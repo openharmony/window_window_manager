@@ -90,6 +90,7 @@ public:
     WSError NotifyHighlightChange(bool isHighlight) override;
     void NotifyWindowCrossAxisChange(CrossAxisState state) override;
     WSError NotifyWindowAttachStateChange(bool isAttach) override;
+    void NotifyKeyboardAnimationCompleted(const KeyboardPanelInfo& keyboardPanelInfo) override;
 
 private:
     static inline BrokerDelegator<SessionStageProxy> delegator_;

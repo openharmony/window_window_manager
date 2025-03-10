@@ -1527,6 +1527,27 @@ HWTEST_F(WindowManagerTest, GetAppDragResizeType, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: EffectiveDragResizeType
+ * @tc.desc: test EffectiveDragResizeType
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, EffectiveDragResizeType, Function | SmallTest | Level2)
+{
+    DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    const std::string bundleName = "test";
+
+    DragResizeType globalDragResizeType = DragResizeType::RESIZE_WHEN_DRAG_END;
+    DragResizeType appDragResizeType = DragResizeType::RESIZE_EACH_FRAME;
+    WindowManager::GetInstance().SetGlobalDragResizeType(globalDragResizeType);
+    WindowManager::GetInstance().SetAppDragResizeType(bundleName, appDragResizeType);
+    WindowManager::GetInstance().GetAppDragResizeType(bundleName, dragResizeType);
+    ASSERT_EQ(dragResizeType, globalDragResizeType);
+    WindowManager::GetInstance().SetGlobalDragResizeType(DragResizeType::RESIZE_TYPE_UNDEFINED);
+    WindowManager::GetInstance().GetAppDragResizeType(bundleName, dragResizeType);
+    ASSERT_EQ(dragResizeType, appDragResizeType);
+}
+
+/**
  * @tc.name: NotifyWMSConnected
  * @tc.desc: check NotifyWMSConnected
  * @tc.type: FUNC

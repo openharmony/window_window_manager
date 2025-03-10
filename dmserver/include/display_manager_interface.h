@@ -176,6 +176,10 @@ public:
     {
         return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
     }
+    virtual DMError SetDefaultDensityDpi(ScreenId screenId, float virtualPixelRatio)
+    {
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     virtual DMError SetResolution(ScreenId screenId, uint32_t width, uint32_t height, float virtualPixelRatio) = 0;
     virtual DMError GetDensityInCurResolution(ScreenId screenId, float& virtualPixelRatio) = 0;
     virtual DMError ResizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height) { return DMError::DM_OK; }

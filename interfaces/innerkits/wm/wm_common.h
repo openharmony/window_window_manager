@@ -112,6 +112,7 @@ enum class WindowType : uint32_t {
     WINDOW_TYPE_TRANSPARENT_VIEW,
     WINDOW_TYPE_WALLET_SWIPE_CARD,
     WINDOW_TYPE_SCREEN_CONTROL,
+    WINDOW_TYPE_FLOAT_NAVIGATION,
     ABOVE_APP_SYSTEM_WINDOW_END,
 
     SYSTEM_SUB_WINDOW_BASE = 2500,
@@ -940,6 +941,40 @@ struct KeyboardPanelInfo : public Parcelable {
 };
 
 /**
+ * @struct CallingWindowInfo
+ *
+ * @brief Info of keyboard calling window
+ */
+struct CallingWindowInfo : public Parcelable {
+    int32_t windowId_ = 0;
+    int32_t callingPid_ = -1;
+    DisplayId displayId_ = 0;
+    int32_t userId_ = 0;
+
+    CallingWindowInfo() {}
+    CallingWindowInfo(int32_t windowId, int32_t callingPid, DisplayId displayId, int32_t userId)
+        : windowId_(windowId), callingPid_(callingPid), displayId_(displayId), userId_(userId) {}
+
+    bool Marshalling(Parcel& parcel) const
+    {
+        return parcel.WriteInt32(windowId_) && parcel.WriteInt32(callingPid_) &&
+               parcel.WriteUint64(displayId_) && parcel.WriteInt32(userId_);
+    }
+
+    static CallingWindowInfo* Unmarshalling(Parcel& parcel)
+    {
+        CallingWindowInfo* callingWindowInfo = new CallingWindowInfo();
+        bool res = parcel.ReadInt32(callingWindowInfo->windowId_) && parcel.ReadInt32(callingWindowInfo->callingPid_) &&
+                   parcel.ReadUint64(callingWindowInfo->displayId_) && parcel.ReadInt32(callingWindowInfo->userId_);
+        if (!res) {
+            delete callingWindowInfo;
+            return nullptr;
+        }
+        return callingWindowInfo;
+    }
+};
+
+/**
  * @brief Enumerates avoid area type.
  */
 enum class AvoidAreaType : uint32_t {
@@ -1681,6 +1716,7 @@ struct SubWindowOptions {
     bool decorEnabled = false;
     bool isModal = false;
     bool isTopmost = false;
+    bool maximizeSupported = false;
     ModalityType modalityType = ModalityType::WINDOW_MODALITY;
 };
 

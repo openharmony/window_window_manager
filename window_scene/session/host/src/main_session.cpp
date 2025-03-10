@@ -291,7 +291,7 @@ WSError MainSession::OnSetWindowRectAutoSave(bool enabled, bool isEnableSpecifie
             TLOGNE(WmsLogTag::WMS_MAIN, "session is null");
             return;
         }
-        seesion->GetSessionProperty()->SetIsEnableSpecified(isEnableSpecified);
+        session->GetSessionProperty()->SetIsEnableSpecified(isEnableSpecified);
         if (session->onSetWindowRectAutoSaveFunc_) {
             session->onSetWindowRectAutoSaveFunc_(enabled, isEnableSpecified);
             TLOGNI(WmsLogTag::WMS_MAIN, "%{public}s id %{public}d isEnableSpecified: %{public}d",

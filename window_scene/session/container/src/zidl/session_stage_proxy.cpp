@@ -1665,4 +1665,31 @@ WSError SessionStageProxy::NotifyWindowAttachStateChange(bool isAttach)
     }
     return WSError::WS_OK;
 }
+
+void SessionStageProxy::NotifyKeyboardAnimationCompleted(const KeyboardPanelInfo& keyboardPanelInfo)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "WriteInterfaceToken failed");
+        return;
+    }
+
+    if (!data.WriteParcelable(&keyboardPanelInfo)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "KeyboardPanelInfo marshalling failed");
+        return;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "remote is null");
+        return;
+    }
+    if (remote->SendRequest(
+        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_KEYBOARD_ANIMATION_COMPLETED),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "SendRequest failed");
+    }
+}
 } // namespace OHOS::Rosen

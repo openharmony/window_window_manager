@@ -13,7 +13,7 @@
 
 import("//build/test.gni")
 import("../../../windowmanager_aafwk.gni")
-module_out_path = "window_manager/wm"
+module_out_path = "window_manager/window_manager/wm"
 
 group("unittest") {
   testonly = true
@@ -507,12 +507,7 @@ ohos_unittest("wm_window_scene_session_impl_test4") {
 ohos_unittest("wm_window_scene_session_impl_test5") {
   module_out_path = module_out_path
   include_dirs = [ "${window_base_path}/test/common/utils/include/" ]
-  sanitize = {
-    cfi = true
-    cfi_cross_dso = true
-    cfi_vcall_icall_only = true
-    debug = false
-  }
+
   sources = [ "window_scene_session_impl_test5.cpp" ]
 
   deps = [

@@ -1822,7 +1822,7 @@ HWTEST_F(WindowSceneSessionImplTest3, SetWindowRectAutoSave, Function | SmallTes
     ret = windowSceneSessionImpl->SetWindowRectAutoSave(true, false);
     EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
     windowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    ret = windowSceneSessionImpl->SetWindowRectAutoSave(true,false);
+    ret = windowSceneSessionImpl->SetWindowRectAutoSave(true, false);
     EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
     GTEST_LOG_(INFO) << "WindowSceneSessionImplTest3: SetWindowRectAutoSave end";
 }
