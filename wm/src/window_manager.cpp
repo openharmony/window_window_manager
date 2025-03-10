@@ -98,8 +98,6 @@ public:
         std::vector<sptr<WindowDisplayChangeAdapter>>> displayInfoChangedListeners_;
     std::vector<sptr<IWindowPidVisibilityChangedListener>> windowPidVisibilityListeners_;
     sptr<WindowManagerAgent> windowPidVisibilityListenerAgent_;
-    std::vector<sptr<IKeyboardCallingWindowDisplayChangeListener>> callingDisplayChangedListeners_;
-    sptr<WindowManagerAgent> callingDisplayListenerAgent_;
 };
 
 void WindowManager::Impl::NotifyWMSConnected(int32_t userId, int32_t screenId)
@@ -1233,11 +1231,6 @@ WMError WindowManager::NotifyWindowStyleChange(WindowStyleType type)
 {
     pImpl_->NotifyWindowStyleChange(type);
     return WMError::WM_OK;
-}
-
-WMError NotifyCallingWindowDisplayChanged(const CallingWindowInfo& callingWindowInfo)
-{
-    return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
 }
 
 WMError WindowManager::RegisterDrawingContentChangedListener(const sptr<IDrawingContentChangedListener>& listener)

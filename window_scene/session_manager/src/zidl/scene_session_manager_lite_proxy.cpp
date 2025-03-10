@@ -1057,8 +1057,8 @@ WMError SceneSessionManagerLiteProxy::GetCallingWindowInfo(CallingWindowInfo& ca
         TLOGE(WmsLogTag::WMS_KEYBOARD, "WriteInterfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (!data.WriteInt32(callingWindowInfo.windowId_) || !data.WriteInt32(callingWindowInfo.userId_)) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "persistentId and userId write failed, id: %{public}d, userId: %{public}d",
+    if (!data.WriteParcelable(&callingWindowInfo)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Write callingWindowInfo failed, id: %{public}d, userId: %{public}d",
             callingWindowInfo.windowId_, callingWindowInfo.userId_);
         return WMError::WM_ERROR_IPC_FAILED;
     }
@@ -1074,10 +1074,12 @@ WMError SceneSessionManagerLiteProxy::GetCallingWindowInfo(CallingWindowInfo& ca
     }
     auto ret = static_cast<WMError>(reply.ReadInt32());
     if (ret == WMError::WM_OK) {
-        callingWindowInfo.windowId_ = reply.ReadInt32();
-        callingWindowInfo.callingPid_ = reply.ReadInt32();
-        callingWindowInfo.displayId_ = reply.ReadUint64();
-        callingWindowInfo.userId_ = reply.ReadInt32();
+        sptr<CallingWindowInfo> info = reply.ReadParcelable<CallingWindowInfo>();
+        if (info == nullptr) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "Read callingWindowInfo failed");
+            return WMError::WM_ERROR_IPC_FAILED;
+        }
+        callingWindowInfo = *info;
     }
     return ret;
 }
