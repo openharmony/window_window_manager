@@ -5386,5 +5386,11 @@ bool WindowSessionImpl::IsSubWindowMaximizeSupported() const
     }
     return false;
 }
+
+WSError WindowSessionImpl::GetClientVpr(float& clientVpr)
+{
+    clientVpr = virtualPixelRatio_;
+    return WSError::WS_OK;
+}
 } // namespace Rosen
 } // namespace OHOS

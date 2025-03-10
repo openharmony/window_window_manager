@@ -1716,4 +1716,28 @@ void SessionStageProxy::NotifyKeyboardAnimationCompleted(const KeyboardPanelInfo
         TLOGE(WmsLogTag::WMS_KEYBOARD, "SendRequest failed");
     }
 }
+
+WSError SessionStageProxy::GetClientVpr(float& clientVpr)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(
+        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_GET_CLIENT_VPR),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "SendRequest failed");
+    }
+    clientVpr = reply.ReadFloat();
+    return WSError::WS_OK;
+}
 } // namespace OHOS::Rosen

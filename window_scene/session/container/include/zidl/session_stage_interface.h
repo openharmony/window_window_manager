@@ -248,6 +248,7 @@ public:
     virtual void NotifyWindowCrossAxisChange(CrossAxisState state) = 0;
     virtual WSError NotifyWindowAttachStateChange(bool isAttach) { return WSError::WS_DO_NOTHING; }
     virtual void NotifyKeyboardAnimationCompleted(const KeyboardPanelInfo& keyboardPanelInfo) {}
+    virtual WSError GetClientVpr(float& clientVpr) { return WSError::WS_DO_NOTHING; }
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_INTERFACE_H

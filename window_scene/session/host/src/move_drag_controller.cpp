@@ -1343,6 +1343,7 @@ WSError MoveDragController::UpdateMoveTempProperty(const std::shared_ptr<MMI::Po
             }
             moveTempProperty_.lastMovePointerPosX_ = pointerDisplayX;
             moveTempProperty_.lastMovePointerPosY_ = pointerDisplayY;
+            lastMovePointerPosX_ = pointerDisplayX;
             break;
         case MMI::PointerEvent::POINTER_ACTION_UP:
         case MMI::PointerEvent::POINTER_ACTION_BUTTON_UP:
@@ -1525,5 +1526,25 @@ void MoveDragController::ResSchedReportData(int32_t type, bool onOffTag)
     }
     WLOGFD("ResSchedReportData success type: %{public}d onOffTag: %{public}d", type, onOffTag);
 #endif
+}
+
+int32_t MoveDragController::GetLastMovePointerPosX() const
+{
+    return lastMovePointerPosX_;
+}
+
+void MoveDragController::SetLastMovePointerPosX(int32_t lastMovePointerPosX)
+{
+    lastMovePointerPosX_ = lastMovePointerPosX;
+}
+
+int32_t MoveDragController::IsMoveDragHotAreaCrossDisplay() const
+{
+    return isMoveDragHotAreaCrossDisplay_;
+}
+
+void MoveDragController::SetMoveDragHotAreaCrossDisplay(bool isMoveDragHotAreaCrossDisplay)
+{
+    isMoveDragHotAreaCrossDisplay_ = isMoveDragHotAreaCrossDisplay;
 }
 }  // namespace OHOS::Rosen
