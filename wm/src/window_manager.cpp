@@ -1555,7 +1555,7 @@ WMError WindowManager::MinimizeByWindowId(const std::vector<int32_t>& windowIds)
 {
     WMError ret = SingletonContainer::Get<WindowAdapter>().MinimizeByWindowId(windowIds);
     if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_PC, "failed");
+        TLOGE(WmsLogTag::WMS_LIFE, "failed");
     }
     return ret;
 }
