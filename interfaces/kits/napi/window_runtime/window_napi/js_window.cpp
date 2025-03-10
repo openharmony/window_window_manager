@@ -4113,10 +4113,10 @@ napi_value JsWindow::OnSetSubWindowZLevel(napi_env env, napi_callback_info info)
             return;
         }
         WMErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetSubWindowZLevel(zLevel));
-        if (ret != WMError::WM_OK) {
-            task->Resolve(env, NapiGetUndefined(env));
-        } else {
+        if (ret != WmErrorCode::WM_OK) {
             task->Reject(env, JsErrUtils::CreateJsError(env, ret, "Set sub window zLevel failed"));
+        } else {
+            task->Resolve(env, NapiGetUndefined(env));
         }
         TLOGNI(WmsLogTag::WMS_HIERARCHY, "%{public}s end. Window [%{public}u, %{public}s], zLevel = %{public}d, ret = %{public}d",
             where, window->GetWindowId(), window->GetWindowName().c_str(), zLevel, ret);
