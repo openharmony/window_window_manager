@@ -1053,6 +1053,7 @@ private:
     WSRect lastKeyFrameRect_;
     uint64_t keyFrameVsyncRequestStamp_ = 0;
     uint64_t lastKeyFrameDragStamp_ = 0;
+    WSRect lastKeyFrameDragRect_;
     bool keyFrameDragPauseNoticed_ = false;
 
     /*

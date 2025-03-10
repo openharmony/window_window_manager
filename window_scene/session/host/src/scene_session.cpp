@@ -3437,6 +3437,7 @@ void SceneSession::UpdateKeyFrameState(SizeChangeReason reason, const WSRect& re
         keyFrameAnimating_ = false;
         lastKeyFrameStamp_ = timeStamp;
         lastKeyFrameRect_ = rect;
+        lastKeyFrameDragRect_ = rect;
         keyFrameVsyncRequestStamp_ = timeStamp;
         lastKeyFrameDragStamp_ = timeStamp;
         keyFrameDragPauseNoticed_ = false;
@@ -3450,6 +3451,7 @@ void SceneSession::UpdateKeyFrameState(SizeChangeReason reason, const WSRect& re
     if (reason == SizeChangeReason::DRAG) {
         TLOGD(WmsLogTag::WMS_LAYOUT, "reset gravity and resize clone node");
         lastKeyFrameDragStamp_ = timeStamp;
+        lastKeyFrameDragRect_ = rect;
         keyFrameDragPauseNoticed_ = false;
         SetFrameGravity(Gravity::DEFAULT);
         keyFrameCloneNode_->SetBounds(0, 0, rect.width_, rect.height_);
@@ -3491,6 +3493,7 @@ void SceneSession::OnKeyFrameNextVsync(uint64_t count)
         TLOGNI(WmsLogTag::WMS_LAYOUT, "to notice for key frame drag paused");
         keyFrameDragPauseNoticed_ = true;
         lastKeyFrameDragStamp_ = nowTimeStamp;
+        winRect_ = lastKeyFrameDragRect_;
         NotifyClientToUpdateRect("OnMoveDragCallback", nullptr);
     }
 }
