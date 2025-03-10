@@ -608,40 +608,43 @@ void WindowSceneSessionImpl::SetParentWindowInner(int32_t oldParentWindowId,
 
 WMError WindowSceneSessionImpl::SetParentWindow(int32_t newParentWindowId)
 {
-    if (IsWindowSessionInvalid()) {
-        TLOGE(WmsLogTag::WMS_SUB, "session is invalid");
-        return WMError::WM_ERROR_INVALID_WINDOW;
-    }
+    auto subWindowId = GetPersistentId();
     if (!IsPcWindow()) {
-        TLOGE(WmsLogTag::WMS_SUB, "device not support");
+        TLOGE(WmsLogTag::WMS_SUB, "winId: %{public}d device not support", subWindowId);
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     if (!WindowHelper::IsSubWindow(GetType())) {
-        TLOGE(WmsLogTag::WMS_SUB, "called by invalid window type %{public}d", GetType());
+        TLOGE(WmsLogTag::WMS_SUB, "winId: %{public}d called by invalid window type %{public}d",
+            subWindowId, GetType());
         return WMError::WM_ERROR_INVALID_CALLING;
     }
-    auto subWindowId = GetPersistentId();
     auto oldParentWindowId = property_->GetParentPersistentId();
     if (oldParentWindowId == newParentWindowId || subWindowId == newParentWindowId) {
-        TLOGE(WmsLogTag::WMS_SUB, "newParentWindowId is the same as oldParentWindowId or subWindowId");
+        TLOGE(WmsLogTag::WMS_SUB, "winId: %{public}d newParentWindowId is the same as "
+            "oldParentWindowId or subWindowId", subWindowId);
         return WMError::WM_ERROR_INVALID_PARENT;
     }
     auto newParentWindow = GetWindowWithId(newParentWindowId);
     if (newParentWindow == nullptr) {
-        TLOGE(WmsLogTag::WMS_SUB, "find not new parent window By Id: %{public}d", newParentWindowId);
+        TLOGE(WmsLogTag::WMS_SUB, "winId: %{public}d find not new parent window By Id: %{public}d",
+            subWindowId, newParentWindowId);
         return WMError::WM_ERROR_INVALID_PARENT;
     }
     auto windowType = newParentWindow->GetType();
     if (!WindowHelper::IsMainWindow(windowType) &&
         !WindowHelper::IsFloatOrSubWindow(windowType)) {
-        TLOGE(WmsLogTag::WMS_SUB, "new parent window type invalid");
+        TLOGE(WmsLogTag::WMS_SUB, "winId: %{public}d new parent window type invalid", subWindowId);
         return WMError::WM_ERROR_INVALID_PARENT;
     }
     TLOGI(WmsLogTag::WMS_SUB, "subWindowId: %{public}d, oldParentWindowId: %{public}d, "
         "newParentWindowId: %{public}d", subWindowId, oldParentWindowId, newParentWindowId);
     WMError ret = SingletonContainer::Get<WindowAdapter>().SetParentWindow(subWindowId, newParentWindowId);
     if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_SUB, "set parent window failed errCode: %{public}d", static_cast<int32_t>(ret));
+        TLOGE(WmsLogTag::WMS_SUB, "winId: %{public}d set parent window failed errCode: %{public}d",
+            subWindowId, static_cast<int32_t>(ret));
         return ret;
     }
     SetParentWindowInner(oldParentWindowId, newParentWindow);
@@ -650,25 +653,26 @@ WMError WindowSceneSessionImpl::SetParentWindow(int32_t newParentWindowId)
 
 WMError WindowSceneSessionImpl::GetParentWindow(sptr<Window>& parentWindow)
 {
-    if (IsWindowSessionInvalid()) {
-        TLOGE(WmsLogTag::WMS_SUB, "session is invalid");
-        return WMError::WM_ERROR_INVALID_WINDOW;
-    }
     if (!IsPcWindow()) {
-        TLOGE(WmsLogTag::WMS_SUB, "device not support");
+        TLOGE(WmsLogTag::WMS_SUB, "winId: %{public}d device not support", GetPersistentId());
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     if (!WindowHelper::IsSubWindow(GetType())) {
-        TLOGE(WmsLogTag::WMS_SUB, "called by invalid window type %{public}d", GetType());
+        TLOGE(WmsLogTag::WMS_SUB, "winId: %{public}d called by invalid window type %{public}d",
+            GetPersistentId(), GetType());
         return WMError::WM_ERROR_INVALID_CALLING;
     }
     if (property_->GetIsUIExtFirstSubWindow()) {
-        TLOGE(WmsLogTag::WMS_SUB, "UIExtension sub window not get parent window");
+        TLOGE(WmsLogTag::WMS_SUB, "winId: %{public}d UIExtension sub window not get parent window",
+            GetPersistentId());
         return WMError::WM_ERROR_INVALID_CALLING;
     }
     parentWindow = FindWindowById(property_->GetParentPersistentId());
     if (parentWindow == nullptr) {
-        TLOGE(WmsLogTag::WMS_SUB, "parentWindow is nullptr");
+        TLOGE(WmsLogTag::WMS_SUB, "winId: %{public}d parentWindow is nullptr", GetPersistentId());
         return WMError::WM_ERROR_INVALID_PARENT;
     }
     return WMError::WM_OK;

@@ -62,7 +62,6 @@ public:
     MOCK_METHOD6(RecoverAndConnectSpecificSession, void(const sptr<ISessionStage>& sessionStage,
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
         sptr<WindowSessionProperty> property, sptr<ISession>& session, sptr<IRemoteObject> token));
-
     MOCK_METHOD2(SetParentWindow, WMError(int32_t subWindowId, int32_t newParentWindowId));
 };
 }
