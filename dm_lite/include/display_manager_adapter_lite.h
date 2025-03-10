@@ -76,7 +76,7 @@ public:
     virtual bool TryToCancelScreenOff();
     virtual bool SetScreenBrightness(uint64_t screenId, uint32_t level);
     virtual uint32_t GetScreenBrightness(uint64_t screenId);
-    virtual DMError SetSystemKeyboardOn(bool isOn = false);
+    virtual DMError SetSystemKeyboardStatus(bool isOn = false);
 private:
     static inline SingletonDelegator<DisplayManagerAdapterLite> delegator;
 };

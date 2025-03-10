@@ -727,24 +727,24 @@ HWTEST_F(DisplayManagerTest, ImplUnregisterScreenMagneticStateListener, Function
 }
 
 /**
- * @tc.name: SetSystemKeyboardOn
- * @tc.desc: SetSystemKeyboardOn with true as parameter
+ * @tc.name: SetSystemKeyboardStatus
+ * @tc.desc: SetSystemKeyboardStatus with true as parameter
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, SetSystemKeyboardOn01, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerTest, SetSystemKeyboardStatus01, Function | SmallTest | Level1)
 {
-    auto ret = DisplayManagerLite::GetInstance().SetSystemKeyboardOn(true);
+    auto ret = DisplayManagerLite::GetInstance().SetSystemKeyboardStatus(true);
     ASSERT_NE(ret, DMError::DM_OK);
 }
  
 /**
- * @tc.name: SetSystemKeyboardOn
- * @tc.desc: SetSystemKeyboardOn with false as parameter
+ * @tc.name: SetSystemKeyboardStatus
+ * @tc.desc: SetSystemKeyboardStatus with false as parameter
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, SetSystemKeyboardOn02, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerTest, SetSystemKeyboardStatus02, Function | SmallTest | Level1)
 {
-    auto ret = DisplayManagerLite::GetInstance().SetSystemKeyboardOn(false);
+    auto ret = DisplayManagerLite::GetInstance().SetSystemKeyboardStatus(false);
     ASSERT_NE(ret, DMError::DM_OK);
 }
 } // namespace Rosen

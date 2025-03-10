@@ -1058,7 +1058,7 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
         }
         case DisplayManagerMessage::TRANS_ID_SET_SYSTEM_KEYBOARD_ON: {
             bool isOn = static_cast<bool>(data.ReadBool());
-            DMError ret = SetSystemKeyboardOn(isOn);
+            DMError ret = SetSystemKeyboardStatus(isOn);
             reply.WriteInt32(static_cast<int32_t>(ret));
             break;
         }

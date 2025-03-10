@@ -311,7 +311,7 @@ public:
      * @param isOn system keyboard is on, default is false.
      * @return DM_OK means set system keyboard on is success.
      */
-    DMError SetSystemKeyboardOn(bool isOn = false);
+    DMError SetSystemKeyboardStatus(bool isOn = false);
 private:
     DisplayManagerLite();
     ~DisplayManagerLite();
