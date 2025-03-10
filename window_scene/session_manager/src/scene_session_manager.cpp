@@ -13459,22 +13459,22 @@ WMError SceneSessionManager::UnregisterSessionLifecycleListener(const sptr<ISess
 WMError SceneSessionManager::MinimizeByWindowId(const std::vector<int32_t>& windowIds)
 {
     if (!SessionPermission::IsShellCall() && !SessionPermission::IsSACalling()) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "The caller is neither Shell nor an SA.");
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller is neither Shell nor an SA.");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
     if (windowIds.empty()) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "The vector of windowid is empty.");
+        TLOGE(WmsLogTag::WMS_LIFE, "The vector of windowid is empty.");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     taskScheduler_->PostAsyncTask([this, windowIds, where = __func__]() {
         for (const auto& persistentId : windowIds) {
             auto sceneSession = GetSceneSession(persistentId);
             if (sceneSession == nullptr) {
-                TLOGE(WmsLogTag::WMS_LAYOUT, "could not find the window, persistentId:%{public}d", persistentId);
+                TLOGE(WmsLogTag::WMS_LIFE, "could not find the window, persistentId:%{public}d", persistentId);
                 continue;
             } else {
                 sceneSession->OnSessionEvent(SessionEvent::EVENT_MINIMIZE);
-                TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s, id:%{public}d", where, persistentId);
+                TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s, id:%{public}d", where, persistentId);
             }
         }
     }, __func__);

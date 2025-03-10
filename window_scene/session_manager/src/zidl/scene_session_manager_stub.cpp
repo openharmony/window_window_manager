@@ -1814,12 +1814,12 @@ int SceneSessionManagerStub::HandleMinimizeByWindowId(MessageParcel& data, Messa
 {
     std::vector<int32_t> windowIds;
     if (!data.ReadInt32Vector(&windowIds)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "read winddowId failed");
+        TLOGE(WmsLogTag::WMS_LIFE, "read windowIds failed");
         return ERR_INVALID_DATA;
     }
     WMError errCode = MinimizeByWindowId(windowIds);
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Write errCode failed.");
+        TLOGE(WmsLogTag::WMS_LIFE, "Write errCode failed.");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;
