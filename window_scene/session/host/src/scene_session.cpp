@@ -7120,7 +7120,7 @@ void SceneSession::UpdateNewSizeForPCWindow()
             UpdateSessionRect(windowRect, SizeChangeReason::UPDATE_DPI_SYNC);
             sessionStage_->UpdateRect(windowRect, SizeChangeReason::UPDATE_DPI_SYNC);
             TLOGI(WmsLogTag::WMS_LAYOUT_PC, "left: %{public}d, top: %{public}d, width: %{public}u, "
-                "height: %{public}u, Id: %{public}u", windowRect.posX_, windowRect.posY_,windowRect.width_,
+                "height: %{public}u, Id: %{public}u", windowRect.posX_, windowRect.posY_, windowRect.width_,
                 windowRect.height_, GetPersistentId());
         }
     }
@@ -7140,10 +7140,13 @@ bool SceneSession::CalcNewWindowRectIfNeed(WSRect& windowRect, DMRect& available
         int32_t top = windowRect.posY_;
         uint32_t width = static_cast<uint32_t>(windowRect.width_ * newVpr / currVpr);
         uint32_t height = static_cast<uint32_t>(windowRect.height_ * newVpr / currVpr);
-        const uint32_t statusBarHeight = isStatusBarVisible_ ? GetStatusBarHeight() : 0;
+        int32_t statusBarHeight = 0;
+        if (isStatusBarVisible_ && IsDefaultScreen()) {
+            statusBarHeight = GetStatusBarHeight();
+        }
         width = MathHelper::Min(width, availableArea.width_);
         height = MathHelper::Min(height, availableArea.height_);
-        bool needMove = top < static_cast<int32_t>(statusBarHeight) || left < 0 ||
+        bool needMove = top < statusBarHeight || left < 0 ||
             top > static_cast<int32_t>(availableArea.height_ - height) ||
             left > static_cast<int32_t>(availableArea.width_ - width) || displayChangedByMoveDrag_;
         if (displayChangedByMoveDrag_ && moveDragController_) {
@@ -7151,7 +7154,7 @@ bool SceneSession::CalcNewWindowRectIfNeed(WSRect& windowRect, DMRect& available
             left = pointerPosX - static_cast<int32_t>((pointerPosX -left) * newVpr / currVpr);
         } else {
             top = MathHelper::Min(top, static_cast<int32_t>(availableArea.height_ - height));
-            top = MathHelper::Max(top, static_cast<int32_t>(statusBarHeight));
+            top = MathHelper::Max(top, statusBarHeight);
             left = MathHelper::Min(left, static_cast<int32_t>(availableArea.width_ - width));
             left = MathHelper::Max(left, 0);
         }
@@ -7166,6 +7169,14 @@ bool SceneSession::CalcNewWindowRectIfNeed(WSRect& windowRect, DMRect& available
             winRect_.posY_ = top;
         }
         return true;
+    }
+    return false;
+}
+
+bool SceneSession::IsDefaultScreen()
+{
+    if (auto property = GetSessionProperty()) {
+        return property->GetDisplayId() == ScreenSessionManagerClient::GetInstance().GetDefaultScreenId();
     }
     return false;
 }
