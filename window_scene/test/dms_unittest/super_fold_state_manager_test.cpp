@@ -338,16 +338,16 @@ HWTEST_F(SuperFoldStateManagerTest, MatchSuperFoldStatusToFoldStatus05, Function
 }
 
 /**
- * @tc.name: SetSystemKeyboardOn
- * @tc.desc: SetSystemKeyboardOn with true as parameter
+ * @tc.name: SetSystemKeyboardStatus
+ * @tc.desc: SetSystemKeyboardStatus with true as parameter
  * @tc.type: FUNC
  */
-HWTEST_F(SuperFoldStateManagerTest, SetSystemKeyboardOn01, Function | SmallTest | Level1)
+HWTEST_F(SuperFoldStateManagerTest, SetSystemKeyboardStatus01, Function | SmallTest | Level1)
 {
     SuperFoldStateManager::GetInstance().SetCurrentStatus(SuperFoldStatus::HALF_FOLDED);
     std::function<void()> func = [&]()
     {
-        SuperFoldStateManager::GetInstance().SetSystemKeyboardOn(true);
+        SuperFoldStateManager::GetInstance().SetSystemKeyboardStatus(true);
     };
  
     func();
@@ -358,16 +358,16 @@ HWTEST_F(SuperFoldStateManagerTest, SetSystemKeyboardOn01, Function | SmallTest 
 }
  
 /**
- * @tc.name: SetSystemKeyboardOn
- * @tc.desc: SetSystemKeyboardOn with false as parameter
+ * @tc.name: SetSystemKeyboardStatus
+ * @tc.desc: SetSystemKeyboardStatus with false as parameter
  * @tc.type: FUNC
  */
-HWTEST_F(SuperFoldStateManagerTest, SetSystemKeyboardOn02, Function | SmallTest | Level1)
+HWTEST_F(SuperFoldStateManagerTest, SetSystemKeyboardStatus02, Function | SmallTest | Level1)
 {
     SuperFoldStateManager::GetInstance().SetCurrentStatus(SuperFoldStatus::HALF_FOLDED);
     std::function<void()> func = [&]()
     {
-        SuperFoldStateManager::GetInstance().SetSystemKeyboardOn(false);
+        SuperFoldStateManager::GetInstance().SetSystemKeyboardStatus(false);
     };
  
     func();

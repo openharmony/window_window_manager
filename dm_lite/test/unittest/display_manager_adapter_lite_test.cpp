@@ -174,24 +174,24 @@ HWTEST_F(DisplayManagerAdapterLiteTest, GetVirtualScreenFlag, Function | SmallTe
 }
 
 /**
- * @tc.name: SetSystemKeyboardOn
- * @tc.desc: SetSystemKeyboardOn with true as parameter
+ * @tc.name: SetSystemKeyboardStatus
+ * @tc.desc: SetSystemKeyboardStatus with true as parameter
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterLiteTest, SetSystemKeyboardOn01, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerAdapterLiteTest, SetSystemKeyboardStatus01, Function | SmallTest | Level1)
 {
-    auto ret = SingletonContainer::Get<DisplayManagerAdapterLite>().SetSystemKeyboardOn(true);
+    auto ret = SingletonContainer::Get<DisplayManagerAdapterLite>().SetSystemKeyboardStatus(true);
     ASSERT_NE(ret, DMError::DM_OK);
 }
  
 /**
- * @tc.name: SetSystemKeyboardOn
- * @tc.desc: SetSystemKeyboardOn with false as parameter
+ * @tc.name: SetSystemKeyboardStatus
+ * @tc.desc: SetSystemKeyboardStatus with false as parameter
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterLiteTest, SetSystemKeyboardOn02, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerAdapterLiteTest, SetSystemKeyboardStatus02, Function | SmallTest | Level1)
 {
-    auto ret = SingletonContainer::Get<DisplayManagerAdapterLite>().SetSystemKeyboardOn(false);
+    auto ret = SingletonContainer::Get<DisplayManagerAdapterLite>().SetSystemKeyboardStatus(false);
     ASSERT_NE(ret, DMError::DM_OK);
 }
 }

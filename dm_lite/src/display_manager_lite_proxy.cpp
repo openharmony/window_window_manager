@@ -790,7 +790,7 @@ DMError DisplayManagerLiteProxy::GetAllScreenInfos(std::vector<sptr<ScreenInfo>>
     return ret;
 }
 
-DMError DisplayManagerLiteProxy::SetSystemKeyboardOn(bool isOn)
+DMError DisplayManagerLiteProxy::SetSystemKeyboardStatus(bool isOn)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
