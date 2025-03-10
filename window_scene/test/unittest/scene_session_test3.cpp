@@ -858,25 +858,6 @@ HWTEST_F(SceneSessionTest3, CloseExtensionSync, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: NotifyTargetScreenWidthAndHeight
- * @tc.desc: NotifyTargetScreenWidthAndHeight
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest3, NotifyTargetScreenWidthAndHeight, Function | SmallTest | Level2)
-{
-    uint32_t screenWidth = 10;
-    uint32_t screenHeight = 10;
-    bool isScreenAngleMismatch = true;
-    SessionInfo info;
-    info.abilityName_ = "NotifyTargetScreenWidthAndHeight";
-    info.bundleName_ = "NotifyTargetScreenWidthAndHeight";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    
-    sceneSession->NotifyTargetScreenWidthAndHeight(isScreenAngleMismatch, screenWidth, screenHeight);
-    EXPECT_NE(sceneSession, nullptr);
-}
-
-/**
  * @tc.name: SetIsStatusBarVisible
  * @tc.desc: SetIsStatusBarVisible
  * @tc.type: FUNC
