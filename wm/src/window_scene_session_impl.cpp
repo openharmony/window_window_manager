@@ -221,7 +221,9 @@ void WindowSceneSessionImpl::AddSubWindowMapForExtensionWindow()
     // update subWindowSessionMap_
     auto extensionWindow = FindExtensionWindowWithContext();
     if (extensionWindow != nullptr) {
-        subWindowSessionMap_[extensionWindow->GetPersistentId()].push_back(this);
+        auto parentWindowId = extensionWindow->GetPersistentId();
+        std::lock_guard<std::recursive_mutex> lock(subWindowSessionMutex_);
+        subWindowSessionMap_[parentWindowId].push_back(this);
     } else {
         TLOGE(WmsLogTag::WMS_SUB, "name: %{public}s not found parent extension window",
             property_->GetWindowName().c_str());
@@ -299,13 +301,17 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         }
         property_->SetDisplayId(parentSession->GetDisplayId());
         // set parent persistentId
-        property_->SetParentPersistentId(parentSession->GetPersistentId());
+        auto parentWindowId = parentSession->GetPersistentId();
+        property_->SetParentPersistentId(parentWindowId);
         property_->SetIsPcAppInPad(parentSession->GetProperty()->GetIsPcAppInPad());
         // creat sub session by parent session
         SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
             surfaceNode_, property_, persistentId, session, windowSystemConfig_, token);
-        // update subWindowSessionMap_
-        subWindowSessionMap_[parentSession->GetPersistentId()].push_back(this);
+        {
+            std::lock_guard<std::recursive_mutex> lock(subWindowSessionMutex_);
+            // update subWindowSessionMap_
+            subWindowSessionMap_[parentWindowId].push_back(this);
+        }
         SetTargetAPIVersion(parentSession->GetTargetAPIVersion());
     } else { // system window
         WMError createSystemWindowRet = CreateSystemWindow(type);
@@ -584,20 +590,12 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
 void WindowSceneSessionImpl::SetParentWindowInner(int32_t oldParentWindowId,
     const sptr<WindowSessionImpl>& newParentWindow)
 {
+    RemoveSubWindow(oldParentWindowId);
     auto newParentWindowId = newParentWindow->GetProperty()->GetPersistentId();
-    auto subWindowId = property_->GetPersistentId();
-    auto subIter = subWindowSessionMap_.find(oldParentWindowId);
-    if (subIter != subWindowSessionMap_.end()) {
-        auto& subWindows = subIter->second;
-        for (auto iter = subWindows.begin(); iter != subWindows.end(); iter++) {
-            auto subWindow = *iter;
-            if (subWindow != nullptr && subWindow->GetPersistentId() == subWindowId) {
-                subWindows.erase(iter);
-                break;
-            }
-        }
+    {
+        std::lock_guard<std::recursive_mutex> lock(subWindowSessionMutex_);
+        subWindowSessionMap_[newParentWindowId].push_back(this);
     }
-    subWindowSessionMap_[newParentWindowId].push_back(this);
     property_->SetParentPersistentId(newParentWindowId);
     UpdateSubWindowLevel(newParentWindow->GetProperty()->GetSubWindowLevel() + 1);
     if (state_ == WindowState::STATE_SHOWN &&
@@ -3347,11 +3345,12 @@ void WindowSceneSessionImpl::UpdateConfiguration(const std::shared_ptr<AppExecFw
         uiContent->UpdateConfiguration(configuration);
     }
     UpdateDefaultStatusBarColor();
-    if (subWindowSessionMap_.count(GetPersistentId()) == 0) {
-        return;
-    }
-    for (auto& subWindowSession : subWindowSessionMap_.at(GetPersistentId())) {
-        subWindowSession->UpdateConfiguration(configuration);
+    std::vector<sptr<WindowSessionImpl>> subWindows;
+    GetSubWidnows(GetPersistentId(), subWindows);
+    for (auto& subWindowSession : subWindows) {
+        if (subWindowSession != nullptr) {
+            subWindowSession->UpdateConfiguration(configuration);
+        }
     }
 }
 
@@ -3367,15 +3366,16 @@ void WindowSceneSessionImpl::UpdateConfigurationForSpecified(
         specifiedColorMode_ = configuration->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
     }
     UpdateDefaultStatusBarColor();
-    if (subWindowSessionMap_.count(GetPersistentId()) == 0) {
+    std::vector<sptr<WindowSessionImpl>> subWindows;
+    GetSubWidnows(GetPersistentId(), subWindows);
+    if (subWindows.empty()) {
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "no subSession, winId: %{public}u", GetWindowId());
         return;
     }
-    for (auto& subWindowSession : subWindowSessionMap_.at(GetPersistentId())) {
-        if (subWindowSession == nullptr) {
-            continue;
+    for (auto& subWindowSession : subWindows) {
+        if (subWindowSession != nullptr) {
+            subWindowSession->UpdateConfigurationForSpecified(configuration, resourceManager);
         }
-        subWindowSession->UpdateConfigurationForSpecified(configuration, resourceManager);
     }
 }
 
@@ -3409,12 +3409,16 @@ void WindowSceneSessionImpl::UpdateConfigurationSync(const std::shared_ptr<AppEx
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d", GetWindowId());
         uiContent->UpdateConfigurationSyncForAll(configuration);
     }
-    if (subWindowSessionMap_.count(GetPersistentId()) == 0) {
-        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "no subSession, winId: %{public}d", GetWindowId());
+    std::vector<sptr<WindowSessionImpl>> subWindows;
+    GetSubWidnows(GetPersistentId(), subWindows);
+    if (subWindows.empty()) {
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "no subSession, winId: %{public}u", GetWindowId());
         return;
     }
-    for (auto& subWindowSession : subWindowSessionMap_.at(GetPersistentId())) {
-        subWindowSession->UpdateConfigurationSync(configuration);
+    for (auto& subWindowSession : subWindows) {
+        if (subWindowSession != nullptr) {
+            subWindowSession->UpdateConfigurationSync(configuration);
+        }
     }
 }
 
