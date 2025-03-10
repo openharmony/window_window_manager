@@ -12543,8 +12543,8 @@ void SceneSessionManager::UpdateSecSurfaceInfo(std::shared_ptr<RSUIExtensionData
         TLOGE(WmsLogTag::WMS_EVENT, "invalid secExtensionData");
         return;
     }
-    const auto& secSurfaceInfoMap = secExtensionData->GetSecData();
-    auto task = [secSurfaceInfoMap = std::move(secSurfaceInfoMap)]()-> WSError {
+    auto secSurfaceInfoMap = secExtensionData->GetSecData();
+    auto task = [secSurfaceInfoMap]()-> WSError {
         SceneInputManager::GetInstance().UpdateSecSurfaceInfo(secSurfaceInfoMap);
         return WSError::WS_OK;
     };
@@ -12574,8 +12574,8 @@ void SceneSessionManager::UpdateConstrainedModalUIExtInfo(std::shared_ptr<RSUIEx
         TLOGE(WmsLogTag::WMS_EVENT, "invalid constrainedModalUIExtData");
         return;
     }
-    const auto& constrainedModalUIExtInfoMap = constrainedModalUIExtData->GetSecData();
-    auto task = [constrainedModalUIExtInfoMap = std::move(constrainedModalUIExtInfoMap)]()-> WSError {
+    auto constrainedModalUIExtInfoMap = constrainedModalUIExtData->GetSecData();
+    auto task = [constrainedModalUIExtInfoMap]()-> WSError {
         SceneInputManager::GetInstance().UpdateConstrainedModalUIExtInfo(constrainedModalUIExtInfoMap);
         return WSError::WS_OK;
     };
