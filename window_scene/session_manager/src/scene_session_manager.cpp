@@ -2092,6 +2092,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
 {
     auto task = [this, sessionInfo, property, where = __func__] {
         if (auto session = GetSceneSessionBySessionInfo(sessionInfo)) {
+            UpdateSessionDisplayIdBySessionInfo(session, sessionInfo);
             NotifySessionUpdate(sessionInfo, ActionType::SINGLE_START);
             return session;
         }
@@ -13373,6 +13374,18 @@ DisplayId SceneSessionManager::UpdateSpecificSessionClientDisplayId(const sptr<W
         ", clientDisplayId: %{public}" PRIu64, property->GetWindowName().c_str(), property->GetWindowType(),
         property->GetDisplayId(), initClientDisplayId);
     return initClientDisplayId;
+}
+
+void SceneSessionManager::UpdateSessionDisplayIdBySessionInfo(
+    sptr<SceneSession> sceneSession, const SessionInfo& sessionInfo)
+{
+    if (sceneSession->GetScreenId() == VIRTUAL_DISPLAY_ID &&
+        sceneSession->GetSessionProperty()->GetDisplayId() == VIRTUAL_DISPLAY_ID) {
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s move display %{public}" PRIu64 " from %{public}" PRIu64,
+            sessionInfo.bundleName_.c_str(), sessionInfo.screenId_, VIRTUAL_DISPLAY_ID);
+        sceneSession->SetScreenId(sessionInfo.screenId_);
+        sceneSession->GetSessionProperty()->SetDisplayId(sessionInfo.screenId_);
+    }
 }
 
 void SceneSessionManager::RemoveLifeCycleTaskByPersistentId(int32_t persistentId,
