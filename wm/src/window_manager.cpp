@@ -1550,5 +1550,14 @@ WMError WindowManager::RequestFocus(int32_t persistentId, bool isFocused,
     }
     return ret;
 }
+
+WMError WindowManager::MinimizeByWindowId(const std::vector<int32_t>& windowIds)
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().MinimizeByWindowId(windowIds);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_PC, "failed");
+    }
+    return ret;
+}
 } // namespace Rosen
 } // namespace OHOS
