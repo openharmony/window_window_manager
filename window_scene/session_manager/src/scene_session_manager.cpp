@@ -13458,12 +13458,12 @@ WMError SceneSessionManager::UnregisterSessionLifecycleListener(const sptr<ISess
 
 WMError SceneSessionManager::MinimizeByWindowId(const std::vector<int32_t>& windowIds)
 {
-    if (!SessionPermission::IsShellCall() && !SessionPermission::IsSACalling()) {
-        TLOGE(WmsLogTag::WMS_LIFE, "The caller is neither Shell nor an SA.");
+    if (!SessionPermission::IsSystemServiceCalling()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller is not system service.");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
     if (windowIds.empty()) {
-        TLOGE(WmsLogTag::WMS_LIFE, "The vector of windowid is empty.");
+        TLOGE(WmsLogTag::WMS_LIFE, "The vector of windowids is empty.");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     taskScheduler_->PostAsyncTask([this, windowIds, where = __func__]() {
