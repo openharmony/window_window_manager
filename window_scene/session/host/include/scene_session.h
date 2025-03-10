@@ -347,7 +347,7 @@ public:
     void SetSidebarMaskColorModifier(bool needBlur);
     WSError UpdateDensity();
     void UpdateNewSizeForPCWindow();
-    void CalcNewWindowRectIfNeed(WSRect& windowRect, DMRect& availableArea, float newVpr);
+    bool CalcNewWindowRectIfNeed(WSRect& windowRect, DMRect& availableArea, float newVpr);
     bool IsDefaultScreen();
 
     /*
