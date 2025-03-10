@@ -935,6 +935,7 @@ private:
     SessionInfo RecoverSessionInfo(const sptr<WindowSessionProperty>& property);
     bool IsNeedRecover(const int32_t persistentId);
     WSError CheckSessionPropertyOnRecovery(const sptr<WindowSessionProperty>& property, bool isSpecificSession);
+    void UpdateRecoverPropertyIfHpr(sptr<WindowSessionProperty>& property);
 
     /*
      * Gesture Back

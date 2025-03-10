@@ -1211,7 +1211,8 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint32(avoidAreaOption_) && parcel.WriteBool(isWindowDelayRaiseEnabled_) &&
         parcel.WriteUint8(backgroundAlpha_) && parcel.WriteUint32(static_cast<uint32_t>(keyboardViewMode_)) &&
         parcel.WriteFloat(cornerRadius_) && parcel.WriteBool(isExclusivelyHighlighted_) &&
-        parcel.WriteBool(isAtomicService_) && parcel.WriteUint32(apiVersion_);
+        parcel.WriteBool(isAtomicService_) && parcel.WriteUint32(apiVersion_) &&
+        parcel.WriteBool(isFullScreenWaterfallMode_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -1300,6 +1301,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetExclusivelyHighlighted(parcel.ReadBool());
     property->SetIsAtomicService(parcel.ReadBool());
     property->SetApiVersion(parcel.ReadUint32());
+    property->SetIsFullScreenWaterfallMode(parcel.ReadBool());
     return property;
 }
 
@@ -1390,6 +1392,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     cornerRadius_ = property->cornerRadius_;
     isAtomicService_ = property->isAtomicService_;
     apiVersion_ = property->apiVersion_;
+    isFullScreenWaterfallMode_ = property->isFullScreenWaterfallMode_;
 }
 
 bool WindowSessionProperty::Write(Parcel& parcel, WSPropertyChangeAction action)
@@ -1944,6 +1947,15 @@ void WindowSessionProperty::SetApiVersion(uint32_t version)
 uint32_t WindowSessionProperty::GetApiVersion() const
 {
     return apiVersion_;
+}
+
+void SetIsFullScreenWaterfallMode(bool isFullScreenWaterfallMode)
+{
+    isFullScreenWaterfallMode_ = isFullScreenWaterfallMode;
+}
+bool GetIsFullScreenWaterfallMode() const
+{
+    return isFullScreenWaterfallMode_;
 }
 } // namespace Rosen
 } // namespace OHOS
