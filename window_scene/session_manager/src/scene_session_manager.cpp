@@ -13319,7 +13319,7 @@ DisplayId SceneSessionManager::UpdateSpecificSessionClientDisplayId(const sptr<W
 void SceneSessionManager::UpdateSessionDisplayIdBySessionInfo(
     sptr<SceneSession> sceneSession, const SessionInfo& sessionInfo)
 {
-    if (PcFoldScreenManager::GetInstance().IsSuperFoldDevice()) {
+    if (!PcFoldScreenManager::GetInstance().IsSuperFoldDevice()) {
         return;
     }
     if (session->GetScreenId() == VIRTUAL_DISPLAY_ID &&
