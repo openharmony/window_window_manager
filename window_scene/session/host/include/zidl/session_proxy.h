@@ -158,7 +158,8 @@ public:
     WSError SetFollowParentWindowLayoutEnabled(bool isFollow) override;
     WSError GetKeyFramePolicy(KeyFramePolicy& keyFramePolicy) override;
     WSError KeyFrameAnimateEnd() override;
-    WSError UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode) override;
+    WSError UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode,
+        std::shared_ptr<RSTransaction>& rsTransaction) override;
 
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;

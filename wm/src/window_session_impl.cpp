@@ -1486,9 +1486,10 @@ void WindowSessionImpl::RegisterKeyFrameCallback()
         TLOGE(WmsLogTag::WMS_EVENT, "uiContent is nullptr");
         return;
     }
-    uiContent->AddKeyFrameCanvasNodeCallback([this](std::shared_ptr<RSCanvasNode> rsCanvasNode) {
+    uiContent->AddKeyFrameCanvasNodeCallback([this](
+        std::shared_ptr<RSCanvasNode>& rsCanvasNode, std::shared_ptr<RSTransaction>& rsTransaction) {
         if (auto session = GetHostSession()) {
-            session->UpdateKeyFrameCloneNode(rsCanvasNode);
+            session->UpdateKeyFrameCloneNode(rsCanvasNode, rsTransaction);
         } else {
             TLOGE(WmsLogTag::WMS_EVENT, "session is nullptr");
         }

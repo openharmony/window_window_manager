@@ -3379,7 +3379,8 @@ bool SceneSession::IsDragResizeWhenEnd(SizeChangeReason reason)
         GetDragResizeTypeDuringDrag() == DragResizeType::RESIZE_WHEN_DRAG_END;
 }
 
-WSError SceneSession::UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode)
+WSError SceneSession::UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode,
+    std::shared_ptr<RSTransaction>& rsTransaction)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "in");
     if (keyFrameCloneNode_) {
@@ -3391,11 +3392,19 @@ WSError SceneSession::UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsC
         TLOGE(WmsLogTag::WMS_LAYOUT, "get nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
+    if (rsTransaction != nullptr) {
+        rsTransaction->Begin();
+        TLOGD(WmsLogTag::WMS_LAYOUT, "begin rsTransaction");
+    }
     keyFrameCloneNode_ = rsCanvasNode;
     keyFrameCloneNode_->SetBounds(0, 0, winRect_.width_, winRect_.height_);
     keyFrameCloneNode_->SetFrame(0, 0, winRect_.width_, winRect_.height_);
     surfaceNode->AddChild(keyFrameCloneNode_, -1);
     sessionStage_->LinkKeyFrameCanvasNode(keyFrameCloneNode_);
+    if (rsTransaction != nullptr) {
+        rsTransaction->Commit();
+        TLOGD(WmsLogTag::WMS_LAYOUT, "commit rsTransaction");
+    }
     return WSError::WS_OK;
 }
 
