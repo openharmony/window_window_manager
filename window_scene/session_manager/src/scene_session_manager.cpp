@@ -13319,9 +13319,6 @@ DisplayId SceneSessionManager::UpdateSpecificSessionClientDisplayId(const sptr<W
 void SceneSessionManager::UpdateSessionDisplayIdBySessionInfo(
     sptr<SceneSession> sceneSession, const SessionInfo& sessionInfo)
 {
-    if (!PcFoldScreenManager::GetInstance().IsSuperFoldDevice()) {
-        return;
-    }
     if (session->GetScreenId() == VIRTUAL_DISPLAY_ID &&
         session->GetSessionProperty()->GetDisplayId() == VIRTUAL_DISPLAY_ID) {
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s move display %{public}" PRIu64 " from %{public}" PRIu64,

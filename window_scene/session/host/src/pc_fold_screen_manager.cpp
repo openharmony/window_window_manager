@@ -93,13 +93,6 @@ void PcFoldScreenManager::SetDisplayRects(
     foldCreaseRect_ = foldCreaseRect;
 }
 
-bool PcFoldScreenManager::IsSuperFoldDevice() const
-{
-    auto currScreenFoldStatus = GetScreenFoldStatus();
-    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "status: %{public}u", currScreenFoldStatus);
-    return currScreenFoldStatus != SuperFoldStatus::UNKNOWN && currScreenFoldStatus != SuperFoldStatus::FOLDED;
-}
-
 SuperFoldStatus PcFoldScreenManager::GetScreenFoldStatus() const
 {
     std::shared_lock<std::shared_mutex> lock(displayInfoMutex_);
