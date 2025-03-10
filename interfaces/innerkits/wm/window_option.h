@@ -276,7 +276,7 @@ public:
     /**
      * @brief Set sub window zLevel.
      *
-     * @param zLevel zLevel of subwindow to specify the hierarchical relationship among subwindows.
+     * @param zLevel zLevel of subWindow to specify the hierarchical relationship among subWindows.
      */
     void SetSubWindowZLevel(int32_t zLevel);
 

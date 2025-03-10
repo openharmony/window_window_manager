@@ -1352,12 +1352,12 @@ static bool ParseZLevelParam(napi_env env, napi_value jsObject, const sptr<windo
             TLOGE(WmsLogTag::WMS_SUB, "zLevel value %{public}d exceeds valid range [-10000, 10000]!", zLevel);
             return false;
         }
-    if (ParseJsValue(jsObject, env, "isModal", isModal)) {
-        if (isModal) {
-            TLOGE(WmsLogTag::WMS_SUB, "modal window not support custom zLevel");
-            return false;
+        if (ParseJsValue(jsObject, env, "isModal", isModal)) {
+            if (isModal) {
+                TLOGE(WmsLogTag::WMS_SUB, "modal window not support custom zLevel");
+                return false;
+            }
         }
-    }
     windowOption->SetSubWindowZLevel(zLevel);
     }
     TLOGI(WmsLogTag::WMS_SUB, "zLevel: %{public}d", zLevel);
