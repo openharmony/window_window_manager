@@ -92,7 +92,7 @@ public:
     void NotifyWindowCrossAxisChange(CrossAxisState state) override;
     WSError NotifyWindowAttachStateChange(bool isAttach) override;
     void NotifyKeyboardAnimationCompleted(const KeyboardPanelInfo& keyboardPanelInfo) override;
-    WSError GetClientVpr(float clientVpr) override;
+    WSError GetClientVpr(float& clientVpr) override;
 
 private:
     static inline BrokerDelegator<SessionStageProxy> delegator_;

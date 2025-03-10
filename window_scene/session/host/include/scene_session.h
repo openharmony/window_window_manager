@@ -343,6 +343,11 @@ public:
     void AddRSNodeModifier(bool isDark, const std::shared_ptr<RSBaseNode>& rsNode);
     void SetSidebarBlur(bool isDefaultSidebarBlur);
     void ModifyRSAnimatableProperty(bool isDefaultSidebarBlur, bool isDark);
+    void AddSidebarMaskColorModifier();
+    void SetSidebarMaskColorModifier(bool needBlur);
+    WSError UpdateDensity();
+    void UpdateNewSizeForPCWindow();
+    void CalcNewWindowRect(WSRect& windowRect, DMRect& availableArea, float currVpr, float newVpr);
 
     /*
      * PC Window Layout
@@ -760,8 +765,6 @@ protected:
     NotifySubModalTypeChangeFunc onSubModalTypeChange_;
     NotifyMainModalTypeChangeFunc onMainModalTypeChange_;
     NotifySetSupportedWindowModesFunc onSetSupportedWindowModesFunc_;
-    WSError UpdateDensity();
-    WSError UpdateNewSizeForPCWindow(const sptr<Display>& info, const DMRect& availableArea);
 
     /*
      * PiP Window
@@ -1108,7 +1111,6 @@ private:
      */
     bool isLayoutFullScreen_ { false };
     bool displayChangedByMoveDrag_ = false;
-    float lastClientVpr_ = 1.5f;
 
     /*
      * Window Property

@@ -1732,12 +1732,12 @@ WSError SessionStageProxy::GetClientVpr(float& clientVpr)
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "remote is null");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (remote->SendRequest(
-        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_GET_CLIENT_VPR),
+    if (remote->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_GET_CLIENT_VPR),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "SendRequest failed");
+        return WSError::WS_OK;
     }
     clientVpr = reply.ReadFloat();
-    return WSError::WS_OK;
+    return WSError::WS_ERROR_IPC_FAILED;
 }
 } // namespace OHOS::Rosen
