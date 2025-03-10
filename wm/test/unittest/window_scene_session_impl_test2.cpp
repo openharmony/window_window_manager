@@ -797,7 +797,7 @@ HWTEST_F(WindowSceneSessionImplTest2, SetSubWindowZLevel, Function | SmallTest |
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetSubWindowZLevel01");
     sptr<WindowSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    SessionInfo = sessonInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbitily"};
+    SessionInfo sessonInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     windowSceneSessionImpl->hostSession_ = session;
 
@@ -819,7 +819,7 @@ HWTEST_F(WindowSceneSessionImplTest2, SetSubWindowZLevel, Function | SmallTest |
     EXPECT_EQ(WMError::WM_OK, ret);
 
     ret = windowSceneSessionImpl->SetSubWindowZLevel(2);
-    EXPECT_EQ(WMError::WM_OK, ret)
+    EXPECT_EQ(WMError::WM_OK, ret);
 }
 
 /**
@@ -832,7 +832,7 @@ HWTEST_F(WindowSceneSessionImplTest2, GetSubWindowZLevel, Function | SmallTest |
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("GetSubWindowZLevel01");
     sptr<WindowSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    SessionInfo = sessonInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbitily"};
+    SessionInfo sessonInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     windowSceneSessionImpl->hostSession_ = session;
     windowSceneSessionImpl->property_->zLevel_ = 1;
@@ -844,7 +844,7 @@ HWTEST_F(WindowSceneSessionImplTest2, GetSubWindowZLevel, Function | SmallTest |
     session->property_->SetPersistentId(2);
 
     ret = windowSceneSessionImpl->GetSubWindowZLevel(zLevel);
-    EXPECT_EQ(WMError:WM_OK, ret);
+    EXPECT_EQ(WMError::WM_OK, ret);
     EXPECT_EQ(1, zLevel);
 }
 

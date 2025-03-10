@@ -2122,6 +2122,7 @@ WMError WindowSceneSessionImpl::SetSubWindowZLevel(int32_t zLevel)
     return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_SUB_WINDOW_Z_LEVEL);
 }
 
+/** @note @window.hierarchy */
 WMError WindowSceneSessionImpl::GetSubWindowZLevel(int32_t& zLevel)
 {
     if (IsWindowSessionInvalid()) {

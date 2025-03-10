@@ -1348,7 +1348,7 @@ static bool ParseZLevelParam(napi_env env, napi_value jsObject, const sptr<windo
     int32_t zLevel = 0;
     bool isModal = false;
     if (ParseJsValue(jsObject, env, "zLevel", zLevel)) {
-        if (zLevel < MINIMUN_Z_LEVEL || zLevel > MAXIMUM_Z_LEVEL) {
+        if (zLevel < MINIMUM_Z_LEVEL || zLevel > MAXIMUM_Z_LEVEL) {
             TLOGE(WmsLogTag::WMS_SUB, "zLevel value %{public}d exceeds valid range [-10000, 10000]!", zLevel);
             return false;
         }

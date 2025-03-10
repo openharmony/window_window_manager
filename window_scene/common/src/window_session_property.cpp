@@ -1719,7 +1719,7 @@ void WindowSessionProperty::ReadActionUpdateMainWindowTopmost(Parcel& parcel)
     UnmarshallingMainWindowTopmost(parcel, this);
 }
 
-void WindowSessionProperty::ReadActionUpdateSubWindowTopmost(Parcel& parcel)
+void WindowSessionProperty::ReadActionUpdateSubWindowZLevel(Parcel& parcel)
 {
     SetSubWindowZLevel(parcel.ReadInt32());
 }

@@ -107,7 +107,7 @@ WSError SceneSessionManagerProxy::CreateAndConnectSpecificSession(const sptr<ISe
     }
     property->SetDisplayId(displayId);
     int32_t zLevel = 0;
-    if (!reply.ReadUint32(zLevel)) {
+    if (!reply.ReadInt32(zLevel)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read zLevel failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
