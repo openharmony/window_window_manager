@@ -629,7 +629,7 @@ HWTEST_F(SessionProxyTest, OnSetWindowRectAutoSave, Function | SmallTest | Level
     ASSERT_NE(iRemoteObjectMocker, nullptr);
     auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     ASSERT_NE(sProxy, nullptr);
-    WSError res = sProxy->OnSetWindowRectAutoSave(true);
+    WSError res = sProxy->OnSetWindowRectAutoSave(true, false);
     ASSERT_EQ(res, WSError::WS_OK);
     GTEST_LOG_(INFO) << "SessionProxyTest: OnSetWindowRectAutoSave end";
 }

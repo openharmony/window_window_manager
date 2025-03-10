@@ -329,7 +329,7 @@ public:
      * @param enabled Enable the window rect auto-save if true, otherwise means the opposite.
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
-    virtual WSError OnSetWindowRectAutoSave(bool enabled) { return WSError::WS_OK; }
+    virtual WSError OnSetWindowRectAutoSave(bool enabled, bool isEnableSpecified) { return WSError::WS_OK; }
 
     /**
      * @brief Callback for setting to radius of window.

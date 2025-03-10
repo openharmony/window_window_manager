@@ -2694,7 +2694,7 @@ public:
      * @param enabled Enable the window rect auto-save if true, otherwise means the opposite.
      * @return WM_OK means set success, others means failed.
      */
-    virtual WMError SetWindowRectAutoSave(bool enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError SetWindowRectAutoSave(bool enabled, bool isEnableSpecified = false) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Get whether the auto-save the window rect is enabled or not.

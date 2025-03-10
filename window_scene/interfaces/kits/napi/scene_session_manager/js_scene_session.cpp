@@ -5773,21 +5773,21 @@ void JsSceneSession::ProcessSetWindowRectAutoSaveRegister()
         return;
     }
     const char* const where = __func__;
-    session->SetWindowRectAutoSaveCallback([weakThis = wptr(this), where](bool enabled) {
+    session->SetWindowRectAutoSaveCallback([weakThis = wptr(this), where](bool enabled, bool isEnableSpecified) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s: jsSceneSession is null", where);
             return;
         }
-        jsSceneSession->OnSetWindowRectAutoSave(enabled);
+        jsSceneSession->OnSetWindowRectAutoSave(enabled, isEnableSpecified);
     });
     TLOGI(WmsLogTag::WMS_MAIN, "success");
 }
 
-void JsSceneSession::OnSetWindowRectAutoSave(bool enabled)
+void JsSceneSession::OnSetWindowRectAutoSave(bool enabled, bool isEnableSpecified)
 {
     const char* const where = __func__;
-    auto task = [weakThis = wptr(this), persistentId = persistentId_, enabled, env = env_, where] {
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, enabled, isEnableSpecified, env = env_, where] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s: jsSceneSession id:%{public}d has been destroyed",
@@ -5800,7 +5800,8 @@ void JsSceneSession::OnSetWindowRectAutoSave(bool enabled)
             return;
         }
         napi_value jsEnabled = CreateJsValue(env, enabled);
-        napi_value argv[] = {jsEnabled};
+        napi_value jsEnableSpecified = CreateJsValue(env, isEnableSpecified);
+        napi_value argv[] = {jsEnabled, jsEnableSpecified};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, __func__);

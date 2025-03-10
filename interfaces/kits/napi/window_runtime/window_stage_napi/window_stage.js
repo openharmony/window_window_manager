@@ -90,6 +90,10 @@ class WindowStage {
     return this.__window_stage__.setWindowRectAutoSave(enabled);
   }
 
+  setWindowRectAutoSave(enabled, isEnabledSpecified) {
+    return this.__window_stage__.setWindowRectAutoSave(enabled, isEnabledSpecified);
+  }
+
   isWindowRectAutoSave() {
     return this.__window_stage__.isWindowRectAutoSave();
   }

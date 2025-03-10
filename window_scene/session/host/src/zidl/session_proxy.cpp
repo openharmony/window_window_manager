@@ -2285,7 +2285,7 @@ WSError SessionProxy::NotifyMainModalTypeChange(bool isModal)
     return WSError::WS_OK;
 }
 
-WSError SessionProxy::OnSetWindowRectAutoSave(bool enabled)
+WSError SessionProxy::OnSetWindowRectAutoSave(bool enabled, bool isEnableSpecified)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2298,6 +2298,12 @@ WSError SessionProxy::OnSetWindowRectAutoSave(bool enabled)
         TLOGE(WmsLogTag::WMS_MAIN, "Write enable failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
+    if (!data.WriteBool(isEnableSpecified)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Write isEnableSpecified failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    TLOGD(WmsLogTag::WMS_MAIN, "enable: %{public}d, isEnableSpecified: %{public}d",
+        enable, isEnableSpecified);
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         TLOGE(WmsLogTag::WMS_MAIN, "remote is null");
