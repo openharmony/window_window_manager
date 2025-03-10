@@ -697,16 +697,6 @@ public:
     static sptr<Window> Find(const std::string& windowName);
 
     /**
-     * @brief get sub window zlevel by window flags
-     *
-     * @param type Window type
-     * @param windowFlags Window flag
-     * @param isTopmost True means window is topmost
-     * @return int32_t Return the sub window zLevel
-     */
-    static int32_t GetSubWindowZLevelByFlags(WindowType type, uint32_t windowFlags, bool isTopmost);
-
-    /**
      * @brief Get parent main windowId, which is used for mainWindow,subWindow or dialog
      *
      * @param windowId window id that need to get parent main window

@@ -1426,6 +1426,7 @@ void JsSceneSession::ProcessMainWindowTopmostChangeRegister()
     TLOGD(WmsLogTag::WMS_HIERARCHY, "register success");
 }
 
+/** @note @window.hierarchy */
 void JsSceneSession::ProcessSubWindowZLevelChangeRegister()
 {
     auto session = weakSession_.promote();
@@ -1433,7 +1434,7 @@ void JsSceneSession::ProcessSubWindowZLevelChangeRegister()
         TLOGE(WmsLogTag::WMS_HIERARCHY, "session is nullptr, persistentId:%{public}d", persistentId_);
         return;
     }
-    session->RegisterSubWindowZLevelChangeCallback([weakThis = wptr(this)](int32_t zLevel) {
+    session->RegisterSubSessionZLevelChangeCallback([weakThis = wptr(this)](int32_t zLevel) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s jsSceneSession is null");

@@ -1364,7 +1364,7 @@ HWTEST_F(WindowSessionPropertyTest, GetSubWindowLevel, Function | SmallTest | Le
 HWTEST_F(WindowSessionPropertyTest, GetSubWindowZLevel, Function | SmallTest | Level2)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    int zLevel = 1;
+    int32_t zLevel = 1;
     property->zLevel_ = zLevel;
     ASSERT_EQ(zLevel, property->GetSubWindowZLevel());
 }
@@ -1377,7 +1377,7 @@ HWTEST_F(WindowSessionPropertyTest, GetSubWindowZLevel, Function | SmallTest | L
 HWTEST_F(WindowSessionPropertyTest, SetSubWindowZLevel, Function | SmallTest | Level2)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    int zLevel = 1;
+    int32_t zLevel = 1;
     property->SetSubWindowZLevel(zLevel);
     ASSERT_EQ(zLevel, property->zLevel_);
 }

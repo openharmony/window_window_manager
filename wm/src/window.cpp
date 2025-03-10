@@ -84,12 +84,6 @@ sptr<Window> Window::Create(const std::string& windowName, sptr<WindowOption>& o
         return nullptr;
     }
     option->SetWindowName(windowName);
-    uint32_t windowFlags = option->GetWindowFlags();
-    bool isTopmost = option->GetWindowTopmost();
-    int32_t zLevel = GetSubWindowZLevelByFlags(type, windowFlags, isTopmost);
-    if (zLevel != NORMAL_SUB_WINDOW_Z_LEVEL) {
-        option->SetSubWindowZLevel(zLevel);
-    }
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         return CreateWindowWithSession(option, context, errCode);
     }
@@ -137,10 +131,6 @@ sptr<Window> Window::Create(sptr<WindowOption>& option, const std::shared_ptr<OH
         WLOGFE("window type is invalid %{public}d", type);
         return nullptr;
     }
-    uint32_t windowFlags = option->GetWindowFlags();
-    bool isTopmost = option->GetWindowTopmost();
-    int32_t zLevel = GetSubWindowZLevelByFlags(type, windowFlags, isTopmost);
-    option->SetSubWindowZLevel(zLevel);
     return CreateWindowWithSession(option, context, errCode,
         iface_cast<Rosen::ISession>(iSession), identityToken);
 }
@@ -185,28 +175,6 @@ sptr<Window> Window::Find(const std::string& windowName)
     } else {
         return WindowImpl::Find(windowName);
     }
-}
-
-int32_t Window::GetSubWindowZLevelByFlags(WindowType type, uint32_t windowFlags, bool isTopmost)
-{
-    if (WindowHelper::IsApplicationModalSubwindow(type, windowFlags)) {
-        if (isTopmost) {
-            return APPLICATION_MODALITY_SUB_WINDOW_Z_LEVEL + TOPMOST_SUB_WINDOW_Z_LEVEL;
-        }
-        return APPLICATION_MODALITY_SUB_WINDOW_Z_LEVEL;
-    } else if (WindowHelper::IsModalSubWindow(type, windowFlags)) {
-        if (isTopmost) {
-            return MODALITY_SUB_WINDOW_Z_LEVEL + TOPMOST_SUB_WINDOW_Z_LEVEL;
-        }
-        return MODALITY_SUB_WINDOW_Z_LEVEL;
-    } else if (WindowHelper::IsToastSubWindow(type, windowFlags)) {
-        return TOAST_SUB_WINDOW_Z_LEVEL;
-    } else if (WindowHelper::IsTextMenuSubWindow(type, windowFlags)) {
-        return TEXT_MENU_SUB_WINDOW_Z_LEVEL;
-    } else if (WindowHelper::IsDialogWindow(type)) {
-        return DIALOG_SUB_WINDOW_Z_LEVEL;
-    }
-    return NORMAL_SUB_WINDOW_Z_LEVEL;
 }
 
 uint32_t Window::GetParentMainWindowId(uint32_t windowId)

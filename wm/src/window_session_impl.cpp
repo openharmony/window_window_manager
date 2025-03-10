@@ -485,6 +485,29 @@ void WindowSessionImpl::SetDefaultDisplayIdIfNeed()
     }
 }
 
+/** @note @window.hierarchy */
+int32_t WindowSessionImpl::GetSubWindowZLevelByFlags(WindowType type, uint32_t windowFlags, bool isTopmost)
+{
+    if (WindowHelper::IsApplicationModalSubwindow(type, windowFlags)) {
+        if (isTopmost) {
+            return APPLICATION_MODALITY_SUB_WINDOW_Z_LEVEL + TOPMOST_SUB_WINDOW_Z_LEVEL;
+        }
+        return APPLICATION_MODALITY_SUB_WINDOW_Z_LEVEL;
+    } else if (WindowHelper::IsModalSubWindow(type, windowFlags)) {
+        if (isTopmost) {
+            return MODALITY_SUB_WINDOW_Z_LEVEL + TOPMOST_SUB_WINDOW_Z_LEVEL;
+        }
+        return MODALITY_SUB_WINDOW_Z_LEVEL;
+    } else if (WindowHelper::IsToastSubWindow(type, windowFlags)) {
+        return TOAST_SUB_WINDOW_Z_LEVEL;
+    } else if (WindowHelper::IsTextMenuSubWindow(type, windowFlags)) {
+        return TEXT_MENU_SUB_WINDOW_Z_LEVEL;
+    } else if (WindowHelper::IsDialogWindow(type)) {
+        return DIALOG_SUB_WINDOW_Z_LEVEL;
+    }
+    return NORMAL_SUB_WINDOW_Z_LEVEL;
+}
+
 WMError WindowSessionImpl::Connect()
 {
     TLOGI(WmsLogTag::WMS_LIFE, "in");

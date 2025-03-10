@@ -278,7 +278,7 @@ public:
      *
      * @param zLevel zLevel of subwindow to specify the hierarchical relationship among subwindows.
      */
-    void SetWindowTopmost(bool isTopmost);
+    void SetSubWindowZLevel(int32_t zLevel);
 
     /**
      * @brief Set real parent id of UIExtension

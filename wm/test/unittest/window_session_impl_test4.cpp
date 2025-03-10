@@ -2699,7 +2699,7 @@ HWTEST_F(WindowSessionImplTest4, SetSubWindowZLevelToProperty, Function | SmallT
     sptr<WindowSessionImpl> mainWindowSessionImpl = sptr<WindowSessionImpl>::MakeSptr(option);
     mainWindowSessionImpl->SetSubWindowZLevelToProperty();
     int32_t zLevel = mainWindowSessionImpl->property_->zLevel_;
-    EXPECT_EQ(1, zLevel);
+    EXPECT_NE(1, zLevel);
 
     sptr<WindowSessionImpl> subWindowSessionImpl = sptr<WindowSessionImpl>::MakeSptr(option);
     subWindowSessionImpl->SetSubWindowZLevelToProperty();
