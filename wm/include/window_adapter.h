@@ -160,6 +160,11 @@ public:
     virtual WMError IsWindowRectAutoSave(const std::string& key, bool& enabled, int persistentId);
     virtual WMError ShiftAppWindowPointerEvent(int32_t sourceWindowId, int32_t targetWindowId);
 
+    /*
+     * Sub Window
+     */
+    virtual WMError SetParentWindow(int32_t subWindowId, int32_t newParentWindowId);
+
     virtual WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap);
     virtual WMError SetGlobalDragResizeType(DragResizeType dragResizeType);

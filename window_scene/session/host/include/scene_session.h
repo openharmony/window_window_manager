@@ -117,6 +117,7 @@ using GetStatusBarAvoidHeightFunc = std::function<void(WSRect& barArea)>;
 using NotifySetWindowCornerRadiusFunc = std::function<void(float cornerRadius)>;
 using NotifyFollowParentRectFunc = std::function<void(bool isFollow)>;
 using GetSceneSessionByIdCallback = std::function<sptr<SceneSession>(int32_t sessionId)>;
+using NotifySetParentSessionFunc = std::function<void(int32_t oldParentWindowId, int32_t newParentWindowId)>;
 using NotifyUpdateFlagFunc = std::function<void(const std::string& flag)>;
 
 struct UIExtensionTokenInfo {
@@ -194,8 +195,6 @@ public:
         uint32_t& screenWidth, uint32_t& screenHeight);
     bool GetScreenWidthAndHeightFromClient(const sptr<WindowSessionProperty>& sessionProperty,
         uint32_t& screenWidth, uint32_t& screenHeight);
-    void NotifyTargetScreenWidthAndHeight(bool isScreenAngleMismatch, uint32_t screenWidth,
-        uint32_t screenHeight);
     sptr<SceneSession> GetSceneSessionById(int32_t sessionId) const;
 
     WSError UpdateActiveStatus(bool isActive) override;
@@ -352,6 +351,15 @@ public:
     bool IsLayoutFullScreen() const;
     WSError StartMovingWithCoordinate(int32_t offsetX, int32_t offsetY,
         int32_t pointerPosX, int32_t pointerPosY) override;
+
+    /*
+     * Sub Window
+     */
+    virtual void SetParentSessionCallback(NotifySetParentSessionFunc&& func) {}
+    virtual WMError NotifySetParentSession(int32_t oldParentWindowId,
+        int32_t newParentWindowId) { return WMError::WM_ERROR_INVALID_WINDOW; }
+    void UpdateSubWindowLevel(uint32_t subWindowLevel);
+    int GetMaxSubWindowLevel() const;
 
     /*
      * Window Immersive
@@ -881,7 +889,6 @@ private:
     void NotifyPropertyWhenConnect();
     WSError RaiseAppMainWindowToTop() override;
     void UpdateWinRectForSystemBar(WSRect& rect);
-    bool UpdateInputMethodSessionRect(const WSRect& rect, WSRect& newWinRect, WSRect& newRequestRect);
     bool IsMovableWindowType();
     bool IsFullScreenMovable();
     bool IsMovable();
@@ -992,7 +999,7 @@ private:
     bool AdjustRectByAspectRatio(WSRect& rect);
     bool SaveAspectRatio(float ratio);
     WSError UpdateRectForDrag(const WSRect& rect);
-    void UpdateSessionRectPosYFromClient(SizeChangeReason reason, DisplayId configDisplayId, WSRect& rect);
+    void UpdateSessionRectPosYFromClient(SizeChangeReason reason, DisplayId& configDisplayId, WSRect& rect);
 
     /*
      * Window Decor
@@ -1012,9 +1019,6 @@ private:
 
     bool isAddBlank_ = false;
     bool bufferAvailableCallbackEnable_ = false;
-    bool isScreenAngleMismatch_ = false;
-    uint32_t targetScreenWidth_ = 0;
-    uint32_t targetScreenHeight_ = 0;
 
     // WMSPipeline-related: only accessed on SSM thread
     PostProcessFocusState postProcessFocusState_;

@@ -368,6 +368,7 @@ public:
     WSError CompatibleFullScreenRecover();
     WSError CompatibleFullScreenMinimize();
     WSError CompatibleFullScreenClose();
+    WSError PcAppInPadNormalClose();
     WSError SetIsPcAppInPad(bool enable);
     bool NeedNotify() const;
     void SetNeedNotify(bool needNotify);
@@ -628,6 +629,7 @@ public:
     sptr<Session> GetMainSession() const;
     sptr<Session> GetMainOrFloatSession() const;
     bool IsPcWindow() const;
+    bool IsAncestorsSession(int ancestorsId) const;
 
     /**
      * Window Property

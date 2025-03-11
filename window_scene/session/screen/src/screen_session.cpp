@@ -484,6 +484,26 @@ int32_t ScreenSession::GetValidWidth() const
     return property_.GetValidWidth();
 }
 
+void ScreenSession::SetPointerActiveWidth(uint32_t pointerActiveWidth)
+{
+    property_.SetPointerActiveWidth(pointerActiveWidth);
+}
+
+uint32_t ScreenSession::GetPointerActiveWidth()
+{
+    return property_.GetPointerActiveWidth();
+}
+
+void ScreenSession::SetPointerActiveHeight(uint32_t pointerActiveHeight)
+{
+    property_.SetPointerActiveHeight(pointerActiveHeight);
+}
+
+uint32_t ScreenSession::GetPointerActiveHeight()
+{
+    return property_.GetPointerActiveHeight();
+}
+
 void ScreenSession::SetIsBScreenHalf(bool isBScreenHalf)
 {
     isBScreenHalf_ = isBScreenHalf;

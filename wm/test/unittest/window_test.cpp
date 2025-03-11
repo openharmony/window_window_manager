@@ -2806,6 +2806,33 @@ HWTEST_F(WindowTest, GetLayoutTransform, Function | SmallTest | Level2)
     ASSERT_EQ(trans, window->GetLayoutTransform());
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
+
+/**
+ * @tc.name: SetParentWindow
+ * @tc.desc: SetParentWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, SetParentWindow, Function | SmallTest | Level2)
+{
+    sptr<Window> window = sptr<Window>::MakeSptr();
+    int32_t newParentWindowId = 1;
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetParentWindow(newParentWindowId));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: GetParentWindow
+ * @tc.desc: GetParentWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, GetParentWindow, Function | SmallTest | Level2)
+{
+    sptr<Window> window = sptr<Window>::MakeSptr();
+    sptr<Window> parentWindow = nullptr;
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->GetParentWindow(parentWindow));
+    ASSERT_EQ(parentWindow, nullptr);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
