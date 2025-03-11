@@ -1835,6 +1835,21 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetSuperFoldStatus, Function | SmallTest
 }
 
 /**
+ * @tc.name: SetLandscapeLockStatus
+ * @tc.desc: SetLandscapeLockStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, SetLandscapeLockStatus, Function | SmallTest | Level1)
+{
+    bool isLocked = false;
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+    ASSERT_NE(screenSessionManagerProxy, nullptr);
+    screenSessionManagerProxy->SetLandscapeLockStatus(isLocked);
+}
+
+/**
  * @tc.name: GetCurrentFoldCreaseRegion
  * @tc.desc: GetCurrentFoldCreaseRegion
  * @tc.type: FUNC
