@@ -6929,7 +6929,7 @@ void SceneSession::UpdateSubWindowLevel(uint32_t subWindowLevel)
     }
 }
 
-int SceneSession::GetMaxSubWindowLevel()
+int SceneSession::GetMaxSubWindowLevel() const
 {
     int maxSubWindowLevel = 1;
     for (const auto& session : GetSubSession()) {

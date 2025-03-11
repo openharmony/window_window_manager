@@ -587,11 +587,20 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
     return ret;
 }
 
-void WindowSceneSessionImpl::SetParentWindowInner(int32_t oldParentWindowId,
+WMError WindowSceneSessionImpl::SetParentWindowInner(int32_t oldParentWindowId,
     const sptr<WindowSessionImpl>& newParentWindow)
 {
+    auto newParentWindowId = newParentWindow->GetPersistentId();
+    auto subWindowId = GetPersistentId();
+    TLOGI(WmsLogTag::WMS_SUB, "subWindowId: %{public}d, oldParentWindowId: %{public}d, "
+        "newParentWindowId: %{public}d", subWindowId, oldParentWindowId, newParentWindowId);
+    WMError ret = SingletonContainer::Get<WindowAdapter>().SetParentWindow(subWindowId, newParentWindowId);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_SUB, "winId: %{public}d set parent window failed errCode: %{public}d",
+            subWindowId, static_cast<int32_t>(ret));
+        return ret;
+    }
     RemoveSubWindow(oldParentWindowId);
-    auto newParentWindowId = newParentWindow->GetProperty()->GetPersistentId();
     {
         std::lock_guard<std::recursive_mutex> lock(subWindowSessionMutex_);
         subWindowSessionMap_[newParentWindowId].push_back(this);
@@ -602,6 +611,7 @@ void WindowSceneSessionImpl::SetParentWindowInner(int32_t oldParentWindowId,
         newParentWindow->GetWindowState() == WindowState::STATE_HIDDEN) {
         UpdateSubWindowStateAndNotify(newParentWindowId, WindowState::STATE_HIDDEN);
     }
+    return WMError::WM_OK;
 }
 
 WMError WindowSceneSessionImpl::SetParentWindow(int32_t newParentWindowId)
@@ -625,28 +635,29 @@ WMError WindowSceneSessionImpl::SetParentWindow(int32_t newParentWindowId)
             "oldParentWindowId or subWindowId", subWindowId);
         return WMError::WM_ERROR_INVALID_PARENT;
     }
+    auto oldParentWindow = GetWindowWithId(oldParentWindowId);
+    if (oldParentWindow == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "winId: %{public}d find not old parent window By Id: %{public}d",
+            subWindowId, oldParentWindowId);
+        return WMError::WM_ERROR_INVALID_PARENT;
+    }
+    auto oldWindowType = oldParentWindow->GetType();
+    if (!WindowHelper::IsMainWindow(oldWindowType) && !WindowHelper::IsFloatOrSubWindow(oldWindowType)) {
+        TLOGE(WmsLogTag::WMS_SUB, "winId: %{public}d old parent window type invalid", subWindowId);
+        return WMError::WM_ERROR_INVALID_PARENT;
+    }
     auto newParentWindow = GetWindowWithId(newParentWindowId);
     if (newParentWindow == nullptr) {
         TLOGE(WmsLogTag::WMS_SUB, "winId: %{public}d find not new parent window By Id: %{public}d",
             subWindowId, newParentWindowId);
         return WMError::WM_ERROR_INVALID_PARENT;
     }
-    auto windowType = newParentWindow->GetType();
-    if (!WindowHelper::IsMainWindow(windowType) &&
-        !WindowHelper::IsFloatOrSubWindow(windowType)) {
+    auto newWindowType = newParentWindow->GetType();
+    if (!WindowHelper::IsMainWindow(newWindowType) && !WindowHelper::IsFloatOrSubWindow(newWindowType)) {
         TLOGE(WmsLogTag::WMS_SUB, "winId: %{public}d new parent window type invalid", subWindowId);
         return WMError::WM_ERROR_INVALID_PARENT;
     }
-    TLOGI(WmsLogTag::WMS_SUB, "subWindowId: %{public}d, oldParentWindowId: %{public}d, "
-        "newParentWindowId: %{public}d", subWindowId, oldParentWindowId, newParentWindowId);
-    WMError ret = SingletonContainer::Get<WindowAdapter>().SetParentWindow(subWindowId, newParentWindowId);
-    if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_SUB, "winId: %{public}d set parent window failed errCode: %{public}d",
-            subWindowId, static_cast<int32_t>(ret));
-        return ret;
-    }
-    SetParentWindowInner(oldParentWindowId, newParentWindow);
-    return WMError::WM_OK;
+    return SetParentWindowInner(oldParentWindowId, newParentWindow);
 }
 
 WMError WindowSceneSessionImpl::GetParentWindow(sptr<Window>& parentWindow)
