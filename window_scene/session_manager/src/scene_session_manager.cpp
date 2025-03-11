@@ -136,7 +136,6 @@ constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PHONE = 3;
 constexpr uint32_t LIFECYCLE_ISOLATE_VERSION = 18;
 constexpr uint64_t NOTIFY_START_ABILITY_TIMEOUT = 3000;
 constexpr uint64_t START_UI_ABILITY_TIMEOUT = 3000;
-constexpr uint64_t HPR_VIRTUAL_DISPLAY_ID = 999;
 
 const std::map<std::string, OHOS::AppExecFwk::DisplayOrientation> STRING_TO_DISPLAY_ORIENTATION_MAP = {
     {"unspecified",                         OHOS::AppExecFwk::DisplayOrientation::UNSPECIFIED},
@@ -3434,7 +3433,7 @@ WSError SceneSessionManager::RecoverAndConnectSpecificSession(const sptr<ISessio
             TLOGNW(WmsLogTag::WMS_RECOVER, "Recover finished, not recovery anymore");
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
-        UpdateRecoverPropertyIfHpr(property);
+        UpdateRecoverPropertyForSuperFold(property);
         // recover specific session
         SessionInfo info = RecoverSessionInfo(property);
         TLOGNI(WmsLogTag::WMS_RECOVER, "callingWindowId=%{public}" PRIu32, property->GetCallingSessionId());
@@ -3580,7 +3579,7 @@ WSError SceneSessionManager::RecoverAndReconnectSceneSession(const sptr<ISession
             TLOGNE(WmsLogTag::WMS_RECOVER, "recoverSceneSessionFunc_ is null");
             return WSError::WS_ERROR_NULLPTR;
         }
-        UpdateRecoverPropertyIfHpr(property);
+        UpdateRecoverPropertyForSuperFold(property);
         SessionInfo sessionInfo = RecoverSessionInfo(property);
         sptr<SceneSession> sceneSession = RequestSceneSession(sessionInfo, nullptr);
         if (sceneSession == nullptr) {
@@ -3609,9 +3608,9 @@ WSError SceneSessionManager::RecoverAndReconnectSceneSession(const sptr<ISession
     return taskScheduler_->PostSyncTask(task, __func__);
 }
 
-void SceneSessionManager::UpdateRecoverPropertyIfHpr(const sptr<WindowSessionProperty>& property)
+void SceneSessionManager::UpdateRecoverPropertyForSuperFold(const sptr<WindowSessionProperty>& property)
 {
-    if (property->GetDisplayId() != HPR_VIRTUAL_DISPLAY_ID) {
+    if (property->GetDisplayId() != VIRTUAL_DISPLAY_ID) {
         return;
     }
     static auto foldCreaseRegion = SingletonContainer::Get<DisplayManager>().GetCurrentFoldCreaseRegion();
@@ -3621,25 +3620,19 @@ void SceneSessionManager::UpdateRecoverPropertyIfHpr(const sptr<WindowSessionPro
     Rect recoverWindowRect = property->GetWindowRect();
     Rect recoverRequestRect = property->GetRequestRect();
     TLOGD(WmsLogTag::WMS_RECOVER,
-        "WindowRect[X,Y,W,H]: [%{public}d,%{public}d,%{public}d,%{public}d]\
-        RequestRect[X,Y,W,H]: [%{public}d,%{public}d,%{public}d,%{public}d]\
-        DisplayId: %{public}d",
-        recoverWindowRect.posX_, recoverWindowRect.posY_, recoverWindowRect.width_, recoverWindowRect.height_,
-        recoverRequestRect.posX_, recoverRequestRect.posY_, recoverRequestRect.width_, recoverRequestRect.height_,
+        "WindowRect: %{public}d, RequestRect: %{public}d, DisplayId: %{public}d",
+        recoverWindowRect.ToString().c_str(), recoverRequestRect.ToString().c_str(),
         static_cast<uint32_t>(property->GetDisplayId()));
     
     auto foldCrease = foldCreaseRegion->GetCreaseRects().front();
-    recoverWindowRect.posY_ = recoverWindowRect.posY_ + foldCrease.posY_ + foldCrease.height_;
-    recoverRequestRect.posY_ = recoverRequestRect.posY_ + foldCrease.posY_ + foldCrease.height_;
+    recoverWindowRect.posY_ += foldCrease.posY_ + foldCrease.height_;
+    recoverRequestRect.posY_ += foldCrease.posY_ + foldCrease.height_;
     property->SetWindowRect(recoverWindowRect);
     property->SetRequestRect(recoverRequestRect);
     property->SetDisplayId(0);
     TLOGD(WmsLogTag::WMS_RECOVER,
-        "WindowRect[X,Y,W,H]: [%{public}d,%{public}d,%{public}d,%{public}d]\
-        RequestRect[X,Y,W,H]: [%{public}d,%{public}d,%{public}d,%{public}d]\
-        DisplayId: %{public}d",
-        recoverWindowRect.posX_, recoverWindowRect.posY_, recoverWindowRect.width_, recoverWindowRect.height_,
-        recoverRequestRect.posX_, recoverRequestRect.posY_, recoverRequestRect.width_, recoverRequestRect.height_,
+        "WindowRect: %{public}d, RequestRect: %{public}d, DisplayId: %{public}d",
+        recoverWindowRect.ToString().c_str(), recoverRequestRect.ToString().c_str(),
         static_cast<uint32_t>(property->GetDisplayId()));
 }
 
