@@ -660,7 +660,6 @@ void WindowSessionImpl::DestroySubWindow()
             }
         }
     }
-    
     // remove from subWindowMap_ when destroy parent window
     std::vector<sptr<WindowSessionImpl>> subWindows;
     GetSubWidnows(persistentId, subWindows);
