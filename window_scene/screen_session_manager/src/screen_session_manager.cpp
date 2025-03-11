@@ -8510,7 +8510,6 @@ bool ScreenSessionManager::GetIsRealScreen(ScreenId screenId)
 
 void ScreenSessionManager::WakeUpPictureFrameBlock(DisplayEvent event)
 {
-    TLOGI(WmsLogTag::DMS, "[UL_POWER]enter");
     std::unique_lock <std::mutex> lock(screenWaitPictureFrameMutex_);
     if (event == DisplayEvent::SCREEN_LOCK_START_DREAM) {
         TLOGI(WmsLogTag::DMS, "[UL_POWER]get pictureFrameReady");
