@@ -34,7 +34,7 @@ public:
      * @param consumer Intercept consumer of the input event
      */
     static void RegisterInputEventIntercept(const int32_t deviceId,
-                                            const std::shared_ptr<IInputEventInterceptConsumer> &consumer);
+                                            const std::shared_ptr<IInputEventInterceptConsumer>& consumer);
 
     /**
      * Unregister the interception of input events
@@ -46,13 +46,13 @@ public:
      * Send key event
      * @param keyEvent KeyEvent of Multi-Model Input.
      */
-    static void SendInputEvent(const std::shared_ptr<MMI::KeyEvent> &keyEvent);
+    static void SendInputEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
 
     /**
      * Send pointer event
      * @param pointerEvent PointerEvent of Multi-Model Input.
      */
-    static void SendInputEvent(const std::shared_ptr<MMI::PointerEvent> &pointerEvent);
+    static void SendInputEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 };
 }
 }

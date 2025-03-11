@@ -28,20 +28,20 @@ const int32_t DEVICE_ID = 12;
 }
 class WindowInputInterceptConsumer : public IInputEventInterceptConsumer {
 public:
-    void OnInputEvent(const std::shared_ptr<MMI::KeyEvent> &keyEvent) override;
+    void OnInputEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
 
-    void OnInputEvent(const std::shared_ptr<MMI::PointerEvent> &pointerEvent) override;
+    void OnInputEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
 public:
     std::shared_ptr<MMI::KeyEvent> keyEventResult_ = nullptr;
     std::shared_ptr<MMI::PointerEvent> pointerEvent_ = nullptr;
 };
 
-void WindowInputInterceptConsumer::OnInputEvent(const std::shared_ptr<MMI::KeyEvent> &keyEvent)
+void WindowInputInterceptConsumer::OnInputEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
     keyEventResult_ = keyEvent;
 }
 
-void WindowInputInterceptConsumer::OnInputEvent(const std::shared_ptr<MMI::PointerEvent> &pointerEvent)
+void WindowInputInterceptConsumer::OnInputEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     pointerEvent_ = pointerEvent;
 }

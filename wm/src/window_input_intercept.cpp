@@ -22,7 +22,7 @@ namespace Rosen {
 
 WM_IMPLEMENT_SINGLE_INSTANCE(WindowInputIntercept)
 void WindowInputIntercept::RegisterInputEventIntercept(const int32_t deviceId,
-                                                       const std::shared_ptr<IInputEventInterceptConsumer> &consumer)
+                                                       const std::shared_ptr<IInputEventInterceptConsumer>& consumer)
 {
     std::lock_guard<std::mutex> lock(registerMutex_);
     if (consumer == nullptr) {
@@ -49,7 +49,7 @@ void WindowInputIntercept::UnRegisterInputEventIntercept(const int32_t deviceId)
 }
 
 
-bool WindowInputIntercept::IsInputIntercept(const std::shared_ptr<MMI::KeyEvent> &keyEvent)
+bool WindowInputIntercept::IsInputIntercept(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
     std::shared_ptr<IInputEventInterceptConsumer> consumer = nullptr;
     {
@@ -69,7 +69,7 @@ bool WindowInputIntercept::IsInputIntercept(const std::shared_ptr<MMI::KeyEvent>
     return true;
 }
 
-bool WindowInputIntercept::IsInputIntercept(const std::shared_ptr<MMI::PointerEvent> &pointerEvent)
+bool WindowInputIntercept::IsInputIntercept(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     std::shared_ptr<IInputEventInterceptConsumer> consumer = nullptr;
     {

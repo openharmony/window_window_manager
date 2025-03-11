@@ -42,8 +42,8 @@ public:
         isRegisteredMMI_ = true;
     }
 
-    void HandleInputEvent(const std::shared_ptr<MMI::KeyEvent> &keyEvent);
-    void HandleInputEvent(const std::shared_ptr<MMI::PointerEvent> &pointerEvent);
+    void HandleInputEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
+    void HandleInputEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 protected:
     InputTransferStation() = default;
     ~InputTransferStation();

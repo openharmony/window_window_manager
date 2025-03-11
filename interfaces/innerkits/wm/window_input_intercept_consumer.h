@@ -23,8 +23,8 @@ struct IInputEventInterceptConsumer {
 public:
     IInputEventInterceptConsumer() = default;
     virtual ~IInputEventInterceptConsumer() = default;
-    virtual void OnInputEvent(const std::shared_ptr<MMI::KeyEvent> &keyEvent);
-    virtual void OnInputEvent(const std::shared_ptr<MMI::PointerEvent> &pointerEvent);
+    virtual void OnInputEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
+    virtual void OnInputEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 };
 }
 }
