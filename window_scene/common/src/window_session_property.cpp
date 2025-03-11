@@ -1161,12 +1161,12 @@ bool WindowSessionProperty::GetIsAtomicService() const
     return isAtomicService_;
 }
 
-void WindowSessionProperty::SetisSaveBySpecifiedFlag(bool isSaveBySpecifiedFlag)
+void WindowSessionProperty::SetIsSaveBySpecifiedFlag(bool isSaveBySpecifiedFlag)
 {
     isSaveBySpecifiedFlag_ = isSaveBySpecifiedFlag;
 }
 
-bool WindowSessionProperty::GetisSaveBySpecifiedFlag() const
+bool WindowSessionProperty::GetIsSaveBySpecifiedFlag() const
 {
     return isSaveBySpecifiedFlag_;
 }
@@ -1221,7 +1221,8 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint32(avoidAreaOption_) && parcel.WriteBool(isWindowDelayRaiseEnabled_) &&
         parcel.WriteUint8(backgroundAlpha_) && parcel.WriteUint32(static_cast<uint32_t>(keyboardViewMode_)) &&
         parcel.WriteFloat(cornerRadius_) && parcel.WriteBool(isExclusivelyHighlighted_) &&
-        parcel.WriteBool(isAtomicService_) && parcel.WriteUint32(apiVersion_) && parcel.WriteBool(isSaveBySpecifiedFlag_);
+        parcel.WriteBool(isAtomicService_) && parcel.WriteUint32(apiVersion_) &&
+        parcel.WriteBool(isSaveBySpecifiedFlag_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -1310,7 +1311,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetExclusivelyHighlighted(parcel.ReadBool());
     property->SetIsAtomicService(parcel.ReadBool());
     property->SetApiVersion(parcel.ReadUint32());
-    property->SetisSaveBySpecifiedFlag(parcel.ReadBool());
+    property->SetIsSaveBySpecifiedFlag(parcel.ReadBool());
     return property;
 }
 
