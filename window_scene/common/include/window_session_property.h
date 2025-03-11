@@ -440,7 +440,7 @@ private:
     /*
     * Window Hierarchy
     */
-   int32_t zLevel_ = 0;
+    int32_t zLevel_ = 0;
 
     /*
      * UIExtension

@@ -941,7 +941,7 @@ public:
 
     /**
      * @brief Set sub window zLevel
-     * 
+     *
      * @param zLevel zLevel of sub window to specify the hierarchical relationship among sub windows.
      * @return WM_OK means success, others mean set failed.
      */
@@ -949,7 +949,7 @@ public:
     
     /**
      * @brief Get sub window zLevel
-     * 
+     *
      * @param zLevel sub window zLevel
      * @return WM_OK means success, others mean get failed.
      */

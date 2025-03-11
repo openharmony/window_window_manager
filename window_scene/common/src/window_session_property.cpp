@@ -82,7 +82,7 @@ const std::map<uint64_t, HandlWritePropertyFunc> WindowSessionProperty::writeFun
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_TOPMOST),
         &WindowSessionProperty::WriteActionUpdateTopmost),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_SUB_WINDOW_Z_LEVEL),
-        &WindowSessionProperty::WriteActionUpdateSubWindowZLevel),    
+        &WindowSessionProperty::WriteActionUpdateSubWindowZLevel),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO),
         &WindowSessionProperty::WriteActionUpdateWindowModeSupportType),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST),
@@ -1209,7 +1209,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint32(static_cast<uint32_t>(windowMode_)) &&
         parcel.WriteUint32(flags_) && parcel.WriteBool(raiseEnabled_) &&
         parcel.WriteBool(topmost_) && parcel.WriteBool(mainWindowTopmost_) &&
-        parcel.WriteInt32(zLevel_)&&
+        parcel.WriteInt32(zLevel_) &&
         parcel.WriteBool(isDecorEnable_) && parcel.WriteBool(dragEnabled_) &&
         parcel.WriteBool(hideNonSystemFloatingWindows_) && parcel.WriteBool(forceHide_) &&
         MarshallingWindowLimits(parcel) && parcel.WriteFloat(brightness_) &&

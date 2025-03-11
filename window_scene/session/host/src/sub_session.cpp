@@ -311,6 +311,7 @@ int32_t SubSession::GetSubWindowZLevel() const
     int32_t zLevel = 0;
     auto sessionProperty = GetSessionProperty();
     zLevel = sessionProperty->GetSubWindowZLevel();
-    TLOGI(WmsLogTag::WMS_HIERARCHY, "zLevel: %{public}d",zLevel);
+    TLOGI(WmsLogTag::WMS_HIERARCHY, "zLevel: %{public}d", zLevel);
+    return zLevel;
 }
 } // namespace OHOS::Rosen
