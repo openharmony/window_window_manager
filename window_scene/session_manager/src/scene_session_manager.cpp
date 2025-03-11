@@ -3620,7 +3620,7 @@ void SceneSessionManager::UpdateRecoverPropertyForSuperFold(const sptr<WindowSes
     Rect recoverWindowRect = property->GetWindowRect();
     Rect recoverRequestRect = property->GetRequestRect();
     TLOGD(WmsLogTag::WMS_RECOVER,
-        "WindowRect: %{public}d, RequestRect: %{public}d, DisplayId: %{public}d",
+        "WindowRect: %{public}s, RequestRect: %{public}s, DisplayId: %{public}d",
         recoverWindowRect.ToString().c_str(), recoverRequestRect.ToString().c_str(),
         static_cast<uint32_t>(property->GetDisplayId()));
     
@@ -3631,7 +3631,7 @@ void SceneSessionManager::UpdateRecoverPropertyForSuperFold(const sptr<WindowSes
     property->SetRequestRect(recoverRequestRect);
     property->SetDisplayId(0);
     TLOGD(WmsLogTag::WMS_RECOVER,
-        "WindowRect: %{public}d, RequestRect: %{public}d, DisplayId: %{public}d",
+        "WindowRect: %{public}s, RequestRect: %{public}s, DisplayId: %{public}d",
         recoverWindowRect.ToString().c_str(), recoverRequestRect.ToString().c_str(),
         static_cast<uint32_t>(property->GetDisplayId()));
 }
