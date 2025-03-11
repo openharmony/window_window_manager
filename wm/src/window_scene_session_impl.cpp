@@ -2104,13 +2104,13 @@ WMError WindowSceneSessionImpl::SetSubWindowZLevel(int32_t zLevel)
         TLOGE(WmsLogTag::WMS_HIERARCHY, "Session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (parentId == INVALID_SESSION_ID) {
-        WLOGFE("Only the children of the main window can be raised!");
-        return WMError::WM_ERROR_INVALID_PARENT;
-    }
     if (!WindowHelper::IsSubWindow(GetType())) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "Must be normal app sub window!");
         return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    if (parentId == INVALID_SESSION_ID) {
+        WLOGFE("Only the children of the main window can be raised!");
+        return WMError::WM_ERROR_INVALID_PARENT;
     }
     if (zLevel > MAXIMUM_Z_LEVEL || zLevel < MINIMUM_Z_LEVEL) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "zLevel value %{public}d exceeds valid range [-10000, 10000]!", zLevel);
