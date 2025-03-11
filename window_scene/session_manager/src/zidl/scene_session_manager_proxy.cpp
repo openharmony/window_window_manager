@@ -2968,7 +2968,12 @@ WMError SceneSessionManagerProxy::SetAppKeyFramePolicy(
         TLOGE(WmsLogTag::WMS_LAYOUT, "SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    return static_cast<WMError>(reply.ReadInt32());
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Read ret failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(ret);
 }
 
 WMError SceneSessionManagerProxy::ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId)

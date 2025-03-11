@@ -2061,8 +2061,10 @@ WMError SceneSessionManager::SetAppKeyFramePolicy(const std::string& bundleName,
         TLOGE(WmsLogTag::WMS_LAYOUT, "bundleName empty");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    std::lock_guard<std::mutex> lock(keyFrameMutex_);
-    appKeyFramePolicyMap_[bundleName] = keyFramePolicy;
+    {
+        std::lock_guard<std::mutex> lock(keyFrameMutex_);
+        appKeyFramePolicyMap_[bundleName] = keyFramePolicy;
+    }
     taskScheduler_->PostAsyncTask([this, bundleName, keyFramePolicy, where = __func__] {
         auto sceneSession = GetSceneSessionByBundleName(bundleName);
         if (sceneSession != nullptr && systemConfig_.IsPcWindow() &&
@@ -2081,7 +2083,7 @@ KeyFramePolicy SceneSessionManager::GetAppKeyFramePolicy(const std::string& bund
     if (auto iter = appKeyFramePolicyMap_.find(bundleName); iter != appKeyFramePolicyMap_.end()) {
         return iter->second;
     }
-    return *(new KeyFramePolicy());
+    return KeyFramePolicy();
 }
 
 sptr<SceneSession> SceneSessionManager::GetSceneSessionBySessionInfo(const SessionInfo& sessionInfo)
