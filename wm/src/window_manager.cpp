@@ -240,6 +240,20 @@ void WindowManager::Impl::NotifyWindowVisibilityInfoChanged(
     }
 }
 
+void WindowManager::Impl::NotifyWindowVisibilityStateChanged(
+    const std::unordered_map<WindowInfoKey, std::any>& windowChangeInfo)
+{
+    std::vector<sptr<IWindowInfoChangedListener>> windowInfoChangedListeners;
+    {
+        std::shared_lock<std::shared_mutex> lock(listenerMutex_);
+        windowInfoChangedListeners = windowInfoChangedListeners_;
+    }
+    for (auto& listener : windowInfoChangedListeners_) {
+        WLOGD("Notify WindowVisibilityInfo to caller");
+        listener->OnWindowInfoChanged(windowChangeInfo);
+    }
+}
+
 void WindowManager::Impl::NotifyWindowDrawingContentInfoChanged(
     const std::vector<sptr<WindowDrawingContentInfo>>& windowDrawingContentInfos)
 {
@@ -1095,6 +1109,15 @@ void WindowManager::UpdateWindowVisibilityInfo(
     const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos) const
 {
     pImpl_->NotifyWindowVisibilityInfoChanged(windowVisibilityInfos);
+    std::unordered_map<WindowInfoKey, std::any> windowChangeInfo;
+    for (const auto& info : windowVisibilityInfos) {
+        windowChangeInfo.emplace(WindowInfoKey::WINDOW_ID, info->windowId_);
+        windowChangeInfo.emplace(WindowInfoKey::BUNDLE_NAME, info->bundleName_);
+        windowChangeInfo.emplace(WindowInfoKey::ABILITY_NAME, info->abilityName_);
+        windowChangeInfo.emplace(WindowInfoKey::APP_INDEX, info->appIndex_);
+        windowChangeInfo.emplace(WindowInfoKey::VISIBILITY_STATE, info->visibilityState_);
+        pImpl_->NotifyWindowInfoChanged(windowChangeInfo);
+    }
 }
 
 void WindowManager::UpdateWindowDrawingContentInfo(
