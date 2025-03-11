@@ -18,6 +18,7 @@
 #include <bundlemgr/launcher_service.h>
 #include <event_handler.h>
 #include <input_manager.h>
+#include <int_wrapper.h>
 #include <iremote_stub.h>
 #include <transaction/rs_interfaces.h>
 #include <ui_content.h>
@@ -540,7 +541,6 @@ void RootScene::UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>& want)
     const auto& configParam = want->GetParams().GetWantParams(Extension::UIEXTENSION_CONFIG_FIELD);
     auto waterfallModeValue = configParam.GetIntParam(Extension::WATERFALL_MODE_FIELD, 0);
     isFullScreenWaterfallMode_.store(static_cast<bool>(waterfallModeValue));
-    isFullScreenWaterfallMode_.store(AAFwk::Boolean::Unbox(waterfallModeBox));
     isValidWaterfallMode_.store(true);
     want->RemoveParam(Extension::UIEXTENSION_CONFIG_FIELD);
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "root waterfall: %{public}d", isFullScreenWaterfallMode_.load());
