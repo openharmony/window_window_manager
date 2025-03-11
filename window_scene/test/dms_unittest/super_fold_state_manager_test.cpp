@@ -201,6 +201,48 @@ HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange07, Function | Sm
 }
 
 /**
+ * @tc.name: HandleSuperFoldStatusChange
+ * @tc.desc: test function : SYSTEM_KEYBOARD_ON
+ * @tc.type: FUNC
+ */
+HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange08, Function | SmallTest | Level1)
+{
+    SuperFoldStatusChangeEvents events = SuperFoldStatusChangeEvents::SYSTEM_KEYBOARD_ON;
+    SuperFoldStateManager::GetInstance().SetCurrentStatus(SuperFoldStatus::HALF_FOLDED);
+    std::function<void()> func = [&]()
+    {
+        SuperFoldStateManager::GetInstance().HandleSuperFoldStatusChange(events);
+    };
+ 
+    func();
+    SuperFoldStatus curState = SuperFoldStateManager::GetInstance().GetCurrentStatus();
+    SuperFoldStatus expState = SuperFoldStatus::HALF_FOLDED;
+ 
+    EXPECT_EQ(curState, expState);
+}
+ 
+/**
+ * @tc.name: HandleSuperFoldStatusChange
+ * @tc.desc: test function : SYSTEM_KEYBOARD_OFF
+ * @tc.type: FUNC
+ */
+HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange09, Function | SmallTest | Level1)
+{
+    SuperFoldStatusChangeEvents events = SuperFoldStatusChangeEvents::SYSTEM_KEYBOARD_OFF;
+    SuperFoldStateManager::GetInstance().SetCurrentStatus(SuperFoldStatus::HALF_FOLDED);
+    std::function<void()> func = [&]()
+    {
+        SuperFoldStateManager::GetInstance().HandleSuperFoldStatusChange(events);
+    };
+ 
+    func();
+    SuperFoldStatus curState = SuperFoldStateManager::GetInstance().GetCurrentStatus();
+    SuperFoldStatus expState = SuperFoldStatus::HALF_FOLDED;
+ 
+    EXPECT_EQ(curState, expState);
+}
+
+/**
  * @tc.name: MatchSuperFoldStatusToFoldStatus
  * @tc.desc: test function : EXPANDED
  * @tc.type: FUNC
@@ -295,6 +337,45 @@ HWTEST_F(SuperFoldStateManagerTest, MatchSuperFoldStatusToFoldStatus05, Function
     EXPECT_EQ(foldStatus, foldStatusExp);
 }
 
+/**
+ * @tc.name: SetSystemKeyboardStatus
+ * @tc.desc: SetSystemKeyboardStatus with true as parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(SuperFoldStateManagerTest, SetSystemKeyboardStatus01, Function | SmallTest | Level1)
+{
+    SuperFoldStateManager::GetInstance().SetCurrentStatus(SuperFoldStatus::HALF_FOLDED);
+    std::function<void()> func = [&]()
+    {
+        SuperFoldStateManager::GetInstance().SetSystemKeyboardStatus(true);
+    };
+ 
+    func();
+    SuperFoldStatus curState = SuperFoldStateManager::GetInstance().GetCurrentStatus();
+    SuperFoldStatus expState = SuperFoldStatus::HALF_FOLDED;
+ 
+    EXPECT_EQ(curState, expState);
+}
+ 
+/**
+ * @tc.name: SetSystemKeyboardStatus
+ * @tc.desc: SetSystemKeyboardStatus with false as parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(SuperFoldStateManagerTest, SetSystemKeyboardStatus02, Function | SmallTest | Level1)
+{
+    SuperFoldStateManager::GetInstance().SetCurrentStatus(SuperFoldStatus::HALF_FOLDED);
+    std::function<void()> func = [&]()
+    {
+        SuperFoldStateManager::GetInstance().SetSystemKeyboardStatus(false);
+    };
+ 
+    func();
+    SuperFoldStatus curState = SuperFoldStateManager::GetInstance().GetCurrentStatus();
+    SuperFoldStatus expState = SuperFoldStatus::HALF_FOLDED;
+ 
+    EXPECT_EQ(curState, expState);
+}
 }
 }
 }

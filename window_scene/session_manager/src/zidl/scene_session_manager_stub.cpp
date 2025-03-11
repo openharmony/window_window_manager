@@ -209,6 +209,10 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleWatchFocusActiveChange(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SHIFT_APP_WINDOW_POINTER_EVENT):
             return HandleShiftAppWindowPointerEvent(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_UI_TYPE):
+            return HandleGetWindowUIType(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_MINIMIZE_BY_WINDOW_ID):
+            return HandleMinimizeByWindowId(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1787,6 +1791,37 @@ int SceneSessionManagerStub::HandleShiftAppWindowPointerEvent(MessageParcel& dat
     }
     WMError errCode = ShiftAppWindowPointerEvent(sourcePersistentId, targetPersistentId);
     reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleGetWindowUIType(MessageParcel& data, MessageParcel& reply)
+{
+    WindowUIType type = WindowUIType::INVALID_WINDOW;
+    WMError errCode = GetWindowUIType(type);
+    TLOGI(WmsLogTag::WMS_MULTI_WINDOW, "WindowUIType:%{public}d!", static_cast<int32_t>(type));
+    if (!reply.WriteUint32(static_cast<int32_t>(type))) {
+        TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "Write WindowUIType failed");
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleMinimizeByWindowId(MessageParcel& data, MessageParcel& reply)
+{
+    std::vector<int32_t> windowIds;
+    if (!data.ReadInt32Vector(&windowIds)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "read windowIds failed");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = MinimizeByWindowId(windowIds);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write errCode failed.");
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

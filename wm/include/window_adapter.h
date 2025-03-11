@@ -138,6 +138,7 @@ public:
     virtual WMError UpdateScreenLockStatusForApp(const std::string& bundleName, bool isRelease);
     virtual WMError NotifyWatchGestureConsumeResult(int32_t keyCode, bool isConsumed);
     virtual WMError NotifyWatchFocusActiveChange(bool isActive);
+    virtual WMError MinimizeByWindowId(const std::vector<int32_t>& windowIds);
 
     /*
      * Window Recover
@@ -165,6 +166,7 @@ public:
     virtual WMError GetGlobalDragResizeType(DragResizeType& dragResizeType);
     virtual WMError SetAppDragResizeType(const std::string& bundleName, DragResizeType dragResizeType);
     virtual WMError GetAppDragResizeType(const std::string& bundleName, DragResizeType& dragResizeType);
+    virtual WMError GetWindowUIType(WindowUIType& windowUIType);
 
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;

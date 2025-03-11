@@ -156,6 +156,7 @@ DMError MultiScreenManager::PhysicalScreenUniqueSwitch(const std::vector<ScreenI
             displayNode->RemoveFromTree();
         }
         screenSession->ReleaseDisplayNode();
+        screenSession->SetVirtualPixelRatio(screenSession->GetScreenProperty().GetDefaultDensity());
         RSDisplayNodeConfig config = { screenSession->screenId_ };
         screenSession->CreateDisplayNode(config);
         ScreenSessionManager::GetInstance().OnVirtualScreenChange(physicalScreenId, ScreenEvent::CONNECTED);
@@ -330,6 +331,8 @@ void MultiScreenManager::DoFirstMainChangeExtend(sptr<IScreenSessionManagerClien
     firstSession->SetIsExtend(false);
     SessionOption secondaryOption = ScreenSessionManager::GetInstance().GetSessionOption(secondarySession);
     scbClient->OnScreenConnectionChanged(secondaryOption, ScreenEvent::CONNECTED);
+    ScreenSessionManager::GetInstance().NotifyScreenChanged(
+        secondarySession->ConvertToScreenInfo(), ScreenChangeEvent::SCREEN_SOURCE_MODE_CHANGE);
     TLOGW(WmsLogTag::DMS, "exec switch mirror to extend 4/6 end");
 }
 
@@ -347,6 +350,8 @@ void MultiScreenManager::DoFirstMainChangeMirror(sptr<IScreenSessionManagerClien
     firstSession->SetIsExtend(false);
     RSDisplayNodeConfig config = { secondarySession->screenId_, true, nodeId };
     secondarySession->ReuseDisplayNode(config);
+    ScreenSessionManager::GetInstance().NotifyScreenChanged(
+        secondarySession->ConvertToScreenInfo(), ScreenChangeEvent::SCREEN_SOURCE_MODE_CHANGE);
     TLOGW(WmsLogTag::DMS, "exec switch mirror 12/14 end");
 }
 

@@ -453,6 +453,36 @@ HWTEST_F(ScreenTest, GetDensityInCurResolution, Function | SmallTest | Level2)
     auto res = screen_->GetDensityInCurResolution(virtualPixelRatio);
     ASSERT_EQ(DMError::DM_OK, res);
 }
+
+/**
+ * @tc.name: SetDefaultDensityDpi01
+ * @tc.desc: SetDefaultDensityDpi
+ * @tc.type: FUNC
+ *
+ */
+HWTEST_F(ScreenTest, SetDefaultDensityDpi, Function | SmallTest | Level2)
+{
+    auto res = screen_->SetDefaultDensityDpi(DOT_PER_INCH_MAXIMUM_VALUE + 1);
+    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
+
+    res = screen_->SetDefaultDensityDpi(100);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(DMError::DM_OK, res);
+    } else {
+        ASSERT_NE(DMError::DM_OK, res);
+    }
+}
+
+/**
+ * @tc.name: GetSerialNumber
+ * @tc.desc: GetSerialNumber
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenTest, GetSerialNumber, Function | SmallTest | Level2)
+{
+    auto res = screen_->GetSerialNumber();
+    ASSERT_EQ(res, "");
+}
 }
 } // namespace Rosen
 } // namespace OHOS

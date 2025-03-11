@@ -229,6 +229,16 @@ WMError WindowAdapterLite::GetMainWindowInfos(int32_t topNum, std::vector<MainWi
     return wmsProxy->GetMainWindowInfos(topNum, topNInfo);
 }
 
+WMError WindowAdapterLite::GetCallingWindowInfo(CallingWindowInfo& callingWindowInfo)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "get calling window info");
+
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->GetCallingWindowInfo(callingWindowInfo);
+}
+
 WMError WindowAdapterLite::GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
