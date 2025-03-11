@@ -289,7 +289,8 @@ struct AppUseControlInfo : public Parcelable {
     {
         return parcel.WriteString(bundleName_) &&
                parcel.WriteInt32(appIndex_) &&
-               parcel.WriteBool(isNeedControl_);
+               parcel.WriteBool(isNeedControl_) &&
+               parcel.WriteBool(isControlRecentOnly_);
     }
 
     /**
@@ -303,7 +304,8 @@ struct AppUseControlInfo : public Parcelable {
         auto info = new AppUseControlInfo();
         if (!parcel.ReadString(info->bundleName_) ||
             !parcel.ReadInt32(info->appIndex_) ||
-            !parcel.ReadBool(info->isNeedControl_)) {
+            !parcel.ReadBool(info->isNeedControl_) ||
+            !parcel.ReadBool(info->isControlRecentOnly_)) {
             delete info;
             return nullptr;
         }
@@ -313,6 +315,7 @@ struct AppUseControlInfo : public Parcelable {
     std::string bundleName_ = "";
     int32_t appIndex_ = 0;
     bool isNeedControl_ = false;
+    bool isControlRecentOnly_ = false;
 };
 
 /**
@@ -1079,6 +1082,14 @@ public:
      */
     WMError RequestFocus(int32_t persistentId, bool isFocused = true,
         bool byForeground = true, WindowFocusChangeReason reason = WindowFocusChangeReason::SA_REQUEST);
+
+    /**
+     * @brief Minimize window within the vector of windowid, Only main window.
+     *
+     * @param WindowId window id which to minimize
+     * @return WM_OK means window minimize event success, others means failed.
+     */
+    WMError MinimizeByWindowId(const std::vector<int32_t>& windowIds);
 
 private:
     WindowManager();

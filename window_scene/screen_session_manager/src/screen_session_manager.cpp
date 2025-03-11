@@ -6519,6 +6519,18 @@ SuperFoldStatus ScreenSessionManager::GetSuperFoldStatus()
 #endif
 }
 
+void ScreenSessionManager::SetLandscapeLockStatus(bool isLocked)
+{
+#ifdef FOLD_ABILITY_ENABLE
+    if (isLocked) {
+        SetIsExtendScreenConnected(true);
+    } else {
+        SetIsExtendScreenConnected(false);
+        SuperFoldSensorManager::GetInstance().HandleScreenDisconnectChange();
+    }
+#endif
+}
+
 ExtendScreenConnectStatus ScreenSessionManager::GetExtendScreenConnectStatus()
 {
 #ifdef WM_MULTI_SCREEN_ENABLE

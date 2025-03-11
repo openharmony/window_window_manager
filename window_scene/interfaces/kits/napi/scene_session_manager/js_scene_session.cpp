@@ -5913,21 +5913,22 @@ void JsSceneSession::RegisterUpdateAppUseControlCallback()
     }
     const char* const where = __func__;
     session->RegisterUpdateAppUseControlCallback(
-        [weakThis = wptr(this), where](ControlAppType type, bool isNeedControl) {
+        [weakThis = wptr(this), where](ControlAppType type, bool isNeedControl, bool isControlRecentOnly) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s: jsSceneSession is null", where);
             return;
         }
-        jsSceneSession->OnUpdateAppUseControl(type, isNeedControl);
+        jsSceneSession->OnUpdateAppUseControl(type, isNeedControl, isControlRecentOnly);
     });
     TLOGI(WmsLogTag::WMS_LIFE, "success");
 }
 
-void JsSceneSession::OnUpdateAppUseControl(ControlAppType type, bool isNeedControl)
+void JsSceneSession::OnUpdateAppUseControl(ControlAppType type, bool isNeedControl, bool isControlRecentOnly)
 {
     const char* const where = __func__;
-    auto task = [weakThis = wptr(this), persistentId = persistentId_, type, isNeedControl, env = env_, where] {
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, type, isNeedControl,
+        isControlRecentOnly, env = env_, where] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s: jsSceneSession id:%{public}d has been destroyed",
@@ -5941,7 +5942,8 @@ void JsSceneSession::OnUpdateAppUseControl(ControlAppType type, bool isNeedContr
         }
         napi_value jsTypeArgv = CreateJsValue(env, static_cast<uint8_t>(type));
         napi_value jsIsNeedControlArgv = CreateJsValue(env, isNeedControl);
-        napi_value argv[] = { jsTypeArgv, jsIsNeedControlArgv };
+        napi_value jsIsControlRecentOnlyArgv = CreateJsValue(env, isControlRecentOnly);
+        napi_value argv[] = { jsTypeArgv, jsIsNeedControlArgv, jsIsControlRecentOnlyArgv };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, __func__);

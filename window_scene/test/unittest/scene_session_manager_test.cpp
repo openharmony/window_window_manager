@@ -2500,6 +2500,18 @@ HWTEST_F(SceneSessionManagerTest, BuildCancelPointerEvent, Function | SmallTest 
     ASSERT_EQ(pointerEvent->GetPointerAction(), MMI::PointerEvent::POINTER_ACTION_CANCEL);
     ASSERT_EQ(pointerEvent->GetSourceType(), MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
 }
+
+/**
+ * @tc.name: MinimizeByWindowId
+ * @tc.desc: test function : MinimizeByWindowId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, MinimizeByWindowId, Function | SmallTest | Level3)
+{
+    std::vector<int32_t> windowIds;
+    WMError res = ssm_->MinimizeByWindowId(windowIds);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, res);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
