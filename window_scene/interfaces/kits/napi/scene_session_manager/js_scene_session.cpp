@@ -5555,10 +5555,13 @@ napi_value JsSceneSession::OnCompatibleFullScreenClose(napi_env env, napi_callba
 
 napi_value JsSceneSession::OnPcAppInPadNormalClose(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_SCB, "[NAPI]");
+    TLOGD(WmsLogTag::WMS_COMPAT, "[NAPI]");
     auto session = weakSession_.promote();
     if (session == nullptr) {
-        TLOGE(WmsLogTag::WMS_SCB, "session is nullptr, id:%{public}d", persistentId_);
+        TLOGE(WmsLogTag::WMS_COMPAT, "session is nullptr, id:%{public}d", persistentId_);
+        return NapiGetUndefined(env);
+    }
+    if (!(session->GetSessionProperty()->GetIsPcAppInPad())) {
         return NapiGetUndefined(env);
     }
     session->PcAppInPadNormalClose();
