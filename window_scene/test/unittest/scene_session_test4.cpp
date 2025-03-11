@@ -1279,7 +1279,7 @@ HWTEST_F(SceneSessionTest4, UpdateAllModalUIExtensions, Function | SmallTest | L
  * @tc.desc: HandleActionUpdateSubWindowZLevel Test
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest3, HandleActionUpdateSubWindowZLevel, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest4, HandleActionUpdateSubWindowZLevel, Function | SmallTest | Level2)
 {
     WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_SUB_WINDOW_Z_LEVEL;
     SessionInfo info;
