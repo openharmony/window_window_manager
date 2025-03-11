@@ -263,6 +263,7 @@ public:
 
     FoldStatus GetFoldStatus() override;
     SuperFoldStatus GetSuperFoldStatus() override;
+    void SetLandscapeLockStatus(bool isLocked) override;
     bool GetTentMode();
     bool GetCameraMode();
     ExtendScreenConnectStatus GetExtendScreenConnectStatus() override;
@@ -290,7 +291,7 @@ public:
     void NotifyDisplayModeChanged(FoldDisplayMode displayMode);
     void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info) override;
     void NotifyScreenMagneticStateChanged(bool isMagneticState);
-    void OnTentModeChanged(bool isTentMode, int32_t hall = -1);
+    void OnTentModeChanged(int tentType, int32_t hall = -1);
     void RegisterSettingDpiObserver();
     void RegisterSettingRotationObserver();
     void RegisterSettingscreenSkipProtectedWindowObserver();
@@ -411,6 +412,7 @@ public:
     void RegisterSettingWireCastObserver(sptr<ScreenSession>& screenSession);
     SessionOption GetSessionOption(sptr<ScreenSession> screenSession);
     SessionOption GetSessionOption(sptr<ScreenSession> screenSession, ScreenId screenId);
+    virtual DMError SetSystemKeyboardStatus(bool isOn = false) override;
 
 protected:
     ScreenSessionManager();

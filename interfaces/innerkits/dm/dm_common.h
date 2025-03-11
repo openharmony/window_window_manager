@@ -122,6 +122,8 @@ enum class ScreenPropertyChangeType : uint32_t {
     ROTATION_UPDATE_PROPERTY_ONLY,
     /* Only update screen rotation property info not notify. */
     ROTATION_UPDATE_PROPERTY_ONLY_NOT_NOTIFY,
+    /* Switch single hand mode. */
+    SINGLE_HAND_SWITCH,
     /* Undefined. */
     UNDEFINED,
 };
@@ -412,6 +414,8 @@ enum class SuperFoldStatusChangeEvents : uint32_t {
     ANGLE_CHANGE_FOLDED,
     KEYBOARD_ON,
     KEYBOARD_OFF,
+    SYSTEM_KEYBOARD_ON,
+    SYSTEM_KEYBOARD_OFF,
     INVALID,
 };
 

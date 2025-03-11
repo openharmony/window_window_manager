@@ -524,5 +524,24 @@ void RootScene::NotifyWaterfallModeChange(bool isWaterfallMode)
         }
     }
 }
+
+void RootScene::GetExtensionConfig(AAFwk::WantParams& want) const
+{
+    want.SetParam(Extension::WATERFALL_MODE_FIELD, AAFwk::Boolean::Box(IsWaterfallModeEnabled()));
+}
+
+void RootScene::UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>& want)
+{
+    if (want == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "want is null");
+        return;
+    }
+    const auto& configParam = want->GetParams().GetWantParams(Extension::UIEXTENSION_CONFIG_FIELD);
+    auto waterfallModeBox = configParam.GetParam(Extension::WATERFALL_MODE_FIELD);
+    isFullScreenWaterfallMode_.store(AAFwk::Boolean::Unbox(waterfallModeBox));
+    isValidWaterfallMode_.store(true);
+    want->RemoveParam(Extension::UIEXTENSION_CONFIG_FIELD);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "root waterfall: %{public}d", isFullScreenWaterfallMode_.load());
+}
 } // namespace Rosen
 } // namespace OHOS

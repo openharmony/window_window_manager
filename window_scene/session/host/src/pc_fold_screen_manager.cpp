@@ -178,14 +178,14 @@ ScreenSide PcFoldScreenManager::CalculateScreenSide(const WSRect& rect)
 {
     int32_t midPosY = rect.height_ / 2 + rect.posY_; // 2: center
     const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] = GetDisplayRects();
-    return midPosY <= (defaultDisplayRect.posY_ + defaultDisplayRect.height_) ?
+    return midPosY <= (foldCreaseRect.posY_ + foldCreaseRect.height_ / 2) ? // 2: center
         ScreenSide::FOLD_B : ScreenSide::FOLD_C;
 }
 
 bool PcFoldScreenManager::IsCrossFoldCrease(const WSRect& rect)
 {
     const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] = GetDisplayRects();
-    const int32_t midScreenY = defaultDisplayRect.posY_ + defaultDisplayRect.height_;
+    const int32_t midScreenY = foldCreaseRect.posY_ + foldCreaseRect.height_ / 2; // 2: center
     return rect.posY_ < midScreenY && rect.posY_ + rect.height_ > midScreenY;
 }
 
@@ -294,13 +294,14 @@ bool PcFoldScreenManager::NeedDoEasyThrowSlip(const WSRect& rect, const WSRect& 
 
     const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] = GetDisplayRects();
     WSRect easyThrowRect = rect;
+    int32_t midY = rect.posY_ + rect.height_ / 2; // 2: center
     if (startSide == ScreenSide::FOLD_B) {
-        if (rect.posY_ > virtualDisplayRect.posY_ + virtualDisplayRect.height_ / 2) { // 2: center
+        if (midY > virtualDisplayRect.posY_ + virtualDisplayRect.height_ / 2) { // 2: center
             return false;
         }
         easyThrowRect.posY_ = foldCreaseRect.posY_ - easyThrowRect.height_ / 2; // 2: center
     } else {
-        if (rect.posY_ < defaultDisplayRect.posY_ + defaultDisplayRect.height_ / 2) { // 2: center
+        if (midY < defaultDisplayRect.posY_ + defaultDisplayRect.height_ / 2) { // 2: center
             return false;
         }
         easyThrowRect.posY_ = foldCreaseRect.posY_ + foldCreaseRect.height_ - easyThrowRect.height_ / 2; // 2: center
