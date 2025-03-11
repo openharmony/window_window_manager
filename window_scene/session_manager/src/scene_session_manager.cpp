@@ -13499,6 +13499,11 @@ WMError SceneSessionManager::SetParentWindow(int32_t subWindowId, int32_t newPar
             TLOGNE(WmsLogTag::WMS_SUB, "%{public}s oldParentSession is nullptr", where);
             return WMError::WM_ERROR_INVALID_PARENT;
         }
+        auto oldWindowType = oldParentSession->GetWindowType();
+        if (!WindowHelper::IsMainWindow(oldWindowType) && !WindowHelper::IsFloatOrSubWindow(oldWindowType)) {
+            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s oldParentSession window type invalid", where);
+            return WMError::WM_ERROR_INVALID_PARENT;
+        }
         auto newParentSession = GetSceneSession(newParentWindowId);
         if (newParentSession == nullptr) {
             TLOGNE(WmsLogTag::WMS_SUB, "%{public}s newParentSession is nullptr", where);
@@ -13506,10 +13511,13 @@ WMError SceneSessionManager::SetParentWindow(int32_t subWindowId, int32_t newPar
         }
         TLOGND(WmsLogTag::WMS_SUB, "%{public}s subWindowId: %{public}d oldParentWindowId: %{public}d "
             "newParentWindowId: %{public}d", where, subWindowId, oldParentWindowId, newParentWindowId);
-        auto windowType = newParentSession->GetWindowType();
-        if (!WindowHelper::IsMainWindow(windowType) &&
-            !WindowHelper::IsFloatOrSubWindow(windowType)) {
+        auto newWindowType = newParentSession->GetWindowType();
+        if (!WindowHelper::IsMainWindow(newWindowType) && !WindowHelper::IsFloatOrSubWindow(newWindowType)) {
             TLOGNE(WmsLogTag::WMS_SUB, "%{public}s newParentSession window type invalid", where);
+            return WMError::WM_ERROR_INVALID_PARENT;
+        }
+        if (oldParentSession->GetCallingPid() != newParentSession->GetCallingPid()) {
+            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s callingPid not same", where);
             return WMError::WM_ERROR_INVALID_PARENT;
         }
         if (newParentSession->IsAncestorsSession(subWindowId)) {
