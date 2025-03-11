@@ -193,8 +193,6 @@ public:
         uint32_t& screenWidth, uint32_t& screenHeight);
     bool GetScreenWidthAndHeightFromClient(const sptr<WindowSessionProperty>& sessionProperty,
         uint32_t& screenWidth, uint32_t& screenHeight);
-    void NotifyTargetScreenWidthAndHeight(bool isScreenAngleMismatch, uint32_t screenWidth,
-        uint32_t screenHeight);
     sptr<SceneSession> GetSceneSessionById(int32_t sessionId) const;
 
     WSError UpdateActiveStatus(bool isActive) override;
@@ -878,7 +876,6 @@ private:
     void NotifyPropertyWhenConnect();
     WSError RaiseAppMainWindowToTop() override;
     void UpdateWinRectForSystemBar(WSRect& rect);
-    bool UpdateInputMethodSessionRect(const WSRect& rect, WSRect& newWinRect, WSRect& newRequestRect);
     bool IsMovableWindowType();
     bool IsFullScreenMovable();
     bool IsMovable();
@@ -1009,9 +1006,6 @@ private:
 
     bool isAddBlank_ = false;
     bool bufferAvailableCallbackEnable_ = false;
-    bool isScreenAngleMismatch_ = false;
-    uint32_t targetScreenWidth_ = 0;
-    uint32_t targetScreenHeight_ = 0;
 
     // WMSPipeline-related: only accessed on SSM thread
     PostProcessFocusState postProcessFocusState_;
