@@ -907,14 +907,14 @@ napi_value JsWindowStage::OnSetWindowRectAutoSave(napi_env env, napi_callback_in
             task->Reject(env, JsErrUtils::CreateJsError(env, wmErroeCode, "window is nullptr."));
             return;
         }
-        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetWindowRectAutoSave(enabled));
+        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetWindowRectAutoSave(enabled, isSaveBySpecifiedFlag));
         if (ret != WmErrorCode::WM_OK) {
             TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s enable recover position failed!", where);
             task->Reject(env, JsErrUtils::CreateJsError(env, ret, "window recover position failed."));
         } else {
             task->Resolve(env, NapiGetUndefined(env));
             TLOGNI(WmsLogTag::WMS_MAIN, "%{public}s id %{public}d isSaveBySpecifiedFlag: %{public}d "
-                "enable:%{public}d", where, session->GetPersistentId(), isSaveBySpecifiedFlag, enabled);
+                "enable:%{public}d", where, window->GetWindowId(), isSaveBySpecifiedFlag, enabled);
         }
     };
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {

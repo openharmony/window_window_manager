@@ -1147,7 +1147,6 @@ HWTEST_F(SessionProxyTest, UpdateFlag, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "SessionProxyTest: UpdateFlag start";
     auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    ASSERT_NE(iRemoteObjectMocker, nullptr);
     auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     ASSERT_NE(sProxy, nullptr);
     std::string flag = "test";

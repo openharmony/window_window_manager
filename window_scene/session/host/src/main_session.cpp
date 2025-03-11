@@ -294,10 +294,11 @@ WSError MainSession::OnSetWindowRectAutoSave(bool enabled, bool isSaveBySpecifie
         session->GetSessionProperty()->SetIsSaveBySpecifiedFlag(isSaveBySpecifiedFlag);
         if (session->onSetWindowRectAutoSaveFunc_) {
             session->onSetWindowRectAutoSaveFunc_(enabled, isSaveBySpecifiedFlag);
-            TLOGNI(WmsLogTag::WMS_MAIN, "%{public}s id %{public}d isSaveBySpecifiedFlag: %{public}d enable:%{public}d",
-                where, session->GetPersistentId(), isSaveBySpecifiedFlag, enabled);
+            TLOGNI(WmsLogTag::WMS_MAIN, "%{public}s id %{public}d isSaveBySpecifiedFlag: %{public}d "
+                "enable:%{public}d", where, session->GetPersistentId(), isSaveBySpecifiedFlag, enabled);
         }
     }, __func__);
+    return WSError::WS_OK
 }
 
 WSError MainSession::NotifySupportWindowModesChange(
@@ -473,5 +474,6 @@ WSError MainSession::UpdateFlag(const std::string& flag)
                 where, session->GetPersistentId(), flag.c_str());
         }
     }, __func__);
+    return WSError::WS_OK
 }
 } // namespace OHOS::Rosen
