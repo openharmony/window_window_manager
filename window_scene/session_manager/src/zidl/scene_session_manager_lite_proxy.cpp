@@ -953,7 +953,7 @@ WMError SceneSessionManagerLiteProxy::CheckUIExtensionCreation(int32_t windowId,
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
-    TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: errcode %{public}u", errCode);
+    TLOGD(WmsLogTag::WMS_UIEXT, "UIExtOnLock: errcode %{public}u", errCode);
     return static_cast<WMError>(errCode);
 }
 
