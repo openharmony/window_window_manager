@@ -86,12 +86,8 @@ class WindowStage {
     return this.__window_stage__.removeStartingWindow();
   }
 
-  setWindowRectAutoSave(enabled) {
-    return this.__window_stage__.setWindowRectAutoSave(enabled);
-  }
-
-  setWindowRectAutoSave(enabled, isEnabledSpecified) {
-    return this.__window_stage__.setWindowRectAutoSave(enabled, isEnabledSpecified);
+  setWindowRectAutoSave(enabled, isSaveBySpecifiedFlag) {
+    return this.__window_stage__.setWindowRectAutoSave(enabled, isSaveBySpecifiedFlag);
   }
 
   isWindowRectAutoSave() {

@@ -299,7 +299,7 @@ public:
     virtual WMError Maximize() = 0;
     virtual WMError Recover() = 0;
     virtual WMError Restore() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
-    virtual WMError SetWindowRectAutoSave(bool enabled, bool isEnableSpecified = false)
+    virtual WMError SetWindowRectAutoSave(bool enabled, bool isSaveBySpecifiedFlag = false)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }

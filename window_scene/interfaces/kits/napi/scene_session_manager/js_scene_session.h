@@ -408,7 +408,7 @@ private:
     void NotifyFrameLayoutFinish();
     void ProcessPrivacyModeChangeRegister();
     void NotifyPrivacyModeChange(bool isPrivacyMode);
-    void OnSetWindowRectAutoSave(bool enabled, bool isEnableSpecified);
+    void OnSetWindowRectAutoSave(bool enabled, bool isSaveBySpecifiedFlag);
     void OnUpdateAppUseControl(ControlAppType type, bool isNeedControl, bool isControlRecentOnly);
     void OnWindowMoving(DisplayId displayId, int32_t pointerX, int32_t pointerY);
     void UpdateSessionLabelAndIcon(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon);

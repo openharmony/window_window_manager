@@ -254,8 +254,8 @@ public:
     bool IsWindowDelayRaiseEnabled() const;
     void SetWindowSizeLimits(const WindowSizeLimits& windowSizeLimits);
     WindowSizeLimits GetWindowSizeLimits() const;
-    void SetIsEnableSpecified(bool isEnableSpecified);
-    bool GetIsEnableSpecified() const;
+    void SetisSaveBySpecifiedFlag(bool isSaveBySpecifiedFlag);
+    bool GetisSaveBySpecifiedFlag() const;
 
     /*
      * Keyboard
@@ -450,7 +450,7 @@ private:
     std::vector<AppExecFwk::SupportWindowMode> supportedWindowModes_;
     bool isWindowDelayRaiseEnabled_ = false;
     WindowSizeLimits windowSizeLimits_;
-    bool isEnableSpecified_ = false;
+    bool isSaveBySpecifiedFlag_ = false;
 
     /*
      * Keyboard

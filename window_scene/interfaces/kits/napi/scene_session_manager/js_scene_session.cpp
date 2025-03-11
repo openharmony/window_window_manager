@@ -5828,21 +5828,21 @@ void JsSceneSession::ProcessSetWindowRectAutoSaveRegister()
         return;
     }
     const char* const where = __func__;
-    session->SetWindowRectAutoSaveCallback([weakThis = wptr(this), where](bool enabled, bool isEnableSpecified) {
+    session->SetWindowRectAutoSaveCallback([weakThis = wptr(this), where](bool enabled, bool isSaveBySpecifiedFlag) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s: jsSceneSession is null", where);
             return;
         }
-        jsSceneSession->OnSetWindowRectAutoSave(enabled, isEnableSpecified);
+        jsSceneSession->OnSetWindowRectAutoSave(enabled, isSaveBySpecifiedFlag);
     });
     TLOGI(WmsLogTag::WMS_MAIN, "success");
 }
 
-void JsSceneSession::OnSetWindowRectAutoSave(bool enabled, bool isEnableSpecified)
+void JsSceneSession::OnSetWindowRectAutoSave(bool enabled, bool isSaveBySpecifiedFlag)
 {
     const char* const where = __func__;
-    auto task = [weakThis = wptr(this), persistentId = persistentId_, enabled, isEnableSpecified, env = env_, where] {
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, enabled, isSaveBySpecifiedFlag, env = env_, where] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s: jsSceneSession id:%{public}d has been destroyed",
@@ -5855,8 +5855,8 @@ void JsSceneSession::OnSetWindowRectAutoSave(bool enabled, bool isEnableSpecifie
             return;
         }
         napi_value jsEnabled = CreateJsValue(env, enabled);
-        napi_value jsEnableSpecified = CreateJsValue(env, isEnableSpecified);
-        napi_value argv[] = {jsEnabled, jsEnableSpecified};
+        napi_value jsSaveBySpecifiedFlag = CreateJsValue(env, isSaveBySpecifiedFlag);
+        napi_value argv[] = { jsEnabled, jsSaveBySpecifiedFlag };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, __func__);
