@@ -9124,8 +9124,12 @@ WSError SceneSessionManager::NotifyAppUseControlList(
             if (mainSessions.empty()) {
                 continue;
             }
+            SceneSession::ControlInfo controlInfo = {
+                .isNeedControl = appUseControlInfo.isNeedControl_,
+                .isControlRecentOnly = appUseControlInfo.isControlRecentOnly_
+            };
             for (const auto& session : mainSessions) {
-                session->NotifyUpdateAppUseControl(type, appUseControlInfo.isNeedControl_);
+                session->NotifyUpdateAppUseControl(type, controlInfo);
             }
             mainSessions.clear();
         }
