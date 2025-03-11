@@ -52,6 +52,7 @@ private:
     int HandleOnHoverStatusChanged(MessageParcel& data, MessageParcel& reply);
     int HandleScreenCaptureNotify(MessageParcel& data, MessageParcel& reply);
     int HandleOnCameraBackSelfieChanged(MessageParcel& data, MessageParcel& reply);
+    int HandleOnSecondaryReflexionChanged(MessageParcel& data, MessageParcel& reply);
 
     HandleScreenChangeMap HandleScreenChangeMap_ {};
 };

@@ -306,6 +306,7 @@ public:
 
     void ReportFoldStatusToScb(std::vector<std::string>& screenFoldInfo);
     std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution() override;
+    void OnSecondaryReflexionChange(ScreenId screenId, bool isSecondaryReflexion) override;
     std::string GetDisplayCapability() override;
     nlohmann::ordered_json GetCapabilityJson(FoldStatus foldStatus, FoldDisplayMode displayMode,
         std::vector<std::string> rotation, std::vector<std::string> orientation);

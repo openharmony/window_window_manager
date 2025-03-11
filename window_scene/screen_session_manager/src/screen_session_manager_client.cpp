@@ -631,4 +631,15 @@ void ScreenSessionManagerClient::ScreenCaptureNotify(ScreenId mainScreenId, int3
     WLOGFI("capture screenId: %{public}" PRIu64", uid=%{public}d", mainScreenId, uid);
     screenSession->ScreenCaptureNotify(mainScreenId, uid, clientName);
 }
+
+void ScreenSessionManagerClient::OnSecondaryReflexionChanged(ScreenId screenId, bool isSecondaryReflexion)
+{
+    auto screenSession = GetScreenSession(screenId);
+    if (!screenSession) {
+        WLOGFE("screenSession is null");
+        return;
+    }
+    WLOGI("screenId=%{public}" PRIu64 " isSecondaryReflexion=%{public}d", screenId, isSecondaryReflexion);
+    screenSession->SecondaryReflexionChange(screenId, isSecondaryReflexion);
+}
 } // namespace OHOS::Rosen
