@@ -6189,7 +6189,10 @@ void ScreenSessionManager::SetDisplayScaleInner(ScreenId screenId, const float& 
     }
     float translateX = 0.0f;
     float translateY = 0.0f;
-    if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
+    if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        CalcDisplayNodeTranslateOnPocketFoldRotation(session, scaleX, scaleY, pivotX, pivotY,
+            translateX, translateY);
+    } else if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
         if (FoldDisplayMode::MAIN == GetFoldDisplayMode()) {
             CalcDisplayNodeTranslateOnPocketFoldRotation(session, scaleX, scaleY, pivotX, pivotY,
                 translateX, translateY);
