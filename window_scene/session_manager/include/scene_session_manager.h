@@ -839,7 +839,7 @@ private:
         REQUIRES(SCENE_GUARD);
     WSError SetBrightness(const sptr<SceneSession>& sceneSession, float brightness);
     void PostBrightnessTask(float brightness);
-    WSError UpdateBrightness(int32_t persistentId, bool onBackGround);
+    WSError UpdateBrightness(int32_t persistentId);
     void SetDisplayBrightness(float brightness);
     float GetDisplayBrightness() const;
     void HandleHideNonSystemFloatingWindows(const sptr<WindowSessionProperty>& property,
@@ -883,6 +883,7 @@ private:
     int32_t GetFoldLowerScreenPosY() const;
     DisplayId UpdateSpecificSessionClientDisplayId(const sptr<WindowSessionProperty>& property);
     void UpdateSessionDisplayIdBySessionInfo(sptr<SceneSession> sceneSession, const SessionInfo& sessionInfo);
+    bool IsNeedUpdateBrightness(float brightness);
 
     /*
      * Window Rotate Animation
