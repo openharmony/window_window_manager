@@ -6986,7 +6986,7 @@ void SceneSession::NotifyUpdateFlagCallback(NotifyUpdateFlagFunc&& func)
     PostTask([weakThis = wptr(this), where, func = std::move(func)] {
         auto session = weakThis.promote();
         if (!session || !func) {
-            TLOGNE(WmsLogTag::WMS_MAIN, "session or onUpateFlagFunc is null");
+            TLOGNE(WmsLogTag::WMS_MAIN, "session or func is null");
             return;
         }
         session->onUpdateFlagFunc_ = std::move(func);
