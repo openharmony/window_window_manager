@@ -32,6 +32,7 @@
 
 #include "proxy/include/window_info.h"
 
+#include "application_context.h"
 #include "common/include/session_permission.h"
 #ifdef DEVICE_STATUS_ENABLE
 #include "interaction_manager.h"
@@ -6889,39 +6890,109 @@ void SceneSession::SetColorSpace(ColorSpace colorSpace)
     }
 }
 
-void SceneSession::AddSidebarMaskColorModifier()
+void SceneSession::AddSidebarBlur()
 {
     auto surfaceNode = GetSurfaceNode();
     if (!surfaceNode) {
         TLOGE(WmsLogTag::WMS_PC, "surfaceNode is null");
         return;
     }
-
     auto rsNodeTemp = Rosen::RSNodeMap::Instance().GetNode(surfaceNode->GetId());
     if (rsNodeTemp) {
-        maskColorValue_ = std::make_shared<RSAnimatableProperty<Rosen::RSColor>>(
-            Rosen::RSColor::FromArgbInt(defaultMaskColor_));
-        std::shared_ptr<Rosen::RSBehindWindowFilterMaskColorModifier> modifier =
-            std::make_shared<Rosen::RSBehindWindowFilterMaskColorModifier>(maskColorValue_);
-        rsNodeTemp->AddModifier(modifier);
+        std::shared_ptr<AbilityRuntime::ApplicationContext> appContext =
+        AbilityRuntime::Context::GetApplicationContext();
+        if (appContext == nullptr) {
+            TLOGE(WmsLogTag::WMS_PC, "app context is nullptr");
+            return;
+        }
+        std::shared_ptr<AppExecFwk::Configuration> config = appContext->GetConfiguration();
+        if (config == nullptr) {
+            TLOGE(WmsLogTag::WMS_PC, "app configuration is nullptr");
+            return;
+        }
+        std::string colorMode = config->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+        bool isDark = (colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_DARK);
+        AddRSNodeModifier(isDark, rsNodeTemp);
     }
 }
 
-void SceneSession::SetSidebarMaskColorModifier(bool needBlur)
+void SceneSession::AddRSNodeModifier(bool isDark, const std::shared_ptr<RSBaseNode>& rsNode)
 {
+    if (!rsNode) {
+        TLOGE(WmsLogTag::WMS_PC, "rsNode is nullptr");
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_PC, "isDark: %{public}d", isDark);
+    if (isDark) {
+        blurRadiusValue_ = std::make_shared<Rosen::RSAnimatableProperty<float>>(
+            SIDEBAR_DEFAULT_RADIUS_DARK);
+        blurSaturationValue_ = std::make_shared<Rosen::RSAnimatableProperty<float>>(
+            SIDEBAR_DEFAULT_SATURATION_DARK);
+        blurBrightnessValue_ = std::make_shared<Rosen::RSAnimatableProperty<float>>(
+            SIDEBAR_DEFAULT_BRIGHTNESS_DARK);
+        blurMaskColorValue_ = std::make_shared<RSAnimatableProperty<Rosen::RSColor>>(
+            Rosen::RSColor::FromArgbInt(SIDEBAR_DEFAULT_MASKCOLOR_DARK));
+    } else {
+        blurRadiusValue_ = std::make_shared<Rosen::RSAnimatableProperty<float>>(
+            SIDEBAR_DEFAULT_RADIUS_LIGHT);
+        blurSaturationValue_ = std::make_shared<Rosen::RSAnimatableProperty<float>>(
+            SIDEBAR_DEFAULT_SATURATION_LIGHT);
+        blurBrightnessValue_ = std::make_shared<Rosen::RSAnimatableProperty<float>>(
+            SIDEBAR_DEFAULT_BRIGHTNESS_LIGHT);
+        blurMaskColorValue_ = std::make_shared<RSAnimatableProperty<Rosen::RSColor>>(
+            Rosen::RSColor::FromArgbInt(SIDEBAR_DEFAULT_MASKCOLOR_LIGHT));
+    }
+
+    std::shared_ptr<Rosen::RSBehindWindowFilterRadiusModifier> radius =
+        std::make_shared<Rosen::RSBehindWindowFilterRadiusModifier>(blurRadiusValue_);
+    rsNode->AddModifier(radius);
+    std::shared_ptr<Rosen::RSBehindWindowFilterSaturationModifier> saturation =
+        std::make_shared<Rosen::RSBehindWindowFilterSaturationModifier>(blurSaturationValue_);
+    rsNode->AddModifier(saturation);
+    std::shared_ptr<Rosen::RSBehindWindowFilterBrightnessModifier> brightness =
+        std::make_shared<Rosen::RSBehindWindowFilterBrightnessModifier>(blurBrightnessValue_);
+    rsNode->AddModifier(brightness);
+    std::shared_ptr<Rosen::RSBehindWindowFilterMaskColorModifier> modifier =
+        std::make_shared<Rosen::RSBehindWindowFilterMaskColorModifier>(blurMaskColorValue_);
+    rsNode->AddModifier(modifier);
+}
+
+void SceneSession::SetSidebarBlur(bool isDefaultSidebarBlur)
+{
+    TLOGI(WmsLogTag::WMS_PC, "isDefaultSidebarBlur: %{public}d", isDefaultSidebarBlur);
     auto surfaceNode = GetSurfaceNode();
     if (!surfaceNode) {
         TLOGE(WmsLogTag::WMS_PC, "surfaceNode is null");
         return;
     }
-    if (!maskColorValue_) {
-        TLOGE(WmsLogTag::WMS_PC, "maskColorValue is null");
+    if (!blurRadiusValue_ || !blurSaturationValue_ || !blurBrightnessValue_ || !blurMaskColorValue_) {
+        TLOGE(WmsLogTag::WMS_PC, "RSAnimatableProperty is null");
         return;
     }
-    TLOGI(WmsLogTag::WMS_PC, "needBlur: %{public}d", needBlur);
+
+    std::shared_ptr<AbilityRuntime::ApplicationContext> appContext =
+        AbilityRuntime::Context::GetApplicationContext();
+    if (appContext == nullptr) {
+        TLOGE(WmsLogTag::WMS_PC, "app context is nullptr");
+        return;
+    }
+    std::shared_ptr<AppExecFwk::Configuration> config = appContext->GetConfiguration();
+    if (config == nullptr) {
+        TLOGE(WmsLogTag::WMS_PC, "app configuration is nullptr");
+        return;
+    }
+    std::string colorMode = config->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+    bool isDark = (colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_DARK);
+    ModifyRSAnimatableProperty(isDefaultSidebarBlur, isDark);
+}
+
+void SceneSession::ModifyRSAnimatableProperty(bool isDefaultSidebarBlur, bool isDark)
+{
+    TLOGI(WmsLogTag::WMS_PC, "isDefaultSidebarBlur: %{public}d, isDark: %{public}d",
+        isDefaultSidebarBlur, isDark);
     // sidebar animation duration
     constexpr int32_t duration = 150;
-    if (needBlur) {
+    if (isDefaultSidebarBlur) {
         Rosen::RSAnimationTimingProtocol timingProtocol;
         timingProtocol.SetDuration(duration);
         timingProtocol.SetDirection(true);
@@ -6929,10 +7000,27 @@ void SceneSession::SetSidebarMaskColorModifier(bool needBlur)
         timingProtocol.SetFinishCallbackType(Rosen::FinishCallbackType::LOGICALLY);
 
         Rosen::RSNode::OpenImplicitAnimation(timingProtocol, Rosen::RSAnimationTimingCurve::LINEAR, nullptr);
-        maskColorValue_->Set(Rosen::RSColor::FromArgbInt(defaultMaskColor_));
+        if (isDark) {
+            blurRadiusValue_->Set(SIDEBAR_DEFAULT_RADIUS_DARK);
+            blurSaturationValue_->Set(SIDEBAR_DEFAULT_SATURATION_DARK);
+            blurBrightnessValue_->Set(SIDEBAR_DEFAULT_BRIGHTNESS_DARK);
+            blurMaskColorValue_->Set(Rosen::RSColor::FromArgbInt(SIDEBAR_DEFAULT_MASKCOLOR_DARK));
+        } else {
+            blurRadiusValue_->Set(SIDEBAR_DEFAULT_RADIUS_LIGHT);
+            blurSaturationValue_->Set(SIDEBAR_DEFAULT_SATURATION_LIGHT);
+            blurBrightnessValue_->Set(SIDEBAR_DEFAULT_BRIGHTNESS_LIGHT);
+            blurMaskColorValue_->Set(Rosen::RSColor::FromArgbInt(SIDEBAR_DEFAULT_MASKCOLOR_LIGHT));
+        }
         Rosen::RSNode::CloseImplicitAnimation();
     } else {
-        maskColorValue_->Set(Rosen::RSColor::FromArgbInt(snapshotMaskColor_));
+        blurRadiusValue_->Set(SIDEBAR_BLUR_NUMBER_ZERO);
+        blurSaturationValue_->Set(SIDEBAR_BLUR_NUMBER_ZERO);
+        blurBrightnessValue_->Set(SIDEBAR_BLUR_NUMBER_ZERO);
+        if (isDark) {
+            blurMaskColorValue_->Set(Rosen::RSColor::FromArgbInt(SIDEBAR_SNAPSHOT_MASKCOLOR_DARK));
+        } else {
+            blurMaskColorValue_->Set(Rosen::RSColor::FromArgbInt(SIDEBAR_SNAPSHOT_MASKCOLOR_LIGHT));
+        }
     }
 }
 
