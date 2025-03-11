@@ -804,27 +804,28 @@ napi_value JsWindowStage::OnCreateSubWindowWithOptions(napi_env env, napi_callba
     }
 
     const char* const where = __func__;
-    NapiAsyncTask::CompleteCallback complete =
-        [where, windowScene, windowName = std::move(windowName), option]
-            (napi_env env, NapiAsyncTask& task, int32_t status) mutable {
+    napi_value callback = (argv[2] != nullptr && GetType(env, argv[2]) == napi_function) ? argv[2] : nullptr;
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, callback, &result);
+    auto asyncTask = [where, windowScene, windowName = std::move(windowName), option, env,
+        task = napiAsyncTask]() mutable {
         option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
         option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
         option->SetOnlySupportSceneBoard(true);
         auto window = windowScene->CreateWindow(windowName, option);
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_SUB, "%{public}s Get window failed", where);
-            task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
                 "Get window failed"));
             return;
         }
-        task.Resolve(env, CreateJsWindowObject(env, window));
+        task->Resolve(env, CreateJsWindowObject(env, window));
         TLOGNI(WmsLogTag::WMS_SUB, "%{public}s Create sub window %{public}s end",
             where, windowName.c_str());
     };
-    napi_value callback = (argv[2] != nullptr && GetType(env, argv[2]) == napi_function) ? argv[2] : nullptr;
-    napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JsWindowStage::OnCreateSubWindowWithOptions",
-        env, CreateAsyncTaskWithLastParam(env, callback, nullptr, std::move(complete), &result));
+    if (napi_send_event(env, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
+        TLOGE(WmsLogTag::WMS_SUB, "napi send event failed, window state is abnormal");
+    }
     return result;
 }
 
