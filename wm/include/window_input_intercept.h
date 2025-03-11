@@ -29,10 +29,10 @@ class WindowInputIntercept {
 WM_DECLARE_SINGLE_INSTANCE_BASE(WindowInputIntercept);
 public:
     void RegisterInputEventIntercept(const int32_t deviceId,
-                                     const std::shared_ptr<IInputEventInterceptConsumer> &consumer);
+                                     const std::shared_ptr<IInputEventInterceptConsumer>& consumer);
     void UnRegisterInputEventIntercept(const int32_t deviceId);
-    bool IsInputIntercept(const std::shared_ptr<MMI::KeyEvent> &keyEvent);
-    bool IsInputIntercept(const std::shared_ptr<MMI::PointerEvent> &pointerEvent);
+    bool IsInputIntercept(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
+    bool IsInputIntercept(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 public:
     WindowInputIntercept() = default;
     ~WindowInputIntercept() = default;

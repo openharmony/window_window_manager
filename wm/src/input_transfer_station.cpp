@@ -149,7 +149,7 @@ void InputTransferStation::AddInputWindow(const sptr<Window>& window)
     if (inputListener_ == nullptr) {
         TLOGD(WmsLogTag::WMS_EVENT, "Init input listener, IsMainHandlerAvailable: %{public}u",
             window->IsMainHandlerAvailable());
-        std::shared_ptr<InputEventListener> listener = std::make_shared<InputEventListener>(InputEventListener());
+        std::shared_ptr<InputEventListener> listener = std::make_shared<InputEventListener>();
         auto mainEventRunner = AppExecFwk::EventRunner::GetMainEventRunner();
         if (mainEventRunner != nullptr && window->IsMainHandlerAvailable()) {
             TLOGD(WmsLogTag::WMS_EVENT, "MainEventRunner is available");
@@ -210,7 +210,7 @@ sptr<WindowInputChannel> InputTransferStation::GetInputChannel(uint32_t windowId
     return iter->second;
 }
 
-void InputTransferStation::HandleInputEvent(const std::shared_ptr<MMI::KeyEvent> &keyEvent)
+void InputTransferStation::HandleInputEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
     if (inputListener_ == nullptr || keyEvent == nullptr) {
         return;
@@ -218,7 +218,7 @@ void InputTransferStation::HandleInputEvent(const std::shared_ptr<MMI::KeyEvent>
     inputListener_->HandleInputEvent(keyEvent);
 }
 
-void InputTransferStation::HandleInputEvent(const std::shared_ptr<MMI::PointerEvent> &pointerEvent)
+void InputTransferStation::HandleInputEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     if (inputListener_ == nullptr || pointerEvent == nullptr) {
         return;

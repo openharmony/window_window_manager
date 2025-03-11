@@ -21,7 +21,7 @@ namespace OHOS {
 namespace Rosen {
 
 void WindowInputInterceptClient::RegisterInputEventIntercept(const int32_t deviceId,
-    const std::shared_ptr<IInputEventInterceptConsumer> &consumer)
+    const std::shared_ptr<IInputEventInterceptConsumer>& consumer)
 {
     WindowInputIntercept::GetInstance().RegisterInputEventIntercept(deviceId, consumer);
 }
@@ -31,12 +31,12 @@ void WindowInputInterceptClient::UnRegisterInputEventIntercept(const int32_t dev
     WindowInputIntercept::GetInstance().UnRegisterInputEventIntercept(deviceId);
 }
 
-void WindowInputInterceptClient::SendInputEvent(const std::shared_ptr<MMI::KeyEvent> &keyEvent)
+void WindowInputInterceptClient::SendInputEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
     InputTransferStation::GetInstance().HandleInputEvent(keyEvent);
 }
 
-void WindowInputInterceptClient::SendInputEvent(const std::shared_ptr<MMI::PointerEvent> &pointerEvent)
+void WindowInputInterceptClient::SendInputEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     InputTransferStation::GetInstance().HandleInputEvent(pointerEvent);
 }
