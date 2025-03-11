@@ -401,9 +401,9 @@ WMError SceneSessionManagerProxy::RequestFocusStatusBySA(int32_t persistentId, b
         TLOGE(WmsLogTag::WMS_FOCUS, "remote is null");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (remote->SendRequest(
-        static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_REQUEST_FOCUS_STATUS_BY_SA),
-            data, reply, option) != ERR_NONE) {
+    if (remote->SendRequest(static_cast<uint32_t>(
+        SceneSessionManagerMessage::TRANS_ID_REQUEST_FOCUS_STATUS_BY_SA),
+        data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_FOCUS, "SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
