@@ -52,6 +52,11 @@ void WindowManagerAgentLite::NotifyWindowStyleChange(WindowStyleType type)
     SingletonContainer::Get<WindowManagerLite>().NotifyWindowStyleChange(type);
 }
 
+void WindowManagerAgentLite::NotifyCallingWindowDisplayChanged(const CallingWindowInfo& callingWindowInfo)
+{
+    SingletonContainer::Get<WindowManagerLite>().NotifyCallingWindowDisplayChanged(callingWindowInfo);
+}
+
 void WindowManagerAgentLite::UpdatePiPWindowStateChanged(const std::string& bundleName, bool isForeground)
 {
     SingletonContainer::Get<WindowManagerLite>().UpdatePiPWindowStateChanged(bundleName, isForeground);

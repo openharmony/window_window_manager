@@ -13,7 +13,7 @@
 
 import("//build/test.gni")
 import("../../../windowmanager_aafwk.gni")
-module_out_path = "window_manager/wmserver"
+module_out_path = "window_manager/window_manager/wmserver"
 
 group("unittest") {
   testonly = true

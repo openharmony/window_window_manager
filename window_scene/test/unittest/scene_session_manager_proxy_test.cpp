@@ -1444,6 +1444,20 @@ HWTEST_F(sceneSessionManagerProxyTest, GetWindowModeType, Function | SmallTest |
     res = sceneSessionManagerProxy->GetWindowModeType(windowModeType);
     ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, res);
 }
+
+/**
+ * @tc.name: MinimizeByWindowId
+ * @tc.desc: MinimizeByWindowId
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, MinimizeByWindowId, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    auto sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+    std::vector<int32_t> windowIds;
+    WMError res = sceneSessionManagerProxy->MinimizeByWindowId(windowIds);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, res);
+}
 }  // namespace
 }
 }
