@@ -287,7 +287,7 @@ WMError SubSession::NotifySetParentSession(int32_t oldParentWindowId, int32_t ne
     }, __func__);
 }
 
-WSError SetSubWindowZLevel(int32_t zLevel)
+WSError SubSession::SetSubWindowZLevel(int32_t zLevel)
 {
     PostTask([weakThis = wptr(this), zLevel]() {
         auto session = weakThis.promote();
@@ -306,7 +306,7 @@ WSError SetSubWindowZLevel(int32_t zLevel)
     return WSError::WS_OK;
 }
 
-int32_t GetSubWindowZLevel() const
+int32_t SubSession::GetSubWindowZLevel() const
 {
     int32_t zLevel = 0;
     auto sessionProperty = GetSessionProperty();
