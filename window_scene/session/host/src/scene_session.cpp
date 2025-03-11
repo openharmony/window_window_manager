@@ -140,6 +140,7 @@ WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
         if (session->pcFoldScreenController_) {
             session->pcFoldScreenController_->OnConnect();
         }
+        session->SaveLastDensity();
         return ret;
     }, __func__);
 }
@@ -7075,20 +7076,8 @@ WSError SceneSession::UpdateDensity()
         Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
         UpdateNewSizeForPCWindow();
     }
-
-    WLOGFI("session update density: id: %{public}d.", GetPersistentId());
-    if (!IsSessionValid()) {
-        TLOGW(WmsLogTag::WMS_MAIN, "Session is invalid, id: %{public}d state: %{public}u",
-            GetPersistentId(), GetSessionState());
-        return WSError::WS_ERROR_INVALID_SESSION;
-    }
-    if (sessionStage_ != nullptr) {
-        sessionStage_->UpdateDensity();
-    } else {
-        WLOGFE("Session::UpdateDensity sessionStage_ is nullptr");
-        return WSError::WS_ERROR_NULLPTR;
-    }
-    return WSError::WS_OK;
+    SaveLastDensity();
+    return Session::UpdateDensity();
 }
 
 void SceneSession::UpdateNewSizeForPCWindow()
@@ -7129,10 +7118,10 @@ void SceneSession::UpdateNewSizeForPCWindow()
 
 bool SceneSession::CalcNewWindowRectIfNeed(WSRect& windowRect, DMRect& availableArea, float newVpr)
 {
-    float currVpr = 1.0f;
-    if (sessionStage_ == nullptr || sessionStage_->GetClientVpr(currVpr) != WSError::WS_OK) {
-        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "get client vpr failed, Id: %{public}u", GetPersistentId());
-        return false;
+    float currVpr = 0.0f;
+    if (auto property = GetSessionProperty()) {
+        currVpr = property->GetLastLimitsVpr();
+        TLOGD(WmsLogTag::WMS_LAYOUT_PC, "currVpr: %{public}f Id: %{public}u", currVpr, GetPersistentId());
     }
     if (MathHelper::NearZero(currVpr - newVpr) || MathHelper::NearZero(currVpr)) {
         TLOGW(WmsLogTag::WMS_LAYOUT_PC, "need not update new rect, currVpr: %{public}f , newVpr: %{public}f, "
@@ -7187,5 +7176,15 @@ bool SceneSession::IsPrimaryDisplay()
         }
     }
     return false;
+}
+
+void SceneSession::SaveLastDensity()
+{
+    if (auto property = GetSessionProperty()) {
+        DisplayId displayId = property->GetDisplayId();
+        if (auto display = DisplayManager::GetInstance().GetDisplayById(displayId)) {
+            property->SetLastLimitsVpr(display->GetVirtualPixelRatio());
+        }
+    }
 }
 } // namespace OHOS::Rosen

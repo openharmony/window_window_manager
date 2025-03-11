@@ -204,8 +204,6 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyWindowAttachStateChange(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_KEYBOARD_ANIMATION_COMPLETED):
             return HandleNotifyKeyboardAnimationCompleted(data, reply);
-        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_GET_CLIENT_VPR):
-            return HandleGetClientVpr(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -861,18 +859,6 @@ int SessionStageStub::HandleNotifyKeyboardAnimationCompleted(MessageParcel& data
         return ERR_INVALID_VALUE;
     }
     NotifyKeyboardAnimationCompleted(*keyboardPanelInfo);
-    return ERR_NONE;
-}
-
-int SessionStageStub::HandleGetClientVpr(MessageParcel& data, MessageParcel& reply)
-{
-    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "in");
-    float clientVpr = 1.0f;
-    GetClientVpr(clientVpr);
-    if (!reply.WriteFloat(clientVpr)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "write client vpr failed!");
-        return ERR_TRANSACTION_FAILED;
-    }
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

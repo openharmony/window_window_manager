@@ -136,7 +136,7 @@ public:
     void StopMoving();
     int32_t GetLastMovePointerPosX() const;
     void SetLastMovePointerPosX(int32_t lastMovePointerPosX);
-    int32_t IsMoveDragHotAreaCrossDisplay() const;
+    bool IsMoveDragHotAreaCrossDisplay() const;
     void SetMoveDragHotAreaCrossDisplay(bool isMoveDragHotAreaCrossDisplay);
 
 private:
