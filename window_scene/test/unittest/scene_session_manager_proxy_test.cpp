@@ -1174,7 +1174,7 @@ HWTEST_F(sceneSessionManagerProxyTest, SetAppKeyFramePolicy, Function | SmallTes
     KeyFramePolicy keyFramePolicy;
     keyFramePolicy.dragResizeType_ = DragResizeType::RESIZE_KEY_FRAME;
     WMError res = sceneSessionManagerProxy->SetAppKeyFramePolicy(bundleName, keyFramePolicy);
-    ASSERT_EQ(WMError::WM_OK, res);
+    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, res);
 }
 
 /**

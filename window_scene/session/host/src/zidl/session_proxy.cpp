@@ -18,6 +18,7 @@
 #include "ability_start_setting.h"
 #include <ipc_types.h>
 #include <message_option.h>
+#include <transaction/rs_transaction.h>
 #include <ui/rs_surface_node.h>
 #include <ui/rs_canvas_node.h>
 
@@ -2470,7 +2471,11 @@ WSError SessionProxy::GetKeyFramePolicy(KeyFramePolicy& keyFramePolicy)
         return WSError::WS_ERROR_IPC_FAILED;
     }
     keyFramePolicy = *keyFramePolicyReply;
-    int32_t ret = reply.ReadInt32();
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "read ret failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
     return static_cast<WSError>(ret);
 }
 
@@ -2493,7 +2498,11 @@ WSError SessionProxy::KeyFrameAnimateEnd()
         TLOGE(WmsLogTag::WMS_LAYOUT, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    int32_t ret = reply.ReadInt32();
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "read ret failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
     return static_cast<WSError>(ret);
 }
 
@@ -2525,7 +2534,11 @@ WSError SessionProxy::UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsC
         TLOGE(WmsLogTag::WMS_LAYOUT, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    int32_t ret = reply.ReadInt32();
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "read ret failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
     return static_cast<WSError>(ret);
 }
 

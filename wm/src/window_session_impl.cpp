@@ -1486,19 +1486,30 @@ void WindowSessionImpl::RegisterKeyFrameCallback()
         TLOGE(WmsLogTag::WMS_EVENT, "uiContent is nullptr");
         return;
     }
-    uiContent->AddKeyFrameCanvasNodeCallback([this](
+    const char* const where = __func__;
+    uiContent->AddKeyFrameCanvasNodeCallback([where, weakThis = wptr(this)](
         std::shared_ptr<RSCanvasNode>& rsCanvasNode, std::shared_ptr<RSTransaction>& rsTransaction) {
-        if (auto session = GetHostSession()) {
+        auto window = weakThis.promote();
+        if (!window) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s window is null", where);
+            return;
+        }
+        if (auto session = window->GetHostSession()) {
             session->UpdateKeyFrameCloneNode(rsCanvasNode, rsTransaction);
         } else {
-            TLOGE(WmsLogTag::WMS_EVENT, "session is nullptr");
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s session is nullptr", where);
         }
     });
-    uiContent->AddKeyFrameAnimateEndCallback([this]() {
-        if (auto session = GetHostSession()) {
+    uiContent->AddKeyFrameAnimateEndCallback([where, weakThis = wptr(this)]() {
+        auto window = weakThis.promote();
+        if (!window) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s window is null", where);
+            return;
+        }
+        if (auto session = window->GetHostSession()) {
             session->KeyFrameAnimateEnd();
         } else {
-            TLOGE(WmsLogTag::WMS_EVENT, "session is nullptr");
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s session is nullptr", where);
         }
     });
 }
