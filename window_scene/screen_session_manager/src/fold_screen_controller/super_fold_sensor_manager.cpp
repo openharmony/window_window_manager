@@ -156,7 +156,10 @@ void SuperFoldSensorManager::NotifyFoldAngleChanged(float foldAngle)
     std::vector<float> foldAngles;
     foldAngles.push_back(foldAngle);
     ScreenSessionManager::GetInstance().NotifyFoldAngleChanged(foldAngles);
-    HandleSuperSensorChange(events);
+    if (!ScreenRotationProperty::isDeviceHorizontal() ||
+        events == SuperFoldStatusChangeEvents::ANGLE_CHANGE_EXPANDED) {
+        HandleSuperSensorChange(events);
+    }
 }
 
 void SuperFoldSensorManager::HandleHallData(const SensorEvent * const event)
@@ -219,12 +222,12 @@ void SuperFoldSensorManager::HandleSuperSensorChange(SuperFoldStatusChangeEvents
 void SuperFoldSensorManager::HandleScreenConnectChange()
 {
     TLOGI(WmsLogTag::DMS, "Screen connect to stop statemachine.");
-    if (SuperFoldStateManager::GetInstance().GetCurrentStatus() == SuperFoldStatus::HALF_FOLDED) {
-        SuperFoldStateManager::GetInstance().HandleSuperFoldStatusChange(
-            SuperFoldStatusChangeEvents::ANGLE_CHANGE_EXPANDED);
-    } else if (SuperFoldStateManager::GetInstance().GetCurrentStatus() == SuperFoldStatus::KEYBOARD) {
+    if (SuperFoldStateManager::GetInstance().GetCurrentStatus() == SuperFoldStatus::KEYBOARD) {
         SuperFoldStateManager::GetInstance().HandleSuperFoldStatusChange(
             SuperFoldStatusChangeEvents::KEYBOARD_OFF);
+        SuperFoldStateManager::GetInstance().HandleSuperFoldStatusChange(
+            SuperFoldStatusChangeEvents::ANGLE_CHANGE_EXPANDED);
+    } else {
         SuperFoldStateManager::GetInstance().HandleSuperFoldStatusChange(
             SuperFoldStatusChangeEvents::ANGLE_CHANGE_EXPANDED);
     }

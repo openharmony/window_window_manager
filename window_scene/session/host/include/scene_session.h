@@ -109,7 +109,7 @@ using IsLastFrameLayoutFinishedFunc = std::function<WSError(bool& isLayoutFinish
 using IsAINavigationBarAvoidAreaValidFunc = std::function<bool(const AvoidArea& avoidArea, int32_t sessionBottom)>;
 using GetStatusBarDefaultVisibilityByDisplayIdFunc = std::function<bool(DisplayId displayId)>;
 using NotifySetWindowRectAutoSaveFunc = std::function<void(bool enabled)>;
-using UpdateAppUseControlFunc = std::function<void(ControlAppType type, bool isNeedControl)>;
+using UpdateAppUseControlFunc = std::function<void(ControlAppType type, bool isNeedControl, bool isControlRecentOnly)>;
 using NotifyAvoidAreaChangeCallback = std::function<void(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)>;
 using NotifySetSupportedWindowModesFunc = std::function<void(
     std::vector<AppExecFwk::SupportWindowMode>&& supportedWindowModes)>;
@@ -156,6 +156,11 @@ public:
     // func for change window scene pattern property
     struct SetWindowScenePatternFunc : public RefBase {
         SetWindowPatternOpacityFunc setOpacityFunc_;
+    };
+
+    struct ControlInfo {
+        bool isNeedControl;
+        bool isControlRecentOnly;
     };
 
     SceneSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback);
@@ -489,7 +494,7 @@ public:
     void RegisterClearCallbackMapCallback(ClearCallbackMapFunc&& callback);
     virtual WSError HideSync() { return WSError::WS_DO_NOTHING; }
     void RegisterUpdateAppUseControlCallback(UpdateAppUseControlFunc&& func);
-    void NotifyUpdateAppUseControl(ControlAppType type, bool isNeedControl);
+    void NotifyUpdateAppUseControl(ControlAppType type, const ControlInfo& controlInfo);
     void SetVisibilityChangedDetectFunc(VisibilityChangedDetectFunc&& func);
     virtual void RegisterSessionLockStateChangeCallback(NotifySessionLockStateChangeCallback&& callback) {}
     virtual void NotifySessionLockStateChange(bool isLockedState) {}
@@ -652,6 +657,9 @@ public:
     void ActivateKeyboardAvoidArea(bool active, bool recalculateAvoid);
     bool IsKeyboardAvoidAreaActive() const;
     virtual void SetKeyboardViewModeChangeListener(const NotifyKeyboarViewModeChangeFunc& func) {};
+    void NotifyKeyboardAnimationCompleted(bool isShowAnimation, const WSRect& panelRect);
+    void NotifyKeyboardDidShowRegistered(bool registered) override;
+    void NotifyKeyboardDidHideRegistered(bool registered) override;
 
     /*
      * Window Focus
@@ -776,7 +784,7 @@ protected:
     NotifyForceHideChangeFunc onForceHideChangeFunc_;
     ClearCallbackMapFunc clearCallbackMapFunc_;
     UpdateAppUseControlFunc onUpdateAppUseControlFunc_;
-    std::unordered_map<ControlAppType, bool> appUseControlMap_;
+    std::unordered_map<ControlAppType, ControlInfo> appUseControlMap_;
 
     /*
      * PC Fold Screen
@@ -803,6 +811,8 @@ protected:
     virtual void EnableCallingSessionAvoidArea() {}
     virtual void RestoreCallingSession(const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) {}
     bool keyboardAvoidAreaActive_ = true;
+    std::atomic<bool> isKeyboardDidShowRegistered_ = false;
+    std::atomic<bool> isKeyboardDidHideRegistered_ = false;
 
 private:
     void NotifyAccessibilityVisibilityChange();

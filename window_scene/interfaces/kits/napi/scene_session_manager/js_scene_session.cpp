@@ -438,6 +438,8 @@ void JsSceneSession::BindNativeMethodForKeyboard(napi_env env, napi_value objVal
         JsSceneSession::CloseKeyboardSyncTransaction);
     BindNativeFunction(env, objValue, "notifyTargetScreenWidthAndHeight", moduleName,
         JsSceneSession::NotifyTargetScreenWidthAndHeight);
+    BindNativeFunction(env, objValue, "notifyKeyboardAnimationCompleted", moduleName,
+        JsSceneSession::NotifyKeyboardAnimationCompleted);
 }
 
 void JsSceneSession::BindNativeMethodForCompatiblePcMode(napi_env env, napi_value objValue, const char* moduleName)
@@ -2012,6 +2014,13 @@ napi_value JsSceneSession::NotifyTargetScreenWidthAndHeight(napi_env env, napi_c
     return (me != nullptr) ? me->OnNotifyTargetScreenWidthAndHeight(env, info) : nullptr;
 }
 
+napi_value JsSceneSession::NotifyKeyboardAnimationCompleted(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "[NAPI]");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnNotifyKeyboardAnimationCompleted(env, info) : nullptr;
+}
+
 napi_value JsSceneSession::SetShowRecent(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::DEFAULT, "Enter");
@@ -3132,6 +3141,52 @@ napi_value JsSceneSession::OnNotifyTargetScreenWidthAndHeight(napi_env env, napi
         return NapiGetUndefined(env);
     }
     session->NotifyTargetScreenWidthAndHeight(isScreenAngleMismatch, screenWidth, screenHeight);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnNotifyKeyboardAnimationCompleted(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARG_COUNT_4;
+    napi_value argv[ARG_COUNT_4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARG_COUNT_3) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    WSRect keyboardPanelRect = { 0, 0, 0, 0 };
+    napi_value nativeObj = argv[ARG_INDEX_0];
+    if (nativeObj == nullptr || !ConvertRectInfoFromJs(env, nativeObj, keyboardPanelRect)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to convert parameter to keyboardPanelRect");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    uint32_t callingId = 0;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_1], callingId)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to convert parameter to uint32_t");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    bool isShowAnimation = false;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_2], isShowAnimation)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to convert parameter to bool");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    sptr<SceneSession> callingSession = SceneSessionManager::GetInstance().GetSceneSession(callingId);
+    if (callingSession == nullptr) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "callingSession is null, id: %{public}d", callingId);
+        return NapiGetUndefined(env);
+    }
+    callingSession->NotifyKeyboardAnimationCompleted(isShowAnimation, keyboardPanelRect);
     return NapiGetUndefined(env);
 }
 
@@ -5852,21 +5907,22 @@ void JsSceneSession::RegisterUpdateAppUseControlCallback()
     }
     const char* const where = __func__;
     session->RegisterUpdateAppUseControlCallback(
-        [weakThis = wptr(this), where](ControlAppType type, bool isNeedControl) {
+        [weakThis = wptr(this), where](ControlAppType type, bool isNeedControl, bool isControlRecentOnly) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s: jsSceneSession is null", where);
             return;
         }
-        jsSceneSession->OnUpdateAppUseControl(type, isNeedControl);
+        jsSceneSession->OnUpdateAppUseControl(type, isNeedControl, isControlRecentOnly);
     });
     TLOGI(WmsLogTag::WMS_LIFE, "success");
 }
 
-void JsSceneSession::OnUpdateAppUseControl(ControlAppType type, bool isNeedControl)
+void JsSceneSession::OnUpdateAppUseControl(ControlAppType type, bool isNeedControl, bool isControlRecentOnly)
 {
     const char* const where = __func__;
-    auto task = [weakThis = wptr(this), persistentId = persistentId_, type, isNeedControl, env = env_, where] {
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, type, isNeedControl,
+        isControlRecentOnly, env = env_, where] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s: jsSceneSession id:%{public}d has been destroyed",
@@ -5880,7 +5936,8 @@ void JsSceneSession::OnUpdateAppUseControl(ControlAppType type, bool isNeedContr
         }
         napi_value jsTypeArgv = CreateJsValue(env, static_cast<uint8_t>(type));
         napi_value jsIsNeedControlArgv = CreateJsValue(env, isNeedControl);
-        napi_value argv[] = { jsTypeArgv, jsIsNeedControlArgv };
+        napi_value jsIsControlRecentOnlyArgv = CreateJsValue(env, isControlRecentOnly);
+        napi_value argv[] = { jsTypeArgv, jsIsNeedControlArgv, jsIsControlRecentOnlyArgv };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, __func__);

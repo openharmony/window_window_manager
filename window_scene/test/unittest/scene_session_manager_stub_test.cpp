@@ -2427,6 +2427,21 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetAppDragResizeType, Function | Sma
     int res = stub_->HandleGetAppDragResizeType(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
+
+/**
+ * @tc.name: HandleminiMizeByWindowId
+ * @tc.desc: test HandleMinimizeByWindowId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleMinimizeByWindowId, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    std::vector<int32_t> windowIds;
+    data.WriteInt32Vector(windowIds);
+    int res = stub_->HandleMinimizeByWindowId(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
 }
 }
 }

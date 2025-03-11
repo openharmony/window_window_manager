@@ -250,6 +250,10 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyWindowAttachStateListenerRegistered(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_FOLLOW_PARENT_LAYOUT_ENABLED):
             return HandleSetFollowParentWindowLayoutEnabled(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_KEYBOARD_DID_SHOW_REGISTERED):
+            return HandleNotifyKeyboardDidShowRegistered(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_KEYBOARD_DID_HIDE_REGISTERED):
+            return HandleNotifyKeyboardDidHideRegistered(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1571,6 +1575,30 @@ int SessionStub::HandleNotifyWindowAttachStateListenerRegistered(MessageParcel& 
     }
     TLOGD(WmsLogTag::WMS_PATTERN, "registered: %{public}d", registered);
     NotifyWindowAttachStateListenerRegistered(registered);
+    return ERR_NONE;
+}
+
+int SessionStub::HandleNotifyKeyboardDidShowRegistered(MessageParcel& data, MessageParcel& reply)
+{
+    bool registered = false;
+    if (!data.ReadBool(registered)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "read registered failed");
+        return ERR_INVALID_DATA;
+    }
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "registered: %{public}d", registered);
+    NotifyKeyboardDidShowRegistered(registered);
+    return ERR_NONE;
+}
+
+int SessionStub::HandleNotifyKeyboardDidHideRegistered(MessageParcel& data, MessageParcel& reply)
+{
+    bool registered = false;
+    if (!data.ReadBool(registered)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "read registered failed");
+        return ERR_INVALID_DATA;
+    }
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "registered: %{public}d", registered);
+    NotifyKeyboardDidHideRegistered(registered);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

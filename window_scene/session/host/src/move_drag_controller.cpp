@@ -365,6 +365,7 @@ bool MoveDragController::ConsumeMoveEvent(const std::shared_ptr<MMI::PointerEven
             }
             reason = SizeChangeReason::DRAG_MOVE;
             uint32_t oldWindowDragHotAreaType = windowDragHotAreaType_;
+            moveDragEndDisplayId_ = static_cast<uint64_t>(pointerEvent->GetTargetDisplayId());
             UpdateHotAreaType(pointerEvent);
             ProcessWindowDragHotAreaFunc(oldWindowDragHotAreaType != windowDragHotAreaType_, reason);
             break;
@@ -526,7 +527,7 @@ bool MoveDragController::ConsumeDragEvent(const std::shared_ptr<MMI::PointerEven
     return true;
 }
 
-void MoveDragController::MoveDragInterrupted()
+void MoveDragController::MoveDragInterrupted(bool resetPosition)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "Screen anomaly, MoveDrag has been interrupted.");
     SizeChangeReason reason = SizeChangeReason::DRAG_END;
@@ -540,8 +541,10 @@ void MoveDragController::MoveDragInterrupted()
         SetStartMoveFlag(false);
         ProcessWindowDragHotAreaFunc(windowDragHotAreaType_ != WINDOW_HOT_AREA_TYPE_UNDEFINED, reason);
     };
-    moveDragEndDisplayId_ = moveDragStartDisplayId_;
-    moveDragProperty_.targetRect_ = moveDragProperty_.originalRect_;
+    if (resetPosition) {
+        moveDragEndDisplayId_ = moveDragStartDisplayId_;
+        moveDragProperty_.targetRect_ = moveDragProperty_.originalRect_;
+    }
     ProcessSessionRectChange(reason);
 }
 
@@ -1481,7 +1484,7 @@ void MoveDragController::OnLostFocus()
     TLOGW(WmsLogTag::WMS_LAYOUT, "window id %{public}d lost focus, should stop MoveDrag isMove: %{public}d,"
         "isDrag: %{public}d", persistentId_, isStartMove_, isStartDrag_);
     if (isStartMove_ || isStartDrag_) {
-        moveDragIsInterrupted_ = true;
+        MoveDragInterrupted(false);
     }
 }
 

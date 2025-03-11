@@ -484,6 +484,26 @@ int32_t ScreenSession::GetValidWidth() const
     return property_.GetValidWidth();
 }
 
+void ScreenSession::SetPointerActiveWidth(uint32_t pointerActiveWidth)
+{
+    property_.SetPointerActiveWidth(pointerActiveWidth);
+}
+
+uint32_t ScreenSession::GetPointerActiveWidth()
+{
+    return property_.GetPointerActiveWidth();
+}
+
+void ScreenSession::SetPointerActiveHeight(uint32_t pointerActiveHeight)
+{
+    property_.SetPointerActiveHeight(pointerActiveHeight);
+}
+
+uint32_t ScreenSession::GetPointerActiveHeight()
+{
+    return property_.GetPointerActiveHeight();
+}
+
 void ScreenSession::SetIsBScreenHalf(bool isBScreenHalf)
 {
     isBScreenHalf_ = isBScreenHalf;
@@ -1388,11 +1408,18 @@ void ScreenSession::FillScreenInfo(sptr<ScreenInfo> info) const
     info->SetIsExtend(GetIsExtend());
     uint32_t width = 0;
     uint32_t height = 0;
-    sptr<SupportedScreenModes> screenSessionModes = GetActiveScreenMode();
-    if (screenSessionModes != nullptr) {
-        height = screenSessionModes->height_;
-        width = screenSessionModes->width_;
+    if (isPcUse_) {
+        RRect bounds = property_.GetBounds();
+        width = bounds.rect_.GetWidth();
+        height = bounds.rect_.GetHeight();
+    } else {
+        sptr<SupportedScreenModes> screenSessionModes = GetActiveScreenMode();
+        if (screenSessionModes != nullptr) {
+            height = screenSessionModes->height_;
+            width = screenSessionModes->width_;
+        }
     }
+    
     float virtualPixelRatio = property_.GetVirtualPixelRatio();
     // "< 1e-set6" means virtualPixelRatio is 0.
     if (fabsf(virtualPixelRatio) < 1e-6) {

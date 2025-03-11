@@ -84,6 +84,7 @@ public:
     void RecordEventFromScb(std::string description, bool needRecordEvent);
     FoldStatus GetFoldStatus();
     SuperFoldStatus GetSuperFoldStatus();
+    void SetLandscapeLockStatus(bool isLocked);
     ExtendScreenConnectStatus GetExtendScreenConnectStatus();
     std::shared_ptr<Media::PixelMap> GetScreenSnapshot(ScreenId screenId, float scaleX, float scaleY);
     DeviceScreenConfig GetDeviceScreenConfig();
@@ -96,6 +97,7 @@ public:
 
     void RegisterSwitchingToAnotherUserFunction(std::function<void()>&& func);
     void SwitchingCurrentUser();
+    void DisconnectAllExternalScreen();
     void SwitchUserCallback(std::vector<int32_t> oldScbPids, int32_t currentScbPid) override;
 
     void OnFoldStatusChangedReportUE(const std::vector<std::string>& screenFoldInfo) override;

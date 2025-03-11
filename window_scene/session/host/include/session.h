@@ -229,6 +229,7 @@ public:
     int32_t GetPersistentId() const;
     void SetSurfaceNode(const std::shared_ptr<RSSurfaceNode>& surfaceNode);
     std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const;
+    std::optional<NodeId> GetSurfaceNodeId() const;
     void SetLeashWinSurfaceNode(std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode);
     std::shared_ptr<RSSurfaceNode> GetLeashWinSurfaceNode() const;
 
@@ -608,7 +609,6 @@ public:
     SingleHandTransform GetSingleHandTransform() const;
     void SetClientDisplayId(DisplayId displayId);
     DisplayId GetClientDisplayId() const;
-    void UpdateDisplayIdByParentSession(DisplayId& updatedDisplayId);
     virtual void RegisterNotifySurfaceBoundsChangeFunc(int32_t sessionId, NotifySurfaceBoundsChangeFunc&& func) {};
     virtual void UnregisterNotifySurfaceBoundsChangeFunc(int32_t sessionId) {};
 

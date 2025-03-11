@@ -175,6 +175,14 @@ public:
     DMError SetDensityDpiSystem(uint32_t dpi) const;
 
     /**
+     * @brief Set the default density dpi of the screen system window.
+     *
+     * @param dpi Default density dpi of the screen.
+     * @return DM_OK means set success, others means set failed.
+     */
+    DMError SetDefaultDensityDpi(uint32_t dpi) const;
+
+    /**
      * @brief Get the screen info.
      *
      * @return Screen info.
