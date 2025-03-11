@@ -254,8 +254,8 @@ public:
     bool IsWindowDelayRaiseEnabled() const;
     void SetWindowSizeLimits(const WindowSizeLimits& windowSizeLimits);
     WindowSizeLimits GetWindowSizeLimits() const;
-    void SetisSaveBySpecifiedFlag(bool isSaveBySpecifiedFlag);
-    bool GetisSaveBySpecifiedFlag() const;
+    void SetIsSaveBySpecifiedFlag(bool isSaveBySpecifiedFlag);
+    bool GetIsSaveBySpecifiedFlag() const;
 
     /*
      * Keyboard

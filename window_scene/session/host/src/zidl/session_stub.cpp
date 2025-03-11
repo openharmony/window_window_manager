@@ -1430,7 +1430,8 @@ int SessionStub::HandleSetWindowRectAutoSave(MessageParcel& data, MessageParcel&
         TLOGE(WmsLogTag::WMS_MAIN, "Read isSaveBySpecifiedFlag failed.");
         return ERR_INVALID_DATA;
     }
-    TLOGD(WmsLogTag::WMS_MAIN, "enabled: %{public}d, isSaveBySpecifiedFlag: %{public}d", enabled, isSaveBySpecifiedFlag);
+    TLOGD(WmsLogTag::WMS_MAIN, "enabled: %{public}d, isSaveBySpecifiedFlag: %{public}d",
+        enabled, isSaveBySpecifiedFlag);
     OnSetWindowRectAutoSave(enabled, isSaveBySpecifiedFlag);
     return ERR_NONE;
 }

@@ -894,11 +894,7 @@ napi_value JsWindowStage::OnSetWindowRectAutoSave(napi_env env, napi_callback_in
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     bool isSaveBySpecifiedFlag = false;
-    if (ConvertFromJsValue(env, argv[INDEX_ONE], isSaveBySpecifiedFlag)) {
-        TLOGI(WmsLogTag::WMS_LAYOUT_PC, "Success to convert parameter to isSaveBySpecifiedFlag: %{public}d",
-            isSaveBySpecifiedFlag);
-    }
-    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "isSaveBySpecifiedFlag: %{public}d", isSaveBySpecifiedFlag);
+    ConvertFromJsValue(env, argv[INDEX_ONE], isSaveBySpecifiedFlag);
     auto window = windowScene->GetMainWindow();
     const char* const where = __func__;
     napi_value result = nullptr;
@@ -917,6 +913,8 @@ napi_value JsWindowStage::OnSetWindowRectAutoSave(napi_env env, napi_callback_in
             task->Reject(env, JsErrUtils::CreateJsError(env, ret, "window recover position failed."));
         } else {
             task->Resolve(env, NapiGetUndefined(env));
+            TLOGNI(WmsLogTag::WMS_MAIN, "%{public}s id %{public}d isSaveBySpecifiedFlag: %{public}d "
+                "enable:%{public}d", where, session->GetPersistentId(), isSaveBySpecifiedFlag, enabled);
         }
     };
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {

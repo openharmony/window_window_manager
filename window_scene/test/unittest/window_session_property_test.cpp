@@ -1453,16 +1453,16 @@ HWTEST_F(WindowSessionPropertyTest, GetIsAtomicService, Function | SmallTest | L
 }
 
 /**
- * @tc.name: SetisSaveBySpecifiedFlag
- * @tc.desc: SetisSaveBySpecifiedFlag
+ * @tc.name: SetIsSaveBySpecifiedFlag
+ * @tc.desc: SetIsSaveBySpecifiedFlag
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionPropertyTest, SetisSaveBySpecifiedFlag, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionPropertyTest, SetIsSaveBySpecifiedFlag, Function | SmallTest | Level2)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     bool isSaveBySpecifiedFlag = false;
-    property->SetisSaveBySpecifiedFlag(isSaveBySpecifiedFlag);
-    ASSERT_EQ(isSaveBySpecifiedFlag, property->GetisSaveBySpecifiedFlag());
+    property->SetIsSaveBySpecifiedFlag(isSaveBySpecifiedFlag);
+    ASSERT_EQ(isSaveBySpecifiedFlag, property->GetIsSaveBySpecifiedFlag());
 }
 } // namespace
 } // namespace Rosen

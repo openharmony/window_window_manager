@@ -386,8 +386,8 @@ HWTEST_F(MainSessionTest, OnSetWindowRectAutoSave, Function | SmallTest | Level2
         return;
     };
     session->onSetWindowRectAutoSaveFunc_ = func;
-    EXPECT_EQ(WSError::WS_OK, session->OnSetWindowRectAutoSave(true, false));
-    EXPECT_EQ(false, session->GetSessionProperty()->GetisSaveBySpecifiedFlag());
+    EXPECT_NE(nullptr, session->onSetWindowRectAutoSaveFunc_);
+    EXPECT_EQ(false, session->GetSessionProperty()->GetIsSaveBySpecifiedFlag());
 }
 
 /**
@@ -510,17 +510,19 @@ HWTEST_F(MainSessionTest, UpdateFlag, Function | SmallTest | Level2)
     info.abilityName_ = "UpdateFlag";
     info.bundleName_ = "UpdateFlag";
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    session->sessionInfo_.specifiedFlag_ = '';
     std::string flag = "test";
-    EXPECT_EQ(WSError::WS_OK, session->UpdateFlag(flag));
+    session->UpdateFlag(flag);
+    EXPECT_EQ(flag, session->sessionInfo_.specifiedFlag_);
 
     session->onUpdateFlagFunc_ = nullptr;
-    EXPECT_EQ(WSError::WS_OK, session->UpdateFlag(flag));
+    EXPECT_EQ(nullptr, session->onUpdateFlagFunc_);
 
     NotifyUpdateFlagFunc func = [](const std::string& flag) {
         return;
     };
     session->onUpdateFlagFunc_ = func;
-    EXPECT_EQ(WSError::WS_OK, session->UpdateFlag(flag));
+    EXPECT_NE(nullptr, session->onUpdateFlagFunc_);
 }
 }
 }

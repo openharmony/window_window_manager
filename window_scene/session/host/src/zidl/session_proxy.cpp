@@ -2624,7 +2624,7 @@ WSError SessionProxy::UpdateFlag(const std::string& flag)
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::WMS_MAIN, "WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
