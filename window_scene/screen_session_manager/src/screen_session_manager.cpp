@@ -8639,4 +8639,24 @@ bool ScreenSessionManager::GetIsRealScreen(ScreenId screenId)
     }
     return screenSession->GetIsRealScreen();
 }
+
+DMError ScreenSessionManager::SetSystemKeyboardStatus(bool isOn)
+{
+    if (!SessionPermission::IsSACalling()) {
+        TLOGE(WmsLogTag::DMS, "Permission Denied! calling: %{public}s, pid: %{public}d",
+            SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
+#ifdef FOLD_ABILITY_ENABLE
+    std::string hprProductType = "HPR";
+    std::string productType = OHOS::system::GetParameter("const.build.product", "HYM");
+    if (productType == hprProductType) {
+        SuperFoldStateManager::GetInstance().SetSystemKeyboardStatus(isOn);
+        return DMError::DM_OK;
+    } else {
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+#endif // FOLD_ABILITY_ENABLE
+    return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+}
 } // namespace OHOS::Rosen
