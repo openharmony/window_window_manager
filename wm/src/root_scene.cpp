@@ -529,7 +529,7 @@ void RootScene::NotifyWaterfallModeChange(bool isWaterfallMode)
 void RootScene::GetExtensionConfig(AAFwk::WantParams& want) const
 {
     want.SetParam(Extension::WATERFALL_MODE_FIELD,
-        AAFwk::Integer::Box(static_cast<int32_t>(IsWaterfallModeEnabled())));
+        AAFwk::Integer::Box(static_cast<int32_t>(isFullScreenWaterfallMode_.load())));
 }
 
 void RootScene::UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>& want)
