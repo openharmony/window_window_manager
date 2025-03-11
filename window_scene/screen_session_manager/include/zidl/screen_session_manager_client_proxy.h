@@ -50,6 +50,7 @@ public:
     void OnFoldStatusChangedReportUE(const std::vector<std::string>& screenFoldInfo) override;
     void ScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) override;
     void OnCameraBackSelfieChanged(ScreenId screenId, bool isCameraBackSelfie) override;
+    void OnSecondaryReflexionChanged(ScreenId screenId, bool isSecondaryReflexion) override;
 
 private:
     static inline BrokerDelegator<ScreenSessionManagerClientProxy> delegator_;
