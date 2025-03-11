@@ -1949,11 +1949,12 @@ uint32_t WindowSessionProperty::GetApiVersion() const
     return apiVersion_;
 }
 
-void SetIsFullScreenWaterfallMode(bool isFullScreenWaterfallMode)
+void WindowSessionProperty::SetIsFullScreenWaterfallMode(bool isFullScreenWaterfallMode)
 {
     isFullScreenWaterfallMode_ = isFullScreenWaterfallMode;
 }
-bool GetIsFullScreenWaterfallMode() const
+
+bool WindowSessionProperty::GetIsFullScreenWaterfallMode() const
 {
     return isFullScreenWaterfallMode_;
 }

@@ -450,7 +450,7 @@ private:
     std::vector<AppExecFwk::SupportWindowMode> supportedWindowModes_;
     bool isWindowDelayRaiseEnabled_ = false;
     WindowSizeLimits windowSizeLimits_;
-    bool isFullScreenWaterfallMode_;
+    bool isFullScreenWaterfallMode_ = false;
 
     /*
      * Keyboard
