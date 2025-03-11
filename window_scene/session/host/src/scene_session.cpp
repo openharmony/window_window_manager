@@ -993,23 +993,23 @@ void SceneSession::RegisterUpdateAppUseControlCallback(UpdateAppUseControlFunc&&
             return;
         }
         session->onUpdateAppUseControlFunc_ = std::move(callback);
-        for (const auto& [type, isNeedControl] : session->appUseControlMap_) {
-            session->onUpdateAppUseControlFunc_(type, isNeedControl);
+        for (const auto& [type, info] : session->appUseControlMap_) {
+            session->onUpdateAppUseControlFunc_(type, info.isNeedControl, info.isControlRecentOnly);
         }
     }, __func__);
 }
 
-void SceneSession::NotifyUpdateAppUseControl(ControlAppType type, bool isNeedControl)
+void SceneSession::NotifyUpdateAppUseControl(ControlAppType type, const ControlInfo& controlInfo)
 {
-    PostTask([weakThis = wptr(this), type, isNeedControl, where = __func__] {
+    PostTask([weakThis = wptr(this), type, controlInfo, where = __func__] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
             return;
         }
-        session->appUseControlMap_[type] = isNeedControl;
+        session->appUseControlMap_[type] = controlInfo;
         if (session->onUpdateAppUseControlFunc_) {
-            session->onUpdateAppUseControlFunc_(type, isNeedControl);
+            session->onUpdateAppUseControlFunc_(type, controlInfo.isNeedControl, controlInfo.isControlRecentOnly);
         }
     }, __func__);
 }
@@ -1630,11 +1630,6 @@ void SceneSession::UpdateSessionRectPosYFromClient(SizeChangeReason reason, Disp
         return;
     }
     auto clientDisplayId = clientDisplayId_;
-    TLOGI(WmsLogTag::WMS_LAYOUT, "winId: %{public}d, clientDisplayId: %{public}" PRIu64,
-        GetPersistentId(), clientDisplayId);
-    if (WindowHelper::IsSubWindow(GetWindowType()) || WindowHelper::IsSystemWindow(GetWindowType())) {
-        UpdateDisplayIdByParentSession(clientDisplayId);
-    }
     TLOGI(WmsLogTag::WMS_LAYOUT, "winId: %{public}d, input: %{public}s, screenId: %{public}" PRIu64
         ", clientDisplayId: %{public}" PRIu64 ", configDisplayId: %{public}" PRIu64,
         GetPersistentId(), rect.ToString().c_str(), GetScreenId(), clientDisplayId, configDisplayId_);
@@ -3165,7 +3160,8 @@ void SceneSession::HandleMoveDragEnd(WSRect& rect, SizeChangeReason reason)
         TLOGI(WmsLogTag::WMS_KEYBOARD, "Calling session is moved and reset oriPosYBeforeRaisedByKeyboard");
         SetOriPosYBeforeRaisedByKeyboard(0);
     }
-    if (MoveUnderInteriaAndNotifyRectChange(rect, reason)) {
+    if (moveDragController_->GetPointerType() == MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN &&
+        MoveUnderInteriaAndNotifyRectChange(rect, reason)) {
         TLOGI(WmsLogTag::WMS_LAYOUT_PC, "set full screen after throw slip");
     }
     if ((moveDragController_->GetMoveDragEndDisplayId() == moveDragController_->GetMoveDragStartDisplayId() ||

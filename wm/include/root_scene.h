@@ -135,6 +135,12 @@ public:
     void NotifyPcScreenFoldStatusChange(SuperFoldStatus foldStatus);
 
     /*
+     * UIExtension
+     */
+    void GetExtensionConfig(AAFwk::WantParams& want) const override;
+    void UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>& want) override;
+
+    /*
      * Window Property
      */
     static void UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);

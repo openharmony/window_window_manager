@@ -726,5 +726,26 @@ HWTEST_F(DisplayManagerTest, ImplUnregisterScreenMagneticStateListener, Function
     listener.clear();
 }
 
+/**
+ * @tc.name: SetSystemKeyboardStatus
+ * @tc.desc: SetSystemKeyboardStatus with true as parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, SetSystemKeyboardStatus01, Function | SmallTest | Level1)
+{
+    auto ret = DisplayManagerLite::GetInstance().SetSystemKeyboardStatus(true);
+    ASSERT_NE(ret, DMError::DM_OK);
+}
+ 
+/**
+ * @tc.name: SetSystemKeyboardStatus
+ * @tc.desc: SetSystemKeyboardStatus with false as parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, SetSystemKeyboardStatus02, Function | SmallTest | Level1)
+{
+    auto ret = DisplayManagerLite::GetInstance().SetSystemKeyboardStatus(false);
+    ASSERT_NE(ret, DMError::DM_OK);
+}
 } // namespace Rosen
 } // namespace OHOS

@@ -816,4 +816,8 @@ VirtualScreenFlag DisplayManagerLite::GetVirtualScreenFlag(ScreenId screenId)
     return SingletonContainer::Get<DisplayManagerAdapterLite>().GetVirtualScreenFlag(screenId);
 }
 
+DMError DisplayManagerLite::SetSystemKeyboardStatus(bool isOn)
+{
+    return SingletonContainer::Get<DisplayManagerAdapterLite>().SetSystemKeyboardStatus(isOn);
+}
 } // namespace OHOS::Rosen

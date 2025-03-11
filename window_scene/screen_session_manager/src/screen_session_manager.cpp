@@ -21,6 +21,7 @@
 #include <iomanip>
 #include <string_ex.h>
 #include <unique_fd.h>
+#include "input_manager.h"
 
 #include <hitrace_meter.h>
 #ifdef DEVICE_STATUS_ENABLE
@@ -130,6 +131,7 @@ const int32_t ROTATE_POLICY = system::GetIntParameter("const.window.device.rotat
 constexpr int32_t FOLDABLE_DEVICE { 2 };
 constexpr float DEFAULT_PIVOT = 0.5f;
 constexpr float DEFAULT_SCALE = 1.0f;
+constexpr float EXTEND_SCREEN_DPI_PARAMETER = 0.85f;
 static const constexpr char* SET_SETTING_DPI_KEY {"default_display_dpi"};
 const std::vector<std::string> ROTATION_DEFAULT = {"0", "1", "2", "3"};
 const std::vector<std::string> ORIENTATION_DEFAULT = {"0", "1", "2", "3"};
@@ -2284,12 +2286,12 @@ void ScreenSessionManager::InitExtendScreenDensity(sptr<ScreenSession> session, 
     float extendDensity = screenSession->GetScreenProperty().GetDensity();
     float curResolution = screenSession->GetScreenProperty().GetDensityInCurResolution();
     TLOGW(WmsLogTag::DMS, "extendDensity = %{public}f", extendDensity);
-    session->SetVirtualPixelRatio(extendDensity);
-    session->SetDefaultDensity(extendDensity);
+    session->SetVirtualPixelRatio(extendDensity * EXTEND_SCREEN_DPI_PARAMETER);
+    session->SetDefaultDensity(extendDensity * EXTEND_SCREEN_DPI_PARAMETER);
     session->SetDensityInCurResolution(curResolution);
     ScreenId screenId = session->GetScreenId();
-    property.SetVirtualPixelRatio(extendDensity);
-    property.SetDefaultDensity(extendDensity);
+    property.SetVirtualPixelRatio(extendDensity * EXTEND_SCREEN_DPI_PARAMETER);
+    property.SetDefaultDensity(extendDensity* EXTEND_SCREEN_DPI_PARAMETER);
     property.SetDensityInCurResolution(curResolution);
     {
         std::lock_guard<std::recursive_mutex> lock_phy(phyScreenPropMapMutex_);
@@ -3288,7 +3290,7 @@ void ScreenSessionManager::SetDpiFromSettingData()
         ScreenId defaultScreenId = GetDefaultScreenId();
         SetVirtualPixelRatio(defaultScreenId, dpi);
         if (g_isPcDevice) {
-            SetExtendPixelRatio(dpi);
+            SetExtendPixelRatio(dpi * EXTEND_SCREEN_DPI_PARAMETER);
         }
     } else {
         TLOGE(WmsLogTag::DMS, "setting dpi error, settingDpi: %{public}d", settingDpi);
@@ -6517,6 +6519,18 @@ SuperFoldStatus ScreenSessionManager::GetSuperFoldStatus()
 #endif
 }
 
+void ScreenSessionManager::SetLandscapeLockStatus(bool isLocked)
+{
+#ifdef FOLD_ABILITY_ENABLE
+    if (isLocked) {
+        SetIsExtendScreenConnected(true);
+    } else {
+        SetIsExtendScreenConnected(false);
+        SuperFoldSensorManager::GetInstance().HandleScreenDisconnectChange();
+    }
+#endif
+}
+
 ExtendScreenConnectStatus ScreenSessionManager::GetExtendScreenConnectStatus()
 {
 #ifdef WM_MULTI_SCREEN_ENABLE
@@ -6540,6 +6554,10 @@ void ScreenSessionManager::SetIsExtendScreenConnected(bool isExtendScreenConnect
 void ScreenSessionManager::HandleExtendScreenConnect(ScreenId screenId)
 {
 #ifdef FOLD_ABILITY_ENABLE
+    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        TLOGI(WmsLogTag::DMS, "not super fold display device.");
+        return;
+    }
     SetIsExtendScreenConnected(true);
     SuperFoldSensorManager::GetInstance().HandleScreenConnectChange();
     OnExtendScreenConnectStatusChange(screenId, ExtendScreenConnectStatus::CONNECT);
@@ -6550,6 +6568,10 @@ void ScreenSessionManager::HandleExtendScreenConnect(ScreenId screenId)
 void ScreenSessionManager::HandleExtendScreenDisconnect(ScreenId screenId)
 {
 #ifdef FOLD_ABILITY_ENABLE
+    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        TLOGI(WmsLogTag::DMS, "not super fold display device.");
+        return;
+    }
     SetIsExtendScreenConnected(false);
     SuperFoldSensorManager::GetInstance().HandleScreenDisconnectChange();
     OnExtendScreenConnectStatusChange(screenId, ExtendScreenConnectStatus::DISCONNECT);
@@ -6801,6 +6823,8 @@ void ScreenSessionManager::SetDisplayNodeScreenId(ScreenId screenId, ScreenId di
 #ifdef DEVICE_STATUS_ENABLE
     SetDragWindowScreenId(screenId, displayNodeScreenId);
 #endif // DEVICE_STATUS_ENABLE
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SetMultiWindowScreenId");
+    MMI::InputManager::GetInstance()->SetMultiWindowScreenId(screenId, displayNodeScreenId);
 }
 
 #ifdef DEVICE_STATUS_ENABLE
@@ -8121,13 +8145,16 @@ void ScreenSessionManager::MultiScreenModeChange(ScreenId mainScreenId, ScreenId
 
 void ScreenSessionManager::SwitchScrollParam(FoldDisplayMode displayMode)
 {
-    std::map<FoldDisplayMode, ScrollableParam> scrollableParams = ScreenSceneConfig::GetAllScrollableParam();
-    std::string srollVelocityScale = scrollableParams.count(displayMode) != 0 ?
-        scrollableParams[displayMode].velocityScale_ : "0";
-    std::string srollFriction = scrollableParams.count(displayMode) != 0 ?
-        scrollableParams[displayMode].friction_ : "0";
-    system::SetParameter("persist.scrollable.velocityScale", srollVelocityScale);
-    system::SetParameter("persist.scrollable.friction", srollFriction);
+    auto task = [=]() {
+        std::map<FoldDisplayMode, ScrollableParam> scrollableParams = ScreenSceneConfig::GetAllScrollableParam();
+        std::string scrollVelocityScale = scrollableParams.count(displayMode) != 0 ?
+            scrollableParams[displayMode].velocityScale_ : "0";
+        std::string scrollFriction = scrollableParams.count(displayMode) != 0 ?
+            scrollableParams[displayMode].friction_ : "0";
+        system::SetParameter("persist.scrollable.velocityScale", scrollVelocityScale);
+        system::SetParameter("persist.scrollable.friction", scrollFriction);
+    };
+    taskScheduler_->PostAsyncTask(task, "SwitchScrollParam");
 }
 
 void ScreenSessionManager::MultiScreenModeChange(const std::string& firstScreenIdStr,
@@ -8158,14 +8185,14 @@ void ScreenSessionManager::OnScreenExtendChange(ScreenId mainScreenId, ScreenId 
     clientProxy_->OnScreenExtendChanged(mainScreenId, extendScreenId);
 }
 
-void ScreenSessionManager::OnTentModeChanged(bool isTentMode, int32_t hall)
+void ScreenSessionManager::OnTentModeChanged(int tentType, int32_t hall)
 {
 #ifdef FOLD_ABILITY_ENABLE
     if (!foldScreenController_) {
         TLOGI(WmsLogTag::DMS, "foldScreenController_ is null");
         return;
     }
-    foldScreenController_->OnTentModeChanged(isTentMode, hall);
+    foldScreenController_->OnTentModeChanged(tentType, hall);
 #endif
 }
 
@@ -8611,5 +8638,25 @@ bool ScreenSessionManager::GetIsRealScreen(ScreenId screenId)
         return false;
     }
     return screenSession->GetIsRealScreen();
+}
+
+DMError ScreenSessionManager::SetSystemKeyboardStatus(bool isOn)
+{
+    if (!SessionPermission::IsSACalling()) {
+        TLOGE(WmsLogTag::DMS, "Permission Denied! calling: %{public}s, pid: %{public}d",
+            SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
+#ifdef FOLD_ABILITY_ENABLE
+    std::string hprProductType = "HPR";
+    std::string productType = OHOS::system::GetParameter("const.build.product", "HYM");
+    if (productType == hprProductType) {
+        SuperFoldStateManager::GetInstance().SetSystemKeyboardStatus(isOn);
+        return DMError::DM_OK;
+    } else {
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+#endif // FOLD_ABILITY_ENABLE
+    return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
 }
 } // namespace OHOS::Rosen

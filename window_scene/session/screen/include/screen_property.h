@@ -227,6 +227,11 @@ public:
     void SetScreenRealDPI() { screenRealDPI_ = CalculateDPI(); }
     uint32_t GetScreenRealDPI() { return screenRealDPI_; }
 
+    void SetPointerActiveWidth(uint32_t pointerActiveWidth);
+    uint32_t GetPointerActiveWidth();
+    void SetPointerActiveHeight(uint32_t pointerActiveHeight);
+    uint32_t GetPointerActiveHeight();
+
 private:
     static inline bool IsVertical(Rotation rotation)
     {
@@ -284,6 +289,9 @@ private:
 
     uint32_t validWidth_ { UINT32_MAX };
     uint32_t validHeight_ { UINT32_MAX };
+
+    uint32_t pointerActiveWidth_ { 0 };
+    uint32_t pointerActiveHeight_ { 0 };
 
     ScreenShape screenShape_ { ScreenShape::RECTANGLE };
 

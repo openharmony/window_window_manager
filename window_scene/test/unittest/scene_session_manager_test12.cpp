@@ -1453,11 +1453,11 @@ HWTEST_F(SceneSessionManagerTest12, RemoveHighlightSessionIds, Function | SmallT
 }
 
 /**
- * @tc.name: NotifyFoldScreenStatusChange
- * @tc.desc: test function : NotifyFoldScreenStatusChange
+ * @tc.name: UpdateSessionCrossAxisState
+ * @tc.desc: test function : UpdateSessionCrossAxisState
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest12, NotifyFoldScreenStatusChange, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest12, UpdateSessionCrossAxisState, Function | SmallTest | Level3)
 {
     SessionInfo info;
     info.abilityName_ = "test1";
@@ -1466,7 +1466,7 @@ HWTEST_F(SceneSessionManagerTest12, NotifyFoldScreenStatusChange, Function | Sma
     sptr<SceneSessionMocker> sceneSession = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
     ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
     EXPECT_CALL(*sceneSession, UpdateCrossAxis()).Times(1);
-    ssm_->NotifyFoldScreenStatusChange(10, SuperFoldStatus::EXPANDED, SuperFoldStatus::FOLDED);
+    ssm_->UpdateSessionCrossAxisState(10, SuperFoldStatus::EXPANDED, SuperFoldStatus::FOLDED);
 }
 
 /**

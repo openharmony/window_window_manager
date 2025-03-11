@@ -14,7 +14,7 @@
 import("//build/test.gni")
 import("../../../windowmanager_aafwk.gni")
 
-module_out_path = "window_manager/dmserver"
+module_out_path = "window_manager/OH-DMS/dmserver"
 
 group("unittest") {
   testonly = true
