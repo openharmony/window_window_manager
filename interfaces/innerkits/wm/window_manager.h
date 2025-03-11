@@ -289,7 +289,8 @@ struct AppUseControlInfo : public Parcelable {
     {
         return parcel.WriteString(bundleName_) &&
                parcel.WriteInt32(appIndex_) &&
-               parcel.WriteBool(isNeedControl_);
+               parcel.WriteBool(isNeedControl_) &&
+               parcel.WriteBool(isControlRecentOnly_);
     }
 
     /**
@@ -303,7 +304,8 @@ struct AppUseControlInfo : public Parcelable {
         auto info = new AppUseControlInfo();
         if (!parcel.ReadString(info->bundleName_) ||
             !parcel.ReadInt32(info->appIndex_) ||
-            !parcel.ReadBool(info->isNeedControl_)) {
+            !parcel.ReadBool(info->isNeedControl_) ||
+            !parcel.ReadBool(info->isControlRecentOnly_)) {
             delete info;
             return nullptr;
         }
@@ -313,6 +315,7 @@ struct AppUseControlInfo : public Parcelable {
     std::string bundleName_ = "";
     int32_t appIndex_ = 0;
     bool isNeedControl_ = false;
+    bool isControlRecentOnly_ = false;
 };
 
 /**
