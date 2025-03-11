@@ -540,7 +540,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         property_->SetWindowFlags(property_->GetWindowFlags() &
             (~(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED))));
     }
-    int32_t zLevel = GetSubWindowZLevelByFlags(GetType(), GetWindowFlags(), isTopmost());
+    int32_t zLevel = GetSubWindowZLevelByFlags(GetType(), GetWindowFlags(), IsTopmost());
     if (zLevel != NORMAL_SUB_WINDOW_Z_LEVEL) {
         property_->SetSubWindowZLevel(zLevel);
     }
