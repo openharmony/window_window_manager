@@ -168,6 +168,7 @@ public:
 
     FoldStatus GetFoldStatus() override { return FoldStatus::UNKNOWN; };
     virtual SuperFoldStatus GetSuperFoldStatus() { return SuperFoldStatus::UNKNOWN; };
+    virtual void SetLandscapeLockStatus(bool isLocked) {};
     virtual ExtendScreenConnectStatus GetExtendScreenConnectStatus() { return ExtendScreenConnectStatus::UNKNOWN; }
 
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() override { return nullptr; };
