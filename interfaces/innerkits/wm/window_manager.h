@@ -1080,6 +1080,14 @@ public:
     WMError RequestFocus(int32_t persistentId, bool isFocused = true,
         bool byForeground = true, WindowFocusChangeReason reason = WindowFocusChangeReason::SA_REQUEST);
 
+    /**
+     * @brief Minimize window within the vector of windowid, Only main window.
+     *
+     * @param WindowId window id which to minimize
+     * @return WM_OK means window minimize event success, others means failed.
+     */
+    WMError MinimizeByWindowId(const std::vector<int32_t>& windowIds);
+
 private:
     WindowManager();
     ~WindowManager();

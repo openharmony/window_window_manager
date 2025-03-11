@@ -1622,6 +1622,22 @@ HWTEST_F(WindowManagerTest, RequestFocus, Function | SmallTest | Level2)
         persistentId, isFocused, byForeground, reason);
     ASSERT_NE(result, WMError::WM_OK);
 }
+
+/**
+ * @tc.name: MinimizeByWindowId
+ * @tc.desc: Check MinimizeByWindowId
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, MinimizeByWindowId, Function | SmallTest | Level2)
+{
+    auto& windowManager = WindowManager::GetInstance();
+    std::vector<int32_t> windowIds;
+    WMError ret_1 = windowManager.MinimizeByWindowId(windowIds);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret_1);
+    windowIds = {-1, 0};
+    WMError ret_2 = windowManager.MinimizeByWindowId(windowIds);
+    ASSERT_EQ(WMError::WM_OK, ret_2);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

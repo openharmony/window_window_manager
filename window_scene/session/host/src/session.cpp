@@ -168,6 +168,15 @@ std::shared_ptr<RSSurfaceNode> Session::GetSurfaceNode() const
     return surfaceNode_;
 }
 
+std::optional<NodeId> Session::GetSurfaceNodeId() const
+{
+    std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
+    if (surfaceNode_ != nullptr) {
+        return surfaceNode_->GetId();
+    }
+    return std::nullopt;
+}
+
 void Session::SetLeashWinSurfaceNode(std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode)
 {
     if (g_enableForceUIFirst) {
@@ -3981,17 +3990,5 @@ DisplayId Session::GetClientDisplayId() const
 void Session::SetClientDisplayId(DisplayId displayid)
 {
     clientDisplayId_ = displayid;
-}
-
-void Session::UpdateDisplayIdByParentSession(DisplayId& updatedDisplayId)
-{
-    if (auto parentSession = GetParentSession()) {
-        TLOGI(WmsLogTag::WMS_MAIN, "winId: %{public}d, parentWinId: %{public}d, parentClientDisplay: %{public}" PRIu64,
-            GetPersistentId(), parentSession->GetPersistentId(), parentSession->GetClientDisplayId());
-        updatedDisplayId = parentSession->GetClientDisplayId();
-    } else if (GetClientDisplayId() == VIRTUAL_DISPLAY_ID) {
-        TLOGI(WmsLogTag::WMS_MAIN, "winId: %{public}d, no parentSession, but init virtual display", GetPersistentId());
-        updatedDisplayId = VIRTUAL_DISPLAY_ID;
-    }
 }
 } // namespace OHOS::Rosen

@@ -6542,6 +6542,10 @@ void ScreenSessionManager::SetIsExtendScreenConnected(bool isExtendScreenConnect
 void ScreenSessionManager::HandleExtendScreenConnect(ScreenId screenId)
 {
 #ifdef FOLD_ABILITY_ENABLE
+    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        TLOGI(WmsLogTag::DMS, "not super fold display device.");
+        return;
+    }
     SetIsExtendScreenConnected(true);
     SuperFoldSensorManager::GetInstance().HandleScreenConnectChange();
     OnExtendScreenConnectStatusChange(screenId, ExtendScreenConnectStatus::CONNECT);
@@ -6552,6 +6556,10 @@ void ScreenSessionManager::HandleExtendScreenConnect(ScreenId screenId)
 void ScreenSessionManager::HandleExtendScreenDisconnect(ScreenId screenId)
 {
 #ifdef FOLD_ABILITY_ENABLE
+    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        TLOGI(WmsLogTag::DMS, "not super fold display device.");
+        return;
+    }
     SetIsExtendScreenConnected(false);
     SuperFoldSensorManager::GetInstance().HandleScreenDisconnectChange();
     OnExtendScreenConnectStatusChange(screenId, ExtendScreenConnectStatus::DISCONNECT);
@@ -8125,13 +8133,16 @@ void ScreenSessionManager::MultiScreenModeChange(ScreenId mainScreenId, ScreenId
 
 void ScreenSessionManager::SwitchScrollParam(FoldDisplayMode displayMode)
 {
-    std::map<FoldDisplayMode, ScrollableParam> scrollableParams = ScreenSceneConfig::GetAllScrollableParam();
-    std::string srollVelocityScale = scrollableParams.count(displayMode) != 0 ?
-        scrollableParams[displayMode].velocityScale_ : "0";
-    std::string srollFriction = scrollableParams.count(displayMode) != 0 ?
-        scrollableParams[displayMode].friction_ : "0";
-    system::SetParameter("persist.scrollable.velocityScale", srollVelocityScale);
-    system::SetParameter("persist.scrollable.friction", srollFriction);
+    auto task = [=]() {
+        std::map<FoldDisplayMode, ScrollableParam> scrollableParams = ScreenSceneConfig::GetAllScrollableParam();
+        std::string scrollVelocityScale = scrollableParams.count(displayMode) != 0 ?
+            scrollableParams[displayMode].velocityScale_ : "0";
+        std::string scrollFriction = scrollableParams.count(displayMode) != 0 ?
+            scrollableParams[displayMode].friction_ : "0";
+        system::SetParameter("persist.scrollable.velocityScale", scrollVelocityScale);
+        system::SetParameter("persist.scrollable.friction", scrollFriction);
+    };
+    taskScheduler_->PostAsyncTask(task, "SwitchScrollParam");
 }
 
 void ScreenSessionManager::MultiScreenModeChange(const std::string& firstScreenIdStr,

@@ -885,6 +885,21 @@ HWTEST_F(WindowAdapterTest, SetParentWindow, Function | SmallTest | Level2)
     auto err = windowAdapter.SetParentWindow(subWindowId, newParentWindowId);
     ASSERT_EQ(err, WMError::WM_ERROR_INVALID_WINDOW);
 }
+
+/**
+ * @tc.name: MinimizeByWindowId
+ * @tc.desc: WindowAdapter/MinimizeByWindowId
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, MinimizeByWindowId, Function | SmallTest | Level2)
+{
+    WindowAdapter windowAdapter;
+    std::vector<int32_t> windowIds;
+    auto err = windowAdapter.MinimizeByWindowId(windowIds);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, err);
+    auto ret = windowAdapter.InitWMSProxy();
+    ASSERT_EQ(ret, true);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

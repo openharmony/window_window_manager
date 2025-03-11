@@ -211,6 +211,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleShiftAppWindowPointerEvent(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_UI_TYPE):
             return HandleGetWindowUIType(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_MINIMIZE_BY_WINDOW_ID):
+            return HandleMinimizeByWindowId(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_PARENT_WINDOW):
             return HandleSetParentWindow(data, reply);
         default:
@@ -1827,6 +1829,21 @@ int SceneSessionManagerStub::HandleGetWindowUIType(MessageParcel& data, MessageP
     }
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleMinimizeByWindowId(MessageParcel& data, MessageParcel& reply)
+{
+    std::vector<int32_t> windowIds;
+    if (!data.ReadInt32Vector(&windowIds)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "read windowIds failed");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = MinimizeByWindowId(windowIds);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write errCode failed.");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;
