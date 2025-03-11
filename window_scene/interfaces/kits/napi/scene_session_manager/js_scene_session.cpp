@@ -329,6 +329,7 @@ napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& sessio
     BindNativeMethod(env, objValue, moduleName);
     BindNativeMethodForKeyboard(env, objValue, moduleName);
     BindNativeMethodForCompatiblePcMode(env, objValue, moduleName);
+    BindNativeMethodForPcAppInPadNormal(env, objValue, moduleName);
     BindNativeMethodForSCBSystemSession(env, objValue, moduleName);
     BindNativeMethodForFocus(env, objValue, moduleName);
     BindNativeMethodForWaterfall(env, objValue, moduleName);
@@ -452,6 +453,12 @@ void JsSceneSession::BindNativeMethodForCompatiblePcMode(napi_env env, napi_valu
         JsSceneSession::CompatibleFullScreenMinimize);
     BindNativeFunction(env, objValue, "compatibleFullScreenClose", moduleName,
         JsSceneSession::CompatibleFullScreenClose);
+}
+
+void JsSceneSession::BindNativeMethodForPcAppInPadNormal(napi_env env, napi_value objValue, const char* moduleName)
+{
+    BindNativeFunction(env, objValue, "pcAppInPadNormalClose", moduleName,
+        JsSceneSession::PcAppInPadNormalClose);
 }
 
 void JsSceneSession::BindNativeMethodForSCBSystemSession(napi_env env, napi_value objValue, const char* moduleName)
@@ -2248,6 +2255,13 @@ napi_value JsSceneSession::CompatibleFullScreenClose(napi_env env, napi_callback
     TLOGD(WmsLogTag::WMS_COMPAT, "[NAPI]");
     JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnCompatibleFullScreenClose(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::PcAppInPadNormalClose(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_COMPAT, "[NAPI]");
+    JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnPcAppInPadNormalClose(env, info) : nullptr;
 }
 
 napi_value JsSceneSession::SyncScenePanelGlobalPosition(napi_env env, napi_callback_info info)
@@ -5542,6 +5556,21 @@ napi_value JsSceneSession::OnCompatibleFullScreenClose(napi_env env, napi_callba
         return NapiGetUndefined(env);
     }
     session->CompatibleFullScreenClose();
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnPcAppInPadNormalClose(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_COMPAT, "[NAPI]");
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "session is nullptr, id:%{public}d", persistentId_);
+        return NapiGetUndefined(env);
+    }
+    if (!(session->GetSessionProperty()->GetIsPcAppInPad())) {
+        return NapiGetUndefined(env);
+    }
+    session->PcAppInPadNormalClose();
     return NapiGetUndefined(env);
 }
 
