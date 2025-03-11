@@ -7094,6 +7094,7 @@ WSError SceneSession::UpdateDensity()
 void SceneSession::UpdateNewSizeForPCWindow()
 {
     if (moveDragController_ && moveDragController_->IsMoveDragHotAreaCrossDisplay()) {
+        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "is move drag to hot area, do nothing.");
         moveDragController_->SetMoveDragHotAreaCrossDisplay(false);
         return;
     }
@@ -7116,8 +7117,7 @@ void SceneSession::UpdateNewSizeForPCWindow()
         float newVpr = display->GetVirtualPixelRatio();
         WSRect& windowRect = winRect_;
         if (CalcNewWindowRectIfNeed(windowRect, availableArea, newVpr)) {
-            SetSessionRequestRect(windowRect);
-            UpdateSessionRect(windowRect, SizeChangeReason::UPDATE_DPI_SYNC);
+            NotifySessionRectChange(windowRect, SizeChangeReason::UPDATE_DPI_SYNC);
             sessionStage_->UpdateRect(windowRect, SizeChangeReason::UPDATE_DPI_SYNC);
             TLOGI(WmsLogTag::WMS_LAYOUT_PC, "left: %{public}d, top: %{public}d, width: %{public}u, "
                 "height: %{public}u, Id: %{public}u", windowRect.posX_, windowRect.posY_, windowRect.width_,
@@ -7130,53 +7130,61 @@ void SceneSession::UpdateNewSizeForPCWindow()
 bool SceneSession::CalcNewWindowRectIfNeed(WSRect& windowRect, DMRect& availableArea, float newVpr)
 {
     float currVpr = 1.0f;
-    if (sessionStage_ && sessionStage_->GetClientVpr(currVpr) == WSError::WS_OK) {
-        if (MathHelper::NearZero(currVpr - newVpr) || MathHelper::NearZero(currVpr)) {
-            TLOGW(WmsLogTag::WMS_LAYOUT_PC, "need not update new rect, currVpr: %{public}f , newVpr: %{public}f, "
-                "Id: %{public}u", currVpr, newVpr, GetPersistentId());
-            return false;
-        }
-        int32_t left = windowRect.posX_;
-        int32_t top = windowRect.posY_;
-        uint32_t width = static_cast<uint32_t>(windowRect.width_ * newVpr / currVpr);
-        uint32_t height = static_cast<uint32_t>(windowRect.height_ * newVpr / currVpr);
-        int32_t statusBarHeight = 0;
-        if (isStatusBarVisible_ && IsDefaultScreen()) {
-            statusBarHeight = GetStatusBarHeight();
-        }
-        width = MathHelper::Min(width, availableArea.width_);
-        height = MathHelper::Min(height, availableArea.height_);
-        bool needMove = top < statusBarHeight || left < 0 ||
-            top > static_cast<int32_t>(availableArea.height_ - height) ||
-            left > static_cast<int32_t>(availableArea.width_ - width) || displayChangedByMoveDrag_;
-        if (displayChangedByMoveDrag_ && moveDragController_) {
-            int32_t pointerPosX = moveDragController_->GetLastMovePointerPosX();
-            left = pointerPosX - static_cast<int32_t>((pointerPosX -left) * newVpr / currVpr);
-        } else {
-            top = MathHelper::Min(top, static_cast<int32_t>(availableArea.height_ - height));
-            top = MathHelper::Max(top, statusBarHeight);
-            left = MathHelper::Min(left, static_cast<int32_t>(availableArea.width_ - width));
-            left = MathHelper::Max(left, 0);
-        }
-        windowRect.width_ = width;
-        windowRect.height_ = height;
-        winRect_.width_ = width;
-        winRect_.height_ = height;
-        if (needMove) {
-            windowRect.posX_ = left;
-            windowRect.posY_ = top;
-            winRect_.posX_ = left;
-            winRect_.posY_ = top;
-        }
-        return true;
+    if (sessionStage_ == nullptr || sessionStage_->GetClientVpr(currVpr) != WSError::WS_OK) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "get client vpr failed, Id: %{public}u", GetPersistentId());
+        return false;
     }
-    return false;
+    if (MathHelper::NearZero(currVpr - newVpr) || MathHelper::NearZero(currVpr)) {
+        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "need not update new rect, currVpr: %{public}f , newVpr: %{public}f, "
+            "Id: %{public}u", currVpr, newVpr, GetPersistentId());
+        return false;
+    }
+    int32_t left = windowRect.posX_;
+    int32_t top = windowRect.posY_;
+    uint32_t width = static_cast<uint32_t>(windowRect.width_ * newVpr / currVpr);
+    uint32_t height = static_cast<uint32_t>(windowRect.height_ * newVpr / currVpr);
+    int32_t statusBarHeight = 0;
+    if (isStatusBarVisible_ && IsPrimaryDisplay()) {
+        statusBarHeight = GetStatusBarHeight();
+    }
+    width = MathHelper::Min(width, availableArea.width_);
+    height = MathHelper::Min(height, availableArea.height_);
+    bool needMove = top < statusBarHeight || left < 0 ||
+        top > static_cast<int32_t>(availableArea.height_ - height) ||
+        left > static_cast<int32_t>(availableArea.width_ - width) || displayChangedByMoveDrag_;
+    if (displayChangedByMoveDrag_ && moveDragController_) {
+        int32_t pointerPosX = moveDragController_->GetLastMovePointerPosX();
+        left = pointerPosX - static_cast<int32_t>((pointerPosX -left) * newVpr / currVpr);
+    } else {
+        top = MathHelper::Min(top, static_cast<int32_t>(availableArea.height_ - height));
+        top = MathHelper::Max(top, statusBarHeight);
+        left = MathHelper::Min(left, static_cast<int32_t>(availableArea.width_ - width));
+        left = MathHelper::Max(left, 0);
+    }
+    windowRect.width_ = width;
+    windowRect.height_ = height;
+    winRect_.width_ = width;
+    winRect_.height_ = height;
+    if (needMove) {
+        windowRect.posX_ = left;
+        windowRect.posY_ = top;
+        winRect_.posX_ = left;
+        winRect_.posY_ = top;
+    }
+    return true;
 }
 
-bool SceneSession::IsDefaultScreen()
+bool SceneSession::IsPrimaryDisplay()
 {
     if (auto property = GetSessionProperty()) {
-        return property->GetDisplayId() == ScreenSessionManagerClient::GetInstance().GetDefaultScreenId();
+        auto display = DisplayManager::GetInstance().GetPrimaryDisplaySync();
+        if (display == nullptr) {
+            TLOGE(WmsLogTag::WMS_LAYOUT_PC, "display is null.");
+            return false;
+        }
+        if (auto displayInfo = display->GetDisplayInfo()) {
+            return property->GetDisplayId() == displayInfo->GetDisplayId();
+        }
     }
     return false;
 }
