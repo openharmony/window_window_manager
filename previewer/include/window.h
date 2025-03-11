@@ -524,7 +524,7 @@ public:
      * @return WM_OK means set parent window success, others means failed.
      */
     virtual WMError SetParentWindow(int32_t newParentWindowId) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
-    
+
     /**
      * @brief Get the parent window of a sub window.
      *

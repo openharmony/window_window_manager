@@ -13458,7 +13458,7 @@ WMError SceneSessionManager::UnregisterSessionLifecycleListener(const sptr<ISess
 }
 
 WMError SceneSessionManager::SetParentWindowInner(const sptr<SceneSession>& subSession,
-        const sptr<SceneSession>& oldParentSession, const sptr<SceneSession>& newParentSession)
+    const sptr<SceneSession>& oldParentSession, const sptr<SceneSession>& newParentSession)
 {
     uint32_t oldSubWindowLevel = oldParentSession->GetSessionProperty()->GetSubWindowLevel();
     uint32_t newSubWindowLevel = newParentSession->GetSessionProperty()->GetSubWindowLevel();
