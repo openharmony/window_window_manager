@@ -658,7 +658,7 @@ HWTEST_F(SceneSessionTest3, SetWindowRectAutoSaveCallback, Function | SmallTest 
     sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
     sceneSession->property_ = windowSessionProperty;
 
-    NotifySetWindowRectAutoSaveFunc func1 = [](bool enabled, bool isEnableSpecified) {
+    NotifySetWindowRectAutoSaveFunc func1 = [](bool enabled, bool isSaveBySpecifiedFlag) {
         return;
     };
     sceneSession->SetWindowRectAutoSaveCallback(std::move(func1));

@@ -2285,7 +2285,7 @@ WSError SessionProxy::NotifyMainModalTypeChange(bool isModal)
     return WSError::WS_OK;
 }
 
-WSError SessionProxy::OnSetWindowRectAutoSave(bool enabled, bool isEnableSpecified)
+WSError SessionProxy::OnSetWindowRectAutoSave(bool enabled, bool isSaveBySpecifiedFlag)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2298,12 +2298,12 @@ WSError SessionProxy::OnSetWindowRectAutoSave(bool enabled, bool isEnableSpecifi
         TLOGE(WmsLogTag::WMS_MAIN, "Write enable failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!data.WriteBool(isEnableSpecified)) {
-        TLOGE(WmsLogTag::WMS_MAIN, "Write isEnableSpecified failed");
+    if (!data.WriteBool(isSaveBySpecifiedFlag)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Write isSaveBySpecifiedFlag failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    TLOGD(WmsLogTag::WMS_MAIN, "enable: %{public}d, isEnableSpecified: %{public}d",
-        enabled, isEnableSpecified);
+    TLOGD(WmsLogTag::WMS_MAIN, "enable: %{public}d, isSaveBySpecifiedFlag: %{public}d",
+        enabled, isSaveBySpecifiedFlag);
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         TLOGE(WmsLogTag::WMS_MAIN, "remote is null");
@@ -2624,7 +2624,7 @@ WSError SessionProxy::UpdateFlag(const std::string& flag)
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
+    MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::WMS_MAIN, "WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;

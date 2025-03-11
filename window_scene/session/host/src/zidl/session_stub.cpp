@@ -1425,13 +1425,13 @@ int SessionStub::HandleSetWindowRectAutoSave(MessageParcel& data, MessageParcel&
         TLOGE(WmsLogTag::WMS_MAIN, "Read enable failed.");
         return ERR_INVALID_DATA;
     }
-    bool isEnableSpecified = false;
-    if (!data.ReadBool(isEnableSpecified)) {
-        TLOGE(WmsLogTag::WMS_MAIN, "Read isEnableSpecified failed.");
+    bool isSaveBySpecifiedFlag = false;
+    if (!data.ReadBool(isSaveBySpecifiedFlag)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Read isSaveBySpecifiedFlag failed.");
         return ERR_INVALID_DATA;
     }
-    TLOGD(WmsLogTag::WMS_MAIN, "enabled: %{public}d, isEnableSpecified: %{public}d", enabled, isEnableSpecified);
-    OnSetWindowRectAutoSave(enabled, isEnableSpecified);
+    TLOGD(WmsLogTag::WMS_MAIN, "enabled: %{public}d, isSaveBySpecifiedFlag: %{public}d", enabled, isSaveBySpecifiedFlag);
+    OnSetWindowRectAutoSave(enabled, isSaveBySpecifiedFlag);
     return ERR_NONE;
 }
 

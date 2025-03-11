@@ -282,20 +282,20 @@ WSError MainSession::OnRestoreMainWindow()
     return WSError::WS_OK;
 }
 
-WSError MainSession::OnSetWindowRectAutoSave(bool enabled, bool isEnableSpecified)
+WSError MainSession::OnSetWindowRectAutoSave(bool enabled, bool isSaveBySpecifiedFlag)
 {
     const char* const where = __func__;
-    PostTask([weakThis = wptr(this), enabled, isEnableSpecified, where] {
+    PostTask([weakThis = wptr(this), enabled, isSaveBySpecifiedFlag, where] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_MAIN, "session is null");
             return;
         }
-        session->GetSessionProperty()->SetIsEnableSpecified(isEnableSpecified);
+        session->GetSessionProperty()->SetisSaveBySpecifiedFlag(isSaveBySpecifiedFlag);
         if (session->onSetWindowRectAutoSaveFunc_) {
-            session->onSetWindowRectAutoSaveFunc_(enabled, isEnableSpecified);
-            TLOGNI(WmsLogTag::WMS_MAIN, "%{public}s id %{public}d isEnableSpecified: %{public}d",
-                where, session->GetPersistentId(), isEnableSpecified);
+            session->onSetWindowRectAutoSaveFunc_(enabled, isSaveBySpecifiedFlag);
+            TLOGNI(WmsLogTag::WMS_MAIN, "%{public}s id %{public}d isSaveBySpecifiedFlag: %{public}d",
+                where, session->GetPersistentId(), isSaveBySpecifiedFlag);
         }
     }, __func__);
     return WSError::WS_OK;

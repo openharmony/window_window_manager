@@ -13129,7 +13129,7 @@ WMError SceneSessionManager::IsWindowRectAutoSave(const std::string& key, bool& 
         return WMError::WM_ERROR_INVALID_SESSION;
     }
     std::string specifiedKey = key;
-    if (sceneSession->GetSessionProperty()->GetIsEnableSpecified()) {
+    if (sceneSession->GetSessionProperty()->GetisSaveBySpecifiedFlag()) {
         specifiedKey = key + sceneSession->GetSessionInfo().specifiedFlag_;
     }
     TLOGD(WmsLogTag::WMS_MAIN, "windowId: %{public}d, specifiedKey: %{public}s", persistentId, specifiedKey.c_str());
