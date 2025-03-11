@@ -4287,7 +4287,7 @@ bool SceneSessionManager::GetIconFromDesk(const SessionInfo& sessionInfo, std::s
 void SceneSessionManager::GetStartupPage(const SessionInfo& sessionInfo, std::string& path, uint32_t& bgColor)
 {
     if (GetIconFromDesk(sessionInfo, path)) {
-        TLOGI(WmsLogTag::WMS_PATTERN, "get from desk suc");
+        TLOGI(WmsLogTag::WMS_PATTERN, "get icon from desk success");
         return;
     }
 
