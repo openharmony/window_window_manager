@@ -220,7 +220,7 @@ void ScreenSession::RegisterScreenChangeListener(IScreenChangeListener* screenCh
         TLOGE(WmsLogTag::DMS, "Failed to register screen change listener, listener is null!");
         return;
     }
-
+    std::lock_guard<std::mutex> lock(screenChangeListenerListMutex_);
     if (std::find(screenChangeListenerList_.begin(), screenChangeListenerList_.end(), screenChangeListener) !=
         screenChangeListenerList_.end()) {
         TLOGI(WmsLogTag::DMS, "Repeat to register screen change listener!");
@@ -241,7 +241,7 @@ void ScreenSession::UnregisterScreenChangeListener(IScreenChangeListener* screen
         TLOGE(WmsLogTag::DMS, "Failed to unregister screen change listener, listener is null!");
         return;
     }
-
+    std::lock_guard<std::mutex> lock(screenChangeListenerListMutex_);
     screenChangeListenerList_.erase(
         std::remove_if(screenChangeListenerList_.begin(), screenChangeListenerList_.end(),
             [screenChangeListener](IScreenChangeListener* listener) { return screenChangeListener == listener; }),
@@ -675,6 +675,7 @@ void ScreenSession::ReleaseDisplayNode()
 
 void ScreenSession::Connect()
 {
+    std::lock_guard<std::mutex> lock(screenChangeListenerListMutex_);
     screenState_ = ScreenState::CONNECTION;
     if (screenChangeListenerList_.empty()) {
         TLOGE(WmsLogTag::DMS, "screenChangeListenerList is empty.");
@@ -691,6 +692,7 @@ void ScreenSession::Connect()
 
 void ScreenSession::Disconnect()
 {
+    std::lock_guard<std::mutex> lock(screenChangeListenerListMutex_);
     screenState_ = ScreenState::DISCONNECTION;
     if (screenChangeListenerList_.empty()) {
         TLOGE(WmsLogTag::DMS, "screenChangeListenerList is empty.");
@@ -707,6 +709,7 @@ void ScreenSession::Disconnect()
 
 void ScreenSession::PropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason)
 {
+    std::lock_guard<std::mutex> lock(screenChangeListenerListMutex_);
     property_ = newProperty;
     if (reason == ScreenPropertyChangeReason::VIRTUAL_PIXEL_RATIO_CHANGE) {
         return;
@@ -726,6 +729,7 @@ void ScreenSession::PropertyChange(const ScreenProperty& newProperty, ScreenProp
 
 void ScreenSession::PowerStatusChange(DisplayPowerEvent event, EventStatus status, PowerStateChangeReason reason)
 {
+    std::lock_guard<std::mutex> lock(screenChangeListenerListMutex_);
     if (screenChangeListenerList_.empty()) {
         TLOGE(WmsLogTag::DMS, "screenChangeListenerList is empty.");
         return;
@@ -772,6 +776,7 @@ void ScreenSession::SensorRotationChange(Rotation sensorRotation)
 
 void ScreenSession::SensorRotationChange(float sensorRotation)
 {
+    std::lock_guard<std::mutex> lock(screenChangeListenerListMutex_);
     if (sensorRotation >= 0.0f) {
         currentValidSensorRotation_ = sensorRotation;
     }
@@ -797,6 +802,7 @@ void ScreenSession::HandleHoverStatusChange(int32_t hoverStatus, bool needRotate
 
 void ScreenSession::HoverStatusChange(int32_t hoverStatus, bool needRotate)
 {
+    std::lock_guard<std::mutex> lock(screenChangeListenerListMutex_);
     for (auto& listener : screenChangeListenerList_) {
         if (!listener) {
             TLOGE(WmsLogTag::DMS, "screenChangeListener is null.");
@@ -813,6 +819,7 @@ void ScreenSession::HandleCameraBackSelfieChange(bool isCameraBackSelfie)
 
 void ScreenSession::CameraBackSelfieChange(bool isCameraBackSelfie)
 {
+    std::lock_guard<std::mutex> lock(screenChangeListenerListMutex_);
     for (auto& listener : screenChangeListenerList_) {
         if (!listener) {
             WLOGFE("screenChangeListener is null.");
@@ -824,6 +831,7 @@ void ScreenSession::CameraBackSelfieChange(bool isCameraBackSelfie)
 
 void ScreenSession::ScreenExtendChange(ScreenId mainScreenId, ScreenId extendScreenId)
 {
+    std::lock_guard<std::mutex> lock(screenChangeListenerListMutex_);
     for (auto& listener : screenChangeListenerList_) {
         if (!listener) {
             TLOGE(WmsLogTag::DMS, "screenChangeListener is null.");
@@ -842,6 +850,7 @@ void ScreenSession::ScreenOrientationChange(Orientation orientation, FoldDisplay
 
 void ScreenSession::ScreenOrientationChange(float orientation)
 {
+    std::lock_guard<std::mutex> lock(screenChangeListenerListMutex_);
     for (auto& listener : screenChangeListenerList_) {
         if (!listener) {
             TLOGE(WmsLogTag::DMS, "screenChangeListener is null.");
@@ -1113,6 +1122,7 @@ void ScreenSession::SetScreenRequestedOrientation(Orientation orientation)
 
 void ScreenSession::SetScreenRotationLocked(bool isLocked)
 {
+    std::lock_guard<std::mutex> lock(screenChangeListenerListMutex_);
     isScreenLocked_ = isLocked;
     if (screenChangeListenerList_.empty()) {
         TLOGE(WmsLogTag::DMS, "screenChangeListenerList is empty.");
@@ -2066,6 +2076,7 @@ void ScreenSession::SetXYPosition(int32_t x, int32_t y)
 
 void ScreenSession::ScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName)
 {
+    std::lock_guard<std::mutex> lock(screenChangeListenerListMutex_);
     if (screenChangeListenerList_.empty()) {
         TLOGE(WmsLogTag::DMS, "screenChangeListenerList is empty.");
         return;
@@ -2081,6 +2092,7 @@ void ScreenSession::ScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, cons
 
 void ScreenSession::SuperFoldStatusChange(ScreenId screenId, SuperFoldStatus superFoldStatus)
 {
+    std::lock_guard<std::mutex> lock(screenChangeListenerListMutex_);
     if (screenChangeListenerList_.empty()) {
         TLOGE(WmsLogTag::DMS, "screenChangeListenerList is empty.");
         return;
@@ -2097,6 +2109,7 @@ void ScreenSession::SuperFoldStatusChange(ScreenId screenId, SuperFoldStatus sup
 void ScreenSession::ExtendScreenConnectStatusChange(ScreenId screenId,
     ExtendScreenConnectStatus extendScreenConnectStatus)
 {
+    std::lock_guard<std::mutex> lock(screenChangeListenerListMutex_);
     if (screenChangeListenerList_.empty()) {
         WLOGFE("screenChangeListenerList is empty.");
         return;
@@ -2112,6 +2125,7 @@ void ScreenSession::ExtendScreenConnectStatusChange(ScreenId screenId,
 
 void ScreenSession::SecondaryReflexionChange(ScreenId screenId, bool isSecondaryReflexion)
 {
+    std::lock_guard<std::mutex> lock(screenChangeListenerListMutex_);
     if (screenChangeListenerList_.empty()) {
         TLOGE(WmsLogTag::DMS, "screenChangeListenerList is empty.");
         return;
