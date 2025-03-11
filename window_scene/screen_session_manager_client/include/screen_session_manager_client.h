@@ -84,6 +84,7 @@ public:
     void RecordEventFromScb(std::string description, bool needRecordEvent);
     FoldStatus GetFoldStatus();
     SuperFoldStatus GetSuperFoldStatus();
+    void SetLandscapeLockStatus(bool isLocked);
     ExtendScreenConnectStatus GetExtendScreenConnectStatus();
     std::shared_ptr<Media::PixelMap> GetScreenSnapshot(ScreenId screenId, float scaleX, float scaleY);
     DeviceScreenConfig GetDeviceScreenConfig();

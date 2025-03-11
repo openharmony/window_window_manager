@@ -644,6 +644,15 @@ SuperFoldStatus ScreenSessionManagerClient::GetSuperFoldStatus()
     return screenSessionManager_->GetSuperFoldStatus();
 }
 
+void ScreenSessionManagerClient::SetLandscapeLockStatus(bool isLocked)
+{
+    if (!screenSessionManager_) {
+        WLOGFE("screenSessionManager_ is null");
+        return;
+    }
+    return screenSessionManager_->SetLandscapeLockStatus(isLocked);
+}
+
 ExtendScreenConnectStatus ScreenSessionManagerClient::GetExtendScreenConnectStatus()
 {
     if (!screenSessionManager_) {

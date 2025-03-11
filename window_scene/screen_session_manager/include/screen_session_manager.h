@@ -263,6 +263,7 @@ public:
 
     FoldStatus GetFoldStatus() override;
     SuperFoldStatus GetSuperFoldStatus() override;
+    void SetLandscapeLockStatus(bool isLocked) override;
     bool GetTentMode();
     bool GetCameraMode();
     ExtendScreenConnectStatus GetExtendScreenConnectStatus() override;
