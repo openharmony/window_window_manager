@@ -111,7 +111,7 @@ public:
     WSRect GetScreenRectById(DisplayId displayId);
     DisplayId GetMoveInputBarStartDisplayId();
     void ResetCrossMoveDragProperty();
-    void MoveDragInterrupted();
+    void MoveDragInterrupted(bool resetPosition = true);
     void SetMoveAvailableArea(const DMRect& area);
     void UpdateMoveAvailableArea(DisplayId targetDisplayId);
     void SetCurrentScreenProperty(DisplayId targetDisplayId);
