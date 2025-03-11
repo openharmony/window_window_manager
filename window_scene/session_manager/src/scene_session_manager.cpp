@@ -4330,8 +4330,27 @@ bool SceneSessionManager::GetStartupPageFromResource(const AppExecFwk::AbilityIn
     return true;
 }
 
+bool SceneSessionManager::GetIconFromDesk(const SessionInfo& sessionInfo, std::string& startupPagePath) const
+{
+    auto& want = sessionInfo.want;
+    if (want == nullptr) {
+        TLOGI(WmsLogTag::WMS_PATTERN, "want is nullPtr");
+        return false;
+    }
+    startupPagePath = want->GetStringParam("realAppIcon");
+    if (startupPagePath.empty()) {
+        return false;
+    }
+    return true;
+}
+
 void SceneSessionManager::GetStartupPage(const SessionInfo& sessionInfo, std::string& path, uint32_t& bgColor)
 {
+    if (GetIconFromDesk(sessionInfo, path)) {
+        TLOGI(WmsLogTag::WMS_PATTERN, "get icon from desk success");
+        return;
+    }
+
     if (!bundleMgr_) {
         TLOGE(WmsLogTag::WMS_PATTERN, "bundleMgr_ is nullptr.");
         return;
