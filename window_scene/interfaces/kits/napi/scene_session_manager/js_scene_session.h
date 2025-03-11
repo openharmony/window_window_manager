@@ -92,6 +92,7 @@ enum class ListenerFuncType : uint32_t {
     SET_WINDOW_CORNER_RADIUS_CB,
     HIGHLIGHT_CHANGE_CB,
     FOLLOW_PARENT_RECT_CB,
+    SET_PARENT_SESSION_CB,
 };
 
 class SceneSession;
@@ -358,6 +359,12 @@ private:
      * PC Window Layout
      */
     void ProcessSetSupportedWindowModesRegister();
+
+    /*
+     * Sub Window
+     */
+    void ProcessSetParentSessionRegister();
+    void OnSetParentSession(int32_t oldParentWindowId, int32_t newParentWindowId);
 
     void ChangeSessionVisibilityWithStatusBar(const SessionInfo& info, bool visible);
     void ChangeSessionVisibilityWithStatusBarInner(std::shared_ptr<SessionInfo> sessionInfo, bool visible);

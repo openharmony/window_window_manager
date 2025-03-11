@@ -1060,6 +1060,20 @@ napi_value JsWindow::CreateSubWindowWithOptions(napi_env env, napi_callback_info
     return (me != nullptr) ? me->OnCreateSubWindowWithOptions(env, info) : nullptr;
 }
 
+napi_value JsWindow::SetParentWindow(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_SUB, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetParentWindow(env, info) : nullptr;
+}
+
+napi_value JsWindow::GetParentWindow(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_SUB, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnGetParentWindow(env, info) : nullptr;
+}
+
 napi_value JsWindow::SetGestureBackEnabled(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
@@ -7606,6 +7620,69 @@ napi_value JsWindow::OnCreateSubWindowWithOptions(napi_env env, napi_callback_in
     return result;
 }
 
+napi_value JsWindow::OnSetParentWindow(napi_env env, napi_callback_info info)
+{
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARG_COUNT_ONE) {
+        TLOGE(WmsLogTag::WMS_SUB, "Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    int32_t newParentWindowId = INVALID_WINDOW_ID;
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], newParentWindowId)) {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to newParentWindowId");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    auto asyncTask = [weakToken = wptr<Window>(windowToken_), newParentWindowId, env,
+                      task = napiAsyncTask, where = __func__] {
+        auto window = weakToken.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s: window is nullptr", where);
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+            return;
+        }
+        WMError ret = window->SetParentWindow(newParentWindowId);
+        if (ret != WMError::WM_OK) {
+            WmErrorCode wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
+            task->Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode, "Set parent window failed"));
+            return;
+        }
+        task->Resolve(env, NapiGetUndefined(env));
+        TLOGNI(WmsLogTag::WMS_SUB, "%{public}s window id: %{public}u set parent window id: %{public}u end",
+            where, window->GetWindowId(), newParentWindowId);
+    };
+    if (napi_status::napi_ok != napi_send_event(env, std::move(asyncTask), napi_eprio_high)) {
+        napiAsyncTask->Reject(env, CreateJsError(env,
+            static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
+    }
+    return result;
+}
+
+napi_value JsWindow::OnGetParentWindow(napi_env env, napi_callback_info info)
+{
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "windowToken is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    sptr<Window> parentWindow = nullptr;
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->GetParentWindow(parentWindow));
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_SUB, "get failed, result=%{public}d", ret);
+        return NapiThrowError(env, ret);
+    }
+    auto objValue = CreateJsWindowObject(env, parentWindow);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "create js window failed");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    TLOGI(WmsLogTag::WMS_SUB, "window id: %{public}u set parent window id: %{public}u end",
+        windowToken_->GetWindowId(), parentWindow->GetWindowId());
+    return objValue;
+}
+
 napi_value JsWindow::OnGetWindowDensityInfo(napi_env env, napi_callback_info info)
 {
     if (windowToken_ == nullptr) {
@@ -7953,6 +8030,8 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "isFocused", moduleName, JsWindow::IsFocused);
     BindNativeFunction(env, object, "requestFocus", moduleName, JsWindow::RequestFocus);
     BindNativeFunction(env, object, "createSubWindowWithOptions", moduleName, JsWindow::CreateSubWindowWithOptions);
+    BindNativeFunction(env, object, "setParentWindow", moduleName, JsWindow::SetParentWindow);
+    BindNativeFunction(env, object, "getParentWindow", moduleName, JsWindow::GetParentWindow);
     BindNativeFunction(env, object, "setGestureBackEnabled", moduleName, JsWindow::SetGestureBackEnabled);
     BindNativeFunction(env, object, "isGestureBackEnabled", moduleName, JsWindow::GetGestureBackEnabled);
     BindNativeFunction(env, object, "getWindowDensityInfo", moduleName, JsWindow::GetWindowDensityInfo);

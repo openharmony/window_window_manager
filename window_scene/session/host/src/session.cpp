@@ -2032,6 +2032,18 @@ sptr<Session> Session::GetMainOrFloatSession() const
     }
 }
 
+bool Session::IsAncestorsSession(int ancestorsId) const
+{
+    if (GetSessionProperty()->GetParentPersistentId() == ancestorsId) {
+        return true;
+    }
+    auto parentSession = GetParentSession();
+    if (parentSession != nullptr) {
+        return parentSession->IsAncestorsSession(ancestorsId);
+    }
+    return false;
+}
+
 void Session::BindDialogToParentSession(const sptr<Session>& session)
 {
     std::unique_lock<std::shared_mutex> lock(dialogVecMutex_);

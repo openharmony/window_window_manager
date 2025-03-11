@@ -6849,6 +6849,27 @@ WSError SceneSession::SetWindowCornerRadius(float cornerRadius)
     return WSError::WS_OK;
 }
 
+void SceneSession::UpdateSubWindowLevel(uint32_t subWindowLevel)
+{
+    GetSessionProperty()->SetSubWindowLevel(subWindowLevel);
+    for (const auto& session : GetSubSession()) {
+        if (session != nullptr) {
+            session->UpdateSubWindowLevel(subWindowLevel + 1);
+        }
+    }
+}
+
+int SceneSession::GetMaxSubWindowLevel() const
+{
+    int maxSubWindowLevel = 1;
+    for (const auto& session : GetSubSession()) {
+        if (session != nullptr) {
+            maxSubWindowLevel = std::max(maxSubWindowLevel, session->GetMaxSubWindowLevel() + 1);
+        }
+    }
+    return maxSubWindowLevel;
+}
+
 void SceneSession::SetColorSpace(ColorSpace colorSpace)
 {
     auto surfaceNode = GetSurfaceNode();
