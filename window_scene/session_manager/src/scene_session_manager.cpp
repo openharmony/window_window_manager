@@ -9124,8 +9124,12 @@ WSError SceneSessionManager::NotifyAppUseControlList(
             if (mainSessions.empty()) {
                 continue;
             }
+            SceneSession::ControlInfo controlInfo = {
+                .isNeedControl = appUseControlInfo.isNeedControl_,
+                .isControlRecentOnly = appUseControlInfo.isControlRecentOnly_
+            };
             for (const auto& session : mainSessions) {
-                session->NotifyUpdateAppUseControl(type, appUseControlInfo.isNeedControl_);
+                session->NotifyUpdateAppUseControl(type, controlInfo);
             }
             mainSessions.clear();
         }
@@ -12543,8 +12547,8 @@ void SceneSessionManager::UpdateSecSurfaceInfo(std::shared_ptr<RSUIExtensionData
         TLOGE(WmsLogTag::WMS_EVENT, "invalid secExtensionData");
         return;
     }
-    const auto& secSurfaceInfoMap = secExtensionData->GetSecData();
-    auto task = [secSurfaceInfoMap = std::move(secSurfaceInfoMap)]()-> WSError {
+    auto secSurfaceInfoMap = secExtensionData->GetSecData();
+    auto task = [secSurfaceInfoMap]()-> WSError {
         SceneInputManager::GetInstance().UpdateSecSurfaceInfo(secSurfaceInfoMap);
         return WSError::WS_OK;
     };
@@ -12574,8 +12578,8 @@ void SceneSessionManager::UpdateConstrainedModalUIExtInfo(std::shared_ptr<RSUIEx
         TLOGE(WmsLogTag::WMS_EVENT, "invalid constrainedModalUIExtData");
         return;
     }
-    const auto& constrainedModalUIExtInfoMap = constrainedModalUIExtData->GetSecData();
-    auto task = [constrainedModalUIExtInfoMap = std::move(constrainedModalUIExtInfoMap)]()-> WSError {
+    auto constrainedModalUIExtInfoMap = constrainedModalUIExtData->GetSecData();
+    auto task = [constrainedModalUIExtInfoMap]()-> WSError {
         SceneInputManager::GetInstance().UpdateConstrainedModalUIExtInfo(constrainedModalUIExtInfoMap);
         return WSError::WS_OK;
     };
@@ -13462,6 +13466,31 @@ WMError SceneSessionManager::UnregisterSessionLifecycleListener(const sptr<ISess
     taskScheduler_->PostAsyncTask([this, listener, where = __func__] {
         WMError ret = listenerController_->UnregisterSessionLifecycleListener(listener);
         TLOGI(WmsLogTag::WMS_LIFE, "%{public}s, ret:%{public}d", where, ret);
+    }, __func__);
+    return WMError::WM_OK;
+}
+
+WMError SceneSessionManager::MinimizeByWindowId(const std::vector<int32_t>& windowIds)
+{
+    if (!SessionPermission::IsSystemServiceCalling()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller is not system service.");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    if (windowIds.empty()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "The vector of windowids is empty.");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    taskScheduler_->PostAsyncTask([this, windowIds, where = __func__]() {
+        for (const auto& persistentId : windowIds) {
+            auto sceneSession = GetSceneSession(persistentId);
+            if (sceneSession == nullptr) {
+                TLOGE(WmsLogTag::WMS_LIFE, "could not find the window, persistentId:%{public}d", persistentId);
+                continue;
+            } else {
+                sceneSession->OnSessionEvent(SessionEvent::EVENT_MINIMIZE);
+                TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s, id:%{public}d", where, persistentId);
+            }
+        }
     }, __func__);
     return WMError::WM_OK;
 }

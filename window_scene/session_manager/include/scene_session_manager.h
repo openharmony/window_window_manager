@@ -630,6 +630,7 @@ public:
         const std::vector<std::string>& bundleNameList);
     WMError UnregisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener);
     bool IsMainWindowByPersistentId(int32_t persistentId);
+    WMError MinimizeByWindowId(const std::vector<int32_t>& windowIds) override;
 
     /*
      * Window Pattern
