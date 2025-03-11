@@ -343,12 +343,11 @@ public:
     void AddRSNodeModifier(bool isDark, const std::shared_ptr<RSBaseNode>& rsNode);
     void SetSidebarBlur(bool isDefaultSidebarBlur);
     void ModifyRSAnimatableProperty(bool isDefaultSidebarBlur, bool isDark);
-    void AddSidebarMaskColorModifier();
-    void SetSidebarMaskColorModifier(bool needBlur);
     WSError UpdateDensity();
     void UpdateNewSizeForPCWindow();
     bool CalcNewWindowRectIfNeed(WSRect& windowRect, DMRect& availableArea, float newVpr);
     bool IsPrimaryDisplay();
+    void SaveLastDensity();
 
     /*
      * PC Window Layout

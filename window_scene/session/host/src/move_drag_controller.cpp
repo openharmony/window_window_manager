@@ -1539,7 +1539,7 @@ void MoveDragController::SetLastMovePointerPosX(int32_t lastMovePointerPosX)
     lastMovePointerPosX_ = lastMovePointerPosX;
 }
 
-int32_t MoveDragController::IsMoveDragHotAreaCrossDisplay() const
+bool MoveDragController::IsMoveDragHotAreaCrossDisplay() const
 {
     return isMoveDragHotAreaCrossDisplay_;
 }
