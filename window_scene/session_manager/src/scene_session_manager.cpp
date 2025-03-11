@@ -2092,6 +2092,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
 {
     auto task = [this, sessionInfo, property, where = __func__] {
         if (auto session = GetSceneSessionBySessionInfo(sessionInfo)) {
+            UpdateSessionDisplayIdBySessionInfo(session, sessionInfo);
             NotifySessionUpdate(sessionInfo, ActionType::SINGLE_START);
             return session;
         }
@@ -3319,11 +3320,10 @@ bool SceneSessionManager::CheckSystemWindowPermission(const sptr<WindowSessionPr
         return true;
     }
     if (type == WindowType::WINDOW_TYPE_FLOAT) {
-        bool isPadAndNotPcApp = systemConfig_.IsPadWindow() && !property->GetIsPcAppInPad();
         // WINDOW_TYPE_FLOAT could be created with the corresponding permission
         if (SessionPermission::VerifyCallingPermission("ohos.permission.SYSTEM_FLOAT_WINDOW") &&
             (SessionPermission::IsSystemCalling() || SessionPermission::IsStartByHdcd() ||
-            (systemConfig_.supportTypeFloatWindow_ && !isPadAndNotPcApp))) {
+            systemConfig_.supportTypeFloatWindow_)) {
             TLOGI(WmsLogTag::WMS_SYSTEM, "check float permission success.");
             return true;
         } else {
@@ -12544,8 +12544,8 @@ void SceneSessionManager::UpdateSecSurfaceInfo(std::shared_ptr<RSUIExtensionData
         TLOGE(WmsLogTag::WMS_EVENT, "invalid secExtensionData");
         return;
     }
-    const auto& secSurfaceInfoMap = secExtensionData->GetSecData();
-    auto task = [secSurfaceInfoMap = std::move(secSurfaceInfoMap)]()-> WSError {
+    auto secSurfaceInfoMap = secExtensionData->GetSecData();
+    auto task = [secSurfaceInfoMap]()-> WSError {
         SceneInputManager::GetInstance().UpdateSecSurfaceInfo(secSurfaceInfoMap);
         return WSError::WS_OK;
     };
@@ -12575,8 +12575,8 @@ void SceneSessionManager::UpdateConstrainedModalUIExtInfo(std::shared_ptr<RSUIEx
         TLOGE(WmsLogTag::WMS_EVENT, "invalid constrainedModalUIExtData");
         return;
     }
-    const auto& constrainedModalUIExtInfoMap = constrainedModalUIExtData->GetSecData();
-    auto task = [constrainedModalUIExtInfoMap = std::move(constrainedModalUIExtInfoMap)]()-> WSError {
+    auto constrainedModalUIExtInfoMap = constrainedModalUIExtData->GetSecData();
+    auto task = [constrainedModalUIExtInfoMap]()-> WSError {
         SceneInputManager::GetInstance().UpdateConstrainedModalUIExtInfo(constrainedModalUIExtInfoMap);
         return WSError::WS_OK;
     };
@@ -13377,6 +13377,18 @@ DisplayId SceneSessionManager::UpdateSpecificSessionClientDisplayId(const sptr<W
     return initClientDisplayId;
 }
 
+void SceneSessionManager::UpdateSessionDisplayIdBySessionInfo(
+    sptr<SceneSession> sceneSession, const SessionInfo& sessionInfo)
+{
+    if (sceneSession->GetScreenId() == VIRTUAL_DISPLAY_ID &&
+        sceneSession->GetSessionProperty()->GetDisplayId() == VIRTUAL_DISPLAY_ID) {
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s move display %{public}" PRIu64 " from %{public}" PRIu64,
+            sessionInfo.bundleName_.c_str(), sessionInfo.screenId_, VIRTUAL_DISPLAY_ID);
+        sceneSession->SetScreenId(sessionInfo.screenId_);
+        sceneSession->GetSessionProperty()->SetDisplayId(sessionInfo.screenId_);
+    }
+}
+
 void SceneSessionManager::RemoveLifeCycleTaskByPersistentId(int32_t persistentId,
     const LifeCycleTaskType taskType)
 {
@@ -13506,5 +13518,30 @@ WMError SceneSessionManager::SetParentWindow(int32_t subWindowId, int32_t newPar
         }
         return SetParentWindowInner(subSession, oldParentSession, newParentSession);
     });
+}
+
+WMError SceneSessionManager::MinimizeByWindowId(const std::vector<int32_t>& windowIds)
+{
+    if (!SessionPermission::IsSystemServiceCalling()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller is not system service.");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    if (windowIds.empty()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "The vector of windowids is empty.");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    taskScheduler_->PostAsyncTask([this, windowIds, where = __func__]() {
+        for (const auto& persistentId : windowIds) {
+            auto sceneSession = GetSceneSession(persistentId);
+            if (sceneSession == nullptr) {
+                TLOGE(WmsLogTag::WMS_LIFE, "could not find the window, persistentId:%{public}d", persistentId);
+                continue;
+            } else {
+                sceneSession->OnSessionEvent(SessionEvent::EVENT_MINIMIZE);
+                TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s, id:%{public}d", where, persistentId);
+            }
+        }
+    }, __func__);
+    return WMError::WM_OK;
 }
 } // namespace OHOS::Rosen

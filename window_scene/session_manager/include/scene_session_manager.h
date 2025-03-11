@@ -635,6 +635,7 @@ public:
         const std::vector<std::string>& bundleNameList);
     WMError UnregisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener);
     bool IsMainWindowByPersistentId(int32_t persistentId);
+    WMError MinimizeByWindowId(const std::vector<int32_t>& windowIds) override;
 
     /*
      * Window Pattern
@@ -881,6 +882,7 @@ private:
     bool IsGetWindowLayoutInfoNeeded(const sptr<SceneSession>& session) const;
     int32_t GetFoldLowerScreenPosY() const;
     DisplayId UpdateSpecificSessionClientDisplayId(const sptr<WindowSessionProperty>& property);
+    void UpdateSessionDisplayIdBySessionInfo(sptr<SceneSession> sceneSession, const SessionInfo& sessionInfo);
 
     /*
      * Window Rotate Animation

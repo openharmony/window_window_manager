@@ -277,6 +277,7 @@ public:
     virtual WMError HasFloatingWindowForeground(const sptr<IRemoteObject>& abilityToken,
         bool& hasOrNot) { return WMError::WM_OK; }
     virtual WMError GetWindowUIType(WindowUIType& windowUIType) { return WMError::WM_OK; }
+    virtual WMError MinimizeByWindowId(const std::vector<int32_t>& windowIds) { return WMError::WM_OK; }
 
     /*
      * Sub Window
