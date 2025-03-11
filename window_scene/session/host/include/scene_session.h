@@ -117,6 +117,7 @@ using GetStatusBarAvoidHeightFunc = std::function<void(WSRect& barArea)>;
 using NotifySetWindowCornerRadiusFunc = std::function<void(float cornerRadius)>;
 using NotifyFollowParentRectFunc = std::function<void(bool isFollow)>;
 using GetSceneSessionByIdCallback = std::function<sptr<SceneSession>(int32_t sessionId)>;
+using NotifySetParentSessionFunc = std::function<void(int32_t oldParentWindowId, int32_t newParentWindowId)>;
 
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
@@ -348,6 +349,15 @@ public:
     bool IsLayoutFullScreen() const;
     WSError StartMovingWithCoordinate(int32_t offsetX, int32_t offsetY,
         int32_t pointerPosX, int32_t pointerPosY) override;
+
+    /*
+     * Sub Window
+     */
+    virtual void SetParentSessionCallback(NotifySetParentSessionFunc&& func) {}
+    virtual WMError NotifySetParentSession(int32_t oldParentWindowId,
+        int32_t newParentWindowId) { return WMError::WM_ERROR_INVALID_WINDOW; }
+    void UpdateSubWindowLevel(uint32_t subWindowLevel);
+    int GetMaxSubWindowLevel() const;
 
     /*
      * Window Immersive

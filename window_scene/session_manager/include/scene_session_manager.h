@@ -350,6 +350,11 @@ public:
     WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId) override;
     void SetFocusedSessionDisplayIdIfNeeded(sptr<SceneSession>& newSession);
 
+    /*
+     * Sub Window
+     */
+    WMError SetParentWindow(int32_t subWindowId, int32_t newParentWindowId) override;
+
     std::map<int32_t, sptr<SceneSession>>& GetSessionMapByScreenId(ScreenId id);
     void UpdatePrivateStateAndNotify(uint32_t persistentId);
     void InitPersistentStorage();
@@ -795,6 +800,12 @@ private:
      */
     WMError ShiftAppWindowPointerEventInner(
         int32_t sourceWindowId, int32_t targetWindowId, DisplayId targetDisplayId);
+
+    /*
+     * Sub Window
+     */
+    WMError SetParentWindowInner(const sptr<SceneSession>& subSession,
+        const sptr<SceneSession>& oldParentSession, const sptr<SceneSession>& newParentSession);
 
     /*
      * Window Immersive
