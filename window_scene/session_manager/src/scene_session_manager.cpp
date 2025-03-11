@@ -3609,7 +3609,7 @@ WSError SceneSessionManager::RecoverAndReconnectSceneSession(const sptr<ISession
     return taskScheduler_->PostSyncTask(task, __func__);
 }
 
-void SceneSessionManager::UpdateRecoverPropertyIfHpr(sptr<WindowSessionProperty>& property)
+void SceneSessionManager::UpdateRecoverPropertyIfHpr(const sptr<WindowSessionProperty>& property)
 {
     if (property->GetDisplayId() != HPR_VIRTUAL_DISPLAY_ID) {
         return;
@@ -3628,7 +3628,7 @@ void SceneSessionManager::UpdateRecoverPropertyIfHpr(sptr<WindowSessionProperty>
         recoverRequestRect.posX_, recoverRequestRect.posY_, recoverRequestRect.width_, recoverRequestRect.height_,
         static_cast<uint32_t>(property->GetDisplayId()));
     
-    auto foldCrease = foldCreaseRegion->GetCreaseRects.front();
+    auto foldCrease = foldCreaseRegion->GetCreaseRects().front();
     recoverWindowRect.posY_ = recoverWindowRect.posY_ + foldCrease.posY_ + foldCrease.height_;
     recoverRequestRect.posY_ = recoverRequestRect.posY_ + foldCrease.posY_ + foldCrease.height_;
     property->SetWindowRect(recoverWindowRect);
