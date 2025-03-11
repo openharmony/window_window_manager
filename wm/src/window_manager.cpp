@@ -1559,5 +1559,63 @@ WMError WindowManager::MinimizeByWindowId(const std::vector<int32_t>& windowIds)
     }
     return ret;
 }
+
+WMError WindowManager::ProcessRegisterWindowInfoChangeCallback(WindowInfoKey observedInfo,
+    const sptr<IWindowInfoChangedListener>& listener)
+{
+    switch(static_cast<uint32_t>(observedInfo)) {
+        case static_cast<uint32_t>(WindowInfoKey::VISIBILITY_STATE) :
+            return RegisterVisibilityStateChangedListener(listener);
+        default:
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Invalid observedInfo: %{public}d", static_cast<uint32_t>(observedInfo));
+            return WMError::WM_ERROR_INVALID_PARAM;
+    }
+}
+
+WMError WindowManager::ProcessUnregisterWindowInfoChangeCallback(WindowInfoKey observedInfo,
+    const sptr<IWindowInfoChangedListener>& listener)
+{
+    switch(static_cast<uint32_t>(observedInfo)) {
+        case static_cast<uint32_t>(WindowInfoKey::VISIBILITY_STATE) :
+            return UnregisterVisibilityStateChangedListener(listener);
+        default:
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Invalid observedInfo: %{public}d", static_cast<uint32_t>(observedInfo));
+            return WMError::WM_ERROR_INVALID_PARAM;
+    }
+}
+
+WMError WindowManager::RegisterWindowInfoChangeCallback(std::unordered_set<WindowInfoKey> observedInfo,
+    const sptr<IWindowInfoChangedListener>& listener)
+{
+    std::string observedInfoForLog = "ObservedInfo: ";
+    auto ret = WMError::WM_OK;
+    for (const auto& info : observedInfo) {
+        observedInfoForLog += std::to_string(static_cast<uint32_t>(info)) + ", ";
+        ret = ProcessRegisterWindowInfoChangeCallback(info, listener);
+        if (ret != WMError::WM_OK) {
+            observedInfoForLog += "failed";
+            break;
+        }
+    }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s", observedInfoForLog.c_str());
+    return ret;
+}
+
+WMError WindowManager::UnregisterWindowInfoChangeCallback(std::unordered_set<WindowInfoKey> observedInfo,
+    const sptr<IWindowInfoChangedListener>& listener)
+{
+    std::string observedInfoForLog = "ObservedInfo: ";
+    auto ret = WMError::WM_OK;
+    for (const auto& info : observedInfo) {
+        observedInfoForLog += std::to_string(static_cast<uint32_t>(info)) + ", ";
+        ret = ProcessUnregisterWindowInfoChangeCallback(info, listener);
+        if (ret != WMError::WM_OK) {
+            observedInfoForLog += "failed";
+            break;
+        }
+    }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s", observedInfoForLog.c_str());
+    return ret;
+}
 } // namespace Rosen
 } // namespace OHOS

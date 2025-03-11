@@ -224,6 +224,27 @@ public:
 };
 
 /**
+ * @class IWindowInfoChangedListener
+ *
+ * @brief Listener to observe window info.
+ */
+class IWindowInfoChangedListener : virtual public RefBase {
+    public:
+        /**
+         * @brief Notify caller when window Info changed.
+         *
+         * @param info
+         */
+        virtual void OnWindowInfoChanged(const std::unordered_map<WindowInfoKey, std::any>& info) = 0;
+
+        void SetInterstInfo(const std::unordered_set<WindowInfoKey>& interstInfo) { interstInfo_ = interstInfo; }
+        std::unordered_set<WindowInfoKey> GetInterstInfo() const { return interstInfo_; }
+
+    private:
+        std::unordered_set<WindowInfoKey> interstInfo_;
+};
+
+/**
  * @class AccessibilityWindowInfo
  *
  * @brief Window info used for Accessibility.
@@ -1090,6 +1111,26 @@ public:
      * @return WM_OK means window minimize event success, others means failed.
      */
     WMError MinimizeByWindowId(const std::vector<int32_t>& windowIds);
+
+    /**
+     * @brief Register window info change callback.
+     *
+     * @param observedInfo property which to observe.
+     * @param listener Listener to observe window info.
+     * @return WM_OK means register success, others means failed.
+     */
+    WMError RegisterWindowInfoChangeCallback(std::unordered_set<WindowInfoKey> observedInfo,
+        const sptr<IWindowInfoChangedListener>& listener);
+    
+    /**
+     * @brief Unregister window info change callback.
+     *
+     * @param observedInfo property which to observe.
+     * @param listener Listener to observe window info.
+     * @return WM_OK means unregister success, others means failed.
+     */
+    WMError UnregisterWindowInfoChangeCallback(std::unordered_set<WindowInfoKey> observedInfo,
+        const sptr<IWindowInfoChangedListener>& listener);
 
 private:
     WindowManager();
