@@ -527,7 +527,8 @@ void RootScene::NotifyWaterfallModeChange(bool isWaterfallMode)
 
 void RootScene::GetExtensionConfig(AAFwk::WantParams& want) const
 {
-    want.SetParam(Extension::WATERFALL_MODE_FIELD, AAFwk::Boolean::Box(IsWaterfallModeEnabled()));
+    want.SetParam(Extension::WATERFALL_MODE_FIELD,
+        AAFwk::Integer::Box(static_cast<int32_t>(IsWaterfallModeEnabled())));
 }
 
 void RootScene::UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>& want)
@@ -537,7 +538,8 @@ void RootScene::UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>& want)
         return;
     }
     const auto& configParam = want->GetParams().GetWantParams(Extension::UIEXTENSION_CONFIG_FIELD);
-    auto waterfallModeBox = configParam.GetParam(Extension::WATERFALL_MODE_FIELD);
+    auto waterfallModeValue = configParam.GetIntParam(Extension::WATERFALL_MODE_FIELD, 0);
+    isFullScreenWaterfallMode_.store(static_cast<bool>(waterfallModeValue));
     isFullScreenWaterfallMode_.store(AAFwk::Boolean::Unbox(waterfallModeBox));
     isValidWaterfallMode_.store(true);
     want->RemoveParam(Extension::UIEXTENSION_CONFIG_FIELD);

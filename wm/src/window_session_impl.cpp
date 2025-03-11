@@ -5407,7 +5407,8 @@ void WindowSessionImpl::RegisterWindowInspectorCallback()
 void WindowSessionImpl::GetExtensionConfig(AAFwk::WantParams& want) const
 {
     want.SetParam(Extension::CROSS_AXIS_FIELD, AAFwk::Integer::Box(static_cast<int32_t>(crossAxisState_.load())));
-    want.SetParam(Extension::WATERFALL_MODE_FIELD, AAFwk::Boolean::Box(IsWaterfallModeEnabled()));
+    want.SetParam(Extension::WATERFALL_MODE_FIELD,
+        AAFwk::Integer::Box(static_cast<int32_t>(IsWaterfallModeEnabled())));
 }
 
 void WindowSessionImpl::UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>& want)
@@ -5422,8 +5423,8 @@ void WindowSessionImpl::UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>
     if (IsValidCrossState(state)) {
         crossAxisState_ = static_cast<CrossAxisState>(state);
     }
-    auto waterfallModeBox = configParam.GetParam(Extension::WATERFALL_MODE_FIELD);
-    isFullScreenWaterfallMode_.store(AAFwk::Boolean::Unbox(waterfallModeBox));
+    auto waterfallModeValue = configParam.GetIntParam(Extension::WATERFALL_MODE_FIELD, 0);
+    isFullScreenWaterfallMode_.store(static_cast<bool>(waterfallModeValue));
     isValidWaterfallMode_.store(true);
     want->RemoveParam(Extension::UIEXTENSION_CONFIG_FIELD);
     TLOGI(WmsLogTag::WMS_UIEXT, "CrossAxisState: %{public}d, waterfall: %{public}d",
