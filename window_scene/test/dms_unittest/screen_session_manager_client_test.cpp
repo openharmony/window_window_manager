@@ -1006,6 +1006,18 @@ HWTEST_F(ScreenSessionManagerClientTest, GetSuperFoldStatus, Function | SmallTes
 }
 
 /**
+ * @tc.name: SetLandscapeLockStatus
+ * @tc.desc: SetLandscapeLockStatus test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, SetLandscapeLockStatus, Function | SmallTest | Level2)
+{
+    bool isLocked = false;
+    ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
+    screenSessionManagerClient_->SetLandscapeLockStatus(isLocked);
+}
+
+/**
  * @tc.name: GetDefaultScreenId
  * @tc.desc: GetDefaultScreenId test
  * @tc.type: FUNC
