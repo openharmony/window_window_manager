@@ -488,7 +488,7 @@ void WindowSessionImpl::SetDefaultDisplayIdIfNeed()
 /** @note @window.hierarchy */
 int32_t WindowSessionImpl::GetSubWindowZLevelByFlags(WindowType type, uint32_t windowFlags, bool isTopmost)
 {
-    if (WindowHelper::IsApplicationModalSubwindow(type, windowFlags)) {
+    if (WindowHelper::IsApplicationModalSubWindow(type, windowFlags)) {
         if (isTopmost) {
             return APPLICATION_MODALITY_SUB_WINDOW_Z_LEVEL + TOPMOST_SUB_WINDOW_Z_LEVEL;
         }
