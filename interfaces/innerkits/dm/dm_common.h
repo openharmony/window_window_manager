@@ -414,6 +414,8 @@ enum class SuperFoldStatusChangeEvents : uint32_t {
     ANGLE_CHANGE_FOLDED,
     KEYBOARD_ON,
     KEYBOARD_OFF,
+    SYSTEM_KEYBOARD_ON,
+    SYSTEM_KEYBOARD_OFF,
     INVALID,
 };
 

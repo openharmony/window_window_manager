@@ -242,6 +242,12 @@ public:
     void SetValidWidth(uint32_t validWidth);
     int32_t GetValidHeight() const;
     int32_t GetValidWidth() const;
+
+    void SetPointerActiveWidth(uint32_t pointerActiveWidth);
+    uint32_t GetPointerActiveWidth();
+    void SetPointerActiveHeight(uint32_t pointerActiveHeight);
+    uint32_t GetPointerActiveHeight();
+
     float GetSensorRotation() const;
     DisplaySourceMode GetDisplaySourceMode() const;
     void SetXYPosition(int32_t x, int32_t y);

@@ -1313,13 +1313,6 @@ WSError SceneSession::NotifyClientToUpdateRect(const std::string& updateReason,
 bool SceneSession::GetScreenWidthAndHeightFromServer(const sptr<WindowSessionProperty>& sessionProperty,
     uint32_t& screenWidth, uint32_t& screenHeight)
 {
-    if (isScreenAngleMismatch_) {
-        screenWidth = targetScreenWidth_;
-        screenHeight = targetScreenHeight_;
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "screenWidth: %{public}d, screenHeight: %{public}d", screenWidth, screenHeight);
-        return true;
-    }
-
     const auto& screenSession = sessionProperty == nullptr ? nullptr :
         ScreenSessionManagerClient::GetInstance().GetScreenSession(sessionProperty->GetDisplayId());
     if (screenSession != nullptr) {
@@ -1350,13 +1343,6 @@ bool SceneSession::GetScreenWidthAndHeightFromServer(const sptr<WindowSessionPro
 bool SceneSession::GetScreenWidthAndHeightFromClient(const sptr<WindowSessionProperty>& sessionProperty,
     uint32_t& screenWidth, uint32_t& screenHeight)
 {
-    if (isScreenAngleMismatch_) {
-        screenWidth = targetScreenWidth_;
-        screenHeight = targetScreenHeight_;
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "screenWidth: %{public}d, screenHeight: %{public}d", screenWidth, screenHeight);
-        return true;
-    }
-
     auto defaultDisplayInfo = DisplayManager::GetInstance().GetDefaultDisplay();
     if (defaultDisplayInfo != nullptr) {
         screenWidth = static_cast<uint32_t>(defaultDisplayInfo->GetWidth());
@@ -1376,57 +1362,6 @@ bool SceneSession::GetScreenWidthAndHeightFromClient(const sptr<WindowSessionPro
     return true;
 }
 
-void SceneSession::NotifyTargetScreenWidthAndHeight(bool isScreenAngleMismatch, uint32_t screenWidth,
-    uint32_t screenHeight)
-{
-    PostTask([weakThis = wptr(this), isScreenAngleMismatch, screenWidth, screenHeight, where = __func__] {
-        auto session = weakThis.promote();
-        if (!session) {
-            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s keyboard session is null", where);
-            return;
-        }
-        session->isScreenAngleMismatch_ = isScreenAngleMismatch;
-        session->targetScreenWidth_ = screenWidth;
-        session->targetScreenHeight_ = screenHeight;
-        TLOGNI(WmsLogTag::WMS_KEYBOARD,
-            "%{public}s target isMismatch: %{public}d, width_: %{public}d, height_: %{public}d",
-            where, isScreenAngleMismatch, screenWidth, screenHeight);
-        return;
-    }, __func__);
-}
-
-bool SceneSession::UpdateInputMethodSessionRect(const WSRect& rect, WSRect& newWinRect, WSRect& newRequestRect)
-{
-    auto sessionProperty = GetSessionProperty();
-    if (!sessionProperty) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "sessionProperty is null");
-        return false;
-    }
-    SessionGravity gravity = GetKeyboardGravity();
-    if (GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&
-        (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM || gravity == SessionGravity::SESSION_GRAVITY_DEFAULT)) {
-        uint32_t screenWidth = 0;
-        uint32_t screenHeight = 0;
-        if (!GetScreenWidthAndHeightFromServer(sessionProperty, screenWidth, screenHeight)) {
-            return false;
-        }
-        newWinRect.width_ = (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM) ?
-            static_cast<int32_t>(screenWidth) : rect.width_;
-        newRequestRect.width_ = newWinRect.width_;
-        newWinRect.height_ = rect.height_;
-        newRequestRect.height_ = newWinRect.height_;
-        newWinRect.posX_ = (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM) ? 0 : rect.posX_;
-        newRequestRect.posX_ = newWinRect.posX_;
-        newWinRect.posY_ = static_cast<int32_t>(screenHeight) - newWinRect.height_;
-        newRequestRect.posY_ = newWinRect.posY_;
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "rect: %{public}s, newRequestRect: %{public}s, newWinRect: %{public}s",
-            rect.ToString().c_str(), newRequestRect.ToString().c_str(), newWinRect.ToString().c_str());
-        return true;
-    }
-    TLOGD(WmsLogTag::WMS_KEYBOARD, "There is no need to update input rect");
-    return false;
-}
-
 void SceneSession::SetSessionRectChangeCallback(const NotifySessionRectChangeFunc& func)
 {
     PostTask([weakThis = wptr(this), func, where = __func__] {
@@ -1442,6 +1377,8 @@ void SceneSession::SetSessionRectChangeCallback(const NotifySessionRectChangeFun
             if (rect.width_ == 0 && rect.height_ == 0) {
                 reason = SizeChangeReason::MOVE;
             }
+            TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s, winName:%{public}s, reason:%{public}d, rect:%{public}s",
+                where, session->GetWindowName().c_str(), reason, rect.ToString().c_str());
             auto rectAnimationConfig = session->GetRequestRectAnimationConfig();
             session->sessionRectChangeFunc_(rect, reason, DISPLAY_ID_INVALID, rectAnimationConfig);
         }
@@ -1574,12 +1511,7 @@ void SceneSession::UpdateSessionRectInner(const WSRect& rect, SizeChangeReason r
         NotifySessionRectChange(newRequestRect, reason, moveConfiguration.displayId,
             moveConfiguration.rectAnimationConfig);
     } else if (reason == SizeChangeReason::RESIZE || reason == SizeChangeReason::RESIZE_WITH_ANIMATION) {
-        bool needUpdateInputMethod = UpdateInputMethodSessionRect(rect, newWinRect, newRequestRect);
-        if (needUpdateInputMethod) {
-            newReason = SizeChangeReason::UNDEFINED;
-            TLOGD(WmsLogTag::WMS_KEYBOARD, "Input rect has totally changed, need to modify reason, id: %{public}d",
-                GetPersistentId());
-        } else if (rect.width_ > 0 && rect.height_ > 0) {
+        if (rect.width_ > 0 && rect.height_ > 0) {
             newWinRect.width_ = rect.width_;
             newWinRect.height_ = rect.height_;
             newRequestRect.width_ = rect.width_;
@@ -1588,7 +1520,6 @@ void SceneSession::UpdateSessionRectInner(const WSRect& rect, SizeChangeReason r
         if (!Session::IsScbCoreEnabled() && GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
             SetSessionRect(newWinRect);
         }
-        SetSessionRequestRect(newRequestRect);
         SetRequestRectAnimationConfig(rectAnimationConfig);
         DisplayId displayId = GetSessionProperty() != nullptr ? GetSessionProperty()->GetDisplayId() :
             DISPLAY_ID_INVALID;
@@ -1598,6 +1529,7 @@ void SceneSession::UpdateSessionRectInner(const WSRect& rect, SizeChangeReason r
             newReason = SizeChangeReason::UNDEFINED;
             notifyRect = rect;
         }
+        SetSessionRequestRect(notifyRect);
         NotifySessionRectChange(notifyRect, newReason, displayId, rectAnimationConfig);
     } else {
         if (!Session::IsScbCoreEnabled()) {
@@ -1611,7 +1543,7 @@ void SceneSession::UpdateSessionRectInner(const WSRect& rect, SizeChangeReason r
         newWinRect.ToString().c_str());
 }
 
-void SceneSession::UpdateSessionRectPosYFromClient(SizeChangeReason reason, DisplayId configDisplayId, WSRect& rect)
+void SceneSession::UpdateSessionRectPosYFromClient(SizeChangeReason reason, DisplayId& configDisplayId, WSRect& rect)
 {
     if (!PcFoldScreenManager::GetInstance().IsHalfFolded(GetScreenId())) {
         TLOGI(WmsLogTag::WMS_LAYOUT, "winId: %{public}d, displayId: %{public}" PRIu64,
@@ -1636,16 +1568,10 @@ void SceneSession::UpdateSessionRectPosYFromClient(SizeChangeReason reason, Disp
     if (configDisplayId_ != VIRTUAL_DISPLAY_ID && clientDisplayId != VIRTUAL_DISPLAY_ID) {
         return;
     }
-    if (rect.posY_ >= 0) {
-        const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
-            PcFoldScreenManager::GetInstance().GetDisplayRects();
-        auto lowerScreenPosY = defaultDisplayRect.height_ + foldCreaseRect.height_;
-        if (rect.posY_ < lowerScreenPosY) {
-            rect.posY_ += lowerScreenPosY;
-        }
-    } else {
-        rect.posY_ += winRect_.posY_;
-    }
+    const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
+        PcFoldScreenManager::GetInstance().GetDisplayRects();
+    rect.posY_ += defaultDisplayRect.height_ + foldCreaseRect.height_;
+    configDisplayId = DEFAULT_DISPLAY_ID;
     TLOGI(WmsLogTag::WMS_LAYOUT, "winId: %{public}d, output: %{public}s", GetPersistentId(), rect.ToString().c_str());
 }
 
@@ -1660,7 +1586,8 @@ WSError SceneSession::UpdateSessionRect(
         return WSError::WS_DO_NOTHING;
     }
     WSRect newRect = rect;
-    UpdateSessionRectPosYFromClient(reason, moveConfiguration.displayId, newRect);
+    MoveConfiguration newMoveConfiguration = moveConfiguration;
+    UpdateSessionRectPosYFromClient(reason, newMoveConfiguration.displayId, newRect);
     if (isGlobal && WindowHelper::IsSubWindow(Session::GetWindowType()) &&
         (systemConfig_.IsPhoneWindow() ||
          (systemConfig_.IsPadWindow() && !IsFreeMultiWindowMode()))) {
@@ -1685,13 +1612,13 @@ WSError SceneSession::UpdateSessionRect(
         }
     }
     Session::RectCheckProcess();
-    PostTask([weakThis = wptr(this), newRect, reason, moveConfiguration, rectAnimationConfig, where = __func__] {
+    PostTask([weakThis = wptr(this), newRect, reason, newMoveConfiguration, rectAnimationConfig, where = __func__] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s session is null", where);
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        session->UpdateSessionRectInner(newRect, reason, moveConfiguration, rectAnimationConfig);
+        session->UpdateSessionRectInner(newRect, reason, newMoveConfiguration, rectAnimationConfig);
         return WSError::WS_OK;
     }, __func__ + GetRectInfo(rect));
     return WSError::WS_OK;
@@ -6917,6 +6844,27 @@ WSError SceneSession::SetWindowCornerRadius(float cornerRadius)
         }
     }, __func__);
     return WSError::WS_OK;
+}
+
+void SceneSession::UpdateSubWindowLevel(uint32_t subWindowLevel)
+{
+    GetSessionProperty()->SetSubWindowLevel(subWindowLevel);
+    for (const auto& session : GetSubSession()) {
+        if (session != nullptr) {
+            session->UpdateSubWindowLevel(subWindowLevel + 1);
+        }
+    }
+}
+
+int SceneSession::GetMaxSubWindowLevel() const
+{
+    int maxSubWindowLevel = 1;
+    for (const auto& session : GetSubSession()) {
+        if (session != nullptr) {
+            maxSubWindowLevel = std::max(maxSubWindowLevel, session->GetMaxSubWindowLevel() + 1);
+        }
+    }
+    return maxSubWindowLevel;
 }
 
 void SceneSession::SetColorSpace(ColorSpace colorSpace)

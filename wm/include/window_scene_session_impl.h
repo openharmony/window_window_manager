@@ -134,6 +134,12 @@ public:
     WMError AdjustKeyboardLayout(const KeyboardLayoutParams params) override;
 
     /*
+     * Sub Window
+     */
+    WMError SetParentWindow(int32_t newParentWindowId) override;
+    WMError GetParentWindow(sptr<Window>& parentWindow) override;
+
+    /*
      * PC Window
      */
     WMError SetWindowMask(const std::vector<std::vector<uint32_t>>& windowMask) override;
@@ -166,6 +172,7 @@ public:
     WSError CompatibleFullScreenMinimize() override;
     WSError CompatibleFullScreenClose() override;
     void HookDecorButtonStyleInCompatibleMode(uint32_t contentColor);
+    WSError PcAppInPadNormalClose() override;
 
     /*
      * Free Multi Window
@@ -374,6 +381,7 @@ private:
      */
     void AddSubWindowMapForExtensionWindow();
     WMError GetParentSessionAndVerify(bool isToast, sptr<WindowSessionImpl>& parentSession);
+    WMError SetParentWindowInner(int32_t oldParentWindowId, const sptr<WindowSessionImpl>& newParentWindow);
 
     WMError RegisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener) override;
     WMError UnregisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener) override;

@@ -858,25 +858,6 @@ HWTEST_F(SceneSessionTest3, CloseExtensionSync, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: NotifyTargetScreenWidthAndHeight
- * @tc.desc: NotifyTargetScreenWidthAndHeight
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest3, NotifyTargetScreenWidthAndHeight, Function | SmallTest | Level2)
-{
-    uint32_t screenWidth = 10;
-    uint32_t screenHeight = 10;
-    bool isScreenAngleMismatch = true;
-    SessionInfo info;
-    info.abilityName_ = "NotifyTargetScreenWidthAndHeight";
-    info.bundleName_ = "NotifyTargetScreenWidthAndHeight";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    
-    sceneSession->NotifyTargetScreenWidthAndHeight(isScreenAngleMismatch, screenWidth, screenHeight);
-    EXPECT_NE(sceneSession, nullptr);
-}
-
-/**
  * @tc.name: SetIsStatusBarVisible
  * @tc.desc: SetIsStatusBarVisible
  * @tc.type: FUNC
@@ -1232,6 +1213,54 @@ HWTEST_F(SceneSessionTest3, IsShowOnLockScreen, Function | SmallTest | Level2)
 
     sceneSession->property_ = nullptr;
     EXPECT_FALSE(sceneSession->IsShowOnLockScreen(2000));
+}
+
+/**
+ * @tc.name: NotifySetParentSession
+ * @tc.desc: NotifySetParentSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, NotifySetParentSession, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "NotifySetParentSession";
+    info.bundleName_ = "NotifySetParentSession";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    int32_t oldParentWindowId = 1;
+    int32_t newParentWindowId = 2;
+    auto res = sceneSession->NotifySetParentSession(oldParentWindowId, newParentWindowId);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+}
+
+/**
+ * @tc.name: UpdateSubWindowLevel
+ * @tc.desc: UpdateSubWindowLevel
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, UpdateSubWindowLevel, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "UpdateSubWindowLevel";
+    info.bundleName_ = "UpdateSubWindowLevel";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    uint32_t subWindowLevel = 10;
+    EXPECT_NE(subWindowLevel, sceneSession->GetSessionProperty()->GetSubWindowLevel());
+    sceneSession->UpdateSubWindowLevel(subWindowLevel);
+    EXPECT_EQ(subWindowLevel, sceneSession->GetSessionProperty()->GetSubWindowLevel());
+}
+
+/**
+ * @tc.name: GetMaxSubWindowLevel
+ * @tc.desc: GetMaxSubWindowLevel
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, GetMaxSubWindowLevel, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "GetMaxSubWindowLevel";
+    info.bundleName_ = "GetMaxSubWindowLevel";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_EQ(1, sceneSession->GetMaxSubWindowLevel());
 }
 
 /**
