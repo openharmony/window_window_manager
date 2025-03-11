@@ -348,7 +348,7 @@ public:
     WSError UpdateDensity();
     void UpdateNewSizeForPCWindow();
     bool CalcNewWindowRectIfNeed(WSRect& windowRect, DMRect& availableArea, float newVpr);
-    bool IsDefaultScreen();
+    bool IsPrimaryDisplay();
 
     /*
      * PC Window Layout
