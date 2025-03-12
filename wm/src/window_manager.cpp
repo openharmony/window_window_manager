@@ -246,7 +246,7 @@ void WindowManager::Impl::NotifyWindowVisibilityInfoChanged(
 void WindowManager::Impl::NotifyWindowVisibilityStateChanged(
     const std::unordered_map<WindowInfoKey, std::any>& windowChangeInfo)
 {
-    std::vector<sptr<IWindowInfoChangedListener>> windowVisibilityStateListeners_;
+    std::vector<sptr<IWindowInfoChangedListener>> windowVisibilityStateListeners;
     {
         std::shared_lock<std::shared_mutex> lock(listenerMutex_);
         windowVisibilityStateListeners = windowVisibilityStateListeners_;
