@@ -1592,6 +1592,34 @@ HWTEST_F(SceneSessionManagerTest5, FindMainWindowWithToken02, Function | SmallTe
 }
 
 /**
+ * @tc.name: FindSessionByToken
+ * @tc.desc: SceneSesionManager FindSessionByToken
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, FindSessionByToken, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test2";
+    info.persistentId_ = 123;
+    sptr<IRemoteObject> targetToken = nullptr;
+    auto result = ssm_->FindSessionByToken(targetToken);
+    ASSERT_EQ(result, nullptr);
+
+    targetToken = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(targetToken, nullptr);
+    result = ssm_->FindSessionByToken(targetToken);
+    ASSERT_EQ(result, nullptr);
+
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->abilityToken_ = targetToken;
+    ssm_->sceneSessionMap_.insert({ 123, sceneSession });
+    result = ssm_->FindSessionByToken(targetToken, sceneSession->GetWindowType());
+    ASSERT_EQ(result, sceneSession);
+}
+
+/**
  * @tc.name: RequestSceneSessionBackground
  * @tc.desc: RequestSceneSessionBackground
  * @tc.type: FUNC
