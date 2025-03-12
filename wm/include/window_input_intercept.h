@@ -16,11 +16,11 @@
 #ifndef OHOS_ROSEN_WINDOW_INPUT_INTERCEPT_H
 #define OHOS_ROSEN_WINDOW_INPUT_INTERCEPT_H
 
+#include <memory>
+#include <mutex>
 #include "input_manager.h"
 #include "window_input_intercept_consumer.h"
 #include "wm_single_instance.h"
-#include <memory>
-#include <mutex>
 
 namespace OHOS {
 namespace Rosen {
@@ -28,14 +28,14 @@ namespace Rosen {
 class WindowInputIntercept {
 WM_DECLARE_SINGLE_INSTANCE_BASE(WindowInputIntercept);
 public:
+    WindowInputIntercept() = default;
+    ~WindowInputIntercept() = default;
+
     void RegisterInputEventIntercept(const int32_t deviceId,
                                      const std::shared_ptr<IInputEventInterceptConsumer>& consumer);
     void UnRegisterInputEventIntercept(const int32_t deviceId);
     bool IsInputIntercept(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
     bool IsInputIntercept(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
-public:
-    WindowInputIntercept() = default;
-    ~WindowInputIntercept() = default;
 
 private:
     std::unordered_map<int32_t, std::shared_ptr<IInputEventInterceptConsumer>> inputIntercept_;

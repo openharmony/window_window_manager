@@ -61,6 +61,8 @@ bool WindowInputIntercept::IsInputIntercept(const std::shared_ptr<MMI::KeyEvent>
         consumer = iter->second;
     }
     if (consumer == nullptr) {
+        TLOGW(WmsLogTag::WMS_EVENT, "IsInputInterceptByKeyEvent consumer is null. the deviceId is %{public}d",
+            keyEvent->GetDeviceId());
         return false;
     }
 
@@ -81,6 +83,8 @@ bool WindowInputIntercept::IsInputIntercept(const std::shared_ptr<MMI::PointerEv
         consumer = iter->second;
     }
     if (consumer == nullptr) {
+        TLOGW(WmsLogTag::WMS_EVENT, "IsInputInterceptByPointerEvent consumer is null. the deviceId is %{public}d",
+                pointerEvent->GetDeviceId());
         return false;
     }
 
