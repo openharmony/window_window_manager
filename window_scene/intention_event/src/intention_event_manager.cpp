@@ -184,7 +184,7 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
         }
         static uint32_t eventId = 0;
         TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW, "eid:%{public}d,InputId:%{public}d,wid:%{public}u"
-            ",windowName:%{public}s,action:%{public}d,isSystem:%{public}d", eventId++, pointerEvent->GetId(), windowId,
+            ",winName:%{public}s,action:%{public}d,isSystem:%{public}d", eventId++, pointerEvent->GetId(), windowId,
             sceneSession->GetSessionInfo().abilityName_.c_str(), action, sceneSession->GetSessionInfo().isSystem_);
     }
     if (sceneSession->GetSessionInfo().isSystem_) {
@@ -314,7 +314,7 @@ void IntentionEventManager::InputEventListener::OnInputEvent(std::shared_ptr<MMI
         };
         auto ret = MiscServices::InputMethodController::GetInstance()->DispatchKeyEvent(keyEvent, callback);
         if (ret != 0) {
-            WLOGFE("DispatchKeyEvent failed, ret:%{public}d, id:%{public}d, focusedSessionId:%{public}d",
+            WLOGFE("DispatchKeyEvent failed,ret:%{public}d,id:%{public}d,focusId:%{public}d",
                 ret, keyEvent->GetId(), focusedSessionId);
             DispatchKeyEventCallback(focusedSessionId, keyEvent, false);
         }
@@ -355,7 +355,7 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
         return;
     }
     if (!(uiContent_->ProcessAxisEvent(axisEvent))) {
-        TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW, "The UI content consumes the axis event failed.");
+        TLOGE(WmsLogTag::WMS_INPUT_KEY_FLOW, "The UI content consumes the axis event failed.");
         axisEvent->MarkProcessed();
     }
 }
