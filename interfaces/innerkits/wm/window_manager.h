@@ -230,6 +230,11 @@ public:
  */
 class IWindowInfoChangedListener : virtual public RefBase {
     public:
+
+        IWindowInfoChangedListener() {}
+
+        virtual ~IWindowInfoChangedListener() {};
+
         /**
          * @brief Notify caller when window Info changed.
          *
@@ -1159,6 +1164,12 @@ private:
     WMError NotifyWindowStyleChange(WindowStyleType type);
     WMError NotifyCallingWindowDisplayChanged(const CallingWindowInfo& callingWindowInfo);
     void NotifyWindowPidVisibilityChanged(const sptr<WindowPidVisibilityInfo>& info) const;
+    WMError ProcessRegisterWindowInfoChangeCallback(WindowInfoKey observedInfo,
+        const sptr<IWindowInfoChangedListener>& listener);
+    WMError ProcessUnregisterWindowInfoChangeCallback(WindowInfoKey observedInfo,
+        const sptr<IWindowInfoChangedListener>& listener);
+    WMError RegisterVisibilityStateChangedListener(const sptr<IWindowInfoChangedListener>& listener);
+    WMError UnregisterVisibilityStateChangedListener(const sptr<IWindowInfoChangedListener>& listener);
 };
 } // namespace Rosen
 } // namespace OHOS
