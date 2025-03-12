@@ -659,7 +659,7 @@ HWTEST_F(SceneSessionTest3, SetWindowRectAutoSaveCallback, Function | SmallTest 
     sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
     sceneSession->property_ = windowSessionProperty;
 
-    NotifySetWindowRectAutoSaveFunc func1 = [](bool enabled) {
+    NotifySetWindowRectAutoSaveFunc func1 = [](bool enabled, bool isSaveBySpecifiedFlag) {
         return;
     };
     sceneSession->SetWindowRectAutoSaveCallback(std::move(func1));
@@ -1590,6 +1590,25 @@ HWTEST_F(SceneSessionTest3, GetMaxSubWindowLevel, Function | SmallTest | Level2)
     info.bundleName_ = "GetMaxSubWindowLevel";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_EQ(1, sceneSession->GetMaxSubWindowLevel());
+}
+
+/**
+ * @tc.name: NotifyUpdateFlagCallback
+ * @tc.desc: NotifyUpdateFlagCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, NotifyUpdateFlagCallback, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "NotifyUpdateFlagCallback";
+    info.bundleName_ = "NotifyUpdateFlagCallback";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    NotifyUpdateFlagFunc func1 = [](const std::string& flag) {
+        return;
+    };
+    sceneSession->NotifyUpdateFlagCallback(std::move(func1));
+    ASSERT_NE(nullptr, sceneSession->onUpdateFlagFunc_);
 }
 }
 }
