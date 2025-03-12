@@ -59,8 +59,8 @@ enum XmlNodeElement {
     CAST_BUNDLE_NAME,
     CAST_ABILITY_NAME,
     PHYSICAL_DISPLAY_RESOLUTION,
-    SCROLLABLE_PARAM,
-    IS_SUPPORT_CAPTURE
+    IS_SUPPORT_CAPTURE,
+    SCROLLABLE_PARAM
 };
 }
 
@@ -99,8 +99,8 @@ std::map<int32_t, std::string> ScreenSceneConfig::xmlNodeMap_ = {
     {CAST_BUNDLE_NAME, "castBundleName"},
     {CAST_ABILITY_NAME, "castAbilityName"},
     {PHYSICAL_DISPLAY_RESOLUTION, "physicalDisplayResolution"},
-    {SCROLLABLE_PARAM, "scrollableParam"},
-    {IS_SUPPORT_CAPTURE, "isSupportCapture"}
+    {IS_SUPPORT_CAPTURE, "isSupportCapture"},
+    {SCROLLABLE_PARAM, "scrollableParam"}
 };
 
 

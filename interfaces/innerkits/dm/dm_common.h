@@ -438,14 +438,6 @@ struct DisplayPhysicalResolution {
 };
 
 /**
- * @brief scrollable param
- */
-struct ScrollableParam {
-    std::string velocityScale_;
-    std::string friction_;
-};
-
-/**
  * @brief screen direction info
  */
 struct ScreenDirectionInfo {
@@ -453,6 +445,14 @@ struct ScreenDirectionInfo {
     int32_t screenRotation_;
     int32_t rotation_;
     int32_t phyRotation_;
+};
+
+/**
+ * @brief scrollable param
+ */
+struct ScrollableParam {
+    std::string velocityScale_;
+    std::string friction_;
 };
 
 /**
