@@ -345,8 +345,8 @@ public:
     void ModifyRSAnimatableProperty(bool isDefaultSidebarBlur, bool isDark);
     WSError UpdateDensity();
     void UpdateNewSizeForPCWindow();
-    bool CalcNewWindowRectIfNeed(WSRect& windowRect, DMRect& availableArea, float newVpr);
-    bool IsPrimaryDisplay();
+    bool CalcNewWindowRectIfNeed(DMRect& availableArea, float newVpr);
+    bool IsPrimaryDisplay() const;
     void SaveLastDensity();
 
     /*

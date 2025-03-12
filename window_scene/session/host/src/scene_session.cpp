@@ -7104,19 +7104,18 @@ void SceneSession::UpdateNewSizeForPCWindow()
         }
 
         float newVpr = display->GetVirtualPixelRatio();
-        WSRect& windowRect = winRect_;
-        if (CalcNewWindowRectIfNeed(windowRect, availableArea, newVpr)) {
-            NotifySessionRectChange(windowRect, SizeChangeReason::UPDATE_DPI_SYNC);
-            sessionStage_->UpdateRect(windowRect, SizeChangeReason::UPDATE_DPI_SYNC);
+        if (CalcNewWindowRectIfNeed(availableArea, newVpr)) {
+            NotifySessionRectChange(winRect_, SizeChangeReason::UPDATE_DPI_SYNC);
+            sessionStage_->UpdateRect(winRect_, SizeChangeReason::UPDATE_DPI_SYNC);
             TLOGI(WmsLogTag::WMS_LAYOUT_PC, "left: %{public}d, top: %{public}d, width: %{public}u, "
-                "height: %{public}u, Id: %{public}u", windowRect.posX_, windowRect.posY_, windowRect.width_,
-                windowRect.height_, GetPersistentId());
+                "height: %{public}u, Id: %{public}u", winRect_.posX_, winRect_.posY_, winRect_.width_,
+                winRect_.height_, GetPersistentId());
         }
     }
     displayChangedByMoveDrag_ = false;
 }
 
-bool SceneSession::CalcNewWindowRectIfNeed(WSRect& windowRect, DMRect& availableArea, float newVpr)
+bool SceneSession::CalcNewWindowRectIfNeed(DMRect& availableArea, float newVpr)
 {
     float currVpr = 0.0f;
     if (auto property = GetSessionProperty()) {
@@ -7128,10 +7127,10 @@ bool SceneSession::CalcNewWindowRectIfNeed(WSRect& windowRect, DMRect& available
             "Id: %{public}u", currVpr, newVpr, GetPersistentId());
         return false;
     }
-    int32_t left = windowRect.posX_;
-    int32_t top = windowRect.posY_;
-    uint32_t width = static_cast<uint32_t>(windowRect.width_ * newVpr / currVpr);
-    uint32_t height = static_cast<uint32_t>(windowRect.height_ * newVpr / currVpr);
+    int32_t left = winRect_.posX_;
+    int32_t top = winRect_.posY_;
+    uint32_t width = static_cast<uint32_t>(winRect_.width_ * newVpr / currVpr);
+    uint32_t height = static_cast<uint32_t>(winRect_.height_ * newVpr / currVpr);
     int32_t statusBarHeight = 0;
     if (isStatusBarVisible_ && IsPrimaryDisplay()) {
         statusBarHeight = GetStatusBarHeight();
@@ -7150,20 +7149,16 @@ bool SceneSession::CalcNewWindowRectIfNeed(WSRect& windowRect, DMRect& available
         left = MathHelper::Min(left, static_cast<int32_t>(availableArea.width_ - width));
         left = MathHelper::Max(left, 0);
     }
-    windowRect.width_ = width;
-    windowRect.height_ = height;
     winRect_.width_ = width;
     winRect_.height_ = height;
     if (needMove) {
-        windowRect.posX_ = left;
-        windowRect.posY_ = top;
         winRect_.posX_ = left;
         winRect_.posY_ = top;
     }
     return true;
 }
 
-bool SceneSession::IsPrimaryDisplay()
+bool SceneSession::IsPrimaryDisplay() const
 {
     if (auto property = GetSessionProperty()) {
         auto display = DisplayManager::GetInstance().GetPrimaryDisplaySync();
