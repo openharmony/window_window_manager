@@ -84,6 +84,7 @@ const int32_t CV_WAIT_SCBSWITCH_MS = 3000;
 const int64_t SWITCH_USER_DISPLAYMODE_CHANGE_DELAY = 500;
 #endif
 const int32_t SCREEN_OFF_MIN_DELAY_TIME = 300;
+const int32_t SCREEN_WAIT_PICTURE_FRAME_TIME = 1500;
 const std::string STATUS_FOLD_HALF = "-z";
 const std::string STATUS_EXPAND = "-y";
 const std::string STATUS_FOLD = "-p";
@@ -2432,8 +2433,16 @@ bool ScreenSessionManager::WakeUpBegin(PowerStateChangeReason reason)
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
         return false;
     }
-    currentWakeUpReason_ = reason;
     TLOGI(WmsLogTag::DMS, "[UL_POWER]WakeUpBegin reason: %{public}u", reason);
+    if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_START_DREAM) {
+        TLOGI(WmsLogTag::DMS, "[UL_POWER]wakeup cannot start dream");
+        return false;
+    }
+    if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_END_DREAM) {
+        NotifyDisplayPowerEvent(DisplayPowerEvent::DISPLAY_END_DREAM, EventStatus::BEGIN, reason);
+        return BlockScreenWaitPictureFrameByCV(false);
+    }
+    currentWakeUpReason_ = reason;
     // 多屏协作灭屏不通知锁屏
     if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION) {
         isMultiScreenCollaboration_ = true;
@@ -2471,9 +2480,16 @@ bool ScreenSessionManager::SuspendBegin(PowerStateChangeReason reason)
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
         return false;
     }
-
-    gotScreenlockFingerprint_ = false;
     TLOGI(WmsLogTag::DMS, "[UL_POWER]Reason: %{public}u", static_cast<uint32_t>(reason));
+    if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_END_DREAM) {
+        TLOGI(WmsLogTag::DMS, "[UL_POWER]suspend cannot end dream");
+        return false;
+    }
+    if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_START_DREAM) {
+        NotifyDisplayPowerEvent(DisplayPowerEvent::DISPLAY_START_DREAM, EventStatus::BEGIN, reason);
+        return BlockScreenWaitPictureFrameByCV(true);
+    }
+    gotScreenlockFingerprint_ = false;
     lastWakeUpReason_ = PowerStateChangeReason::STATE_CHANGE_REASON_INIT;
     if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF) {
         lastWakeUpReason_ = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF;
@@ -3351,7 +3367,6 @@ void ScreenSessionManager::NotifyDisplayEvent(DisplayEvent event)
             needScreenOnWhenKeyguardNotify_ = false;
         }
     }
-
     if (event == DisplayEvent::SCREEN_LOCK_SUSPEND) {
         TLOGI(WmsLogTag::DMS, "[UL_POWER]screen lock suspend");
         if (isPhyScreenConnected_) {
@@ -3362,24 +3377,22 @@ void ScreenSessionManager::NotifyDisplayEvent(DisplayEvent event)
         }
         SetGotScreenOffAndWakeUpBlock();
     }
-
     if (event == DisplayEvent::SCREEN_LOCK_OFF) {
         TLOGI(WmsLogTag::DMS, "[UL_POWER]screen lock off");
         isScreenLockSuspend_ = false;
         TLOGI(WmsLogTag::DMS, "[UL_POWER]isScreenLockSuspend__  is false");
         SetGotScreenOffAndWakeUpBlock();
     }
-
     if (event == DisplayEvent::SCREEN_LOCK_FINGERPRINT) {
         TLOGI(WmsLogTag::DMS, "[UL_POWER]screen lock fingerprint");
         gotScreenlockFingerprint_ = true;
         SetGotScreenOffAndWakeUpBlock();
     }
-
     if (event == DisplayEvent::SCREEN_LOCK_DOZE_FINISH) {
         TLOGI(WmsLogTag::DMS, "[UL_POWER]screen lock doze finish");
         SetGotScreenOffAndWakeUpBlock();
     }
+    WakeUpPictureFrameBlock(event);
 }
 
 void ScreenSessionManager::SetGotScreenOffAndWakeUpBlock()
@@ -8662,5 +8675,32 @@ DMError ScreenSessionManager::SetSystemKeyboardStatus(bool isOn)
     }
 #endif // FOLD_ABILITY_ENABLE
     return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+}
+
+void ScreenSessionManager::WakeUpPictureFrameBlock(DisplayEvent event)
+{
+    std::unique_lock <std::mutex> lock(screenWaitPictureFrameMutex_);
+    if (event == DisplayEvent::SCREEN_LOCK_START_DREAM) {
+        TLOGI(WmsLogTag::DMS, "[UL_POWER]get pictureFrameReady");
+        pictureFrameReady_ = true;
+    } else if (event == DisplayEvent::SCREEN_LOCK_END_DREAM) {
+        TLOGI(WmsLogTag::DMS, "[UL_POWER]get pictureFrameBreak");
+        pictureFrameBreak_ = true;
+    }
+    screenWaitPictureFrameCV_.notify_all();
+}
+
+bool ScreenSessionManager::BlockScreenWaitPictureFrameByCV(bool isStartDream)
+{
+    TLOGI(WmsLogTag::DMS, "[UL_POWER]enter");
+    std::unique_lock <std::mutex> lock(screenWaitPictureFrameMutex_);
+    pictureFrameReady_ = false;
+    pictureFrameBreak_ = false;
+    if (screenWaitPictureFrameCV_.wait_for(lock, std::chrono::milliseconds(SCREEN_WAIT_PICTURE_FRAME_TIME))
+        == std::cv_status::timeout) {
+        TLOGI(WmsLogTag::DMS, "[UL_POWER]wait picture frame timeout");
+        return true;
+    }
+    return isStartDream ? pictureFrameReady_ : pictureFrameBreak_;
 }
 } // namespace OHOS::Rosen
