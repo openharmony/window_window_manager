@@ -108,6 +108,7 @@ void RootScene::LoadContent(const std::string& contentUrl, napi_env env, napi_va
     uiContent_->SetFrameLayoutFinishCallback(std::move(frameLayoutFinishCb_));
     uiContent_->AddFocusActiveChangeCallback(notifyWatchFocusActiveChangeCallback_);
     RegisterInputEventListener();
+    IsWaterfallModeEnabled();   // init waterfall mode
 }
 
 void RootScene::SetDisplayOrientation(int32_t orientation)
@@ -528,8 +529,9 @@ void RootScene::NotifyWaterfallModeChange(bool isWaterfallMode)
 
 void RootScene::GetExtensionConfig(AAFwk::WantParams& want) const
 {
-    want.SetParam(Extension::WATERFALL_MODE_FIELD,
-        AAFwk::Integer::Box(static_cast<int32_t>(isFullScreenWaterfallMode_.load())));
+    bool isWaterfallMode = isFullScreenWaterfallMode_.load();
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "waterfall: %{public}d, root winId: %{public}u", isWaterfallMode, GetWindowId());
+    want.SetParam(Extension::WATERFALL_MODE_FIELD, AAFwk::Integer::Box(static_cast<int32_t>(isWaterfallMode));
 }
 
 void RootScene::UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>& want)
@@ -543,7 +545,8 @@ void RootScene::UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>& want)
     isFullScreenWaterfallMode_.store(static_cast<bool>(waterfallModeValue));
     isValidWaterfallMode_.store(true);
     want->RemoveParam(Extension::UIEXTENSION_CONFIG_FIELD);
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "root waterfall: %{public}d", isFullScreenWaterfallMode_.load());
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "waterfall: %{public}d, winId: %{public}u",
+        isFullScreenWaterfallMode_.load(), GetWindowId());
 }
 } // namespace Rosen
 } // namespace OHOS
