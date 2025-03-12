@@ -134,6 +134,12 @@ HWTEST_F(ScreenSessionManagerTest, WakeUpBegin, Function | SmallTest | Level3)
     reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_ON;
     ASSERT_EQ(true, ssm_->WakeUpBegin(reason));
 
+    reason = PowerStateChangeReason::STATE_CHANGE_REASON_START_DREAM;
+    ASSERT_EQ(false, ssm_->WakeUpBegin(reason));
+
+    reason = PowerStateChangeReason::STATE_CHANGE_REASON_END_DREAM;
+    ASSERT_EQ(true, ssm_->WakeUpBegin(reason));
+
     EXPECT_EQ(DMError::DM_OK, ssm_->DestroyVirtualScreen(screenId));
     EXPECT_EQ(DMError::DM_OK, ssm_->UnregisterDisplayManagerAgent(displayManagerAgent, type));
 }
@@ -433,6 +439,12 @@ HWTEST_F(ScreenSessionManagerTest, SuspendBegin, Function | SmallTest | Level3)
 
     reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF;
     ASSERT_EQ(true, ssm_->SuspendBegin(reason));
+
+    reason = PowerStateChangeReason::STATE_CHANGE_REASON_START_DREAM;
+    ASSERT_EQ(true, ssm_->SuspendBegin(reason));
+
+    reason = PowerStateChangeReason::STATE_CHANGE_REASON_END_DREAM;
+    ASSERT_EQ(false, ssm_->SuspendBegin(reason));
 
     EXPECT_EQ(DMError::DM_OK, ssm_->DestroyVirtualScreen(screenId));
     EXPECT_EQ(DMError::DM_OK, ssm_->UnregisterDisplayManagerAgent(displayManagerAgent, type));

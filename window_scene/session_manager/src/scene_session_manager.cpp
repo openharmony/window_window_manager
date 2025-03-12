@@ -2544,7 +2544,7 @@ bool SceneSessionManager::IsPcSceneSessionLifecycle(const sptr<SceneSession>& sc
 {
     bool isPcAppInPad = sceneSession->GetSessionProperty()->GetIsPcAppInPad();
     bool isAppSupportPhoneInPc = sceneSession->GetSessionProperty()->GetIsAppSupportPhoneInPc();
-    return (systemConfig_.backgroundswitch && !isAppSupportPhoneInPc) || isPcAppInPad;
+    return (systemConfig_.backgroundswitch && !isAppSupportPhoneInPc) || (isPcAppInPad && !IsScreenLocked());
 }
 
 void SceneSessionManager::InitSnapshotCache()
@@ -2636,7 +2636,7 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
         if (persistentId == brightnessSessionId_) {
             auto displayId = sceneSession->GetSessionProperty()->GetDisplayId();
             auto focusedSessionId = windowFocusController_->GetFocusedSessionId(displayId);
-            UpdateBrightness(focusedSessionId, true);
+            UpdateBrightness(focusedSessionId);
         }
         if (IsPcSceneSessionLifecycle(sceneSession)) {
             TLOGNI(WmsLogTag::WMS_MAIN, "Notify session background: %{public}d", persistentId);
@@ -3433,6 +3433,7 @@ WSError SceneSessionManager::RecoverAndConnectSpecificSession(const sptr<ISessio
             TLOGNW(WmsLogTag::WMS_RECOVER, "Recover finished, not recovery anymore");
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
+        UpdateRecoverPropertyForSuperFold(property);
         // recover specific session
         SessionInfo info = RecoverSessionInfo(property);
         TLOGNI(WmsLogTag::WMS_RECOVER, "callingWindowId=%{public}" PRIu32, property->GetCallingSessionId());
@@ -3578,6 +3579,7 @@ WSError SceneSessionManager::RecoverAndReconnectSceneSession(const sptr<ISession
             TLOGNE(WmsLogTag::WMS_RECOVER, "recoverSceneSessionFunc_ is null");
             return WSError::WS_ERROR_NULLPTR;
         }
+        UpdateRecoverPropertyForSuperFold(property);
         SessionInfo sessionInfo = RecoverSessionInfo(property);
         sptr<SceneSession> sceneSession = RequestSceneSession(sessionInfo, nullptr);
         if (sceneSession == nullptr) {
@@ -3604,6 +3606,34 @@ WSError SceneSessionManager::RecoverAndReconnectSceneSession(const sptr<ISession
         return WSError::WS_OK;
     };
     return taskScheduler_->PostSyncTask(task, __func__);
+}
+
+void SceneSessionManager::UpdateRecoverPropertyForSuperFold(const sptr<WindowSessionProperty>& property)
+{
+    if (property->GetDisplayId() != VIRTUAL_DISPLAY_ID) {
+        return;
+    }
+    static auto foldCreaseRegion = SingletonContainer::Get<DisplayManager>().GetCurrentFoldCreaseRegion();
+    if (foldCreaseRegion == nullptr) {
+        return;
+    }
+    Rect recoverWindowRect = property->GetWindowRect();
+    Rect recoverRequestRect = property->GetRequestRect();
+    TLOGD(WmsLogTag::WMS_RECOVER,
+        "WindowRect: %{public}s, RequestRect: %{public}s, DisplayId: %{public}d",
+        recoverWindowRect.ToString().c_str(), recoverRequestRect.ToString().c_str(),
+        static_cast<uint32_t>(property->GetDisplayId()));
+    
+    auto foldCrease = foldCreaseRegion->GetCreaseRects().front();
+    recoverWindowRect.posY_ += foldCrease.posY_ + foldCrease.height_;
+    recoverRequestRect.posY_ += foldCrease.posY_ + foldCrease.height_;
+    property->SetWindowRect(recoverWindowRect);
+    property->SetRequestRect(recoverRequestRect);
+    property->SetDisplayId(0);
+    TLOGD(WmsLogTag::WMS_RECOVER,
+        "WindowRect: %{public}s, RequestRect: %{public}s, DisplayId: %{public}d",
+        recoverWindowRect.ToString().c_str(), recoverRequestRect.ToString().c_str(),
+        static_cast<uint32_t>(property->GetDisplayId()));
 }
 
 void SceneSessionManager::SetRecoverSceneSessionListener(const NotifyRecoverSceneSessionFunc& func)
@@ -4833,7 +4863,7 @@ void SceneSessionManager::PostBrightnessTask(float brightness)
     }
 }
 
-WSError SceneSessionManager::UpdateBrightness(int32_t persistentId, bool onBackGround)
+WSError SceneSessionManager::UpdateBrightness(int32_t persistentId)
 {
     if (systemConfig_.IsPcWindow()) {
         return WSError::WS_OK;
@@ -4851,14 +4881,14 @@ WSError SceneSessionManager::UpdateBrightness(int32_t persistentId, bool onBackG
     auto brightness = sceneSession->GetBrightness();
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Brightness: [%{public}f, %{public}f]", GetDisplayBrightness(), brightness);
     if (std::fabs(brightness - UNDEFINED_BRIGHTNESS) < std::numeric_limits<float>::min()) {
-        if (onBackGround && GetDisplayBrightness() != brightness) {
+        if (IsNeedUpdateBrightness(brightness)) {
             TLOGI(WmsLogTag::WMS_ATTRIBUTE, "adjust brightness with default value");
             DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().RestoreBrightness();
             SetDisplayBrightness(UNDEFINED_BRIGHTNESS); // UNDEFINED_BRIGHTNESS means system default brightness
             brightnessSessionId_ = INVALID_WINDOW_ID;
         }
     } else {
-        if (GetDisplayBrightness() != brightness) {
+        if (std::fabs(brightness - GetDisplayBrightness()) > std::numeric_limits<float>::min()) {
             TLOGI(WmsLogTag::WMS_ATTRIBUTE, "adjust brightness with value");
             DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().OverrideBrightness(
                 static_cast<uint32_t>(brightness * MAX_BRIGHTNESS));
@@ -4867,6 +4897,18 @@ WSError SceneSessionManager::UpdateBrightness(int32_t persistentId, bool onBackG
         brightnessSessionId_ = sceneSession->GetPersistentId();
     }
     return WSError::WS_OK;
+}
+
+bool SceneSessionManager::IsNeedUpdateBrightness(float brightness)
+{
+    if (std::fabs(brightness - GetDisplayBrightness()) < std::numeric_limits<float>::min()) {
+        return false;
+    }
+    auto sceneSession = GetSceneSession(brightnessSessionId_);
+    if (sceneSession != nullptr && sceneSession->IsSessionForeground()) {
+        return false;
+    }
+    return true;
 }
 
 int32_t SceneSessionManager::GetCurrentUserId() const
@@ -5424,6 +5466,7 @@ WSError SceneSessionManager::GetSpecifiedSessionDumpInfo(std::string& dumpInfo, 
         << session->GetScaleX() << ", " << session->GetScaleY() << ", "
         << session->GetPivotX() << ", " << session->GetPivotY()
         << " ]" << std::endl;
+    oss << "ParentWindowId: " << session->GetParentPersistentId() << std::endl;
     dumpInfo.append(oss.str());
 
     DumpSessionElementInfo(session, params, dumpInfo);
@@ -6460,7 +6503,7 @@ void SceneSessionManager::NotifyFocusStatus(const sptr<SceneSession>& sceneSessi
         if (IsSessionVisibleForeground(sceneSession)) {
             NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_FOCUSED);
         }
-        UpdateBrightness(focusGroup->GetFocusedSessionId(), false);
+        UpdateBrightness(focusGroup->GetFocusedSessionId());
         FocusIDChange(sceneSession->GetPersistentId(), sceneSession);
     }
     // notify window manager
@@ -6558,7 +6601,7 @@ WSError SceneSessionManager::UpdateFocus(int32_t persistentId, bool isFocused)
         auto focusedSessionId = windowFocusController_->GetFocusedSessionId(displayId);
         if (isFocused) {
             SetFocusedSessionId(displayId, persistentId);
-            UpdateBrightness(focusedSessionId, false);
+            UpdateBrightness(focusedSessionId);
             FocusIDChange(persistentId, sceneSession);
         } else if (persistentId == GetFocusedSessionId()) {
             SetFocusedSessionId(displayId, INVALID_SESSION_ID);
@@ -13472,6 +13515,77 @@ WMError SceneSessionManager::UnregisterSessionLifecycleListener(const sptr<ISess
         TLOGI(WmsLogTag::WMS_LIFE, "%{public}s, ret:%{public}d", where, ret);
     }, __func__);
     return WMError::WM_OK;
+}
+
+WMError SceneSessionManager::SetParentWindowInner(const sptr<SceneSession>& subSession,
+    const sptr<SceneSession>& oldParentSession, const sptr<SceneSession>& newParentSession)
+{
+    uint32_t oldSubWindowLevel = oldParentSession->GetSessionProperty()->GetSubWindowLevel();
+    uint32_t newSubWindowLevel = newParentSession->GetSessionProperty()->GetSubWindowLevel();
+    if (oldSubWindowLevel < newSubWindowLevel &&
+        subSession->GetMaxSubWindowLevel() + newSubWindowLevel > MAX_SUB_WINDOW_LEVEL) {
+        TLOGE(WmsLogTag::WMS_SUB, "newParentSession sub level limit");
+        return WMError::WM_ERROR_INVALID_PARENT;
+    }
+    int32_t oldParentWindowId = oldParentSession->GetPersistentId();
+    int32_t newParentWindowId = newParentSession->GetPersistentId();
+    subSession->NotifySetParentSession(oldParentWindowId, newParentWindowId);
+    int32_t subWindowId = subSession->GetPersistentId();
+    oldParentSession->RemoveSubSession(subWindowId);
+    newParentSession->AddSubSession(subSession);
+    subSession->SetParentSession(newParentSession);
+    subSession->SetParentPersistentId(newParentWindowId);
+    subSession->UpdateSubWindowLevel(newSubWindowLevel + 1);
+    if (oldSubWindowLevel == 0) {
+        oldParentSession->UnregisterNotifySurfaceBoundsChangeFunc(subWindowId);
+        if (newSubWindowLevel == 0 && subSession->GetIsFollowParentLayout()) {
+            subSession->SetFollowParentWindowLayoutEnabled(true);
+        }
+    }
+    return WMError::WM_OK;
+}
+
+WMError SceneSessionManager::SetParentWindow(int32_t subWindowId, int32_t newParentWindowId)
+{
+    return taskScheduler_->PostSyncTask([this, subWindowId, newParentWindowId, where = __func__] {
+        auto subSession = GetSceneSession(subWindowId);
+        if (!subSession || !WindowHelper::IsSubWindow(subSession->GetWindowType())) {
+            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s subSession is nullptr or type invalid", where);
+            return WMError::WM_ERROR_INVALID_WINDOW;
+        }
+        int32_t oldParentWindowId = subSession->GetParentPersistentId();
+        auto oldParentSession = GetSceneSession(oldParentWindowId);
+        if (oldParentSession == nullptr) {
+            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s oldParentSession is nullptr", where);
+            return WMError::WM_ERROR_INVALID_PARENT;
+        }
+        auto oldWindowType = oldParentSession->GetWindowType();
+        if (!WindowHelper::IsMainWindow(oldWindowType) && !WindowHelper::IsFloatOrSubWindow(oldWindowType)) {
+            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s oldParentSession window type invalid", where);
+            return WMError::WM_ERROR_INVALID_PARENT;
+        }
+        auto newParentSession = GetSceneSession(newParentWindowId);
+        if (newParentSession == nullptr) {
+            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s newParentSession is nullptr", where);
+            return WMError::WM_ERROR_INVALID_PARENT;
+        }
+        TLOGND(WmsLogTag::WMS_SUB, "%{public}s subWindowId: %{public}d oldParentWindowId: %{public}d "
+            "newParentWindowId: %{public}d", where, subWindowId, oldParentWindowId, newParentWindowId);
+        auto newWindowType = newParentSession->GetWindowType();
+        if (!WindowHelper::IsMainWindow(newWindowType) && !WindowHelper::IsFloatOrSubWindow(newWindowType)) {
+            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s newParentSession window type invalid", where);
+            return WMError::WM_ERROR_INVALID_PARENT;
+        }
+        if (oldParentSession->GetCallingPid() != newParentSession->GetCallingPid()) {
+            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s callingPid not same", where);
+            return WMError::WM_ERROR_INVALID_PARENT;
+        }
+        if (newParentSession->IsAncestorsSession(subWindowId)) {
+            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s newParentSession is subsession ancestor", where);
+            return WMError::WM_ERROR_INVALID_PARENT;
+        }
+        return SetParentWindowInner(subSession, oldParentSession, newParentSession);
+    });
 }
 
 WMError SceneSessionManager::MinimizeByWindowId(const std::vector<int32_t>& windowIds)

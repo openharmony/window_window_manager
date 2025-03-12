@@ -1276,10 +1276,10 @@ HWTEST_F(SceneSessionManagerTest3, UpdateBrightness, Function | SmallTest | Leve
 {
     int32_t persistentId = 10086;
     ssm_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    WSError result01 = ssm_->UpdateBrightness(persistentId, false);
+    WSError result01 = ssm_->UpdateBrightness(persistentId);
     EXPECT_EQ(result01, WSError::WS_ERROR_NULLPTR);
     ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
-    result01 = ssm_->UpdateBrightness(persistentId, false);
+    result01 = ssm_->UpdateBrightness(persistentId);
     EXPECT_EQ(result01, WSError::WS_OK);
 }
 

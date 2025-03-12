@@ -159,6 +159,8 @@ public:
      */
     static napi_value CreateSubWindowWithOptions(napi_env env, napi_callback_info info);
     static napi_value SetSubWindowModal(napi_env env, napi_callback_info info);
+    static napi_value SetParentWindow(napi_env env, napi_callback_info info);
+    static napi_value GetParentWindow(napi_env env, napi_callback_info info);
 
     /*
      * Gesture Back
@@ -345,6 +347,8 @@ private:
      */
     napi_value OnCreateSubWindowWithOptions(napi_env env, napi_callback_info info);
     napi_value OnSetSubWindowModal(napi_env env, napi_callback_info info);
+    napi_value OnSetParentWindow(napi_env env, napi_callback_info info);
+    napi_value OnGetParentWindow(napi_env env, napi_callback_info info);
 
     /*
      * Gesture Back

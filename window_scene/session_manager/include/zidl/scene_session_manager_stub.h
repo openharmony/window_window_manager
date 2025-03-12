@@ -60,6 +60,11 @@ private:
     int HandleGetSessionInfo(MessageParcel& data, MessageParcel& reply);
     int HandleGetSessionInfoByContinueSessionId(MessageParcel& data, MessageParcel& reply);
 
+    /*
+     * Sub Window
+     */
+    int HandleSetParentWindow(MessageParcel& data, MessageParcel& reply);
+
     int HandleDumpSessionAll(MessageParcel& data, MessageParcel& reply);
     int HandleDumpSessionWithId(MessageParcel& data, MessageParcel& reply);
     int HandleSetSessionContinueState(MessageParcel& data, MessageParcel& reply);
