@@ -298,7 +298,7 @@ WSError MainSession::OnSetWindowRectAutoSave(bool enabled, bool isSaveBySpecifie
                 "enable:%{public}d", where, session->GetPersistentId(), isSaveBySpecifiedFlag, enabled);
         }
     }, __func__);
-    return WSError::WS_OK
+    return WSError::WS_OK;
 }
 
 WSError MainSession::NotifySupportWindowModesChange(
@@ -474,6 +474,6 @@ WSError MainSession::UpdateFlag(const std::string& flag)
                 where, session->GetPersistentId(), flag.c_str());
         }
     }, __func__);
-    return WSError::WS_OK
+    return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen

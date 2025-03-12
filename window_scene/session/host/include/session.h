@@ -786,7 +786,7 @@ protected:
     float clientPivotX_ = 0.0f;
     float clientPivotY_ = 0.0f;
     DisplayId clientDisplayId_ = 0; // Window displayId on the client
-    DisplayId configDisplayId_ = 0;
+    DisplayId configDisplayId_ = DISPLAY_ID_INVALID;
     SuperFoldStatus lastScreenFoldStatus_ = SuperFoldStatus::UNKNOWN;
 
     /*

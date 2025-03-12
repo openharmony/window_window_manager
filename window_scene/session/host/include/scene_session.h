@@ -340,8 +340,10 @@ public:
     void RegisterMainModalTypeChangeCallback(NotifyMainModalTypeChangeFunc&& func);
     void RegisterSupportWindowModesCallback(NotifySetSupportedWindowModesFunc&& func);
     void CloneWindow(NodeId surfaceNodeId);
-    void AddSidebarMaskColorModifier();
-    void SetSidebarMaskColorModifier(bool needBlur);
+    void AddSidebarBlur();
+    void AddRSNodeModifier(bool isDark, const std::shared_ptr<RSBaseNode>& rsNode);
+    void SetSidebarBlur(bool isDefaultSidebarBlur);
+    void ModifyRSAnimatableProperty(bool isDefaultSidebarBlur, bool isDark);
     void NotifyUpdateFlagCallback(NotifyUpdateFlagFunc&& func);
 
     /*
@@ -1118,9 +1120,10 @@ private:
     /*
      * PC Window Sidebar Blur
      */
-    uint32_t defaultMaskColor_ = 0xe5ffffff;
-    uint32_t snapshotMaskColor_ = 0xffe5e5e5;
-    std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::RSColor>> maskColorValue_;
+    std::shared_ptr<Rosen::RSAnimatableProperty<float>> blurRadiusValue_;
+    std::shared_ptr<Rosen::RSAnimatableProperty<float>> blurSaturationValue_;
+    std::shared_ptr<Rosen::RSAnimatableProperty<float>> blurBrightnessValue_;
+    std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::RSColor>> blurMaskColorValue_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H

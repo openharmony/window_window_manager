@@ -427,10 +427,8 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
     BindNativeFunction(env, objValue, "sendContainerModalEvent", moduleName, JsSceneSession::SendContainerModalEvent);
     BindNativeFunction(env, objValue, "setColorSpace", moduleName, JsSceneSession::SetColorSpace);
     BindNativeFunction(env, objValue, "setSnapshotSkip", moduleName, JsSceneSession::SetSnapshotSkip);
-    BindNativeFunction(env, objValue, "addSidebarMaskColorModifier", moduleName,
-        JsSceneSession::AddSidebarMaskColorModifier);
-    BindNativeFunction(env, objValue, "setSidebarMaskColorModifier", moduleName,
-        JsSceneSession::SetSidebarMaskColorModifier);
+    BindNativeFunction(env, objValue, "addSidebarBlur", moduleName, JsSceneSession::AddSidebarBlur);
+    BindNativeFunction(env, objValue, "setSidebarBlur", moduleName, JsSceneSession::SetSidebarBlur);
 }
 
 void JsSceneSession::BindNativeMethodForKeyboard(napi_env env, napi_value objValue, const char* moduleName)
@@ -2380,18 +2378,18 @@ napi_value JsSceneSession::SetSnapshotSkip(napi_env env, napi_callback_info info
     return (me != nullptr) ? me->OnSetSnapshotSkip(env, info) : nullptr;
 }
 
-napi_value JsSceneSession::AddSidebarMaskColorModifier(napi_env env, napi_callback_info info)
+napi_value JsSceneSession::AddSidebarBlur(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_PC, "[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
-    return (me != nullptr) ? me->OnAddSidebarMaskColorModifier(env, info) : nullptr;
+    return (me != nullptr) ? me->OnAddSidebarBlur(env, info) : nullptr;
 }
 
-napi_value JsSceneSession::SetSidebarMaskColorModifier(napi_env env, napi_callback_info info)
+napi_value JsSceneSession::SetSidebarBlur(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_PC, "[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
-    return (me != nullptr) ? me->OnSetSidebarMaskColorModifier(env, info) : nullptr;
+    return (me != nullptr) ? me->OnSetSidebarBlur(env, info) : nullptr;
 }
 
 bool JsSceneSession::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
@@ -6523,18 +6521,18 @@ napi_value JsSceneSession::OnSetSnapshotSkip(napi_env env, napi_callback_info in
     return NapiGetUndefined(env);
 }
 
-napi_value JsSceneSession::OnAddSidebarMaskColorModifier(napi_env env, napi_callback_info info)
+napi_value JsSceneSession::OnAddSidebarBlur(napi_env env, napi_callback_info info)
 {
     auto session = weakSession_.promote();
     if (session == nullptr) {
         TLOGE(WmsLogTag::WMS_PC, "session is nullptr, id: %{public}d", persistentId_);
         return NapiGetUndefined(env);
     }
-    session->AddSidebarMaskColorModifier();
+    session->AddSidebarBlur();
     return NapiGetUndefined(env);
 }
 
-napi_value JsSceneSession::OnSetSidebarMaskColorModifier(napi_env env, napi_callback_info info)
+napi_value JsSceneSession::OnSetSidebarBlur(napi_env env, napi_callback_info info)
 {
     size_t argc = ARGC_FOUR;
     napi_value argv[ARGC_FOUR] = {nullptr};
@@ -6545,8 +6543,8 @@ napi_value JsSceneSession::OnSetSidebarMaskColorModifier(napi_env env, napi_call
                                       "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    bool needBlur = false;
-    if (!ConvertFromJsValue(env, argv[0], needBlur)) {
+    bool isDefaultSidebarBlur = false;
+    if (!ConvertFromJsValue(env, argv[0], isDefaultSidebarBlur)) {
         TLOGE(WmsLogTag::WMS_PC, "Failed to convert parameter to bool");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
                                       "Input parameter is missing or invalid"));
@@ -6557,7 +6555,7 @@ napi_value JsSceneSession::OnSetSidebarMaskColorModifier(napi_env env, napi_call
         TLOGE(WmsLogTag::WMS_PC, "session is nullptr, id:%{public}d", persistentId_);
         return NapiGetUndefined(env);
     }
-    session->SetSidebarMaskColorModifier(needBlur);
+    session->SetSidebarBlur(isDefaultSidebarBlur);
     return NapiGetUndefined(env);
 }
 
