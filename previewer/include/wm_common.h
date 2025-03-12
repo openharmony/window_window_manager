@@ -1199,6 +1199,19 @@ enum class BackupAndRestoreType : int32_t {
     APP_RECOVERY = 2,               // app recovery
     RESOURCESCHEDULE_RECOVERY = 3,  // app is killed due to resource schedule
 };
+
+/**
+ * @brief Windowinfokey
+ */
+ enum class WindowInfoKey : int32_t {
+    START = 0,
+    WINDOW_ID = START,
+    BUNDLE_NAME,
+    ABILITY_NAME,
+    APP_INDEX,
+    VISIBILITY_STATE,
+    END = VISIBILITY_STATE,
+};
 }
 }
 #endif // OHOS_ROSEN_WM_COMMON_H
