@@ -3434,7 +3434,11 @@ void WindowSessionImpl::NotifyAfterForeground(bool needNotifyListeners, bool nee
         TLOGW(WmsLogTag::WMS_MAIN, "vsyncStation is null");
     }
 
-    if (isFullScreenWaterfallMode_.load() != waterfallModeWhenEnterBackground_) {
+    if (!isValidWaterfallMode_.load()) {
+        if (InitWaterfallMode()) {
+            isValidWaterfallMode_.store(true);
+        }
+    } else if (isFullScreenWaterfallMode_.load() != waterfallModeWhenEnterBackground_) {
         NotifyWaterfallModeChange(isFullScreenWaterfallMode_.load());
     }
 }
@@ -5427,8 +5431,9 @@ void WindowSessionImpl::RegisterWindowInspectorCallback()
 void WindowSessionImpl::GetExtensionConfig(AAFwk::WantParams& want) const
 {
     want.SetParam(Extension::CROSS_AXIS_FIELD, AAFwk::Integer::Box(static_cast<int32_t>(crossAxisState_.load())));
-    want.SetParam(Extension::WATERFALL_MODE_FIELD,
-        AAFwk::Integer::Box(static_cast<int32_t>(isFullScreenWaterfallMode_.load())));
+    bool isWaterfallMode = isFullScreenWaterfallMode_.load();
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "waterfall: %{public}d, winId: %{public}u", isWaterfallMode, GetWindowId());
+    want.SetParam(Extension::WATERFALL_MODE_FIELD, AAFwk::Integer::Box(static_cast<int32_t>(isWaterfallMode));
 }
 
 void WindowSessionImpl::UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>& want)
@@ -5447,8 +5452,8 @@ void WindowSessionImpl::UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>
     isFullScreenWaterfallMode_.store(static_cast<bool>(waterfallModeValue));
     isValidWaterfallMode_.store(true);
     want->RemoveParam(Extension::UIEXTENSION_CONFIG_FIELD);
-    TLOGI(WmsLogTag::WMS_UIEXT, "CrossAxisState: %{public}d, waterfall: %{public}d",
-        state, isFullScreenWaterfallMode_.load());
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "CrossAxisState: %{public}d, waterfall: %{public}d, winId: %{public}u",
+        state, isFullScreenWaterfallMode_.load(), GetWindowId());
 }
 
 bool WindowSessionImpl::IsValidCrossState(int32_t state) const
