@@ -1527,7 +1527,7 @@ HWTEST_F(SceneSessionManagerTest4, UpdateBrightness, Function | SmallTest | Leve
     sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
     ssm_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    WSError result = ssm_->UpdateBrightness(1, false);
+    WSError result = ssm_->UpdateBrightness(1);
     EXPECT_EQ(result, WSError::WS_DO_NOTHING);
 
     SessionInfo sessionInfo02;
@@ -1539,7 +1539,7 @@ HWTEST_F(SceneSessionManagerTest4, UpdateBrightness, Function | SmallTest | Leve
     ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession02));
     sceneSession02->property_->SetBrightness(50.f);
     ssm_->SetDisplayBrightness(40.f);
-    result = ssm_->UpdateBrightness(2, false);
+    result = ssm_->UpdateBrightness(2);
     EXPECT_EQ(ssm_->displayBrightness_, 50);
     EXPECT_EQ(result, WSError::WS_OK);
 }

@@ -873,6 +873,20 @@ HWTEST_F(WindowAdapterTest, GetAppDragResizeType, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SetParentWindow
+ * @tc.desc: WindowAdapter/SetParentWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, SetParentWindow, Function | SmallTest | Level2)
+{
+    WindowAdapter windowAdapter;
+    int32_t subWindowId = 1;
+    int32_t newParentWindowId = 2;
+    auto err = windowAdapter.SetParentWindow(subWindowId, newParentWindowId);
+    ASSERT_EQ(err, WMError::WM_ERROR_INVALID_WINDOW);
+}
+
+/**
  * @tc.name: MinimizeByWindowId
  * @tc.desc: WindowAdapter/MinimizeByWindowId
  * @tc.type: FUNC

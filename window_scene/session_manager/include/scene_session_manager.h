@@ -350,6 +350,11 @@ public:
     WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId) override;
     void SetFocusedSessionDisplayIdIfNeeded(sptr<SceneSession>& newSession);
 
+    /*
+     * Sub Window
+     */
+    WMError SetParentWindow(int32_t subWindowId, int32_t newParentWindowId) override;
+
     std::map<int32_t, sptr<SceneSession>>& GetSessionMapByScreenId(ScreenId id);
     void UpdatePrivateStateAndNotify(uint32_t persistentId);
     void InitPersistentStorage();
@@ -797,6 +802,12 @@ private:
         int32_t sourceWindowId, int32_t targetWindowId, DisplayId targetDisplayId);
 
     /*
+     * Sub Window
+     */
+    WMError SetParentWindowInner(const sptr<SceneSession>& subSession,
+        const sptr<SceneSession>& oldParentSession, const sptr<SceneSession>& newParentSession);
+
+    /*
      * Window Immersive
      */
     void UpdateAvoidSessionAvoidArea(WindowType type);
@@ -828,7 +839,7 @@ private:
         REQUIRES(SCENE_GUARD);
     WSError SetBrightness(const sptr<SceneSession>& sceneSession, float brightness);
     void PostBrightnessTask(float brightness);
-    WSError UpdateBrightness(int32_t persistentId, bool onBackGround);
+    WSError UpdateBrightness(int32_t persistentId);
     void SetDisplayBrightness(float brightness);
     float GetDisplayBrightness() const;
     void HandleHideNonSystemFloatingWindows(const sptr<WindowSessionProperty>& property,
@@ -872,6 +883,7 @@ private:
     int32_t GetFoldLowerScreenPosY() const;
     DisplayId UpdateSpecificSessionClientDisplayId(const sptr<WindowSessionProperty>& property);
     void UpdateSessionDisplayIdBySessionInfo(sptr<SceneSession> sceneSession, const SessionInfo& sessionInfo);
+    bool IsNeedUpdateBrightness(float brightness);
 
     /*
      * Window Rotate Animation
@@ -936,6 +948,7 @@ private:
     SessionInfo RecoverSessionInfo(const sptr<WindowSessionProperty>& property);
     bool IsNeedRecover(const int32_t persistentId);
     WSError CheckSessionPropertyOnRecovery(const sptr<WindowSessionProperty>& property, bool isSpecificSession);
+    void UpdateRecoverPropertyForSuperFold(const sptr<WindowSessionProperty>& property);
 
     /*
      * Gesture Back

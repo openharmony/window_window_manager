@@ -46,7 +46,7 @@ protected:
     FoldStatus GetCurrentState();
     void SetTentMode(int tentType);
     std::recursive_mutex mutex_;
-    int tentModeType_ = -1;
+    int tentModeType_ = 0;
 
 private:
     void ReportNotifyFoldStatusChange(int32_t currentStatus, int32_t nextStatus, float postureAngle);
