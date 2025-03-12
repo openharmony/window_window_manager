@@ -84,7 +84,7 @@ bool WindowInputIntercept::IsInputIntercept(const std::shared_ptr<MMI::PointerEv
     }
     if (consumer == nullptr) {
         TLOGW(WmsLogTag::WMS_EVENT, "IsInputInterceptByPointerEvent consumer is null. the deviceId is %{public}d",
-                pointerEvent->GetDeviceId());
+            pointerEvent->GetDeviceId());
         return false;
     }
 
