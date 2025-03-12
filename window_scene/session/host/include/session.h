@@ -368,6 +368,7 @@ public:
     WSError CompatibleFullScreenRecover();
     WSError CompatibleFullScreenMinimize();
     WSError CompatibleFullScreenClose();
+    WSError PcAppInPadNormalClose();
     WSError SetIsPcAppInPad(bool enable);
     bool NeedNotify() const;
     void SetNeedNotify(bool needNotify);
@@ -628,6 +629,7 @@ public:
     sptr<Session> GetMainSession() const;
     sptr<Session> GetMainOrFloatSession() const;
     bool IsPcWindow() const;
+    bool IsAncestorsSession(int ancestorsId) const;
 
     /**
      * Window Property
@@ -784,7 +786,7 @@ protected:
     float clientPivotX_ = 0.0f;
     float clientPivotY_ = 0.0f;
     DisplayId clientDisplayId_ = 0; // Window displayId on the client
-    DisplayId configDisplayId_ = 0;
+    DisplayId configDisplayId_ = DISPLAY_ID_INVALID;
     SuperFoldStatus lastScreenFoldStatus_ = SuperFoldStatus::UNKNOWN;
 
     /*
