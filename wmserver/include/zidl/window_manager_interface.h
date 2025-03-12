@@ -280,6 +280,11 @@ public:
         bool& hasOrNot) { return WMError::WM_OK; }
     virtual WMError GetWindowUIType(WindowUIType& windowUIType) { return WMError::WM_OK; }
     virtual WMError MinimizeByWindowId(const std::vector<int32_t>& windowIds) { return WMError::WM_OK; }
+
+    /*
+     * Sub Window
+     */
+    virtual WMError SetParentWindow(int32_t subWindowId, int32_t newParentWindowId) { return WMError::WM_OK; }
 };
 }
 }

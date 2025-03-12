@@ -448,6 +448,8 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession10, Function
     ASSERT_NE(nullptr, textMenuWindow);
     error = textMenuWindow->Create(abilityContext_, nullptr);
     ASSERT_EQ(error, WMError::WM_OK);
+    ASSERT_EQ(WMError::WM_OK, textMenuWindow->Destroy(true));
+    ASSERT_EQ(WMError::WM_OK, parentWindow->Destroy(true));
 }
 
 /**
@@ -2048,6 +2050,28 @@ HWTEST_F(WindowSceneSessionImplTest, CompatibleFullScreenClose, Function | Small
 
     window->property_->SetCompatibleModeInPc(true);
     ASSERT_EQ(WSError::WS_OK, window->CompatibleFullScreenClose());
+}
+
+/**
+ * @tc.name: PcAppInPadNormalClose
+ * @tc.desc: PcAppInPadNormalClose test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, PcAppInPadNormalClose, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("PcAppInPadNormalClose");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_WINDOW, window->PcAppInPadNormalClose());
+
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_WINDOW, window->PcAppInPadNormalClose());
+
+    window->property_->SetIsPcAppInPad(true);
+    ASSERT_EQ(WSError::WS_OK, window->PcAppInPadNormalClose());
 }
 
 /**

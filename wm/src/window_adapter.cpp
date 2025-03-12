@@ -103,6 +103,14 @@ WMError WindowAdapter::DestroyWindow(uint32_t windowId)
     return wmsProxy->DestroyWindow(windowId);
 }
 
+WMError WindowAdapter::SetParentWindow(int32_t subWindowId, int32_t newParentWindowId)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->SetParentWindow(subWindowId, newParentWindowId);
+}
+
 WMError WindowAdapter::RequestFocus(uint32_t windowId)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);

@@ -240,6 +240,10 @@ public:
     }
     virtual ScreenCombination GetScreenCombination(ScreenId screenId) { return ScreenCombination::SCREEN_ALONE; }
     virtual bool GetIsRealScreen(ScreenId screenId) { return false; }
+    virtual DMError SetSystemKeyboardStatus(bool isOn = false) override
+    {
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 };
 } // namespace Rosen
 } // namespace OHOS
