@@ -684,6 +684,20 @@ struct AppWindowSceneConfig {
     WindowImmersive windowImmersive_;
 };
 
+struct SingleHandCompatibleModeConfig {
+    bool enabled = false;
+    float singleHandScale = 1.0f;
+    float heightChangeRatio = 1.0f;
+    float widthChangeRatio = 1.0f;
+};
+
+struct SingleHandScreenInfo {
+    int32_t scaleRatio;
+    int32_t scalePivotX;
+    int32_t scalePivotY;
+    SingleHandMode mode;
+};
+
 struct DeviceScreenConfig {
     std::string rotationPolicy_ = "11"; // default use phone policy
     std::string defaultRotationPolicy_ = "1"; // default unspecified policy
