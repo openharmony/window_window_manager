@@ -855,26 +855,9 @@ std::shared_ptr<Media::PixelMap> WindowImpl::Snapshot()
     return pixelMap;
 }
 
-WMError WindowImpl::SnapshotSkipPrivacy(std::shared_ptr<Media::PixelMap>& pixelMap)
+WMError WindowImpl::snapshotIgnorePrivacy(std::shared_ptr<Media::PixelMap>& pixelMap)
 {
-    if (!IsWindowValid()) {
-        return WMError::WM_ERROR_INVALID_WINDOW;
-    }
-    std::shared_ptr<SurfaceCaptureFuture> callback = std::make_shared<SurfaceCaptureFuture>();
-    RSSurfaceCaptureConfig config = { .captureType = SurfaceCaptureType::UICAPTURE }; // captureType SELF_CAPTURE
-    auto isSucceeded = RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode_, callback, config);
-    if (!isSucceeded) {
-        WLOGFE("Failed to TakeSurfaceCapture!");
-        return WMError::WM_ERROR_INVALID_OPERATION;
-    }
-    pixelMap = callback->GetResult(2000); // wait for <= 2000ms
-    if (pixelMap != nullptr) {
-        WLOGFI("Snapshot succeed, save WxH=%{public}dx%{public}d", pixelMap->GetWidth(), pixelMap->GetHeight());
-    } else {
-        WLOGFE("Failed to get pixelmap, return nullptr!");
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    return WMError::WM_OK;
+    return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
 }
 
 void WindowImpl::DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)

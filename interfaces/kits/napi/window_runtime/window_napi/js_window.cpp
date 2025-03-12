@@ -5120,11 +5120,11 @@ napi_value JsWindow::Snapshot(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnSnapshot(env, info) : nullptr;
 }
 
-napi_value JsWindow::SnapshotSkipPrivacy(napi_env env, napi_callback_info info)
+napi_value JsWindow::snapshotIgnorePrivacy(napi_env env, napi_callback_info info)
 {
-    WLOGI("SnapshotSkipPrivacy");
+    WLOGI("snapshotIgnorePrivacy");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
-    return (me != nullptr) ? me->OnSnapshotSkipPrivacy(env, info) : nullptr;
+    return (me != nullptr) ? me->snapshotIgnorePrivacy(env, info) : nullptr;
 }
 
 napi_value JsWindow::OnSetForbidSplitMove(napi_env env, napi_callback_info info)
@@ -5219,7 +5219,7 @@ napi_value JsWindow::OnSnapshot(napi_env env, napi_callback_info info)
     return result;
 }
 
-napi_value JsWindow::OnSnapshotSkipPrivacy(napi_env env, napi_callback_info info)
+napi_value JsWindow::snapshotIgnorePrivacy(napi_env env, napi_callback_info info)
 {
     wptr<Window> weakToken(windowToken_);
     NapiAsyncTask::CompleteCallback complete =
@@ -5232,23 +5232,23 @@ napi_value JsWindow::OnSnapshotSkipPrivacy(napi_env env, napi_callback_info info
             }
 
             std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
-            WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SnapshotSkipPrivacy(pixelMap));
+            WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->snapshotIgnorePrivacy(pixelMap));
             if (ret == WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT) {
                 task.Reject(env, JsErrUtils::CreateJsError(env, ret));
                 WLOGFE("device not support");
                 return;
             } else if (ret == WmErrorCode::WM_ERROR_STATE_ABNORMALLY) {
                 task.Reject(env, JsErrUtils::CreateJsError(env, ret));
-                WLOGFE("window snapshotSkipPrivacy get pixelmap is null");
+                WLOGFE("window snapshotIgnorePrivacy get pixelmap is null");
                 return;
             }
 
             auto nativePixelMap = Media::PixelMapNapi::CreatePixelMap(env, pixelMap);
             if (nativePixelMap == nullptr) {
-                WLOGFE("window snapshotSkipPrivacy get nativePixelMap is null");
+                WLOGFE("window snapshotIgnorePrivacy get nativePixelMap is null");
             }
             task.Resolve(env, nativePixelMap);
-            WLOGI("Window [%{public}u, %{public}s] OnSnapshotSkipPrivacy, WxH=%{public}dx%{public}d",
+            WLOGI("Window [%{public}u, %{public}s] OnsnapshotIgnorePrivacy, WxH=%{public}dx%{public}d",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(),
                 pixelMap->GetWidth(), pixelMap->GetHeight());
         };
@@ -5258,7 +5258,7 @@ napi_value JsWindow::OnSnapshotSkipPrivacy(napi_env env, napi_callback_info info
     napi_value lastParam = (argc == 0) ? nullptr :
         ((argv[0] != nullptr && GetType(env, argv[0]) == napi_function) ? argv[0] : nullptr);
     napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JsWindow::OnSnapshotSkipPrivacy",
+    NapiAsyncTask::Schedule("JsWindow::OnsnapshotIgnorePrivacy",
         env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
@@ -7945,7 +7945,7 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "translate", moduleName, JsWindow::Translate);
     BindNativeFunction(env, object, "getTransitionController", moduleName, JsWindow::GetTransitionController);
     BindNativeFunction(env, object, "snapshot", moduleName, JsWindow::Snapshot);
-    BindNativeFunction(env, object, "snapshotSkipPrivacy", moduleName, JsWindow::SnapshotSkipPrivacy);
+    BindNativeFunction(env, object, "snapshotIgnorePrivacy", moduleName, JsWindow::snapshotIgnorePrivacy);
     BindNativeFunction(env, object, "setCornerRadius", moduleName, JsWindow::SetCornerRadius);
     BindNativeFunction(env, object, "setWindowCornerRadius", moduleName, JsWindow::SetWindowCornerRadius);
     BindNativeFunction(env, object, "getWindowCornerRadius", moduleName, JsWindow::GetWindowCornerRadius);
