@@ -306,7 +306,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest11, Function | SmallTest | Level2)
     code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_OCCUPIED_AREA_AND_RECT);
     windowStub_->OnRemoteRequest(code, data, reply, option);
     code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_ACTIVE_STATUS);
-    
+
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_NE(res, 10);
 }
