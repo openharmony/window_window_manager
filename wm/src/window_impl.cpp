@@ -1762,6 +1762,7 @@ WMError WindowImpl::Show(uint32_t reason, bool withAnimation, bool withFocus)
             return WMError::WM_OK;
         } else {
             NotifyAfterForeground(true, false);
+            NotifyAfterDidForeground(reason);
         }
         return WMError::WM_OK;
     }
@@ -1775,7 +1776,7 @@ WMError WindowImpl::Show(uint32_t reason, bool withAnimation, bool withFocus)
     ret = SingletonContainer::Get<WindowAdapter>().AddWindow(property_);
     RecordLifeCycleExceptionEvent(LifeCycleEvent::SHOW_EVENT, ret);
     if (ret == WMError::WM_OK) {
-        UpdateWindowStateWhenShow();
+        UpdateWindowStateWhenShow(reason);
     } else {
         NotifyForegroundFailed(ret);
         WLOGFE("show window id:%{public}u errCode:%{public}d", property_->GetWindowId(), static_cast<int32_t>(ret));
@@ -3649,7 +3650,7 @@ void WindowImpl::UpdateWindowState(WindowState state)
     }
 }
 
-WmErrorCode WindowImpl::UpdateWindowStateWhenShow()
+WmErrorCode WindowImpl::UpdateWindowStateWhenShow(uint32_t reason)
 {
     state_ = WindowState::STATE_SHOWN;
     if (WindowHelper::IsMainWindow(property_->GetWindowType()) ||
@@ -3657,6 +3658,7 @@ WmErrorCode WindowImpl::UpdateWindowStateWhenShow()
         // update subwindow subWindowState_ and notify subwindow shown or not
         UpdateSubWindowStateAndNotify(GetWindowId());
         NotifyAfterForeground();
+        NotifyAfterDidForeground(reason);
     } else if (GetType() == WindowType::WINDOW_TYPE_APP_COMPONENT) {
         subWindowState_ = WindowState::STATE_SHOWN;
         NotifyAfterForeground();
@@ -3681,7 +3683,7 @@ WmErrorCode WindowImpl::UpdateWindowStateWhenShow()
     return WmErrorCode::WM_OK;
 }
 
-WmErrorCode WindowImpl::UpdateWindowStateWhenHide()
+WmErrorCode WindowImpl::UpdateWindowStateWhenHide(uint32_t reason)
 {
     state_ = WindowState::STATE_HIDDEN;
     if (WindowHelper::IsSystemMainWindow(property_->GetWindowType()) ||
@@ -3689,6 +3691,7 @@ WmErrorCode WindowImpl::UpdateWindowStateWhenHide()
         // main window need to update subwindow subWindowState_ and notify subwindow shown or not
         UpdateSubWindowStateAndNotify(GetWindowId());
         NotifyAfterBackground();
+        NotifyAfterDidBackground(reason);
     } else if (GetType() == WindowType::WINDOW_TYPE_APP_COMPONENT) {
         subWindowState_ = WindowState::STATE_HIDDEN;
         NotifyAfterBackground();
@@ -3918,6 +3921,30 @@ void WindowImpl::NotifyAfterForeground(bool needNotifyListeners, bool needNotify
     }
 }
 
+void WindowImpl::NotifyAfterDidForeground(uint32_t reason)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "reason: %{public}d", reason);
+    if (reason != static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL)) {
+        TLOGI(WmsLogTag::WMS_LIFE, "reason: %{public}d no need notify did foreground", reason);
+        return;
+    }
+    if (handler_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "handler is nullptr");
+        return;
+    }
+    const char* const where = __func__;
+    handler_->PostTask([weak = wptr(this), where] {
+        auto window = weak.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s window is nullptr", where);
+            return;
+        }
+        TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s execute", where);
+        auto lifecycleListeners = window->GetListeners<IWindowLifeCycle>();
+        CALL_LIFECYCLE_LISTENER(AfterDidForeground, lifecycleListeners);
+    }, where, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+}
+
 void WindowImpl::NotifyAfterBackground(bool needNotifyListeners, bool needNotifyUiContent)
 {
     if (needNotifyListeners) {
@@ -3927,6 +3954,30 @@ void WindowImpl::NotifyAfterBackground(bool needNotifyListeners, bool needNotify
     if (needNotifyUiContent) {
         CALL_UI_CONTENT(Background);
     }
+}
+
+void WindowImpl::NotifyAfterDidBackground(uint32_t reason)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "reason: %{public}d", reason);
+    if (reason != static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL)) {
+        TLOGI(WmsLogTag::WMS_LIFE, "reason: %{public}d no need notify did background", reason);
+        return;
+    }
+    if (handler_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "handler is nullptr");
+        return;
+    }
+    const char* const where = __func__;
+    handler_->PostTask([weak = wptr(this), where] {
+        auto window = weak.promote();
+        if (window == nullptr) {
+            TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s window is nullptr", where);
+            return;
+        }
+        TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s execute", where);
+        auto lifecycleListeners = window->GetListeners<IWindowLifeCycle>();
+        CALL_LIFECYCLE_LISTENER(AfterDidBackground, lifecycleListeners);
+    }, where, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
 void WindowImpl::NotifyAfterFocused()
