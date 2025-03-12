@@ -24,11 +24,11 @@ WM_IMPLEMENT_SINGLE_INSTANCE(WindowInputIntercept)
 void WindowInputIntercept::RegisterInputEventIntercept(const int32_t deviceId,
                                                        const std::shared_ptr<IInputEventInterceptConsumer>& consumer)
 {
-    std::lock_guard<std::mutex> lock(registerMutex_);
     if (consumer == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "GameController call RegisterInputEventIntercept failed. the consumer is nullptr");
         return;
     }
+    std::lock_guard<std::mutex> lock(registerMutex_);
     auto iter = inputIntercept_.find(deviceId);
     if (iter == inputIntercept_.end()) {
         TLOGI(WmsLogTag::WMS_EVENT, "GameController call RegisterInputEventIntercept success."
