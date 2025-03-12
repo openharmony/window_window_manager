@@ -4833,8 +4833,10 @@ WMError WindowSceneSessionImpl::RegisterWindowAttachStateChangeListener(
         TLOGE(WmsLogTag::WMS_SUB, "id: %{public}d, listener is null", GetPersistentId());
         return WMError::WM_ERROR_NULLPTR;
     }
-    std::lock_guard<std::mutex> lockListener(windowAttachStateChangeListenerMutex_);
-    windowAttachStateChangeListener_ = listener;
+    {
+        std::lock_guard<std::mutex> lockListener(windowAttachStateChangeListenerMutex_);
+        windowAttachStateChangeListener_ = listener;
+    }
     TLOGD(WmsLogTag::WMS_SUB, "id: %{public}d listener registered", GetPersistentId());
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
@@ -4844,8 +4846,10 @@ WMError WindowSceneSessionImpl::RegisterWindowAttachStateChangeListener(
 
 WMError WindowSceneSessionImpl::UnregisterWindowAttachStateChangeListener()
 {
-    std::lock_guard<std::mutex> lockListener(windowAttachStateChangeListenerMutex_);
-    windowAttachStateChangeListener_ = nullptr;
+    {
+        std::lock_guard<std::mutex> lockListener(windowAttachStateChangeListenerMutex_);
+        windowAttachStateChangeListener_ = nullptr;
+    }
     TLOGD(WmsLogTag::WMS_SUB, "id: %{public}d listener unregistered", GetPersistentId());
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
