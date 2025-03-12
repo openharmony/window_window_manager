@@ -147,7 +147,7 @@ WSError SubSession::Hide(bool needSyncHide)
 WSError SubSession::ProcessPointDownSession(int32_t posX, int32_t posY)
 {
     const auto& id = GetPersistentId();
-    WLOGFI("id: %{public}d, type: %{public}d", id, GetWindowType());
+    TLOGD(WmsLogTag::WMS_INPUT_KEY_FLOW, "id:%{public}d, type:%{public}d", id, GetWindowType());
     auto isModal = IsModal();
     auto parentSession = GetParentSession();
     if (!isModal && parentSession && parentSession->CheckDialogOnForeground()) {
