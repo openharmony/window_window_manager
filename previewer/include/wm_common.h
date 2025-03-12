@@ -1205,7 +1205,7 @@ enum class BackupAndRestoreType : int32_t {
 /**
  * @brief Windowinfokey
  */
- enum class WindowInfoKey : int32_t {
+enum class WindowInfoKey : int32_t {
     START = 0,
     WINDOW_ID = START,
     BUNDLE_NAME,

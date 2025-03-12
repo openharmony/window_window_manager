@@ -741,8 +741,8 @@ WMError WindowManager::RegisterVisibilityStateChangedListener(const sptr<IWindow
         WLOGFW("RegisterWindowManagerAgent failed!");
         pImpl_->windowVisibilityStateListenerAgent_ = nullptr;
     } else {
-        auto iter = std::find(pImpl_->windowVisibilityStateListeners_.begin(), pImpl_->windowVisibilityStateListeners_.end(),
-            listener);
+        auto iter = std::find(pImpl_->windowVisibilityStateListeners_.begin(),
+            pImpl_->windowVisibilityStateListeners_.end(), listener);
         if (iter != pImpl_->windowVisibilityStateListeners_.end()) {
             WLOGFW("Listener is already registered.");
             return WMError::WM_OK;
@@ -1173,7 +1173,7 @@ void WindowManager::UpdateWindowVisibilityInfo(
         windowChangeInfo.emplace(WindowInfoKey::APP_INDEX, info->appIndex_);
         windowChangeInfo.emplace(WindowInfoKey::VISIBILITY_STATE, info->visibilityState_);
         pImpl_->NotifyWindowVisibilityStateChanged(windowChangeInfo);
-    } 
+    }
 }
 
 void WindowManager::UpdateWindowDrawingContentInfo(
@@ -1639,12 +1639,10 @@ WMError WindowManager::MinimizeByWindowId(const std::vector<int32_t>& windowIds)
     return ret;
 }
 
-
-
 WMError WindowManager::ProcessRegisterWindowInfoChangeCallback(WindowInfoKey observedInfo,
     const sptr<IWindowInfoChangedListener>& listener)
 {
-    switch(static_cast<uint32_t>(observedInfo)) {
+    switch (static_cast<uint32_t>(observedInfo)) {
         case static_cast<uint32_t>(WindowInfoKey::VISIBILITY_STATE) :
             return RegisterVisibilityStateChangedListener(listener);
         default:
@@ -1656,7 +1654,7 @@ WMError WindowManager::ProcessRegisterWindowInfoChangeCallback(WindowInfoKey obs
 WMError WindowManager::ProcessUnregisterWindowInfoChangeCallback(WindowInfoKey observedInfo,
     const sptr<IWindowInfoChangedListener>& listener)
 {
-    switch(static_cast<uint32_t>(observedInfo)) {
+    switch (static_cast<uint32_t>(observedInfo)) {
         case static_cast<uint32_t>(WindowInfoKey::VISIBILITY_STATE) :
             return UnregisterVisibilityStateChangedListener(listener);
         default:
