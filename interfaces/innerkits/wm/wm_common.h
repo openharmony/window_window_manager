@@ -1519,7 +1519,7 @@ struct WindowMetaInfo : public Parcelable {
     {
         WindowMetaInfo* windowMetaInfo = new WindowMetaInfo();
         if (!parcel.ReadInt32(windowMetaInfo->windowId) || !parcel.ReadString(windowMetaInfo->windowName) ||
-            !parcel.ReadString(windowMetaInfo->bundleName) || !parcel.ReadString(windowMetaInfo->abilityName)
+            !parcel.ReadString(windowMetaInfo->bundleName) || !parcel.ReadString(windowMetaInfo->abilityName) ||
             !parcel.ReadInt32(WindowMetaInfo->appIndex)) {
             delete windowMetaInfo;
             return nullptr;
