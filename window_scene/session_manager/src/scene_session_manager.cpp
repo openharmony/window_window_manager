@@ -2544,7 +2544,7 @@ bool SceneSessionManager::IsPcSceneSessionLifecycle(const sptr<SceneSession>& sc
 {
     bool isPcAppInPad = sceneSession->GetSessionProperty()->GetIsPcAppInPad();
     bool isAppSupportPhoneInPc = sceneSession->GetSessionProperty()->GetIsAppSupportPhoneInPc();
-    return (systemConfig_.backgroundswitch && !isAppSupportPhoneInPc) || isPcAppInPad;
+    return (systemConfig_.backgroundswitch && !isAppSupportPhoneInPc) || (isPcAppInPad && !IsScreenLocked());
 }
 
 void SceneSessionManager::InitSnapshotCache()
@@ -2636,7 +2636,7 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
         if (persistentId == brightnessSessionId_) {
             auto displayId = sceneSession->GetSessionProperty()->GetDisplayId();
             auto focusedSessionId = windowFocusController_->GetFocusedSessionId(displayId);
-            UpdateBrightness(focusedSessionId, true);
+            UpdateBrightness(focusedSessionId);
         }
         if (IsPcSceneSessionLifecycle(sceneSession)) {
             TLOGNI(WmsLogTag::WMS_MAIN, "Notify session background: %{public}d", persistentId);
@@ -4833,7 +4833,7 @@ void SceneSessionManager::PostBrightnessTask(float brightness)
     }
 }
 
-WSError SceneSessionManager::UpdateBrightness(int32_t persistentId, bool onBackGround)
+WSError SceneSessionManager::UpdateBrightness(int32_t persistentId)
 {
     auto sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
@@ -4849,7 +4849,7 @@ WSError SceneSessionManager::UpdateBrightness(int32_t persistentId, bool onBackG
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Brightness: [%{public}f, %{public}f]", GetDisplayBrightness(), brightness);
     bool isPC = systemConfig_.IsPcWindow();
     if (std::fabs(brightness - UNDEFINED_BRIGHTNESS) < std::numeric_limits<float>::min()) {
-        if (onBackGround && GetDisplayBrightness() != brightness) {
+        if (IsNeedUpdateBrightness(brightness)) {
             TLOGI(WmsLogTag::WMS_ATTRIBUTE, "adjust brightness with default value");
             if (!isPC) {
                 DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().RestoreBrightness();
@@ -4858,7 +4858,7 @@ WSError SceneSessionManager::UpdateBrightness(int32_t persistentId, bool onBackG
             brightnessSessionId_ = INVALID_WINDOW_ID;
         }
     } else {
-        if (GetDisplayBrightness() != brightness) {
+        if (std::fabs(brightness - GetDisplayBrightness()) > std::numeric_limits<float>::min()) {
             TLOGI(WmsLogTag::WMS_ATTRIBUTE, "adjust brightness with value");
             if (isPC) {
                 DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().SetBrightness(
@@ -4872,6 +4872,18 @@ WSError SceneSessionManager::UpdateBrightness(int32_t persistentId, bool onBackG
         brightnessSessionId_ = sceneSession->GetPersistentId();
     }
     return WSError::WS_OK;
+}
+
+bool SceneSessionManager::IsNeedUpdateBrightness(float brightness)
+{
+    if (std::fabs(brightness - GetDisplayBrightness()) < std::numeric_limits<float>::min()) {
+        return false;
+    }
+    auto sceneSession = GetSceneSession(brightnessSessionId_);
+    if (sceneSession != nullptr && sceneSession->IsSessionForeground()) {
+        return false;
+    }
+    return true;
 }
 
 int32_t SceneSessionManager::GetCurrentUserId() const
@@ -6466,7 +6478,7 @@ void SceneSessionManager::NotifyFocusStatus(const sptr<SceneSession>& sceneSessi
         if (IsSessionVisibleForeground(sceneSession)) {
             NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_FOCUSED);
         }
-        UpdateBrightness(focusGroup->GetFocusedSessionId(), false);
+        UpdateBrightness(focusGroup->GetFocusedSessionId());
         FocusIDChange(sceneSession->GetPersistentId(), sceneSession);
     }
     // notify window manager
@@ -6564,7 +6576,7 @@ WSError SceneSessionManager::UpdateFocus(int32_t persistentId, bool isFocused)
         auto focusedSessionId = windowFocusController_->GetFocusedSessionId(displayId);
         if (isFocused) {
             SetFocusedSessionId(displayId, persistentId);
-            UpdateBrightness(focusedSessionId, false);
+            UpdateBrightness(focusedSessionId);
             FocusIDChange(persistentId, sceneSession);
         } else if (persistentId == GetFocusedSessionId()) {
             SetFocusedSessionId(displayId, INVALID_SESSION_ID);

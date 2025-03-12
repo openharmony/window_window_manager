@@ -103,6 +103,7 @@
             "//foundation/window/window_manager/interfaces/kits/js/declaration:window",
             "//foundation/window/window_manager/dm:libdm",
             "//foundation/window/window_manager/dm:libdm_ndk",
+            "//foundation/window/window_manager/edidparse:libedid_parse",
             "//foundation/window/window_manager/extension/extension_connection:libwindow_extension_client",
             "//foundation/window/window_manager/extension/modal_system_ui_extension:libmodal_system_ui_extension_client",
             "//foundation/window/window_manager/extension/window_extension:libwindow_extension",
@@ -202,6 +203,15 @@
               "header_files": [
               ],
               "header_base": "//foundation/window/window_manager/interfaces/kits/dmndk/dm"
+            }
+          },
+          {
+            "type": "so",
+            "name": "//foundation/window/window_manager/edidparse:libedid_parse",
+            "header": {
+              "header_files": [
+              ],
+              "header_base": "//foundation/window/window_manager/interfaces/innerkits/edidparse"
             }
           },
           {

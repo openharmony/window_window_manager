@@ -768,6 +768,7 @@ void ScreenSessionManager::NotifyScreenModeChange(ScreenId disconnectedScreenId)
             if (disconnectedScreenId == screenId) {
                 continue;
             }
+            TLOGI(WmsLogTag::DMS, "screenId:%{public}" PRIu64, screenId);
             auto screenSession = GetScreenSession(screenId);
             screenInfos.emplace_back(screenSession->ConvertToScreenInfo());
         }
@@ -959,12 +960,12 @@ bool ScreenSessionManager::RecoverRestoredMultiScreenMode(sptr<ScreenSession> sc
         info.secondaryScreenOption.screenId_ = screenSession->GetScreenId();
     }
     if (info.multiScreenMode == MultiScreenMode::SCREEN_MIRROR) {
-        SetMultiScreenMode(info.mainScreenOption.screenId_, info.secondaryScreenOption.screenId_,
-            info.multiScreenMode);
+        SetMultiScreenMode(info.mainScreenOption.screenId_, info.secondaryScreenOption.screenId_, info.multiScreenMode);
         TLOGW(WmsLogTag::DMS, "mirror, return befor OnScreenConnectionChanged");
         ReportHandleScreenEvent(ScreenEvent::CONNECTED, ScreenCombination::SCREEN_MIRROR);
         return true;
     }
+    NotifyScreenModeChange();
     if (screenSession->GetScreenCombination() == ScreenCombination::SCREEN_MIRROR) {
         SetMultiScreenMode(info.mainScreenOption.screenId_, info.secondaryScreenOption.screenId_,
             info.multiScreenMode);
