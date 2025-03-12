@@ -7123,7 +7123,7 @@ bool SceneSession::CalcNewWindowRectIfNeed(DMRect& availableArea, float newVpr)
         TLOGD(WmsLogTag::WMS_LAYOUT_PC, "currVpr: %{public}f Id: %{public}u", currVpr, GetPersistentId());
     }
     if (MathHelper::NearZero(currVpr - newVpr) || MathHelper::NearZero(currVpr)) {
-        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "need not update new rect, currVpr: %{public}f , newVpr: %{public}f, "
+        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "need not update new rect, currVpr: %{public}f newVpr: %{public}f "
             "Id: %{public}u", currVpr, newVpr, GetPersistentId());
         return false;
     }
