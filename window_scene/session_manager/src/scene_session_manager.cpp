@@ -6055,11 +6055,13 @@ sptr<SceneSession> SceneSessionManager::GetNextFocusableSession(DisplayId displa
     TLOGD(WmsLogTag::WMS_FOCUS, "id: %{public}d", persistentId);
     bool previousFocusedSessionFound = false;
     sptr<SceneSession> ret = nullptr;
-    auto func = [this, persistentId, &previousFocusedSessionFound, &ret, displayId](sptr<SceneSession> session) {
+    DisplayId displayGroupId = windowFocusController_->GetDisplayGroupId(displayId);
+    auto func = [this, persistentId, &previousFocusedSessionFound, &ret, displayGroupId](sptr<SceneSession> session) {
         if (session == nullptr) {
             return false;
         }
-        if (session->GetSessionProperty()->GetDisplayId() != displayId) {
+        if (windowFocusController_->GetDisplayGroupId(session->GetSessionProperty()->GetDisplayId()) !=
+            displayGroupId) {
             return false;
         }
         if (session->GetForceHideState() != ForceHideState::NOT_HIDDEN) {
@@ -6088,11 +6090,13 @@ sptr<SceneSession> SceneSessionManager::GetTopNearestBlockingFocusSession(Displa
     bool includingAppSession)
 {
     sptr<SceneSession> ret = nullptr;
-    auto func = [this, &ret, zOrder, includingAppSession, displayId](sptr<SceneSession> session) {
+    DisplayId displayGroupId = windowFocusController_->GetDisplayGroupId(displayId);
+    auto func = [this, &ret, zOrder, includingAppSession, displayGroupId](sptr<SceneSession> session) {
         if (session == nullptr) {
             return false;
         }
-        if (session->GetSessionProperty()->GetDisplayId() != displayId) {
+        if (windowFocusController_->GetDisplayGroupId(session->GetSessionProperty()->GetDisplayId()) !=
+            displayGroupId) {
             return false;
         }
         uint32_t sessionZOrder = session->GetZOrder();
@@ -6132,7 +6136,8 @@ sptr<SceneSession> SceneSessionManager::GetTopFocusableNonAppSession()
         if (session == nullptr) {
             return false;
         }
-        if (session->GetSessionProperty()->GetDisplayId() != DEFAULT_DISPLAY_ID) {
+        if (windowFocusController_->GetDisplayGroupId(session->GetSessionProperty()->GetDisplayId()) !=
+            DEFAULT_DISPLAY_ID) {
             return false;
         }
         if (session->IsAppSession()) {
