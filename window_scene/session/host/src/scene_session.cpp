@@ -140,6 +140,7 @@ WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
         if (session->pcFoldScreenController_) {
             session->pcFoldScreenController_->OnConnect();
         }
+        session->SaveLastDensity();
         return ret;
     }, __func__);
 }
@@ -3087,6 +3088,7 @@ void SceneSession::HandleMoveDragEnd(WSRect& rect, SizeChangeReason reason)
          WindowHelper::IsSystemWindow(GetWindowType())) && !WindowHelper::IsInputWindow(GetWindowType())) {
         NotifySessionRectChange(rect, reason);
     } else {
+        displayChangedByMoveDrag_ = true;
         NotifySessionRectChange(rect, reason, moveDragController_->GetMoveDragEndDisplayId());
         CheckSubSessionShouldFollowParent(moveDragController_->GetMoveDragEndDisplayId());
     }
@@ -7066,6 +7068,119 @@ void SceneSession::NotifyKeyboardDidShowRegistered(bool registered)
 void SceneSession::NotifyKeyboardDidHideRegistered(bool registered)
 {
     isKeyboardDidHideRegistered_.store(registered);
+}
+
+WSError SceneSession::UpdateDensity()
+{
+    if (systemConfig_.IsPcWindow() && WindowHelper::IsAppWindow(GetWindowType()) &&
+        Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
+        UpdateNewSizeForPCWindow();
+    }
+    SaveLastDensity();
+    return Session::UpdateDensity();
+}
+
+void SceneSession::UpdateNewSizeForPCWindow()
+{
+    if (moveDragController_ && moveDragController_->IsMoveDragHotAreaCrossDisplay()) {
+        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "is move drag to hot area, do nothing.");
+        moveDragController_->SetMoveDragHotAreaCrossDisplay(false);
+        return;
+    }
+
+    if (auto property = GetSessionProperty()) {
+        DisplayId displayId = property->GetDisplayId();
+        auto display = DisplayManager::GetInstance().GetDisplayById(displayId);
+        if (display == nullptr) {
+            TLOGE(WmsLogTag::WMS_LAYOUT_PC, "get available area failed!");
+            return;
+        }
+
+        DMRect availableArea = { 0, 0, 0, 0 };
+        DMError ret = display->GetAvailableArea(availableArea);
+        if (ret != DMError::DM_OK || availableArea.IsUninitializedRect()) {
+            TLOGE(WmsLogTag::WMS_LAYOUT_PC, "get available area failed!");
+            return;
+        }
+
+        float newVpr = display->GetVirtualPixelRatio();
+        if (CalcNewWindowRectIfNeed(availableArea, newVpr)) {
+            NotifySessionRectChange(winRect_, SizeChangeReason::UPDATE_DPI_SYNC);
+            sessionStage_->UpdateRect(winRect_, SizeChangeReason::UPDATE_DPI_SYNC);
+            TLOGI(WmsLogTag::WMS_LAYOUT_PC, "left: %{public}d, top: %{public}d, width: %{public}u, "
+                "height: %{public}u, Id: %{public}u", winRect_.posX_, winRect_.posY_, winRect_.width_,
+                winRect_.height_, GetPersistentId());
+        }
+    }
+    displayChangedByMoveDrag_ = false;
+}
+
+bool SceneSession::CalcNewWindowRectIfNeed(DMRect& availableArea, float newVpr)
+{
+    float currVpr = 0.0f;
+    if (auto property = GetSessionProperty()) {
+        currVpr = property->GetLastLimitsVpr();
+        TLOGD(WmsLogTag::WMS_LAYOUT_PC, "currVpr: %{public}f Id: %{public}u", currVpr, GetPersistentId());
+    }
+    if (MathHelper::NearZero(currVpr - newVpr) || MathHelper::NearZero(currVpr)) {
+        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "need not update new rect, currVpr: %{public}f newVpr: %{public}f "
+            "Id: %{public}u", currVpr, newVpr, GetPersistentId());
+        return false;
+    }
+    int32_t left = winRect_.posX_;
+    int32_t top = winRect_.posY_;
+    uint32_t width = static_cast<uint32_t>(winRect_.width_ * newVpr / currVpr);
+    uint32_t height = static_cast<uint32_t>(winRect_.height_ * newVpr / currVpr);
+    int32_t statusBarHeight = 0;
+    if (isStatusBarVisible_ && IsPrimaryDisplay()) {
+        statusBarHeight = GetStatusBarHeight();
+    }
+    width = MathHelper::Min(width, availableArea.width_);
+    height = MathHelper::Min(height, availableArea.height_);
+    bool needMove = top < statusBarHeight || left < 0 ||
+        top > static_cast<int32_t>(availableArea.height_ - height) ||
+        left > static_cast<int32_t>(availableArea.width_ - width) || displayChangedByMoveDrag_;
+    if (displayChangedByMoveDrag_ && moveDragController_) {
+        int32_t pointerPosX = moveDragController_->GetLastMovePointerPosX();
+        left = pointerPosX - static_cast<int32_t>((pointerPosX -left) * newVpr / currVpr);
+    } else {
+        top = MathHelper::Min(top, static_cast<int32_t>(availableArea.height_ - height));
+        top = MathHelper::Max(top, statusBarHeight);
+        left = MathHelper::Min(left, static_cast<int32_t>(availableArea.width_ - width));
+        left = MathHelper::Max(left, 0);
+    }
+    winRect_.width_ = width;
+    winRect_.height_ = height;
+    if (needMove) {
+        winRect_.posX_ = left;
+        winRect_.posY_ = top;
+    }
+    return true;
+}
+
+bool SceneSession::IsPrimaryDisplay() const
+{
+    if (auto property = GetSessionProperty()) {
+        auto display = DisplayManager::GetInstance().GetPrimaryDisplaySync();
+        if (display == nullptr) {
+            TLOGE(WmsLogTag::WMS_LAYOUT_PC, "display is null.");
+            return false;
+        }
+        if (auto displayInfo = display->GetDisplayInfo()) {
+            return property->GetDisplayId() == displayInfo->GetDisplayId();
+        }
+    }
+    return false;
+}
+
+void SceneSession::SaveLastDensity()
+{
+    if (auto property = GetSessionProperty()) {
+        DisplayId displayId = property->GetDisplayId();
+        if (auto display = DisplayManager::GetInstance().GetDisplayById(displayId)) {
+            property->SetLastLimitsVpr(display->GetVirtualPixelRatio());
+        }
+    }
 }
 
 void SceneSession::NotifyUpdateFlagCallback(NotifyUpdateFlagFunc&& func)
