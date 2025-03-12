@@ -90,8 +90,8 @@ Ace::ContentInfoType GetAceContentInfoType(BackupAndRestoreType type)
     return contentInfoType;
 }
 
-Ace::ViewportConfig FillViewportConfig(Rect rect, float density, int32_t orientation,
-    uint32_t transformHint, uint64_t displayId, KeyFramePolicy& keyFramePolicy)
+Ace::ViewportConfig FillViewportConfig(
+    Rect rect, float density, int32_t orientation, uint32_t transformHint, uint64_t displayId)
 {
     Ace::ViewportConfig config;
     config.SetSize(rect.width_, rect.height_);
@@ -100,8 +100,6 @@ Ace::ViewportConfig FillViewportConfig(Rect rect, float density, int32_t orienta
     config.SetOrientation(orientation);
     config.SetTransformHint(transformHint);
     config.SetDisplayId(displayId);
-    config.SetKeyFrameConfig(keyFramePolicy.running_, keyFramePolicy.animationDuration_,
-        keyFramePolicy.animationDelay_);
     return config;
 }
 }
@@ -1300,7 +1298,9 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
     if (auto hostSession = GetHostSession()) {
         hostSession->GetKeyFramePolicy(keyFramePolicy);
     }
-    const auto& config = FillViewportConfig(rect, density, orientation, transformHint, GetDisplayId(), keyFramePolicy);
+    auto config = FillViewportConfig(rect, density, orientation, transformHint, GetDisplayId());
+    config.SetKeyFrameConfig(keyFramePolicy.running_, keyFramePolicy.animationDuration_,
+        keyFramePolicy.animationDelay_);
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
     if (uiContent == nullptr) {
         WLOGFW("uiContent is null!");
