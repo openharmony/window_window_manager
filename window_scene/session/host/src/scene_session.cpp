@@ -231,13 +231,13 @@ bool SceneSession::IsShowOnLockScreen(uint32_t lockScreenZOrder)
 
     // current window on lock screen jurded by zorder
     if (zOrder_ >= lockScreenZOrder) {
-        TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: zOrder_ is more than lockScreenZOrder");
+        TLOGI(WmsLogTag::WMS_UIEXT, "zOrder >= lockScreenZOrder");
         return true;
     }
 
     if (zOrder_ == 0) {
         if (auto mainSession = GetMainSession()) {
-            TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: mainSession zOrder_: %{public}d", mainSession->GetZOrder());
+            TLOGI(WmsLogTag::WMS_UIEXT, "mainSession zOrder=%{public}d", mainSession->GetZOrder());
             return mainSession->GetZOrder() >= lockScreenZOrder;
         }
     }
@@ -247,7 +247,7 @@ bool SceneSession::IsShowOnLockScreen(uint32_t lockScreenZOrder)
 void SceneSession::AddExtensionTokenInfo(const UIExtensionTokenInfo& tokenInfo)
 {
     extensionTokenInfos_.push_back(tokenInfo);
-    TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: canShowOnLockScreen: %{public}u, persistentId: %{public}d",
+    TLOGI(WmsLogTag::WMS_UIEXT, "can show:%{public}u, id: %{public}d",
         tokenInfo.canShowOnLockScreen, GetPersistentId());
 }
 
