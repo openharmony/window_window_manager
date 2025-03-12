@@ -34,6 +34,8 @@ constexpr int DEFALUT_DISPLAYID = 0;
 constexpr int EMPTY_FOCUS_WINDOW_ID = -1;
 constexpr int INVALID_PERSISTENT_ID = 0;
 constexpr int DEFAULT_SCREEN_POS = 0;
+constexpr int DEFAULT_SCREEN_SCALE = 100;
+constexpr int DEFAULT_EXPAND_HEIGHT = 0;
 
 bool IsEqualUiExtentionWindowInfo(const std::vector<MMI::WindowInfo>& a, const std::vector<MMI::WindowInfo>& b);
 constexpr unsigned int TRANSFORM_DATA_LEN = 9;
@@ -228,9 +230,15 @@ void SceneInputManager::ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& dis
         std::vector<float> transformData(transform.GetData(), transform.GetData() + TRANSFORM_DATA_LEN);
         int32_t screenOneHandX = DEFAULT_SCREEN_POS;
         int32_t screenOneHandY = DEFAULT_SCREEN_POS;
+        int32_t scalePercent = DEFAULT_SCREEN_SCALE;
+        int32_t expandHeight = DEFAULT_EXPAND_HEIGHT;
         if (screenId == ScreenSessionManagerClient::GetInstance().GetDefaultScreenId()) {
-            screenOneHandX = SceneSessionManager::GetInstance().GetNormalSingleHandTransform().posX;
-            screenOneHandY = SceneSessionManager::GetInstance().GetNormalSingleHandTransform().posY;
+            SingleHandTransform singleHandTransform = SceneSessionManager::GetInstance().GetNormalSingleHandTransform();
+            WSRect originRect = SceneSessionManager::GetInstance().GetOriginRect();
+            screenOneHandX = singleHandTransform.posX;
+            screenOneHandY = singleHandTransform.posY;
+            scalePercent = singleHandTransform.scaleX * DEFAULT_SCREEN_SCALE;
+            expandHeight = screenProperty.GetBounds().rect_.GetHeight() - originRect.height_;
         }
         MMI::DisplayInfo displayInfo = {
             .id = screenId,
@@ -256,6 +264,8 @@ void SceneInputManager::ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& dis
             .screenCombination = static_cast<MMI::ScreenCombination>(screenCombination),
             .oneHandX = screenOneHandX,
             .oneHandY = screenOneHandY,
+            .scalePercent = scalePercent,
+            .expandHeight = expandHeight,
             .validWidth = screenProperty.GetValidWidth(),
             .validHeight = screenProperty.GetValidHeight(),
             .fixedDirection = ConvertDegreeToMMIRotation(screenProperty.GetDefaultDeviceRotationOffset()),

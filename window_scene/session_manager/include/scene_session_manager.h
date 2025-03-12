@@ -503,10 +503,15 @@ public:
      * Window Layout
      */
     SingleHandTransform GetNormalSingleHandTransform() const;
-    void NotifySingleHandInfoChange(float singleHandScaleX, float singleHandScaleY, SingleHandMode singleHandMode);
+    SingleHandScreenInfo GetSingleHandScreenInfo() const;
+    WSRect GetOriginRect() const;
+    WSRect GetSingleHandRect() const;
+    void NotifySingleHandInfoChange(SingleHandScreenInfo singleHandScreenInfo, WSRect originRect,
+        WSRect singleHandRect);
     void RegisterGetRSNodeByStringIDFunc(GetRSNodeByStringIDFunc&& func);
     void RegisterSetTopWindowBoundaryByIDFunc(SetTopWindowBoundaryByIDFunc&& func);
     void RegisterSingleHandContainerNode(const std::string& stringId);
+    const SingleHandCompatibleModeConfig& GetSingleHandCompatibleModeConfig() const;
 
     /*
      * Window Property
@@ -1218,12 +1223,17 @@ private:
     std::shared_ptr<VsyncCallback> vsyncCallback_ = nullptr;
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
     SingleHandTransform singleHandTransform_;
+    WSRect originRect_;
+    WSRect singleHandRect_;
+    SingleHandScreenInfo singleHandScreenInfo_;
     GetRSNodeByStringIDFunc getRSNodeByStringIDFunc_;
     SetTopWindowBoundaryByIDFunc setTopWindowBoundaryByIDFunc_;
+    SingleHandCompatibleModeConfig singleHandCompatibleModeConfig_;
     void InitVsyncStation();
     void RegisterRequestVsyncFunc(const sptr<SceneSession>& sceneSession);
     bool GetDisplaySizeById(DisplayId displayId, int32_t& displayWidth, int32_t& displayHeight);
     void UpdateSessionCrossAxisState(DisplayId displayId, SuperFoldStatus status, SuperFoldStatus prevStatus);
+    void ConfigSingleHandCompatibleMode(const WindowSceneConfig::ConfigItem& configItem);
 
     /*
      * Window Snapshot
