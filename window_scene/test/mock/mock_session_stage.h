@@ -66,6 +66,7 @@ public:
     MOCK_METHOD0(CompatibleFullScreenRecover, WSError(void));
     MOCK_METHOD0(CompatibleFullScreenMinimize, WSError(void));
     MOCK_METHOD0(CompatibleFullScreenClose, WSError(void));
+    MOCK_METHOD0(PcAppInPadNormalClose, WSError(void));
     MOCK_METHOD1(NotifyCompatibleModeEnableInPad, WSError(bool enable));
     MOCK_METHOD1(NotifySessionFullScreen, void(bool fullScreen));
     MOCK_METHOD1(GetUIContentRemoteObj, WSError(sptr<IRemoteObject>& uiContentRemoteObj));

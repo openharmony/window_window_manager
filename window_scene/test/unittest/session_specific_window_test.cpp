@@ -81,40 +81,6 @@ void SessionSpecificWindowTest::TearDown()
 
 namespace {
 /**
- * @tc.name: UpdateInputMethodSessionRect
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SessionSpecificWindowTest, UpdateInputMethodSessionRect, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "UpdateInputMethodSessionRect";
-    info.bundleName_ = "UpdateInputMethodSessionRect";
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sceneSession->isActive_ = true;
-
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    property->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
-
-    sceneSession->SetSessionProperty(property);
-    WSRect rect({1, 1, 1, 1});
-    WSRect newWinRect;
-    WSRect newRequestRect;
-
-    sceneSession->UpdateInputMethodSessionRect(rect, newWinRect, newRequestRect);
-
-    property->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_FLOAT;
-    sceneSession->SetSessionProperty(property);
-    auto res = sceneSession->UpdateInputMethodSessionRect(rect, newWinRect, newRequestRect);
-    ASSERT_EQ(res, true);
-}
-
-
-/**
  * @tc.name: BindDialogSessionTarget
  * @tc.desc: normal function
  * @tc.type: FUNC

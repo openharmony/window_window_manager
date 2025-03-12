@@ -74,6 +74,7 @@ public:
     WSError CompatibleFullScreenRecover() override;
     WSError CompatibleFullScreenMinimize() override;
     WSError CompatibleFullScreenClose() override;
+    WSError PcAppInPadNormalClose() override;
     WSError NotifyCompatibleModeEnableInPad(bool enable) override;
     void SetUniqueVirtualPixelRatio(bool useUniqueDensity, float virtualPixelRatio) override;
     void NotifySessionFullScreen(bool fullScreen) override;

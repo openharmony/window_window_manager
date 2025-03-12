@@ -2413,6 +2413,23 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetAppDragResizeType, Function | Sma
 }
 
 /**
+ * @tc.name: HandleSetParentWindow
+ * @tc.desc: test HandleSetParentWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleSetParentWindow, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t subWindowId = 1;
+    int32_t newParentWindowId = 2;
+    data.WriteInt32(subWindowId);
+    data.WriteInt32(newParentWindowId);
+    int res = stub_->HandleSetParentWindow(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
  * @tc.name: HandleGetAppDragResizeType
  * @tc.desc: test HandleGetAppDragResizeType
  * @tc.type: FUNC

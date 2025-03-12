@@ -1446,6 +1446,23 @@ HWTEST_F(sceneSessionManagerProxyTest, GetWindowModeType, Function | SmallTest |
 }
 
 /**
+ * @tc.name: SetParentWindow
+ * @tc.desc: SetParentWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, SetParentWindow, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+
+    int32_t subWindowId = 1;
+    int32_t newParentWindowId = 2;
+    WMError res = sceneSessionManagerProxy->SetParentWindow(subWindowId, newParentWindowId);
+    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, res);
+}
+
+/**
  * @tc.name: MinimizeByWindowId
  * @tc.desc: MinimizeByWindowId
  * @tc.type: FUNC

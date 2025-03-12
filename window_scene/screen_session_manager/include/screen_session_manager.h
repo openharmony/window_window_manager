@@ -228,6 +228,7 @@ public:
     bool SuspendEnd() override;
     void BlockScreenOnByCV(void);
     void BlockScreenOffByCV(void);
+    bool BlockScreenWaitPictureFrameByCV(bool isStartDream);
     bool BlockSetDisplayState(void);
     bool IsScreenLockSuspend(void);
     bool IsPreBrightAuthFail(void);
@@ -412,6 +413,7 @@ public:
     void RegisterSettingWireCastObserver(sptr<ScreenSession>& screenSession);
     SessionOption GetSessionOption(sptr<ScreenSession> screenSession);
     SessionOption GetSessionOption(sptr<ScreenSession> screenSession, ScreenId screenId);
+    virtual DMError SetSystemKeyboardStatus(bool isOn = false) override;
 
 protected:
     ScreenSessionManager();
@@ -511,6 +513,7 @@ private:
      * On/Off screen
      */
     void SetGotScreenOffAndWakeUpBlock();
+    void WakeUpPictureFrameBlock(DisplayEvent event);
 
     class ScreenIdManager {
     friend class ScreenSessionGroup;
@@ -613,10 +616,15 @@ private:
     bool gotScreenOffNotify_ = false;
     bool needScreenOffNotify_ = false;
     bool dozeNotifyFinish_ = false;
+    bool pictureFrameReady_ = false;
+    bool pictureFrameBreak_ = false;
+
     std::mutex screenOnMutex_;
     std::condition_variable screenOnCV_;
     std::mutex screenOffMutex_;
     std::condition_variable screenOffCV_;
+    std::mutex screenWaitPictureFrameMutex_;
+    std::condition_variable screenWaitPictureFrameCV_;
     int32_t screenOffDelay_ {0};
     int32_t screenOnDelay_ {0};
 
