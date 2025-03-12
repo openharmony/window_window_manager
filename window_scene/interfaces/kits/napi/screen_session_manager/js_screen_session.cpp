@@ -259,7 +259,7 @@ napi_value JsScreenSession::SetTouchEnabled(napi_env env, napi_callback_info inf
 
 napi_value JsScreenSession::OnSetTouchEnabled(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_EVENT, "napi called");
+    TLOGI(WmsLogTag::WMS_EVENT, "in");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
