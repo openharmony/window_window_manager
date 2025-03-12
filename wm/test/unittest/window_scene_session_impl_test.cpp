@@ -448,6 +448,8 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession10, Function
     ASSERT_NE(nullptr, textMenuWindow);
     error = textMenuWindow->Create(abilityContext_, nullptr);
     ASSERT_EQ(error, WMError::WM_OK);
+    ASSERT_EQ(WMError::WM_OK, textMenuWindow->Destroy(true));
+    ASSERT_EQ(WMError::WM_OK, parentWindow->Destroy(true));
 }
 
 /**
