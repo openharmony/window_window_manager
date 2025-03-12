@@ -2827,6 +2827,6 @@ HWTEST_F(WindowTest, GetLayoutTransform, Function | SmallTest | Level2)
     ASSERT_EQ(trans, window->GetLayoutTransform());
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS
