@@ -48,6 +48,11 @@ public:
         bool byForeground = true, FocusChangeReason reason = FocusChangeReason::SA_REQUEST) override;
     WSError RaiseWindowToTop(int32_t persistentId) override;
 
+    /*
+     * Sub Window
+     */
+    WMError SetParentWindow(int32_t subWindowId, int32_t newParentWindowId) override;
+
     WMError RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
     WMError UnregisterWindowManagerAgent(WindowManagerAgentType type,

@@ -3336,6 +3336,22 @@ public:
     virtual uint32_t GetApiCompatibleVersion() const { return 0; }
 
     /**
+     * @brief Set the parent window of a sub window.
+     *
+     * @param newParentWindowId new parent window id.
+     * @return WM_OK means set parent window success, others means failed.
+     */
+    virtual WMError SetParentWindow(int32_t newParentWindowId) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Get the parent window of a sub window.
+     *
+     * @param parentWindow parent window.
+     * @return WM_OK means get parent window success, others means failed.
+     */
+    virtual WMError GetParentWindow(sptr<Window>& parentWindow) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
      * @brief Set the feature of subwindow follow the layout of the parent window.
      *
      * @param isFollow true - follow, false - not follow.
