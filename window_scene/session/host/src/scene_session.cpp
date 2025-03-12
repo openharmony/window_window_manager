@@ -6874,11 +6874,9 @@ void SceneSession::UpdateAllModalUIExtensions(const WSRect& globalRect)
             }
         }
         session->NotifySessionInfoChange();
-        if (session->modalUIExtensionInfoList_.size() > 0) {
-            TLOGNI(WmsLogTag::WMS_UIEXT, "%{public}s: id: %{public}d, globalRect: %{public}s, transX: %{public}d, "
-                "transY: %{public}d", where, session->GetPersistentId(), globalRect.ToString().c_str(),
-                parentTransX, parentTransY);
-        }
+        TLOGNI(WmsLogTag::WMS_UIEXT, "%{public}s: id: %{public}d, globalRect: %{public}s, parentTransX: %{public}d, "
+            "parentTransY: %{public}d", where, session->GetPersistentId(), globalRect.ToString().c_str(),
+            parentTransX, parentTransY);
     }, __func__);
 }
 
