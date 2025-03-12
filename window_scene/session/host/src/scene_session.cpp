@@ -229,7 +229,7 @@ bool SceneSession::IsShowOnLockScreen(uint32_t lockScreenZOrder)
 
     // current window on lock screen jurded by zorder
     if (zOrder_ >= lockScreenZOrder) {
-        TLOGI(WmsLogTag::WMS_UIEXT, "zOrder > lockScreenZOrder");
+        TLOGI(WmsLogTag::WMS_UIEXT, "zOrder >= lockScreenZOrder");
         return true;
     }
 
