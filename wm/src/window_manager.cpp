@@ -759,7 +759,7 @@ WMError WindowManager::UnregisterVisibilityStateChangedListener(const sptr<IWind
         return WMError::WM_ERROR_NULLPTR;
     }
     std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
-    pImpl_->windowVisibilityStateListeners_.erase(std::remove_if(pImpl_->windowVisibilityListeners_.begin(),
+    pImpl_->windowVisibilityStateListeners_.erase(std::remove_if(pImpl_->windowVisibilityStateListeners_ .begin(),
         pImpl_->windowVisibilityStateListeners_.end(), [listener](sptr<IWindowInfoChangedListener> registeredListener) {
             return registeredListener == listener;
         }), pImpl_->windowVisibilityStateListeners_.end());
