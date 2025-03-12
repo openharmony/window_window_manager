@@ -3433,6 +3433,7 @@ WSError SceneSessionManager::RecoverAndConnectSpecificSession(const sptr<ISessio
             TLOGNW(WmsLogTag::WMS_RECOVER, "Recover finished, not recovery anymore");
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
+        UpdateRecoverPropertyForSuperFold(property);
         // recover specific session
         SessionInfo info = RecoverSessionInfo(property);
         TLOGNI(WmsLogTag::WMS_RECOVER, "callingWindowId=%{public}" PRIu32, property->GetCallingSessionId());
@@ -3578,6 +3579,7 @@ WSError SceneSessionManager::RecoverAndReconnectSceneSession(const sptr<ISession
             TLOGNE(WmsLogTag::WMS_RECOVER, "recoverSceneSessionFunc_ is null");
             return WSError::WS_ERROR_NULLPTR;
         }
+        UpdateRecoverPropertyForSuperFold(property);
         SessionInfo sessionInfo = RecoverSessionInfo(property);
         sptr<SceneSession> sceneSession = RequestSceneSession(sessionInfo, nullptr);
         if (sceneSession == nullptr) {
@@ -3604,6 +3606,34 @@ WSError SceneSessionManager::RecoverAndReconnectSceneSession(const sptr<ISession
         return WSError::WS_OK;
     };
     return taskScheduler_->PostSyncTask(task, __func__);
+}
+
+void SceneSessionManager::UpdateRecoverPropertyForSuperFold(const sptr<WindowSessionProperty>& property)
+{
+    if (property->GetDisplayId() != VIRTUAL_DISPLAY_ID) {
+        return;
+    }
+    static auto foldCreaseRegion = SingletonContainer::Get<DisplayManager>().GetCurrentFoldCreaseRegion();
+    if (foldCreaseRegion == nullptr) {
+        return;
+    }
+    Rect recoverWindowRect = property->GetWindowRect();
+    Rect recoverRequestRect = property->GetRequestRect();
+    TLOGD(WmsLogTag::WMS_RECOVER,
+        "WindowRect: %{public}s, RequestRect: %{public}s, DisplayId: %{public}d",
+        recoverWindowRect.ToString().c_str(), recoverRequestRect.ToString().c_str(),
+        static_cast<uint32_t>(property->GetDisplayId()));
+    
+    auto foldCrease = foldCreaseRegion->GetCreaseRects().front();
+    recoverWindowRect.posY_ += foldCrease.posY_ + foldCrease.height_;
+    recoverRequestRect.posY_ += foldCrease.posY_ + foldCrease.height_;
+    property->SetWindowRect(recoverWindowRect);
+    property->SetRequestRect(recoverRequestRect);
+    property->SetDisplayId(0);
+    TLOGD(WmsLogTag::WMS_RECOVER,
+        "WindowRect: %{public}s, RequestRect: %{public}s, DisplayId: %{public}d",
+        recoverWindowRect.ToString().c_str(), recoverRequestRect.ToString().c_str(),
+        static_cast<uint32_t>(property->GetDisplayId()));
 }
 
 void SceneSessionManager::SetRecoverSceneSessionListener(const NotifyRecoverSceneSessionFunc& func)
