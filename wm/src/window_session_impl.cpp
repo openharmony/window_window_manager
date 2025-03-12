@@ -5433,7 +5433,7 @@ void WindowSessionImpl::GetExtensionConfig(AAFwk::WantParams& want) const
     want.SetParam(Extension::CROSS_AXIS_FIELD, AAFwk::Integer::Box(static_cast<int32_t>(crossAxisState_.load())));
     bool isWaterfallMode = isFullScreenWaterfallMode_.load();
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "waterfall: %{public}d, winId: %{public}u", isWaterfallMode, GetWindowId());
-    want.SetParam(Extension::WATERFALL_MODE_FIELD, AAFwk::Integer::Box(static_cast<int32_t>(isWaterfallMode));
+    want.SetParam(Extension::WATERFALL_MODE_FIELD, AAFwk::Integer::Box(static_cast<int32_t>(isWaterfallMode)));
 }
 
 void WindowSessionImpl::UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>& want)
