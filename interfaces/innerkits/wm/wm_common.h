@@ -1508,17 +1508,19 @@ struct WindowMetaInfo : public Parcelable {
     std::string windowName;
     std::string bundleName;
     std::string abilityName;
+    int32_t appIndex;
 
     bool Marshalling(Parcel& parcel) const override
     {
         return parcel.WriteInt32(windowId) && parcel.WriteString(windowName) && parcel.WriteString(bundleName) &&
-               parcel.WriteString(abilityName);
+               parcel.WriteString(abilityName) && parcel.WriteInt32(appIndex);
     }
     static WindowMetaInfo* Unmarshalling(Parcel& parcel)
     {
         WindowMetaInfo* windowMetaInfo = new WindowMetaInfo();
         if (!parcel.ReadInt32(windowMetaInfo->windowId) || !parcel.ReadString(windowMetaInfo->windowName) ||
-            !parcel.ReadString(windowMetaInfo->bundleName) || !parcel.ReadString(windowMetaInfo->abilityName)) {
+            !parcel.ReadString(windowMetaInfo->bundleName) || !parcel.ReadString(windowMetaInfo->abilityName)
+            !parcel.ReadInt32(WindowMetaInfo->appIndex)) {
             delete windowMetaInfo;
             return nullptr;
         }
