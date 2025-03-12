@@ -531,7 +531,7 @@ void RootScene::GetExtensionConfig(AAFwk::WantParams& want) const
 {
     bool isWaterfallMode = isFullScreenWaterfallMode_.load();
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "waterfall: %{public}d, root winId: %{public}u", isWaterfallMode, GetWindowId());
-    want.SetParam(Extension::WATERFALL_MODE_FIELD, AAFwk::Integer::Box(static_cast<int32_t>(isWaterfallMode));
+    want.SetParam(Extension::WATERFALL_MODE_FIELD, AAFwk::Integer::Box(static_cast<int32_t>(isWaterfallMode)));
 }
 
 void RootScene::UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>& want)
