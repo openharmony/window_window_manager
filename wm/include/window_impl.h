@@ -278,8 +278,8 @@ public:
     void UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
     void UpdateWindowState(WindowState state);
     WmErrorCode UpdateSubWindowStateAndNotify(uint32_t parentId);
-    WmErrorCode UpdateWindowStateWhenShow();
-    WmErrorCode UpdateWindowStateWhenHide();
+    WmErrorCode UpdateWindowStateWhenShow(uint32_t reason);
+    WmErrorCode UpdateWindowStateWhenHide(uint32_t reason);
     sptr<WindowProperty> GetWindowProperty();
     void UpdateDragEvent(const PointInfo& point, DragEvent event);
     void UpdateDisplayId(DisplayId from, DisplayId to);
@@ -389,6 +389,8 @@ private:
 
     void NotifyAfterForeground(bool needNotifyListeners = true, bool needNotifyUiContent = true);
     void NotifyAfterBackground(bool needNotifyListeners = true, bool needNotifyUiContent = true);
+    void NotifyAfterDidForeground(uint32_t reason);
+    void NotifyAfterDidBackground(uint32_t reason);
     void NotifyAfterFocused();
     void NotifyAfterUnfocused(bool needNotifyUiContent = true);
     void NotifyAfterResumed();
