@@ -223,7 +223,7 @@ int32_t OH_WindowManager_SetWindowStatusBarEnabled(int32_t windowId, bool enable
             static_cast<uint32_t>(property.settingFlag_) | static_cast<uint32_t>(SystemBarSettingFlag::ENABLE_SETTING));
         property.enableAnimation_ = enableAnimation;
         errCode = OH_WINDOW_TO_ERROR_CODE_MAP.at(
-            window->SetSpecificBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
+            window->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
     }, __func__);
     return errCode;
 }
@@ -253,7 +253,7 @@ int32_t OH_WindowManager_SetWindowStatusBarColor(int32_t windowId, int32_t color
         property.settingFlag_ = static_cast<SystemBarSettingFlag>(
             static_cast<uint32_t>(property.settingFlag_) | static_cast<uint32_t>(SystemBarSettingFlag::COLOR_SETTING));
         errCode = OH_WINDOW_TO_ERROR_CODE_MAP.at(
-            window->SetSpecificBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
+            window->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
     }, __func__);
     return errCode;
 }
@@ -284,7 +284,7 @@ int32_t OH_WindowManager_SetWindowNavigationBarEnabled(int32_t windowId, bool en
             static_cast<uint32_t>(property.settingFlag_) | static_cast<uint32_t>(SystemBarSettingFlag::ENABLE_SETTING));
         property.enableAnimation_ = enableAnimation;
         errCode = OH_WINDOW_TO_ERROR_CODE_MAP.at(
-            window->SetSpecificBarProperty(WindowType::WINDOW_TYPE_NAVIGATION_BAR, property));
+            window->SetSystemBarProperty(WindowType::WINDOW_TYPE_NAVIGATION_BAR, property));
     }, __func__);
     return errCode;
 }
