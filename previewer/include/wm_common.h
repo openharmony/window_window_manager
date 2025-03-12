@@ -966,7 +966,7 @@ struct WindowLayoutInfo : public Parcelable {
  *
  * @brief Window meta info
  */
-struct WindowMetaInfo : public Parcelable {
+ struct WindowMetaInfo : public Parcelable {
     int32_t windowId;
     std::string windowName;
     std::string bundleName;
@@ -982,8 +982,8 @@ struct WindowMetaInfo : public Parcelable {
     {
         WindowMetaInfo* windowMetaInfo = new WindowMetaInfo();
         if (!parcel.ReadInt32(windowMetaInfo->windowId) || !parcel.ReadString(windowMetaInfo->windowName) ||
-            !parcel.ReadString(windowMetaInfo->bundleName) || !parcel.ReadString(windowMetaInfo->abilityName)
-            !parcel.ReadInt32(WindowMetaInfo->appIndex)) {
+            !parcel.ReadString(windowMetaInfo->bundleName) || !parcel.ReadString(windowMetaInfo->abilityName) ||
+            !parcel.ReadInt32(windowMetaInfo->appIndex)) {
             delete windowMetaInfo;
             return nullptr;
         }
