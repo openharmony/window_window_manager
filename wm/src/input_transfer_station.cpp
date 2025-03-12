@@ -82,7 +82,7 @@ void InputEventListener::OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointer
     if (action != MMI::PointerEvent::POINTER_ACTION_MOVE) {
         static uint32_t eventId = 0;
         TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW, "eid:%{public}d,InputId:%{public}d"
-            ",wid:%{public}u,action:%{public}d", eventId++, pointerEvent->GetId(), windowId,
+            ",wid:%{public}u,ac:%{public}d", eventId++, pointerEvent->GetId(), windowId,
             pointerEvent->GetPointerAction());
     }
     auto channel = InputTransferStation::GetInstance().GetInputChannel(windowId);
@@ -140,11 +140,11 @@ void InputTransferStation::AddInputWindow(const sptr<Window>& window)
             }
         }
         MMI::InputManager::GetInstance()->SetWindowInputEventConsumer(listener, eventHandler_);
-        TLOGI(WmsLogTag::WMS_EVENT, "SetWindowInputEventConsumer success, windowid:%{public}u", windowId);
+        TLOGI(WmsLogTag::WMS_EVENT, "SetWindowInputEventConsumer success, wid:%{public}u", windowId);
         inputListener_ = listener;
     } else {
         auto ret = MMI::InputManager::GetInstance()->SetWindowInputEventConsumer(inputListener_, eventHandler_);
-        TLOGI(WmsLogTag::WMS_EVENT, "SetWindowInputEventConsumer %{public}u, windowid:%{public}u", ret, windowId);
+        TLOGI(WmsLogTag::WMS_EVENT, "SetWindowInputEventConsumer %{public}u, wid:%{public}u", ret, windowId);
     }
 }
 
