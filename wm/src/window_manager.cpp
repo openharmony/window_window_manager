@@ -759,7 +759,7 @@ WMError WindowManager::UnregisterVisibilityChangedListener(const sptr<IVisibilit
 WMError WindowManager::RegisterVisibilityStateChangedListener(const sptr<IWindowInfoChangedListener>& listener)
 {
     if (listener == nullptr) {
-        WLOGFE("listener could not be null");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "listener could not be null");
         return WMError::WM_ERROR_NULLPTR;
     }
     std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
@@ -771,13 +771,13 @@ WMError WindowManager::RegisterVisibilityStateChangedListener(const sptr<IWindow
         WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_VISIBILITY,
         pImpl_->windowVisibilityStateListenerAgent_);
     if (ret != WMError::WM_OK) {
-        WLOGFW("RegisterWindowManagerAgent failed!");
+        TLOGW(WmsLogTag::WMS_ATTRIBUTE, "RegisterWindowManagerAgent failed!");
         pImpl_->windowVisibilityStateListenerAgent_ = nullptr;
     } else {
         auto iter = std::find(pImpl_->windowVisibilityStateListeners_.begin(),
             pImpl_->windowVisibilityStateListeners_.end(), listener);
         if (iter != pImpl_->windowVisibilityStateListeners_.end()) {
-            WLOGFW("Listener is already registered.");
+            TLOGW(WmsLogTag::WMS_ATTRIBUTE, "Listener is already registered.");
             return WMError::WM_OK;
         }
         pImpl_->windowVisibilityStateListeners_.emplace_back(listener);
@@ -788,7 +788,7 @@ WMError WindowManager::RegisterVisibilityStateChangedListener(const sptr<IWindow
 WMError WindowManager::UnregisterVisibilityStateChangedListener(const sptr<IWindowInfoChangedListener>& listener)
 {
     if (listener == nullptr) {
-        WLOGFE("listener could not be null");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "listener could not be null");
         return WMError::WM_ERROR_NULLPTR;
     }
     std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
