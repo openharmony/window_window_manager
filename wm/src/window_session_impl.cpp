@@ -5386,5 +5386,17 @@ bool WindowSessionImpl::IsSubWindowMaximizeSupported() const
     }
     return false;
 }
+
+void WindowSessionImpl::NotifySize()
+{
+    if (property_->GetIsPcAppInPad() && GetWindowMode() ==  WindowMode::WINDOW_MODE_FULLSCREEN &&
+        !IsFreeMultiWindowMode()) {
+        const auto& windowRect = GetRect();
+        NotifySizeChange(windowRect, WindowSizeChangeReason::MOVE);
+        auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
+        sptr<DisplayInfo> displayInfo = display ? display->GetDisplayInfo() : nullptr;
+        UpdateViewportConfig(windowRect, WindowSizeChangeReason::UNDEFINED, nullptr, displayInfo);
+    }
+}
 } // namespace Rosen
 } // namespace OHOS
