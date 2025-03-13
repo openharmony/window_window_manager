@@ -10550,13 +10550,15 @@ WSError SceneSessionManager::UpdateSessionDisplayId(int32_t persistentId, uint64
     sceneSession->NotifyDisplayMove(fromScreenId, screenId);
     sceneSession->UpdateDensity();
 
+    // Find keyboard session.
     const auto& keyboardSessionVec = GetSceneSessionVectorByType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     for (const auto& keyboardSession : keyboardSessionVec) {
-        if (keyboardSession) {
-            TLOGD(WmsLogTag::WMS_KEYBOARD, "isSystemKeyboard: %{public}d, callingSessionId: %{public}d",
-                keyboardSession->IsSystemKeyboard(), keyboardSession->GetCallingSessionId());
+        if (!keyboardSession) {
+            continue;
         }
-        if (keyboardSession && !keyboardSession->IsSystemKeyboard() &&
+        TLOGD(WmsLogTag::WMS_KEYBOARD, "isSystemKeyboard: %{public}d, callingSessionId: %{public}d",
+            keyboardSession->IsSystemKeyboard(), keyboardSession->GetCallingSessionId());
+        if (!keyboardSession->IsSystemKeyboard() &&
             static_cast<int32_t>(keyboardSession->GetCallingSessionId()) == persistentId) {
             CallingWindowInfo callingWindowInfo(persistentId, sceneSession->GetCallingPid(), screenId, GetUserIdByUid(getuid()));
             SessionManagerAgentController::GetInstance().NotifyCallingWindowDisplayChanged(callingWindowInfo);
@@ -12334,19 +12336,20 @@ WMError SceneSessionManager::GetCallingWindowInfo(CallingWindowInfo& callingWind
 {
     int32_t curUserId = GetUserIdByUid(getuid());
     if (curUserId != callingWindowInfo.userId_) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "Target user not exists,targetUserId: %{public}d, curUserId: %{public}d, id: %{public}d",
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Target user not exists, targetUserId: %{public}d, curUserId: %{public}d, id: %{public}d",
             callingWindowInfo.userId_, curUserId, callingWindowInfo.windowId_);
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     auto sceneSession = GetSceneSession(callingWindowInfo.windowId_);
     if (sceneSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "sceneSession is nullptr,id: %{public}d", callingWindowInfo.windowId_);
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "sceneSession is nullptr, id: %{public}d", callingWindowInfo.windowId_);
         return WMError::WM_ERROR_NULLPTR;
     }
     callingWindowInfo.callingPid_ = sceneSession->GetCallingPid();
     callingWindowInfo.displayId_ = sceneSession->GetSessionProperty()->GetDisplayId();
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "callingWindow id: %{public}d,pid: %{public}d,displayId: %{public}" PRIu64" , curUserId: %{public}d",
-        callingWindowInfo.windowId_, callingWindowInfo.callingPid_, callingWindowInfo.displayId_, curUserId);
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "callingWindowInfo: [id: %{public}d, pid: %{public}d, "
+        "displayId: %{public}" PRIu64" , userId: %{public}d]", callingWindowInfo.windowId_,
+        callingWindowInfo.callingPid_, callingWindowInfo.displayId_, callingWindowInfo.userId_);
     return WMError::WM_OK;
 }
 

@@ -194,18 +194,18 @@ public:
 };
 
 /**
- * @class IKeyboardCallingWindowDisplayChangeListener
+ * @class IKeyboardCallingWindowDisplayChangedListener
  *
  * @brief Observe the display change of keyboard callingWindow.
  */
-class IKeyboardCallingWindowDisplayChangeListener : virtual public RefBase {
+class IKeyboardCallingWindowDisplayChangedListener : virtual public RefBase {
 public:
     /**
      * @brief Notify caller when calling window display changed.
      *
      * @param callingWindowInfo The information about the calling window.
      */
-    virtual void OnCallingWindowDisplayChanged(CallingWindowInfo callingWindowInfo) = 0;
+    virtual void OnCallingWindowDisplayChanged(const CallingWindowInfo& callingWindowInfo) = 0;
 };
 
 /**
@@ -939,25 +939,25 @@ public:
     WMError UnregisterWindowStyleChangedListener(const sptr<IWindowStyleChangedListener>& listener);
 
     /**
-     * @brief Register keyboard calling window display change listener.
+     * @brief Register a listener to detect display changes for the keyboard calling window.
      *
-     * @param listener IKeyboardCallingWindowDisplayChangeListener
+     * @param listener IKeyboardCallingWindowDisplayChangedListener
      * @return WM_OK means register success, others means unregister failed.
      */
-    WMError RegisterCallingWindowDisplayChangeListener(
-        const sptr<IKeyboardCallingWindowDisplayChangeListener>& listener)
+    WMError RegisterCallingWindowDisplayChangedListener(
+        const sptr<IKeyboardCallingWindowDisplayChangedListener>& listener)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     
     /**
-     * @brief Unregister keyboard calling window display change listener.
+     * @brief Unregister the listener that detects display changes for the keyboard calling window.
      *
-     * @param listener IKeyboardCallingWindowDisplayChangeListener
+     * @param listener IKeyboardCallingWindowDisplayChangedListener
      * @return WM_OK means unregister success, others means unregister failed.
      */
-    WMError UnregisterCallingWindowDisplayChangeListener(
-        const sptr<IKeyboardCallingWindowDisplayChangeListener>& listener)
+    WMError UnregisterCallingWindowDisplayChangedListener(
+        const sptr<IKeyboardCallingWindowDisplayChangedListener>& listener)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -1116,7 +1116,6 @@ private:
     void NotifyGestureNavigationEnabledResult(bool enable) const;
     void UpdateVisibleWindowNum(const std::vector<VisibleWindowNumInfo>& visibleWindowNumInfo);
     WMError NotifyWindowStyleChange(WindowStyleType type);
-    WMError NotifyCallingWindowDisplayChanged(const CallingWindowInfo& callingWindowInfo);
     void NotifyWindowPidVisibilityChanged(const sptr<WindowPidVisibilityInfo>& info) const;
 };
 } // namespace Rosen
