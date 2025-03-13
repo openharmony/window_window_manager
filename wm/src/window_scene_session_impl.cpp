@@ -3787,15 +3787,15 @@ WMError WindowSceneSessionImpl::SnapshotIgnorePrivacy(std::shared_ptr<Media::Pix
     std::shared_ptr<SurfaceCaptureFuture> callback = std::make_shared<SurfaceCaptureFuture>();
     auto isSucceeded = RSInterfaces::GetInstance().TakeSelfSurfaceCapture(surfaceNode_, callback);
     if (!isSucceeded) {
-        WLOGFE("Failed to TakeSelfSurfaceCapture!");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to TakeSelfSurfaceCapture!");
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
     pixelMap = callback->GetResult(2000); // wait for <= 2000ms
     if (pixelMap != nullptr) {
-        WLOGFD("SnapshotIgnorePrivacy succeed, save WxH=%{public}dx%{public}d", pixelMap->GetWidth(),
-            pixelMap->GetHeight());
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "SnapshotIgnorePrivacy succeed, save WxH=%{public}dx%{public}d",
+            pixelMap->GetWidth(), pixelMap->GetHeight());
     } else {
-        WLOGFE("Failed to get pixelmap, return nullptr!");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to get pixelmap, return nullptr!");
         return WMError::WM_ERROR_NULLPTR;
     }
     return WMError::WM_OK;
