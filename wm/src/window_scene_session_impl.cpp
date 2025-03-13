@@ -130,7 +130,7 @@ constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_HEIGHT = 40;
 constexpr int32_t API_VERSION_18 = 18;
 constexpr uint32_t LIFECYCLE_ISOLATE_VERSION = 18;
 const uint32_t API_VERSION_MOD = 1000;
-constexpr uint32_t MAX_SNAPSHOT_WAIT_TIME = 2000;
+constexpr uint32_t SNAPSHOT_TIMEOUT_MS = 2000;
 }
 uint32_t WindowSceneSessionImpl::maxFloatingWindowSize_ = 1920;
 std::mutex WindowSceneSessionImpl::keyboardPanelInfoChangeListenerMutex_;
@@ -3913,7 +3913,7 @@ std::shared_ptr<Media::PixelMap> WindowSceneSessionImpl::Snapshot()
         WLOGFE("Failed to TakeSurfaceCapture!");
         return nullptr;
     }
-    std::shared_ptr<Media::PixelMap> pixelMap = callback->GetResult(MAX_SNAPSHOT_WAIT_TIME); // wait for <= 2000ms
+    std::shared_ptr<Media::PixelMap> pixelMap = callback->GetResult(SNAPSHOT_TIMEOUT_MS);
     if (pixelMap != nullptr) {
         WLOGFD("Snapshot succeed, save WxH=%{public}dx%{public}d", pixelMap->GetWidth(), pixelMap->GetHeight());
     } else {
@@ -3933,7 +3933,7 @@ WMError WindowSceneSessionImpl::SnapshotIgnorePrivacy(std::shared_ptr<Media::Pix
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "windowId:%{public}u, Failed to TakeSelfSurfaceCapture!", GetWindowId());
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
-    pixelMap = callback->GetResult(MAX_SNAPSHOT_WAIT_TIME); // wait for <= 2000ms
+    pixelMap = callback->GetResult(SNAPSHOT_TIMEOUT_MS);
     if (pixelMap == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to get pixelmap, windowId:%{public}u", GetWindowId());
         return WMError::WM_ERROR_NULLPTR;
