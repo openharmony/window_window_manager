@@ -78,7 +78,7 @@ void DisplayAniListener::OnCreate(DisplayId id)
         TLOGE(WmsLogTag::DMS, "[ANI] OnCreate not this event, return");
         return;
     }
-    TLOGI(WmsLogTag::DMS, "[ANI] OnCreate is called, displayId: %{public}llu", id);
+    TLOGI(WmsLogTag::DMS, "[ANI] OnCreate is called, displayId: %{public}d", (uint32_t)id);
     auto thisListener = weakRef_.promote();
     if (thisListener == nullptr || env_ == nullptr) {
         TLOGE(WmsLogTag::DMS, "[ANI] This listener or env is nullptr");
