@@ -1696,7 +1696,7 @@ WMError WindowManager::RegisterWindowInfoChangeCallback(const std::unordered_set
     for (const auto& info : observedInfo) {
         observedInfoForLog += std::to_string(static_cast<uint32_t>(info)) + ", ";
         auto interstInfo = listener->GetInterstInfo();
-        if (interstInfo.find(info) == interstInfo.end) {
+        if (interstInfo.find(info) == interstInfo.end()) {
             interstInfo.insert(info);
         }
         ret = ProcessRegisterWindowInfoChangeCallback(info, listener);
@@ -1716,6 +1716,10 @@ WMError WindowManager::UnregisterWindowInfoChangeCallback(const std::unordered_s
     auto ret = WMError::WM_OK;
     for (const auto& info : observedInfo) {
         observedInfoForLog += std::to_string(static_cast<uint32_t>(info)) + ", ";
+        auto interstInfo = listener->GetInterstInfo();
+        if (interstInfo.find(info) == interstInfo.end()) {
+            interstInfo.insert(info);
+        }
         ret = ProcessUnregisterWindowInfoChangeCallback(info, listener);
         if (ret != WMError::WM_OK) {
             observedInfoForLog += "failed";
