@@ -117,9 +117,12 @@ private:
     int HandleSetSupportedWindowModes(MessageParcel& data, MessageParcel& reply);
     int HandleStartMovingWithCoordinate(MessageParcel& data, MessageParcel& reply);
     int HandleContainerModalEvent(MessageParcel& data, MessageParcel& reply);
+    int HandleUpdateFlag(MessageParcel& data, MessageParcel& reply);
 
     // Keyboard
     int HandleChangeKeyboardViewMode(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyKeyboardDidShowRegistered(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyKeyboardDidHideRegistered(MessageParcel& data, MessageParcel& reply);
 
     // Window Property
     int HandleSetWindowCornerRadius(MessageParcel& data, MessageParcel& reply);

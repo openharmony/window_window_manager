@@ -993,6 +993,7 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
     SetJsSessionInfoByWant(env, sessionInfo, objValue);
     napi_set_named_property(env, objValue, "supportWindowModes",
         CreateSupportWindowModes(env, sessionInfo.supportedWindowModes));
+    napi_set_named_property(env, objValue, "specifiedFlag", CreateJsValue(env, sessionInfo.specifiedFlag_));
     if (sessionInfo.want != nullptr) {
         napi_set_named_property(env, objValue, "want", AppExecFwk::WrapWant(env, *sessionInfo.want));
     }
@@ -1042,6 +1043,8 @@ napi_value CreateJsSessionRecoverInfo(
     napi_set_named_property(env, objValue, "recoverRect", CreateJsSessionRect(env, wsRect));
     napi_set_named_property(env, objValue, "layoutFullScreen", CreateJsValue(env, property->IsLayoutFullScreen()));
     napi_set_named_property(env, objValue, "mainWindowTopmost", CreateJsValue(env, property->IsMainWindowTopmost()));
+    napi_set_named_property(env, objValue, "isFullScreenWaterfallMode",
+        CreateJsValue(env, property->GetIsFullScreenWaterfallMode()));
     return objValue;
 }
 
@@ -1715,6 +1718,7 @@ napi_value SessionTypeInit(napi_env env)
     SetTypeProperty(objValue, env, "TYPE_TRANSPARENT_VIEW", JsSessionType::TYPE_TRANSPARENT_VIEW);
     SetTypeProperty(objValue, env, "TYPE_WALLET_SWIPE_CARD", JsSessionType::TYPE_WALLET_SWIPE_CARD);
     SetTypeProperty(objValue, env, "TYPE_SCREEN_CONTROL", JsSessionType::TYPE_SCREEN_CONTROL);
+    SetTypeProperty(objValue, env, "TYPE_FLOAT_NAVIGATION", JsSessionType::TYPE_FLOAT_NAVIGATION);
     return objValue;
 }
 
@@ -1746,30 +1750,6 @@ napi_value SceneTypeInit(napi_env env)
     napi_set_named_property(env, objValue, "INPUT_SCENE",
         CreateJsValue(env, static_cast<int32_t>(SceneType::INPUT_SCENE)));
     return objValue;
-}
-
-struct AsyncInfo {
-    napi_env env;
-    napi_async_work work;
-    std::function<void()> func;
-};
-
-static void NapiAsyncWork(napi_env env, std::function<void()> task)
-{
-    napi_value resource = nullptr;
-    AsyncInfo* info = new AsyncInfo();
-    info->env = env;
-    info->func = task;
-    napi_create_string_utf8(env, "AsyncWork", NAPI_AUTO_LENGTH, &resource);
-    napi_create_async_work(env, nullptr, resource, [](napi_env env, void* data) {
-    },
-    [](napi_env env, napi_status status, void* data) {
-        AsyncInfo* info = (AsyncInfo*)data;
-        info->func();
-        napi_delete_async_work(env, info->work);
-        delete info;
-    }, (void*)info, &info->work);
-    napi_queue_async_work(env, info->work);
 }
 
 MainThreadScheduler::MainThreadScheduler(napi_env env)
@@ -1805,7 +1785,7 @@ void MainThreadScheduler::PostMainThreadTask(Task&& localTask, std::string trace
         handler_->PostTask(std::move(task), "wms:" + traceInfo, delayTime,
             OHOS::AppExecFwk::EventQueue::Priority::IMMEDIATE);
     } else {
-        NapiAsyncWork(env_, task);
+        napi_send_event(env_, task, napi_eprio_immediate);
     }
 }
 } // namespace OHOS::Rosen

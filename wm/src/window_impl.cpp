@@ -51,6 +51,7 @@ namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowImpl"};
 const std::string PARAM_DUMP_HELP = "-h";
+const uint32_t API_VERSION_MOD = 1000;
 
 Ace::ContentInfoType GetAceContentInfoType(BackupAndRestoreType type)
 {
@@ -4137,8 +4138,7 @@ void WindowImpl::SetDefaultOption()
         case WindowType::WINDOW_TYPE_SEARCHING_BAR:
         case WindowType::WINDOW_TYPE_SCREENSHOT:
         case WindowType::WINDOW_TYPE_GLOBAL_SEARCH:
-        case WindowType::WINDOW_TYPE_DIALOG:
-        case WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD: {
+        case WindowType::WINDOW_TYPE_DIALOG: {
             property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
             break;
         }
@@ -4461,9 +4461,13 @@ void WindowImpl::RegisterWindowInspectorCallback()
     WindowInspector::GetInstance().RegisterGetWMSWindowListCallback(GetWindowId(), std::move(getWMSWindowListCallback));
 }
 
-uint32_t WindowImpl::GetApiVersion() const
+uint32_t WindowImpl::GetApiCompatibleVersion() const
 {
-    return SysCapUtil::GetApiCompatibleVersion();
+    uint32_t version = 0;
+    if ((context_ != nullptr) && (context_->GetApplicationInfo() != nullptr)) {
+        version = context_->GetApplicationInfo()->apiCompatibleVersion % API_VERSION_MOD;
+    }
+    return version;
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -98,6 +98,8 @@ napi_value WindowTypeInit(napi_env env)
         static_cast<int32_t>(ApiWindowType::TYPE_WALLET_SWIPE_CARD)));
     napi_set_named_property(env, objValue, "TYPE_SCREEN_CONTROL", CreateJsValue(env,
         static_cast<int32_t>(ApiWindowType::TYPE_SCREEN_CONTROL)));
+    napi_set_named_property(env, objValue, "TYPE_FLOAT_NAVIGATION", CreateJsValue(env,
+        static_cast<int32_t>(ApiWindowType::TYPE_FLOAT_NAVIGATION)));
 
     return objValue;
 }
@@ -465,7 +467,7 @@ napi_value CreateJsWindowPropertiesObject(napi_env env, sptr<Window>& window, co
     napi_set_named_property(env, objValue, "drawableRect", drawableRectObj);
 
     WindowType type = window->GetType();
-    uint32_t apiVersion = window->GetApiVersion();
+    uint32_t apiVersion = window->GetApiCompatibleVersion();
     if (apiVersion < API_VERSION_18 && type == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "api version %{public}d.", apiVersion);
         napi_set_named_property(env, objValue, "type", CreateJsValue(env, type));
@@ -1357,8 +1359,14 @@ bool ParseSubWindowOptions(napi_env env, napi_value jsObject, const sptr<WindowO
         return false;
     }
 
+    bool maximizeSupported = false;
+    if (!ParseJsValue(jsObject, env, "maximizeSupported", maximizeSupported)) {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to maximizeSupported");
+    }
+
     windowOption->SetSubWindowTitle(title);
     windowOption->SetSubWindowDecorEnable(decorEnabled);
+    windowOption->SetSubWindowMaximizeSupported(maximizeSupported);
     if (!ParseRectParam(env, jsObject, windowOption)) {
         return false;
     }

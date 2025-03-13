@@ -30,7 +30,11 @@ const std::string CAST_PLUG_IN_FLAG_DATA = "1";
 const std::string CAST_PLUG_OUT_FLAG_DATA = "0";
 const std::string COMMON_EVENT_DISPLAY_ROTATION_CHANGED = "custom.event.display_rotation_changed";
 const std::string COMMON_EVENT_CAST_PLUGGED_CHANGED = "custom.event.cast_plugged_changed";
+const std::string COMMON_EVENT_SMART_NOTIFICATION = "hicare.event.SMART_NOTIFICATION";
+const std::string COMMON_EVENT_LOW_TEMP_WARNING = "usual.event.thermal.LOW_TEMP_WARNING";
 constexpr int32_t PUBLISH_FAILURE = -1;
+const std::string FAULT_DESCRIPTION = "842003014";
+const std::string FAULT_SUGGESTION = "542003014";
 }
 
 class ScreenSessionPublishTest : public testing::Test {
@@ -141,6 +145,52 @@ HWTEST_F(ScreenSessionPublishTest, PublishDisplayRotationEvent, Function | Small
     screenSessionPublish.cesWantMap_.insert(std::make_pair(COMMON_EVENT_DISPLAY_ROTATION_CHANGED, want));
     screenSessionPublish.PublishDisplayRotationEvent(screenId, displayRotation);
     ASSERT_EQ(screenSessionPublish.cesWantMap_.size(), 2);
+}
+
+/**
+ * @tc.name: PublishSmartNotificationEvent
+ * @tc.desc: PublishSmartNotificationEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionPublishTest, PublishSmartNotificationEvent, Function | SmallTest | Level3)
+{
+    auto screenSessionPublish = ScreenSessionPublish::GetInstance();
+    screenSessionPublish.cesWantMap_.clear();
+    screenSessionPublish.PublishSmartNotificationEvent(FAULT_DESCRIPTION, FAULT_SUGGESTION);
+    ASSERT_EQ(screenSessionPublish.cesWantMap_.size(), 1);
+
+    screenSessionPublish.cesWantMap_.clear();
+    sptr<EventFwk::Want> want = new (std::nothrow) EventFwk::Want();
+    screenSessionPublish.cesWantMap_.insert(std::make_pair(COMMON_EVENT_SMART_NOTIFICATION, want));
+    screenSessionPublish.PublishSmartNotificationEvent(FAULT_DESCRIPTION, FAULT_SUGGESTION);
+    ASSERT_EQ(screenSessionPublish.cesWantMap_.size(), 1);
+}
+
+/**
+ * @tc.name: RegisterLowTempSubscriber
+ * @tc.desc: RegisterLowTempSubscriber
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionPublishTest, RegisterLowTempSubscriber, Function | SmallTest | Level3)
+{
+    auto screenSessionPublish = ScreenSessionPublish::GetInstance();
+    screenSessionPublish.subscriber_ = nullptr;
+    ASSERT_EQ(screenSessionPublish.RegisterLowTempSubscriber(), true);
+    ASSERT_EQ(screenSessionPublish.RegisterLowTempSubscriber(), false);
+}
+
+/**
+ * @tc.name: UnRegisterLowTempSubscriber
+ * @tc.desc: UnRegisterLowTempSubscriber
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionPublishTest, UnRegisterLowTempSubscriber, Function | SmallTest | Level3)
+{
+    auto screenSessionPublish = ScreenSessionPublish::GetInstance();
+    screenSessionPublish.RegisterLowTempSubscriber();
+    ASSERT_EQ(screenSessionPublish.UnRegisterLowTempSubscriber(), true);
+    screenSessionPublish.subscriber_ = nullptr;
+    ASSERT_EQ(screenSessionPublish.UnRegisterLowTempSubscriber(), false);
 }
 }
 } // namespace Rosen

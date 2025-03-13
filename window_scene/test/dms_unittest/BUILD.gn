@@ -13,7 +13,7 @@
 
 import("//build/test.gni")
 import("../../../windowmanager_aafwk.gni")
-module_out_path = "window_manager/window_scene"
+module_out_path = "window_manager/OH-DMS/window_scene"
 
 group("unittest") {
   testonly = true
@@ -193,7 +193,11 @@ ohos_unittest("ws_screen_session_test") {
     "${window_base_path}/window_scene/session:screen_session",
   ]
 
-  external_deps = [ "c_utils:utils" ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "init:libbegetutil",
+  ]
 
   defines = []
 
@@ -701,6 +705,7 @@ if (window_manager_fold_ability) {
       "ability_runtime:app_manager",
       "c_utils:utils",
       "hilog:libhilog",
+      "init:libbegetutil",
     ]
   }
 

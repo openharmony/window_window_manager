@@ -41,6 +41,7 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowExtensionSessionImpl"};
 constexpr int64_t DISPATCH_KEY_EVENT_TIMEOUT_TIME_MS = 1000;
 constexpr int32_t UIEXTENTION_ROTATION_ANIMATION_TIME = 400;
+constexpr uint32_t API_VERSION_18 = 18;
 }
 
 #define CHECK_HOST_SESSION_RETURN_IF_NULL(hostSession)                         \
@@ -68,7 +69,7 @@ WindowExtensionSessionImpl::WindowExtensionSessionImpl(const sptr<WindowOption>&
     if ((isDensityFollowHost_ = option->GetIsDensityFollowHost())) {
         hostDensityValue_ = option->GetDensity();
     }
-    TLOGI(WmsLogTag::WMS_UIEXT, "UIExtension usage=%{public}u, the default state of hideNonSecureWindows is %{public}d",
+    TLOGI(WmsLogTag::WMS_UIEXT, "UIExtension usage=%{public}u, hideNonSecureWindows=%{public}d",
         property_->GetUIExtensionUsage(), extensionWindowFlags_.hideNonSecureWindowsFlag);
     dataHandler_ = std::make_shared<Extension::ProviderDataHandler>();
     RegisterDataConsumer();
@@ -360,7 +361,7 @@ void WindowExtensionSessionImpl::RegisterTransferComponentDataListener(const Not
 
 WSError WindowExtensionSessionImpl::NotifyTransferComponentData(const AAFwk::WantParams& wantParams)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "id: %{public}d", GetPersistentId());
+    TLOGD(WmsLogTag::WMS_UIEXT, "id: %{public}d", GetPersistentId());
     if (notifyTransferComponentDataFunc_) {
         notifyTransferComponentDataFunc_(wantParams);
     }
@@ -972,6 +973,18 @@ WMError WindowExtensionSessionImpl::GetAvoidAreaByType(AvoidAreaType type, Avoid
     return WMError::WM_OK;
 }
 
+void WindowExtensionSessionImpl::NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
+{
+    int32_t version = static_cast<int32_t>(SysCapUtil::GetApiCompatibleVersion());
+    if (version < API_VERSION_18 && WindowHelper::IsSystemWindow(GetParentWindowType())) {
+        TLOGI(WmsLogTag::WMS_IMMS,
+            "win [%{public}d %{public}s] type %{public}d api %{public}d not supported",
+            GetPersistentId(), GetWindowName().c_str(), type, version);
+        return;
+    }
+    WindowSessionImpl::NotifyAvoidAreaChange(avoidArea, type);
+}
+
 WMError WindowExtensionSessionImpl::RegisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener)
 {
     return RegisterExtensionAvoidAreaChangeListener(listener);
@@ -1301,7 +1314,7 @@ bool WindowExtensionSessionImpl::PreNotifyKeyEvent(const std::shared_ptr<MMI::Ke
             keyEvent->GetId(), keyEvent->GetAgentWindowId());
     }
     if (auto uiContent = GetUIContentSharedPtr()) {
-        TLOGI(WmsLogTag::WMS_EVENT, "Start to process keyEvent, id: %{public}d", keyEvent->GetId());
+        TLOGD(WmsLogTag::WMS_EVENT, "Start to process keyEvent, id: %{public}d", keyEvent->GetId());
         return uiContent->ProcessKeyEvent(keyEvent, true);
     }
     return false;

@@ -334,6 +334,34 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualPixelRatioSystem, Function | S
 }
 
 /**
+ * @tc.name: SetDefaultDensityDpi
+ * @tc.desc: SetDefaultDensityDpi
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, SetDefaultDensityDpi, Function | SmallTest | Level1)
+{
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    ScreenId id = 1001;
+    float virtualPixelRatio = 1.0;
+
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
+
+    DMError res = DMError::DM_ERROR_NOT_SYSTEM_APP;
+    std::function<void()> func = [&]()
+    {
+        res = screenSessionManagerProxy->SetDefaultDensityDpi(id, virtualPixelRatio);
+    };
+    func();
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_NE(res, DMError::DM_ERROR_IPC_FAILED);
+    } else {
+        ASSERT_EQ(res, DMError::DM_ERROR_IPC_FAILED);
+    }
+}
+
+/**
  * @tc.name: SetResolution
  * @tc.desc: SetResolution
  * @tc.type: FUNC
@@ -1807,6 +1835,21 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetSuperFoldStatus, Function | SmallTest
 }
 
 /**
+ * @tc.name: SetLandscapeLockStatus
+ * @tc.desc: SetLandscapeLockStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, SetLandscapeLockStatus, Function | SmallTest | Level1)
+{
+    bool isLocked = false;
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+    ASSERT_NE(screenSessionManagerProxy, nullptr);
+    screenSessionManagerProxy->SetLandscapeLockStatus(isLocked);
+}
+
+/**
  * @tc.name: GetCurrentFoldCreaseRegion
  * @tc.desc: GetCurrentFoldCreaseRegion
  * @tc.type: FUNC
@@ -1835,13 +1878,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, MakeUniqueScreen, Function | SmallTest |
     
     const std::vector<ScreenId> screenIds {1001, 1002, 1003};
     std::vector<DisplayId> displayIds;
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_NE(DMError::DM_ERROR_NULLPTR,
-            screenSessionManagerProxy->MakeUniqueScreen(screenIds, displayIds));
-    } else {
-        EXPECT_EQ(DMError::DM_ERROR_NULLPTR,
-            screenSessionManagerProxy->MakeUniqueScreen(screenIds, displayIds));
-    }
+    EXPECT_EQ(DMError::DM_ERROR_NULLPTR, screenSessionManagerProxy->MakeUniqueScreen(screenIds, displayIds));
 }
 
 /**

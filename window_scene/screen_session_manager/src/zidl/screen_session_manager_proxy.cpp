@@ -131,6 +131,33 @@ DMError ScreenSessionManagerProxy::SetVirtualPixelRatioSystem(ScreenId screenId,
     return static_cast<DMError>(reply.ReadInt32());
 }
 
+DMError ScreenSessionManagerProxy::SetDefaultDensityDpi(ScreenId screenId, float virtualPixelRatio)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("SetDefaultDensity: remote is nullptr");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    if (!data.WriteUint64(screenId) || !data.WriteFloat(virtualPixelRatio)) {
+        WLOGFE("write screenId/virtualPixelRatio failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_DEFAULT_DENSITY_DPI),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    return static_cast<DMError>(reply.ReadInt32());
+}
+
 DMError ScreenSessionManagerProxy::SetResolution(ScreenId screenId, uint32_t width, uint32_t height,
     float virtualPixelRatio)
 {
@@ -2506,6 +2533,33 @@ SuperFoldStatus ScreenSessionManagerProxy::GetSuperFoldStatus()
         return SuperFoldStatus::UNKNOWN;
     }
     return static_cast<SuperFoldStatus>(reply.ReadUint32());
+}
+
+void ScreenSessionManagerProxy::SetLandscapeLockStatus(bool isLocked)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("remote is null");
+        return;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteBool(isLocked)) {
+        WLOGFE("Write isLocked failed");
+        return;
+    }
+    if (remote->SendRequest(
+        static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCENE_BOARD_LANDSCAPE_LOCK_STATUS),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return;
+    }
 }
 
 ExtendScreenConnectStatus ScreenSessionManagerProxy::GetExtendScreenConnectStatus()

@@ -341,6 +341,7 @@ HWTEST_F(WindowSceneSessionImplSpecialWindowTest, CreateAndConnectSpecificSessio
     windowSceneSession->windowSessionMap_["mainWindow"] = {parentId, mainWindow};
     windowSceneSession->Create(abilityContext_, nullptr);
     ASSERT_EQ(windowSceneSession->property_->GetDisplayId(), mainWindow->property_->GetDisplayId());
+    windowSceneSession->Destroy(true);
 }
 
 /**
@@ -374,7 +375,6 @@ HWTEST_F(WindowSceneSessionImplSpecialWindowTest, FindParentSessionByParentId01,
     ASSERT_TRUE(nullptr != windowSceneSession->FindParentSessionByParentId(1112));
     windowSceneSession->Destroy(true);
 }
-
 }
 } // namespace Rosen
 } // namespace OHOS

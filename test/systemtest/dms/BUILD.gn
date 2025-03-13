@@ -14,7 +14,7 @@
 import("//build/test.gni")
 import("../../../windowmanager_aafwk.gni")
 
-module_out_path = "window_manager/dms"
+module_out_path = "window_manager/OH-DMS/dms"
 
 group("systemtest") {
   testonly = true
