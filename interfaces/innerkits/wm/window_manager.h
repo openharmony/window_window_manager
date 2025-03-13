@@ -244,7 +244,7 @@ class IWindowInfoChangedListener : virtual public RefBase {
 
         void SetInterstInfo(const std::unordered_set<WindowInfoKey>& interstInfo) { interstInfo_ = interstInfo; }
         std::unordered_set<WindowInfoKey> GetInterstInfo() const { return interstInfo_; }
-        void AddInterstInfo(WindowInfoKey interstValue) { interstInfo.insert(interstValue); }
+        void AddInterstInfo(WindowInfoKey interstValue) { interstInfo_.insert(interstValue); }
 
     private:
         std::unordered_set<WindowInfoKey> interstInfo_;
