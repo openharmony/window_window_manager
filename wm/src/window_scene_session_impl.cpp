@@ -129,6 +129,7 @@ constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_WIDTH = 40;
 constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_HEIGHT = 40;
 constexpr int32_t API_VERSION_18 = 18;
 constexpr uint32_t LIFECYCLE_ISOLATE_VERSION = 18;
+constexpr uint32_t MAX_SNAPSHOT_WAIT_TIME = 2000;
 }
 uint32_t WindowSceneSessionImpl::maxFloatingWindowSize_ = 1920;
 std::mutex WindowSceneSessionImpl::keyboardPanelInfoChangeListenerMutex_;
@@ -3770,7 +3771,7 @@ std::shared_ptr<Media::PixelMap> WindowSceneSessionImpl::Snapshot()
         WLOGFE("Failed to TakeSurfaceCapture!");
         return nullptr;
     }
-    std::shared_ptr<Media::PixelMap> pixelMap = callback->GetResult(2000); // wait for <= 2000ms
+    std::shared_ptr<Media::PixelMap> pixelMap = callback->GetResult(MAX_SNAPSHOT_WAIT_TIME); // wait for <= 2000ms
     if (pixelMap != nullptr) {
         WLOGFD("Snapshot succeed, save WxH=%{public}dx%{public}d", pixelMap->GetWidth(), pixelMap->GetHeight());
     } else {
@@ -3787,17 +3788,16 @@ WMError WindowSceneSessionImpl::SnapshotIgnorePrivacy(std::shared_ptr<Media::Pix
     std::shared_ptr<SurfaceCaptureFuture> callback = std::make_shared<SurfaceCaptureFuture>();
     auto isSucceeded = RSInterfaces::GetInstance().TakeSelfSurfaceCapture(surfaceNode_, callback);
     if (!isSucceeded) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to TakeSelfSurfaceCapture!");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "windowId:%{public}u, Failed to TakeSelfSurfaceCapture!", GetWindowId());
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
-    pixelMap = callback->GetResult(2000); // wait for <= 2000ms
-    if (pixelMap != nullptr) {
-        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "SnapshotIgnorePrivacy succeed, save WxH=%{public}dx%{public}d",
-            pixelMap->GetWidth(), pixelMap->GetHeight());
-    } else {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to get pixelmap, return nullptr!");
+    pixelMap = callback->GetResult(MAX_SNAPSHOT_WAIT_TIME); // wait for <= 2000ms
+    if (pixelMap == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to get pixelmap, windowId:%{public}u", GetWindowId());
         return WMError::WM_ERROR_NULLPTR;
     }
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "succeed, windowId:%{public}u, WxH=%{public}dx%{public}d",
+        GetWindowId(), pixelMap->GetWidth(), pixelMap->GetHeight());
     return WMError::WM_OK;
 }
 

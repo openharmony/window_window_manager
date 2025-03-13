@@ -407,7 +407,7 @@ std::shared_ptr<Media::PixelMap> WindowImpl::Snapshot()
 
 WMError WindowImpl::SnapshotIgnorePrivacy(std::shared_ptr<Media::PixelMap>& pixelMap)
 {
-    return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    return WMError::WM_OK;
 }
 
 void WindowImpl::DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
