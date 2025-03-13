@@ -769,13 +769,13 @@ HWTEST_F(ScreenManagerTest, GetScreenInfoSrting, Function | SmallTest | Level1)
  * @tc.desc: SetScreenSkipProtectedWindow fun
  * @tc.type: FUNC
  */
- HWTEST_F(ScreenManagerTest, SetScreenSkipProtectedWindow, Function | SmallTest | Level1)
- {
-     const std::vector<ScreenId> screenIds;
-     bool isEnable = true;
-     auto result = ScreenManager::GetInstance().SetScreenSkipProtectedWindow(screenIds, isEnable);
-     EXPECT_EQ(result, DMError::DM_ERROR_INVALID_PARAM);
- }
+HWTEST_F(ScreenManagerTest, SetScreenSkipProtectedWindow, Function | SmallTest | Level1)
+{
+    const std::vector<ScreenId> screenIds;
+    bool isEnable = true;
+    auto result = ScreenManager::GetInstance().SetScreenSkipProtectedWindow(screenIds, isEnable);
+    EXPECT_EQ(result, DMError::DM_ERROR_INVALID_PARAM);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -281,7 +281,6 @@ Uri SettingProvider::AssembleUri(const std::string& key)
     return uri;
 }
 
-
 ErrCode SettingProvider::RegisterObserverByTable(const sptr<SettingObserver>& observer, std::string tableName)
 {
     if (observer == nullptr) {
