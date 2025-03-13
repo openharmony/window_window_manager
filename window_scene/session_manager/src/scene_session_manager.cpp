@@ -8464,6 +8464,7 @@ WSError SceneSessionManager::BindDialogSessionTarget(uint64_t persistentId, sptr
         sceneSession->SetScreenId(displayId);
         sceneSession->SetParentSession(parentSession);
         sceneSession->SetParentPersistentId(parentSession->GetPersistentId());
+        sceneSession->SetClientDisplayId(parentSession->GetClientDisplayId());
         UpdateParentSessionForDialog(sceneSession, sceneSession->GetSessionProperty());
         TLOGNI(WmsLogTag::WMS_DIALOG, "Bind dialog success, dialog id %{public}" PRIu64 ", parentId %{public}d",
             persistentId, parentSession->GetPersistentId());
