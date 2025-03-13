@@ -31,7 +31,6 @@
 #include "window.h"
 #include "window_manager.h"
 #include "window_manager_hilog.h"
-#include "wm_common.h"
 
 using namespace OHOS::Rosen;
 
