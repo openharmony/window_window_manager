@@ -369,7 +369,7 @@ public:
      * @param isEnable wether to enable the screen sharing protect.
      * @return DM_OK means set success, others means failed.
      */
-     DMError SetScreenSkipProtectedWindow(const std::vector<ScreenId>& screenIds, bool isEnable);
+    DMError SetScreenSkipProtectedWindow(const std::vector<ScreenId>& screenIds, bool isEnable);
 private:
     ScreenManager();
     ~ScreenManager();
