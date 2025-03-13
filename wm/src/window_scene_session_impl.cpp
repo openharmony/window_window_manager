@@ -129,7 +129,6 @@ constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_WIDTH = 40;
 constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_HEIGHT = 40;
 constexpr int32_t API_VERSION_18 = 18;
 constexpr uint32_t LIFECYCLE_ISOLATE_VERSION = 18;
-constexpr uint32_t MAX_SNAPSHOT_WAIT_TIME = 2000;
 const uint32_t API_VERSION_MOD = 1000;
 constexpr uint32_t MAX_SNAPSHOT_WAIT_TIME = 2000;
 }
