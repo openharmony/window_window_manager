@@ -102,6 +102,7 @@ void ScreenSettingHelper::RegisterSettingCastObserver(SettingObserver::UpdateFun
     castObserver_ = castProvider.CreateObserver(SETTING_CAST_KEY, func);
     if (castObserver_ == nullptr) {
         TLOGE(WmsLogTag::DMS, "create observer failed");
+        return;
     }
     ErrCode ret = castProvider.RegisterObserver(castObserver_);
     if (ret != ERR_OK) {
@@ -145,6 +146,7 @@ void ScreenSettingHelper::RegisterSettingRotationObserver(SettingObserver::Updat
     rotationObserver_ = settingProvider.CreateObserver(SETTING_ROTATION_KEY, func);
     if (rotationObserver_ == nullptr) {
         TLOGE(WmsLogTag::DMS, "create observer failed");
+        return;
     }
     ErrCode ret = settingProvider.RegisterObserver(rotationObserver_);
     if (ret != ERR_OK) {
@@ -213,17 +215,17 @@ bool ScreenSettingHelper::GetSettingRotationScreenId(int32_t& screenId, const st
     return true;
 }
 
-
 void ScreenSettingHelper::RegisterSettingscreenSkipProtectedWindowObserver(SettingObserver::UpdateFunc func)
 {
     if (screenSkipProtectedWindowObserver_ != nullptr) {
-        TLOGI(WmsLogTag::DMS, "setting rotation observer is registered");
+        TLOGI(WmsLogTag::DMS, "observer is registered");
         return;
     }
     SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
     screenSkipProtectedWindowObserver_ = settingProvider.CreateObserver(SETTING_SCREEN_SHARE_PROTECT_KEY, func);
     if (screenSkipProtectedWindowObserver_ == nullptr) {
         TLOGE(WmsLogTag::DMS, "create observer failed");
+        return;
     }
     ErrCode ret = settingProvider.RegisterObserverByTable(screenSkipProtectedWindowObserver_,
         SCREEN_SHARE_PROTECT_TABLE);
@@ -236,7 +238,7 @@ void ScreenSettingHelper::RegisterSettingscreenSkipProtectedWindowObserver(Setti
 void ScreenSettingHelper::UnregisterSettingscreenSkipProtectedWindowObserver()
 {
     if (screenSkipProtectedWindowObserver_ == nullptr) {
-        TLOGI(WmsLogTag::DMS, "rotationObserver_ is nullptr");
+        TLOGI(WmsLogTag::DMS, "observer is nullptr");
         return;
     }
     SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
