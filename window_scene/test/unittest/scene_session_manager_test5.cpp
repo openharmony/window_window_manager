@@ -1459,6 +1459,7 @@ HWTEST_F(SceneSessionManagerTest5, ProcessDialogRequestFocusImmdediately02, Func
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     auto ret = ssm_->ProcessDialogRequestFocusImmdediately(sceneSession);
     EXPECT_EQ(WSError::WS_DO_NOTHING, ret);
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 /**
