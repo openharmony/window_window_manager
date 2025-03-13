@@ -2215,8 +2215,14 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
             return WMError::WM_ERROR_INVALID_WINDOW;
         }
         CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
-        hostSession->OnSessionEvent(isFullScreenWaterfallMode_.load() ? SessionEvent::EVENT_MAXIMIZE_WATERFALL
-                                                                      : SessionEvent::EVENT_MAXIMIZE);
+        auto event = SessionEvent::EVENT_MAXIMIZE;
+        if (isFullScreenWaterfallMode_.load()) {
+            event = SessionEvent::EVENT_MAXIMIZE_WATERFALL;
+        } else if (isWaterfallToMaximize_.load()) {
+            event = SessionEvent::EVENT_WATERFALL_TO_MAXIMIZE;
+            isWaterfallToMaximize_.store(false);
+        }
+        hostSession->OnSessionEvent(event);
         SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     }
 
@@ -2666,10 +2672,12 @@ WMError WindowSceneSessionImpl::Recover()
     TLOGI(WmsLogTag::WMS_LAYOUT_PC, "id: %{public}d", GetPersistentId());
     if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() && isFullScreenWaterfallMode_.load() &&
         lastWindowModeBeforeWaterfall_.load() == WindowMode::WINDOW_MODE_FULLSCREEN) {
+        isWaterfallToMaximize_.store(true);
         SetFullScreenWaterfallMode(false);
         WMError ret = Maximize();
         if (ret != WMError::WM_OK) {
             TLOGE(WmsLogTag::WMS_LAYOUT_PC, "recover to fullscreen failed");
+            isWaterfallToMaximize_.store(false);
             SetFullScreenWaterfallMode(true);
         }
         return ret;
