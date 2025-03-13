@@ -32,17 +32,17 @@ public:
     static ani_int getFoldStatus(ani_env* env);
     static ani_object getCurrentFoldCreaseRegion(ani_env* env, ani_object obj);
 
-    static ani_array_ref getAllDisplaysAni(ani_env* env);
+    static ani_array_ref getAllDisplaysAni(ani_env* env, ani_object arrayObj);
     static ani_status getDisplayByIdSyncAni(ani_env* env, ani_object obj, ani_int displayId);
     static ani_status getDefaultDisplaySyncAni(ani_env* env, ani_object obj);
 
-    static ani_object registerCallback(ani_env* env, ani_object obj,
-        ani_string type, ani_ref callback, ani_long nativeObj);
-    static ani_object unRegisterCallback(ani_env* env, ani_object obj,
-        ani_string type, ani_ref callback, ani_long nativeObj);
+    static ani_object registerCallback(ani_env* env, ani_string type,
+        ani_ref callbackInternal, ani_long nativeObj);
+    static ani_object unRegisterCallback(ani_env* env, ani_string type,
+        ani_ref callbackInternal, ani_long nativeObj);
 
 private:
-    ani_object onRegisterCallback(ani_env* env, ani_string type, ani_ref callback);
+    ani_object onRegisterCallback(ani_env* env, ani_string type, ani_object callbackInternal);
     ani_object onUnRegisterCallback(ani_env* env, ani_string type, ani_ref callback);
     std::mutex mtx_;
     std::unique_ptr<OHOS::Rosen::DisplayAniRegisterManager> registerManager_ = nullptr;
