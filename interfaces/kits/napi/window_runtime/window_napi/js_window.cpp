@@ -5244,13 +5244,12 @@ napi_value JsWindow::OnSnapshot(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::OnSnapshotIgnorePrivacy(napi_env env, napi_callback_info info)
 {
-    wptr<Window> weakToken(windowToken_);
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
-    auto asyncTask = [weakToken, env, task = napiAsyncTask] {
+    auto asyncTask = [weakToken = wptr<Window>(windowToken_), env, task = napiAsyncTask] {
         auto weakWindow = weakToken.promote();
             if (weakWindow == nullptr) {
                 TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "window is nullptr");
