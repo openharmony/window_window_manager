@@ -28,14 +28,19 @@ namespace Rosen {
 #endif
 
 class AniWindowStage {
-public:
+    public:
     explicit AniWindowStage(const std::shared_ptr<Rosen::WindowScene>& windowScene);
     ~AniWindowStage();
+    static void DisableWindowDecor(ani_env* env, ani_object obj, ani_long nativeObj);
+    static void SetShowOnLockScreen(ani_env* env, ani_class cls, ani_long nativeObj, ani_boolean showOnLockScreen);
+
     void LoadContent(ani_env* env, const std::string& content);
     std::weak_ptr<WindowScene> GetWindowScene() { return windowScene_; }
     ani_object GetMainWindow(ani_env* env);
     ani_boolean WindowIsWindowSupportWideGamut(ani_env* env, ani_class cls, ani_object obj);
 private:
+    void OnDisableWindowDecor(ani_env* env);
+    void OnSetShowOnLockScreen(ani_env* env, ani_boolean showOnLockScreen);
     std::weak_ptr<WindowScene> windowScene_;
 };
 
