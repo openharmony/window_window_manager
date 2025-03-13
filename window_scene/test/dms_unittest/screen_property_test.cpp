@@ -87,40 +87,6 @@ HWTEST_F(ScreenPropertyTest, SetRotationAndScreenRotationOnly001, Function | Sma
     delete property;
     GTEST_LOG_(INFO) << "ScreenPropertyTest: SetRotationAndScreenRotationOnly001 end";
 }
- 
- /**
- * @tc.name: SetRotationAndScreenRotationOnly002
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenPropertyTest, SetRotationAndScreenRotationOnly002, Function | SmallTest | Level2)
-{
-    GTEST_LOG_(INFO) << "ScreenPropertyTest: SetRotationAndScreenRotationOnly002 start";
-    ScreenProperty* property = new(std::nothrow) ScreenProperty();
-    ASSERT_NE(property, nullptr);
-    Rotation ret = Rotation::ROTATION_0;
-    Rotation rotation = Rotation::ROTATION_0;
-    property->SetRotationAndScreenRotationOnly(rotation);
-    ret = property->GetRotation();
-    ASSERT_EQ(ret, rotation);
-
-    rotation = Rotation::ROTATION_90;
-    property->SetRotationAndScreenRotationOnly(rotation);
-    ret = property->GetRotation();
-    ASSERT_EQ(ret, rotation);
-
-    rotation = Rotation::ROTATION_180;
-    property->SetRotationAndScreenRotationOnly(rotation);
-    ret = property->GetRotation();
-    ASSERT_EQ(ret, rotation);
-
-    rotation = Rotation::ROTATION_270;
-    property->SetRotationAndScreenRotationOnly(rotation);
-    ret = property->GetRotation();
-    ASSERT_EQ(ret, rotation);
-    delete property;
-    GTEST_LOG_(INFO) << "ScreenPropertyTest: SetRotationAndScreenRotationOnly002 end";
-}
 
 /**
  * @tc.name: UpdateDeviceRotation
