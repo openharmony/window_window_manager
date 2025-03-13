@@ -156,7 +156,6 @@ public:
      * Window layout
      */
     WSError SetFollowParentWindowLayoutEnabled(bool isFollow) override;
-    WSError GetKeyFramePolicy(KeyFramePolicy& keyFramePolicy) override;
     WSError KeyFrameAnimateEnd() override;
     WSError UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode,
         std::shared_ptr<RSTransaction>& rsTransaction) override;

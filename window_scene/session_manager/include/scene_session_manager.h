@@ -186,7 +186,7 @@ public:
 
     sptr<SceneSession> GetSceneSessionByIdentityInfo(const SessionIdentityInfo& info);
     sptr<SceneSession> GetSceneSessionByType(WindowType type);
-    sptr<SceneSession> GetSceneSessionByBundleName(const std::string& bundleName);
+    std::vector<sptr<SceneSession>> GetSceneSessionByBundleName(const std::string& bundleName);
 
     WSError CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,

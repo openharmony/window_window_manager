@@ -1294,13 +1294,15 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
     float density = GetVirtualPixelRatio(displayInfo);
     int32_t orientation = static_cast<int32_t>(displayInfo->GetDisplayOrientation());
     virtualPixelRatio_ = density;
-    KeyFramePolicy keyFramePolicy;
-    if (auto hostSession = GetHostSession()) {
-        hostSession->GetKeyFramePolicy(keyFramePolicy);
-    }
     auto config = FillViewportConfig(rect, density, orientation, transformHint, GetDisplayId());
-    config.SetKeyFrameConfig(keyFramePolicy.running_, keyFramePolicy.animationDuration_,
-        keyFramePolicy.animationDelay_);
+    if (reason == WindowSizeChangeReason::DRAG_END && keyFramePolicy_.stopping_) {
+        TLOGI(WmsLogTag::WMS_LAYOUT, "key frame stop");
+        keyFramePolicy_.stopping_ = false;
+        config.SetKeyFrameConfig(true, keyFramePolicy_.animationDuration_, keyFramePolicy_.animationDelay_);
+    } else {
+        config.SetKeyFrameConfig(keyFramePolicy_.running_, keyFramePolicy_.animationDuration_,
+            keyFramePolicy_.animationDelay_);
+    }
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
     if (uiContent == nullptr) {
         WLOGFW("uiContent is null!");
@@ -1543,6 +1545,13 @@ WSError WindowSessionImpl::LinkKeyFrameCanvasNode(std::shared_ptr<RSCanvasNode>&
         return WSError::WS_ERROR_NULLPTR;
     }
     uiContent->LinkKeyFrameCanvasNode(rsCanvasNode);
+    return WSError::WS_OK;
+}
+
+WSError WindowSessionImpl::SetKeyFramePolicy(KeyFramePolicy& keyFramePolicy)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    keyFramePolicy_ = keyFramePolicy;
     return WSError::WS_OK;
 }
 

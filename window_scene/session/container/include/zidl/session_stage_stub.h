@@ -79,6 +79,7 @@ private:
     int HandleNotifyDumpInfo(MessageParcel& data, MessageParcel& reply);
     int HandleExtensionHostData(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int HandleLinkKeyFrameCanvasNode(MessageParcel& data, MessageParcel& reply);
+    int HandleSetKeyFramePolicy(MessageParcel& data, MessageParcel& reply);
     int HandleSetDragActivated(MessageParcel& data, MessageParcel& reply);
     int HandleSetSplitButtonVisible(MessageParcel& data, MessageParcel& reply);
     int HandleSetEnableDragBySystem(MessageParcel& data, MessageParcel& reply);

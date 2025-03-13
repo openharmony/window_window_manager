@@ -1466,15 +1466,19 @@ sptr<SceneSession> SceneSessionManager::GetSceneSessionByType(WindowType type)
     return nullptr;
 }
 
-sptr<SceneSession> SceneSessionManager::GetSceneSessionByBundleName(const std::string& bundleName)
+std::vector<sptr<SceneSession>> SceneSessionManager::GetSceneSessionByBundleName(const std::string& bundleName)
 {
+    std::vector<sptr<SceneSession>> sceneSessionVector;
+    if (bundleName.empty()) {
+        return sceneSessionVector;
+    }
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (const auto& [_, sceneSession] : sceneSessionMap_) {
         if (sceneSession && sceneSession->GetSessionInfo().bundleName_ == bundleName) {
-            return sceneSession;
+            sceneSessionVector.emplace_back(sceneSession);
         }
     }
-    return nullptr;
+    return sceneSessionVector;
 }
 
 std::vector<sptr<SceneSession>> SceneSessionManager::GetSceneSessionVectorByTypeAndDisplayId(
@@ -2022,11 +2026,13 @@ WMError SceneSessionManager::SetAppDragResizeTypeInner(const std::string& bundle
     appDragResizeTypeMap_[bundleName] = dragResizeType;
     GetAppDragResizeTypeInner(bundleName, dragResizeType);
     taskScheduler_->PostAsyncTask([this, bundleName, dragResizeType] {
-        auto sceneSession = GetSceneSessionByBundleName(bundleName);
-        if (sceneSession != nullptr) {
-            TLOGNI(WmsLogTag::WMS_LAYOUT, "SetAppDragResizeType persistentId: %{public}d, bundleName: %{public}s, "
-                "dragResizeType: %{public}d", sceneSession->GetPersistentId(), bundleName.c_str(), dragResizeType);
-            sceneSession->SetAppDragResizeType(dragResizeType);
+        auto allMatchSession = GetSceneSessionByBundleName(bundleName);
+        for (const auto& sceneSession : allMatchSession) {
+            if (sceneSession != nullptr) {
+                TLOGNI(WmsLogTag::WMS_LAYOUT, "SetAppDragResizeType persistentId: %{public}d, bundleName: %{public}s, "
+                    "dragResizeType: %{public}d", sceneSession->GetPersistentId(), bundleName.c_str(), dragResizeType);
+                sceneSession->SetAppDragResizeType(dragResizeType);
+            }
         }
     }, __func__);
     return WMError::WM_OK;
@@ -2077,12 +2083,14 @@ WMError SceneSessionManager::SetAppKeyFramePolicy(const std::string& bundleName,
         appKeyFramePolicyMap_[bundleName] = keyFramePolicy;
     }
     taskScheduler_->PostAsyncTask([this, bundleName, keyFramePolicy, where = __func__] {
-        auto sceneSession = GetSceneSessionByBundleName(bundleName);
-        if (sceneSession != nullptr && systemConfig_.IsPcWindow() &&
-            WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
-            TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s: pc main window id: %{public}d, bundleName: %{public}s",
-                where, sceneSession->GetPersistentId(), bundleName.c_str());
-            sceneSession->SetKeyFramePolicy(keyFramePolicy);
+        auto allMatchSession = GetSceneSessionByBundleName(bundleName);
+        for (const auto& sceneSession : allMatchSession) {
+            if (sceneSession != nullptr && systemConfig_.IsPcWindow() &&
+                WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
+                TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s: pc main window id: %{public}d, bundleName: %{public}s",
+                    where, sceneSession->GetPersistentId(), bundleName.c_str());
+                sceneSession->SetKeyFramePolicy(keyFramePolicy);
+            }
         }
     }, __func__);
     return WMError::WM_OK;

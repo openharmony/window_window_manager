@@ -211,12 +211,10 @@ public:
     }
 
     /**
-     * @brief get policy info of keyFrame.
+     * @brief keyFrame event info.
      *
-     * @param keyFramePolicy KeyFramePolicy instance.
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
-    virtual WSError GetKeyFramePolicy(KeyFramePolicy& keyFramePolicy) { return WSError::WS_OK; }
     virtual WSError KeyFrameAnimateEnd() { return WSError::WS_OK; }
     virtual WSError UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode,
         std::shared_ptr<RSTransaction>& rsTransaction) { return WSError::WS_OK; }

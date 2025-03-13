@@ -3337,26 +3337,18 @@ WSError SceneSession::UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsC
 void SceneSession::SetKeyFramePolicy(const KeyFramePolicy& keyFramePolicy)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "in");
+    bool running = keyFramePolicy_.running_;
+    bool stopping = keyFramePolicy_.stopping_;
     keyFramePolicy_ = keyFramePolicy;
-    keyFramePolicy_.running_ = keyFramePolicy.running_;
-}
-
-WSError SceneSession::GetKeyFramePolicy(KeyFramePolicy& keyFramePolicy)
-{
-    TLOGI(WmsLogTag::WMS_LAYOUT, "running %{public}d", keyFramePolicy_.running_);
-    keyFramePolicy = keyFramePolicy_;
-    if (keyFramePolicy_.running_ && reason_ == SizeChangeReason::DRAG_END) {
-        TLOGI(WmsLogTag::WMS_LAYOUT, "key frame stop");
-        keyFramePolicy_.running_ = false;
-    }
-    return WSError::WS_OK;
+    keyFramePolicy_.running_ = running;
+    keyFramePolicy_.stopping_ = stopping;
 }
 
 void SceneSession::UpdateKeyFrameState(SizeChangeReason reason, const WSRect& rect)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "in");
-    if (!moveDragController_) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "no moveDragController");
+    if (!moveDragController_ || !sessionStage_) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "no moveDragController or sessionStage");
         return;
     }
     uint64_t timeStamp = std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -3369,6 +3361,7 @@ void SceneSession::UpdateKeyFrameState(SizeChangeReason reason, const WSRect& re
         }
         TLOGI(WmsLogTag::WMS_LAYOUT, "key frame start");
         keyFramePolicy_.running_ = true;
+        keyFramePolicy_.stopping_ = false;
         keyFrameAnimating_ = false;
         lastKeyFrameStamp_ = timeStamp;
         lastKeyFrameRect_ = rect;
@@ -3376,6 +3369,7 @@ void SceneSession::UpdateKeyFrameState(SizeChangeReason reason, const WSRect& re
         keyFrameVsyncRequestStamp_ = timeStamp;
         lastKeyFrameDragStamp_ = timeStamp;
         keyFrameDragPauseNoticed_ = false;
+        sessionStage_->SetKeyFramePolicy(keyFramePolicy_);
         RequestKeyFrameNextVsync(keyFrameVsyncRequestStamp_, 0);
         return;
     }
@@ -3394,6 +3388,9 @@ void SceneSession::UpdateKeyFrameState(SizeChangeReason reason, const WSRect& re
         RSTransaction::FlushImplicitTransaction();
     } else if (reason == SizeChangeReason::DRAG_END) {
         TLOGI(WmsLogTag::WMS_LAYOUT, "key frame stopping");
+        keyFramePolicy_.running_ = false;
+        keyFramePolicy_.stopping_ = true;
+        sessionStage_->SetKeyFramePolicy(keyFramePolicy_);
         keyFrameCloneNode_ = nullptr;
     }
 }
@@ -3437,6 +3434,7 @@ bool SceneSession::KeyFrameNotifyFilter(const WSRect& rect, SizeChangeReason rea
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "reason in: %{public}d", reason);
     if (!keyFramePolicy_.running_) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "skip filter for not running");
         return false;
     }
     if (reason == SizeChangeReason::DRAG_START) {
@@ -3445,6 +3443,7 @@ bool SceneSession::KeyFrameNotifyFilter(const WSRect& rect, SizeChangeReason rea
         return true;
     }
     if (reason != SizeChangeReason::DRAG) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "skip filter for not drag");
         return false;
     }
     if (keyFrameAnimating_) {
