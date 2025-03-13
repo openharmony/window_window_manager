@@ -26,7 +26,7 @@ class DisplayAni {
 public:
     explicit DisplayAni(const std::shared_ptr<OHOS::Rosen::Display>& display);
 
-    static ani_object getCutoutInfo(ani_env* env, ani_object obj);
+    static void getCutoutInfo(ani_env* env, ani_object obj, ani_object cutoutInfoObj);
 private:
     std::mutex mtx_;
     std::unique_ptr<OHOS::Rosen::DisplayAniRegisterManager> registerManager_ = nullptr;

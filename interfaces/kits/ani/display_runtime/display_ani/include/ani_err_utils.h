@@ -25,6 +25,9 @@ class AniErrUtils {
 public:
     static ani_object CreateAniError(ani_env* env, const DMError& errorCode, std::string msg = "");
     static ani_object CreateAniError(ani_env* env, const DmErrorCode& errorCode, std::string msg = "");
+    static ani_status ThrowBusinessError(ani_env* env, DMError error, std::string message);
+    static ani_status ThrowBusinessError(ani_env* env, DmErrorCode error, std::string message);
+    static ani_status CreateBusinessError(ani_env* env, int32_t error, std::string message, ani_object* err);
 
 private:
     static std::string GetErrorMsg(const DMError& errorCode);
