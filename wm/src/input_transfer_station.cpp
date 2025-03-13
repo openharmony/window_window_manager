@@ -92,10 +92,6 @@ void InputEventListener::HandleInputEvent(std::shared_ptr<MMI::PointerEvent> poi
 
 void InputEventListener::OnInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent) const
 {
-    if (keyEvent == nullptr) {
-        TLOGE(WmsLogTag::WMS_INPUT_KEY_FLOW, "KeyEvent is nullptr");
-        return;
-    }
     if (WindowInputIntercept::GetInstance().IsInputIntercept(keyEvent)) {
         return;
     }
@@ -114,10 +110,6 @@ void InputEventListener::OnInputEvent(std::shared_ptr<MMI::AxisEvent> axisEvent)
 
 void InputEventListener::OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent) const
 {
-    if (pointerEvent == nullptr) {
-        TLOGE(WmsLogTag::WMS_INPUT_KEY_FLOW, "PointerEvent is nullptr");
-        return;
-    }
     if (WindowInputIntercept::GetInstance().IsInputIntercept(pointerEvent)) {
         return;
     }
@@ -212,7 +204,7 @@ sptr<WindowInputChannel> InputTransferStation::GetInputChannel(uint32_t windowId
 
 void InputTransferStation::HandleInputEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
-    if (inputListener_ == nullptr || keyEvent == nullptr) {
+    if (inputListener_ == nullptr) {
         return;
     }
     inputListener_->HandleInputEvent(keyEvent);
@@ -220,7 +212,7 @@ void InputTransferStation::HandleInputEvent(const std::shared_ptr<MMI::KeyEvent>
 
 void InputTransferStation::HandleInputEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
-    if (inputListener_ == nullptr || pointerEvent == nullptr) {
+    if (inputListener_ == nullptr) {
         return;
     }
     inputListener_->HandleInputEvent(pointerEvent);
