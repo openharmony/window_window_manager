@@ -19,8 +19,8 @@ generate_static_abc("window_stage_abc") {
   dst_file = "$target_out_dir/window_stage_ani.abc"
   in_puts = [
     "./main.json",
-    "./sts/window.ets",
-    "./sts/window_entry.ets",
+    "./ets/window.ets",
+    "./ets/window_entry.ets",
   ]
   out_puts = [ "$target_out_dir/window_stage_ani.abc" ]
 
