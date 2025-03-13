@@ -190,7 +190,7 @@ bool PcFoldScreenController::NeedFollowHandAnimation()
 
 void PcFoldScreenController::RecordStartMoveRect(const WSRect& rect, bool isStartFullScreen)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "rect: %{public}s, isStartFullScreen: %{public}d",
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "rect: %{public}s, isStartFullScreen: %{public}d",
         rect.ToString().c_str(), isStartFullScreen);
     std::unique_lock<std::mutex> lock(moveMutex_);
     startMoveRect_ = rect;
@@ -235,13 +235,13 @@ void PcFoldScreenController::RecordMoveRects(const WSRect& rect)
     auto time = std::chrono::high_resolution_clock::now();
     std::unique_lock<std::mutex> lock(moveMutex_);
     movingRectRecords_.push_back(std::make_pair(time, rect));
-    TLOGD(WmsLogTag::WMS_LAYOUT, "id: %{public}d, rect: %{public}s", GetPersistentId(), rect.ToString().c_str());
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "id: %{public}d, rect: %{public}s", GetPersistentId(), rect.ToString().c_str());
     // pop useless record
     while (movingRectRecords_.size() > MOVING_RECORDS_SIZE_LIMIT ||
            TimeHelper::GetDuration(movingRectRecords_[0].first, time) > MOVING_RECORDS_TIME_LIMIT) {
         movingRectRecords_.erase(movingRectRecords_.begin());
     }
-    TLOGD(WmsLogTag::WMS_LAYOUT, "records size: %{public}zu, duration: %{public}f", movingRectRecords_.size(),
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "records size: %{public}zu, duration: %{public}f", movingRectRecords_.size(),
         TimeHelper::GetDuration(movingRectRecords_[0].first, movingRectRecords_[movingRectRecords_.size() - 1].first));
 }
 
@@ -377,13 +377,13 @@ void PcFoldScreenController::UpdateFullScreenWaterfallMode(bool isWaterfallMode)
 {
     auto sceneSession = weakSceneSession_.promote();
     if (sceneSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_PC, "session is nullptr, id: %{public}d", GetPersistentId());
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "session is nullptr, id: %{public}d", GetPersistentId());
         return;
     }
     sceneSession->PostTask([weakThis = wptr(this), isWaterfallMode, where = __func__] {
         auto controller = weakThis.promote();
         if (controller == nullptr) {
-            TLOGNE(WmsLogTag::WMS_PC, "controller is nullptr");
+            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "controller is nullptr");
             return;
         }
         if (controller->isFullScreenWaterfallMode_ == isWaterfallMode) {
@@ -392,6 +392,8 @@ void PcFoldScreenController::UpdateFullScreenWaterfallMode(bool isWaterfallMode)
         if (isWaterfallMode && !controller->supportEnterWaterfallMode_) {
             TLOGNW(WmsLogTag::WMS_LAYOUT_PC, "%{public}s not support waterfall mode!", where);
         }
+        TLOGNI(WmsLogTag::WMS_LAYOUT_PC, "%{public}s id: %{public}d, mode: %{public}d",
+            where, controller->GetPersistentId(), isWaterfallMode);
         controller->isFullScreenWaterfallMode_ = isWaterfallMode;
         controller->ExecuteFullScreenWaterfallModeChangeCallback();
         controller->supportEnterWaterfallMode_ = controller->IsSupportEnterWaterfallMode(
@@ -449,11 +451,11 @@ void PcFoldScreenController::ExecuteFullScreenWaterfallModeChangeCallback()
     // notify client
     auto sceneSession = weakSceneSession_.promote();
     if (sceneSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "session is nullptr, id: %{public}d", GetPersistentId());
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "session is nullptr, id: %{public}d", GetPersistentId());
         return;
     }
     if (sceneSession->sessionStage_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "sessionStage is nullptr, id: %{public}d", GetPersistentId());
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "sessionStage is nullptr, id: %{public}d", GetPersistentId());
         return;
     }
     sceneSession->sessionStage_->SetFullScreenWaterfallMode(isFullScreenWaterfallMode_);
@@ -468,7 +470,7 @@ DisplayId PcFoldScreenController::GetDisplayId()
 {
     auto sceneSession = weakSceneSession_.promote();
     if (sceneSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "session is nullptr, id: %{public}d", GetPersistentId());
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "session is nullptr, id: %{public}d", GetPersistentId());
         return SCREEN_ID_INVALID;
     }
     return sceneSession->GetScreenId();
@@ -523,12 +525,12 @@ void PcFoldScreenController::UpdateRect()
 {
     auto sceneSession = weakSceneSession_.promote();
     if (sceneSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "session is nullptr, id: %{public}d", GetPersistentId());
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "session is nullptr, id: %{public}d", GetPersistentId());
         return;
     }
     auto ret = sceneSession->NotifyClientToUpdateRect("ScreenFoldStatusChanged", nullptr);
     if (ret != WSError::WS_OK) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "NotifyClientToUpdateRect Fail, id: %{public}d", GetPersistentId());
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "NotifyClientToUpdateRect Fail, id: %{public}d", GetPersistentId());
     }
 }
 } // namespace OHOS::Rosen
