@@ -66,22 +66,22 @@ HWTEST_F(ScreenPropertyTest, SetRotationAndScreenRotationOnly001, Function | Sma
     ASSERT_NE(property, nullptr);
     Rotation ret = Rotation::ROTATION_0;
     Rotation rotation = Rotation::ROTATION_0;
-    property->SetRotationAndScreenRotationOnly(SetRotationAndScreenRotationOnly);
+    property->SetRotationAndScreenRotationOnly(rotation);
     ret = property->GetScreenRotation();
     ASSERT_EQ(ret, rotation);
 
     Rotation rotation = Rotation::ROTATION_90;
-    property->SetRotationAndScreenRotationOnly(SetRotationAndScreenRotationOnly);
+    property->SetRotationAndScreenRotationOnly(rotation);
     ret = property->GetScreenRotation();
     ASSERT_EQ(ret, rotation);
 
     Rotation rotation = Rotation::ROTATION_180;
-    property->SetRotationAndScreenRotationOnly(SetRotationAndScreenRotationOnly);
+    property->SetRotationAndScreenRotationOnly(rotation);
     ret = property->GetScreenRotation();
     ASSERT_EQ(ret, rotation);
 
     Rotation rotation = Rotation::ROTATION_270;
-    property->SetRotationAndScreenRotationOnly(SetRotationAndScreenRotationOnly);
+    property->SetRotationAndScreenRotationOnly(rotation);
     ret = property->GetScreenRotation();
     ASSERT_EQ(ret, rotation);
     delete property;
@@ -100,27 +100,27 @@ HWTEST_F(ScreenPropertyTest, SetRotationAndScreenRotationOnly002, Function | Sma
     ASSERT_NE(property, nullptr);
     Rotation ret = Rotation::ROTATION_0;
     Rotation rotation = Rotation::ROTATION_0;
-    property->SetRotationAndScreenRotationOnly(SetRotationAndScreenRotationOnly);
+    property->SetRotationAndScreenRotationOnly(rotation);
     ret = property->GetRotation();
     ASSERT_EQ(ret, rotation);
 
     Rotation rotation = Rotation::ROTATION_90;
-    property->SetRotationAndScreenRotationOnly(SetRotationAndScreenRotationOnly);
+    property->SetRotationAndScreenRotationOnly(rotation);
     ret = property->GetRotation();
     ASSERT_EQ(ret, rotation);
 
     Rotation rotation = Rotation::ROTATION_180;
-    property->SetRotationAndScreenRotationOnly(SetRotationAndScreenRotationOnly);
+    property->SetRotationAndScreenRotationOnly(rotation);
     ret = property->GetRotation();
     ASSERT_EQ(ret, rotation);
 
     Rotation rotation = Rotation::ROTATION_270;
-    property->SetRotationAndScreenRotationOnly(SetRotationAndScreenRotationOnly);
+    property->SetRotationAndScreenRotationOnly(rotation);
     ret = property->GetRotation();
     ASSERT_EQ(ret, rotation);
     delete property;
     GTEST_LOG_(INFO) << "ScreenPropertyTest: SetRotationAndScreenRotationOnly002 end";
-} 
+}
 
 /**
  * @tc.name: UpdateDeviceRotation
