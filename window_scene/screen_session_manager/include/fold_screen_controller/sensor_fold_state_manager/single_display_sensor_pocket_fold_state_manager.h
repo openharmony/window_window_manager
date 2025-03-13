@@ -62,18 +62,14 @@ public:
 
     void HandleAngleChange(float angle, int hall, sptr<FoldScreenPolicy> foldScreenPolicy) override;
     void HandleHallChange(float angle, int hall, sptr<FoldScreenPolicy> foldScreenPolicy) override;
-    void HandleTentChange(bool isTent, sptr<FoldScreenPolicy> foldScreenPolicy, int32_t hall = -1) override;
+    void HandleTentChange(int tentType, sptr<FoldScreenPolicy> foldScreenPolicy, int32_t hall = -1) override;
     void RegisterApplicationStateObserver() override;
     bool IsCameraMode() override;
 
 private:
     FoldStatus GetNextFoldState(float angle, int hall);
     void UpdateSwitchScreenBoundaryForLargeFoldDevice(float, int);
-    void SetCameraFoldStrategy(float angle);
-    void SetCameraRotationStatusChange(float angle, int hall);
     sptr<ApplicationStatePocketObserver> applicationStateObserver_;
-    bool isInCameraFoldStrategy_ = false;
-    bool isCameraRotationStrategy_ = false;
     std::vector<std::string> hallSwitchPackageNameList_;
     int allowUserSensorForLargeFoldDevice = 0;
     bool TriggerTentExit(float angle, int hall);

@@ -41,6 +41,7 @@ public:
     static napi_value GetPiPWindowInfo(napi_env env, napi_callback_info info);
     static napi_value RegisterCallback(napi_env env, napi_callback_info info);
     static napi_value UnregisterCallback(napi_env env, napi_callback_info info);
+    static napi_value PictureInPicturePossible(napi_env env, napi_callback_info info);
 private:
     enum class ListenerType : uint32_t {
         STATE_CHANGE_CB,
@@ -59,6 +60,7 @@ private:
     napi_value OnGetPiPWindowInfo(napi_env env, napi_callback_info info);
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
     napi_value OnUnregisterCallback(napi_env env, napi_callback_info info);
+    napi_value OnPictureInPicturePossible(napi_env env, napi_callback_info info);
 
     bool IfCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);
     WmErrorCode RegisterListenerWithType(napi_env env, const std::string& type, napi_value value);

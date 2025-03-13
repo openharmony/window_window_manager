@@ -1806,7 +1806,7 @@ HWTEST_F(SceneSessionTest5, IsSameMainSession, Function | SmallTest | Level2)
     ASSERT_EQ(true, currSceneSession->IsSameMainSession(preSceneSession));
     currSceneSession->persistentId_ = 2;
     ASSERT_EQ(false, currSceneSession->IsSameMainSession(preSceneSession));
- 
+
     sptr<SceneSession> subSession1 = sptr<SceneSession>::MakeSptr(info1, nullptr);
     sptr<SceneSession> subSession2 = sptr<SceneSession>::MakeSptr(info2, nullptr);
     subSession1->SetParentSession(preSceneSession);
@@ -1818,7 +1818,7 @@ HWTEST_F(SceneSessionTest5, IsSameMainSession, Function | SmallTest | Level2)
     currSceneSession->persistentId_ = 2;
     ASSERT_EQ(false, subSession1->IsSameMainSession(subSession2));
 }
- 
+
 /**
  * @tc.name: HandleActionUpdateExclusivelyHighlighted
  * @tc.desc: test HandleActionUpdateExclusivelyHighlighted
@@ -1839,7 +1839,7 @@ HWTEST_F(SceneSessionTest5, HandleActionUpdateExclusivelyHighlighted, Function |
     auto res = session->HandleActionUpdateExclusivelyHighlighted(property, action);
     EXPECT_EQ(WMError::WM_OK, res);
 }
- 
+
 /**
  * @tc.name: SetHighlightChangeNotifyFunc
  * @tc.desc: SetHighlightChangeNotifyFunc Test
@@ -1992,5 +1992,5 @@ HWTEST_F(SceneSessionTest5, GetCrossAxisState, Function | SmallTest | Level2)
     EXPECT_EQ(state, CrossAxisState::STATE_CROSS);
 }
 }
-}
-}
+} // namespace Rosen
+} // namespace OHOS

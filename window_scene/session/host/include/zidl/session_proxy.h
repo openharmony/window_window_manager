@@ -52,7 +52,7 @@ public:
     WSError OnTitleAndDockHoverShowChange(bool isTitleHoverShown = true,
         bool isDockHoverShown = true) override;
     WSError OnRestoreMainWindow() override;
-    WSError OnSetWindowRectAutoSave(bool enabled) override;
+    WSError OnSetWindowRectAutoSave(bool enabled, bool isSaveBySpecifiedFlag) override;
     WSError RaiseToAppTop() override;
     WSError UpdateSessionRect(const WSRect& rect, SizeChangeReason reason, bool isGlobal = false,
         bool isFromMoveToGlobal = false, const MoveConfiguration& moveConfiguration = {},
@@ -103,6 +103,8 @@ public:
     bool IsStartMoving() override;
     WSError UpdateRectChangeListenerRegistered(bool isRegister) override;
     void SetCallingSessionId(uint32_t callingSessionId) override;
+    void NotifyKeyboardDidShowRegistered(bool registered) override;
+    void NotifyKeyboardDidHideRegistered(bool registered) override;
     void SetCustomDecorHeight(int32_t height) override;
     WSError AdjustKeyboardLayout(const KeyboardLayoutParams& params) override;
     WSError ChangeKeyboardViewMode(KeyboardViewMode mode) override;
@@ -144,6 +146,7 @@ public:
     WSError StartMovingWithCoordinate(int32_t offsetX, int32_t offsetY,
         int32_t pointerPosX, int32_t pointerPosY) override;
     WSError OnContainerModalEvent(const std::string& eventName, const std::string& eventValue) override;
+    WSError UpdateFlag(const std::string& flag) override;
 
     /*
      * Window Pattern

@@ -14,7 +14,7 @@
 import("//build/test.gni")
 import("../../../../windowmanager_aafwk.gni")
 
-module_out_path = "window_manager/window_scene/window_pattern"
+module_out_path = "window_manager/window_manager/window_scene/window_pattern"
 ws_unittest_common = "../:ws_unittest_common"
 
 ohos_unittest("window_pattern_snapshot_test") {

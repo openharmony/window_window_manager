@@ -621,6 +621,32 @@ public:
     virtual void OnKeyboardPanelInfoChanged(const KeyboardPanelInfo& keyboardPanelInfo) {}
 };
 
+/**
+ * @class IKeyboardDidShowListener
+ *
+ * @brief IKeyboardDidShowListener is used to observe keyboard show animation completion.
+ */
+class IKeyboardDidShowListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify the caller when keyboard show animation is completed.
+     */
+    virtual void OnKeyboardDidShow(const KeyboardPanelInfo& keyboardPanelInfo) {}
+};
+
+/**
+ * @class IKeyboardDidHideListener
+ *
+ * @brief IKeyboardDidHideListener is used to observe keyboard hide animation completion.
+ */
+class IKeyboardDidHideListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify the caller when keyboard hide animation is completed.
+     */
+    virtual void OnKeyboardDidHide(const KeyboardPanelInfo& keyboardPanelInfo) {}
+};
+
 static WMError DefaultCreateErrCode = WMError::WM_OK;
 class Window : virtual public RefBase {
 public:
@@ -2702,7 +2728,8 @@ public:
      * @param enabled Enable the window rect auto-save if true, otherwise means the opposite.
      * @return WM_OK means set success, others means failed.
      */
-    virtual WMError SetWindowRectAutoSave(bool enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError SetWindowRectAutoSave(bool enabled,
+        bool isSaveBySpecifiedFlag = false) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Get whether the auto-save the window rect is enabled or not.
@@ -3267,11 +3294,27 @@ public:
     }
 
     /**
-     * @brief Get the api version.
+     * @brief Get the api compatible version.
      *
-     * @return Api version
+     * @return Api compatible version
      */
-    virtual uint32_t GetApiVersion() const { return 0; }
+    virtual uint32_t GetApiCompatibleVersion() const { return 0; }
+
+    /**
+     * @brief Set the parent window of a sub window.
+     *
+     * @param newParentWindowId new parent window id.
+     * @return WM_OK means set parent window success, others means failed.
+     */
+    virtual WMError SetParentWindow(int32_t newParentWindowId) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Get the parent window of a sub window.
+     *
+     * @param parentWindow parent window.
+     * @return WM_OK means get parent window success, others means failed.
+     */
+    virtual WMError GetParentWindow(sptr<Window>& parentWindow) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Set the feature of subwindow follow the layout of the parent window.
@@ -3280,6 +3323,57 @@ public:
      * @return WM_OK means set success.
      */
     virtual WMError SetFollowParentWindowLayoutEnabled(bool isFollow) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+     /**
+     * @brief Get is subwindow support maximize.
+     *
+     * @return true means subwindow support maximize, others means do not support.
+     */
+    virtual bool IsSubWindowMaximizeSupported() const { return false; }
+
+    /**
+     * @brief Register keyboard show animation completion listener.
+     *
+     * @param listener IKeyboardDidShowListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterKeyboardDidShowListener(const sptr<IKeyboardDidShowListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Unregister keyboard show animation completion listener.
+     *
+     * @param listener IKeyboardDidShowListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterKeyboardDidShowListener(const sptr<IKeyboardDidShowListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Register keyboard hide animation completion listener.
+     *
+     * @param listener IKeyboardDidHideListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterKeyboardDidHideListener(const sptr<IKeyboardDidHideListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Unregister keyboard hide animation completion listener.
+     *
+     * @param listener IKeyboardDidHideListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterKeyboardDidHideListener(const sptr<IKeyboardDidHideListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 };
 }
 }

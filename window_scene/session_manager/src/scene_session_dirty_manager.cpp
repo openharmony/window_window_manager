@@ -477,15 +477,13 @@ bool SceneSessionDirtyManager::GetLastConstrainedModalUIExtInfo(const sptr<Scene
         TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is nullptr");
         return false;
     }
-    auto surfaceNode = sceneSession->GetSurfaceNode();
-    if (surfaceNode == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "surfaceNode is nullptr");
+    auto surfaceNodeId = sceneSession->GetSurfaceNodeId();
+    if (!surfaceNodeId) {
         return false;
     }
-    auto surfaceNodeId = surfaceNode->GetId();
     {
         std::shared_lock<std::shared_mutex> lock(constrainedModalUIExtInfoMutex_);
-        auto iter = constrainedModalUIExtInfoMap_.find(surfaceNodeId);
+        auto iter = constrainedModalUIExtInfoMap_.find(*surfaceNodeId);
         if (iter == constrainedModalUIExtInfoMap_.end()) {
             return false;
         }
@@ -978,7 +976,7 @@ bool operator==(const SecSurfaceInfo& a, const SecSurfaceInfo& b)
 
 void DumpSecSurfaceInfoMap(const std::map<uint64_t, std::vector<SecSurfaceInfo>>& secSurfaceInfoMap)
 {
-    TLOGI(WmsLogTag::WMS_EVENT, "secSurfaceInfoMap size:%{public}d", static_cast<int>(secSurfaceInfoMap.size()));
+    TLOGI(WmsLogTag::WMS_EVENT, "size:%{public}d", static_cast<int>(secSurfaceInfoMap.size()));
     for (auto& e : secSurfaceInfoMap) {
         auto hostNodeId = e.first;
         TLOGI(WmsLogTag::WMS_EVENT, "hostNodeId:%{public}" PRIu64 " secSurfaceInfoList size:%{public}d",
@@ -1037,16 +1035,14 @@ std::vector<MMI::WindowInfo> SceneSessionDirtyManager::GetSecSurfaceWindowinfoLi
         TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is nullptr");
         return {};
     }
-    auto surfaceNode = sceneSession->GetSurfaceNode();
-    if (surfaceNode == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "surfaceNode is nullptr");
+    auto surfaceNodeId = sceneSession->GetSurfaceNodeId();
+    if (!surfaceNodeId) {
         return {};
     }
     std::vector<SecSurfaceInfo> secSurfaceInfoList;
-    auto surfaceNodeId = surfaceNode->GetId();
     {
         std::shared_lock<std::shared_mutex> lock(secSurfaceInfoMutex_);
-        auto iter = secSurfaceInfoMap_.find(surfaceNodeId);
+        auto iter = secSurfaceInfoMap_.find(*surfaceNodeId);
         if (iter == secSurfaceInfoMap_.end()) {
             return {};
         }

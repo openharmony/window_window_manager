@@ -299,7 +299,8 @@ public:
     virtual WMError Maximize() = 0;
     virtual WMError Recover() = 0;
     virtual WMError Restore() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
-    virtual WMError SetWindowRectAutoSave(bool enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError SetWindowRectAutoSave(bool enabled,
+        bool isSaveBySpecifiedFlag = false) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError SetSupportedWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
@@ -512,12 +513,28 @@ public:
     virtual WMError IsWindowHighlighted(bool& highlighted) const { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
-     * @brief Get the api version.
+     * @brief Get the api compatible version.
      *
-     * @return Api version
+     * @return Api compatible version
      */
-    virtual uint32_t GetApiVersion() const { return 0; }
-    
+    virtual uint32_t GetApiCompatibleVersion() const { return 0; }
+
+    /**
+     * @brief Set the parent window of a sub window.
+     *
+     * @param newParentWindowId new parent window id.
+     * @return WM_OK means set parent window success, others means failed.
+     */
+    virtual WMError SetParentWindow(int32_t newParentWindowId) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Get the parent window of a sub window.
+     *
+     * @param parentWindow parent window.
+     * @return WM_OK means get parent window success, others means failed.
+     */
+    virtual WMError GetParentWindow(sptr<Window>& parentWindow) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
     /**
      * @brief Set the feature of subwindow follow the layout of the parent window.
      *
@@ -525,6 +542,13 @@ public:
      * @return WM_OK means set success.
      */
     virtual WMError SetFollowParentWindowLayoutEnabled(bool isFollow) { return WMError::WM_ERROR_SYSTEM_ABNORMALLY; }
+
+      /**
+     * @brief Get is subwindow support maximize.
+     *
+     * @return true means subwindow support maximize, others means do not support.
+     */
+    virtual bool IsSubWindowMaximizeSupported() const { return false; }
 };
 }
 }

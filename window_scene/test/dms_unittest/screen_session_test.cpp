@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 #include "screen_session_manager/include/screen_session_manager.h"
 #include "scene_board_judgement.h"
+#include "fold_screen_state_internel.h"
 
 // using namespace FRAME_TRACE;
 using namespace testing;
@@ -462,7 +463,9 @@ HWTEST_F(ScreenSessionTest, UpdateToInputManager, Function | SmallTest | Level2)
  */
 HWTEST_F(ScreenSessionTest, OptimizeSecondaryDisplayMode01, Function | SmallTest | Level2)
 {
-#ifdef FOLD_ABILITY_ENABLE
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        GTEST_SKIP();
+    }
     GTEST_LOG_(INFO) << "OptimizeSecondaryDisplayMode start";
     ScreenSessionConfig config = {
         .screenId = 100,
@@ -487,7 +490,6 @@ HWTEST_F(ScreenSessionTest, OptimizeSecondaryDisplayMode01, Function | SmallTest
     EXPECT_EQ(foldDisplayMode, FoldDisplayMode::GLOBAL_FULL);
 
     GTEST_LOG_(INFO) << "OptimizeSecondaryDisplayMode end";
-#endif
 }
 
 /**
@@ -2731,6 +2733,65 @@ HWTEST_F(ScreenSessionTest, GetDisplaySourceMode02, Function | SmallTest | Level
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetDisplaySourceMode02 end";
 }
 
+/**
+ * @tc.name: SetPointerActiveWidth
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetPointerActiveWidth, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetPointerActiveWidth start";
+    uint32_t pointerActiveWidth = 123;
+    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    session->SetPointerActiveWidth(pointerActiveWidth);
+    ASSERT_EQ(pointerActiveWidth, session->property_.GetPointerActiveWidth());
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetPointerActiveWidth end";
+}
+ 
+/**
+ * @tc.name: GetPointerActiveWidth
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, GetPointerActiveWidth, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: GetPointerActiveWidth start";
+    uint32_t pointerActiveWidth = 123;
+    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    session->SetPointerActiveWidth(pointerActiveWidth);
+    ASSERT_EQ(pointerActiveWidth, session->GetPointerActiveWidth());
+    GTEST_LOG_(INFO) << "ScreenSessionTest: GetPointerActiveWidth end";
+}
+ 
+/**
+ * @tc.name: SetPointerActiveHeight
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetPointerActiveHeight, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetPointerActiveHeight start";
+    uint32_t pointerActiveHeight = 321;
+    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    session->SetPointerActiveHeight(pointerActiveHeight);
+    ASSERT_EQ(pointerActiveHeight, session->property_.GetPointerActiveHeight());
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetPointerActiveHeight end";
+}
+ 
+/**
+ * @tc.name: GetPointerActiveHeighth
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, GetPointerActiveHeight, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: GetPointerActiveHeight start";
+    uint32_t pointerActiveHeight = 321;
+    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    session->SetPointerActiveHeight(pointerActiveHeight);
+    ASSERT_EQ(pointerActiveHeight, session->GetPointerActiveHeight());
+    GTEST_LOG_(INFO) << "ScreenSessionTest: GetPointerActiveHeight end";
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
