@@ -510,7 +510,9 @@ void SceneInputManager::PrintDisplayInfo(const std::vector<MMI::DisplayInfo>& di
                           << static_cast<int32_t>(displayInfo.screenCombination) << "|"
                           << displayInfo.validWidth << "|" << displayInfo.validHeight << "|"
                           << displayInfo.fixedDirection << "|" << displayInfo.physicalWidth << "|"
-                          << displayInfo.physicalHeight << ",";
+                          << displayInfo.physicalHeight << "|" << displayInfo.oneHandX << "|"
+                          << displayInfo.oneHandY << "|" << displayInfo.scalePercent << "|"
+                          << displayInfo.expandHeight << ",";
     }
 
     std::string displayList = displayListStream.str();
