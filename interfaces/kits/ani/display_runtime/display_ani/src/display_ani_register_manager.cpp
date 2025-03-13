@@ -31,19 +31,19 @@ DisplayAniRegisterManager::~DisplayAniRegisterManager()
 {
 }
 
-ani_object DisplayAniRegisterManager::RegisterListener(std::string type, ani_env* env, ani_ref callback)
+ani_object DisplayAniRegisterManager::RegisterListener(std::string type, ani_env* env, ani_object callbackInternal)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     ani_boolean callbackNotNull = 0;
-    env->Reference_IsNull(callback, &callbackNotNull);
+    env->Reference_IsNull(callbackInternal, &callbackNotNull);
     DmErrorCode ret;
     if (callbackNotNull) {
         sptr<DisplayAniListener> displayAniListener = new(std::nothrow) DisplayAniListener(env);
         if (type == EVENT_ADD) {
             // add callback to listener
-            displayAniListener->AddCallback(type, callback);
+            displayAniListener->AddCallback(type, callbackInternal);
             // add listener to map
-            jsCbMap_[type][callback] = displayAniListener;
+            jsCbMap_[type][callbackInternal] = displayAniListener;
             ret = DM_JS_TO_ERROR_CODE_MAP.at(
                 SingletonContainer::Get<DisplayManager>().RegisterDisplayListener(displayAniListener));
             DmErrorCode errCode = DmErrorCode::DM_ERROR_INVALID_PARAM;
