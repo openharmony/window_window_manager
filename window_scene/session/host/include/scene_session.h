@@ -117,7 +117,6 @@ using GetStatusBarAvoidHeightFunc = std::function<void(WSRect& barArea)>;
 using NotifySetWindowCornerRadiusFunc = std::function<void(float cornerRadius)>;
 using NotifyFollowParentRectFunc = std::function<void(bool isFollow)>;
 using GetSceneSessionByIdCallback = std::function<sptr<SceneSession>(int32_t sessionId)>;
-using NotifyPcScreenFoldStatusChangeFunc = std::function<void(SuperFoldStatus foldStatus)>;
 using NotifySetParentSessionFunc = std::function<void(int32_t oldParentWindowId, int32_t newParentWindowId)>;
 using NotifyUpdateFlagFunc = std::function<void(const std::string& flag)>;
 
@@ -154,7 +153,6 @@ public:
         UpdateGestureBackEnabledCallback onUpdateGestureBackEnabled_;
         NotifyAvoidAreaChangeCallback onNotifyAvoidAreaChange_;
         GetSceneSessionByIdCallback onGetSceneSessionByIdCallback_;
-        NotifyPcScreenFoldStatusChangeFunc onNotifyScreenFoldStatusChange_;
     };
 
     // func for change window scene pattern property
@@ -668,7 +666,6 @@ public:
     void SetSupportEnterWaterfallMode(bool isSupportEnter);
     void ThrowSlipDirectly(const WSRectF& velocity);
     WSError GetWaterfallMode(bool& isWaterfallMode) override;
-    void UpdateScreenFoldStatus(SuperFoldStatus foldStatus);
 
     /*
      * Keyboard

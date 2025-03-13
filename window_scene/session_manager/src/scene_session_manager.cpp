@@ -410,7 +410,6 @@ void SceneSessionManager::Init()
     InitVsyncStation();
     UpdateDarkColorModeToRS();
     CreateRootSceneSession();
-    SetFoldScreenStatusChangeCallbackForRootScene();
     std::shared_ptr<FoldScreenStatusChangeCallback> callback = std::make_shared<FoldScreenStatusChangeCallback>(
         std::bind(&SceneSessionManager::UpdateSessionCrossAxisState, this, std::placeholders::_1,
         std::placeholders::_2, std::placeholders::_3));
@@ -1342,11 +1341,6 @@ void SceneSessionManager::CreateRootSceneSession()
     };
     specificCb->onNotifyAvoidAreaChange_ = [this](const sptr<AvoidArea>& avoidArea, AvoidAreaType type) {
         onNotifyAvoidAreaChangeForRootFunc_(avoidArea, type);
-    };
-    specificCb->onNotifyScreenFoldStatusChange_ = [this](SuperFoldStatus foldStatus) {
-        if (onNotifyScreenFoldStatusChangeFunc_) {
-            onNotifyScreenFoldStatusChangeFunc_(foldStatus);
-        }
     };
     rootSceneSession_ = sptr<RootSceneSession>::MakeSptr(specificCb);
     rootSceneSession_->isKeyboardPanelEnabled_ = isKeyboardPanelEnabled_;
@@ -13640,41 +13634,5 @@ WMError SceneSessionManager::MinimizeByWindowId(const std::vector<int32_t>& wind
         }
     }, __func__);
     return WMError::WM_OK;
-}
-
-SuperFoldStatus SceneSessionManager::GetPcScreenFoldStatus()
-{
-    return PcFoldScreenManager::GetInstance().GetScreenFoldStatus();
-}
-
-void SceneSessionManager::RegisterNotifyScreenFoldStatusChangeFunc(NotifyScreenFoldStatusChangeFunc&& func)
-{
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "register");
-    onNotifyScreenFoldStatusChangeFunc_ = std::move(func);
-}
-
-void SceneSessionManager::SetFoldScreenStatusChangeCallbackForRootScene()
-{
-    onFoldScreenStatusChangeCallback_ = std::make_shared<FoldScreenStatusChangeCallback>(
-        [weakThis = wptr(this), funcName = __func__](
-            DisplayId displayId, SuperFoldStatus status, SuperFoldStatus prevStatus) {
-            auto sessionManager = weakThis.promote();
-            if (sessionManager == nullptr) {
-                TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: sessionManager is nullptr", funcName);
-                return;
-            }
-            auto rootScene = sessionManager->GetRootSceneSession();
-            if (rootScene == nullptr) {
-                TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: rootSceneSession is nullptr", funcName);
-                return;
-            }
-            TLOGI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: prev: %{public}d, cur: %{public}d",
-                funcName, static_cast<int32_t>(prevStatus), static_cast<int32_t>(status));
-            rootScene->UpdateScreenFoldStatus(status);
-        }
-    );
-    PcFoldScreenManager::GetInstance().RegisterFoldScreenStatusChangeCallback(
-        rootSceneSession_ != nullptr ? rootSceneSession_->GetPersistentId() : 1,
-        std::weak_ptr<FoldScreenStatusChangeCallback>(onFoldScreenStatusChangeCallback_));
 }
 } // namespace OHOS::Rosen

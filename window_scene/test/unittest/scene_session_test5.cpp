@@ -1993,29 +1993,6 @@ HWTEST_F(SceneSessionTest5, GetCrossAxisState, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: UpdateScreenFoldStatus
- * @tc.desc: UpdateScreenFoldStatus
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest5, UpdateScreenFoldStatus, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "UpdateScreenFoldStatus";
-    info.bundleName_ = "UpdateScreenFoldStatus";
-    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(session, nullptr);
-    sptr<SceneSession::SpecificSessionCallback> specificCb =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    SuperFoldStatus status = SuperFoldStatus::UNKNOWN;
-    specificCb->onNotifyScreenFoldStatusChange_ = [&status](SuperFoldStatus foldStatus) {
-        status = foldStatus;
-    };
-    session->specificCallback_ = specificCb;
-    session->UpdateScreenFoldStatus(SuperFoldStatus::HALF_FOLDED);
-    EXPECT_EQ(status, SuperFoldStatus::HALF_FOLDED);
-}
-
-/**
  * @tc.name: GetWaterfallMode
  * @tc.desc: GetWaterfallMode
  * @tc.type: FUNC

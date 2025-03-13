@@ -1663,15 +1663,6 @@ WSError SceneSession::GetCrossAxisState(CrossAxisState& state)
     return WSError::WS_OK;
 }
 
-void SceneSession::UpdateScreenFoldStatus(SuperFoldStatus foldStatus)
-{
-    if (specificCallback_ == nullptr || specificCallback_->onNotifyScreenFoldStatusChange_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "callback is nullptr");
-        return;
-    }
-    specificCallback_->onNotifyScreenFoldStatusChange_(foldStatus);
-}
-
 /** @note @window.layout */
 WSError SceneSession::UpdateClientRect(const WSRect& rect)
 {
