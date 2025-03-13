@@ -51,6 +51,10 @@ void WindowInputIntercept::UnRegisterInputEventIntercept(const int32_t deviceId)
 
 bool WindowInputIntercept::IsInputIntercept(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
+    if (keyEvent == nullptr) {
+        TLOGW(WmsLogTag::WMS_EVENT, "IsInputInterceptByKeyEvent keyEvent is null.");
+        return false;
+    }
     std::shared_ptr<IInputEventInterceptConsumer> consumer = nullptr;
     {
         std::lock_guard<std::mutex> lock(registerMutex_);
@@ -73,6 +77,10 @@ bool WindowInputIntercept::IsInputIntercept(const std::shared_ptr<MMI::KeyEvent>
 
 bool WindowInputIntercept::IsInputIntercept(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
+    if (pointerEvent == nullptr) {
+        TLOGW(WmsLogTag::WMS_EVENT, "IsInputInterceptByPointerEvent pointerEvent is null.");
+        return false;
+    }
     std::shared_ptr<IInputEventInterceptConsumer> consumer = nullptr;
     {
         std::lock_guard<std::mutex> lock(registerMutex_);
