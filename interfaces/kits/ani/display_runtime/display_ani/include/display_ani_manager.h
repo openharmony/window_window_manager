@@ -32,7 +32,7 @@ public:
     static ani_int getFoldStatus(ani_env* env);
     static ani_object getCurrentFoldCreaseRegion(ani_env* env, ani_object obj);
 
-    static ani_array_ref getAllDisplaysAni(ani_env* env, ani_object arrayObj);
+    static void getAllDisplaysAni(ani_env* env, ani_object arrayObj);
     static ani_status getDisplayByIdSyncAni(ani_env* env, ani_object obj, ani_int displayId);
     static ani_status getDefaultDisplaySyncAni(ani_env* env, ani_object obj);
 
