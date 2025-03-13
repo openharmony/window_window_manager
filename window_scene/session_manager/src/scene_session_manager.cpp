@@ -11177,7 +11177,7 @@ WMError SceneSessionManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisi
 {
     if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_VISIBLE_WINDOW_INFO)) {
         TLOGE(WmsLogTag::DEFAULT, "permission denied!");
-        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+        return WMError::WM_ERROR_INVALID_PERMISSION;
     }
     auto task = [this, &infos]() {
         for (auto [surfaceId, _] : lastVisibleData_) {
