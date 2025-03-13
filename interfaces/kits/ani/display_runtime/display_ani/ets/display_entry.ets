@@ -2,24 +2,24 @@ import display from '@ohos.display'
 
 loadLibrary('displayani_kit.z');
 
-function main()
-{
+function main() {
     let isFoldable = display.isFoldable();
-    console.log("[ANI] isfoldable test, result = " + isFoldable);
+    console.log('[ANI] isfoldable test, result = ' + isFoldable);
     display.getFoldDisplayMode();
     let disret : display.Display = display.getDefaultDisplaySync();
-    let cbk : display.Callback = (err: display.BusinessError, i : number) => {
+    let cbk = (i : number): void => {
+        console.log('[ANI] isfoldable test, result = ' + i);
     }
     display.on('add', cbk);
     display.getDisplayByIdSync(0);
-    let asyncCbk : display.AsyncCallBackByArray = (err: display.BusinessError, arr : Array<display.Display>) => {
-        console.log("AsyncCallBackByArray");
+    let asyncCbk = (err: display.BusinessError, arr : Array<display.Display>):void => {
+        console.log('AsyncCallBack');
     }
     display.getAllDisplays(asyncCbk);
     display.getCurrentFoldCreaseRegion();
     let dis : display.Display = new display.DisplayImpl();
-    let asyncbk : display.AsyncCallback = (err: display.BusinessError, arr : display.CutoutInfo) => {
-        console.log("AsyncCallBack");
+    let asyncbk = (err: display.BusinessError, arr : display.CutoutInfo):void => {
+        console.log('AsyncCallBack');
     }
     dis.getCutoutInfo(asyncbk);
 }
