@@ -5273,6 +5273,7 @@ napi_value JsWindow::OnSnapshotIgnorePrivacy(napi_env env, napi_callback_info in
             auto nativePixelMap = Media::PixelMapNapi::CreatePixelMap(env, pixelMap);
             if (nativePixelMap == nullptr) {
                 TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "SnapshotIgnorePrivacy get nativePixelMap is null");
+                return;
             }
             task->Resolve(env, nativePixelMap);
             TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "Window [%{public}u, %{public}s] OnSnapshotIgnorePrivacy, "
