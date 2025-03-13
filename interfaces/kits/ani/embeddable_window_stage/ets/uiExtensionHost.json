@@ -25,7 +25,6 @@
     "package": "@ohos"
   },
   "files": [
-    "./uiExtensionHost_entry.ets",
     "./uiExtensionHost.ets"
   ]
 }
