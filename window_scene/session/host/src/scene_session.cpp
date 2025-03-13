@@ -231,13 +231,13 @@ bool SceneSession::IsShowOnLockScreen(uint32_t lockScreenZOrder)
 
     // current window on lock screen jurded by zorder
     if (zOrder_ >= lockScreenZOrder) {
-        TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: zOrder_ is more than lockScreenZOrder");
+        TLOGI(WmsLogTag::WMS_UIEXT, "zOrder >= lockScreenZOrder");
         return true;
     }
 
     if (zOrder_ == 0) {
         if (auto mainSession = GetMainSession()) {
-            TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: mainSession zOrder_: %{public}d", mainSession->GetZOrder());
+            TLOGI(WmsLogTag::WMS_UIEXT, "mainSession zOrder=%{public}d", mainSession->GetZOrder());
             return mainSession->GetZOrder() >= lockScreenZOrder;
         }
     }
@@ -247,7 +247,7 @@ bool SceneSession::IsShowOnLockScreen(uint32_t lockScreenZOrder)
 void SceneSession::AddExtensionTokenInfo(const UIExtensionTokenInfo& tokenInfo)
 {
     extensionTokenInfos_.push_back(tokenInfo);
-    TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: canShowOnLockScreen: %{public}u, persistentId: %{public}d",
+    TLOGI(WmsLogTag::WMS_UIEXT, "can show:%{public}u, id: %{public}d",
         tokenInfo.canShowOnLockScreen, GetPersistentId());
 }
 
@@ -800,7 +800,7 @@ void SceneSession::UpdateWaterfallMode(SessionEvent event)
         case SessionEvent::EVENT_MAXIMIZE_WATERFALL:
             UpdateFullScreenWaterfallMode(pcFoldScreenController_->IsHalfFolded(GetScreenId()));
             break;
-        case SessionEvent::EVENT_MAXIMIZE:
+        case SessionEvent::EVENT_WATERFALL_TO_MAXIMIZE:
         case SessionEvent::EVENT_RECOVER:
         case SessionEvent::EVENT_SPLIT_PRIMARY:
         case SessionEvent::EVENT_SPLIT_SECONDARY:
@@ -2491,7 +2491,7 @@ void SceneSession::RegisterProcessPrepareClosePiPCallback(NotifyPrepareClosePiPS
 WSError SceneSession::ProcessPointDownSession(int32_t posX, int32_t posY)
 {
     const auto& id = GetPersistentId();
-    WLOGFI("id: %{public}d, type: %{public}d", id, GetWindowType());
+    TLOGD(WmsLogTag::WMS_INPUT_KEY_FLOW, "id:%{public}d, type:%{public}d", id, GetWindowType());
 
     // notify touch outside
     if (specificCallback_ != nullptr && specificCallback_->onSessionTouchOutside_ &&
@@ -7196,5 +7196,21 @@ void SceneSession::SaveLastDensity()
             property->SetLastLimitsVpr(display->GetVirtualPixelRatio());
         }
     }
+}
+
+void SceneSession::NotifyUpdateFlagCallback(NotifyUpdateFlagFunc&& func)
+{
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), where, func = std::move(func)] {
+        auto session = weakThis.promote();
+        if (!session || !func) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "session or func is null");
+            return;
+        }
+        session->onUpdateFlagFunc_ = std::move(func);
+        session->onUpdateFlagFunc_(session->sessionInfo_.specifiedFlag_);
+        TLOGND(WmsLogTag::WMS_MAIN, "%{public}s id: %{public}d specifiedFlag: %{public}s", where,
+            session->GetPersistentId(), session->sessionInfo_.specifiedFlag_.c_str());
+    }, __func__);
 }
 } // namespace OHOS::Rosen

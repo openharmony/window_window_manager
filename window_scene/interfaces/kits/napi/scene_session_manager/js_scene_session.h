@@ -93,6 +93,7 @@ enum class ListenerFuncType : uint32_t {
     HIGHLIGHT_CHANGE_CB,
     FOLLOW_PARENT_RECT_CB,
     SET_PARENT_SESSION_CB,
+    UPDATE_FLAG_CB,
 };
 
 class SceneSession;
@@ -359,6 +360,7 @@ private:
      * PC Window Layout
      */
     void ProcessSetSupportedWindowModesRegister();
+    void ProcessUpdateFlagRegister();
 
     /*
      * Sub Window
@@ -414,7 +416,7 @@ private:
     void NotifyFrameLayoutFinish();
     void ProcessPrivacyModeChangeRegister();
     void NotifyPrivacyModeChange(bool isPrivacyMode);
-    void OnSetWindowRectAutoSave(bool enabled);
+    void OnSetWindowRectAutoSave(bool enabled, bool isSaveBySpecifiedFlag);
     void OnUpdateAppUseControl(ControlAppType type, bool isNeedControl, bool isControlRecentOnly);
     void OnWindowMoving(DisplayId displayId, int32_t pointerX, int32_t pointerY);
     void UpdateSessionLabelAndIcon(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon);
@@ -432,6 +434,7 @@ private:
      * PC Window Layout
      */
     void OnSetSupportedWindowModes(std::vector<AppExecFwk::SupportWindowMode>&& supportedWindowModes);
+    void OnUpdateFlag(const std::string& flag);
 
     static void Finalizer(napi_env env, void* data, void* hint);
 

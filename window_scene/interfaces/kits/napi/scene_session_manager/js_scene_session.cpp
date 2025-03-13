@@ -92,6 +92,7 @@ const std::string KEYBOARD_VIEW_MODE_CHANGE_CB = "keyboardViewModeChange";
 const std::string SET_WINDOW_CORNER_RADIUS_CB = "setWindowCornerRadius";
 const std::string HIGHLIGHT_CHANGE_CB = "highlightChange";
 const std::string SET_PARENT_SESSION_CB = "setParentSession";
+const std::string UPDATE_FLAG_CB = "updateFlag";
 
 constexpr int ARG_COUNT_1 = 1;
 constexpr int ARG_COUNT_2 = 2;
@@ -171,6 +172,7 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {HIGHLIGHT_CHANGE_CB,                   ListenerFuncType::HIGHLIGHT_CHANGE_CB},
     {FOLLOW_PARENT_RECT_CB,                 ListenerFuncType::FOLLOW_PARENT_RECT_CB},
     {SET_PARENT_SESSION_CB,                 ListenerFuncType::SET_PARENT_SESSION_CB},
+    {UPDATE_FLAG_CB,                        ListenerFuncType::UPDATE_FLAG_CB},
 };
 
 const std::vector<std::string> g_syncGlobalPositionPermission {
@@ -2655,6 +2657,9 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
             break;
         case static_cast<uint32_t>(ListenerFuncType::SET_PARENT_SESSION_CB):
             ProcessSetParentSessionRegister();
+            break;
+        case static_cast<uint32_t>(ListenerFuncType::UPDATE_FLAG_CB):
+            ProcessUpdateFlagRegister();
             break;
         default:
             break;
@@ -5801,21 +5806,22 @@ void JsSceneSession::ProcessSetWindowRectAutoSaveRegister()
         return;
     }
     const char* const where = __func__;
-    session->SetWindowRectAutoSaveCallback([weakThis = wptr(this), where](bool enabled) {
+    session->SetWindowRectAutoSaveCallback([weakThis = wptr(this), where](bool enabled, bool isSaveBySpecifiedFlag) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s: jsSceneSession is null", where);
             return;
         }
-        jsSceneSession->OnSetWindowRectAutoSave(enabled);
+        jsSceneSession->OnSetWindowRectAutoSave(enabled, isSaveBySpecifiedFlag);
     });
     TLOGI(WmsLogTag::WMS_MAIN, "success");
 }
 
-void JsSceneSession::OnSetWindowRectAutoSave(bool enabled)
+void JsSceneSession::OnSetWindowRectAutoSave(bool enabled, bool isSaveBySpecifiedFlag)
 {
     const char* const where = __func__;
-    auto task = [weakThis = wptr(this), persistentId = persistentId_, enabled, env = env_, where] {
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, enabled,
+        isSaveBySpecifiedFlag, env = env_, where] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s: jsSceneSession id:%{public}d has been destroyed",
@@ -5828,7 +5834,8 @@ void JsSceneSession::OnSetWindowRectAutoSave(bool enabled)
             return;
         }
         napi_value jsEnabled = CreateJsValue(env, enabled);
-        napi_value argv[] = {jsEnabled};
+        napi_value jsSaveBySpecifiedFlag = CreateJsValue(env, isSaveBySpecifiedFlag);
+        napi_value argv[] = { jsEnabled, jsSaveBySpecifiedFlag };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, __func__);
@@ -6594,5 +6601,47 @@ void JsSceneSession::OnSetParentSession(int32_t oldParentWindowId, int32_t newPa
         napi_value argv[] = { jsOldParentWindowId, jsNewParentWindowId };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     }, where);
+}
+
+void JsSceneSession::ProcessUpdateFlagRegister()
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "session is nullptr, id:%{public}d", persistentId_);
+        return;
+    }
+    const char* const where = __func__;
+    session->NotifyUpdateFlagCallback([weakThis = wptr(this), where](const std::string& flag) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s: jsSceneSession is null", where);
+            return;
+        }
+        jsSceneSession->OnUpdateFlag(flag);
+    });
+    TLOGD(WmsLogTag::WMS_MAIN, "success");
+}
+
+void JsSceneSession::OnUpdateFlag(const std::string& flag)
+{
+    const char* const where = __func__;
+    taskScheduler_->PostMainThreadTask([weakThis = wptr(this), persistentId = persistentId_,
+        flag, env = env_, where] {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s: jsSceneSession id:%{public}d has been destroyed",
+                where, persistentId);
+            return;
+        }
+        TLOGND(WmsLogTag::WMS_MAIN, "%{public}s: flag is %{public}s", where, flag.c_str());
+        auto jsCallBack = jsSceneSession->GetJSCallback(UPDATE_FLAG_CB);
+        if (!jsCallBack) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s: jsCallBack is nullptr", where);
+            return;
+        }
+        napi_value jsFlag = CreateJsValue(env, flag);
+        napi_value argv[] = { jsFlag };
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    }, __func__);
 }
 } // namespace OHOS::Rosen

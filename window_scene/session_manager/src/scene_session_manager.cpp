@@ -220,7 +220,7 @@ bool GetEnableRemoveStartingWindowFromBMS(const std::shared_ptr<AppExecFwk::Abil
 bool IsUIExtCanShowOnLockScreen(const AppExecFwk::ElementName& element, uint32_t callingTokenId,
     AppExecFwk::ExtensionAbilityType extensionAbilityType)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: bundleName: %{public}s, moduleName: %{public}s, ablilityName: %{public}s",
+    TLOGD(WmsLogTag::WMS_UIEXT, "UIExtOnLock: bundleName: %{public}s, moduleName: %{public}s, ablilityName: %{public}s",
           element.GetBundleName().c_str(), element.GetModuleName().c_str(), element.GetAbilityName().c_str());
     static const std::unordered_set<AppExecFwk::ExtensionAbilityType> extensionAbilityTypeWhitelist = {
         AppExecFwk::ExtensionAbilityType::LIVEVIEW_LOCKSCREEN
@@ -250,7 +250,7 @@ bool IsUIExtCanShowOnLockScreen(const AppExecFwk::ElementName& element, uint32_t
     };
 
     if (extensionAbilityTypeWhitelist.find(extensionAbilityType) != extensionAbilityTypeWhitelist.end()) {
-        TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: extensionAbilityType in white list");
+        TLOGI(WmsLogTag::WMS_UIEXT, "ability in white list");
         return true;
     }
 
@@ -262,7 +262,7 @@ bool IsUIExtCanShowOnLockScreen(const AppExecFwk::ElementName& element, uint32_t
         return true;
     }
 
-    TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: not in white list");
+    TLOGD(WmsLogTag::WMS_UIEXT, "UIExtOnLock: not in white list");
     return SessionPermission::VerifyPermissionByCallerToken(callingTokenId,
         PermissionConstants::PERMISSION_CALLED_EXTENSION_ON_LOCK_SCREEN);
 }
@@ -1668,7 +1668,7 @@ uint32_t SceneSessionManager::GetLockScreenZOrder()
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (const auto& [persistentId, session] : sceneSessionMap_) {
         if (session && session->IsScreenLockWindow()) {
-            TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: found window %{public}d-%{public}d", persistentId,
+            TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: window %{public}d-%{public}d", persistentId,
                 session->GetZOrder());
             return session->GetZOrder() < DEFAULT_LOCK_SCREEN_ZORDER ? DEFAULT_LOCK_SCREEN_ZORDER :
                 session->GetZOrder();
@@ -1694,7 +1694,7 @@ WMError SceneSessionManager::CheckUIExtensionCreation(int32_t windowId, uint32_t
         }
         pid = sceneSession->GetCallingPid();
         if (!IsScreenLocked()) {
-            TLOGNI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: not in lock screen");
+            TLOGND(WmsLogTag::WMS_UIEXT, "UIExtOnLock: not in lock screen");
             return WMError::WM_OK;
         }
         if (IsUserAuthPassed()) {
@@ -1712,7 +1712,7 @@ WMError SceneSessionManager::CheckUIExtensionCreation(int32_t windowId, uint32_t
                 callingTokenId);
             return WMError::WM_ERROR_INVALID_PERMISSION;
         }
-        TLOGNI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: IsShowOnLockScreen: The caller permission has granted");
+        TLOGNI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: pass");
         return WMError::WM_OK;
     };
 
@@ -3439,6 +3439,7 @@ WSError SceneSessionManager::RecoverAndConnectSpecificSession(const sptr<ISessio
             TLOGNW(WmsLogTag::WMS_RECOVER, "Recover finished, not recovery anymore");
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
+        UpdateRecoverPropertyForSuperFold(property);
         // recover specific session
         SessionInfo info = RecoverSessionInfo(property);
         TLOGNI(WmsLogTag::WMS_RECOVER, "callingWindowId=%{public}" PRIu32, property->GetCallingSessionId());
@@ -3584,6 +3585,7 @@ WSError SceneSessionManager::RecoverAndReconnectSceneSession(const sptr<ISession
             TLOGNE(WmsLogTag::WMS_RECOVER, "recoverSceneSessionFunc_ is null");
             return WSError::WS_ERROR_NULLPTR;
         }
+        UpdateRecoverPropertyForSuperFold(property);
         SessionInfo sessionInfo = RecoverSessionInfo(property);
         sptr<SceneSession> sceneSession = RequestSceneSession(sessionInfo, nullptr);
         if (sceneSession == nullptr) {
@@ -3610,6 +3612,34 @@ WSError SceneSessionManager::RecoverAndReconnectSceneSession(const sptr<ISession
         return WSError::WS_OK;
     };
     return taskScheduler_->PostSyncTask(task, __func__);
+}
+
+void SceneSessionManager::UpdateRecoverPropertyForSuperFold(const sptr<WindowSessionProperty>& property)
+{
+    if (property->GetDisplayId() != VIRTUAL_DISPLAY_ID) {
+        return;
+    }
+    static auto foldCreaseRegion = SingletonContainer::Get<DisplayManager>().GetCurrentFoldCreaseRegion();
+    if (foldCreaseRegion == nullptr) {
+        return;
+    }
+    Rect recoverWindowRect = property->GetWindowRect();
+    Rect recoverRequestRect = property->GetRequestRect();
+    TLOGD(WmsLogTag::WMS_RECOVER,
+        "WindowRect: %{public}s, RequestRect: %{public}s, DisplayId: %{public}d",
+        recoverWindowRect.ToString().c_str(), recoverRequestRect.ToString().c_str(),
+        static_cast<uint32_t>(property->GetDisplayId()));
+    
+    auto foldCrease = foldCreaseRegion->GetCreaseRects().front();
+    recoverWindowRect.posY_ += foldCrease.posY_ + foldCrease.height_;
+    recoverRequestRect.posY_ += foldCrease.posY_ + foldCrease.height_;
+    property->SetWindowRect(recoverWindowRect);
+    property->SetRequestRect(recoverRequestRect);
+    property->SetDisplayId(0);
+    TLOGD(WmsLogTag::WMS_RECOVER,
+        "WindowRect: %{public}s, RequestRect: %{public}s, DisplayId: %{public}d",
+        recoverWindowRect.ToString().c_str(), recoverRequestRect.ToString().c_str(),
+        static_cast<uint32_t>(property->GetDisplayId()));
 }
 
 void SceneSessionManager::SetRecoverSceneSessionListener(const NotifyRecoverSceneSessionFunc& func)
@@ -6754,7 +6784,7 @@ WSError SceneSessionManager::SendTouchEvent(const std::shared_ptr<MMI::PointerEv
 #ifdef SECURITY_COMPONENT_MANAGER_ENABLE
     FillSecCompEnhanceData(pointerEvent, pointerItem);
 #endif
-    TLOGI(WmsLogTag::WMS_EVENT, "eid=%{public}d,action=%{public}d,deviceId=%{public}d,zIndex=%{public}ud",
+    TLOGI(WmsLogTag::WMS_EVENT, "eid=%{public}d,ac=%{public}d,deviceId=%{public}d,zIndex=%{public}ud",
         pointerEvent->GetPointerId(), pointerEvent->GetPointerAction(), pointerEvent->GetDeviceId(), zIndex);
     pointerEvent->AddFlag(MMI::PointerEvent::EVENT_FLAG_NO_INTERCEPT);
     MMI::InputManager::GetInstance()->SimulateInputEvent(pointerEvent, static_cast<float>(zIndex));
@@ -9582,7 +9612,7 @@ void SceneSessionManager::NotifyMMIWindowPidChange(int32_t windowId, bool startM
         return;
     }
 
-    TLOGI(WmsLogTag::WMS_EVENT, "Notify window: %{public}d, pid: %{public}d", windowId, pid);
+    TLOGI(WmsLogTag::WMS_EVENT, "Notify window:%{public}d, pid:%{public}d", windowId, pid);
     taskScheduler_->PostAsyncTask([weakSceneSession = wptr<SceneSession>(sceneSession), startMoving] {
         auto sceneSession = weakSceneSession.promote();
         if (sceneSession == nullptr) {
@@ -13159,10 +13189,20 @@ WSError SceneSessionManager::IsLastFrameLayoutFinished(bool& isLayoutFinished)
     return WSError::WS_OK;
 }
 
-WMError SceneSessionManager::IsWindowRectAutoSave(const std::string& key, bool& enabled)
+WMError SceneSessionManager::IsWindowRectAutoSave(const std::string& key, bool& enabled, int persistentId)
 {
+    auto sceneSession = GetSceneSession(persistentId);
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "sceneSession %{public}d is nullptr", persistentId);
+        return WMError::WM_ERROR_INVALID_SESSION;
+    }
+    std::string specifiedKey = key;
+    if (sceneSession->GetSessionProperty()->GetIsSaveBySpecifiedFlag()) {
+        specifiedKey = key + sceneSession->GetSessionInfo().specifiedFlag_;
+    }
+    TLOGD(WmsLogTag::WMS_MAIN, "windowId: %{public}d, specifiedKey: %{public}s", persistentId, specifiedKey.c_str());
     std::unique_lock<std::mutex> lock(isWindowRectAutoSaveMapMutex_);
-    if (auto iter = isWindowRectAutoSaveMap_.find(key); iter != isWindowRectAutoSaveMap_.end()) {
+    if (auto iter = isWindowRectAutoSaveMap_.find(specifiedKey); iter != isWindowRectAutoSaveMap_.end()) {
         enabled = iter->second;
     } else {
         enabled = false;

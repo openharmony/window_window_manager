@@ -2285,7 +2285,7 @@ WSError SessionProxy::NotifyMainModalTypeChange(bool isModal)
     return WSError::WS_OK;
 }
 
-WSError SessionProxy::OnSetWindowRectAutoSave(bool enabled)
+WSError SessionProxy::OnSetWindowRectAutoSave(bool enabled, bool isSaveBySpecifiedFlag)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2298,6 +2298,12 @@ WSError SessionProxy::OnSetWindowRectAutoSave(bool enabled)
         TLOGE(WmsLogTag::WMS_MAIN, "Write enable failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
+    if (!data.WriteBool(isSaveBySpecifiedFlag)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Write isSaveBySpecifiedFlag failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    TLOGD(WmsLogTag::WMS_MAIN, "enable: %{public}d, isSaveBySpecifiedFlag: %{public}d",
+        enabled, isSaveBySpecifiedFlag);
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         TLOGE(WmsLogTag::WMS_MAIN, "remote is null");
@@ -2635,5 +2641,33 @@ void SessionProxy::NotifyKeyboardDidHideRegistered(bool registered)
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "SendRequest failed");
     }
+}
+
+WSError SessionProxy::UpdateFlag(const std::string& flag)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_MAIN, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteString(flag)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Write flag failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    TLOGD(WmsLogTag::WMS_MAIN, "specifiedFlag: %{public}s", flag.c_str());
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_FLAG),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_MAIN, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen
