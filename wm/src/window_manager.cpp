@@ -72,7 +72,6 @@ public:
     void NotifyWindowStyleChange(WindowStyleType type);
     void NotifyWindowPidVisibilityChanged(const sptr<WindowPidVisibilityInfo>& info);
 
-
     static inline SingletonDelegator<WindowManager> delegator_;
 
     std::shared_mutex listenerMutex_;
