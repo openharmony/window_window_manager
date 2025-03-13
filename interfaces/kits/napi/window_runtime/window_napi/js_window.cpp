@@ -5233,18 +5233,18 @@ napi_value JsWindow::OnSnapshotIgnorePrivacy(napi_env env, napi_callback_info in
         auto weakWindow = weakToken.promote();
             if (weakWindow == nullptr) {
                 TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "window is nullptr");
-                task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+                task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
                 return;
             }
 
             std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
             WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SnapshotIgnorePrivacy(pixelMap));
             if (ret == WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT) {
-                task.Reject(env, JsErrUtils::CreateJsError(env, ret));
+                task->Reject(env, JsErrUtils::CreateJsError(env, ret));
                 TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "device not support");
                 return;
             } else if (ret != WmErrorCode::WM_OK) {
-                task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+                task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
                 TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "SnapshotIgnorePrivacy get pixelmap failed, code:%{public}d", ret);
                 return;
             }
@@ -5253,7 +5253,7 @@ napi_value JsWindow::OnSnapshotIgnorePrivacy(napi_env env, napi_callback_info in
             if (nativePixelMap == nullptr) {
                 TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "SnapshotIgnorePrivacy get nativePixelMap is null");
             }
-            task.Resolve(env, nativePixelMap);
+            task->Resolve(env, nativePixelMap);
             TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "Window [%{public}u, %{public}s] OnSnapshotIgnorePrivacy, "
                 "WxH=%{public}dx%{public}d", weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(),
                 pixelMap->GetWidth(), pixelMap->GetHeight());
