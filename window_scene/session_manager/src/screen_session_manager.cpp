@@ -6331,7 +6331,6 @@ void ScreenSessionManager::SetScreenSkipProtectedWindowInner()
     }
     std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     for (auto sessionIt : screenSessionMap_) {
-
         auto screenSession = sessionIt.second;
         if (screenSession == nullptr) {
             TLOGE(WmsLogTag::DMS, "screenSession is nullptr, ScreenId:%{public}" PRIu64"",
@@ -6351,7 +6350,6 @@ void ScreenSessionManager::SetScreenSkipProtectedWindowInner()
                 "SetCastScreenEnableSkipWindow(%" PRIu64")", sessionIt.first);
             rsInterface_.SetCastScreenEnableSkipWindow(rsScreenId, requiredSkipWindow);
         }
-
     }
 }
 } // namespace OHOS::Rosen
