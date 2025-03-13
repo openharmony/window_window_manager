@@ -269,9 +269,9 @@ void WindowManagerLite::Impl::NotifyCallingWindowDisplayChanged(const CallingWin
         displayChangeListeners = callingDisplayChangedListeners_;
     }
     TLOGI(WmsLogTag::WMS_KEYBOARD, "notify persistentId: %{public}d, pid: %{public}d, "
-        "displayId: %{public}" PRIu64" , userId: %{public}d, num: %{public}" PRIu32" ",
+        "displayId: %{public}" PRIu64" , userId: %{public}d, size: %{public}zu",
         callingWindowInfo.windowId_, callingWindowInfo.callingPid_, callingWindowInfo.displayId_,
-        callingWindowInfo.userId_, static_cast<uint32_t>(displayChangeListeners.size()));
+        callingWindowInfo.userId_, displayChangeListeners.size());
 
     for (const auto& listener : displayChangeListeners) {
         if (!listener) {
