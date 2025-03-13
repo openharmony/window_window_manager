@@ -490,7 +490,7 @@ int32_t OH_WindowManager_SetWindowFocusable(int32_t windowId, bool isFocusable)
 }
 
 int32_t OH_WindowManager_GetAllWindowLayoutInfo(
-    int64_t displayId, WindowManager_Rect** windowLayoutInfo, uint32_t* windowLayoutInfoSize)
+    int64_t displayId, WindowManager_Rect** windowLayoutInfo, size_t* windowLayoutInfoSize)
 {
     if (displayId < 0 ||
         SingletonContainer::Get<DisplayManager>().GetDisplayById(static_cast<uint64_t>(displayId)) == nullptr) {
@@ -505,7 +505,7 @@ int32_t OH_WindowManager_GetAllWindowLayoutInfo(
     auto eventHandler = GetMainEventHandler();
     if (eventHandler == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "eventHandler is null, displayId:%{public}" PRIu64, displayId);
-        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
     }
     eventHandler->PostSyncTask([displayId, windowLayoutInfo, windowLayoutInfoSize, &errCode, where = __func__] {
         std::vector<OHOS::sptr<WindowLayoutInfo>> infos;
@@ -518,11 +518,11 @@ int32_t OH_WindowManager_GetAllWindowLayoutInfo(
         }
         WindowManager_Rect *infosInner = (WindowManager_Rect*)malloc(sizeof(WindowManager_Rect) * infos.size());
         if (infosInner == nullptr) {
-            errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
+            errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s infosInner is nullptr" PRIu64, where);
             return;
         }
-        for (uint32_t i = 0; i < infos.size(); i++) {
+        for (size_t i = 0; i < infos.size(); i++) {
             TransformedToWindowManagerRect(infos[i]->rect, infosInner[i]);
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s rect: %{public}d %{public}d %{public}d %{public}d",
                 where, infosInner[i].posX, infosInner[i].posY, infosInner[i].width, infosInner[i].height);
