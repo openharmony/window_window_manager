@@ -429,6 +429,12 @@ private:
      */
     bool isColdStart_ = true;
     void NotifyFreeMultiWindowModeResume();
+
+    /*
+     * Pc App In Pad
+     */
+    bool IsFullScreenPcAppInPadMode();
+    bool SupportFullScreen();
 };
 } // namespace Rosen
 } // namespace OHOS
