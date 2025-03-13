@@ -259,7 +259,7 @@ void WindowManager::Impl::NotifyWindowVisibilityStateChanged(
     for (auto& listener : windowVisibilityStateListeners) {
         std::vector<std::unordered_map<WindowInfoKey, std::any>> windowChangeInfos;
         PackWindowChangeInfo(listener->GetInterstInfo(), windowChangeInfos, windowVisibilityInfos);
-        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "Notify WindowVisibilityState to caller, info size: {public}zu",
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "Notify WindowVisibilityState to caller, info size: %{public}zu",
             windowChangeInfos.size());
         listener->OnWindowInfoChanged(windowChangeInfos);
     }
