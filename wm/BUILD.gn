@@ -433,6 +433,7 @@ ohos_shared_library("libwm_ndk") {
   deps = [
     ":libwm",
     "${window_base_path}/utils:libwmutil_base",
+    "../dm:libdm",
   ]
 
   innerapi_tags = [ "ndk" ]

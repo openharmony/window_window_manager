@@ -240,6 +240,8 @@ int32_t OH_WindowManager_SetWindowTouchable(int32_t windowId, bool touchable);
  */
 int32_t OH_WindowManager_SetWindowFocusable(int32_t windowId, bool isFocusable);
 
+int32_t OH_WindowManager_GetAllWindowLayoutInfo(
+    int64_t displayId, WindowManager_Rect** windowLayoutInfo, uint32_t* windowLayoutInfoSize);
 #ifdef __cplusplus
 }
 #endif
