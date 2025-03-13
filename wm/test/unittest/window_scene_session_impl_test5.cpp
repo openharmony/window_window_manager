@@ -179,6 +179,31 @@ HWTEST_F(WindowSceneSessionImplTest5, StartMoveWindowWithCoordinate_02, Function
     ASSERT_EQ(window->StartMoveWindowWithCoordinate(1500, 50), WmErrorCode::WM_ERROR_INVALID_PARAM);
     ASSERT_EQ(window->StartMoveWindowWithCoordinate(100, 1500), WmErrorCode::WM_ERROR_INVALID_PARAM);
 }
+
+/**
+ * @tc.name: IsFullScreenEnable
+ * @tc.desc: IsFullScreenEnable
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, IsFullScreenEnable, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetDisplayId(0);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetWindowModeSupportType(0);
+    ASSERT_EQ(window->IsFullScreenEnable(), false);
+    window->property_->SetWindowModeSupportType(1);
+    ASSERT_EQ(window->IsFullScreenEnable(), true);
+    window->property_->SetDragEnabled(true);
+    WindowLimits windowLimits = {5000, 5000, 500, 500, 0.0f, 0.0f};
+    window->property_->SetWindowLimits(windowLimits);
+    ASSERT_EQ(window->IsFullScreenEnable(), true);
+    WindowLimits windowLimits1 = {800, 800, 500, 500, 0.0f, 0.0f};
+    window->property_->SetWindowLimits(windowLimits1);
+    ASSERT_EQ(window->IsFullScreenEnable(), false);
+    window->property_->SetDragEnabled(false);
+    ASSERT_EQ(window->IsFullScreenEnable(), true);
+}
 }  // namespace
 }
 }
