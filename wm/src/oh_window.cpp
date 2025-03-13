@@ -504,11 +504,11 @@ int32_t OH_WindowManager_GetAllWindowLayoutInfo(
     WindowManager_ErrorCode errCode = WindowManager_ErrorCode::OK;
     auto eventHandler = GetMainEventHandler();
     if (eventHandler == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "eventHandler is null, windowId:%{public}d", windowId);
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "eventHandler is null, displayId:%{public}" PRIu64, displayId);
         return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
     }
     eventHandler->PostSyncTask([displayId, windowLayoutInfo, windowLayoutInfoSize, &errCode, where = __func__] {
-        std::vector<OHOS::sptr<windowLayoutInfo>> infos;
+        std::vector<OHOS::sptr<WindowLayoutInfo>> infos;
         errCode = OH_WINDOW_TO_ERROR_CODE_MAP.at(
             SingletonContainer::Get<WindowManager>().GetAllWindowLayoutInfo(static_cast<uint64_t>(displayId), infos));
         if (errCode != WindowManager_ErrorCode::OK) {
@@ -516,7 +516,7 @@ int32_t OH_WindowManager_GetAllWindowLayoutInfo(
                 WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL : errCode;
             return;
         }
-        WindowManager_Rect *infosInner = (WindowManager_Rect*)malloc(sizeof(WindowManager_Rect)) * infos.size();
+        WindowManager_Rect *infosInner = (WindowManager_Rect*)malloc(sizeof(WindowManager_Rect) * infos.size());
         if (infosInner == nullptr) {
             errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s infosInner is nullptr" PRIu64, where);
