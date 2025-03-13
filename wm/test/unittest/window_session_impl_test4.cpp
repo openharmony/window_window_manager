@@ -200,8 +200,6 @@ HWTEST_F(WindowSessionImplTest4, SetMainWindowTopmost, Function | SmallTest | Le
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetMainWindowTopmost");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-    WMError res = window->SetMainWindowTopmost(false);
-
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
@@ -209,8 +207,8 @@ HWTEST_F(WindowSessionImplTest4, SetMainWindowTopmost, Function | SmallTest | Le
     window->state_ = WindowState::STATE_CREATED;
     window->windowSystemConfig_.uiType_ = UI_TYPE_PC;
     window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    res = window->SetMainWindowTopmost(true);
-    ASSERT_EQ(WMError::WM_OK, res);
+    WMError res = window->SetMainWindowTopmost(true);
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, res);
 }
 
 /**

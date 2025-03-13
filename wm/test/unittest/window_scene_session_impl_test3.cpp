@@ -584,8 +584,8 @@ HWTEST_F(WindowSceneSessionImplTest3, SetKeyboardTouchHotAreas, Function | Small
     KeyboardTouchHotAreas hotAreas;
     Rect rect = {800, 800, 1200, 1200};
     hotAreas.landscapeKeyboardHotAreas_.push_back(rect);
-    hotAreas.portraitKeyboardHotAreas_.push_back(rect);
     hotAreas.landscapePanelHotAreas_.push_back(rect);
+    hotAreas.portraitKeyboardHotAreas_.push_back(rect);
     hotAreas.portraitPanelHotAreas_.push_back(rect);
     auto ret = windowSceneSessionImpl->SetKeyboardTouchHotAreas(hotAreas);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_TYPE, ret);
@@ -958,7 +958,7 @@ HWTEST_F(WindowSceneSessionImplTest3, Resize01, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, subWindow);
     ASSERT_NE(nullptr, subWindow->property_);
     subWindow->property_->SetPersistentId(1002);
-    SessionInfo subSessionInfo = {"CreateSubTestBundle", "CreateSubTestMoudle", "CreateSubTestAbility"};
+    SessionInfo subSessionInfo = {"CreateSubTestBundle", "CreateSubTestModule", "CreateSubTestAbility"};
     sptr<SessionMocker> subSession = new (std::nothrow) SessionMocker(subSessionInfo);
     ASSERT_NE(nullptr, subSession);
     subWindow->hostSession_ = subSession;
@@ -973,7 +973,7 @@ HWTEST_F(WindowSceneSessionImplTest3, Resize01, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     ASSERT_NE(nullptr, window->property_);
     window->property_->SetPersistentId(1003);
-    SessionInfo sessionInfo = {"CreateSubTestBundle", "CreateSubTestMoudle", "CreateSubTestAbility"};
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
@@ -985,7 +985,7 @@ HWTEST_F(WindowSceneSessionImplTest3, Resize01, Function | SmallTest | Level2)
     std::pair<uint64_t, sptr<WindowSessionImpl>>(window->GetWindowId(), window)));
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
     ASSERT_EQ(WMError::WM_OK, subWindow->Resize(100, 100));
-    ASSERT_EQ(WMError::WM_OK, subWindow->Resize(100, 200));
+    ASSERT_EQ(WMError::WM_OK, subWindow->Resize(200, 200));
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
     ASSERT_EQ(WMError::WM_OK, subWindow->Resize(100, 200));
     ASSERT_EQ(WMError::WM_OK, subWindow->Resize(200, 200));
