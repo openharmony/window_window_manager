@@ -5250,7 +5250,7 @@ napi_value JsWindow::OnSnapshotIgnorePrivacy(napi_env env, napi_callback_info in
             task.Resolve(env, nativePixelMap);
             TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "Window [%{public}u, %{public}s] OnSnapshotIgnorePrivacy, "
                 "WxH=%{public}dx%{public}d", weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(),
-                    pixelMap->GetWidth(), pixelMap->GetHeight());
+                pixelMap->GetWidth(), pixelMap->GetHeight());
         };
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
