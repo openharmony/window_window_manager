@@ -5122,7 +5122,7 @@ napi_value JsWindow::Snapshot(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::SnapshotIgnorePrivacy(napi_env env, napi_callback_info info)
 {
-    WLOGI("SnapshotIgnorePrivacy");
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "SnapshotIgnorePrivacy");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSnapshotIgnorePrivacy(env, info) : nullptr;
 }
@@ -5219,14 +5219,14 @@ napi_value JsWindow::OnSnapshot(napi_env env, napi_callback_info info)
     return result;
 }
 
-napi_value JsWindow::SnapshotIgnorePrivacy(napi_env env, napi_callback_info info)
+napi_value JsWindow::OnSnapshotIgnorePrivacy(napi_env env, napi_callback_info info)
 {
     wptr<Window> weakToken(windowToken_);
     NapiAsyncTask::CompleteCallback complete =
         [weakToken](napi_env env, NapiAsyncTask& task, int32_t status) {
             auto weakWindow = weakToken.promote();
             if (weakWindow == nullptr) {
-                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window is nullptr");
+                TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "window is nullptr");
                 task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
                 return;
             }
@@ -5235,20 +5235,20 @@ napi_value JsWindow::SnapshotIgnorePrivacy(napi_env env, napi_callback_info info
             WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SnapshotIgnorePrivacy(pixelMap));
             if (ret == WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT) {
                 task.Reject(env, JsErrUtils::CreateJsError(env, ret));
-                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "device not support");
+                TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "device not support");
                 return;
             } else if (ret == WmErrorCode::WM_ERROR_STATE_ABNORMALLY) {
                 task.Reject(env, JsErrUtils::CreateJsError(env, ret));
-                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window SnapshotIgnorePrivacy get pixelmap is null");
+                TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "window SnapshotIgnorePrivacy get pixelmap is null");
                 return;
             }
 
             auto nativePixelMap = Media::PixelMapNapi::CreatePixelMap(env, pixelMap);
             if (nativePixelMap == nullptr) {
-                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window SnapshotIgnorePrivacy get nativePixelMap is null");
+                TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "window SnapshotIgnorePrivacy get nativePixelMap is null");
             }
             task.Resolve(env, nativePixelMap);
-            TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Window [%{public}u, %{public}s] OnSnapshotIgnorePrivacy, "
+            TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "Window [%{public}u, %{public}s] OnSnapshotIgnorePrivacy, "
                 "WxH=%{public}dx%{public}d", weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(),
                     pixelMap->GetWidth(), pixelMap->GetHeight());
         };
