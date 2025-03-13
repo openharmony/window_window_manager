@@ -2843,7 +2843,7 @@ HWTEST_F(ScreenSessionTest, SetShareProtect, Function | SmallTest | Level2)
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetShareProtect start";
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
     session->SetShareProtect(false);
-    ASSERT_EQ(session->SetShareProtect(), false);
+    ASSERT_EQ(session->GetShareProtect(), false);
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetShareProtect end";
 }
 
