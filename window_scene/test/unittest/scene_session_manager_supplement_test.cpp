@@ -1354,6 +1354,7 @@ HWTEST_F(SceneSessionManagerSupplementTest, GetFocusWindowInfo, Function | Small
     ssm_->displayBrightness_ = 3.f;
     ret = ssm_->SetBrightness(sceneSession, 2.f);
     ASSERT_EQ(ret, WSError::WS_OK);
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     ret = ssm_->UpdateBrightness(1);
     ASSERT_EQ(ret, WSError::WS_ERROR_NULLPTR);
     ssm_->sceneSessionMap_.insert({1, sceneSession});
