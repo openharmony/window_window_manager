@@ -18,7 +18,6 @@
 #include <bundlemgr/launcher_service.h>
 #include <event_handler.h>
 #include <input_manager.h>
-#include <int_wrapper.h>
 #include <iremote_stub.h>
 #include <transaction/rs_interfaces.h>
 #include <ui_content.h>
@@ -27,7 +26,6 @@
 
 #include "ability_context.h"
 #include "app_mgr_client.h"
-#include "extension/extension_business_info.h"
 #include "fold_screen_state_internel.h"
 #include "input_transfer_station.h"
 #include "singleton.h"
@@ -108,7 +106,6 @@ void RootScene::LoadContent(const std::string& contentUrl, napi_env env, napi_va
     uiContent_->SetFrameLayoutFinishCallback(std::move(frameLayoutFinishCb_));
     uiContent_->AddFocusActiveChangeCallback(notifyWatchFocusActiveChangeCallback_);
     RegisterInputEventListener();
-    IsWaterfallModeEnabled();   // init waterfall mode
 }
 
 void RootScene::SetDisplayOrientation(int32_t orientation)
@@ -438,115 +435,6 @@ void RootScene::SetTopWindowBoundaryByID(const std::string& stringId)
     }
     TLOGI(WmsLogTag::WMS_LAYOUT, "end");
     uiContent_->SetTopWindowBoundaryByID(stringId);
-}
-
-void RootScene::RegisterGetPcScreenFoldStatusCallback(GetPcScreenFoldStatusCallback&& callback)
-{
-    getPcScreenFoldStatusCallback_ = std::move(callback);
-}
-
-void RootScene::NotifyPcScreenFoldStatusChange(SuperFoldStatus foldStatus)
-{
-    NotifyWaterfallModeChange(foldStatus == SuperFoldStatus::HALF_FOLDED);
-}
-
-bool RootScene::IsWaterfallModeEnabled()
-{
-    bool isWaterfallMode = isFullScreenWaterfallMode_.load();
-    if (!isValidWaterfallMode_.load()) {
-        if (getPcScreenFoldStatusCallback_ == nullptr) {
-            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "callback is null, root winId: %{public}u", GetWindowId());
-            return false;
-        }
-        isWaterfallMode = getPcScreenFoldStatusCallback_() == SuperFoldStatus::HALF_FOLDED;
-        isFullScreenWaterfallMode_.store(isWaterfallMode);
-        isValidWaterfallMode_.store(true);
-        NotifyWaterfallModeChange(isWaterfallMode);
-    }
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "waterfall: %{public}d, root winId: %{public}u", isWaterfallMode, GetWindowId());
-    return isWaterfallMode;
-}
-
-WMError RootScene::RegisterWaterfallModeChangeListener(const sptr<IWaterfallModeChangeListener>& listener)
-{
-    if (listener == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "root listener is null");
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    std::lock_guard<std::mutex> lock(waterfallModeMutex_);
-    if (waterfallModeChangeListeners_.find(listener) == waterfallModeChangeListeners_.end()) {
-        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "root register success");
-        waterfallModeChangeListeners_.insert(listener);
-    }
-    return WMError::WM_OK;
-}
-
-WMError RootScene::UnregisterWaterfallModeChangeListener(const sptr<IWaterfallModeChangeListener>& listener)
-{
-    if (listener == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "root listener is null");
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "root unregister success");
-    std::lock_guard<std::mutex> lock(waterfallModeMutex_);
-    waterfallModeChangeListeners_.erase(listener);
-    return WMError::WM_OK;
-}
-
-std::vector<sptr<IWaterfallModeChangeListener>> RootScene::GetWaterfallModeChangeListeners()
-{
-    std::vector<sptr<IWaterfallModeChangeListener>> listeners;
-    std::lock_guard<std::mutex> lock(waterfallModeMutex_);
-    for (auto& listener : waterfallModeChangeListeners_) {
-        listeners.push_back(listener);
-    }
-    return listeners;
-}
-
-void RootScene::NotifyWaterfallModeChange(bool isWaterfallMode)
-{
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "prev: %{public}d, curr: %{public}d, winId: %{public}u",
-        isFullScreenWaterfallMode_.load(), isWaterfallMode, GetWindowId());
-    if (isValidWaterfallMode_.load() && isFullScreenWaterfallMode_.load() == isWaterfallMode) {
-        return;
-    }
-    isFullScreenWaterfallMode_.store(isWaterfallMode);
-    isValidWaterfallMode_.store(true);
-    AAFwk::Want want;
-    want.SetParam(Extension::WATERFALL_MODE_FIELD, isWaterfallMode);
-    if (auto uiContent = GetUIContent()) {
-        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "send uiext root winId: %{public}u", GetWindowId());
-        uiContent->SendUIExtProprty(static_cast<uint32_t>(Extension::Businesscode::SYNC_HOST_WATERFALL_MODE),
-            want, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
-    }
-    auto waterfallModeChangeListeners = GetWaterfallModeChangeListeners();
-    for (const auto& listener : waterfallModeChangeListeners) {
-        if (listener != nullptr) {
-            listener->OnWaterfallModeChange(isWaterfallMode);
-        }
-    }
-}
-
-void RootScene::GetExtensionConfig(AAFwk::WantParams& want) const
-{
-    bool isWaterfallMode = isFullScreenWaterfallMode_.load();
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "waterfall: %{public}d, root winId: %{public}u", isWaterfallMode, GetWindowId());
-    want.SetParam(Extension::WATERFALL_MODE_FIELD, AAFwk::Integer::Box(static_cast<int32_t>(isWaterfallMode)));
-}
-
-void RootScene::UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>& want)
-{
-    if (want == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "want is null");
-        return;
-    }
-    const auto& configParam = want->GetParams().GetWantParams(Extension::UIEXTENSION_CONFIG_FIELD);
-    auto waterfallModeValue = configParam.GetIntParam(Extension::WATERFALL_MODE_FIELD, 0);
-    isFullScreenWaterfallMode_.store(static_cast<bool>(waterfallModeValue));
-    isValidWaterfallMode_.store(true);
-    want->RemoveParam(Extension::UIEXTENSION_CONFIG_FIELD);
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "waterfall: %{public}d, winId: %{public}u",
-        isFullScreenWaterfallMode_.load(), GetWindowId());
 }
 } // namespace Rosen
 } // namespace OHOS
