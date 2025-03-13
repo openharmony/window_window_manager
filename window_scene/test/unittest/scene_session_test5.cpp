@@ -1769,5 +1769,5 @@ HWTEST_F(SceneSessionTest5, SetColorSpace, Function | SmallTest | Level2)
     EXPECT_NE(nullptr, session->GetSurfaceNode());
 }
 }
-}
-}
+} // namespace Rosen
+} // namespace OHOS
