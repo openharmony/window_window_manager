@@ -615,6 +615,10 @@ void SceneSessionManager::ConfigWindowSceneXml(const WindowSceneConfig::ConfigIt
     if (item.IsBool()) {
         systemConfig_.supportTypeFloatWindow_ = item.boolValue_;
     }
+    item = config["singleHandCompatibleMode"];
+    if (item.IsMap()) {
+        ConfigSingleHandCompatibleMode(item);
+    }
 }
 
 void SceneSessionManager::ConfigWindowImmersive(const WindowSceneConfig::ConfigItem& immersiveConfig)
@@ -1216,6 +1220,29 @@ std::tuple<std::string, std::vector<float>> SceneSessionManager::CreateCurve(
 
     return {curveName, curveParams};
 }
+
+
+void SceneSessionManager::ConfigSingleHandCompatibleMode(const WindowSceneConfig::ConfigItem& configItem)
+{
+    auto& config = singleHandCompatibleModeConfig_;
+    auto item = configItem.GetProp("enable");
+    if (item.IsBool()) {
+        config.enabled = item.boolValue_;
+    }
+    item = configItem["singleHandScale"];
+    if (item.IsFloats() && item.floatsValue_->size() == 1) {
+        config.singleHandScale = (*item.floatsValue_)[0];
+    }
+    item = configItem["heightChangeRatio"];
+    if (item.IsFloats() && item.floatsValue_->size() == 1) {
+        config.heightChangeRatio = (*item.floatsValue_)[0];
+    }
+    item = configItem["widthChangeRatio"];
+    if (item.IsFloats() && item.floatsValue_->size() == 1) {
+        config.widthChangeRatio = (*item.floatsValue_)[0];
+    }
+}
+
 
 void SceneSessionManager::ConfigWindowSizeLimits()
 {
@@ -6661,11 +6688,25 @@ SingleHandTransform SceneSessionManager::GetNormalSingleHandTransform() const
     return singleHandTransform_;
 }
 
-void SceneSessionManager::NotifySingleHandInfoChange(
-    float singleHandScaleX, float singleHandScaleY, SingleHandMode singleHandMode)
+SingleHandScreenInfo SceneSessionManager::GetSingleHandScreenInfo() const
+{
+    return singleHandScreenInfo_;
+}
+
+WSRect SceneSessionManager::GetOriginRect() const
+{
+    return originRect_;
+}
+
+WSRect SceneSessionManager::GetSingleHandRect() const
+{
+    return singleHandRect_;
+}
+
+void SceneSessionManager::NotifySingleHandInfoChange(SingleHandScreenInfo singleHandScreenInfo, WSRect originRect, WSRect singleHandRect)
 {
     const char* const funcName = __func__;
-    taskScheduler_->PostAsyncTask([this, singleHandScaleX, singleHandScaleY, singleHandMode, funcName] {
+    taskScheduler_->PostAsyncTask([this, singleHandScreenInfo, originRect, singleHandRect, funcName] {
         if (!systemConfig_.IsPhoneWindow()) {
             TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s: only support phone", funcName);
             return;
@@ -6677,27 +6718,13 @@ void SceneSessionManager::NotifySingleHandInfoChange(
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: get display size failed", funcName);
             return;
         }
-        switch (singleHandMode) {
-            case SingleHandMode::MIDDLE:
-                singleHandTransform_.posX = 0;
-                singleHandTransform_.posY = 0;
-                break;
-            case SingleHandMode::LEFT:
-                singleHandTransform_.posX = 0;
-                singleHandTransform_.posY =
-                    static_cast<int32_t>(static_cast<float>(displayHeight) * (1 - singleHandScaleY));
-                break;
-            case SingleHandMode::RIGHT:
-                singleHandTransform_.posX =
-                    static_cast<int32_t>(static_cast<float>(displayWidth) * (1 - singleHandScaleX));
-                singleHandTransform_.posY =
-                    static_cast<int32_t>(static_cast<float>(displayHeight) * (1 - singleHandScaleY));
-                break;
-            default:
-                break;
-        }
-        singleHandTransform_.scaleX = singleHandScaleX;
-        singleHandTransform_.scaleY = singleHandScaleY;
+        singleHandScreenInfo_ = singleHandScreenInfo;
+        originRect_ = originRect;
+        singleHandRect_ = singleHandRect;
+        singleHandTransform_.posX = singleHandRect.posX_;
+        singleHandTransform_.posY = singleHandRect.posY_;
+        singleHandTransform_.scaleX = static_cast<float>(singleHandScreenInfo_.scaleRatio) / 100;
+        singleHandTransform_.scaleY = singleHandTransform_.scaleX;
         {
             std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
             for (const auto& [_, sceneSession] : sceneSessionMap_) {
@@ -6705,6 +6732,7 @@ void SceneSessionManager::NotifySingleHandInfoChange(
                     sceneSession->GetWindowName().find("OneHandModeBackground", 0) != std::string::npos) {
                     continue;
                 }
+                sceneSession->SetSingleHandModeFlag(true);
                 sceneSession->SetSingleHandTransform(singleHandTransform_);
                 sceneSession->NotifySingleHandTransformChange(singleHandTransform_);
             }
@@ -6737,6 +6765,11 @@ void SceneSessionManager::RegisterSingleHandContainerNode(const std::string& str
     TLOGI(WmsLogTag::WMS_LAYOUT, "get OneHandModeBox node, id: %{public}" PRIu64, rsNode->GetId());
     setTopWindowBoundaryByIDFunc_(stringId);
     rsInterface_.SetWindowContainer(rsNode->GetId(), true);
+}
+
+const SingleHandCompatibleModeConfig& SceneSessionManager::GetSingleHandCompatibleModeConfig() const
+{
+    return singleHandCompatibleModeConfig_;
 }
 
 #ifdef SECURITY_COMPONENT_MANAGER_ENABLE

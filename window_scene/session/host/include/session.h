@@ -608,6 +608,8 @@ public:
     bool IsDragAccessible() const;
     void SetSingleHandTransform(const SingleHandTransform& transform);
     SingleHandTransform GetSingleHandTransform() const;
+    void SetSingleHandModeFlag(bool flag);
+    bool SessionIsSingleHandMode();
     void SetClientDisplayId(DisplayId displayId);
     DisplayId GetClientDisplayId() const;
     virtual void RegisterNotifySurfaceBoundsChangeFunc(int32_t sessionId, NotifySurfaceBoundsChangeFunc&& func) {};
@@ -951,6 +953,8 @@ private:
     std::optional<bool> clientDragEnable_;
     bool dragActivated_ = true;
     SingleHandTransform singleHandTransform_;
+    bool singleHandModeFlag_ = false;
+    SingleHandScreenInfo singleHandScreenInfo_;
 
     /*
      * Screen Lock
