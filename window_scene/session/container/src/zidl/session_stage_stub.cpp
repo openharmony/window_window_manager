@@ -800,6 +800,8 @@ int SessionStageStub::HandleSetKeyFramePolicy(MessageParcel& data, MessageParcel
         return ERR_INVALID_DATA;
     }
     SetKeyFramePolicy(*keyFramePolicy);
+    delete keyFramePolicy;
+    keyFramePolicy = nullptr;
     return ERR_NONE;
 }
 
