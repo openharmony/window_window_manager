@@ -240,10 +240,11 @@ class IWindowInfoChangedListener : virtual public RefBase {
          *
          * @param info
          */
-        virtual void OnWindowInfoChanged(const std::unordered_map<WindowInfoKey, std::any>& info) = 0;
+        virtual void OnWindowInfoChanged(const std::vector<std::unordered_map<WindowInfoKey, std::any>>& infos) = 0;
 
         void SetInterstInfo(const std::unordered_set<WindowInfoKey>& interstInfo) { interstInfo_ = interstInfo; }
         std::unordered_set<WindowInfoKey> GetInterstInfo() const { return interstInfo_; }
+        void AddInterstInfo(WindowInfoKey interstValue) { interstInfo.insert(interstValue); }
 
     private:
         std::unordered_set<WindowInfoKey> interstInfo_;
@@ -1120,21 +1121,21 @@ public:
     /**
      * @brief Register window info change callback.
      *
-     * @param observedInfo property which to observe.
+     * @param observedInfo Property which to observe.
      * @param listener Listener to observe window info.
      * @return WM_OK means register success, others means failed.
      */
-    WMError RegisterWindowInfoChangeCallback(std::unordered_set<WindowInfoKey> observedInfo,
+    WMError RegisterWindowInfoChangeCallback(const std::unordered_set<WindowInfoKey>& observedInfo,
         const sptr<IWindowInfoChangedListener>& listener);
     
     /**
      * @brief Unregister window info change callback.
      *
-     * @param observedInfo property which to observe.
+     * @param observedInfo Property which to observe.
      * @param listener Listener to observe window info.
      * @return WM_OK means unregister success, others means failed.
      */
-    WMError UnregisterWindowInfoChangeCallback(std::unordered_set<WindowInfoKey> observedInfo,
+    WMError UnregisterWindowInfoChangeCallback(const std::unordered_set<WindowInfoKey>& observedInfo,
         const sptr<IWindowInfoChangedListener>& listener);
 
 private:
