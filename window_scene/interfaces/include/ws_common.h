@@ -40,6 +40,7 @@ class RSTransaction;
 constexpr int32_t ROTATE_ANIMATION_DURATION = 400;
 constexpr int32_t INVALID_SESSION_ID = 0;
 constexpr int32_t WINDOW_SUPPORT_MODE_MAX_SIZE = 4;
+constexpr int32_t DEFAULT_SCALE_RATIO = 100;
 
 enum class WSError : int32_t {
     WS_OK = 0,
@@ -683,6 +684,20 @@ struct AppWindowSceneConfig {
     StartingWindowAnimationConfig startingWindowAnimationConfig_;
     SystemUIStatusBarConfig systemUIStatusBarConfig_;
     WindowImmersive windowImmersive_;
+};
+
+struct SingleHandCompatibleModeConfig {
+    bool enabled = false;
+    float singleHandScale = 1.0f;
+    float heightChangeRatio = 1.0f;
+    float widthChangeRatio = 1.0f;
+};
+
+struct SingleHandScreenInfo {
+    int32_t scaleRatio = DEFAULT_SCALE_RATIO;
+    int32_t scalePivotX = 0;
+    int32_t scalePivotY = 0;
+    SingleHandMode mode = SingleHandMode::MIDDLE;
 };
 
 struct DeviceScreenConfig {
