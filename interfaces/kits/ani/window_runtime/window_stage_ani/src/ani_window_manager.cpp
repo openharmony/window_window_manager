@@ -13,56 +13,56 @@
  * limitations under the License.
  */
 
- #include "ani_window_manager.h"
- 
- #include <ability.h>
-  
- #include "ani.h"
- #include "window_scene.h"
- #include "window_manager_hilog.h"
- #include "ani_window_utils.h"
- #include "ani_window.h"
-  
- namespace OHOS {
- namespace Rosen {
- ani_status AniWindowManager::AniWindowManagerInit(ani_env* env, ani_namespace windowNameSpace)
- {
-     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-     ani_function setObjFunc = nullptr;
-     ani_status ret = env->Namespace_FindFunction(windowNameSpace, "setNativeObj", "J:V", &setObjFunc);
-     if (ret != ANI_OK) {
-         TLOGE(WmsLogTag::DEFAULT, "[ANI] find setNativeObj func fail %{public}u", ret);
-         return ret;
-     }
-     std::unique_ptr<AniWindowManager> aniWinManager = std::make_unique<AniWindowManager>();
-     ret = env->Function_Call_Void(setObjFunc, aniWinManager.get());
-     if (ret != ANI_OK) {
-         TLOGE(WmsLogTag::DEFAULT, "[ANI] find setNativeObj func fail %{public}u", ret);
-         return ret;
-     }
-     return ret;
- }
-  
- ani_object AniWindowManager::GetLastWindow(ani_env* env, ani_object obj, ani_long nativeObj, ani_object context)
- {
-     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-     AniWindowManager* aniWindowManager = reinterpret_cast<AniWindowManager*>(nativeObj);
-     return aniWindowManager != nullptr ? aniWindowManager->OnGetLastWindow(env, context) : nullptr;
- }
-  
- ani_object AniWindowManager::OnGetLastWindow(ani_env* env, ani_object aniContext)
- {
-     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-     auto contextPtr = AniWindowUtils::GetAbilityContext(env, aniContext);
-     auto context = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(contextPtr);
-     if (context == nullptr) {
-         return AniWindowUtils::AniThrowError(env, WMError::WM_ERROR_NULLPTR, "Stage mode without context");
-     }
-     auto window = Window::GetTopWindowWithContext(context->lock());
-     if (window == nullptr || window->GetWindowState() == WindowState::STATE_DESTROYED) {
-         return AniWindowUtils::AniThrowError(env, WMError::WM_ERROR_NULLPTR, "Get top window failed");
-     }
-     return CreateAniWindowObject(env, window);
- }
- }  // namespace Rosen
- }  // namespace OHOS
+#include "ani_window_manager.h"
+
+#include <ability.h>
+
+#include "ani.h"
+#include "window_scene.h"
+#include "window_manager_hilog.h"
+#include "ani_window_utils.h"
+#include "ani_window.h"
+
+namespace OHOS {
+namespace Rosen {
+ani_status AniWindowManager::AniWindowManagerInit(ani_env* env, ani_namespace windowNameSpace)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    ani_function setObjFunc = nullptr;
+    ani_status ret = env->Namespace_FindFunction(windowNameSpace, "setNativeObj", "J:V", &setObjFunc);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] find setNativeObj func fail %{public}u", ret);
+        return ret;
+    }
+    std::unique_ptr<AniWindowManager> aniWinManager = std::make_unique<AniWindowManager>();
+    ret = env->Function_Call_Void(setObjFunc, aniWinManager.get());
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] find setNativeObj func fail %{public}u", ret);
+        return ret;
+    }
+    return ret;
+}
+
+ani_object AniWindowManager::GetLastWindow(ani_env* env, ani_object obj, ani_long nativeObj, ani_object context)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    AniWindowManager* aniWindowManager = reinterpret_cast<AniWindowManager*>(nativeObj);
+    return aniWindowManager != nullptr ? aniWindowManager->OnGetLastWindow(env, context) : nullptr;
+}
+
+ani_object AniWindowManager::OnGetLastWindow(ani_env* env, ani_object aniContext)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    auto contextPtr = AniWindowUtils::GetAbilityContext(env, aniContext);
+    auto context = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(contextPtr);
+    if (context == nullptr) {
+        return AniWindowUtils::AniThrowError(env, WMError::WM_ERROR_NULLPTR, "Stage mode without context");
+    }
+    auto window = Window::GetTopWindowWithContext(context->lock());
+    if (window == nullptr || window->GetWindowState() == WindowState::STATE_DESTROYED) {
+        return AniWindowUtils::AniThrowError(env, WMError::WM_ERROR_NULLPTR, "Get top window failed");
+    }
+    return CreateAniWindowObject(env, window);
+}
+}  // namespace Rosen
+}  // namespace OHOS

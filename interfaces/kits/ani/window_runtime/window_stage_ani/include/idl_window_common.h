@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,10 +13,14 @@
  * limitations under the License.
  */
 
- #include "../generated/native/window.h"
- #include "window.h"
- 
- class IdlWindowCommon {
-     static virtual OH_WINDOW_Rect ConvertToIdlWindowRect(OHOS::Rosen::Rect rect) = 0;
-     static OH_WINDOW_Rect ConvertToIdlWindowRect(OHOS::Rosen::Rect rect);
- };
+#ifndef OHOS_IDL_WINDOW_COMMOH_H
+#define OHOS_IDL_WINDOW_COMMOH_H
+
+#include "../generated/native/window.h"
+#include "window.h"
+
+class IdlWindowCommon {
+    static virtual OH_WINDOW_Rect ConvertToIdlWindowRect(OHOS::Rosen::Rect rect) = 0;
+    static OH_WINDOW_Rect ConvertToIdlWindowRect(OHOS::Rosen::Rect rect);
+};
+#endif  // OHOS_IDL_WINDOW_COMMOH_H

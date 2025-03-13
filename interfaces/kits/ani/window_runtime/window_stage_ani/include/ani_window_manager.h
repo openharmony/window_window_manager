@@ -13,29 +13,29 @@
  * limitations under the License.
  */
 
- #ifndef OHOS_ANI_WINDOW_MANAGER_H
- #define OHOS_ANI_WINDOW_MANAGER_H
- 
- #include "ani.h"
- #include "ani_window_register_manager.h"
- #include "window.h"
-  
- namespace OHOS {
- namespace Rosen {
- #ifdef _WIN32
- #define WINDOW_EXPORT __attribute__((dllexport))
- #else
- #define WINDOW_EXPORT __attribute__((visibility("default")))
- #endif
- 
- class AniWindowManager {
- public:
-     static ani_status AniWindowManagerInit(ani_env* env, ani_namespace windowNameSpace);
-     static ani_object GetLastWindow(ani_env* env, ani_object obj, ani_long nativeObj, ani_object context);
- private:
-     ani_object OnGetLastWindow(ani_env* env, ani_object context);
-     ani_object GetTopWindowTask(ani_env* env, void* contextPtr, bool newApi);
- };
- } // namespace Rosen
- } // namespace OHOS
- #endif // OHOS_ANI_WINDOW_MANAGER_H
+#ifndef OHOS_ANI_WINDOW_MANAGER_H
+#define OHOS_ANI_WINDOW_MANAGER_H
+
+#include "ani.h"
+#include "ani_window_register_manager.h"
+#include "window.h"
+
+namespace OHOS {
+namespace Rosen {
+#ifdef _WIN32
+#define WINDOW_EXPORT __attribute__((dllexport))
+#else
+#define WINDOW_EXPORT __attribute__((visibility("default")))
+#endif
+
+class AniWindowManager {
+public:
+    static ani_status AniWindowManagerInit(ani_env* env, ani_namespace windowNameSpace);
+    static ani_object GetLastWindow(ani_env* env, ani_object obj, ani_long nativeObj, ani_object context);
+private:
+    ani_object OnGetLastWindow(ani_env* env, ani_object context);
+    ani_object GetTopWindowTask(ani_env* env, void* contextPtr, bool newApi);
+};
+} // namespace Rosen
+} // namespace OHOS
+#endif // OHOS_ANI_WINDOW_MANAGER_H
