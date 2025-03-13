@@ -42,6 +42,9 @@ public:
         isRegisteredMMI_ = true;
     }
 
+    void HandleInputEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
+    void HandleInputEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+
 protected:
     InputTransferStation() = default;
     ~InputTransferStation();
@@ -56,7 +59,7 @@ private:
     std::mutex mtx_;
     bool destroyed_ { false };
     std::unordered_map<uint32_t, sptr<WindowInputChannel>> windowInputChannels_;
-    std::shared_ptr<MMI::IInputEventConsumer> inputListener_ = nullptr;
+    std::shared_ptr<InputEventListener> inputListener_ = nullptr;
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_ = nullptr;
     const std::string INPUT_AND_VSYNC_THREAD = "InputAndVsyncThread";
 
@@ -69,6 +72,8 @@ public:
     void OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent) const override;
     void OnInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent) const override;
     void OnInputEvent(std::shared_ptr<MMI::AxisEvent> axisEvent) const override;
+    void HandleInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent) const;
+    void HandleInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent) const;
 };
 } // namespace Rosen
 } // namespace OHOS
