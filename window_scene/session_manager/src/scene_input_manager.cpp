@@ -232,7 +232,9 @@ void SceneInputManager::ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& dis
         int32_t screenOneHandY = DEFAULT_SCREEN_POS;
         int32_t scalePercent = DEFAULT_SCREEN_SCALE;
         int32_t expandHeight = DEFAULT_EXPAND_HEIGHT;
-        if (screenId == ScreenSessionManagerClient::GetInstance().GetDefaultScreenId()) {
+        const SingleHandScreenInfo& singleHandScreenInfo = SceneSessionManager::GetInstance().GetSingleHandScreenInfo();
+        if (screenId == ScreenSessionManagerClient::GetInstance().GetDefaultScreenId() &&
+            singleHandScreenInfo.mode != SingleHandMode::MIDDLE) {
             SingleHandTransform singleHandTransform = SceneSessionManager::GetInstance().GetNormalSingleHandTransform();
             WSRect originRect = SceneSessionManager::GetInstance().GetOriginRect();
             screenOneHandX = singleHandTransform.posX;
