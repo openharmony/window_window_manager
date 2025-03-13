@@ -5265,19 +5265,18 @@ napi_value JsWindow::OnSnapshotIgnorePrivacy(napi_env env, napi_callback_info in
                 return;
             } else if (ret != WmErrorCode::WM_OK) {
                 task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
-                TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "SnapshotIgnorePrivacy get pixelmap failed, code:%{public}d", ret);
+                TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "get pixelmap failed, code:%{public}d", ret);
                 return;
             }
 
             auto nativePixelMap = Media::PixelMapNapi::CreatePixelMap(env, pixelMap);
             if (nativePixelMap == nullptr) {
-                TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "SnapshotIgnorePrivacy get nativePixelMap is null");
+                TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "get nativePixelMap is null");
                 return;
             }
             task->Resolve(env, nativePixelMap);
-            TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "Window [%{public}u, %{public}s] OnSnapshotIgnorePrivacy, "
-                "WxH=%{public}dx%{public}d", weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(),
-                pixelMap->GetWidth(), pixelMap->GetHeight());
+            TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "windowId:%{public}u, WxH=%{public}dx%{public}d",
+                weakWindow->GetWindowId(), pixelMap->GetWidth(), pixelMap->GetHeight());
     };
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "napi_send_event failed");
