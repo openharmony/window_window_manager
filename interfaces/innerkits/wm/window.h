@@ -2052,12 +2052,12 @@ public:
     virtual std::shared_ptr<Media::PixelMap> Snapshot() { return nullptr; }
 
     /**
-     * @brief window snapshotIgnorePrivacy
+     * @brief window SnapshotIgnorePrivacy
      *
      * @param pixelMap pixel map
      * @return the error code of this operation
      */
-    virtual WMError snapshotIgnorePrivacy(std::shared_ptr<Media::PixelMap>& pixelMap) { return WMError::WM_OK; }
+    virtual WMError SnapshotIgnorePrivacy(std::shared_ptr<Media::PixelMap>& pixelMap) { return WMError::WM_OK; }
 
     /**
      * @brief Handle and notify memory level.

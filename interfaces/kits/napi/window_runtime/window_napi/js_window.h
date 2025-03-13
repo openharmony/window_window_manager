@@ -131,7 +131,7 @@ public:
     static napi_value Dump(napi_env env, napi_callback_info info);
     static napi_value SetForbidSplitMove(napi_env env, napi_callback_info info);
     static napi_value Snapshot(napi_env env, napi_callback_info info);
-    static napi_value snapshotIgnorePrivacy(napi_env env, napi_callback_info info);
+    static napi_value SnapshotIgnorePrivacy(napi_env env, napi_callback_info info);
 
     // animation config
     static napi_value Opacity(napi_env env, napi_callback_info info);
@@ -310,7 +310,7 @@ private:
     napi_value OnDump(napi_env env, napi_callback_info info);
     napi_value OnSetForbidSplitMove(napi_env env, napi_callback_info info);
     napi_value OnSnapshot(napi_env env, napi_callback_info info);
-    napi_value OnsnapshotIgnorePrivacy(napi_env env, napi_callback_info info);
+    napi_value OnSnapshotIgnorePrivacy(napi_env env, napi_callback_info info);
     napi_value OnSetSnapshotSkip(napi_env env, napi_callback_info info);
     napi_value OnSetSingleFrameComposerEnabled(napi_env env, napi_callback_info info);
     napi_value OnEnableLandscapeMultiWindow(napi_env env, napi_callback_info info);
