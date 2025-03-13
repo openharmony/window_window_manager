@@ -468,26 +468,6 @@ int32_t OH_WindowManager_SetWindowTouchable(int32_t windowId, bool touchable)
     return errCode;
 }
 
-int32_t OH_WindowManager_SetWindowFocusable(int32_t windowId, bool isFocusable)
-{
-    auto eventHandler = GetMainEventHandler();
-    if (eventHandler == nullptr) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "eventHandler is null, windowId:%{public}d", windowId);
-        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
-    }
-    WindowManager_ErrorCode errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
-    eventHandler->PostSyncTask([windowId, isFocusable, &errCode, where = __func__] {
-        auto window = Window::GetWindowWithId(windowId);
-        if (window == nullptr) {
-            TLOGNE(WmsLogTag::WMS_FOCUS, "%{public}s window is null, windowId:%{public}d", where, windowId);
-            errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
-            return;
-        }
-        errCode = OH_WINDOW_TO_ERROR_CODE_MAP.at(window->SetFocusable(isFocusable));
-    }, __func__);
-    return errCode;
-}
-
 int32_t OH_WindowManager_GetAllWindowLayoutInfo(
     int64_t displayId, WindowManager_Rect** windowLayoutInfo, size_t* windowLayoutInfoSize)
 {
@@ -528,6 +508,26 @@ int32_t OH_WindowManager_GetAllWindowLayoutInfo(
         }
         *windowLayoutInfo = infosInner;
         *windowLayoutInfoSize = infos.size();
+    }, __func__);
+    return errCode;
+}
+
+int32_t OH_WindowManager_SetWindowFocusable(int32_t windowId, bool isFocusable)
+{
+    auto eventHandler = GetMainEventHandler();
+    if (eventHandler == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "eventHandler is null, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
+    }
+    WindowManager_ErrorCode errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
+    eventHandler->PostSyncTask([windowId, isFocusable, &errCode, where = __func__] {
+        auto window = Window::GetWindowWithId(windowId);
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_FOCUS, "%{public}s window is null, windowId:%{public}d", where, windowId);
+            errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
+            return;
+        }
+        errCode = OH_WINDOW_TO_ERROR_CODE_MAP.at(window->SetFocusable(isFocusable));
     }, __func__);
     return errCode;
 }
