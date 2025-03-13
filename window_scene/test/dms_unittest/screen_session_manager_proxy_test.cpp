@@ -1676,23 +1676,23 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayCapability, Function | SmallTe
  * @tc.desc: SetScreenSkipProtectedWindow test
  * @tc.type: FUNC
  */
- HWTEST_F(ScreenSessionManagerProxyTest, SetScreenSkipProtectedWindow, Function | SmallTest | Level1)
- {
-     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-     sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
-     ASSERT_TRUE(screenSessionManagerProxy != nullptr);
- 
-     const std::vector<ScreenId> screenIds = {1001, 1002};
-     bool isEnable = true;
-     int resultValue = 0;
-     std::function<void()> func = [&]() {
+HWTEST_F(ScreenSessionManagerProxyTest, SetScreenSkipProtectedWindow, Function | SmallTest | Level1)
+{
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+    ASSERT_TRUE(screenSessionManagerProxy != nullptr);
+
+    const std::vector<ScreenId> screenIds = {1001, 1002};
+    bool isEnable = true;
+    int resultValue = 0;
+    std::function<void()> func = [&]() {
         screenSessionManagerProxy->SetScreenSkipProtectedWindow(screenIds, isEnable);
-         resultValue = 1;
-     };
-     func();
-     ASSERT_EQ(resultValue, 1);
- }
+        resultValue = 1;
+    };
+    func();
+    ASSERT_EQ(resultValue, 1);
+}
 }
 }
 }

@@ -2182,20 +2182,20 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest148, Function | SmallTest 
  * @tc.desc: normal function, TRANS_ID_SCENE_BOARD_GET_SUPER_FOLD_STATUS test
  * @tc.type: FUNC
  */
- HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest147, Function | SmallTest | Level2)
- {
-     MessageParcel data;
-     MessageParcel reply;
-     MessageOption option;
-     const std::vector<ScreenId> screenIds = {1001, 1002};
-     bool isEnable = true;
-     data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
-     data.WriteUInt64Vector(screenIds);
-     data.WriteBool(isEnable);
-     uint32_t code = static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SCREEN_SKIP_PROTECTED_WINDOW);
-     int res = stub_->OnRemoteRequest(code, data, reply, option);
-     EXPECT_EQ(res, 0);
- }
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest147, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    const std::vector<ScreenId> screenIds = {1001, 1002};
+    bool isEnable = true;
+    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
+    data.WriteUInt64Vector(screenIds);
+    data.WriteBool(isEnable);
+    uint32_t code = static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SCREEN_SKIP_PROTECTED_WINDOW);
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, 0);
+}
 }
 }
 }
