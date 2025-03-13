@@ -861,10 +861,10 @@ HWTEST_F(DisplayManagerAdapterTest, GetPrimaryDisplayInfo, Function | SmallTest 
  */
  HWTEST_F(DisplayManagerAdapterTest, SetScreenSkipProtectedWindow, Function | SmallTest | Level2)
  {
-     const std::vector<ScreenId> screenIds = {1001, 1002};
-     bool isEnable = true;
-     auto result = SingletonContainer::Get<ScreenManagerAdapter>().SetScreenSkipProtectedWindow(screenIds, isEnable);
-     ASSERT_EQ(result, DMError::DM_OK);
+    const std::vector<ScreenId> screenIds = {1001, 1002};
+    bool isEnable = true;
+    auto result = SingletonContainer::Get<ScreenManagerAdapter>().SetScreenSkipProtectedWindow(screenIds, isEnable);
+    ASSERT_EQ(result, DMError::DM_OK);
  }
 
 /**
