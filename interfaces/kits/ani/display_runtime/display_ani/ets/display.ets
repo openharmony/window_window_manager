@@ -18,6 +18,7 @@ loadLibrary('displayani_kit.z');
 
 export class BusinessError extends Error {
   code: number;
+  message: string;
 }
 
 export interface Rect {
@@ -74,7 +75,10 @@ export interface CutoutInfo {
 
 export class CutoutInfoImpl implements CutoutInfo {
     constructor() {
-        this.boundingRects = new Array<Rect>();
+        this.boundingRects = new Array<Rect>(5);
+        for (let i = 0; i < this.boundingRects.length; i++) {
+            this.boundingRects[i] = new RectImpl();
+        }
         this.waterfallDisplayAreaRects = new WaterfallDisplayAreaRectsImpl();
     }
 
@@ -235,7 +239,7 @@ enum HDRFormat {
 }
 
 export interface Display {
-    id: number;
+    id: double;
 
     name: string;
 
@@ -243,42 +247,54 @@ export interface Display {
 
     state: DisplayState;
 
-    refreshRate: number;
+    refreshRate: double;
 
-    rotation: number;
+    rotation: double;
 
-    width: number;
+    width: double;
  
-    height: number;
+    height: double;
 
-    availableHeight: number;
+    availableHeight: double;
 
-    availableWidth: number;
+    availableWidth: double;
 
-    densityDPI: number;
+    densityDPI: double;
 
     orientation: Orientation;
 
-    densityPixels: number;
+    densityPixels: double;
 
-    scaledDensity: number;
+    scaledDensity: double;
 
-    xDPI: number;
+    xDPI: double;
 
-    yDPI: number;
+    yDPI: double;
 
     colorSpaces: Array<ColorSpace>;
 
     hdrFormats: Array<HDRFormat>;
 
-    getCutoutInfo(callback: AsyncCallback): void;
+    getCutoutInfo(callback: AsyncCallback<CutoutInfo>): void;
+
+    getCutoutInfo(): Promise<CutoutInfo>;
 }
 
-export type Callback = (err: BusinessError, data : number) => void;
+export type Callback<T> = (data: T) => void;
 
-export type AsyncCallback = (err: BusinessError, data : CutoutInfo) => void;
+export class DisplayEventCallbackInternal<T> {
+    private callback: Callback<T>;
 
-export type AsyncCallBackByArray = (err: BusinessError, data: Array<Display>) => void
+    constructor(cb: Callback<T>) {
+        this.callback = cb;
+    }
+
+    public invoke(data: T) {
+        this.callback(data);
+    }
+}
+
+export type AsyncCallback<T> = (err: BusinessError, data: T) => void;
 
 export class DisplayImpl implements Display {
     static { loadLibrary("displayani_kit.z"); }
@@ -288,7 +304,7 @@ export class DisplayImpl implements Display {
         this.hdrFormats = new Array<HDRFormat>();
     }
 
-    id: number;
+    id: double;
 
     name: string;
 
@@ -296,40 +312,74 @@ export class DisplayImpl implements Display {
 
     state: DisplayState;
 
-    refreshRate: number;
+    refreshRate: double;
 
-    rotation: number;
+    rotation: double;
 
-    width: number;
+    width: double;
+ 
+    height: double;
 
-    height: number;
+    availableHeight: double;
 
-    availableHeight: number;
+    availableWidth: double;
 
-    availableWidth: number;
-
-    densityDPI: number;
+    densityDPI: double;
 
     orientation: Orientation;
 
-    densityPixels: number;
+    densityPixels: double;
 
-    scaledDensity: number;
+    scaledDensity: double;
 
-    xDPI: number;
+    xDPI: double;
 
-    yDPI: number;
+    yDPI: double;
 
     colorSpaces: Array<ColorSpace>;
 
     hdrFormats: Array<HDRFormat>;
 
-    getCutoutInfo(callback: AsyncCallback): void {
-
+    getCutoutInfo(callback: AsyncCallback<CutoutInfo>): void {
+        taskpool.execute((): CutoutInfo => {
+            let res: CutoutInfo = new CutoutInfoImpl()
+            this.getCutoutInfoInternal(res);
+            minusRectArray(res.boundingRects);
+            return res;
+        }).then((ret: NullishType) => {
+            callback(new BusinessError(), ret as CutoutInfo);
+        }).catch((err: NullishType) => {
+            callback(err as BusinessError, new CutoutInfoImpl());
+        });
     }
 
-    public native getCutoutInfoInternal(): CutoutInfo;
+    getCutoutInfo(): Promise<CutoutInfo> {
+        return new Promise<CutoutInfo>((resolve: (value: CutoutInfo) => void, reject: (error: BusinessError) => void ) => {
+            taskpool.execute((): CutoutInfo => {
+                let res: CutoutInfo = new CutoutInfoImpl()
+                this.getCutoutInfoInternal(res);
+                minusRectArray(res.boundingRects);
+                return res;
+            }).then((ret: NullishType) => {
+                resolve(ret as CutoutInfo);
+            }).catch((err: NullishType) => {
+                reject(err as BusinessError);
+            });
+        });
+    }
 
+    public native getCutoutInfoInternal(cutoutInfo: CutoutInfo): void;
+
+}
+
+function minusRectArray(rectArr: Array<Rect>): void {
+    let i = 0;
+    for (; i < rectArr.length; i++) {
+        if (rectArr[i].width == 0) {
+            break;
+        }
+    }
+    rectArr.splice(i);
 }
 
 export native function isFoldable(): boolean;
@@ -363,27 +413,69 @@ export function getDefaultDisplaySync(): Display {
 
 export native function getDefaultDisplaySyncNative(obj: object): int;
 
-export native function getAllDisplaysSyncNative(): Array<Display>;
+export native function getAllDisplaysSyncNative(displayArray: Array<Display>): void;
 
-export function getAllDisplays(callback: AsyncCallBackByArray): void {
-    let displayArr : Array<Display> = getAllDisplaysSyncNative();
+export function getAllDisplays(callback: AsyncCallback<Array<Display>>): void {
+    taskpool.execute((): Array<Display> => {
+        let res: Array<Display> = new Array<Display>(5);
+        for (let i = 0; i < res.length; i++) {
+            res[i] = new DisplayImpl();
+        }
+        getAllDisplaysSyncNative(res);
+        minusDisplayArray(res);
+        return res;
+    }).then((ret: NullishType) => {
+        callback(new BusinessError(), ret as Array<Display>);
+    }).catch((err: NullishType) => {
+        callback(err as BusinessError, new Array<Display>());
+    });
+}
+
+export function getAllDisplays(): Promise<Array<Display>> {
+    return new Promise<Array<Display>>((resolve: (value: Array<Display>) => void, reject: (error: BusinessError) => void ) => {
+        taskpool.execute((): Array<Display> => {
+            let res: Array<Display> = new Array<Display>(5);
+            for (let i = 0; i < res.length; i++) {
+                res[i] = new DisplayImpl();
+            }
+            getAllDisplaysSyncNative(res);
+            minusDisplayArray(res)
+            return res;
+        }).then((ret: NullishType) => {
+            resolve(ret as Array<Display>);
+        }).catch((err: NullishType) => {
+            reject(err as BusinessError);
+        });
+    });
+}
+
+function minusDisplayArray(displayArr: Array<Display>): void {
+    let i = 0;
+    for (; i < displayArr.length; i++) {
+        if (displayArr[i].width == 0) {
+            break;
+        }
+    }
+    displayArr.splice(i);
 }
 
 export function getNewDisplay(): DisplayImpl {
     return new DisplayImpl();
 }
 
-export function on(type: 'add' | 'remove' | 'change', callback: Callback): void {
-    syncOn(type, callback as object, displayMgrRef);
+export function on(type: 'add' | 'remove' | 'change', callback: Callback<number>): void {
+    let callbackInternal:DisplayEventCallbackInternal<number> = new DisplayEventCallbackInternal<number>(callback);
+    syncOn(type, callbackInternal as object, displayMgrRef);
 }
 
 export native function syncOn(type: 'add' | 'remove' | 'change', callback: object, nativeObj: long): void;
 
-export function off(type: 'foldDisplayModeChange' | 'foldStatusChange', callback?: Callback): void
+export function off(type: 'foldDisplayModeChange' | 'foldStatusChange', callback: Callback<int>): void
 {
-    syncOff(type, callback as object, displayMgrRef);
+    let callbackInternal:DisplayEventCallbackInternal<int> = new DisplayEventCallbackInternal<int>(callback);
+    syncOff(type, callbackInternal as object, displayMgrRef);
 }
-export native function syncOff(type: 'foldDisplayModeChange' | 'foldStatusChange', callback?: object, nativeObj: long) : void;
+export native function syncOff(type: 'foldDisplayModeChange' | 'foldStatusChange', callback: object, nativeObj: long) : void;
 
 export let displayMgrRef: long;
 
