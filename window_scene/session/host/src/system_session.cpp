@@ -371,4 +371,12 @@ void SystemSession::UpdatePiPWindowStateChanged(bool isForeground)
         TLOGD(WmsLogTag::WMS_PIP, "skip type");
     }
 }
+
+int32_t SystemSession::GetSubWindowZLevel() const
+{
+    int32_t zLevel = 0;
+    auto sessionProperty = GetSessionProperty();
+    zLevel = sessionProperty->GetSubWindowZLevel();
+    return zLevel;
+}
 } // namespace OHOS::Rosen

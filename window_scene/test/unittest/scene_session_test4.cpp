@@ -1294,7 +1294,7 @@ HWTEST_F(SceneSessionTest4, HandleActionUpdateSubWindowZLevel, Function | SmallT
     property->zLevel_ = 1;
     WMError ret = sceneSession->HandleActionUpdateSubWindowZLevel(property,
         WSPropertyChangeAction::ACTION_UPDATE_SUB_WINDOW_Z_LEVEL);
-    sceneSession->GetSubWindowZLevel(1);
+    sceneSession->GetSubWindowZLevel();
     EXPECT_EQ(ret, WMError::WM_OK);
 }
 
