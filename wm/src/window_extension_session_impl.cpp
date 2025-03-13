@@ -69,7 +69,7 @@ WindowExtensionSessionImpl::WindowExtensionSessionImpl(const sptr<WindowOption>&
     if ((isDensityFollowHost_ = option->GetIsDensityFollowHost())) {
         hostDensityValue_ = option->GetDensity();
     }
-    TLOGI(WmsLogTag::WMS_UIEXT, "UIExtension usage=%{public}u, the default state of hideNonSecureWindows is %{public}d",
+    TLOGI(WmsLogTag::WMS_UIEXT, "UIExtension usage=%{public}u, hideNonSecureWindows=%{public}d",
         property_->GetUIExtensionUsage(), extensionWindowFlags_.hideNonSecureWindowsFlag);
     dataHandler_ = std::make_shared<Extension::ProviderDataHandler>();
     RegisterDataConsumer();
@@ -361,7 +361,7 @@ void WindowExtensionSessionImpl::RegisterTransferComponentDataListener(const Not
 
 WSError WindowExtensionSessionImpl::NotifyTransferComponentData(const AAFwk::WantParams& wantParams)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "id: %{public}d", GetPersistentId());
+    TLOGD(WmsLogTag::WMS_UIEXT, "id: %{public}d", GetPersistentId());
     if (notifyTransferComponentDataFunc_) {
         notifyTransferComponentDataFunc_(wantParams);
     }
@@ -1314,7 +1314,7 @@ bool WindowExtensionSessionImpl::PreNotifyKeyEvent(const std::shared_ptr<MMI::Ke
             keyEvent->GetId(), keyEvent->GetAgentWindowId());
     }
     if (auto uiContent = GetUIContentSharedPtr()) {
-        TLOGI(WmsLogTag::WMS_EVENT, "Start to process keyEvent, id: %{public}d", keyEvent->GetId());
+        TLOGD(WmsLogTag::WMS_EVENT, "Start to process keyEvent, id: %{public}d", keyEvent->GetId());
         return uiContent->ProcessKeyEvent(keyEvent, true);
     }
     return false;

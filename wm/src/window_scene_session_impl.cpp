@@ -458,6 +458,7 @@ WMError WindowSceneSessionImpl::RecoverAndReconnectSceneSession()
         TLOGE(WmsLogTag::WMS_RECOVER, "want is nullptr!");
     }
     property_->SetWindowState(state_);
+    property_->SetIsFullScreenWaterfallMode(isFullScreenWaterfallMode_.load());
     sptr<ISessionStage> iSessionStage(this);
     sptr<IWindowEventChannel> iWindowEventChannel = sptr<WindowEventChannel>::MakeSptr(iSessionStage);
     sptr<IRemoteObject> token = context_ ? context_->GetToken() : nullptr;
@@ -2214,8 +2215,14 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
             return WMError::WM_ERROR_INVALID_WINDOW;
         }
         CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
-        hostSession->OnSessionEvent(isFullScreenWaterfallMode_.load() ? SessionEvent::EVENT_MAXIMIZE_WATERFALL
-                                                                      : SessionEvent::EVENT_MAXIMIZE);
+        auto event = SessionEvent::EVENT_MAXIMIZE;
+        if (isFullScreenWaterfallMode_.load()) {
+            event = SessionEvent::EVENT_MAXIMIZE_WATERFALL;
+        } else if (isWaterfallToMaximize_.load()) {
+            event = SessionEvent::EVENT_WATERFALL_TO_MAXIMIZE;
+            isWaterfallToMaximize_.store(false);
+        }
+        hostSession->OnSessionEvent(event);
         SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     }
 
@@ -2665,10 +2672,12 @@ WMError WindowSceneSessionImpl::Recover()
     TLOGI(WmsLogTag::WMS_LAYOUT_PC, "id: %{public}d", GetPersistentId());
     if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() && isFullScreenWaterfallMode_.load() &&
         lastWindowModeBeforeWaterfall_.load() == WindowMode::WINDOW_MODE_FULLSCREEN) {
+        isWaterfallToMaximize_.store(true);
         SetFullScreenWaterfallMode(false);
         WMError ret = Maximize();
         if (ret != WMError::WM_OK) {
             TLOGE(WmsLogTag::WMS_LAYOUT_PC, "recover to fullscreen failed");
+            isWaterfallToMaximize_.store(false);
             SetFullScreenWaterfallMode(true);
         }
         return ret;
@@ -2780,7 +2789,7 @@ WMError WindowSceneSessionImpl::Recover(uint32_t reason)
     return WMError::WM_OK;
 }
 
-WMError WindowSceneSessionImpl::SetWindowRectAutoSave(bool enabled)
+WMError WindowSceneSessionImpl::SetWindowRectAutoSave(bool enabled, bool isSaveBySpecifiedFlag)
 {
     TLOGI(WmsLogTag::WMS_MAIN, "id: %{public}d", GetPersistentId());
     if (IsWindowSessionInvalid()) {
@@ -2800,7 +2809,7 @@ WMError WindowSceneSessionImpl::SetWindowRectAutoSave(bool enabled)
 
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
-    hostSession->OnSetWindowRectAutoSave(enabled);
+    hostSession->OnSetWindowRectAutoSave(enabled, isSaveBySpecifiedFlag);
     return WMError::WM_OK;
 }
 
@@ -2838,7 +2847,8 @@ WMError WindowSceneSessionImpl::IsWindowRectAutoSave(bool& enabled)
         bundleName = context_->GetBundleName();
     }
     std::string key = bundleName + moduleName + abilityName;
-    auto ret = SingletonContainer::Get<WindowAdapter>().IsWindowRectAutoSave(key, enabled);
+    int persistentId = GetPersistentId();
+    auto ret = SingletonContainer::Get<WindowAdapter>().IsWindowRectAutoSave(key, enabled, persistentId);
     return ret;
 }
 

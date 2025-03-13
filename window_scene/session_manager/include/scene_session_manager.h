@@ -344,7 +344,7 @@ public:
      */
     WMError IsPcWindow(bool& isPcWindow) override;
     WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode) override;
-    WMError IsWindowRectAutoSave(const std::string& key, bool& enabled) override;
+    WMError IsWindowRectAutoSave(const std::string& key, bool& enabled, int persistentId) override;
     void SetIsWindowRectAutoSave(const std::string& key, bool enabled);
     int32_t ChangeUIAbilityVisibilityBySCB(const sptr<SceneSession>& sceneSession, bool visibility,
         bool isFromClient = true);
@@ -951,6 +951,7 @@ private:
     SessionInfo RecoverSessionInfo(const sptr<WindowSessionProperty>& property);
     bool IsNeedRecover(const int32_t persistentId);
     WSError CheckSessionPropertyOnRecovery(const sptr<WindowSessionProperty>& property, bool isSpecificSession);
+    void UpdateRecoverPropertyForSuperFold(const sptr<WindowSessionProperty>& property);
 
     /*
      * Gesture Back

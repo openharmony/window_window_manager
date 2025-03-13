@@ -150,7 +150,7 @@ public:
     WMError Restore() override;
     WMError SetTitleAndDockHoverShown(bool isTitleHoverShown = true,
         bool isDockHoverShown = true) override;
-    WMError SetWindowRectAutoSave(bool enabled) override;
+    WMError SetWindowRectAutoSave(bool enabled, bool isSaveBySpecifiedFlag = false) override;
     WMError IsWindowRectAutoSave(bool& enabled) override;
     WMError MaximizeFloating() override;
     WMError Maximize() override;
@@ -395,6 +395,7 @@ private:
     /*
      * PC Fold Screen
      */
+    std::atomic_bool isWaterfallToMaximize_ { false };
     std::atomic<WindowMode> lastWindowModeBeforeWaterfall_ { WindowMode::WINDOW_MODE_UNDEFINED };
 
     /*
