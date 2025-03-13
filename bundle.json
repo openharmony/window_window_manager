@@ -133,7 +133,9 @@
                 "window_option.h",
                 "window_scene.h",
                 "wm_common.h",
-                "occupied_area_change_info.h"
+                "occupied_area_change_info.h",
+                "window_input_intercept_client.h",
+                "window_input_intercept_consumer.h"
               ],
               "header_base": "//foundation/window/window_manager/interfaces/innerkits/wm"
             }
