@@ -6166,11 +6166,13 @@ sptr<SceneSession> SceneSessionManager::GetNextFocusableSession(DisplayId displa
     TLOGD(WmsLogTag::WMS_FOCUS, "id: %{public}d", persistentId);
     bool previousFocusedSessionFound = false;
     sptr<SceneSession> ret = nullptr;
-    auto func = [this, persistentId, &previousFocusedSessionFound, &ret, displayId](sptr<SceneSession> session) {
+    DisplayId displayGroupId = windowFocusController_->GetDisplayGroupId(displayId);
+    auto func = [this, persistentId, &previousFocusedSessionFound, &ret, displayGroupId](sptr<SceneSession> session) {
         if (session == nullptr) {
             return false;
         }
-        if (session->GetSessionProperty()->GetDisplayId() != displayId) {
+        if (windowFocusController_->GetDisplayGroupId(session->GetSessionProperty()->GetDisplayId()) !=
+            displayGroupId) {
             return false;
         }
         if (session->GetForceHideState() != ForceHideState::NOT_HIDDEN) {
@@ -6199,11 +6201,13 @@ sptr<SceneSession> SceneSessionManager::GetTopNearestBlockingFocusSession(Displa
     bool includingAppSession)
 {
     sptr<SceneSession> ret = nullptr;
-    auto func = [this, &ret, zOrder, includingAppSession, displayId](sptr<SceneSession> session) {
+    DisplayId displayGroupId = windowFocusController_->GetDisplayGroupId(displayId);
+    auto func = [this, &ret, zOrder, includingAppSession, displayGroupId](sptr<SceneSession> session) {
         if (session == nullptr) {
             return false;
         }
-        if (session->GetSessionProperty()->GetDisplayId() != displayId) {
+        if (windowFocusController_->GetDisplayGroupId(session->GetSessionProperty()->GetDisplayId()) !=
+            displayGroupId) {
             return false;
         }
         uint32_t sessionZOrder = session->GetZOrder();
@@ -6243,7 +6247,8 @@ sptr<SceneSession> SceneSessionManager::GetTopFocusableNonAppSession()
         if (session == nullptr) {
             return false;
         }
-        if (session->GetSessionProperty()->GetDisplayId() != DEFAULT_DISPLAY_ID) {
+        if (windowFocusController_->GetDisplayGroupId(session->GetSessionProperty()->GetDisplayId()) !=
+            DEFAULT_DISPLAY_ID) {
             return false;
         }
         if (session->IsAppSession()) {
@@ -9370,18 +9375,21 @@ void SceneSessionManager::WindowDestroyNotifyVisibility(const sptr<SceneSession>
     }
 }
 
-sptr<SceneSession> SceneSessionManager::FindSessionByToken(const sptr<IRemoteObject>& token)
+sptr<SceneSession> SceneSessionManager::FindSessionByToken(const sptr<IRemoteObject>& token, WindowType type)
 {
     if (token == nullptr) {
         TLOGW(WmsLogTag::WMS_MAIN, "token is nullptr");
         return nullptr;
     }
     sptr<SceneSession> session = nullptr;
-    auto cmpFunc = [token](const std::map<uint64_t, sptr<SceneSession>>::value_type& pair) {
+    auto cmpFunc = [token, type](const std::map<uint64_t, sptr<SceneSession>>::value_type& pair) {
         if (pair.second == nullptr) {
             return false;
         }
-        return pair.second->GetAbilityToken() == token || pair.second->AsObject() == token;
+        if (pair.second->GetWindowType() == type) {
+            return pair.second->GetAbilityToken() == token || pair.second->AsObject() == token;
+        }
+        return false;
     };
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     auto iter = std::find_if(sceneSessionMap_.begin(), sceneSessionMap_.end(), cmpFunc);

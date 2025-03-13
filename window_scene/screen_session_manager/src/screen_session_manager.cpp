@@ -1162,13 +1162,13 @@ void ScreenSessionManager::HandleScreenDisconnectEvent(sptr<ScreenSession> scree
         }
     }
     HandlePCScreenDisconnect(screenSession);
-#ifdef WM_MULTI_SCREEN_ENABLE
-        HandleExtendScreenDisconnect(screenId);
-#endif
     if (clientProxy_) {
         TLOGW(WmsLogTag::DMS, "screen disconnect and notify to scb.");
         clientProxy_->OnScreenConnectionChanged(GetSessionOption(screenSession, screenId), ScreenEvent::DISCONNECTED);
     }
+#ifdef WM_MULTI_SCREEN_ENABLE
+    HandleExtendScreenDisconnect(screenId);
+#endif
     {
         std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
         screenSessionMap_.erase(screenId);
