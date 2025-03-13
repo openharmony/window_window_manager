@@ -1654,6 +1654,21 @@ void ScreenSession::ScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, cons
     }
 }
 
+void ScreenSession::SecondaryReflexionChange(ScreenId screenId, bool isSecondaryReflexion)
+{
+    if (screenChangeListenerList_.empty()) {
+        WLOGFE("screenChangeListenerList is empty.");
+        return;
+    }
+    for (auto& listener : screenChangeListenerList_) {
+        if (!listener) {
+            WLOGFE("screenChangeListener is null.");
+            continue;
+        }
+        listener->OnSecondaryReflexionChange(screenId, isSecondaryReflexion);
+    }
+}
+
 void ScreenSession::SetIsPhysicalMirrorSwitch(bool isPhysicalMirrorSwitch)
 {
     isPhysicalMirrorSwitch_ = isPhysicalMirrorSwitch;

@@ -52,6 +52,7 @@ public:
     virtual void OnHoverStatusChange(int32_t hoverStatus, bool needRotate, ScreenId extendScreenId) = 0;
     virtual void OnScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) = 0;
     virtual void OnCameraBackSelfieChange(bool isCameraBackSelfie, ScreenId screenId) = 0;
+    virtual void OnSecondaryReflexionChange(ScreenId screenId, bool isSecondaryReflexion) = 0;
 };
 
 enum class MirrorScreenType : int32_t {
@@ -248,6 +249,7 @@ public:
     void SetIsExtend(bool isExtend);
     bool GetIsExtend() const;
     void EnableMirrorScreenRegion();
+    void SecondaryReflexionChange(ScreenId screenId, bool isSecondaryReflexion);
 
 private:
     ScreenProperty property_;
