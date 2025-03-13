@@ -192,6 +192,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleExtensionHostData(data, reply, option);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_LINK_KEYFRAME_CANVAS_NODE):
             return HandleLinkKeyFrameCanvasNode(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_KEYFRAME_POLICY):
+            return HandleSetKeyFramePolicy(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SEND_CONTAINER_MODAL_EVENT):
             return HandleSendContainerModalEvent(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_DRAG_ACTIVATED):
@@ -786,6 +788,18 @@ int SessionStageStub::HandleLinkKeyFrameCanvasNode(MessageParcel& data, MessageP
         return ERR_INVALID_DATA;
     }
     LinkKeyFrameCanvasNode(rsCanvasNode);
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleSetKeyFramePolicy(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    auto keyFramePolicy = data.ReadParcelable<KeyFramePolicy>();
+    if (!keyFramePolicy) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Read keyFramePolicy failed.");
+        return ERR_INVALID_DATA;
+    }
+    SetKeyFramePolicy(*keyFramePolicy);
     return ERR_NONE;
 }
 

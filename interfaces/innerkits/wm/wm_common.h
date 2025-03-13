@@ -493,6 +493,7 @@ struct KeyFramePolicy : public Parcelable {
     uint32_t animationDuration_ = 100;
     uint32_t animationDelay_ = 100;
     bool running_ = false;
+    bool stopping_ = false;
 
     bool enabled() const
     {
@@ -504,7 +505,7 @@ struct KeyFramePolicy : public Parcelable {
         return parcel.WriteUint32(static_cast<uint32_t>(dragResizeType_)) &&
             parcel.WriteUint32(interval_) && parcel.WriteUint32(distance_) &&
             parcel.WriteUint32(animationDuration_) && parcel.WriteUint32(animationDelay_) &&
-            parcel.WriteBool(running_);
+            parcel.WriteBool(running_) && parcel.WriteBool(stopping_);
     }
 
     static KeyFramePolicy* Unmarshalling(Parcel& parcel)
@@ -513,7 +514,8 @@ struct KeyFramePolicy : public Parcelable {
         uint32_t dragResizeType;
         if (!parcel.ReadUint32(dragResizeType) || !parcel.ReadUint32(keyFramePolicy->interval_) ||
             !parcel.ReadUint32(keyFramePolicy->distance_) || !parcel.ReadUint32(keyFramePolicy->animationDuration_) ||
-            !parcel.ReadUint32(keyFramePolicy->animationDelay_) || !parcel.ReadBool(keyFramePolicy->running_)) {
+            !parcel.ReadUint32(keyFramePolicy->animationDelay_) || !parcel.ReadBool(keyFramePolicy->running_) ||
+            !parcel.ReadBool(keyFramePolicy->stopping_)) {
             delete keyFramePolicy;
             return nullptr;
         }

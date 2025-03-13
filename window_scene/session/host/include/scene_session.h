@@ -632,7 +632,6 @@ public:
     WSError UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode,
         std::shared_ptr<RSTransaction>& rsTransaction) override;
     void SetKeyFramePolicy(const KeyFramePolicy& keyFramePolicy);
-    WSError GetKeyFramePolicy(KeyFramePolicy& keyFramePolicy) override;
     void UpdateKeyFrameState(SizeChangeReason reason, const WSRect& rect);
     void RequestKeyFrameNextVsync(uint64_t requestStamp, uint64_t count);
     void OnKeyFrameNextVsync(uint64_t count);

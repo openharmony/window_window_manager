@@ -84,6 +84,7 @@ public:
     WSError SendExtensionData(MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
 
     WSError LinkKeyFrameCanvasNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode) override;
+    WSError SetKeyFramePolicy(KeyFramePolicy& keyFramePolicy) override;
 
     WSError SetDragActivated(bool dragActivated) override;
     WSError SetSplitButtonVisible(bool isVisible) override;

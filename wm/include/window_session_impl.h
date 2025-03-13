@@ -341,6 +341,7 @@ public:
     CrossAxisState GetCrossAxisState() override;
     void RegisterKeyFrameCallback();
     WSError LinkKeyFrameCanvasNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode) override;
+    WSError SetKeyFramePolicy(KeyFramePolicy& keyFramePolicy) override;
 
     /*
      * Free Multi Window
@@ -743,6 +744,7 @@ private:
     int16_t rotationAnimationCount_ { 0 };
     Transform layoutTransform_;
     SingleHandTransform singleHandTransform_;
+    KeyFramePolicy keyFramePolicy_;
     
     /*
      * Window Decor

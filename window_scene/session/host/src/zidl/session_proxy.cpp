@@ -2446,39 +2446,6 @@ WSError SessionProxy::SetFollowParentWindowLayoutEnabled(bool isFollow)
     return static_cast<WSError>(ret);
 }
 
-WSError SessionProxy::GetKeyFramePolicy(KeyFramePolicy& keyFramePolicy)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "WriteInterfaceToken failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "remote is null");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_KEY_FRAME_POLICY),
-        data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "SendRequest failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    auto keyFramePolicyReply = reply.ReadParcelable<KeyFramePolicy>();
-    if (keyFramePolicyReply == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "get keyFramePolicy failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    keyFramePolicy = *keyFramePolicyReply;
-    int32_t ret = 0;
-    if (!reply.ReadInt32(ret)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "read ret failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    return static_cast<WSError>(ret);
-}
-
 WSError SessionProxy::KeyFrameAnimateEnd()
 {
     MessageParcel data;

@@ -252,8 +252,6 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyWindowAttachStateListenerRegistered(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_FOLLOW_PARENT_LAYOUT_ENABLED):
             return HandleSetFollowParentWindowLayoutEnabled(data, reply);
-        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_KEY_FRAME_POLICY):
-            return HandleGetKeyFramePolicy(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_KEY_FRAME_ANIMATE_END):
             return HandleKeyFrameAnimateEnd(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_KEY_FRAME_CLONE_NODE):
@@ -1514,22 +1512,6 @@ int SessionStub::HandleSetFollowParentWindowLayoutEnabled(MessageParcel& data, M
     WSError errCode = SetFollowParentWindowLayoutEnabled(isFollow);
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_MAIN, "write errCode fail.");
-        return ERR_INVALID_DATA;
-    }
-    return ERR_NONE;
-}
-
-int SessionStub::HandleGetKeyFramePolicy(MessageParcel& data, MessageParcel& reply)
-{
-    TLOGD(WmsLogTag::WMS_LAYOUT, "In");
-    KeyFramePolicy keyFramePolicy;
-    const WSError errCode = GetKeyFramePolicy(keyFramePolicy);
-    if (!reply.WriteParcelable(&keyFramePolicy)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "write keyFramePolicy failed");
-        return ERR_INVALID_DATA;
-    }
-    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "write errCode fail.");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;

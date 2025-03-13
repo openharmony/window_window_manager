@@ -129,7 +129,6 @@ private:
     int HandleGetCrossAxisState(MessageParcel& data, MessageParcel& reply);
 
     // KeyFrame
-    int HandleGetKeyFramePolicy(MessageParcel& data, MessageParcel& reply);
     int HandleKeyFrameAnimateEnd(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateKeyFrameCloneNode(MessageParcel& data, MessageParcel& reply);
 
