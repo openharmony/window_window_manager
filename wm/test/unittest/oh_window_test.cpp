@@ -96,6 +96,26 @@ HWTEST_F(OHWindowTest, IsWindowShowing01, Function | SmallTest | Level2)
     auto ret = OH_WindowManager_IsWindowShown(scene_->GetMainWindow()->GetWindowId(), &isShow);
     EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::OK), ret);
 }
+
+/**
+ * @tc.name: OH_WindowManager_GetAllWindowLayoutInfo
+ * @tc.desc: OH_WindowManager_GetAllWindowLayoutInfo test
+ * @tc.type: FUNC
+ */
+HWTEST_F(OHWindowTest, OH_WindowManager_GetAllWindowLayoutInfo, Function | SmallTest | Level2)
+{
+    int64_t displayId = -1;
+    WindowManager_Rect** windowLayoutInfo = nullptr;
+    size_t* windowLayoutInfoSize = nullptr;
+    auto ret = OH_WindowManager_GetAllWindowLayoutInfo(displayId, windowLayoutInfo, windowLayoutInfoSize);
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM), ret);
+    displayId = 0;
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM), ret);
+    windowLayoutInfo = (WindowManager_Rect**)malloc(sizeof(WindowManager_Rect**));
+    windowLayoutInfoSize = (size_t*)malloc(size_t(size_t*));
+    ret = OH_WindowManager_GetAllWindowLayoutInfo(displayId, windowLayoutInfo, windowLayoutInfoSize);
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL), ret);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
