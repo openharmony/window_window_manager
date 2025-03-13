@@ -966,7 +966,7 @@ struct WindowLayoutInfo : public Parcelable {
  *
  * @brief Window meta info
  */
- struct WindowMetaInfo : public Parcelable {
+struct WindowMetaInfo : public Parcelable {
     int32_t windowId;
     std::string windowName;
     std::string bundleName;

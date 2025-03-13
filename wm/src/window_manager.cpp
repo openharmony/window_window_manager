@@ -57,7 +57,10 @@ public:
     void NotifySystemBarChanged(DisplayId displayId, const SystemBarRegionTints& tints);
     void NotifyAccessibilityWindowInfo(const std::vector<sptr<AccessibilityWindowInfo>>& infos, WindowUpdateType type);
     void NotifyWindowVisibilityInfoChanged(const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos);
-    void NotifyWindowVisibilityStateChanged(const std::unordered_map<WindowInfoKey, std::any>& info);
+    void NotifyWindowVisibilityStateChanged(const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos);
+    void PackWindowChangeInfo(const std::unordered_set<WindowInfoKey>& interstInfo,
+        std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowChangeInfos,
+        const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos);
     void NotifyWindowDrawingContentInfoChanged(const std::vector<sptr<WindowDrawingContentInfo>>&
         windowDrawingContentInfos);
     void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing);
@@ -68,6 +71,7 @@ public:
         float density, DisplayOrientation orientation);
     void NotifyWindowStyleChange(WindowStyleType type);
     void NotifyWindowPidVisibilityChanged(const sptr<WindowPidVisibilityInfo>& info);
+
 
     static inline SingletonDelegator<WindowManager> delegator_;
 
@@ -244,16 +248,45 @@ void WindowManager::Impl::NotifyWindowVisibilityInfoChanged(
 }
 
 void WindowManager::Impl::NotifyWindowVisibilityStateChanged(
-    const std::unordered_map<WindowInfoKey, std::any>& windowChangeInfo)
+    const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos)
 {
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "in");
     std::vector<sptr<IWindowInfoChangedListener>> windowVisibilityStateListeners;
     {
         std::shared_lock<std::shared_mutex> lock(listenerMutex_);
         windowVisibilityStateListeners = windowVisibilityStateListeners_;
     }
     for (auto& listener : windowVisibilityStateListeners) {
-        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "Notify WindowVisibilityState to caller");
-        listener->OnWindowInfoChanged(windowChangeInfo);
+        std::vector<std::unordered_map<WindowInfoKey, std::any>> windowChangeInfos;
+        PackWindowChangeInfo(listener->GetInterstInfo(), windowChangeInfos, windowVisibilityInfos);
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "Notify WindowVisibilityState to caller, info size: {public}zu",
+            windowChangeInfos.size());
+        listener->OnWindowInfoChanged(windowChangeInfos);
+    }
+}
+
+void WindowManager::Impl::PackWindowChangeInfo(const std::unordered_set<WindowInfoKey>& interstInfo,
+    std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowChangeInfos,
+    const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos)
+{
+    for (const auto& info : windowVisibilityInfos) {
+        std::unordered_map<WindowInfoKey, std::any> windowChangeInfo;
+        if (interstInfo.find(WindowInfoKey::WINDOW_ID) != interstInfo.end()) {
+            windowChangeInfo.emplace(WindowInfoKey::WINDOW_ID, info->windowId_);
+        }
+        if (interstInfo.find(WindowInfoKey::BUNDLE_NAME) != interstInfo.end()) {
+            windowChangeInfo.emplace(WindowInfoKey::BUNDLE_NAME, info->bundleName_);
+        }
+        if (interstInfo.find(WindowInfoKey::ABILITY_NAME) != interstInfo.end()) {
+            windowChangeInfo.emplace(WindowInfoKey::BUNDLE_NAME, info->abilityName_);
+        }
+        if (interstInfo.find(WindowInfoKey::APP_INDEX) != interstInfo.end()) {
+            windowChangeInfo.emplace(WindowInfoKey::BUNDLE_NAME, info->appIndex_);
+        }
+        if (interstInfo.find(WindowInfoKey::VISIBILITY_STATE) != interstInfo.end()) {
+            windowChangeInfo.emplace(WindowInfoKey::BUNDLE_NAME, info->visibilityState_);
+        }
+        windowChangeInfos.emplace_back(windowChangeInfo);
     }
 }
 
@@ -1165,15 +1198,7 @@ void WindowManager::UpdateWindowVisibilityInfo(
     const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos) const
 {
     pImpl_->NotifyWindowVisibilityInfoChanged(windowVisibilityInfos);
-    for (const auto& info : windowVisibilityInfos) {
-        std::unordered_map<WindowInfoKey, std::any> windowChangeInfo;
-        windowChangeInfo.emplace(WindowInfoKey::WINDOW_ID, info->windowId_);
-        windowChangeInfo.emplace(WindowInfoKey::BUNDLE_NAME, info->bundleName_);
-        windowChangeInfo.emplace(WindowInfoKey::ABILITY_NAME, info->abilityName_);
-        windowChangeInfo.emplace(WindowInfoKey::APP_INDEX, info->appIndex_);
-        windowChangeInfo.emplace(WindowInfoKey::VISIBILITY_STATE, info->visibilityState_);
-        pImpl_->NotifyWindowVisibilityStateChanged(windowChangeInfo);
-    }
+    pImpl_->NotifyWindowVisibilityStateChanged(windowVisibilityInfos);
 }
 
 void WindowManager::UpdateWindowDrawingContentInfo(
@@ -1663,13 +1688,17 @@ WMError WindowManager::ProcessUnregisterWindowInfoChangeCallback(WindowInfoKey o
     }
 }
 
-WMError WindowManager::RegisterWindowInfoChangeCallback(std::unordered_set<WindowInfoKey> observedInfo,
+WMError WindowManager::RegisterWindowInfoChangeCallback(const std::unordered_set<WindowInfoKey>& observedInfo,
     const sptr<IWindowInfoChangedListener>& listener)
 {
     std::string observedInfoForLog = "ObservedInfo: ";
     auto ret = WMError::WM_OK;
     for (const auto& info : observedInfo) {
         observedInfoForLog += std::to_string(static_cast<uint32_t>(info)) + ", ";
+        auto interstInfo = listener->GetInterstInfo();
+        if (interstInfo.find(info) == interstInfo.end) {
+            interstInfo.insert(info);
+        }
         ret = ProcessRegisterWindowInfoChangeCallback(info, listener);
         if (ret != WMError::WM_OK) {
             observedInfoForLog += "failed";
@@ -1680,7 +1709,7 @@ WMError WindowManager::RegisterWindowInfoChangeCallback(std::unordered_set<Windo
     return ret;
 }
 
-WMError WindowManager::UnregisterWindowInfoChangeCallback(std::unordered_set<WindowInfoKey> observedInfo,
+WMError WindowManager::UnregisterWindowInfoChangeCallback(const std::unordered_set<WindowInfoKey>& observedInfo,
     const sptr<IWindowInfoChangedListener>& listener)
 {
     std::string observedInfoForLog = "ObservedInfo: ";
