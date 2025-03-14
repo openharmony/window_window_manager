@@ -623,31 +623,31 @@ public:
 };
 
 /**
- * @class IFrontendOrientationListener
+ * @class IPreferredOrientationChangeListener
  * 
- * @brief IFrontendOrientationListener is used to observer the orientation set by developer.
+ * @brief listener of preferred orientation change which set by developer.
  */
-class IFrontendOrientationListener : virtual public RefBase {
+class IPreferredOrientationChangeListener : virtual public RefBase {
 public:
     /**
      * @brief Notify caller when orientation set by developer.
      *
      * @param ori the orientation set by developer.
      */
-    virtual void OnFrontendOrientationSetted(Orientation ori) {}
+    virtual void OnPreferredOrientationChange(Orientation ori) {}
 }
 
 /**
- * @class IWindowOrientationChangeListener
+ * @class IWindowOrientationWillChangeListener
  * 
- * @brief IWindowOrientationChangeListener is used to notify before the window starts rotating.
+ * @brief IWindowOrientationWillChangeListener is used to notify before the window starts rotating.
  */
-class IWindowOrientationChangeListener : virtual public RefBase {
+class IWindowOrientationWillChangeListener : virtual public RefBase {
 public:
     /**
      * @brief Notify caller befor window starts rotating.
      */
-    virtual void OnOrientationChange() {}
+    virtual void OnOrientationWillChange() {}
 }
 
 static WMError DefaultCreateErrCode = WMError::WM_OK;
@@ -1867,10 +1867,10 @@ public:
     /**
      * @brief Register window orientation set by developer
      *
-     * @param listener IFrontendOrientationListener.
+     * @param listener IPreferredOrientationChangeListener.
      * @return WM_OK means register success, others means register failed
      */
-    virtual WMError RegisterFrontendOrientationListener(const sptr<IFrontendOrientationListener>& listener) 
+    virtual WMError RegisterFrontendOrientationListener(const sptr<IPreferredOrientationChangeListener>& listener) 
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -1878,10 +1878,10 @@ public:
     /**
      * @brief Unregister window orientation set by developer
      *
-     * @param listener IFrontendOrientationListener.
+     * @param listener IPreferredOrientationChangeListener.
      * @return WM_OK means register success, others means unregister failed
      */
-    virtual WMError UnregisterFrontendOrientationListener(const sptr<IFrontendOrientationListener>& listener) 
+    virtual WMError UnregisterFrontendOrientationListener(const sptr<IPreferredOrientationChangeListener>& listener) 
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -1889,10 +1889,10 @@ public:
     /**
      * @brief Register window orientation change listener
      *
-     * @param listener IWindowOrientationChangeListener.
+     * @param listener IWindowOrientationWillChangeListener.
      * @return WM_OK means register success, others means register failed
      */
-    virtual WMError RegisterOrientationChangeListener(const sptr<IWindowOrientationChangeListener>& listener) 
+    virtual WMError RegisterOrientationChangeListener(const sptr<IWindowOrientationWillChangeListener>& listener) 
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -1900,10 +1900,10 @@ public:
     /**
      * @brief Unregister window orientation change listener
      *
-     * @param listener IWindowOrientationChangeListener.
+     * @param listener IWindowOrientationWillChangeListener.
      * @return WM_OK means register success, others means unregister failed
      */
-    virtual WMError UnregisterOrientationChangeListener(const sptr<IWindowOrientationChangeListener>& listener) 
+    virtual WMError UnregisterOrientationChangeListener(const sptr<IWindowOrientationWillChangeListener>& listener) 
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
