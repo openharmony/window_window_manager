@@ -169,6 +169,13 @@ public:
      */
     DMError GetAvailableArea(DMRect& area) const;
 
+    /**
+     * @brief Get current display information, including foldstatus, displaymode, rotation, and orientation information.
+     * @param capabilitInfo capabilitInfo of the screen.
+     * @return DMError
+     */
+    DMError GetDisplayCapability(std::string& capabilitInfo) const;
+
 protected:
     // No more methods or variables can be defined here.
     Display(const std::string& name, sptr<DisplayInfo> info);

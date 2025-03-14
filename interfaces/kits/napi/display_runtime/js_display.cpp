@@ -187,6 +187,13 @@ napi_value JsDisplay::GetCutoutInfo(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnGetCutoutInfo(env, info) : nullptr;
 }
 
+napi_value JsDisplay::GetDisplayCapability(napi_env env, napi_callback_info info)
+{
+    WLOGI("GetDisplayCapability is called");
+    JsDisplay* me = CheckParamsAndGetThis<JsDisplay>(env, info);
+    return (me != nullptr) ? me->OnGetDisplayCapability(env, info) : nullptr;
+}
+
 napi_value JsDisplay::GetAvailableArea(napi_env env, napi_callback_info info)
 {
     WLOGI("GetAvailableArea is called");
@@ -501,6 +508,23 @@ napi_value JsDisplay::OnGetAvailableArea(napi_env env, napi_callback_info info)
         napiAsyncTask.release();
     }
     return result;
+}
+
+napi_value JsDisplay::OnGetDisplayCapability(napi_env env, napi_callback_info info)
+{
+    WLOGI("OnGetDisplayCapability is called");
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    std::string capabilitInfo;
+    DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(display_->GetDisplayCapability(capabilitInfo));
+    if (ret == DmErrorCode::DM_OK) {
+        WLOGI("JsDisplay::OnGetDisplayCapability success, displayCapability = %{public}s", capabilitInfo.c_str());
+    } else {
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(ret)));
+        WLOGE("JsDisplay::OnGetDisplayCapability failed.");
+    }
+    return CreateJsValue(env, capabilitInfo);
 }
 
 napi_value JsDisplay::OnHasImmersiveWindow(napi_env env, napi_callback_info info)
@@ -831,6 +855,7 @@ napi_value CreateJsDisplayObject(napi_env env, sptr<Display>& display)
         BindNativeFunction(env, objValue, "getAvailableArea", "JsDisplay", JsDisplay::GetAvailableArea);
         BindNativeFunction(env, objValue, "on", "JsDisplay", JsDisplay::RegisterDisplayManagerCallback);
         BindNativeFunction(env, objValue, "off", "JsDisplay", JsDisplay::UnregisterDisplayManagerCallback);
+        BindNativeFunction(env, objValue, "getDisplayCapability", "JsDisplay", JsDisplay::GetDisplayCapability);
         std::shared_ptr<NativeReference> jsDisplayRef;
         napi_ref result = nullptr;
         napi_create_reference(env, objValue, 1, &result);

@@ -1058,7 +1058,10 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             break;
         }
         case DisplayManagerMessage::TRANS_ID_GET_DISPLAY_CAPABILITY: {
-            reply.WriteString(GetDisplayCapability());
+            std::string capabilitInfo;
+            DMError ret = GetDisplayCapability(capabilitInfo);
+            static_cast<void>(reply.WriteInt32(static_cast<int32_t>(ret)));
+            reply.WriteString(capabilitInfo);
             break;
         }
         case DisplayManagerMessage::TRANS_ID_SET_SYSTEM_KEYBOARD_ON: {
