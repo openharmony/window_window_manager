@@ -132,7 +132,7 @@ public:
     WMError SetWindowType(WindowType type) override;
     WMError SetBrightness(float brightness) override;
     virtual float GetBrightness() const override;
-    void SetRequestedOrientation(Orientation orientation) override;
+    void SetRequestedOrientation(Orientation orientation, bool needAnimation = true) override;
     bool GetTouchable() const override;
     uint32_t GetWindowId() const override;
     uint64_t GetDisplayId() const override;

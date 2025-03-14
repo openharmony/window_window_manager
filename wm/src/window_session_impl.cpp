@@ -2083,7 +2083,7 @@ float WindowSessionImpl::GetBrightness() const
     return property_->GetBrightness();
 }
 
-void WindowSessionImpl::SetRequestedOrientation(Orientation orientation)
+void WindowSessionImpl::SetRequestedOrientation(Orientation orientation, bool needAnimation)
 {
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::DEFAULT, "windowSession is invalid");

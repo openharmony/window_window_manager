@@ -4198,7 +4198,7 @@ bool WindowImpl::IsFullScreen() const
     return (IsLayoutFullScreen() && !statusProperty.enable_ && !naviProperty.enable_);
 }
 
-void WindowImpl::SetRequestedOrientation(Orientation orientation)
+void WindowImpl::SetRequestedOrientation(Orientation orientation, bool needAnimation)
 {
     if (!IsWindowValid()) {
         TLOGE(WmsLogTag::DEFAULT, "window is invalid");
