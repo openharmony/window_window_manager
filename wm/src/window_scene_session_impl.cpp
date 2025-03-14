@@ -2103,7 +2103,7 @@ WMError WindowSceneSessionImpl::SetSubWindowZLevel(int32_t zLevel)
         TLOGE(WmsLogTag::WMS_HIERARCHY, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (!WindowHelper::IsSubWindow(GetType())) {
+    if (!WindowHelper::IsNormalSubWindow(GetType(), property_->GetWindowFlags())) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "must be normal app sub window");
         return WMError::WM_ERROR_INVALID_CALLING;
     }
