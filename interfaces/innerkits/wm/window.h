@@ -665,7 +665,7 @@ public:
 
 /**
  * @class IWindowOrientationChangeListener
- * 
+ *
  * @brief IWindowOrientationChangeListener is used to notify while window rotate.
  */
 class IWindowOrientationChangeListener : virtual public RefBase {
@@ -1907,7 +1907,7 @@ public:
 
     /**
      * @brief Unregister window orientation set by developer
-     *
+     * 9
      * @param listener IPreferredOrientationChangeListener.
      * @return WM_OK means register success, others means unregister failed
      */
@@ -1940,7 +1940,7 @@ public:
     }
 
     /**
-     * @brief Notify caller window orientation set by developer 
+     * @brief Notify caller window orientation set by developer
      *
      * @param ori Orientation set by developer
      */
