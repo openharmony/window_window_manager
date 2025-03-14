@@ -541,6 +541,10 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         property_->SetWindowFlags(property_->GetWindowFlags() &
             (~(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED))));
     }
+    int32_t zLevel = GetSubWindowZLevelByFlags(GetType(), GetWindowFlags(), IsTopmost());
+    if (zLevel != NORMAL_SUB_WINDOW_Z_LEVEL) {
+        property_->SetSubWindowZLevel(zLevel);
+    }
 
     bool isSpecificSession = false;
     const auto& initRect = GetRequestRect();
@@ -576,6 +580,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         UpdateDefaultStatusBarColor();
         AddSetUIContentTimeoutCheck();
         SetUIExtensionDestroyCompleteInSubWindow();
+        SetSubWindowZLevelToProperty();
         InputTransferStation::GetInstance().AddInputWindow(this);
         if (WindowHelper::IsSubWindow(GetType()) && !initRect.IsUninitializedRect()) {
             Resize(initRect.width_, initRect.height_);
@@ -2089,6 +2094,51 @@ WMError WindowSceneSessionImpl::RaiseAboveTarget(int32_t subWindowId)
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
     WSError ret = hostSession->RaiseAboveTarget(subWindowId);
     return static_cast<WMError>(ret);
+}
+
+/** @note @window.hierarchy */
+WMError WindowSceneSessionImpl::SetSubWindowZLevel(int32_t zLevel)
+{
+    TLOGD(WmsLogTag::WMS_HIERARCHY, "%{public}d", zLevel);
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (!WindowHelper::IsNormalSubWindow(GetType(), property_->GetWindowFlags())) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "must be normal app sub window");
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    if (GetParentId() == INVALID_SESSION_ID) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "only the children of the main window can be raised");
+        return WMError::WM_ERROR_INVALID_PARENT;
+    }
+    if (zLevel > MAXIMUM_Z_LEVEL || zLevel < MINIMUM_Z_LEVEL) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "zLevel value %{public}d exceeds valid range [-10000, 10000]!", zLevel);
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+
+    auto currentZLevel = property_->GetSubWindowZLevel();
+    if (currentZLevel == static_cast<int32_t>(zLevel)) {
+        return WMError::WM_OK;
+    }
+    property_->SetSubWindowZLevel(zLevel);
+    return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_SUB_WINDOW_Z_LEVEL);
+}
+
+/** @note @window.hierarchy */
+WMError WindowSceneSessionImpl::GetSubWindowZLevel(int32_t& zLevel)
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (!WindowHelper::IsSubWindow(GetType()) || !WindowHelper::IsDialogWindow(GetType())) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "must be app sub window!");
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    zLevel = property_->GetSubWindowZLevel();
+    TLOGI(WmsLogTag::WMS_HIERARCHY, "Id:%{public}u, zLevel:%{public}d", GetWindowId(), zLevel);
+    return WMError::WM_OK;
 }
 
 WMError WindowSceneSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea,
