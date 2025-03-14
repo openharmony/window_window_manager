@@ -246,25 +246,25 @@ public:
     void SetOnlySupportSceneBoard(bool onlySupportSceneBoard);
 
     /**
+     * @brief Set sub window zLevel
+     *
+     * @param zLevel zLevel of sub window
+     */
+    void SetSubWindowZLevel(int32_t zLevel);
+
+    /**
+     * @brief Get sub window zLevel
+     *
+     * @return The zLevel of sub window
+     */
+    int32_t GetSubWindowZLevel() const;
+
+    /**
      * @brief Get window mode.
      *
      * @return The mode of window.
      */
     WindowMode GetWindowMode() const;
-
-    /**
-     * @brief Set subwindow zLevel.
-     *
-     * @param zLevel zLevel of subwindow.
-     */
-    void SetSubWindowZLevel(int32_t zLevel);
-
-    /**
-     * @brief Get subwindow zLevel.
-     *
-     * @return The zLevel of subwindow.
-     */
-    int32_t GetSubWindowZLevel() const;
 
     /**
      * @brief Get window type.

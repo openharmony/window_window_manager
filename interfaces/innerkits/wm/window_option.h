@@ -274,9 +274,9 @@ public:
     void SetWindowTopmost(bool isTopmost);
 
     /**
-     * @brief Set sub window zLevel.
+     * @brief Set sub window zLevel
      *
-     * @param zLevel zLevel of subWindow to specify the hierarchical relationship among subWindows.
+     * @param zLevel zLevel of sub window to specify the hierarchical relationship among sub windows
      */
     void SetSubWindowZLevel(int32_t zLevel);
 
@@ -477,9 +477,9 @@ public:
     bool GetWindowTopmost() const;
 
     /**
-     * @brief Get subwindow zLevel
+     * @brief Get sub window zLevel
      *
-     * @return Return zLevel of subwindow.
+     * @return Return zLevel of sub window
      */
     int32_t GetSubWindowZLevel() const;
 

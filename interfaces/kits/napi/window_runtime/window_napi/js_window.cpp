@@ -4103,9 +4103,9 @@ napi_value JsWindow::OnSetSubWindowZLevel(napi_env env, napi_callback_info info)
     napi_value lastParam = nullptr;
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-    auto asyncTask = [weakToken = wptr<Window>(windowToken_), zLevel, env,
+    auto asyncTask = [windowToken = wptr<Window>(windowToken_), zLevel, env,
         task = napiAsyncTask, where = __func__] {
-        auto window = weakToken.promote();
+        auto window = windowToken.promote();
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_HIERARCHY, "%{public}s window is nullptr", where);
             task->Reject(env, JsErrUtils::CreateJsError(env,
@@ -4113,12 +4113,12 @@ napi_value JsWindow::OnSetSubWindowZLevel(napi_env env, napi_callback_info info)
             return;
         }
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetSubWindowZLevel(zLevel));
-        if (ret != WmErrorCode::WM_OK) {
-            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "Set sub window zLevel failed"));
-        } else {
+        if (ret == WmErrorCode::WM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
+        } else {
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "Set sub window zLevel failed"));
         }
-        TLOGNI(WmsLogTag::WMS_HIERARCHY, "Window [%{public}u, %{public}s], zLevel = %{public}d, ret = %{public}d",
+        TLOGNI(WmsLogTag::WMS_HIERARCHY, "window [%{public}u, %{public}s], zLevel = %{public}d, ret = %{public}d",
             window->GetWindowId(), window->GetWindowName().c_str(), zLevel, ret);
     };
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
@@ -4139,6 +4139,7 @@ napi_value JsWindow::OnGetSubWindowZLevel(napi_env env, napi_callback_info info)
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "window is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     int32_t zLevel = 0;
