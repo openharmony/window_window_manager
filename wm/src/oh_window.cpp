@@ -23,7 +23,6 @@
 #include "pixelmap_native_impl.h"
 #include "ui_content.h"
 
-#include "display_manager.h"
 #include <event_handler.h>
 #include <event_runner.h>
 #include "oh_window_comm.h"
@@ -133,6 +132,7 @@ namespace {
             (ptr) = NULL; \
         } \
     } while (0)
+
 /*
  * Used to map from WMError to WindowManager_ErrorCode.
  */
@@ -478,8 +478,7 @@ int32_t OH_WindowManager_SetWindowTouchable(int32_t windowId, bool touchable)
 int32_t OH_WindowManager_GetAllWindowLayoutInfoList(
     int64_t displayId, WindowManager_Rect** windowLayoutInfoList, size_t* windowLayoutInfoSize)
 {
-    if (displayId < 0 ||
-        SingletonContainer::Get<DisplayManager>().GetDisplayById(static_cast<uint64_t>(displayId)) == nullptr) {
+    if (displayId < 0) {
         TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "displayId is invalid, displayId:%{public}" PRIu64, displayId);
         return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM;
     }
@@ -507,7 +506,7 @@ int32_t OH_WindowManager_GetAllWindowLayoutInfoList(
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s get failed, errCode: %{public}d", where, errCode);
             return;
         }
-        WindowManager_Rect *infosInner = (WindowManager_Rect*)malloc(sizeof(WindowManager_Rect) * infos.size());
+        WindowManager_Rect* infosInner = (WindowManager_Rect*)malloc(sizeof(WindowManager_Rect) * infos.size());
         if (infosInner == nullptr) {
             errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s infosInner is nullptr", where);
@@ -515,7 +514,7 @@ int32_t OH_WindowManager_GetAllWindowLayoutInfoList(
         }
         for (size_t i = 0; i < infos.size(); i++) {
             TransformedToWindowManagerRect(infos[i]->rect, infosInner[i]);
-            TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s rect: %{public}d %{public}d %{public}d %{public}d",
+            TLOGND(WmsLogTag::WMS_ATTRIBUTE, "%{public}s rect: %{public}d %{public}d %{public}d %{public}d",
                 where, infosInner[i].posX, infosInner[i].posY, infosInner[i].width, infosInner[i].height);
         }
         *windowLayoutInfoList = infosInner;
@@ -526,10 +525,6 @@ int32_t OH_WindowManager_GetAllWindowLayoutInfoList(
 
 void OH_WindowManager_ReleaseAllWindowLayoutInfoList(WindowManager_Rect* windowLayoutInfoList)
 {
-    if (windowLayoutInfoList == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "windowLayoutInfoList is nullptr");
-        return;
-    }
     WINDOW_MANAGER_FREE_MEMORY(windowLayoutInfoList);
 }
 
