@@ -1318,6 +1318,7 @@ private:
     std::unordered_map<std::string, DragResizeType> appDragResizeTypeMap_;
     void GetEffectiveDragResizeType(DragResizeType& dragResizeType);
     WMError GetAppDragResizeTypeInner(const std::string& bundleName, DragResizeType& dragResizeType);
+    std::mutex keyFrameMutex_;
     std::unordered_map<std::string, KeyFramePolicy> appKeyFramePolicyMap_;
 
     /*
