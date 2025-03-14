@@ -437,7 +437,8 @@ public:
      */
     void RequestInputMethodCloseKeyboard(int32_t persistentId);
     void RegisterNotifyRootSceneOccupiedAreaChangeFunc(NotifyRootSceneOccupiedAreaChangeFunc&& func);
-    void GetKeyboardOccupiedAreaWithRotation(int32_t persistentId, uint32_t rotation, std::vector<std::pair<bool, WSRect>>& avoidAreas);
+    void GetKeyboardOccupiedAreaWithRotation(
+        int32_t persistentId, uint32_t rotation, std::vector<std::pair<bool, WSRect>>& avoidAreas);
 
     /*
      * UIExtension
