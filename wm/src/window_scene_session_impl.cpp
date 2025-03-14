@@ -1916,14 +1916,12 @@ WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height, const Re
         TLOGW(WmsLogTag::WMS_LAYOUT, "Unsupported operation for pip window");
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
-    if (GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING && !IsFullScreenPcAppInPadMode()) {
-        TLOGW(WmsLogTag::WMS_LAYOUT, "Fullscreen window could not resize, winId: %{public}u", GetWindowId());
+    if (IsFullScreenPcAppInPadMode() && IsFullScreenEnable()) {
+        NotifySize();
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
-
-    if (IsFullScreenPcAppInPadMode() && IsFullScreenEnable()) {
-        auto win = GetMainWindowWithId(property_->GetPersistentId());
-        win->NotifySize();
+    if (GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Fullscreen window could not resize, winId: %{public}u", GetWindowId());
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
 
