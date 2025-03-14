@@ -664,16 +664,16 @@ public:
 }
 
 /**
- * @class IWindowOrientationWillChangeListener
+ * @class IWindowOrientationChangeListener
  * 
- * @brief IWindowOrientationWillChangeListener is used to notify before the window starts rotating.
+ * @brief IWindowOrientationChangeListener is used to notify before the window starts rotating.
  */
-class IWindowOrientationWillChangeListener : virtual public RefBase {
+class IWindowOrientationChangeListener : virtual public RefBase {
 public:
     /**
-     * @brief Notify caller befor window starts rotating.
+     * @brief Innerapi, notify caller befor window starts rotating.
      */
-    virtual void OnOrientationWillChange() {}
+    virtual void OnOrientationChange() {}
 }
 
 static WMError DefaultCreateErrCode = WMError::WM_OK;
@@ -1918,10 +1918,10 @@ public:
     /**
      * @brief Register window orientation change listener
      *
-     * @param listener IWindowOrientationWillChangeListener.
+     * @param listener IWindowOrientationChangeListener.
      * @return WM_OK means register success, others means register failed
      */
-    virtual WMError RegisterOrientationWillChangeListener(const sptr<IWindowOrientationWillChangeListener>& listener) 
+    virtual WMError RegisterOrientationChangeListener(const sptr<IWindowOrientationChangeListener>& listener) 
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -1929,10 +1929,10 @@ public:
     /**
      * @brief Unregister window orientation change listener
      *
-     * @param listener IWindowOrientationWillChangeListener.
+     * @param listener IWindowOrientationChangeListener.
      * @return WM_OK means register success, others means unregister failed
      */
-    virtual WMError UnregisterOrientationWillChangeListener(const sptr<IWindowOrientationWillChangeListener>& listener) 
+    virtual WMError UnregisterOrientationChangeListener(const sptr<IWindowOrientationChangeListener>& listener) 
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
