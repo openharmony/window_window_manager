@@ -438,8 +438,8 @@ private:
     uint32_t subWindowLevel_ = 0;
 
     /*
-    * Window Hierarchy
-    */
+     * Window Hierarchy
+     */
     int32_t zLevel_ = 0;
 
     /*
