@@ -304,6 +304,14 @@ public:
      * @return virtual screen flag
      */
     VirtualScreenFlag GetVirtualScreenFlag(ScreenId screenId);
+
+    /**
+     * @brief Set System Keyboard is on or off.
+     *
+     * @param isOn system keyboard is on, default is false.
+     * @return DM_OK means set system keyboard on is success.
+     */
+    DMError SetSystemKeyboardStatus(bool isOn = false);
 private:
     DisplayManagerLite();
     ~DisplayManagerLite();

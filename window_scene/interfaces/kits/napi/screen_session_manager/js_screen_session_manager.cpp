@@ -105,6 +105,8 @@ napi_value JsScreenSessionManager::Init(napi_env env, napi_value exportObj)
         JsScreenSessionManager::RecordEventFromScb);
     BindNativeFunction(env, exportObj, "getFoldStatus", moduleName, JsScreenSessionManager::GetFoldStatus);
     BindNativeFunction(env, exportObj, "getSuperFoldStatus", moduleName, JsScreenSessionManager::GetSuperFoldStatus);
+    BindNativeFunction(env, exportObj, "setLandscapeLockStatus", moduleName,
+        JsScreenSessionManager::SetLandscapeLockStatus);
     BindNativeFunction(env, exportObj, "getScreenSnapshot", moduleName,
         JsScreenSessionManager::GetScreenSnapshot);
     BindNativeFunction(env, exportObj, "getDeviceScreenConfig", moduleName,
@@ -250,6 +252,13 @@ napi_value JsScreenSessionManager::GetSuperFoldStatus(napi_env env, napi_callbac
     WLOGD("[NAPI]GetSuperFoldStatus");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnGetSuperFoldStatus(env, info) : nullptr;
+}
+
+napi_value JsScreenSessionManager::SetLandscapeLockStatus(napi_env env, napi_callback_info info)
+{
+    WLOGD("[NAPI]SetLandscapeLockStatus");
+    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
+    return (me != nullptr) ? me->OnSetLandscapeLockStatus(env, info) : nullptr;
 }
 
 napi_value JsScreenSessionManager::GetScreenSnapshot(napi_env env, napi_callback_info info)
@@ -832,6 +841,29 @@ napi_value JsScreenSessionManager::OnGetSuperFoldStatus(napi_env env, napi_callb
     SuperFoldStatus status = ScreenSessionManagerClient::GetInstance().GetSuperFoldStatus();
     WLOGI("[NAPI]" PRIu64", getSuperFoldStatus = %{public}u", status);
     return CreateJsValue(env, status);
+}
+
+napi_value JsScreenSessionManager::OnSetLandscapeLockStatus(napi_env env, napi_callback_info info)
+{
+    WLOGFD("[NAPI]OnSetLandscapeLockStatus");
+    size_t argc = 1;
+    napi_value argv[1] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 1) {
+        TLOGE(WmsLogTag::DMS, "[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    bool isLocked;
+    if (!ConvertFromJsValue(env, argv[0], isLocked)) {
+        TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert parameter to isLocked");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    ScreenSessionManagerClient::GetInstance().SetLandscapeLockStatus(isLocked);
+    return NapiGetUndefined(env);
 }
 
 napi_value JsScreenSessionManager::OnGetScreenSnapshot(napi_env env, const napi_callback_info info)

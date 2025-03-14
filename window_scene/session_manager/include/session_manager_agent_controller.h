@@ -47,6 +47,7 @@ public:
     void UpdateCameraWindowStatus(uint32_t accessTokenId, bool isShowing);
     void NotifyGestureNavigationEnabledResult(bool enable);
     void NotifyWindowStyleChange(WindowStyleType type);
+    void NotifyCallingWindowDisplayChanged(const CallingWindowInfo& callingWindowInfo);
     void NotifyWindowPidVisibilityChanged(const sptr<WindowPidVisibilityInfo>& info);
     void UpdatePiPWindowStateChanged(const std::string& bundleName, bool isForeground);
 

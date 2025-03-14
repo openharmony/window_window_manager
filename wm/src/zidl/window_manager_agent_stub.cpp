@@ -192,6 +192,15 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
             UpdatePiPWindowStateChanged(bundleName, isForeground);
             break;
         }
+        case WindowManagerAgentMsg::TRANS_ID_NOTIFY_CALLING_DISPLAY_CHANGE: {
+            sptr<CallingWindowInfo> callingWindowInfo = data.ReadParcelable<CallingWindowInfo>();
+            if (callingWindowInfo == nullptr) {
+                TLOGE(WmsLogTag::WMS_KEYBOARD, "callingWindowInfo is nullptr!");
+                return ERR_INVALID_VALUE;
+            }
+            NotifyCallingWindowDisplayChanged(*callingWindowInfo);
+            break;
+        }
         default:
             WLOGFW("unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);

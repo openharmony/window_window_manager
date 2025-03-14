@@ -48,6 +48,20 @@ constexpr uint32_t MAX_BUTTON_BACKGROUND_SIZE = 40;
 constexpr uint32_t MIN_CLOSE_BUTTON_RIGHT_MARGIN = 8;
 constexpr uint32_t MAX_CLOSE_BUTTON_RIGHT_MARGIN = 22;
 constexpr int32_t API_VERSION_INVALID = -1;
+/*
+ * PC Window Sidebar Blur
+ */
+constexpr float SIDEBAR_BLUR_NUMBER_ZERO = 0.0f;
+constexpr float SIDEBAR_DEFAULT_RADIUS_LIGHT = 57.0f;
+constexpr float SIDEBAR_DEFAULT_RADIUS_DARK = 57.0f;
+constexpr float SIDEBAR_DEFAULT_SATURATION_LIGHT = 2.0f;
+constexpr float SIDEBAR_DEFAULT_SATURATION_DARK = 2.6f;
+constexpr float SIDEBAR_DEFAULT_BRIGHTNESS_LIGHT = 1.0f;
+constexpr float SIDEBAR_DEFAULT_BRIGHTNESS_DARK = 0.4f;
+constexpr uint32_t SIDEBAR_DEFAULT_MASKCOLOR_LIGHT = 0xdbf1f1f1;
+constexpr uint32_t SIDEBAR_DEFAULT_MASKCOLOR_DARK = 0xe61a1a1a;
+constexpr uint32_t SIDEBAR_SNAPSHOT_MASKCOLOR_LIGHT = 0xffe5e5e5;
+constexpr uint32_t SIDEBAR_SNAPSHOT_MASKCOLOR_DARK = 0xff414141;
 }
 
 /**
@@ -937,6 +951,40 @@ struct KeyboardPanelInfo : public Parcelable {
         keyboardPanelInfo->isShowing_ = parcel.ReadBool();
 
         return keyboardPanelInfo;
+    }
+};
+
+/**
+ * @struct CallingWindowInfo
+ *
+ * @brief Information of keyboard calling window.
+ */
+struct CallingWindowInfo : public Parcelable {
+    int32_t windowId_ = 0;
+    int32_t callingPid_ = -1;
+    DisplayId displayId_ = 0;
+    int32_t userId_ = 0;
+
+    CallingWindowInfo() {}
+    CallingWindowInfo(int32_t windowId, int32_t callingPid, DisplayId displayId, int32_t userId)
+        : windowId_(windowId), callingPid_(callingPid), displayId_(displayId), userId_(userId) {}
+
+    bool Marshalling(Parcel& parcel) const
+    {
+        return parcel.WriteInt32(windowId_) && parcel.WriteInt32(callingPid_) &&
+               parcel.WriteUint64(displayId_) && parcel.WriteInt32(userId_);
+    }
+
+    static CallingWindowInfo* Unmarshalling(Parcel& parcel)
+    {
+        CallingWindowInfo* callingWindowInfo = new CallingWindowInfo();
+        bool res = parcel.ReadInt32(callingWindowInfo->windowId_) && parcel.ReadInt32(callingWindowInfo->callingPid_) &&
+                   parcel.ReadUint64(callingWindowInfo->displayId_) && parcel.ReadInt32(callingWindowInfo->userId_);
+        if (!res) {
+            delete callingWindowInfo;
+            return nullptr;
+        }
+        return callingWindowInfo;
     }
 };
 

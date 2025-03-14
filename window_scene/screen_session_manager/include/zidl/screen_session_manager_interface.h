@@ -168,6 +168,7 @@ public:
 
     FoldStatus GetFoldStatus() override { return FoldStatus::UNKNOWN; };
     virtual SuperFoldStatus GetSuperFoldStatus() { return SuperFoldStatus::UNKNOWN; };
+    virtual void SetLandscapeLockStatus(bool isLocked) {};
     virtual ExtendScreenConnectStatus GetExtendScreenConnectStatus() { return ExtendScreenConnectStatus::UNKNOWN; }
 
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() override { return nullptr; };
@@ -239,6 +240,10 @@ public:
     }
     virtual ScreenCombination GetScreenCombination(ScreenId screenId) { return ScreenCombination::SCREEN_ALONE; }
     virtual bool GetIsRealScreen(ScreenId screenId) { return false; }
+    virtual DMError SetSystemKeyboardStatus(bool isOn = false) override
+    {
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 };
 } // namespace Rosen
 } // namespace OHOS

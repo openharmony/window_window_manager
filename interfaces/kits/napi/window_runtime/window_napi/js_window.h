@@ -131,6 +131,7 @@ public:
     static napi_value Dump(napi_env env, napi_callback_info info);
     static napi_value SetForbidSplitMove(napi_env env, napi_callback_info info);
     static napi_value Snapshot(napi_env env, napi_callback_info info);
+    static napi_value SnapshotIgnorePrivacy(napi_env env, napi_callback_info info);
 
     // animation config
     static napi_value Opacity(napi_env env, napi_callback_info info);
@@ -159,6 +160,8 @@ public:
      */
     static napi_value CreateSubWindowWithOptions(napi_env env, napi_callback_info info);
     static napi_value SetSubWindowModal(napi_env env, napi_callback_info info);
+    static napi_value SetParentWindow(napi_env env, napi_callback_info info);
+    static napi_value GetParentWindow(napi_env env, napi_callback_info info);
 
     /*
      * Gesture Back
@@ -309,6 +312,7 @@ private:
     napi_value OnDump(napi_env env, napi_callback_info info);
     napi_value OnSetForbidSplitMove(napi_env env, napi_callback_info info);
     napi_value OnSnapshot(napi_env env, napi_callback_info info);
+    napi_value OnSnapshotIgnorePrivacy(napi_env env, napi_callback_info info);
     napi_value OnSetSnapshotSkip(napi_env env, napi_callback_info info);
     napi_value OnSetSingleFrameComposerEnabled(napi_env env, napi_callback_info info);
     napi_value OnEnableLandscapeMultiWindow(napi_env env, napi_callback_info info);
@@ -345,6 +349,8 @@ private:
      */
     napi_value OnCreateSubWindowWithOptions(napi_env env, napi_callback_info info);
     napi_value OnSetSubWindowModal(napi_env env, napi_callback_info info);
+    napi_value OnSetParentWindow(napi_env env, napi_callback_info info);
+    napi_value OnGetParentWindow(napi_env env, napi_callback_info info);
 
     /*
      * Gesture Back

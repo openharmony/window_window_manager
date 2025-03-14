@@ -291,6 +291,8 @@ public:
         return WSError::WS_OK;
     }
     virtual void SetCallingSessionId(uint32_t callingSessionId) {};
+    virtual void NotifyKeyboardDidShowRegistered(bool registered) { };
+    virtual void NotifyKeyboardDidHideRegistered(bool registered) { };
     virtual void SetCustomDecorHeight(int32_t height) {};
     virtual WMError UpdateSessionPropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action) { return WMError::WM_OK; }
@@ -329,7 +331,7 @@ public:
      * @param enabled Enable the window rect auto-save if true, otherwise means the opposite.
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
-    virtual WSError OnSetWindowRectAutoSave(bool enabled) { return WSError::WS_OK; }
+    virtual WSError OnSetWindowRectAutoSave(bool enabled, bool isSaveBySpecifiedFlag) { return WSError::WS_OK; }
 
     /**
      * @brief Callback for setting to radius of window.
@@ -387,6 +389,7 @@ public:
      */
     virtual void NotifyWindowAttachStateListenerRegistered(bool registered) { }
     virtual WSError SetFollowParentWindowLayoutEnabled(bool isFollow) { return WSError::WS_OK; };
+    virtual WSError UpdateFlag(const std::string& flag) { return WSError::WS_OK; };
 };
 } // namespace OHOS::Rosen
 

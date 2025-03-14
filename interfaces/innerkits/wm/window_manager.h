@@ -194,6 +194,21 @@ public:
 };
 
 /**
+ * @class IKeyboardCallingWindowDisplayChangedListener
+ *
+ * @brief Observe the display change of keyboard callingWindow.
+ */
+class IKeyboardCallingWindowDisplayChangedListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when calling window display changed.
+     *
+     * @param callingWindowInfo The information about the calling window.
+     */
+    virtual void OnCallingWindowDisplayChanged(const CallingWindowInfo& callingWindowInfo) = 0;
+};
+
+/**
  * @class IWindowPidVisibilityChangedListener
  *
  * @brief Listener to observe window visibility that in same pid.
@@ -274,7 +289,8 @@ struct AppUseControlInfo : public Parcelable {
     {
         return parcel.WriteString(bundleName_) &&
                parcel.WriteInt32(appIndex_) &&
-               parcel.WriteBool(isNeedControl_);
+               parcel.WriteBool(isNeedControl_) &&
+               parcel.WriteBool(isControlRecentOnly_);
     }
 
     /**
@@ -288,7 +304,8 @@ struct AppUseControlInfo : public Parcelable {
         auto info = new AppUseControlInfo();
         if (!parcel.ReadString(info->bundleName_) ||
             !parcel.ReadInt32(info->appIndex_) ||
-            !parcel.ReadBool(info->isNeedControl_)) {
+            !parcel.ReadBool(info->isNeedControl_) ||
+            !parcel.ReadBool(info->isControlRecentOnly_)) {
             delete info;
             return nullptr;
         }
@@ -298,6 +315,7 @@ struct AppUseControlInfo : public Parcelable {
     std::string bundleName_ = "";
     int32_t appIndex_ = 0;
     bool isNeedControl_ = false;
+    bool isControlRecentOnly_ = false;
 };
 
 /**
@@ -921,6 +939,30 @@ public:
     WMError UnregisterWindowStyleChangedListener(const sptr<IWindowStyleChangedListener>& listener);
 
     /**
+     * @brief Register a listener to detect display changes for the keyboard calling window.
+     *
+     * @param listener IKeyboardCallingWindowDisplayChangedListener
+     * @return WM_OK means register success, others means unregister failed.
+     */
+    WMError RegisterCallingWindowDisplayChangedListener(
+        const sptr<IKeyboardCallingWindowDisplayChangedListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    
+    /**
+     * @brief Unregister the listener that detects display changes for the keyboard calling window.
+     *
+     * @param listener IKeyboardCallingWindowDisplayChangedListener
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    WMError UnregisterCallingWindowDisplayChangedListener(
+        const sptr<IKeyboardCallingWindowDisplayChangedListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
      * @brief Skip Snapshot for app process.
      *
      * @param pid process id
@@ -1040,6 +1082,14 @@ public:
      */
     WMError RequestFocus(int32_t persistentId, bool isFocused = true,
         bool byForeground = true, WindowFocusChangeReason reason = WindowFocusChangeReason::SA_REQUEST);
+
+    /**
+     * @brief Minimize window within the vector of windowid, Only main window.
+     *
+     * @param WindowId window id which to minimize
+     * @return WM_OK means window minimize event success, others means failed.
+     */
+    WMError MinimizeByWindowId(const std::vector<int32_t>& windowIds);
 
 private:
     WindowManager();

@@ -1589,7 +1589,6 @@ HWTEST_F(WindowSessionImplTest, SetRaiseByClickEnabled01, Function | SmallTest |
     option->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     sptr<WindowSessionImpl> floatWindow = new (std::nothrow) WindowSessionImpl(option);
     floatWindow->property_->SetParentPersistentId(1);
-    ASSERT_NE(nullptr, floatWindow);
 
     retCode = floatWindow->SetRaiseByClickEnabled(true);
     ASSERT_EQ(retCode, WMError::WM_ERROR_INVALID_CALLING);

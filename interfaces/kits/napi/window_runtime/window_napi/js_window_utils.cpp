@@ -467,7 +467,7 @@ napi_value CreateJsWindowPropertiesObject(napi_env env, sptr<Window>& window, co
     napi_set_named_property(env, objValue, "drawableRect", drawableRectObj);
 
     WindowType type = window->GetType();
-    uint32_t apiVersion = window->GetApiVersion();
+    uint32_t apiVersion = window->GetApiCompatibleVersion();
     if (apiVersion < API_VERSION_18 && type == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "api version %{public}d.", apiVersion);
         napi_set_named_property(env, objValue, "type", CreateJsValue(env, type));
