@@ -1269,7 +1269,7 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
     auto deviceRotation = static_cast<uint32_t>(displayInfo->GetDefaultDeviceRotationOffset());
     uint32_t transformHint = (rotation + deviceRotation) % FULL_CIRCLE_DEGREE;
     float density = GetVirtualPixelRatio(displayInfo);
-    int32_t orientation = rect.width_ > rect.height_ ? 1 : 0;
+    int32_t orientation = static_cast<int32_t>(displayInfo->GetDisplayOrientation());
     virtualPixelRatio_ = density;
     const auto& config = FillViewportConfig(rect, density, orientation, transformHint, GetDisplayId());
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
@@ -1278,13 +1278,18 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
         return;
     }
     uiContent->UpdateViewportConfig(config, reason, rsTransaction, lastAvoidAreaMap_);
-
-
-    TLOGI(WmsLogTag::WMS_LAYOUT, "Id: %{public}d, reason: %{public}d, windowRect: %{public}s, "
-        "displayOrientation: %{public}d, config[%{public}u, %{public}u, %{public}u, "
-        "%{public}f]", GetPersistentId(), reason, rect.ToString().c_str(), orientation,
-        rotation, deviceRotation, transformHint, virtualPixelRatio_);
-
+    
+    if (WindowHelper::IsUIExtensionWindow(GetType())) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "Id: %{public}d, reason: %{public}d, windowRect: %{public}s, "
+            "displayOrientation: %{public}d, config[%{public}u, %{public}u, %{public}u, "
+            "%{public}f]", GetPersistentId(), reason, rect.ToString().c_str(), orientation,
+            rotation, deviceRotation, transformHint, virtualPixelRatio_);
+    } else {
+        TLOGI(WmsLogTag::WMS_LAYOUT, "Id: %{public}d, reason: %{public}d, windowRect: %{public}s, "
+            "displayOrientation: %{public}d, config[%{public}u, %{public}u, %{public}u, "
+            "%{public}f]", GetPersistentId(), reason, rect.ToString().c_str(), orientation,
+            rotation, deviceRotation, transformHint, virtualPixelRatio_);
+    }
 }
 
 int32_t WindowSessionImpl::GetFloatingWindowParentId()
