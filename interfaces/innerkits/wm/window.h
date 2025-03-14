@@ -1849,7 +1849,7 @@ public:
      * @param Orientation Screen orientation.
      * @param animation true means window rotation needs animation. Otherwise not needed.
      */
-    virtual void SetRequestedOrientation(Orientation, bool animation = true) {}
+    virtual void SetRequestedOrientation(Orientation, bool needAnimation = true) {}
 
     /**
      * @brief Get the Target Orientation ConfigInfo.
@@ -1862,7 +1862,7 @@ public:
      */
     virtual WMError GetTargetOrientationConfigInfo(Orientation targetOri,
         const std::map<WindowType, SystemBarProperty>& properties, Ace::ViewportConfig& config,
-        std::map<AvoidAreaType, AvoidArea>& avoidAreas) { return WMError::WM_OK; }
+        std::map<AvoidAreaType, AvoidArea>& avoidAreas) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Register window orientation set by developer
