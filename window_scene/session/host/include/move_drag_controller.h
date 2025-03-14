@@ -120,6 +120,7 @@ public:
     void SetOriginalDisplayOffset(int32_t offsetX, int32_t offsetY);
     void SetOriginalPositionZ(float originalPositionZ) { originalPositionZ_ = originalPositionZ; }
     float GetOriginalPositionZ() const { return originalPositionZ_; }
+    bool isSupportWindowDragCrossDisplay();
 
     /*
      * Monitor screen connection status

@@ -3098,8 +3098,9 @@ void SceneSession::HandleMoveDragEnd(WSRect& rect, SizeChangeReason reason)
         MoveUnderInteriaAndNotifyRectChange(rect, reason)) {
         TLOGI(WmsLogTag::WMS_LAYOUT_PC, "set full screen after throw slip");
     }
-    if ((moveDragController_->GetMoveDragEndDisplayId() == moveDragController_->GetMoveDragStartDisplayId() ||
-         WindowHelper::IsSystemWindow(GetWindowType())) && !WindowHelper::IsInputWindow(GetWindowType())) {
+
+    if (moveDragController_->GetMoveDragEndDisplayId() == moveDragController_->GetMoveDragStartDisplayId() ||
+        (!moveDragController_->(isSupportWindowDragCrossDisplay) && !WindowHelper::IsInputWindow(GetWindowType()))) {
         NotifySessionRectChange(rect, reason);
     } else {
         displayChangedByMoveDrag_ = true;
