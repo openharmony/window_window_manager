@@ -774,7 +774,7 @@ WMError WindowManager::RegisterVisibilityStateChangedListener(const sptr<IWindow
         WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_VISIBILITY,
         pImpl_->windowVisibilityStateListenerAgent_);
     if (ret != WMError::WM_OK) {
-        TLOGW(WmsLogTag::WMS_ATTRIBUTE, "RegisterWindowManagerAgent failed!");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "RegisterWindowManagerAgent failed!");
         pImpl_->windowVisibilityStateListenerAgent_ = nullptr;
     } else {
         auto iter = std::find(pImpl_->windowVisibilityStateListeners_.begin(),
