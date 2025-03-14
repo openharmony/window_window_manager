@@ -2133,6 +2133,7 @@ WMError WindowSceneSessionImpl::GetSubWindowZLevel(int32_t& zLevel)
     }
     if (!WindowHelper::IsSubWindow(GetType()) || !WindowHelper::IsDialogWindow(GetType())) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "must be app sub window!");
+        return WMError::WM_ERROR_INVALID_CALLING;
     }
     zLevel = property_->GetSubWindowZLevel();
     TLOGI(WmsLogTag::WMS_HIERARCHY, "Id:%{public}u, zLevel:%{public}d", GetWindowId(), zLevel);
