@@ -294,8 +294,7 @@ void WindowSessionImpl::MakeSubOrDialogWindowDragableAndMoveble()
 
 void WindowSessionImpl::SetSubWindowZLevelToProperty()
 {
-    WindowType type = property_->GetWindowType();
-    if (WindowHelper::IsSubWindow(type) || WindowHelper::IsDialogWindow(type)) {
+    if (WindowHelper::IsNormalSubWindow(property_->GetWindowType(), property_->GetWindowFlags())) {
         property_->SetSubWindowZLevel(windowOption_->GetSubWindowZLevel());
     }
 }
