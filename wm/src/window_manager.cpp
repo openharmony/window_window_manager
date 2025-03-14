@@ -59,8 +59,8 @@ public:
     void NotifyWindowVisibilityInfoChanged(const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos);
     void NotifyWindowVisibilityStateChanged(const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos);
     void PackWindowChangeInfo(const std::unordered_set<WindowInfoKey>& interestInfo,
-        std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowChangeInfos,
-        const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos);
+        const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos,
+        std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowChangeInfos,);
     void NotifyWindowDrawingContentInfoChanged(const std::vector<sptr<WindowDrawingContentInfo>>&
         windowDrawingContentInfos);
     void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing);
@@ -256,8 +256,12 @@ void WindowManager::Impl::NotifyWindowVisibilityStateChanged(
         windowVisibilityStateListeners = windowVisibilityStateListeners_;
     }
     for (auto& listener : windowVisibilityStateListeners) {
+        if (listener == nullptr) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "listener is null");
+            continue;
+        }
         std::vector<std::unordered_map<WindowInfoKey, std::any>> windowChangeInfos;
-        PackWindowChangeInfo(listener->GetInterestInfo(), windowChangeInfos, windowVisibilityInfos);
+        PackWindowChangeInfo(listener->GetInterestInfo(), windowVisibilityInfos, windowChangeInfos);
         TLOGD(WmsLogTag::WMS_ATTRIBUTE, "Notify WindowVisibilityState to caller, info size: %{public}zu",
             windowChangeInfos.size());
         listener->OnWindowInfoChanged(windowChangeInfos);
@@ -265,8 +269,8 @@ void WindowManager::Impl::NotifyWindowVisibilityStateChanged(
 }
 
 void WindowManager::Impl::PackWindowChangeInfo(const std::unordered_set<WindowInfoKey>& interestInfo,
-    std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowChangeInfos,
-    const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos)
+    const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos,
+    std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowChangeInfos)
 {
     for (const auto& info : windowVisibilityInfos) {
         std::unordered_map<WindowInfoKey, std::any> windowChangeInfo;
