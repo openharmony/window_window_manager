@@ -1281,7 +1281,6 @@ HWTEST_F(SceneSessionTest4, UpdateAllModalUIExtensions, Function | SmallTest | L
  */
 HWTEST_F(SceneSessionTest4, HandleActionUpdateSubWindowZLevel, Function | SmallTest | Level2)
 {
-    WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_SUB_WINDOW_Z_LEVEL;
     SessionInfo info;
     info.abilityName_ = "HandleActionUpdateSubWindowZLevel";
     info.bundleName_ = "HandleActionUpdateSubWindowZLevel";
@@ -1294,8 +1293,8 @@ HWTEST_F(SceneSessionTest4, HandleActionUpdateSubWindowZLevel, Function | SmallT
     property->zLevel_ = 1;
     WMError ret = sceneSession->HandleActionUpdateSubWindowZLevel(property,
         WSPropertyChangeAction::ACTION_UPDATE_SUB_WINDOW_Z_LEVEL);
-    sceneSession->GetSubWindowZLevel();
-    EXPECT_EQ(ret, WMError::WM_OK);
+    sceneSession->SetSubWindowZLevel(1);
+    ASSERT_EQ(WMError::WM_OK, ret);
 }
 
 /**
