@@ -1870,7 +1870,7 @@ public:
      * @param listener IPreferredOrientationChangeListener.
      * @return WM_OK means register success, others means register failed
      */
-    virtual WMError RegisterFrontendOrientationListener(const sptr<IPreferredOrientationChangeListener>& listener) 
+    virtual WMError RegisterPreferredOrientationChangeListener(const sptr<IPreferredOrientationChangeListener>& listener) 
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -1881,7 +1881,7 @@ public:
      * @param listener IPreferredOrientationChangeListener.
      * @return WM_OK means register success, others means unregister failed
      */
-    virtual WMError UnregisterFrontendOrientationListener(const sptr<IPreferredOrientationChangeListener>& listener) 
+    virtual WMError UnregisterPreferredOrientationChangeListener(const sptr<IPreferredOrientationChangeListener>& listener) 
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -1892,7 +1892,7 @@ public:
      * @param listener IWindowOrientationWillChangeListener.
      * @return WM_OK means register success, others means register failed
      */
-    virtual WMError RegisterOrientationChangeListener(const sptr<IWindowOrientationWillChangeListener>& listener) 
+    virtual WMError RegisterOrientationWillChangeListener(const sptr<IWindowOrientationWillChangeListener>& listener) 
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -1903,7 +1903,7 @@ public:
      * @param listener IWindowOrientationWillChangeListener.
      * @return WM_OK means register success, others means unregister failed
      */
-    virtual WMError UnregisterOrientationChangeListener(const sptr<IWindowOrientationWillChangeListener>& listener) 
+    virtual WMError UnregisterOrientationWillChangeListener(const sptr<IWindowOrientationWillChangeListener>& listener) 
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
