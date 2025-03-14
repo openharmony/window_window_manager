@@ -73,6 +73,7 @@ public:
     WSError CompatibleFullScreenRecover() override;
     WSError CompatibleFullScreenMinimize() override;
     WSError CompatibleFullScreenClose() override;
+    WSError PcAppInPadNormalClose() override;
     WSError NotifyCompatibleModeEnableInPad(bool enable) override;
     void SetUniqueVirtualPixelRatio(bool useUniqueDensity, float virtualPixelRatio) override;
     void NotifySessionFullScreen(bool fullScreen) override;
@@ -90,6 +91,7 @@ public:
     WSError NotifyHighlightChange(bool isHighlight) override;
     void NotifyWindowCrossAxisChange(CrossAxisState state) override;
     WSError NotifyWindowAttachStateChange(bool isAttach) override;
+    void NotifyKeyboardAnimationCompleted(const KeyboardPanelInfo& keyboardPanelInfo) override;
 
 private:
     static inline BrokerDelegator<SessionStageProxy> delegator_;

@@ -51,6 +51,7 @@ namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowImpl"};
 const std::string PARAM_DUMP_HELP = "-h";
+const uint32_t API_VERSION_MOD = 1000;
 
 Ace::ContentInfoType GetAceContentInfoType(BackupAndRestoreType type)
 {
@@ -853,6 +854,11 @@ std::shared_ptr<Media::PixelMap> WindowImpl::Snapshot()
         WLOGFE("Failed to get pixelmap, return nullptr!");
     }
     return pixelMap;
+}
+
+WMError WindowImpl::SnapshotIgnorePrivacy(std::shared_ptr<Media::PixelMap>& pixelMap)
+{
+    return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
 }
 
 void WindowImpl::DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
@@ -4455,9 +4461,13 @@ void WindowImpl::RegisterWindowInspectorCallback()
     WindowInspector::GetInstance().RegisterGetWMSWindowListCallback(GetWindowId(), std::move(getWMSWindowListCallback));
 }
 
-uint32_t WindowImpl::GetApiVersion() const
+uint32_t WindowImpl::GetApiCompatibleVersion() const
 {
-    return SysCapUtil::GetApiCompatibleVersion();
+    uint32_t version = 0;
+    if ((context_ != nullptr) && (context_->GetApplicationInfo() != nullptr)) {
+        version = context_->GetApplicationInfo()->apiCompatibleVersion % API_VERSION_MOD;
+    }
+    return version;
 }
 } // namespace Rosen
 } // namespace OHOS

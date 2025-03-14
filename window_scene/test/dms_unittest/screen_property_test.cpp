@@ -639,6 +639,75 @@ HWTEST_F(ScreenPropertyTest, GetScreenShape, Function | SmallTest | Level2)
     delete property;
     GTEST_LOG_(INFO) << "ScreenPropertyTest: GetScreenShape end";
 }
+
+/**
+ * @tc.name: SetPointerActiveWidth
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenPropertyTest, SetPointerActiveWidth, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: SetPointerActiveWidth start";
+    ScreenProperty* property = new(std::nothrow) ScreenProperty();
+    ASSERT_NE(property, nullptr);
+    uint32_t pointerActiveWidth = 123;
+    property->SetPointerActiveWidth(pointerActiveWidth);
+    ASSERT_EQ(property->pointerActiveWidth_, pointerActiveWidth);
+    delete property;
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: SetPointerActiveWidth end";
+}
+ 
+/**
+ * @tc.name: GetPointerActiveWidth
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenPropertyTest, GetPointerActiveWidth, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: GetPointerActiveWidth start";
+    ScreenProperty* property = new(std::nothrow) ScreenProperty();
+    ASSERT_NE(property, nullptr);
+    uint32_t pointerActiveWidth = 123;
+    property->SetPointerActiveWidth(pointerActiveWidth);
+    ASSERT_EQ(property->GetPointerActiveWidth(), pointerActiveWidth);
+    delete property;
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: GetPointerActiveWidth end";
+}
+ 
+/**
+ * @tc.name: SetPointerActiveHeight
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenPropertyTest, SetPointerActiveHeight, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: SetPointerActiveHeight start";
+    ScreenProperty* property = new(std::nothrow) ScreenProperty();
+    ASSERT_NE(property, nullptr);
+    uint32_t pointerActiveHeight = 321;
+    property->SetPointerActiveHeight(pointerActiveHeight);
+    ASSERT_EQ(property->pointerActiveHeight_, pointerActiveHeight);
+    delete property;
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: SetPointerActiveHeight end";
+}
+ 
+/**
+ * @tc.name: GetPointerActiveHeight
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenPropertyTest, GetPointerActiveHeight, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: GetPointerActiveHeight start";
+    ScreenProperty* property = new(std::nothrow) ScreenProperty();
+    ASSERT_NE(property, nullptr);
+    uint32_t pointerActiveHeight = 321;
+    property->SetPointerActiveHeight(pointerActiveHeight);
+    ASSERT_EQ(property->GetPointerActiveHeight(), pointerActiveHeight);
+    delete property;
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: GetPointerActiveHeight end";
+}
+
 /**
 * @tc.name: SetX
 * @tc.desc: normal function

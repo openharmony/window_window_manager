@@ -14,7 +14,7 @@
 import("//build/test.gni")
 import("//foundation/window/window_manager/windowmanager_aafwk.gni")
 
-module_out_path = "window_manager/wm/ui_extension"
+module_out_path = "window_manager/window_manager/wm/ui_extension"
 wm_unittest_common = "../:wm_unittest_common"
 
 ohos_unittest("wm_extension_window_impl_test") {

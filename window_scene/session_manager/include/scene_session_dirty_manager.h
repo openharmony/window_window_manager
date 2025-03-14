@@ -36,11 +36,11 @@ std::string DumpRect(const std::vector<MMI::Rect>& rects);
 struct SingleHandData {
     float scaleX = 1.0f;
     float scaleY = 1.0f;
-    float width = 0.f;
-    float height = 0.f;
     float singleHandX = 0.f;
     float singleHandY = 0.f;
     float pivotX = 0.f;
+    float pivotY = 0.f;
+    SingleHandMode mode = SingleHandMode::MIDDLE;
 };
 
 class SceneSessionDirtyManager {
@@ -78,7 +78,7 @@ private:
         GetWindowInfo(const sptr<SceneSession>& sceneSession, const WindowAction& action) const;
     SingleHandData GetSingleHandData(const sptr<SceneSession>& sceneSession) const;
     void CalNotRotateTransform(const sptr<SceneSession>& sceneSession, Matrix3f& transform,
-        const SingleHandData& singleHandData, bool useUIExtension = false) const;
+        bool useUIExtension = false) const;
     void CalTransform(const sptr<SceneSession>& sceneSession, Matrix3f& transform,
         const SingleHandData& singleHandData, bool useUIExtension = false) const;
     void UpdatePrivacyMode(const sptr<SceneSession>& sceneSession,

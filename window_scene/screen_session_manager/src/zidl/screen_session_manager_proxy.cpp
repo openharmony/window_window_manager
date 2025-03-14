@@ -2535,6 +2535,33 @@ SuperFoldStatus ScreenSessionManagerProxy::GetSuperFoldStatus()
     return static_cast<SuperFoldStatus>(reply.ReadUint32());
 }
 
+void ScreenSessionManagerProxy::SetLandscapeLockStatus(bool isLocked)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("remote is null");
+        return;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteBool(isLocked)) {
+        WLOGFE("Write isLocked failed");
+        return;
+    }
+    if (remote->SendRequest(
+        static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCENE_BOARD_LANDSCAPE_LOCK_STATUS),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return;
+    }
+}
+
 ExtendScreenConnectStatus ScreenSessionManagerProxy::GetExtendScreenConnectStatus()
 {
     sptr<IRemoteObject> remote = Remote();

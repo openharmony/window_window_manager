@@ -183,6 +183,10 @@ public:
     {
         return WSError::WS_OK;
     }
+    virtual WSError PcAppInPadNormalClose()
+    {
+        return WSError::WS_OK;
+    }
     virtual WSError NotifyCompatibleModeEnableInPad(bool enable)
     {
         return WSError::WS_OK;
@@ -243,6 +247,7 @@ public:
     virtual WSError SendContainerModalEvent(const std::string& eventName, const std::string& eventValue) = 0;
     virtual void NotifyWindowCrossAxisChange(CrossAxisState state) = 0;
     virtual WSError NotifyWindowAttachStateChange(bool isAttach) { return WSError::WS_DO_NOTHING; }
+    virtual void NotifyKeyboardAnimationCompleted(const KeyboardPanelInfo& keyboardPanelInfo) {}
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_INTERFACE_H
