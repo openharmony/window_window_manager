@@ -2148,7 +2148,8 @@ void SceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
     return;
 }
 
-void SceneSession::GetKeyboardOccupiedAreaWithRotation(int32_t persistentId, uint32_t rotation, std::vector<std::pair<bool, WSRect>>& avoidAreas)
+void SceneSession::GetKeyboardOccupiedAreaWithRotation(
+    int32_t persistentId, uint32_t rotation, std::vector<std::pair<bool, WSRect>>& avoidAreas)
 {
     TLOGI(WmsLogTag::WMS_KEYBOARD, "In");
     if (!specificCallback_ || !specificCallback_->onKeyboardRotationChange_) {
