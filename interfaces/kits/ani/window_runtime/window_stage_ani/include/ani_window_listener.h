@@ -72,7 +72,7 @@ class AniWindowListener : public IWindowChangeListener,
 public:
     AniWindowListener(ani_env* env, ani_ref callback, CaseType caseType)
         : env_(env), aniCallBack_(callback), caseType_(caseType), 
-            weakRef_(wptr<AniWindowListener> (this)) {}
+        weakRef_(wptr<AniWindowListener> (this)) {}
     ~AniWindowListener();
     void OnSystemBarPropertyChange(DisplayId displayId, const SystemBarRegionTints& tints) override;
     void OnSizeChange(Rect rect, WindowSizeChangeReason reason,

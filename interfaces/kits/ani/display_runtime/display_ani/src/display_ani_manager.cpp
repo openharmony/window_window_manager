@@ -104,13 +104,13 @@ void DisplayManagerAni::getAllDisplaysAni(ani_env* env, ani_object arrayObj)
         AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_SCREEN, "");
     }
     ani_double length;
-    if(ANI_OK != env->Object_GetPropertyByName_Double(arrayObj, "length", &length)) {
+    if (ANI_OK != env->Object_GetPropertyByName_Double(arrayObj, "length", &length)) {
         TLOGE(WmsLogTag::DMS, "[ANI] get ani_array len fail");
     }
 
-    for(int i = 0; i < std::min(int(length), static_cast<int>(displays.size())); i++) {
+    for (int i = 0; i < std::min(int(length), static_cast<int>(displays.size())); i++) {
         ani_ref currentDisplay;
-        if(ANI_OK != env->Object_CallMethodByName_Ref(arrayObj, "$_get", "I:Lstd/core/Object;",
+        if (ANI_OK != env->Object_CallMethodByName_Ref(arrayObj, "$_get", "I:Lstd/core/Object;",
             &currentDisplay, (ani_int)i)) {
             TLOGE(WmsLogTag::DMS, "[ANI] get ani_array index %{public}u fail", (ani_int)i);
         }
