@@ -102,7 +102,7 @@ constexpr int ARG_INDEX_0 = 0;
 constexpr int ARG_INDEX_1 = 1;
 constexpr int ARG_INDEX_2 = 2;
 constexpr int ARG_INDEX_3 = 3;
-constexpr uint32_t LIFECYCLE_ISOLATE_VERSION = 20;
+constexpr uint32_t DISALLOW_ACTIVATION_ISOLATE_VERSION = 20;
 
 const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {PENDING_SCENE_CB,                      ListenerFuncType::PENDING_SCENE_CB},
@@ -3887,7 +3887,7 @@ void JsSceneSession::PendingSessionActivationInner(std::shared_ptr<SessionInfo> 
                 sessionInfo->persistentId_, LifeCycleTaskType::START);
             return;
         }
-        if (sessionInfo->GetSessionProperty()->GetApiVersion() >= LIFECYCLE_ISOLATE_VERSION) {
+        if (session->GetSessionProperty()->GetApiVersion() >= DISALLOW_ACTIVATION_ISOLATE_VERSION) {
             bool isFromAncoAndToAnco = session->IsAnco() && AbilityInfoManager::GetInstance().IsAnco(
                 sessionInfo->bundleName_, sessionInfo->abilityName_, sessionInfo->moduleName_);
             if (session->DisallowActivationFromPendingBackground(sessionInfo->isPcOrPadEnableActivation_,
