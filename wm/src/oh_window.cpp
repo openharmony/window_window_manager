@@ -27,9 +27,10 @@
 #include <event_runner.h>
 
 #include "oh_window_comm.h"
+#include "singleton_container.h"
 #include "window.h"
+#include "window_manager.h"
 #include "window_manager_hilog.h"
-#include "wm_common.h"
 
 using namespace OHOS::Rosen;
 
@@ -125,6 +126,14 @@ int32_t OH_WindowManager_IsWindowShown(int32_t windowId, bool* isShow)
 }
 
 namespace {
+#define WINDOW_MANAGER_FREE_MEMORY(ptr) \
+    do { \
+        if ((ptr)) { \
+            free((ptr)); \
+            (ptr) = NULL; \
+        } \
+    } while (0)
+
 /*
  * Used to map from WMError to WindowManager_ErrorCode.
  */
@@ -465,6 +474,59 @@ int32_t OH_WindowManager_SetWindowTouchable(int32_t windowId, bool touchable)
         errCode = OH_WINDOW_TO_ERROR_CODE_MAP.at(window->SetTouchable(touchable));
     }, __func__);
     return errCode;
+}
+
+int32_t OH_WindowManager_GetAllWindowLayoutInfoList(
+    int64_t displayId, WindowManager_Rect** windowLayoutInfoList, size_t* windowLayoutInfoSize)
+{
+    if (displayId < 0) {
+        TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "displayId is invalid, displayId:%{public}" PRIu64, displayId);
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM;
+    }
+    if (windowLayoutInfoList == nullptr || windowLayoutInfoSize == nullptr) {
+        TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "param is nullptr, displayId:%{public}" PRIu64, displayId);
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM;
+    }
+    WindowManager_ErrorCode errCode = WindowManager_ErrorCode::OK;
+    auto eventHandler = GetMainEventHandler();
+    if (eventHandler == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "eventHandler is null, displayId:%{public}" PRIu64, displayId);
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
+    }
+    eventHandler->PostSyncTask([displayId, windowLayoutInfoList, windowLayoutInfoSize, &errCode, where = __func__] {
+        std::vector<OHOS::sptr<WindowLayoutInfo>> infos;
+        auto ret =
+            SingletonContainer::Get<WindowManager>().GetAllWindowLayoutInfo(static_cast<uint64_t>(displayId), infos);
+        if (OH_WINDOW_TO_ERROR_CODE_MAP.find(ret) == OH_WINDOW_TO_ERROR_CODE_MAP.end()) {
+            errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s get failed, errCode: %{public}d", where, errCode);
+            return;
+        } else if (OH_WINDOW_TO_ERROR_CODE_MAP.at(ret) != WindowManager_ErrorCode::OK) {
+            errCode = errCode != WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_DEVICE_NOT_SUPPORTED ?
+                WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL : errCode;
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s get failed, errCode: %{public}d", where, errCode);
+            return;
+        }
+        WindowManager_Rect* infosInner = (WindowManager_Rect*)malloc(sizeof(WindowManager_Rect) * infos.size());
+        if (infosInner == nullptr) {
+            errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s infosInner is nullptr", where);
+            return;
+        }
+        for (size_t i = 0; i < infos.size(); i++) {
+            TransformedToWindowManagerRect(infos[i]->rect, infosInner[i]);
+            TLOGND(WmsLogTag::WMS_ATTRIBUTE, "%{public}s rect: %{public}d %{public}d %{public}d %{public}d",
+                where, infosInner[i].posX, infosInner[i].posY, infosInner[i].width, infosInner[i].height);
+        }
+        *windowLayoutInfoList = infosInner;
+        *windowLayoutInfoSize = infos.size();
+    }, __func__);
+    return errCode;
+}
+
+void OH_WindowManager_ReleaseAllWindowLayoutInfoList(WindowManager_Rect* windowLayoutInfoList)
+{
+    WINDOW_MANAGER_FREE_MEMORY(windowLayoutInfoList);
 }
 
 int32_t OH_WindowManager_SetWindowFocusable(int32_t windowId, bool isFocusable)
