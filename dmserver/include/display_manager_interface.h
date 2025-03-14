@@ -249,9 +249,9 @@ public:
     {
         return std::vector<DisplayPhysicalResolution> {};
     }
-    virtual std::string GetDisplayCapability()
+    virtual DMError GetDisplayCapability(std::string& capabilitInfo)
     {
-        return std::string {};
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
     }
     virtual bool SetVirtualScreenStatus(ScreenId screenId, VirtualScreenStatus screenStatus) { return false; }
     virtual DMError SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid,

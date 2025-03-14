@@ -7819,16 +7819,16 @@ nlohmann::ordered_json ScreenSessionManager::GetCapabilityJson(FoldStatus foldSt
     return capabilityInfo;
 }
 
-std::string ScreenSessionManager::GetDisplayCapability()
+DMError ScreenSessionManager::GetDisplayCapability(std::string& capabilitInfo)
 {
     if (g_foldScreenFlag) {
         if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
-            return GetSecondaryDisplayCapability();
+            return GetSecondaryDisplayCapability(capabilitInfo);
         }
-        return GetFoldableDeviceCapability();
+        return GetFoldableDeviceCapability(capabilitInfo);
     }
     if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
-        return GetSuperFoldCapability();
+        return GetSuperFoldCapability(capabilitInfo);
     }
 
     std::vector<std::string> orientation = ORIENTATION_DEFAULT;
@@ -7841,10 +7841,11 @@ std::string ScreenSessionManager::GetDisplayCapability()
         ROTATION_DEFAULT, orientation);
     jsonDisplayCapabilityList["capability"].push_back(std::move(capabilityInfo));
 
-    return jsonDisplayCapabilityList.dump();
+    capabilitInfo = jsonDisplayCapabilityList.dump();
+    return DMError::DM_OK;
 }
 
-std::string ScreenSessionManager::GetSecondaryDisplayCapability()
+DMError ScreenSessionManager::GetSecondaryDisplayCapability(std::string& capabilitInfo)
 {
     nlohmann::ordered_json jsonDisplayCapabilityList;
     jsonDisplayCapabilityList["capability"] = nlohmann::json::array();
@@ -7863,11 +7864,11 @@ std::string ScreenSessionManager::GetSecondaryDisplayCapability()
         FoldDisplayMode::FULL, ROTATION_DEFAULT, orientation);
     jsonDisplayCapabilityList["capability"].push_back(std::move(gCapability));
 
-    std::string jsonStr = jsonDisplayCapabilityList.dump();
-    return jsonStr;
+    capabilitInfo = jsonDisplayCapabilityList.dump();
+    return DMError::DM_OK;
 }
 
-std::string ScreenSessionManager::GetFoldableDeviceCapability()
+DMError ScreenSessionManager::GetFoldableDeviceCapability(std::string& capabilitInfo)
 {
     nlohmann::ordered_json jsonDisplayCapabilityList;
     jsonDisplayCapabilityList["capability"] = nlohmann::json::array();
@@ -7886,11 +7887,11 @@ std::string ScreenSessionManager::GetFoldableDeviceCapability()
         ROTATION_DEFAULT, ORIENTATION_DEFAULT);
     jsonDisplayCapabilityList["capability"].push_back(std::move(foldCapabilityInfo));
 
-    std::string jsonStr = jsonDisplayCapabilityList.dump();
-    return jsonStr;
+    capabilitInfo = jsonDisplayCapabilityList.dump();
+    return DMError::DM_OK;
 }
 
-std::string ScreenSessionManager::GetSuperFoldCapability()
+DMError ScreenSessionManager::GetSuperFoldCapability(std::string& capabilitInfo)
 {
     nlohmann::ordered_json jsonDisplayCapabilityList;
     jsonDisplayCapabilityList["capability"] = nlohmann::json::array();
@@ -7905,8 +7906,8 @@ std::string ScreenSessionManager::GetSuperFoldCapability()
         ROTATION_DEFAULT, ORIENTATION_DEFAULT);
     jsonDisplayCapabilityList["capability"].push_back(std::move(halfFoldCapabilityInfo));
 
-    std::string jsonStr = jsonDisplayCapabilityList.dump();
-    return jsonStr;
+    capabilitInfo = jsonDisplayCapabilityList.dump();
+    return DMError::DM_OK;
 }
 
 bool ScreenSessionManager::SetVirtualScreenStatus(ScreenId screenId, VirtualScreenStatus screenStatus)
