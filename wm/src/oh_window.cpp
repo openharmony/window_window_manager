@@ -475,8 +475,8 @@ int32_t OH_WindowManager_SetWindowTouchable(int32_t windowId, bool touchable)
     return errCode;
 }
 
-int32_t OH_WindowManager_GetAllWindowLayoutInfo(
-    int64_t displayId, WindowManager_Rect** windowLayoutInfo, size_t* windowLayoutInfoSize)
+int32_t OH_WindowManager_GetAllWindowLayoutInfoList(
+    int64_t displayId, WindowManager_Rect** windowLayoutInfoList, size_t* windowLayoutInfoSize)
 {
     if (displayId < 0 ||
         SingletonContainer::Get<DisplayManager>().GetDisplayById(static_cast<uint64_t>(displayId)) == nullptr) {
@@ -518,19 +518,19 @@ int32_t OH_WindowManager_GetAllWindowLayoutInfo(
             TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s rect: %{public}d %{public}d %{public}d %{public}d",
                 where, infosInner[i].posX, infosInner[i].posY, infosInner[i].width, infosInner[i].height);
         }
-        *windowLayoutInfo = infosInner;
+        *windowLayoutInfoList = infosInner;
         *windowLayoutInfoSize = infos.size();
     }, __func__);
     return errCode;
 }
 
-void OH_WindowManager_ReleaseAllWindowLayoutInfo(WindowManager_Rect* windowLayoutInfo)
+void OH_WindowManager_ReleaseAllWindowLayoutInfoList(WindowManager_Rect* windowLayoutInfoList)
 {
-    if (windowLayoutInfo == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "windowLayoutInfo is nullptr");
+    if (windowLayoutInfoList == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "windowLayoutInfoList is nullptr");
         return;
     }
-    WINDOW_MANAGER_FREE_MEMORY(windowLayoutInfo);
+    WINDOW_MANAGER_FREE_MEMORY(windowLayoutInfoList);
 }
 
 int32_t OH_WindowManager_SetWindowFocusable(int32_t windowId, bool isFocusable)

@@ -98,24 +98,24 @@ HWTEST_F(OHWindowTest, IsWindowShowing01, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: OH_WindowManager_GetAllWindowLayoutInfo
- * @tc.desc: OH_WindowManager_GetAllWindowLayoutInfo test
+ * @tc.name: OH_WindowManager_GetAllWindowLayoutInfoList
+ * @tc.desc: OH_WindowManager_GetAllWindowLayoutInfoList test
  * @tc.type: FUNC
  */
-HWTEST_F(OHWindowTest, OH_WindowManager_GetAllWindowLayoutInfo, Function | SmallTest | Level2)
+HWTEST_F(OHWindowTest, OH_WindowManager_GetAllWindowLayoutInfoList, Function | SmallTest | Level2)
 {
     int64_t displayId = -1;
     WindowManager_Rect** windowLayoutInfo = nullptr;
     size_t* windowLayoutInfoSize = nullptr;
-    auto ret = OH_WindowManager_GetAllWindowLayoutInfo(displayId, windowLayoutInfo, windowLayoutInfoSize);
+    auto ret = OH_WindowManager_GetAllWindowLayoutInfoList(displayId, windowLayoutInfo, windowLayoutInfoSize);
     EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM), ret);
     displayId = 0;
     EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM), ret);
     windowLayoutInfo = (WindowManager_Rect**)malloc(sizeof(WindowManager_Rect**));
     windowLayoutInfoSize = (size_t*)malloc(sizeof(size_t*));
-    ret = OH_WindowManager_GetAllWindowLayoutInfo(displayId, windowLayoutInfo, windowLayoutInfoSize);
+    ret = OH_WindowManager_GetAllWindowLayoutInfoList(displayId, windowLayoutInfo, windowLayoutInfoSize);
     EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::OK), ret);
-    OH_WindowManager_ReleaseAllWindowLayoutInfo(*windowLayoutInfo);
+    OH_WindowManager_ReleaseAllWindowLayoutInfoList(*windowLayoutInfo);
     *windowLayoutInfo = NULL;
     free(windowLayoutInfo);
     windowLayoutInfo = NULL;
