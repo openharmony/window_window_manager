@@ -650,7 +650,7 @@ public:
 
 /**
  * @class IPreferredOrientationChangeListener
- * 
+ *
  * @brief listener of preferred orientation change which set by developer.
  */
 class IPreferredOrientationChangeListener : virtual public RefBase {
@@ -1900,7 +1900,7 @@ public:
      * @return WM_OK means register success, others means register failed
      */
     virtual WMError RegisterPreferredOrientationChangeListener(
-        const sptr<IPreferredOrientationChangeListener>& listener) 
+        const sptr<IPreferredOrientationChangeListener>& listener)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -1923,7 +1923,7 @@ public:
      * @param listener IWindowOrientationChangeListener.
      * @return WM_OK means register success, others means register failed
      */
-    virtual WMError RegisterOrientationChangeListener(const sptr<IWindowOrientationChangeListener>& listener) 
+    virtual WMError RegisterOrientationChangeListener(const sptr<IWindowOrientationChangeListener>& listener)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -1934,16 +1934,16 @@ public:
      * @param listener IWindowOrientationChangeListener.
      * @return WM_OK means register success, others means unregister failed
      */
-    virtual WMError UnregisterOrientationChangeListener(const sptr<IWindowOrientationChangeListener>& listener) 
+    virtual WMError UnregisterOrientationChangeListener(const sptr<IWindowOrientationChangeListener>& listener)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
 
     /**
      * @brief Notify caller window orientation set by developer 
-     *  
+     *
      * @param ori Orientation set by developer
-     */    
+     */
     virtual void NotifyPreferredOrientationChange(Orientation orientation) {}
 
     /**
