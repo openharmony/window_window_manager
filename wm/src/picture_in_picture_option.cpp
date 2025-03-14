@@ -33,6 +33,7 @@ void PipOption::ClearNapiRefs(napi_env env)
         typeNode_ = nullptr;
     }
 }
+
 void PipOption::SetContext(void* contextPtr)
 {
     contextPtr_ = contextPtr;
