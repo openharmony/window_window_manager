@@ -256,6 +256,7 @@ private:
     std::shared_ptr<RSDisplayNode> displayNode_;
     ScreenState screenState_ { ScreenState::INIT };
     std::vector<IScreenChangeListener*> screenChangeListenerList_;
+    std::mutex screenChangeListenerListMutex_;
     ScreenCombination combination_ { ScreenCombination::SCREEN_ALONE };
     VirtualScreenFlag screenFlag_ { VirtualScreenFlag::DEFAULT };
     MirrorScreenType mirrorScreenType_ { MirrorScreenType::VIRTUAL_MIRROR };

@@ -211,7 +211,7 @@ void ScreenSession::RegisterScreenChangeListener(IScreenChangeListener* screenCh
         WLOGFE("Failed to register screen change listener, listener is null!");
         return;
     }
-
+    std::lock_guard<std::mutex> lock(screenChangeListenerListMutex_);
     if (std::find(screenChangeListenerList_.begin(), screenChangeListenerList_.end(), screenChangeListener) !=
         screenChangeListenerList_.end()) {
         WLOGFI("Repeat to register screen change listener!");
@@ -465,6 +465,7 @@ void ScreenSession::ReleaseDisplayNode()
 
 void ScreenSession::Connect()
 {
+    std::lock_guard<std::mutex> lock(screenChangeListenerListMutex_);
     screenState_ = ScreenState::CONNECTION;
     if (screenChangeListenerList_.empty()) {
         WLOGFE("screenChangeListenerList is empty.");
@@ -481,6 +482,7 @@ void ScreenSession::Connect()
 
 void ScreenSession::Disconnect()
 {
+    std::lock_guard<std::mutex> lock(screenChangeListenerListMutex_);
     screenState_ = ScreenState::DISCONNECTION;
     for (auto& listener : screenChangeListenerList_) {
         if (!listener) {
@@ -492,6 +494,7 @@ void ScreenSession::Disconnect()
 
 void ScreenSession::PropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason)
 {
+    std::lock_guard<std::mutex> lock(screenChangeListenerListMutex_);
     property_ = newProperty;
     for (auto& listener : screenChangeListenerList_) {
         if (!listener) {
@@ -503,6 +506,7 @@ void ScreenSession::PropertyChange(const ScreenProperty& newProperty, ScreenProp
 
 void ScreenSession::PowerStatusChange(DisplayPowerEvent event, EventStatus status, PowerStateChangeReason reason)
 {
+    std::lock_guard<std::mutex> lock(screenChangeListenerListMutex_);
     for (auto& listener : screenChangeListenerList_) {
         if (!listener) {
             continue;
@@ -544,6 +548,7 @@ void ScreenSession::SensorRotationChange(Rotation sensorRotation)
 
 void ScreenSession::SensorRotationChange(float sensorRotation)
 {
+    std::lock_guard<std::mutex> lock(screenChangeListenerListMutex_);
     if (sensorRotation >= 0.0f) {
         currentValidSensorRotation_ = sensorRotation;
     }
@@ -569,6 +574,7 @@ void ScreenSession::HandleHoverStatusChange(int32_t hoverStatus, bool needRotate
 
 void ScreenSession::HoverStatusChange(int32_t hoverStatus, bool needRotate)
 {
+    std::lock_guard<std::mutex> lock(screenChangeListenerListMutex_);
     for (auto& listener : screenChangeListenerList_) {
         if (!listener) {
             WLOGFE("screenChangeListener is null.");
@@ -585,6 +591,7 @@ void ScreenSession::HandleCameraBackSelfieChange(bool isCameraBackSelfie)
 
 void ScreenSession::CameraBackSelfieChange(bool isCameraBackSelfie)
 {
+    std::lock_guard<std::mutex> lock(screenChangeListenerListMutex_);
     for (auto& listener : screenChangeListenerList_) {
         if (!listener) {
             WLOGFE("screenChangeListener is null.");
@@ -603,6 +610,7 @@ void ScreenSession::ScreenOrientationChange(Orientation orientation, FoldDisplay
 
 void ScreenSession::ScreenOrientationChange(float orientation)
 {
+    std::lock_guard<std::mutex> lock(screenChangeListenerListMutex_);
     for (auto& listener : screenChangeListenerList_) {
         if (!listener) {
             WLOGFE("screenChangeListener is null.");
@@ -859,6 +867,7 @@ void ScreenSession::SetScreenRequestedOrientation(Orientation orientation)
 
 void ScreenSession::SetScreenRotationLocked(bool isLocked)
 {
+    std::lock_guard<std::mutex> lock(screenChangeListenerListMutex_);
     isScreenLocked_ = isLocked;
     for (auto& listener : screenChangeListenerList_) {
         if (!listener) {
@@ -1646,6 +1655,7 @@ std::shared_ptr<Media::PixelMap> ScreenSession::GetScreenSnapshot(float scaleX, 
 
 void ScreenSession::ScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName)
 {
+    std::lock_guard<std::mutex> lock(screenChangeListenerListMutex_);
     for (auto& listener : screenChangeListenerList_) {
         if (!listener) {
             continue;
@@ -1656,6 +1666,7 @@ void ScreenSession::ScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, cons
 
 void ScreenSession::SecondaryReflexionChange(ScreenId screenId, bool isSecondaryReflexion)
 {
+    std::lock_guard<std::mutex> lock(screenChangeListenerListMutex_);
     if (screenChangeListenerList_.empty()) {
         WLOGFE("screenChangeListenerList is empty.");
         return;
