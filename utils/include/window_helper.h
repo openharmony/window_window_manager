@@ -51,8 +51,8 @@ public:
     static inline bool IsNormalSubWindow(WindowType type, uint32_t windowFlags)
     {
         const uint32_t mask = static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_MODAL) |
-            static_cast<uint32_t>(WindowFlag::Window_FLAG_IS_TOAST) |
-            static_cast<uint32_t>(WindowFlag::Window_FLAG_IS_TEXT_MENU);
+            static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_TOAST) |
+            static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_TEXT_MENU);
         return ((windowFlags & mask) == 0 && IsSubWindow(type));
     }
 
