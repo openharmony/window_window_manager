@@ -623,6 +623,32 @@ public:
 };
 
 /**
+ * @class IKeyboardDidShowListener
+ *
+ * @brief IKeyboardDidShowListener is used to observe keyboard show animation completion.
+ */
+class IKeyboardDidShowListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify the caller when keyboard show animation is completed.
+     */
+    virtual void OnKeyboardDidShow(const KeyboardPanelInfo& keyboardPanelInfo) {}
+};
+
+/**
+ * @class IKeyboardDidHideListener
+ *
+ * @brief IKeyboardDidHideListener is used to observe keyboard hide animation completion.
+ */
+class IKeyboardDidHideListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify the caller when keyboard hide animation is completed.
+     */
+    virtual void OnKeyboardDidHide(const KeyboardPanelInfo& keyboardPanelInfo) {}
+};
+
+/**
  * @class IPreferredOrientationChangeListener
  * 
  * @brief listener of preferred orientation change which set by developer.
