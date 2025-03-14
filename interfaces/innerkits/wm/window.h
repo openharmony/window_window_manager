@@ -3366,12 +3366,6 @@ public:
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
-
-    /**
-     * @brief Notify app window size change.
-     *
-     */
-    virtual void NotifySize() {}
 };
 }
 }

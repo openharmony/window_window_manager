@@ -5387,10 +5387,15 @@ bool WindowSessionImpl::IsSubWindowMaximizeSupported() const
     return false;
 }
 
+bool WindowSessionImpl::IsFullScreenPcAppInPadMode()
+{
+    return property_->GetIsPcAppInPad() && GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN
+        && !IsFreeMultiWindowMode();
+}
+
 void WindowSessionImpl::NotifySize()
 {
-    if (property_->GetIsPcAppInPad() && GetWindowMode() ==  WindowMode::WINDOW_MODE_FULLSCREEN &&
-        !IsFreeMultiWindowMode()) {
+    if (IsFullScreenPcAppInPadMode()) {
         const auto& windowRect = GetRect();
         NotifySizeChange(windowRect, WindowSizeChangeReason::MOVE);
         auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
