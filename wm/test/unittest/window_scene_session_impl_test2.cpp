@@ -878,6 +878,28 @@ HWTEST_F(WindowSceneSessionImplTest2, Snapshot01, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SnapshotIgnorePrivacy
+ * @tc.desc: SnapshotIgnorePrivacy
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest2, SnapshotIgnorePrivacy, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, windowSceneSession->SnapshotIgnorePrivacy(pixelMap));
+
+    windowSceneSession->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreatTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    windowSceneSession->hostSession_ = session;
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowSceneSession->SnapshotIgnorePrivacy(pixelMap));
+
+    windowSceneSession->surfaceNode_ = nullptr;
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, windowSceneSession->SnapshotIgnorePrivacy(pixelMap));
+}
+
+/**
  * @tc.name: BindDialogTarget01
  * @tc.desc: BindDialogTarget
  * @tc.type: FUNC
