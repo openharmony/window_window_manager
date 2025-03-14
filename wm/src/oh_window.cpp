@@ -25,6 +25,7 @@
 
 #include <event_handler.h>
 #include <event_runner.h>
+
 #include "oh_window_comm.h"
 #include "singleton_container.h"
 #include "window.h"
