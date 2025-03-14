@@ -1721,7 +1721,7 @@ WMError WindowManager::UnregisterWindowInfoChangeCallback(const std::unordered_s
         }
         ret = ProcessUnregisterWindowInfoChangeCallback(info, listener);
         if (ret != WMError::WM_OK) {
-            observedInfoForLog += "failed";
+            observedInfoForLog << "failed";
             break;
         }
     }
