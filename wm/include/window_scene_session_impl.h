@@ -411,6 +411,7 @@ private:
      * only used when delay raise is enabled and hit draggable component
      */
     bool isExecuteDelayRaise_ = false;
+    bool IsFullScreenEnable();
 
     /*
      * Window Input Event
@@ -429,12 +430,6 @@ private:
      */
     bool isColdStart_ = true;
     void NotifyFreeMultiWindowModeResume();
-
-    /*
-     * Pc App In Pad
-     */
-    bool IsFullScreenPcAppInPadMode();
-    bool SupportFullScreen();
 };
 } // namespace Rosen
 } // namespace OHOS

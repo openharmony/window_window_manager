@@ -126,7 +126,8 @@ public:
     WMError SetWindowModal(bool isModal) override;
     void SetTargetAPIVersion(uint32_t targetAPIVersion);
     uint32_t GetTargetAPIVersion() const;
-    void NotifySize() override;
+    void NotifySize();
+    bool IsFullScreenPcAppInPadMode();
 
     WMError SetWindowType(WindowType type) override;
     WMError SetBrightness(float brightness) override;

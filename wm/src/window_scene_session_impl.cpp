@@ -1921,7 +1921,7 @@ WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height, const Re
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
 
-    if (isFullScreenPcAppInPadMode() && SupportFullScreen()) {
+    if (IsFullScreenPcAppInPadMode() && IsFullScreenEnable()) {
         auto win = GetMainWindowWithId(property_->GetPersistentId());
         win->NotifySize();
         return WMError::WM_ERROR_INVALID_OPERATION;
@@ -5463,15 +5463,8 @@ uint32_t WindowSceneSessionImpl::GetApiCompatibleVersion() const
     }
     return version;
 }
-
-bool WindowSceneSessionImpl::IsFullScreenPcAppInPadMode()
-
-{
-    return property_->GetIsPcAppInPad() && GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN
-        && !IsFreeMultiWindowMode();
-}
  
-bool WindowSceneSessionImpl::SupportFullScreen()
+bool WindowSceneSessionImpl::IsFullScreenEnable()
 {
     if (!WindowHelper::IsWindowModeSupported(property_->GetWindowModeSupportType(),
         WindowMode::WINDOW_MODE_FULLSCREEN)) {
