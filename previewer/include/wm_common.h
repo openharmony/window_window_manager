@@ -967,11 +967,11 @@ struct WindowLayoutInfo : public Parcelable {
  * @brief Window meta info
  */
 struct WindowMetaInfo : public Parcelable {
-    int32_t windowId;
+    int32_t windowId = 0;
     std::string windowName;
     std::string bundleName;
     std::string abilityName;
-    int32_t appIndex;
+    int32_t appIndex = 0;
 
     bool Marshalling(Parcel& parcel) const override
     {
@@ -1208,7 +1208,7 @@ enum class BackupAndRestoreType : int32_t {
  * @brief Windowinfokey
  */
 enum class WindowInfoKey : int32_t {
-    WINDOW_ID = START,
+    WINDOW_ID,
     BUNDLE_NAME,
     ABILITY_NAME,
     APP_INDEX,

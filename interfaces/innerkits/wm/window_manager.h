@@ -237,7 +237,7 @@ public:
     /**
      * @brief Notify caller when window Info changed.
      *
-     * @param info
+     * @param windowInfoList
      */
     virtual void OnWindowInfoChanged(
         const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList) = 0;
