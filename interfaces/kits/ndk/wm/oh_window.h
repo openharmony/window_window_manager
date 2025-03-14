@@ -241,9 +241,28 @@ int32_t OH_WindowManager_SetWindowTouchable(int32_t windowId, bool touchable);
  */
 int32_t OH_WindowManager_SetWindowFocusable(int32_t windowId, bool isFocusable);
 
+/**
+ * @brief Get all window layout info
+ *
+ * @param displayId The ID of the display to be got all window layout info.
+ * @param windowLayoutInfo Output parameter for all window layout info.
+ * @param windowLayoutInfoSize Output parameter for the length of all window layout info.
+ * @return Returns the result code.
+ *         {@link OK} the function call is successful.
+ *         {@link WINDOW_MANAGER_ERRORCODE_INVALID_PARAM} parameter error.
+ *         {@link WINDOW_MANAGER_ERRORCODE_DEVICE_NOT_SUPPORTED} capability not supported.
+ *         {@link WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL} the window manager service works abnormally.
+ * @since 16
+ */
 int32_t OH_WindowManager_GetAllWindowLayoutInfo(
     int64_t displayId, WindowManager_Rect** windowLayoutInfo, size_t* windowLayoutInfoSize);
 
+/**
+ * @brief Release all window layout info
+ *
+ * @param windowLayoutInfo Output parameter for all window layout info.
+ * @since 16
+ */
 void OH_WindowManager_ReleaseAllWindowLayoutInfo(WindowManager_Rect* windowLayoutInfo);
 #ifdef __cplusplus
 }
