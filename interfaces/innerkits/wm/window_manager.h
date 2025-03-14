@@ -224,6 +224,33 @@ public:
 };
 
 /**
+ * @class IWindowInfoChangedListener
+ *
+ * @brief Listener to observe window info.
+ */
+class IWindowInfoChangedListener : virtual public RefBase {
+public:
+    IWindowInfoChangedListener() = default;
+
+    virtual ~IWindowInfoChangedListener() = default;
+
+    /**
+     * @brief Notify caller when window Info changed.
+     *
+     * @param windowInfoList
+     */
+    virtual void OnWindowInfoChanged(
+        const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList) = 0;
+
+    void SetInterestInfo(const std::unordered_set<WindowInfoKey>& interestInfo) { interestInfo_ = interestInfo; }
+    const std::unordered_set<WindowInfoKey>& GetInterestInfo() const { return interestInfo_; }
+    void AddInterestInfo(WindowInfoKey interestValue) { interestInfo_.insert(interestValue); }
+
+private:
+    std::unordered_set<WindowInfoKey> interestInfo_;
+};
+
+/**
  * @class AccessibilityWindowInfo
  *
  * @brief Window info used for Accessibility.
@@ -1091,6 +1118,26 @@ public:
      */
     WMError MinimizeByWindowId(const std::vector<int32_t>& windowIds);
 
+    /**
+     * @brief Register window info change callback.
+     *
+     * @param observedInfo Property which to observe.
+     * @param listener Listener to observe window info.
+     * @return WM_OK means register success, others means failed.
+     */
+    WMError RegisterWindowInfoChangeCallback(const std::unordered_set<WindowInfoKey>& observedInfo,
+        const sptr<IWindowInfoChangedListener>& listener);
+    
+    /**
+     * @brief Unregister window info change callback.
+     *
+     * @param observedInfo Property which to observe.
+     * @param listener Listener to observe window info.
+     * @return WM_OK means unregister success, others means failed.
+     */
+    WMError UnregisterWindowInfoChangeCallback(const std::unordered_set<WindowInfoKey>& observedInfo,
+        const sptr<IWindowInfoChangedListener>& listener);
+
 private:
     WindowManager();
     ~WindowManager();
@@ -1117,6 +1164,12 @@ private:
     void UpdateVisibleWindowNum(const std::vector<VisibleWindowNumInfo>& visibleWindowNumInfo);
     WMError NotifyWindowStyleChange(WindowStyleType type);
     void NotifyWindowPidVisibilityChanged(const sptr<WindowPidVisibilityInfo>& info) const;
+    WMError ProcessRegisterWindowInfoChangeCallback(WindowInfoKey observedInfo,
+        const sptr<IWindowInfoChangedListener>& listener);
+    WMError ProcessUnregisterWindowInfoChangeCallback(WindowInfoKey observedInfo,
+        const sptr<IWindowInfoChangedListener>& listener);
+    WMError RegisterVisibilityStateChangedListener(const sptr<IWindowInfoChangedListener>& listener);
+    WMError UnregisterVisibilityStateChangedListener(const sptr<IWindowInfoChangedListener>& listener);
 };
 } // namespace Rosen
 } // namespace OHOS
