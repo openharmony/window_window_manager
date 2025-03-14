@@ -2019,13 +2019,11 @@ enum class WindowFocusChangeReason : int32_t {
  * @brief Windowinfokey
  */
 enum class WindowInfoKey : int32_t {
-    START = 0,
     WINDOW_ID = START,
     BUNDLE_NAME,
     ABILITY_NAME,
     APP_INDEX,
     VISIBILITY_STATE,
-    END = VISIBILITY_STATE,
 };
 }
 }
