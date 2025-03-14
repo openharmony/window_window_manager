@@ -3100,7 +3100,7 @@ void SceneSession::HandleMoveDragEnd(WSRect& rect, SizeChangeReason reason)
     }
 
     if (moveDragController_->GetMoveDragEndDisplayId() == moveDragController_->GetMoveDragStartDisplayId() ||
-        (!moveDragController_->(isSupportWindowDragCrossDisplay) && !WindowHelper::IsInputWindow(GetWindowType()))) {
+        (!moveDragController_->isSupportWindowDragCrossDisplay() && !WindowHelper::IsInputWindow(GetWindowType()))) {
         NotifySessionRectChange(rect, reason);
     } else {
         displayChangedByMoveDrag_ = true;
