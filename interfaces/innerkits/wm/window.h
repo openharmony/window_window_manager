@@ -1406,7 +1406,7 @@ public:
      * @param ability
      * @return WMError
      */
-    virtual WMError NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
+    virtual WMError NapiSetUIContent(const std::string& contentInfo, api_env* env, api_object storage,
         BackupAndRestoreType type = BackupAndRestoreType::NONE, sptr<IRemoteObject> token = nullptr,
         AppExecFwk::Ability* ability = nullptr)
     {
