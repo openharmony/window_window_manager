@@ -126,7 +126,6 @@ int32_t OH_WindowManager_IsWindowShown(int32_t windowId, bool* isShow)
 }
 
 namespace {
-#define NULL 0
 #define WINDOW_MANAGER_FREE_MEMORY(ptr) \
     do { \
         if ((ptr)) { \
@@ -500,18 +499,18 @@ int32_t OH_WindowManager_GetAllWindowLayoutInfo(
             SingletonContainer::Get<WindowManager>().GetAllWindowLayoutInfo(static_cast<uint64_t>(displayId), infos);
         if (OH_WINDOW_TO_ERROR_CODE_MAP.find(ret) == OH_WINDOW_TO_ERROR_CODE_MAP.end()) {
             errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
-            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "get failed, errCode: %{public}d" PRIu64, where, errCode);
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s get failed, errCode: %{public}d", where, errCode);
             return;
         } else if (OH_WINDOW_TO_ERROR_CODE_MAP.at(ret) != WindowManager_ErrorCode::OK) {
             errCode = errCode != WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_DEVICE_NOT_SUPPORTED ?
                 WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL : errCode;
-            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "get failed, errCode: %{public}d" PRIu64, where, errCode);
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s get failed, errCode: %{public}d", where, errCode);
             return;
         }
         WindowManager_Rect *infosInner = (WindowManager_Rect*)malloc(sizeof(WindowManager_Rect) * infos.size());
         if (infosInner == nullptr) {
             errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
-            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s infosInner is nullptr" PRIu64, where);
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s infosInner is nullptr", where);
             return;
         }
         for (size_t i = 0; i < infos.size(); i++) {
