@@ -60,7 +60,7 @@ public:
     void NotifyWindowVisibilityStateChanged(const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos);
     void PackWindowChangeInfo(const std::unordered_set<WindowInfoKey>& interestInfo,
         const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos,
-        std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowChangeInfos,);
+        std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowChangeInfos);
     void NotifyWindowDrawingContentInfoChanged(const std::vector<sptr<WindowDrawingContentInfo>>&
         windowDrawingContentInfos);
     void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing);
