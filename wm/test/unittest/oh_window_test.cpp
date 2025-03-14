@@ -115,6 +115,8 @@ HWTEST_F(OHWindowTest, OH_WindowManager_GetAllWindowLayoutInfo, Function | Small
     windowLayoutInfoSize = (size_t*)malloc(sizeof(size_t*));
     ret = OH_WindowManager_GetAllWindowLayoutInfo(displayId, windowLayoutInfo, windowLayoutInfoSize);
     EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::OK), ret);
+    OH_WindowManager_ReleaseAllWindowLayoutInfo(*windowLayoutInfo);
+    free(windowLayoutInfoSize);
 }
 }
 } // namespace Rosen

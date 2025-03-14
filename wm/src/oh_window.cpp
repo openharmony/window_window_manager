@@ -126,6 +126,14 @@ int32_t OH_WindowManager_IsWindowShown(int32_t windowId, bool* isShow)
 }
 
 namespace {
+#define NULL 0
+#define WINDOW_MANAGER_FREE_MEMORY(ptr) \
+    do { \
+        if ((ptr)) { \
+            free((ptr)); \
+            (ptr) = NULL; \
+        } \
+    } while(0)
 /*
  * Used to map from WMError to WindowManager_ErrorCode.
  */
@@ -488,11 +496,16 @@ int32_t OH_WindowManager_GetAllWindowLayoutInfo(
     }
     eventHandler->PostSyncTask([displayId, windowLayoutInfo, windowLayoutInfoSize, &errCode, where = __func__] {
         std::vector<OHOS::sptr<WindowLayoutInfo>> infos;
-        errCode = OH_WINDOW_TO_ERROR_CODE_MAP.at(
-            SingletonContainer::Get<WindowManager>().GetAllWindowLayoutInfo(static_cast<uint64_t>(displayId), infos));
-        if (errCode != WindowManager_ErrorCode::OK) {
+        auto ret =
+            SingletonContainer::Get<WindowManager>().GetAllWindowLayoutInfo(static_cast<uint64_t>(displayId), infos);
+        if (OH_WINDOW_TO_ERROR_CODE_MAP.find(ret) == OH_WINDOW_TO_ERROR_CODE_MAP.end()) {
+            errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "get failed, errCode: %{public}d" PRIu64, where, errCode);
+            return;
+        } else if (OH_WINDOW_TO_ERROR_CODE_MAP.at(ret) != WindowManager_ErrorCode::OK) {
             errCode = errCode != WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_DEVICE_NOT_SUPPORTED ?
                 WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL : errCode;
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "get failed, errCode: %{public}d" PRIu64, where, errCode);
             return;
         }
         WindowManager_Rect *infosInner = (WindowManager_Rect*)malloc(sizeof(WindowManager_Rect) * infos.size());
@@ -503,13 +516,22 @@ int32_t OH_WindowManager_GetAllWindowLayoutInfo(
         }
         for (size_t i = 0; i < infos.size(); i++) {
             TransformedToWindowManagerRect(infos[i]->rect, infosInner[i]);
-            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s rect: %{public}d %{public}d %{public}d %{public}d",
+            TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s rect: %{public}d %{public}d %{public}d %{public}d",
                 where, infosInner[i].posX, infosInner[i].posY, infosInner[i].width, infosInner[i].height);
         }
         *windowLayoutInfo = infosInner;
         *windowLayoutInfoSize = infos.size();
     }, __func__);
     return errCode;
+}
+
+void OH_WindowManager_ReleaseAllWindowLayoutInfo(WindowManager_Rect* windowLayoutInfo)
+{
+    if (windowLayoutInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "windowLayoutInfo is nullptr");
+        return;
+    }
+    WINDOW_MANAGER_FREE_MEMORY(windowLayoutInfo);
 }
 
 int32_t OH_WindowManager_SetWindowFocusable(int32_t windowId, bool isFocusable)

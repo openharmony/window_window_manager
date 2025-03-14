@@ -243,6 +243,8 @@ int32_t OH_WindowManager_SetWindowFocusable(int32_t windowId, bool isFocusable);
 
 int32_t OH_WindowManager_GetAllWindowLayoutInfo(
     int64_t displayId, WindowManager_Rect** windowLayoutInfo, size_t* windowLayoutInfoSize);
+
+void OH_WindowManager_ReleaseAllWindowLayoutInfo(WindowManager_Rect* windowLayoutInfo);
 #ifdef __cplusplus
 }
 #endif
