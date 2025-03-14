@@ -1694,9 +1694,8 @@ WMError WindowManager::RegisterWindowInfoChangeCallback(const std::unordered_set
     auto ret = WMError::WM_OK;
     for (const auto& info : observedInfo) {
         observedInfoForLog += std::to_string(static_cast<uint32_t>(info)) + ", ";
-        auto interestInfo = listener->GetInterestInfo();
-        if (interestInfo.find(info) == interestInfo.end()) {
-            interestInfo.insert(info);
+        if (listener->GetInterestInfo().find(info) == listener->GetInterestInfo().end()) {
+            listener->AddInterestInfo(info);
         }
         ret = ProcessRegisterWindowInfoChangeCallback(info, listener);
         if (ret != WMError::WM_OK) {
@@ -1715,9 +1714,8 @@ WMError WindowManager::UnregisterWindowInfoChangeCallback(const std::unordered_s
     auto ret = WMError::WM_OK;
     for (const auto& info : observedInfo) {
         observedInfoForLog += std::to_string(static_cast<uint32_t>(info)) + ", ";
-        auto interestInfo = listener->GetInterestInfo();
-        if (interestInfo.find(info) == interestInfo.end()) {
-            interestInfo.insert(info);
+        if (listener->GetInterestInfo().find(info) == listener->GetInterestInfo().end()) {
+            listener->AddInterestInfo(info);
         }
         ret = ProcessUnregisterWindowInfoChangeCallback(info, listener);
         if (ret != WMError::WM_OK) {
