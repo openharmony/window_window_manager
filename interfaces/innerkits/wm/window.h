@@ -55,6 +55,7 @@ class WantParams;
 
 namespace OHOS::Ace {
 class UIContent;
+class ViewportConfig;
 }
 
 namespace OHOS::Media {
@@ -645,6 +646,34 @@ public:
      * @brief Notify the caller when keyboard hide animation is completed.
      */
     virtual void OnKeyboardDidHide(const KeyboardPanelInfo& keyboardPanelInfo) {}
+};
+
+/**
+ * @class IPreferredOrientationChangeListener
+ *
+ * @brief listener of preferred orientation change which set by developer.
+ */
+class IPreferredOrientationChangeListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when orientation set by developer.
+     *
+     * @param ori the orientation set by developer.
+     */
+    virtual void OnPreferredOrientationChange(Orientation orientation) {}
+};
+
+/**
+ * @class IWindowOrientationChangeListener
+ *
+ * @brief IWindowOrientationChangeListener is used to notify while window rotate.
+ */
+class IWindowOrientationChangeListener : virtual public RefBase {
+public:
+    /**
+     * @brief Innerapi, notify caller while window rotate.
+     */
+    virtual void OnOrientationChange() {}
 };
 
 static WMError DefaultCreateErrCode = WMError::WM_OK;
@@ -1860,8 +1889,78 @@ public:
      * @brief Set requested orientation.
      *
      * @param Orientation Screen orientation.
+     * @param animation true means window rotation needs animation. Otherwise not needed.
      */
-    virtual void SetRequestedOrientation(Orientation) {}
+    virtual void SetRequestedOrientation(Orientation orientation, bool needAnimation = true) {}
+
+    /**
+     * @brief Get the Target Orientation ConfigInfo.
+     *
+     * @param targetOri target Orientation.
+     * @param config Viewport config.
+     * @param properties systemBar properties
+     * @param avoidAreas avoidArea information
+     * @return WMError
+     */
+    virtual WMError GetTargetOrientationConfigInfo(Orientation targetOri,
+        const std::map<WindowType, SystemBarProperty>& properties, Ace::ViewportConfig& config,
+        std::map<AvoidAreaType, AvoidArea>& avoidAreas)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Register window orientation set by developer
+     *
+     * @param listener IPreferredOrientationChangeListener.
+     * @return WM_OK means register success, others means register failed
+     */
+    virtual WMError RegisterPreferredOrientationChangeListener(
+        const sptr<IPreferredOrientationChangeListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Unregister window orientation set by developer
+     * 9
+     * @param listener IPreferredOrientationChangeListener.
+     * @return WM_OK means register success, others means unregister failed
+     */
+    virtual WMError UnregisterPreferredOrientationChangeListener(
+        const sptr<IPreferredOrientationChangeListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Register window orientation change listener
+     *
+     * @param listener IWindowOrientationChangeListener.
+     * @return WM_OK means register success, others means register failed
+     */
+    virtual WMError RegisterOrientationChangeListener(const sptr<IWindowOrientationChangeListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Unregister window orientation change listener
+     *
+     * @param listener IWindowOrientationChangeListener.
+     * @return WM_OK means register success, others means unregister failed
+     */
+    virtual WMError UnregisterOrientationChangeListener(const sptr<IWindowOrientationChangeListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Notify caller window orientation set by developer
+     *
+     * @param ori Orientation set by developer
+     */
+    virtual void NotifyPreferredOrientationChange(Orientation orientation) {}
 
     /**
      * @brief Get requested orientation.

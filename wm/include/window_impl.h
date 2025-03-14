@@ -309,7 +309,7 @@ public:
     virtual Ace::UIContent* GetUIContent() const override;
     virtual Ace::UIContent* GetUIContentWithId(uint32_t winId) const override;
     virtual void OnNewWant(const AAFwk::Want& want) override;
-    virtual void SetRequestedOrientation(Orientation) override;
+    virtual void SetRequestedOrientation(Orientation orientation, bool needAnimation = true) override;
     virtual Orientation GetRequestedOrientation() override;
     virtual void SetNeedRemoveWindowInputChannel(bool needRemoveWindowInputChannel) override;
     virtual WMError SetTouchHotAreas(const std::vector<Rect>& rects) override;
