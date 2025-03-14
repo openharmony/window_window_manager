@@ -82,6 +82,7 @@ ohos_shared_library("scene_session_manager") {
     "src/window_scene_config.cpp",
     "src/zidl/scene_session_manager_lite_stub.cpp",
     "src/zidl/scene_session_manager_stub.cpp",
+    "src/zidl/session_lifecycle_listener_stub.cpp",
   ]
 
   public_configs = [ ":session_manager_public_config" ]
@@ -207,6 +208,7 @@ ohos_shared_library("session_manager") {
     "../session_manager_service/src/session_manager_service_proxy.cpp",
     "src/session_manager.cpp",
     "src/zidl/scene_session_manager_proxy.cpp",
+    "src/zidl/session_lifecycle_listener_proxy.cpp",
   ]
 
   cflags_cc = [ "-std=c++17" ]

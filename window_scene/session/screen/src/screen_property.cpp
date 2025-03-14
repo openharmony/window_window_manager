@@ -647,4 +647,24 @@ uint32_t ScreenProperty::CalculateDPI()
 {
     return static_cast<uint32_t>(std::round(CalculatePPI() * PPI_TO_DPI));
 }
+
+void ScreenProperty::SetPointerActiveWidth(uint32_t pointerActiveWidth)
+{
+    pointerActiveWidth_ = pointerActiveWidth;
+}
+
+uint32_t ScreenProperty::GetPointerActiveWidth()
+{
+    return pointerActiveWidth_;
+}
+
+void ScreenProperty::SetPointerActiveHeight(uint32_t pointerActiveHeight)
+{
+    pointerActiveHeight_ = pointerActiveHeight;
+}
+
+uint32_t ScreenProperty::GetPointerActiveHeight()
+{
+    return pointerActiveHeight_;
+}
 } // namespace OHOS::Rosen

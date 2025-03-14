@@ -296,6 +296,24 @@ HWTEST_F(SessionStageStubTest, HandleNotifyOccupiedAreaChange, Function | SmallT
 }
 
 /**
+ * @tc.name: HandleNotifyKeyboardAnimationCompleted
+ * @tc.desc: test function : HandleNotifyKeyboardAnimationCompleted
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifyKeyboardAnimationCompleted, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    sptr<KeyboardPanelInfo> keyboardPanelInfo = sptr<KeyboardPanelInfo>::MakeSptr();
+    data.WriteParcelable(keyboardPanelInfo);
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_KEYBOARD_ANIMATION_COMPLETED);
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_EQ(ERR_NONE, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
  * @tc.name: HandleUpdateAvoidArea
  * @tc.desc: test function : HandleUpdateAvoidArea
  * @tc.type: FUNC
@@ -717,6 +735,22 @@ HWTEST_F(SessionStageStubTest, HandleCompatibleFullScreenClose, Function | Small
     MessageParcel reply;
     MessageOption option;
     uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_COMPATIBLE_FULLSCREEN_CLOSE);
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    ASSERT_NE(sessionStageStub_, nullptr);
+    ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandlePcAppInPadNormalClose
+ * @tc.desc: test function : HandlePcAppInPadNormalClose
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandlePcAppInPadNormalClose, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_PCAPPINPADNORMAL_CLOSE);
     data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
     ASSERT_NE(sessionStageStub_, nullptr);
     ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));

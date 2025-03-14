@@ -1302,6 +1302,30 @@ WSError SessionStageProxy::CompatibleFullScreenClose()
     return static_cast<WSError>(ret);
 }
 
+WSError SessionStageProxy::PcAppInPadNormalClose()
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC | MessageOption::TF_ASYNC_WAKEUP_LATER);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (remote->SendRequest(
+        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_PCAPPINPADNORMAL_CLOSE),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return WSError::WS_OK;
+}
+
 WSError SessionStageProxy::NotifyCompatibleModeEnableInPad(bool enable)
 {
     sptr<IRemoteObject> remote = Remote();
@@ -1664,5 +1688,32 @@ WSError SessionStageProxy::NotifyWindowAttachStateChange(bool isAttach)
         return WSError::WS_ERROR_IPC_FAILED;
     }
     return WSError::WS_OK;
+}
+
+void SessionStageProxy::NotifyKeyboardAnimationCompleted(const KeyboardPanelInfo& keyboardPanelInfo)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "WriteInterfaceToken failed");
+        return;
+    }
+
+    if (!data.WriteParcelable(&keyboardPanelInfo)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "KeyboardPanelInfo marshalling failed");
+        return;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "remote is null");
+        return;
+    }
+    if (remote->SendRequest(
+        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_KEYBOARD_ANIMATION_COMPLETED),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "SendRequest failed");
+    }
 }
 } // namespace OHOS::Rosen

@@ -283,6 +283,18 @@ HWTEST_F(SessionStageProxyTest, NotifyOccupiedAreaChangeInfo, Function | SmallTe
 }
 
 /**
+ * @tc.name: NotifyKeyboardAnimationCompleted
+ * @tc.desc: test function : NotifyKeyboardAnimationCompleted
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, NotifyKeyboardAnimationCompleted, Function | SmallTest | Level1)
+{
+    ASSERT_TRUE((sessionStage_ != nullptr));
+    KeyboardPanelInfo keyboardPanelInfo;
+    sessionStage_->NotifyKeyboardAnimationCompleted(keyboardPanelInfo);
+}
+
+/**
  * @tc.name: UpdateAvoidArea
  * @tc.desc: test function : UpdateAvoidArea
  * @tc.type: FUNC
@@ -570,6 +582,27 @@ HWTEST_F(SessionStageProxyTest, CompatibleFullScreenClose, Function | SmallTest 
     ASSERT_TRUE(sessionStage_ != nullptr);
     WSError res = sessionStage_->CompatibleFullScreenClose();
     ASSERT_EQ(WSError::WS_OK, res);
+}
+
+/**
+ * @tc.name: PcAppInPadNormalClose
+ * @tc.desc: test function : PcAppInPadNormalClose
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, PcAppInPadNormalClose, Function | SmallTest | Level1)
+{
+    ASSERT_TRUE(sessionStage_ != nullptr);
+    auto res = sessionStage_->PcAppInPadNormalClose();
+    ASSERT_NE(WSError::WS_ERROR_INVALID_WINDOW, res);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    res = sessionStage_->PcAppInPadNormalClose();
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
+
+    sptr<SessionStageProxy> sessionStage = sptr<SessionStageProxy>::MakeSptr(nullptr);
+    res = sessionStage->PcAppInPadNormalClose();
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
+    MockMessageParcel::ClearAllErrorFlag();
 }
 
 /**

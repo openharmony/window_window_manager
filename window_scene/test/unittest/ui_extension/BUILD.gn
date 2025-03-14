@@ -19,7 +19,7 @@ group("unittest") {
   deps = [ ":extension_data_handler_test" ]
 }
 
-module_out_path = "window_manager/window_scene/ui_extension"
+module_out_path = "window_manager/window_manager/window_scene/ui_extension"
 ws_unittest_common = "../:ws_unittest_common"
 
 ohos_unittest("extension_data_handler_test") {
