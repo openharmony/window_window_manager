@@ -666,7 +666,7 @@ public:
 /**
  * @class IWindowOrientationChangeListener
  * 
- * @brief IWindowOrientationChangeListener is used to notify before the window starts rotating.
+ * @brief IWindowOrientationChangeListener is used to notify before window rotate.
  */
 class IWindowOrientationChangeListener : virtual public RefBase {
 public:
