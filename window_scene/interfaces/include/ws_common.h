@@ -637,10 +637,15 @@ struct WindowAnimationConfig {
 };
 
 struct StartingWindowInfo {
-    int32_t startingWindowBackgroundId_;
-    int32_t startingWindowIconId_;
-    uint32_t startingWindowBackgroundColor_;
-    std::string startingWindowIconPath_;
+    uint32_t backgroundColorEarlyVersion_;
+    std::string iconPathEarlyVersion_;
+    bool configFileEnabled_;
+    uint32_t backgroundColor_;
+    std::string iconPath_;
+    std::string illustrationPath_;
+    std::string brandingPath_;
+    std::string backgroundImagePath_;
+    std::string backgroundImageFit_;
 };
 
 struct StartingWindowAnimationConfig {
