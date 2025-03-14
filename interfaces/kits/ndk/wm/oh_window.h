@@ -28,6 +28,7 @@
 
 #include <stdint.h>
 #include "oh_window_comm.h"
+#include "wm_common.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -240,6 +241,30 @@ int32_t OH_WindowManager_SetWindowTouchable(int32_t windowId, bool touchable);
  */
 int32_t OH_WindowManager_SetWindowFocusable(int32_t windowId, bool isFocusable);
 
+/**
+ * @brief Get Layout info of all windows on the selected display.
+ *
+ * @param display IdIndicate the id of display.
+ * @param windowLayoutInfo Pointer to the layout information of the visible windows on the specified screen.
+ * @param windowLayoutInfoSize Pointer to the size of the array of layout information of the visible windows on the
+ *                             specified screen.
+ * @return Returns the result code.
+ *         {@link OK} the function call is successful, return window layout info list.
+ *         {@link WINDOW_MANAGER_ERRORCODE_INVALID_PARAM} parameter error.
+ *         {@link WINDOW_MANAGER_ERRORCODE_DEVICE_NOT_SUPPORTED} capability not supported.
+ *         {@link WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL} the window manager service works abnormally.
+ * @since 17
+ */
+int32_t OH_WindowManager_GetAllWindowLayoutInfoList(
+    int64_t displayId, WindowManager_Rect** windowLayoutInfoList, size_t* windowLayoutInfoSize);
+
+/**
+ * @brief Release the memory of window layout info list.
+ *
+ * @param windowLayoutInfo Pointer to the layout information of the visible windows on the specified screen.
+ * @since 17
+ */
+void OH_WindowManager_ReleaseAllWindowLayoutInfoList(WindowManager_Rect* windowLayoutInfoList);
 #ifdef __cplusplus
 }
 #endif
