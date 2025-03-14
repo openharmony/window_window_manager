@@ -63,6 +63,21 @@ void FoldScreenPolicy::SetFoldStatus(FoldStatus foldStatus)
     lastFoldStatus_ = foldStatus;
 }
 
+std::chrono::steady_clock::time_point FoldScreenPolicy::GetStartTimePoint()
+{
+    return startTimePoint_;
+}
+
+bool FoldScreenPolicy::GetIsFirstFrameCommitReported()
+{
+    return isFirstFrameCommitReported_;
+}
+
+void FoldScreenPolicy::SetIsFirstFrameCommitReported(bool isFirstFrameCommitReported)
+{
+    isFirstFrameCommitReported_ = isFirstFrameCommitReported;
+}
+
 void FoldScreenPolicy::ClearState()
 {
     currentDisplayMode_ = FoldDisplayMode::UNKNOWN;

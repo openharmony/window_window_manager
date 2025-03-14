@@ -58,6 +58,9 @@ public:
     Drawing::Rect GetScreenSnapshotRect();
     void SetMainScreenRegion(DMRect& mainScreenRegion);
     bool GetCameraMode();
+    std::chrono::steady_clock::time_point GetStartTimePoint();
+    bool GetIsFirstFrameCommitReported();
+    void SetIsFirstFrameCommitReported(bool isFirstFrameCommitReported);
     /*
      *    Avoid fold to expand process queues public interface
      */

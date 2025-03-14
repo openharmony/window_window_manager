@@ -70,6 +70,7 @@ void SingleDisplayPocketFoldPolicy::SetdisplayModeChangeStatus(bool status, bool
     if (status) {
         pengdingTask_ = isOnBootAnimation ? FOLD_TO_EXPAND_ONBOOTANIMATION_TASK_NUM : FOLD_TO_EXPAND_TASK_NUM;
         startTimePoint_ = std::chrono::steady_clock::now();
+        SetIsFirstFrameCommitReported(false);
         displayModeChangeRunning_ = status;
     } else {
         pengdingTask_ --;
@@ -305,6 +306,8 @@ void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeToMainWhenFoldScreenO
         if (ifTentMode) {
             PowerMgr::PowerMgrClient::GetInstance().WakeupDeviceAsync(
                 PowerMgr::WakeupDeviceType::WAKEUP_DEVICE_TENT_MODE_CHANGE);
+        } else {
+            SetIsFirstFrameCommitReported(true);
         }
         SetdisplayModeChangeStatus(false);
     };
