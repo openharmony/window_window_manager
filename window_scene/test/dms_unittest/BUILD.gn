@@ -616,6 +616,7 @@ if (window_manager_fold_ability) {
       "ability_runtime:app_manager",
       "c_utils:utils",
       "hilog:libhilog",
+      "hisysevent:libhisysevent",
       "init:libbegetutil",
     ]
   }
@@ -679,6 +680,7 @@ if (window_manager_fold_ability) {
       "ability_runtime:app_manager",
       "c_utils:utils",
       "hilog:libhilog",
+      "hisysevent:libhisysevent",
       "init:libbegetutil",
     ]
 
@@ -773,6 +775,7 @@ if (window_manager_fold_ability) {
       "ability_runtime:app_manager",
       "c_utils:utils",
       "hilog:libhilog",
+      "hisysevent:libhisysevent",
       "init:libbegetutil",
       "sensor:sensor_interface_native",
     ]
