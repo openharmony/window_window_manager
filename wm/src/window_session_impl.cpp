@@ -229,6 +229,7 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     property_->SetCallingSessionId(option->GetCallingWindow());
     property_->SetIsUIExtFirstSubWindow(option->GetIsUIExtFirstSubWindow());
     property_->SetTopmost(option->GetWindowTopmost());
+    property_->SetSubWindowZLevel(option->GetSubWindowZLevel());
     property_->SetRealParentId(option->GetRealParentId());
     property_->SetParentWindowType(option->GetParentWindowType());
     property_->SetUIExtensionUsage(static_cast<UIExtensionUsage>(option->GetUIExtensionUsage()));
@@ -291,6 +292,13 @@ void WindowSessionImpl::MakeSubOrDialogWindowDragableAndMoveble()
             TLOGI(WmsLogTag::WMS_PC, "create dialogWindow, title: %{public}s, decorEnable: %{public}d",
                 dialogTitle_.c_str(), dialogDecorEnable);
         }
+    }
+}
+
+void WindowSessionImpl::SetSubWindowZLevelToProperty()
+{
+    if (WindowHelper::IsNormalSubWindow(property_->GetWindowType(), property_->GetWindowFlags())) {
+        property_->SetSubWindowZLevel(windowOption_->GetSubWindowZLevel());
     }
 }
 
@@ -477,6 +485,29 @@ void WindowSessionImpl::SetDefaultDisplayIdIfNeed()
         property_->SetDisplayId(defaultDisplayId);
         TLOGI(WmsLogTag::DEFAULT, "Reset displayId to %{public}" PRIu64, defaultDisplayId);
     }
+}
+
+/** @note @window.hierarchy */
+int32_t WindowSessionImpl::GetSubWindowZLevelByFlags(WindowType type, uint32_t windowFlags, bool isTopmost)
+{
+    if (WindowHelper::IsApplicationModalSubWindow(type, windowFlags)) {
+        if (isTopmost) {
+            return APPLICATION_MODALITY_SUB_WINDOW_Z_LEVEL + TOPMOST_SUB_WINDOW_Z_LEVEL;
+        }
+        return APPLICATION_MODALITY_SUB_WINDOW_Z_LEVEL;
+    } else if (WindowHelper::IsModalSubWindow(type, windowFlags)) {
+        if (isTopmost) {
+            return MODALITY_SUB_WINDOW_Z_LEVEL + TOPMOST_SUB_WINDOW_Z_LEVEL;
+        }
+        return MODALITY_SUB_WINDOW_Z_LEVEL;
+    } else if (WindowHelper::IsToastSubWindow(type, windowFlags)) {
+        return TOAST_SUB_WINDOW_Z_LEVEL;
+    } else if (WindowHelper::IsTextMenuSubWindow(type, windowFlags)) {
+        return TEXT_MENU_SUB_WINDOW_Z_LEVEL;
+    } else if (WindowHelper::IsDialogWindow(type)) {
+        return DIALOG_SUB_WINDOW_Z_LEVEL;
+    }
+    return NORMAL_SUB_WINDOW_Z_LEVEL;
 }
 
 WMError WindowSessionImpl::Connect()
@@ -2055,7 +2086,7 @@ float WindowSessionImpl::GetBrightness() const
     return property_->GetBrightness();
 }
 
-void WindowSessionImpl::SetRequestedOrientation(Orientation orientation)
+void WindowSessionImpl::SetRequestedOrientation(Orientation orientation, bool needAnimation)
 {
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::DEFAULT, "windowSession is invalid");
@@ -2411,6 +2442,11 @@ WMError WindowSessionImpl::SetSubWindowModal(bool isModal, ModalityType modality
         subWindowModalType = modalityType == ModalityType::WINDOW_MODALITY ?
             SubWindowModalType::TYPE_WINDOW_MODALITY :
             SubWindowModalType::TYPE_APPLICATION_MODALITY;
+    }
+    if (!(property_->GetSubWindowZLevel() <= MAXIMUM_Z_LEVEL && !isModal)) {
+        int32_t zLevel = GetSubWindowZLevelByFlags(GetType(), GetWindowFlags(), IsTopmost());
+        property_->SetSubWindowZLevel(zLevel);
+        UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_SUB_WINDOW_Z_LEVEL);
     }
     hostSession->NotifySubModalTypeChange(subWindowModalType);
     return modalRet;

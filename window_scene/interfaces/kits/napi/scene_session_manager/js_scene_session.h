@@ -94,6 +94,7 @@ enum class ListenerFuncType : uint32_t {
     FOLLOW_PARENT_RECT_CB,
     SET_PARENT_SESSION_CB,
     UPDATE_FLAG_CB,
+    Z_LEVEL_CHANGE_CB,
 };
 
 class SceneSession;
@@ -314,6 +315,7 @@ private:
     void ProcessSessionTouchableChangeRegister();
     void ProcessSessionTopmostChangeRegister();
     void ProcessMainWindowTopmostChangeRegister();
+    void ProcessSubWindowZLevelChangeRegister();
     void ProcessSubModalTypeChangeRegister();
     void ProcessMainModalTypeChangeRegister();
     void RegisterThrowSlipAnimationStateChangeCallback();
@@ -388,6 +390,7 @@ private:
     void OnSessionTouchableChange(bool touchable);
     void OnSessionTopmostChange(bool topmost);
     void OnMainWindowTopmostChange(bool isTopmost);
+    void OnSubSessionZLevelChange(int32_t zLevel);
     void OnSubModalTypeChange(SubWindowModalType subWindowModalType);
     void OnMainModalTypeChange(bool isModal);
     void OnThrowSlipAnimationStateChange(bool isAnimating);

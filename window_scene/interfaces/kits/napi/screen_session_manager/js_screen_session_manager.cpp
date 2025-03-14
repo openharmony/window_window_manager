@@ -109,6 +109,8 @@ napi_value JsScreenSessionManager::Init(napi_env env, napi_value exportObj)
         JsScreenSessionManager::SetLandscapeLockStatus);
     BindNativeFunction(env, exportObj, "getScreenSnapshot", moduleName,
         JsScreenSessionManager::GetScreenSnapshot);
+    BindNativeFunction(env, exportObj, "getScreenSnapshotSync", moduleName,
+        JsScreenSessionManager::GetScreenSnapshot);
     BindNativeFunction(env, exportObj, "getDeviceScreenConfig", moduleName,
         JsScreenSessionManager::GetDeviceScreenConfig);
     BindNativeFunction(env, exportObj, "setCameraStatus", moduleName, JsScreenSessionManager::SetCameraStatus);
