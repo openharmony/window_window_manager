@@ -277,13 +277,13 @@ void WindowManager::Impl::PackWindowChangeInfo(const std::unordered_set<WindowIn
             windowChangeInfo.emplace(WindowInfoKey::BUNDLE_NAME, info->bundleName_);
         }
         if (interstInfo.find(WindowInfoKey::ABILITY_NAME) != interstInfo.end()) {
-            windowChangeInfo.emplace(WindowInfoKey::BUNDLE_NAME, info->abilityName_);
+            windowChangeInfo.emplace(WindowInfoKey::ABILITY_NAME, info->abilityName_);
         }
         if (interstInfo.find(WindowInfoKey::APP_INDEX) != interstInfo.end()) {
-            windowChangeInfo.emplace(WindowInfoKey::BUNDLE_NAME, info->appIndex_);
+            windowChangeInfo.emplace(WindowInfoKey::APP_INDEX, info->appIndex_);
         }
         if (interstInfo.find(WindowInfoKey::VISIBILITY_STATE) != interstInfo.end()) {
-            windowChangeInfo.emplace(WindowInfoKey::BUNDLE_NAME, info->visibilityState_);
+            windowChangeInfo.emplace(WindowInfoKey::VISIBILITY_STATE, info->visibilityState_);
         }
         windowChangeInfos.emplace_back(windowChangeInfo);
     }
