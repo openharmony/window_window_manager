@@ -483,7 +483,7 @@ int32_t OH_WindowManager_GetAllWindowLayoutInfoList(
         TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "displayId is invalid, displayId:%{public}" PRIu64, displayId);
         return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM;
     }
-    if (windowLayoutInfo == nullptr || windowLayoutInfoSize == nullptr) {
+    if (windowLayoutInfoList == nullptr || windowLayoutInfoSize == nullptr) {
         TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "param is nullptr, displayId:%{public}" PRIu64, displayId);
         return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM;
     }
@@ -493,7 +493,7 @@ int32_t OH_WindowManager_GetAllWindowLayoutInfoList(
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "eventHandler is null, displayId:%{public}" PRIu64, displayId);
         return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
     }
-    eventHandler->PostSyncTask([displayId, windowLayoutInfo, windowLayoutInfoSize, &errCode, where = __func__] {
+    eventHandler->PostSyncTask([displayId, windowLayoutInfoList, windowLayoutInfoSize, &errCode, where = __func__] {
         std::vector<OHOS::sptr<WindowLayoutInfo>> infos;
         auto ret =
             SingletonContainer::Get<WindowManager>().GetAllWindowLayoutInfo(static_cast<uint64_t>(displayId), infos);
