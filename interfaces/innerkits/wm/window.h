@@ -1899,7 +1899,8 @@ public:
      * @param listener IPreferredOrientationChangeListener.
      * @return WM_OK means register success, others means register failed
      */
-    virtual WMError RegisterPreferredOrientationChangeListener(const sptr<IPreferredOrientationChangeListener>& listener) 
+    virtual WMError RegisterPreferredOrientationChangeListener(
+        const sptr<IPreferredOrientationChangeListener>& listener) 
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -1910,7 +1911,8 @@ public:
      * @param listener IPreferredOrientationChangeListener.
      * @return WM_OK means register success, others means unregister failed
      */
-    virtual WMError UnregisterPreferredOrientationChangeListener(const sptr<IPreferredOrientationChangeListener>& listener) 
+    virtual WMError UnregisterPreferredOrientationChangeListener(
+        const sptr<IPreferredOrientationChangeListener>& listener)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
