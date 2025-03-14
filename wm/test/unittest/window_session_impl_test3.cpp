@@ -413,6 +413,10 @@ HWTEST_F(WindowSessionImplTest3, RegisterMainWindowCloseListeners, Function | Sm
     window_->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     ret = window_->RegisterMainWindowCloseListeners(listener);
     ASSERT_EQ(ret, WMError::WM_OK);
+
+    window_->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    ret = window_->RegisterMainWindowCloseListeners(listener);
+    ASSERT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterMainWindowCloseListeners end";
 }
 
@@ -442,6 +446,10 @@ HWTEST_F(WindowSessionImplTest3, UnregisterMainWindowCloseListeners, Function | 
     window_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     ret = window_->UnregisterMainWindowCloseListeners(listener);
     ASSERT_EQ(ret, WMError::WM_OK);
+
+    window_->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    ret = window_->UnregisterMainWindowCloseListeners(listener);
+    ASSERT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: UnregisterMainWindowCloseListeners end";
 }
 
@@ -1368,6 +1376,41 @@ HWTEST_F(WindowSessionImplTest3, NotifyWatchFocusActiveChange, Function | SmallT
     window->hostSession_ = sptr<SessionMocker>::MakeSptr(info);
     window->property_->persistentId_ = ROTATE_ANIMATION_DURATION;
     ret = window->SetWindowDelayRaiseEnabled(true);
+}
+
+/**
+ * @tc.name: UpdateSubWindowLevel
+ * @tc.desc: UpdateSubWindowLevel
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, UpdateSubWindowLevel, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateSubWindowLevel");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+
+    sptr<WindowOption> subWindowOption = sptr<WindowOption>::MakeSptr();
+    subWindowOption->SetWindowName("UpdateSubWindowLevel_subWindow");
+    sptr<WindowSessionImpl> subWindow = sptr<WindowSessionImpl>::MakeSptr(subWindowOption);
+    subWindow->property_->SetPersistentId(2);
+    subWindow->property_->SetParentPersistentId(1);
+    subWindow->hostSession_ = session;
+    subWindow->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    subWindow->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    WindowSessionImpl::subWindowSessionMap_.insert(std::pair<int32_t,
+        std::vector<sptr<WindowSessionImpl>>>(1, { subWindow }));
+
+    int subWindowLevel = 5;
+    window->UpdateSubWindowLevel(subWindowLevel);
+    auto res = subWindow->property_->GetSubWindowLevel();
+    EXPECT_EQ(res, 6);
+    EXPECT_EQ(WMError::WM_OK, subWindow->Destroy(true));
+    EXPECT_EQ(WMError::WM_OK, window->Destroy(true));
 }
 } // namespace
 } // namespace Rosen

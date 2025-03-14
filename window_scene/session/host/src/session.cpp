@@ -168,6 +168,15 @@ std::shared_ptr<RSSurfaceNode> Session::GetSurfaceNode() const
     return surfaceNode_;
 }
 
+std::optional<NodeId> Session::GetSurfaceNodeId() const
+{
+    std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
+    if (surfaceNode_ != nullptr) {
+        return surfaceNode_->GetId();
+    }
+    return std::nullopt;
+}
+
 void Session::SetLeashWinSurfaceNode(std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode)
 {
     if (g_enableForceUIFirst) {
@@ -1037,6 +1046,7 @@ void Session::UpdateClientRectPosYAndDisplayId(WSRect& rect)
     auto updatedDisplayId = TransformGlobalRectToRelativeRect(rect);
     auto ret = UpdateClientDisplayId(updatedDisplayId);
     lastScreenFoldStatus_ = currScreenFoldStatus;
+    configDisplayId_ = DISPLAY_ID_INVALID;
     TLOGI(WmsLogTag::WMS_LAYOUT, "CalculatedRect: winId: %{public}d, input: %{public}s, output: %{public}s,"
         " result: %{public}d, clientDisplayId: %{public}" PRIu64, GetPersistentId(), lastRect.ToString().c_str(),
         rect.ToString().c_str(), ret, updatedDisplayId);
@@ -1051,6 +1061,17 @@ SingleHandTransform Session::GetSingleHandTransform() const
 {
     return singleHandTransform_;
 }
+
+void Session::SetSingleHandModeFlag(bool flag)
+{
+    singleHandModeFlag_ = flag;
+}
+
+bool Session::SessionIsSingleHandMode()
+{
+    return singleHandModeFlag_;
+}
+
 
 WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason,
     const std::string& updateReason, const std::shared_ptr<RSTransaction>& rsTransaction)
@@ -2023,6 +2044,18 @@ sptr<Session> Session::GetMainOrFloatSession() const
     }
 }
 
+bool Session::IsAncestorsSession(int ancestorsId) const
+{
+    if (GetSessionProperty()->GetParentPersistentId() == ancestorsId) {
+        return true;
+    }
+    auto parentSession = GetParentSession();
+    if (parentSession != nullptr) {
+        return parentSession->IsAncestorsSession(ancestorsId);
+    }
+    return false;
+}
+
 void Session::BindDialogToParentSession(const sptr<Session>& session)
 {
     std::unique_lock<std::shared_mutex> lock(dialogVecMutex_);
@@ -2865,6 +2898,22 @@ WSError Session::CompatibleFullScreenClose()
         return WSError::WS_ERROR_NULLPTR;
     }
     return sessionStage_->CompatibleFullScreenClose();
+}
+
+WSError Session::PcAppInPadNormalClose()
+{
+    TLOGD(WmsLogTag::WMS_COMPAT, "windowId:%{public}d", GetPersistentId());
+    if (!IsSessionValid()) {
+        TLOGD(WmsLogTag::WMS_COMPAT, "Session is invalid, id: %{public}d state: %{public}u",
+            GetPersistentId(), GetSessionState());
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    if (sessionStage_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "session stage is nullptr id: %{public}d state: %{public}u",
+              GetPersistentId(), GetSessionState());
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return sessionStage_->PcAppInPadNormalClose();
 }
 
 WSError Session::UpdateWindowMode(WindowMode mode)
@@ -3969,17 +4018,5 @@ DisplayId Session::GetClientDisplayId() const
 void Session::SetClientDisplayId(DisplayId displayid)
 {
     clientDisplayId_ = displayid;
-}
-
-void Session::UpdateDisplayIdByParentSession(DisplayId& updatedDisplayId)
-{
-    if (auto parentSession = GetParentSession()) {
-        TLOGI(WmsLogTag::WMS_MAIN, "winId: %{public}d, parentWinId: %{public}d, parentClientDisplay: %{public}" PRIu64,
-            GetPersistentId(), parentSession->GetPersistentId(), parentSession->GetClientDisplayId());
-        updatedDisplayId = parentSession->GetClientDisplayId();
-    } else if (GetClientDisplayId() == VIRTUAL_DISPLAY_ID) {
-        TLOGI(WmsLogTag::WMS_MAIN, "winId: %{public}d, no parentSession, but init virtual display", GetPersistentId());
-        updatedDisplayId = VIRTUAL_DISPLAY_ID;
-    }
 }
 } // namespace OHOS::Rosen

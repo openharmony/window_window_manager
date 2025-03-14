@@ -1592,6 +1592,39 @@ HWTEST_F(WindowSessionImplTest2, GetListeners02, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: GetListeners
+ * @tc.desc: GetListeners03 IKeyboardDidShowListener IKeyboardDidHideListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest2, GetListeners03, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest2: GetListeners03 start";
+    window_ = GetTestWindowImpl("GetListeners03");
+    ASSERT_NE(window_, nullptr);
+    KeyboardPanelInfo keyboardPanelInfo;
+    window_->NotifyKeyboardAnimationCompleted(keyboardPanelInfo);
+    keyboardPanelInfo.isShowing_ = true;
+    window_->NotifyKeyboardAnimationCompleted(keyboardPanelInfo);
+    ASSERT_TRUE(window_->keyboardDidShowListeners_[window_->GetPersistentId()].empty());
+    ASSERT_TRUE(window_->keyboardDidHideListeners_[window_->GetPersistentId()].empty());
+    sptr<IKeyboardDidShowListener> listener = sptr<MockIKeyboardDidShowListener>::MakeSptr();
+    window_->RegisterKeyboardDidShowListener(listener);
+    keyboardPanelInfo.isShowing_ = true;
+    window_->NotifyKeyboardAnimationCompleted(keyboardPanelInfo);
+    ASSERT_FALSE(window_->keyboardDidShowListeners_[window_->GetPersistentId()].empty());
+    window_->UnregisterKeyboardDidShowListener(listener);
+
+    sptr<IKeyboardDidHideListener> listener1 = sptr<MockIKeyboardDidHideListener>::MakeSptr();
+    window_->RegisterKeyboardDidHideListener(listener1);
+    keyboardPanelInfo.isShowing_ = false;
+    window_->NotifyKeyboardAnimationCompleted(keyboardPanelInfo);
+    ASSERT_FALSE(window_->keyboardDidHideListeners_[window_->GetPersistentId()].empty());
+    window_->UnregisterKeyboardDidHideListener(listener1);
+    window_->Destroy();
+    GTEST_LOG_(INFO) << "WindowSessionImplTest2: GetListeners03 end";
+}
+
+/**
  * @tc.name: GetUIContent
  * @tc.desc: GetUIContent
  * @tc.type: FUNC

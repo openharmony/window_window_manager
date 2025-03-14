@@ -155,6 +155,14 @@ public:
     WMError GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo);
 
     /**
+     * @brief Get keyboard calling window information.
+     *
+     * @param callingWindowInfo calling window information
+     * @return WM_OK means get success, others means get failed.
+     */
+    WMError GetCallingWindowInfo(CallingWindowInfo& callingWindowInfo);
+
+    /**
      * @brief Get all main window info.
      *
      * @param infos the all main window info.
@@ -221,6 +229,24 @@ public:
      * @return WM_OK means unregister success, others means unregister failed.
      */
     WMError UnregisterWindowStyleChangedListener(const sptr<IWindowStyleChangedListener>& listener);
+
+    /**
+     * @brief Register a listener to detect display changes for the keyboard calling window.
+     *
+     * @param listener IKeyboardCallingWindowDisplayChangedListener
+     * @return WM_OK means register success, others means unregister failed.
+     */
+    WMError RegisterCallingWindowDisplayChangedListener(
+        const sptr<IKeyboardCallingWindowDisplayChangedListener>& listener);
+
+    /**
+     * @brief Unregister the listener that detects display changes for the keyboard calling window.
+     *
+     * @param listener IKeyboardCallingWindowDisplayChangedListener
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    WMError UnregisterCallingWindowDisplayChangedListener(
+        const sptr<IKeyboardCallingWindowDisplayChangedListener>& listener);
 
     /**
      * @brief Get window style type.
@@ -325,6 +351,7 @@ private:
     WMError NotifyWindowStyleChange(WindowStyleType type);
     void NotifyAccessibilityWindowInfo(const std::vector<sptr<AccessibilityWindowInfo>>& infos,
         WindowUpdateType type) const;
+    WMError NotifyCallingWindowDisplayChanged(const CallingWindowInfo& callingWindowInfo);
 };
 } // namespace Rosen
 } // namespace OHOS

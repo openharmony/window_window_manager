@@ -506,6 +506,67 @@ bool IsJsObjNameUndefind(napi_env env, napi_value jsObjName, int32_t& objName)
     return true;
 }
 
+bool ConvertSessionRectInfoFromJs(napi_env env, napi_value jsObject, WSRect& rect)
+{
+    napi_value jsPosX = nullptr;
+    napi_get_named_property(env, jsObject, "posX_", &jsPosX);
+    napi_value jsPosY = nullptr;
+    napi_get_named_property(env, jsObject, "posY_", &jsPosY);
+    napi_value jsWidth = nullptr;
+    napi_get_named_property(env, jsObject, "width_", &jsWidth);
+    napi_value jsHeight = nullptr;
+    napi_get_named_property(env, jsObject, "height_", &jsHeight);
+
+    if (!IsJsObjNameUndefind(env, jsPosX, rect.posX_)) {
+        return false;
+    }
+
+    if (!IsJsObjNameUndefind(env, jsPosY, rect.posY_)) {
+        return false;
+    }
+
+    if (!IsJsObjNameUndefind(env, jsWidth, rect.width_)) {
+        return false;
+    }
+
+    if (!IsJsObjNameUndefind(env, jsHeight, rect.height_)) {
+        return false;
+    }
+    return true;
+}
+
+bool ConvertSingleHandScreenInfoFromJs(napi_env env, napi_value jsObject, SingleHandScreenInfo& singleHandScreenInfo)
+{
+    napi_value jsScaleRatio = nullptr;
+    napi_get_named_property(env, jsObject, "scaleRatio", &jsScaleRatio);
+    napi_value jsPivotX = nullptr;
+    napi_get_named_property(env, jsObject, "scalePivotX", &jsPivotX);
+    napi_value jsPivotY = nullptr;
+    napi_get_named_property(env, jsObject, "scalePivotY", &jsPivotY);
+    napi_value jsSingleHandMode = nullptr;
+    napi_get_named_property(env, jsObject, "singleHandMode", &jsSingleHandMode);
+
+    if (!IsJsObjNameUndefind(env, jsScaleRatio, singleHandScreenInfo.scaleRatio)) {
+        return false;
+    }
+
+    if (!IsJsObjNameUndefind(env, jsPivotX, singleHandScreenInfo.scalePivotX)) {
+        return false;
+    }
+
+    if (!IsJsObjNameUndefind(env, jsPivotY, singleHandScreenInfo.scalePivotY)) {
+        return false;
+    }
+
+    int32_t singleHandmode = 0;
+    if (!IsJsObjNameUndefind(env, jsSingleHandMode, singleHandmode)) {
+        return false;
+    }
+    singleHandScreenInfo.mode = static_cast<SingleHandMode>(singleHandmode);
+    return true;
+}
+
+
 bool ConvertRectInfoFromJs(napi_env env, napi_value jsObject, WSRect& rect)
 {
     napi_value jsLeftName = nullptr;
@@ -993,6 +1054,7 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
     SetJsSessionInfoByWant(env, sessionInfo, objValue);
     napi_set_named_property(env, objValue, "supportWindowModes",
         CreateSupportWindowModes(env, sessionInfo.supportedWindowModes));
+    napi_set_named_property(env, objValue, "specifiedFlag", CreateJsValue(env, sessionInfo.specifiedFlag_));
     if (sessionInfo.want != nullptr) {
         napi_set_named_property(env, objValue, "want", AppExecFwk::WrapWant(env, *sessionInfo.want));
     }
@@ -1042,6 +1104,8 @@ napi_value CreateJsSessionRecoverInfo(
     napi_set_named_property(env, objValue, "recoverRect", CreateJsSessionRect(env, wsRect));
     napi_set_named_property(env, objValue, "layoutFullScreen", CreateJsValue(env, property->IsLayoutFullScreen()));
     napi_set_named_property(env, objValue, "mainWindowTopmost", CreateJsValue(env, property->IsMainWindowTopmost()));
+    napi_set_named_property(env, objValue, "isFullScreenWaterfallMode",
+        CreateJsValue(env, property->GetIsFullScreenWaterfallMode()));
     return objValue;
 }
 
@@ -1749,30 +1813,6 @@ napi_value SceneTypeInit(napi_env env)
     return objValue;
 }
 
-struct AsyncInfo {
-    napi_env env;
-    napi_async_work work;
-    std::function<void()> func;
-};
-
-static void NapiAsyncWork(napi_env env, std::function<void()> task)
-{
-    napi_value resource = nullptr;
-    AsyncInfo* info = new AsyncInfo();
-    info->env = env;
-    info->func = task;
-    napi_create_string_utf8(env, "AsyncWork", NAPI_AUTO_LENGTH, &resource);
-    napi_create_async_work(env, nullptr, resource, [](napi_env env, void* data) {
-    },
-    [](napi_env env, napi_status status, void* data) {
-        AsyncInfo* info = (AsyncInfo*)data;
-        info->func();
-        napi_delete_async_work(env, info->work);
-        delete info;
-    }, (void*)info, &info->work);
-    napi_queue_async_work(env, info->work);
-}
-
 MainThreadScheduler::MainThreadScheduler(napi_env env)
     : env_(env)
 {
@@ -1806,7 +1846,7 @@ void MainThreadScheduler::PostMainThreadTask(Task&& localTask, std::string trace
         handler_->PostTask(std::move(task), "wms:" + traceInfo, delayTime,
             OHOS::AppExecFwk::EventQueue::Priority::IMMEDIATE);
     } else {
-        NapiAsyncWork(env_, task);
+        napi_send_event(env_, task, napi_eprio_immediate);
     }
 }
 } // namespace OHOS::Rosen

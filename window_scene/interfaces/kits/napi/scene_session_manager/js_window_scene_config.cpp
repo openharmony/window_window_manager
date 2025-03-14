@@ -212,4 +212,22 @@ napi_value JsWindowSceneConfig::CreateFreeMultiWindowConfig(napi_env env, const 
         config.freeMultiWindowConfig_.defaultWindowMode_));
     return objValue;
 }
+
+napi_value JsWindowSceneConfig::CreateSingleHandCompatibleConfig(napi_env env,
+                                                                 const SingleHandCompatibleModeConfig& config)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Object is null!");
+        return NapiGetUndefined(env);
+    }
+
+    napi_set_named_property(env, objValue, "enabled", CreateJsValue(env, config.enabled));
+    napi_set_named_property(env, objValue, "singleHandScale", CreateJsValue(env, config.singleHandScale));
+    napi_set_named_property(env, objValue, "heightChangeRatio", CreateJsValue(env, config.heightChangeRatio));
+    napi_set_named_property(env, objValue, "widthChangeRatio", CreateJsValue(env, config.widthChangeRatio));
+    return objValue;
+}
 } // namespace OHOS::Rosen

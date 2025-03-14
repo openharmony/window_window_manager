@@ -92,6 +92,8 @@ enum class ListenerFuncType : uint32_t {
     SET_WINDOW_CORNER_RADIUS_CB,
     HIGHLIGHT_CHANGE_CB,
     FOLLOW_PARENT_RECT_CB,
+    SET_PARENT_SESSION_CB,
+    UPDATE_FLAG_CB,
 };
 
 class SceneSession;
@@ -155,7 +157,7 @@ private:
     static napi_value UpdateSizeChangeReason(napi_env env, napi_callback_info info);
     static napi_value OpenKeyboardSyncTransaction(napi_env env, napi_callback_info info);
     static napi_value CloseKeyboardSyncTransaction(napi_env env, napi_callback_info info);
-    static napi_value NotifyTargetScreenWidthAndHeight(napi_env env, napi_callback_info info);
+    static napi_value NotifyKeyboardAnimationCompleted(napi_env env, napi_callback_info info);
     static napi_value SetScale(napi_env env, napi_callback_info info);
     static napi_value SetWindowLastSafeRect(napi_env env, napi_callback_info info);
     static napi_value SetMovable(napi_env env, napi_callback_info info);
@@ -179,6 +181,7 @@ private:
     static void BindNativeMethod(napi_env env, napi_value objValue, const char* moduleName);
     static void BindNativeMethodForKeyboard(napi_env env, napi_value objValue, const char* moduleName);
     static void BindNativeMethodForCompatiblePcMode(napi_env env, napi_value objValue, const char* moduleName);
+    static void BindNativeMethodForPcAppInPadNormal(napi_env env, napi_value objValue, const char* moduleName);
     static void BindNativeMethodForSCBSystemSession(napi_env env, napi_value objValue, const char* moduleName);
     static void BindNativeMethodForFocus(napi_env env, napi_value objValue, const char* moduleName);
     static void BindNativeMethodForWaterfall(napi_env env, napi_value objValue, const char* moduleName);
@@ -199,6 +202,7 @@ private:
     static napi_value CompatibleFullScreenRecover(napi_env env, napi_callback_info info);
     static napi_value CompatibleFullScreenMinimize(napi_env env, napi_callback_info info);
     static napi_value CompatibleFullScreenClose(napi_env env, napi_callback_info info);
+    static napi_value PcAppInPadNormalClose(napi_env env, napi_callback_info info);
     static napi_value SetWindowEnableDragBySystem(napi_env env, napi_callback_info info);
     static napi_value SetIsPendingToBackgroundState(napi_env env, napi_callback_info info);
     static napi_value SetIsActivatedAfterScreenLocked(napi_env env, napi_callback_info info);
@@ -212,8 +216,8 @@ private:
     static napi_value SetColorSpace(napi_env env, napi_callback_info info);
     static napi_value SetSnapshotSkip(napi_env env, napi_callback_info info);
     static napi_value ThrowSlipDirectly(napi_env env, napi_callback_info info);
-    static napi_value AddSidebarMaskColorModifier(napi_env env, napi_callback_info info);
-    static napi_value SetSidebarMaskColorModifier(napi_env env, napi_callback_info info);
+    static napi_value AddSidebarBlur(napi_env env, napi_callback_info info);
+    static napi_value SetSidebarBlur(napi_env env, napi_callback_info info);
 
     napi_value OnActivateDragBySystem(napi_env env, napi_callback_info info);
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
@@ -237,7 +241,7 @@ private:
     napi_value OnUpdateSizeChangeReason(napi_env env, napi_callback_info info);
     napi_value OnOpenKeyboardSyncTransaction(napi_env env, napi_callback_info info);
     napi_value OnCloseKeyboardSyncTransaction(napi_env env, napi_callback_info info);
-    napi_value OnNotifyTargetScreenWidthAndHeight(napi_env env, napi_callback_info info);
+    napi_value OnNotifyKeyboardAnimationCompleted(napi_env env, napi_callback_info info);
     napi_value OnSetScale(napi_env env, napi_callback_info info);
     napi_value OnSetWindowLastSafeRect(napi_env env, napi_callback_info info);
     napi_value OnSetMovable(napi_env env, napi_callback_info info);
@@ -271,6 +275,7 @@ private:
     napi_value OnCompatibleFullScreenRecover(napi_env env, napi_callback_info info);
     napi_value OnCompatibleFullScreenMinimize(napi_env env, napi_callback_info info);
     napi_value OnCompatibleFullScreenClose(napi_env env, napi_callback_info info);
+    napi_value OnPcAppInPadNormalClose(napi_env env, napi_callback_info info);
     napi_value OnSyncScenePanelGlobalPosition(napi_env env, napi_callback_info info);
     napi_value OnUnSyncScenePanelGlobalPosition(napi_env env, napi_callback_info info);
     napi_value OnSetNeedSyncSessionRect(napi_env env, napi_callback_info info);
@@ -289,8 +294,8 @@ private:
     napi_value OnSetColorSpace(napi_env env, napi_callback_info info);
     napi_value OnSetSnapshotSkip(napi_env env, napi_callback_info info);
     napi_value OnThrowSlipDirectly(napi_env env, napi_callback_info info);
-    napi_value OnAddSidebarMaskColorModifier(napi_env env, napi_callback_info info);
-    napi_value OnSetSidebarMaskColorModifier(napi_env env, napi_callback_info info);
+    napi_value OnAddSidebarBlur(napi_env env, napi_callback_info info);
+    napi_value OnSetSidebarBlur(napi_env env, napi_callback_info info);
 
     bool IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);
     void ProcessChangeSessionVisibilityWithStatusBarRegister();
@@ -355,6 +360,13 @@ private:
      * PC Window Layout
      */
     void ProcessSetSupportedWindowModesRegister();
+    void ProcessUpdateFlagRegister();
+
+    /*
+     * Sub Window
+     */
+    void ProcessSetParentSessionRegister();
+    void OnSetParentSession(int32_t oldParentWindowId, int32_t newParentWindowId);
 
     void ChangeSessionVisibilityWithStatusBar(const SessionInfo& info, bool visible);
     void ChangeSessionVisibilityWithStatusBarInner(std::shared_ptr<SessionInfo> sessionInfo, bool visible);
@@ -404,8 +416,8 @@ private:
     void NotifyFrameLayoutFinish();
     void ProcessPrivacyModeChangeRegister();
     void NotifyPrivacyModeChange(bool isPrivacyMode);
-    void OnSetWindowRectAutoSave(bool enabled);
-    void OnUpdateAppUseControl(ControlAppType type, bool isNeedControl);
+    void OnSetWindowRectAutoSave(bool enabled, bool isSaveBySpecifiedFlag);
+    void OnUpdateAppUseControl(ControlAppType type, bool isNeedControl, bool isControlRecentOnly);
     void OnWindowMoving(DisplayId displayId, int32_t pointerX, int32_t pointerY);
     void UpdateSessionLabelAndIcon(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon);
     void OnKeyboardStateChange(SessionState state, KeyboardViewMode mode);
@@ -422,6 +434,7 @@ private:
      * PC Window Layout
      */
     void OnSetSupportedWindowModes(std::vector<AppExecFwk::SupportWindowMode>&& supportedWindowModes);
+    void OnUpdateFlag(const std::string& flag);
 
     static void Finalizer(napi_env env, void* data, void* hint);
 

@@ -14,7 +14,7 @@
 import("//build/test.gni")
 import("//foundation/window/window_manager/windowmanager_aafwk.gni")
 
-module_out_path = "window_manager/wm/special_window"
+module_out_path = "window_manager/window_manager/wm/special_window"
 wm_unittest_common = "../:wm_unittest_common"
 
 ohos_unittest("window_scene_session_impl_special_window_test") {

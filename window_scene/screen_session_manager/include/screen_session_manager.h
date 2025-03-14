@@ -217,6 +217,7 @@ public:
     sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) override;
     DMError HasImmersiveWindow(ScreenId screenId, bool& immersive) override;
     void SetDisplayBoundary(const sptr<ScreenSession> screenSession);
+    void SetLowTemp(LowTempMode lowTemp);
 
     /**
      * On/Off screen
@@ -227,6 +228,7 @@ public:
     bool SuspendEnd() override;
     void BlockScreenOnByCV(void);
     void BlockScreenOffByCV(void);
+    bool BlockScreenWaitPictureFrameByCV(bool isStartDream);
     bool BlockSetDisplayState(void);
     bool IsScreenLockSuspend(void);
     bool IsPreBrightAuthFail(void);
@@ -262,6 +264,7 @@ public:
 
     FoldStatus GetFoldStatus() override;
     SuperFoldStatus GetSuperFoldStatus() override;
+    void SetLandscapeLockStatus(bool isLocked) override;
     bool GetTentMode();
     bool GetCameraMode();
     ExtendScreenConnectStatus GetExtendScreenConnectStatus() override;
@@ -289,7 +292,7 @@ public:
     void NotifyDisplayModeChanged(FoldDisplayMode displayMode);
     void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info) override;
     void NotifyScreenMagneticStateChanged(bool isMagneticState);
-    void OnTentModeChanged(bool isTentMode, int32_t hall = -1);
+    void OnTentModeChanged(int tentType, int32_t hall = -1);
     void RegisterSettingDpiObserver();
     void RegisterSettingRotationObserver();
     void RegisterSettingscreenSkipProtectedWindowObserver();
@@ -388,6 +391,7 @@ public:
      */
     void SwitchUser() override;
     void SwitchScbNodeHandle(int32_t userId, int32_t newScbPid, bool coldBoot);
+    void HotSwitch(int32_t newUserId, int32_t newScbPid);
     void AddScbClientDeathRecipient(const sptr<IScreenSessionManagerClient>& scbClient, int32_t scbPid);
     void ScbClientDeathCallback(int32_t deathScbPid);
     void ScbStatusRecoveryWhenSwitchUser(std::vector<int32_t> oldScbPids, int32_t newScbPid);
@@ -409,6 +413,7 @@ public:
     void RegisterSettingWireCastObserver(sptr<ScreenSession>& screenSession);
     SessionOption GetSessionOption(sptr<ScreenSession> screenSession);
     SessionOption GetSessionOption(sptr<ScreenSession> screenSession, ScreenId screenId);
+    virtual DMError SetSystemKeyboardStatus(bool isOn = false) override;
 
 protected:
     ScreenSessionManager();
@@ -459,6 +464,7 @@ private:
     void SetClientInner();
     void RecoverMultiScreenMode(sptr<ScreenSession> screenSession);
     void GetCurrentScreenPhyBounds(float& phyWidth, float& phyHeight, bool& isReset, const ScreenId& screenid);
+    void SetPhysicalRotationClientInner(ScreenId screenId, int rotation);
 
     void NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);
@@ -507,6 +513,7 @@ private:
      * On/Off screen
      */
     void SetGotScreenOffAndWakeUpBlock();
+    void WakeUpPictureFrameBlock(DisplayEvent event);
 
     class ScreenIdManager {
     friend class ScreenSessionGroup;
@@ -609,10 +616,15 @@ private:
     bool gotScreenOffNotify_ = false;
     bool needScreenOffNotify_ = false;
     bool dozeNotifyFinish_ = false;
+    bool pictureFrameReady_ = false;
+    bool pictureFrameBreak_ = false;
+
     std::mutex screenOnMutex_;
     std::condition_variable screenOnCV_;
     std::mutex screenOffMutex_;
     std::condition_variable screenOffCV_;
+    std::mutex screenWaitPictureFrameMutex_;
+    std::condition_variable screenWaitPictureFrameCV_;
     int32_t screenOffDelay_ {0};
     int32_t screenOnDelay_ {0};
 
@@ -673,6 +685,10 @@ private:
     bool IsFakeDisplayExist();
     DMError DoMakeUniqueScreenOld(const std::vector<ScreenId>& allUniqueScreenIds, std::vector<DisplayId>& displayIds,
         bool isCallingByThirdParty);
+    bool IsSupportCoordination();
+
+    LowTempMode lowTemp_ {LowTempMode::UNKNOWN};
+    std::mutex lowTempMutex_;
 
 private:
     class ScbClientListenerDeathRecipient : public IRemoteObject::DeathRecipient {
