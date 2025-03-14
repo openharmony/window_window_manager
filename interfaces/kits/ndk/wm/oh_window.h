@@ -242,28 +242,29 @@ int32_t OH_WindowManager_SetWindowTouchable(int32_t windowId, bool touchable);
 int32_t OH_WindowManager_SetWindowFocusable(int32_t windowId, bool isFocusable);
 
 /**
- * @brief Get all window layout info
+ * @brief Get Layout info of all windows on the selected display.
  *
- * @param displayId The ID of the display to be got all window layout info.
- * @param windowLayoutInfo Output parameter for all window layout info.
- * @param windowLayoutInfoSize Output parameter for the length of all window layout info.
+ * @param display IdIndicate the id of display.
+ * @param windowLayoutInfo Pointer to the layout information of the visible windows on the specified screen.
+ * @param windowLayoutInfoSize Pointer to the size of the array of layout information of the visible windows on the
+ *                             specified screen.
  * @return Returns the result code.
- *         {@link OK} the function call is successful.
+ *         {@link OK} the function call is successful, return window layout info list.
  *         {@link WINDOW_MANAGER_ERRORCODE_INVALID_PARAM} parameter error.
  *         {@link WINDOW_MANAGER_ERRORCODE_DEVICE_NOT_SUPPORTED} capability not supported.
  *         {@link WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL} the window manager service works abnormally.
- * @since 16
+ * @since 17
  */
-int32_t OH_WindowManager_GetAllWindowLayoutInfo(
-    int64_t displayId, WindowManager_Rect** windowLayoutInfo, size_t* windowLayoutInfoSize);
+int32_t OH_WindowManager_GetAllWindowLayoutInfoList(
+    int64_t displayId, WindowManager_Rect** windowLayoutInfoList, size_t* windowLayoutInfoSize);
 
 /**
- * @brief Release all window layout info
+ * @brief Release the memory of window layout info list.
  *
- * @param windowLayoutInfo Output parameter for all window layout info.
- * @since 16
+ * @param windowLayoutInfo Pointer to the layout information of the visible windows on the specified screen.
+ * @since 17
  */
-void OH_WindowManager_ReleaseAllWindowLayoutInfo(WindowManager_Rect* windowLayoutInfo);
+void OH_WindowManager_ReleaseAllWindowLayoutInfoList(WindowManager_Rect* windowLayoutInfoList);
 #ifdef __cplusplus
 }
 #endif
