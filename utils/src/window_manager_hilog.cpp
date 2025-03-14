@@ -47,8 +47,6 @@ const std::unordered_map<WmsLogTag, const char *> DOMAIN_CONTENTS_MAP = {
     { WmsLogTag::WMS_LAYOUT_PC, "WMSLayoutPc" },
     { WmsLogTag::WMS_STARTUP_PAGE, "WMSStartupPage" },
     { WmsLogTag::WMS_COMPAT, "WMSCompat" },
-    { WmsLogTag::WMS_ROTATION, "WMSRotation" },
-    { WmsLogTag::WMS_ANIMATION, "WMSAnimation" },
 };
 } // namespace OHOS
 }
