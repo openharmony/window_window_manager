@@ -229,25 +229,25 @@ public:
  * @brief Listener to observe window info.
  */
 class IWindowInfoChangedListener : virtual public RefBase {
-    public:
+public:
+    IWindowInfoChangedListener() = default;
 
-        IWindowInfoChangedListener() {}
+    virtual ~IWindowInfoChangedListener() = default;
 
-        virtual ~IWindowInfoChangedListener() {};
+    /**
+     * @brief Notify caller when window Info changed.
+     *
+     * @param info
+     */
+    virtual void OnWindowInfoChanged(
+        const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList) = 0;
 
-        /**
-         * @brief Notify caller when window Info changed.
-         *
-         * @param info
-         */
-        virtual void OnWindowInfoChanged(const std::vector<std::unordered_map<WindowInfoKey, std::any>>& infos) = 0;
+    void SetInterestInfo(const std::unordered_set<WindowInfoKey>& interestInfo) { interestInfo_ = interestInfo; }
+    const std::unordered_set<WindowInfoKey>& GetInterestInfo() const { return interestInfo_; }
+    void AddInterestInfo(WindowInfoKey interestValue) { interestInfo_.insert(interestValue); }
 
-        void SetInterestInfo(const std::unordered_set<WindowInfoKey>& interestInfo) { interestInfo_ = interestInfo; }
-        std::unordered_set<WindowInfoKey> GetInterestInfo() const { return interestInfo_; }
-        void AddInterestInfo(WindowInfoKey interstValue) { interestInfo_.insert(interstValue); }
-
-    private:
-        std::unordered_set<WindowInfoKey> interestInfo_;
+private:
+    std::unordered_set<WindowInfoKey> interestInfo_;
 };
 
 /**

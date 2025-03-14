@@ -1690,7 +1690,7 @@ WMError WindowManager::ProcessUnregisterWindowInfoChangeCallback(WindowInfoKey o
 WMError WindowManager::RegisterWindowInfoChangeCallback(const std::unordered_set<WindowInfoKey>& observedInfo,
     const sptr<IWindowInfoChangedListener>& listener)
 {
-    std::string observedInfoForLog = "ObservedInfo: ";
+    std::ostringstream observedInfoForLog = "ObservedInfo: ";
     auto ret = WMError::WM_OK;
     for (const auto& info : observedInfo) {
         observedInfoForLog += std::to_string(static_cast<uint32_t>(info)) + ", ";
@@ -1710,7 +1710,7 @@ WMError WindowManager::RegisterWindowInfoChangeCallback(const std::unordered_set
 WMError WindowManager::UnregisterWindowInfoChangeCallback(const std::unordered_set<WindowInfoKey>& observedInfo,
     const sptr<IWindowInfoChangedListener>& listener)
 {
-    std::string observedInfoForLog = "ObservedInfo: ";
+    std::ostringstream observedInfoForLog = "ObservedInfo: ";
     auto ret = WMError::WM_OK;
     for (const auto& info : observedInfo) {
         observedInfoForLog += std::to_string(static_cast<uint32_t>(info)) + ", ";
