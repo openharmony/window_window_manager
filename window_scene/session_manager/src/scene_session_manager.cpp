@@ -3126,7 +3126,7 @@ void SceneSessionManager::ReportSubWindowCreationFailure(int32_t pid, std::strin
         oss << ", hostwindow bundleName: " << hostBundleName;
         oss << ", abilityName: " << abilityName;
         SingletonContainer::Get<WindowInfoReporter>().ReportWindowException(
-            static_cast<int32_t>(WindowDFXHelperType::WINDOW_CREATE_SUB_WINDOW_FAILED), getpid(), oss.str());
+            static_cast<int32_t>(WindowDFXHelperType::WINDOW_CREATE_SUB_WINDOW_FAILED), pid, oss.str());
     }, __func__);
 }
 
