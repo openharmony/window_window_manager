@@ -527,6 +527,8 @@ WMError WindowExtensionSessionImpl::NapiSetUIContentInner(const std::string& con
         if (uiContent == nullptr) {
             WLOGFE("failed, id: %{public}d", GetPersistentId());
             return WMError::WM_ERROR_NULLPTR;
+        }
+        uiContent->SetParentToken(token);
         if (property_->GetUIExtensionUsage() == UIExtensionUsage::CONSTRAINED_EMBEDDED) {
             uiContent->SetUIContentType(Ace::UIContentType::SECURITY_UI_EXTENSION);
         }
