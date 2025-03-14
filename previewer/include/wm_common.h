@@ -16,9 +16,11 @@
 #ifndef OHOS_ROSEN_WM_COMMON_H
 #define OHOS_ROSEN_WM_COMMON_H
 
+#include <any>
 #include <map>
 #include <sstream>
 #include <string>
+#include <unordered_set>
 
 #include <float.h>
 
@@ -967,21 +969,23 @@ struct WindowLayoutInfo : public Parcelable {
  * @brief Window meta info
  */
 struct WindowMetaInfo : public Parcelable {
-    int32_t windowId;
+    int32_t windowId = 0;
     std::string windowName;
     std::string bundleName;
     std::string abilityName;
+    int32_t appIndex = 0;
 
     bool Marshalling(Parcel& parcel) const override
     {
         return parcel.WriteInt32(windowId) && parcel.WriteString(windowName) && parcel.WriteString(bundleName) &&
-               parcel.WriteString(abilityName);
+               parcel.WriteString(abilityName) && parcel.WriteInt32(appIndex);
     }
     static WindowMetaInfo* Unmarshalling(Parcel& parcel)
     {
         WindowMetaInfo* windowMetaInfo = new WindowMetaInfo();
         if (!parcel.ReadInt32(windowMetaInfo->windowId) || !parcel.ReadString(windowMetaInfo->windowName) ||
-            !parcel.ReadString(windowMetaInfo->bundleName) || !parcel.ReadString(windowMetaInfo->abilityName)) {
+            !parcel.ReadString(windowMetaInfo->bundleName) || !parcel.ReadString(windowMetaInfo->abilityName) ||
+            !parcel.ReadInt32(windowMetaInfo->appIndex)) {
             delete windowMetaInfo;
             return nullptr;
         }
@@ -1200,6 +1204,17 @@ enum class BackupAndRestoreType : int32_t {
     CONTINUATION = 1,               // distribute
     APP_RECOVERY = 2,               // app recovery
     RESOURCESCHEDULE_RECOVERY = 3,  // app is killed due to resource schedule
+};
+
+/**
+ * @brief Windowinfokey
+ */
+enum class WindowInfoKey : int32_t {
+    WINDOW_ID,
+    BUNDLE_NAME,
+    ABILITY_NAME,
+    APP_INDEX,
+    VISIBILITY_STATE,
 };
 }
 }
