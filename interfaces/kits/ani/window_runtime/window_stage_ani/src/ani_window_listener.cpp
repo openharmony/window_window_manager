@@ -47,7 +47,8 @@ void AniWindowListener::SetMainEventHandler()
 void AniWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason reason,
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
-    TLOGI(WmsLogTag::DEFAULT, "[ANI] wh[%{public}u, %{public}u], reason = %{public}u", rect.width_, rect.height_, reason);
+    TLOGI(WmsLogTag::DEFAULT, "[ANI] wh[%{public}u, %{public}u], reason = %{public}u", rect.width_,
+        rect.height_, reason);
     if (currRect_.width_ == rect.width_ && currRect_.height_ == rect.height_ &&
         reason != WindowSizeChangeReason::DRAG_END) {
         TLOGI(WmsLogTag::DEFAULT, "[ANI]no need to change size");

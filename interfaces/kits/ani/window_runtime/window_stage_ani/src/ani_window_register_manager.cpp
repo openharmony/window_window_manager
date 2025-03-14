@@ -247,7 +247,8 @@ WmErrorCode AniWindowRegisterManager::ProcessScreenshotRegister(sptr<AniWindowLi
 {
     TLOGI(WmsLogTag::DEFAULT, "called");
     if (window == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "%{public}sregister screenshot listener failed. window is null", isRegister? "" : "un");
+        TLOGE(WmsLogTag::DEFAULT,
+            "%{public}sregister screenshot listener failed. window is null", isRegister? "" : "un");
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     sptr<IScreenshotListener> thisListener(listener);
@@ -484,7 +485,8 @@ WmErrorCode AniWindowRegisterManager::UnregisterListener(sptr<Window> window, st
             break;
         }
         if (!findFlag) {
-            TLOGW(WmsLogTag::DEFAULT, "[ANI]Unregister type %{public}s failed because not found callback!", type.c_str());
+            TLOGW(WmsLogTag::DEFAULT,
+                "[ANI]Unregister type %{public}s failed because not found callback!", type.c_str());
             return WmErrorCode::WM_OK;
         }
     }
