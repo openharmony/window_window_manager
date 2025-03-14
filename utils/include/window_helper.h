@@ -56,7 +56,6 @@ public:
         return ((windowFlags & mask) == 0 && IsSubWindow(type));
     }
 
-
     static inline bool IsModalSubWindow(WindowType type, uint32_t windowFlags)
     {
         return IsSubWindow(type) && (windowFlags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_MODAL));
