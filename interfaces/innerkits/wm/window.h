@@ -1862,7 +1862,10 @@ public:
      */
     virtual WMError GetTargetOrientationConfigInfo(Orientation targetOri,
         const std::map<WindowType, SystemBarProperty>& properties, Ace::ViewportConfig& config,
-        std::map<AvoidAreaType, AvoidArea>& avoidAreas) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+        std::map<AvoidAreaType, AvoidArea>& avoidAreas)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 
     /**
      * @brief Register window orientation set by developer
