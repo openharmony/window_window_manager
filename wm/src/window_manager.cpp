@@ -758,7 +758,7 @@ WMError WindowManager::UnregisterVisibilityChangedListener(const sptr<IVisibilit
 WMError WindowManager::RegisterVisibilityStateChangedListener(const sptr<IWindowInfoChangedListener>& listener)
 {
     if (listener == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "listener could not be null");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "listener is null");
         return WMError::WM_ERROR_NULLPTR;
     }
     std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
@@ -787,7 +787,7 @@ WMError WindowManager::RegisterVisibilityStateChangedListener(const sptr<IWindow
 WMError WindowManager::UnregisterVisibilityStateChangedListener(const sptr<IWindowInfoChangedListener>& listener)
 {
     if (listener == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "listener could not be null");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "listener is null");
         return WMError::WM_ERROR_NULLPTR;
     }
     std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
@@ -1666,8 +1666,8 @@ WMError WindowManager::MinimizeByWindowId(const std::vector<int32_t>& windowIds)
 WMError WindowManager::ProcessRegisterWindowInfoChangeCallback(WindowInfoKey observedInfo,
     const sptr<IWindowInfoChangedListener>& listener)
 {
-    switch (static_cast<uint32_t>(observedInfo)) {
-        case static_cast<uint32_t>(WindowInfoKey::VISIBILITY_STATE) :
+    switch (observedInfo) {
+        case WindowInfoKey::VISIBILITY_STATE :
             return RegisterVisibilityStateChangedListener(listener);
         default:
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Invalid observedInfo: %{public}d", static_cast<uint32_t>(observedInfo));
@@ -1678,8 +1678,8 @@ WMError WindowManager::ProcessRegisterWindowInfoChangeCallback(WindowInfoKey obs
 WMError WindowManager::ProcessUnregisterWindowInfoChangeCallback(WindowInfoKey observedInfo,
     const sptr<IWindowInfoChangedListener>& listener)
 {
-    switch (static_cast<uint32_t>(observedInfo)) {
-        case static_cast<uint32_t>(WindowInfoKey::VISIBILITY_STATE) :
+    switch (observedInfo) {
+        case WindowInfoKey::VISIBILITY_STATE :
             return UnregisterVisibilityStateChangedListener(listener);
         default:
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Invalid observedInfo: %{public}d", static_cast<uint32_t>(observedInfo));
@@ -1690,30 +1690,32 @@ WMError WindowManager::ProcessUnregisterWindowInfoChangeCallback(WindowInfoKey o
 WMError WindowManager::RegisterWindowInfoChangeCallback(const std::unordered_set<WindowInfoKey>& observedInfo,
     const sptr<IWindowInfoChangedListener>& listener)
 {
-    std::ostringstream observedInfoForLog = "ObservedInfo: ";
+    std::ostringstream observedInfoForLog;
+    observedInfoForLog << "ObservedInfo: ";
     auto ret = WMError::WM_OK;
     for (const auto& info : observedInfo) {
-        observedInfoForLog += std::to_string(static_cast<uint32_t>(info)) + ", ";
+        observedInfoForLog << static_cast<uint32_t>(info) << ", ";
         if (listener->GetInterestInfo().find(info) == listener->GetInterestInfo().end()) {
             listener->AddInterestInfo(info);
         }
         ret = ProcessRegisterWindowInfoChangeCallback(info, listener);
         if (ret != WMError::WM_OK) {
-            observedInfoForLog += "failed";
+            observedInfoForLog << "failed";
             break;
         }
     }
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s", observedInfoForLog.c_str());
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s", observedInfoForLog.str().c_str());
     return ret;
 }
 
 WMError WindowManager::UnregisterWindowInfoChangeCallback(const std::unordered_set<WindowInfoKey>& observedInfo,
     const sptr<IWindowInfoChangedListener>& listener)
 {
-    std::ostringstream observedInfoForLog = "ObservedInfo: ";
+    std::ostringstream observedInfoForLog;
+    observedInfoForLog << "ObservedInfo: ";
     auto ret = WMError::WM_OK;
     for (const auto& info : observedInfo) {
-        observedInfoForLog += std::to_string(static_cast<uint32_t>(info)) + ", ";
+        observedInfoForLog << static_cast<uint32_t>(info) << ", ";
         if (listener->GetInterestInfo().find(info) == listener->GetInterestInfo().end()) {
             listener->AddInterestInfo(info);
         }
@@ -1723,7 +1725,7 @@ WMError WindowManager::UnregisterWindowInfoChangeCallback(const std::unordered_s
             break;
         }
     }
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s", observedInfoForLog.c_str());
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s", observedInfoForLog.str().c_str());
     return ret;
 }
 } // namespace Rosen
