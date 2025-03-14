@@ -491,20 +491,39 @@ void WindowExtensionSessionImpl::ArkUIFrameworkSupport()
     }
 }
 
+std::unique_ptr<Ace::UIContent> WindowExtensionSessionImpl::UIContentCreate(AppExecFwk::Ability* ability, void* env,
+    int isAni)
+{
+    if (isAni) {
+        return  ability != nullptr ? Ace::UIContent::Create(ability) :
+            Ace::UIContent::CreateWithAniEnv(context_.get(), reinterpret_cast<ani_env*>(env));
+    } else {
+        return  ability != nullptr ? Ace::UIContent::Create(ability) :
+            Ace::UIContent::Create(context_.get(), reinterpret_cast<NativeEngine*>(env));
+    }
+}
+ 
+WMError WindowExtensionSessionImpl::NapiSetUIContent(const std::string& contentInfo, ani_env* env, ani_object storage,
+    BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
+{
+    return NapiSetUIContentInner(contentInfo, env, storage, type, token, ability, 1);
+}
+ 
 WMError WindowExtensionSessionImpl::NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
     BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
+{
+    return NapiSetUIContentInner(contentInfo, env, storage, type, token, ability, 0);
+}
+ 
+WMError WindowExtensionSessionImpl::NapiSetUIContentInner(const std::string& contentInfo, void* env, void* storage,
+    BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability, int isAni)
 {
     WLOGFD("%{public}s state:%{public}u", contentInfo.c_str(), state_);
     if (auto uiContent = GetUIContentSharedPtr()) {
         uiContent->Destroy();
     }
     {
-        std::unique_ptr<Ace::UIContent> uiContent;
-        if (ability != nullptr) {
-            uiContent = Ace::UIContent::Create(ability);
-        } else {
-            uiContent = Ace::UIContent::Create(context_.get(), reinterpret_cast<NativeEngine*>(env));
-        }
+        std::unique_ptr<Ace::UIContent> uiContent = UIContentCreate(ability, (void*)env, isAni);
         if (uiContent == nullptr) {
             WLOGFE("failed, id: %{public}d", GetPersistentId());
             return WMError::WM_ERROR_NULLPTR;
@@ -513,20 +532,20 @@ WMError WindowExtensionSessionImpl::NapiSetUIContent(const std::string& contentI
         if (property_->GetUIExtensionUsage() == UIExtensionUsage::CONSTRAINED_EMBEDDED) {
             uiContent->SetUIContentType(Ace::UIContentType::SECURITY_UI_EXTENSION);
         }
-        uiContent->Initialize(this, contentInfo, storage, property_->GetParentId());
+        if (isAni) {
+            uiContent->InitializeWithAniStorage(this, contentInfo, (ani_object)storage, property_->GetParentId());
+        } else {
+            uiContent->Initialize(this, contentInfo, (napi_value)storage, property_->GetParentId());
+        }
         // make uiContent available after Initialize/Restore
         std::unique_lock<std::shared_mutex> lock(uiContentMutex_);
         uiContent_ = std::move(uiContent);
     }
     SetUIContentComplete();
     NotifyModalUIExtensionMayBeCovered(true);
-
+ 
     UpdateAccessibilityTreeInfo();
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
-    if (uiContent == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "uiContent is nullptr.");
-        return WMError::WM_ERROR_NULLPTR;
-    }
     if (focusState_ != std::nullopt) {
         focusState_.value() ? uiContent->Focus() : uiContent->UnFocus();
     }
