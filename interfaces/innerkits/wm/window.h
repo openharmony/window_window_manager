@@ -661,20 +661,20 @@ public:
      * @param ori the orientation set by developer.
      */
     virtual void OnPreferredOrientationChange(Orientation orientation) {}
-}
+};
 
 /**
  * @class IWindowOrientationChangeListener
  * 
- * @brief IWindowOrientationChangeListener is used to notify before window rotate.
+ * @brief IWindowOrientationChangeListener is used to notify while window rotate.
  */
 class IWindowOrientationChangeListener : virtual public RefBase {
 public:
     /**
-     * @brief Innerapi, notify caller befor window starts rotating.
+     * @brief Innerapi, notify caller while window rotate.
      */
     virtual void OnOrientationChange() {}
-}
+};
 
 static WMError DefaultCreateErrCode = WMError::WM_OK;
 class Window : virtual public RefBase {
