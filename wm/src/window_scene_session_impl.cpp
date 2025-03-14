@@ -2099,17 +2099,16 @@ WMError WindowSceneSessionImpl::RaiseAboveTarget(int32_t subWindowId)
 WMError WindowSceneSessionImpl::SetSubWindowZLevel(int32_t zLevel)
 {
     TLOGD(WmsLogTag::WMS_HIERARCHY, "%{public}d", zLevel);
-    auto parentId = GetParentId();
     if (IsWindowSessionInvalid()) {
-        TLOGE(WmsLogTag::WMS_HIERARCHY, "Session is invalid");
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (!WindowHelper::IsSubWindow(GetType())) {
-        TLOGE(WmsLogTag::WMS_HIERARCHY, "Must be normal app sub window!");
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "must be normal app sub window");
         return WMError::WM_ERROR_INVALID_CALLING;
     }
-    if (parentId == INVALID_SESSION_ID) {
-        WLOGFE("Only the children of the main window can be raised!");
+    if (GetParentId() == INVALID_SESSION_ID) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "only the children of the main window can be raised");
         return WMError::WM_ERROR_INVALID_PARENT;
     }
     if (zLevel > MAXIMUM_Z_LEVEL || zLevel < MINIMUM_Z_LEVEL) {
@@ -2132,8 +2131,11 @@ WMError WindowSceneSessionImpl::GetSubWindowZLevel(int32_t& zLevel)
         TLOGE(WmsLogTag::WMS_HIERARCHY, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+    if (!WindowHelper::IsSubWindow(GetType()) || !WindowHelper::IsDialogWindow(GetType())) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "must be app sub window!");
+    }
     zLevel = property_->GetSubWindowZLevel();
-    TLOGI(WmsLogTag::WMS_HIERARCHY, "Id:%{public}d, zLevel:%{public}d", GetWindowId(), zLevel);
+    TLOGI(WmsLogTag::WMS_HIERARCHY, "Id:%{public}u, zLevel:%{public}d", GetWindowId(), zLevel);
     return WMError::WM_OK;
 }
 
