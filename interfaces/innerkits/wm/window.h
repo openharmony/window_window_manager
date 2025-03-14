@@ -634,7 +634,7 @@ public:
      *
      * @param ori the orientation set by developer.
      */
-    virtual void OnPreferredOrientationChange(Orientation ori) {}
+    virtual void OnPreferredOrientationChange(Orientation orientation) {}
 }
 
 /**
@@ -1849,7 +1849,7 @@ public:
      * @param Orientation Screen orientation.
      * @param animation true means window rotation needs animation. Otherwise not needed.
      */
-    virtual void SetRequestedOrientation(Orientation, bool needAnimation = true) {}
+    virtual void SetRequestedOrientation(Orientation orientation, bool needAnimation = true) {}
 
     /**
      * @brief Get the Target Orientation ConfigInfo.
@@ -1916,7 +1916,7 @@ public:
      *  
      * @param ori Orientation set by developer
      */    
-    virtual void NotifyFrontendOrientation(Orientation ori) {}
+    virtual void NotifyPreferredOrientationChange(Orientation orientation) {}
 
     /**
      * @brief Get requested orientation.
