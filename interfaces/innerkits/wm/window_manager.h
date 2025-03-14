@@ -242,12 +242,12 @@ class IWindowInfoChangedListener : virtual public RefBase {
          */
         virtual void OnWindowInfoChanged(const std::vector<std::unordered_map<WindowInfoKey, std::any>>& infos) = 0;
 
-        void SetInterstInfo(const std::unordered_set<WindowInfoKey>& interstInfo) { interstInfo_ = interstInfo; }
-        std::unordered_set<WindowInfoKey> GetInterstInfo() const { return interstInfo_; }
-        void AddInterstInfo(WindowInfoKey interstValue) { interstInfo_.insert(interstValue); }
+        void SetInterestInfo(const std::unordered_set<WindowInfoKey>& interestInfo) { interestInfo_ = interestInfo; }
+        std::unordered_set<WindowInfoKey> GetInterestInfo() const { return interestInfo_; }
+        void AddInterestInfo(WindowInfoKey interstValue) { interestInfo_.insert(interstValue); }
 
     private:
-        std::unordered_set<WindowInfoKey> interstInfo_;
+        std::unordered_set<WindowInfoKey> interestInfo_;
 };
 
 /**
