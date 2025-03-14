@@ -3450,7 +3450,6 @@ bool SceneSession::KeyFrameNotifyFilter(const WSRect& rect, SizeChangeReason rea
         TLOGD(WmsLogTag::WMS_LAYOUT, "filter for animating");
         return true;
     }
-    bool isKeyFrame = false;
     uint64_t nowTimeStamp = std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now().time_since_epoch()).count();
     uint64_t interval = nowTimeStamp - lastKeyFrameStamp_;
@@ -3465,12 +3464,12 @@ bool SceneSession::KeyFrameNotifyFilter(const WSRect& rect, SizeChangeReason rea
     TLOGI(WmsLogTag::WMS_LAYOUT, "key frame checking: %{public}" PRIu64 "[%{public}d], %{public}f[%{public}d]",
         interval, intervalCheckPass, distance, distanceCheckPass);
     if (intervalCheckPass || distanceCheckPass) {
-        isKeyFrame = true;
         lastKeyFrameStamp_ = nowTimeStamp;
         lastKeyFrameRect_ = rect;
         keyFrameAnimating_ = true;
+        return false;
     }
-    return !isKeyFrame;
+    return true;
 }
 
 WSError SceneSession::KeyFrameAnimateEnd()
