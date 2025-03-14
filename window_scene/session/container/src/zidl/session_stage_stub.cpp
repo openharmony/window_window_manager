@@ -794,14 +794,12 @@ int SessionStageStub::HandleLinkKeyFrameCanvasNode(MessageParcel& data, MessageP
 int SessionStageStub::HandleSetKeyFramePolicy(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "in");
-    auto keyFramePolicy = data.ReadParcelable<KeyFramePolicy>();
+    sptr<KeyFramePolicy> keyFramePolicy = data.ReadParcelable<KeyFramePolicy>();
     if (!keyFramePolicy) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Read keyFramePolicy failed.");
         return ERR_INVALID_DATA;
     }
     SetKeyFramePolicy(*keyFramePolicy);
-    delete keyFramePolicy;
-    keyFramePolicy = nullptr;
     return ERR_NONE;
 }
 

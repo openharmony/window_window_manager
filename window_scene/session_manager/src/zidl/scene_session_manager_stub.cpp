@@ -1810,14 +1810,12 @@ int SceneSessionManagerStub::HandleSetAppKeyFramePolicy(MessageParcel& data, Mes
         TLOGE(WmsLogTag::WMS_LAYOUT, "Read bundleName failed.");
         return ERR_INVALID_DATA;
     }
-    auto keyFramePolicy = data.ReadParcelable<KeyFramePolicy>();
+    sptr<KeyFramePolicy> keyFramePolicy = data.ReadParcelable<KeyFramePolicy>();
     if (!keyFramePolicy) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Read keyFramePolicy failed.");
         return ERR_INVALID_DATA;
     }
     WMError errCode = SetAppKeyFramePolicy(bundleName, *keyFramePolicy);
-    delete keyFramePolicy;
-    keyFramePolicy = nullptr;
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Write errCode fail.");
         return ERR_INVALID_DATA;
