@@ -38,6 +38,7 @@ public:
     void RectCheck(uint32_t curWidth, uint32_t curHeight) override;
     bool IsVisibleForeground() const override;
     WSError SetDialogSessionBackGestureEnabled(bool isEnabled) override;
+    int32_t GetSubWindowZLevel() const override;
 
 protected:
     bool CheckKeyEventDispatch(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const;

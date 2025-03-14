@@ -657,6 +657,15 @@ constexpr int32_t ONE_FOURTH_FULL_CIRCLE_DEGREE = 90;
 constexpr float UNDEFINED_DENSITY = -1.0f;
 constexpr float MINIMUM_CUSTOM_DENSITY = 0.5f;
 constexpr float MAXIMUM_CUSTOM_DENSITY = 4.0f;
+constexpr int32_t MINIMUM_Z_LEVEL = -10000;
+constexpr int32_t MAXIMUM_Z_LEVEL = 10000;
+constexpr int32_t NORMAL_SUB_WINDOW_Z_LEVEL = 0;
+constexpr int32_t MODALITY_SUB_WINDOW_Z_LEVEL = 13000;
+constexpr int32_t DIALOG_SUB_WINDOW_Z_LEVEL = 13000;
+constexpr int32_t TEXT_MENU_SUB_WINDOW_Z_LEVEL = 13500;
+constexpr int32_t TOAST_SUB_WINDOW_Z_LEVEL = 14000;
+constexpr int32_t APPLICATION_MODALITY_SUB_WINDOW_Z_LEVEL = 20000;
+constexpr int32_t TOPMOST_SUB_WINDOW_Z_LEVEL = 2000;
 }
 
 inline int32_t GetUserIdByUid(int32_t uid)
@@ -957,7 +966,7 @@ struct KeyboardPanelInfo : public Parcelable {
 /**
  * @struct CallingWindowInfo
  *
- * @brief Info of keyboard calling window
+ * @brief Information of keyboard calling window.
  */
 struct CallingWindowInfo : public Parcelable {
     int32_t windowId_ = 0;
@@ -1730,6 +1739,7 @@ struct SubWindowOptions {
     bool decorEnabled = false;
     bool isModal = false;
     bool isTopmost = false;
+    int32_t zLevel = 0;
     bool maximizeSupported = false;
     ModalityType modalityType = ModalityType::WINDOW_MODALITY;
 };

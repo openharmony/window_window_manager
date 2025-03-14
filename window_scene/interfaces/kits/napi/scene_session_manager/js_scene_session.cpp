@@ -93,6 +93,7 @@ const std::string SET_WINDOW_CORNER_RADIUS_CB = "setWindowCornerRadius";
 const std::string HIGHLIGHT_CHANGE_CB = "highlightChange";
 const std::string SET_PARENT_SESSION_CB = "setParentSession";
 const std::string UPDATE_FLAG_CB = "updateFlag";
+const std::string Z_LEVEL_CHANGE_CB = "zLevelChange";
 
 constexpr int ARG_COUNT_1 = 1;
 constexpr int ARG_COUNT_2 = 2;
@@ -173,6 +174,7 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {FOLLOW_PARENT_RECT_CB,                 ListenerFuncType::FOLLOW_PARENT_RECT_CB},
     {SET_PARENT_SESSION_CB,                 ListenerFuncType::SET_PARENT_SESSION_CB},
     {UPDATE_FLAG_CB,                        ListenerFuncType::UPDATE_FLAG_CB},
+    {Z_LEVEL_CHANGE_CB,                     ListenerFuncType::Z_LEVEL_CHANGE_CB},
 };
 
 const std::vector<std::string> g_syncGlobalPositionPermission {
@@ -319,6 +321,8 @@ napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& sessio
         CreateJsValue(env, static_cast<int32_t>(session->IsSystemKeyboard())));
     napi_set_named_property(env, objValue, "bundleName",
         CreateJsValue(env, session->GetSessionInfo().bundleName_));
+    napi_set_named_property(env, objValue, "zLevel",
+        CreateJsValue(env, static_cast<int32_t>(session->GetSubWindowZLevel())));
     SetWindowSizeAndPosition(env, objValue, session);
     sptr<WindowSessionProperty> sessionProperty = session->GetSessionProperty();
     if (sessionProperty != nullptr) {
@@ -1420,6 +1424,25 @@ void JsSceneSession::ProcessMainWindowTopmostChangeRegister()
         jsSceneSession->OnMainWindowTopmostChange(isTopmost);
     });
     TLOGD(WmsLogTag::WMS_HIERARCHY, "register success");
+}
+
+/** @note @window.hierarchy */
+void JsSceneSession::ProcessSubWindowZLevelChangeRegister()
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "session is nullptr, persistentId:%{public}d", persistentId_);
+        return;
+    }
+    session->RegisterSubSessionZLevelChangeCallback([weakThis = wptr(this)](int32_t zLevel) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "jsSceneSession is null");
+            return;
+        }
+        jsSceneSession->OnSubSessionZLevelChange(zLevel);
+    });
+    TLOGD(WmsLogTag::WMS_HIERARCHY, "register success, persistentId:%{public}d", persistentId_);
 }
 
 void JsSceneSession::ProcessSubModalTypeChangeRegister()
@@ -2526,6 +2549,9 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
         case static_cast<uint32_t>(ListenerFuncType::MAIN_WINDOW_TOP_MOST_CHANGE_CB):
             ProcessMainWindowTopmostChangeRegister();
             break;
+        case static_cast<uint32_t>(ListenerFuncType::Z_LEVEL_CHANGE_CB):
+            ProcessSubWindowZLevelChangeRegister();
+            break;
         case static_cast<uint32_t>(ListenerFuncType::SUB_MODAL_TYPE_CHANGE_CB):
             ProcessSubModalTypeChangeRegister();
             break;
@@ -3597,6 +3623,26 @@ void JsSceneSession::OnMainWindowTopmostChange(bool isTopmost)
         napi_value argv[] = { jsMainWindowTopmostObj };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     }, "OnMainWindowTopmostChange: " + std::to_string(isTopmost));
+}
+
+void JsSceneSession::OnSubSessionZLevelChange(int32_t zLevel)
+{
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, zLevel, env = env_] {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
+            TLOGNE(WmsLogTag::WMS_HIERARCHY, "jsSceneSession id:%{public}d has been destroyed", persistentId);
+            return;
+        }
+        auto jsCallBack = jsSceneSession->GetJSCallback(Z_LEVEL_CHANGE_CB);
+        if (!jsCallBack) {
+            TLOGNE(WmsLogTag::WMS_HIERARCHY, "jsCallBack is nullptr");
+            return;
+        }
+        napi_value jsZLevelObj = CreateJsValue(env, zLevel);
+        napi_value argv[] = {jsZLevelObj};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task, "OnSubSessionZLevelChange: " + std::to_string(zLevel));
 }
 
 void JsSceneSession::OnSubModalTypeChange(SubWindowModalType subWindowModalType)

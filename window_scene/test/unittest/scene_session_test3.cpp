@@ -1126,7 +1126,7 @@ HWTEST_F(SceneSessionTest3, AddExtensionTokenInfo, Function | SmallTest | Level2
     info.abilityName_ = "AddExtensionTokenInfo";
     info.bundleName_ = "AddExtensionTokenInfo";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    
+
     sceneSession->AddExtensionTokenInfo(tokenInfo);
     EXPECT_NE(sceneSession, nullptr);
 }
@@ -1161,7 +1161,7 @@ HWTEST_F(SceneSessionTest3, OnNotifyAboveLockScreen, Function | SmallTest | Leve
     info.abilityName_ = "OnNotifyAboveLockScreen";
     info.bundleName_ = "OnNotifyAboveLockScreen";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    
+
     sceneSession->OnNotifyAboveLockScreen();
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->CheckExtensionOnLockScreenToClose();
@@ -1181,7 +1181,7 @@ HWTEST_F(SceneSessionTest3, CloseExtensionSync, Function | SmallTest | Level2)
     info.abilityName_ = "CloseExtensionSync";
     info.bundleName_ = "CloseExtensionSync";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    
+
     sceneSession->CloseExtensionSync(tokenInfo);
     EXPECT_NE(sceneSession, nullptr);
 }
@@ -1198,7 +1198,7 @@ HWTEST_F(SceneSessionTest3, SetIsStatusBarVisible, Function | SmallTest | Level2
     info.abilityName_ = "SetIsStatusBarVisible";
     info.bundleName_ = "SetIsStatusBarVisible";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    
+
     sceneSession->SetIsStatusBarVisible(isVisible);
     EXPECT_NE(sceneSession, nullptr);
 }
@@ -1215,7 +1215,7 @@ HWTEST_F(SceneSessionTest3, GetAllAvoidAreas, Function | SmallTest | Level2)
     info.abilityName_ = "GetAllAvoidAreas";
     info.bundleName_ = "GetAllAvoidAreas";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    
+
     auto res = sceneSession->GetAllAvoidAreas(avoidAreas);
     EXPECT_EQ(res, WSError::WS_OK);
 }
@@ -1234,7 +1234,7 @@ HWTEST_F(SceneSessionTest3, NotifyPipWindowSizeChange, Function | SmallTest | Le
     info.abilityName_ = "NotifyPipWindowSizeChange";
     info.bundleName_ = "NotifyPipWindowSizeChange";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    
+
     auto res = sceneSession->NotifyPipWindowSizeChange(width, height, scale);
     EXPECT_EQ(res, WSError::WS_ERROR_NULLPTR);
 }
@@ -1252,7 +1252,7 @@ HWTEST_F(SceneSessionTest3, SendPointEventForMoveDrag, Function | SmallTest | Le
     info.abilityName_ = "SendPointEventForMoveDrag";
     info.bundleName_ = "SendPointEventForMoveDrag";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    
+
     auto res = sceneSession->SendPointEventForMoveDrag(pointerEvent, isExecuteDelayRaise);
     EXPECT_EQ(res, WSError::WS_OK);
 }
@@ -1268,7 +1268,7 @@ HWTEST_F(SceneSessionTest3, DisallowActivationFromPendingBackground, Function | 
     info.abilityName_ = "DisallowActivationFromPendingBackground";
     info.bundleName_ = "DisallowActivationFromPendingBackground";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    
+
     auto res = sceneSession->DisallowActivationFromPendingBackground(true, true, true, true);
     EXPECT_EQ(res, false);
 }
@@ -1285,7 +1285,7 @@ HWTEST_F(SceneSessionTest3, UpdateFullScreenWaterfallMode, Function | SmallTest 
     info.abilityName_ = "UpdateFullScreenWaterfallMode";
     info.bundleName_ = "UpdateFullScreenWaterfallMode";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    
+
     sceneSession->UpdateFullScreenWaterfallMode(isWaterfallMode);
     EXPECT_NE(sceneSession, nullptr);
 }
@@ -1301,7 +1301,7 @@ HWTEST_F(SceneSessionTest3, RegisterFullScreenWaterfallModeChangeCallback, Funct
     info.abilityName_ = "RegisterFullScreenWaterfallModeChangeCallback";
     info.bundleName_ = "RegisterFullScreenWaterfallModeChangeCallback";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    
+
     std::function<void(bool isWaterfallMode)> func = [](bool isWaterfallMode) {
         return;
     };
@@ -1320,7 +1320,7 @@ HWTEST_F(SceneSessionTest3, RegisterThrowSlipAnimationStateChangeCallback, Funct
     info.abilityName_ = "RegisterThrowSlipAnimationStateChangeCallback";
     info.bundleName_ = "RegisterThrowSlipAnimationStateChangeCallback";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    
+
     std::function<void(bool isAnimating)> func = [](bool isAnimating) {
         return;
     };
@@ -1339,7 +1339,7 @@ HWTEST_F(SceneSessionTest3, MaskSupportEnterWaterfallMode, Function | SmallTest 
     info.abilityName_ = "MaskSupportEnterWaterfallMode";
     info.bundleName_ = "MaskSupportEnterWaterfallMode";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    
+
     sceneSession->MaskSupportEnterWaterfallMode();
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->pcFoldScreenController_ = nullptr;
@@ -1363,6 +1363,25 @@ HWTEST_F(SceneSessionTest3, HandleActionUpdateMainWindowTopmost, Function | Smal
     sceneSession->property_ = windowSessionProperty;
 
     auto res = sceneSession->HandleActionUpdateMainWindowTopmost(windowSessionProperty, action);
+    EXPECT_EQ(res, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: HandleActionUpdateSubWindowZLevel
+ * @tc.desc: HandleActionUpdateSubWindowZLevel
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, HandleActionUpdateSubWindowZLevel, Function | SmallTest | Level2)
+{
+    WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_SUB_WINDOW_Z_LEVEL;
+    SessionInfo info;
+    info.abilityName_ = "HandleActionUpdateSubWindowZLevel";
+    info.bundleName_ = "HandleActionUpdateSubWindowZLevel";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->property_ = windowSessionProperty;
+
+    auto res = sceneSession->HandleActionUpdateSubWindowZLevel(windowSessionProperty, action);
     EXPECT_EQ(res, WMError::WM_OK);
 }
 
@@ -1415,7 +1434,7 @@ HWTEST_F(SceneSessionTest3, RegisterSetLandscapeMultiWindowFunc, Function | Smal
     info.abilityName_ = "RegisterSetLandscapeMultiWindowFunc";
     info.bundleName_ = "RegisterSetLandscapeMultiWindowFunc";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    
+
     std::function<void(bool isLandscapeMultiWindow)> func = [](bool isLandscapeMultiWindow) {
         return;
     };
@@ -1453,7 +1472,7 @@ HWTEST_F(SceneSessionTest3, RequestHideKeyboard, Function | SmallTest | Level2)
     info.abilityName_ = "RequestHideKeyboard";
     info.bundleName_ = "RequestHideKeyboard";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    
+
     sceneSession->RequestHideKeyboard(isAppColdStart);
     EXPECT_NE(sceneSession, nullptr);
 }
@@ -1470,7 +1489,7 @@ HWTEST_F(SceneSessionTest3, SetStartingWindowExitAnimationFlag, Function | Small
     info.abilityName_ = "SetStartingWindowExitAnimationFlag";
     info.bundleName_ = "SetStartingWindowExitAnimationFlag";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    
+
     sceneSession->SetStartingWindowExitAnimationFlag(enable);
     EXPECT_NE(sceneSession, nullptr);
 }
@@ -1487,7 +1506,7 @@ HWTEST_F(SceneSessionTest3, SetSkipSelfWhenShowOnVirtualScreen, Function | Small
     info.abilityName_ = "SetSkipSelfWhenShowOnVirtualScreen";
     info.bundleName_ = "SetSkipSelfWhenShowOnVirtualScreen";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    
+
     sceneSession->SetSkipSelfWhenShowOnVirtualScreen(isSkip);
     EXPECT_NE(sceneSession, nullptr);
 }

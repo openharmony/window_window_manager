@@ -246,6 +246,20 @@ public:
     void SetOnlySupportSceneBoard(bool onlySupportSceneBoard);
 
     /**
+     * @brief Set sub window zLevel
+     *
+     * @param zLevel zLevel of sub window
+     */
+    void SetSubWindowZLevel(int32_t zLevel);
+
+    /**
+     * @brief Get sub window zLevel
+     *
+     * @return The zLevel of sub window
+     */
+    int32_t GetSubWindowZLevel() const;
+
+    /**
      * @brief Get window mode.
      *
      * @return The mode of window.
@@ -446,6 +460,7 @@ private:
     WindowTag windowTag_;
     WindowSessionType sessionType_ { WindowSessionType::SCENE_SESSION };
     float brightness_ = UNDEFINED_BRIGHTNESS;
+    int32_t zLevel_ = 0;
 
     Orientation requestedOrientation_ { Orientation::UNSPECIFIED };
     std::unordered_map<WindowType, SystemBarProperty> sysBarPropMap_ {

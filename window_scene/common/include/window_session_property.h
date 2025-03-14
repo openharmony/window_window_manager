@@ -216,6 +216,12 @@ public:
     uint32_t GetSubWindowLevel() const;
 
     /*
+     * Window Hierarchy
+     */
+    void SetSubWindowZLevel(int32_t zLevel);
+    int32_t GetSubWindowZLevel() const;
+
+    /*
      * Window Property
      */
     void SetWindowCornerRadius(float cornerRadius);
@@ -307,6 +313,7 @@ private:
     bool WriteActionUpdateWindowMask(Parcel& parcel);
     bool WriteActionUpdateTopmost(Parcel& parcel);
     bool WriteActionUpdateMainWindowTopmost(Parcel& parcel);
+    bool WriteActionUpdateSubWindowZLevel(Parcel& parcel);
     bool WriteActionUpdateWindowModeSupportType(Parcel& parcel);
     bool WriteActionUpdateAvoidAreaOption(Parcel& parcel);
     bool WriteActionUpdateBackgroundAlpha(Parcel& parcel);
@@ -335,6 +342,7 @@ private:
     void ReadActionUpdateWindowMask(Parcel& parcel);
     void ReadActionUpdateTopmost(Parcel& parcel);
     void ReadActionUpdateMainWindowTopmost(Parcel& parcel);
+    void ReadActionUpdateSubWindowZLevel(Parcel& parcel);
     void ReadActionUpdateWindowModeSupportType(Parcel& parcel);
     void ReadActionUpdateAvoidAreaOption(Parcel& parcel);
     void ReadActionUpdateBackgroundAlpha(Parcel& parcel);
@@ -428,6 +436,11 @@ private:
      * Sub Window
      */
     uint32_t subWindowLevel_ = 0;
+
+    /*
+     * Window Hierarchy
+     */
+    int32_t zLevel_ = 0;
 
     /*
      * UIExtension

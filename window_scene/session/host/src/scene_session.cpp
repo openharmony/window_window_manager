@@ -1736,6 +1736,20 @@ void SceneSession::RegisterSessionTopmostChangeCallback(NotifySessionTopmostChan
 }
 
 /** @note @window.hierarchy */
+void SceneSession::RegisterSubSessionZLevelChangeCallback(NotifySubSessionZLevelChangeFunc&& callback)
+{
+    PostTask([weakThis = wptr(this), callback = std::move(callback), where = __func__] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
+            return;
+        }
+        session->onSubSessionZLevelChange_ = std::move(callback);
+        session->onSubSessionZLevelChange_(session->GetSubWindowZLevel());
+    }, __func__);
+}
+
+/** @note @window.hierarchy */
 WSError SceneSession::RaiseToAppTop()
 {
     return PostSyncTask([weakThis = wptr(this), where = __func__] {
@@ -4757,6 +4771,8 @@ WMError SceneSession::ProcessUpdatePropertyByAction(const sptr<WindowSessionProp
             return HandleActionUpdateTopmost(property, action);
         case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST):
             return HandleActionUpdateMainWindowTopmost(property, action);
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_SUB_WINDOW_Z_LEVEL):
+            return HandleActionUpdateSubWindowZLevel(property, action);
         case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO):
             return HandleActionUpdateWindowModeSupportType(property, action);
         case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_AVOID_AREA_OPTION):
@@ -5064,6 +5080,13 @@ WMError SceneSession::HandleActionUpdateMainWindowTopmost(const sptr<WindowSessi
     WSPropertyChangeAction action)
 {
     SetMainWindowTopmost(property->IsMainWindowTopmost());
+    return WMError::WM_OK;
+}
+
+WMError SceneSession::HandleActionUpdateSubWindowZLevel(const sptr<WindowSessionProperty>& property,
+    WSPropertyChangeAction action)
+{
+    SetSubWindowZLevel(property->GetSubWindowZLevel());
     return WMError::WM_OK;
 }
 

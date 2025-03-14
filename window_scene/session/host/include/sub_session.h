@@ -56,6 +56,8 @@ protected:
     bool IsTopmost() const override;
     bool IsModal() const override;
     bool IsApplicationModal() const override;
+    WSError SetSubWindowZLevel(int32_t zLevel) override;
+    int32_t GetSubWindowZLevel() const override;
 
     /*
      * Sub Window

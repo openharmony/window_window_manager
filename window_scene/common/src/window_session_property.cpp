@@ -81,6 +81,8 @@ const std::map<uint64_t, HandlWritePropertyFunc> WindowSessionProperty::writeFun
         &WindowSessionProperty::WriteActionUpdateWindowMask),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_TOPMOST),
         &WindowSessionProperty::WriteActionUpdateTopmost),
+    std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_SUB_WINDOW_Z_LEVEL),
+        &WindowSessionProperty::WriteActionUpdateSubWindowZLevel),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO),
         &WindowSessionProperty::WriteActionUpdateWindowModeSupportType),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST),
@@ -148,6 +150,8 @@ const std::map<uint64_t, HandlReadPropertyFunc> WindowSessionProperty::readFuncM
         &WindowSessionProperty::ReadActionUpdateWindowMask),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_TOPMOST),
         &WindowSessionProperty::ReadActionUpdateTopmost),
+    std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_SUB_WINDOW_Z_LEVEL),
+        &WindowSessionProperty::ReadActionUpdateSubWindowZLevel),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO),
         &WindowSessionProperty::ReadActionUpdateWindowModeSupportType),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST),
@@ -1139,6 +1143,16 @@ uint32_t WindowSessionProperty::GetSubWindowLevel() const
     return subWindowLevel_;
 }
 
+void WindowSessionProperty::SetSubWindowZLevel(int32_t zLevel)
+{
+    zLevel_ = zLevel;
+}
+
+int32_t WindowSessionProperty::GetSubWindowZLevel() const
+{
+    return zLevel_;
+}
+
 void WindowSessionProperty::SetIsSupportDragInPcCompatibleMode(bool isSupportDragInPcCompatibleMode)
 {
     isSupportDragInPcCompatibleMode_ = isSupportDragInPcCompatibleMode;
@@ -1195,6 +1209,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint32(static_cast<uint32_t>(windowMode_)) &&
         parcel.WriteUint32(flags_) && parcel.WriteBool(raiseEnabled_) &&
         parcel.WriteBool(topmost_) && parcel.WriteBool(mainWindowTopmost_) &&
+        parcel.WriteInt32(zLevel_) &&
         parcel.WriteBool(isDecorEnable_) && parcel.WriteBool(dragEnabled_) &&
         parcel.WriteBool(hideNonSystemFloatingWindows_) && parcel.WriteBool(forceHide_) &&
         MarshallingWindowLimits(parcel) && parcel.WriteFloat(brightness_) &&
@@ -1265,6 +1280,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetRaiseEnabled(parcel.ReadBool());
     property->SetTopmost(parcel.ReadBool());
     property->SetMainWindowTopmost(parcel.ReadBool());
+    property->SetSubWindowZLevel(parcel.ReadInt32());
     property->SetDecorEnable(parcel.ReadBool());
     property->SetDragEnabled(parcel.ReadBool());
     property->SetHideNonSystemFloatingWindows(parcel.ReadBool());
@@ -1336,6 +1352,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     keepScreenOn_ = property->keepScreenOn_;
     topmost_ = property->topmost_;
     mainWindowTopmost_ = property->mainWindowTopmost_;
+    zLevel_ = property->zLevel_;
     requestedOrientation_ = property->requestedOrientation_;
     defaultRequestedOrientation_ = property->defaultRequestedOrientation_;
     isPrivacyMode_ = property->isPrivacyMode_;
@@ -1541,6 +1558,11 @@ bool WindowSessionProperty::WriteActionUpdateMainWindowTopmost(Parcel& parcel)
     return MarshallingMainWindowTopmost(parcel);
 }
 
+bool WindowSessionProperty::WriteActionUpdateSubWindowZLevel(Parcel& parcel)
+{
+    return parcel.WriteInt32(zLevel_);
+}
+
 bool WindowSessionProperty::WriteActionUpdateWindowModeSupportType(Parcel& parcel)
 {
     return parcel.WriteUint32(windowModeSupportType_);
@@ -1695,6 +1717,11 @@ void WindowSessionProperty::ReadActionUpdateTopmost(Parcel& parcel)
 void WindowSessionProperty::ReadActionUpdateMainWindowTopmost(Parcel& parcel)
 {
     UnmarshallingMainWindowTopmost(parcel, this);
+}
+
+void WindowSessionProperty::ReadActionUpdateSubWindowZLevel(Parcel& parcel)
+{
+    SetSubWindowZLevel(parcel.ReadInt32());
 }
 
 void WindowSessionProperty::ReadActionUpdateWindowModeSupportType(Parcel& parcel)

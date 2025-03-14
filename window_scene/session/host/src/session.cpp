@@ -1062,6 +1062,17 @@ SingleHandTransform Session::GetSingleHandTransform() const
     return singleHandTransform_;
 }
 
+void Session::SetSingleHandModeFlag(bool flag)
+{
+    singleHandModeFlag_ = flag;
+}
+
+bool Session::SessionIsSingleHandMode()
+{
+    return singleHandModeFlag_;
+}
+
+
 WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason,
     const std::string& updateReason, const std::shared_ptr<RSTransaction>& rsTransaction)
 {
