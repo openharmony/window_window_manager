@@ -15,8 +15,8 @@
 declare namespace display {
 
 export class BusinessError extends Error {
-  code: number;
-  message: string;
+  public code: number;
+  public message: string;
 }
 
 export interface Rect {

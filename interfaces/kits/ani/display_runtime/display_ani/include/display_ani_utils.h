@@ -31,7 +31,7 @@ class DisplayAniUtils {
 public:
 static void convertRect(DMRect rect, ani_object rectObj, ani_env* env);
 
-static void convertWaterArea(WaterfallDisplayAreaRects waterfallDisplayAreaRects, 
+static void convertWaterArea(WaterfallDisplayAreaRects waterfallDisplayAreaRects,
     ani_object waterfallObj, ani_env *env);
 
 static ani_status cvtDisplay(sptr<Display> display, ani_env* env, ani_object obj);

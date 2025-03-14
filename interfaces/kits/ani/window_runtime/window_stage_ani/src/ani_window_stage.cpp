@@ -282,8 +282,10 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     }
     std::array methods = {
         ani_native_function {"loadContent", "JLstd/core/String;:I", reinterpret_cast<void *>(WindowStageLoadContent)},
-        ani_native_function {"disableWindowDecorSync", nullptr, reinterpret_cast<void *>(AniWindowStage::DisableWindowDecor)},
-        ani_native_function {"setShowOnLockScreenSync", nullptr, reinterpret_cast<void *>(AniWindowStage::SetShowOnLockScreen)},
+        ani_native_function {"disableWindowDecorSync", nullptr,
+            reinterpret_cast<void *>(AniWindowStage::DisableWindowDecor)},
+        ani_native_function {"setShowOnLockScreenSync",
+            nullptr, reinterpret_cast<void *>(AniWindowStage::SetShowOnLockScreen)},
         ani_native_function {"getMainWindowSync", "J:L@ohos/window/window/Window;",
             reinterpret_cast<void *>(WindowGetMainWindow)},
     };

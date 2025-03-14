@@ -53,14 +53,15 @@ static const std::map<DisplayState,      DisplayStateMode> NATIVE_TO_JS_DISPLAY_
 void DisplayAniUtils::convertRect(DMRect rect, ani_object rectObj, ani_env* env)
 {
     TLOGI(WmsLogTag::DMS, "[ANI] rect area start");
-    TLOGI(WmsLogTag::DMS, "[ANI] rect area info: %{public}d, %{public}d, %{public}u, %{public}u", rect.posX_, rect.posY_, rect.width_, rect.height_);
+    TLOGI(WmsLogTag::DMS, "[ANI] rect area info: %{public}d, %{public}d, %{public}u, %{public}u",
+        rect.posX_, rect.posY_, rect.width_, rect.height_);
     env->Object_SetFieldByName_Double(rectObj, "<property>left", rect.posX_);
     env->Object_SetFieldByName_Double(rectObj, "<property>width", rect.width_);
     env->Object_SetFieldByName_Double(rectObj, "<property>top", rect.posY_);
     env->Object_SetFieldByName_Double(rectObj, "<property>height", rect.height_);
 }
 
-void DisplayAniUtils::convertWaterArea(WaterfallDisplayAreaRects waterfallDisplayAreaRects, 
+void DisplayAniUtils::convertWaterArea(WaterfallDisplayAreaRects waterfallDisplayAreaRects,
     ani_object waterfallObj, ani_env *env)
 {
     TLOGI(WmsLogTag::DMS, "[ANI] start convert WaterArea");
@@ -82,7 +83,7 @@ ani_status DisplayAniUtils::cvtDisplay(sptr<Display> display, ani_env* env, ani_
 {
     sptr<DisplayInfo> info = display->GetDisplayInfoByJs();
     int setfieldid = env->Object_SetFieldByName_Double(obj, "<property>id", info->GetDisplayId());
-    if(ANI_OK != setfieldid){
+    if(ANI_OK != setfieldid) {
         TLOGE(WmsLogTag::DMS, "[ANI] set id failed: %{public}d", setfieldid);
     }
     const ani_size stringLength = info->GetName().size();
@@ -98,15 +99,17 @@ ani_status DisplayAniUtils::cvtDisplay(sptr<Display> display, ani_env* env, ani_
     }
     env->Object_SetFieldByName_Double(obj, "<property>refreshRate", info->GetRefreshRate());
     env->Object_SetFieldByName_Double(obj, "<property>rotation", static_cast<uint32_t>(info->GetRotation()));
-    ani_status setfieldRes = env->Object_SetFieldByName_Double(obj, "<property>width", static_cast<uint32_t>(info->GetWidth()));
-    if(ANI_OK != setfieldRes){
+    ani_status setfieldRes = env->Object_SetFieldByName_Double(obj,
+        "<property>width", static_cast<uint32_t>(info->GetWidth()));
+    if(ANI_OK != setfieldRes) {
         TLOGE(WmsLogTag::DMS, "[ANI] set failed: %{public}d, %{public}u", info->GetWidth(), setfieldRes);
     }
     env->Object_SetFieldByName_Double(obj, "<property>height", display->GetHeight());
     env->Object_SetFieldByName_Double(obj, "<property>availableWidth", info->GetAvailableWidth());
     env->Object_SetFieldByName_Double(obj, "<property>availableHeight", info->GetAvailableHeight());
     env->Object_SetFieldByName_Double(obj, "<property>densityDPI", info->GetVirtualPixelRatio() * DOT_PER_INCH);
-    env->Object_SetFieldByName_Double(obj, "<property>orientation", static_cast<uint32_t>(info->GetDisplayOrientation()));
+    env->Object_SetFieldByName_Double(obj, "<property>orientation",
+        static_cast<uint32_t>(info->GetDisplayOrientation()));
     env->Object_SetFieldByName_Double(obj, "<property>densityPixels", info->GetVirtualPixelRatio());
     env->Object_SetFieldByName_Double(obj, "<property>scaledDensity", info->GetVirtualPixelRatio());
     env->Object_SetFieldByName_Double(obj, "<property>xDPI", info->GetXDpi());
@@ -117,14 +120,16 @@ ani_status DisplayAniUtils::cvtDisplay(sptr<Display> display, ani_env* env, ani_
     if (colorSpaces.size() != 0) {
         ani_array_int colorSpacesAni;
         CreateAniArrayInt(env, colorSpaces.size(), &colorSpacesAni, colorSpaces);
-        if (ANI_OK != env->Object_SetFieldByName_Ref(obj, "<property>colorSpaces", static_cast<ani_ref>(colorSpacesAni))) {
+        if (ANI_OK != env->Object_SetFieldByName_Ref(obj, "<property>colorSpaces",
+            static_cast<ani_ref>(colorSpacesAni))) {
             TLOGE(WmsLogTag::DMS, "[ANI] Array set colorSpaces field error");
         }
     }
     if (hdrFormats.size() != 0) {
         ani_array_int hdrFormatsAni;
         CreateAniArrayInt(env, hdrFormats.size(), &hdrFormatsAni, hdrFormats);
-        if (ANI_OK != env->Object_SetFieldByName_Ref(obj, "<property>hdrFormats", static_cast<ani_ref>(hdrFormatsAni))) {
+        if (ANI_OK != env->Object_SetFieldByName_Ref(obj, "<property>hdrFormats",
+            static_cast<ani_ref>(hdrFormatsAni))) {
             TLOGE(WmsLogTag::DMS, "[ANI] Array set hdrFormats field error");
         }
     }

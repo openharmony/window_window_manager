@@ -15,7 +15,8 @@
 
 #include "idl_window_common.h"
 
-OH_WINDOW_Rect IdlWindowCommon::ConvertToIdlWindowRect(OHOS::Rosen::Rect rect) {
+OH_WINDOW_Rect IdlWindowCommon::ConvertToIdlWindowRect(OHOS::Rosen::Rect rect)
+{
     OH_WINDOW_Rect idlRect;
     idlRect.left.i32 = rect.posX_;
     idlRect.top.i32 = rect.posY_;
