@@ -83,11 +83,12 @@ ani_status DisplayAniUtils::cvtDisplay(sptr<Display> display, ani_env* env, ani_
 {
     sptr<DisplayInfo> info = display->GetDisplayInfoByJs();
     int setfieldid = env->Object_SetFieldByName_Double(obj, "<property>id", info->GetDisplayId());
-    if(ANI_OK != setfieldid) {
+    if (ANI_OK != setfieldid) {
         TLOGE(WmsLogTag::DMS, "[ANI] set id failed: %{public}d", setfieldid);
     }
     const ani_size stringLength = info->GetName().size();
-    TLOGI(WmsLogTag::DMS, "[ANI] display = %{public}u, name = %{public}s", static_cast<uint32_t>(info->GetDisplayId()), info->GetName().c_str());
+    TLOGI(WmsLogTag::DMS, "[ANI] display = %{public}u, name = %{public}s",
+        static_cast<uint32_t>(info->GetDisplayId()), info->GetName().c_str());
     ani_string str = nullptr;
     env->String_NewUTF8(info->GetName().data(), stringLength, &str);
     env->Object_SetFieldByName_Ref(obj, "<property>name", str);
@@ -101,7 +102,7 @@ ani_status DisplayAniUtils::cvtDisplay(sptr<Display> display, ani_env* env, ani_
     env->Object_SetFieldByName_Double(obj, "<property>rotation", static_cast<uint32_t>(info->GetRotation()));
     ani_status setfieldRes = env->Object_SetFieldByName_Double(obj,
         "<property>width", static_cast<uint32_t>(info->GetWidth()));
-    if(ANI_OK != setfieldRes) {
+    if (ANI_OK != setfieldRes) {
         TLOGE(WmsLogTag::DMS, "[ANI] set failed: %{public}d, %{public}u", info->GetWidth(), setfieldRes);
     }
     env->Object_SetFieldByName_Double(obj, "<property>height", display->GetHeight());

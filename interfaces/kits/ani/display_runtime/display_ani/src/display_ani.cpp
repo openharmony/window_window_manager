@@ -53,12 +53,12 @@ void DisplayAni::getCutoutInfo(ani_env* env, ani_object obj, ani_object cutoutIn
     }
 
     ani_double length;
-    if(ANI_OK != env->Object_GetPropertyByName_Double(static_cast<ani_object>(boundingRects), "length", &length)) {
+    if (ANI_OK != env->Object_GetPropertyByName_Double(static_cast<ani_object>(boundingRects), "length", &length)) {
         TLOGE(WmsLogTag::DMS, "[ANI] get ani_array len fail");
     }
-    for(int i = 0; i < std::min(int(length), static_cast<int>(rects.size())); i++) {
+    for (int i = 0; i < std::min(int(length), static_cast<int>(rects.size())); i++) {
         ani_ref currentCutoutInfo;
-        if(ANI_OK != env->Object_CallMethodByName_Ref(static_cast<ani_object>(boundingRects), "$_get",
+        if (ANI_OK != env->Object_CallMethodByName_Ref(static_cast<ani_object>(boundingRects), "$_get",
             "I:Lstd/core/Object;", &currentCutoutInfo, (ani_int)i)) {
             TLOGE(WmsLogTag::DMS, "[ANI] get ani_array index %{public}u fail", (ani_int)i);
         }
