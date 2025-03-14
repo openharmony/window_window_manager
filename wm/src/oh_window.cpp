@@ -132,7 +132,7 @@ namespace {
             free((ptr)); \
             (ptr) = NULL; \
         } \
-    } while(0)
+    } while (0)
 /*
  * Used to map from WMError to WindowManager_ErrorCode.
  */
