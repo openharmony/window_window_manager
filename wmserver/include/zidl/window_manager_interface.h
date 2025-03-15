@@ -270,6 +270,8 @@ public:
         DragResizeType dragResizeType) { return WMError::WM_OK; }
     virtual WMError GetAppDragResizeType(const std::string& bundleName,
         DragResizeType& dragResizeType) { return WMError::WM_OK; }
+    virtual WMError SetAppKeyFramePolicy(const std::string& bundleName,
+        const KeyFramePolicy& keyFramePolicy) { return WMError::WM_OK; }
     virtual WMError NotifyWatchGestureConsumeResult(int32_t keyCode,
         bool isConsumed) { return WMError::WM_OK; }
     virtual WMError NotifyWatchFocusActiveChange(bool isActive) { return WMError::WM_OK; }

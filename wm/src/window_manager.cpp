@@ -1623,6 +1623,15 @@ WMError WindowManager::GetAppDragResizeType(const std::string& bundleName, DragR
     return ret;
 }
 
+WMError WindowManager::SetAppKeyFramePolicy(const std::string& bundleName, const KeyFramePolicy& keyFramePolicy)
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().SetAppKeyFramePolicy(bundleName, keyFramePolicy);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "failed");
+    }
+    return ret;
+}
+
 WMError WindowManager::ShiftAppWindowPointerEvent(int32_t sourceWindowId, int32_t targetWindowId)
 {
     WMError ret = SingletonContainer::Get<WindowAdapter>().ShiftAppWindowPointerEvent(

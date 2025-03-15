@@ -938,7 +938,7 @@ bool ConvertDragResizeTypeFromJs(napi_env env, napi_value value, DragResizeType&
     if (!ConvertFromJsValue(env, value, dragResizeTypeValue)) {
         return false;
     }
-    if (dragResizeTypeValue > static_cast<uint32_t>(DragResizeType::RESIZE_WHEN_DRAG_END)) {
+    if (dragResizeTypeValue >= static_cast<uint32_t>(DragResizeType::RESIZE_MAX_VALUE)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to dragResizeType");
         return false;
     }
