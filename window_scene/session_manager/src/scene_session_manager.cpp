@@ -1372,6 +1372,7 @@ void SceneSessionManager::CreateRootSceneSession()
     rootSceneSession_ = sptr<RootSceneSession>::MakeSptr(specificCb);
     rootSceneSession_->isKeyboardPanelEnabled_ = isKeyboardPanelEnabled_;
     rootSceneSession_->SetEventHandler(taskScheduler_->GetEventHandler());
+    rootSceneSession_->SetSystemConfig(systemConfig_);
     AAFwk::AbilityManagerClient::GetInstance()->SetRootSceneSession(rootSceneSession_->AsObject());
 }
 
