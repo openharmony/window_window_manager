@@ -568,10 +568,10 @@ bool AniWindowUtils::SetWindowNavigationBarContentColor(ani_env* env,
 }
 
 bool AniWindowUtils::SetSystemBarPropertiesFromAni(ani_env* env,
-                                                 std::map<WindowType, SystemBarProperty>& windowBarProperties,
-                                                 std::map<WindowType, SystemBarPropertyFlag>& windowPropertyFlags,
-                                                 const ani_object& aniProperties,
-                                                 const sptr<Window>& window)
+                                                   std::map<WindowType, SystemBarProperty>& windowBarProperties,
+                                                   std::map<WindowType, SystemBarPropertyFlag>& windowPropertyFlags,
+                                                   const ani_object& aniProperties,
+                                                   const sptr<Window>& window)
 {
     auto statusProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
     auto navProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
