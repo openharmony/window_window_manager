@@ -1090,6 +1090,19 @@ public:
     WMError GetAppDragResizeType(const std::string& bundleName, DragResizeType& dragResizeType);
 
     /**
+     * @brief Set drag key frame type of specific app.
+     * effective order:
+     *  1. resize when drag
+     *  2. key frame
+     *  3. default value
+     *
+     * @param bundleName bundleName of specific app
+     * @param keyFramePolicy param of key frame
+     * @return WM_OK means get success, others means failed.
+     */
+    WMError SetAppKeyFramePolicy(const std::string& bundleName, const KeyFramePolicy& keyFramePolicy);
+
+    /**
      * @brief Shift window pointer event within the same application. Only main window and subwindow.
      *
      * @param sourceWindowId Window id which the pointer event shift from

@@ -23,6 +23,7 @@
 #include <event_handler.h>
 #include <i_input_event_consumer.h>
 #include <ui_content.h>
+#include <ui/rs_canvas_node.h>
 #include <ui/rs_surface_node.h>
 #include "display_manager.h"
 #include "singleton_container.h"
@@ -340,6 +341,9 @@ public:
     bool IsWindowDraggable();
     float GetVirtualPixelRatio() override;
     CrossAxisState GetCrossAxisState() override;
+    void RegisterKeyFrameCallback();
+    WSError LinkKeyFrameCanvasNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode) override;
+    WSError SetKeyFramePolicy(KeyFramePolicy& keyFramePolicy) override;
 
     /*
      * Free Multi Window
@@ -652,6 +656,7 @@ private:
     WMError InitUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
         WindowSetUIContentType setUIContentType, BackupAndRestoreType restoreType, AppExecFwk::Ability* ability,
         OHOS::Ace::UIContentErrorCode& aceRet);
+    void RegisterUIContenCallback();
     WMError SetUIContentInner(const std::string& contentInfo, napi_env env, napi_value storage,
         WindowSetUIContentType setUIContentType, BackupAndRestoreType restoreType, AppExecFwk::Ability* ability);
     std::shared_ptr<std::vector<uint8_t>> GetAbcContent(const std::string& abcPath);
@@ -760,6 +765,7 @@ private:
     int16_t rotationAnimationCount_ { 0 };
     Transform layoutTransform_;
     SingleHandTransform singleHandTransform_;
+    KeyFramePolicy keyFramePolicy_;
     
     /*
      * Window Decor

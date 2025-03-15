@@ -29,6 +29,8 @@ class AccessibilityEventInfo;
 }
 namespace OHOS::Rosen {
 class RSSurfaceNode;
+class RSCanvasNode;
+class RSTransaction;
 class ISession : public IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISession");
@@ -207,6 +209,16 @@ public:
     {
         return WSError::WS_OK;
     }
+
+    /**
+     * @brief keyFrame event info.
+     *
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError KeyFrameAnimateEnd() { return WSError::WS_OK; }
+    virtual WSError UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode,
+        std::shared_ptr<RSTransaction>& rsTransaction) { return WSError::WS_OK; }
+
     virtual WSError NotifyFrameLayoutFinishFromApp(bool notifyListener, const WSRect& rect)
     {
         return WSError::WS_OK;

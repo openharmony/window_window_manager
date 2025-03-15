@@ -33,6 +33,7 @@ class AccessibilityElementInfo;
 }
 namespace OHOS::Rosen {
 class RSTransaction;
+class RSCanvasNode;
 
 class ISessionStage : public IRemoteBroker {
 public:
@@ -236,6 +237,10 @@ public:
     {
         return WSError::WS_OK;
     }
+
+    virtual WSError LinkKeyFrameCanvasNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode) = 0;
+    virtual WSError SetKeyFramePolicy(KeyFramePolicy& keyFramePolicy) = 0;
+
     virtual WSError SetSplitButtonVisible(bool isVisible) = 0;
 
     virtual WSError SetEnableDragBySystem(bool dragEnable) = 0;

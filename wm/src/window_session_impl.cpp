@@ -1328,7 +1328,15 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
     float density = GetVirtualPixelRatio(displayInfo);
     int32_t orientation = static_cast<int32_t>(displayInfo->GetDisplayOrientation());
     virtualPixelRatio_ = density;
-    const auto& config = FillViewportConfig(rect, density, orientation, transformHint, GetDisplayId());
+    auto config = FillViewportConfig(rect, density, orientation, transformHint, GetDisplayId());
+    if (reason == WindowSizeChangeReason::DRAG_END && keyFramePolicy_.stopping_) {
+        TLOGI(WmsLogTag::WMS_LAYOUT, "key frame stop");
+        keyFramePolicy_.stopping_ = false;
+        config.SetKeyFrameConfig(true, keyFramePolicy_.animationDuration_, keyFramePolicy_.animationDelay_);
+    } else {
+        config.SetKeyFrameConfig(keyFramePolicy_.running_, keyFramePolicy_.animationDuration_,
+            keyFramePolicy_.animationDelay_);
+    }
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
     if (uiContent == nullptr) {
         WLOGFW("uiContent is null!");
@@ -1505,8 +1513,14 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
         WLOGFI("Initialized, isUIExtensionSubWindow:%{public}d, isUIExtensionAbilityProcess:%{public}d",
             uiContent_->IsUIExtensionSubWindow(), uiContent_->IsUIExtensionAbilityProcess());
     }
-    RegisterWatchFocusActiveChangeCallback();
+    RegisterUIContenCallback();
     return WMError::WM_OK;
+}
+
+void WindowSessionImpl::RegisterUIContenCallback()
+{
+    RegisterWatchFocusActiveChangeCallback();
+    RegisterKeyFrameCallback();
 }
 
 void WindowSessionImpl::RegisterWatchFocusActiveChangeCallback()
@@ -1518,6 +1532,61 @@ void WindowSessionImpl::RegisterWatchFocusActiveChangeCallback()
     } else {
         TLOGE(WmsLogTag::WMS_EVENT, "uiContent is nullptr");
     }
+}
+
+void WindowSessionImpl::RegisterKeyFrameCallback()
+{
+    auto uiContent = GetUIContentSharedPtr();
+    if (!uiContent) {
+        TLOGE(WmsLogTag::WMS_EVENT, "uiContent is nullptr");
+        return;
+    }
+    const char* const where = __func__;
+    uiContent->AddKeyFrameCanvasNodeCallback([where, weakThis = wptr(this)](
+        std::shared_ptr<RSCanvasNode>& rsCanvasNode, std::shared_ptr<RSTransaction>& rsTransaction) {
+        auto window = weakThis.promote();
+        if (!window) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s window is null", where);
+            return;
+        }
+        if (auto session = window->GetHostSession()) {
+            session->UpdateKeyFrameCloneNode(rsCanvasNode, rsTransaction);
+        } else {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s session is nullptr", where);
+        }
+    });
+    uiContent->AddKeyFrameAnimateEndCallback([where, weakThis = wptr(this)]() {
+        auto window = weakThis.promote();
+        if (!window) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s window is null", where);
+            return;
+        }
+        if (auto session = window->GetHostSession()) {
+            session->KeyFrameAnimateEnd();
+        } else {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s session is nullptr", where);
+        }
+    });
+}
+
+WSError WindowSessionImpl::LinkKeyFrameCanvasNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    auto uiContent = GetUIContentSharedPtr();
+    auto session = GetHostSession();
+    if (!uiContent || !session) {
+        TLOGE(WmsLogTag::WMS_EVENT, "uiContent or session is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    uiContent->LinkKeyFrameCanvasNode(rsCanvasNode);
+    return WSError::WS_OK;
+}
+
+WSError WindowSessionImpl::SetKeyFramePolicy(KeyFramePolicy& keyFramePolicy)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    keyFramePolicy_ = keyFramePolicy;
+    return WSError::WS_OK;
 }
 
 WMError WindowSessionImpl::NotifyWatchFocusActiveChange(bool isActive)
