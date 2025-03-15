@@ -5393,7 +5393,7 @@ bool WindowSessionImpl::IsFullScreenPcAppInPadMode() const
         && !IsFreeMultiWindowMode();
 }
 
-void WindowSessionImpl::NotifySize() const
+void WindowSessionImpl::NotifySize()
 {
     if (IsFullScreenPcAppInPadMode()) {
         const auto& windowRect = GetRect();
