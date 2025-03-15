@@ -5387,13 +5387,13 @@ bool WindowSessionImpl::IsSubWindowMaximizeSupported() const
     return false;
 }
 
-bool WindowSessionImpl::IsFullScreenPcAppInPadMode()
+bool WindowSessionImpl::IsFullScreenPcAppInPadMode() const
 {
     return property_->GetIsPcAppInPad() && GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN
         && !IsFreeMultiWindowMode();
 }
 
-void WindowSessionImpl::NotifySize()
+void WindowSessionImpl::NotifySize() const
 {
     if (IsFullScreenPcAppInPadMode()) {
         const auto& windowRect = GetRect();
