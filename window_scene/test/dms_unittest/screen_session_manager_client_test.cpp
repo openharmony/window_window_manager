@@ -21,6 +21,7 @@
 #include "display_manager.h"
 #include "window_manager_hilog.h"
 #include "scene_board_judgement.h"
+#include "fold_screen_state_internel.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -408,7 +409,10 @@ HWTEST_F(ScreenSessionManagerClientTest, SetScreenPrivacyWindowList, Function | 
 HWTEST_F(ScreenSessionManagerClientTest, GetFoldDisplayMode01, Function | SmallTest | Level2)
 {
     EXPECT_NE(screenSessionManagerClient_->screenSessionManager_, nullptr);
-    if (screenSessionManagerClient_->IsFoldable()) {
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        EXPECT_NE(FoldDisplayMode::FULL, screenSessionManagerClient_->GetFoldDisplayMode());
+        EXPECT_NE(FoldStatus::UNKNOWN, screenSessionManagerClient_->GetFoldStatus());
+    } else if (screenSessionManagerClient_->IsFoldable()) {
         EXPECT_NE(FoldDisplayMode::UNKNOWN, screenSessionManagerClient_->GetFoldDisplayMode());
         EXPECT_NE(FoldStatus::UNKNOWN, screenSessionManagerClient_->GetFoldStatus());
     } else {
@@ -432,7 +436,7 @@ HWTEST_F(ScreenSessionManagerClientTest, GetFoldDisplayMode02, Function | SmallT
     screenSessionManagerClient_->GetPhyScreenProperty(screenId);
     screenSessionManagerClient_->UpdateAvailableArea(screenId, area);
     screenSessionManagerClient_->NotifyFoldToExpandCompletion(foldToExpand);
-    if (screenSessionManagerClient_->IsFoldable()) {
+    if (screenSessionManagerClient_->IsFoldable() && !FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
         EXPECT_NE(FoldDisplayMode::UNKNOWN, screenSessionManagerClient_->GetFoldDisplayMode());
     } else {
         EXPECT_EQ(FoldDisplayMode::UNKNOWN, screenSessionManagerClient_->GetFoldDisplayMode());
