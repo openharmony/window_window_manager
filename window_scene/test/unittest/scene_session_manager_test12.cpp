@@ -1518,6 +1518,46 @@ HWTEST_F(SceneSessionManagerTest12, SetStatusBarAvoidHeight, Function | SmallTes
     ssm_->GetStatusBarAvoidHeight(barArea);
     ASSERT_EQ(barArea.height_, height);
 }
+
+/**
+ * @tc.name: GetKeyboardOccupiedAreaWithRotation1
+ * @tc.desc: test function : GetKeyboardOccupiedAreaWithRotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetKeyboardOccupiedAreaWithRotation1, Function | SmallTest | Level2)
+{
+    sptr<SceneSessionManager> sceneSessionManager = sptr<SceneSessionManager>::MakeSptr();
+    sceneSessionManager->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+
+    int32_t persistentId = 1;
+    uint32_t rotation = 90;
+    std::vector<std::pair<bool, WSRect>> avoidAreas;
+    std::pair<bool, WSRect> keyboardOccupiedArea = {false, {0, 0, 0, 0}};
+    avoidAreas.emplace_back(keyboardOccupiedArea);
+    sceneSessionManager->GetKeyboardOccupiedAreaWithRotation(persistentId, rotation, avoidAreas);
+    uint32_t areaSize = static_cast<uint32_t>(avoidAreas.size());
+    ASSERT_EQ(1, areaSize);
+    ASSERT_EQ(false, avoidAreas[0].first);
+}
+
+/**
+ * @tc.name: GetKeyboardOccupiedAreaWithRotation2
+ * @tc.desc: test function : GetKeyboardOccupiedAreaWithRotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetKeyboardOccupiedAreaWithRotation1, Function | SmallTest | Level2)
+{
+    sptr<SceneSessionManager> sceneSessionManager = sptr<SceneSessionManager>::MakeSptr();
+    sceneSessionManager->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+
+    int32_t persistentId = 1;
+    uint32_t rotation = 90;
+    std::vector<std::pair<bool, WSRect>> avoidAreas;
+    std::pair<bool, WSRect> keyboardOccupiedArea = {false, {0, 0, 0, 0}};
+    avoidAreas.emplace_back(keyboardOccupiedArea);
+    sceneSessionManager->GetKeyboardOccupiedAreaWithRotation(persistentId, rotation, avoidAreas);
+    ASSERT_EQ(false, avoidAreas[0].first);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
