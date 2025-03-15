@@ -200,7 +200,9 @@ HWTEST_F(FoldScreenSensorManagerTest, TriggerDisplaySwitch, Function | SmallTest
 
     mgr.registerPosture_ = true;
     mgr.TriggerDisplaySwitch();
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+    if (FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
+        EXPECT_EQ(mgr.globalAngle, 85);
+    } else if (SceneBoardJudgement::IsSceneBoardEnabled() || FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
         EXPECT_EQ(mgr.globalAngle, 25);
     } else {
         EXPECT_NE(mgr.globalAngle, 25);

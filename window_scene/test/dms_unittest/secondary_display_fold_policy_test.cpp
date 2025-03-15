@@ -473,7 +473,7 @@ HWTEST_F(SecondaryDisplayFoldPolicyTest, SetMainScreenRegion, Function | SmallTe
 
     policy.currentDisplayMode_ = FoldDisplayMode::MAIN;
     mainScreenRegion = {0, 0, 0, 0};
-    targetMainScreenRegion = {0, 0, 2232, 3184};
+    targetMainScreenRegion = {0, 0, 2232, 1008};
     policy.SetMainScreenRegion(mainScreenRegion);
     EXPECT_EQ(mainScreenRegion, targetMainScreenRegion);
 

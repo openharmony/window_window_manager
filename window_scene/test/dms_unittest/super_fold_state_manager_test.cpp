@@ -24,7 +24,6 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
-
 class SuperFoldStateManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
