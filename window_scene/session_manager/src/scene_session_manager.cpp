@@ -3212,6 +3212,8 @@ WSError SceneSessionManager::CheckSubSessionStartedByExtensionAndSetDisplayId(co
             TLOGE(WmsLogTag::WMS_UIEXT, "The hostWindow is not this parentwindow ! parentwindow bundleName: %{public}s,"
                 " hostwindow bundleName: %{public}s", sessionInfo.bundleName_.c_str(),
                 hostInfo.elementName_.GetBundleName().c_str());
+            ReportSubWindowCreationFailure(pid, info.elementName.GetAbilityName(), sessionInfo.bundleName_,
+                hostInfo.elementName_.GetBundleName());
             return WSError::WS_ERROR_INVALID_WINDOW;
         }
         result = WSError::WS_OK;
@@ -3226,6 +3228,19 @@ WSError SceneSessionManager::CheckSubSessionStartedByExtensionAndSetDisplayId(co
         TLOGE(WmsLogTag::WMS_UIEXT, "can't create sub window: persistentId %{public}d", property->GetPersistentId());
     }
     return result;
+}
+
+void SceneSessionManager::ReportSubWindowCreationFailure(const int32_t& pid, const std::string& abilityName,
+        const std::string& parentBundleName, const std::string& hostBundleName)
+{
+    taskScheduler_->PostAsyncTask([pid, abilityName, parentBundleName, hostBundleName]() {
+        std::ostringstream oss;
+        oss << "The hostWindow is not this parentwindow ! parentwindow bundleName: " << parentBundleName;
+        oss << ", hostwindow bundleName: " << hostBundleName;
+        oss << ", abilityName: " << abilityName;
+        SingletonContainer::Get<WindowInfoReporter>().ReportWindowException(
+            static_cast<int32_t>(WindowDFXHelperType::WINDOW_CREATE_SUB_WINDOW_FAILED), pid, oss.str());
+    }, __func__);
 }
 
 void SceneSessionManager::ClosePipWindowIfExist(WindowType type)
