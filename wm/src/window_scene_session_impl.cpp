@@ -1921,7 +1921,7 @@ WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height, const Re
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
     if (IsFullScreenPcAppInPadMode() && IsFullScreenEnable()) {
-        NotifySize();
+        NotifyClientWindowSize();
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
 
