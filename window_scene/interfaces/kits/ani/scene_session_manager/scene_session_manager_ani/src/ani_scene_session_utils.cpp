@@ -34,7 +34,8 @@ ani_object AniSceneSessionUtils::CreateAniUndefined(ani_env* env)
     return static_cast<ani_object>(aniRef);
 }
 
-ani_status AniSceneSessionUtils::NewAniObject(ani_env* env, ani_class cls, const char *signature, ani_object* result, ...)
+ani_status AniSceneSessionUtils::NewAniObject(ani_env* env, ani_class cls,
+    const char *signature, ani_object* result, ...)
 {
     ani_method aniCtor;
     auto ret = env->Class_FindMethod(cls, "<ctor>", signature, &aniCtor);
