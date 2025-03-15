@@ -703,6 +703,7 @@ public:
      */
     virtual void OnSystemBarPropertyUpdate(WindowType type, const SystemBarProperty& property) {}
 }
+
 /*
  * @class IWindowRotationChangeListener
  *

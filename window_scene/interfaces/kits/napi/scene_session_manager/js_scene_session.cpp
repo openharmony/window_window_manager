@@ -95,6 +95,7 @@ const std::string HIGHLIGHT_CHANGE_CB = "highlightChange";
 const std::string SET_PARENT_SESSION_CB = "setParentSession";
 const std::string UPDATE_FLAG_CB = "updateFlag";
 const std::string Z_LEVEL_CHANGE_CB = "zLevelChange";
+const std::string SESSION_ROTATION_CHANGE_CB = "sessionRotationChange";
 
 constexpr int ARG_COUNT_1 = 1;
 constexpr int ARG_COUNT_2 = 2;
@@ -439,7 +440,6 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
     BindNativeFunction(env, objValue, "addSidebarBlur", moduleName, JsSceneSession::AddSidebarBlur);
     BindNativeFunction(env, objValue, "setSidebarBlur", moduleName, JsSceneSession::SetSidebarBlur);
     BindNativeFunction(env, objValue, "notifyRotationProperty", moduleName, JsSceneSession::NotifyRotationProperty);
-    BindNativeFunction(env, objValue, "notifyRotationChange", moduleName, JsSceneSession::NotifyRotationChange);
 }
 
 void JsSceneSession::BindNativeMethodForKeyboard(napi_env env, napi_value objValue, const char* moduleName)
@@ -2723,6 +2723,9 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
             break;
         case static_cast<uint32_t>(ListenerFuncType::UPDATE_FLAG_CB):
             ProcessUpdateFlagRegister();
+            break;
+        case static_cast<uint32_t>(ListenerFuncType::SESSION_ROTATION_CHANGE_CB):
+            ProcessRotationChange();
             break;
         default:
             break;
