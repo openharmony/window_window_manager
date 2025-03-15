@@ -398,7 +398,7 @@
           },
           {
             "type": "so",
-            "name": "//foundation/window/window_manager/interfaces/kits/ani/scene_session_manager:scenesessionmanagerani_kit",
+            "name": "//foundation/window/window_manager/window_scene/interfaces/kits/ani/scene_session_manager:scenesessionmanagerani_kit",
             "header": {
               "header_files": [
               ],
