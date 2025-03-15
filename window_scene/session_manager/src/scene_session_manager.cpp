@@ -9693,9 +9693,8 @@ void SceneSessionManager::GetKeyboardOccupiedAreaWithRotation(
         return;
     }
     
-    auto keyboardSessionProperty = keyboardSession->GetSessionProperty();
     std::pair<bool, WSRect> keyboardOccupiedArea = {true, {0, 0, 0, 0}};
-    const KeyboardLayoutParams keyboardLayoutParams = keyboardSessionProperty->GetKeyboardLayoutParams();
+    const KeyboardLayoutParams keyboardLayoutParams = keyboardSession->GetSessionProperty()->GetKeyboardLayoutParams();
     Rect nextRect;
     if (rotation == 0 || rotation == 180 || rotation == 360) {
         nextRect = keyboardLayoutParams.PortraitPanelRect_;
