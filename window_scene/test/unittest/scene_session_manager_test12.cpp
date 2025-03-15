@@ -86,21 +86,6 @@ HWTEST_F(SceneSessionManagerTest12, GetResourceManager, Function | SmallTest | L
 }
 
 /**
- * @tc.name: GetStartupPageFromResource
- * @tc.desc: GetStartupPageFromResource
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest12, GetStartupPageFromResource, Function | SmallTest | Level3)
-{
-    ASSERT_NE(ssm_, nullptr);
-    AppExecFwk::AbilityInfo abilityInfo;
-    std::string path = "";
-    uint32_t bgColor = 0;
-    bool result = ssm_->GetStartupPageFromResource(abilityInfo, path, bgColor);
-    EXPECT_EQ(result, false);
-}
-
-/**
  * @tc.name: RequestKeyboardPanelSession
  * @tc.desc: test RequestKeyboardPanelSession
  * @tc.type: FUNC

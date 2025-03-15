@@ -1359,7 +1359,7 @@ private:
     void GetBundleStartingWindowInfos(const AppExecFwk::BundleInfo& bundleInfo,
         std::vector<std::pair<StartingWindowRdbItemKey, StartingWindowInfo>>& outValues);
     void CacheStartingWindowInfo(const std::string& bundleName, const std::string& moduleName,
-        const std::string& abilityName, StartingWindowInfo& startingWindowInfo);
+        const std::string& abilityName, const StartingWindowInfo& startingWindowInfo);
     std::atomic<int32_t> darkMode_ { false };
     std::unique_ptr<StartingWindowRdbManager> startingWindowRdbMgr_;
     std::unique_ptr<LruCache> snapshotLruCache_;

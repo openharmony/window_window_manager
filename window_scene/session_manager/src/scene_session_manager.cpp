@@ -4162,7 +4162,7 @@ WSError SceneSessionManager::InitUserInfo(int32_t userId, std::string& fileDir)
     }
     TLOGI(WmsLogTag::WMS_MAIN, "userId: %{public}d, path: %{public}s", userId, fileDir.c_str());
     taskScheduler_->PostAsyncTask([this, userId, rdbDir = fileDir]() {
-        InitStartingWindowRdb(rdbDir + "/StartingWindowRdb");
+        InitStartingWindowRdb(rdbDir + "/StartingWindowRdb/");
     }, "startingWindowRdbTask");
     return taskScheduler_->PostSyncTask([this, userId, &fileDir]() {
         if (!ScenePersistence::CreateSnapshotDir(fileDir)) {
@@ -4398,8 +4398,8 @@ bool SceneSessionManager::GetStartupPageFromResource(const AppExecFwk::AbilityIn
     if (resourceMgr->GetColorById(abilityInfo.startWindowBackgroundId,
             startingWindowInfo.backgroundColorEarlyVersion_) != Global::Resource::RState::SUCCESS ||
         !GetPathInfoFromResource(resourceMgr, hapPathEmpty,
-            abilityInfo.startWindowIconId, startingWindowInfo.IconPathEarlyVersion_)) {
-        TLOGE(WmsLogTag::WMS_PATTERN, "failed:%{public}d.", abilityInfo.bundleName.c_str());
+            abilityInfo.startWindowIconId, startingWindowInfo.iconPathEarlyVersion_)) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "failed:%{public}s.", abilityInfo.bundleName.c_str());
         return false;
     }
     // check start_window.json enabled by required field
@@ -4408,8 +4408,8 @@ bool SceneSessionManager::GetStartupPageFromResource(const AppExecFwk::AbilityIn
         return true;
     }
     if (resourceMgr->GetColorById(abilityInfo.startWindowResource.startWindowBackgroundColorId,
-        startingWindowInfo.backgroundColor_) != Global::Resource::RState::SUCCESS) {
-        TLOGE(WmsLogTag::WMS_PATTERN, "failed:%{public}d.", abilityInfo.bundleName.c_str());
+            startingWindowInfo.backgroundColor_) != Global::Resource::RState::SUCCESS) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "failed:%{public}s.", abilityInfo.bundleName.c_str());
         return false;
     }
     auto res = GetPathInfoFromResource(resourceMgr, hapPathEmpty,
@@ -4495,12 +4495,12 @@ void SceneSessionManager::InitStartingWindowRdb(const std::string& rdbPath)
     }
     int64_t outInsertNum = -1;
     auto batchInsertRes = startingWindowRdbMgr_->BatchInsert(outInsertNum, inputValues);
-    TLOGI(WmsLogTag::WMS_PATTERN, "res:%{public}d, insert num%{public}ld", batchInsertRes, outInsertNum);
+    TLOGI(WmsLogTag::WMS_PATTERN, "res:%{public}d, insert num%{public}lld", batchInsertRes, outInsertNum);
 }
 
 void SceneSessionManager::GetStartupPage(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo)
 {
-    if (GetIconFromDesk(sessionInfo, path)) {
+    if (GetIconFromDesk(sessionInfo, startingWindowInfo.iconPathEarlyVersion_)) {
         TLOGI(WmsLogTag::WMS_PATTERN, "get icon from desk success");
         return;
     }
@@ -4593,16 +4593,10 @@ bool SceneSessionManager::GetStartingWindowInfoFromRdb(
 }
 
 void SceneSessionManager::CacheStartingWindowInfo(const std::string& bundleName, const std::string& moduleName,
-    const std::string& abilityName, StartingWindowInfo& startingWindowInfo)
+    const std::string& abilityName, const StartingWindowInfo& startingWindowInfo)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:CacheStartingWindowInfo");
     auto key = moduleName + abilityName;
-    StartingWindowInfo info = {
-        .startingWindowBackgroundId_ = abilityInfo.startWindowBackgroundId,
-        .startingWindowIconId_ = abilityInfo.startWindowIconId,
-        .startingWindowBackgroundColor_ = bgColor,
-        .startingWindowIconPath_ = path,
-    };
     std::unique_lock<std::shared_mutex> lock(startingWindowMapMutex_);
     auto iter = startingWindowMap_.find(bundleName);
     if (iter != startingWindowMap_.end()) {
@@ -4636,7 +4630,7 @@ void SceneSessionManager::OnBundleUpdated(const std::string& bundleName, int use
             GetBundleStartingWindowInfos(bundleInfo, inputValues);
             int64_t outInsertNum = -1;
             auto batchInsertRes = startingWindowRdbMgr_->BatchInsert(outInsertNum, inputValues);
-            TLOGNI(WmsLogTag::WMS_PATTERN, "res:%{public}d, inset num:%{public}ld", batchInsertRes, outInsertNum);
+            TLOGNI(WmsLogTag::WMS_PATTERN, "res:%{public}d, insert num:%{public}lld", batchInsertRes, outInsertNum);
         }
     }, __func__);
     taskScheduler_->PostAsyncTask([this, bundleName]() {
