@@ -123,6 +123,7 @@ private:
     void ProcessPendingSessionToForegroundRegister();
     void ProcessPendingSessionToBackgroundForDelegatorRegister();
     void ProcessSessionLockStateChangeRegister();
+    void ProcessRotationChange();
     void OnSessionLockStateChange(bool isLockedState);
     sptr<SceneSession> GenSceneSession(SessionInfo& info);
     void PendingSessionActivation(SessionInfo& info);
@@ -300,7 +301,7 @@ private:
     napi_value OnAddSidebarBlur(napi_env env, napi_callback_info info);
     napi_value OnSetSidebarBlur(napi_env env, napi_callback_info info);
     napi_value OnNotifyRotationProperty(napi_env env, napi_callback_info info);
-    
+
     bool IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);
     void ProcessChangeSessionVisibilityWithStatusBarRegister();
     void ProcessBufferAvailableChangeRegister();
@@ -432,6 +433,7 @@ private:
     void NotifyHighlightChange(bool isHighlight);
     void NotifyFollowParentRect(bool isFollow);
     void OnGetTargetOrientationConfigInfo(uint32_t targetOrientation);
+    void OnRotationChange(int32_t persistentId, bool isRegister);
 
     /*
      * Window Property
