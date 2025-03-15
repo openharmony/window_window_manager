@@ -9571,7 +9571,8 @@ void SceneSessionManager::UpdateAvoidArea(int32_t persistentId)
     }, "UpdateAvoidArea:PID:" + std::to_string(persistentId));
 }
 
-void SceneSessionManager::GetKeyboardOccupiedAreaWithRotation(int32_t persistentId, uint32_t rotation, std::vector<std::pair<bool, WSRect>>& avoidAreas)
+void SceneSessionManager::GetKeyboardOccupiedAreaWithRotation(
+    int32_t persistentId, uint32_t rotation, std::vector<std::pair<bool, WSRect>>& avoidAreas)
 {
     if (systemConfig_.IsPcWindow()) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "The PC device is not compatible, id: %{public}d", persistentId);
@@ -9598,10 +9599,13 @@ void SceneSessionManager::GetKeyboardOccupiedAreaWithRotation(int32_t persistent
     } else if (rotation == 90 || rotation == 270) {
         nextRect = keyboardLayoutParams.LandscapePanelRect_;
     } else {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "Rotation is invalid, id: %{public}d, rotation: %{public}u", persistentId, rotation);
+        TLOGE(WmsLogTag::WMS_KEYBOARD,
+            "Rotation is invalid, id: %{public}d, rotation: %{public}u", persistentId, rotation);
         return;
     }
-    keyboardOccupiedArea.second = {nextRect.posX_, nextRect.posY_, static_cast<int32_t>(nextRect.width_), static_cast<int32_t>(nextRect.height_)};
+    keyboardOccupiedArea.second = {
+        nextRect.posX_, nextRect.posY_, static_cast<int32_t>(nextRect.width_), static_cast<int32_t>(nextRect.height_)
+    };
 
     if (!keyboardSession->IsSessionForeground() || 
         keyboardLayoutParams.gravity_ == WindowGravity::WINDOW_GRAVITY_FLOAT) {
