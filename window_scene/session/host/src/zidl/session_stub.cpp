@@ -1536,13 +1536,12 @@ int SessionStub::HandleUpdateKeyFrameCloneNode(MessageParcel& data, MessageParce
         TLOGE(WmsLogTag::WMS_LAYOUT, "fail get rsCanvasNode");
         return ERR_INVALID_DATA;
     }
-    auto tranaction = data.ReadParcelable<RSTransaction>();
+    std::shared_ptr<RSTransaction> tranaction(data.ReadParcelable<RSTransaction>());
     if (!tranaction) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "fail get rsTransaction");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "fail get tranaction");
         return ERR_INVALID_DATA;
     }
-    std::shared_ptr<RSTransaction> rsTransaction(tranaction);
-    const WSError errCode = UpdateKeyFrameCloneNode(rsCanvasNode, rsTransaction);
+    const WSError errCode = UpdateKeyFrameCloneNode(rsCanvasNode, tranaction);
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "write errCode fail.");
         return ERR_INVALID_DATA;
