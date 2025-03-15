@@ -153,6 +153,9 @@ std::mutex WindowSessionImpl::mainWindowCloseListenersMutex_;
 std::mutex WindowSessionImpl::windowWillCloseListenersMutex_;
 std::mutex WindowSessionImpl::switchFreeMultiWindowListenerMutex_;
 std::mutex WindowSessionImpl::highlightChangeListenerMutex_;
+std::mutex WindowSessionImpl::waterfallModeChangeListenerMutex_;
+std::unordered_map<int32_t, std::vector<sptr<IWaterfallModeChangeListener>>>
+    WindowSessionImpl::waterfallModeChangeListeners_;
 std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>> WindowSessionImpl::windowSessionMap_;
 std::shared_mutex WindowSessionImpl::windowSessionMutex_;
 std::set<sptr<WindowSessionImpl>> WindowSessionImpl::windowExtensionSessionSet_;
@@ -226,6 +229,7 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     property_->SetCallingSessionId(option->GetCallingWindow());
     property_->SetIsUIExtFirstSubWindow(option->GetIsUIExtFirstSubWindow());
     property_->SetTopmost(option->GetWindowTopmost());
+    property_->SetSubWindowZLevel(option->GetSubWindowZLevel());
     property_->SetRealParentId(option->GetRealParentId());
     property_->SetParentWindowType(option->GetParentWindowType());
     property_->SetUIExtensionUsage(static_cast<UIExtensionUsage>(option->GetUIExtensionUsage()));
@@ -288,6 +292,13 @@ void WindowSessionImpl::MakeSubOrDialogWindowDragableAndMoveble()
             TLOGI(WmsLogTag::WMS_PC, "create dialogWindow, title: %{public}s, decorEnable: %{public}d",
                 dialogTitle_.c_str(), dialogDecorEnable);
         }
+    }
+}
+
+void WindowSessionImpl::SetSubWindowZLevelToProperty()
+{
+    if (WindowHelper::IsNormalSubWindow(property_->GetWindowType(), property_->GetWindowFlags())) {
+        property_->SetSubWindowZLevel(windowOption_->GetSubWindowZLevel());
     }
 }
 
@@ -474,6 +485,29 @@ void WindowSessionImpl::SetDefaultDisplayIdIfNeed()
         property_->SetDisplayId(defaultDisplayId);
         TLOGI(WmsLogTag::DEFAULT, "Reset displayId to %{public}" PRIu64, defaultDisplayId);
     }
+}
+
+/** @note @window.hierarchy */
+int32_t WindowSessionImpl::GetSubWindowZLevelByFlags(WindowType type, uint32_t windowFlags, bool isTopmost)
+{
+    if (WindowHelper::IsApplicationModalSubWindow(type, windowFlags)) {
+        if (isTopmost) {
+            return APPLICATION_MODALITY_SUB_WINDOW_Z_LEVEL + TOPMOST_SUB_WINDOW_Z_LEVEL;
+        }
+        return APPLICATION_MODALITY_SUB_WINDOW_Z_LEVEL;
+    } else if (WindowHelper::IsModalSubWindow(type, windowFlags)) {
+        if (isTopmost) {
+            return MODALITY_SUB_WINDOW_Z_LEVEL + TOPMOST_SUB_WINDOW_Z_LEVEL;
+        }
+        return MODALITY_SUB_WINDOW_Z_LEVEL;
+    } else if (WindowHelper::IsToastSubWindow(type, windowFlags)) {
+        return TOAST_SUB_WINDOW_Z_LEVEL;
+    } else if (WindowHelper::IsTextMenuSubWindow(type, windowFlags)) {
+        return TEXT_MENU_SUB_WINDOW_Z_LEVEL;
+    } else if (WindowHelper::IsDialogWindow(type)) {
+        return DIALOG_SUB_WINDOW_Z_LEVEL;
+    }
+    return NORMAL_SUB_WINDOW_Z_LEVEL;
 }
 
 WMError WindowSessionImpl::Connect()
@@ -2121,7 +2155,7 @@ float WindowSessionImpl::GetBrightness() const
     return property_->GetBrightness();
 }
 
-void WindowSessionImpl::SetRequestedOrientation(Orientation orientation)
+void WindowSessionImpl::SetRequestedOrientation(Orientation orientation, bool needAnimation)
 {
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::DEFAULT, "windowSession is invalid");
@@ -2477,6 +2511,11 @@ WMError WindowSessionImpl::SetSubWindowModal(bool isModal, ModalityType modality
         subWindowModalType = modalityType == ModalityType::WINDOW_MODALITY ?
             SubWindowModalType::TYPE_WINDOW_MODALITY :
             SubWindowModalType::TYPE_APPLICATION_MODALITY;
+    }
+    if (!(property_->GetSubWindowZLevel() <= MAXIMUM_Z_LEVEL && !isModal)) {
+        int32_t zLevel = GetSubWindowZLevelByFlags(GetType(), GetWindowFlags(), IsTopmost());
+        property_->SetSubWindowZLevel(zLevel);
+        UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_SUB_WINDOW_Z_LEVEL);
     }
     hostSession->NotifySubModalTypeChange(subWindowModalType);
     return modalRet;
@@ -3087,6 +3126,81 @@ void WindowSessionImpl::NotifyWindowCrossAxisChange(CrossAxisState state)
     }
 }
 
+bool WindowSessionImpl::IsWaterfallModeEnabled()
+{
+    if (!isValidWaterfallMode_.load() && InitWaterfallMode()) {
+        isValidWaterfallMode_.store(true);
+    }
+    bool isWaterfallMode = isFullScreenWaterfallMode_.load();
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "waterfall: %{public}d, winId: %{public}u", isWaterfallMode, GetWindowId());
+    return isWaterfallMode;
+}
+
+bool WindowSessionImpl::InitWaterfallMode()
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "session is invalid");
+        return false;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, false);
+    bool isWaterfallMode = false;
+    if (hostSession->GetWaterfallMode(isWaterfallMode) != WSError::WS_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "failed winId: %{public}u", GetWindowId());
+        return false;
+    }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u", GetWindowId());
+    isFullScreenWaterfallMode_.store(isWaterfallMode);
+    NotifyWaterfallModeChange(isWaterfallMode);
+    return true;
+}
+
+WMError WindowSessionImpl::RegisterWaterfallModeChangeListener(const sptr<IWaterfallModeChangeListener>& listener)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u", GetWindowId());
+    std::lock_guard<std::mutex> lockListener(waterfallModeChangeListenerMutex_);
+    return RegisterListener(waterfallModeChangeListeners_[GetPersistentId()], listener);
+}
+
+WMError WindowSessionImpl::UnregisterWaterfallModeChangeListener(const sptr<IWaterfallModeChangeListener>& listener)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u", GetWindowId());
+    std::lock_guard<std::mutex> lockListener(waterfallModeChangeListenerMutex_);
+    return UnregisterListener(waterfallModeChangeListeners_[GetPersistentId()], listener);
+}
+
+std::vector<sptr<IWaterfallModeChangeListener>> WindowSessionImpl::GetWaterfallModeChangeListeners()
+{
+    std::vector<sptr<IWaterfallModeChangeListener>> listeners;
+    std::lock_guard<std::mutex> lockListener(waterfallModeChangeListenerMutex_);
+    for (auto& listener : waterfallModeChangeListeners_[GetPersistentId()]) {
+        listeners.push_back(listener);
+    }
+    return listeners;
+}
+
+void WindowSessionImpl::NotifyWaterfallModeChange(bool isWaterfallMode)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u, waterfall: %{public}d, stat: %{public}u",
+        GetWindowId(), isWaterfallMode, static_cast<uint32_t>(state_));
+    if (state_ != WindowState::STATE_SHOWN) {
+        return;
+    }
+    AAFwk::Want want;
+    want.SetParam(Extension::WATERFALL_MODE_FIELD, isWaterfallMode);
+    if (auto uiContent = GetUIContentSharedPtr()) {
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "send uiext winId: %{public}u", GetWindowId());
+        uiContent->SendUIExtProprty(static_cast<uint32_t>(Extension::Businesscode::SYNC_HOST_WATERFALL_MODE),
+            want, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
+    }
+    auto waterfallModeChangeListeners = GetWaterfallModeChangeListeners();
+    for (const auto& listener : waterfallModeChangeListeners) {
+        if (listener != nullptr) {
+            listener->OnWaterfallModeChange(isWaterfallMode);
+        }
+    }
+}
+
 template<typename T>
 EnableIfSame<T, IOccupiedAreaChangeListener,
     std::vector<sptr<IOccupiedAreaChangeListener>>> WindowSessionImpl::GetListeners()
@@ -3256,6 +3370,10 @@ void WindowSessionImpl::ClearListenersById(int32_t persistentId)
         std::lock_guard<std::recursive_mutex> lockListener(windowCrossAxisListenerMutex_);
         ClearUselessListeners(windowCrossAxisListeners_, persistentId);
     }
+    {
+        std::lock_guard<std::mutex> lockListener(waterfallModeChangeListenerMutex_);
+        ClearUselessListeners(waterfallModeChangeListeners_, persistentId);
+    }
     ClearSwitchFreeMultiWindowListenersById(persistentId);
     TLOGI(WmsLogTag::WMS_LIFE, "Clear success, id: %{public}d.", GetPersistentId());
 }
@@ -3421,6 +3539,14 @@ void WindowSessionImpl::NotifyAfterForeground(bool needNotifyListeners, bool nee
     } else {
         TLOGW(WmsLogTag::WMS_MAIN, "vsyncStation is null");
     }
+
+    if (!isValidWaterfallMode_.load()) {
+        if (InitWaterfallMode()) {
+            isValidWaterfallMode_.store(true);
+        }
+    } else if (isFullScreenWaterfallMode_.load() != waterfallModeWhenEnterBackground_) {
+        NotifyWaterfallModeChange(isFullScreenWaterfallMode_.load());
+    }
 }
 
 void WindowSessionImpl::NotifyAfterDidForeground(uint32_t reason)
@@ -3470,6 +3596,8 @@ void WindowSessionImpl::NotifyAfterBackground(bool needNotifyListeners, bool nee
     } else {
         TLOGW(WmsLogTag::WMS_MAIN, "vsyncStation is null");
     }
+
+    waterfallModeWhenEnterBackground_ = isFullScreenWaterfallMode_.load();
 }
 
 void WindowSessionImpl::NotifyAfterDidBackground(uint32_t reason)
@@ -4371,13 +4499,13 @@ void WindowSessionImpl::NotifyPointerEvent(const std::shared_ptr<MMI::PointerEve
     }
     if (auto uiContent = GetUIContentSharedPtr()) {
         if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
-            TLOGI(WmsLogTag::WMS_EVENT, "eid:%{public}d", pointerEvent->GetId());
+            TLOGD(WmsLogTag::WMS_EVENT, "eid:%{public}d", pointerEvent->GetId());
         }
         if (IsWindowDelayRaiseEnabled()) {
             pointerEvent->MarkProcessed();
             return;
         }
-        TLOGI(WmsLogTag::WMS_EVENT, "Start to process pointerEvent, id: %{public}d", pointerEvent->GetId());
+        TLOGD(WmsLogTag::WMS_EVENT, "Start to process pointerEvent, id: %{public}d", pointerEvent->GetId());
         if (!uiContent->ProcessPointerEvent(pointerEvent)) {
             TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW, "UI content dose not consume");
             pointerEvent->MarkProcessed();
@@ -5409,6 +5537,9 @@ void WindowSessionImpl::RegisterWindowInspectorCallback()
 void WindowSessionImpl::GetExtensionConfig(AAFwk::WantParams& want) const
 {
     want.SetParam(Extension::CROSS_AXIS_FIELD, AAFwk::Integer::Box(static_cast<int32_t>(crossAxisState_.load())));
+    bool isWaterfallMode = isFullScreenWaterfallMode_.load();
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "waterfall: %{public}d, winId: %{public}u", isWaterfallMode, GetWindowId());
+    want.SetParam(Extension::WATERFALL_MODE_FIELD, AAFwk::Integer::Box(static_cast<int32_t>(isWaterfallMode)));
 }
 
 void WindowSessionImpl::UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>& want)
@@ -5423,8 +5554,12 @@ void WindowSessionImpl::UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>
     if (IsValidCrossState(state)) {
         crossAxisState_ = static_cast<CrossAxisState>(state);
     }
+    auto waterfallModeValue = configParam.GetIntParam(Extension::WATERFALL_MODE_FIELD, 0);
+    isFullScreenWaterfallMode_.store(static_cast<bool>(waterfallModeValue));
+    isValidWaterfallMode_.store(true);
     want->RemoveParam(Extension::UIEXTENSION_CONFIG_FIELD);
-    TLOGI(WmsLogTag::WMS_UIEXT, "CrossAxisState:%{public}d", state);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "CrossAxisState: %{public}d, waterfall: %{public}d, winId: %{public}u",
+        state, isFullScreenWaterfallMode_.load(), GetWindowId());
 }
 
 bool WindowSessionImpl::IsValidCrossState(int32_t state) const

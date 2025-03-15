@@ -798,8 +798,9 @@ HWTEST_F(WindowAdapterTest, IsWindowRectAutoSave, Function | SmallTest | Level2)
     WindowAdapter windowAdapter;
     std::string key = "com.example.recposentryEntryAbility";
     bool enabled = false;
-    auto err = windowAdapter.IsWindowRectAutoSave(key, enabled);
-    ASSERT_EQ(err, WMError::WM_OK);
+    int persistentId = 1;
+    auto err = windowAdapter.IsWindowRectAutoSave(key, enabled, persistentId);
+    ASSERT_EQ(err, WMError::WM_ERROR_INVALID_SESSION);
     auto ret = windowAdapter.InitWMSProxy();
     ASSERT_EQ(ret, true);
 }

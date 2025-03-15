@@ -55,8 +55,14 @@ public:
         const RectAnimationConfig& rectAnimationConfig = {}) override;
     WMError SetFollowParentWindowLayoutEnabled(bool isFollow) override;
 
+    /*
+     * Window Hierarchy
+     */
     WMError RaiseToAppTop() override;
     WMError RaiseAboveTarget(int32_t subWindowId) override;
+    WMError SetSubWindowZLevel(int32_t zLevel) override;
+    WMError GetSubWindowZLevel(int32_t& zLevel) override;
+
     void PerformBack() override;
     WMError SetAspectRatio(float ratio) override;
     WMError ResetAspectRatio() override;
@@ -93,6 +99,7 @@ public:
     virtual void SetSystemPrivacyMode(bool isSystemPrivacyMode) override;
     virtual WMError SetSnapshotSkip(bool isSkip) override;
     virtual std::shared_ptr<Media::PixelMap> Snapshot() override;
+    WMError SnapshotIgnorePrivacy(std::shared_ptr<Media::PixelMap>& pixelMap) override;
     WMError SetTouchHotAreas(const std::vector<Rect>& rects) override;
     WMError SetKeyboardTouchHotAreas(const KeyboardTouchHotAreas& hotAreas) override;
     virtual WmErrorCode KeepKeyboardOnFocus(bool keepKeyboardFlag) override;
@@ -150,7 +157,7 @@ public:
     WMError Restore() override;
     WMError SetTitleAndDockHoverShown(bool isTitleHoverShown = true,
         bool isDockHoverShown = true) override;
-    WMError SetWindowRectAutoSave(bool enabled) override;
+    WMError SetWindowRectAutoSave(bool enabled, bool isSaveBySpecifiedFlag = false) override;
     WMError IsWindowRectAutoSave(bool& enabled) override;
     WMError MaximizeFloating() override;
     WMError Maximize() override;
@@ -395,7 +402,7 @@ private:
     /*
      * PC Fold Screen
      */
-    std::atomic_bool isFullScreenWaterfallMode_ { false };
+    std::atomic_bool isWaterfallToMaximize_ { false };
     std::atomic<WindowMode> lastWindowModeBeforeWaterfall_ { WindowMode::WINDOW_MODE_UNDEFINED };
 
     /*

@@ -343,7 +343,7 @@ public:
      * @param enabled Enable the window rect auto-save if true, otherwise means the opposite.
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
-    virtual WSError OnSetWindowRectAutoSave(bool enabled) { return WSError::WS_OK; }
+    virtual WSError OnSetWindowRectAutoSave(bool enabled, bool isSaveBySpecifiedFlag) { return WSError::WS_OK; }
 
     /**
      * @brief Callback for setting to radius of window.
@@ -357,6 +357,14 @@ public:
      *  Gesture Back
      */
     virtual WMError SetGestureBackEnabled(bool isEnabled) { return WMError::WM_OK; }
+
+    /**
+     * @brief Get waterfall mode.
+     *
+     * @param isWaterfallMode Indicates the waterfall mode.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError GetWaterfallMode(bool& isWaterfallMode) { return WSError::WS_OK; }
 
     /**
      * @brief Callback for setting the window support modes.
@@ -401,6 +409,7 @@ public:
      */
     virtual void NotifyWindowAttachStateListenerRegistered(bool registered) { }
     virtual WSError SetFollowParentWindowLayoutEnabled(bool isFollow) { return WSError::WS_OK; };
+    virtual WSError UpdateFlag(const std::string& flag) { return WSError::WS_OK; };
 };
 } // namespace OHOS::Rosen
 

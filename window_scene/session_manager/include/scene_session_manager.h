@@ -343,7 +343,7 @@ public:
      */
     WMError IsPcWindow(bool& isPcWindow) override;
     WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode) override;
-    WMError IsWindowRectAutoSave(const std::string& key, bool& enabled) override;
+    WMError IsWindowRectAutoSave(const std::string& key, bool& enabled, int persistentId) override;
     void SetIsWindowRectAutoSave(const std::string& key, bool enabled);
     int32_t ChangeUIAbilityVisibilityBySCB(const sptr<SceneSession>& sceneSession, bool visibility,
         bool isFromClient = true);
@@ -505,10 +505,15 @@ public:
      * Window Layout
      */
     SingleHandTransform GetNormalSingleHandTransform() const;
-    void NotifySingleHandInfoChange(float singleHandScaleX, float singleHandScaleY, SingleHandMode singleHandMode);
+    SingleHandScreenInfo GetSingleHandScreenInfo() const;
+    WSRect GetOriginRect() const;
+    WSRect GetSingleHandRect() const;
+    void NotifySingleHandInfoChange(SingleHandScreenInfo singleHandScreenInfo, WSRect originRect,
+        WSRect singleHandRect);
     void RegisterGetRSNodeByStringIDFunc(GetRSNodeByStringIDFunc&& func);
     void RegisterSetTopWindowBoundaryByIDFunc(SetTopWindowBoundaryByIDFunc&& func);
     void RegisterSingleHandContainerNode(const std::string& stringId);
+    const SingleHandCompatibleModeConfig& GetSingleHandCompatibleModeConfig() const;
 
     /*
      * Window Property
@@ -1091,7 +1096,8 @@ private:
     void ProcessFocusWhenForegroundScbCore(sptr<SceneSession>& sceneSession);
     void ProcessSubSessionForeground(sptr<SceneSession>& sceneSession);
     void ProcessSubSessionBackground(sptr<SceneSession>& sceneSession);
-    sptr<SceneSession> FindSessionByToken(const sptr<IRemoteObject>& token);
+    sptr<SceneSession> FindSessionByToken(const sptr<IRemoteObject>& token,
+        WindowType type = WindowType::APP_MAIN_WINDOW_BASE);
 
     void CheckAndNotifyWaterMarkChangedResult();
     WSError NotifyWaterMarkFlagChangedResult(bool hasWaterMark);
@@ -1221,12 +1227,17 @@ private:
     std::shared_ptr<VsyncCallback> vsyncCallback_ = nullptr;
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
     SingleHandTransform singleHandTransform_;
+    WSRect originRect_;
+    WSRect singleHandRect_;
+    SingleHandScreenInfo singleHandScreenInfo_;
     GetRSNodeByStringIDFunc getRSNodeByStringIDFunc_;
     SetTopWindowBoundaryByIDFunc setTopWindowBoundaryByIDFunc_;
+    SingleHandCompatibleModeConfig singleHandCompatibleModeConfig_;
     void InitVsyncStation();
     void RegisterRequestVsyncFunc(const sptr<SceneSession>& sceneSession);
     bool GetDisplaySizeById(DisplayId displayId, int32_t& displayWidth, int32_t& displayHeight);
     void UpdateSessionCrossAxisState(DisplayId displayId, SuperFoldStatus status, SuperFoldStatus prevStatus);
+    void ConfigSingleHandCompatibleMode(const WindowSceneConfig::ConfigItem& configItem);
 
     /*
      * Window Snapshot

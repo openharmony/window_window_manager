@@ -239,6 +239,11 @@ void ScreenSessionManager::HandleFoldScreenPowerInit()
 #endif
 }
 
+bool ScreenSessionManager::IsSupportCoordination()
+{
+    return !FoldScreenStateInternel::IsDualDisplayFoldDevice() || IS_COORDINATION_SUPPORT;
+}
+
 void ScreenSessionManager::FoldScreenPowerInit()
 {
 #ifdef FOLD_ABILITY_ENABLE
@@ -257,7 +262,7 @@ void ScreenSessionManager::FoldScreenPowerInit()
         if (currentScreenId == SCREEN_ID_FULL) {
             TLOGI(WmsLogTag::DMS, "ScreenSessionManager Fold Screen Power Full animation Init 1.");
             rsInterface_.SetScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_OFF_FAKE);
-            if (!FoldScreenStateInternel::IsDualDisplayFoldDevice() || IS_COORDINATION_SUPPORT) {
+            if (IsSupportCoordination()) {
                 rsInterface_.SetScreenPowerStatus(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_ON);
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(timeStamp));
@@ -265,7 +270,7 @@ void ScreenSessionManager::FoldScreenPowerInit()
 #ifdef TP_FEATURE_ENABLE
             rsInterface_.SetTpFeatureConfig(tpType, fullTpChange.c_str());
 #endif
-            if (!FoldScreenStateInternel::IsDualDisplayFoldDevice() || IS_COORDINATION_SUPPORT) {
+            if (IsSupportCoordination()) {
                 rsInterface_.SetScreenPowerStatus(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_OFF);
             }
             foldScreenController_->AddOrRemoveDisplayNodeToTree(SCREEN_ID_MAIN, REMOVE_DISPLAY_MODE);
@@ -273,7 +278,7 @@ void ScreenSessionManager::FoldScreenPowerInit()
         } else if (currentScreenId == SCREEN_ID_MAIN) {
             TLOGI(WmsLogTag::DMS, "ScreenSessionManager Fold Screen Power Main animation Init 3.");
             rsInterface_.SetScreenPowerStatus(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_OFF_FAKE);
-            if (!FoldScreenStateInternel::IsDualDisplayFoldDevice() || IS_COORDINATION_SUPPORT) {
+            if (IsSupportCoordination()) {
                 rsInterface_.SetScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_ON);
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(timeStamp));
@@ -281,7 +286,7 @@ void ScreenSessionManager::FoldScreenPowerInit()
 #ifdef TP_FEATURE_ENABLE
             rsInterface_.SetTpFeatureConfig(tpType, mainTpChange.c_str());
 #endif
-            if (!FoldScreenStateInternel::IsDualDisplayFoldDevice() || IS_COORDINATION_SUPPORT) {
+            if (IsSupportCoordination()) {
                 rsInterface_.SetScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_OFF);
             }
             foldScreenController_->AddOrRemoveDisplayNodeToTree(SCREEN_ID_FULL, REMOVE_DISPLAY_MODE);
@@ -1162,13 +1167,13 @@ void ScreenSessionManager::HandleScreenDisconnectEvent(sptr<ScreenSession> scree
         }
     }
     HandlePCScreenDisconnect(screenSession);
-#ifdef WM_MULTI_SCREEN_ENABLE
-        HandleExtendScreenDisconnect(screenId);
-#endif
     if (clientProxy_) {
         TLOGW(WmsLogTag::DMS, "screen disconnect and notify to scb.");
         clientProxy_->OnScreenConnectionChanged(GetSessionOption(screenSession, screenId), ScreenEvent::DISCONNECTED);
     }
+#ifdef WM_MULTI_SCREEN_ENABLE
+    HandleExtendScreenDisconnect(screenId);
+#endif
     {
         std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
         screenSessionMap_.erase(screenId);
@@ -3107,7 +3112,24 @@ void ScreenSessionManager::SetScreenPowerForFold(ScreenPowerStatus status)
 
 void ScreenSessionManager::SetScreenPowerForFold(ScreenId screenId, ScreenPowerStatus status)
 {
-    rsInterface_.SetScreenPowerStatus(screenId, status);
+    if (status != ScreenPowerStatus::POWER_STATUS_OFF) {
+        rsInterface_.SetScreenPowerStatus(screenId, status);
+        return;
+    }
+    ScreenPowerStatus preStatus = rsInterface_.GetScreenPowerStatus(screenId);
+    if (preStatus != ScreenPowerStatus::POWER_STATUS_ON_ADVANCED) {
+        rsInterface_.SetScreenPowerStatus(screenId, status);
+        return;
+    }
+    TLOGW(WmsLogTag::DMS,
+        "screenId = %{public}" PRIu64\
+        ", prepare set power status %{public}u, set %{public}u instead because preStatus is %{public}u",
+        screenId,
+        ScreenPowerStatus::POWER_STATUS_OFF,
+        ScreenPowerStatus::POWER_STATUS_OFF_ADVANCED,
+        preStatus
+    );
+    rsInterface_.SetScreenPowerStatus(screenId, ScreenPowerStatus::POWER_STATUS_OFF_ADVANCED);
 }
 
 void ScreenSessionManager::TriggerDisplayModeUpdate(FoldDisplayMode targetDisplayMode)

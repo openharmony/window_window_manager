@@ -788,6 +788,67 @@ HWTEST_F(WindowSceneSessionImplTest2, RaiseAboveTarget01, Function | SmallTest |
 }
 
 /**
+ * @tc.name: SetSubWindowZLevel
+ * @tc.desc: SetSubWindowZLevel
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest2, SetSubWindowZLevel, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetSubWindowZLevel01");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    windowSceneSessionImpl->hostSession_ = session;
+
+    session->property_->SetPersistentId(INVALID_SESSION_ID);
+    auto ret = windowSceneSessionImpl->SetSubWindowZLevel(10001);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+    session->property_->SetPersistentId(2);
+
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ret = windowSceneSessionImpl->SetSubWindowZLevel(10001);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+
+    ret = windowSceneSessionImpl->SetSubWindowZLevel(10001);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+
+    windowSceneSessionImpl->property_->zLevel_ = 1;
+    ret = windowSceneSessionImpl->SetSubWindowZLevel(1);
+    EXPECT_EQ(WMError::WM_OK, ret);
+
+    ret = windowSceneSessionImpl->SetSubWindowZLevel(2);
+    EXPECT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: GetSubWindowZLevel
+ * @tc.desc: GetSubWindowZLevel
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest2, GetSubWindowZLevel, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetSubWindowZLevel01");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    windowSceneSessionImpl->hostSession_ = session;
+    windowSceneSessionImpl->property_->zLevel_ = 1;
+    int32_t zLevel = 0;
+
+    session->property_->SetPersistentId(INVALID_SESSION_ID);
+    auto ret = windowSceneSessionImpl->GetSubWindowZLevel(zLevel);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+    session->property_->SetPersistentId(2);
+
+    ret = windowSceneSessionImpl->GetSubWindowZLevel(zLevel);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(1, zLevel);
+}
+
+/**
  * @tc.name: FindParentSessionByParentId02
  * @tc.desc: FindParentSessionByParentId
  * @tc.type: FUNC
@@ -875,6 +936,28 @@ HWTEST_F(WindowSceneSessionImplTest2, Snapshot01, Function | SmallTest | Level2)
     int ret = 0;
     windowSceneSession->Snapshot();
     ASSERT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: SnapshotIgnorePrivacy
+ * @tc.desc: SnapshotIgnorePrivacy
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest2, SnapshotIgnorePrivacy, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, windowSceneSession->SnapshotIgnorePrivacy(pixelMap));
+
+    windowSceneSession->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreatTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    windowSceneSession->hostSession_ = session;
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowSceneSession->SnapshotIgnorePrivacy(pixelMap));
+
+    windowSceneSession->surfaceNode_ = nullptr;
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, windowSceneSession->SnapshotIgnorePrivacy(pixelMap));
 }
 
 /**

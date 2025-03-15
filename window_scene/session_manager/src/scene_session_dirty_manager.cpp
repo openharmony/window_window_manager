@@ -37,7 +37,6 @@ constexpr int UPDATE_TASK_DURATION = 10;
 const std::string UPDATE_WINDOW_INFO_TASK = "UpdateWindowInfoTask";
 static int32_t g_screenRotationOffset = system::GetIntParameter<int32_t>("const.fold.screen_rotation.offset", 0);
 constexpr float ZORDER_UIEXTENSION_INDEX = 0.1;
-
 } // namespace
 
 static bool operator==(const MMI::Rect left, const MMI::Rect right)
@@ -128,7 +127,7 @@ Matrix3f GetTransformFromWindowInfo(const MMI::WindowInfo& hostWindowInfo)
 }
 
 void SceneSessionDirtyManager::CalNotRotateTransform(const sptr<SceneSession>& sceneSession, Matrix3f& transform,
-    const SingleHandData& singleHandData, bool useUIExtension) const
+    bool useUIExtension) const
 {
     if (sceneSession == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is nullptr");
@@ -153,10 +152,6 @@ void SceneSessionDirtyManager::CalNotRotateTransform(const sptr<SceneSession>& s
     Vector2f offset = sceneSession->GetSessionGlobalPosition(useUIExtension);
     float rotate = 0.0f;
     Vector2f translate = CalRotationToTranslate(displayRotation, width, height, offset, rotate);
-    if (!NearZero(singleHandData.singleHandY)) {
-        transform = transform.Scale({singleHandData.scaleX, singleHandData.scaleY},
-                                    singleHandData.pivotX, singleHandData.height);
-    }
     transform = transform.Translate(translate).Rotate(rotate)
                          .Scale(scale, sceneSession->GetPivotX(), sceneSession->GetPivotY()).Inverse();
 }
@@ -171,6 +166,10 @@ void SceneSessionDirtyManager::CalTransform(const sptr<SceneSession>& sceneSessi
     transform = Matrix3f::IDENTITY;
     bool isRotate = sceneSession->GetSessionInfo().isRotable_;
     auto displayMode = ScreenSessionManagerClient::GetInstance().GetFoldDisplayMode();
+    if (singleHandData.mode != SingleHandMode::MIDDLE) {
+        transform = transform.Scale({singleHandData.scaleX, singleHandData.scaleY},
+                                    singleHandData.pivotX, singleHandData.pivotY);
+    }
     if (isRotate || !sceneSession->GetSessionInfo().isSystem_ ||
         static_cast<MMI::DisplayMode>(displayMode) == MMI::DisplayMode::FULL ||
         displayMode == FoldDisplayMode::GLOBAL_FULL ||
@@ -179,15 +178,11 @@ void SceneSessionDirtyManager::CalTransform(const sptr<SceneSession>& sceneSessi
         FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()))) {
         Vector2f scale(sceneSession->GetScaleX(), sceneSession->GetScaleY());
         Vector2f translate = sceneSession->GetSessionGlobalPosition(useUIExtension);
-        if (!NearZero(singleHandData.singleHandY)) {
-            transform = transform.Scale({singleHandData.scaleX, singleHandData.scaleY},
-                                        singleHandData.pivotX, singleHandData.height);
-        }
         transform = transform.Translate(translate)
                              .Scale(scale, sceneSession->GetPivotX(), sceneSession->GetPivotY()).Inverse();
         return;
     }
-    CalNotRotateTransform(sceneSession, transform, singleHandData, useUIExtension);
+    CalNotRotateTransform(sceneSession, transform, useUIExtension);
 }
 
 
@@ -508,10 +503,10 @@ void SceneSessionDirtyManager::AddModalExtensionWindowInfo(std::vector<MMI::Wind
     if (extensionInfo.windowRect.width_ != 0 || extensionInfo.windowRect.height_ != 0) {
         auto singleHandData = GetSingleHandData(sceneSession);
         MMI::Rect windowRect = {
-            .x = static_cast<float>(extensionInfo.windowRect.posX_) * singleHandData.scaleX +
-                 singleHandData.singleHandX,
-            .y = static_cast<float>(extensionInfo.windowRect.posY_) * singleHandData.scaleY +
-                 singleHandData.singleHandY,
+            .x = ceil(singleHandData.scaleX * extensionInfo.windowRect.posX_ +
+                 singleHandData.singleHandX),
+            .y = ceil(singleHandData.scaleY * extensionInfo.windowRect.posY_ +
+                 singleHandData.singleHandY),
             .width = extensionInfo.windowRect.width_,
             .height = extensionInfo.windowRect.height_
         };
@@ -734,8 +729,8 @@ std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyMa
         .id = windowId,
         .pid = sceneSession->IsStartMoving() ? static_cast<int32_t>(getpid()) : pid,
         .uid = uid,
-        .area = { windowRect.posX_ * singleHandData.scaleX + singleHandData.singleHandX,
-                  windowRect.posY_ * singleHandData.scaleY + singleHandData.singleHandY,
+        .area = { ceil(singleHandData.scaleX * windowRect.posX_ + singleHandData.singleHandX),
+                  ceil(singleHandData.scaleX * windowRect.posY_ + singleHandData.singleHandY),
                   windowRect.width_, windowRect.height_ },
         .defaultHotAreas = std::move(touchHotAreas),
         .pointerHotAreas = std::move(pointerHotAreas),
@@ -763,24 +758,21 @@ SingleHandData SceneSessionDirtyManager::GetSingleHandData(const sptr<SceneSessi
     SingleHandData singleHandData;
     auto sessionProperty = sceneSession->GetSessionProperty();
     auto displayId = sessionProperty->GetDisplayId();
-    if (displayId != ScreenSessionManagerClient::GetInstance().GetDefaultScreenId()) {
+    if (displayId != ScreenSessionManagerClient::GetInstance().GetDefaultScreenId() ||
+        !sceneSession->SessionIsSingleHandMode()) {
         return singleHandData;
     }
     const std::map<ScreenId, ScreenProperty>& screensProperties =
         ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
-    auto screenPropertyIter = screensProperties.find(displayId);
-    if (screenPropertyIter == screensProperties.end()) {
-        return singleHandData;
-    }
     const SingleHandTransform& transform = sceneSession->GetSingleHandTransform();
-    const auto& screenProperty = screenPropertyIter->second;
+    const SingleHandScreenInfo& singleHandScreenInfo = SceneSessionManager::GetInstance().GetSingleHandScreenInfo();
     singleHandData.scaleX = transform.scaleX;
     singleHandData.scaleY = transform.scaleY;
-    singleHandData.width = screenProperty.GetBounds().rect_.GetWidth();
-    singleHandData.height = screenProperty.GetBounds().rect_.GetHeight();
     singleHandData.singleHandX = transform.posX;
     singleHandData.singleHandY = transform.posY;
-    singleHandData.pivotX = (transform.posX == 0) ? 0.0f : singleHandData.width;
+    singleHandData.pivotX = singleHandScreenInfo.scalePivotX;
+    singleHandData.pivotY = singleHandScreenInfo.scalePivotY;
+    singleHandData.mode = singleHandScreenInfo.mode;
     return singleHandData;
 }
 
@@ -976,7 +968,7 @@ bool operator==(const SecSurfaceInfo& a, const SecSurfaceInfo& b)
 
 void DumpSecSurfaceInfoMap(const std::map<uint64_t, std::vector<SecSurfaceInfo>>& secSurfaceInfoMap)
 {
-    TLOGI(WmsLogTag::WMS_EVENT, "secSurfaceInfoMap size:%{public}d", static_cast<int>(secSurfaceInfoMap.size()));
+    TLOGI(WmsLogTag::WMS_EVENT, "size:%{public}d", static_cast<int>(secSurfaceInfoMap.size()));
     for (auto& e : secSurfaceInfoMap) {
         auto hostNodeId = e.first;
         TLOGI(WmsLogTag::WMS_EVENT, "hostNodeId:%{public}" PRIu64 " secSurfaceInfoList size:%{public}d",
