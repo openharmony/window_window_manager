@@ -16,9 +16,11 @@
 #ifndef OHOS_ROSEN_WM_COMMON_H
 #define OHOS_ROSEN_WM_COMMON_H
 
+#include <any>
 #include <map>
 #include <sstream>
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 #include <float.h>
@@ -48,6 +50,20 @@ constexpr uint32_t MAX_BUTTON_BACKGROUND_SIZE = 40;
 constexpr uint32_t MIN_CLOSE_BUTTON_RIGHT_MARGIN = 8;
 constexpr uint32_t MAX_CLOSE_BUTTON_RIGHT_MARGIN = 22;
 constexpr int32_t API_VERSION_INVALID = -1;
+/*
+ * PC Window Sidebar Blur
+ */
+constexpr float SIDEBAR_BLUR_NUMBER_ZERO = 0.0f;
+constexpr float SIDEBAR_DEFAULT_RADIUS_LIGHT = 57.0f;
+constexpr float SIDEBAR_DEFAULT_RADIUS_DARK = 57.0f;
+constexpr float SIDEBAR_DEFAULT_SATURATION_LIGHT = 2.0f;
+constexpr float SIDEBAR_DEFAULT_SATURATION_DARK = 2.6f;
+constexpr float SIDEBAR_DEFAULT_BRIGHTNESS_LIGHT = 1.0f;
+constexpr float SIDEBAR_DEFAULT_BRIGHTNESS_DARK = 0.4f;
+constexpr uint32_t SIDEBAR_DEFAULT_MASKCOLOR_LIGHT = 0xdbf1f1f1;
+constexpr uint32_t SIDEBAR_DEFAULT_MASKCOLOR_DARK = 0xe61a1a1a;
+constexpr uint32_t SIDEBAR_SNAPSHOT_MASKCOLOR_LIGHT = 0xffe5e5e5;
+constexpr uint32_t SIDEBAR_SNAPSHOT_MASKCOLOR_DARK = 0xff414141;
 }
 
 /**
@@ -643,6 +659,15 @@ constexpr int32_t ONE_FOURTH_FULL_CIRCLE_DEGREE = 90;
 constexpr float UNDEFINED_DENSITY = -1.0f;
 constexpr float MINIMUM_CUSTOM_DENSITY = 0.5f;
 constexpr float MAXIMUM_CUSTOM_DENSITY = 4.0f;
+constexpr int32_t MINIMUM_Z_LEVEL = -10000;
+constexpr int32_t MAXIMUM_Z_LEVEL = 10000;
+constexpr int32_t NORMAL_SUB_WINDOW_Z_LEVEL = 0;
+constexpr int32_t MODALITY_SUB_WINDOW_Z_LEVEL = 13000;
+constexpr int32_t DIALOG_SUB_WINDOW_Z_LEVEL = 13000;
+constexpr int32_t TEXT_MENU_SUB_WINDOW_Z_LEVEL = 13500;
+constexpr int32_t TOAST_SUB_WINDOW_Z_LEVEL = 14000;
+constexpr int32_t APPLICATION_MODALITY_SUB_WINDOW_Z_LEVEL = 20000;
+constexpr int32_t TOPMOST_SUB_WINDOW_Z_LEVEL = 2000;
 }
 
 inline int32_t GetUserIdByUid(int32_t uid)
@@ -943,7 +968,7 @@ struct KeyboardPanelInfo : public Parcelable {
 /**
  * @struct CallingWindowInfo
  *
- * @brief Info of keyboard calling window
+ * @brief Information of keyboard calling window.
  */
 struct CallingWindowInfo : public Parcelable {
     int32_t windowId_ = 0;
@@ -1488,21 +1513,23 @@ struct WindowLayoutInfo : public Parcelable {
  * @brief Window meta info
  */
 struct WindowMetaInfo : public Parcelable {
-    int32_t windowId;
+    int32_t windowId = 0;
     std::string windowName;
     std::string bundleName;
     std::string abilityName;
+    int32_t appIndex = 0;
 
     bool Marshalling(Parcel& parcel) const override
     {
         return parcel.WriteInt32(windowId) && parcel.WriteString(windowName) && parcel.WriteString(bundleName) &&
-               parcel.WriteString(abilityName);
+               parcel.WriteString(abilityName) && parcel.WriteInt32(appIndex);
     }
     static WindowMetaInfo* Unmarshalling(Parcel& parcel)
     {
         WindowMetaInfo* windowMetaInfo = new WindowMetaInfo();
         if (!parcel.ReadInt32(windowMetaInfo->windowId) || !parcel.ReadString(windowMetaInfo->windowName) ||
-            !parcel.ReadString(windowMetaInfo->bundleName) || !parcel.ReadString(windowMetaInfo->abilityName)) {
+            !parcel.ReadString(windowMetaInfo->bundleName) || !parcel.ReadString(windowMetaInfo->abilityName) ||
+            !parcel.ReadInt32(windowMetaInfo->appIndex)) {
             delete windowMetaInfo;
             return nullptr;
         }
@@ -1716,6 +1743,7 @@ struct SubWindowOptions {
     bool decorEnabled = false;
     bool isModal = false;
     bool isTopmost = false;
+    int32_t zLevel = 0;
     bool maximizeSupported = false;
     ModalityType modalityType = ModalityType::WINDOW_MODALITY;
 };
@@ -1995,6 +2023,17 @@ enum class WindowFocusChangeReason : int32_t {
      * focus change max.
      */
     MAX,
+};
+
+/**
+ * @brief Windowinfokey
+ */
+enum class WindowInfoKey : int32_t {
+    WINDOW_ID,
+    BUNDLE_NAME,
+    ABILITY_NAME,
+    APP_INDEX,
+    VISIBILITY_STATE,
 };
 }
 }

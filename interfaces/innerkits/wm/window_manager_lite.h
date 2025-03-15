@@ -155,9 +155,9 @@ public:
     WMError GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo);
 
     /**
-     * @brief Get keyboard calling window info.
+     * @brief Get keyboard calling window information.
      *
-     * @param callingWindowInfo calling window info
+     * @param callingWindowInfo calling window information
      * @return WM_OK means get success, others means get failed.
      */
     WMError GetCallingWindowInfo(CallingWindowInfo& callingWindowInfo);
@@ -231,22 +231,22 @@ public:
     WMError UnregisterWindowStyleChangedListener(const sptr<IWindowStyleChangedListener>& listener);
 
     /**
-     * @brief Register keyboard calling window display change listener.
+     * @brief Register a listener to detect display changes for the keyboard calling window.
      *
-     * @param listener IKeyboardCallingWindowDisplayChangeListener
+     * @param listener IKeyboardCallingWindowDisplayChangedListener
      * @return WM_OK means register success, others means unregister failed.
      */
-    WMError RegisterCallingWindowDisplayChangeListener(
-        const sptr<IKeyboardCallingWindowDisplayChangeListener>& listener);
+    WMError RegisterCallingWindowDisplayChangedListener(
+        const sptr<IKeyboardCallingWindowDisplayChangedListener>& listener);
 
     /**
-     * @brief Unregister keyboard calling window display change listener.
+     * @brief Unregister the listener that detects display changes for the keyboard calling window.
      *
-     * @param listener IKeyboardCallingWindowDisplayChangeListener
+     * @param listener IKeyboardCallingWindowDisplayChangedListener
      * @return WM_OK means unregister success, others means unregister failed.
      */
-    WMError UnregisterCallingWindowDisplayChangeListener(
-        const sptr<IKeyboardCallingWindowDisplayChangeListener>& listener);
+    WMError UnregisterCallingWindowDisplayChangedListener(
+        const sptr<IKeyboardCallingWindowDisplayChangedListener>& listener);
 
     /**
      * @brief Get window style type.

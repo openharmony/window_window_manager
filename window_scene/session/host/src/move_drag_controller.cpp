@@ -365,6 +365,7 @@ bool MoveDragController::ConsumeMoveEvent(const std::shared_ptr<MMI::PointerEven
             }
             reason = SizeChangeReason::DRAG_MOVE;
             uint32_t oldWindowDragHotAreaType = windowDragHotAreaType_;
+            moveDragEndDisplayId_ = static_cast<uint64_t>(pointerEvent->GetTargetDisplayId());
             UpdateHotAreaType(pointerEvent);
             ProcessWindowDragHotAreaFunc(oldWindowDragHotAreaType != windowDragHotAreaType_, reason);
             break;
@@ -387,6 +388,7 @@ bool MoveDragController::ConsumeMoveEvent(const std::shared_ptr<MMI::PointerEven
             moveDragEndDisplayId_ = static_cast<uint64_t>(pointerEvent->GetTargetDisplayId());
             UpdateHotAreaType(pointerEvent);
             ProcessWindowDragHotAreaFunc(windowDragHotAreaType_ != WINDOW_HOT_AREA_TYPE_UNDEFINED, reason);
+            isMoveDragHotAreaCrossDisplay_ = windowDragHotAreaType_ != WINDOW_HOT_AREA_TYPE_UNDEFINED;
             // The Pointer up event sent to the ArkUI.
             ret = false;
             break;
@@ -526,7 +528,7 @@ bool MoveDragController::ConsumeDragEvent(const std::shared_ptr<MMI::PointerEven
     return true;
 }
 
-void MoveDragController::MoveDragInterrupted()
+void MoveDragController::MoveDragInterrupted(bool resetPosition)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "Screen anomaly, MoveDrag has been interrupted.");
     SizeChangeReason reason = SizeChangeReason::DRAG_END;
@@ -540,8 +542,10 @@ void MoveDragController::MoveDragInterrupted()
         SetStartMoveFlag(false);
         ProcessWindowDragHotAreaFunc(windowDragHotAreaType_ != WINDOW_HOT_AREA_TYPE_UNDEFINED, reason);
     };
-    moveDragEndDisplayId_ = moveDragStartDisplayId_;
-    moveDragProperty_.targetRect_ = moveDragProperty_.originalRect_;
+    if (resetPosition) {
+        moveDragEndDisplayId_ = moveDragStartDisplayId_;
+        moveDragProperty_.targetRect_ = moveDragProperty_.originalRect_;
+    }
     ProcessSessionRectChange(reason);
 }
 
@@ -1340,6 +1344,7 @@ WSError MoveDragController::UpdateMoveTempProperty(const std::shared_ptr<MMI::Po
             }
             moveTempProperty_.lastMovePointerPosX_ = pointerDisplayX;
             moveTempProperty_.lastMovePointerPosY_ = pointerDisplayY;
+            lastMovePointerPosX_ = pointerDisplayX;
             break;
         case MMI::PointerEvent::POINTER_ACTION_UP:
         case MMI::PointerEvent::POINTER_ACTION_BUTTON_UP:
@@ -1481,7 +1486,7 @@ void MoveDragController::OnLostFocus()
     TLOGW(WmsLogTag::WMS_LAYOUT, "window id %{public}d lost focus, should stop MoveDrag isMove: %{public}d,"
         "isDrag: %{public}d", persistentId_, isStartMove_, isStartDrag_);
     if (isStartMove_ || isStartDrag_) {
-        moveDragIsInterrupted_ = true;
+        MoveDragInterrupted(false);
     }
 }
 
@@ -1522,5 +1527,25 @@ void MoveDragController::ResSchedReportData(int32_t type, bool onOffTag)
     }
     WLOGFD("ResSchedReportData success type: %{public}d onOffTag: %{public}d", type, onOffTag);
 #endif
+}
+
+int32_t MoveDragController::GetLastMovePointerPosX() const
+{
+    return lastMovePointerPosX_;
+}
+
+void MoveDragController::SetLastMovePointerPosX(int32_t lastMovePointerPosX)
+{
+    lastMovePointerPosX_ = lastMovePointerPosX;
+}
+
+bool MoveDragController::IsMoveDragHotAreaCrossDisplay() const
+{
+    return isMoveDragHotAreaCrossDisplay_;
+}
+
+void MoveDragController::SetMoveDragHotAreaCrossDisplay(bool isMoveDragHotAreaCrossDisplay)
+{
+    isMoveDragHotAreaCrossDisplay_ = isMoveDragHotAreaCrossDisplay;
 }
 }  // namespace OHOS::Rosen

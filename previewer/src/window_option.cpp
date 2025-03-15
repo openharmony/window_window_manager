@@ -171,6 +171,16 @@ void WindowOption::SetWindowTopmost(bool isTopmost)
     isTopmost_ = isTopmost;
 }
 
+void WindowOption::SetSubWindowZLevel(int32_t zLevel)
+{
+    zLevel_ = zLevel;
+}
+
+int32_t WindowOption::GetSubWindowZLevel() const
+{
+    return zLevel_;
+}
+
 WindowMode WindowOption::GetWindowMode() const
 {
     return mode_;

@@ -542,6 +542,49 @@ HWTEST_F(SceneSessionManagerTest11, HasFloatingWindowForeground, Function | Smal
     auto ret = ssm_->HasFloatingWindowForeground(abilityToken, hasOrNot);
     ASSERT_EQ(ret, WMError::WM_ERROR_NULLPTR);
 }
+
+/**
+ * @tc.name: SetParentWindow
+ * @tc.desc: SceneSesionManager test SetParentWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, SetParentWindow, Function | SmallTest | Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    int32_t subWindowId = 1;
+    int32_t newParentWindowId = 3;
+    auto res = ssm_->SetParentWindow(subWindowId, newParentWindowId);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+    SessionInfo info;
+    info.abilityName_ = "SetParentWindow";
+    info.bundleName_ = "SetParentWindow";
+    sptr<SceneSession> subSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    subSession->property_->SetPersistentId(1);
+    subSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    ssm_->sceneSessionMap_.insert({ subSession->property_->GetPersistentId(), subSession });
+    res = ssm_->SetParentWindow(subWindowId, newParentWindowId);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_PARENT);
+
+    sptr<SceneSession> oldParentSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    oldParentSession->property_->SetPersistentId(2);
+    oldParentSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    ssm_->sceneSessionMap_.insert({ oldParentSession->property_->GetPersistentId(), oldParentSession });
+    subSession->property_->SetParentPersistentId(2);
+    subSession->SetParentSession(oldParentSession);
+    res = ssm_->SetParentWindow(subWindowId, newParentWindowId);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_PARENT);
+
+    sptr<SceneSession> newParentSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    newParentSession->property_->SetPersistentId(3);
+    newParentSession->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    ssm_->sceneSessionMap_.insert({ newParentSession->property_->GetPersistentId(), newParentSession });
+    res = ssm_->SetParentWindow(subWindowId, newParentWindowId);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_PARENT);
+
+    newParentSession->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    res = ssm_->SetParentWindow(subWindowId, newParentWindowId);
+    EXPECT_EQ(res, WMError::WM_OK);
+}
 }  // namespace
 }
 }

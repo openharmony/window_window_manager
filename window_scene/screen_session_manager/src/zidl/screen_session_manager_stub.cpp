@@ -721,6 +721,11 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             static_cast<void>(reply.WriteUint32(static_cast<uint32_t>(GetSuperFoldStatus())));
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SCENE_BOARD_LANDSCAPE_LOCK_STATUS: {
+            bool isLocked = data.ReadBool();
+            SetLandscapeLockStatus(isLocked);
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_GET_EXTEND_SCREEN_CONNECT_STATUS: {
             static_cast<void>(reply.WriteUint32(static_cast<uint32_t>(GetExtendScreenConnectStatus())));
             break;
@@ -1054,6 +1059,12 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
         }
         case DisplayManagerMessage::TRANS_ID_GET_DISPLAY_CAPABILITY: {
             reply.WriteString(GetDisplayCapability());
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SET_SYSTEM_KEYBOARD_ON: {
+            bool isOn = static_cast<bool>(data.ReadBool());
+            DMError ret = SetSystemKeyboardStatus(isOn);
+            reply.WriteInt32(static_cast<int32_t>(ret));
             break;
         }
         default:

@@ -343,12 +343,17 @@ public:
      */
     WMError IsPcWindow(bool& isPcWindow) override;
     WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode) override;
-    WMError IsWindowRectAutoSave(const std::string& key, bool& enabled) override;
+    WMError IsWindowRectAutoSave(const std::string& key, bool& enabled, int persistentId) override;
     void SetIsWindowRectAutoSave(const std::string& key, bool enabled);
     int32_t ChangeUIAbilityVisibilityBySCB(const sptr<SceneSession>& sceneSession, bool visibility,
         bool isFromClient = true);
     WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId) override;
     void SetFocusedSessionDisplayIdIfNeeded(sptr<SceneSession>& newSession);
+
+    /*
+     * Sub Window
+     */
+    WMError SetParentWindow(int32_t subWindowId, int32_t newParentWindowId) override;
 
     std::map<int32_t, sptr<SceneSession>>& GetSessionMapByScreenId(ScreenId id);
     void UpdatePrivateStateAndNotify(uint32_t persistentId);
@@ -500,10 +505,15 @@ public:
      * Window Layout
      */
     SingleHandTransform GetNormalSingleHandTransform() const;
-    void NotifySingleHandInfoChange(float singleHandScaleX, float singleHandScaleY, SingleHandMode singleHandMode);
+    SingleHandScreenInfo GetSingleHandScreenInfo() const;
+    WSRect GetOriginRect() const;
+    WSRect GetSingleHandRect() const;
+    void NotifySingleHandInfoChange(SingleHandScreenInfo singleHandScreenInfo, WSRect originRect,
+        WSRect singleHandRect);
     void RegisterGetRSNodeByStringIDFunc(GetRSNodeByStringIDFunc&& func);
     void RegisterSetTopWindowBoundaryByIDFunc(SetTopWindowBoundaryByIDFunc&& func);
     void RegisterSingleHandContainerNode(const std::string& stringId);
+    const SingleHandCompatibleModeConfig& GetSingleHandCompatibleModeConfig() const;
 
     /*
      * Window Property
@@ -632,6 +642,7 @@ public:
         const std::vector<std::string>& bundleNameList);
     WMError UnregisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener);
     bool IsMainWindowByPersistentId(int32_t persistentId);
+    WMError MinimizeByWindowId(const std::vector<int32_t>& windowIds) override;
 
     /*
      * Window Pattern
@@ -798,6 +809,12 @@ private:
         int32_t sourceWindowId, int32_t targetWindowId, DisplayId targetDisplayId);
 
     /*
+     * Sub Window
+     */
+    WMError SetParentWindowInner(const sptr<SceneSession>& subSession,
+        const sptr<SceneSession>& oldParentSession, const sptr<SceneSession>& newParentSession);
+
+    /*
      * Window Immersive
      */
     void UpdateAvoidSessionAvoidArea(WindowType type);
@@ -829,7 +846,7 @@ private:
         REQUIRES(SCENE_GUARD);
     WSError SetBrightness(const sptr<SceneSession>& sceneSession, float brightness);
     void PostBrightnessTask(float brightness);
-    WSError UpdateBrightness(int32_t persistentId, bool onBackGround);
+    WSError UpdateBrightness(int32_t persistentId);
     void SetDisplayBrightness(float brightness);
     float GetDisplayBrightness() const;
     void HandleHideNonSystemFloatingWindows(const sptr<WindowSessionProperty>& property,
@@ -872,6 +889,8 @@ private:
     bool IsGetWindowLayoutInfoNeeded(const sptr<SceneSession>& session) const;
     int32_t GetFoldLowerScreenPosY() const;
     DisplayId UpdateSpecificSessionClientDisplayId(const sptr<WindowSessionProperty>& property);
+    void UpdateSessionDisplayIdBySessionInfo(sptr<SceneSession> sceneSession, const SessionInfo& sessionInfo);
+    bool IsNeedUpdateBrightness(float brightness);
 
     /*
      * Window Rotate Animation
@@ -936,6 +955,7 @@ private:
     SessionInfo RecoverSessionInfo(const sptr<WindowSessionProperty>& property);
     bool IsNeedRecover(const int32_t persistentId);
     WSError CheckSessionPropertyOnRecovery(const sptr<WindowSessionProperty>& property, bool isSpecificSession);
+    void UpdateRecoverPropertyForSuperFold(const sptr<WindowSessionProperty>& property);
 
     /*
      * Gesture Back
@@ -1076,7 +1096,8 @@ private:
     void ProcessFocusWhenForegroundScbCore(sptr<SceneSession>& sceneSession);
     void ProcessSubSessionForeground(sptr<SceneSession>& sceneSession);
     void ProcessSubSessionBackground(sptr<SceneSession>& sceneSession);
-    sptr<SceneSession> FindSessionByToken(const sptr<IRemoteObject>& token);
+    sptr<SceneSession> FindSessionByToken(const sptr<IRemoteObject>& token,
+        WindowType type = WindowType::APP_MAIN_WINDOW_BASE);
 
     void CheckAndNotifyWaterMarkChangedResult();
     WSError NotifyWaterMarkFlagChangedResult(bool hasWaterMark);
@@ -1206,12 +1227,17 @@ private:
     std::shared_ptr<VsyncCallback> vsyncCallback_ = nullptr;
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
     SingleHandTransform singleHandTransform_;
+    WSRect originRect_;
+    WSRect singleHandRect_;
+    SingleHandScreenInfo singleHandScreenInfo_;
     GetRSNodeByStringIDFunc getRSNodeByStringIDFunc_;
     SetTopWindowBoundaryByIDFunc setTopWindowBoundaryByIDFunc_;
+    SingleHandCompatibleModeConfig singleHandCompatibleModeConfig_;
     void InitVsyncStation();
     void RegisterRequestVsyncFunc(const sptr<SceneSession>& sceneSession);
     bool GetDisplaySizeById(DisplayId displayId, int32_t& displayWidth, int32_t& displayHeight);
     void UpdateSessionCrossAxisState(DisplayId displayId, SuperFoldStatus status, SuperFoldStatus prevStatus);
+    void ConfigSingleHandCompatibleMode(const WindowSceneConfig::ConfigItem& configItem);
 
     /*
      * Window Snapshot
@@ -1331,6 +1357,7 @@ private:
      */
     std::unique_ptr<LruCache> snapshotLruCache_;
     std::size_t snapshotCapacity_ = 0;
+    bool GetIconFromDesk(const SessionInfo& sessionInfo, std::string& startupPagePath) const;
 };
 } // namespace OHOS::Rosen
 
