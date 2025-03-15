@@ -79,6 +79,7 @@ public:
     MOCK_METHOD2(UpdateSessionPropertyByAction, WMError(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action));
     MOCK_METHOD1(GetCrossAxisState, WSError(CrossAxisState& state));
+    MOCK_METHOD1(GetWaterfallMode, WSError(bool& isWaterfallMode));
 };
 } // namespace Rosen
 } // namespace OHOS
