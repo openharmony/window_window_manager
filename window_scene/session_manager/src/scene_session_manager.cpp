@@ -1623,6 +1623,10 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
     specificCb->onUpdateGestureBackEnabled_ = [this](int32_t persistentId) {
         this->UpdateGestureBackEnabled(persistentId);
     };
+    specificCb->onKeyboardRotationChange_ = [this](int32_t persistentId, uint32_t rotation,
+        std::vector<std::pair<bool, WSRect>>& avoidAreas) {
+        this->GetKeyboardOccupiedAreaWithRotation(persistentId, rotation, avoidAreas);
+    };
     specificCb->onGetSceneSessionByIdCallback_ = [this](int32_t persistentId) {
         return this->GetSceneSession(persistentId);
     };
@@ -9733,6 +9737,51 @@ void SceneSessionManager::UpdateAvoidArea(int32_t persistentId)
             NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_BOUNDS);
         }
     }, "UpdateAvoidArea:PID:" + std::to_string(persistentId));
+}
+
+void SceneSessionManager::GetKeyboardOccupiedAreaWithRotation(
+    int32_t persistentId, uint32_t rotation, std::vector<std::pair<bool, WSRect>>& avoidAreas)
+{
+    if (systemConfig_.IsPcWindow()) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "The PC device is not compatible, id: %{public}d", persistentId);
+        return;
+    }
+
+    auto sceneSession = GetSceneSession(persistentId);
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "sceneSession is nullptr, id: %{public}d", persistentId);
+        return;
+    }
+    auto keyboardSession = GetKeyboardSession(sceneSession->GetSessionProperty()->GetDisplayId(), false);
+    if (keyboardSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboardSession is nullptr, id: %{public}d", persistentId);
+        return;
+    }
+    
+    std::pair<bool, WSRect> keyboardOccupiedArea = {true, {0, 0, 0, 0}};
+    const KeyboardLayoutParams keyboardLayoutParams = keyboardSession->GetSessionProperty()->GetKeyboardLayoutParams();
+    Rect nextRect;
+    if (rotation == 0 || rotation == 180 || rotation == 360) {
+        nextRect = keyboardLayoutParams.PortraitPanelRect_;
+    } else if (rotation == 90 || rotation == 270) {
+        nextRect = keyboardLayoutParams.LandscapePanelRect_;
+    } else {
+        TLOGE(WmsLogTag::WMS_KEYBOARD,
+            "Rotation is invalid, id: %{public}d, rotation: %{public}u", persistentId, rotation);
+        return;
+    }
+    keyboardOccupiedArea.second = {
+        nextRect.posX_, nextRect.posY_, static_cast<int32_t>(nextRect.width_), static_cast<int32_t>(nextRect.height_)
+    };
+
+    if (!keyboardSession->IsSessionForeground() || 
+        keyboardLayoutParams.gravity_ == WindowGravity::WINDOW_GRAVITY_FLOAT) {
+        keyboardOccupiedArea.first = false;
+    }
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "next keyboardOccupiedArea: [%{public}d, posX: %{public}d, poxY: %{public}d, "
+        "width: %{public}d, height: %{public}d]", keyboardOccupiedArea.first, keyboardOccupiedArea.second.posX_,
+        keyboardOccupiedArea.second.posY_, keyboardOccupiedArea.second.width_, keyboardOccupiedArea.second.height_);
+    avoidAreas.emplace_back(keyboardOccupiedArea);
 }
 
 void SceneSessionManager::UpdateGestureBackEnabled(int32_t persistentId)

@@ -2088,6 +2088,17 @@ void SceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
     return;
 }
 
+void SceneSession::GetKeyboardOccupiedAreaWithRotation(
+    int32_t persistentId, uint32_t rotation, std::vector<std::pair<bool, WSRect>>& avoidAreas)
+{
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "In");
+    if (!specificCallback_ || !specificCallback_->onKeyboardRotationChange_) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "specificCallback_ or onKeyboardRotationChange_ is nullptr");
+        return;
+    }
+    specificCallback_->onKeyboardRotationChange_(persistentId, rotation, avoidAreas);
+}
+
 void SceneSession::GetCutoutAvoidArea(WSRect& rect, AvoidArea& avoidArea)
 {
     auto display = DisplayManager::GetInstance().GetDisplayById(GetSessionProperty()->GetDisplayId());
