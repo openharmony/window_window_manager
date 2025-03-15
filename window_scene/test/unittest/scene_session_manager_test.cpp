@@ -2383,8 +2383,9 @@ HWTEST_F(SceneSessionManagerTest, IsWindowRectAutoSave, Function | SmallTest | L
 {
     std::string key = "com.example.recposentryEntryAbilityabc";
     bool enabled = false;
-    auto result = ssm_->IsWindowRectAutoSave(key, enabled);
-    ASSERT_EQ(result, WMError::WM_OK);
+    int persistentId = 1;
+    auto result = ssm_->IsWindowRectAutoSave(key, enabled, persistentId);
+    ASSERT_EQ(result, WMError::WM_ERROR_INVALID_SESSION);
 }
 
 /**
@@ -2498,6 +2499,18 @@ HWTEST_F(SceneSessionManagerTest, BuildCancelPointerEvent, Function | SmallTest 
     ASSERT_EQ(pointerEvent->GetPointerId(), 0);
     ASSERT_EQ(pointerEvent->GetPointerAction(), MMI::PointerEvent::POINTER_ACTION_CANCEL);
     ASSERT_EQ(pointerEvent->GetSourceType(), MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
+}
+
+/**
+ * @tc.name: MinimizeByWindowId
+ * @tc.desc: test function : MinimizeByWindowId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, MinimizeByWindowId, Function | SmallTest | Level3)
+{
+    std::vector<int32_t> windowIds;
+    WMError res = ssm_->MinimizeByWindowId(windowIds);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, res);
 }
 }
 } // namespace Rosen

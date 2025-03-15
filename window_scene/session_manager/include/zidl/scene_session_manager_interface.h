@@ -132,6 +132,8 @@ public:
         TRANS_ID_SHIFT_APP_WINDOW_POINTER_EVENT,
         TRANS_ID_REQUEST_FOCUS_STATUS_BY_SA,
         TRANS_ID_GET_WINDOW_UI_TYPE,
+        TRANS_ID_MINIMIZE_BY_WINDOW_ID,
+        TRANS_ID_SET_PARENT_WINDOW,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
@@ -289,6 +291,7 @@ public:
     void SetMaximizeMode(MaximizeMode maximizeMode) override {}
     MaximizeMode GetMaximizeMode() override { return MaximizeMode::MODE_AVOID_SYSTEM_BAR; }
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId = DEFAULT_DISPLAY_ID) override {}
+    WMError MinimizeByWindowId(const std::vector<int32_t>& windowIds) override { return WMError::WM_OK; }
 
     /**
      * @brief Raise a window to screen top by id of window.
@@ -357,7 +360,8 @@ public:
 
     WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode) override { return WMError::WM_OK; }
 
-    WMError IsWindowRectAutoSave(const std::string& key, bool& enabled) override { return WMError::WM_OK; }
+    WMError IsWindowRectAutoSave(const std::string& key, bool& enabled,
+        int persistentId) override { return WMError::WM_OK; }
 
     WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap) override { return WMError::WM_OK; }

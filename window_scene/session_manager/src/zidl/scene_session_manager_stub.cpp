@@ -211,6 +211,10 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleShiftAppWindowPointerEvent(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_UI_TYPE):
             return HandleGetWindowUIType(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_MINIMIZE_BY_WINDOW_ID):
+            return HandleMinimizeByWindowId(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_PARENT_WINDOW):
+            return HandleSetParentWindow(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -367,6 +371,28 @@ int SceneSessionManagerStub::HandleDestroyAndDisconnectSpcificSessionWithDetachC
     sptr<IRemoteObject> callback = data.ReadRemoteObject();
     const WSError ret = DestroyAndDisconnectSpecificSessionWithDetachCallback(persistentId, callback);
     reply.WriteUint32(static_cast<uint32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleSetParentWindow(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t subWindowId = INVALID_WINDOW_ID;
+    if (!data.ReadInt32(subWindowId)) {
+        TLOGE(WmsLogTag::WMS_SUB, "read subWindowId failed");
+        return ERR_INVALID_DATA;
+    }
+    int32_t newParentWindowId = INVALID_WINDOW_ID;
+    if (!data.ReadInt32(newParentWindowId)) {
+        TLOGE(WmsLogTag::WMS_SUB, "read newParentWindowId failed");
+        return ERR_INVALID_DATA;
+    }
+    TLOGD(WmsLogTag::WMS_SUB, "subWindowId: %{public}d, newParentWindowId: %{public}d",
+        subWindowId, newParentWindowId);
+    WMError errCode = SetParentWindow(subWindowId, newParentWindowId);
+    if (!reply.WriteUint32(static_cast<uint32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_SUB, "Write errCode failed.");
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 
@@ -1684,8 +1710,13 @@ int SceneSessionManagerStub::HandleIsWindowRectAutoSave(MessageParcel& data, Mes
         TLOGE(WmsLogTag::WMS_MAIN, "Read key failed.");
         return ERR_INVALID_DATA;
     }
+    int persistentId = 0;
+    if (!data.ReadInt32(persistentId)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Read persistentId failed.");
+        return ERR_INVALID_DATA;
+    }
     bool enabled = false;
-    WMError errCode = IsWindowRectAutoSave(key, enabled);
+    WMError errCode = IsWindowRectAutoSave(key, enabled, persistentId);
     if (!reply.WriteBool(enabled)) {
         TLOGE(WmsLogTag::WMS_MAIN, "Write enabled failed.");
         return ERR_INVALID_DATA;
@@ -1803,6 +1834,21 @@ int SceneSessionManagerStub::HandleGetWindowUIType(MessageParcel& data, MessageP
     }
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleMinimizeByWindowId(MessageParcel& data, MessageParcel& reply)
+{
+    std::vector<int32_t> windowIds;
+    if (!data.ReadInt32Vector(&windowIds)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "read windowIds failed");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = MinimizeByWindowId(windowIds);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write errCode failed.");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;

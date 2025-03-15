@@ -247,10 +247,6 @@ HWTEST_F(KeyboardSessionTest3, MoveAndResizeKeyboard01, Function | SmallTest | L
     param.LandscapeKeyboardRect_ = { 100, 100, 100, 200 };
     param.PortraitKeyboardRect_ = { 200, 200, 200, 100 };
 
-    keyboardSession->isScreenAngleMismatch_ = true;
-    keyboardSession->targetScreenWidth_ = 300;
-    keyboardSession->targetScreenHeight_ = 400;
-
     // branch SESSION_GRAVITY_BOTTOM
     param.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
     Rect expectRect = param.PortraitKeyboardRect_;

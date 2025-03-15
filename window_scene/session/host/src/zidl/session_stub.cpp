@@ -244,6 +244,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleStartMovingWithCoordinate(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_CROSS_AXIS_STATE):
             return HandleGetCrossAxisState(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_WATERFALL_MODE):
+            return HandleGetWaterfallMode(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CONTAINER_MODAL_EVENT):
             return HandleContainerModalEvent(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_WINDOW_ATTACH_STATE_LISTENER_REGISTERED):
@@ -254,6 +256,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyKeyboardDidShowRegistered(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_KEYBOARD_DID_HIDE_REGISTERED):
             return HandleNotifyKeyboardDidHideRegistered(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_FLAG):
+            return HandleUpdateFlag(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1423,8 +1427,14 @@ int SessionStub::HandleSetWindowRectAutoSave(MessageParcel& data, MessageParcel&
         TLOGE(WmsLogTag::WMS_MAIN, "Read enable failed.");
         return ERR_INVALID_DATA;
     }
-    TLOGD(WmsLogTag::WMS_MAIN, "enabled: %{public}d", enabled);
-    OnSetWindowRectAutoSave(enabled);
+    bool isSaveBySpecifiedFlag = false;
+    if (!data.ReadBool(isSaveBySpecifiedFlag)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Read isSaveBySpecifiedFlag failed.");
+        return ERR_INVALID_DATA;
+    }
+    TLOGD(WmsLogTag::WMS_MAIN, "enabled: %{public}d, isSaveBySpecifiedFlag: %{public}d",
+        enabled, isSaveBySpecifiedFlag);
+    OnSetWindowRectAutoSave(enabled, isSaveBySpecifiedFlag);
     return ERR_NONE;
 }
 
@@ -1549,6 +1559,17 @@ int SessionStub::HandleGetCrossAxisState(MessageParcel& data, MessageParcel& rep
     return ERR_NONE;
 }
 
+int SessionStub::HandleGetWaterfallMode(MessageParcel& data, MessageParcel& reply)
+{
+    bool isWaterfallMode = false;
+    GetWaterfallMode(isWaterfallMode);
+    if (!reply.WriteBool(isWaterfallMode)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write fail.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
 int SessionStub::HandleContainerModalEvent(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_EVENT, "In");
@@ -1599,6 +1620,18 @@ int SessionStub::HandleNotifyKeyboardDidHideRegistered(MessageParcel& data, Mess
     }
     TLOGD(WmsLogTag::WMS_KEYBOARD, "registered: %{public}d", registered);
     NotifyKeyboardDidHideRegistered(registered);
+    return ERR_NONE;
+}
+
+int SessionStub::HandleUpdateFlag(MessageParcel& data, MessageParcel& reply)
+{
+    std::string flag;
+    if (!data.ReadString(flag)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "read flag failed");
+        return ERR_INVALID_DATA;
+    }
+    TLOGD(WmsLogTag::WMS_MAIN, "specifiedFlag: %{public}s", flag.c_str());
+    UpdateFlag(flag);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

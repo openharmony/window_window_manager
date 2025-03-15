@@ -288,16 +288,15 @@ HWTEST_F(SceneSessionDirtyManagerTest, CalNotRotateTransform, Function | SmallTe
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "CalNotRotateTransform";
     sessionInfo.moduleName_ = "sessionInfo";
-    SingleHandData testSingleHandData;
     Matrix3f transform;
     Matrix3f testTransform = transform;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_NE(sceneSession, nullptr);
-    manager_->CalNotRotateTransform(nullptr, transform, testSingleHandData);
+    manager_->CalNotRotateTransform(nullptr, transform);
     ASSERT_EQ(transform, testTransform);
     auto screenId = 0;
     sceneSession->GetSessionProperty()->SetDisplayId(screenId);
-    manager_->CalNotRotateTransform(sceneSession, transform, testSingleHandData);
+    manager_->CalNotRotateTransform(sceneSession, transform);
     ASSERT_EQ(transform, testTransform);
     ScreenProperty screenProperty0;
     screenProperty0.SetRotation(0.0f);
@@ -310,19 +309,19 @@ HWTEST_F(SceneSessionDirtyManagerTest, CalNotRotateTransform, Function | SmallTe
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.emplace(screenId, screenSession);
     testTransform.SetZero();
     ScreenSessionManagerClient::GetInstance().OnPropertyChanged(screenId, screenProperty0, reason);
-    manager_->CalNotRotateTransform(sceneSession, transform, testSingleHandData);
+    manager_->CalNotRotateTransform(sceneSession, transform);
     ASSERT_EQ(transform, testTransform);
     screenProperty0.SetRotation(90.0f);
     ScreenSessionManagerClient::GetInstance().OnPropertyChanged(screenId, screenProperty0, reason);
-    manager_->CalNotRotateTransform(sceneSession, transform, testSingleHandData);
+    manager_->CalNotRotateTransform(sceneSession, transform);
     ASSERT_EQ(transform, testTransform);
     screenProperty0.SetRotation(180.0f);
     ScreenSessionManagerClient::GetInstance().OnPropertyChanged(screenId, screenProperty0, reason);
-    manager_->CalNotRotateTransform(sceneSession, transform, testSingleHandData);
+    manager_->CalNotRotateTransform(sceneSession, transform);
     ASSERT_EQ(transform, testTransform);
     screenProperty0.SetRotation(270.0f);
     ScreenSessionManagerClient::GetInstance().OnPropertyChanged(screenId, screenProperty0, reason);
-    manager_->CalNotRotateTransform(sceneSession, transform, testSingleHandData);
+    manager_->CalNotRotateTransform(sceneSession, transform);
     ASSERT_EQ(transform, testTransform);
 }
 
@@ -334,7 +333,6 @@ HWTEST_F(SceneSessionDirtyManagerTest, CalNotRotateTransform, Function | SmallTe
 HWTEST_F(SceneSessionDirtyManagerTest, CalNotRotateTransform2, Function | SmallTest | Level2)
 {
     SessionInfo sessionInfo;
-    SingleHandData testSingleHandData;
     Matrix3f transform;
     Matrix3f testTransform = transform;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
@@ -354,12 +352,9 @@ HWTEST_F(SceneSessionDirtyManagerTest, CalNotRotateTransform2, Function | SmallT
     ScreenSessionManagerClient::GetInstance().OnPropertyChanged(screenId, screenProperty0, reason);
     auto oriProperty = sceneSession->GetSessionProperty();
     sceneSession->property_ = nullptr;
-    manager_->CalNotRotateTransform(sceneSession, transform, testSingleHandData);
+    manager_->CalNotRotateTransform(sceneSession, transform);
     ASSERT_EQ(transform, testTransform);
     sceneSession->property_ = oriProperty;
-    testSingleHandData.singleHandY = 0;
-    manager_->CalNotRotateTransform(sceneSession, transform, testSingleHandData);
-    ASSERT_EQ(transform, testTransform);
 }
 
 /**

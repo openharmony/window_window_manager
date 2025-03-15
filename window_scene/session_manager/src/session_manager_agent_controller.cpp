@@ -230,13 +230,17 @@ void SessionManagerAgentController::NotifyWindowStyleChange(WindowStyleType type
 
 void SessionManagerAgentController::NotifyCallingWindowDisplayChanged(const CallingWindowInfo& callingWindowInfo)
 {
-    TLOGD(WmsLogTag::WMS_KEYBOARD,
-        "notify userId: %{public}d, displayId: %{public}d, persistentId: %{public}d",
-        callingWindowInfo.userId_, static_cast<int32_t>(callingWindowInfo.displayId_), callingWindowInfo.windowId_);
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "notify persistentId: %{public}d, pid: %{public}d, "
+        "displayId: %{public}d, userId: %{public}d", callingWindowInfo.windowId_,
+        callingWindowInfo.callingPid_, static_cast<int32_t>(callingWindowInfo.displayId_), callingWindowInfo.userId_);
     for (const auto& agent : smAgentContainer_.GetAgentsByType(
         WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_CALLING_DISPLAY)) {
         if (agent != nullptr) {
             agent->NotifyCallingWindowDisplayChanged(callingWindowInfo);
+        } else {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "agent is nullptr, userId: %{public}d, displayId: %{public}d, "
+                "persistentId: %{public}d", callingWindowInfo.userId_,
+                static_cast<int32_t>(callingWindowInfo.displayId_), callingWindowInfo.windowId_);
         }
     }
 }

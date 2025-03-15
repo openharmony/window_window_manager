@@ -176,6 +176,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "updateWindowMode", moduleName, JsSceneSessionManager::UpdateWindowMode);
     BindNativeFunction(env, exportObj, "notifySingleHandInfoChange", moduleName,
         JsSceneSessionManager::NotifySingleHandInfoChange);
+    BindNativeFunction(env, exportObj, "getSingleHandCompatibleModeConfig", moduleName,
+        JsSceneSessionManager::GetSingleHandCompatibleModeConfig);
     BindNativeFunction(env, exportObj, "getRootSceneUIContext", moduleName,
         JsSceneSessionManager::GetRootSceneUIContext);
     BindNativeFunction(env, exportObj, "sendTouchEvent", moduleName, JsSceneSessionManager::SendTouchEvent);
@@ -257,7 +259,7 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::SetStatusBarAvoidHeight);
     BindNativeFunction(env, exportObj, "cloneWindow", moduleName,
         JsSceneSessionManager::CloneWindow);
-    BindNativeFunction(env, exportObj, "RegisterSingleHandContainerNode", moduleName,
+    BindNativeFunction(env, exportObj, "registerSingleHandContainerNode", moduleName,
         JsSceneSessionManager::RegisterSingleHandContainerNode);
     return NapiGetUndefined(env);
 }
@@ -953,6 +955,13 @@ napi_value JsSceneSessionManager::NotifySingleHandInfoChange(napi_env env, napi_
     return (me != nullptr) ? me->OnNotifySingleHandInfoChange(env, info) : nullptr;
 }
 
+napi_value JsSceneSessionManager::GetSingleHandCompatibleModeConfig(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnGetSingleHandCompatibleModeConfig(env, info) : nullptr;
+}
+
 napi_value JsSceneSessionManager::AddWindowDragHotArea(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]");
@@ -969,7 +978,7 @@ napi_value JsSceneSessionManager::GetRootSceneUIContext(napi_env env, napi_callb
 
 napi_value JsSceneSessionManager::SendTouchEvent(napi_env env, napi_callback_info info)
 {
-    WLOGFI("[NAPI]");
+    TLOGI(WmsLogTag::WMS_EVENT, "in");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnSendTouchEvent(env, info) : nullptr;
 }
@@ -2600,36 +2609,44 @@ napi_value JsSceneSessionManager::OnNotifySingleHandInfoChange(napi_env env, nap
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    double singleHandScaleX = 1.0f;
-    if (!ConvertFromJsValue(env, argv[ARG_INDEX_ZERO], singleHandScaleX)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to singleHandScaleX");
+    SingleHandScreenInfo singleHandScreenInfo;
+    if (!ConvertSingleHandScreenInfoFromJs(env, argv[ARG_INDEX_ZERO], singleHandScreenInfo)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to singleHandScreenInfo");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    double singleHandScaleY = 1.0f;
-    if (!ConvertFromJsValue(env, argv[ARG_INDEX_ONE], singleHandScaleY)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to singleHandScaleY");
+    WSRect originRect;
+    if (!ConvertSessionRectInfoFromJs(env, argv[ARG_INDEX_ONE], originRect)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to originRect");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    std::string str;
-    if (!ConvertFromJsValue(env, argv[ARG_INDEX_TWO], str)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to singleHandMode");
+    WSRect singleHandRect;
+    if (!ConvertSessionRectInfoFromJs(env, argv[ARG_INDEX_TWO], singleHandRect)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to originRect");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    SingleHandMode singleHandMode = SingleHandMode::MIDDLE;
-    if (str == "left") {
-        singleHandMode = SingleHandMode::LEFT;
-    } else if (str == "right") {
-        singleHandMode = SingleHandMode::RIGHT;
-    }
-    SceneSessionManager::GetInstance().NotifySingleHandInfoChange(
-        static_cast<float>(singleHandScaleX), static_cast<float>(singleHandScaleY), singleHandMode);
+    SceneSessionManager::GetInstance().NotifySingleHandInfoChange(singleHandScreenInfo, originRect, singleHandRect);
     return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSessionManager::OnGetSingleHandCompatibleModeConfig(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    const auto& singleHandCompatibleModeConfig =
+        SceneSessionManager::GetInstance().GetSingleHandCompatibleModeConfig();
+    napi_value jsSingleHandCompatibleModeConfigObj =
+        JsWindowSceneConfig::CreateSingleHandCompatibleConfig(env, singleHandCompatibleModeConfig);
+    if (jsSingleHandCompatibleModeConfigObj == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "jsSingleHandCompatibleModeConfigObj is nullptr");
+        napi_throw(env, CreateJsError(env,
+            static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY), "System is abnormal"));
+    }
+    return jsSingleHandCompatibleModeConfigObj;
 }
 
 napi_value JsSceneSessionManager::OnAddWindowDragHotArea(napi_env env, napi_callback_info info)
@@ -4038,6 +4055,8 @@ static napi_value CreateAppUseControlInfos(
         napi_set_named_property(env, objValue, "bundleName", CreateJsValue(env, appUseControlInfo.bundleName_));
         napi_set_named_property(env, objValue, "appIndex", CreateJsValue(env, appUseControlInfo.appIndex_));
         napi_set_named_property(env, objValue, "isNeedControl", CreateJsValue(env, appUseControlInfo.isNeedControl_));
+        napi_set_named_property(env, objValue, "isControlRecentOnly",
+            CreateJsValue(env, appUseControlInfo.isControlRecentOnly_));
         napi_set_element(env, arrayValue, index++, objValue);
     }
     return arrayValue;

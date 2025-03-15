@@ -561,8 +561,12 @@ void ScreenSessionManagerClient::SwitchUserCallback(std::vector<int32_t> oldScbP
         WLOGFE("oldScbPids size 0");
         return;
     }
-    std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
-    for (const auto& iter : screenSessionMap_) {
+    std::map<ScreenId, sptr<ScreenSession>> screenSessionMapCopy;
+    {
+        std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
+        screenSessionMapCopy = screenSessionMap_;
+    }
+    for (const auto& iter : screenSessionMapCopy) {
         auto displayNode = screenSessionManager_->GetDisplayNode(iter.first);
         if (displayNode == nullptr) {
             WLOGFE("display node is null");
@@ -642,6 +646,15 @@ SuperFoldStatus ScreenSessionManagerClient::GetSuperFoldStatus()
         return SuperFoldStatus::UNKNOWN;
     }
     return screenSessionManager_->GetSuperFoldStatus();
+}
+
+void ScreenSessionManagerClient::SetLandscapeLockStatus(bool isLocked)
+{
+    if (!screenSessionManager_) {
+        WLOGFE("screenSessionManager_ is null");
+        return;
+    }
+    return screenSessionManager_->SetLandscapeLockStatus(isLocked);
 }
 
 ExtendScreenConnectStatus ScreenSessionManagerClient::GetExtendScreenConnectStatus()
