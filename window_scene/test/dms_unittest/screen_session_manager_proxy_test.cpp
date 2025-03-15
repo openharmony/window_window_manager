@@ -2381,13 +2381,14 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayCapability, Function | SmallTe
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
     sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
     ASSERT_TRUE(screenSessionManagerProxy != nullptr);
-
-    std::string res = "";
-    std::function<void()> func = [&]() {
-        res = screenSessionManagerProxy->GetDisplayCapability();
-    };
-    func();
-    ASSERT_NE(res, "");
+    std::string capabilitInfo;
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_NE(DMError::DM_ERROR_IPC_FAILED,
+                screenSessionManagerProxy->GetDisplayCapability(capabilitInfo));
+    } else {
+        EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED,
+                screenSessionManagerProxy->GetDisplayCapability(capabilitInfo));
+    }
 }
 }
 }
