@@ -1524,7 +1524,7 @@ HWTEST_F(SceneSessionManagerTest12, SetStatusBarAvoidHeight, Function | SmallTes
  * @tc.desc: test function : GetKeyboardOccupiedAreaWithRotation
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest12, GetKeyboardOccupiedAreaWithRotation1, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerTest12, GetKeyboardOccupiedAreaWithRotation1, Function | SmallTest | Level3)
 {
     sptr<SceneSessionManager> sceneSessionManager = sptr<SceneSessionManager>::MakeSptr();
     sceneSessionManager->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
@@ -1545,7 +1545,7 @@ HWTEST_F(SceneSessionManagerTest12, GetKeyboardOccupiedAreaWithRotation1, Functi
  * @tc.desc: test function : GetKeyboardOccupiedAreaWithRotation
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest12, GetKeyboardOccupiedAreaWithRotation1, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerTest12, GetKeyboardOccupiedAreaWithRotation2, Function | SmallTest | Level3)
 {
     sptr<SceneSessionManager> sceneSessionManager = sptr<SceneSessionManager>::MakeSptr();
     sceneSessionManager->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
