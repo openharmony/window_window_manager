@@ -208,17 +208,19 @@ void AniWindowStage::SetShowOnLockScreen(ani_env* env, ani_class cls, ani_long n
 void AniWindowStage::OnSetShowOnLockScreen(ani_env* env, ani_boolean showOnLockScreen)
 {
     if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
-        TLOGE(WmsLogTag::DEFAULT, "set show on lock screen permission denied!");
+        TLOGE(WmsLogTag::DEFAULT, "[ANI]set show on lock screen permission denied!");
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
         return;
     }
     auto windowScene = GetWindowScene().lock();
     if (windowScene == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI]windowScene is nullptr!");
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
     auto mainWindow = windowScene->GetMainWindow();
     if (mainWindow == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] mainWindowis nullptr!");
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
@@ -227,6 +229,7 @@ void AniWindowStage::OnSetShowOnLockScreen(ani_env* env, ani_boolean showOnLockS
     } else {
         mainWindow->RemoveWindowFlag(OHOS::Rosen::WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED);
     }
+    TLOGE(WmsLogTag::DEFAULT, "[ANI] OnSetShowOnLockScreen end!");
 }
 }  // namespace Rosen
 }  // namespace OHOS

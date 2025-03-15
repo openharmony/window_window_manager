@@ -56,18 +56,18 @@ public:
     static void UnregisterWindowCallback(ani_env* env, ani_object obj, ani_long nativeObj, ani_string type,
         ani_ref callback);
 
-    ani_int GetWindowDecorHeight(ani_env* env);
-    ani_object SetWindowBackgroundColorSync(ani_env* env, const std::string& color);
+    ani_double GetWindowDecorHeight(ani_env* env);
+    ani_object SetWindowBackgroundColor(ani_env* env, const std::string& color);
     ani_object SetImmersiveModeEnabledState(ani_env* env, bool enable);
     ani_object SetWindowDecorVisible(ani_env* env, bool isVisible);
-    ani_object SetWindowDecorHeight(ani_env* env, ani_int height);
+    ani_object SetWindowDecorHeight(ani_env* env, ani_double height);
     ani_object GetWindowPropertiesSync(ani_env* env);
-    ani_object GetPropertiesSync(ani_env* env);
     ani_boolean IsWindowSupportWideGamut(ani_env* env);
     ani_object SetWindowLayoutFullScreen(ani_env* env, ani_boolean isLayoutFullScreen);
-    ani_object SetSystemBarProperties(ani_env* env, ani_object aniSystemBarProperties);
+    void SetSystemBarProperties(ani_env* env, ani_object aniSystemBarProperties);
     ani_object SetSpecificSystemBarEnabled(ani_env* env, ani_string, ani_boolean enable,
         ani_boolean enableAnimation);
+
 private:
     void OnSetWindowColorSpace(ani_env* env, ani_int colorSpace);
     void OnSetPreferredOrientation(ani_env* env, ani_int orientation);
