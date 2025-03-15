@@ -960,6 +960,31 @@ HWTEST_F(WindowSceneSessionImplTest5, SetParentWindow02, Function | SmallTest | 
     ASSERT_NE(parentWindow, nullptr);
     EXPECT_EQ(parentWindow->GetWindowName(), newParentWindow->GetWindowName());
 }
+
+/**
+ * @tc.name: IsFullScreenEnable
+ * @tc.desc: IsFullScreenEnable
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, IsFullScreenEnable, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetDisplayId(0);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetWindowModeSupportType(0);
+    ASSERT_EQ(window->IsFullScreenEnable(), false);
+    window->property_->SetWindowModeSupportType(1);
+    ASSERT_EQ(window->IsFullScreenEnable(), true);
+    window->property_->SetDragEnabled(true);
+    WindowLimits windowLimits = {5000, 5000, 500, 500, 0.0f, 0.0f};
+    window->property_->SetWindowLimits(windowLimits);
+    ASSERT_EQ(window->IsFullScreenEnable(), true);
+    WindowLimits windowLimits1 = {800, 800, 500, 500, 0.0f, 0.0f};
+    window->property_->SetWindowLimits(windowLimits1);
+    ASSERT_EQ(window->IsFullScreenEnable(), false);
+    window->property_->SetDragEnabled(false);
+    ASSERT_EQ(window->IsFullScreenEnable(), true);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

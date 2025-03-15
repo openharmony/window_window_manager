@@ -417,6 +417,7 @@ private:
      * only used when delay raise is enabled and hit draggable component
      */
     bool isExecuteDelayRaise_ = false;
+    bool IsFullScreenEnable() const;
 
     /*
      * Window Input Event

@@ -5590,5 +5590,22 @@ bool WindowSessionImpl::IsSubWindowMaximizeSupported() const
     }
     return false;
 }
+
+bool WindowSessionImpl::IsFullScreenPcAppInPadMode() const
+{
+    return property_->GetIsPcAppInPad() && GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN
+        && !IsFreeMultiWindowMode();
+}
+
+void WindowSessionImpl::NotifyClientWindowSize()
+{
+    if (IsFullScreenPcAppInPadMode()) {
+        const auto& windowRect = GetRect();
+        NotifySizeChange(windowRect, WindowSizeChangeReason::MOVE);
+        auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
+        sptr<DisplayInfo> displayInfo = display ? display->GetDisplayInfo() : nullptr;
+        UpdateViewportConfig(windowRect, WindowSizeChangeReason::UNDEFINED, nullptr, displayInfo);
+    }
+}
 } // namespace Rosen
 } // namespace OHOS

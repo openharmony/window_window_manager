@@ -1922,8 +1922,12 @@ WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height, const Re
         TLOGW(WmsLogTag::WMS_LAYOUT, "Unsupported operation for pip window");
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
-    if (GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING) {
+    if (GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING && !IsFullScreenPcAppInPadMode()) {
         TLOGW(WmsLogTag::WMS_LAYOUT, "Fullscreen window could not resize, winId: %{public}u", GetWindowId());
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
+    if (IsFullScreenPcAppInPadMode() && IsFullScreenEnable()) {
+        NotifyClientWindowSize();
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
 
@@ -1972,7 +1976,7 @@ WMError WindowSceneSessionImpl::ResizeAsync(uint32_t width, uint32_t height,
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
-    if (GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING) {
+    if (GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING && !property_->GetIsPcAppInPad()) {
         TLOGW(WmsLogTag::WMS_LAYOUT, "window should not resize, winId:%{public}u, mode:%{public}u",
             GetWindowId(), GetWindowMode());
         return WMError::WM_ERROR_INVALID_OP_IN_CUR_STATUS;
@@ -5531,5 +5535,35 @@ uint32_t WindowSceneSessionImpl::GetApiCompatibleVersion() const
     }
     return version;
 }
+ 
+bool WindowSceneSessionImpl::IsFullScreenEnable() const
+{
+    if (!WindowHelper::IsWindowModeSupported(property_->GetWindowModeSupportType(),
+        WindowMode::WINDOW_MODE_FULLSCREEN)) {
+        return false;
+    }
+    const auto& sizeLimits = property_->GetWindowLimits();
+    int32_t displayWidth = 0;
+    int32_t displayHeight = 0;
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
+    if (display != nullptr) {
+        displayWidth = display->GetWidth();
+        displayHeight = display->GetHeight();
+    } else {
+        auto defaultDisplayInfo = DisplayManager::GetInstance().GetDefaultDisplay();
+        if (defaultDisplayInfo != nullptr) {
+            displayWidth = defaultDisplayInfo->GetWidth();
+            displayHeight = defaultDisplayInfo->GetHeight();
+        } else {
+            return false;
+        }
+    }
+    if (property_->GetDragEnabled() && (sizeLimits.maxWidth_ < displayWidth || sizeLimits.maxHeight_ < displayHeight)) {
+        return false;
+    }
+    return true;
+}
+
+
 } // namespace Rosen
 } // namespace OHOS

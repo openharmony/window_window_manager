@@ -816,6 +816,25 @@ HWTEST_F(WindowSceneSessionImplTest3, Resize, Function | SmallTest | Level2)
     windowSceneSessionImpl->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     ret = windowSceneSessionImpl->Resize(100, 100);
     EXPECT_EQ(WMError::WM_OK, ret);
+    windowSceneSessionImpl->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    windowSceneSessionImpl->property_->SetIsPcAppInPad(true);
+    windowSceneSessionImpl->property_->SetWindowModeSupportType(WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN);
+    windowSceneSessionImpl->property_->SetDragEnabled(false);
+    ret = windowSceneSessionImpl->Resize(100, 100);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
+    windowSceneSessionImpl->property_->SetDragEnabled(true);
+    WindowLimits windowLimits = {5000, 5000, 50, 50, 0.0f, 0.0f};
+    windowSceneSessionImpl->property_->SetWindowLimits(windowLimits);
+    ret = windowSceneSessionImpl->Resize(100, 100);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
+    WindowLimits windowLimits1 = {800, 800, 50, 50, 0.0f, 0.0f};
+    windowSceneSessionImpl->property_->SetWindowLimits(windowLimits1);
+    ret = windowSceneSessionImpl->Resize(100, 100);
+    if (!windowSceneSessionImpl->IsFreeMultiWindowMode()) {
+        EXPECT_EQ(WMError::WM_OK, ret);
+    } else {
+        EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
+    }
 }
 
 /**
