@@ -5462,7 +5462,7 @@ uint32_t WindowSceneSessionImpl::GetApiCompatibleVersion() const
     return version;
 }
  
-bool WindowSceneSessionImpl::IsFullScreenEnable()
+bool WindowSceneSessionImpl::IsFullScreenEnable() const
 {
     if (!WindowHelper::IsWindowModeSupported(property_->GetWindowModeSupportType(),
         WindowMode::WINDOW_MODE_FULLSCREEN)) {
