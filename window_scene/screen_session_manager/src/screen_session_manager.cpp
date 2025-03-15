@@ -6792,16 +6792,14 @@ void ScreenSessionManager::RefreshMirrorScreenRegion(ScreenId screenId)
         TLOGE(WmsLogTag::DMS, "can not get screen session");
         return;
     }
-    if (screenSession->GetName() == "CastEngine" || screenSession->GetName() == "Cooperation") {
-        DMRect mainScreenRegion = {0, 0, 0, 0};
-        foldScreenController_->SetMainScreenRegion(mainScreenRegion);
-        ScreenId rsScreenId = SCREEN_ID_INVALID;
-        if (!ConvertScreenIdToRsScreenId(screenId, rsScreenId)) {
-            TLOGE(WmsLogTag::DMS, "Screen: %{public}" PRIu64" convert to rs id failed", screenId);
-        } else {
-            screenSession->SetMirrorScreenRegion(rsScreenId, mainScreenRegion);
-            screenSession->EnableMirrorScreenRegion();
-        }
+    DMRect mainScreenRegion = {0, 0, 0, 0};
+    foldScreenController_->SetMainScreenRegion(mainScreenRegion);
+    ScreenId rsScreenId = SCREEN_ID_INVALID;
+    if (!ConvertScreenIdToRsScreenId(screenId, rsScreenId)) {
+        TLOGE(WmsLogTag::DMS, "Screen: %{public}" PRIu64" convert to rs id failed", screenId);
+    } else {
+        screenSession->SetMirrorScreenRegion(rsScreenId, mainScreenRegion);
+        screenSession->EnableMirrorScreenRegion();
     }
 #endif
 }
