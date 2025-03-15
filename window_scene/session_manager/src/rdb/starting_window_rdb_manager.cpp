@@ -50,7 +50,7 @@ constexpr int32_t DB_BRANDING_PATH_INDEX = 11;
 constexpr int32_t DB_BACKGROUND_IMAGE_PATH_INDEX = 12;
 constexpr int32_t DB_BACKGROUND_IMAGE_FIT_INDEX = 13;
 
-inline NativeRdb::ValuesBucket BuildValuesBucket(const StartingWindowRdbItemKey& key, const StartingWindowInfo& value)
+NativeRdb::ValuesBucket BuildValuesBucket(const StartingWindowRdbItemKey& key, const StartingWindowInfo& value)
 {
     NativeRdb::ValuesBucket valuesBucket;
     valuesBucket.PutString(DB_BUNDLE_NAME, key.bundleName);
@@ -69,19 +69,19 @@ inline NativeRdb::ValuesBucket BuildValuesBucket(const StartingWindowRdbItemKey&
     return valuesBucket;
 }
 
-inline NativeRdb::AbsRdbPredicates BuildPredicates(cosnt std::string tableName, const StartingWindowRdbItemKey& key)
+NativeRdb::AbsRdbPredicates BuildPredicates(const std::string tableName, const StartingWindowRdbItemKey& key)
 {
     NativeRdb::AbsRdbPredicates absRdbPredicates(tableName);
     absRdbPredicates.EqualTo(DB_BUNDLE_NAME, key.bundleName)->And()->
-                    .EqualTo(DB_MODULE_NAME, key.moduleName)->And()->
-                    .EqualTo(DB_ABILITY_NAME, key.abilityName)->And()->
-                    .EqualTo(DB_DARK_MODE, key.darkMode);
+                     EqualTo(DB_MODULE_NAME, key.moduleName)->And()->
+                     EqualTo(DB_ABILITY_NAME, key.abilityName)->And()->
+                     EqualTo(DB_DARK_MODE, key.darkMode);
     return absRdbPredicates;
 }
 
-inline bool CheckRdbResult(int resCode)
+bool CheckRdbResult(int resCode)
 {
-    if (rescode != NativeRdb::E_OK) {
+    if (resCode != NativeRdb::E_OK) {
         TLOGE(WmsLogTag::WMS_PATTERN, "rdb failed, ret:%{public}d", resCode);
         return false;
     }
@@ -89,7 +89,8 @@ inline bool CheckRdbResult(int resCode)
 }
 } // namespace
 
-StartingWindowRdbManager::StartingWindowRdbManager(const WmsRdbConfig& rdbConfig)
+StartingWindowRdbManager::StartingWindowRdbManager(const WmsRdbConfig& wmsRdbConfig)
+    : wmsRdbConfig_(wmsRdbConfig)
 {
     std::string uniqueConstraint = std::string("CONSTRAINT uniqueConstraint UNIQUE (" +
         DB_BUNDLE_NAME + ", " + DB_MODULE_NAME + ", " + DB_ABILITY_NAME + ", " + DB_DARK_MODE + ")");
@@ -98,7 +99,7 @@ StartingWindowRdbManager::StartingWindowRdbManager(const WmsRdbConfig& rdbConfig
         DB_MODULE_NAME + " TEXT NOT NULL, " + DB_ABILITY_NAME + " TEXT NOT NULL, " + DB_DARK_MODE + " BOOLEAN, " +
         DB_BACKGROUND_COLOR_EARLY_VERSION + " INTEGER, " + DB_ICON_PATH_EARLY_VERSION + " TEXT, " +
         DB_CONFIG_FILE_ENABLED + " BOOLEAN, " + DB_BACKGROUND_COLOR + " INTEGER, " + DB_ICON_PATH + " TEXT, " +
-        DB_ICON_PATH + " TEXT, " + DB_BRANDING_PATH + " TEXT, " +
+        DB_ILLUSTRATION_PATH + " TEXT, " + DB_BRANDING_PATH + " TEXT, " +
         DB_BACKGROUND_IMAGE_PATH + " TEXT, " + DB_BACKGROUND_IMAGE_FIT + " TEXT, " +
         uniqueConstraint + ");");
 }
@@ -114,7 +115,7 @@ std::shared_ptr<NativeRdb::RdbStore> StartingWindowRdbManager::GetRdbStore()
     if (rdbStore_ != nullptr) {
         return rdbStore_;
     }
-    NativeRdb::RdbStoreConfig rdbStoreConfig(wmsRdbConfig_.dbPath, wmsRdbConfig_.dbName);
+    NativeRdb::RdbStoreConfig rdbStoreConfig(wmsRdbConfig_.dbPath + wmsRdbConfig_.dbName);
     rdbStoreConfig.SetSecurityLevel(NativeRdb::SecurityLevel::S1);
     int32_t resCode = NativeRdb::E_OK;
     WmsRdbOpenCallback wmsCallback(wmsRdbConfig_);
@@ -143,7 +144,7 @@ bool StartingWindowRdbManager::InsertData(const StartingWindowRdbItemKey& key, c
     }
     int64_t rowId = -1;
     auto valuesBucket = BuildValuesBucket(key, value);
-    auto ret = rdbStore->InsertWithConflitResolution(
+    auto ret = rdbStore->InsertWithConflictResolution(
         rowId, wmsRdbConfig_.tableName, valuesBucket, NativeRdb::ConflictResolution::ON_CONFLICT_REPLACE);
     return CheckRdbResult(ret);
 }
@@ -156,7 +157,6 @@ bool StartingWindowRdbManager::BatchInsert(int64_t& outInsertNum,
         TLOGE(WmsLogTag::WMS_PATTERN, "RdbStore is null");
         return false;
     }
-    int64_t rowId = -1;
     std::vector<NativeRdb::ValuesBucket> valuesBuckets;
     for (const auto& pair : inputValues) {
         auto valuesBucket = BuildValuesBucket(pair.first, pair.second);
@@ -173,14 +173,14 @@ bool StartingWindowRdbManager::DeleteDataByBundleName(const std::string& bundleN
         TLOGE(WmsLogTag::WMS_PATTERN, "RdbStore is null");
         return false;
     }
-    int64_t deletedRows = -1;
+    int32_t deletedRows = -1;
     NativeRdb::AbsRdbPredicates absRdbPredicates(wmsRdbConfig_.tableName);
     absRdbPredicates.EqualTo(DB_BUNDLE_NAME, bundleName);
     auto ret = rdbStore->Delete(deletedRows, absRdbPredicates);
     return CheckRdbResult(ret);
 }
 
-bool StartingWindowRdbManager::DeleteDataByBundleName(const StartingWindowRdbItemKey& key, StartingWindowInfo& value)
+bool StartingWindowRdbManager::QueryData(const StartingWindowRdbItemKey& key, StartingWindowInfo& value)
 {
     auto rdbStore = GetRdbStore();
     if (rdbStore == nullptr) {
@@ -188,7 +188,7 @@ bool StartingWindowRdbManager::DeleteDataByBundleName(const StartingWindowRdbIte
         return false;
     }
     auto absRdbPredicates = BuildPredicates(wmsRdbConfig_.tableName, key);
-    auto absSharedResultSet = rdbStore_->QueryByStep(absRdbPredicates, std::vector<std::string>());
+    auto absSharedResultSet = rdbStore->QueryByStep(absRdbPredicates, std::vector<std::string>());
     if (absSharedResultSet == nullptr) {
         TLOGE(WmsLogTag::WMS_PATTERN, "absSharedResultSet failed");
         return false;
@@ -203,7 +203,7 @@ bool StartingWindowRdbManager::DeleteDataByBundleName(const StartingWindowRdbIte
     int backgroundColor = 0;
     int configFileEnabled = 0;
     if (!CheckRdbResult(absSharedResultSet->GetInt(
-        DB_BACKGROUND_COLOR_EARLY_VERSION_INDEX, backgroundColorEarlyVersion)) ||
+            DB_BACKGROUND_COLOR_EARLY_VERSION_INDEX, backgroundColorEarlyVersion)) ||
         !CheckRdbResult(absSharedResultSet->GetString(
             DB_ICON_PATH_EARLY_VERSION_INDEX, value.iconPathEarlyVersion_)) ||
         !CheckRdbResult(absSharedResultSet->GetInt(DB_BACKGROUND_COLOR_INDEX, backgroundColor)) ||
