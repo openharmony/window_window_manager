@@ -1629,6 +1629,57 @@ HWTEST_F(SceneSessionTest3, NotifyUpdateFlagCallback, Function | SmallTest | Lev
     sceneSession->NotifyUpdateFlagCallback(std::move(func1));
     ASSERT_NE(nullptr, sceneSession->onUpdateFlagFunc_);
 }
+
+/**
+ * @tc.name: GetKeyboardOccupiedAreaWithRotation1
+ * @tc.desc: GetKeyboardOccupiedAreaWithRotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, GetKeyboardOccupiedAreaWithRotation1, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "GetKeyboardOccupiedAreaWithRotation";
+    info.bundleName_ = "GetKeyboardOccupiedAreaWithRotation";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->specificCallback_ = nullptr;
+
+    int32_t persistentId = 1;
+    uint32_t rotation = 90;
+    std::vector<std::pair<bool, WSRect>> avoidAreas;
+    std::pair<bool, WSRect> keyboardOccupiedArea = {false, {0, 0, 0, 0}};
+    avoidAreas.emplace_back(keyboardOccupiedArea);
+    sceneSession->GetKeyboardOccupiedAreaWithRotation(persistentId, rotation, avoidAreas);
+    uint32_t areaSize = static_cast<uint32_t>(avoidAreas.size());
+    ASSERT_EQ(1, areaSize);
+    ASSERT_EQ(false, avoidAreas[0].first);
+}
+
+/**
+ * @tc.name: GetKeyboardOccupiedAreaWithRotation2
+ * @tc.desc: GetKeyboardOccupiedAreaWithRotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, GetKeyboardOccupiedAreaWithRotation2, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "GetKeyboardOccupiedAreaWithRotation";
+    info.bundleName_ = "GetKeyboardOccupiedAreaWithRotation";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sceneSession->specificCallback_ = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sceneSession->specificCallback_ = nullptr;
+
+    int32_t persistentId = 1;
+    uint32_t rotation = 90;
+    std::vector<std::pair<bool, WSRect>> avoidAreas;
+    std::pair<bool, WSRect> keyboardOccupiedArea = {true, {0, 0, 0, 0}};
+    avoidAreas.emplace_back(keyboardOccupiedArea);
+    sceneSession->GetKeyboardOccupiedAreaWithRotation(persistentId, rotation, avoidAreas);
+    uint32_t areaSize = static_cast<uint32_t>(avoidAreas.size());
+    ASSERT_EQ(1, areaSize);
+    ASSERT_EQ(true, avoidAreas[0].first);
+}
 }
 }
 }
