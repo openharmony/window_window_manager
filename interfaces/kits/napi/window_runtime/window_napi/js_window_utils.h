@@ -322,6 +322,7 @@ public:
     napi_value GetRectAndConvertToJsValue(napi_env env, const Rect& rect);
     napi_value CreateJsWindowPropertiesObject(napi_env env, sptr<Window>& window, const Rect& drawableRect);
     napi_value CreateJsSystemBarPropertiesObject(napi_env env, sptr<Window>& window);
+    napi_value CreateRotationChangeInfoObj(napi_env env, const RotationChangeInfo& rotationChangeInfo);
     bool GetSystemBarPropertiesFromJs(napi_env env, napi_value jsObject,
         std::unordered_map<WindowType, SystemBarProperty>& properties,
         std::unordered_map<WindowType, SystemBarPropertyFlag>& propertyFlags);
@@ -361,6 +362,8 @@ public:
     napi_value WindowErrorInit(napi_env env);
     napi_value WindowStatusTypeInit(napi_env env);
     napi_value RectChangeReasonInit(napi_env env);
+    napi_value RotationChangeTypeInit(napi_env env);
+    napi_value RectTypeInit(napi_env env);
     napi_value GetWindowLimitsAndConvertToJsValue(napi_env env, const WindowLimits& windowLimits);
     napi_value ConvertTitleButtonAreaToJsValue(napi_env env, const TitleButtonRect& titleButtonRect);
     napi_value ExtensionWindowAttributeInit(napi_env env);
@@ -381,6 +384,8 @@ public:
     std::unique_ptr<AbilityRuntime::NapiAsyncTask> CreateEmptyAsyncTask(
         napi_env env, napi_value lastParam, napi_value* result);
     bool ParseSubWindowOptions(napi_env env, napi_value jsObject, const sptr<WindowOption>& windowOption);
+    bool GetRotationChangeResultFromJs(napi_env env, napi_value jsObject, RotationChangeResult& rotationChangeResult);
+    bool ConvertRectFromJsValue(napi_env env, napi_value jsObject, Rect& displayRect);
     template<class T>
     bool ParseJsValue(napi_value jsObject, napi_env env, const std::string& name, T& data)
     {

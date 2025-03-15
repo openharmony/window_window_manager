@@ -1046,6 +1046,72 @@ bool ConvertResultFromJsValue(napi_env env, napi_value jsObject, RotationChangeR
     return true;
 }
 
+bool ConvertInfoFromJsValue(napi_env env, napi_value jsObject, RotationChangeInfo& rotationChangeInfo)
+{
+    napi_value jsType = nullptr, jsOrientation = nullptr, jsDisplayId = nullptr, jsDisplayRect = nullptr;
+    napi_get_named_property(env, jsObject, "type", &jsType);
+    napi_get_named_property(env, jsObject, "orientation", &jsOrientation);
+    napi_get_named_property(env, jsObject, "displayId", &jsDisplayId);
+    napi_get_named_property(env, jsObject, "displayRect", &jsDisplayRect);
+    if (GetType(env, jsType) != napi_undefined) {
+        uint32_t type;
+        if (!ConvertFromJsValue(env, jsType, type)) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to type");
+            return false;
+        }
+        rotationChangeInfo.type = static_cast<RotationChangeType>(type);
+    }
+    if (GetType(env, jsOrientation) != napi_undefined) {
+        uint32_t orientation;
+        if (!ConvertFromJsValue(env, jsOrientation, orientation)) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to orientation");
+            return false;
+        }
+        rotationChangeInfo.orientation = orientation;
+    }
+    if (GetType(env, jsDisplayId) != napi_undefined) {
+        int32_t displayId;
+        if (!ConvertFromJsValue(env, jsDisplayId, displayId)) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to displayId");
+            return false;
+        }
+        rotationChangeInfo.displayId = static_cast<uint64_t>(displayId);
+    }
+    if (GetType(env, jsDisplayRect) != napi_undefined) {
+        Rect displayRect;
+        if (!ConvertRectFromJsValue(env, jsDisplayRect, displayRect)) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to displayRect");
+            return false;
+        }
+        rotationChangeInfo.displayRect = displayRect;
+    }
+    return true;
+}
+
+bool ConvertResultFromJsValue(napi_env env, napi_value jsObject, RotationChangeResult& rotationChangeResult)
+{
+    napi_value jsRectType = nullptr, jsWindowRect = nullptr;
+    napi_get_named_property(env, jsObject, "rectType", &jsRectType);
+    napi_get_named_property(env, jsObject, "windowRect", &jsWindowRect);
+    if (GetType(env, jsRectType) != napi_undefined) {
+        uint32_t rectType;
+        if (!ConvertFromJsValue(env, jsRectType, type)) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to rectType");
+            return false;
+        }
+        rotationChangeResult.rectType = static_cast<RectType>(rectType);
+    }
+    if (GetType(env, jsWindowRect) != napi_undefined) {
+        Rect windowRect;
+        if (!ConvertRectFromJsValue(env, jsWindowRect, windowRect)) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to windowRect");
+            return false;
+        }
+        rotationChangeInfo.windowRect = windowRect;
+    }
+    return true;
+}
+
 bool ConvertDragResizeTypeFromJs(napi_env env, napi_value value, DragResizeType& dragResizeType)
 {
     uint32_t dragResizeTypeValue;
@@ -1978,6 +2044,36 @@ napi_value SceneTypeInit(napi_env env)
         CreateJsValue(env, static_cast<int32_t>(SceneType::PANEL_SCENE)));
     napi_set_named_property(env, objValue, "INPUT_SCENE",
         CreateJsValue(env, static_cast<int32_t>(SceneType::INPUT_SCENE)));
+    return objValue;
+}
+
+napi_value CreateRotationChangeType(napi_env env)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Failed to get object");
+        return NapiGetUndefined(env);
+    }
+    napi_set_named_property(env, objValue, "WINDOW_WILL_ROTATE",
+        CreateJsValue(env, static_cast<uint32_t>(RotationChangeType::WINDOW_WILL_ROTATE)));
+    napi_set_named_property(env, objValue, "WINDOW_DID_ROTATE",
+        CreateJsValue(env, static_cast<uint32_t>(RotationChangeType::WINDOW_DID_ROTATE)));
+    return objValue;
+}
+
+napi_value CreateRectType(napi_env env)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Failed to get object");
+        return NapiGetUndefined(env);
+    }
+    napi_set_named_property(env, objValue, "RELATIVE_TO_SCREEN",
+        CreateJsValue(env, static_cast<uint32_t>(RectType::RELATIVE_TO_SCREEN)));
+    napi_set_named_property(env, objValue, "RELATIVE_TO_PARENT_WINDOW",
+        CreateJsValue(env, static_cast<uint32_t>(RectType::RELATIVE_TO_PARENT_WINDOW)));
     return objValue;
 }
 

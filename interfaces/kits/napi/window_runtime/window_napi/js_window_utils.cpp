@@ -674,6 +674,17 @@ napi_value CreateJsSystemBarRegionTintArrayObject(napi_env env, const SystemBarR
     return objValue;
 }
 
+napi_value CreateRotationChangeInfoObject(napi_env env, const RotationChangeInfo& info)
+{
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+    napi_set_named_property(env, objValue, "type", CreateJsValue(env, static_cast<uint32_t>(info.type)));
+    napi_set_named_property(env, objValue, "orientation", CreateJsValue(env, info.orientation));
+    napi_set_named_property(env, objValue, "displayId", CreateJsValue(env, static_cast<uint32_t>(info.displayId)));
+    napi_set_named_property(env, objValue, "displayRect", GetRectAndConvertToJsValue(env, info.displayRect)));
+    return objValue;
+}
+
 bool GetSystemBarStatus(napi_env env, napi_callback_info info,
     std::unordered_map<WindowType, SystemBarProperty>& systemBarProperties,
     std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarpropertyFlags)
@@ -1334,6 +1345,30 @@ napi_value ModalityTypeInit(napi_env env)
         CreateJsValue(env, ApiModalityType::WINDOW_MODALITY));
     napi_set_named_property(env, objValue, "APPLICATION_MODALITY",
         CreateJsValue(env, ApiModalityType::APPLICATION_MODALITY));
+    return objValue;
+}
+
+napi_value RotationChangeTypeInit(napi_env env)
+{
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+    napi_set_named_property(env, objValue, "WINDOW_WILL_ROTATE",
+        CreateJsValue(env, static_cast<uint32_t>(RotationChangeType::WINDOW_WILL_ROTATE)));
+    napi_set_named_property(env, objValue, "WINDOW_DID_ROTATE",
+        CreateJsValue(env, static_cast<uint32_t>(RotationChangeType::WINDOW_DID_ROTATE)));
+    return objValue;
+}
+
+napi_value RectTypeInit(napi_env env)
+{
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+    napi_set_named_property(env, objValue, "RELATIVE_TO_SCREEN",
+        CreateJsValue(env, static_cast<uint32_t>(RectType::RELATIVE_TO_SCREEN)));
+    napi_set_named_property(env, objValue, "RELATIVE_TO_PARENT_WINDOW",
+        CreateJsValue(env, static_cast<uint32_t>(RectType::RELATIVE_TO_PARENT_WINDOW)));
     return objValue;
 }
 

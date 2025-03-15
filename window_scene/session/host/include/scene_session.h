@@ -125,6 +125,7 @@ using NotifyFollowParentRectFunc = std::function<void(bool isFollow)>;
 using GetSceneSessionByIdCallback = std::function<sptr<SceneSession>(int32_t sessionId)>;
 using NotifySetParentSessionFunc = std::function<void(int32_t oldParentWindowId, int32_t newParentWindowId)>;
 using NotifyUpdateFlagFunc = std::function<void(const std::string& flag)>;
+using NotifyRotationChangeFunc = std::function<void(int32_t persistentId, bool isRegister)>;
 
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
@@ -1132,6 +1133,7 @@ private:
      * Window Rotation
      */
     NotifyReqOrientationChangeFunc onRequestedOrientationChange_;
+    NotifyRotationChangeFunc onUpdateRotationChangeFunc_;
 
     /*
      * Window Animation
