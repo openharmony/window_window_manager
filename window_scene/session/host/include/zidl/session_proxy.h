@@ -172,11 +172,6 @@ public:
      * window rotation
      */
     WSError UpdateRotationChangeRegistered(int32_t persistentId, bool isRegister) override;
-
-    /**
-     * window rotation
-     */
-    WSError UpdateRotationChangeRegistered(int32_t persistentId, bool isRegister) override;
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;
 };
