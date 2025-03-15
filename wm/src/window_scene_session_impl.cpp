@@ -2698,7 +2698,7 @@ WMError WindowSceneSessionImpl::MaximizeFloating()
         WindowMode::WINDOW_MODE_FULLSCREEN)) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() && property_->GetCompatibleModeInPc()) {
+    if (property_->GetCompatibleModeInPc()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (GetGlobalMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
