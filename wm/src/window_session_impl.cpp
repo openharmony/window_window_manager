@@ -3112,7 +3112,8 @@ std::vector<sptr<IWaterfallModeChangeListener>> WindowSessionImpl::GetWaterfallM
 
 void WindowSessionImpl::NotifyWaterfallModeChange(bool isWaterfallMode)
 {
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u, waterfall: %{public}d", GetWindowId(), isWaterfallMode);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u, waterfall: %{public}d, stat: %{public}u",
+        GetWindowId(), isWaterfallMode, static_cast<uint32_t>(state_));
     if (state_ != WindowState::STATE_SHOWN) {
         return;
     }
