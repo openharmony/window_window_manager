@@ -5484,7 +5484,7 @@ bool WindowSceneSessionImpl::IsFullScreenEnable()
             return false;
         }
     }
-    if (property_->GetDragEnabled() && (sizeLimits.maxWidth_ < displayWidth|| sizeLimits.maxHeight_ < displayHeight)) {
+    if (property_->GetDragEnabled() && (sizeLimits.maxWidth_ < displayWidth || sizeLimits.maxHeight_ < displayHeight)) {
         return false;
     }
     return true;
