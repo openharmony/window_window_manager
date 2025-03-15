@@ -137,6 +137,12 @@ public:
     WMError HideNonSecureWindows(bool shouldHide) override;
     void UpdateDensity() override;
     WSError UpdateOrientation() override;
+    WMError GetTargetOrientationConfigInfo(Orientation targetOrientation,
+        const std::map<Rosen::WindowType, Rosen::SystemBarProperty>& properties, Ace::ViewportConfig& config,
+        std::map<AvoidAreaType, AvoidArea>& avoidAreas) override;
+    Ace::ViewportConfig FillTargetOrientationConfig(
+        OrientationInfo info, const sptr<DisplayInfo>& displayInfo, uint64_t displayId);
+    WSError NotifyTargetRotationInfo(OrientationInfo& info) override;
     WSError UpdateDisplayId(uint64_t displayId) override;
     WMError AdjustKeyboardLayout(const KeyboardLayoutParams params) override;
 

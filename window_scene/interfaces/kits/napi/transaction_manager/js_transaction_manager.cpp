@@ -51,6 +51,8 @@ napi_value JsTransactionManager::Init(napi_env env, napi_value exportObj)
         JsTransactionManager::OpenSyncTransaction);
     BindNativeFunction(env, exportObj, "closeSyncTransaction", moduleName,
         JsTransactionManager::CloseSyncTransaction);
+    BindNativeFunction(env, exportObj, "closeSyncTransactionWithVsync", moduleName,
+        JsTransactionManager::closeSyncTransactionWithVsync);
     return NapiGetUndefined(env);
 }
 
@@ -75,6 +77,13 @@ napi_value JsTransactionManager::CloseSyncTransaction(napi_env env, napi_callbac
     TLOGD(WmsLogTag::DEFAULT, "Enter");
     JsTransactionManager* me = CheckParamsAndGetThis<JsTransactionManager>(env, info);
     return (me != nullptr) ? me->OnCloseSyncTransaction(env, info) : nullptr;
+}
+
+napi_value JsTransactionManager::OnOpenSyncTransactionWithVsync(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DEFAULT, "Enter");
+    JsTransactionManager* me = CheckParamsAndGetThis<JsTransactionManager>(env, info);
+    return (me != nullptr) ? me->OnCloseSyncTransactionWithVsync(env, info) : nullptr;
 }
 
 napi_value JsTransactionManager::OnOpenSyncTransaction(napi_env env, napi_callback_info info)
@@ -108,6 +117,17 @@ napi_value JsTransactionManager::OnCloseSyncTransaction(napi_env env, napi_callb
     } else {
         task();
     }
+    return NapiGetUndefined(env);
+}
+
+napi_value JsTransactionManager::OnCloseSyncTransactionWithVsync(napi_env env, napi_callback_info info)
+{
+    auto task = [] {
+        if (auto transactionController = RSSyncTransactionController::GetInstance()) {
+            transactionController->CloseSyncTransaction();
+        }
+    };
+    SceneSessionManager::GetInstance().CloseSyncTransaction(task);
     return NapiGetUndefined(env);
 }
 } // namespace OHOS::Rosen

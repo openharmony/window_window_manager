@@ -282,5 +282,12 @@ void VsyncStation::SetUiDvsyncSwitch(bool dvsyncSwitch)
         receiver->SetUiDvsyncSwitch(dvsyncSwitch);
     }
 }
+
+void VsyncStation::DecreaseRequestVsyncTimes()
+{
+    requestVsyncTimes_--;
+    requestVsyncTimes_ = std::max(requestVsyncTimes_.load(), 0);
+}
+
 } // namespace Rosen
 } // namespace OHOS

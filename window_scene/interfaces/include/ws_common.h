@@ -467,6 +467,7 @@ enum class SizeChangeReason : uint32_t {
     AVOID_AREA_CHANGE,
     MAXIMIZE_TO_SPLIT,
     SPLIT_TO_MAXIMIZE,
+    PAGE_ROTATION,
     END,
 };
 

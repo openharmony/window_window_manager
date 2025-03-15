@@ -138,6 +138,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleGetAvoidAreaByType(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_ALL_AVOID_AREAS):
             return HandleGetAllAvoidAreas(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_TARGET_ORIENTATION_CONFIG_INFO):
+            return HandleGetTargetOrientaionConfigInfo(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_ASPECT_RATIO):
             return HandleSetAspectRatio(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_WINDOW_ANIMATION_FLAG):
@@ -962,6 +964,32 @@ int SessionStub::HandleGetAllAvoidAreas(MessageParcel& data, MessageParcel& repl
         reply.WriteUint32(static_cast<uint32_t>(type));
         reply.WriteParcelable(&avoidArea);
     }
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleGetTargetOrientationConfigInfo(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_ROTATION, "in");
+    Orientation targetOrientation = static_cast<Orientation>(data.ReadUint32());
+    std::map<Rosen::WindowType, Rosen::SystemBarProperty> properties;
+    uint32_t size = data.ReadUint32();
+    for (uint32_t i = 0; i < size; i++) {
+        uint32_t type = data.ReadUint32();
+        if (type < static_cast<uint32_t>(WindowType::APP_WINDOW_BASE) ||
+            type > static_cast<uint32_t>(WindowType::WINDOW_TYPE_UI_EXTENSION)) {
+            TLOGD(WmsLogTag::WMS_ROTATION, "read type fail");
+            return ERR_INVALID_DATA;
+        }
+        bool enable = data.ReadBool();
+        uint32_t backgroundColor = data.ReadUint32();
+        uint32_t contentColor = data.ReadUint32();
+        bool enableAnimation = data.ReadBool();
+        SystemBarSettingFlag settingFlag = static_cast<SystemBarSettingFlag>(data.ReadUint32());
+        SystemBarProperty property = { enable, backgroundColor, contentColor, enableAnimation, settingFlag };
+        properties[static_cast<WindowType>(type)] = property;
+    }
+    WSError errCode = GetTargetOrientationConfigInfo(targetOrientation, properties);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }

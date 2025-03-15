@@ -134,6 +134,14 @@ public:
     WMError SetBrightness(float brightness) override;
     virtual float GetBrightness() const override;
     void SetRequestedOrientation(Orientation orientation, bool needAnimation = true) override;
+    WMError RegisterPreferredOrientationChangeListener(
+        const sptr<IPreferredOrientationChangeListener>& listener) override;
+    WMError UnregisterPreferredOrientationChangeListener(
+        const sptr<IPreferredOrientationChangeListener>& listener) override;
+    void NotifyPreferredOrientationChange(Orientation orientation) override;
+    void NotifyClientOrientationChange();
+    WMError RegisterOrientationChangeListener(const sptr<IWindowOrientationChangeListener>& listener) override;
+    WMError UnRegisterOrientationChangeListener(const sptr<IWindowOrientationChangeListener>& listener) override;
     bool GetTouchable() const override;
     uint32_t GetWindowId() const override;
     uint64_t GetDisplayId() const override;
@@ -551,6 +559,7 @@ protected:
     std::atomic_bool isDragTaskPostDone_ = true;
     void FlushLayoutSize(int32_t width, int32_t height) override;
     sptr<FutureCallback> layoutCallback_ = nullptr;
+    sptr<FutureCallback> getTargetInfoCallback_ = nullptr;
     void UpdateVirtualPixelRatio(const sptr<Display>& display);
     WMError GetVirtualPixelRatio(float& vpr);
     mutable std::recursive_mutex transformMutex_;
@@ -630,6 +639,10 @@ private:
     template<typename T>
     EnableIfSame<T, IWindowRectChangeListener, std::vector<sptr<IWindowRectChangeListener>>> GetListeners();
     template<typename T>
+    EnableIfSame<T, IPreferredOrientationChangeListener, sptr<IPreferredOrientationChangeListener>> GetListeners();
+    template<typename T>
+    EnableIfSame<T, IWindowOrientationChangeListener, sptr<IWindowOrientationChangeListener>> GetListeners();
+    template<typename T>
     EnableIfSame<T, ISwitchFreeMultiWindowListener, std::vector<sptr<ISwitchFreeMultiWindowListener>>> GetListeners();
     template<typename T>
     EnableIfSame<T, IWindowHighlightChangeListener, std::vector<sptr<IWindowHighlightChangeListener>>> GetListeners();
@@ -665,6 +678,8 @@ private:
 
     bool CheckIfNeedCommitRsTransaction(WindowSizeChangeReason wmReason);
     void UpdateRectForRotation(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
+        const SceneAnimationConfig& config, const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {});
+    void UpdateRectForPageRotation(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
         const SceneAnimationConfig& config, const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {});
     void UpdateRectForOtherReason(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr,
@@ -716,6 +731,8 @@ private:
     static std::mutex displayMoveListenerMutex_;
     static std::mutex windowRectChangeListenerMutex_;
     static std::mutex switchFreeMultiWindowListenerMutex_;
+    static std::mutex preferredOrientationChangeListenerMutex_;
+    static std::mutex windowOrientationChangeListenerMutex_;
     static std::mutex highlightChangeListenerMutex_;
     static std::map<int32_t, std::vector<sptr<IWindowLifeCycle>>> lifecycleListeners_;
     static std::map<int32_t, std::vector<sptr<IDisplayMoveListener>>> displayMoveListeners_;
@@ -738,6 +755,8 @@ private:
     static std::map<int32_t, std::vector<sptr<IWindowStatusChangeListener>>> windowStatusChangeListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowRectChangeListener>>> windowRectChangeListeners_;
     static std::map<int32_t, std::vector<sptr<ISwitchFreeMultiWindowListener>>> switchFreeMultiWindowListeners_;
+    static std::map<int32_t, std::vector<sptr<IPreferredOrientationChangeListener>>> preferredOrientationChangeListener_;
+    static std::map<int32_t, std::vector<sptr<IWindowOrientationChangeListener>>> windowOrientationChangeListener_;
     static std::map<int32_t, std::vector<sptr<IWindowHighlightChangeListener>>> highlightChangeListeners_;
 
     // FA only

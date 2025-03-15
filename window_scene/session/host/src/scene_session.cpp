@@ -2441,6 +2441,77 @@ WSError SceneSession::GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoid
     }, __func__);
 }
 
+void SceneSession::SetSessionGetTargetOrientationConfigInfoCallback(
+    cosnt NotifySessionGetTargetOrientationConfigInfoFunc& func)
+{
+    PostTask([weakThis = wptr(this), func, where = __func__] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s session is null", where);
+            return WSError::WS_ERROR_NULLPTR;
+        }
+        session->sessionGetTargetOrientationConfigInfoFunc_ = func;
+        return WSError::WS_OK;
+    }, __func__);
+}
+
+WSError SceneSession::GetTargetOrientationConfigInfo(Orientation targetOrientation,
+    const std::map<Rosen::WindowType, Rosen::SystemBarProperty>& properties)
+{
+    PostTask(
+        [weakThis = wptr(this), targetOrientation, properties, where = __func__] {
+            auto session = weakThis.promote();
+            if (!session) {
+                TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s session is null", where);
+                return WSError::WS_ERROR_NULLPTR;
+            }
+            session->SetSystemBarPropertyForRotation(properties);
+            if (session->sessionGetTargetOrientationConfigInfoFunc_) {
+                session->sessionGetTargetOrientationConfigInfoFunc_(static_cast<targetOrientation>);
+            }
+            return WSError::WS_OK;
+        },
+        __func__);
+    return WSError::WS_OK;
+}
+
+WSError SceneSession::NotifyRotationProperty(int32_t rotation, uint32_t width, uint32_t height)
+{
+    PostTask(
+        [weakThis = wptr(this), rotation, width, height, where = __func__] {
+            auto session = weakThis.promote();
+            if (!session) {
+                TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s session is null", where);
+                return WSError::WS_ERROR_NULLPTR;
+            }
+            WSRect wsrect = { 0, 0, width, height };
+            auto properties = session->GetSystemBarPropertyForRotation();
+            std::map<AvoidAreaType, AvoidArea> avoidAreas;
+            // session->GetAvoidAreasByRotation(rotation, wsrect, properties, avoidAreas); //
+            // 此行代码依赖沉浸式，需要先注释
+            if (!session->sessionStage_) {
+                return WSError::WS_ERROR_NULLPTR;
+            }
+            Rect rect = { wsrect.posX_, wsrect.poxY_, wsrect.width_, wsrect.heigth_ };
+            OrientationInfo info = { rotation, rect, avoidAreas };
+            session->sessionStage_->NotifyTargetRotationInfo(info);
+            return WSError::WS_OK;
+        },
+        __func__);
+    return WSError::WS_OK;
+}
+
+void SceneSession::SetSystemBarPropertyForRotation(const std::map<Rosen::WindowType>,
+    Rosen::SystemBarProperty>& properties)
+{
+    targetSystemBarProperty_ = properties;
+}
+
+std::map<Rosen::WindowTYpe, Rosen::SystemBarProperty> SceneSession::SetSystemBarPropertyForRotation()
+{
+    return targetSystemBarProperty_;
+}
+
 WSError SceneSession::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
 {
     if (!sessionStage_) {
@@ -4241,12 +4312,12 @@ bool SceneSession::CheckTouchOutsideCallbackRegistered()
     return onTouchOutside_ != nullptr;
 }
 
-void SceneSession::SetRequestedOrientation(Orientation orientation)
+void SceneSession::SetRequestedOrientation(Orientation orientation, bool needAnimation)
 {
     WLOGFI("id: %{public}d orientation: %{public}u", GetPersistentId(), static_cast<uint32_t>(orientation));
-    GetSessionProperty()->SetRequestedOrientation(orientation);
+    GetSessionProperty()->SetRequestedOrientation(orientation, needAnimation);
     if (onRequestedOrientationChange_) {
-        onRequestedOrientationChange_(static_cast<uint32_t>(orientation));
+        onRequestedOrientationChange_(static_cast<uint32_t>(orientation), needAnimation);
     }
 }
 
@@ -5040,7 +5111,7 @@ WMError SceneSession::HandleActionUpdateSetBrightness(const sptr<WindowSessionPr
 WMError SceneSession::HandleActionUpdateOrientation(const sptr<WindowSessionProperty>& property,
     WSPropertyChangeAction action)
 {
-    SetRequestedOrientation(property->GetRequestedOrientation());
+    SetRequestedOrientation(property->GetRequestedOrientation(), property->GetRequestAnimation());
     return WMError::WM_OK;
 }
 
@@ -6566,6 +6637,10 @@ bool SceneSession::PipelineNeedNotifyClientToUpdateRect() const
 
 bool SceneSession::UpdateRectInner(const SessionUIParam& uiParam, SizeChangeReason reason)
 {
+    if (reason == SizeChangeReason::PAGE_ROTATION) {
+        dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
+    }
+
     if (!((NotifyServerToUpdateRect(uiParam, reason) || IsDirtyWindow()) && PipelineNeedNotifyClientToUpdateRect())) {
         return false;
     }
