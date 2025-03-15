@@ -291,11 +291,21 @@ public:
         std::map<WindowType, SystemBarPropertyFlag>& windowPropertyFlags,
         const ani_object& aniProperties,
         const sptr<Window>& window);
+    static void GetSystemBarPropertiesFromAni(sptr<Window>& window,
+        std::map<WindowType, SystemBarProperty>& newProperties,
+        std::map<WindowType, SystemBarPropertyFlag>& newPropertyFlags,
+        std::map<WindowType, SystemBarProperty>& properties,
+        std::map<WindowType, SystemBarPropertyFlag>& propertyFlags);
+    static void UpdateSystemBarProperties(std::map<WindowType, SystemBarProperty>& systemBarProperties,
+            const std::map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags, sptr<Window> windowToken);
     static bool SetSpecificSystemBarEnabled(ani_env* env,
         std::map<WindowType, SystemBarProperty>& systemBarProperties,
         ani_string aniName,
         ani_boolean aniEnable,
         ani_boolean aniEnableAnimation);
+    static void GetSpecificBarStatus(sptr<Window>& window, const std::string& name,
+        std::map<WindowType, SystemBarProperty>& newSystemBarProperties,
+        std::map<WindowType, SystemBarProperty>& systemBarProperties);
 
 private:
     static void SetSystemPropertiesWindowRect(ani_env* env, const sptr<Window>& window,

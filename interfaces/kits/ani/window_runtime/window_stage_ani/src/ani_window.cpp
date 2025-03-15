@@ -92,6 +92,7 @@ void AniWindow::OnSetWindowColorSpace(ani_env* env, ani_int colorSpace)
         return;
     }
     window->SetColorSpace(static_cast<ColorSpace>(colorSpace));
+    TLOGI(WmsLogTag::DEFAULT, "[ANI] SetWindowColorSpace end");
 }
 
 void AniWindow::SetPreferredOrientation(ani_env* env, ani_object obj, ani_long nativeObj, ani_int orientation)
@@ -198,11 +199,12 @@ void AniWindow::SetWindowKeepScreenOn(ani_env* env, ani_object obj, ani_long nat
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
-    if (aniWindow != nullptr) {
-        aniWindow->OnSetWindowKeepScreenOn(env, isKeepScreenOn);
-    } else {
+    if (aniWindow == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] aniWindow is nullptr");
+        return;
     }
+    aniWindow->OnSetWindowKeepScreenOn(env, isKeepScreenOn);
+    TLOGI(WmsLogTag::DEFAULT, "[ANI] SetWindowKeepScreenOn end");
 }
 
 void AniWindow::OnSetWindowKeepScreenOn(ani_env* env, ani_boolean isKeepScreenOn)
@@ -311,18 +313,19 @@ void AniWindow::OnLoadContent(ani_env* env, ani_string path, ani_object storage)
 
 void AniWindow::SetWindowSystemBarEnable(ani_env* env, ani_object obj, ani_long nativeObj, ani_object nameAry)
 {
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    TLOGI(WmsLogTag::WMS_MAIN, "[ANI]");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (aniWindow != nullptr) {
         aniWindow->OnSetWindowSystemBarEnable(env, nameAry);
     } else {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] aniWindow is nullptr");
+        TLOGE(WmsLogTag::WMS_MAIN, "[ANI] aniWindow is nullptr");
     }
+    TLOGI(WmsLogTag::WMS_MAIN, "[ANI] SetWindowSystemBarEnable end");
 }
 
 void AniWindow::OnSetWindowSystemBarEnable(ani_env* env, ani_object nameAry)
 {
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    TLOGI(WmsLogTag::WMS_MAIN, "[ANI]");
     auto window = GetWindow();
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_MAIN, "[ANI] window is nullptr");
@@ -521,7 +524,7 @@ __attribute__((no_sanitize("cfi")))
     return obj;
 }
 
-ani_int AniWindow::GetWindowDecorHeight(ani_env* env)
+ani_double AniWindow::GetWindowDecorHeight(ani_env* env)
 {
     int32_t height { 0 };
     wptr<Window> weakToken(windowToken_);
@@ -542,10 +545,10 @@ ani_int AniWindow::GetWindowDecorHeight(ani_env* env)
     }
     TLOGI(WmsLogTag::DEFAULT, "[ANI] Window [%{public}u, %{public}s] OnGetDecorHeight end, height = %{public}d",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), height);
-    return static_cast<ani_int>(height);
+    return static_cast<ani_double>(height);
 }
 
-ani_object AniWindow::SetWindowBackgroundColorSync(ani_env* env, const std::string& color)
+ani_object AniWindow::SetWindowBackgroundColor(ani_env* env, const std::string& color)
 {
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetBackgroundColor(color));
     if (ret == WmErrorCode::WM_OK) {
@@ -657,7 +660,7 @@ ani_object AniWindow::SetWindowDecorVisible(ani_env* env, bool isVisible)
     return AniWindowUtils::CreateAniUndefined(env);
 }
 
-ani_object AniWindow::SetWindowDecorHeight(ani_env* env, ani_int height)
+ani_object AniWindow::SetWindowDecorHeight(ani_env* env, ani_double height)
 {
     if (height < MIN_DECOR_HEIGHT || height > MAX_DECOR_HEIGHT) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] height should greater than 37 or smaller than 112");
@@ -670,16 +673,11 @@ ani_object AniWindow::SetWindowDecorHeight(ani_env* env, ani_int height)
         return AniWindowUtils::AniThrowError(env, ret);
     }
     TLOGI(WmsLogTag::DEFAULT, "[ANI] Window [%{public}u, %{public}s] OnSetDecorHeight end, height = %{public}d",
-        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), height);
+        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), static_cast<int32_t>(height));
     return AniWindowUtils::CreateAniUndefined(env);
 }
 
 ani_object AniWindow::GetWindowPropertiesSync(ani_env* env)
-{
-    return AniWindowUtils::CreateWindowsProperties(env, windowToken_);
-}
-
-ani_object AniWindow::GetPropertiesSync(ani_env* env)
 {
     wptr<Window> weakToken(windowToken_);
     TLOGI(WmsLogTag::WMS_IMMS, "[ANI]");
@@ -691,9 +689,7 @@ ani_object AniWindow::GetPropertiesSync(ani_env* env)
 
     auto objValue = AniWindowUtils::CreateWindowsProperties(env, weakWindow);
     if (objValue == nullptr) {
-        AniErrUtils::ThrowBusinessError(env, WMError::WM_ERROR_NULLPTR,
-            "[ANI] Window get properties failed");
-        return AniWindowUtils::CreateAniUndefined(env);
+        return AniWindowUtils::AniThrowError(env, WMError::WM_ERROR_NULLPTR, "[ANI] Window get properties failed");
     }
     TLOGI(WmsLogTag::WMS_IMMS, "[ANI] Window [%{public}u, %{public}s] get properties end",
         weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
@@ -703,7 +699,9 @@ ani_object AniWindow::GetPropertiesSync(ani_env* env)
 ani_boolean AniWindow::IsWindowSupportWideGamut(ani_env* env)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-    return static_cast<ani_boolean>(windowToken_->IsSupportWideGamut());
+    ani_boolean res = static_cast<ani_boolean>(windowToken_->IsSupportWideGamut());
+    TLOGI(WmsLogTag::DEFAULT, "[ANI] Window IsWindowSupportWideGamut end");
+    return res;
 }
 
 ani_object AniWindow::SetWindowLayoutFullScreen(ani_env* env, ani_boolean isLayoutFullScreen)
@@ -725,38 +723,78 @@ ani_object AniWindow::SetWindowLayoutFullScreen(ani_env* env, ani_boolean isLayo
     return 0;
 }
 
-ani_object AniWindow::SetSystemBarProperties(ani_env* env, ani_object aniSystemBarProperties)
+void AniWindow::SetSystemBarProperties(ani_env* env, ani_object aniSystemBarProperties)
 {
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "[ANI] windowToken_ is nullptr");
-        return AniWindowUtils::CreateAniUndefined(env);
+        return;
     }
-    std::map<WindowType, SystemBarProperty> properties;
-    std::map<WindowType, SystemBarPropertyFlag> jsSystemBarPropertyFlags;
+    std::map<WindowType, SystemBarProperty> aniProperties;
+    std::map<WindowType, SystemBarPropertyFlag> aniSystemBarPropertyFlags;
 
-    if (!AniWindowUtils::SetSystemBarPropertiesFromAni(env, properties, jsSystemBarPropertyFlags,
+    if (!AniWindowUtils::SetSystemBarPropertiesFromAni(env, aniProperties, aniSystemBarPropertyFlags,
         aniSystemBarProperties, windowToken_)) {
         TLOGE(WmsLogTag::WMS_IMMS, "[ANI] Failed to convert parameter to systemBarProperties");
+        return;
     }
-    return {};
+
+    std::map<WindowType, SystemBarProperty> systemBarProperties;
+    std::map<WindowType, SystemBarPropertyFlag> systemBarPropertyFlags;
+    AniWindowUtils::GetSystemBarPropertiesFromAni(windowToken_, aniProperties, aniSystemBarPropertyFlags,
+        systemBarProperties, systemBarPropertyFlags);
+    AniWindowUtils::UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags, windowToken_);
+    WMError ret = SetSystemBarPropertiesByFlags(
+        systemBarPropertyFlags, systemBarProperties, windowToken_);
+    if (ret != WMError::WM_OK) {
+        AniWindowUtils::AniThrowError(env, WMError::WM_ERROR_NULLPTR, "[ANI] Window SetSystemBarProperties failed");
+        return;
+    }
+
+    TLOGI(WmsLogTag::WMS_IMMS, "[ANI] Succeed in setting systemBarProperties");
 }
 
 ani_object AniWindow::SetSpecificSystemBarEnabled(ani_env* env, ani_string name, ani_boolean enable,
     ani_boolean enableAnimation)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI] SetSystemBarEnable");
-    std::map<WindowType, SystemBarProperty> systemBarProperties;
-    if (!AniWindowUtils::SetSpecificSystemBarEnabled(env, systemBarProperties, name, enable, enableAnimation)) {
+    std::map<WindowType, SystemBarProperty> aniSystemBarProperties;
+    if (!AniWindowUtils::SetSpecificSystemBarEnabled(env, aniSystemBarProperties, name, enable, enableAnimation)) {
         TLOGE(WmsLogTag::WMS_IMMS, "[ANI] invalid param or argc");
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
+    std::map<WindowType, SystemBarProperty> systemBarProperties;
+    std::string barName;
+    ani_status ret = AniWindowUtils::GetStdString(env, name, barName);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_IMMS, "[ANI] invalid param of name");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
 
-    return {};
+    AniWindowUtils::GetSpecificBarStatus(windowToken_, barName, systemBarProperties, systemBarProperties);
+    WmErrorCode err = (windowToken_ == nullptr) ? WmErrorCode::WM_ERROR_STATE_ABNORMALLY : WmErrorCode::WM_OK;
+    if (barName.compare("status") == 0) {
+        err = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetSpecificBarProperty(
+            WindowType::WINDOW_TYPE_STATUS_BAR, systemBarProperties.at(WindowType::WINDOW_TYPE_STATUS_BAR)));
+    } else if (barName.compare("navigation") == 0) {
+        err = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetSpecificBarProperty(WindowType::WINDOW_TYPE_NAVIGATION_BAR,
+            systemBarProperties.at(WindowType::WINDOW_TYPE_NAVIGATION_BAR)));
+    } else if (barName.compare("navigationIndicator") == 0) {
+        err = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetSpecificBarProperty(
+            WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR,
+            systemBarProperties.at(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR)));
+    }
+
+    if (err == WmErrorCode::WM_OK) {
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+
+    TLOGE(WmsLogTag::WMS_IMMS, "SetSpecificSystemBarEnabled failed, ret = %{public}d", err);
+    return AniWindowUtils::AniThrowError(env, err);
 }
 }  // namespace Rosen
 }  // namespace OHOS
 
-static ani_int WindowGetWindowDecorHeight(ani_env* env, ani_object obj, ani_long nativeObj)
+static ani_double WindowGetWindowDecorHeight(ani_env* env, ani_object obj, ani_long nativeObj)
 {
     using namespace OHOS::Rosen;
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
@@ -768,20 +806,21 @@ static ani_int WindowGetWindowDecorHeight(ani_env* env, ani_object obj, ani_long
     return aniWindow->GetWindowDecorHeight(env);
 }
 
-static ani_int WindowSetWindowBackgroundColorSync(ani_env* env, ani_object obj, ani_long nativeObj,
+static ani_int WindowSetWindowBackgroundColor(ani_env* env, ani_object obj, ani_long nativeObj,
     ani_string color)
 {
     using namespace OHOS::Rosen;
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     std::string colorStr;
     OHOS::Rosen::AniWindowUtils::GetStdString(env, color, colorStr);
-    TLOGD(WmsLogTag::DEFAULT, "[ANI] SetWindowBackgroundColorSync %{public}s", colorStr.c_str());
+    TLOGD(WmsLogTag::DEFAULT, "[ANI] SetWindowBackgroundColor %{public}s", colorStr.c_str());
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (aniWindow == nullptr || aniWindow->GetWindow() == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] windowToken_ is nullptr");
         return ANI_ERROR;
     }
-    aniWindow->SetWindowBackgroundColorSync(env, colorStr);
+    aniWindow->SetWindowBackgroundColor(env, colorStr);
+    TLOGI(WmsLogTag::DEFAULT, "[ANI] SetWindowBackgroundColor end");
     return ANI_OK;
 }
 
@@ -813,7 +852,7 @@ static ani_int WindowSetWindowDecorVisible(ani_env* env, ani_object obj, ani_lon
     return ANI_OK;
 }
 
-static ani_int WindowSetWindowDecorHeight(ani_env* env, ani_object obj, ani_long nativeObj, ani_int height)
+static ani_int WindowSetWindowDecorHeight(ani_env* env, ani_object obj, ani_long nativeObj, ani_double height)
 {
     using namespace OHOS::Rosen;
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
@@ -833,21 +872,9 @@ static ani_object WindowGetWindowProperties(ani_env* env, ani_object obj, ani_lo
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (aniWindow == nullptr || aniWindow->GetWindow() == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] windowToken_ is nullptr");
-        return ani_object {};
+        return AniWindowUtils::CreateAniUndefined(env);
     }
     return aniWindow->GetWindowPropertiesSync(env);
-}
-
-static ani_object WindowGetProperties(ani_env* env, ani_object obj, ani_long nativeObj)
-{
-    using namespace OHOS::Rosen;
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
-    if (aniWindow == nullptr || aniWindow->GetWindow() == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] windowToken_ is nullptr");
-        return ani_object {};
-    }
-    return aniWindow->GetPropertiesSync(env);
 }
 
 static ani_boolean WindowIsWindowSupportWideGamut(ani_env* env, ani_object obj, ani_long nativeObj)
@@ -859,6 +886,7 @@ static ani_boolean WindowIsWindowSupportWideGamut(ani_env* env, ani_object obj, 
         TLOGE(WmsLogTag::DEFAULT, "[ANI] windowToken_ is nullptr");
         return false;
     }
+    TLOGI(WmsLogTag::WMS_IMMS, "[ANI] WindowIsWindowSupportWideGamut end");
     return aniWindow->IsWindowSupportWideGamut(env);
 }
 
@@ -873,6 +901,7 @@ static ani_int WindowSetWindowLayoutFullScreen(ani_env* env, ani_object obj,
         return ANI_ERROR;
     }
     aniWindow->SetWindowLayoutFullScreen(env, isLayoutFullScreen);
+    TLOGI(WmsLogTag::WMS_IMMS, "[ANI] SetWindowLayoutFullScreen end");
     return ANI_OK;
 }
 
@@ -901,6 +930,7 @@ static ani_int WindowSetSpecificSystemBarEnabled(ani_env* env, ani_object obj, a
         return ANI_ERROR;
     }
     aniWindow->SetSpecificSystemBarEnabled(env, name, enable, enableAnimation);
+    TLOGI(WmsLogTag::DEFAULT, "[ANI] SetSpecificSystemBarEnabled end");
     return ANI_OK;
 }
 
@@ -985,25 +1015,25 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
         return ANI_NOT_FOUND;
     }
     std::array methods = {
-        ani_native_function {"getWindowDecorHeight", "J:I",
+        ani_native_function {"getWindowDecorHeight", "J:D",
             reinterpret_cast<void *>(WindowGetWindowDecorHeight)},
         ani_native_function {"setWindowBackgroundColor", "JLstd/core/String;:I",
-            reinterpret_cast<void *>(WindowSetWindowBackgroundColorSync)},
+            reinterpret_cast<void *>(WindowSetWindowBackgroundColor)},
         ani_native_function {"setImmersiveModeEnabledState", "JZ:I",
             reinterpret_cast<void *>(WindowSetImmersiveModeEnabledState)},
         ani_native_function {"setWindowDecorVisible", "JZ:I",
             reinterpret_cast<void *>(WindowSetWindowDecorVisible)},
-        ani_native_function {"setWindowDecorHeight", "JI:I",
+        ani_native_function {"setWindowDecorHeight", "JD:I",
             reinterpret_cast<void *>(WindowSetWindowDecorHeight)},
         ani_native_function {"getWindowProperties", "J:L@ohos/window/window/WindowProperties;",
             reinterpret_cast<void *>(WindowGetWindowProperties)},
         ani_native_function {"getProperties", "J:L@ohos/window/window/WindowProperties;",
-            reinterpret_cast<void *>(WindowGetProperties)},
+            reinterpret_cast<void *>(WindowGetWindowProperties)},
         ani_native_function {"isWindowSupportWideGamut", "J:Z",
             reinterpret_cast<void *>(WindowIsWindowSupportWideGamut)},
         ani_native_function {"setWindowLayoutFullScreen", "JZ:I",
             reinterpret_cast<void *>(WindowSetWindowLayoutFullScreen)},
-        ani_native_function {"setSystemBarProperties", "JL@ohos/window/window/SystemBarProperties;:I",
+        ani_native_function {"setWindowSystemBarProperties", "JL@ohos/window/window/SystemBarProperties;:I",
             reinterpret_cast<void *>(WindowSetSystemBarProperties)},
         ani_native_function {"setSpecificSystemBarEnabled", "JLstd/core/String;ZZ:I",
             reinterpret_cast<void *>(WindowSetSpecificSystemBarEnabled)},
