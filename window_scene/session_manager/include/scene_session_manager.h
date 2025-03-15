@@ -897,8 +897,8 @@ private:
     void DestroyUIServiceExtensionSubWindow(const sptr<SceneSession>& sceneSession);
     WSError CheckSubSessionStartedByExtensionAndSetDisplayId(const sptr<IRemoteObject>& token,
         const sptr<WindowSessionProperty>& property, const sptr<ISessionStage>& sessionStage);
-    void ReportSubWindowCreationFailure(int32_t pid, std::string abilityName,
-        std::string parentBundleName, std::string hostBundleName);
+    void ReportSubWindowCreationFailure(const int32_t& pid, const std::string& abilityName,
+        const std::string& parentBundleName, const std::string& hostBundleName);
 
     /*
      * Multi User
