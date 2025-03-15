@@ -10,9 +10,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
- 
+
 import("//build/config/components/ets_frontend/ets2abc_config.gni")
- 
+
 # abc generate
 generate_static_abc("scene_session_manager_abc") {
   arktsconfig = "./main.json"
@@ -28,7 +28,7 @@ generate_static_abc("scene_session_manager_abc") {
   is_boot_abc = "True"
   device_dst_file = "/system/framework/scene_session_manager.abc"
 }
- 
+
 ohos_prebuilt_etc("scene_session_manager_etc") {
   source = "$target_out_dir/scene_session_manager.abc"
   deps = [ ":scene_session_manager_abc" ]
