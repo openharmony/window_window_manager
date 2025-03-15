@@ -3117,8 +3117,8 @@ WSError SceneSessionManager::CheckSubSessionStartedByExtensionAndSetDisplayId(co
     return result;
 }
 
-void SceneSessionManager::ReportSubWindowCreationFailure(int32_t pid, std::string abilityName,
-    std::string parentBundleName, std::string hostBundleName)
+void SceneSessionManager::ReportSubWindowCreationFailure(const int32_t& pid, const std::string& abilityName,
+        const std::string& parentBundleName, const std::string& hostBundleName)
 {
     taskScheduler_->PostAsyncTask([pid, abilityName, parentBundleName, hostBundleName]() {
         std::ostringstream oss;
