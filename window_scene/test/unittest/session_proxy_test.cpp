@@ -629,7 +629,7 @@ HWTEST_F(SessionProxyTest, OnSetWindowRectAutoSave, Function | SmallTest | Level
     ASSERT_NE(iRemoteObjectMocker, nullptr);
     auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     ASSERT_NE(sProxy, nullptr);
-    WSError res = sProxy->OnSetWindowRectAutoSave(true);
+    WSError res = sProxy->OnSetWindowRectAutoSave(true, false);
     ASSERT_EQ(res, WSError::WS_OK);
     GTEST_LOG_(INFO) << "SessionProxyTest: OnSetWindowRectAutoSave end";
 }
@@ -1123,7 +1123,7 @@ HWTEST_F(SessionProxyTest, SetSessionLabelAndIcon, Function | SmallTest | Level2
 
 /**
  * @tc.name: SetWindowCornerRadius
- * @tc.desc: normal function
+ * @tc.desc: SetWindowCornerRadius
  * @tc.type: FUNC
  */
 HWTEST_F(SessionProxyTest, SetWindowCornerRadius, Function | SmallTest | Level2)
@@ -1136,6 +1136,23 @@ HWTEST_F(SessionProxyTest, SetWindowCornerRadius, Function | SmallTest | Level2)
     WSError res = sProxy->SetWindowCornerRadius(1.0f);
     ASSERT_EQ(res, WSError::WS_OK);
     GTEST_LOG_(INFO) << "SessionProxyTest: SetWindowCornerRadius end";
+}
+
+/**
+ * @tc.name: UpdateFlag
+ * @tc.desc: UpdateFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, UpdateFlag, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: UpdateFlag start";
+    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
+    std::string flag = "test";
+    WSError res = sProxy->UpdateFlag(flag);
+    ASSERT_EQ(res, WSError::WS_OK);
+    GTEST_LOG_(INFO) << "SessionProxyTest: UpdateFlag end";
 }
 
 /**
@@ -1312,6 +1329,22 @@ HWTEST_F(SessionProxyTest, OnContainerModalEvent, Function | SmallTest | Level2)
     WSError res = sProxy->OnContainerModalEvent("name", "value");
     ASSERT_EQ(res, WSError::WS_OK);
     GTEST_LOG_(INFO) << "SessionProxyTest: OnContainerModalEvent end";
+}
+
+/**
+ * @tc.name: GetWaterfallMode
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, GetWaterfallMode, Function | SmallTest | Level2)
+{
+    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
+    bool isWaterfallMode = false;
+    WSError res = sProxy->GetWaterfallMode(isWaterfallMode);
+    ASSERT_EQ(res, WSError::WS_OK);
 }
 } // namespace
 } // namespace Rosen

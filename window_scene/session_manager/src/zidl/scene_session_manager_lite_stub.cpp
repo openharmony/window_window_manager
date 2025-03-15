@@ -599,7 +599,7 @@ int SceneSessionManagerLiteStub::HandleCheckUIExtensionCreation(MessageParcel& d
 
     int32_t pid = INVALID_PID;
     WMError errCode = CheckUIExtensionCreation(windowId, token, *element, extAbilityType, pid);
-    TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: ret %{public}u", errCode);
+    TLOGD(WmsLogTag::WMS_UIEXT, "UIExtOnLock: ret %{public}u", errCode);
 
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: Failed to write errcode");
@@ -710,25 +710,22 @@ int SceneSessionManagerLiteStub::HandleGetMainWinodowInfo(MessageParcel& data, M
 int SceneSessionManagerLiteStub::HandleGetCallingWindowInfo(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_KEYBOARD, "In");
-    int32_t persistentId;
-    int32_t userId;
-    if (!data.ReadInt32(persistentId) || !data.ReadInt32(userId)) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "Read persistentId and userId failed.");
+    sptr<CallingWindowInfo> callingWindowInfo = data.ReadParcelable<CallingWindowInfo>();
+    if (callingWindowInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Read callingWindowInfo failed");
         return ERR_INVALID_DATA;
     }
-    CallingWindowInfo callingWindowInfo;
-    callingWindowInfo.windowId_ = persistentId;
-    callingWindowInfo.userId_ = userId;
-    WMError ret = GetCallingWindowInfo(callingWindowInfo);
+    WMError ret = GetCallingWindowInfo(*callingWindowInfo);
     if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "id: %{public}d, failed to get calling window info", persistentId);
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Get callingWindowInfo failed, id: %{public}d, userId: %{public}d",
+            callingWindowInfo->windowId_, callingWindowInfo->userId_);
         return ERR_INVALID_DATA;
     }
-    reply.WriteInt32(static_cast<int32_t>(ret));
-    reply.WriteInt32(callingWindowInfo.windowId_);
-    reply.WriteInt32(callingWindowInfo.callingPid_);
-    reply.WriteUint64(callingWindowInfo.displayId_);
-    reply.WriteInt32(callingWindowInfo.userId_);
+    if (!reply.WriteInt32(static_cast<int32_t>(ret)) || !reply.WriteParcelable(callingWindowInfo)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Write callingWindowInfo failed, id: %{public}d, userId: %{public}d",
+            callingWindowInfo->windowId_, callingWindowInfo->userId_);
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 

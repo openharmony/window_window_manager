@@ -74,7 +74,7 @@ public:
     sptr<WindowManagerAgentLite> windowStyleListenerAgent_;
     std::vector<sptr<IPiPStateChangedListener>> pipStateChangedListeners_;
     sptr<WindowManagerAgentLite> pipStateChangedListenerAgent_;
-    std::vector<sptr<IKeyboardCallingWindowDisplayChangeListener>> callingDisplayChangedListeners_;
+    std::vector<sptr<IKeyboardCallingWindowDisplayChangedListener>> callingDisplayChangedListeners_;
     sptr<WindowManagerAgentLite> callingDisplayListenerAgent_;
 };
 
@@ -263,18 +263,17 @@ void WindowManagerLite::Impl::NotifyWindowStyleChange(WindowStyleType type)
 
 void WindowManagerLite::Impl::NotifyCallingWindowDisplayChanged(const CallingWindowInfo& callingWindowInfo)
 {
-    std::vector<sptr<IKeyboardCallingWindowDisplayChangeListener>> displayChangeListeners;
+    std::vector<sptr<IKeyboardCallingWindowDisplayChangedListener>> displayChangeListeners;
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         displayChangeListeners = callingDisplayChangedListeners_;
     }
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "notify persistentId: %{public}d, pid: %{public}d, "
+        "displayId: %{public}" PRIu64" , userId: %{public}d, size: %{public}zu",
+        callingWindowInfo.windowId_, callingWindowInfo.callingPid_, callingWindowInfo.displayId_,
+        callingWindowInfo.userId_, displayChangeListeners.size());
 
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "notify userId: %{public}d, displayId: %{public}" PRIu64
-        " ,persistentId: %{public}d, num: %{public}" PRIu32" ",
-        callingWindowInfo.userId_, callingWindowInfo.displayId_,
-        callingWindowInfo.windowId_, static_cast<uint32_t>(callingDisplayChangedListeners_.size()));
-    
-    for (const auto& listener : callingDisplayChangedListeners_) {
+    for (const auto& listener : displayChangeListeners) {
         if (!listener) {
             TLOGE(WmsLogTag::WMS_KEYBOARD, "listener is nullptr");
             continue;
@@ -823,8 +822,8 @@ WMError WindowManagerLite::UnregisterWindowStyleChangedListener(const sptr<IWind
     return ret;
 }
 
-WMError  WindowManagerLite::RegisterCallingWindowDisplayChangeListener(
-    const sptr<IKeyboardCallingWindowDisplayChangeListener>& listener)
+WMError  WindowManagerLite::RegisterCallingWindowDisplayChangedListener(
+    const sptr<IKeyboardCallingWindowDisplayChangedListener>& listener)
 {
     TLOGI(WmsLogTag::WMS_KEYBOARD, "start register callingDisplayChangeListener");
     if (listener == nullptr) {
@@ -860,8 +859,8 @@ WMError  WindowManagerLite::RegisterCallingWindowDisplayChangeListener(
     return ret;
 }
 
-WMError  WindowManagerLite::UnregisterCallingWindowDisplayChangeListener(
-    const sptr<IKeyboardCallingWindowDisplayChangeListener>& listener)
+WMError  WindowManagerLite::UnregisterCallingWindowDisplayChangedListener(
+    const sptr<IKeyboardCallingWindowDisplayChangedListener>& listener)
 {
     TLOGI(WmsLogTag::WMS_KEYBOARD, "start unRegister callingDisplayChangeListener");
     if (listener == nullptr) {

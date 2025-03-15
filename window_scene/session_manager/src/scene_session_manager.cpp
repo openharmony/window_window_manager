@@ -220,7 +220,7 @@ bool GetEnableRemoveStartingWindowFromBMS(const std::shared_ptr<AppExecFwk::Abil
 bool IsUIExtCanShowOnLockScreen(const AppExecFwk::ElementName& element, uint32_t callingTokenId,
     AppExecFwk::ExtensionAbilityType extensionAbilityType)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: bundleName: %{public}s, moduleName: %{public}s, ablilityName: %{public}s",
+    TLOGD(WmsLogTag::WMS_UIEXT, "UIExtOnLock: bundleName: %{public}s, moduleName: %{public}s, ablilityName: %{public}s",
           element.GetBundleName().c_str(), element.GetModuleName().c_str(), element.GetAbilityName().c_str());
     static const std::unordered_set<AppExecFwk::ExtensionAbilityType> extensionAbilityTypeWhitelist = {
         AppExecFwk::ExtensionAbilityType::LIVEVIEW_LOCKSCREEN
@@ -250,7 +250,7 @@ bool IsUIExtCanShowOnLockScreen(const AppExecFwk::ElementName& element, uint32_t
     };
 
     if (extensionAbilityTypeWhitelist.find(extensionAbilityType) != extensionAbilityTypeWhitelist.end()) {
-        TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: extensionAbilityType in white list");
+        TLOGI(WmsLogTag::WMS_UIEXT, "ability in white list");
         return true;
     }
 
@@ -262,7 +262,7 @@ bool IsUIExtCanShowOnLockScreen(const AppExecFwk::ElementName& element, uint32_t
         return true;
     }
 
-    TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: not in white list");
+    TLOGD(WmsLogTag::WMS_UIEXT, "UIExtOnLock: not in white list");
     return SessionPermission::VerifyPermissionByCallerToken(callingTokenId,
         PermissionConstants::PERMISSION_CALLED_EXTENSION_ON_LOCK_SCREEN);
 }
@@ -614,6 +614,10 @@ void SceneSessionManager::ConfigWindowSceneXml(const WindowSceneConfig::ConfigIt
     item = config["supportTypeFloatWindow"].GetProp("enable");
     if (item.IsBool()) {
         systemConfig_.supportTypeFloatWindow_ = item.boolValue_;
+    }
+    item = config["singleHandCompatibleMode"];
+    if (item.IsMap()) {
+        ConfigSingleHandCompatibleMode(item);
     }
 }
 
@@ -1217,6 +1221,29 @@ std::tuple<std::string, std::vector<float>> SceneSessionManager::CreateCurve(
     return {curveName, curveParams};
 }
 
+
+void SceneSessionManager::ConfigSingleHandCompatibleMode(const WindowSceneConfig::ConfigItem& configItem)
+{
+    auto& config = singleHandCompatibleModeConfig_;
+    auto item = configItem.GetProp("enable");
+    if (item.IsBool()) {
+        config.enabled = item.boolValue_;
+    }
+    item = configItem["singleHandScale"];
+    if (item.IsFloats() && item.floatsValue_->size() == 1) {
+        config.singleHandScale = (*item.floatsValue_)[0];
+    }
+    item = configItem["heightChangeRatio"];
+    if (item.IsFloats() && item.floatsValue_->size() == 1) {
+        config.heightChangeRatio = (*item.floatsValue_)[0];
+    }
+    item = configItem["widthChangeRatio"];
+    if (item.IsFloats() && item.floatsValue_->size() == 1) {
+        config.widthChangeRatio = (*item.floatsValue_)[0];
+    }
+}
+
+
 void SceneSessionManager::ConfigWindowSizeLimits()
 {
     const auto& config = WindowSceneConfig::GetConfig();
@@ -1666,7 +1693,7 @@ uint32_t SceneSessionManager::GetLockScreenZOrder()
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (const auto& [persistentId, session] : sceneSessionMap_) {
         if (session && session->IsScreenLockWindow()) {
-            TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: found window %{public}d-%{public}d", persistentId,
+            TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: window %{public}d-%{public}d", persistentId,
                 session->GetZOrder());
             return session->GetZOrder() < DEFAULT_LOCK_SCREEN_ZORDER ? DEFAULT_LOCK_SCREEN_ZORDER :
                 session->GetZOrder();
@@ -1692,7 +1719,7 @@ WMError SceneSessionManager::CheckUIExtensionCreation(int32_t windowId, uint32_t
         }
         pid = sceneSession->GetCallingPid();
         if (!IsScreenLocked()) {
-            TLOGNI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: not in lock screen");
+            TLOGND(WmsLogTag::WMS_UIEXT, "UIExtOnLock: not in lock screen");
             return WMError::WM_OK;
         }
         if (IsUserAuthPassed()) {
@@ -1710,7 +1737,7 @@ WMError SceneSessionManager::CheckUIExtensionCreation(int32_t windowId, uint32_t
                 callingTokenId);
             return WMError::WM_ERROR_INVALID_PERMISSION;
         }
-        TLOGNI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: IsShowOnLockScreen: The caller permission has granted");
+        TLOGNI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: pass");
         return WMError::WM_OK;
     };
 
@@ -4914,6 +4941,9 @@ void SceneSessionManager::PostBrightnessTask(float brightness)
 
 WSError SceneSessionManager::UpdateBrightness(int32_t persistentId)
 {
+    if (systemConfig_.IsPcWindow()) {
+        return WSError::WS_OK;
+    }
     auto sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "session is invalid");
@@ -4926,26 +4956,18 @@ WSError SceneSessionManager::UpdateBrightness(int32_t persistentId)
     }
     auto brightness = sceneSession->GetBrightness();
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Brightness: [%{public}f, %{public}f]", GetDisplayBrightness(), brightness);
-    bool isPC = systemConfig_.IsPcWindow();
     if (std::fabs(brightness - UNDEFINED_BRIGHTNESS) < std::numeric_limits<float>::min()) {
         if (IsNeedUpdateBrightness(brightness)) {
             TLOGI(WmsLogTag::WMS_ATTRIBUTE, "adjust brightness with default value");
-            if (!isPC) {
-                DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().RestoreBrightness();
-            }
+            DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().RestoreBrightness();
             SetDisplayBrightness(UNDEFINED_BRIGHTNESS); // UNDEFINED_BRIGHTNESS means system default brightness
             brightnessSessionId_ = INVALID_WINDOW_ID;
         }
     } else {
         if (std::fabs(brightness - GetDisplayBrightness()) > std::numeric_limits<float>::min()) {
             TLOGI(WmsLogTag::WMS_ATTRIBUTE, "adjust brightness with value");
-            if (isPC) {
-                DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().SetBrightness(
-                    static_cast<uint32_t>(brightness * MAX_BRIGHTNESS));
-            } else {
-                DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().OverrideBrightness(
-                    static_cast<uint32_t>(brightness * MAX_BRIGHTNESS));
-            }
+            DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().OverrideBrightness(
+                static_cast<uint32_t>(brightness * MAX_BRIGHTNESS));
             SetDisplayBrightness(brightness);
         }
         brightnessSessionId_ = sceneSession->GetPersistentId();
@@ -6209,11 +6231,13 @@ sptr<SceneSession> SceneSessionManager::GetNextFocusableSession(DisplayId displa
     TLOGD(WmsLogTag::WMS_FOCUS, "id: %{public}d", persistentId);
     bool previousFocusedSessionFound = false;
     sptr<SceneSession> ret = nullptr;
-    auto func = [this, persistentId, &previousFocusedSessionFound, &ret, displayId](sptr<SceneSession> session) {
+    DisplayId displayGroupId = windowFocusController_->GetDisplayGroupId(displayId);
+    auto func = [this, persistentId, &previousFocusedSessionFound, &ret, displayGroupId](sptr<SceneSession> session) {
         if (session == nullptr) {
             return false;
         }
-        if (session->GetSessionProperty()->GetDisplayId() != displayId) {
+        if (windowFocusController_->GetDisplayGroupId(session->GetSessionProperty()->GetDisplayId()) !=
+            displayGroupId) {
             return false;
         }
         if (session->GetForceHideState() != ForceHideState::NOT_HIDDEN) {
@@ -6242,11 +6266,13 @@ sptr<SceneSession> SceneSessionManager::GetTopNearestBlockingFocusSession(Displa
     bool includingAppSession)
 {
     sptr<SceneSession> ret = nullptr;
-    auto func = [this, &ret, zOrder, includingAppSession, displayId](sptr<SceneSession> session) {
+    DisplayId displayGroupId = windowFocusController_->GetDisplayGroupId(displayId);
+    auto func = [this, &ret, zOrder, includingAppSession, displayGroupId](sptr<SceneSession> session) {
         if (session == nullptr) {
             return false;
         }
-        if (session->GetSessionProperty()->GetDisplayId() != displayId) {
+        if (windowFocusController_->GetDisplayGroupId(session->GetSessionProperty()->GetDisplayId()) !=
+            displayGroupId) {
             return false;
         }
         uint32_t sessionZOrder = session->GetZOrder();
@@ -6286,7 +6312,8 @@ sptr<SceneSession> SceneSessionManager::GetTopFocusableNonAppSession()
         if (session == nullptr) {
             return false;
         }
-        if (session->GetSessionProperty()->GetDisplayId() != DEFAULT_DISPLAY_ID) {
+        if (windowFocusController_->GetDisplayGroupId(session->GetSessionProperty()->GetDisplayId()) !=
+            DEFAULT_DISPLAY_ID) {
             return false;
         }
         if (session->IsAppSession()) {
@@ -6710,11 +6737,25 @@ SingleHandTransform SceneSessionManager::GetNormalSingleHandTransform() const
     return singleHandTransform_;
 }
 
-void SceneSessionManager::NotifySingleHandInfoChange(
-    float singleHandScaleX, float singleHandScaleY, SingleHandMode singleHandMode)
+SingleHandScreenInfo SceneSessionManager::GetSingleHandScreenInfo() const
+{
+    return singleHandScreenInfo_;
+}
+
+WSRect SceneSessionManager::GetOriginRect() const
+{
+    return originRect_;
+}
+
+WSRect SceneSessionManager::GetSingleHandRect() const
+{
+    return singleHandRect_;
+}
+
+void SceneSessionManager::NotifySingleHandInfoChange(SingleHandScreenInfo singleHandScreenInfo, WSRect originRect, WSRect singleHandRect)
 {
     const char* const funcName = __func__;
-    taskScheduler_->PostAsyncTask([this, singleHandScaleX, singleHandScaleY, singleHandMode, funcName] {
+    taskScheduler_->PostAsyncTask([this, singleHandScreenInfo, originRect, singleHandRect, funcName] {
         if (!systemConfig_.IsPhoneWindow()) {
             TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s: only support phone", funcName);
             return;
@@ -6726,27 +6767,13 @@ void SceneSessionManager::NotifySingleHandInfoChange(
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: get display size failed", funcName);
             return;
         }
-        switch (singleHandMode) {
-            case SingleHandMode::MIDDLE:
-                singleHandTransform_.posX = 0;
-                singleHandTransform_.posY = 0;
-                break;
-            case SingleHandMode::LEFT:
-                singleHandTransform_.posX = 0;
-                singleHandTransform_.posY =
-                    static_cast<int32_t>(static_cast<float>(displayHeight) * (1 - singleHandScaleY));
-                break;
-            case SingleHandMode::RIGHT:
-                singleHandTransform_.posX =
-                    static_cast<int32_t>(static_cast<float>(displayWidth) * (1 - singleHandScaleX));
-                singleHandTransform_.posY =
-                    static_cast<int32_t>(static_cast<float>(displayHeight) * (1 - singleHandScaleY));
-                break;
-            default:
-                break;
-        }
-        singleHandTransform_.scaleX = singleHandScaleX;
-        singleHandTransform_.scaleY = singleHandScaleY;
+        singleHandScreenInfo_ = singleHandScreenInfo;
+        originRect_ = originRect;
+        singleHandRect_ = singleHandRect;
+        singleHandTransform_.posX = singleHandRect.posX_;
+        singleHandTransform_.posY = singleHandRect.posY_;
+        singleHandTransform_.scaleX = static_cast<float>(singleHandScreenInfo_.scaleRatio) / 100;
+        singleHandTransform_.scaleY = singleHandTransform_.scaleX;
         {
             std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
             for (const auto& [_, sceneSession] : sceneSessionMap_) {
@@ -6754,6 +6781,7 @@ void SceneSessionManager::NotifySingleHandInfoChange(
                     sceneSession->GetWindowName().find("OneHandModeBackground", 0) != std::string::npos) {
                     continue;
                 }
+                sceneSession->SetSingleHandModeFlag(true);
                 sceneSession->SetSingleHandTransform(singleHandTransform_);
                 sceneSession->NotifySingleHandTransformChange(singleHandTransform_);
             }
@@ -6786,6 +6814,11 @@ void SceneSessionManager::RegisterSingleHandContainerNode(const std::string& str
     TLOGI(WmsLogTag::WMS_LAYOUT, "get OneHandModeBox node, id: %{public}" PRIu64, rsNode->GetId());
     setTopWindowBoundaryByIDFunc_(stringId);
     rsInterface_.SetWindowContainer(rsNode->GetId(), true);
+}
+
+const SingleHandCompatibleModeConfig& SceneSessionManager::GetSingleHandCompatibleModeConfig() const
+{
+    return singleHandCompatibleModeConfig_;
 }
 
 #ifdef SECURITY_COMPONENT_MANAGER_ENABLE
@@ -6827,7 +6860,7 @@ WSError SceneSessionManager::SendTouchEvent(const std::shared_ptr<MMI::PointerEv
 #ifdef SECURITY_COMPONENT_MANAGER_ENABLE
     FillSecCompEnhanceData(pointerEvent, pointerItem);
 #endif
-    TLOGI(WmsLogTag::WMS_EVENT, "eid=%{public}d,action=%{public}d,deviceId=%{public}d,zIndex=%{public}ud",
+    TLOGI(WmsLogTag::WMS_EVENT, "eid=%{public}d,ac=%{public}d,deviceId=%{public}d,zIndex=%{public}ud",
         pointerEvent->GetPointerId(), pointerEvent->GetPointerAction(), pointerEvent->GetDeviceId(), zIndex);
     pointerEvent->AddFlag(MMI::PointerEvent::EVENT_FLAG_NO_INTERCEPT);
     MMI::InputManager::GetInstance()->SimulateInputEvent(pointerEvent, static_cast<float>(zIndex));
@@ -8513,6 +8546,7 @@ WSError SceneSessionManager::BindDialogSessionTarget(uint64_t persistentId, sptr
         sceneSession->SetScreenId(displayId);
         sceneSession->SetParentSession(parentSession);
         sceneSession->SetParentPersistentId(parentSession->GetPersistentId());
+        sceneSession->SetClientDisplayId(parentSession->GetClientDisplayId());
         UpdateParentSessionForDialog(sceneSession, sceneSession->GetSessionProperty());
         TLOGNI(WmsLogTag::WMS_DIALOG, "Bind dialog success, dialog id %{public}" PRIu64 ", parentId %{public}d",
             persistentId, parentSession->GetPersistentId());
@@ -9413,18 +9447,21 @@ void SceneSessionManager::WindowDestroyNotifyVisibility(const sptr<SceneSession>
     }
 }
 
-sptr<SceneSession> SceneSessionManager::FindSessionByToken(const sptr<IRemoteObject>& token)
+sptr<SceneSession> SceneSessionManager::FindSessionByToken(const sptr<IRemoteObject>& token, WindowType type)
 {
     if (token == nullptr) {
         TLOGW(WmsLogTag::WMS_MAIN, "token is nullptr");
         return nullptr;
     }
     sptr<SceneSession> session = nullptr;
-    auto cmpFunc = [token](const std::map<uint64_t, sptr<SceneSession>>::value_type& pair) {
+    auto cmpFunc = [token, type](const std::map<uint64_t, sptr<SceneSession>>::value_type& pair) {
         if (pair.second == nullptr) {
             return false;
         }
-        return pair.second->GetAbilityToken() == token || pair.second->AsObject() == token;
+        if (pair.second->GetWindowType() == type) {
+            return pair.second->GetAbilityToken() == token || pair.second->AsObject() == token;
+        }
+        return false;
     };
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     auto iter = std::find_if(sceneSessionMap_.begin(), sceneSessionMap_.end(), cmpFunc);
@@ -9655,7 +9692,7 @@ void SceneSessionManager::NotifyMMIWindowPidChange(int32_t windowId, bool startM
         return;
     }
 
-    TLOGI(WmsLogTag::WMS_EVENT, "Notify window: %{public}d, pid: %{public}d", windowId, pid);
+    TLOGI(WmsLogTag::WMS_EVENT, "Notify window:%{public}d, pid:%{public}d", windowId, pid);
     taskScheduler_->PostAsyncTask([weakSceneSession = wptr<SceneSession>(sceneSession), startMoving] {
         auto sceneSession = weakSceneSession.promote();
         if (sceneSession == nullptr) {
@@ -10596,13 +10633,15 @@ WSError SceneSessionManager::UpdateSessionDisplayId(int32_t persistentId, uint64
     sceneSession->NotifyDisplayMove(fromScreenId, screenId);
     sceneSession->UpdateDensity();
 
+    // Find keyboard session.
     const auto& keyboardSessionVec = GetSceneSessionVectorByType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     for (const auto& keyboardSession : keyboardSessionVec) {
-        if (keyboardSession) {
-            TLOGD(WmsLogTag::WMS_KEYBOARD, "isSystemKeyboard: %{public}d, callingSessionId: %{public}d",
-                keyboardSession->IsSystemKeyboard(), keyboardSession->GetCallingSessionId());
+        if (!keyboardSession) {
+            continue;
         }
-        if (keyboardSession && !keyboardSession->IsSystemKeyboard() &&
+        TLOGD(WmsLogTag::WMS_KEYBOARD, "isSystemKeyboard: %{public}d, callingSessionId: %{public}d",
+            keyboardSession->IsSystemKeyboard(), keyboardSession->GetCallingSessionId());
+        if (!keyboardSession->IsSystemKeyboard() &&
             static_cast<int32_t>(keyboardSession->GetCallingSessionId()) == persistentId) {
             CallingWindowInfo callingWindowInfo(persistentId, sceneSession->GetCallingPid(), screenId, GetUserIdByUid(getuid()));
             SessionManagerAgentController::GetInstance().NotifyCallingWindowDisplayChanged(callingWindowInfo);
@@ -12380,19 +12419,20 @@ WMError SceneSessionManager::GetCallingWindowInfo(CallingWindowInfo& callingWind
 {
     int32_t curUserId = GetUserIdByUid(getuid());
     if (curUserId != callingWindowInfo.userId_) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "Target user not exists,targetUserId: %{public}d, curUserId: %{public}d, id: %{public}d",
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Target user not exists, targetUserId: %{public}d, curUserId: %{public}d, id: %{public}d",
             callingWindowInfo.userId_, curUserId, callingWindowInfo.windowId_);
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     auto sceneSession = GetSceneSession(callingWindowInfo.windowId_);
     if (sceneSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "sceneSession is nullptr,id: %{public}d", callingWindowInfo.windowId_);
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "sceneSession is nullptr, id: %{public}d", callingWindowInfo.windowId_);
         return WMError::WM_ERROR_NULLPTR;
     }
     callingWindowInfo.callingPid_ = sceneSession->GetCallingPid();
     callingWindowInfo.displayId_ = sceneSession->GetSessionProperty()->GetDisplayId();
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "callingWindow id: %{public}d,pid: %{public}d,displayId: %{public}" PRIu64" , curUserId: %{public}d",
-        callingWindowInfo.windowId_, callingWindowInfo.callingPid_, callingWindowInfo.displayId_, curUserId);
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "callingWindowInfo: [id: %{public}d, pid: %{public}d, "
+        "displayId: %{public}" PRIu64" , userId: %{public}d]", callingWindowInfo.windowId_,
+        callingWindowInfo.callingPid_, callingWindowInfo.displayId_, callingWindowInfo.userId_);
     return WMError::WM_OK;
 }
 
@@ -13232,10 +13272,20 @@ WSError SceneSessionManager::IsLastFrameLayoutFinished(bool& isLayoutFinished)
     return WSError::WS_OK;
 }
 
-WMError SceneSessionManager::IsWindowRectAutoSave(const std::string& key, bool& enabled)
+WMError SceneSessionManager::IsWindowRectAutoSave(const std::string& key, bool& enabled, int persistentId)
 {
+    auto sceneSession = GetSceneSession(persistentId);
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "sceneSession %{public}d is nullptr", persistentId);
+        return WMError::WM_ERROR_INVALID_SESSION;
+    }
+    std::string specifiedKey = key;
+    if (sceneSession->GetSessionProperty()->GetIsSaveBySpecifiedFlag()) {
+        specifiedKey = key + sceneSession->GetSessionInfo().specifiedFlag_;
+    }
+    TLOGD(WmsLogTag::WMS_MAIN, "windowId: %{public}d, specifiedKey: %{public}s", persistentId, specifiedKey.c_str());
     std::unique_lock<std::mutex> lock(isWindowRectAutoSaveMapMutex_);
-    if (auto iter = isWindowRectAutoSaveMap_.find(key); iter != isWindowRectAutoSaveMap_.end()) {
+    if (auto iter = isWindowRectAutoSaveMap_.find(specifiedKey); iter != isWindowRectAutoSaveMap_.end()) {
         enabled = iter->second;
     } else {
         enabled = false;

@@ -66,6 +66,7 @@ using NotifyAutoStartPiPStatusChangeFunc = std::function<void(bool isAutoStart, 
     uint32_t width, uint32_t height)>;
 using NotifySessionEventFunc = std::function<void(int32_t eventId, SessionEventParam param)>;
 using NotifySessionTopmostChangeFunc = std::function<void(const bool topmost)>;
+using NotifySubSessionZLevelChangeFunc = std::function<void(const int32_t zLevel)>;
 using NotifySubModalTypeChangeFunc = std::function<void(SubWindowModalType subWindowModalType)>;
 using NotifyMainModalTypeChangeFunc = std::function<void(bool isModal)>;
 using NotifyRaiseToTopFunc = std::function<void()>;
@@ -109,7 +110,7 @@ using NotifyVisibleChangeFunc = std::function<void(int32_t persistentId)>;
 using IsLastFrameLayoutFinishedFunc = std::function<WSError(bool& isLayoutFinished)>;
 using IsAINavigationBarAvoidAreaValidFunc = std::function<bool(const AvoidArea& avoidArea, int32_t sessionBottom)>;
 using GetStatusBarDefaultVisibilityByDisplayIdFunc = std::function<bool(DisplayId displayId)>;
-using NotifySetWindowRectAutoSaveFunc = std::function<void(bool enabled)>;
+using NotifySetWindowRectAutoSaveFunc = std::function<void(bool enabled, bool isSaveBySpecifiedFlag)>;
 using UpdateAppUseControlFunc = std::function<void(ControlAppType type, bool isNeedControl, bool isControlRecentOnly)>;
 using NotifyAvoidAreaChangeCallback = std::function<void(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)>;
 using NotifySetSupportedWindowModesFunc = std::function<void(
@@ -119,6 +120,7 @@ using NotifySetWindowCornerRadiusFunc = std::function<void(float cornerRadius)>;
 using NotifyFollowParentRectFunc = std::function<void(bool isFollow)>;
 using GetSceneSessionByIdCallback = std::function<sptr<SceneSession>(int32_t sessionId)>;
 using NotifySetParentSessionFunc = std::function<void(int32_t oldParentWindowId, int32_t newParentWindowId)>;
+using NotifyUpdateFlagFunc = std::function<void(const std::string& flag)>;
 
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
@@ -324,6 +326,8 @@ public:
     virtual bool IsTopmost() const { return false; }
     virtual WSError SetMainWindowTopmost(bool isTopmost) { return WSError::WS_ERROR_INVALID_CALLING; }
     virtual bool IsMainWindowTopmost() const { return false; }
+    virtual WSError SetSubWindowZLevel(int32_t zLevel) { return WSError::WS_ERROR_INVALID_CALLING; }
+    virtual int32_t GetSubWindowZLevel() const { return 0; }
     void SetMainWindowTopmostChangeCallback(NotifyMainWindowTopmostChangeFunc&& func);
 
     /*
@@ -349,6 +353,7 @@ public:
     bool CalcNewWindowRectIfNeed(DMRect& availableArea, float newVpr);
     bool IsPrimaryDisplay() const;
     void SaveLastDensity();
+    void NotifyUpdateFlagCallback(NotifyUpdateFlagFunc&& func);
 
     /*
      * PC Window Layout
@@ -499,6 +504,7 @@ public:
     void RegisterRaiseToTopCallback(NotifyRaiseToTopFunc&& callback);
     void RegisterRaiseAboveTargetCallback(NotifyRaiseAboveTargetFunc&& callback);
     void RegisterSessionTopmostChangeCallback(NotifySessionTopmostChangeFunc&& callback);
+    void RegisterSubSessionZLevelChangeCallback(NotifySubSessionZLevelChangeFunc&& callback);
 
     /*
      * Window Lifecycle
@@ -673,6 +679,7 @@ public:
     void MaskSupportEnterWaterfallMode();
     void SetSupportEnterWaterfallMode(bool isSupportEnter);
     void ThrowSlipDirectly(const WSRectF& velocity);
+    WSError GetWaterfallMode(bool& isWaterfallMode) override;
 
     /*
      * Keyboard
@@ -765,6 +772,7 @@ protected:
     NotifyRaiseToTopFunc onRaiseToTop_;
     NotifyRaiseAboveTargetFunc onRaiseAboveTarget_;
     NotifySessionTopmostChangeFunc onSessionTopmostChange_;
+    NotifySubSessionZLevelChangeFunc onSubSessionZLevelChange_;
 
     /*
      * PC Window
@@ -775,6 +783,7 @@ protected:
     NotifySubModalTypeChangeFunc onSubModalTypeChange_;
     NotifyMainModalTypeChangeFunc onMainModalTypeChange_;
     NotifySetSupportedWindowModesFunc onSetSupportedWindowModesFunc_;
+    NotifyUpdateFlagFunc onUpdateFlagFunc_;
 
     /*
      * PiP Window
@@ -962,6 +971,8 @@ private:
     WMError HandleActionUpdateTopmost(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);
     WMError HandleActionUpdateMainWindowTopmost(const sptr<WindowSessionProperty>& property,
+        WSPropertyChangeAction action);
+    WMError HandleActionUpdateSubWindowZLevel(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);
     WMError HandleActionUpdateWindowModeSupportType(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);

@@ -130,6 +130,7 @@ constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_HEIGHT = 40;
 constexpr int32_t API_VERSION_18 = 18;
 constexpr uint32_t LIFECYCLE_ISOLATE_VERSION = 18;
 const uint32_t API_VERSION_MOD = 1000;
+constexpr uint32_t SNAPSHOT_TIMEOUT = 2000; // MS
 }
 uint32_t WindowSceneSessionImpl::maxFloatingWindowSize_ = 1920;
 std::mutex WindowSceneSessionImpl::keyboardPanelInfoChangeListenerMutex_;
@@ -540,6 +541,10 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         property_->SetWindowFlags(property_->GetWindowFlags() &
             (~(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED))));
     }
+    int32_t zLevel = GetSubWindowZLevelByFlags(GetType(), GetWindowFlags(), IsTopmost());
+    if (zLevel != NORMAL_SUB_WINDOW_Z_LEVEL) {
+        property_->SetSubWindowZLevel(zLevel);
+    }
 
     bool isSpecificSession = false;
     const auto& initRect = GetRequestRect();
@@ -575,6 +580,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         UpdateDefaultStatusBarColor();
         AddSetUIContentTimeoutCheck();
         SetUIExtensionDestroyCompleteInSubWindow();
+        SetSubWindowZLevelToProperty();
         InputTransferStation::GetInstance().AddInputWindow(this);
         if (WindowHelper::IsSubWindow(GetType()) && !initRect.IsUninitializedRect()) {
             Resize(initRect.width_, initRect.height_);
@@ -2090,6 +2096,51 @@ WMError WindowSceneSessionImpl::RaiseAboveTarget(int32_t subWindowId)
     return static_cast<WMError>(ret);
 }
 
+/** @note @window.hierarchy */
+WMError WindowSceneSessionImpl::SetSubWindowZLevel(int32_t zLevel)
+{
+    TLOGD(WmsLogTag::WMS_HIERARCHY, "%{public}d", zLevel);
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (!WindowHelper::IsNormalSubWindow(GetType(), property_->GetWindowFlags())) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "must be normal app sub window");
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    if (GetParentId() == INVALID_SESSION_ID) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "only the children of the main window can be raised");
+        return WMError::WM_ERROR_INVALID_PARENT;
+    }
+    if (zLevel > MAXIMUM_Z_LEVEL || zLevel < MINIMUM_Z_LEVEL) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "zLevel value %{public}d exceeds valid range [-10000, 10000]!", zLevel);
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+
+    auto currentZLevel = property_->GetSubWindowZLevel();
+    if (currentZLevel == static_cast<int32_t>(zLevel)) {
+        return WMError::WM_OK;
+    }
+    property_->SetSubWindowZLevel(zLevel);
+    return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_SUB_WINDOW_Z_LEVEL);
+}
+
+/** @note @window.hierarchy */
+WMError WindowSceneSessionImpl::GetSubWindowZLevel(int32_t& zLevel)
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (!WindowHelper::IsSubWindow(GetType()) || !WindowHelper::IsDialogWindow(GetType())) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "must be app sub window!");
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    zLevel = property_->GetSubWindowZLevel();
+    TLOGI(WmsLogTag::WMS_HIERARCHY, "Id:%{public}u, zLevel:%{public}d", GetWindowId(), zLevel);
+    return WMError::WM_OK;
+}
+
 WMError WindowSceneSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea,
     const Rect& rect, int32_t apiVersion)
 {
@@ -2215,8 +2266,14 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
             return WMError::WM_ERROR_INVALID_WINDOW;
         }
         CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
-        hostSession->OnSessionEvent(isFullScreenWaterfallMode_.load() ? SessionEvent::EVENT_MAXIMIZE_WATERFALL
-                                                                      : SessionEvent::EVENT_MAXIMIZE);
+        auto event = SessionEvent::EVENT_MAXIMIZE;
+        if (isFullScreenWaterfallMode_.load()) {
+            event = SessionEvent::EVENT_MAXIMIZE_WATERFALL;
+        } else if (isWaterfallToMaximize_.load()) {
+            event = SessionEvent::EVENT_WATERFALL_TO_MAXIMIZE;
+            isWaterfallToMaximize_.store(false);
+        }
+        hostSession->OnSessionEvent(event);
         SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     }
 
@@ -2666,10 +2723,12 @@ WMError WindowSceneSessionImpl::Recover()
     TLOGI(WmsLogTag::WMS_LAYOUT_PC, "id: %{public}d", GetPersistentId());
     if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() && isFullScreenWaterfallMode_.load() &&
         lastWindowModeBeforeWaterfall_.load() == WindowMode::WINDOW_MODE_FULLSCREEN) {
+        isWaterfallToMaximize_.store(true);
         SetFullScreenWaterfallMode(false);
         WMError ret = Maximize();
         if (ret != WMError::WM_OK) {
             TLOGE(WmsLogTag::WMS_LAYOUT_PC, "recover to fullscreen failed");
+            isWaterfallToMaximize_.store(false);
             SetFullScreenWaterfallMode(true);
         }
         return ret;
@@ -2781,7 +2840,7 @@ WMError WindowSceneSessionImpl::Recover(uint32_t reason)
     return WMError::WM_OK;
 }
 
-WMError WindowSceneSessionImpl::SetWindowRectAutoSave(bool enabled)
+WMError WindowSceneSessionImpl::SetWindowRectAutoSave(bool enabled, bool isSaveBySpecifiedFlag)
 {
     TLOGI(WmsLogTag::WMS_MAIN, "id: %{public}d", GetPersistentId());
     if (IsWindowSessionInvalid()) {
@@ -2801,7 +2860,7 @@ WMError WindowSceneSessionImpl::SetWindowRectAutoSave(bool enabled)
 
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
-    hostSession->OnSetWindowRectAutoSave(enabled);
+    hostSession->OnSetWindowRectAutoSave(enabled, isSaveBySpecifiedFlag);
     return WMError::WM_OK;
 }
 
@@ -2839,7 +2898,8 @@ WMError WindowSceneSessionImpl::IsWindowRectAutoSave(bool& enabled)
         bundleName = context_->GetBundleName();
     }
     std::string key = bundleName + moduleName + abilityName;
-    auto ret = SingletonContainer::Get<WindowAdapter>().IsWindowRectAutoSave(key, enabled);
+    int persistentId = GetPersistentId();
+    auto ret = SingletonContainer::Get<WindowAdapter>().IsWindowRectAutoSave(key, enabled, persistentId);
     return ret;
 }
 
@@ -3903,13 +3963,34 @@ std::shared_ptr<Media::PixelMap> WindowSceneSessionImpl::Snapshot()
         WLOGFE("Failed to TakeSurfaceCapture!");
         return nullptr;
     }
-    std::shared_ptr<Media::PixelMap> pixelMap = callback->GetResult(2000); // wait for <= 2000ms
+    std::shared_ptr<Media::PixelMap> pixelMap = callback->GetResult(SNAPSHOT_TIMEOUT);
     if (pixelMap != nullptr) {
         WLOGFD("Snapshot succeed, save WxH=%{public}dx%{public}d", pixelMap->GetWidth(), pixelMap->GetHeight());
     } else {
         WLOGFE("Failed to get pixelmap, return nullptr!");
     }
     return pixelMap;
+}
+
+WMError WindowSceneSessionImpl::SnapshotIgnorePrivacy(std::shared_ptr<Media::PixelMap>& pixelMap)
+{
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    std::shared_ptr<SurfaceCaptureFuture> callback = std::make_shared<SurfaceCaptureFuture>();
+    auto isSucceeded = RSInterfaces::GetInstance().TakeSelfSurfaceCapture(surfaceNode_, callback);
+    if (!isSucceeded) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "windowId:%{public}u, Failed to TakeSelfSurfaceCapture!", GetWindowId());
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
+    pixelMap = callback->GetResult(SNAPSHOT_TIMEOUT);
+    if (pixelMap == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to get pixelmap, windowId:%{public}u", GetWindowId());
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "succeed, windowId:%{public}u, WxH=%{public}dx%{public}d",
+        GetWindowId(), pixelMap->GetWidth(), pixelMap->GetHeight());
+    return WMError::WM_OK;
 }
 
 WMError WindowSceneSessionImpl::NotifyMemoryLevel(int32_t level)
@@ -5264,9 +5345,9 @@ WMError WindowSceneSessionImpl::GetGestureBackEnabled(bool& enable)
 
 WSError WindowSceneSessionImpl::SetFullScreenWaterfallMode(bool isWaterfallMode)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "prev: %{public}d, curr: %{public}d",
-        isFullScreenWaterfallMode_.load(), isWaterfallMode);
-    if (isFullScreenWaterfallMode_.load() == isWaterfallMode) {
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "prev: %{public}d, curr: %{public}d, winId: %{public}u",
+        isFullScreenWaterfallMode_.load(), isWaterfallMode, GetWindowId());
+    if (isValidWaterfallMode_.load() && isFullScreenWaterfallMode_.load() == isWaterfallMode) {
         return WSError::WS_DO_NOTHING;
     }
     isFullScreenWaterfallMode_.store(isWaterfallMode);
@@ -5275,6 +5356,8 @@ WSError WindowSceneSessionImpl::SetFullScreenWaterfallMode(bool isWaterfallMode)
     } else {
         lastWindowModeBeforeWaterfall_.store(WindowMode::WINDOW_MODE_UNDEFINED);
     }
+    isValidWaterfallMode_.store(true);
+    NotifyWaterfallModeChange(isWaterfallMode);
     return WSError::WS_OK;
 }
 

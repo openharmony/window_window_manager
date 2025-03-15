@@ -201,6 +201,9 @@ napi_value NapiGetUndefined(napi_env env);
 napi_valuetype GetType(napi_env env, napi_value value);
 bool NapiIsCallable(napi_env env, napi_value value);
 bool ConvertRectInfoFromJs(napi_env env, napi_value jsObject, WSRect& rect);
+bool ConvertSessionRectInfoFromJs(napi_env env, napi_value jsObject, WSRect& rect);
+bool ConvertSingleHandScreenInfoFromJs(napi_env env, napi_value jsObject,
+    SingleHandScreenInfo& singleHandHandScreenInfo);
 bool ConvertHookInfoFromJs(napi_env env, napi_value jsObject, HookInfo& hookInfo);
 bool ConvertRotateAnimationConfigFromJs(napi_env env, napi_value value, RotateAnimationConfig& config);
 bool ConvertDragResizeTypeFromJs(napi_env env, napi_value value, DragResizeType& dragResizeType);

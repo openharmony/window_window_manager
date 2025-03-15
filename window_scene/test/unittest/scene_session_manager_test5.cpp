@@ -437,6 +437,7 @@ HWTEST_F(SceneSessionManagerTest5, UpdateBrightness, Function | SmallTest | Leve
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, property);
     ASSERT_NE(property, nullptr);
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     ssm_->UpdateBrightness(1);
     FocusChangeInfo focusInfo;
     ssm_->GetCurrentUserId();
@@ -1459,6 +1460,7 @@ HWTEST_F(SceneSessionManagerTest5, ProcessDialogRequestFocusImmdediately02, Func
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     auto ret = ssm_->ProcessDialogRequestFocusImmdediately(sceneSession);
     EXPECT_EQ(WSError::WS_DO_NOTHING, ret);
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 /**
@@ -1589,6 +1591,34 @@ HWTEST_F(SceneSessionManagerTest5, FindMainWindowWithToken02, Function | SmallTe
     ssm_->FindMainWindowWithToken(targetToken);
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ssm_->FindMainWindowWithToken(targetToken);
+}
+
+/**
+ * @tc.name: FindSessionByToken
+ * @tc.desc: SceneSesionManager FindSessionByToken
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, FindSessionByToken, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test2";
+    info.persistentId_ = 123;
+    sptr<IRemoteObject> targetToken = nullptr;
+    auto result = ssm_->FindSessionByToken(targetToken);
+    ASSERT_EQ(result, nullptr);
+
+    targetToken = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(targetToken, nullptr);
+    result = ssm_->FindSessionByToken(targetToken);
+    ASSERT_EQ(result, nullptr);
+
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->abilityToken_ = targetToken;
+    ssm_->sceneSessionMap_.insert({ 123, sceneSession });
+    result = ssm_->FindSessionByToken(targetToken, sceneSession->GetWindowType());
+    ASSERT_EQ(result, sceneSession);
 }
 
 /**

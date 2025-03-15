@@ -2304,6 +2304,20 @@ HWTEST_F(WindowExtensionSessionImplTest, OnCrossAxisStateChange, Function | Smal
     ASSERT_EQ(WMError::WM_OK, window_->OnCrossAxisStateChange(std::move(want), reply));
     ASSERT_EQ(CrossAxisState::STATE_CROSS, window_->crossAxisState_.load());
 }
+
+/**
+ * @tc.name: OnWaterfallModeChange
+ * @tc.desc: OnWaterfallModeChange Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, OnWaterfallModeChange, Function | SmallTest | Level3)
+{
+    AAFwk::Want want;
+    std::optional<AAFwk::Want> reply = std::make_optional<AAFwk::Want>();
+    want.SetParam(Extension::WATERFALL_MODE_FIELD, true);
+    EXPECT_EQ(WMError::WM_OK, window_->OnWaterfallModeChange(std::move(want), reply));
+    EXPECT_TRUE(window_->IsWaterfallModeEnabled());
+}
 }
 } // namespace Rosen
 } // namespace OHOS

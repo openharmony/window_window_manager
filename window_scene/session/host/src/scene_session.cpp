@@ -233,13 +233,13 @@ bool SceneSession::IsShowOnLockScreen(uint32_t lockScreenZOrder)
 
     // current window on lock screen jurded by zorder
     if (zOrder_ >= lockScreenZOrder) {
-        TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: zOrder_ is more than lockScreenZOrder");
+        TLOGI(WmsLogTag::WMS_UIEXT, "zOrder >= lockScreenZOrder");
         return true;
     }
 
     if (zOrder_ == 0) {
         if (auto mainSession = GetMainSession()) {
-            TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: mainSession zOrder_: %{public}d", mainSession->GetZOrder());
+            TLOGI(WmsLogTag::WMS_UIEXT, "mainSession zOrder=%{public}d", mainSession->GetZOrder());
             return mainSession->GetZOrder() >= lockScreenZOrder;
         }
     }
@@ -249,7 +249,7 @@ bool SceneSession::IsShowOnLockScreen(uint32_t lockScreenZOrder)
 void SceneSession::AddExtensionTokenInfo(const UIExtensionTokenInfo& tokenInfo)
 {
     extensionTokenInfos_.push_back(tokenInfo);
-    TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: canShowOnLockScreen: %{public}u, persistentId: %{public}d",
+    TLOGI(WmsLogTag::WMS_UIEXT, "can show:%{public}u, id: %{public}d",
         tokenInfo.canShowOnLockScreen, GetPersistentId());
 }
 
@@ -802,7 +802,7 @@ void SceneSession::UpdateWaterfallMode(SessionEvent event)
         case SessionEvent::EVENT_MAXIMIZE_WATERFALL:
             UpdateFullScreenWaterfallMode(pcFoldScreenController_->IsHalfFolded(GetScreenId()));
             break;
-        case SessionEvent::EVENT_MAXIMIZE:
+        case SessionEvent::EVENT_WATERFALL_TO_MAXIMIZE:
         case SessionEvent::EVENT_RECOVER:
         case SessionEvent::EVENT_SPLIT_PRIMARY:
         case SessionEvent::EVENT_SPLIT_SECONDARY:
@@ -1738,6 +1738,20 @@ void SceneSession::RegisterSessionTopmostChangeCallback(NotifySessionTopmostChan
 }
 
 /** @note @window.hierarchy */
+void SceneSession::RegisterSubSessionZLevelChangeCallback(NotifySubSessionZLevelChangeFunc&& callback)
+{
+    PostTask([weakThis = wptr(this), callback = std::move(callback), where = __func__] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
+            return;
+        }
+        session->onSubSessionZLevelChange_ = std::move(callback);
+        session->onSubSessionZLevelChange_(session->GetSubWindowZLevel());
+    }, __func__);
+}
+
+/** @note @window.hierarchy */
 WSError SceneSession::RaiseToAppTop()
 {
     return PostSyncTask([weakThis = wptr(this), where = __func__] {
@@ -2484,7 +2498,7 @@ void SceneSession::RegisterProcessPrepareClosePiPCallback(NotifyPrepareClosePiPS
 WSError SceneSession::ProcessPointDownSession(int32_t posX, int32_t posY)
 {
     const auto& id = GetPersistentId();
-    WLOGFI("id: %{public}d, type: %{public}d", id, GetWindowType());
+    TLOGD(WmsLogTag::WMS_INPUT_KEY_FLOW, "id:%{public}d, type:%{public}d", id, GetWindowType());
 
     // notify touch outside
     if (specificCallback_ != nullptr && specificCallback_->onSessionTouchOutside_ &&
@@ -4792,6 +4806,12 @@ bool SceneSession::IsFullScreenWaterfallMode()
     return pcFoldScreenController_->IsFullScreenWaterfallMode();
 }
 
+WSError SceneSession::GetWaterfallMode(bool& isWaterfallMode)
+{
+    isWaterfallMode = IsFullScreenWaterfallMode();
+    return WSError::WS_OK;
+}
+
 void SceneSession::RegisterFullScreenWaterfallModeChangeCallback(std::function<void(bool isWaterfallMode)>&& func)
 {
     PostTask([weakThis = wptr(this), func = std::move(func), where = __func__]() mutable {
@@ -4928,6 +4948,8 @@ WMError SceneSession::ProcessUpdatePropertyByAction(const sptr<WindowSessionProp
             return HandleActionUpdateTopmost(property, action);
         case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST):
             return HandleActionUpdateMainWindowTopmost(property, action);
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_SUB_WINDOW_Z_LEVEL):
+            return HandleActionUpdateSubWindowZLevel(property, action);
         case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO):
             return HandleActionUpdateWindowModeSupportType(property, action);
         case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_AVOID_AREA_OPTION):
@@ -5235,6 +5257,13 @@ WMError SceneSession::HandleActionUpdateMainWindowTopmost(const sptr<WindowSessi
     WSPropertyChangeAction action)
 {
     SetMainWindowTopmost(property->IsMainWindowTopmost());
+    return WMError::WM_OK;
+}
+
+WMError SceneSession::HandleActionUpdateSubWindowZLevel(const sptr<WindowSessionProperty>& property,
+    WSPropertyChangeAction action)
+{
+    SetSubWindowZLevel(property->GetSubWindowZLevel());
     return WMError::WM_OK;
 }
 
@@ -7358,5 +7387,21 @@ void SceneSession::SaveLastDensity()
             property->SetLastLimitsVpr(display->GetVirtualPixelRatio());
         }
     }
+}
+
+void SceneSession::NotifyUpdateFlagCallback(NotifyUpdateFlagFunc&& func)
+{
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), where, func = std::move(func)] {
+        auto session = weakThis.promote();
+        if (!session || !func) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "session or func is null");
+            return;
+        }
+        session->onUpdateFlagFunc_ = std::move(func);
+        session->onUpdateFlagFunc_(session->sessionInfo_.specifiedFlag_);
+        TLOGND(WmsLogTag::WMS_MAIN, "%{public}s id: %{public}d specifiedFlag: %{public}s", where,
+            session->GetPersistentId(), session->sessionInfo_.specifiedFlag_.c_str());
+    }, __func__);
 }
 } // namespace OHOS::Rosen
