@@ -1994,6 +1994,58 @@ WMError WindowSceneSessionImpl::ResizeAsync(uint32_t width, uint32_t height,
     return static_cast<WMError>(ret);
 }
 
+
+WMError WindowSceneSessionImpl::GetTargetOrientationConfigInfo(Orientation targetOrientation,
+    const std::map<WindowType, SystemBarProperty>& properties, Ace::ViewportConfig& config,
+    std::map<AvoidAreaType, AvoidArea>& avoidAreas)
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    AUTO hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
+    sptr<DisplayInfo> displayInfo = display ? display->GetDisplayInfo() : nullptr;
+    auto ret = hostSession->GetTargetOrientationConfigInfo(targetOrientation, properties);
+    getTargetInfoCallback_->ResetGetTargetRotationLock();
+    OrientationInfo info = getTargetInfoCallback_->GetTargetOrientationResult(WINDOW_LAYOUT_TIMEOUT);
+    avoidAreas = info.avoidAreas;
+    config = FillTargetOrientationConfig(info, displayInfo, GetDisplayId());
+    TLOGI(WmsLogTag::WMS_ROTATION, "win:%{public}u, avoidAreas:%{public}s, %{public}s, %{public}s, %{public}s",
+        GetWindowId(), avoidAreas[AvoidAreaType::TYPE_SYSTEM].ToString().c_str(),
+        avoidAreas[AvoidAreaType::TYPE_CUTOUT].ToString().c_str(),
+        avoidAreas[AvoidAreaType::TYPE_KEYBOARD].ToString().c_str(),
+        avoidAreas[AvoidAreaType::TYPE_NAVIGATION_INDICATOR].ToString().c_str());
+    return static_cast<WMError>(ret);
+}
+
+Ace::ViewportConfig WindowSceneSessionImpl::FillTargetOrientationConfig(
+    OrientationInfo info, const sptr<DisplayInfo>& displayInfo, uint64_t displayId)
+{
+    Ace::ViewportConfig config;
+    Rect targetRect = info.rect;
+    int32_t targetRotation = info.rotation;
+    auto deviceRotation = static_cast<uint32_t>(displayInfo->GetDefaultDeviceRotationOffset());
+    uint32_t transformHint = (targetRotation + deviceRotation) % FULL_CIRCLE_DEGREE;
+    float density = GetVirtualPixelRatio(displayInfo);
+    int32_t orientation = targetRotation / ONE_FOURTH_FULL_CIRCLE_DEGREE;
+    virtualPixelRatio_ = density;
+    config.SetSize(targetRect.width_, targetRect.height_);
+    config.SetPosition(targetRect.posX_, targetRect.posY_);
+    config.SetDensity(density);
+    config.SetOrientation(orientation);
+    config.SetTransformHint(transformHint);
+    config.SetDisplayId(displayId);
+    return config;
+}
+
+WSError WindowSceneSessionImpl::NotifyTargetRotationInfo(OrientationInfo& info)
+{
+    return getTargetInfoCallback_->OnUpdateTargetOrientation(info);
+}
+
 WMError WindowSceneSessionImpl::SetAspectRatio(float ratio)
 {
     if (IsWindowSessionInvalid()) {

@@ -208,6 +208,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyWindowAttachStateChange(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_KEYBOARD_ANIMATION_COMPLETED):
             return HandleNotifyKeyboardAnimationCompleted(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_ROTATION_PROPERTY):
+            return HandleNotifyRotationProperty(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -887,6 +889,52 @@ int SessionStageStub::HandleNotifyKeyboardAnimationCompleted(MessageParcel& data
         return ERR_INVALID_VALUE;
     }
     NotifyKeyboardAnimationCompleted(*keyboardPanelInfo);
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleNotifyRotationProperty(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_ROTATION, "in");
+    int32_t rotation;
+    if (!data.ReadInt32(rotation)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "read rotation failed");
+        return ERR_INVALID_VALUE;
+    }
+
+    Rect rect = {0, 0, 0, 0};
+    if (!data.ReadInt32(rect.posX_) || !data.ReadInt32(rect.posY_) ||
+        !data.ReadUint32(rect.width_) ||!data.ReadUint32(rect.height_)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "read rect failed");
+        return ERR_INVALID_VALUE;
+    }
+    std::map<AvoidAreaType, AvoidArea> avoidAreas;
+    uint32_t size = 0;
+    if (!data.ReadUint32(size)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "read avoid area size failed");
+        return ERR_INVALID_VALUE;
+    }
+    constexpr uint32_t AVOID_AREA_TYPE_MAX_SIZE = 100;
+    if (size > AVOID_AREA_TYPE_MAX_SIZE) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "read avoid area size is invalid");
+        return ERR_INVALID_VALUE;
+    }
+    for (uint32_t i = 0; i < size; i++) {
+        uint32_t type = data.ReadUint32();
+        if (type < static_cast<uint32_t>(AvoidAreaType::TYPE_START) ||
+            type >= static_cast<uint32_t>(AvoidAreaType::TYPE_END)) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "read avoid area type invalid");
+            return ERR_INVALID_VALUE;
+        }
+        sptr<AvoidArea> area = data.ReadParcelable<AvoidArea>();
+        if (area == nullptr) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "read avoid area invalid");
+            return ERR_INVALID_VALUE;
+        }
+        avoidAreas[static_cast<AvoidAreaType>(type)] = *area;
+    }
+
+    OrientationInfo info = { rotation, rect, avoidAreas };
+    NotifyTargetRotationInfo(info);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

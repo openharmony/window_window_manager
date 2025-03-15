@@ -5227,6 +5227,23 @@ void SceneSessionManager::RegisterAcquireRotateAnimationConfigFunc(const sptr<Sc
         sceneSession->GetPersistentId());
 }
 
+void SceneSessionManager::CloseSyncTransaction(std::function<void()> func)
+{
+    auto task = [this, param = std::move(func), where = __func__] {
+        if (!closeSyncFunc_) {
+            closeSyncFunc_ = std::move(func);
+        }
+        bool isLastFrameLayoutFinished = true;
+        IsLastFrameLayoutFinished(isLastFrameLayoutFinished);
+        if (isLastFrameLayoutFinished) {
+            closeSyncFunc_();
+        } else {
+            needCloseSync_ = true;
+        }
+    };
+    taskScheduler_->PostAsyncTask(task, __func__);
+}
+
 void SceneSessionManager::NotifySessionForCallback(const sptr<SceneSession>& sceneSession, const bool needRemoveSession)
 {
     if (sceneSession == nullptr) {
@@ -10832,6 +10849,12 @@ void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<in
                     sceneSession->SetUIStateDirty(false);
                 }
             }
+        }
+        if (needCloseSync_) {
+            if (!closeSyncFunc_) {
+                closeSyncFunc_();
+            }
+            needCloseSync_ = false;
         }
     }, __func__);
 }

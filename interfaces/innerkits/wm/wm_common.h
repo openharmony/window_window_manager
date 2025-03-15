@@ -444,6 +444,7 @@ enum class WindowSizeChangeReason : uint32_t {
     AVOID_AREA_CHANGE,
     MAXIMIZE_TO_SPLIT,
     SPLIT_TO_MAXIMIZE,
+    PAGE_ROTATION,
     END,
 };
 
@@ -2083,6 +2084,17 @@ enum class WindowInfoKey : int32_t {
     ABILITY_NAME,
     APP_INDEX,
     VISIBILITY_STATE,
+};
+
+/**
+ * @struct OrientationInfo
+ *
+ * @brief orientation info
+ */
+struct OrientationInfo {
+    int32_t rotation = 0;
+    Rect rect;
+    std::map<AvoidAreaType, AvoidArea> avoidAreas;
 };
 }
 }

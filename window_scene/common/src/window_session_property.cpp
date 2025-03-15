@@ -237,9 +237,10 @@ void WindowSessionProperty::SetRaiseEnabled(bool raiseEnabled)
     raiseEnabled_ = raiseEnabled;
 }
 
-void WindowSessionProperty::SetRequestedOrientation(Orientation orientation)
+void WindowSessionProperty::SetRequestedOrientation(Orientation orientation, bool needAnimation)
 {
     requestedOrientation_ = orientation;
+    needRotateAnimation_ = needAnimation;
 }
 
 void WindowSessionProperty::SetDefaultRequestedOrientation(Orientation orientation)
@@ -358,6 +359,11 @@ bool WindowSessionProperty::GetRaiseEnabled() const
 Orientation WindowSessionProperty::GetRequestedOrientation() const
 {
     return requestedOrientation_;
+}
+
+bool WindowSessionProperty::GetRequestedAnimation() const
+{
+    return needRotateAnimation_;
 }
 
 Orientation WindowSessionProperty::GetDefaultRequestedOrientation() const
@@ -1206,6 +1212,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteInt32(parentPersistentId_) &&
         parcel.WriteUint32(accessTokenId_) && parcel.WriteUint32(static_cast<uint32_t>(maximizeMode_)) &&
         parcel.WriteUint32(static_cast<uint32_t>(requestedOrientation_)) &&
+        parcel.WriteBool(needRotateAnimation_) &&
         parcel.WriteUint32(static_cast<uint32_t>(windowMode_)) &&
         parcel.WriteUint32(flags_) && parcel.WriteBool(raiseEnabled_) &&
         parcel.WriteBool(topmost_) && parcel.WriteBool(mainWindowTopmost_) &&
@@ -1274,7 +1281,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetParentPersistentId(parcel.ReadInt32());
     property->SetAccessTokenId(parcel.ReadUint32());
     property->SetMaximizeMode(static_cast<MaximizeMode>(parcel.ReadUint32()));
-    property->SetRequestedOrientation(static_cast<Orientation>(parcel.ReadUint32()));
+    property->SetRequestedOrientation(static_cast<Orientation>(parcel.ReadUint32()), parcel.ReadBool());
     property->SetWindowMode(static_cast<WindowMode>(parcel.ReadUint32()));
     property->SetWindowFlags(parcel.ReadUint32());
     property->SetRaiseEnabled(parcel.ReadBool());
@@ -1463,7 +1470,8 @@ bool WindowSessionProperty::WriteActionUpdateSetBrightness(Parcel& parcel)
 
 bool WindowSessionProperty::WriteActionUpdateOrientation(Parcel& parcel)
 {
-    return parcel.WriteUint32(static_cast<uint32_t>(requestedOrientation_));
+    return parcel.WriteUint32(static_cast<uint32_t>(requestedOrientation_)) &&
+        parcel.WriteBool(needRotateAnimation_);
 }
 
 bool WindowSessionProperty::WriteActionUpdatePrivacyMode(Parcel& parcel)
@@ -1621,7 +1629,7 @@ void WindowSessionProperty::ReadActionUpdateSetBrightness(Parcel& parcel)
 
 void WindowSessionProperty::ReadActionUpdateOrientation(Parcel& parcel)
 {
-    SetRequestedOrientation(static_cast<Orientation>(parcel.ReadUint32()));
+    SetRequestedOrientation(static_cast<Orientation>(parcel.ReadUint32()), parcel.ReadBool());
 }
 
 void WindowSessionProperty::ReadActionUpdatePrivacyMode(Parcel& parcel)
