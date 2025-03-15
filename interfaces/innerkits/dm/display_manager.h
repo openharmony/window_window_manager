@@ -835,6 +835,15 @@ public:
      */
     std::shared_ptr<Media::PixelMap> GetScreenshotWithOption(const CaptureOption& captureOption,
         const Media::Rect &rect, const Media::Size &size, int rotation, DmErrorCode* errorCode = nullptr);
+    
+    /**
+     * @brief Get CutoutInfo with rotation
+     *
+     * @param Rotation rotation.
+     * @return CutoutInfo object of default screen.
+     */
+     sptr<CutoutInfo> GetCutoutInfoWithRotation(Rotation rotation);
+    
 private:
     DisplayManager();
     ~DisplayManager();
@@ -848,6 +857,7 @@ private:
     class Impl;
     std::recursive_mutex mutex_;
     sptr<Impl> pImpl_;
+    int32_t rotationIndex_ = 0;
 };
 } // namespace OHOS::Rosen
 

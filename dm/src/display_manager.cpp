@@ -101,6 +101,7 @@ public:
     DMError SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid, std::vector<uint64_t>& windowIdList);
     sptr<Display> GetPrimaryDisplaySync();
     void OnRemoteDied();
+    sptr<CutoutInfo> GetCutoutInfoWithRotation(Rotation rotation);
 private:
     void ClearDisplayStateCallback();
     void ClearFoldStatusCallback();
@@ -2466,6 +2467,23 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshotWithOption(const C
     }
     std::shared_ptr<Media::PixelMap> dstScreenshot(pixelMap.release());
     return dstScreenshot;
+}
+
+sptr<CutoutInfo> DisplayManager::GetCutoutInfoWithRotation(Rotation rotation)
+{
+    return pImpl_->GetCutoutInfoWithRotation(rotation);
+}
+
+sptr<CutoutInfo> DisplayManager::Impl::GetCutoutInfoWithRotation(Rotation rotation)
+{
+    int32_t rotationNum = static_cast<int32_t>(rotation);
+    auto displayInfo = SingletonContainer::Get<DisplayManagerAdapter>().GetDefaultDisplayInfo();
+    if(displayInfo == nullptr) {
+        WLOGFE("displayInfo is nullptr!");
+        return nullptr;
+    }
+    auto displayId = displayInfo->GetDisplayId();
+    return SingletonContainer::Get<DisplayManagerAdapter>().GetCutoutInfoWithRotation(displayId, rotationNum);
 }
 } // namespace OHOS::Rosen
 

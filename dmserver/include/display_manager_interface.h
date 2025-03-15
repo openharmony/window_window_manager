@@ -137,6 +137,10 @@ public:
     virtual uint32_t GetScreenBrightness(uint64_t screenId) { return 0; }
     virtual std::vector<DisplayId> GetAllDisplayIds() = 0;
     virtual sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) = 0;
+    virtual sptr<CutoutInfo> GetCutoutInfoWithRotation(DisplayId displayId, int32_t rotation)
+    {
+        return nullptr;
+    }
     virtual void NotifyDisplayEvent(DisplayEvent event) = 0;
     virtual bool SetFreeze(std::vector<DisplayId> displayIds, bool isFreeze) = 0;
     virtual sptr<ScreenInfo> GetScreenInfoById(ScreenId screenId) = 0;
