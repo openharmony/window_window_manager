@@ -10,11 +10,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
- 
+
 import("//build/ohos.gni")
- 
+
 group("window_scene_ani_packages") {
-  deps = [
-    "scene_session_manager:scene_session_manager_ani",
-  ]
+  deps = [ "scene_session_manager:scene_session_manager_ani" ]
 }
