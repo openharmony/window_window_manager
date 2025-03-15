@@ -622,6 +622,17 @@ sptr<CutoutInfo> DisplayManagerAdapter::GetCutoutInfo(DisplayId displayId)
     return displayManagerServiceProxy_->GetCutoutInfo(displayId);
 }
 
+sptr<CutoutInfo> GetCutoutInfoWithRotation(DisplayId displayId, int32_t rotation)
+{
+    WLOGFD("DisplayManagerAdapter::GetCutoutInfoWithRotation");
+    if (displayId == DISPLAY_ID_INVALID) {
+        WLOGFE("screen id is invalid");
+        return nullptr;
+    }
+    INIT_PROXY_CHECK_RETURN(nullptr);
+    return displayManagerServiceProxy_->GetCutoutInfoWithRotation(displayId, rotation);
+}
+
 DMError DisplayManagerAdapter::AddSurfaceNodeToDisplay(DisplayId displayId,
     std::shared_ptr<class RSSurfaceNode>& surfaceNode)
 {
