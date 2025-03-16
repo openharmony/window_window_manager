@@ -475,7 +475,7 @@ WMError WindowManagerLite::RegisterVisibilityStateChangedListener(const sptr<IWi
     std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
     WMError ret = WMError::WM_OK;
     if (pImpl_->windowVisibilityStateListenerAgent_ == nullptr) {
-        pImpl_->windowVisibilityStateListenerAgent_ = new WindowManagerAgent();
+        pImpl_->windowVisibilityStateListenerAgent_ = new WindowManagerAgentLite();
     }
     ret = SingletonContainer::Get<WindowAdapterLite>().RegisterWindowManagerAgent(
         WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_VISIBILITY,
