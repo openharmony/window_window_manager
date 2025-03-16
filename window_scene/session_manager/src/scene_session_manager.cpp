@@ -13291,12 +13291,6 @@ WMError SceneSessionManager::IsPcWindow(bool& isPcWindow)
     return WMError::WM_OK;
 }
 
-WMError SceneSessionManager::GetWindowUIType(WindowUIType& windowUIType)
-{
-    windowUIType = systemConfig_.windowUIType_;
-    return WMError::WM_OK;
-}
-
 WMError SceneSessionManager::IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode)
 {
     isPcOrPadFreeMultiWindowMode = (systemConfig_.IsPcWindow() || systemConfig_.IsFreeMultiWindowMode());
