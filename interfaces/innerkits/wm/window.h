@@ -691,6 +691,19 @@ public:
     virtual void OnOrientationChange() {}
 };
 
+/**
+ * @class ISystemBarPropertyListener
+ *
+ * @brief ISystemBarPropertyListener is used to notify while developer set SystemBarProperty.
+ */
+class ISystemBarPropertyListener : virtual public RefBase {
+public:
+    /**
+     * @brief Innerapi, notify caller when developer set SystemBarProperty.
+     */
+    virtual void OnSystemBarPropertyUpdate(WindowType type, const SystemBarProperty& property) {}
+};
+
 static WMError DefaultCreateErrCode = WMError::WM_OK;
 class Window : virtual public RefBase {
 public:
@@ -1976,6 +1989,36 @@ public:
      * @param ori Orientation set by developer
      */
     virtual void NotifyPreferredOrientationChange(Orientation orientation) {}
+
+    /**
+     * @brief Register SystemBarProperty listener.
+     *
+     * @param listener ISystemBarPropertyListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterSystemBarPropertyListener(const sptr<ISystemBarPropertyListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Unregister SystemBarProperty listener.
+     *
+     * @param listener ISystemBarPropertyListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterSystemBarPropertyListener(const sptr<ISystemBarPropertyListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Notify SystemBarProperty listener.
+     *
+     * @param type The WindowType.
+     * @param property new property value setted by developer.
+     */
+    virtual void NotifySystemBarPropertyUpdate(WindowType type, const SystemBarProperty& property) {}
 
     /**
      * @brief Get requested orientation.
