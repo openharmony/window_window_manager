@@ -22,6 +22,7 @@
 #include "window_adapter.h"
 #include "window_manager_hilog.h"
 #include "window_option.h"
+#include "parameters.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -961,7 +962,6 @@ napi_ref PictureInPictureController::GetTypeNode() const
 void PictureInPictureController::GetPipPossible(bool& pipPossible)
 {
     const std::string multiWindowUIType = system::GetParameter("const.window.multiWindowUIType", "");
-    TLOGI(WmsLogTag::WMS_PIP, "get window type: %{public}s ", multiWindowUIType);
     pipPossible = multiWindowUIType == "HandsetSmartWindow" || multiWindowUIType == "FreeFormMultiWindow" ||
         multiWindowUIType == "TabletSmartWindow";
     return;
