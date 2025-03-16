@@ -2514,8 +2514,7 @@ WMError WindowSessionImpl::RegisterMainWindowCloseListeners(const sptr<IMainWind
         TLOGE(WmsLogTag::DEFAULT, "window type is not supported");
         return WMError::WM_ERROR_INVALID_CALLING;
     }
-    auto isPC = windowSystemConfig_.uiType_ == UI_TYPE_PC;
-    if (!(isPC || IsFreeMultiWindowMode())) {
+    if (!IsPcOrPadCapabilityEnabled()) {
         TLOGE(WmsLogTag::DEFAULT, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -2533,8 +2532,7 @@ WMError WindowSessionImpl::UnregisterMainWindowCloseListeners(const sptr<IMainWi
         TLOGE(WmsLogTag::DEFAULT, "listener could not be null");
         return WMError::WM_ERROR_NULLPTR;
     }
-    auto isPC = windowSystemConfig_.uiType_ == UI_TYPE_PC;
-    if (!(isPC || IsFreeMultiWindowMode())) {
+    if (!IsPcOrPadCapabilityEnabled()) {
         TLOGE(WmsLogTag::DEFAULT, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
