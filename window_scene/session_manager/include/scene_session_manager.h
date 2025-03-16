@@ -413,6 +413,11 @@ public:
     bool GetImmersiveState(ScreenId screenId);
     WSError NotifyStatusBarShowStatus(int32_t persistentId, bool isVisible);
     WSError NotifyAINavigationBarShowStatus(bool isVisible, WSRect barArea, uint64_t displayId);
+    // tanhong
+    WSError NotifyNextAvoidRectInfo(uint32_t type, bool isVisible,
+        const WSRect& rect portraitRect, const WSRect& rect landspaceRect, DisplayId displayId);
+    WSRect GetNextAvoidRectInfo(DisplayId displayId, AvoidAreaType type,
+        std::tuple<bool, WSRect, WSRect>& nextSystemBarAvoidAreaRectInfo);
     WSRect GetAINavigationBarArea(uint64_t displayId);
     void ClearDisplayStatusBarTemporarilyFlags();
     AvoidArea GetRootSessionAvoidAreaByType(AvoidAreaType type);
@@ -1289,6 +1294,10 @@ private:
     bool isAINavigationBarVisible_ = false;
     std::shared_mutex currAINavigationBarAreaMapMutex_;
     std::map<uint64_t, WSRect> currAINavigationBarAreaMap_;
+    // tanhong
+    std::mutex nextAvoidRectInfoMapMutex_;
+    std::unordered_map<AvoidAreaType,
+        std::unordered_map<DisplayId, std::tuple<bool, WSRect, WSRect>>> nextAvoidRectInfoMap_;
     std::unordered_map<DisplayId, bool> statusBarDefaultVisibilityPerDisplay_;
     std::set<int32_t> avoidAreaListenerSessionSet_;
     static constexpr int32_t INVALID_STATUS_BAR_AVOID_HEIGHT = -1;
