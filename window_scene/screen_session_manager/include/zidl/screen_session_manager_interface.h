@@ -112,7 +112,7 @@ public:
     virtual sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) override { return nullptr; }
     virtual sptr<CutoutInfo> GetCutoutInfoWithRotation(DisplayId displayId, int32_t rotation) override
     {
-        return nullptr; 
+        return nullptr;
     }
     virtual void NotifyDisplayEvent(DisplayEvent event) override {}
     virtual bool SetFreeze(std::vector<DisplayId> displayIds, bool isFreeze) override { return false; }
