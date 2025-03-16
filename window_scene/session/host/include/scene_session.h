@@ -381,7 +381,7 @@ public:
     WSError GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoidAreas) override;
     WSError GetTargetOrientationConfigInfo(Orientation targetOrientation,
         const std::map<Rosen::WindowType, Rosen::SystemBarProperty>& properties) override;
-    void SetSessionGetTargetOrientationConfigCallback(
+    void SetSessionGetTargetOrientationConfigInfoCallback(
         const NotifySessionGetTargetOrientationConfigInfoFunc& func);
     WSError SetSystemBarProperty(WindowType type, SystemBarProperty systemBarProperty);
     void SetIsStatusBarVisible(bool isVisible);
