@@ -102,6 +102,7 @@ public:
     sptr<Display> GetPrimaryDisplaySync();
     void OnRemoteDied();
     sptr<CutoutInfo> GetCutoutInfoWithRotation(Rotation rotation);
+    
 private:
     void ClearDisplayStateCallback();
     void ClearFoldStatusCallback();

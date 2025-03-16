@@ -37,7 +37,7 @@ sptr<CutoutInfo> ScreenCutoutController::GetScreenCutoutInfo(DisplayId displayId
     TLOGD(WmsLogTag::DMS, "start");
     std::vector<DMRect> boundaryRects;
     if (!ScreenSceneConfig::GetCutoutBoundaryRect(displayId).empty()) {
-        ConvertBoundaryRectsByRotation(boundaryRects, displayId);
+        ConvertBoundaryRectsByRotation(displayId, boundaryRects);
     }
 
     CalcWaterfallRects(displayId);
@@ -45,20 +45,20 @@ sptr<CutoutInfo> ScreenCutoutController::GetScreenCutoutInfo(DisplayId displayId
     return cutoutInfo;
 }
 
-sptr<CutoutInfo> ScreenCutoutController::GetCutoutInfoWithRotation(DisplayId displayId, int32_t tranRotation)
+sptr<CutoutInfo> ScreenCutoutController::GetCutoutInfoWithRotation(DisplayId displayId, int32_t transRotation)
 {
     TLOGD(WmsLogTag::DMS, "start");
     std::vector<DMRect> boundaryRects;
     if (!ScreenSceneConfig::GetCutoutBoundaryRect(displayId).empty()) {
-        ConvertBoundaryRectsByRotation(boundaryRects, displayId, tranRotation);
+        ConvertBoundaryRectsByRotation(displayId, boundaryRects, transRotation);
     }
-    CalcWaterfallRects(displayId, tranRotation);
+    CalcWaterfallRects(displayId, transRotation);
     sptr<CutoutInfo> cutoutInfo = new CutoutInfo(boundaryRects, waterfallDisplayAreaRects_);
     return cutoutInfo;
 }
 
-void ScreenCutoutController::ConvertBoundaryRectsByRotation(std::vector<DMRect>& boundaryRects,
-    DisplayId displayId, int32_t tranRotation)
+void ScreenCutoutController::ConvertBoundaryRectsByRotation(DisplayId displayId, std::vector<DMRect>& boundaryRects,
+    int32_t transRotation)
 {
     std::vector<DMRect>  finalVector;
     sptr<DisplayInfo> displayInfo = ScreenSessionManager::GetInstance().GetDisplayInfoById(displayId);
@@ -71,10 +71,10 @@ void ScreenCutoutController::ConvertBoundaryRectsByRotation(std::vector<DMRect>&
     ScreenProperty screenProperty = ScreenSessionManager::GetInstance().GetScreenProperty(displayInfo->GetScreenId());
     Rotation currentRotation;
     Rotation deviceRotation = screenProperty.GetScreenRotation();
-    if (tranRotation == -1) {
+    if (transRotation == -1) {
         currentRotation = deviceRotation;
     } else {
-        currentRotation = static_cast<Rotation>(tranRotation);
+        currentRotation = static_cast<Rotation>(transRotation);
     }
     TLOGD(WmsLogTag::DMS, "display:[W: %{public}u, H: %{public}u, R: %{public}u], screen: [W: %{public}f, "
         "H: %{public}f, R: %{public}u]", displayInfo->GetWidth(), displayInfo->GetHeight(), displayInfo->GetRotation(),
@@ -99,12 +99,12 @@ void ScreenCutoutController::ConvertBoundaryRectsByRotation(std::vector<DMRect>&
     if (deviceRotation == Rotation::ROTATION_90 || deviceRotation == Rotation::ROTATION_270) {
         std::swap(screenWidth, screenHeight);
     }
-    ConvertBoundaryRectsByRotationInner(displayBoundaryRects, finalVector, currentRotation, screenWidth, screenHeight);
+    ConvertBoundaryRectsByRotationInner(currentRotation, screenWidth, screenHeight, displayBoundaryRects, finalVector);
     boundaryRects = finalVector;
 }
 
-void ScreenCutoutController::ConvertBoundaryRectsByRotationInner(const std::vector<DMRect>& displayBoundaryRects,
-    std::vector<DMRect>& finalVector, Rotation currentRotation, uint32_t screenWidth, uint32_t screenHeight)
+void ScreenCutoutController::ConvertBoundaryRectsByRotationInner(Rotation currentRotation, uint32_t screenWidth,
+    uint32_t screenHeight, const std::vector<DMRect>& displayBoundaryRects, std::vector<DMRect>& finalVector)
 {
     switch (currentRotation) {
         case Rotation::ROTATION_90: {
@@ -179,7 +179,7 @@ void ScreenCutoutController::CheckBoundaryRects(std::vector<DMRect>& boundaryRec
     }
 }
 
-void ScreenCutoutController::CalcWaterfallRects(DisplayId displayId, int32_t tranRotation)
+void ScreenCutoutController::CalcWaterfallRects(DisplayId displayId, int32_t transRotation)
 {
     WaterfallDisplayAreaRects emptyRects = {};
     if (!ScreenSceneConfig::IsWaterfallDisplay()) {
@@ -220,10 +220,10 @@ void ScreenCutoutController::CalcWaterfallRects(DisplayId displayId, int32_t tra
         return;
     }
     Rotation rotation;
-    if (tranRotation == -1) {
+    if (transRotation == -1) {
         rotation = GetCurrentDisplayRotation(displayId);
     } else {
-        rotation = static_cast<Rotation>(tranRotation);
+        rotation = static_cast<Rotation>(transRotation);
     }
     CalcWaterfallRectsByRotation(rotation, displayWidth, displayHeight, realNumVec);
 }
