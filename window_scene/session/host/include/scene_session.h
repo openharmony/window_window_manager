@@ -869,13 +869,16 @@ private:
     void GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea) const;
     AvoidArea GetAvoidAreaByTypeInner(AvoidAreaType type, const WSRect& rect = WSRect::EMPTY_RECT,
         int32_t apiVersion = API_VERSION_INVALID);
-    WSError GetAvoidAreasByRotation(int32_t rotation, const WSRect& rect,
+    WSError GetAvoidAreasByRotation(
+        int32_t rotation, const WSRect& rect,
         const std::map<WindowType, SystemBarProperty>& properties, std::map<AvoidAreaType, AvoidArea>& avoidAreas);
-    void GetSystemBarAvoidAreaByRotation(int32_t rotation, AvoidAreaType type, const WSRect& rect,
+    void GetSystemBarAvoidAreaByRotation(
+        int32_t rotation, AvoidAreaType type, const WSRect& rect,
         const std::map<WindowType, SystemBarProperty>& properties, AvoidArea& avoidArea);
     void GetCutoutAvoidAreaByRotation(int32_t rotation, const WSRect& rect, AvoidArea& avoidArea);
     void GetKeyboardAvoidAreaByRotation(int32_t rotation, const WSRect& rect, AvoidArea& avoidArea);
-    AvoidArea GetAvoidAreaByRotation(int32_t rotation, const WSRect& rect,
+    AvoidArea GetAvoidAreaByRotation(
+        int32_t rotation, const WSRect& rect,
         const std::map<WindowType, SystemBarProperty>& properties, AvoidAreaType type);
 
     /*
