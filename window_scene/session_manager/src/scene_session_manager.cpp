@@ -3724,7 +3724,7 @@ void SceneSessionManager::UpdateRecoverPropertyForSuperFold(const sptr<WindowSes
         "WindowRect: %{public}s, RequestRect: %{public}s, DisplayId: %{public}d",
         recoverWindowRect.ToString().c_str(), recoverRequestRect.ToString().c_str(),
         static_cast<uint32_t>(property->GetDisplayId()));
-    
+
     auto foldCrease = foldCreaseRegion->GetCreaseRects().front();
     recoverWindowRect.posY_ += foldCrease.posY_ + foldCrease.height_;
     recoverRequestRect.posY_ += foldCrease.posY_ + foldCrease.height_;
@@ -13831,5 +13831,33 @@ WMError SceneSessionManager::MinimizeByWindowId(const std::vector<int32_t>& wind
         }
     }, __func__);
     return WMError::WM_OK;
+}
+
+std::vector<sptr<SceneSession>> SceneSessionManager::GetActiveSceneSessionCopy()
+{
+    std::map<int32_t, sptr<SceneSession>> sceneSessionMapCopy;
+    {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        sceneSessionMapCopy = sceneSessionMap_;
+    }
+    std::vector<sptr<SceneSession>> activeSession;
+    for (const auto& elem : sceneSessionMapCopy) {
+        auto curSession = elem.second;
+        if (curSession == nullptr) {
+            TLOGW(WmsLogTag::DEFAULT, "curSession nullptr");
+            continue;
+        }
+        if (!curSession->GetSessionInfo().isSystem_ &&
+            (curSession->GetSessionState() < SessionState::STATE_FOREGROUND ||
+            curSession->GetSessionState() > SessionState::STATE_BACKGROUND)) {
+            TLOGW(WmsLogTag::DEFAULT, "id:%{public}d,invalid state:%{public}u",
+                 curSession->GetPersistentId(), curSession->GetSessionState());
+             continue;
+         }
+        if (IsSessionVisibleForeground(curSession)) {
+            activeSession.push_back(curSession);
+        }
+    }
+    return activeSession;
 }
 } // namespace OHOS::Rosen

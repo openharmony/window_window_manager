@@ -336,6 +336,7 @@ public:
     virtual WMError GetCallingWindowRect(Rect& rect) const override;
     virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
     WMError SetContinueState(int32_t continueState) override;
+    virtual WMError CheckWindowRect(uint32_t& width, uint32_t& height) { return WMError::WM_ERROR_INVALID_PARAM; }
 
     /*
      * Multi Window
@@ -413,6 +414,14 @@ public:
     bool IsWaterfallModeEnabled() override;
     WMError RegisterWaterfallModeChangeListener(const sptr<IWaterfallModeChangeListener>& listener) override;
     WMError UnregisterWaterfallModeChangeListener(const sptr<IWaterfallModeChangeListener>& listener) override;
+
+    /*
+     * Window Rotation
+     */
+    WMError RegisterWindowRotationChangeListener(const sptr<IWindowRotationChangeListener>& listener) override;
+    WMError UnregisterWindowRotationChangeListener(const sptr<IWindowRotationChangeListener>& listener) override;
+    RotationChangeResult NotifyRotationChange(const RotationChangeInfo& rotationChangeInfo) override;
+    WMError CheckMultiWindowRect(uint32_t& width, uint32_t& height);
 
 protected:
     WMError Connect();
@@ -793,7 +802,7 @@ private:
     Transform layoutTransform_;
     SingleHandTransform singleHandTransform_;
     KeyFramePolicy keyFramePolicy_;
-    
+
     /*
      * Window Decor
      */

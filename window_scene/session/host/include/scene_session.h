@@ -497,6 +497,10 @@ public:
      */
     void RegisterRequestedOrientationChangeCallback(NotifyReqOrientationChangeFunc&& callback);
     WSError NotifyRotationProperty(int32_t rotation, uint32_t width, uint32_t height);
+    void RegisterUpdateRotationChangeListener(NotifyRotationChangeFunc&& callback);
+    WSError UpdateRotationChangeListener(int32_t persistentId, bool isRegister) override;
+    RotationChangeResult NotifyRotationChange(const RotationChangeInfo& rotationChangeInfo);
+    bool isRotationChangeCallbackRegistered = false;
 
     /*
      * Window Animation
@@ -725,7 +729,7 @@ public:
      * Window Pattern
     */
     void NotifyWindowAttachStateListenerRegistered(bool registered) override;
-    
+
 protected:
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
     void SetMoveDragCallback();

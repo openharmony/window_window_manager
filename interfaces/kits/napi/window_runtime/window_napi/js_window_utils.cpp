@@ -1195,6 +1195,77 @@ bool ParseRectAnimationConfig(napi_env env, napi_value jsObject, RectAnimationCo
     return true;
 }
 
+bool ConvertRectFromJsValue(napi_env env, napi_value jsObject, Rect& displayRect)
+{
+    napi_value jsPosX_ = nullptr;
+    napi_value jsPosY_ = nullptr;
+    napi_value jsWidth_ = nullptr;
+    napi_value jsHeight_ = nullptr;
+    napi_get_named_property(env, jsObject, "left", &jsPosX_);
+    napi_get_named_property(env, jsObject, "top", &jsPosY_);
+    napi_get_named_property(env, jsObject, "width", &jsWidth_);
+    napi_get_named_property(env, jsObject, "height", &jsHeight_);
+
+    if (GetType(env, jsPosX_) != napi_undefined) {
+        int32_t posX_;
+        if (!ConvertFromJsValue(env, jsPosX_, posX_)) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "[NAPI]Failed to convert parameter to posX_");
+            return false;
+        }
+        displayRect.posX_ = posX_;
+    }
+    if (GetType(env, jsPosY_) != napi_undefined) {
+        int32_t posY_;
+        if (!ConvertFromJsValue(env, jsPosY_, posY_)) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "[NAPI]Failed to convert parameter to posY_");
+            return false;
+        }
+        displayRect.posY_ = posY_;
+    }
+    if (GetType(env, jsWidth_) != napi_undefined) {
+        int32_t width_;
+        if (!ConvertFromJsValue(env, jsWidth_, width_)) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "[NAPI]Failed to convert parameter to width_");
+            return false;
+        }
+        displayRect.width_ = width_;
+    }
+    if (GetType(env, jsHeight_) != napi_undefined) {
+        int32_t height_;
+        if (!ConvertFromJsValue(env, jsHeight_, height_)) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "[NAPI]Failed to convert parameter to height_");
+            return false;
+        }
+        displayRect.height_ = height_;
+    }
+    return true;
+}
+
+bool GetRotationResultFromJs(napi_env env, napi_value jsObject, RotationChangeResult& rotationChangeResult)
+{
+    napi_value jsRectType = nullptr;
+    napi_value jsWindowRect = nullptr;
+    napi_get_named_property(env, jsObject, "rectType", &jsRecType);
+    napi_get_named_property(env, jsObject, "windowRect", &jsWindowRect);
+    if (GetType(env, jsRectType) != napi_undefined) {
+        uint32_t rectType;
+        if (!ConvertFromJsValue(env, jsRectType, rectType)) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "[NAPI]Failed to convert parameter to rectType");
+            return false;
+        }
+        rotationChangeResult.rectType = static_cast<RectType>(rectType);
+    }
+    if (GetType(env, jsWindowRect) != napi_undefined) {
+        Rect windowRect;
+        if (!ConvertRectFromJsValue(env, jsWindowRect, windowRect)) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "[NAPI]Failed to convert parameter to windowRect");
+            return false;
+        }
+        rotationChangeResult.windowRect = windowRect;
+    }
+    return true;
+}
+
 napi_value ExtensionWindowAttributeInit(napi_env env)
 {
     if (env == nullptr) {

@@ -7456,7 +7456,7 @@ void SceneSession::NotifyKeyboardAnimationCompleted(bool isShowAnimation, const 
             TLOGND(WmsLogTag::WMS_KEYBOARD, "keyboard did hide listener is not registered");
             return;
         }
-    
+
         KeyboardPanelInfo keyboardPanelInfo;
         keyboardPanelInfo.rect_ = SessionHelper::TransferToRect(panelRect);
         keyboardPanelInfo.isShowing_ = isShowAnimation;
@@ -7601,5 +7601,25 @@ void SceneSession::NotifyUpdateFlagCallback(NotifyUpdateFlagFunc&& func)
         TLOGND(WmsLogTag::WMS_MAIN, "%{public}s id: %{public}d specifiedFlag: %{public}s", where,
             session->GetPersistentId(), session->sessionInfo_.specifiedFlag_.c_str());
     }, __func__);
+}
+
+WSError SceneSession::UpdateRotationChangeRegistered(int32_t persistentId, bool isRegister)
+{
+    TLOGI(WmsLogTag::WMS_ROTATION, "persistentId: %{public}d, isRegister: %{public}d", persistentId, isRegister);
+    if (isRegister) {
+        isRotationChangeCallbackRegistered = true;
+    } else {
+        isRotationChangeCallbackRegistered = false;
+    }
+    return WSError::WS_OK;
+}
+
+RotationChangeResult SceneSession::NotifyRotationChange(const RotationChangeInfo& rotationChangeInfo)
+{
+    if (!sessionStage_ || !isRotationChangeCallbackRegistered) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "sessionStage_ is null or isRotationChangeCallbackRegistered is false");
+        return { RectType::RELATIVE_TO_SCREEN, { 0, 0, 0, 0, } };
+    }
+    return sessionStage_->NotifyRotationChange(rotationChangeInfo);
 }
 } // namespace OHOS::Rosen

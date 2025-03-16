@@ -702,6 +702,23 @@ public:
      * @brief Innerapi, notify caller when developer set SystemBarProperty.
      */
     virtual void OnSystemBarPropertyUpdate(WindowType type, const SystemBarProperty& property) {}
+}
+/*
+ * @class IWindowRotationChangeListener
+ *
+ * @brief IWindowRotationChangeListener is used to observe the window rotation change.
+ */
+class IWindowOrientationChangeListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when window rotate
+     *
+     * @param rotationChangeInfo information of rotation
+     * @param rotationChangeResult result of rotation
+     *
+     */
+    virtual void OnRotationChange(const RotationChangeInfo& rotationChangeInfo,
+        RotationChangeResult& rotationChangeResult) {}
 };
 
 static WMError DefaultCreateErrCode = WMError::WM_OK;
@@ -1003,7 +1020,7 @@ public:
      * @return WM_OK means success, others mean set failed
      */
     virtual WMError SetSubWindowZLevel(int32_t zLevel) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
-    
+
     /**
      * @brief Get sub window zLevel
      *
