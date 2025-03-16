@@ -2084,7 +2084,7 @@ enum class WindowInfoKey : int32_t {
     ABILITY_NAME,
     APP_INDEX,
     VISIBILITY_STATE,
-}
+};
 
 /*
  * @brief Enumerates rotation change type.
@@ -2119,8 +2119,7 @@ enum class RectType : uint32_t {
 /**
  * @brief rotation change info to notify listener.
  */
-struct RotationChangeInfo
-{
+struct RotationChangeInfo {
     RotationChangeType type;
     uint32_t orientation;
     DisplayId displayId;
@@ -2130,8 +2129,7 @@ struct RotationChangeInfo
 /**
  * @brief rotation change result return from listener.
  */
-struct RotationChangeResult
-{
+struct RotationChangeResult {
     RectType rectType;
     Rect windowRect;
 };
