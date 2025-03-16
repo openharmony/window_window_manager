@@ -2452,6 +2452,115 @@ WSError SceneSession::GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoid
     }, __func__);
 }
 
+WSError SceneSession::GetAvoidAreasByRotation(int32_t rotation, const WSRect& rect,
+    const std::map<WindowType, SystemBarProperty>& properties, std::map<AvoidAreaType, AvoidArea>& avoidAreas)
+{
+    return PostSyncTask([weakThis = wptr(this), rotation, &rect, &properties, &avoidAreas, where = __func__] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s session is null", where);
+            return WSError::WS_ERROR_NULLPTR;
+        }
+        using T = std::underlying_type_t<AvoidAreaType>;
+        for (T avoidType = static_cast<T>(AvoidAreaType::TYPE_START);
+            avoidType < static_cast<T>(AvoidAreaType::TYPE_END); avoidType++) {
+            auto type = static_cast<AvoidAreaType>(avoidType);
+            avoidAreas[type] = session->GetAvoidAreaByRotation(rotation, rect, properties, type);
+        }
+        return WSError::WS_OK;
+    }, __func__);
+}
+
+AvoidArea SceneSession::GetAvoidAreaByRotation(int32_t rotation, const WSRect& rect,
+    const std::map<WindowType, SystemBarProperty>& properties, AvoidAreaType type)
+{
+    AvoidArea avoidArea;
+    switch (type) {
+        case AvoidAreaType::TYPE_SYSTEM:
+        case AvoidAreaType::TYPE_NAVIGATION_INDICATOR: {
+            GetSystemBarAvoidAreaByRotation(rotation, type, rect, properties, avoidArea);
+            break;
+        }
+        case AvoidAreaType::TYPE_CUTOUT: {
+            GetCutoutAvoidAreaByRotation(rotation, rect, avoidArea);
+            break;
+        }
+        case AvoidAreaType::TYPE_KEYBOARD: {
+            GetKeyboardAvoidAreaByRotation(rotation, rect, avoidArea);
+            break;
+        }
+        default: {
+            TLOGE(WmsLogTag::WMS_IMMS, "cannot find win %{public}d type %{public}u", GetPersistentId(), type);
+            break;
+        }
+    }
+    return avoidArea;
+}
+
+void SceneSession::GetSystemBarAvoidAreaByRotation(int32_t rotation, AvoidAreaType type, const WSRect& rect,
+    const std::map<WindowType, SystemBarProperty>& properties, AvoidArea& avoidArea)
+{
+    DisplayId displayId = GetSessionProperty()->GetDisplayId();
+    std::pair<WSRect, WSRect> nextSystemBarAvoidAreaRectInfo;
+    if (specificCallback_ == nullptr ||
+        specificCallback_->onGetNextAvoidAreaRectInfo_(
+            displayId, type, nextSystemBarAvoidAreaRectInfo) != WSError::WS_OK) {
+        TLOGE(WmsLogTag::WMS_IMMS, "get nextSystemBarAvoidAreaRectInfo failed.");
+        return;
+    }
+    WindowType winType = (type == AvoidAreaType::TYPE_SYSTEM) ? WindowType::WINDOW_TYPE_STATUS_BAR :
+                                                                WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR;
+    if (auto iter = properties.find(winType); iter != properties.end() && !iter->second.enable_) {
+        TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}d] avoid area is empty, type %{public}d", GetPersistentId(), type);
+        return;
+    }
+    WSRect avoidRect = (rotation == 0 || rotation == 180) ? nextSystemBarAvoidAreaRectInfo.first :
+                                                            nextSystemBarAvoidAreaRectInfo.second;
+    TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d tyep %{public}d rect %{public}s bar %{public}s",
+        GetPersistentId(), type, rect.ToString().c_str(), avoidRect.ToString().c_str());
+    CalculateAvoidAreaRect(rect, avoidRect, avoidArea);
+}
+
+void SceneSession::GetCutoutAvoidAreaByRotation(int32_t rotation, const WSRect& rect, AvoidArea& avoidArea)
+{
+    auto cutoutInfo = DisplayManager::GetInstance().GetCutoutInfoWithRotation(static_cast<Rotation>(rotation / 90));
+    if (cutoutInfo == nullptr) {
+        TLOGI(WmsLogTag::WMS_IMMS, "There is no cutout info");
+        return;
+    }
+    std::vector<DMRect> cutoutAreas = cutoutInfo->GetBoundingRects();
+    if (cutoutAreas.empty()) {
+        TLOGI(WmsLogTag::WMS_IMMS, "There is no cutout area");
+        return;
+    }
+    for (auto& cutoutArea : cutoutAreas) {
+        WSRect cutoutAreaRect = {
+            cutoutArea.posX_,
+            cutoutArea.posY_,
+            cutoutArea.width_,
+            cutoutArea.height_
+        };
+        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}s cutout %{public}s",
+              rect.ToString().c_str(), cutoutAreaRect.ToString().c_str());
+        CalculateAvoidAreaRect(rect, cutoutAreaRect, avoidArea);
+    }
+}
+
+void SceneSession::GetKeyboardAvoidAreaByRotation(int32_t rotation, const WSRect& rect, AvoidArea& avoidArea)
+{
+    std::vector<std::pair<bool, WSRect>> avoidInfoVector;
+    GetKeyboardOccupiedAreaWithRotation(GetPersistentId(), rotation, avoidInfoVector);
+    for (auto avoidInfo : avoidInfoVector) {
+        if (!avoidInfo.first) {
+            TLOGI(WmsLogTag::WMS_IMMS, "keyboard avoid area is empty id: %{public}d", GetPersistentId());
+            continue;
+        }
+        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}s keyboard %{public}s",
+            rect.ToString().c_str(), avoidInfo.second.ToString().c_str());
+            CalculateAvoidAreaRect(rect, avoidInfo.second, avoidArea);
+    }
+}
+
 WSError SceneSession::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
 {
     if (!sessionStage_) {
