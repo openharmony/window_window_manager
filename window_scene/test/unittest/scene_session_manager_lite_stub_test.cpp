@@ -127,6 +127,11 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     {
         return WMError::WM_OK;
     }
+    WMError ListWindowInfo(const WindowInfoOption& windowInfoOption,
+        std::vector<sptr<WindowInfo>>& infos) override
+    {
+        return WMError::WM_OK;
+    }
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId) override
     {
     }
@@ -823,6 +828,26 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleUnregisterWindowManagerAgent, Fu
     data.WriteUint32(5);
     res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleRegisterWindowManagerAgent(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleListWindowInfo
+ * @tc.desc: test function : HandleListWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleListWindowInfo, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    DisplayId displayId = 0;
+    int32_t windowId = 0;
+    data.WriteUint8(static_cast<WindowInfoFilterOptionDataType>(windowInfoFilterOption = WindowInfoFilterOption::ALL));
+    data.WriteUint8(static_cast<WindowInfoTypeOptionDataType>(WindowInfoTypeOption::ALL));
+    data.WriteUint64(displayId);
+    data.WriteInt32(windowId);
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleListWindowInfo(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 
