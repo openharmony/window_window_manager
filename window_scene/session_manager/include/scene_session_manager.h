@@ -414,9 +414,9 @@ public:
     WSError NotifyStatusBarShowStatus(int32_t persistentId, bool isVisible);
     WSError NotifyAINavigationBarShowStatus(bool isVisible, WSRect barArea, uint64_t displayId);
     // tanhong
-    WSError NotifyNextAvoidRectInfo(uint32_t type, bool isVisible,
-        const WSRect& rect portraitRect, const WSRect& rect landspaceRect, DisplayId displayId);
-    WSRect GetNextAvoidRectInfo(DisplayId displayId, AvoidAreaType type,
+    WSError NotifyNextAvoidRectInfo(AvoidAreaType type, bool isVisible,
+        const WSRect& portraitRect, const WSRect& landspaceRect, DisplayId displayId);
+    WSError GetNextAvoidRectInfo(DisplayId displayId, AvoidAreaType type,
         std::tuple<bool, WSRect, WSRect>& nextSystemBarAvoidAreaRectInfo);
     WSRect GetAINavigationBarArea(uint64_t displayId);
     void ClearDisplayStatusBarTemporarilyFlags();

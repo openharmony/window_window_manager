@@ -3137,15 +3137,13 @@ napi_value JsSceneSessionManager::OnNotifyNextAvoidRectInfo(napi_env env, napi_c
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-
     int32_t type = 0;
-    if (!ConvertFromJsValue(env, argv[ARG_INDEX_ZREO], type)) {
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_ZERO], type)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to type");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-
     int64_t displayId = -1;
     if (!ConvertFromJsValue(env, argv[ARG_INDEX_ONE], displayId)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to displayId");
@@ -3153,8 +3151,6 @@ napi_value JsSceneSessionManager::OnNotifyNextAvoidRectInfo(napi_env env, napi_c
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-
-
     bool isVisible = false;
     if (!ConvertFromJsValue(env, argv[ARG_INDEX_TWO], isVisible)) {
         WLOGFE("Failed to convert parameter to isVisible");
@@ -3162,8 +3158,7 @@ napi_value JsSceneSessionManager::OnNotifyNextAvoidRectInfo(napi_env env, napi_c
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-
-    WSRect landspaceRect;
+    WSRect portraitRect;
     if (argv[ARG_INDEX_THREE] == nullptr || !ConvertRectInfoFromJs(env, argv[ARG_INDEX_THREE], portraitRect)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to landspaceRect");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
@@ -3177,8 +3172,9 @@ napi_value JsSceneSessionManager::OnNotifyNextAvoidRectInfo(napi_env env, napi_c
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    SceneSessionManager::GetInstance().NotifyAINavigationBarShowStatus(
-        isVisible, barArea, static_cast<uint64_t>(displayId));
+    auto avoidType = (type == 5) ? AvoidAreaType::TYPE_START : AvoidAreaType::TYPE_NAVIGATION_INDICATOR;
+    SceneSessionManager::GetInstance().NotifyNextAvoidRectInfo(
+        avoidType, isVisible, portraitRect, landspaceRect, static_cast<uint64_t>(displayId));
     return NapiGetUndefined(env);
 }
 
