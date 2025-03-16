@@ -45,6 +45,8 @@ private:
     void CheckBoundaryRects(std::vector<DMRect>& boundaryRects, ScreenProperty screenProperty);
     void ConvertBoundaryRectsByRotation(std::vector<DMRect>& boundaryRects, DisplayId displayId,
         int32_t tranRotation = -1);
+    void ConvertBoundaryRectsByRotationInner(const std::vector<DMRect>& displayBoundaryRects,
+            std::vector<DMRect>& finalVector, Rotation currentRotation, uint32_t screenWidth, uint32_t screenHeight);
     void CurrentRotation90(const std::vector<DMRect>& displayBoundaryRects, std::vector<DMRect>& finalVector,
         uint32_t displayWidth);
     void CurrentRotation180(const std::vector<DMRect>& displayBoundaryRects, std::vector<DMRect>& finalVector,

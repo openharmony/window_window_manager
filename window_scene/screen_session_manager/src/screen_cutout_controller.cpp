@@ -99,6 +99,13 @@ void ScreenCutoutController::ConvertBoundaryRectsByRotation(std::vector<DMRect>&
     if (deviceRotation == Rotation::ROTATION_90 || deviceRotation == Rotation::ROTATION_270) {
         std::swap(screenWidth, screenHeight);
     }
+    ConvertBoundaryRectsByRotationInner(displayBoundaryRects, finalVector, currentRotation, screenWidth, screenHeight);
+    boundaryRects = finalVector;
+}
+
+void ScreenCutoutController::ConvertBoundaryRectsByRotationInner(const std::vector<DMRect>& displayBoundaryRects,
+    std::vector<DMRect>& finalVector, Rotation currentRotation, uint32_t screenWidth, uint32_t screenHeight)
+{
     switch (currentRotation) {
         case Rotation::ROTATION_90: {
             CurrentRotation90(displayBoundaryRects, finalVector, screenHeight);
@@ -115,7 +122,6 @@ void ScreenCutoutController::ConvertBoundaryRectsByRotation(std::vector<DMRect>&
         default:
             break;
     }
-    boundaryRects = finalVector;
 }
 
 void ScreenCutoutController::CurrentRotation90(const std::vector<DMRect>& displayBoundaryRects,
