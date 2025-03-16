@@ -842,7 +842,7 @@ public:
      * @param Rotation rotation.
      * @return CutoutInfo object of default screen.
      */
-     sptr<CutoutInfo> GetCutoutInfoWithRotation(Rotation rotation);
+    sptr<CutoutInfo> GetCutoutInfoWithRotation(Rotation rotation);
     
 private:
     DisplayManager();

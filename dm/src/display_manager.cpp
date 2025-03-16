@@ -2478,7 +2478,7 @@ sptr<CutoutInfo> DisplayManager::Impl::GetCutoutInfoWithRotation(Rotation rotati
 {
     int32_t rotationNum = static_cast<int32_t>(rotation);
     auto displayInfo = SingletonContainer::Get<DisplayManagerAdapter>().GetDefaultDisplayInfo();
-    if(displayInfo == nullptr) {
+    if (displayInfo == nullptr) {
         WLOGFE("displayInfo is nullptr!");
         return nullptr;
     }
