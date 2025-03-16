@@ -254,6 +254,10 @@ public:
     virtual WSError NotifyWindowAttachStateChange(bool isAttach) { return WSError::WS_DO_NOTHING; }
     virtual void NotifyKeyboardAnimationCompleted(const KeyboardPanelInfo& keyboardPanelInfo) {}
     virtual WSError NotifyTargetRotationInfo(OrientationInfo& info) { return WSError::WS_DO_NOTHING; }
+    virtual RotationChangeResult NotifyRotationChange(const RotationChangeInfo& rotationChangeInfo)
+    {
+        return { RectType::RELATIVE_TO_SCREEN, { 0, 0, 0, 0, } };
+    }
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_INTERFACE_H

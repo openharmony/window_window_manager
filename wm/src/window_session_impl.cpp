@@ -5783,5 +5783,126 @@ void WindowSessionImpl::NotifyClientWindowSize()
         UpdateViewportConfig(windowRect, WindowSizeChangeReason::UNDEFINED, nullptr, displayInfo);
     }
 }
+
+void WindowSessionImpl::UpdateFloatingWindowSizeBySizeLimits(uint32_t& width, uint32_t& height)
+{
+    if (property_->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT_CAMERA) {
+        TLOGW(WmsLogTag::WMS_ROTATION, "float camera window");
+        return;
+    }
+    const auto& sizeLimits = property_->GetWindowLimits();
+    if (!WindowHelper::IsSystemWindow(property_->GetWindowType()) ||
+        property_->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) {
+        width = std::max(sizeLimits.minWidth_, width);
+        height = std::max(sizeLimits.minHeight_, height);
+    }
+    width = std::min(sizeLimits.maxWidth_, width);
+    height = std::min(sizeLimits.maxHeight_, height);
+    if (height == 0){
+        return;
+    }
+    float curRatio = static_cast<float>(width) / static_cast<float>(height);
+    if (!WindowHelper::IsMainFloatingWindow(property_->GetWindowType(), GetWindowMode()) ||
+        (!MathHelper::GreatNotEqual(sizeLimits.minRatio_, curRatio) &&
+        !MathHelper::GreatNotEqual(curRatio, sizeLimits.maxRatio_))) {
+        return;
+    }
+    float newRatio = curRatio < sizeLimits.minRatio_ ? sizeLimits.minRatio_ : sizeLimits.maxRatio_;
+    if (!MathHelper::NearZero(newRatio)) {
+        return;
+    }
+    if (sizeLimits.maxWidth_ == sizeLimits.minWidth_) {
+        height = static_cast<uint32_t>(static_cast<float>(width) / newRatio);
+        return;
+    }
+    if (sizeLimits.maxHeight_ == sizeLimits.minHeight_) {
+        width = static_cast<uint32_t>(static_cast<float>(height) / newRatio);
+        return;
+    }
+}
+
+void WindowSessionImpl::CheckWindowRect(Rect& windowRect)
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "window session is invalid");
+        windowRect.width_ = 0;
+        windowRect.height_ = 0;
+        return;
+    }
+    if (property_->GetWindowType() == WindowType::WINDOW_TYPE_PIP) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Unsupported pip window");
+        windowRect.width_ = 0;
+        windowRect.height_ = 0;
+        return;
+    }
+    const auto& mainWindowRect = GetRequestRect();
+    auto mainWindow = FindMainWindowWithContext();
+    if (WindowHelper::IsSubWindow(GetType()) && mainWindow != nullptr) {
+        if (mainWindowRect.width_ < windowRect.height_ && mainWindowRect.height_ < windowRect.height_) {
+            TLOGW(WmsLogTag::WMS_ROTATION, "window rect too big");
+            windowRect.width_ = 0;
+            windowRect.height_ = 0;
+            return;
+        }
+    }
+    if (property_->GetWindowType() != WindowType::WINDOW_TYPE_FLOAT &&
+        property_->GetWindowType() != WindowType::WINDOW_TYPE_PANEL &&
+        property_->GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING) {
+        TLOGW(WmsLogTag::WMS_ROTATION, "Unsupported full screen window");
+        windowRect.width_ = 0;
+        windowRect.height_ = 0;
+        return;
+    }
+    UpdateFloatingWindowSizeBySizeLimits(windowRect.width_, windowRect.height_);
+}
+
+WMError WindowSessionImpl::CheckMultiWindowRect(uint32_t& width, uint32_t& height)
+{
+    const auto& requestRect = GetRequestRect();
+
+    if (WindowHelper::IsSubWindow(GetType())) {
+        auto mainWindow = FindMainWindowWithContext();
+        if (mainWindow != nullptr && (mainWindow->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY ||
+                                      mainWindow->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY)) {
+            if (width == requestRect.width_ && height == requestRect.height_) {
+                TLOGW(WmsLogTag::WMS_LAYOUT, "Request same size in multiWindow will not update, return");
+                return WMError::WM_ERROR_INVALID_WINDOW;
+            }
+        }
+    }
+    return WMError::WM_OK;
+}
+
+RotationChangeResult WindowSessionImpl::NotifyRotationChange(const RotationChangeInfo& rotationChangeInfo)
+{
+    TLOGI(WmsLogTag::WMS_ROTATION, "info type: %{public}d, orientation: %{public}d, displayId: %{public}d, ",
+        "rect:[%{public}d, %{public}d, %{public}d, %{public}d]", rotationChangeInfo.type,
+        rotationChangeInfo.orientation, rotationChangeInfo.displayId, rotationChangeInfo.displayRect.posX_,
+        rotationChangeInfo.displayRect.posY_, rotationChangeInfo.displayRect.width_,
+        rotationChangeInfo.displayRect.height_);
+    RotationChangeResult rotationChangeResult = { RectType::RELATIVE_TO_SCREEN, { 0, 0, 0, 0 } };
+    {
+        std::lock_guard<std::mutex> lockListener(windowRotationChangeListenerMutex_);
+        auto windowRotationChangeListeners = GetListeners<IWindowRotationChangeListener>();
+        for (auto& listener : windowRotationChangeListeners) {
+            if (listener != nullptr) {
+                listener->OnRotationChange(rotationChangeInfo, rotationChangeResult);
+                if (rotationChangeInfo.type == RotationChangeType::WINDOW_DID_ROTATE) {
+                    break;
+                }
+                Rect resultRect = rotationChangeResult.windowRect;
+                if (CheckWindowRect(resultRect.width_, resultRect.height_) != WMError::WM_OK ||
+                    CheckMultiWindowRect(resultRect.width_, resultRect.height_) != WMError::WM_OK) {
+                    rotationChangeResult.windowRect.width_ = 0;
+                    rotationChangeResult.windowRect.height_ = 0;
+                }
+            }
+        }
+    }
+    TLOGI(WmsLogTag::WMS_ROTATION, "result rectType: %{public}d, rect:[%{public}d, %{public}d, %{public}d, %{public}d]",
+        rotationChangeResult.rectType, rotationChangeResult.windowRect.posX_, rotationChangeResult.windowRect.posY_,
+        rotationChangeResult.windowRect.width_, rotationChangeResult.windowRect.height_);
+    return rotationChangeResult;
+}
 } // namespace Rosen
 } // namespace OHOS

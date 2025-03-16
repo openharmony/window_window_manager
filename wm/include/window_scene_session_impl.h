@@ -143,6 +143,7 @@ public:
     WSError NotifyTargetRotationInfo(OrientationInfo& info) override;
     WSError UpdateDisplayId(uint64_t displayId) override;
     WMError AdjustKeyboardLayout(const KeyboardLayoutParams params) override;
+    WMError CheckWindowRect(uint32_t& width, uint32_t& height) override;
 
     /*
      * Sub Window

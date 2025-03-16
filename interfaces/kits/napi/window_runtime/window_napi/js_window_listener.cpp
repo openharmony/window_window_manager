@@ -778,5 +778,37 @@ void JsWindowListener::OnWindowWillClose(sptr<Window> window)
     eventHandler_->PostSyncTask(jsCallback, "wms:JsWindowListener::OnWindowWillClose",
         AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
+
+void JsWindowListener::OnRotationChange(const RotationChangeInfo& rotationChangeInfo,
+    RotationChangeResult& rotationChangeResult)
+{
+    auto jsCallback = [self = weakRef_, rotationChangeInfo, weakWindow = wptr<Window>(window), env = env_] () {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsWindowListener::OnRotationChange");
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "this listener or env is nullptr");
+            return;
+        }
+        HandleScope handleScope(env);
+        napi_value rotationInfoObj = CreateRotationChangeInfoObject(env, rotationChangeInfo);
+        if (rotationInfoObj == nullptr) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "failed to create js object");
+            return;
+        }
+        napi_value argv[] = { rotationInfoObj };
+        napi_value rotationChangeResultObj = thisListener->CallJsMethod(WINDOW_ROTATION_CHANGE_CB.c_str(), argv,
+            ArraySize(argv));
+        if (rotationChangeResultObj != nullptr) {
+            GetRotationResultFromJs(env, rotationChangeResultObj, rotationChangeResult);
+        }
+    };
+
+    if (!eventHandler_|| eventHandler_->GetEventRunner()->IsCurrentRunnerThread()) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "get main event handler failed!");
+        return jsCallback();
+    }
+    eventHandler_->PostSyncTask(jsCallback, "wms:JsWindowListener::OnRotationChange",
+        AppExecFwk::EventQueue::Priority::IMMEDIATE);
+}
 } // namespace Rosen
 } // namespace OHOS
