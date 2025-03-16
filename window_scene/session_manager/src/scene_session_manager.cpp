@@ -9893,29 +9893,28 @@ WSError SceneSessionManager::NotifyAINavigationBarShowStatus(bool isVisible, WSR
     return WSError::WS_OK;
 }
 
-WSError SceneSessionManager::NotifyNextAvoidRectInfo(uint32_t type, bool isVisible,
-    const WSRect& rect portraitRect, const WSRect& rect landspaceRect, DisplayId displayId)
+WSError SceneSessionManager::NotifyNextAvoidRectInfo(AvoidAreaType type, bool isVisible,
+    const WSRect& portraitRect, const WSRect& landspaceRect, DisplayId displayId)
 {
     TLOGI(WmsLogTag::WMS_IMMS, "type %{public}d isVisible %{public}u "
         "portraitRect %{public}s, portraitRect %{public}s, displayId %{public}" PRIu64,
         type, isVisible, portraitRect.ToString().c_str(), landspaceRect.ToString().c_str(), displayId);
-    
-    atuo avoidType = (type == 5) ? AvoidAreaType::TYPE_START : AvoidAreaType::TYPE_NAVIGATION_INDICATOR;
+    // auto avoidType = (type == 5) ? AvoidAreaType::TYPE_START : AvoidAreaType::TYPE_NAVIGATION_INDICATOR;
     std::lock_guard<std::mutex> lock(nextAvoidRectInfoMapMutex_);
     nextAvoidRectInfoMap_[avoidType][displayId] = { isVisible, portraitRect, landspaceRect };
     return WSError::WS_OK;
 }
 
-WSRect SceneSessionManager::GetNextAvoidRectInfo(
+WSError SceneSessionManager::GetNextAvoidRectInfo(
     DisplayId displayId, AvoidAreaType type, std::tuple<bool, WSRect, WSRect>& nextSystemBarAvoidAreaRectInfo)
 {
     {
         std::lock_guard<std::mutex> lock(nextAvoidRectInfoMapMutex_);
-        if (nextAvoidRectInfoMap_count(type) == 0 || nextAvoidRectInfoMap_[type].count(displayId) == 0) {
+        if (nextAvoidRectInfoMap_.count(type) == 0 || nextAvoidRectInfoMap_[type].count(displayId) == 0) {
             TLOGI(WmsLogTag::WMS_IMMS, "get failed, type %{public}d displayId %{public}" PRIu64, type, displayId);
             return WSError::WS_ERROR_INVALID_PARENT;
         }
-        nextSystemBarAvoidAreaRectInfo = nextAvoidRectInfoMap_[avoidType][displayId];
+        nextSystemBarAvoidAreaRectInfo = nextAvoidRectInfoMap_[type][displayId];
     }
     return WSError::WS_OK;
 }
