@@ -7616,9 +7616,9 @@ WSError SceneSession::UpdateRotationChangeRegistered(int32_t persistentId, bool 
 
 RotationChangeResult SceneSession::NotifyRotationChange(const RotationChangeInfo& rotationChangeInfo)
 {
-    if (!sessionStage_) {
-        TLOGE(WmsLogTag::WMS_ROTATION, "sessionStage_ is null");
-        return { RectType::RELATIVE_TO_SCREEN, { 0, 0, 0, 0, }};
+    if (!sessionStage_ || !isRotationChangeCallbackRegistered) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "sessionStage_ is null or isRotationChangeCallbackRegistered is false");
+        return { RectType::RELATIVE_TO_SCREEN, { 0, 0, 0, 0, } };
     }
     return sessionStage_->NotifyRotationChange(rotationChangeInfo);
 }
