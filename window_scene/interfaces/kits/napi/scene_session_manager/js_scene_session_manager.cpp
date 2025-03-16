@@ -57,11 +57,13 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsSceneSessionManager" };
 constexpr int MIN_ARG_COUNT = 3;
 constexpr int DEFAULT_ARG_COUNT = 4;
+constexpr int ARG_COUNT_FIVE = 5;  // tanhong
 constexpr int ARG_INDEX_ZERO = 0;
 constexpr int ARG_INDEX_ONE = 1;
 constexpr int ARG_INDEX_TWO = 2;
 constexpr int ARG_INDEX_THREE = 3;
 constexpr int ARG_INDEX_FOUR = 4;
+constexpr int ARG_INDEX_FIVE = 5;
 constexpr int32_t RESTYPE_RECLAIM = 100001;
 const std::string RES_PARAM_RECLAIM_TAG = "reclaimTag";
 const std::string CREATE_SYSTEM_SESSION_CB = "createSpecificSession";
@@ -205,6 +207,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::NotifyStatusBarShowStatus);
     BindNativeFunction(env, exportObj, "notifyAINavigationBarShowStatus", moduleName,
         JsSceneSessionManager::NotifyAINavigationBarShowStatus);
+    BindNativeFunction(env, exportObj, "notifyNextAvoidRectInfo", moduleName,
+        JsSceneSessionManager::NotifyNextAvoidRectInfo);    
     BindNativeFunction(env, exportObj, "updateTitleInTargetPos", moduleName, JsSceneSessionManager::UpdateTitleInTargetPos);
     BindNativeFunction(env, exportObj, "setSystemAnimatedScenes", moduleName,
         JsSceneSessionManager::SetSystemAnimatedScenes);
@@ -1093,6 +1097,14 @@ napi_value JsSceneSessionManager::NotifyAINavigationBarShowStatus(napi_env env, 
     TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnNotifyAINavigationBarShowStatus(env, info) : nullptr;
+}
+
+//tanhong
+napi_value JsSceneSessionManager::NotifyNextAvoidRectInfo(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnNotifyNextAvoidRectInfo(env, info) : nullptr;
 }
 
 napi_value JsSceneSessionManager::NotifySessionRecoverStatus(napi_env env, napi_callback_info info)
@@ -3104,6 +3116,63 @@ napi_value JsSceneSessionManager::OnNotifyAINavigationBarShowStatus(napi_env env
     int64_t displayId = -1;
     if (!ConvertFromJsValue(env, argv[ARG_INDEX_TWO], displayId)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to displayId");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    SceneSessionManager::GetInstance().NotifyAINavigationBarShowStatus(
+        isVisible, barArea, static_cast<uint64_t>(displayId));
+    return NapiGetUndefined(env);
+}
+
+//tanhong
+napi_value JsSceneSessionManager::OnNotifyNextAvoidRectInfo(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARG_COUNT_FIVE;
+    napi_value argv[ARG_INDEX_FIVE] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARG_INDEX_FOUR) {
+        TLOGE(WmsLogTag::WMS_IMMS, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    int32_t type = 0;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_ZREO], type)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to type");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    int64_t displayId = -1;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_ONE], displayId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to displayId");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+
+    bool isVisible = false;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_TWO], isVisible)) {
+        WLOGFE("Failed to convert parameter to isVisible");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    WSRect landspaceRect;
+    if (argv[ARG_INDEX_THREE] == nullptr || !ConvertRectInfoFromJs(env, argv[ARG_INDEX_THREE], portraitRect)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to landspaceRect");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    WSRect landspaceRect;
+    if (argv[ARG_INDEX_FOUR] == nullptr || !ConvertRectInfoFromJs(env, argv[ARG_INDEX_FOUR], landspaceRect)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to landspaceRect");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
