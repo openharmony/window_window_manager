@@ -2041,6 +2041,7 @@ napi_value JsSceneSession::SetStartingWindowExitAnimationFlag(napi_env env, napi
     JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetStartingWindowExitAnimationFlag(env, info) : nullptr;
 }
+
 napi_value JsSceneSession::SyncScenePanelGlobalPosition(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_SCB, "[NAPI]in");
