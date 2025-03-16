@@ -512,7 +512,8 @@ WMError WindowManagerLite::UnregisterVisibilityStateChangedListener(const sptr<I
         ret = SingletonContainer::Get<WindowAdapterLite>().UnregisterWindowManagerAgent(
             WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_VISIBILITY,
             pImpl_->windowVisibilityStateListenerAgent_);
-        if (ret == WMError::WM_OK) {
+        if (ret == WMError::WM_OK && pImpl_->windowVisibilityStateListenerAgent_ != nullptr) {
+            delete pImpl_->windowVisibilityStateListenerAgent_;
             pImpl_->windowVisibilityStateListenerAgent_ = nullptr;
         }
     }
