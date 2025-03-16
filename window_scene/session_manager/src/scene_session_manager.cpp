@@ -9911,7 +9911,7 @@ WSError SceneSessionManager::GetNextAvoidRectInfo(DisplayId displayId, AvoidArea
         std::lock_guard<std::mutex> lock(nextAvoidRectInfoMapMutex_);
         if (nextAvoidRectInfoMap_.count(type) == 0 || nextAvoidRectInfoMap_[type].count(displayId) == 0) {
             TLOGI(WmsLogTag::WMS_IMMS, "get failed, type %{public}d displayId %{public}" PRIu64, type, displayId);
-            return WSError::WS_ERROR_INVALID_PARAM;
+            return WSError::WS_DO_NOTHING;
         }
         nextSystemBarAvoidAreaRectInfo = nextAvoidRectInfoMap_[type][displayId];
     }
