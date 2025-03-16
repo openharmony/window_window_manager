@@ -1797,7 +1797,7 @@ napi_value ConvertResultToJsValue(napi_env env, RotationChangeRersult& rotationC
     napi_set_named_property(env, objValue, "rectType",
         CreateJsValue(env, static_cast<uint32_t>(rotationChangeResult.rectType)));
     napi_set_named_property(env, objValue, "windowRect",
-        CreateJsValue(env, static_cast<uint32_t>(rotationChangeResult.windowRect)));
+        CreateJsSessionRect(env, static_cast<uint32_t>(rotationChangeResult.windowRect)));
     return objValue;
 }
 

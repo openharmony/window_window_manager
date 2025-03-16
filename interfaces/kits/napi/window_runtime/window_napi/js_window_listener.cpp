@@ -782,7 +782,8 @@ void JsWindowListener::OnWindowWillClose(sptr<Window> window)
 void JsWindowListener::OnRotationChange(const RotationChangeInfo& rotationChangeInfo,
     RotationChangeResult& rotationChangeResult)
 {
-    auto jsCallback = [self = weakRef_, rotationChangeInfo, weakWindow = wptr<Window>(window), env = env_] () {
+    auto jsCallback = [self = weakRef_, rotationChangeInfo, &rotationChangeResult, weakWindow = wptr<Window>(window),
+            env = env_] () {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsWindowListener::OnRotationChange");
         auto thisListener = self.promote();
         if (thisListener == nullptr || env == nullptr) {
