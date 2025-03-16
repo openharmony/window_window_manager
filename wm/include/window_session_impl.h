@@ -141,7 +141,7 @@ public:
     void NotifyPreferredOrientationChange(Orientation orientation) override;
     void NotifyClientOrientationChange();
     WMError RegisterOrientationChangeListener(const sptr<IWindowOrientationChangeListener>& listener) override;
-    WMError UnRegisterOrientationChangeListener(const sptr<IWindowOrientationChangeListener>& listener) override;
+    WMError UnregisterOrientationChangeListener(const sptr<IWindowOrientationChangeListener>& listener) override;
     bool GetTouchable() const override;
     uint32_t GetWindowId() const override;
     uint64_t GetDisplayId() const override;

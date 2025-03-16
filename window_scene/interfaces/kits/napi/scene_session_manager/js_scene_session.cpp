@@ -1733,7 +1733,7 @@ void JsSceneSession::ProcessRequestedOrientationChange()
         });
 }
 
-void JsSceneSession::ProcessSessionGetTargetOrientationConfigInfoRegister()
+void JsSceneSession::ProcessGetTargetOrientationConfigInfoRegister()
 {
     auto session = weakSession_.promote();
     if (session == nullptr) {
@@ -2698,8 +2698,8 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
             ProcessUpdateSessionLabelAndIconRegister();
             break;
         case static_cast<uint32_t>(ListenerFuncType::SESSION_GET_TARGET_ORIENTATION_CONFIG_INFO_CB):
-                ProcessSessionGetTargetOrientationConfigInfoRegister();
-                break;
+            ProcessGetTargetOrientationConfigInfoRegister();
+            break;
         case static_cast<uint32_t>(ListenerFuncType::KEYBOARD_STATE_CHANGE_CB):
             ProcessKeyboardStateChangeRegister();
             break;
@@ -4451,16 +4451,16 @@ void JsSceneSession::OnReuqestedOrientationChange(uint32_t orientation, bool nee
             napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
             WLOGFI("change rotation success %{public}u", rotation);
         };
-    taskScheduler_->PostMainThreadTask(task, "OnReuqestedOrientationChange:orientation" +std::to_string(orientation));
+    taskScheduler_->PostMainThreadTask(task, "OnReuqestedOrientationChange:orientation" + std::to_string(orientation));
 }
 
-napi_value JsSceneSession::OnGetTargetOrientationConfigInfo(uint32_t targetOrientation)
+void JsSceneSession::OnGetTargetOrientationConfigInfo(uint32_t targetOrientation)
 {
-    auto task = [WeakThis = wptr(this), persistentId = persistentId_, targetOrientation, env = env_] {
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, targetOrientation, env = env_] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGNE(WmsLogTag::WMS_ROTATION,
-                "OnGetTargetOrientationConfigInfo jsSceneSession id:%{public}d has been destroyed", persistentId);
+                "jsSceneSession id:%{public}d has been destroyed", persistentId);
             return;
         }
         auto jsCallBack = jsSceneSession->GetJSCallback(SESSION_GET_TARGET_ORIENTATION_CONFIG_INFO_CB);
@@ -4469,9 +4469,9 @@ napi_value JsSceneSession::OnGetTargetOrientationConfigInfo(uint32_t targetOrien
             return;
         }
         napi_value orientationValue = CreateJsValue(env, targetOrientation);
-        napi_value argv[] = {jorientationValue};
+        napi_value argv[] = {orientationValue};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
-        TLOGNI(WmsLogTag::WMS_ROTATION, "Get target orientation(%{public}u) success", targetOri);
+        TLOGNI(WmsLogTag::WMS_ROTATION, "Get target orientation(%{public}u) success", targetOrientation);
     };
     taskScheduler_->PostMainThreadTask(task, "OnGetTargetOrientationConfigInfo" + std::to_string(targetOrientation));
 }

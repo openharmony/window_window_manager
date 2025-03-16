@@ -3417,6 +3417,14 @@ void WindowSessionImpl::ClearListenersById(int32_t persistentId)
         std::lock_guard<std::mutex> lockListener(waterfallModeChangeListenerMutex_);
         ClearUselessListeners(waterfallModeChangeListeners_, persistentId);
     }
+    {
+        std::lock_guard<std::mutex> lockListener(preferredOrientationChangeListenerMutex_);
+        ClearUselessListeners(preferredOrientationChangeListener_, persistentId);
+    }
+    {
+        std::lock_guard<std::mutex> lockListener(windowOrientationChangeListenerMutex_);
+        ClearUselessListeners(windowOrientationChangeListener_, persistentId);
+    }
     ClearSwitchFreeMultiWindowListenersById(persistentId);
     TLOGI(WmsLogTag::WMS_LIFE, "Clear success, id: %{public}d.", GetPersistentId());
 }
@@ -5236,7 +5244,7 @@ EnableIfSame<T, IPreferredOrientationChangeListener, sptr<IPreferredOrientationC
 }
 
 WMError WindowSessionImpl::RegisterPreferredOrientationChangeListener(
-    const sptr<IPreferredOrientationChangeListener> listener)
+    const sptr<IPreferredOrientationChangeListener>& listener)
 {
     if (listener == nullptr) {
         TLOGE(WmsLogTag::WMS_ROTATION, "listener is null.");
@@ -5247,8 +5255,8 @@ WMError WindowSessionImpl::RegisterPreferredOrientationChangeListener(
     return WMError::WM_OK;
 }
 
-WMError WindowSessionImpl::UnRegisterPreferredOrientationChangeListener(
-    const sptr<IPreferredOrientationChangeListener> listener)
+WMError WindowSessionImpl::UnregisterPreferredOrientationChangeListener(
+    const sptr<IPreferredOrientationChangeListener>& listener)
 {
     if (listener == nullptr) {
         TLOGE(WmsLogTag::WMS_ROTATION, "listener is null.");
@@ -5298,12 +5306,12 @@ WMError WindowSessionImpl::RegisterOrientationChangeListener(
         TLOGE(WmsLogTag::WMS_ROTATION, "listener is null.");
         return WMError::WM_ERROR_NULLPTR;
     }
-    std::lock_guard<std_mutex> lockListener(windowOrientationChangeListenerMutex_);
+    std::lock_guard<std::mutex> lockListener(windowOrientationChangeListenerMutex_);
     windowOrientationChangeListener_[GetPersistentId()] = listener;
     return WMError::WM_OK;
 }
 
-WMError WindowSessionImpl::UnRegisterOrientationChangeListener(
+WMError WindowSessionImpl::UnregisterOrientationChangeListener(
     const sptr<IWindowOrientationChangeListener>& listener)
 {
     TLOGI(WmsLogTag::WMS_ROTATION, "in");

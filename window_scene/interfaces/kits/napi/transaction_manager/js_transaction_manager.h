@@ -35,7 +35,7 @@ public:
 private:
     napi_value OnOpenSyncTransaction(napi_env env, napi_callback_info info);
     napi_value OnCloseSyncTransaction(napi_env env, napi_callback_info info);
-    napi_value CloseSyncTransactionWithVsync(napi_env env, napi_callback_info info);
+    napi_value OnCloseSyncTransactionWithVsync(napi_env env, napi_callback_info info);
 };
 } // namespace OHOS::Rosen
 

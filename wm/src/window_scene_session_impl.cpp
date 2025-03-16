@@ -2003,7 +2003,7 @@ WMError WindowSceneSessionImpl::GetTargetOrientationConfigInfo(Orientation targe
         TLOGE(WmsLogTag::WMS_ROTATION, "Session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    AUTO hostSession = GetHostSession();
+    auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
 
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
@@ -2043,7 +2043,7 @@ Ace::ViewportConfig WindowSceneSessionImpl::FillTargetOrientationConfig(
 
 WSError WindowSceneSessionImpl::NotifyTargetRotationInfo(OrientationInfo& info)
 {
-    return getTargetInfoCallback_->OnUpdateTargetOrientation(info);
+    return getTargetInfoCallback_->OnUpdateTargetOrientationInfo(info);
 }
 
 WMError WindowSceneSessionImpl::SetAspectRatio(float ratio)

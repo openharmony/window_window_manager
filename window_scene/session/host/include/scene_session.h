@@ -1139,7 +1139,7 @@ private:
     /*
      * Window Immersive
      */
-    std::map<Rosen::WindowTYpe, Rosen::SystemBarProperty> targetSystemBarProperty_;
+    std::map<Rosen::WindowType, Rosen::SystemBarProperty> targetSystemBarProperty_;
     std::atomic_bool isDisplayStatusBarTemporarily_ { false };
     bool isStatusBarVisible_ = true;
     IsLastFrameLayoutFinishedFunc isLastFrameLayoutFinishedFunc_;

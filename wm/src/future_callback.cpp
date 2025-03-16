@@ -38,7 +38,7 @@ WSError FutureCallback::OnUpdateSessionRect(const Rect& rect, WindowSizeChangeRe
     return WSError::WS_DO_NOTHING;
 }
 
-WSError FutureCallback::OnUpdateTargetOrientationInfo(OrientationInfo info)
+WSError FutureCallback::OnUpdateTargetOrientationInfo(OrientationInfo& info)
 {
     TLOGI(WmsLogTag::WMS_ROTATION, "update the target orientation info");
     getTargetRotationFuture_.SetValue(info);

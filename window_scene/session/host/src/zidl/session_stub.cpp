@@ -139,7 +139,7 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_ALL_AVOID_AREAS):
             return HandleGetAllAvoidAreas(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_TARGET_ORIENTATION_CONFIG_INFO):
-            return HandleGetTargetOrientaionConfigInfo(data, reply);
+            return HandleGetTargetOrientationConfigInfo(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_ASPECT_RATIO):
             return HandleSetAspectRatio(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_WINDOW_ANIMATION_FLAG):
@@ -978,7 +978,7 @@ int SessionStub::HandleGetTargetOrientationConfigInfo(MessageParcel& data, Messa
         uint32_t type = data.ReadUint32();
         if (type < static_cast<uint32_t>(WindowType::APP_WINDOW_BASE) ||
             type > static_cast<uint32_t>(WindowType::WINDOW_TYPE_UI_EXTENSION)) {
-            TLOGD(WmsLogTag::WMS_ROTATION, "read type fail");
+            TLOGD(WmsLogTag::WMS_ROTATION, "read type failed");
             return ERR_INVALID_DATA;
         }
         bool enable = data.ReadBool();

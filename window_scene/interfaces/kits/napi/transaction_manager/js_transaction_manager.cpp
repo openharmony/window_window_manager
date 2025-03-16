@@ -52,7 +52,7 @@ napi_value JsTransactionManager::Init(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "closeSyncTransaction", moduleName,
         JsTransactionManager::CloseSyncTransaction);
     BindNativeFunction(env, exportObj, "closeSyncTransactionWithVsync", moduleName,
-        JsTransactionManager::closeSyncTransactionWithVsync);
+        JsTransactionManager::CloseSyncTransactionWithVsync);
     return NapiGetUndefined(env);
 }
 
@@ -79,7 +79,7 @@ napi_value JsTransactionManager::CloseSyncTransaction(napi_env env, napi_callbac
     return (me != nullptr) ? me->OnCloseSyncTransaction(env, info) : nullptr;
 }
 
-napi_value JsTransactionManager::OnOpenSyncTransactionWithVsync(napi_env env, napi_callback_info info)
+napi_value JsTransactionManager::CloseSyncTransactionWithVsync(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::DEFAULT, "Enter");
     JsTransactionManager* me = CheckParamsAndGetThis<JsTransactionManager>(env, info);

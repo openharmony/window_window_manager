@@ -895,7 +895,7 @@ int SessionStageStub::HandleNotifyKeyboardAnimationCompleted(MessageParcel& data
 int SessionStageStub::HandleNotifyRotationProperty(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_ROTATION, "in");
-    int32_t rotation;
+    int32_t rotation = 0;
     if (!data.ReadInt32(rotation)) {
         TLOGE(WmsLogTag::WMS_ROTATION, "read rotation failed");
         return ERR_INVALID_VALUE;
@@ -915,14 +915,14 @@ int SessionStageStub::HandleNotifyRotationProperty(MessageParcel& data, MessageP
     }
     constexpr uint32_t AVOID_AREA_TYPE_MAX_SIZE = 100;
     if (size > AVOID_AREA_TYPE_MAX_SIZE) {
-        TLOGE(WmsLogTag::WMS_ROTATION, "read avoid area size is invalid");
+        TLOGE(WmsLogTag::WMS_ROTATION, "avoid area size is invalid");
         return ERR_INVALID_VALUE;
     }
     for (uint32_t i = 0; i < size; i++) {
         uint32_t type = data.ReadUint32();
         if (type < static_cast<uint32_t>(AvoidAreaType::TYPE_START) ||
             type >= static_cast<uint32_t>(AvoidAreaType::TYPE_END)) {
-            TLOGE(WmsLogTag::WMS_ROTATION, "read avoid area type invalid");
+            TLOGE(WmsLogTag::WMS_ROTATION, "avoid area type invalid");
             return ERR_INVALID_VALUE;
         }
         sptr<AvoidArea> area = data.ReadParcelable<AvoidArea>();

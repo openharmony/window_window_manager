@@ -5229,9 +5229,9 @@ void SceneSessionManager::RegisterAcquireRotateAnimationConfigFunc(const sptr<Sc
 
 void SceneSessionManager::CloseSyncTransaction(std::function<void()> func)
 {
-    auto task = [this, param = std::move(func), where = __func__] {
+    auto task = [this, param = std::move(func), where = __func__] () {
         if (!closeSyncFunc_) {
-            closeSyncFunc_ = std::move(func);
+            closeSyncFunc_ = param;
         }
         bool isLastFrameLayoutFinished = true;
         IsLastFrameLayoutFinished(isLastFrameLayoutFinished);
@@ -10851,7 +10851,7 @@ void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<in
             }
         }
         if (needCloseSync_) {
-            if (!closeSyncFunc_) {
+            if (closeSyncFunc_) {
                 closeSyncFunc_();
             }
             needCloseSync_ = false;
