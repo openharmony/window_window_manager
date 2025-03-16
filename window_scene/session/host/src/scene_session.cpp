@@ -2208,15 +2208,15 @@ void SceneSession::HookAvoidAreaInCompatibleMode(const WSRect& rect, AvoidArea& 
     }
     switch (avoidAreaType) {
         case AvoidAreaType::TYPE_SYSTEM: {
-            avoidArea.topRect_.posX_ = rect.posX_;
-            avoidArea.topRect_.posY_ = rect.posY_;
+            avoidArea.topRect_.posX_ = 0;
+            avoidArea.topRect_.posY_ = 0;
             avoidArea.topRect_.height_ = HOOK_SYSTEM_BAR_HEIGHT * vpr;
             avoidArea.topRect_.width_ = rect.width_;
             return;
         }
         case AvoidAreaType::TYPE_NAVIGATION_INDICATOR: {
-            avoidArea.bottomRect_.posX_ = rect.posX_;
-            avoidArea.bottomRect_.posY_ = rect.posY_ + rect.height_ - HOOK_AI_BAR_HEIGHT * vpr;
+            avoidArea.bottomRect_.posX_ = 0;
+            avoidArea.bottomRect_.posY_ = rect.height_ - HOOK_AI_BAR_HEIGHT * vpr;
             avoidArea.bottomRect_.width_ = rect.width_;
             avoidArea.bottomRect_.height_ = HOOK_AI_BAR_HEIGHT * vpr;
             return;

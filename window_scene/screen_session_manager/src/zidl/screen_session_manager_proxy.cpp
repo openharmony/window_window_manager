@@ -3563,11 +3563,11 @@ void ScreenSessionManagerProxy::GetDisplayHookInfo(int32_t uid, DMHookInfo& hook
         TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return;
     }
-    hookInfo.width_ = reply.ReadUint32();
-    hookInfo.height_ = reply.ReadUint32();
-    hookInfo.density_ = reply.ReadFloat();
-    hookInfo.rotation_ = reply.ReadUint32();
-    hookInfo.enableHookRotation_ = reply.ReadBool();
+    if(!reply.WriteUint32(hookInfo.width_) || !reply.WriteUint32(hookInfo.height_) ||
+        !reply.WriteFloat(hookInfo.density_) || !reply.WriteUint32(hookInfo.rotation_)||
+        !reply.WriteBool(hookInfo.enableHookRotation_)) {
+        TLOGE(WmsLogTag::DMS, "reply write hookInfo failed!");
+    }
 }
 
 DMError ScreenSessionManagerProxy::SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid,
