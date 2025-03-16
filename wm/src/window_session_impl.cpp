@@ -104,6 +104,7 @@ Ace::ViewportConfig FillViewportConfig(
 }
 }
 
+std::map<int32_t, std::vector<sptr<ISystemBarPropertyListener>>> WindowSessionImpl::systemBarPropertyListeners_;
 std::map<int32_t, std::vector<sptr<IWindowLifeCycle>>> WindowSessionImpl::lifecycleListeners_;
 std::map<int32_t, std::vector<sptr<IDisplayMoveListener>>> WindowSessionImpl::displayMoveListeners_;
 std::map<int32_t, std::vector<sptr<IWindowChangeListener>>> WindowSessionImpl::windowChangeListeners_;
@@ -153,6 +154,7 @@ std::mutex WindowSessionImpl::mainWindowCloseListenersMutex_;
 std::mutex WindowSessionImpl::windowWillCloseListenersMutex_;
 std::mutex WindowSessionImpl::switchFreeMultiWindowListenerMutex_;
 std::mutex WindowSessionImpl::highlightChangeListenerMutex_;
+std::mutex WindowSessionImpl::systemBarPropertyListenerMutex_;
 std::mutex WindowSessionImpl::waterfallModeChangeListenerMutex_;
 std::unordered_map<int32_t, std::vector<sptr<IWaterfallModeChangeListener>>>
     WindowSessionImpl::waterfallModeChangeListeners_;
@@ -2905,6 +2907,40 @@ template<typename T>
 EnableIfSame<T, IMainWindowCloseListener, sptr<IMainWindowCloseListener>> WindowSessionImpl::GetListeners()
 {
     return mainWindowCloseListeners_[GetPersistentId()];
+}
+
+template<typename T>
+EnableIfSame<T, ISystemBarPropertyListener,
+    std::vector<sptr<ISystemBarPropertyListener>>> WindowSessionImpl::GetListeners()
+{
+    std::vector<sptr<ISystemBarPropertyListener>> listeners;
+    for (auto& listener : systemBarPropertyListeners_[GetPersistentId()]) {
+        listeners.push_back(listener);
+    }
+    return listeners;
+}
+
+WMError WindowSessionImpl::RegisterSystemBarPropertyListener(const sptr<ISystemBarPropertyListener>& listener)
+{
+    std::lock_guard<std::mutex> lockListener(systemBarPropertyListenerMutex_);
+    return RegisterListener(systemBarPropertyListeners_[GetPersistentId()], listener);
+}
+
+WMError WindowSessionImpl::UnregisterSystemBarPropertyListener(const sptr<ISystemBarPropertyListener>& listener)
+{
+    std::lock_guard<std::mutex> lockListener(systemBarPropertyListenerMutex_);
+    return UnregisterListener(systemBarPropertyListeners_[GetPersistentId()], listener);
+}
+
+void WindowSessionImpl::NotifySystemBarPropertyUpdate(WindowType type, const SystemBarProperty& property)
+{
+    std::lock_guard<std::mutex> lockListener(systemBarPropertyListenerMutex_);
+    auto listeners = GetListeners<ISystemBarPropertyListener>();
+    for (auto& listener : listeners) {
+        if (listener != nullptr) {
+            listener->OnSystemBarPropertyUpdate(type, property);
+        }
+    }
 }
 
 WMError WindowSessionImpl::RegisterMainWindowCloseListeners(const sptr<IMainWindowCloseListener>& listener)
