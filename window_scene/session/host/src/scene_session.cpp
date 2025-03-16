@@ -2452,7 +2452,8 @@ WSError SceneSession::GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoid
     }, __func__);
 }
 
-WSError SceneSession::GetAvoidAreasByRotation(int32_t rotation, const WSRect& rect,
+WSError SceneSession::GetAvoidAreasByRotation(
+    int32_t rotation, const WSRect& rect,
     const std::map<WindowType, SystemBarProperty>& properties, std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
     return PostSyncTask([weakThis = wptr(this), rotation, &rect, &properties, &avoidAreas, where = __func__] {
@@ -2475,7 +2476,8 @@ WSError SceneSession::GetAvoidAreasByRotation(int32_t rotation, const WSRect& re
     }, __func__);
 }
 
-AvoidArea SceneSession::GetAvoidAreaByRotation(int32_t rotation, const WSRect& rect,
+AvoidArea SceneSession::GetAvoidAreaByRotation(
+    int32_t rotation, const WSRect& rect,
     const std::map<WindowType, SystemBarProperty>& properties, AvoidAreaType type)
 {
     AvoidArea avoidArea;
@@ -2501,7 +2503,8 @@ AvoidArea SceneSession::GetAvoidAreaByRotation(int32_t rotation, const WSRect& r
     return avoidArea;
 }
 
-void SceneSession::GetSystemBarAvoidAreaByRotation(int32_t rotation, AvoidAreaType type, const WSRect& rect,
+void SceneSession::GetSystemBarAvoidAreaByRotation(
+    int32_t rotation, AvoidAreaType type, const WSRect& rect,
     const std::map<WindowType, SystemBarProperty>& properties, AvoidArea& avoidArea)
 {
     DisplayId displayId = GetSessionProperty()->GetDisplayId();

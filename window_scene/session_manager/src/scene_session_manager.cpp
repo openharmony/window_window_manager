@@ -1605,8 +1605,8 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
     specificCb->onGetAINavigationBarArea_ = [this](uint64_t displayId) {
         return this->GetAINavigationBarArea(displayId);
     };
-    specificCb->onGetNextAvoidAreaRectInfo_ = [this](DisplayId displayId, AvoidAreaType type,
-        std::tuple<bool, WSRect, WSRect>& nextSystemBarAvoidAreaRectInfo) {
+    specificCb->onGetNextAvoidAreaRectInfo_ = [this](
+        DisplayId displayId, AvoidAreaType type, std::tuple<bool, WSRect, WSRect>& nextSystemBarAvoidAreaRectInfo) {
         return this->GetNextAvoidRectInfo(displayId, type, nextSystemBarAvoidAreaRectInfo);
     };
     specificCb->onOutsideDownEvent_ = [this](int32_t x, int32_t y) {
@@ -9893,7 +9893,8 @@ WSError SceneSessionManager::NotifyAINavigationBarShowStatus(bool isVisible, WSR
     return WSError::WS_OK;
 }
 
-WSError SceneSessionManager::NotifyNextAvoidRectInfo(AvoidAreaType type, bool isVisible,
+WSError SceneSessionManager::NotifyNextAvoidRectInfo(
+    AvoidAreaType type, bool isVisible,
     const WSRect& portraitRect, const WSRect& landspaceRect, DisplayId displayId)
 {
     TLOGI(WmsLogTag::WMS_IMMS, "type %{public}d isVisible %{public}u "
@@ -9911,7 +9912,7 @@ WSError SceneSessionManager::GetNextAvoidRectInfo(
         std::lock_guard<std::mutex> lock(nextAvoidRectInfoMapMutex_);
         if (nextAvoidRectInfoMap_.count(type) == 0 || nextAvoidRectInfoMap_[type].count(displayId) == 0) {
             TLOGI(WmsLogTag::WMS_IMMS, "get failed, type %{public}d displayId %{public}" PRIu64, type, displayId);
-            return WSError::WS_ERROR_INVALID_PARENT;
+            return WSError::WS_ERROR_INVALID_PARAM;
         }
         nextSystemBarAvoidAreaRectInfo = nextAvoidRectInfoMap_[type][displayId];
     }

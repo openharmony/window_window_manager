@@ -413,10 +413,11 @@ public:
     bool GetImmersiveState(ScreenId screenId);
     WSError NotifyStatusBarShowStatus(int32_t persistentId, bool isVisible);
     WSError NotifyAINavigationBarShowStatus(bool isVisible, WSRect barArea, uint64_t displayId);
-    WSError NotifyNextAvoidRectInfo(AvoidAreaType type, bool isVisible,
+    WSError NotifyNextAvoidRectInfo(
+        AvoidAreaType type, bool isVisible,
         const WSRect& portraitRect, const WSRect& landspaceRect, DisplayId displayId);
-    WSError GetNextAvoidRectInfo(DisplayId displayId, AvoidAreaType type,
-        std::tuple<bool, WSRect, WSRect>& nextSystemBarAvoidAreaRectInfo);
+    WSError GetNextAvoidRectInfo(
+        DisplayId displayId, AvoidAreaType type, std::tuple<bool, WSRect, WSRect>& nextSystemBarAvoidAreaRectInfo);
     WSRect GetAINavigationBarArea(uint64_t displayId);
     void ClearDisplayStatusBarTemporarilyFlags();
     AvoidArea GetRootSessionAvoidAreaByType(AvoidAreaType type);
