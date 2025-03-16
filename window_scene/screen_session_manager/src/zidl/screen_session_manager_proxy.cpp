@@ -2122,6 +2122,37 @@ sptr<CutoutInfo> ScreenSessionManagerProxy::GetCutoutInfo(DisplayId displayId)
     return info;
 }
 
+sptr<CutoutInfo> ScreenSessionManagerProxy::GetCutoutInfoWithRotation(DisplayId displayId, int32_t rotation)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::DMS, "remote is null!");
+        return nullptr;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "with rotation : failed!");
+        return nullptr;
+    }
+    if (!data.WriteUint64(displayId)) {
+        TLOGE(WmsLogTag::DMS, "write displayId failed!");
+        return nullptr;
+    }
+    if (!data.WriteInt32(rotation)) {
+        TLOGE(WmsLogTag::DMS, "write rotation failed!");
+        return nullptr;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_CUTOUT_INFO_WITH_ROTATION),
+        data, reply, option) != ERR_NONE) {
+        TLOGW(WmsLogTag::DMS, "GetCutoutInfoWithRotation failed");
+        return nullptr;
+    }
+    sptr<CutoutInfo> info = reply.ReadParcelable<CutoutInfo>();
+    return info;
+}
+
 DMError ScreenSessionManagerProxy::HasImmersiveWindow(ScreenId screenId, bool& immersive)
 {
     sptr<IRemoteObject> remote = Remote();

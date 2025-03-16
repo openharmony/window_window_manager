@@ -110,6 +110,10 @@ public:
     virtual uint32_t GetScreenBrightness(uint64_t screenId) override { return 0; }
     virtual std::vector<DisplayId> GetAllDisplayIds() override { return std::vector<DisplayId>{}; }
     virtual sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) override { return nullptr; }
+    virtual sptr<CutoutInfo> GetCutoutInfoWithRotation(DisplayId displayId, int32_t rotation) override
+    {
+        return nullptr;
+    }
     virtual void NotifyDisplayEvent(DisplayEvent event) override {}
     virtual bool SetFreeze(std::vector<DisplayId> displayIds, bool isFreeze) override { return false; }
     virtual sptr<ScreenInfo> GetScreenInfoById(ScreenId screenId) override { return nullptr; }
