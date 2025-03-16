@@ -3993,7 +3993,7 @@ HWTEST_F(ScreenSessionManagerTest, SetSystemKeyboardStatus02, Function | SmallTe
 
 /**
  * @tc.name: CalculateXYPosition
- * @tc.desc: CalculateXYPosition
+ * @tc.desc: CalculateXYPosition test
  * @tc.type: FUNC
  */
 HWTEST_F(ScreenSessionManagerTest, CalculateXYPosition, Function | SmallTest | Level3)

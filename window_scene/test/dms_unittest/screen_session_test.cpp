@@ -1042,7 +1042,7 @@ HWTEST_F(ScreenSessionTest, GetScreenCombination, Function | SmallTest | Level2)
 
 /**
  * @tc.name: Resize001
- * @tc.desc: normal function
+ * @tc.desc: Resize001 test
  * @tc.type: FUNC
  */
 HWTEST_F(ScreenSessionTest, Resize001, Function | SmallTest | Level2)
@@ -1063,7 +1063,7 @@ HWTEST_F(ScreenSessionTest, Resize001, Function | SmallTest | Level2)
 
 /**
  * @tc.name: Resize002
- * @tc.desc: normal function
+ * @tc.desc: Resize002 test
  * @tc.type: FUNC
  */
 HWTEST_F(ScreenSessionTest, Resize002, Function | SmallTest | Level2)
@@ -1281,7 +1281,7 @@ HWTEST_F(ScreenSessionTest, ConvertToDisplayInfo, Function | SmallTest | Level2)
 
 /**
  * @tc.name: SetMirrorScreenRegion
- * @tc.desc: normal function
+ * @tc.desc: SetMirrorScreenRegion test
  * @tc.type: FUNC
  */
 HWTEST_F(ScreenSessionTest, SetMirrorScreenRegion, Function | SmallTest | Level2)
@@ -2835,7 +2835,7 @@ HWTEST_F(ScreenSessionTest, GetPointerActiveHeight, Function | SmallTest | Level
 
 /**
  * @tc.name: SetShareProtect
- * @tc.desc: normal function
+ * @tc.desc: SetShareProtect test
  * @tc.type: FUNC
  */
 HWTEST_F(ScreenSessionTest, SetShareProtect, Function | SmallTest | Level2)
@@ -2849,7 +2849,7 @@ HWTEST_F(ScreenSessionTest, SetShareProtect, Function | SmallTest | Level2)
 
 /**
  * @tc.name: UpdateExpandAvailableArea
- * @tc.desc: normal function
+ * @tc.desc: UpdateExpandAvailableArea test
  * @tc.type: FUNC
  */
 HWTEST_F(ScreenSessionTest, UpdateExpandAvailableArea, Function | SmallTest | Level2)
