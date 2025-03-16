@@ -42,8 +42,8 @@ ani_status AniWindowUtils::GetStdString(ani_env *env, ani_string ani_str, std::s
     if (ret != ANI_OK) {
         return ret;
     }
-    utf8_buffer[bytes_written] = '\0';
-    result = std::string(utf8_buffer);
+    utf8_buffer[bytes_written] = '\0'; 
+    result = std::string(utf8_buffer); 
     return ret;
 }
 
@@ -253,8 +253,7 @@ ani_status AniWindowUtils::CallAniMethodVoid(ani_env *env, ani_object object, co
     ani_method aniMethod;
     ret = env->Class_FindMethod(aniClass, method, nullptr, &aniMethod);
     if (ret != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI]2 class:%{public}s method:%{public}s not found, ret:%{public}d",
-            cls, method, ret);
+        TLOGE(WmsLogTag::DEFAULT, "[ANI]2 class:%{public}s method:%{public}s not found, ret:%{public}d", cls, method, ret);
         return ret;
     }
     va_list args;
@@ -431,6 +430,7 @@ void AniWindowUtils::SetSystemPropertieswindowId(ani_env* env, const sptr<Window
     uint32_t windowId = window->GetWindowId();
     CallAniMethodVoid(env, systemProperties, clsName, "<set>id", nullptr,
         static_cast<ani_int>(windowId));
+
 }
 
 void AniWindowUtils::SetSystemPropertiesdisplayId(ani_env* env, const sptr<Window>& window,
@@ -486,10 +486,10 @@ ani_object AniWindowUtils::CreateProperties(ani_env* env, const sptr<Window>& wi
 }
 
 uint32_t AniWindowUtils::GetColorFromAni(ani_env* env,
-                                         const char* name,
-                                         uint32_t defaultColor,
-                                         bool& flag,
-                                         const ani_object& aniObject)
+                                        const char* name,
+                                        uint32_t defaultColor,
+                                        bool& flag,
+                                        const ani_object& aniObject)
 {
     ani_ref result;
     env->Object_GetPropertyByName_Ref(aniObject, name, &result);
@@ -568,10 +568,10 @@ bool AniWindowUtils::SetWindowNavigationBarContentColor(ani_env* env,
 }
 
 bool AniWindowUtils::SetSystemBarPropertiesFromAni(ani_env* env,
-                                                   std::map<WindowType, SystemBarProperty>& windowBarProperties,
-                                                   std::map<WindowType, SystemBarPropertyFlag>& windowPropertyFlags,
-                                                   const ani_object& aniProperties,
-                                                   const sptr<Window>& window)
+                                                std::map<WindowType, SystemBarProperty>& windowBarProperties,
+                                                std::map<WindowType, SystemBarPropertyFlag>& windowPropertyFlags,
+                                                const ani_object& aniProperties,
+                                                const sptr<Window>& window)
 {
     auto statusProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
     auto navProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
@@ -623,12 +623,66 @@ bool AniWindowUtils::SetSystemBarPropertiesFromAni(ani_env* env,
     return true;
 }
 
+void AniWindowUtils::GetSystemBarPropertiesFromAni(sptr<Window>& window,
+    std::map<WindowType, SystemBarProperty>& newProperties,
+    std::map<WindowType, SystemBarPropertyFlag>& newPropertyFlags,
+    std::map<WindowType, SystemBarProperty>& properties,
+    std::map<WindowType, SystemBarPropertyFlag>& propertyFlags)
+{
+    for (auto type : {WindowType::WINDOW_TYPE_STATUS_BAR, WindowType::WINDOW_TYPE_NAVIGATION_BAR}) {
+        auto property = window->GetSystemBarPropertyByType(type);
+        properties[type] = property;
+        propertyFlags[type] = SystemBarPropertyFlag();
+
+        properties[type].backgroundColor_ = newProperties[type].backgroundColor_;
+        properties[type].contentColor_ = newProperties[type].contentColor_;
+        properties[type].enableAnimation_ = newProperties[type].enableAnimation_;
+        propertyFlags[type].backgroundColorFlag = newPropertyFlags[type].backgroundColorFlag;
+        propertyFlags[type].contentColorFlag = newPropertyFlags[type].contentColorFlag;
+        propertyFlags[type].enableAnimationFlag = newPropertyFlags[type].enableAnimationFlag;
+    }
+}
+
+void AniWindowUtils::UpdateSystemBarProperties(std::map<WindowType, SystemBarProperty>& systemBarProperties,
+    const std::map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags, sptr<Window> windowToken)
+{
+    for (auto it : systemBarPropertyFlags) {
+        WindowType type = it.first;
+        SystemBarPropertyFlag flag = it.second;
+        auto property = windowToken->GetSystemBarPropertyByType(type);
+        if (flag.enableFlag == false) {
+            systemBarProperties[type].enable_ = property.enable_;
+        }
+        if (flag.backgroundColorFlag == false) {
+            systemBarProperties[type].backgroundColor_ = property.backgroundColor_;
+        }
+        if (flag.contentColorFlag == false) {
+            systemBarProperties[type].contentColor_ = property.contentColor_;
+        }
+        if (flag.enableAnimationFlag == false) {
+            systemBarProperties[type].enableAnimation_ = property.enableAnimation_;
+        }
+        if (flag.enableFlag == true) {
+            systemBarProperties[type].settingFlag_ =
+                static_cast<SystemBarSettingFlag>(static_cast<uint32_t>(property.settingFlag_) |
+                static_cast<uint32_t>(SystemBarSettingFlag::ENABLE_SETTING));
+        }
+        if (flag.backgroundColorFlag == true || flag.contentColorFlag == true) {
+            systemBarProperties[type].settingFlag_ =
+                static_cast<SystemBarSettingFlag>(static_cast<uint32_t>(property.settingFlag_) |
+                static_cast<uint32_t>(SystemBarSettingFlag::COLOR_SETTING));
+        }
+    }
+
+    return;
+}
+
 bool AniWindowUtils::SetSpecificSystemBarEnabled(ani_env* env,
-                                                 std::map<WindowType,
-                                                 SystemBarProperty>& systemBarProperties,
-                                                 ani_string aniName,
-                                                 ani_boolean aniEnable,
-                                                 ani_boolean aniEnableAnimation)
+                                                std::map<WindowType,
+                                                SystemBarProperty>& systemBarProperties,
+                                                ani_string aniName,
+                                                ani_boolean aniEnable,
+                                                ani_boolean aniEnableAnimation)
 {
     std::string barName;
     GetStdString(env, aniName, barName);
@@ -667,6 +721,21 @@ void* AniWindowUtils::GetAbilityContext(ani_env *env, ani_object aniObj)
         return nullptr;
     }
     return (void*)nativeContextLong;
+}
+
+void AniWindowUtils::GetSpecificBarStatus(sptr<Window>& window, const std::string& name,
+    std::map<WindowType, SystemBarProperty>& newSystemBarProperties,
+    std::map<WindowType, SystemBarProperty>& systemBarProperties)
+{
+    auto type = (name.compare("status") == 0) ? WindowType::WINDOW_TYPE_STATUS_BAR :
+                (name.compare("navigation") == 0) ? WindowType::WINDOW_TYPE_NAVIGATION_BAR :
+                WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR;
+    auto property = window->GetSystemBarPropertyByType(type);
+    systemBarProperties[type] = property;
+    systemBarProperties[type].enable_ = newSystemBarProperties[type].enable_;
+    systemBarProperties[type].enableAnimation_ = newSystemBarProperties[type].enableAnimation_;
+    systemBarProperties[type].settingFlag_ = systemBarProperties[type].settingFlag_ |
+        SystemBarSettingFlag::ENABLE_SETTING;
 }
 } // namespace Rosen
 } // namespace OHOS
