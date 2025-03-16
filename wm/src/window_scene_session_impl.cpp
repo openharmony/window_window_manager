@@ -5489,7 +5489,5 @@ bool WindowSceneSessionImpl::IsFullScreenEnable() const
     }
     return true;
 }
-
-
 } // namespace Rosen
 } // namespace OHOS
