@@ -336,6 +336,7 @@ public:
         int32_t landscapeWidth, int32_t landscapeHeight);
     WSError SetAppSupportPhoneInPc(bool isSupportPhone);
     WSError SetCompatibleModeEnableInPad(bool enable);
+    WSError PcAppInPadNormalClose();
     bool NeedNotify() const;
     void SetNeedNotify(bool needNotify);
     void SetStartingBeforeVisible(bool isStartingBeforeVisible);

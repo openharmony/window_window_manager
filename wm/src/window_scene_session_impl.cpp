@@ -3974,6 +3974,20 @@ bool WindowSceneSessionImpl::GetFreeMultiWindowModeEnabledState()
         windowSystemConfig_.freeMultiWindowSupport_;
 }
 
+WSError WindowSceneSessionImpl::PcAppInPadNormalClose()
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "window session invalid!");
+        return WSError::WS_ERROR_INVALID_WINDOW;
+    }
+    if (!property_->GetIsPcAppInPad()) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "is not pcAppInPad, can not Close");
+        return WSError::WS_ERROR_INVALID_WINDOW;
+    }
+    Close();
+    return WSError::WS_OK;
+}
+
 WSError WindowSceneSessionImpl::NotifyCompatibleModeEnableInPad(bool enable)
 {
     TLOGI(WmsLogTag::DEFAULT, "id: %{public}d, enable: %{public}d", GetPersistentId(), enable);

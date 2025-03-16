@@ -162,6 +162,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleGetUIContentRemoteObj(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_KEYBOARD_INFO_CHANGE):
             return HandleNotifyKeyboardPanelInfoChange(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_PCAPPINPADNORMAL_CLOSE):
+            return HandlePcAppInPadNormalClose(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_COMPATIBLE_MODE_ENABLE):
             return HandleNotifyCompatibleModeEnableInPad(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DENSITY_UNIQUE):
@@ -558,6 +560,12 @@ int SessionStageStub::HandleSetUniqueVirtualPixelRatio(MessageParcel& data, Mess
     bool useUniqueDensity = data.ReadBool();
     float densityValue = data.ReadFloat();
     SetUniqueVirtualPixelRatio(useUniqueDensity, densityValue);
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandlePcAppInPadNormalClose(MessageParcel& data, MessageParcel& reply)
+{
+    WSError errCode = PcAppInPadNormalClose();
     return ERR_NONE;
 }
 
