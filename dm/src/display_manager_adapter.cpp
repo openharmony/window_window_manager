@@ -624,7 +624,7 @@ sptr<CutoutInfo> DisplayManagerAdapter::GetCutoutInfo(DisplayId displayId)
 
 sptr<CutoutInfo> DisplayManagerAdapter::GetCutoutInfoWithRotation(DisplayId displayId, int32_t rotation)
 {
-    WLOGFD("DisplayManagerAdapter::GetCutoutInfoWithRotation");
+    TLOGD(WmsLogTag::DMS, "GetCutoutInfoWithRotation!");
     if (displayId == DISPLAY_ID_INVALID) {
         WLOGFE("screen id is invalid");
         return nullptr;
