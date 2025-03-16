@@ -56,7 +56,7 @@ HWTEST_F(ScreenPropertyTest, SetScreenRotation, Function | SmallTest | Level2)
 
 /**
  * @tc.name: SetRotationAndScreenRotationOnly001
- * @tc.desc: normal function
+ * @tc.desc: SetRotationAndScreenRotationOnly001 test
  * @tc.type: FUNC
  */
 HWTEST_F(ScreenPropertyTest, SetRotationAndScreenRotationOnly001, Function | SmallTest | Level2)
@@ -156,7 +156,7 @@ HWTEST_F(ScreenPropertyTest, SetDeviceOrientation, Function | SmallTest | Level2
 
 /**
  * @tc.name: UpdateScreenRotation
- * @tc.desc: normal function
+ * @tc.desc: UpdateScreenRotation test
  * @tc.type: FUNC
  */
 HWTEST_F(ScreenPropertyTest, UpdateScreenRotation, Function | SmallTest | Level2)
@@ -190,7 +190,7 @@ HWTEST_F(ScreenPropertyTest, UpdateScreenRotation, Function | SmallTest | Level2
 
 /**
  * @tc.name: SetOrientation
- * @tc.desc: normal function
+ * @tc.desc: SetOrientation test
  * @tc.type: FUNC
  */
 HWTEST_F(ScreenPropertyTest, SetOrientation, Function | SmallTest | Level2)
@@ -881,7 +881,7 @@ HWTEST_F(ScreenPropertyTest, SetXYPosition, Function | SmallTest | Level2)
 
 /**
  * @tc.name: SetVirtualPixelRatio
- * @tc.desc: normal function
+ * @tc.desc: SetVirtualPixelRatio test
  * @tc.type: FUNC
  */
 HWTEST_F(ScreenPropertyTest, SetVirtualPixelRatio, Function | SmallTest | Level2)
@@ -900,7 +900,7 @@ HWTEST_F(ScreenPropertyTest, SetVirtualPixelRatio, Function | SmallTest | Level2
  
 /**
  * @tc.name: GetVirtualPixelRatio
- * @tc.desc: normal function
+ * @tc.desc: GetVirtualPixelRatio test
  * @tc.type: FUNC
  */
 HWTEST_F(ScreenPropertyTest, GetVirtualPixelRatio, Function | SmallTest | Level2)
