@@ -1261,6 +1261,7 @@ HWTEST_F(SceneSessionManagerTest9, IsLastPiPWindowVisible01, Function | SmallTes
 HWTEST_F(SceneSessionManagerTest9, UpdateSpecificSessionClientDisplayId01, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.clear();
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "SceneSessionManagerTest9";
     sessionInfo.abilityName_ = "UpdateSpecificSessionClientDisplayId";
@@ -1289,6 +1290,7 @@ HWTEST_F(SceneSessionManagerTest9, UpdateSpecificSessionClientDisplayId01, Funct
 HWTEST_F(SceneSessionManagerTest9, UpdateSpecificSessionClientDisplayId02, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.clear();
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "SceneSessionManagerTest9";
     sessionInfo.abilityName_ = "UpdateSpecificSessionClientDisplayId";
@@ -1318,6 +1320,7 @@ HWTEST_F(SceneSessionManagerTest9, UpdateSpecificSessionClientDisplayId02, Funct
 HWTEST_F(SceneSessionManagerTest9, UpdateSpecificSessionClientDisplayId03, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.clear();
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "SceneSessionManagerTest9";
     sessionInfo.abilityName_ = "UpdateSpecificSessionClientDisplayId";
