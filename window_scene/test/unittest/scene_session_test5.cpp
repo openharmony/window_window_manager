@@ -165,12 +165,12 @@ HWTEST_F(SceneSessionTest5, HookAvoidAreaInCompatibleMode, Function | SmallTest 
     session->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     session->HookAvoidAreaInCompatibleMode(rect, avoidArea, AvoidAreaType::TYPE_SYSTEM);
     auto vpr = 3.5f;
-    Rect targetRect = {rect.posX_, rect.posY_, 40 * vpr, rect.width_};
+    Rect targetRect = {0, 0, rect.width_, 40 * vpr};
     EXPECT_TRUE(avoidArea.topRect_ == targetRect);
 
     // test buttom aiBar avoidArea
     session->HookAvoidAreaInCompatibleMode(rect, avoidArea, AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
-    targetRect = {rect.posX_, rect.posY_ + rect.height_ - 28 * vpr, rect.width_, 28 * vpr};
+    targetRect = {0, rect.height_ - 28 * vpr, rect.width_, 28 * vpr};
     EXPECT_TRUE(avoidArea.bottomRect_ == targetRect);
 }
 

@@ -970,11 +970,11 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             int32_t uid = data.ReadInt32();
             DMHookInfo hookInfo;
             GetDisplayHookInfo(uid, hookInfo);
-            static_cast<void>(reply.WriteUint32(hookInfo.width_));
-            static_cast<void>(reply.WriteUint32(hookInfo.height_));
-            static_cast<void>(reply.WriteFloat(hookInfo.density_));
-            static_cast<void>(reply.WriteUint32(hookInfo.rotation_));
-            static_cast<void>(reply.WriteBool(hookInfo.enableHookRotation_));
+            if (!reply.ReadUint32(hookInfo.width_) || !reply.ReadUint32(hookInfo.height_) ||
+                !reply.ReadFloat(ookInfo.density_) || !reply.ReadUint32( hookInfo.rotation_) ||
+                !reply.ReadBool(hookInfo.enableHookRotation_)) {
+                TLOGE(WmsLogTag::DMS, "read reply hookInfo failed!");
+            }
             break;
         }
         case DisplayManagerMessage::TRANS_ID_GET_ALL_PHYSICAL_DISPLAY_RESOLUTION: {
