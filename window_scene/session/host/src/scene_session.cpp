@@ -2467,7 +2467,7 @@ WSError SceneSession::GetTargetOrientationConfigInfo(Orientation targetOrientati
             }
             session->SetSystemBarPropertyForRotation(properties);
             if (session->sessionGetTargetOrientationConfigInfoFunc_) {
-                session->sessionGetTargetOrientationConfigInfoFunc_(static_cast<uint32_t>targetOrientation);
+                session->sessionGetTargetOrientationConfigInfoFunc_(static_cast<uint32_t>(targetOrientation));
             }
             return WSError::WS_OK;
         },

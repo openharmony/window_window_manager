@@ -1193,7 +1193,7 @@ WSError SessionProxy::GetTargetOrientationConfigInfo(Orientation targetOrientati
         if (!data.WriteBool(systemBarProperty.enableAnimation_)) {
             return WSError::WS_ERROR_IPC_FAILED;
         }
-        if (!data.WriteUint32_t(static_cast<uint32_t>(systemBarProperty.settingFlag_))) {
+        if (!data.WriteUint32(static_cast<uint32_t>(systemBarProperty.settingFlag_))) {
             return WSError::WS_ERROR_IPC_FAILED;
         }
     }
