@@ -119,8 +119,8 @@ using GetStatusBarAvoidHeightFunc = std::function<void(WSRect& barArea)>;
 using NotifySetWindowCornerRadiusFunc = std::function<void(float cornerRadius)>;
 using GetKeyboardOccupiedAreaWithRotationCallback =
     std::function<void(int32_t persistentId, uint32_t rotation, std::vector<std::pair<bool, WSRect>>& avoidAreas)>;
-using GetNextAvoidAreaRectInfo = std::function<WSError(DisplayId displayId, AvoidAreaType type,
-    std::tuple<bool, WSRect, WSRect>& nextSystemBarAvoidAreaRectInfo)>;
+using GetNextAvoidAreaRectInfoFunc = std::function<WSError(DisplayId displayId, AvoidAreaType type,
+    std::pair<WSRect, WSRect>& nextSystemBarAvoidAreaRectInfo)>;
 using NotifyFollowParentRectFunc = std::function<void(bool isFollow)>;
 using GetSceneSessionByIdCallback = std::function<sptr<SceneSession>(int32_t sessionId)>;
 using NotifySetParentSessionFunc = std::function<void(int32_t oldParentWindowId, int32_t newParentWindowId)>;
@@ -151,7 +151,7 @@ public:
         NotifyWindowPidChangeCallback onWindowInputPidChangeCallback_;
         NotifySessionTouchOutsideCallback onSessionTouchOutside_;
         GetAINavigationBarArea onGetAINavigationBarArea_;
-        GetNextAvoidAreaRectInfo onGetNextAvoidAreaRectInfo_;
+        GetNextAvoidAreaRectInfoFunc onGetNextAvoidAreaRectInfo_;
         OnOutsideDownEvent onOutsideDownEvent_;
         HandleSecureSessionShouldHideCallback onHandleSecureSessionShouldHide_;
         CameraSessionChangeCallback onCameraSessionChange_;
@@ -869,16 +869,13 @@ private:
     void GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea) const;
     AvoidArea GetAvoidAreaByTypeInner(AvoidAreaType type, const WSRect& rect = WSRect::EMPTY_RECT,
         int32_t apiVersion = API_VERSION_INVALID);
-    WSError GetAvoidAreasByRotation(
-        int32_t rotation, const WSRect& rect,
+    WSError GetAvoidAreasByRotation(int32_t rotation, const WSRect& rect,
         const std::map<WindowType, SystemBarProperty>& properties, std::map<AvoidAreaType, AvoidArea>& avoidAreas);
-    void GetSystemBarAvoidAreaByRotation(
-        int32_t rotation, AvoidAreaType type, const WSRect& rect,
+    void GetSystemBarAvoidAreaByRotation(int32_t rotation, AvoidAreaType type, const WSRect& rect,
         const std::map<WindowType, SystemBarProperty>& properties, AvoidArea& avoidArea);
     void GetCutoutAvoidAreaByRotation(int32_t rotation, const WSRect& rect, AvoidArea& avoidArea);
     void GetKeyboardAvoidAreaByRotation(int32_t rotation, const WSRect& rect, AvoidArea& avoidArea);
-    AvoidArea GetAvoidAreaByRotation(
-        int32_t rotation, const WSRect& rect,
+    AvoidArea GetAvoidAreaByRotation(int32_t rotation, const WSRect& rect,
         const std::map<WindowType, SystemBarProperty>& properties, AvoidAreaType type);
 
     /*

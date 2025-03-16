@@ -2452,8 +2452,7 @@ WSError SceneSession::GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoid
     }, __func__);
 }
 
-WSError SceneSession::GetAvoidAreasByRotation(
-    int32_t rotation, const WSRect& rect,
+WSError SceneSession::GetAvoidAreasByRotation(int32_t rotation, const WSRect& rect,
     const std::map<WindowType, SystemBarProperty>& properties, std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
     return PostSyncTask([weakThis = wptr(this), rotation, &rect, &properties, &avoidAreas, where = __func__] {
@@ -2466,18 +2465,13 @@ WSError SceneSession::GetAvoidAreasByRotation(
         for (T avoidType = static_cast<T>(AvoidAreaType::TYPE_START);
             avoidType < static_cast<T>(AvoidAreaType::TYPE_END); avoidType++) {
             auto type = static_cast<AvoidAreaType>(avoidType);
-            if (type == AvoidAreaType::TYPE_SYSTEM_GESTURE) {
-                continue;
-            }
-            auto area = session->GetAvoidAreaByRotation(rotation, rect, properties, type);
-            avoidAreas[type] = area;
+            avoidAreas[type] = session->GetAvoidAreaByRotation(rotation, rect, properties, type);
         }
         return WSError::WS_OK;
     }, __func__);
 }
 
-AvoidArea SceneSession::GetAvoidAreaByRotation(
-    int32_t rotation, const WSRect& rect,
+AvoidArea SceneSession::GetAvoidAreaByRotation(int32_t rotation, const WSRect& rect,
     const std::map<WindowType, SystemBarProperty>& properties, AvoidAreaType type)
 {
     AvoidArea avoidArea;
@@ -2503,12 +2497,11 @@ AvoidArea SceneSession::GetAvoidAreaByRotation(
     return avoidArea;
 }
 
-void SceneSession::GetSystemBarAvoidAreaByRotation(
-    int32_t rotation, AvoidAreaType type, const WSRect& rect,
+void SceneSession::GetSystemBarAvoidAreaByRotation(int32_t rotation, AvoidAreaType type, const WSRect& rect,
     const std::map<WindowType, SystemBarProperty>& properties, AvoidArea& avoidArea)
 {
     DisplayId displayId = GetSessionProperty()->GetDisplayId();
-    std::tuple<bool, WSRect, WSRect> nextSystemBarAvoidAreaRectInfo;
+    std::pair<WSRect, WSRect> nextSystemBarAvoidAreaRectInfo;
     if (specificCallback_ == nullptr ||
         specificCallback_->onGetNextAvoidAreaRectInfo_(
             displayId, type, nextSystemBarAvoidAreaRectInfo) != WSError::WS_OK) {
@@ -2521,8 +2514,8 @@ void SceneSession::GetSystemBarAvoidAreaByRotation(
         TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}d] avoid area is empty, type %{public}d", GetPersistentId(), type);
         return;
     }
-    WSRect avoidRect = (rotation == 0 || rotation == 180) ? std::get<1>(nextSystemBarAvoidAreaRectInfo) :
-                                                            std::get<2>(nextSystemBarAvoidAreaRectInfo);
+    WSRect avoidRect = (rotation == 0 || rotation == 180) ? nextSystemBarAvoidAreaRectInfo.first :
+                                                            nextSystemBarAvoidAreaRectInfo.second;
     TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d tyep %{public}d rect %{public}s bar %{public}s",
         GetPersistentId(), type, rect.ToString().c_str(), avoidRect.ToString().c_str());
     CalculateAvoidAreaRect(rect, avoidRect, avoidArea);
@@ -2559,7 +2552,7 @@ void SceneSession::GetKeyboardAvoidAreaByRotation(int32_t rotation, const WSRect
     GetKeyboardOccupiedAreaWithRotation(GetPersistentId(), rotation, avoidInfoVector);
     for (auto avoidInfo : avoidInfoVector) {
         if (!avoidInfo.first) {
-            TLOGD(WmsLogTag::WMS_IMMS, "Keyboard avoid area is empty id: %{public}d", GetPersistentId());
+            TLOGI(WmsLogTag::WMS_IMMS, "keyboard avoid area is empty id: %{public}d", GetPersistentId());
             continue;
         }
         TLOGI(WmsLogTag::WMS_IMMS, "win %{public}s keyboard %{public}s",

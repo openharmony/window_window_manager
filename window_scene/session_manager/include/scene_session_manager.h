@@ -413,11 +413,10 @@ public:
     bool GetImmersiveState(ScreenId screenId);
     WSError NotifyStatusBarShowStatus(int32_t persistentId, bool isVisible);
     WSError NotifyAINavigationBarShowStatus(bool isVisible, WSRect barArea, uint64_t displayId);
-    WSError NotifyNextAvoidRectInfo(
-        AvoidAreaType type, bool isVisible,
+    WSError NotifyNextAvoidRectInfo(AvoidAreaType type,
         const WSRect& portraitRect, const WSRect& landspaceRect, DisplayId displayId);
-    WSError GetNextAvoidRectInfo(
-        DisplayId displayId, AvoidAreaType type, std::tuple<bool, WSRect, WSRect>& nextSystemBarAvoidAreaRectInfo);
+    WSError GetNextAvoidRectInfo(DisplayId displayId, AvoidAreaType type,
+        std::pair<WSRect, WSRect>& nextSystemBarAvoidAreaRectInfo);
     WSRect GetAINavigationBarArea(uint64_t displayId);
     void ClearDisplayStatusBarTemporarilyFlags();
     AvoidArea GetRootSessionAvoidAreaByType(AvoidAreaType type);
@@ -1295,8 +1294,7 @@ private:
     std::shared_mutex currAINavigationBarAreaMapMutex_;
     std::map<uint64_t, WSRect> currAINavigationBarAreaMap_;
     std::mutex nextAvoidRectInfoMapMutex_;
-    std::unordered_map<AvoidAreaType,
-        std::unordered_map<DisplayId, std::tuple<bool, WSRect, WSRect>>> nextAvoidRectInfoMap_;
+    std::unordered_map<AvoidAreaType, std::unordered_map<DisplayId, std::pair<WSRect, WSRect>>> nextAvoidRectInfoMap_;
     std::unordered_map<DisplayId, bool> statusBarDefaultVisibilityPerDisplay_;
     std::set<int32_t> avoidAreaListenerSessionSet_;
     static constexpr int32_t INVALID_STATUS_BAR_AVOID_HEIGHT = -1;
