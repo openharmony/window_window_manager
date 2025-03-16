@@ -342,7 +342,8 @@ WMError WindowAdapterLite::GetAccessibilityWindowInfo(std::vector<sptr<Accessibi
     return wmsProxy->GetAccessibilityWindowInfo(infos);
 }
 
-WMError WindowAdapterLite::ListWindowInfo(const WindowInfoOption& windowInfoOption, std::vector<sptr<WindowInfo>>& infos)
+WMError WindowAdapterLite::ListWindowInfo(const WindowInfoOption& windowInfoOption,
+    std::vector<sptr<WindowInfo>>& infos)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
     auto wmsProxy = GetWindowManagerServiceProxy();
