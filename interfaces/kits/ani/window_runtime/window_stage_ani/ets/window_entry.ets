@@ -57,14 +57,14 @@ function main() {
     });
 
     let systemBarProperties = new window.SystemBarPropertiesInternal();
-    w.setSystemBarProperties(systemBarProperties).then((res:int)=>{
-      console.println('[ANI]setSystemBarProperties primise' + res);
+    w.setWindowSystemBarProperties(systemBarProperties).then((res:int)=>{
+      console.println('[ANI]setWindowSystemBarProperties primise' + res);
     }).catch((e:NullishType)=>{
-      console.println('[ANI]setSystemBarProperties catch');
+      console.println('[ANI]setWindowSystemBarProperties catch');
     });
 
-    w.setSystemBarProperties(systemBarProperties, ()=>{
-      console.println('[ANI]setSystemBarProperties callback');
+    w.setWindowSystemBarProperties(systemBarProperties, ()=>{
+      console.println('[ANI]setWindowSystemBarProperties callback');
     });
 
     w.setSpecificSystemBarEnabled('w', false, false).then((res:int)=>{
@@ -123,7 +123,7 @@ function main() {
     w.setWindowDecorVisible(false);
     w.setWindowDecorHeight(100);
     w.getWindowProperties();
-    w.setSystemBarProperties(systemBarProperties);
+    w.setWindowSystemBarProperties(systemBarProperties);
     w.setSpecificSystemBarEnabled('w', false, false);
     console.println('ok');
 }
