@@ -97,5 +97,6 @@ void JsWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaTy
     NapiAsyncTask::Schedule("JsWindowListener::OnAvoidAreaChanged",
         env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
+
 } // namespace Rosen
 } // namespace OHOS

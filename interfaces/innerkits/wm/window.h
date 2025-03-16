@@ -708,7 +708,7 @@ public:
  *
  * @brief IWindowRotationChangeListener is used to observe the window rotation change.
  */
-class IWindowOrientationChangeListener : virtual public RefBase {
+class IWindowRotationChangeListener : virtual public RefBase {
 public:
     /**
      * @brief Notify caller when window rotate
