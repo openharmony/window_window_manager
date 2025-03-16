@@ -57,13 +57,11 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsSceneSessionManager" };
 constexpr int MIN_ARG_COUNT = 3;
 constexpr int DEFAULT_ARG_COUNT = 4;
-constexpr int ARG_COUNT_FIVE = 5;
 constexpr int ARG_INDEX_ZERO = 0;
 constexpr int ARG_INDEX_ONE = 1;
 constexpr int ARG_INDEX_TWO = 2;
 constexpr int ARG_INDEX_THREE = 3;
 constexpr int ARG_INDEX_FOUR = 4;
-constexpr int ARG_INDEX_FIVE = 5;
 constexpr int32_t RESTYPE_RECLAIM = 100001;
 const std::string RES_PARAM_RECLAIM_TAG = "reclaimTag";
 const std::string CREATE_SYSTEM_SESSION_CB = "createSpecificSession";
@@ -3126,53 +3124,52 @@ napi_value JsSceneSessionManager::OnNotifyAINavigationBarShowStatus(napi_env env
 
 napi_value JsSceneSessionManager::OnNotifyNextAvoidRectInfo(napi_env env, napi_callback_info info)
 {
-    size_t argc = ARG_COUNT_FIVE;
-    napi_value argv[ARG_INDEX_FIVE] = { nullptr };
+    size_t argc = DEFAULT_ARG_COUNT;
+    napi_value argv[ARG_INDEX_FOUR] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < ARG_INDEX_FOUR) {
+    if (argc < ARGC_THREE) {
         TLOGE(WmsLogTag::WMS_IMMS, "Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     int32_t type = 0;
-    if (!ConvertFromJsValue(env, argv[ARG_INDEX_ZERO], type)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to type");
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_ZERO], type) ||
+        JS_SESSION_TO_WINDOW_TYPE_MAP.find(static_cast<JsSessionType>(type)) == 0 ||
+        (JS_SESSION_TO_WINDOW_TYPE_MAP[static_cast<JsSessionType>(type)] != WindowType::WINDOW_TYPE_STATUS_BAR &&
+         JS_SESSION_TO_WINDOW_TYPE_MAP[static_cast<JsSessionType>(type)] !=
+            WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to type");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     int64_t displayId = -1;
     if (!ConvertFromJsValue(env, argv[ARG_INDEX_ONE], displayId)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to displayId");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
-        return NapiGetUndefined(env);
-    }
-    bool isVisible = false;
-    if (!ConvertFromJsValue(env, argv[ARG_INDEX_TWO], isVisible)) {
-        WLOGFE("Failed to convert parameter to isVisible");
+        TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to displayId");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     WSRect portraitRect;
-    if (argv[ARG_INDEX_THREE] == nullptr || !ConvertRectInfoFromJs(env, argv[ARG_INDEX_THREE], portraitRect)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to landspaceRect");
+    if (argv[ARG_INDEX_TWO] == nullptr || !ConvertRectInfoFromJs(env, argv[ARG_INDEX_TWO], portraitRect)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to landspaceRect");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     WSRect landspaceRect;
-    if (argv[ARG_INDEX_FOUR] == nullptr || !ConvertRectInfoFromJs(env, argv[ARG_INDEX_FOUR], landspaceRect)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to landspaceRect");
+    if (argv[ARG_INDEX_THREE] == nullptr || !ConvertRectInfoFromJs(env, argv[ARG_INDEX_THREE], landspaceRect)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to landspaceRect");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    auto avoidType = (type == 5) ? AvoidAreaType::TYPE_START : AvoidAreaType::TYPE_NAVIGATION_INDICATOR;
-    SceneSessionManager::GetInstance().NotifyNextAvoidRectInfo(
-        avoidType, isVisible, portraitRect, landspaceRect, static_cast<uint64_t>(displayId));
+    auto winType = JS_SESSION_TO_WINDOW_TYPE_MAP[static_cast<JsSessionType>(type)];
+    auto avoidType = (winType == WindowType::WINDOW_TYPE_STATUS_BAR) ? AvoidAreaType::TYPE_SYSTEM :
+                                                                       AvoidAreaType::TYPE_NAVIGATION_INDICATOR;
+    SceneSessionManager::GetInstance().NotifyNextAvoidRectInfo(avoidType, portraitRect,
+        landspaceRect, static_cast<uint64_t>(displayId));
     return NapiGetUndefined(env);
 }
 

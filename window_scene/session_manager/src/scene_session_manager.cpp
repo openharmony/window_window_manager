@@ -1606,7 +1606,7 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
         return this->GetAINavigationBarArea(displayId);
     };
     specificCb->onGetNextAvoidAreaRectInfo_ = [this](
-        DisplayId displayId, AvoidAreaType type, std::tuple<bool, WSRect, WSRect>& nextSystemBarAvoidAreaRectInfo) {
+        DisplayId displayId, AvoidAreaType type, std::pair<WSRect, WSRect>& nextSystemBarAvoidAreaRectInfo) {
         return this->GetNextAvoidRectInfo(displayId, type, nextSystemBarAvoidAreaRectInfo);
     };
     specificCb->onOutsideDownEvent_ = [this](int32_t x, int32_t y) {
@@ -9893,20 +9893,19 @@ WSError SceneSessionManager::NotifyAINavigationBarShowStatus(bool isVisible, WSR
     return WSError::WS_OK;
 }
 
-WSError SceneSessionManager::NotifyNextAvoidRectInfo(
-    AvoidAreaType type, bool isVisible,
+WSError SceneSessionManager::NotifyNextAvoidRectInfo(AvoidAreaType type,
     const WSRect& portraitRect, const WSRect& landspaceRect, DisplayId displayId)
 {
-    TLOGI(WmsLogTag::WMS_IMMS, "type %{public}d isVisible %{public}u "
+    TLOGI(WmsLogTag::WMS_IMMS, "type %{public}d "
         "portraitRect %{public}s, portraitRect %{public}s, displayId %{public}" PRIu64,
-        type, isVisible, portraitRect.ToString().c_str(), landspaceRect.ToString().c_str(), displayId);
+        type, portraitRect.ToString().c_str(), landspaceRect.ToString().c_str(), displayId);
     std::lock_guard<std::mutex> lock(nextAvoidRectInfoMapMutex_);
-    nextAvoidRectInfoMap_[type][displayId] = { isVisible, portraitRect, landspaceRect };
+    nextAvoidRectInfoMap_[type][displayId] = { portraitRect, landspaceRect };
     return WSError::WS_OK;
 }
 
-WSError SceneSessionManager::GetNextAvoidRectInfo(
-    DisplayId displayId, AvoidAreaType type, std::tuple<bool, WSRect, WSRect>& nextSystemBarAvoidAreaRectInfo)
+WSError SceneSessionManager::GetNextAvoidRectInfo(DisplayId displayId, AvoidAreaType type,
+    std::pair<WSRect, WSRect>& nextSystemBarAvoidAreaRectInfo)
 {
     {
         std::lock_guard<std::mutex> lock(nextAvoidRectInfoMapMutex_);
