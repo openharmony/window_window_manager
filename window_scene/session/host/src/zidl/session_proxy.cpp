@@ -1173,27 +1173,27 @@ WSError SessionProxy::GetTargetOrientationConfigInfo(Orientation targetOrientati
         TLOGE(WmsLogTag::WMS_ROTATION, "write orientation error");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!data.WriteUint32(properties.size())) {
+    if (!data.WriteUint32(static_cast<uint32_t>(properties.size()))) {
         TLOGE(WmsLogTag::WMS_ROTATION, "write size error");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    for (const auto& [type, systemBarProperty] : propertes) {
+    for (const auto& [type, systemBarProperty] : properties) {
         if (!data.WriteUint32(static_cast<uint32_t>(type))) {
             return WSError::WS_ERROR_IPC_FAILED;
         }
-        if (!data.WriteBool(systemBarProperty.enable_))) {
+        if (!data.WriteBool(systemBarProperty.enable_)) {
             return WSError::WS_ERROR_IPC_FAILED;
         }
-        if (!data.WriteBool(systemBarProperty.backgroundColor_))) {
+        if (!data.WriteUint32(systemBarProperty.backgroundColor_)) {
             return WSError::WS_ERROR_IPC_FAILED;
         }
-        if (!data.WriteBool(systemBarProperty.contentColor_))) {
+        if (!data.WriteUint32(systemBarProperty.contentColor_)) {
             return WSError::WS_ERROR_IPC_FAILED;
         }
-        if (!data.WriteBool(systemBarProperty.enableAnimation_))) {
+        if (!data.WriteBool(systemBarProperty.enableAnimation_)) {
             return WSError::WS_ERROR_IPC_FAILED;
         }
-        if (!data.WriteBool(systemBarProperty.settingFlag_))) {
+        if (!data.WriteUint32_t(static_cast<uint32_t>(systemBarProperty.settingFlag_))) {
             return WSError::WS_ERROR_IPC_FAILED;
         }
     }

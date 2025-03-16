@@ -32,9 +32,9 @@ public:
     void ResetMoveToLock();
 
     // oriention
-    Orientation GetTargetOrientationResult(long timeOut); // unit: ms
+    OrientationInfo GetTargetOrientationResult(long timeOut); // unit: ms
     void ResetGetTargetRotationLock();
-    WSError OnUpdateTargetOrientationInfo(OrientationInfo info);
+    WSError OnUpdateTargetOrientationInfo(OrientationInfo& info);
 
 private:
     RunnableFuture<Rect> resizeFuture_{};

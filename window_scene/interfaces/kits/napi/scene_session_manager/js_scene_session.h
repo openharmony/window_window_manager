@@ -299,7 +299,7 @@ private:
     napi_value OnThrowSlipDirectly(napi_env env, napi_callback_info info);
     napi_value OnAddSidebarBlur(napi_env env, napi_callback_info info);
     napi_value OnSetSidebarBlur(napi_env env, napi_callback_info info);
-    napi_value OnNotifyRotationProPerty(napi_env env, napi_callback_info info);
+    napi_value OnNotifyRotationProperty(napi_env env, napi_callback_info info);
     
     bool IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);
     void ProcessChangeSessionVisibilityWithStatusBarRegister();
@@ -355,7 +355,7 @@ private:
     void ProcessKeyboardViewModeChangeRegister();
     void ProcessSetHighlightChangeRegister();
     void ProcessFollowParentRectRegister();
-    void ProcessSessionGetTargetOrientationConfigInfoRegister();
+    void ProcessGetTargetOrientationConfigInfoRegister();
 
     /*
      * Window Property

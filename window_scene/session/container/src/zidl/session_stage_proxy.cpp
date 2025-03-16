@@ -1785,12 +1785,12 @@ WSError SessionStageProxy::NotifyTargetRotationInfo(OrientationInfo& info)
     }
 
     if (!data.WriteInt32(info.rect.posX_) || !data.WriteInt32(info.rect.posY_) ||
-        !data.WriteInt32(info.rect.width_) || !data.WriteInt32(info.rect.height_)) {
+        !data.WriteUint32(info.rect.width_) || !data.WriteUint32(info.rect.height_)) {
         TLOGE(WmsLogTag::WMS_ROTATION, "write rect failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
-    if (!data.WriteUint32(info.avoidAreas.size())) {
+    if (!data.WriteUint32(static_cast<uint32_t>(info.avoidAreas.size()))) {
         TLOGE(WmsLogTag::WMS_ROTATION, "write avoid area size failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
@@ -1815,6 +1815,7 @@ WSError SessionStageProxy::NotifyTargetRotationInfo(OrientationInfo& info)
         static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_ROTATION_PROPERTY),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_ROTATION, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
     }
     return WSError::WS_OK;
 }

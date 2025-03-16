@@ -2442,7 +2442,7 @@ WSError SceneSession::GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoid
 }
 
 void SceneSession::SetSessionGetTargetOrientationConfigInfoCallback(
-    cosnt NotifySessionGetTargetOrientationConfigInfoFunc& func)
+    const NotifySessionGetTargetOrientationConfigInfoFunc& func)
 {
     PostTask([weakThis = wptr(this), func, where = __func__] {
         auto session = weakThis.promote();
@@ -2467,7 +2467,7 @@ WSError SceneSession::GetTargetOrientationConfigInfo(Orientation targetOrientati
             }
             session->SetSystemBarPropertyForRotation(properties);
             if (session->sessionGetTargetOrientationConfigInfoFunc_) {
-                session->sessionGetTargetOrientationConfigInfoFunc_(static_cast<targetOrientation>);
+                session->sessionGetTargetOrientationConfigInfoFunc_(static_cast<uint32_t>targetOrientation);
             }
             return WSError::WS_OK;
         },
@@ -2492,7 +2492,7 @@ WSError SceneSession::NotifyRotationProperty(int32_t rotation, uint32_t width, u
             if (!session->sessionStage_) {
                 return WSError::WS_ERROR_NULLPTR;
             }
-            Rect rect = { wsrect.posX_, wsrect.poxY_, wsrect.width_, wsrect.heigth_ };
+            Rect rect = { wsrect.posX_, wsrect.posY_, wsrect.width_, wsrect.height_ };
             OrientationInfo info = { rotation, rect, avoidAreas };
             session->sessionStage_->NotifyTargetRotationInfo(info);
             return WSError::WS_OK;
@@ -2501,13 +2501,13 @@ WSError SceneSession::NotifyRotationProperty(int32_t rotation, uint32_t width, u
     return WSError::WS_OK;
 }
 
-void SceneSession::SetSystemBarPropertyForRotation(const std::map<Rosen::WindowType>,
-    Rosen::SystemBarProperty>& properties)
+void SceneSession::SetSystemBarPropertyForRotation(
+    const std::map<Rosen::WindowType, Rosen::SystemBarProperty>& properties)
 {
     targetSystemBarProperty_ = properties;
 }
 
-std::map<Rosen::WindowTYpe, Rosen::SystemBarProperty> SceneSession::SetSystemBarPropertyForRotation()
+std::map<Rosen::WindowType, Rosen::SystemBarProperty> SceneSession::GetSystemBarPropertyForRotation()
 {
     return targetSystemBarProperty_;
 }
@@ -5111,7 +5111,7 @@ WMError SceneSession::HandleActionUpdateSetBrightness(const sptr<WindowSessionPr
 WMError SceneSession::HandleActionUpdateOrientation(const sptr<WindowSessionProperty>& property,
     WSPropertyChangeAction action)
 {
-    SetRequestedOrientation(property->GetRequestedOrientation(), property->GetRequestAnimation());
+    SetRequestedOrientation(property->GetRequestedOrientation(), property->GetRequestedAnimation());
     return WMError::WM_OK;
 }
 
