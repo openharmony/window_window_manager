@@ -3135,10 +3135,10 @@ napi_value JsSceneSessionManager::OnNotifyNextAvoidRectInfo(napi_env env, napi_c
     }
     int32_t type = 0;
     if (!ConvertFromJsValue(env, argv[ARG_INDEX_ZERO], type) ||
-        JS_SESSION_TO_WINDOW_TYPE_MAP.find(static_cast<JsSessionType>(type)) == 0 ||
-        (JS_SESSION_TO_WINDOW_TYPE_MAP[static_cast<JsSessionType>(type)] != WindowType::WINDOW_TYPE_STATUS_BAR &&
-         JS_SESSION_TO_WINDOW_TYPE_MAP[static_cast<JsSessionType>(type)] !=
-            WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR)) {
+        JS_SESSION_TO_WINDOW_TYPE_MAP.find(static_cast<JsSessionType>(type)) == JS_SESSION_TO_WINDOW_TYPE_MAP.end() ||
+        (JS_SESSION_TO_WINDOW_TYPE_MAP.at(static_cast<JsSessionType>(type)) != WindowType::WINDOW_TYPE_STATUS_BAR &&
+         JS_SESSION_TO_WINDOW_TYPE_MAP.at(static_cast<JsSessionType>(type)) !=
+             WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR)) {
         TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to type");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
@@ -3165,7 +3165,7 @@ napi_value JsSceneSessionManager::OnNotifyNextAvoidRectInfo(napi_env env, napi_c
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    auto winType = JS_SESSION_TO_WINDOW_TYPE_MAP[static_cast<JsSessionType>(type)];
+    auto winType = JS_SESSION_TO_WINDOW_TYPE_MAP.at(static_cast<JsSessionType>(type));
     auto avoidType = (winType == WindowType::WINDOW_TYPE_STATUS_BAR) ? AvoidAreaType::TYPE_SYSTEM :
                                                                        AvoidAreaType::TYPE_NAVIGATION_INDICATOR;
     SceneSessionManager::GetInstance().NotifyNextAvoidRectInfo(avoidType, portraitRect,
