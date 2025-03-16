@@ -2571,7 +2571,7 @@ void SceneSession::GetKeyboardAvoidAreaByRotation(int32_t rotation, const WSRect
         }
         TLOGI(WmsLogTag::WMS_IMMS, "win %{public}s keyboard %{public}s",
             rect.ToString().c_str(), avoidInfo.second.ToString().c_str());
-            CalculateAvoidAreaRect(rect, avoidInfo.second, avoidArea);     
+            CalculateAvoidAreaRect(rect, avoidInfo.second, avoidArea);
     }
 }
 
