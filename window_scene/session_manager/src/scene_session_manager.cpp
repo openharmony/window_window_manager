@@ -9899,7 +9899,6 @@ WSError SceneSessionManager::NotifyNextAvoidRectInfo(AvoidAreaType type, bool is
     TLOGI(WmsLogTag::WMS_IMMS, "type %{public}d isVisible %{public}u "
         "portraitRect %{public}s, portraitRect %{public}s, displayId %{public}" PRIu64,
         type, isVisible, portraitRect.ToString().c_str(), landspaceRect.ToString().c_str(), displayId);
-    // auto avoidType = (type == 5) ? AvoidAreaType::TYPE_START : AvoidAreaType::TYPE_NAVIGATION_INDICATOR;
     std::lock_guard<std::mutex> lock(nextAvoidRectInfoMapMutex_);
     nextAvoidRectInfoMap_[type][displayId] = { isVisible, portraitRect, landspaceRect };
     return WSError::WS_OK;
