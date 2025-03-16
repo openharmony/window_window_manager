@@ -43,7 +43,8 @@ private:
     void CalcWaterfallRectsByRotation(Rotation rotation, uint32_t displayHeight, uint32_t displayWidth,
         std::vector<uint32_t> realNumVec);
     void CheckBoundaryRects(std::vector<DMRect>& boundaryRects, ScreenProperty screenProperty);
-    void ConvertBoundaryRectsByRotation(std::vector<DMRect>& boundaryRects, DisplayId displayId, int32_t tranRotation = -1);
+    void ConvertBoundaryRectsByRotation(std::vector<DMRect>& boundaryRects, DisplayId displayId,
+        int32_t tranRotation = -1);
     void CurrentRotation90(const std::vector<DMRect>& displayBoundaryRects, std::vector<DMRect>& finalVector,
         uint32_t displayWidth);
     void CurrentRotation180(const std::vector<DMRect>& displayBoundaryRects, std::vector<DMRect>& finalVector,

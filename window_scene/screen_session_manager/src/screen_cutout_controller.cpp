@@ -214,7 +214,7 @@ void ScreenCutoutController::CalcWaterfallRects(DisplayId displayId, int32_t tra
         return;
     }
     Rotation rotation;
-    if(tranRotation == -1) {
+    if (tranRotation == -1) {
         rotation = GetCurrentDisplayRotation(displayId);
     } else {
         rotation = static_cast<Rotation>(tranRotation);
