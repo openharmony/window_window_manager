@@ -1048,7 +1048,10 @@ bool ConvertResultFromJsValue(napi_env env, napi_value jsObject, RotationChangeR
 
 bool ConvertInfoFromJsValue(napi_env env, napi_value jsObject, RotationChangeInfo& rotationChangeInfo)
 {
-    napi_value jsType = nullptr, jsOrientation = nullptr, jsDisplayId = nullptr, jsDisplayRect = nullptr;
+    napi_value jsType = nullptr;
+    napi_value jsOrientation = nullptr;
+    napi_value jsDisplayId = nullptr;
+    napi_value jsDisplayRect = nullptr;
     napi_get_named_property(env, jsObject, "type", &jsType);
     napi_get_named_property(env, jsObject, "orientation", &jsOrientation);
     napi_get_named_property(env, jsObject, "displayId", &jsDisplayId);
@@ -1090,12 +1093,13 @@ bool ConvertInfoFromJsValue(napi_env env, napi_value jsObject, RotationChangeInf
 
 bool ConvertResultFromJsValue(napi_env env, napi_value jsObject, RotationChangeResult& rotationChangeResult)
 {
-    napi_value jsRectType = nullptr, jsWindowRect = nullptr;
+    napi_value jsRectType = nullptr;
+    napi_value jsWindowRect = nullptr;
     napi_get_named_property(env, jsObject, "rectType", &jsRectType);
     napi_get_named_property(env, jsObject, "windowRect", &jsWindowRect);
     if (GetType(env, jsRectType) != napi_undefined) {
         uint32_t rectType;
-        if (!ConvertFromJsValue(env, jsRectType, type)) {
+        if (!ConvertFromJsValue(env, jsRectType, rectType)) {
             TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to rectType");
             return false;
         }

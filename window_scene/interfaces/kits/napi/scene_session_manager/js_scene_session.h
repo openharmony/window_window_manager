@@ -123,7 +123,6 @@ private:
     void ProcessPendingSessionToForegroundRegister();
     void ProcessPendingSessionToBackgroundForDelegatorRegister();
     void ProcessSessionLockStateChangeRegister();
-    void ProcessRotationChange();
     void OnSessionLockStateChange(bool isLockedState);
     sptr<SceneSession> GenSceneSession(SessionInfo& info);
     void PendingSessionActivation(SessionInfo& info);
