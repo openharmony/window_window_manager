@@ -150,6 +150,8 @@ const bool IS_COORDINATION_SUPPORT =
 const std::string FAULT_DESCRIPTION = "842003014";
 const std::string FAULT_SUGGESTION = "542003014";
 constexpr uint32_t COMMON_EVENT_SERVICE_ID = 3299;
+const std::set<std::string> packageNames {
+};
 
 // based on the bundle_util
 inline int32_t GetUserIdByCallingUid()
@@ -6450,6 +6452,15 @@ FoldDisplayMode ScreenSessionManager::GetFoldDisplayMode()
         TLOGD(WmsLogTag::DMS, "foldScreenController_ is null");
         return FoldDisplayMode::UNKNOWN;
     }
+    if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
+        std::string bundleName = SysCapUtil::GetBundleName();
+        TLOGI(WmsLogTag::DMS, "bundleName: %{public}s", bundleName.c_str());
+        auto it = packageNames.find(bundleName);
+        if (it != packageNames.end()) {
+            TLOGI(WmsLogTag::DMS, "MAIN");
+            return FoldDisplayMode::MAIN;
+        }
+    }
     return foldScreenController_->GetDisplayMode();
 #else
     return FoldDisplayMode::UNKNOWN;
@@ -6474,6 +6485,15 @@ bool ScreenSessionManager::IsFoldable()
     if (foldScreenController_ == nullptr) {
         TLOGI(WmsLogTag::DMS, "foldScreenController_ is null");
         return false;
+    }
+    if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
+        std::string bundleName = SysCapUtil::GetBundleName();
+        TLOGI(WmsLogTag::DMS, "bundleName: %{public}s", bundleName.c_str());
+        auto it = packageNames.find(bundleName);
+        if (it != packageNames.end()) {
+            TLOGI(WmsLogTag::DMS, "enter false");
+            return false;
+        }
     }
     return foldScreenController_->IsFoldable();
 #else
@@ -6537,6 +6557,15 @@ FoldStatus ScreenSessionManager::GetFoldStatus()
     if (foldScreenController_ == nullptr) {
         TLOGI(WmsLogTag::DMS, "foldScreenController_ is null");
         return FoldStatus::UNKNOWN;
+    }
+    if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
+        std::string bundleName = SysCapUtil::GetBundleName();
+        TLOGI(WmsLogTag::DMS, "bundleName: %{public}s", bundleName.c_str());
+        auto it = packageNames.find(bundleName);
+        if (it != packageNames.end()) {
+            TLOGI(WmsLogTag::DMS, "UNKNOWN");
+            return FoldStatus::UNKNOWN;
+        }
     }
     return foldScreenController_->GetFoldStatus();
 #else
