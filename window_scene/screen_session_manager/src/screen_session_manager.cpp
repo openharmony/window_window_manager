@@ -112,6 +112,7 @@ static const int NOTIFY_EVENT_FOR_DUAL_FAILED = 0;
 static const int NOTIFY_EVENT_FOR_DUAL_SUCESS = 1;
 static const int NO_NEED_NOTIFY_EVENT_FOR_DUAL = 2;
 static bool g_isPcDevice = false;
+static float g_extendScreenDpiCoef = 0.85f;
 static uint32_t g_internalWidth = 3120;
 const unsigned int XCOLLIE_TIMEOUT_10S = 10;
 constexpr int32_t CAST_WIRED_PROJECTION_START = 1005;
@@ -132,7 +133,8 @@ const int32_t ROTATE_POLICY = system::GetIntParameter("const.window.device.rotat
 constexpr int32_t FOLDABLE_DEVICE { 2 };
 constexpr float DEFAULT_PIVOT = 0.5f;
 constexpr float DEFAULT_SCALE = 1.0f;
-constexpr float EXTEND_SCREEN_DPI_PARAMETER = 0.85f;
+constexpr float EXTEND_SCREEN_DPI_MIN_PARAMETER = 0.85f;
+constexpr float EXTEND_SCREEN_DPI_MAX_PARAMETER = 1.00f;
 static const constexpr char* SET_SETTING_DPI_KEY {"default_display_dpi"};
 const std::vector<std::string> ROTATION_DEFAULT = {"0", "1", "2", "3"};
 const std::vector<std::string> ORIENTATION_DEFAULT = {"0", "1", "2", "3"};
@@ -2293,12 +2295,12 @@ void ScreenSessionManager::InitExtendScreenDensity(sptr<ScreenSession> session, 
     float extendDensity = screenSession->GetScreenProperty().GetDensity();
     float curResolution = screenSession->GetScreenProperty().GetDensityInCurResolution();
     TLOGW(WmsLogTag::DMS, "extendDensity = %{public}f", extendDensity);
-    session->SetVirtualPixelRatio(extendDensity * EXTEND_SCREEN_DPI_PARAMETER);
-    session->SetDefaultDensity(extendDensity * EXTEND_SCREEN_DPI_PARAMETER);
+    session->SetVirtualPixelRatio(extendDensity * g_extendScreenDpiCoef);
+    session->SetDefaultDensity(extendDensity * g_extendScreenDpiCoef);
     session->SetDensityInCurResolution(curResolution);
     ScreenId screenId = session->GetScreenId();
-    property.SetVirtualPixelRatio(extendDensity * EXTEND_SCREEN_DPI_PARAMETER);
-    property.SetDefaultDensity(extendDensity* EXTEND_SCREEN_DPI_PARAMETER);
+    property.SetVirtualPixelRatio(extendDensity * g_extendScreenDpiCoef);
+    property.SetDefaultDensity(extendDensity* g_extendScreenDpiCoef);
     property.SetDensityInCurResolution(curResolution);
     {
         std::lock_guard<std::recursive_mutex> lock_phy(phyScreenPropMapMutex_);
@@ -3250,6 +3252,7 @@ void ScreenSessionManager::BootFinishedCallback(const char *key, const char *val
         that.SetDpiFromSettingData();
         that.SetDisplayState(DisplayState::ON);
         that.RegisterSettingDpiObserver();
+        that.RegisterSettingExtendScreenDpiObserver();
         if (that.foldScreenPowerInit_ != nullptr) {
             that.foldScreenPowerInit_();
         }
@@ -3329,7 +3332,7 @@ void ScreenSessionManager::SetDpiFromSettingData()
         ScreenId defaultScreenId = GetDefaultScreenId();
         SetVirtualPixelRatio(defaultScreenId, dpi);
         if (g_isPcDevice) {
-            SetExtendPixelRatio(dpi * EXTEND_SCREEN_DPI_PARAMETER);
+            SetExtendPixelRatio(dpi * g_extendScreenDpiCoef);
         }
     } else {
         TLOGE(WmsLogTag::DMS, "setting dpi error, settingDpi: %{public}d", settingDpi);
@@ -8729,5 +8732,28 @@ bool ScreenSessionManager::BlockScreenWaitPictureFrameByCV(bool isStartDream)
         return true;
     }
     return isStartDream ? pictureFrameReady_ : pictureFrameBreak_;
+}
+
+void ScreenSessionManager::RegisterSettingExtendScreenDpiObserver()
+{
+    TLOGI(WmsLogTag::DMS, "Register Setting Extend Dpi Observer");
+    SettingObserver::UpdateFunc updateFunc = [&](const std::string& key) { SetExtendScreenDpi(); };
+    ScreenSettingHelper::RegisterSettingExtendScreenDpiObserver(updateFunc);
+}
+
+void ScreenSessionManager::SetExtendScreenDpi()
+{
+    bool extendScreenDpi;
+    bool ret = ScreenSettingHelper::GetSettingExtendScreenDpi(extendScreenDpi);
+    if (!ret) {
+        TLOGE(WmsLogTag::DMS, "get setting extend screen dpi failed");
+    }
+    if (extendScreenDpi) {
+        g_extendScreenDpiCoef = EXTEND_SCREEN_DPI_MAX_PARAMETER;
+    } else {
+        g_extendScreenDpiCoef = EXTEND_SCREEN_DPI_MIN_PARAMETER;
+    }
+    SetDpiFromSettingData();
+    TLOGI(WmsLogTag::DMS, "get setting extend screen dpi is : %{public}f", g_extendScreenDpiCoef);
 }
 } // namespace OHOS::Rosen
