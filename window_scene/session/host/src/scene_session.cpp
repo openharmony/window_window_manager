@@ -2452,7 +2452,6 @@ WSError SceneSession::GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoid
     }, __func__);
 }
 
-// tanhong
 WSError SceneSession::GetAvoidAreasByRotation(int32_t rotation, const WSRect& rect,
     const std::map<WindowType, SystemBarProperty>& properties, std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
@@ -2553,15 +2552,6 @@ void SceneSession::GetCutoutAvoidAreaByRotation(int32_t rotation, const WSRect& 
 
 void SceneSession::GetKeyboardAvoidAreaByRotation(int32_t rotation, const WSRect& rect, AvoidArea& avoidArea)
 {
-    // if (!keyboardAvoidAreaActive_) {
-    //     TLOGI(WmsLogTag::WMS_IMMS, "id: %{public}d, isSystemKeyboard: %{public}d, state: %{public}d, "
-    //         "gravity: %{public}d", GetPersistentId(), IsSystemKeyboard(), GetSessionState(), GetKeyboardGravity());
-    //     return;
-    // }
-    // if (Session::CheckEmptyKeyboardAvoidAreaIfNeeded()) {
-    //     TLOGD(WmsLogTag::WMS_IMMS, "Keyboard avoid area needs to be empty in floating mode");
-    //     return;
-    // }
     std::vector<std::pair<bool, WSRect>> avoidInfoVector;
     GetKeyboardOccupiedAreaWithRotation(GetPersistentId(), rotation, avoidInfoVector);
     for (auto avoidInfo : avoidInfoVector) {

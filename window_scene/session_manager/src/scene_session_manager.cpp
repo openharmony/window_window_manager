@@ -9901,7 +9901,7 @@ WSError SceneSessionManager::NotifyNextAvoidRectInfo(AvoidAreaType type, bool is
         type, isVisible, portraitRect.ToString().c_str(), landspaceRect.ToString().c_str(), displayId);
     // auto avoidType = (type == 5) ? AvoidAreaType::TYPE_START : AvoidAreaType::TYPE_NAVIGATION_INDICATOR;
     std::lock_guard<std::mutex> lock(nextAvoidRectInfoMapMutex_);
-    nextAvoidRectInfoMap_[avoidType][displayId] = { isVisible, portraitRect, landspaceRect };
+    nextAvoidRectInfoMap_[type][displayId] = { isVisible, portraitRect, landspaceRect };
     return WSError::WS_OK;
 }
 

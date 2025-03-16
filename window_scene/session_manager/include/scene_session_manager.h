@@ -413,7 +413,6 @@ public:
     bool GetImmersiveState(ScreenId screenId);
     WSError NotifyStatusBarShowStatus(int32_t persistentId, bool isVisible);
     WSError NotifyAINavigationBarShowStatus(bool isVisible, WSRect barArea, uint64_t displayId);
-    // tanhong
     WSError NotifyNextAvoidRectInfo(AvoidAreaType type, bool isVisible,
         const WSRect& portraitRect, const WSRect& landspaceRect, DisplayId displayId);
     WSError GetNextAvoidRectInfo(DisplayId displayId, AvoidAreaType type,
@@ -1294,7 +1293,6 @@ private:
     bool isAINavigationBarVisible_ = false;
     std::shared_mutex currAINavigationBarAreaMapMutex_;
     std::map<uint64_t, WSRect> currAINavigationBarAreaMap_;
-    // tanhong
     std::mutex nextAvoidRectInfoMapMutex_;
     std::unordered_map<AvoidAreaType,
         std::unordered_map<DisplayId, std::tuple<bool, WSRect, WSRect>>> nextAvoidRectInfoMap_;
