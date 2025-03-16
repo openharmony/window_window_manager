@@ -29,6 +29,7 @@ sptr<SettingObserver> ScreenSettingHelper::rotationObserver_;
 sptr<SettingObserver> ScreenSettingHelper::halfScreenObserver_;
 sptr<SettingObserver> ScreenSettingHelper::screenSkipProtectedWindowObserver_;
 sptr<SettingObserver> ScreenSettingHelper::wireCastObserver_;
+sptr<SettingObserver> ScreenSettingHelper::extendScreenDpi_;
 constexpr int32_t PARAM_NUM_TEN = 10;
 constexpr uint32_t EXPECT_SCREEN_MODE_SIZE = 2;
 constexpr uint32_t EXPECT_RELATIVE_POSITION_SIZE = 3;
@@ -44,7 +45,8 @@ constexpr uint32_t SCREEN_MAIN_IN_DATA = 0;
 constexpr uint32_t SCREEN_MIRROR_IN_DATA = 1;
 constexpr uint32_t SCREEN_EXTEND_IN_DATA = 2;
 const std::string SCREEN_SHAPE = system::GetParameter("const.window.screen_shape", "0:0");
-const std::string SCREEN_SHARE_PROTECT_TABLE = "USER_SETTINGDATA_SECURE_";
+const std::string SCREEN_SHARE_PROTECT_TABLE = "USER_SETTINGSDATA_SECURE_";
+const std::string EXTEND_DPI_TABLE = "USER_SETTINGSDATA_";
 
 void ScreenSettingHelper::RegisterSettingDpiObserver(SettingObserver::UpdateFunc func)
 {
@@ -596,6 +598,54 @@ void ScreenSettingHelper::UnregisterSettingWireCastObserver()
         TLOGW(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
     }
     wireCastObserver_ = nullptr;
+}
+
+void ScreenSettingHelper::RegisterSettingExtendScreenDpiObserver(SettingObserver::UpdateFunc func)
+{
+    if (extendScreenDpi_ != nullptr) {
+        TLOGD(WmsLogTag::DMS, "setting extend dpi observer is registered");
+        return;
+    }
+    SettingProvider& extendScreenProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    extendScreenDpi_ = extendScreenProvider.CreateObserver(SETTING_EXTEND_DPI_KEY, func);
+    if (extendScreenDpi_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "create observer failed");
+        return;
+    }
+    ErrCode ret = extendScreenProvider.RegisterObserverByTable(extendScreenDpi_, EXTEND_DPI_TABLE);
+    if (ret != ERR_OK) {
+        TLOGW(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
+        extendScreenDpi_ = nullptr;
+    }
+}
+
+void ScreenSettingHelper::UnRegisterSettingExtendScreenDpiObserver()
+{
+    if (extendScreenDpi_ == nullptr) {
+        TLOGD(WmsLogTag::DMS, "extendScreenDpi_ is nullptr");
+        return;
+    }
+    SettingProvider& extendScreenProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    ErrCode ret = extendScreenProvider.UnregisterObserver(extendScreenDpi_);
+    if (ret != ERR_OK) {
+        TLOGW(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
+    }
+    extendScreenDpi_ = nullptr;
+}
+
+bool ScreenSettingHelper::GetSettingExtendScreenDpi(bool& enable, const std::string& key)
+{
+    SettingProvider& extendScreenProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    std::string value = "";
+    ErrCode ret = extendScreenProvider.GetStringValueMultiUser(key, value);
+    if (ret != ERR_OK) {
+        TLOGE(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
+        return false;
+    }
+    uint32_t num = static_cast<uint32_t>(strtoll(value.c_str(), nullptr, PARAM_NUM_TEN));
+    TLOGI(WmsLogTag::DMS, "get setting extend dpi is %{public}u", num);
+    enable = static_cast<bool>(num);
+    return true;
 }
 } // namespace Rosen
 } // namespace OHOS

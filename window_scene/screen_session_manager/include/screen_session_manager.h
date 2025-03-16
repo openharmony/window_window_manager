@@ -686,6 +686,8 @@ private:
     DMError DoMakeUniqueScreenOld(const std::vector<ScreenId>& allUniqueScreenIds, std::vector<DisplayId>& displayIds,
         bool isCallingByThirdParty);
     bool IsSupportCoordination();
+    void RegisterSettingExtendScreenDpiObserver();
+    void SetExtendScreenDpi();
 
     LowTempMode lowTemp_ {LowTempMode::UNKNOWN};
     std::mutex lowTempMutex_;
