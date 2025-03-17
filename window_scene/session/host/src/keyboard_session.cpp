@@ -121,7 +121,8 @@ WSError KeyboardSession::Hide()
         WSRect rect = {0, 0, 0, 0};
         session->NotifyKeyboardPanelInfoChange(rect, false);
         if (session->systemConfig_.IsPcWindow() || session->GetSessionScreenName() == "HiCar" ||
-            session->GetSessionScreenName() == "SuperLauncher") {
+            session->GetSessionScreenName() == "SuperLauncher" ||
+			session->GetSessionScreenName() == "PadWithCar") {
             TLOGD(WmsLogTag::WMS_KEYBOARD, "pc or virtual screen, restore calling session");
             !session->IsSystemKeyboard() ? session->RestoreCallingSession() :
                 session->NotifySystemKeyboardAvoidChange(SystemKeyboardAvoidChangeReason::KEYBOARD_HIDE);
