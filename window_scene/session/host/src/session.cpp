@@ -4020,4 +4020,15 @@ void Session::SetClientDisplayId(DisplayId displayid)
 {
     clientDisplayId_ = displayid;
 }
+
+void Session::SetBorderUnoccupied(bool borderUnoccupied)
+{
+    TLOGI(WmsLogTag::WMS_PATTERN, "borderUnoccupied: %{public}d", borderUnoccupied);
+    borderUnoccupied_ = borderUnoccupied;
+}
+
+bool Session::GetBorderUnoccupied() const
+{
+    return borderUnoccupied_;
+}
 } // namespace OHOS::Rosen

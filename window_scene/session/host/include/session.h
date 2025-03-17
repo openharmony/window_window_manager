@@ -641,6 +641,12 @@ public:
     WindowLayoutInfo GetWindowLayoutInfoForWindowInfo() const;
     WindowMetaInfo GetWindowMetaInfoForWindowInfo() const;
 
+    /*
+     * Window Pattern
+     */
+    void SetBorderUnoccupied(bool borderUnoccupied = false);
+    bool GetBorderUnoccupied() const;
+    
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
     public:
@@ -969,6 +975,11 @@ private:
     std::mutex saveSnapshotCallbackMutex_;
     std::mutex removeSnapshotCallbackMutex_;
     std::atomic<bool> needNotifyAttachState_ = { false };
+
+    /*
+     * Window Pattern
+     */
+    bool borderUnoccupied_ = false;
 };
 } // namespace OHOS::Rosen
 
