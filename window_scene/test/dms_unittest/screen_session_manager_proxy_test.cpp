@@ -2213,7 +2213,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayHookInfo, Function | SmallTest
     func();
 
     EXPECT_EQ(hookInfo.height_, 0);
-    EXPECT_EQ(hookInfo.weigh_, 0);
+    EXPECT_EQ(hookInfo.width_, 0);
 }
 
 /**
