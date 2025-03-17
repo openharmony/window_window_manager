@@ -659,12 +659,17 @@ void WindowSessionImpl::RemoveSubWindow(int32_t parentPersistentId)
 {
     const int32_t persistentId = GetPersistentId();
     TLOGI(WmsLogTag::WMS_SUB, "Id: %{public}d, parentId: %{public}d", persistentId, parentPersistentId);
-    std::vector<sptr<WindowSessionImpl>> subWindows;
-    GetSubWidnows(parentPersistentId, subWindows);
+    std::lock_guard<std::recursive_mutex> lock(subWindowSessionMutex_);
+    auto subIter = subWindowSessionMap_.find(parentPersistentId);
+    if (subIter == subWindowSessionMap_.end()) {
+        TLOGW(WmsLogTag::WMS_SUB, "find parentPersistentId: %{public}d failed", parentPersistentId);
+        return;
+    }
+    auto& subWindows = subIter->second;
     for (auto iter = subWindows.begin(); iter != subWindows.end(); iter++) {
         auto subWindow = *iter;
         if (subWindow != nullptr && subWindow->GetPersistentId() == persistentId) {
-            TLOGD(WmsLogTag::WMS_SUB, "Destroy sub window, persistentId: %{public}d", persistentId);
+            TLOGD(WmsLogTag::WMS_SUB, "erase persistentId: %{public}d", persistentId);
             subWindows.erase(iter);
             break;
         } else {
@@ -5606,6 +5611,7 @@ bool WindowSessionImpl::IsValidCrossState(int32_t state) const
 
 void WindowSessionImpl::UpdateSubWindowLevel(uint32_t subWindowLevel)
 {
+    property_->SetSubWindowLevel(subWindowLevel);
     std::vector<sptr<WindowSessionImpl>> subWindows;
     GetSubWidnows(GetPersistentId(), subWindows);
     for (auto& subWindow : subWindows) {
