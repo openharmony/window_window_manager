@@ -21,6 +21,7 @@
 #include "refbase.h"
 #include "display_manager.h"
 #include "ani.h"
+#include "event_handler.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -35,6 +36,7 @@ public:
     DisplayAniListener(ani_env* env)
         : env_(env), weakRef_(wptr<DisplayAniListener> (this)) {}
     ~DisplayAniListener() override;
+    void SetMainEventHandler();
     void AddCallback(const std::string& type, ani_ref callback);
     void RemoveAllCallback();
     void RemoveCallback(ani_env* env, const std::string& type, ani_ref callback);
@@ -55,6 +57,7 @@ private:
     std::mutex mtx_;
     std::map<std::string, std::vector<ani_ref>> aniCallBack_;
     wptr<DisplayAniListener> weakRef_  = nullptr;
+    std::shared_ptr<AppExecFwk::EventHandler> eventHandler_ = nullptr;
 };
 const std::string EVENT_ADD = "add";
 const std::string EVENT_REMOVE = "remove";

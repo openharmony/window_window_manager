@@ -47,7 +47,6 @@ ohos_shared_library("displayani_kit") {
     "display_ani/src/display_ani.cpp",
     "display_ani/src/display_ani_listener.cpp",
     "display_ani/src/display_ani_manager.cpp",
-    "display_ani/src/display_ani_register_manager.cpp",
     "display_ani/src/display_ani_utils.cpp",
   ]
 
@@ -69,6 +68,7 @@ ohos_shared_library("displayani_kit") {
     "ability_runtime:ability_manager",
     "ability_runtime:runtime",
     "c_utils:utils",
+    "eventhandler:libeventhandler",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "runtime_core:ani",
