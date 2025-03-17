@@ -202,7 +202,7 @@ napi_value KeyboardViewModeInit(napi_env env);
 napi_value CreateResultMapToJsValue(napi_env env,
     const std::unordered_map<int32_t, RotationChangeResult>& rotationChangeResultMap);
 napi_value CreateJsRotationChangeResultMapObject(napi_env env, const int32_t persistentId,
-        const RotationChangeRersult& rotationChangeResult);
+    const RotationChangeResult& rotationChangeResult);
 napi_value ConvertResultToJsValue(napi_env env, RotationChangeResult& rotationChangeResult);
 napi_value NapiGetUndefined(napi_env env);
 napi_valuetype GetType(napi_env env, napi_value value);

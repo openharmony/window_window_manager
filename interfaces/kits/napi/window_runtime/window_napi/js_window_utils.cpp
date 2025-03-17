@@ -1234,7 +1234,7 @@ bool GetRotationResultFromJs(napi_env env, napi_value jsObject, RotationChangeRe
 {
     napi_value jsRectType = nullptr;
     napi_value jsWindowRect = nullptr;
-    napi_get_named_property(env, jsObject, "rectType", &jsRecType);
+    napi_get_named_property(env, jsObject, "rectType", &jsRectType);
     napi_get_named_property(env, jsObject, "windowRect", &jsWindowRect);
     if (GetType(env, jsRectType) != napi_undefined) {
         uint32_t rectType;

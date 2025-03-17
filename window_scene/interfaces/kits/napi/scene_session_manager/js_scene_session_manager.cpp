@@ -266,7 +266,7 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "registerSingleHandContainerNode", moduleName,
         JsSceneSessionManager::RegisterSingleHandContainerNode);
     BindNativeFunction(env, exportObj, "notifyRotationChange", moduleName,
-            JsSceneSessionManager::NotifyRotationChange);
+        JsSceneSessionManager::NotifyRotationChange);
     return NapiGetUndefined(env);
 }
 
@@ -4307,11 +4307,6 @@ std::unordered_map<int32_t, RotationChangeResult> JsSceneSessionManager::GetRota
             continue;
         }
         RotationChangeResult rotationChangeResult = curSession->NotifyRotationChange(rotationChangeInfo);
-        TLOGI(WmsLogTag::WMS_ROTATION, "persistentId: %{public}d, type: %{public}d," +
-            " rect: [%{public}d, %{public}d, %{public}d, %{public}d]", curSession->GetPersistentId(),
-            static_cast<uint32_t>(rotationChangeResult.rectType), rotationChangeResult.windowRect.posX_,
-            rotationChangeResult.windowRect.posY_, rotationChangeResult.windowRect.width_,
-            rotationChangeResult.windowRect.height_);
         if (rotationChangeResult.windowRect.width_ != 0 && rotationChangeResult.windowRect.height_ != 0) {
             rotationChangeResultMap[curSession->GetPersistentId()] = rotationChangeResult;
         }
@@ -4347,10 +4342,10 @@ napi_value JsSceneSessionManager::OnNotifyRotationChange(napi_env env, napi_call
 
     std::vector<sptr<SceneSession>> activeSceneSessionMapCopy =
         SceneSessionManager::GetInstance().GetActiveSceneSessionCopy();
-     if (activeSceneSessionMapCopy.empty()) {
+    if (activeSceneSessionMapCopy.empty()) {
         TLOGE(WmsLogTag::WMS_ROTATION, "activeSceneSessionMapCopy empty");
-        return NapiGetUndefined(env);;
-     }
+        return NapiGetUndefined(env);
+    }
     std::unordered_map<int32_t, RotationChangeResult> rotationChangeResultMap =
         GetRotationChangeResult(activeSceneSessionMapCopy, rotationChangeInfo);
     napi_value rotationChangeResultObj = CreateResultMapToJsValue(env, rotationChangeResultMap);

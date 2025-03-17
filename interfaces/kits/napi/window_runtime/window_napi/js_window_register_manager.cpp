@@ -726,9 +726,9 @@ WmErrorCode JsWindowRegisterManager::ProcessWindowRotationChangeRegister(const s
         return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     if (isRegister) {
-        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterWindowRotationChangeListeners(thisListener));
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterWindowRotationChangeListener(thisListener));
     } else {
-        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterWindowRotationChangeListeners(thisListener));
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterWindowRotationChangeListener(thisListener));
     }
     return ret;
 }
