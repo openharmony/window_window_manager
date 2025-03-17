@@ -118,7 +118,7 @@ HWTEST_F(SceneSessionTest4, HandleActionUpdateKeyboardTouchHotArea01, Function |
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO;
     WMError ret = sceneSession->HandleActionUpdateKeyboardTouchHotArea(property, action);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_TYPE, ret);
+    ASSERT_EQ(WMError::WM_OK, ret);
 }
 
 /**
@@ -145,21 +145,36 @@ HWTEST_F(SceneSessionTest4, HandleActionUpdateKeyboardTouchHotArea02, Function |
 HWTEST_F(SceneSessionTest4, HandleActionUpdateDecorEnable, Function | SmallTest | Level2)
 {
     SessionInfo info;
+    info.abilityName_ = "HandleActionUpdateDecorEnable";
+    info.bundleName_ = "HandleActionUpdateDecorEnable";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->isSystemCalling_ = true;
+    sceneSession->SetSessionProperty(property);
     WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO;
 
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(nullptr, property);
-    OHOS::Rosen::Session session(info);
-    session.property_ = nullptr;
-    sceneSession->HandleActionUpdateDecorEnable(property, action);
-    session.property_ = sptr<WindowSessionProperty>::MakeSptr();
-    sceneSession->HandleActionUpdateDecorEnable(property, action);
-
-    OHOS::Rosen::WindowSessionProperty windowSessionProperty;
     auto ret = sceneSession->HandleActionUpdateDecorEnable(property, action);
     ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: HandleActionUpdateDecorEnableTest001
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, HandleActionUpdateDecorEnableTest001, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "HandleActionUpdateDecorEnableTest001";
+    info.bundleName_ = "HandleActionUpdateDecorEnableTest001";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->isSystemCalling_ = false;
+    sceneSession->SetSessionProperty(property);
+    WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO;
+
+    auto ret = sceneSession->HandleActionUpdateDecorEnable(property, action);
+    ASSERT_EQ(WMError::WM_ERROR_NOT_SYSTEM_APP, ret);
 }
 
 /**
@@ -1419,6 +1434,304 @@ HWTEST_F(SceneSessionTest4, GetAvoidAreaBytype, Function | SmallTest | Level2)
         avoidArea = sessionVector[i]->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM, rect);
         ASSERT_EQ(avoidArea.topRect_.posX_, 0);
     }
+}
+
+/**
+ * @tc.name: NotifyFrameLayoutFinishFromAppTest
+ * @tc.desc: NotifyFrameLayoutFinishFromApp test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, NotifyFrameLayoutFinishFromAppTest, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "NotifyFrameLayoutFinishFromAppTest";
+    info.bundleName_ = "NotifyFrameLayoutFinishFromAppTest";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    bool notifyListener = true;
+    NotifySessionExceptionFunc func = [](const OHOS::Rosen::SessionInfo &sessionInfo,
+                                         const OHOS::Rosen::ExceptionInfo &exceptionInfo,
+                                         bool needRecover) {};
+    session->sessionExceptionFunc_ = func;
+    WSRect rect = { 200, 200, 200, 200 };
+    WSError res = session->NotifyFrameLayoutFinishFromApp(notifyListener, rect);
+    ASSERT_EQ(res, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: NotifyFrameLayoutFinishFromAppTest001
+ * @tc.desc: NotifyFrameLayoutFinishFromApp test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, NotifyFrameLayoutFinishFromAppTest001, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "NotifyFrameLayoutFinishFromAppTest001";
+    info.bundleName_ = "NotifyFrameLayoutFinishFromAppTest001";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    bool notifyListener = true;
+    NotifySessionExceptionFunc func = nullptr;
+    session->sessionExceptionFunc_ = func;
+    WSRect rect = { 200, 200, 200, 200 };
+    WSError res = session->NotifyFrameLayoutFinishFromApp(notifyListener, rect);
+    ASSERT_EQ(res, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: NotifyFrameLayoutFinishFromAppTest002
+ * @tc.desc: NotifyFrameLayoutFinishFromApp test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, NotifyFrameLayoutFinishFromAppTest002, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "NotifyFrameLayoutFinishFromAppTest002";
+    info.bundleName_ = "NotifyFrameLayoutFinishFromAppTest002";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    bool notifyListener = false;
+    NotifySessionExceptionFunc func = nullptr;
+    session->sessionExceptionFunc_ = func;
+    WSRect rect = { 200, 200, 200, 200 };
+    WSError res = session->NotifyFrameLayoutFinishFromApp(notifyListener, rect);
+    ASSERT_EQ(res, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: UpdateWaterfallModeTest
+ * @tc.desc: UpdateWaterfallMode test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, UpdateWaterfallModeTest, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "UpdateWaterfallModeTest";
+    info.bundleName_ = "UpdateWaterfallModeTest";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    session->pcFoldScreenController_ = nullptr;
+    SessionEvent event = SessionEvent::EVENT_MAXIMIZE_WATERFALL;
+    session->UpdateWaterfallMode(event);
+
+    session->pcFoldScreenController_ = sptr<PcFoldScreenController>::MakeSptr(wptr(session),
+        session->GetPersistentId());
+    event = SessionEvent::EVENT_MAXIMIZE_WATERFALL;
+    session->UpdateWaterfallMode(event);
+
+    event = SessionEvent::EVENT_WATERFALL_TO_MAXIMIZE;
+    session->UpdateWaterfallMode(event);
+    ASSERT_EQ(session->pcFoldScreenController_->isFullScreenWaterfallMode_, false);
+
+    event = SessionEvent::EVENT_END;
+    session->UpdateWaterfallMode(event);
+    ASSERT_NE(session->pcFoldScreenController_, nullptr);
+}
+
+/**
+ * @tc.name: SyncSessionEventTest
+ * @tc.desc: SyncSessionEvent function test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, SyncSessionEventTest, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SyncSessionEventTest";
+    info.bundleName_ = "SyncSessionEventTest";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    SessionEvent event = SessionEvent::EVENT_END;
+    auto result = sceneSession->SyncSessionEvent(event);
+    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: SyncSessionEventTest001
+ * @tc.desc: SyncSessionEvent function test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, SyncSessionEventTest001, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SyncSessionEventTest001";
+    info.bundleName_ = "SyncSessionEventTest001";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
+    property->isSystemCalling_ = true;
+    sceneSession->SetSessionProperty(property);
+    sceneSession->isActive_ = false;
+    sceneSession->moveDragController_ = nullptr;
+
+    SessionEvent event = SessionEvent::EVENT_START_MOVE;
+    auto result = sceneSession->SyncSessionEvent(event);
+    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: SyncSessionEventTest002
+ * @tc.desc: SyncSessionEvent function test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, SyncSessionEventTest002, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SyncSessionEventTest002";
+    info.bundleName_ = "SyncSessionEventTest002";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
+    property->isSystemCalling_ = true;
+    sceneSession->SetSessionProperty(property);
+    sceneSession->isActive_ = false;
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024, sceneSession->GetWindowType());
+
+    SessionEvent event = SessionEvent::EVENT_END_MOVE;
+    sceneSession->moveDragController_->isStartMove_ = true;
+    auto result = sceneSession->SyncSessionEvent(event);
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: SyncSessionEventTest003
+ * @tc.desc: SyncSessionEvent function test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, SyncSessionEventTest003, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SyncSessionEventTest003";
+    info.bundleName_ = "SyncSessionEventTest003";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
+    property->isSystemCalling_ = true;
+    sceneSession->SetSessionProperty(property);
+    sceneSession->isActive_ = false;
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024, sceneSession->GetWindowType());
+
+    SessionEvent event = SessionEvent::EVENT_END_MOVE;
+    sceneSession->moveDragController_->isStartMove_ = false;
+    auto result = sceneSession->SyncSessionEvent(event);
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: SyncSessionEventTest004
+ * @tc.desc: SyncSessionEvent function test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, SyncSessionEventTest004, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SyncSessionEventTest004";
+    info.bundleName_ = "SyncSessionEventTest004";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
+    property->isSystemCalling_ = true;
+    sceneSession->SetSessionProperty(property);
+    sceneSession->isActive_ = false;
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024, sceneSession->GetWindowType());
+
+    SessionEvent event = SessionEvent::EVENT_START_MOVE;
+    sceneSession->moveDragController_->isStartMove_ = false;
+    auto result = sceneSession->SyncSessionEvent(event);
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: SyncSessionEventTest005
+ * @tc.desc: SyncSessionEvent function test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, SyncSessionEventTest005, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SyncSessionEventTest005";
+    info.bundleName_ = "SyncSessionEventTest005";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
+    property->isSystemCalling_ = true;
+    sceneSession->SetSessionProperty(property);
+    sceneSession->isActive_ = false;
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024, sceneSession->GetWindowType());
+
+    SessionEvent event = SessionEvent::EVENT_START_MOVE;
+    sceneSession->moveDragController_->isStartMove_ = true;
+    auto result = sceneSession->SyncSessionEvent(event);
+    ASSERT_EQ(result, WSError::WS_ERROR_REPEAT_OPERATION);
+}
+
+/**
+ * @tc.name: SetWinRectWhenUpdateRectTest
+ * @tc.desc: SetWinRectWhenUpdateRect function test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, SetWinRectWhenUpdateRectTest, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetWinRectWhenUpdateRectTest";
+    info.bundleName_ = "SetWinRectWhenUpdateRectTest";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    WSRect rect = { 10, 10, 200, 200 };
+    sceneSession->isMidScene_ = false;
+    sceneSession->SetWinRectWhenUpdateRect(rect);
+    ASSERT_EQ(sceneSession->winRect_.posX_, rect.posX_);
+    ASSERT_EQ(sceneSession->winRect_.posY_, rect.posY_);
+}
+
+/**
+ * @tc.name: SetWinRectWhenUpdateRectTest001
+ * @tc.desc: SetWinRectWhenUpdateRect function test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, SetWinRectWhenUpdateRectTest001, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetWinRectWhenUpdateRectTest001";
+    info.bundleName_ = "SetWinRectWhenUpdateRectTest001";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    WSRect rect = { 10, 10, 200, 200 };
+    sceneSession->isMidScene_ = true;
+    sceneSession->SetWinRectWhenUpdateRect(rect);
+    ASSERT_EQ(sceneSession->winRect_.posX_, rect.posX_);
+    ASSERT_EQ(sceneSession->winRect_.posY_, rect.posY_);
+}
+
+/**
+ * @tc.name: SetWinRectWhenUpdateRectTest002
+ * @tc.desc: SetWinRectWhenUpdateRect function test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, SetWinRectWhenUpdateRectTest002, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetWinRectWhenUpdateRectTest002";
+    info.bundleName_ = "SetWinRectWhenUpdateRectTest002";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    WSRect rect = { 0, 10, 200, 200 };
+    sceneSession->isMidScene_ = true;
+    sceneSession->SetWinRectWhenUpdateRect(rect);
+    ASSERT_EQ(sceneSession->winRect_.posX_, rect.posX_);
+    ASSERT_EQ(sceneSession->winRect_.posY_, rect.posY_);
+}
+
+/**
+ * @tc.name: SetWinRectWhenUpdateRectTest003
+ * @tc.desc: SetWinRectWhenUpdateRect function test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, SetWinRectWhenUpdateRectTest003, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetWinRectWhenUpdateRectTest003";
+    info.bundleName_ = "SetWinRectWhenUpdateRectTest003";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    WSRect rect = { 0, 0, 200, 200 };
+    sceneSession->isMidScene_ = true;
+    sceneSession->SetWinRectWhenUpdateRect(rect);
+    ASSERT_EQ(sceneSession->winRect_.width_, rect.width_);
+    ASSERT_EQ(sceneSession->winRect_.height_, rect.height_);
 }
 }
 }

@@ -319,6 +319,68 @@ HWTEST_F(SceneSessionManagerTest12, TestCheckSystemWindowPermission_09, Function
 }
 
 /**
+ * @tc.name: TestCheckSystemWindowPermission_010
+ * @tc.desc: Test CheckSystemWindowPermission with windowType WINDOW_TYPE_SYSTEM_SUB_WINDOW
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, TestCheckSystemWindowPermission_010, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, ssm_);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetParentPersistentId(100101);
+    property->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW);
+    ASSERT_EQ(true, ssm_->CheckSystemWindowPermission(property));
+}
+
+/**
+ * @tc.name: TestCheckSystemWindowPermission_011
+ * @tc.desc: Test CheckSystemWindowPermission with windowType WINDOW_TYPE_SYSTEM_SUB_WINDOW
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, TestCheckSystemWindowPermission_011, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, ssm_);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetParentPersistentId(100101);
+    property->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW);
+
+    sptr<WindowSessionProperty> parentProperty = sptr<WindowSessionProperty>::MakeSptr();
+    parentProperty->SetPersistentId(100101);
+    parentProperty->SetWindowType(WindowType::WINDOW_TYPE_TOAST);
+    SessionInfo info;
+    info.abilityName_ = "CheckSystemWindowPermission";
+    info.bundleName_ = "CheckSystemWindowPermission";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->SetSessionProperty(parentProperty);
+
+    ASSERT_EQ(true, ssm_->CheckSystemWindowPermission(property));
+}
+
+/**
+ * @tc.name: TestCheckSystemWindowPermission_012
+ * @tc.desc: Test CheckSystemWindowPermission with windowType WINDOW_TYPE_SYSTEM_SUB_WINDOW
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, TestCheckSystemWindowPermission_012, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, ssm_);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetParentPersistentId(100101);
+    property->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW);
+
+    sptr<WindowSessionProperty> parentProperty = sptr<WindowSessionProperty>::MakeSptr();
+    parentProperty->SetPersistentId(100101);
+    parentProperty->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    SessionInfo info;
+    info.abilityName_ = "CheckSystemWindowPermission";
+    info.bundleName_ = "CheckSystemWindowPermission";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->SetSessionProperty(parentProperty);
+
+    ASSERT_EQ(true, ssm_->CheckSystemWindowPermission(property));
+}
+
+/**
  * @tc.name: CreateAndConnectSpecificSession
  * @tc.desc: CreateAndConnectSpecificSession
  * @tc.type: FUNC
@@ -1505,13 +1567,6 @@ HWTEST_F(SceneSessionManagerTest12, RemoveLifeCycleTaskByPersistentId, Function 
  */
 HWTEST_F(SceneSessionManagerTest12, SetStatusBarAvoidHeight, Function | SmallTest | Level3)
 {
-    SessionInfo info;
-    info.abilityName_ = "test1";
-    info.bundleName_ = "test1";
-    info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    sptr<SceneSessionMocker> sceneSession = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
-    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
-    EXPECT_CALL(*sceneSession, UpdateCrossAxis()).Times(1);
     int32_t height = 10;
     ssm_->SetStatusBarAvoidHeight(height);
     WSRect barArea;
@@ -1557,6 +1612,178 @@ HWTEST_F(SceneSessionManagerTest12, GetKeyboardOccupiedAreaWithRotation2, Functi
     avoidAreas.emplace_back(keyboardOccupiedArea);
     sceneSessionManager->GetKeyboardOccupiedAreaWithRotation(persistentId, rotation, avoidAreas);
     ASSERT_EQ(false, avoidAreas[0].first);
+}
+
+/**
+ * @tc.name: SetFocusedSessionDisplayIdIfNeededTest
+ * @tc.desc: test function : SetFocusedSessionDisplayIdIfNeeded
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, SetFocusedSessionDisplayIdIfNeededTest, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test1";
+    sptr<SceneSessionMocker> sceneSessionMock = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetDisplayId(DISPLAY_ID_INVALID);
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSessionMock->SetSessionProperty(property);
+
+    EXPECT_CALL(*sceneSessionMock, SetScreenId(_)).Times(1);
+    sptr<SceneSession> sceneSession = static_cast<sptr<SceneSession>>(sceneSessionMock);
+    ssm_->SetFocusedSessionDisplayIdIfNeeded(sceneSession);
+}
+
+/**
+ * @tc.name: SetFocusedSessionDisplayIdIfNeededTest001
+ * @tc.desc: test function : SetFocusedSessionDisplayIdIfNeeded
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, SetFocusedSessionDisplayIdIfNeededTest001, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test1";
+    sptr<SceneSessionMocker> sceneSessionMock = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetDisplayId(DISPLAY_ID_INVALID + 1);
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSessionMock->SetSessionProperty(property);
+
+    EXPECT_CALL(*sceneSessionMock, SetScreenId(_)).Times(0);
+    sptr<SceneSession> sceneSession = static_cast<sptr<SceneSession>>(sceneSessionMock);
+    ssm_->SetFocusedSessionDisplayIdIfNeeded(sceneSession);
+}
+
+/**
+ * @tc.name: QueryAbilityInfoFromBMSTest
+ * @tc.desc: SceneSesionManager QueryAbilityInfoFromBMS NotifyStartAbility
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, QueryAbilityInfoFromBMSTest, Function | SmallTest | Level1)
+{
+    const int32_t uId = 32;
+    SessionInfo sessionInfo_;
+    sessionInfo_.bundleName_ = "BundleName";
+    sessionInfo_.abilityName_ = "AbilityName";
+    sessionInfo_.moduleName_ = "ModuleName";
+    ssm_->bundleMgr_ = nullptr;
+
+    auto res = ssm_->QueryAbilityInfoFromBMS(uId,
+        sessionInfo_.bundleName_, sessionInfo_.abilityName_, sessionInfo_.moduleName_);
+    EXPECT_EQ(res, nullptr);
+}
+
+/**
+ * @tc.name: QueryAbilityInfoFromBMSTest001
+ * @tc.desc: SceneSesionManager QueryAbilityInfoFromBMS NotifyStartAbility
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, QueryAbilityInfoFromBMSTest001, Function | SmallTest | Level1)
+{
+    const int32_t uId = 32;
+    SessionInfo sessionInfo_;
+    sessionInfo_.bundleName_ = "BundleName";
+    sessionInfo_.abilityName_ = "AbilityName";
+    sessionInfo_.moduleName_ = "ModuleName";
+    ssm_->bundleMgr_ = ssm_->GetBundleManager();
+    SceneSessionManager::SessionInfoList listKey = {
+        .uid_ = uId, .bundleName_ = "BundleName", .abilityName_ = "AbilityName", .moduleName_ = "ModuleName"
+    };
+    ssm_->abilityInfoMap_[listKey] = std::make_shared<AppExecFwk::AbilityInfo>();
+
+    auto res = ssm_->QueryAbilityInfoFromBMS(uId,
+        sessionInfo_.bundleName_, sessionInfo_.abilityName_, sessionInfo_.moduleName_);
+    EXPECT_NE(res, nullptr);
+}
+
+/**
+ * @tc.name: RequestFocusSpecificCheckTest
+ * @tc.desc: Test for RequestFocusSpecificCheck
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, RequestFocusSpecificCheckTest, Function | SmallTest | Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test2";
+    bool byForeground = true;
+    FocusChangeReason reason = FocusChangeReason::CLIENT_REQUEST;
+
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
+    session->persistentId_ = 1;
+    sceneSession->dialogVec_.push_back(session);
+    ssm_->windowFocusController_->UpdateFocusedSessionId(DEFAULT_DISPLAY_ID, 1);
+    sceneSession->SetForceHideState(ForceHideState::NOT_HIDDEN);
+
+    WSError result = ssm_->RequestFocusSpecificCheck(DEFAULT_DISPLAY_ID, sceneSession, byForeground, reason);
+    EXPECT_EQ(result, WSError::WS_DO_NOTHING);
+}
+
+/**
+ * @tc.name: NotifyUnFocusedByMissionTest001
+ * @tc.desc: Test for NotifyUnFocusedByMission
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, NotifyUnFocusedByMissionTest001, Function | SmallTest | Level1)
+{
+    sptr<SceneSession> sceneSession;
+    ssm_->NotifyUnFocusedByMission(sceneSession);
+    EXPECT_EQ(sceneSession, nullptr);
+}
+
+/**
+ * @tc.name: NotifyUnFocusedByMissionTest002
+ * @tc.desc: Test for NotifyUnFocusedByMission
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, NotifyUnFocusedByMissionTest002, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.bundleName_ = "NotifyUnFocusedByMission";
+    info.abilityName_ = "NotifyUnFocusedByMission";
+    info.isSystem_ = true;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ssm_->NotifyUnFocusedByMission(sceneSession);
+    EXPECT_EQ(sceneSession->GetSessionInfo().isSystem_, true);
+}
+
+/**
+ * @tc.name: NotifyUnFocusedByMissionTest003
+ * @tc.desc: Test for NotifyUnFocusedByMission
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, NotifyUnFocusedByMissionTest003, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.bundleName_ = "NotifyUnFocusedByMission";
+    info.abilityName_ = "NotifyUnFocusedByMission";
+    info.isSystem_ = false;
+    ssm_->listenerController_ = std::make_shared<SessionListenerController>();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ssm_->NotifyUnFocusedByMission(sceneSession);
+    EXPECT_EQ(sceneSession->GetSessionInfo().isSystem_, false);
+}
+
+/**
+ * @tc.name: NotifyStackEmptyTest
+ * @tc.desc: test function : NotifyStackEmpty
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, NotifyStackEmptyTest, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.bundleName_ = "NotifyStackEmpty";
+    info.abilityName_ = "NotifyStackEmpty";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    int persistentId = 1112;
+    sceneSession->property_->SetPersistentId(persistentId);
+    auto ret = ssm_->NotifyStackEmpty(persistentId);
+    usleep(WAIT_SYNC_IN_NS);
+    EXPECT_EQ(ret, WSError::WS_OK);
 }
 }
 } // namespace Rosen
