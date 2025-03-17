@@ -702,7 +702,7 @@ public:
      * @brief Innerapi, notify caller when developer set SystemBarProperty.
      */
     virtual void OnSystemBarPropertyUpdate(WindowType type, const SystemBarProperty& property) {}
-}
+};
 
 /*
  * @class IWindowRotationChangeListener
