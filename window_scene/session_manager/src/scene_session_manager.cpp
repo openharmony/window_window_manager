@@ -9074,6 +9074,7 @@ void SceneSessionManager::SetSessionVisibilityInfo(const sptr<SceneSession>& ses
     windowVisibilityInfo->SetBundleName(session->GetSessionInfo().bundleName_);
     windowVisibilityInfo->SetAbilityName(session->GetSessionInfo().abilityName_);
     windowVisibilityInfo->SetIsSystem(session->GetSessionInfo().isSystem_);
+    windowVisibilityInfo->SetZOrder(session->GetZOrder());
     windowVisibilityInfos.emplace_back(windowVisibilityInfo);
 
     visibilityInfo +=
@@ -9455,6 +9456,7 @@ void SceneSessionManager::WindowDestroyNotifyVisibility(const sptr<SceneSession>
         windowVisibilityInfo->SetBundleName(sceneSession->GetSessionInfo().bundleName_);
         windowVisibilityInfo->SetAbilityName(sceneSession->GetSessionInfo().abilityName_);
         windowVisibilityInfo->SetIsSystem(sceneSession->GetSessionInfo().isSystem_);
+        windowVisibilityInfo->SetZOrder(sceneSession->GetZOrder());
         windowVisibilityInfos.emplace_back(windowVisibilityInfo);
 #ifdef MEMMGR_WINDOW_ENABLE
         memMgrWindowInfos.emplace_back(new Memory::MemMgrWindowInfo(sceneSession->GetWindowId(),
@@ -11477,6 +11479,7 @@ WMError SceneSessionManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisi
                 session->IsFocused());
             windowVisibilityInfo->SetAppIndex(session->GetSessionInfo().appIndex_);
             windowVisibilityInfo->SetIsSystem(session->GetSessionInfo().isSystem_);
+            windowVisibilityInfo->SetZOrder(session->GetZOrder());
             infos.emplace_back(windowVisibilityInfo);
         }
         return WMError::WM_OK;
