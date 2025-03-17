@@ -1267,6 +1267,8 @@ napi_value CreateJsSessionSizeChangeReason(napi_env env)
         static_cast<int32_t>(SizeChangeReason::MAXIMIZE_TO_SPLIT)));
     napi_set_named_property(env, objValue, "SPLIT_TO_MAXIMIZE", CreateJsValue(env,
         static_cast<int32_t>(SizeChangeReason::SPLIT_TO_MAXIMIZE)));
+    napi_set_named_property(env, objValue, "PAGE_ROTATION", CreateJsValue(env,
+        static_cast<int32_t>(SizeChangeReason::PAGE_ROTATION)));
     napi_set_named_property(env, objValue, "END", CreateJsValue(env,
         static_cast<int32_t>(SizeChangeReason::END)));
 

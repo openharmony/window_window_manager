@@ -245,6 +245,7 @@ public:
      * Window Rotate Animation
      */
     void UpdateRotateAnimationConfig(const RotateAnimationConfig& config);
+    void CloseSyncTransaction(std::function<void()> func);
 
     WSError ProcessBackEvent();
     WSError BindDialogSessionTarget(uint64_t persistentId, sptr<IRemoteObject> targetToken) override;
@@ -1369,6 +1370,8 @@ private:
     std::unique_ptr<LruCache> snapshotLruCache_;
     std::size_t snapshotCapacity_ = 0;
     bool GetIconFromDesk(const SessionInfo& sessionInfo, std::string& startupPagePath) const;
+    bool needCloseSync_ = false;
+    std::function<void()> closeSyncFunc_ = nullptr;
 };
 } // namespace OHOS::Rosen
 

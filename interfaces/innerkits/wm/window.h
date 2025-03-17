@@ -1924,13 +1924,13 @@ public:
     /**
      * @brief Get the Target Orientation ConfigInfo.
      *
-     * @param targetOri target Orientation.
-     * @param config Viewport config.
+     * @param targetOrientation target Orientation.
      * @param properties systemBar properties
+     * @param config Viewport config.
      * @param avoidAreas avoidArea information
      * @return WMError
      */
-    virtual WMError GetTargetOrientationConfigInfo(Orientation targetOri,
+    virtual WMError GetTargetOrientationConfigInfo(Orientation targetOrientation,
         const std::map<WindowType, SystemBarProperty>& properties, Ace::ViewportConfig& config,
         std::map<AvoidAreaType, AvoidArea>& avoidAreas)
     {
@@ -1951,7 +1951,7 @@ public:
 
     /**
      * @brief Unregister window orientation set by developer
-     * 9
+     *
      * @param listener IPreferredOrientationChangeListener.
      * @return WM_OK means register success, others means unregister failed
      */
@@ -1976,7 +1976,7 @@ public:
      * @brief Unregister window orientation change listener
      *
      * @param listener IWindowOrientationChangeListener.
-     * @return WM_OK means register success, others means unregister failed
+     * @return WM_OK means unregister success, others means unregister failed
      */
     virtual WMError UnregisterOrientationChangeListener(const sptr<IWindowOrientationChangeListener>& listener)
     {
