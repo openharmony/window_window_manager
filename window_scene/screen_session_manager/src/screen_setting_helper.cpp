@@ -26,7 +26,6 @@ namespace Rosen {
 sptr<SettingObserver> ScreenSettingHelper::dpiObserver_;
 sptr<SettingObserver> ScreenSettingHelper::castObserver_;
 sptr<SettingObserver> ScreenSettingHelper::rotationObserver_;
-sptr<SettingObserver> ScreenSettingHelper::halfScreenObserver_;
 sptr<SettingObserver> ScreenSettingHelper::screenSkipProtectedWindowObserver_;
 sptr<SettingObserver> ScreenSettingHelper::wireCastObserver_;
 sptr<SettingObserver> ScreenSettingHelper::extendScreenDpi_;
