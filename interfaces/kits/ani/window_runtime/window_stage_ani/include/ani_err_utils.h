@@ -22,10 +22,10 @@
 namespace OHOS::Rosen {
 class AniErrUtils {
 public:
-    static ani_status ThrowBusinessError(ani_env* env, WMError error, const std::string& message = "");
-    static ani_status ThrowBusinessError(ani_env* env, WmErrorCode error, const std::string& message = "");
+    static ani_status ThrowBusinessError(ani_env* env, WMError error, std::string message = "");
+    static ani_status ThrowBusinessError(ani_env* env, WmErrorCode error, std::string message = "");
 public:
-    static ani_status CreateBusinessError(ani_env* env, int32_t error, const std::string& message, ani_object* err);
+    static ani_status CreateBusinessError(ani_env* env, int32_t error, std::string message, ani_object* err);
     static std::string GetErrorMsg(WMError error);
     static std::string GetErrorMsg(WmErrorCode error);
 };

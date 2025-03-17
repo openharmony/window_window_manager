@@ -192,55 +192,62 @@ static std::map<DmErrorCode, const char*> DM_ERROR_CODE_TO_ERROR_MSG_MAP {
     {DmErrorCode::DM_ERROR_SYSTEM_INNORMAL,           DM_ERROR_CODE_MSG_SYSTEM_INNORMAL    },
 };
 
-ani_status AniErrUtils::ThrowBusinessError(ani_env* env, WMError error, const std::string& message)
+ani_status AniErrUtils::ThrowBusinessError(ani_env* env, WMError error, std::string message)
 {
     ani_object aniError;
     CreateBusinessError(env, static_cast<int32_t>(error), message == "" ? GetErrorMsg(error) : message, &aniError);
     ani_status status = env->ThrowError(static_cast<ani_error>(aniError));
     if (status != ANI_OK) {
-        TLOGE(WmsLogTag::WMS_MAIN, "[ANI] fail to throw err, status:%{public}d", static_cast<int32_t>(status));
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to throw err, status:%{public}d", static_cast<int32_t>(status));
         return status;
     }
     return ANI_OK;
 }
 
-ani_status AniErrUtils::ThrowBusinessError(ani_env* env, WmErrorCode error, const std::string& message)
+ani_status AniErrUtils::ThrowBusinessError(ani_env* env, WmErrorCode error, std::string message)
 {
     ani_object aniError;
     CreateBusinessError(env, static_cast<int32_t>(error), message == "" ? GetErrorMsg(error) : message, &aniError);
     ani_status status = env->ThrowError(static_cast<ani_error>(aniError));
     if (status != ANI_OK) {
-        TLOGE(WmsLogTag::WMS_MAIN, "[ANI] fail to throw err, status:%{public}d", static_cast<int32_t>(status));
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to throw err, status:%{public}d", static_cast<int32_t>(status));
         return status;
     }
     return ANI_OK;
 }
 
-ani_status AniErrUtils::CreateBusinessError(ani_env* env, int32_t error, const std::string& message, ani_object* err)
+ani_status AniErrUtils::CreateBusinessError(ani_env* env, int32_t error, std::string message, ani_object* err)
 {
-    TLOGI(WmsLogTag::WMS_MAIN, "[ANI] in");
+    TLOGI(WmsLogTag::DEFAULT, "[ANI] in2");
     ani_class aniClass;
-    ani_status status = env->FindClass("L@ohos/window/BusinessError;", &aniClass);
+    ani_status status = env->FindClass("L@ohos/window/window/BusinessErrorInternal;", &aniClass);
     if (status != ANI_OK) {
-        TLOGE(WmsLogTag::WMS_MAIN, "[ANI] class not found, status:%{public}d", static_cast<int32_t>(status));
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] class not found, status:%{public}d", static_cast<int32_t>(status));
         return status;
     }
     ani_method aniCtor;
-    status = env->Class_FindMethod(aniClass, "<ctor>", "Lstd/core/String;Lescompat/ErrorOptions;:V", &aniCtor);
+    status = env->Class_FindMethod(aniClass, "<ctor>", ":V", &aniCtor);
     if (status != ANI_OK) {
-        TLOGE(WmsLogTag::WMS_MAIN, "[ANI] ctor not found, status:%{public}d", static_cast<int32_t>(status));
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] ctor not found, status:%{public}d", static_cast<int32_t>(status));
+        return status;
+    }
+    status = env->Object_New(aniClass, aniCtor, err);
+    if (status != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to new err, status:%{public}d", static_cast<int32_t>(status));
+        return status;
+    }
+    ani_object aniCode;
+    AniWindowUtils::NewAniObject(env, "Lstd/core/Double;", "D:V", &aniCode, ani_double(static_cast<double>(error)));
+    status = env->Object_SetFieldByName_Ref(*err, "code", static_cast<ani_ref>(aniCode));
+    if (status != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to set code, status:%{public}d", static_cast<int32_t>(status));
         return status;
     }
     ani_string aniMsg;
     AniWindowUtils::GetAniString(env, message, &aniMsg);
-    status = env->Object_New(aniClass, aniCtor, err, aniMsg, AniWindowUtils::CreateAniUndefined(env));
+    status = env->Object_SetFieldByName_Ref(*err, "message", static_cast<ani_ref>(aniMsg));
     if (status != ANI_OK) {
-        TLOGE(WmsLogTag::WMS_MAIN, "[ANI] fail to new err, status:%{public}d", static_cast<int32_t>(status));
-        return status;
-    }
-    status = env->Object_SetFieldByName_Int(*err, "code", static_cast<ani_int>(error));
-    if (status != ANI_OK) {
-        TLOGE(WmsLogTag::WMS_MAIN, "[ANI] fail to set code, status:%{public}d", static_cast<int32_t>(status));
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to set message, status:%{public}d", static_cast<int32_t>(status));
         return status;
     }
     return ANI_OK;

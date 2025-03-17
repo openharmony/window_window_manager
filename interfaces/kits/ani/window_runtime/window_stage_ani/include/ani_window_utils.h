@@ -17,6 +17,8 @@
 #define OHOS_JS_WINDOW_UTILS_H
 #include <map>
 #include "ani.h"
+#include "native_engine/native_engine.h"
+#include "native_engine/native_value.h"
 #include "window.h"
 
 #ifndef WINDOW_PREVIEW
@@ -33,6 +35,7 @@ namespace OHOS {
 namespace Rosen {
 constexpr int32_t RGB_LENGTH = 6;
 constexpr int32_t RGBA_LENGTH = 8;
+constexpr Rect g_emptyRect = {0, 0, 0, 0};
 
 enum class ApiWindowType : uint32_t {
     TYPE_BASE,
@@ -71,6 +74,56 @@ enum class LifeCycleEventType : uint32_t {
     DESTROYED,
 };
 
+const std::map<WindowType, ApiWindowType> NATIVE_JS_TO_WINDOW_TYPE_MAP {
+    { WindowType::WINDOW_TYPE_APP_SUB_WINDOW,      ApiWindowType::TYPE_APP               },
+    { WindowType::WINDOW_TYPE_DIALOG,              ApiWindowType::TYPE_DIALOG            },
+    { WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW, ApiWindowType::TYPE_SYSTEM_ALERT      },
+    { WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT,  ApiWindowType::TYPE_INPUT_METHOD      },
+    { WindowType::WINDOW_TYPE_STATUS_BAR,          ApiWindowType::TYPE_STATUS_BAR        },
+    { WindowType::WINDOW_TYPE_PANEL,               ApiWindowType::TYPE_PANEL             },
+    { WindowType::WINDOW_TYPE_KEYGUARD,            ApiWindowType::TYPE_KEYGUARD          },
+    { WindowType::WINDOW_TYPE_VOLUME_OVERLAY,      ApiWindowType::TYPE_VOLUME_OVERLAY    },
+    { WindowType::WINDOW_TYPE_NAVIGATION_BAR,      ApiWindowType::TYPE_NAVIGATION_BAR    },
+    { WindowType::WINDOW_TYPE_FLOAT,               ApiWindowType::TYPE_FLOAT             },
+    { WindowType::WINDOW_TYPE_FLOAT_CAMERA,        ApiWindowType::TYPE_FLOAT_CAMERA      },
+    { WindowType::WINDOW_TYPE_WALLPAPER,           ApiWindowType::TYPE_WALLPAPER         },
+    { WindowType::WINDOW_TYPE_DESKTOP,             ApiWindowType::TYPE_DESKTOP           },
+    { WindowType::WINDOW_TYPE_LAUNCHER_RECENT,     ApiWindowType::TYPE_LAUNCHER_RECENT   },
+    { WindowType::WINDOW_TYPE_LAUNCHER_DOCK,       ApiWindowType::TYPE_LAUNCHER_DOCK     },
+    { WindowType::WINDOW_TYPE_VOICE_INTERACTION,   ApiWindowType::TYPE_VOICE_INTERACTION },
+    { WindowType::WINDOW_TYPE_POINTER,             ApiWindowType::TYPE_POINTER           },
+    { WindowType::WINDOW_TYPE_SCREENSHOT,          ApiWindowType::TYPE_SCREENSHOT        },
+    { WindowType::WINDOW_TYPE_SYSTEM_TOAST,        ApiWindowType::TYPE_SYSTEM_TOAST      },
+    { WindowType::WINDOW_TYPE_DOCK_SLICE,          ApiWindowType::TYPE_DIVIDER           },
+    { WindowType::WINDOW_TYPE_GLOBAL_SEARCH,       ApiWindowType::TYPE_GLOBAL_SEARCH     },
+    { WindowType::WINDOW_TYPE_HANDWRITE,           ApiWindowType::TYPE_HANDWRITE         },
+};
+
+const std::map<ApiWindowType, WindowType> JS_TO_NATIVE_WINDOW_TYPE_MAP {
+    { ApiWindowType::TYPE_APP,                 WindowType::WINDOW_TYPE_APP_SUB_WINDOW      },
+    { ApiWindowType::TYPE_DIALOG,              WindowType::WINDOW_TYPE_DIALOG              },
+    { ApiWindowType::TYPE_SYSTEM_ALERT,        WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW },
+    { ApiWindowType::TYPE_INPUT_METHOD,        WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT  },
+    { ApiWindowType::TYPE_STATUS_BAR,          WindowType::WINDOW_TYPE_STATUS_BAR          },
+    { ApiWindowType::TYPE_PANEL,               WindowType::WINDOW_TYPE_PANEL               },
+    { ApiWindowType::TYPE_KEYGUARD,            WindowType::WINDOW_TYPE_KEYGUARD            },
+    { ApiWindowType::TYPE_VOLUME_OVERLAY,      WindowType::WINDOW_TYPE_VOLUME_OVERLAY      },
+    { ApiWindowType::TYPE_NAVIGATION_BAR,      WindowType::WINDOW_TYPE_NAVIGATION_BAR      },
+    { ApiWindowType::TYPE_FLOAT,               WindowType::WINDOW_TYPE_FLOAT               },
+    { ApiWindowType::TYPE_FLOAT_CAMERA,        WindowType::WINDOW_TYPE_FLOAT_CAMERA        },
+    { ApiWindowType::TYPE_WALLPAPER,           WindowType::WINDOW_TYPE_WALLPAPER           },
+    { ApiWindowType::TYPE_DESKTOP,             WindowType::WINDOW_TYPE_DESKTOP             },
+    { ApiWindowType::TYPE_LAUNCHER_RECENT,     WindowType::WINDOW_TYPE_LAUNCHER_RECENT     },
+    { ApiWindowType::TYPE_LAUNCHER_DOCK,       WindowType::WINDOW_TYPE_LAUNCHER_DOCK       },
+    { ApiWindowType::TYPE_VOICE_INTERACTION,   WindowType::WINDOW_TYPE_VOICE_INTERACTION   },
+    { ApiWindowType::TYPE_POINTER,             WindowType::WINDOW_TYPE_POINTER             },
+    { ApiWindowType::TYPE_SCREENSHOT,          WindowType::WINDOW_TYPE_SCREENSHOT          },
+    { ApiWindowType::TYPE_SYSTEM_TOAST,        WindowType::WINDOW_TYPE_SYSTEM_TOAST        },
+    { ApiWindowType::TYPE_DIVIDER,             WindowType::WINDOW_TYPE_DOCK_SLICE          },
+    { ApiWindowType::TYPE_GLOBAL_SEARCH,       WindowType::WINDOW_TYPE_GLOBAL_SEARCH       },
+    { ApiWindowType::TYPE_HANDWRITE,           WindowType::WINDOW_TYPE_HANDWRITE           },
+};
+
 enum class ApiWindowMode : uint32_t {
     UNDEFINED = 1,
     FULLSCREEN,
@@ -78,6 +131,22 @@ enum class ApiWindowMode : uint32_t {
     SECONDARY,
     FLOATING,
     MODE_END = FLOATING
+};
+
+const std::map<WindowMode, ApiWindowMode> NATIVE_TO_JS_WINDOW_MODE_MAP {
+    { WindowMode::WINDOW_MODE_UNDEFINED,       ApiWindowMode::UNDEFINED  },
+    { WindowMode::WINDOW_MODE_FULLSCREEN,      ApiWindowMode::FULLSCREEN },
+    { WindowMode::WINDOW_MODE_SPLIT_PRIMARY,   ApiWindowMode::PRIMARY    },
+    { WindowMode::WINDOW_MODE_SPLIT_SECONDARY, ApiWindowMode::SECONDARY  },
+    { WindowMode::WINDOW_MODE_FLOATING,        ApiWindowMode::FLOATING   },
+};
+
+const std::map<ApiWindowMode, WindowMode> JS_TO_NATIVE_WINDOW_MODE_MAP {
+    {ApiWindowMode::UNDEFINED,  WindowMode::WINDOW_MODE_UNDEFINED       },
+    {ApiWindowMode::FULLSCREEN, WindowMode::WINDOW_MODE_FULLSCREEN      },
+    {ApiWindowMode::PRIMARY,    WindowMode::WINDOW_MODE_SPLIT_PRIMARY   },
+    {ApiWindowMode::SECONDARY,  WindowMode::WINDOW_MODE_SPLIT_SECONDARY },
+    {ApiWindowMode::FLOATING,   WindowMode::WINDOW_MODE_FLOATING        },
 };
 
 enum class ApiOrientation : uint32_t {
@@ -103,6 +172,49 @@ enum class ApiOrientation : uint32_t {
     END = FOLLOW_DESKTOP,
 };
 
+const std::map<ApiOrientation, Orientation> JS_TO_NATIVE_ORIENTATION_MAP {
+    {ApiOrientation::UNSPECIFIED,                           Orientation::UNSPECIFIED                        },
+    {ApiOrientation::PORTRAIT,                              Orientation::VERTICAL                           },
+    {ApiOrientation::LANDSCAPE,                             Orientation::HORIZONTAL                         },
+    {ApiOrientation::PORTRAIT_INVERTED,                     Orientation::REVERSE_VERTICAL                   },
+    {ApiOrientation::LANDSCAPE_INVERTED,                    Orientation::REVERSE_HORIZONTAL                 },
+    {ApiOrientation::AUTO_ROTATION,                         Orientation::SENSOR                             },
+    {ApiOrientation::AUTO_ROTATION_PORTRAIT,                Orientation::SENSOR_VERTICAL                    },
+    {ApiOrientation::AUTO_ROTATION_LANDSCAPE,               Orientation::SENSOR_HORIZONTAL                  },
+    {ApiOrientation::AUTO_ROTATION_RESTRICTED,              Orientation::AUTO_ROTATION_RESTRICTED           },
+    {ApiOrientation::AUTO_ROTATION_PORTRAIT_RESTRICTED,     Orientation::AUTO_ROTATION_PORTRAIT_RESTRICTED  },
+    {ApiOrientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED,    Orientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED },
+    {ApiOrientation::LOCKED,                                Orientation::LOCKED                             },
+    {ApiOrientation::AUTO_ROTATION_UNSPECIFIED,             Orientation::AUTO_ROTATION_UNSPECIFIED          },
+    {ApiOrientation::USER_ROTATION_PORTRAIT,                Orientation::USER_ROTATION_PORTRAIT             },
+    {ApiOrientation::USER_ROTATION_LANDSCAPE,               Orientation::USER_ROTATION_LANDSCAPE            },
+    {ApiOrientation::USER_ROTATION_PORTRAIT_INVERTED,       Orientation::USER_ROTATION_PORTRAIT_INVERTED    },
+    {ApiOrientation::USER_ROTATION_LANDSCAPE_INVERTED,      Orientation::USER_ROTATION_LANDSCAPE_INVERTED   },
+    {ApiOrientation::FOLLOW_DESKTOP,                        Orientation::FOLLOW_DESKTOP                     },
+};
+
+const std::map<Orientation, ApiOrientation> NATIVE_TO_JS_ORIENTATION_MAP {
+    {Orientation::UNSPECIFIED,                           ApiOrientation::UNSPECIFIED                        },
+    {Orientation::VERTICAL,                              ApiOrientation::PORTRAIT                           },
+    {Orientation::HORIZONTAL,                            ApiOrientation::LANDSCAPE                          },
+    {Orientation::REVERSE_VERTICAL,                      ApiOrientation::PORTRAIT_INVERTED                  },
+    {Orientation::REVERSE_HORIZONTAL,                    ApiOrientation::LANDSCAPE_INVERTED                 },
+    {Orientation::SENSOR,                                ApiOrientation::AUTO_ROTATION                      },
+    {Orientation::SENSOR_VERTICAL,                       ApiOrientation::AUTO_ROTATION_PORTRAIT             },
+    {Orientation::SENSOR_HORIZONTAL,                     ApiOrientation::AUTO_ROTATION_LANDSCAPE            },
+    {Orientation::AUTO_ROTATION_RESTRICTED,              ApiOrientation::AUTO_ROTATION_RESTRICTED           },
+    {Orientation::AUTO_ROTATION_PORTRAIT_RESTRICTED,     ApiOrientation::AUTO_ROTATION_PORTRAIT_RESTRICTED  },
+    {Orientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED,    ApiOrientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED },
+    {Orientation::LOCKED,                                ApiOrientation::LOCKED                             },
+    {Orientation::FOLLOW_RECENT,                         ApiOrientation::UNSPECIFIED                        },
+    {Orientation::AUTO_ROTATION_UNSPECIFIED,             ApiOrientation::AUTO_ROTATION_UNSPECIFIED          },
+    {Orientation::USER_ROTATION_PORTRAIT,                ApiOrientation::USER_ROTATION_PORTRAIT             },
+    {Orientation::USER_ROTATION_LANDSCAPE,               ApiOrientation::USER_ROTATION_LANDSCAPE            },
+    {Orientation::USER_ROTATION_PORTRAIT_INVERTED,       ApiOrientation::USER_ROTATION_PORTRAIT_INVERTED    },
+    {Orientation::USER_ROTATION_LANDSCAPE_INVERTED,      ApiOrientation::USER_ROTATION_LANDSCAPE_INVERTED   },
+    {Orientation::FOLLOW_DESKTOP,                        ApiOrientation::FOLLOW_DESKTOP                     },
+};
+
 enum class RectChangeReason : uint32_t {
     UNDEFINED = 0,
     MAXIMIZE,
@@ -111,6 +223,26 @@ enum class RectChangeReason : uint32_t {
     DRAG,
     DRAG_START,
     DRAG_END,
+};
+
+const std::map<WindowSizeChangeReason, RectChangeReason> JS_SIZE_CHANGE_REASON {
+    { WindowSizeChangeReason::UNDEFINED,             RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::MAXIMIZE,              RectChangeReason::MAXIMIZE   },
+    { WindowSizeChangeReason::RECOVER,               RectChangeReason::RECOVER    },
+    { WindowSizeChangeReason::ROTATION,              RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::DRAG,                  RectChangeReason::DRAG       },
+    { WindowSizeChangeReason::DRAG_START,            RectChangeReason::DRAG_START },
+    { WindowSizeChangeReason::DRAG_END,              RectChangeReason::DRAG_END   },
+    { WindowSizeChangeReason::RESIZE,                RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::MOVE,                  RectChangeReason::MOVE       },
+    { WindowSizeChangeReason::HIDE,                  RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::TRANSFORM,             RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::CUSTOM_ANIMATION_SHOW, RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::FULL_TO_SPLIT,         RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::SPLIT_TO_FULL,         RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::FULL_TO_FLOATING,      RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::FLOATING_TO_FULL,      RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::END,                   RectChangeReason::UNDEFINED  },
 };
 
 enum class ApiModalityType : uint32_t {
@@ -127,21 +259,25 @@ inline const std::map<ApiModalityType, ModalityType> JS_TO_NATIVE_MODALITY_TYPE_
 
 class AniWindowUtils {
 public:
-    static ani_status GetStdString(ani_env* env, ani_string str, std::string& result);
+    static ani_status GetStdString(ani_env* env, ani_string ani_str, std::string& result);
     static ani_status GetStdStringVector(ani_env* env, ani_object ary, std::vector<std::string>& result);
     static ani_status NewAniObjectNoParams(ani_env* env, const char* cls, ani_object* object);
     static ani_status NewAniObject(ani_env* env, const char* cls, const char* signature, ani_object* result, ...);
     static ani_object CreateAniUndefined(ani_env* env);
-    static ani_object AniThrowError(ani_env* env, WMError errorCode, const std::string& msg = "");
-    static ani_object AniThrowError(ani_env* env, WmErrorCode errorCode, const std::string& msg = "");
+    static ani_object AniThrowError(ani_env* env, WMError errorCode, std::string msg = "");
+    static ani_object AniThrowError(ani_env* env, WmErrorCode errorCode, std::string msg = "");
+    static ani_object CreateAniSize(ani_env* env, int32_t width, int32_t height);
     static ani_object CreateAniRect(ani_env* env, const Rect& rect);
     static ani_object CreateAniAvoidArea(ani_env* env, const AvoidArea& avoidArea, AvoidAreaType type);
+    static ani_status CallAniFunctionVoid(ani_env *env, const char* ns, const char* func, const char* signature, ...);
     static ani_status CallAniMethodVoid(ani_env* env, ani_object object, const char* cls,
         const char* method, const char* signature, ...);
     static ani_status CallAniMethodVoid(ani_env* env, ani_object object, ani_class cls,
         const char* method, const char* signature, ...);
     static ani_status GetAniString(ani_env* env, const std::string& str, ani_string* result);
+    static void* GetAbilityContext(ani_env *env, ani_object aniObj);
     static ani_object CreateWindowsProperties(ani_env* env, const sptr<Window>& window);
+    static ani_object CreateProperties(ani_env* env, const sptr<Window>& window);
     static uint32_t GetColorFromAni(ani_env* env, const char* name,
         uint32_t defaultColor, bool& flag, const ani_object& aniObject);
     static bool SetWindowStatusBarContentColor(ani_env* env, ani_object aniObject,
@@ -155,45 +291,53 @@ public:
         std::map<WindowType, SystemBarPropertyFlag>& windowPropertyFlags,
         const ani_object& aniProperties,
         const sptr<Window>& window);
+    static void GetSystemBarPropertiesFromAni(sptr<Window>& window,
+        std::map<WindowType, SystemBarProperty>& newProperties,
+        std::map<WindowType, SystemBarPropertyFlag>& newPropertyFlags,
+        std::map<WindowType, SystemBarProperty>& properties,
+        std::map<WindowType, SystemBarPropertyFlag>& propertyFlags);
+    static void UpdateSystemBarProperties(std::map<WindowType, SystemBarProperty>& systemBarProperties,
+            const std::map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags, sptr<Window> windowToken);
     static bool SetSpecificSystemBarEnabled(ani_env* env,
         std::map<WindowType, SystemBarProperty>& systemBarProperties,
         ani_string aniName,
         ani_boolean aniEnable,
         ani_boolean aniEnableAnimation);
+    static void GetSpecificBarStatus(sptr<Window>& window, const std::string& name,
+        std::map<WindowType, SystemBarProperty>& newSystemBarProperties,
+        std::map<WindowType, SystemBarProperty>& systemBarProperties);
 
 private:
-    static void SetSystemPropertiesWindowRect(ani_env* env,
-        const sptr<Window>& window, ani_object& systemProperties);
-    static void SetSystemPropertiesDrawableRect(ani_env* env,
-        const sptr<Window>& window, ani_object& systemProperties);
-    static void SetSystemPropertiesWindowType(ani_env* env,
-        const sptr<Window>& window, ani_object& systemProperties);
-    static void SetSystemPropertiesWindowIsLayoutFullScreen(ani_env* env,
-        const sptr<Window>& window, ani_object& systemProperties);
-    static void SetSystemPropertiesWindowIsFullScreen(ani_env* env,
-        const sptr<Window>& window, ani_object& systemProperties);
-    static void SetSystemPropertiesWindowTouchable(ani_env* env,
-        const sptr<Window>& window, ani_object& systemProperties);
-    static void SetSystemPropertiesWindowFousable(ani_env* env,
-        const sptr<Window>& window, ani_object& systemProperties);
-    static void SetSystemPropertiesWindowName(ani_env* env,
-        const sptr<Window>& window, ani_object& systemProperties);
-    static void SetSystemPropertiesWindowIsPrivacyMode(ani_env* env,
-        const sptr<Window>& window, ani_object& systemProperties);
-    static void SetSystemPropertiesWindowIsKeepScreenOn(ani_env* env,
-        const sptr<Window>& window, ani_object& systemProperties);
-    static void SetSystemPropertiesWindowBrightness(ani_env* env,
-        const sptr<Window>& window, ani_object& systemProperties);
-    static void SetSystemPropertiesWindowIsTransparent(ani_env* env,
-        const sptr<Window>& window, ani_object& systemProperties);
-    static void SetSystemPropertieswindowIsRoundCorner(ani_env* env,
-        const sptr<Window>& window, ani_object& systemProperties);
-    static void SetSystemPropertiesWindowDimBehindValue(ani_env* env,
-        const sptr<Window>& window, ani_object& systemProperties);
-    static void SetSystemPropertieswindowId(ani_env* env,
-        const sptr<Window>& window, ani_object& systemProperties);
-    static void SetSystemPropertiesdisplayId(ani_env* env,
-        const sptr<Window>& window, ani_object& systemProperties);
+    static void SetSystemPropertiesWindowRect(ani_env* env, const sptr<Window>& window,
+        ani_object& systemProperties, const char* clsName);
+    static void SetSystemPropertiesDrawableRect(ani_env* env, const sptr<Window>& window,
+        ani_object& systemProperties, const char* clsName);
+    static void SetSystemPropertiesWindowType(ani_env* env, const sptr<Window>& window,
+        ani_object& systemProperties, const char* clsName);
+    static void SetSystemPropertiesWindowIsLayoutFullScreen(ani_env* env, const sptr<Window>& window,
+        ani_object& systemProperties, const char* clsName);
+    static void SetSystemPropertiesWindowIsFullScreen(ani_env* env, const sptr<Window>& window,
+        ani_object& systemProperties, const char* clsName);
+    static void SetSystemPropertiesWindowTouchable(ani_env* env, const sptr<Window>& window,
+        ani_object& systemProperties, const char* clsName);
+    static void SetSystemPropertiesWindowFousable(ani_env* env, const sptr<Window>& window,
+        ani_object& systemProperties, const char* clsName);
+    static void SetSystemPropertiesWindowIsPrivacyMode(ani_env* env, const sptr<Window>& window,
+        ani_object& systemProperties, const char* clsName);
+    static void SetSystemPropertiesWindowIsKeepScreenOn(ani_env* env, const sptr<Window>& window,
+        ani_object& systemProperties, const char* clsName);
+    static void SetSystemPropertiesWindowBrightness(ani_env* env, const sptr<Window>& window,
+        ani_object& systemProperties, const char* clsName);
+    static void SetSystemPropertiesWindowIsTransparent(ani_env* env, const sptr<Window>& window,
+        ani_object& systemProperties, const char* clsName);
+    static void SetSystemPropertieswindowIsRoundCorner(ani_env* env, const sptr<Window>& window,
+        ani_object& systemProperties, const char* clsName);
+    static void SetSystemPropertiesWindowDimBehindValue(ani_env* env, const sptr<Window>& window,
+        ani_object& systemProperties, const char* clsName);
+    static void SetSystemPropertieswindowId(ani_env* env, const sptr<Window>& window,
+        ani_object& systemProperties, const char* clsName);
+    static void SetSystemPropertiesdisplayId(ani_env* env, const sptr<Window>& window,
+        ani_object& systemProperties, const char* clsName);
 };
 }
 }

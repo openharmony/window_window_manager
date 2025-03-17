@@ -20,6 +20,7 @@
 
 #include "ani.h"
 #include "ani_window.h"
+#include "ani_window_manager.h"
 #include "ani_window_utils.h"
 #include "window_manager_hilog.h"
 #include "permission.h"
@@ -71,7 +72,7 @@ ani_object AniWindowStage::GetMainWindow(ani_env* env)
     }
     TLOGI(WmsLogTag::DEFAULT, "[ANI] Get main window [%{public}u, %{public}s]",
         windowScene->GetWindowId(), windowScene->GetWindowName().c_str());
-    
+
     return CreateAniWindowObject(env, windowScene);
 }
 
@@ -164,9 +165,74 @@ AniWindowStage* GetWindowStageFromEnv(ani_env* env, ani_class cls, ani_object ob
     }
     return reinterpret_cast<AniWindowStage*>(nativeObj);
 }
+
+void AniWindowStage::DisableWindowDecor(ani_env* env, ani_object obj, ani_long nativeObj)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    AniWindowStage* aniWindowStage = reinterpret_cast<AniWindowStage*>(nativeObj);
+    if (aniWindowStage != nullptr) {
+        aniWindowStage->OnDisableWindowDecor(env);
+    } else {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] aniWindowStage is nullptr");
+    }
+}
+void AniWindowStage::OnDisableWindowDecor(ani_env* env)
+{
+    auto windowScene = GetWindowScene().lock();
+    if (windowScene == nullptr) {
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    auto mainWindow = windowScene->GetMainWindow();
+    if (mainWindow == nullptr) {
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(mainWindow->DisableAppWindowDecor());
+    if (ret != WmErrorCode::WM_OK) {
+        AniWindowUtils::AniThrowError(env, ret);
+        return;
+    }
+}
+    
+void AniWindowStage::SetShowOnLockScreen(ani_env* env, ani_class cls, ani_long nativeObj, ani_boolean showOnLockScreen)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    AniWindowStage* aniWindowStage = reinterpret_cast<AniWindowStage*>(nativeObj);
+    if (aniWindowStage != nullptr) {
+        aniWindowStage->OnSetShowOnLockScreen(env, showOnLockScreen);
+    } else {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] aniWindowStage is nullptr");
+    }
+}
+void AniWindowStage::OnSetShowOnLockScreen(ani_env* env, ani_boolean showOnLockScreen)
+{
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI]set show on lock screen permission denied!");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
+        return;
+    }
+    auto windowScene = GetWindowScene().lock();
+    if (windowScene == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI]windowScene is nullptr!");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    auto mainWindow = windowScene->GetMainWindow();
+    if (mainWindow == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] mainWindowis nullptr!");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    if (showOnLockScreen) {
+        mainWindow->AddWindowFlag(OHOS::Rosen::WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED);
+    } else {
+        mainWindow->RemoveWindowFlag(OHOS::Rosen::WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED);
+    }
+    TLOGE(WmsLogTag::DEFAULT, "[ANI] OnSetShowOnLockScreen end!");
+}
 }  // namespace Rosen
 }  // namespace OHOS
-
 
 static ani_int WindowStageLoadContent(ani_env* env, ani_object obj,
     ani_long nativeObj, ani_string content)
@@ -175,50 +241,9 @@ static ani_int WindowStageLoadContent(ani_env* env, ani_object obj,
     AniWindowStage* windowStage = reinterpret_cast<AniWindowStage*>(nativeObj);
     std::string contentStr;
     GetStdString(env, content, contentStr);
-    TLOGD(WmsLogTag::DEFAULT, "[ANI] loadcontent 0x%{public}p: %{public}s", windowStage, contentStr.c_str());
+    TLOGI(WmsLogTag::DEFAULT, "[ANI] loadcontent 0x%{public}p: %{public}s", windowStage, contentStr.c_str());
     windowStage->LoadContent(env, contentStr);
     return (ani_int)0u;
-}
-
-static ani_int DisableWindowDecor(ani_env* env, ani_object obj, ani_long nativeObj)
-{
-    using namespace OHOS::Rosen;
-    AniWindowStage* windowStage = reinterpret_cast<AniWindowStage*>(nativeObj);
-    auto windowScene = windowStage->GetWindowScene().lock();
-    if (windowScene == nullptr) {
-        return static_cast<ani_int>(WMError::WM_DO_NOTHING);
-    }
-    auto mainWindow = windowScene->GetMainWindow();
-    if (mainWindow == nullptr) {
-        return static_cast<ani_int>(WMError::WM_DO_NOTHING);
-    }
-    return static_cast<ani_int>(mainWindow->DisableAppWindowDecor());
-}
-
-static ani_int SetShowOnLockScreen(ani_env* env, ani_class cls, ani_long nativeObj,
-    ani_boolean showOnLockScreen)
-{
-    using namespace OHOS::Rosen;
-    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
-        TLOGE(WmsLogTag::DEFAULT, "set show on lock screen permission denied!");
-        return static_cast<ani_int>(WMError::WM_ERROR_NOT_SYSTEM_APP);
-    }
-    AniWindowStage* windowStage = reinterpret_cast<AniWindowStage*>(nativeObj);
-    auto windowScene = windowStage->GetWindowScene().lock();
-    if (windowScene == nullptr) {
-        return static_cast<ani_int>(WMError::WM_DO_NOTHING);
-    }
-    auto mainWindow = windowScene->GetMainWindow();
-    if (mainWindow == nullptr) {
-        return static_cast<ani_int>(WMError::WM_DO_NOTHING);
-    }
-    WMError ret;
-    if (showOnLockScreen) {
-        ret = mainWindow->AddWindowFlag(OHOS::Rosen::WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED);
-    } else {
-        ret = mainWindow->RemoveWindowFlag(OHOS::Rosen::WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED);
-    }
-    return static_cast<ani_int>(ret);
 }
 
 static ani_object WindowStageCreate(ani_env* env, ani_long scene)
@@ -260,8 +285,10 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     }
     std::array methods = {
         ani_native_function {"loadContent", "JLstd/core/String;:I", reinterpret_cast<void *>(WindowStageLoadContent)},
-        ani_native_function {"disableWindowDecor", "J:I", reinterpret_cast<void *>(DisableWindowDecor)},
-        ani_native_function {"setShowOnLockScreen", "JZ:I", reinterpret_cast<void *>(SetShowOnLockScreen)},
+        ani_native_function {"disableWindowDecorSync", nullptr,
+            reinterpret_cast<void *>(AniWindowStage::DisableWindowDecor)},
+        ani_native_function {"setShowOnLockScreenSync",
+            nullptr, reinterpret_cast<void *>(AniWindowStage::SetShowOnLockScreen)},
         ani_native_function {"getMainWindowSync", "J:L@ohos/window/window/Window;",
             reinterpret_cast<void *>(WindowGetMainWindow)},
     };
@@ -280,11 +307,13 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     std::array functions = {
         ani_native_function {"CreateWindowStage", "J:L@ohos/window/window/WindowStageInternal;",
             reinterpret_cast<void *>(WindowStageCreate)},
+        ani_native_function {"getLastWindowSync", nullptr, reinterpret_cast<void *>(AniWindowManager::GetLastWindow)},
     };
     if ((ret = env->Namespace_BindNativeFunctions(ns, functions.data(), functions.size())) != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] bind ns func %{public}u", ret);
         return ANI_NOT_FOUND;
     }
+    AniWindowManager::AniWindowManagerInit(env, ns);
 
     OHOS::Rosen::ANI_Window_Constructor(vm, result);
     return ANI_OK;

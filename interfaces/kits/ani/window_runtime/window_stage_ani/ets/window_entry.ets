@@ -1,9 +1,9 @@
 import window from '@ohos.window';
 import {
+  AsyncCallback,
   AsyncCallbackVoid,
   BaseContext,
   LocalStorage,
-  Callback,
   BusinessError,
   UIContext,
 } from '@ohos.window';
@@ -11,6 +11,7 @@ import {
 function main() {
     loadLibrary('windowstageani_kit.z')
     let ws = window.CreateWindowStage(0);
+
     let callback:AsyncCallbackVoid = (err) => {
       if (err.code) {
         console.error(`Failed to load the content. Cause code: ${err.code}, message: ${err.message}`);
@@ -18,6 +19,7 @@ function main() {
       }
       console.info('Succeeded in loading the content.');
     }
+
     ws.loadContent('ohos.test', callback);
 
     ws.getMainWindowSync();
@@ -55,14 +57,14 @@ function main() {
     });
 
     let systemBarProperties = new window.SystemBarPropertiesInternal();
-    w.setSystemBarProperties(systemBarProperties).then((res:int)=>{
-      console.println('[ANI]setSystemBarProperties primise' + res);
+    w.setWindowSystemBarProperties(systemBarProperties).then((res:int)=>{
+      console.println('[ANI]setWindowSystemBarProperties primise' + res);
     }).catch((e:NullishType)=>{
-      console.println('[ANI]setSystemBarProperties catch');
+      console.println('[ANI]setWindowSystemBarProperties catch');
     });
 
-    w.setSystemBarProperties(systemBarProperties, ()=>{
-      console.println('[ANI]setSystemBarProperties callback');
+    w.setWindowSystemBarProperties(systemBarProperties, ()=>{
+      console.println('[ANI]setWindowSystemBarProperties callback');
     });
 
     w.setSpecificSystemBarEnabled('w', false, false).then((res:int)=>{
@@ -73,14 +75,14 @@ function main() {
 
 
     w.getWindowDecorHeight();
-    w.setWindowBackgroundColorSync('0xFFFFFF');
-    w.setColorSpace(window.ColorSpace.DEFAULT).then((ret: int) => {
+    w.setWindowBackgroundColor('0xFFFFFF');
+    w.setWindowColorSpace(window.ColorSpace.DEFAULT).then((ret: int) => {
       console.println('[ANI] in ret:' + ret);
     }).catch((e: NullishType) => {
       let err = e as BusinessError;
       console.println('[ANI] in code:' + err?.code + ' err:' + err?.message);
     });
-    w.setColorSpace(window.ColorSpace.DEFAULT, (err) => {
+    w.setWindowColorSpace(window.ColorSpace.DEFAULT, (err) => {
       console.println('[ANI] setColorSpace err:' + err);
     });
     w.setPreferredOrientation(window.Orientation.UNSPECIFIED);
@@ -101,20 +103,27 @@ function main() {
     let avoidArea = w.getWindowAvoidArea(window.AvoidAreaType.TYPE_SYSTEM);
     console.println('[ANI] avoidArea:' + JSON.stringify(avoidArea));
     w.setWaterMarkFlag(true);
-    let cb = new Callback<window.WindowEventType | window.Size | window.WindowStatusType>();
+    let cb = (data: window.WindowStatusType): void => {
+      console.println(`onOffWindowStatusChangeTest status:${data as int}`);
+    };
     w.on('windowEvent', cb);
     w.off('windowEvent', cb);
-    w.on('windowSizeChange', cb);
-    w.off('windowSizeChange', cb);
-    w.on('windowStatusChange', cb);
-    w.off('windowStatusChange', cb);
+    let cb2 = (data: window.Size): void => {
+      console.println(`windowSizeChange size:${JSON.stringify(data)}`);
+    };
+    w.on('windowSizeChange', cb2);
+    w.off('windowSizeChange', cb2);
+    let cb3 = (data: window.WindowEventType): void => {
+      console.println(`windowEvent event:${data as int}`);
+    };
+    w.on('windowStatusChange', cb3);
+    w.off('windowStatusChange', cb3);
 
     w.setImmersiveModeEnabledState(false);
     w.setWindowDecorVisible(false);
     w.setWindowDecorHeight(100);
     w.getWindowProperties();
-    w.setSystemBarProperties(systemBarProperties);
+    w.setWindowSystemBarProperties(systemBarProperties);
     w.setSpecificSystemBarEnabled('w', false, false);
     console.println('ok');
 }
-

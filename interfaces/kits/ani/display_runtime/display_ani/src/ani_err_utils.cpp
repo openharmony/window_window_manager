@@ -118,4 +118,61 @@ ani_object AniErrUtils::CreateAniError(ani_env* env, const DmErrorCode& errorCod
     DisplayAniUtils::NewAniObject(env, cls, "Lstd/core/String;Lescompat/ErrorOptions;:V", &aniError, aniMsg);
     return aniError;
 }
+
+ani_status AniErrUtils::ThrowBusinessError(ani_env* env, DMError error, std::string message)
+{
+    ani_object aniError;
+    CreateBusinessError(env, static_cast<int32_t>(error), message == "" ? GetErrorMsg(error) : message, &aniError);
+    ani_status status = env->ThrowError(static_cast<ani_error>(aniError));
+    if (status != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] fail to throw err, status:%{public}d", static_cast<int32_t>(status));
+        return status;
+    }
+    return ANI_OK;
+}
+
+ani_status AniErrUtils::ThrowBusinessError(ani_env* env, DmErrorCode error, std::string message)
+{
+    ani_object aniError;
+    CreateBusinessError(env, static_cast<int32_t>(error), message == "" ? GetErrorMsg(error) : message, &aniError);
+    ani_status status = env->ThrowError(static_cast<ani_error>(aniError));
+    if (status != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] fail to throw err, status:%{public}d", static_cast<int32_t>(status));
+        return status;
+    }
+    return ANI_OK;
+}
+
+ani_status AniErrUtils::CreateBusinessError(ani_env* env, int32_t error, std::string message, ani_object* err)
+{
+    TLOGI(WmsLogTag::DMS, "[ANI] in");
+    ani_class aniClass;
+    ani_status status = env->FindClass("L@ohos/display/BusinessError;", &aniClass);
+    if (status != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] class not found, status:%{public}d", static_cast<int32_t>(status));
+        return status;
+    }
+    ani_method aniCtor;
+    status = env->Class_FindMethod(aniClass, "<ctor>", "Lstd/core/String;Lescompat/ErrorOptions;:V", &aniCtor);
+    if (status != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] ctor not found, status:%{public}d", static_cast<int32_t>(status));
+        return status;
+    }
+    ani_string aniMsg;
+    DisplayAniUtils::GetAniString(env, message, &aniMsg);
+    status = env->Object_New(aniClass, aniCtor, err, aniMsg, DisplayAniUtils::CreateAniUndefined(env));
+    if (status != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] fail to new err, status:%{public}d", static_cast<int32_t>(status));
+        return status;
+    }
+    status = env->Object_SetFieldByName_Int(*err, "<property>code", static_cast<ani_int>(error));
+    if (status != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] fail to set code, status:%{public}d", static_cast<int32_t>(status));
+        return status;
+    }
+    status = env->Object_SetFieldByName_Int(*err, "<property>code", static_cast<ani_int>(error));
+    
+    return ANI_OK;
+}
+
 } // namespace OHOS::Rosen

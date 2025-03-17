@@ -38,7 +38,7 @@ enum class DisplayStateMode : uint32_t {
     STATE_VR,
     STATE_ON_SUSPEND
 };
- 
+
 static const std::map<DisplayState,      DisplayStateMode> NATIVE_TO_JS_DISPLAY_STATE_MAP {
     { DisplayState::UNKNOWN,      DisplayStateMode::STATE_UNKNOWN      },
     { DisplayState::OFF,          DisplayStateMode::STATE_OFF          },
@@ -48,116 +48,89 @@ static const std::map<DisplayState,      DisplayStateMode> NATIVE_TO_JS_DISPLAY_
     { DisplayState::VR,           DisplayStateMode::STATE_VR           },
     { DisplayState::ON_SUSPEND,   DisplayStateMode::STATE_ON_SUSPEND   },
 };
- 
- 
-ani_object DisplayAniUtils::convertRect(DMRect rect, ani_env* env)
-{
-    // find class
-    ani_class cls;
-    // return obj
-    ani_object obj = nullptr;
-    // find field
-    ani_field leftFld;
-    ani_field widthFld;
-    ani_field topFld;
-    ani_field heightFld;
 
-    if (ANI_OK != env->FindClass("L@ohos/display/display/rectImpl", &cls)) {
-        TLOGE(WmsLogTag::DMS, "[ANI] null class CutoutInfoImpl");
-        return obj;
-    }
-    if (ANI_OK != DisplayAniUtils::NewAniObjectNoParams(env, cls, &obj)) {
-        TLOGE(WmsLogTag::DMS, "[ANI] create rect obj fail");
-        return obj;
-    }
-    if (ANI_OK != env->Class_FindField(cls, "left", &leftFld)) {
-        TLOGE(WmsLogTag::DMS, "[ANI] null field left");
-        return obj;
-    }
-    if (ANI_OK != env->Class_FindField(cls, "width", &widthFld)) {
-        TLOGE(WmsLogTag::DMS, "[ANI] null field right");
-        return obj;
-    }
-    if (ANI_OK != env->Class_FindField(cls, "top", &topFld)) {
-        TLOGE(WmsLogTag::DMS, "[ANI] null field top");
-        return obj;
-    }
-    if (ANI_OK != env->Class_FindField(cls, "height", &heightFld)) {
-        TLOGE(WmsLogTag::DMS, "[ANI] null field bottom");
-        return obj;
-    }
-    env->Object_SetField_Int(obj, leftFld, rect.posX_);
-    env->Object_SetField_Int(obj, widthFld, rect.width_);
-    env->Object_SetField_Int(obj, topFld, rect.posY_);
-    env->Object_SetField_Int(obj, heightFld, rect.height_);
 
-    return obj;
-}
- 
-ani_array_ref DisplayAniUtils::convertRects(std::vector<DMRect> rects, ani_env* env)
+void DisplayAniUtils::convertRect(DMRect rect, ani_object rectObj, ani_env* env)
 {
-    ani_array_ref arrayres = nullptr;
-    int size = rects.size();
-    ani_class cls = nullptr;
-    if (ANI_OK != env->FindClass("L@ohos/display/display/RectImpl", &cls)) {
-        TLOGE(WmsLogTag::DMS, "[ANI] null class CutoutInfoImpl");
-    }
-    ani_ref undefinedRef = nullptr;
-    if (ANI_OK != env->GetUndefined(&undefinedRef)) {
-        TLOGE(WmsLogTag::DMS, "[ANI] get undefined error");
-    }
-    if (ANI_OK != env->Array_New_Ref(cls, size, undefinedRef, &arrayres)) {
-        TLOGE(WmsLogTag::DMS, "[ANI] create rect array error");
-    }
-    for (int i = 0; i < size; i++) {
-        DMRect rect = rects[i];
-        if (ANI_OK != env->Array_Set_Ref(arrayres, i, convertRect(rect, env))) {
-            TLOGE(WmsLogTag::DMS, "[ANI] set rect array error");
-        }
-    }
-    TLOGI(WmsLogTag::DMS, "[ANI] arrayres size = %{public}d", size);
-    return arrayres;
+    TLOGI(WmsLogTag::DMS, "[ANI] rect area start");
+    TLOGI(WmsLogTag::DMS, "[ANI] rect area info: %{public}d, %{public}d, %{public}u, %{public}u",
+        rect.posX_, rect.posY_, rect.width_, rect.height_);
+    env->Object_SetFieldByName_Double(rectObj, "<property>left", rect.posX_);
+    env->Object_SetFieldByName_Double(rectObj, "<property>width", rect.width_);
+    env->Object_SetFieldByName_Double(rectObj, "<property>top", rect.posY_);
+    env->Object_SetFieldByName_Double(rectObj, "<property>height", rect.height_);
 }
- 
+
+void DisplayAniUtils::convertWaterArea(WaterfallDisplayAreaRects waterfallDisplayAreaRects,
+    ani_object waterfallObj, ani_env *env)
+{
+    TLOGI(WmsLogTag::DMS, "[ANI] start convert WaterArea");
+    ani_ref leftObj;
+    ani_ref rightObj;
+    ani_ref topObj;
+    ani_ref bottomObj;
+    env->Object_GetFieldByName_Ref(waterfallObj, "<property>left", &leftObj);
+    env->Object_GetFieldByName_Ref(waterfallObj, "<property>right", &rightObj);
+    env->Object_GetFieldByName_Ref(waterfallObj, "<property>top", &topObj);
+    env->Object_GetFieldByName_Ref(waterfallObj, "<property>bottom", &bottomObj);
+    convertRect(waterfallDisplayAreaRects.left, static_cast<ani_object>(leftObj), env);
+    convertRect(waterfallDisplayAreaRects.right, static_cast<ani_object>(rightObj), env);
+    convertRect(waterfallDisplayAreaRects.top, static_cast<ani_object>(topObj), env);
+    convertRect(waterfallDisplayAreaRects.bottom, static_cast<ani_object>(bottomObj), env);
+}
+
 ani_status DisplayAniUtils::cvtDisplay(sptr<Display> display, ani_env* env, ani_object obj)
 {
     sptr<DisplayInfo> info = display->GetDisplayInfoByJs();
-    env->Object_SetFieldByName_Int(obj, "id",  static_cast<uint32_t>(info->GetDisplayId()));
+    int setfieldid = env->Object_SetFieldByName_Double(obj, "<property>id", info->GetDisplayId());
+    if (ANI_OK != setfieldid) {
+        TLOGE(WmsLogTag::DMS, "[ANI] set id failed: %{public}d", setfieldid);
+    }
     const ani_size stringLength = info->GetName().size();
+    TLOGI(WmsLogTag::DMS, "[ANI] display = %{public}u, name = %{public}s",
+        static_cast<uint32_t>(info->GetDisplayId()), info->GetName().c_str());
     ani_string str = nullptr;
     env->String_NewUTF8(info->GetName().data(), stringLength, &str);
-    env->Object_SetFieldByName_Ref(obj, "name", str);
-    env->Object_SetFieldByName_Boolean(obj, "alive", info->GetAliveStatus());
+    env->Object_SetFieldByName_Ref(obj, "<property>name", str);
+    env->Object_SetFieldByName_Boolean(obj, "<property>alive", info->GetAliveStatus());
     if (NATIVE_TO_JS_DISPLAY_STATE_MAP.count(info->GetDisplayState()) != 0) {
-        env->Object_SetFieldByName_Int(obj, "state", static_cast<uint32_t>(info->GetDisplayState()));
+        env->Object_SetFieldByName_Int(obj, "<property>state", static_cast<uint32_t>(info->GetDisplayState()));
     } else {
-        env->Object_SetFieldByName_Int(obj, "state", 0);
+        env->Object_SetFieldByName_Int(obj, "<property>state", 0);
     }
-    env->Object_SetFieldByName_Int(obj, "refreshRate", info->GetRefreshRate());
-    env->Object_SetFieldByName_Int(obj, "rotation", static_cast<uint32_t>(info->GetRotation()));
-    env->Object_SetFieldByName_Int(obj, "width", info->GetWidth());
-    env->Object_SetFieldByName_Int(obj, "height", display->GetHeight());
-    env->Object_SetFieldByName_Int(obj, "availableWidth", info->GetAvailableWidth());
-    env->Object_SetFieldByName_Int(obj, "availableHeight", info->GetAvailableHeight());
-    env->Object_SetFieldByName_Float(obj, "densityDPI", info->GetVirtualPixelRatio() * DOT_PER_INCH);
-    env->Object_SetFieldByName_Int(obj, "orientation", static_cast<uint32_t>(info->GetDisplayOrientation()));
-    env->Object_SetFieldByName_Float(obj, "densityPixels", info->GetVirtualPixelRatio());
-    env->Object_SetFieldByName_Float(obj, "scaledDensity", info->GetVirtualPixelRatio());
-    env->Object_SetFieldByName_Float(obj, "xDPI", info->GetXDpi());
-    env->Object_SetFieldByName_Float(obj, "yDPI", info->GetYDpi());
+    env->Object_SetFieldByName_Double(obj, "<property>refreshRate", info->GetRefreshRate());
+    env->Object_SetFieldByName_Double(obj, "<property>rotation", static_cast<uint32_t>(info->GetRotation()));
+    ani_status setfieldRes = env->Object_SetFieldByName_Double(obj,
+        "<property>width", static_cast<uint32_t>(info->GetWidth()));
+    if (ANI_OK != setfieldRes) {
+        TLOGE(WmsLogTag::DMS, "[ANI] set failed: %{public}d, %{public}u", info->GetWidth(), setfieldRes);
+    }
+    env->Object_SetFieldByName_Double(obj, "<property>height", display->GetHeight());
+    env->Object_SetFieldByName_Double(obj, "<property>availableWidth", info->GetAvailableWidth());
+    env->Object_SetFieldByName_Double(obj, "<property>availableHeight", info->GetAvailableHeight());
+    env->Object_SetFieldByName_Double(obj, "<property>densityDPI", info->GetVirtualPixelRatio() * DOT_PER_INCH);
+    env->Object_SetFieldByName_Double(obj, "<property>orientation",
+        static_cast<uint32_t>(info->GetDisplayOrientation()));
+    env->Object_SetFieldByName_Double(obj, "<property>densityPixels", info->GetVirtualPixelRatio());
+    env->Object_SetFieldByName_Double(obj, "<property>scaledDensity", info->GetVirtualPixelRatio());
+    env->Object_SetFieldByName_Double(obj, "<property>xDPI", info->GetXDpi());
+    env->Object_SetFieldByName_Double(obj, "<property>yDPI", info->GetYDpi());
     auto colorSpaces = info->GetColorSpaces();
     auto hdrFormats = info->GetHdrFormats();
+    TLOGI(WmsLogTag::DMS, "[ANI] colorSpaces(0) %{public}u, %{public}u", colorSpaces.size(), colorSpaces[1]);
     if (colorSpaces.size() != 0) {
         ani_array_int colorSpacesAni;
         CreateAniArrayInt(env, colorSpaces.size(), &colorSpacesAni, colorSpaces);
-        if (ANI_OK != env->Object_SetFieldByName_Ref(obj, "colorSpaces", static_cast<ani_ref>(colorSpacesAni))) {
+        if (ANI_OK != env->Object_SetFieldByName_Ref(obj, "<property>colorSpaces",
+            static_cast<ani_ref>(colorSpacesAni))) {
             TLOGE(WmsLogTag::DMS, "[ANI] Array set colorSpaces field error");
         }
     }
     if (hdrFormats.size() != 0) {
         ani_array_int hdrFormatsAni;
         CreateAniArrayInt(env, hdrFormats.size(), &hdrFormatsAni, hdrFormats);
-        if (ANI_OK != env->Object_SetFieldByName_Ref(obj, "hdrFormats", static_cast<ani_ref>(hdrFormatsAni))) {
+        if (ANI_OK != env->Object_SetFieldByName_Ref(obj, "<property>hdrFormats",
+            static_cast<ani_ref>(hdrFormatsAni))) {
             TLOGE(WmsLogTag::DMS, "[ANI] Array set hdrFormats field error");
         }
     }
@@ -213,6 +186,11 @@ ani_object DisplayAniUtils::CreateAniUndefined(ani_env* env)
     ani_ref aniRef;
     env->GetUndefined(&aniRef);
     return static_cast<ani_object>(aniRef);
+}
+
+ani_status DisplayAniUtils::GetAniString(ani_env* env, const std::string& str, ani_string* result)
+{
+    return env->String_NewUTF8(str.c_str(), static_cast<ani_size>(str.size()), result);
 }
 }
 }
