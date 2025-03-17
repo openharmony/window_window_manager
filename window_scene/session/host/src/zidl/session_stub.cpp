@@ -1716,6 +1716,7 @@ int SessionStub::HandleUpdateRotationChangeListenerRegistered(MessageParcel& dat
         return ERR_INVALID_DATA;
     }
     WSError errCode = UpdateRotationChangeRegistered(persistentId, isRegister);
+    TLOGD(WmsLogTag::WMS_ROTATION, "persistentId: %{public}d, register: %{public}d", persistentId, isRegister);
     reply.WriteUint32(errCode);
     return ERR_NONE;
 }

@@ -805,7 +805,7 @@ void JsWindowListener::OnRotationChange(const RotationChangeInfo& rotationChange
     };
 
     if (!eventHandler_|| eventHandler_->GetEventRunner()->IsCurrentRunnerThread()) {
-        TLOGE(WmsLogTag::WMS_ROTATION, "get main event handler failed!");
+        TLOGE(WmsLogTag::WMS_ROTATION, "get main event handler failed or current is alreay main thread!");
         return jsCallback();
     }
     eventHandler_->PostSyncTask(jsCallback, "wms:JsWindowListener::OnRotationChange",

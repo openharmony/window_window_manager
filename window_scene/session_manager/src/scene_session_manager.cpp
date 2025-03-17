@@ -2136,7 +2136,7 @@ WMError SceneSessionManager::SetAppKeyFramePolicy(const std::string& bundleName,
 KeyFramePolicy SceneSessionManager::GetAppKeyFramePolicy(const std::string& bundleName)
 {
     {
-        std::lock_guard<std::mutex> lock(keyFrameMutex_); 
+        std::lock_guard<std::mutex> lock(keyFrameMutex_);
         if (auto iter = appKeyFramePolicyMap_.find(bundleName); iter != appKeyFramePolicyMap_.end()) {
             return iter->second;
         }
@@ -9780,7 +9780,7 @@ void SceneSessionManager::GetKeyboardOccupiedAreaWithRotation(
         TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboardSession is nullptr, id: %{public}d", persistentId);
         return;
     }
-    
+
     std::pair<bool, WSRect> keyboardOccupiedArea = {true, {0, 0, 0, 0}};
     const KeyboardLayoutParams keyboardLayoutParams = keyboardSession->GetSessionProperty()->GetKeyboardLayoutParams();
     Rect nextRect;
@@ -9797,7 +9797,7 @@ void SceneSessionManager::GetKeyboardOccupiedAreaWithRotation(
         nextRect.posX_, nextRect.posY_, static_cast<int32_t>(nextRect.width_), static_cast<int32_t>(nextRect.height_)
     };
 
-    if (!keyboardSession->IsSessionForeground() || 
+    if (!keyboardSession->IsSessionForeground() ||
         keyboardLayoutParams.gravity_ == WindowGravity::WINDOW_GRAVITY_FLOAT) {
         keyboardOccupiedArea.first = false;
     }
@@ -13847,16 +13847,11 @@ std::vector<sptr<SceneSession>> SceneSessionManager::GetActiveSceneSessionCopy()
             TLOGW(WmsLogTag::DEFAULT, "curSession nullptr");
             continue;
         }
-        if (!curSession->GetSessionInfo().isSystem_ &&
-            (curSession->GetSessionState() < SessionState::STATE_FOREGROUND ||
-            curSession->GetSessionState() > SessionState::STATE_BACKGROUND)) {
-            TLOGW(WmsLogTag::DEFAULT, "id:%{public}d,invalid state:%{public}u",
-                 curSession->GetPersistentId(), curSession->GetSessionState());
+        if (curSession->GetSessionInfo().isSystem_ ||
+            (!IsSessionForeground(curSession))) {
              continue;
          }
-        if (IsSessionVisibleForeground(curSession)) {
-            activeSession.push_back(curSession);
-        }
+        activeSession.push_back(curSession);
     }
     return activeSession;
 }
