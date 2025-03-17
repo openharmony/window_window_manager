@@ -620,8 +620,8 @@ private:
     static sptr<SceneSessionManager> CreateInstance();
     static inline bool isNotCurrentScreen(sptr<SceneSession> sceneSession, ScreenId screenId)
     {
-            return sceneSession->GetSessionInfo().screenId_ != screenId &&
-                   sceneSession->GetSessionInfo().screenId_ != SCREEN_ID_INVALID;
+        return sceneSession->GetSessionInfo().screenId_ != screenId &&
+               sceneSession->GetSessionInfo().screenId_ != SCREEN_ID_INVALID;
     }
     void Init();
     void RegisterAppListener();
