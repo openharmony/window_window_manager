@@ -139,7 +139,6 @@ public:
     WMError UnregisterPreferredOrientationChangeListener(
         const sptr<IPreferredOrientationChangeListener>& listener) override;
     void NotifyPreferredOrientationChange(Orientation orientation) override;
-    void NotifyClientOrientationChange();
     WMError RegisterOrientationChangeListener(const sptr<IWindowOrientationChangeListener>& listener) override;
     WMError UnregisterOrientationChangeListener(const sptr<IWindowOrientationChangeListener>& listener) override;
     bool GetTouchable() const override;
@@ -755,8 +754,8 @@ private:
     static std::map<int32_t, std::vector<sptr<IWindowStatusChangeListener>>> windowStatusChangeListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowRectChangeListener>>> windowRectChangeListeners_;
     static std::map<int32_t, std::vector<sptr<ISwitchFreeMultiWindowListener>>> switchFreeMultiWindowListeners_;
-    static std::map<int32_t, std::vector<sptr<IPreferredOrientationChangeListener>>> preferredOrientationChangeListener_;
-    static std::map<int32_t, std::vector<sptr<IWindowOrientationChangeListener>>> windowOrientationChangeListener_;
+    static std::map<int32_t, sptr<IPreferredOrientationChangeListener>> preferredOrientationChangeListener_;
+    static std::map<int32_t, sptr<IWindowOrientationChangeListener>> windowOrientationChangeListener_;
     static std::map<int32_t, std::vector<sptr<IWindowHighlightChangeListener>>> highlightChangeListeners_;
 
     // FA only
@@ -834,6 +833,11 @@ private:
      * Window Scene
      */
     WSError NotifyWindowAttachStateChange(bool isAttach) override { return WSError::WS_OK; }
+
+    /*
+     * Window Rotation
+     */
+    void NotifyClientOrientationChange();
 
     /*
      * keyboard
