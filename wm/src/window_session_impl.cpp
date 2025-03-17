@@ -4466,8 +4466,7 @@ WMError WindowSessionImpl::UnregisterWindowNoInteractionListener(const IWindowNo
 }
 
 template<typename T>
-EnableIfSame<T, IWindowRotationChangeListener,
-    std::vector<sptr<IWindowRotationChangeListener>>> WindowSessionImpl::GetListeners()
+EnableIfSame<T, IWindowRotationChangeListener, std::vector<sptr<IWindowRotationChangeListener>>> WindowSessionImpl::GetListeners()
 {
     std::vector<sptr<IWindowRotationChangeListener>> windowRotationChangeListener;
     for (auto& listener : windowRotationChangeListener_[GetPersistentId()]) {

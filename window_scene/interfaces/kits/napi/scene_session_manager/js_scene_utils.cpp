@@ -1041,7 +1041,7 @@ bool ConvertResultFromJsValue(napi_env env, napi_value jsObject, RotationChangeR
             TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to windowRect");
             return false;
         }
-        rotationChangeInfo.windowRect = windowRect;
+        rotationChangeResult.windowRect = windowRect;
     }
     return true;
 }
@@ -1786,7 +1786,7 @@ napi_value CreateJsSystemBarPropertyArrayObject(
     return arrayValue;
 }
 
-napi_value ConvertResultToJsValue(napi_env env, RotationChangeRersult& rotationChangeResult)
+napi_value ConvertResultToJsValue(napi_env env, RotationChangeResult& rotationChangeResult)
 {
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
@@ -1797,12 +1797,12 @@ napi_value ConvertResultToJsValue(napi_env env, RotationChangeRersult& rotationC
     napi_set_named_property(env, objValue, "rectType",
         CreateJsValue(env, static_cast<uint32_t>(rotationChangeResult.rectType)));
     napi_set_named_property(env, objValue, "windowRect",
-        CreateJsSessionRect(env, static_cast<uint32_t>(rotationChangeResult.windowRect)));
+        CreateJsSessionRect(env, rotationChangeResult.windowRect));
     return objValue;
 }
 
 napi_value CreateJsRotationChangeResultMapObject(napi_env env, const int32_t persistentId,
-        const RotationChangeRersult& rotationChangeResult)
+    const RotationChangeResult& rotationChangeResult)
 {
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
@@ -1814,7 +1814,7 @@ napi_value CreateJsRotationChangeResultMapObject(napi_env env, const int32_t per
     napi_set_named_property(env, objValue, "rectType",
         CreateJsValue(env, static_cast<uint32_t>(rotationChangeResult.rectType)));
     napi_set_named_property(env, objValue, "windowRect",
-        CreateJsSessionRect(env, static_cast<uint32_t>(rotationChangeResult.windowRect)));
+        CreateJsSessionRect(env, rotationChangeResult.windowRect));
     return objValue;
 }
 
