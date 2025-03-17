@@ -13848,7 +13848,7 @@ std::vector<sptr<SceneSession>> SceneSessionManager::GetActiveSceneSessionCopy()
             continue;
         }
         if (curSession->GetSessionInfo().isSystem_ ||
-            (!IsSessionForeground(curSession))) {
+            (!curSession->IsSessionForeground())) {
              continue;
          }
         activeSession.push_back(curSession);

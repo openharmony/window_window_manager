@@ -681,7 +681,7 @@ napi_value CreateRotationChangeInfoObject(napi_env env, const RotationChangeInfo
     napi_set_named_property(env, objValue, "type", CreateJsValue(env, static_cast<uint32_t>(info.type)));
     napi_set_named_property(env, objValue, "orientation", CreateJsValue(env, info.orientation));
     napi_set_named_property(env, objValue, "displayId", CreateJsValue(env, static_cast<uint32_t>(info.displayId)));
-    napi_set_named_property(env, objValue, "displayRect", GetRectAndConvertToJsValue(env, info.displayRect)));
+    napi_set_named_property(env, objValue, "displayRect", GetRectAndConvertToJsValue(env, info.displayRect));
     return objValue;
 }
 

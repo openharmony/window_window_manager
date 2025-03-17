@@ -959,8 +959,8 @@ int SessionStageStub::HandleNotifyRotationChange(MessageParcel& data, MessagePar
     }
 
     Rect rect = { 0, 0, 0, 0 };
-    if (!data.ReadUint32(rect.posX_) || !data.ReadUint32(rect.posY_ ||
-        !data.ReadInt32(rect.width_) || !data.ReadInt32(rect.height_))) {
+    if (!data.ReadInt32(rect.posX_) || !data.ReadInt32(rect.posY_ ||
+        !data.ReadUint32(rect.width_) || !data.ReadUint32(rect.height_))) {
         TLOGE(WmsLogTag::WMS_ROTATION, "read rect failed");
         return ERR_INVALID_DATA;
     }
@@ -982,7 +982,7 @@ int SessionStageStub::HandleNotifyRotationChange(MessageParcel& data, MessagePar
         return ERR_INVALID_DATA;
     }
     TLOGI(WmsLogTag::WMS_ROTATION, "send type:%{public}d, rect: [%{public}d, %{public}d, %{public}d, %{public}d]",
-        rectType, rotationChangeResult.windowRect.posX_, rotationChangeResult.windowRect.posY_,
+        rotationChangeResult.rectType, rotationChangeResult.windowRect.posX_, rotationChangeResult.windowRect.posY_,
         rotationChangeResult.windowRect.width_, rotationChangeResult.windowRect.height_);
     return ERR_NONE;
 }
