@@ -59,7 +59,7 @@ public:
     void SetSystemKeyboardStatus(bool isOn = false);
 private:
     std::atomic<SuperFoldStatus> curState_ = SuperFoldStatus::UNKNOWN;
-
+    sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion_ = nullptr;
     struct Transition {
         SuperFoldStatus nextState;
         std::function<void (SuperFoldStatusChangeEvents)> action;
@@ -97,7 +97,7 @@ private:
     void ReportNotifySuperFoldStatusChange(int32_t currentStatus, int32_t nextStatus, float postureAngle);
 
     static bool ChangeScreenState(bool toHalf);
-    static int32_t GetCurrentValidHeight(sptr<ScreenSession> screenSession);
+    int32_t GetCurrentValidHeight(sptr<ScreenSession> screenSession);
 };
 } // Rosen
 } // OHOS
