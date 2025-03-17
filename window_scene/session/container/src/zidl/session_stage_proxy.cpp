@@ -1768,4 +1768,55 @@ void SessionStageProxy::NotifyKeyboardAnimationCompleted(const KeyboardPanelInfo
         TLOGE(WmsLogTag::WMS_KEYBOARD, "SendRequest failed");
     }
 }
+
+WSError SessionStageProxy::NotifyTargetRotationInfo(OrientationInfo& info)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteInt32(info.rotation)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "write rotation failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteInt32(info.rect.posX_) || !data.WriteInt32(info.rect.posY_) ||
+        !data.WriteUint32(info.rect.width_) || !data.WriteUint32(info.rect.height_)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "write rect failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteUint32(static_cast<uint32_t>(info.avoidAreas.size()))) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "write avoid area size failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    for (const auto& [type, avoidArea] : info.avoidAreas) {
+        if (!data.WriteUint32(static_cast<uint32_t>(type))) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "write avoid area type failed");
+            return WSError::WS_ERROR_IPC_FAILED;
+        }
+        if (!data.WriteParcelable(&avoidArea)) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "write avoid area failed");
+            return WSError::WS_ERROR_IPC_FAILED;
+        }
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(
+        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_ROTATION_PROPERTY),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return WSError::WS_OK;
+}
 } // namespace OHOS::Rosen

@@ -1523,7 +1523,7 @@ HWTEST_F(SceneSessionTest3, RegisterRequestedOrientationChangeCallback, Function
     info.bundleName_ = "RegisterRequestedOrientationChangeCallback";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
 
-    std::function<void(uint32_t orientation)> func = [](uint32_t orientation) {
+    std::function<void(uint32_t orientation, bool needAnimation)> func = [](uint32_t orientation, bool needAnimation) {
         return;
     };
     sceneSession->RegisterRequestedOrientationChangeCallback(std::move(func));

@@ -4363,12 +4363,12 @@ bool SceneSession::CheckTouchOutsideCallbackRegistered()
     return onTouchOutside_ != nullptr;
 }
 
-void SceneSession::SetRequestedOrientation(Orientation orientation)
+void SceneSession::SetRequestedOrientation(Orientation orientation, bool needAnimation)
 {
     WLOGFI("id: %{public}d orientation: %{public}u", GetPersistentId(), static_cast<uint32_t>(orientation));
-    GetSessionProperty()->SetRequestedOrientation(orientation);
+    GetSessionProperty()->SetRequestedOrientation(orientation, needAnimation);
     if (onRequestedOrientationChange_) {
-        onRequestedOrientationChange_(static_cast<uint32_t>(orientation));
+        onRequestedOrientationChange_(static_cast<uint32_t>(orientation), needAnimation);
     }
 }
 
@@ -5162,7 +5162,7 @@ WMError SceneSession::HandleActionUpdateSetBrightness(const sptr<WindowSessionPr
 WMError SceneSession::HandleActionUpdateOrientation(const sptr<WindowSessionProperty>& property,
     WSPropertyChangeAction action)
 {
-    SetRequestedOrientation(property->GetRequestedOrientation());
+    SetRequestedOrientation(property->GetRequestedOrientation(), property->GetRequestedAnimation());
     return WMError::WM_OK;
 }
 
@@ -6688,6 +6688,10 @@ bool SceneSession::PipelineNeedNotifyClientToUpdateRect() const
 
 bool SceneSession::UpdateRectInner(const SessionUIParam& uiParam, SizeChangeReason reason)
 {
+    if (reason == SizeChangeReason::PAGE_ROTATION) {
+        dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
+    }
+
     if (!((NotifyServerToUpdateRect(uiParam, reason) || IsDirtyWindow()) && PipelineNeedNotifyClientToUpdateRect())) {
         return false;
     }
@@ -7244,6 +7248,78 @@ void SceneSession::AddSidebarBlur()
         bool isDark = (colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_DARK);
         AddRSNodeModifier(isDark, rsNodeTemp);
     }
+}
+
+void SceneSession::SetSessionGetTargetOrientationConfigInfoCallback(
+    const NotifySessionGetTargetOrientationConfigInfoFunc& func)
+{
+    PostTask(
+        [weakThis = wptr(this), func, where = __func__] {
+            auto session = weakThis.promote();
+            if (!session) {
+                TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s session is null", where);
+                return WSError::WS_ERROR_NULLPTR;
+            }
+            session->sessionGetTargetOrientationConfigInfoFunc_ = func;
+            return WSError::WS_OK;
+        }, __func__);
+}
+
+WSError SceneSession::GetTargetOrientationConfigInfo(Orientation targetOrientation,
+    const std::map<Rosen::WindowType, Rosen::SystemBarProperty>& properties)
+{
+    PostTask(
+        [weakThis = wptr(this), targetOrientation, properties, where = __func__] {
+            auto session = weakThis.promote();
+            if (!session) {
+                TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s session is null", where);
+                return WSError::WS_ERROR_NULLPTR;
+            }
+            session->SetSystemBarPropertyForRotation(properties);
+            if (session->sessionGetTargetOrientationConfigInfoFunc_) {
+                session->sessionGetTargetOrientationConfigInfoFunc_(static_cast<uint32_t>(targetOrientation));
+            }
+            return WSError::WS_OK;
+        }, __func__);
+    return WSError::WS_OK;
+}
+
+WSError SceneSession::NotifyRotationProperty(int32_t rotation, uint32_t width, uint32_t height)
+{
+    PostTask(
+        [weakThis = wptr(this), rotation, width, height, where = __func__] {
+            if (width == 0 || height == 0) {
+                return WSError::WS_ERROR_INVALID_PARAM;
+            }
+            auto session = weakThis.promote();
+            if (!session) {
+                TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s session is null", where);
+                return WSError::WS_ERROR_NULLPTR;
+            }
+            WSRect wsrect = { 0, 0, width, height };
+            auto properties = session->GetSystemBarPropertyForRotation();
+            std::map<AvoidAreaType, AvoidArea> avoidAreas;
+            session->GetAvoidAreasByRotation(rotation, wsrect, properties, avoidAreas);
+            if (!session->sessionStage_) {
+                return WSError::WS_ERROR_NULLPTR;
+            }
+            Rect rect = { wsrect.posX_, wsrect.posY_, wsrect.width_, wsrect.height_ };
+            OrientationInfo info = { rotation, rect, avoidAreas };
+            session->sessionStage_->NotifyTargetRotationInfo(info);
+            return WSError::WS_OK;
+        }, __func__);
+    return WSError::WS_OK;
+}
+
+void SceneSession::SetSystemBarPropertyForRotation(
+    const std::map<Rosen::WindowType, Rosen::SystemBarProperty>& properties)
+{
+    targetSystemBarProperty_ = properties;
+}
+
+std::map<Rosen::WindowType, Rosen::SystemBarProperty>& SceneSession::GetSystemBarPropertyForRotation()
+{
+    return targetSystemBarProperty_;
 }
 
 void SceneSession::AddRSNodeModifier(bool isDark, const std::shared_ptr<RSBaseNode>& rsNode)

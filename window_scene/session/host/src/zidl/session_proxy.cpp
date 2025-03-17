@@ -1158,6 +1158,59 @@ WSError SessionProxy::GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoid
     return static_cast<WSError>(ret);
 }
 
+
+WSError SessionProxy::GetTargetOrientationConfigInfo(Orientation targetOrientation,
+    const std::map<Rosen::WindowType, Rosen::SystemBarProperty>& properties)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(targetOrientation))) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "write orientation error");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(properties.size()))) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "write size error");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    for (const auto& [type, systemBarProperty] : properties) {
+        if (!data.WriteUint32(static_cast<uint32_t>(type))) {
+            return WSError::WS_ERROR_IPC_FAILED;
+        }
+        if (!data.WriteBool(systemBarProperty.enable_)) {
+            return WSError::WS_ERROR_IPC_FAILED;
+        }
+        if (!data.WriteUint32(systemBarProperty.backgroundColor_)) {
+            return WSError::WS_ERROR_IPC_FAILED;
+        }
+        if (!data.WriteUint32(systemBarProperty.contentColor_)) {
+            return WSError::WS_ERROR_IPC_FAILED;
+        }
+        if (!data.WriteBool(systemBarProperty.enableAnimation_)) {
+            return WSError::WS_ERROR_IPC_FAILED;
+        }
+        if (!data.WriteUint32(static_cast<uint32_t>(systemBarProperty.settingFlag_))) {
+            return WSError::WS_ERROR_IPC_FAILED;
+        }
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_TARGET_ORIENTATION_CONFIG_INFO),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    uint32_t ret = reply.ReadUint32();
+    return static_cast<WSError>(ret);
+}
+
 WSError SessionProxy::RequestSessionBack(bool needMoveToBackground)
 {
     MessageParcel data;

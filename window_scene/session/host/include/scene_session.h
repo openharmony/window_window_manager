@@ -77,7 +77,7 @@ using NotifySystemBarPropertyChangeFunc = std::function<void(
     const std::unordered_map<WindowType, SystemBarProperty>& propertyMap)>;
 using NotifyNeedAvoidFunc = std::function<void(bool status)>;
 using NotifyShowWhenLockedFunc = std::function<void(bool showWhenLocked)>;
-using NotifyReqOrientationChangeFunc = std::function<void(uint32_t orientation)>;
+using NotifyReqOrientationChangeFunc = std::function<void(uint32_t orientation, bool needAnimation)>;
 using NotifyRaiseAboveTargetFunc = std::function<void(int32_t subWindowId)>;
 using NotifyForceHideChangeFunc = std::function<void(bool hide)>;
 using NotifyTouchOutsideFunc = std::function<void()>;
@@ -316,7 +316,7 @@ public:
     void SetSystemSceneForceUIFirst(bool forceUIFirst);
     void SetUIFirstSwitch(RSUIFirstSwitch uiFirstSwitch);
     void MarkSystemSceneUIFirst(bool isForced, bool isUIFirstEnabled);
-    void SetRequestedOrientation(Orientation orientation);
+    void SetRequestedOrientation(Orientation orientation, bool needAnimation = true);
     WSError SetDefaultRequestedOrientation(Orientation orientation);
     void SetWindowAnimationFlag(bool needDefaultAnimationFlag);
     void SetCollaboratorType(int32_t collaboratorType);
@@ -385,6 +385,10 @@ public:
     AvoidArea GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect = WSRect::EMPTY_RECT,
         int32_t apiVersion = API_VERSION_INVALID) override;
     WSError GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoidAreas) override;
+    WSError GetTargetOrientationConfigInfo(Orientation targetOrientation,
+        const std::map<Rosen::WindowType, Rosen::SystemBarProperty>& properties) override;
+    void SetSessionGetTargetOrientationConfigInfoCallback(
+        const NotifySessionGetTargetOrientationConfigInfoFunc& func);
     WSError SetSystemBarProperty(WindowType type, SystemBarProperty systemBarProperty);
     void SetIsStatusBarVisible(bool isVisible);
     WSError SetIsStatusBarVisibleInner(bool isVisible);
@@ -492,6 +496,7 @@ public:
      * Window Rotation
      */
     void RegisterRequestedOrientationChangeCallback(NotifyReqOrientationChangeFunc&& callback);
+    WSError NotifyRotationProperty(int32_t rotation, uint32_t width, uint32_t height);
 
     /*
      * Window Animation
@@ -863,6 +868,8 @@ private:
     /*
      * Window Immersive
      */
+    void SetSystemBarPropertyForRotation(const std::map<WindowType, SystemBarProperty>& properties);
+    std::map<Rosen::WindowType, Rosen::SystemBarProperty>& GetSystemBarPropertyForRotation();
     void GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea);
     void GetCutoutAvoidArea(WSRect& rect, AvoidArea& avoidArea);
     void GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea);
@@ -1148,6 +1155,7 @@ private:
     /*
      * Window Immersive
      */
+    std::map<Rosen::WindowType, Rosen::SystemBarProperty> targetSystemBarProperty_;
     std::atomic_bool isDisplayStatusBarTemporarily_ { false };
     bool isStatusBarVisible_ = true;
     IsLastFrameLayoutFinishedFunc isLastFrameLayoutFinishedFunc_;

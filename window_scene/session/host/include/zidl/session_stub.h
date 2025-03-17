@@ -55,6 +55,7 @@ private:
     int HandleNeedAvoid(MessageParcel& data, MessageParcel& reply);
     int HandleGetAvoidAreaByType(MessageParcel& data, MessageParcel& reply);
     int HandleGetAllAvoidAreas(MessageParcel& data, MessageParcel& reply);
+    int HandleGetTargetOrientationConfigInfo(MessageParcel& data, MessageParcel& reply);
     int HandleSetAspectRatio(MessageParcel& data, MessageParcel& reply);
     int HandleSetWindowAnimationFlag(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateWindowSceneAfterCustomAnimation(MessageParcel& data, MessageParcel& reply);
