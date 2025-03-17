@@ -2021,7 +2021,7 @@ WMError WindowSceneSessionImpl::GetTargetOrientationConfigInfo(Orientation targe
         avoidAreas[AvoidAreaType::TYPE_CUTOUT].ToString().c_str(),
         avoidAreas[AvoidAreaType::TYPE_KEYBOARD].ToString().c_str(),
         avoidAreas[AvoidAreaType::TYPE_NAVIGATION_INDICATOR].ToString().c_str());
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, 
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
         "GetTargetOrientationConfigInfo: targetOrientation:%u, rotation:%d, rect:%s",
         static_cast<uint32_t>(targetOrientation), info.rotation, info.rect.ToString().c_str());
 
