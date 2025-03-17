@@ -1668,7 +1668,7 @@ HWTEST_F(SceneSessionTest3, GetKeyboardOccupiedAreaWithRotation2, Function | Sma
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     sceneSession->specificCallback_ = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    sceneSession->specificCallback_ = nullptr;
+    sceneSession->specificCallback_->onKeyboardRotationChange_ = nullptr;
 
     int32_t persistentId = 1;
     uint32_t rotation = 90;
