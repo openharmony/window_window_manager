@@ -140,8 +140,6 @@ public:
     WMError GetTargetOrientationConfigInfo(Orientation targetOrientation,
         const std::map<Rosen::WindowType, Rosen::SystemBarProperty>& properties, Ace::ViewportConfig& config,
         std::map<AvoidAreaType, AvoidArea>& avoidAreas) override;
-    Ace::ViewportConfig FillTargetOrientationConfig(
-        OrientationInfo info, const sptr<DisplayInfo>& displayInfo, uint64_t displayId);
     WSError NotifyTargetRotationInfo(OrientationInfo& info) override;
     WSError UpdateDisplayId(uint64_t displayId) override;
     WMError AdjustKeyboardLayout(const KeyboardLayoutParams params) override;
@@ -435,6 +433,12 @@ private:
     static std::mutex windowAttachStateChangeListenerMutex_;
     sptr<IWindowAttachStateChangeListner> windowAttachStateChangeListener_;
     WSError NotifyWindowAttachStateChange(bool isAttach) override;
+
+    /*
+     * Window Rotation
+     */
+    Ace::ViewportConfig FillTargetOrientationConfig(
+        const OrientationInfo& info, const sptr<DisplayInfo>& displayInfo, uint64_t displayId);
 
     /*
      * Window Lifecycle

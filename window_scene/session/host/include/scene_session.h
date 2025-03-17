@@ -861,7 +861,7 @@ private:
      * Window Immersive
      */
     void SetSystemBarPropertyForRotation(const std::map<WindowType, SystemBarProperty>& properties);
-    std::map<Rosen::WindowType, Rosen::SystemBarProperty> GetSystemBarPropertyForRotation();
+    std::map<Rosen::WindowType, Rosen::SystemBarProperty>& GetSystemBarPropertyForRotation();
     void GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea);
     void GetCutoutAvoidArea(WSRect& rect, AvoidArea& avoidArea);
     void GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea);

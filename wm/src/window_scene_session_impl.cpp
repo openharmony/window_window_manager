@@ -2022,7 +2022,7 @@ WMError WindowSceneSessionImpl::GetTargetOrientationConfigInfo(Orientation targe
 }
 
 Ace::ViewportConfig WindowSceneSessionImpl::FillTargetOrientationConfig(
-    OrientationInfo info, const sptr<DisplayInfo>& displayInfo, uint64_t displayId)
+    const OrientationInfo& info, const sptr<DisplayInfo>& displayInfo, uint64_t displayId)
 {
     Ace::ViewportConfig config;
     Rect targetRect = info.rect;
