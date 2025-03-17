@@ -153,23 +153,23 @@ HWTEST_F(SceneSessionTest5, HookAvoidAreaInCompatibleMode, Function | SmallTest 
     // hook Func only support compatibleMode
     session->SetCompatibleModeInPc(false, true);
     session->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    session->HookAvoidAreaInCompatibleMode(rect, avoidArea, AvoidAreaType::TYPE_SYSTEM);
+    session->HookAvoidAreaInCompatibleMode(rect, AvoidAreaType::TYPE_SYSTEM, avoidArea);
     EXPECT_TRUE(avoidArea.topRect_ == invalidRect);
     session->SetCompatibleModeInPc(true, true);
     session->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    session->HookAvoidAreaInCompatibleMode(rect, avoidArea, AvoidAreaType::TYPE_SYSTEM);
+    session->HookAvoidAreaInCompatibleMode(rect, AvoidAreaType::TYPE_SYSTEM, avoidArea);
     EXPECT_TRUE(avoidArea.topRect_ == invalidRect);
 
     // test top system avoidArea
     session->SetCompatibleModeInPc(true, true);
     session->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    session->HookAvoidAreaInCompatibleMode(rect, avoidArea, AvoidAreaType::TYPE_SYSTEM);
+    session->HookAvoidAreaInCompatibleMode(rect, AvoidAreaType::TYPE_SYSTEM, avoidArea);
     auto vpr = 3.5f;
     Rect targetRect = {0, 0, rect.width_, 40 * vpr};
     EXPECT_TRUE(avoidArea.topRect_ == targetRect);
 
     // test buttom aiBar avoidArea
-    session->HookAvoidAreaInCompatibleMode(rect, avoidArea, AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
+    session->HookAvoidAreaInCompatibleMode(rect, AvoidAreaType::TYPE_NAVIGATION_INDICATOR, avoidArea);
     targetRect = {0, rect.height_ - 28 * vpr, rect.width_, 28 * vpr};
     EXPECT_TRUE(avoidArea.bottomRect_ == targetRect);
 }

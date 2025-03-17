@@ -2029,7 +2029,7 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
         return;
     }
     if (sessionProperty->GetCompatibleModeInPc()) {
-        HookAvoidAreaInCompatibleMode(rect, avoidArea, AvoidAreaType::TYPE_SYSTEM);
+        HookAvoidAreaInCompatibleMode(rect, AvoidAreaType::TYPE_SYSTEM, avoidArea);
         return;
     }
     WindowMode windowMode = Session::GetWindowMode();
@@ -2179,7 +2179,7 @@ void SceneSession::GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea) con
     }
     // compatibleMode app need to hook avoidArea in pc
     if (GetSessionProperty()->GetCompatibleModeInPc()) {
-        HookAvoidAreaInCompatibleMode(rect, avoidArea, AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
+        HookAvoidAreaInCompatibleMode(rect, AvoidAreaType::TYPE_NAVIGATION_INDICATOR, avoidArea);
         return;
     }
     WSRect barArea;
@@ -2191,8 +2191,8 @@ void SceneSession::GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea) con
     CalculateAvoidAreaRect(rect, barArea, avoidArea);
 }
 
-void SceneSession::HookAvoidAreaInCompatibleMode(const WSRect& rect, AvoidArea& avoidArea,
-    AvoidAreaType avoidAreaType) const
+void SceneSession::HookAvoidAreaInCompatibleMode(const WSRect& rect, AvoidAreaType avoidAreaType,
+    AvoidArea& avoidArea) const
 {
     WindowMode mode = GetWindowMode();
     if (!GetSessionProperty()->GetCompatibleModeInPc() || mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
