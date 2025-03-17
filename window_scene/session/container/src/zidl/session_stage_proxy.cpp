@@ -1852,7 +1852,7 @@ RotationChangeResult SessionStageProxy::NotifyRotationChange(const RotationChang
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         TLOGE(WmsLogTag::WMS_ROTATION, "remote is null");
-        return;
+        return rotationChangeResult;
     }
     if (remote->SendRequest(
         static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_ROTATION_CHANGE),
@@ -1874,7 +1874,7 @@ RotationChangeResult SessionStageProxy::NotifyRotationChange(const RotationChang
     if (!reply.ReadInt32(rotationChangeResult.windowRect.posX_) ||
         !reply.ReadInt32(rotationChangeResult.windowRect.posY_) ||
         !reply.ReadUint32(rotationChangeResult.windowRect.width_) ||
-        !reply.ReadUint32(rotationChangeResult.windowRect.height_) ||) {
+        !reply.ReadUint32(rotationChangeResult.windowRect.height_)) {
         TLOGE(WmsLogTag::WMS_ROTATION, "read window rect failed");
         return rotationChangeResult;
     }
