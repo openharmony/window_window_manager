@@ -36,7 +36,7 @@ const int32_t TP_TYPE = 12;
 const char* KEYBOARD_ON_CONFIG = "version:3+main";
 const char* KEYBOARD_OFF_CONFIG = "version:3+whole";
 #endif
-static sptr<FoldCreaseRegion> currentSuperFoldCreaseRegion_ = nullptr;
+static bool isKeyboardOn_ = false;
 }
 
 void SuperFoldStateManager::DoAngleChangeFolded(SuperFoldStatusChangeEvents event)
@@ -57,6 +57,7 @@ void SuperFoldStateManager::DoAngleChangeExpanded(SuperFoldStatusChangeEvents ev
 void SuperFoldStateManager::DoKeyboardOn(SuperFoldStatusChangeEvents event)
 {
     TLOGI(WmsLogTag::DMS, "enter %{public}d", event);
+    isKeyboardOn_ = true;
     if (!ChangeScreenState(true)) {
         TLOGI(WmsLogTag::DMS, "change to half screen fail!");
     }
@@ -65,6 +66,7 @@ void SuperFoldStateManager::DoKeyboardOn(SuperFoldStatusChangeEvents event)
 void SuperFoldStateManager::DoKeyboardOff(SuperFoldStatusChangeEvents event)
 {
     TLOGI(WmsLogTag::DMS, "enter %{public}d", event);
+    isKeyboardOn_ = false;
     if (!ChangeScreenState(false)) {
         TLOGI(WmsLogTag::DMS, "recover from half screen fail!");
     }
