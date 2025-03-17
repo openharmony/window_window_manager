@@ -45,6 +45,11 @@ public:
     void SetUp() override;
     void TearDown() override;
 
+    // keyboard
+    bool CheckKeyboardOccupiedAreaInfo(const Rect& desiredRect, const WSRect& actualRect);
+    void GetKeyboardOccupiedAreaWithRotationTestData(WindowUIType windowType, DisplayId cDisplayId,
+        DisplayId kDisplayId, SessionState keyboardState, WindowGravity gravity);
+
     static sptr<SceneSessionManager> ssm_;
 private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
@@ -69,6 +74,50 @@ void SceneSessionManagerTest12::SetUp()
 void SceneSessionManagerTest12::TearDown()
 {
     usleep(WAIT_SYNC_IN_NS);
+}
+
+const Rect landscapePanelRect_ = {0, 538, 2720, 722};
+const Rect portraitPanelRect_ = {0, 1700, 1260, 1020};
+std::vector<std::pair<bool, WSRect>> avoidAreas_ = {};
+bool SceneSessionManagerTest12::CheckKeyboardOccupiedAreaInfo(const Rect& desiredRect, const WSRect& actualRect)
+{
+    return desiredRect.posX_ == actualRect.posX_ && desiredRect.posY_ == actualRect.posY_ &&
+        static_cast<int32_t>(desiredRect.width_) == actualRect.width_ &&
+        static_cast<int32_t>(desiredRect.height_) == actualRect.height_;
+}
+
+void SceneSessionManagerTest12::GetKeyboardOccupiedAreaWithRotationTestData(WindowUIType windowType,
+    DisplayId cDisplayId, DisplayId kDisplayId, SessionState keyboardState, WindowGravity gravity)
+{
+    ssm_->sceneSessionMap_.clear();
+    avoidAreas_.clear();
+    ssm_->systemConfig_.windowUIType_ = windowType;
+    SessionInfo callingSessionInfo;
+    callingSessionInfo.abilityName_ = "callingSession";
+    callingSessionInfo.bundleName_ = "callingSession";
+    sptr<SceneSession> callingSession = sptr<SceneSession>::MakeSptr(callingSessionInfo, nullptr);
+    sptr<WindowSessionProperty> callingSessionProperties = sptr<WindowSessionProperty>::MakeSptr();
+    callingSessionProperties->SetDisplayId(cDisplayId);
+    callingSession->SetSessionProperty(callingSessionProperties);
+
+    SessionInfo keyboardSessionInfo;
+    keyboardSessionInfo.abilityName_ = "keyboardSession";
+    keyboardSessionInfo.bundleName_ = "keyboardSession";
+    sptr<SceneSession> keyboardSession = sptr<SceneSession>::MakeSptr(keyboardSessionInfo, nullptr);
+    keyboardSession->SetScreenId(kDisplayId);
+    sptr<WindowSessionProperty> keyboardProperties = sptr<WindowSessionProperty>::MakeSptr();
+    keyboardProperties->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    keyboardProperties->SetIsSystemKeyboard(false);
+    KeyboardLayoutParams params;
+    params.LandscapePanelRect_ = landscapePanelRect_;
+    params.PortraitPanelRect_ = portraitPanelRect_;
+    params.gravity_ = gravity;
+    keyboardProperties->SetKeyboardLayoutParams(params);
+    keyboardSession->SetSessionState(keyboardState);
+    keyboardSession->SetSessionProperty(keyboardProperties);
+
+    ssm_->sceneSessionMap_.insert({1, callingSession});
+    ssm_->sceneSessionMap_.insert({2, keyboardSession});
 }
 
 namespace {
@@ -1521,23 +1570,29 @@ HWTEST_F(SceneSessionManagerTest12, SetStatusBarAvoidHeight, Function | SmallTes
 
 /**
  * @tc.name: GetKeyboardOccupiedAreaWithRotation1
- * @tc.desc: test function : GetKeyboardOccupiedAreaWithRotation
+ * @tc.desc: PC device is not compatible
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerTest12, GetKeyboardOccupiedAreaWithRotation1, Function | SmallTest | Level3)
 {
-    sptr<SceneSessionManager> sceneSessionManager = sptr<SceneSessionManager>::MakeSptr();
-    sceneSessionManager->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    GetKeyboardOccupiedAreaWithRotationTestData(WindowUIType::PHONE_WINDOW, 0, 0,
+        SessionState::STATE_FOREGROUND, WindowGravity::WINDOW_GRAVITY_BOTTOM);
+    ssm_->GetKeyboardOccupiedAreaWithRotation(1, 0, avoidAreas_);
+    ASSERT_EQ(1, static_cast<uint32_t>(avoidAreas_.size()));
+    ASSERT_EQ(true, avoidAreas_[0].first);
+    ASSERT_EQ(true, CheckKeyboardOccupiedAreaInfo(portraitPanelRect_, avoidAreas_[0].second));
 
-    int32_t persistentId = 1;
-    uint32_t rotation = 90;
-    std::vector<std::pair<bool, WSRect>> avoidAreas;
-    std::pair<bool, WSRect> keyboardOccupiedArea = {false, {0, 0, 0, 0}};
-    avoidAreas.emplace_back(keyboardOccupiedArea);
-    sceneSessionManager->GetKeyboardOccupiedAreaWithRotation(persistentId, rotation, avoidAreas);
-    uint32_t areaSize = static_cast<uint32_t>(avoidAreas.size());
-    ASSERT_EQ(1, areaSize);
-    ASSERT_EQ(false, avoidAreas[0].first);
+    GetKeyboardOccupiedAreaWithRotationTestData(WindowUIType::PAD_WINDOW, 0, 0,
+        SessionState::STATE_FOREGROUND, WindowGravity::WINDOW_GRAVITY_BOTTOM);
+    ssm_->GetKeyboardOccupiedAreaWithRotation(1, 90, avoidAreas_);
+    ASSERT_EQ(1, static_cast<uint32_t>(avoidAreas_.size()));
+    ASSERT_EQ(true, avoidAreas_[0].first);
+    ASSERT_EQ(true, CheckKeyboardOccupiedAreaInfo(landscapePanelRect_, avoidAreas_[0].second));
+
+    GetKeyboardOccupiedAreaWithRotationTestData(WindowUIType::PC_WINDOW, 0, 0,
+        SessionState::STATE_FOREGROUND, WindowGravity::WINDOW_GRAVITY_BOTTOM);
+    ssm_->GetKeyboardOccupiedAreaWithRotation(1, 0, avoidAreas_);
+    ASSERT_EQ(0, static_cast<uint32_t>(avoidAreas_.size()));
 }
 
 /**
@@ -1547,16 +1602,108 @@ HWTEST_F(SceneSessionManagerTest12, GetKeyboardOccupiedAreaWithRotation1, Functi
  */
 HWTEST_F(SceneSessionManagerTest12, GetKeyboardOccupiedAreaWithRotation2, Function | SmallTest | Level3)
 {
-    sptr<SceneSessionManager> sceneSessionManager = sptr<SceneSessionManager>::MakeSptr();
-    sceneSessionManager->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    GetKeyboardOccupiedAreaWithRotationTestData(WindowUIType::PHONE_WINDOW, 0, 0,
+        SessionState::STATE_FOREGROUND, WindowGravity::WINDOW_GRAVITY_BOTTOM);
 
-    int32_t persistentId = 1;
-    uint32_t rotation = 90;
-    std::vector<std::pair<bool, WSRect>> avoidAreas;
-    std::pair<bool, WSRect> keyboardOccupiedArea = {false, {0, 0, 0, 0}};
-    avoidAreas.emplace_back(keyboardOccupiedArea);
-    sceneSessionManager->GetKeyboardOccupiedAreaWithRotation(persistentId, rotation, avoidAreas);
-    ASSERT_EQ(false, avoidAreas[0].first);
+    ssm_->GetKeyboardOccupiedAreaWithRotation(-1, 0, avoidAreas_);
+    ASSERT_EQ(0, static_cast<uint32_t>(avoidAreas_.size()));
+
+    ssm_->GetKeyboardOccupiedAreaWithRotation(0, 0, avoidAreas_);
+    ASSERT_EQ(0, static_cast<uint32_t>(avoidAreas_.size()));
+
+    GetKeyboardOccupiedAreaWithRotationTestData(WindowUIType::PHONE_WINDOW, 12, 0,
+        SessionState::STATE_FOREGROUND, WindowGravity::WINDOW_GRAVITY_BOTTOM);
+    ssm_->GetKeyboardOccupiedAreaWithRotation(1, 0, avoidAreas_);
+    ASSERT_EQ(0, static_cast<uint32_t>(avoidAreas_.size()));
+}
+
+/**
+ * @tc.name: GetKeyboardOccupiedAreaWithRotation3
+ * @tc.desc: test function : GetKeyboardOccupiedAreaWithRotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetKeyboardOccupiedAreaWithRotation3, Function | SmallTest | Level3)
+{
+    GetKeyboardOccupiedAreaWithRotationTestData(WindowUIType::PHONE_WINDOW, 0, 0,
+        SessionState::STATE_FOREGROUND, WindowGravity::WINDOW_GRAVITY_BOTTOM);
+    
+    ssm_->GetKeyboardOccupiedAreaWithRotation(1, 450, avoidAreas_);
+    ASSERT_EQ(0, static_cast<uint32_t>(avoidAreas_.size()));
+
+    ssm_->GetKeyboardOccupiedAreaWithRotation(1, -90, avoidAreas_);
+    ASSERT_EQ(0, static_cast<uint32_t>(avoidAreas_.size()));
+
+    ssm_->GetKeyboardOccupiedAreaWithRotation(1, 45, avoidAreas_);
+    ASSERT_EQ(0, static_cast<uint32_t>(avoidAreas_.size()));
+}
+
+/**
+ * @tc.name: GetKeyboardOccupiedAreaWithRotation4
+ * @tc.desc: test function : GetKeyboardOccupiedAreaWithRotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetKeyboardOccupiedAreaWithRotation4, Function | SmallTest | Level3)
+{
+    GetKeyboardOccupiedAreaWithRotationTestData(WindowUIType::PHONE_WINDOW, 0, 0,
+        SessionState::STATE_FOREGROUND, WindowGravity::WINDOW_GRAVITY_FLOAT);
+    
+    ssm_->GetKeyboardOccupiedAreaWithRotation(1, 0, avoidAreas_);
+    ASSERT_EQ(1, static_cast<uint32_t>(avoidAreas_.size()));
+    ASSERT_EQ(false, avoidAreas_[0].first);
+    ASSERT_EQ(true, CheckKeyboardOccupiedAreaInfo(portraitPanelRect_, avoidAreas_[0].second));
+}
+
+/**
+ * @tc.name: GetKeyboardOccupiedAreaWithRotation5
+ * @tc.desc: test function : GetKeyboardOccupiedAreaWithRotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetKeyboardOccupiedAreaWithRotation5, Function | SmallTest | Level3)
+{
+    GetKeyboardOccupiedAreaWithRotationTestData(WindowUIType::PHONE_WINDOW, 0, 0,
+        SessionState::STATE_BACKGROUND, WindowGravity::WINDOW_GRAVITY_BOTTOM);
+    
+    ssm_->GetKeyboardOccupiedAreaWithRotation(1, 90, avoidAreas_);
+    ASSERT_EQ(1, static_cast<uint32_t>(avoidAreas_.size()));
+    ASSERT_EQ(false, avoidAreas_[0].first);
+    ASSERT_EQ(true, CheckKeyboardOccupiedAreaInfo(landscapePanelRect_, avoidAreas_[0].second));
+}
+
+/**
+ * @tc.name: GetKeyboardOccupiedAreaWithRotation6
+ * @tc.desc: test function : GetKeyboardOccupiedAreaWithRotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetKeyboardOccupiedAreaWithRotation6, Function | SmallTest | Level2)
+{
+    GetKeyboardOccupiedAreaWithRotationTestData(WindowUIType::PHONE_WINDOW, 0, 0,
+        SessionState::STATE_FOREGROUND, WindowGravity::WINDOW_GRAVITY_BOTTOM);
+
+    ssm_->GetKeyboardOccupiedAreaWithRotation(1, 180, avoidAreas_);
+    ASSERT_EQ(1, static_cast<uint32_t>(avoidAreas_.size()));
+    ASSERT_EQ(true, avoidAreas_[0].first);
+    ASSERT_EQ(true, CheckKeyboardOccupiedAreaInfo(portraitPanelRect_, avoidAreas_[0].second));
+
+    ssm_->GetKeyboardOccupiedAreaWithRotation(1, 360, avoidAreas_);
+    ASSERT_EQ(2, static_cast<uint32_t>(avoidAreas_.size()));
+    ASSERT_EQ(true, avoidAreas_[1].first);
+    ASSERT_EQ(true, CheckKeyboardOccupiedAreaInfo(portraitPanelRect_, avoidAreas_[1].second));
+}
+
+/**
+ * @tc.name: GetKeyboardOccupiedAreaWithRotation7
+ * @tc.desc: test function : GetKeyboardOccupiedAreaWithRotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetKeyboardOccupiedAreaWithRotation7, Function | SmallTest | Level2)
+{
+    GetKeyboardOccupiedAreaWithRotationTestData(WindowUIType::PHONE_WINDOW, 0, 0,
+        SessionState::STATE_ACTIVE, WindowGravity::WINDOW_GRAVITY_BOTTOM);
+    ssm_->GetKeyboardOccupiedAreaWithRotation(1, 270, avoidAreas_);
+
+    ASSERT_EQ(1, static_cast<uint32_t>(avoidAreas_.size()));
+    ASSERT_EQ(true, avoidAreas_[0].first);
+    ASSERT_EQ(true, CheckKeyboardOccupiedAreaInfo(landscapePanelRect_, avoidAreas_[0].second));
 }
 }
 } // namespace Rosen
