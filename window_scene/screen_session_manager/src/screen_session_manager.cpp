@@ -6719,10 +6719,17 @@ void ScreenSessionManager::NotifyFoldStatusChanged(FoldStatus foldStatus)
             screenSession->SetDefaultDeviceRotationOffset(defaultDeviceRotationOffset_);
         }
     }
-    if (screenSession != nullptr && FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() &&
-        foldStatus == FoldStatus::FOLDED) {
+    if (screenSession != nullptr && FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
+        // 维护外屏独立dpi
+        if (foldStatus == FoldStatus::FOLDED) {
             // sub screen default rotation offset is 270
             screenSession->SetDefaultDeviceRotationOffset(270);
+            auto property = screenSession->GetScreenProperty();
+            densityDpi_ = property.GetDensity();
+            SetVirtualPixelRatio(GetDefaultScreenId(), subDensityDpi_);
+        } else {
+            SetVirtualPixelRatio(GetDefaultScreenId(), densityDpi_);
+        }
     }
     auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::FOLD_STATUS_CHANGED_LISTENER);
     TLOGI(WmsLogTag::DMS, "foldStatus:%{public}d, agent size: %{public}u",
