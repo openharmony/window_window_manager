@@ -1357,7 +1357,8 @@ void WindowSceneSessionImpl::SetDefaultProperty()
         case WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR:
         case WindowType::WINDOW_TYPE_DOCK_SLICE:
         case WindowType::WINDOW_TYPE_STATUS_BAR:
-        case WindowType::WINDOW_TYPE_NAVIGATION_BAR: {
+        case WindowType::WINDOW_TYPE_NAVIGATION_BAR:
+        case WindowType::WINDOW_TYPE_FLOAT_NAVIGATION: {
             property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
             property_->SetFocusable(false);
             break;
