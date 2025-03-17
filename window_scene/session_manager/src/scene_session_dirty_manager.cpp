@@ -461,15 +461,14 @@ bool SceneSessionDirtyManager::GetLastConstrainedModalUIExtInfo(const sptr<Scene
         TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is nullptr");
         return false;
     }
-    auto surfaceNode = sceneSession->GetSurfaceNode();
-    if (surfaceNode == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "surfaceNode is nullptr");
+    auto surfaceNodeId = sceneSession->GetSurfaceNodeId();
+    if (!surfaceNodeId) {
+        TLOGE(WmsLogTag::WMS_EVENT, "surfaceNodeId not found");
         return false;
     }
-    auto surfaceNodeId = surfaceNode->GetId();
     {
         std::shared_lock<std::shared_mutex> lock(constrainedModalUIExtInfoMutex_);
-        auto iter = constrainedModalUIExtInfoMap_.find(surfaceNodeId);
+        auto iter = constrainedModalUIExtInfoMap_.find(*surfaceNodeId);
         if (iter == constrainedModalUIExtInfoMap_.end()) {
             return false;
         }
@@ -1018,16 +1017,15 @@ std::vector<MMI::WindowInfo> SceneSessionDirtyManager::GetSecSurfaceWindowinfoLi
         TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is nullptr");
         return {};
     }
-    auto surfaceNode = sceneSession->GetSurfaceNode();
-    if (surfaceNode == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "surfaceNode is nullptr");
+    auto surfaceNodeId = sceneSession->GetSurfaceNodeId();
+    if (!surfaceNodeId) {
+        TLOGE(WmsLogTag::WMS_EVENT, "surfaceNodeId not found");
         return {};
     }
     std::vector<SecSurfaceInfo> secSurfaceInfoList;
-    auto surfaceNodeId = surfaceNode->GetId();
     {
         std::shared_lock<std::shared_mutex> lock(secSurfaceInfoMutex_);
-        auto iter = secSurfaceInfoMap_.find(surfaceNodeId);
+        auto iter = secSurfaceInfoMap_.find(*surfaceNodeId);
         if (iter == secSurfaceInfoMap_.end()) {
             return {};
         }
