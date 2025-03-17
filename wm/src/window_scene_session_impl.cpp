@@ -20,6 +20,7 @@
 #include <ability_manager_client.h>
 #include <parameters.h>
 #include <transaction/rs_transaction.h>
+#include <hitrace_meter.h>
 
 #include <application_context.h>
 #include "color_parser.h"
@@ -2013,11 +2014,17 @@ WMError WindowSceneSessionImpl::GetTargetOrientationConfigInfo(Orientation targe
     OrientationInfo info = getTargetInfoCallback_->GetTargetOrientationResult(WINDOW_LAYOUT_TIMEOUT);
     avoidAreas = info.avoidAreas;
     config = FillTargetOrientationConfig(info, displayInfo, GetDisplayId());
-    TLOGI(WmsLogTag::WMS_ROTATION, "win:%{public}u, avoidAreas:%{public}s, %{public}s, %{public}s, %{public}s",
-        GetWindowId(), avoidAreas[AvoidAreaType::TYPE_SYSTEM].ToString().c_str(),
+    TLOGI(WmsLogTag::WMS_ROTATION,
+        "win:%{public}u, rotate:%{public}d, rect:%{public}s, avoidAreas:%{public}s,%{public}s,%{public}s,%{public}s",
+        GetWindowId(), info.rotation, info.rect.ToString().c_str(),
+        avoidAreas[AvoidAreaType::TYPE_SYSTEM].ToString().c_str(),
         avoidAreas[AvoidAreaType::TYPE_CUTOUT].ToString().c_str(),
         avoidAreas[AvoidAreaType::TYPE_KEYBOARD].ToString().c_str(),
         avoidAreas[AvoidAreaType::TYPE_NAVIGATION_INDICATOR].ToString().c_str());
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, 
+        "GetTargetOrientationConfigInfo: targetOrientation:%u, rotation:%d, rect:%s",
+        static_cast<uint32_t>(targetOrientation), info.rotation, info.rect.ToString().c_str());
+
     return static_cast<WMError>(ret);
 }
 
@@ -2043,7 +2050,11 @@ Ace::ViewportConfig WindowSceneSessionImpl::FillTargetOrientationConfig(
 
 WSError WindowSceneSessionImpl::NotifyTargetRotationInfo(OrientationInfo& info)
 {
-    return getTargetInfoCallback_->OnUpdateTargetOrientationInfo(info);
+    WSError ret = WSError::WS_OK;
+    if (getTargetInfoCallback_) {
+        ret = getTargetInfoCallback_->OnUpdateTargetOrientationInfo(info);
+    }
+    return ret;
 }
 
 WMError WindowSceneSessionImpl::SetAspectRatio(float ratio)
