@@ -18,8 +18,8 @@ generate_static_abc("display_abc") {
   arktsconfig = "./arktsconfig.json"
   in_puts = [
     "./arktsconfig.json",
-    "./sts/display.ets",
-    "./sts/display_entry.ets",
+    "./ets/display.ets",
+    "./ets/display_entry.ets",
   ]
   dst_file = "$target_out_dir/display.abc"
   out_puts = [ "$target_out_dir/display.abc" ]

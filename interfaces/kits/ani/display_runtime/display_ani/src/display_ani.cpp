@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 #include <hitrace_meter.h>
- 
+
 #include "ani.h"
 #include "display_ani.h"
 #include "display_info.h"
@@ -25,6 +25,7 @@
 #include "display_ani_utils.h"
 #include "refbase.h"
 #include "display_ani_manager.h"
+#include "ani_err_utils.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -35,39 +36,40 @@ DisplayAni::DisplayAni(const std::shared_ptr<OHOS::Rosen::Display>& display)
 {
 }
 
-ani_object DisplayAni::getCutoutInfo(ani_env* env, ani_object obj)
+void DisplayAni::getCutoutInfo(ani_env* env, ani_object obj, ani_object cutoutInfoObj)
 {
     auto display = SingletonContainer::Get<DisplayManager>().GetDefaultDisplay();
+    TLOGI(WmsLogTag::DMS, "[ANI] getCutoutInfo begin");
     sptr<CutoutInfo> cutoutInfo = display->GetCutoutInfo();
-    ani_object objRet = nullptr;
-    ani_class cls;
-    if (ANI_OK != env->FindClass("L@ohos/display/display/CutoutInfoImpl", &cls)) {
-        TLOGE(WmsLogTag::DMS, "[ANI] null class CutoutInfoImpl");
+    if (cutoutInfo == nullptr) {
+        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_SCREEN, "");
     }
-    if (ANI_OK != DisplayAniUtils::NewAniObjectNoParams(env, cls, &objRet)) {
-        TLOGE(WmsLogTag::DMS, "[ANI] create object fail");
+    std::vector<DMRect> rects = cutoutInfo->GetBoundingRects();
+    // bounding rects
+    ani_ref boundingRects = nullptr;
+    ani_status status = env->Object_GetFieldByName_Ref(cutoutInfoObj, "<property>boundingRects", &boundingRects);
+    if (ANI_OK != status) {
+        TLOGE(WmsLogTag::DMS, "[ANI] get field bounding rects fail, ani_status = %{public}d", status);
     }
-    ani_array_ref arrayRef = DisplayAniUtils::convertRects(cutoutInfo->GetBoundingRects(), env);
-    env->Object_SetFieldByName_Ref(objRet, "boundingRects", arrayRef);
-    ani_object waterfallObj = nullptr;
 
-    if (ANI_OK != env->FindClass("L@ohos/display/display/WaterfallDisplayAreaRectsImpl", &cls)) {
-        TLOGE(WmsLogTag::DMS, "[ANI] null class WaterfallDisplayAreaRectsImpl");
+    ani_double length;
+    if (ANI_OK != env->Object_GetPropertyByName_Double(static_cast<ani_object>(boundingRects), "length", &length)) {
+        TLOGE(WmsLogTag::DMS, "[ANI] get ani_array len fail");
     }
-    if (ANI_OK != DisplayAniUtils::NewAniObjectNoParams(env, cls, &waterfallObj)) {
-        TLOGE(WmsLogTag::DMS, "[ANI] create object fail");
+    for (int i = 0; i < std::min(int(length), static_cast<int>(rects.size())); i++) {
+        ani_ref currentCutoutInfo;
+        if (ANI_OK != env->Object_CallMethodByName_Ref(static_cast<ani_object>(boundingRects), "$_get",
+            "I:Lstd/core/Object;", &currentCutoutInfo, (ani_int)i)) {
+            TLOGE(WmsLogTag::DMS, "[ANI] get ani_array index %{public}u fail", (ani_int)i);
+        }
+        TLOGI(WmsLogTag::DMS, "current i: %{public}d", i);
+        DisplayAniUtils::convertRect(rects[i], static_cast<ani_object>(currentCutoutInfo), env);
     }
-    auto WaterfallDisplayAreaRects = cutoutInfo->GetWaterfallDisplayAreaRects();
-    DMRect left = WaterfallDisplayAreaRects.left;
-    DMRect top = WaterfallDisplayAreaRects.top;
-    DMRect right = WaterfallDisplayAreaRects.right;
-    DMRect bottom = WaterfallDisplayAreaRects.bottom;
-    env->Object_SetFieldByName_Ref(waterfallObj, "left", DisplayAniUtils::convertRect(left, env));
-    env->Object_SetFieldByName_Ref(waterfallObj, "top", DisplayAniUtils::convertRect(top, env));
-    env->Object_SetFieldByName_Ref(waterfallObj, "right", DisplayAniUtils::convertRect(right, env));
-    env->Object_SetFieldByName_Ref(waterfallObj, "bottom", DisplayAniUtils::convertRect(bottom, env));
-    env->Object_SetFieldByName_Ref(objRet, "waterfallDisplayAreaRects", waterfallObj);
-    return objRet;
+    // waterfall area
+    ani_ref waterfallObj = nullptr;
+    env->Object_GetFieldByName_Ref(cutoutInfoObj, "<property>waterfallDisplayAreaRects", &waterfallObj);
+    auto waterfallDisplayAreaRects = cutoutInfo->GetWaterfallDisplayAreaRects();
+    DisplayAniUtils::convertWaterArea(waterfallDisplayAreaRects, static_cast<ani_object>(waterfallObj), env);
 }
 
 extern "C" {
@@ -97,14 +99,13 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(DisplayManagerAni::getDisplayByIdSyncAni)},
         ani_native_function {"getDefaultDisplaySyncNative", "Lstd/core/Object;:I",
             reinterpret_cast<void *>(DisplayManagerAni::getDefaultDisplaySyncAni)},
-        ani_native_function {"getAllDisplaysSyncNative", ":Lescompat/Array;",
+        ani_native_function {"getAllDisplaysSyncNative", "Lescompat/Array;:V",
             reinterpret_cast<void *>(DisplayManagerAni::getAllDisplaysAni)},
         ani_native_function {"syncOn", "Lstd/core/String;Lstd/core/Object;J:V",
             reinterpret_cast<void *>(DisplayManagerAni::registerCallback)},
         ani_native_function {"syncOff", "Lstd/core/String;Lstd/core/Object;J:V",
             reinterpret_cast<void *>(DisplayManagerAni::unRegisterCallback)}
     };
-    TLOGI(WmsLogTag::DMS, "[ANI] func len %{public}u", funcs.size());
     if ((ret = env->Namespace_BindNativeFunctions(nsp, funcs.data(), funcs.size()))) {
         TLOGE(WmsLogTag::DMS, "[ANI] bind namespace fail %{public}u", ret);
         return ANI_NOT_FOUND;
@@ -116,7 +117,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         return ANI_NOT_FOUND;
     }
     std::array methods = {
-        ani_native_function {"getCutoutInfoInternal", ":L@ohos/display/display/CutoutInfo;",
+        ani_native_function {"getCutoutInfoInternal", "L@ohos/display/display/CutoutInfo;:V",
             reinterpret_cast<void *>(DisplayAni::getCutoutInfo)},
     };
     if ((ret = env->Class_BindNativeMethods(displayCls, methods.data(), methods.size())) != ANI_OK) {
@@ -127,6 +128,6 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     return ANI_OK;
 }
 }
- 
+
 }  // namespace Rosen
 }  // namespace OHOS

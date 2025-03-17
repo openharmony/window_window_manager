@@ -17,6 +17,7 @@
 #define OHOS_ANI_WINDOW_H
 
 #include "ani.h"
+#include "ani_window_register_manager.h"
 #include "window.h"
 
 namespace OHOS {
@@ -50,22 +51,23 @@ public:
     static void SetWindowSystemBarEnable(ani_env* env, ani_object obj, ani_long nativeObj, ani_object nameAry);
     static ani_object GetUIContext(ani_env* env, ani_object obj, ani_long nativeObj);
     static ani_object GetWindowAvoidArea(ani_env* env, ani_object obj, ani_long nativeObj, ani_int type);
-    static ani_object RegisterWindowCallback(ani_env* env, ani_object obj, ani_long nativeObj, ani_string type,
+    static void RegisterWindowCallback(ani_env* env, ani_object obj, ani_long nativeObj, ani_string type,
         ani_ref callback);
-    static ani_object UnregisterWindowCallback(ani_env* env, ani_object obj, ani_long nativeObj, ani_string type,
+    static void UnregisterWindowCallback(ani_env* env, ani_object obj, ani_long nativeObj, ani_string type,
         ani_ref callback);
 
-    ani_int GetWindowDecorHeight(ani_env* env);
-    ani_object SetWindowBackgroundColorSync(ani_env* env, const std::string& color);
+    ani_double GetWindowDecorHeight(ani_env* env);
+    ani_object SetWindowBackgroundColor(ani_env* env, const std::string& color);
     ani_object SetImmersiveModeEnabledState(ani_env* env, bool enable);
     ani_object SetWindowDecorVisible(ani_env* env, bool isVisible);
-    ani_object SetWindowDecorHeight(ani_env* env, ani_int height);
+    ani_object SetWindowDecorHeight(ani_env* env, ani_double height);
     ani_object GetWindowPropertiesSync(ani_env* env);
     ani_boolean IsWindowSupportWideGamut(ani_env* env);
     ani_object SetWindowLayoutFullScreen(ani_env* env, ani_boolean isLayoutFullScreen);
-    ani_object SetSystemBarProperties(ani_env* env, ani_object aniSystemBarProperties);
+    void SetSystemBarProperties(ani_env* env, ani_object aniSystemBarProperties);
     ani_object SetSpecificSystemBarEnabled(ani_env* env, ani_string, ani_boolean enable,
         ani_boolean enableAnimation);
+
 private:
     void OnSetWindowColorSpace(ani_env* env, ani_int colorSpace);
     void OnSetPreferredOrientation(ani_env* env, ani_int orientation);
@@ -79,8 +81,8 @@ private:
     void OnSetWindowSystemBarEnable(ani_env* env, ani_object nameAry);
     ani_object OnGetUIContext(ani_env* env);
     ani_object OnGetWindowAvoidArea(ani_env* env, ani_int type);
-    ani_object OnRegisterWindowCallback(ani_env* env, ani_string type, ani_ref callback);
-    ani_object OnUnregisterWindowCallback(ani_env* env, ani_string type, ani_ref callback);
+    void OnRegisterWindowCallback(ani_env* env, ani_string type, ani_ref callback);
+    void OnUnregisterWindowCallback(ani_env* env, ani_string type, ani_ref callback);
     bool GetSystemBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProperties,
         std::map<WindowType, SystemBarPropertyFlag>& systemBarpropertyFlags,
         const std::vector<std::string>& names, sptr<Window>& window);
@@ -90,6 +92,7 @@ private:
         std::map<WindowType, SystemBarProperty>& systemBarProperties, sptr<Window> windowToken);
 
     sptr<Window> windowToken_ = nullptr;
+    std::unique_ptr<AniWindowRegisterManager> registerManager_ = nullptr;
 };
 
 /* window obj stored in ANI */
