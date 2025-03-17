@@ -842,7 +842,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleListWindowInfo, Function | Small
     MessageParcel reply;
     DisplayId displayId = 0;
     int32_t windowId = 0;
-    data.WriteUint8(static_cast<WindowInfoFilterOptionDataType>(windowInfoFilterOption = WindowInfoFilterOption::ALL));
+    data.WriteUint8(static_cast<WindowInfoFilterOptionDataType>(WindowInfoFilterOption::ALL));
     data.WriteUint8(static_cast<WindowInfoTypeOptionDataType>(WindowInfoTypeOption::ALL));
     data.WriteUint64(displayId);
     data.WriteInt32(windowId);
