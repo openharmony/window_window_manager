@@ -7166,6 +7166,9 @@ WSError SceneSession::NotifyRotationProperty(int32_t rotation, uint32_t width, u
 {
     PostTask(
         [weakThis = wptr(this), rotation, width, height, where = __func__] {
+            if (width == 0 || height == 0) {
+                return WSError::WS_ERROR_INVALID_PARAM;
+            }
             auto session = weakThis.promote();
             if (!session) {
                 TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s session is null", where);

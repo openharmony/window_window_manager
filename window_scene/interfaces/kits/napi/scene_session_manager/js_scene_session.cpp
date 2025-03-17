@@ -4429,7 +4429,7 @@ void JsSceneSession::OnShowWhenLocked(bool showWhenLocked)
 
 void JsSceneSession::OnReuqestedOrientationChange(uint32_t orientation, bool needAnimation)
 {
-    WLOGFI("orientation=%{public}u, needAnimation=%{public}d", orientation, needAnimation);
+    TLOGNI(WmsLogTag::WMS_ROTATION,"orientation=%{public}u, needAnimation=%{public}d", orientation, needAnimation);
 
     auto task =
         [weakThis = wptr(this), persistentId = persistentId_, rotation = orientation, needAnimation, env = env_] {

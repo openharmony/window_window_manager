@@ -5231,7 +5231,7 @@ void SceneSessionManager::CloseSyncTransaction(std::function<void()> func)
 {
     auto task = [this, param = std::move(func), where = __func__] () {
         if (!closeSyncFunc_) {
-            closeSyncFunc_ = param;
+            closeSyncFunc_ = std::move(param);
         }
         bool isLastFrameLayoutFinished = true;
         IsLastFrameLayoutFinished(isLastFrameLayoutFinished);

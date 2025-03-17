@@ -387,7 +387,7 @@ HWTEST_F(SceneSessionTest4, SetRequestedOrientation, Function | SmallTest | Leve
     session->SetRequestedOrientation(orientation);
     session->onRequestedOrientationChange_ = nullptr;
     session->SetRequestedOrientation(orientation);
-    NotifyReqOrientationChangeFunc func = [](uint32_t orientation) {
+    NotifyReqOrientationChangeFunc func = [](uint32_t orientation, bool needAnimation) {
         return;
     };
     session->onRequestedOrientationChange_ = func;
