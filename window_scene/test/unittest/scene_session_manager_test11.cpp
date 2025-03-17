@@ -542,6 +542,7 @@ HWTEST_F(SceneSessionManagerTest11, NotifyNextAvoidRectInfo_02, Function | Small
     ASSERT_EQ(avoidAreas[AvoidAreaType::TYPE_SYSTEM].topRect_, rect);
     properties[WindowType::WINDOW_TYPE_STATUS_BAR].enable_ = false;
     rect = { 0, 0, 0, 0 };
+    sceneSession->GetAvoidAreasByRotation(0, { 0, 0, 1260, 123 }, properties, avoidAreas);
     ASSERT_EQ(avoidAreas[AvoidAreaType::TYPE_SYSTEM].topRect_, rect);
     ssm_->sceneSessionMap_.clear();
 }
@@ -579,9 +580,9 @@ HWTEST_F(SceneSessionManagerTest11, NotifyNextAvoidRectInfo_03, Function | Small
     Rect rect = { 0, 0, 2710, 123 };
     ASSERT_EQ(avoidAreas[AvoidAreaType::TYPE_SYSTEM].topRect_, rect);
     properties[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR].enable_ = false;
-    sceneSession->GetAvoidAreasByRotation(90, { 0, 0, 2710, 1260 }, properties, avoidAreas);
     rect = { 0, 0, 0, 0 };
-    ASSERT_EQ(avoidAreas[AvoidAreaType::TYPE_NAVIGATION_INDICATOR].bottomRect_, { 0, 0, 0, 0 });
+    sceneSession->GetAvoidAreasByRotation(90, { 0, 0, 2710, 1260 }, properties, avoidAreas);
+    ASSERT_EQ(avoidAreas[AvoidAreaType::TYPE_NAVIGATION_INDICATOR].bottomRect_, rect);
     ssm_->sceneSessionMap_.clear();
 }
 
@@ -610,7 +611,7 @@ HWTEST_F(SceneSessionManagerTest11, NotifyNextAvoidRectInfo_04, Function | Small
     AvoidArea avoidArea;
     sceneSession->GetKeyboardAvoidAreaByRotation(0, { 0, 0, 1260, 2710 }, avoidArea);
     Rect rect = { 0, 0, 0, 0 };
-    ASSERT_EQ(avoidArea.topRect_, rect);
+    ASSERT_EQ(avoidArea.bottomRect_, rect);
     ssm_->sceneSessionMap_.clear();
 }
 
@@ -641,11 +642,11 @@ HWTEST_F(SceneSessionManagerTest11, NotifyNextAvoidRectInfo_05, Function | Small
     Rect rect = { 494, 36, 273, 72 };
     ASSERT_EQ(avoidArea.topRect_, rect);
     sceneSession->GetCutoutAvoidAreaByRotation(90, { 0, 0, 2710, 1260 }, avoidArea);
-    Rect rect = { 2612, 494, 72, 273 };
-    ASSERT_EQ(avoidArea.topRect_, rect);
+    rect = { 2612, 494, 72, 273 };
+    ASSERT_EQ(avoidArea.rightRect_, rect);
     sceneSession->GetCutoutAvoidAreaByRotation(270, { 0, 0, 2710, 1260 }, avoidArea);
-    Rect rect = { 36, 493, 72, 273 };
-    ASSERT_EQ(avoidArea.topRect_, rect);
+    rect = { 36, 493, 72, 273 };
+    ASSERT_EQ(avoidArea.bottomRect_, rect);
     ssm_->sceneSessionMap_.clear();
 }
 
