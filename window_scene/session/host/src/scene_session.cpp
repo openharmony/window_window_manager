@@ -7174,8 +7174,7 @@ WSError SceneSession::NotifyRotationProperty(int32_t rotation, uint32_t width, u
             WSRect wsrect = { 0, 0, width, height };
             auto properties = session->GetSystemBarPropertyForRotation();
             std::map<AvoidAreaType, AvoidArea> avoidAreas;
-            // session->GetAvoidAreasByRotation(rotation, wsrect, properties, avoidAreas); //
-            // 此行代码依赖沉浸式，需要先注释
+            session->GetAvoidAreasByRotation(rotation, wsrect, properties, avoidAreas);
             if (!session->sessionStage_) {
                 return WSError::WS_ERROR_NULLPTR;
             }
