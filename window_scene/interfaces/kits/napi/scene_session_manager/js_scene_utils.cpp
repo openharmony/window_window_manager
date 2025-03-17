@@ -942,36 +942,36 @@ bool ConvertRectFromJsValue(napi_env env, napi_value jsObject, Rect& displayRect
     napi_get_named_property(env, jsObject, "width_", &jsWidth_);
     napi_get_named_property(env, jsObject, "height_", &jsHeight_);
     if (GetType(env, jsPosX_) != napi_undefined) {
-        int32_t posX_;
-        if (!ConvertFromJsValue(env, jsPosX_, posX_)) {
+        int32_t posX;
+        if (!ConvertFromJsValue(env, jsPosX_, posX)) {
             TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to posX_");
             return false;
         }
-        displayRect.posX_ = posX_;
+        displayRect.posX_ = posX;
     }
     if (GetType(env, jsPosY_) != napi_undefined) {
-        int32_t posY_;
-        if (!ConvertFromJsValue(env, jsPosY_, posY_)) {
+        int32_t posY;
+        if (!ConvertFromJsValue(env, jsPosY_, posY)) {
             TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to posY_");
             return false;
         }
-        displayRect.posY_ = posY_;
+        displayRect.posY_ = posY;
     }
     if (GetType(env, jsWidth_) != napi_undefined) {
-        int32_t width_;
-        if (!ConvertFromJsValue(env, jsWidth_, width_)) {
+        int32_t width;
+        if (!ConvertFromJsValue(env, jsWidth_, width)) {
             TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to width_");
             return false;
         }
-        displayRect.width_ = width_;
+        displayRect.width_ = width;
     }
     if (GetType(env, jsHeight_) != napi_undefined) {
-        int32_t height_;
-        if (!ConvertFromJsValue(env, jsHeight_, height_)) {
+        int32_t height;
+        if (!ConvertFromJsValue(env, jsHeight_, height)) {
             TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to height_");
             return false;
         }
-        displayRect.height_ = height_;
+        displayRect.height_ = height;
     }
     return true;
 }
