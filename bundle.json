@@ -70,6 +70,7 @@
           "eventhandler",
           "c_utils",
           "soc_perf",
+          "relational_store",
           "resource_management",
           "resource_schedule_service",
           "imf",
