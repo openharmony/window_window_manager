@@ -59,7 +59,7 @@ public:
     void SetSystemKeyboardStatus(bool isOn = false);
 private:
     std::atomic<SuperFoldStatus> curState_ = SuperFoldStatus::UNKNOWN;
-    sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion_ = nullptr;
+    sptr<FoldCreaseRegion> currentSuperFoldCreaseRegion_ = nullptr;
     struct Transition {
         SuperFoldStatus nextState;
         std::function<void (SuperFoldStatusChangeEvents)> action;
