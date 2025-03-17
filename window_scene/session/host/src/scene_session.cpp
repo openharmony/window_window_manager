@@ -1982,7 +1982,7 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
         return;
     }
     if (sessionProperty->GetCompatibleModeInPc()) {
-        HookAvoidAreaInCompatibleMode(rect, avoidArea, AvoidAreaType::TYPE_SYSTEM);
+        HookAvoidAreaInCompatibleMode(rect, AvoidAreaType::TYPE_SYSTEM, avoidArea);
         return;
     }
     WindowMode windowMode = Session::GetWindowMode();
@@ -2143,7 +2143,7 @@ void SceneSession::GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea) con
     }
     // compatibleMode app need to hook avoidArea in pc
     if (GetSessionProperty()->GetCompatibleModeInPc()) {
-        HookAvoidAreaInCompatibleMode(rect, avoidArea, AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
+        HookAvoidAreaInCompatibleMode(rect, AvoidAreaType::TYPE_NAVIGATION_INDICATOR, avoidArea);
         return;
     }
     WSRect barArea;
@@ -2155,7 +2155,8 @@ void SceneSession::GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea) con
     CalculateAvoidAreaRect(rect, barArea, avoidArea);
 }
 
-void SceneSession::HookAvoidAreaInCompatibleMode(WSRect& rect, AvoidArea& avoidArea, AvoidAreaType avoidAreaType) const
+void SceneSession::HookAvoidAreaInCompatibleMode(const WSRect& rect, AvoidAreaType avoidAreaType,
+    AvoidArea& avoidArea) const
 {
     WindowMode mode = GetWindowMode();
     if (!GetSessionProperty()->GetCompatibleModeInPc() || mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
@@ -2171,15 +2172,15 @@ void SceneSession::HookAvoidAreaInCompatibleMode(WSRect& rect, AvoidArea& avoidA
     }
     switch (avoidAreaType) {
         case AvoidAreaType::TYPE_SYSTEM: {
-            avoidArea.topRect_.posX_ = rect.posX_;
-            avoidArea.topRect_.posY_ = rect.posY_;
+            avoidArea.topRect_.posX_ = 0;
+            avoidArea.topRect_.posY_ = 0;
             avoidArea.topRect_.height_ = HOOK_SYSTEM_BAR_HEIGHT * vpr;
             avoidArea.topRect_.width_ = rect.width_;
             return;
         }
         case AvoidAreaType::TYPE_NAVIGATION_INDICATOR: {
-            avoidArea.bottomRect_.posX_ = rect.posX_;
-            avoidArea.bottomRect_.posY_ = rect.posY_ + rect.height_ - HOOK_AI_BAR_HEIGHT * vpr;
+            avoidArea.bottomRect_.posX_ = 0;
+            avoidArea.bottomRect_.posY_ = rect.height_ - HOOK_AI_BAR_HEIGHT * vpr;
             avoidArea.bottomRect_.width_ = rect.width_;
             avoidArea.bottomRect_.height_ = HOOK_AI_BAR_HEIGHT * vpr;
             return;
