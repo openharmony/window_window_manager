@@ -57,6 +57,10 @@ public:
 
     WMError UnregisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener);
 
+    bool IsListenerMapSizeReachLimit();
+
+    bool IsListenerMapSizeReachLimit(bool isBundleNameListEmpty);
+
     void NotifySessionClosed(const SessionInfo& sessionInfo);
 
     void NotifySessionSnapshotChanged(int32_t persistentId);
@@ -109,6 +113,7 @@ private:
    /*
     * Window Lifecycle
     */
+    std::mutex lifecycleListenerLock_;
     void ConstructPayload(ISessionLifecycleListener::LifecycleEventPayload& payload, const SessionInfo& sessionInfo);
     void OnSessionLifecycleListenerDied(const wptr<IRemoteObject>& remote);
     void RemoveSessionLifecycleListener(const sptr<IRemoteObject>& target);
@@ -116,7 +121,7 @@ private:
     template <typename KeyType, typename MapType>
     void NotifyListeners(const MapType& listenerMap, const KeyType& key,
         const ISessionLifecycleListener::SessionLifecycleEvent event,
-        ISessionLifecycleListener::LifecycleEventPayload& payload);
+        const ISessionLifecycleListener::LifecycleEventPayload& payload);
     std::shared_ptr<TaskScheduler> taskScheduler_;
     sptr<IRemoteObject::DeathRecipient> lifecycleListenerDeathRecipient_;
     std::map<int32_t, std::vector<sptr<ISessionLifecycleListener>>> listenerMapById_;
