@@ -1208,46 +1208,24 @@ bool ParseRectAnimationConfig(napi_env env, napi_value jsObject, RectAnimationCo
 
 bool ConvertRectFromJsValue(napi_env env, napi_value jsObject, Rect& displayRect)
 {
-    napi_value jsPosX_ = nullptr;
-    napi_value jsPosY_ = nullptr;
-    napi_value jsWidth_ = nullptr;
-    napi_value jsHeight_ = nullptr;
-    napi_get_named_property(env, jsObject, "left", &jsPosX_);
-    napi_get_named_property(env, jsObject, "top", &jsPosY_);
-    napi_get_named_property(env, jsObject, "width", &jsWidth_);
-    napi_get_named_property(env, jsObject, "height", &jsHeight_);
+    if (!ParseJsValue(jsObject, env, "left", displayRect.posX_)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "[NAPI]Failed to convert parameter to posX_");
+        return false;
+    }
 
-    if (GetType(env, jsPosX_) != napi_undefined) {
-        int32_t posX_;
-        if (!ConvertFromJsValue(env, jsPosX_, posX_)) {
-            TLOGE(WmsLogTag::WMS_ROTATION, "[NAPI]Failed to convert parameter to posX_");
-            return false;
-        }
-        displayRect.posX_ = posX_;
+    if (!ParseJsValue(jsObject, env, "top", displayRect.posY_)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "[NAPI]Failed to convert parameter to posY_");
+        return false;
     }
-    if (GetType(env, jsPosY_) != napi_undefined) {
-        int32_t posY_;
-        if (!ConvertFromJsValue(env, jsPosY_, posY_)) {
-            TLOGE(WmsLogTag::WMS_ROTATION, "[NAPI]Failed to convert parameter to posY_");
-            return false;
-        }
-        displayRect.posY_ = posY_;
+
+    if (!ParseJsValue(jsObject, env, "width", displayRect.width_)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "[NAPI]Failed to convert parameter to width_");
+        return false;
     }
-    if (GetType(env, jsWidth_) != napi_undefined) {
-        int32_t width_;
-        if (!ConvertFromJsValue(env, jsWidth_, width_)) {
-            TLOGE(WmsLogTag::WMS_ROTATION, "[NAPI]Failed to convert parameter to width_");
-            return false;
-        }
-        displayRect.width_ = width_;
-    }
-    if (GetType(env, jsHeight_) != napi_undefined) {
-        int32_t height_;
-        if (!ConvertFromJsValue(env, jsHeight_, height_)) {
-            TLOGE(WmsLogTag::WMS_ROTATION, "[NAPI]Failed to convert parameter to height_");
-            return false;
-        }
-        displayRect.height_ = height_;
+
+    if (!ParseJsValue(jsObject, env, "height", displayRect.height_)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "[NAPI]Failed to convert parameter to height_");
+        return false;
     }
     return true;
 }
@@ -1265,6 +1243,9 @@ bool GetRotationResultFromJs(napi_env env, napi_value jsObject, RotationChangeRe
             return false;
         }
         rotationChangeResult.rectType = static_cast<RectType>(rectType);
+    } else {
+        TLOGE(WmsLogTag::WMS_ROTATION, "[NAPI]Failed to get object rectType");
+        return false;
     }
     if (GetType(env, jsWindowRect) != napi_undefined) {
         Rect windowRect;
@@ -1273,6 +1254,9 @@ bool GetRotationResultFromJs(napi_env env, napi_value jsObject, RotationChangeRe
             return false;
         }
         rotationChangeResult.windowRect = windowRect;
+    } else {
+        TLOGE(WmsLogTag::WMS_ROTATION, "[NAPI]Failed to get object windowRect");
+        return false;
     }
     return true;
 }

@@ -265,6 +265,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::CloneWindow);
     BindNativeFunction(env, exportObj, "registerSingleHandContainerNode", moduleName,
         JsSceneSessionManager::RegisterSingleHandContainerNode);
+    BindNativeFunction(env, exportObj, "notifyRotationChange", moduleName,
+            JsSceneSessionManager::NotifyRotationChange);
     return NapiGetUndefined(env);
 }
 
@@ -1300,6 +1302,13 @@ napi_value JsSceneSessionManager::RegisterSingleHandContainerNode(napi_env env, 
     TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnRegisterSingleHandContainerNode(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::NotifyRotationChange(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_ROTATION, "[NAPI]");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnNotifyRotationChange(env, info) : nullptr;
 }
 
 bool JsSceneSessionManager::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
@@ -4286,5 +4295,69 @@ napi_value JsSceneSessionManager::OnRegisterSingleHandContainerNode(napi_env env
     }
     SceneSessionManager::GetInstance().RegisterSingleHandContainerNode(stringId);
     return NapiGetUndefined(env);
+}
+
+std::unordered_map<int32_t, RotationChangeResult> JsSceneSessionManager::GetRotationChangeResult(
+    const std::vector<sptr<SceneSession>>& activeSceneSessionMapCopy, const RotationChangeInfo& rotationChangeInfo)
+{
+    std::unordered_map<int32_t, RotationChangeResult> rotationChangeResultMap;
+    for (const auto& curSession : activeSceneSessionMapCopy) {
+        if (curSession == nullptr) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "sesison is nullptr");
+            continue;
+        }
+        RotationChangeResult rotationChangeResult = curSession->NotifyRotationChange(rotationChangeInfo);
+        TLOGI(WmsLogTag::WMS_ROTATION, "persistentId: %{public}d, type: %{public}d," +
+            " rect: [%{public}d, %{public}d, %{public}d, %{public}d]", curSession->GetPersistentId(),
+            static_cast<uint32_t>(rotationChangeResult.rectType), rotationChangeResult.windowRect.posX_,
+            rotationChangeResult.windowRect.posY_, rotationChangeResult.windowRect.width_,
+            rotationChangeResult.windowRect.height_);
+        if (rotationChangeResult.windowRect.width_ != 0 && rotationChangeResult.windowRect.height_ != 0) {
+            rotationChangeResultMap[curSession->GetPersistentId()] = rotationChangeResult;
+        }
+    }
+    return rotationChangeResultMap;
+}
+
+napi_value JsSceneSessionManager::OnNotifyRotationChange(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Argc count is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                                      "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    RotationChangeInfo rotationChangeInfo;
+    napi_value rotationChangeInfoObj = argv[0];
+    if (rotationChangeInfoObj == nullptr) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Failed to get rotationChangeInfoObj");
+        return NapiGetUndefined(env);
+    }
+    if (!ConvertInfoFromJsValue(env, rotationChangeInfoObj, rotationChangeInfo)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to rotationChangeInfo");
+        return NapiGetUndefined(env);
+    }
+    TLOGI(WmsLogTag::WMS_ROTATION, "info type: %{public}d, rect: [%{public}d, %{public}d, %{public}d, %{public}d]",
+        static_cast<uint32_t>(rotationChangeInfo.type), rotationChangeInfo.displayRect.posX_,
+        rotationChangeInfo.displayRect.posY_, rotationChangeInfo.displayRect.width_,
+        rotationChangeInfo.displayRect.height_);
+
+    std::vector<sptr<SceneSession>> activeSceneSessionMapCopy =
+        SceneSessionManager::GetInstance().GetActiveSceneSessionCopy();
+     if (activeSceneSessionMapCopy.empty()) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "activeSceneSessionMapCopy empty");
+        return NapiGetUndefined(env);;
+     }
+    std::unordered_map<int32_t, RotationChangeResult> rotationChangeResultMap =
+        GetRotationChangeResult(activeSceneSessionMapCopy, rotationChangeInfo);
+    napi_value rotationChangeResultObj = CreateResultMapToJsValue(env, rotationChangeResultMap);
+    if (rotationChangeResultObj == nullptr) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert rotationChangeResult to js value");
+        return NapiGetUndefined(env);
+    }
+    return rotationChangeResultObj;
 }
 } // namespace OHOS::Rosen

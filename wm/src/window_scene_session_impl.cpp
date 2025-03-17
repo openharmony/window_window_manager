@@ -1933,7 +1933,6 @@ WMError WindowSceneSessionImpl::CheckWindowRect(uint32_t& width, uint32_t& heigh
     return WMError::WM_OK;
 }
 
-WMError WindowSceneSessionImpl::
 /** @note @window.layout */
 WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height, const RectAnimationConfig& rectAnimationConfig)
 {
@@ -5611,7 +5610,7 @@ uint32_t WindowSceneSessionImpl::GetApiCompatibleVersion() const
     }
     return version;
 }
- 
+
 bool WindowSceneSessionImpl::IsFullScreenEnable() const
 {
     if (!WindowHelper::IsWindowModeSupported(property_->GetWindowModeSupportType(),

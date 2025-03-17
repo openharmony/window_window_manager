@@ -722,6 +722,9 @@ WmErrorCode JsWindowRegisterManager::ProcessWindowRotationChangeRegister(const s
     }
     sptr<IWindowRotationChangeListener> thisListener(listener);
     WmErrorCode ret = WmErrorCode::WM_OK;
+    if (window->IsPcWindow()) {
+        return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     if (isRegister) {
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterWindowRotationChangeListeners(thisListener));
     } else {
