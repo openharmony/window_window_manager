@@ -12,14 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import type { AsyncCallback, Callback} from '@ohos.base';
+import { BusinessError } from '@ohos.base';
+
 export default namespace display {
 
 loadLibrary('displayani_kit.z');
 
-export class BusinessError extends Error {
-  code: number;
-  message: string;
-}
+// export class BusinessError extends Error {
+  // code: number;
+  // message: string;
+// }
 
 export interface Rect {
     left: number;
@@ -128,15 +131,63 @@ export enum Orientation {
   }
 
 export enum FoldStatus {
-
+    /**
+     * Fold Status Unknown.
+     *
+     * @syscap SystemCapability.Window.SessionManager
+     * @since 10
+     */
+    /**
+     * Fold Status Unknown.
+     *
+     * @syscap SystemCapability.Window.SessionManager
+     * @atomicservice
+     * @since 12
+     */
     FOLD_STATUS_UNKNOWN = 0,
-
+    /**
+     * Fold Status Expanded.
+     *
+     * @syscap SystemCapability.Window.SessionManager
+     * @since 10
+     */
+    /**
+     * Fold Status Expanded.
+     *
+     * @syscap SystemCapability.Window.SessionManager
+     * @atomicservice
+     * @since 12
+     */
     FOLD_STATUS_EXPANDED,
-
+    /**
+     * Fold Status Folded.
+     *
+     * @syscap SystemCapability.Window.SessionManager
+     * @since 10
+     */
+    /**
+     * Fold Status Folded.
+     *
+     * @syscap SystemCapability.Window.SessionManager
+     * @atomicservice
+     * @since 12
+     */
     FOLD_STATUS_FOLDED,
-
+    /**
+     * Fold Status Half Folded.
+     *
+     * @syscap SystemCapability.Window.SessionManager
+     * @since 10
+     */
+    /**
+     * Fold Status Half Folded.
+     *
+     * @syscap SystemCapability.Window.SessionManager
+     * @atomicservice
+     * @since 12
+     */
     FOLD_STATUS_HALF_FOLDED
-}
+  }
 
 enum DisplayState {
 
@@ -280,21 +331,9 @@ export interface Display {
     getCutoutInfo(): Promise<CutoutInfo>;
 }
 
-export type Callback<T> = (data: T) => void;
+// export type Callback<T> = (data: T) => void;
 
-export class DisplayEventCallbackInternal<T> {
-    private callback: Callback<T>;
-
-    constructor(cb: Callback<T>) {
-        this.callback = cb;
-    }
-
-    public invoke(data: T) {
-        this.callback(data);
-    }
-}
-
-export type AsyncCallback<T> = (err: BusinessError, data: T) => void;
+// export type AsyncCallback<T> = (err: BusinessError, data: T) => void;
 
 export class DisplayImpl implements Display {
     static { loadLibrary("displayani_kit.z"); }
@@ -384,9 +423,19 @@ function minusRectArray(rectArr: Array<Rect>): void {
 
 export native function isFoldable(): boolean;
 
-export native function getFoldDisplayMode(): FoldDisplayMode;
+export function getFoldDisplayMode(): FoldDisplayMode {
+    let res = getFoldDisplayModeNative();
+    return res as FoldDisplayMode;
+}
 
-export native function getFoldStatus(): FoldStatus;
+export native function getFoldDisplayModeNative(): int;
+
+export function getFoldStatus(): FoldStatus{
+    let res = getFoldStatusNative();
+    return res as FoldStatus;
+}
+
+export native function getFoldStatusNative(): int;
 
 export function getCurrentFoldCreaseRegion(): FoldCreaseRegion {
     let foldCreaseRegion:FoldCreaseRegion = new FoldCreaseRegionImpl();
@@ -397,13 +446,13 @@ export function getCurrentFoldCreaseRegion(): FoldCreaseRegion {
 export native function getCurrentFoldCreaseRegionNative(foldCreaseRegion : FoldCreaseRegion): int;
 
 // display sync interfaces
-export function getDisplayByIdSync(displayId: int): Display {
+export function getDisplayByIdSync(displayId: number): Display {
     let display:Display = new DisplayImpl();
     getDisplayByIdSyncNative(display as object, displayId);
     return display;
 }
 
-export native function getDisplayByIdSyncNative(obj: object, displayId: int): int;
+export native function getDisplayByIdSyncNative(obj: object, displayId: number): int;
 
 export function getDefaultDisplaySync(): Display {
     let display:Display = new DisplayImpl();
@@ -463,19 +512,37 @@ export function getNewDisplay(): DisplayImpl {
     return new DisplayImpl();
 }
 
-export function on(type: 'add' | 'remove' | 'change', callback: Callback<number>): void {
-    let callbackInternal:DisplayEventCallbackInternal<number> = new DisplayEventCallbackInternal<number>(callback);
-    syncOn(type, callbackInternal as object, displayMgrRef);
-}
-
-export native function syncOn(type: 'add' | 'remove' | 'change', callback: object, nativeObj: long): void;
-
-export function off(type: 'foldDisplayModeChange' | 'foldStatusChange', callback: Callback<int>): void
+export function on(type: 'add' | 'remove' | 'change', callback: Callback<number>): void
 {
-    let callbackInternal:DisplayEventCallbackInternal<int> = new DisplayEventCallbackInternal<int>(callback);
-    syncOff(type, callbackInternal as object, displayMgrRef);
+    syncOn(type, callback as object, displayMgrRef);
 }
-export native function syncOff(type: 'foldDisplayModeChange' | 'foldStatusChange', callback: object, nativeObj: long) : void;
+
+// export function on(type: 'foldStatusChange', callback: Callback<FoldStatus>): void
+// {
+    // syncOn(type, callback as object, displayMgrRef);
+// }
+
+export native function syncOn(type: 'add' | 'remove' | 'change' | 'foldStatusChange', 
+    callback: object, nativeObj: long): void;
+
+export function off(type: 'add' | 'remove' | 'change' | 'foldDisplayModeChange' | 'foldStatusChange',
+    callback?: Callback<number>): void
+{
+    syncOff(type, callback as object, displayMgrRef);
+}
+
+export native function syncOff(type: 'add' | 'remove' | 'change' | 'foldDisplayModeChange' | 'foldStatusChange',
+    callback: object, nativeObj: long) : void;
+
+export function displayEventCallBack(cb: object, cbArg: double): void {
+    const func = cb as (cbArg: double) => void;
+    func(cbArg as double);
+}
+
+export function foldStatusCallback(cb: object, cbArg: int): void {
+    const func = cb as (cbArg: FoldStatus) => void;
+    func(cbArg as FoldStatus);
+}
 
 export let displayMgrRef: long;
 

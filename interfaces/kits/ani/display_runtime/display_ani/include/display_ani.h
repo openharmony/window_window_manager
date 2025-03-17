@@ -17,7 +17,6 @@
 
 #include "ani.h"
 #include "display.h"
-#include "display_ani_register_manager.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -27,9 +26,6 @@ public:
     explicit DisplayAni(const std::shared_ptr<OHOS::Rosen::Display>& display);
 
     static void getCutoutInfo(ani_env* env, ani_object obj, ani_object cutoutInfoObj);
-private:
-    std::mutex mtx_;
-    std::unique_ptr<OHOS::Rosen::DisplayAniRegisterManager> registerManager_ = nullptr;
 };
 }  // namespace Rosen
 }  // namespace OHOS

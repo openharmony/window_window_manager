@@ -22,6 +22,9 @@
       ],
       "@ohos.display": [
         "./display.ets"
+      ],
+      "@ohos.base": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.base.d.ets"
       ]
     },
     "outDir": "../cache",

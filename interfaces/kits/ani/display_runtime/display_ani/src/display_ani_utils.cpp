@@ -100,8 +100,8 @@ ani_status DisplayAniUtils::cvtDisplay(sptr<Display> display, ani_env* env, ani_
     }
     env->Object_SetFieldByName_Double(obj, "<property>refreshRate", info->GetRefreshRate());
     env->Object_SetFieldByName_Double(obj, "<property>rotation", static_cast<uint32_t>(info->GetRotation()));
-    ani_status setfieldRes = env->Object_SetFieldByName_Double(obj,
-        "<property>width", static_cast<uint32_t>(info->GetWidth()));
+    ani_status setfieldRes = env->Object_SetFieldByName_Double(obj, "<property>width",
+        static_cast<uint32_t>(info->GetWidth()));
     if (ANI_OK != setfieldRes) {
         TLOGE(WmsLogTag::DMS, "[ANI] set failed: %{public}d, %{public}u", info->GetWidth(), setfieldRes);
     }
@@ -148,12 +148,23 @@ void DisplayAniUtils::CreateAniArrayInt(ani_env* env, ani_size size, ani_array_i
     }
 }
 
-void DisplayAniUtils::GetStdString(ani_env *env, ani_string str, std::string &result)
+ani_status DisplayAniUtils::GetStdString(ani_env *env, ani_string ani_str, std::string &result)
 {
-    ani_size sz {};
-    env->String_GetUTF8Size(str, &sz);
-    result.resize(sz + 1);
-    env->String_GetUTF8SubString(str, 0, sz, result.data(), result.size(), &sz);
+    ani_size strSize;
+    ani_status ret = env->String_GetUTF8Size(ani_str, &strSize);
+    if (ret != ANI_OK) {
+        return ret;
+    }
+    std::vector<char> buffer(strSize + 1);
+    char* utf8_buffer = buffer.data();
+    ani_size bytes_written = 0;
+    ret = env->String_GetUTF8(ani_str, utf8_buffer, strSize + 1, &bytes_written);
+    if (ret != ANI_OK) {
+        return ret;
+    }
+    utf8_buffer[bytes_written] = '\0';
+    result = std::string(utf8_buffer);
+    return ret;
 }
 
 ani_status DisplayAniUtils::NewAniObject(ani_env* env, ani_class cls, const char *signature, ani_object* result, ...)
@@ -192,5 +203,37 @@ ani_status DisplayAniUtils::GetAniString(ani_env* env, const std::string& str, a
 {
     return env->String_NewUTF8(str.c_str(), static_cast<ani_size>(str.size()), result);
 }
+
+ani_status DisplayAniUtils::CallAniFunctionVoid(ani_env *env, const char* ns,
+    const char* fn, const char* signature, ...)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]CallAniFunctionVoid begin");
+    ani_status ret = ANI_OK;
+    ani_namespace aniNamespace{};
+    if ((ret = env->FindNamespace(ns, &aniNamespace)) != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI]canot find ns %{public}d", ret);
+        return ret;
+    }
+    ani_function func{};
+    if ((ret = env->Namespace_FindFunction(aniNamespace, fn, signature, &func)) != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI]canot find callBack %{public}d", ret);
+        return ret;
+    }
+    va_list args;
+    va_start(args, signature);
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]CallAniFunctionVoid begin %{public}s", signature);
+    if (func == nullptr) {
+        TLOGI(WmsLogTag::DEFAULT, "[ANI] null func ani");
+        return ret;
+    }
+    ret = env->Function_Call_Void_V(func, args);
+    va_end(args);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI]canot run callBack %{public}d", ret);
+        return ret;
+    }
+    return ret;
+}
+
 }
 }
