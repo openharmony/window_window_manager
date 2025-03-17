@@ -646,7 +646,7 @@ HWTEST_F(SceneSessionManagerTest11, NotifyNextAvoidRectInfo_05, Function | Small
     ASSERT_EQ(avoidArea.rightRect_, rect);
     sceneSession->GetCutoutAvoidAreaByRotation(270, { 0, 0, 2710, 1260 }, avoidArea);
     rect = { 36, 493, 72, 273 };
-    ASSERT_EQ(avoidArea.bottomRect_, rect);
+    ASSERT_EQ(avoidArea.leftRect_, rect);
     ssm_->sceneSessionMap_.clear();
 }
 
