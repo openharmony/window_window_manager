@@ -6301,13 +6301,11 @@ napi_value JsSceneSession::OnSendContainerModalEvent(napi_env env, napi_callback
     return NapiGetUndefined(env);
 }
 
-
 napi_value JsSceneSession::OnNotifyRotationProperty(napi_env env, napi_callback_info info)
 {
     size_t argc = ARGC_FOUR;
     napi_value argv[ARGC_FOUR] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-
     if (argc < ARGC_THREE) {
         TLOGE(WmsLogTag::WMS_ROTATION, "Argc count is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
