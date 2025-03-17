@@ -175,10 +175,10 @@ ani_object AniWindowUtils::CreateAniRect(ani_env* env, const Rect& rect)
         TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to create new obj");
         return AniWindowUtils::CreateAniUndefined(env);
     }
-    CallAniMethodVoid(env, aniRect, aniClass, "<set>left", nullptr, ani_int(rect.posX_));
-    CallAniMethodVoid(env, aniRect, aniClass, "<set>top", nullptr, ani_int(rect.posY_));
-    CallAniMethodVoid(env, aniRect, aniClass, "<set>width", nullptr, ani_int(rect.width_));
-    CallAniMethodVoid(env, aniRect, aniClass, "<set>height", nullptr, ani_int(rect.height_));
+    CallAniMethodVoid(env, aniRect, aniClass, "<set>left", nullptr, ani_double(rect.posX_));
+    CallAniMethodVoid(env, aniRect, aniClass, "<set>top", nullptr, ani_double(rect.posY_));
+    CallAniMethodVoid(env, aniRect, aniClass, "<set>width", nullptr, ani_double(rect.width_));
+    CallAniMethodVoid(env, aniRect, aniClass, "<set>height", nullptr, ani_double(rect.height_));
     return aniRect;
 }
 
@@ -325,8 +325,7 @@ void AniWindowUtils::SetSystemPropertiesWindowType(ani_env* env, const sptr<Wind
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     WindowType aniWindowType = window->GetType();
-    CallAniMethodVoid(env, systemProperties, clsName, "<set>type", nullptr,
-        reinterpret_cast<ani_type>(aniWindowType));
+    env->Object_SetFieldByName_Int(systemProperties, "typeInternal", ani_int(aniWindowType));
 }
 
 void AniWindowUtils::SetSystemPropertiesWindowIsLayoutFullScreen(ani_env* env, const sptr<Window>& window,
