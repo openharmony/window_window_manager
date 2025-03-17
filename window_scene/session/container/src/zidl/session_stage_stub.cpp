@@ -937,6 +937,7 @@ int SessionStageStub::HandleNotifyRotationProperty(MessageParcel& data, MessageP
 
     OrientationInfo info = { rotation, rect, avoidAreas };
     NotifyTargetRotationInfo(info);
+    return ERR_NONE;
 }
 
 int SessionStageStub::HandleNotifyRotationChange(MessageParcel& data, MessageParcel& reply)
@@ -959,8 +960,8 @@ int SessionStageStub::HandleNotifyRotationChange(MessageParcel& data, MessagePar
     }
 
     Rect rect = { 0, 0, 0, 0 };
-    if (!data.ReadInt32(rect.posX_) || !data.ReadInt32(rect.posY_ ||
-        !data.ReadUint32(rect.width_) || !data.ReadUint32(rect.height_))) {
+    if (!data.ReadInt32(rect.posX_) || !data.ReadInt32(rect.posY_) ||
+        !data.ReadUint32(rect.width_) || !data.ReadUint32(rect.height_)) {
         TLOGE(WmsLogTag::WMS_ROTATION, "read rect failed");
         return ERR_INVALID_DATA;
     }
