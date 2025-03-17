@@ -169,6 +169,15 @@ std::shared_ptr<RSSurfaceNode> Session::GetSurfaceNode() const
     return surfaceNode_;
 }
 
+std::optional<uint64_t> Session::GetSurfaceNodeId() const
+{
+    std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
+    if (surfaceNode_ != nullptr) {
+        return surfaceNode_->GetId();
+    }
+    return std::nullopt;
+}
+
 void Session::SetLeashWinSurfaceNode(std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode)
 {
     if (g_enableForceUIFirst) {
