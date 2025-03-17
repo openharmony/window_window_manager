@@ -274,7 +274,9 @@ CWindowProperties CJWindowImpl::GetWindowProperties(int32_t* errCode)
     wp.windowRect.height = rect.height_;
     wp.windowRect.width = rect.width_;
     WindowType type = windowToken_->GetType();
-    if (CJ_TO_WINDOW_TYPE_MAP.count(type) != 0) {
+    if (type == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
+        wp.type = static_cast<uint32_t>(type);
+    } else if (CJ_TO_WINDOW_TYPE_MAP.count(type) != 0) {
         wp.type = static_cast<uint32_t>(CJ_TO_WINDOW_TYPE_MAP.at(type));
     } else {
         wp.type = static_cast<uint32_t>(type);
