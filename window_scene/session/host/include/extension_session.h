@@ -24,6 +24,8 @@
 #include "session/host/include/session.h"
 
 namespace OHOS::Rosen {
+    bool IsExtensionSessionInvalid(int32_t persistentId);
+
 class WindowEventChannelListener : public IRemoteStub<IWindowEventChannelListener> {
 public:
     explicit WindowEventChannelListener() = default;
