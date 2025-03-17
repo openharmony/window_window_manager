@@ -1013,6 +1013,7 @@ export class WindowPropertiesInternal implements WindowProperties {
     isTransparent: boolean;
     id: number;
     displayId: number;
+    typeInternal: int;
 }
 
 export interface MoveConfiguration {
@@ -1282,15 +1283,17 @@ export class WindowInternal implements Window {
     }
 
     public getWindowProperties(): WindowProperties {
-        let windowProperties = this.getWindowProperties(this.nativeObj);
-        return windowProperties ;
+        let windowProperties = this.getWindowProperties(this.nativeObj) as WindowPropertiesInternal;
+        windowProperties.type = windowProperties.typeInternal as WindowType;
+        return windowProperties;
     }
 
     public getProperties(): Promise<WindowProperties> {
         return new Promise<WindowProperties>((resolve: (value: WindowProperties) => void,
             reject: (error: BusinessError) => void ) => {
             taskpool.execute((): WindowProperties => {
-                let res = this.getProperties(this.nativeObj);
+                let res = this.getProperties(this.nativeObj) as WindowPropertiesInternal;
+                res.type = res.typeInternal as WindowType;
                 return res;
             }).then((ret: NullishType) => {
                 resolve(ret as WindowProperties);
