@@ -40,6 +40,7 @@
 #include "include/core/SkRegion.h"
 #include "interfaces/include/ws_common.h"
 #include "mission_snapshot.h"
+#include "rdb/starting_window_rdb_manager.h"
 #include "scb_session_handler.h"
 #include "scene_session_converter.h"
 #include "screen_fold_data.h"
@@ -249,7 +250,6 @@ public:
 
     WSError ProcessBackEvent();
     WSError BindDialogSessionTarget(uint64_t persistentId, sptr<IRemoteObject> targetToken) override;
-    void GetStartupPage(const SessionInfo& sessionInfo, std::string& path, uint32_t& bgColor);
     WMError SetGestureNavigationEnabled(bool enable) override;
     WMError RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
@@ -657,6 +657,7 @@ public:
     void VisitSnapshotFromCache(int32_t persistentId);
     void PutSnapshotToCache(int32_t persistentId);
     void RemoveSnapshotFromCache(int32_t persistentId);
+    void GetStartupPage(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo);
 
 protected:
     SceneSessionManager();
@@ -834,10 +835,6 @@ private:
 
     sptr<AppExecFwk::IBundleMgr> GetBundleManager();
     std::shared_ptr<Global::Resource::ResourceManager> GetResourceManager(const AppExecFwk::AbilityInfo& abilityInfo);
-    bool GetStartupPageFromResource(const AppExecFwk::AbilityInfo& abilityInfo, std::string& path, uint32_t& bgColor);
-    bool GetStartingWindowInfoFromCache(const SessionInfo& sessionInfo, std::string& path, uint32_t& bgColor);
-    void CacheStartingWindowInfo(
-        const AppExecFwk::AbilityInfo& abilityInfo, const std::string& path, const uint32_t& bgColor);
 
     bool CheckIsRemote(const std::string& deviceId);
     bool GetLocalDeviceId(std::string& localDeviceId);
@@ -1367,6 +1364,18 @@ private:
     /*
      * Window Pattern
      */
+    void InitStartingWindowRdb(const std::string& rdbPath);
+    bool GetStartingWindowInfoFromCache(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo);
+    bool GetStartingWindowInfoFromRdb(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo);
+    bool GetPathInfoFromResource(const std::shared_ptr<Global::Resource::ResourceManager> resourceMgr,
+        bool hapPathEmpty, uint32_t resourceId, std::string& path);
+    bool GetStartupPageFromResource(const AppExecFwk::AbilityInfo& abilityInfo, StartingWindowInfo& startingWindowInfo);
+    void GetBundleStartingWindowInfos(const AppExecFwk::BundleInfo& bundleInfo,
+        std::vector<std::pair<StartingWindowRdbItemKey, StartingWindowInfo>>& outValues);
+    void CacheStartingWindowInfo(const std::string& bundleName, const std::string& moduleName,
+        const std::string& abilityName, const StartingWindowInfo& startingWindowInfo);
+    std::atomic<int32_t> darkMode_ { false };
+    std::unique_ptr<StartingWindowRdbManager> startingWindowRdbMgr_;
     std::unique_ptr<LruCache> snapshotLruCache_;
     std::size_t snapshotCapacity_ = 0;
     bool GetIconFromDesk(const SessionInfo& sessionInfo, std::string& startupPagePath) const;
