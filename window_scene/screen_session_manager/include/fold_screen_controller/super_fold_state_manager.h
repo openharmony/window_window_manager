@@ -98,11 +98,6 @@ private:
     void HandleSystemKeyboardStatusDisplayNotify(sptr<ScreenSession> screenSession, bool isOn = false);
     void ReportNotifySuperFoldStatusChange(int32_t currentStatus, int32_t nextStatus, float postureAngle);
 
-    static void BootFinishedCallback(const char *key, const char *value, void *context);
-    void InitHalfScreen();
-    void RegisterHalfScreenSwitchesObserver();
-    void UnregisterHalfScreenSwitchesObserver();
-    void OnHalfScreenSwitchesStateChanged();
     static bool ChangeScreenState(bool toHalf);
     static int32_t GetCurrentValidHeight(sptr<ScreenSession> screenSession);
 };
