@@ -1333,6 +1333,29 @@ HWTEST_F(ScreenSessionManagerTest, UpdateDisplayHookInfo002, Function | SmallTes
 }
 
 /**
+ * @tc.name: GetDisplayHookInfo
+ * @tc.desc: GetDisplayHookInfo by uid
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetDisplayHookInfo, Function | SmallTest | Level2)
+{
+    int32_t uid = 0;
+    DMHookInfo hookInfo;
+    hookInfo.enableHookRotation_ = true;
+    hookInfo.rotation_ = true;
+    hookInfo.density_ = 1.1;
+    hookInfo.width_ = 100;
+    hookInfo.height_ = 200;
+    ssm_->UpdateDisplayHookInfo(uid, true, hookInfo);
+    ssm_->GetDisplayHookInfo(uid, hookInfo);
+    ASSERT_TRUE(hookInfo.enableHookRotation_);
+    ASSERT_TRUE(hookInfo.rotation_);
+    ASSERT_EQ(hookInfo.width_, 100);
+    ASSERT_EQ(hookInfo.height_, 200);
+}
+
+
+/**
  * @tc.name: SetVirtualPixelRatio
  * @tc.desc: SetVirtualPixelRatio virtual screen
  * @tc.type: FUNC
