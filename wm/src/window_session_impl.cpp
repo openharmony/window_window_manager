@@ -5865,7 +5865,7 @@ WMError WindowSessionImpl::CheckMultiWindowRect(uint32_t& width, uint32_t& heigh
 
 RotationChangeResult WindowSessionImpl::NotifyRotationChange(const RotationChangeInfo& rotationChangeInfo)
 {
-    TLOGI(WmsLogTag::WMS_ROTATION, "info type: %{public}d, orientation: %{public}d, displayId: %{public}lu, "
+    TLOGI(WmsLogTag::WMS_ROTATION, "info type: %{public}d, orientation: %{public}d, displayId: %{public}llu, "
         "rect:[%{public}d, %{public}d, %{public}d, %{public}d]", rotationChangeInfo.type,
         rotationChangeInfo.orientation, rotationChangeInfo.displayId, rotationChangeInfo.displayRect.posX_,
         rotationChangeInfo.displayRect.posY_, rotationChangeInfo.displayRect.width_,
