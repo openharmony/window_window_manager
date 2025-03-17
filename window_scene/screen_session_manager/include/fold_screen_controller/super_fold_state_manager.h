@@ -92,9 +92,7 @@ private:
     void HandleExtendToHalfFoldDisplayNotify(sptr<ScreenSession> screenSession);
     void HandleHalfFoldToExtendDisplayNotify(sptr<ScreenSession> screenSession);
     void HandleKeyboardOnDisplayNotify(sptr<ScreenSession> screenSession);
-    static void HandleHalfScreenDisplayNotify(sptr<ScreenSession> screenSession);
     void HandleKeyboardOffDisplayNotify(sptr<ScreenSession> screenSession);
-    static void HandleFullScreenDisplayNotify(sptr<ScreenSession> screenSession);
     void HandleSystemKeyboardStatusDisplayNotify(sptr<ScreenSession> screenSession, bool isOn = false);
     void ReportNotifySuperFoldStatusChange(int32_t currentStatus, int32_t nextStatus, float postureAngle);
 
