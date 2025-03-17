@@ -2093,7 +2093,7 @@ enum class WindowInfoKey : int32_t {
  */
 struct OrientationInfo {
     int32_t rotation = 0;
-    Rect rect = { 0 };
+    Rect rect = {0, 0, 0, 0};
     std::map<AvoidAreaType, AvoidArea> avoidAreas;
 };
 }

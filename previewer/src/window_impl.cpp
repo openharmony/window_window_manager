@@ -990,7 +990,7 @@ bool WindowImpl::IsFullScreen() const
     return (IsLayoutFullScreen() && !statusProperty.enable_ && !naviProperty.enable_);
 }
 
-void NotifyPreferredOrientationChange(Orientation orientation)
+void WindowImpl::NotifyPreferredOrientationChange(Orientation orientation)
 {
 }
 
