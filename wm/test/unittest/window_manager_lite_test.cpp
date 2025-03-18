@@ -1147,7 +1147,7 @@ HWTEST_F(WindowManagerLiteTest, UnregisterWindowUpdateListener01, Function | Sma
  */
 HWTEST_F(WindowManagerLiteTest, ProcessRegisterWindowInfoChangeCallback01, Function | SmallTest | Level2)
 {
-    sptr<IWindowInfoChangedListener> listener = sptr<IWindowInfoChangedListener>::MakeSptr();
+    sptr<TestWindowVisibilityStateListener> listener = sptr<TestWindowVisibilityStateListener>::MakeSptr();
     WindowInfoKey observedInfo = WindowInfoKey::VISIBILITY_STATE;
     auto ret = WindowManagerLite::GetInstance().ProcessRegisterWindowInfoChangeCallback(observedInfo, listener);
     ASSERT_EQ(WMError::WM_OK, ret);
@@ -1165,7 +1165,7 @@ HWTEST_F(WindowManagerLiteTest, ProcessRegisterWindowInfoChangeCallback01, Funct
  */
 HWTEST_F(WindowManagerLiteTest, ProcessUnregisterWindowInfoChangeCallback01, Function | SmallTest | Level2)
 {
-    sptr<IWindowInfoChangedListener> listener = sptr<IWindowInfoChangedListener>::MakeSptr();
+    sptr<TestWindowVisibilityStateListener> listener = sptr<TestWindowVisibilityStateListener>::MakeSptr();
     WindowInfoKey observedInfo = WindowInfoKey::VISIBILITY_STATE;
     auto ret = WindowManagerLite::GetInstance().ProcessUnregisterWindowInfoChangeCallback(observedInfo, listener);
     ASSERT_EQ(WMError::WM_OK, ret);
@@ -1183,7 +1183,7 @@ HWTEST_F(WindowManagerLiteTest, ProcessUnregisterWindowInfoChangeCallback01, Fun
  */
 HWTEST_F(WindowManagerLiteTest, RegisterWindowInfoChangeCallback01, Function | SmallTest | Level2)
 {
-    sptr<IWindowInfoChangedListener> listener = sptr<IWindowInfoChangedListener>::MakeSptr();
+    sptr<TestWindowVisibilityStateListener> listener = sptr<TestWindowVisibilityStateListener>::MakeSptr();
     auto interestInfoSizeOld = listener->GetInterestInfo().size();
     std::unordered_set<WindowInfoKey> observedInfo;
     observedInfo.insert(WindowInfoKey::VISIBILITY_STATE);
@@ -1205,7 +1205,7 @@ HWTEST_F(WindowManagerLiteTest, RegisterWindowInfoChangeCallback01, Function | S
  */
 HWTEST_F(WindowManagerLiteTest, UnregisterWindowInfoChangeCallback01, Function | SmallTest | Level2)
 {
-    sptr<IWindowInfoChangedListener> listener = sptr<IWindowInfoChangedListener>::MakeSptr();
+    sptr<TestWindowVisibilityStateListener> listener = sptr<TestWindowVisibilityStateListener>::MakeSptr();
     auto interestInfoSizeOld = listener->GetInterestInfo().size();
     std::unordered_set<WindowInfoKey> observedInfo;
     observedInfo.insert(WindowInfoKey::VISIBILITY_STATE);
