@@ -740,6 +740,8 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
         }
         TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s event: %{public}d", where, static_cast<int32_t>(event));
         session->UpdateWaterfallMode(event);
+        auto property = session->GetSessionProperty();
+        bool isCompatibleModeInPc = property->GetCompatibleModeInPc();
         if (event == SessionEvent::EVENT_START_MOVE) {
             if (!session->IsMovable()) {
                 return WSError::WS_OK;
@@ -765,7 +767,8 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
                 session->moveDragController_->CalcFirstMoveTargetRect(rect, true);
             } else {
                 session->moveDragController_->SetStartMoveFlag(true);
-                session->moveDragController_->CalcFirstMoveTargetRect(rect, false);
+                // use window rect when fullscreen or compatible mode
+                session->moveDragController_->CalcFirstMoveTargetRect(rect, isCompatibleModeInPc);
             }
             session->SetSessionEventParam({session->moveDragController_->GetOriginalPointerPosX(),
                 session->moveDragController_->GetOriginalPointerPosY(), rect.width_, rect.height_});

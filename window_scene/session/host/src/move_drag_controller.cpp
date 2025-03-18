@@ -1379,7 +1379,7 @@ void MoveDragController::HandleStartMovingWithCoordinate(int32_t offsetX, int32_
 }
 
 /** @note @window.drag */
-void MoveDragController::CalcFirstMoveTargetRect(const WSRect& windowRect, bool isFullToFloating)
+void MoveDragController::CalcFirstMoveTargetRect(const WSRect& windowRect, bool useWindowRect)
 {
     if (!GetStartMoveFlag() || moveTempProperty_.isEmpty()) {
         return;
@@ -1391,7 +1391,7 @@ void MoveDragController::CalcFirstMoveTargetRect(const WSRect& windowRect, bool 
         windowRect.width_,
         windowRect.height_
     };
-    if (isFullToFloating) {
+    if (useWindowRect) {
         originalRect.posX_ = windowRect.posX_;
         originalRect.posY_ = windowRect.posY_;
     }
