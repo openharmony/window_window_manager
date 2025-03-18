@@ -1486,9 +1486,6 @@ HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_keyboard, Function |
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCb);
     sceneSession->property_->SetPersistentId(1);
     ssm_->sceneSessionMap_.insert({ 1, sceneSession });
-    std::map<WindowType, SystemBarProperty> properties;
-    properties[WindowType::WINDOW_TYPE_STATUS_BAR] = SystemBarProperty();
-    properties[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR] = SystemBarProperty();
     AvoidArea avoidArea;
     sceneSession->GetKeyboardAvoidAreaByRotation(0, { 0, 0, 1260, 2720 }, avoidArea);
     Rect rect = { 0, 0, 0, 0 };
@@ -1555,17 +1552,9 @@ HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_cutOut, Function | S
     info.abilityName_ = "NotifyNextAvoidRectInfo_cutOut";
     info.bundleName_ = "NotifyNextAvoidRectInfo_cutOut";
     info.screenId_ = 0;
-    auto specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    specificCb->onKeyboardRotationChange_ = [](int32_t persistentId, uint32_t rotation,
-        std::vector<std::pair<bool, WSRect>>& avoidAreas) {
-        ssm_->GetKeyboardOccupiedAreaWithRotation(persistentId, rotation, avoidAreas);
-    };
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCb);
     sceneSession->property_->SetPersistentId(1);
     ssm_->sceneSessionMap_.insert({ 1, sceneSession });
-    std::map<WindowType, SystemBarProperty> properties;
-    properties[WindowType::WINDOW_TYPE_STATUS_BAR] = SystemBarProperty();
-    properties[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR] = SystemBarProperty();
     AvoidArea avoidArea;
     sceneSession->GetCutoutAvoidAreaByRotation(0, { 0, 0, 1260, 2720 }, avoidArea);
     Rect rect = { 494, 36, 273, 72 };
