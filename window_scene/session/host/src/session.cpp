@@ -1006,6 +1006,21 @@ DisplayId Session::TransformGlobalRectToRelativeRect(WSRect& rect) const
     return updatedDisplayId;
 }
 
+void Session::TransformRelativeRectToGlobalRect(WSRect& rect) const
+{
+    const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
+        PcFoldScreenManager::GetInstance().GetDisplayRects();
+    int32_t lowerScreenPosY = defaultDisplayRect.height_ + foldCreaseRect.height_;
+    auto screenHeight = defaultDisplayRect.height_ + foldCreaseRect.height_ + virtualDisplayRect.height_;
+
+    if (GetSessionProperty()->GetDisplayId() == VIRTUAL_DISPLAY_ID || GetSessionGlobalRect().posY_ > screenHeight) {
+        WSRect relativeRect = rect;
+        rect.posY_ += lowerScreenPosY;
+        TLOGI(WmsLogTag::WMS_LAYOUT, "Transform relativeRect: %{public}s to globalRect: %{public}s",
+            relativeRect.ToString().c_str(), rect.ToString().c_str());
+    }
+}
+
 void Session::UpdateClientRectPosYAndDisplayId(WSRect& rect)
 {
     if (GetSessionProperty()->IsSystemKeyboard()) {
