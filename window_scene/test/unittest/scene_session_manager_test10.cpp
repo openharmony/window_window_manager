@@ -1552,7 +1552,7 @@ HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_cutOut, Function | S
     info.abilityName_ = "NotifyNextAvoidRectInfo_cutOut";
     info.bundleName_ = "NotifyNextAvoidRectInfo_cutOut";
     info.screenId_ = 0;
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCb);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->property_->SetPersistentId(1);
     ssm_->sceneSessionMap_.insert({ 1, sceneSession });
     AvoidArea avoidArea;
