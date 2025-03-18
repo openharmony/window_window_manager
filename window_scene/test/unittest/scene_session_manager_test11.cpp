@@ -509,11 +509,11 @@ HWTEST_F(SceneSessionManagerTest11, NotifyNextAvoidRectInfo_01, Function | Small
 }
 
 /**
- * @tc.name: NotifyNextAvoidRectInfo_02
- * @tc.desc: SceneSesionManager test NotifyNextAvoidRectInfo_02
+ * @tc.name: NotifyNextAvoidRectInfo_statusBar
+ * @tc.desc: SceneSesionManager test NotifyNextAvoidRectInfo_statusBar
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest11, NotifyNextAvoidRectInfo_02, Function | SmallTest | Level1)
+HWTEST_F(SceneSessionManagerTest11, NotifyNextAvoidRectInfo_statusBar, Function | SmallTest | Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     WSRect portraitRect = { 0, 0, 1260, 123 };
@@ -521,8 +521,8 @@ HWTEST_F(SceneSessionManagerTest11, NotifyNextAvoidRectInfo_02, Function | Small
     auto ret = ssm_->NotifyNextAvoidRectInfo(AvoidAreaType::TYPE_SYSTEM, portraitRect, landspaceRect, 0);
     ASSERT_EQ(ret, WSError::WS_OK);
     SessionInfo info;
-    info.abilityName_ = "NotifyNextAvoidRectInfo";
-    info.bundleName_ = "NotifyNextAvoidRectInfo";
+    info.abilityName_ = "NotifyNextAvoidRectInfo_statusBar";
+    info.bundleName_ = "NotifyNextAvoidRectInfo_statusBar";
     info.screenId_ = 0;
     auto specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     specificCb->onGetNextAvoidAreaRectInfo_ = [](
@@ -548,11 +548,11 @@ HWTEST_F(SceneSessionManagerTest11, NotifyNextAvoidRectInfo_02, Function | Small
 }
 
 /**
- * @tc.name: NotifyNextAvoidRectInfo_03
- * @tc.desc: SceneSesionManager test NotifyNextAvoidRectInfo_03
+ * @tc.name: NotifyNextAvoidRectInfo_statusBar_01
+ * @tc.desc: SceneSesionManager test NotifyNextAvoidRectInfo_statusBar_01
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest11, NotifyNextAvoidRectInfo_03, Function | SmallTest | Level1)
+HWTEST_F(SceneSessionManagerTest11, NotifyNextAvoidRectInfo_statusBar_01, Function | SmallTest | Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     WSRect portraitRect = { 0, 0, 1260, 123 };
@@ -560,8 +560,8 @@ HWTEST_F(SceneSessionManagerTest11, NotifyNextAvoidRectInfo_03, Function | Small
     auto ret = ssm_->NotifyNextAvoidRectInfo(AvoidAreaType::TYPE_SYSTEM, portraitRect, landspaceRect, 0);
     ASSERT_EQ(ret, WSError::WS_OK);
     SessionInfo info;
-    info.abilityName_ = "NotifyNextAvoidRectInfo";
-    info.bundleName_ = "NotifyNextAvoidRectInfo";
+    info.abilityName_ = "NotifyNextAvoidRectInfo_statusBar_01";
+    info.bundleName_ = "NotifyNextAvoidRectInfo_statusBar_01";
     info.screenId_ = 0;
     auto specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     specificCb->onGetNextAvoidAreaRectInfo_ = [](
@@ -587,15 +587,15 @@ HWTEST_F(SceneSessionManagerTest11, NotifyNextAvoidRectInfo_03, Function | Small
 }
 
 /**
- * @tc.name: NotifyNextAvoidRectInfo_04
- * @tc.desc: SceneSesionManager test NotifyNextAvoidRectInfo_04
+ * @tc.name: NotifyNextAvoidRectInfo_keyboard
+ * @tc.desc: SceneSesionManager test NotifyNextAvoidRectInfo_keyboard
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest11, NotifyNextAvoidRectInfo_04, Function | SmallTest | Level1)
+HWTEST_F(SceneSessionManagerTest11, NotifyNextAvoidRectInfo_keyboard, Function | SmallTest | Level1)
 {
     SessionInfo info;
-    info.abilityName_ = "NotifyNextAvoidRectInfo";
-    info.bundleName_ = "NotifyNextAvoidRectInfo";
+    info.abilityName_ = "NotifyNextAvoidRectInfo_keyboard";
+    info.bundleName_ = "NotifyNextAvoidRectInfo_keyboard";
     info.screenId_ = 0;
     auto specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     specificCb->onKeyboardRotationChange_ = [](int32_t persistentId, uint32_t rotation,
@@ -616,15 +616,15 @@ HWTEST_F(SceneSessionManagerTest11, NotifyNextAvoidRectInfo_04, Function | Small
 }
 
 /**
- * @tc.name: NotifyNextAvoidRectInfo_keyboard
- * @tc.desc: SceneSesionManager test NotifyNextAvoidRectInfo_keyboard
+ * @tc.name: NotifyNextAvoidRectInfo_keyboard_01
+ * @tc.desc: SceneSesionManager test NotifyNextAvoidRectInfo_keyboard_01
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest11, NotifyNextAvoidRectInfo_keyboard, Function | SmallTest | Level1)
+HWTEST_F(SceneSessionManagerTest11, NotifyNextAvoidRectInfo_keyboard_01, Function | SmallTest | Level1)
 {
     SessionInfo info;
-    info.abilityName_ = "NotifyNextAvoidRectInfo_keyboard";
-    info.bundleName_ = "NotifyNextAvoidRectInfo_keyboard";
+    info.abilityName_ = "NotifyNextAvoidRectInfo_keyboard_01";
+    info.bundleName_ = "NotifyNextAvoidRectInfo_keyboard_01";
     info.screenId_ = 0;
     auto specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     specificCb->onKeyboardRotationChange_ = [](int32_t persistentId, uint32_t rotation,
@@ -660,15 +660,15 @@ HWTEST_F(SceneSessionManagerTest11, NotifyNextAvoidRectInfo_keyboard, Function |
 }
 
 /**
- * @tc.name: NotifyNextAvoidRectInfo_05
- * @tc.desc: SceneSesionManager test NotifyNextAvoidRectInfo_05
+ * @tc.name: NotifyNextAvoidRectInfo_cutOut
+ * @tc.desc: SceneSesionManager test NotifyNextAvoidRectInfo_cutOut
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest11, NotifyNextAvoidRectInfo_05, Function | SmallTest | Level1)
+HWTEST_F(SceneSessionManagerTest11, NotifyNextAvoidRectInfo_cutOut, Function | SmallTest | Level1)
 {
     SessionInfo info;
-    info.abilityName_ = "NotifyNextAvoidRectInfo";
-    info.bundleName_ = "NotifyNextAvoidRectInfo";
+    info.abilityName_ = "NotifyNextAvoidRectInfo_cutOut";
+    info.bundleName_ = "NotifyNextAvoidRectInfo_cutOut";
     info.screenId_ = 0;
     auto specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     specificCb->onKeyboardRotationChange_ = [](int32_t persistentId, uint32_t rotation,
@@ -695,11 +695,11 @@ HWTEST_F(SceneSessionManagerTest11, NotifyNextAvoidRectInfo_05, Function | Small
 }
 
 /**
- * @tc.name: NotifyNextAvoidRectInfo_06
- * @tc.desc: SceneSesionManager test NotifyNextAvoidRectInfo_06
+ * @tc.name: NotifyNextAvoidRectInfo_AIBar
+ * @tc.desc: SceneSesionManager test NotifyNextAvoidRectInfo_AIBar
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest11, NotifyNextAvoidRectInfo_06, Function | SmallTest | Level1)
+HWTEST_F(SceneSessionManagerTest11, NotifyNextAvoidRectInfo_AIBar, Function | SmallTest | Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     WSRect portraitRect = { 409, 2629, 442, 91 };
@@ -707,8 +707,8 @@ HWTEST_F(SceneSessionManagerTest11, NotifyNextAvoidRectInfo_06, Function | Small
     auto ret = ssm_->NotifyNextAvoidRectInfo(AvoidAreaType::TYPE_NAVIGATION_INDICATOR, portraitRect, landspaceRect, 0);
     ASSERT_EQ(ret, WSError::WS_OK);
     SessionInfo info;
-    info.abilityName_ = "NotifyNextAvoidRectInfo";
-    info.bundleName_ = "NotifyNextAvoidRectInfo";
+    info.abilityName_ = "NotifyNextAvoidRectInfo_AIBar";
+    info.bundleName_ = "NotifyNextAvoidRectInfo_AIBar";
     info.screenId_ = 0;
     auto specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     specificCb->onGetNextAvoidAreaRectInfo_ = [](
