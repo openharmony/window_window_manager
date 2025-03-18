@@ -68,6 +68,7 @@ const std::string ARG_SET_SECONDARY_FOLD_STATUS = "-secondary";
 const std::string ARG_CHANGE_OUTER_CMD = "outer";
 const std::string ANGLE_STR = "angle";
 const std::string HALL_STR = "hall";
+const std::string ARG_SET_LANDSCAPE_LOCK = "-landscapelock";
 #ifdef FOLD_ABILITY_ENABLE
 constexpr int SUPER_FOLD_STATUS_MAX = 2;
 const char SECONDARY_DUMPER_VALUE_BOUNDARY[] = "mfg";
@@ -228,6 +229,8 @@ void ScreenSessionDumper::ExecuteInjectCmd2()
         SetHallAndPostureStatus(params_[0]);
     } else if (params_[0].find(ARG_SET_SECONDARY_FOLD_STATUS) != std::string::npos) {
         SetSecondaryStatusChange(params_[0]);
+    } else if (params_[0].find(ARG_SET_LANDSCAPE_LOCK) != std::string::npos) {
+        SetLandscapeLock(params_[0]);
     }
 }
 
@@ -972,6 +975,32 @@ void ScreenSessionDumper::SetSecondaryStatusChange(const std::string &input)
     ScreenSessionManager::GetInstance().SetFoldDisplayMode(displayMode);
 #endif
 }
+
+void ScreenSessionDumper::SetLandscapeLock(std::string input)
+{
+#ifdef FOLD_ABILITY_ENABLE
+    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        TLOGI(WmsLogTag::DMS, "not super fold device");
+        return;
+    }
+    size_t commaPos = input.find_last_of(',');
+    if ((commaPos != std::string::npos) && (input.substr(0, commaPos) == ARG_SET_LANDSCAPE_LOCK)) {
+        std::string valueStr = input.substr(commaPos + 1, DUMPER_PARAM_INDEX_ONE);
+        if (valueStr.size() != DUMPER_PARAM_INDEX_ONE && !std::isdigit(valueStr[0])) {
+            return;
+        }
+        int32_t value = std::stoi(valueStr);
+        if (value) {
+            ScreenSessionManager::GetInstance().HandleExtendScreenConnect(0);
+        } else {
+            ScreenSessionManager::GetInstance().HandleExtendScreenDisconnect(0);
+        }
+        TLOGI(WmsLogTag::DMS, "landscape lock: %{public}d", value);
+    }
+#endif
+}
+
+
 #ifdef FOLD_ABILITY_ENABLE
 bool ScreenSessionDumper::IsAllCharDigit(const std::string &firstPostureStr)
 {
