@@ -119,7 +119,7 @@ public:
     WMError SetSystemWindowEnableDrag(bool enableDrag) override;
     void NotifyExtensionDetachToDisplay() override;
     WSError RequestFocus(bool isFocused) override;
-    
+
     /*
      * Gesture Back
      */
@@ -168,6 +168,10 @@ public:
     WSError UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode,
         std::shared_ptr<RSTransaction>& rsTransaction) override;
 
+    /**
+     * window rotation
+     */
+    WSError UpdateRotationChangeRegistered(int32_t persistentId, bool isRegister) override;
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;
 };

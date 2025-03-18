@@ -1907,11 +1907,8 @@ void WindowSceneSessionImpl::LimitWindowSize(uint32_t& width, uint32_t& height)
     UpdateFloatingWindowSizeBySizeLimits(width, height);
 }
 
-/** @note @window.layout */
-WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height, const RectAnimationConfig& rectAnimationConfig)
+WMError WindowSceneSessionImpl::CheckWindowRect(uint32_t& width, uint32_t& height)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d resize %{public}u %{public}u",
-        property_->GetPersistentId(), width, height);
     if (width == 0 || height == 0) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "width or height should greater than 0!");
         return WMError::WM_ERROR_INVALID_PARAM;
@@ -1933,7 +1930,18 @@ WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height, const Re
     }
 
     LimitWindowSize(width, height);
+    return WMError::WM_OK;
+}
 
+/** @note @window.layout */
+WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height, const RectAnimationConfig& rectAnimationConfig)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d resize %{public}u %{public}u",
+        property_->GetPersistentId(), width, height);
+
+    if (CheckWindowRect(width, height) != WMError::WM_OK) {
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
     const auto& windowRect = GetRect();
     const auto& requestRect = GetRequestRect();
 
@@ -5602,7 +5610,7 @@ uint32_t WindowSceneSessionImpl::GetApiCompatibleVersion() const
     }
     return version;
 }
- 
+
 bool WindowSceneSessionImpl::IsFullScreenEnable() const
 {
     if (!WindowHelper::IsWindowModeSupported(property_->GetWindowModeSupportType(),

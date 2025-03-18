@@ -266,6 +266,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyKeyboardDidHideRegistered(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_FLAG):
             return HandleUpdateFlag(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_ROTATION_CHANGE):
+            return HandleUpdateRotationChangeListenerRegistered(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1698,6 +1700,24 @@ int SessionStub::HandleUpdateFlag(MessageParcel& data, MessageParcel& reply)
     }
     TLOGD(WmsLogTag::WMS_MAIN, "specifiedFlag: %{public}s", flag.c_str());
     UpdateFlag(flag);
+    return ERR_NONE;
+}
+
+int SessionStub::HandleUpdateRotationChangeListenerRegistered(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t persistentId = 0;
+    if (!data.ReadInt32(persistentId)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "read persistentId failed");
+        return ERR_INVALID_DATA;
+    }
+    bool isRegister = false;
+    if (!data.ReadBool(isRegister)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "read isRegister failed");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = UpdateRotationChangeRegistered(persistentId, isRegister);
+    TLOGD(WmsLogTag::WMS_ROTATION, "persistentId: %{public}d, register: %{public}d", persistentId, isRegister);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

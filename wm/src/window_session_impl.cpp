@@ -134,6 +134,7 @@ std::map<int32_t, sptr<IWindowOrientationChangeListener>> WindowSessionImpl::win
 std::unordered_map<int32_t, std::vector<sptr<IWindowWillCloseListener>>> WindowSessionImpl::windowWillCloseListeners_;
 std::map<int32_t, std::vector<sptr<ISwitchFreeMultiWindowListener>>> WindowSessionImpl::switchFreeMultiWindowListeners_;
 std::map<int32_t, std::vector<sptr<IWindowHighlightChangeListener>>> WindowSessionImpl::highlightChangeListeners_;
+std::map<int32_t, std::vector<sptr<IWindowRotationChangeListener>>> WindowSessionImpl::windowRotationChangeListeners_;
 std::recursive_mutex WindowSessionImpl::lifeCycleListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowChangeListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowCrossAxisListenerMutex_;
@@ -162,6 +163,7 @@ std::mutex WindowSessionImpl::systemBarPropertyListenerMutex_;
 std::mutex WindowSessionImpl::waterfallModeChangeListenerMutex_;
 std::unordered_map<int32_t, std::vector<sptr<IWaterfallModeChangeListener>>>
     WindowSessionImpl::waterfallModeChangeListeners_;
+std::mutex WindowSessionImpl::windowRotationChangeListenerMutex_;
 std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>> WindowSessionImpl::windowSessionMap_;
 std::shared_mutex WindowSessionImpl::windowSessionMutex_;
 std::set<sptr<WindowSessionImpl>> WindowSessionImpl::windowExtensionSessionSet_;
@@ -3153,6 +3155,15 @@ void WindowSessionImpl::RecoverSessionListener()
             }
         }
     }
+    {
+        std::lock_guard<std::mutex> lockListener(windowRotationChangeListenerMutex_);
+        if (windowRotationChangeListeners_.find(persistentId) != windowRotationChangeListeners_.end() &&
+            !windowRotationChangeListeners_[persistentId].empty()) {
+            if (auto hostSession = GetHostSession()) {
+                hostSession->UpdateRotationChangeRegistered(persistentId, true);
+            }
+        }
+    }
 }
 
 template<typename T>
@@ -3460,6 +3471,10 @@ void WindowSessionImpl::ClearListenersById(int32_t persistentId)
     {
         std::lock_guard<std::mutex> lockListener(windowOrientationChangeListenerMutex_);
         ClearUselessListeners(windowOrientationChangeListener_, persistentId);
+    }
+    {
+        std::lock_guard<std::mutex> lockListener(windowRotationChangeListenerMutex_);
+        ClearUselessListeners(windowRotationChangeListeners_, persistentId);
     }
     ClearSwitchFreeMultiWindowListenersById(persistentId);
     TLOGI(WmsLogTag::WMS_LIFE, "Clear success, id: %{public}d.", GetPersistentId());
@@ -4446,6 +4461,53 @@ WMError WindowSessionImpl::UnregisterWindowNoInteractionListener(const IWindowNo
     WMError ret = UnregisterListener(windowNoInteractionListeners_[GetPersistentId()], listener);
     if (windowNoInteractionListeners_[GetPersistentId()].empty()) {
         lastInteractionEventId_.store(-1);
+    }
+    return ret;
+}
+
+template<typename T>
+EnableIfSame<T, IWindowRotationChangeListener, std::vector<sptr<IWindowRotationChangeListener>>> WindowSessionImpl::GetListeners()
+{
+    std::vector<sptr<IWindowRotationChangeListener>> windowRotationChangeListener;
+    for (auto& listener : windowRotationChangeListeners_[GetPersistentId()]) {
+        windowRotationChangeListener.push_back(listener);
+    }
+    return windowRotationChangeListener;
+}
+
+WMError WindowSessionImpl::RegisterWindowRotationChangeListener(const sptr<IWindowRotationChangeListener>& listener)
+{
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "listener is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    auto persistentId = GetPersistentId();
+    WMError ret = WMError::WM_OK;
+    {
+        std::lock_guard<std::mutex> lockListener(windowRotationChangeListenerMutex_);
+        ret = RegisterListener(windowRotationChangeListeners_[persistentId], listener);
+    }
+    auto hostSession = GetHostSession();
+    if (hostSession != nullptr && ret == WMError::WM_OK) {
+        hostSession->UpdateRotationChangeRegistered(persistentId, true);
+    }
+    return ret;
+}
+
+WMError WindowSessionImpl::UnregisterWindowRotationChangeListener(const sptr<IWindowRotationChangeListener>& listener)
+{
+    WMError ret = WMError::WM_OK;
+    auto persistentId = GetPersistentId();
+    bool windowRotationChangeListenerEmpty = false;
+    {
+        std::lock_guard<std::mutex> lockListener(windowRotationChangeListenerMutex_);
+        ret = UnregisterListener(windowRotationChangeListeners_[persistentId], listener);
+        windowRotationChangeListenerEmpty = windowRotationChangeListeners_.count(persistentId) == 0 ||
+                                            windowRotationChangeListeners_[persistentId].empty();
+    }
+    auto hostSession = GetHostSession();
+    if (hostSession != nullptr && windowRotationChangeListenerEmpty) {
+        hostSession->UpdateRotationChangeRegistered(persistentId, false);
     }
     return ret;
 }
@@ -5782,6 +5844,55 @@ void WindowSessionImpl::NotifyClientWindowSize()
         sptr<DisplayInfo> displayInfo = display ? display->GetDisplayInfo() : nullptr;
         UpdateViewportConfig(windowRect, WindowSizeChangeReason::UNDEFINED, nullptr, displayInfo);
     }
+}
+
+WMError WindowSessionImpl::CheckMultiWindowRect(uint32_t& width, uint32_t& height)
+{
+    const auto& requestRect = GetRequestRect();
+
+    if (WindowHelper::IsSubWindow(GetType())) {
+        auto mainWindow = FindMainWindowWithContext();
+        if (mainWindow != nullptr && (mainWindow->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY ||
+                                      mainWindow->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY)) {
+            if (width == requestRect.width_ && height == requestRect.height_) {
+                TLOGW(WmsLogTag::WMS_LAYOUT, "Request same size in multiWindow will not update, return");
+                return WMError::WM_ERROR_INVALID_WINDOW;
+            }
+        }
+    }
+    return WMError::WM_OK;
+}
+
+RotationChangeResult WindowSessionImpl::NotifyRotationChange(const RotationChangeInfo& rotationChangeInfo)
+{
+    TLOGI(WmsLogTag::WMS_ROTATION, "info type: %{public}d, orientation: %{public}d, displayId: %{public}llu, "
+        "rect:[%{public}d, %{public}d, %{public}d, %{public}d]", rotationChangeInfo.type,
+        rotationChangeInfo.orientation, rotationChangeInfo.displayId, rotationChangeInfo.displayRect.posX_,
+        rotationChangeInfo.displayRect.posY_, rotationChangeInfo.displayRect.width_,
+        rotationChangeInfo.displayRect.height_);
+    RotationChangeResult rotationChangeResult = { RectType::RELATIVE_TO_SCREEN, { 0, 0, 0, 0 } };
+    {
+        std::lock_guard<std::mutex> lockListener(windowRotationChangeListenerMutex_);
+        auto windowRotationChangeListeners = GetListeners<IWindowRotationChangeListener>();
+        for (auto& listener : windowRotationChangeListeners) {
+            if (listener != nullptr) {
+                listener->OnRotationChange(rotationChangeInfo, rotationChangeResult);
+                if (rotationChangeInfo.type == RotationChangeType::WINDOW_DID_ROTATE) {
+                    break;
+                }
+                Rect resultRect = rotationChangeResult.windowRect;
+                if (CheckWindowRect(resultRect.width_, resultRect.height_) != WMError::WM_OK ||
+                    CheckMultiWindowRect(resultRect.width_, resultRect.height_) != WMError::WM_OK) {
+                    rotationChangeResult.windowRect.width_ = 0;
+                    rotationChangeResult.windowRect.height_ = 0;
+                }
+            }
+        }
+    }
+    TLOGI(WmsLogTag::WMS_ROTATION, "result rectType: %{public}d, rect:[%{public}d, %{public}d, %{public}d, %{public}d]",
+        rotationChangeResult.rectType, rotationChangeResult.windowRect.posX_, rotationChangeResult.windowRect.posY_,
+        rotationChangeResult.windowRect.width_, rotationChangeResult.windowRect.height_);
+    return rotationChangeResult;
 }
 } // namespace Rosen
 } // namespace OHOS

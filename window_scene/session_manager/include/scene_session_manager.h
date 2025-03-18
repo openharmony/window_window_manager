@@ -247,6 +247,7 @@ public:
      */
     void UpdateRotateAnimationConfig(const RotateAnimationConfig& config);
     void CloseSyncTransaction(std::function<void()> func);
+    std::vector<sptr<SceneSession>> GetActiveSceneSessionCopy();
 
     WSError ProcessBackEvent();
     WSError BindDialogSessionTarget(uint64_t persistentId, sptr<IRemoteObject> targetToken) override;

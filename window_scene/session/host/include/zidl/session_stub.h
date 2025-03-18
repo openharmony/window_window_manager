@@ -90,6 +90,7 @@ private:
     int HandleNotifySubModalTypeChange(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyMainModalTypeChange(MessageParcel& data, MessageParcel& reply);
     int HandleSetSessionLabelAndIcon(MessageParcel& data, MessageParcel& reply);
+    int HandleUpdateRotationChangeListenerRegistered(MessageParcel& data, MessageParcel& reply);
 
     // extension extension
     int HandleTransferAbilityResult(MessageParcel& data, MessageParcel& reply);
@@ -112,7 +113,7 @@ private:
 
     // Window Pattern
     int HandleNotifyWindowAttachStateListenerRegistered(MessageParcel& data, MessageParcel& reply);
-    
+
     // PC Window
     int HandleSetWindowRectAutoSave(MessageParcel& data, MessageParcel& reply);
     int HandleSetSupportedWindowModes(MessageParcel& data, MessageParcel& reply);
