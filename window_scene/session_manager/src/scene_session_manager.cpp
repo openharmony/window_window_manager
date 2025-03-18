@@ -6141,7 +6141,7 @@ sptr<SceneSession> SceneSessionManager::GetTopFocusableNonAppSession()
             return false;
         }
         if (session->IsAppSession()) {
-            return true;
+            return session->GetZOrder() == 0 ? false :true;
         }
         if (session->CheckFocusable() && IsSessionVisibleForeground(session)) {
             ret = session;
