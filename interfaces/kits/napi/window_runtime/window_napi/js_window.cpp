@@ -3102,6 +3102,7 @@ napi_value JsWindow::OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_i
         auto errCode =
             WM_JS_TO_ERROR_CODE_MAP.at(window->SetSpecificBarProperty(systemBarType, property));
         if (errCode == WmErrorCode::WM_OK) {
+            window->NotifySystemBarPropertyUpdate(systemBarType, property);
             task->Resolve(env, NapiGetUndefined(env));
         } else {
             TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s failed, ret %{public}d", where, errCode);
@@ -3570,6 +3571,7 @@ napi_value JsWindow::OnSetPreferredOrientation(napi_env env, napi_callback_info 
             return;
         }
         weakWindow->SetRequestedOrientation(requestedOrientation);
+        weakWindow->NotifyPreferredOrientationChange(requestedOrientation);
         task->Resolve(env, NapiGetUndefined(env));
         TLOGNI(WmsLogTag::WMS_ROTATION, "%{public}s end, window [%{public}u, %{public}s] orientation=%{public}u",
             where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(),

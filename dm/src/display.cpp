@@ -241,4 +241,9 @@ DMError Display::GetAvailableArea(DMRect& area) const
     return SingletonContainer::Get<DisplayManagerAdapter>().GetAvailableArea(GetId(), area);
 }
 
+DMError Display::GetDisplayCapability(std::string& capabilitInfo) const
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayCapability(capabilitInfo);
+}
+
 } // namespace OHOS::Rosen

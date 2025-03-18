@@ -444,6 +444,7 @@ enum class WindowSizeChangeReason : uint32_t {
     AVOID_AREA_CHANGE,
     MAXIMIZE_TO_SPLIT,
     SPLIT_TO_MAXIMIZE,
+    PAGE_ROTATION,
     END,
 };
 
@@ -479,6 +480,55 @@ enum class DragResizeType : uint32_t {
     RESIZE_TYPE_UNDEFINED = 0,
     RESIZE_EACH_FRAME = 1,
     RESIZE_WHEN_DRAG_END = 2,
+    RESIZE_KEY_FRAME = 3,
+    RESIZE_MAX_VALUE = 99,
+};
+
+/**
+ * @struct KeyFramePolicy
+ *
+ * @brief info for drag key frame policy.
+ */
+struct KeyFramePolicy : public Parcelable {
+    DragResizeType dragResizeType_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    uint32_t interval_ = 1000;
+    uint32_t distance_ = 1000;
+    uint32_t animationDuration_ = 100;
+    uint32_t animationDelay_ = 100;
+    bool running_ = false;
+    bool stopping_ = false;
+
+    bool enabled() const
+    {
+        return dragResizeType_ == DragResizeType::RESIZE_KEY_FRAME;
+    }
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        return parcel.WriteUint32(static_cast<uint32_t>(dragResizeType_)) &&
+            parcel.WriteUint32(interval_) && parcel.WriteUint32(distance_) &&
+            parcel.WriteUint32(animationDuration_) && parcel.WriteUint32(animationDelay_) &&
+            parcel.WriteBool(running_) && parcel.WriteBool(stopping_);
+    }
+
+    static KeyFramePolicy* Unmarshalling(Parcel& parcel)
+    {
+        KeyFramePolicy* keyFramePolicy = new KeyFramePolicy();
+        uint32_t dragResizeType;
+        if (!parcel.ReadUint32(dragResizeType) || !parcel.ReadUint32(keyFramePolicy->interval_) ||
+            !parcel.ReadUint32(keyFramePolicy->distance_) || !parcel.ReadUint32(keyFramePolicy->animationDuration_) ||
+            !parcel.ReadUint32(keyFramePolicy->animationDelay_) || !parcel.ReadBool(keyFramePolicy->running_) ||
+            !parcel.ReadBool(keyFramePolicy->stopping_)) {
+            delete keyFramePolicy;
+            return nullptr;
+        }
+        if (dragResizeType >= static_cast<uint32_t>(DragResizeType::RESIZE_MAX_VALUE)) {
+            delete keyFramePolicy;
+            return nullptr;
+        }
+        keyFramePolicy->dragResizeType_ = static_cast<DragResizeType>(dragResizeType);
+        return keyFramePolicy;
+    }
 };
 
 /**
@@ -1494,7 +1544,7 @@ struct WindowLayoutInfo : public Parcelable {
         return parcel.WriteInt32(rect.posX_) && parcel.WriteInt32(rect.posY_) && parcel.WriteUint32(rect.width_) &&
                parcel.WriteUint32(rect.height_);
     }
-  
+
     static WindowLayoutInfo* Unmarshalling(Parcel& parcel)
     {
         WindowLayoutInfo* windowLayoutInfo = new WindowLayoutInfo();
@@ -2034,6 +2084,65 @@ enum class WindowInfoKey : int32_t {
     ABILITY_NAME,
     APP_INDEX,
     VISIBILITY_STATE,
+};
+
+/**
+ * @struct OrientationInfo
+ *
+ * @brief orientation info
+ */
+struct OrientationInfo {
+    int32_t rotation = 0;
+    Rect rect = {0, 0, 0, 0};
+    std::map<AvoidAreaType, AvoidArea> avoidAreas;
+};
+
+/*
+ * @brief Enumerates rotation change type.
+ */
+enum class RotationChangeType : uint32_t {
+    /**
+     * rotate will begin.
+     */
+    WINDOW_WILL_ROTATE = 0,
+
+    /**
+     * rotate end.
+     */
+    WINDOW_DID_ROTATE,
+};
+
+/**
+ * @brief Enumerates rect type
+ */
+enum class RectType : uint32_t {
+    /**
+     * the window rect of app relative to screen.
+     */
+    RELATIVE_TO_SCREEN = 0,
+
+    /**
+     * the window rect of app relative to parent window.
+     */
+    RELATIVE_TO_PARENT_WINDOW,
+};
+
+/**
+ * @brief rotation change info to notify listener.
+ */
+struct RotationChangeInfo {
+    RotationChangeType type;
+    uint32_t orientation;
+    DisplayId displayId;
+    Rect displayRect;
+};
+
+/**
+ * @brief rotation change result return from listener.
+ */
+struct RotationChangeResult {
+    RectType rectType;
+    Rect windowRect;
 };
 }
 }

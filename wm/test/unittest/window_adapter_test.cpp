@@ -874,6 +874,21 @@ HWTEST_F(WindowAdapterTest, GetAppDragResizeType, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SetAppKeyFramePolicy
+ * @tc.desc: WindowAdapter/SetAppKeyFramePolicy
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, SetAppKeyFramePolicy, Function | SmallTest | Level2)
+{
+    WindowAdapter windowAdapter;
+    const std::string bundleName = "test";
+    KeyFramePolicy keyFramePolicy;
+    keyFramePolicy.dragResizeType_ = DragResizeType::RESIZE_KEY_FRAME;
+    auto err = windowAdapter.SetAppKeyFramePolicy(bundleName, keyFramePolicy);
+    ASSERT_EQ(err, WMError::WM_OK);
+}
+
+/**
  * @tc.name: SetParentWindow
  * @tc.desc: WindowAdapter/SetParentWindow
  * @tc.type: FUNC

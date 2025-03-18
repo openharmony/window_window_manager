@@ -124,6 +124,7 @@ public:
     static napi_value NotifyAboveLockScreen(napi_env env, napi_callback_info info);
     static napi_value CloneWindow(napi_env env, napi_callback_info info);
     static napi_value RegisterSingleHandContainerNode(napi_env env, napi_callback_info info);
+    static napi_value NotifyRotationChange(napi_env env, napi_callback_info info);
 
     /*
      * Multi Instance
@@ -137,6 +138,7 @@ public:
      * Window Immersive
      */
     static napi_value NotifyAINavigationBarShowStatus(napi_env env, napi_callback_info info);
+    static napi_value NotifyNextAvoidRectInfo(napi_env env, napi_callback_info info);
     static napi_value GetIsLayoutFullScreen(napi_env env, napi_callback_info info);
     static napi_value SetStatusBarDefaultVisibilityPerDisplay(napi_env env, napi_callback_info info);
     static napi_value NotifyStatusBarShowStatus(napi_env env, napi_callback_info info);
@@ -216,6 +218,7 @@ private:
     napi_value OnNotifyAboveLockScreen(napi_env env, napi_callback_info info);
     napi_value OnCloneWindow(napi_env env, napi_callback_info info);
     napi_value OnRegisterSingleHandContainerNode(napi_env env, napi_callback_info info);
+    napi_value OnNotifyRotationChange(napi_env env, napi_callback_info info);
 
     /*
      * Multi Instance
@@ -229,6 +232,7 @@ private:
      * Window Immersive
      */
     napi_value OnNotifyAINavigationBarShowStatus(napi_env env, napi_callback_info info);
+    napi_value OnNotifyNextAvoidRectInfo(napi_env env, napi_callback_info info);
     napi_value OnGetIsLayoutFullScreen(napi_env env, napi_callback_info info);
     napi_value OnSetStatusBarDefaultVisibilityPerDisplay(napi_env env, napi_callback_info info);
     napi_value OnNotifyStatusBarShowStatus(napi_env env, napi_callback_info info);
@@ -301,6 +305,13 @@ private:
 
     sptr<RootScene> rootScene_;
     std::shared_ptr<MainThreadScheduler> taskScheduler_;
+
+    /*
+     * Window Rotation
+     */
+    std::unordered_map<int32_t, RotationChangeResult> GetRotationChangeResult(
+        const std::vector<sptr<SceneSession>>& activeSceneSessionMapCopy,
+        const RotationChangeInfo& rotationChangeInfo);
 };
 } // namespace OHOS::Rosen
 

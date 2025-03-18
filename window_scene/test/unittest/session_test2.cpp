@@ -1545,6 +1545,31 @@ HWTEST_F(WindowSessionTest2, NeedCheckContextTransparent, Function | SmallTest |
     session_->SetContextTransparentFunc(func);
     ASSERT_EQ(session_->NeedCheckContextTransparent(), true);
 }
+
+/**
+ * @tc.name: GetBorderUnoccupied
+ * @tc.desc: GetBorderUnoccupied Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest2, GetBorderUnoccupied, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    bool res = session_->GetBorderUnoccupied();
+    ASSERT_EQ(res, false);
+}
+
+/**
+ * @tc.name: SetBorderUnoccupied
+ * @tc.desc: SetBorderUnoccupied Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest2, SetBorderUnoccupied, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->SetBorderUnoccupied(true);
+    bool res = session_->GetBorderUnoccupied();
+    ASSERT_EQ(res, true);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

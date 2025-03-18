@@ -567,17 +567,18 @@ void ScreenSessionManagerClient::SwitchUserCallback(std::vector<int32_t> oldScbP
         screenSessionMapCopy = screenSessionMap_;
     }
     for (const auto& iter : screenSessionMapCopy) {
-        auto displayNode = screenSessionManager_->GetDisplayNode(iter.first);
-        if (displayNode == nullptr) {
-            WLOGFE("display node is null");
-            continue;
+        {
+            auto displayNode = screenSessionManager_->GetDisplayNode(iter.first);
+            if (displayNode == nullptr) {
+                WLOGFE("display node is null");
+                continue;
+            }
+            displayNode->SetScbNodePid(oldScbPids, currentScbPid);
         }
         auto transactionProxy = RSTransactionProxy::GetInstance();
         if (transactionProxy != nullptr) {
-            displayNode->SetScbNodePid(oldScbPids, currentScbPid);
             transactionProxy->FlushImplicitTransaction();
         } else {
-            displayNode->SetScbNodePid(oldScbPids, currentScbPid);
             WLOGFW("transactionProxy is null");
         }
         ScreenId screenId = iter.first;
@@ -738,7 +739,7 @@ void ScreenSessionManagerClient::UpdateDisplayHookInfo(int32_t uid, bool enable,
     screenSessionManager_->UpdateDisplayHookInfo(uid, enable, hookInfo);
 }
 
-void ScreenSessionManagerClient::GetDisplayHookInfo(int32_t uid, DMHookInfo& hookInfo)
+void ScreenSessionManagerClient::GetDisplayHookInfo(int32_t uid, DMHookInfo& hookInfo) const
 {
     if (!screenSessionManager_) {
         WLOGFE("screenSessionManager_ is null");

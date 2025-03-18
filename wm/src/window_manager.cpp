@@ -803,7 +803,8 @@ WMError WindowManager::UnregisterVisibilityStateChangedListener(const sptr<IWind
         ret = SingletonContainer::Get<WindowAdapter>().UnregisterWindowManagerAgent(
             WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_VISIBILITY,
             pImpl_->windowVisibilityStateListenerAgent_);
-        if (ret == WMError::WM_OK) {
+        if (ret == WMError::WM_OK && pImpl_->windowVisibilityStateListenerAgent_ != nullptr) {
+            delete pImpl_->windowVisibilityStateListenerAgent_;
             pImpl_->windowVisibilityStateListenerAgent_ = nullptr;
         }
     }
@@ -1617,6 +1618,15 @@ WMError WindowManager::SetAppDragResizeType(const std::string& bundleName, DragR
 WMError WindowManager::GetAppDragResizeType(const std::string& bundleName, DragResizeType& dragResizeType)
 {
     WMError ret = SingletonContainer::Get<WindowAdapter>().GetAppDragResizeType(bundleName, dragResizeType);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "failed");
+    }
+    return ret;
+}
+
+WMError WindowManager::SetAppKeyFramePolicy(const std::string& bundleName, const KeyFramePolicy& keyFramePolicy)
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().SetAppKeyFramePolicy(bundleName, keyFramePolicy);
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::DEFAULT, "failed");
     }

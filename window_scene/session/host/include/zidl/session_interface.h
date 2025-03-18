@@ -29,6 +29,8 @@ class AccessibilityEventInfo;
 }
 namespace OHOS::Rosen {
 class RSSurfaceNode;
+class RSCanvasNode;
+class RSTransaction;
 class ISession : public IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISession");
@@ -136,6 +138,8 @@ public:
     virtual WSError OnNeedAvoid(bool status) { return WSError::WS_OK; }
     virtual AvoidArea GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect = WSRect::EMPTY_RECT,
         int32_t apiVersion = API_VERSION_INVALID) { return {}; }
+    virtual WSError GetTargetOrientationConfigInfo(Orientation targetOrientation,
+        const std::map<Rosen::WindowType, Rosen::SystemBarProperty>& properties) { return WSError::WS_OK; }
     virtual WSError GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoidAreas) { return WSError::WS_OK; }
     virtual WSError RequestSessionBack(bool needMoveToBackground) { return WSError::WS_OK; }
     virtual WSError MarkProcessed(int32_t eventId) { return WSError::WS_OK; }
@@ -207,6 +211,16 @@ public:
     {
         return WSError::WS_OK;
     }
+
+    /**
+     * @brief keyFrame event info.
+     *
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError KeyFrameAnimateEnd() { return WSError::WS_OK; }
+    virtual WSError UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode,
+        std::shared_ptr<RSTransaction>& rsTransaction) { return WSError::WS_OK; }
+
     virtual WSError NotifyFrameLayoutFinishFromApp(bool notifyListener, const WSRect& rect)
     {
         return WSError::WS_OK;
@@ -398,6 +412,7 @@ public:
     virtual void NotifyWindowAttachStateListenerRegistered(bool registered) { }
     virtual WSError SetFollowParentWindowLayoutEnabled(bool isFollow) { return WSError::WS_OK; };
     virtual WSError UpdateFlag(const std::string& flag) { return WSError::WS_OK; };
+    virtual WSError UpdateRotationChangeRegistered(int32_t persistentId, bool isRegister) { return WSError::WS_OK; }
 };
 } // namespace OHOS::Rosen
 

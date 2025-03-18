@@ -17,6 +17,7 @@
 
 #include <refbase.h>
 #include <transaction/rs_sync_transaction_controller.h>
+#include "parameters.h"
 #include "picture_in_picture_manager.h"
 #include "singleton_container.h"
 #include "window_adapter.h"
@@ -75,6 +76,9 @@ PictureInPictureController::PictureInPictureController(sptr<PipOption> pipOption
 
 PictureInPictureController::~PictureInPictureController()
 {
+    if (pipOption_) {
+        pipOption_->ClearNapiRefs(env_);
+    }
     TLOGI(WmsLogTag::WMS_PIP, "Destruction");
     if (!isAutoStartEnabled_) {
         return;
@@ -960,20 +964,9 @@ napi_ref PictureInPictureController::GetTypeNode() const
 
 void PictureInPictureController::GetPipPossible(bool& pipPossible)
 {
-    TLOGI(WmsLogTag::WMS_PIP, "called");
-    if (pipOption_ == nullptr || pipOption_->GetContext() == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "pipOption is null or Get PictureInPictureOption failed");
-        return;
-    }
-    WindowUIType type = WindowUIType::INVALID_WINDOW;
-    WMError ret = SingletonContainer::Get<WindowAdapter>().GetWindowUIType(type);
-    if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "can't find GetWindowUIType, err: %{public}u",
-            static_cast<uint32_t>(ret));
-        return;
-    }
-    pipPossible = type == WindowUIType::PHONE_WINDOW || type == WindowUIType::PC_WINDOW ||
-        type == WindowUIType::PAD_WINDOW;
+    const std::string multiWindowUIType = system::GetParameter("const.window.multiWindowUIType", "");
+    pipPossible = multiWindowUIType == "HandsetSmartWindow" || multiWindowUIType == "FreeFormMultiWindow" ||
+        multiWindowUIType == "TabletSmartWindow";
     return;
 }
 

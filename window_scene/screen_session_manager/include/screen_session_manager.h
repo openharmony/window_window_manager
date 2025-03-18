@@ -46,9 +46,7 @@ static const std::map<ScreenPowerStatus, DisplayPowerEvent> SCREEN_STATUS_POWER_
     {ScreenPowerStatus::POWER_STATUS_ON, DisplayPowerEvent::DISPLAY_ON},
     {ScreenPowerStatus::POWER_STATUS_OFF, DisplayPowerEvent::DISPLAY_OFF},
     {ScreenPowerStatus::POWER_STATUS_DOZE, DisplayPowerEvent::DISPLAY_DOZE},
-    {ScreenPowerStatus::POWER_STATUS_DOZE_SUSPEND, DisplayPowerEvent::DISPLAY_DOZE_SUSPEND},
-    {ScreenPowerStatus::POWER_STATUS_ON_ADVANCED, DisplayPowerEvent::DISPLAY_ON},
-    {ScreenPowerStatus::POWER_STATUS_OFF_ADVANCED, DisplayPowerEvent::DISPLAY_OFF}
+    {ScreenPowerStatus::POWER_STATUS_DOZE_SUSPEND, DisplayPowerEvent::DISPLAY_DOZE_SUSPEND}
 };
 
 class ScreenSessionManager : public SystemAbility, public ScreenSessionManagerStub, public IScreenChangeListener {
@@ -215,6 +213,7 @@ public:
     bool HasCastEngineOrPhyMirror(const std::vector<ScreenId>& screenIdsToExclude);
     void HandlePhysicalMirrorConnect(sptr<ScreenSession> screenSession, bool phyMirrorEnable);
     sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) override;
+    sptr<CutoutInfo> GetCutoutInfoWithRotation(DisplayId displayId, int32_t rotation) override;
     DMError HasImmersiveWindow(ScreenId screenId, bool& immersive) override;
     void SetDisplayBoundary(const sptr<ScreenSession> screenSession);
     void SetLowTemp(LowTempMode lowTemp);
@@ -348,6 +347,7 @@ public:
     DMError SetVirtualScreenRefreshRate(ScreenId screenId, uint32_t refreshInterval) override;
     void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList,
         std::vector<uint64_t> surfaceIdList = {}) override;
+    void SetVirtualDisplayMuteFlag(ScreenId screenId, bool muteFlag) override;
     // notify scb virtual screen change
     void OnVirtualScreenChange(ScreenId screenId, ScreenEvent screenEvent);
     DMError VirtualScreenUniqueSwitch(const std::vector<ScreenId>& screenIds);
@@ -359,12 +359,12 @@ public:
     void ReportFoldStatusToScb(std::vector<std::string>& screenFoldInfo);
     std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution() override;
 
-    std::string GetDisplayCapability() override;
+    DMError GetDisplayCapability(std::string& capabilitInfo) override;
     nlohmann::ordered_json GetCapabilityJson(FoldStatus foldStatus, FoldDisplayMode displayMode,
         std::vector<std::string> rotation, std::vector<std::string> orientation);
-    std::string GetSecondaryDisplayCapability();
-    std::string GetFoldableDeviceCapability();
-    std::string GetSuperFoldCapability();
+    DMError GetSecondaryDisplayCapability(std::string& capabilitInfo);
+    DMError GetFoldableDeviceCapability(std::string& capabilitInfo);
+    DMError GetSuperFoldCapability(std::string& capabilitInfo);
 
     void OnScreenExtendChange(ScreenId mainScreenId, ScreenId extendScreenId) override;
     void OnSuperFoldStatusChange(ScreenId screenId, SuperFoldStatus superFoldStatus) override;
@@ -395,7 +395,9 @@ public:
     void AddScbClientDeathRecipient(const sptr<IScreenSessionManagerClient>& scbClient, int32_t scbPid);
     void ScbClientDeathCallback(int32_t deathScbPid);
     void ScbStatusRecoveryWhenSwitchUser(std::vector<int32_t> oldScbPids, int32_t newScbPid);
-    void RecoverMultiScreenModeWhenSwitchUser();
+    void RecoverMultiScreenModeWhenSwitchUser(std::vector<int32_t> oldScbPids, int32_t newScbPid);
+    void FlushDisplayNodeWhenSwtichUser(std::vector<int32_t> oldScbPids, int32_t newScbPid,
+        sptr<ScreenSession> screenSession);
     int32_t GetCurrentUserId();
 
     std::shared_ptr<Media::PixelMap> GetScreenCapture(const CaptureOption& captureOption,
@@ -686,6 +688,8 @@ private:
     DMError DoMakeUniqueScreenOld(const std::vector<ScreenId>& allUniqueScreenIds, std::vector<DisplayId>& displayIds,
         bool isCallingByThirdParty);
     bool IsSupportCoordination();
+    void RegisterSettingExtendScreenDpiObserver();
+    void SetExtendScreenDpi();
 
     LowTempMode lowTemp_ {LowTempMode::UNKNOWN};
     std::mutex lowTempMutex_;
