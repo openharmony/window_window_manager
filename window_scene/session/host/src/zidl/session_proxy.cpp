@@ -1478,7 +1478,6 @@ int32_t SessionProxy::TransferExtensionData(const AAFwk::WantParams& wantParams)
         data, reply, option);
     if (sendCode != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_UIEXT, "SendRequest failed, code: %{public}d", sendCode);
-        return IPC_PROXY_ERR;
     }
     int32_t ret = reply.ReadInt32();
     return sendCode;
