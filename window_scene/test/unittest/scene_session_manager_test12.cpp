@@ -45,6 +45,12 @@ public:
     void SetUp() override;
     void TearDown() override;
 
+    // keyboard
+    void ConstructKeyboardCallingWindowTestData(
+        uint64_t cScreenId, int32_t cPid, int32_t kScreenId, WindowType keyboardWindowType, bool isSysKeyboard,
+        uint32_t callingSessionId);
+    bool CheckCallingWindowInfo(const CallingWindowInfo& desiredInfo, const CallingWindowInfo& actualInfo);
+
     static sptr<SceneSessionManager> ssm_;
 private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
@@ -69,6 +75,43 @@ void SceneSessionManagerTest12::SetUp()
 void SceneSessionManagerTest12::TearDown()
 {
     usleep(WAIT_SYNC_IN_NS);
+}
+
+void SceneSessionManagerTest12::ConstructKeyboardCallingWindowTestData(
+    uint64_t cScreenId, int32_t cPid, int32_t kScreenId, WindowType keyboardWindowType, bool isSysKeyboard,
+    uint32_t callingSessionId)
+{
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo callingSessionInfo;
+    callingSessionInfo.abilityName_ = "callingSession";
+    callingSessionInfo.bundleName_ = "callingSession";
+    callingSessionInfo.screenId_ = cScreenId;
+    sptr<SceneSession> callingSession = sptr<SceneSession>::MakeSptr(callingSessionInfo, nullptr);
+    callingSession->SetCallingPid(cPid);
+    sptr<WindowSessionProperty> callingSessionProperties = sptr<WindowSessionProperty>::MakeSptr();
+    callingSessionProperties->SetDisplayId(cScreenId);
+    callingSession->SetSessionProperty(callingSessionProperties);
+
+    SessionInfo keyboardSessionInfo;
+    keyboardSessionInfo.abilityName_ = "keyboardSession";
+    keyboardSessionInfo.bundleName_ = "keyboardSession";
+    sptr<SceneSession> keyboardSession = sptr<SceneSession>::MakeSptr(keyboardSessionInfo, nullptr);
+    KeyboardSession->SetScreenId(kScreenId);
+    sptr<WindowSessionProperty> keyboardProperties = sptr<WindowSessionProperty>::MakeSptr();
+    keyboardProperties->SetWindowType(keyboardWindowType);
+    keyboardProperties->SetIsSystemKeyboard(isSysKeyboard);
+    keyboardProperties->SetCallingSessionId(callingSessionId);
+    keyboardSession->SetSessionProperty(keyboardProperties);
+
+    ssm_->sceneSessionMap_.insert({callingSessionId, callingSession});
+    ssm_->sceneSessionMap_.insert({2, keyboardSession});
+}
+
+bool SceneSessionManagerTest12::CheckCallingWindowInfo(
+    const CallingWindowInfo& desiredInfo, const CallingWindowInfo& actualInfo)
+{
+    return desiredInfo.windowId_ == actualInfo.windowId_ && desiredInfo.callingPid_ == actualInfo.callingPid_ &&
+        desiredInfo.displayId_ == actualInfo.displayId_ && desiredInfo.userId_ == actualInfo.userId_;
 }
 
 namespace {
@@ -1517,6 +1560,51 @@ HWTEST_F(SceneSessionManagerTest12, SetStatusBarAvoidHeight, Function | SmallTes
     WSRect barArea;
     ssm_->GetStatusBarAvoidHeight(barArea);
     ASSERT_EQ(barArea.height_, height);
+}
+
+/**
+ * @tc.name: GetCallingWindowInfo1
+ * @tc.desc: test function : GetCallingWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetCallingWindowInfo1, Function | SmallTest | Level2)
+{
+    ConstructKeyboardCallingWindowTestData(0, 57256, 0, WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, false, 86);
+    // Invalid callingWindowId
+    CallingWindowInfo info = {0, -1, 0, GetUserIdByUid(getuid())}; // windowId_ callingPid_ displayId_ userId_
+    WMError ret = ssm_->GetCallingWindowInfo(info);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+}
+
+/**
+ * @tc.name: GetCallingWindowInfo2
+ * @tc.desc: test function : GetCallingWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetCallingWindowInfo2, Function | SmallTest | Level2)
+{
+    ConstructKeyboardCallingWindowTestData(0, 57256, 0, WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, false, 86);
+    // Invalid userId
+    int32_t userId = GetUserIdByUid(getuid()) + 1;
+    CallingWindowInfo info = {86, -1, 0, userId}; // windowId_ callingPid_ displayId_ userId_
+    WMError ret = ssm_->GetCallingWindowInfo(info);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+}
+
+/**
+ * @tc.name: GetCallingWindowInfo3
+ * @tc.desc: test function : GetCallingWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetCallingWindowInfo3, Function | SmallTest | Level2)
+{
+    ConstructKeyboardCallingWindowTestData(12, 57256, 0, WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, false, 86);
+    int32_t userId = GetUserIdByUid(getuid());
+    CallingWindowInfo info = {86, -1, 0, userId}; // windowId_ callingPid_ displayId_ userId_
+    WMError ret = ssm_->GetCallingWindowInfo(info);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(57256, info.callingPid_);
+    ASSERT_EQ(12, info.displayId_);
 }
 }
 } // namespace Rosen
