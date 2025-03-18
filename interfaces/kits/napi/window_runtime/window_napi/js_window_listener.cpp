@@ -83,8 +83,9 @@ void JsWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason reason,
     TLOGI(WmsLogTag::WMS_LAYOUT, "wh[%{public}u, %{public}u], reason=%{public}u",
         rect.width_, rect.height_, reason);
     // js callback should run in js thread
-    auto jsCallback = [self = weakRef_, rect, env = env_, funcName = __func__] {
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsWindowListener::OnSizeChange");
+    auto jsCallback = [self = weakRef_, rect, reason, env = env_, funcName = __func__] {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsWindowListener::OnSizeChange [%d, %d, %u, %u] reason:%u",
+            rect.posX_, rect.posY_, rect.width_, rect.height_, reason);
         auto thisListener = self.promote();
         if (thisListener == nullptr || env == nullptr) {
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: this listener or env is nullptr", funcName);

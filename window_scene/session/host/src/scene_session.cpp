@@ -3205,6 +3205,10 @@ void SceneSession::OnNextVsyncReceivedWhenDrag()
             return;
         }
         if (session->IsDirtyDragWindow()) {
+            HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
+                "SceneSession::OnNextVsyncReceivedWhenDrag id:%d [%d, %d, %d, %d] reason:%u",
+                session->GetPersistentId(), session->winRect_.posX_, session->winRect_.posY_,
+                session->winRect_.width_, session->winRect_.height_, session->reason_);
             TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s: id:%{public}u, winRect:%{public}s",
                 where, session->GetPersistentId(), session->winRect_.ToString().c_str());
             session->NotifyClientToUpdateRect("OnMoveDragCallback", nullptr);
@@ -3397,7 +3401,8 @@ void SceneSession::OnMoveDragCallback(SizeChangeReason reason)
     WSRect rect = moveDragController_->GetTargetRect(
         MoveDragController::TargetRectCoordinate::RELATED_TO_START_DISPLAY);
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
-        "SceneSession::OnMoveDragCallback [%d, %d, %u, %u]", rect.posX_, rect.posY_, rect.width_, rect.height_);
+        "SceneSession::OnMoveDragCallback id:%d [%d, %d, %d, %d] reason:%u", GetPersistentId(), rect.posX_, rect.posY_,
+        rect.width_, rect.height_, reason);
     if (reason == SizeChangeReason::DRAG || reason == SizeChangeReason::DRAG_END) {
         UpdateWinRectForSystemBar(rect);
     }
@@ -3738,6 +3743,8 @@ void SceneSession::SetSurfaceBoundsWithAnimation(
 
 void SceneSession::SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool needFlush)
 {
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::SetSurfaceBounds id:%d [%d, %d, %d, %d] reason:%u",
+        GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_, reason_);
     TLOGD(WmsLogTag::WMS_LAYOUT, "rect: %{public}s isGlobal: %{public}d needFlush: %{public}d",
         rect.ToString().c_str(), isGlobal, needFlush);
     auto rsTransaction = RSTransactionProxy::GetInstance();
