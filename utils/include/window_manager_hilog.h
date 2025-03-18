@@ -16,8 +16,9 @@
 #ifndef OHOS_WM_INCLUDE_WINDOW_MANAGER_HILOG_H
 #define OHOS_WM_INCLUDE_WINDOW_MANAGER_HILOG_H
 
+#include <cstdint>
 #include "hilog/log.h"
-#include <unordered_map>
+
 namespace OHOS {
 namespace Rosen {
 static constexpr unsigned int HILOG_DOMAIN_WINDOW = 0xD004200;
@@ -37,7 +38,7 @@ static constexpr unsigned int HILOG_DOMAIN_DISPLAY = 0xD004201;
 #define WLOGFW(fmt, ...) WLOGW("%{public}s: " fmt, C_W_FUNC, ##__VA_ARGS__)
 #define WLOGFE(fmt, ...) WLOGE("%{public}s: " fmt, C_W_FUNC, ##__VA_ARGS__)
 
-enum class WmsLogTag {
+enum class WmsLogTag : uint8_t {
     DEFAULT = 0,               // C04200
     DMS,                       // C04201
     WMS_MAIN,                  // C04202
@@ -63,7 +64,31 @@ enum class WmsLogTag {
     END = 256,                 // Last one, do not use
 };
 
-extern const std::unordered_map<WmsLogTag, const char *> DOMAIN_CONTENTS_MAP;
+static const char *DOMAIN_CONTENTS_MAP[] = {
+    "WMS",                   // DEFAULT
+    "DMS",                   // DMS
+    "WMSMain",               // WMS_MAIN
+    "WMSSub",                // WMS_SUB
+    "WMSScb",                // WMS_SCB
+    "WMSDialog",             // WMS_DIALOG
+    "WMSSystem",             // WMS_SYSTEM
+    "WMSFocus",              // WMS_FOCUS
+    "WMSLayout",             // WMS_LAYOUT
+    "WMSImms",               // WMS_IMMS
+    "WMSLife",               // WMS_LIFE
+    "WMSKeyboard",           // WMS_KEYBOARD
+    "WMSEvent",              // WMS_EVENT
+    "WMSUiext",              // WMS_UIEXT
+    "WMSPiP",                // WMS_PIP
+    "WMSRecover",            // WMS_RECOVER
+    "WMSMultiUser",          // WMS_MULTI_USER
+    "WMSToast",              // WMS_TOAST
+    "WMSMultiWindow",        // WMS_MULTI_WINDOW
+    "InputKeyFlow",          // WMS_INPUT_KEY_FLOW
+    "WMSPipeLine",           // WMS_PIPELINE
+    "WMSHierarchy",          // WMS_HIERARCHY
+};
+
 #ifdef IS_RELEASE_VERSION
 #define WMS_FILE_NAME ""
 #else
@@ -78,7 +103,9 @@ extern const std::unordered_map<WmsLogTag, const char *> DOMAIN_CONTENTS_MAP;
 #define PRINT_TLOG(level, tag, ...)                                                                     \
     do {                                                                                                \
         uint32_t hilogDomain = HILOG_DOMAIN_WINDOW + static_cast<uint32_t>(tag);                        \
-        const char *domainContent = DOMAIN_CONTENTS_MAP.count(tag) ? DOMAIN_CONTENTS_MAP.at(tag) : "";  \
+        const char *domainContent =                                                                     \
+            static_cast<size_t>(tag) < sizeof(DOMAIN_CONTENTS_MAP) / sizeof(*DOMAIN_CONTENTS_MAP) ?     \
+                DOMAIN_CONTENTS_MAP[static_cast<uint8_t>(tag)] : "";                                    \
         HILOG_IMPL(LOG_CORE, level, hilogDomain, domainContent, ##__VA_ARGS__);                         \
     } while (0)
 
