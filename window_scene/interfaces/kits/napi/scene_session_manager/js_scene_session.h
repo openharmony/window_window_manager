@@ -211,6 +211,7 @@ private:
     static napi_value SetFrameGravity(napi_env env, napi_callback_info info);
     static napi_value SetUseStartingWindowAboveLocked(napi_env env, napi_callback_info info);
     static napi_value SaveSnapshotSync(napi_env env, napi_callback_info info);
+    static napi_value SetBorderUnoccupied(napi_env env, napi_callback_info info);
     static napi_value SetBehindWindowFilterEnabled(napi_env env, napi_callback_info info);
     static napi_value SetFreezeImmediately(napi_env env, napi_callback_info info);
     static napi_value SendContainerModalEvent(napi_env env, napi_callback_info info);
@@ -288,6 +289,7 @@ private:
     napi_value OnSetFrameGravity(napi_env env, napi_callback_info info);
     napi_value OnSetUseStartingWindowAboveLocked(napi_env env, napi_callback_info info);
     napi_value OnSaveSnapshotSync(napi_env env, napi_callback_info info);
+    napi_value OnSetBorderUnoccupied(napi_env env, napi_callback_info info);
     napi_value OnSetBehindWindowFilterEnabled(napi_env env, napi_callback_info info);
     napi_value OnSetFreezeImmediately(napi_env env, napi_callback_info info);
     napi_value OnMaskSupportEnterWaterfallMode(napi_env env, napi_callback_info info);
