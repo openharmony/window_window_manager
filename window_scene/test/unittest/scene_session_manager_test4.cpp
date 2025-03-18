@@ -1785,6 +1785,7 @@ HWTEST_F(SceneSessionManagerTest4, GetTopFocusableNonAppSession01, Function | Sm
     ssm_->sceneSessionMap_.insert(std::make_pair(1, wallpaper));
     ssm_->sceneSessionMap_.insert(std::make_pair(2, desktop));
     ssm_->sceneSessionMap_.insert(std::make_pair(3, sceneSession));
+    sptr<SceneSession> result = ssm_->GetTopFocusableNonAppSession();
     EXPECT_EQ(result, desktop);
 }
 
