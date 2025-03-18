@@ -84,6 +84,15 @@ public:
     }
 };
 
+class TestWindowVisibilityStateListener : public IWindowInfoChangedListener {
+public:
+    void OnWindowInfoChanged(
+        const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList) override
+    {
+        WLOGI("TestWindowUpdateListener");
+    };
+};
+
 class WindowManagerLiteTest : public testing::Test {
 public:
     static void SetUpTestCase();
