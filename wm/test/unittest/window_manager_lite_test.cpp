@@ -1263,7 +1263,7 @@ HWTEST_F(WindowManagerLiteTest, UnregisterVisibilityStateChangedListener01, Func
     auto& windowManager = WindowManagerLite::GetInstance();
     auto oldWindowManagerAgent = windowManager.pImpl_->windowVisibilityStateListenerAgent_;
     auto oldListeners = windowManager.pImpl_->windowVisibilityStateListeners_;
-    windowManager.pImpl_->windowVisibilityStateListenerAgent_ = sptr<WindowManagerAgent>::MakeSptr();
+    windowManager.pImpl_->windowVisibilityStateListenerAgent_ = sptr<WindowManagerAgentLite>::MakeSptr();
     windowManager.pImpl_->windowVisibilityStateListeners_.clear();
 
     // check nullpter
