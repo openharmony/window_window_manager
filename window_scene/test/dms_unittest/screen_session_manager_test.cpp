@@ -2667,6 +2667,58 @@ HWTEST_F(ScreenSessionManagerTest, CheckAndSendHiSysEvent, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ProxyForFreeze
+ * @tc.desc: ProxyForFreeze
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, ProxyForFreeze, TestSize.Level1)
+{
+    int32_t pid = 1;
+    std::set<int32_t> unfreezedPidList = {1, 2, 3};
+    std::set<DisplayManagerAgentType> pidAgentTypes = {DisplayManagerAgentType::SCREEN_EVENT_LISTENER};
+    ScreenId screenId = 1050;
+    sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession(screenId, ScreenProperty(), 0);
+    ssm_->NotifyUnfreezedAgents(pid, unfreezedPidList, pidAgentTypes, screenSession);
+
+    ssm_->NotifyUnfreezed(unfreezedPidList, screenSession);
+
+    std::set<int32_t> pidList = {1, 2, 3};
+    DMError ret = ssm_->ProxyForFreeze(pidList, true);
+    ASSERT_EQ(ret, DMError::DM_OK);
+
+    ret = ssm_->ProxyForFreeze(pidList, false);
+    ASSERT_EQ(ret, DMError::DM_OK);
+}
+
+/**
+ * @tc.name: GetOrCreateFakeScreenSession
+ * @tc.desc: GetOrCreateFakeScreenSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetOrCreateFakeScreenSession, TestSize.Level1)
+{
+    ScreenId screenId = 1050;
+    sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession(screenId, ScreenProperty(), 0);
+    auto ret = ssm_->GetOrCreateFakeScreenSession(screenSession);
+    ssm_->InitFakeScreenSession(screenSession);
+    ASSERT_NE(ret, nullptr);
+}
+
+/**
+ * @tc.name: SetVirtualScreenSecurityExemption
+ * @tc.desc: SetVirtualScreenSecurityExemption
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetVirtualScreenSecurityExemption, TestSize.Level1)
+{
+    ScreenId screenId = 0;
+    uint32_t pid = 1111;
+    std::vector<uint64_t> windowList = {11, 22, 33};
+    auto ret = ssm_->SetVirtualScreenSecurityExemption(screenId, pid, windowList);
+    ASSERT_NE(ret, DMError::DM_ERROR_UNKNOWN);
+}
+
+/**
  * @tc.name: NotifyFoldToExpandCompletion
  * @tc.desc: NotifyFoldToExpandCompletion
  * @tc.type: FUNC
