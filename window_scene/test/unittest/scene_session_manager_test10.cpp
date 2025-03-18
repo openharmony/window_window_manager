@@ -1341,7 +1341,7 @@ HWTEST_F(SceneSessionManagerTest10, FilterForListWindowInfo08, Function | SmallT
  * @tc.desc: SceneSesionManager test NotifyNextAvoidRectInfo
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest11, NotifyNextAvoidRectInfo, Function | SmallTest | Level1)
+HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo, Function | SmallTest | Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     WSRect portraitRect = { 0, 0, 1260, 123 };
@@ -1360,7 +1360,7 @@ HWTEST_F(SceneSessionManagerTest11, NotifyNextAvoidRectInfo, Function | SmallTes
  * @tc.desc: SceneSesionManager test NotifyNextAvoidRectInfo_01
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest11, NotifyNextAvoidRectInfo_01, Function | SmallTest | Level1)
+HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_01, Function | SmallTest | Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     WSRect portraitRect = { 0, 0, 1260, 123 };
@@ -1394,7 +1394,7 @@ HWTEST_F(SceneSessionManagerTest11, NotifyNextAvoidRectInfo_01, Function | Small
  * @tc.desc: SceneSesionManager test NotifyNextAvoidRectInfo_statusBar
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest11, NotifyNextAvoidRectInfo_statusBar, Function | SmallTest | Level1)
+HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_statusBar, Function | SmallTest | Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     WSRect portraitRect = { 0, 0, 1260, 123 };
@@ -1433,7 +1433,7 @@ HWTEST_F(SceneSessionManagerTest11, NotifyNextAvoidRectInfo_statusBar, Function 
  * @tc.desc: SceneSesionManager test NotifyNextAvoidRectInfo_statusBar_01
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest11, NotifyNextAvoidRectInfo_statusBar_01, Function | SmallTest | Level1)
+HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_statusBar_01, Function | SmallTest | Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     WSRect portraitRect = { 0, 0, 1260, 123 };
@@ -1472,7 +1472,7 @@ HWTEST_F(SceneSessionManagerTest11, NotifyNextAvoidRectInfo_statusBar_01, Functi
  * @tc.desc: SceneSesionManager test NotifyNextAvoidRectInfo_keyboard
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest11, NotifyNextAvoidRectInfo_keyboard, Function | SmallTest | Level1)
+HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_keyboard, Function | SmallTest | Level1)
 {
     SessionInfo info;
     info.abilityName_ = "NotifyNextAvoidRectInfo_keyboard";
@@ -1501,7 +1501,7 @@ HWTEST_F(SceneSessionManagerTest11, NotifyNextAvoidRectInfo_keyboard, Function |
  * @tc.desc: SceneSesionManager test NotifyNextAvoidRectInfo_keyboard_01
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest11, NotifyNextAvoidRectInfo_keyboard_01, Function | SmallTest | Level1)
+HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_keyboard_01, Function | SmallTest | Level1)
 {
     SessionInfo info;
     info.abilityName_ = "NotifyNextAvoidRectInfo_keyboard_01";
@@ -1526,6 +1526,8 @@ HWTEST_F(SceneSessionManagerTest11, NotifyNextAvoidRectInfo_keyboard_01, Functio
     keyboardSession->property_->SetPersistentId(2);
     ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
     ssm_->sceneSessionMap_.insert({ keyboardSession->GetPersistentId(), keyboardSession });
+    auto uiType = ssm_->systemConfig_.windowUIType_;
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     AvoidArea avoidArea;
     sceneSession->GetKeyboardAvoidAreaByRotation(0, { 0, 0, 1260, 2720 }, avoidArea);
     Rect rect = { 0, 1700, 1260, 1020 };
@@ -1538,6 +1540,7 @@ HWTEST_F(SceneSessionManagerTest11, NotifyNextAvoidRectInfo_keyboard_01, Functio
     avoidArea.bottomRect_ = rect;
     sceneSession->GetKeyboardAvoidAreaByRotation(180, { 0, 0, 1260, 2720 }, avoidArea);
     ASSERT_EQ(avoidArea.bottomRect_, rect);
+    ssm_->systemConfig_.windowUIType_ = uiType;
     ssm_->sceneSessionMap_.clear();
 }
 
@@ -1546,7 +1549,7 @@ HWTEST_F(SceneSessionManagerTest11, NotifyNextAvoidRectInfo_keyboard_01, Functio
  * @tc.desc: SceneSesionManager test NotifyNextAvoidRectInfo_cutOut
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest11, NotifyNextAvoidRectInfo_cutOut, Function | SmallTest | Level1)
+HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_cutOut, Function | SmallTest | Level1)
 {
     SessionInfo info;
     info.abilityName_ = "NotifyNextAvoidRectInfo_cutOut";
@@ -1581,7 +1584,7 @@ HWTEST_F(SceneSessionManagerTest11, NotifyNextAvoidRectInfo_cutOut, Function | S
  * @tc.desc: SceneSesionManager test NotifyNextAvoidRectInfo_AIBar
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest11, NotifyNextAvoidRectInfo_AIBar, Function | SmallTest | Level1)
+HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_AIBar, Function | SmallTest | Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     WSRect portraitRect = { 409, 2629, 442, 91 };
