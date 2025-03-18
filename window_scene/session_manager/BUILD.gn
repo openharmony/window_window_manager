@@ -68,6 +68,8 @@ ohos_shared_library("scene_session_manager") {
     "src/ffrt_queue_helper.cpp",
     "src/hidump_controller.cpp",
     "src/publish/scb_dump_subscriber.cpp",
+    "src/rdb/starting_window_rdb_manager.cpp",
+    "src/rdb/wms_rdb_open_callback.cpp",
     "src/scb_session_handler.cpp",
     "src/scene_input_manager.cpp",
     "src/scene_session_converter.cpp",

@@ -439,6 +439,12 @@ void MoveDragController::UpdateGravityWhenDrag(const std::shared_ptr<MMI::Pointe
     }
 }
 
+bool MoveDragController::isSupportWindowDragCrossDisplay()
+{
+    return !WindowHelper::IsSystemWindow(winType_) || winType_ == WindowType::WINDOW_TYPE_FLOAT ||
+            winType_ == WindowType::WINDOW_TYPE_SCREENSHOT;
+}
+
 /** @note @window.drag */
 void MoveDragController::CalcDragTargetRect(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
                                             SizeChangeReason reason)
@@ -449,7 +455,7 @@ void MoveDragController::CalcDragTargetRect(const std::shared_ptr<MMI::PointerEv
         return;
     }
     std::pair<int32_t, int32_t> trans = CalcUnifiedTranslate(pointerEvent);
-    if (!WindowHelper::IsSystemWindow(winType_) ||
+    if (isSupportWindowDragCrossDisplay() ||
         static_cast<uint64_t>(pointerEvent->GetTargetDisplayId()) == moveDragStartDisplayId_) {
         moveDragProperty_.targetRect_ =
             MathHelper::GreatNotEqual(aspectRatio_, NEAR_ZERO) ?
@@ -897,7 +903,7 @@ bool MoveDragController::CalcMoveTargetRect(const std::shared_ptr<MMI::PointerEv
         InitializeMoveDragPropertyNotValid(pointerEvent, originalRect);
         return false;
     };
-    if (!WindowHelper::IsSystemWindow(winType_) ||
+    if (isSupportWindowDragCrossDisplay() ||
         static_cast<uint64_t>(pointerEvent->GetTargetDisplayId()) == moveDragStartDisplayId_) {
         std::pair<int32_t, int32_t> trans = CalcUnifiedTranslate(pointerEvent);
         moveDragProperty_.targetRect_ = {

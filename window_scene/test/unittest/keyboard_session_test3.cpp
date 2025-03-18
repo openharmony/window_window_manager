@@ -15,6 +15,7 @@
 
 #include "session/host/include/keyboard_session.h"
 #include <gtest/gtest.h>
+#include <ui/rs_surface_node.h>
 
 #include "interfaces/include/ws_common.h"
 #include "mock/mock_session_stage.h"
@@ -28,7 +29,9 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
-
+namespace {
+constexpr uint32_t SLEEP_TIME_US = 100000; // 100ms
+}
 class KeyboardSessionTest3 : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -325,6 +328,38 @@ HWTEST_F(KeyboardSessionTest3, OnCallingSessionUpdated02, Function | SmallTest |
     ASSERT_EQ(false, keyboardSession->keyboardAvoidAreaActive_);
     keyboardSession->OnCallingSessionUpdated();
     ASSERT_EQ(keyboardSession->state_, SessionState::STATE_DISCONNECT);
+}
+
+/**
+ * @tc.name: SetSkipSelfWhenShowOnVirtualScreen
+ * @tc.desc: test function : SetSkipSelfWhenShowOnVirtualScreen
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest3, SetSkipSelfWhenShowOnVirtualScreen, Function | SmallTest | Level1)
+{
+    auto keyboardSession = GetKeyboardSession("SetSkipSelfWhenShowOnVirtualScreen",
+        "SetSkipSelfWhenShowOnVirtualScreen");
+    bool skipResult = false;
+    auto callFunc = [&skipResult](uint64_t surfaceNodeId, bool isSkip) {
+        skipResult = isSkip;
+    };
+    keyboardSession->SetSkipSelfWhenShowOnVirtualScreen(true);
+    usleep(SLEEP_TIME_US);
+    ASSERT_EQ(skipResult, false);
+
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    surfaceNode->id_ = 1;
+    keyboardSession->surfaceNode_ = surfaceNode;
+
+    keyboardSession->SetSkipSelfWhenShowOnVirtualScreen(true);
+    usleep(SLEEP_TIME_US);
+    ASSERT_EQ(skipResult, false);
+
+    keyboardSession->specificCallback_->onSetSkipSelfWhenShowOnVirtualScreen_ = callFunc;
+    keyboardSession->SetSkipSelfWhenShowOnVirtualScreen(true);
+    usleep(SLEEP_TIME_US);
+    ASSERT_EQ(skipResult, true);
 }
 }  // namespace
 }  // namespace Rosen

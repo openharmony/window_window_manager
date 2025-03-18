@@ -17,6 +17,8 @@
 
 #include "ability_start_setting.h"
 #include <ipc_types.h>
+#include <transaction/rs_transaction.h>
+#include <ui/rs_canvas_node.h>
 #include <ui/rs_surface_node.h>
 #include "want.h"
 #include "pointer_event.h"
@@ -136,6 +138,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleGetAvoidAreaByType(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_ALL_AVOID_AREAS):
             return HandleGetAllAvoidAreas(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_TARGET_ORIENTATION_CONFIG_INFO):
+            return HandleGetTargetOrientationConfigInfo(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_ASPECT_RATIO):
             return HandleSetAspectRatio(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_WINDOW_ANIMATION_FLAG):
@@ -252,12 +256,18 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyWindowAttachStateListenerRegistered(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_FOLLOW_PARENT_LAYOUT_ENABLED):
             return HandleSetFollowParentWindowLayoutEnabled(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_KEY_FRAME_ANIMATE_END):
+            return HandleKeyFrameAnimateEnd(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_KEY_FRAME_CLONE_NODE):
+            return HandleUpdateKeyFrameCloneNode(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_KEYBOARD_DID_SHOW_REGISTERED):
             return HandleNotifyKeyboardDidShowRegistered(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_KEYBOARD_DID_HIDE_REGISTERED):
             return HandleNotifyKeyboardDidHideRegistered(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_FLAG):
             return HandleUpdateFlag(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_ROTATION_CHANGE):
+            return HandleUpdateRotationChangeListenerRegistered(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -960,6 +970,32 @@ int SessionStub::HandleGetAllAvoidAreas(MessageParcel& data, MessageParcel& repl
     return ERR_NONE;
 }
 
+int SessionStub::HandleGetTargetOrientationConfigInfo(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_ROTATION, "in");
+    Orientation targetOrientation = static_cast<Orientation>(data.ReadUint32());
+    std::map<Rosen::WindowType, Rosen::SystemBarProperty> properties;
+    uint32_t size = data.ReadUint32();
+    for (uint32_t i = 0; i < size; i++) {
+        uint32_t type = data.ReadUint32();
+        if (type < static_cast<uint32_t>(WindowType::APP_WINDOW_BASE) ||
+            type > static_cast<uint32_t>(WindowType::WINDOW_TYPE_UI_EXTENSION)) {
+            TLOGD(WmsLogTag::WMS_ROTATION, "read type failed");
+            return ERR_INVALID_DATA;
+        }
+        bool enable = data.ReadBool();
+        uint32_t backgroundColor = data.ReadUint32();
+        uint32_t contentColor = data.ReadUint32();
+        bool enableAnimation = data.ReadBool();
+        SystemBarSettingFlag settingFlag = static_cast<SystemBarSettingFlag>(data.ReadUint32());
+        SystemBarProperty property = { enable, backgroundColor, contentColor, enableAnimation, settingFlag };
+        properties[static_cast<WindowType>(type)] = property;
+    }
+    WSError errCode = GetTargetOrientationConfigInfo(targetOrientation, properties);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
 /** @note @window.layout */
 int SessionStub::HandleSetAspectRatio(MessageParcel& data, MessageParcel& reply)
 {
@@ -1521,6 +1557,38 @@ int SessionStub::HandleSetFollowParentWindowLayoutEnabled(MessageParcel& data, M
     return ERR_NONE;
 }
 
+int SessionStub::HandleKeyFrameAnimateEnd(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "In");
+    const WSError errCode = KeyFrameAnimateEnd();
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SessionStub::HandleUpdateKeyFrameCloneNode(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "In");
+    auto rsCanvasNode = RSCanvasNode::Unmarshalling(data);
+    if (rsCanvasNode == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "fail get rsCanvasNode");
+        return ERR_INVALID_DATA;
+    }
+    std::shared_ptr<RSTransaction> tranaction(data.ReadParcelable<RSTransaction>());
+    if (!tranaction) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "fail get tranaction");
+        return ERR_INVALID_DATA;
+    }
+    const WSError errCode = UpdateKeyFrameCloneNode(rsCanvasNode, tranaction);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
 int SessionStub::HandleStartMovingWithCoordinate(MessageParcel& data, MessageParcel& reply)
 {
     int32_t offsetX;
@@ -1632,6 +1700,24 @@ int SessionStub::HandleUpdateFlag(MessageParcel& data, MessageParcel& reply)
     }
     TLOGD(WmsLogTag::WMS_MAIN, "specifiedFlag: %{public}s", flag.c_str());
     UpdateFlag(flag);
+    return ERR_NONE;
+}
+
+int SessionStub::HandleUpdateRotationChangeListenerRegistered(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t persistentId = 0;
+    if (!data.ReadInt32(persistentId)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "read persistentId failed");
+        return ERR_INVALID_DATA;
+    }
+    bool isRegister = false;
+    if (!data.ReadBool(isRegister)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "read isRegister failed");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = UpdateRotationChangeRegistered(persistentId, isRegister);
+    TLOGD(WmsLogTag::WMS_ROTATION, "persistentId: %{public}d, register: %{public}d", persistentId, isRegister);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

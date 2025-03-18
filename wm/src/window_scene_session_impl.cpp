@@ -20,6 +20,7 @@
 #include <ability_manager_client.h>
 #include <parameters.h>
 #include <transaction/rs_transaction.h>
+#include <hitrace_meter.h>
 
 #include <application_context.h>
 #include "color_parser.h"
@@ -1906,11 +1907,8 @@ void WindowSceneSessionImpl::LimitWindowSize(uint32_t& width, uint32_t& height)
     UpdateFloatingWindowSizeBySizeLimits(width, height);
 }
 
-/** @note @window.layout */
-WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height, const RectAnimationConfig& rectAnimationConfig)
+WMError WindowSceneSessionImpl::CheckWindowRect(uint32_t& width, uint32_t& height)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d resize %{public}u %{public}u",
-        property_->GetPersistentId(), width, height);
     if (width == 0 || height == 0) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "width or height should greater than 0!");
         return WMError::WM_ERROR_INVALID_PARAM;
@@ -1922,13 +1920,28 @@ WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height, const Re
         TLOGW(WmsLogTag::WMS_LAYOUT, "Unsupported operation for pip window");
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
-    if (GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING) {
+    if (GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING && !IsFullScreenPcAppInPadMode()) {
         TLOGW(WmsLogTag::WMS_LAYOUT, "Fullscreen window could not resize, winId: %{public}u", GetWindowId());
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
+    if (IsFullScreenPcAppInPadMode() && IsFullScreenEnable()) {
+        NotifyClientWindowSize();
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
 
     LimitWindowSize(width, height);
+    return WMError::WM_OK;
+}
 
+/** @note @window.layout */
+WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height, const RectAnimationConfig& rectAnimationConfig)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d resize %{public}u %{public}u",
+        property_->GetPersistentId(), width, height);
+
+    if (CheckWindowRect(width, height) != WMError::WM_OK) {
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
     const auto& windowRect = GetRect();
     const auto& requestRect = GetRequestRect();
 
@@ -1972,7 +1985,7 @@ WMError WindowSceneSessionImpl::ResizeAsync(uint32_t width, uint32_t height,
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
-    if (GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING) {
+    if (GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING && !property_->GetIsPcAppInPad()) {
         TLOGW(WmsLogTag::WMS_LAYOUT, "window should not resize, winId:%{public}u, mode:%{public}u",
             GetWindowId(), GetWindowMode());
         return WMError::WM_ERROR_INVALID_OP_IN_CUR_STATUS;
@@ -1992,6 +2005,68 @@ WMError WindowSceneSessionImpl::ResizeAsync(uint32_t width, uint32_t height,
         }
     }
     return static_cast<WMError>(ret);
+}
+
+
+WMError WindowSceneSessionImpl::GetTargetOrientationConfigInfo(Orientation targetOrientation,
+    const std::map<WindowType, SystemBarProperty>& properties, Ace::ViewportConfig& config,
+    std::map<AvoidAreaType, AvoidArea>& avoidAreas)
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
+    sptr<DisplayInfo> displayInfo = display ? display->GetDisplayInfo() : nullptr;
+    auto ret = hostSession->GetTargetOrientationConfigInfo(targetOrientation, properties);
+    getTargetInfoCallback_->ResetGetTargetRotationLock();
+    OrientationInfo info = getTargetInfoCallback_->GetTargetOrientationResult(WINDOW_LAYOUT_TIMEOUT);
+    avoidAreas = info.avoidAreas;
+    config = FillTargetOrientationConfig(info, displayInfo, GetDisplayId());
+    TLOGI(WmsLogTag::WMS_ROTATION,
+        "win:%{public}u, rotate:%{public}d, rect:%{public}s, avoidAreas:%{public}s,%{public}s,%{public}s,%{public}s",
+        GetWindowId(), info.rotation, info.rect.ToString().c_str(),
+        avoidAreas[AvoidAreaType::TYPE_SYSTEM].ToString().c_str(),
+        avoidAreas[AvoidAreaType::TYPE_CUTOUT].ToString().c_str(),
+        avoidAreas[AvoidAreaType::TYPE_KEYBOARD].ToString().c_str(),
+        avoidAreas[AvoidAreaType::TYPE_NAVIGATION_INDICATOR].ToString().c_str());
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
+        "GetTargetOrientationConfigInfo: targetOrientation:%u, rotation:%d, rect:%s",
+        static_cast<uint32_t>(targetOrientation), info.rotation, info.rect.ToString().c_str());
+
+    return static_cast<WMError>(ret);
+}
+
+Ace::ViewportConfig WindowSceneSessionImpl::FillTargetOrientationConfig(
+    const OrientationInfo& info, const sptr<DisplayInfo>& displayInfo, uint64_t displayId)
+{
+    Ace::ViewportConfig config;
+    Rect targetRect = info.rect;
+    int32_t targetRotation = info.rotation;
+    auto deviceRotation = static_cast<uint32_t>(displayInfo->GetDefaultDeviceRotationOffset());
+    uint32_t transformHint = (targetRotation + deviceRotation) % FULL_CIRCLE_DEGREE;
+    float density = GetVirtualPixelRatio(displayInfo);
+    int32_t orientation = targetRotation / ONE_FOURTH_FULL_CIRCLE_DEGREE;
+    virtualPixelRatio_ = density;
+    config.SetSize(targetRect.width_, targetRect.height_);
+    config.SetPosition(targetRect.posX_, targetRect.posY_);
+    config.SetDensity(density);
+    config.SetOrientation(orientation);
+    config.SetTransformHint(transformHint);
+    config.SetDisplayId(displayId);
+    return config;
+}
+
+WSError WindowSceneSessionImpl::NotifyTargetRotationInfo(OrientationInfo& info)
+{
+    WSError ret = WSError::WS_OK;
+    if (getTargetInfoCallback_) {
+        ret = getTargetInfoCallback_->OnUpdateTargetOrientationInfo(info);
+    }
+    return ret;
 }
 
 WMError WindowSceneSessionImpl::SetAspectRatio(float ratio)
@@ -2371,9 +2446,13 @@ void WindowSceneSessionImpl::HookDecorButtonStyleInCompatibleMode(uint32_t color
     if (!property_->GetCompatibleModeInPc()) {
         return;
     }
+    // alpha Color Channel
     auto alpha = (color >> 24) & 0xFF;
+    // R Color Channel
     auto red = (color >> 16) & 0xFF;
+    // G Color Channel
     auto green = (color >> 8) & 0xFF;
+    // B Color Channel
     auto blue = color & 0xFF;
     // calculate luminance, Identify whether a color is more black or more white.
     double luminance = 0.299 * red + 0.587 * green + 0.114 * blue;
@@ -2698,7 +2777,7 @@ WMError WindowSceneSessionImpl::MaximizeFloating()
         WindowMode::WINDOW_MODE_FULLSCREEN)) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() && property_->GetCompatibleModeInPc()) {
+    if (property_->GetCompatibleModeInPc()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (GetGlobalMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
@@ -5530,6 +5609,34 @@ uint32_t WindowSceneSessionImpl::GetApiCompatibleVersion() const
         version = context_->GetApplicationInfo()->apiCompatibleVersion % API_VERSION_MOD;
     }
     return version;
+}
+
+bool WindowSceneSessionImpl::IsFullScreenEnable() const
+{
+    if (!WindowHelper::IsWindowModeSupported(property_->GetWindowModeSupportType(),
+        WindowMode::WINDOW_MODE_FULLSCREEN)) {
+        return false;
+    }
+    const auto& sizeLimits = property_->GetWindowLimits();
+    int32_t displayWidth = 0;
+    int32_t displayHeight = 0;
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
+    if (display != nullptr) {
+        displayWidth = display->GetWidth();
+        displayHeight = display->GetHeight();
+    } else {
+        auto defaultDisplayInfo = DisplayManager::GetInstance().GetDefaultDisplay();
+        if (defaultDisplayInfo != nullptr) {
+            displayWidth = defaultDisplayInfo->GetWidth();
+            displayHeight = defaultDisplayInfo->GetHeight();
+        } else {
+            return false;
+        }
+    }
+    if (property_->GetDragEnabled() && (sizeLimits.maxWidth_ < displayWidth || sizeLimits.maxHeight_ < displayHeight)) {
+        return false;
+    }
+    return true;
 }
 } // namespace Rosen
 } // namespace OHOS

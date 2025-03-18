@@ -63,6 +63,8 @@ public:
     AvoidArea GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect = WSRect::EMPTY_RECT,
         int32_t apiVersion = API_VERSION_INVALID) override;
     WSError GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoidAreas) override;
+    WSError GetTargetOrientationConfigInfo(Orientation targetOrientation,
+        const std::map<Rosen::WindowType, Rosen::SystemBarProperty>& properties) override;
     WSError RequestSessionBack(bool needMoveToBackground) override;
     WSError MarkProcessed(int32_t eventId) override;
     WSError SetGlobalMaximizeMode(MaximizeMode mode) override;
@@ -117,7 +119,7 @@ public:
     WMError SetSystemWindowEnableDrag(bool enableDrag) override;
     void NotifyExtensionDetachToDisplay() override;
     WSError RequestFocus(bool isFocused) override;
-    
+
     /*
      * Gesture Back
      */
@@ -162,7 +164,14 @@ public:
      * Window layout
      */
     WSError SetFollowParentWindowLayoutEnabled(bool isFollow) override;
+    WSError KeyFrameAnimateEnd() override;
+    WSError UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode,
+        std::shared_ptr<RSTransaction>& rsTransaction) override;
 
+    /**
+     * window rotation
+     */
+    WSError UpdateRotationChangeRegistered(int32_t persistentId, bool isRegister) override;
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;
 };

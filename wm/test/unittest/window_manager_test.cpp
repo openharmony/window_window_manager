@@ -1548,6 +1548,35 @@ HWTEST_F(WindowManagerTest, EffectiveDragResizeType, Function | SmallTest | Leve
 }
 
 /**
+ * @tc.name: SetAppKeyFramePolicy01
+ * @tc.desc: check SetAppKeyFramePolicy enable
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, SetAppKeyFramePolicy01, Function | SmallTest | Level2)
+{
+    const std::string bundleName = "test";
+    KeyFramePolicy keyFramePolicy;
+    keyFramePolicy.dragResizeType_ = DragResizeType::RESIZE_KEY_FRAME;
+    keyFramePolicy.animationDelay_ = 200;
+    auto ret = WindowManager::GetInstance().SetAppKeyFramePolicy(bundleName, keyFramePolicy);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: SetAppKeyFramePolicy02
+ * @tc.desc: check SetAppKeyFramePolicy disable
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, SetAppKeyFramePolicy02, Function | SmallTest | Level2)
+{
+    const std::string bundleName = "test";
+    KeyFramePolicy keyFramePolicy;
+    keyFramePolicy.dragResizeType_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    auto ret = WindowManager::GetInstance().SetAppKeyFramePolicy(bundleName, keyFramePolicy);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
  * @tc.name: NotifyWMSConnected
  * @tc.desc: check NotifyWMSConnected
  * @tc.type: FUNC

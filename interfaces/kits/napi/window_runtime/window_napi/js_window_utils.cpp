@@ -674,6 +674,17 @@ napi_value CreateJsSystemBarRegionTintArrayObject(napi_env env, const SystemBarR
     return objValue;
 }
 
+napi_value CreateRotationChangeInfoObject(napi_env env, const RotationChangeInfo& info)
+{
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+    napi_set_named_property(env, objValue, "type", CreateJsValue(env, static_cast<uint32_t>(info.type)));
+    napi_set_named_property(env, objValue, "orientation", CreateJsValue(env, info.orientation));
+    napi_set_named_property(env, objValue, "displayId", CreateJsValue(env, static_cast<uint32_t>(info.displayId)));
+    napi_set_named_property(env, objValue, "displayRect", GetRectAndConvertToJsValue(env, info.displayRect));
+    return objValue;
+}
+
 bool GetSystemBarStatus(napi_env env, napi_callback_info info,
     std::unordered_map<WindowType, SystemBarProperty>& systemBarProperties,
     std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarpropertyFlags)
@@ -1195,6 +1206,61 @@ bool ParseRectAnimationConfig(napi_env env, napi_value jsObject, RectAnimationCo
     return true;
 }
 
+bool ConvertRectFromJsValue(napi_env env, napi_value jsObject, Rect& displayRect)
+{
+    if (!ParseJsValue(jsObject, env, "left", displayRect.posX_)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "[NAPI]Failed to convert parameter to posX_");
+        return false;
+    }
+
+    if (!ParseJsValue(jsObject, env, "top", displayRect.posY_)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "[NAPI]Failed to convert parameter to posY_");
+        return false;
+    }
+
+    if (!ParseJsValue(jsObject, env, "width", displayRect.width_)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "[NAPI]Failed to convert parameter to width_");
+        return false;
+    }
+
+    if (!ParseJsValue(jsObject, env, "height", displayRect.height_)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "[NAPI]Failed to convert parameter to height_");
+        return false;
+    }
+    return true;
+}
+
+bool GetRotationResultFromJs(napi_env env, napi_value jsObject, RotationChangeResult& rotationChangeResult)
+{
+    napi_value jsRectType = nullptr;
+    napi_value jsWindowRect = nullptr;
+    napi_get_named_property(env, jsObject, "rectType", &jsRectType);
+    napi_get_named_property(env, jsObject, "windowRect", &jsWindowRect);
+    if (GetType(env, jsRectType) != napi_undefined) {
+        uint32_t rectType;
+        if (!ConvertFromJsValue(env, jsRectType, rectType)) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "[NAPI]Failed to convert parameter to rectType");
+            return false;
+        }
+        rotationChangeResult.rectType = static_cast<RectType>(rectType);
+    } else {
+        TLOGE(WmsLogTag::WMS_ROTATION, "[NAPI]Failed to get object rectType");
+        return false;
+    }
+    if (GetType(env, jsWindowRect) != napi_undefined) {
+        Rect windowRect;
+        if (!ConvertRectFromJsValue(env, jsWindowRect, windowRect)) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "[NAPI]Failed to convert parameter to windowRect");
+            return false;
+        }
+        rotationChangeResult.windowRect = windowRect;
+    } else {
+        TLOGE(WmsLogTag::WMS_ROTATION, "[NAPI]Failed to get object windowRect");
+        return false;
+    }
+    return true;
+}
+
 napi_value ExtensionWindowAttributeInit(napi_env env)
 {
     if (env == nullptr) {
@@ -1263,6 +1329,30 @@ napi_value ModalityTypeInit(napi_env env)
         CreateJsValue(env, ApiModalityType::WINDOW_MODALITY));
     napi_set_named_property(env, objValue, "APPLICATION_MODALITY",
         CreateJsValue(env, ApiModalityType::APPLICATION_MODALITY));
+    return objValue;
+}
+
+napi_value RotationChangeTypeInit(napi_env env)
+{
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+    napi_set_named_property(env, objValue, "WINDOW_WILL_ROTATE",
+        CreateJsValue(env, static_cast<uint32_t>(RotationChangeType::WINDOW_WILL_ROTATE)));
+    napi_set_named_property(env, objValue, "WINDOW_DID_ROTATE",
+        CreateJsValue(env, static_cast<uint32_t>(RotationChangeType::WINDOW_DID_ROTATE)));
+    return objValue;
+}
+
+napi_value RectTypeInit(napi_env env)
+{
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+    napi_set_named_property(env, objValue, "RELATIVE_TO_SCREEN",
+        CreateJsValue(env, static_cast<uint32_t>(RectType::RELATIVE_TO_SCREEN)));
+    napi_set_named_property(env, objValue, "RELATIVE_TO_PARENT_WINDOW",
+        CreateJsValue(env, static_cast<uint32_t>(RectType::RELATIVE_TO_PARENT_WINDOW)));
     return objValue;
 }
 
