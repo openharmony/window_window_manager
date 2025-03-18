@@ -162,7 +162,7 @@ HWTEST_F(ExtensionSessionTest, TransferExtensionData, Function | SmallTest | Lev
     extensionSession_->RegisterExtensionSessionEventCallback(extSessionEventCallback_);
     EXPECT_CALL(mockTransferExtensionDataFunc, Call(_)).Times(0);
     result = extensionSession_->TransferExtensionData(wantParams);
-    ASSERT_EQ(result, WERR_NONE);
+    ASSERT_EQ(result, ERR_NONE);
 
     extSessionEventCallback_ = nullptr;
     extensionSession_->RegisterExtensionSessionEventCallback(extSessionEventCallback_);
