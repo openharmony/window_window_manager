@@ -767,9 +767,11 @@ void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenE
 
 void ScreenSessionManager::NotifyScreenModeChange(ScreenId disconnectedScreenId)
 {
+    TLOGI(WmsLogTag::DMS, "NotifyScreenModeChange start");
     auto task = [=] {
         auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::SCREEN_MODE_CHANGE_EVENT_LISTENER);
         if (agents.empty()) {
+            TLOGE(WmsLogTag::DMS, "NotifyScreenModeChange agent is null");
             return;
         }
         std::vector<sptr<ScreenInfo>> screenInfos;
