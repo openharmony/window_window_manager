@@ -916,6 +916,22 @@ HWTEST_F(WindowAdapterTest, MinimizeByWindowId, Function | SmallTest | Level2)
     auto ret = windowAdapter.InitWMSProxy();
     ASSERT_EQ(ret, true);
 }
+
+/**
+ * @tc.name: ListWindowInfo01
+ * @tc.desc: WindowAdapter/ListWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, ListWindowInfo01, Function | SmallTest | Level2)
+{
+    WindowAdapter windowAdapter;
+    WindowInfoOption windowInfoOption;
+    std::vector<sptr<WindowInfo>> infos;
+    auto err = windowAdapter.ListWindowInfo(windowIds);
+    ASSERT_EQ(WMError::WM_OK, err);
+    auto ret = windowAdapter.InitWMSProxy();
+    ASSERT_EQ(ret, true);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
