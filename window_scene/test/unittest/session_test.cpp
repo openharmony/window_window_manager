@@ -1691,7 +1691,7 @@ HWTEST_F(WindowSessionTest, NotifyHighlightChange, Function | SmallTest | Level2
  * @tc.desc: TransformRelativeRectToGlobalRect Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest4, TransformRelativeRectToGlobalRect, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionTest, TransformRelativeRectToGlobalRect, Function | SmallTest | Level2)
 {
     SessionInfo sessionInfo;
     sessionInfo.isSystem_ = false;
