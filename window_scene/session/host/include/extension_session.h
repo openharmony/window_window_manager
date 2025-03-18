@@ -99,7 +99,7 @@ public:
 
     WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
     WSError TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want) override;
-    WSError TransferExtensionData(const AAFwk::WantParams& wantParams) override;
+    int32_t TransferExtensionData(const AAFwk::WantParams& wantParams) override;
     WSError TransferComponentData(const AAFwk::WantParams& wantParams);
     WSErrorCode TransferComponentDataSync(const AAFwk::WantParams& wantParams,
                                           AAFwk::WantParams& reWantParams);
