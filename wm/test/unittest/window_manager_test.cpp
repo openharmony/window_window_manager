@@ -1686,7 +1686,7 @@ HWTEST_F(WindowManagerTest, ProcessRegisterWindowInfoChangeCallback01, Function 
 {
     sptr<IWindowInfoChangedListener> listener = sptr<IWindowInfoChangedListener>::MakeSptr();
     WindowInfoKey observedInfo = WindowInfoKey::VISIBILITY_STATE;
-    ret = WindowManager::GetInstance().ProcessRegisterWindowInfoChangeCallback(observedInfo, listener);
+    auto ret = WindowManager::GetInstance().ProcessRegisterWindowInfoChangeCallback(observedInfo, listener);
     ASSERT_EQ(WMError::WM_OK, ret);
     ret = WindowManager::GetInstance().ProcessRegisterWindowInfoChangeCallback(observedInfo, nullptr);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
@@ -1704,7 +1704,7 @@ HWTEST_F(WindowManagerTest, ProcessUnregisterWindowInfoChangeCallback01, Functio
 {
     sptr<IWindowInfoChangedListener> listener = sptr<IWindowInfoChangedListener>::MakeSptr();
     WindowInfoKey observedInfo = WindowInfoKey::VISIBILITY_STATE;
-    ret = WindowManager::GetInstance().ProcessUnregisterWindowInfoChangeCallback(observedInfo, listener);
+    auto ret = WindowManager::GetInstance().ProcessUnregisterWindowInfoChangeCallback(observedInfo, listener);
     ASSERT_EQ(WMError::WM_OK, ret);
     ret = WindowManager::GetInstance().ProcessUnregisterWindowInfoChangeCallback(observedInfo, nullptr);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
@@ -1722,13 +1722,15 @@ HWTEST_F(WindowManagerTest, RegisterWindowInfoChangeCallback01, Function | Small
 {
     sptr<IWindowInfoChangedListener> listener = sptr<IWindowInfoChangedListener>::MakeSptr();
     auto interestInfoSizeOld = listener->GetInterestInfo().size();
-    WindowInfoKey observedInfo = WindowInfoKey::VISIBILITY_STATE;
-    ret = WindowManager::GetInstance().RegisterWindowInfoChangeCallback(observedInfo, listener);
+    std::unordered_set<WindowInfoKey> observedInfo;
+    observedInfo.insert(WindowInfoKey::VISIBILITY_STATE);
+    auto ret = WindowManager::GetInstance().RegisterWindowInfoChangeCallback(observedInfo, listener);
     ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(interestInfoSizeOld + 1, listener->GetInterestInfo().size());
     ret = WindowManager::GetInstance().RegisterWindowInfoChangeCallback(observedInfo, nullptr);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
-    observedInfo = WindowInfoKey::BUNDLE_NAME;
+    std::unordered_set<WindowInfoKey> observedInfo1;
+    observedInfo1.insert(WindowInfoKey::BUNDLE_NAME);
     ret = WindowManager::GetInstance().RegisterWindowInfoChangeCallback(observedInfo, listener);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
 }
@@ -1742,13 +1744,15 @@ HWTEST_F(WindowManagerTest, UnregisterWindowInfoChangeCallback01, Function | Sma
 {
     sptr<IWindowInfoChangedListener> listener = sptr<IWindowInfoChangedListener>::MakeSptr();
     auto interestInfoSizeOld = listener->GetInterestInfo().size();
-    WindowInfoKey observedInfo = WindowInfoKey::VISIBILITY_STATE;
-    ret = WindowManager::GetInstance().UnregisterWindowInfoChangeCallback(observedInfo, listener);
+    std::unordered_set<WindowInfoKey> observedInfo;
+    observedInfo.insert(WindowInfoKey::VISIBILITY_STATE);
+    auto ret = WindowManager::GetInstance().UnregisterWindowInfoChangeCallback(observedInfo, listener);
     ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(interestInfoSizeOld + 1, listener->GetInterestInfo().size());
     ret = WindowManager::GetInstance().UnregisterWindowInfoChangeCallback(observedInfo, nullptr);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
-    observedInfo = WindowInfoKey::BUNDLE_NAME;
+    std::unordered_set<WindowInfoKey> observedInfo1;
+    observedInfo1.insert(WindowInfoKey::BUNDLE_NAME);
     ret = WindowManager::GetInstance().UnregisterWindowInfoChangeCallback(observedInfo, listener);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
 }
