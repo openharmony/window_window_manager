@@ -464,24 +464,25 @@ export native function getDefaultDisplaySyncNative(obj: object): int;
 
 export native function getAllDisplaysSyncNative(displayArray: Array<Display>): void;
 
-export function getAllDisplays(callback: AsyncCallback<Array<Display>>): void {
-    taskpool.execute((): Array<Display> => {
-        let res: Array<Display> = new Array<Display>(5);
-        for (let i = 0; i < res.length; i++) {
-            res[i] = new DisplayImpl();
-        }
-        getAllDisplaysSyncNative(res);
-        minusDisplayArray(res);
-        return res;
-    }).then((ret: NullishType) => {
-        callback(new BusinessError(), ret as Array<Display>);
-    }).catch((err: NullishType) => {
-        callback(err as BusinessError, new Array<Display>());
-    });
-}
-
-export function getAllDisplays(): Promise<Array<Display>> {
-    return new Promise<Array<Display>>((resolve: (value: Array<Display>) => void, reject: (error: BusinessError) => void ) => {
+export function getAllDisplays(callback?: AsyncCallback<Array<Display>>): undefined | Promise<Array<Display>> {
+    if (callback != undefined) {
+        let AsyncCallback: AsyncCallback<Array<Display>> = callback as AsyncCallback<Array<Display>>;
+        taskpool.execute((): Array<Display> => {
+            let res: Array<Display> = new Array<Display>(5);
+            for (let i = 0; i < res.length; i++) {
+                res[i] = new DisplayImpl();
+            }
+            getAllDisplaysSyncNative(res);
+            minusDisplayArray(res);
+            return res;
+        }).then((ret: NullishType) => {
+            AsyncCallback(new BusinessError(), ret as Array<Display>);
+        }).catch((err: NullishType) => {
+            AsyncCallback(err as BusinessError, new Array<Display>());
+        });
+        return undefined;
+    } else {
+        return new Promise<Array<Display>>((resolve: (value: Array<Display>) => void, reject: (error: BusinessError) => void ) => {
         taskpool.execute((): Array<Display> => {
             let res: Array<Display> = new Array<Display>(5);
             for (let i = 0; i < res.length; i++) {
@@ -496,6 +497,7 @@ export function getAllDisplays(): Promise<Array<Display>> {
             reject(err as BusinessError);
         });
     });
+    }
 }
 
 function minusDisplayArray(displayArr: Array<Display>): void {
@@ -512,17 +514,16 @@ export function getNewDisplay(): DisplayImpl {
     return new DisplayImpl();
 }
 
-export function on(type: 'add' | 'remove' | 'change', callback: Callback<number>): void
+export function on(type: 'add' | 'remove' | 'change' | 'privateModeChange' | 'foldStatusChange' |
+    'foldAngleChange' | 'captureStatusChange' | 'foldDisplayModeChange',
+    callback: Callback<number> | Callback<boolean> | Callback<FoldStatus> | Callback<Array<number>> |
+    Callback<boolean> | Callback<FoldDisplayMode>): void
 {
     syncOn(type, callback as object, displayMgrRef);
 }
 
-// export function on(type: 'foldStatusChange', callback: Callback<FoldStatus>): void
-// {
-    // syncOn(type, callback as object, displayMgrRef);
-// }
-
-export native function syncOn(type: 'add' | 'remove' | 'change' | 'foldStatusChange', 
+export native function syncOn(type: 'add' | 'remove' | 'change' | 'privateModeChange' | 'foldStatusChange' |
+    'foldAngleChange' | 'captureStatusChange' | 'foldDisplayModeChange',
     callback: object, nativeObj: long): void;
 
 export function off(type: 'add' | 'remove' | 'change' | 'foldDisplayModeChange' | 'foldStatusChange',
