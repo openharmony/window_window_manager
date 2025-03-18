@@ -11799,7 +11799,9 @@ void SceneSessionManager::UpdateModalExtensionRect(const sptr<IRemoteObject>& to
             auto isSystemKeyboard = parentSession->GetSessionProperty() != nullptr &&
                 parentSession->GetSessionProperty()->IsSystemKeyboard();
             if (!isSystemKeyboard && needTransRect) {
-                parentSession->TransformRelativeRectToGlobalRect(globalRect);
+                WSRect transRect = { globalRect.posX_, globalRect.posY_, globalRect.width_, globalRect.height_ };
+                parentSession->TransformRelativeRectToGlobalRect(transRect);
+                globalRect.posY_ = transRect.posY_;
             }
             ExtensionWindowEventInfo extensionInfo { persistentId, pid, globalRect, rect, true };
             TLOGNI(WmsLogTag::WMS_UIEXT, "%{public}s: pid: %{public}d, persistentId: %{public}d, "
