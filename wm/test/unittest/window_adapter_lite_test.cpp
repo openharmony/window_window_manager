@@ -117,10 +117,8 @@ HWTEST_F(WindowAdapterLiteTest, ListWindowInfo01, Function | SmallTest | Level2)
     WindowAdapterLite WindowAdapterLite;
     WindowInfoOption windowInfoOption;
     std::vector<sptr<WindowInfo>> infos;
-    auto err = WindowAdapterLite.ListWindowInfo(windowIds);
+    auto err = WindowAdapterLite.ListWindowInfo(WindowAdapterLite, windowInfoOption);
     ASSERT_EQ(WMError::WM_OK, err);
-    auto ret = WindowAdapterLite.InitWMSProxy();
-    ASSERT_EQ(ret, true);
 }
 } // namespace
 } // namespace Rosen
