@@ -205,7 +205,7 @@ public:
 
     // extension session
     virtual WSError TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want) { return WSError::WS_OK; }
-    virtual WSError TransferExtensionData(const AAFwk::WantParams& wantParams) { return WSError::WS_OK; }
+    virtual int32_t TransferExtensionData(const AAFwk::WantParams& wantParams) { return WSError::WS_OK; }
     virtual WSError TransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
         int64_t uiExtensionIdLevel)
     {
