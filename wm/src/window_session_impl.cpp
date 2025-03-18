@@ -5100,7 +5100,10 @@ void WindowSessionImpl::UpdateSpecificSystemBarEnabled(bool systemBarEnable, boo
 {
     property.enable_ = systemBarEnable;
     property.enableAnimation_ = systemBarEnableAnimation;
-    property.settingFlag_ |= SystemBarSettingFlag::ENABLE_SETTING;
+    // isolate on api 18
+    if (GetTargetAPIVersion() >= API_VERSION_18) {
+        property.settingFlag_ |= SystemBarSettingFlag::ENABLE_SETTING;
+    }
 }
 
 WMError WindowSessionImpl::SetSpecificBarProperty(WindowType type, const SystemBarProperty& property)
