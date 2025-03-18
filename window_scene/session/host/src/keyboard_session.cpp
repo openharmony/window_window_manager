@@ -790,4 +790,25 @@ WSRect KeyboardSession::GetPanelRect() const
     }
     return panelRect;
 }
+
+void KeyboardSession::SetSkipSelfWhenShowOnVirtualScreen(bool isSkip)
+{
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Set Skip keyboard, isSkip: %{public}d", isSkip);
+    PostTask([weakThis = wptr(this), isSkip, where = __func__]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s: Session is null", where);
+            return;
+        }
+        std::shared_ptr<RSSurfaceNode> surfaceNode = session->GetSurfaceNode();
+        if (!surfaceNode) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s: SurfaceNode is null", where);
+            return;
+        }
+        if (session->specificCallback_ != nullptr
+            && session->specificCallback_->onSetSkipSelfWhenShowOnVirtualScreen_ != nullptr) {
+            session->specificCallback_->onSetSkipSelfWhenShowOnVirtualScreen_(surfaceNode->GetId(), isSkip);
+        }
+    }, __func__);
+}
 } // namespace OHOS::Rosen
