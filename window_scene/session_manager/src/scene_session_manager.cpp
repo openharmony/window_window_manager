@@ -11793,6 +11793,14 @@ void SceneSessionManager::UpdateModalExtensionRect(const sptr<IRemoteObject>& to
             auto parentTransX = parentSession->GetSessionGlobalRect().posX_ - parentSession->GetClientRect().posX_;
             auto parentTransY = parentSession->GetSessionGlobalRect().posY_ - parentSession->GetClientRect().posY_;
             Rect globalRect = { rect.posX_ + parentTransX, rect.posY_ + parentTransY, rect.width_, rect.height_ };
+            auto currScreenFoldStatus = PcFoldScreenManager::GetInstance().GetScreenFoldStatus();
+            auto needTransRect = currScreenFoldStatus != SuperFoldStatus::UNKNOWN &&
+                currScreenFoldStatus != SuperFoldStatus::FOLDED && currScreenFoldStatus != SuperFoldStatus::EXPANDED;
+            auto isSystemKeyboard = parentSession->GetSessionProperty() != nullptr &&
+                parentSession->GetSessionProperty()->IsSystemKeyboard();
+            if (!isSystemKeyboard && needTransRect) {
+                parentSession->TransformRelativeRectToGlobalRect(globalRect);
+            }
             ExtensionWindowEventInfo extensionInfo { persistentId, pid, globalRect, rect, true };
             TLOGNI(WmsLogTag::WMS_UIEXT, "%{public}s: pid: %{public}d, persistentId: %{public}d, "
                 "parentId: %{public}d, rect: %{public}s, globalRect: %{public}s, parentGlobalRect: %{public}s",
