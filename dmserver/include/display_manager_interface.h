@@ -247,6 +247,7 @@ public:
     }
     virtual void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList,
         std::vector<uint64_t> surfaceIdList = {}) {}
+    virtual void SetVirtualDisplayMuteFlag(ScreenId screenId, bool muteFlag) {}
     virtual void DisablePowerOffRenderControl(ScreenId screenId) {}
 
     virtual std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution()
