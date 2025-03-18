@@ -18,6 +18,9 @@
 #include "singleton_mocker.h"
 #include "window_manager_lite.cpp"
 #include "wm_common.h"
+#include "session/host/include/scene_session.h"
+#include "common/include/window_session_property.h"
+#include "session_manager/include/scene_session_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -82,6 +85,16 @@ public:
     {
         WLOGI("TestWindowUpdateListener");
     }
+};
+
+class TestIKeyboardCallingWindowDisplayChangedListener : public IKeyboardCallingWindowDisplayChangedListener {
+public:
+    void OnCallingWindowDisplayChanged(const CallingWindowInfo& callingWindowInfo)
+    {
+        info = callingWindowInfo;
+    }
+private:
+    CallingWindowInfo info = {0, -1, 0, 0};
 };
 
 class WindowManagerLiteTest : public testing::Test {
@@ -1129,6 +1142,87 @@ HWTEST_F(WindowManagerLiteTest, UnregisterWindowUpdateListener01, Function | Sma
 
     windowManager.pImpl_->windowUpdateListenerAgent_ = oldWindowManagerAgent;
     windowManager.pImpl_->windowUpdateListeners_ = oldListeners;
+}
+
+/**
+ * @tc.name: RegisterCallingWindowDisplayChangedListener1
+ * @tc.desc: check RegisterCallingWindowDisplayChangedListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, RegisterCallingWindowDisplayChangedListener1, Function | SmallTest | Level2)
+{
+    sptr<TestIKeyboardCallingWindowDisplayChangedListener> listener
+        = sptr<TestIKeyboardCallingWindowDisplayChangedListener>::MakeSptr();
+    auto& windowManager = WindowManagerLite::GetInstance(); 
+    WMError ret = WindowManagerLite.RegisterCallingWindowDisplayChangedListener(nullptr);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+
+    ret = WindowManagerLite.RegisterCallingWindowDisplayChangedListener(listener);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_NE(nullptr, windowManager.pImpl_->callingDisplayListenerAgent_);
+    ASSERT_EQ(1, static_cast<uint32_t>(windowManager.pImpl_->callingDisplayChangedListeners_.size()));
+
+    // Register the same listener repeatedly.
+    ret = WindowManagerLite.RegisterCallingWindowDisplayChangedListener(listener);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(1, static_cast<uint32_t>(windowManager.pImpl_->callingDisplayChangedListeners_.size()));
+}
+
+/**
+ * @tc.name: RegisterCallingWindowDisplayChangedListener2
+ * @tc.desc: check RegisterCallingWindowDisplayChangedListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, RegisterCallingWindowDisplayChangedListener2, Function | SmallTest | Level2)
+{
+    sptr<TestIKeyboardCallingWindowDisplayChangedListener> listener1
+        = sptr<TestIKeyboardCallingWindowDisplayChangedListener>::MakeSptr();
+    sptr<TestIKeyboardCallingWindowDisplayChangedListener> listener2
+        = sptr<TestIKeyboardCallingWindowDisplayChangedListener>::MakeSptr();
+    
+    auto& windowManager = WindowManagerLite::GetInstance(); 
+    WMError ret = WindowManagerLite.RegisterCallingWindowDisplayChangedListener(listener1);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_NE(nullptr, windowManager.pImpl_->callingDisplayListenerAgent_);
+    ASSERT_EQ(1, static_cast<uint32_t>(windowManager.pImpl_->callingDisplayChangedListeners_.size()));
+
+    ret = WindowManagerLite.RegisterCallingWindowDisplayChangedListener(listener2);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(2, static_cast<uint32_t>(windowManager.pImpl_->callingDisplayChangedListeners_.size()));
+
+    ret = WindowManagerLite.UnregisterCallingWindowDisplayChangedListener(listener1);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(1, static_cast<uint32_t>(windowManager.pImpl_->callingDisplayChangedListeners_.size()));
+    ASSERT_NE(nullptr, windowManager.pImpl_->callingDisplayListenerAgent_);
+
+    // Unregister the same listener repeatedly.
+    ret = WindowManagerLite.UnregisterCallingWindowDisplayChangedListener(listener1);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(1, static_cast<uint32_t>(windowManager.pImpl_->callingDisplayChangedListeners_.size()));
+
+    ret = WindowManagerLite.UnregisterCallingWindowDisplayChangedListener(listener2);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(0, static_cast<uint32_t>(windowManager.pImpl_->callingDisplayChangedListeners_.size()));
+    ASSERT_EQ(nullptr, windowManager.pImpl_->callingDisplayListenerAgent_);
+}
+
+/**
+ * @tc.name: RegisterCallingWindowDisplayChangedListener3
+ * @tc.desc: check RegisterCallingWindowDisplayChangedListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, RegisterCallingWindowDisplayChangedListener3, Function | SmallTest | Level2)
+{
+    sptr<TestIKeyboardCallingWindowDisplayChangedListener> listener
+        = sptr<TestIKeyboardCallingWindowDisplayChangedListener>::MakeSptr();
+    
+    auto& windowManager = WindowManagerLite::GetInstance(); 
+    
+    WMError ret = WindowManagerLite.UnregisterCallingWindowDisplayChangedListener(nullptr);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+    
+    ret = WindowManagerLite.UnregisterCallingWindowDisplayChangedListener(listener);
+    ASSERT_EQ(WMError::WM_OK, ret);
 }
 } // namespace
 } // namespace OHOS::Rosen
