@@ -25,6 +25,7 @@
 #include "session/host/include/move_drag_controller.h"
 #include "session/host/include/scene_session.h"
 #include "session_manager/include/scene_session_manager.h"
+#include "session/host/include/pc_fold_screen_manager.h"
 #include "session/host/include/session.h"
 #include "session_info.h"
 #include "key_event.h"
@@ -1683,6 +1684,28 @@ HWTEST_F(WindowSessionTest, NotifyHighlightChange, Function | SmallTest | Level2
     EXPECT_EQ(session_->NotifyHighlightChange(true), WSError::WS_OK);
     session_->sessionStage_ = nullptr;
     EXPECT_EQ(session_->NotifyHighlightChange(true), WSError::WS_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: TransformRelativeRectToGlobalRect
+ * @tc.desc: TransformRelativeRectToGlobalRect Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, TransformRelativeRectToGlobalRect, Function | SmallTest | Level2)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.isSystem_ = false;
+    sessionInfo.bundleName_ = "bundleName";
+    sessionInfo.abilityName_ = "abilityName";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sceneSession->property_->displayId_ = 0;
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::EXPANDED,
+        { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
+    WSRect rect { 0, 100, 100, 100 };
+    sceneSession->TransformRelativeRectToGlobalRect(rect);
+    EXPECT_EQ(rect.posY_, 100);
+    sceneSession->property_->displayId_ = 999;
+    EXPECT_NE(rect.posY_, 100);
 }
 }
 } // namespace Rosen
