@@ -407,23 +407,30 @@ WMError WindowManager::RegisterFocusChangedListener(const sptr<IFocusChangedList
         return WMError::WM_ERROR_NULLPTR;
     }
 
-    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
-    WMError ret = WMError::WM_OK;
-    if (pImpl_->focusChangedListenerAgent_ == nullptr) {
-        pImpl_->focusChangedListenerAgent_ = new WindowManagerAgent();
+    auto focusChangedListenerAgentBack_;
+    {
+        std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+        WMError ret = WMError::WM_OK;
+        if (pImpl_->focusChangedListenerAgent_ == nullptr) {
+            pImpl_->focusChangedListenerAgent_ = new WindowManagerAgent();
+            focusChangedListenerAgentBack_ = pImpl_->focusChangedListenerAgent_;
+        }
     }
     ret = WindowAdapter::GetInstance().RegisterWindowManagerAgent(
         WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS, pImpl_->focusChangedListenerAgent_);
-    if (ret != WMError::WM_OK) {
-        WLOGFW("RegisterWindowManagerAgent failed!");
-        pImpl_->focusChangedListenerAgent_ = nullptr;
-    } else {
-        auto iter = std::find(pImpl_->focusChangedListeners_.begin(), pImpl_->focusChangedListeners_.end(), listener);
-        if (iter != pImpl_->focusChangedListeners_.end()) {
-            WLOGFW("Listener is already registered.");
-            return WMError::WM_OK;
+    {
+        std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+        if (ret != WMError::WM_OK) {
+            WLOGFW("RegisterWindowManagerAgent failed!");
+            pImpl_->focusChangedListenerAgent_ = nullptr;
+        } else {
+            auto iter = std::find(pImpl_->focusChangedListeners_.begin(), pImpl_->focusChangedListeners_.end(), listener);
+            if (iter != pImpl_->focusChangedListeners_.end()) {
+                WLOGFW("Listener is already registered.");
+                return WMError::WM_OK;
+            }
+            pImpl_->focusChangedListeners_.push_back(listener);
         }
-        pImpl_->focusChangedListeners_.push_back(listener);
     }
     return ret;
 }
