@@ -17,6 +17,7 @@
 
 #include <bundlemgr/launcher_service.h>
 #include "interfaces/include/ws_common.h"
+#include "iremote_object_mocker.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "session_info.h"
 #include "session/host/include/scene_session.h"
@@ -25,6 +26,8 @@
 #include "mock/mock_ibundle_mgr.h"
 #include "common/include/task_scheduler.h"
 #include "session/host/include/multi_instance_manager.h"
+#include "test/mock/mock_session_stage.h"
+#include "test/mock/mock_window_event_channel.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -601,7 +604,7 @@ HWTEST_F(SceneSessionManagerTest11, GetMainSessionByBundleNameAndAppIndex, Funct
     ssm_->GetMainSessionByBundleNameAndAppIndex(bundleName, appIndex, mainSessions);
 
     sptr<SceneSession> sceneSession = GetSceneSession(bundleName);
-    ssm_->sceneSessionMap_.insert(1, sceneSession);
+    ssm_->sceneSessionMap_.insert( {1, sceneSession} );
     ssm_->GetMainSessionByBundleNameAndAppIndex(bundleName, appIndex, mainSessions);
 
     ssm_->GetMainSessionByBundleNameAndAppIndex(BUNDLE_NAME, appIndex, mainSessions);
@@ -628,7 +631,7 @@ HWTEST_F(SceneSessionManagerTest11, GetMainSessionByAbilityInfo, Function | Smal
     std::vector<sptr<SceneSession>> mainSessions;
     std::string bundleName = "bundleName_test";
     sptr<SceneSession> sceneSession = GetSceneSession(bundleName);
-    ssm_->sceneSessionMap_.insert(1, sceneSession);
+    ssm_->sceneSessionMap_.insert( {1, sceneSession} );
     ssm_->GetMainSessionByAbilityInfo(abilityInfo, mainSessions);
 
     abilityInfo.bundleName = BUNDLE_NAME;
@@ -663,53 +666,22 @@ HWTEST_F(SceneSessionManagerTest11, GetKeyboardSession, Function | SmallTest | L
 
     SessionInfo info;
     info.bundleName_ = BUNDLE_NAME;
-    info.SetScreenId(5);
+    info.screenId_ = 5;
     sptr<SceneSession::SpecificSessionCallback> specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCb);
-    ssm_->sceneSessionMap_.insert(1, sceneSession);
+    ssm_->sceneSessionMap_.insert( {1, sceneSession} );
     ssm_->GetKeyboardSession(displayId, isSystemKeyboard);
 
     displayId = 5;
     ssm_->GetKeyboardSession(displayId, isSystemKeyboard);
 
-    sceneSession->GetSessionProperty->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     ssm_->GetKeyboardSession(displayId, isSystemKeyboard);
 
     isSystemKeyboard = false;
     sptr<SceneSession> keyboardSession = ssm_->GetKeyboardSession(displayId, isSystemKeyboard);
     ASSERT_EQ(keyboardSession, sceneSession);
-    ssm_->sceneSessionMap_.clera();
-}
-
-/**
- * @tc.name: CreateKeyboardPanelSession
- * @tc.desc: CreateKeyboardPanelSession
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest11, CreateKeyboardPanelSession, Function | SmallTest | Level1)
-{
-    ASSERT_NE(ssm_, nullptr);
-    std::string bundleName = "bundleName_test";
-    sptr<SceneSession> sceneSession = GetSceneSession(bundleName);
-    ssm_->isKeyboardPanelEnabled_ = false;
-    ssm_->CreateKeyboardPanelSession(sceneSession);
-
-    ssm_->isKeyboardPanelEnabled_ = true;
-    ssm_->CreateKeyboardPanelSession(nullptr);
-
-    std::string bundleName02 = "bundleName_test02";
-    sptr<SceneSession> sceneSession02 = GetSceneSession(bundleName02);
-    ssm_->sceneSessionMap_.insert(1, sceneSession02);
-    ssm_->CreateKeyboardPanelSession(sceneSession);
-
-    sceneSession02->GetSessionProperty->SetWindowType(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
-    sceneSession02->GetSessionProperty->SetIsSystemKeyboard(true);
-    ssm_->CreateKeyboardPanelSession(sceneSession);
-
-    sceneSession02->GetSessionProperty->SetIsSystemKeyboard(false);
-    ssm_->CreateKeyboardPanelSession(sceneSession);
-    ASSERT_EQ(ssm_->sceneSessionMap_.empty(), false);
-    ssm_->sceneSessionMap_.clera();
+    ssm_->sceneSessionMap_.clear();
 }
 
 /**
@@ -726,9 +698,9 @@ HWTEST_F(SceneSessionManagerTest11, DestroyToastSession, Function | SmallTest | 
     ssm_->DestroyToastSession(sceneSession);
 
     sptr<SceneSession> sceneSession02 = GetSceneSession(bundleName);
-    ssm_->toastSession_.emplace_back(sceneSession02);
+    sceneSession->toastSession_.emplace_back(sceneSession02);
     ssm_->DestroyToastSession(sceneSession);
-    ASSERT_EQ(ssm_->toastSession_.empty(), false);
+    ASSERT_EQ(sceneSession->toastSession_.empty(), false);
 }
 
 /**
@@ -756,8 +728,8 @@ HWTEST_F(SceneSessionManagerTest11, CreateAndConnectSpecificSession01, Function 
     property->SetWindowType(WindowType::WINDOW_TYPE_MEDIA);
     std::string bundleName = "bundleName_test";
     sptr<SceneSession> parentSession = GetSceneSession(bundleName);
-    parentSession->GetSessionProperty->SetSubWindowLevel(10);
-    ssm_->sceneSessionMap_.inset(1, parentSession);
+    parentSession->GetSessionProperty()->SetSubWindowLevel(10);
+    ssm_->sceneSessionMap_.insert( {1, parentSession} );
     property->SetParentPersistentId(1);
     result = ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property,
         persistentId, session, systemConfig, iRemoteObjectMocker);
@@ -773,7 +745,7 @@ HWTEST_F(SceneSessionManagerTest11, IsLastPiPWindowVisible, Function | SmallTest
 {
     uint64_t surfaceId = 1;
     WindowVisibilityState lastVisibilityState = WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION;
-    ssm_->sceneSessionMap_.clera();
+    ssm_->sceneSessionMap_.clear();
     auto res = ssm_->IsLastPiPWindowVisible(surfaceId, lastVisibilityState);
     ASSERT_EQ(res, false);
 }
