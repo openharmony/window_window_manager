@@ -424,7 +424,8 @@ WMError WindowManager::RegisterFocusChangedListener(const sptr<IFocusChangedList
             WLOGFW("RegisterWindowManagerAgent failed!");
             pImpl_->focusChangedListenerAgent_ = nullptr;
         } else {
-            auto iter = std::find(pImpl_->focusChangedListeners_.begin(), pImpl_->focusChangedListeners_.end(), listener);
+            auto iter = std::find(pImpl_->focusChangedListeners_.begin(), pImpl_->focusChangedListeners_.end(),
+                listener);
             if (iter != pImpl_->focusChangedListeners_.end()) {
                 WLOGFW("Listener is already registered.");
                 return WMError::WM_OK;
