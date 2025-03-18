@@ -540,6 +540,13 @@ void ScreenSessionManager::ConfigureDpi()
             densityDpi_ = static_cast<float>(densityDpi) / BASELINE_DENSITY;
         }
     }
+    if (numbersConfig.count("applicationDefaultDpi") != 0) {
+        uint32_t densityDpi = static_cast<uint32_t>(numbersConfig["applicationDefaultDpi"][0]);
+        TLOGI(WmsLogTag::DMS, "densityDpi = %{public}u", densityDpi);
+        if (densityDpi >= DOT_PER_INCH_MINIMUM_VALUE && densityDpi <= DOT_PER_INCH_MAXIMUM_VALUE) {
+            applicationDefaultDpi = densityDpi;
+        }
+    }
     if (numbersConfig.count("subDpi") != 0) {
         uint32_t subDensityDpi = static_cast<uint32_t>(numbersConfig["subDpi"][0]);
         TLOGI(WmsLogTag::DMS, "subDensityDpi = %{public}u", subDensityDpi);
@@ -3320,8 +3327,8 @@ void ScreenSessionManager::SetDpiFromSettingData()
     uint32_t settingDpi;
     bool ret = ScreenSettingHelper::GetSettingDpi(settingDpi);
     if (!ret) {
-        TLOGW(WmsLogTag::DMS, "get setting dpi failed,use default dpi");
-        settingDpi = defaultDpi;
+        settingDpi = (applicationDefaultDpi != 0) ? applicationDefaultDpi : defaultDpi;
+        TLOGW(WmsLogTag::DMS, "get setting dpi failed,use default dpi,defaultDpi: %{public}u", settingDpi);
     } else {
         TLOGI(WmsLogTag::DMS, "get setting dpi success,settingDpi: %{public}u", settingDpi);
     }
