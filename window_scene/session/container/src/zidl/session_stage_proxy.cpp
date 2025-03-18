@@ -1819,4 +1819,68 @@ WSError SessionStageProxy::NotifyTargetRotationInfo(OrientationInfo& info)
     }
     return WSError::WS_OK;
 }
+
+RotationChangeResult SessionStageProxy::NotifyRotationChange(const RotationChangeInfo& rotationChangeInfo)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    RotationChangeResult rotationChangeResult = { RectType::RELATIVE_TO_SCREEN, { 0, 0, 0, 0, } };
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "WriteInterfaceToken failed");
+        return rotationChangeResult;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(rotationChangeInfo.type))) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Write type failed");
+        return rotationChangeResult;
+    }
+    if (!data.WriteUint32(rotationChangeInfo.orientation)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Write orientation failed");
+        return rotationChangeResult;
+    }
+    if (!data.WriteUint64(rotationChangeInfo.displayId)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Write displayId failed");
+        return rotationChangeResult;
+    }
+    if (!data.WriteInt32(rotationChangeInfo.displayRect.posX_) ||
+        !data.WriteInt32(rotationChangeInfo.displayRect.posY_) ||
+        !data.WriteUint32(rotationChangeInfo.displayRect.width_) ||
+        !data.WriteUint32(rotationChangeInfo.displayRect.height_)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Write display rect failed");
+        return rotationChangeResult;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "remote is null");
+        return rotationChangeResult;
+    }
+    if (remote->SendRequest(
+        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_ROTATION_CHANGE),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "SendRequest failed");
+        return rotationChangeResult;
+    }
+
+    if (rotationChangeInfo.type == RotationChangeType::WINDOW_DID_ROTATE) {
+        TLOGI(WmsLogTag::WMS_ROTATION, "WINDOW_DID_ROTATE return");
+        return rotationChangeResult;
+    }
+    uint32_t rectType = 0;
+    if (!reply.ReadUint32(rectType)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "read rectType failed");
+        return rotationChangeResult;
+    }
+    rotationChangeResult.rectType = static_cast<RectType>(rectType);
+    if (!reply.ReadInt32(rotationChangeResult.windowRect.posX_) ||
+        !reply.ReadInt32(rotationChangeResult.windowRect.posY_) ||
+        !reply.ReadUint32(rotationChangeResult.windowRect.width_) ||
+        !reply.ReadUint32(rotationChangeResult.windowRect.height_)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "read window rect failed");
+        return rotationChangeResult;
+    }
+    TLOGI(WmsLogTag::WMS_ROTATION, "receive type:%{public}d, rect: [%{public}d, %{public}d, %{public}d, %{public}d]",
+        rectType, rotationChangeResult.windowRect.posX_, rotationChangeResult.windowRect.posY_,
+        rotationChangeResult.windowRect.width_, rotationChangeResult.windowRect.height_);
+    return rotationChangeResult;
+}
 } // namespace OHOS::Rosen

@@ -124,6 +124,7 @@ public:
     static napi_value NotifyAboveLockScreen(napi_env env, napi_callback_info info);
     static napi_value CloneWindow(napi_env env, napi_callback_info info);
     static napi_value RegisterSingleHandContainerNode(napi_env env, napi_callback_info info);
+    static napi_value NotifyRotationChange(napi_env env, napi_callback_info info);
 
     /*
      * Multi Instance
@@ -217,6 +218,7 @@ private:
     napi_value OnNotifyAboveLockScreen(napi_env env, napi_callback_info info);
     napi_value OnCloneWindow(napi_env env, napi_callback_info info);
     napi_value OnRegisterSingleHandContainerNode(napi_env env, napi_callback_info info);
+    napi_value OnNotifyRotationChange(napi_env env, napi_callback_info info);
 
     /*
      * Multi Instance
@@ -303,6 +305,13 @@ private:
 
     sptr<RootScene> rootScene_;
     std::shared_ptr<MainThreadScheduler> taskScheduler_;
+
+    /*
+     * Window Rotation
+     */
+    std::unordered_map<int32_t, RotationChangeResult> GetRotationChangeResult(
+        const std::vector<sptr<SceneSession>>& activeSceneSessionMapCopy,
+        const RotationChangeInfo& rotationChangeInfo);
 };
 } // namespace OHOS::Rosen
 

@@ -125,6 +125,7 @@ using NotifyFollowParentRectFunc = std::function<void(bool isFollow)>;
 using GetSceneSessionByIdCallback = std::function<sptr<SceneSession>(int32_t sessionId)>;
 using NotifySetParentSessionFunc = std::function<void(int32_t oldParentWindowId, int32_t newParentWindowId)>;
 using NotifyUpdateFlagFunc = std::function<void(const std::string& flag)>;
+using NotifyRotationChangeFunc = std::function<void(int32_t persistentId, bool isRegister)>;
 
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
@@ -497,6 +498,10 @@ public:
      */
     void RegisterRequestedOrientationChangeCallback(NotifyReqOrientationChangeFunc&& callback);
     WSError NotifyRotationProperty(int32_t rotation, uint32_t width, uint32_t height);
+    void RegisterUpdateRotationChangeListener(NotifyRotationChangeFunc&& callback);
+    WSError UpdateRotationChangeRegistered(int32_t persistentId, bool isRegister) override;
+    RotationChangeResult NotifyRotationChange(const RotationChangeInfo& rotationChangeInfo);
+    bool isRotationChangeCallbackRegistered = false;
 
     /*
      * Window Animation
@@ -725,7 +730,7 @@ public:
      * Window Pattern
     */
     void NotifyWindowAttachStateListenerRegistered(bool registered) override;
-    
+
 protected:
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
     void SetMoveDragCallback();
@@ -1128,6 +1133,7 @@ private:
      * Window Rotation
      */
     NotifyReqOrientationChangeFunc onRequestedOrientationChange_;
+    NotifyRotationChangeFunc onUpdateRotationChangeFunc_;
 
     /*
      * Window Animation

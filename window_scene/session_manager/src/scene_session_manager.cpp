@@ -2137,7 +2137,7 @@ WMError SceneSessionManager::SetAppKeyFramePolicy(const std::string& bundleName,
 KeyFramePolicy SceneSessionManager::GetAppKeyFramePolicy(const std::string& bundleName)
 {
     {
-        std::lock_guard<std::mutex> lock(keyFrameMutex_); 
+        std::lock_guard<std::mutex> lock(keyFrameMutex_);
         if (auto iter = appKeyFramePolicyMap_.find(bundleName); iter != appKeyFramePolicyMap_.end()) {
             return iter->second;
         }
@@ -3725,7 +3725,7 @@ void SceneSessionManager::UpdateRecoverPropertyForSuperFold(const sptr<WindowSes
         "WindowRect: %{public}s, RequestRect: %{public}s, DisplayId: %{public}d",
         recoverWindowRect.ToString().c_str(), recoverRequestRect.ToString().c_str(),
         static_cast<uint32_t>(property->GetDisplayId()));
-    
+
     auto foldCrease = foldCreaseRegion->GetCreaseRects().front();
     recoverWindowRect.posY_ += foldCrease.posY_ + foldCrease.height_;
     recoverRequestRect.posY_ += foldCrease.posY_ + foldCrease.height_;
@@ -9937,7 +9937,7 @@ void SceneSessionManager::GetKeyboardOccupiedAreaWithRotation(
         TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboardSession is nullptr, id: %{public}d", persistentId);
         return;
     }
-    
+
     std::pair<bool, WSRect> keyboardOccupiedArea = {true, {0, 0, 0, 0}};
     const KeyboardLayoutParams keyboardLayoutParams = keyboardSession->GetSessionProperty()->GetKeyboardLayoutParams();
     Rect nextRect;
@@ -9954,7 +9954,7 @@ void SceneSessionManager::GetKeyboardOccupiedAreaWithRotation(
         nextRect.posX_, nextRect.posY_, static_cast<int32_t>(nextRect.width_), static_cast<int32_t>(nextRect.height_)
     };
 
-    if (!keyboardSession->IsSessionForeground() || 
+    if (!keyboardSession->IsSessionForeground() ||
         keyboardLayoutParams.gravity_ == WindowGravity::WINDOW_GRAVITY_FLOAT) {
         keyboardOccupiedArea.first = false;
     }
@@ -13988,5 +13988,28 @@ WMError SceneSessionManager::MinimizeByWindowId(const std::vector<int32_t>& wind
         }
     }, __func__);
     return WMError::WM_OK;
+}
+
+std::vector<sptr<SceneSession>> SceneSessionManager::GetActiveSceneSessionCopy()
+{
+    std::map<int32_t, sptr<SceneSession>> sceneSessionMapCopy;
+    {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        sceneSessionMapCopy = sceneSessionMap_;
+    }
+    std::vector<sptr<SceneSession>> activeSession;
+    for (const auto& elem : sceneSessionMapCopy) {
+        auto curSession = elem.second;
+        if (curSession == nullptr) {
+            TLOGW(WmsLogTag::DEFAULT, "curSession nullptr");
+            continue;
+        }
+        if (curSession->GetSessionInfo().isSystem_ ||
+            (!curSession->IsSessionForeground())) {
+             continue;
+         }
+        activeSession.push_back(curSession);
+    }
+    return activeSession;
 }
 } // namespace OHOS::Rosen

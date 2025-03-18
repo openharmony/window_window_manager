@@ -336,6 +336,7 @@ public:
     virtual WMError GetCallingWindowRect(Rect& rect) const override;
     virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
     WMError SetContinueState(int32_t continueState) override;
+    virtual WMError CheckWindowRect(uint32_t& width, uint32_t& height) { return WMError::WM_ERROR_INVALID_PARAM; }
 
     /*
      * Multi Window
@@ -413,6 +414,14 @@ public:
     bool IsWaterfallModeEnabled() override;
     WMError RegisterWaterfallModeChangeListener(const sptr<IWaterfallModeChangeListener>& listener) override;
     WMError UnregisterWaterfallModeChangeListener(const sptr<IWaterfallModeChangeListener>& listener) override;
+
+    /*
+     * Window Rotation
+     */
+    WMError RegisterWindowRotationChangeListener(const sptr<IWindowRotationChangeListener>& listener) override;
+    WMError UnregisterWindowRotationChangeListener(const sptr<IWindowRotationChangeListener>& listener) override;
+    RotationChangeResult NotifyRotationChange(const RotationChangeInfo& rotationChangeInfo) override;
+    WMError CheckMultiWindowRect(uint32_t& width, uint32_t& height);
 
 protected:
     WMError Connect();
@@ -652,6 +661,8 @@ private:
     EnableIfSame<T, IWindowHighlightChangeListener, std::vector<sptr<IWindowHighlightChangeListener>>> GetListeners();
     template<typename T>
     EnableIfSame<T, ISystemBarPropertyListener, std::vector<sptr<ISystemBarPropertyListener>>> GetListeners();
+    template<typename T>
+    EnableIfSame<T, IWindowRotationChangeListener, std::vector<sptr<IWindowRotationChangeListener>>> GetListeners();
     void NotifyAfterFocused();
     void NotifyUIContentFocusStatus();
     void NotifyAfterUnfocused(bool needNotifyUiContent = true);
@@ -741,6 +752,7 @@ private:
     static std::mutex windowOrientationChangeListenerMutex_;
     static std::mutex highlightChangeListenerMutex_;
     static std::mutex systemBarPropertyListenerMutex_;
+    static std::mutex windowRotationChangeListenerMutex_;
     static std::map<int32_t, std::vector<sptr<ISystemBarPropertyListener>>> systemBarPropertyListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowLifeCycle>>> lifecycleListeners_;
     static std::map<int32_t, std::vector<sptr<IDisplayMoveListener>>> displayMoveListeners_;
@@ -766,6 +778,7 @@ private:
     static std::map<int32_t, sptr<IPreferredOrientationChangeListener>> preferredOrientationChangeListener_;
     static std::map<int32_t, sptr<IWindowOrientationChangeListener>> windowOrientationChangeListener_;
     static std::map<int32_t, std::vector<sptr<IWindowHighlightChangeListener>>> highlightChangeListeners_;
+    static std::map<int32_t, std::vector<sptr<IWindowRotationChangeListener>>> windowRotationChangeListeners_;
 
     // FA only
     sptr<IAceAbilityHandler> aceAbilityHandler_;
@@ -793,7 +806,7 @@ private:
     Transform layoutTransform_;
     SingleHandTransform singleHandTransform_;
     KeyFramePolicy keyFramePolicy_;
-    
+
     /*
      * Window Decor
      */
