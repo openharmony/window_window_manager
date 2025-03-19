@@ -7821,6 +7821,10 @@ napi_value JsWindow::OnGetParentWindow(napi_env env, napi_callback_info info)
         TLOGE(WmsLogTag::WMS_SUB, "get failed, result=%{public}d", ret);
         return NapiThrowError(env, ret);
     }
+    if (parentWindow == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "parentWindow is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARENT);
+    }
     auto objValue = CreateJsWindowObject(env, parentWindow);
     if (objValue == nullptr) {
         TLOGE(WmsLogTag::WMS_SUB, "create js window failed");
