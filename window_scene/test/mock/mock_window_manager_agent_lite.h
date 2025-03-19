@@ -12,8 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#ifndef MOCK_WINDOW_MANAGER_AGENT_LITE_H
+#define MOCK_WINDOW_MANAGER_AGENT_LITE_H
 #include "window_manager_agent_lite.h"
 #include <gmock/gmock.h>
+
 namespace OHOS {
 namespace Rosen {
 class WindowManagerAgentLiteMocker : public WindowManagerAgentLite {
@@ -25,3 +29,4 @@ public:
 };
 } // namespace Rosen
 } // namespace OHOS
+#endif // MOCK_WINDOW_MANAGER_AGENT_LITE_H
