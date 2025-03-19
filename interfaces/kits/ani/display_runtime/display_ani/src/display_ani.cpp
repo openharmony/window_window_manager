@@ -91,7 +91,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         ani_native_function {"getFoldDisplayModeNative", ":I",
             reinterpret_cast<void *>(DisplayManagerAni::getFoldDisplayModeAni)},
         ani_native_function {"getFoldStatusNative", ":I", reinterpret_cast<void *>(DisplayManagerAni::getFoldStatus)},
-        ani_native_function {"getCurrentFoldCreaseRegionNative", "Lstd/core/Object;J;V",
+        ani_native_function {"getCurrentFoldCreaseRegionNative", "Lstd/core/Object;J:V",
             reinterpret_cast<void *>(DisplayManagerAni::getCurrentFoldCreaseRegion)},
         ani_native_function {"getDisplayByIdSyncNative", "Lstd/core/Object;D:V",
             reinterpret_cast<void *>(DisplayManagerAni::getDisplayByIdSyncAni)},

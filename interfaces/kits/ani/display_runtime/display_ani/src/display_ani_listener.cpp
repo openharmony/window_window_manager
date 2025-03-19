@@ -108,7 +108,7 @@ void DisplayAniListener::OnCreate(DisplayId id)
             TLOGE(WmsLogTag::DMS, "[ANI] OnCreate Callback is undefined, return");
             return;
         }
-        if (ANI_OK != env_->Reference_IsNull(oneAniCallback ,&result)) {
+        if (ANI_OK != env_->Reference_IsNull(oneAniCallback, &result)) {
             TLOGE(WmsLogTag::DMS, "[ANI] OnCreate Callback is null, return");
             return;
         }
@@ -151,11 +151,11 @@ void DisplayAniListener::OnChange(DisplayId id)
         ani_boolean nullRes;
         env_->Reference_IsUndefined(oneAniCallback, &undefRes);
         env_->Reference_IsNull(oneAniCallback, &nullRes);
-        if (undefRes == 0 ) {
+        if (undefRes == 0) {
             TLOGE(WmsLogTag::DMS, "[ANI] oneAniCallback undefRes, return");
             return;
         }
-        if (nullRes == 0 ) {
+        if (nullRes == 0) {
             TLOGE(WmsLogTag::DMS, "[ANI] oneAniCallback null, return");
             return;
         }
