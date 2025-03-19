@@ -247,12 +247,14 @@ HWTEST_F(KeyboardSessionTest3, UpdateKeyboardAvoidArea02, Function | SmallTest |
     ASSERT_NE(keyboardSession, nullptr);
 
     auto expectDirtyFlag = 0;
-    keyboardSession->SetScbCoreEnabled(false);
+    auto isScbCoreEnabled = Session::IsScbCoreEnabled();
+    Session::SetScbCoreEnabled(false);
     keyboardSession->specificCallback_->onUpdateAvoidArea_ = [&expectDirtyFlag](const uint32_t& persistentId) {
         expectDirtyFlag = 1;
     };
     keyboardSession->UpdateKeyboardAvoidArea();
     ASSERT_EQ(expectDirtyFlag, 1);
+    Session::SetScbCoreEnabled(isScbCoreEnabled);
 }
 
 /**
