@@ -1698,15 +1698,15 @@ HWTEST_F(WindowSessionTest, TransformRelativeRectToGlobalRect, Function | SmallT
     sessionInfo.bundleName_ = "bundleName";
     sessionInfo.abilityName_ = "abilityName";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    sceneSession->property_->displayId_ = 0;
-    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::EXPANDED,
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::HALF_FOLDED,
         { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
     WSRect rect { 0, 100, 100, 100 };
+    sceneSession->globalRect_ = { 0, 0, 2472, 1648 };
+    sceneSession->winRect_ = { 0, 0, 2472, 1648 };
     sceneSession->TransformRelativeRectToGlobalRect(rect);
     EXPECT_EQ(rect.posY_, 100);
-    sceneSession->property_->displayId_ = 999;
-    sceneSession->globalRect_ = { 0, 9999, 2472, 1648 }
-    sceneSession->winRect_ = { 0, 9999, 2472, 1648 }
+    sceneSession->globalRect_ = { 0, 9999, 2472, 1648 };
+    sceneSession->winRect_ = { 0, 9999, 2472, 1648 };
     EXPECT_NE(rect.posY_, 100);
 }
 }

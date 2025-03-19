@@ -1008,11 +1008,17 @@ DisplayId Session::TransformGlobalRectToRelativeRect(WSRect& rect) const
 
 void Session::TransformRelativeRectToGlobalRect(WSRect& rect) const
 {
+    auto currScreenFoldStatus = PcFoldScreenManager::GetInstance().GetScreenFoldStatus();
+    auto needTransRect = currScreenFoldStatus != SuperFoldStatus::UNKNOWN &&
+        currScreenFoldStatus != SuperFoldStatus::FOLDED && currScreenFoldStatus != SuperFoldStatus::EXPANDED;
+    auto isSystemKeyboard = parentSession->GetSessionProperty() != nullptr &&
+        parentSession->GetSessionProperty()->IsSystemKeyboard();
+    if (isSystemKeyboard || !needTransRect) {
+        return;
+    }
     const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
         PcFoldScreenManager::GetInstance().GetDisplayRects();
     int32_t lowerScreenPosY = defaultDisplayRect.height_ + foldCreaseRect.height_;
-    auto screenHeight = defaultDisplayRect.height_ + foldCreaseRect.height_ + virtualDisplayRect.height_;
-
     if (GetSessionGlobalRect().posY_ >= lowerScreenPosY) {
         WSRect relativeRect = rect;
         rect.posY_ += lowerScreenPosY;
