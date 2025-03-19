@@ -133,7 +133,6 @@ constexpr uint32_t LIFECYCLE_ISOLATE_VERSION = 18;
 const uint32_t API_VERSION_MOD = 1000;
 constexpr uint32_t SNAPSHOT_TIMEOUT = 2000; // MS
 }
-uint32_t WindowSceneSessionImpl::maxFloatingWindowSize_ = 1920;
 std::mutex WindowSceneSessionImpl::keyboardPanelInfoChangeListenerMutex_;
 using WindowSessionImplMap = std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>>;
 std::mutex WindowSceneSessionImpl::windowAttachStateChangeListenerMutex_;
@@ -327,9 +326,6 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         PreProcessCreate();
         SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
             surfaceNode_, property_, persistentId, session, windowSystemConfig_, token);
-        if (windowSystemConfig_.maxFloatingWindowSize_ != UINT32_MAX) {
-            maxFloatingWindowSize_ = windowSystemConfig_.maxFloatingWindowSize_;
-        }
     }
     property_->SetPersistentId(persistentId);
     if (session == nullptr) {
@@ -491,9 +487,6 @@ void WindowSceneSessionImpl::UpdateWindowState()
     requestState_ = WindowState::STATE_CREATED;
     WindowType windowType = GetType();
     if (WindowHelper::IsMainWindow(windowType)) {
-        if (windowSystemConfig_.maxFloatingWindowSize_ != UINT32_MAX) {
-            maxFloatingWindowSize_ = windowSystemConfig_.maxFloatingWindowSize_;
-        }
         if (property_->GetIsNeedUpdateWindowMode()) {
             WLOGFI("UpdateWindowMode %{public}u mode %{public}u",
                 GetWindowId(), static_cast<uint32_t>(property_->GetWindowMode()));
@@ -1061,8 +1054,8 @@ WindowLimits WindowSceneSessionImpl::GetSystemSizeLimits(uint32_t displayWidth,
     uint32_t displayHeight, float vpr)
 {
     WindowLimits systemLimits;
-    systemLimits.maxWidth_ = static_cast<uint32_t>(maxFloatingWindowSize_ * vpr);
-    systemLimits.maxHeight_ = static_cast<uint32_t>(maxFloatingWindowSize_ * vpr);
+    systemLimits.maxWidth_ = static_cast<uint32_t>(windowSystemConfig_.maxFloatingWindowSize_ * vpr);
+    systemLimits.maxHeight_ = static_cast<uint32_t>(windowSystemConfig_.maxFloatingWindowSize_ * vpr);
 
     if (WindowHelper::IsMainWindow(GetType())) {
         systemLimits.minWidth_ = UpdateConfigVal(0, displayWidth, windowSystemConfig_.miniWidthOfMainWindow_,
@@ -1082,8 +1075,9 @@ WindowLimits WindowSceneSessionImpl::GetSystemSizeLimits(uint32_t displayWidth,
         systemLimits.minHeight_ = static_cast<uint32_t>(MIN_FLOATING_HEIGHT * vpr);
     }
     TLOGI(WmsLogTag::WMS_LAYOUT, "maxWidth: %{public}u, minWidth: %{public}u, maxHeight: %{public}u, "
-        "minHeight: %{public}u", systemLimits.maxWidth_, systemLimits.minWidth_,
-        systemLimits.maxHeight_, systemLimits.minHeight_);
+        "minHeight: %{public}u, maxFloatingWindowSize: %{public}u, vpr: %{public}f", systemLimits.maxWidth_,
+        systemLimits.minWidth_, systemLimits.maxHeight_, systemLimits.minHeight_,
+        windowSystemConfig_.maxFloatingWindowSize_, vpr);
     return systemLimits;
 }
 

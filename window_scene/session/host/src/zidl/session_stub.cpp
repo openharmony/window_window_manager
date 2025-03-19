@@ -1067,7 +1067,7 @@ int SessionStub::HandleTransferExtensionData(MessageParcel& data, MessageParcel&
         WLOGFE("wantParams is nullptr");
         return ERR_INVALID_VALUE;
     }
-    WSError errCode = TransferExtensionData(*wantParams);
+    auto errCode = TransferExtensionData(*wantParams);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
