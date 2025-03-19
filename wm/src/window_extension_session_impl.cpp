@@ -16,6 +16,7 @@
 #include "window_extension_session_impl.h"
 
 #include <hitrace_meter.h>
+#include <ipc_types.h>
 #include <parameters.h>
 #include <transaction/rs_interfaces.h>
 #include <transaction/rs_transaction.h>
@@ -328,22 +329,21 @@ WMError WindowExtensionSessionImpl::TransferExtensionData(const AAFwk::WantParam
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
     auto ret = hostSession->TransferExtensionData(wantParams);
-    if (ret == 0) {
+    if (ret == ERR_NONE) {
         return WMError::WM_OK;
-    } else {
-        if (context_ != nullptr) {
-            std::ostringstream oss;
-            oss << "TransferExtensionData from provider to host failed" << ",";
-            oss << " provider bundleName: " << context_->GetBundleName() << ",";
-            oss << " provider windowName: " << property_->GetWindowName() << ",";
-            oss << " errorCode: " << static_cast<int32_t>(ret) << ";";
-            int32_t res = WindowInfoReporter::GetInstance().ReportUIExtensionException(
-                static_cast<int32_t>(WindowDFXHelperType::WINDOW_UIEXTENSION_TRANSFER_DATA_FAIL),
-                getpid(), GetPersistentId(), oss.str()
-            );
-            if (res != 0) {
-                TLOGI(WmsLogTag::WMS_UIEXT, "ReportUIExtensionException message failed, res: %{public}d", res);
-            }
+    }
+    if (context_ != nullptr) {
+        std::ostringstream oss;
+        oss << "TransferExtensionData from provider to host failed" << ",";
+        oss << " provider bundleName: " << context_->GetBundleName() << ",";
+        oss << " provider windowName: " << property_->GetWindowName() << ",";
+        oss << " errorCode: " << static_cast<int32_t>(ret) << ";";
+        int32_t ret = WindowInfoReporter::GetInstance().ReportUIExtensionException(
+            static_cast<int32_t>(WindowDFXHelperType::WINDOW_UIEXTENSION_TRANSFER_DATA_FAIL),
+            getpid(), GetPersistentId(), oss.str()
+        );
+        if (ret != 0) {
+            TLOGI(WmsLogTag::WMS_UIEXT, "ReportUIExtensionException message failed, ret: %{public}d", ret);
         }
     }
     return WMError::WM_ERROR_IPC_FAILED;
