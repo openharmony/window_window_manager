@@ -100,7 +100,7 @@ void DisplayAniListener::OnCreate(DisplayId id)
         return;
     }
     std::vector<ani_ref> vec = it->second;
-    TLOGI(WmsLogTag::DMS, "vec_callback size: %{public}lu", vec.size());
+    TLOGI(WmsLogTag::DMS, "vec_callback size: %{public}u", vec.size());
     // find callbacks in vector
     for (ani_ref oneAniCallback : vec) {
         ani_boolean result;
@@ -140,7 +140,7 @@ void DisplayAniListener::OnChange(DisplayId id)
         return;
     }
     std::vector<ani_ref> vec = it->second;
-    TLOGI(WmsLogTag::DMS, "vec_callback size: %{public}lu", vec.size());
+    TLOGI(WmsLogTag::DMS, "vec_callback size: %{public}u", vec.size());
     // find callbacks in vector
     for (auto oneAniCallback : vec) {
         if (env_ == nullptr) {

@@ -77,7 +77,6 @@ ani_int DisplayManagerAni::getFoldStatus(ani_env* env)
 
 void DisplayManagerAni::getCurrentFoldCreaseRegion(ani_env* env, ani_object obj, ani_long nativeObj)
 {
-    TLOGI(WmsLogTag::DMS, "[ANI] getCurrentFoldCreaseRegion begin: %{public}ld", nativeObj);
     DisplayManagerAni* displayManagerAni = reinterpret_cast<DisplayManagerAni*>(nativeObj);
     if (displayManagerAni != nullptr) {
         displayManagerAni->onGetCurrentFoldCreaseRegion(env, obj);
@@ -118,7 +117,7 @@ void DisplayManagerAni::onGetCurrentFoldCreaseRegion(ani_env* env, ani_object ob
             "$_get", "I:Lstd/core/Object;", &currentCrease, (ani_int)i)) {
             TLOGE(WmsLogTag::DMS, "[ANI] get ani_array index %{public}u fail", (ani_int)i);
         }
-        TLOGI(WmsLogTag::DMS, "current i: %{public}lu", i);
+        TLOGI(WmsLogTag::DMS, "current i: %{public}u", i);
         DisplayAniUtils::convertRect(rects[i], static_cast<ani_object>(currentCrease), env);
     }
 }
@@ -180,7 +179,6 @@ void DisplayManagerAni::getDefaultDisplaySyncAni(ani_env* env, ani_object obj)
 void DisplayManagerAni::registerCallback(ani_env* env, ani_string type,
     ani_ref callback, ani_long nativeObj)
 {
-    TLOGI(WmsLogTag::DMS, "[ANI] start to register: %{public}ld", nativeObj);
     DisplayManagerAni* displayManagerAni = reinterpret_cast<DisplayManagerAni*>(nativeObj);
     if (displayManagerAni != nullptr) {
         displayManagerAni->onRegisterCallback(env, type, callback);
