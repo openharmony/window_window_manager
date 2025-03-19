@@ -130,7 +130,6 @@ constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_WIDTH = 40;
 constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_HEIGHT = 40;
 constexpr int32_t API_VERSION_18 = 18;
 constexpr uint32_t LIFECYCLE_ISOLATE_VERSION = 18;
-const uint32_t API_VERSION_MOD = 1000;
 constexpr uint32_t SNAPSHOT_TIMEOUT = 2000; // MS
 }
 uint32_t WindowSceneSessionImpl::maxFloatingWindowSize_ = 1920;
