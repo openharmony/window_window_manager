@@ -9600,20 +9600,9 @@ WSError SceneSessionManager::NotifyAINavigationBarShowStatus(bool isVisible, WSR
             for (auto persistentId : avoidAreaListenerSessionSet_) {
                 NotifySessionAINavigationBarChange(persistentId);
             }
-            bool isLastFrameLayoutFinished = true;
-            WSError ret = IsLastFrameLayoutFinished(isLastFrameLayoutFinished);
-            if (ret != WSError::WS_OK) {
-                TLOGE(WmsLogTag::WMS_IMMS, "isLastFrameLayoutFinishedFunc failed, ret %{public}d", ret);
-                return;
-            }
-            TLOGI(WmsLogTag::WMS_IMMS, "rootscene layout finished %{public}d", isLastFrameLayoutFinished);
-            if (isLastFrameLayoutFinished) {
-                rootSceneSession_->UpdateAvoidArea(
-                    new AvoidArea(rootSceneSession_->GetAvoidAreaByType(AvoidAreaType::TYPE_NAVIGATION_INDICATOR)),
-                    AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
-            } else {
-                rootSceneSession_->MarkAvoidAreaAsDirty();
-            }
+            rootSceneSession_->UpdateAvoidArea(
+                new AvoidArea(rootSceneSession_->GetAvoidAreaByType(AvoidAreaType::TYPE_NAVIGATION_INDICATOR)),
+                AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
         }
     }, __func__);
     return WSError::WS_OK;
