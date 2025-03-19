@@ -56,7 +56,7 @@ public:
 
     FoldStatus MatchSuperFoldStatusToFoldStatus(SuperFoldStatus superFoldStatus);
 
-    void SetSystemKeyboardStatus(bool isOn = false);
+    void SetSystemKeyboardStatus(bool isTpKeyboardOn = false);
 private:
     std::atomic<SuperFoldStatus> curState_ = SuperFoldStatus::UNKNOWN;
 
@@ -95,7 +95,7 @@ private:
     static void HandleHalfScreenDisplayNotify(sptr<ScreenSession> screenSession);
     void HandleKeyboardOffDisplayNotify(sptr<ScreenSession> screenSession);
     static void HandleFullScreenDisplayNotify(sptr<ScreenSession> screenSession);
-    void HandleSystemKeyboardStatusDisplayNotify(sptr<ScreenSession> screenSession, bool isOn = false);
+    void HandleSystemKeyboardStatusDisplayNotify(sptr<ScreenSession> screenSession, bool isTpKeyboardOn = false);
     void ReportNotifySuperFoldStatusChange(int32_t currentStatus, int32_t nextStatus, float postureAngle);
 
     static void BootFinishedCallback(const char *key, const char *value, void *context);

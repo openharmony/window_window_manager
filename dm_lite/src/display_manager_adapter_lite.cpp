@@ -248,11 +248,11 @@ VirtualScreenFlag DisplayManagerAdapterLite::GetVirtualScreenFlag(ScreenId scree
     return displayManagerServiceProxy_->GetVirtualScreenFlag(screenId);
 }
 
-DMError DisplayManagerAdapterLite::SetSystemKeyboardStatus(bool isOn)
+DMError DisplayManagerAdapterLite::SetSystemKeyboardStatus(bool isTpKeyboardOn)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
     
-    return displayManagerServiceProxy_->SetSystemKeyboardStatus(isOn);
+    return displayManagerServiceProxy_->SetSystemKeyboardStatus(isTpKeyboardOn);
 }
 
 bool ScreenManagerAdapterLite::SetSpecifiedScreenPower(ScreenId screenId, ScreenPowerState state,
