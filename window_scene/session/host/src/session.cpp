@@ -1013,7 +1013,7 @@ void Session::TransformRelativeRectToGlobalRect(WSRect& rect) const
     int32_t lowerScreenPosY = defaultDisplayRect.height_ + foldCreaseRect.height_;
     auto screenHeight = defaultDisplayRect.height_ + foldCreaseRect.height_ + virtualDisplayRect.height_;
 
-    if (GetSessionProperty()->GetDisplayId() == VIRTUAL_DISPLAY_ID || GetSessionGlobalRect().posY_ > screenHeight) {
+    if (GetSessionGlobalRect().posY_ >= lowerScreenPosY) {
         WSRect relativeRect = rect;
         rect.posY_ += lowerScreenPosY;
         TLOGI(WmsLogTag::WMS_LAYOUT, "Transform relativeRect: %{public}s to globalRect: %{public}s",
