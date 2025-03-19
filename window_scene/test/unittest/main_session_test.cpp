@@ -385,7 +385,6 @@ HWTEST_F(MainSessionTest, OnSetWindowRectAutoSave, Function | SmallTest | Level2
     };
     session->onSetWindowRectAutoSaveFunc_ = func;
     EXPECT_NE(nullptr, session->onSetWindowRectAutoSaveFunc_);
-    EXPECT_EQ(false, session->GetSessionProperty()->GetIsSaveBySpecifiedFlag());
 }
 
 /**

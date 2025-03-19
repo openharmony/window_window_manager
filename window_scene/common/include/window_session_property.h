@@ -256,8 +256,6 @@ public:
     WindowSizeLimits GetWindowSizeLimits() const;
     void SetIsFullScreenWaterfallMode(bool isFullScreenWaterfallMode);
     bool GetIsFullScreenWaterfallMode() const;
-    void SetIsSaveBySpecifiedFlag(bool isSaveBySpecifiedFlag);
-    bool GetIsSaveBySpecifiedFlag() const;
 
     /*
      * Keyboard
@@ -453,7 +451,6 @@ private:
     bool isWindowDelayRaiseEnabled_ = false;
     WindowSizeLimits windowSizeLimits_;
     bool isFullScreenWaterfallMode_ = false;
-    bool isSaveBySpecifiedFlag_ = false;
 
     /*
      * Keyboard

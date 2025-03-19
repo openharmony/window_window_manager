@@ -13191,11 +13191,13 @@ WMError SceneSessionManager::IsWindowRectAutoSave(const std::string& key, bool& 
         return WMError::WM_ERROR_INVALID_SESSION;
     }
     std::string specifiedKey = key;
-    if (sceneSession->GetSessionProperty()->GetIsSaveBySpecifiedFlag()) {
-        specifiedKey = key + sceneSession->GetSessionInfo().specifiedFlag_;
+    std::unique_lock<std::mutex> lock(getIsWindowRectAutoSaveMapMutex_);
+    if (auto iter = isSaveBySpecifiedFlagMap_.find(key); iter != isSaveBySpecifiedFlagMap_.end()) {
+        if (iter->second) {
+            specifiedKey = key + sceneSession->GetSessionInfo().specifiedFlag_;
+        }
     }
     TLOGD(WmsLogTag::WMS_MAIN, "windowId: %{public}d, specifiedKey: %{public}s", persistentId, specifiedKey.c_str());
-    std::unique_lock<std::mutex> lock(isWindowRectAutoSaveMapMutex_);
     if (auto iter = isWindowRectAutoSaveMap_.find(specifiedKey); iter != isWindowRectAutoSaveMap_.end()) {
         enabled = iter->second;
     } else {
@@ -13204,9 +13206,21 @@ WMError SceneSessionManager::IsWindowRectAutoSave(const std::string& key, bool& 
     return WMError::WM_OK;
 }
 
-void SceneSessionManager::SetIsWindowRectAutoSave(const std::string& key, bool enabled)
+void SceneSessionManager::SetIsWindowRectAutoSave(const std::string& key, bool enabled,
+    const std::string& abilityKey, bool isSaveBySpecifiedFlag)
 {
-    std::unique_lock<std::mutex> lock(isWindowRectAutoSaveMapMutex_);
+    std::unique_lock<std::mutex> lock(getIsWindowRectAutoSaveMapMutex_);
+    if (auto iter = isSaveBySpecifiedFlagMap_.find(abilityKey); iter != isSaveBySpecifiedFlagMap_.end()) {
+        if (!isSaveBySpecifiedFlag) {
+            isSaveBySpecifiedFlagMap_.erase(abilityKey);
+        } else {
+            iter->second = isSaveBySpecifiedFlag;
+        }
+    } else {
+        if (isSaveBySpecifiedFlag) {
+            isSaveBySpecifiedFlagMap_.insert({abilityKey, isSaveBySpecifiedFlag});
+        }
+    }
     if (auto iter = isWindowRectAutoSaveMap_.find(key); iter != isWindowRectAutoSaveMap_.end()) {
         if (!enabled) {
             isWindowRectAutoSaveMap_.erase(key);
