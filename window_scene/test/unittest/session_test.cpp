@@ -1707,6 +1707,7 @@ HWTEST_F(WindowSessionTest, TransformRelativeRectToGlobalRect, Function | SmallT
     EXPECT_EQ(rect.posY_, 100);
     sceneSession->globalRect_ = { 0, 9999, 2472, 1648 };
     sceneSession->winRect_ = { 0, 9999, 2472, 1648 };
+    sceneSession->TransformRelativeRectToGlobalRect(rect);
     EXPECT_NE(rect.posY_, 100);
 }
 }
