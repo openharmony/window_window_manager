@@ -17,7 +17,7 @@
 
 #include "ani.h"
 #include "display.h"
-#include "display_ani_register_manager.h"
+#include "display_ani_listener.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -25,28 +25,32 @@ namespace Rosen {
 class DisplayManagerAni {
 public:
     explicit DisplayManagerAni();
-    static void setAniEnv(ani_env* env);
+    static ani_status initDisplayManagerAni(ani_namespace displayNameSpace, ani_env* env);
 
     static ani_int getFoldDisplayModeAni(ani_env* env);
     static ani_boolean isFoldableAni(ani_env* env);
     static ani_int getFoldStatus(ani_env* env);
-    static ani_object getCurrentFoldCreaseRegion(ani_env* env, ani_object obj);
+    static void getCurrentFoldCreaseRegion(ani_env* env, ani_object obj, ani_long nativeObj);
 
     static void getAllDisplaysAni(ani_env* env, ani_object arrayObj);
-    static ani_status getDisplayByIdSyncAni(ani_env* env, ani_object obj, ani_int displayId);
-    static ani_status getDefaultDisplaySyncAni(ani_env* env, ani_object obj);
+    static void getDisplayByIdSyncAni(ani_env* env, ani_object obj, ani_double displayId);
+    static void getDefaultDisplaySyncAni(ani_env* env, ani_object obj);
 
-    static ani_object registerCallback(ani_env* env, ani_string type,
-        ani_ref callbackInternal, ani_long nativeObj);
-    static ani_object unRegisterCallback(ani_env* env, ani_string type,
-        ani_ref callbackInternal, ani_long nativeObj);
-
+    static void registerCallback(ani_env* env, ani_string type,
+        ani_ref callback, ani_long nativeObj);
+    static void unRegisterCallback(ani_env* env, ani_string type,
+        ani_ref callback, ani_long nativeObj);
+    DMError UnRegisterDisplayListenerWithType(std::string type, ani_env* env, ani_ref callback);
+    DMError UnregisterAllDisplayListenerWithType(std::string type);
+    DmErrorCode processRegisterCallback(ani_env* env, std::string& typeStr,
+        sptr<DisplayAniListener> displayAniListener);
 private:
-    ani_object onRegisterCallback(ani_env* env, ani_string type, ani_object callbackInternal);
-    ani_object onUnRegisterCallback(ani_env* env, ani_string type, ani_ref callback);
+    void onRegisterCallback(ani_env* env, ani_string type, ani_ref callback);
+    void onUnRegisterCallback(ani_env* env, ani_string type, ani_ref callback);
+    void onGetCurrentFoldCreaseRegion(ani_env* env, ani_object obj);
     std::mutex mtx_;
-    std::unique_ptr<OHOS::Rosen::DisplayAniRegisterManager> registerManager_ = nullptr;
-    static ani_env* env_;
+    std::map<std::string, std::map<ani_ref, sptr<DisplayAniListener>>> jsCbMap_;
+    std::map<std::string, sptr<DisplayAniListener>> jsCbMap1_;
 };
 }
 }

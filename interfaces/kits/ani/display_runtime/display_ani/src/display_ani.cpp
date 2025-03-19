@@ -32,7 +32,6 @@ namespace Rosen {
 
 // construct, set registerManager.
 DisplayAni::DisplayAni(const std::shared_ptr<OHOS::Rosen::Display>& display)
-    : registerManager_(std::make_unique<DisplayAniRegisterManager>())
 {
 }
 
@@ -51,7 +50,6 @@ void DisplayAni::getCutoutInfo(ani_env* env, ani_object obj, ani_object cutoutIn
     if (ANI_OK != status) {
         TLOGE(WmsLogTag::DMS, "[ANI] get field bounding rects fail, ani_status = %{public}d", status);
     }
-
     ani_double length;
     if (ANI_OK != env->Object_GetPropertyByName_Double(static_cast<ani_object>(boundingRects), "length", &length)) {
         TLOGE(WmsLogTag::DMS, "[ANI] get ani_array len fail");
@@ -82,28 +80,28 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         TLOGE(WmsLogTag::DMS, "[ANI] null env");
         return ANI_NOT_FOUND;
     }
-    DisplayManagerAni::setAniEnv(env);
     ani_namespace nsp;
     if ((ret = env->FindNamespace("L@ohos/display/display;", &nsp)) != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] null env %{public}u", ret);
         return ANI_NOT_FOUND;
     }
+    DisplayManagerAni::initDisplayManagerAni(nsp, env);
     std::array funcs = {
         ani_native_function {"isFoldable", ":Z", reinterpret_cast<void *>(DisplayManagerAni::isFoldableAni)},
-        ani_native_function {"getFoldDisplayMode", ":I",
+        ani_native_function {"getFoldDisplayModeNative", ":I",
             reinterpret_cast<void *>(DisplayManagerAni::getFoldDisplayModeAni)},
-        ani_native_function {"getFoldStatus", ":I", reinterpret_cast<void *>(DisplayManagerAni::getFoldStatus)},
-        ani_native_function {"getCurrentFoldCreaseRegionNative", "L@ohos/display/display/FoldCreaseRegion;:I",
+        ani_native_function {"getFoldStatusNative", ":I", reinterpret_cast<void *>(DisplayManagerAni::getFoldStatus)},
+        ani_native_function {"getCurrentFoldCreaseRegionNative", "Lstd/core/Object;J:V",
             reinterpret_cast<void *>(DisplayManagerAni::getCurrentFoldCreaseRegion)},
-        ani_native_function {"getDisplayByIdSyncNative", "Lstd/core/Object;I:I",
+        ani_native_function {"getDisplayByIdSyncNative", "Lstd/core/Object;D:V",
             reinterpret_cast<void *>(DisplayManagerAni::getDisplayByIdSyncAni)},
-        ani_native_function {"getDefaultDisplaySyncNative", "Lstd/core/Object;:I",
+        ani_native_function {"getDefaultDisplaySyncNative", "Lstd/core/Object;:V",
             reinterpret_cast<void *>(DisplayManagerAni::getDefaultDisplaySyncAni)},
         ani_native_function {"getAllDisplaysSyncNative", "Lescompat/Array;:V",
             reinterpret_cast<void *>(DisplayManagerAni::getAllDisplaysAni)},
-        ani_native_function {"syncOn", "Lstd/core/String;Lstd/core/Object;J:V",
+        ani_native_function {"syncOn", nullptr,
             reinterpret_cast<void *>(DisplayManagerAni::registerCallback)},
-        ani_native_function {"syncOff", "Lstd/core/String;Lstd/core/Object;J:V",
+        ani_native_function {"syncOff", nullptr,
             reinterpret_cast<void *>(DisplayManagerAni::unRegisterCallback)}
     };
     if ((ret = env->Namespace_BindNativeFunctions(nsp, funcs.data(), funcs.size()))) {

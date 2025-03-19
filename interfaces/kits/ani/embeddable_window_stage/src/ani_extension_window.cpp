@@ -264,6 +264,7 @@ extern "C" {
 ANI_EXPORT ani_status ExtensionWindow_ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
     using namespace OHOS::Rosen;
+    TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] init ExtensionWindow begin");
     ani_status ret;
     ani_env* env;
     if ((ret = vm->GetEnv(ANI_VERSION_1, &env)) != ANI_OK) {
@@ -311,6 +312,7 @@ ANI_EXPORT ani_status ExtensionWindow_ANI_Constructor(ani_vm *vm, uint32_t *resu
         return ANI_NOT_FOUND;
     }
 
+    TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] init ExtensionWindow end");
     return ANI_OK;
 }
 }

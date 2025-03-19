@@ -12,14 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import type { AsyncCallback, Callback} from '@ohos.base';
+import { BusinessError } from '@ohos.base';
+import colorSpaceManager from '@ohos.graphics.colorSpaceManager';
+import hdrCapability from '@ohos.graphics.hdrCapability';
+
 export default namespace display {
 
 loadLibrary('displayani_kit.z');
-
-export class BusinessError extends Error {
-  code: number;
-  message: string;
-}
 
 export interface Rect {
     left: number;
@@ -87,7 +87,7 @@ export class CutoutInfoImpl implements CutoutInfo {
     readonly waterfallDisplayAreaRects: WaterfallDisplayAreaRects;
 }
 
-interface FoldCreaseRegion {
+export interface FoldCreaseRegion {
     readonly displayId: number;
 
     readonly creaseRects: Array<Rect>;
@@ -95,7 +95,10 @@ interface FoldCreaseRegion {
 
 export class FoldCreaseRegionImpl implements FoldCreaseRegion {
     constructor() {
-        this.creaseRects = new Array<Rect>();
+        this.creaseRects = new Array<Rect>(10);
+        for (let i = 0; i < this.creaseRects.length; i++) {
+            this.creaseRects[i] = new RectImpl();
+        }
     }
 
     readonly displayId: number;
@@ -128,7 +131,6 @@ export enum Orientation {
   }
 
 export enum FoldStatus {
-
     FOLD_STATUS_UNKNOWN = 0,
 
     FOLD_STATUS_EXPANDED,
@@ -136,7 +138,7 @@ export enum FoldStatus {
     FOLD_STATUS_FOLDED,
 
     FOLD_STATUS_HALF_FOLDED
-}
+  }
 
 enum DisplayState {
 
@@ -153,89 +155,6 @@ enum DisplayState {
     STATE_VR,
 
     STATE_ON_SUSPEND
-}
-
-enum ColorSpace {
-
-    UNKNOWN = 0,
-
-    ADOBE_RGB_1998 = 1,
-
-    DCI_P3 = 2,
-
-    DISPLAY_P3 = 3,
-
-    SRGB = 4,
-
-    BT709 = 6,
-
-    BT601_EBU = 7,
-
-    BT601_SMPTE_C = 8,
-
-    BT2020_HLG = 9,
-
-    BT2020_PQ = 10,
-
-    P3_HLG = 11,
-
-    P3_PQ = 12,
-
-    ADOBE_RGB_1998_LIMIT = 13,
-
-    DISPLAY_P3_LIMIT = 14,
-
-    SRGB_LIMIT = 15,
-
-    BT709_LIMIT = 16,
-
-    BT601_EBU_LIMIT = 17,
-
-    BT601_SMPTE_C_LIMIT = 18,
-
-    BT2020_HLG_LIMIT = 19,
-
-    BT2020_PQ_LIMIT = 20,
-
-    P3_HLG_LIMIT = 21,
-
-    P3_PQ_LIMIT = 22,
-
-    LINEAR_P3 = 23,
-
-    LINEAR_SRGB = 24,
-
-    LINEAR_BT709 = 24,
-
-    LINEAR_BT2020 = 25,
-
-    DISPLAY_SRGB = 4,
-
-    DISPLAY_P3_SRGB = 3,
-
-    DISPLAY_P3_HLG = 11,
-
-    DISPLAY_P3_PQ = 12,
-
-    CUSTOM = 5,
-}
-
-enum HDRFormat {
-    NONE = 0,
-
-    VIDEO_HLG = 1,
-
-    VIDEO_HDR10 = 2,
-
-    VIDEO_HDR_VIVID = 3,
-
-    IMAGE_HDR_VIVID_DUAL = 4,
-
-    IMAGE_HDR_VIVID_SINGLE = 5,
-
-    IMAGE_HDR_ISO_DUAL = 6,
-
-    IMAGE_HDR_ISO_SINGLE = 7,
 }
 
 export interface Display {
@@ -271,37 +190,21 @@ export interface Display {
 
     yDPI: double;
 
-    colorSpaces: Array<ColorSpace>;
+    colorSpaces: Array<colorSpaceManager.ColorSpace>;
 
-    hdrFormats: Array<HDRFormat>;
+    hdrFormats: Array<hdrCapability.HDRFormat>;
 
     getCutoutInfo(callback: AsyncCallback<CutoutInfo>): void;
 
     getCutoutInfo(): Promise<CutoutInfo>;
 }
 
-export type Callback<T> = (data: T) => void;
-
-export class DisplayEventCallbackInternal<T> {
-    private callback: Callback<T>;
-
-    constructor(cb: Callback<T>) {
-        this.callback = cb;
-    }
-
-    public invoke(data: T) {
-        this.callback(data);
-    }
-}
-
-export type AsyncCallback<T> = (err: BusinessError, data: T) => void;
-
 export class DisplayImpl implements Display {
     static { loadLibrary("displayani_kit.z"); }
 
     constructor() {
-        this.colorSpaces = new Array<ColorSpace>();
-        this.hdrFormats = new Array<HDRFormat>();
+        this.colorSpaces = new Array<colorSpaceManager.ColorSpace>();
+        this.hdrFormats = new Array<hdrCapability.HDRFormat>();
     }
 
     id: double;
@@ -336,9 +239,9 @@ export class DisplayImpl implements Display {
 
     yDPI: double;
 
-    colorSpaces: Array<ColorSpace>;
+    colorSpaces: Array<colorSpaceManager.ColorSpace>;
 
-    hdrFormats: Array<HDRFormat>;
+    hdrFormats: Array<hdrCapability.HDRFormat>;
 
     getCutoutInfo(callback: AsyncCallback<CutoutInfo>): void {
         taskpool.execute((): CutoutInfo => {
@@ -384,26 +287,50 @@ function minusRectArray(rectArr: Array<Rect>): void {
 
 export native function isFoldable(): boolean;
 
-export native function getFoldDisplayMode(): FoldDisplayMode;
+export function getFoldDisplayMode(): FoldDisplayMode {
+    let res = getFoldDisplayModeNative();
+    return res as FoldDisplayMode;
+}
 
-export native function getFoldStatus(): FoldStatus;
+export native function getFoldDisplayModeNative(): int;
+
+export function getFoldStatus(): FoldStatus{
+    let res = getFoldStatusNative();
+    return res as FoldStatus;
+}
+
+export native function getFoldStatusNative(): int;
 
 export function getCurrentFoldCreaseRegion(): FoldCreaseRegion {
-    let foldCreaseRegion:FoldCreaseRegion = new FoldCreaseRegionImpl();
-    // getCurrentFoldCreaseRegionNative(foldCreaseRegion);
+    let foldCreaseRegion: FoldCreaseRegion = new FoldCreaseRegionImpl();
+    getCurrentFoldCreaseRegionNative(foldCreaseRegion as object, displayMgrRef);
+    minusCreaseRects(foldCreaseRegion);
     return foldCreaseRegion;
 }
 
-export native function getCurrentFoldCreaseRegionNative(foldCreaseRegion : FoldCreaseRegion): int;
+function minusCreaseRects(foldCreaseRegionObj: FoldCreaseRegion): void {
+    let foldCreaseRegion: FoldCreaseRegion = foldCreaseRegionObj as FoldCreaseRegion;
+    let creaseRects: Array<Rect> = foldCreaseRegion.creaseRects;
+    let i = 0;
+    for (; i < creaseRects.length; i++) {
+        if (creaseRects[i].left == 0 && creaseRects[i].top == 0 && 
+            creaseRects[i].width == 0 && creaseRects[i].height == 0) {
+                break;
+        }
+    }
+    creaseRects.splice(i);
+}
+
+export native function getCurrentFoldCreaseRegionNative(foldCreaseRegion: object, nativeObj: long): void;
 
 // display sync interfaces
-export function getDisplayByIdSync(displayId: int): Display {
+export function getDisplayByIdSync(displayId: number): Display {
     let display:Display = new DisplayImpl();
     getDisplayByIdSyncNative(display as object, displayId);
     return display;
 }
 
-export native function getDisplayByIdSyncNative(obj: object, displayId: int): int;
+export native function getDisplayByIdSyncNative(obj: object, displayId: number): void;
 
 export function getDefaultDisplaySync(): Display {
     let display:Display = new DisplayImpl();
@@ -411,28 +338,29 @@ export function getDefaultDisplaySync(): Display {
     return display;
 }
 
-export native function getDefaultDisplaySyncNative(obj: object): int;
+export native function getDefaultDisplaySyncNative(obj: object): void;
 
 export native function getAllDisplaysSyncNative(displayArray: Array<Display>): void;
 
-export function getAllDisplays(callback: AsyncCallback<Array<Display>>): void {
-    taskpool.execute((): Array<Display> => {
-        let res: Array<Display> = new Array<Display>(5);
-        for (let i = 0; i < res.length; i++) {
-            res[i] = new DisplayImpl();
-        }
-        getAllDisplaysSyncNative(res);
-        minusDisplayArray(res);
-        return res;
-    }).then((ret: NullishType) => {
-        callback(new BusinessError(), ret as Array<Display>);
-    }).catch((err: NullishType) => {
-        callback(err as BusinessError, new Array<Display>());
-    });
-}
-
-export function getAllDisplays(): Promise<Array<Display>> {
-    return new Promise<Array<Display>>((resolve: (value: Array<Display>) => void, reject: (error: BusinessError) => void ) => {
+export function getAllDisplays(callback?: AsyncCallback<Array<Display>>): undefined | Promise<Array<Display>> {
+    if (callback != undefined) {
+        let AsyncCallback: AsyncCallback<Array<Display>> = callback as AsyncCallback<Array<Display>>;
+        taskpool.execute((): Array<Display> => {
+            let res: Array<Display> = new Array<Display>(5);
+            for (let i = 0; i < res.length; i++) {
+                res[i] = new DisplayImpl();
+            }
+            getAllDisplaysSyncNative(res);
+            minusDisplayArray(res);
+            return res;
+        }).then((ret: NullishType) => {
+            AsyncCallback(new BusinessError(), ret as Array<Display>);
+        }).catch((err: NullishType) => {
+            AsyncCallback(err as BusinessError, new Array<Display>());
+        });
+        return undefined;
+    } else {
+        return new Promise<Array<Display>>((resolve: (value: Array<Display>) => void, reject: (error: BusinessError) => void ) => {
         taskpool.execute((): Array<Display> => {
             let res: Array<Display> = new Array<Display>(5);
             for (let i = 0; i < res.length; i++) {
@@ -447,6 +375,7 @@ export function getAllDisplays(): Promise<Array<Display>> {
             reject(err as BusinessError);
         });
     });
+    }
 }
 
 function minusDisplayArray(displayArr: Array<Display>): void {
@@ -463,19 +392,39 @@ export function getNewDisplay(): DisplayImpl {
     return new DisplayImpl();
 }
 
-export function on(type: 'add' | 'remove' | 'change', callback: Callback<number>): void {
-    let callbackInternal:DisplayEventCallbackInternal<number> = new DisplayEventCallbackInternal<number>(callback);
-    syncOn(type, callbackInternal as object, displayMgrRef);
-}
-
-export native function syncOn(type: 'add' | 'remove' | 'change', callback: object, nativeObj: long): void;
-
-export function off(type: 'foldDisplayModeChange' | 'foldStatusChange', callback: Callback<int>): void
+export function on(type: 'add' | 'remove' | 'change' | 'privateModeChange' | 'foldStatusChange' |
+    'foldAngleChange' | 'captureStatusChange' | 'foldDisplayModeChange',
+    callback: Callback<number> | Callback<boolean> | Callback<FoldStatus> | Callback<Array<number>> |
+    Callback<boolean> | Callback<FoldDisplayMode>): void
 {
-    let callbackInternal:DisplayEventCallbackInternal<int> = new DisplayEventCallbackInternal<int>(callback);
-    syncOff(type, callbackInternal as object, displayMgrRef);
+    syncOn(type, callback as object, displayMgrRef);
 }
-export native function syncOff(type: 'foldDisplayModeChange' | 'foldStatusChange', callback: object, nativeObj: long) : void;
+
+export native function syncOn(type: 'add' | 'remove' | 'change' | 'privateModeChange' | 'foldStatusChange' |
+    'foldAngleChange' | 'captureStatusChange' | 'foldDisplayModeChange',
+    callback: object, nativeObj: long): void;
+
+export function off(type: 'add' | 'remove' | 'change' | 'privateModeChange' | 'foldStatusChange' |
+      'foldAngleChange' | 'captureStatusChange' | 'foldDisplayModeChange',
+      callback?: Callback<number> | Callback<boolean> | Callback<FoldStatus> | Callback<Array<number>> |
+      Callback<boolean> | Callback<FoldDisplayMode>): void
+{
+    syncOff(type, callback, displayMgrRef);
+}
+
+export native function syncOff(type: 'add' | 'remove' | 'change' | 'privateModeChange' | 'foldStatusChange' |
+      'foldAngleChange' | 'captureStatusChange' | 'foldDisplayModeChange',
+    callback?: object, nativeObj: long) : void;
+
+export function displayEventCallBack(cb: object, cbArg: double): void {
+    const func = cb as (cbArg: double) => void;
+    func(cbArg as double);
+}
+
+export function foldStatusCallback(cb: object, cbArg: int): void {
+    const func = cb as (cbArg: FoldStatus) => void;
+    func(cbArg as FoldStatus);
+}
 
 export let displayMgrRef: long;
 
