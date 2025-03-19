@@ -7512,8 +7512,10 @@ void SceneSession::UpdateNewSizeForPCWindow()
 
         float newVpr = display->GetVirtualPixelRatio();
         if (CalcNewWindowRectIfNeed(availableArea, newVpr)) {
+            WSRect rect = winRect_;
+            CalcNewClientRectForSuperFold(rect);
+            sessionStage_->UpdateRect(rect, SizeChangeReason::UPDATE_DPI_SYNC);
             NotifySessionRectChange(winRect_, SizeChangeReason::UPDATE_DPI_SYNC);
-            sessionStage_->UpdateRect(winRect_, SizeChangeReason::UPDATE_DPI_SYNC);
             TLOGI(WmsLogTag::WMS_LAYOUT_PC, "left: %{public}d, top: %{public}d, width: %{public}u, "
                 "height: %{public}u, Id: %{public}u", winRect_.posX_, winRect_.posY_, winRect_.width_,
                 winRect_.height_, GetPersistentId());
@@ -7527,7 +7529,8 @@ bool SceneSession::CalcNewWindowRectIfNeed(DMRect& availableArea, float newVpr)
     float currVpr = 0.0f;
     if (auto property = GetSessionProperty()) {
         currVpr = property->GetLastLimitsVpr();
-        TLOGD(WmsLogTag::WMS_LAYOUT_PC, "currVpr: %{public}f Id: %{public}u", currVpr, GetPersistentId());
+        TLOGI(WmsLogTag::WMS_LAYOUT_PC, "currVpr: %{public}f, newVpr: %{public}f, Id: %{public}u", currVpr, newVpr,
+            GetPersistentId());
     }
     if (MathHelper::NearZero(currVpr - newVpr) || MathHelper::NearZero(currVpr)) {
         TLOGW(WmsLogTag::WMS_LAYOUT_PC, "need not update new rect, currVpr: %{public}f newVpr: %{public}f "
@@ -7538,21 +7541,21 @@ bool SceneSession::CalcNewWindowRectIfNeed(DMRect& availableArea, float newVpr)
     int32_t top = winRect_.posY_;
     uint32_t width = static_cast<uint32_t>(winRect_.width_ * newVpr / currVpr);
     uint32_t height = static_cast<uint32_t>(winRect_.height_ * newVpr / currVpr);
-    int32_t statusBarHeight = 0;
-    if (isStatusBarVisible_ && IsPrimaryDisplay()) {
-        statusBarHeight = GetStatusBarHeight();
-    }
+    int32_t topThreshold = availableArea.posY_;
+    int32_t bottomThreshold = static_cast<int32_t>(availableArea.posY_ + availableArea.height_);
+
+    UpdateSuperFoldThredshold(topThreshold, bottomThreshold, availableArea);
     width = MathHelper::Min(width, availableArea.width_);
     height = MathHelper::Min(height, availableArea.height_);
-    bool needMove = top < statusBarHeight || left < 0 ||
-        top > static_cast<int32_t>(availableArea.height_ - height) ||
+    bool needMove = top < topThreshold || left < 0 ||
+        top > static_cast<int32_t>(bottomThreshold - height) ||
         left > static_cast<int32_t>(availableArea.width_ - width) || displayChangedByMoveDrag_;
     if (displayChangedByMoveDrag_ && moveDragController_) {
         int32_t pointerPosX = moveDragController_->GetLastMovePointerPosX();
         left = pointerPosX - static_cast<int32_t>((pointerPosX -left) * newVpr / currVpr);
     } else {
-        top = MathHelper::Min(top, static_cast<int32_t>(availableArea.height_ - height));
-        top = MathHelper::Max(top, statusBarHeight);
+        top = MathHelper::Min(top, static_cast<int32_t>(bottomThreshold - height));
+        top = MathHelper::Max(top, topThreshold);
         left = MathHelper::Min(left, static_cast<int32_t>(availableArea.width_ - width));
         left = MathHelper::Max(left, 0);
     }
@@ -7565,21 +7568,6 @@ bool SceneSession::CalcNewWindowRectIfNeed(DMRect& availableArea, float newVpr)
     return true;
 }
 
-bool SceneSession::IsPrimaryDisplay() const
-{
-    if (auto property = GetSessionProperty()) {
-        auto display = DisplayManager::GetInstance().GetPrimaryDisplaySync();
-        if (display == nullptr) {
-            TLOGE(WmsLogTag::WMS_LAYOUT_PC, "display is null.");
-            return false;
-        }
-        if (auto displayInfo = display->GetDisplayInfo()) {
-            return property->GetDisplayId() == displayInfo->GetDisplayId();
-        }
-    }
-    return false;
-}
-
 void SceneSession::SaveLastDensity()
 {
     if (auto property = GetSessionProperty()) {
@@ -7588,6 +7576,47 @@ void SceneSession::SaveLastDensity()
             property->SetLastLimitsVpr(display->GetVirtualPixelRatio());
         }
     }
+}
+
+void SceneSession::CalcNewClientRectForSuperFold(WSRect& rect)
+{
+    auto currScreenFoldStatus = PcFoldScreenManager::GetInstance().GetScreenFoldStatus();
+    if (currScreenFoldStatus == SuperFoldStatus::HALF_FOLDED) {
+        sptr<FoldCreaseRegion> creaseRegion = DisplayManager::GetInstance().GetCurrentFoldCreaseRegion();
+        if (creaseRegion != nullptr) {
+            std::vector<DMRect> creaseRects = creaseRegion->GetCreaseRects();
+            if (creaseRects.size() > 0 && winRect_.posY_ >= creaseRects[0].posY_ + creaseRects[0].height_) {
+                rect.posY_ = winRect_.posY_ - creaseRects[0].posY_ - creaseRects[0].height_;
+            }
+        }
+    }
+}
+
+void SceneSession::UpdateSuperFoldThredshold(int32_t& topThreshold, int32_t& bottomThreshold, DMRect& availableArea)
+{
+    auto currScreenFoldStatus = PcFoldScreenManager::GetInstance().GetScreenFoldStatus();
+    if (currScreenFoldStatus == SuperFoldStatus::HALF_FOLDED) {
+        sptr<FoldCreaseRegion> creaseRegion = DisplayManager::GetInstance().GetCurrentFoldCreaseRegion();
+        if (creaseRegion != nullptr) {
+            std::vector<DMRect> creaseRects = creaseRegion->GetCreaseRects();
+            if (creaseRects.size() > 0 && winRect_.posY_ >= creaseRects[0].posY_ + creaseRects[0].height_) {
+                int32_t dockHeight = GetDockHeight();
+                topThreshold = creaseRects[0].posY_ + creaseRects[0].height_;
+                bottomThreshold = static_cast<int32_t>(creaseRects[0].posY_ + creaseRects[0].height_ +
+                    availableArea.height_ - dockHeight);
+                TLOGW(WmsLogTag::WMS_LAYOUT_PC, "topThreshold: %{public}d, bottomThreshold: %{public}d "
+                    "Id: %{public}u", topThreshold, bottomThreshold, GetPersistentId());
+            }
+        }
+    }
+}
+
+void SceneSession::SetWindowRect(int32_t posX, int32_t posY, uint32_t width, uint32_t height)
+{
+    winRect_.posX_ = posX;
+    winRect_.posY_ = posY;
+    winRect_.width_ = width;
+    winRect_.height_ = height;
 }
 
 void SceneSession::NotifyUpdateFlagCallback(NotifyUpdateFlagFunc&& func)
