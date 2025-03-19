@@ -3332,7 +3332,7 @@ bool SceneSessionManager::IsPiPForbidden(const sptr<WindowSessionProperty>& prop
     }
     std::string screenName = screenSession->GetName();
     if (type == WindowType::WINDOW_TYPE_PIP &&
-       (screenName == "HiCar" || screenName == "SuperLauncher")) {
+       (screenName == "HiCar" || screenName == "SuperLauncher" || screenName == "PadWithCar")) {
         TLOGI(WmsLogTag::WMS_PIP, "screen name %{public}s", screenName.c_str());
         return true;
     }
