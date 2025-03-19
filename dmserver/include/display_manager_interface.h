@@ -293,7 +293,7 @@ public:
         return DMError::DM_OK;
     }
 
-    virtual DMError SetSystemKeyboardStatus(bool isOn = false)
+    virtual DMError SetSystemKeyboardStatus(bool isTpKeyboardOn = false)
     {
         return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
     }
