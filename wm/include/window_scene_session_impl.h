@@ -234,7 +234,6 @@ public:
     float GetCustomDensity() const override;
     WMError SetCustomDensity(float density) override;
     WMError GetWindowDensityInfo(WindowDensityInfo& densityInfo) override;
-    uint32_t GetApiCompatibleVersion() const override;
 
     /*
      * Window Decor
