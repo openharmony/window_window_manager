@@ -104,7 +104,7 @@ void DisplayAniListener::OnCreate(DisplayId id)
     // find callbacks in vector
     for (ani_ref oneAniCallback : vec) {
         ani_boolean result;
-        if (ANI_OK != env_->Reference_IsUndefined(oneAniCallback ,&result)) {
+        if (ANI_OK != env_->Reference_IsUndefined(oneAniCallback, &result)) {
             TLOGE(WmsLogTag::DMS, "[ANI] OnCreate Callback is undefined, return");
             return;
         }
