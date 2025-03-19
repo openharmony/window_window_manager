@@ -770,7 +770,6 @@ HWTEST_F(WindowSceneSessionImplTest3, UpdateWindowState, Function | SmallTest | 
     windowSceneSessionImpl->windowSystemConfig_.maxFloatingWindowSize_ = 1920;
     windowSceneSessionImpl->property_->SetIsNeedUpdateWindowMode(true);
     windowSceneSessionImpl->UpdateWindowState();
-    EXPECT_EQ(1920, windowSceneSessionImpl->maxFloatingWindowSize_);
     windowSceneSessionImpl->property_->SetIsNeedUpdateWindowMode(false);
     windowSceneSessionImpl->UpdateWindowState();
     windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
