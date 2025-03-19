@@ -22,6 +22,15 @@
       ],
       "@ohos.display": [
         "./display.ets"
+      ],
+      "@ohos.base": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.base.d.ets"
+      ],
+      "@ohos.graphics.colorSpaceManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.graphics.colorSpaceManager.d.ets"
+      ],
+      "@ohos.graphics.hdrCapability": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.graphics.hdrCapability.d.ets"
       ]
     },
     "outDir": "../cache",

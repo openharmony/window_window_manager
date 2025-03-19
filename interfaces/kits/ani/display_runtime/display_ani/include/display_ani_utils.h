@@ -36,7 +36,7 @@ static void convertWaterArea(WaterfallDisplayAreaRects waterfallDisplayAreaRects
 
 static ani_status cvtDisplay(sptr<Display> display, ani_env* env, ani_object obj);
 
-static void GetStdString(ani_env *env, ani_string str, std::string &result);
+static ani_status GetStdString(ani_env *env, ani_string ani_str, std::string &result);
 
 static ani_status NewAniObject(ani_env* env, ani_class cls, const char *signature, ani_object* result, ...);
 
@@ -47,6 +47,9 @@ static ani_object CreateAniUndefined(ani_env* env);
 static void CreateAniArrayInt(ani_env* env, ani_size size, ani_array_int *aniArray, std::vector<uint32_t> vec);
 
 static ani_status GetAniString(ani_env* env, const std::string& str, ani_string* result);
+
+static ani_status CallAniFunctionVoid(ani_env *env, const char* ns,
+    const char* fn, const char* signature, ...);
 };
 }
 }
