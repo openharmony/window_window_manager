@@ -83,7 +83,7 @@ public:
      * UIExtension
      */
     WSError TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want) override;
-    WSError TransferExtensionData(const AAFwk::WantParams& wantParams) override;
+    int32_t TransferExtensionData(const AAFwk::WantParams& wantParams) override;
     WSError TransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
         int64_t uiExtensionIdLevel) override;
     void NotifySyncOn() override;
