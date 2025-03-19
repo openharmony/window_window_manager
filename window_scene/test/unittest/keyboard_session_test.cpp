@@ -303,6 +303,34 @@ HWTEST_F(KeyboardSessionTest, NotifyOccupiedAreaChangeInfo, Function | SmallTest
 }
 
 /**
+ * @tc.name: NotifyOccupiedAreaChangeInfo02
+ * @tc.desc: NotifyOccupiedAreaChangeInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest, NotifyOccupiedAreaChangeInfo02, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "NotifyOccupiedAreaChangeInfo02";
+    info.bundleName_ = "NotifyOccupiedAreaChangeInfo02";
+    sptr<SceneSession::SpecificSessionCallback> specificCb =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    EXPECT_NE(specificCb, nullptr);
+    sptr<KeyboardSession::KeyboardSessionCallback> keyboardCb =
+        sptr<KeyboardSession::KeyboardSessionCallback>::MakeSptr();
+    EXPECT_NE(keyboardCb, nullptr);
+    sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, specificCb, keyboardCb);
+    EXPECT_NE(keyboardSession, nullptr);
+    sptr<SceneSession> callingSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    WSRect rect = { 0, 0, 1260, 2720 };
+    WSRect occupiedArea = { 0, 1700, 1260, 1020 };
+    // test CalculateSafeRectForMidScene
+    callingSession->SetIsMidScene(true);
+    keyboardSession->NotifyOccupiedAreaChangeInfo(callingSession, rect, occupiedArea);
+    WSRect lastRect =  { 0, 0, 0, 0 };
+    EXPECT_NE(callingSession->GetLastSafeRect(), lastRect);
+}
+
+/**
  * @tc.name: NotifyRootSceneOccupiedAreaChange
  * @tc.desc: NotifyRootSceneOccupiedAreaChange
  * @tc.type: FUNC
