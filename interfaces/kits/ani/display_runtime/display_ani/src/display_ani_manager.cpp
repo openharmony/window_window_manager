@@ -34,6 +34,7 @@ namespace Rosen {
 
 DisplayManagerAni::DisplayManagerAni()
 {
+
 }
 
 ani_status DisplayManagerAni::initDisplayManagerAni(ani_namespace displayNameSpace, ani_env* env)
@@ -75,24 +76,52 @@ ani_int DisplayManagerAni::getFoldStatus(ani_env* env)
     return static_cast<ani_int>(status);
 }
 
-ani_object DisplayManagerAni::getCurrentFoldCreaseRegion(ani_env* env, ani_object obj)
+void DisplayManagerAni::getCurrentFoldCreaseRegion(ani_env* env, ani_object obj, ani_long nativeObj)
 {
-    auto region = SingletonContainer::Get<DisplayManager>().GetCurrentFoldCreaseRegion();
-    ani_class rectCls;
-    if (ANI_OK != env->FindClass("L@ohos/display/display/RectImpl;", &rectCls)) {
-        TLOGE(WmsLogTag::DMS, "[ANI] null class RectImpl");
-        return obj;
+    TLOGI(WmsLogTag::DMS, "[ANI] getCurrentFoldCreaseRegion begin: %{public}ld", nativeObj);
+    DisplayManagerAni* displayManagerAni = reinterpret_cast<DisplayManagerAni*>(nativeObj);
+    if (displayManagerAni != nullptr) {
+        displayManagerAni->onGetCurrentFoldCreaseRegion(env, obj);
+    } else {
+        TLOGI(WmsLogTag::DMS, "[ANI] null ptr");
     }
-    ani_int displayId = static_cast<ani_int>(region->GetDisplayId());
+}
+
+void DisplayManagerAni::onGetCurrentFoldCreaseRegion(ani_env* env, ani_object obj)
+{
+    TLOGI(WmsLogTag::DMS, "[ANI] getCurrentFoldCreaseRegion begin instance");
+    sptr<FoldCreaseRegion> region = SingletonContainer::Get<DisplayManager>().GetCurrentFoldCreaseRegion();
+    if (region == nullptr) {
+        return;
+    }
+    TLOGI(WmsLogTag::DMS, "[ANI] SingletonContainer getCurrentFoldCreaseRegion");
+    uint64_t displayId = region->GetDisplayId();
     std::vector<DMRect> rects = region->GetCreaseRects();
-    ani_array_ref aniRects = nullptr;
-    if (ANI_OK != env->Object_SetFieldByName_Int(obj, "<property>displayId", displayId)) {
+    if (rects.size() == 0) {
+        return;
+    }
+    TLOGI(WmsLogTag::DMS, "[ANI] DisplayManager getCurrentFoldCreaseRegion success %{public}d", (int)displayId);
+    if (ANI_OK != env->Object_SetFieldByName_Double(obj, "<property>displayId", (ani_double)displayId)) {
         TLOGE(WmsLogTag::DMS, "[ANI] set displayId field fail");
     }
-    if (ANI_OK != env->Object_SetFieldByName_Ref(obj, "<property>creaseRects", aniRects)) {
-        TLOGE(WmsLogTag::DMS, "[ANI] set creaseRects field fail");
+    ani_ref creaseRectsObj{};
+    if (ANI_OK != env->Object_GetFieldByName_Ref(obj, "<property>creaseRects", &creaseRectsObj)) {
+        TLOGE(WmsLogTag::DMS, "[ANI] get ani_array len fail");
     }
-    return obj;
+    ani_double length;
+    if (ANI_OK != env->Object_GetPropertyByName_Double(static_cast<ani_object>(creaseRectsObj), "length", &length)) {
+        TLOGE(WmsLogTag::DMS, "[ANI] get ani_array len fail");
+    }
+    TLOGI(WmsLogTag::DMS, "[ANI] set CurrentFoldCreaseRegion property begin");
+    for(size_t i = 0; i < std::min(int(length), static_cast<int>(rects.size())); i++){
+        ani_ref currentCrease;
+        if (ANI_OK != env->Object_CallMethodByName_Ref(static_cast<ani_object>(creaseRectsObj),
+            "$_get", "I:Lstd/core/Object;", &currentCrease, (ani_int)i)) {
+            TLOGE(WmsLogTag::DMS, "[ANI] get ani_array index %{public}u fail", (ani_int)i);
+        }
+        TLOGI(WmsLogTag::DMS, "current i: %{public}lu", i);
+        DisplayAniUtils::convertRect(rects[i], static_cast<ani_object>(currentCrease), env);
+    }
 }
 
 void DisplayManagerAni::getAllDisplaysAni(ani_env* env, ani_object arrayObj)
@@ -103,14 +132,13 @@ void DisplayManagerAni::getAllDisplaysAni(ani_env* env, ani_object arrayObj)
         AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_SCREEN, "");
     }
     ani_double length;
-    if (ANI_OK != env->Object_GetPropertyByName_Double(arrayObj, "length", &length)) {
+    if(ANI_OK != env->Object_GetPropertyByName_Double(arrayObj, "length", &length)){
         TLOGE(WmsLogTag::DMS, "[ANI] get ani_array len fail");
     }
 
-    for (int i = 0; i < std::min(int(length), static_cast<int>(displays.size())); i++) {
+    for(int i = 0; i < std::min(int(length), static_cast<int>(displays.size())); i++){
         ani_ref currentDisplay;
-        if (ANI_OK != env->Object_CallMethodByName_Ref(arrayObj, "$_get",
-            "I:Lstd/core/Object;", &currentDisplay, (ani_int)i)) {
+        if(ANI_OK != env->Object_CallMethodByName_Ref(arrayObj, "$_get", "I:Lstd/core/Object;", &currentDisplay, (ani_int)i)){
             TLOGE(WmsLogTag::DMS, "[ANI] get ani_array index %{public}u fail", (ani_int)i);
         }
         TLOGI(WmsLogTag::DMS, "current i: %{public}d", i);
@@ -119,12 +147,12 @@ void DisplayManagerAni::getAllDisplaysAni(ani_env* env, ani_object arrayObj)
     TLOGI(WmsLogTag::DMS, "[ANI] getAllDisplaysAni end");
 }
 
-ani_status DisplayManagerAni::getDisplayByIdSyncAni(ani_env* env, ani_object obj, ani_int displayId)
+void DisplayManagerAni::getDisplayByIdSyncAni(ani_env* env, ani_object obj, ani_double displayId)
 {
     TLOGE(WmsLogTag::DMS, "[ANI] getDisplayByIdSyncAni begin");
     if (displayId < 0) {
         TLOGE(WmsLogTag::DMS, "[ANI] Invalid displayId, less than 0");
-        return ANI_ERROR;
+        return;
     }
     sptr<Display> display = SingletonContainer::Get<DisplayManager>().GetDisplayById(static_cast<DisplayId>(displayId));
     if (display == nullptr) {
@@ -132,27 +160,27 @@ ani_status DisplayManagerAni::getDisplayByIdSyncAni(ani_env* env, ani_object obj
     }
     if (display == nullptr) {
         TLOGE(WmsLogTag::DMS, "[ANI] Display null");
-        return ANI_ERROR;
+        return;
     }
-    ani_status ret = DisplayAniUtils::cvtDisplay(display, env, obj);
-    return ret;
+    DisplayAniUtils::cvtDisplay(display, env, obj);
 }
 
-ani_status DisplayManagerAni::getDefaultDisplaySyncAni(ani_env* env, ani_object obj)
+void DisplayManagerAni::getDefaultDisplaySyncAni(ani_env* env, ani_object obj)
 {
     sptr<Display> display = SingletonContainer::Get<DisplayManager>().GetDefaultDisplaySync(true);
     if (display == nullptr) {
         TLOGE(WmsLogTag::DMS, "[ANI] Display null");
-        return ANI_ERROR;
+        return;
     }
     TLOGI(WmsLogTag::DMS, "[ANI] getDefaultDisplaySyncAni");
-    ani_status ret = DisplayAniUtils::cvtDisplay(display, env, obj);
-    return ret;
+    DisplayAniUtils::cvtDisplay(display, env, obj);
+    return;
 }
 
 void DisplayManagerAni::registerCallback(ani_env* env, ani_string type,
     ani_ref callback, ani_long nativeObj)
 {
+    TLOGI(WmsLogTag::DMS, "[ANI] start to register: %{public}ld", nativeObj);
     DisplayManagerAni* displayManagerAni = reinterpret_cast<DisplayManagerAni*>(nativeObj);
     if (displayManagerAni != nullptr) {
         displayManagerAni->onRegisterCallback(env, type, callback);
@@ -167,12 +195,14 @@ void DisplayManagerAni::onRegisterCallback(ani_env* env, ani_string type, ani_re
     std::lock_guard<std::mutex> lock(mtx_);
     std::string typeString;
     DisplayAniUtils::GetStdString(env, type, typeString);
-    ani_boolean callbackNull = 0;
-    env->Reference_IsNull(callback, &callbackNull);
+    ani_boolean callbackUndefined = 0;
+    ani_boolean callbackIsNull = 0;
+    env->Reference_IsUndefined(callback, &callbackUndefined);
+    env->Reference_IsNull(callback, &callbackIsNull);
     DmErrorCode ret;
-    if (callbackNull) {
-        std::string errMsg = "[ANI] failed to register display listener with type";
-        TLOGE(WmsLogTag::DMS, "callbackNull");
+    if (callbackUndefined || callbackIsNull) {
+        std::string errMsg = "[ANI] failed to register display listener with type, cbk null or undefined";
+        TLOGE(WmsLogTag::DMS, "callbackNull or undefined");
         AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, errMsg);
         return;
     }
@@ -189,7 +219,7 @@ void DisplayManagerAni::onRegisterCallback(ani_env* env, ani_string type, ani_re
     }
     displayAniListener->AddCallback(typeString, cbRef);
 
-    displayAniListener->SetMainEventHandler();
+    // displayAniListener->SetMainEventHandler();
     ret = processRegisterCallback(env, typeString, displayAniListener);
     if (ret != DmErrorCode::DM_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] register display listener with type, errcode: %{public}d", ret);
@@ -205,8 +235,7 @@ void DisplayManagerAni::onRegisterCallback(ani_env* env, ani_string type, ani_re
 }
 
 DmErrorCode DisplayManagerAni::processRegisterCallback(ani_env* env, std::string& typeStr,
-    sptr<DisplayAniListener> displayAniListener)
-{
+    sptr<DisplayAniListener> displayAniListener) {
     DmErrorCode ret = DmErrorCode::DM_ERROR_INVALID_PARAM;
     if (typeStr == EVENT_ADD || typeStr == EVENT_REMOVE || typeStr == EVENT_CHANGE) {
         TLOGI(WmsLogTag::DMS, "processRegisterCallback %{public}s", typeStr.c_str());
@@ -241,7 +270,7 @@ void DisplayManagerAni::onUnRegisterCallback(ani_env* env, ani_string type, ani_
     DisplayAniUtils::GetStdString(env, type, typeString);
     std::lock_guard<std::mutex> lock(mtx_);
     ani_boolean callbackNull = 0;
-    env->Reference_IsNull(callback, &callbackNull);
+    env->Reference_IsUndefined(callback, &callbackNull);
     DmErrorCode ret;
     if (callbackNull) {
         TLOGI(WmsLogTag::DMS, "[ANI] onUnRegisterCallback for all");
@@ -276,16 +305,21 @@ DMError DisplayManagerAni::UnRegisterDisplayListenerWithType(std::string type, a
         if (isEquals) {
             it->second->RemoveCallback(env, type, callback);
             if (type == EVENT_ADD || type == EVENT_REMOVE || type == EVENT_CHANGE) {
-                TLOGI(WmsLogTag::DMS, "[ANI] start to unregis display event listener! event = %{public}s",
-                    type.c_str());
+                TLOGI(WmsLogTag::DMS, "[ANI] start to unregis display event listener! event = %{public}s", type.c_str());
                 sptr<DisplayManager::IDisplayListener> thisListener(it->second);
                 ret = SingletonContainer::Get<DisplayManager>().UnregisterDisplayListener(thisListener);
             } else if (type == EVENT_FOLD_STATUS_CHANGED) {
+                TLOGI(WmsLogTag::DMS, "[ANI] start to unregis FoldStatusListener event listener! event = %{public}s",
+                    type.c_str());
                 sptr<DisplayManager::IFoldStatusListener> thisListener(it->second);
                 ret = SingletonContainer::Get<DisplayManager>().UnregisterFoldStatusListener(thisListener);
+                TLOGI(WmsLogTag::DMS, "[ANI] UnRegisterDisplayListener foldStatusChange success");
             } else if (type == EVENT_DISPLAY_MODE_CHANGED) {
+                TLOGI(WmsLogTag::DMS, "[ANI] start to unregis foldDisplayModeChange event listener! event = %{public}s",
+                    type.c_str());
                 sptr<DisplayManager::IDisplayModeListener> thisListener(it->second);
                 ret = SingletonContainer::Get<DisplayManager>().UnregisterDisplayModeListener(thisListener);
+                TLOGI(WmsLogTag::DMS, "[ANI] UnRegisterDisplayListener foldDisplayModeChange success");
             }
         }
     }

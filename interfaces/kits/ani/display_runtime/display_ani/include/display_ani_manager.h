@@ -30,11 +30,11 @@ public:
     static ani_int getFoldDisplayModeAni(ani_env* env);
     static ani_boolean isFoldableAni(ani_env* env);
     static ani_int getFoldStatus(ani_env* env);
-    static ani_object getCurrentFoldCreaseRegion(ani_env* env, ani_object obj);
+    static void getCurrentFoldCreaseRegion(ani_env* env, ani_object obj, ani_long nativeObj);
 
     static void getAllDisplaysAni(ani_env* env, ani_object arrayObj);
-    static ani_status getDisplayByIdSyncAni(ani_env* env, ani_object obj, ani_int displayId);
-    static ani_status getDefaultDisplaySyncAni(ani_env* env, ani_object obj);
+    static void getDisplayByIdSyncAni(ani_env* env, ani_object obj, ani_double displayId);
+    static void getDefaultDisplaySyncAni(ani_env* env, ani_object obj);
 
     static void registerCallback(ani_env* env, ani_string type,
         ani_ref callback, ani_long nativeObj);
@@ -47,6 +47,7 @@ public:
 private:
     void onRegisterCallback(ani_env* env, ani_string type, ani_ref callback);
     void onUnRegisterCallback(ani_env* env, ani_string type, ani_ref callback);
+    void onGetCurrentFoldCreaseRegion(ani_env* env, ani_object obj);
     std::mutex mtx_;
     std::map<std::string, std::map<ani_ref, sptr<DisplayAniListener>>> jsCbMap_;
     std::map<std::string, sptr<DisplayAniListener>> jsCbMap1_;

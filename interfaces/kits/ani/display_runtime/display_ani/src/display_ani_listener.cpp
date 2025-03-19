@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-
 #include "display_ani_listener.h"
 #include "window_manager_hilog.h"
 #include "display_ani_utils.h"
@@ -43,7 +42,12 @@ void DisplayAniListener::AddCallback(const std::string& type, ani_ref callback)
         return;
     }
     std::lock_guard<std::mutex> lock(mtx_);
-    aniCallBack_[type].emplace_back(callback);
+    ani_ref cbRef{};
+    if (env_->GlobalReference_Create(callback, &cbRef) != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI]create global ref fail");
+        return;
+    };
+    aniCallBack_[type].emplace_back(cbRef);
     TLOGI(WmsLogTag::DMS, "[ANI] AddCallback success aniCallBack_ size: %{public}u!",
         static_cast<uint32_t>(aniCallBack_[type].size()));
 }
@@ -96,9 +100,18 @@ void DisplayAniListener::OnCreate(DisplayId id)
         return;
     }
     std::vector<ani_ref> vec = it->second;
-    TLOGI(WmsLogTag::DMS, "vec_callback size: %{public}u", vec.size());
+    TLOGI(WmsLogTag::DMS, "vec_callback size: %{public}lu", vec.size());
     // find callbacks in vector
-    for (auto oneAniCallback : vec) {
+    for (ani_ref oneAniCallback : vec) {
+        ani_boolean result;
+        if (ANI_OK != env_->Reference_IsUndefined(oneAniCallback ,&result)) {
+            TLOGE(WmsLogTag::DMS, "[ANI] OnCreate Callback is undefined, return");
+            return;
+        }
+        if (ANI_OK != env_->Reference_IsNull(oneAniCallback ,&result)) {
+            TLOGE(WmsLogTag::DMS, "[ANI] OnCreate Callback is null, return");
+            return;
+        }
         DisplayAniUtils::CallAniFunctionVoid(env_, "L@ohos/display/display;", "displayEventCallBack",
             "Lstd/core/Object;D:V", oneAniCallback, static_cast<ani_double>(id));
     }
@@ -127,20 +140,27 @@ void DisplayAniListener::OnChange(DisplayId id)
         return;
     }
     std::vector<ani_ref> vec = it->second;
-    TLOGI(WmsLogTag::DMS, "vec_callback size: %{public}u", vec.size());
+    TLOGI(WmsLogTag::DMS, "vec_callback size: %{public}lu", vec.size());
     // find callbacks in vector
     for (auto oneAniCallback : vec) {
         if (env_ == nullptr) {
             TLOGI(WmsLogTag::DMS, "OnDestroy: null env_");
             return;
         }
-        if (oneAniCallback == nullptr) {
-            TLOGI(WmsLogTag::DMS, "OnDestroy: null oneAniCallback");
+        ani_boolean undefRes;
+        ani_boolean nullRes;
+        env_->Reference_IsUndefined(oneAniCallback, &undefRes);
+        env_->Reference_IsNull(oneAniCallback, &nullRes);
+        if (undefRes == 0 ) {
+            TLOGE(WmsLogTag::DMS, "[ANI] oneAniCallback undefRes, return");
+            return;
+        }
+        if (nullRes == 0 ) {
+            TLOGE(WmsLogTag::DMS, "[ANI] oneAniCallback null, return");
             return;
         }
         DisplayAniUtils::CallAniFunctionVoid(env_, "L@ohos/display/display;", "displayEventCallBack",
             "Lstd/core/Object;D:V", oneAniCallback, static_cast<ani_double>(id));
-        TLOGI(WmsLogTag::DMS, "[ANI] CallAniFunctionVoid success");
     }
 }
 void DisplayAniListener::OnPrivateWindow(bool hasPrivate)
