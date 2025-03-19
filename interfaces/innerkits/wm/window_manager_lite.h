@@ -155,6 +155,14 @@ public:
     WMError GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo);
 
     /**
+     * @brief Get keyboard calling window information.
+     *
+     * @param callingWindowInfo calling window information
+     * @return WM_OK means get success, others means get failed.
+     */
+    WMError GetCallingWindowInfo(CallingWindowInfo& callingWindowInfo);
+
+    /**
      * @brief Get all main window info.
      *
      * @param infos the all main window info.
@@ -221,6 +229,24 @@ public:
      * @return WM_OK means unregister success, others means unregister failed.
      */
     WMError UnregisterWindowStyleChangedListener(const sptr<IWindowStyleChangedListener>& listener);
+
+    /**
+     * @brief Register a listener to detect display changes for the keyboard calling window.
+     *
+     * @param listener IKeyboardCallingWindowDisplayChangedListener
+     * @return WM_OK means register success, others means unregister failed.
+     */
+    WMError RegisterCallingWindowDisplayChangedListener(
+        const sptr<IKeyboardCallingWindowDisplayChangedListener>& listener);
+
+    /**
+     * @brief Unregister the listener that detects display changes for the keyboard calling window.
+     *
+     * @param listener IKeyboardCallingWindowDisplayChangedListener
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    WMError UnregisterCallingWindowDisplayChangedListener(
+        const sptr<IKeyboardCallingWindowDisplayChangedListener>& listener);
 
     /**
      * @brief Get window style type.
@@ -302,6 +328,35 @@ public:
      */
     WMError UnregisterWindowUpdateListener(const sptr<IWindowUpdateListener>& listener);
 
+    /**
+     * @brief Register window info change callback.
+     *
+     * @param observedInfo Property which to observe.
+     * @param listener Listener to observe window info.
+     * @return WM_OK means register success, others means failed.
+     */
+    WMError RegisterWindowInfoChangeCallback(const std::unordered_set<WindowInfoKey>& observedInfo,
+        const sptr<IWindowInfoChangedListener>& listener);
+    
+    /**
+     * @brief Unregister window info change callback.
+     *
+     * @param observedInfo Property which to observe.
+     * @param listener Listener to observe window info.
+     * @return WM_OK means unregister success, others means failed.
+     */
+    WMError UnregisterWindowInfoChangeCallback(const std::unordered_set<WindowInfoKey>& observedInfo,
+        const sptr<IWindowInfoChangedListener>& listener);
+
+    /**
+     * @brief List window info.
+     *
+     * @param windowInfoOption Option for selecting window info.
+     * @param infos Window info.
+     * @return WM_OK means get success, others means get failed.
+     */
+    WMError ListWindowInfo(const WindowInfoOption& windowInfoOption, std::vector<sptr<WindowInfo>>& infos) const;
+
 private:
     WindowManagerLite();
     ~WindowManagerLite();
@@ -325,6 +380,13 @@ private:
     WMError NotifyWindowStyleChange(WindowStyleType type);
     void NotifyAccessibilityWindowInfo(const std::vector<sptr<AccessibilityWindowInfo>>& infos,
         WindowUpdateType type) const;
+    WMError NotifyCallingWindowDisplayChanged(const CallingWindowInfo& callingWindowInfo);
+    WMError ProcessRegisterWindowInfoChangeCallback(WindowInfoKey observedInfo,
+        const sptr<IWindowInfoChangedListener>& listener);
+    WMError ProcessUnregisterWindowInfoChangeCallback(WindowInfoKey observedInfo,
+        const sptr<IWindowInfoChangedListener>& listener);
+    WMError RegisterVisibilityStateChangedListener(const sptr<IWindowInfoChangedListener>& listener);
+    WMError UnregisterVisibilityStateChangedListener(const sptr<IWindowInfoChangedListener>& listener);
 };
 } // namespace Rosen
 } // namespace OHOS

@@ -930,6 +930,22 @@ HWTEST_F(WindowImplTest2, Snapshot, Function | SmallTest | Level3)
 }
 
 /**
+ * @tc.name: SnapshotIgnorePrivacy
+ * @tc.desc: SnapshotIgnorePrivacy test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest2, SnapshotIgnorePrivacy, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SnapshotIgnorePrivacy");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SnapshotIgnorePrivacy(pixelMap));
+}
+
+/**
  * @tc.name: DumpInfo
  * @tc.desc: DumpInfo test
  * @tc.type: FUNC

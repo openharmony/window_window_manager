@@ -31,7 +31,7 @@ public:
 
     virtual void HandleAngleChange(float angle, int hall, sptr<FoldScreenPolicy> foldScreenPolicy);
     virtual void HandleHallChange(float angle, int hall, sptr<FoldScreenPolicy> foldScreenPolicy);
-    virtual void HandleTentChange(bool isTentMode, sptr<FoldScreenPolicy> foldScreenPolicy, int32_t hall = -1);
+    virtual void HandleTentChange(int tentType, sptr<FoldScreenPolicy> foldScreenPolicy, int32_t hall = -1);
     virtual void HandleAngleOrHallChange(const std::vector<float> &angles, const std::vector<uint16_t> &halls,
         sptr<FoldScreenPolicy> foldScreenPolicy);
     virtual void RegisterApplicationStateObserver();
@@ -44,15 +44,15 @@ protected:
     void HandleSensorChange(FoldStatus nextState, const std::vector<float> &angles,
         sptr<FoldScreenPolicy> foldScreenPolicy);
     FoldStatus GetCurrentState();
-    void SetTentMode(bool status);
+    void SetTentMode(int tentType);
     std::recursive_mutex mutex_;
+    int tentModeType_ = 0;
 
 private:
     void ReportNotifyFoldStatusChange(int32_t currentStatus, int32_t nextStatus, float postureAngle);
     void ReportNotifyFoldStatusChange(int32_t currentStatus, int32_t nextStatus,
         const std::vector<float> &postureAngles);
     FoldStatus mState_ = FoldStatus::UNKNOWN;
-    bool isTentMode_ = false;
 
     std::chrono::time_point<std::chrono::system_clock> mLastStateClock_ = std::chrono::system_clock::now();
     void NotifyReportFoldStatusToScb(FoldStatus currentStatus, FoldStatus nextStatus, float postureAngle);

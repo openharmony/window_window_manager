@@ -50,7 +50,42 @@ HWTEST_F(ScreenPropertyTest, SetScreenRotation, Function | SmallTest | Level2)
     rotation = Rotation::ROTATION_270;
     property->SetScreenRotation(rotation);
     ASSERT_EQ(ret, 0);
+    delete property;
     GTEST_LOG_(INFO) << "ScreenPropertyTest: SetScreenRotation end";
+}
+
+/**
+ * @tc.name: SetRotationAndScreenRotationOnly001
+ * @tc.desc: SetRotationAndScreenRotationOnly001 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenPropertyTest, SetRotationAndScreenRotationOnly001, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: SetRotationAndScreenRotationOnly001 start";
+    ScreenProperty* property = new(std::nothrow) ScreenProperty();
+    ASSERT_NE(property, nullptr);
+    Rotation ret = Rotation::ROTATION_0;
+    Rotation rotation = Rotation::ROTATION_0;
+    property->SetRotationAndScreenRotationOnly(rotation);
+    ret = property->GetScreenRotation();
+    ASSERT_EQ(ret, rotation);
+
+    rotation = Rotation::ROTATION_90;
+    property->SetRotationAndScreenRotationOnly(rotation);
+    ret = property->GetScreenRotation();
+    ASSERT_EQ(ret, rotation);
+
+    rotation = Rotation::ROTATION_180;
+    property->SetRotationAndScreenRotationOnly(rotation);
+    ret = property->GetScreenRotation();
+    ASSERT_EQ(ret, rotation);
+
+    rotation = Rotation::ROTATION_270;
+    property->SetRotationAndScreenRotationOnly(rotation);
+    ret = property->GetScreenRotation();
+    ASSERT_EQ(ret, rotation);
+    delete property;
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: SetRotationAndScreenRotationOnly001 end";
 }
 
 /**
@@ -82,6 +117,7 @@ HWTEST_F(ScreenPropertyTest, UpdateDeviceRotation, Function | SmallTest | Level2
     property->UpdateDeviceRotation(rotation);
     ret = property->GetDeviceRotation();
     ASSERT_EQ(ret, rotation);
+    delete property;
     GTEST_LOG_(INFO) << "ScreenPropertyTest: UpdateDeviceRotation end";
 }
 
@@ -114,7 +150,80 @@ HWTEST_F(ScreenPropertyTest, SetDeviceOrientation, Function | SmallTest | Level2
     property->SetDeviceOrientation(displayOrientation);
     ret = property->GetDeviceOrientation();
     ASSERT_EQ(ret, displayOrientation);
+    delete property;
     GTEST_LOG_(INFO) << "ScreenPropertyTest: SetDeviceOrientation end";
+}
+
+/**
+ * @tc.name: UpdateScreenRotation
+ * @tc.desc: UpdateScreenRotation test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenPropertyTest, UpdateScreenRotation, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: UpdateScreenRotation start";
+    ScreenProperty* property = new(std::nothrow) ScreenProperty();
+    ASSERT_NE(property, nullptr);
+    Rotation ret = Rotation::ROTATION_0;
+    Rotation rotation = Rotation::ROTATION_0;
+    property->UpdateScreenRotation(rotation);
+    ret = property->GetScreenRotation();
+    ASSERT_EQ(ret, rotation);
+
+    rotation = Rotation::ROTATION_90;
+    property->UpdateScreenRotation(rotation);
+    ret = property->GetScreenRotation();
+    ASSERT_EQ(ret, rotation);
+
+    rotation = Rotation::ROTATION_180;
+    property->UpdateScreenRotation(rotation);
+    ret = property->GetScreenRotation();
+    ASSERT_EQ(ret, rotation);
+
+    rotation = Rotation::ROTATION_270;
+    property->UpdateScreenRotation(rotation);
+    ret = property->GetScreenRotation();
+    ASSERT_EQ(ret, rotation);
+    delete property;
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: UpdateScreenRotation end";
+}
+
+/**
+ * @tc.name: SetOrientation
+ * @tc.desc: SetOrientation test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenPropertyTest, SetOrientation, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: SetOrientation start";
+    ScreenProperty* property = new(std::nothrow) ScreenProperty();
+    ASSERT_NE(property, nullptr);
+    Orientation ret = Orientation::BEGIN;
+    Orientation orientation = Orientation::SENSOR;
+    property->SetOrientation(orientation);
+    ret = property->orientation_;
+    ASSERT_EQ(ret, orientation);
+    delete property;
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: SetOrientation end";
+}
+
+/**
+ * @tc.name: GetOrientation
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenPropertyTest, GetOrientation, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: GetOrientation start";
+    ScreenProperty* property = new(std::nothrow) ScreenProperty();
+    ASSERT_NE(property, nullptr);
+    Orientation ret = Orientation::BEGIN;
+    Orientation orientation = Orientation::SENSOR;
+    property->SetOrientation(orientation);
+    ret = property->GetOrientation();
+    ASSERT_EQ(ret, orientation);
+    delete property;
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: GetOrientation end";
 }
 
 /**
@@ -144,6 +253,7 @@ HWTEST_F(ScreenPropertyTest, UpdateVirtualPixelRatio, Function | SmallTest | Lev
     bounds.rect_.height_ = 1111;
     property->UpdateVirtualPixelRatio(bounds);
     ASSERT_EQ(ret, 0);
+    delete property;
     GTEST_LOG_(INFO) << "ScreenPropertyTest: UpdateVirtualPixelRatio end";
 }
 
@@ -176,6 +286,7 @@ HWTEST_F(ScreenPropertyTest, SetBounds, Function | SmallTest | Level2)
     property->SetPhyHeight(phyHeigth1);
     property->SetBounds(bounds);
     ASSERT_EQ(ret, 0);
+    delete property;
     GTEST_LOG_(INFO) << "ScreenPropertyTest: SetBounds end";
 }
 
@@ -639,6 +750,75 @@ HWTEST_F(ScreenPropertyTest, GetScreenShape, Function | SmallTest | Level2)
     delete property;
     GTEST_LOG_(INFO) << "ScreenPropertyTest: GetScreenShape end";
 }
+
+/**
+ * @tc.name: SetPointerActiveWidth
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenPropertyTest, SetPointerActiveWidth, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: SetPointerActiveWidth start";
+    ScreenProperty* property = new(std::nothrow) ScreenProperty();
+    ASSERT_NE(property, nullptr);
+    uint32_t pointerActiveWidth = 123;
+    property->SetPointerActiveWidth(pointerActiveWidth);
+    ASSERT_EQ(property->pointerActiveWidth_, pointerActiveWidth);
+    delete property;
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: SetPointerActiveWidth end";
+}
+ 
+/**
+ * @tc.name: GetPointerActiveWidth
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenPropertyTest, GetPointerActiveWidth, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: GetPointerActiveWidth start";
+    ScreenProperty* property = new(std::nothrow) ScreenProperty();
+    ASSERT_NE(property, nullptr);
+    uint32_t pointerActiveWidth = 123;
+    property->SetPointerActiveWidth(pointerActiveWidth);
+    ASSERT_EQ(property->GetPointerActiveWidth(), pointerActiveWidth);
+    delete property;
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: GetPointerActiveWidth end";
+}
+ 
+/**
+ * @tc.name: SetPointerActiveHeight
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenPropertyTest, SetPointerActiveHeight, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: SetPointerActiveHeight start";
+    ScreenProperty* property = new(std::nothrow) ScreenProperty();
+    ASSERT_NE(property, nullptr);
+    uint32_t pointerActiveHeight = 321;
+    property->SetPointerActiveHeight(pointerActiveHeight);
+    ASSERT_EQ(property->pointerActiveHeight_, pointerActiveHeight);
+    delete property;
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: SetPointerActiveHeight end";
+}
+ 
+/**
+ * @tc.name: GetPointerActiveHeight
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenPropertyTest, GetPointerActiveHeight, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: GetPointerActiveHeight start";
+    ScreenProperty* property = new(std::nothrow) ScreenProperty();
+    ASSERT_NE(property, nullptr);
+    uint32_t pointerActiveHeight = 321;
+    property->SetPointerActiveHeight(pointerActiveHeight);
+    ASSERT_EQ(property->GetPointerActiveHeight(), pointerActiveHeight);
+    delete property;
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: GetPointerActiveHeight end";
+}
+
 /**
 * @tc.name: SetX
 * @tc.desc: normal function
@@ -697,6 +877,44 @@ HWTEST_F(ScreenPropertyTest, SetXYPosition, Function | SmallTest | Level2)
     property->SetXYPosition(retx_copy, rety_copy);
     delete property;
     GTEST_LOG_(INFO) << "ScreenPropertyTest: SetXYPosition end";
+}
+
+/**
+ * @tc.name: SetVirtualPixelRatio
+ * @tc.desc: SetVirtualPixelRatio test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenPropertyTest, SetVirtualPixelRatio, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: SetVirtualPixelRatio start";
+    ScreenProperty* property = new(std::nothrow) ScreenProperty();
+    ASSERT_NE(property, nullptr);
+    float pixelRatio = 1.0f;
+    float pixelCopy = property->GetVirtualPixelRatio();
+    property->SetVirtualPixelRatio(pixelRatio);
+    ASSERT_EQ(property->virtualPixelRatio_, pixelRatio);
+    property->SetVirtualPixelRatio(pixelCopy);
+    delete property;
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: SetVirtualPixelRatio end";
+}
+ 
+/**
+ * @tc.name: GetVirtualPixelRatio
+ * @tc.desc: GetVirtualPixelRatio test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenPropertyTest, GetVirtualPixelRatio, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: GetVirtualPixelRatio start";
+    ScreenProperty* property = new(std::nothrow) ScreenProperty();
+    ASSERT_NE(property, nullptr);
+    float pixelRatio = 1.0f;
+    float pixelCopy = property->GetVirtualPixelRatio();
+    property->SetVirtualPixelRatio(pixelRatio);
+    ASSERT_EQ(property->GetVirtualPixelRatio(), pixelRatio);
+    property->SetVirtualPixelRatio(pixelCopy);
+    delete property;
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: GetVirtualPixelRatio end";
 }
 } // namespace
 } // namespace Rosen

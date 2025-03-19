@@ -2383,8 +2383,9 @@ HWTEST_F(SceneSessionManagerTest, IsWindowRectAutoSave, Function | SmallTest | L
 {
     std::string key = "com.example.recposentryEntryAbilityabc";
     bool enabled = false;
-    auto result = ssm_->IsWindowRectAutoSave(key, enabled);
-    ASSERT_EQ(result, WMError::WM_OK);
+    int persistentId = 1;
+    auto result = ssm_->IsWindowRectAutoSave(key, enabled, persistentId);
+    ASSERT_EQ(result, WMError::WM_ERROR_INVALID_SESSION);
 }
 
 /**
@@ -2484,6 +2485,25 @@ HWTEST_F(SceneSessionManagerTest, GetAppDragResizeType, Function | SmallTest | L
 }
 
 /**
+ * @tc.name: SetAppKeyFramePolicy
+ * @tc.desc: test function : SetAppKeyFramePolicy
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, SetAppKeyFramePolicy, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test1";
+    info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    KeyFramePolicy keyFramePolicy;
+    keyFramePolicy.dragResizeType_ = DragResizeType::RESIZE_KEY_FRAME;
+    ASSERT_EQ(ssm_->SetAppKeyFramePolicy(info.bundleName_, keyFramePolicy), WMError::WM_OK);
+}
+
+/**
  * @tc.name: BuildCancelPointerEvent
  * @tc.desc: test function : BuildCancelPointerEvent
  * @tc.type: FUNC
@@ -2498,6 +2518,18 @@ HWTEST_F(SceneSessionManagerTest, BuildCancelPointerEvent, Function | SmallTest 
     ASSERT_EQ(pointerEvent->GetPointerId(), 0);
     ASSERT_EQ(pointerEvent->GetPointerAction(), MMI::PointerEvent::POINTER_ACTION_CANCEL);
     ASSERT_EQ(pointerEvent->GetSourceType(), MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
+}
+
+/**
+ * @tc.name: MinimizeByWindowId
+ * @tc.desc: test function : MinimizeByWindowId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, MinimizeByWindowId, Function | SmallTest | Level3)
+{
+    std::vector<int32_t> windowIds;
+    WMError res = ssm_->MinimizeByWindowId(windowIds);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, res);
 }
 }
 } // namespace Rosen

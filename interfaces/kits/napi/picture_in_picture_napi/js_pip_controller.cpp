@@ -44,6 +44,8 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "getPiPWindowInfo", moduleName, JsPipController::GetPiPWindowInfo);
     BindNativeFunction(env, object, "on", moduleName, JsPipController::RegisterCallback);
     BindNativeFunction(env, object, "off", moduleName, JsPipController::UnregisterCallback);
+    // test api
+    BindNativeFunction(env, object, "isPiPSupported", moduleName, JsPipController::PictureInPicturePossible);
 }
 
 napi_value CreateJsPipControllerObject(napi_env env, sptr<PictureInPictureController>& pipController)
@@ -226,8 +228,12 @@ napi_value JsPipController::OnUpdateContentNode(napi_env env, napi_callback_info
             napi_delete_reference(env, typeNodeRef);
             return;
         }
+        napi_ref oldTypeNodeRef = pipController->GetTypeNode();
         pipController->UpdateContentNodeRef(typeNodeRef);
-        napi_delete_reference(env, typeNodeRef);
+        if (oldTypeNodeRef != nullptr) {
+            napi_delete_reference(env, oldTypeNodeRef);
+            oldTypeNodeRef = nullptr;
+        }
         task->Resolve(env, NapiGetUndefined(env));
     };
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
@@ -658,6 +664,26 @@ WmErrorCode JsPipController::UnRegisterListener(const std::string& type,
             break;
     }
     return WmErrorCode::WM_OK;
+}
+
+napi_value JsPipController::PictureInPicturePossible(napi_env env, napi_callback_info info)
+{
+    JsPipController* me = CheckParamsAndGetThis<JsPipController>(env, info);
+    return (me != nullptr) ? me->OnPictureInPicturePossible(env, info) : nullptr;
+}
+
+napi_value JsPipController::OnPictureInPicturePossible(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "called");
+    bool isPiPSupported = false;
+    if (pipController_ == nullptr) {
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_PIP_INTERNAL_ERROR),
+            "PiP internal error."));
+        TLOGE(WmsLogTag::WMS_PIP, "error, controller is nullptr");
+        return CreateJsValue(env, isPiPSupported);
+    }
+    pipController_->GetPipPossible(isPiPSupported);
+    return CreateJsValue(env, isPiPSupported);
 }
 } // namespace Rosen
 } // namespace OHOS

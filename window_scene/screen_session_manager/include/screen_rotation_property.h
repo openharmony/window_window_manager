@@ -42,6 +42,7 @@ enum class DeviceHoverStatus: int32_t {
     TENT_STATUS_CANCEL,
     CAMERA_STATUS,
     CAMERA_STATUS_CANCEL,
+    TENT_STATUS_HOVER,
 };
 
 class ScreenRotationProperty : public RefBase {
@@ -50,8 +51,12 @@ public:
     ~ScreenRotationProperty() = default;
     static void HandleSensorEventInput(DeviceRotation deviceRotation);
     static void HandleHoverStatusEventInput(DeviceHoverStatus hoverStatus, bool needRotate = true);
+
+    static bool isDeviceHorizontal();
 private:
     static float ConvertDeviceToFloat(DeviceRotation deviceRotation);
+    
+    static bool isDeviceHorizontal_;
 };
 } // Rosen
 } // OHOS

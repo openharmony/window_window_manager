@@ -309,7 +309,7 @@ public:
     virtual Ace::UIContent* GetUIContent() const override;
     virtual Ace::UIContent* GetUIContentWithId(uint32_t winId) const override;
     virtual void OnNewWant(const AAFwk::Want& want) override;
-    virtual void SetRequestedOrientation(Orientation) override;
+    virtual void SetRequestedOrientation(Orientation orientation, bool needAnimation = true) override;
     virtual Orientation GetRequestedOrientation() override;
     virtual void SetNeedRemoveWindowInputChannel(bool needRemoveWindowInputChannel) override;
     virtual WMError SetTouchHotAreas(const std::vector<Rect>& rects) override;
@@ -324,6 +324,7 @@ public:
 
     virtual void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
     virtual std::shared_ptr<Media::PixelMap> Snapshot() override;
+    WMError SnapshotIgnorePrivacy(std::shared_ptr<Media::PixelMap>& pixelMap) override;
     virtual WMError NotifyMemoryLevel(int32_t level) override;
     virtual bool IsAllowHaveSystemSubWindow() override;
     virtual KeyboardAnimationConfig GetKeyboardAnimationConfig() override;
@@ -352,7 +353,7 @@ public:
     static void UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
     void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
     void RegisterWindowInspectorCallback();
-    uint32_t GetApiVersion() const override;
+    uint32_t GetApiCompatibleVersion() const override;
 
     /*
      * Keyboard

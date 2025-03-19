@@ -405,6 +405,11 @@ std::shared_ptr<Media::PixelMap> WindowImpl::Snapshot()
     return nullptr;
 }
 
+WMError WindowImpl::SnapshotIgnorePrivacy(std::shared_ptr<Media::PixelMap>& pixelMap)
+{
+    return WMError::WM_OK;
+}
+
 void WindowImpl::DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
 {
     return;
@@ -983,6 +988,10 @@ bool WindowImpl::IsFullScreen() const
     auto statusProperty = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
     auto naviProperty = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
     return (IsLayoutFullScreen() && !statusProperty.enable_ && !naviProperty.enable_);
+}
+
+void WindowImpl::NotifyPreferredOrientationChange(Orientation orientation)
+{
 }
 
 void WindowImpl::SetRequestedOrientation(Orientation orientation)

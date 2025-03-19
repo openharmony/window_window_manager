@@ -622,6 +622,18 @@ sptr<CutoutInfo> DisplayManagerAdapter::GetCutoutInfo(DisplayId displayId)
     return displayManagerServiceProxy_->GetCutoutInfo(displayId);
 }
 
+sptr<CutoutInfo> DisplayManagerAdapter::GetCutoutInfoWithRotation(DisplayId displayId, int32_t rotation)
+{
+    TLOGD(WmsLogTag::DMS, "GetCutoutInfoWithRotation enter, rotation: %{public}d, displayId: %{public}" PRIu64" ",
+        rotation, displayId);
+    if (displayId == DISPLAY_ID_INVALID) {
+        WLOGFE("screen id is invalid");
+        return nullptr;
+    }
+    INIT_PROXY_CHECK_RETURN(nullptr);
+    return displayManagerServiceProxy_->GetCutoutInfoWithRotation(displayId, rotation);
+}
+
 DMError DisplayManagerAdapter::AddSurfaceNodeToDisplay(DisplayId displayId,
     std::shared_ptr<class RSSurfaceNode>& surfaceNode)
 {
@@ -873,6 +885,12 @@ void DisplayManagerAdapter::SetVirtualScreenBlackList(ScreenId screenId, std::ve
     displayManagerServiceProxy_->SetVirtualScreenBlackList(screenId, windowIdList, surfaceIdList);
 }
 
+void DisplayManagerAdapter::SetVirtualDisplayMuteFlag(ScreenId screenId, bool muteFlag)
+{
+    INIT_PROXY_CHECK_RETURN();
+    displayManagerServiceProxy_->SetVirtualDisplayMuteFlag(screenId, muteFlag);
+}
+
 void DisplayManagerAdapter::DisablePowerOffRenderControl(ScreenId screenId)
 {
     INIT_PROXY_CHECK_RETURN();
@@ -897,10 +915,10 @@ std::vector<DisplayPhysicalResolution> DisplayManagerAdapter::GetAllDisplayPhysi
     return displayManagerServiceProxy_->GetAllDisplayPhysicalResolution();
 }
 
-std::string DisplayManagerAdapter::GetDisplayCapability()
+DMError DisplayManagerAdapter::GetDisplayCapability(std::string& capabilitInfo)
 {
-    INIT_PROXY_CHECK_RETURN("");
-    return displayManagerServiceProxy_->GetDisplayCapability();
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+    return displayManagerServiceProxy_->GetDisplayCapability(capabilitInfo);
 }
 
 DMError DisplayManagerAdapter::SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid,

@@ -1526,7 +1526,8 @@ HWTEST_F(SceneSessionManagerTest4, UpdateBrightness, Function | SmallTest | Leve
     ASSERT_NE(sceneSession->property_, nullptr);
     sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
-    WSError result = ssm_->UpdateBrightness(1, false);
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    WSError result = ssm_->UpdateBrightness(1);
     EXPECT_EQ(result, WSError::WS_DO_NOTHING);
 
     SessionInfo sessionInfo02;
@@ -1538,7 +1539,7 @@ HWTEST_F(SceneSessionManagerTest4, UpdateBrightness, Function | SmallTest | Leve
     ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession02));
     sceneSession02->property_->SetBrightness(50.f);
     ssm_->SetDisplayBrightness(40.f);
-    result = ssm_->UpdateBrightness(2, false);
+    result = ssm_->UpdateBrightness(2);
     EXPECT_EQ(ssm_->displayBrightness_, 50);
     EXPECT_EQ(result, WSError::WS_OK);
 }
@@ -1754,6 +1755,39 @@ HWTEST_F(SceneSessionManagerTest4, GetTopFocusableNonAppSession, Function | Smal
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     result = ssm_->GetTopFocusableNonAppSession();
     EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: GetTopFocusableNonAppSession01
+ * @tc.desc: GetTopFocusableNonAppSession01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest4, GetTopFocusableNonAppSession01, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "bundleName";
+    sptr<SceneSession> wallpaper = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    wallpaper->property_->SetWindowType(WindowType::WINDOW_TYPE_WALLPAPER);
+    wallpaper->zOrder_ = 1;
+    sptr<SceneSession> desktop = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    desktop->property_->SetWindowType(WindowType::WINDOW_TYPE_DESKTOP);
+    desktop->zOrder_ = 2;
+    desktop->property_->SetFocusable(true);
+    desktop->isVisible_ = true;
+    desktop->state_ = SessionState::STATE_FOREGROUND;
+
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
+    sceneSession->zOrder_ = 3;
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sceneSession1->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
+    sceneSession1->zOrder_ = 0;
+    ssm_->sceneSessionMap_.insert(std::make_pair(0, sceneSession1));
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, wallpaper));
+    ssm_->sceneSessionMap_.insert(std::make_pair(2, desktop));
+    ssm_->sceneSessionMap_.insert(std::make_pair(3, sceneSession));
+    sptr<SceneSession> result = ssm_->GetTopFocusableNonAppSession();
+    EXPECT_EQ(result, desktop);
 }
 
 /**

@@ -66,6 +66,16 @@ public:
         const std::shared_ptr<RSTransaction>& rsTransaction));
 };
 
+class MockIKeyboardDidShowListener : public IKeyboardDidShowListener {
+public:
+    MOCK_METHOD0(OnKeyboardShow, void());
+};
+
+class MockIKeyboardDidHideListener : public IKeyboardDidHideListener {
+public:
+    MOCK_METHOD0(OnKeyboardHide, void());
+};
+
 class MockInputEventConsumer : public IInputEventConsumer {
 public:
     MOCK_CONST_METHOD1(OnInputEvent, bool(const std::shared_ptr<MMI::KeyEvent>&));
@@ -144,6 +154,11 @@ public:
 class MockIWindowCrossAxisListener : public IWindowCrossAxisListener {
 public:
     MOCK_METHOD1(OnCrossAxisChange, void(CrossAxisState));
+};
+
+class MockIWaterfallModeChangeListener : public IWaterfallModeChangeListener {
+public:
+    MOCK_METHOD1(OnWaterfallModeChange, void(bool isWaterfallMode));
 };
 } // Rosen
 } // OHOS

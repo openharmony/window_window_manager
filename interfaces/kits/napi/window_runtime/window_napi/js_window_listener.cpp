@@ -283,6 +283,66 @@ void JsWindowListener::OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info,
     }
 }
 
+void JsWindowListener::OnKeyboardDidShow(const KeyboardPanelInfo& keyboardPanelInfo)
+{
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Called");
+    auto jsCallback = [self = weakRef_, env = env_, rect = keyboardPanelInfo.rect_, funcName = __func__] {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "%{public}s: this listener or env is nullptr", funcName);
+            return;
+        }
+        HandleScope handleScope(env);
+        napi_value objValue = nullptr;
+        napi_create_object(env, &objValue);
+        if (objValue == nullptr) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s failed to create js object", funcName);
+            return;
+        }
+        napi_value rectObjValue = GetRectAndConvertToJsValue(env, rect);
+        if (rectObjValue == nullptr) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s failed to convert rect to jsObject", funcName);
+            return;
+        }
+        napi_set_named_property(env, objValue, "rect", rectObjValue);
+        napi_value argv[] = { objValue };
+        thisListener->CallJsMethod(KEYBOARD_DID_SHOW_CB.c_str(), argv, ArraySize(argv));
+    };
+    if (napi_send_event(env_, jsCallback, napi_eprio_immediate) != napi_status::napi_ok) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to send event");
+    }
+}
+
+void JsWindowListener::OnKeyboardDidHide(const KeyboardPanelInfo& keyboardPanelInfo)
+{
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Called");
+    auto jsCallback = [self = weakRef_, env = env_, rect = keyboardPanelInfo.rect_, funcName = __func__] {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "%{public}s: this listener or env is nullptr", funcName);
+            return;
+        }
+        HandleScope handleScope(env);
+        napi_value objValue = nullptr;
+        napi_create_object(env, &objValue);
+        if (objValue == nullptr) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s failed to create js object", funcName);
+            return;
+        }
+        napi_value rectObjValue = GetRectAndConvertToJsValue(env, rect);
+        if (rectObjValue == nullptr) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s failed to convert rect to jsObject", funcName);
+            return;
+        }
+        napi_set_named_property(env, objValue, "rect", rectObjValue);
+        napi_value argv[] = { objValue };
+        thisListener->CallJsMethod(KEYBOARD_DID_HIDE_CB.c_str(), argv, ArraySize(argv));
+    };
+    if (napi_send_event(env_, jsCallback, napi_eprio_immediate) != napi_status::napi_ok) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to send event");
+    }
+}
+
 void JsWindowListener::OnTouchOutside() const
 {
     WLOGI("CALLED");
@@ -295,7 +355,7 @@ void JsWindowListener::OnTouchOutside() const
         thisListener->CallJsMethod(TOUCH_OUTSIDE_CB.c_str(), nullptr, 0);
     };
     if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
-        TLOGE(WmsLogTag::WMS_IMMS, "Failed to send event");
+        TLOGE(WmsLogTag::WMS_EVENT, "Failed to send event");
     }
 }
 
@@ -330,27 +390,22 @@ void JsWindowListener::OnDialogTargetTouch() const
         thisListener->CallJsMethod(DIALOG_TARGET_TOUCH_CB.c_str(), nullptr, 0);
     };
     if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
-        TLOGE(WmsLogTag::WMS_IMMS, "Failed to send event");
+        TLOGE(WmsLogTag::WMS_EVENT, "Failed to send event");
     }
 }
 
 void JsWindowListener::OnDialogDeathRecipient() const
 {
-    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
-        [self = weakRef_] (napi_env env, NapiAsyncTask& task, int32_t status) {
-            auto thisListener = self.promote();
+    auto asyncTask = [self = weakRef_] {
+        auto thisListener = self.promote();
             if (thisListener == nullptr) {
-                WLOGFE("this listener is nullptr");
+                TLOGE(WmsLogTag::WMS_SYSTEM, "this listener is nullptr");
                 return;
             }
             thisListener->CallJsMethod(DIALOG_DEATH_RECIPIENT_CB.c_str(), nullptr, 0);
-        }
-    );
+    };
 
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsWindowListener::OnDialogDeathRecipient",
-        env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+    napi_send_event(env_, asyncTask, napi_eprio_immediate);
 }
 
 void JsWindowListener::OnGestureNavigationEnabledUpdate(bool enable)
@@ -414,7 +469,7 @@ void JsWindowListener::OnWindowNoInteractionCallback()
         thisListener->CallJsMethod(WINDOW_NO_INTERACTION_DETECT_CB.c_str(), nullptr, 0);
     };
     if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
-        TLOGE(WmsLogTag::WMS_IMMS, "Failed to send event");
+        TLOGE(WmsLogTag::WMS_EVENT, "Failed to send event");
     }
 }
 
@@ -721,6 +776,38 @@ void JsWindowListener::OnWindowWillClose(sptr<Window> window)
         return;
     }
     eventHandler_->PostSyncTask(jsCallback, "wms:JsWindowListener::OnWindowWillClose",
+        AppExecFwk::EventQueue::Priority::IMMEDIATE);
+}
+
+void JsWindowListener::OnRotationChange(const RotationChangeInfo& rotationChangeInfo,
+    RotationChangeResult& rotationChangeResult)
+{
+    auto jsCallback = [self = weakRef_, rotationChangeInfo, &rotationChangeResult, env = env_] () {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsWindowListener::OnRotationChange");
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "this listener or env is nullptr");
+            return;
+        }
+        HandleScope handleScope(env);
+        napi_value rotationInfoObj = CreateRotationChangeInfoObject(env, rotationChangeInfo);
+        if (rotationInfoObj == nullptr) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "failed to create js object");
+            return;
+        }
+        napi_value argv[] = { rotationInfoObj };
+        napi_value rotationChangeResultObj = thisListener->CallJsMethod(WINDOW_ROTATION_CHANGE_CB.c_str(), argv,
+            ArraySize(argv));
+        if (rotationChangeResultObj != nullptr) {
+            GetRotationResultFromJs(env, rotationChangeResultObj, rotationChangeResult);
+        }
+    };
+
+    if (!eventHandler_|| eventHandler_->GetEventRunner()->IsCurrentRunnerThread()) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "get main event handler failed or current is alreay main thread!");
+        return jsCallback();
+    }
+    eventHandler_->PostSyncTask(jsCallback, "wms:JsWindowListener::OnRotationChange",
         AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 } // namespace Rosen

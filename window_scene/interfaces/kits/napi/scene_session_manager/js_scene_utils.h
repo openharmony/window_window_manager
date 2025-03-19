@@ -189,6 +189,8 @@ template<typename T>
 napi_value CreateJsSessionRect(napi_env env, const T& rect);
 napi_value CreateJsRectAnimationConfig(napi_env env, const RectAnimationConfig& rectAnimationConfig);
 napi_value CreateJsSessionEventParam(napi_env env, const SessionEventParam& param);
+napi_value CreateRotationChangeType(napi_env env);
+napi_value CreateRectType(napi_env env);
 napi_value SubWindowModalTypeInit(napi_env env);
 napi_value CreateJsSystemBarPropertyArrayObject(
     napi_env env, const std::unordered_map<WindowType, SystemBarProperty>& propertyMap);
@@ -197,13 +199,23 @@ napi_value SessionTypeInit(napi_env env);
 napi_value SceneTypeInit(napi_env env);
 napi_value KeyboardGravityInit(napi_env env);
 napi_value KeyboardViewModeInit(napi_env env);
+napi_value CreateResultMapToJsValue(napi_env env,
+    const std::unordered_map<int32_t, RotationChangeResult>& rotationChangeResultMap);
+napi_value CreateJsRotationChangeResultMapObject(napi_env env, const int32_t persistentId,
+    const RotationChangeResult& rotationChangeResult);
+napi_value ConvertResultToJsValue(napi_env env, RotationChangeResult& rotationChangeResult);
 napi_value NapiGetUndefined(napi_env env);
 napi_valuetype GetType(napi_env env, napi_value value);
 bool NapiIsCallable(napi_env env, napi_value value);
 bool ConvertRectInfoFromJs(napi_env env, napi_value jsObject, WSRect& rect);
+bool ConvertSessionRectInfoFromJs(napi_env env, napi_value jsObject, WSRect& rect);
+bool ConvertSingleHandScreenInfoFromJs(napi_env env, napi_value jsObject,
+    SingleHandScreenInfo& singleHandHandScreenInfo);
 bool ConvertHookInfoFromJs(napi_env env, napi_value jsObject, HookInfo& hookInfo);
 bool ConvertRotateAnimationConfigFromJs(napi_env env, napi_value value, RotateAnimationConfig& config);
 bool ConvertDragResizeTypeFromJs(napi_env env, napi_value value, DragResizeType& dragResizeType);
+bool ConvertRectFromJsValue(napi_env env, napi_value jsObject, Rect& displayRect);
+bool ConvertInfoFromJsValue(napi_env env, napi_value jsObject, RotationChangeInfo& rotationChangeInfo);
 WSError GetIntValueFromString(const std::string& str, uint32_t& value);
 constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;

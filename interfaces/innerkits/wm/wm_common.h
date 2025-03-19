@@ -16,9 +16,11 @@
 #ifndef OHOS_ROSEN_WM_COMMON_H
 #define OHOS_ROSEN_WM_COMMON_H
 
+#include <any>
 #include <map>
 #include <sstream>
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 #include <float.h>
@@ -48,6 +50,20 @@ constexpr uint32_t MAX_BUTTON_BACKGROUND_SIZE = 40;
 constexpr uint32_t MIN_CLOSE_BUTTON_RIGHT_MARGIN = 8;
 constexpr uint32_t MAX_CLOSE_BUTTON_RIGHT_MARGIN = 22;
 constexpr int32_t API_VERSION_INVALID = -1;
+/*
+ * PC Window Sidebar Blur
+ */
+constexpr float SIDEBAR_BLUR_NUMBER_ZERO = 0.0f;
+constexpr float SIDEBAR_DEFAULT_RADIUS_LIGHT = 57.0f;
+constexpr float SIDEBAR_DEFAULT_RADIUS_DARK = 57.0f;
+constexpr float SIDEBAR_DEFAULT_SATURATION_LIGHT = 2.0f;
+constexpr float SIDEBAR_DEFAULT_SATURATION_DARK = 2.6f;
+constexpr float SIDEBAR_DEFAULT_BRIGHTNESS_LIGHT = 1.0f;
+constexpr float SIDEBAR_DEFAULT_BRIGHTNESS_DARK = 0.4f;
+constexpr uint32_t SIDEBAR_DEFAULT_MASKCOLOR_LIGHT = 0xdbf1f1f1;
+constexpr uint32_t SIDEBAR_DEFAULT_MASKCOLOR_DARK = 0xe61a1a1a;
+constexpr uint32_t SIDEBAR_SNAPSHOT_MASKCOLOR_LIGHT = 0xffe5e5e5;
+constexpr uint32_t SIDEBAR_SNAPSHOT_MASKCOLOR_DARK = 0xff414141;
 }
 
 /**
@@ -428,6 +444,7 @@ enum class WindowSizeChangeReason : uint32_t {
     AVOID_AREA_CHANGE,
     MAXIMIZE_TO_SPLIT,
     SPLIT_TO_MAXIMIZE,
+    PAGE_ROTATION,
     END,
 };
 
@@ -463,6 +480,55 @@ enum class DragResizeType : uint32_t {
     RESIZE_TYPE_UNDEFINED = 0,
     RESIZE_EACH_FRAME = 1,
     RESIZE_WHEN_DRAG_END = 2,
+    RESIZE_KEY_FRAME = 3,
+    RESIZE_MAX_VALUE = 99,
+};
+
+/**
+ * @struct KeyFramePolicy
+ *
+ * @brief info for drag key frame policy.
+ */
+struct KeyFramePolicy : public Parcelable {
+    DragResizeType dragResizeType_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    uint32_t interval_ = 1000;
+    uint32_t distance_ = 1000;
+    uint32_t animationDuration_ = 100;
+    uint32_t animationDelay_ = 100;
+    bool running_ = false;
+    bool stopping_ = false;
+
+    bool enabled() const
+    {
+        return dragResizeType_ == DragResizeType::RESIZE_KEY_FRAME;
+    }
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        return parcel.WriteUint32(static_cast<uint32_t>(dragResizeType_)) &&
+            parcel.WriteUint32(interval_) && parcel.WriteUint32(distance_) &&
+            parcel.WriteUint32(animationDuration_) && parcel.WriteUint32(animationDelay_) &&
+            parcel.WriteBool(running_) && parcel.WriteBool(stopping_);
+    }
+
+    static KeyFramePolicy* Unmarshalling(Parcel& parcel)
+    {
+        KeyFramePolicy* keyFramePolicy = new KeyFramePolicy();
+        uint32_t dragResizeType;
+        if (!parcel.ReadUint32(dragResizeType) || !parcel.ReadUint32(keyFramePolicy->interval_) ||
+            !parcel.ReadUint32(keyFramePolicy->distance_) || !parcel.ReadUint32(keyFramePolicy->animationDuration_) ||
+            !parcel.ReadUint32(keyFramePolicy->animationDelay_) || !parcel.ReadBool(keyFramePolicy->running_) ||
+            !parcel.ReadBool(keyFramePolicy->stopping_)) {
+            delete keyFramePolicy;
+            return nullptr;
+        }
+        if (dragResizeType >= static_cast<uint32_t>(DragResizeType::RESIZE_MAX_VALUE)) {
+            delete keyFramePolicy;
+            return nullptr;
+        }
+        keyFramePolicy->dragResizeType_ = static_cast<DragResizeType>(dragResizeType);
+        return keyFramePolicy;
+    }
 };
 
 /**
@@ -643,6 +709,15 @@ constexpr int32_t ONE_FOURTH_FULL_CIRCLE_DEGREE = 90;
 constexpr float UNDEFINED_DENSITY = -1.0f;
 constexpr float MINIMUM_CUSTOM_DENSITY = 0.5f;
 constexpr float MAXIMUM_CUSTOM_DENSITY = 4.0f;
+constexpr int32_t MINIMUM_Z_LEVEL = -10000;
+constexpr int32_t MAXIMUM_Z_LEVEL = 10000;
+constexpr int32_t NORMAL_SUB_WINDOW_Z_LEVEL = 0;
+constexpr int32_t MODALITY_SUB_WINDOW_Z_LEVEL = 13000;
+constexpr int32_t DIALOG_SUB_WINDOW_Z_LEVEL = 13000;
+constexpr int32_t TEXT_MENU_SUB_WINDOW_Z_LEVEL = 13500;
+constexpr int32_t TOAST_SUB_WINDOW_Z_LEVEL = 14000;
+constexpr int32_t APPLICATION_MODALITY_SUB_WINDOW_Z_LEVEL = 20000;
+constexpr int32_t TOPMOST_SUB_WINDOW_Z_LEVEL = 2000;
 }
 
 inline int32_t GetUserIdByUid(int32_t uid)
@@ -937,6 +1012,40 @@ struct KeyboardPanelInfo : public Parcelable {
         keyboardPanelInfo->isShowing_ = parcel.ReadBool();
 
         return keyboardPanelInfo;
+    }
+};
+
+/**
+ * @struct CallingWindowInfo
+ *
+ * @brief Information of keyboard calling window.
+ */
+struct CallingWindowInfo : public Parcelable {
+    int32_t windowId_ = 0;
+    int32_t callingPid_ = -1;
+    DisplayId displayId_ = 0;
+    int32_t userId_ = 0;
+
+    CallingWindowInfo() {}
+    CallingWindowInfo(int32_t windowId, int32_t callingPid, DisplayId displayId, int32_t userId)
+        : windowId_(windowId), callingPid_(callingPid), displayId_(displayId), userId_(userId) {}
+
+    bool Marshalling(Parcel& parcel) const
+    {
+        return parcel.WriteInt32(windowId_) && parcel.WriteInt32(callingPid_) &&
+               parcel.WriteUint64(displayId_) && parcel.WriteInt32(userId_);
+    }
+
+    static CallingWindowInfo* Unmarshalling(Parcel& parcel)
+    {
+        CallingWindowInfo* callingWindowInfo = new CallingWindowInfo();
+        bool res = parcel.ReadInt32(callingWindowInfo->windowId_) && parcel.ReadInt32(callingWindowInfo->callingPid_) &&
+                   parcel.ReadUint64(callingWindowInfo->displayId_) && parcel.ReadInt32(callingWindowInfo->userId_);
+        if (!res) {
+            delete callingWindowInfo;
+            return nullptr;
+        }
+        return callingWindowInfo;
     }
 };
 
@@ -1435,7 +1544,7 @@ struct WindowLayoutInfo : public Parcelable {
         return parcel.WriteInt32(rect.posX_) && parcel.WriteInt32(rect.posY_) && parcel.WriteUint32(rect.width_) &&
                parcel.WriteUint32(rect.height_);
     }
-  
+
     static WindowLayoutInfo* Unmarshalling(Parcel& parcel)
     {
         WindowLayoutInfo* windowLayoutInfo = new WindowLayoutInfo();
@@ -1454,21 +1563,23 @@ struct WindowLayoutInfo : public Parcelable {
  * @brief Window meta info
  */
 struct WindowMetaInfo : public Parcelable {
-    int32_t windowId;
+    int32_t windowId = 0;
     std::string windowName;
     std::string bundleName;
     std::string abilityName;
+    int32_t appIndex = 0;
 
     bool Marshalling(Parcel& parcel) const override
     {
         return parcel.WriteInt32(windowId) && parcel.WriteString(windowName) && parcel.WriteString(bundleName) &&
-               parcel.WriteString(abilityName);
+               parcel.WriteString(abilityName) && parcel.WriteInt32(appIndex);
     }
     static WindowMetaInfo* Unmarshalling(Parcel& parcel)
     {
         WindowMetaInfo* windowMetaInfo = new WindowMetaInfo();
         if (!parcel.ReadInt32(windowMetaInfo->windowId) || !parcel.ReadString(windowMetaInfo->windowName) ||
-            !parcel.ReadString(windowMetaInfo->bundleName) || !parcel.ReadString(windowMetaInfo->abilityName)) {
+            !parcel.ReadString(windowMetaInfo->bundleName) || !parcel.ReadString(windowMetaInfo->abilityName) ||
+            !parcel.ReadInt32(windowMetaInfo->appIndex)) {
             delete windowMetaInfo;
             return nullptr;
         }
@@ -1682,6 +1793,7 @@ struct SubWindowOptions {
     bool decorEnabled = false;
     bool isModal = false;
     bool isTopmost = false;
+    int32_t zLevel = 0;
     bool maximizeSupported = false;
     ModalityType modalityType = ModalityType::WINDOW_MODALITY;
 };
@@ -1961,6 +2073,76 @@ enum class WindowFocusChangeReason : int32_t {
      * focus change max.
      */
     MAX,
+};
+
+/**
+ * @brief Windowinfokey
+ */
+enum class WindowInfoKey : int32_t {
+    WINDOW_ID,
+    BUNDLE_NAME,
+    ABILITY_NAME,
+    APP_INDEX,
+    VISIBILITY_STATE,
+};
+
+/**
+ * @struct OrientationInfo
+ *
+ * @brief orientation info
+ */
+struct OrientationInfo {
+    int32_t rotation = 0;
+    Rect rect = {0, 0, 0, 0};
+    std::map<AvoidAreaType, AvoidArea> avoidAreas;
+};
+
+/*
+ * @brief Enumerates rotation change type.
+ */
+enum class RotationChangeType : uint32_t {
+    /**
+     * rotate will begin.
+     */
+    WINDOW_WILL_ROTATE = 0,
+
+    /**
+     * rotate end.
+     */
+    WINDOW_DID_ROTATE,
+};
+
+/**
+ * @brief Enumerates rect type
+ */
+enum class RectType : uint32_t {
+    /**
+     * the window rect of app relative to screen.
+     */
+    RELATIVE_TO_SCREEN = 0,
+
+    /**
+     * the window rect of app relative to parent window.
+     */
+    RELATIVE_TO_PARENT_WINDOW,
+};
+
+/**
+ * @brief rotation change info to notify listener.
+ */
+struct RotationChangeInfo {
+    RotationChangeType type;
+    uint32_t orientation;
+    DisplayId displayId;
+    Rect displayRect;
+};
+
+/**
+ * @brief rotation change result return from listener.
+ */
+struct RotationChangeResult {
+    RectType rectType;
+    Rect windowRect;
 };
 }
 }

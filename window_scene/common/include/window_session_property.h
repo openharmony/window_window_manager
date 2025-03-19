@@ -55,7 +55,7 @@ public:
     void SetSystemCalling(bool isSystemCalling);
     void SetTurnScreenOn(bool turnScreenOn);
     void SetKeepScreenOn(bool keepScreenOn);
-    void SetRequestedOrientation(Orientation orientation);
+    void SetRequestedOrientation(Orientation orientation, bool needAnimation = true);
     void SetDefaultRequestedOrientation(Orientation orientation);
     void SetPrivacyMode(bool isPrivate);
     void SetSystemPrivacyMode(bool isSystemPrivate);
@@ -127,6 +127,7 @@ public:
     bool IsTurnScreenOn() const;
     bool IsKeepScreenOn() const;
     Orientation GetRequestedOrientation() const;
+    bool GetRequestedAnimation() const;
     Orientation GetDefaultRequestedOrientation() const;
     bool GetPrivacyMode() const;
     bool GetSystemPrivacyMode() const;
@@ -216,6 +217,12 @@ public:
     uint32_t GetSubWindowLevel() const;
 
     /*
+     * Window Hierarchy
+     */
+    void SetSubWindowZLevel(int32_t zLevel);
+    int32_t GetSubWindowZLevel() const;
+
+    /*
      * Window Property
      */
     void SetWindowCornerRadius(float cornerRadius);
@@ -254,6 +261,10 @@ public:
     bool IsWindowDelayRaiseEnabled() const;
     void SetWindowSizeLimits(const WindowSizeLimits& windowSizeLimits);
     WindowSizeLimits GetWindowSizeLimits() const;
+    void SetIsFullScreenWaterfallMode(bool isFullScreenWaterfallMode);
+    bool GetIsFullScreenWaterfallMode() const;
+    void SetIsSaveBySpecifiedFlag(bool isSaveBySpecifiedFlag);
+    bool GetIsSaveBySpecifiedFlag() const;
 
     /*
      * Keyboard
@@ -303,6 +314,7 @@ private:
     bool WriteActionUpdateWindowMask(Parcel& parcel);
     bool WriteActionUpdateTopmost(Parcel& parcel);
     bool WriteActionUpdateMainWindowTopmost(Parcel& parcel);
+    bool WriteActionUpdateSubWindowZLevel(Parcel& parcel);
     bool WriteActionUpdateWindowModeSupportType(Parcel& parcel);
     bool WriteActionUpdateAvoidAreaOption(Parcel& parcel);
     bool WriteActionUpdateBackgroundAlpha(Parcel& parcel);
@@ -331,6 +343,7 @@ private:
     void ReadActionUpdateWindowMask(Parcel& parcel);
     void ReadActionUpdateTopmost(Parcel& parcel);
     void ReadActionUpdateMainWindowTopmost(Parcel& parcel);
+    void ReadActionUpdateSubWindowZLevel(Parcel& parcel);
     void ReadActionUpdateWindowModeSupportType(Parcel& parcel);
     void ReadActionUpdateAvoidAreaOption(Parcel& parcel);
     void ReadActionUpdateBackgroundAlpha(Parcel& parcel);
@@ -354,6 +367,7 @@ private:
     bool topmost_ = false;
     bool mainWindowTopmost_ = false;
     Orientation requestedOrientation_ = Orientation::UNSPECIFIED;
+    bool needRotateAnimation_ = true;
     Orientation defaultRequestedOrientation_ = Orientation::UNSPECIFIED; // only accessed on SSM thread
     bool isPrivacyMode_ { false };
     bool isSystemPrivacyMode_ { false };
@@ -426,6 +440,11 @@ private:
     uint32_t subWindowLevel_ = 0;
 
     /*
+     * Window Hierarchy
+     */
+    int32_t zLevel_ = 0;
+
+    /*
      * UIExtension
      */
     int32_t realParentId_ = INVALID_SESSION_ID;
@@ -448,6 +467,8 @@ private:
     std::vector<AppExecFwk::SupportWindowMode> supportedWindowModes_;
     bool isWindowDelayRaiseEnabled_ = false;
     WindowSizeLimits windowSizeLimits_;
+    bool isFullScreenWaterfallMode_ = false;
+    bool isSaveBySpecifiedFlag_ = false;
 
     /*
      * Keyboard

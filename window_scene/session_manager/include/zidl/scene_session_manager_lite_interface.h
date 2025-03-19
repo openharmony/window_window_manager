@@ -26,6 +26,7 @@
 #include "mission_snapshot.h"
 #include "session_info.h"
 #include "zidl/window_manager_lite_interface.h"
+#include "session_lifecycle_listener_interface.h"
 namespace OHOS::Media {
 class PixelMap;
 } // namespace OHOS::Media
@@ -66,6 +67,7 @@ public:
         TRANS_ID_UNREGISTER_WINDOW_MANAGER_AGENT,
         TRANS_ID_GET_WINDOW_INFO,
         TRANS_ID_CHECK_WINDOW_ID,
+        TRANS_ID_LIST_WINDOW_INFO,
         TRANS_ID_GET_VISIBILITY_WINDOW_INFO_ID,
         TRANS_ID_GET_WINDOW_MODE_TYPE,
         TRANS_ID_GET_TOPN_MAIN_WINDOW_INFO,
@@ -86,6 +88,10 @@ public:
         TRANS_ID_MINIMIZE_MAIN_SESSION,
         TRANS_ID_LOCK_SESSION_BY_ABILITY_INFO,
         TRANS_ID_HAS_FLOAT_FOREGROUND,
+        TRANS_ID_GET_CALLING_WINDOW_INFO,
+        TRANS_ID_REGISTER_SESSION_LIFECYCLE_LISTENER_BY_IDS,
+        TRANS_ID_REGISTER_SESSION_LIFECYCLE_LISTENER_BY_BUNDLES,
+        TRANS_ID_UNREGISTER_SESSION_LIFECYCLE_LISTENER,
     };
 
     /*
@@ -124,6 +130,8 @@ public:
     virtual WSError UnlockSession(int32_t sessionId) = 0;
     virtual WSError RaiseWindowToTop(int32_t persistentId) = 0;
     virtual WMError GetWindowStyleType(WindowStyleType& windowStyleType) = 0;
+    virtual WMError ListWindowInfo(const WindowInfoOption& windowInfoOption,
+        std::vector<sptr<WindowInfo>>& infos) = 0;
 
     /**
      * @brief Application Control SA Notification Window Control Application Information
@@ -192,6 +200,52 @@ public:
      */
     virtual WMError HasFloatingWindowForeground(const sptr<IRemoteObject>& abilityToken,
         bool& hasOrNot) = 0;
+
+    /**
+     * @brief Register a main session lifecycle listener for specific persistentIds
+     *
+     * This function is used to register a main session lifecycle listener for a list of specific persistentIds.
+     * The listener will be notified when lifecycle events occur for the specified persistentId
+     *
+     * @caller SA
+     * @permission SA permission
+     *
+     * @param listener The session lifecycle listener to be registered
+     * @param persistentIdList The list of persistentId for which the listener should be registered
+     * @return Successful call returns WMError: WM-OK, otherwise it indicates failure
+     */
+    virtual WMError RegisterSessionLifecycleListenerByIds(const sptr<ISessionLifecycleListener>& listener,
+        const std::vector<int32_t>& persistentIdList) = 0;
+
+    /**
+     * @brief Register a session lifecycle listener for specific bundles
+     *
+     * This function is used to register a session lifecycle listener for a list of specific bundles.
+     * The listener will be notified when lifecycle events occur for the specified bundles
+     *
+     * @caller SA
+     * @permission SA permission
+     *
+     * @param listener The session lifecycle listener to be registered
+     * @param bundleNameList The list of bundle for which the listener should be registered
+     * @return Successful call returns WMError: WM-OK, otherwise it indicates failure
+     */
+    virtual WMError RegisterSessionLifecycleListenerByBundles(const sptr<ISessionLifecycleListener>& listener,
+        const std::vector<std::string>& bundleNameList) = 0;
+
+    /**
+     * @brief Unregister a session lifecycle listener
+     *
+     * This function is used to unregister a session lifecycle listener.
+     * The unregistered listener will no longer receive notifications about session lifecycle events.
+     *
+     * @caller SA
+     * @permission SA permission
+     *
+     * @param listener The session lifecycle listener to be unregistered
+     * @return Successful call returns WMError: WS-OK, otherwise it indicates failure
+     */
+    virtual WMError UnregisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener) = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_LITE_INTERFACE_H

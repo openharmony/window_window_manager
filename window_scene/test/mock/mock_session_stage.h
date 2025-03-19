@@ -66,6 +66,7 @@ public:
     MOCK_METHOD0(CompatibleFullScreenRecover, WSError(void));
     MOCK_METHOD0(CompatibleFullScreenMinimize, WSError(void));
     MOCK_METHOD0(CompatibleFullScreenClose, WSError(void));
+    MOCK_METHOD0(PcAppInPadNormalClose, WSError(void));
     MOCK_METHOD1(NotifyCompatibleModeEnableInPad, WSError(bool enable));
     MOCK_METHOD1(NotifySessionFullScreen, void(bool fullScreen));
     MOCK_METHOD1(GetUIContentRemoteObj, WSError(sptr<IRemoteObject>& uiContentRemoteObj));
@@ -78,6 +79,8 @@ public:
     MOCK_METHOD1(SetDragActivated, WSError(bool dragActivated));
     MOCK_METHOD1(NotifyWindowCrossAxisChange, void(CrossAxisState state));
     MOCK_METHOD3(NotifyPipWindowSizeChange, WSError(uint32_t width, uint32_t height, double scale));
+    MOCK_METHOD1(LinkKeyFrameCanvasNode, WSError(std::shared_ptr<RSCanvasNode>& rsCanvasNode));
+    MOCK_METHOD1(SetKeyFramePolicy, WSError(KeyFramePolicy& keyFramePolicy));
 };
 } // namespace Rosen
 } // namespace OHOS

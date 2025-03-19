@@ -189,6 +189,7 @@ public:
     virtual Ace::UIContent* GetUIContent() const override;
     virtual void OnNewWant(const AAFwk::Want& want) override;
     virtual void SetRequestedOrientation(Orientation) override;
+    virtual void NotifyPreferredOrientationChange(Orientation orientation) override;
     virtual Orientation GetRequestedOrientation() override;
     virtual void SetNeedRemoveWindowInputChannel(bool needRemoveWindowInputChannel) override;
     virtual WMError SetTouchHotAreas(const std::vector<Rect>& rects) override;
@@ -203,6 +204,7 @@ public:
 
     virtual void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
     virtual std::shared_ptr<Media::PixelMap> Snapshot() override;
+    WMError SnapshotIgnorePrivacy(std::shared_ptr<Media::PixelMap>& pixelMap) override;
     virtual WMError NotifyMemoryLevel(int32_t level) override;
     virtual bool IsAllowHaveSystemSubWindow() override;
     WMError RaiseToAppTop() override;

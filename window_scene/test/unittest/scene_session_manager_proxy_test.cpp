@@ -1075,7 +1075,8 @@ HWTEST_F(sceneSessionManagerProxyTest, IsWindowRectAutoSave, Function | SmallTes
         sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
     bool enabled = false;
     std::string key = "com.example.recposentryEntryAbility";
-    ASSERT_EQ(sceneSessionManagerProxy->IsWindowRectAutoSave(key, enabled), WMError::WM_ERROR_IPC_FAILED);
+    int persistentId = 1;
+    ASSERT_EQ(sceneSessionManagerProxy->IsWindowRectAutoSave(key, enabled, persistentId), WMError::WM_ERROR_IPC_FAILED);
 }
 
 /**
@@ -1157,6 +1158,24 @@ HWTEST_F(sceneSessionManagerProxyTest, GetAppDragResizeType, Function | SmallTes
     std::unordered_map<std::string, DragResizeType> appDragResizeTypeMap_;
     appDragResizeTypeMap_[bundleName] = toDragResizeType;
     sceneSessionManagerProxy->GetAppDragResizeType(bundleName, dragResizeType);
+}
+
+/**
+ * @tc.name: SetAppKeyFramePolicy
+ * @tc.desc: SetAppKeyFramePolicy
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, SetAppKeyFramePolicy, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_TRUE(sceneSessionManagerProxy != nullptr);
+    const std::string bundleName = "test";
+    KeyFramePolicy keyFramePolicy;
+    keyFramePolicy.dragResizeType_ = DragResizeType::RESIZE_KEY_FRAME;
+    WMError res = sceneSessionManagerProxy->SetAppKeyFramePolicy(bundleName, keyFramePolicy);
+    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, res);
 }
 
 /**
@@ -1425,6 +1444,37 @@ HWTEST_F(sceneSessionManagerProxyTest, GetWindowModeType, Function | SmallTest |
     sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(nullptr);
     res = sceneSessionManagerProxy->GetWindowModeType(windowModeType);
     ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, res);
+}
+
+/**
+ * @tc.name: SetParentWindow
+ * @tc.desc: SetParentWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, SetParentWindow, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+
+    int32_t subWindowId = 1;
+    int32_t newParentWindowId = 2;
+    WMError res = sceneSessionManagerProxy->SetParentWindow(subWindowId, newParentWindowId);
+    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, res);
+}
+
+/**
+ * @tc.name: MinimizeByWindowId
+ * @tc.desc: MinimizeByWindowId
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, MinimizeByWindowId, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    auto sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+    std::vector<int32_t> windowIds;
+    WMError res = sceneSessionManagerProxy->MinimizeByWindowId(windowIds);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, res);
 }
 }  // namespace
 }

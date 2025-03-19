@@ -381,6 +381,31 @@ void WindowManagerAgentProxy::NotifyWindowStyleChange(WindowStyleType type)
     }
 }
 
+void WindowManagerAgentProxy::NotifyCallingWindowDisplayChanged(const CallingWindowInfo& callingWindowInfo)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteParcelable(&callingWindowInfo)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Write callingWindowInfo failed");
+        return;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "remote is null");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerAgentMsg::TRANS_ID_NOTIFY_CALLING_DISPLAY_CHANGE),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "SendRequest calling display info change failed");
+    }
+}
+
 void WindowManagerAgentProxy::NotifyWindowPidVisibilityChanged(const sptr<WindowPidVisibilityInfo>& info)
 {
     MessageParcel data;

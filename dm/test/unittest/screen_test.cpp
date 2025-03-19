@@ -472,6 +472,17 @@ HWTEST_F(ScreenTest, SetDefaultDensityDpi, Function | SmallTest | Level2)
         ASSERT_NE(DMError::DM_OK, res);
     }
 }
+
+/**
+ * @tc.name: GetSerialNumber
+ * @tc.desc: GetSerialNumber
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenTest, GetSerialNumber, Function | SmallTest | Level2)
+{
+    auto res = screen_->GetSerialNumber();
+    ASSERT_EQ(res, "");
+}
 }
 } // namespace Rosen
 } // namespace OHOS

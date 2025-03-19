@@ -33,6 +33,7 @@ class AccessibilityElementInfo;
 }
 namespace OHOS::Rosen {
 class RSTransaction;
+class RSCanvasNode;
 
 class ISessionStage : public IRemoteBroker {
 public:
@@ -183,6 +184,10 @@ public:
     {
         return WSError::WS_OK;
     }
+    virtual WSError PcAppInPadNormalClose()
+    {
+        return WSError::WS_OK;
+    }
     virtual WSError NotifyCompatibleModeEnableInPad(bool enable)
     {
         return WSError::WS_OK;
@@ -232,6 +237,10 @@ public:
     {
         return WSError::WS_OK;
     }
+
+    virtual WSError LinkKeyFrameCanvasNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode) = 0;
+    virtual WSError SetKeyFramePolicy(KeyFramePolicy& keyFramePolicy) = 0;
+
     virtual WSError SetSplitButtonVisible(bool isVisible) = 0;
 
     virtual WSError SetEnableDragBySystem(bool dragEnable) = 0;
@@ -243,6 +252,12 @@ public:
     virtual WSError SendContainerModalEvent(const std::string& eventName, const std::string& eventValue) = 0;
     virtual void NotifyWindowCrossAxisChange(CrossAxisState state) = 0;
     virtual WSError NotifyWindowAttachStateChange(bool isAttach) { return WSError::WS_DO_NOTHING; }
+    virtual void NotifyKeyboardAnimationCompleted(const KeyboardPanelInfo& keyboardPanelInfo) {}
+    virtual WSError NotifyTargetRotationInfo(OrientationInfo& info) { return WSError::WS_DO_NOTHING; }
+    virtual RotationChangeResult NotifyRotationChange(const RotationChangeInfo& rotationChangeInfo)
+    {
+        return { RectType::RELATIVE_TO_SCREEN, { 0, 0, 0, 0, } };
+    }
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_INTERFACE_H
