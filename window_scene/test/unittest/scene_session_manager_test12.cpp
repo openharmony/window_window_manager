@@ -1645,20 +1645,6 @@ HWTEST_F(SceneSessionManagerTest12, SetStatusBarAvoidHeight, Function | SmallTes
 }
 
 /**
- * @tc.name: GetCallingWindowInfo1
- * @tc.desc: test function : GetCallingWindowInfo
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest12, GetCallingWindowInfo1, Function | SmallTest | Level2)
-{
-    ConstructKeyboardCallingWindowTestData(0, 57256, 0, WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, false, 86);
-    // Invalid callingWindowId
-    CallingWindowInfo info = {0, -1, 0, GetUserIdByUid(getuid())}; // windowId_ callingPid_ displayId_ userId_
-    WMError ret = ssm_->GetCallingWindowInfo(info);
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
-}
-
-/**
  * @tc.name: GetKeyboardOccupiedAreaWithRotation1
  * @tc.desc: PC device is not compatible
  * @tc.type: FUNC
@@ -1969,6 +1955,20 @@ HWTEST_F(SceneSessionManagerTest12, NotifyStackEmptyTest, Function | SmallTest |
 }
 
 /**
+ * @tc.name: GetCallingWindowInfo1
+ * @tc.desc: test function : GetCallingWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetCallingWindowInfo1, Function | SmallTest | Level2)
+{
+    ConstructKeyboardCallingWindowTestData(0, 57256, 0, WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, false, 86);
+    // Invalid callingWindowId
+    CallingWindowInfo info = {0, -1, 0, GetUserIdByUid(getuid())}; // windowId_ callingPid_ displayId_ userId_
+    WMError ret = ssm_->GetCallingWindowInfo(info);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+}
+
+/**
  * @tc.name: GetCallingWindowInfo2
  * @tc.desc: test function : GetCallingWindowInfo
  * @tc.type: FUNC
@@ -2011,11 +2011,11 @@ HWTEST_F(SceneSessionManagerTest12, UpdateSessionDisplayId1, Function | SmallTes
         wmAgentLiteMocker, WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_CALLING_DISPLAY, 12345);
     ConstructKeyboardCallingWindowTestData(0, 57256, 0, WindowType::WINDOW_TYPE_APP_SUB_WINDOW, false, 86);
     ssm_->UpdateSessionDisplayId(86, 12);
-    EXCEPT_CALL(*wmAgentLiteMocker, NotifyCallingWindowDisplayChanged(_)).Times(0);
+    EXPECT_CALL(*wmAgentLiteMocker, NotifyCallingWindowDisplayChanged(_)).Times(0);
 
     ConstructKeyboardCallingWindowTestData(0, 57256, 0, WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, true, 86);
     ssm_->UpdateSessionDisplayId(86, 12);
-    EXCEPT_CALL(*wmAgentLiteMocker, NotifyCallingWindowDisplayChanged(_)).Times(0);
+    EXPECT_CALL(*wmAgentLiteMocker, NotifyCallingWindowDisplayChanged(_)).Times(0);
 }
 
 /**
@@ -2029,8 +2029,20 @@ HWTEST_F(SceneSessionManagerTest12, UpdateSessionDisplayId2, Function | SmallTes
     SessionManagerAgentController::GetInstance().RegisterWindowManagerAgent(
         wmAgentLiteMocker, WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_CALLING_DISPLAY, 12345);
     ConstructKeyboardCallingWindowTestData(0, 57256, 0, WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, false, 86);
+    SessionInfo info;
+    info.abilityName_ = "non-callingSession";
+    info.bundleName_ = "non-callingSession";
+    info.screenId_ = 0;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->callingPid_ = 54321;
+    sptr<WindowSessionProperty> sceneSessionProperties = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSessionProperties->SetDisplayId(0);
+    sceneSession->SetSessionProperty(sceneSessionProperties);
+    // Add non-callingWindow
+    ssm_->sceneSessionMap_.insert({90, sceneSession});
+    // Change display id of non-callingWindow
     ssm_->UpdateSessionDisplayId(90, 12);
-    EXCEPT_CALL(*wmAgentLiteMocker, NotifyCallingWindowDisplayChanged(_)).Times(0);
+    EXPECT_CALL(*wmAgentLiteMocker, NotifyCallingWindowDisplayChanged(_)).Times(0);
 }
 
 /**
@@ -2045,7 +2057,7 @@ HWTEST_F(SceneSessionManagerTest12, UpdateSessionDisplayId3, Function | SmallTes
         wmAgentLiteMocker, WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_CALLING_DISPLAY, 12345);
     ConstructKeyboardCallingWindowTestData(0, 57256, 0, WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, false, 86);
     ssm_->UpdateSessionDisplayId(86, 12);
-    EXCEPT_CALL(*wmAgentLiteMocker, NotifyCallingWindowDisplayChanged(_)).Times(1);
+    EXPECT_CALL(*wmAgentLiteMocker, NotifyCallingWindowDisplayChanged(_)).Times(1);
 }
 }
 } // namespace Rosen
