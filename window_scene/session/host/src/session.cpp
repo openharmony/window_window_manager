@@ -1011,8 +1011,7 @@ void Session::TransformRelativeRectToGlobalRect(WSRect& rect) const
     auto currScreenFoldStatus = PcFoldScreenManager::GetInstance().GetScreenFoldStatus();
     auto needTransRect = currScreenFoldStatus != SuperFoldStatus::UNKNOWN &&
         currScreenFoldStatus != SuperFoldStatus::FOLDED && currScreenFoldStatus != SuperFoldStatus::EXPANDED;
-    auto isSystemKeyboard = parentSession->GetSessionProperty() != nullptr &&
-        parentSession->GetSessionProperty()->IsSystemKeyboard();
+    auto isSystemKeyboard = GetSessionProperty() != nullptr && GetSessionProperty()->IsSystemKeyboard();
     if (isSystemKeyboard || !needTransRect) {
         return;
     }
