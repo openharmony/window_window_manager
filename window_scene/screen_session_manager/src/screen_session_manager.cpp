@@ -7100,7 +7100,31 @@ void ScreenSessionManager::SwitchScbNodeHandle(int32_t newUserId, int32_t newScb
     currentScbPId_ = newScbPid;
     scbSwitchCV_.notify_all();
     oldScbDisplayMode_ = GetFoldDisplayMode();
+    NotifyCastWhenSwitchScbNode();
 #endif
+}
+
+void ScreenSessionManager::NotifyCastWhenSwitchScbNode()
+{
+    for (const auto& sessionIt : screenSessionMap_) {
+        auto screenSession = sessionIt.second;
+        if (screenSession == nullptr) {
+            TLOGE(WmsLogTag::DMS, "screenSession is nullptr, screenId:%{public}" PRIu64"", sessionIt.first);
+            continue;
+        }
+        bool phyMirrorEnable = IsDefaultMirrorMode(screenSession->GetScreenId());
+        if (screenSession->GetScreenProperty().GetScreenType() != ScreenType::REAL || !phyMirrorEnable) {
+            TLOGE(WmsLogTag::DMS, "screen is not real or external, screenId:%{public}" PRIu64"", sessionIt.first);
+            continue;
+        }
+        if (screenSession ->GetScreenCombination() == ScreenCombination::SCREEN_MIRROR) {
+            NotifyCastWhenScreenConnectChange(true);
+            return;
+        } else {
+            NotifyCastWhenScreenConnectChange(false);
+            return;
+        }
+    }
 }
 
 int32_t ScreenSessionManager::GetCurrentUserId()

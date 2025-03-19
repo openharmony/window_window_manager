@@ -3890,6 +3890,34 @@ HWTEST_F(ScreenSessionManagerTest, UnregisterSettingWireCastObserver, Function |
     ssm_->screenSessionMap_[id] = newSession;
     ssm_->UnregisterSettingWireCastObserver(id);
 }
+
+/**
+ * @tc.name: NotifyCastWhenSwitchScbNode
+ * @tc.desc: NotifyCastWhenSwitchScbNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, NotifyCastWhenSwitchScbNode, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    ASSERT_NE(displayManagerAgent, nullptr);
+
+    ScreenId id = 2;
+    sptr<ScreenSession> newSession = new (std::nothrow) ScreenSession(id, ScreenProperty(), 0);
+    newSession ->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
+    ASSERT_NE(newSession, nullptr);
+    ssm_->screenSessionMap_[id] = newSession;
+    ScreenId id1 = 3;
+    sptr<ScreenSession> newSession1 = new (std::nothrow) ScreenSession(id1, ScreenProperty(), 0);
+    newSession1 ->SetScreenCombination(ScreenCombination::SCREEN_UNIQUE);
+    ASSERT_NE(newSession1, nullptr);
+    ssm_->screenSessionMap_[id1] = newSession1;
+    ScreenId id2 = 4;
+    sptr<ScreenSession> newSession2 = nullptr;
+    ssm_->screenSessionMap_[id2] = newSession2;
+
+    ssm_->NotifyCastWhenSwitchScbNode();
+}
 }
 } // namespace Rosen
 } // namespace OHOS
