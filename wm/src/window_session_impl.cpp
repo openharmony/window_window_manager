@@ -4559,6 +4559,15 @@ WSError WindowSessionImpl::NotifyDisplayIdChange(DisplayId displayId)
     return WSError::WS_OK;
 }
 
+uint32_t WindowSessionImpl::GetApiCompatibleVersion() const
+{
+    uint32_t version = 0;
+    if ((context_ != nullptr) && (context_->GetApplicationInfo() != nullptr)) {
+        version = context_->GetApplicationInfo()->apiCompatibleVersion % API_VERSION_MOD;
+    }
+    return version;
+}
+
 WMError WindowSessionImpl::NotifyWatchGestureConsumeResult(int32_t keyCode, bool isConsumed)
 {
     TLOGD(WmsLogTag::WMS_EVENT, "keyCode:%{public}d, isConsumed:%{public}d", keyCode, isConsumed);
@@ -5101,7 +5110,7 @@ void WindowSessionImpl::UpdateSpecificSystemBarEnabled(bool systemBarEnable, boo
     property.enable_ = systemBarEnable;
     property.enableAnimation_ = systemBarEnableAnimation;
     // isolate on api 18
-    if (GetTargetAPIVersion() >= API_VERSION_18) {
+    if (GetApiCompatibleVersion() >= API_VERSION_18) {
         property.settingFlag_ |= SystemBarSettingFlag::ENABLE_SETTING;
     }
 }
