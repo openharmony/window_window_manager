@@ -770,7 +770,6 @@ HWTEST_F(WindowSceneSessionImplTest3, UpdateWindowState, Function | SmallTest | 
     windowSceneSessionImpl->windowSystemConfig_.maxFloatingWindowSize_ = 1920;
     windowSceneSessionImpl->property_->SetIsNeedUpdateWindowMode(true);
     windowSceneSessionImpl->UpdateWindowState();
-    EXPECT_EQ(1920, windowSceneSessionImpl->maxFloatingWindowSize_);
     windowSceneSessionImpl->property_->SetIsNeedUpdateWindowMode(false);
     windowSceneSessionImpl->UpdateWindowState();
     windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
@@ -816,6 +815,25 @@ HWTEST_F(WindowSceneSessionImplTest3, Resize, Function | SmallTest | Level2)
     windowSceneSessionImpl->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     ret = windowSceneSessionImpl->Resize(100, 100);
     EXPECT_EQ(WMError::WM_OK, ret);
+    windowSceneSessionImpl->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    windowSceneSessionImpl->property_->SetIsPcAppInPad(true);
+    windowSceneSessionImpl->property_->SetWindowModeSupportType(WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN);
+    windowSceneSessionImpl->property_->SetDragEnabled(false);
+    ret = windowSceneSessionImpl->Resize(100, 100);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
+    windowSceneSessionImpl->property_->SetDragEnabled(true);
+    WindowLimits windowLimits = {5000, 5000, 50, 50, 0.0f, 0.0f};
+    windowSceneSessionImpl->property_->SetWindowLimits(windowLimits);
+    ret = windowSceneSessionImpl->Resize(100, 100);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
+    WindowLimits windowLimits1 = {800, 800, 50, 50, 0.0f, 0.0f};
+    windowSceneSessionImpl->property_->SetWindowLimits(windowLimits1);
+    ret = windowSceneSessionImpl->Resize(100, 100);
+    if (!windowSceneSessionImpl->IsFreeMultiWindowMode()) {
+        EXPECT_EQ(WMError::WM_OK, ret);
+    } else {
+        EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
+    }
 }
 
 /**
@@ -1804,25 +1822,25 @@ HWTEST_F(WindowSceneSessionImplTest3, SetWindowRectAutoSave, Function | SmallTes
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetWindowRectAutoSave");
     sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    auto ret = windowSceneSessionImpl->SetWindowRectAutoSave(true);
+    auto ret = windowSceneSessionImpl->SetWindowRectAutoSave(true, false);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     windowSceneSessionImpl->property_->SetPersistentId(1);
     windowSceneSessionImpl->hostSession_ = session;
     windowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
-    ret = windowSceneSessionImpl->SetWindowRectAutoSave(true);
+    ret = windowSceneSessionImpl->SetWindowRectAutoSave(true, false);
     EXPECT_EQ(WMError::WM_OK, ret);
-    ret = windowSceneSessionImpl->SetWindowRectAutoSave(false);
+    ret = windowSceneSessionImpl->SetWindowRectAutoSave(false, false);
     EXPECT_EQ(WMError::WM_OK, ret);
     windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
-    ret = windowSceneSessionImpl->SetWindowRectAutoSave(true);
+    ret = windowSceneSessionImpl->SetWindowRectAutoSave(true, false);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
     windowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
-    ret = windowSceneSessionImpl->SetWindowRectAutoSave(true);
+    ret = windowSceneSessionImpl->SetWindowRectAutoSave(true, false);
     EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
     windowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    ret = windowSceneSessionImpl->SetWindowRectAutoSave(true);
+    ret = windowSceneSessionImpl->SetWindowRectAutoSave(true, false);
     EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
     GTEST_LOG_(INFO) << "WindowSceneSessionImplTest3: SetWindowRectAutoSave end";
 }

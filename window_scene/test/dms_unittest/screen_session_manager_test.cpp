@@ -134,6 +134,12 @@ HWTEST_F(ScreenSessionManagerTest, WakeUpBegin, Function | SmallTest | Level3)
     reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_ON;
     ASSERT_EQ(true, ssm_->WakeUpBegin(reason));
 
+    reason = PowerStateChangeReason::STATE_CHANGE_REASON_START_DREAM;
+    ASSERT_EQ(false, ssm_->WakeUpBegin(reason));
+
+    reason = PowerStateChangeReason::STATE_CHANGE_REASON_END_DREAM;
+    ASSERT_EQ(true, ssm_->WakeUpBegin(reason));
+
     EXPECT_EQ(DMError::DM_OK, ssm_->DestroyVirtualScreen(screenId));
     EXPECT_EQ(DMError::DM_OK, ssm_->UnregisterDisplayManagerAgent(displayManagerAgent, type));
 }
@@ -433,6 +439,12 @@ HWTEST_F(ScreenSessionManagerTest, SuspendBegin, Function | SmallTest | Level3)
 
     reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF;
     ASSERT_EQ(true, ssm_->SuspendBegin(reason));
+
+    reason = PowerStateChangeReason::STATE_CHANGE_REASON_START_DREAM;
+    ASSERT_EQ(true, ssm_->SuspendBegin(reason));
+
+    reason = PowerStateChangeReason::STATE_CHANGE_REASON_END_DREAM;
+    ASSERT_EQ(false, ssm_->SuspendBegin(reason));
 
     EXPECT_EQ(DMError::DM_OK, ssm_->DestroyVirtualScreen(screenId));
     EXPECT_EQ(DMError::DM_OK, ssm_->UnregisterDisplayManagerAgent(displayManagerAgent, type));
@@ -1319,6 +1331,29 @@ HWTEST_F(ScreenSessionManagerTest, UpdateDisplayHookInfo002, Function | SmallTes
     displayHookMap.erase(uid);
     ASSERT_EQ(displayHookMap.find(uid) != displayHookMap.end(), false);
 }
+
+/**
+ * @tc.name: GetDisplayHookInfo
+ * @tc.desc: GetDisplayHookInfo by uid
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetDisplayHookInfo, Function | SmallTest | Level2)
+{
+    int32_t uid = 0;
+    DMHookInfo hookInfo;
+    hookInfo.enableHookRotation_ = true;
+    hookInfo.rotation_ = true;
+    hookInfo.density_ = 1.1;
+    hookInfo.width_ = 100;
+    hookInfo.height_ = 200;
+    ssm_->UpdateDisplayHookInfo(uid, true, hookInfo);
+    ssm_->GetDisplayHookInfo(uid, hookInfo);
+    ASSERT_TRUE(hookInfo.enableHookRotation_);
+    ASSERT_TRUE(hookInfo.rotation_);
+    ASSERT_EQ(hookInfo.width_, 100);
+    ASSERT_EQ(hookInfo.height_, 200);
+}
+
 
 /**
  * @tc.name: SetVirtualPixelRatio
@@ -2520,6 +2555,44 @@ HWTEST_F(ScreenSessionManagerTest, SetVirtualScreenBlackList02, Function | Small
 }
 
 /**
+ * @tc.name: SetVirtualDisplayMuteFlag
+ * @tc.desc: SetVirtualDisplayMuteFlag test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetVirtualDisplayMuteFlag01, Function | SmallTest | Level3)
+{
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    EXPECT_NE(displayManagerAgent, nullptr);
+
+    DisplayManagerAgentType type = DisplayManagerAgentType::SCREEN_EVENT_LISTENER;
+    EXPECT_EQ(DMError::DM_OK, ssm_->RegisterDisplayManagerAgent(displayManagerAgent, type));
+
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    if (screenId != VIRTUAL_SCREEN_ID) {
+        ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
+    }
+    bool muteFlag = false;
+    ssm_->SetVirtualDisplayMuteFlag(screenId, muteFlag);
+    ssm_->DestroyVirtualScreen(screenId);
+}
+
+/**
+ * @tc.name: SetVirtualDisplayMuteFlag
+ * @tc.desc: ConvertScreenIdToRsScreenId = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetVirtualDisplayMuteFlag02, Function | SmallTest | Level3)
+{
+    ScreenId screenId = 1010;
+    ScreenId rsScreenId = SCREEN_ID_INVALID;
+    ASSERT_FALSE(ssm_->ConvertScreenIdToRsScreenId(screenId, rsScreenId));
+    bool muteFlag = false;
+    ssm_->SetVirtualDisplayMuteFlag(screenId, muteFlag);
+}
+
+/**
  * @tc.name: GetAllDisplayPhysicalResolution
  * @tc.desc: GetAllDisplayPhysicalResolution test
  * @tc.type: FUNC
@@ -3675,10 +3748,10 @@ HWTEST_F(ScreenSessionManagerTest, GetFoldStatus, Function | SmallTest | Level3)
 HWTEST_F(ScreenSessionManagerTest, SetLowTemp, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
-    ssm_->SetLowTemp(LowTempMode::LowTempOff);
-    ASSERT_EQ(ssm_->lowTemp_, LowTempMode::LowTempOff);
-    ssm_->SetLowTemp(LowTempMode::LowTempOn);
-    ASSERT_EQ(ssm_->lowTemp_, LowTempMode::LowTempOn);
+    ssm_->SetLowTemp(LowTempMode::LOW_TEMP_OFF);
+    ASSERT_EQ(ssm_->lowTemp_, LowTempMode::LOW_TEMP_OFF);
+    ssm_->SetLowTemp(LowTempMode::LOW_TEMP_ON);
+    ASSERT_EQ(ssm_->lowTemp_, LowTempMode::LOW_TEMP_ON);
 }
 
 /**
@@ -3739,7 +3812,7 @@ HWTEST_F(ScreenSessionManagerTest, GetDisplayCapability, Function | SmallTest | 
 {
     std::string info {""};
     if (ssm_ != nullptr) {
-        info = ssm_->GetDisplayCapability();
+        EXPECT_EQ(DMError::DM_OK, ssm_->GetDisplayCapability(info));
         ASSERT_NE(info, "");
     } else {
         ASSERT_EQ(info, "");
@@ -3755,7 +3828,7 @@ HWTEST_F(ScreenSessionManagerTest, GetSecondaryDisplayCapability, Function | Sma
 {
     std::string info {""};
     if (ssm_ != nullptr) {
-        info = ssm_->GetSecondaryDisplayCapability();
+        EXPECT_EQ(DMError::DM_OK, ssm_->GetSecondaryDisplayCapability(info));
         ASSERT_NE(info, "");
     } else {
         ASSERT_EQ(info, "");
@@ -3771,7 +3844,7 @@ HWTEST_F(ScreenSessionManagerTest, GetSuperFoldCapability, Function | SmallTest 
 {
     std::string info {""};
     if (ssm_ != nullptr) {
-        info = ssm_->GetSuperFoldCapability();
+        EXPECT_EQ(DMError::DM_OK, ssm_->GetSuperFoldCapability(info));
         ASSERT_NE(info, "");
     } else {
         ASSERT_EQ(info, "");
@@ -3787,7 +3860,7 @@ HWTEST_F(ScreenSessionManagerTest, GetFoldableDeviceCapability, Function | Small
 {
     std::string info {""};
     if (ssm_ != nullptr) {
-        info = ssm_->GetFoldableDeviceCapability();
+        EXPECT_EQ(DMError::DM_OK, ssm_->GetFoldableDeviceCapability(info));
         ASSERT_NE(info, "");
     } else {
         ASSERT_EQ(info, "");
@@ -3889,6 +3962,118 @@ HWTEST_F(ScreenSessionManagerTest, UnregisterSettingWireCastObserver, Function |
     ASSERT_NE(newSession, nullptr);
     ssm_->screenSessionMap_[id] = newSession;
     ssm_->UnregisterSettingWireCastObserver(id);
+}
+
+/**
+ * @tc.name: MultiScreenChangeOuter
+ * @tc.desc: MultiScreenChangeOuter
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, MultiScreenChangeOuter, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    EXPECT_EQ(ssm_->clientProxy_, nullptr);
+    std::string outerFlag = "2";
+    ssm_->MultiScreenChangeOuter(outerFlag);
+    outerFlag = "0";
+    ssm_->MultiScreenChangeOuter(outerFlag);
+    outerFlag = "1";
+    ssm_->MultiScreenChangeOuter(outerFlag);
+}
+
+/**
+ * @tc.name: UpdateValidArea
+ * @tc.desc: UpdateValidArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, UpdateValidArea, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->UpdateValidArea(2000, 800, 1000);
+
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    sptr<ScreenSession> screenSession = ssm_->GetScreenSession(screenId);
+
+    int32_t originValidWidth = screenSession->GetValidWidth();
+    int32_t originValidHeight = screenSession->GetValidHeight();
+    ssm_->UpdateValidArea(screenId, 800, 1000);
+    EXPECT_EQ(800, screenSession->GetValidWidth());
+    EXPECT_EQ(1000, screenSession->GetValidHeight());
+    ssm_->UpdateValidArea(screenId, originValidWidth, originValidHeight);
+    ssm_->DestroyVirtualScreen(screenId);
+}
+
+/**
+ * @tc.name: GetIsRealScreen
+ * @tc.desc: GetIsRealScreen
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetIsRealScreen, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    EXPECT_EQ(ssm_->GetIsRealScreen(2000), false);
+
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    sptr<ScreenSession> screenSession = ssm_->GetScreenSession(screenId);
+    screenSession->SetIsRealScreen(true);
+    ASSERT_EQ(ssm_->GetIsRealScreen(screenId), true);
+    screenSession->SetIsRealScreen(false);
+    ASSERT_EQ(ssm_->GetIsRealScreen(screenId), false);
+    ssm_->DestroyVirtualScreen(screenId);
+}
+
+/**
+ * @tc.name: SetSystemKeyboardStatus
+ * @tc.desc: SetSystemKeyboardStatus with true as parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetSystemKeyboardStatus01, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    auto ret = ssm_->SetSystemKeyboardStatus(true);
+    ASSERT_NE(ret, DMError::DM_ERROR_UNKNOWN);
+}
+ 
+/**
+ * @tc.name: SetSystemKeyboardStatus
+ * @tc.desc: SetSystemKeyboardStatus with false as parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetSystemKeyboardStatus02, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    auto ret = ssm_->SetSystemKeyboardStatus(false);
+    ASSERT_NE(ret, DMError::DM_ERROR_UNKNOWN);
+}
+
+/**
+ * @tc.name: CalculateXYPosition
+ * @tc.desc: CalculateXYPosition test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, CalculateXYPosition, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    sptr<ScreenSession> screenSession = ssm_->GetScreenSession(screenId);
+    ASSERT_NE(screenSession, nullptr);
+    screenSession->SetScreenType(ScreenType::REAL);
+    screenSession->SetIsInternal(true);
+    int32_t x = screenSession->GetScreenProperty().GetX();
+    EXPECT_EQ(0, x);
+    int32_t y = screenSession->GetScreenProperty().GetY();
+    EXPECT_EQ(0, y);
+    ssm_->DestroyVirtualScreen(screenId);
 }
 
 /**

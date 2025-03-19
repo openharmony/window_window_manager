@@ -147,7 +147,7 @@ WSError SubSession::Hide(bool needSyncHide)
 WSError SubSession::ProcessPointDownSession(int32_t posX, int32_t posY)
 {
     const auto& id = GetPersistentId();
-    WLOGFI("id: %{public}d, type: %{public}d", id, GetWindowType());
+    TLOGD(WmsLogTag::WMS_INPUT_KEY_FLOW, "id:%{public}d, type:%{public}d", id, GetWindowType());
     auto isModal = IsModal();
     auto parentSession = GetParentSession();
     if (!isModal && parentSession && parentSession->CheckDialogOnForeground()) {
@@ -252,5 +252,66 @@ bool SubSession::IsVisibleForeground() const
         return mainOrFloatSession->IsVisibleForeground() && Session::IsVisibleForeground();
     }
     return Session::IsVisibleForeground();
+}
+
+void SubSession::SetParentSessionCallback(NotifySetParentSessionFunc&& func)
+{
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), where, func = std::move(func)] {
+        auto session = weakThis.promote();
+        if (!session || !func) {
+            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s session or func is nullptr", where);
+            return;
+        }
+        session->setParentSessionFunc_ = std::move(func);
+        TLOGND(WmsLogTag::WMS_SUB, "%{public}s id: %{public}d", where,
+            session->GetPersistentId());
+    }, __func__);
+}
+
+WMError SubSession::NotifySetParentSession(int32_t oldParentWindowId, int32_t newParentWindowId)
+{
+    return PostSyncTask([weakThis = wptr(this), oldParentWindowId, newParentWindowId, where = __func__] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s session is nullptr", where);
+            return WMError::WM_ERROR_INVALID_WINDOW;
+        }
+        if (session->setParentSessionFunc_) {
+            session->setParentSessionFunc_(oldParentWindowId, newParentWindowId);
+            TLOGND(WmsLogTag::WMS_SUB, "%{public}s id: %{public}d oldParentWindowId: %{public}d "
+                "newParentWindowId: %{public}d", where, session->GetPersistentId(), oldParentWindowId,
+                newParentWindowId);
+        }
+        return WMError::WM_OK;
+    }, __func__);
+}
+
+WSError SubSession::SetSubWindowZLevel(int32_t zLevel)
+{
+    PostTask([weakThis = wptr(this), zLevel]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGE(WmsLogTag::WMS_HIERARCHY, "session is null");
+            return;
+        }
+        auto property = session->GetSessionProperty();
+        TLOGI(WmsLogTag::WMS_HIERARCHY, "Notify session zLevel change, id: %{public}d, zLevel: %{public}d",
+            session->GetPersistentId(), zLevel);
+        property->SetSubWindowZLevel(zLevel);
+        if (session->onSubSessionZLevelChange_) {
+            session->onSubSessionZLevelChange_(zLevel);
+        }
+    }, "SetSubWindowZLevel");
+    return WSError::WS_OK;
+}
+
+int32_t SubSession::GetSubWindowZLevel() const
+{
+    int32_t zLevel = 0;
+    auto sessionProperty = GetSessionProperty();
+    zLevel = sessionProperty->GetSubWindowZLevel();
+    TLOGI(WmsLogTag::WMS_HIERARCHY, "zLevel: %{public}d", zLevel);
+    return zLevel;
 }
 } // namespace OHOS::Rosen

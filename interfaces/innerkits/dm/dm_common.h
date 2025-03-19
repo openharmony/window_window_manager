@@ -94,6 +94,8 @@ enum class PowerStateChangeReason : uint32_t {
     STATE_CHANGE_REASON_EX_SCREEN_INIT = 46,
     STATE_CHANGE_REASON_ABNORMAL_SCREEN_CONNECT = 47,
     STATE_CHANGE_REASON_ROLLBACK_HIBERNATE = 48,
+    STATE_CHANGE_REASON_START_DREAM = 49,
+    STATE_CHANGE_REASON_END_DREAM = 50,
     STATE_CHANGE_REASON_REMOTE = 100,
     STATE_CHANGE_REASON_UNKNOWN = 1000,
 };
@@ -122,6 +124,8 @@ enum class ScreenPropertyChangeType : uint32_t {
     ROTATION_UPDATE_PROPERTY_ONLY,
     /* Only update screen rotation property info not notify. */
     ROTATION_UPDATE_PROPERTY_ONLY_NOT_NOTIFY,
+    /* Switch single hand mode. */
+    SINGLE_HAND_SWITCH,
     /* Undefined. */
     UNDEFINED,
 };
@@ -168,6 +172,8 @@ enum class DisplayEvent : uint32_t {
     SCREEN_LOCK_OFF,
     SCREEN_LOCK_FINGERPRINT,
     SCREEN_LOCK_DOZE_FINISH,
+    SCREEN_LOCK_START_DREAM,
+    SCREEN_LOCK_END_DREAM,
 };
 
 /**
@@ -244,6 +250,8 @@ enum class DisplayPowerEvent : uint32_t {
     DISPLAY_DOZE,
     DISPLAY_DOZE_SUSPEND,
     DISPLAY_OFF_CANCELED,
+    DISPLAY_START_DREAM,
+    DISPLAY_END_DREAM,
 };
 
 /**
@@ -412,6 +420,8 @@ enum class SuperFoldStatusChangeEvents : uint32_t {
     ANGLE_CHANGE_FOLDED,
     KEYBOARD_ON,
     KEYBOARD_OFF,
+    SYSTEM_KEYBOARD_ON,
+    SYSTEM_KEYBOARD_OFF,
     INVALID,
 };
 
@@ -470,8 +480,8 @@ enum class MultiScreenMode : uint32_t {
  */
 enum class LowTempMode: int32_t {
     UNKNOWN = -1,
-    LowTempOff = 0,
-    LowTempOn = 1,
+    LOW_TEMP_OFF = 0,
+    LOW_TEMP_ON = 1,
 };
 
 /**

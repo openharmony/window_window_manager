@@ -127,6 +127,11 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     {
         return WMError::WM_OK;
     }
+    WMError ListWindowInfo(const WindowInfoOption& windowInfoOption,
+        std::vector<sptr<WindowInfo>>& infos) override
+    {
+        return WMError::WM_OK;
+    }
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId) override
     {
     }
@@ -144,6 +149,10 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     {
         MainWindowInfo mainWindowInfo;
         infos.push_back(mainWindowInfo);
+        return WMError::WM_OK;
+    }
+    WMError GetCallingWindowInfo(CallingWindowInfo& callingWindowInfo) override
+    {
         return WMError::WM_OK;
     }
     WMError ClearMainSessions(const std::vector<int32_t>& persistentIds,
@@ -211,6 +220,12 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
         bool& hasFloatingShowing) override { return WMError::WM_OK; }
     WMError LockSessionByAbilityInfo(const AbilityInfoBase& abilityInfo,
         bool isLock) override { return WMError::WM_OK; }
+    WMError RegisterSessionLifecycleListenerByIds(const sptr<ISessionLifecycleListener>& listener,
+        const std::vector<int32_t>& persistentIdList) override { return WMError::WM_OK; }
+    WMError RegisterSessionLifecycleListenerByBundles(const sptr<ISessionLifecycleListener>& listener,
+        const std::vector<std::string>& bundleNameList) override { return WMError::WM_OK; }
+    WMError UnregisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener)
+        override { return WMError::WM_OK; }
 };
 
 class SceneSessionManagerLiteStubTest : public testing::Test {
@@ -813,6 +828,26 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleUnregisterWindowManagerAgent, Fu
     data.WriteUint32(5);
     res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleRegisterWindowManagerAgent(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleListWindowInfo
+ * @tc.desc: test function : HandleListWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleListWindowInfo, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    DisplayId displayId = 0;
+    int32_t windowId = 0;
+    data.WriteUint8(static_cast<WindowInfoFilterOptionDataType>(WindowInfoFilterOption::ALL));
+    data.WriteUint8(static_cast<WindowInfoTypeOptionDataType>(WindowInfoTypeOption::ALL));
+    data.WriteUint64(displayId);
+    data.WriteInt32(windowId);
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleListWindowInfo(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 

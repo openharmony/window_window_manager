@@ -630,6 +630,13 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             reply.WriteParcelable(cutoutInfo);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_GET_CUTOUT_INFO_WITH_ROTATION: {
+            DisplayId displayId = static_cast<DisplayId>(data.ReadUint64());
+            int32_t rotation = data.ReadInt32();
+            sptr<CutoutInfo> cutoutInfo = GetCutoutInfoWithRotation(displayId, rotation);
+            reply.WriteParcelable(cutoutInfo);
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_HAS_PRIVATE_WINDOW: {
             DisplayId id = static_cast<DisplayId>(data.ReadUint64());
             bool hasPrivateWindow = false;
@@ -719,6 +726,11 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
         }
         case DisplayManagerMessage::TRANS_ID_SCENE_BOARD_GET_SUPER_FOLD_STATUS: {
             static_cast<void>(reply.WriteUint32(static_cast<uint32_t>(GetSuperFoldStatus())));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SCENE_BOARD_LANDSCAPE_LOCK_STATUS: {
+            bool isLocked = data.ReadBool();
+            SetLandscapeLockStatus(isLocked);
             break;
         }
         case DisplayManagerMessage::TRANS_ID_GET_EXTEND_SCREEN_CONNECT_STATUS: {
@@ -977,11 +989,11 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             int32_t uid = data.ReadInt32();
             DMHookInfo hookInfo;
             GetDisplayHookInfo(uid, hookInfo);
-            static_cast<void>(reply.WriteUint32(hookInfo.width_));
-            static_cast<void>(reply.WriteUint32(hookInfo.height_));
-            static_cast<void>(reply.WriteFloat(hookInfo.density_));
-            static_cast<void>(reply.WriteUint32(hookInfo.width_));
-            static_cast<void>(reply.WriteBool(hookInfo.enableHookRotation_));
+            if (!reply.ReadUint32(hookInfo.width_) || !reply.ReadUint32(hookInfo.height_) ||
+                !reply.ReadFloat(hookInfo.density_) || !reply.ReadUint32(hookInfo.rotation_) ||
+                !reply.ReadBool(hookInfo.enableHookRotation_)) {
+                TLOGE(WmsLogTag::DMS, "read reply hookInfo failed!");
+            }
             break;
         }
         case DisplayManagerMessage::TRANS_ID_GET_ALL_PHYSICAL_DISPLAY_RESOLUTION: {
@@ -1053,7 +1065,22 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             break;
         }
         case DisplayManagerMessage::TRANS_ID_GET_DISPLAY_CAPABILITY: {
-            reply.WriteString(GetDisplayCapability());
+            std::string capabilitInfo;
+            DMError ret = GetDisplayCapability(capabilitInfo);
+            static_cast<void>(reply.WriteInt32(static_cast<int32_t>(ret)));
+            reply.WriteString(capabilitInfo);
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SET_SYSTEM_KEYBOARD_ON: {
+            bool isOn = static_cast<bool>(data.ReadBool());
+            DMError ret = SetSystemKeyboardStatus(isOn);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_DISPLAY_MUTE_FLAG: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            bool muteFlag = data.ReadBool();
+            SetVirtualDisplayMuteFlag(screenId, muteFlag);
             break;
         }
         default:

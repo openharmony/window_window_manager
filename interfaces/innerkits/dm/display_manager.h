@@ -653,13 +653,6 @@ public:
     FoldStatus GetFoldStatus();
 
     /**
-     * @brief Get current display information, including foldstatus, displaymode, rotation, and orientation information.
-     *
-     * @return information of device.
-     */
-    std::string GetDisplayCapability();
-
-    /**
      * @brief Get the display mode of the foldable device.
      *
      * @return display mode of the foldable device.
@@ -741,6 +734,14 @@ public:
     */
     void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList,
         std::vector<uint64_t> surfaceIdList = {});
+
+    /**
+     * @brief Set virtual display mute flag to RS.
+     *
+     * @param screenId ScreenId used in virtual screen.
+     * @param muteFlag The mute flag.
+    */
+    void SetVirtualDisplayMuteFlag(ScreenId screenId, bool muteFlag);
 
     /**
      * @brief When casting the screen, the display not be skipped after the physical screen is turned off.
@@ -835,6 +836,15 @@ public:
      */
     std::shared_ptr<Media::PixelMap> GetScreenshotWithOption(const CaptureOption& captureOption,
         const Media::Rect &rect, const Media::Size &size, int rotation, DmErrorCode* errorCode = nullptr);
+    
+    /**
+     * @brief Get CutoutInfo with rotation
+     *
+     * @param Rotation rotation.
+     * @return CutoutInfo object of default screen.
+     */
+    sptr<CutoutInfo> GetCutoutInfoWithRotation(Rotation rotation);
+    
 private:
     DisplayManager();
     ~DisplayManager();
@@ -848,6 +858,7 @@ private:
     class Impl;
     std::recursive_mutex mutex_;
     sptr<Impl> pImpl_;
+    int32_t rotationIndex_ = 0;
 };
 } // namespace OHOS::Rosen
 

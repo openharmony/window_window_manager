@@ -798,8 +798,9 @@ HWTEST_F(WindowAdapterTest, IsWindowRectAutoSave, Function | SmallTest | Level2)
     WindowAdapter windowAdapter;
     std::string key = "com.example.recposentryEntryAbility";
     bool enabled = false;
-    auto err = windowAdapter.IsWindowRectAutoSave(key, enabled);
-    ASSERT_EQ(err, WMError::WM_OK);
+    int persistentId = 1;
+    auto err = windowAdapter.IsWindowRectAutoSave(key, enabled, persistentId);
+    ASSERT_EQ(err, WMError::WM_ERROR_INVALID_SESSION);
     auto ret = windowAdapter.InitWMSProxy();
     ASSERT_EQ(ret, true);
 }
@@ -870,6 +871,50 @@ HWTEST_F(WindowAdapterTest, GetAppDragResizeType, Function | SmallTest | Level2)
     const std::string bundleName = "test";
     auto err = windowAdapter.GetAppDragResizeType(bundleName, dragResizeType);
     ASSERT_EQ(err, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: SetAppKeyFramePolicy
+ * @tc.desc: WindowAdapter/SetAppKeyFramePolicy
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, SetAppKeyFramePolicy, Function | SmallTest | Level2)
+{
+    WindowAdapter windowAdapter;
+    const std::string bundleName = "test";
+    KeyFramePolicy keyFramePolicy;
+    keyFramePolicy.dragResizeType_ = DragResizeType::RESIZE_KEY_FRAME;
+    auto err = windowAdapter.SetAppKeyFramePolicy(bundleName, keyFramePolicy);
+    ASSERT_EQ(err, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: SetParentWindow
+ * @tc.desc: WindowAdapter/SetParentWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, SetParentWindow, Function | SmallTest | Level2)
+{
+    WindowAdapter windowAdapter;
+    int32_t subWindowId = 1;
+    int32_t newParentWindowId = 2;
+    auto err = windowAdapter.SetParentWindow(subWindowId, newParentWindowId);
+    ASSERT_EQ(err, WMError::WM_ERROR_INVALID_WINDOW);
+}
+
+/**
+ * @tc.name: MinimizeByWindowId
+ * @tc.desc: WindowAdapter/MinimizeByWindowId
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, MinimizeByWindowId, Function | SmallTest | Level2)
+{
+    WindowAdapter windowAdapter;
+    std::vector<int32_t> windowIds;
+    auto err = windowAdapter.MinimizeByWindowId(windowIds);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, err);
+    auto ret = windowAdapter.InitWMSProxy();
+    ASSERT_EQ(ret, true);
 }
 } // namespace
 } // namespace Rosen

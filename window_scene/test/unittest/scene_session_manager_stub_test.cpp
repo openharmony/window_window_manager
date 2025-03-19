@@ -2327,7 +2327,9 @@ HWTEST_F(SceneSessionManagerStubTest, HandleIsWindowRectAutoSave, Function | Sma
     MessageParcel data;
     MessageParcel reply;
     std::string key = "com.example.recposentryEntryAbility";
+    int persistentId = 1;
     data.WriteString(key);
+    data.WriteInt32(persistentId);
     int res = stub_->HandleIsWindowRectAutoSave(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
@@ -2412,6 +2414,22 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetAppDragResizeType, Function | Sma
     EXPECT_EQ(res, ERR_NONE);
 }
 
+/**
+ * @tc.name: HandleSetParentWindow
+ * @tc.desc: test HandleSetParentWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleSetParentWindow, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t subWindowId = 1;
+    int32_t newParentWindowId = 2;
+    data.WriteInt32(subWindowId);
+    data.WriteInt32(newParentWindowId);
+    int res = stub_->HandleSetParentWindow(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
 
 /**
  * @tc.name: HandleGetAppDragResizeType
@@ -2425,6 +2443,38 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetAppDragResizeType, Function | Sma
     const std::string bundleName = "test";
     data.WriteString(bundleName);
     int res = stub_->HandleGetAppDragResizeType(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleSetAppKeyFramePolicy
+ * @tc.desc: test HandleSetAppKeyFramePolicy
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleSetAppKeyFramePolicy, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    const std::string bundleName = "test";
+    KeyFramePolicy keyFramePolicy;
+    data.WriteString(bundleName);
+    data.WriteParcelable(&keyFramePolicy);
+    int res = stub_->HandleSetAppKeyFramePolicy(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleminiMizeByWindowId
+ * @tc.desc: test HandleMinimizeByWindowId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleMinimizeByWindowId, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    std::vector<int32_t> windowIds;
+    data.WriteInt32Vector(windowIds);
+    int res = stub_->HandleMinimizeByWindowId(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
 }

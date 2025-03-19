@@ -2216,6 +2216,56 @@ HWTEST_F(WindowSessionImplTest4, ClearListenersById_occupiedAreaChangeListeners,
 }
 
 /**
+ * @tc.name: ClearListenersById_keyboardDidShowListeners
+ * @tc.desc: ClearListenersById_keyboardDidShowListeners
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, ClearListenersById_keyboardDidShowListeners, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: ClearListenersById_keyboardDidShowListeners start";
+    sptr<WindowOption> option_ = sptr<WindowOption>::MakeSptr();
+    option_->SetWindowName("ClearListenersById_keyboardDidShowListeners");
+    sptr<WindowSessionImpl> window_ = sptr<WindowSessionImpl>::MakeSptr(option_);
+
+    int persistentId = window_->GetPersistentId();
+    window_->ClearListenersById(persistentId);
+
+    sptr<IKeyboardDidShowListener> listener_ = new (std::nothrow) MockIKeyboardDidShowListener();
+    window_->RegisterKeyboardDidShowListener(listener_);
+    ASSERT_NE(window_->keyboardDidShowListeners_.find(persistentId), window_->keyboardDidShowListeners_.end());
+
+    window_->ClearListenersById(persistentId);
+    ASSERT_EQ(window_->keyboardDidShowListeners_.find(persistentId), window_->keyboardDidShowListeners_.end());
+
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: ClearListenersById_keyboardDidShowListeners end";
+}
+
+/**
+ * @tc.name: ClearListenersById_keyboardDidHideListeners
+ * @tc.desc: ClearListenersById_keyboardDidHideListeners
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, ClearListenersById_keyboardDidHideListeners, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: ClearListenersById_keyboardDidHideListeners start";
+    sptr<WindowOption> option_ = sptr<WindowOption>::MakeSptr();
+    option_->SetWindowName("ClearListenersById_keyboardDidHideListeners");
+    sptr<WindowSessionImpl> window_ = sptr<WindowSessionImpl>::MakeSptr(option_);
+
+    int persistentId = window_->GetPersistentId();
+    window_->ClearListenersById(persistentId);
+
+    sptr<IKeyboardDidHideListener> listener_ = new (std::nothrow) MockIKeyboardDidHideListener();
+    window_->RegisterKeyboardDidHideListener(listener_);
+    ASSERT_NE(window_->keyboardDidHideListeners_.find(persistentId), window_->keyboardDidHideListeners_.end());
+
+    window_->ClearListenersById(persistentId);
+    ASSERT_EQ(window_->keyboardDidHideListeners_.find(persistentId), window_->keyboardDidHideListeners_.end());
+
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: ClearListenersById_keyboardDidHideListeners end";
+}
+
+/**
  * @tc.name: ClearListenersById_switchFreeMultiWindowListeners
  * @tc.desc: ClearListenersById_switchFreeMultiWindowListeners
  * @tc.type: FUNC
@@ -2634,6 +2684,27 @@ HWTEST_F(WindowSessionImplTest4, SendContainerModalEvent, Function | SmallTest |
     EXPECT_EQ(ret, WSError::WS_OK);
     ret = window->SendContainerModalEvent("win_waterfall_visibility", "false");
     EXPECT_EQ(ret, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: SetSubWindowZLevelToProperty
+ * @tc.desc: SetSubWindowZLevelToProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, SetSubWindowZLevelToProperty, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    option->SetSubWindowZLevel(1);
+    sptr<WindowSessionImpl> mainWindowSessionImpl = sptr<WindowSessionImpl>::MakeSptr(option);
+    mainWindowSessionImpl->SetSubWindowZLevelToProperty();
+    int32_t zLevel = mainWindowSessionImpl->property_->zLevel_;
+    EXPECT_NE(1, zLevel);
+
+    sptr<WindowSessionImpl> subWindowSessionImpl = sptr<WindowSessionImpl>::MakeSptr(option);
+    subWindowSessionImpl->SetSubWindowZLevelToProperty();
+    zLevel = subWindowSessionImpl->property_->zLevel_;
+    EXPECT_EQ(1, zLevel);
 }
 } // namespace
 } // namespace Rosen

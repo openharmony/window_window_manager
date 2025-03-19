@@ -95,6 +95,7 @@ using RequestVsyncFunc = std::function<void(const std::shared_ptr<VsyncCallback>
 using NotifyWindowMovingFunc = std::function<void(DisplayId displayId, int32_t pointerX, int32_t pointerY)>;
 using NofitySessionLabelAndIconUpdatedFunc =
     std::function<void(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon)>;
+using NotifySessionGetTargetOrientationConfigInfoFunc = std::function<void(uint32_t targetOrientation)>;
 using NotifyKeyboardStateChangeFunc = std::function<void(SessionState state, KeyboardViewMode mode)>;
 using NotifyHighlightChangeFunc = std::function<void(bool isHighlight)>;
 using NotifySurfaceBoundsChangeFunc = std::function<void(const WSRect& rect, bool isGlobal, bool needFlush)>;
@@ -229,6 +230,7 @@ public:
     int32_t GetPersistentId() const;
     void SetSurfaceNode(const std::shared_ptr<RSSurfaceNode>& surfaceNode);
     std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const;
+    std::optional<NodeId> GetSurfaceNodeId() const;
     void SetLeashWinSurfaceNode(std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode);
     std::shared_ptr<RSSurfaceNode> GetLeashWinSurfaceNode() const;
 
@@ -367,6 +369,7 @@ public:
     WSError CompatibleFullScreenRecover();
     WSError CompatibleFullScreenMinimize();
     WSError CompatibleFullScreenClose();
+    WSError PcAppInPadNormalClose();
     WSError SetIsPcAppInPad(bool enable);
     bool NeedNotify() const;
     void SetNeedNotify(bool needNotify);
@@ -606,9 +609,10 @@ public:
     bool IsDragAccessible() const;
     void SetSingleHandTransform(const SingleHandTransform& transform);
     SingleHandTransform GetSingleHandTransform() const;
+    void SetSingleHandModeFlag(bool flag);
+    bool SessionIsSingleHandMode();
     void SetClientDisplayId(DisplayId displayId);
     DisplayId GetClientDisplayId() const;
-    void UpdateDisplayIdByParentSession(DisplayId& updatedDisplayId);
     virtual void RegisterNotifySurfaceBoundsChangeFunc(int32_t sessionId, NotifySurfaceBoundsChangeFunc&& func) {};
     virtual void UnregisterNotifySurfaceBoundsChangeFunc(int32_t sessionId) {};
 
@@ -628,6 +632,7 @@ public:
     sptr<Session> GetMainSession() const;
     sptr<Session> GetMainOrFloatSession() const;
     bool IsPcWindow() const;
+    bool IsAncestorsSession(int ancestorsId) const;
 
     /**
      * Window Property
@@ -637,6 +642,12 @@ public:
     WindowLayoutInfo GetWindowLayoutInfoForWindowInfo() const;
     WindowMetaInfo GetWindowMetaInfoForWindowInfo() const;
 
+    /*
+     * Window Pattern
+     */
+    void SetBorderUnoccupied(bool borderUnoccupied = false);
+    bool GetBorderUnoccupied() const;
+    
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
     public:
@@ -755,6 +766,7 @@ protected:
     NotifySessionExceptionFunc jsSceneSessionExceptionFunc_;
     VisibilityChangedDetectFunc visibilityChangedDetectFunc_ GUARDED_BY(SCENE_GUARD);
     NofitySessionLabelAndIconUpdatedFunc updateSessionLabelAndIconFunc_;
+    NotifySessionGetTargetOrientationConfigInfoFunc sessionGetTargetOrientationConfigInfoFunc_;
 
     /*
      * Window Rotate Animation
@@ -784,7 +796,7 @@ protected:
     float clientPivotX_ = 0.0f;
     float clientPivotY_ = 0.0f;
     DisplayId clientDisplayId_ = 0; // Window displayId on the client
-    DisplayId configDisplayId_ = 0;
+    DisplayId configDisplayId_ = DISPLAY_ID_INVALID;
     SuperFoldStatus lastScreenFoldStatus_ = SuperFoldStatus::UNKNOWN;
 
     /*
@@ -949,6 +961,8 @@ private:
     std::optional<bool> clientDragEnable_;
     bool dragActivated_ = true;
     SingleHandTransform singleHandTransform_;
+    bool singleHandModeFlag_ = false;
+    SingleHandScreenInfo singleHandScreenInfo_;
 
     /*
      * Screen Lock
@@ -963,6 +977,11 @@ private:
     std::mutex saveSnapshotCallbackMutex_;
     std::mutex removeSnapshotCallbackMutex_;
     std::atomic<bool> needNotifyAttachState_ = { false };
+
+    /*
+     * Window Pattern
+     */
+    bool borderUnoccupied_ = false;
 };
 } // namespace OHOS::Rosen
 
