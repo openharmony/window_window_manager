@@ -94,6 +94,7 @@ public:
         info = callingWindowInfo;
         isNotified = true;
     }
+
 private:
     CallingWindowInfo info = {0, -1, 0, 0};
     bool isNotified = false;
@@ -1165,7 +1166,7 @@ HWTEST_F(WindowManagerLiteTest, RegisterCallingWindowDisplayChangedListener1, Fu
 {
     sptr<TestIKeyboardCallingWindowDisplayChangedListener> listener
         = sptr<TestIKeyboardCallingWindowDisplayChangedListener>::MakeSptr();
-    auto& windowManager = WindowManagerLite::GetInstance(); 
+    auto& windowManager = WindowManagerLite::GetInstance();
     windowManager.pImpl_->callingDisplayChangedListeners_.clear();
     windowManager.pImpl_->callingDisplayListenerAgent_ = nullptr;
     WMError ret = windowManager.RegisterCallingWindowDisplayChangedListener(nullptr);
@@ -1194,7 +1195,7 @@ HWTEST_F(WindowManagerLiteTest, RegisterCallingWindowDisplayChangedListener2, Fu
     sptr<TestIKeyboardCallingWindowDisplayChangedListener> listener2
         = sptr<TestIKeyboardCallingWindowDisplayChangedListener>::MakeSptr();
     
-    auto& windowManager = WindowManagerLite::GetInstance(); 
+    auto& windowManager = WindowManagerLite::GetInstance();
     windowManager.pImpl_->callingDisplayChangedListeners_.clear();
     windowManager.pImpl_->callingDisplayListenerAgent_ = nullptr;
     WMError ret = windowManager.RegisterCallingWindowDisplayChangedListener(listener1);
@@ -1232,7 +1233,7 @@ HWTEST_F(WindowManagerLiteTest, RegisterCallingWindowDisplayChangedListener3, Fu
     sptr<TestIKeyboardCallingWindowDisplayChangedListener> listener
         = sptr<TestIKeyboardCallingWindowDisplayChangedListener>::MakeSptr();
     
-    auto& windowManager = WindowManagerLite::GetInstance(); 
+    auto& windowManager = WindowManagerLite::GetInstance();
     windowManager.pImpl_->callingDisplayChangedListeners_.clear();
     windowManager.pImpl_->callingDisplayListenerAgent_ = nullptr;
     WMError ret = windowManager.UnregisterCallingWindowDisplayChangedListener(nullptr);
@@ -1252,7 +1253,7 @@ HWTEST_F(WindowManagerLiteTest, NotifyCallingWindowDisplayChanged1, Function | S
     sptr<TestIKeyboardCallingWindowDisplayChangedListener> listener
         = sptr<TestIKeyboardCallingWindowDisplayChangedListener>::MakeSptr();
     
-    auto& windowManager = WindowManagerLite::GetInstance(); 
+    auto& windowManager = WindowManagerLite::GetInstance();
     windowManager.pImpl_->callingDisplayChangedListeners_.clear();
     windowManager.pImpl_->callingDisplayListenerAgent_ = nullptr;
 
@@ -1278,7 +1279,7 @@ HWTEST_F(WindowManagerLiteTest, NotifyCallingWindowDisplayChanged2, Function | S
     sptr<TestIKeyboardCallingWindowDisplayChangedListener> listener2
         = sptr<TestIKeyboardCallingWindowDisplayChangedListener>::MakeSptr();
     
-    auto& windowManager = WindowManagerLite::GetInstance(); 
+    auto& windowManager = WindowManagerLite::GetInstance();
     windowManager.pImpl_->callingDisplayChangedListeners_.clear();
     windowManager.pImpl_->callingDisplayListenerAgent_ = nullptr;
 
