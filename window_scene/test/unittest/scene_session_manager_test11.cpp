@@ -604,7 +604,7 @@ HWTEST_F(SceneSessionManagerTest11, GetMainSessionByBundleNameAndAppIndex, Funct
     ssm_->GetMainSessionByBundleNameAndAppIndex(bundleName, appIndex, mainSessions);
 
     sptr<SceneSession> sceneSession = GetSceneSession(bundleName);
-    ssm_->sceneSessionMap_.insert( {1, sceneSession} );
+    ssm_->sceneSessionMap_.insert({1, sceneSession});
     ssm_->GetMainSessionByBundleNameAndAppIndex(bundleName, appIndex, mainSessions);
 
     ssm_->GetMainSessionByBundleNameAndAppIndex(BUNDLE_NAME, appIndex, mainSessions);
@@ -631,7 +631,7 @@ HWTEST_F(SceneSessionManagerTest11, GetMainSessionByAbilityInfo, Function | Smal
     std::vector<sptr<SceneSession>> mainSessions;
     std::string bundleName = "bundleName_test";
     sptr<SceneSession> sceneSession = GetSceneSession(bundleName);
-    ssm_->sceneSessionMap_.insert( {1, sceneSession} );
+    ssm_->sceneSessionMap_.insert({1, sceneSession});
     ssm_->GetMainSessionByAbilityInfo(abilityInfo, mainSessions);
 
     abilityInfo.bundleName = BUNDLE_NAME;
@@ -669,7 +669,7 @@ HWTEST_F(SceneSessionManagerTest11, GetKeyboardSession, Function | SmallTest | L
     info.screenId_ = 5;
     sptr<SceneSession::SpecificSessionCallback> specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCb);
-    ssm_->sceneSessionMap_.insert( {1, sceneSession} );
+    ssm_->sceneSessionMap_.insert({1, sceneSession});
     ssm_->GetKeyboardSession(displayId, isSystemKeyboard);
 
     displayId = 5;
@@ -729,7 +729,7 @@ HWTEST_F(SceneSessionManagerTest11, CreateAndConnectSpecificSession01, Function 
     std::string bundleName = "bundleName_test";
     sptr<SceneSession> parentSession = GetSceneSession(bundleName);
     parentSession->GetSessionProperty()->SetSubWindowLevel(10);
-    ssm_->sceneSessionMap_.insert( {1, parentSession} );
+    ssm_->sceneSessionMap_.insert({1, parentSession});
     property->SetParentPersistentId(1);
     result = ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property,
         persistentId, session, systemConfig, iRemoteObjectMocker);
