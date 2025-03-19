@@ -26,7 +26,6 @@ namespace Rosen {
 sptr<SettingObserver> ScreenSettingHelper::dpiObserver_;
 sptr<SettingObserver> ScreenSettingHelper::castObserver_;
 sptr<SettingObserver> ScreenSettingHelper::rotationObserver_;
-sptr<SettingObserver> ScreenSettingHelper::halfScreenObserver_;
 sptr<SettingObserver> ScreenSettingHelper::screenSkipProtectedWindowObserver_;
 sptr<SettingObserver> ScreenSettingHelper::wireCastObserver_;
 sptr<SettingObserver> ScreenSettingHelper::extendScreenDpi_;
@@ -477,47 +476,6 @@ ScreenShape ScreenSettingHelper::GetScreenShape(ScreenId screenId)
     }
     TLOGI(WmsLogTag::DMS, "Can not find screen shape info. ccm:%{public}s", SCREEN_SHAPE.c_str());
     return ScreenShape::RECTANGLE;
-}
-
-void ScreenSettingHelper::RegisterSettingHalfScreenObserver(SettingObserver::UpdateFunc func)
-{
-    if (halfScreenObserver_ != nullptr) {
-        TLOGI(WmsLogTag::DMS, "setting halfScreen observer is registered");
-        return;
-    }
-    SettingProvider& halfScreenProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
-    halfScreenObserver_ = halfScreenProvider.CreateObserver(SETTING_HALF_SCREEN_SWITCH_KEY, func);
-    ErrCode ret = halfScreenProvider.RegisterObserver(halfScreenObserver_);
-    if (ret != ERR_OK) {
-        TLOGE(WmsLogTag::DMS, "halfScreen failed, ret:%{public}d", ret);
-        halfScreenObserver_ = nullptr;
-    }
-}
-
-void ScreenSettingHelper::UnregisterSettingHalfScreenObserver()
-{
-    if (halfScreenObserver_ == nullptr) {
-        TLOGI(WmsLogTag::DMS, "halfScreenObserver_ is nullptr");
-        return;
-    }
-    SettingProvider& halfScreenProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
-    ErrCode ret = halfScreenProvider.UnregisterObserver(halfScreenObserver_);
-    if (ret != ERR_OK) {
-        TLOGE(WmsLogTag::DMS, "failed, ret:%{public}d", ret);
-    }
-    halfScreenObserver_ = nullptr;
-}
-
-bool ScreenSettingHelper::GetHalfScreenSwitchState(const std::string& key)
-{
-    SettingProvider& halfScreenProvider = SettingProvider::GetInstance(DEVICE_STANDBY_SERVICE_SYSTEM_ABILITY_ID);
-    int dbValue = 0;
-    ErrCode ret = halfScreenProvider.GetIntValue(key, dbValue);
-    if (ret != ERR_OK) {
-        TLOGE(WmsLogTag::DMS, "GetHalfScreenSwitchState failed, ret:%{public}d", ret);
-        return false;
-    }
-    return !dbValue;
 }
 
 void ScreenSettingHelper::RegisterSettingscreenSkipProtectedWindowObserver(SettingObserver::UpdateFunc func)
