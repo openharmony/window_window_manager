@@ -407,6 +407,32 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession09, Function
 }
 
 /**
+ * @tc.name: CreateAndConnectSpecificSession11
+ * @tc.desc: CreateAndConnectSpecificSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession11, Function | SmallTest | Level2)
+{
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
+    }
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("CreateAndConnectSpecificSession10");
+    sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+
+    windowSceneSession->SetWindowType(WindowType::WINDOW_TYPE_FLOAT_NAVIGATION);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowSceneSession->CreateAndConnectSpecificSession());
+    windowSceneSession->property_->SetPersistentId(102);
+    windowSceneSession->property_->SetParentPersistentId(100);
+    windowSceneSession->property_->SetParentId(100);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+
+    ASSERT_EQ(WMError::WM_OK, windowSceneSession->Create(abilityContext_, session));
+    ASSERT_EQ(WMError::WM_OK, windowSceneSession->Destroy(true));
+}
+
+/**
  * @tc.name: RecoverAndReconnectSceneSession
  * @tc.desc: RecoverAndReconnectSceneSession
  * @tc.type: FUNC
