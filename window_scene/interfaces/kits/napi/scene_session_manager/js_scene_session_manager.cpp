@@ -51,10 +51,6 @@
         }                                                                                                 \
     } while (0)
 
-#define INIT_ARG(a) \
-    size_t argc = a; \
-    napi_value argv[a] = {nullptr}
-
 namespace OHOS::Rosen {
 using namespace AbilityRuntime;
 namespace {
@@ -2948,7 +2944,8 @@ napi_value JsSceneSessionManager::OnUpdateMaximizeMode(napi_env env, napi_callba
 
 napi_value JsSceneSessionManager::OnUpdateSessionDisplayId(napi_env env, napi_callback_info info)
 {
-    INIT_ARG(ARGC_FIVE);
+    size_t argc = ARGC_FIVE;
+    napi_value argv[ARGC_FIVE] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_TWO) {
         WLOGFE("Argc is invalid: %{public}zu", argc);
