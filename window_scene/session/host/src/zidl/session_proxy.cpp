@@ -1456,32 +1456,31 @@ WSError SessionProxy::TransferAbilityResult(uint32_t resultCode, const AAFwk::Wa
     return static_cast<WSError>(ret);
 }
 
-WSError SessionProxy::TransferExtensionData(const AAFwk::WantParams& wantParams)
+int32_t SessionProxy::TransferExtensionData(const AAFwk::WantParams& wantParams)
 {
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::WMS_UIEXT, "WriteInterfaceToken failed");
-        return WSError::WS_ERROR_IPC_FAILED;
+        return IPC_PROXY_ERR;
     }
     if (!data.WriteParcelable(&wantParams)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "wantParams write failed.");
-        return WSError::WS_ERROR_IPC_FAILED;
+        return IPC_PROXY_ERR;
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "remote is null");
-        return WSError::WS_ERROR_IPC_FAILED;
+        return IPC_PROXY_ERR;
     }
     int sendCode = remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_TRANSFER_EXTENSION_DATA),
         data, reply, option);
     if (sendCode != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_UIEXT, "SendRequest failed, code: %{public}d", sendCode);
-        return WSError::WS_ERROR_IPC_FAILED;
     }
     int32_t ret = reply.ReadInt32();
-    return static_cast<WSError>(ret);
+    return sendCode;
 }
 
 void SessionProxy::NotifySyncOn()
@@ -2717,7 +2716,7 @@ void SessionProxy::NotifyKeyboardDidShowRegistered(bool registered)
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
+    MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "writeInterfaceToken failed");
         return;
@@ -2741,7 +2740,7 @@ void SessionProxy::NotifyKeyboardDidHideRegistered(bool registered)
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
+    MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "writeInterfaceToken failed");
         return;

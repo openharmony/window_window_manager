@@ -55,9 +55,6 @@ public:
     static bool UpdateScreenMode(MultiScreenInfo& info, uint32_t mode, bool isExternal);
     static bool GetScreenRelativePosition(MultiScreenInfo& info, const std::string& inputString);
     static ScreenShape GetScreenShape(ScreenId screenId);
-    static void RegisterSettingHalfScreenObserver(SettingObserver::UpdateFunc func);
-    static void UnregisterSettingHalfScreenObserver();
-    static bool GetHalfScreenSwitchState(const std::string& key = SETTING_HALF_SCREEN_SWITCH_KEY);
     static void RegisterSettingscreenSkipProtectedWindowObserver(SettingObserver::UpdateFunc func);
     static void UnregisterSettingscreenSkipProtectedWindowObserver();
     static bool GetSettingscreenSkipProtectedWindow(bool& enable,
@@ -74,16 +71,14 @@ private:
     static const constexpr char* SETTING_ROTATION_KEY {"screen_rotation_value"};
     static const constexpr char* SETTING_ROTATION_SCREEN_ID_KEY {"screen_rotation_screen_id_value"};
     static const constexpr char* SETTING_SCREEN_MODE_KEY {"user_set_screen_mode_edid"};
-    static const constexpr char* SETTING_HALF_SCREEN_SWITCH_KEY {"half_screen_display"};
     static const constexpr char* SETTING_SCREEN_SHARE_PROTECT_KEY {"spamshield_screenshare_protect"};
     static const constexpr char* SETTING_EXTEND_DPI_KEY {"user_set_dpi_extend"};
     static sptr<SettingObserver> dpiObserver_;
     static sptr<SettingObserver> castObserver_;
     static sptr<SettingObserver> rotationObserver_;
-    static sptr<SettingObserver> halfScreenObserver_;
     static sptr<SettingObserver> screenSkipProtectedWindowObserver_;
     static sptr<SettingObserver> wireCastObserver_;
-    static sptr<SettingObserver> extendScreenDpi_;
+    static sptr<SettingObserver> extendScreenDpiObserver_;
 };
 } // namespace Rosen
 } // namespace OHOS
