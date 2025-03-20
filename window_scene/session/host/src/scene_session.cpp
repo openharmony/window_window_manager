@@ -1774,8 +1774,8 @@ std::set<uint64_t> SceneSession::GetNewDisplayIdsDuringMoveTo(WSRect &newRect)
     std::set<uint64_t> newAddedDisplayIdSet;
     WSRect windowRect = newRect;
     std::map<ScreenId, ScreenProperty> screenProperties =
-        ScreenSessionManagerClient::GetInstance().GetALLScreensProperties();
-        std::lock_guard<std::mutex> lock(displayIdSetDuringMoveToMutex_);
+        ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
+    std::lock_guard<std::mutex> lock(displayIdSetDuringMoveToMutex_);
     for (const auto& [screenId, screenProperty] : screenProperties) {
         if (displayIdSetDuringMoveTo_.find(screenId) != displayIdSetDuringMoveTo_.end()) {
             continue;
@@ -1787,8 +1787,8 @@ std::set<uint64_t> SceneSession::GetNewDisplayIdsDuringMoveTo(WSRect &newRect)
             screenProperty.GetBounds().rect_.GetHeight(),
         };
         if (windowRect.IsOverlap(screenRect)) {
-            TLOGI(WmsLogTag::WMS_LAYOUT, "Overlap with new screen:%{public}" PRIu64 "persistentId: %{public}d",
-            screenId, GetPersistentId());
+            TLOGI(WmsLogTag::WMS_LAYOUT, "Overlap with new screen:%{public}" PRIu64 "persistentId:%{public}d",
+                screenId, GetPersistentId());
             displayIdSetDuringMoveTo_.insert(screenId);
             newAddedDisplayIdSet.insert(screenId);
         }
