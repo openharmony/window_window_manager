@@ -745,7 +745,7 @@ bool SceneSession::IsNeedConvertToRelativeRect(SizeChangeReason reason) const
         return true;
     }
     if (WindowHelper::IsSubWindow(GetWindowType())) {
-        return IsNeedCrossDisplayRendering();   
+        return IsNeedCrossDisplayRendering();
     }
     return false;
 }
@@ -1764,7 +1764,7 @@ void SceneSession::HandleCrossMoveToSurfaceNode(WSRect &globalRect)
         screenSession->GetDisplayNode()->AddCrossScreenChild(movedSurfaceNode, suffixIndex, true);
         movedSurfaceNode->SetIsCrossNode(true);
         TLOGI(WmsLogTag::WMS_LAYOUT, "Add sub window to display: %{public}" PRIu64 "persistentId: %{public}d",
-        displayId, GetPersistentId());
+            displayId, GetPersistentId());
     }
     RSTransaction::FlushImplicitTransaction();
 }
