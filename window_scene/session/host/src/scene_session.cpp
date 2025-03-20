@@ -3890,7 +3890,7 @@ void SceneSession::HandleSubSessionSurfaceNode(bool isAdd)
         if (isAdd) {
             AddSurfaceNodeToScreen();
             SetSurfaceBounds(targetRect, true, true);
-        }else {
+        } else {
             RemoveSufaceNodeFromScreen();
             SetSurfaceBounds(targetRect, false, false);
             std::lock_guard<std::mutex> lock(displayIdSetDuringMoveToMutex_);
