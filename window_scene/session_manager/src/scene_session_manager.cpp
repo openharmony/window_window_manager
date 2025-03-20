@@ -1901,7 +1901,7 @@ int32_t SceneSessionManager::StartUIAbilityBySCBTimeoutCheck(const sptr<AAFwk::S
     }, START_UI_ABILITY_TIMEOUT);
 
     if (isTimeout) {
-        TLOGE(WmsLogTag::WMS_LIFE, "start ui ability timeout, currentUserId: %{public}d", currentUserId_.load());
+        TLOGE(WmsLogTag::WMS_LIFE, "start ui ability timeout, currentUserId: %{public}d", currentUserId_);
         return static_cast<int32_t>(WSError::WS_ERROR_START_UI_ABILITY_TIMEOUT);
     }
     isColdStart = *coldStartFlag;
@@ -1986,7 +1986,7 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
     if (systemConfig_.backgroundswitch == false) {
         TLOGI(WmsLogTag::WMS_MAIN, "Begin StartUIAbility: %{public}d system: %{public}u", persistentId,
             static_cast<uint32_t>(scnSession->GetSessionInfo().isSystem_));
-        errCode = StartUIAbilityBySCBTimeoutCheck(sceneSessionInfo,
+        errCode = StartUIAbilityBySCBTimeoutCheck(scnSessionInfo,
             static_cast<uint32_t>(WindowStateChangeReason::NORMAL), isColdStart);
     } else {
         TLOGI(WmsLogTag::WMS_MAIN, "Background switch on, isNewActive %{public}d state %{public}u",
@@ -1995,7 +1995,7 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
             scnSession->GetSessionState() == SessionState::STATE_END) {
             TLOGI(WmsLogTag::WMS_MAIN, "Call StartUIAbility: %{public}d system: %{public}u", persistentId,
                 static_cast<uint32_t>(scnSession->GetSessionInfo().isSystem_));
-            errCode = StartUIAbilityBySCBTimeoutCheck(sceneSessionInfo,
+            errCode = StartUIAbilityBySCBTimeoutCheck(scnSessionInfo,
                 static_cast<uint32_t>(WindowStateChangeReason::NORMAL), isColdStart);
         } else {
             TLOGI(WmsLogTag::WMS_MAIN, "NotifySessionForeground: %{public}d", persistentId);
@@ -8825,7 +8825,7 @@ BrokerStates SceneSessionManager::NotifyStartAbility(
         }, NOTIFY_START_ABILITY_TIMEOUT);
 
         if (isTimeout) {
-            TLOGE(WmsLogTag::WMS_LIFE, "notify start ability timeout, current userId: %{public}d", currentUserId_.load());
+            TLOGE(WmsLogTag::WMS_LIFE, "notify start ability timeout, current userId: %{public}d", currentUserId_);
             return BrokerStates::BROKER_NOT_START;
         }
         TLOGI(WmsLogTag::WMS_LIFE, "collaborator ret: %{public}d", *ret);
