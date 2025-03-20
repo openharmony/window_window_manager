@@ -2476,7 +2476,7 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
             isPcAppInpad = property->GetIsPcAppInPad();
             isAppSupportPhoneInPc = property->GetIsAppSupportPhoneInPc();
         }
-        if ((systemConfig_.backgroundswitch && !isAppSupportPhoneInPc) || (isPcAppInpad && !IsScreenLocked())) {
+        if ((systemConfig_.backgroundswitch && !isAppSupportPhoneInPc) || isPcAppInpad) {
             TLOGI(WmsLogTag::WMS_MAIN, "NotifySessionBackground: %{public}d", persistentId);
             scnSession->NotifySessionBackground(1, true, true);
         } else {
@@ -3038,9 +3038,10 @@ bool SceneSessionManager::CheckSystemWindowPermission(const sptr<WindowSessionPr
     }
     if (type == WindowType::WINDOW_TYPE_FLOAT &&
         SessionPermission::VerifyCallingPermission("ohos.permission.SYSTEM_FLOAT_WINDOW")) {
+        bool isPadAndNotPcApp = systemConfig_.uiType_ == UI_TYPE_PHONE && !property->GetIsPcAppInPad();
         // WINDOW_TYPE_FLOAT could be created with the corresponding permission
-        if (systemConfig_.supportTypeFloatWindow_) {
-            WLOGFD("check create float window permission success on 2in1 device.");
+        if (systemConfig_.supportTypeFloatWindow_ && !isPadAndNotPcApp) {
+            WLOGFD("check create float window permission success.");
             return true;
         }
     }
