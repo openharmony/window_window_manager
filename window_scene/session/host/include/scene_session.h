@@ -236,8 +236,8 @@ public:
     WSError NotifyClientToUpdateRect(const std::string& updateReason,
         std::shared_ptr<RSTransaction> rsTransaction) override;
     void SetWinRectWhenUpdateRect(const WSRect& rect);
-    void SetRequestRectWhenFollowParent(const WSRect& rect) { requestRectWhenFollowparent_ = rect; }
-    WSRect GetRequestRectWhenFollowParent() { return requestRectWhenFollowparent_; }
+    void SetRequestRectWhenFollowParent(const WSRect& rect) { requestRectWhenFollowParent_ = rect; }
+    WSRect GetRequestRectWhenFollowParent() { return requestRectWhenFollowParent_; }
     virtual bool IsNeedCrossDisplayRendering() const { return false; }
     void RegisterNotifySurfaceBoundsChangeFunc(int32_t sessionId, NotifySurfaceBoundsChangeFunc&& func) override;
     void UnregisterNotifySurfaceBoundsChangeFunc(int32_t sessionId) override;
