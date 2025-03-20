@@ -550,8 +550,8 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
     const auto& initRect = GetRequestRect();
     if (GetHostSession()) { // main window
         SetDefaultDisplayIdIfNeed();
-        ret = Connect();
         SetTargetAPIVersion(SysCapUtil::GetApiCompatibleVersion());
+        ret = Connect();
         TLOGD(WmsLogTag::WMS_PC, "targeAPItVersion: %{public}d", GetTargetAPIVersion());
     } else { // system or sub window
         TLOGI(WmsLogTag::WMS_LIFE, "Create system or sub window with type=%{public}d", GetType());
