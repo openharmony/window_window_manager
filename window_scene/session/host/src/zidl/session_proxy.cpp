@@ -2707,7 +2707,7 @@ WSError SessionProxy::NotifyFollowParentMultiScreenPolicy(bool enabled)
     }
     if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_FOLLOW_PARENT_MULTI_SCREEN_POLICY),
         data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_EVENT, "SendRequest failed");
+        TLOGE(WmsLogTag::WMS_SUB, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     return WSError::WS_OK;

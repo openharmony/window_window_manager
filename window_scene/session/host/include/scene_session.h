@@ -272,9 +272,9 @@ public:
     void SetScale(float scaleX, float scaleY, float pivotX, float pivotY) override;
     void SetFloatingScale(float floatingScale) override;
     WSError RaiseAboveTarget(int32_t subWindowId) override;
-    void HandleCrossMoveTo(WSRect &gloableRect);
-    void HandleCrossMoveToSurfaceNode(WSRect &gloableRect);
-    std::set<uint64_t> GetNewAddedDisplayIdsDuringMoveTo(WSRect &newRect);
+    void HandleCrossMoveTo(WSRect &globalRect);
+    void HandleCrossMoveToSurfaceNode(WSRect &globalRect);
+    std::set<uint64_t> GetNewDisplayIdsDuringMoveTo(WSRect &newRect);
 
     /*
      * PiP Window
@@ -847,7 +847,7 @@ protected:
     void CheckSubSessionShouldFollowParent(uint64_t displayId);
     WSRect ConvertRelativeRectToGlobal(const WSRect& relativeRect, DisplayId currentDisplayId) const override;
     WSRect ConvertGlobalRectToRelative(const WSRect& globalRect, DisplayId targetDisplayId) const override;
-    bool IsNeedConvertToRelativeRect(const WSRect& globalRect, DisplayId targetDisplayId) const override;
+    bool IsNeedConvertToRelativeRect(SizeChangeReason reason = SizeChangeReason::UNDEFINED) const override;
 
     /*
      * Window Lifecycle
@@ -1074,9 +1074,9 @@ private:
     bool SaveAspectRatio(float ratio);
     WSError UpdateRectForDrag(const WSRect& rect);
     void UpdateSessionRectPosYFromClient(SizeChangeReason reason, DisplayId& configDisplayId, WSRect& rect);
-    void ProcSubSessionSurfaceNode(bool isAdd);
+    void HandleSubSessionSurfaceNode(bool isAdd);
     void AddSurfaceNodeToScreen();
-    void RemoveSurfaceNodeFromScreen();
+    void RemoveSufaceNodeFromScreen();
 
     /*
      * Window Decor

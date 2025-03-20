@@ -4935,11 +4935,11 @@ WMError WindowSceneSessionImpl::SetFollowParentMultiScreenPolicy(bool enabled)
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (!IsPcOrPadFreeMultiWindowMode()) {
-        WLOGFE(WmsLogTag::WMS_SUB, "device not support");
+        TLOGE(WmsLogTag::WMS_SUB, "device not support");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     if (!WindowHelpper::IsSubWindow(GetType())) {
-        WLOGFE(WmsLogTag::WMS_SUB, "called by invalid window type, type :%{public}d", GetType());
+        TLOGE(WmsLogTag::WMS_SUB, "called by invalid window type, type :%{public}d", GetType());
         return WMError::WM_ERROR_INVALID_CALLING;
     }
     auto hostSession = GetHostSession();

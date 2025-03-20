@@ -2946,10 +2946,10 @@ public:
      *        when the parent window is dragged to move or dragged to zoom.
      *
      * @param enabled The value true means sub window supports simultaneous display on multiple screens
-     *                when the parent window is dragged to move or dragged to zoom, and false means the opposiste.
+     *                when the parent window is dragged to move or dragged to zoom, and false means the opposite.
      * @return WM_OK means set success, others means failed.
      */
-    virtual WMError SetFollowParentMultiScreenPolity(bool enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;}
+    virtual WMError SetFollowParentMultiScreenPolicy(bool enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;}
 
     /**
      * @brief Get the rect of host window.

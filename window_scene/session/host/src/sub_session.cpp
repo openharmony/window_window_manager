@@ -111,8 +111,10 @@ void SubSession::UpdateSessionRectInner(const WSRect& rect, SizeChangeReason rea
         }
         SetSessionRequestRect(newRequestRect);
         SetRequestRectWhenFollowParent(newRequestRect);
-        WSRect globalRect = ConvertReleativeRectToGlobal(newRequestRect, moveConfiguration.displayId);
-        UpdateCrossMoveTo(globalRect);
+        WSRect globaleRect = ConvertRelativeRectToGlobal(newRequestRect, moveConfiguration.displayId);
+        UpdateSizeChangeReason(reason);
+        TLOGI(WmsLogTag::WMS_LAYOUT, "need show cross window, globalRect:%{public}s", globaleRect.ToString().c_str());
+        HandleCrossMoveTo(globaleRect);
         return;
     }
     SceneSession::UpdateSessionRectInner(rect, reason, moveConfiguration, rectAnimationConfig);
@@ -282,10 +284,10 @@ WSError SubSession::NotifyFollowParentMultiScreenPolicy(bool enabled)
             TLOGNE(WmsLogTag::WMS_SUB, " session is null");
             return;
         }
-        TLOGNE(WmsLogTag::WMS_SUB, "%{public}s: enabled:%{public}d", funcName, enabled);
+        TLOGE(WmsLogTag::WMS_SUB, "%{public}s: enabled:%{public}d", funcName, enabled);
         session->isFollowParentMultiScreenPolicy_ = enabled;
     }, __func__);
-    return WMError::WM_OK;
+    return WSError::WS_OK;
 }
 
 bool SubSession::IsFollowParentMultiScreenPolicy() const

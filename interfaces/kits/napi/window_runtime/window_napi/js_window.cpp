@@ -943,11 +943,11 @@ napi_value JsWindow::SetSubWindowModal(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnSetSubWindowModal(env, info) : nullptr;
 }
 
-napi_value JsWindow::SetFollowParentMultiScreenPolity(napi_env env, napi_callback_info info)
+napi_value JsWindow::SetFollowParentMultiScreenPolicy(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_MAIN, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
-    return (me != nullptr) ? me->OnSetFollowParentMultiScreenPolity(env, info) : nullptr;
+    return (me != nullptr) ? me->OnSetFollowParentMultiScreenPolicy(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetWindowDecorHeight(napi_env env, napi_callback_info info)
@@ -6899,10 +6899,10 @@ napi_value JsWindow::OnSetSubWindowModal(napi_env env, napi_callback_info info)
     return result;
 }
 
-napi_value JsWindow::OnSetFollowParentMultiScreenPolity(napi_env env, napi_callback_info info)
+napi_value JsWindow::OnSetFollowParentMultiScreenPolicy(napi_env env, napi_callback_info info)
 {
     if (windowToken_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_SUB, "WindowToken is nullptr");
+        TLOGE(WmsLogTag::WMS_SUB, "windowToken is null");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     if (!windowToken_->IsPcOrPadFreeMultiWindowMode()) {
@@ -6924,10 +6924,10 @@ napi_value JsWindow::OnSetFollowParentMultiScreenPolity(napi_env env, napi_callb
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
     const char* const where = __func__;
-    auto asyncTask = [where, weakToken = wptr<Window>(windowToken_), isModal, modalityType, env, task = napiAsyncTask] {
-        auto window = weakToken.promote();
+    auto asyncTask = [where, weakWindow = wptr<Window>(windowToken_), isModal, modalityType, env, task = napiAsyncTask] {
+        auto window = weakWindow.promote();
         if (window == nullptr) {
-            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s window is nullptr", where);
+            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s failed, window is nullptr", where);
             task->Reject(env, JsErrUtils::CreateJsError(env,
                 WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "window is null"));
             return;
@@ -6939,8 +6939,8 @@ napi_value JsWindow::OnSetFollowParentMultiScreenPolity(napi_env env, napi_callb
                 WmErrorCode::WM_ERROR_INVALID_CALLING, "invalid window type"));
             return;
         }
-        WMError ret = window->SetFollowParentMultiScreenPolity(enabled);
-        if (ret == WMError::WM_OK) {
+        WMError ret = window->SetFollowParentMultiScreenPolicy(enabled);
+        if (ret != WMError::WM_OK) {
             WmErrorCode wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
             TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s failed, ret is %{public}d", where, wmErrorCode);
             task->Reject(env, JsErrUtils::CreateJsError(env,
@@ -6948,7 +6948,7 @@ napi_value JsWindow::OnSetFollowParentMultiScreenPolity(napi_env env, napi_callb
             return;
         }
         task->Resolve(env, NapiGetUndefined(env));
-        TLOGNE(WmsLogTag::WMS_SUB, "%{public}s id:%{public}u, name:%{public}s, enabled:%{public}d",
+        TLOGNI(WmsLogTag::WMS_SUB, "%{public}s id:%{public}u, name:%{public}s, enabled:%{public}d",
             where, window->GetWindowId(), window->GetWindowName().c_str(), enabled);
     };
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
@@ -8261,8 +8261,8 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "getWindowDecorVisible", moduleName, JsWindow::GetWindowDecorVisible);
     BindNativeFunction(env, object, "setWindowTitleMoveEnabled", moduleName, JsWindow::SetWindowTitleMoveEnabled);
     BindNativeFunction(env, object, "setSubWindowModal", moduleName, JsWindow::SetSubWindowModal);
-    BindNativeFunction(env, object, "SetFollowParentMultiScreenPolity",
-        moduleName, JsWindow::SetFollowParentMultiScreenPolity);
+    BindNativeFunction(env, object, "SetFollowParentMultiScreenPolicy",
+        moduleName, JsWindow::SetFollowParentMultiScreenPolicy);
     BindNativeFunction(env, object, "enableDrag", moduleName, JsWindow::EnableDrag);
     BindNativeFunction(env, object, "setWindowDecorHeight", moduleName, JsWindow::SetWindowDecorHeight);
     BindNativeFunction(env, object, "getWindowDecorHeight", moduleName, JsWindow::GetWindowDecorHeight);

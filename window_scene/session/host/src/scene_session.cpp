@@ -777,11 +777,11 @@ WSRect SceneSession::ConvertGlobalRectToRelative(const WSRect& globalRect, Displ
     sptr<ScreenSession> screenSession =
         ScreenSessionManagerClient::GetInstance().GetScreenSessionById(targetDisplayId);
     if (!screenSession) {
-        TLOGW(WmsLogTag::WMS_LAYOUT, "Screen session is null, displayId:%{public}"PRIu64, targetDisplayId);
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Screen session is null, displayId:%{public}" PRIu64, targetDisplayId);
         screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSessionById(GetDisplayId());
     }
     if (!screenSession) {
-        TLOGW(WmsLogTag::WMS_LAYOUT, "Screen session is null, displayId:%{public}"PRIu64, GetDisplayId());
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Screen session is null, displayId:%{public}" PRIu64, GetDisplayId());
         return globalRect;
     }
     const ScreenProperty& screenProperty = screenSession->GetScreenProperty();
@@ -1759,41 +1759,41 @@ void SceneSession::HandleCrossMoveToSurfaceNode(WSRect &globalRect)
             TLOGD(WmsLogTag::WMS_LAYOUT, "virtual screen, no need to add cross parent child");
             continue;
         }
-        movedSurfaceNode->SetPositionZ(GetZorder());
+        movedSurfaceNode->SetPositionZ(GetZOrder());
         const int suffixIndex = -1;
         screenSession->GetDisplayNode()->AddCrossScreenChild(movedSurfaceNode, suffixIndex, true);
         movedSurfaceNode->SetIsCrossNode(true);
-        TLOGI(WmsLogTag::WMS_LAYOUT, "ADD sub window to display: %{public}" PRIu64 "persistentId: %{public}d",
+        TLOGI(WmsLogTag::WMS_LAYOUT, "Add sub window to display: %{public}" PRIu64 "persistentId: %{public}d",
         displayId, GetPersistentId());
     }
-    RsTransaction::FlushImplicitTransaction();
+    RSTransaction::FlushImplicitTransaction();
 }
 
-std::set<uint64_t> SceneSession::GetNewAddedDisplayIdsDuringMoveTo(WSRect &newRect)
+std::set<uint64_t> SceneSession::GetNewDisplayIdsDuringMoveTo(WSRect &newRect)
 {
-    std::set<uint64_t> newADDedDisplayIdSet;
+    std::set<uint64_t> newAddedDisplayIdSet;
     WSRect windowRect = newRect;
-    std::map<ScreenId, ScreenProperty>screenProperties =
-        ScreenSessionManagerClient::GetInstance().GetALLScreenProperties();
-        std::lock_guard<std::mutex> lock(dispalyIdSetDuringMoveToMutex_);
+    std::map<ScreenId, ScreenProperty> screenProperties =
+        ScreenSessionManagerClient::GetInstance().GetALLScreensProperties();
+        std::lock_guard<std::mutex> lock(displayIdSetDuringMoveToMutex_);
     for (const auto& [screenId, screenProperty] : screenProperties) {
         if (displayIdSetDuringMoveTo_.find(screenId) != displayIdSetDuringMoveTo_.end()) {
             continue;
         }
-        WSRect ScreenRect = {
+        WSRect screenRect = {
             screenProperty.GetStartX(),
             screenProperty.GetStartY(),
             screenProperty.GetBounds().rect_.GetWidth(),
             screenProperty.GetBounds().rect_.GetHeight(),
         };
         if (windowRect.IsOverlap(screenRect)) {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "Overlap with new screen:%{public}" PRIu64 "persistentId: %{public}d",
+            TLOGI(WmsLogTag::WMS_LAYOUT, "Overlap with new screen:%{public}" PRIu64 "persistentId: %{public}d",
             screenId, GetPersistentId());
             displayIdSetDuringMoveTo_.insert(screenId);
-            newADDedDisplayIdSet.insert(screenId);
+            newAddedDisplayIdSet.insert(screenId);
         }
     }
-    return newADDedDisplayIdSet;
+    return newAddedDisplayIdSet;
 }
 
 void SceneSession::UpdateCrossAxisOfLayout(const WSRect& rect)
@@ -3613,7 +3613,7 @@ void SceneSession::HandleSubSessionCrossNode(SizeChangeReason reason)
         if (!subSession_.empty()) {
             HandleSubSessionSurfaceNode(true);
         }
-    }else if (reason == SizeChangeReason::DRAG_END) {
+    } else if (reason == SizeChangeReason::DRAG_END) {
         Session::SetDragStart(false);
         if (!subSession_.empty()) {
             HandleSubSessionSurfaceNode(false);
@@ -3878,7 +3878,7 @@ void SceneSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
 void SceneSession::HandleSubSessionSurfaceNode(bool isAdd)
 {
     for (const auto& session : subSession_) {
-        if (session){
+        if (session) {
             session->HandleSubSessionSurfaceNode(isAdd);
         }
     }
@@ -3929,7 +3929,7 @@ void SceneSession::AddSurfaceNodeToScreen()
         }
         auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSessionById(displayId);
         if (screenSession == nullptr) {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "screenSession is null");
+            TLOGE(WmsLogTag::WMS_LAYOUT, "ScreenSession is null");
             continue;
         }
         if (screenSession->GetDisplayNode() == nullptr) {
@@ -3940,7 +3940,7 @@ void SceneSession::AddSurfaceNodeToScreen()
             TLOGD(WmsLogTag::WMS_LAYOUT, "virtual screen, no need to add cross parent child");
             continue;
         }
-        currSurfacedNode->SetPositionZ(GetZorder());
+        currSurfacedNode->SetPositionZ(GetZOrder());
         screenSession->GetDisplayNode()->AddCrossScreenChild(currSurfacedNode, -1, true);
         currSurfacedNode->SetIsCrossNode(true);
         TLOGI(WmsLogTag::WMS_LAYOUT, "Add sub window to display: %{public}" PRIu64 "persistentId: %{public}d",
@@ -3953,7 +3953,7 @@ void SceneSession::RemoveSufaceNodeFromScreen()
 {
     auto currSurfacedNode = GetSurfaceNodeForMoveDrag();
     if (currSurfacedNode == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "surfaceNode is null");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "SurfaceNode is null");
         return;
     }
 
@@ -3964,7 +3964,7 @@ void SceneSession::RemoveSufaceNodeFromScreen()
         }
         auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSessionById(displayId);
         if (screenSession == nullptr) {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "screenSession is null");
+            TLOGE(WmsLogTag::WMS_LAYOUT, "ScreenSession is null");
             continue;
         }
         if (screenSession->GetDisplayNode() == nullptr) {

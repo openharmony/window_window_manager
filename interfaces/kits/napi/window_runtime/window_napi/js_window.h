@@ -176,7 +176,7 @@ public:
      */
     static napi_value GetWindowStatus(napi_env env, napi_callback_info info);
     static napi_value SetWindowMask(napi_env env, napi_callback_info info);
-    static napi_value SetFollowParentMultiScreenPolity(napi_env env, napi_callback_info info);
+    static napi_value SetFollowParentMultiScreenPolicy(napi_env env, napi_callback_info info);
 
     /*
      * Window Decor
@@ -368,7 +368,7 @@ private:
      */
     napi_value OnSetWindowMask(napi_env env, napi_callback_info info);
     napi_value OnGetWindowStatus(napi_env env, napi_callback_info info);
-    napi_value OnSetFollowParentMultiScreenPolity(napi_env env, napi_callback_info info);
+    napi_value OnSetFollowParentMultiScreenPolicy(napi_env env, napi_callback_info info);
 
     /*
      * Window Decor

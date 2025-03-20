@@ -1664,6 +1664,7 @@ int SessionStub::HandleNotifyFollowParentMultiScreenPolicy(MessageParcel& data, 
         return ERR_INVALID_DATA;
     }
     TLOGD(WmsLogTag::WMS_SUB, "enabled: %{public}d", enabled);
+    NotifyFollowParentMultiScreenPolicy(enabled);
     return ERR_NONE;
 }
 
