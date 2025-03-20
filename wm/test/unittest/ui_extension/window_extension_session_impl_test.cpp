@@ -17,7 +17,9 @@
 
 #include <ability_context_impl.h>
 #include <context_impl.h>
+#include <int_wrapper.h>
 #include <transaction/rs_transaction.h>
+#include <want_params_wrapper.h>
 
 #include "accessibility_event_info.h"
 #include "display_info.h"
