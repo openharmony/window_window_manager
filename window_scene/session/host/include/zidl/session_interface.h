@@ -342,7 +342,6 @@ public:
     /**
      * @brief Callback for setting whether the sub window supports simultaneous display on multiple screens
      *        when the parent window is dragged to move or dragged to zoom.
-     *
      * @param enabled Indicates the {@link bool}
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
