@@ -8364,6 +8364,11 @@ void ScreenSessionManager::SetCoordinationFlag(bool isCoordinationFlag)
     isCoordinationFlag_ = isCoordinationFlag;
 }
 
+bool ScreenSessionManager::GetCoordinationFlag(void)
+{
+    return isCoordinationFlag_;
+}
+
 DMError ScreenSessionManager::SetVirtualScreenMaxRefreshRate(ScreenId id, uint32_t refreshRate,
     uint32_t& actualRefreshRate)
 {
