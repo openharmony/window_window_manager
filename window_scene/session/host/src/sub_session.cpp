@@ -281,10 +281,10 @@ WSError SubSession::NotifyFollowParentMultiScreenPolicy(bool enabled)
     PostTask([weakThis = wptr(this), enabled, funcName = __func__] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_SUB, " session is null");
+            TLOGE(WmsLogTag::WMS_SUB, " session is null");
             return;
         }
-        TLOGE(WmsLogTag::WMS_SUB, "%{public}s: enabled:%{public}d", funcName, enabled);
+        TLOGNI(WmsLogTag::WMS_SUB, "%{public}s: enabled:%{public}d", funcName, enabled);
         session->isFollowParentMultiScreenPolicy_ = enabled;
     }, __func__);
     return WSError::WS_OK;
