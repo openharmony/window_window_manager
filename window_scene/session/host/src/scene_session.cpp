@@ -1740,9 +1740,9 @@ void SceneSession::HandleCrossMoveToSurfaceNode(WSRect &globalRect)
         return;
     }
 
-    TLOGE(WmsLogTag::WMS_LAYOUT, "displayId:%{public}d, persistentId:%{public}d, globalRect:%{public}s",
+    TLOGI(WmsLogTag::WMS_LAYOUT, "displayId:%{public}lu, persistentId:%{public}d, globalRect:%{public}s",
         GetScreenId(), GetPersistentId(), globalRect.ToString().c_str());
-    for (const auto displayId : GetNewAddedDisplayIdsDuringMoveTo(globalRect)) {
+    for (const auto displayId : GetNewDisplayIdsDuringMoveTo(globalRect)) {
         if (displayId == GetScreenId()) {
             continue;
         }
@@ -1756,18 +1756,17 @@ void SceneSession::HandleCrossMoveToSurfaceNode(WSRect &globalRect)
             continue;
         }
         if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::VIRTUAL) {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "virtual screen, no need to add cross parent child");
+            TLOGD(WmsLogTag::WMS_LAYOUT, "virtual screen, no need to add cross parent child");
             continue;
         }
         movedSurfaceNode->SetPositionZ(GetZorder());
-        screenSession->GetDisplayNode()->AddCrossScreenChild(movedSurfaceNode, -1, true);
+        const int suffixIndex = -1;
+        screenSession->GetDisplayNode()->AddCrossScreenChild(movedSurfaceNode, suffixIndex, true);
         movedSurfaceNode->SetIsCrossNode(true);
-        TLOGE(WmsLogTag::WMS_LAYOUT, "ADD sub window to display: %{public}" PRIu64 "persistentId: %{public}d",
+        TLOGI(WmsLogTag::WMS_LAYOUT, "ADD sub window to display: %{public}" PRIu64 "persistentId: %{public}d",
         displayId, GetPersistentId());
     }
-    if (reTransaction != nullptr) {
-        reTransaction->Commit();
-    }
+    RsTransaction::FlushImplicitTransaction();
 }
 
 std::set<uint64_t> SceneSession::GetNewAddedDisplayIdsDuringMoveTo(WSRect &newRect)
