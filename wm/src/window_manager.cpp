@@ -407,17 +407,17 @@ WMError WindowManager::RegisterFocusChangedListener(const sptr<IFocusChangedList
         return WMError::WM_ERROR_NULLPTR;
     }
 
-    sptr<WindowManagerAgent> focusChangedListenerAgentBack_;
+    sptr<WindowManagerAgent> focusChangedListenerAgentBack;
     WMError ret = WMError::WM_OK;
     {
         std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
         if (pImpl_->focusChangedListenerAgent_ == nullptr) {
             pImpl_->focusChangedListenerAgent_ = new WindowManagerAgent();
         }
-        focusChangedListenerAgentBack_ = pImpl_->focusChangedListenerAgent_;
+        focusChangedListenerAgentBack = pImpl_->focusChangedListenerAgent_;
     }
     ret = WindowAdapter::GetInstance().RegisterWindowManagerAgent(
-        WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS, focusChangedListenerAgentBack_);
+        WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS, focusChangedListenerAgentBack);
     {
         std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
         if (ret != WMError::WM_OK) {
