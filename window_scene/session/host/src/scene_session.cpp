@@ -7625,11 +7625,11 @@ WSRect SceneSession::GetCreaseRegion(CreaseRegionName regionName)
     if (creaseRegion != nullptr) {
         std::vector<DMRect> creaseRects = creaseRegion->GetCreaseRects();
         uint8_t index = static_cast<uint8_t>(regionName);
-        if (creaseRects.size() > index) {
+        if (index >= 0 && index < creaseRects.size()) {
             return { creaseRects[index].posX_, creaseRects[index].posY_,
                 creaseRects[index].width_, creaseRects[index].height_ };
         } else {
-            TLOGW(WmsLogTag::WMS_LAYOUT_PC, "creaseRegion %{public}u is empty", index);
+            TLOGW(WmsLogTag::WMS_LAYOUT_PC, "creaseRegion index %{public}u is out of range", index);
         }
     }
     return { 0, 0, 0, 0 };
