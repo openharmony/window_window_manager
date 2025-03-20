@@ -50,7 +50,7 @@ const float SCREEN_HEIGHT = 2232;
 constexpr uint32_t SECONDARY_ROTATION_90 = 1;
 constexpr uint32_t SECONDARY_ROTATION_270 = 3;
 constexpr uint32_t SECONDARY_ROTATION_MOD = 4;
-ScreenCache g_uidVersionMap(MAP_SIZE, NO_EXIST_UID_VERSION);
+ScreenCache<int32_t, int32_t> g_uidVersionMap(MAP_SIZE, NO_EXIST_UID_VERSION);
 }
 
 ScreenSession::ScreenSession(const ScreenSessionConfig& config, ScreenSessionReason reason)
