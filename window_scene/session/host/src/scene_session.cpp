@@ -1742,10 +1742,6 @@ void SceneSession::HandleCrossMoveToSurfaceNode(WSRect &globalRect)
 
     TLOGE(WmsLogTag::WMS_LAYOUT, "displayId:%{public}d, persistentId:%{public}d, globalRect:%{public}s",
         GetScreenId(), GetPersistentId(), globalRect.ToString().c_str());
-    auto reTransaction = RSTransactionProxy::GetInstance();
-    if (reTransaction != nullptr) {
-        reTransaction->Begin();
-    }
     for (const auto displayId : GetNewAddedDisplayIdsDuringMoveTo(globalRect)) {
         if (displayId == GetScreenId()) {
             continue;
@@ -3333,6 +3329,7 @@ void SceneSession::HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect,
     bool isGlobal = (reason != SizeChangeReason::DRAG_END);
     bool needFlush = (reason != SizeChangeReason::DRAG_END);
     throwSlipToFullScreenAnimCount_.store(0);
+    UpdateSizeChangeReason(reason);
     if (moveDragController_ && moveDragController_->GetPointerType() == MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN &&
         pcFoldScreenController_ && pcFoldScreenController_->IsAllowThrowSlip(GetScreenId()) &&
         (reason == SizeChangeReason::DRAG_MOVE || reason == SizeChangeReason::DRAG_END)) {
@@ -3347,7 +3344,6 @@ void SceneSession::HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect,
     } else {
         SetSurfaceBounds(globalRect, isGlobal, needFlush);
     }
-    UpdateSizeChangeReason(reason);
     if (reason != SizeChangeReason::DRAG_MOVE && !KeyFrameNotifyFilter(rect, reason)) {
         UpdateRectForDrag(rect);
         std::shared_ptr<VsyncCallback> nextVsyncDragCallback = std::make_shared<VsyncCallback>();
