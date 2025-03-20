@@ -6156,6 +6156,7 @@ WSError SceneSession::OnLayoutFullScreenChange(bool isLayoutFullScreen)
 
 WSError SceneSession::OnDefaultDensityEnabled(bool isDefaultDensityEnabled)
 {
+    isDefaultDensityEnabled_ = isDefaultDensityEnabled;
     PostTask([weakThis = wptr(this), isDefaultDensityEnabled, where = __func__] {
         auto session = weakThis.promote();
         if (!session) {
@@ -7480,7 +7481,7 @@ void SceneSession::NotifyKeyboardDidHideRegistered(bool registered)
 WSError SceneSession::UpdateDensity()
 {
     if (systemConfig_.IsPcWindow() && WindowHelper::IsAppWindow(GetWindowType()) &&
-        Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
+        Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING && !isDefaultDensityEnabled_) {
         UpdateNewSizeForPCWindow();
     }
     SaveLastDensity();
