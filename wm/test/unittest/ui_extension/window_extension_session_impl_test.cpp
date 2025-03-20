@@ -2328,7 +2328,7 @@ HWTEST_F(WindowExtensionSessionImplTest, OnResyncExtensionConfig, Function | Sma
 {
     AAFwk::Want want;
     AAFwk::WantParams configParam;
-    AAFwk::WantParams wantParam(want->GetParams());
+    AAFwk::WantParams wantParam;
     configParam.SetParam(Extension::CROSS_AXIS_FIELD,
         AAFwk::Integer::Box(static_cast<int32_t>(CrossAxisState::STATE_CROSS)));
     configParam.SetParam(Extension::WATERFALL_MODE_FIELD, AAFwk::Integer::Box(static_cast<int32_t>(1)));
