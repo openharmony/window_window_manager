@@ -378,6 +378,31 @@ HWTEST_F(KeyboardSessionTest2, UpdateCallingSessionIdAndPosition01, Function | S
 }
 
 /**
+ * @tc.name: UpdateCallingSessionIdAndPosition02
+ * @tc.desc: UpdateCallingSessionIdAndPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest2, UpdateCallingSessionIdAndPosition02, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "UpdateCallingSessionIdAndPosition02";
+    info.bundleName_ = "UpdateCallingSessionIdAndPosition02";
+    sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, nullptr, nullptr);
+    ASSERT_NE(keyboardSession, nullptr);
+    sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(windowSessionProperty, nullptr);
+    keyboardSession->property_ = windowSessionProperty;
+    ASSERT_NE(keyboardSession->property_, nullptr);
+
+    keyboardSession->property_->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
+    keyboardSession->property_->SetCallingSessionId(-1);
+    keyboardSession->UpdateCallingSessionIdAndPosition(0);
+    keyboardSession->property_->SetCallingSessionId(0);
+    keyboardSession->UpdateCallingSessionIdAndPosition(0);
+    EXPECT_EQ(keyboardSession->property_->keyboardLayoutParams_.gravity_, WindowGravity::WINDOW_GRAVITY_BOTTOM);
+}
+
+/**
  * @tc.name: OpenKeyboardSyncTransaction01
  * @tc.desc: OpenKeyboardSyncTransaction
  * @tc.type: FUNC
