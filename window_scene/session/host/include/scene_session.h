@@ -238,6 +238,7 @@ public:
     void SetWinRectWhenUpdateRect(const WSRect& rect);
     void SetRequestRectWhenFollowParent(const WSRect& rect) { requestRectWhenFollowparent_ = rect; }
     WSRect GetRequestRectWhenFollowParent() { return requestRectWhenFollowparent_; }
+    virtual bool IsNeedCrossDisplayRendering() const { return false; }
     void RegisterNotifySurfaceBoundsChangeFunc(int32_t sessionId, NotifySurfaceBoundsChangeFunc&& func) override;
     void UnregisterNotifySurfaceBoundsChangeFunc(int32_t sessionId) override;
 
