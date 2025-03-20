@@ -6924,7 +6924,7 @@ napi_value JsWindow::OnSetFollowParentMultiScreenPolicy(napi_env env, napi_callb
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
     const char* const where = __func__;
-    auto asyncTask = [where, weakWindow = wptr<Window>(windowToken_), isModal, enabled, env, task = napiAsyncTask] {
+    auto asyncTask = [where, weakWindow = wptr<Window>(windowToken_), enabled, env, task = napiAsyncTask] {
         auto window = weakWindow.promote();
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_SUB, "%{public}s failed, window is null", where);
