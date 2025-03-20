@@ -51,13 +51,16 @@
         }                                                                                                 \
     } while (0)
 
+#define INIT_ARG(a) \
+    size_t argc = a; \
+    napi_value argv[a] = {nullptr}
+
 namespace OHOS::Rosen {
 using namespace AbilityRuntime;
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsSceneSessionManager" };
 constexpr int MIN_ARG_COUNT = 3;
 constexpr int DEFAULT_ARG_COUNT = 4;
-constexpr int ARG_COUNT_FIVE = 5;
 constexpr int ARG_INDEX_ZERO = 0;
 constexpr int ARG_INDEX_ONE = 1;
 constexpr int ARG_INDEX_TWO = 2;
@@ -2945,8 +2948,7 @@ napi_value JsSceneSessionManager::OnUpdateMaximizeMode(napi_env env, napi_callba
 
 napi_value JsSceneSessionManager::OnUpdateSessionDisplayId(napi_env env, napi_callback_info info)
 {
-    size_t argc = ARG_COUNT_FIVE;
-    napi_value argv[ARG_COUNT_FIVE] = {nullptr};
+    INIT_ARG(ARGC_FIVE);
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_TWO) {
         WLOGFE("Argc is invalid: %{public}zu", argc);
