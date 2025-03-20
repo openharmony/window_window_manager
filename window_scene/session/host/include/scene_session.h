@@ -236,6 +236,8 @@ public:
     WSError NotifyClientToUpdateRect(const std::string& updateReason,
         std::shared_ptr<RSTransaction> rsTransaction) override;
     void SetWinRectWhenUpdateRect(const WSRect& rect);
+    void SetRequestRectWhenFollowParent(const WSRect& rect) { requestRectWhenFollowparent_ = rect; }
+    WSRect GetRequestRectWhenFollowParent() { return requestRectWhenFollowparent_; }
     void RegisterNotifySurfaceBoundsChangeFunc(int32_t sessionId, NotifySurfaceBoundsChangeFunc&& func) override;
     void UnregisterNotifySurfaceBoundsChangeFunc(int32_t sessionId) override;
 
@@ -269,6 +271,9 @@ public:
     void SetScale(float scaleX, float scaleY, float pivotX, float pivotY) override;
     void SetFloatingScale(float floatingScale) override;
     WSError RaiseAboveTarget(int32_t subWindowId) override;
+    void HandleCrossMoveTo(WSRect &gloableRect);
+    void HandleCrossMoveToSurfaceNode(WSRect &gloableRect);
+    std::set<uint64_t> GetNewAddedDisplayIdsDuringMoveTo(WSRect &newRect);
 
     /*
      * PiP Window
@@ -360,6 +365,7 @@ public:
     void SaveLastDensity();
     void UpdateSuperFoldThreshold(DMRect& availableArea, int32_t& topThreshold, int32_t& bottomThreshold);
     WSRect GetCreaseRegion(CreaseRegionName regionName) const;
+    virtual bool IsFollowParentMultiScreenPolity() const { return false; }
     void NotifyUpdateFlagCallback(NotifyUpdateFlagFunc&& func);
 
     /*
@@ -651,6 +657,8 @@ public:
     void SetWindowMovingCallback(NotifyWindowMovingFunc&& func);
     DMRect CalcRectForStatusBar();
     WSError SetMoveAvailableArea(DisplayId displayId);
+    bool IsDragMoving() const override;
+    bool IsDragZooming() const override;
     // KeyFrame
     WSError UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode,
         std::shared_ptr<RSTransaction>& rsTransaction) override;
@@ -674,6 +682,8 @@ public:
     bool SetFrameGravity(Gravity gravity);
     WSError GetCrossAxisState(CrossAxisState& state) override;
     virtual void UpdateCrossAxis();
+    bool IsAnyParentSessionDragMoving() const override;
+    bool IsAnyParentSessionDragZooming() const override;
     bool GetIsFollowParentLayout() const { return isFollowParentLayout_; }
     sptr<MoveDragController> GetMoveDragController() const { return moveDragController_; }
     void NotifyUpdateGravity();
@@ -817,6 +827,8 @@ protected:
      */
     NotifyDefaultDensityEnabledFunc onDefaultDensityEnabledFunc_;
     sptr<MoveDragController> moveDragController_ = nullptr;
+    std::mutex displayIdSetDuringMoveToMutex_;
+    std::set<uint64_t> displayIdSetDuringMoveTo_;
     NotifyFollowParentRectFunc followParentRectFunc_ = nullptr;
     std::mutex registerNotifySurfaceBoundsChangeMutex_;
     std::unordered_map<int32_t, NotifySurfaceBoundsChangeFunc> notifySurfaceBoundsChangeFuncMap_;
@@ -832,6 +844,9 @@ protected:
     void SetShouldFollowParentWhenShow(bool shouldFollow) { shouldFollowParentWhenShow_ = shouldFollow; }
     bool GetShouldFollowParentWhenShow() const { return shouldFollowParentWhenShow_; }
     void CheckSubSessionShouldFollowParent(uint64_t displayId);
+    WSRect ConvertRelativeRectToGlobal(const WSRect& relativeRect, DisplayId currentDisplayId) const override;
+    WSRect ConvertGlobalRectToRelative(const WSRect& globalRect, DisplayId targetDisplayId) const override;
+    bool IsNeedConvertToRelativeRect(const WSRect& globalRect, DisplayId targetDisplayId) const override;
 
     /*
      * Window Lifecycle
@@ -922,6 +937,7 @@ private:
     void HandleCompatibleModeDrag(WSRect& rect, SizeChangeReason reason, bool isSupportDragInPcCompatibleMode);
     NotifySessionEventFunc onSessionEvent_;
     void ProcessWindowMoving(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    void HandleSubSessionCrossNode(SizeChangeReason reason);
 
     /*
      * Gesture Back
@@ -1057,6 +1073,9 @@ private:
     bool SaveAspectRatio(float ratio);
     WSError UpdateRectForDrag(const WSRect& rect);
     void UpdateSessionRectPosYFromClient(SizeChangeReason reason, DisplayId& configDisplayId, WSRect& rect);
+    void ProcSubSessionSurfaceNode(bool isAdd);
+    void AddSurfaceNodeToScreen();
+    void RemoveSurfaceNodeFromScreen();
 
     /*
      * Window Decor
@@ -1154,6 +1173,7 @@ private:
     void SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool needFlush = true);
     virtual void UpdateCrossAxisOfLayout(const WSRect& rect);
     NotifyLayoutFullScreenChangeFunc onLayoutFullScreenChangeFunc_;
+    WSRect requestRectWhenFollowParent_;
     virtual void NotifySubAndDialogFollowRectChange(const WSRect& rect, bool isGlobal, bool needFlush) {};
     std::atomic<bool> shouldFollowParentWhenShow_ = true;
     bool isDragging_ = false;

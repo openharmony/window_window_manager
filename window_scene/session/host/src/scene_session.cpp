@@ -739,6 +739,95 @@ WSError SceneSession::InitializeMoveInputBar()
     return WSError::WS_OK;
 }
 
+bool SceneSession::IsNeedConvertToRelativeRect(SizeChangeReason reason) const
+{
+    if (IsDraggingReason(reason)) {
+        return true;
+    }
+    if (WindowHelper::IsSubWindow(GetWindowType())) {
+        if (IsFollowParentMultiScreenPolicy() && (IsAnyParentSessionDragMoving() || IsAnyParentSessionDragZooming())) {
+            return true;
+        }
+    }
+    return false;
+}
+
+WSError SceneSession::ConvertRelativeRectToGlobal(const WSRect& relativeRect, DisplayId currentDisplayId) const
+{
+    sptr<ScreensSession> screenSession =
+        ScreenSessionManagerClient::GetInstance().GetScreenSessionById(currentDisplayId);
+    if (!screenSession) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Screen session is null, displayId:%{public}"PRIu64, currentDisplayId);
+        screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSessionById(GetDisplayId());
+    }
+    if (!screenSession) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Screen session is null, displayId:%{public}"PRIu64, GetDisplayId());
+        return relativeRect;
+    }
+    const ScreenProperty& ScreenProperty = screenSession->GetScreenProperty();
+    int32_t currentDisplayOffsetX = static_cast<int32_t>(screenProperty.GetStartX());
+    int32_t currentDisplayOffsetY = static_cast<int32_t>(screenProperty.GetStartY());
+    TLOGI(WmsLogTag::WMS_LAYOUT, "relativeRect:%{public}s, offsetX:%{public}d, offsetY:%{public}d",
+        releativeRect.ToString().c_str(), currentDisplayOffsetX, currentDisplayOffsetY);
+    return {relativeRect.posX_ + currentDisplayOffsetX,
+            relativeRect.posY_ + currentDisplayOffsetY,
+            relativeRect.width_, relativeRect.height_};
+}
+
+WSError SceneSession::ConvertGlobalRectToRelative(const WSRect& globalRect, DisplayId targetDisplayId) const
+{
+    sptr<ScreensSession> screenSession =
+        ScreenSessionManagerClient::GetInstance().GetScreenSessionById(targetDisplayId);
+    if (!screenSession) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Screen session is null, displayId:%{public}"PRIu64, targetDisplayId);
+        screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSessionById(GetDisplayId());
+    }
+    if (!screenSession) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Screen session is null, displayId:%{public}"PRIu64, GetDisplayId());
+        return globalRect;
+    }
+    const ScreenProperty& ScreenProperty = screenSession->GetScreenProperty();
+    int32_t targetDisplayOffsetX = static_cast<int32_t>(screenProperty.GetStartX());
+    int32_t targetDisplayOffsetY = static_cast<int32_t>(screenProperty.GetStartY());
+    TLOGI(WmsLogTag::WMS_LAYOUT, "globalRect:%{public}s, offsetX:%{public}d, offsetY:%{public}d",
+        globalRect.ToString().c_str(), targetDisplayOffsetX, targetDisplayOffsetY);
+    return {globalRect.posX_ - targetDisplayOffsetX,
+            globalRect.posY_ - targetDisplayOffsetY,
+            globalRect.width_, globalRect.height_};
+}
+
+bool SceneSession::IsDragMoving() const
+{
+    return moveDragController_ ? moveDragController_->GetStartMoveFlag() : false;
+}
+
+bool SceneSession::IsDragZooming() const
+{
+    return moveDragController_ ? moveDragController_->GetStartMoveFlag() : false;
+}
+
+bool SceneSession::IsAnyParentSessionDragMoving() const
+{
+    if (SessionHelper::IsMainWindow(GetWindowType())) {
+        return IsDragMoving();
+    }else if (parentSession_) {
+        return parentSession_->IsDragMoving() ? true : parentSession_->IsAnyParentSessionDragMoving();
+    }else {
+        return false;
+    }
+}
+
+bool SceneSession::IsAnyParentSessionDragZooming() const
+{
+    if (SessionHelper::IsMainWindow(GetWindowType())) {
+        return IsDragZooming();
+    }else if (parentSession_) {
+        return parentSession_->IsDragZooming() ? true : parentSession_->IsAnyParentSessionDragZooming();
+    }else {
+        return false;
+    }
+}
+
 WSError SceneSession::OnSessionEvent(SessionEvent event)
 {
     PostTask([weakThis = wptr(this), event, where = __func__] {
@@ -1637,6 +1726,81 @@ WSError SceneSession::UpdateSessionRect(
         return WSError::WS_OK;
     }, __func__ + GetRectInfo(rect));
     return WSError::WS_OK;
+}
+
+void SceneSession::HandleCrossMoveTo(WSRect &globalRect)
+{
+    HandleCrossMoveToSurfaceNode(globalRect);
+    SetSurfaceBounds(globalRect, true, true);
+}
+
+void SceneSession::HandleCrossMoveToSurfaceNode(WSRect &globalRect)
+{
+    auto movedSurfaceNode = GetSurfaceNodeForMoveDrag();
+    if (movedSurfaceNode == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "SurfaceNode is null");
+        return;
+    }
+
+    TLOGE(WmsLogTag::WMS_LAYOUT, "displayId:%{public}d, persistentId:%{public}d, globalRect:%{public}s",
+        GetScreenId(), GetPersistentId(), globalRect.ToString().c_str());
+    auto reTransaction = RSTransactionProxy::GetInstance();
+    if (reTransaction != nullptr) {
+        reTransaction->Begin();
+    }
+    for (const auto displayId : GetNewAddedDisplayIdsDuringMoveTo(globalRect)) {
+        if (displayId == GetScreenId()) {
+            continue;
+        }
+        auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSessionById(displayId);
+        if (screenSession == nullptr) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "ScreenSession is null");
+            continue;
+        }
+        if (screenSession->GetDisplayNode() == nullptr) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "DisplayNode is null");
+            continue;
+        }
+        if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::VIRTUAL) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "virtual screen, no need to add cross parent child");
+            continue;
+        }
+        movedSurfaceNode->SetPositionZ(GetZorder());
+        screenSession->GetDisplayNode()->AddCrossScreenChild(movedSurfaceNode, -1, true);
+        movedSurfaceNode->SetIsCrossNode(true);
+        TLOGE(WmsLogTag::WMS_LAYOUT, "ADD sub window to display: %{public}" PRIu64 "persistentId: %{public}d",
+        displayId, GetPersistentId());
+    }
+    if (reTransaction != nullptr) {
+        reTransaction->Commit();
+    }
+}
+
+std::set<uint64_t> SceneSession::GetNewAddedDisplayIdsDuringMoveTo(WSRect &newRect)
+{
+    std::set<uint64_t> newADDedDisplayIdSet;
+    WSRect windowRect = newRect;
+    std::map<ScreenId, ScreenProperty>screenProperties =
+        ScreenSessionManagerClient::GetInstance().GetALLScreenProperties();
+        std::lock_guard<std::mutex> lock(dispalyIdSetDuringMoveToMutex_);
+    for (const auto& [screenId, screenProperty] : screenProperties) {
+        if (displayIdSetDuringMoveTo_.find(screenId) != displayIdSetDuringMoveTo_.end()) {
+            continue;
+        }
+        WSRect ScreenRect = {
+            screenProperty.GetStartX(),
+            screenProperty.GetStartY(),
+            screenProperty.GetBounds().rect_.GetWidth(),
+            screenProperty.GetBounds().rect_.GetHeight(),
+        };
+        if (windowRect.IsOverlap(screenRect)) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "Overlap with new screen:%{public}" PRIu64 "persistentId: %{public}d",
+            screenId, GetPersistentId());
+            displayIdSetDuringMoveTo_.insert(screenId);
+            newADDedDisplayIdSet.insert(screenId);
+        }
+    }
+    return newADDedDisplayIdSet;
 }
 
 void SceneSession::UpdateCrossAxisOfLayout(const WSRect& rect)
@@ -3420,6 +3584,7 @@ void SceneSession::OnMoveDragCallback(SizeChangeReason reason)
     if (isCompatibleModeInPc && !IsFreeMultiWindowMode()) {
         HandleCompatibleModeMoveDrag(rect, reason);
     }
+    HandleSubSessionCrossNode(reason);
     if (DragResizeWhenEndFilter(reason)) {
         return;
     }
@@ -3442,6 +3607,24 @@ void SceneSession::OnMoveDragCallback(SizeChangeReason reason)
     } else if (reason == SizeChangeReason::DRAG_START) {
         OnSessionEvent(SessionEvent::EVENT_DRAG_START);
         SetUIFirstSwitch(RSUIFirstSwitch::FORCE_DISABLE);
+    }
+}
+
+void SceneSession::HandleSubSessionCrossNode(SizeChangeReason reason)
+{
+    if (reason == SizeChangeReason::DRAG || reason == SizeChangeReason::DRAG_MOVE && !Session::IsDragStart()) {
+        Session::SetDragStart(true);
+        if (Session::GetOriginDisplayId() == DISPLAY_ID_INVALID) {
+            Session::SetOriginDisplayId(moveDragController_->GetMoveGragStartDisplayId());
+        }
+        if (!subSession_.empty()) {
+            ProcSubSessionSurfaceNode(true);
+        }
+    }else if (reason == SizeChangeReason::DRAG_END) {
+        Session::SetDragStart(false);
+        if (!subSession_.empty()) {
+            ProcSubSessionSurfaceNode(false);
+        }
     }
 }
 
@@ -3697,6 +3880,119 @@ void SceneSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
             TLOGD(WmsLogTag::WMS_LAYOUT, "Remove window from display: %{public}" PRIu64, displayId);
         }
     }
+}
+
+void SceneSession::ProcSubSessionSurfaceNode(bool isAdd)
+{
+    for (const auto& session : subSession_) {
+        session->ProcSubSessionSurfaceNode(isAdd);
+    }
+}
+
+if (WindowHelper::IsSubWindow(GetWinodwType()) && IsFollowParentMultiScreenPolicy()) {
+    WSRect targetRect isAdd ? ConvertRelativeRectToGlobal(winRect_, GetScreenId()) :
+        ConvertGlobalRectToRelative(winRect_, GetScreenId());
+    TLOGD(WmsLogTag::WMS_LAYOUT, "isAdd:%{public}d targetRect:%{public}s", isAdd, targetRect.ToString().c_str());
+    if (isAdd) {
+        AddSurfaceNodeToScreen();
+        SetSurfaceBounds(targetRect, true, true);
+    }else {
+        RemoveSurfaceNodeScreen();
+        SetSurfaceBounds(targetRect, false, false);
+        std::lock_guard<std::mutex> lock(displayIdSetDuringMoveToMutex_);
+        displayIdSetDuringMoveDrag_.clear();
+        auto lastRect = GetRequestRectWhenFollowRarent();
+        if (lastRect.IsInvalid()) {
+            return;
+        }
+        NotifySessionRectChange(lastRect, SizeChangeReason::MOVE);
+        SetRequestRectWhenFollowParent({0, 0, 0, 0});
+    }
+}
+
+void SceneSession::AddSurfaceNodeToScreen()
+{
+    auto currSurfacedNode = GetSurfaceNodeForMoveDrag();
+    if (currSurfacedNode == nullptr) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "surfaceNode is null");
+        return;
+    }
+    float originalPositionZ = currSurfacedNode->GetStagingProperties().GetPositionZ();
+    moveDragController_->SetOriginalPositionZ(originalPositionZ);
+
+    DispalyId orignDisplayId = Session::GetOriginDisplayId();
+    if (orignDisplayId == DISPLAY_ID_INVALID) {
+        orignDisplayId = GetScreenId();
+        Session::SetOriginDisplayId(orignDisplayId);
+    }
+    WSRect currRect = winRect_;
+    TLOGD(WmsLogTag::WMS_LAYOUT, "orignDisplayId:%{public}lu, originalPositionZ:%{public}f, winRect_:%{public}s",
+        GetOriginDisplayId(), originalPositionZ, winRect_.ToString().c_str());
+    auto rsTransaction = RSTransactionProxy::GetInstance();
+    if (rsTransaction != nullptr) {
+        rsTransaction->Begin();
+    }
+    for (const auto displayId : GetNewAddedDisplayIdsDuringMoveTo(currRect)) {
+        if (displayId == originDisplayId) {
+            continue;
+        }
+        auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSessionById(displayId);
+        if (screenSession == nullptr) {
+            TLOGD(WmsLogTag::WMS_LAYOUT, "screenSession is null");
+            continue;
+        }
+        if (screenSession->GetDisplayNode() == nullptr) {
+            TLOGD(WmsLogTag::WMS_LAYOUT, "DisplayNode is null");
+            continue;
+        }
+        if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::VIRTUAL) {
+            TLOGD(WmsLogTag::WMS_LAYOUT, "virtual screen, no need to add cross parent child");
+            continue;
+        }
+        currSurfaceNode->SetPositionZ(GetZorder());
+        screenSession->GetDisplayNode()->AddCrossScreenChild(currSurfaceNode, -1, true);
+        currSurfaceNode->SetIsCrossNode(true);
+        TLOGD(WmsLogTag::WMS_LAYOUT, "Add sub window to display: %{public}" PRIu64 "persistentId: %{public}d",
+            displayId, GetPersistentId());
+    }
+    if (rsTransaction != nullptr) {
+        rsTransaction->Commit();
+    }
+}
+
+void SceneSession::RemoveSurfaceNodeFromScreen()
+{
+    auto currSurfacedNode = GetSurfaceNodeForMoveDrag();
+    if (currSurfacedNode == nullptr) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "surfaceNode is null");
+        return;
+    }
+
+    DispalyId orignDisplayId = Session::GetOriginDisplayId();
+    for (const auto displayId : displayIdSetDuringMoveTo_) {
+        if (displayId == originDisplayId) {
+            continue;
+        }
+        auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSessionById(displayId);
+        if (screenSession == nullptr) {
+            TLOGD(WmsLogTag::WMS_LAYOUT, "screenSession is null");
+            continue;
+        }
+        if (screenSession->GetDisplayNode() == nullptr) {
+            TLOGD(WmsLogTag::WMS_LAYOUT, "DisplayNode is null");
+            continue;
+        }
+        if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::VIRTUAL) {
+            TLOGD(WmsLogTag::WMS_LAYOUT, "virtual screen, no need to add cross parent child");
+            continue;
+        }
+        currSurfaceNode->SetPositionZ(moveDragController_->GetOriginalPositionZ());
+        screenSession->GetDisplayNode()->RemoveCrossScreenChild(currSurfaceNode);
+        currSurfaceNode->SetIsCrossNode(false);
+        TLOGD(WmsLogTag::WMS_LAYOUT, "Remove sub window to display: %{public}" PRIu64 "persistentId: %{public}d",
+            displayId, GetPersistentId());
+    }
+    Session::SetOriginDisplayId(DISPLAY_ID_INVALID);
 }
 
 /** @note @window.drag */

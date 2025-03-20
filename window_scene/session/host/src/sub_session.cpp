@@ -89,11 +89,31 @@ void SubSession::NotifySessionRectChange(const WSRect& rect, SizeChangeReason re
     SceneSession::NotifySessionRectChange(rect, reason, displayId, rectAnimationConfig);
 }
 
+bool SubSession::IsNeedCrossDisplayRendering() const
+{
+    return IsFollowParentMultiScreenPolicy() && (IsAnyParentSessionDragMoving() || IsAnyParentSessionDragZooming());
+}
+
 void SubSession::UpdateSessionRectInner(const WSRect& rect, SizeChangeReason reason,
     const MoveConfiguration& moveConfiguration, const RectAnimationConfig& rectAnimationConfig)
 {
     if (moveConfiguration.displayId != DISPLAY_ID_INVALID) {
         SetShouldFollowParentWhenShow(false);
+    }
+    if (IsNeedCrossDisplayRendering()) {
+        auto newRequestRect = GetSessionRequestRect();
+        if (reason == SizeChangeReason::MOVE) {
+            newRequestRect.posX_ = rect.posX_;
+            newRequestRect.posY_ = rect.posY_;
+        }else if (reason == SizeChangeReason::RESIZE && rect.width_ > 0 && rect.height_ > 0) {
+            newRequestRect.width_ = rect.width_;
+            newRequestRect.height_ = rect.height_;
+        }
+        SetSessionRequestRect(newRequestRect);
+        SetRequestRectWhenFollowParent(newRequestRect);
+        WSRect globalRect = ConvertReleativeRectToGlobal(newRequestRect, moveConfiguration.displayId);
+        UpdateCrossMoveTo(globalRect);
+        return;
     }
     SceneSession::UpdateSessionRectInner(rect, reason, moveConfiguration, rectAnimationConfig);
 }
@@ -252,6 +272,25 @@ bool SubSession::IsVisibleForeground() const
         return mainOrFloatSession->IsVisibleForeground() && Session::IsVisibleForeground();
     }
     return Session::IsVisibleForeground();
+}
+
+WSError SubSession::NotifyFollowParentMultiScreenPolicy(bool enabled)
+{
+    PostTask([weakThis = wptr(this), enabled, funcName = __func__] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_SUB, " session is null");
+            return;
+        }
+        TLOGNE(WmsLogTag::WMS_SUB, "%{public}s: enabled:%{public}d", funcName, enabled);
+        session->isFollowParentMultiScreenPolicy_ = enabled;
+    }, __func__);
+    return WMError::WM_OK;
+}
+
+bool SubSession::IsFollowParentMultiScreenPolicy() const
+{
+    return isFollowParentMultiScreenPolicy_;
 }
 
 void SubSession::SetParentSessionCallback(NotifySetParentSessionFunc&& func)

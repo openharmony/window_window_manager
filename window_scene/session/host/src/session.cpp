@@ -966,6 +966,12 @@ WSError Session::UpdateSizeChangeReason(SizeChangeReason reason)
     return WSError::WS_OK;
 }
 
+bool Session::IsDraggingReason(SizeChangeReason reason) const
+{
+    return reason == SizeChangeReason::DRAG || reason == SizeChangeReason::DRAG_MOVE ||
+           reason == SizeChangeReason::DRAG_START;
+}
+
 WSError Session::UpdateClientDisplayId(DisplayId displayId)
 {
     if (sessionStage_ == nullptr) {
@@ -1112,6 +1118,8 @@ WSError Session::UpdateRectWithLayoutInfo(const WSRect& rect, SizeChangeReason r
         SceneAnimationConfig config { .rsTransaction_ = rsTransaction, .animationDuration_ = rotateAnimationDuration };
         WSRect updatedRect = rect;
         UpdateClientRectPosYAndDisplayId(updatedRect);
+        UpdateRect =
+            IsNeedConvertToRelativeRect(reason) ? ConvertGlobalRectToRelative(updatedRect, GetDisplayId()) : updateRect;
         sessionStage_->UpdateRect(updatedRect, reason, config, avoidAreas);
         SetClientRect(rect);
         RectCheckProcess();
@@ -3140,6 +3148,11 @@ WSRect Session::GetLayoutRect() const
     return layoutRect_;
 }
 
+vid Session::SetOriginDisplayId(DisplayId displayId)
+{
+    originDisplayId_ = displayId;
+}
+
 void Session::SetSessionRequestRect(const WSRect& rect)
 {
     GetSessionProperty()->SetRequestRect(SessionHelper::TransferToRect(rect));
@@ -4031,6 +4044,11 @@ DisplayId Session::GetClientDisplayId() const
 void Session::SetClientDisplayId(DisplayId displayid)
 {
     clientDisplayId_ = displayid;
+}
+
+void Session::SetDragStart(bool isDragStart)
+{
+    isDragStart_ = isDragStart;
 }
 
 void Session::SetBorderUnoccupied(bool borderUnoccupied)

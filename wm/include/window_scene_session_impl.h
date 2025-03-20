@@ -155,6 +155,7 @@ public:
      * PC Window
      */
     WMError SetWindowMask(const std::vector<std::vector<uint32_t>>& windowMask) override;
+    WMError SetFollowParentMultiScreenPolicy(bool enabled) override;
 
     /*
      * PC Window Layout
