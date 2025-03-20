@@ -2261,8 +2261,8 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
     if (systemConfig_.backgroundswitch == false || isAppSupportPhoneInPc) {
         TLOGI(WmsLogTag::WMS_MAIN, "Begin StartUIAbility: %{public}d system: %{public}u", persistentId,
             static_cast<uint32_t>(scnSession->GetSessionInfo().isSystem_));
-        errCode = StartUIAbilityBySCBTimeoutCheck(sceneSessionInfo,
-            static_cast<uint32_t>(WindowStateChangeReason::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(scnSessionInfo, isColdStart);
+        errCode = StartUIAbilityBySCBTimeoutCheck(scnSessionInfo,
+            static_cast<uint32_t>(WindowStateChangeReason::NORMAL), isColdStart);
     } else {
         TLOGI(WmsLogTag::WMS_MAIN, "Background switch on, isNewActive %{public}d state %{public}u",
             isNewActive, scnSession->GetSessionState());
@@ -2270,7 +2270,7 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
             scnSession->GetSessionState() == SessionState::STATE_END) {
             TLOGI(WmsLogTag::WMS_MAIN, "Call StartUIAbility: %{public}d system: %{public}u", persistentId,
                 static_cast<uint32_t>(scnSession->GetSessionInfo().isSystem_));
-            errCode = StartUIAbilityBySCBTimeoutCheck(sceneSessionInfo,
+            errCode = StartUIAbilityBySCBTimeoutCheck(scnSessionInfo,
                 static_cast<uint32_t>(WindowStateChangeReason::NORMAL), isColdStart);
         } else {
             TLOGI(WmsLogTag::WMS_MAIN, "NotifySessionForeground: %{public}d", persistentId);
