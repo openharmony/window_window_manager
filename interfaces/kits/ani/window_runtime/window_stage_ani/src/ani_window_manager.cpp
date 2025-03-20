@@ -35,7 +35,7 @@ ani_status AniWindowManager::AniWindowManagerInit(ani_env* env, ani_namespace wi
         return ret;
     }
     std::unique_ptr<AniWindowManager> aniWinManager = std::make_unique<AniWindowManager>();
-    ret = env->Function_Call_Void(setObjFunc, aniWinManager.get());
+    ret = env->Function_Call_Void(setObjFunc, aniWinManager.release());
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] find setNativeObj func fail %{public}u", ret);
         return ret;
@@ -57,12 +57,12 @@ ani_object AniWindowManager::OnGetLastWindow(ani_env* env, ani_object aniContext
     TLOGI(WmsLogTag::DEFAULT, "[ANI] nativeContextLong : %{public}p", contextPtr);
     auto context = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(contextPtr);
     if (context == nullptr) {
-        TLOGI(WmsLogTag::DEFAULT, "[ANI] context is nullptr");
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] context is nullptr");
         return AniWindowUtils::AniThrowError(env, WMError::WM_ERROR_NULLPTR, "Stage mode without context");
     }
     auto window = Window::GetTopWindowWithContext(context->lock());
     if (window == nullptr || window->GetWindowState() == WindowState::STATE_DESTROYED) {
-        TLOGI(WmsLogTag::DEFAULT, "[ANI] window is nullptr or destroyed");
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] window is nullptr or destroyed");
         return AniWindowUtils::AniThrowError(env, WMError::WM_ERROR_NULLPTR, "Get top window failed");
     }
     return CreateAniWindowObject(env, window);
