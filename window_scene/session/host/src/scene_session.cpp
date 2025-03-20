@@ -7085,41 +7085,6 @@ std::unordered_set<int32_t> SceneSession::GetFingerPointerDownStatusList() const
     return fingerPointerDownStatusList_;
 }
 
-void SceneSession::SetBehindWindowFilterEnabled(bool enabled)
-{
-    TLOGD(WmsLogTag::WMS_LAYOUT, "id: %{public}d, enabled: %{public}d", GetPersistentId(), enabled);
-    auto surfaceNode = GetSurfaceNode();
-    if (surfaceNode == nullptr) {
-        TLOGW(WmsLogTag::WMS_LAYOUT, "fail to get surfaceNode");
-        return;
-    }
-    auto rsTransaction = RSTransactionProxy::GetInstance();
-    if (rsTransaction != nullptr) {
-        TLOGD(WmsLogTag::WMS_LAYOUT, "begin rsTransaction");
-        rsTransaction->Begin();
-    }
-
-    if (behindWindowFilterEnabledModifier_ == nullptr) {
-        auto behindWindowFilterEnabledProperty = std::make_shared<RSProperty<bool>>(enabled);
-        behindWindowFilterEnabledModifier_ = std::make_shared<RSBehindWindowFilterEnabledModifier>(
-            behindWindowFilterEnabledProperty);
-        surfaceNode->AddModifier(behindWindowFilterEnabledModifier_);
-    } else {
-        auto behindWindowFilterEnabledProperty = std::static_pointer_cast<RSProperty<bool>>(
-            behindWindowFilterEnabledModifier_->GetProperty());
-        if (!behindWindowFilterEnabledProperty) {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "fail to get property");
-            return;
-        }
-        behindWindowFilterEnabledProperty->Set(enabled);
-    }
-
-    if (rsTransaction != nullptr) {
-        TLOGD(WmsLogTag::WMS_LAYOUT, "commit rsTransaction");
-        rsTransaction->Commit();
-    }
-}
-
 void SceneSession::UpdateAllModalUIExtensions(const WSRect& globalRect)
 {
     PostTask([weakThis = wptr(this), where = __func__, globalRect] {
