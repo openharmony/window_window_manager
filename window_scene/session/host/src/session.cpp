@@ -3572,6 +3572,18 @@ void Session::CreateWindowStateDetectTask(bool isAttach, WindowMode windowMode)
                     "attach:%{public}d, sessioniState:%{public}d, persistenId:%{public}d, bundleName:%{public}s",
                     isAttach, static_cast<uint32_t>(session->GetSessionState()),
                     session->GetPersistentId(), session->GetSessionInfo().bundleName_.c_str());
+
+                int32_t ret = HiSysEventWrite(
+                    HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
+                    "WINDOW_STATE_ATTACH_EXCEPTION",
+                    HiviewDFX::HiSysEvent::EventType::FAULT,
+                    "WINDOW_ID", session->GetPersistentId(),
+                    "BUNDLENAME", session->GetSessionInfo().bundleName_.c_str(),
+                    "ATTACH_STATE": isAttach,
+                    "SESSION_STATE": static_cast<uint32_t>(session->GetSessionState()));
+                if (ret != 0) {
+                    TLOGE(WmsLogTag::WMS_LIFE, "write HiSysEvent error, ret: %{public}d", ret);
+                }
             }
         }
         DetectTaskInfo detectTaskInfo;

@@ -447,6 +447,8 @@ private:
      */
     bool isColdStart_ = true;
     void NotifyFreeMultiWindowModeResume();
+    std::string TransferLifeCycleEventToString(LifeCycleEvent type) const;
+    void RecordLifeCycleExceptionEvent(LifeCycleEvent event, WMError erCode) const;
 };
 } // namespace Rosen
 } // namespace OHOS
