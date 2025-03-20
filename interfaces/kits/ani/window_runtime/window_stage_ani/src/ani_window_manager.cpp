@@ -57,12 +57,12 @@ ani_object AniWindowManager::OnGetLastWindow(ani_env* env, ani_object aniContext
     TLOGI(WmsLogTag::DEFAULT, "[ANI] nativeContextLong : %{public}p", contextPtr);
     auto context = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(contextPtr);
     if (context == nullptr) {
-        TLOGI(WmsLogTag::DEFAULT, "[ANI] context is nullptr");
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] context is nullptr");
         return AniWindowUtils::AniThrowError(env, WMError::WM_ERROR_NULLPTR, "Stage mode without context");
     }
     auto window = Window::GetTopWindowWithContext(context->lock());
     if (window == nullptr || window->GetWindowState() == WindowState::STATE_DESTROYED) {
-        TLOGI(WmsLogTag::DEFAULT, "[ANI] window is nullptr or destroyed");
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] window is nullptr or destroyed");
         return AniWindowUtils::AniThrowError(env, WMError::WM_ERROR_NULLPTR, "Get top window failed");
     }
     return CreateAniWindowObject(env, window);
