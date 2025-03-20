@@ -35,7 +35,7 @@ ani_status AniWindowManager::AniWindowManagerInit(ani_env* env, ani_namespace wi
         return ret;
     }
     std::unique_ptr<AniWindowManager> aniWinManager = std::make_unique<AniWindowManager>();
-    ret = env->Function_Call_Void(setObjFunc, aniWinManager.get());
+    ret = env->Function_Call_Void(setObjFunc, aniWinManager.release());
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] find setNativeObj func fail %{public}u", ret);
         return ret;
