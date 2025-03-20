@@ -1129,16 +1129,17 @@ export interface WindowLimits {
 
 export class WindowStageInternal implements WindowStage {
     static { loadLibrary('windowstageani_kit.z') }
+
+    private nativeObj : long;
     setNativeObj(nativeObj: long):void {
         this.nativeObj = nativeObj;
     }
-
-    private nativeObj : long;
 
     public native loadContent(nativeObj:long, path: String): int;
     public native disableWindowDecorSync(nativeObj:long): void;
     public native setShowOnLockScreenSync(nativeObj:long, showOnLockScreen: boolean): void;
     public native getMainWindowSync(nativeObj: long): Window;
+
     public loadContent(path: string, callback: AsyncCallback<void>): void {
         // uicontent not support taskpool, must use ui thread
         let ret = this.loadContent(this.nativeObj, String(path));
@@ -1152,12 +1153,15 @@ export class WindowStageInternal implements WindowStage {
         }
         callback({code: WmErrorCode_WM_OK, message: ""} as BusinessError, undefined);
     }
+
     public loadContentByName(name: string, callback: AsyncCallbackVoid): void {
         let ret = this.loadContent(this.nativeObj, name);
     }
+  
     public disableWindowDecor(): void {
         this.disableWindowDecorSync(this.nativeObj);
     }
+
     public setShowOnLockScreen(showOnLockScreen: boolean): void {
         this.setShowOnLockScreenSync(this.nativeObj, showOnLockScreen);
     }
@@ -1478,68 +1482,62 @@ export class WindowInternal implements Window {
 
     public setUIContent(path: string): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
-        taskpool.execute((): void => {
+        try {
           this.setUIContentSync(this.nativeObj, path);
-        }).then((ret: NullishType) => {
           resolve(undefined);
-        }).catch((err: NullishType) => {
+        } catch (err: Error) {
           reject(err as BusinessError);
-        });
+        }
       });
     }
 
     public setUIContent(path: string, callback: AsyncCallback<void>): void {
-      taskpool.execute((): void => {
+      try {
         this.setUIContentSync(this.nativeObj, path);
-      }).then((ret: NullishType) => {
         callback(new BusinessError(), undefined);
-      }).catch((err: NullishType) => {
+      } catch (err: Error) {
         callback(err as BusinessError, undefined);
-      });
+      }
     }
 
     public loadContent(path: string, storage: LocalStorage): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
-        taskpool.execute((): void => {
+        try {
           this.loadContentSync(this.nativeObj, path, storage);
-        }).then((ret: NullishType) => {
           resolve(undefined);
-        }).catch((err: NullishType) => {
+        } catch (err: Error) {
           reject(err as BusinessError);
-        });
+        }
       });
     }
 
     public loadContent(path: string, storage: LocalStorage, callback: AsyncCallback<void>): void {
-      taskpool.execute((): void => {
+      try {
         this.loadContentSync(this.nativeObj, path, storage);
-      }).then((ret: NullishType) => {
         callback(new BusinessError(), undefined);
-      }).catch((err: NullishType) => {
+      } catch (err: Error) {
         callback(err as BusinessError, undefined);
-      });
+      }
     }
 
     public loadContent(path: string): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
-        taskpool.execute((): void => {
+        try {
           this.loadContentSync(this.nativeObj, path);
-        }).then((ret: NullishType) => {
           resolve(undefined);
-        }).catch((err: NullishType) => {
+        } catch (err: Error) {
           reject(err as BusinessError);
-        });
+        }
       });
     }
 
     public loadContent(path: string, callback: AsyncCallback<void>): void {
-      taskpool.execute((): void => {
+      try {
         this.loadContentSync(this.nativeObj, path);
-      }).then((ret: NullishType) => {
         callback(new BusinessError(), undefined);
-      }).catch((err: NullishType) => {
+      } catch (err: Error) {
         callback(err as BusinessError, undefined);
-      });
+      }
     }
 
     public setWindowKeepScreenOn(isKeepScreenOn: boolean): Promise<void> {
