@@ -9939,7 +9939,7 @@ void SceneSessionManager::GetKeyboardOccupiedAreaWithRotation(
     }
 
     std::pair<bool, WSRect> keyboardOccupiedArea = {true, {0, 0, 0, 0}};
-    const KeyboardLayoutParams keyboardLayoutParams = keyboardSession->GetSessionProperty()->GetKeyboardLayoutParams();
+    const KeyboardLayoutParams& keyboardLayoutParams = keyboardSession->GetSessionProperty()->GetKeyboardLayoutParams();
     Rect nextRect;
     if (rotation == 0 || rotation == 180 || rotation == 360) {
         nextRect = keyboardLayoutParams.PortraitPanelRect_;
@@ -9958,9 +9958,8 @@ void SceneSessionManager::GetKeyboardOccupiedAreaWithRotation(
         keyboardLayoutParams.gravity_ == WindowGravity::WINDOW_GRAVITY_FLOAT) {
         keyboardOccupiedArea.first = false;
     }
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "next keyboardOccupiedArea: [%{public}d, posX: %{public}d, poxY: %{public}d, "
-        "width: %{public}d, height: %{public}d]", keyboardOccupiedArea.first, keyboardOccupiedArea.second.posX_,
-        keyboardOccupiedArea.second.posY_, keyboardOccupiedArea.second.width_, keyboardOccupiedArea.second.height_);
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "next keyboardOccupiedArea: [%{public}d, %{public}s]", keyboardOccupiedArea.first,
+        keyboardOccupiedArea.second.ToString().c_str());
     avoidAreas.emplace_back(keyboardOccupiedArea);
 }
 
