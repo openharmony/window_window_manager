@@ -57,6 +57,7 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsSceneSessionManager" };
 constexpr int MIN_ARG_COUNT = 3;
 constexpr int DEFAULT_ARG_COUNT = 4;
+constexpr int ARG_COUNT_FIVE = 5;
 constexpr int ARG_INDEX_ZERO = 0;
 constexpr int ARG_INDEX_ONE = 1;
 constexpr int ARG_INDEX_TWO = 2;
@@ -2944,8 +2945,8 @@ napi_value JsSceneSessionManager::OnUpdateMaximizeMode(napi_env env, napi_callba
 
 napi_value JsSceneSessionManager::OnUpdateSessionDisplayId(napi_env env, napi_callback_info info)
 {
-    size_t argc = 5;
-    napi_value argv[5] = {nullptr};
+    size_t argc = ARG_COUNT_FIVE;
+    napi_value argv[ARG_COUNT_FIVE] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_TWO) {
         WLOGFE("Argc is invalid: %{public}zu", argc);
@@ -2969,13 +2970,10 @@ napi_value JsSceneSessionManager::OnUpdateSessionDisplayId(napi_env env, napi_ca
     }
 
     WSRect winRect = { 0, 0, 0, 0 };
-    if (!ConvertRectInfoFromJs(env, argv[ARG_INDEX_TWO], winRect)) {
-        WLOGFE("[NAPI]Failed to convert parameter to winRect");
-    }
-    if (winRect.IsEmpty()) {
-        SceneSessionManager::GetInstance().UpdateSessionDisplayId(persistentId, screenId);
-    } else {
+    if (ConvertRectInfoFromJs(env, argv[ARG_INDEX_TWO], winRect) && !winRect.IsEmpty()) {
         SceneSessionManager::GetInstance().UpdateSessionDisplayId(persistentId, screenId, winRect);
+    } else {
+        SceneSessionManager::GetInstance().UpdateSessionDisplayId(persistentId, screenId);
     }
     return NapiGetUndefined(env);
 }
