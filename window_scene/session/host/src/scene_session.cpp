@@ -7582,12 +7582,12 @@ void SceneSession::CalcNewClientRectForSuperFold(WSRect& rect)
 {
     auto currScreenFoldStatus = PcFoldScreenManager::GetInstance().GetScreenFoldStatus();
     if (currScreenFoldStatus == SuperFoldStatus::HALF_FOLDED) {
-        sptr<FoldCreaseRegion> creaseRegion = DisplayManager::GetInstance().GetCurrentFoldCreaseRegion();
-        if (creaseRegion != nullptr) {
-            std::vector<DMRect> creaseRects = creaseRegion->GetCreaseRects();
-            if (creaseRects.size() > 0 && winRect_.posY_ >= creaseRects[0].posY_ + creaseRects[0].height_) {
-                rect.posY_ = winRect_.posY_ - creaseRects[0].posY_ - creaseRects[0].height_;
-            }
+        WSRect creaseRect = GetCreaseRegion(CreaseRegionName::FIRST_CREASE_REGION);
+        if (creaseRect.IsEmpty()) {
+            return;
+        }
+        if (winRect_.posY_ >= creaseRect.posY_ + creaseRect.height_) {
+            rect.posY_ = winRect_.posY_ - creaseRect.posY_ - creaseRect.height_;
         }
     }
 }
@@ -7596,17 +7596,17 @@ void SceneSession::UpdateSuperFoldThredshold(int32_t& topThreshold, int32_t& bot
 {
     auto currScreenFoldStatus = PcFoldScreenManager::GetInstance().GetScreenFoldStatus();
     if (currScreenFoldStatus == SuperFoldStatus::HALF_FOLDED) {
-        sptr<FoldCreaseRegion> creaseRegion = DisplayManager::GetInstance().GetCurrentFoldCreaseRegion();
-        if (creaseRegion != nullptr) {
-            std::vector<DMRect> creaseRects = creaseRegion->GetCreaseRects();
-            if (creaseRects.size() > 0 && winRect_.posY_ >= creaseRects[0].posY_ + creaseRects[0].height_) {
-                int32_t dockHeight = GetDockHeight();
-                topThreshold = creaseRects[0].posY_ + creaseRects[0].height_;
-                bottomThreshold = static_cast<int32_t>(creaseRects[0].posY_ + creaseRects[0].height_ +
-                    availableArea.height_ - dockHeight);
-                TLOGW(WmsLogTag::WMS_LAYOUT_PC, "topThreshold: %{public}d, bottomThreshold: %{public}d "
-                    "Id: %{public}u", topThreshold, bottomThreshold, GetPersistentId());
-            }
+        WSRect creaseRect = GetCreaseRegion(CreaseRegionName::FIRST_CREASE_REGION);
+        if (creaseRect.IsEmpty()) {
+            return;
+        }
+        if (winRect_.posY_ >= creaseRect.posY_ + creaseRect.height_) {
+            int32_t dockHeight = GetDockHeight();
+            topThreshold = creaseRect.posY_ + creaseRect.height_;
+            bottomThreshold = static_cast<int32_t>(creaseRect.posY_ + creaseRect.height_ +
+                availableArea.height_ - dockHeight);
+            TLOGW(WmsLogTag::WMS_LAYOUT_PC, "topThreshold: %{public}d, bottomThreshold: %{public}d "
+                "Id: %{public}u", topThreshold, bottomThreshold, GetPersistentId());
         }
     }
 }
@@ -7617,6 +7617,22 @@ void SceneSession::SetWindowRect(int32_t posX, int32_t posY, uint32_t width, uin
     winRect_.posY_ = posY;
     winRect_.width_ = width;
     winRect_.height_ = height;
+}
+
+WSRect SceneSession::GetCreaseRegion(CreaseRegionName regionName)
+{
+    sptr<FoldCreaseRegion> creaseRegion = DisplayManager::GetInstance().GetCurrentFoldCreaseRegion();
+    if (creaseRegion != nullptr) {
+        std::vector<DMRect> creaseRects = creaseRegion->GetCreaseRects();
+        uint8_t index = static_cast<uint8_t>(regionName);
+        if (creaseRects.size() > index) {
+            return { creaseRects[index].posX_, creaseRects[index].posY_,
+                creaseRects[index].width_, creaseRects[index].height_ };
+        } else {
+            TLOGW(WmsLogTag::WMS_LAYOUT_PC, "creaseRegion %{public}u is empty", index);
+        }
+    }
+    return { 0, 0, 0, 0 };
 }
 
 void SceneSession::NotifyUpdateFlagCallback(NotifyUpdateFlagFunc&& func)

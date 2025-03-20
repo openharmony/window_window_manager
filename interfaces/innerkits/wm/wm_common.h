@@ -595,6 +595,14 @@ enum class GestureBackType : uint8_t {
 };
 
 /**
+ * @brief Crease Region Name
+ */
+ enum class CreaseRegionName : uint8_t {
+    FIRST_CREASE_REGION = 0,
+    SECOND_CREASE_REGION = 1,
+};
+
+/**
  * @struct PointInfo.
  *
  * @brief point Info.
