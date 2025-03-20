@@ -1486,6 +1486,9 @@ CrossAxisState WindowExtensionSessionImpl::GetCrossAxisState()
 WMError WindowExtensionSessionImpl::OnWaterfallModeChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)
 {
     bool isWaterfallMode = data.GetBoolParam(Extension::WATERFALL_MODE_FIELD, false);
+    if (isWaterfallMode == isFullScreenWaterfallMode_) {
+        return WMError::WM_OK;
+    }
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "prev: %{public}d, curr: %{public}d, winId: %{public}u",
         isFullScreenWaterfallMode_.load(), isWaterfallMode, GetWindowId());
     isFullScreenWaterfallMode_.store(isWaterfallMode);
@@ -1501,6 +1504,20 @@ WMError WindowExtensionSessionImpl::OnWaterfallModeChange(AAFwk::Want&& data, st
             listener->OnWaterfallModeChange(isWaterfallMode);
         }
     }
+    return WMError::WM_OK;
+}
+
+WMError WindowExtensionSessionImpl::OnResyncExtensionConfig(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)
+{
+    const auto& configParam = data.GetParams().GetWantParams(Extension::UIEXTENSION_CONFIG_FIELD);
+    AAFwk::Want axisWant;
+    axisWant.SetParam(Extension::CROSS_AXIS_FIELD,
+        static_cast<int32_t>(configParam.GetIntParam(Extension::CROSS_AXIS_FIELD, 0)));
+    OnCrossAxisStateChange(std::move(axisWant), reply);
+    AAFwk::Want waterfallWant;
+    waterfallWant.SetParam(Extension::WATERFALL_MODE_FIELD,
+        static_cast<bool>(configParam.GetIntParam(Extension::WATERFALL_MODE_FIELD, 0)));
+    OnWaterfallModeChange(std::move(waterfallWant), reply);
     return WMError::WM_OK;
 }
 
@@ -1535,6 +1552,9 @@ void WindowExtensionSessionImpl::RegisterDataConsumer()
         this, std::placeholders::_1, std::placeholders::_2));
     RegisterConsumer(Extension::Businesscode::SYNC_HOST_WATERFALL_MODE,
         std::bind(&WindowExtensionSessionImpl::OnWaterfallModeChange,
+        this, std::placeholders::_1, std::placeholders::_2));
+    RegisterConsumer(Extension::Businesscode::SYNC_WANT_PARAMS,
+        std::bind(&WindowExtensionSessionImpl::OnResyncExtensionConfig,
         this, std::placeholders::_1, std::placeholders::_2));
 
     auto consumersEntry = [weakThis = wptr(this)](SubSystemId id, uint32_t customId, AAFwk::Want&& data,
