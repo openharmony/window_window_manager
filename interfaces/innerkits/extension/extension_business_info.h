@@ -28,6 +28,7 @@ enum class Businesscode : uint8_t {
     SYNC_HOST_WINDOW_MODE = 0,  // Synchronize the host's window mode
     SYNC_CROSS_AXIS_STATE,
     SYNC_HOST_WATERFALL_MODE,
+    SYNC_WANT_PARAMS,
 };
 }  // namespace OHOS::Rosen::Extension
 
