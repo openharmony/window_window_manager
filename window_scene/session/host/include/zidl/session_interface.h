@@ -345,7 +345,7 @@ public:
      * @param enabled Indicates the {@link bool}
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
-    virtual WSError NotifyMainFollowParentMultiScreenPolicy(bool enabled) { return WSError::WS_OK; }
+    virtual WSError NotifyFollowParentMultiScreenPolicy(bool enabled) { return WSError::WS_OK; }
 
     /**
      * @brief Callback for setting to automatically save the window rect.

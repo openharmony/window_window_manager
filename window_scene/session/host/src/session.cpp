@@ -1118,7 +1118,7 @@ WSError Session::UpdateRectWithLayoutInfo(const WSRect& rect, SizeChangeReason r
         SceneAnimationConfig config { .rsTransaction_ = rsTransaction, .animationDuration_ = rotateAnimationDuration };
         WSRect updatedRect = rect;
         UpdateClientRectPosYAndDisplayId(updatedRect);
-        UpdateRect =
+        updatedRect =
             IsNeedConvertToRelativeRect(reason) ? ConvertGlobalRectToRelative(updatedRect, GetDisplayId()) : updateRect;
         sessionStage_->UpdateRect(updatedRect, reason, config, avoidAreas);
         SetClientRect(rect);
@@ -3148,7 +3148,7 @@ WSRect Session::GetLayoutRect() const
     return layoutRect_;
 }
 
-vid Session::SetOriginDisplayId(DisplayId displayId)
+void Session::SetOriginDisplayId(DisplayId displayId)
 {
     originDisplayId_ = displayId;
 }
