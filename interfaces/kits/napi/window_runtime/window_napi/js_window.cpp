@@ -4945,34 +4945,34 @@ napi_value JsWindow::OnSetTransparent(napi_env env, napi_callback_info info)
         }
     }
 
-    wptr<Window> weakToken(windowToken_);
-    NapiAsyncTask::CompleteCallback complete =
-        [weakToken, isTransparent, errCode](napi_env env, NapiAsyncTask& task, int32_t status) {
-            auto weakWindow = weakToken.promote();
-            if (weakWindow == nullptr) {
-                WLOGFE("window is nullptr");
-                task.Reject(env, JsErrUtils::CreateJsError(env, WMError::WM_ERROR_NULLPTR));
-                return;
-            }
-            if (errCode != WMError::WM_OK) {
-                task.Reject(env, JsErrUtils::CreateJsError(env, errCode, "Invalidate params."));
-                return;
-            }
-            WMError ret = weakWindow->SetTransparent(isTransparent);
-            if (ret == WMError::WM_OK) {
-                task.Resolve(env, NapiGetUndefined(env));
-            } else {
-                task.Reject(env, JsErrUtils::CreateJsError(env, ret, "Window set transparent failed"));
-            }
-            WLOGI("Window [%{public}u, %{public}s] set transparent end",
-                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
-        };
-
     napi_value lastParam = (argc <= 1) ? nullptr :
         (GetType(env, argv[1]) == napi_function ? argv[1] : nullptr);
     napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JsWindow::OnSetTransparent",
-        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
+    auto asyncTask = [env, task = napiAsyncTask, weakToken = wptr<Window>(windowToken_), isTransparent, errCode] {
+        auto weakWindow = weakToken.promote();
+        if (weakWindow == nullptr) {
+            WLOGFE("window is nullptr");
+            task->Reject(env, JsErrUtils::CreateJsError(env, WMError::WM_ERROR_NULLPTR));
+            return;
+        }
+        if (errCode != WMError::WM_OK) {
+            task->Reject(env, JsErrUtils::CreateJsError(env, errCode, "Invalidate params."));
+            return;
+        }
+        WMError ret = weakWindow->SetTransparent(isTransparent);
+        if (ret == WMError::WM_OK) {
+            task->Resolve(env, NapiGetUndefined(env));
+        } else {
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "Window set transparent failed"));
+        }
+        WLOGI("Window [%{public}u, %{public}s] set transparent end",
+            weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+        napiAsyncTask->Reject(env,
+            JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
+    }
     return result;
 }
 
