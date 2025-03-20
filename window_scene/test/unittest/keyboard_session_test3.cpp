@@ -246,6 +246,15 @@ HWTEST_F(KeyboardSessionTest3, UpdateKeyboardAvoidArea02, Function | SmallTest |
         "UpdateKeyboardAvoidArea02");
     ASSERT_NE(keyboardSession, nullptr);
 
+    // not foreground
+    keyboardSession->dirtyFlags_ = 0;
+    keyboardSession->state_ = SessionState::STATE_CONNECT;
+    keyboardSession->isVisible_ = true;
+    keyboardSession->UpdateKeyboardAvoidArea();
+    ASSERT_EQ(keyboardSession->dirtyFlags_, 0);
+
+    keyboardSession->state_ = SessionState::STATE_FOREGROUND;
+    keyboardSession->isVisible_ = true;
     auto expectDirtyFlag = 0;
     auto isScbCoreEnabled = Session::IsScbCoreEnabled();
     Session::SetScbCoreEnabled(false);
