@@ -2036,6 +2036,7 @@ sptr<ScreenSession> ScreenSessionManager::CreatePhysicalMirrorSessionInner(Scree
         screenSession->SetIsExtend(true);
         screenSession->SetName("CastEngine");
         screenSession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
+        screenSession->SetVirtualScreenFlag(VirtualScreenFlag::CAST);
     }
     GetAndMergeEdidInfo(screenSession);
     screenSession->SetMirrorScreenType(MirrorScreenType::PHYSICAL_MIRROR);
