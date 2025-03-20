@@ -901,7 +901,7 @@ private:
      */
     void HandleMoveDragSurfaceNode(SizeChangeReason reason);
     void OnMoveDragCallback(SizeChangeReason reason);
-    bool IsDragResizeWhenEnd(SizeChangeReason reason);
+    bool DragResizeWhenEndFilter(SizeChangeReason reason);
     void InitializeCrossMoveDrag();
     WSError InitializeMoveInputBar();
     void HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect, SizeChangeReason reason);
