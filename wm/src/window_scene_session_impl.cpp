@@ -21,6 +21,7 @@
 #include <parameters.h>
 #include <transaction/rs_transaction.h>
 #include <hitrace_meter.h>
+#include <hisysevent.h>
 
 #include <application_context.h>
 #include "color_parser.h"
@@ -480,6 +481,52 @@ WMError WindowSceneSessionImpl::RecoverAndReconnectSceneSession()
     return static_cast<WMError>(ret);
 }
 
+std::string WindowSceneSessionImpl::TransferLifeCycleEventToString(LifeCycleEvent type) const
+{
+    std::string event;
+    switch (type) {
+        case LifeCycleEvent::CREATE_EVENT:
+            event = "CREATE";
+            break;
+        case LifeCycleEvent::SHOW_EVENT:
+            event = "SHOW";
+            break;
+        case LifeCycleEvent::HIDE_EVENT:
+            event = "HIDE";
+            break;
+        case LifeCycleEvent::DESTROY_EVENT:
+            event = "DESTROY";
+            break;
+        default:
+            event = "UNDEFINE";
+            break;
+    }
+    return event;
+}
+
+void WindowSceneSessionImpl::RecordLifeCycleExceptionEvent(LifeCycleEvent event, WMError errCode) const
+{
+    if (!(errCode > WMError::WM_ERROR_NEED_REPORT_BASE && errCode < WMError::WM_ERROR_PIP_REPEAT_OPERATION)) {
+        return;
+    }
+    std::ostringstream oss;
+    oss << "life cycle is abnormal: " << "window_name: " << GetWindowName().c_str()
+        << ", id:" << GetWindowId() << ", event: " << TransferLifeCycleEventToString(event)
+        << ", errCode: " << static_cast<int32_t>(errCode) << ";";
+    std::string info = oss.str();
+    WLOGI("window life cycle exception: %{public}s", info.c_str());
+    int32_t ret = HiSysEventWrite(
+        OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
+        "WINDOW_LIFE_CYCLE_EXCEPTION",
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
+        "PID", getpid(),
+        "UID", getuid(),
+        "MSG", info);
+    if (ret != 0) {
+        WLOGFE("Write HiSysEvent error, ret:%{public}d", ret);
+    }
+}
+
 void WindowSceneSessionImpl::UpdateWindowState()
 {
     {
@@ -573,6 +620,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
             return WMError::WM_ERROR_INVALID_CALLING;
         }
         ret = CreateAndConnectSpecificSession();
+        RecordLifeCycleExceptionEvent(LifeCycleEvent::CREATE_EVENT, ret);
     }
     if (ret == WMError::WM_OK) {
         MakeSubOrDialogWindowDragableAndMoveble();
@@ -1315,6 +1363,7 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool w
     } else {
         ret = WMError::WM_ERROR_INVALID_WINDOW;
     }
+    RecordLifeCycleExceptionEvent(LifeCycleEvent::SHOW_EVENT, ret);
     if (ret == WMError::WM_OK) {
         // update sub window state
         UpdateSubWindowStateAndNotify(GetPersistentId(), WindowState::STATE_SHOWN);
@@ -1420,7 +1469,7 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
     } else {
         res = WMError::WM_ERROR_INVALID_WINDOW;
     }
-
+    RecordLifeCycleExceptionEvent(LifeCycleEvent::HIDE_EVENT, ret);
     if (res == WMError::WM_OK) {
         // update sub window state if this is main window
         UpdateSubWindowState(type);
@@ -1618,6 +1667,7 @@ WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearLis
     SingletonContainer::Get<WindowAdapter>().UnregisterSessionRecoverCallbackFunc(property_->GetPersistentId());
 
     auto ret = DestroyInner(needNotifyServer);
+    RecordLifeCycleExceptionEvent(LifeCycleEvent::DESTROY_EVENT, ret);
     if (ret != WMError::WM_OK && ret != WMError::WM_ERROR_NULLPTR) { // nullptr means no session in server
         WLOGFW("Destroy window failed, id: %{public}d", GetPersistentId());
         return ret;
