@@ -3541,8 +3541,10 @@ void ScreenSessionManager::NotifyAndPublishEvent(sptr<DisplayInfo> displayInfo, 
         TLOGE(WmsLogTag::DMS, "error, displayInfo or screenSession is nullptr");
         return;
     }
-    NotifyDisplayChanged(displayInfo, DisplayChangeEvent::UPDATE_ROTATION);
-    NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::UPDATE_ROTATION);
+    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        NotifyDisplayChanged(displayInfo, DisplayChangeEvent::UPDATE_ROTATION);
+        NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::UPDATE_ROTATION);
+    }
     UpdateDisplayScaleState(screenId);
     std::map<DisplayId, sptr<DisplayInfo>> emptyMap;
     NotifyDisplayStateChange(GetDefaultScreenId(), screenSession->ConvertToDisplayInfo(),
@@ -6253,7 +6255,7 @@ void ScreenSessionManager::SetDisplayScaleInner(ScreenId screenId, const float& 
     } else {
         CalcDisplayNodeTranslateOnRotation(session, scaleX, scaleY, pivotX, pivotY, translateX, translateY);
     }
-    TLOGD(WmsLogTag::DMS,
+    TLOGW(WmsLogTag::DMS,
           "screenId %{public}" PRIu64 ", scale [%{public}f, %{public}f], "
           "pivot [%{public}f, %{public}f], translate [%{public}f, %{public}f]",
           screenId, scaleX, scaleY, pivotX, pivotY, translateX, translateY);
@@ -7586,6 +7588,8 @@ void ScreenSessionManager::UpdateSuperFoldAvailableArea(ScreenId screenId, DMRec
     }
     if (screenSession->UpdateAvailableArea(bArea)) {
         NotifyAvailableAreaChanged(bArea, screenId);
+        NotifyDisplayChanged(screenSession->ConvertToDisplayInfo(),
+            DisplayChangeEvent::SUPER_FOLD_AVAILABLE_AREA_UPDATE);
     }
     if (!screenSession->GetIsFakeInUse()) {
         TLOGE(WmsLogTag::DMS, "fake screen session is not in use");
@@ -7598,6 +7602,8 @@ void ScreenSessionManager::UpdateSuperFoldAvailableArea(ScreenId screenId, DMRec
     }
     if (fakeScreenSession->UpdateAvailableArea(cArea) && cArea.width_ > 0) {
         NotifyAvailableAreaChanged(cArea, fakeScreenSession->GetScreenId());
+        NotifyDisplayChanged(fakeScreenSession->ConvertToDisplayInfo(),
+            DisplayChangeEvent::SUPER_FOLD_AVAILABLE_AREA_UPDATE);
     }
 }
 

@@ -769,7 +769,7 @@ void ScreenSessionManagerClient::UpdateDisplayScale(ScreenId id, float scaleX, f
         TLOGE(WmsLogTag::DMS, "displayNode is null");
         return;
     }
-    TLOGD(WmsLogTag::DMS, "scale [%{public}f, %{public}f] translate [%{public}f, %{public}f]", scaleX, scaleY,
+    TLOGW(WmsLogTag::DMS, "scale [%{public}f, %{public}f] translate [%{public}f, %{public}f]", scaleX, scaleY,
           translateX, translateY);
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
                       "ssmc:UpdateDisplayScale(ScreenId = %" PRIu64
