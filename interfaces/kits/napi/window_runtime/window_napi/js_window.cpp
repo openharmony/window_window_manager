@@ -6924,10 +6924,10 @@ napi_value JsWindow::OnSetFollowParentMultiScreenPolicy(napi_env env, napi_callb
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
     const char* const where = __func__;
-    auto asyncTask = [where, weakWindow = wptr<Window>(windowToken_), isModal, modalityType, env, task = napiAsyncTask] {
+    auto asyncTask = [where, weakWindow = wptr<Window>(windowToken_), isModal, enabled, env, task = napiAsyncTask] {
         auto window = weakWindow.promote();
         if (window == nullptr) {
-            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s failed, window is nullptr", where);
+            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s failed, window is null", where);
             task->Reject(env, JsErrUtils::CreateJsError(env,
                 WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "window is null"));
             return;
@@ -8261,7 +8261,7 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "getWindowDecorVisible", moduleName, JsWindow::GetWindowDecorVisible);
     BindNativeFunction(env, object, "setWindowTitleMoveEnabled", moduleName, JsWindow::SetWindowTitleMoveEnabled);
     BindNativeFunction(env, object, "setSubWindowModal", moduleName, JsWindow::SetSubWindowModal);
-    BindNativeFunction(env, object, "SetFollowParentMultiScreenPolicy",
+    BindNativeFunction(env, object, "setFollowParentMultiScreenPolicy",
         moduleName, JsWindow::SetFollowParentMultiScreenPolicy);
     BindNativeFunction(env, object, "enableDrag", moduleName, JsWindow::EnableDrag);
     BindNativeFunction(env, object, "setWindowDecorHeight", moduleName, JsWindow::SetWindowDecorHeight);
