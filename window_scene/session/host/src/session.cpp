@@ -1119,7 +1119,7 @@ WSError Session::UpdateRectWithLayoutInfo(const WSRect& rect, SizeChangeReason r
         WSRect updatedRect = rect;
         UpdateClientRectPosYAndDisplayId(updatedRect);
         updatedRect =
-            IsNeedConvertToRelativeRect(reason) ? ConvertGlobalRectToRelative(updatedRect, GetDisplayId()) : updateRect;
+            IsNeedConvertToRelativeRect(reason) ? ConvertGlobalRectToRelative(updatedRect, GetDisplayId()) : updatedRect;
         sessionStage_->UpdateRect(updatedRect, reason, config, avoidAreas);
         SetClientRect(rect);
         RectCheckProcess();
