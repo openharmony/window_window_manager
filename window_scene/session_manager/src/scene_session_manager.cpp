@@ -2476,7 +2476,7 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
             isPcAppInpad = property->GetIsPcAppInPad();
             isAppSupportPhoneInPc = property->GetIsAppSupportPhoneInPc();
         }
-        if ((systemConfig_.backgroundswitch && !isAppSupportPhoneInPc) || isPcAppInpad) {
+        if ((systemConfig_.backgroundswitch && !isAppSupportPhoneInPc) || (isPcAppInpad && !IsScreenLocked())) {
             TLOGI(WmsLogTag::WMS_MAIN, "NotifySessionBackground: %{public}d", persistentId);
             scnSession->NotifySessionBackground(1, true, true);
         } else {
