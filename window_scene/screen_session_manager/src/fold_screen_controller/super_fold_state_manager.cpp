@@ -44,6 +44,7 @@ static bool isHalfFolded_ = false;
 static bool isKeyboardOn_ = false;
 const std::string BOOTEVENT_BOOT_COMPLETED = "bootevent.boot.completed";
 static sptr<FoldCreaseRegion> currentSuperFoldCreaseRegion_ = nullptr;
+static bool isSystemKeyboardOn_ = false;
 }
 
 void SuperFoldStateManager::DoAngleChangeFolded(SuperFoldStatusChangeEvents event)
@@ -480,7 +481,13 @@ void SuperFoldStateManager::SetSystemKeyboardStatus(bool isOn)
 {
     SuperFoldStatusChangeEvents events = isOn ? SuperFoldStatusChangeEvents::SYSTEM_KEYBOARD_ON
         : SuperFoldStatusChangeEvents::SYSTEM_KEYBOARD_OFF;
+    isSystemKeyboardOn_ = isOn;
     HandleDisplayNotify(events);
+}
+
+bool SuperFoldStateManager::GetSystemKeyboardStatus()
+{
+    return isSystemKeyboardOn_;
 }
 
 void SuperFoldStateManager::HandleSystemKeyboardStatusDisplayNotify(
