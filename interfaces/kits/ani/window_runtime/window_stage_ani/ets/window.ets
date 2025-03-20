@@ -1482,68 +1482,62 @@ export class WindowInternal implements Window {
 
     public setUIContent(path: string): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
-        taskpool.execute((): void => {
+        try {
           this.setUIContentSync(this.nativeObj, path);
-        }).then((ret: NullishType) => {
           resolve(undefined);
-        }).catch((err: NullishType) => {
+        } catch (err: Error) {
           reject(err as BusinessError);
-        });
+        }
       });
     }
 
     public setUIContent(path: string, callback: AsyncCallback<void>): void {
-      taskpool.execute((): void => {
+      try {
         this.setUIContentSync(this.nativeObj, path);
-      }).then((ret: NullishType) => {
         callback(new BusinessError(), undefined);
-      }).catch((err: NullishType) => {
+      } catch (err: Error) {
         callback(err as BusinessError, undefined);
-      });
+      }
     }
 
     public loadContent(path: string, storage: LocalStorage): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
-        taskpool.execute((): void => {
+        try {
           this.loadContentSync(this.nativeObj, path, storage);
-        }).then((ret: NullishType) => {
           resolve(undefined);
-        }).catch((err: NullishType) => {
+        } catch (err: Error) {
           reject(err as BusinessError);
-        });
+        }
       });
     }
 
     public loadContent(path: string, storage: LocalStorage, callback: AsyncCallback<void>): void {
-      taskpool.execute((): void => {
+      try {
         this.loadContentSync(this.nativeObj, path, storage);
-      }).then((ret: NullishType) => {
         callback(new BusinessError(), undefined);
-      }).catch((err: NullishType) => {
+      } catch (err: Error) {
         callback(err as BusinessError, undefined);
-      });
+      }
     }
 
     public loadContent(path: string): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
-        taskpool.execute((): void => {
+        try {
           this.loadContentSync(this.nativeObj, path);
-        }).then((ret: NullishType) => {
           resolve(undefined);
-        }).catch((err: NullishType) => {
+        } catch (err: Error) {
           reject(err as BusinessError);
-        });
+        }
       });
     }
 
     public loadContent(path: string, callback: AsyncCallback<void>): void {
-      taskpool.execute((): void => {
+      try {
         this.loadContentSync(this.nativeObj, path);
-      }).then((ret: NullishType) => {
         callback(new BusinessError(), undefined);
-      }).catch((err: NullishType) => {
+      } catch (err: Error) {
         callback(err as BusinessError, undefined);
-      });
+      }
     }
 
     public setWindowKeepScreenOn(isKeepScreenOn: boolean): Promise<void> {
