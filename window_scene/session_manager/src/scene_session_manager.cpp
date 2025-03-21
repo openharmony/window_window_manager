@@ -64,6 +64,7 @@
 #include "softbus_bus_center.h"
 #include "perform_reporter.h"
 #include "dms_reporter.h"
+#include "rdb/starting_window_rdb_manager.h"
 #include "res_sched_client.h"
 #include "anomaly_detection.h"
 #include "session/host/include/ability_info_manager.h"
