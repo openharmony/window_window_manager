@@ -1888,7 +1888,7 @@ WSError SessionStageProxy::SetCurrentRotation(int32_t currentRotation)
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
+    MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::WMS_ROTATION, "WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
