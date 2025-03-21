@@ -37,6 +37,7 @@ const char* KEYBOARD_ON_CONFIG = "version:3+main";
 const char* KEYBOARD_OFF_CONFIG = "version:3+whole";
 #endif
 static bool isKeyboardOn_ = false;
+static bool isSystemKeyboardOn_ = false;
 }
 
 void SuperFoldStateManager::DoAngleChangeFolded(SuperFoldStatusChangeEvents event)
@@ -421,7 +422,13 @@ void SuperFoldStateManager::SetSystemKeyboardStatus(bool isOn)
 {
     SuperFoldStatusChangeEvents events = isOn ? SuperFoldStatusChangeEvents::SYSTEM_KEYBOARD_ON
         : SuperFoldStatusChangeEvents::SYSTEM_KEYBOARD_OFF;
+    isSystemKeyboardOn_ = isOn;
     HandleDisplayNotify(events);
+}
+
+bool SuperFoldStateManager::GetSystemKeyboardStatus()
+{
+    return isSystemKeyboardOn_;
 }
 
 void SuperFoldStateManager::HandleSystemKeyboardStatusDisplayNotify(
