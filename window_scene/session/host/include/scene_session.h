@@ -361,7 +361,7 @@ public:
     bool CalcNewWindowRectIfNeed(DMRect& availableArea, float newVpr);
     void CalcNewClientRectForSuperFold(WSRect& rect);
     void SaveLastDensity();
-    void UpdateSuperFoldThredshold(int32_t& topThreshold, int32_t& bottomThreshold, DMRect& availableArea);
+    void UpdateSuperFoldThreshold(int32_t& topThreshold, int32_t& bottomThreshold, DMRect& availableArea);
     WSRect GetCreaseRegion(CreaseRegionName regionName);
     void NotifyUpdateFlagCallback(NotifyUpdateFlagFunc&& func);
 
