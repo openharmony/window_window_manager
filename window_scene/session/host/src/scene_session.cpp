@@ -3404,9 +3404,7 @@ void SceneSession::OnMoveDragCallback(SizeChangeReason reason)
     if (isCompatibleModeInPc && !IsFreeMultiWindowMode()) {
         HandleCompatibleModeMoveDrag(rect, reason);
     }
-    if (IsDragResizeWhenEnd(reason)) {
-        UpdateSizeChangeReason(reason);
-        OnSessionEvent(SessionEvent::EVENT_DRAG);
+    if (DragResizeWhenEndFilter(reason)) {
         return;
     }
     UpdateKeyFrameState(reason, rect);
@@ -3431,17 +3429,28 @@ void SceneSession::OnMoveDragCallback(SizeChangeReason reason)
     }
 }
 
-bool SceneSession::IsDragResizeWhenEnd(SizeChangeReason reason)
+bool SceneSession::DragResizeWhenEndFilter(SizeChangeReason reason)
 {
     auto property = GetSessionProperty();
-    if (property == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "property is null");
+    if (property == nullptr || moveDragController_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "property or controller is null");
         return true;
     }
     bool isPcOrPcModeMainWindow = (systemConfig_.IsPcWindow() || IsFreeMultiWindowMode()) &&
         WindowHelper::IsMainWindow(property->GetWindowType());
-    return reason == SizeChangeReason::DRAG && isPcOrPcModeMainWindow &&
+    bool isReasonMatched = reason == SizeChangeReason::DRAG || reason == SizeChangeReason::DRAG_END;
+    bool isResizeWhenEnd = isReasonMatched && isPcOrPcModeMainWindow && moveDragController_->GetStartDragFlag() &&
         GetDragResizeTypeDuringDrag() == DragResizeType::RESIZE_WHEN_DRAG_END;
+    if (isResizeWhenEnd) {
+        UpdateSizeChangeReason(reason);
+        if (reason == SizeChangeReason::DRAG) {
+            OnSessionEvent(SessionEvent::EVENT_DRAG);
+        } else {
+            TLOGI(WmsLogTag::WMS_LAYOUT, "trigger client rect change by scb");
+            OnSessionEvent(SessionEvent::EVENT_END_MOVE);
+        }
+    }
+    return isResizeWhenEnd;
 }
 
 WSError SceneSession::UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode,
