@@ -421,13 +421,13 @@ WMError WindowManager::RegisterFocusChangedListener(const sptr<IFocusChangedList
     {
         std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
         if (ret != WMError::WM_OK) {
-            WLOGFW("RegisterWindowManagerAgent failed!");
+            TLOGE(WmsLogTag::WMS_FOCUS, "RegisterWindowManagerAgent failed!");
             pImpl_->focusChangedListenerAgent_ = nullptr;
         } else {
             auto iter = std::find(
                 pImpl_->focusChangedListeners_.begin(), pImpl_->focusChangedListeners_.end(), listener);
             if (iter != pImpl_->focusChangedListeners_.end()) {
-                WLOGFW("Listener is already registered.");
+                TLOGW(WmsLogTag::WMS_FOCUS, "Listener is already registered.");
                 return WMError::WM_OK;
             }
             pImpl_->focusChangedListeners_.push_back(listener);
