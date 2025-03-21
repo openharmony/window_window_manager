@@ -2481,10 +2481,7 @@ WMError WindowSceneSessionImpl::SetSpecificBarPropertyForPage(WindowType type, c
         return WMError::WM_OK;
     }
     if (property == nullptr) {
-        TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}u %{public}s] type %{public}u "
-            "%{public}u %{public}x %{public}x %{public}u %{public}u",
-            GetWindowId(), GetWindowName().c_str(), static_cast<uint32_t>(type), property.enable_,
-            property.backgroundColor_, property.contentColor_, property.enableAnimation_, property.settingFlag_);
+        TLOGI(WmsLogTag::WMS_IMMS, "use main window prop, win %{public}u", GetWindowId());
         return NotifySpecificWindowSessionProperty(type, GetSystemBarPropertyByType(type));
     }
     property->settingFlag_ = static_cast<SystemBarSettingFlag>(
