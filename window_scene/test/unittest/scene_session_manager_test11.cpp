@@ -776,17 +776,16 @@ HWTEST_F(SceneSessionManagerTest11, GetStartingWindowInfoFromCache, Function | S
 {
     ASSERT_NE(ssm_, nullptr);
     SessionInfo sessionInfo;
+    sessionInfo.moduleName_ = "test";
     sessionInfo.abilityName_ = BUNDLE_NAME;
     sessionInfo.bundleName_ = BUNDLE_NAME;
-    std::string path = "test";
-    uint32_t bgColor = 0;
-    bool res = ssm_->GetStartingWindowInfoFromCache(sessionInfo, path, bgColor);
+    StartingWindowInfo startingWindowInfo;
+    bool res = ssm_->GetStartingWindowInfoFromCache(sessionInfo, startingWindowInfo);
     ASSERT_EQ(res, false);
 
-    StartingWindowInfo startingWindowInfo;
-    std::map<std::string, StartingWindowInfo> startingWindowInfoMap{{ path, startingWindowInfo }};
+    std::map<std::string, StartingWindowInfo> startingWindowInfoMap{{ BUNDLE_NAME, startingWindowInfo }};
     ssm_->startingWindowMap_.insert({ BUNDLE_NAME, startingWindowInfoMap });
-    res = ssm_->GetStartingWindowInfoFromCache(sessionInfo, path, bgColor);
+    res = ssm_->GetStartingWindowInfoFromCache(sessionInfo, startingWindowInfo);
     ASSERT_EQ(res, false);
     ssm_->startingWindowMap_.clear();
 }
@@ -802,17 +801,16 @@ HWTEST_F(SceneSessionManagerTest11, GetStartingWindowInfoFromCache02, Function |
     SessionInfo sessionInfo;
     sessionInfo.moduleName_ = "te";
     sessionInfo.abilityName_ = "st";
-    sessionInfo.bundleName_ = BUNDLE_NAME;
-    std::string path = "test";
-    uint32_t bgColor = 0;
-    bool res = ssm_->GetStartingWindowInfoFromCache(sessionInfo, path, bgColor);
+    sessionInfo.bundleName_ = "test";
+    StartingWindowInfo startingWindowInfo;
+
+    bool res = ssm_->GetStartingWindowInfoFromCache(sessionInfo, startingWindowInfo);
     ASSERT_EQ(res, false);
 
-    StartingWindowInfo startingWindowInfo;
-    std::map<std::string, StartingWindowInfo> startingWindowInfoMap{{ path, startingWindowInfo }};
-    ssm_->startingWindowMap_.insert({ BUNDLE_NAME, startingWindowInfoMap });
+    std::map<std::string, StartingWindowInfo> startingWindowInfoMap{{ "test", startingWindowInfo }};
+    ssm_->startingWindowMap_.insert({ "test", startingWindowInfoMap });
 
-    res = ssm_->GetStartingWindowInfoFromCache(sessionInfo, path, bgColor);
+    res = ssm_->GetStartingWindowInfoFromCache(sessionInfo, startingWindowInfo);
     ASSERT_EQ(res, true);
     ssm_->startingWindowMap_.clear();
 }
