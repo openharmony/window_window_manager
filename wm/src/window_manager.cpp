@@ -1669,6 +1669,15 @@ WMError WindowManager::MinimizeByWindowId(const std::vector<int32_t>& windowIds)
     return ret;
 }
 
+WMError WindowManager::SetForegroundWindowNum(int32_t windowNum)
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().SetForegroundWindowNum(windowNum);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_LIFE, "failed");
+    }
+    return ret;
+}
+
 WMError WindowManager::ProcessRegisterWindowInfoChangeCallback(WindowInfoKey observedInfo,
     const sptr<IWindowInfoChangedListener>& listener)
 {

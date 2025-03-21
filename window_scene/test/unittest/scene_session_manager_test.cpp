@@ -2567,6 +2567,18 @@ HWTEST_F(SceneSessionManagerTest, MinimizeByWindowId, Function | SmallTest | Lev
     WMError res = ssm_->MinimizeByWindowId(windowIds);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, res);
 }
+
+/**
+ * @tc.name: SetForegroundWindowNum
+ * @tc.desc: test function : SetForegroundWindowNum
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, SetForegroundWindowNum, Function | SmallTest | Level3)
+{
+    int32_t windowNum = 0;
+    WMError res = ssm_->SetForegroundWindowNum(windowNum);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, res);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
