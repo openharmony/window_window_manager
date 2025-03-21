@@ -376,6 +376,8 @@ void HidumpController::DumpSysconfigParam(std::ostringstream& oss, sptr<SceneSes
         << systemConfig.miniHeightOfMainWindow_ << "|"
         << systemConfig.miniWidthOfSubWindow_ << "|"
         << systemConfig.miniHeightOfSubWindow_ << "|"
+        << systemConfig.miniWidthOfDialogWindow_ << "|"
+        << systemConfig.miniHeightOfDialogWindow_ << "|"
         << systemConfig.backgroundswitch << "|"
         << systemConfig.freeMultiWindowEnable_ << "|"
         << systemConfig.freeMultiWindowSupport_ << "|"
