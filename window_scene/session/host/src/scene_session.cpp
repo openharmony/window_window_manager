@@ -7571,7 +7571,7 @@ bool SceneSession::CalcNewWindowRectIfNeed(DMRect& availableArea, float newVpr)
 
 void SceneSession::SaveLastDensity()
 {
-    auto property = GetSessionProperty()
+    auto property = GetSessionProperty();
     DisplayId displayId = property->GetDisplayId();
     if (auto display = DisplayManager::GetInstance().GetDisplayById(displayId)) {
         property->SetLastLimitsVpr(display->GetVirtualPixelRatio());
