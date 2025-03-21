@@ -71,13 +71,17 @@ void SingleDisplayPocketFoldPolicy::SetdisplayModeChangeStatus(bool status, bool
         pengdingTask_ = isOnBootAnimation ? FOLD_TO_EXPAND_ONBOOTANIMATION_TASK_NUM : FOLD_TO_EXPAND_TASK_NUM;
         startTimePoint_ = std::chrono::steady_clock::now();
         displayModeChangeRunning_ = status;
+        TLOGI(WmsLogTag::DMS, "displaymodechange start, taskCount: %{public}d", pengdingTask_.load());
     } else {
         pengdingTask_ --;
         if (pengdingTask_ != 0) {
+            TLOGI(WmsLogTag::DMS, "displaymodechange 1 task finished, %{public}d task left", pengdingTask_.load());
             return;
         }
         displayModeChangeRunning_ = false;
         endTimePoint_ = std::chrono::steady_clock::now();
+        TLOGI(WmsLogTag::DMS, "displaymodechange finished, current displaymode: %{public}ud,"
+            "target displaymode: %{public}ud", GetScreenDisplayMode(), lastCachedisplayMode_.load());
         if (lastCachedisplayMode_.load() != GetScreenDisplayMode()) {
             ScreenSessionManager::GetInstance().TriggerDisplayModeUpdate(lastCachedisplayMode_.load());
         }
