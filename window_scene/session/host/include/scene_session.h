@@ -500,6 +500,7 @@ public:
     WSError UpdateRotationChangeRegistered(int32_t persistentId, bool isRegister) override;
     RotationChangeResult NotifyRotationChange(const RotationChangeInfo& rotationChangeInfo);
     bool isRotationChangeCallbackRegistered = false;
+    WSError SetCurrentRotation(int32_t currentRotation);
 
     /*
      * Window Animation
