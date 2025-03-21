@@ -1346,6 +1346,22 @@ HWTEST_F(SessionProxyTest, GetWaterfallMode, Function | SmallTest | Level2)
     WSError res = sProxy->GetWaterfallMode(isWaterfallMode);
     ASSERT_EQ(res, WSError::WS_OK);
 }
+
+/**
+ * @tc.name: NotifyFollowParentMultiScreenPolicy
+ * @tc.desc: NotifyFollowParentMultiScreenPolicy test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, NotifyFollowParentMultiScreenPolicy, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: NotifyFollowParentMultiScreenPolicy start";
+    auto sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    ASSERT_EQ(sProxy->NotifyFollowParentMultiScreenPolicy(true), WSError::WS_ERROR_IPC_FAILED);
+    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_EQ(sProxy->NotifyFollowParentMultiScreenPolicy(true), WSError::WS_OK);
+    GTEST_LOG_(INFO) << "SessionProxyTest: NotifyFollowParentMultiScreenPolicy end";
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

@@ -2040,6 +2040,20 @@ HWTEST_F(SceneSessionTest, SetUIFirstSwitch, Function | SmallTest | Level2)
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->SetUIFirstSwitch(RSUIFirstSwitch::FORCE_DISABLE_NONFOCUS);
 }
+
+/**
+ * @tc.name: IsFollowParentMultiScreenPolicy
+ * @tc.desc: IsFollowParentMultiScreenPolicy
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, IsFollowParentMultiScreenPolicy, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback);
+    EXPECT_EQ(sceneSession->IsFollowParentMultiScreenPolicy(), false);
+}
 } // namespace
 } // Rosen
 } // OHOS

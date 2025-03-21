@@ -1116,11 +1116,11 @@ WSError Session::UpdateRectWithLayoutInfo(const WSRect& rect, SizeChangeReason r
     if (sessionStage_ != nullptr) {
         int32_t rotateAnimationDuration = GetRotateAnimationDuration();
         SceneAnimationConfig config { .rsTransaction_ = rsTransaction, .animationDuration_ = rotateAnimationDuration };
-        WSRect updatedRect = rect;
-        UpdateClientRectPosYAndDisplayId(updatedRect);
-        updatedRect =
-            IsNeedConvertToRelativeRect(reason) ? ConvertGlobalRectToRelative(updatedRect, GetDisplayId()) : updatedRect;
-        sessionStage_->UpdateRect(updatedRect, reason, config, avoidAreas);
+        WSRect updateRect = rect;
+        UpdateClientRectPosYAndDisplayId(updateRect);
+        updateRect =
+            IsNeedConvertToRelativeRect(reason) ? ConvertGlobalRectToRelative(updateRect, GetDisplayId()) : updateRect;
+        sessionStage_->UpdateRect(updateRect, reason, config, avoidAreas);
         SetClientRect(rect);
         RectCheckProcess();
     } else {
