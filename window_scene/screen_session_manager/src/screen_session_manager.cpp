@@ -3541,10 +3541,8 @@ void ScreenSessionManager::NotifyAndPublishEvent(sptr<DisplayInfo> displayInfo, 
         TLOGE(WmsLogTag::DMS, "error, displayInfo or screenSession is nullptr");
         return;
     }
-    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
-        NotifyDisplayChanged(displayInfo, DisplayChangeEvent::UPDATE_ROTATION);
-        NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::UPDATE_ROTATION);
-    }
+    NotifyDisplayChanged(displayInfo, DisplayChangeEvent::UPDATE_ROTATION);
+    NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::UPDATE_ROTATION);
     UpdateDisplayScaleState(screenId);
     std::map<DisplayId, sptr<DisplayInfo>> emptyMap;
     NotifyDisplayStateChange(GetDefaultScreenId(), screenSession->ConvertToDisplayInfo(),
