@@ -8919,26 +8919,10 @@ WMError SceneSessionManager::GetAccessibilityWindowInfo(std::vector<sptr<Accessi
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
     auto task = [this, &infos]() {
-        std::map<int32_t, sptr<SceneSession>>::iterator iter;
-        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-        for (iter = sceneSessionMap_.begin(); iter != sceneSessionMap_.end(); iter++) {
-            sptr<SceneSession> sceneSession = iter->second;
-            if (sceneSession == nullptr) {
-                TLOGNW(WmsLogTag::WMS_ATTRIBUTE, "null scene session");
-                continue;
-            }
-            bool isVisibleForAccessibility = Session::IsScbCoreEnabled() ?
-                sceneSession->IsVisibleForAccessibility() :
-                sceneSession->IsVisibleForAccessibility() && IsSessionVisibleForeground(sceneSession);
-            TLOGND(WmsLogTag::WMS_ATTRIBUTE, "name=%{public}s, isSystem=%{public}d, persistentId=%{public}d, "
-                "winType=%{public}d, state=%{public}d, visible=%{public}d", sceneSession->GetWindowName().c_str(),
-                sceneSession->GetSessionInfo().isSystem_, iter->first, sceneSession->GetWindowType(),
-                sceneSession->GetSessionState(), isVisibleForAccessibility);
-            if (isVisibleForAccessibility) {
-                FillWindowInfo(infos, iter->second);
-            }
-        }
         TLOGND(WmsLogTag::WMS_ATTRIBUTE, "notify accessibility infos");
+        std::vector<sptr<SceneSession>> sceneSessionList;
+        GetAllSceneSessionForAccessibility(sceneSessionList);
+        FillAccessibilityInfo(sceneSessionList, infos);
         SessionManagerAgentController::GetInstance().NotifyAccessibilityWindowInfo(infos,
             WindowUpdateType::WINDOW_UPDATE_ALL);
         return WMError::WM_OK;
