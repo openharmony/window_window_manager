@@ -425,7 +425,7 @@ void SuperFoldStateManager::SetSystemKeyboardStatus(bool isTpKeyboardOn)
 {
     SuperFoldStatusChangeEvents events = isTpKeyboardOn ? SuperFoldStatusChangeEvents::SYSTEM_KEYBOARD_ON
         : SuperFoldStatusChangeEvents::SYSTEM_KEYBOARD_OFF;
-    isSystemKeyboardOn_ = isOn;
+    isSystemKeyboardOn_ = isTpKeyboardOn;
     HandleDisplayNotify(events);
 }
 
