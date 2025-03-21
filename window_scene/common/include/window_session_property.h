@@ -574,6 +574,10 @@ struct SystemSessionConfig : public Parcelable {
     uint32_t miniWidthOfSubWindow_ = 320;
     // 240: default minHeight sub window size
     uint32_t miniHeightOfSubWindow_ = 240;
+    // 320: default minWidth dialog window size
+    uint32_t miniWidthOfDialogWindow_ = 320;
+    // 240: default minHeight dialog window size
+    uint32_t miniHeightOfDialogWindow_ = 240;
     bool backgroundswitch = false;
     bool freeMultiWindowEnable_ = false;
     bool freeMultiWindowSupport_ = false;
@@ -595,7 +599,8 @@ struct SystemSessionConfig : public Parcelable {
         }
 
         if (!parcel.WriteUint32(miniWidthOfMainWindow_) || !parcel.WriteUint32(miniHeightOfMainWindow_) ||
-            !parcel.WriteUint32(miniWidthOfSubWindow_) || !parcel.WriteUint32(miniHeightOfSubWindow_)) {
+            !parcel.WriteUint32(miniWidthOfSubWindow_) || !parcel.WriteUint32(miniHeightOfSubWindow_) ||
+            !parcel.WriteUint32(miniWidthOfDialogWindow_) || !parcel.WriteUint32(miniHeightOfDialogWindow_)) {
             return false;
         }
 
@@ -649,6 +654,8 @@ struct SystemSessionConfig : public Parcelable {
         config->miniHeightOfMainWindow_ = parcel.ReadUint32();
         config->miniWidthOfSubWindow_ = parcel.ReadUint32();
         config->miniHeightOfSubWindow_ = parcel.ReadUint32();
+        config->miniWidthOfDialogWindow_ = parcel.ReadUint32();
+        config->miniHeightOfDialogWindow_ = parcel.ReadUint32();
         config->backgroundswitch = parcel.ReadBool();
         config->freeMultiWindowEnable_ = parcel.ReadBool();
         config->freeMultiWindowSupport_ = parcel.ReadBool();
