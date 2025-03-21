@@ -1834,10 +1834,10 @@ WSError SceneSession::SetSystemBarProperty(WindowType type, SystemBarProperty sy
         static_cast<uint32_t>(systemBarProperty.settingFlag_))) {
         GetSessionProperty()->SetSystemBarProperty(type, systemBarProperty);
     } else {
-        systemBarProperty->settingFlag_ =
-            static_cast<SystemBarSettingFlag>(static_cast<uint32_t>(statusBarProp.settingFlag_) |
-            static_cast<uint32_t>(SystemBarSettingFlag::ALL_SETTING) &
-            (~static_cast<uint32_t>(SystemBarSettingFlag::PAGE_SETTING)));
+        systemBarProperty.settingFlag_ = static_cast<SystemBarSettingFlag>(
+            (static_cast<uint32_t>(systemBarProperty.settingFlag_) &
+            (~static_cast<uint32_t>(SystemBarSettingFlag::PAGE_SETTING))) |
+            static_cast<uint32_t>(SystemBarSettingFlag::ALL_SETTING));
     }
     systemBarPropertyMap[type] = systemBarProperty;
     if (type == WindowType::WINDOW_TYPE_STATUS_BAR && systemBarProperty.enable_) {
