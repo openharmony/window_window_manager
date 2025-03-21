@@ -164,6 +164,8 @@ HWTEST_F(ScreenSessionManagerTest, WakeUpPictureFrameBlock, Function | SmallTest
     ASSERT_EQ(ssm_->pictureFrameReady_, true);
     ssm_->WakeUpPictureFrameBlock(DisplayEvent::SCREEN_LOCK_END_DREAM);
     ASSERT_EQ(ssm_->pictureFrameBreak_, true);
+    ssm_->WakeUpPictureFrameBlock(DisplayEvent::SCREEN_LOCK_OFF);
+    ASSERT_EQ(ssm_->pictureFrameBreak_, false);
 }
 
 /**
