@@ -1673,7 +1673,7 @@ WMError WindowManager::SetForegroundWindowNum(int32_t windowNum)
 {
     WMError ret = SingletonContainer::Get<WindowAdapter>().SetForegroundWindowNum(windowNum);
     if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_LIFE, "failed");
+        TLOGE(WmsLogTag::WMS_PC, "failed");
     }
     return ret;
 }
