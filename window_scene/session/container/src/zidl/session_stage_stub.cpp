@@ -212,6 +212,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyRotationProperty(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_ROTATION_CHANGE):
             return HandleNotifyRotationChange(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_CURRENT_ROTATION):
+            return HandleSetCurrentRotation(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -985,6 +987,17 @@ int SessionStageStub::HandleNotifyRotationChange(MessageParcel& data, MessagePar
     TLOGI(WmsLogTag::WMS_ROTATION, "send type:%{public}d, rect: [%{public}d, %{public}d, %{public}d, %{public}d]",
         rotationChangeResult.rectType, rotationChangeResult.windowRect.posX_, rotationChangeResult.windowRect.posY_,
         rotationChangeResult.windowRect.width_, rotationChangeResult.windowRect.height_);
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleSetCurrentRotation(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_ROTATION, "in");
+    int32_t currentRotation;
+    if (!data.ReadInt32(currentRotation)) {
+        return ERR_INVALID_VALUE;
+    }
+    SetCurrentRotation(currentRotation);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

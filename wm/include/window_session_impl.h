@@ -422,6 +422,7 @@ public:
     WMError UnregisterWindowRotationChangeListener(const sptr<IWindowRotationChangeListener>& listener) override;
     RotationChangeResult NotifyRotationChange(const RotationChangeInfo& rotationChangeInfo) override;
     WMError CheckMultiWindowRect(uint32_t& width, uint32_t& height);
+    WSError SetCurrentRotation(int32_t currentRotation) override;
 
 protected:
     WMError Connect();

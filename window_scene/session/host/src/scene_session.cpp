@@ -7590,4 +7590,13 @@ RotationChangeResult SceneSession::NotifyRotationChange(const RotationChangeInfo
     }
     return sessionStage_->NotifyRotationChange(rotationChangeInfo);
 }
+
+WSError SceneSession::SetCurrentRotation(int32_t currentRotation)
+{
+    TLOGI(WmsLogTag::WMS_ROTATION, "currentRotation: %{public}d", currentRotation);
+    if (!sessionStage_) {
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return sessionStage_->SetCurrentRotation(currentRotation);
+}
 } // namespace OHOS::Rosen
