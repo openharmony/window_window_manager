@@ -965,8 +965,7 @@ napi_ref PictureInPictureController::GetTypeNode() const
 void PictureInPictureController::GetPipPossible(bool& pipPossible)
 {
     const std::string multiWindowUIType = system::GetParameter("const.window.multiWindowUIType", "");
-    pipPossible = multiWindowUIType == "HandsetSmartWindow" || multiWindowUIType == "FreeFormMultiWindow" ||
-        multiWindowUIType == "TabletSmartWindow";
+    pipPossible = multiWindowUIType == "HandsetSmartWindow" || multiWindowUIType == "TabletSmartWindow";
     return;
 }
 
