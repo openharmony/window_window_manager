@@ -656,8 +656,7 @@ WSError Session::SetTouchable(bool touchable)
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     if (touchable != GetSessionProperty()->GetTouchable()) {
-        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d touchable:%{public}d", GetPersistentId(),
-            static_cast<int>(touchable));
+        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d, %{public}d", GetPersistentId(), touchable);
     }
     UpdateSessionTouchable(touchable);
     return WSError::WS_OK;
@@ -676,8 +675,7 @@ bool Session::GetTouchable() const
 void Session::SetForceTouchable(bool forceTouchable)
 {
     if (forceTouchable != forceTouchable_) {
-        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d forceTouchable:%{public}d", GetPersistentId(),
-            static_cast<int>(forceTouchable));
+        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d, %{public}d", GetPersistentId(), forceTouchable);
     }
     forceTouchable_ = forceTouchable;
 }
@@ -685,8 +683,7 @@ void Session::SetForceTouchable(bool forceTouchable)
 void Session::SetSystemTouchable(bool touchable)
 {
     if (touchable != systemTouchable_) {
-        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d systemTouchable_:%{public}d", GetPersistentId(),
-            static_cast<int>(touchable));
+        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d, %{public}d", GetPersistentId(), touchable);
     }
     systemTouchable_ = touchable;
     NotifySessionInfoChange();
@@ -753,7 +750,7 @@ int32_t Session::GetWindowId() const
 
 void Session::SetCallingPid(int32_t id)
 {
-    TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d, callingPid:%{public}u", persistentId_, id);
+    TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d, %{public}d", persistentId_, id);
     callingPid_ = id;
 }
 
@@ -1402,7 +1399,7 @@ void Session::NotifyForegroundInteractiveStatus(bool interactive)
 void Session::SetForegroundInteractiveStatus(bool interactive)
 {
     if (interactive != GetForegroundInteractiveStatus()) {
-        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d interactive:%{public}d", GetPersistentId(),
+        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d, %{public}d", GetPersistentId(),
             static_cast<int>(interactive));
     }
     foregroundInteractiveStatus_.store(interactive);
