@@ -1116,6 +1116,7 @@ ohos_unittest("ws_scene_session_test") {
     "scene_session_test3.cpp",
     "scene_session_test4.cpp",
     "scene_session_test5.cpp",
+    "scene_session_test6.cpp",
   ]
 
   cflags_cc = [ "-Wno-thread-safety" ]
