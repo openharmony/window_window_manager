@@ -8848,7 +8848,10 @@ void ScreenSessionManager::WakeUpPictureFrameBlock(DisplayEvent event)
     } else if (event == DisplayEvent::SCREEN_LOCK_END_DREAM) {
         TLOGI(WmsLogTag::DMS, "[UL_POWER]get pictureFrameBreak");
         pictureFrameBreak_ = true;
+    } else {
+        return;
     }
+    TLOGI(WmsLogTag::DMS, "[UL_POWER]notify block");
     screenWaitPictureFrameCV_.notify_all();
 }
 
@@ -8863,7 +8866,9 @@ bool ScreenSessionManager::BlockScreenWaitPictureFrameByCV(bool isStartDream)
         TLOGI(WmsLogTag::DMS, "[UL_POWER]wait picture frame timeout");
         return true;
     }
-    return isStartDream ? pictureFrameReady_ : pictureFrameBreak_;
+    bool pictureFrameIsOk = isStartDream ? pictureFrameReady_ : pictureFrameBreak_;
+    TLOGI(WmsLogTag::DMS, "[UL_POWER]pictureFrameIsOk:%{public}d", pictureFrameIsOk);
+    return pictureFrameIsOk;
 }
 
 void ScreenSessionManager::RegisterSettingExtendScreenDpiObserver()
