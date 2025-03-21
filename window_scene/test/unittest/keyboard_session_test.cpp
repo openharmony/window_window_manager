@@ -601,6 +601,46 @@ HWTEST_F(KeyboardSessionTest, SetCallingSessionId, Function | SmallTest | Level1
 }
 
 /**
+ * @tc.name: SetCallingSessionId02
+ * @tc.desc: SetCallingSessionId
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest, SetCallingSessionId02, Function | SmallTest | Level1)
+{
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "SetCallingSessionId02 begin!");
+    SessionInfo info;
+    info.abilityName_ = "SetCallingSessionId02";
+    info.bundleName_ = "SetCallingSessionId02";
+    sptr<SceneSession::SpecificSessionCallback> specificCb =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    EXPECT_NE(specificCb, nullptr);
+    sptr<KeyboardSession::KeyboardSessionCallback> keyboardCb =
+        sptr<KeyboardSession::KeyboardSessionCallback>::MakeSptr();
+    EXPECT_NE(keyboardCb, nullptr);
+    sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, specificCb, keyboardCb);
+    EXPECT_NE(keyboardSession, nullptr);
+
+    // getCallingSession is not nullptr
+    info.windowType_ = 1; // 1 is main_window_type
+    sptr<SceneSession> callingSession = sptr<SceneSession>::MakeSptr(info, specificCb);
+    EXPECT_NE(callingSession, nullptr);
+    ASSERT_NE(keyboardSession->keyboardCallback_, nullptr);
+    keyboardSession->keyboardCallback_->onGetSceneSession =
+        [callingSession](int32_t persistenId)->sptr<SceneSession> {
+        if (persistenId != 100) { // callingSession's persistentId is 100
+            return nullptr;
+        }
+        return callingSession;
+    };
+    keyboardSession->keyboardCallback_->onGetFocusedSessionId = []()->int32_t {
+        return 100; // focusSession's persistentId is 100
+    };
+    keyboardSession->state_ = SessionState::STATE_FOREGROUND;
+    keyboardSession->SetCallingSessionId(0);
+    ASSERT_EQ(keyboardSession->GetCallingSessionId(), 100); // 100 is callingSessionId
+}
+
+/**
  * @tc.name: GetCallingSessionId
  * @tc.desc: GetCallingSessionId
  * @tc.type: FUNC
