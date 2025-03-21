@@ -1483,6 +1483,58 @@ napi_value InitHDRFormat(napi_env env)
     return objValue;
 }
 
+napi_value InitScreenShape(napi_env env)
+{
+    TLOGD(WmsLogTag::DMS, "InitScreenShape called");
+
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::DMS, "env is nullptr");
+        return nullptr;
+    }
+
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::DMS, "Failed to get object");
+        return nullptr;
+    }
+
+    napi_set_named_property(env, objValue, "RECTANGLE",
+        CreateJsValue(env, static_cast<uint32_t>(ScreenShape::RECTANGLE)));
+    napi_set_named_property(env, objValue, "ROUND",
+        CreateJsValue(env, static_cast<uint32_t>(ScreenShape::ROUND)));
+    return objValue;
+}
+
+napi_value InitDisplaySourceMode(napi_env env)
+{
+    TLOGD(WmsLogTag::DMS, "InitDisplaySourceMode called");
+
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::DMS, "env is nullptr");
+        return nullptr;
+    }
+
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::DMS, "Failed to get object");
+        return nullptr;
+    }
+
+    napi_set_named_property(env, objValue, "NONE",
+        CreateJsValue(env, static_cast<uint32_t>(DisplaySourceMode::NONE)));
+    napi_set_named_property(env, objValue, "MAIN",
+        CreateJsValue(env, static_cast<uint32_t>(DisplaySourceMode::MAIN)));
+    napi_set_named_property(env, objValue, "MIRROR",
+        CreateJsValue(env, static_cast<uint32_t>(DisplaySourceMode::MIRROR)));
+    napi_set_named_property(env, objValue, "EXTEND",
+        CreateJsValue(env, static_cast<uint32_t>(DisplaySourceMode::EXTEND)));
+    napi_set_named_property(env, objValue, "ALONE",
+        CreateJsValue(env, static_cast<uint32_t>(DisplaySourceMode::ALONE)));
+    return objValue;
+}
+
 napi_value JsDisplayManagerInit(napi_env env, napi_value exportObj)
 {
     WLOGD("JsDisplayManagerInit is called");
@@ -1503,6 +1555,8 @@ napi_value JsDisplayManagerInit(napi_env env, napi_value exportObj)
     napi_set_named_property(env, exportObj, "FoldDisplayMode", InitFoldDisplayMode(env));
     napi_set_named_property(env, exportObj, "ColorSpace", InitColorSpace(env));
     napi_set_named_property(env, exportObj, "HDRFormat", InitHDRFormat(env));
+    napi_set_named_property(env, exportObj, "ScreenShape", InitScreenShape(env));
+    napi_set_named_property(env, exportObj, "DisplaySourceMode", InitDisplaySourceMode(env));
 
     const char *moduleName = "JsDisplayManager";
     BindNativeFunction(env, exportObj, "getDefaultDisplay", moduleName, JsDisplayManager::GetDefaultDisplay);
