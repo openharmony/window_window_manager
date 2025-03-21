@@ -620,10 +620,10 @@ public:
     bool SessionIsSingleHandMode();
     void SetClientDisplayId(DisplayId displayId);
     DisplayId GetClientDisplayId() const;
-    virtual bool IsAnyParentSessionDragMoving() const { return false; }
-    virtual bool IsAnyParentSessionDragZooming() const { return false; }
     virtual void RegisterNotifySurfaceBoundsChangeFunc(int32_t sessionId, NotifySurfaceBoundsChangeFunc&& func) {};
     virtual void UnregisterNotifySurfaceBoundsChangeFunc(int32_t sessionId) {};
+    virtual bool IsAnyParentSessionDragMoving() const { return false; }
+    virtual bool IsAnyParentSessionDragZooming() const { return false; }
 
     /*
      * Screen Lock

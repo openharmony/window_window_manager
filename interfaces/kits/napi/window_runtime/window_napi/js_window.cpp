@@ -6899,6 +6899,38 @@ napi_value JsWindow::OnSetSubWindowModal(napi_env env, napi_callback_info info)
     return result;
 }
 
+static std::function<void()> SetFollowParentMultiScreenPolicyTask(const wptr<Window>& weakToken, bool enabled,
+    napi_env env, std::shared_ptr<NapiAsyncTask> napiAsyncTask)
+{
+    return [weakToken, enabled, env, task = napiAsyncTask] {
+        auto window = weakToken.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_SUB, "OnSetFollowParentMultiScreenPolicy failed, window is null");
+            task->Reject(env, JsErrUtils::CreateJsError(env,
+                WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "window is null"));
+            return;
+        }
+        if (!WindowHelper::IsSubWindow(window->GetType())) {
+            TLOGNE(WmsLogTag::WMS_SUB, "OnSetFollowParentMultiScreenPolicy invalid call, type:%{public}d",
+                window->GetType());
+            task->Reject(env, JsErrUtils::CreateJsError(env,
+                WmErrorCode::WM_ERROR_INVALID_CALLING, "invalid window type"));
+            return;
+        }
+        WMError ret = window->SetFollowParentMultiScreenPolicy(enabled);
+        if (ret != WMError::WM_OK) {
+            WmErrorCode wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
+            TLOGNE(WmsLogTag::WMS_MAIN, "OnSetFollowParentMultiScreenPolicy failed, ret is %{public}d", wmErrorCode);
+            task->Reject(env, JsErrUtils::CreateJsError(env,
+                wmErrorCode, "Set multi-screen simultaneous display failed"));
+            return;
+        }
+        task->Resolve(env, NapiGetUndefined(env));
+        TLOGNI(WmsLogTag::WMS_SUB, "OnSetFollowParentMultiScreenPolicy id:%{public}u, name:%{public}s, "
+            "enabled:%{public}d", window->GetWindowId(), window->GetWindowName().c_str(), enabled);
+    };
+}
+
 napi_value JsWindow::OnSetFollowParentMultiScreenPolicy(napi_env env, napi_callback_info info)
 {
     if (windowToken_ == nullptr) {
@@ -6923,34 +6955,7 @@ napi_value JsWindow::OnSetFollowParentMultiScreenPolicy(napi_env env, napi_callb
     }
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
-    const char* const where = __func__;
-    auto asyncTask = [where, weakWindow = wptr<Window>(windowToken_), enabled, env, task = napiAsyncTask] {
-        auto window = weakWindow.promote();
-        if (window == nullptr) {
-            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s failed, window is null", where);
-            task->Reject(env, JsErrUtils::CreateJsError(env,
-                WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "window is null"));
-            return;
-        }
-        if (!WindowHelper::IsSubWindow(window->GetType())) {
-            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s invalid call, type:%{public}d",
-                where, window->GetType());
-            task->Reject(env, JsErrUtils::CreateJsError(env,
-                WmErrorCode::WM_ERROR_INVALID_CALLING, "invalid window type"));
-            return;
-        }
-        WMError ret = window->SetFollowParentMultiScreenPolicy(enabled);
-        if (ret != WMError::WM_OK) {
-            WmErrorCode wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
-            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s failed, ret is %{public}d", where, wmErrorCode);
-            task->Reject(env, JsErrUtils::CreateJsError(env,
-                wmErrorCode, "Set multi-screen simultaneous display failed"));
-            return;
-        }
-        task->Resolve(env, NapiGetUndefined(env));
-        TLOGNI(WmsLogTag::WMS_SUB, "%{public}s id:%{public}u, name:%{public}s, enabled:%{public}d",
-            where, window->GetWindowId(), window->GetWindowName().c_str(), enabled);
-    };
+    auto asyncTask = SetFollowParentMultiScreenPolicyTask(wptr<Window>(windowToken_), enabled, env, napiAsyncTask);
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
         napiAsyncTask->Reject(env,
             CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));

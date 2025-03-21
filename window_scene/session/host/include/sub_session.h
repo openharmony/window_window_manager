@@ -34,6 +34,8 @@ public:
     void RectCheck(uint32_t curWidth, uint32_t curHeight) override;
     bool IsVisibleForeground() const override;
     bool IsNeedCrossDisplayRendering() const override;
+    void HandleCrossMoveToSurfaceNode(WSRect& globalRect) override;
+    std::set<uint64_t> GetNewDisplayIdsDuringMoveTo(WSRect& newRect);
 
     void SetParentSessionCallback(NotifySetParentSessionFunc&& func) override;
     WMError NotifySetParentSession(int32_t oldParentWindowId, int32_t newParentWindowId) override;
@@ -71,6 +73,13 @@ protected:
      * Sub Window
      */
     NotifySetParentSessionFunc setParentSessionFunc_;
+
+private:
+    /*
+     * Window Layout
+     */
+    void AddSurfaceNodeToScreen() override;
+    void RemoveSufaceNodeFromScreen() override;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SUB_SESSION_H

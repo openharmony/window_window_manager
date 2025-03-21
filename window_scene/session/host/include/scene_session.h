@@ -236,11 +236,13 @@ public:
     WSError NotifyClientToUpdateRect(const std::string& updateReason,
         std::shared_ptr<RSTransaction> rsTransaction) override;
     void SetWinRectWhenUpdateRect(const WSRect& rect);
-    void SetRequestRectWhenFollowParent(const WSRect& rect) { requestRectWhenFollowParent_ = rect; }
-    WSRect GetRequestRectWhenFollowParent() { return requestRectWhenFollowParent_; }
-    virtual bool IsNeedCrossDisplayRendering() const { return false; }
     void RegisterNotifySurfaceBoundsChangeFunc(int32_t sessionId, NotifySurfaceBoundsChangeFunc&& func) override;
     void UnregisterNotifySurfaceBoundsChangeFunc(int32_t sessionId) override;
+    void SetRequestRectWhenFollowParent(const WSRect& rect) { requestRectWhenFollowParent_ = rect; }
+    WSRect GetRequestRectWhenFollowParent() const { return requestRectWhenFollowParent_; }
+    void HandleCrossMoveTo(WSRect& globalRect);
+    virtual void HandleCrossMoveToSurfaceNode(WSRect& globalRect) {}
+    virtual bool IsNeedCrossDisplayRendering() const { return false; }
 
     virtual void OpenKeyboardSyncTransaction() {}
     virtual void CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRect,
@@ -272,9 +274,6 @@ public:
     void SetScale(float scaleX, float scaleY, float pivotX, float pivotY) override;
     void SetFloatingScale(float floatingScale) override;
     WSError RaiseAboveTarget(int32_t subWindowId) override;
-    void HandleCrossMoveTo(WSRect &globalRect);
-    void HandleCrossMoveToSurfaceNode(WSRect &globalRect);
-    std::set<uint64_t> GetNewDisplayIdsDuringMoveTo(WSRect &newRect);
 
     /*
      * PiP Window
@@ -366,7 +365,7 @@ public:
     void SaveLastDensity();
     void UpdateSuperFoldThreshold(DMRect& availableArea, int32_t& topThreshold, int32_t& bottomThreshold);
     WSRect GetCreaseRegion(CreaseRegionName regionName) const;
-    virtual bool IsFollowParentMultiScreenPolity() const { return false; }
+    virtual bool IsFollowParentMultiScreenPolicy() const { return false; }
     void NotifyUpdateFlagCallback(NotifyUpdateFlagFunc&& func);
 
     /*
@@ -683,8 +682,6 @@ public:
     bool SetFrameGravity(Gravity gravity);
     WSError GetCrossAxisState(CrossAxisState& state) override;
     virtual void UpdateCrossAxis();
-    bool IsAnyParentSessionDragMoving() const override;
-    bool IsAnyParentSessionDragZooming() const override;
     bool GetIsFollowParentLayout() const { return isFollowParentLayout_; }
     sptr<MoveDragController> GetMoveDragController() const { return moveDragController_; }
     void NotifyUpdateGravity();
@@ -692,6 +689,8 @@ public:
     {
         tempRect_ = rect;
     }
+    bool IsAnyParentSessionDragMoving() const override;
+    bool IsAnyParentSessionDragZooming() const override;
 
     /*
      * Gesture Back
@@ -1075,8 +1074,8 @@ private:
     WSError UpdateRectForDrag(const WSRect& rect);
     void UpdateSessionRectPosYFromClient(SizeChangeReason reason, DisplayId& configDisplayId, WSRect& rect);
     void HandleSubSessionSurfaceNode(bool isAdd);
-    void AddSurfaceNodeToScreen();
-    void RemoveSufaceNodeFromScreen();
+    virtual void AddSurfaceNodeToScreen() {}
+    virtual void RemoveSufaceNodeFromScreen() {}
 
     /*
      * Window Decor
