@@ -7545,7 +7545,7 @@ bool SceneSession::CalcNewWindowRectIfNeed(DMRect& availableArea, float newVpr)
     int32_t topThreshold = availableArea.posY_;
     int32_t bottomThreshold = static_cast<int32_t>(availableArea.posY_ + availableArea.height_);
 
-    UpdateSuperFoldThredshold(topThreshold, bottomThreshold, availableArea);
+    UpdateSuperFoldThreshold(topThreshold, bottomThreshold, availableArea);
     width = MathHelper::Min(width, availableArea.width_);
     height = MathHelper::Min(height, availableArea.height_);
     bool needMove = top < topThreshold || left < 0 ||
@@ -7593,7 +7593,7 @@ void SceneSession::CalcNewClientRectForSuperFold(WSRect& rect)
     }
 }
 
-void SceneSession::UpdateSuperFoldThredshold(int32_t& topThreshold, int32_t& bottomThreshold, DMRect& availableArea)
+void SceneSession::UpdateSuperFoldThreshold(int32_t& topThreshold, int32_t& bottomThreshold, DMRect& availableArea)
 {
     auto currScreenFoldStatus = PcFoldScreenManager::GetInstance().GetScreenFoldStatus();
     if (currScreenFoldStatus == SuperFoldStatus::HALF_FOLDED) {
