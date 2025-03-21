@@ -236,6 +236,37 @@ HWTEST_F(KeyboardSessionTest3, UpdateKeyboardAvoidArea01, Function | SmallTest |
 }
 
 /**
+ * @tc.name: UpdateKeyboardAvoidArea02
+ * @tc.desc: test function : UpdateKeyboardAvoidArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest3, UpdateKeyboardAvoidArea02, Function | SmallTest | Level1)
+{
+    auto keyboardSession = GetKeyboardSession("UpdateKeyboardAvoidArea02",
+        "UpdateKeyboardAvoidArea02");
+    ASSERT_NE(keyboardSession, nullptr);
+
+    // not foreground
+    keyboardSession->dirtyFlags_ = 0;
+    keyboardSession->state_ = SessionState::STATE_CONNECT;
+    keyboardSession->isVisible_ = true;
+    keyboardSession->UpdateKeyboardAvoidArea();
+    ASSERT_EQ(keyboardSession->dirtyFlags_, 0);
+
+    keyboardSession->state_ = SessionState::STATE_FOREGROUND;
+    keyboardSession->isVisible_ = true;
+    auto expectDirtyFlag = 0;
+    auto isScbCoreEnabled = Session::IsScbCoreEnabled();
+    Session::SetScbCoreEnabled(false);
+    keyboardSession->specificCallback_->onUpdateAvoidArea_ = [&expectDirtyFlag](const uint32_t& persistentId) {
+        expectDirtyFlag = 1;
+    };
+    keyboardSession->UpdateKeyboardAvoidArea();
+    ASSERT_EQ(expectDirtyFlag, 1);
+    Session::SetScbCoreEnabled(isScbCoreEnabled);
+}
+
+/**
  * @tc.name: MoveAndResizeKeyboard01
  * @tc.desc: test function : MoveAndResizeKeyboard
  * @tc.type: FUNC

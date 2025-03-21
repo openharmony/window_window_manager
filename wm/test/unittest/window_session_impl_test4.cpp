@@ -2706,6 +2706,24 @@ HWTEST_F(WindowSessionImplTest4, SetSubWindowZLevelToProperty, Function | SmallT
     zLevel = subWindowSessionImpl->property_->zLevel_;
     EXPECT_EQ(1, zLevel);
 }
+
+/**
+ * @tc.name: SetCurrentRotation
+ * @tc.desc: SetCurrentRotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, SetCurrentRotation, Function | SmallTest | Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetCurrentRotation");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    auto ret = window->SetCurrentRotation(FULL_CIRCLE_DEGREE + 1);
+    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_PARAM);
+    ret = window->SetCurrentRotation(ZERO_CIRCLE_DEGREE - 1);
+    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_PARAM);
+    ret = window->SetCurrentRotation(ONE_FOURTH_FULL_CIRCLE_DEGREE);
+    EXPECT_EQ(ret, WSError::WS_OK);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

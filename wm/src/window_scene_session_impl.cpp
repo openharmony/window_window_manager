@@ -1067,7 +1067,12 @@ WindowLimits WindowSceneSessionImpl::GetSystemSizeLimits(uint32_t displayWidth,
                                                  MIN_FLOATING_WIDTH, vpr);
         systemLimits.minHeight_ = UpdateConfigVal(0, displayHeight, windowSystemConfig_.miniHeightOfSubWindow_,
                                                   MIN_FLOATING_HEIGHT, vpr);
-    } else if (WindowHelper::IsSystemWindow(GetType()) && GetType() != WindowType::WINDOW_TYPE_DIALOG) {
+    } else if (WindowHelper::IsDialogWindow(GetType())) {
+        systemLimits.minWidth_ = UpdateConfigVal(0, displayWidth, windowSystemConfig_.miniWidthOfDialogWindow_,
+                                                 MIN_FLOATING_WIDTH, vpr);
+        systemLimits.minHeight_ = UpdateConfigVal(0, displayHeight, windowSystemConfig_.miniHeightOfDialogWindow_,
+                                                  MIN_FLOATING_HEIGHT, vpr);
+    } else if (WindowHelper::IsSystemWindow(GetType())) {
         systemLimits.minWidth_ = 0;
         systemLimits.minHeight_ = 0;
     } else {

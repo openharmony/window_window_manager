@@ -20,8 +20,6 @@
 #include <animation/rs_animation_timing_protocol.h>
 #include <animation/rs_symbol_animation.h>
 #include <pipeline/rs_node_map.h>
-#include <modifier/rs_property.h>
-#include <modifier/rs_property_modifier.h>
 #include <ui/rs_canvas_node.h>
 
 #include "display_manager.h"
@@ -502,6 +500,7 @@ public:
     WSError UpdateRotationChangeRegistered(int32_t persistentId, bool isRegister) override;
     RotationChangeResult NotifyRotationChange(const RotationChangeInfo& rotationChangeInfo);
     bool isRotationChangeCallbackRegistered = false;
+    WSError SetCurrentRotation(int32_t currentRotation);
 
     /*
      * Window Animation
@@ -671,7 +670,6 @@ public:
     void OnNextVsyncReceivedWhenDrag();
     void RegisterLayoutFullScreenChangeCallback(NotifyLayoutFullScreenChangeFunc&& callback);
     bool SetFrameGravity(Gravity gravity);
-    void SetBehindWindowFilterEnabled(bool enabled); // Only accessed on main thread
     WSError GetCrossAxisState(CrossAxisState& state) override;
     virtual void UpdateCrossAxis();
     bool GetIsFollowParentLayout() const { return isFollowParentLayout_; }
@@ -904,7 +902,7 @@ private:
      */
     void HandleMoveDragSurfaceNode(SizeChangeReason reason);
     void OnMoveDragCallback(SizeChangeReason reason);
-    bool IsDragResizeWhenEnd(SizeChangeReason reason);
+    bool DragResizeWhenEndFilter(SizeChangeReason reason);
     void InitializeCrossMoveDrag();
     WSError InitializeMoveInputBar();
     void HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect, SizeChangeReason reason);
@@ -1152,8 +1150,6 @@ private:
     NotifyLayoutFullScreenChangeFunc onLayoutFullScreenChangeFunc_;
     virtual void NotifySubAndDialogFollowRectChange(const WSRect& rect, bool isGlobal, bool needFlush) {};
     std::atomic<bool> shouldFollowParentWhenShow_ = true;
-    std::shared_ptr<RSBehindWindowFilterEnabledModifier>
-        behindWindowFilterEnabledModifier_; // Only accessed on main thread
     bool isDragging_ = false;
     std::atomic<bool> isCrossAxisOfLayout_ = false;
     std::atomic<uint32_t> crossAxisState_ = 0;

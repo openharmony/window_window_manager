@@ -67,6 +67,7 @@ private:
     void CloseCoordinationScreen();
     void NotifyRefreshRateEvent(bool isEventStatus);
     std::recursive_mutex& displayInfoMutex_;
+    std::mutex coordinationMutex_;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler_;
 };
 } // namespace OHOS::Rosen

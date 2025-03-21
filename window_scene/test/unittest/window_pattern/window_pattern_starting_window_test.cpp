@@ -20,6 +20,7 @@
 
 #include "context.h"
 #include "interfaces/include/ws_common.h"
+#include "session_manager/include/rdb/starting_window_rdb_manager.h"
 #include "session_manager/include/scene_session_manager.h"
 
 using namespace testing;
