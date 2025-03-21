@@ -271,7 +271,6 @@ public:
     void SetScale(float scaleX, float scaleY, float pivotX, float pivotY) override;
     void SetFloatingScale(float floatingScale) override;
     WSError RaiseAboveTarget(int32_t subWindowId) override;
-    void SetWindowRect(int32_t posX, int32_t posY, uint32_t width, uint32_t height);
 
     /*
      * PiP Window
@@ -361,8 +360,8 @@ public:
     bool CalcNewWindowRectIfNeed(DMRect& availableArea, float newVpr);
     void CalcNewClientRectForSuperFold(WSRect& rect);
     void SaveLastDensity();
-    void UpdateSuperFoldThreshold(int32_t& topThreshold, int32_t& bottomThreshold, DMRect& availableArea);
-    WSRect GetCreaseRegion(CreaseRegionName regionName);
+    void UpdateSuperFoldThreshold(DMRect& availableArea, int32_t& topThreshold, int32_t& bottomThreshold);
+    WSRect GetCreaseRegion(CreaseRegionName regionName) const;
     void NotifyUpdateFlagCallback(NotifyUpdateFlagFunc&& func);
 
     /*

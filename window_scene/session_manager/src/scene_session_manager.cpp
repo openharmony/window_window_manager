@@ -10901,7 +10901,7 @@ WSError SceneSessionManager::UpdateSessionDisplayId(int32_t persistentId, uint64
         sceneSession->GetPersistentId(), screenId, fromScreenId);
     NotifySessionUpdate(sceneSession->GetSessionInfo(), ActionType::MOVE_DISPLAY, fromScreenId);
     if (!winRect.IsEmpty()) {
-        sceneSession->SetWindowRect(winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
+        sceneSession->SetSessionRect({ winRect.posX_, winRect.posY_, winRect.width_, winRect.height_ });
     }
     sceneSession->NotifyDisplayMove(fromScreenId, screenId);
     sceneSession->UpdateDensity();

@@ -6156,7 +6156,6 @@ WSError SceneSession::OnLayoutFullScreenChange(bool isLayoutFullScreen)
 
 WSError SceneSession::OnDefaultDensityEnabled(bool isDefaultDensityEnabled)
 {
-    isDefaultDensityEnabled_ = isDefaultDensityEnabled;
     PostTask([weakThis = wptr(this), isDefaultDensityEnabled, where = __func__] {
         auto session = weakThis.promote();
         if (!session) {
@@ -6165,6 +6164,7 @@ WSError SceneSession::OnDefaultDensityEnabled(bool isDefaultDensityEnabled)
         }
         TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s isDefaultDensityEnabled: %{public}d",
             where, isDefaultDensityEnabled);
+        session->isDefaultDensityEnabled_ = isDefaultDensityEnabled;
         if (session->onDefaultDensityEnabledFunc_) {
             session->onDefaultDensityEnabledFunc_(isDefaultDensityEnabled);
         }
@@ -7530,8 +7530,8 @@ bool SceneSession::CalcNewWindowRectIfNeed(DMRect& availableArea, float newVpr)
     float currVpr = 0.0f;
     if (auto property = GetSessionProperty()) {
         currVpr = property->GetLastLimitsVpr();
-        TLOGI(WmsLogTag::WMS_LAYOUT_PC, "currVpr: %{public}f, newVpr: %{public}f, Id: %{public}u", currVpr, newVpr,
-            GetPersistentId());
+        TLOGI(WmsLogTag::WMS_LAYOUT_PC, "currVpr: %{public}f, newVpr: %{public}f, Id: %{public}u",
+            currVpr, newVpr, GetPersistentId());
     }
     if (MathHelper::NearZero(currVpr - newVpr) || MathHelper::NearZero(currVpr)) {
         TLOGW(WmsLogTag::WMS_LAYOUT_PC, "need not update new rect, currVpr: %{public}f newVpr: %{public}f "
@@ -7545,7 +7545,7 @@ bool SceneSession::CalcNewWindowRectIfNeed(DMRect& availableArea, float newVpr)
     int32_t topThreshold = availableArea.posY_;
     int32_t bottomThreshold = static_cast<int32_t>(availableArea.posY_ + availableArea.height_);
 
-    UpdateSuperFoldThreshold(topThreshold, bottomThreshold, availableArea);
+    UpdateSuperFoldThreshold(availableArea, topThreshold, bottomThreshold);
     width = MathHelper::Min(width, availableArea.width_);
     height = MathHelper::Min(height, availableArea.height_);
     bool needMove = top < topThreshold || left < 0 ||
@@ -7571,11 +7571,10 @@ bool SceneSession::CalcNewWindowRectIfNeed(DMRect& availableArea, float newVpr)
 
 void SceneSession::SaveLastDensity()
 {
-    if (auto property = GetSessionProperty()) {
-        DisplayId displayId = property->GetDisplayId();
-        if (auto display = DisplayManager::GetInstance().GetDisplayById(displayId)) {
-            property->SetLastLimitsVpr(display->GetVirtualPixelRatio());
-        }
+    auto property = GetSessionProperty()
+    DisplayId displayId = property->GetDisplayId();
+    if (auto display = DisplayManager::GetInstance().GetDisplayById(displayId)) {
+        property->SetLastLimitsVpr(display->GetVirtualPixelRatio());
     }
 }
 
@@ -7593,7 +7592,7 @@ void SceneSession::CalcNewClientRectForSuperFold(WSRect& rect)
     }
 }
 
-void SceneSession::UpdateSuperFoldThreshold(int32_t& topThreshold, int32_t& bottomThreshold, DMRect& availableArea)
+void SceneSession::UpdateSuperFoldThreshold(DMRect& availableArea, int32_t& topThreshold, int32_t& bottomThreshold)
 {
     auto currScreenFoldStatus = PcFoldScreenManager::GetInstance().GetScreenFoldStatus();
     if (currScreenFoldStatus == SuperFoldStatus::HALF_FOLDED) {
@@ -7612,26 +7611,27 @@ void SceneSession::UpdateSuperFoldThreshold(int32_t& topThreshold, int32_t& bott
     }
 }
 
-void SceneSession::SetWindowRect(int32_t posX, int32_t posY, uint32_t width, uint32_t height)
-{
-    winRect_.posX_ = posX;
-    winRect_.posY_ = posY;
-    winRect_.width_ = width;
-    winRect_.height_ = height;
-}
-
-WSRect SceneSession::GetCreaseRegion(CreaseRegionName regionName)
+WSRect SceneSession::GetCreaseRegion(CreaseRegionName regionName) const
 {
     sptr<FoldCreaseRegion> creaseRegion = DisplayManager::GetInstance().GetCurrentFoldCreaseRegion();
-    if (creaseRegion != nullptr) {
-        std::vector<DMRect> creaseRects = creaseRegion->GetCreaseRects();
-        uint8_t index = static_cast<uint8_t>(regionName);
-        if (index >= 0 && index < creaseRects.size()) {
-            return { creaseRects[index].posX_, creaseRects[index].posY_,
-                creaseRects[index].width_, creaseRects[index].height_ };
-        } else {
-            TLOGW(WmsLogTag::WMS_LAYOUT_PC, "creaseRegion index %{public}u is out of range", index);
-        }
+    if (creaseRegion == nullptr) {
+        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "creaseRegion is null.");
+        return { 0, 0, 0, 0 };
+    }
+    std::vector<DMRect> creaseRects = creaseRegion->GetCreaseRects();
+    uint8_t index = static_cast<uint8_t>(regionName);
+    if (index >= 0 && index < creaseRects.size()) {
+        // posX_ from left to right. Otherwise posY_ from top to bottom.
+        std::sort(creaseRects.begin(), creaseRects.end(), [] (const DMRect& rectA, const DMRect& rectB) {
+            if (rectA.posX_ != rectB.posX_) {
+                return rectA.posX_ < rectB.posX_;
+            }
+            return rectA.posY_ < rectB.posY_;
+        });
+        return { creaseRects[index].posX_, creaseRects[index].posY_,
+            creaseRects[index].width_, creaseRects[index].height_ };
+    } else {
+        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "creaseRegion index %{public}u is out of range", index);
     }
     return { 0, 0, 0, 0 };
 }
