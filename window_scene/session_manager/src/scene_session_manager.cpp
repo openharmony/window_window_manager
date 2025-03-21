@@ -8938,6 +8938,9 @@ WMError SceneSessionManager::GetAccessibilityWindowInfo(std::vector<sptr<Accessi
                 FillWindowInfo(infos, iter->second);
             }
         }
+        TLOGND(WmsLogTag::WMS_ATTRIBUTE, "notify accessibility infos");
+        SessionManagerAgentController::GetInstance().NotifyAccessibilityWindowInfo(infos,
+            WindowUpdateType::WINDOW_UPDATE_ALL);
         return WMError::WM_OK;
     };
     return taskScheduler_->PostSyncTask(task, "GetAccessibilityWindowInfo");
@@ -12410,14 +12413,31 @@ void SceneSessionManager::GetAllSceneSessionForAccessibility(std::vector<sptr<Sc
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (const auto& [_, sceneSession] : sceneSessionMap_) {
         if (sceneSession == nullptr) {
+            TLOGD(WmsLogTag::WMS_ATTRIBUTE, "session is null");
             continue;
         }
         if (Session::IsScbCoreEnabled()) {
             if (!sceneSession->IsVisibleForAccessibility()) {
+                TLOGD(WmsLogTag::WMS_ATTRIBUTE, "unvisible: isSys=%{public}d, inWid=%{public}d, bundle=%{public}s, "
+                    "zOrder=%{public}u, displayId=%{public}" PRIu64 ", nodeId=%{public}d, "
+                    "sysTouchable=%{public}d, interactive=%{public}d, visibleForeground=%{public}d",
+                    sceneSession->GetSessionInfo().isSystem_, static_cast<int32_t>(sceneSession->GetPersistentId()),
+                    sceneSession->GetSessionInfo().bundleName_.c_str(), sceneSession->GetZOrder(),
+                    sceneSession->GetSessionProperty()->GetDisplayId(), sceneSession->GetUINodeId(),
+                    sceneSession->GetSystemTouchable(), sceneSession->GetForegroundInteractiveStatus(),
+                    sceneSession->IsVisibleForeground());
                 continue;
             }
         } else {
             if (!sceneSession->IsVisibleForAccessibility() || !IsSessionVisible(sceneSession)) {
+                TLOGD(WmsLogTag::WMS_ATTRIBUTE, "unvisible2: isSys=%{public}d, inWid=%{public}d, bundle=%{public}s, "
+                    "zOrder=%{public}u, displayId=%{public}" PRIu64 ", nodeId=%{public}d, "
+                    "sysTouchable=%{public}d, interactive=%{public}d, visibleForeground=%{public}d",
+                    sceneSession->GetSessionInfo().isSystem_, static_cast<int32_t>(sceneSession->GetPersistentId()),
+                    sceneSession->GetSessionInfo().bundleName_.c_str(), sceneSession->GetZOrder(),
+                    sceneSession->GetSessionProperty()->GetDisplayId(), sceneSession->GetUINodeId(),
+                    sceneSession->GetSystemTouchable(), sceneSession->GetForegroundInteractiveStatus(),
+                    sceneSession->IsVisibleForeground());
                 continue;
             }
         }
@@ -12429,6 +12449,9 @@ void SceneSessionManager::GetAllSceneSessionForAccessibility(std::vector<sptr<Sc
         if (sceneSession->GetSessionInfo().bundleName_.find("SCBDragScale") != std::string::npos) {
             continue;
         }
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "isSys=%{public}d, inWid=%{public}d, bundle=%{public}s, zOrder=%{public}u",
+            sceneSession->GetSessionInfo().isSystem_, static_cast<int32_t>(sceneSession->GetPersistentId()),
+            sceneSession->GetSessionInfo().bundleName_.c_str(), sceneSession->GetZOrder());
         sceneSessionList.push_back(sceneSession);
     }
 }
@@ -12448,6 +12471,7 @@ void SceneSessionManager::FilterSceneSessionCovered(std::vector<sptr<SceneSessio
     std::sort(sceneSessionList.begin(), sceneSessionList.end(), [](sptr<SceneSession> a, sptr<SceneSession> b) {
         return a->GetZOrder() > b->GetZOrder();
     });
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "in");
     std::vector<sptr<SceneSession>> result;
     std::unordered_map<DisplayId, std::shared_ptr<SkRegion>> unaccountedSpaceMap;
     for (const auto& sceneSession : sceneSessionList) {
@@ -12484,6 +12508,11 @@ void SceneSessionManager::FilterSceneSessionCovered(std::vector<sptr<SceneSessio
         result.push_back(sceneSession);
         unaccountedSpace->op(windowRegion, SkRegion::Op::kDifference_Op);
         if (unaccountedSpace->isEmpty()) {
+            TLOGD(WmsLogTag::WMS_ATTRIBUTE, "break after: isSys=%{public}d, inWid=%{public}d, bundle=%{public}s, "
+                "zOrder=%{public}u, displayId=%{public}" PRIu64 ", nodeId=%{public}d",
+                sceneSession->GetSessionInfo().isSystem_, static_cast<int32_t>(sceneSession->GetPersistentId()),
+                sceneSession->GetSessionInfo().bundleName_.c_str(), sceneSession->GetZOrder(),
+                sceneSession->GetSessionProperty()->GetDisplayId(), sceneSession->GetUINodeId());
             break;
         }
     }
@@ -12496,6 +12525,7 @@ void SceneSessionManager::NotifyAllAccessibilityInfo()
         TLOGD(WmsLogTag::WMS_MULTI_USER, "The user is in the background");
         return;
     }
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "in");
     std::vector<sptr<SceneSession>> sceneSessionList;
     GetAllSceneSessionForAccessibility(sceneSessionList);
     FilterSceneSessionCovered(sceneSessionList);
