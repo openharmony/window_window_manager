@@ -1220,6 +1220,7 @@ napi_value CreateJsSessionRecoverInfo(
     napi_set_named_property(env, objValue, "mainWindowTopmost", CreateJsValue(env, property->IsMainWindowTopmost()));
     napi_set_named_property(env, objValue, "isFullScreenWaterfallMode",
         CreateJsValue(env, property->GetIsFullScreenWaterfallMode()));
+    napi_set_named_property(env, objValue, "currentRotation", CreateJsValue(env, sessionInfo.currentRotation_));
     return objValue;
 }
 
