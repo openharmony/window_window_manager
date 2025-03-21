@@ -550,7 +550,7 @@ napi_value JsWindow::SetWindowPrivacyMode(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::SetTouchable(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetTouchable");
+    TLOGD(WmsLogTag::WMS_EVENT, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetTouchable(env, info) : nullptr;
 }
