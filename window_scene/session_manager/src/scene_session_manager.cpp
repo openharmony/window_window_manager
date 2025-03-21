@@ -765,13 +765,12 @@ WMError SceneSessionManager::SetForegroundWindowNum(int32_t windowNum)
         TLOGE(WmsLogTag::WMS_PC, "windowNum is invaild.");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    auto task = [this, windowNum] {
+    taskScheduler_->PostAsyncTask([this, windowNum]() {
         if (setForegroundWindowNumFunc_) {
-            TLOGI(WmsLogTag::WMS_PC, "windowNum:%{public}d", windowNum);
+            TLOGNI(WmsLogTag::WMS_PC, "max foreground windowNum: %{public}d", windowNum);
             setForegroundWindowNumFunc_(windowNum);
         }
-    };
-    taskScheduler_->PostTask(task, __func__);
+    }, __func__);
     return WMError::WM_OK;
 }
 
