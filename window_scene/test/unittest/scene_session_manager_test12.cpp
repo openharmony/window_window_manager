@@ -2035,14 +2035,14 @@ HWTEST_F(SceneSessionManagerTest12, UpdateSessionDisplayId1, Function | SmallTes
     KeyboardTestData keyboardTestData(0, 57256, 0, WindowType::WINDOW_TYPE_APP_SUB_WINDOW, false);
     keyboardTestData.SetCallingSessionId(86);
     ConstructKeyboardCallingWindowTestData(keyboardTestData);
-    ssm_->UpdateSessionDisplayId(86, 12);
     EXPECT_CALL(*wmAgentLiteMocker, NotifyCallingWindowDisplayChanged(_)).Times(0);
+    ssm_->UpdateSessionDisplayId(86, 12);
 
     keyboardTestData = {0, 57256, 0, WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, true};
     keyboardTestData.SetCallingSessionId(86);
     ConstructKeyboardCallingWindowTestData(keyboardTestData);
-    ssm_->UpdateSessionDisplayId(86, 12);
     EXPECT_CALL(*wmAgentLiteMocker, NotifyCallingWindowDisplayChanged(_)).Times(0);
+    ssm_->UpdateSessionDisplayId(86, 12);
 }
 
 /**
@@ -2070,8 +2070,8 @@ HWTEST_F(SceneSessionManagerTest12, UpdateSessionDisplayId2, Function | SmallTes
     // Add non-callingWindow
     ssm_->sceneSessionMap_.insert({90, sceneSession});
     // Change display id of non-callingWindow
-    ssm_->UpdateSessionDisplayId(90, 12);
     EXPECT_CALL(*wmAgentLiteMocker, NotifyCallingWindowDisplayChanged(_)).Times(0);
+    ssm_->UpdateSessionDisplayId(90, 12);
 }
 
 /**
@@ -2087,8 +2087,8 @@ HWTEST_F(SceneSessionManagerTest12, UpdateSessionDisplayId3, Function | SmallTes
     KeyboardTestData keyboardTestData(0, 57256, 0, WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, false);
     keyboardTestData.SetCallingSessionId(86);
     ConstructKeyboardCallingWindowTestData(keyboardTestData);
-    ssm_->UpdateSessionDisplayId(86, 12);
     EXPECT_CALL(*wmAgentLiteMocker, NotifyCallingWindowDisplayChanged(_)).Times(1);
+    ssm_->UpdateSessionDisplayId(86, 12);
 }
 }
 } // namespace Rosen
