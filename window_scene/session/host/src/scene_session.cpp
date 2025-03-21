@@ -705,6 +705,15 @@ WSError SceneSession::SetMoveAvailableArea(DisplayId displayId)
     if (systemConfig_.IsPhoneWindow() && isFoldable && statusBarRect.width_) {
         availableArea.width_ = statusBarRect.width_;
     }
+    if (PcFoldScreenManager::GetInstance().IsHalfFolded(GetScreenId())) {
+        ret = DisplayManager::GetInstance().GetExpandAvailableArea(GetSessionProperty()->GetDisplayId(),
+            availableArea);
+        if (ret != DMError::DM_OK) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to get available area, ret: %{public}d", ret);
+            return WSError::WS_ERROR_INVALID_DISPLAY;
+        }
+    }
+
     TLOGD(WmsLogTag::WMS_KEYBOARD,
           "the available area x is: %{public}d, y is: %{public}d, width is: %{public}d, height is: %{public}d",
           availableArea.posX_, availableArea.posY_, availableArea.width_, availableArea.height_);
@@ -3404,9 +3413,7 @@ void SceneSession::OnMoveDragCallback(SizeChangeReason reason)
     if (isCompatibleModeInPc && !IsFreeMultiWindowMode()) {
         HandleCompatibleModeMoveDrag(rect, reason);
     }
-    if (IsDragResizeWhenEnd(reason)) {
-        UpdateSizeChangeReason(reason);
-        OnSessionEvent(SessionEvent::EVENT_DRAG);
+    if (DragResizeWhenEndFilter(reason)) {
         return;
     }
     UpdateKeyFrameState(reason, rect);
@@ -3431,17 +3438,28 @@ void SceneSession::OnMoveDragCallback(SizeChangeReason reason)
     }
 }
 
-bool SceneSession::IsDragResizeWhenEnd(SizeChangeReason reason)
+bool SceneSession::DragResizeWhenEndFilter(SizeChangeReason reason)
 {
     auto property = GetSessionProperty();
-    if (property == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "property is null");
+    if (property == nullptr || moveDragController_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "property or controller is null");
         return true;
     }
     bool isPcOrPcModeMainWindow = (systemConfig_.IsPcWindow() || IsFreeMultiWindowMode()) &&
         WindowHelper::IsMainWindow(property->GetWindowType());
-    return reason == SizeChangeReason::DRAG && isPcOrPcModeMainWindow &&
+    bool isReasonMatched = reason == SizeChangeReason::DRAG || reason == SizeChangeReason::DRAG_END;
+    bool isResizeWhenEnd = isReasonMatched && isPcOrPcModeMainWindow && moveDragController_->GetStartDragFlag() &&
         GetDragResizeTypeDuringDrag() == DragResizeType::RESIZE_WHEN_DRAG_END;
+    if (isResizeWhenEnd) {
+        UpdateSizeChangeReason(reason);
+        if (reason == SizeChangeReason::DRAG) {
+            OnSessionEvent(SessionEvent::EVENT_DRAG);
+        } else {
+            TLOGI(WmsLogTag::WMS_LAYOUT, "trigger client rect change by scb");
+            OnSessionEvent(SessionEvent::EVENT_END_MOVE);
+        }
+    }
+    return isResizeWhenEnd;
 }
 
 WSError SceneSession::UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode,
@@ -7085,41 +7103,6 @@ std::unordered_set<int32_t> SceneSession::GetFingerPointerDownStatusList() const
     return fingerPointerDownStatusList_;
 }
 
-void SceneSession::SetBehindWindowFilterEnabled(bool enabled)
-{
-    TLOGD(WmsLogTag::WMS_LAYOUT, "id: %{public}d, enabled: %{public}d", GetPersistentId(), enabled);
-    auto surfaceNode = GetSurfaceNode();
-    if (surfaceNode == nullptr) {
-        TLOGW(WmsLogTag::WMS_LAYOUT, "fail to get surfaceNode");
-        return;
-    }
-    auto rsTransaction = RSTransactionProxy::GetInstance();
-    if (rsTransaction != nullptr) {
-        TLOGD(WmsLogTag::WMS_LAYOUT, "begin rsTransaction");
-        rsTransaction->Begin();
-    }
-
-    if (behindWindowFilterEnabledModifier_ == nullptr) {
-        auto behindWindowFilterEnabledProperty = std::make_shared<RSProperty<bool>>(enabled);
-        behindWindowFilterEnabledModifier_ = std::make_shared<RSBehindWindowFilterEnabledModifier>(
-            behindWindowFilterEnabledProperty);
-        surfaceNode->AddModifier(behindWindowFilterEnabledModifier_);
-    } else {
-        auto behindWindowFilterEnabledProperty = std::static_pointer_cast<RSProperty<bool>>(
-            behindWindowFilterEnabledModifier_->GetProperty());
-        if (!behindWindowFilterEnabledProperty) {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "fail to get property");
-            return;
-        }
-        behindWindowFilterEnabledProperty->Set(enabled);
-    }
-
-    if (rsTransaction != nullptr) {
-        TLOGD(WmsLogTag::WMS_LAYOUT, "commit rsTransaction");
-        rsTransaction->Commit();
-    }
-}
-
 void SceneSession::UpdateAllModalUIExtensions(const WSRect& globalRect)
 {
     PostTask([weakThis = wptr(this), where = __func__, globalRect] {
@@ -7624,5 +7607,14 @@ RotationChangeResult SceneSession::NotifyRotationChange(const RotationChangeInfo
         return { RectType::RELATIVE_TO_SCREEN, { 0, 0, 0, 0, } };
     }
     return sessionStage_->NotifyRotationChange(rotationChangeInfo);
+}
+
+WSError SceneSession::SetCurrentRotation(int32_t currentRotation)
+{
+    TLOGI(WmsLogTag::WMS_ROTATION, "currentRotation: %{public}d", currentRotation);
+    if (!sessionStage_) {
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return sessionStage_->SetCurrentRotation(currentRotation);
 }
 } // namespace OHOS::Rosen

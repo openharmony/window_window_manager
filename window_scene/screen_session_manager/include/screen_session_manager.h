@@ -380,6 +380,7 @@ public:
     void OnScreenChange(ScreenId screenId, ScreenEvent screenEvent,
         ScreenChangeReason reason = ScreenChangeReason::DEFAULT);
     void SetCoordinationFlag(bool isCoordinationFlag);
+    bool GetCoordinationFlag(void);
     DMError SetVirtualScreenMaxRefreshRate(ScreenId id, uint32_t refreshRate,
         uint32_t& actualRefreshRate) override;
 
@@ -496,6 +497,7 @@ private:
     std::shared_ptr<RSDisplayNode> GetDisplayNodeByDisplayId(DisplayId displayId);
     void RefreshMirrorScreenRegion(ScreenId screenId);
     void CalculateXYPosition(sptr<ScreenSession> screenSession);
+    bool IsSpecialApp();
 #ifdef DEVICE_STATUS_ENABLE
     void SetDragWindowScreenId(ScreenId screenId, ScreenId displayNodeScreenId);
 #endif // DEVICE_STATUS_ENABLE
@@ -510,6 +512,7 @@ private:
     bool IsExtendMode();
     bool IsScreenCasting();
     void SetScreenSkipProtectedWindowInner();
+    const std::set<std::string> g_packageNames_ {};
 
     /**
      * On/Off screen

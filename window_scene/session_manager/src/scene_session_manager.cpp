@@ -64,6 +64,7 @@
 #include "softbus_bus_center.h"
 #include "perform_reporter.h"
 #include "dms_reporter.h"
+#include "rdb/starting_window_rdb_manager.h"
 #include "res_sched_client.h"
 #include "anomaly_detection.h"
 #include "session/host/include/ability_info_manager.h"
@@ -1257,6 +1258,30 @@ void SceneSessionManager::ConfigWindowSizeLimits()
     item = config["subWindowSizeLimits"];
     if (item.IsMap()) {
         ConfigSubWindowSizeLimits(item);
+    }
+
+    item = config["dialogWindowSizeLimits"];
+    if (item.IsMap()) {
+        ConfigDialogWindowSizeLimits(item);
+    }
+}
+
+void SceneSessionManager::ConfigDialogWindowSizeLimits(const WindowSceneConfig::ConfigItem& dialogWindowSizeConifg)
+{
+    auto item = dialogWindowSizeConifg["miniWidth"];
+    if (item.IsInts()) {
+        auto numbers = *item.intsValue_;
+        if (numbers.size() == 1) {
+            systemConfig_.miniWidthOfDialogWindow_ = static_cast<uint32_t>(numbers[0]);
+        }
+    }
+
+    item = dialogWindowSizeConifg["miniHeight"];
+    if (item.IsInts()) {
+        auto numbers = *item.intsValue_;
+        if (numbers.size() == 1) {
+            systemConfig_.miniHeightOfDialogWindow_ = static_cast<uint32_t>(numbers[0]);
+        }
     }
 }
 
@@ -9250,6 +9275,7 @@ void SceneSessionManager::SetSessionVisibilityInfo(const sptr<SceneSession>& ses
     windowVisibilityInfo->SetBundleName(session->GetSessionInfo().bundleName_);
     windowVisibilityInfo->SetAbilityName(session->GetSessionInfo().abilityName_);
     windowVisibilityInfo->SetIsSystem(session->GetSessionInfo().isSystem_);
+    windowVisibilityInfo->SetZOrder(session->GetZOrder());
     windowVisibilityInfos.emplace_back(windowVisibilityInfo);
 
     visibilityInfo +=
@@ -9631,6 +9657,7 @@ void SceneSessionManager::WindowDestroyNotifyVisibility(const sptr<SceneSession>
         windowVisibilityInfo->SetBundleName(sceneSession->GetSessionInfo().bundleName_);
         windowVisibilityInfo->SetAbilityName(sceneSession->GetSessionInfo().abilityName_);
         windowVisibilityInfo->SetIsSystem(sceneSession->GetSessionInfo().isSystem_);
+        windowVisibilityInfo->SetZOrder(sceneSession->GetZOrder());
         windowVisibilityInfos.emplace_back(windowVisibilityInfo);
 #ifdef MEMMGR_WINDOW_ENABLE
         memMgrWindowInfos.emplace_back(new Memory::MemMgrWindowInfo(sceneSession->GetWindowId(),
@@ -9939,7 +9966,7 @@ void SceneSessionManager::GetKeyboardOccupiedAreaWithRotation(
     }
 
     std::pair<bool, WSRect> keyboardOccupiedArea = {true, {0, 0, 0, 0}};
-    const KeyboardLayoutParams keyboardLayoutParams = keyboardSession->GetSessionProperty()->GetKeyboardLayoutParams();
+    const KeyboardLayoutParams& keyboardLayoutParams = keyboardSession->GetSessionProperty()->GetKeyboardLayoutParams();
     Rect nextRect;
     if (rotation == 0 || rotation == 180 || rotation == 360) {
         nextRect = keyboardLayoutParams.PortraitPanelRect_;
@@ -9958,9 +9985,8 @@ void SceneSessionManager::GetKeyboardOccupiedAreaWithRotation(
         keyboardLayoutParams.gravity_ == WindowGravity::WINDOW_GRAVITY_FLOAT) {
         keyboardOccupiedArea.first = false;
     }
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "next keyboardOccupiedArea: [%{public}d, posX: %{public}d, poxY: %{public}d, "
-        "width: %{public}d, height: %{public}d]", keyboardOccupiedArea.first, keyboardOccupiedArea.second.posX_,
-        keyboardOccupiedArea.second.posY_, keyboardOccupiedArea.second.width_, keyboardOccupiedArea.second.height_);
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "next keyboardOccupiedArea: [%{public}d, %{public}s]", keyboardOccupiedArea.first,
+        keyboardOccupiedArea.second.ToString().c_str());
     avoidAreas.emplace_back(keyboardOccupiedArea);
 }
 
@@ -10064,6 +10090,9 @@ WSError SceneSessionManager::NotifyAINavigationBarShowStatus(bool isVisible, WSR
             for (auto persistentId : avoidAreaListenerSessionSet_) {
                 NotifySessionAINavigationBarChange(persistentId);
             }
+            rootSceneSession_->UpdateAvoidArea(
+                new AvoidArea(rootSceneSession_->GetAvoidAreaByType(AvoidAreaType::TYPE_NAVIGATION_INDICATOR)),
+                AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
         }
     }, __func__);
     return WSError::WS_OK;
@@ -11659,6 +11688,7 @@ WMError SceneSessionManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisi
                 session->IsFocused());
             windowVisibilityInfo->SetAppIndex(session->GetSessionInfo().appIndex_);
             windowVisibilityInfo->SetIsSystem(session->GetSessionInfo().isSystem_);
+            windowVisibilityInfo->SetZOrder(session->GetZOrder());
             infos.emplace_back(windowVisibilityInfo);
         }
         return WMError::WM_OK;

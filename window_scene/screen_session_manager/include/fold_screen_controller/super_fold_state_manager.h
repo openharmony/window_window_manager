@@ -57,6 +57,7 @@ public:
     FoldStatus MatchSuperFoldStatusToFoldStatus(SuperFoldStatus superFoldStatus);
 
     void SetSystemKeyboardStatus(bool isTpKeyboardOn = false);
+    bool GetSystemKeyboardStatus();
 private:
     std::atomic<SuperFoldStatus> curState_ = SuperFoldStatus::UNKNOWN;
     sptr<FoldCreaseRegion> currentSuperFoldCreaseRegion_ = nullptr;

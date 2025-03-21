@@ -78,7 +78,7 @@ private:
     static sptr<SettingObserver> rotationObserver_;
     static sptr<SettingObserver> screenSkipProtectedWindowObserver_;
     static sptr<SettingObserver> wireCastObserver_;
-    static sptr<SettingObserver> extendScreenDpi_;
+    static sptr<SettingObserver> extendScreenDpiObserver_;
 };
 } // namespace Rosen
 } // namespace OHOS
