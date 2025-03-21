@@ -1829,13 +1829,23 @@ WSError SceneSession::SetSystemBarProperty(WindowType type, SystemBarProperty sy
         GetPersistentId(), static_cast<uint32_t>(type),
         systemBarProperty.enable_, systemBarProperty.backgroundColor_, systemBarProperty.contentColor_,
         systemBarProperty.enableAnimation_, systemBarProperty.settingFlag_);
-    auto property = GetSessionProperty();
-    property->SetSystemBarProperty(type, systemBarProperty);
+    auto systemBarPropertyMap = GetSessionProperty()->GetSystemBarProperty();
+    if (!(static_cast<uint32_t>(SystemBarSettingFlag::PAGE_SETTING) &
+        static_cast<uint32_t>(systemBarProperty.settingFlag_))) {
+        GetSessionProperty()->SetSystemBarProperty(type, systemBarProperty);
+    } else {
+        systemBarProperty->settingFlag_ =
+            static_cast<SystemBarSettingFlag>(static_cast<uint32_t>(statusBarProp.settingFlag_) |
+            static_cast<uint32_t>(SystemBarSettingFlag::ALL_SETTING) &
+            (~static_cast<uint32_t>(SystemBarSettingFlag::PAGE_SETTING)));
+        
+    }
+    systemBarPropertyMap[type] = systemBarProperty;
     if (type == WindowType::WINDOW_TYPE_STATUS_BAR && systemBarProperty.enable_) {
         SetIsDisplayStatusBarTemporarily(false);
     }
     if (onSystemBarPropertyChange_) {
-        onSystemBarPropertyChange_(property->GetSystemBarProperty());
+        onSystemBarPropertyChange_(systemBarPropertyMap);
     }
     return WSError::WS_OK;
 }

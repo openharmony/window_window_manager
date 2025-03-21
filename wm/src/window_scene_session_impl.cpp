@@ -2481,14 +2481,18 @@ WMError SetSpecificBarPropertyForPage(WindowType type, const sptr<SystemBarPrope
         return WMError::WM_OK;
     }
     if (property == nullptr) {
-        TLOGI(WmsLogTag::WMS_IMMS, "property is nullptr, win %{public}u  use prop: type %{public}u ",
-            "%{public}u %{public}u %{public}x %{public}x %{public}u",
-            GetWindowId(), static_cast<uint32_t>(type), property.enable_, property.backgroundColor_,
-            property.contentColor_, property.enableAnimation_);
+        TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}u %{public}s] type %{public}u "
+            "%{public}u %{public}x %{public}x %{public}u %{public}u",
+            GetWindowId(), GetWindowName().c_str(), static_cast<uint32_t>(type), property.enable_,
+            property.backgroundColor_, property.contentColor_, property.enableAnimation_, property.settingFlag_);
         return NotifySpecificWindowSessionProperty(type, GetSystemBarPropertyByType(type));
     }
     property->settingFlag_ = static_cast<SystemBarSettingFlag>(
-        static_cast<uint32_t>(statusBarProp.settingFlag_) | static_cast<uint32_t>(SystemBarSettingFlag::ALL_SETTING));
+        static_cast<uint32_t>(statusBarProp.settingFlag_) | static_cast<uint32_t>(SystemBarSettingFlag::PAGE_SETTING));
+    TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}u %{public}s] type %{public}u "
+        "%{public}u %{public}x %{public}x %{public}u %{public}u",
+        GetWindowId(), GetWindowName().c_str(), static_cast<uint32_t>(type), property.enable_,
+        property.backgroundColor_, property.contentColor_, property.enableAnimation_, property.settingFlag_);
     return NotifySpecificWindowSessionProperty(type, *property);
 }
 
