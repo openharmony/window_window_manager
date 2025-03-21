@@ -816,5 +816,11 @@ struct PostProcessFocusState {
         reason_ = FocusChangeReason::DEFAULT;
     }
 };
+
+enum class SnapshotWindowNode : int32_t {
+    DEFAULT_WINDOW_NODE = 0,
+    LEASH_WINDOW_NODE,
+    APP_WINDOW_NODE,
+};
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H
