@@ -827,6 +827,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, ClearSession, Function | SmallTest | 
 
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, ssm_->ClearSession(nullptr));
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, ssm_->ClearSession(sceneSession));
+}
 
 /**
  * @tc.name: StartUIAbilityBySCBTimeoutCheck
