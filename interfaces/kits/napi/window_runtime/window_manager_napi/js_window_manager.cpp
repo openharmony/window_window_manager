@@ -1140,7 +1140,6 @@ napi_value JsWindowManager::OnSetWaterMarkImage(napi_env env, napi_callback_info
         return NapiGetUndefined(env);
     }
 
-    
     // 2: maximum params num; 2: index of callback
     napi_value lastParam = (argc <= 2) ? nullptr :
         (GetType(env, argv[2]) == napi_function ? argv[2] : nullptr);
