@@ -61,6 +61,7 @@
 #include "publish/screen_session_publish.h"
 #include "dms_xcollie.h"
 #include "screen_sensor_plugin.h"
+#include "screen_cache.h"
 #ifdef FOLD_ABILITY_ENABLE
 #include "fold_screen_controller/super_fold_sensor_manager.h"
 #include "fold_screen_controller/super_fold_state_manager.h"
@@ -138,6 +139,10 @@ constexpr float EXTEND_SCREEN_DPI_MAX_PARAMETER = 1.00f;
 static const constexpr char* SET_SETTING_DPI_KEY {"default_display_dpi"};
 const std::vector<std::string> ROTATION_DEFAULT = {"0", "1", "2", "3"};
 const std::vector<std::string> ORIENTATION_DEFAULT = {"0", "1", "2", "3"};
+const uint32_t MAX_INTERVAL_US = 1800000000; // 30分钟
+const int32_t MAP_SIZE = 300;
+const std::string NO_EXIST_BUNDLE_MANE = "null";
+ScreenCache<int32_t, std::string> g_uidVersionMap(MAP_SIZE, NO_EXIST_BUNDLE_MANE);
 
 const std::string SCREEN_UNKNOWN = "unknown";
 #ifdef WM_MULTI_SCREEN_ENABLE
@@ -152,8 +157,6 @@ const bool IS_COORDINATION_SUPPORT =
 const std::string FAULT_DESCRIPTION = "842003014";
 const std::string FAULT_SUGGESTION = "542003014";
 constexpr uint32_t COMMON_EVENT_SERVICE_ID = 3299;
-const std::set<std::string> packageNames {
-};
 
 // based on the bundle_util
 inline int32_t GetUserIdByCallingUid()
@@ -6463,14 +6466,8 @@ FoldDisplayMode ScreenSessionManager::GetFoldDisplayMode()
         TLOGD(WmsLogTag::DMS, "foldScreenController_ is null");
         return FoldDisplayMode::UNKNOWN;
     }
-    if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
-        std::string bundleName = SysCapUtil::GetBundleName();
-        TLOGI(WmsLogTag::DMS, "bundleName: %{public}s", bundleName.c_str());
-        auto it = packageNames.find(bundleName);
-        if (it != packageNames.end()) {
-            TLOGI(WmsLogTag::DMS, "MAIN");
-            return FoldDisplayMode::MAIN;
-        }
+    if (IsSpecialApp()) {
+        return FoldDisplayMode::MAIN;
     }
     return foldScreenController_->GetDisplayMode();
 #else
@@ -6497,14 +6494,8 @@ bool ScreenSessionManager::IsFoldable()
         TLOGI(WmsLogTag::DMS, "foldScreenController_ is null");
         return false;
     }
-    if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
-        std::string bundleName = SysCapUtil::GetBundleName();
-        TLOGI(WmsLogTag::DMS, "bundleName: %{public}s", bundleName.c_str());
-        auto it = packageNames.find(bundleName);
-        if (it != packageNames.end()) {
-            TLOGI(WmsLogTag::DMS, "enter false");
-            return false;
-        }
+    if (IsSpecialApp()) {
+        return false;
     }
     return foldScreenController_->IsFoldable();
 #else
@@ -6569,14 +6560,8 @@ FoldStatus ScreenSessionManager::GetFoldStatus()
         TLOGI(WmsLogTag::DMS, "foldScreenController_ is null");
         return FoldStatus::UNKNOWN;
     }
-    if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
-        std::string bundleName = SysCapUtil::GetBundleName();
-        TLOGI(WmsLogTag::DMS, "bundleName: %{public}s", bundleName.c_str());
-        auto it = packageNames.find(bundleName);
-        if (it != packageNames.end()) {
-            TLOGI(WmsLogTag::DMS, "UNKNOWN");
-            return FoldStatus::UNKNOWN;
-        }
+    if (IsSpecialApp()) {
+        return FoldStatus::UNKNOWN;
     }
     return foldScreenController_->GetFoldStatus();
 #else
@@ -8769,6 +8754,35 @@ void ScreenSessionManager::SetScreenSkipProtectedWindowInner()
             rsInterface_.SetCastScreenEnableSkipWindow(rsScreenId, requiredSkipWindow);
         }
     }
+}
+
+bool ScreenSessionManager::IsSpecialApp()
+{
+    if (!FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
+        return false;
+    }
+    static std::chrono::steady_clock::time_point lastRequestTime = std::chrono::steady_clock::now();
+    auto currentTime = std::chrono::steady_clock::now();
+    auto interval = std::chrono::duration_cast<std::chrono::microseconds>(currentTime - lastRequestTime).count();
+    std::string bundleName = NO_EXIST_BUNDLE_MANE;
+    int32_t currentPid = IPCSkeleton::GetCallingPid();
+    if (interval < MAX_INTERVAL_US) {
+        bundleName = g_uidVersionMap.Get(currentPid);
+    }
+    if (bundleName == NO_EXIST_BUNDLE_MANE) {
+        bundleName = SysCapUtil::GetBundleName();
+        TLOGI(WmsLogTag::DMS, "Get BundleName from IPC pid: %{public}d name: %{public}s",
+            currentPid, bundleName.c_str());
+        g_uidVersionMap.Set(currentPid, bundleName);
+    }
+    lastRequestTime = currentTime;
+    TLOGD(WmsLogTag::DMS, "bundleName: %{public}s", bundleName.c_str());
+    auto it = g_packageNames_.find(bundleName);
+    if (it != g_packageNames_.end()) {
+        TLOGI(WmsLogTag::DMS, "Is Special App");
+        return true;
+    }
+    return false;
 }
 
 bool ScreenSessionManager::IsOrientationNeedChanged()
