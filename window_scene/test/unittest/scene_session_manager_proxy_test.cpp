@@ -1476,6 +1476,25 @@ HWTEST_F(sceneSessionManagerProxyTest, MinimizeByWindowId, Function | SmallTest 
     WMError res = sceneSessionManagerProxy->MinimizeByWindowId(windowIds);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, res);
 }
+
+/**
+ * @tc.name: SetForegroundWindowNum
+ * @tc.desc: SetForegroundWindowNum
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, SetForegroundWindowNum, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+
+    int32_t windowNum = 1;
+    WMError res = sceneSessionManagerProxy->SetForegroundWindowNum(windowNum);
+    ASSERT_EQ(WMError::WM_OK, res);
+    sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(nullptr);
+    res = sceneSessionManagerProxy->SetForegroundWindowNum(windowNum);
+    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, res);
+}
 }  // namespace
 }
 }

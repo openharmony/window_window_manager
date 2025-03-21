@@ -143,6 +143,7 @@ using NotifyWatchFocusActiveChangeFunc = std::function<void(bool isActive)>;
 using NotifyRootSceneOccupiedAreaChangeFunc = std::function<void(const sptr<OccupiedAreaChangeInfo>& info)>;
 using GetRSNodeByStringIDFunc = std::function<std::shared_ptr<Rosen::RSNode>(const std::string& id)>;
 using SetTopWindowBoundaryByIDFunc = std::function<void(const std::string& id)>;
+using SetForegroundWindowNumFunc = std::function<void(int32_t windowNum)>;
 
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
@@ -489,6 +490,9 @@ public:
      */
     WSError SwitchFreeMultiWindow(bool enable);
     WSError GetFreeMultiWindowEnableState(bool& enable) override;
+    WMError SetForegroundWindowNum(int32_t windowNum) override;
+    void RegisterSetForegroundWindowNumCallback(SetForegroundWindowNumFunc&& func);
+
 
     const SystemSessionConfig& GetSystemSessionConfig() const;
     WSError NotifyEnterRecentTask(bool enterRecent);
@@ -1016,6 +1020,7 @@ private:
     DumpUITreeFunc dumpUITreeFunc_;
     ProcessVirtualPixelRatioChangeFunc processVirtualPixelRatioChangeFunc_ = nullptr;
     ProcessCloseTargetFloatWindowFunc closeTargetFloatWindowFunc_;
+    SetForegroundWindowNumFunc setForegroundWindowNumFunc_;
 
     AppWindowSceneConfig appWindowSceneConfig_;
 

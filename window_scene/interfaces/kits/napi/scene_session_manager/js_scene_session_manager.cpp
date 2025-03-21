@@ -80,6 +80,7 @@ const std::string START_PIP_FAILED_CB = "startPiPFailed";
 const std::string NOTIFY_APP_USE_CONTROL_LIST_CB = "updateAppUseControl";
 const std::string WATCH_GESTURE_CONSUME_RESULT_CB = "watchGestureConsumeResult";
 const std::string WATCH_FOCUS_ACTIVE_CHANGE_CB = "watchFocusActiveChange";
+const std::string SET_FOREGROUND_WINDOW_NUM_CB = "setForegroundWindowNum";
 
 const std::map<std::string, ListenerFunctionType> ListenerFunctionTypeMap {
     {CREATE_SYSTEM_SESSION_CB,     ListenerFunctionType::CREATE_SYSTEM_SESSION_CB},
@@ -98,6 +99,7 @@ const std::map<std::string, ListenerFunctionType> ListenerFunctionTypeMap {
     {NOTIFY_APP_USE_CONTROL_LIST_CB, ListenerFunctionType::NOTIFY_APP_USE_CONTROL_LIST_CB},
     {WATCH_GESTURE_CONSUME_RESULT_CB,          ListenerFunctionType::WATCH_GESTURE_CONSUME_RESULT_CB},
     {WATCH_FOCUS_ACTIVE_CHANGE_CB,             ListenerFunctionType::WATCH_FOCUS_ACTIVE_CHANGE_CB},
+    {SET_FOREGROUND_WINDOW_NUM_CB,             ListenerFunctionType::SET_FOREGROUND_WINDOW_NUM_CB},
 };
 } // namespace
 
@@ -1427,6 +1429,9 @@ void JsSceneSessionManager::ProcessRegisterCallback(ListenerFunctionType listene
             break;
         case ListenerFunctionType::WATCH_FOCUS_ACTIVE_CHANGE_CB:
             RegisterWatchFocusActiveChangeCallback();
+            break;
+        case ListenerFunctionType::SET_FOREGROUND_WINDOW_NUM_CB:
+            RegisterSetForegroundWindowNumCallback();
             break;
         default:
             break;
@@ -4242,6 +4247,29 @@ void JsSceneSessionManager::OnWatchFocusActiveChange(bool isActive)
         }
         napi_value isActiveValue = CreateJsValue(env, isActive);
         napi_value argv[] = { isActiveValue };
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    }, __func__);
+}
+
+void JsSceneSessionManager::RegisterSetForegroundWindowNumCallback()
+{
+    SceneSessionManager::GetInstance().RegisterSetForegroundWindowNumCallback([this](int32_t windowNum) {
+        TLOGND(WmsLogTag::WMS_PC, "RegisterSetForegroundWindowNumCallback called");
+        this->OnSetForegroundWindowNum(windowNum);
+    });
+}
+
+void JsSceneSessionManager::OnSetForegroundWindowNum(int32_t windowNum)
+{
+    TLOGD(WmsLogTag::WMS_PC, "in");
+    taskScheduler_->PostMainThreadTask([this, windowNum,
+        jsCallBack = GetJSCallback(SET_FOREGROUND_WINDOW_NUM_CB), env = env_] {
+        if (jsCallBack == nullptr) {
+            TLOGNE(WmsLogTag::WMS_PC, "jsCallBack is nullptr");
+            return;
+        }
+        napi_value windowNumValue = CreateJsValue(env, windowNum);
+        napi_value argv[] = { windowNumValue };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     }, __func__);
 }

@@ -134,6 +134,7 @@ public:
         TRANS_ID_REQUEST_FOCUS_STATUS_BY_SA,
         TRANS_ID_MINIMIZE_BY_WINDOW_ID,
         TRANS_ID_SET_PARENT_WINDOW,
+        TRANS_ID_SET_FOREGROUND_WINDOW_NUM,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;

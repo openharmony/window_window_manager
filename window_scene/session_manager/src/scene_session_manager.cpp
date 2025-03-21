@@ -751,6 +751,35 @@ WSError SceneSessionManager::GetFreeMultiWindowEnableState(bool& enable)
     return WSError::WS_OK;
 }
 
+WMError SceneSessionManager::SetForegroundWindowNum(int32_t windowNum)
+{
+    if (!SessionPermission::IsSystemServiceCalling()) {
+        TLOGE(WmsLogTag::WMS_PC, "The caller is not system service.");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    if (!systemConfig_.freeMultiWindowSupport_) {
+        TLOGE(WmsLogTag::WMS_PC, "device not support");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (windowNum <= 0) {
+        TLOGE(WmsLogTag::WMS_PC, "windowNum is invaild.");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    auto task = [this, windowNum] {
+        if (setForegroundWindowNumFunc_) {
+            TLOGI(WmsLogTag::WMS_PC, "windowNum:%{public}d", windowNum);
+            setForegroundWindowNumFunc_(windowNum);
+        }
+    };
+    taskScheduler_->PostTask(task, __func__);
+    return WMError::WM_OK;
+}
+
+void SceneSessionManager::RegisterSetForegroundWindowNumCallback(SetForegroundWindowNumFunc&& func)
+{
+    setForegroundWindowNumFunc_ = std::move(func);
+}
+
 WSError SceneSessionManager::SetSessionContinueState(const sptr<IRemoteObject>& token,
     const ContinueState& continueState)
 {
