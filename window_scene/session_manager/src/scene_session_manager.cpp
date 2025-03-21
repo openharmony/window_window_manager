@@ -1259,6 +1259,30 @@ void SceneSessionManager::ConfigWindowSizeLimits()
     if (item.IsMap()) {
         ConfigSubWindowSizeLimits(item);
     }
+
+    item = config["dialogWindowSizeLimits"];
+    if (item.IsMap()) {
+        ConfigDialogWindowSizeLimits(item);
+    }
+}
+
+void SceneSessionManager::ConfigDialogWindowSizeLimits(const WindowSceneConfig::ConfigItem& dialogWindowSizeConifg)
+{
+    auto item = dialogWindowSizeConifg["miniWidth"];
+    if (item.IsInts()) {
+        auto numbers = *item.intsValue_;
+        if (numbers.size() == 1) {
+            systemConfig_.miniWidthOfDialogWindow_ = static_cast<uint32_t>(numbers[0]);
+        }
+    }
+
+    item = dialogWindowSizeConifg["miniHeight"];
+    if (item.IsInts()) {
+        auto numbers = *item.intsValue_;
+        if (numbers.size() == 1) {
+            systemConfig_.miniHeightOfDialogWindow_ = static_cast<uint32_t>(numbers[0]);
+        }
+    }
 }
 
 void SceneSessionManager::ConfigMainWindowSizeLimits(const WindowSceneConfig::ConfigItem& mainWindowSizeConifg)
