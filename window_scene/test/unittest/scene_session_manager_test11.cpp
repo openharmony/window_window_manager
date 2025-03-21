@@ -749,6 +749,20 @@ HWTEST_F(SceneSessionManagerTest11, IsLastPiPWindowVisible, Function | SmallTest
     auto res = ssm_->IsLastPiPWindowVisible(surfaceId, lastVisibilityState);
     ASSERT_EQ(res, false);
 }
+
+/**
+ * @tc.name: GetStartupPage
+ * @tc.desc: GetStartupPage
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, GetStartupPage, Function | SmallTest | Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = BUNDLE_NAME;
+    sessionInfo.abilityName_ = BUNDLE_NAME;
+    StartingWindowInfo startingWindowInfo;
+}
 }  // namespace
 }
 }
