@@ -13577,39 +13577,61 @@ WSError SceneSessionManager::IsLastFrameLayoutFinished(bool& isLayoutFinished)
 
 WMError SceneSessionManager::IsWindowRectAutoSave(const std::string& key, bool& enabled, int persistentId)
 {
-    auto sceneSession = GetSceneSession(persistentId);
-    if (sceneSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "sceneSession %{public}d is nullptr", persistentId);
-        return WMError::WM_ERROR_INVALID_SESSION;
-    }
-    std::string specifiedKey = key;
-    if (sceneSession->GetSessionProperty()->GetIsSaveBySpecifiedFlag()) {
-        specifiedKey = key + sceneSession->GetSessionInfo().specifiedFlag_;
-    }
-    TLOGD(WmsLogTag::WMS_MAIN, "windowId: %{public}d, specifiedKey: %{public}s", persistentId, specifiedKey.c_str());
-    std::unique_lock<std::mutex> lock(isWindowRectAutoSaveMapMutex_);
-    if (auto iter = isWindowRectAutoSaveMap_.find(specifiedKey); iter != isWindowRectAutoSaveMap_.end()) {
-        enabled = iter->second;
-    } else {
-        enabled = false;
-    }
-    return WMError::WM_OK;
+    return taskScheduler_->PostSyncTask([key, &enabled, persistentId, this] {
+        auto sceneSession = GetSceneSession(persistentId);
+        if (sceneSession == nullptr) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "sceneSession %{public}d is nullptr", persistentId);
+            return WMError::WM_ERROR_INVALID_SESSION;
+        }
+        std::string specifiedKey = key;
+        if (auto iter = this->isSaveBySpecifiedFlagMap_.find(key);
+            iter != this->isSaveBySpecifiedFlagMap_.end()) {
+            if (iter->second) {
+                specifiedKey = key + sceneSession->GetSessionInfo().specifiedFlag_;
+            }
+        }
+        TLOGND(WmsLogTag::WMS_MAIN, "windowId: %{public}d, specifiedKey: %{public}s", persistentId, specifiedKey.c_str());
+        if (auto iter = this->isWindowRectAutoSaveMap_.find(specifiedKey);
+            iter != this->isWindowRectAutoSaveMap_.end()) {
+            enabled = iter->second;
+        } else {
+            enabled = false;
+        }
+        return WMError::WM_OK;
+    });
+    
 }
 
-void SceneSessionManager::SetIsWindowRectAutoSave(const std::string& key, bool enabled)
+void SceneSessionManager::SetIsWindowRectAutoSave(const std::string& key, bool enabled,
+    const std::string& abilityKey, bool isSaveBySpecifiedFlag)
 {
-    std::unique_lock<std::mutex> lock(isWindowRectAutoSaveMapMutex_);
-    if (auto iter = isWindowRectAutoSaveMap_.find(key); iter != isWindowRectAutoSaveMap_.end()) {
-        if (!enabled) {
-            isWindowRectAutoSaveMap_.erase(key);
+    taskScheduler_->PostSyncTask([key, enabled, abilityKey, isSaveBySpecifiedFlag ,this] {
+        if (auto iter = this->isSaveBySpecifiedFlagMap_.find(abilityKey);
+            iter != this->isSaveBySpecifiedFlagMap_.end()) {
+            if (!isSaveBySpecifiedFlag) {
+                this->isSaveBySpecifiedFlagMap_.erase(abilityKey);
+            } else {
+                iter->second = isSaveBySpecifiedFlag;
+            }
         } else {
-            iter->second = enabled;
+            if (isSaveBySpecifiedFlag) {
+                this->isSaveBySpecifiedFlagMap_.insert({abilityKey, isSaveBySpecifiedFlag});
+            }
         }
-    } else {
-        if (enabled) {
-            isWindowRectAutoSaveMap_.insert({key, enabled});
+        if (auto iter = this->isWindowRectAutoSaveMap_.find(key);
+            iter != this->isWindowRectAutoSaveMap_.end()) {
+            if (!enabled) {
+                this->isWindowRectAutoSaveMap_.erase(key);
+            } else {
+                iter->second = enabled;
+            }
+        } else {
+            if (enabled) {
+                this->isWindowRectAutoSaveMap_.insert({key, enabled});
+            }
         }
-    }
+        return WMError::WM_OK;
+    });
 }
 
 WMError SceneSessionManager::MinimizeMainSession(const std::string& bundleName, int32_t appIndex, int32_t userId)

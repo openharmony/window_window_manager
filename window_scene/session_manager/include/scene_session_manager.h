@@ -347,7 +347,8 @@ public:
     WMError IsPcWindow(bool& isPcWindow) override;
     WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode) override;
     WMError IsWindowRectAutoSave(const std::string& key, bool& enabled, int persistentId) override;
-    void SetIsWindowRectAutoSave(const std::string& key, bool enabled);
+    void SetIsWindowRectAutoSave(const std::string& key, bool enabled,
+        const std::string& abilityKey, bool isSaveBySpecifiedFlag);
     int32_t ChangeUIAbilityVisibilityBySCB(const sptr<SceneSession>& sceneSession, bool visibility,
         bool isFromClient = true);
     WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId) override;
@@ -1353,8 +1354,10 @@ private:
     /*
      * PC Window
      */
-    std::mutex isWindowRectAutoSaveMapMutex_;
+    //Whether to save window rect
     std::unordered_map<std::string, bool> isWindowRectAutoSaveMap_;
+    //Whether to save rect according to specifiedFlag
+    std::unordered_map<std::string, bool> isSaveBySpecifiedFlagMap_;
 
     /*
      * Window Lifecycle
