@@ -3304,6 +3304,13 @@ bool SceneSession::MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeR
 void SceneSession::OnThrowSlipAnimationStateChange(bool isAnimating)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT_PC, "status: %{public}d", isAnimating);
+    if (isAnimating) {
+        StartAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER, static_cast<int32_t>(AsyncTraceTaskId::THROW_SLIP_ANIMATION),
+            "SceneSession::ThrowSlipAnimation(id:%d)", GetPersistentId());
+    } else {
+        FinishAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER, static_cast<int32_t>(AsyncTraceTaskId::THROW_SLIP_ANIMATION),
+            "SceneSession::ThrowSlipAnimation(id:%d)", GetPersistentId());
+    }
     auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
     if (leashWinSurfaceNode) {
         leashWinSurfaceNode->SetUIFirstSwitch(isAnimating ? RSUIFirstSwitch::FORCE_DISABLE : RSUIFirstSwitch::NONE);
@@ -3347,10 +3354,10 @@ void SceneSession::NotifyFullScreenAfterThrowSlip(const WSRect& rect)
     }, __func__);
 }
 
-void SceneSession::ThrowSlipDirectly(const WSRectF& velocity)
+void SceneSession::ThrowSlipDirectly(ThrowSlipMode throwSlipMode, const WSRectF& velocity)
 {
     const char* const where = __func__;
-    PostTask([weakThis = wptr(this), velocity, where] {
+    PostTask([weakThis = wptr(this), throwSlipMode, velocity, where] {
         auto session = weakThis.promote();
         if (session == nullptr) {
             TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s session is nullptr", where);
@@ -3368,7 +3375,7 @@ void SceneSession::ThrowSlipDirectly(const WSRectF& velocity)
             return;
         }
         bool isFullScreen = session->IsFullScreenMovable();
-        controller->RecordStartMoveRectDirectly(session->GetSessionRect(), velocity, isFullScreen);
+        controller->RecordStartMoveRectDirectly(session->GetSessionRect(), throwSlipMode, velocity, isFullScreen);
         const WSRect& oriGlobalRect = session->GetSessionGlobalRect();
         WSRect globalRect = oriGlobalRect;
         if (!session->MoveUnderInteriaAndNotifyRectChange(globalRect, SizeChangeReason::UNDEFINED)) {
@@ -5643,9 +5650,9 @@ WSError SceneSession::OnContainerModalEvent(const std::string& eventName, const 
     TLOGI(WmsLogTag::WMS_LAYOUT_PC, "name: %{public}s, value: %{public}s", eventName.c_str(), eventValue.c_str());
     if (eventName == WINDOW_RELOCATION_EVENT) {
         if (eventValue == "true") {
-            ThrowSlipDirectly(VELOCITY_RELOCATION_TO_TOP);
+            ThrowSlipDirectly(ThrowSlipMode::BUTTON, VELOCITY_RELOCATION_TO_TOP);
         } else {
-            ThrowSlipDirectly(VELOCITY_RELOCATION_TO_BOTTOM);
+            ThrowSlipDirectly(ThrowSlipMode::BUTTON, VELOCITY_RELOCATION_TO_BOTTOM);
         }
     }
     return WSError::WS_OK;

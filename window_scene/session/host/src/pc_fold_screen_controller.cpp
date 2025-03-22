@@ -197,17 +197,17 @@ void PcFoldScreenController::RecordStartMoveRect(const WSRect& rect, bool isStar
     isStartFullScreen_ = isStartFullScreen;
     isStartWaterfallMode_ = isFullScreenWaterfallMode_;
     movingRectRecords_.clear();
-    isStartDirectly_ = false;
+    startThrowSlipMode_ = ThrowSlipMode::MOVE;
 }
 
-void PcFoldScreenController::RecordStartMoveRectDirectly(const WSRect& rect, const WSRectF& velocity,
-    bool isStartFullScreen)
+void PcFoldScreenController::RecordStartMoveRectDirectly(const WSRect& rect, ThrowSlipMode throwSlipMode,
+    const WSRectF& velocity, bool isStartFullScreen)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT_PC, "rect: %{public}s, isStartFullScreen: %{public}d, velocity: %{public}s",
         rect.ToString().c_str(), isStartFullScreen, velocity.ToString().c_str());
     RecordStartMoveRect(rect, isStartFullScreen);
     std::unique_lock<std::mutex> lock(moveMutex_);
-    isStartDirectly_ = true;
+    startThrowSlipMode_ = throwSlipMode;
     startVelocity_ = velocity;
     startVelocity_.posY_ *= MOVING_DIRECTLY_BUFF;
 }
@@ -220,7 +220,7 @@ void PcFoldScreenController::ResetRecords()
     isStartFullScreen_ = false;
     isStartWaterfallMode_ = false;
     movingRectRecords_.clear();
-    isStartDirectly_ = false;
+    startThrowSlipMode_ = ThrowSlipMode::INVALID;
     startVelocity_ = ZERO_RECTF;
 }
 
@@ -262,16 +262,17 @@ bool PcFoldScreenController::ThrowSlip(DisplayId displayId, WSRect& rect,
     WSRect startRect;
     bool startFullScreen;
     bool startWaterfallMode;
-    bool startDirectly;
+    ThrowSlipMode startThrowSlipMode;
     {
         std::unique_lock<std::mutex> lock(moveMutex_);
         manager.ResetArrangeRule(startMoveRect_);
         startRect = startMoveRect_;
         startFullScreen = isStartFullScreen_;
         startWaterfallMode = isStartWaterfallMode_;
-        startDirectly = isStartDirectly_;
+        startThrowSlipMode = startThrowSlipMode_;
     }
-    WSRect titleRect = { rect.posX_, rect.posY_, rect.width_, startDirectly ? rect.height_ : GetTitleHeight() };
+    WSRect titleRect = { rect.posX_, rect.posY_, rect.width_,
+        IsThrowSlipModeDirectly(startThrowSlipMode) ? rect.height_ : GetTitleHeight() };
     ScreenSide throwSide = manager.CalculateScreenSide(titleRect);
     const WSRectF& velocity = CalculateMovingVelocity();
     if (isFullScreenWaterfallMode_) {
@@ -298,10 +299,9 @@ bool PcFoldScreenController::ThrowSlip(DisplayId displayId, WSRect& rect,
         startWindowMode = startWaterfallMode ? ThrowSlipWindowMode::FULLSCREEN_WATERFALLMODE :
                                                ThrowSlipWindowMode::FULLSCREEN;
     }
-    ThrowSlipMode throwMode = startDirectly ? ThrowSlipMode::GESTURE : ThrowSlipMode::MOVE;
     auto sceneSession = weakSceneSession_.promote();
     std::string bundleName = sceneSession == nullptr ? "" : sceneSession->GetSessionInfo().bundleName_;
-    ThrowSlipHiSysEvent(bundleName, throwSide, startWindowMode, throwMode);
+    ThrowSlipHiSysEvent(bundleName, throwSide, startWindowMode, startThrowSlipMode);
     TLOGI(WmsLogTag::WMS_LAYOUT_PC, "throw to rect: %{public}s", rect.ToString().c_str());
     return true;
 }
@@ -341,7 +341,15 @@ void PcFoldScreenController::ThrowSlipFloatingRectDirectly(WSRect& rect, const W
 bool PcFoldScreenController::IsThrowSlipDirectly() const
 {
     std::unique_lock<std::mutex> lock(moveMutex_);
-    return isStartDirectly_;
+    return IsThrowSlipModeDirectly(startThrowSlipMode_);
+}
+
+bool PcFoldScreenController::IsThrowSlipModeDirectly(ThrowSlipMode throwSlipMode) const
+{
+    return throwSlipMode == ThrowSlipMode::BUTTON ||
+        throwSlipMode == ThrowSlipMode::THREE_FINGERS_SWIPE ||
+        throwSlipMode == ThrowSlipMode::FOUR_FINGERS_SWIPE ||
+        throwSlipMode == ThrowSlipMode::FIVE_FINGERS_SWIPE;
 }
 
 /**
@@ -493,7 +501,7 @@ WSRectF PcFoldScreenController::CalculateMovingVelocity()
 {
     WSRectF velocity = { 0.0f, 0.0f, 0.0f, 0.0f };
     std::unique_lock<std::mutex> lock(moveMutex_);
-    if (isStartDirectly_) {
+    if (IsThrowSlipModeDirectly(startThrowSlipMode_)) {
         return startVelocity_;
     }
     uint32_t recordsSize = static_cast<uint32_t>(movingRectRecords_.size());

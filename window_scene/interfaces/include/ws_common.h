@@ -827,5 +827,9 @@ struct PostProcessFocusState {
         reason_ = FocusChangeReason::DEFAULT;
     }
 };
+
+enum class AsyncTraceTaskId: int32_t {
+    THROW_SLIP_ANIMATION = 0,
+};
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H
