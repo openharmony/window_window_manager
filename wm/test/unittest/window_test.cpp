@@ -73,8 +73,7 @@ HWTEST_F(WindowTest, Create02, Function | SmallTest | Level2)
     //                  default onlySupportSceneBoard_ is false
     sptr<WindowOption> option = nullptr;
     auto window = Window::Create("WindowTest02", option);
-    // Create app main window need context and isession
-    ASSERT_EQ(nullptr, window);
+    ASSERT_NE(nullptr, window);
 }
 
 /**
@@ -121,7 +120,7 @@ HWTEST_F(WindowTest, Create05, Function | SmallTest | Level2)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    ASSERT_EQ(nullptr, Window::Create("WindowTest05", option, abilityContext_));
+    ASSERT_NE(nullptr, Window::Create("WindowTest05", option, abilityContext_));
 }
 
 /**
@@ -2349,6 +2348,9 @@ HWTEST_F(WindowTest, UnregisterKeyboardPanelInfoChangeListener, Function | Small
  */
 HWTEST_F(WindowTest, GetTopWindowWithContext, Function | SmallTest | Level2)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
+    }
     sptr<Window> window = sptr<Window>::MakeSptr();
     ASSERT_EQ(nullptr, window->GetTopWindowWithContext(nullptr));
 

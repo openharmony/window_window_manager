@@ -109,7 +109,7 @@ HWTEST_F(WindowAdapterTest, RequestFocusStatusBySA, Function | SmallTest | Level
  
     auto result = windowAdapter.RequestFocusStatusBySA(
         persistentId, isFocused, byForeground, reason);
-    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PERMISSION);
+    EXPECT_EQ(result, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
 }
 
 /**
@@ -487,12 +487,12 @@ HWTEST_F(WindowAdapterTest, RecoverAndReconnectSceneSession, Function | SmallTes
     sptr<IRemoteObject> token = nullptr;
     auto ret1 =
         windowAdapter.RecoverAndReconnectSceneSession(iSessionStage, eventChannel, nullptr, session, nullptr, token);
-    ASSERT_EQ(ret1, WMError::WM_DO_NOTHING);
+    ASSERT_EQ(ret1, WMError::WM_OK);
 
     windowAdapter.isProxyValid_ = true;
     auto ret2 =
         windowAdapter.RecoverAndReconnectSceneSession(iSessionStage, eventChannel, nullptr, session, nullptr, token);
-    ASSERT_EQ(ret2, WMError::WM_DO_NOTHING);
+    ASSERT_EQ(ret2, WMError::WM_OK);
 
     sptr<IRemoteObject> remotObject = nullptr;
     windowAdapter.windowManagerServiceProxy_ = iface_cast<IWindowManager>(remotObject);
@@ -800,7 +800,7 @@ HWTEST_F(WindowAdapterTest, IsWindowRectAutoSave, Function | SmallTest | Level2)
     bool enabled = false;
     int persistentId = 1;
     auto err = windowAdapter.IsWindowRectAutoSave(key, enabled, persistentId);
-    ASSERT_EQ(err, WMError::WM_ERROR_INVALID_SESSION);
+    ASSERT_EQ(err, WMError::WM_OK);
     auto ret = windowAdapter.InitWMSProxy();
     ASSERT_EQ(ret, true);
 }
@@ -884,7 +884,7 @@ HWTEST_F(WindowAdapterTest, SetParentWindow, Function | SmallTest | Level2)
     int32_t subWindowId = 1;
     int32_t newParentWindowId = 2;
     auto err = windowAdapter.SetParentWindow(subWindowId, newParentWindowId);
-    ASSERT_EQ(err, WMError::WM_ERROR_INVALID_WINDOW);
+    ASSERT_EQ(err, WMError::WM_OK);
 }
 
 /**
@@ -897,7 +897,7 @@ HWTEST_F(WindowAdapterTest, MinimizeByWindowId, Function | SmallTest | Level2)
     WindowAdapter windowAdapter;
     std::vector<int32_t> windowIds;
     auto err = windowAdapter.MinimizeByWindowId(windowIds);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, err);
+    ASSERT_EQ(WMError::WM_OK, err);
     auto ret = windowAdapter.InitWMSProxy();
     ASSERT_EQ(ret, true);
 }

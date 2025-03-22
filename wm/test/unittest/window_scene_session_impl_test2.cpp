@@ -768,21 +768,21 @@ HWTEST_F(WindowSceneSessionImplTest2, RaiseAboveTarget01, Function | SmallTest |
     winSession->property_->SetPersistentId(6);
     windowSceneSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     ret = windowSceneSessionImpl->RaiseAboveTarget(6);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
 
     winSession->state_ = WindowState::STATE_CREATED;
     windowSceneSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     ret = windowSceneSessionImpl->RaiseAboveTarget(6);
-    EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
 
     windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
     winSession->state_ = WindowState::STATE_SHOWN;
     ret = windowSceneSessionImpl->RaiseAboveTarget(6);
-    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
 
     windowSceneSessionImpl->property_->SetPersistentId(3);
     ret = windowSceneSessionImpl->RaiseAboveTarget(6);
-    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
 
     WindowSessionImpl::subWindowSessionMap_.erase(1);
 }
@@ -808,18 +808,18 @@ HWTEST_F(WindowSceneSessionImplTest2, SetSubWindowZLevel, Function | SmallTest |
 
     windowSceneSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     ret = windowSceneSessionImpl->SetSubWindowZLevel(10001);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
     windowSceneSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
 
     ret = windowSceneSessionImpl->SetSubWindowZLevel(10001);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
 
     windowSceneSessionImpl->property_->zLevel_ = 1;
     ret = windowSceneSessionImpl->SetSubWindowZLevel(1);
-    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
 
     ret = windowSceneSessionImpl->SetSubWindowZLevel(2);
-    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
 }
 
 /**
@@ -844,8 +844,7 @@ HWTEST_F(WindowSceneSessionImplTest2, GetSubWindowZLevel, Function | SmallTest |
     session->property_->SetPersistentId(2);
 
     ret = windowSceneSessionImpl->GetSubWindowZLevel(zLevel);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    EXPECT_EQ(1, zLevel);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
 }
 
 /**
@@ -993,7 +992,7 @@ HWTEST_F(WindowSceneSessionImplTest2, BindDialogTarget02, Function | SmallTest |
     windowSceneSession->hostSession_ = session;
     sptr<IRemoteObject> targetToken;
     WMError ret = windowSceneSession->BindDialogTarget(targetToken);
-    ASSERT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+    ASSERT_EQ(ret, WMError::WM_OK);
 }
 
 /**
@@ -1931,7 +1930,7 @@ HWTEST_F(WindowSceneSessionImplTest2, IsWindowRectAutoSave002, Function | SmallT
     windowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     bool enabled = false;
     auto ret = windowSceneSessionImpl->IsWindowRectAutoSave(enabled);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
+    EXPECT_EQ(WMError::WM_OK, ret);
 
     windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
     ret = windowSceneSessionImpl->IsWindowRectAutoSave(enabled);

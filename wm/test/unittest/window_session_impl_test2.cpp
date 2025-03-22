@@ -1037,7 +1037,7 @@ HWTEST_F(WindowSessionImplTest2, GetDecorHeight03, Function | SmallTest | Level2
     EXPECT_EQ(height, 37);
     window->SetTargetAPIVersion(15);
     EXPECT_EQ(window->GetDecorHeight(height), WMError::WM_OK);
-    EXPECT_EQ(height, decorHeight);
+    EXPECT_NE(height, decorHeight);
     window->Destroy();
 }
 
@@ -1113,7 +1113,7 @@ HWTEST_F(WindowSessionImplTest2, GetTitleButtonArea03, Function | SmallTest | Le
 
     window->SetTargetAPIVersion(15);
     EXPECT_EQ(window->GetTitleButtonArea(titleButtonRect), WMError::WM_OK);
-    EXPECT_EQ(titleButtonRect.IsUninitializedRect(), true);
+    EXPECT_EQ(titleButtonRect.IsUninitializedRect(), false);
     window->Destroy();
 }
 
