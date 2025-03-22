@@ -2944,8 +2944,8 @@ napi_value JsSceneSessionManager::OnUpdateMaximizeMode(napi_env env, napi_callba
 
 napi_value JsSceneSessionManager::OnUpdateSessionDisplayId(napi_env env, napi_callback_info info)
 {
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
+    size_t argc = ARGC_FIVE;
+    napi_value argv[ARGC_FIVE] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_TWO) {
         WLOGFE("Argc is invalid: %{public}zu", argc);
@@ -2967,7 +2967,13 @@ napi_value JsSceneSessionManager::OnUpdateSessionDisplayId(napi_env env, napi_ca
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    SceneSessionManager::GetInstance().UpdateSessionDisplayId(persistentId, screenId);
+
+    WSRect winRect = { 0, 0, 0, 0 };
+    if (argc > ARGC_TWO && ConvertRectInfoFromJs(env, argv[ARG_INDEX_TWO], winRect) && !winRect.IsEmpty()) {
+        SceneSessionManager::GetInstance().UpdateSessionDisplayId(persistentId, screenId, winRect);
+    } else {
+        SceneSessionManager::GetInstance().UpdateSessionDisplayId(persistentId, screenId);
+    }
     return NapiGetUndefined(env);
 }
 
