@@ -87,13 +87,17 @@ public:
     }
 };
 
-class TestWindowVisibilityStateListener : public IWindowInfoChangedListener {
+class TestIKeyboardCallingWindowDisplayChangedListener : public IKeyboardCallingWindowDisplayChangedListener {
 public:
-    void OnWindowInfoChanged(
-        const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList) override
+    void OnCallingWindowDisplayChanged(const CallingWindowInfo& callingWindowInfo)
     {
-        WLOGI("TestWindowUpdateListener");
-    };
+        info = callingWindowInfo;
+        isNotified = true;
+    }
+
+private:
+    CallingWindowInfo info = {0, -1, 0, 0};
+    bool isNotified = false;
 };
 
 class WindowManagerLiteTest : public testing::Test {
