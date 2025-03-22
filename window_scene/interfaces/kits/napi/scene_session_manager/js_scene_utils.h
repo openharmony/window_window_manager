@@ -228,6 +228,7 @@ public:
     using Task = std::function<void()>;
     explicit MainThreadScheduler(napi_env env);
     void PostMainThreadTask(Task&& localTask, std::string traceInfo = "Unnamed", int64_t delayTime = 0);
+    void RemoveMainThreadTaskByName(const std::string taskName);
 
 private:
     void GetMainEventHandler();

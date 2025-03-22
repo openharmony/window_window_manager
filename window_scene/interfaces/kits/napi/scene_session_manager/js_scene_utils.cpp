@@ -2048,4 +2048,11 @@ void MainThreadScheduler::PostMainThreadTask(Task&& localTask, std::string trace
         napi_send_event(env_, task, napi_eprio_immediate);
     }
 }
+
+void MainThreadScheduler::RemoveMainThreadTaskByName(const std::string taskName)
+{
+    if (handler_ && !handler_->GetEventRunner()->IsCurrentRunnerThread()) {
+        handler_->RemoveTask("wms:" + taskName);
+    }
+}
 } // namespace OHOS::Rosen
