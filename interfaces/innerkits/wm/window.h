@@ -718,8 +718,7 @@ public:
      * @param rotationChangeResult result of rotation
      *
      */
-    virtual void OnRotationChange(const RotationChangeInfo& rotationChangeInfo,
-        RotationChangeResult& rotationChangeResult) {}
+    virtual void OnRotationChange(const RotationChangeInfo& rotationChangeInfo, sptr<Window> window) {}
 };
 
 static WMError DefaultCreateErrCode = WMError::WM_OK;
@@ -2176,6 +2175,11 @@ public:
      * @return WMError
      */
     virtual WMError CloseDirectly() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief notify rotation change result.
+     */
+    virtual void NotifyRotationChangeResult(const RotationChangeResult rotationChangeResult) {}
 
     /**
      * @brief start move main window. It is called by ACE when title is moved.

@@ -577,6 +577,7 @@ protected:
     void FlushLayoutSize(int32_t width, int32_t height) override;
     sptr<FutureCallback> layoutCallback_ = nullptr;
     sptr<FutureCallback> getTargetInfoCallback_ = nullptr;
+    sptr<FutureCallback> getRotationResultFuture_ = nullptr;
     void UpdateVirtualPixelRatio(const sptr<Display>& display);
     WMError GetVirtualPixelRatio(float& vpr);
     mutable std::recursive_mutex transformMutex_;
@@ -864,6 +865,7 @@ private:
      * Window Rotation
      */
     void NotifyClientOrientationChange();
+    void NotifyRotationChangeResult(const RotationChangeResult rotationChangeResult) override;
 
     /*
      * keyboard
