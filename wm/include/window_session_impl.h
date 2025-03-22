@@ -336,7 +336,10 @@ public:
     virtual WMError GetCallingWindowRect(Rect& rect) const override;
     virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
     WMError SetContinueState(int32_t continueState) override;
-    virtual WMError CheckWindowRect(uint32_t& width, uint32_t& height) { return WMError::WM_ERROR_INVALID_PARAM; }
+    virtual WMError CheckAndModifyWindowRect(uint32_t& width, uint32_t& height)
+    {
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
 
     /*
      * Multi Window
