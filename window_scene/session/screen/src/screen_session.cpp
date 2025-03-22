@@ -1945,6 +1945,19 @@ void ScreenSession::Resize(uint32_t width, uint32_t height, bool isFreshBoundsSy
     RSTransaction::FlushImplicitTransaction();
 }
 
+void ScreenSession::SetFrameGravity(Gravity gravity)
+{
+    {
+        std::unique_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
+        if (displayNode_ == nullptr) {
+            TLOGE(WmsLogTag::DMS, "displayNode_ is null, setFrameGravity failed");
+            return;
+        }
+        displayNode_->SetFrameGravity(gravity);
+    }
+    RSTransaction::FlushImplicitTransaction();
+}
+
 bool ScreenSession::UpdateAvailableArea(DMRect area)
 {
     if (property_.GetAvailableArea() == area) {
