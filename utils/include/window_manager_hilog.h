@@ -74,7 +74,7 @@ enum class WmsLogTag : uint8_t {
     END = 256,                 // Last one, do not use
 };
 
-extern const std::unordered_map<WmsLogTag, const char *> DOMAIN_CONTENTS_MAP;
+const char* getDomainContents(WmsLogTag tag);
 #ifdef IS_RELEASE_VERSION
 #define WMS_FILE_NAME ""
 #else
@@ -89,7 +89,7 @@ extern const std::unordered_map<WmsLogTag, const char *> DOMAIN_CONTENTS_MAP;
 #define PRINT_TLOG(level, tag, ...)                                                                     \
     do {                                                                                                \
         uint32_t hilogDomain = HILOG_DOMAIN_WINDOW + static_cast<uint32_t>(tag);                        \
-        const char *domainContent = DOMAIN_CONTENTS_MAP.count(tag) ? DOMAIN_CONTENTS_MAP.at(tag) : "";  \
+        const char *domainContent = getDomainContents(tag);                                             \
         HILOG_IMPL(LOG_CORE, level, hilogDomain, domainContent, ##__VA_ARGS__);                         \
     } while (0)
 
