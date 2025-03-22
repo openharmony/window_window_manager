@@ -7484,6 +7484,7 @@ WSError SceneSession::UpdateDensity()
         Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING && !isDefaultDensityEnabled_) {
         UpdateNewSizeForPCWindow();
     }
+    SetTempRect({ 0, 0, 0, 0 });
     SaveLastDensity();
     return Session::UpdateDensity();
 }
@@ -7511,21 +7512,24 @@ void SceneSession::UpdateNewSizeForPCWindow()
             return;
         }
 
+        WSRect winRect = winRect_;
+        if (!tempRect_.IsEmpty()) {
+            winRect = tempRect_;
+        }
         float newVpr = display->GetVirtualPixelRatio();
-        if (CalcNewWindowRectIfNeed(availableArea, newVpr)) {
-            WSRect rect = winRect_;
-            CalcNewClientRectForSuperFold(rect);
-            sessionStage_->UpdateRect(rect, SizeChangeReason::UPDATE_DPI_SYNC);
-            NotifySessionRectChange(winRect_, SizeChangeReason::UPDATE_DPI_SYNC);
+        if (CalcNewWindowRectIfNeed(availableArea, newVpr, winRect)) {
+            CalcNewClientRectForSuperFold(winRect);
+            sessionStage_->UpdateRect(winRect, SizeChangeReason::UPDATE_DPI_SYNC);
+            NotifySessionRectChange(winRect, SizeChangeReason::UPDATE_DPI_SYNC);
             TLOGI(WmsLogTag::WMS_LAYOUT_PC, "left: %{public}d, top: %{public}d, width: %{public}u, "
-                "height: %{public}u, Id: %{public}u", winRect_.posX_, winRect_.posY_, winRect_.width_,
-                winRect_.height_, GetPersistentId());
+                "height: %{public}u, Id: %{public}u", winRect.posX_, winRect.posY_, winRect.width_,
+                winRect.height_, GetPersistentId());
         }
     }
     displayChangedByMoveDrag_ = false;
 }
 
-bool SceneSession::CalcNewWindowRectIfNeed(DMRect& availableArea, float newVpr)
+bool SceneSession::CalcNewWindowRectIfNeed(DMRect& availableArea, float newVpr, WSRect& winRect)
 {
     float currVpr = 0.0f;
     if (auto property = GetSessionProperty()) {
@@ -7538,10 +7542,10 @@ bool SceneSession::CalcNewWindowRectIfNeed(DMRect& availableArea, float newVpr)
             "Id: %{public}u", currVpr, newVpr, GetPersistentId());
         return false;
     }
-    int32_t left = winRect_.posX_;
-    int32_t top = winRect_.posY_;
-    uint32_t width = static_cast<uint32_t>(winRect_.width_ * newVpr / currVpr);
-    uint32_t height = static_cast<uint32_t>(winRect_.height_ * newVpr / currVpr);
+    int32_t left = winRect.posX_;
+    int32_t top = winRect.posY_;
+    uint32_t width = static_cast<uint32_t>(winRect.width_ * newVpr / currVpr);
+    uint32_t height = static_cast<uint32_t>(winRect.height_ * newVpr / currVpr);
     int32_t topThreshold = availableArea.posY_;
     int32_t bottomThreshold = static_cast<int32_t>(availableArea.posY_ + availableArea.height_);
 
@@ -7560,11 +7564,11 @@ bool SceneSession::CalcNewWindowRectIfNeed(DMRect& availableArea, float newVpr)
         left = MathHelper::Min(left, static_cast<int32_t>(availableArea.width_ - width));
         left = MathHelper::Max(left, 0);
     }
-    winRect_.width_ = width;
-    winRect_.height_ = height;
+    winRect.width_ = width;
+    winRect.height_ = height;
     if (needMove) {
-        winRect_.posX_ = left;
-        winRect_.posY_ = top;
+        winRect.posX_ = left;
+        winRect.posY_ = top;
     }
     return true;
 }
