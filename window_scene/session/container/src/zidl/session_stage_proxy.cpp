@@ -1830,22 +1830,22 @@ RotationChangeResult SessionStageProxy::NotifyRotationChange(const RotationChang
         TLOGE(WmsLogTag::WMS_ROTATION, "WriteInterfaceToken failed");
         return rotationChangeResult;
     }
-    if (!data.WriteUint32(static_cast<uint32_t>(rotationChangeInfo.type))) {
+    if (!data.WriteUint32(static_cast<uint32_t>(rotationChangeInfo.type_))) {
         TLOGE(WmsLogTag::WMS_ROTATION, "Write type failed");
         return rotationChangeResult;
     }
-    if (!data.WriteUint32(rotationChangeInfo.orientation)) {
+    if (!data.WriteUint32(rotationChangeInfo.orientation_)) {
         TLOGE(WmsLogTag::WMS_ROTATION, "Write orientation failed");
         return rotationChangeResult;
     }
-    if (!data.WriteUint64(rotationChangeInfo.displayId)) {
+    if (!data.WriteUint64(rotationChangeInfo.displayId_)) {
         TLOGE(WmsLogTag::WMS_ROTATION, "Write displayId failed");
         return rotationChangeResult;
     }
-    if (!data.WriteInt32(rotationChangeInfo.displayRect.posX_) ||
-        !data.WriteInt32(rotationChangeInfo.displayRect.posY_) ||
-        !data.WriteUint32(rotationChangeInfo.displayRect.width_) ||
-        !data.WriteUint32(rotationChangeInfo.displayRect.height_)) {
+    if (!data.WriteInt32(rotationChangeInfo.displayRect_.posX_) ||
+        !data.WriteInt32(rotationChangeInfo.displayRect_.posY_) ||
+        !data.WriteUint32(rotationChangeInfo.displayRect_.width_) ||
+        !data.WriteUint32(rotationChangeInfo.displayRect_.height_)) {
         TLOGE(WmsLogTag::WMS_ROTATION, "Write display rect failed");
         return rotationChangeResult;
     }
@@ -1861,7 +1861,7 @@ RotationChangeResult SessionStageProxy::NotifyRotationChange(const RotationChang
         return rotationChangeResult;
     }
 
-    if (rotationChangeInfo.type == RotationChangeType::WINDOW_DID_ROTATE) {
+    if (rotationChangeInfo.type_ == RotationChangeType::WINDOW_DID_ROTATE) {
         TLOGI(WmsLogTag::WMS_ROTATION, "WINDOW_DID_ROTATE return");
         return rotationChangeResult;
     }
@@ -1870,17 +1870,17 @@ RotationChangeResult SessionStageProxy::NotifyRotationChange(const RotationChang
         TLOGE(WmsLogTag::WMS_ROTATION, "read rectType failed");
         return rotationChangeResult;
     }
-    rotationChangeResult.rectType = static_cast<RectType>(rectType);
-    if (!reply.ReadInt32(rotationChangeResult.windowRect.posX_) ||
-        !reply.ReadInt32(rotationChangeResult.windowRect.posY_) ||
-        !reply.ReadUint32(rotationChangeResult.windowRect.width_) ||
-        !reply.ReadUint32(rotationChangeResult.windowRect.height_)) {
+    rotationChangeResult.rectType_ = static_cast<RectType>(rectType);
+    if (!reply.ReadInt32(rotationChangeResult.windowRect_.posX_) ||
+        !reply.ReadInt32(rotationChangeResult.windowRect_.posY_) ||
+        !reply.ReadUint32(rotationChangeResult.windowRect_.width_) ||
+        !reply.ReadUint32(rotationChangeResult.windowRect_.height_)) {
         TLOGE(WmsLogTag::WMS_ROTATION, "read window rect failed");
         return rotationChangeResult;
     }
     TLOGI(WmsLogTag::WMS_ROTATION, "receive type:%{public}d, rect: [%{public}d, %{public}d, %{public}d, %{public}d]",
-        rectType, rotationChangeResult.windowRect.posX_, rotationChangeResult.windowRect.posY_,
-        rotationChangeResult.windowRect.width_, rotationChangeResult.windowRect.height_);
+        rectType, rotationChangeResult.windowRect_.posX_, rotationChangeResult.windowRect_.posY_,
+        rotationChangeResult.windowRect_.width_, rotationChangeResult.windowRect_.height_);
     return rotationChangeResult;
 }
 

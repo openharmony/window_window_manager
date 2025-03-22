@@ -14023,7 +14023,7 @@ WMError SceneSessionManager::MinimizeByWindowId(const std::vector<int32_t>& wind
     return WMError::WM_OK;
 }
 
-std::vector<sptr<SceneSession>> SceneSessionManager::GetActiveSceneSessionCopy()
+const std::vector<sptr<SceneSession>> SceneSessionManager::GetActiveSceneSessionCopy()
 {
     std::map<int32_t, sptr<SceneSession>> sceneSessionMapCopy;
     {

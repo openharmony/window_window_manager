@@ -1906,7 +1906,7 @@ void WindowSceneSessionImpl::LimitWindowSize(uint32_t& width, uint32_t& height)
     UpdateFloatingWindowSizeBySizeLimits(width, height);
 }
 
-WMError WindowSceneSessionImpl::CheckWindowRect(uint32_t& width, uint32_t& height)
+WMError WindowSceneSessionImpl::CheckAndModifyWindowRect(uint32_t& width, uint32_t& height)
 {
     if (width == 0 || height == 0) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "width or height should greater than 0!");
@@ -1938,7 +1938,7 @@ WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height, const Re
     TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d resize %{public}u %{public}u",
         property_->GetPersistentId(), width, height);
 
-    if (CheckWindowRect(width, height) != WMError::WM_OK) {
+    if (CheckAndModifyWindowRect(width, height) != WMError::WM_OK) {
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
     const auto& windowRect = GetRect();

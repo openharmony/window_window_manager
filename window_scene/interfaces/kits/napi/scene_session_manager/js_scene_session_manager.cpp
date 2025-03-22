@@ -4307,7 +4307,7 @@ std::unordered_map<int32_t, RotationChangeResult> JsSceneSessionManager::GetRota
             continue;
         }
         RotationChangeResult rotationChangeResult = curSession->NotifyRotationChange(rotationChangeInfo);
-        if (rotationChangeResult.windowRect.width_ != 0 && rotationChangeResult.windowRect.height_ != 0) {
+        if (rotationChangeResult.windowRect_.width_ != 0 && rotationChangeResult.windowRect_.height_ != 0) {
             rotationChangeResultMap[curSession->GetPersistentId()] = rotationChangeResult;
         }
     }
@@ -4336,9 +4336,9 @@ napi_value JsSceneSessionManager::OnNotifyRotationChange(napi_env env, napi_call
         return NapiGetUndefined(env);
     }
     TLOGI(WmsLogTag::WMS_ROTATION, "info type: %{public}d, rect: [%{public}d, %{public}d, %{public}d, %{public}d]",
-        static_cast<uint32_t>(rotationChangeInfo.type), rotationChangeInfo.displayRect.posX_,
-        rotationChangeInfo.displayRect.posY_, rotationChangeInfo.displayRect.width_,
-        rotationChangeInfo.displayRect.height_);
+        static_cast<uint32_t>(rotationChangeInfo.type_), rotationChangeInfo.displayRect_.posX_,
+        rotationChangeInfo.displayRect_.posY_, rotationChangeInfo.displayRect_.width_,
+        rotationChangeInfo.displayRect_.height_);
 
     std::vector<sptr<SceneSession>> activeSceneSessionMapCopy =
         SceneSessionManager::GetInstance().GetActiveSceneSessionCopy();
