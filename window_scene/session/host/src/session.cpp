@@ -3561,7 +3561,7 @@ void Session::RecordWindowStateAttachExceptionEvent(bool isAttach)
         "ATTACH_STATE", isAttach,
         "SESSION_STATE", static_cast<uint32_t>(GetSessionState()));
     if (ret != 0) {
-        TLOGNE(WmsLogTag::WMS_LIFE, "write HiSysEvent error, ret: %{public}d", ret);
+        TLOGE(WmsLogTag::WMS_LIFE, "write HiSysEvent error, ret: %{public}d", ret);
     }
 }
 
