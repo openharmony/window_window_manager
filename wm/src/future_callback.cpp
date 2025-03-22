@@ -45,7 +45,7 @@ WSError FutureCallback::OnUpdateTargetOrientationInfo(OrientationInfo& info)
     return WSError::WS_DO_NOTHING;
 }
 
-void FutureCallback::OnUpdateRotationResult(const RotationChangeResult rotationChangeResult)
+void FutureCallback::OnUpdateRotationResult(RotationChangeResult rotationChangeResult)
 {
     TLOGI(WmsLogTag::WMS_ROTATION, "update the rotation change result");
     getRotationResultFuture_.SetValue(rotationChangeResult);

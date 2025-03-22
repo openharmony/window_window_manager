@@ -2179,7 +2179,7 @@ public:
     /**
      * @brief notify rotation change result.
      */
-    virtual void NotifyRotationChangeResult(const RotationChangeResult rotationChangeResult) {}
+    virtual void NotifyRotationChangeResult(RotationChangeResult rotationChangeResult) {}
 
     /**
      * @brief start move main window. It is called by ACE when title is moved.

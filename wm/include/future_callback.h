@@ -39,7 +39,7 @@ public:
     // rotation change
     RotationChangeResult GetRotationResult(long timeout);
     void ResetRotationResultLock();
-    void OnUpdateRotationResult(const RotationChangeResult rotationChangeResult);
+    void OnUpdateRotationResult(RotationChangeResult rotationChangeResult);
 
 private:
     RunnableFuture<Rect> resizeFuture_{};
