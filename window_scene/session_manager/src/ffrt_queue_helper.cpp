@@ -48,4 +48,9 @@ bool FfrtQueueHelper::SubmitTaskAndWait(std::function<void()>&& task, uint64_t t
     timeoutFuture->GetResult(timeout, isTimeout);
     return isTimeout;
 }
+
+void FfrtQueueHelper::SubmitTask(std::function<void()>&& task)
+{
+    ffrtQueueHelper_->submit(task);
+}
 } // namespace OHOS::Rosen

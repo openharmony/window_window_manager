@@ -137,7 +137,6 @@ constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PAD = 8;
 constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PHONE = 3;
 constexpr uint32_t LIFECYCLE_ISOLATE_VERSION = 20;
 constexpr uint64_t NOTIFY_START_ABILITY_TIMEOUT = 3000;
-constexpr uint64_t NOTIFY_CLEAR_SESSION_TIMEOUT = 3000;
 constexpr uint64_t START_UI_ABILITY_TIMEOUT = 3000;
 
 const std::map<std::string, OHOS::AppExecFwk::DisplayOrientation> STRING_TO_DISPLAY_ORIENTATION_MAP = {
@@ -11002,15 +11001,12 @@ void SceneSessionManager::NotifyClearSession(int32_t collaboratorType, int32_t p
 {
     TLOGD(WmsLogTag::WMS_LIFE, "id: %{public}d, type: %{public}d", persistentId, collaboratorType);
     if (auto collaborator = GetCollaboratorByType(collaboratorType)) {
-        bool isTimeout = ffrtQueueHelper_->SubmitTaskAndWait([collaborator, persistentId] {
-            TLOGNI(WmsLogTag::WMS_LIFE, "called NotifyClearMission %{public}d", persistentId);
-            collaborator->NotifyClearMission(persistentId);
-        }, NOTIFY_CLEAR_SESSION_TIMEOUT);
-
-        if (isTimeout) {
-            TLOGE(WmsLogTag::WMS_LIFE, "called NotifyClearMission timeout, persistent id: %{public}d",
-                persistentId);
-        }
+        const char* const where = __func__;
+        ffrtQueueHelper_->SubmitTask([collaboratorType, persistentId, where] {
+            int32_t ret = collaborator->NotifyClearMission(persistentId);
+            TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s called clear mission ret: %{public}d, persistent id: %{public}d",
+                where, ret, persistentId);
+        });
     }
 }
 
