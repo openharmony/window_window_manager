@@ -758,14 +758,14 @@ void JsWindowListener::OnWindowWillClose(sptr<Window> window)
         AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
-void JsWindowListener::OnRotationChange(const RotationChangeInfo& rotationChangeInfo,
-    RotationChangeResult& rotationChangeResult)
+void JsWindowListener::OnRotationChange(const RotationChangeInfo& rotationChangeInfo, sptr<Window> window)
 {
-    auto jsCallback = [self = weakRef_, rotationChangeInfo, &rotationChangeResult, env = env_] () {
+    auto jsCallback = [self = weakRef_, rotationChangeInfo, weakWindow = wptr<Window>, env = env_] () {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsWindowListener::OnRotationChange");
         auto thisListener = self.promote();
-        if (thisListener == nullptr || env == nullptr) {
-            TLOGE(WmsLogTag::WMS_ROTATION, "this listener or env is nullptr");
+        auto window = weakWindow.promote();
+        if (thisListener == nullptr || env == nullptr || window == nullptr) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "this listener or env or window is nullptr");
             return;
         }
         HandleScope handleScope(env);
@@ -777,9 +777,11 @@ void JsWindowListener::OnRotationChange(const RotationChangeInfo& rotationChange
         napi_value argv[] = { rotationInfoObj };
         napi_value rotationChangeResultObj = thisListener->CallJsMethod(WINDOW_ROTATION_CHANGE_CB.c_str(), argv,
             ArraySize(argv));
+        RotationChangeResult rotationChangeResult;
         if (rotationChangeResultObj != nullptr) {
             GetRotationResultFromJs(env, rotationChangeResultObj, rotationChangeResult);
         }
+        window->NotifyRotationChangeResult(rotationChangeResult);
     };
 
     if (!eventHandler_||
@@ -787,7 +789,7 @@ void JsWindowListener::OnRotationChange(const RotationChangeInfo& rotationChange
         TLOGE(WmsLogTag::WMS_ROTATION, "get main event handler failed or current is alreay main thread!");
         return jsCallback();
     }
-    eventHandler_->PostSyncTask(jsCallback, "wms:JsWindowListener::OnRotationChange",
+    eventHandler_->PostTask(jsCallback, "wms:JsWindowListener::OnRotationChange", 0,
         AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 } // namespace Rosen
