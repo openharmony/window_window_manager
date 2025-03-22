@@ -660,6 +660,8 @@ public:
     void PutSnapshotToCache(int32_t persistentId);
     void RemoveSnapshotFromCache(int32_t persistentId);
     void GetStartupPage(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo);
+    void RegisterSaveSnapshotFunc(const sptr<SceneSession>& sceneSession);
+    void RegisterRemoveSnapshotFunc(const sptr<SceneSession>& sceneSession);
 
 protected:
     SceneSessionManager();
