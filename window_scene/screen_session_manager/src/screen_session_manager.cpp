@@ -928,22 +928,39 @@ void ScreenSessionManager::GetAndMergeEdidInfo(sptr<ScreenSession> screenSession
 {
     ScreenId screenId = screenSession->GetScreenId();
     struct BaseEdid edid;
+    int32_t fillInfo = 4;
     if (!GetEdid(screenId, edid)) {
         TLOGE(WmsLogTag::DMS, "get EDID failed.");
         return;
     }
     std::string serialNumber = ConvertEdidToString(edid);
+    TLOGI(WmsLogTag::DMS, "serialNumber: %{public}s", serialNumber.c_str());
     screenSession->SetSerialNumber(serialNumber);
     if (g_isPcDevice) {
-        screenSession->SetName(edid.manufacturerName_ + std::to_string(screenSession->GetScreenId()));
+        if (!edid.displayProductName_.empty()) {
+            screenSession->SetName(edid.displayProductName_);
+        } else {
+            std::string productCodeStr;
+            std::string connector = "-";
+            std::ostringstream oss;
+            oss << std::hex << std::uppercase << std::setw(fillInfo) << std::setfill('0') << edid.productCode_;
+            productCodeStr = oss.str();
+            screenSession->SetName(edid.manufacturerName_ + connector + productCodeStr);
+        }
     }
 }
 
 std::string ScreenSessionManager::ConvertEdidToString(const struct BaseEdid edid)
 {
-    std::string edidInfo = "_";
-    edidInfo = edidInfo + std::to_string(edid.serialNumber_);
-    return edidInfo;
+    std::string edidInfo = edid.manufacturerName_ + std::to_string(edid.productCode_)
+        + std::to_string(edid.serialNumber_) + std::to_string(edid.weekOfManufactureOrModelYearFlag_)
+        + std::to_string(edid.yearOfManufactureOrModelYear_);
+    TLOGI(WmsLogTag::DMS, "edidInfo: %{public}s", edidInfo.c_str());
+    std::hash<std::string> hasher;
+    std::size_t hashValue = hasher(edidInfo);
+    std::ostringstream oss;
+    oss << std::hex << std::uppercase << hashValue;
+    return oss.str();
 }
 
 bool ScreenSessionManager::RecoverRestoredMultiScreenMode(sptr<ScreenSession> screenSession)
