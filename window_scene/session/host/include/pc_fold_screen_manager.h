@@ -45,9 +45,12 @@ enum class ThrowSlipWindowMode : int32_t {
 };
 
 enum class ThrowSlipMode : int32_t {
+    INVALID = -1,
     MOVE = 0,
-    GESTURE = 1,
     BUTTON = 2,
+    THREE_FINGERS_SWIPE = 3,
+    FOUR_FINGERS_SWIPE = 4,
+    FIVE_FINGERS_SWIPE = 5,
 };
 
 class PcFoldScreenManager {

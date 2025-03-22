@@ -1592,7 +1592,7 @@ HWTEST_F(SceneSessionTest5, ThrowSlipDirectly, Function | SmallTest | Level2)
     sptr<MainSession> mainSession = sptr<MainSession>::MakeSptr(info, nullptr);
     WSRect rect = { 100, 100, 400, 400 };
     mainSession->winRect_ = rect;
-    mainSession->ThrowSlipDirectly(WSRectF { 0.0f, 0.0f, 0.0f, 0.0f });
+    mainSession->ThrowSlipDirectly(ThrowSlipMode::THREE_FINGERS_SWIPE, WSRectF { 0.0f, 0.0f, 0.0f, 0.0f });
     EXPECT_EQ(mainSession->winRect_, rect);
 }
 

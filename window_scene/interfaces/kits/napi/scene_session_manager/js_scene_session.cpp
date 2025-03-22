@@ -6210,21 +6210,30 @@ napi_value JsSceneSession::OnThrowSlipDirectly(napi_env env, napi_callback_info 
     size_t argc = ARGC_FOUR;
     napi_value argv[ARGC_FOUR] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc != ARGC_TWO) {
+    if (argc != ARGC_THREE) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
+
+    ThrowSlipMode throwSlipMode = ThrowSlipMode::INVALID;
+    napi_value nativeValue = argv[0];
+    if (nativeValue == nullptr || !ConvertThrowSlipModeFromJs(env, nativeValue, throwSlipMode)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Failed to convert parameter to throwSlipMode");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
     double vx = 0.0;
-    if (!ConvertFromJsValue(env, argv[0], vx)) {
+    if (!ConvertFromJsValue(env, argv[ARGC_ONE], vx)) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Failed to convert parameter to vx");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     double vy = 0.0;
-    if (!ConvertFromJsValue(env, argv[ARGC_ONE], vy)) {
+    if (!ConvertFromJsValue(env, argv[ARGC_TWO], vy)) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Failed to convert parameter to vy");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
@@ -6236,7 +6245,7 @@ napi_value JsSceneSession::OnThrowSlipDirectly(napi_env env, napi_callback_info 
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "session is nullptr, id:%{public}d", persistentId_);
         return NapiGetUndefined(env);
     }
-    session->ThrowSlipDirectly(WSRectF {static_cast<float>(vx), static_cast<float>(vy), 0.0f, 0.0f});
+    session->ThrowSlipDirectly(throwSlipMode, WSRectF {static_cast<float>(vx), static_cast<float>(vy), 0.0f, 0.0f});
     return NapiGetUndefined(env);
 }
 
