@@ -2040,7 +2040,7 @@ HWTEST_F(SceneSessionTest5, UpdateDensity, Function | SmallTest | Level2)
         .name = "updateDensity",
         .property = screenProperty,
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
     ASSERT_NE(nullptr, screenSession);
     
     session->UpdateDensity();

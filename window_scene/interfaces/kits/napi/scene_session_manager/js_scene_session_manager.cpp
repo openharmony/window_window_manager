@@ -2969,7 +2969,7 @@ napi_value JsSceneSessionManager::OnUpdateSessionDisplayId(napi_env env, napi_ca
     }
 
     WSRect winRect = { 0, 0, 0, 0 };
-    if (ConvertRectInfoFromJs(env, argv[ARG_INDEX_TWO], winRect) && !winRect.IsEmpty()) {
+    if (argc > ARGC_TWO && ConvertRectInfoFromJs(env, argv[ARG_INDEX_TWO], winRect) && !winRect.IsEmpty()) {
         SceneSessionManager::GetInstance().UpdateSessionDisplayId(persistentId, screenId, winRect);
     } else {
         SceneSessionManager::GetInstance().UpdateSessionDisplayId(persistentId, screenId);
