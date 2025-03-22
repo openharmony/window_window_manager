@@ -165,7 +165,7 @@ void TentMotionEventCallback(const MotionSensorEvent& motionData)
         TLOGE(WmsLogTag::DMS, "tent mode datalen %{public}d", motionData.dataLen);
         return;
     }
-    int32_t tentData = motionData.data[0];
+    uint32_t tentData = static_cast<uint32_t>(motionData.data[0]);
     int realHall = static_cast<int>(tentData & 0xFF);
     if (realHall != 0 && realHall != 1) {
         TLOGW(WmsLogTag::DMS, "tent mode invalid hall : %{public}d", realHall);
