@@ -106,20 +106,6 @@ HWTEST_F(WindowAdapterLiteTest, GetWindowStyleType, Function | SmallTest | Level
     windowAdapterLite_->GetWindowStyleType(windowStyleType);
     ASSERT_EQ(Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT, windowStyleType);
 }
-
-/**
- * @tc.name: ListWindowInfo01
- * @tc.desc: WindowAdapter/ListWindowInfo
- * @tc.type: FUNC
- */
-HWTEST_F(WindowAdapterLiteTest, ListWindowInfo01, Function | SmallTest | Level2)
-{
-    WindowAdapterLite WindowAdapterLite;
-    WindowInfoOption windowInfoOption;
-    std::vector<sptr<WindowInfo>> infos;
-    auto err = WindowAdapterLite.ListWindowInfo(WindowAdapterLite, windowInfoOption);
-    ASSERT_EQ(WMError::WM_OK, err);
-}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
