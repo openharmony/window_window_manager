@@ -191,15 +191,15 @@ void SCBSystemSession::UpdatePointerArea(const WSRect& rect)
 void SCBSystemSession::SetSkipSelfWhenShowOnVirtualScreen(bool isSkip)
 {
     TLOGD(WmsLogTag::WMS_SCB, "Set Skip Self, isSkip: %{public}d", isSkip);
-    PostTask([weakThis = wptr(this), isSkip]() {
+    PostTask([weakThis = wptr(this), isSkip, where = __func__]() {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGE(WmsLogTag::WMS_SCB, "session is null");
+            TLOGNE(WmsLogTag::WMS_SCB, "%{public}s session is null", where);
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         std::shared_ptr<RSSurfaceNode> surfaceNode = session->GetSurfaceNode();
         if (!surfaceNode) {
-            TLOGE(WmsLogTag::WMS_SCB, "surfaceNode_ is null");
+            TLOGNE(WmsLogTag::WMS_SCB, "%{public}s surfaceNode_ is null", where);
             return WSError::WS_OK;
         }
         if (session->specificCallback_ != nullptr
@@ -207,7 +207,25 @@ void SCBSystemSession::SetSkipSelfWhenShowOnVirtualScreen(bool isSkip)
             session->specificCallback_->onSetSkipSelfWhenShowOnVirtualScreen_(surfaceNode->GetId(), isSkip);
         }
         return WSError::WS_OK;
-    }, "SetSkipSelf");
+    }, __func__);
+}
+
+void SCBSystemSession::SetSkipEventOnCastPlus(bool isSkip)
+{
+    TLOGD(WmsLogTag::WMS_SCB, "Set Skip event on cast plus, wid: %{public}d, isSkip: %{public}d",
+        GetPersistentId(), isSkip);
+    PostTask([weakThis = wptr(this), isSkip, where = __func__]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_SCB, "%{public}s session is null", where);
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        if (session->specificCallback_ != nullptr
+            && session->specificCallback_->onSetSkipEventOnCastPlus_ != nullptr) {
+            session->specificCallback_->onSetSkipEventOnCastPlus_(session->GetPersistentId(), isSkip);
+        }
+        return WSError::WS_OK;
+    }, __func__);
 }
 
 bool SCBSystemSession::IsVisibleForeground() const

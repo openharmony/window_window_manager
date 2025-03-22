@@ -1659,6 +1659,18 @@ void SceneSessionManager::SetSkipSelfWhenShowOnVirtualScreen(uint64_t surfaceNod
     rsInterface_.SetVirtualScreenBlackList(INVALID_SCREEN_ID, skipSurfaceNodeIds_);
 }
 
+WMError SceneSessionManager::SetSkipEventOnCastPlusInner(int32_t windowId, bool isSkip)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Wid: %{public}d, isSkip: %{public}d", windowId, isSkip);
+    auto sceneSession = GetSceneSession(windowId);
+    if(sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "SceneSession is nullptr, Wid: %{public}d", windowId);
+        return;
+    }
+    sceneSession->GetSessionProperty()->SetSkipEventOnCastPlus(isSkip);
+    FlushWindowInfoToMMI(true);
+}
+
 sptr<KeyboardSession::KeyboardSessionCallback> SceneSessionManager::CreateKeyboardSessionCallback()
 {
     auto keyboardCb = sptr<KeyboardSession::KeyboardSessionCallback>::MakeSptr();

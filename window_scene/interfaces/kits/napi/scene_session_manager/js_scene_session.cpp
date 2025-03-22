@@ -394,6 +394,7 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
     BindNativeFunction(env, objValue, "setSkipDraw", moduleName, JsSceneSession::SetSkipDraw);
     BindNativeFunction(env, objValue, "setSkipSelfWhenShowOnVirtualScreen", moduleName,
         JsSceneSession::SetSkipSelfWhenShowOnVirtualScreen);
+    BindNativeFunction(env, objValue, "setSkipEventOnCastPlus", moduleName, JsSceneSession::SetSkipEventOnCastPlus);
     BindNativeFunction(env, objValue, "setCompatibleModeInPc", moduleName,
         JsSceneSession::SetCompatibleModeInPc);
     BindNativeFunction(env, objValue, "setUniqueDensityDpiFromSCB", moduleName,
@@ -1955,6 +1956,13 @@ napi_value JsSceneSession::SetSkipSelfWhenShowOnVirtualScreen(napi_env env, napi
     WLOGFI("[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetSkipSelfWhenShowOnVirtualScreen(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::SetSkipEventOnCastPlus(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnSetSkipEventOnCastPlus(env, info) : nullptr;
 }
 
 napi_value JsSceneSession::SetSystemSceneOcclusionAlpha(napi_env env, napi_callback_info info)
@@ -5270,6 +5278,34 @@ napi_value JsSceneSession::OnSetSkipSelfWhenShowOnVirtualScreen(napi_env env, na
     }
     session->SetSkipSelfWhenShowOnVirtualScreen(isSkip);
     WLOGFI("end");
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnSetSkipEventOnCastPlus(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != 1) { // 1: params num
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    bool isSkip = false;
+    if (!ConvertFromJsValue(env, argv[0], isSkip)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to convert parameter to bool");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "session is nullptr, id:%{public}d", persistentId_);
+        return NapiGetUndefined(env);
+    }
+    session->SetSkipEventOnCastPlus(isSkip);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "end");
     return NapiGetUndefined(env);
 }
 
