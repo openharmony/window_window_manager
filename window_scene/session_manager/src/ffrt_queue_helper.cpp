@@ -51,6 +51,6 @@ bool FfrtQueueHelper::SubmitTaskAndWait(std::function<void()>&& task, uint64_t t
 
 void FfrtQueueHelper::SubmitTask(std::function<void()>&& task)
 {
-    ffrtQueueHelper_->submit(task);
+    ffrtQueue_->submit(task);
 }
 } // namespace OHOS::Rosen
