@@ -2533,9 +2533,32 @@ HWTEST_F(SceneSessionManagerTest, SetAppKeyFramePolicy, Function | SmallTest | L
     info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
-    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
     KeyFramePolicy keyFramePolicy;
+    // empty map
+    ASSERT_EQ(ssm_->SetAppKeyFramePolicy(info.bundleName_, keyFramePolicy), WMError::WM_OK);
+    auto getKeyFramePolicy = ssm_->GetAppKeyFramePolicy(info.bundleName_);
+    ASSERT_EQ(getKeyFramePolicy.dragResizeType_, keyFramePolicy.dragResizeType_);
     keyFramePolicy.dragResizeType_ = DragResizeType::RESIZE_KEY_FRAME;
+    ASSERT_EQ(ssm_->SetAppKeyFramePolicy(info.bundleName_, keyFramePolicy), WMError::WM_OK);
+    getKeyFramePolicy = ssm_->GetAppKeyFramePolicy(info.bundleName_);
+    ASSERT_EQ(getKeyFramePolicy.dragResizeType_, keyFramePolicy.dragResizeType_);
+    // valid
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    ASSERT_EQ(ssm_->SetAppKeyFramePolicy(info.bundleName_, keyFramePolicy), WMError::WM_OK);
+    getKeyFramePolicy = ssm_->GetAppKeyFramePolicy(info.bundleName_);
+    ASSERT_EQ(getKeyFramePolicy.dragResizeType_, keyFramePolicy.dragResizeType_);
+    // nullptr
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), nullptr});
+    ASSERT_EQ(ssm_->SetAppKeyFramePolicy(info.bundleName_, keyFramePolicy), WMError::WM_OK);
+    getKeyFramePolicy = ssm_->GetAppKeyFramePolicy(info.bundleName_);
+    ASSERT_EQ(getKeyFramePolicy.dragResizeType_, keyFramePolicy.dragResizeType_);
+    // empty name
+    ASSERT_EQ(ssm_->SetAppKeyFramePolicy("", keyFramePolicy), WMError::WM_ERROR_INVALID_PARAM);
+    // sub window
+    info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession2);
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession2});
     ASSERT_EQ(ssm_->SetAppKeyFramePolicy(info.bundleName_, keyFramePolicy), WMError::WM_OK);
 }
 

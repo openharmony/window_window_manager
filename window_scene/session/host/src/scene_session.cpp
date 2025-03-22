@@ -3455,8 +3455,12 @@ bool SceneSession::DragResizeWhenEndFilter(SizeChangeReason reason)
         if (reason == SizeChangeReason::DRAG) {
             OnSessionEvent(SessionEvent::EVENT_DRAG);
         } else {
-            TLOGI(WmsLogTag::WMS_LAYOUT, "trigger client rect change by scb");
-            OnSessionEvent(SessionEvent::EVENT_END_MOVE);
+            if (systemConfig_.IsPcWindow()) {
+                TLOGI(WmsLogTag::WMS_LAYOUT, "trigger client rect change by scb");
+                OnSessionEvent(SessionEvent::EVENT_END_MOVE);
+            } else {
+                return false;
+            }
         }
     }
     return isResizeWhenEnd;
@@ -3470,8 +3474,7 @@ WSError SceneSession::UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsC
         TLOGW(WmsLogTag::WMS_LAYOUT, "keyFrameCloneNode_ already exist");
         return WSError::WS_OK;
     }
-    auto surfaceNode = GetSurfaceNode();
-    if (!rsCanvasNode || !surfaceNode || !sessionStage_) {
+    if (!rsCanvasNode || !sessionStage_) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "get nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
@@ -3480,9 +3483,7 @@ WSError SceneSession::UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsC
         TLOGD(WmsLogTag::WMS_LAYOUT, "begin rsTransaction");
     }
     keyFrameCloneNode_ = rsCanvasNode;
-    keyFrameCloneNode_->SetBounds(0, 0, winRect_.width_, winRect_.height_);
-    keyFrameCloneNode_->SetFrame(0, 0, winRect_.width_, winRect_.height_);
-    surfaceNode->AddChild(keyFrameCloneNode_, -1);
+    TLOGD(WmsLogTag::WMS_LAYOUT, "change key frame node to %{public}" PRIu64 "", keyFrameCloneNode_->GetId());
     sessionStage_->LinkKeyFrameCanvasNode(keyFrameCloneNode_);
     if (rsTransaction != nullptr) {
         rsTransaction->Commit();
@@ -3578,10 +3579,12 @@ void SceneSession::OnKeyFrameNextVsync(uint64_t count)
     uint64_t nowTimeStamp = std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now().time_since_epoch()).count();
     uint64_t duration = nowTimeStamp - lastKeyFrameDragStamp_;
-    if (!keyFrameDragPauseNoticed_ && duration >= keyFramePolicy_.interval_) {
+    uint64_t minDelay = 100;
+    if (!keyFrameDragPauseNoticed_ && !keyFrameAnimating_ && duration >= minDelay) {
         TLOGNI(WmsLogTag::WMS_LAYOUT, "to notice for key frame drag paused");
         keyFrameDragPauseNoticed_ = true;
         lastKeyFrameDragStamp_ = nowTimeStamp;
+        lastKeyFrameStamp_ = nowTimeStamp;
         winRect_ = lastKeyFrameDragRect_;
         NotifyClientToUpdateRect("OnMoveDragCallback", nullptr);
     }
@@ -6729,6 +6732,10 @@ bool SceneSession::NotifyServerToUpdateRect(const SessionUIParam& uiParam, SizeC
 {
     if (!GetForegroundInteractiveStatus()) {
         TLOGD(WmsLogTag::WMS_PIPELINE, "skip recent, id:%{public}d", GetPersistentId());
+        return false;
+    }
+    if (keyFramePolicy_.running_) {
+        TLOGI(WmsLogTag::WMS_PIPELINE, "skip for key frame running, id:%{public}d", GetPersistentId());
         return false;
     }
     if (uiParam.rect_.IsInvalid()) {
