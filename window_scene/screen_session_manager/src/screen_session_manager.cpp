@@ -7212,7 +7212,32 @@ void ScreenSessionManager::SwitchScbNodeHandle(int32_t newUserId, int32_t newScb
     currentScbPId_ = newScbPid;
     scbSwitchCV_.notify_all();
     oldScbDisplayMode_ = GetFoldDisplayMode();
+    NotifyCastWhenSwitchScbNode();
 #endif
+}
+
+void ScreenSessionManager::NotifyCastWhenSwitchScbNode()
+{
+    std::map<ScreenId, sptr<ScreenSession>> screenSessionMapCopy;
+    {
+        std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+        screenSessionMapCopy = screenSessionMap_;
+    }
+    for (const auto& sessionIt : screenSessionMapCopy) {
+        auto screenSession = sessionIt.second;
+        if (screenSession == nullptr) {
+            TLOGE(WmsLogTag::DMS, "screenSession is nullptr, screenId:%{public}" PRIu64"", sessionIt.first);
+            continue;
+        }
+        if (screenSession->GetScreenProperty().GetScreenType() != ScreenType::REAL ||
+            !IsDefaultMirrorMode(screenSession->GetScreenId())) {
+            TLOGE(WmsLogTag::DMS, "screen is not real or external, screenId:%{public}" PRIu64"", sessionIt.first);
+            continue;
+        }
+        bool isScreenMirror = screenSession ->GetScreenCombination() == ScreenCombination::SCREEN_MIRROR;
+        NotifyCastWhenScreenConnectChange(isScreenMirror);
+        return;
+    }
 }
 
 void ScreenSessionManager::HotSwitch(int32_t newUserId, int32_t newScbPid)
