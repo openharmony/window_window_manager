@@ -678,10 +678,10 @@ napi_value CreateRotationChangeInfoObject(napi_env env, const RotationChangeInfo
 {
     napi_value objValue = nullptr;
     CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
-    napi_set_named_property(env, objValue, "type", CreateJsValue(env, static_cast<uint32_t>(info.type)));
-    napi_set_named_property(env, objValue, "orientation", CreateJsValue(env, info.orientation));
-    napi_set_named_property(env, objValue, "displayId", CreateJsValue(env, static_cast<uint32_t>(info.displayId)));
-    napi_set_named_property(env, objValue, "displayRect", GetRectAndConvertToJsValue(env, info.displayRect));
+    napi_set_named_property(env, objValue, "type", CreateJsValue(env, static_cast<uint32_t>(info.type_)));
+    napi_set_named_property(env, objValue, "orientation", CreateJsValue(env, info.orientation_));
+    napi_set_named_property(env, objValue, "displayId", CreateJsValue(env, static_cast<uint32_t>(info.displayId_)));
+    napi_set_named_property(env, objValue, "displayRect", GetRectAndConvertToJsValue(env, info.displayRect_));
     return objValue;
 }
 
@@ -1242,7 +1242,7 @@ bool GetRotationResultFromJs(napi_env env, napi_value jsObject, RotationChangeRe
             TLOGE(WmsLogTag::WMS_ROTATION, "[NAPI]Failed to convert parameter to rectType");
             return false;
         }
-        rotationChangeResult.rectType = static_cast<RectType>(rectType);
+        rotationChangeResult.rectType_ = static_cast<RectType>(rectType);
     } else {
         TLOGE(WmsLogTag::WMS_ROTATION, "[NAPI]Failed to get object rectType");
         return false;
@@ -1253,7 +1253,7 @@ bool GetRotationResultFromJs(napi_env env, napi_value jsObject, RotationChangeRe
             TLOGE(WmsLogTag::WMS_ROTATION, "[NAPI]Failed to convert parameter to windowRect");
             return false;
         }
-        rotationChangeResult.windowRect = windowRect;
+        rotationChangeResult.windowRect_ = windowRect;
     } else {
         TLOGE(WmsLogTag::WMS_ROTATION, "[NAPI]Failed to get object windowRect");
         return false;
