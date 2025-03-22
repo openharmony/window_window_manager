@@ -355,9 +355,11 @@ public:
     void ModifyRSAnimatableProperty(bool isDefaultSidebarBlur, bool isDark);
     WSError UpdateDensity();
     void UpdateNewSizeForPCWindow();
-    bool CalcNewWindowRectIfNeed(DMRect& availableArea, float newVpr);
-    bool IsPrimaryDisplay() const;
+    bool CalcNewWindowRectIfNeed(DMRect& availableArea, float newVpr, WSRect& winRect);
+    void CalcNewClientRectForSuperFold(WSRect& rect);
     void SaveLastDensity();
+    void UpdateSuperFoldThreshold(DMRect& availableArea, int32_t& topThreshold, int32_t& bottomThreshold);
+    WSRect GetCreaseRegion(CreaseRegionName regionName) const;
     void NotifyUpdateFlagCallback(NotifyUpdateFlagFunc&& func);
 
     /*
@@ -675,6 +677,10 @@ public:
     bool GetIsFollowParentLayout() const { return isFollowParentLayout_; }
     sptr<MoveDragController> GetMoveDragController() const { return moveDragController_; }
     void NotifyUpdateGravity();
+    void SetTempRect(WSRect rect)
+    {
+        tempRect_ = rect;
+    }
 
     /*
      * Gesture Back
@@ -1168,6 +1174,8 @@ private:
      */
     bool isLayoutFullScreen_ { false };
     bool displayChangedByMoveDrag_ = false;
+    bool isDefaultDensityEnabled_ = false;
+    WSRect tempRect_ = { 0, 0, 0, 0 };  // need not sync to service, only for calculate
 
     /*
      * Window Property
