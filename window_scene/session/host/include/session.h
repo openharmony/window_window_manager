@@ -605,6 +605,7 @@ public:
     std::shared_ptr<AppExecFwk::EventHandler> GetEventHandler() const;
     WSError UpdateClientDisplayId(DisplayId displayId);
     DisplayId TransformGlobalRectToRelativeRect(WSRect& rect) const;
+    void TransformRelativeRectToGlobalRect(WSRect& rect) const;
     void UpdateClientRectPosYAndDisplayId(WSRect& rect);
     bool IsDragAccessible() const;
     void SetSingleHandTransform(const SingleHandTransform& transform);
@@ -642,6 +643,12 @@ public:
     WindowLayoutInfo GetWindowLayoutInfoForWindowInfo() const;
     WindowMetaInfo GetWindowMetaInfoForWindowInfo() const;
 
+    /*
+     * Window Pattern
+     */
+    void SetBorderUnoccupied(bool borderUnoccupied = false);
+    bool GetBorderUnoccupied() const;
+    
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
     public:
@@ -971,6 +978,11 @@ private:
     std::mutex saveSnapshotCallbackMutex_;
     std::mutex removeSnapshotCallbackMutex_;
     std::atomic<bool> needNotifyAttachState_ = { false };
+
+    /*
+     * Window Pattern
+     */
+    bool borderUnoccupied_ = false;
 };
 } // namespace OHOS::Rosen
 

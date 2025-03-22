@@ -187,4 +187,4 @@ THROW_SLIP:
   BUNDLE_NAME: {type: STRING, desc: Bundle name}
   START_SIDE: {type: INT32, desc: Start side of throw slip 1 B side 2 C side}
   START_WINDOW_MODE: {type: INT32, desc: Start window mode of throw slip 0 float 1 fullscreen 2 waterfall mode}
-  THROW_MODE: {type: INT32, desc: Throw slip mode 0 move drag 1 multifingers gesture 2 button in titlebar menu}
+  THROW_MODE: {type: INT32, desc: Throw slip mode 0 move drag 2 button in titlebar menu 3 three fingers gesture 4 four fingers 5 five fingers}

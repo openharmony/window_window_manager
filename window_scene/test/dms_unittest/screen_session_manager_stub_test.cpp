@@ -3160,7 +3160,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest148, Function | SmallTest 
 
 /**
  * @tc.name: OnRemoteRequest149
- * @tc.desc: normal function, TRANS_ID_SET_SYSTEM_KEYBOARD_ON test
+ * @tc.desc: normal function, TRANS_ID_SET_SYSTEM_KEYBOARD_STATUS test
  * @tc.type: FUNC
  */
 HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest149, Function | SmallTest | Level2)
@@ -3168,10 +3168,30 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest149, Function | SmallTest 
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    bool isOn = true;
+    bool isTpKeyboardOn = true;
     data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
-    data.WriteBool(isOn);
-    uint32_t code = static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SYSTEM_KEYBOARD_ON);
+    data.WriteBool(isTpKeyboardOn);
+    uint32_t code = static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SYSTEM_KEYBOARD_STATUS);
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: OnRemoteRequest150
+ * @tc.desc: normal function, TRANS_ID_SET_VIRTUAL_DISPLAY_MUTE_FLAG test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest150, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
+    ScreenId testScreenId = 1123;
+    data.WriteUint64(static_cast<uint64_t>(testScreenId));
+    bool muteFlag = false;
+    data.WriteBool(muteFlag);
+    uint32_t code = static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_DISPLAY_MUTE_FLAG);
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
 }

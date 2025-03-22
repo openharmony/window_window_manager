@@ -20,8 +20,6 @@
 #include <animation/rs_animation_timing_protocol.h>
 #include <animation/rs_symbol_animation.h>
 #include <pipeline/rs_node_map.h>
-#include <modifier/rs_property.h>
-#include <modifier/rs_property_modifier.h>
 #include <ui/rs_canvas_node.h>
 
 #include "display_manager.h"
@@ -126,6 +124,7 @@ using NotifyFollowParentRectFunc = std::function<void(bool isFollow)>;
 using GetSceneSessionByIdCallback = std::function<sptr<SceneSession>(int32_t sessionId)>;
 using NotifySetParentSessionFunc = std::function<void(int32_t oldParentWindowId, int32_t newParentWindowId)>;
 using NotifyUpdateFlagFunc = std::function<void(const std::string& flag)>;
+using NotifyRotationChangeFunc = std::function<void(int32_t persistentId, bool isRegister)>;
 
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
@@ -358,9 +357,11 @@ public:
     void ModifyRSAnimatableProperty(bool isDefaultSidebarBlur, bool isDark);
     WSError UpdateDensity();
     void UpdateNewSizeForPCWindow();
-    bool CalcNewWindowRectIfNeed(DMRect& availableArea, float newVpr);
-    bool IsPrimaryDisplay() const;
+    bool CalcNewWindowRectIfNeed(DMRect& availableArea, float newVpr, WSRect& winRect);
+    void CalcNewClientRectForSuperFold(WSRect& rect);
     void SaveLastDensity();
+    void UpdateSuperFoldThreshold(DMRect& availableArea, int32_t& topThreshold, int32_t& bottomThreshold);
+    WSRect GetCreaseRegion(CreaseRegionName regionName) const;
     void NotifyUpdateFlagCallback(NotifyUpdateFlagFunc&& func);
 
     /*
@@ -500,6 +501,11 @@ public:
      */
     void RegisterRequestedOrientationChangeCallback(NotifyReqOrientationChangeFunc&& callback);
     WSError NotifyRotationProperty(int32_t rotation, uint32_t width, uint32_t height);
+    void RegisterUpdateRotationChangeListener(NotifyRotationChangeFunc&& callback);
+    WSError UpdateRotationChangeRegistered(int32_t persistentId, bool isRegister) override;
+    RotationChangeResult NotifyRotationChange(const RotationChangeInfo& rotationChangeInfo);
+    bool isRotationChangeCallbackRegistered = false;
+    WSError SetCurrentRotation(int32_t currentRotation);
 
     /*
      * Window Animation
@@ -669,12 +675,15 @@ public:
     void OnNextVsyncReceivedWhenDrag();
     void RegisterLayoutFullScreenChangeCallback(NotifyLayoutFullScreenChangeFunc&& callback);
     bool SetFrameGravity(Gravity gravity);
-    void SetBehindWindowFilterEnabled(bool enabled); // Only accessed on main thread
     WSError GetCrossAxisState(CrossAxisState& state) override;
     virtual void UpdateCrossAxis();
     bool GetIsFollowParentLayout() const { return isFollowParentLayout_; }
     sptr<MoveDragController> GetMoveDragController() const { return moveDragController_; }
     void NotifyUpdateGravity();
+    void SetTempRect(WSRect rect)
+    {
+        tempRect_ = rect;
+    }
 
     /*
      * Gesture Back
@@ -692,7 +701,7 @@ public:
     bool IsMissionHighlighted();
     void MaskSupportEnterWaterfallMode();
     void SetSupportEnterWaterfallMode(bool isSupportEnter);
-    void ThrowSlipDirectly(const WSRectF& velocity);
+    void ThrowSlipDirectly(ThrowSlipMode throwSlipMode, const WSRectF& velocity);
     WSError GetWaterfallMode(bool& isWaterfallMode) override;
 
     /*
@@ -728,7 +737,7 @@ public:
      * Window Pattern
     */
     void NotifyWindowAttachStateListenerRegistered(bool registered) override;
-    
+
 protected:
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
     void SetMoveDragCallback();
@@ -902,7 +911,7 @@ private:
      */
     void HandleMoveDragSurfaceNode(SizeChangeReason reason);
     void OnMoveDragCallback(SizeChangeReason reason);
-    bool IsDragResizeWhenEnd(SizeChangeReason reason);
+    bool DragResizeWhenEndFilter(SizeChangeReason reason);
     void InitializeCrossMoveDrag();
     WSError InitializeMoveInputBar();
     void HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect, SizeChangeReason reason);
@@ -1131,6 +1140,7 @@ private:
      * Window Rotation
      */
     NotifyReqOrientationChangeFunc onRequestedOrientationChange_;
+    NotifyRotationChangeFunc onUpdateRotationChangeFunc_;
 
     /*
      * Window Animation
@@ -1149,8 +1159,6 @@ private:
     NotifyLayoutFullScreenChangeFunc onLayoutFullScreenChangeFunc_;
     virtual void NotifySubAndDialogFollowRectChange(const WSRect& rect, bool isGlobal, bool needFlush) {};
     std::atomic<bool> shouldFollowParentWhenShow_ = true;
-    std::shared_ptr<RSBehindWindowFilterEnabledModifier>
-        behindWindowFilterEnabledModifier_; // Only accessed on main thread
     bool isDragging_ = false;
     std::atomic<bool> isCrossAxisOfLayout_ = false;
     std::atomic<uint32_t> crossAxisState_ = 0;
@@ -1169,6 +1177,8 @@ private:
      */
     bool isLayoutFullScreen_ { false };
     bool displayChangedByMoveDrag_ = false;
+    bool isDefaultDensityEnabled_ = false;
+    WSRect tempRect_ = { 0, 0, 0, 0 };  // need not sync to service, only for calculate
 
     /*
      * Window Property

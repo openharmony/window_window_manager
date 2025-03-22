@@ -247,6 +247,7 @@ public:
     }
     virtual void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList,
         std::vector<uint64_t> surfaceIdList = {}) {}
+    virtual void SetVirtualDisplayMuteFlag(ScreenId screenId, bool muteFlag) {}
     virtual void DisablePowerOffRenderControl(ScreenId screenId) {}
 
     virtual std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution()
@@ -292,7 +293,7 @@ public:
         return DMError::DM_OK;
     }
 
-    virtual DMError SetSystemKeyboardStatus(bool isOn = false)
+    virtual DMError SetSystemKeyboardStatus(bool isTpKeyboardOn = false)
     {
         return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
     }

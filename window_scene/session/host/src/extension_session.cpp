@@ -275,14 +275,14 @@ WSError ExtensionSession::TransferAbilityResult(uint32_t resultCode, const AAFwk
     return WSError::WS_OK;
 }
 
-WSError ExtensionSession::TransferExtensionData(const AAFwk::WantParams& wantParams)
+int32_t ExtensionSession::TransferExtensionData(const AAFwk::WantParams& wantParams)
 {
     TLOGI(WmsLogTag::WMS_UIEXT, "id: %{public}d", GetPersistentId());
     if (extSessionEventCallback_ != nullptr &&
         extSessionEventCallback_->transferExtensionDataFunc_ != nullptr) {
         extSessionEventCallback_->transferExtensionDataFunc_(wantParams);
     }
-    return WSError::WS_OK;
+    return ERR_NONE;
 }
 
 WSError ExtensionSession::TransferComponentData(const AAFwk::WantParams& wantParams)

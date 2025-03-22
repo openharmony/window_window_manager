@@ -704,6 +704,24 @@ public:
     virtual void OnSystemBarPropertyUpdate(WindowType type, const SystemBarProperty& property) {}
 };
 
+/*
+ * @class IWindowRotationChangeListener
+ *
+ * @brief IWindowRotationChangeListener is used to observe the window rotation change.
+ */
+class IWindowRotationChangeListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when window rotate
+     *
+     * @param rotationChangeInfo information of rotation
+     * @param rotationChangeResult result of rotation
+     *
+     */
+    virtual void OnRotationChange(const RotationChangeInfo& rotationChangeInfo,
+        RotationChangeResult& rotationChangeResult) {}
+};
+
 static WMError DefaultCreateErrCode = WMError::WM_OK;
 class Window : virtual public RefBase {
 public:
@@ -1003,7 +1021,7 @@ public:
      * @return WM_OK means success, others mean set failed
      */
     virtual WMError SetSubWindowZLevel(int32_t zLevel) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
-    
+
     /**
      * @brief Get sub window zLevel
      *
@@ -3493,6 +3511,28 @@ public:
     virtual WMError UnregisterWindowAttachStateChangeListener()
     {
         return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Register window rotation change listener.
+     *
+     * @param listener IWindowRotationChangeListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterWindowRotationChangeListener(const sptr<IWindowRotationChangeListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Unregister window rotation change listener.
+     *
+     * @param listener IWindowRotationChangeListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterWindowRotationChangeListener(const sptr<IWindowRotationChangeListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
 
     /**
