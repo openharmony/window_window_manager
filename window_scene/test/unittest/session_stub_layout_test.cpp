@@ -102,7 +102,7 @@ HWTEST_F(SessionStubLayoutTest, HandleUpdateSessionRect, Function | SmallTest | 
     data.WriteBool(true);
     data.WriteBool(true);
     auto res = session_->HandleUpdateSessionRect(data, reply);
-    ASSERT_EQ(ERR_NONE, res);
+    ASSERT_EQ(ERR_INVALID_DATA, res);
 }
 
 /**

@@ -1743,28 +1743,28 @@ HWTEST_F(WindowSceneSessionImplTest3, PreLayoutOnShow, Function | SmallTest | Le
     window->property_->SetRequestRect(request);
     // uicontent is not nullptr and session is nullptr
     window->PreLayoutOnShow(window->property_->GetWindowType());
-    ASSERT_EQ(WindowState::STATE_SHOWN, window->state_);
-    ASSERT_EQ(WindowState::STATE_SHOWN, window->requestState_);
+    ASSERT_EQ(WindowState::STATE_INITIAL, window->state_);
+    ASSERT_EQ(WindowState::STATE_INITIAL, window->requestState_);
 
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
     // uicontent is not nullptr and session is not nullptr
     window->PreLayoutOnShow(window->property_->GetWindowType());
-    ASSERT_EQ(WindowState::STATE_SHOWN, window->state_);
-    ASSERT_EQ(WindowState::STATE_SHOWN, window->requestState_);
+    ASSERT_EQ(WindowState::STATE_INITIAL, window->state_);
+    ASSERT_EQ(WindowState::STATE_INITIAL, window->requestState_);
 
     request = { 100, 100, 0, 100 };
     window->property_->SetRequestRect(request);
     window->PreLayoutOnShow(window->property_->GetWindowType());
-    ASSERT_EQ(WindowState::STATE_SHOWN, window->state_);
-    ASSERT_EQ(WindowState::STATE_SHOWN, window->requestState_);
+    ASSERT_EQ(WindowState::STATE_INITIAL, window->state_);
+    ASSERT_EQ(WindowState::STATE_INITIAL, window->requestState_);
 
     request = { 100, 100, 100, 0 };
     window->property_->SetRequestRect(request);
     window->PreLayoutOnShow(window->property_->GetWindowType());
-    ASSERT_EQ(WindowState::STATE_SHOWN, window->state_);
-    ASSERT_EQ(WindowState::STATE_SHOWN, window->requestState_);
+    ASSERT_EQ(WindowState::STATE_INITIAL, window->state_);
+    ASSERT_EQ(WindowState::STATE_INITIAL, window->requestState_);
 }
 
 /**

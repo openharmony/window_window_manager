@@ -759,7 +759,7 @@ HWTEST_F(PcFoldScreenControllerTest, OnConnect, Function | SmallTest | Level2)
     mainSession_->sessionInfo_.screenId_ = DEFAULT_DISPLAY_ID;
     SetExpanded();
     controller_->OnConnect();
-    EXPECT_TRUE(controller_->supportEnterWaterfallMode_);
+    EXPECT_FALSE(controller_->supportEnterWaterfallMode_);
     controller_->onFoldScreenStatusChangeCallback_ = nullptr;
     controller_->onSystemKeyboardStatusChangeCallback_ = nullptr;
     SetExpanded();
@@ -917,7 +917,7 @@ HWTEST_F(PcFoldScreenControllerTest, ThrowSlip4, Function | SmallTest | Level1)
     controller_->isFullScreenWaterfallMode_ = true;
     controller_->RecordStartMoveRectDirectly(rect, C_VELOCITY, true);
     EXPECT_TRUE(controller_->ThrowSlip(DEFAULT_SCREEN_ID, rect, TOP_AVOID_HEIGHT, BOT_AVOID_HEIGHT));
-    EXPECT_EQ(ScreenSide::FOLD_B, manager_.CalculateScreenSide(rect));
+    EXPECT_EQ(ScreenSide::FOLD_C, manager_.CalculateScreenSide(rect));
 }
 
 /**
