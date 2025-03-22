@@ -8919,10 +8919,10 @@ WMError SceneSessionManager::GetAccessibilityWindowInfo(std::vector<sptr<Accessi
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
     auto task = [this, &infos]() {
-        TLOGND(WmsLogTag::WMS_ATTRIBUTE, "notify accessibility infos");
         std::vector<sptr<SceneSession>> sceneSessionList;
         GetAllSceneSessionForAccessibility(sceneSessionList);
         FillAccessibilityInfo(sceneSessionList, infos);
+        TLOGND(WmsLogTag::WMS_ATTRIBUTE, "notify window infos");
         SessionManagerAgentController::GetInstance().NotifyAccessibilityWindowInfo(infos,
             WindowUpdateType::WINDOW_UPDATE_ALL);
         return WMError::WM_OK;
@@ -12492,11 +12492,8 @@ void SceneSessionManager::FilterSceneSessionCovered(std::vector<sptr<SceneSessio
         result.push_back(sceneSession);
         unaccountedSpace->op(windowRegion, SkRegion::Op::kDifference_Op);
         if (unaccountedSpace->isEmpty()) {
-            TLOGD(WmsLogTag::WMS_ATTRIBUTE, "break after: isSys=%{public}d, inWid=%{public}d, bundle=%{public}s, "
-                "zOrder=%{public}u, displayId=%{public}" PRIu64 ", nodeId=%{public}d",
-                sceneSession->GetSessionInfo().isSystem_, static_cast<int32_t>(sceneSession->GetPersistentId()),
-                sceneSession->GetSessionInfo().bundleName_.c_str(), sceneSession->GetZOrder(),
-                sceneSession->GetSessionProperty()->GetDisplayId(), sceneSession->GetUINodeId());
+            TLOGD(WmsLogTag::WMS_ATTRIBUTE, "break after: inWid=%{public}d, zOrder=%{public}u",
+                static_cast<int32_t>(sceneSession->GetPersistentId()), sceneSession->GetZOrder());
             break;
         }
     }
