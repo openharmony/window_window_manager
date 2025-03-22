@@ -955,6 +955,8 @@ private:
     /*
      * Window Lifecycle
      */
+    void RecordWindowStateAttachExceptionEvent(bool isAttach);
+
     std::atomic<bool> isAttach_ { false };
     std::atomic<bool> isPendingToBackgroundState_ { false };
     std::atomic<bool> isActivatedAfterScreenLocked_ { true };
