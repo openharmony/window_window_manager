@@ -106,6 +106,7 @@ HWTEST_F(WindowAdapterLiteTest, GetWindowStyleType, Function | SmallTest | Level
     windowAdapterLite_->GetWindowStyleType(windowStyleType);
     ASSERT_EQ(Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT, windowStyleType);
 }
+
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
