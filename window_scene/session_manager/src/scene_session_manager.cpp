@@ -5776,13 +5776,14 @@ WSError SceneSessionManager::GetSpecifiedSessionDumpInfo(std::string& dumpInfo, 
 
 WSError SceneSessionManager::GetSCBDebugDumpInfo(std::string&& cmd, std::string& dumpInfo)
 {
+    std::string filePath;
     {
         auto rootContext = rootSceneContextWeak_.lock();
-        std::string filePath = rootContext != nullptr ? rootContext->GetFileDir() + "/wms.dump" : "";
+        filePath = rootContext != nullptr ? rootContext->GetFilesDir() + "/wms.dump" : "";
     }
     // publish data
     bool ret = eventHandler_->PostSyncTask(
-        [this, filePath, cmd = std::move(cmd)] {
+        [this, filePath = std::move(filePath), cmd = std::move(cmd)] {
             return scbDumpSubscriber_->Publish(cmd, filePath);
         }, "PublishSCBDumper");
     if (!ret) {
