@@ -227,7 +227,7 @@ void WindowSessionProperty::SetHideNonSystemFloatingWindows(bool hide)
     hideNonSystemFloatingWindows_ = hide;
 }
 
-void windowSessionProperty::SetSkipEventOnCastPlus(bool isSkip)
+void WindowSessionProperty::SetSkipEventOnCastPlus(bool isSkip)
 {
     isSkipEventOnCastPlus_ = isSkip;
 }
