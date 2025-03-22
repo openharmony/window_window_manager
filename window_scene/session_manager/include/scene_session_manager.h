@@ -1329,7 +1329,6 @@ private:
     /*
      * PC Window
      */
-    std::mutex getIsWindowRectAutoSaveMapMutex_;
     //Whether to save window rect
     std::unordered_map<std::string, bool> isWindowRectAutoSaveMap_;
     //Whether to save rect according to specifiedFlag
