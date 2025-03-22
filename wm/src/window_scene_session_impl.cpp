@@ -523,7 +523,7 @@ void WindowSceneSessionImpl::RecordLifeCycleExceptionEvent(LifeCycleEvent event,
         "UID", getuid(),
         "MSG", info);
     if (ret != 0) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Write HiSysEvent error, ret:%{public}d", ret);
+        TLOGE(WmsLogTag::WMS_LIFE, "write HiSysEvent error, ret:%{public}d", ret);
     }
 }
 
@@ -621,6 +621,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         }
         ret = CreateAndConnectSpecificSession();
     }
+
     RecordLifeCycleExceptionEvent(LifeCycleEvent::CREATE_EVENT, ret);
     if (ret == WMError::WM_OK) {
         MakeSubOrDialogWindowDragableAndMoveble();
@@ -1469,7 +1470,7 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
     } else {
         res = WMError::WM_ERROR_INVALID_WINDOW;
     }
-    RecordLifeCycleExceptionEvent(LifeCycleEvent::HIDE_EVENT, ret);
+    RecordLifeCycleExceptionEvent(LifeCycleEvent::HIDE_EVENT, res);
     if (res == WMError::WM_OK) {
         // update sub window state if this is main window
         UpdateSubWindowState(type);

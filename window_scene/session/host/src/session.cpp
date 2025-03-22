@@ -3548,16 +3548,16 @@ void Session::CreateWindowStateDetectTask(bool isAttach, WindowMode windowMode)
                     isAttach, static_cast<uint32_t>(session->GetSessionState()),
                     session->GetPersistentId(), session->GetSessionInfo().bundleName_.c_str());
                 int32_t ret = HiSysEventWrite(
-                    HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
+                    OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
                     "WINDOW_STATE_ERROR",
-                    HiviewDFX::HiSysEvent::EventType::FAULT,
+                    OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
                     "TYPE", "WINDOW_STATE_ATTACH_EXCEPTION",
                     "PERSISTENT_ID", session->GetPersistentId(),
                     "WINDOW_NAME", session->GetWindowName().c_str(),
-                    "ATTACH_STATE": isAttach,
-                    "SESSION_STATE": static_cast<uint32_t>(session->GetSessionState()));
+                    "ATTACH_STATE", isAttach,
+                    "SESSION_STATE", static_cast<uint32_t>(session->GetSessionState()));
                 if (ret != 0) {
-                    TLOGE(WmsLogTag::WMS_LIFE, "write HiSysEvent error, ret: %{public}d", ret);
+                    TLOGNE(WmsLogTag::WMS_LIFE, "write HiSysEvent error, ret: %{public}d", ret);
                 }
             }
         }
