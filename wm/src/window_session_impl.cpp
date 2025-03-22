@@ -5886,10 +5886,12 @@ RotationChangeResult WindowSessionImpl::NotifyRotationChange(const RotationChang
             if (listener == nullptr) {
                 continue;
             }
-            listener->OnRotationChange(rotationChangeInfo, rotationChangeResult);
+            listener->OnRotationChange(rotationChangeInfo, this);
             if (rotationChangeInfo.type_ == RotationChangeType::WINDOW_DID_ROTATE) {
                 continue;
             }
+            getRotationResultFuture_->ResetRotationResultLock();
+            rotationChangeResult = getRotationResultFuture_->GetRotationResult(WINDOW_ROTATION_CHANGE);
             Rect resultRect = rotationChangeResult.windowRect_;
             if (CheckAndModifyWindowRect(resultRect.width_, resultRect.height_) != WMError::WM_OK ||
                 CheckMultiWindowRect(resultRect.width_, resultRect.height_) != WMError::WM_OK) {
@@ -5903,6 +5905,14 @@ RotationChangeResult WindowSessionImpl::NotifyRotationChange(const RotationChang
         rotationChangeResult.rectType_, rotationChangeResult.windowRect_.posX_, rotationChangeResult.windowRect_.posY_,
         rotationChangeResult.windowRect_.width_, rotationChangeResult.windowRect_.height_);
     return rotationChangeResult;
+}
+
+void WindowSessionImpl::NotifyRotationChangeResult(RotationChangeResult rotationChangeResult)
+{
+    TLOGI(WmsLogTag::WMS_ROTATION, "release rotation change lock.");
+    if (getRotationResultFuture_) {
+        getRotationResultFuture_->OnUpdateRotationResult(rotationChangeResult);
+    }
 }
 
 WSError WindowSessionImpl::SetCurrentRotation(int32_t currentRotation)

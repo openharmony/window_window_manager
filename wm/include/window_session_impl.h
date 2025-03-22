@@ -865,7 +865,7 @@ private:
      * Window Rotation
      */
     void NotifyClientOrientationChange();
-    void NotifyRotationChangeResult(const RotationChangeResult rotationChangeResult) override;
+    void NotifyRotationChangeResult(RotationChangeResult rotationChangeResult) override;
 
     /*
      * keyboard
