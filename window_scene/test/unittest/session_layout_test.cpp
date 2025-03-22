@@ -227,6 +227,55 @@ HWTEST_F(SessionLayoutTest, SetSingleHandTransform, Function | SmallTest | Level
     session->SetSingleHandTransform(transform);
     ASSERT_EQ(transform, session->GetSingleHandTransform());
 }
+
+/**
+ * @tc.name: IsDraggingReason
+ * @tc.desc: IsDraggingReason
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionLayoutTest, IsDraggingReason, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsDraggingReason";
+    info.bundleName_ = "IsDraggingReason";
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
+    ASSERT_EQ(false, session->IsDraggingReason(SizeChangeReason::UNDEFINED));
+    ASSERT_EQ(true, session->IsDraggingReason(SizeChangeReason::DRAG));
+    ASSERT_EQ(true, session->IsDraggingReason(SizeChangeReason::DRAG_START));
+    ASSERT_EQ(true, session->IsDraggingReason(SizeChangeReason::DRAG_MOVE));
+}
+
+/**
+ * @tc.name: SetDragStart
+ * @tc.desc: SetDragStart
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionLayoutTest, SetDragStart, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetDragStart";
+    info.bundleName_ = "SetDragStart";
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
+    session->SetDragStart(true);
+    ASSERT_EQ(true, session->IsDragStart());
+    session->SetDragStart(false);
+    ASSERT_EQ(false, session->IsDragStart());
+}
+
+/**
+ * @tc.name: SetOriginDisplayId
+ * @tc.desc: SetOriginDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionLayoutTest, SetOriginDisplayId, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetOriginDisplayId";
+    info.bundleName_ = "SetOriginDisplayId";
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
+    session->SetOriginDisplayId(999);
+    ASSERT_EQ(999, session->GetOriginDisplayId());
+}
 }
 } // namespace Rosen
 } // namespace OHOS

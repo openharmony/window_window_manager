@@ -256,6 +256,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyWindowAttachStateListenerRegistered(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_FOLLOW_PARENT_LAYOUT_ENABLED):
             return HandleSetFollowParentWindowLayoutEnabled(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_FOLLOW_PARENT_MULTI_SCREEN_POLICY):
+            return HandleNotifyFollowParentMultiScreenPolicy(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_KEY_FRAME_ANIMATE_END):
             return HandleKeyFrameAnimateEnd(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_KEY_FRAME_CLONE_NODE):
@@ -1652,6 +1654,17 @@ int SessionStub::HandleContainerModalEvent(MessageParcel& data, MessageParcel& r
         return ERR_INVALID_DATA;
     }
     OnContainerModalEvent(eventName, eventValue);
+    return ERR_NONE;
+}
+
+int SessionStub::HandleNotifyFollowParentMultiScreenPolicy(MessageParcel& data, MessageParcel& reply)
+{
+    bool enabled = false;
+    if (!data.ReadBool(enabled)) {
+        return ERR_INVALID_DATA;
+    }
+    TLOGD(WmsLogTag::WMS_SUB, "enabled: %{public}d", enabled);
+    NotifyFollowParentMultiScreenPolicy(enabled);
     return ERR_NONE;
 }
 
