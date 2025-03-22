@@ -885,6 +885,12 @@ void DisplayManagerAdapter::SetVirtualScreenBlackList(ScreenId screenId, std::ve
     displayManagerServiceProxy_->SetVirtualScreenBlackList(screenId, windowIdList, surfaceIdList);
 }
 
+void DisplayManagerAdapter::SetVirtualDisplayMuteFlag(ScreenId screenId, bool muteFlag)
+{
+    INIT_PROXY_CHECK_RETURN();
+    displayManagerServiceProxy_->SetVirtualDisplayMuteFlag(screenId, muteFlag);
+}
+
 void DisplayManagerAdapter::DisablePowerOffRenderControl(ScreenId screenId)
 {
     INIT_PROXY_CHECK_RETURN();

@@ -291,7 +291,6 @@ WSError MainSession::OnSetWindowRectAutoSave(bool enabled, bool isSaveBySpecifie
             TLOGNE(WmsLogTag::WMS_MAIN, "session is null");
             return;
         }
-        session->GetSessionProperty()->SetIsSaveBySpecifiedFlag(isSaveBySpecifiedFlag);
         if (session->onSetWindowRectAutoSaveFunc_) {
             session->onSetWindowRectAutoSaveFunc_(enabled, isSaveBySpecifiedFlag);
             TLOGNI(WmsLogTag::WMS_MAIN, "%{public}s id %{public}d isSaveBySpecifiedFlag: %{public}d "

@@ -2395,10 +2395,13 @@ HWTEST_F(SceneSessionManagerTest, IsWindowRectAutoSave, Function | SmallTest | L
  */
 HWTEST_F(SceneSessionManagerTest, SetIsWindowRectAutoSave, Function | SmallTest | Level3)
 {
-    std::string key = "com.example.recposentryEntryAbility";
+    std::string key = "com.example.recposentryEntryAbilityTest";
     bool enabled = true;
-    ssm_->SetIsWindowRectAutoSave(key, enabled);
+    std::string abilityKey = "com.example.recposentryEntryAbility";
+    bool isSaveSpecifiedFlag = true;
+    ssm_->SetIsWindowRectAutoSave(key, enabled, abilityKey, isSaveSpecifiedFlag);
     ASSERT_EQ(ssm_->isWindowRectAutoSaveMap_.at(key), true);
+    ASSERT_EQ(ssm_->isSaveBySpecifiedFlagMap_.at(abilityKey), true);
 }
 
 /**
@@ -2427,13 +2430,48 @@ HWTEST_F(SceneSessionManagerTest, GetDisplayIdByWindowId, Function | SmallTest |
 }
 
 /**
- * @tc.name: SetGlobalDragResizeType
- * @tc.desc: test function : SetGlobalDragResizeType
+ * @tc.name: SetGlobalDragResizeType01
+ * @tc.desc: test function : SetGlobalDragResizeType valid session
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest, SetGlobalDragResizeType, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest, SetGlobalDragResizeType01, Function | SmallTest | Level3)
 {
     DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
+    ASSERT_EQ(ssm_->SetGlobalDragResizeType(dragResizeType), WMError::WM_OK);
+
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test1";
+    info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+
+    ASSERT_EQ(ssm_->SetGlobalDragResizeType(DragResizeType::RESIZE_TYPE_UNDEFINED), WMError::WM_OK);
+    ASSERT_EQ(ssm_->SetGlobalDragResizeType(dragResizeType), WMError::WM_OK);
+}
+
+/**
+ * @tc.name: SetGlobalDragResizeType02
+ * @tc.desc: test function : SetGlobalDragResizeType invalid session
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, SetGlobalDragResizeType02, Function | SmallTest | Level3)
+{
+    DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
+    ASSERT_EQ(ssm_->SetGlobalDragResizeType(dragResizeType), WMError::WM_OK);
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test1";
+    info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    ASSERT_EQ(ssm_->SetGlobalDragResizeType(dragResizeType), WMError::WM_OK);
+    ssm_->sceneSessionMap_.insert({0, nullptr});
+    ASSERT_EQ(ssm_->SetGlobalDragResizeType(dragResizeType), WMError::WM_OK);
+    ssm_->sceneSessionMap_.clear();
+    ssm_->sceneSessionMap_.insert({0, nullptr});
     ASSERT_EQ(ssm_->SetGlobalDragResizeType(dragResizeType), WMError::WM_OK);
 }
 
@@ -2463,6 +2501,7 @@ HWTEST_F(SceneSessionManagerTest, SetAppDragResizeType, Function | SmallTest | L
     ASSERT_NE(nullptr, sceneSession);
     ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
     DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
+    ASSERT_EQ(ssm_->SetAppDragResizeType("", dragResizeType), WMError::WM_ERROR_INVALID_PARAM);
     ASSERT_EQ(ssm_->SetAppDragResizeType(info.bundleName_, dragResizeType), WMError::WM_OK);
 }
 

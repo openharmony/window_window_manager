@@ -574,14 +574,6 @@ void Session::UpdateSessionState(SessionState state)
         state == SessionState::STATE_BACKGROUND) {
         RemoveWindowDetectTask();
     }
-    /* The state will be set background first when destroy keyboard, there is no need to notify scb if the state is
-     * already background, which may cause performance deterioration.
-     */
-    if (GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT && state == state_ &&
-        state == SessionState::STATE_BACKGROUND) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "Keyboard is already hide");
-        return;
-    }
     state_ = state;
     SetMainSessionUIStateDirty(true);
     NotifySessionStateChange(state);
@@ -1004,6 +996,26 @@ DisplayId Session::TransformGlobalRectToRelativeRect(WSRect& rect) const
         rect.posY_ -= lowerScreenPosY;
     }
     return updatedDisplayId;
+}
+
+void Session::TransformRelativeRectToGlobalRect(WSRect& rect) const
+{
+    auto currScreenFoldStatus = PcFoldScreenManager::GetInstance().GetScreenFoldStatus();
+    auto needTransRect = currScreenFoldStatus != SuperFoldStatus::UNKNOWN &&
+        currScreenFoldStatus != SuperFoldStatus::FOLDED && currScreenFoldStatus != SuperFoldStatus::EXPANDED;
+    auto isSystemKeyboard = GetSessionProperty() != nullptr && GetSessionProperty()->IsSystemKeyboard();
+    if (isSystemKeyboard || !needTransRect) {
+        return;
+    }
+    const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
+        PcFoldScreenManager::GetInstance().GetDisplayRects();
+    int32_t lowerScreenPosY = defaultDisplayRect.height_ + foldCreaseRect.height_;
+    if (GetSessionGlobalRect().posY_ >= lowerScreenPosY) {
+        WSRect relativeRect = rect;
+        rect.posY_ += lowerScreenPosY;
+        TLOGI(WmsLogTag::WMS_LAYOUT, "Transform relativeRect: %{public}s to globalRect: %{public}s",
+            relativeRect.ToString().c_str(), rect.ToString().c_str());
+    }
 }
 
 void Session::UpdateClientRectPosYAndDisplayId(WSRect& rect)
@@ -4019,5 +4031,16 @@ DisplayId Session::GetClientDisplayId() const
 void Session::SetClientDisplayId(DisplayId displayid)
 {
     clientDisplayId_ = displayid;
+}
+
+void Session::SetBorderUnoccupied(bool borderUnoccupied)
+{
+    TLOGI(WmsLogTag::WMS_PATTERN, "borderUnoccupied: %{public}d", borderUnoccupied);
+    borderUnoccupied_ = borderUnoccupied;
+}
+
+bool Session::GetBorderUnoccupied() const
+{
+    return borderUnoccupied_;
 }
 } // namespace OHOS::Rosen

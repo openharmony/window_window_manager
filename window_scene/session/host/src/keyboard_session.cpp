@@ -121,7 +121,8 @@ WSError KeyboardSession::Hide()
         WSRect rect = {0, 0, 0, 0};
         session->NotifyKeyboardPanelInfoChange(rect, false);
         if (session->systemConfig_.IsPcWindow() || session->GetSessionScreenName() == "HiCar" ||
-            session->GetSessionScreenName() == "SuperLauncher") {
+            session->GetSessionScreenName() == "SuperLauncher" ||
+            session->GetSessionScreenName() == "PadWithCar") {
             TLOGD(WmsLogTag::WMS_KEYBOARD, "pc or virtual screen, restore calling session");
             !session->IsSystemKeyboard() ? session->RestoreCallingSession() :
                 session->NotifySystemKeyboardAvoidChange(SystemKeyboardAvoidChangeReason::KEYBOARD_HIDE);
@@ -789,5 +790,26 @@ WSRect KeyboardSession::GetPanelRect() const
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Panel session is nullptr, get panel rect failed.");
     }
     return panelRect;
+}
+
+void KeyboardSession::SetSkipSelfWhenShowOnVirtualScreen(bool isSkip)
+{
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Set Skip keyboard, isSkip: %{public}d", isSkip);
+    PostTask([weakThis = wptr(this), isSkip, where = __func__]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s: Session is null", where);
+            return;
+        }
+        std::shared_ptr<RSSurfaceNode> surfaceNode = session->GetSurfaceNode();
+        if (!surfaceNode) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s: SurfaceNode is null", where);
+            return;
+        }
+        if (session->specificCallback_ != nullptr
+            && session->specificCallback_->onSetSkipSelfWhenShowOnVirtualScreen_ != nullptr) {
+            session->specificCallback_->onSetSkipSelfWhenShowOnVirtualScreen_(surfaceNode->GetId(), isSkip);
+        }
+    }, __func__);
 }
 } // namespace OHOS::Rosen

@@ -1071,10 +1071,16 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             reply.WriteString(capabilitInfo);
             break;
         }
-        case DisplayManagerMessage::TRANS_ID_SET_SYSTEM_KEYBOARD_ON: {
-            bool isOn = static_cast<bool>(data.ReadBool());
-            DMError ret = SetSystemKeyboardStatus(isOn);
+        case DisplayManagerMessage::TRANS_ID_SET_SYSTEM_KEYBOARD_STATUS: {
+            bool isTpKeyboardOn = static_cast<bool>(data.ReadBool());
+            DMError ret = SetSystemKeyboardStatus(isTpKeyboardOn);
             reply.WriteInt32(static_cast<int32_t>(ret));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_DISPLAY_MUTE_FLAG: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            bool muteFlag = data.ReadBool();
+            SetVirtualDisplayMuteFlag(screenId, muteFlag);
             break;
         }
         default:

@@ -1888,6 +1888,7 @@ HWTEST_F(WindowSceneSessionImplTest2, IsWindowRectAutoSave, Function | SmallTest
     windowSceneSessionImpl->hostSession_ = session;
     windowSceneSessionImpl->context_ = abilityContext_;
     windowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    EXPECT_CALL(m->Mock(), IsWindowRectAutoSave(_, _, _)).WillRepeatedly(Return(WMError::WM_OK));
     enabled = false;
     ret = windowSceneSessionImpl->IsWindowRectAutoSave(enabled);
     EXPECT_EQ(WMError::WM_OK, ret);

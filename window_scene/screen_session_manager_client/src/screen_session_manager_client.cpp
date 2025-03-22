@@ -123,7 +123,8 @@ bool ScreenSessionManagerClient::CheckIfNeedConnectScreen(SessionOption option)
     }
     if (screenSessionManager_->GetScreenProperty(option.screenId_).GetScreenType() == ScreenType::VIRTUAL) {
         if (option.name_ == "HiCar" || option.name_ == "SuperLauncher" || option.name_ == "CastEngine" ||
-            option.name_ == "DevEcoViewer" || option.innerName_ == "CustomScbScreen" || option.name_ == "CeliaView") {
+            option.name_ == "DevEcoViewer" || option.innerName_ == "CustomScbScreen" || option.name_ == "CeliaView" ||
+            option.name_ == "PadWithCar") {
             WLOGFI("HiCar or SuperLauncher or CastEngine or DevEcoViewer or CeliaView, need to connect the screen");
             return true;
         } else {
@@ -768,7 +769,7 @@ void ScreenSessionManagerClient::UpdateDisplayScale(ScreenId id, float scaleX, f
         TLOGE(WmsLogTag::DMS, "displayNode is null");
         return;
     }
-    TLOGD(WmsLogTag::DMS, "scale [%{public}f, %{public}f] translate [%{public}f, %{public}f]", scaleX, scaleY,
+    TLOGW(WmsLogTag::DMS, "scale [%{public}f, %{public}f] translate [%{public}f, %{public}f]", scaleX, scaleY,
           translateX, translateY);
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
                       "ssmc:UpdateDisplayScale(ScreenId = %" PRIu64
