@@ -514,7 +514,7 @@ void WindowSceneSessionImpl::RecordLifeCycleExceptionEvent(LifeCycleEvent event,
         << ", id:" << GetWindowId() << ", event: " << TransferLifeCycleEventToString(event)
         << ", errCode: " << static_cast<int32_t>(errCode) << ";";
     std::string info = oss.str();
-    WLOGI("window life cycle exception: %{public}s", info.c_str());
+    TLOGI(WmsLogTag::WMS_LIFE, "window life cycle exception: %{public}s", info.c_str());
     int32_t ret = HiSysEventWrite(
         OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
         "WINDOW_LIFE_CYCLE_EXCEPTION",
@@ -523,7 +523,7 @@ void WindowSceneSessionImpl::RecordLifeCycleExceptionEvent(LifeCycleEvent event,
         "UID", getuid(),
         "MSG", info);
     if (ret != 0) {
-        WLOGFE("Write HiSysEvent error, ret:%{public}d", ret);
+        TLOGE(WmsLogTag::WMS_LIFE, "Write HiSysEvent error, ret:%{public}d", ret);
     }
 }
 
@@ -620,8 +620,8 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
             return WMError::WM_ERROR_INVALID_CALLING;
         }
         ret = CreateAndConnectSpecificSession();
-        RecordLifeCycleExceptionEvent(LifeCycleEvent::CREATE_EVENT, ret);
     }
+    RecordLifeCycleExceptionEvent(LifeCycleEvent::CREATE_EVENT, ret);
     if (ret == WMError::WM_OK) {
         MakeSubOrDialogWindowDragableAndMoveble();
         UpdateWindowState();
