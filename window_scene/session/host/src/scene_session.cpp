@@ -739,6 +739,91 @@ WSError SceneSession::InitializeMoveInputBar()
     return WSError::WS_OK;
 }
 
+bool SceneSession::IsNeedConvertToRelativeRect(SizeChangeReason reason) const
+{
+    if (IsDraggingReason(reason)) {
+        return true;
+    }
+    if (WindowHelper::IsSubWindow(GetWindowType())) {
+        return IsNeedCrossDisplayRendering();
+    }
+    return false;
+}
+
+WSRect SceneSession::ConvertRelativeRectToGlobal(const WSRect& relativeRect, DisplayId currentDisplayId) const
+{
+    sptr<ScreenSession> screenSession =
+        ScreenSessionManagerClient::GetInstance().GetScreenSessionById(currentDisplayId);
+    if (!screenSession) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Screen session is null, displayId:%{public}" PRIu64, currentDisplayId);
+        screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSessionById(GetDisplayId());
+        if (!screenSession) {
+            TLOGW(WmsLogTag::WMS_LAYOUT, "Screen session is null, displayId:%{public}" PRIu64, GetDisplayId());
+            return relativeRect;
+        }
+    }
+    const ScreenProperty& screenProperty = screenSession->GetScreenProperty();
+    int32_t currentDisplayOffsetX = static_cast<int32_t>(screenProperty.GetStartX());
+    int32_t currentDisplayOffsetY = static_cast<int32_t>(screenProperty.GetStartY());
+    TLOGI(WmsLogTag::WMS_LAYOUT, "relativeRect:%{public}s, offsetX:%{public}d, offsetY:%{public}d",
+        relativeRect.ToString().c_str(), currentDisplayOffsetX, currentDisplayOffsetY);
+    return {relativeRect.posX_ + currentDisplayOffsetX,
+            relativeRect.posY_ + currentDisplayOffsetY,
+            relativeRect.width_, relativeRect.height_};
+}
+
+WSRect SceneSession::ConvertGlobalRectToRelative(const WSRect& globalRect, DisplayId targetDisplayId) const
+{
+    sptr<ScreenSession> screenSession =
+        ScreenSessionManagerClient::GetInstance().GetScreenSessionById(targetDisplayId);
+    if (!screenSession) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Screen session is null, displayId:%{public}" PRIu64, targetDisplayId);
+        screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSessionById(GetDisplayId());
+        if (!screenSession) {
+            TLOGW(WmsLogTag::WMS_LAYOUT, "Screen session is null, displayId:%{public}" PRIu64, GetDisplayId());
+            return globalRect;
+        }
+    }
+    const ScreenProperty& screenProperty = screenSession->GetScreenProperty();
+    int32_t targetDisplayOffsetX = static_cast<int32_t>(screenProperty.GetStartX());
+    int32_t targetDisplayOffsetY = static_cast<int32_t>(screenProperty.GetStartY());
+    TLOGI(WmsLogTag::WMS_LAYOUT, "globalRect:%{public}s, offsetX:%{public}d, offsetY:%{public}d",
+        globalRect.ToString().c_str(), targetDisplayOffsetX, targetDisplayOffsetY);
+    return {globalRect.posX_ - targetDisplayOffsetX,
+            globalRect.posY_ - targetDisplayOffsetY,
+            globalRect.width_, globalRect.height_};
+}
+
+bool SceneSession::IsDragMoving() const
+{
+    return moveDragController_ ? moveDragController_->GetStartMoveFlag() : false;
+}
+
+bool SceneSession::IsDragZooming() const
+{
+    return moveDragController_ ? moveDragController_->GetStartDragFlag() : false;
+}
+
+bool SceneSession::IsAnyParentSessionDragMoving() const
+{
+    if (SessionHelper::IsMainWindow(GetWindowType())) {
+        return IsDragMoving();
+    } else if (parentSession_) {
+        return parentSession_->IsDragMoving() ? true : parentSession_->IsAnyParentSessionDragMoving();
+    }
+    return false;
+}
+
+bool SceneSession::IsAnyParentSessionDragZooming() const
+{
+    if (SessionHelper::IsMainWindow(GetWindowType())) {
+        return IsDragZooming();
+    } else if (parentSession_) {
+        return parentSession_->IsDragZooming() ? true : parentSession_->IsAnyParentSessionDragZooming();
+    }
+    return false;
+}
+
 WSError SceneSession::OnSessionEvent(SessionEvent event)
 {
     PostTask([weakThis = wptr(this), event, where = __func__] {
@@ -1637,6 +1722,12 @@ WSError SceneSession::UpdateSessionRect(
         return WSError::WS_OK;
     }, __func__ + GetRectInfo(rect));
     return WSError::WS_OK;
+}
+
+void SceneSession::HandleCrossMoveTo(WSRect& globalRect)
+{
+    HandleCrossMoveToSurfaceNode(globalRect);
+    SetSurfaceBounds(globalRect, true, true);
 }
 
 void SceneSession::UpdateCrossAxisOfLayout(const WSRect& rect)
@@ -3171,6 +3262,7 @@ void SceneSession::HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect,
     bool isGlobal = (reason != SizeChangeReason::DRAG_END);
     bool needFlush = (reason != SizeChangeReason::DRAG_END);
     throwSlipToFullScreenAnimCount_.store(0);
+    UpdateSizeChangeReason(reason);
     if (moveDragController_ && moveDragController_->GetPointerType() == MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN &&
         pcFoldScreenController_ && pcFoldScreenController_->IsAllowThrowSlip(GetScreenId()) &&
         (reason == SizeChangeReason::DRAG_MOVE || reason == SizeChangeReason::DRAG_END)) {
@@ -3185,7 +3277,6 @@ void SceneSession::HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect,
     } else {
         SetSurfaceBounds(globalRect, isGlobal, needFlush);
     }
-    UpdateSizeChangeReason(reason);
     if (reason != SizeChangeReason::DRAG_MOVE && !KeyFrameNotifyFilter(rect, reason)) {
         UpdateRectForDrag(rect);
         std::shared_ptr<VsyncCallback> nextVsyncDragCallback = std::make_shared<VsyncCallback>();
@@ -3420,6 +3511,7 @@ void SceneSession::OnMoveDragCallback(SizeChangeReason reason)
     if (isCompatibleModeInPc && !IsFreeMultiWindowMode()) {
         HandleCompatibleModeMoveDrag(rect, reason);
     }
+    HandleSubSessionCrossNode(reason);
     if (DragResizeWhenEndFilter(reason)) {
         return;
     }
@@ -3442,6 +3534,24 @@ void SceneSession::OnMoveDragCallback(SizeChangeReason reason)
     } else if (reason == SizeChangeReason::DRAG_START) {
         OnSessionEvent(SessionEvent::EVENT_DRAG_START);
         SetUIFirstSwitch(RSUIFirstSwitch::FORCE_DISABLE);
+    }
+}
+
+void SceneSession::HandleSubSessionCrossNode(SizeChangeReason reason)
+{
+    if ((reason == SizeChangeReason::DRAG || reason == SizeChangeReason::DRAG_MOVE) && !Session::IsDragStart()) {
+        Session::SetDragStart(true);
+        if (Session::GetOriginDisplayId() == DISPLAY_ID_INVALID) {
+            Session::SetOriginDisplayId(moveDragController_->GetMoveDragStartDisplayId());
+        }
+        if (!subSession_.empty()) {
+            HandleSubSessionSurfaceNode(true);
+        }
+    } else if (reason == SizeChangeReason::DRAG_END) {
+        Session::SetDragStart(false);
+        if (!subSession_.empty()) {
+            HandleSubSessionSurfaceNode(false);
+        }
     }
 }
 
@@ -3695,6 +3805,38 @@ void SceneSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
             screenSession->GetDisplayNode()->RemoveCrossScreenChild(movedSurfaceNode);
             movedSurfaceNode->SetIsCrossNode(false);
             TLOGD(WmsLogTag::WMS_LAYOUT, "Remove window from display: %{public}" PRIu64, displayId);
+        }
+    }
+}
+
+void SceneSession::HandleSubSessionSurfaceNode(bool isAdd)
+{
+    for (const auto& session : subSession_) {
+        if (session) {
+            session->HandleSubSessionSurfaceNode(isAdd);
+        }
+    }
+
+    if (WindowHelper::IsSubWindow(GetWindowType()) && IsFollowParentMultiScreenPolicy()) {
+        WSRect targetRect = isAdd ? ConvertRelativeRectToGlobal(winRect_, GetScreenId()) :
+            ConvertGlobalRectToRelative(winRect_, GetScreenId());
+        TLOGI(WmsLogTag::WMS_LAYOUT, "isAdd:%{public}d targetRect:%{public}s", isAdd, targetRect.ToString().c_str());
+        if (isAdd) {
+            AddSurfaceNodeToScreen();
+            SetSurfaceBounds(targetRect, true, true);
+        } else {
+            RemoveSufaceNodeFromScreen();
+            SetSurfaceBounds(targetRect, false, false);
+            {
+                std::lock_guard<std::mutex> lock(displayIdSetDuringMoveToMutex_);
+                displayIdSetDuringMoveTo_.clear();
+            }
+            auto lastRect = GetRequestRectWhenFollowParent();
+            if (lastRect.IsInvalid()) {
+                return;
+            }
+            NotifySessionRectChange(lastRect, SizeChangeReason::UNDEFINED);
+            SetRequestRectWhenFollowParent({0, 0, 0, 0});
         }
     }
 }
