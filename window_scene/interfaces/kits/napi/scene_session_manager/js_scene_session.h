@@ -188,6 +188,7 @@ private:
     static void BindNativeMethodForFocus(napi_env env, napi_value objValue, const char* moduleName);
     static void BindNativeMethodForWaterfall(napi_env env, napi_value objValue, const char* moduleName);
     static napi_value SetSkipSelfWhenShowOnVirtualScreen(napi_env env, napi_callback_info info);
+    static napi_value SetSkipEventOnCastPlus(napi_env env, napi_callback_info info);
     static napi_value SetCompatibleModeInPc(napi_env env, napi_callback_info info);
     static napi_value SetAppSupportPhoneInPc(napi_env env, napi_callback_info info);
     static napi_value SetCompatibleWindowSizeInPc(napi_env env, napi_callback_info info);
@@ -262,6 +263,7 @@ private:
     napi_value OnSetTemporarilyShowWhenLocked(napi_env env, napi_callback_info info);
     napi_value OnSetSkipDraw(napi_env env, napi_callback_info info);
     napi_value OnSetSkipSelfWhenShowOnVirtualScreen(napi_env env, napi_callback_info info);
+    napi_value OnSetSkipEventOnCastPlus(napi_env env, napi_callback_info info);
     napi_value OnSetCompatibleModeInPc(napi_env env, napi_callback_info info);
     napi_value OnSetAppSupportPhoneInPc(napi_env env, napi_callback_info info);
     napi_value OnSetCompatibleWindowSizeInPc(napi_env env, napi_callback_info info);
