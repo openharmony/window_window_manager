@@ -2614,13 +2614,12 @@ public:
         SystemBarProperty& property) {}
 
     /**
-     * @brief Set Specific System Bar(include status bar and nav bar) Property for page
+     * @brief Set System Bar Property for page
      *
-     * @param type WINDOW_TYPE_STATUS_BAR or WINDOW_TYPE_NAVIGATION_BAR
-     * @param property system bar prop,include content color, background color
+     * @param systemBarProperty System Bar Property
      * @return WMError
      */
-    virtual WMError SetSpecificBarPropertyForPage(WindowType type, const sptr<SystemBarProperty>& property)
+    virtual WMError SetSystemBarPropertyForPage(std::unordered_map<WindowType, SystemBarProperty>& systemBarProperty)
     {
         return WMError::WM_OK;
     }
