@@ -2482,27 +2482,26 @@ WMError WindowSceneSessionImpl::SetSystemBarPropertyForPage(
         return WMError::WM_OK;
     }
     for (auto type : { WindowType::WINDOW_TYPE_STATUS_BAR, WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR }) {
-        auto ret = WMError::WM_OK;
-        if (auto iter = systemBarProperty.find(type); iter != systemBarProperty.end()) {
+        if (auto iter = systemBarProperty.find(type); iter == systemBarProperty.end()) {
+            TLOGI(WmsLogTag::WMS_IMMS, "use main window prop, win %{public}u", GetWindowId());
+            systemBarProperty[type] = GetSystemBarPropertyByType(type);
+        } else {
             systemBarProperty[type].settingFlag_ = static_cast<SystemBarSettingFlag>(
                 static_cast<uint32_t>(systemBarProperty[type].settingFlag_) |
-                static_cast<uint32_t>(SystemBarSettingFlag::FOLLOW_SETTING));
-            TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}u %{public}s] type %{public}u "
-                "%{public}u %{public}x %{public}x %{public}u %{public}u",
-                GetWindowId(), GetWindowName().c_str(), static_cast<uint32_t>(type), systemBarProperty[type].enable_,
-                systemBarProperty[type].backgroundColor_, systemBarProperty[type].contentColor_,
-                systemBarProperty[type].enableAnimation_, systemBarProperty[type].settingFlag_);
-            auto hostSession = GetHostSession();
-            CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
-            ret = SetSystemBarPropertyForPage(systemBarProperty);
-        } else {
-            TLOGI(WmsLogTag::WMS_IMMS, "use main window prop, win %{public}u", GetWindowId());
-            ret = NotifySpecificWindowSessionProperty(type, GetSystemBarPropertyByType(type));
+                static_cast<uint32_t>(SystemBarSettingFlag::ALL_SETTING));
         }
-        if (ret != WMError::WM_OK) {
-            TLOGE(WmsLogTag::WMS_IMMS, "set prop fail, ret %{public}u", ret);
-            return ret;
-        }
+        TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}u %{public}s] type %{public}u "
+            "%{public}u %{public}x %{public}x %{public}u %{public}u",
+            GetWindowId(), GetWindowName().c_str(), static_cast<uint32_t>(type), systemBarProperty[type].enable_,
+            systemBarProperty[type].backgroundColor_, systemBarProperty[type].contentColor_,
+            systemBarProperty[type].enableAnimation_, systemBarProperty[type].settingFlag_);
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+    auto ret = SetSystemBarPropertyForPage(systemBarProperty);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_IMMS, "set prop fail, ret %{public}u", ret);
+        return ret;
     }
     return WMError::WM_OK;
 }
