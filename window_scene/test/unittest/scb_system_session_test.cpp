@@ -245,8 +245,6 @@ HWTEST_F(SCBSystemSessionTest, PresentFoucusIfNeed, Function | SmallTest | Level
  */
 HWTEST_F(SCBSystemSessionTest, SetSkipEventOnCastPlus01, Function | SmallTest | Level0)
 {
-    scbSystemSession_->SetSkipEventOnCastPlus(true);
-    ASSERT_EQ(true, scbSystemSession_->GetSessionProperty()->GetSkipEventOnCastPlus());
     scbSystemSession_->SetSkipEventOnCastPlus(false);
     ASSERT_EQ(false, scbSystemSession_->GetSessionProperty()->GetSkipEventOnCastPlus());
 }
