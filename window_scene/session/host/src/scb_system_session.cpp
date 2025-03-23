@@ -190,7 +190,7 @@ void SCBSystemSession::UpdatePointerArea(const WSRect& rect)
 
 void SCBSystemSession::SetSkipSelfWhenShowOnVirtualScreen(bool isSkip)
 {
-    TLOGD(WmsLogTag::WMS_SCB, "Set Skip Self, isSkip: %{public}d", isSkip);
+    TLOGD(WmsLogTag::WMS_SCB, "Set skip Self, isSkip: %{public}d", isSkip);
     PostTask([weakThis = wptr(this), isSkip, where = __func__]() {
         auto session = weakThis.promote();
         if (!session) {

@@ -6293,7 +6293,7 @@ void SceneSession::SetSkipDraw(bool skip)
 
 void SceneSession::SetSkipSelfWhenShowOnVirtualScreen(bool isSkip)
 {
-    TLOGD(WmsLogTag::WMS_SCB, "Set Skip Self, isSkip: %{public}d", isSkip);
+    TLOGD(WmsLogTag::WMS_SCB, "Set skip Self, isSkip: %{public}d", isSkip);
     PostTask([weakThis = wptr(this), isSkip, where = __func__]() {
         auto session = weakThis.promote();
         if (!session) {
@@ -6315,7 +6315,7 @@ void SceneSession::SetSkipSelfWhenShowOnVirtualScreen(bool isSkip)
 
 void SceneSession::SetSkipEventOnCastPlus(bool isSkip)
 {
-    TLOGD(WmsLogTag::WMS_SCB, "Set Skip event on cast plus, wid: %{public}d, isSkip: %{public}d",
+    TLOGD(WmsLogTag::WMS_SCB, "Set skip event on cast plus, wid: %{public}d, isSkip: %{public}d",
         GetPersistentId(), isSkip);
     PostTask([weakThis = wptr(this), isSkip, where = __func__]() {
         auto session = weakThis.promote();
