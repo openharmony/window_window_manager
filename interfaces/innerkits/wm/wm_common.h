@@ -328,8 +328,7 @@ enum class SystemBarSettingFlag : uint32_t {
     COLOR_SETTING = 1,
     ENABLE_SETTING = 1 << 1,
     ALL_SETTING = COLOR_SETTING | ENABLE_SETTING,
-    FOLLOW_SETTING = 1 << 2,
-    PAGE_SETTING = 1 << 3
+    FOLLOW_SETTING = 1 << 2
 };
 
 inline SystemBarSettingFlag operator|(SystemBarSettingFlag lhs, SystemBarSettingFlag rhs)

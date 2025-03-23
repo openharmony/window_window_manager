@@ -87,6 +87,7 @@ private:
     int HandleRequestFocus(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateClientRect(MessageParcel& data, MessageParcel& reply);
     int HandleSetGestureBackEnabled(MessageParcel& data, MessageParcel& reply);
+    int HandleSetSystemBarPropertyForPage(MessageParcel& data, MessageParcel& reply);
     int HandleNotifySubModalTypeChange(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyMainModalTypeChange(MessageParcel& data, MessageParcel& reply);
     int HandleSetSessionLabelAndIcon(MessageParcel& data, MessageParcel& reply);
