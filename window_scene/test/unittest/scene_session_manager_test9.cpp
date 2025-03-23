@@ -1335,6 +1335,27 @@ HWTEST_F(SceneSessionManagerTest9, UpdateSpecificSessionClientDisplayId03, Funct
     EXPECT_EQ(999, displayId);
     EXPECT_EQ(0, property->GetDisplayId());
 }
+
+/**
+ * @tc.name: SetSkipEventOnCastPlusInner01
+ * @tc.desc: SetSkipEventOnCastPlusInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest9, SetSkipEventOnCastPlusInner01, Function | SmallTest | Level0)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest9";
+    sessionInfo.abilityName_ = "SetSkipEventOnCastPlusInner";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    ssm_->SetSkipEventOnCastPlusInner(sceneSession->GetPersistentId(), true);
+    EXPECT_EQ(true, sceneSession->GetSessionProperty()->GetSkipEventOnCastPlus());
+    ssm_->SetSkipEventOnCastPlusInner(sceneSession->GetPersistentId(), false);
+    EXPECT_EQ(false, sceneSession->GetSessionProperty()->GetSkipEventOnCastPlus());
+}
 }
 } // namespace Rosen
 } // namespace OHOS
