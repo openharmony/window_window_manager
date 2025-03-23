@@ -2470,7 +2470,8 @@ void WindowSceneSessionImpl::UpdateSpecificSystemBarEnabled(bool systemBarEnable
     property.settingFlag_ |= SystemBarSettingFlag::ENABLE_SETTING;
 }
 
-WMError WindowSceneSessionImpl::SetSystemBarPropertyForPage(std::unordered_map<WindowType, SystemBarProperty>& systemBarProperty)
+WMError WindowSceneSessionImpl::SetSystemBarPropertyForPage(
+    std::unordered_map<WindowType, SystemBarProperty>& systemBarProperty)
 {
     if (IsWindowSessionInvalid() || !(state_ > WindowState::STATE_INITIAL && state_ < WindowState::STATE_BOTTOM)) {
         TLOGE(WmsLogTag::WMS_IMMS, "win %{public}u invalid state", GetWindowId());
@@ -2480,7 +2481,7 @@ WMError WindowSceneSessionImpl::SetSystemBarPropertyForPage(std::unordered_map<W
         TLOGI(WmsLogTag::WMS_IMMS, "only main window support, win %{public}u", GetWindowId());
         return WMError::WM_OK;
     }
-    for (auto type : { WindowType:: WINDOW_TYPE_STATUS_BAR, WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR }) {
+    for (auto type : { WindowType::WINDOW_TYPE_STATUS_BAR, WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR }) {
         auto ret = WMError::WM_OK;
         if (auto iter = systemBarProperty.find(type); iter != systemBarProperty.end()) {
             systemBarProperty[type].settingFlag_ = static_cast<SystemBarSettingFlag>(
