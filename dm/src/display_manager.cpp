@@ -71,6 +71,7 @@ public:
     DMError RegisterDisplayListener(sptr<IDisplayListener> listener);
     DMError UnregisterDisplayListener(sptr<IDisplayListener> listener);
     bool SetDisplayState(DisplayState state, DisplayStateCallback callback);
+    void SetVirtualDisplayMuteFlag(ScreenId screenId, bool muteFlag);
     DMError RegisterDisplayPowerEventListener(sptr<IDisplayPowerEventListener> listener);
     DMError UnregisterDisplayPowerEventListener(sptr<IDisplayPowerEventListener> listener);
     DMError RegisterScreenshotListener(sptr<IScreenshotListener> listener);
@@ -2315,6 +2316,16 @@ void DisplayManager::SetVirtualScreenBlackList(ScreenId screenId, std::vector<ui
     std::vector<uint64_t> surfaceIdList)
 {
     SingletonContainer::Get<DisplayManagerAdapter>().SetVirtualScreenBlackList(screenId, windowIdList, surfaceIdList);
+}
+
+void DisplayManager::SetVirtualDisplayMuteFlag(ScreenId screenId, bool muteFlag)
+{
+    return pImpl_->SetVirtualDisplayMuteFlag(screenId, muteFlag);
+}
+
+void DisplayManager::Impl::SetVirtualDisplayMuteFlag(ScreenId screenId, bool muteFlag)
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().SetVirtualDisplayMuteFlag(screenId, muteFlag);
 }
 
 void DisplayManager::DisablePowerOffRenderControl(ScreenId screenId)

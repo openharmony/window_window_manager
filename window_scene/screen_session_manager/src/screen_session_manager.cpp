@@ -7755,6 +7755,32 @@ void ScreenSessionManager::SetVirtualScreenBlackList(ScreenId screenId, std::vec
     rsInterface_.SetVirtualScreenBlackList(rsScreenId, surfaceNodeIdsToRS);
 }
 
+void ScreenSessionManager::SetVirtualDisplayMuteFlag(ScreenId screenId, bool muteFlag)
+{
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "permission denied!");
+        return;
+    }
+    sptr<ScreenSession> virtualScreenSession = GetScreenSession(screenId);
+    if (!virtualScreenSession) {
+        TLOGE(WmsLogTag::DMS, "ScreenSession is null");
+        return;
+    }
+    std::shared_ptr<RSDisplayNode> virtualDisplayNode = virtualScreenSession->GetDisplayNode();
+    if (virtualDisplayNode) {
+        virtualDisplayNode->SetVirtualScreenMuteStatus(muteFlag);
+    } else {
+        TLOGE(WmsLogTag::DMS, "DisplayNode is null");
+        return;
+    }
+    auto transactionProxy = RSTransactionProxy::GetInstance();
+    if (transactionProxy != nullptr) {
+        TLOGI(WmsLogTag::DMS, "flush displayNode mute");
+        transactionProxy->FlushImplicitTransaction();
+    }
+    TLOGW(WmsLogTag::DMS, "screenId: %{public}" PRIu64 " muteFlag: %{public}d", screenId, muteFlag);
+}
+
 void ScreenSessionManager::DisablePowerOffRenderControl(ScreenId screenId)
 {
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
