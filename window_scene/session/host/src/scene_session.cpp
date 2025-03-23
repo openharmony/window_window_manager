@@ -6298,18 +6298,18 @@ void SceneSession::SetSkipSelfWhenShowOnVirtualScreen(bool isSkip)
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_SCB, "%{public}s session is null", where);
-            return WSError::WS_ERROR_DESTROYED_OBJECT;
+            return;
         }
         std::shared_ptr<RSSurfaceNode> surfaceNode = session->GetSurfaceNode();
         if (!surfaceNode) {
             TLOGNE(WmsLogTag::WMS_SCB, "%{public}s surfaceNode_ is null", where);
-            return WSError::WS_OK;
+            return;
         }
-        if (session->specificCallback_ != nullptr
-            && session->specificCallback_->onSetSkipSelfWhenShowOnVirtualScreen_ != nullptr) {
+        if (session->specificCallback_ != nullptr &&
+            session->specificCallback_->onSetSkipSelfWhenShowOnVirtualScreen_ != nullptr) {
             session->specificCallback_->onSetSkipSelfWhenShowOnVirtualScreen_(surfaceNode->GetId(), isSkip);
         }
-        return WSError::WS_OK;
+        return;
     }, __func__);
 }
 
@@ -6321,13 +6321,13 @@ void SceneSession::SetSkipEventOnCastPlus(bool isSkip)
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_SCB, "%{public}s session is null", where);
-            return WSError::WS_ERROR_DESTROYED_OBJECT;
+            return;
         }
-        if (session->specificCallback_ != nullptr
-            && session->specificCallback_->onSetSkipEventOnCastPlus_ != nullptr) {
+        if (session->specificCallback_ != nullptr &&
+            session->specificCallback_->onSetSkipEventOnCastPlus_ != nullptr) {
             session->specificCallback_->onSetSkipEventOnCastPlus_(session->GetPersistentId(), isSkip);
         }
-        return WSError::WS_OK;
+        return;
     }, __func__);
 }
 
