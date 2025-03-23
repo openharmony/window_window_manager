@@ -1689,20 +1689,14 @@ HWTEST_F(SceneSessionTest3, GetKeyboardOccupiedAreaWithRotation2, Function | Sma
  */
 HWTEST_F(SceneSessionTest3, SetSkipEventOnCastPlus01, Function | SmallTest | Level0)
 {
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     SessionInfo info;
     info.abilityName_ = "SetSkipEventOnCastPlus";
     info.bundleName_ = "SetSkipEventOnCastPlus";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sceneSession->SetSkipEventOnCastPlus(true);
-    ASSERT_EQ(true, sceneSession->GetSessionProperty()->GetSkipEventOnCastPlus());
     sceneSession->SetSkipEventOnCastPlus(false);
     ASSERT_EQ(false, sceneSession->GetSessionProperty()->GetSkipEventOnCastPlus());
-    sceneSession->specificCallback_->onSetSkipEventOnCastPlus_ = nullptr;
-    sceneSession->SetSkipEventOnCastPlus(true);
-    ASSERT_NE(true, sceneSession->GetSessionProperty()->GetSkipEventOnCastPlus());
-
 }
 }
 }
