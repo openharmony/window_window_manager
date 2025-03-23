@@ -237,6 +237,19 @@ HWTEST_F(SCBSystemSessionTest, PresentFoucusIfNeed, Function | SmallTest | Level
     scbSystemSession_->PresentFoucusIfNeed(pointerAction);
     ASSERT_EQ(pointerAction, 100);
 }
+
+/**
+ * @tc.name: SetSkipEventOnCastPlus01
+ * @tc.desc: check func SetSkipEventOnCastPlus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SCBSystemSessionTest, SetSkipEventOnCastPlus01, Function | SmallTest | Level0)
+{
+    scbSystemSession_->SetSkipEventOnCastPlus(true);
+    ASSERT_EQ(true, scbSystemSession_->GetSessionProperty()->GetSkipEventOnCastPlus());
+    scbSystemSession_->SetSkipEventOnCastPlus(false);
+    ASSERT_EQ(false, scbSystemSession_->GetSessionProperty()->GetSkipEventOnCastPlus());
+}
 } //namespace
 } //namespace Rosen
 } //namespace OHOS
