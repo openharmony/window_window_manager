@@ -6435,8 +6435,42 @@ void SceneSession::SetSkipDraw(bool skip)
 
 void SceneSession::SetSkipSelfWhenShowOnVirtualScreen(bool isSkip)
 {
-    TLOGW(WmsLogTag::WMS_SCB, "in sceneSession, do nothing");
-    return;
+    TLOGD(WmsLogTag::WMS_SCB, "Set skip Self, isSkip: %{public}d", isSkip);
+    PostTask([weakThis = wptr(this), isSkip, where = __func__]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_SCB, "%{public}s session is null", where);
+            return;
+        }
+        std::shared_ptr<RSSurfaceNode> surfaceNode = session->GetSurfaceNode();
+        if (!surfaceNode) {
+            TLOGNE(WmsLogTag::WMS_SCB, "%{public}s surfaceNode_ is null", where);
+            return;
+        }
+        if (session->specificCallback_ != nullptr &&
+            session->specificCallback_->onSetSkipSelfWhenShowOnVirtualScreen_ != nullptr) {
+            session->specificCallback_->onSetSkipSelfWhenShowOnVirtualScreen_(surfaceNode->GetId(), isSkip);
+        }
+        return;
+    }, __func__);
+}
+
+void SceneSession::SetSkipEventOnCastPlus(bool isSkip)
+{
+    TLOGD(WmsLogTag::WMS_SCB, "Set skip event on cast plus, wid: %{public}d, isSkip: %{public}d",
+        GetPersistentId(), isSkip);
+    PostTask([weakThis = wptr(this), isSkip, where = __func__]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_SCB, "%{public}s session is null", where);
+            return;
+        }
+        if (session->specificCallback_ != nullptr &&
+            session->specificCallback_->onSetSkipEventOnCastPlus_ != nullptr) {
+            session->specificCallback_->onSetSkipEventOnCastPlus_(session->GetPersistentId(), isSkip);
+        }
+        return;
+    }, __func__);
 }
 
 WMError SceneSession::SetUniqueDensityDpi(bool useUnique, float dpi)

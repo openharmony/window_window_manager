@@ -96,6 +96,7 @@ using NotifyTitleAndDockHoverShowChangeFunc = std::function<void(bool isTitleHov
     bool isDockHoverShown)>;
 using NotifyRestoreMainWindowFunc = std::function<void()>;
 using SetSkipSelfWhenShowOnVirtualScreenCallback = std::function<void(uint64_t surfaceNodeId, bool isSkip)>;
+using SetSkipEventOnCastPlusCallback = std::function<void(int32_t persistentId, bool isSkip)>;
 using NotifyForceSplitFunc = std::function<AppForceLandscapeConfig(const std::string& bundleName)>;
 using UpdatePrivateStateAndNotifyFunc = std::function<void(int32_t persistentId)>;
 using PiPStateChangeCallback = std::function<void(const std::string& bundleName, bool isForeground)>;
@@ -155,6 +156,7 @@ public:
         HandleSecureSessionShouldHideCallback onHandleSecureSessionShouldHide_;
         CameraSessionChangeCallback onCameraSessionChange_;
         SetSkipSelfWhenShowOnVirtualScreenCallback onSetSkipSelfWhenShowOnVirtualScreen_;
+        SetSkipEventOnCastPlusCallback onSetSkipEventOnCastPlus_;
         PiPStateChangeCallback onPiPStateChange_;
         UpdateGestureBackEnabledCallback onUpdateGestureBackEnabled_;
         NotifyAvoidAreaChangeCallback onNotifyAvoidAreaChange_;
@@ -421,6 +423,7 @@ public:
     void SetAdjustKeyboardLayoutCallback(const NotifyKeyboardLayoutAdjustFunc& func);
     void SetSkipDraw(bool skip);
     virtual void SetSkipSelfWhenShowOnVirtualScreen(bool isSkip);
+    virtual void SetSkipEventOnCastPlus(bool isSkip);
     WMError SetUniqueDensityDpi(bool useUnique, float dpi);
 
     bool IsAnco() const override;
