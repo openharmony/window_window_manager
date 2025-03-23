@@ -712,33 +712,30 @@ HWTEST_F(WindowSceneSessionImplTest4, SetSpecificBarProperty, Function | SmallTe
 }
 
 /**
- * @tc.name: SetSpecificBarPropertyForPage
- * @tc.desc: SetSpecificBarPropertyForPage
+ * @tc.name: SetSystemBarPropertyForPage
+ * @tc.desc: SetSystemBarPropertyForPage
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest4, SetSpecificBarPropertyForPage, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplTest4, SetSystemBarPropertyForPage, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SetSpecificBarPropertyForPage");
+    option->SetWindowName("SetSystemBarPropertyForPage");
     sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
 
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     windowSceneSessionImpl->hostSession_ = session;
-    sptr<SystemBarProperty> property = nullptr;
+    std::unordered_map<WindowType, SystemBarProperty> systemBarProperty;
+    systemBarProperty[WindowType::WINDOW_TYPE_STATUS_BAR] = SystemBarProperty();
     windowSceneSessionImpl->property_->SetPersistentId(1);
     windowSceneSessionImpl->state_ = WindowState::STATE_INITIAL;
-    auto type = WindowType::WINDOW_TYPE_STATUS_BAR;
-    auto ret = windowSceneSessionImpl->SetSpecificBarPropertyForPage(type, property);
+    auto ret = windowSceneSessionImpl->SetSystemBarPropertyForPage(systemBarProperty);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
     windowSceneSessionImpl->state_ = WindowState::STATE_BOTTOM;
-    ret = windowSceneSessionImpl->SetSpecificBarPropertyForPage(type, property);
+    ret = windowSceneSessionImpl->SetSystemBarPropertyForPage(systemBarProperty);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
     windowSceneSessionImpl->state_ = WindowState::STATE_CREATED;
-    ret = windowSceneSessionImpl->SetSpecificBarPropertyForPage(type, property);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    property = sptr<SystemBarProperty>::MakeSptr();
-    ret = windowSceneSessionImpl->SetSpecificBarPropertyForPage(type, property);
+    ret = windowSceneSessionImpl->SetSystemBarPropertyForPage(systemBarProperty);
     EXPECT_EQ(WMError::WM_OK, ret);
 }
 
