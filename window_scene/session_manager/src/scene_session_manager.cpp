@@ -1648,6 +1648,9 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
     specificCb->onSetSkipSelfWhenShowOnVirtualScreen_ = [this](uint64_t surfaceNodeId, bool isSkip) {
         this->SetSkipSelfWhenShowOnVirtualScreen(surfaceNodeId, isSkip);
     };
+    specificCb->onSetSkipEventOnCastPlus_ = [this](int32_t windowId, bool isSkip) {
+        this->SetSkipEventOnCastPlusInner(windowId, isSkip);
+    };
     specificCb->onPiPStateChange_ = [this](const std::string& bundleName, bool isForeground) {
         this->UpdatePiPWindowStateChanged(bundleName, isForeground);
     };
@@ -1682,6 +1685,18 @@ void SceneSessionManager::SetSkipSelfWhenShowOnVirtualScreen(uint64_t surfaceNod
         }
     }
     rsInterface_.SetVirtualScreenBlackList(INVALID_SCREEN_ID, skipSurfaceNodeIds_);
+}
+
+void SceneSessionManager::SetSkipEventOnCastPlusInner(int32_t windowId, bool isSkip)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Wid: %{public}d, isSkip: %{public}d", windowId, isSkip);
+    auto sceneSession = GetSceneSession(windowId);
+    if(sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "SceneSession is nullptr, Wid: %{public}d", windowId);
+        return;
+    }
+    sceneSession->GetSessionProperty()->SetSkipEventOnCastPlus(isSkip);
+    FlushWindowInfoToMMI(true);
 }
 
 sptr<KeyboardSession::KeyboardSessionCallback> SceneSessionManager::CreateKeyboardSessionCallback()

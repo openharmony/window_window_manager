@@ -1681,6 +1681,23 @@ HWTEST_F(SceneSessionTest3, GetKeyboardOccupiedAreaWithRotation2, Function | Sma
     ASSERT_EQ(1, areaSize);
     ASSERT_EQ(true, avoidAreas[0].first);
 }
+
+/**
+ * @tc.name: SetSkipEventOnCastPlus01
+ * @tc.desc: check func SetSkipEventOnCastPlus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, SetSkipEventOnCastPlus01, Function | SmallTest | Level0)
+{
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    SessionInfo info;
+    info.abilityName_ = "SetSkipEventOnCastPlus";
+    info.bundleName_ = "SetSkipEventOnCastPlus";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->SetSkipEventOnCastPlus(false);
+    ASSERT_EQ(false, sceneSession->GetSessionProperty()->GetSkipEventOnCastPlus());
+}
 }
 }
 }
