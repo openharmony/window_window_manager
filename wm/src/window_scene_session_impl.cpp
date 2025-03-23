@@ -2486,13 +2486,15 @@ WMError WindowSceneSessionImpl::SetSystemBarPropertyForPage(
         if (auto iter = systemBarProperty.find(type); iter != systemBarProperty.end()) {
             systemBarProperty[type].settingFlag_ = static_cast<SystemBarSettingFlag>(
                 static_cast<uint32_t>(systemBarProperty[type].settingFlag_) |
-                static_cast<uint32_t>(SystemBarSettingFlag::PAGE_SETTING));
+                static_cast<uint32_t>(SystemBarSettingFlag::FOLLOW_SETTING));
             TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}u %{public}s] type %{public}u "
                 "%{public}u %{public}x %{public}x %{public}u %{public}u",
                 GetWindowId(), GetWindowName().c_str(), static_cast<uint32_t>(type), systemBarProperty[type].enable_,
                 systemBarProperty[type].backgroundColor_, systemBarProperty[type].contentColor_,
                 systemBarProperty[type].enableAnimation_, systemBarProperty[type].settingFlag_);
-            ret = NotifySpecificWindowSessionProperty(type, property);
+            auto hostSession = GetHostSession();
+            CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+            ret = SetSystemBarPropertyForPage(systemBarProperty);
         } else {
             TLOGI(WmsLogTag::WMS_IMMS, "use main window prop, win %{public}u", GetWindowId());
             ret = NotifySpecificWindowSessionProperty(type, GetSystemBarPropertyByType(type));

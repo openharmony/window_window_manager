@@ -125,6 +125,11 @@ public:
      */
     WMError SetGestureBackEnabled(bool isEnabled) override;
 
+    /*
+     * Window Immersive
+     */
+    WMError SetSystemBarPropertyForPage(std::unordered_map<WindowType, SystemBarProperty>& systemBarProperty) override;
+
     WSError NotifySubModalTypeChange(SubWindowModalType subWindowModalType) override;
     WSError NotifyMainModalTypeChange(bool isModal) override;
 
