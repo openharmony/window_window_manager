@@ -2480,15 +2480,24 @@ WMError WindowSceneSessionImpl::SetSystemBarPropertyForPage(std::unordered_map<W
         TLOGI(WmsLogTag::WMS_IMMS, "only main window support, win %{public}u", GetWindowId());
         return WMError::WM_OK;
     }
-    for (auto property : systemBarProperty) {
-        property.settingFlag_ = static_cast<SystemBarSettingFlag>(
-            static_cast<uint32_t>(property.settingFlag_) | static_cast<uint32_t>(SystemBarSettingFlag::PAGE_SETTING));
-        TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}u %{public}s] type %{public}u "
-            "%{public}u %{public}x %{public}x %{public}u %{public}u",
-            GetWindowId(), GetWindowName().c_str(), static_cast<uint32_t>(type), property.enable_,
-            property.backgroundColor_, property.contentColor_, property.enableAnimation_, property.settingFlag_);
-        auto ret = NotifySpecificWindowSessionProperty(type, property);
+    for (auto type : { WindowType:: WINDOW_TYPE_STATUS_BAR, WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR }) {
+        auto ret = WMError::WM_OK;
+        if (auto iter = systemBarProperty.find(type); iter != systemBarProperty.end()) {
+            systemBarProperty[type].settingFlag_ = static_cast<SystemBarSettingFlag>(
+                static_cast<uint32_t>(systemBarProperty[type].settingFlag_) |
+                static_cast<uint32_t>(SystemBarSettingFlag::PAGE_SETTING));
+            TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}u %{public}s] type %{public}u "
+                "%{public}u %{public}x %{public}x %{public}u %{public}u",
+                GetWindowId(), GetWindowName().c_str(), static_cast<uint32_t>(type), systemBarProperty[type].enable_,
+                systemBarProperty[type].backgroundColor_, systemBarProperty[type].contentColor_,
+                systemBarProperty[type].enableAnimation_, systemBarProperty[type].settingFlag_);
+            ret = NotifySpecificWindowSessionProperty(type, property);
+        } else {
+            TLOGI(WmsLogTag::WMS_IMMS, "use main window prop, win %{public}u", GetWindowId());
+            ret = NotifySpecificWindowSessionProperty(type, GetSystemBarPropertyByType(type));
+        }
         if (ret != WMError::WM_OK) {
+            TLOGE(WmsLogTag::WMS_IMMS, "set prop fail, ret %{public}u", ret);
             return ret;
         }
     }
