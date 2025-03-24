@@ -226,8 +226,6 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleRequestFocus(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_GESTURE_BACK_ENABLE):
             return HandleSetGestureBackEnabled(data, reply);
-        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_SET_SYSTEM_BAR_PROPERTY_FOR_PAGE):
-            return HandleSetSystemBarPropertyForPage(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SUB_MODAL_TYPE_CHANGE):
             return HandleNotifySubModalTypeChange(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_MAIN_MODAL_TYPE_CHANGE):
@@ -1430,36 +1428,6 @@ int SessionStub::HandleSetGestureBackEnabled(MessageParcel& data, MessageParcel&
     }
     WMError ret = SetGestureBackEnabled(isEnabled);
     reply.WriteInt32(static_cast<int32_t>(ret));
-    return ERR_NONE;
-}
-
-int SessionStub::HandleSetSystemBarPropertyForPage(MessageParcel& data, MessageParcel& reply)
-{
-    TLOGD(WmsLogTag::WMS_IMMS, "in");
-    std::unordered_map<WindowType, SystemBarProperty> systemBarProperty;
-    uint32_t size = data.ReadUint32();
-    constexpr uint32_t SYSTEM_BAR_PROPERTY_MAX_SIZE = 3;
-    if (size > SYSTEM_BAR_PROPERTY_MAX_SIZE) {
-        TLOGE(WmsLogTag::WMS_IMMS, "size is invalid");
-        return ERR_INVALID_DATA;
-    }
-    for (uint32_t i = 0; i < size; i++) {
-        uint32_t type = data.ReadUint32();
-        if (type != static_cast<uint32_t>(WindowType::WINDOW_TYPE_STATUS_BAR) &&
-            type != static_cast<uint32_t>(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR)) {
-            TLOGE(WmsLogTag::WMS_IMMS, "read type failed");
-            return ERR_INVALID_DATA;
-        }
-        bool enable = data.ReadBool();
-        uint32_t backgroundColor = data.ReadUint32();
-        uint32_t contentColor = data.ReadUint32();
-        bool enableAnimation = data.ReadBool();
-        SystemBarSettingFlag settingFlag = static_cast<SystemBarSettingFlag>(data.ReadUint32());
-        systemBarProperty[static_cast<WindowType>(type)] = { enable, backgroundColor,
-            contentColor, enableAnimation, settingFlag };
-    }
-    auto errCode = SetSystemBarPropertyForPage(systemBarProperty);
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
 

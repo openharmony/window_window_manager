@@ -4916,15 +4916,6 @@ WMError SceneSession::SetGestureBackEnabled(bool isEnabled)
     return WMError::WM_OK;
 }
 
-WMError SceneSession::SetSystemBarPropertyForPage(std::unordered_map<WindowType, SystemBarProperty>& systemBarProperty)
-{
-    if (onSystemBarPropertyChange_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "onSystemBarPropertyChange_ is nullptr");
-    }
-    onSystemBarPropertyChange_(systemBarProperty);
-    return WMError::WM_OK;
-}
-
 bool SceneSession::GetGestureBackEnabled()
 {
     return isEnableGestureBack_;
