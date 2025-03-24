@@ -517,6 +517,40 @@ HWTEST_F(MainSessionTest, UpdateFlag, Function | SmallTest | Level2)
     session->onUpdateFlagFunc_ = func;
     EXPECT_NE(nullptr, session->onUpdateFlagFunc_);
 }
+
+/**
+ * @tc.name: NotifySubAndDialogFollowRectChange
+ * @tc.desc: NotifySubAndDialogFollowRectChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, NotifySubAndDialogFollowRectChange01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    sptr<SceneSession> subSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<MainSession> mainSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    
+    bool isCall = false;
+    auto task = [&isCall](const WSRect& rect, bool isGlobal, bool needFlush) {
+        isCall = true;
+    };
+    mainSession->RegisterNotifySurfaceBoundsChangeFunc(subSession->GetPersistentId(), std::move(task));
+    ASSERT_NE(nullptr, mainSession->notifySurfaceBoundsChangeFuncMap_[subSession->GetPersistentId()]);
+
+    WSRect rect;
+    subSession->isFollowParentLayout_ = false;
+    mainSession->NotifySubAndDialogFollowRectChange(rect, false, false);
+    ASSERT_EQ(false, isCall);
+
+    subSession->isFollowParentLayout_ = true;
+    sptr<SceneSession::SpecificSessionCallback> callBack = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    mainSession->specificCallback_ = callBack;
+    auto getSessionCallBack = [&subSession](int32_t persistentId) {
+        return subSession;
+    };
+    callBack->onGetSceneSessionByIdCallback_ = getSessionCallBack;
+    mainSession->NotifySubAndDialogFollowRectChange(rect, false, false);
+    ASSERT_EQ(true, isCall);
+}
 }
 }
 }
