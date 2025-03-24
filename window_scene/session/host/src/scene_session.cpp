@@ -76,7 +76,7 @@ constexpr int32_t API_VERSION_18 = 18;
 constexpr int32_t HOOK_SYSTEM_BAR_HEIGHT = 40;
 constexpr int32_t HOOK_AI_BAR_HEIGHT = 28;
 constexpr int32_t POW_DOUBLE = 2;
-constexpr int32_t MULTI_WINDOW_FLOATING_TITLE_BAR_HEIGHT_PX = 116;
+constexpr int32_t MULTI_WINDOW_FLOATING_TITLE_BAR_HEIGHT_VP = 46;
 constexpr int32_t MULTI_WINDOW_TITLE_BAR_DEFAULT_HEIGHT_VP = 32;
 
 bool CheckIfRectElementIsTooLarge(const WSRect& rect)
@@ -2115,9 +2115,9 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
             return;
         }
         vpr = display->GetVirtualPixelRatio();
-        bool isFloatWindow = windowMode == WindowMode::WINDOW_MODE_FLOATING && !GetIsMidScene();
-        avoidArea.topRect_.height_ =
-            isFloatWindow ? MULTI_WINDOW_FLOATING_TITLE_BAR_HEIGHT_PX : vpr * MULTI_WINDOW_TITLE_BAR_DEFAULT_HEIGHT_VP;
+        bool isFloat = windowMode == WindowMode::WINDOW_MODE_FLOATING && !GetIsMidScene();
+        int32_t height = isFloat ? MULTI_WINDOW_FLOATING_TITLE_BAR_HEIGHT_VP : MULTI_WINDOW_TITLE_BAR_DEFAULT_HEIGHT_VP;
+        avoidArea.topRect_.height_ = vpr * height;
         avoidArea.topRect_.width_ = static_cast<uint32_t>(display->GetWidth());
         return;
     }
