@@ -369,7 +369,7 @@ struct SessionInfo {
     /*
      * Window Rotation
      */
-     int32_t currentRotation_ = 0;
+    int32_t currentRotation_ = 0;
 };
 
 enum class SessionFlag : uint32_t {

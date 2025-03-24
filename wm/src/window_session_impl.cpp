@@ -4714,8 +4714,6 @@ WSError WindowSessionImpl::SetCurrentRotation(int32_t currentRotation)
         return WSError::WS_ERROR_INVALID_PARAM;
     }
     property_->EditSessionInfo().currentRotation_ = currentRotation;
-
-
     return WSError::WS_OK;
 }
 } // namespace Rosen
