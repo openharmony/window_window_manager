@@ -1142,7 +1142,7 @@ HWTEST_F(WindowSceneSessionImplTest5, TransferLifeCycleEventToString, Function |
     option->SetWindowName("TransferLifeCycleEventToString");
     option->SetDisplayId(0);
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    ASSERT_NE(Window, nullptr);
+    ASSERT_NE(window, nullptr);
     window->RecordLifeCycleExceptionEvent(LifeCycleEvent::CREATE_EVENT, WMError::WM_ERROR_REPEAT_OPERATION);
     ASSERT_EQ(window->TransferLifeCycleEventToString(LifeCycleEvent::CREATE_EVENT), "CREATE");
     ASSERT_EQ(window->TransferLifeCycleEventToString(LifeCycleEvent::SHOW_EVENT), "SHOW");
