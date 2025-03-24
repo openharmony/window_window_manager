@@ -5927,9 +5927,9 @@ void WindowSessionImpl::NotifyRotationChangeResultInner(
                 listener->OnRotationChange(rotationChangeInfo, rotationChangeResult);
                 if (rotationChangeInfo.type_ == RotationChangeType::WINDOW_DID_ROTATE) {
                     continue;
-                }              
+                }
             }
-    }, __func__);
+        }, __func__);
 }
 
 WSError WindowSessionImpl::SetCurrentRotation(int32_t currentRotation)
