@@ -719,15 +719,8 @@ WMError WindowImpl::SetUIContentInner(const std::string& contentInfo, napi_env e
 
 float WindowImpl::GetVirtualPixelRatio()
 {
-    float vpr = 1.0f; // This is an abnormal value, which is used to identify abnormal scenarios.
-    auto display = SingletonContainer::IsDestroyed() ? nullptr :
-        SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
-    if (display == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "get display failed displayId:%{public}" PRIu64 ", window id:%{public}u",
-            property_->GetDisplayId(), property_->GetWindowId());
-        return vpr;
-    }
-    return display->GetVirtualPixelRatio();
+    TLOGD(WmsLogTag::WMS_LAYOUT, "virtualPixelRatio: %{public}f", virtualPixelRatio_.load());
+    return virtualPixelRatio_.load();
 }
 
 std::shared_ptr<std::vector<uint8_t>> WindowImpl::GetAbcContent(const std::string& abcPath)
@@ -3483,7 +3476,9 @@ void WindowImpl::UpdateViewportConfig(const Rect& rect, const sptr<Display>& dis
     config.SetSize(rect.width_, rect.height_);
     config.SetPosition(rect.posX_, rect.posY_);
     if (display) {
-        config.SetDensity(display->GetVirtualPixelRatio());
+        float virtualPixelRatio = display->GetVirtualPixelRatio();
+        virtualPixelRatio_.store(virtualPixelRatio);
+        config.SetDensity(virtualPixelRatio);
         auto displayInfo = display->GetDisplayInfo();
         if (displayInfo != nullptr) {
             config.SetOrientation(static_cast<int32_t>(displayInfo->GetDisplayOrientation()));
