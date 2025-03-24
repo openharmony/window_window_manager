@@ -5913,6 +5913,7 @@ void WindowSessionImpl::NotifyRotationChangeResultInner(
 {
     handler_->PostTask(
         [weakThis = wptr(this), &windowRotationChangeListeners, &rotationChangeInfo] {
+            TLOGI(WmsLogTag::WMS_ROTATION, "post task to notify listener.");
             auto window = weakThis.promote();
             if (window == nullptr) {
                 TLOGE(WmsLogTag::WMS_ROTATION, "window is null");
