@@ -74,7 +74,7 @@ enum class WmsLogTag : uint8_t {
     END,                       // Last one, do not use
 };
 
-extern const char* g_domainContents[];
+extern const char* g_domainContents[static_cast<uint32_t>(WmsLogTag::END)];
 #ifdef IS_RELEASE_VERSION
 #define WMS_FILE_NAME ""
 #else
