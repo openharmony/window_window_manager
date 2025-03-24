@@ -2721,7 +2721,7 @@ void SceneSessionManager::RegisterSaveSnapshotFunc(const sptr<SceneSession>& sce
         return;
     }
     auto persistentId = sceneSession->GetPersistentId();
-    sceneSession->SetRemoveSnapshotCallback([this, persistentId]() {
+    sceneSession->SetSaveSnapshotCallback([this, persistentId]() {
         this->PutSnapshotToCache(persistentId);
     });
 }
