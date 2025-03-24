@@ -2711,34 +2711,36 @@ void SceneSessionManager::RemoveSnapshotFromCache(int32_t persistentId)
     }
 }
 
-void SceneSessionManager::RegisterSaveSnapshotFunc(const sptr<SceneSession>& sceneSession)
+WSError SceneSessionManager::RegisterSaveSnapshotFunc(const sptr<SceneSession>& sceneSession)
 {
     if (sceneSession == nullptr) {
         TLOGE(WmsLogTag::WMS_PATTERN, "session is nullptr");
-        return;
+        return WSError::WS_ERROR_NULLPTR;
     }
     if (!WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
-        return;
+        return WSError::WS_ERROR_INVALID_WINDOW;
     }
     auto persistentId = sceneSession->GetPersistentId();
     sceneSession->SetSaveSnapshotCallback([this, persistentId]() {
         this->PutSnapshotToCache(persistentId);
     });
+    return WSError::WS_OK;
 }
 
-void SceneSessionManager::RegisterRemoveSnapshotFunc(const sptr<SceneSession>& sceneSession)
+WSError SceneSessionManager::RegisterRemoveSnapshotFunc(const sptr<SceneSession>& sceneSession)
 {
     if (sceneSession == nullptr) {
         TLOGE(WmsLogTag::WMS_PATTERN, "session is nullptr");
-        return;
+        return WSError::WS_ERROR_NULLPTR;
     }
     if (!WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
-        return;
+        return WSError::WS_ERROR_INVALID_WINDOW;
     }
     auto persistentId = sceneSession->GetPersistentId();
     sceneSession->SetRemoveSnapshotCallback([this, persistentId]() {
         this->RemoveSnapshotFromCache(persistentId);
     });
+    return WSError::WS_OK;
 }
 
 WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSession>& sceneSession,
