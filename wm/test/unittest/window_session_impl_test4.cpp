@@ -1425,15 +1425,15 @@ HWTEST_F(WindowSessionImplTest4, SetAutoStartPiP, TestSize.Level1)
 }
 
 /**
- * @tc.name: UpdatePiPDefaultWindowSizeType
- * @tc.desc: UpdatePiPDefaultWindowSizeType
+ * @tc.name: UpdatePiPTemplateInfo
+ * @tc.desc: UpdatePiPTemplateInfo
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest4, UpdatePiPDefaultWindowSizeType, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest4, UpdatePiPTemplateInfo, Function | SmallTest | Level2)
 {
     auto option = sptr<WindowOption>::MakeSptr();
     ASSERT_NE(option, nullptr);
-    std::string testName = "UpdatePiPDefaultWindowSizeType";
+    std::string testName = "UpdatePiPTemplateInfo";
     option->SetWindowName(testName);
     auto window = sptr<WindowSessionImpl>::MakeSptr(option);
     ASSERT_NE(window, nullptr);
@@ -1442,8 +1442,8 @@ HWTEST_F(WindowSessionImplTest4, UpdatePiPDefaultWindowSizeType, Function | Smal
     auto session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
-    uint32_t defaultWindowSizeType = 1;
-    window->UpdatePiPDefaultWindowSizeType(defaultWindowSizeType);
+    PiPTemplateInfo templateInfo;
+    window->UpdatePiPTemplateInfo(templateInfo);
 }
 
 /**

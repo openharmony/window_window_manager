@@ -247,6 +247,26 @@ HWTEST_F(PictureInPictureOptionTest, TypeNodeEnabled, TestSize.Level1)
     option->SetTypeNodeEnabled(false);
     ASSERT_TRUE(!option->IsTypeNodeEnabled());
 }
+
+/**
+ * @tc.name: GetPiPTemplateInfo
+ * @tc.desc: GetPiPTemplateInfo/GetPipPriority
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureOptionTest, GetPiPTemplateInfo, TestSize.Level1)
+{
+    sptr<PipOption> option = new PipOption();
+    uint32_t pipTypeTemplate = 5;
+    uint32_t testValue = 0;
+    ASSERT_EQ(testValue, option->GetPipPriority(pipTypeTemplate));
+    ASSERT_EQ(testValue, option->GetPipPriority(pipTypeTemplate = 3));
+    ASSERT_EQ(testValue, option->GetPipPriority(pipTypeTemplate = 0));
+    ASSERT_EQ(testValue = 1, option->GetPipPriority(pipTypeTemplate = 1));
+    PiPTemplateInfo pipTemplateInfo;
+    option->SetDefaultWindowSizeType(testValue = 2);
+    option->GetPiPTemplateInfo(pipTemplateInfo);
+    ASSERT_EQ(testValue, pipTemplateInfo.defaultWindowSizeType);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

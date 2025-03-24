@@ -1622,7 +1622,7 @@ HWTEST_F(SceneSessionManagerTest, TestIsEnablePiPCreate, TestSize.Level1)
 
     reqRect = { 0, 0, 10, 10 };
     property->SetRequestRect(reqRect);
-    PiPTemplateInfo info = {0, 0, {}};
+    PiPTemplateInfo info = {};
     property->SetPiPTemplateInfo(info);
     SessionInfo info1;
     info1.abilityName_ = "test1";
@@ -1630,7 +1630,8 @@ HWTEST_F(SceneSessionManagerTest, TestIsEnablePiPCreate, TestSize.Level1)
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info1, nullptr);
     ASSERT_NE(nullptr, sceneSession);
     property->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
-    sceneSession->pipTemplateInfo_ = {0, 100, {}};
+    sceneSession->pipTemplateInfo_ = {};
+    sceneSession->pipTemplateInfo_.priority = 100;
     ssm_->sceneSessionMap_.insert({0, sceneSession});
     ASSERT_TRUE(!ssm_->IsEnablePiPCreate(property));
     ssm_->sceneSessionMap_.clear();

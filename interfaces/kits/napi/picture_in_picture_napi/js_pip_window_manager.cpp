@@ -254,7 +254,7 @@ napi_value JsPipWindowManager::NapiSendTask(napi_env env, PipOption& pipOption)
 {
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, &result);
-    auto asyncTask = [this, env, task = napiAsyncTask, pipOption]() {
+    auto asyncTask = [this, env, task = napiAsyncTask, pipOption]() mutable {
         if (!PictureInPictureManager::IsSupportPiP()) {
             task->Reject(env, CreateJsError(env, static_cast<int32_t>(
                 WMError::WM_ERROR_DEVICE_NOT_SUPPORT), "device not support pip."));
@@ -276,7 +276,9 @@ napi_value JsPipWindowManager::NapiSendTask(napi_env env, PipOption& pipOption)
         sptr<PictureInPictureController> pipController =
             new PictureInPictureController(pipOptionPtr, mainWindow, mainWindow->GetWindowId(), env);
         task->Resolve(env, CreateJsPipControllerObject(env, pipController));
-        mainWindow->UpdatePiPDefaultWindowSizeType(pipOption.GetDefaultWindowSizeType());
+        PiPTemplateInfo pipTemplateInfo;
+        pipOption.GetPiPTemplateInfo(pipTemplateInfo);
+        mainWindow->UpdatePiPTemplateInfo(pipTemplateInfo);
     };
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
         napiAsyncTask->Reject(env, CreateJsError(env,

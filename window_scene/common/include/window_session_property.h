@@ -182,9 +182,7 @@ public:
     bool MarshallingSystemBarMap(Parcel& parcel) const;
     static void UnMarshallingSystemBarMap(Parcel& parcel, WindowSessionProperty* property);
     bool MarshallingPiPTemplateInfo(Parcel& parcel) const;
-    bool MarshallingPiPControlEnableInfo(Parcel& parcel) const;
     static void UnmarshallingPiPTemplateInfo(Parcel& parcel, WindowSessionProperty* property);
-    static void UnmarshallingPiPControlEnableInfo(Parcel& parcel, PiPTemplateInfo& pipTemplateInfo);
     bool Marshalling(Parcel& parcel) const override;
     static WindowSessionProperty* Unmarshalling(Parcel& parcel);
     bool MarshallingWindowMask(Parcel& parcel) const;
@@ -395,7 +393,7 @@ private:
     WindowLimits userLimits_;
     WindowLimits configLimitsVP_;
     float lastVpr_ = 0.0f;
-    PiPTemplateInfo pipTemplateInfo_ = {0, 0, {}};
+    PiPTemplateInfo pipTemplateInfo_ = {};
     KeyboardLayoutParams keyboardLayoutParams_;
     uint32_t windowModeSupportType_ {WindowModeSupport::WINDOW_MODE_SUPPORT_ALL};
     std::unordered_map<WindowType, SystemBarProperty> sysBarPropMap_ {
