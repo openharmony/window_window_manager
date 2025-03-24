@@ -113,7 +113,6 @@ private:
     };
 
 private:
-    uint32_t GetPipPriority(uint32_t pipTemplateType);
     WMError CreatePictureInPictureWindow(StartPipType startType);
     WMError ShowPictureInPictureWindow(StartPipType startType);
     WMError StartPictureInPictureInner(StartPipType startType);

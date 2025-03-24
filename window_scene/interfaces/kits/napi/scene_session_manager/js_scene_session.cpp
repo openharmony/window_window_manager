@@ -36,7 +36,7 @@ const std::string SESSION_RECT_CHANGE_CB = "sessionRectChange";
 const std::string WINDOW_MOVING_CB = "windowMoving";
 const std::string SESSION_PIP_CONTROL_STATUS_CHANGE_CB = "sessionPiPControlStatusChange";
 const std::string SESSION_AUTO_START_PIP_CB = "autoStartPiP";
-const std::string PIP_DEFAULT_WINDOW_SIZE_TYPE_CHANGE_CB = "pipDefaultWindowSizeTypeChange";
+const std::string UPDATE_PIP_TEMPLATE_INFO_CB = "updatePiPTemplateInfo";
 const std::string CREATE_SUB_SESSION_CB = "createSpecificSession";
 const std::string FOLLOW_PARENT_RECT_CB = "followParentRect";
 const std::string BIND_DIALOG_TARGET_CB = "bindDialogTarget";
@@ -180,8 +180,7 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {SET_PARENT_SESSION_CB,                 ListenerFuncType::SET_PARENT_SESSION_CB},
     {UPDATE_FLAG_CB,                        ListenerFuncType::UPDATE_FLAG_CB},
     {Z_LEVEL_CHANGE_CB,                     ListenerFuncType::Z_LEVEL_CHANGE_CB},
-    {PIP_DEFAULT_WINDOW_SIZE_TYPE_CHANGE_CB,
-        ListenerFuncType::PIP_DEFAULT_WINDOW_SIZE_TYPE_CHANGE_CB},
+    {UPDATE_PIP_TEMPLATE_INFO_CB,           ListenerFuncType::UPDATE_PIP_TEMPLATE_INFO_CB},
 };
 
 const std::vector<std::string> g_syncGlobalPositionPermission {
@@ -223,19 +222,19 @@ napi_value CreateJsPiPControlEnableObject(napi_env env, PiPControlEnableInfo con
     return objValue;
 }
 
-static napi_value CreatePipTemplateInfo(napi_env env, const sptr<SceneSession>& session)
+static napi_value CreatePipTemplateInfo(napi_env env, const PiPTemplateInfo& pipTemplateInfo)
 {
     TLOGI(WmsLogTag::WMS_PIP, "in");
     napi_value pipTemplateInfoValue = nullptr;
     napi_create_object(env, &pipTemplateInfoValue);
     napi_set_named_property(env, pipTemplateInfoValue, "pipTemplateType",
-        CreateJsValue(env, session->GetPiPTemplateInfo().pipTemplateType));
+        CreateJsValue(env, pipTemplateInfo.pipTemplateType));
     napi_set_named_property(env, pipTemplateInfoValue, "priority",
-        CreateJsValue(env, session->GetPiPTemplateInfo().priority));
+        CreateJsValue(env, pipTemplateInfo.priority));
     napi_set_named_property(env, pipTemplateInfoValue, "defaultWindowSizeType",
-        CreateJsValue(env, session->GetPiPTemplateInfo().defaultWindowSizeType));
+        CreateJsValue(env, pipTemplateInfo.defaultWindowSizeType));
     napi_value controlArrayValue = nullptr;
-    std::vector<std::uint32_t> controlGroups = session->GetPiPTemplateInfo().controlGroup;
+    std::vector<std::uint32_t> controlGroups = pipTemplateInfo.controlGroup;
     napi_create_array_with_length(env, controlGroups.size(), &controlArrayValue);
     auto index = 0;
     for (const auto& controlGroup : controlGroups) {
@@ -243,7 +242,7 @@ static napi_value CreatePipTemplateInfo(napi_env env, const sptr<SceneSession>& 
     }
     napi_set_named_property(env, pipTemplateInfoValue, "controlGroup", controlArrayValue);
     napi_value controlStatusArrayValue = nullptr;
-    std::vector<PiPControlStatusInfo> controlStatusInfoList = session->GetPiPTemplateInfo().pipControlStatusInfoList;
+    std::vector<PiPControlStatusInfo> controlStatusInfoList = pipTemplateInfo.pipControlStatusInfoList;
     napi_create_array_with_length(env, controlStatusInfoList.size(), &controlStatusArrayValue);
     auto controlStatusIndex = 0;
     for (const auto& controlStatus : controlStatusInfoList) {
@@ -252,7 +251,7 @@ static napi_value CreatePipTemplateInfo(napi_env env, const sptr<SceneSession>& 
     }
     napi_set_named_property(env, pipTemplateInfoValue, "pipControlStatusInfoList", controlStatusArrayValue);
     napi_value controlEnableArrayValue = nullptr;
-    std::vector<PiPControlEnableInfo> controlEnableInfoList = session->GetPiPTemplateInfo().pipControlEnableInfoList;
+    std::vector<PiPControlEnableInfo> controlEnableInfoList = pipTemplateInfo.pipControlEnableInfoList;
     napi_create_array_with_length(env, controlEnableInfoList.size(), &controlEnableArrayValue);
     auto controlEnableIndex = 0;
     for (const auto& controlEnableInfo : controlEnableInfoList) {
@@ -315,7 +314,8 @@ napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& sessio
     napi_set_named_property(env, objValue, "type",
         CreateJsValue(env, static_cast<uint32_t>(GetApiType(session->GetWindowType()))));
     napi_set_named_property(env, objValue, "isAppType", CreateJsValue(env, session->IsFloatingWindowAppType()));
-    napi_set_named_property(env, objValue, "pipTemplateInfo", CreatePipTemplateInfo(env, session));
+    napi_set_named_property(env, objValue, "pipTemplateInfo",
+        CreatePipTemplateInfo(env, session->GetPiPTemplateInfo()));
     napi_set_named_property(env, objValue, "keyboardGravity",
         CreateJsValue(env, static_cast<int32_t>(session->GetKeyboardGravity())));
     napi_set_named_property(env, objValue, "isTopmost",
@@ -1175,20 +1175,20 @@ void JsSceneSession::ProcessAutoStartPiPStatusChangeRegister()
     TLOGI(WmsLogTag::WMS_PIP, "success");
 }
 
-void JsSceneSession::ProcessUpdatePiPDefaultWindowSizeTypeRegister()
+void JsSceneSession::ProcessUpdatePiPTemplateInfoRegister()
 {
     auto session = weakSession_.promote();
     if (session == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "session is nullptr, id:%{public}d", persistentId_);
         return;
     }
-    session->SetUpdatePiPDefaultWindowSizeTypeCallback([weakThis = wptr(this)](uint32_t defaultWindowSizeType) {
+    session->SetUpdatePiPTemplateInfoCallback([weakThis = wptr(this)](PiPTemplateInfo& pipTemplateInfo) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGNE(WmsLogTag::WMS_PIP, "jsSceneSession is null");
             return;
         }
-        jsSceneSession->OnUpdatePiPDefaultWindowSizeType(defaultWindowSizeType);
+        jsSceneSession->OnUpdatePiPTemplateInfo(pipTemplateInfo);
     });
     TLOGI(WmsLogTag::WMS_PIP, "success");
 }
@@ -2590,8 +2590,8 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
         case static_cast<uint32_t>(ListenerFuncType::SESSION_AUTO_START_PIP_CB):
             ProcessAutoStartPiPStatusChangeRegister();
             break;
-        case static_cast<uint32_t>(ListenerFuncType::PIP_DEFAULT_WINDOW_SIZE_TYPE_CHANGE_CB):
-            ProcessUpdatePiPDefaultWindowSizeTypeRegister();
+        case static_cast<uint32_t>(ListenerFuncType::UPDATE_PIP_TEMPLATE_INFO_CB):
+            ProcessUpdatePiPTemplateInfoRegister();
             break;
         case static_cast<uint32_t>(ListenerFuncType::CREATE_SUB_SESSION_CB):
             ProcessCreateSubSessionRegister();
@@ -3528,22 +3528,25 @@ void JsSceneSession::OnAutoStartPiPStatusChange(bool isAutoStart, uint32_t prior
     taskScheduler_->PostMainThreadTask(task, __func__);
 }
 
-void JsSceneSession::OnUpdatePiPDefaultWindowSizeType(uint32_t defaultWindowSizeType)
+void JsSceneSession::OnUpdatePiPTemplateInfo(PiPTemplateInfo& pipTemplateInfo)
 {
-    TLOGI(WmsLogTag::WMS_PIP, "defaultWindowSizeType:%{public}u", defaultWindowSizeType);
-    auto task = [weakThis = wptr(this), persistentId = persistentId_, defaultWindowSizeType, env = env_] {
+    TLOGI(WmsLogTag::WMS_PIP, "pipTemplateType: %{public}u, priority: %{public}d, "
+        "defaultWindowSizeType: %{public}d", pipTemplateInfo.pipTemplateType, pipTemplateInfo.priority,
+        pipTemplateInfo.defaultWindowSizeType);
+    auto task = [weakThis = wptr(this), persistentId = persistentId_,
+        pipTemplateInfo = std::move(pipTemplateInfo), env = env_] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGNE(WmsLogTag::WMS_PIP, "jsSceneSession id:%{public}d has been destroyed", persistentId);
             return;
         }
-        auto jsCallBack = jsSceneSession->GetJSCallback(PIP_DEFAULT_WINDOW_SIZE_TYPE_CHANGE_CB);
+        auto jsCallBack = jsSceneSession->GetJSCallback(UPDATE_PIP_TEMPLATE_INFO_CB);
         if (!jsCallBack) {
             TLOGNE(WmsLogTag::WMS_PIP, "jsCallBack is nullptr");
             return;
         }
-        napi_value defaultWindowSizeTypeValue = AbilityRuntime::CreateJsNumber(env, defaultWindowSizeType);
-        napi_value argv[] = {defaultWindowSizeTypeValue};
+        napi_value pipTemplateInfoValue = CreatePipTemplateInfo(env, pipTemplateInfo);
+        napi_value argv[] = {pipTemplateInfoValue};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, __func__);

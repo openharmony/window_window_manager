@@ -1585,31 +1585,33 @@ void SceneSession::SetSessionPiPControlStatusChangeCallback(const NotifySessionP
     }, __func__);
 }
 
-void SceneSession::SetUpdatePiPDefaultWindowSizeTypeCallback(const NotifyUpdatePiPDefaultWindowSizeTypeFunc& func)
+void SceneSession::SetUpdatePiPTemplateInfoCallback(NotifyUpdatePiPTemplateInfoFunc&& func)
 {
-    auto task = [weakThis = wptr(this), func, where = __func__] {
+    auto task = [weakThis = wptr(this), func = std::move(func), where = __func__] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_PIP, "%{public}s session is null", where);
             return;
         }
-        session->updatePiPDefaultWindowSizeTypeCallbackFunc_ = func;
+        session->updatePiPTemplateInfoCallbackFunc_ = std::move(func);
     };
     PostTask(task, __func__);
 }
 
-WSError SceneSession::UpdatePiPDefaultWindowSizeType(uint32_t defaultWindowSizeType)
+WSError SceneSession::UpdatePiPTemplateInfo(PiPTemplateInfo& pipTemplateInfo)
 {
-    TLOGI(WmsLogTag::WMS_PIP, "defaultWindowSizeType:%{public}u", defaultWindowSizeType);
-    auto task = [weakThis = wptr(this), defaultWindowSizeType, where = __func__] {
+    TLOGI(WmsLogTag::WMS_PIP, "UpdatePiPTemplateInfo, pipTemplateType: %{public}u, priority: %{public}d, "
+        "defaultWindowSizeType: %{public}d", pipTemplateInfo.pipTemplateType, pipTemplateInfo.priority,
+        pipTemplateInfo.defaultWindowSizeType);
+    auto task = [weakThis = wptr(this), pipTemplateInfo = std::move(pipTemplateInfo), where = __func__]() mutable {
         auto session = weakThis.promote();
         if (!session || session->isTerminating_) {
             TLOGNE(WmsLogTag::WMS_PIP, "%{public}s session is null or is terminating", where);
             return;
         }
-        if (session->updatePiPDefaultWindowSizeTypeCallbackFunc_) {
-            HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::NotifyUpdatePiPDefaultWindowSizeType");
-            session->updatePiPDefaultWindowSizeTypeCallbackFunc_(defaultWindowSizeType);
+        if (session->updatePiPTemplateInfoCallbackFunc_) {
+            HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::UpdatePiPTemplateInfo");
+            session->updatePiPTemplateInfoCallbackFunc_(pipTemplateInfo);
         }
     };
     PostTask(task, __func__);

@@ -59,6 +59,8 @@ public:
     napi_ref GetStorageRef() const;
     void SetTypeNodeEnabled(bool enable);
     bool IsTypeNodeEnabled() const;
+    uint32_t GetPipPriority(uint32_t pipTemplateType) const;
+    void GetPiPTemplateInfo(PiPTemplateInfo& pipTemplateInfo);
 private:
     void* contextPtr_ = nullptr;
     uint32_t templateType_  = 0;

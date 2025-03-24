@@ -29,8 +29,6 @@ namespace Rosen {
 namespace {
     constexpr int32_t PIP_SUCCESS = 1;
     constexpr int32_t FAILED = 0;
-    constexpr uint32_t PIP_LOW_PRIORITY = 0;
-    constexpr uint32_t PIP_HIGH_PRIORITY = 1;
     const std::string PIP_CONTENT_PATH = "/system/etc/window/resources/pip_content.abc";
     const std::string DESTROY_TIMEOUT_TASK = "PipDestroyTimeout";
     const std::string STATE_CHANGE = "stateChange";
@@ -51,20 +49,6 @@ static napi_value CallJsFunction(napi_env env, napi_value method, napi_value con
     napi_get_undefined(env, &callResult);
     napi_call_function(env, result, method, argc, argv, &callResult);
     return callResult;
-}
-
-uint32_t PictureInPictureController::GetPipPriority(uint32_t pipTemplateType)
-{
-    if (pipTemplateType >= static_cast<uint32_t>(PiPTemplateType::END)) {
-        TLOGE(WmsLogTag::WMS_PIP, "param invalid, pipTemplateType is %{public}d", pipTemplateType);
-        return PIP_LOW_PRIORITY;
-    }
-    if (pipTemplateType == static_cast<uint32_t>(PiPTemplateType::VIDEO_PLAY) ||
-        pipTemplateType == static_cast<uint32_t>(PiPTemplateType::VIDEO_LIVE)) {
-        return PIP_LOW_PRIORITY;
-    } else {
-        return PIP_HIGH_PRIORITY;
-    }
 }
 
 PictureInPictureController::PictureInPictureController(sptr<PipOption> pipOption, sptr<Window> mainWindow,
@@ -115,12 +99,7 @@ WMError PictureInPictureController::CreatePictureInPictureWindow(StartPipType st
     windowOption->SetTouchable(false);
     WMError errCode = WMError::WM_OK;
     PiPTemplateInfo pipTemplateInfo;
-    pipTemplateInfo.pipTemplateType = pipOption_->GetPipTemplate();
-    pipTemplateInfo.controlGroup = pipOption_->GetControlGroup();
-    pipTemplateInfo.priority = GetPipPriority(pipOption_->GetPipTemplate());
-    pipTemplateInfo.defaultWindowSizeType = pipOption_->GetDefaultWindowSizeType();
-    pipTemplateInfo.pipControlStatusInfoList = pipOption_->GetControlStatus();
-    pipTemplateInfo.pipControlEnableInfoList = pipOption_->GetControlEnable();
+    pipOption_->GetPiPTemplateInfo(pipTemplateInfo);
     auto context = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(pipOption_->GetContext());
     const std::shared_ptr<AbilityRuntime::Context>& abilityContext = context->lock();
     SingletonContainer::Get<PiPReporter>().SetCurrentPackageName(abilityContext->GetApplicationInfo()->name);
@@ -417,7 +396,7 @@ void PictureInPictureController::SetAutoStartEnabled(bool enable)
         TLOGE(WmsLogTag::WMS_PIP, "pipOption is null");
         return;
     }
-    uint32_t priority = GetPipPriority(pipOption_->GetPipTemplate());
+    uint32_t priority = pipOption_->GetPipPriority(pipOption_->GetPipTemplate());
     uint32_t contentWidth = 0;
     uint32_t contentHeight = 0;
     pipOption_->GetContentSize(contentWidth, contentHeight);
@@ -468,7 +447,7 @@ void PictureInPictureController::UpdateContentSize(int32_t width, int32_t height
     }
     if (mainWindow_ != nullptr) {
         TLOGI(WmsLogTag::WMS_PIP, "mainWindow width:%{public}u height:%{public}u", width, height);
-        uint32_t priority = GetPipPriority(pipOption_->GetPipTemplate());
+        uint32_t priority = pipOption_->GetPipPriority(pipOption_->GetPipTemplate());
         uint32_t contentWidth = static_cast<uint32_t>(width);
         uint32_t contentHeight = static_cast<uint32_t>(height);
         mainWindow_->SetAutoStartPiP(isAutoStartEnabled_, priority, contentWidth, contentHeight);
