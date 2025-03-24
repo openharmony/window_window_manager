@@ -71,10 +71,10 @@ enum class WmsLogTag : uint8_t {
     WMS_COMPAT,                // C0421C
     WMS_ROTATION,              // C0421D
     WMS_ANIMATION,             // C0421E
-    END = 256,                 // Last one, do not use
+    END,                       // Last one, do not use
 };
 
-const char* getDomainContents(WmsLogTag tag);
+extern const char* g_domainContents[static_cast<uint32_t>(WmsLogTag::END)];
 #ifdef IS_RELEASE_VERSION
 #define WMS_FILE_NAME ""
 #else
@@ -89,7 +89,8 @@ const char* getDomainContents(WmsLogTag tag);
 #define PRINT_TLOG(level, tag, ...)                                                                     \
     do {                                                                                                \
         uint32_t hilogDomain = HILOG_DOMAIN_WINDOW + static_cast<uint32_t>(tag);                        \
-        const char *domainContent = getDomainContents(tag);                                             \
+        const char *domainContent = (tag >= WmsLogTag::DEFAULT && tag < WmsLogTag::END) ?               \
+            g_domainContents[static_cast<uint32_t>(tag)] : "";                                          \
         HILOG_IMPL(LOG_CORE, level, hilogDomain, domainContent, ##__VA_ARGS__);                         \
     } while (0)
 
