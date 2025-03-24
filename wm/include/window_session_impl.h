@@ -866,6 +866,9 @@ private:
      */
     void NotifyClientOrientationChange();
     void NotifyRotationChangeResult(RotationChangeResult rotationChangeResult) override;
+    void NotifyRotationChangeResultInner(
+            const std::vector<sptr<IWindowRotationChangeListener>>& windowRotationChangeListener,
+            const RotationChangeInfo& rotationChangeInfo);
 
     /*
      * keyboard

@@ -123,7 +123,8 @@ public:
     int64_t GetTimeout() const override;
     void OnRectChange(Rect rect, WindowSizeChangeReason reason) override;
     void OnWindowHighlightChange(bool isHighlight) override;
-    void OnRotationChange(const RotationChangeInfo& rotationChangeInfo, sptr<Window> window) override;
+    void OnRotationChange(const RotationChangeInfo& rotationChangeInfo,
+        RotationChangeResult& rotationChangeResult) override;
 
     /*
      * Window Decor listener
