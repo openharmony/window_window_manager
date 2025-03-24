@@ -2509,6 +2509,8 @@ WMError WindowSceneSessionImpl::ResetSystemBarPropertyForPage()
     }
     auto ret = NotifySpecificWindowSessionProperty(WindowType::WINDOW_TYPE_STATUS_BAR,
         GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR));
+    ret = NotifySpecificWindowSessionProperty(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR,
+        GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR));
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_IMMS, "set prop fail, ret %{public}u", ret);
         return ret;
