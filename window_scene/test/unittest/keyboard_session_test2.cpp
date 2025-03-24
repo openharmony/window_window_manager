@@ -18,6 +18,7 @@
 
 #include "interfaces/include/ws_common.h"
 #include "mock/mock_session_stage.h"
+#include "mock/mock_scene_session.h"
 #include "mock/mock_keyboard_session.h"
 #include "session/host/include/session.h"
 #include "session/host/include/scene_session.h"
@@ -387,19 +388,34 @@ HWTEST_F(KeyboardSessionTest2, UpdateCallingSessionIdAndPosition02, Function | S
     SessionInfo info;
     info.abilityName_ = "UpdateCallingSessionIdAndPosition02";
     info.bundleName_ = "UpdateCallingSessionIdAndPosition02";
-    sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, nullptr, nullptr);
+    sptr<KeyboardSession::KeyboardSessionCallback> keyboardCb =
+        sptr<KeyboardSession::KeyboardSessionCallback>::MakeSptr();
+    ASSERT_NE(keyboardCb, nullptr);
+    sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, nullptr, keyboardCb);
     ASSERT_NE(keyboardSession, nullptr);
     sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(windowSessionProperty, nullptr);
     keyboardSession->property_ = windowSessionProperty;
     ASSERT_NE(keyboardSession->property_, nullptr);
 
+    sptr<SceneSessionMocker> callingSession = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
+    keyboardSession->keyboardCallback_->onGetSceneSession =
+        [callingSession](int32_t persistenId)->sptr<SceneSession> {
+        if (persistenId != 100) { // callingSession's persistentId is 100
+            return nullptr;
+        }
+        return callingSession;
+    };
+
     keyboardSession->property_->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
-    keyboardSession->property_->SetCallingSessionId(-1);
+    keyboardSession->property_->SetCallingSessionId(100);
+    EXPECT_CALL(*callingSession, NotifyKeyboardAnimationCompleted(false, keyboardSession->GetPanelRect())).Times(1);
     keyboardSession->UpdateCallingSessionIdAndPosition(0);
+
+    keyboardSession->property_->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_FLOAT;
     keyboardSession->property_->SetCallingSessionId(0);
+    EXPECT_CALL(*callingSession, NotifyKeyboardAnimationCompleted(false, _)).Times(0);
     keyboardSession->UpdateCallingSessionIdAndPosition(0);
-    EXPECT_EQ(keyboardSession->property_->keyboardLayoutParams_.gravity_, WindowGravity::WINDOW_GRAVITY_BOTTOM);
 }
 
 /**
