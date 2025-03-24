@@ -5145,8 +5145,8 @@ napi_value JsSceneSession::OnNotifyPipSizeChange(napi_env env, napi_callback_inf
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    uint32_t width = 0;
-    uint32_t height = 0;
+    double width = 0.0;
+    double height = 0.0;
     double scale = 0.0;
     if (!ConvertFromJsValue(env, argv[ARG_INDEX_0], width) || !ConvertFromJsValue(env, argv[ARG_INDEX_1], height) ||
         !ConvertFromJsValue(env, argv[ARG_INDEX_2], scale)) {
@@ -5162,7 +5162,7 @@ napi_value JsSceneSession::OnNotifyPipSizeChange(napi_env env, napi_callback_inf
         return NapiGetUndefined(env);
     }
 
-    TLOGI(WmsLogTag::WMS_PIP, "persistId:%{public}d, width:%{public}u height:%{public}u scale:%{public}f",
+    TLOGI(WmsLogTag::WMS_PIP, "persistId:%{public}d, width:%{public}f height:%{public}f scale:%{public}f",
           persistentId_, width, height, scale);
     // Maybe expand with session visibility&state change
     session->NotifyPipWindowSizeChange(width, height, scale);

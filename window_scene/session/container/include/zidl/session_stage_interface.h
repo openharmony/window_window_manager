@@ -156,7 +156,7 @@ public:
      * @param scale Indicates the size scale.
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
-    virtual WSError NotifyPipWindowSizeChange(uint32_t width, uint32_t height, double scale) = 0;
+    virtual WSError NotifyPipWindowSizeChange(double width, double height, double scale) = 0;
 
     /**
      * @brief Set the media control event to client.
