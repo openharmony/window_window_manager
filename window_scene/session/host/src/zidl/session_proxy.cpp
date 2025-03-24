@@ -2287,53 +2287,6 @@ WMError SessionProxy::SetGestureBackEnabled(bool isEnabled)
     return static_cast<WMError>(ret);
 }
 
-WMError SessionProxy::SetSystemBarPropertyForPage(std::unordered_map<WindowType, SystemBarProperty>& systemBarProperty)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::WMS_IMMS, "WriteInterfaceToken failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteUint32(static_cast<uint32_t>(systemBarProperty.size()))) {
-        TLOGE(WmsLogTag::WMS_IMMS, "write size error");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    for (const auto& [type, property] : systemBarProperty) {
-        if (!data.WriteUint32(static_cast<uint32_t>(type))) {
-            return WMError::WM_ERROR_IPC_FAILED;
-        }
-        if (!data.WriteBool(property.enable_)) {
-            return WMError::WM_ERROR_IPC_FAILED;
-        }
-        if (!data.WriteUint32(property.backgroundColor_)) {
-            return WMError::WM_ERROR_IPC_FAILED;
-        }
-        if (!data.WriteUint32(property.contentColor_)) {
-            return WMError::WM_ERROR_IPC_FAILED;
-        }
-        if (!data.WriteBool(property.enableAnimation_)) {
-            return WMError::WM_ERROR_IPC_FAILED;
-        }
-        if (!data.WriteUint32(static_cast<uint32_t>(property.settingFlag_))) {
-            return WMError::WM_ERROR_IPC_FAILED;
-        }
-    }
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "remote is null");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_SET_SYSTEM_BAR_PROPERTY_FOR_PAGE),
-        data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_IMMS, "SendRequest failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    uint32_t ret = reply.ReadUint32();
-    return static_cast<WMError>(ret);
-}
-
 WSError SessionProxy::NotifySubModalTypeChange(SubWindowModalType subWindowModalType)
 {
     MessageParcel data;

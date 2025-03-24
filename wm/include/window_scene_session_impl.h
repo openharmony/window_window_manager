@@ -129,7 +129,8 @@ public:
         const std::map<WindowType, SystemBarPropertyFlag>& propertyFlags) override;
     WMError GetSystemBarProperties(std::map<WindowType, SystemBarProperty>& properties) override;
     WMError SetSpecificBarProperty(WindowType type, const SystemBarProperty& property) override;
-    WMError SetSystemBarPropertyForPage(std::unordered_map<WindowType, SystemBarProperty>& systemBarProperty) override;
+    WMError SetSystemBarPropertyForPage(WindowType type, SystemBarProperty& systemBarProperty) override;
+    WMError ResetSystemBarPropertyForPage() override;
     void ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     bool PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     WSError NotifyDialogStateChange(bool isForeground) override;
