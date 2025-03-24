@@ -278,8 +278,8 @@ public:
     void UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
     void UpdateWindowState(WindowState state);
     WmErrorCode UpdateSubWindowStateAndNotify(uint32_t parentId);
-    WmErrorCode UpdateWindowStateWhenShow(uint32_t reason);
-    WmErrorCode UpdateWindowStateWhenHide(uint32_t reason);
+    WmErrorCode UpdateWindowStateWhenShow(uint32_t reason = WindowStateChangeReason::NORMAL);
+    WmErrorCode UpdateWindowStateWhenHide(uint32_t reason = WindowStateChangeReason::NORMAL);
     sptr<WindowProperty> GetWindowProperty();
     void UpdateDragEvent(const PointInfo& point, DragEvent event);
     void UpdateDisplayId(DisplayId from, DisplayId to);
