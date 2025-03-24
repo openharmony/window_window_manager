@@ -389,7 +389,6 @@ public:
      * Window Property
      */
     WSError NotifyDisplayIdChange(DisplayId displayId);
-    uint32_t GetApiCompatibleVersion() const override;
 
     /*
      * Window Input Event

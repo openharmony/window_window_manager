@@ -480,7 +480,7 @@ void WindowImpl::UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool syste
     property.enable_ = systemBarEnable;
     property.enableAnimation_ = systemBarEnableAnimation;
     // isolate on api 18
-    if (GetApiCompatibleVersion() >= API_VERSION_18) {
+    if (GetApiTargetVersion() >= API_VERSION_18) {
         property.settingFlag_ |= SystemBarSettingFlag::ENABLE_SETTING;
     }
 }
@@ -1249,6 +1249,15 @@ WMError WindowImpl::SetImmersiveModeEnabledState(bool enable)
 bool WindowImpl::GetImmersiveModeEnabledState() const
 {
     return true;
+}
+
+uint32_t WindowImpl::GetApiTargetVersion() const
+{
+    uint32_t version = 0;
+    if ((context_ != nullptr) && (context_->GetApplicationInfo() != nullptr)) {
+        version = context_->GetApplicationInfo()->apiTargetVersion % API_VERSION_MOD;
+    }
+    return version;
 }
 } // namespace Rosen
 } // namespace OHOS
