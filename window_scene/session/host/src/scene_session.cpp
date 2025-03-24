@@ -217,6 +217,9 @@ WSError SceneSession::ReconnectInner(sptr<WindowSessionProperty> property)
     if (ret != WSError::WS_OK) {
         Session::Disconnect(false);
     }
+    if (pcFoldScreenController_) {
+        pcFoldScreenController_->OnConnect();
+    }
     return ret;
 }
 

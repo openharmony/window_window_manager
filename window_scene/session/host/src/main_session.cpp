@@ -87,6 +87,9 @@ WSError MainSession::Reconnect(const sptr<ISessionStage>& sessionStage, const sp
                 session->scenePersistence_->SetHasSnapshot(true);
             }
         }
+        if (session->pcFoldScreenController_) {
+            session->pcFoldScreenController_->OnConnect();
+        }
         return ret;
     });
 }
