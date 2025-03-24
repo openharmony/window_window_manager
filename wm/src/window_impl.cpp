@@ -52,6 +52,7 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowImpl"};
 const std::string PARAM_DUMP_HELP = "-h";
 const uint32_t API_VERSION_MOD = 1000;
+constexpr int32_t API_VERSION_18 = 18;
 
 Ace::ContentInfoType GetAceContentInfoType(BackupAndRestoreType type)
 {
@@ -964,7 +965,10 @@ void WindowImpl::UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool syste
 {
     property.enable_ = systemBarEnable;
     property.enableAnimation_ = systemBarEnableAnimation;
-    property.settingFlag_ |= SystemBarSettingFlag::ENABLE_SETTING;
+    // isolate on api 18
+    if (GetApiTargetVersion() >= API_VERSION_18) {
+        property.settingFlag_ |= SystemBarSettingFlag::ENABLE_SETTING;
+    }
 }
 
 WMError WindowImpl::SetSpecificBarProperty(WindowType type, const SystemBarProperty& property)
@@ -4456,11 +4460,11 @@ void WindowImpl::RegisterWindowInspectorCallback()
     WindowInspector::GetInstance().RegisterGetWMSWindowListCallback(GetWindowId(), std::move(getWMSWindowListCallback));
 }
 
-uint32_t WindowImpl::GetApiCompatibleVersion() const
+uint32_t WindowImpl::GetApiTargetVersion() const
 {
     uint32_t version = 0;
     if ((context_ != nullptr) && (context_->GetApplicationInfo() != nullptr)) {
-        version = context_->GetApplicationInfo()->apiCompatibleVersion % API_VERSION_MOD;
+        version = context_->GetApplicationInfo()->apiTargetVersion % API_VERSION_MOD;
     }
     return version;
 }
