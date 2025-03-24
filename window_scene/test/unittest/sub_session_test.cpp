@@ -627,6 +627,43 @@ HWTEST_F(SubSessionTest, RemoveSufaceNodeFromScreen, Function | SmallTest | Leve
     sceneSession->RemoveSufaceNodeFromScreen();
     ASSERT_EQ(DISPLAY_ID_INVALID, sceneSession->GetOriginDisplayId());
 }
+
+/**
+ * @tc.name: SetSubWindowZLevel
+ * @tc.desc: SetSubWindowZLevel
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubSessionTest, SetSubWindowZLevel, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetSubWindowZLevel";
+    info.bundleName_ = "SetSubWindowZLevel";
+    sptr<SubSession> subSession = sptr<SubSession>::MakeSptr(info, nullptr);
+    int32_t testZLevel = 0;
+    subSession->onSubSessionZLevelChange_ = [&testZLevel](int32_t zLevel) {
+        testZLevel = zLevel;
+    };
+    subSession->property_->zLevel_ = 0;
+    WSError ret = subSession->SetSubWindowZLevel(1);
+    EXPECT_EQ(1, subSession->property_->zLevel_);
+    EXPECT_EQ(1, testZLevel);
+    EXPECT_EQ(ret, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: GetSubWindowZLevel
+ * @tc.desc: GetSubWindowZLevel
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubSessionTest, GetSubWindowZLevel, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "GetSubWindowZLevel";
+    info.bundleName_ = "GetSubWindowZLevel";
+    sptr<SubSession> subSession = sptr<SubSession>::MakeSptr(info, nullptr);
+    subSession->property_->zLevel_ = 1;
+    EXPECT_EQ(1, subSession->GetSubWindowZLevel());
+}
 }
 }
 }
