@@ -1306,7 +1306,7 @@ sptr<ScreenSession> ScreenSessionManager::GetScreenSession(ScreenId screenId) co
     }
     auto iter = screenSessionMap_.find(screenId);
     if (iter == screenSessionMap_.end()) {
-        TLOGW(WmsLogTag::DMS, "not found screen session id: %{public}" PRIu64" and create new.", screenId);
+        TLOGW(WmsLogTag::DMS, "not found screen session id: %{public}" PRIu64".", screenId);
         return nullptr;
     }
     return iter->second;

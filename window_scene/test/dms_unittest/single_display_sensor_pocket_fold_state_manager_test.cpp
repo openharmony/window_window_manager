@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 
 #include "screen_session_manager/include/fold_screen_controller/sensor_fold_state_manager/single_display_sensor_pocket_fold_state_manager.h"
+#include "fold_screen_state_internel.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -230,6 +231,9 @@ HWTEST_F(SingleDisplaySensorPocketFoldStateManagerTest, TriggerTentExit, Functio
  */
 HWTEST_F(SingleDisplaySensorPocketFoldStateManagerTest, HandleTentChange, Function | SmallTest | Level1)
 {
+    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        GTEST_SKIP();
+    }
     SingleDisplaySensorPocketFoldStateManager mgr;
     
     ASSERT_EQ(mgr.IsTentMode(), false);
