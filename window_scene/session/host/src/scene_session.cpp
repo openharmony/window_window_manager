@@ -7601,9 +7601,9 @@ WSError SceneSession::UpdateRotationChangeRegistered(int32_t persistentId, bool 
             TLOGI(
                 WmsLogTag::WMS_ROTATION, "persistentId: %{public}d, isRegister: %{public}d", persistentId, isRegister);
             if (isRegister) {
-                isRotationChangeCallbackRegistered = true;
+                session->isRotationChangeCallbackRegistered = true;
             } else {
-                isRotationChangeCallbackRegistered = false;
+                session->isRotationChangeCallbackRegistered = false;
             }
     }, __func__);
 
