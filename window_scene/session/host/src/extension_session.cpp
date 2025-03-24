@@ -159,7 +159,7 @@ void ChannelDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
         TLOGE(WmsLogTag::WMS_UIEXT, "listener_ is null");
         return;
     }
-    TLOGE(WmsLogTag::WMS_UIEXT, "ChannelDeathRecipient OnRemoteDied");
+    TLOGE(WmsLogTag::WMS_UIEXT, "Died");
     listener_->ResetTransferKeyEventForConsumedParams(false, WSError::WS_ERROR_IPC_FAILED);
 }
 
@@ -275,7 +275,7 @@ WSError ExtensionSession::TransferAbilityResult(uint32_t resultCode, const AAFwk
 
 WSError ExtensionSession::TransferExtensionData(const AAFwk::WantParams& wantParams)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "persistenId: %{public}d", GetPersistentId());
+    TLOGI(WmsLogTag::WMS_UIEXT, "id: %{public}d", GetPersistentId());
     if (extSessionEventCallback_ != nullptr &&
         extSessionEventCallback_->transferExtensionDataFunc_ != nullptr) {
         extSessionEventCallback_->transferExtensionDataFunc_(wantParams);
@@ -285,7 +285,7 @@ WSError ExtensionSession::TransferExtensionData(const AAFwk::WantParams& wantPar
 
 WSError ExtensionSession::TransferComponentData(const AAFwk::WantParams& wantParams)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "persistenId: %{public}d", GetPersistentId());
+    TLOGD(WmsLogTag::WMS_UIEXT, "id: %{public}d", GetPersistentId());
     if (!IsSessionValid()) {
         return WSError::WS_ERROR_INVALID_SESSION;
     }
@@ -296,7 +296,7 @@ WSError ExtensionSession::TransferComponentData(const AAFwk::WantParams& wantPar
 WSErrorCode ExtensionSession::TransferComponentDataSync(const AAFwk::WantParams& wantParams,
                                                         AAFwk::WantParams& reWantParams)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "persistenId: %{public}d", GetPersistentId());
+    TLOGI(WmsLogTag::WMS_UIEXT, "id: %{public}d", GetPersistentId());
     if (!IsSessionValid()) {
         return WSErrorCode::WS_ERROR_TRANSFER_DATA_FAILED;
     }
@@ -509,7 +509,7 @@ WSError ExtensionSession::Background(bool isFromClient, const std::string& ident
 
 void ExtensionSession::NotifyExtensionEventAsync(uint32_t notifyEvent)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "notifyEvent: %{public}d", notifyEvent);
+    TLOGD(WmsLogTag::WMS_UIEXT, "notifyEvent: %{public}d", notifyEvent);
     if (extSessionEventCallback_ != nullptr && extSessionEventCallback_->notifyExtensionEventFunc_ != nullptr) {
         extSessionEventCallback_->notifyExtensionEventFunc_(notifyEvent);
     }
