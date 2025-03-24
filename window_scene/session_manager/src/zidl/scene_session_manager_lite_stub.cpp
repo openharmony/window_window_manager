@@ -494,7 +494,7 @@ int SceneSessionManagerLiteStub::HandleCheckUIExtensionCreation(MessageParcel& d
     }
     int32_t pid = INVALID_PID;
     WMError errCode = CheckUIExtensionCreation(windowId, tokenId, *element, extAbilityType, pid);
-    TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: ret %{public}u", errCode);
+    TLOGD(WmsLogTag::WMS_UIEXT, "UIExtOnLock: ret %{public}u", errCode);
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: Failed to write errcode");
         return ERR_INVALID_DATA;
