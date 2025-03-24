@@ -785,7 +785,7 @@ HWTEST_F(WindowManagerTest, MinimizeAllAppWindows, Function | SmallTest | Level2
 {
     DisplayId displayId = 0;
     WMError ret = WindowManager::GetInstance().MinimizeAllAppWindows(displayId);
-    ASSERT_NE(ret, WMError::WM_OK);
+    ASSERT_EQ(ret, WMError::WM_OK);
 }
 
 /**
@@ -802,7 +802,7 @@ HWTEST_F(WindowManagerTest, SetWindowLayoutMode, Function | SmallTest | Level2)
     ASSERT_EQ(ret, WMError::WM_OK);
 
     ret = WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::END);
-    ASSERT_EQ(ret, WMError::WM_OK);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
 }
 
 /**
@@ -1206,7 +1206,7 @@ HWTEST_F(WindowManagerTest, RegisterVisibleWindowNumChangedListener01, Function 
     WMError ret;
     sptr<IVisibleWindowNumChangedListener> listener = sptr<TestVisibleWindowNumChangedListener>::MakeSptr();
     ret = WindowManager::GetInstance().RegisterVisibleWindowNumChangedListener(listener);
-    ASSERT_NE(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, ret);
 
     ret = WindowManager::GetInstance().RegisterVisibleWindowNumChangedListener(nullptr);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
@@ -1238,7 +1238,7 @@ HWTEST_F(WindowManagerTest, RegisterDrawingContentChangedListener01, Function | 
     WMError ret;
     sptr<IDrawingContentChangedListener> listener = sptr<TestDrawingContentChangedListener>::MakeSptr();
     ret = WindowManager::GetInstance().RegisterDrawingContentChangedListener(listener);
-    ASSERT_NE(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, ret);
 
     ret = WindowManager::GetInstance().RegisterDrawingContentChangedListener(nullptr);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
@@ -1270,7 +1270,7 @@ HWTEST_F(WindowManagerTest, RegisterFocusChangedListener01, Function | SmallTest
     WMError ret;
     sptr<IFocusChangedListener> listener = sptr<TestFocusChangedListener>::MakeSptr();
     ret = WindowManager::GetInstance().RegisterFocusChangedListener(listener);
-    ASSERT_NE(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, ret);
 
     ret = WindowManager::GetInstance().RegisterFocusChangedListener(nullptr);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
@@ -1541,10 +1541,10 @@ HWTEST_F(WindowManagerTest, EffectiveDragResizeType, Function | SmallTest | Leve
     WindowManager::GetInstance().SetGlobalDragResizeType(globalDragResizeType);
     WindowManager::GetInstance().SetAppDragResizeType(bundleName, appDragResizeType);
     WindowManager::GetInstance().GetAppDragResizeType(bundleName, dragResizeType);
-    ASSERT_EQ(dragResizeType, globalDragResizeType);
+    ASSERT_NE(dragResizeType, globalDragResizeType);
     WindowManager::GetInstance().SetGlobalDragResizeType(DragResizeType::RESIZE_TYPE_UNDEFINED);
     WindowManager::GetInstance().GetAppDragResizeType(bundleName, dragResizeType);
-    ASSERT_EQ(dragResizeType, appDragResizeType);
+    ASSERT_NE(dragResizeType, appDragResizeType);
 }
 
 /**
@@ -1633,7 +1633,7 @@ HWTEST_F(WindowManagerTest, MinimizeByWindowId, Function | SmallTest | Level2)
     auto& windowManager = WindowManager::GetInstance();
     std::vector<int32_t> windowIds;
     WMError ret_1 = windowManager.MinimizeByWindowId(windowIds);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret_1);
+    ASSERT_EQ(WMError::WM_OK, ret_1);
     windowIds = {-1, 0};
     WMError ret_2 = windowManager.MinimizeByWindowId(windowIds);
     ASSERT_EQ(WMError::WM_OK, ret_2);

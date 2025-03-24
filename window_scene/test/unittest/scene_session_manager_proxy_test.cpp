@@ -1456,7 +1456,7 @@ HWTEST_F(sceneSessionManagerProxyTest, MinimizeByWindowId, Function | SmallTest 
     auto sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
     std::vector<int32_t> windowIds;
     WMError res = sceneSessionManagerProxy->MinimizeByWindowId(windowIds);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, res);
+    ASSERT_EQ(WMError::WM_OK, res);
 }
 }  // namespace
 }

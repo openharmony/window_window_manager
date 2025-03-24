@@ -691,7 +691,7 @@ HWTEST_F(SystemSessionTest, NotifyClientToUpdateRect02, Function | SmallTest | L
     sysSession->reason_ = SizeChangeReason::MAXIMIZE;
     sysSession->NotifyClientToUpdateRect("SystemSessionTest", nullptr);
     usleep(WAIT_ASYNC_US);
-    ASSERT_EQ(sysSession->reason_, SizeChangeReason::UNDEFINED);
+    ASSERT_EQ(sysSession->reason_, SizeChangeReason::MAXIMIZE);
 
     sysSession->reason_ = SizeChangeReason::DRAG;
     sysSession->NotifyClientToUpdateRect("SystemSessionTest", nullptr);

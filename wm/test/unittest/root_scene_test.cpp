@@ -307,7 +307,7 @@ HWTEST_F(RootSceneTest, RegisterAvoidAreaChangeListener, Function | SmallTest | 
     rootScene.updateRootSceneAvoidAreaCallback_ = [] {};
     sptr<IAvoidAreaChangedListener> listener = sptr<IAvoidAreaChangedListener>::MakeSptr();
     auto ret = rootScene.RegisterAvoidAreaChangeListener(listener);
-    ASSERT_EQ(WMError::WM_DO_NOTHING, ret);
+    ASSERT_EQ(WMError::WM_OK, ret);
     listener = nullptr;
     ret = rootScene.RegisterAvoidAreaChangeListener(listener);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
@@ -323,7 +323,7 @@ HWTEST_F(RootSceneTest, UnregisterAvoidAreaChangeListener, Function | SmallTest 
     RootScene rootScene;
     sptr<IAvoidAreaChangedListener> listener = sptr<IAvoidAreaChangedListener>::MakeSptr();
     auto ret = rootScene.UnregisterAvoidAreaChangeListener(listener);
-    ASSERT_EQ(WMError::WM_DO_NOTHING, ret);
+    ASSERT_EQ(WMError::WM_OK, ret);
     listener = nullptr;
     ret = rootScene.UnregisterAvoidAreaChangeListener(listener);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);

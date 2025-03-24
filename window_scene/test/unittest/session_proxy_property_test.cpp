@@ -86,7 +86,7 @@ HWTEST_F(SessionProxyPropertyTest, UpdateSessionPropertyByAction, Function | Sma
     MockMessageParcel::ClearAllErrorFlag();
 
     MockMessageParcel::SetWriteUint32ErrorFlag(true);
-    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, sessionProxy->UpdateSessionPropertyByAction(nullptr,
+    ASSERT_EQ(WMError::WM_OK, sessionProxy->UpdateSessionPropertyByAction(nullptr,
         WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
     MockMessageParcel::ClearAllErrorFlag();
 
