@@ -1198,7 +1198,8 @@ HWTEST_F(PictureInPictureControllerTest, GetPipPossible, Function | SmallTest | 
     auto pipControl = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
 
     const std::string multiWindowUIType = system::GetParameter("const.window.multiWindowUIType", "");
-    bool isDeviceSupported = multiWindowUIType == "HandsetSmartWindow" || multiWindowUIType == "TabletSmartWindow";
+    bool isDeviceSupported = multiWindowUIType == "HandsetSmartWindow" || multiWindowUIType == "FreeFormMultiWindow" ||
+        multiWindowUIType == "TabletSmartWindow";
 
     bool pipSupported = false;
     pipControl->pipOption_ = option;
