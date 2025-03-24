@@ -600,18 +600,18 @@ HWTEST_F(SubSessionTest, AddSurfaceNodeToScreen, TestSize.Level1)
 }
 
 /**
- * @tc.name: RemoveSufaceNodeFromScreen
- * @tc.desc: RemoveSufaceNodeFromScreen
+ * @tc.name: RemoveSurfaceNodeFromScreen
+ * @tc.desc: RemoveSurfaceNodeFromScreen
  * @tc.type: FUNC
  */
-HWTEST_F(SubSessionTest, RemoveSufaceNodeFromScreen, TestSize.Level1)
+HWTEST_F(SubSessionTest, RemoveSurfaceNodeFromScreen, TestSize.Level1)
 {
     SessionInfo info;
-    info.abilityName_ = "RemoveSufaceNodeFromScreen";
-    info.bundleName_ = "RemoveSufaceNodeFromScreen";
+    info.abilityName_ = "RemoveSurfaceNodeFromScreen";
+    info.bundleName_ = "RemoveSurfaceNodeFromScreen";
     sptr<SubSession> sceneSession = sptr<SubSession>::MakeSptr(info, nullptr);
     sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    sceneSession->RemoveSufaceNodeFromScreen();
+    sceneSession->RemoveSurfaceNodeFromScreen();
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
     rsSurfaceNodeConfig.SurfaceNodeName = info.abilityName_;
     RSSurfaceNodeType rsSurfaceNodeType = RSSurfaceNodeType::DEFAULT;
@@ -621,10 +621,10 @@ HWTEST_F(SubSessionTest, RemoveSufaceNodeFromScreen, TestSize.Level1)
     sceneSession->SetOriginDisplayId(DISPLAY_ID_INVALID);
     sceneSession->displayIdSetDuringMoveTo_.insert(0);
     sceneSession->displayIdSetDuringMoveTo_.insert(888);
-    sceneSession->RemoveSufaceNodeFromScreen();
+    sceneSession->RemoveSurfaceNodeFromScreen();
     ASSERT_EQ(DISPLAY_ID_INVALID, sceneSession->GetOriginDisplayId());
     sceneSession->SetOriginDisplayId(DISPLAY_ID_INVALID);
-    sceneSession->RemoveSufaceNodeFromScreen();
+    sceneSession->RemoveSurfaceNodeFromScreen();
     ASSERT_EQ(DISPLAY_ID_INVALID, sceneSession->GetOriginDisplayId());
 }
 
