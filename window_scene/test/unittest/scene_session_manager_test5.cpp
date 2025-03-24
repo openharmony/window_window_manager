@@ -1711,16 +1711,16 @@ HWTEST_F(SceneSessionManagerTest5, RegisterSaveSnapshotFunc, Function | SmallTes
 {
     ASSERT_NE(ssm_, nullptr);
     sptr<SceneSession> sceneSession = nullptr;
-    ssm_->RegisterSaveSnapshotFunc(sceneSession);
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, ssm_->RegisterSaveSnapshotFunc(sceneSession));
 
     SessionInfo info;
     info.windowType_ = 1000;
     sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->property_->SetPersistentId(1);
-    ssm_->RegisterSaveSnapshotFunc(sceneSession);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_WINDOW, ssm_->RegisterSaveSnapshotFunc(sceneSession));
 
     sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    ssm_->RegisterSaveSnapshotFunc(sceneSession);
+    ASSERT_EQ(WSError::WS_OK, ssm_->RegisterSaveSnapshotFunc(sceneSession));
 }
 
 /**
@@ -1732,16 +1732,16 @@ HWTEST_F(SceneSessionManagerTest5, RegisterRemoveSnapshotFunc, Function | SmallT
 {
     ASSERT_NE(ssm_, nullptr);
     sptr<SceneSession> sceneSession = nullptr;
-    ssm_->RegisterRemoveSnapshotFunc(sceneSession);
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, ssm_->RegisterSaveSnapshotFunc(sceneSession));
 
     SessionInfo info;
     info.windowType_ = 1000;
     sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->property_->SetPersistentId(1);
-    ssm_->RegisterRemoveSnapshotFunc(sceneSession);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_WINDOW, ssm_->RegisterSaveSnapshotFunc(sceneSession));
 
     sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    ssm_->RegisterRemoveSnapshotFunc(sceneSession);
+    ASSERT_EQ(WSError::WS_OK, ssm_->RegisterSaveSnapshotFunc(sceneSession));
 }
 }
 } // namespace Rosen
