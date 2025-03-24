@@ -2718,7 +2718,7 @@ HWTEST_F(WindowSessionImplTest4, SetSubWindowZLevelToProperty, Function | SmallT
  * @tc.desc: GetSubWindowZLevelByFlags
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest4, GetSubWindowZLevelByFlags01, Function | SmallTest | Level1)
+HWTEST_F(WindowSessionImplTest4, GetSubWindowZLevelByFlags01, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
@@ -2729,25 +2729,25 @@ HWTEST_F(WindowSessionImplTest4, GetSubWindowZLevelByFlags01, Function | SmallTe
 
     option->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_TEXT_MENU));
     sptr<WindowSceneSessionImpl> textMenuSubWindow = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    int32_t ret = textMenuSubWindow->GetSubWindowZLevelByFlags(textMenuSubWindow->GetType(),
+    ret = textMenuSubWindow->GetSubWindowZLevelByFlags(textMenuSubWindow->GetType(),
         textMenuSubWindow->GetWindowFlags(), textMenuSubWindow->IsTopmost());
     EXPECT_EQ(ret, TEXT_MENU_SUB_WINDOW_Z_LEVEL);
 
     option->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_TOAST));
     sptr<WindowSceneSessionImpl> toastSubWindow = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    int32_t ret = toastSubWindow->GetSubWindowZLevelByFlags(toastSubWindow->GetType(),
+    ret = toastSubWindow->GetSubWindowZLevelByFlags(toastSubWindow->GetType(),
         toastSubWindow->GetWindowFlags(), toastSubWindow->IsTopmost());
     EXPECT_EQ(ret, TOAST_SUB_WINDOW_Z_LEVEL);
 
     option->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_MODAL));
     sptr<WindowSceneSessionImpl> modalSubWindow = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    int32_t ret = modalSubWindow->GetSubWindowZLevelByFlags(modalSubWindow->GetType(),
+    ret = modalSubWindow->GetSubWindowZLevelByFlags(modalSubWindow->GetType(),
         modalSubWindow->GetWindowFlags(), modalSubWindow->IsTopmost());
     EXPECT_EQ(ret, MODALITY_SUB_WINDOW_Z_LEVEL);
 
-    option->AddWindowFlag(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_APPLICATION_MODAL));
+    option->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_APPLICATION_MODAL);
     sptr<WindowSceneSessionImpl> appModalSubWindow = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    int32_t ret = appModalSubWindow->GetSubWindowZLevelByFlags(appModalSubWindow->GetType(),
+    ret = appModalSubWindow->GetSubWindowZLevelByFlags(appModalSubWindow->GetType(),
         appModalSubWindow->GetWindowFlags(), appModalSubWindow->IsTopmost());
     EXPECT_EQ(ret, APPLICATION_MODALITY_SUB_WINDOW_Z_LEVEL);
 }
@@ -2757,7 +2757,7 @@ HWTEST_F(WindowSessionImplTest4, GetSubWindowZLevelByFlags01, Function | SmallTe
  * @tc.desc: GetSubWindowZLevelByFlags
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest4, GetSubWindowZLevelByFlags02, Function | SmallTest | Level1)
+HWTEST_F(WindowSessionImplTest4, GetSubWindowZLevelByFlags02, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
@@ -2768,9 +2768,9 @@ HWTEST_F(WindowSessionImplTest4, GetSubWindowZLevelByFlags02, Function | SmallTe
         topmostModalSubWindow->GetWindowFlags(), topmostModalSubWindow->IsTopmost());
     EXPECT_EQ(ret, MODALITY_SUB_WINDOW_Z_LEVEL + TOPMOST_SUB_WINDOW_Z_LEVEL);
 
-    option->AddWindowFlag(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_APPLICATION_MODAL));
+    option->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_APPLICATION_MODAL);
     sptr<WindowSceneSessionImpl> topmostAppModalSubWindow = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    int32_t ret = topmostAppModalSubWindow->GetSubWindowZLevelByFlags(topmostAppModalSubWindow->GetType(),
+    ret = topmostAppModalSubWindow->GetSubWindowZLevelByFlags(topmostAppModalSubWindow->GetType(),
         topmostAppModalSubWindow->GetWindowFlags(), topmostAppModalSubWindow->IsTopmost());
     EXPECT_EQ(ret, APPLICATION_MODALITY_SUB_WINDOW_Z_LEVEL + TOPMOST_SUB_WINDOW_Z_LEVEL);
 }
@@ -2780,7 +2780,7 @@ HWTEST_F(WindowSessionImplTest4, GetSubWindowZLevelByFlags02, Function | SmallTe
  * @tc.desc: GetSubWindowZLevelByFlags
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest4, GetSubWindowZLevelByFlags03, Function | SmallTest | Level1)
+HWTEST_F(WindowSessionImplTest4, GetSubWindowZLevelByFlags03, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
