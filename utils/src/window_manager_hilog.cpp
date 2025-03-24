@@ -50,10 +50,5 @@ const char* g_domainContents[static_cast<uint32_t>(WmsLogTag::END)] = {
     "WMSRotation",
     "WMSAnimation",
 };
-
-const char* getDomainContents(WmsLogTag tag)
-{
-    return DOMAIN_CONTENTS_MAP.count(tag) ? DOMAIN_CONTENTS_MAP.at(tag) : "";
-}
 } // namespace OHOS
 }
