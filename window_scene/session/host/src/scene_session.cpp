@@ -7617,7 +7617,7 @@ RotationChangeResult SceneSession::NotifyRotationChange(const RotationChangeInfo
             auto session = weakThis.promote();
             if (!session) {
                 TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s session is null", where);
-                return { RectType:: RELATIVE_TO_SCREEN, { 0, 0, 0, 0 } };
+                return { RectType::RELATIVE_TO_SCREEN, { 0, 0, 0, 0 } };
             }
             if (!session->sessionStage_ || !session->isRotationChangeCallbackRegistered) {
                 TLOGE(WmsLogTag::WMS_ROTATION, "sessionStage_ is null or isRotationChangeCallbackRegistered is false");
