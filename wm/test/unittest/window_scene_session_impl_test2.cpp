@@ -804,7 +804,7 @@ HWTEST_F(WindowSceneSessionImplTest2, SetSubWindowZLevel, Function | SmallTest |
     windowSceneSessionImpl->property_->SetPersistentId(2);
     auto ret = windowSceneSessionImpl->SetSubWindowZLevel(10001);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
-    windowSceneSessionImpl->hostSession = session;
+    windowSceneSessionImpl->hostSession_ = session;
 
     windowSceneSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     ret = windowSceneSessionImpl->SetSubWindowZLevel(10001);
@@ -862,7 +862,7 @@ HWTEST_F(WindowSceneSessionImplTest2, GetSubWindowZLevel, Function | SmallTest |
     EXPECT_EQ(1, zLevel);
 
     windowSceneSessionImpl->property_->zLevel_ = 2;
-    windowSceneSessionImpl->Property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
     ret = windowSceneSessionImpl->GetSubWindowZLevel(zLevel);
     EXPECT_EQ(WMError::WM_OK, ret);
     EXPECT_EQ(2, zLevel);
