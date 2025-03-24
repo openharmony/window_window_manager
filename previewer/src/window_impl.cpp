@@ -28,6 +28,7 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowImpl"};
+constexpr uint32_t API_VERSION_MOD = 1000;
 constexpr int32_t API_VERSION_18 = 18;
 }
 std::map<std::string, std::pair<uint32_t, sptr<Window>>> WindowImpl::windowMap_;
