@@ -718,7 +718,8 @@ public:
      * @param rotationChangeResult result of rotation
      *
      */
-    virtual void OnRotationChange(const RotationChangeInfo& rotationChangeInfo, sptr<Window> window) {}
+    virtual void OnRotationChange(const RotationChangeInfo& rotationChangeInfo,
+        RotationChangeResult& rotationChangeResult) {}
 };
 
 static WMError DefaultCreateErrCode = WMError::WM_OK;
