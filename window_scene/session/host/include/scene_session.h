@@ -432,6 +432,7 @@ public:
      * Window Rotation
      */
     void RegisterRequestedOrientationChangeCallback(NotifyReqOrientationChangeFunc&& callback);
+    WSError SetCurrentRotation(int32_t currentRotation);
 
     /**
      * Window Animation

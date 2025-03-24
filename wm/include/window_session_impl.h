@@ -322,6 +322,12 @@ public:
     WMError RegisterWindowHighlightChangeListeners(const sptr<IWindowHighlightChangeListener>& listener) override;
     WMError UnregisterWindowHighlightChangeListeners(const sptr<IWindowHighlightChangeListener>& listener) override;
     WSError NotifyHighlightChange(bool isHighlight) override;
+
+    /*
+     * Window Rotation
+     */
+    WSError SetCurrentRotation(int32_t currentRotation) override;
+
 protected:
     WMError Connect();
     bool IsWindowSessionInvalid() const;

@@ -81,6 +81,7 @@ public:
     WSError SetEnableDragBySystem(bool dragEnable) override;
     WSError NotifyHighlightChange(bool isHighlight) override;
     WSError NotifyWindowAttachStateChange(bool isAttach) override;
+    WSError SetCurrentRotation(int32_t currentRotation) override;
 
 private:
     static inline BrokerDelegator<SessionStageProxy> delegator_;

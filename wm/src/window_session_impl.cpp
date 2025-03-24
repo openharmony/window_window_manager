@@ -56,8 +56,6 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowSessionImpl"};
-constexpr int32_t FULL_CIRCLE_DEGREE = 360;
-constexpr int32_t ONE_FOURTH_FULL_CIRCLE_DEGREE = 90;
 constexpr int32_t FORCE_SPLIT_MODE = 5;
 
 /**
@@ -4706,6 +4704,19 @@ Transform WindowSessionImpl::GetLayoutTransform() const
 {
     std::lock_guard<std::recursive_mutex> lock(transformMutex_);
     return layoutTransform_;
+}
+
+WSError WindowSessionImpl::SetCurrentRotation(int32_t currentRotation)
+{
+    TLOGI(WmsLogTag::WMS_ROTATION, "currentRotation: %{public}d", currentRotation);
+    if (currentRotation > FULL_CIRCLE_DEGREE || currentRotation < ZERO_CIRCLE_DEGREE) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "currentRotation is invalid: %{public}d", currentRotation);
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    property_->EditSessionInfo().currentRotation_ = currentRotation;
+
+
+    return WSError::WS_OK;
 }
 } // namespace Rosen
 } // namespace OHOS
