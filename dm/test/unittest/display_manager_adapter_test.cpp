@@ -74,6 +74,19 @@ HWTEST_F(DisplayManagerAdapterTest, GetCutoutInfo, Function | SmallTest | Level2
 }
 
 /**
+ * @tc.name: GetCutoutInfoWithRotation
+ * @tc.desc: test nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, GetCutoutInfoWithRotation, Function | SmallTest | Level2)
+{
+    int32_t rotation = 0;
+    sptr<CutoutInfo> info = SingletonContainer::Get<DisplayManagerAdapter>().
+        GetCutoutInfoWithRotation(DISPLAY_ID_INVALID, rotation);
+    ASSERT_EQ(info, nullptr);
+}
+
+/**
  * @tc.name: GetScreenSupportedColorGamuts
  * @tc.desc: test success
  * @tc.type: FUNC
