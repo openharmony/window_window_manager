@@ -427,6 +427,7 @@ struct SessionInfo {
      */
     std::vector<AppExecFwk::SupportWindowMode> supportedWindowModes;
     WindowSizeLimits windowSizeLimits;
+    bool isFollowParentMultiScreenPolicy = false;
 
     /*
      * Window Rotation
