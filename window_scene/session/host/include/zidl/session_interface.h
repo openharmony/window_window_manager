@@ -361,17 +361,6 @@ public:
     virtual WMError SetGestureBackEnabled(bool isEnabled) { return WMError::WM_OK; }
 
     /**
-     * @brief Set System Bar Property for page
-     *
-     * @param systemBarProperty System Bar Property
-     * @return WMError
-     */
-    virtual WMError SetSystemBarPropertyForPage(std::unordered_map<WindowType, SystemBarProperty>& systemBarProperty)
-    {
-        return WMError::WM_OK;
-    }
-
-    /**
      * @brief Get waterfall mode.
      *
      * @param isWaterfallMode Indicates the waterfall mode.
