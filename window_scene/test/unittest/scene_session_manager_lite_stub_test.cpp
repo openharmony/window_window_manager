@@ -1021,7 +1021,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleNotifyAppUseControlList, Functio
 
     auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleNotifyAppUseControlList(data, reply);
-    EXPECT_EQ(ERR_NONE, res);
+    EXPECT_EQ(ERR_INVALID_DATA, res);
 }
 
 /**

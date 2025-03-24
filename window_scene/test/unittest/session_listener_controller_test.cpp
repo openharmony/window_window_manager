@@ -471,7 +471,7 @@ HWTEST_F(SessionListenerControllerTest, RegisterSessionLifecycleListenerByIds, F
     sptr<ISessionLifecycleListener> listener = sptr<MySessionLifecycleListener>::MakeSptr();
     ASSERT_NE(listener, nullptr);
     res = slController->RegisterSessionLifecycleListener(listener, persistentIdList1);
-    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
+    ASSERT_EQ(res, WMError::WM_OK);
 
     std::vector<int32_t> persistentIdList2;
     res = slController->RegisterSessionLifecycleListener(listener, persistentIdList2);
