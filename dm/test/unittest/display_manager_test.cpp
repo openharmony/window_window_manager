@@ -1748,6 +1748,18 @@ HWTEST_F(DisplayManagerTest, ImplUnregisterScreenMagneticStateListener, Function
     ASSERT_EQ(ret, DMError::DM_OK);
     listener.clear();
 }
+
+/**
+ * @tc.name: GetCutoutInfoWithRotation
+ * @tc.desc: GetCutoutInfoWithRotation with right rotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetCutoutInfoWithRotation, Function | SmallTest | Level2)
+{
+    Rotation rotation = Rotation::ROTATION_0;
+    sptr<CutoutInfo> info = DisplayManager::GetInstance().GetCutoutInfoWithRotation(rotation);
+    ASSERT_NE(nullptr, info);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
