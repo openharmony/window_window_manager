@@ -546,7 +546,7 @@ private:
     bool escKeyEventTriggered_ = false;
     bool enableImmersiveMode_ = false;
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
-
+    std::atomic<float> virtualPixelRatio_ = 1.0f;
     std::string restoredRouterStack_; // It was set and get in same thread, which is js thread.
 };
 } // namespace Rosen

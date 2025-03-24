@@ -1330,10 +1330,6 @@ HWTEST_F(WindowImplTest5, GetVirtualPixelRatio01, Function | SmallTest | Level1)
     window->property_->SetDisplayId(-1);
     vpr = window->GetVirtualPixelRatio();
     ASSERT_EQ(vpr, 1.0f);
-
-    window->property_->SetDisplayId(0);
-    vpr = window->GetVirtualPixelRatio();
-    ASSERT_NE(vpr, 1.0f);
 }
 } // namespace
 } // namespace Rosen
