@@ -17,6 +17,7 @@
 
 #include "screen_session_manager/include/screen_setting_helper.h"
 #include "window_manager_hilog.h"
+#include "scene_board_judgement.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -179,6 +180,9 @@ namespace {
      */
     HWTEST_F(ScreenSettingHelperTest, GetSettingCast02, Function | SmallTest | Level3)
     {
+        if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+            GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
+        }
         bool enable = true;
         std::string key = "default_display_dpi";
         bool ret = ScreenSettingHelper::GetSettingCast(enable, key);
@@ -239,6 +243,9 @@ namespace {
      */
     HWTEST_F(ScreenSettingHelperTest, GetSettingRotation02, Function | SmallTest | Level3)
     {
+        if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+            GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
+        }
         int32_t rotation = 0;
         std::string key = "default_display_dpi";
         auto result = ScreenSettingHelper::GetSettingRotation(rotation, key);
