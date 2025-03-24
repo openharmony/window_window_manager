@@ -29,6 +29,7 @@
 #include "window_accessibility_controller.h"
 #include "window_helper.h"
 #include "window_session_impl.h"
+#include "window_scene_session_impl.h"
 #include "wm_common.h"
 
 using namespace testing;
@@ -2695,16 +2696,21 @@ HWTEST_F(WindowSessionImplTest4, SetSubWindowZLevelToProperty, Function | SmallT
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    option->SetSubWindowZLevel(1);
+    option->SetSubWindowZLevel(0);
     sptr<WindowSessionImpl> mainWindowSessionImpl = sptr<WindowSessionImpl>::MakeSptr(option);
+    option->SetSubWindowZLevel(1);
+    mainWindowSessionImpl->windowOption_ = option;
     mainWindowSessionImpl->SetSubWindowZLevelToProperty();
     int32_t zLevel = mainWindowSessionImpl->property_->zLevel_;
     EXPECT_NE(1, zLevel);
 
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     sptr<WindowSessionImpl> subWindowSessionImpl = sptr<WindowSessionImpl>::MakeSptr(option);
+    option->SetSubWindowZLevel(2);
+    subWindowSessionImpl->windowOption_ = option;
     subWindowSessionImpl->SetSubWindowZLevelToProperty();
     zLevel = subWindowSessionImpl->property_->zLevel_;
-    EXPECT_EQ(1, zLevel);
+    EXPECT_EQ(2, zLevel);
 }
 
 /**
