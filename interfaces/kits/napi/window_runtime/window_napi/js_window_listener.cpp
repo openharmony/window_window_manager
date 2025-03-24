@@ -765,7 +765,7 @@ void JsWindowListener::OnRotationChange(const RotationChangeInfo& rotationChange
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsWindowListener::OnRotationChange");
         auto thisListener = self.promote();
         if (thisListener == nullptr || env == nullptr) {
-            TLOGE(WmsLogTag::WMS_ROTATION, "this listener or env or window is nullptr");
+            TLOGE(WmsLogTag::WMS_ROTATION, "this listener or env is nullptr");
             return;
         }
         HandleScope handleScope(env);
