@@ -247,6 +247,7 @@ public:
      */
     static void UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
     void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
+    uint32_t GetApiTargetVersion() const;
 
 private:
     static sptr<Window> FindWindowById(uint32_t windowId);
