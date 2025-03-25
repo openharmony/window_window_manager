@@ -701,4 +701,15 @@ int SessionStageStub::HandleNotifyWindowAttachStateChange(MessageParcel& data, M
     return ERR_NONE;
 }
 
+
+int SessionStageStub::HandleSetCurrentRotation(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_ROTATION, "in");
+    int32_t currentRotation;
+    if (!data.ReadInt32(currentRotation)) {
+        return ERR_INVALID_VALUE;
+    }
+    SetCurrentRotation(currentRotation);
+    return ERR_NONE;
+}
 } // namespace OHOS::Rosen
