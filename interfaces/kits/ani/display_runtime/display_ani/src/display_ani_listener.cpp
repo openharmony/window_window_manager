@@ -227,7 +227,8 @@ void DisplayAniListener::OnDisplayModeChanged(FoldDisplayMode foldDisplayMode)
         auto it = aniCallBack_.find(EVENT_DISPLAY_MODE_CHANGED);
         for (auto oneAniCallback : it->second) {
             ani_status ret = DisplayAniUtils::CallAniFunctionVoid(env_, "L@ohos/display/display;",
-                "foldDisplayModeCallback", "Lstd/core/Object;I:V", oneAniCallback, static_cast<ani_int>(foldDisplayMode));
+                "foldDisplayModeCallback", "Lstd/core/Object;I:V", oneAniCallback,
+                static_cast<ani_int>(foldDisplayMode));
             if (ret != ANI_OK) {
                 TLOGE(WmsLogTag::DMS, "[ANI] OnDisplayModeChanged: Failed to SendEvent.");
                 break;
