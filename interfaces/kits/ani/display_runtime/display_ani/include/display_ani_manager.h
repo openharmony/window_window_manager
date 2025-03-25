@@ -50,7 +50,6 @@ private:
     void onGetCurrentFoldCreaseRegion(ani_env* env, ani_object obj);
     std::mutex mtx_;
     std::map<std::string, std::map<ani_ref, sptr<DisplayAniListener>>> jsCbMap_;
-    std::map<std::string, sptr<DisplayAniListener>> jsCbMap1_;
 };
 }
 }
