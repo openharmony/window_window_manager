@@ -3070,4 +3070,30 @@ WMError SceneSessionManagerProxy::MinimizeByWindowId(const std::vector<int32_t>&
     }
     return static_cast<WMError>(reply.ReadInt32());
 }
+
+WMError SceneSessionManagerProxy::SetForegroundWindowNum(int32_t windowNum)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_PC, "Write interfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(windowNum)) {
+        TLOGE(WmsLogTag::WMS_PC, "Write windowNum failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_PC, "Remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_FOREGROUND_WINDOW_NUM),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_PC, "SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(reply.ReadInt32());
+}
 } // namespace OHOS::Rosen

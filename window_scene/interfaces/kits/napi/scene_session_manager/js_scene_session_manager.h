@@ -44,7 +44,8 @@ enum class ListenerFunctionType : uint32_t {
     START_PIP_FAILED_CB,
     NOTIFY_APP_USE_CONTROL_LIST_CB,
     WATCH_GESTURE_CONSUME_RESULT_CB,
-    WATCH_FOCUS_ACTIVE_CHANGE_CB
+    WATCH_FOCUS_ACTIVE_CHANGE_CB,
+    SET_FOREGROUND_WINDOW_NUM_CB
 };
 
 class JsSceneSessionManager final {
@@ -276,6 +277,8 @@ private:
     void OnNotifyAppUseControlList(
         ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList);
     void RegisterNotifyAppUseControlListCallback();
+    void RegisterSetForegroundWindowNumCallback();
+    void OnSetForegroundWindowNum(int32_t windowNum);
 
     /*
      * Window Recover
