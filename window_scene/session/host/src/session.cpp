@@ -2820,6 +2820,14 @@ WSError Session::NotifyHighlightChange(bool isHighlight)
     return WSError::WS_OK;
 }
 
+WSError GetIsHighlighted(bool& isHighlighted)
+{
+    isHighlight_ = isHighlight;
+    TLOGD(WmsLogTag::WMS_FOCUS, "windowId: %{public}d, isHighlighted: %{public}d",
+        GetPersistentId(), isHighlighted_);
+    return WSError::WS_OK;
+}
+
 WSError Session::SetCompatibleModeInPc(bool enable, bool isSupportDragInPcCompatibleMode)
 {
     TLOGI(WmsLogTag::WMS_SCB, "SetCompatibleModeInPc enable: %{public}d, isSupportDragInPcCompatibleMode: %{public}d",
