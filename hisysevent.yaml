@@ -69,6 +69,18 @@ WINDOW_LIFE_CYCLE_EXCEPTION:
   UID: {type: INT32, desc: session uid}
   MSG: {type: STRING, desc: windowmanager event message}
 
+WINDOW_STATE_ERROR:
+  __BASE: {type: FAULT, level: CRITICAL, desc: The window attach state and session state mismatch}
+  TYPE: {type: STRING, desc: error type}
+  PID: {type: INT32, desc: app pid}
+  PERSISTENT_ID: {type: INT32, desc: window id}
+  FRAME_NODE_ID: {type: INT32, desc: error frame node id}
+  RS_NODE_ID: {type: INT32, desc: error rs node id}
+  DISPLAY_ID: {type: INT32, desc: display id}
+  WINDOW_NAME: {type: STRING, desc: window name}
+  ATTACH_STATE: {type: BOOL, desc: attach_state}
+  SESSION_STATE: {type: UINT32, desc: session_state}
+
 WINDOW_BOOT_ANIMATION_DONE:
   __BASE: {type: BEHAVIOR, level: CRITICAL, desc: Boot animation done}
   MSG: {type: STRING, desc: windowmanager event message}
