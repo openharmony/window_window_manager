@@ -2470,54 +2470,6 @@ void WindowSceneSessionImpl::UpdateSpecificSystemBarEnabled(bool systemBarEnable
     property.settingFlag_ |= SystemBarSettingFlag::ENABLE_SETTING;
 }
 
-WMError WindowSceneSessionImpl::SetSystemBarPropertyForPage(WindowType type, SystemBarProperty& systemBarProperty)
-{
-    if (IsWindowSessionInvalid()) {
-        TLOGE(WmsLogTag::WMS_IMMS, "win %{public}u invalid state", GetWindowId());
-        return WMError::WM_ERROR_INVALID_WINDOW;
-    }
-    if (!WindowHelper::IsMainWindow(GetType())) {
-        TLOGI(WmsLogTag::WMS_IMMS, "only main window support, win %{public}u", GetWindowId());
-        return WMError::WM_DO_NOTHING;
-    }
-    systemBarProperty.settingFlag_ = SystemBarSettingFlag::ALL_SETTING;
-    TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}u %{public}s] type %{public}u "
-        "%{public}u %{public}x %{public}x %{public}u %{public}u",
-        GetWindowId(), GetWindowName().c_str(), static_cast<uint32_t>(type),
-        systemBarProperty.enable_, systemBarProperty.backgroundColor_,
-        systemBarProperty.contentColor_, systemBarProperty.enableAnimation_, systemBarProperty.settingFlag_);
-    auto lastSystemBarProperty = GetSystemBarPropertyByType(type);
-    property_->SetSystemBarProperty(type, systemBarProperty);
-    auto ret = NotifySpecificWindowSessionProperty(type, systemBarProperty);
-    property_->SetSystemBarProperty(type, lastSystemBarProperty);
-    if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_IMMS, "set prop fail, ret %{public}u", ret);
-        return ret;
-    }
-    return WMError::WM_OK;
-}
-
-WMError WindowSceneSessionImpl::ResetSystemBarPropertyForPage()
-{
-    if (IsWindowSessionInvalid()) {
-        TLOGE(WmsLogTag::WMS_IMMS, "win %{public}u invalid state", GetWindowId());
-        return WMError::WM_ERROR_INVALID_WINDOW;
-    }
-    if (!WindowHelper::IsMainWindow(GetType())) {
-        TLOGI(WmsLogTag::WMS_IMMS, "only main window support, win %{public}u", GetWindowId());
-        return WMError::WM_DO_NOTHING;
-    }
-    auto ret = NotifySpecificWindowSessionProperty(WindowType::WINDOW_TYPE_STATUS_BAR,
-        GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR));
-    ret = NotifySpecificWindowSessionProperty(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR,
-        GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR));
-    if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_IMMS, "set prop fail, ret %{public}u", ret);
-        return ret;
-    }
-    return WMError::WM_OK;
-}
-
 WMError WindowSceneSessionImpl::SetSpecificBarProperty(WindowType type, const SystemBarProperty& property)
 {
     if (IsWindowSessionInvalid()) {
@@ -2620,6 +2572,54 @@ WMError WindowSceneSessionImpl::GetSystemBarProperties(std::map<WindowType, Syst
 {
     auto currProperties = property_->GetSystemBarProperty();
     properties[WindowType::WINDOW_TYPE_STATUS_BAR] = currProperties[WindowType::WINDOW_TYPE_STATUS_BAR];
+    return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::SetSystemBarPropertyForPage(WindowType type, SystemBarProperty& systemBarProperty)
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_IMMS, "win %{public}u invalid state", GetWindowId());
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (!WindowHelper::IsMainWindow(GetType())) {
+        TLOGI(WmsLogTag::WMS_IMMS, "only main window support, win %{public}u", GetWindowId());
+        return WMError::WM_DO_NOTHING;
+    }
+    systemBarProperty.settingFlag_ = SystemBarSettingFlag::ALL_SETTING;
+    TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}u %{public}s] type %{public}u "
+        "%{public}u %{public}x %{public}x %{public}u %{public}u",
+        GetWindowId(), GetWindowName().c_str(), static_cast<uint32_t>(type),
+        systemBarProperty.enable_, systemBarProperty.backgroundColor_,
+        systemBarProperty.contentColor_, systemBarProperty.enableAnimation_, systemBarProperty.settingFlag_);
+    auto lastSystemBarProperty = GetSystemBarPropertyByType(type);
+    property_->SetSystemBarProperty(type, systemBarProperty);
+    auto ret = NotifySpecificWindowSessionProperty(type, systemBarProperty);
+    property_->SetSystemBarProperty(type, lastSystemBarProperty);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_IMMS, "set prop fail, ret %{public}u", ret);
+        return ret;
+    }
+    return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::ResetSystemBarPropertyForPage()
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_IMMS, "win %{public}u invalid state", GetWindowId());
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (!WindowHelper::IsMainWindow(GetType())) {
+        TLOGI(WmsLogTag::WMS_IMMS, "only main window support, win %{public}u", GetWindowId());
+        return WMError::WM_DO_NOTHING;
+    }
+    auto ret = NotifySpecificWindowSessionProperty(WindowType::WINDOW_TYPE_STATUS_BAR,
+        GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR));
+    ret = NotifySpecificWindowSessionProperty(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR,
+        GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR));
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_IMMS, "set prop fail, ret %{public}u", ret);
+        return ret;
+    }
     return WMError::WM_OK;
 }
 
