@@ -370,6 +370,8 @@ private:
     std::map<std::string, std::shared_ptr<NativeReference>> jsCbMap_;
     std::shared_ptr<MainThreadScheduler> taskScheduler_;
     static std::map<int32_t, napi_ref> jsSceneSessionMap_;
+    std::mutex windowRotationMutex_;
+    uint32_t windowRotation_ = 0;
 };
 } // namespace OHOS::Rosen
 
