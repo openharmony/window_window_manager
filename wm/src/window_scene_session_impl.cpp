@@ -2015,12 +2015,13 @@ WMError WindowSceneSessionImpl::GetTargetOrientationConfigInfo(Orientation targe
         TLOGE(WmsLogTag::WMS_ROTATION, "Session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+    std::map<WindowType, SystemBarProperty> pageProperties;
+    GetSystemBarPropertyForPage(properties, pageProperties);
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
-
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
     sptr<DisplayInfo> displayInfo = display ? display->GetDisplayInfo() : nullptr;
-    auto ret = hostSession->GetTargetOrientationConfigInfo(targetOrientation, properties);
+    auto ret = hostSession->GetTargetOrientationConfigInfo(targetOrientation, pageProperties);
     getTargetInfoCallback_->ResetGetTargetRotationLock();
     OrientationInfo info = getTargetInfoCallback_->GetTargetOrientationResult(WINDOW_LAYOUT_TIMEOUT);
     avoidAreas = info.avoidAreas;
@@ -2575,7 +2576,7 @@ WMError WindowSceneSessionImpl::GetSystemBarProperties(std::map<WindowType, Syst
     return WMError::WM_OK;
 }
 
-WMError WindowSceneSessionImpl::SetSystemBarPropertyForPage(WindowType type, SystemBarProperty& systemBarProperty)
+WMError WindowSceneSessionImpl::SetSystemBarPropertyForPage(WindowType type, const sptr<SystemBarProperty>& property)
 {
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_IMMS, "win %{public}u invalid state", GetWindowId());
@@ -2585,13 +2586,16 @@ WMError WindowSceneSessionImpl::SetSystemBarPropertyForPage(WindowType type, Sys
         TLOGI(WmsLogTag::WMS_IMMS, "only main window support, win %{public}u", GetWindowId());
         return WMError::WM_DO_NOTHING;
     }
-    systemBarProperty.settingFlag_ = SystemBarSettingFlag::ALL_SETTING;
+    if (property == nullptr) {
+        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u property is nullptr use main window prop", GetWindowId());
+        return NotifySpecificWindowSessionProperty(type, GetSystemBarPropertyByType(type));
+    }
     TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}u %{public}s] type %{public}u "
         "%{public}u %{public}x %{public}x %{public}u %{public}u",
         GetWindowId(), GetWindowName().c_str(), static_cast<uint32_t>(type),
         systemBarProperty.enable_, systemBarProperty.backgroundColor_,
         systemBarProperty.contentColor_, systemBarProperty.enableAnimation_, systemBarProperty.settingFlag_);
-    auto lastSystemBarProperty = GetSystemBarPropertyByType(type);
+    auto lastSystemBarProperty = GetSystemBarPropertyByType(type)
     property_->SetSystemBarProperty(type, systemBarProperty);
     auto ret = NotifySpecificWindowSessionProperty(type, systemBarProperty);
     property_->SetSystemBarProperty(type, lastSystemBarProperty);
@@ -2602,25 +2606,22 @@ WMError WindowSceneSessionImpl::SetSystemBarPropertyForPage(WindowType type, Sys
     return WMError::WM_OK;
 }
 
-WMError WindowSceneSessionImpl::ResetSystemBarPropertyForPage()
+WMError WindowSceneSessionImpl::GetSystemBarPropertyForPage(const std::map<WindowType, SystemBarProperty>& properties,
+    std::map<WindowType, SystemBarProperty>& pageProperties)
 {
-    if (IsWindowSessionInvalid()) {
-        TLOGE(WmsLogTag::WMS_IMMS, "win %{public}u invalid state", GetWindowId());
-        return WMError::WM_ERROR_INVALID_WINDOW;
+    for (auto type : { WindowType::WINDOW_TYPE_STATUS_BAR, WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR }) {
+        if (properties.find(type) != properties.end()) {
+            pageProperties[type] = properties[type];
+        } else {
+            pageProperties[type] = GetSystemBarPropertyByType(type);
+        }
+        TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}u %{public}s] type %{public}u "
+            "%{public}u %{public}x %{public}x %{public}u %{public}u",
+            GetWindowId(), GetWindowName().c_str(), static_cast<uint32_t>(type),
+            pageProperties[type].enable_, pageProperties[type].backgroundColor_,
+            pageProperties[type].contentColor_, pageProperties[type].enableAnimation_,
+            pageProperties[type].settingFlag_);
     }
-    if (!WindowHelper::IsMainWindow(GetType())) {
-        TLOGI(WmsLogTag::WMS_IMMS, "only main window support, win %{public}u", GetWindowId());
-        return WMError::WM_DO_NOTHING;
-    }
-    auto ret = NotifySpecificWindowSessionProperty(WindowType::WINDOW_TYPE_STATUS_BAR,
-        GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR));
-    ret = NotifySpecificWindowSessionProperty(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR,
-        GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR));
-    if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_IMMS, "set prop fail, ret %{public}u", ret);
-        return ret;
-    }
-    return WMError::WM_OK;
 }
 
 WMError WindowSceneSessionImpl::SetFullScreen(bool status)

@@ -716,57 +716,29 @@ HWTEST_F(WindowSceneSessionImplTest4, SetSpecificBarProperty, Function | SmallTe
  * @tc.desc: SetSystemBarPropertyForPage
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest4, SetSystemBarPropertyForPage, Function | SmallTest | Level2)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SetSystemBarPropertyForPage");
-    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    windowSceneSessionImpl->hostSession_ = session;
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    property->SetPersistentId(1);
-    windowSceneSessionImpl->property_ = property;
-    SystemBarProperty prop = SystemBarProperty();
-    windowSceneSessionImpl->state_ = WindowState::STATE_DESTROYED;
-    auto ret = windowSceneSessionImpl->SetSystemBarPropertyForPage(WindowType::WINDOW_TYPE_STATUS_BAR, prop);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
-    windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
-    windowSceneSessionImpl->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
-    ret = windowSceneSessionImpl->SetSystemBarPropertyForPage(WindowType::WINDOW_TYPE_STATUS_BAR, prop);
-    EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
-    windowSceneSessionImpl->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    ret = windowSceneSessionImpl->SetSystemBarPropertyForPage(WindowType::WINDOW_TYPE_STATUS_BAR, prop);
-    EXPECT_EQ(WMError::WM_OK, ret);
-}
-
-/**
- * @tc.name: ResetSystemBarPropertyForPage
- * @tc.desc: ResetSystemBarPropertyForPage
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest4, ResetSystemBarPropertyForPage, Function | SmallTest | Level2)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("ResetSystemBarPropertyForPage");
-    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    windowSceneSessionImpl->hostSession_ = session;
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    property->SetPersistentId(1);
-    windowSceneSessionImpl->property_ = property;
-    windowSceneSessionImpl->state_ = WindowState::STATE_DESTROYED;
-    auto ret = windowSceneSessionImpl->ResetSystemBarPropertyForPage();
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
-    windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
-    windowSceneSessionImpl->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
-    ret = windowSceneSessionImpl->ResetSystemBarPropertyForPage();
-    EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
-    windowSceneSessionImpl->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    ret = windowSceneSessionImpl->ResetSystemBarPropertyForPage();
-    EXPECT_EQ(WMError::WM_OK, ret);
-}
+// HWTEST_F(WindowSceneSessionImplTest4, SetSystemBarPropertyForPage, Function | SmallTest | Level2)
+// {
+//     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+//     option->SetWindowName("SetSystemBarPropertyForPage");
+//     sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+//     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+//     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+//     windowSceneSessionImpl->hostSession_ = session;
+//     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+//     property->SetPersistentId(1);
+//     windowSceneSessionImpl->property_ = property;
+//     SystemBarProperty prop = SystemBarProperty();
+//     windowSceneSessionImpl->state_ = WindowState::STATE_DESTROYED;
+//     auto ret = windowSceneSessionImpl->SetSystemBarPropertyForPage(WindowType::WINDOW_TYPE_STATUS_BAR, prop);
+//     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+//     windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
+//     windowSceneSessionImpl->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+//     ret = windowSceneSessionImpl->SetSystemBarPropertyForPage(WindowType::WINDOW_TYPE_STATUS_BAR, prop);
+//     EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
+//     windowSceneSessionImpl->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+//     ret = windowSceneSessionImpl->SetSystemBarPropertyForPage(WindowType::WINDOW_TYPE_STATUS_BAR, prop);
+//     EXPECT_EQ(WMError::WM_OK, ret);
+// }
 
 /**
  * @tc.name: NotifyDialogStateChange

@@ -2617,20 +2617,13 @@ public:
      * @brief Set System Bar Property for page
      *
      * @param type WINDOW_TYPE_STATUS_BAR or WINDOW_TYPE_NAVIGATION_INDICATOR
-     * @param systemBarProperty System Bar Property
+     * @param property System Bar Property
      * @return WMError
      */
-    virtual WMError SetSystemBarPropertyForPage(WindowType type, SystemBarProperty& systemBarProperty)
+    virtual WMError SetSystemBarPropertyForPage(WindowType type, const sptr<SystemBarProperty>& property)
     {
         return WMError::WM_OK;
     }
-
-    /**
-     * @brief Reset System Bar Property for page
-     *
-     * @return WMError
-     */
-    virtual WMError ResetSystemBarPropertyForPage() { return WMError::WM_OK; }
 
     /**
      * @brief Set Specific System Bar(include status bar and nav bar) Property

@@ -848,7 +848,7 @@ struct SingleHandTransform {
  *
  * @brief Property of system bar
  */
-struct SystemBarProperty {
+struct SystemBarProperty : public RefBase {
     bool enable_;
     uint32_t backgroundColor_;
     uint32_t contentColor_;
