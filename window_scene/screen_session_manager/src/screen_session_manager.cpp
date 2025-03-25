@@ -1448,10 +1448,12 @@ sptr<DisplayInfo> ScreenSessionManager::GetVisibleAreaDisplayInfoById(DisplayId 
         }
 #ifdef FOLD_ABILITY_ENABLE
         SuperFoldStatus status = SuperFoldStateManager::GetInstance().GetCurrentStatus();
+        bool isSystemKeyboardOn = SuperFoldStateManager::GetInstance().GetSystemKeyboardStatus();
         RRect bounds = screenSession->GetScreenProperty().GetBounds();
         auto screenWdith = bounds.rect_.GetWidth();
         auto screenHeight = bounds.rect_.GetHeight();
-        if (status == SuperFoldStatus::KEYBOARD) {
+        // Adjust screen height when physical keyboard attach or touchPad virtual Keyboard on
+        if (status == SuperFoldStatus::KEYBOARD || isSystemKeyboardOn) {
             if (screenWdith > screenHeight) {
                 std::swap(screenWdith, screenHeight);
             }
