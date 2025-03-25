@@ -336,7 +336,7 @@ HWTEST_F(WindowLayoutTest, resize01, Function | MediumTest | Level3)
     EXPECT_EQ(windowLimits.maxHeight_, rect.height_);
 
     ret = window->Resize(0, 0);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret); // check parameter first
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret); // check parameter first
 }
 
 /**
@@ -370,7 +370,7 @@ HWTEST_F(WindowLayoutTest, resize02, Function | MediumTest | Level3)
     EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
 
     ret = window->Resize(0, 0);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret); // check parameter first
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret); // check parameter first
 }
 
 /**
@@ -404,7 +404,7 @@ HWTEST_F(WindowLayoutTest, resize03, Function | MediumTest | Level3)
     EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
 
     ret = window->Resize(0, 0);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret); // check parameter first
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret); // check parameter first
 }
 
 /**
@@ -438,7 +438,7 @@ HWTEST_F(WindowLayoutTest, resize04, Function | MediumTest | Level3)
     EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
 
     ret = window->Resize(0, 0);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret); // check parameter first
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret); // check parameter first
 }
 
 /**
