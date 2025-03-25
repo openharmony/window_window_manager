@@ -1426,4 +1426,34 @@ WSError SessionStageProxy::NotifyWindowAttachStateChange(bool isAttach)
     }
     return WSError::WS_OK;
 }
+
+WSError SessionStageProxy::SetCurrentRotation(int32_t currentRotation)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteInt32(currentRotation)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Write params failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (remote->SendRequest(
+        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_CURRENT_ROTATION),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return WSError::WS_OK;
+}
 } // namespace OHOS::Rosen

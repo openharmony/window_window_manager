@@ -964,6 +964,7 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
     }
     napi_set_named_property(env, objValue, "supportWindowModes",
         CreateSupportWindowModes(env, sessionInfo.supportedWindowModes));
+    napi_set_named_property(env, objValue, "currentRotation", CreateJsValue(env, sessionInfo.currentRotation_));
     return objValue;
 }
 

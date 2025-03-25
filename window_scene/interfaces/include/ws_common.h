@@ -365,6 +365,11 @@ struct SessionInfo {
      * PC Window
      */
     std::vector<AppExecFwk::SupportWindowMode> supportedWindowModes;
+
+    /*
+     * Window Rotation
+     */
+    int32_t currentRotation_ = 0;
 };
 
 enum class SessionFlag : uint32_t {
