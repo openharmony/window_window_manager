@@ -426,6 +426,11 @@ export function foldStatusCallback(cb: object, cbArg: int): void {
     func(cbArg as FoldStatus);
 }
 
+export function foldDisplayModeCallback(cb: object, cbArg: int): void {
+    const func = cb as (cbArg: FoldDisplayMode) => void;
+    func(cbArg as FlodDisplayMode);
+}
+
 export let displayMgrRef: long;
 
 export function setDisplayMgrRef(nativeObj : long) : void{
