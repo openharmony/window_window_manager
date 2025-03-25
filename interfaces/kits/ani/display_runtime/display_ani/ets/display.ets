@@ -428,7 +428,7 @@ export function foldStatusCallback(cb: object, cbArg: int): void {
 
 export function foldDisplayModeCallback(cb: object, cbArg: int): void {
     const func = cb as (cbArg: FoldDisplayMode) => void;
-    func(cbArg as FlodDisplayMode);
+    func(cbArg as FoldDisplayMode);
 }
 
 export let displayMgrRef: long;

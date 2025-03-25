@@ -10,9 +10,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
- 
+
 import("//build/config/components/ets_frontend/ets2abc_config.gni")
- 
+
 # abc generate
 generate_static_abc("screen_abc") {
   arktsconfig = "./arktsconfig.json"
@@ -27,7 +27,7 @@ generate_static_abc("screen_abc") {
   is_boot_abc = "True"
   device_dst_file = "/system/framework/screen.abc"
 }
- 
+
 ohos_prebuilt_etc("screen_etc") {
   source = "$target_out_dir/screen.abc"
   deps = [ ":screen_abc" ]

@@ -226,7 +226,7 @@ void DisplayManagerAni::onRegisterCallback(ani_env* env, ani_string type, ani_re
     }
     // add listener to map
     jsCbMap_[typeString][callback] = displayAniListener;
-    // invoke callback manualy
+    // invoke callback manually
     if (typeString == EVENT_ADD) {
         displayAniListener->OnCreate(1);
     } else if (typeString == EVENT_CHANGE) {
