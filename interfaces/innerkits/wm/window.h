@@ -2630,7 +2630,7 @@ public:
      *
      * @return WMError
      */
-    virtual WMError ResetSystemBarPropertyForPage() { return WMError::WM_OK; }   
+    virtual WMError ResetSystemBarPropertyForPage() { return WMError::WM_OK; }
 
     /**
      * @brief Set Specific System Bar(include status bar and nav bar) Property
