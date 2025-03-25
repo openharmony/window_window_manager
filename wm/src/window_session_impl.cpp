@@ -1374,6 +1374,9 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
               rect.width_, rect.height_, GetPersistentId());
         return;
     }
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
+        "WindowSessionimpl::UpdateViewportConfig id:%d [%d, %d, %u, %u] reason:%u", GetPersistentId(),
+        rect.posX_, rect.posY_, rect.width_, rect.height_, reason);
     auto rotation =  ONE_FOURTH_FULL_CIRCLE_DEGREE * static_cast<uint32_t>(displayInfo->GetOriginRotation());
     auto deviceRotation = static_cast<uint32_t>(displayInfo->GetDefaultDeviceRotationOffset());
     uint32_t transformHint = (rotation + deviceRotation) % FULL_CIRCLE_DEGREE;
