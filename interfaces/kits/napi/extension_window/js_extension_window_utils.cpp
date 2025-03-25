@@ -57,7 +57,7 @@ napi_value ConvertAvoidAreaToJsValue(napi_env env, const AvoidArea& avoidArea, A
 
 napi_value CreateJsExtensionWindowPropertiesObject(napi_env env, sptr<Window>& window)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "CreateJsExtensionWindowPropertiesObject is called");
+    TLOGD(WmsLogTag::WMS_UIEXT, "CreateJsExtensionWindowPropertiesObject is called");
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
