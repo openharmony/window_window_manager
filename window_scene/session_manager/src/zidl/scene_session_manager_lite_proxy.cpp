@@ -934,7 +934,7 @@ WMError SceneSessionManagerLiteProxy::CheckUIExtensionCreation(int32_t windowId,
         TLOGE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: Failed to read pid");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: errcode %{public}u", errCode);
+    TLOGD(WmsLogTag::WMS_UIEXT, "UIExtOnLock: errcode %{public}u", errCode);
     return static_cast<WMError>(errCode);
 }
 
