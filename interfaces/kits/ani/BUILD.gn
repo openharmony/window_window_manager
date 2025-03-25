@@ -16,8 +16,8 @@ import("//build/ohos.gni")
 group("ani_packages") {
   deps = [
     "display_runtime:display_ani",
-    "screen_runtime:screen_ani",
     "embeddable_window_stage:embeddable_window_stage_ani",
+    "screen_runtime:screen_ani",
     "window_runtime:window_stage_ani",
   ]
 }
