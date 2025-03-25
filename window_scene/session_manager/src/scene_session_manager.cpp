@@ -3041,7 +3041,7 @@ bool SceneSessionManager::CheckSystemWindowPermission(const sptr<WindowSessionPr
         bool isPadAndNotPcApp = systemConfig_.uiType_ == UI_TYPE_PAD && !property->GetIsPcAppInPad();
         // WINDOW_TYPE_FLOAT could be created with the corresponding permission
         if (systemConfig_.supportTypeFloatWindow_ && !isPadAndNotPcApp) {
-            WLOGFD("check create float window permission success.");
+            TLOGD(WmsLogTag::WMS_PC, "check create float window permission success.");
             return true;
         }
     }
