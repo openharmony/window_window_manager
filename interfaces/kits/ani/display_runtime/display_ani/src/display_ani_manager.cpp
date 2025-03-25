@@ -242,7 +242,7 @@ void DisplayManagerAni::onRegisterCallback(ani_env* env, ani_string type, ani_re
 
 DmErrorCode DisplayManagerAni::processRegisterCallback(ani_env* env, std::string& typeStr,
     sptr<DisplayAniListener> displayAniListener)
-    {
+{
     DmErrorCode ret = DmErrorCode::DM_ERROR_INVALID_PARAM;
     if (typeStr == EVENT_ADD || typeStr == EVENT_REMOVE || typeStr == EVENT_CHANGE) {
         TLOGI(WmsLogTag::DMS, "processRegisterCallback %{public}s", typeStr.c_str());
