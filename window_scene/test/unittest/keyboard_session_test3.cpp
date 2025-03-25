@@ -246,21 +246,32 @@ HWTEST_F(KeyboardSessionTest3, UpdateKeyboardAvoidArea02, Function | SmallTest |
         "UpdateKeyboardAvoidArea02");
     ASSERT_NE(keyboardSession, nullptr);
 
-    // not foreground
+    // not foreground and visiable
     keyboardSession->dirtyFlags_ = 0;
     keyboardSession->state_ = SessionState::STATE_CONNECT;
     keyboardSession->isVisible_ = true;
     keyboardSession->UpdateKeyboardAvoidArea();
     ASSERT_EQ(keyboardSession->dirtyFlags_, 0);
 
+    // foreground and not visiable
+    keyboardSession->dirtyFlags_ = 0;
+    keyboardSession->state_ = SessionState::STATE_FOREGROUND;
+    keyboardSession->isVisible_ = false;
+    keyboardSession->UpdateKeyboardAvoidArea();
+    ASSERT_EQ(keyboardSession->dirtyFlags_, 0);
+
     keyboardSession->state_ = SessionState::STATE_FOREGROUND;
     keyboardSession->isVisible_ = true;
     auto expectDirtyFlag = 0;
-    auto isScbCoreEnabled = Session::IsScbCoreEnabled();
-    Session::SetScbCoreEnabled(false);
     keyboardSession->specificCallback_->onUpdateAvoidArea_ = [&expectDirtyFlag](const uint32_t& persistentId) {
         expectDirtyFlag = 1;
     };
+    auto isScbCoreEnabled = Session::IsScbCoreEnabled();
+    Session::SetScbCoreEnabled(true);
+    expectDirtyFlag = 0 | static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA);
+    keyboardSession->UpdateKeyboardAvoidArea();
+    ASSERT_EQ(keyboardSession->dirtyFlags_, expectDirtyFlag);
+    Session::SetScbCoreEnabled(false);
     keyboardSession->UpdateKeyboardAvoidArea();
     ASSERT_EQ(expectDirtyFlag, 1);
     Session::SetScbCoreEnabled(isScbCoreEnabled);
@@ -359,6 +370,72 @@ HWTEST_F(KeyboardSessionTest3, OnCallingSessionUpdated02, Function | SmallTest |
     ASSERT_EQ(false, keyboardSession->keyboardAvoidAreaActive_);
     keyboardSession->OnCallingSessionUpdated();
     ASSERT_EQ(keyboardSession->state_, SessionState::STATE_DISCONNECT);
+}
+
+/**
+ * @tc.name: RecalculatePanelRectForAvoidArea
+ * @tc.desc: test function : RecalculatePanelRectForAvoidArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest3, RecalculatePanelRectForAvoidArea, Function | SmallTest | Level1)
+{
+    auto keyboardSession = GetKeyboardSession("RecalculatePanelRectForAvoidArea",
+        "RecalculatePanelRectForAvoidArea");
+    
+    // if landscapeAvoidHeight_ or portraitAvoidHeight_ < 0
+    WSRect panelRect = { 0, 0, 0, 0 };
+    KeyboardLayoutParams params;
+    keyboardSession->GetSessionProperty()->SetKeyboardLayoutParams(params);
+    keyboardSession->RecalculatePanelRectForAvoidArea(panelRect);
+    EXPECT_EQ(panelRect.height_, 0);
+    params.landscapeAvoidHeight_ = 1;
+    params.portraitAvoidHeight_ = -1;
+    keyboardSession->GetSessionProperty()->SetKeyboardLayoutParams(params);
+    keyboardSession->RecalculatePanelRectForAvoidArea(panelRect);
+    EXPECT_EQ(panelRect.height_, 0);
+    params.landscapeAvoidHeight_ = -1;
+    params.portraitAvoidHeight_ = 1;
+    keyboardSession->GetSessionProperty()->SetKeyboardLayoutParams(params);
+    keyboardSession->RecalculatePanelRectForAvoidArea(panelRect);
+    EXPECT_EQ(panelRect.height_, 0);
+    params.landscapeAvoidHeight_ = 1;
+    params.portraitAvoidHeight_ = 1;
+    // the landscape width is same to the portrait
+    keyboardSession->GetSessionProperty()->SetKeyboardLayoutParams(params);
+    keyboardSession->RecalculatePanelRectForAvoidArea(panelRect);
+    EXPECT_EQ(panelRect.height_, 1);
+}
+
+/**
+ * @tc.name: RecalculatePanelRectForAvoidArea02
+ * @tc.desc: test function : RecalculatePanelRectForAvoidArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest3, RecalculatePanelRectForAvoidArea02, Function | SmallTest | Level1)
+{
+    auto keyboardSession = GetKeyboardSession("RecalculatePanelRectForAvoidArea02",
+        "RecalculatePanelRectForAvoidArea02");
+    
+    // if the landscape width is not same to the portrait
+    KeyboardLayoutParams params;
+    params.landscapeAvoidHeight_ = 1;
+    params.portraitAvoidHeight_ = 2;
+    params.LandscapePanelRect_.width_ = 1;
+    params.PortraitPanelRect_.width_ = 2;
+    keyboardSession->GetSessionProperty()->SetKeyboardLayoutParams(params);
+    
+    WSRect panelRect = { 0, 0, 0, 0 };
+    panelRect.width_ = 1;
+    keyboardSession->RecalculatePanelRectForAvoidArea(panelRect);
+    EXPECT_EQ(panelRect.height_, 1);
+    panelRect.width_ = 2;
+    keyboardSession->RecalculatePanelRectForAvoidArea(panelRect);
+    EXPECT_EQ(panelRect.height_, 2);
+    panelRect.width_ = 3;
+    params.portraitAvoidHeight_ = 1;
+    keyboardSession->GetSessionProperty()->SetKeyboardLayoutParams(params);
+    keyboardSession->RecalculatePanelRectForAvoidArea(panelRect);
+    EXPECT_EQ(panelRect.height_, 1);
 }
 
 /**
