@@ -98,7 +98,7 @@ void ScreenManagerAni::onRegisterCallback(ani_env* env, ani_string type, ani_ref
 }
 
 DmErrorCode ScreenManagerAni::processRegisterCallback(ani_env* env, std::string& typeStr,
-    sptr<ScreenAniListener> screenAniListener){
+    sptr<ScreenAniListener> screenAniListener) {
     DmErrorCode ret = DmErrorCode::DM_ERROR_INVALID_PARAM;
     if (typeStr == EVENT_CHANGE) {
         TLOGI(WmsLogTag::DMS, "processRegisterCallback %{public}s", typeStr.c_str());

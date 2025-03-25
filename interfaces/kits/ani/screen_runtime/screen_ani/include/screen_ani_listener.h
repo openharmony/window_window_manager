@@ -41,7 +41,6 @@ private:
     std::mutex mtx_;
     std::map<std::string, std::vector<ani_ref>> aniCallBack_;
     wptr<ScreenAniListener> weakRef_;
-    // napi_value CreateScreenIdArray(napi_env env, const std::vector<ScreenId>& data);
 };
 const std::string EVENT_CONNECT = "connect";
 const std::string EVENT_DISCONNECT = "disconnect";
