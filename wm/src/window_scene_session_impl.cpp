@@ -2019,6 +2019,7 @@ WMError WindowSceneSessionImpl::GetTargetOrientationConfigInfo(Orientation targe
     GetSystemBarPropertyForPage(properties, pageProperties);
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
     sptr<DisplayInfo> displayInfo = display ? display->GetDisplayInfo() : nullptr;
     auto ret = hostSession->GetTargetOrientationConfigInfo(targetOrientation, pageProperties);
@@ -2593,12 +2594,12 @@ WMError WindowSceneSessionImpl::SetSystemBarPropertyForPage(WindowType type, con
     TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}u %{public}s] type %{public}u "
         "%{public}u %{public}x %{public}x %{public}u %{public}u",
         GetWindowId(), GetWindowName().c_str(), static_cast<uint32_t>(type),
-        systemBarProperty.enable_, systemBarProperty.backgroundColor_,
-        systemBarProperty.contentColor_, systemBarProperty.enableAnimation_, systemBarProperty.settingFlag_);
-    auto lastSystemBarProperty = GetSystemBarPropertyByType(type)
-    property_->SetSystemBarProperty(type, systemBarProperty);
-    auto ret = NotifySpecificWindowSessionProperty(type, systemBarProperty);
-    property_->SetSystemBarProperty(type, lastSystemBarProperty);
+        property->enable_, property->backgroundColor_,
+        property->contentColor_, property->enableAnimation_, property->settingFlag_);
+    auto lastProperty = GetSystemBarPropertyByType(type)
+    property_->SetSystemBarProperty(type, *property);
+    auto ret = NotifySpecificWindowSessionProperty(type, *property);
+    property_->SetSystemBarProperty(type, lastProperty);
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_IMMS, "set prop fail, ret %{public}u", ret);
         return ret;
