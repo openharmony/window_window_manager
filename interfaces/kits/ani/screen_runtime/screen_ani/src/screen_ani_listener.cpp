@@ -12,137 +12,133 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#include "ani_err_utils.h"
-#include "screen_ani_utils.h"
+#include "screen_ani_listener.h"
 #include "window_manager_hilog.h"
-
-#include <map>
-
-namespace OHOS::Rosen {
-constexpr const char* DM_ERROR_MSG_OK = "ok";
-constexpr const char* DM_ERROR_MSG_INIT_DMS_PROXY_LOCKED = "init dms proxy locked";
-constexpr const char* DM_ERROR_MSG_IPC_FAILED = "ipc failed";
-constexpr const char* DM_ERROR_MSG_REMOTE_CREATE_FAILED = "remote create failed";
-constexpr const char* DM_ERROR_MSG_NULLPTR = "nullptr";
-constexpr const char* DM_ERROR_MSG_INVALID_PARAM = "invalid param";
-constexpr const char* DM_ERROR_MSG_WRITE_INTERFACE_TOKEN_FAILED = "write interface token failed";
-constexpr const char* DM_ERROR_MSG_DEATH_RECIPIENT = "death recipient";
-constexpr const char* DM_ERROR_MSG_INVALID_MODE_ID = "invalid mode id";
-constexpr const char* DM_ERROR_MSG_WRITE_DATA_FAILED = "write data failed";
-constexpr const char* DM_ERROR_MSG_RENDER_SERVICE_FAILED = "render service failed";
-constexpr const char* DM_ERROR_MSG_UNREGISTER_AGENT_FAILED = "unregister agent failed";
-constexpr const char* DM_ERROR_MSG_INVALID_CALLING = "invalid calling";
-constexpr const char* DM_ERROR_MSG_INVALID_PERMISSION = "invalid permission";
-constexpr const char* DM_ERROR_MSG_NOT_SYSTEM_APP = "not system app";
-constexpr const char* DM_ERROR_MSG_DEVICE_NOT_SUPPORT = "device not support";
-constexpr const char* DM_ERROR_MSG_UNKNOWN = "unknown";
-
-static std::map<DMError, const char*> DM_ERROR_TO_ERROR_MSG_MAP {
-    {DMError::DM_OK,                                    DM_ERROR_MSG_OK                           },
-    {DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED,           DM_ERROR_MSG_INIT_DMS_PROXY_LOCKED        },
-    {DMError::DM_ERROR_IPC_FAILED,                      DM_ERROR_MSG_IPC_FAILED                   },
-    {DMError::DM_ERROR_REMOTE_CREATE_FAILED,            DM_ERROR_MSG_REMOTE_CREATE_FAILED         },
-    {DMError::DM_ERROR_NULLPTR,                         DM_ERROR_MSG_NULLPTR                      },
-    {DMError::DM_ERROR_INVALID_PARAM,                   DM_ERROR_MSG_INVALID_PARAM                },
-    {DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED,    DM_ERROR_MSG_WRITE_INTERFACE_TOKEN_FAILED },
-    {DMError::DM_ERROR_DEATH_RECIPIENT,                 DM_ERROR_MSG_DEATH_RECIPIENT              },
-    {DMError::DM_ERROR_INVALID_MODE_ID,                 DM_ERROR_MSG_INVALID_MODE_ID              },
-    {DMError::DM_ERROR_WRITE_DATA_FAILED,               DM_ERROR_MSG_WRITE_DATA_FAILED            },
-    {DMError::DM_ERROR_RENDER_SERVICE_FAILED,           DM_ERROR_MSG_RENDER_SERVICE_FAILED        },
-    {DMError::DM_ERROR_UNREGISTER_AGENT_FAILED,         DM_ERROR_MSG_UNREGISTER_AGENT_FAILED      },
-    {DMError::DM_ERROR_INVALID_CALLING,                 DM_ERROR_MSG_INVALID_CALLING              },
-    {DMError::DM_ERROR_INVALID_PERMISSION,              DM_ERROR_MSG_INVALID_PERMISSION           },
-    {DMError::DM_ERROR_NOT_SYSTEM_APP,                  DM_ERROR_MSG_NOT_SYSTEM_APP               },
-    {DMError::DM_ERROR_DEVICE_NOT_SUPPORT,              DM_ERROR_MSG_DEVICE_NOT_SUPPORT           },
-    {DMError::DM_ERROR_UNKNOWN,                         DM_ERROR_MSG_UNKNOWN                      },
-};
-
-constexpr const char* DM_ERROR_CODE_MSG_OK = "ok";
-constexpr const char* DM_ERROR_CODE_MSG_NO_PERMISSION = "no permission";
-constexpr const char* DM_ERROR_CODE_MSG_NOT_SYSTEM_APP = "not system app";
-constexpr const char* DM_ERROR_CODE_MSG_INVALID_PARAM = "invalid param";
-constexpr const char* DM_ERROR_CODE_MSG_DEVICE_NOT_SUPPORT = "device not support";
-constexpr const char* DM_ERROR_CODE_MSG_INVALID_SCREEN = "invalid screen";
-constexpr const char* DM_ERROR_CODE_MSG_INVALID_CALLING = "invalid calling";
-constexpr const char* DM_ERROR_CODE_MSG_SYSTEM_INNORMAL = "system innormal";
-
-static std::map<DmErrorCode, const char*> DM_ERROR_CODE_TO_ERROR_MSG_MAP {
-    {DmErrorCode::DM_OK,                              DM_ERROR_CODE_MSG_OK                 },
-    {DmErrorCode::DM_ERROR_NO_PERMISSION,             DM_ERROR_CODE_MSG_NO_PERMISSION      },
-    {DmErrorCode::DM_ERROR_NOT_SYSTEM_APP,            DM_ERROR_CODE_MSG_NOT_SYSTEM_APP     },
-    {DmErrorCode::DM_ERROR_INVALID_PARAM,             DM_ERROR_CODE_MSG_INVALID_PARAM      },
-    {DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT,        DM_ERROR_CODE_MSG_DEVICE_NOT_SUPPORT },
-    {DmErrorCode::DM_ERROR_INVALID_SCREEN,            DM_ERROR_CODE_MSG_INVALID_SCREEN     },
-    {DmErrorCode::DM_ERROR_INVALID_CALLING,           DM_ERROR_CODE_MSG_INVALID_CALLING    },
-    {DmErrorCode::DM_ERROR_SYSTEM_INNORMAL,           DM_ERROR_CODE_MSG_SYSTEM_INNORMAL    },
-};
-
-std::string AniErrUtils::GetErrorMsg(const DMError& errorCode)
+#include "screen_ani_utils.h"
+ 
+namespace OHOS {
+namespace Rosen {
+ 
+ScreenAniListener::~ScreenAniListener()
 {
-    return DM_ERROR_TO_ERROR_MSG_MAP.find(errorCode) != DM_ERROR_TO_ERROR_MSG_MAP.end() ?
-        DM_ERROR_TO_ERROR_MSG_MAP.at(errorCode) : "";
+    TLOGI(WmsLogTag::DMS, "[ANI]~ScreenAniListener");
 }
-
-std::string AniErrUtils::GetErrorMsg(const DmErrorCode& errorCode)
+ 
+void ScreenAniListener::AddCallback(const std::string& type, ani_ref callback)
 {
-    return DM_ERROR_CODE_TO_ERROR_MSG_MAP.find(errorCode) != DM_ERROR_CODE_TO_ERROR_MSG_MAP.end() ?
-        DM_ERROR_CODE_TO_ERROR_MSG_MAP.at(errorCode) : "";
-}
-
-ani_status AniErrUtils::ThrowBusinessError(ani_env* env, DMError error, std::string message)
-{
-    ani_object aniError;
-    CreateBusinessError(env, static_cast<int32_t>(error), message == "" ? GetErrorMsg(error) : message, &aniError);
-    ani_status status = env->ThrowError(static_cast<ani_error>(aniError));
-    if (status != ANI_OK) {
-        TLOGE(WmsLogTag::DMS, "[ANI] fail to throw err, status:%{public}d", static_cast<int32_t>(status));
-        return status;
+    TLOGI(WmsLogTag::DMS, "[ANI] AddCallback is called, type = %{public}s", type.c_str());
+    if (env_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "env_ nullptr");
+        return;
     }
-    return ANI_OK;
+    std::lock_guard<std::mutex> lock(mtx_);
+    ani_ref cbRef{};
+    if (env_->GlobalReference_Create(callback, &cbRef) != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI]create global ref fail");
+        return;
+    };
+    aniCallBack_[type].emplace_back(cbRef);
+    TLOGI(WmsLogTag::DMS, "[ANI] AddCallback success aniCallBack_ size: %{public}u!",
+        static_cast<uint32_t>(aniCallBack_[type].size()));
 }
-
-ani_status AniErrUtils::ThrowBusinessError(ani_env* env, DmErrorCode error, std::string message)
+void ScreenAniListener::RemoveAllCallback()
 {
-    ani_object aniError;
-    CreateBusinessError(env, static_cast<int32_t>(error), message == "" ? GetErrorMsg(error) : message, &aniError);
-    ani_status status = env->ThrowError(static_cast<ani_error>(aniError));
-    if (status != ANI_OK) {
-        TLOGE(WmsLogTag::DMS, "[ANI] fail to throw err, status:%{public}d", static_cast<int32_t>(status));
-        return status;
+    std::lock_guard<std::mutex> lock(mtx_);
+    aniCallBack_.clear();
+}
+void ScreenAniListener::RemoveCallback(ani_env* env, const std::string& type, ani_ref callback)
+{
+    std::lock_guard<std::mutex> lock(mtx_);
+    auto it = aniCallBack_.find(type);
+    if (it == aniCallBack_.end()) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Listener no callback to remove");
+        return;
     }
-    return ANI_OK;
+    auto& listeners = it->second;
+    for (auto iter = listeners.begin(); iter != listeners.end();) {
+        ani_boolean isEquals = 0;
+        env->Reference_StrictEquals(callback, *iter, &isEquals);
+        if (isEquals) {
+            listeners.erase(iter);
+        } else {
+            iter++;
+        }
+    }
+    TLOGI(WmsLogTag::DMS, "[ANI] Success remove callback, jsCallBack_ size: %{public}u!",
+        static_cast<uint32_t>(listeners.size()));
 }
-
-ani_status AniErrUtils::CreateBusinessError(ani_env* env, int32_t error, std::string message, ani_object* err)
+void ScreenAniListener::OnConnect(ScreenId id)
 {
-    TLOGI(WmsLogTag::DMS, "[ANI] in");
+}
+void ScreenAniListener::OnDisconnect(ScreenId id)
+{
+}
+ 
+// need to implement
+void ScreenAniListener::OnChange(ScreenId id)
+{
+    TLOGI(WmsLogTag::DMS, "[ANI] OnChange begin");
+    std::lock_guard<std::mutex> lock(mtx_);
+    auto thisListener = weakRef_.promote();
+    if (thisListener == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] this listener is nullptr");
+        return;
+    }
+    TLOGI(WmsLogTag::DMS, "[ANI] OnChange is called, displayId: %{public}d", static_cast<uint32_t>(id));
+    if (aniCallBack_.empty()) {
+        TLOGE(WmsLogTag::DMS, "[ANI] OnChange not register!");
+        return;
+    }
+    auto it = aniCallBack_.find(EVENT_CHANGE);
+    if (it == aniCallBack_.end()) {
+        TLOGE(WmsLogTag::DMS, "[ANI] OnChange not this event, return");
+        return;
+    }
+    std::vector<ani_ref> vec = it->second;
+    TLOGI(WmsLogTag::DMS, "vec_callback size: %{public}lu", vec.size());
+    // find callbacks in vector
+    for (auto oneAniCallback : vec) {
+        if (env_ == nullptr) {
+            TLOGI(WmsLogTag::DMS, "OnDestroy: null env_");
+            return;
+        }
+        ani_boolean undefRes;
+        ani_boolean nullRes;
+        env_->Reference_IsUndefined(oneAniCallback, &undefRes);
+        env_->Reference_IsNull(oneAniCallback, &nullRes);
+        // judge is null or undefined
+        if (undefRes == 1) {
+            TLOGE(WmsLogTag::DMS, "[ANI] oneAniCallback undefRes, return");
+            return;
+        }
+        if (nullRes == 1) {
+            TLOGE(WmsLogTag::DMS, "[ANI] oneAniCallback null, return");
+            return;
+        }
+        
+        ScreenAniUtils::CallAniFunctionVoid(env_, "L@ohos/screen/screen;", "screenEventCallBack",
+            "Lstd/core/Object;D:V", oneAniCallback, static_cast<ani_double>(id));
+    }
+}
+ 
+ani_status ScreenAniListener::CallAniMethodVoid(ani_object object, const char* cls,
+    const char* method, const char* signature, ...)
+{
     ani_class aniClass;
-    ani_status status = env->FindClass("L@ohos/base/BusinessError;", &aniClass);
-    if (status != ANI_OK) {
-        TLOGE(WmsLogTag::DMS, "[ANI] class not found, status:%{public}d", static_cast<int32_t>(status));
-        return status;
+    ani_status ret = env_->FindClass(cls, &aniClass);
+    if (ret != ANI_OK) {
+        return ret;
     }
-    ani_method aniCtor;
-    status = env->Class_FindMethod(aniClass, "<ctor>", "Lstd/core/String;Lescompat/ErrorOptions;:V", &aniCtor);
-    if (status != ANI_OK) {
-        TLOGE(WmsLogTag::DMS, "[ANI] ctor not found, status:%{public}d", static_cast<int32_t>(status));
-        return status;
+    ani_method aniMethod;
+    ret = env_->Class_FindMethod(aniClass, method, signature, &aniMethod);
+    if (ret != ANI_OK) {
+        return ret;
     }
-    ani_string aniMsg;
-    ScreenAniUtils::GetAniString(env, message, &aniMsg);
-    status = env->Object_New(aniClass, aniCtor, err, aniMsg, ScreenAniUtils::CreateAniUndefined(env));
-    if (status != ANI_OK) {
-        TLOGE(WmsLogTag::DMS, "[ANI] fail to new err, status:%{public}d", static_cast<int32_t>(status));
-        return status;
-    }
-    status = env->Object_SetFieldByName_Int(*err, "<property>code", static_cast<ani_int>(error));
-    if (status != ANI_OK) {
-        TLOGE(WmsLogTag::DMS, "[ANI] fail to set code, status:%{public}d", static_cast<int32_t>(status));
-        return status;
-    }
-    status = env->Object_SetFieldByName_Int(*err, "<property>code", static_cast<ani_int>(error));
-    
-    return ANI_OK;
+    va_list args;
+    va_start(args, signature);
+    ret = env_->Object_CallMethod_Void(object, aniMethod, args);
+    va_end(args);
+    return ret;
 }
-} // namespace OHOS::Rosen
+}
+}
