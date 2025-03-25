@@ -1376,6 +1376,9 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
               rect.width_, rect.height_, GetPersistentId());
         return;
     }
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
+        "WindowSessionimpl::UpdateViewportConfig id:%d [%d, %d, %u, %u] reason:%u", GetPersistentId(),
+        rect.posX_, rect.posY_, rect.width_, rect.height_, reason);
     auto rotation =  ONE_FOURTH_FULL_CIRCLE_DEGREE * static_cast<uint32_t>(displayInfo->GetOriginRotation());
     auto deviceRotation = static_cast<uint32_t>(displayInfo->GetDefaultDeviceRotationOffset());
     uint32_t transformHint = (rotation + deviceRotation) % FULL_CIRCLE_DEGREE;
@@ -4286,9 +4289,9 @@ WSError WindowSessionImpl::SetPiPControlEvent(WsPiPControlType controlType, WsPi
     return WSError::WS_OK;
 }
 
-WSError WindowSessionImpl::NotifyPipWindowSizeChange(uint32_t width, uint32_t height, double scale)
+WSError WindowSessionImpl::NotifyPipWindowSizeChange(double width, double height, double scale)
 {
-    TLOGI(WmsLogTag::WMS_PIP, "width: %{public}u, height: %{public}u scale: %{public}f", width, height, scale);
+    TLOGI(WmsLogTag::WMS_PIP, "width: %{public}f, height: %{public}f scale: %{public}f", width, height, scale);
     auto task = [width, height, scale]() {
         PictureInPictureManager::PipSizeChange(width, height, scale);
     };
@@ -5107,7 +5110,10 @@ void WindowSessionImpl::UpdateSpecificSystemBarEnabled(bool systemBarEnable, boo
 {
     property.enable_ = systemBarEnable;
     property.enableAnimation_ = systemBarEnableAnimation;
-    property.settingFlag_ |= SystemBarSettingFlag::ENABLE_SETTING;
+    // isolate on api 18
+    if (GetTargetAPIVersion() >= API_VERSION_18) {
+        property.settingFlag_ |= SystemBarSettingFlag::ENABLE_SETTING;
+    }
 }
 
 WMError WindowSessionImpl::SetSpecificBarProperty(WindowType type, const SystemBarProperty& property)

@@ -206,6 +206,7 @@ public:
     void SetName(std::string name);
     void SetInnerName(std::string innerName);
     void Resize(uint32_t width, uint32_t height, bool isFreshBoundsSync = true);
+    void SetFrameGravity(Gravity gravity);
 
     void SetHdrFormats(std::vector<uint32_t>&& hdrFormats);
     void SetColorSpaces(std::vector<uint32_t>&& colorSpaces);

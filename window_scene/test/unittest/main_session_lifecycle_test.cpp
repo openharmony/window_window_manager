@@ -103,6 +103,10 @@ HWTEST_F(MainSessionLifecycleTest, Reconnect01, Function | SmallTest | Level1)
     property->SetWindowState(WindowState::STATE_SHOWN);
     result = mainSession_->Reconnect(mockSessionStage, testWindowEventChannel, surfaceNode, property);
     ASSERT_EQ(result, WSError::WS_OK);
+
+    mainSession_->pcFoldScreenController_ = nullptr;
+    result = mainSession_->Reconnect(mockSessionStage, testWindowEventChannel, surfaceNode, property);
+    ASSERT_EQ(result, WSError::WS_OK);
 }
 
 /**

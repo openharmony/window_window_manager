@@ -250,6 +250,7 @@ bool IsUIExtCanShowOnLockScreen(const AppExecFwk::ElementName& element, uint32_t
         std::make_tuple("com.huawei.hmos.wallet", "WalletDialogUIExtensionAbility", "entry"),
         std::make_tuple("com.huawei.hmos.settings", "WifiWindowSettingsAbility", "pc_settings"),
         std::make_tuple("com.ohos.mms", "DeskDialogExtensionAbility", "entry"),
+        std::make_tuple("com.ohos.sceneboard", "ThemeChargingAbility", "engineservice"),
     };
 
     if (extensionAbilityTypeWhitelist.find(extensionAbilityType) != extensionAbilityTypeWhitelist.end()) {
@@ -1648,6 +1649,9 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
     specificCb->onSetSkipSelfWhenShowOnVirtualScreen_ = [this](uint64_t surfaceNodeId, bool isSkip) {
         this->SetSkipSelfWhenShowOnVirtualScreen(surfaceNodeId, isSkip);
     };
+    specificCb->onSetSkipEventOnCastPlus_ = [this](int32_t windowId, bool isSkip) {
+        this->SetSkipEventOnCastPlusInner(windowId, isSkip);
+    };
     specificCb->onPiPStateChange_ = [this](const std::string& bundleName, bool isForeground) {
         this->UpdatePiPWindowStateChanged(bundleName, isForeground);
     };
@@ -1682,6 +1686,18 @@ void SceneSessionManager::SetSkipSelfWhenShowOnVirtualScreen(uint64_t surfaceNod
         }
     }
     rsInterface_.SetVirtualScreenBlackList(INVALID_SCREEN_ID, skipSurfaceNodeIds_);
+}
+
+void SceneSessionManager::SetSkipEventOnCastPlusInner(int32_t windowId, bool isSkip)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Wid: %{public}d, isSkip: %{public}d", windowId, isSkip);
+    auto sceneSession = GetSceneSession(windowId);
+    if(sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "SceneSession is nullptr, Wid: %{public}d", windowId);
+        return;
+    }
+    sceneSession->GetSessionProperty()->SetSkipEventOnCastPlus(isSkip);
+    FlushWindowInfoToMMI(true);
 }
 
 sptr<KeyboardSession::KeyboardSessionCallback> SceneSessionManager::CreateKeyboardSessionCallback()
@@ -2289,6 +2305,10 @@ void SceneSessionManager::InitSceneSession(sptr<SceneSession>& sceneSession, con
     }
     RegisterSessionExceptionFunc(sceneSession);
     RegisterVisibilityChangedDetectFunc(sceneSession);
+    RegisterSaveSnapshotFunc(sceneSession);
+    if (systemConfig_.windowUIType_ == WindowUIType::PAD_WINDOW) {
+        RegisterRemoveSnapshotFunc(sceneSession);
+    }
     // Skip FillSessionInfo when atomicService free-install start.
     if (!IsAtomicServiceFreeInstall(sessionInfo)) {
         FillSessionInfo(sceneSession);
@@ -2707,6 +2727,38 @@ void SceneSessionManager::RemoveSnapshotFromCache(int32_t persistentId)
     }
 }
 
+WSError SceneSessionManager::RegisterSaveSnapshotFunc(const sptr<SceneSession>& sceneSession)
+{
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "session is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    if (!WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
+        return WSError::WS_ERROR_INVALID_WINDOW;
+    }
+    auto persistentId = sceneSession->GetPersistentId();
+    sceneSession->SetSaveSnapshotCallback([this, persistentId]() {
+        this->PutSnapshotToCache(persistentId);
+    });
+    return WSError::WS_OK;
+}
+
+WSError SceneSessionManager::RegisterRemoveSnapshotFunc(const sptr<SceneSession>& sceneSession)
+{
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "session is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    if (!WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
+        return WSError::WS_ERROR_INVALID_WINDOW;
+    }
+    auto persistentId = sceneSession->GetPersistentId();
+    sceneSession->SetRemoveSnapshotCallback([this, persistentId]() {
+        this->RemoveSnapshotFromCache(persistentId);
+    });
+    return WSError::WS_OK;
+}
+
 WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSession>& sceneSession,
     const bool isDelegator, const bool isToDesktop, const bool isSaveSnapshot)
 {
@@ -2735,9 +2787,6 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
             sceneSession->EditSessionInfo().callingTokenId_ = 0;
         }
 
-        sceneSession->SetSaveSnapshotCallback([this, persistentId]() {
-            this->PutSnapshotToCache(persistentId);
-        });
         sceneSession->BackgroundTask(isSaveSnapshot);
         listenerController_->NotifySessionLifecycleEvent(
             ISessionLifecycleListener::SessionLifecycleEvent::BACKGROUND, sceneSession->GetSessionInfo());
@@ -3447,10 +3496,11 @@ bool SceneSessionManager::CheckSystemWindowPermission(const sptr<WindowSessionPr
         return true;
     }
     if (type == WindowType::WINDOW_TYPE_FLOAT) {
+        bool isPadAndNotPcApp = systemConfig_.IsPadWindow() && !property->GetIsPcAppInPad();
         // WINDOW_TYPE_FLOAT could be created with the corresponding permission
         if (SessionPermission::VerifyCallingPermission("ohos.permission.SYSTEM_FLOAT_WINDOW") &&
             (SessionPermission::IsSystemCalling() || SessionPermission::IsStartByHdcd() ||
-            systemConfig_.supportTypeFloatWindow_)) {
+            (systemConfig_.supportTypeFloatWindow_ && !isPadAndNotPcApp))) {
             TLOGI(WmsLogTag::WMS_SYSTEM, "check float permission success.");
             return true;
         } else {
@@ -10916,7 +10966,7 @@ WSError SceneSessionManager::GetIsLayoutFullScreen(bool& isLayoutFullScreen)
     return WSError::WS_OK;
 }
 
-WSError SceneSessionManager::UpdateSessionDisplayId(int32_t persistentId, uint64_t screenId)
+WSError SceneSessionManager::UpdateSessionDisplayId(int32_t persistentId, uint64_t screenId, WSRect winRect)
 {
     auto sceneSession = GetSceneSession(persistentId);
     if (!sceneSession) {
@@ -10929,6 +10979,9 @@ WSError SceneSessionManager::UpdateSessionDisplayId(int32_t persistentId, uint64
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "wid: %{public}d, move display %{public}" PRIu64 " from %{public}" PRIu64,
         sceneSession->GetPersistentId(), screenId, fromScreenId);
     NotifySessionUpdate(sceneSession->GetSessionInfo(), ActionType::MOVE_DISPLAY, fromScreenId);
+    if (!winRect.IsEmpty()) {
+        sceneSession->SetTempRect(winRect);
+    }
     sceneSession->NotifyDisplayMove(fromScreenId, screenId);
     sceneSession->UpdateDensity();
 
@@ -13577,39 +13630,61 @@ WSError SceneSessionManager::IsLastFrameLayoutFinished(bool& isLayoutFinished)
 
 WMError SceneSessionManager::IsWindowRectAutoSave(const std::string& key, bool& enabled, int persistentId)
 {
-    auto sceneSession = GetSceneSession(persistentId);
-    if (sceneSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "sceneSession %{public}d is nullptr", persistentId);
-        return WMError::WM_ERROR_INVALID_SESSION;
-    }
-    std::string specifiedKey = key;
-    if (sceneSession->GetSessionProperty()->GetIsSaveBySpecifiedFlag()) {
-        specifiedKey = key + sceneSession->GetSessionInfo().specifiedFlag_;
-    }
-    TLOGD(WmsLogTag::WMS_MAIN, "windowId: %{public}d, specifiedKey: %{public}s", persistentId, specifiedKey.c_str());
-    std::unique_lock<std::mutex> lock(isWindowRectAutoSaveMapMutex_);
-    if (auto iter = isWindowRectAutoSaveMap_.find(specifiedKey); iter != isWindowRectAutoSaveMap_.end()) {
-        enabled = iter->second;
-    } else {
-        enabled = false;
-    }
-    return WMError::WM_OK;
+    return taskScheduler_->PostSyncTask([key, &enabled, persistentId, this] {
+        auto sceneSession = GetSceneSession(persistentId);
+        if (sceneSession == nullptr) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "sceneSession %{public}d is nullptr", persistentId);
+            return WMError::WM_ERROR_INVALID_SESSION;
+        }
+        std::string specifiedKey = key;
+        if (auto iter = this->isSaveBySpecifiedFlagMap_.find(key);
+            iter != this->isSaveBySpecifiedFlagMap_.end()) {
+            if (iter->second) {
+                specifiedKey = key + sceneSession->GetSessionInfo().specifiedFlag_;
+            }
+        }
+        TLOGND(WmsLogTag::WMS_MAIN, "windowId: %{public}d, specifiedKey: %{public}s", persistentId, specifiedKey.c_str());
+        if (auto iter = this->isWindowRectAutoSaveMap_.find(specifiedKey);
+            iter != this->isWindowRectAutoSaveMap_.end()) {
+            enabled = iter->second;
+        } else {
+            enabled = false;
+        }
+        return WMError::WM_OK;
+    });
+    
 }
 
-void SceneSessionManager::SetIsWindowRectAutoSave(const std::string& key, bool enabled)
+void SceneSessionManager::SetIsWindowRectAutoSave(const std::string& key, bool enabled,
+    const std::string& abilityKey, bool isSaveBySpecifiedFlag)
 {
-    std::unique_lock<std::mutex> lock(isWindowRectAutoSaveMapMutex_);
-    if (auto iter = isWindowRectAutoSaveMap_.find(key); iter != isWindowRectAutoSaveMap_.end()) {
-        if (!enabled) {
-            isWindowRectAutoSaveMap_.erase(key);
+    taskScheduler_->PostSyncTask([key, enabled, abilityKey, isSaveBySpecifiedFlag ,this] {
+        if (auto iter = this->isSaveBySpecifiedFlagMap_.find(abilityKey);
+            iter != this->isSaveBySpecifiedFlagMap_.end()) {
+            if (!isSaveBySpecifiedFlag) {
+                this->isSaveBySpecifiedFlagMap_.erase(abilityKey);
+            } else {
+                iter->second = isSaveBySpecifiedFlag;
+            }
         } else {
-            iter->second = enabled;
+            if (isSaveBySpecifiedFlag) {
+                this->isSaveBySpecifiedFlagMap_.insert({abilityKey, isSaveBySpecifiedFlag});
+            }
         }
-    } else {
-        if (enabled) {
-            isWindowRectAutoSaveMap_.insert({key, enabled});
+        if (auto iter = this->isWindowRectAutoSaveMap_.find(key);
+            iter != this->isWindowRectAutoSaveMap_.end()) {
+            if (!enabled) {
+                this->isWindowRectAutoSaveMap_.erase(key);
+            } else {
+                iter->second = enabled;
+            }
+        } else {
+            if (enabled) {
+                this->isWindowRectAutoSaveMap_.insert({key, enabled});
+            }
         }
-    }
+        return WMError::WM_OK;
+    });
 }
 
 WMError SceneSessionManager::MinimizeMainSession(const std::string& bundleName, int32_t appIndex, int32_t userId)

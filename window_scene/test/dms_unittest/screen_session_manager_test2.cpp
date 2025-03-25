@@ -186,6 +186,33 @@ HWTEST_F(ScreenSessionManagerTest, WakeUpPictureFrameBlock, Function | SmallTest
      ASSERT_EQ(ssm_->pictureFrameReady_, false);
      ASSERT_EQ(ssm_->pictureFrameBreak_, false);
 }
+
+/**
+ * @tc.name: GetCutoutInfoWithRotation01
+ * @tc.desc: GetCutoutInfoWithRotation test with controller nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetCutoutInfoWithRotation01, Function | SmallTest | Level3)
+{
+    DisplayId id = 0;
+    int32_t rotation = 0;
+    ScreenSessionManager::GetInstance().screenCutoutController_ = nullptr;
+    auto cutoutInfo = ScreenSessionManager::GetInstance().GetCutoutInfoWithRotation(id, rotation);
+    ASSERT_EQ(cutoutInfo, nullptr);
+}
+
+/**
+ * @tc.name: GetCutoutInfoWithRotation02
+ * @tc.desc: GetCutoutInfoWithRotation test with controller not nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetCutoutInfoWithRotation02, Function | SmallTest | Level3)
+{
+    DisplayId id = 0;
+    int32_t rotation = 0;
+    auto cutoutInfo = ssm_->GetCutoutInfoWithRotation(id, rotation);
+    ASSERT_NE(cutoutInfo, nullptr);
+}
 }
 }
 }

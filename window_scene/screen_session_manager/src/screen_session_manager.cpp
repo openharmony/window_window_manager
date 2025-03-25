@@ -1306,7 +1306,7 @@ sptr<ScreenSession> ScreenSessionManager::GetScreenSession(ScreenId screenId) co
     }
     auto iter = screenSessionMap_.find(screenId);
     if (iter == screenSessionMap_.end()) {
-        TLOGW(WmsLogTag::DMS, "not found screen session id: %{public}" PRIu64" and create new.", screenId);
+        TLOGW(WmsLogTag::DMS, "not found screen session id: %{public}" PRIu64".", screenId);
         return nullptr;
     }
     return iter->second;
@@ -1448,10 +1448,12 @@ sptr<DisplayInfo> ScreenSessionManager::GetVisibleAreaDisplayInfoById(DisplayId 
         }
 #ifdef FOLD_ABILITY_ENABLE
         SuperFoldStatus status = SuperFoldStateManager::GetInstance().GetCurrentStatus();
+        bool isSystemKeyboardOn = SuperFoldStateManager::GetInstance().GetSystemKeyboardStatus();
         RRect bounds = screenSession->GetScreenProperty().GetBounds();
         auto screenWdith = bounds.rect_.GetWidth();
         auto screenHeight = bounds.rect_.GetHeight();
-        if (status == SuperFoldStatus::KEYBOARD) {
+        // Adjust screen height when physical keyboard attach or touchPad virtual Keyboard on
+        if (status == SuperFoldStatus::KEYBOARD || isSystemKeyboardOn) {
             if (screenWdith > screenHeight) {
                 std::swap(screenWdith, screenHeight);
             }
@@ -2267,18 +2269,19 @@ void ScreenSessionManager::SetExtendedScreenFallbackPlan(ScreenId screenId)
         TLOGE(WmsLogTag::DMS, "No corresponding rsId.");
         return;
     }
-    int32_t res = -1;
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:SetPhysicalScreenResolution(%" PRIu64")", screenId);
-    res = rsInterface_.SetPhysicalScreenResolution(rsScreenId, screenAdjustWidth, screenAdjustHeight);
-    screenSession->Resize(screenAdjustWidth, screenAdjustHeight, false);
+    int32_t res = rsInterface_.SetPhysicalScreenResolution(rsScreenId, screenAdjustWidth, screenAdjustHeight);
     if (screenSession->GetScreenCombination() == ScreenCombination::SCREEN_EXTEND) {
         screenSession->PropertyChange(screenSession->GetScreenProperty(), ScreenPropertyChangeReason::UNDEFINED);
+        screenSession->SetFrameGravity(Rosen::Gravity::RESIZE);
+    } else {
+        screenSession->SetFrameGravity(Rosen::Gravity::TOP_LEFT);
     }
     if (res != StatusCode::SUCCESS) {
         TLOGE(WmsLogTag::DMS, "RS SetPhysicalScreenResolution failed.");
         screenEventTracker_.RecordEvent("SetPhysicalScreenResolution failed.");
     } else {
-        TLOGD(WmsLogTag::DMS, "RS SetPhysicalScreenResolution success.");
+        TLOGI(WmsLogTag::DMS, "RS SetPhysicalScreenResolution success.");
         screenEventTracker_.RecordEvent("SetPhysicalScreenResolution success.");
     }
     TLOGI(WmsLogTag::DMS, "screenId:%{public}" PRIu64 ", screenAdjustWidth:%{public}u, screenAdjustHeight:%{public}u",
@@ -7212,7 +7215,32 @@ void ScreenSessionManager::SwitchScbNodeHandle(int32_t newUserId, int32_t newScb
     currentScbPId_ = newScbPid;
     scbSwitchCV_.notify_all();
     oldScbDisplayMode_ = GetFoldDisplayMode();
+    NotifyCastWhenSwitchScbNode();
 #endif
+}
+
+void ScreenSessionManager::NotifyCastWhenSwitchScbNode()
+{
+    std::map<ScreenId, sptr<ScreenSession>> screenSessionMapCopy;
+    {
+        std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+        screenSessionMapCopy = screenSessionMap_;
+    }
+    for (const auto& sessionIt : screenSessionMapCopy) {
+        auto screenSession = sessionIt.second;
+        if (screenSession == nullptr) {
+            TLOGE(WmsLogTag::DMS, "screenSession is nullptr, screenId:%{public}" PRIu64"", sessionIt.first);
+            continue;
+        }
+        if (screenSession->GetScreenProperty().GetScreenType() != ScreenType::REAL ||
+            !IsDefaultMirrorMode(screenSession->GetScreenId())) {
+            TLOGE(WmsLogTag::DMS, "screen is not real or external, screenId:%{public}" PRIu64"", sessionIt.first);
+            continue;
+        }
+        bool isScreenMirror = screenSession ->GetScreenCombination() == ScreenCombination::SCREEN_MIRROR;
+        NotifyCastWhenScreenConnectChange(isScreenMirror);
+        return;
+    }
 }
 
 void ScreenSessionManager::HotSwitch(int32_t newUserId, int32_t newScbPid)

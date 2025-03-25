@@ -23,6 +23,7 @@
 
 #include "property/rs_properties_def.h"
 #include "root_scene.h"
+#include "session/host/include/pc_fold_screen_manager.h"
 #include "window_manager_hilog.h"
 #include "window_visibility_info.h"
 #include "process_options.h"
@@ -33,6 +34,12 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsSceneUtils" };
 constexpr int32_t US_PER_NS = 1000;
 constexpr int32_t INVALID_VAL = -9999;
+
+const std::unordered_map<int32_t, ThrowSlipMode> FINGERS_TO_THROWSLIPMODE_MAP = {
+    { 3, ThrowSlipMode::THREE_FINGERS_SWIPE },
+    { 4, ThrowSlipMode::FOUR_FINGERS_SWIPE },
+    { 5, ThrowSlipMode::FIVE_FINGERS_SWIPE }
+};
 
 // Refer to OHOS::Ace::TouchType
 enum class AceTouchType : int32_t {
@@ -1035,6 +1042,20 @@ bool ConvertDragResizeTypeFromJs(napi_env env, napi_value value, DragResizeType&
     return true;
 }
 
+bool ConvertThrowSlipModeFromJs(napi_env env, napi_value value, ThrowSlipMode& throwSlipMode)
+{
+    int32_t fingers = 0;
+    if (!ConvertFromJsValue(env, value, fingers)) {
+        return false;
+    }
+    auto it = FINGERS_TO_THROWSLIPMODE_MAP.find(fingers);
+    if (it == FINGERS_TO_THROWSLIPMODE_MAP.end()) {
+        return false;
+    }
+    throwSlipMode = it->second;
+    return true;
+}
+
 bool ParseArrayStringValue(napi_env env, napi_value array, std::vector<std::string>& vector)
 {
     if (array == nullptr) {
@@ -2022,6 +2043,13 @@ void MainThreadScheduler::PostMainThreadTask(Task&& localTask, std::string trace
             OHOS::AppExecFwk::EventQueue::Priority::IMMEDIATE);
     } else {
         napi_send_event(env_, task, napi_eprio_immediate);
+    }
+}
+
+void MainThreadScheduler::RemoveMainThreadTaskByName(const std::string taskName)
+{
+    if (handler_ && !handler_->GetEventRunner()->IsCurrentRunnerThread()) {
+        handler_->RemoveTask("wms:" + taskName);
     }
 }
 } // namespace OHOS::Rosen

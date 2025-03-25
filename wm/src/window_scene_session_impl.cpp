@@ -21,6 +21,7 @@
 #include <parameters.h>
 #include <transaction/rs_transaction.h>
 #include <hitrace_meter.h>
+#include <hisysevent.h>
 
 #include <application_context.h>
 #include "color_parser.h"
@@ -130,7 +131,6 @@ constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_WIDTH = 40;
 constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_HEIGHT = 40;
 constexpr int32_t API_VERSION_18 = 18;
 constexpr uint32_t LIFECYCLE_ISOLATE_VERSION = 18;
-const uint32_t API_VERSION_MOD = 1000;
 constexpr uint32_t SNAPSHOT_TIMEOUT = 2000; // MS
 }
 std::mutex WindowSceneSessionImpl::keyboardPanelInfoChangeListenerMutex_;
@@ -476,6 +476,52 @@ WMError WindowSceneSessionImpl::RecoverAndReconnectSceneSession()
     return static_cast<WMError>(ret);
 }
 
+std::string WindowSceneSessionImpl::TransferLifeCycleEventToString(LifeCycleEvent type) const
+{
+    std::string event;
+    switch (type) {
+        case LifeCycleEvent::CREATE_EVENT:
+            event = "CREATE";
+            break;
+        case LifeCycleEvent::SHOW_EVENT:
+            event = "SHOW";
+            break;
+        case LifeCycleEvent::HIDE_EVENT:
+            event = "HIDE";
+            break;
+        case LifeCycleEvent::DESTROY_EVENT:
+            event = "DESTROY";
+            break;
+        default:
+            event = "UNDEFINE";
+            break;
+    }
+    return event;
+}
+
+void WindowSceneSessionImpl::RecordLifeCycleExceptionEvent(LifeCycleEvent event, WMError errCode) const
+{
+    if (!(errCode > WMError::WM_ERROR_NEED_REPORT_BASE && errCode < WMError::WM_ERROR_PIP_REPEAT_OPERATION)) {
+        return;
+    }
+    std::ostringstream oss;
+    oss << "life cycle is abnormal: " << "window_name: " << GetWindowName().c_str()
+        << ", id:" << GetWindowId() << ", event: " << TransferLifeCycleEventToString(event)
+        << ", errCode: " << static_cast<int32_t>(errCode) << ";";
+    std::string info = oss.str();
+    TLOGI(WmsLogTag::WMS_LIFE, "window life cycle exception: %{public}s", info.c_str());
+    int32_t ret = HiSysEventWrite(
+        OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
+        "WINDOW_LIFE_CYCLE_EXCEPTION",
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
+        "PID", getpid(),
+        "UID", getuid(),
+        "MSG", info);
+    if (ret != 0) {
+        TLOGE(WmsLogTag::WMS_LIFE, "write HiSysEvent error, ret:%{public}d", ret);
+    }
+}
+
 void WindowSceneSessionImpl::UpdateWindowState()
 {
     {
@@ -567,6 +613,8 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         }
         ret = CreateAndConnectSpecificSession();
     }
+
+    RecordLifeCycleExceptionEvent(LifeCycleEvent::CREATE_EVENT, ret);
     if (ret == WMError::WM_OK) {
         MakeSubOrDialogWindowDragableAndMoveble();
         UpdateWindowState();
@@ -947,15 +995,21 @@ void WindowSceneSessionImpl::ConsumePointerEvent(const std::shared_ptr<MMI::Poin
         ConsumePointerEventInner(pointerEvent, pointerItem, false);
         return;
     }
+    std::shared_ptr<MMI::PointerEvent> pointerEventBackup;
+    if (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
+        pointerEventBackup = std::make_shared<MMI::PointerEvent>(*pointerEvent);
+    } else {
+        pointerEventBackup = pointerEvent;
+    }
     if (auto uiContent = GetUIContentSharedPtr()) {
         uiContent->ProcessPointerEvent(pointerEvent,
-            [weakThis = wptr(this), pointerEvent, pointerItem](bool isHitTargetDraggable) mutable {
+            [weakThis = wptr(this), pointerEventBackup, pointerItem](bool isHitTargetDraggable) mutable {
                 auto window = weakThis.promote();
                 if (window == nullptr) {
                     TLOGNE(WmsLogTag::WMS_FOCUS, "window is null");
                     return;
                 }
-                window->ConsumePointerEventInner(pointerEvent, pointerItem, isHitTargetDraggable);
+                window->ConsumePointerEventInner(pointerEventBackup, pointerItem, isHitTargetDraggable);
             });
     }
 }
@@ -1314,6 +1368,7 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool w
     } else {
         ret = WMError::WM_ERROR_INVALID_WINDOW;
     }
+    RecordLifeCycleExceptionEvent(LifeCycleEvent::SHOW_EVENT, ret);
     if (ret == WMError::WM_OK) {
         // update sub window state
         UpdateSubWindowStateAndNotify(GetPersistentId(), WindowState::STATE_SHOWN);
@@ -1420,6 +1475,7 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
         res = WMError::WM_ERROR_INVALID_WINDOW;
     }
 
+    RecordLifeCycleExceptionEvent(LifeCycleEvent::HIDE_EVENT, res);
     if (res == WMError::WM_OK) {
         // update sub window state if this is main window
         UpdateSubWindowState(type);
@@ -1617,6 +1673,7 @@ WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearLis
     SingletonContainer::Get<WindowAdapter>().UnregisterSessionRecoverCallbackFunc(property_->GetPersistentId());
 
     auto ret = DestroyInner(needNotifyServer);
+    RecordLifeCycleExceptionEvent(LifeCycleEvent::DESTROY_EVENT, ret);
     if (ret != WMError::WM_OK && ret != WMError::WM_ERROR_NULLPTR) { // nullptr means no session in server
         WLOGFW("Destroy window failed, id: %{public}d", GetPersistentId());
         return ret;
@@ -2460,14 +2517,6 @@ void WindowSceneSessionImpl::HookDecorButtonStyleInCompatibleMode(uint32_t color
     TLOGI(WmsLogTag::WMS_DECOR, "contentColor:%{public}d luminance:%{public}f colorMode:%{public}d",
         color, luminance, style.colorMode);
     SetDecorButtonStyle(style);
-}
-
-void WindowSceneSessionImpl::UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool systemBarEnableAnimation,
-    SystemBarProperty& property)
-{
-    property.enable_ = systemBarEnable;
-    property.enableAnimation_ = systemBarEnableAnimation;
-    property.settingFlag_ |= SystemBarSettingFlag::ENABLE_SETTING;
 }
 
 WMError WindowSceneSessionImpl::SetSpecificBarProperty(WindowType type, const SystemBarProperty& property)
@@ -4929,6 +4978,25 @@ WMError WindowSceneSessionImpl::SetWindowMask(const std::vector<std::vector<uint
     return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_MASK);
 }
 
+WMError WindowSceneSessionImpl::SetFollowParentMultiScreenPolicy(bool enabled)
+{
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (!IsPcOrPadFreeMultiWindowMode()) {
+        TLOGE(WmsLogTag::WMS_SUB, "device not support");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (!WindowHelper::IsSubWindow(GetType())) {
+        TLOGE(WmsLogTag::WMS_SUB, "called by invalid window type, type:%{public}d", GetType());
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
+    hostSession->NotifyFollowParentMultiScreenPolicy(enabled);
+    return WMError::WM_OK;
+}
+
 void WindowSceneSessionImpl::UpdateDensity()
 {
     UpdateDensityInner(nullptr);
@@ -5542,6 +5610,10 @@ WMError WindowSceneSessionImpl::SetFollowParentWindowLayoutEnabled(bool isFollow
         TLOGI(WmsLogTag::WMS_SUB, "not support more than 1 level window");
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
+    if (!GetHostSession()) {
+        TLOGI(WmsLogTag::WMS_SUB, "session is nullptr");
+        return WMError::WM_ERROR_INVALID_SESSION;
+    }
     WSError ret = GetHostSession()->SetFollowParentWindowLayoutEnabled(isFollow);
     return ret != WSError::WS_OK ? WMError::WM_ERROR_SYSTEM_ABNORMALLY : WMError::WM_OK;
 }
@@ -5599,15 +5671,6 @@ WMError WindowSceneSessionImpl::GetWindowDensityInfo(WindowDensityInfo& densityI
     }
     densityInfo.customDensity = customDensity;
     return WMError::WM_OK;
-}
-
-uint32_t WindowSceneSessionImpl::GetApiCompatibleVersion() const
-{
-    uint32_t version = 0;
-    if ((context_ != nullptr) && (context_->GetApplicationInfo() != nullptr)) {
-        version = context_->GetApplicationInfo()->apiCompatibleVersion % API_VERSION_MOD;
-    }
-    return version;
 }
 
 bool WindowSceneSessionImpl::IsFullScreenEnable() const
