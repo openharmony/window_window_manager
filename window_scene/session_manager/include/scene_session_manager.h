@@ -32,6 +32,7 @@
 #include "scb_session_handler.h"
 #include "session/host/include/root_scene_session.h"
 #include "session/host/include/keyboard_session.h"
+#include "session_manager/include/ffrt_queue_helper.h"
 #include "session_manager/include/zidl/scene_session_manager_stub.h"
 #include "wm_single_instance.h"
 #include "window_scene_config.h"
@@ -545,6 +546,8 @@ private:
      */
     bool isUserAuthPassed_ {false};
     sptr<SceneSession> GetSceneSessionBySessionInfo(const SessionInfo& sessionInfo);
+    int32_t StartUIAbilityBySCBTimeoutCheck(const sptr<AAFwk::SessionInfo>& abilitySessionInfo,
+        const uint32_t& windowStateChangeReason, bool& isColdStart);
 
     std::vector<std::pair<int32_t, sptr<SceneSession>>> GetSceneSessionVector(CmpFunc cmp);
     void TraverseSessionTree(TraverseFunc func, bool isFromTopToBottom);
@@ -960,6 +963,7 @@ private:
      * Window Lifecycle
      */
     NotifyAppUseControlListFunc notifyAppUseControlListFunc_;
+    std::shared_ptr<FfrtQueueHelper> ffrtQueueHelper_ = nullptr;
 };
 } // namespace OHOS::Rosen
 
