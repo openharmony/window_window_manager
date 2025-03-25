@@ -137,8 +137,13 @@ public:
     WMError HideNonSecureWindows(bool shouldHide) override;
     void UpdateDensity() override;
     WSError UpdateOrientation() override;
+    WMError GetTargetOrientationConfigInfo(Orientation targetOrientation,
+        const std::map<Rosen::WindowType, Rosen::SystemBarProperty>& properties, Ace::ViewportConfig& config,
+        std::map<AvoidAreaType, AvoidArea>& avoidAreas) override;
+    WSError NotifyTargetRotationInfo(OrientationInfo& info) override;
     WSError UpdateDisplayId(uint64_t displayId) override;
     WMError AdjustKeyboardLayout(const KeyboardLayoutParams params) override;
+    WMError CheckWindowRect(uint32_t& width, uint32_t& height) override;
 
     /*
      * Sub Window
@@ -150,6 +155,7 @@ public:
      * PC Window
      */
     WMError SetWindowMask(const std::vector<std::vector<uint32_t>>& windowMask) override;
+    WMError SetFollowParentMultiScreenPolicy(bool enabled) override;
 
     /*
      * PC Window Layout
@@ -229,7 +235,6 @@ public:
     float GetCustomDensity() const override;
     WMError SetCustomDensity(float density) override;
     WMError GetWindowDensityInfo(WindowDensityInfo& densityInfo) override;
-    uint32_t GetApiCompatibleVersion() const override;
 
     /*
      * Window Decor
@@ -263,8 +268,6 @@ public:
     WMError SetFullScreen(bool status) override;
     WMError UpdateSystemBarProperties(const std::unordered_map<WindowType, SystemBarProperty>& systemBarProperties,
         const std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags) override;
-    void UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool systemBarEnableAnimation,
-        SystemBarProperty& property) override;
 
 protected:
     WMError CreateAndConnectSpecificSession();
@@ -297,7 +300,6 @@ private:
     WMError SyncDestroyAndDisconnectSpecificSession(int32_t persistentId);
     bool IsValidSystemWindowType(const WindowType& type);
     WMError CheckParmAndPermission();
-    static uint32_t maxFloatingWindowSize_;
     void TransformSurfaceNode(const Transform& trans);
     void AdjustWindowAnimationFlag(bool withAnimation = false);
     WMError UpdateAnimationFlagProperty(bool withAnimation);
@@ -432,10 +434,18 @@ private:
     WSError NotifyWindowAttachStateChange(bool isAttach) override;
 
     /*
+     * Window Rotation
+     */
+    Ace::ViewportConfig FillTargetOrientationConfig(
+        const OrientationInfo& info, const sptr<DisplayInfo>& displayInfo, uint64_t displayId);
+
+    /*
      * Window Lifecycle
      */
     bool isColdStart_ = true;
     void NotifyFreeMultiWindowModeResume();
+    std::string TransferLifeCycleEventToString(LifeCycleEvent type) const;
+    void RecordLifeCycleExceptionEvent(LifeCycleEvent event, WMError erCode) const;
 };
 } // namespace Rosen
 } // namespace OHOS

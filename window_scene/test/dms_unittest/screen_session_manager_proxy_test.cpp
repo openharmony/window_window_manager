@@ -28,6 +28,7 @@
 #include "display_manager_agent_default.h"
 #include "scene_board_judgement.h"
 #include "screen_session_manager/include/screen_session_manager.h"
+#include "fold_screen_state_internel.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -128,6 +129,23 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualScreenBlackList, Function | Sm
     };
     func();
     ASSERT_EQ(resultValue, 1);
+}
+
+/**
+ * @tc.name: SetVirtualDisplayMuteFlag
+ * @tc.desc: SetVirtualDisplayMuteFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualDisplayMuteFlag, Function | SmallTest | Level1)
+{
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    ScreenId id = 1001;
+    bool muteFlag = false;
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+    screenSessionManagerProxy->SetVirtualDisplayMuteFlag(id, muteFlag);
+    auto screenSession = ScreenSessionManager::GetInstance().GetScreenSession(2000);
+    EXPECT_EQ(screenSession, nullptr);
 }
 
 /**
@@ -1691,7 +1709,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetFoldDisplayMode, Function | SmallTest
 
     const FoldDisplayMode displayMode {0};
     screenSessionManagerProxy->SetFoldDisplayMode(displayMode);
-    if (screenSessionManagerProxy->IsFoldable()) {
+    if (screenSessionManagerProxy->IsFoldable() && !FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
         EXPECT_NE(ScreenSessionManager::GetInstance().foldScreenController_, nullptr);
     } else {
         EXPECT_EQ(ScreenSessionManager::GetInstance().foldScreenController_, nullptr);
@@ -1733,7 +1751,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetFoldStatusLocked, Function | SmallTes
 
     bool locked = true;
     screenSessionManagerProxy->SetFoldStatusLocked(locked);
-    if (screenSessionManagerProxy->IsFoldable()) {
+    if (screenSessionManagerProxy->IsFoldable() && !FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
         EXPECT_NE(ScreenSessionManager::GetInstance().foldScreenController_, nullptr);
     } else {
         EXPECT_EQ(ScreenSessionManager::GetInstance().foldScreenController_, nullptr);
@@ -2226,6 +2244,31 @@ HWTEST_F(ScreenSessionManagerProxyTest, UpdateDisplayHookInfo, Function | SmallT
     };
     func();
     EXPECT_EQ(resultValue, 1);
+}
+
+/**
+ * @tc.name: GetDisplayHookInfo
+ * @tc.desc: GetDisplayHookInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayHookInfo, Function | SmallTest | Level1)
+{
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
+    int32_t uid = 0;
+    DMHookInfo hookInfo;
+    hookInfo.height_ = 1344;
+    hookInfo.width_ = 2772;
+    std::function<void()> func = [&]()
+    {
+        screenSessionManagerProxy->GetDisplayHookInfo(uid, hookInfo);
+    };
+    func();
+
+    EXPECT_EQ(hookInfo.height_, 0);
+    EXPECT_EQ(hookInfo.width_, 0);
 }
 
 /**

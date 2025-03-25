@@ -123,7 +123,8 @@ bool ScreenSessionManagerClient::CheckIfNeedConnectScreen(SessionOption option)
     }
     if (screenSessionManager_->GetScreenProperty(option.screenId_).GetScreenType() == ScreenType::VIRTUAL) {
         if (option.name_ == "HiCar" || option.name_ == "SuperLauncher" || option.name_ == "CastEngine" ||
-            option.name_ == "DevEcoViewer" || option.innerName_ == "CustomScbScreen" || option.name_ == "CeliaView") {
+            option.name_ == "DevEcoViewer" || option.innerName_ == "CustomScbScreen" || option.name_ == "CeliaView" ||
+            option.name_ == "PadWithCar") {
             WLOGFI("HiCar or SuperLauncher or CastEngine or DevEcoViewer or CeliaView, need to connect the screen");
             return true;
         } else {
@@ -567,17 +568,18 @@ void ScreenSessionManagerClient::SwitchUserCallback(std::vector<int32_t> oldScbP
         screenSessionMapCopy = screenSessionMap_;
     }
     for (const auto& iter : screenSessionMapCopy) {
-        auto displayNode = screenSessionManager_->GetDisplayNode(iter.first);
-        if (displayNode == nullptr) {
-            WLOGFE("display node is null");
-            continue;
+        {
+            auto displayNode = screenSessionManager_->GetDisplayNode(iter.first);
+            if (displayNode == nullptr) {
+                WLOGFE("display node is null");
+                continue;
+            }
+            displayNode->SetScbNodePid(oldScbPids, currentScbPid);
         }
         auto transactionProxy = RSTransactionProxy::GetInstance();
         if (transactionProxy != nullptr) {
-            displayNode->SetScbNodePid(oldScbPids, currentScbPid);
             transactionProxy->FlushImplicitTransaction();
         } else {
-            displayNode->SetScbNodePid(oldScbPids, currentScbPid);
             WLOGFW("transactionProxy is null");
         }
         ScreenId screenId = iter.first;
@@ -738,7 +740,7 @@ void ScreenSessionManagerClient::UpdateDisplayHookInfo(int32_t uid, bool enable,
     screenSessionManager_->UpdateDisplayHookInfo(uid, enable, hookInfo);
 }
 
-void ScreenSessionManagerClient::GetDisplayHookInfo(int32_t uid, DMHookInfo& hookInfo)
+void ScreenSessionManagerClient::GetDisplayHookInfo(int32_t uid, DMHookInfo& hookInfo) const
 {
     if (!screenSessionManager_) {
         WLOGFE("screenSessionManager_ is null");
@@ -767,7 +769,7 @@ void ScreenSessionManagerClient::UpdateDisplayScale(ScreenId id, float scaleX, f
         TLOGE(WmsLogTag::DMS, "displayNode is null");
         return;
     }
-    TLOGD(WmsLogTag::DMS, "scale [%{public}f, %{public}f] translate [%{public}f, %{public}f]", scaleX, scaleY,
+    TLOGW(WmsLogTag::DMS, "scale [%{public}f, %{public}f] translate [%{public}f, %{public}f]", scaleX, scaleY,
           translateX, translateY);
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
                       "ssmc:UpdateDisplayScale(ScreenId = %" PRIu64

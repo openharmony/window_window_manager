@@ -23,6 +23,7 @@
 #include "screen_scene_config.h"
 #include "screen_session_manager.h"
 #include "scene_board_judgement.h"
+#include "fold_screen_state_internel.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -434,7 +435,7 @@ HWTEST_F(ScreenSceneConfigTest, GetCutoutBoundaryRect, Function | SmallTest | Le
 HWTEST_F(ScreenSceneConfigTest, GetSubCutoutBoundaryRect, Function | SmallTest | Level3)
 {
     auto result = ScreenSceneConfig::GetSubCutoutBoundaryRect();
-    if (ScreenSessionManager::GetInstance().IsFoldable()) {
+    if (ScreenSessionManager::GetInstance().IsFoldable() && !FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
         ASSERT_TRUE(result.size() > 0);
     } else {
         ASSERT_TRUE(result.size() == 0);

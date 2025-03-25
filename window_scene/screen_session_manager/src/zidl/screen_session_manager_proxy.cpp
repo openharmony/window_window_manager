@@ -3497,6 +3497,36 @@ void ScreenSessionManagerProxy::SetVirtualScreenBlackList(ScreenId screenId, std
     }
 }
 
+void ScreenSessionManagerProxy::SetVirtualDisplayMuteFlag(ScreenId screenId, bool muteFlag)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("Remote is nullptr");
+        return;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteUint64(static_cast<uint64_t>(screenId))) {
+        WLOGFE("Write screenId failed");
+        return;
+    }
+    if (!data.WriteBool(muteFlag)) {
+        WLOGFE("Write muteFlag failed");
+        return;
+    }
+    
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_DISPLAY_MUTE_FLAG),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return;
+    }
+}
+
 void ScreenSessionManagerProxy::DisablePowerOffRenderControl(ScreenId screenId)
 {
     sptr<IRemoteObject> remote = Remote();
@@ -3648,11 +3678,11 @@ void ScreenSessionManagerProxy::GetDisplayHookInfo(int32_t uid, DMHookInfo& hook
         TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return;
     }
-    hookInfo.width_ = reply.ReadUint32();
-    hookInfo.height_ = reply.ReadUint32();
-    hookInfo.density_ = reply.ReadFloat();
-    hookInfo.rotation_ = reply.ReadUint32();
-    hookInfo.enableHookRotation_ = reply.ReadBool();
+    if (!reply.WriteUint32(hookInfo.width_) || !reply.WriteUint32(hookInfo.height_) ||
+        !reply.WriteFloat(hookInfo.density_) || !reply.WriteUint32(hookInfo.rotation_)||
+        !reply.WriteBool(hookInfo.enableHookRotation_)) {
+        TLOGE(WmsLogTag::DMS, "reply write hookInfo failed!");
+    }
 }
 
 DMError ScreenSessionManagerProxy::SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid,

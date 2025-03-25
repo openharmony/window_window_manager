@@ -156,7 +156,7 @@ public:
      * @param scale Indicates the size scale.
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
-    virtual WSError NotifyPipWindowSizeChange(uint32_t width, uint32_t height, double scale) = 0;
+    virtual WSError NotifyPipWindowSizeChange(double width, double height, double scale) = 0;
 
     /**
      * @brief Set the media control event to client.
@@ -253,6 +253,12 @@ public:
     virtual void NotifyWindowCrossAxisChange(CrossAxisState state) = 0;
     virtual WSError NotifyWindowAttachStateChange(bool isAttach) { return WSError::WS_DO_NOTHING; }
     virtual void NotifyKeyboardAnimationCompleted(const KeyboardPanelInfo& keyboardPanelInfo) {}
+    virtual WSError NotifyTargetRotationInfo(OrientationInfo& info) { return WSError::WS_DO_NOTHING; }
+    virtual RotationChangeResult NotifyRotationChange(const RotationChangeInfo& rotationChangeInfo)
+    {
+        return { RectType::RELATIVE_TO_SCREEN, { 0, 0, 0, 0, } };
+    }
+    virtual WSError SetCurrentRotation(int32_t currentRotation) = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_INTERFACE_H

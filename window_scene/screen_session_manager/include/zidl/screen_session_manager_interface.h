@@ -40,7 +40,7 @@ public:
     virtual DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow) override { return DMError::DM_OK; }
     virtual bool ConvertScreenIdToRsScreenId(ScreenId screenId, ScreenId& rsScreenId) override { return true; }
     virtual void UpdateDisplayHookInfo(int32_t uid, bool enable, const DMHookInfo& hookInfo) override {};
-    virtual void GetDisplayHookInfo(int32_t uid, DMHookInfo& hookInfo) override {};
+    void GetDisplayHookInfo(int32_t uid, DMHookInfo& hookInfo) override {};
 
     virtual ScreenId CreateVirtualScreen(VirtualScreenOption option,
         const sptr<IRemoteObject>& displayManagerAgent) override { return -1; }
@@ -219,6 +219,7 @@ public:
     }
     virtual void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList,
         std::vector<uint64_t> surfaceIdList = {}) override {}
+    virtual void SetVirtualDisplayMuteFlag(ScreenId screenId, bool muteFlag) override {}
     virtual void DisablePowerOffRenderControl(ScreenId screenId) override {}
 
     virtual std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution() override
@@ -244,7 +245,7 @@ public:
     }
     virtual ScreenCombination GetScreenCombination(ScreenId screenId) { return ScreenCombination::SCREEN_ALONE; }
     virtual bool GetIsRealScreen(ScreenId screenId) { return false; }
-    virtual DMError SetSystemKeyboardStatus(bool isOn = false) override
+    virtual DMError SetSystemKeyboardStatus(bool isTpKeyboardOn = false) override
     {
         return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
     }

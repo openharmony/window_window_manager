@@ -103,6 +103,8 @@ class RSUIExtensionData;
 class AccessibilityWindowInfo;
 class UnreliableWindowInfo;
 class ScbDumpSubscriber;
+class StartingWindowRdbManager;
+struct StartingWindowRdbItemKey;
 
 using NotifyCreateSystemSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
 using NotifyCreateKeyboardSessionFunc = std::function<void(const sptr<SceneSession>& keyboardSession,
@@ -142,6 +144,7 @@ using NotifyWatchFocusActiveChangeFunc = std::function<void(bool isActive)>;
 using NotifyRootSceneOccupiedAreaChangeFunc = std::function<void(const sptr<OccupiedAreaChangeInfo>& info)>;
 using GetRSNodeByStringIDFunc = std::function<std::shared_ptr<Rosen::RSNode>(const std::string& id)>;
 using SetTopWindowBoundaryByIDFunc = std::function<void(const std::string& id)>;
+using SetForegroundWindowNumFunc = std::function<void(int32_t windowNum)>;
 
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
@@ -245,10 +248,11 @@ public:
      * Window Rotate Animation
      */
     void UpdateRotateAnimationConfig(const RotateAnimationConfig& config);
+    void CloseSyncTransaction(std::function<void()> func);
+    std::vector<sptr<SceneSession>> GetActiveSceneSessionCopy();
 
     WSError ProcessBackEvent();
     WSError BindDialogSessionTarget(uint64_t persistentId, sptr<IRemoteObject> targetToken) override;
-    void GetStartupPage(const SessionInfo& sessionInfo, std::string& path, uint32_t& bgColor);
     WMError SetGestureNavigationEnabled(bool enable) override;
     WMError RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
@@ -344,7 +348,8 @@ public:
     WMError IsPcWindow(bool& isPcWindow) override;
     WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode) override;
     WMError IsWindowRectAutoSave(const std::string& key, bool& enabled, int persistentId) override;
-    void SetIsWindowRectAutoSave(const std::string& key, bool enabled);
+    void SetIsWindowRectAutoSave(const std::string& key, bool enabled,
+        const std::string& abilityKey, bool isSaveBySpecifiedFlag);
     int32_t ChangeUIAbilityVisibilityBySCB(const sptr<SceneSession>& sceneSession, bool visibility,
         bool isFromClient = true);
     WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId) override;
@@ -395,7 +400,7 @@ public:
     void AddWindowDragHotArea(DisplayId displayId, uint32_t type, WSRect& area);
     void PreloadInLakeApp(const std::string& bundleName);
     WSError UpdateMaximizeMode(int32_t persistentId, bool isMaximize);
-    WSError UpdateSessionDisplayId(int32_t persistentId, uint64_t screenId);
+    WSError UpdateSessionDisplayId(int32_t persistentId, uint64_t screenId, WSRect winRect = { 0, 0, 0, 0 });
     WSError NotifyStackEmpty(int32_t persistentId);
     void NotifySessionUpdate(const SessionInfo& sessionInfo, ActionType type,
         ScreenId fromScreenId = SCREEN_ID_INVALID);
@@ -488,6 +493,8 @@ public:
      */
     WSError SwitchFreeMultiWindow(bool enable);
     WSError GetFreeMultiWindowEnableState(bool& enable) override;
+    WMError SetForegroundWindowNum(int32_t windowNum) override;
+    void RegisterSetForegroundWindowNumCallback(SetForegroundWindowNumFunc&& func);
 
     const SystemSessionConfig& GetSystemSessionConfig() const;
     WSError NotifyEnterRecentTask(bool enterRecent);
@@ -529,7 +536,6 @@ public:
     void DealwithDrawingContentChange(const std::vector<std::pair<uint64_t, bool>>& drawingContentChangeInfo);
     WMError ListWindowInfo(const WindowInfoOption& windowInfoOption, std::vector<sptr<WindowInfo>>& infos) override;
     WMError GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos) override;
-    WMError GetWindowUIType(WindowUIType& windowUIType) override;
 
     /*
      * Multi Window
@@ -658,6 +664,9 @@ public:
     void VisitSnapshotFromCache(int32_t persistentId);
     void PutSnapshotToCache(int32_t persistentId);
     void RemoveSnapshotFromCache(int32_t persistentId);
+    void GetStartupPage(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo);
+    WSError RegisterSaveSnapshotFunc(const sptr<SceneSession>& sceneSession);
+    WSError RegisterRemoveSnapshotFunc(const sptr<SceneSession>& sceneSession);
 
 protected:
     SceneSessionManager();
@@ -689,6 +698,7 @@ private:
     void ConfigWindowSizeLimits();
     void ConfigMainWindowSizeLimits(const WindowSceneConfig::ConfigItem& mainWindowSizeConifg);
     void ConfigSubWindowSizeLimits(const WindowSceneConfig::ConfigItem& subWindowSizeConifg);
+    void ConfigDialogWindowSizeLimits(const WindowSceneConfig::ConfigItem& dialogWindowSizeConifg);
     void ConfigSnapshotScale();
     void ConfigFreeMultiWindow();
     void LoadFreeMultiWindowConfig(bool enable);
@@ -835,10 +845,6 @@ private:
 
     sptr<AppExecFwk::IBundleMgr> GetBundleManager();
     std::shared_ptr<Global::Resource::ResourceManager> GetResourceManager(const AppExecFwk::AbilityInfo& abilityInfo);
-    bool GetStartupPageFromResource(const AppExecFwk::AbilityInfo& abilityInfo, std::string& path, uint32_t& bgColor);
-    bool GetStartingWindowInfoFromCache(const SessionInfo& sessionInfo, std::string& path, uint32_t& bgColor);
-    void CacheStartingWindowInfo(
-        const AppExecFwk::AbilityInfo& abilityInfo, const std::string& path, const uint32_t& bgColor);
 
     bool CheckIsRemote(const std::string& deviceId);
     bool GetLocalDeviceId(std::string& localDeviceId);
@@ -896,6 +902,7 @@ private:
     bool IsGetWindowLayoutInfoNeeded(const sptr<SceneSession>& session) const;
     int32_t GetFoldLowerScreenPosY() const;
     DisplayId UpdateSpecificSessionClientDisplayId(const sptr<WindowSessionProperty>& property);
+    void SetSkipEventOnCastPlusInner(int32_t windowId, bool isSkip);
     void UpdateSessionDisplayIdBySessionInfo(sptr<SceneSession> sceneSession, const SessionInfo& sessionInfo);
     bool IsNeedUpdateBrightness(float brightness);
 
@@ -1019,6 +1026,7 @@ private:
     DumpUITreeFunc dumpUITreeFunc_;
     ProcessVirtualPixelRatioChangeFunc processVirtualPixelRatioChangeFunc_ = nullptr;
     ProcessCloseTargetFloatWindowFunc closeTargetFloatWindowFunc_;
+    SetForegroundWindowNumFunc setForegroundWindowNumFunc_;
 
     AppWindowSceneConfig appWindowSceneConfig_;
 
@@ -1354,8 +1362,10 @@ private:
     /*
      * PC Window
      */
-    std::mutex isWindowRectAutoSaveMapMutex_;
+    //Whether to save window rect
     std::unordered_map<std::string, bool> isWindowRectAutoSaveMap_;
+    //Whether to save rect according to specifiedFlag
+    std::unordered_map<std::string, bool> isSaveBySpecifiedFlagMap_;
 
     /*
      * Window Lifecycle
@@ -1368,9 +1378,23 @@ private:
     /*
      * Window Pattern
      */
+    void InitStartingWindowRdb(const std::string& rdbPath);
+    bool GetStartingWindowInfoFromCache(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo);
+    bool GetStartingWindowInfoFromRdb(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo);
+    bool GetPathInfoFromResource(const std::shared_ptr<Global::Resource::ResourceManager> resourceMgr,
+        bool hapPathEmpty, uint32_t resourceId, std::string& path);
+    bool GetStartupPageFromResource(const AppExecFwk::AbilityInfo& abilityInfo, StartingWindowInfo& startingWindowInfo);
+    void GetBundleStartingWindowInfos(const AppExecFwk::BundleInfo& bundleInfo,
+        std::vector<std::pair<StartingWindowRdbItemKey, StartingWindowInfo>>& outValues);
+    void CacheStartingWindowInfo(const std::string& bundleName, const std::string& moduleName,
+        const std::string& abilityName, const StartingWindowInfo& startingWindowInfo);
+    std::atomic<int32_t> darkMode_ { false };
+    std::unique_ptr<StartingWindowRdbManager> startingWindowRdbMgr_;
     std::unique_ptr<LruCache> snapshotLruCache_;
     std::size_t snapshotCapacity_ = 0;
     bool GetIconFromDesk(const SessionInfo& sessionInfo, std::string& startupPagePath) const;
+    bool needCloseSync_ = false;
+    std::function<void()> closeSyncFunc_ = nullptr;
 };
 } // namespace OHOS::Rosen
 

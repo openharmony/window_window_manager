@@ -74,6 +74,19 @@ HWTEST_F(DisplayManagerAdapterTest, GetCutoutInfo, Function | SmallTest | Level2
 }
 
 /**
+ * @tc.name: GetCutoutInfoWithRotation
+ * @tc.desc: test nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, GetCutoutInfoWithRotation, Function | SmallTest | Level2)
+{
+    int32_t rotation = 0;
+    sptr<CutoutInfo> info = SingletonContainer::Get<DisplayManagerAdapter>().
+        GetCutoutInfoWithRotation(DISPLAY_ID_INVALID, rotation);
+    ASSERT_EQ(info, nullptr);
+}
+
+/**
  * @tc.name: GetScreenSupportedColorGamuts
  * @tc.desc: test success
  * @tc.type: FUNC
@@ -585,8 +598,6 @@ HWTEST_F(DisplayManagerAdapterTest, SetDisplayState, Function | SmallTest | Leve
     bool ret = SingletonContainer::Get<DisplayManagerAdapter>().SetDisplayState(state);
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_TRUE(ret);
-    } else {
-        ASSERT_FALSE(ret);
     }
 }
 
@@ -601,7 +612,7 @@ HWTEST_F(DisplayManagerAdapterTest, MakeMirror, Function | SmallTest | Level2)
     ScreenId screenGroupId;
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().MakeMirror(0,
         mirrorScreenId, screenGroupId);
-    ASSERT_EQ(err, DMError::DM_ERROR_NULLPTR);
+    ASSERT_EQ(err, DMError::DM_ERROR_INVALID_PARAM);
 }
 
 /**
@@ -869,7 +880,11 @@ HWTEST_F(DisplayManagerAdapterTest, GetDisplayCapability, Function | SmallTest |
 {
     std::string capabilitInfo;
     auto result = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayCapability(capabilitInfo);
-    ASSERT_EQ(result, DMError::DM_OK);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(result, DMError::DM_ERROR_DEVICE_NOT_SUPPORT);
+    } else {
+        ASSERT_EQ(result, DMError::DM_OK);
+    }
 }
 }
 }

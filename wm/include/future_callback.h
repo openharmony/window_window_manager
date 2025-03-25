@@ -30,10 +30,16 @@ public:
     Rect GetMoveToAsyncResult(long timeOut); // unit: ms
     void ResetResizeLock();
     void ResetMoveToLock();
-    
+
+    // oriention
+    OrientationInfo GetTargetOrientationResult(long timeOut); // unit: ms
+    void ResetGetTargetRotationLock();
+    WSError OnUpdateTargetOrientationInfo(OrientationInfo& info);
+
 private:
     RunnableFuture<Rect> resizeFuture_{};
     RunnableFuture<Rect> moveToFuture_{};
+    RunnableFuture<OrientationInfo> getTargetRotationFuture_{};
 };
 } // namespace Rosen
 } // namespace OHOS

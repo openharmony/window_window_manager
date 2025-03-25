@@ -1041,24 +1041,45 @@ HWTEST_F(ScreenSessionTest, GetScreenCombination, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: Resize
- * @tc.desc: normal function
+ * @tc.name: Resize001
+ * @tc.desc: Resize001 test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, Resize, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, Resize001, Function | SmallTest | Level2)
 {
-    GTEST_LOG_(INFO) << "Resize start";
+    GTEST_LOG_(INFO) << "Resize001 start";
     ScreenSessionConfig config = {
         .screenId = 100,
         .rsId = 101,
         .name = "OpenHarmony",
     };
     sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
-    EXPECT_NE(nullptr, screenSession);
+    ASSERT_NE(nullptr, screenSession);
     uint32_t width = 1000;
     uint32_t height = 1000;
     screenSession->Resize(width, height);
-    GTEST_LOG_(INFO) << "Resize end";
+    GTEST_LOG_(INFO) << "Resize001 end";
+}
+
+/**
+ * @tc.name: Resize002
+ * @tc.desc: Resize002 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, Resize002, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "Resize002 start";
+    ScreenSessionConfig config = {
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    ASSERT_NE(nullptr, screenSession);
+    uint32_t width = 1000;
+    uint32_t height = 1000;
+    screenSession->Resize(width, height, false);
+    GTEST_LOG_(INFO) << "Resize002 end";
 }
 
 /**
@@ -1256,6 +1277,25 @@ HWTEST_F(ScreenSessionTest, ConvertToDisplayInfo, Function | SmallTest | Level2)
     EXPECT_NE(info, nullptr);
     EXPECT_NE(nullptr, session->ConvertToScreenInfo());
     GTEST_LOG_(INFO) << "ScreenSessionTest: ConvertToDisplayInfo end";
+}
+
+/**
+ * @tc.name: SetMirrorScreenRegion
+ * @tc.desc: SetMirrorScreenRegion test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetMirrorScreenRegion, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetMirrorScreenRegion start";
+    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    ASSERT_NE(session, nullptr);
+    DMRect area = {2, 2, 2, 2};
+    ScreenId screenId = 0;
+    session->SetMirrorScreenRegion(screenId, area);
+    std::pair<ScreenId, DMRect> mode1 = session->GetMirrorScreenRegion();
+    EXPECT_EQ(screenId, mode1.first);
+    EXPECT_EQ(area, mode1.second);
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetMirrorScreenRegion end";
 }
 
 /**
@@ -2140,7 +2180,7 @@ HWTEST_F(ScreenSessionTest, CalcRotation01, Function | SmallTest | Level2)
 
     orientation = Orientation::VERTICAL;
     res = session->CalcRotation(orientation, foldDisplayMode);
-    if (ScreenSessionManager::GetInstance().IsFoldable()) {
+    if (ScreenSessionManager::GetInstance().IsFoldable() && !FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
         EXPECT_EQ(Rotation::ROTATION_0, res);
     } else {
         EXPECT_EQ(Rotation::ROTATION_90, res);
@@ -2148,7 +2188,7 @@ HWTEST_F(ScreenSessionTest, CalcRotation01, Function | SmallTest | Level2)
     
     orientation = Orientation::HORIZONTAL;
     res = session->CalcRotation(orientation, foldDisplayMode);
-    if (ScreenSessionManager::GetInstance().IsFoldable()) {
+    if (ScreenSessionManager::GetInstance().IsFoldable() && !FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
         EXPECT_EQ(Rotation::ROTATION_90, res);
     } else {
         EXPECT_EQ(Rotation::ROTATION_0, res);
@@ -2156,7 +2196,7 @@ HWTEST_F(ScreenSessionTest, CalcRotation01, Function | SmallTest | Level2)
 
     orientation = Orientation::REVERSE_VERTICAL;
     res = session->CalcRotation(orientation, foldDisplayMode);
-    if (ScreenSessionManager::GetInstance().IsFoldable()) {
+    if (ScreenSessionManager::GetInstance().IsFoldable() && !FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
         EXPECT_EQ(Rotation::ROTATION_180, res);
     } else {
         EXPECT_EQ(Rotation::ROTATION_270, res);
@@ -2164,7 +2204,7 @@ HWTEST_F(ScreenSessionTest, CalcRotation01, Function | SmallTest | Level2)
 
     orientation = Orientation::REVERSE_HORIZONTAL;
     res = session->CalcRotation(orientation, foldDisplayMode);
-    if (ScreenSessionManager::GetInstance().IsFoldable()) {
+    if (ScreenSessionManager::GetInstance().IsFoldable() && !FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
         EXPECT_EQ(Rotation::ROTATION_270, res);
     } else {
         EXPECT_EQ(Rotation::ROTATION_180, res);
@@ -2791,6 +2831,44 @@ HWTEST_F(ScreenSessionTest, GetPointerActiveHeight, Function | SmallTest | Level
     session->SetPointerActiveHeight(pointerActiveHeight);
     ASSERT_EQ(pointerActiveHeight, session->GetPointerActiveHeight());
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetPointerActiveHeight end";
+}
+
+/**
+ * @tc.name: SetShareProtect
+ * @tc.desc: SetShareProtect test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetShareProtect, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetShareProtect start";
+    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    session->SetShareProtect(false);
+    ASSERT_EQ(session->GetShareProtect(), false);
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetShareProtect end";
+}
+
+/**
+ * @tc.name: UpdateExpandAvailableArea
+ * @tc.desc: UpdateExpandAvailableArea test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, UpdateExpandAvailableArea, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: UpdateExpandAvailableArea start";
+    ScreenSessionConfig config = {
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    ASSERT_NE(screenSession, nullptr);
+    DMRect area = screenSession->GetExpandAvailableArea();
+    auto res = screenSession->UpdateExpandAvailableArea(area);
+    ASSERT_EQ(res, false);
+    area = {200, 200, 200, 200};
+    res = screenSession->UpdateExpandAvailableArea(area);
+    ASSERT_EQ(res, true);
+    GTEST_LOG_(INFO) << "ScreenSessionTest: UpdateExpandAvailableArea end";
 }
 } // namespace
 } // namespace Rosen

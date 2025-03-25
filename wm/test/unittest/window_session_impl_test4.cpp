@@ -29,6 +29,7 @@
 #include "window_accessibility_controller.h"
 #include "window_helper.h"
 #include "window_session_impl.h"
+#include "window_scene_session_impl.h"
 #include "wm_common.h"
 
 using namespace testing;
@@ -2695,16 +2696,116 @@ HWTEST_F(WindowSessionImplTest4, SetSubWindowZLevelToProperty, Function | SmallT
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    option->SetSubWindowZLevel(1);
+    option->SetSubWindowZLevel(0);
     sptr<WindowSessionImpl> mainWindowSessionImpl = sptr<WindowSessionImpl>::MakeSptr(option);
+    option->SetSubWindowZLevel(1);
+    mainWindowSessionImpl->windowOption_ = option;
     mainWindowSessionImpl->SetSubWindowZLevelToProperty();
     int32_t zLevel = mainWindowSessionImpl->property_->zLevel_;
     EXPECT_NE(1, zLevel);
 
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     sptr<WindowSessionImpl> subWindowSessionImpl = sptr<WindowSessionImpl>::MakeSptr(option);
+    option->SetSubWindowZLevel(2);
+    subWindowSessionImpl->windowOption_ = option;
     subWindowSessionImpl->SetSubWindowZLevelToProperty();
     zLevel = subWindowSessionImpl->property_->zLevel_;
-    EXPECT_EQ(1, zLevel);
+    EXPECT_EQ(2, zLevel);
+}
+
+/**
+ * @tc.name: GetSubWindowZLevelByFlags01
+ * @tc.desc: GetSubWindowZLevelByFlags
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, GetSubWindowZLevelByFlags01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sptr<WindowSceneSessionImpl> normalSubWindow = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    int32_t ret = normalSubWindow->GetSubWindowZLevelByFlags(normalSubWindow->GetType(),
+        normalSubWindow->GetWindowFlags(), normalSubWindow->IsTopmost());
+    EXPECT_EQ(ret, NORMAL_SUB_WINDOW_Z_LEVEL);
+
+    option->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_TEXT_MENU));
+    sptr<WindowSceneSessionImpl> textMenuSubWindow = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ret = textMenuSubWindow->GetSubWindowZLevelByFlags(textMenuSubWindow->GetType(),
+        textMenuSubWindow->GetWindowFlags(), textMenuSubWindow->IsTopmost());
+    EXPECT_EQ(ret, TEXT_MENU_SUB_WINDOW_Z_LEVEL);
+
+    option->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_TOAST));
+    sptr<WindowSceneSessionImpl> toastSubWindow = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ret = toastSubWindow->GetSubWindowZLevelByFlags(toastSubWindow->GetType(),
+        toastSubWindow->GetWindowFlags(), toastSubWindow->IsTopmost());
+    EXPECT_EQ(ret, TOAST_SUB_WINDOW_Z_LEVEL);
+
+    option->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_MODAL));
+    sptr<WindowSceneSessionImpl> modalSubWindow = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ret = modalSubWindow->GetSubWindowZLevelByFlags(modalSubWindow->GetType(),
+        modalSubWindow->GetWindowFlags(), modalSubWindow->IsTopmost());
+    EXPECT_EQ(ret, MODALITY_SUB_WINDOW_Z_LEVEL);
+
+    option->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_APPLICATION_MODAL);
+    sptr<WindowSceneSessionImpl> appModalSubWindow = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ret = appModalSubWindow->GetSubWindowZLevelByFlags(appModalSubWindow->GetType(),
+        appModalSubWindow->GetWindowFlags(), appModalSubWindow->IsTopmost());
+    EXPECT_EQ(ret, APPLICATION_MODALITY_SUB_WINDOW_Z_LEVEL);
+}
+
+/**
+ * @tc.name: GetSubWindowZLevelByFlags02
+ * @tc.desc: GetSubWindowZLevelByFlags
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, GetSubWindowZLevelByFlags02, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    option->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_MODAL));
+    option->SetWindowTopmost(true);
+    sptr<WindowSceneSessionImpl> topmostModalSubWindow = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    int32_t ret = topmostModalSubWindow->GetSubWindowZLevelByFlags(topmostModalSubWindow->GetType(),
+        topmostModalSubWindow->GetWindowFlags(), topmostModalSubWindow->IsTopmost());
+    EXPECT_EQ(ret, MODALITY_SUB_WINDOW_Z_LEVEL + TOPMOST_SUB_WINDOW_Z_LEVEL);
+
+    option->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_APPLICATION_MODAL);
+    sptr<WindowSceneSessionImpl> topmostAppModalSubWindow = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ret = topmostAppModalSubWindow->GetSubWindowZLevelByFlags(topmostAppModalSubWindow->GetType(),
+        topmostAppModalSubWindow->GetWindowFlags(), topmostAppModalSubWindow->IsTopmost());
+    EXPECT_EQ(ret, APPLICATION_MODALITY_SUB_WINDOW_Z_LEVEL + TOPMOST_SUB_WINDOW_Z_LEVEL);
+}
+
+/**
+ * @tc.name: GetSubWindowZLevelByFlags03
+ * @tc.desc: GetSubWindowZLevelByFlags
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, GetSubWindowZLevelByFlags03, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    sptr<WindowSceneSessionImpl> dialogWindow = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    int32_t ret = dialogWindow->GetSubWindowZLevelByFlags(dialogWindow->GetType(),
+        dialogWindow->GetWindowFlags(), dialogWindow->IsTopmost());
+    EXPECT_EQ(ret, DIALOG_SUB_WINDOW_Z_LEVEL);
+}
+
+/**
+ * @tc.name: SetCurrentRotation
+ * @tc.desc: SetCurrentRotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, SetCurrentRotation, Function | SmallTest | Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetCurrentRotation");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    auto ret = window->SetCurrentRotation(FULL_CIRCLE_DEGREE + 1);
+    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_PARAM);
+    ret = window->SetCurrentRotation(ZERO_CIRCLE_DEGREE - 1);
+    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_PARAM);
+    ret = window->SetCurrentRotation(ONE_FOURTH_FULL_CIRCLE_DEGREE);
+    EXPECT_EQ(ret, WSError::WS_OK);
 }
 } // namespace
 } // namespace Rosen

@@ -83,8 +83,9 @@ void JsWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason reason,
     TLOGI(WmsLogTag::WMS_LAYOUT, "wh[%{public}u, %{public}u], reason=%{public}u",
         rect.width_, rect.height_, reason);
     // js callback should run in js thread
-    auto jsCallback = [self = weakRef_, rect, env = env_, funcName = __func__] {
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsWindowListener::OnSizeChange");
+    auto jsCallback = [self = weakRef_, rect, reason, env = env_, funcName = __func__] {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsWindowListener::OnSizeChange [%d, %d, %u, %u] reason:%u",
+            rect.posX_, rect.posY_, rect.width_, rect.height_, reason);
         auto thisListener = self.promote();
         if (thisListener == nullptr || env == nullptr) {
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: this listener or env is nullptr", funcName);
@@ -120,33 +121,28 @@ void JsWindowListener::OnSystemBarPropertyChange(DisplayId displayId, const Syst
 {
     WLOGFD("[NAPI]");
     // js callback should run in js thread
-    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
-        [self = weakRef_, displayId, tints, eng = env_] (napi_env env,
-            NapiAsyncTask& task, int32_t status) {
-            auto thisListener = self.promote();
-            if (thisListener == nullptr || eng == nullptr) {
-                WLOGFE("this listener or eng is nullptr");
-                return;
-            }
-            napi_value propertyValue = nullptr;
-            napi_create_object(eng, &propertyValue);
-            if (propertyValue == nullptr) {
-                WLOGFE("Failed to convert prop to jsObject");
-                return;
-            }
-            napi_set_named_property(env, propertyValue, "displayId",
-                CreateJsValue(eng, static_cast<uint32_t>(displayId)));
-            napi_set_named_property(env, propertyValue, "regionTint",
-                CreateJsSystemBarRegionTintArrayObject(eng, tints));
-            napi_value argv[] = {propertyValue};
-            thisListener->CallJsMethod(SYSTEM_BAR_TINT_CHANGE_CB.c_str(), argv, ArraySize(argv));
+    auto jsCallback = [self = weakRef_, displayId, tints, env = env_] {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            WLOGFE("this listener or eng is nullptr");
+            return;
         }
-    );
-
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsWindowListener::OnSystemBarPropertyChange",
-        env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+        napi_value propertyValue = nullptr;
+        napi_create_object(env, &propertyValue);
+        if (propertyValue == nullptr) {
+            WLOGFE("Failed to convert prop to jsObject");
+            return;
+        }
+        napi_set_named_property(env, propertyValue, "displayId",
+            CreateJsValue(env, static_cast<uint32_t>(displayId)));
+        napi_set_named_property(env, propertyValue, "regionTint",
+            CreateJsSystemBarRegionTintArrayObject(env, tints));
+        napi_value argv[] = {propertyValue};
+        thisListener->CallJsMethod(SYSTEM_BAR_TINT_CHANGE_CB.c_str(), argv, ArraySize(argv));
+    };
+    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "Failed to send event");
+    }
 }
 
 void JsWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type)
@@ -362,21 +358,17 @@ void JsWindowListener::OnTouchOutside() const
 void JsWindowListener::OnScreenshot()
 {
     WLOGI("CALLED");
-    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
-        [self = wptr<JsWindowListener>(this)] (napi_env env, NapiAsyncTask& task, int32_t status) {
-            auto thisListener = self.promote();
-            if (thisListener == nullptr) {
-                WLOGFE("this listener is nullptr");
-                return;
-            }
-            thisListener->CallJsMethod(SCREENSHOT_EVENT_CB.c_str(), nullptr, 0);
+    auto jsCallback = [self = wptr<JsWindowListener>(this)] {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr) {
+            WLOGFE("this listener is nullptr");
+            return;
         }
-    );
-
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsWindowListener::OnScreenshot",
-        env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+        thisListener->CallJsMethod(SCREENSHOT_EVENT_CB.c_str(), nullptr, 0);
+    };
+    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "Failed to send event");
+    }
 }
 
 void JsWindowListener::OnDialogTargetTouch() const
@@ -410,42 +402,34 @@ void JsWindowListener::OnDialogDeathRecipient() const
 
 void JsWindowListener::OnGestureNavigationEnabledUpdate(bool enable)
 {
-    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
-        [self = weakRef_, enable, eng = env_] (napi_env env, NapiAsyncTask& task, int32_t status) {
-            auto thisListener = self.promote();
-            if (thisListener == nullptr || eng == nullptr) {
-                WLOGFE("this listener or eng is nullptr");
-                return;
-            }
-            napi_value argv[] = {CreateJsValue(eng, enable)};
-            thisListener->CallJsMethod(GESTURE_NAVIGATION_ENABLED_CHANGE_CB.c_str(), argv, ArraySize(argv));
+    auto jsCallback = [self = weakRef_, enable, eng = env_] {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || eng == nullptr) {
+            WLOGFE("this listener or eng is nullptr");
+            return;
         }
-    );
-
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsWindowListener::OnGestureNavigationEnabledUpdate",
-        env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+        napi_value argv[] = {CreateJsValue(eng, enable)};
+        thisListener->CallJsMethod(GESTURE_NAVIGATION_ENABLED_CHANGE_CB.c_str(), argv, ArraySize(argv));
+    };
+    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "Failed to send event");
+    }
 }
 
 void JsWindowListener::OnWaterMarkFlagUpdate(bool showWaterMark)
 {
-    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
-        [self = weakRef_, showWaterMark, eng = env_] (napi_env env, NapiAsyncTask& task, int32_t status) {
-            auto thisListener = self.promote();
-            if (thisListener == nullptr || eng == nullptr) {
-                WLOGFE("this listener or eng is nullptr");
-                return;
-            }
-            napi_value argv[] = {CreateJsValue(eng, showWaterMark)};
-            thisListener->CallJsMethod(WATER_MARK_FLAG_CHANGE_CB.c_str(), argv, ArraySize(argv));
+    auto jsCallback = [self = weakRef_, showWaterMark, eng = env_] {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || eng == nullptr) {
+            WLOGFE("this listener or eng is nullptr");
+            return;
         }
-    );
-
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsWindowListener::OnWaterMarkFlagUpdate",
-        env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+        napi_value argv[] = {CreateJsValue(eng, showWaterMark)};
+        thisListener->CallJsMethod(WATER_MARK_FLAG_CHANGE_CB.c_str(), argv, ArraySize(argv));
+    };
+    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "Failed to send event");
+    }
 }
 
 void JsWindowListener::SetTimeout(int64_t timeout)
@@ -531,22 +515,18 @@ void JsWindowListener::OnSystemDensityChanged(float density)
 
 void JsWindowListener::OnWindowVisibilityChangedCallback(const bool isVisible)
 {
-    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
-        [self = weakRef_, isVisible, eng = env_] (napi_env env, NapiAsyncTask& task, int32_t status) {
-            auto thisListener = self.promote();
-            if (thisListener == nullptr || eng == nullptr) {
-                WLOGFE("This listener or eng is nullptr");
-                return;
-            }
-            napi_value argv[] = { CreateJsValue(eng, isVisible) };
-            thisListener->CallJsMethod(WINDOW_VISIBILITY_CHANGE_CB.c_str(), argv, ArraySize(argv));
+    auto jsCallback = [self = weakRef_, isVisible, eng = env_] {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || eng == nullptr) {
+            WLOGFE("This listener or eng is nullptr");
+            return;
         }
-    );
-
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsWindowListener::OnWindowVisibilityChangedCallback", env_,
-        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+        napi_value argv[] = { CreateJsValue(eng, isVisible) };
+        thisListener->CallJsMethod(WINDOW_VISIBILITY_CHANGE_CB.c_str(), argv, ArraySize(argv));
+    };
+    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "Failed to send event");
+    }
 }
 
 void JsWindowListener::OnWindowTitleButtonRectChanged(const TitleButtonRect& titleButtonRect)
@@ -776,6 +756,38 @@ void JsWindowListener::OnWindowWillClose(sptr<Window> window)
         return;
     }
     eventHandler_->PostSyncTask(jsCallback, "wms:JsWindowListener::OnWindowWillClose",
+        AppExecFwk::EventQueue::Priority::IMMEDIATE);
+}
+
+void JsWindowListener::OnRotationChange(const RotationChangeInfo& rotationChangeInfo,
+    RotationChangeResult& rotationChangeResult)
+{
+    auto jsCallback = [self = weakRef_, rotationChangeInfo, &rotationChangeResult, env = env_] () {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsWindowListener::OnRotationChange");
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "this listener or env is nullptr");
+            return;
+        }
+        HandleScope handleScope(env);
+        napi_value rotationInfoObj = CreateRotationChangeInfoObject(env, rotationChangeInfo);
+        if (rotationInfoObj == nullptr) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "failed to create js object");
+            return;
+        }
+        napi_value argv[] = { rotationInfoObj };
+        napi_value rotationChangeResultObj = thisListener->CallJsMethod(WINDOW_ROTATION_CHANGE_CB.c_str(), argv,
+            ArraySize(argv));
+        if (rotationChangeResultObj != nullptr) {
+            GetRotationResultFromJs(env, rotationChangeResultObj, rotationChangeResult);
+        }
+    };
+
+    if (!eventHandler_|| eventHandler_->GetEventRunner()->IsCurrentRunnerThread()) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "get main event handler failed or current is alreay main thread!");
+        return jsCallback();
+    }
+    eventHandler_->PostSyncTask(jsCallback, "wms:JsWindowListener::OnRotationChange",
         AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 } // namespace Rosen

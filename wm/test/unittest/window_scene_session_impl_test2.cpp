@@ -799,17 +799,22 @@ HWTEST_F(WindowSceneSessionImplTest2, SetSubWindowZLevel, Function | SmallTest |
     sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    windowSceneSessionImpl->hostSession_ = session;
+    windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
 
-    session->property_->SetPersistentId(INVALID_SESSION_ID);
+    windowSceneSessionImpl->property_->SetPersistentId(2);
     auto ret = windowSceneSessionImpl->SetSubWindowZLevel(10001);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
-    session->property_->SetPersistentId(2);
+    windowSceneSessionImpl->hostSession_ = session;
 
     windowSceneSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     ret = windowSceneSessionImpl->SetSubWindowZLevel(10001);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
     windowSceneSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+
+    windowSceneSessionImpl->property_->SetParentPersistentId(INVALID_SESSION_ID);
+    ret = windowSceneSessionImpl->SetSubWindowZLevel(10001);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARENT, ret);
+    windowSceneSessionImpl->property_->SetParentPersistentId(3);
 
     ret = windowSceneSessionImpl->SetSubWindowZLevel(10001);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
@@ -834,18 +839,33 @@ HWTEST_F(WindowSceneSessionImplTest2, GetSubWindowZLevel, Function | SmallTest |
     sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
     windowSceneSessionImpl->hostSession_ = session;
     windowSceneSessionImpl->property_->zLevel_ = 1;
     int32_t zLevel = 0;
 
-    session->property_->SetPersistentId(INVALID_SESSION_ID);
+    windowSceneSessionImpl->property_->SetPersistentId(INVALID_SESSION_ID);
     auto ret = windowSceneSessionImpl->GetSubWindowZLevel(zLevel);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
-    session->property_->SetPersistentId(2);
+    windowSceneSessionImpl->property_->SetPersistentId(2);
 
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ret = windowSceneSessionImpl->GetSubWindowZLevel(zLevel);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    ret = windowSceneSessionImpl->GetSubWindowZLevel(zLevel);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
+
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     ret = windowSceneSessionImpl->GetSubWindowZLevel(zLevel);
     EXPECT_EQ(WMError::WM_OK, ret);
     EXPECT_EQ(1, zLevel);
+
+    windowSceneSessionImpl->property_->zLevel_ = 2;
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    ret = windowSceneSessionImpl->GetSubWindowZLevel(zLevel);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(2, zLevel);
 }
 
 /**
@@ -1888,6 +1908,7 @@ HWTEST_F(WindowSceneSessionImplTest2, IsWindowRectAutoSave, Function | SmallTest
     windowSceneSessionImpl->hostSession_ = session;
     windowSceneSessionImpl->context_ = abilityContext_;
     windowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    EXPECT_CALL(m->Mock(), IsWindowRectAutoSave(_, _, _)).WillRepeatedly(Return(WMError::WM_OK));
     enabled = false;
     ret = windowSceneSessionImpl->IsWindowRectAutoSave(enabled);
     EXPECT_EQ(WMError::WM_OK, ret);
