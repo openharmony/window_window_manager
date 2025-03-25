@@ -238,6 +238,7 @@ void DisplayManagerAni::onRegisterCallback(ani_env* env, ani_string type, ani_re
     } else if (typeString == EVENT_DISPLAY_MODE_CHANGED) {
         TLOGI(WmsLogTag::DMS, "exe event fold mode change %{public}s", typeString.c_str());
         displayAniListener->OnDisplayModeChanged(FoldDisplayMode::UNKNOWN);
+    }
 }
 
 DmErrorCode DisplayManagerAni::processRegisterCallback(ani_env* env, std::string& typeStr,
