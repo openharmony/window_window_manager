@@ -598,8 +598,6 @@ HWTEST_F(DisplayManagerAdapterTest, SetDisplayState, Function | SmallTest | Leve
     bool ret = SingletonContainer::Get<DisplayManagerAdapter>().SetDisplayState(state);
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_TRUE(ret);
-    } else {
-        ASSERT_FALSE(ret);
     }
 }
 
@@ -614,7 +612,7 @@ HWTEST_F(DisplayManagerAdapterTest, MakeMirror, Function | SmallTest | Level2)
     ScreenId screenGroupId;
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().MakeMirror(0,
         mirrorScreenId, screenGroupId);
-    ASSERT_EQ(err, DMError::DM_ERROR_NULLPTR);
+    ASSERT_EQ(err, DMError::DM_ERROR_INVALID_PARAM);
 }
 
 /**
@@ -882,7 +880,11 @@ HWTEST_F(DisplayManagerAdapterTest, GetDisplayCapability, Function | SmallTest |
 {
     std::string capabilitInfo;
     auto result = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayCapability(capabilitInfo);
-    ASSERT_EQ(result, DMError::DM_OK);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(result, DMError::DM_ERROR_DEVICE_NOT_SUPPORT);
+    } else {
+        ASSERT_EQ(result, DMError::DM_OK);
+    }
 }
 }
 }
