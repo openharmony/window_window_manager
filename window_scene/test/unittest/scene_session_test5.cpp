@@ -2030,6 +2030,32 @@ HWTEST_F(SceneSessionTest5, UpdateDensity, Function | SmallTest | Level2)
     WSRect resultRect = { 10, 10, 800, 600 };
     EXPECT_EQ(session->winRect_, resultRect);
 }
+
+/**
+ * @tc.name: NotifyRotationChange
+ * @tc.desc: NotifyRotationChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, NotifyRotationChange, Function | SmallTest | Level2)
+{
+    const SessionInfo info;
+    sptr<SceneSessionMocker> session = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
+    session->sessionStage_ = nullptr;
+    session->isRotationChangeCallbackRegistered = false;
+    RotationChangeInfo info = { RotationChangeType::WINDOW_WILL_ROTATE, 0, 0, { 0, 0, 2720, 1270 } };
+    RotationChangeResult res = session->NotifyRotationChange(info);
+    EXPECT_EQ(res.winRect_.width_, 0);
+
+    session->isRotationChangeCallbackRegistered = true;
+    res = session->NotifyRotationChange(info);
+    EXPECT_EQ(res.winRect_.width_, 0);
+    
+    sptr<SessionStageMocker> sessionStageMocker = sptr<SessionStageMocker>::MakeSptr();
+    ASSERT_NE(sessionStageMocker, nullptr);
+    session->sessionStage_ = sessionStageMocker;
+    RotationChangeResult res = session->NotifyRotationChange(info);
+    EXPECT_EQ(res.winRect_.width_, 0);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
