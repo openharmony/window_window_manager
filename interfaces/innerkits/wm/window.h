@@ -704,6 +704,24 @@ public:
     virtual void OnSystemBarPropertyUpdate(WindowType type, const SystemBarProperty& property) {}
 };
 
+/*
+ * @class IWindowRotationChangeListener
+ *
+ * @brief IWindowRotationChangeListener is used to observe the window rotation change.
+ */
+class IWindowRotationChangeListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when window rotate
+     *
+     * @param rotationChangeInfo information of rotation
+     * @param rotationChangeResult result of rotation
+     *
+     */
+    virtual void OnRotationChange(const RotationChangeInfo& rotationChangeInfo,
+        RotationChangeResult& rotationChangeResult) {}
+};
+
 static WMError DefaultCreateErrCode = WMError::WM_OK;
 class Window : virtual public RefBase {
 public:
@@ -1003,7 +1021,7 @@ public:
      * @return WM_OK means success, others mean set failed
      */
     virtual WMError SetSubWindowZLevel(int32_t zLevel) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
-    
+
     /**
      * @brief Get sub window zLevel
      *
@@ -1924,13 +1942,13 @@ public:
     /**
      * @brief Get the Target Orientation ConfigInfo.
      *
-     * @param targetOri target Orientation.
-     * @param config Viewport config.
+     * @param targetOrientation target Orientation.
      * @param properties systemBar properties
+     * @param config Viewport config.
      * @param avoidAreas avoidArea information
      * @return WMError
      */
-    virtual WMError GetTargetOrientationConfigInfo(Orientation targetOri,
+    virtual WMError GetTargetOrientationConfigInfo(Orientation targetOrientation,
         const std::map<WindowType, SystemBarProperty>& properties, Ace::ViewportConfig& config,
         std::map<AvoidAreaType, AvoidArea>& avoidAreas)
     {
@@ -1951,7 +1969,7 @@ public:
 
     /**
      * @brief Unregister window orientation set by developer
-     * 9
+     *
      * @param listener IPreferredOrientationChangeListener.
      * @return WM_OK means register success, others means unregister failed
      */
@@ -1976,7 +1994,7 @@ public:
      * @brief Unregister window orientation change listener
      *
      * @param listener IWindowOrientationChangeListener.
-     * @return WM_OK means register success, others means unregister failed
+     * @return WM_OK means unregister success, others means unregister failed
      */
     virtual WMError UnregisterOrientationChangeListener(const sptr<IWindowOrientationChangeListener>& listener)
     {
@@ -2924,6 +2942,16 @@ public:
     }
 
     /**
+     * @brief Set whether the sub window supports simultaneous display on multiple screens
+     *        when the parent window is dragged to move or dragged to zoom.
+     *
+     * @param enabled The value true means sub window supports simultaneous display on multiple screens
+     *                when the parent window is dragged to move or dragged to zoom, and false means the opposite.
+     * @return WM_OK means set success, others means failed.
+     */
+    virtual WMError SetFollowParentMultiScreenPolicy(bool enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;}
+
+    /**
      * @brief Get the rect of host window.
      *
      * @param hostWindowId window Id of the host window.
@@ -3493,6 +3521,28 @@ public:
     virtual WMError UnregisterWindowAttachStateChangeListener()
     {
         return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Register window rotation change listener.
+     *
+     * @param listener IWindowRotationChangeListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterWindowRotationChangeListener(const sptr<IWindowRotationChangeListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Unregister window rotation change listener.
+     *
+     * @param listener IWindowRotationChangeListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterWindowRotationChangeListener(const sptr<IWindowRotationChangeListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
 
     /**

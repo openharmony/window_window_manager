@@ -95,6 +95,7 @@ using RequestVsyncFunc = std::function<void(const std::shared_ptr<VsyncCallback>
 using NotifyWindowMovingFunc = std::function<void(DisplayId displayId, int32_t pointerX, int32_t pointerY)>;
 using NofitySessionLabelAndIconUpdatedFunc =
     std::function<void(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon)>;
+using NotifySessionGetTargetOrientationConfigInfoFunc = std::function<void(uint32_t targetOrientation)>;
 using NotifyKeyboardStateChangeFunc = std::function<void(SessionState state, KeyboardViewMode mode)>;
 using NotifyHighlightChangeFunc = std::function<void(bool isHighlight)>;
 using NotifySurfaceBoundsChangeFunc = std::function<void(const WSRect& rect, bool isGlobal, bool needFlush)>;
@@ -291,10 +292,14 @@ public:
     std::string GetWindowName() const;
     WSRect GetLastLayoutRect() const;
     WSRect GetLayoutRect() const;
+    DisplayId GetDisplayId() const { return GetSessionProperty()->GetDisplayId(); }
+    DisplayId GetOriginDisplayId() const { return originDisplayId_; }
+    void SetOriginDisplayId(DisplayId displayId);
 
     virtual WSError SetActive(bool active);
     virtual WSError UpdateSizeChangeReason(SizeChangeReason reason);
     SizeChangeReason GetSizeChangeReason() const { return reason_; }
+    bool IsDraggingReason(SizeChangeReason reason) const;
     virtual WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
         const std::string& updateReason, const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     virtual WSError UpdateRectWithLayoutInfo(const WSRect& rect, SizeChangeReason reason,
@@ -302,6 +307,8 @@ public:
         const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {});
     WSError UpdateDensity();
     WSError UpdateOrientation();
+    virtual bool IsDragMoving() const { return false; }
+    virtual bool IsDragZooming() const { return false; }
 
     void SetShowRecent(bool showRecent);
     void SetSystemActive(bool systemActive);
@@ -604,6 +611,7 @@ public:
     std::shared_ptr<AppExecFwk::EventHandler> GetEventHandler() const;
     WSError UpdateClientDisplayId(DisplayId displayId);
     DisplayId TransformGlobalRectToRelativeRect(WSRect& rect) const;
+    void TransformRelativeRectToGlobalRect(WSRect& rect) const;
     void UpdateClientRectPosYAndDisplayId(WSRect& rect);
     bool IsDragAccessible() const;
     void SetSingleHandTransform(const SingleHandTransform& transform);
@@ -614,6 +622,8 @@ public:
     DisplayId GetClientDisplayId() const;
     virtual void RegisterNotifySurfaceBoundsChangeFunc(int32_t sessionId, NotifySurfaceBoundsChangeFunc&& func) {};
     virtual void UnregisterNotifySurfaceBoundsChangeFunc(int32_t sessionId) {};
+    virtual bool IsAnyParentSessionDragMoving() const { return false; }
+    virtual bool IsAnyParentSessionDragZooming() const { return false; }
 
     /*
      * Screen Lock
@@ -641,6 +651,12 @@ public:
     WindowLayoutInfo GetWindowLayoutInfoForWindowInfo() const;
     WindowMetaInfo GetWindowMetaInfoForWindowInfo() const;
 
+    /*
+     * Window Pattern
+     */
+    void SetBorderUnoccupied(bool borderUnoccupied = false);
+    bool GetBorderUnoccupied() const;
+    
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
     public:
@@ -759,6 +775,7 @@ protected:
     NotifySessionExceptionFunc jsSceneSessionExceptionFunc_;
     VisibilityChangedDetectFunc visibilityChangedDetectFunc_ GUARDED_BY(SCENE_GUARD);
     NofitySessionLabelAndIconUpdatedFunc updateSessionLabelAndIconFunc_;
+    NotifySessionGetTargetOrientationConfigInfoFunc sessionGetTargetOrientationConfigInfoFunc_;
 
     /*
      * Window Rotate Animation
@@ -790,6 +807,14 @@ protected:
     DisplayId clientDisplayId_ = 0; // Window displayId on the client
     DisplayId configDisplayId_ = DISPLAY_ID_INVALID;
     SuperFoldStatus lastScreenFoldStatus_ = SuperFoldStatus::UNKNOWN;
+    virtual bool IsNeedConvertToRelativeRect(
+        SizeChangeReason reason = SizeChangeReason::UNDEFINED) const { return false; }
+    virtual WSRect ConvertRelativeRectToGlobal(const WSRect& relativeRect,
+        DisplayId currentDisplayId) const { return { 0, 0, 0, 0 }; }
+    virtual WSRect ConvertGlobalRectToRelative(const WSRect& globalRect,
+        DisplayId targetDisplayId) const { return { 0, 0, 0, 0 }; }
+    bool IsDragStart() const { return isDragStart_; }
+    void SetDragStart(bool isDragStart);
 
     /*
      * Window ZOrder
@@ -930,6 +955,8 @@ private:
     /*
      * Window Lifecycle
      */
+    void RecordWindowStateAttachExceptionEvent(bool isAttached);
+
     std::atomic<bool> isAttach_ { false };
     std::atomic<bool> isPendingToBackgroundState_ { false };
     std::atomic<bool> isActivatedAfterScreenLocked_ { true };
@@ -955,6 +982,8 @@ private:
     SingleHandTransform singleHandTransform_;
     bool singleHandModeFlag_ = false;
     SingleHandScreenInfo singleHandScreenInfo_;
+    DisplayId originDisplayId_ = DISPLAY_ID_INVALID;
+    bool isDragStart_ = { false };
 
     /*
      * Screen Lock
@@ -969,6 +998,11 @@ private:
     std::mutex saveSnapshotCallbackMutex_;
     std::mutex removeSnapshotCallbackMutex_;
     std::atomic<bool> needNotifyAttachState_ = { false };
+
+    /*
+     * Window Pattern
+     */
+    bool borderUnoccupied_ = false;
 };
 } // namespace OHOS::Rosen
 

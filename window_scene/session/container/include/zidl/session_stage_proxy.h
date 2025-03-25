@@ -65,7 +65,7 @@ public:
     WSError NotifyDialogStateChange(bool isForeground) override;
     WSError SetPipActionEvent(const std::string& action, int32_t status) override;
     WSError SetPiPControlEvent(WsPiPControlType controlType, WsPiPControlStatus status) override;
-    WSError NotifyPipWindowSizeChange(uint32_t width, uint32_t height, double scale) override;
+    WSError NotifyPipWindowSizeChange(double width, double height, double scale) override;
     WSError UpdateDisplayId(uint64_t displayId) override;
     void NotifyDisplayMove(DisplayId from, DisplayId to) override;
     WSError SwitchFreeMultiWindow(bool enable) override;
@@ -78,6 +78,8 @@ public:
     WSError NotifyCompatibleModeEnableInPad(bool enable) override;
     void SetUniqueVirtualPixelRatio(bool useUniqueDensity, float virtualPixelRatio) override;
     void NotifySessionFullScreen(bool fullScreen) override;
+    WSError NotifyTargetRotationInfo(OrientationInfo& Info) override;
+    RotationChangeResult NotifyRotationChange(const RotationChangeInfo& rotationChangeInfo) override;
 
     // UIExtension
     WSError NotifyDumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
@@ -96,6 +98,7 @@ public:
     void NotifyWindowCrossAxisChange(CrossAxisState state) override;
     WSError NotifyWindowAttachStateChange(bool isAttach) override;
     void NotifyKeyboardAnimationCompleted(const KeyboardPanelInfo& keyboardPanelInfo) override;
+    WSError SetCurrentRotation(int32_t currentRotation) override;
 
 private:
     static inline BrokerDelegator<SessionStageProxy> delegator_;

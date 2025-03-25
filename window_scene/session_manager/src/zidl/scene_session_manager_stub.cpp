@@ -211,12 +211,12 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleWatchFocusActiveChange(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SHIFT_APP_WINDOW_POINTER_EVENT):
             return HandleShiftAppWindowPointerEvent(data, reply);
-        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_UI_TYPE):
-            return HandleGetWindowUIType(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_MINIMIZE_BY_WINDOW_ID):
             return HandleMinimizeByWindowId(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_PARENT_WINDOW):
             return HandleSetParentWindow(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_FOREGROUND_WINDOW_NUM):
+            return HandleSetForegroundWindowNum(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1845,22 +1845,6 @@ int SceneSessionManagerStub::HandleShiftAppWindowPointerEvent(MessageParcel& dat
     return ERR_NONE;
 }
 
-int SceneSessionManagerStub::HandleGetWindowUIType(MessageParcel& data, MessageParcel& reply)
-{
-    WindowUIType type = WindowUIType::INVALID_WINDOW;
-    WMError errCode = GetWindowUIType(type);
-    TLOGI(WmsLogTag::WMS_MULTI_WINDOW, "WindowUIType:%{public}d!", static_cast<int32_t>(type));
-    if (!reply.WriteUint32(static_cast<int32_t>(type))) {
-        TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "Write WindowUIType failed");
-        return ERR_INVALID_DATA;
-    }
-    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "Write errCode fail.");
-        return ERR_INVALID_DATA;
-    }
-    return ERR_NONE;
-}
-
 int SceneSessionManagerStub::HandleMinimizeByWindowId(MessageParcel& data, MessageParcel& reply)
 {
     std::vector<int32_t> windowIds;
@@ -1871,6 +1855,21 @@ int SceneSessionManagerStub::HandleMinimizeByWindowId(MessageParcel& data, Messa
     WMError errCode = MinimizeByWindowId(windowIds);
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_LIFE, "Write errCode failed.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleSetForegroundWindowNum(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t windowNum = 0;
+    if (!data.ReadInt32(windowNum)) {
+        TLOGE(WmsLogTag::WMS_PC, "read windowNum failed");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = SetForegroundWindowNum(windowNum);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_PC, "Write errCode failed.");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;

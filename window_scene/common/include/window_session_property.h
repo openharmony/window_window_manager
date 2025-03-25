@@ -50,12 +50,13 @@ public:
     void SetTouchable(bool isTouchable);
     void SetDragEnabled(bool dragEnabled);
     void SetHideNonSystemFloatingWindows(bool hide);
+    void SetSkipEventOnCastPlus(bool isSkip);
     void SetForceHide(bool hide);
     void SetRaiseEnabled(bool raiseEnabled);
     void SetSystemCalling(bool isSystemCalling);
     void SetTurnScreenOn(bool turnScreenOn);
     void SetKeepScreenOn(bool keepScreenOn);
-    void SetRequestedOrientation(Orientation orientation);
+    void SetRequestedOrientation(Orientation orientation, bool needAnimation = true);
     void SetDefaultRequestedOrientation(Orientation orientation);
     void SetPrivacyMode(bool isPrivate);
     void SetSystemPrivacyMode(bool isSystemPrivate);
@@ -121,12 +122,14 @@ public:
     bool GetDragEnabled() const;
     bool GetTouchable() const;
     bool GetHideNonSystemFloatingWindows() const;
+    bool GetSkipEventOnCastPlus() const;
     bool GetForceHide() const;
     bool GetRaiseEnabled() const;
     bool GetSystemCalling() const;
     bool IsTurnScreenOn() const;
     bool IsKeepScreenOn() const;
     Orientation GetRequestedOrientation() const;
+    bool GetRequestedAnimation() const;
     Orientation GetDefaultRequestedOrientation() const;
     bool GetPrivacyMode() const;
     bool GetSystemPrivacyMode() const;
@@ -262,8 +265,6 @@ public:
     WindowSizeLimits GetWindowSizeLimits() const;
     void SetIsFullScreenWaterfallMode(bool isFullScreenWaterfallMode);
     bool GetIsFullScreenWaterfallMode() const;
-    void SetIsSaveBySpecifiedFlag(bool isSaveBySpecifiedFlag);
-    bool GetIsSaveBySpecifiedFlag() const;
 
     /*
      * Keyboard
@@ -366,6 +367,7 @@ private:
     bool topmost_ = false;
     bool mainWindowTopmost_ = false;
     Orientation requestedOrientation_ = Orientation::UNSPECIFIED;
+    bool needRotateAnimation_ = true;
     Orientation defaultRequestedOrientation_ = Orientation::UNSPECIFIED; // only accessed on SSM thread
     bool isPrivacyMode_ { false };
     bool isSystemPrivacyMode_ { false };
@@ -401,6 +403,7 @@ private:
     std::vector<Rect> touchHotAreas_;  // coordinates relative to window.
     KeyboardTouchHotAreas keyboardTouchHotAreas_;  // coordinates relative to window.
     bool hideNonSystemFloatingWindows_ = false;
+    bool isSkipEventOnCastPlus_ = false;
     bool forceHide_ = false;
     bool keepKeyboardFlag_ = false;
     uint32_t callingSessionId_ = INVALID_SESSION_ID;
@@ -466,7 +469,6 @@ private:
     bool isWindowDelayRaiseEnabled_ = false;
     WindowSizeLimits windowSizeLimits_;
     bool isFullScreenWaterfallMode_ = false;
-    bool isSaveBySpecifiedFlag_ = false;
 
     /*
      * Keyboard
@@ -572,6 +574,10 @@ struct SystemSessionConfig : public Parcelable {
     uint32_t miniWidthOfSubWindow_ = 320;
     // 240: default minHeight sub window size
     uint32_t miniHeightOfSubWindow_ = 240;
+    // 320: default minWidth dialog window size
+    uint32_t miniWidthOfDialogWindow_ = 320;
+    // 240: default minHeight dialog window size
+    uint32_t miniHeightOfDialogWindow_ = 240;
     bool backgroundswitch = false;
     bool freeMultiWindowEnable_ = false;
     bool freeMultiWindowSupport_ = false;
@@ -593,7 +599,8 @@ struct SystemSessionConfig : public Parcelable {
         }
 
         if (!parcel.WriteUint32(miniWidthOfMainWindow_) || !parcel.WriteUint32(miniHeightOfMainWindow_) ||
-            !parcel.WriteUint32(miniWidthOfSubWindow_) || !parcel.WriteUint32(miniHeightOfSubWindow_)) {
+            !parcel.WriteUint32(miniWidthOfSubWindow_) || !parcel.WriteUint32(miniHeightOfSubWindow_) ||
+            !parcel.WriteUint32(miniWidthOfDialogWindow_) || !parcel.WriteUint32(miniHeightOfDialogWindow_)) {
             return false;
         }
 
@@ -647,6 +654,8 @@ struct SystemSessionConfig : public Parcelable {
         config->miniHeightOfMainWindow_ = parcel.ReadUint32();
         config->miniWidthOfSubWindow_ = parcel.ReadUint32();
         config->miniHeightOfSubWindow_ = parcel.ReadUint32();
+        config->miniWidthOfDialogWindow_ = parcel.ReadUint32();
+        config->miniHeightOfDialogWindow_ = parcel.ReadUint32();
         config->backgroundswitch = parcel.ReadBool();
         config->freeMultiWindowEnable_ = parcel.ReadBool();
         config->freeMultiWindowSupport_ = parcel.ReadBool();

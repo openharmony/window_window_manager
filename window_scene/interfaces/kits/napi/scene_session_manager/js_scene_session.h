@@ -95,6 +95,7 @@ enum class ListenerFuncType : uint32_t {
     SET_PARENT_SESSION_CB,
     UPDATE_FLAG_CB,
     Z_LEVEL_CHANGE_CB,
+    SESSION_GET_TARGET_ORIENTATION_CONFIG_INFO_CB,
 };
 
 class SceneSession;
@@ -187,6 +188,7 @@ private:
     static void BindNativeMethodForFocus(napi_env env, napi_value objValue, const char* moduleName);
     static void BindNativeMethodForWaterfall(napi_env env, napi_value objValue, const char* moduleName);
     static napi_value SetSkipSelfWhenShowOnVirtualScreen(napi_env env, napi_callback_info info);
+    static napi_value SetSkipEventOnCastPlus(napi_env env, napi_callback_info info);
     static napi_value SetCompatibleModeInPc(napi_env env, napi_callback_info info);
     static napi_value SetAppSupportPhoneInPc(napi_env env, napi_callback_info info);
     static napi_value SetCompatibleWindowSizeInPc(napi_env env, napi_callback_info info);
@@ -210,7 +212,7 @@ private:
     static napi_value SetFrameGravity(napi_env env, napi_callback_info info);
     static napi_value SetUseStartingWindowAboveLocked(napi_env env, napi_callback_info info);
     static napi_value SaveSnapshotSync(napi_env env, napi_callback_info info);
-    static napi_value SetBehindWindowFilterEnabled(napi_env env, napi_callback_info info);
+    static napi_value SetBorderUnoccupied(napi_env env, napi_callback_info info);
     static napi_value SetFreezeImmediately(napi_env env, napi_callback_info info);
     static napi_value SendContainerModalEvent(napi_env env, napi_callback_info info);
     static napi_value SetExclusivelyHighlighted(napi_env env, napi_callback_info info);
@@ -219,6 +221,8 @@ private:
     static napi_value ThrowSlipDirectly(napi_env env, napi_callback_info info);
     static napi_value AddSidebarBlur(napi_env env, napi_callback_info info);
     static napi_value SetSidebarBlur(napi_env env, napi_callback_info info);
+    static napi_value NotifyRotationProperty(napi_env env, napi_callback_info info);
+    static napi_value SetCurrentRotation(napi_env env, napi_callback_info info);
 
     napi_value OnActivateDragBySystem(napi_env env, napi_callback_info info);
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
@@ -260,6 +264,7 @@ private:
     napi_value OnSetTemporarilyShowWhenLocked(napi_env env, napi_callback_info info);
     napi_value OnSetSkipDraw(napi_env env, napi_callback_info info);
     napi_value OnSetSkipSelfWhenShowOnVirtualScreen(napi_env env, napi_callback_info info);
+    napi_value OnSetSkipEventOnCastPlus(napi_env env, napi_callback_info info);
     napi_value OnSetCompatibleModeInPc(napi_env env, napi_callback_info info);
     napi_value OnSetAppSupportPhoneInPc(napi_env env, napi_callback_info info);
     napi_value OnSetCompatibleWindowSizeInPc(napi_env env, napi_callback_info info);
@@ -286,7 +291,7 @@ private:
     napi_value OnSetFrameGravity(napi_env env, napi_callback_info info);
     napi_value OnSetUseStartingWindowAboveLocked(napi_env env, napi_callback_info info);
     napi_value OnSaveSnapshotSync(napi_env env, napi_callback_info info);
-    napi_value OnSetBehindWindowFilterEnabled(napi_env env, napi_callback_info info);
+    napi_value OnSetBorderUnoccupied(napi_env env, napi_callback_info info);
     napi_value OnSetFreezeImmediately(napi_env env, napi_callback_info info);
     napi_value OnMaskSupportEnterWaterfallMode(napi_env env, napi_callback_info info);
     napi_value OnUpdateFullScreenWaterfallMode(napi_env env, napi_callback_info info);
@@ -297,6 +302,9 @@ private:
     napi_value OnThrowSlipDirectly(napi_env env, napi_callback_info info);
     napi_value OnAddSidebarBlur(napi_env env, napi_callback_info info);
     napi_value OnSetSidebarBlur(napi_env env, napi_callback_info info);
+    napi_value OnNotifyRotationProperty(napi_env env, napi_callback_info info);
+    napi_value OnNotifyRotationChange(napi_env env, napi_callback_info info);
+    napi_value OnSetCurrentRotation(napi_env env, napi_callback_info info);
 
     bool IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);
     void ProcessChangeSessionVisibilityWithStatusBarRegister();
@@ -352,6 +360,7 @@ private:
     void ProcessKeyboardViewModeChangeRegister();
     void ProcessSetHighlightChangeRegister();
     void ProcessFollowParentRectRegister();
+    void ProcessGetTargetOrientationConfigInfoRegister();
 
     /*
      * Window Property
@@ -403,7 +412,7 @@ private:
     void OnDefaultAnimationFlagChange(bool isNeedDefaultAnimationFlag);
     void OnIsCustomAnimationPlaying(bool status);
     void OnShowWhenLocked(bool showWhenLocked);
-    void OnReuqestedOrientationChange(uint32_t orientation);
+    void OnReuqestedOrientationChange(uint32_t orientation, bool needAnimation = true);
     void OnForceHideChange(bool hide);
     void OnWindowDragHotArea(DisplayId displayId, uint32_t type, SizeChangeReason reason);
     void OnTouchOutside();
@@ -427,6 +436,8 @@ private:
     void OnKeyboardViewModeChange(KeyboardViewMode mode);
     void NotifyHighlightChange(bool isHighlight);
     void NotifyFollowParentRect(bool isFollow);
+    void OnGetTargetOrientationConfigInfo(uint32_t targetOrientation);
+    void OnRotationChange(int32_t persistentId, bool isRegister);
 
     /*
      * Window Property
@@ -451,6 +462,8 @@ private:
     std::map<std::string, std::shared_ptr<NativeReference>> jsCbMap_;
     std::shared_ptr<MainThreadScheduler> taskScheduler_;
     static std::map<int32_t, napi_ref> jsSceneSessionMap_;
+    std::mutex windowRotationMutex_;
+    uint32_t  windowRotation_ = 0;
 };
 } // namespace OHOS::Rosen
 

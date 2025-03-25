@@ -38,6 +38,7 @@ public:
     sptr<SceneSession> GetKeyboardSession() const override;
     void SetKeyboardPanelRectUpdateCallback(const KeyboardPanelRectUpdateCallback& func);
     void SetSkipSelfWhenShowOnVirtualScreen(bool isSkip) override;
+    void SetSkipEventOnCastPlus(bool isSkip) override;
     void SyncScenePanelGlobalPosition(bool needSync) override;
     bool IsNeedSyncScenePanelGlobalPosition() override { return isNeedSyncGlobalPos_; }
     bool IsVisibleForeground() const override;

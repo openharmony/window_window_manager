@@ -306,12 +306,12 @@ public:
     VirtualScreenFlag GetVirtualScreenFlag(ScreenId screenId);
 
     /**
-     * @brief Set System Keyboard is on or off.
+     * @brief Set System Keyboard status.
      *
-     * @param isOn system keyboard is on, default is false.
-     * @return DM_OK means set system keyboard on is success.
+     * @param isTpKeyboardOn whether system keyboard with touchpad is shown, default is false.
+     * @return DM_OK means set system keyboard status success.
      */
-    DMError SetSystemKeyboardStatus(bool isOn = false);
+    DMError SetSystemKeyboardStatus(bool isTpKeyboardOn = false);
 private:
     DisplayManagerLite();
     ~DisplayManagerLite();

@@ -52,6 +52,7 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowImpl"};
 const std::string PARAM_DUMP_HELP = "-h";
 const uint32_t API_VERSION_MOD = 1000;
+constexpr int32_t API_VERSION_18 = 18;
 
 Ace::ContentInfoType GetAceContentInfoType(BackupAndRestoreType type)
 {
@@ -707,15 +708,8 @@ WMError WindowImpl::SetUIContentInner(const std::string& contentInfo, napi_env e
 
 float WindowImpl::GetVirtualPixelRatio()
 {
-    float vpr = 1.0f; // This is an abnormal value, which is used to identify abnormal scenarios.
-    auto display = SingletonContainer::IsDestroyed() ? nullptr :
-        SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
-    if (display == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "get display failed displayId:%{public}" PRIu64 ", window id:%{public}u",
-            property_->GetDisplayId(), property_->GetWindowId());
-        return vpr;
-    }
-    return display->GetVirtualPixelRatio();
+    TLOGD(WmsLogTag::WMS_LAYOUT, "virtualPixelRatio: %{public}f", virtualPixelRatio_.load());
+    return virtualPixelRatio_.load();
 }
 
 std::shared_ptr<std::vector<uint8_t>> WindowImpl::GetAbcContent(const std::string& abcPath)
@@ -971,7 +965,10 @@ void WindowImpl::UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool syste
 {
     property.enable_ = systemBarEnable;
     property.enableAnimation_ = systemBarEnableAnimation;
-    property.settingFlag_ |= SystemBarSettingFlag::ENABLE_SETTING;
+    // isolate on api 18
+    if (GetApiTargetVersion() >= API_VERSION_18) {
+        property.settingFlag_ |= SystemBarSettingFlag::ENABLE_SETTING;
+    }
 }
 
 WMError WindowImpl::SetSpecificBarProperty(WindowType type, const SystemBarProperty& property)
@@ -3558,7 +3555,9 @@ void WindowImpl::UpdateViewportConfig(const Rect& rect, const sptr<Display>& dis
     config.SetPosition(rect.posX_, rect.posY_);
     config.SetDisplayId(GetDisplayId());
     if (display) {
-        config.SetDensity(display->GetVirtualPixelRatio());
+        float virtualPixelRatio = display->GetVirtualPixelRatio();
+        virtualPixelRatio_.store(virtualPixelRatio);
+        config.SetDensity(virtualPixelRatio);
         auto displayInfo = display->GetDisplayInfo();
         if (displayInfo != nullptr) {
             config.SetOrientation(static_cast<int32_t>(displayInfo->GetDisplayOrientation()));
@@ -4461,11 +4460,11 @@ void WindowImpl::RegisterWindowInspectorCallback()
     WindowInspector::GetInstance().RegisterGetWMSWindowListCallback(GetWindowId(), std::move(getWMSWindowListCallback));
 }
 
-uint32_t WindowImpl::GetApiCompatibleVersion() const
+uint32_t WindowImpl::GetApiTargetVersion() const
 {
     uint32_t version = 0;
     if ((context_ != nullptr) && (context_->GetApplicationInfo() != nullptr)) {
-        version = context_->GetApplicationInfo()->apiCompatibleVersion % API_VERSION_MOD;
+        version = context_->GetApplicationInfo()->apiTargetVersion % API_VERSION_MOD;
     }
     return version;
 }

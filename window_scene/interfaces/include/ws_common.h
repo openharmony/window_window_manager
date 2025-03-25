@@ -427,6 +427,11 @@ struct SessionInfo {
      */
     std::vector<AppExecFwk::SupportWindowMode> supportedWindowModes;
     WindowSizeLimits windowSizeLimits;
+
+    /*
+     * Window Rotation
+     */
+    int32_t currentRotation_ = 0;
 };
 
 enum class SessionFlag : uint32_t {
@@ -467,6 +472,7 @@ enum class SizeChangeReason : uint32_t {
     AVOID_AREA_CHANGE,
     MAXIMIZE_TO_SPLIT,
     SPLIT_TO_MAXIMIZE,
+    PAGE_ROTATION,
     END,
 };
 
@@ -637,10 +643,15 @@ struct WindowAnimationConfig {
 };
 
 struct StartingWindowInfo {
-    int32_t startingWindowBackgroundId_;
-    int32_t startingWindowIconId_;
-    uint32_t startingWindowBackgroundColor_;
-    std::string startingWindowIconPath_;
+    uint32_t backgroundColorEarlyVersion_;
+    std::string iconPathEarlyVersion_;
+    bool configFileEnabled_;
+    uint32_t backgroundColor_;
+    std::string iconPath_;
+    std::string illustrationPath_;
+    std::string brandingPath_;
+    std::string backgroundImagePath_;
+    std::string backgroundImageFit_;
 };
 
 struct StartingWindowAnimationConfig {
@@ -817,10 +828,17 @@ struct PostProcessFocusState {
     }
 };
 
+/**
+ * @brief WindowNode for snapshot
+ */
 enum class SnapshotWindowNode : int32_t {
     DEFAULT_WINDOW_NODE = 0,
     LEASH_WINDOW_NODE,
     APP_WINDOW_NODE,
+};
+
+enum class AsyncTraceTaskId: int32_t {
+    THROW_SLIP_ANIMATION = 0,
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H

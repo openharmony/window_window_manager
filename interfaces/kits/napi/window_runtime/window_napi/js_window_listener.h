@@ -57,6 +57,7 @@ const std::string SUB_WINDOW_CLOSE_CB = "subWindowClose";
 const std::string WINDOW_STAGE_CLOSE_CB = "windowStageClose";
 const std::string WINDOW_HIGHLIGHT_CHANGE_CB = "windowHighlightChange";
 const std::string WINDOW_WILL_CLOSE_CB = "windowWillClose";
+const std::string WINDOW_ROTATION_CHANGE_CB = "rotationChange";
 
 class JsWindowListener : public IWindowChangeListener,
                          public ISystemBarChangedListener,
@@ -81,7 +82,8 @@ class JsWindowListener : public IWindowChangeListener,
                          public IWindowWillCloseListener,
                          public IMainWindowCloseListener,
                          public ISubWindowCloseListener,
-                         public IWindowHighlightChangeListener {
+                         public IWindowHighlightChangeListener,
+                         public IWindowRotationChangeListener {
 public:
     JsWindowListener(napi_env env, NativeReference* callback, CaseType caseType)
         : env_(env), jsCallBack_(callback), caseType_(caseType), weakRef_(wptr<JsWindowListener> (this)) {}
@@ -121,6 +123,8 @@ public:
     int64_t GetTimeout() const override;
     void OnRectChange(Rect rect, WindowSizeChangeReason reason) override;
     void OnWindowHighlightChange(bool isHighlight) override;
+    void OnRotationChange(const RotationChangeInfo& rotationChangeInfo,
+        RotationChangeResult& rotationChangeResult) override;
 
     /*
      * Window Decor listener

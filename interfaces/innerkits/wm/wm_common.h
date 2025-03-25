@@ -444,6 +444,7 @@ enum class WindowSizeChangeReason : uint32_t {
     AVOID_AREA_CHANGE,
     MAXIMIZE_TO_SPLIT,
     SPLIT_TO_MAXIMIZE,
+    PAGE_ROTATION,
     END,
 };
 
@@ -594,6 +595,14 @@ enum class GestureBackType : uint8_t {
 };
 
 /**
+ * @brief Crease Region Name
+ */
+enum class CreaseRegionName : uint8_t {
+    FIRST_CREASE_REGION = 0,    // posX_ from left to right. Otherwise posY_ from top to bottom.
+    SECOND_CREASE_REGION = 1,
+};
+
+/**
  * @struct PointInfo.
  *
  * @brief point Info.
@@ -703,6 +712,7 @@ constexpr int32_t INVALID_USER_ID = -1;
 constexpr int32_t SYSTEM_USERID = 0;
 constexpr int32_t BASE_USER_RANGE = 200000;
 constexpr int32_t DEFAULT_SCREEN_ID = 0;
+constexpr int32_t ZERO_CIRCLE_DEGREE = 0;
 constexpr int32_t FULL_CIRCLE_DEGREE = 360;
 constexpr int32_t ONE_FOURTH_FULL_CIRCLE_DEGREE = 90;
 constexpr float UNDEFINED_DENSITY = -1.0f;
@@ -1543,7 +1553,7 @@ struct WindowLayoutInfo : public Parcelable {
         return parcel.WriteInt32(rect.posX_) && parcel.WriteInt32(rect.posY_) && parcel.WriteUint32(rect.width_) &&
                parcel.WriteUint32(rect.height_);
     }
-  
+
     static WindowLayoutInfo* Unmarshalling(Parcel& parcel)
     {
         WindowLayoutInfo* windowLayoutInfo = new WindowLayoutInfo();
@@ -2083,6 +2093,65 @@ enum class WindowInfoKey : int32_t {
     ABILITY_NAME,
     APP_INDEX,
     VISIBILITY_STATE,
+};
+
+/**
+ * @struct OrientationInfo
+ *
+ * @brief orientation info
+ */
+struct OrientationInfo {
+    int32_t rotation = 0;
+    Rect rect = {0, 0, 0, 0};
+    std::map<AvoidAreaType, AvoidArea> avoidAreas;
+};
+
+/*
+ * @brief Enumerates rotation change type.
+ */
+enum class RotationChangeType : uint32_t {
+    /**
+     * rotate will begin.
+     */
+    WINDOW_WILL_ROTATE = 0,
+
+    /**
+     * rotate end.
+     */
+    WINDOW_DID_ROTATE,
+};
+
+/**
+ * @brief Enumerates rect type
+ */
+enum class RectType : uint32_t {
+    /**
+     * the window rect of app relative to screen.
+     */
+    RELATIVE_TO_SCREEN = 0,
+
+    /**
+     * the window rect of app relative to parent window.
+     */
+    RELATIVE_TO_PARENT_WINDOW,
+};
+
+/**
+ * @brief rotation change info to notify listener.
+ */
+struct RotationChangeInfo {
+    RotationChangeType type;
+    uint32_t orientation;
+    DisplayId displayId;
+    Rect displayRect;
+};
+
+/**
+ * @brief rotation change result return from listener.
+ */
+struct RotationChangeResult {
+    RectType rectType;
+    Rect windowRect;
 };
 }
 }
