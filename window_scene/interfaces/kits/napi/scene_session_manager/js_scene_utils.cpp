@@ -1718,4 +1718,11 @@ void MainThreadScheduler::PostMainThreadTask(Task&& localTask, std::string trace
         NapiAsyncWork(env_, task);
     }
 }
+
+void MainThreadScheduler::RemoveMainThreadTaskByName(const std::string taskName)
+{
+    if (handler_ && !handler_->GetEventRunner()->IsCurrentRunnerThread()) {
+        handler_->RemoveTask("wms:" + taskName);
+    }
+}
 } // namespace OHOS::Rosen
