@@ -178,7 +178,9 @@ public:
     bool MarshallingSystemBarMap(Parcel& parcel) const;
     static void UnMarshallingSystemBarMap(Parcel& parcel, WindowSessionProperty* property);
     bool MarshallingPiPTemplateInfo(Parcel& parcel) const;
+    bool MarshallingPiPControlEnableInfo(Parcel& parcel) const;
     static void UnmarshallingPiPTemplateInfo(Parcel& parcel, WindowSessionProperty* property);
+    static void UnmarshallingPiPControlEnableInfo(Parcel& parcel, PiPTemplateInfo& pipTemplateInfo);
     bool Marshalling(Parcel& parcel) const override;
     static WindowSessionProperty* Unmarshalling(Parcel& parcel);
     bool MarshallingWindowMask(Parcel& parcel) const;

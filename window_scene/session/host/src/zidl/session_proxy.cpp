@@ -2814,6 +2814,38 @@ WSError SessionProxy::UpdateFlag(const std::string& flag)
     return WSError::WS_OK;
 }
 
+WSError SessionProxy::UpdatePiPDefaultWindowSizeType(uint32_t defaultWindowSizeType)
+{
+    TLOGD(WmsLogTag::WMS_PIP, "defaultWindowSizeType:%{public}u", defaultWindowSizeType);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_PIP, "writeInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint32(defaultWindowSizeType)) {
+        TLOGE(WmsLogTag::WMS_PIP, "write defaultWindowSizeType failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_PIP_DEFAULT_WINDOW_SIZE_TYPE),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_PIP, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        TLOGE(WmsLogTag::WMS_PIP, "read ret failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return static_cast<WSError>(ret);
+}
+
 WSError SessionProxy::UpdateRotationChangeRegistered(int32_t persistentId, bool isRegister)
 {
     MessageParcel data;

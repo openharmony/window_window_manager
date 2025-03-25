@@ -287,6 +287,17 @@ public:
         return WSError::WS_OK;
     }
 
+    /**
+     * @brief update the default window size type
+     *
+     * @param defaultWindowSizeType Indicates the {@link uint32_t} default window size type of pip window
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError UpdatePiPDefaultWindowSizeType(uint32_t defaultWindowSizeType)
+    {
+        return WSError::WS_OK;
+    }
+
     virtual WSError ProcessPointDownSession(int32_t posX, int32_t posY) { return WSError::WS_OK; }
     virtual WSError SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         bool isExecuteDelayRaise = false) { return WSError::WS_OK; }

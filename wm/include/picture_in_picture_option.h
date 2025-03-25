@@ -33,6 +33,7 @@ public:
     void SetContext(void* contextPtr);
     void SetNavigationId(const std::string& navigationId);
     void SetPipTemplate(uint32_t templateType);
+    void SetDefaultWindowSizeType(uint32_t defaultWindowSizeType);
     void SetContentSize(uint32_t width, uint32_t height);
     void SetPiPControlStatus(PiPControlType controlType, PiPControlStatus status);
     void SetPiPControlEnabled(PiPControlType controlType, PiPControlStatus enabled);
@@ -43,6 +44,7 @@ public:
     void* GetContext() const;
     std::string GetNavigationId() const;
     uint32_t GetPipTemplate();
+    uint32_t GetDefaultWindowSizeType() const;
     std::vector<std::uint32_t> GetControlGroup();
     std::vector<PiPControlStatusInfo> GetControlStatus();
     std::vector<PiPControlEnableInfo> GetControlEnable();
@@ -61,6 +63,7 @@ private:
     std::string navigationId_ = "";
     uint32_t contentWidth_ = 0;
     uint32_t contentHeight_ = 0;
+    uint32_t defaultWindowSizeType_ = 0;
     std::vector<PiPControlStatusInfo> pipControlStatusInfoList_;
     std::vector<PiPControlEnableInfo> pipControlEnableInfoList_;
     std::vector<std::uint32_t> controlGroup_;
