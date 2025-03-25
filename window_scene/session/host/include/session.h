@@ -434,6 +434,7 @@ public:
     virtual WSError UpdateHighlightStatus(bool isHighlight, bool needBlockHighlightNotify);
     WSError NotifyHighlightChange(bool isHighlight);
     void SetExclusivelyHighlighted(bool isExclusivelyHighlighted);
+    WSError GetIsHighlighted(bool& isHighlighted) override;
 
     /*
      * Multi Window
