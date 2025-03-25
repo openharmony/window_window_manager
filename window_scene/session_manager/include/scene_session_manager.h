@@ -347,7 +347,8 @@ public:
     WMError IsPcWindow(bool& isPcWindow) override;
     WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode) override;
     WMError IsWindowRectAutoSave(const std::string& key, bool& enabled, int persistentId) override;
-    void SetIsWindowRectAutoSave(const std::string& key, bool enabled);
+    void SetIsWindowRectAutoSave(const std::string& key, bool enabled,
+        const std::string& abilityKey, bool isSaveBySpecifiedFlag);
     int32_t ChangeUIAbilityVisibilityBySCB(const sptr<SceneSession>& sceneSession, bool visibility,
         bool isFromClient = true);
     WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId) override;
@@ -398,7 +399,7 @@ public:
     void AddWindowDragHotArea(DisplayId displayId, uint32_t type, WSRect& area);
     void PreloadInLakeApp(const std::string& bundleName);
     WSError UpdateMaximizeMode(int32_t persistentId, bool isMaximize);
-    WSError UpdateSessionDisplayId(int32_t persistentId, uint64_t screenId);
+    WSError UpdateSessionDisplayId(int32_t persistentId, uint64_t screenId, WSRect winRect = { 0, 0, 0, 0 });
     WSError NotifyStackEmpty(int32_t persistentId);
     void NotifySessionUpdate(const SessionInfo& sessionInfo, ActionType type,
         ScreenId fromScreenId = SCREEN_ID_INVALID);
@@ -660,6 +661,8 @@ public:
     void PutSnapshotToCache(int32_t persistentId);
     void RemoveSnapshotFromCache(int32_t persistentId);
     void GetStartupPage(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo);
+    WSError RegisterSaveSnapshotFunc(const sptr<SceneSession>& sceneSession);
+    WSError RegisterRemoveSnapshotFunc(const sptr<SceneSession>& sceneSession);
 
 protected:
     SceneSessionManager();
@@ -895,6 +898,7 @@ private:
     bool IsGetWindowLayoutInfoNeeded(const sptr<SceneSession>& session) const;
     int32_t GetFoldLowerScreenPosY() const;
     DisplayId UpdateSpecificSessionClientDisplayId(const sptr<WindowSessionProperty>& property);
+    void SetSkipEventOnCastPlusInner(int32_t windowId, bool isSkip);
     void UpdateSessionDisplayIdBySessionInfo(sptr<SceneSession> sceneSession, const SessionInfo& sessionInfo);
     bool IsNeedUpdateBrightness(float brightness);
 
@@ -1353,8 +1357,10 @@ private:
     /*
      * PC Window
      */
-    std::mutex isWindowRectAutoSaveMapMutex_;
+    //Whether to save window rect
     std::unordered_map<std::string, bool> isWindowRectAutoSaveMap_;
+    //Whether to save rect according to specifiedFlag
+    std::unordered_map<std::string, bool> isSaveBySpecifiedFlagMap_;
 
     /*
      * Window Lifecycle

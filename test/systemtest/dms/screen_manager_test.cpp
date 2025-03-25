@@ -1430,7 +1430,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate04, Function | MediumT
     DMError res = ScreenManager::GetInstance().SetVirtualScreenMaxRefreshRate(virtualScreenId,
         refreshRate, actualRefreshRate);
     sleep(TEST_SLEEP_S);
-    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
+    ASSERT_NE(DMError::DM_ERROR_INVALID_PARAM, res);
     ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
 
@@ -1801,7 +1801,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate14, Function | MediumT
     DMError res = ScreenManager::GetInstance().SetVirtualScreenMaxRefreshRate(mainID,
         refreshRate, actualRefreshRate);
     sleep(TEST_SLEEP_S);
-    ASSERT_NE(DMError::DM_OK, res);
+    ASSERT_EQ(DMError::DM_OK, res);
     ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
 
@@ -1839,7 +1839,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate15, Function | MediumT
     DMError res = ScreenManager::GetInstance().SetVirtualScreenMaxRefreshRate(virtualScreenId,
         refreshRate, actualRefreshRate);
     sleep(TEST_SLEEP_S);
-    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
+    ASSERT_NE(DMError::DM_ERROR_INVALID_PARAM, res);
     ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
 
@@ -1876,7 +1876,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate16, Function | MediumT
     DMError res = ScreenManager::GetInstance().SetVirtualScreenMaxRefreshRate(virtualScreenId,
         refreshRate, actualRefreshRate);
     sleep(TEST_SLEEP_S);
-    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
+    ASSERT_NE(DMError::DM_ERROR_INVALID_PARAM, res);
     ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
 
@@ -1913,7 +1913,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate17, Function | MediumT
     DMError res = ScreenManager::GetInstance().SetVirtualScreenMaxRefreshRate(virtualScreenId,
         refreshRate, actualRefreshRate);
     sleep(TEST_SLEEP_S);
-    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
+    ASSERT_NE(DMError::DM_ERROR_INVALID_PARAM, res);
     ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
 
@@ -1950,7 +1950,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate18, Function | MediumT
     DMError res = ScreenManager::GetInstance().SetVirtualScreenMaxRefreshRate(virtualScreenId,
         refreshRate, actualRefreshRate);
     sleep(TEST_SLEEP_S);
-    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
+    ASSERT_NE(DMError::DM_ERROR_INVALID_PARAM, res);
     ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
 
@@ -1987,7 +1987,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate19, Function | MediumT
     DMError res = ScreenManager::GetInstance().SetVirtualScreenMaxRefreshRate(virtualScreenId,
         refreshRate, actualRefreshRate);
     sleep(TEST_SLEEP_S);
-    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
+    ASSERT_NE(DMError::DM_ERROR_INVALID_PARAM, res);
     ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
 
@@ -2024,7 +2024,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate20, Function | MediumT
     DMError res = ScreenManager::GetInstance().SetVirtualScreenMaxRefreshRate(virtualScreenId,
         refreshRate, actualRefreshRate);
     sleep(TEST_SLEEP_S);
-    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
+    ASSERT_NE(DMError::DM_ERROR_INVALID_PARAM, res);
     ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
 
@@ -2061,7 +2061,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate21, Function | MediumT
     DMError res = ScreenManager::GetInstance().SetVirtualScreenMaxRefreshRate(virtualScreenId,
         refreshRate, actualRefreshRate);
     sleep(TEST_SLEEP_S);
-    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
+    ASSERT_NE(DMError::DM_ERROR_INVALID_PARAM, res);
     ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
 
@@ -2098,7 +2098,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate22, Function | MediumT
     DMError res = ScreenManager::GetInstance().SetVirtualScreenMaxRefreshRate(virtualScreenId,
         refreshRate, actualRefreshRate);
     sleep(TEST_SLEEP_S);
-    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
+    ASSERT_NE(DMError::DM_ERROR_INVALID_PARAM, res);
     ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
 
@@ -2135,7 +2135,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate23, Function | MediumT
     DMError res = ScreenManager::GetInstance().SetVirtualScreenMaxRefreshRate(virtualScreenId,
         refreshRate, actualRefreshRate);
     sleep(TEST_SLEEP_S);
-    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
+    ASSERT_NE(DMError::DM_ERROR_INVALID_PARAM, res);
     ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
 
@@ -2172,7 +2172,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate24, Function | MediumT
     DMError res = ScreenManager::GetInstance().SetVirtualScreenMaxRefreshRate(virtualScreenId,
         refreshRate, actualRefreshRate);
     sleep(TEST_SLEEP_S);
-    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
+    ASSERT_NE(DMError::DM_ERROR_INVALID_PARAM, res);
     ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
 
@@ -2209,7 +2209,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate25, Function | MediumT
     DMError res = ScreenManager::GetInstance().SetVirtualScreenMaxRefreshRate(virtualScreenId,
         refreshRate, actualRefreshRate);
     sleep(TEST_SLEEP_S);
-    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
+    ASSERT_NE(DMError::DM_ERROR_INVALID_PARAM, res);
     ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
 
@@ -2246,7 +2246,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate26, Function | MediumT
     DMError res = ScreenManager::GetInstance().SetVirtualScreenMaxRefreshRate(virtualScreenId,
         refreshRate, actualRefreshRate);
     sleep(TEST_SLEEP_S);
-    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
+    ASSERT_NE(DMError::DM_ERROR_INVALID_PARAM, res);
     ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
 }

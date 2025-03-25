@@ -1592,7 +1592,7 @@ HWTEST_F(SceneSessionTest5, ThrowSlipDirectly, Function | SmallTest | Level2)
     sptr<MainSession> mainSession = sptr<MainSession>::MakeSptr(info, nullptr);
     WSRect rect = { 100, 100, 400, 400 };
     mainSession->winRect_ = rect;
-    mainSession->ThrowSlipDirectly(WSRectF { 0.0f, 0.0f, 0.0f, 0.0f });
+    mainSession->ThrowSlipDirectly(ThrowSlipMode::THREE_FINGERS_SWIPE, WSRectF { 0.0f, 0.0f, 0.0f, 0.0f });
     EXPECT_EQ(mainSession->winRect_, rect);
 }
 
@@ -1990,6 +1990,45 @@ HWTEST_F(SceneSessionTest5, GetWaterfallMode, Function | SmallTest | Level2)
     bool isWaterfallMode = true;
     session->GetWaterfallMode(isWaterfallMode);
     EXPECT_EQ(isWaterfallMode, false);
+}
+
+/**
+ * @tc.name: UpdateDensity
+ * @tc.desc: UpdateDensity Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, UpdateDensity, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "updateDensity";
+    info.bundleName_ = "updateDensity";
+    info.windowType_ = static_cast<uint32_t>(WindowType::APP_MAIN_WINDOW_END);
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, session);
+    SystemSessionConfig systemConfig;
+    systemConfig.windowUIType_ = WindowUIType::PC_WINDOW;
+    session->SetSystemConfig(systemConfig);
+    session->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    session->property_->SetLastLimitsVpr(1.9f);
+    session->property_->SetDisplayId(0);
+
+    WSRect rect = { 10, 10, 800, 600 };
+    session->winRect_ = rect;
+    DMRect availableArea = { 0, 0, 1000, 800 };
+    ScreenProperty screenProperty;
+    screenProperty.SetAvailableArea(availableArea);
+    ScreenSessionConfig config = {
+        .screenId = 0,
+        .rsId = 0,
+        .name = "updateDensity",
+        .property = screenProperty,
+    };
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(nullptr, screenSession);
+    
+    session->UpdateDensity();
+    WSRect resultRect = { 10, 10, 800, 600 };
+    EXPECT_EQ(session->winRect_, resultRect);
 }
 }
 } // namespace Rosen

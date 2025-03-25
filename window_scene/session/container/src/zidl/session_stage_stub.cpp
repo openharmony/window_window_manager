@@ -857,16 +857,16 @@ int SessionStageStub::HandleNotifyWindowCrossAxisChange(MessageParcel& data, Mes
 int SessionStageStub::HandleNotifyPipSizeChange(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_PIP, "in");
-    uint32_t width;
-    if (!data.ReadUint32(width)) {
+    double width;
+    if (!data.ReadDouble(width)) {
         return ERR_INVALID_VALUE;
     }
-    uint32_t height;
-    if (!data.ReadUint32(height)) {
+    double height;
+    if (!data.ReadDouble(height)) {
         return ERR_INVALID_VALUE;
     }
-    float scale;
-    if (!data.ReadFloat(scale)) {
+    double scale;
+    if (!data.ReadDouble(scale)) {
         return ERR_INVALID_VALUE;
     }
     NotifyPipWindowSizeChange(width, height, scale);

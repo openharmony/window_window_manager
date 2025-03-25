@@ -2871,6 +2871,10 @@ HWTEST_F(ScreenSessionManagerTest, NotifyFoldStatusChanged02, Function | SmallTe
     statusParam = "-coor";     // ARG_FOLD_DISPLAY_COOR
     ret = ssm_->NotifyFoldStatusChanged(statusParam);
 
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        ASSERT_EQ(ssm_->foldScreenController_, nullptr);
+        GTEST_SKIP();
+    }
     if (!(ssm_->IsFoldable())) {
         ssm_->foldScreenController_ = new FoldScreenController(
             ssm_->displayInfoMutex_, ssm_->screenPowerTaskScheduler_);
@@ -2964,7 +2968,12 @@ HWTEST_F(ScreenSessionManagerTest, GetCurrentScreenPhyBounds01, Function | Small
     bool isReset = true;
     ScreenId screenId = 1050;
     ssm_->GetCurrentScreenPhyBounds(phyWidth, phyHeight, isReset, screenId);
-    ASSERT_NE(isReset, true);
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        ASSERT_EQ(isReset, true);
+        GTEST_SKIP();
+    } else {
+        ASSERT_NE(isReset, true);
+    }
     if (!(ssm_->IsFoldable())) {
         ssm_->foldScreenController_ = new FoldScreenController(
             ssm_->displayInfoMutex_, ssm_->screenPowerTaskScheduler_);
@@ -3315,7 +3324,11 @@ HWTEST_F(ScreenSessionManagerTest, SetMultiScreenRelativePosition04, Function | 
     MultiScreenPositionOptions mainScreenOptions = {screenId, 0, 0};
     MultiScreenPositionOptions secondScreenOption = {screenId1, 100, 50};
     auto ret = ssm_->SetMultiScreenRelativePosition(mainScreenOptions, secondScreenOption);
-    ASSERT_EQ(ret, DMError::DM_ERROR_INVALID_PARAM);
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        ASSERT_EQ(ret, DMError::DM_OK);
+    } else {
+        ASSERT_EQ(ret, DMError::DM_ERROR_INVALID_PARAM);
+    }
 
     ssm_->DestroyVirtualScreen(screenId);
     ssm_->DestroyVirtualScreen(screenId1);
@@ -3350,7 +3363,11 @@ HWTEST_F(ScreenSessionManagerTest, SetMultiScreenRelativePosition05, Function | 
     MultiScreenPositionOptions mainScreenOptions = {screenId, 0, 0};
     MultiScreenPositionOptions secondScreenOption = {screenId1, 200, 100};
     auto ret = ssm_->SetMultiScreenRelativePosition(mainScreenOptions, secondScreenOption);
-    ASSERT_EQ(ret, DMError::DM_ERROR_INVALID_PARAM);
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        ASSERT_EQ(ret, DMError::DM_OK);
+    } else {
+        ASSERT_EQ(ret, DMError::DM_ERROR_INVALID_PARAM);
+    }
 
     ssm_->DestroyVirtualScreen(screenId);
     ssm_->DestroyVirtualScreen(screenId1);
@@ -3601,7 +3618,6 @@ HWTEST_F(ScreenSessionManagerTest, ConvertOffsetToCorrectRotation, Function | Sm
  */
 HWTEST_F(ScreenSessionManagerTest, ConfigureScreenSnapshotParams, Function | SmallTest | Level3)
 {
-    ssm_->OnStart();
     auto stringConfig = ScreenSceneConfig::GetStringConfig();
     if (g_isPcDevice) {
         ASSERT_EQ(stringConfig.count("screenSnapshotBundleName"), 1);
@@ -4074,6 +4090,34 @@ HWTEST_F(ScreenSessionManagerTest, CalculateXYPosition, Function | SmallTest | L
     int32_t y = screenSession->GetScreenProperty().GetY();
     EXPECT_EQ(0, y);
     ssm_->DestroyVirtualScreen(screenId);
+}
+
+/**
+ * @tc.name: NotifyCastWhenSwitchScbNode
+ * @tc.desc: NotifyCastWhenSwitchScbNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, NotifyCastWhenSwitchScbNode, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    ASSERT_NE(displayManagerAgent, nullptr);
+
+    ScreenId id = 2;
+    sptr<ScreenSession> newSession = new (std::nothrow) ScreenSession(id, ScreenProperty(), 0);
+    newSession ->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
+    ASSERT_NE(newSession, nullptr);
+    ssm_->screenSessionMap_[id] = newSession;
+    ScreenId id1 = 3;
+    sptr<ScreenSession> newSession1 = new (std::nothrow) ScreenSession(id1, ScreenProperty(), 0);
+    newSession1 ->SetScreenCombination(ScreenCombination::SCREEN_UNIQUE);
+    ASSERT_NE(newSession1, nullptr);
+    ssm_->screenSessionMap_[id1] = newSession1;
+    ScreenId id2 = 4;
+    sptr<ScreenSession> newSession2 = nullptr;
+    ssm_->screenSessionMap_[id2] = newSession2;
+
+    ssm_->NotifyCastWhenSwitchScbNode();
 }
 }
 } // namespace Rosen

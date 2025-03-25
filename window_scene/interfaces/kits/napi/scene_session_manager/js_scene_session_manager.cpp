@@ -2944,8 +2944,8 @@ napi_value JsSceneSessionManager::OnUpdateMaximizeMode(napi_env env, napi_callba
 
 napi_value JsSceneSessionManager::OnUpdateSessionDisplayId(napi_env env, napi_callback_info info)
 {
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
+    size_t argc = ARGC_FIVE;
+    napi_value argv[ARGC_FIVE] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_TWO) {
         WLOGFE("Argc is invalid: %{public}zu", argc);
@@ -2967,7 +2967,13 @@ napi_value JsSceneSessionManager::OnUpdateSessionDisplayId(napi_env env, napi_ca
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    SceneSessionManager::GetInstance().UpdateSessionDisplayId(persistentId, screenId);
+
+    WSRect winRect = { 0, 0, 0, 0 };
+    if (argc > ARGC_TWO && ConvertRectInfoFromJs(env, argv[ARG_INDEX_TWO], winRect) && !winRect.IsEmpty()) {
+        SceneSessionManager::GetInstance().UpdateSessionDisplayId(persistentId, screenId, winRect);
+    } else {
+        SceneSessionManager::GetInstance().UpdateSessionDisplayId(persistentId, screenId);
+    }
     return NapiGetUndefined(env);
 }
 
@@ -4150,7 +4156,7 @@ napi_value JsSceneSessionManager::OnSetIsWindowRectAutoSave(napi_env env, napi_c
     size_t argc = DEFAULT_ARG_COUNT;
     napi_value argv[DEFAULT_ARG_COUNT] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc != ARGC_TWO) {
+    if (argc != DEFAULT_ARG_COUNT) {
         TLOGE(WmsLogTag::WMS_MAIN, "Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
@@ -4170,7 +4176,21 @@ napi_value JsSceneSessionManager::OnSetIsWindowRectAutoSave(napi_env env, napi_c
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    SceneSessionManager::GetInstance().SetIsWindowRectAutoSave(key, enabled);
+    std::string abilityKey;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_TWO], abilityKey)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Failed to convert abilityKey to %{public}s", abilityKey.c_str());
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    bool isSaveBySpecifiedFlag = false;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_THREE], isSaveBySpecifiedFlag)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Failed to convert isSaveBySpecifiedFlag to %{public}d", isSaveBySpecifiedFlag);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    SceneSessionManager::GetInstance().SetIsWindowRectAutoSave(key, enabled, abilityKey, isSaveBySpecifiedFlag);
     return NapiGetUndefined(env);
 }
 

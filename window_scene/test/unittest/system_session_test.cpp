@@ -799,6 +799,21 @@ HWTEST_F(SystemSessionTest, UpdatePiPWindowStateChanged, Function | SmallTest | 
     EXPECT_EQ(WindowType::WINDOW_TYPE_PIP, system->GetWindowType());
     system->UpdatePiPWindowStateChanged(true);
 }
+
+/**
+ * @tc.name: GetSubWindowZLevel
+ * @tc.desc: GetSubWindowZLevel
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemSessionTest, GetSubWindowZLevel, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "GetSubWindowZLevel";
+    info.bundleName_ = "GetSubWindowZLevel";
+    sptr<SystemSession> systemSession = sptr<SystemSession>::MakeSptr(info, nullptr);
+    systemSession->property_->zLevel_ = 1;
+    EXPECT_EQ(1, systemSession->GetSubWindowZLevel());
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
