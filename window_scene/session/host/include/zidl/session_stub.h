@@ -111,6 +111,7 @@ private:
     int HandleUpdatePiPRect(MessageParcel& data, MessageParcel& reply);
     int HandleUpdatePiPControlStatus(MessageParcel& data, MessageParcel& reply);
     int HandleSetAutoStartPiP(MessageParcel& data, MessageParcel& reply);
+    int HandleUpdatePiPDefaultWindowSizeType(MessageParcel& data, MessageParcel& reply);
 
     // Window Pattern
     int HandleNotifyWindowAttachStateListenerRegistered(MessageParcel& data, MessageParcel& reply);

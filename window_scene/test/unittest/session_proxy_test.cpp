@@ -424,6 +424,24 @@ HWTEST_F(SessionProxyTest, SetAutoStartPiP, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: UpdatePiPDefaultWindowSizeType
+ * @tc.desc: sessionStub sessionStubTest
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionProxyTest, UpdatePiPDefaultWindowSizeType, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "UpdatePiPDefaultWindowSizeType: UpdatePiPDefaultWindowSizeType start";
+    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
+    uint32_t defaultWindowSizeType = 1;
+    ASSERT_EQ(WSError::WS_OK, sProxy->UpdatePiPDefaultWindowSizeType(defaultWindowSizeType));
+    GTEST_LOG_(INFO) << "UpdatePiPDefaultWindowSizeType: UpdatePiPDefaultWindowSizeType end";
+}
+
+/**
  * @tc.name: GetGlobalScaledRect
  * @tc.desc: normal function
  * @tc.type: FUNC

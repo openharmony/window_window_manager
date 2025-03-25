@@ -1582,6 +1582,37 @@ void SceneSession::SetSessionPiPControlStatusChangeCallback(const NotifySessionP
     }, __func__);
 }
 
+void SceneSession::SetUpdatePiPDefaultWindowSizeTypeCallback(const NotifyUpdatePiPDefaultWindowSizeTypeFunc& func)
+{
+    auto task = [weakThis = wptr(this), func, where = __func__] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_PIP, "%{public}s session is null", where);
+            return;
+        }
+        session->updatePiPDefaultWindowSizeTypeCallbackFunc_ = func;
+    };
+    PostTask(task, __func__);
+}
+
+WSError SceneSession::UpdatePiPDefaultWindowSizeType(uint32_t defaultWindowSizeType)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "defaultWindowSizeType:%{public}u", defaultWindowSizeType);
+    auto task = [weakThis = wptr(this), defaultWindowSizeType, where = __func__] {
+        auto session = weakThis.promote();
+        if (!session || session->isTerminating_) {
+            TLOGNE(WmsLogTag::WMS_PIP, "%{public}s session is null or is terminating", where);
+            return;
+        }
+        if (session->updatePiPDefaultWindowSizeTypeCallbackFunc_) {
+            HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::NotifyUpdatePiPDefaultWindowSizeType");
+            session->updatePiPDefaultWindowSizeTypeCallbackFunc_(defaultWindowSizeType);
+        }
+    };
+    PostTask(task, __func__);
+    return WSError::WS_OK;
+}
+
 void SceneSession::SetAutoStartPiPStatusChangeCallback(const NotifyAutoStartPiPStatusChangeFunc& func)
 {
     PostTask([weakThis = wptr(this), func, where = __func__] {
