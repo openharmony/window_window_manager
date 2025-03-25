@@ -528,11 +528,11 @@ HWTEST_F(WindowSceneSessionImplTest, InvalidWindow, Function | SmallTest | Level
     option->SetWindowName("InvalidWindow");
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->MoveTo(0, 0));
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->Resize(0, 0));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, window->Resize(0, 0));
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetBackgroundColor(std::string("???")));
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetTransparent(false));
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Show(2, false));
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Resize(2, 2));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, window->Resize(2, 2));
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Minimize());
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Maximize());
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->MaximizeFloating());
