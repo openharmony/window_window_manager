@@ -7855,7 +7855,7 @@ WSError SceneSession::UpdateRotationChangeRegistered(int32_t persistentId, bool 
             } else {
                 session->isRotationChangeCallbackRegistered = false;
             }
-    }, __func__);
+        }, __func__);
 
     return WSError::WS_OK;
 }
