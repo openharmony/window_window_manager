@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 
+#include "application_context.h"
 #include "display_manager.h"
 #include "input_event.h"
 #include "key_event.h"
@@ -135,7 +136,8 @@ HWTEST_F(SceneSessionTest3, BindDialogSessionTarget1, Function | SmallTest | Lev
     result = sceneSession->BindDialogSessionTarget(sceneSession2);
     ASSERT_EQ(result, WSError::WS_OK);
 
-    sceneSession1->onBindDialogTarget_ = [](const sptr<SceneSession>&) {};
+    sceneSession->onBindDialogTarget_ = [](const sptr<SceneSession>&) {};
+    sceneSession1 = sptr<SceneSession>::MakeSptr(info, nullptr);
     result = sceneSession->BindDialogSessionTarget(sceneSession1);
     ASSERT_EQ(result, WSError::WS_OK);
 }
@@ -658,7 +660,7 @@ HWTEST_F(SceneSessionTest3, SetWindowRectAutoSaveCallback, Function | SmallTest 
     sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
     sceneSession->property_ = windowSessionProperty;
 
-    NotifySetWindowRectAutoSaveFunc func1 = [](bool enabled) {
+    NotifySetWindowRectAutoSaveFunc func1 = [](bool enabled, bool isSaveBySpecifiedFlag) {
         return;
     };
     sceneSession->SetWindowRectAutoSaveCallback(std::move(func1));
@@ -727,61 +729,389 @@ HWTEST_F(SceneSessionTest3, SetWindowCornerRadius, Function | SmallTest | Level2
 }
 
 /**
- * @tc.name: AddSidebarMaskColorModifier
- * @tc.desc: AddSidebarMaskColorModifier
+ * @tc.name: AddSidebarBlur01
+ * @tc.desc: AddSidebarBlur01
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest3, AddSidebarMaskColorModifier, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest3, AddSidebarBlur01, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "AddSidebarMaskColorModifier";
-    info.bundleName_ = "AddSidebarMaskColorModifier";
+    info.abilityName_ = "AddSidebarBlur01";
+    info.bundleName_ = "AddSidebarBlur01";
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
      
-    struct RSSurfaceNodeConfig config;
-    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
-    session->AddSidebarMaskColorModifier();
+    struct RSSurfaceNodeConfig surfaceNodeConfig;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig);
     EXPECT_EQ(nullptr, session->GetSurfaceNode());
-    EXPECT_EQ(nullptr, session->maskColorValue_);
+
+    session->AddSidebarBlur();
+    EXPECT_EQ(nullptr, session->blurRadiusValue_);
+    EXPECT_EQ(nullptr, session->blurSaturationValue_);
+    EXPECT_EQ(nullptr, session->blurBrightnessValue_);
+    EXPECT_EQ(nullptr, session->blurMaskColorValue_);
     
     session->surfaceNode_ = surfaceNode;
-    session->AddSidebarMaskColorModifier();
     EXPECT_NE(nullptr, session->GetSurfaceNode());
-    EXPECT_NE(nullptr, session->maskColorValue_);
+
+    AbilityRuntime::Context::applicationContext_ = std::make_shared<
+        AbilityRuntime::ApplicationContext>();
+    std::shared_ptr<AbilityRuntime::ApplicationContext> appContext =
+        AbilityRuntime::Context::GetApplicationContext();
+    EXPECT_NE(nullptr, appContext);
+
+    appContext->contextImpl_ = std::make_shared<AbilityRuntime::ContextImpl>();
+    appContext->contextImpl_->config_ = std::make_shared<AppExecFwk::Configuration>();
+    std::shared_ptr<AppExecFwk::Configuration> appContextConfig = appContext->GetConfiguration();
+    EXPECT_NE(nullptr, appContextConfig);
+
+    appContextConfig->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE,
+        AppExecFwk::ConfigurationInner::COLOR_MODE_DARK);
+
+    session->AddSidebarBlur();
+    EXPECT_NE(nullptr, session->blurRadiusValue_);
+    EXPECT_NE(nullptr, session->blurSaturationValue_);
+    EXPECT_NE(nullptr, session->blurBrightnessValue_);
+    EXPECT_NE(nullptr, session->blurMaskColorValue_);
 }
 
 /**
- * @tc.name: SetSidebarMaskColorModifier
- * @tc.desc: SetSidebarMaskColorModifier
+ * @tc.name: AddSidebarBlur02
+ * @tc.desc: AddSidebarBlur02
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest3, SetSidebarMaskColorModifier, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest3, AddSidebarBlur02, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "SetSidebarMaskColorModifier";
-    info.bundleName_ = "SetSidebarMaskColorModifier";
+    info.abilityName_ = "AddSidebarBlur02";
+    info.bundleName_ = "AddSidebarBlur02";
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
      
-    struct RSSurfaceNodeConfig config;
-    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
-    session->AddSidebarMaskColorModifier();
+    struct RSSurfaceNodeConfig surfaceNodeConfig;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig);
     EXPECT_EQ(nullptr, session->GetSurfaceNode());
-    EXPECT_EQ(nullptr, session->maskColorValue_);
+ 
+    session->AddSidebarBlur();
+    EXPECT_EQ(nullptr, session->blurRadiusValue_);
+    EXPECT_EQ(nullptr, session->blurSaturationValue_);
+    EXPECT_EQ(nullptr, session->blurBrightnessValue_);
+    EXPECT_EQ(nullptr, session->blurMaskColorValue_);
     
     session->surfaceNode_ = surfaceNode;
-    session->AddSidebarMaskColorModifier();
     EXPECT_NE(nullptr, session->GetSurfaceNode());
-    EXPECT_NE(nullptr, session->maskColorValue_);
+ 
+    AbilityRuntime::Context::applicationContext_ = std::make_shared<
+        AbilityRuntime::ApplicationContext>();
+    std::shared_ptr<AbilityRuntime::ApplicationContext> appContext =
+        AbilityRuntime::Context::GetApplicationContext();
+    EXPECT_NE(nullptr, appContext);
+ 
+    appContext->contextImpl_ = std::make_shared<AbilityRuntime::ContextImpl>();
+    appContext->contextImpl_->config_ = std::make_shared<AppExecFwk::Configuration>();
+    std::shared_ptr<AppExecFwk::Configuration> appContextConfig = appContext->GetConfiguration();
+    EXPECT_NE(nullptr, appContextConfig);
+ 
+    appContextConfig->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE,
+        AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT);
+ 
+    session->AddSidebarBlur();
+    EXPECT_NE(nullptr, session->blurRadiusValue_);
+    EXPECT_NE(nullptr, session->blurSaturationValue_);
+    EXPECT_NE(nullptr, session->blurBrightnessValue_);
+    EXPECT_NE(nullptr, session->blurMaskColorValue_);
+}
+
+/*
+ * @c.name: AddSidebarBlur03
+ * @c.desc: AddSidebarBlur03
+ * @c.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, AddSidebarBlur03, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "AddSidebarBlur03";
+    info.bundleName_ = "AddSidebarBlur03";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+     
+    struct RSSurfaceNodeConfig surfaceNodeConfig;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig);
+    EXPECT_EQ(nullptr, session->GetSurfaceNode());
+    session->surfaceNode_ = surfaceNode;
+    EXPECT_NE(nullptr, session->GetSurfaceNode());
+ 
+    AbilityRuntime::Context::applicationContext_ = std::make_shared<
+        AbilityRuntime::ApplicationContext>();
+    std::shared_ptr<AbilityRuntime::ApplicationContext> appContext =
+        AbilityRuntime::Context::GetApplicationContext();
+    EXPECT_NE(nullptr, appContext);
+ 
+    appContext->contextImpl_ = std::make_shared<AbilityRuntime::ContextImpl>();
+    appContext->contextImpl_->config_ = std::make_shared<AppExecFwk::Configuration>();
+    std::shared_ptr<AppExecFwk::Configuration> appContextConfig = appContext->GetConfiguration();
+    EXPECT_NE(nullptr, appContextConfig);
+ 
+    appContextConfig->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE,
+        AppExecFwk::ConfigurationInner::COLOR_MODE_DARK);
+ 
+    session->AddSidebarBlur();
+    float radiusOpenDark = session->blurRadiusValue_->Get();
+    float saturationOpenDark = session->blurSaturationValue_->Get();
+    float brightnessOpenDark = session->blurBrightnessValue_->Get();
+    Rosen::RSColor colorOpenDark = session->blurMaskColorValue_->Get();
+    EXPECT_EQ(SIDEBAR_DEFAULT_RADIUS_DARK, radiusOpenDark);
+    EXPECT_EQ(SIDEBAR_DEFAULT_SATURATION_DARK, saturationOpenDark);
+    EXPECT_EQ(SIDEBAR_DEFAULT_BRIGHTNESS_DARK, brightnessOpenDark);
+    EXPECT_EQ(SIDEBAR_DEFAULT_MASKCOLOR_DARK, colorOpenDark.AsArgbInt());
+}
+
+/**
+ * @tc.name: AddSidebarBlur04
+ * @tc.desc: AddSidebarBlur04
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, AddSidebarBlur04, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "AddSidebarBlur04";
+    info.bundleName_ = "AddSidebarBlur04";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+     
+    struct RSSurfaceNodeConfig surfaceNodeConfig;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig);
+    EXPECT_EQ(nullptr, session->GetSurfaceNode());
+    session->surfaceNode_ = surfaceNode;
+    EXPECT_NE(nullptr, session->GetSurfaceNode());
+
+    AbilityRuntime::Context::applicationContext_ = std::make_shared<
+        AbilityRuntime::ApplicationContext>();
+    std::shared_ptr<AbilityRuntime::ApplicationContext> appContext =
+        AbilityRuntime::Context::GetApplicationContext();
+    EXPECT_NE(nullptr, appContext);
+
+    appContext->contextImpl_ = std::make_shared<AbilityRuntime::ContextImpl>();
+    appContext->contextImpl_->config_ = std::make_shared<AppExecFwk::Configuration>();
+    std::shared_ptr<AppExecFwk::Configuration> appContextConfig = appContext->GetConfiguration();
+    EXPECT_NE(nullptr, appContextConfig);
+
+    appContextConfig->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE,
+        AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT);
+
+    session->AddSidebarBlur();
+    float radiusOpenLight = session->blurRadiusValue_->Get();
+    float saturationOpenLight = session->blurSaturationValue_->Get();
+    float brightnessOpenLight = session->blurBrightnessValue_->Get();
+    Rosen::RSColor colorOpenLight = session->blurMaskColorValue_->Get();
+    EXPECT_EQ(SIDEBAR_DEFAULT_RADIUS_LIGHT, radiusOpenLight);
+    EXPECT_EQ(SIDEBAR_DEFAULT_SATURATION_LIGHT, saturationOpenLight);
+    EXPECT_EQ(SIDEBAR_DEFAULT_BRIGHTNESS_LIGHT, brightnessOpenLight);
+    EXPECT_EQ(SIDEBAR_DEFAULT_MASKCOLOR_LIGHT, colorOpenLight.AsArgbInt());
+}
+
+/**
+ * @tc.name: SetSidebarBlur01
+ * @tc.desc: SetSidebarBlur01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, SetSidebarBlur01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetSidebarBlur01";
+    info.bundleName_ = "SetSidebarBlur01";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+     
+    struct RSSurfaceNodeConfig surfaceNodeConfig;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig);
+    EXPECT_EQ(nullptr, session->GetSurfaceNode());
+
+    session->AddSidebarBlur();
+    EXPECT_EQ(nullptr, session->blurRadiusValue_);
+    EXPECT_EQ(nullptr, session->blurSaturationValue_);
+    EXPECT_EQ(nullptr, session->blurBrightnessValue_);
+    EXPECT_EQ(nullptr, session->blurMaskColorValue_);
     
-    session->SetSidebarMaskColorModifier(false);
-    Rosen::RSColor colorClose = session->maskColorValue_->Get();
-    EXPECT_EQ(session->defaultMaskColor_, colorClose.AsArgbInt());
+    session->surfaceNode_ = surfaceNode;
+    EXPECT_NE(nullptr, session->GetSurfaceNode());
+
+    AbilityRuntime::Context::applicationContext_ = std::make_shared<
+        AbilityRuntime::ApplicationContext>();
+    std::shared_ptr<AbilityRuntime::ApplicationContext> appContext =
+        AbilityRuntime::Context::GetApplicationContext();
+    EXPECT_NE(nullptr, appContext);
+ 
+    appContext->contextImpl_ = std::make_shared<AbilityRuntime::ContextImpl>();
+    appContext->contextImpl_->config_ = std::make_shared<AppExecFwk::Configuration>();
+    std::shared_ptr<AppExecFwk::Configuration> appContextConfig = appContext->GetConfiguration();
+    EXPECT_NE(nullptr, appContextConfig);
+ 
+    appContextConfig->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE,
+        AppExecFwk::ConfigurationInner::COLOR_MODE_DARK);
+
+    session->AddSidebarBlur();
+    EXPECT_NE(nullptr, session->blurRadiusValue_);
+    EXPECT_NE(nullptr, session->blurSaturationValue_);
+    EXPECT_NE(nullptr, session->blurBrightnessValue_);
+    EXPECT_NE(nullptr, session->blurMaskColorValue_);
+}
+
+/**
+ * @tc.name: SetSidebarBlur02
+ * @tc.desc: SetSidebarBlur02
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, SetSidebarBlur02, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetSidebarBlur02";
+    info.bundleName_ = "SetSidebarBlur02";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+     
+    struct RSSurfaceNodeConfig surfaceNodeConfig;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig);
+    EXPECT_EQ(nullptr, session->GetSurfaceNode());
+
+    session->AddSidebarBlur();
+    EXPECT_EQ(nullptr, session->blurRadiusValue_);
+    EXPECT_EQ(nullptr, session->blurSaturationValue_);
+    EXPECT_EQ(nullptr, session->blurBrightnessValue_);
+    EXPECT_EQ(nullptr, session->blurMaskColorValue_);
     
-    session->SetSidebarMaskColorModifier(true);
-    Rosen::RSColor colorOpen = session->maskColorValue_->Get();
-    EXPECT_EQ(session->snapshotMaskColor_, colorOpen.AsArgbInt());
+    session->surfaceNode_ = surfaceNode;
+    EXPECT_NE(nullptr, session->GetSurfaceNode());
+
+    AbilityRuntime::Context::applicationContext_ = std::make_shared<
+        AbilityRuntime::ApplicationContext>();
+    std::shared_ptr<AbilityRuntime::ApplicationContext> appContext =
+        AbilityRuntime::Context::GetApplicationContext();
+    EXPECT_NE(nullptr, appContext);
+ 
+    appContext->contextImpl_ = std::make_shared<AbilityRuntime::ContextImpl>();
+    appContext->contextImpl_->config_ = std::make_shared<AppExecFwk::Configuration>();
+    std::shared_ptr<AppExecFwk::Configuration> appContextConfig = appContext->GetConfiguration();
+    EXPECT_NE(nullptr, appContextConfig);
+ 
+    appContextConfig->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE,
+        AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT);
+
+    session->AddSidebarBlur();
+    EXPECT_NE(nullptr, session->blurRadiusValue_);
+    EXPECT_NE(nullptr, session->blurSaturationValue_);
+    EXPECT_NE(nullptr, session->blurBrightnessValue_);
+    EXPECT_NE(nullptr, session->blurMaskColorValue_);
+}
+
+/**
+ * @tc.name: SetSidebarBlur03
+ * @tc.desc: SetSidebarBlur03
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, SetSidebarBlur03, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetSidebarBlur03";
+    info.bundleName_ = "SetSidebarBlur03";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+     
+    struct RSSurfaceNodeConfig surfaceNodeConfig;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig);
+    EXPECT_EQ(nullptr, session->GetSurfaceNode());
+    session->surfaceNode_ = surfaceNode;
+    EXPECT_NE(nullptr, session->GetSurfaceNode());
+
+    AbilityRuntime::Context::applicationContext_ = std::make_shared<
+        AbilityRuntime::ApplicationContext>();
+    std::shared_ptr<AbilityRuntime::ApplicationContext> appContext =
+        AbilityRuntime::Context::GetApplicationContext();
+    EXPECT_NE(nullptr, appContext);
+ 
+    appContext->contextImpl_ = std::make_shared<AbilityRuntime::ContextImpl>();
+    appContext->contextImpl_->config_ = std::make_shared<AppExecFwk::Configuration>();
+    std::shared_ptr<AppExecFwk::Configuration> appContextConfig = appContext->GetConfiguration();
+    EXPECT_NE(nullptr, appContextConfig);
+ 
+    appContextConfig->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE,
+        AppExecFwk::ConfigurationInner::COLOR_MODE_DARK);
+
+    session->AddSidebarBlur();
+    session->SetSidebarBlur(false);
+    float radiusCloseDark = session->blurRadiusValue_->Get();
+    float saturationCloseDark = session->blurSaturationValue_->Get();
+    float brightnessCloseDark = session->blurBrightnessValue_->Get();
+    Rosen::RSColor colorCloseDark = session->blurMaskColorValue_->Get();
+    EXPECT_EQ(SIDEBAR_BLUR_NUMBER_ZERO, radiusCloseDark);
+    EXPECT_EQ(SIDEBAR_BLUR_NUMBER_ZERO, saturationCloseDark);
+    EXPECT_EQ(SIDEBAR_BLUR_NUMBER_ZERO, brightnessCloseDark);
+    EXPECT_EQ(SIDEBAR_SNAPSHOT_MASKCOLOR_DARK, colorCloseDark.AsArgbInt());
+    
+    session->SetSidebarBlur(true);
+    float radiusOpenDark = session->blurRadiusValue_->Get();
+    float saturationOpenDark = session->blurSaturationValue_->Get();
+    float brightnessOpenDark = session->blurBrightnessValue_->Get();
+    Rosen::RSColor colorOpenDark = session->blurMaskColorValue_->Get();
+    EXPECT_EQ(SIDEBAR_DEFAULT_RADIUS_DARK, radiusOpenDark);
+    EXPECT_EQ(SIDEBAR_DEFAULT_SATURATION_DARK, saturationOpenDark);
+    EXPECT_EQ(SIDEBAR_DEFAULT_BRIGHTNESS_DARK, brightnessOpenDark);
+    EXPECT_EQ(SIDEBAR_DEFAULT_MASKCOLOR_DARK, colorOpenDark.AsArgbInt());
+}
+
+/**
+ * @tc.name: SetSidebarBlur04
+ * @tc.desc: SetSidebarBlur04
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, SetSidebarBlur04, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetSidebarBlur04";
+    info.bundleName_ = "SetSidebarBlur04";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+     
+    struct RSSurfaceNodeConfig surfaceNodeConfig;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig);
+    EXPECT_EQ(nullptr, session->GetSurfaceNode());
+    session->surfaceNode_ = surfaceNode;
+    EXPECT_NE(nullptr, session->GetSurfaceNode());
+
+    AbilityRuntime::Context::applicationContext_ = std::make_shared<
+        AbilityRuntime::ApplicationContext>();
+    std::shared_ptr<AbilityRuntime::ApplicationContext> appContext =
+        AbilityRuntime::Context::GetApplicationContext();
+    EXPECT_NE(nullptr, appContext);
+ 
+    appContext->contextImpl_ = std::make_shared<AbilityRuntime::ContextImpl>();
+    appContext->contextImpl_->config_ = std::make_shared<AppExecFwk::Configuration>();
+    std::shared_ptr<AppExecFwk::Configuration> appContextConfig = appContext->GetConfiguration();
+    EXPECT_NE(nullptr, appContextConfig);
+ 
+    appContextConfig->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE,
+        AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT);
+
+    session->AddSidebarBlur();
+    session->SetSidebarBlur(false);
+    float radiusCloseLight = session->blurRadiusValue_->Get();
+    float saturationCloseLight = session->blurSaturationValue_->Get();
+    float brightnessCloseLight = session->blurBrightnessValue_->Get();
+    Rosen::RSColor colorCloseLight = session->blurMaskColorValue_->Get();
+    EXPECT_EQ(SIDEBAR_BLUR_NUMBER_ZERO, radiusCloseLight);
+    EXPECT_EQ(SIDEBAR_BLUR_NUMBER_ZERO, saturationCloseLight);
+    EXPECT_EQ(SIDEBAR_BLUR_NUMBER_ZERO, brightnessCloseLight);
+    EXPECT_EQ(SIDEBAR_SNAPSHOT_MASKCOLOR_LIGHT, colorCloseLight.AsArgbInt());
+    
+    session->SetSidebarBlur(true);
+    float radiusOpenLight = session->blurRadiusValue_->Get();
+    float saturationOpenLight = session->blurSaturationValue_->Get();
+    float brightnessOpenLight = session->blurBrightnessValue_->Get();
+    Rosen::RSColor colorOpenLight = session->blurMaskColorValue_->Get();
+    EXPECT_EQ(SIDEBAR_DEFAULT_RADIUS_LIGHT, radiusOpenLight);
+    EXPECT_EQ(SIDEBAR_DEFAULT_SATURATION_LIGHT, saturationOpenLight);
+    EXPECT_EQ(SIDEBAR_DEFAULT_BRIGHTNESS_LIGHT, brightnessOpenLight);
+    EXPECT_EQ(SIDEBAR_DEFAULT_MASKCOLOR_LIGHT, colorOpenLight.AsArgbInt());
 }
 
 /**
@@ -797,7 +1127,7 @@ HWTEST_F(SceneSessionTest3, AddExtensionTokenInfo, Function | SmallTest | Level2
     info.abilityName_ = "AddExtensionTokenInfo";
     info.bundleName_ = "AddExtensionTokenInfo";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    
+
     sceneSession->AddExtensionTokenInfo(tokenInfo);
     EXPECT_NE(sceneSession, nullptr);
 }
@@ -832,7 +1162,7 @@ HWTEST_F(SceneSessionTest3, OnNotifyAboveLockScreen, Function | SmallTest | Leve
     info.abilityName_ = "OnNotifyAboveLockScreen";
     info.bundleName_ = "OnNotifyAboveLockScreen";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    
+
     sceneSession->OnNotifyAboveLockScreen();
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->CheckExtensionOnLockScreenToClose();
@@ -852,27 +1182,8 @@ HWTEST_F(SceneSessionTest3, CloseExtensionSync, Function | SmallTest | Level2)
     info.abilityName_ = "CloseExtensionSync";
     info.bundleName_ = "CloseExtensionSync";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    
-    sceneSession->CloseExtensionSync(tokenInfo);
-    EXPECT_NE(sceneSession, nullptr);
-}
 
-/**
- * @tc.name: NotifyTargetScreenWidthAndHeight
- * @tc.desc: NotifyTargetScreenWidthAndHeight
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest3, NotifyTargetScreenWidthAndHeight, Function | SmallTest | Level2)
-{
-    uint32_t screenWidth = 10;
-    uint32_t screenHeight = 10;
-    bool isScreenAngleMismatch = true;
-    SessionInfo info;
-    info.abilityName_ = "NotifyTargetScreenWidthAndHeight";
-    info.bundleName_ = "NotifyTargetScreenWidthAndHeight";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    
-    sceneSession->NotifyTargetScreenWidthAndHeight(isScreenAngleMismatch, screenWidth, screenHeight);
+    sceneSession->CloseExtensionSync(tokenInfo);
     EXPECT_NE(sceneSession, nullptr);
 }
 
@@ -888,7 +1199,7 @@ HWTEST_F(SceneSessionTest3, SetIsStatusBarVisible, Function | SmallTest | Level2
     info.abilityName_ = "SetIsStatusBarVisible";
     info.bundleName_ = "SetIsStatusBarVisible";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    
+
     sceneSession->SetIsStatusBarVisible(isVisible);
     EXPECT_NE(sceneSession, nullptr);
 }
@@ -905,7 +1216,7 @@ HWTEST_F(SceneSessionTest3, GetAllAvoidAreas, Function | SmallTest | Level2)
     info.abilityName_ = "GetAllAvoidAreas";
     info.bundleName_ = "GetAllAvoidAreas";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    
+
     auto res = sceneSession->GetAllAvoidAreas(avoidAreas);
     EXPECT_EQ(res, WSError::WS_OK);
 }
@@ -924,7 +1235,7 @@ HWTEST_F(SceneSessionTest3, NotifyPipWindowSizeChange, Function | SmallTest | Le
     info.abilityName_ = "NotifyPipWindowSizeChange";
     info.bundleName_ = "NotifyPipWindowSizeChange";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    
+
     auto res = sceneSession->NotifyPipWindowSizeChange(width, height, scale);
     EXPECT_EQ(res, WSError::WS_ERROR_NULLPTR);
 }
@@ -942,7 +1253,7 @@ HWTEST_F(SceneSessionTest3, SendPointEventForMoveDrag, Function | SmallTest | Le
     info.abilityName_ = "SendPointEventForMoveDrag";
     info.bundleName_ = "SendPointEventForMoveDrag";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    
+
     auto res = sceneSession->SendPointEventForMoveDrag(pointerEvent, isExecuteDelayRaise);
     EXPECT_EQ(res, WSError::WS_OK);
 }
@@ -958,7 +1269,7 @@ HWTEST_F(SceneSessionTest3, DisallowActivationFromPendingBackground, Function | 
     info.abilityName_ = "DisallowActivationFromPendingBackground";
     info.bundleName_ = "DisallowActivationFromPendingBackground";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    
+
     auto res = sceneSession->DisallowActivationFromPendingBackground(true, true, true, true);
     EXPECT_EQ(res, false);
 }
@@ -975,7 +1286,7 @@ HWTEST_F(SceneSessionTest3, UpdateFullScreenWaterfallMode, Function | SmallTest 
     info.abilityName_ = "UpdateFullScreenWaterfallMode";
     info.bundleName_ = "UpdateFullScreenWaterfallMode";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    
+
     sceneSession->UpdateFullScreenWaterfallMode(isWaterfallMode);
     EXPECT_NE(sceneSession, nullptr);
 }
@@ -991,7 +1302,7 @@ HWTEST_F(SceneSessionTest3, RegisterFullScreenWaterfallModeChangeCallback, Funct
     info.abilityName_ = "RegisterFullScreenWaterfallModeChangeCallback";
     info.bundleName_ = "RegisterFullScreenWaterfallModeChangeCallback";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    
+
     std::function<void(bool isWaterfallMode)> func = [](bool isWaterfallMode) {
         return;
     };
@@ -1010,7 +1321,7 @@ HWTEST_F(SceneSessionTest3, RegisterThrowSlipAnimationStateChangeCallback, Funct
     info.abilityName_ = "RegisterThrowSlipAnimationStateChangeCallback";
     info.bundleName_ = "RegisterThrowSlipAnimationStateChangeCallback";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    
+
     std::function<void(bool isAnimating)> func = [](bool isAnimating) {
         return;
     };
@@ -1029,7 +1340,7 @@ HWTEST_F(SceneSessionTest3, MaskSupportEnterWaterfallMode, Function | SmallTest 
     info.abilityName_ = "MaskSupportEnterWaterfallMode";
     info.bundleName_ = "MaskSupportEnterWaterfallMode";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    
+
     sceneSession->MaskSupportEnterWaterfallMode();
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->pcFoldScreenController_ = nullptr;
@@ -1053,6 +1364,25 @@ HWTEST_F(SceneSessionTest3, HandleActionUpdateMainWindowTopmost, Function | Smal
     sceneSession->property_ = windowSessionProperty;
 
     auto res = sceneSession->HandleActionUpdateMainWindowTopmost(windowSessionProperty, action);
+    EXPECT_EQ(res, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: HandleActionUpdateSubWindowZLevel
+ * @tc.desc: HandleActionUpdateSubWindowZLevel
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, HandleActionUpdateSubWindowZLevel, Function | SmallTest | Level2)
+{
+    WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_SUB_WINDOW_Z_LEVEL;
+    SessionInfo info;
+    info.abilityName_ = "HandleActionUpdateSubWindowZLevel";
+    info.bundleName_ = "HandleActionUpdateSubWindowZLevel";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->property_ = windowSessionProperty;
+
+    auto res = sceneSession->HandleActionUpdateSubWindowZLevel(windowSessionProperty, action);
     EXPECT_EQ(res, WMError::WM_OK);
 }
 
@@ -1105,7 +1435,7 @@ HWTEST_F(SceneSessionTest3, RegisterSetLandscapeMultiWindowFunc, Function | Smal
     info.abilityName_ = "RegisterSetLandscapeMultiWindowFunc";
     info.bundleName_ = "RegisterSetLandscapeMultiWindowFunc";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    
+
     std::function<void(bool isLandscapeMultiWindow)> func = [](bool isLandscapeMultiWindow) {
         return;
     };
@@ -1143,7 +1473,7 @@ HWTEST_F(SceneSessionTest3, RequestHideKeyboard, Function | SmallTest | Level2)
     info.abilityName_ = "RequestHideKeyboard";
     info.bundleName_ = "RequestHideKeyboard";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    
+
     sceneSession->RequestHideKeyboard(isAppColdStart);
     EXPECT_NE(sceneSession, nullptr);
 }
@@ -1160,7 +1490,7 @@ HWTEST_F(SceneSessionTest3, SetStartingWindowExitAnimationFlag, Function | Small
     info.abilityName_ = "SetStartingWindowExitAnimationFlag";
     info.bundleName_ = "SetStartingWindowExitAnimationFlag";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    
+
     sceneSession->SetStartingWindowExitAnimationFlag(enable);
     EXPECT_NE(sceneSession, nullptr);
 }
@@ -1177,7 +1507,7 @@ HWTEST_F(SceneSessionTest3, SetSkipSelfWhenShowOnVirtualScreen, Function | Small
     info.abilityName_ = "SetSkipSelfWhenShowOnVirtualScreen";
     info.bundleName_ = "SetSkipSelfWhenShowOnVirtualScreen";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    
+
     sceneSession->SetSkipSelfWhenShowOnVirtualScreen(isSkip);
     EXPECT_NE(sceneSession, nullptr);
 }
@@ -1194,7 +1524,7 @@ HWTEST_F(SceneSessionTest3, RegisterRequestedOrientationChangeCallback, Function
     info.bundleName_ = "RegisterRequestedOrientationChangeCallback";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
 
-    std::function<void(uint32_t orientation)> func = [](uint32_t orientation) {
+    std::function<void(uint32_t orientation, bool needAnimation)> func = [](uint32_t orientation, bool needAnimation) {
         return;
     };
     sceneSession->RegisterRequestedOrientationChangeCallback(std::move(func));
@@ -1232,6 +1562,141 @@ HWTEST_F(SceneSessionTest3, IsShowOnLockScreen, Function | SmallTest | Level2)
 
     sceneSession->property_ = nullptr;
     EXPECT_FALSE(sceneSession->IsShowOnLockScreen(2000));
+}
+
+/**
+ * @tc.name: NotifySetParentSession
+ * @tc.desc: NotifySetParentSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, NotifySetParentSession, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "NotifySetParentSession";
+    info.bundleName_ = "NotifySetParentSession";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    int32_t oldParentWindowId = 1;
+    int32_t newParentWindowId = 2;
+    auto res = sceneSession->NotifySetParentSession(oldParentWindowId, newParentWindowId);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+}
+
+/**
+ * @tc.name: UpdateSubWindowLevel
+ * @tc.desc: UpdateSubWindowLevel
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, UpdateSubWindowLevel, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "UpdateSubWindowLevel";
+    info.bundleName_ = "UpdateSubWindowLevel";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    uint32_t subWindowLevel = 10;
+    EXPECT_NE(subWindowLevel, sceneSession->GetSessionProperty()->GetSubWindowLevel());
+    sceneSession->UpdateSubWindowLevel(subWindowLevel);
+    EXPECT_EQ(subWindowLevel, sceneSession->GetSessionProperty()->GetSubWindowLevel());
+}
+
+/**
+ * @tc.name: GetMaxSubWindowLevel
+ * @tc.desc: GetMaxSubWindowLevel
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, GetMaxSubWindowLevel, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "GetMaxSubWindowLevel";
+    info.bundleName_ = "GetMaxSubWindowLevel";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_EQ(1, sceneSession->GetMaxSubWindowLevel());
+}
+
+/**
+ * @tc.name: NotifyUpdateFlagCallback
+ * @tc.desc: NotifyUpdateFlagCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, NotifyUpdateFlagCallback, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "NotifyUpdateFlagCallback";
+    info.bundleName_ = "NotifyUpdateFlagCallback";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    NotifyUpdateFlagFunc func1 = [](const std::string& flag) {
+        return;
+    };
+    sceneSession->NotifyUpdateFlagCallback(std::move(func1));
+    ASSERT_NE(nullptr, sceneSession->onUpdateFlagFunc_);
+}
+
+/**
+ * @tc.name: GetKeyboardOccupiedAreaWithRotation1
+ * @tc.desc: GetKeyboardOccupiedAreaWithRotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, GetKeyboardOccupiedAreaWithRotation1, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "GetKeyboardOccupiedAreaWithRotation";
+    info.bundleName_ = "GetKeyboardOccupiedAreaWithRotation";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->specificCallback_ = nullptr;
+
+    int32_t persistentId = 1;
+    uint32_t rotation = 90;
+    std::vector<std::pair<bool, WSRect>> avoidAreas;
+    std::pair<bool, WSRect> keyboardOccupiedArea = {false, {0, 0, 0, 0}};
+    avoidAreas.emplace_back(keyboardOccupiedArea);
+    sceneSession->GetKeyboardOccupiedAreaWithRotation(persistentId, rotation, avoidAreas);
+    uint32_t areaSize = static_cast<uint32_t>(avoidAreas.size());
+    ASSERT_EQ(1, areaSize);
+    ASSERT_EQ(false, avoidAreas[0].first);
+}
+
+/**
+ * @tc.name: GetKeyboardOccupiedAreaWithRotation2
+ * @tc.desc: GetKeyboardOccupiedAreaWithRotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, GetKeyboardOccupiedAreaWithRotation2, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "GetKeyboardOccupiedAreaWithRotation";
+    info.bundleName_ = "GetKeyboardOccupiedAreaWithRotation";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sceneSession->specificCallback_ = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sceneSession->specificCallback_->onKeyboardRotationChange_ = nullptr;
+
+    int32_t persistentId = 1;
+    uint32_t rotation = 90;
+    std::vector<std::pair<bool, WSRect>> avoidAreas;
+    std::pair<bool, WSRect> keyboardOccupiedArea = {true, {0, 0, 0, 0}};
+    avoidAreas.emplace_back(keyboardOccupiedArea);
+    sceneSession->GetKeyboardOccupiedAreaWithRotation(persistentId, rotation, avoidAreas);
+    uint32_t areaSize = static_cast<uint32_t>(avoidAreas.size());
+    ASSERT_EQ(1, areaSize);
+    ASSERT_EQ(true, avoidAreas[0].first);
+}
+
+/**
+ * @tc.name: SetSkipEventOnCastPlus01
+ * @tc.desc: check func SetSkipEventOnCastPlus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, SetSkipEventOnCastPlus01, Function | SmallTest | Level0)
+{
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    SessionInfo info;
+    info.abilityName_ = "SetSkipEventOnCastPlus";
+    info.bundleName_ = "SetSkipEventOnCastPlus";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->SetSkipEventOnCastPlus(false);
+    ASSERT_EQ(false, sceneSession->GetSessionProperty()->GetSkipEventOnCastPlus());
 }
 }
 }

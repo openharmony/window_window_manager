@@ -363,6 +363,16 @@ bool WindowOption::GetWindowTopmost() const
     return isTopmost_;
 }
 
+void WindowOption::SetSubWindowZLevel(int32_t zLevel)
+{
+    zLevel_ = zLevel;
+}
+
+int32_t WindowOption::GetSubWindowZLevel() const
+{
+    return zLevel_;
+}
+
 void WindowOption::SetIsSystemKeyboard(bool isSystemKeyboard)
 {
     isSystemKeyboard_ = isSystemKeyboard;

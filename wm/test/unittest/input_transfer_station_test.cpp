@@ -33,7 +33,7 @@ public:
     virtual void SetUp() override;
     virtual void TearDown() override;
     sptr<WindowImpl> window_;
-    std::shared_ptr<MMI::IInputEventConsumer> listener;
+    std::shared_ptr<InputEventListener> listener;
 };
 void InputTransferStationTest::SetUpTestCase() {}
 

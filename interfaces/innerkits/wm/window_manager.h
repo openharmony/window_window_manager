@@ -194,6 +194,21 @@ public:
 };
 
 /**
+ * @class IKeyboardCallingWindowDisplayChangedListener
+ *
+ * @brief Observe the display change of keyboard callingWindow.
+ */
+class IKeyboardCallingWindowDisplayChangedListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when calling window display changed.
+     *
+     * @param callingWindowInfo The information about the calling window.
+     */
+    virtual void OnCallingWindowDisplayChanged(const CallingWindowInfo& callingWindowInfo) = 0;
+};
+
+/**
  * @class IWindowPidVisibilityChangedListener
  *
  * @brief Listener to observe window visibility that in same pid.
@@ -206,6 +221,33 @@ public:
      * @param info
      */
     virtual void NotifyWindowPidVisibilityChanged(const sptr<WindowPidVisibilityInfo>& info) = 0;
+};
+
+/**
+ * @class IWindowInfoChangedListener
+ *
+ * @brief Listener to observe window info.
+ */
+class IWindowInfoChangedListener : virtual public RefBase {
+public:
+    IWindowInfoChangedListener() = default;
+
+    virtual ~IWindowInfoChangedListener() = default;
+
+    /**
+     * @brief Notify caller when window Info changed.
+     *
+     * @param windowInfoList
+     */
+    virtual void OnWindowInfoChanged(
+        const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList) = 0;
+
+    void SetInterestInfo(const std::unordered_set<WindowInfoKey>& interestInfo) { interestInfo_ = interestInfo; }
+    const std::unordered_set<WindowInfoKey>& GetInterestInfo() const { return interestInfo_; }
+    void AddInterestInfo(WindowInfoKey interestValue) { interestInfo_.insert(interestValue); }
+
+private:
+    std::unordered_set<WindowInfoKey> interestInfo_;
 };
 
 /**
@@ -274,7 +316,8 @@ struct AppUseControlInfo : public Parcelable {
     {
         return parcel.WriteString(bundleName_) &&
                parcel.WriteInt32(appIndex_) &&
-               parcel.WriteBool(isNeedControl_);
+               parcel.WriteBool(isNeedControl_) &&
+               parcel.WriteBool(isControlRecentOnly_);
     }
 
     /**
@@ -288,7 +331,8 @@ struct AppUseControlInfo : public Parcelable {
         auto info = new AppUseControlInfo();
         if (!parcel.ReadString(info->bundleName_) ||
             !parcel.ReadInt32(info->appIndex_) ||
-            !parcel.ReadBool(info->isNeedControl_)) {
+            !parcel.ReadBool(info->isNeedControl_) ||
+            !parcel.ReadBool(info->isControlRecentOnly_)) {
             delete info;
             return nullptr;
         }
@@ -298,6 +342,7 @@ struct AppUseControlInfo : public Parcelable {
     std::string bundleName_ = "";
     int32_t appIndex_ = 0;
     bool isNeedControl_ = false;
+    bool isControlRecentOnly_ = false;
 };
 
 /**
@@ -921,6 +966,30 @@ public:
     WMError UnregisterWindowStyleChangedListener(const sptr<IWindowStyleChangedListener>& listener);
 
     /**
+     * @brief Register a listener to detect display changes for the keyboard calling window.
+     *
+     * @param listener IKeyboardCallingWindowDisplayChangedListener
+     * @return WM_OK means register success, others means unregister failed.
+     */
+    WMError RegisterCallingWindowDisplayChangedListener(
+        const sptr<IKeyboardCallingWindowDisplayChangedListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    
+    /**
+     * @brief Unregister the listener that detects display changes for the keyboard calling window.
+     *
+     * @param listener IKeyboardCallingWindowDisplayChangedListener
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    WMError UnregisterCallingWindowDisplayChangedListener(
+        const sptr<IKeyboardCallingWindowDisplayChangedListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
      * @brief Skip Snapshot for app process.
      *
      * @param pid process id
@@ -1021,6 +1090,19 @@ public:
     WMError GetAppDragResizeType(const std::string& bundleName, DragResizeType& dragResizeType);
 
     /**
+     * @brief Set drag key frame type of specific app.
+     * effective order:
+     *  1. resize when drag
+     *  2. key frame
+     *  3. default value
+     *
+     * @param bundleName bundleName of specific app
+     * @param keyFramePolicy param of key frame
+     * @return WM_OK means get success, others means failed.
+     */
+    WMError SetAppKeyFramePolicy(const std::string& bundleName, const KeyFramePolicy& keyFramePolicy);
+
+    /**
      * @brief Shift window pointer event within the same application. Only main window and subwindow.
      *
      * @param sourceWindowId Window id which the pointer event shift from
@@ -1040,6 +1122,42 @@ public:
      */
     WMError RequestFocus(int32_t persistentId, bool isFocused = true,
         bool byForeground = true, WindowFocusChangeReason reason = WindowFocusChangeReason::SA_REQUEST);
+
+    /**
+     * @brief Minimize window within the vector of windowid, Only main window.
+     *
+     * @param WindowId window id which to minimize
+     * @return WM_OK means window minimize event success, others means failed.
+     */
+    WMError MinimizeByWindowId(const std::vector<int32_t>& windowIds);
+
+    /**
+     * @brief Set foreground window number. Only main window. Only support freeMultiWindow.
+     *
+     * @param windowNum foreground window number
+     * @return WM_OK means set success, others means failed.
+     */
+    WMError SetForegroundWindowNum(int32_t windowNum);
+
+    /**
+     * @brief Register window info change callback.
+     *
+     * @param observedInfo Property which to observe.
+     * @param listener Listener to observe window info.
+     * @return WM_OK means register success, others means failed.
+     */
+    WMError RegisterWindowInfoChangeCallback(const std::unordered_set<WindowInfoKey>& observedInfo,
+        const sptr<IWindowInfoChangedListener>& listener);
+    
+    /**
+     * @brief Unregister window info change callback.
+     *
+     * @param observedInfo Property which to observe.
+     * @param listener Listener to observe window info.
+     * @return WM_OK means unregister success, others means failed.
+     */
+    WMError UnregisterWindowInfoChangeCallback(const std::unordered_set<WindowInfoKey>& observedInfo,
+        const sptr<IWindowInfoChangedListener>& listener);
 
 private:
     WindowManager();
@@ -1067,6 +1185,12 @@ private:
     void UpdateVisibleWindowNum(const std::vector<VisibleWindowNumInfo>& visibleWindowNumInfo);
     WMError NotifyWindowStyleChange(WindowStyleType type);
     void NotifyWindowPidVisibilityChanged(const sptr<WindowPidVisibilityInfo>& info) const;
+    WMError ProcessRegisterWindowInfoChangeCallback(WindowInfoKey observedInfo,
+        const sptr<IWindowInfoChangedListener>& listener);
+    WMError ProcessUnregisterWindowInfoChangeCallback(WindowInfoKey observedInfo,
+        const sptr<IWindowInfoChangedListener>& listener);
+    WMError RegisterVisibilityStateChangedListener(const sptr<IWindowInfoChangedListener>& listener);
+    WMError UnregisterVisibilityStateChangedListener(const sptr<IWindowInfoChangedListener>& listener);
 };
 } // namespace Rosen
 } // namespace OHOS

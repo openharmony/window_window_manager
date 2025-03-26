@@ -28,6 +28,8 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowImpl"};
+constexpr uint32_t API_VERSION_MOD = 1000;
+constexpr int32_t API_VERSION_18 = 18;
 }
 std::map<std::string, std::pair<uint32_t, sptr<Window>>> WindowImpl::windowMap_;
 std::map<uint32_t, std::vector<sptr<WindowImpl>>> WindowImpl::subWindowMap_;
@@ -405,6 +407,11 @@ std::shared_ptr<Media::PixelMap> WindowImpl::Snapshot()
     return nullptr;
 }
 
+WMError WindowImpl::SnapshotIgnorePrivacy(std::shared_ptr<Media::PixelMap>& pixelMap)
+{
+    return WMError::WM_OK;
+}
+
 void WindowImpl::DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
 {
     return;
@@ -466,6 +473,17 @@ WMError WindowImpl::SetSystemBarProperties(const std::map<WindowType, SystemBarP
 WMError WindowImpl::GetSystemBarProperties(std::map<WindowType, SystemBarProperty>& properties)
 {
     return WMError::WM_OK;
+}
+
+void WindowImpl::UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool systemBarEnableAnimation,
+    SystemBarProperty& property)
+{
+    property.enable_ = systemBarEnable;
+    property.enableAnimation_ = systemBarEnableAnimation;
+    // isolate on api 18
+    if (GetApiTargetVersion() >= API_VERSION_18) {
+        property.settingFlag_ |= SystemBarSettingFlag::ENABLE_SETTING;
+    }
 }
 
 WMError WindowImpl::SetLayoutFullScreen(bool status)
@@ -985,6 +1003,10 @@ bool WindowImpl::IsFullScreen() const
     return (IsLayoutFullScreen() && !statusProperty.enable_ && !naviProperty.enable_);
 }
 
+void WindowImpl::NotifyPreferredOrientationChange(Orientation orientation)
+{
+}
+
 void WindowImpl::SetRequestedOrientation(Orientation orientation)
 {
 }
@@ -1228,6 +1250,15 @@ WMError WindowImpl::SetImmersiveModeEnabledState(bool enable)
 bool WindowImpl::GetImmersiveModeEnabledState() const
 {
     return true;
+}
+
+uint32_t WindowImpl::GetApiTargetVersion() const
+{
+    uint32_t version = 0;
+    if ((context_ != nullptr) && (context_->GetApplicationInfo() != nullptr)) {
+        version = context_->GetApplicationInfo()->apiTargetVersion % API_VERSION_MOD;
+    }
+    return version;
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -1252,6 +1252,110 @@ HWTEST_F(SceneSessionManagerTest9, IsLastPiPWindowVisible01, Function | SmallTes
     ret = ssm_->IsLastPiPWindowVisible(surfaceId, lastVisibilityState);
     ASSERT_EQ(ret, false);
 }
+
+/**
+ * @tc.name: UpdateSpecificSessionClientDisplayId01
+ * @tc.desc: UpdateSpecificSessionClientDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest9, UpdateSpecificSessionClientDisplayId01, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest9";
+    sessionInfo.abilityName_ = "UpdateSpecificSessionClientDisplayId";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sceneSession->persistentId_ = 1;
+    ssm_->sceneSessionMap_.insert({1, sceneSession});
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    property->SetParentPersistentId(1);
+    auto displayId = ssm_->UpdateSpecificSessionClientDisplayId(property);
+    EXPECT_EQ(0, displayId);
+    EXPECT_EQ(0, property->GetDisplayId());
+
+    property->SetDisplayId(999);
+    displayId = ssm_->UpdateSpecificSessionClientDisplayId(property);
+    EXPECT_EQ(0, displayId);
+    EXPECT_EQ(0, property->GetDisplayId());
+}
+
+/**
+ * @tc.name: UpdateSpecificSessionClientDisplayId02
+ * @tc.desc: UpdateSpecificSessionClientDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest9, UpdateSpecificSessionClientDisplayId02, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest9";
+    sessionInfo.abilityName_ = "UpdateSpecificSessionClientDisplayId";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sceneSession->persistentId_ = 1;
+    sceneSession->SetClientDisplayId(999);
+    ssm_->sceneSessionMap_.insert({1, sceneSession});
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    property->SetParentPersistentId(1);
+    auto displayId = ssm_->UpdateSpecificSessionClientDisplayId(property);
+    EXPECT_EQ(999, displayId);
+    EXPECT_EQ(0, property->GetDisplayId());
+
+    property->SetDisplayId(999);
+    displayId = ssm_->UpdateSpecificSessionClientDisplayId(property);
+    EXPECT_EQ(999, displayId);
+    EXPECT_EQ(0, property->GetDisplayId());
+}
+
+/**
+ * @tc.name: UpdateSpecificSessionClientDisplayId03
+ * @tc.desc: UpdateSpecificSessionClientDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest9, UpdateSpecificSessionClientDisplayId03, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest9";
+    sessionInfo.abilityName_ = "UpdateSpecificSessionClientDisplayId";
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    auto displayId = ssm_->UpdateSpecificSessionClientDisplayId(property);
+    EXPECT_EQ(0, displayId);
+    EXPECT_EQ(0, property->GetDisplayId());
+
+    property->SetDisplayId(999);
+    displayId = ssm_->UpdateSpecificSessionClientDisplayId(property);
+    EXPECT_EQ(999, displayId);
+    EXPECT_EQ(0, property->GetDisplayId());
+}
+
+/**
+ * @tc.name: SetSkipEventOnCastPlusInner01
+ * @tc.desc: SetSkipEventOnCastPlusInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest9, SetSkipEventOnCastPlusInner01, Function | SmallTest | Level0)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest9";
+    sessionInfo.abilityName_ = "SetSkipEventOnCastPlusInner";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    ssm_->SetSkipEventOnCastPlusInner(sceneSession->GetPersistentId(), true);
+    EXPECT_EQ(true, sceneSession->GetSessionProperty()->GetSkipEventOnCastPlus());
+    ssm_->SetSkipEventOnCastPlusInner(sceneSession->GetPersistentId(), false);
+    EXPECT_EQ(false, sceneSession->GetSessionProperty()->GetSkipEventOnCastPlus());
+}
 }
 } // namespace Rosen
 } // namespace OHOS

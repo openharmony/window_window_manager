@@ -32,18 +32,27 @@
 #include "session/host/include/main_session.h"
 #include "window_manager_agent.h"
 #include "zidl/window_manager_agent_interface.h"
+#include "mock/mock_window_manager_agent_lite.h"
+#include "session_manager/include/session_manager_agent_controller.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+class KeyboardTestData;
 class SceneSessionManagerTest12 : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+
+    // keyboard
+    void ConstructKeyboardCallingWindowTestData(const KeyboardTestData& keyboardTestData);
+    bool CheckKeyboardOccupiedAreaInfo(const Rect& desiredRect, const WSRect& actualRect);
+    void GetKeyboardOccupiedAreaWithRotationTestData(WindowUIType windowType, DisplayId cDisplayId,
+        DisplayId kDisplayId, SessionState keyboardState, WindowGravity gravity);
 
     static sptr<SceneSessionManager> ssm_;
 private:
@@ -71,6 +80,99 @@ void SceneSessionManagerTest12::TearDown()
     usleep(WAIT_SYNC_IN_NS);
 }
 
+const Rect landscapePanelRect_ = {0, 538, 2720, 722};
+const Rect portraitPanelRect_ = {0, 1700, 1260, 1020};
+std::vector<std::pair<bool, WSRect>> avoidAreas_ = {};
+bool SceneSessionManagerTest12::CheckKeyboardOccupiedAreaInfo(const Rect& desiredRect, const WSRect& actualRect)
+{
+    return desiredRect.posX_ == actualRect.posX_ && desiredRect.posY_ == actualRect.posY_ &&
+        static_cast<int32_t>(desiredRect.width_) == actualRect.width_ &&
+        static_cast<int32_t>(desiredRect.height_) == actualRect.height_;
+}
+
+void SceneSessionManagerTest12::GetKeyboardOccupiedAreaWithRotationTestData(WindowUIType windowType,
+    DisplayId cDisplayId, DisplayId kDisplayId, SessionState keyboardState, WindowGravity gravity)
+{
+    ssm_->sceneSessionMap_.clear();
+    avoidAreas_.clear();
+    ssm_->systemConfig_.windowUIType_ = windowType;
+    SessionInfo callingSessionInfo;
+    callingSessionInfo.abilityName_ = "callingSession";
+    callingSessionInfo.bundleName_ = "callingSession";
+    sptr<SceneSession> callingSession = sptr<SceneSession>::MakeSptr(callingSessionInfo, nullptr);
+    sptr<WindowSessionProperty> callingSessionProperties = sptr<WindowSessionProperty>::MakeSptr();
+    callingSessionProperties->SetDisplayId(cDisplayId);
+    callingSession->SetSessionProperty(callingSessionProperties);
+
+    SessionInfo keyboardSessionInfo;
+    keyboardSessionInfo.abilityName_ = "keyboardSession";
+    keyboardSessionInfo.bundleName_ = "keyboardSession";
+    sptr<SceneSession> keyboardSession = sptr<SceneSession>::MakeSptr(keyboardSessionInfo, nullptr);
+    keyboardSession->SetScreenId(kDisplayId);
+    sptr<WindowSessionProperty> keyboardProperties = sptr<WindowSessionProperty>::MakeSptr();
+    keyboardProperties->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    keyboardProperties->SetIsSystemKeyboard(false);
+    KeyboardLayoutParams params;
+    params.LandscapePanelRect_ = landscapePanelRect_;
+    params.PortraitPanelRect_ = portraitPanelRect_;
+    params.gravity_ = gravity;
+    keyboardProperties->SetKeyboardLayoutParams(params);
+    keyboardSession->SetSessionState(keyboardState);
+    keyboardSession->SetSessionProperty(keyboardProperties);
+
+    ssm_->sceneSessionMap_.insert({1, callingSession});
+    ssm_->sceneSessionMap_.insert({2, keyboardSession});
+}
+
+class KeyboardTestData {
+public:
+    KeyboardTestData(uint64_t cScreenId, int32_t cPid, int32_t kScreenId, WindowType keyboardWindowType,
+        bool isSysKeyboard) : cScreenId_(cScreenId), cPid_(cPid), kScreenId_(kScreenId),
+        keyboardWindowType_(keyboardWindowType), isSysKeyboard_(isSysKeyboard) {}
+
+    void SetCallingSessionId(uint32_t callingSessionId)
+    {
+        callingSessionId_ = callingSessionId;
+    }
+
+private:
+    uint64_t cScreenId_; // screenId of callingWindow
+    int32_t cPid_; // callingPid of callingWindow
+    int32_t kScreenId_; // screenId of keyboard
+    WindowType keyboardWindowType_;
+    bool isSysKeyboard_;
+    uint32_t callingSessionId_;
+};
+
+void SceneSessionManagerTest12::ConstructKeyboardCallingWindowTestData(const KeyboardTestData& keyboardTestData)
+{
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo callingSessionInfo;
+    callingSessionInfo.abilityName_ = "callingSession";
+    callingSessionInfo.bundleName_ = "callingSession";
+    callingSessionInfo.screenId_ = keyboardTestData.cScreenId_;
+    sptr<SceneSession> callingSession = sptr<SceneSession>::MakeSptr(callingSessionInfo, nullptr);
+    callingSession->callingPid_ = keyboardTestData.cPid_;
+    sptr<WindowSessionProperty> callingSessionProperties = sptr<WindowSessionProperty>::MakeSptr();
+    callingSessionProperties->SetDisplayId(keyboardTestData.cScreenId_);
+    callingSession->SetSessionProperty(callingSessionProperties);
+
+    SessionInfo keyboardSessionInfo;
+    keyboardSessionInfo.abilityName_ = "keyboardSession";
+    keyboardSessionInfo.bundleName_ = "keyboardSession";
+    sptr<SceneSession> keyboardSession = sptr<SceneSession>::MakeSptr(keyboardSessionInfo, nullptr);
+
+    keyboardSession->SetScreenId(keyboardTestData.kScreenId_);
+    sptr<WindowSessionProperty> keyboardProperties = sptr<WindowSessionProperty>::MakeSptr();
+    keyboardProperties->SetWindowType(keyboardTestData.keyboardWindowType_);
+    keyboardProperties->SetIsSystemKeyboard(keyboardTestData.isSysKeyboard_);
+    keyboardProperties->SetCallingSessionId(keyboardTestData.callingSessionId_);
+    keyboardSession->SetSessionProperty(keyboardProperties);
+
+    ssm_->sceneSessionMap_.insert({keyboardTestData.callingSessionId_, callingSession});
+    ssm_->sceneSessionMap_.insert({2, keyboardSession});
+}
+
 namespace {
 /**
  * @tc.name: GetResourceManager
@@ -83,21 +185,6 @@ HWTEST_F(SceneSessionManagerTest12, GetResourceManager, Function | SmallTest | L
     AppExecFwk::AbilityInfo abilityInfo;
     auto result = ssm_->GetResourceManager(abilityInfo);
     EXPECT_EQ(result, nullptr);
-}
-
-/**
- * @tc.name: GetStartupPageFromResource
- * @tc.desc: GetStartupPageFromResource
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest12, GetStartupPageFromResource, Function | SmallTest | Level3)
-{
-    ASSERT_NE(ssm_, nullptr);
-    AppExecFwk::AbilityInfo abilityInfo;
-    std::string path = "";
-    uint32_t bgColor = 0;
-    bool result = ssm_->GetStartupPageFromResource(abilityInfo, path, bgColor);
-    EXPECT_EQ(result, false);
 }
 
 /**
@@ -315,6 +402,68 @@ HWTEST_F(SceneSessionManagerTest12, TestCheckSystemWindowPermission_09, Function
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
 
     property->SetWindowType(WindowType::WINDOW_TYPE_TOAST);
+    ASSERT_EQ(true, ssm_->CheckSystemWindowPermission(property));
+}
+
+/**
+ * @tc.name: TestCheckSystemWindowPermission_010
+ * @tc.desc: Test CheckSystemWindowPermission with windowType WINDOW_TYPE_SYSTEM_SUB_WINDOW
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, TestCheckSystemWindowPermission_010, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, ssm_);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetParentPersistentId(100101);
+    property->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW);
+    ASSERT_EQ(true, ssm_->CheckSystemWindowPermission(property));
+}
+
+/**
+ * @tc.name: TestCheckSystemWindowPermission_011
+ * @tc.desc: Test CheckSystemWindowPermission with windowType WINDOW_TYPE_SYSTEM_SUB_WINDOW
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, TestCheckSystemWindowPermission_011, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, ssm_);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetParentPersistentId(100101);
+    property->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW);
+
+    sptr<WindowSessionProperty> parentProperty = sptr<WindowSessionProperty>::MakeSptr();
+    parentProperty->SetPersistentId(100101);
+    parentProperty->SetWindowType(WindowType::WINDOW_TYPE_TOAST);
+    SessionInfo info;
+    info.abilityName_ = "CheckSystemWindowPermission";
+    info.bundleName_ = "CheckSystemWindowPermission";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->SetSessionProperty(parentProperty);
+
+    ASSERT_EQ(true, ssm_->CheckSystemWindowPermission(property));
+}
+
+/**
+ * @tc.name: TestCheckSystemWindowPermission_012
+ * @tc.desc: Test CheckSystemWindowPermission with windowType WINDOW_TYPE_SYSTEM_SUB_WINDOW
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, TestCheckSystemWindowPermission_012, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, ssm_);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetParentPersistentId(100101);
+    property->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW);
+
+    sptr<WindowSessionProperty> parentProperty = sptr<WindowSessionProperty>::MakeSptr();
+    parentProperty->SetPersistentId(100101);
+    parentProperty->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    SessionInfo info;
+    info.abilityName_ = "CheckSystemWindowPermission";
+    info.bundleName_ = "CheckSystemWindowPermission";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->SetSessionProperty(parentProperty);
+
     ASSERT_EQ(true, ssm_->CheckSystemWindowPermission(property));
 }
 
@@ -1505,18 +1654,441 @@ HWTEST_F(SceneSessionManagerTest12, RemoveLifeCycleTaskByPersistentId, Function 
  */
 HWTEST_F(SceneSessionManagerTest12, SetStatusBarAvoidHeight, Function | SmallTest | Level3)
 {
-    SessionInfo info;
-    info.abilityName_ = "test1";
-    info.bundleName_ = "test1";
-    info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    sptr<SceneSessionMocker> sceneSession = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
-    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
-    EXPECT_CALL(*sceneSession, UpdateCrossAxis()).Times(1);
     int32_t height = 10;
     ssm_->SetStatusBarAvoidHeight(height);
     WSRect barArea;
     ssm_->GetStatusBarAvoidHeight(barArea);
     ASSERT_EQ(barArea.height_, height);
+}
+
+/**
+ * @tc.name: GetKeyboardOccupiedAreaWithRotation1
+ * @tc.desc: PC device is not compatible
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetKeyboardOccupiedAreaWithRotation1, Function | SmallTest | Level3)
+{
+    GetKeyboardOccupiedAreaWithRotationTestData(WindowUIType::PHONE_WINDOW, 0, 0,
+        SessionState::STATE_FOREGROUND, WindowGravity::WINDOW_GRAVITY_BOTTOM);
+    ssm_->GetKeyboardOccupiedAreaWithRotation(1, 0, avoidAreas_);
+    ASSERT_EQ(1, static_cast<uint32_t>(avoidAreas_.size()));
+    ASSERT_EQ(true, avoidAreas_[0].first);
+    ASSERT_EQ(true, CheckKeyboardOccupiedAreaInfo(portraitPanelRect_, avoidAreas_[0].second));
+
+    GetKeyboardOccupiedAreaWithRotationTestData(WindowUIType::PAD_WINDOW, 0, 0,
+        SessionState::STATE_FOREGROUND, WindowGravity::WINDOW_GRAVITY_BOTTOM);
+    ssm_->GetKeyboardOccupiedAreaWithRotation(1, 90, avoidAreas_);
+    ASSERT_EQ(1, static_cast<uint32_t>(avoidAreas_.size()));
+    ASSERT_EQ(true, avoidAreas_[0].first);
+    ASSERT_EQ(true, CheckKeyboardOccupiedAreaInfo(landscapePanelRect_, avoidAreas_[0].second));
+
+    GetKeyboardOccupiedAreaWithRotationTestData(WindowUIType::PC_WINDOW, 0, 0,
+        SessionState::STATE_FOREGROUND, WindowGravity::WINDOW_GRAVITY_BOTTOM);
+    ssm_->GetKeyboardOccupiedAreaWithRotation(1, 0, avoidAreas_);
+    ASSERT_EQ(0, static_cast<uint32_t>(avoidAreas_.size()));
+}
+
+/**
+ * @tc.name: GetKeyboardOccupiedAreaWithRotation2
+ * @tc.desc: test function : GetKeyboardOccupiedAreaWithRotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetKeyboardOccupiedAreaWithRotation2, Function | SmallTest | Level3)
+{
+    GetKeyboardOccupiedAreaWithRotationTestData(WindowUIType::PHONE_WINDOW, 0, 0,
+        SessionState::STATE_FOREGROUND, WindowGravity::WINDOW_GRAVITY_BOTTOM);
+
+    ssm_->GetKeyboardOccupiedAreaWithRotation(-1, 0, avoidAreas_);
+    ASSERT_EQ(0, static_cast<uint32_t>(avoidAreas_.size()));
+
+    ssm_->GetKeyboardOccupiedAreaWithRotation(0, 0, avoidAreas_);
+    ASSERT_EQ(0, static_cast<uint32_t>(avoidAreas_.size()));
+
+    GetKeyboardOccupiedAreaWithRotationTestData(WindowUIType::PHONE_WINDOW, 12, 0,
+        SessionState::STATE_FOREGROUND, WindowGravity::WINDOW_GRAVITY_BOTTOM);
+    ssm_->GetKeyboardOccupiedAreaWithRotation(1, 0, avoidAreas_);
+    ASSERT_EQ(0, static_cast<uint32_t>(avoidAreas_.size()));
+}
+
+/**
+ * @tc.name: GetKeyboardOccupiedAreaWithRotation3
+ * @tc.desc: test function : GetKeyboardOccupiedAreaWithRotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetKeyboardOccupiedAreaWithRotation3, Function | SmallTest | Level3)
+{
+    GetKeyboardOccupiedAreaWithRotationTestData(WindowUIType::PHONE_WINDOW, 0, 0,
+        SessionState::STATE_FOREGROUND, WindowGravity::WINDOW_GRAVITY_BOTTOM);
+    
+    ssm_->GetKeyboardOccupiedAreaWithRotation(1, 450, avoidAreas_);
+    ASSERT_EQ(0, static_cast<uint32_t>(avoidAreas_.size()));
+
+    ssm_->GetKeyboardOccupiedAreaWithRotation(1, -90, avoidAreas_);
+    ASSERT_EQ(0, static_cast<uint32_t>(avoidAreas_.size()));
+
+    ssm_->GetKeyboardOccupiedAreaWithRotation(1, 45, avoidAreas_);
+    ASSERT_EQ(0, static_cast<uint32_t>(avoidAreas_.size()));
+}
+
+/**
+ * @tc.name: GetKeyboardOccupiedAreaWithRotation4
+ * @tc.desc: test function : GetKeyboardOccupiedAreaWithRotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetKeyboardOccupiedAreaWithRotation4, Function | SmallTest | Level3)
+{
+    GetKeyboardOccupiedAreaWithRotationTestData(WindowUIType::PHONE_WINDOW, 0, 0,
+        SessionState::STATE_FOREGROUND, WindowGravity::WINDOW_GRAVITY_FLOAT);
+    
+    ssm_->GetKeyboardOccupiedAreaWithRotation(1, 0, avoidAreas_);
+    ASSERT_EQ(1, static_cast<uint32_t>(avoidAreas_.size()));
+    ASSERT_EQ(false, avoidAreas_[0].first);
+    ASSERT_EQ(true, CheckKeyboardOccupiedAreaInfo(portraitPanelRect_, avoidAreas_[0].second));
+}
+
+/**
+ * @tc.name: GetKeyboardOccupiedAreaWithRotation5
+ * @tc.desc: test function : GetKeyboardOccupiedAreaWithRotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetKeyboardOccupiedAreaWithRotation5, Function | SmallTest | Level3)
+{
+    GetKeyboardOccupiedAreaWithRotationTestData(WindowUIType::PHONE_WINDOW, 0, 0,
+        SessionState::STATE_BACKGROUND, WindowGravity::WINDOW_GRAVITY_BOTTOM);
+    
+    ssm_->GetKeyboardOccupiedAreaWithRotation(1, 90, avoidAreas_);
+    ASSERT_EQ(1, static_cast<uint32_t>(avoidAreas_.size()));
+    ASSERT_EQ(false, avoidAreas_[0].first);
+    ASSERT_EQ(true, CheckKeyboardOccupiedAreaInfo(landscapePanelRect_, avoidAreas_[0].second));
+}
+
+/**
+ * @tc.name: GetKeyboardOccupiedAreaWithRotation6
+ * @tc.desc: test function : GetKeyboardOccupiedAreaWithRotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetKeyboardOccupiedAreaWithRotation6, Function | SmallTest | Level2)
+{
+    GetKeyboardOccupiedAreaWithRotationTestData(WindowUIType::PHONE_WINDOW, 0, 0,
+        SessionState::STATE_FOREGROUND, WindowGravity::WINDOW_GRAVITY_BOTTOM);
+
+    ssm_->GetKeyboardOccupiedAreaWithRotation(1, 180, avoidAreas_);
+    ASSERT_EQ(1, static_cast<uint32_t>(avoidAreas_.size()));
+    ASSERT_EQ(true, avoidAreas_[0].first);
+    ASSERT_EQ(true, CheckKeyboardOccupiedAreaInfo(portraitPanelRect_, avoidAreas_[0].second));
+
+    ssm_->GetKeyboardOccupiedAreaWithRotation(1, 360, avoidAreas_);
+    ASSERT_EQ(2, static_cast<uint32_t>(avoidAreas_.size()));
+    ASSERT_EQ(true, avoidAreas_[1].first);
+    ASSERT_EQ(true, CheckKeyboardOccupiedAreaInfo(portraitPanelRect_, avoidAreas_[1].second));
+}
+
+/**
+ * @tc.name: GetKeyboardOccupiedAreaWithRotation7
+ * @tc.desc: test function : GetKeyboardOccupiedAreaWithRotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetKeyboardOccupiedAreaWithRotation7, Function | SmallTest | Level2)
+{
+    GetKeyboardOccupiedAreaWithRotationTestData(WindowUIType::PHONE_WINDOW, 0, 0,
+        SessionState::STATE_ACTIVE, WindowGravity::WINDOW_GRAVITY_BOTTOM);
+    ssm_->GetKeyboardOccupiedAreaWithRotation(1, 270, avoidAreas_);
+
+    ASSERT_EQ(1, static_cast<uint32_t>(avoidAreas_.size()));
+    ASSERT_EQ(true, avoidAreas_[0].first);
+    ASSERT_EQ(true, CheckKeyboardOccupiedAreaInfo(landscapePanelRect_, avoidAreas_[0].second));
+}
+
+/**
+ * @tc.name: SetFocusedSessionDisplayIdIfNeededTest
+ * @tc.desc: test function : SetFocusedSessionDisplayIdIfNeeded
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, SetFocusedSessionDisplayIdIfNeededTest, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test1";
+    sptr<SceneSessionMocker> sceneSessionMock = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetDisplayId(DISPLAY_ID_INVALID);
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSessionMock->SetSessionProperty(property);
+
+    EXPECT_CALL(*sceneSessionMock, SetScreenId(_)).Times(1);
+    sptr<SceneSession> sceneSession = static_cast<sptr<SceneSession>>(sceneSessionMock);
+    ssm_->SetFocusedSessionDisplayIdIfNeeded(sceneSession);
+}
+
+/**
+ * @tc.name: SetFocusedSessionDisplayIdIfNeededTest001
+ * @tc.desc: test function : SetFocusedSessionDisplayIdIfNeeded
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, SetFocusedSessionDisplayIdIfNeededTest001, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test1";
+    sptr<SceneSessionMocker> sceneSessionMock = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetDisplayId(DISPLAY_ID_INVALID + 1);
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSessionMock->SetSessionProperty(property);
+
+    EXPECT_CALL(*sceneSessionMock, SetScreenId(_)).Times(0);
+    sptr<SceneSession> sceneSession = static_cast<sptr<SceneSession>>(sceneSessionMock);
+    ssm_->SetFocusedSessionDisplayIdIfNeeded(sceneSession);
+}
+
+/**
+ * @tc.name: QueryAbilityInfoFromBMSTest
+ * @tc.desc: SceneSesionManager QueryAbilityInfoFromBMS NotifyStartAbility
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, QueryAbilityInfoFromBMSTest, Function | SmallTest | Level1)
+{
+    const int32_t uId = 32;
+    SessionInfo sessionInfo_;
+    sessionInfo_.bundleName_ = "BundleName";
+    sessionInfo_.abilityName_ = "AbilityName";
+    sessionInfo_.moduleName_ = "ModuleName";
+    ssm_->bundleMgr_ = nullptr;
+
+    auto res = ssm_->QueryAbilityInfoFromBMS(uId,
+        sessionInfo_.bundleName_, sessionInfo_.abilityName_, sessionInfo_.moduleName_);
+    EXPECT_EQ(res, nullptr);
+}
+
+/**
+ * @tc.name: QueryAbilityInfoFromBMSTest001
+ * @tc.desc: SceneSesionManager QueryAbilityInfoFromBMS NotifyStartAbility
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, QueryAbilityInfoFromBMSTest001, Function | SmallTest | Level1)
+{
+    const int32_t uId = 32;
+    SessionInfo sessionInfo_;
+    sessionInfo_.bundleName_ = "BundleName";
+    sessionInfo_.abilityName_ = "AbilityName";
+    sessionInfo_.moduleName_ = "ModuleName";
+    ssm_->bundleMgr_ = ssm_->GetBundleManager();
+    SceneSessionManager::SessionInfoList listKey = {
+        .uid_ = uId, .bundleName_ = "BundleName", .abilityName_ = "AbilityName", .moduleName_ = "ModuleName"
+    };
+    ssm_->abilityInfoMap_[listKey] = std::make_shared<AppExecFwk::AbilityInfo>();
+
+    auto res = ssm_->QueryAbilityInfoFromBMS(uId,
+        sessionInfo_.bundleName_, sessionInfo_.abilityName_, sessionInfo_.moduleName_);
+    EXPECT_NE(res, nullptr);
+}
+
+/**
+ * @tc.name: RequestFocusSpecificCheckTest
+ * @tc.desc: Test for RequestFocusSpecificCheck
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, RequestFocusSpecificCheckTest, Function | SmallTest | Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test2";
+    bool byForeground = true;
+    FocusChangeReason reason = FocusChangeReason::CLIENT_REQUEST;
+
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
+    session->persistentId_ = 1;
+    sceneSession->dialogVec_.push_back(session);
+    ssm_->windowFocusController_->UpdateFocusedSessionId(DEFAULT_DISPLAY_ID, 1);
+    sceneSession->SetForceHideState(ForceHideState::NOT_HIDDEN);
+
+    WSError result = ssm_->RequestFocusSpecificCheck(DEFAULT_DISPLAY_ID, sceneSession, byForeground, reason);
+    EXPECT_EQ(result, WSError::WS_DO_NOTHING);
+}
+
+/**
+ * @tc.name: NotifyUnFocusedByMissionTest001
+ * @tc.desc: Test for NotifyUnFocusedByMission
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, NotifyUnFocusedByMissionTest001, Function | SmallTest | Level1)
+{
+    sptr<SceneSession> sceneSession;
+    ssm_->NotifyUnFocusedByMission(sceneSession);
+    EXPECT_EQ(sceneSession, nullptr);
+}
+
+/**
+ * @tc.name: NotifyUnFocusedByMissionTest002
+ * @tc.desc: Test for NotifyUnFocusedByMission
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, NotifyUnFocusedByMissionTest002, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.bundleName_ = "NotifyUnFocusedByMission";
+    info.abilityName_ = "NotifyUnFocusedByMission";
+    info.isSystem_ = true;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ssm_->NotifyUnFocusedByMission(sceneSession);
+    EXPECT_EQ(sceneSession->GetSessionInfo().isSystem_, true);
+}
+
+/**
+ * @tc.name: NotifyUnFocusedByMissionTest003
+ * @tc.desc: Test for NotifyUnFocusedByMission
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, NotifyUnFocusedByMissionTest003, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.bundleName_ = "NotifyUnFocusedByMission";
+    info.abilityName_ = "NotifyUnFocusedByMission";
+    info.isSystem_ = false;
+    ssm_->listenerController_ = std::make_shared<SessionListenerController>();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ssm_->NotifyUnFocusedByMission(sceneSession);
+    EXPECT_EQ(sceneSession->GetSessionInfo().isSystem_, false);
+}
+
+/**
+ * @tc.name: NotifyStackEmptyTest
+ * @tc.desc: test function : NotifyStackEmpty
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, NotifyStackEmptyTest, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.bundleName_ = "NotifyStackEmpty";
+    info.abilityName_ = "NotifyStackEmpty";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    int persistentId = 1112;
+    sceneSession->property_->SetPersistentId(persistentId);
+    auto ret = ssm_->NotifyStackEmpty(persistentId);
+    usleep(WAIT_SYNC_IN_NS);
+    EXPECT_EQ(ret, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: GetCallingWindowInfo1
+ * @tc.desc: test function : GetCallingWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetCallingWindowInfo1, Function | SmallTest | Level2)
+{
+    KeyboardTestData keyboardTestData(0, 57256, 0, WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, false);
+    keyboardTestData.SetCallingSessionId(86);
+    ConstructKeyboardCallingWindowTestData(keyboardTestData);
+    // Invalid callingWindowId
+    CallingWindowInfo info(0, -1, 0, GetUserIdByUid(getuid())); // windowId_ callingPid_ displayId_ userId_
+    WMError ret = ssm_->GetCallingWindowInfo(info);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+}
+
+/**
+ * @tc.name: GetCallingWindowInfo2
+ * @tc.desc: test function : GetCallingWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetCallingWindowInfo2, Function | SmallTest | Level2)
+{
+    KeyboardTestData keyboardTestData(0, 57256, 0, WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, false);
+    keyboardTestData.SetCallingSessionId(86);
+    ConstructKeyboardCallingWindowTestData(keyboardTestData);
+    // Invalid userId
+    int32_t userId = GetUserIdByUid(getuid()) + 1;
+    CallingWindowInfo info(86, -1, 0, userId); // windowId_ callingPid_ displayId_ userId_
+    WMError ret = ssm_->GetCallingWindowInfo(info);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+}
+
+/**
+ * @tc.name: GetCallingWindowInfo3
+ * @tc.desc: test function : GetCallingWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetCallingWindowInfo3, Function | SmallTest | Level2)
+{
+    KeyboardTestData keyboardTestData(12, 57256, 0, WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, false);
+    keyboardTestData.SetCallingSessionId(86);
+    ConstructKeyboardCallingWindowTestData(keyboardTestData);
+    int32_t userId = GetUserIdByUid(getuid());
+    CallingWindowInfo info(86, -1, 0, userId); // windowId_ callingPid_ displayId_ userId_
+    WMError ret = ssm_->GetCallingWindowInfo(info);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(57256, info.callingPid_);
+    ASSERT_EQ(12, info.displayId_);
+}
+
+/**
+ * @tc.name: UpdateSessionDisplayId1
+ * @tc.desc: test function : UpdateSessionDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, UpdateSessionDisplayId1, Function | SmallTest | Level2)
+{
+    sptr<WindowManagerAgentLiteMocker> wmAgentLiteMocker = sptr<WindowManagerAgentLiteMocker>::MakeSptr();
+    SessionManagerAgentController::GetInstance().RegisterWindowManagerAgent(
+        wmAgentLiteMocker, WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_CALLING_DISPLAY, 12345);
+    KeyboardTestData keyboardTestData(0, 57256, 0, WindowType::WINDOW_TYPE_APP_SUB_WINDOW, false);
+    keyboardTestData.SetCallingSessionId(86);
+    ConstructKeyboardCallingWindowTestData(keyboardTestData);
+    EXPECT_CALL(*wmAgentLiteMocker, NotifyCallingWindowDisplayChanged(_)).Times(0);
+    ssm_->UpdateSessionDisplayId(86, 12);
+
+    keyboardTestData = {0, 57256, 0, WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, true};
+    keyboardTestData.SetCallingSessionId(86);
+    ConstructKeyboardCallingWindowTestData(keyboardTestData);
+    EXPECT_CALL(*wmAgentLiteMocker, NotifyCallingWindowDisplayChanged(_)).Times(0);
+    ssm_->UpdateSessionDisplayId(86, 12);
+}
+
+/**
+ * @tc.name: UpdateSessionDisplayId2
+ * @tc.desc: test function : UpdateSessionDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, UpdateSessionDisplayId2, Function | SmallTest | Level2)
+{
+    sptr<WindowManagerAgentLiteMocker> wmAgentLiteMocker = sptr<WindowManagerAgentLiteMocker>::MakeSptr();
+    SessionManagerAgentController::GetInstance().RegisterWindowManagerAgent(
+        wmAgentLiteMocker, WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_CALLING_DISPLAY, 12345);
+    KeyboardTestData keyboardTestData(0, 57256, 0, WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, false);
+    keyboardTestData.SetCallingSessionId(86);
+    ConstructKeyboardCallingWindowTestData(keyboardTestData);
+    SessionInfo info;
+    info.abilityName_ = "non-callingSession";
+    info.bundleName_ = "non-callingSession";
+    info.screenId_ = 0;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->callingPid_ = 54321;
+    sptr<WindowSessionProperty> sceneSessionProperties = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSessionProperties->SetDisplayId(0);
+    sceneSession->SetSessionProperty(sceneSessionProperties);
+    // Add non-callingWindow
+    ssm_->sceneSessionMap_.insert({90, sceneSession});
+    // Change display id of non-callingWindow
+    EXPECT_CALL(*wmAgentLiteMocker, NotifyCallingWindowDisplayChanged(_)).Times(0);
+    ssm_->UpdateSessionDisplayId(90, 12);
+}
+
+/**
+ * @tc.name: UpdateSessionDisplayId3
+ * @tc.desc: test function : UpdateSessionDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, UpdateSessionDisplayId3, Function | SmallTest | Level2)
+{
+    sptr<WindowManagerAgentLiteMocker> wmAgentLiteMocker = sptr<WindowManagerAgentLiteMocker>::MakeSptr();
+    SessionManagerAgentController::GetInstance().RegisterWindowManagerAgent(
+        wmAgentLiteMocker, WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_CALLING_DISPLAY, 12345);
+    KeyboardTestData keyboardTestData(0, 57256, 0, WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, false);
+    keyboardTestData.SetCallingSessionId(86);
+    ConstructKeyboardCallingWindowTestData(keyboardTestData);
+    EXPECT_CALL(*wmAgentLiteMocker, NotifyCallingWindowDisplayChanged(_)).Times(1);
+    ssm_->UpdateSessionDisplayId(86, 12);
 }
 }
 } // namespace Rosen

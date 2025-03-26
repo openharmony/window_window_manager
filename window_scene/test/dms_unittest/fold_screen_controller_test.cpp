@@ -108,6 +108,9 @@ namespace {
      */
     HWTEST_F(FoldScreenControllerTest, SetDisplayMode02, TestSize.Level1)
     {
+        if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+            GTEST_SKIP();
+        }
         std::recursive_mutex mutex;
         FoldScreenController fsc_(mutex, std::shared_ptr<TaskScheduler>());
 
@@ -554,11 +557,12 @@ namespace {
      */
     HWTEST_F(FoldScreenControllerTest, GetTentMode, TestSize.Level1)
     {
-        if (ssm_.IsFoldable()) {
-            ASSERT_NE(ssm_.foldScreenController_, nullptr);
+        if (!ssm_.IsFoldable() || FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+            GTEST_SKIP();
+        }
+        ASSERT_NE(ssm_.foldScreenController_, nullptr);
             auto tentMode = ssm_.foldScreenController_->GetTentMode();
             ASSERT_EQ(tentMode, false);
-        }
     }
 
     /**

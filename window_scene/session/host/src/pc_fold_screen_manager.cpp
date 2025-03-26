@@ -178,14 +178,14 @@ ScreenSide PcFoldScreenManager::CalculateScreenSide(const WSRect& rect)
 {
     int32_t midPosY = rect.height_ / 2 + rect.posY_; // 2: center
     const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] = GetDisplayRects();
-    return midPosY <= (defaultDisplayRect.posY_ + defaultDisplayRect.height_) ?
+    return midPosY <= (foldCreaseRect.posY_ + foldCreaseRect.height_ / 2) ? // 2: center
         ScreenSide::FOLD_B : ScreenSide::FOLD_C;
 }
 
 bool PcFoldScreenManager::IsCrossFoldCrease(const WSRect& rect)
 {
     const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] = GetDisplayRects();
-    const int32_t midScreenY = defaultDisplayRect.posY_ + defaultDisplayRect.height_;
+    const int32_t midScreenY = foldCreaseRect.posY_ + foldCreaseRect.height_ / 2; // 2: center
     return rect.posY_ < midScreenY && rect.posY_ + rect.height_ > midScreenY;
 }
 
@@ -204,7 +204,7 @@ void PcFoldScreenManager::ResetArrangeRule(const WSRect& rect)
 void PcFoldScreenManager::ResetArrangeRule(ScreenSide side)
 {
     if (side != ScreenSide::FOLD_B && side != ScreenSide::FOLD_C) {
-        TLOGD(WmsLogTag::WMS_LAYOUT, "invalid side: %{public}d", static_cast<int32_t>(side));
+        TLOGD(WmsLogTag::WMS_LAYOUT_PC, "invalid side: %{public}d", static_cast<int32_t>(side));
         return;
     }
     std::unique_lock<std::mutex> lock(arrangedRectsMutex_);
@@ -218,10 +218,10 @@ void PcFoldScreenManager::ResetArrangeRule(ScreenSide side)
 void PcFoldScreenManager::ResizeToFullScreen(WSRect& rect, int32_t topAvoidHeight, int32_t botAvoidHeight)
 {
     ScreenSide side = CalculateScreenSide(rect);
-    TLOGD(WmsLogTag::WMS_LAYOUT, "side: %{public}d, rect: %{public}s",
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "side: %{public}d, rect: %{public}s",
         static_cast<int32_t>(side), rect.ToString().c_str());
     if (side != ScreenSide::FOLD_B && side != ScreenSide::FOLD_C) {
-        TLOGW(WmsLogTag::WMS_LAYOUT, "rule not avaliable, side %{public}d", static_cast<int32_t>(side));
+        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "rule not avaliable, side %{public}d", static_cast<int32_t>(side));
         return;
     }
 
@@ -294,13 +294,14 @@ bool PcFoldScreenManager::NeedDoEasyThrowSlip(const WSRect& rect, const WSRect& 
 
     const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] = GetDisplayRects();
     WSRect easyThrowRect = rect;
+    int32_t midY = rect.posY_ + rect.height_ / 2; // 2: center
     if (startSide == ScreenSide::FOLD_B) {
-        if (rect.posY_ > virtualDisplayRect.posY_ + virtualDisplayRect.height_ / 2) { // 2: center
+        if (midY > virtualDisplayRect.posY_ + virtualDisplayRect.height_ / 2) { // 2: center
             return false;
         }
         easyThrowRect.posY_ = foldCreaseRect.posY_ - easyThrowRect.height_ / 2; // 2: center
     } else {
-        if (rect.posY_ < defaultDisplayRect.posY_ + defaultDisplayRect.height_ / 2) { // 2: center
+        if (midY < defaultDisplayRect.posY_ + defaultDisplayRect.height_ / 2) { // 2: center
             return false;
         }
         easyThrowRect.posY_ = foldCreaseRect.posY_ + foldCreaseRect.height_ - easyThrowRect.height_ / 2; // 2: center
@@ -409,7 +410,7 @@ bool PcFoldScreenManager::ThrowSlipToOppositeSide(ScreenSide startSide, WSRect& 
 void PcFoldScreenManager::MappingRectInScreenSide(ScreenSide side, WSRect& rect,
     int32_t topAvoidHeight, int32_t botAvoidHeight)
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT, "side: %{public}d, rect: %{public}s, avoid heights: [%{public}d,%{public}d]",
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "side: %{public}d, rect: %{public}s, avoid heights: [%{public}d,%{public}d]",
         static_cast<int32_t>(side), rect.ToString().c_str(), topAvoidHeight, botAvoidHeight);
     WSRect topLeftLimit = RECT_ZERO;
     WSRect botRightLimit = RECT_ZERO;
@@ -438,7 +439,7 @@ void PcFoldScreenManager::MappingRectInScreenSide(ScreenSide side, WSRect& rect,
                 virtualDisplayRect.posY_ + virtualDisplayRect.height_ - topLeftLimit.posY_ - botAvoidHeight);
             break;
         default:
-            TLOGW(WmsLogTag::WMS_LAYOUT, "invalid side: %{public}d", static_cast<int32_t>(side));
+            TLOGW(WmsLogTag::WMS_LAYOUT_PC, "invalid side: %{public}d", static_cast<int32_t>(side));
             return;
     }
     rect.posX_ = std::max(rect.posX_, topLeftLimit.posX_);
@@ -447,17 +448,17 @@ void PcFoldScreenManager::MappingRectInScreenSide(ScreenSide side, WSRect& rect,
     rect.posY_ = std::min(rect.posY_, botRightLimit.posY_);
     rect.width_ = std::min(rect.width_, botRightLimit.width_);
     rect.height_ = std::min(rect.height_, botRightLimit.height_);
-    TLOGD(WmsLogTag::WMS_LAYOUT, "limit rects: [%{public}s,%{public}s], mapped rect: %{public}s",
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "limit rects: [%{public}s,%{public}s], mapped rect: %{public}s",
         topLeftLimit.ToString().c_str(), botRightLimit.ToString().c_str(), rect.ToString().c_str());
 }
 
 void PcFoldScreenManager::MappingRectInScreenSideWithArrangeRule(ScreenSide side, WSRect& rect,
     int32_t topAvoidHeight, int32_t botAvoidHeight, int32_t titleHeight)
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT, "side: %{public}d, rect: %{public}s",
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "side: %{public}d, rect: %{public}s",
         static_cast<int32_t>(side), rect.ToString().c_str());
     if (side != ScreenSide::FOLD_B && side != ScreenSide::FOLD_C) {
-        TLOGW(WmsLogTag::WMS_LAYOUT, "rule not avaliable, side %{public}d", static_cast<int32_t>(side));
+        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "rule not avaliable, side %{public}d", static_cast<int32_t>(side));
         return;
     }
 
@@ -481,13 +482,13 @@ void PcFoldScreenManager::MappingRectInScreenSideWithArrangeRule(ScreenSide side
         WSRect& lastArrangedRect = (side == ScreenSide::FOLD_B) ? defaultArrangedRect_ : virtualArrangedRect_;
         if (lastArrangedRect.IsEmpty()) {
             ApplyInitArrangeRule(rect, lastArrangedRect, limitRect, titleHeight);
-            TLOGD(WmsLogTag::WMS_LAYOUT, "init rule, limit: %{public}s, arranged: %{public}s, rect: %{public}s",
+            TLOGD(WmsLogTag::WMS_LAYOUT_PC, "init rule, limit: %{public}s, arranged: %{public}s, rect: %{public}s",
                 limitRect.ToString().c_str(), lastArrangedRect.ToString().c_str(), rect.ToString().c_str());
             return;
         }
 
         ApplyArrangeRule(rect, lastArrangedRect, limitRect, titleHeight);
-        TLOGD(WmsLogTag::WMS_LAYOUT, "apply rule, limit: %{public}s, arranged: %{public}s, rect: %{public}s",
+        TLOGD(WmsLogTag::WMS_LAYOUT_PC, "apply rule, limit: %{public}s, arranged: %{public}s, rect: %{public}s",
             limitRect.ToString().c_str(), lastArrangedRect.ToString().c_str(), rect.ToString().c_str());
     }
 }
@@ -530,21 +531,21 @@ void PcFoldScreenManager::ApplyArrangeRule(WSRect& rect, WSRect& lastArrangedRec
 void PcFoldScreenManager::RegisterFoldScreenStatusChangeCallback(int32_t persistentId,
     const std::weak_ptr<FoldScreenStatusChangeCallback>& func)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "id: %{public}d", persistentId);
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "id: %{public}d", persistentId);
     std::unique_lock<std::mutex> lock(callbackMutex_);
     auto [_, result] = foldScreenStatusChangeCallbacks_.insert_or_assign(persistentId, func);
     if (result) {
-        TLOGW(WmsLogTag::WMS_LAYOUT, "callback has registered");
+        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "callback has registered");
     }
 }
 
 void PcFoldScreenManager::UnregisterFoldScreenStatusChangeCallback(int32_t persistentId)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "id: %{public}d", persistentId);
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "id: %{public}d", persistentId);
     std::unique_lock<std::mutex> lock(callbackMutex_);
     auto iter = foldScreenStatusChangeCallbacks_.find(persistentId);
     if (iter == foldScreenStatusChangeCallbacks_.end()) {
-        TLOGW(WmsLogTag::WMS_LAYOUT, "callback not registered");
+        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "callback not registered");
         return;
     }
     foldScreenStatusChangeCallbacks_.erase(iter);
@@ -557,7 +558,7 @@ void PcFoldScreenManager::ExecuteFoldScreenStatusChangeCallbacks(DisplayId displ
     for (auto iter = foldScreenStatusChangeCallbacks_.begin(); iter != foldScreenStatusChangeCallbacks_.end();) {
         auto callback = iter->second.lock();
         if (callback == nullptr) {
-            TLOGW(WmsLogTag::WMS_LAYOUT, "callback invalid, id: %{public}d", iter->first);
+            TLOGW(WmsLogTag::WMS_LAYOUT_PC, "callback invalid, id: %{public}d", iter->first);
             iter = foldScreenStatusChangeCallbacks_.erase(iter);
             continue;
         }

@@ -2383,8 +2383,9 @@ HWTEST_F(SceneSessionManagerTest, IsWindowRectAutoSave, Function | SmallTest | L
 {
     std::string key = "com.example.recposentryEntryAbilityabc";
     bool enabled = false;
-    auto result = ssm_->IsWindowRectAutoSave(key, enabled);
-    ASSERT_EQ(result, WMError::WM_OK);
+    int persistentId = 1;
+    auto result = ssm_->IsWindowRectAutoSave(key, enabled, persistentId);
+    ASSERT_EQ(result, WMError::WM_ERROR_INVALID_SESSION);
 }
 
 /**
@@ -2394,10 +2395,13 @@ HWTEST_F(SceneSessionManagerTest, IsWindowRectAutoSave, Function | SmallTest | L
  */
 HWTEST_F(SceneSessionManagerTest, SetIsWindowRectAutoSave, Function | SmallTest | Level3)
 {
-    std::string key = "com.example.recposentryEntryAbility";
+    std::string key = "com.example.recposentryEntryAbilityTest";
     bool enabled = true;
-    ssm_->SetIsWindowRectAutoSave(key, enabled);
+    std::string abilityKey = "com.example.recposentryEntryAbility";
+    bool isSaveSpecifiedFlag = true;
+    ssm_->SetIsWindowRectAutoSave(key, enabled, abilityKey, isSaveSpecifiedFlag);
     ASSERT_EQ(ssm_->isWindowRectAutoSaveMap_.at(key), true);
+    ASSERT_EQ(ssm_->isSaveBySpecifiedFlagMap_.at(abilityKey), true);
 }
 
 /**
@@ -2426,13 +2430,48 @@ HWTEST_F(SceneSessionManagerTest, GetDisplayIdByWindowId, Function | SmallTest |
 }
 
 /**
- * @tc.name: SetGlobalDragResizeType
- * @tc.desc: test function : SetGlobalDragResizeType
+ * @tc.name: SetGlobalDragResizeType01
+ * @tc.desc: test function : SetGlobalDragResizeType valid session
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest, SetGlobalDragResizeType, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest, SetGlobalDragResizeType01, Function | SmallTest | Level3)
 {
     DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
+    ASSERT_EQ(ssm_->SetGlobalDragResizeType(dragResizeType), WMError::WM_OK);
+
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test1";
+    info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+
+    ASSERT_EQ(ssm_->SetGlobalDragResizeType(DragResizeType::RESIZE_TYPE_UNDEFINED), WMError::WM_OK);
+    ASSERT_EQ(ssm_->SetGlobalDragResizeType(dragResizeType), WMError::WM_OK);
+}
+
+/**
+ * @tc.name: SetGlobalDragResizeType02
+ * @tc.desc: test function : SetGlobalDragResizeType invalid session
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, SetGlobalDragResizeType02, Function | SmallTest | Level3)
+{
+    DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
+    ASSERT_EQ(ssm_->SetGlobalDragResizeType(dragResizeType), WMError::WM_OK);
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test1";
+    info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    ASSERT_EQ(ssm_->SetGlobalDragResizeType(dragResizeType), WMError::WM_OK);
+    ssm_->sceneSessionMap_.insert({0, nullptr});
+    ASSERT_EQ(ssm_->SetGlobalDragResizeType(dragResizeType), WMError::WM_OK);
+    ssm_->sceneSessionMap_.clear();
+    ssm_->sceneSessionMap_.insert({0, nullptr});
     ASSERT_EQ(ssm_->SetGlobalDragResizeType(dragResizeType), WMError::WM_OK);
 }
 
@@ -2462,6 +2501,7 @@ HWTEST_F(SceneSessionManagerTest, SetAppDragResizeType, Function | SmallTest | L
     ASSERT_NE(nullptr, sceneSession);
     ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
     DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
+    ASSERT_EQ(ssm_->SetAppDragResizeType("", dragResizeType), WMError::WM_ERROR_INVALID_PARAM);
     ASSERT_EQ(ssm_->SetAppDragResizeType(info.bundleName_, dragResizeType), WMError::WM_OK);
 }
 
@@ -2484,6 +2524,25 @@ HWTEST_F(SceneSessionManagerTest, GetAppDragResizeType, Function | SmallTest | L
 }
 
 /**
+ * @tc.name: SetAppKeyFramePolicy
+ * @tc.desc: test function : SetAppKeyFramePolicy
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, SetAppKeyFramePolicy, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test1";
+    info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    KeyFramePolicy keyFramePolicy;
+    keyFramePolicy.dragResizeType_ = DragResizeType::RESIZE_KEY_FRAME;
+    ASSERT_EQ(ssm_->SetAppKeyFramePolicy(info.bundleName_, keyFramePolicy), WMError::WM_OK);
+}
+
+/**
  * @tc.name: BuildCancelPointerEvent
  * @tc.desc: test function : BuildCancelPointerEvent
  * @tc.type: FUNC
@@ -2498,6 +2557,30 @@ HWTEST_F(SceneSessionManagerTest, BuildCancelPointerEvent, Function | SmallTest 
     ASSERT_EQ(pointerEvent->GetPointerId(), 0);
     ASSERT_EQ(pointerEvent->GetPointerAction(), MMI::PointerEvent::POINTER_ACTION_CANCEL);
     ASSERT_EQ(pointerEvent->GetSourceType(), MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
+}
+
+/**
+ * @tc.name: MinimizeByWindowId
+ * @tc.desc: test function : MinimizeByWindowId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, MinimizeByWindowId, Function | SmallTest | Level3)
+{
+    std::vector<int32_t> windowIds;
+    WMError res = ssm_->MinimizeByWindowId(windowIds);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, res);
+}
+
+/**
+ * @tc.name: SetForegroundWindowNum
+ * @tc.desc: test function : SetForegroundWindowNum
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, SetForegroundWindowNum, Function | SmallTest | Level3)
+{
+    int32_t windowNum = 0;
+    WMError res = ssm_->SetForegroundWindowNum(windowNum);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, res);
 }
 }
 } // namespace Rosen

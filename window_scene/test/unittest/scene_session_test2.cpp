@@ -175,7 +175,7 @@ HWTEST_F(SceneSessionTest2, TransferPointerEvent01, Function | SmallTest | Level
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback_);
     EXPECT_NE(sceneSession, nullptr);
     std::shared_ptr<MMI::PointerEvent> pointerEvent = nullptr;
-    ASSERT_EQ(sceneSession->TransferPointerEvent(pointerEvent), WSError::WS_ERROR_NULLPTR);
+    ASSERT_EQ(sceneSession->TransferPointerEvent(pointerEvent), WSError::WS_OK);
 
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
@@ -186,26 +186,21 @@ HWTEST_F(SceneSessionTest2, TransferPointerEvent01, Function | SmallTest | Level
 
     std::shared_ptr<MMI::PointerEvent> pointerEvent_ = MMI::PointerEvent::Create();
     pointerEvent_->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW);
-    ASSERT_EQ(sceneSession->TransferPointerEvent(pointerEvent_),
-        WSError::WS_ERROR_INVALID_SESSION);
+    ASSERT_EQ(sceneSession->TransferPointerEvent(pointerEvent_), WSError::WS_OK);
 
     sceneSession->sessionInfo_.isSystem_ = true;
     pointerEvent_->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
-    ASSERT_EQ(sceneSession->TransferPointerEvent(pointerEvent_),
-    WSError::WS_ERROR_NULLPTR);
+    ASSERT_EQ(sceneSession->TransferPointerEvent(pointerEvent_), WSError::WS_OK);
 
     pointerEvent_->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW);
-    ASSERT_EQ(sceneSession->TransferPointerEvent(pointerEvent_),
-    WSError::WS_ERROR_NULLPTR);
+    ASSERT_EQ(sceneSession->TransferPointerEvent(pointerEvent_), WSError::WS_OK);
 
     sceneSession->sessionInfo_.isSystem_ = false;
     pointerEvent_->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
-    ASSERT_EQ(sceneSession->TransferPointerEvent(pointerEvent_),
-    WSError::WS_ERROR_INVALID_SESSION);
+    ASSERT_EQ(sceneSession->TransferPointerEvent(pointerEvent_), WSError::WS_OK);
 
     pointerEvent_->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW);
-    ASSERT_EQ(sceneSession->TransferPointerEvent(pointerEvent_),
-    WSError::WS_ERROR_INVALID_SESSION);
+    ASSERT_EQ(sceneSession->TransferPointerEvent(pointerEvent_), WSError::WS_OK);
 }
 
 /**
@@ -226,7 +221,7 @@ HWTEST_F(SceneSessionTest2, TransferPointerEvent02, Function | SmallTest | Level
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback_);
     EXPECT_NE(sceneSession, nullptr);
     std::shared_ptr<MMI::PointerEvent> pointerEvent = nullptr;
-    ASSERT_EQ(sceneSession->TransferPointerEvent(pointerEvent), WSError::WS_ERROR_NULLPTR);
+    ASSERT_EQ(sceneSession->TransferPointerEvent(pointerEvent), WSError::WS_OK);
 
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
@@ -237,7 +232,7 @@ HWTEST_F(SceneSessionTest2, TransferPointerEvent02, Function | SmallTest | Level
 
     std::shared_ptr<MMI::PointerEvent> pointerEvent_ = MMI::PointerEvent::Create();
     pointerEvent_->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_DOWN);
-    ASSERT_EQ(sceneSession->TransferPointerEvent(pointerEvent_), WSError::WS_ERROR_INVALID_SESSION);
+    ASSERT_EQ(sceneSession->TransferPointerEvent(pointerEvent_), WSError::WS_OK);
 }
 
 /**
@@ -1391,10 +1386,12 @@ HWTEST_F(SceneSessionTest2, OnMoveDragCallback02, Function | SmallTest | Level2)
     Session session(info);
     sptr<AAFwk::SessionInfo> abilitySessionInfo = nullptr;
     ExceptionInfo exceptionInfo;
-    session.sessionExceptionFunc_ = [](const SessionInfo& info,
+    NotifySessionExceptionFunc func = [](const SessionInfo& info,
         const ExceptionInfo& exceInfo, bool startFail) {};
-    session.jsSceneSessionExceptionFunc_ = [](const SessionInfo& info,
+    session.sessionExceptionFunc_ = func;
+    NotifySessionExceptionFunc func1 = [](const SessionInfo& info,
         const ExceptionInfo& exceInfo, bool startFail) {};
+    session.jsSceneSessionExceptionFunc_ = func1;
     sceneSession->NotifySessionException(abilitySessionInfo, exceptionInfo);
 
     sceneSession->NotifyPiPWindowPrepareClose();

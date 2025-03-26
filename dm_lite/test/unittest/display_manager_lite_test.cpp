@@ -65,7 +65,7 @@ namespace {
  * @tc.desc: OnDisplayCreate
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, OnDisplayCreate01, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerTest, OnDisplayCreate01, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), RegisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
@@ -90,7 +90,7 @@ HWTEST_F(DisplayManagerTest, OnDisplayCreate01, Function | SmallTest | Level1)
  * @tc.desc: OnDisplayDestroy
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, OnDisplayDestroy, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerTest, OnDisplayDestroy, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), RegisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
@@ -110,7 +110,7 @@ HWTEST_F(DisplayManagerTest, OnDisplayDestroy, Function | SmallTest | Level1)
  * @tc.desc: OnDisplayChange
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, OnDisplayChange, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerTest, OnDisplayChange, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), RegisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
@@ -136,7 +136,7 @@ HWTEST_F(DisplayManagerTest, OnDisplayChange, Function | SmallTest | Level1)
  * @tc.desc: ImplUpdateDisplayInfoLocked fun
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, ImplUpdateDisplayInfoLocked, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerTest, ImplUpdateDisplayInfoLocked, TestSize.Level1)
 {
     sptr<DisplayInfo> displayInfo = new DisplayInfo();
     displayInfo->SetDisplayId(DISPLAY_ID_INVALID);
@@ -150,7 +150,7 @@ HWTEST_F(DisplayManagerTest, ImplUpdateDisplayInfoLocked, Function | SmallTest |
  * @tc.desc: ImplUpdateDisplayInfoLocked fun
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, ImplUpdateDisplayInfoLocked01, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerTest, ImplUpdateDisplayInfoLocked01, TestSize.Level1)
 {
     sptr<DisplayInfo> displayInfo = nullptr;
     auto ret = DisplayManagerLite::GetInstance().pImpl_->UpdateDisplayInfoLocked(displayInfo);
@@ -163,7 +163,7 @@ HWTEST_F(DisplayManagerTest, ImplUpdateDisplayInfoLocked01, Function | SmallTest
  * @tc.desc: displayManagerListener_ == nullptr, ret == DMError::DM_OK
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, RegisterDisplayListener01, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerTest, RegisterDisplayListener01, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), RegisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
@@ -179,7 +179,7 @@ HWTEST_F(DisplayManagerTest, RegisterDisplayListener01, Function | SmallTest | L
  * @tc.desc: ret ! = DMError::DM_OK
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, RegisterDisplayListener02, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerTest, RegisterDisplayListener02, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), RegisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(DMError::DM_ERROR_IPC_FAILED));
@@ -195,7 +195,7 @@ HWTEST_F(DisplayManagerTest, RegisterDisplayListener02, Function | SmallTest | L
  * @tc.desc: listener == nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, RegisterDisplayListener03, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerTest, RegisterDisplayListener03, TestSize.Level1)
 {
     sptr<DisplayManagerLite::IDisplayListener> listener = nullptr;
     auto ret = DisplayManagerLite::GetInstance().RegisterDisplayListener(listener);
@@ -207,7 +207,7 @@ HWTEST_F(DisplayManagerTest, RegisterDisplayListener03, Function | SmallTest | L
  * @tc.desc: displayManagerListener_ != nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, RegisterDisplayListener04, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerTest, RegisterDisplayListener04, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), RegisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
@@ -223,7 +223,7 @@ HWTEST_F(DisplayManagerTest, RegisterDisplayListener04, Function | SmallTest | L
  * @tc.desc: listener == nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, UnregisterDisplayListener01, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerTest, UnregisterDisplayListener01, TestSize.Level1)
 {
     sptr<DisplayManagerLite::IDisplayListener> listener = nullptr;
     auto ret = DisplayManagerLite::GetInstance().UnregisterDisplayListener(listener);
@@ -235,7 +235,7 @@ HWTEST_F(DisplayManagerTest, UnregisterDisplayListener01, Function | SmallTest |
  * @tc.desc: iter == displayListeners_.end()
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, UnregisterDisplayListener02, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerTest, UnregisterDisplayListener02, TestSize.Level1)
 {
     sptr<DisplayManagerLite::IDisplayListener> listener = new DmMockDisplayListener();
     auto ret = DisplayManagerLite::GetInstance().UnregisterDisplayListener(listener);
@@ -247,7 +247,7 @@ HWTEST_F(DisplayManagerTest, UnregisterDisplayListener02, Function | SmallTest |
  * @tc.desc: iter == displayListeners_.end()
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, UnregisterDisplayListener03, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerTest, UnregisterDisplayListener03, TestSize.Level1)
 {
     sptr<DisplayManagerLite::IDisplayListener> listener = new DmMockDisplayListener();
     DisplayManagerLite::GetInstance().pImpl_->displayListeners_.insert(listener);
@@ -260,7 +260,7 @@ HWTEST_F(DisplayManagerTest, UnregisterDisplayListener03, Function | SmallTest |
  * @tc.desc: listener == nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, RegisterFoldStatusListener01, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerTest, RegisterFoldStatusListener01, TestSize.Level1)
 {
     sptr<DisplayManagerLite::IFoldStatusListener> listener = nullptr;
     auto ret = DisplayManagerLite::GetInstance().RegisterFoldStatusListener(listener);
@@ -272,7 +272,7 @@ HWTEST_F(DisplayManagerTest, RegisterFoldStatusListener01, Function | SmallTest 
  * @tc.desc: listener == nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, RegisterFoldStatusListener02, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerTest, RegisterFoldStatusListener02, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), RegisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
@@ -287,7 +287,7 @@ HWTEST_F(DisplayManagerTest, RegisterFoldStatusListener02, Function | SmallTest 
  * @tc.desc: foldStatusListenerAgent_ == nullptr, ret != DMError::DM_OK
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, RegisterFoldStatusListener03, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerTest, RegisterFoldStatusListener03, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), RegisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(DMError::DM_ERROR_IPC_FAILED));
@@ -301,7 +301,7 @@ HWTEST_F(DisplayManagerTest, RegisterFoldStatusListener03, Function | SmallTest 
  * @tc.desc: foldStatusListenerAgent_ != nullptr, ret == DMError::DM_OK
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, RegisterFoldStatusListener04, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerTest, RegisterFoldStatusListener04, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), RegisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
@@ -317,7 +317,7 @@ HWTEST_F(DisplayManagerTest, RegisterFoldStatusListener04, Function | SmallTest 
  * @tc.desc: foldStatusListenerAgent_ != nullptr, ret == DMError::DM_OK
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, UnregisterFoldStatusListener01, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerTest, UnregisterFoldStatusListener01, TestSize.Level1)
 {
     sptr<DisplayManagerLite::IFoldStatusListener> listener = nullptr;
     auto ret = DisplayManagerLite::GetInstance().UnregisterFoldStatusListener(listener);
@@ -329,7 +329,7 @@ HWTEST_F(DisplayManagerTest, UnregisterFoldStatusListener01, Function | SmallTes
  * @tc.desc: iter == foldStatusListeners_.end()
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, UnregisterFoldStatusListener02, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerTest, UnregisterFoldStatusListener02, TestSize.Level1)
 {
     sptr<DisplayManagerLite::IFoldStatusListener> listener = new DmMockFoldStatusListener();
     auto ret = DisplayManagerLite::GetInstance().UnregisterFoldStatusListener(listener);
@@ -341,7 +341,7 @@ HWTEST_F(DisplayManagerTest, UnregisterFoldStatusListener02, Function | SmallTes
  * @tc.desc: iter != foldStatusListeners_.end()
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, UnregisterFoldStatusListener03, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerTest, UnregisterFoldStatusListener03, TestSize.Level1)
 {
     sptr<DisplayManagerLite::IFoldStatusListener> listener = new DmMockFoldStatusListener();
     DisplayManagerLite::GetInstance().pImpl_->foldStatusListeners_.insert(listener);
@@ -354,7 +354,7 @@ HWTEST_F(DisplayManagerTest, UnregisterFoldStatusListener03, Function | SmallTes
  * @tc.desc: GetDefaultDisplay
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, GetDefaultDisplay, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerTest, GetDefaultDisplay, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), GetDefaultDisplayInfo()).Times(1).WillOnce(Return(nullptr));
@@ -367,7 +367,7 @@ HWTEST_F(DisplayManagerTest, GetDefaultDisplay, Function | SmallTest | Level1)
  * @tc.desc: destroyed_ == false
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, GetDisplayById01, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerTest, GetDisplayById01, TestSize.Level1)
 {
     DisplayId displayId = 1000;
     auto ret = DisplayManagerLite::GetInstance().GetDisplayById(displayId);
@@ -379,7 +379,7 @@ HWTEST_F(DisplayManagerTest, GetDisplayById01, Function | SmallTest | Level1)
  * @tc.desc: UpdateDisplayInfoLocked
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, GetDisplayById02, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerTest, GetDisplayById02, TestSize.Level1)
 {
     DisplayManagerLite::GetInstance().destroyed_ = false;
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
@@ -394,7 +394,7 @@ HWTEST_F(DisplayManagerTest, GetDisplayById02, Function | SmallTest | Level1)
  * @tc.desc: OnDisplayCreate
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, OnDisplayCreate02, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerTest, OnDisplayCreate02, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), RegisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
@@ -419,7 +419,7 @@ HWTEST_F(DisplayManagerTest, OnDisplayCreate02, Function | SmallTest | Level1)
  * @tc.desc: OnDisplayDestroy02
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, OnDisplayDestroy02, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerTest, OnDisplayDestroy02, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), RegisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
@@ -439,7 +439,7 @@ HWTEST_F(DisplayManagerTest, OnDisplayDestroy02, Function | SmallTest | Level1)
  * @tc.desc: ImplUpdateDisplayInfoLocked fun
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, ImplUpdateDisplayInfoLocked03, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerTest, ImplUpdateDisplayInfoLocked03, TestSize.Level1)
 {
     sptr<DisplayInfo> displayInfo = new DisplayInfo();
     displayInfo->SetDisplayId(10);
@@ -453,7 +453,7 @@ HWTEST_F(DisplayManagerTest, ImplUpdateDisplayInfoLocked03, Function | SmallTest
  * @tc.desc: ImplUpdateDisplayInfoLocked fun
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, ImplUpdateDisplayInfoLocked04, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerTest, ImplUpdateDisplayInfoLocked04, TestSize.Level1)
 {
     sptr<DisplayInfo> displayInfo = new DisplayInfo();
     displayInfo->SetDisplayId(1000);
@@ -467,7 +467,7 @@ HWTEST_F(DisplayManagerTest, ImplUpdateDisplayInfoLocked04, Function | SmallTest
  * @tc.desc: destroyed_ == false
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, GetDisplayById03, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerTest, GetDisplayById03, TestSize.Level1)
 {
     DisplayId displayId = DISPLAY_ID_INVALID;
     auto ret = DisplayManagerLite::GetInstance().GetDisplayById(displayId);
@@ -479,7 +479,7 @@ HWTEST_F(DisplayManagerTest, GetDisplayById03, Function | SmallTest | Level1)
  * @tc.desc: destroyed_ == false
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, GetDisplayById04, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerTest, GetDisplayById04, TestSize.Level1)
 {
     DisplayId displayId = 10;
     auto ret = DisplayManagerLite::GetInstance().GetDisplayById(displayId);
@@ -491,7 +491,7 @@ HWTEST_F(DisplayManagerTest, GetDisplayById04, Function | SmallTest | Level1)
  * @tc.desc: IsFoldable
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, IsFoldable, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerTest, IsFoldable, TestSize.Level1)
 {
     sptr<DisplayInfo> displayInfo = nullptr;
     auto ret = DisplayManagerLite::GetInstance().pImpl_->IsFoldable();
@@ -504,7 +504,7 @@ HWTEST_F(DisplayManagerTest, IsFoldable, Function | SmallTest | Level1)
  * @tc.desc: IsFoldable01
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, IsFoldable01, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerTest, IsFoldable01, TestSize.Level1)
 {
     sptr<DisplayInfo> displayInfo = new DisplayInfo();
     displayInfo->SetDisplayId(DISPLAY_ID_INVALID);
@@ -518,7 +518,7 @@ HWTEST_F(DisplayManagerTest, IsFoldable01, Function | SmallTest | Level1)
  * @tc.desc: IsFoldable02
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, IsFoldable02, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerTest, IsFoldable02, TestSize.Level1)
 {
     sptr<DisplayInfo> displayInfo = new DisplayInfo();
     displayInfo->SetDisplayId(10);
@@ -532,7 +532,7 @@ HWTEST_F(DisplayManagerTest, IsFoldable02, Function | SmallTest | Level1)
  * @tc.desc: GetFoldStatus
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, GetFoldStatus, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerTest, GetFoldStatus, TestSize.Level1)
 {
     sptr<DisplayInfo> displayInfo = nullptr;
     auto ret = DisplayManagerLite::GetInstance().pImpl_->GetFoldStatus();
@@ -545,7 +545,7 @@ HWTEST_F(DisplayManagerTest, GetFoldStatus, Function | SmallTest | Level1)
  * @tc.desc: GetFoldStatus01
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, GetFoldStatus01, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerTest, GetFoldStatus01, TestSize.Level1)
 {
     sptr<DisplayInfo> displayInfo = new DisplayInfo();
     displayInfo->SetDisplayId(DISPLAY_ID_INVALID);
@@ -559,7 +559,7 @@ HWTEST_F(DisplayManagerTest, GetFoldStatus01, Function | SmallTest | Level1)
  * @tc.desc: GetFoldStatus02
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, GetFoldStatus02, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerTest, GetFoldStatus02, TestSize.Level1)
 {
     sptr<DisplayInfo> displayInfo = new DisplayInfo();
     displayInfo->SetDisplayId(10);
@@ -573,7 +573,7 @@ HWTEST_F(DisplayManagerTest, GetFoldStatus02, Function | SmallTest | Level1)
  * @tc.desc: GetFoldStatus03
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, GetFoldStatus03, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerTest, GetFoldStatus03, TestSize.Level1)
 {
     sptr<DisplayInfo> displayInfo = new DisplayInfo();
     displayInfo->SetDisplayId(1000);
@@ -587,7 +587,7 @@ HWTEST_F(DisplayManagerTest, GetFoldStatus03, Function | SmallTest | Level1)
  * @tc.desc: GetFoldDisplayMode
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, GetFoldDisplayMode, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerTest, GetFoldDisplayMode, TestSize.Level1)
 {
     sptr<DisplayInfo> displayInfo = nullptr;
     auto ret = DisplayManagerLite::GetInstance().pImpl_->GetFoldDisplayMode();
@@ -600,7 +600,7 @@ HWTEST_F(DisplayManagerTest, GetFoldDisplayMode, Function | SmallTest | Level1)
  * @tc.desc: GetFoldDisplayMode01
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, GetFoldDisplayMode01, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerTest, GetFoldDisplayMode01, TestSize.Level1)
 {
     sptr<DisplayInfo> displayInfo = new DisplayInfo();
     displayInfo->SetDisplayId(DISPLAY_ID_INVALID);
@@ -614,7 +614,7 @@ HWTEST_F(DisplayManagerTest, GetFoldDisplayMode01, Function | SmallTest | Level1
  * @tc.desc: GetFoldDisplayMode02
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, GetFoldDisplayMode02, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerTest, GetFoldDisplayMode02, TestSize.Level1)
 {
     sptr<DisplayInfo> displayInfo = new DisplayInfo();
     displayInfo->SetDisplayId(10);
@@ -628,7 +628,7 @@ HWTEST_F(DisplayManagerTest, GetFoldDisplayMode02, Function | SmallTest | Level1
  * @tc.desc: GetFoldDisplayMode03
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, GetFoldDisplayMode03, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerTest, GetFoldDisplayMode03, TestSize.Level1)
 {
     sptr<DisplayInfo> displayInfo = new DisplayInfo();
     displayInfo->SetDisplayId(1000);
@@ -642,7 +642,7 @@ HWTEST_F(DisplayManagerTest, GetFoldDisplayMode03, Function | SmallTest | Level1
  * @tc.desc: GetScreenBrightness
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, GetScreenBrightness, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerTest, GetScreenBrightness, TestSize.Level1)
 {
     uint64_t screenId = 2;
     auto ret = DisplayManagerLite::GetInstance().GetScreenBrightness(screenId);
@@ -654,7 +654,7 @@ HWTEST_F(DisplayManagerTest, GetScreenBrightness, Function | SmallTest | Level1)
  * @tc.desc: GetVirtualScreenFlag
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, GetVirtualScreenFlag, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerTest, GetVirtualScreenFlag, TestSize.Level1)
 {
     uint64_t screenId = 0;
     auto ret = DisplayManagerLite::GetInstance().GetVirtualScreenFlag(screenId);
@@ -666,7 +666,7 @@ HWTEST_F(DisplayManagerTest, GetVirtualScreenFlag, Function | SmallTest | Level1
  * @tc.desc: RegisterScreenMagneticStateListener fun
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, RegisterScreenMagneticStateListener, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerTest, RegisterScreenMagneticStateListener, TestSize.Level1)
 {
     sptr<DisplayManagerLite::IScreenMagneticStateListener> listener;
     auto ret = DisplayManagerLite::GetInstance().RegisterScreenMagneticStateListener(listener);
@@ -682,7 +682,7 @@ HWTEST_F(DisplayManagerTest, RegisterScreenMagneticStateListener, Function | Sma
  * @tc.desc: ImplRegisterScreenMagneticStateListener fun
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, ImplRegisterScreenMagneticStateListener, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerTest, ImplRegisterScreenMagneticStateListener, TestSize.Level1)
 {
     sptr<DisplayManagerLite::IScreenMagneticStateListener> listener;
     DisplayManagerLite::GetInstance().pImpl_->screenMagneticStateListenerAgent_ = nullptr;
@@ -702,7 +702,7 @@ HWTEST_F(DisplayManagerTest, ImplRegisterScreenMagneticStateListener, Function |
  * @tc.desc: UnregisterScreenMagneticStateListener fun
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, UnregisterScreenMagneticStateListener, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerTest, UnregisterScreenMagneticStateListener, TestSize.Level1)
 {
     sptr<DisplayManagerLite::IScreenMagneticStateListener> listener;
     auto ret = DisplayManagerLite::GetInstance().UnregisterScreenMagneticStateListener(listener);
@@ -718,7 +718,7 @@ HWTEST_F(DisplayManagerTest, UnregisterScreenMagneticStateListener, Function | S
  * @tc.desc: ImplUnregisterScreenMagneticStateListener fun
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, ImplUnregisterScreenMagneticStateListener, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerTest, ImplUnregisterScreenMagneticStateListener, TestSize.Level1)
 {
     sptr<DisplayManagerLite::IScreenMagneticStateListener> listener;
     auto ret = DisplayManagerLite::GetInstance().pImpl_->UnregisterScreenMagneticStateListener(listener);
@@ -726,5 +726,26 @@ HWTEST_F(DisplayManagerTest, ImplUnregisterScreenMagneticStateListener, Function
     listener.clear();
 }
 
+/**
+ * @tc.name: SetSystemKeyboardStatus
+ * @tc.desc: SetSystemKeyboardStatus with true as parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, SetSystemKeyboardStatus01, TestSize.Level1)
+{
+    auto ret = DisplayManagerLite::GetInstance().SetSystemKeyboardStatus(true);
+    ASSERT_NE(ret, DMError::DM_OK);
+}
+ 
+/**
+ * @tc.name: SetSystemKeyboardStatus
+ * @tc.desc: SetSystemKeyboardStatus with false as parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, SetSystemKeyboardStatus02, TestSize.Level1)
+{
+    auto ret = DisplayManagerLite::GetInstance().SetSystemKeyboardStatus(false);
+    ASSERT_NE(ret, DMError::DM_OK);
+}
 } // namespace Rosen
 } // namespace OHOS

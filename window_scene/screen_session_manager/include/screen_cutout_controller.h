@@ -33,16 +33,20 @@ class ScreenCutoutController : public RefBase {
 public:
     ScreenCutoutController() {};
     sptr<CutoutInfo> GetScreenCutoutInfo(DisplayId displayId);
+    sptr<CutoutInfo> GetCutoutInfoWithRotation(DisplayId displayId, int32_t rotation);
     RectF CalculateCurvedCompression(const ScreenProperty& screenProperty);
     uint32_t GetOffsetY();
 
 private:
-    void CalcWaterfallRects(DisplayId displayId);
+    void CalcWaterfallRects(DisplayId displayId, int32_t transRotation = -1);
     void ProcessRotationMapping();
     void CalcWaterfallRectsByRotation(Rotation rotation, uint32_t displayHeight, uint32_t displayWidth,
         std::vector<uint32_t> realNumVec);
     void CheckBoundaryRects(std::vector<DMRect>& boundaryRects, ScreenProperty screenProperty);
-    void ConvertBoundaryRectsByRotation(std::vector<DMRect>& boundaryRects, DisplayId displayId);
+    void ConvertBoundaryRectsByRotation(DisplayId displayId, std::vector<DMRect>& boundaryRects,
+        int32_t transRotation = -1);
+    void ConvertBoundaryRectsByRotationInner(Rotation currentRotation, uint32_t screenWidth, uint32_t screenHeight,
+        const std::vector<DMRect>& displayBoundaryRects, std::vector<DMRect>& finalVector);
     void CurrentRotation90(const std::vector<DMRect>& displayBoundaryRects, std::vector<DMRect>& finalVector,
         uint32_t displayWidth);
     void CurrentRotation180(const std::vector<DMRect>& displayBoundaryRects, std::vector<DMRect>& finalVector,

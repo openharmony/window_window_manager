@@ -131,7 +131,7 @@ HWTEST_F(SensorFoldStateManagerTest, NotifyReportFoldStatusToScb, TestSize.Level
 HWTEST_F(SensorFoldStateManagerTest, IsTentMode, TestSize.Level1)
 {
     SensorFoldStateManager mgr = SensorFoldStateManager();
-    mgr.isTentMode_ = true;
+    mgr.tentModeType_ = 1;
     bool ret = mgr.IsTentMode();
     ASSERT_EQ(ret, true);
 }
@@ -144,8 +144,8 @@ HWTEST_F(SensorFoldStateManagerTest, IsTentMode, TestSize.Level1)
 HWTEST_F(SensorFoldStateManagerTest, SetTentMode, TestSize.Level1)
 {
     SensorFoldStateManager mgr = SensorFoldStateManager();
-    mgr.isTentMode_ = false;
-    mgr.SetTentMode(false);
+    mgr.tentModeType_ = 0;
+    mgr.SetTentMode(0);
     bool ret = mgr.IsTentMode();
     ASSERT_EQ(ret, false);
 }

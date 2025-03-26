@@ -60,6 +60,11 @@ private:
     int HandleGetSessionInfo(MessageParcel& data, MessageParcel& reply);
     int HandleGetSessionInfoByContinueSessionId(MessageParcel& data, MessageParcel& reply);
 
+    /*
+     * Sub Window
+     */
+    int HandleSetParentWindow(MessageParcel& data, MessageParcel& reply);
+
     int HandleDumpSessionAll(MessageParcel& data, MessageParcel& reply);
     int HandleDumpSessionWithId(MessageParcel& data, MessageParcel& reply);
     int HandleSetSessionContinueState(MessageParcel& data, MessageParcel& reply);
@@ -117,9 +122,12 @@ private:
     int HandleGetGlobalDragResizeType(MessageParcel& data, MessageParcel& reply);
     int HandleSetAppDragResizeType(MessageParcel& data, MessageParcel& reply);
     int HandleGetAppDragResizeType(MessageParcel& data, MessageParcel& reply);
+    int HandleSetAppKeyFramePolicy(MessageParcel& data, MessageParcel& reply);
     int HandleShiftAppWindowPointerEvent(MessageParcel& data, MessageParcel& reply);
 
     int ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    int HandleMinimizeByWindowId(MessageParcel& data, MessageParcel& reply);
+    int HandleSetForegroundWindowNum(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_STUB_H

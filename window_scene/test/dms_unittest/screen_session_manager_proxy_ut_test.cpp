@@ -155,6 +155,9 @@ HWTEST_F(ScreenSessionManagerProxyUtTest, ProxyForFreeze, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyUtTest, SetVirtualScreenStatus, TestSize.Level1)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
+    }
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     ScreenId id = 1001;
     VirtualScreenStatus screenStatus = VirtualScreenStatus::VIRTUAL_SCREEN_PAUSE;
@@ -754,6 +757,9 @@ HWTEST_F(ScreenSessionManagerProxyUtTest, SetDisplayState, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyUtTest, SetSpecifiedScreenPower, TestSize.Level1)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
+    }
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
     sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
@@ -807,6 +813,9 @@ HWTEST_F(ScreenSessionManagerProxyUtTest, GetDisplayState, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyUtTest, TryToCancelScreenOff, TestSize.Level1)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
+    }
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
     sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);

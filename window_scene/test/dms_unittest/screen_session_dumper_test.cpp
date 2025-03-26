@@ -732,6 +732,22 @@ HWTEST_F(ScreenSessionDumperTest, DumpTentMode, TestSize.Level1)
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
     sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    dumper->SetLandscapeLock("-landscapelock,");
+    ASSERT_EQ(ScreenSessionManager::GetInstance().extendScreenConnectStatus_, ExtendScreenConnectStatus::UNKNOWN);
+    dumper->SetLandscapeLock("-landscapelock,a");
+    ASSERT_EQ(ScreenSessionManager::GetInstance().extendScreenConnectStatus_, ExtendScreenConnectStatus::UNKNOWN);
+}
+
+/**
+ * @tc.name: DumpTentMode
+ * @tc.desc: test function : DumpTentMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, DumpTentMode, Function | SmallTest | Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-h"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
     dumper->DumpTentMode();
     ASSERT_EQ(dumper->fd_, 1);
 }
@@ -849,6 +865,34 @@ HWTEST_F(ScreenSessionDumperTest, ExecuteInjectCmd205, TestSize.Level1)
     sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
     dumper->ExecuteInjectCmd2();
     ASSERT_EQ(dumper->fd_, 1);
+}
+
+/**
+ * @tc.name: ExecuteInjectCmd206
+ * @tc.desc: test function : ExecuteInjectCmd2
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, ExecuteInjectCmd206, Function | SmallTest | Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-landscapelock,1"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    dumper->ExecuteInjectCmd2();
+    ASSERT_EQ(ScreenSessionManager::GetInstance().extendScreenConnectStatus_, ExtendScreenConnectStatus::CONNECT);
+}
+
+/**
+ * @tc.name: ExecuteInjectCmd207
+ * @tc.desc: test function : ExecuteInjectCmd2
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, ExecuteInjectCmd207, Function | SmallTest | Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-landscapelock,0"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    dumper->ExecuteInjectCmd2();
+    ASSERT_EQ(ScreenSessionManager::GetInstance().extendScreenConnectStatus_, ExtendScreenConnectStatus::DISCONNECT);
 }
 
 /**

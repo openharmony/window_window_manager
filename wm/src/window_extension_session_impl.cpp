@@ -16,6 +16,7 @@
 #include "window_extension_session_impl.h"
 
 #include <hitrace_meter.h>
+#include <ipc_types.h>
 #include <parameters.h>
 #include <transaction/rs_interfaces.h>
 #include <transaction/rs_transaction.h>
@@ -69,7 +70,7 @@ WindowExtensionSessionImpl::WindowExtensionSessionImpl(const sptr<WindowOption>&
     if ((isDensityFollowHost_ = option->GetIsDensityFollowHost())) {
         hostDensityValue_ = option->GetDensity();
     }
-    TLOGI(WmsLogTag::WMS_UIEXT, "UIExtension usage=%{public}u, the default state of hideNonSecureWindows is %{public}d",
+    TLOGI(WmsLogTag::WMS_UIEXT, "UIExtension usage=%{public}u, hideNonSecureWindows=%{public}d",
         property_->GetUIExtensionUsage(), extensionWindowFlags_.hideNonSecureWindowsFlag);
     dataHandler_ = std::make_shared<Extension::ProviderDataHandler>();
     RegisterDataConsumer();
@@ -272,6 +273,7 @@ WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClea
     SetUIContentComplete();
     SetUIExtensionDestroyComplete();
     RemoveExtensionWindowStageFromSCB(property_->IsConstrainedModal());
+    dataHandler_->SetRemoteProxyObject(nullptr);
     TLOGI(WmsLogTag::WMS_LIFE, "Destroyed success, id: %{public}d.", GetPersistentId());
     return WMError::WM_OK;
 }
@@ -328,23 +330,24 @@ WMError WindowExtensionSessionImpl::TransferExtensionData(const AAFwk::WantParam
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
     auto ret = hostSession->TransferExtensionData(wantParams);
-    if (static_cast<int32_t>(ret) != 0) {
-        if (context_ != nullptr) {
-            std::ostringstream oss;
-            oss << "TransferExtensionData from provider to host failed" << ",";
-            oss << " provider bundleName: " << context_->GetBundleName() << ",";
-            oss << " provider windowName: " << property_->GetWindowName() << ",";
-            oss << " errorCode: " << static_cast<int32_t>(ret) << ";";
-            int32_t ret = WindowInfoReporter::GetInstance().ReportUIExtensionException(
-                static_cast<int32_t>(WindowDFXHelperType::WINDOW_UIEXTENSION_TRANSFER_DATA_FAIL),
-                getpid(), GetPersistentId(), oss.str()
-            );
-            if (ret != 0) {
-                TLOGI(WmsLogTag::WMS_UIEXT, "ReportUIExtensionException message failed, ret: %{public}d", ret);
-            }
+    if (ret == ERR_NONE) {
+        return WMError::WM_OK;
+    }
+    if (context_ != nullptr) {
+        std::ostringstream oss;
+        oss << "TransferExtensionData from provider to host failed" << ",";
+        oss << " provider bundleName: " << context_->GetBundleName() << ",";
+        oss << " provider windowName: " << property_->GetWindowName() << ",";
+        oss << " errorCode: " << static_cast<int32_t>(ret) << ";";
+        int32_t ret = WindowInfoReporter::GetInstance().ReportUIExtensionException(
+            static_cast<int32_t>(WindowDFXHelperType::WINDOW_UIEXTENSION_TRANSFER_DATA_FAIL),
+            getpid(), GetPersistentId(), oss.str()
+        );
+        if (ret != 0) {
+            TLOGI(WmsLogTag::WMS_UIEXT, "ReportUIExtensionException message failed, ret: %{public}d", ret);
         }
     }
-    return static_cast<WMError>(ret);
+    return WMError::WM_ERROR_IPC_FAILED;
 }
 
 void WindowExtensionSessionImpl::RegisterTransferComponentDataListener(const NotifyTransferComponentDataFunc& func)
@@ -361,7 +364,7 @@ void WindowExtensionSessionImpl::RegisterTransferComponentDataListener(const Not
 
 WSError WindowExtensionSessionImpl::NotifyTransferComponentData(const AAFwk::WantParams& wantParams)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "id: %{public}d", GetPersistentId());
+    TLOGD(WmsLogTag::WMS_UIEXT, "id: %{public}d", GetPersistentId());
     if (notifyTransferComponentDataFunc_) {
         notifyTransferComponentDataFunc_(wantParams);
     }
@@ -1314,7 +1317,7 @@ bool WindowExtensionSessionImpl::PreNotifyKeyEvent(const std::shared_ptr<MMI::Ke
             keyEvent->GetId(), keyEvent->GetAgentWindowId());
     }
     if (auto uiContent = GetUIContentSharedPtr()) {
-        TLOGI(WmsLogTag::WMS_EVENT, "Start to process keyEvent, id: %{public}d", keyEvent->GetId());
+        TLOGD(WmsLogTag::WMS_EVENT, "Start to process keyEvent, id: %{public}d", keyEvent->GetId());
         return uiContent->ProcessKeyEvent(keyEvent, true);
     }
     return false;
@@ -1467,12 +1470,56 @@ WMError WindowExtensionSessionImpl::OnCrossAxisStateChange(AAFwk::Want&& data, s
             data, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
     }
     TLOGI(WmsLogTag::WMS_UIEXT, "CrossAxisState:%{public}d", state);
+    auto windowCrossAxisListeners = GetListeners<IWindowCrossAxisListener>();
+    for (const auto& listener : windowCrossAxisListeners) {
+        if (listener != nullptr) {
+            listener->OnCrossAxisChange(static_cast<CrossAxisState>(state));
+        }
+    }
     return WMError::WM_OK;
 }
 
 CrossAxisState WindowExtensionSessionImpl::GetCrossAxisState()
 {
     return crossAxisState_.load();
+}
+
+WMError WindowExtensionSessionImpl::OnWaterfallModeChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)
+{
+    bool isWaterfallMode = data.GetBoolParam(Extension::WATERFALL_MODE_FIELD, false);
+    if (isWaterfallMode == isFullScreenWaterfallMode_) {
+        return WMError::WM_OK;
+    }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "prev: %{public}d, curr: %{public}d, winId: %{public}u",
+        isFullScreenWaterfallMode_.load(), isWaterfallMode, GetWindowId());
+    isFullScreenWaterfallMode_.store(isWaterfallMode);
+    isValidWaterfallMode_.store(true);
+    if (auto uiContent = GetUIContentSharedPtr()) {
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "send uiext winId: %{public}u", GetWindowId());
+        uiContent->SendUIExtProprty(static_cast<uint32_t>(Extension::Businesscode::SYNC_HOST_WATERFALL_MODE),
+            data, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
+    }
+    auto waterfallModeChangeListeners = GetWaterfallModeChangeListeners();
+    for (const auto& listener : waterfallModeChangeListeners) {
+        if (listener != nullptr) {
+            listener->OnWaterfallModeChange(isWaterfallMode);
+        }
+    }
+    return WMError::WM_OK;
+}
+
+WMError WindowExtensionSessionImpl::OnResyncExtensionConfig(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)
+{
+    const auto& configParam = data.GetParams().GetWantParams(Extension::UIEXTENSION_CONFIG_FIELD);
+    AAFwk::Want axisWant;
+    axisWant.SetParam(Extension::CROSS_AXIS_FIELD,
+        static_cast<int32_t>(configParam.GetIntParam(Extension::CROSS_AXIS_FIELD, 0)));
+    OnCrossAxisStateChange(std::move(axisWant), reply);
+    AAFwk::Want waterfallWant;
+    waterfallWant.SetParam(Extension::WATERFALL_MODE_FIELD,
+        static_cast<bool>(configParam.GetIntParam(Extension::WATERFALL_MODE_FIELD, 0)));
+    OnWaterfallModeChange(std::move(waterfallWant), reply);
+    return WMError::WM_OK;
 }
 
 void WindowExtensionSessionImpl::RegisterConsumer(Extension::Businesscode code,
@@ -1503,6 +1550,12 @@ void WindowExtensionSessionImpl::RegisterDataConsumer()
                            std::move(windowModeConsumer));
     RegisterConsumer(Extension::Businesscode::SYNC_CROSS_AXIS_STATE,
         std::bind(&WindowExtensionSessionImpl::OnCrossAxisStateChange,
+        this, std::placeholders::_1, std::placeholders::_2));
+    RegisterConsumer(Extension::Businesscode::SYNC_HOST_WATERFALL_MODE,
+        std::bind(&WindowExtensionSessionImpl::OnWaterfallModeChange,
+        this, std::placeholders::_1, std::placeholders::_2));
+    RegisterConsumer(Extension::Businesscode::SYNC_WANT_PARAMS,
+        std::bind(&WindowExtensionSessionImpl::OnResyncExtensionConfig,
         this, std::placeholders::_1, std::placeholders::_2));
 
     auto consumersEntry = [weakThis = wptr(this)](SubSystemId id, uint32_t customId, AAFwk::Want&& data,

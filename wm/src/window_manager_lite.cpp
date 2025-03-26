@@ -42,6 +42,10 @@ public:
     void NotifyFocused(const sptr<FocusChangeInfo>& focusChangeInfo);
     void NotifyUnfocused(const sptr<FocusChangeInfo>& focusChangeInfo);
     void NotifyWindowVisibilityInfoChanged(const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos);
+    void NotifyWindowVisibilityStateChanged(const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos);
+    void PackWindowChangeInfo(const std::unordered_set<WindowInfoKey>& interestInfo,
+        const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos,
+        std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowChangeInfos);
     void NotifyWindowDrawingContentInfoChanged(const std::vector<sptr<WindowDrawingContentInfo>>&
         windowDrawingContentInfos);
     void NotifyWindowModeChange(WindowModeType type);
@@ -49,6 +53,7 @@ public:
     void NotifyWMSConnected(int32_t userId, int32_t screenId);
     void NotifyWMSDisconnected(int32_t userId, int32_t screenId);
     void NotifyWindowStyleChange(WindowStyleType type);
+    void NotifyCallingWindowDisplayChanged(const CallingWindowInfo& callingWindowInfo);
     void UpdatePiPWindowStateChanged(const std::string& bundleName, bool isForeground);
     void NotifyAccessibilityWindowInfo(const std::vector<sptr<AccessibilityWindowInfo>>& infos,
         WindowUpdateType type);
@@ -62,6 +67,8 @@ public:
     sptr<WindowManagerAgentLite> windowUpdateListenerAgent_;
     std::vector<sptr<IVisibilityChangedListener>> windowVisibilityListeners_;
     sptr<WindowManagerAgentLite> windowVisibilityListenerAgent_;
+    std::vector<sptr<IWindowInfoChangedListener>> windowVisibilityStateListeners_;
+    sptr<WindowManagerAgentLite> windowVisibilityStateListenerAgent_;
     std::vector<sptr<IDrawingContentChangedListener>> windowDrawingContentListeners_;
     sptr<WindowManagerAgentLite> windowDrawingContentListenerAgent_;
     std::vector<sptr<IWindowModeChangedListener>> windowModeListeners_;
@@ -73,6 +80,8 @@ public:
     sptr<WindowManagerAgentLite> windowStyleListenerAgent_;
     std::vector<sptr<IPiPStateChangedListener>> pipStateChangedListeners_;
     sptr<WindowManagerAgentLite> pipStateChangedListenerAgent_;
+    std::vector<sptr<IKeyboardCallingWindowDisplayChangedListener>> callingDisplayChangedListeners_;
+    sptr<WindowManagerAgentLite> callingDisplayListenerAgent_;
 };
 
 void WindowManagerLite::Impl::NotifyWMSConnected(int32_t userId, int32_t screenId)
@@ -160,6 +169,53 @@ void WindowManagerLite::Impl::NotifyWindowVisibilityInfoChanged(
             continue;
         }
         listener->OnWindowVisibilityChanged(windowVisibilityInfos);
+    }
+}
+
+void WindowManagerLite::Impl::NotifyWindowVisibilityStateChanged(
+    const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "in");
+    std::vector<sptr<IWindowInfoChangedListener>> windowVisibilityStateListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        windowVisibilityStateListeners = windowVisibilityStateListeners_;
+    }
+    for (auto& listener : windowVisibilityStateListeners) {
+        if (listener == nullptr) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "listener is null");
+            continue;
+        }
+        std::vector<std::unordered_map<WindowInfoKey, std::any>> windowChangeInfos;
+        PackWindowChangeInfo(listener->GetInterestInfo(), windowVisibilityInfos, windowChangeInfos);
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "Notify WindowVisibilityState to caller, info size: %{public}zu",
+            windowChangeInfos.size());
+        listener->OnWindowInfoChanged(windowChangeInfos);
+    }
+}
+
+void WindowManagerLite::Impl::PackWindowChangeInfo(const std::unordered_set<WindowInfoKey>& interestInfo,
+    const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos,
+    std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowChangeInfos)
+{
+    for (const auto& info : windowVisibilityInfos) {
+        std::unordered_map<WindowInfoKey, std::any> windowChangeInfo;
+        if (interestInfo.find(WindowInfoKey::WINDOW_ID) != interestInfo.end()) {
+            windowChangeInfo.emplace(WindowInfoKey::WINDOW_ID, info->windowId_);
+        }
+        if (interestInfo.find(WindowInfoKey::BUNDLE_NAME) != interestInfo.end()) {
+            windowChangeInfo.emplace(WindowInfoKey::BUNDLE_NAME, info->bundleName_);
+        }
+        if (interestInfo.find(WindowInfoKey::ABILITY_NAME) != interestInfo.end()) {
+            windowChangeInfo.emplace(WindowInfoKey::ABILITY_NAME, info->abilityName_);
+        }
+        if (interestInfo.find(WindowInfoKey::APP_INDEX) != interestInfo.end()) {
+            windowChangeInfo.emplace(WindowInfoKey::APP_INDEX, info->appIndex_);
+        }
+        if (interestInfo.find(WindowInfoKey::VISIBILITY_STATE) != interestInfo.end()) {
+            windowChangeInfo.emplace(WindowInfoKey::VISIBILITY_STATE, info->visibilityState_);
+        }
+        windowChangeInfos.emplace_back(windowChangeInfo);
     }
 }
 
@@ -255,6 +311,27 @@ void WindowManagerLite::Impl::NotifyWindowStyleChange(WindowStyleType type)
         TLOGI(WmsLogTag::WMS_MAIN, "real WindowStyleChange type: %{public}d",
               static_cast<uint8_t>(type));
         listener->OnWindowStyleUpdate(type);
+    }
+}
+
+void WindowManagerLite::Impl::NotifyCallingWindowDisplayChanged(const CallingWindowInfo& callingWindowInfo)
+{
+    std::vector<sptr<IKeyboardCallingWindowDisplayChangedListener>> displayChangeListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        displayChangeListeners = callingDisplayChangedListeners_;
+    }
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "notify persistentId: %{public}d, pid: %{public}d, "
+        "displayId: %{public}" PRIu64" , userId: %{public}d, size: %{public}zu",
+        callingWindowInfo.windowId_, callingWindowInfo.callingPid_, callingWindowInfo.displayId_,
+        callingWindowInfo.userId_, displayChangeListeners.size());
+
+    for (const auto& listener : displayChangeListeners) {
+        if (!listener) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "listener is nullptr");
+            continue;
+        }
+        listener->OnCallingWindowDisplayChanged(callingWindowInfo);
     }
 }
 
@@ -389,6 +466,59 @@ WMError WindowManagerLite::UnregisterVisibilityChangedListener(const sptr<IVisib
     return ret;
 }
 
+WMError WindowManagerLite::RegisterVisibilityStateChangedListener(const sptr<IWindowInfoChangedListener>& listener)
+{
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "listener is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+    WMError ret = WMError::WM_OK;
+    if (pImpl_->windowVisibilityStateListenerAgent_ == nullptr) {
+        pImpl_->windowVisibilityStateListenerAgent_ = new WindowManagerAgentLite();
+    }
+    ret = SingletonContainer::Get<WindowAdapterLite>().RegisterWindowManagerAgent(
+        WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_VISIBILITY,
+        pImpl_->windowVisibilityStateListenerAgent_);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "RegisterWindowManagerAgent failed!");
+        pImpl_->windowVisibilityStateListenerAgent_ = nullptr;
+    } else {
+        auto iter = std::find(pImpl_->windowVisibilityStateListeners_.begin(),
+            pImpl_->windowVisibilityStateListeners_.end(), listener);
+        if (iter != pImpl_->windowVisibilityStateListeners_.end()) {
+            TLOGW(WmsLogTag::WMS_ATTRIBUTE, "Listener is already registered.");
+            return WMError::WM_OK;
+        }
+        pImpl_->windowVisibilityStateListeners_.emplace_back(listener);
+    }
+    return ret;
+}
+
+WMError WindowManagerLite::UnregisterVisibilityStateChangedListener(const sptr<IWindowInfoChangedListener>& listener)
+{
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "listener is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+    pImpl_->windowVisibilityStateListeners_.erase(std::remove_if(pImpl_->windowVisibilityStateListeners_ .begin(),
+        pImpl_->windowVisibilityStateListeners_.end(), [listener](sptr<IWindowInfoChangedListener> registeredListener) {
+            return registeredListener == listener;
+        }), pImpl_->windowVisibilityStateListeners_.end());
+
+    WMError ret = WMError::WM_OK;
+    if (pImpl_->windowVisibilityStateListeners_.empty() && pImpl_->windowVisibilityStateListenerAgent_ != nullptr) {
+        ret = SingletonContainer::Get<WindowAdapterLite>().UnregisterWindowManagerAgent(
+            WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_VISIBILITY,
+            pImpl_->windowVisibilityStateListenerAgent_);
+        if (ret == WMError::WM_OK) {
+            pImpl_->windowVisibilityStateListenerAgent_ = nullptr;
+        }
+    }
+    return ret;
+}
+
 void WindowManagerLite::GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId)
 {
     WLOGFD("In");
@@ -413,6 +543,7 @@ void WindowManagerLite::UpdateWindowVisibilityInfo(
     const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos) const
 {
     pImpl_->NotifyWindowVisibilityInfoChanged(windowVisibilityInfos);
+    pImpl_->NotifyWindowVisibilityStateChanged(windowVisibilityInfos);
 }
 
 WMError WindowManagerLite::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) const
@@ -645,6 +776,11 @@ WMError WindowManagerLite::GetMainWindowInfos(int32_t topNum, std::vector<MainWi
     return SingletonContainer::Get<WindowAdapterLite>().GetMainWindowInfos(topNum, topNInfo);
 }
 
+WMError WindowManagerLite::GetCallingWindowInfo(CallingWindowInfo& callingWindowInfo)
+{
+    return SingletonContainer::Get<WindowAdapterLite>().GetCallingWindowInfo(callingWindowInfo);
+}
+
 WMError WindowManagerLite::RegisterWMSConnectionChangedListener(const sptr<IWMSConnectionChangedListener>& listener)
 {
     int32_t clientUserId = GetUserIdByUid(getuid());
@@ -725,6 +861,12 @@ WMError WindowManagerLite::NotifyWindowStyleChange(WindowStyleType type)
     return WMError::WM_OK;
 }
 
+WMError WindowManagerLite::NotifyCallingWindowDisplayChanged(const CallingWindowInfo& callingWindowInfo)
+{
+    pImpl_->NotifyCallingWindowDisplayChanged(callingWindowInfo);
+    return WMError::WM_OK;
+}
+
 WMError WindowManagerLite::RegisterWindowStyleChangedListener(const sptr<IWindowStyleChangedListener>& listener)
 {
     TLOGI(WmsLogTag::WMS_MAIN, "start register windowStyleChangedListener");
@@ -782,6 +924,73 @@ WMError WindowManagerLite::UnregisterWindowStyleChangedListener(const sptr<IWind
         if (ret == WMError::WM_OK) {
             std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
             pImpl_->windowStyleListenerAgent_ = nullptr;
+        }
+    }
+    return ret;
+}
+
+WMError  WindowManagerLite::RegisterCallingWindowDisplayChangedListener(
+    const sptr<IKeyboardCallingWindowDisplayChangedListener>& listener)
+{
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "start register callingDisplayChangeListener");
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "listener could not be null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    {
+        std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+        if (pImpl_->callingDisplayListenerAgent_ == nullptr) {
+            pImpl_->callingDisplayListenerAgent_ = new WindowManagerAgentLite();
+        }
+        auto iter = std::find(pImpl_->callingDisplayChangedListeners_.begin(),
+            pImpl_->callingDisplayChangedListeners_.end(), listener);
+        if (iter != pImpl_->callingDisplayChangedListeners_.end()) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "listener is already registered");
+            return WMError::WM_OK;
+        }
+        pImpl_->callingDisplayChangedListeners_.emplace_back(listener);
+    }
+    WMError ret = WMError::WM_OK;
+    ret = SingletonContainer::Get<WindowAdapterLite>().RegisterWindowManagerAgent(
+        WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_CALLING_DISPLAY, pImpl_->callingDisplayListenerAgent_);
+    if (ret != WMError::WM_OK) {
+        TLOGW(WmsLogTag::WMS_KEYBOARD, "Register agent failed!");
+        std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+        pImpl_->callingDisplayListenerAgent_ = nullptr;
+        auto iter = std::find(pImpl_->callingDisplayChangedListeners_.begin(),
+            pImpl_->callingDisplayChangedListeners_.end(), listener);
+        if (iter != pImpl_->callingDisplayChangedListeners_.end()) {
+            pImpl_->callingDisplayChangedListeners_.erase(iter);
+        }
+    }
+    return ret;
+}
+
+WMError  WindowManagerLite::UnregisterCallingWindowDisplayChangedListener(
+    const sptr<IKeyboardCallingWindowDisplayChangedListener>& listener)
+{
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "start unRegister callingDisplayChangeListener");
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "listener could not be null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    {
+        std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+        auto iter = std::find(pImpl_->callingDisplayChangedListeners_.begin(),
+            pImpl_->callingDisplayChangedListeners_.end(), listener);
+        if (iter == pImpl_->callingDisplayChangedListeners_.end()) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "could not find this listener");
+            return WMError::WM_OK;
+        }
+        pImpl_->callingDisplayChangedListeners_.erase(iter);
+    }
+    WMError ret = WMError::WM_OK;
+    if (pImpl_->callingDisplayChangedListeners_.empty() && pImpl_->callingDisplayListenerAgent_ != nullptr) {
+        ret = SingletonContainer::Get<WindowAdapterLite>().UnregisterWindowManagerAgent(
+            WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_CALLING_DISPLAY, pImpl_->callingDisplayListenerAgent_);
+        if (ret == WMError::WM_OK) {
+            std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+            pImpl_->callingDisplayListenerAgent_ = nullptr;
         }
     }
     return ret;
@@ -947,6 +1156,86 @@ WMError WindowManagerLite::UnregisterWindowUpdateListener(const sptr<IWindowUpda
         if (ret == WMError::WM_OK) {
             pImpl_->windowUpdateListenerAgent_ = nullptr;
         }
+    }
+    return ret;
+}
+
+WMError WindowManagerLite::ProcessRegisterWindowInfoChangeCallback(WindowInfoKey observedInfo,
+    const sptr<IWindowInfoChangedListener>& listener)
+{
+    switch (observedInfo) {
+        case WindowInfoKey::VISIBILITY_STATE :
+            return RegisterVisibilityStateChangedListener(listener);
+        default:
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Invalid observedInfo: %{public}d", static_cast<uint32_t>(observedInfo));
+            return WMError::WM_ERROR_INVALID_PARAM;
+    }
+}
+
+WMError WindowManagerLite::ProcessUnregisterWindowInfoChangeCallback(WindowInfoKey observedInfo,
+    const sptr<IWindowInfoChangedListener>& listener)
+{
+    switch (observedInfo) {
+        case WindowInfoKey::VISIBILITY_STATE :
+            return UnregisterVisibilityStateChangedListener(listener);
+        default:
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Invalid observedInfo: %{public}d", static_cast<uint32_t>(observedInfo));
+            return WMError::WM_ERROR_INVALID_PARAM;
+    }
+}
+
+WMError WindowManagerLite::RegisterWindowInfoChangeCallback(const std::unordered_set<WindowInfoKey>& observedInfo,
+    const sptr<IWindowInfoChangedListener>& listener)
+{
+    std::ostringstream observedInfoForLog;
+    observedInfoForLog << "ObservedInfo: ";
+    auto ret = WMError::WM_OK;
+    for (const auto& info : observedInfo) {
+        observedInfoForLog << static_cast<uint32_t>(info) << ", ";
+        if (listener->GetInterestInfo().find(info) == listener->GetInterestInfo().end()) {
+            listener->AddInterestInfo(info);
+        }
+        ret = ProcessRegisterWindowInfoChangeCallback(info, listener);
+        if (ret != WMError::WM_OK) {
+            observedInfoForLog << "failed";
+            break;
+        }
+    }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s", observedInfoForLog.str().c_str());
+    return ret;
+}
+
+WMError WindowManagerLite::UnregisterWindowInfoChangeCallback(const std::unordered_set<WindowInfoKey>& observedInfo,
+    const sptr<IWindowInfoChangedListener>& listener)
+{
+    std::ostringstream observedInfoForLog;
+    observedInfoForLog << "ObservedInfo: ";
+    auto ret = WMError::WM_OK;
+    for (const auto& info : observedInfo) {
+        observedInfoForLog << static_cast<uint32_t>(info) << ", ";
+        if (listener->GetInterestInfo().find(info) == listener->GetInterestInfo().end()) {
+            listener->AddInterestInfo(info);
+        }
+        ret = ProcessUnregisterWindowInfoChangeCallback(info, listener);
+        if (ret != WMError::WM_OK) {
+            observedInfoForLog << "failed";
+            break;
+        }
+    }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s", observedInfoForLog.str().c_str());
+    return ret;
+}
+
+WMError WindowManagerLite::ListWindowInfo(const WindowInfoOption& windowInfoOption,
+    std::vector<sptr<WindowInfo>>& infos) const
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "windowInfoOption: %{public}u %{public}u %{public}" PRIu64" %{public}d",
+        static_cast<WindowInfoFilterOptionDataType>(windowInfoOption.windowInfoFilterOption),
+        static_cast<WindowInfoTypeOptionDataType>(windowInfoOption.windowInfoTypeOption),
+        windowInfoOption.displayId, windowInfoOption.windowId);
+    WMError ret = SingletonContainer::Get<WindowAdapterLite>().ListWindowInfo(windowInfoOption, infos);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "failed");
     }
     return ret;
 }

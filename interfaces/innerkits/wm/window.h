@@ -55,6 +55,7 @@ class WantParams;
 
 namespace OHOS::Ace {
 class UIContent;
+class ViewportConfig;
 }
 
 namespace OHOS::Media {
@@ -621,6 +622,106 @@ public:
     virtual void OnKeyboardPanelInfoChanged(const KeyboardPanelInfo& keyboardPanelInfo) {}
 };
 
+/**
+ * @class IKeyboardDidShowListener
+ *
+ * @brief IKeyboardDidShowListener is used to observe keyboard show animation completion.
+ */
+class IKeyboardDidShowListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify the caller when keyboard show animation is completed.
+     */
+    virtual void OnKeyboardDidShow(const KeyboardPanelInfo& keyboardPanelInfo) {}
+};
+
+/**
+ * @class IKeyboardDidHideListener
+ *
+ * @brief IKeyboardDidHideListener is used to observe keyboard hide animation completion.
+ */
+class IKeyboardDidHideListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify the caller when keyboard hide animation is completed.
+     */
+    virtual void OnKeyboardDidHide(const KeyboardPanelInfo& keyboardPanelInfo) {}
+};
+
+/**
+ * @class IWaterfallModeChangeListener
+ *
+ * @brief IWaterfallModeChangeListener is used to observe the waterfall mode.
+ */
+class IWaterfallModeChangeListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when waterfall mode changed.
+     *
+     * @param isWaterfallMode new waterfall mode.
+     */
+    virtual void OnWaterfallModeChange(bool isWaterfallMode) {}
+};
+
+/**
+ * @class IPreferredOrientationChangeListener
+ *
+ * @brief listener of preferred orientation change which set by developer.
+ */
+class IPreferredOrientationChangeListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when orientation set by developer.
+     *
+     * @param ori the orientation set by developer.
+     */
+    virtual void OnPreferredOrientationChange(Orientation orientation) {}
+};
+
+/**
+ * @class IWindowOrientationChangeListener
+ *
+ * @brief IWindowOrientationChangeListener is used to notify while window rotate.
+ */
+class IWindowOrientationChangeListener : virtual public RefBase {
+public:
+    /**
+     * @brief Innerapi, notify caller while window rotate.
+     */
+    virtual void OnOrientationChange() {}
+};
+
+/**
+ * @class ISystemBarPropertyListener
+ *
+ * @brief ISystemBarPropertyListener is used to notify while developer set SystemBarProperty.
+ */
+class ISystemBarPropertyListener : virtual public RefBase {
+public:
+    /**
+     * @brief Innerapi, notify caller when developer set SystemBarProperty.
+     */
+    virtual void OnSystemBarPropertyUpdate(WindowType type, const SystemBarProperty& property) {}
+};
+
+/*
+ * @class IWindowRotationChangeListener
+ *
+ * @brief IWindowRotationChangeListener is used to observe the window rotation change.
+ */
+class IWindowRotationChangeListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when window rotate
+     *
+     * @param rotationChangeInfo information of rotation
+     * @param rotationChangeResult result of rotation
+     *
+     */
+    virtual void OnRotationChange(const RotationChangeInfo& rotationChangeInfo,
+        RotationChangeResult& rotationChangeResult) {}
+};
+
 static WMError DefaultCreateErrCode = WMError::WM_OK;
 class Window : virtual public RefBase {
 public:
@@ -912,6 +1013,22 @@ public:
      * @return True means main window is topmost
      */
     virtual bool IsMainWindowTopmost() const { return false; }
+
+    /**
+     * @brief Set sub window zLevel
+     *
+     * @param zLevel zLevel of sub window to specify the hierarchical relationship among sub windows
+     * @return WM_OK means success, others mean set failed
+     */
+    virtual WMError SetSubWindowZLevel(int32_t zLevel) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Get sub window zLevel
+     *
+     * @param zLevel sub window zLevel
+     * @return WM_OK means success, others mean get failed
+     */
+    virtual WMError GetSubWindowZLevel(int32_t& zLevel) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Set alpha of window.
@@ -1818,8 +1935,108 @@ public:
      * @brief Set requested orientation.
      *
      * @param Orientation Screen orientation.
+     * @param animation true means window rotation needs animation. Otherwise not needed.
      */
-    virtual void SetRequestedOrientation(Orientation) {}
+    virtual void SetRequestedOrientation(Orientation orientation, bool needAnimation = true) {}
+
+    /**
+     * @brief Get the Target Orientation ConfigInfo.
+     *
+     * @param targetOrientation target Orientation.
+     * @param properties systemBar properties
+     * @param config Viewport config.
+     * @param avoidAreas avoidArea information
+     * @return WMError
+     */
+    virtual WMError GetTargetOrientationConfigInfo(Orientation targetOrientation,
+        const std::map<WindowType, SystemBarProperty>& properties, Ace::ViewportConfig& config,
+        std::map<AvoidAreaType, AvoidArea>& avoidAreas)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Register window orientation set by developer
+     *
+     * @param listener IPreferredOrientationChangeListener.
+     * @return WM_OK means register success, others means register failed
+     */
+    virtual WMError RegisterPreferredOrientationChangeListener(
+        const sptr<IPreferredOrientationChangeListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Unregister window orientation set by developer
+     *
+     * @param listener IPreferredOrientationChangeListener.
+     * @return WM_OK means register success, others means unregister failed
+     */
+    virtual WMError UnregisterPreferredOrientationChangeListener(
+        const sptr<IPreferredOrientationChangeListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Register window orientation change listener
+     *
+     * @param listener IWindowOrientationChangeListener.
+     * @return WM_OK means register success, others means register failed
+     */
+    virtual WMError RegisterOrientationChangeListener(const sptr<IWindowOrientationChangeListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Unregister window orientation change listener
+     *
+     * @param listener IWindowOrientationChangeListener.
+     * @return WM_OK means unregister success, others means unregister failed
+     */
+    virtual WMError UnregisterOrientationChangeListener(const sptr<IWindowOrientationChangeListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Notify caller window orientation set by developer
+     *
+     * @param ori Orientation set by developer
+     */
+    virtual void NotifyPreferredOrientationChange(Orientation orientation) {}
+
+    /**
+     * @brief Register SystemBarProperty listener.
+     *
+     * @param listener ISystemBarPropertyListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterSystemBarPropertyListener(const sptr<ISystemBarPropertyListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Unregister SystemBarProperty listener.
+     *
+     * @param listener ISystemBarPropertyListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterSystemBarPropertyListener(const sptr<ISystemBarPropertyListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Notify SystemBarProperty listener.
+     *
+     * @param type The WindowType.
+     * @param property new property value setted by developer.
+     */
+    virtual void NotifySystemBarPropertyUpdate(WindowType type, const SystemBarProperty& property) {}
 
     /**
      * @brief Get requested orientation.
@@ -1961,6 +2178,11 @@ public:
     virtual WMError CloseDirectly() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
+     * @brief notify rotation change result.
+     */
+    virtual void NotifyRotationChangeResult(RotationChangeResult rotationChangeResult) {}
+
+    /**
      * @brief start move main window. It is called by ACE when title is moved.
      *
      */
@@ -2050,6 +2272,14 @@ public:
      * @return std::shared_ptr<Media::PixelMap> snapshot pixel
      */
     virtual std::shared_ptr<Media::PixelMap> Snapshot() { return nullptr; }
+
+    /**
+     * @brief window SnapshotIgnorePrivacy
+     *
+     * @param pixelMap pixel map
+     * @return the error code of this operation
+     */
+    virtual WMError SnapshotIgnorePrivacy(std::shared_ptr<Media::PixelMap>& pixelMap) { return WMError::WM_OK; }
 
     /**
      * @brief Handle and notify memory level.
@@ -2694,7 +2924,8 @@ public:
      * @param enabled Enable the window rect auto-save if true, otherwise means the opposite.
      * @return WM_OK means set success, others means failed.
      */
-    virtual WMError SetWindowRectAutoSave(bool enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError SetWindowRectAutoSave(bool enabled,
+        bool isSaveBySpecifiedFlag = false) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Get whether the auto-save the window rect is enabled or not.
@@ -2714,6 +2945,16 @@ public:
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
+
+    /**
+     * @brief Set whether the sub window supports simultaneous display on multiple screens
+     *        when the parent window is dragged to move or dragged to zoom.
+     *
+     * @param enabled The value true means sub window supports simultaneous display on multiple screens
+     *                when the parent window is dragged to move or dragged to zoom, and false means the opposite.
+     * @return WM_OK means set success, others means failed.
+     */
+    virtual WMError SetFollowParentMultiScreenPolicy(bool enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;}
 
     /**
      * @brief Get the rect of host window.
@@ -3238,6 +3479,35 @@ public:
     virtual void UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>& want) {}
 
     /**
+     * @brief Query whether the waterfall mode is enabled or not.
+     *
+     * @return true means the waterfall mode is enabled, and false means the opposite.
+     */
+    virtual bool IsWaterfallModeEnabled() { return false; }
+
+    /**
+     * @brief Register waterfall mode change listener.
+     *
+     * @param listener IWaterfallModeChangeListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterWaterfallModeChangeListener(const sptr<IWaterfallModeChangeListener>& listener)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Unregister waterfall mode change listener.
+     *
+     * @param listener IWaterfallModeChangeListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterWaterfallModeChangeListener(const sptr<IWaterfallModeChangeListener>& listener)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
      * @brief Register window scene attach or detach framenode listener.
      *
      * @param listener IWindowAttachStateChangeListner.
@@ -3259,11 +3529,49 @@ public:
     }
 
     /**
-     * @brief Get the api version.
+     * @brief Register window rotation change listener.
      *
-     * @return Api version
+     * @param listener IWindowRotationChangeListener.
+     * @return WM_OK means register success, others means register failed.
      */
-    virtual uint32_t GetApiVersion() const { return 0; }
+    virtual WMError RegisterWindowRotationChangeListener(const sptr<IWindowRotationChangeListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Unregister window rotation change listener.
+     *
+     * @param listener IWindowRotationChangeListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterWindowRotationChangeListener(const sptr<IWindowRotationChangeListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Get the api compatible version.
+     *
+     * @return Api compatible version
+     */
+    virtual uint32_t GetApiCompatibleVersion() const { return 0; }
+
+    /**
+     * @brief Set the parent window of a sub window.
+     *
+     * @param newParentWindowId new parent window id.
+     * @return WM_OK means set parent window success, others means failed.
+     */
+    virtual WMError SetParentWindow(int32_t newParentWindowId) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Get the parent window of a sub window.
+     *
+     * @param parentWindow parent window.
+     * @return WM_OK means get parent window success, others means failed.
+     */
+    virtual WMError GetParentWindow(sptr<Window>& parentWindow) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Set the feature of subwindow follow the layout of the parent window.
@@ -3279,6 +3587,50 @@ public:
      * @return true means subwindow support maximize, others means do not support.
      */
     virtual bool IsSubWindowMaximizeSupported() const { return false; }
+
+    /**
+     * @brief Register keyboard show animation completion listener.
+     *
+     * @param listener IKeyboardDidShowListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterKeyboardDidShowListener(const sptr<IKeyboardDidShowListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Unregister keyboard show animation completion listener.
+     *
+     * @param listener IKeyboardDidShowListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterKeyboardDidShowListener(const sptr<IKeyboardDidShowListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Register keyboard hide animation completion listener.
+     *
+     * @param listener IKeyboardDidHideListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterKeyboardDidHideListener(const sptr<IKeyboardDidHideListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Unregister keyboard hide animation completion listener.
+     *
+     * @param listener IKeyboardDidHideListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterKeyboardDidHideListener(const sptr<IKeyboardDidHideListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 };
 }
 }

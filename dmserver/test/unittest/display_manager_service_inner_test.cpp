@@ -56,7 +56,7 @@ namespace {
  * @tc.desc: test function : RegisterWindowInfoQueriedListener
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerServiceInnerTest, RegisterWindowInfoQueriedListener, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerServiceInnerTest, RegisterWindowInfoQueriedListener, TestSize.Level1)
 {
     DisplayManagerServiceInner inner;
     sptr<IWindowInfoQueriedListener> listener = nullptr;
@@ -69,7 +69,7 @@ HWTEST_F(DisplayManagerServiceInnerTest, RegisterWindowInfoQueriedListener, Func
  * @tc.desc: test function : GetAllDisplays
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerServiceInnerTest, GetAllDisplays, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerServiceInnerTest, GetAllDisplays, TestSize.Level1)
 {
     DisplayManagerServiceInner inner;
     auto ret = inner.GetAllDisplays();
@@ -81,7 +81,7 @@ HWTEST_F(DisplayManagerServiceInnerTest, GetAllDisplays, Function | SmallTest | 
  * @tc.desc: test function : UpdateRSTree
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerServiceInnerTest, UpdateRSTree, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerServiceInnerTest, UpdateRSTree, TestSize.Level1)
 {
     DisplayId displayId = 0;
     DisplayId parentDisplayId = 0;
@@ -99,7 +99,7 @@ HWTEST_F(DisplayManagerServiceInnerTest, UpdateRSTree, Function | SmallTest | Le
  * @tc.desc: test function : GetScreenGroupIdByDisplayId
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerServiceInnerTest, GetScreenGroupIdByDisplayId, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerServiceInnerTest, GetScreenGroupIdByDisplayId, TestSize.Level1)
 {
     DisplayId displayId = 0;
     DisplayManagerServiceInner inner;
@@ -116,7 +116,7 @@ HWTEST_F(DisplayManagerServiceInnerTest, GetScreenGroupIdByDisplayId, Function |
  * @tc.desc: test function : GetDisplaySnapshot
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerServiceInnerTest, GetDisplaySnapshot, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerServiceInnerTest, GetDisplaySnapshot, TestSize.Level1)
 {
     DisplayId displayId = 0;
     DmErrorCode* errorCode = nullptr;
@@ -130,7 +130,7 @@ HWTEST_F(DisplayManagerServiceInnerTest, GetDisplaySnapshot, Function | SmallTes
  * @tc.desc: test function : RegisterDisplayChangeListener
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerServiceInnerTest, RegisterDisplayChangeListener, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerServiceInnerTest, RegisterDisplayChangeListener, TestSize.Level1)
 {
     sptr<IDisplayChangeListener> listener = nullptr;
     DisplayManagerServiceInner inner;
@@ -143,7 +143,7 @@ HWTEST_F(DisplayManagerServiceInnerTest, RegisterDisplayChangeListener, Function
  * @tc.desc: test function : SetOrientationFromWindow
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerServiceInnerTest, SetOrientationFromWindow, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerServiceInnerTest, SetOrientationFromWindow, TestSize.Level1)
 {
     DisplayId displayId = 0;
     Orientation orientation = Orientation::BEGIN;
@@ -162,7 +162,7 @@ HWTEST_F(DisplayManagerServiceInnerTest, SetOrientationFromWindow, Function | Sm
  * @tc.desc: test function : SetRotationFromWindow
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerServiceInnerTest, SetRotationFromWindow, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerServiceInnerTest, SetRotationFromWindow, TestSize.Level1)
 {
     DisplayId displayId = 0;
     Rotation targetRotation = Rotation::ROTATION_0;
@@ -181,7 +181,7 @@ HWTEST_F(DisplayManagerServiceInnerTest, SetRotationFromWindow, Function | Small
  * @tc.desc: test function : RegisterDisplayChangeListener
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerServiceInnerTest, SetGravitySensorSubscriptionEnabled, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerServiceInnerTest, SetGravitySensorSubscriptionEnabled, TestSize.Level1)
 {
     DisplayManagerServiceInner inner;
     inner.SetGravitySensorSubscriptionEnabled();
@@ -193,7 +193,7 @@ HWTEST_F(DisplayManagerServiceInnerTest, SetGravitySensorSubscriptionEnabled, Fu
  * @tc.desc: test function : GetCutoutInfo
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerServiceInnerTest, GetCutoutInfo, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerServiceInnerTest, GetCutoutInfo, TestSize.Level1)
 {
     DisplayId displayId = 0;
     DisplayManagerServiceInner inner;
@@ -206,7 +206,7 @@ HWTEST_F(DisplayManagerServiceInnerTest, GetCutoutInfo, Function | SmallTest | L
  * @tc.desc: test function : NotifyPrivateWindowStateChanged
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerServiceInnerTest, NotifyPrivateWindowStateChanged, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerServiceInnerTest, NotifyPrivateWindowStateChanged, TestSize.Level1)
 {
     bool hasPrivate = false;
     DisplayManagerServiceInner inner;

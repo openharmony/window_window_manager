@@ -742,6 +742,218 @@ HWTEST_F(SceneSessionLayoutTest, GetSessionGlobalRectWithSingleHandScale, Functi
     ASSERT_NE(sceneSession->GetSessionGlobalRect().posX_,
               sceneSession->GetSessionGlobalRectWithSingleHandScale().posX_);
 }
+
+/**
+ * @tc.name: IsNeedConvertToRelativeRect
+ * @tc.desc: IsNeedConvertToRelativeRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLayoutTest, IsNeedConvertToRelativeRect, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsNeedConvertToRelativeRect";
+    info.bundleName_ = "IsNeedConvertToRelativeRect";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->moveDragController_ =
+        sptr<MoveDragController>::MakeSptr(sceneSession->GetPersistentId(), sceneSession->GetWindowType());
+    info.abilityName_ = "IsNeedConvertToRelativeRect_subSession";
+    info.bundleName_ = "IsNeedConvertToRelativeRect_subSession";
+    sptr<SceneSession> subSceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    subSceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sceneSession->subSession_.emplace_back(subSceneSession);
+    subSceneSession->parentSession_ = sceneSession;
+
+    ASSERT_EQ(sceneSession->IsNeedConvertToRelativeRect(SizeChangeReason::MAXIMIZE), false);
+    ASSERT_EQ(sceneSession->IsNeedConvertToRelativeRect(SizeChangeReason::DRAG_START), true);
+
+    sceneSession->moveDragController_->isStartMove_ = true;
+    sceneSession->moveDragController_->isStartDrag_ = false;
+    ASSERT_EQ(subSceneSession->IsNeedConvertToRelativeRect(SizeChangeReason::MAXIMIZE), false);
+
+    sceneSession->moveDragController_->isStartMove_ = false;
+    sceneSession->moveDragController_->isStartDrag_ = true;
+    ASSERT_EQ(subSceneSession->IsNeedConvertToRelativeRect(SizeChangeReason::MAXIMIZE), false);
+}
+
+/**
+ * @tc.name: ConvertRelativeRectToGlobal
+ * @tc.desc: ConvertRelativeRectToGlobal
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLayoutTest, ConvertRelativeRectToGlobal, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "ConvertRelativeRectToGlobal";
+    info.bundleName_ = "ConvertRelativeRectToGlobal";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    DisplayId defaultDisplayId = 0;
+    DisplayId invalidDisplayId = -1ULL;
+    WSRect relativeRect = { 500, 500, 800, 800 };
+    sceneSession->GetSessionProperty()->SetDisplayId(invalidDisplayId);
+    ASSERT_EQ(sceneSession->ConvertRelativeRectToGlobal(relativeRect, invalidDisplayId), relativeRect);
+
+    sceneSession->GetSessionProperty()->SetDisplayId(defaultDisplayId);
+    ASSERT_EQ(sceneSession->ConvertRelativeRectToGlobal(relativeRect, invalidDisplayId), relativeRect);
+    ASSERT_EQ(sceneSession->ConvertRelativeRectToGlobal(relativeRect, defaultDisplayId), relativeRect);
+}
+
+/**
+ * @tc.name: ConvertGlobalRectToRelative
+ * @tc.desc: ConvertGlobalRectToRelative
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLayoutTest, ConvertGlobalRectToRelative, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "ConvertGlobalRectToRelative";
+    info.bundleName_ = "ConvertGlobalRectToRelative";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    DisplayId defaultDisplayId = 0;
+    DisplayId invalidDisplayId = -1ULL;
+    WSRect globalRect = { 500, 500, 800, 800 };
+    sceneSession->GetSessionProperty()->SetDisplayId(invalidDisplayId);
+    ASSERT_EQ(sceneSession->ConvertGlobalRectToRelative(globalRect, invalidDisplayId), globalRect);
+
+    sceneSession->GetSessionProperty()->SetDisplayId(defaultDisplayId);
+    ASSERT_EQ(sceneSession->ConvertGlobalRectToRelative(globalRect, invalidDisplayId), globalRect);
+    ASSERT_EQ(sceneSession->ConvertGlobalRectToRelative(globalRect, defaultDisplayId), globalRect);
+}
+
+/**
+ * @tc.name: IsAnyParentSessionDragMoving
+ * @tc.desc: IsAnyParentSessionDragMoving
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLayoutTest, IsAnyParentSessionDragMoving, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsAnyParentSessionDragMoving";
+    info.bundleName_ = "IsAnyParentSessionDragMoving";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->moveDragController_ =
+        sptr<MoveDragController>::MakeSptr(sceneSession->GetPersistentId(), sceneSession->GetWindowType());
+    info.abilityName_ = "IsAnyParentSessionDragMoving_subSession";
+    info.bundleName_ = "IsAnyParentSessionDragMoving_subSession";
+    sptr<SceneSession> subSceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    subSceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+
+    subSceneSession->parentSession_ = nullptr;
+    ASSERT_EQ(subSceneSession->IsAnyParentSessionDragMoving(), false);
+    sceneSession->moveDragController_->isStartMove_ = true;
+    ASSERT_EQ(sceneSession->IsAnyParentSessionDragMoving(), true);
+
+    sceneSession->subSession_.emplace_back(subSceneSession);
+    subSceneSession->parentSession_ = sceneSession;
+    ASSERT_EQ(subSceneSession->IsAnyParentSessionDragMoving(), true);
+}
+
+/**
+ * @tc.name: IsAnyParentSessionDragZooming
+ * @tc.desc: IsAnyParentSessionDragZooming
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLayoutTest, IsAnyParentSessionDragZooming, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsAnyParentSessionDragZooming";
+    info.bundleName_ = "IsAnyParentSessionDragZooming";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->moveDragController_ =
+        sptr<MoveDragController>::MakeSptr(sceneSession->GetPersistentId(), sceneSession->GetWindowType());
+    info.abilityName_ = "IsAnyParentSessionDragZooming_subSession";
+    info.bundleName_ = "IsAnyParentSessionDragZooming_subSession";
+    sptr<SceneSession> subSceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    subSceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+
+    subSceneSession->parentSession_ = nullptr;
+    ASSERT_EQ(subSceneSession->IsAnyParentSessionDragZooming(), false);
+    sceneSession->moveDragController_->isStartDrag_ = true;
+    ASSERT_EQ(sceneSession->IsAnyParentSessionDragZooming(), true);
+
+    sceneSession->subSession_.emplace_back(subSceneSession);
+    subSceneSession->parentSession_ = sceneSession;
+    ASSERT_EQ(subSceneSession->IsAnyParentSessionDragZooming(), true);
+}
+
+/**
+ * @tc.name: HandleSubSessionSurfaceNode
+ * @tc.desc: HandleSubSessionSurfaceNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLayoutTest, HandleSubSessionSurfaceNode, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "HandleSubSessionSurfaceNode";
+    info.bundleName_ = "HandleSubSessionSurfaceNode";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->moveDragController_ =
+        sptr<MoveDragController>::MakeSptr(sceneSession->GetPersistentId(), sceneSession->GetWindowType());
+    info.abilityName_ = "HandleSubSessionSurfaceNode_subSession";
+    info.bundleName_ = "HandleSubSessionSurfaceNode_subSession";
+    sptr<SubSession> subSceneSession = sptr<SubSession>::MakeSptr(info, nullptr);
+    subSceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sceneSession->subSession_.emplace_back(subSceneSession);
+    subSceneSession->parentSession_ = sceneSession;
+    sceneSession->displayIdSetDuringMoveTo_.insert(888);
+    subSceneSession->displayIdSetDuringMoveTo_.insert(888);
+
+    subSceneSession->NotifyFollowParentMultiScreenPolicy(false);
+    sceneSession->HandleSubSessionSurfaceNode(false);
+    ASSERT_NE(0, subSceneSession->displayIdSetDuringMoveTo_.size());
+    subSceneSession->NotifyFollowParentMultiScreenPolicy(true);
+    sceneSession->HandleSubSessionSurfaceNode(true);
+    ASSERT_NE(0, subSceneSession->displayIdSetDuringMoveTo_.size());
+    sceneSession->HandleSubSessionSurfaceNode(false);
+    ASSERT_EQ(0, subSceneSession->displayIdSetDuringMoveTo_.size());
+}
+
+/**
+ * @tc.name: HandleSubSessionCrossNode
+ * @tc.desc: HandleSubSessionCrossNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLayoutTest, HandleSubSessionCrossNode, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "HandleSubSessionCrossNode";
+    info.bundleName_ = "HandleSubSessionCrossNode";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->moveDragController_ =
+        sptr<MoveDragController>::MakeSptr(sceneSession->GetPersistentId(), sceneSession->GetWindowType());
+    info.abilityName_ = "HandleSubSessionCrossNode_subSession";
+    info.bundleName_ = "HandleSubSessionCrossNode_subSession";
+    sptr<SceneSession> subSceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    subSceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+
+    sceneSession->SetDragStart(true);
+    sceneSession->moveDragController_->moveDragStartDisplayId_ = 888;
+    sceneSession->SetOriginDisplayId(DISPLAY_ID_INVALID);
+    sceneSession->HandleSubSessionCrossNode(SizeChangeReason::UNDEFINED);
+    ASSERT_EQ(sceneSession->IsDragStart(), true);
+    ASSERT_EQ(sceneSession->GetOriginDisplayId(), DISPLAY_ID_INVALID);
+    sceneSession->HandleSubSessionCrossNode(SizeChangeReason::DRAG);
+    ASSERT_EQ(sceneSession->IsDragStart(), true);
+    ASSERT_EQ(sceneSession->GetOriginDisplayId(), DISPLAY_ID_INVALID);
+    sceneSession->HandleSubSessionCrossNode(SizeChangeReason::DRAG_END);
+    ASSERT_EQ(sceneSession->IsDragStart(), false);
+
+    sceneSession->HandleSubSessionCrossNode(SizeChangeReason::DRAG);
+    ASSERT_EQ(sceneSession->IsDragStart(), true);
+    ASSERT_EQ(sceneSession->GetOriginDisplayId(), 888);
+    sceneSession->subSession_.emplace_back(subSceneSession);
+    subSceneSession->parentSession_ = sceneSession;
+    sceneSession->HandleSubSessionCrossNode(SizeChangeReason::DRAG_END);
+    ASSERT_EQ(sceneSession->IsDragStart(), false);
+    sceneSession->HandleSubSessionCrossNode(SizeChangeReason::DRAG_MOVE);
+    ASSERT_EQ(sceneSession->IsDragStart(), true);
+}
 } // namespace
 } // Rosen
 } // OHOS

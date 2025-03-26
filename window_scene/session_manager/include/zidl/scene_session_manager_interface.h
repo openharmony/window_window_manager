@@ -127,10 +127,14 @@ public:
         TRANS_ID_GET_GLOBAL_DRAG_RESIZE_TYPE,
         TRANS_ID_SET_APP_DRAG_RESIZE_TYPE,
         TRANS_ID_GET_APP_DRAG_RESIZE_TYPE,
+        TRANS_ID_SET_APP_KEY_FRAME_POLICY,
         TRANS_ID_WATCH_GESTURE_CONSUME_RESULT,
         TRANS_ID_WATCH_FOCUS_ACTIVE_CHANGE,
         TRANS_ID_SHIFT_APP_WINDOW_POINTER_EVENT,
         TRANS_ID_REQUEST_FOCUS_STATUS_BY_SA,
+        TRANS_ID_MINIMIZE_BY_WINDOW_ID,
+        TRANS_ID_SET_PARENT_WINDOW,
+        TRANS_ID_SET_FOREGROUND_WINDOW_NUM,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
@@ -288,6 +292,8 @@ public:
     void SetMaximizeMode(MaximizeMode maximizeMode) override {}
     MaximizeMode GetMaximizeMode() override { return MaximizeMode::MODE_AVOID_SYSTEM_BAR; }
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId = DEFAULT_DISPLAY_ID) override {}
+    WMError MinimizeByWindowId(const std::vector<int32_t>& windowIds) override { return WMError::WM_OK; }
+    WMError SetForegroundWindowNum(int32_t windowNum) override { return WMError::WM_OK; }
 
     /**
      * @brief Raise a window to screen top by id of window.
@@ -356,7 +362,8 @@ public:
 
     WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode) override { return WMError::WM_OK; }
 
-    WMError IsWindowRectAutoSave(const std::string& key, bool& enabled) override { return WMError::WM_OK; }
+    WMError IsWindowRectAutoSave(const std::string& key, bool& enabled,
+        int persistentId) override { return WMError::WM_OK; }
 
     WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap) override { return WMError::WM_OK; }
@@ -367,6 +374,8 @@ public:
         DragResizeType dragResizeType) override { return WMError::WM_OK; }
     WMError GetAppDragResizeType(const std::string& bundleName,
         DragResizeType& dragResizeType) override { return WMError::WM_OK; }
+    WMError SetAppKeyFramePolicy(const std::string& bundleName,
+        const KeyFramePolicy& keyFramePolicy) override { return WMError::WM_OK; }
     WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId,
         int32_t targetPersistentId) override { return WMError::WM_OK; }
     WMError HasFloatingWindowForeground(const sptr<IRemoteObject>& abilityToken,

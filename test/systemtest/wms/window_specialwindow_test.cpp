@@ -413,6 +413,102 @@ HWTEST_F(WindowSpecialWindowTest, SetWindowModal03, Function | MediumTest | Leve
     window->Destroy(true, true);
 }
 
+/**
+ * @tc.name: setWindowMask01
+ * @tc.desc: setWindowMask
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSpecialWindowTest, setWindowMask01, Function | MediumTest | Level0)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("Window3_1");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
+
+    window->property_->SetPersistentId(10031);
+    window->hostSession_ = session;
+
+    std::vector<std::vector<uint32_t>> windowMask;
+    windowMask = {{1, 1, 1}, {1, 0, 1}, {1, 1, 1}};
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    ASSERT_EQ(WMError::WM_OK, window->SetWindowMask(windowMask));
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    ASSERT_EQ(WMError::WM_OK, window->SetWindowMask(windowMask));
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ASSERT_EQ(WMError::WM_OK, window->SetWindowMask(windowMask));
+
+    window->Destroy(true, true);
+}
+
+/**
+ * @tc.name: setWindowMask02
+ * @tc.desc: setWindowMask
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSpecialWindowTest, setWindowMask02, Function | MediumTest | Level0)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("Window3_2");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
+
+    window->property_->SetPersistentId(10032);
+    window->hostSession_ = session;
+
+    std::vector<std::vector<uint32_t>> windowMask;
+    windowMask = {{1, 1, 1}, {1, 0, 1}, {1, 1, 1}};
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    ASSERT_EQ(WMError::WM_OK, window->SetWindowMask(windowMask));
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    ASSERT_EQ(WMError::WM_OK, window->SetWindowMask(windowMask));
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ASSERT_EQ(WMError::WM_OK, window->SetWindowMask(windowMask));
+
+    window->Destroy(true, true);
+}
+
+/**
+ * @tc.name: setWindowMask03
+ * @tc.desc: setWindowMask
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSpecialWindowTest, setWindowMask03, Function | MediumTest | Level0)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("Window3_3");
+    option->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
+
+    window->property_->SetPersistentId(10033);
+    window->hostSession_ = session;
+
+    std::vector<std::vector<uint32_t>> windowMask;
+    windowMask = {{1, 1, 1}, {1, 0, 1}, {1, 1, 1}};
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    ASSERT_EQ(WMError::WM_OK, window->SetWindowMask(windowMask));
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    ASSERT_EQ(WMError::WM_OK, window->SetWindowMask(windowMask));
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ASSERT_EQ(WMError::WM_OK, window->SetWindowMask(windowMask));
+
+    window->Destroy(true, true);
+}
+
 }
 } // namespace Rosen
 } // namespace OHOS

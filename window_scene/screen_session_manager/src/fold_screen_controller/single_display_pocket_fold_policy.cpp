@@ -70,14 +70,19 @@ void SingleDisplayPocketFoldPolicy::SetdisplayModeChangeStatus(bool status, bool
     if (status) {
         pengdingTask_ = isOnBootAnimation ? FOLD_TO_EXPAND_ONBOOTANIMATION_TASK_NUM : FOLD_TO_EXPAND_TASK_NUM;
         startTimePoint_ = std::chrono::steady_clock::now();
+        SetIsFirstFrameCommitReported(false);
         displayModeChangeRunning_ = status;
+        TLOGI(WmsLogTag::DMS, "displaymodechange start, taskCount: %{public}d", pengdingTask_.load());
     } else {
         pengdingTask_ --;
         if (pengdingTask_ != 0) {
+            TLOGI(WmsLogTag::DMS, "displaymodechange 1 task finished, %{public}d task left", pengdingTask_.load());
             return;
         }
         displayModeChangeRunning_ = false;
         endTimePoint_ = std::chrono::steady_clock::now();
+        TLOGI(WmsLogTag::DMS, "displaymodechange finished, current displaymode: %{public}ud,"
+            "target displaymode: %{public}ud", GetScreenDisplayMode(), lastCachedisplayMode_.load());
         if (lastCachedisplayMode_.load() != GetScreenDisplayMode()) {
             ScreenSessionManager::GetInstance().TriggerDisplayModeUpdate(lastCachedisplayMode_.load());
         }
@@ -305,6 +310,8 @@ void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeToMainWhenFoldScreenO
         if (ifTentMode) {
             PowerMgr::PowerMgrClient::GetInstance().WakeupDeviceAsync(
                 PowerMgr::WakeupDeviceType::WAKEUP_DEVICE_TENT_MODE_CHANGE);
+        } else {
+            SetIsFirstFrameCommitReported(true);
         }
         SetdisplayModeChangeStatus(false);
     };
@@ -524,6 +531,11 @@ void SingleDisplayPocketFoldPolicy::AddOrRemoveDisplayNodeToTree(ScreenId screen
 
 void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeToCoordination()
 {
+    std::lock_guard<std::mutex> lock(coordinationMutex_);
+    if (ScreenSessionManager::GetInstance().GetCoordinationFlag()) {
+        TLOGW(WmsLogTag::DMS, "change displaymode to coordination skipped, current coordination flag is true");
+        return;
+    }
     TLOGI(WmsLogTag::DMS, "change displaymode to coordination current mode=%{public}d", currentDisplayMode_);
     
     ScreenSessionManager::GetInstance().SetCoordinationFlag(true);
@@ -542,6 +554,11 @@ void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeToCoordination()
 
 void SingleDisplayPocketFoldPolicy::CloseCoordinationScreen()
 {
+    std::lock_guard<std::mutex> lock(coordinationMutex_);
+    if (!ScreenSessionManager::GetInstance().GetCoordinationFlag()) {
+        TLOGW(WmsLogTag::DMS, "change displaymode to coordination skipped, current coordination flag is false");
+        return;
+    }
     TLOGI(WmsLogTag::DMS, "Close Coordination Screen current mode=%{public}d", currentDisplayMode_);
     
     // on main screen
@@ -559,6 +576,11 @@ void SingleDisplayPocketFoldPolicy::CloseCoordinationScreen()
 
 void SingleDisplayPocketFoldPolicy::ExitCoordination()
 {
+    std::lock_guard<std::mutex> lock(coordinationMutex_);
+    if (!ScreenSessionManager::GetInstance().GetCoordinationFlag()) {
+        TLOGW(WmsLogTag::DMS, "change displaymode to coordination skipped, current coordination flag is false");
+        return;
+    }
     ChangeScreenDisplayModePower(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_OFF);
     AddOrRemoveDisplayNodeToTree(SCREEN_ID_MAIN, REMOVE_DISPLAY_NODE);
     ScreenSessionManager::GetInstance().OnScreenChange(SCREEN_ID_MAIN, ScreenEvent::DISCONNECTED);

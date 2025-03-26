@@ -18,6 +18,7 @@
 #include <system_ability_definition.h>
 
 #include "fold_screen_controller/super_fold_state_manager.h"
+#include "fold_screen_state_internel.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -25,6 +26,10 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 
+namespace {
+#define ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {return;}
+}
+    
 class SuperFoldStateManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -58,6 +63,7 @@ namespace {
  */
 HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange01, TestSize.Level1)
 {
+    ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
     SuperFoldStatusChangeEvents events = SuperFoldStatusChangeEvents::ANGLE_CHANGE_EXPANDED;
     SuperFoldStateManager::GetInstance().SetCurrentStatus(SuperFoldStatus::HALF_FOLDED);
     std::function<void()> func = [&]()
@@ -79,6 +85,7 @@ HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange01, TestSize.Leve
  */
 HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange02, TestSize.Level1)
 {
+    ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
     SuperFoldStatusChangeEvents events = SuperFoldStatusChangeEvents::ANGLE_CHANGE_HALF_FOLDED;
     SuperFoldStateManager::GetInstance().SetCurrentStatus(SuperFoldStatus::FOLDED);
     std::function<void()> func = [&]()
@@ -100,6 +107,7 @@ HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange02, TestSize.Leve
  */
 HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange03, TestSize.Level1)
 {
+    ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
     SuperFoldStatusChangeEvents events = SuperFoldStatusChangeEvents::ANGLE_CHANGE_HALF_FOLDED;
     SuperFoldStateManager::GetInstance().SetCurrentStatus(SuperFoldStatus::EXPANDED);
     std::function<void()> func = [&]()
@@ -121,6 +129,7 @@ HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange03, TestSize.Leve
  */
 HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange04, TestSize.Level1)
 {
+    ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
     SuperFoldStatusChangeEvents events = SuperFoldStatusChangeEvents::ANGLE_CHANGE_FOLDED;
     SuperFoldStateManager::GetInstance().SetCurrentStatus(SuperFoldStatus::HALF_FOLDED);
     std::function<void()> func = [&]()
@@ -142,6 +151,7 @@ HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange04, TestSize.Leve
  */
 HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange05, TestSize.Level1)
 {
+    ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
     SuperFoldStatusChangeEvents events = SuperFoldStatusChangeEvents::KEYBOARD_ON;
     SuperFoldStateManager::GetInstance().SetCurrentStatus(SuperFoldStatus::HALF_FOLDED);
     std::function<void()> func = [&]()
@@ -163,6 +173,7 @@ HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange05, TestSize.Leve
  */
 HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange06, TestSize.Level1)
 {
+    ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
     SuperFoldStatusChangeEvents events = SuperFoldStatusChangeEvents::KEYBOARD_ON;
     SuperFoldStateManager::GetInstance().SetCurrentStatus(SuperFoldStatus::EXPANDED);
     std::function<void()> func = [&]()
@@ -186,6 +197,7 @@ HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange06, TestSize.Leve
  */
 HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange07, TestSize.Level1)
 {
+    ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
     SuperFoldStatusChangeEvents events = SuperFoldStatusChangeEvents::KEYBOARD_OFF;
     SuperFoldStateManager::GetInstance().SetCurrentStatus(SuperFoldStatus::KEYBOARD);
     std::function<void()> func = [&]()
@@ -201,12 +213,57 @@ HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange07, TestSize.Leve
 }
 
 /**
+ * @tc.name: HandleSuperFoldStatusChange
+ * @tc.desc: test function : SYSTEM_KEYBOARD_ON
+ * @tc.type: FUNC
+ */
+HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange08, Function | SmallTest | Level1)
+{
+    ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
+    SuperFoldStatusChangeEvents events = SuperFoldStatusChangeEvents::SYSTEM_KEYBOARD_ON;
+    SuperFoldStateManager::GetInstance().SetCurrentStatus(SuperFoldStatus::HALF_FOLDED);
+    std::function<void()> func = [&]()
+    {
+        SuperFoldStateManager::GetInstance().HandleSuperFoldStatusChange(events);
+    };
+ 
+    func();
+    SuperFoldStatus curState = SuperFoldStateManager::GetInstance().GetCurrentStatus();
+    SuperFoldStatus expState = SuperFoldStatus::HALF_FOLDED;
+ 
+    EXPECT_EQ(curState, expState);
+}
+ 
+/**
+ * @tc.name: HandleSuperFoldStatusChange
+ * @tc.desc: test function : SYSTEM_KEYBOARD_OFF
+ * @tc.type: FUNC
+ */
+HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange09, Function | SmallTest | Level1)
+{
+    ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
+    SuperFoldStatusChangeEvents events = SuperFoldStatusChangeEvents::SYSTEM_KEYBOARD_OFF;
+    SuperFoldStateManager::GetInstance().SetCurrentStatus(SuperFoldStatus::HALF_FOLDED);
+    std::function<void()> func = [&]()
+    {
+        SuperFoldStateManager::GetInstance().HandleSuperFoldStatusChange(events);
+    };
+ 
+    func();
+    SuperFoldStatus curState = SuperFoldStateManager::GetInstance().GetCurrentStatus();
+    SuperFoldStatus expState = SuperFoldStatus::HALF_FOLDED;
+ 
+    EXPECT_EQ(curState, expState);
+}
+
+/**
  * @tc.name: MatchSuperFoldStatusToFoldStatus
  * @tc.desc: test function : EXPANDED
  * @tc.type: FUNC
  */
 HWTEST_F(SuperFoldStateManagerTest, MatchSuperFoldStatusToFoldStatus01, TestSize.Level1)
 {
+    ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
     SuperFoldStatus superFoldStatus = SuperFoldStatus::EXPANDED;
     FoldStatus foldStatus;
     std::function<void()> func = [&]()
@@ -226,6 +283,7 @@ HWTEST_F(SuperFoldStateManagerTest, MatchSuperFoldStatusToFoldStatus01, TestSize
  */
 HWTEST_F(SuperFoldStateManagerTest, MatchSuperFoldStatusToFoldStatus02, TestSize.Level1)
 {
+    ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
     SuperFoldStatus superFoldStatus = SuperFoldStatus::HALF_FOLDED;
     FoldStatus foldStatus;
     std::function<void()> func = [&]()
@@ -245,6 +303,7 @@ HWTEST_F(SuperFoldStateManagerTest, MatchSuperFoldStatusToFoldStatus02, TestSize
  */
 HWTEST_F(SuperFoldStateManagerTest, MatchSuperFoldStatusToFoldStatus03, TestSize.Level1)
 {
+    ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
     SuperFoldStatus superFoldStatus = SuperFoldStatus::FOLDED;
     FoldStatus foldStatus;
     std::function<void()> func = [&]()
@@ -264,6 +323,7 @@ HWTEST_F(SuperFoldStateManagerTest, MatchSuperFoldStatusToFoldStatus03, TestSize
  */
 HWTEST_F(SuperFoldStateManagerTest, MatchSuperFoldStatusToFoldStatus04, TestSize.Level1)
 {
+    ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
     SuperFoldStatus superFoldStatus = SuperFoldStatus::KEYBOARD;
     FoldStatus foldStatus;
     std::function<void()> func = [&]()
@@ -283,6 +343,7 @@ HWTEST_F(SuperFoldStateManagerTest, MatchSuperFoldStatusToFoldStatus04, TestSize
  */
 HWTEST_F(SuperFoldStateManagerTest, MatchSuperFoldStatusToFoldStatus05, TestSize.Level1)
 {
+    ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
     SuperFoldStatus superFoldStatus = SuperFoldStatus::UNKNOWN;
     FoldStatus foldStatus;
     std::function<void()> func = [&]()
@@ -295,6 +356,47 @@ HWTEST_F(SuperFoldStateManagerTest, MatchSuperFoldStatusToFoldStatus05, TestSize
     EXPECT_EQ(foldStatus, foldStatusExp);
 }
 
+/**
+ * @tc.name: SetSystemKeyboardStatus
+ * @tc.desc: SetSystemKeyboardStatus with true as parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(SuperFoldStateManagerTest, SetSystemKeyboardStatus01, Function | SmallTest | Level1)
+{
+    ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
+    SuperFoldStateManager::GetInstance().SetCurrentStatus(SuperFoldStatus::HALF_FOLDED);
+    std::function<void()> func = [&]()
+    {
+        SuperFoldStateManager::GetInstance().SetSystemKeyboardStatus(true);
+    };
+ 
+    func();
+    SuperFoldStatus curState = SuperFoldStateManager::GetInstance().GetCurrentStatus();
+    SuperFoldStatus expState = SuperFoldStatus::HALF_FOLDED;
+ 
+    EXPECT_EQ(curState, expState);
+}
+ 
+/**
+ * @tc.name: SetSystemKeyboardStatus
+ * @tc.desc: SetSystemKeyboardStatus with false as parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(SuperFoldStateManagerTest, SetSystemKeyboardStatus02, Function | SmallTest | Level1)
+{
+    ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
+    SuperFoldStateManager::GetInstance().SetCurrentStatus(SuperFoldStatus::HALF_FOLDED);
+    std::function<void()> func = [&]()
+    {
+        SuperFoldStateManager::GetInstance().SetSystemKeyboardStatus(false);
+    };
+ 
+    func();
+    SuperFoldStatus curState = SuperFoldStateManager::GetInstance().GetCurrentStatus();
+    SuperFoldStatus expState = SuperFoldStatus::HALF_FOLDED;
+ 
+    EXPECT_EQ(curState, expState);
+}
 }
 }
 }

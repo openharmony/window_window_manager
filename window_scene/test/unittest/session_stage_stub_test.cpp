@@ -296,6 +296,24 @@ HWTEST_F(SessionStageStubTest, HandleNotifyOccupiedAreaChange, Function | SmallT
 }
 
 /**
+ * @tc.name: HandleNotifyKeyboardAnimationCompleted
+ * @tc.desc: test function : HandleNotifyKeyboardAnimationCompleted
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifyKeyboardAnimationCompleted, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    sptr<KeyboardPanelInfo> keyboardPanelInfo = sptr<KeyboardPanelInfo>::MakeSptr();
+    data.WriteParcelable(keyboardPanelInfo);
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_KEYBOARD_ANIMATION_COMPLETED);
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_EQ(ERR_NONE, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
  * @tc.name: HandleUpdateAvoidArea
  * @tc.desc: test function : HandleUpdateAvoidArea
  * @tc.type: FUNC
@@ -723,6 +741,22 @@ HWTEST_F(SessionStageStubTest, HandleCompatibleFullScreenClose, Function | Small
 }
 
 /**
+ * @tc.name: HandlePcAppInPadNormalClose
+ * @tc.desc: test function : HandlePcAppInPadNormalClose
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandlePcAppInPadNormalClose, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_PCAPPINPADNORMAL_CLOSE);
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    ASSERT_NE(sessionStageStub_, nullptr);
+    ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
  * @tc.name: HandleSetUniqueVirtualPixelRatio
  * @tc.desc: test function : HandleSetUniqueVirtualPixelRatio
  * @tc.type: FUNC
@@ -930,6 +964,26 @@ HWTEST_F(SessionStageStubTest, HandleNotifyWindowCrossAxisChange, Function | Sma
     MessageParcel data3;
     data2.WriteUint32(1000);
     EXPECT_EQ(sessionStageStub->HandleNotifyWindowCrossAxisChange(data, reply), ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandleSetCurrentRotation
+ * @tc.desc: test function : HandleSetCurrentRotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleSetCurrentRotation, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_CURRENT_ROTATION);
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    ASSERT_TRUE(sessionStageStub_ != nullptr);
+    EXPECT_EQ(ERR_INVALID_VALUE, sessionStageStub_->HandleSetCurrentRotation(data, reply));
+
+    data.WriteInt32(ONE_FOURTH_FULL_CIRCLE_DEGREE);
+    EXPECT_EQ(ERR_NONE, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+    EXPECT_EQ(ERR_NONE, sessionStageStub_->HandleSetCurrentRotation(data, reply));
 }
 }
 }

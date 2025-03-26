@@ -831,6 +831,38 @@ HWTEST_F(WindowSessionTest4, GetMainOrFloatSession, Function | SmallTest | Level
 }
 
 /**
+ * @tc.name: IsAncestorsSession
+ * @tc.desc: IsAncestorsSession Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, IsAncestorsSession, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsAncestorsSession";
+    info.moduleName_ = "IsAncestorsSession";
+    info.bundleName_ = "IsAncestorsSession";
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
+    session->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    session->property_->SetPersistentId(1);
+
+    sptr<Session> subSession = sptr<Session>::MakeSptr(info);
+    subSession->SetParentSession(session);
+    subSession->property_->SetPersistentId(2);
+    subSession->property_->SetParentPersistentId(1);
+    subSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    EXPECT_EQ(true, subSession->IsAncestorsSession(1));
+
+    sptr<Session> subSubSession = sptr<Session>::MakeSptr(info);
+    subSubSession->SetParentSession(subSession);
+    subSubSession->property_->SetPersistentId(3);
+    subSubSession->property_->SetParentPersistentId(2);
+    subSubSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    EXPECT_EQ(true, subSubSession->IsAncestorsSession(1));
+    EXPECT_EQ(true, subSubSession->IsAncestorsSession(2));
+    EXPECT_EQ(false, subSubSession->IsAncestorsSession(3));
+}
+
+/**
  * @tc.name: IsSupportDetectWindow
  * @tc.desc: IsSupportDetectWindow Test
  * @tc.type: FUNC

@@ -393,6 +393,7 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest07, Function | SmallTest | Lev
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_TITLE_AND_DOCK_HOVER_SHOW_CHANGE), data, reply, option);
     ASSERT_EQ(ERR_NONE, res);
     ASSERT_EQ(data.WriteBool(true), true);
+    ASSERT_EQ(data.WriteBool(false), true);
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_WINDOW_RECT_AUTO_SAVE), data, reply, option);
     ASSERT_EQ(ERR_NONE, res);
@@ -403,6 +404,15 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest07, Function | SmallTest | Lev
     ASSERT_EQ(data.WriteFloat(1.0f), true);
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_WINDOW_CORNER_RADIUS), data, reply, option);
+    ASSERT_EQ(ERR_NONE, res);
+    ASSERT_EQ(data.WriteString("test"), true);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_FLAG), data, reply, option);
+    ASSERT_EQ(ERR_NONE, res);
+    ASSERT_EQ(data.WriteBool(true), true);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_FOLLOW_PARENT_MULTI_SCREEN_POLICY),
+        data, reply, option);
     ASSERT_EQ(ERR_NONE, res);
 }
 

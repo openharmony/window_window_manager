@@ -92,6 +92,8 @@ public:
     virtual WMError SetSystemBarProperties(const std::map<WindowType, SystemBarProperty>& properties,
         const std::map<WindowType, SystemBarPropertyFlag>& propertyFlags) override;
     virtual WMError GetSystemBarProperties(std::map<WindowType, SystemBarProperty>& properties) override;
+    void UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool systemBarEnableAnimation,
+        SystemBarProperty& property) override;
     virtual WMError SetLayoutFullScreen(bool status) override;
     virtual WMError SetFullScreen(bool status) override;
     virtual const Transform& GetTransform() const override;
@@ -189,6 +191,7 @@ public:
     virtual Ace::UIContent* GetUIContent() const override;
     virtual void OnNewWant(const AAFwk::Want& want) override;
     virtual void SetRequestedOrientation(Orientation) override;
+    virtual void NotifyPreferredOrientationChange(Orientation orientation) override;
     virtual Orientation GetRequestedOrientation() override;
     virtual void SetNeedRemoveWindowInputChannel(bool needRemoveWindowInputChannel) override;
     virtual WMError SetTouchHotAreas(const std::vector<Rect>& rects) override;
@@ -203,6 +206,7 @@ public:
 
     virtual void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
     virtual std::shared_ptr<Media::PixelMap> Snapshot() override;
+    WMError SnapshotIgnorePrivacy(std::shared_ptr<Media::PixelMap>& pixelMap) override;
     virtual WMError NotifyMemoryLevel(int32_t level) override;
     virtual bool IsAllowHaveSystemSubWindow() override;
     WMError RaiseToAppTop() override;
@@ -243,6 +247,7 @@ public:
      */
     static void UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
     void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
+    uint32_t GetApiTargetVersion() const;
 
 private:
     static sptr<Window> FindWindowById(uint32_t windowId);
