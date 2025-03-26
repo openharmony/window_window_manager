@@ -339,6 +339,8 @@ public:
     bool IsCameraBackSelfie() { return isCameraBackSelfie_; };
     void UpdateCameraBackSelfie(bool isCameraBackSelfie);
     void SetScreenCorrection();
+    void ReportFoldDisplayTime(uint64_t screenId, int64_t rsFirstFrameTime);
+    void RegisterFirstFrameCommitCallback();
 
     VirtualScreenFlag GetVirtualScreenFlag(ScreenId screenId) override;
     DMError SetVirtualScreenFlag(ScreenId screenId, VirtualScreenFlag screenFlag) override;
