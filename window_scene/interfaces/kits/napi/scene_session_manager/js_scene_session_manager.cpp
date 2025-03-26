@@ -3400,7 +3400,7 @@ napi_value JsSceneSessionManager::OnGetSessionSnapshotPixelMap(napi_env env, nap
     }
     SnapshotWindowNode windowNode = SnapshotWindowNode::DEFAULT_WINDOW_NODE;
     if (argc > ARGC_TWO && !ConvertFromJsValue(env, argv[ARG_INDEX_TWO], windowNode)) {
-        TLOGE(WmsLogTag::WMS_PATTERN, "Failed to convert parameter to scaleValue");
+        TLOGE(WmsLogTag::WMS_PATTERN, "Failed to convert parameter to windowNode");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
@@ -3468,7 +3468,7 @@ napi_value JsSceneSessionManager::OnGetSessionSnapshotPixelMapSync(napi_env env,
     }
     SnapshotWindowNode windowNode = SnapshotWindowNode::DEFAULT_WINDOW_NODE;
     if (argc > ARGC_TWO && !ConvertFromJsValue(env, argv[ARG_INDEX_TWO], windowNode)) {
-        TLOGE(WmsLogTag::WMS_PATTERN, "Failed to convert parameter to scaleValue");
+        TLOGE(WmsLogTag::WMS_PATTERN, "Failed to convert parameter to windowNode");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
