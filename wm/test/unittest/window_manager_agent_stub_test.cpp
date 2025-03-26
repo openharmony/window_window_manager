@@ -48,7 +48,7 @@ namespace {
  * @tc.desc: test InterfaceToken check failed
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest01, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -67,7 +67,7 @@ HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest01, Function | SmallTest | L
  * @tc.desc: test TRANS_ID_UPDATE_FOCUS
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest02, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest02, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -91,7 +91,7 @@ HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest02, Function | SmallTest | L
  * @tc.desc: test TRANS_ID_UPDATE_FOCUS failed
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest03, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest03, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -110,7 +110,7 @@ HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest03, Function | SmallTest | L
  * @tc.desc: test TRANS_ID_UPDATE_WINDOW_STATUS success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest04, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest04, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -136,7 +136,7 @@ HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest04, Function | SmallTest | L
  * @tc.desc: test TRANS_ID_UPDATE_WINDOW_VISIBILITY success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest06, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest06, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -163,7 +163,7 @@ HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest06, Function | SmallTest | L
  * @tc.desc: test TRANS_ID_UPDATE_SYSTEM_BAR_PROPS success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest08, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest08, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -193,7 +193,7 @@ HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest08, Function | SmallTest | L
  * @tc.desc: test TRANS_ID_UPDATE_SYSTEM_BAR_PROPS success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest09, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest09, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -211,7 +211,7 @@ HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest09, Function | SmallTest | L
  * @tc.desc: test TRANS_ID_UPDATE_SYSTEM_BAR_PROPS success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest10, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest10, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -230,7 +230,7 @@ HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest10, Function | SmallTest | L
  * @tc.desc: test InterfaceToken check failed
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest11, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest11, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -248,7 +248,7 @@ HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest11, Function | SmallTest | L
  * @tc.desc: test TRANS_ID_UPDATE_WINDOW_MODE_TYPE
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest12, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest12, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -266,7 +266,7 @@ HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest12, Function | SmallTest | L
  * @tc.desc: test TRANS_ID_UPDATE_WINDOW_MODE_TYPE success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest13, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest13, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -279,7 +279,7 @@ HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest13, Function | SmallTest | L
     EXPECT_EQ(res, 0);
 }
 
-HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest14, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest14, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -309,7 +309,7 @@ HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest14, Function | SmallTest | L
  * @tc.desc: test TRANS_ID_UPDATE_WINDOW_DRAWING_STATE
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest15, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest15, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -328,7 +328,7 @@ HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest15, Function | SmallTest | L
  * @tc.desc: test TRANS_ID_UPDATE_CAMERA_FLOAT
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest16, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest16, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -348,7 +348,7 @@ HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest16, Function | SmallTest | L
  * @tc.desc: test TRANS_ID_UPDATE_CAMERA_WINDOW_STATUS
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest17, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest17, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -369,7 +369,7 @@ HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest17, Function | SmallTest | L
  * @tc.desc: test default
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest18, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest18, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -388,7 +388,7 @@ HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest18, Function | SmallTest | L
  * @tc.desc: test TRANS_ID_UPDATE_WINDOW_STYLE_TYPE success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest19, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest19, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -406,7 +406,7 @@ HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest19, Function | SmallTest | L
  * @tc.desc: test TRANS_ID_UPDATE_WINDOW_FOCUS error
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest20, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest20, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;

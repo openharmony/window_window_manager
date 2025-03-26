@@ -64,7 +64,7 @@ namespace {
  * @tc.desc:UpdateSplitRatioPoints
  * @tc.type: FUNC
  */
-HWTEST_F(WindowCommonEventTest, SubscriberEventInner, Function | SmallTest | Level2)
+HWTEST_F(WindowCommonEventTest, SubscriberEventInner, TestSize.Level1)
 {
     sptr<WindowCommonEvent> windowCommonEvent_ = new WindowCommonEvent();
     windowCommonEvent_->SubscriberEventInner(0);
@@ -77,7 +77,7 @@ HWTEST_F(WindowCommonEventTest, SubscriberEventInner, Function | SmallTest | Lev
  * @tc.desc: UnSubscriberEvent
  * @tc.type: FUNC
  */
-HWTEST_F(WindowCommonEventTest, UnSubscriberEvent, Function | SmallTest | Level2)
+HWTEST_F(WindowCommonEventTest, UnSubscriberEvent, TestSize.Level1)
 {
     sptr<WindowCommonEvent> windowCommonEvent_ = new WindowCommonEvent();
     windowCommonEvent_->UnSubscriberEvent();
@@ -90,7 +90,7 @@ HWTEST_F(WindowCommonEventTest, UnSubscriberEvent, Function | SmallTest | Level2
  * @tc.desc: OnReceiveEvent
  * @tc.type: FUNC
  */
-HWTEST_F(WindowCommonEventTest, OnReceiveEvent, Function | SmallTest | Level2)
+HWTEST_F(WindowCommonEventTest, OnReceiveEvent, TestSize.Level1)
 {
     sptr<WindowCommonEvent> windowCommonEvent_ = new WindowCommonEvent();
     EventFwk::CommonEventData data;
@@ -104,7 +104,7 @@ HWTEST_F(WindowCommonEventTest, OnReceiveEvent, Function | SmallTest | Level2)
  * @tc.desc: HandleAccountSwitched
  * @tc.type: FUNC
  */
-HWTEST_F(WindowCommonEventTest, HandleAccountSwitched, Function | SmallTest | Level2)
+HWTEST_F(WindowCommonEventTest, HandleAccountSwitched, TestSize.Level1)
 {
     sptr<WindowCommonEvent> windowCommonEvent_ = new WindowCommonEvent();
     EventFwk::CommonEventData data;

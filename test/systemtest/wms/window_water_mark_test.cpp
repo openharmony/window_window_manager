@@ -139,7 +139,7 @@ namespace {
  * @tc.type: FUNC
  * @tc.require: issueI5FSQW
  */
-HWTEST_F(WaterMarkTest, SetWaterMarkFlag01, Function | MediumTest | Level1)
+HWTEST_F(WaterMarkTest, SetWaterMarkFlag01, TestSize.Level1)
 {
     appInfo_.name = "window1";
     appInfo_.rect = {200, 200, 300, 300};

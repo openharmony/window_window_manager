@@ -43,7 +43,7 @@ namespace {
  * @tc.desc: RequestVsyncOneWindow Test
  * @tc.type: FUNC
  */
-HWTEST_F(VsyncStationTest, RequestVsyncOneWindow, Function | SmallTest | Level3)
+HWTEST_F(VsyncStationTest, RequestVsyncOneWindow, TestSize.Level1)
 {
     NodeId nodeId = 0;
     std::shared_ptr<VsyncStation> vsyncStation = std::make_shared<VsyncStation>(nodeId);
@@ -57,7 +57,7 @@ HWTEST_F(VsyncStationTest, RequestVsyncOneWindow, Function | SmallTest | Level3)
  * @tc.desc: RequestVsyncMultiWindow Test
  * @tc.type: FUNC
  */
-HWTEST_F(VsyncStationTest, RequestVsyncMultiWindow, Function | SmallTest | Level3)
+HWTEST_F(VsyncStationTest, RequestVsyncMultiWindow, TestSize.Level1)
 {
     NodeId nodeId0 = 0;
     std::shared_ptr<VsyncStation> vsyncStation0 = std::make_shared<VsyncStation>(nodeId0);
@@ -76,7 +76,7 @@ HWTEST_F(VsyncStationTest, RequestVsyncMultiWindow, Function | SmallTest | Level
  * @tc.desc: GetFrameRateLinkerId Test
  * @tc.type: FUNC
  */
-HWTEST_F(VsyncStationTest, GetFrameRateLinkerId, Function | SmallTest | Level3)
+HWTEST_F(VsyncStationTest, GetFrameRateLinkerId, TestSize.Level1)
 {
     NodeId nodeId0 = 0;
     std::shared_ptr<VsyncStation> vsyncStation0 = std::make_shared<VsyncStation>(nodeId0);
@@ -93,7 +93,7 @@ HWTEST_F(VsyncStationTest, GetFrameRateLinkerId, Function | SmallTest | Level3)
  * @tc.desc: FlushFrameRate Test
  * @tc.type: FUNC
  */
-HWTEST_F(VsyncStationTest, FlushFrameRate, Function | SmallTest | Level3)
+HWTEST_F(VsyncStationTest, FlushFrameRate, TestSize.Level1)
 {
     NodeId nodeId0 = 0;
     std::shared_ptr<VsyncStation> vsyncStation0 = std::make_shared<VsyncStation>(nodeId0);
@@ -113,7 +113,7 @@ HWTEST_F(VsyncStationTest, FlushFrameRate, Function | SmallTest | Level3)
  * @tc.desc: SetFrameRateLinkerEnable Test
  * @tc.type: FUNC
  */
-HWTEST_F(VsyncStationTest, SetFrameRateLinkerEnable, Function | SmallTest | Level3)
+HWTEST_F(VsyncStationTest, SetFrameRateLinkerEnable, TestSize.Level1)
 {
     NodeId nodeId0 = 0;
     std::shared_ptr<VsyncStation> vsyncStation0 = std::make_shared<VsyncStation>(nodeId0);
@@ -132,7 +132,7 @@ HWTEST_F(VsyncStationTest, SetFrameRateLinkerEnable, Function | SmallTest | Leve
  * @tc.desc: SetUiDvsyncSwitch Test
  * @tc.type: FUNC
  */
-HWTEST_F(VsyncStationTest, SetUiDvsyncSwitch, Function | SmallTest | Level3)
+HWTEST_F(VsyncStationTest, SetUiDvsyncSwitch, TestSize.Level1)
 {
     NodeId nodeId = 0;
     std::shared_ptr<VsyncStation> vsyncStation = std::make_shared<VsyncStation>(nodeId);

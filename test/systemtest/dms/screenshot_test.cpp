@@ -89,7 +89,7 @@ namespace {
  * @tc.desc: Check if screenshot of default display's ID is valid
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenshotTest, ScreenShotValid01, Function | MediumTest | Level2)
+HWTEST_F(ScreenshotTest, ScreenShotValid01, TestSize.Level1)
 {
     ASSERT_NE(nullptr, DisplayManager::GetInstance().GetScreenshot(defaultId_));
 }
@@ -99,7 +99,7 @@ HWTEST_F(ScreenshotTest, ScreenShotValid01, Function | MediumTest | Level2)
  * @tc.desc: Check if screenshot of invalid display's ID is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenshotTest, ScreenShotValid02, Function | MediumTest | Level2)
+HWTEST_F(ScreenshotTest, ScreenShotValid02, TestSize.Level1)
 {
     ASSERT_EQ(nullptr, DisplayManager::GetInstance().GetScreenshot(invalidId_));
 }
@@ -109,7 +109,7 @@ HWTEST_F(ScreenshotTest, ScreenShotValid02, Function | MediumTest | Level2)
  * @tc.desc: Check if screenshot of default display's ID match default display's Media::Size
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenshotTest, ScreenShotValid03, Function | MediumTest | Level2)
+HWTEST_F(ScreenshotTest, ScreenShotValid03, TestSize.Level1)
 {
     auto& dm = DisplayManager::GetInstance();
     std::shared_ptr<Media::PixelMap> screenshot = dm.GetScreenshot(defaultId_);
@@ -124,7 +124,7 @@ HWTEST_F(ScreenshotTest, ScreenShotValid03, Function | MediumTest | Level2)
  * @tc.desc: Check if screenshot created by default parameters is valid
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenshotTest, ScreenShotValid04, Function | MediumTest | Level2)
+HWTEST_F(ScreenshotTest, ScreenShotValid04, TestSize.Level1)
 {
     auto& dm = DisplayManager::GetInstance();
     std::shared_ptr<Media::PixelMap> screenshot = dm.GetScreenshot(defaultId_, defaultScreen_,
@@ -137,7 +137,7 @@ HWTEST_F(ScreenshotTest, ScreenShotValid04, Function | MediumTest | Level2)
  * @tc.desc: Check if screenshot match default imageSize
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenshotTest, ScreenShotValid05, Function | MediumTest | Level2)
+HWTEST_F(ScreenshotTest, ScreenShotValid05, TestSize.Level1)
 {
     auto& dm = DisplayManager::GetInstance();
     std::shared_ptr<Media::PixelMap> screenshot = dm.GetScreenshot(defaultId_, defaultScreen_,
@@ -165,7 +165,7 @@ HWTEST_F(ScreenshotTest, ScreenShotValid05, Function | MediumTest | Level2)
  * @tc.desc: Check if screenshot created by default parameters match default display's Media::Size
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenshotTest, ScreenShotValid06, Function | MediumTest | Level2)
+HWTEST_F(ScreenshotTest, ScreenShotValid06, TestSize.Level1)
 {
     auto& dm = DisplayManager::GetInstance();
     std::shared_ptr<Media::PixelMap> screenshot = dm.GetScreenshot(defaultId_, defaultScreen_,
@@ -180,7 +180,7 @@ HWTEST_F(ScreenshotTest, ScreenShotValid06, Function | MediumTest | Level2)
  * @tc.desc: Check if screenshot created by invalid display ID is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenshotTest, ScreenShot07, Function | MediumTest | Level2)
+HWTEST_F(ScreenshotTest, ScreenShot07, TestSize.Level1)
 {
     auto& dm = DisplayManager::GetInstance();
     std::shared_ptr<Media::PixelMap> screenshot = dm.GetScreenshot(invalidId_, defaultScreen_,
@@ -193,7 +193,7 @@ HWTEST_F(ScreenshotTest, ScreenShot07, Function | MediumTest | Level2)
  * @tc.desc: Check if screenshot created by invalid screenRect is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenshotTest, ScreenShot08, Function | MediumTest | Level2)
+HWTEST_F(ScreenshotTest, ScreenShot08, TestSize.Level1)
 {
     auto& dm = DisplayManager::GetInstance();
     std::shared_ptr<Media::PixelMap> screenshot = dm.GetScreenshot(defaultId_, invalidRect_,
@@ -212,7 +212,7 @@ HWTEST_F(ScreenshotTest, ScreenShot08, Function | MediumTest | Level2)
  * @tc.desc: Check if screenshot created by invalid imageSize is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenshotTest, ScreenShot09, Function | MediumTest | Level2)
+HWTEST_F(ScreenshotTest, ScreenShot09, TestSize.Level1)
 {
     auto& dm = DisplayManager::GetInstance();
     Media::Size invalidSize = {invalidRect_.width, invalidRect_.height};
@@ -233,7 +233,7 @@ HWTEST_F(ScreenshotTest, ScreenShot09, Function | MediumTest | Level2)
  * @tc.type: FUNC
  * @tc.require: issueI5G62O
  */
-HWTEST_F(ScreenshotTest, ScreenShotListener01, Function | MediumTest | Level2)
+HWTEST_F(ScreenshotTest, ScreenShotListener01, TestSize.Level1)
 {
     sptr<ScreenshotListenerFuture> screenShotListener = new ScreenshotListenerFuture();
 

@@ -47,7 +47,7 @@ namespace {
  * @tc.desc: SetContext/GetContext
  * @tc.type: FUNC
  */
-HWTEST_F(PictureInPictureOptionTest, Context, Function | SmallTest | Level2)
+HWTEST_F(PictureInPictureOptionTest, Context, TestSize.Level1)
 {
     void* contextPtr = nullptr;
     sptr<PipOption> option = new PipOption();
@@ -60,7 +60,7 @@ HWTEST_F(PictureInPictureOptionTest, Context, Function | SmallTest | Level2)
  * @tc.desc: SetPipTemplate/GetPipTemplate
  * @tc.type: FUNC
  */
-HWTEST_F(PictureInPictureOptionTest, PipTemplate, Function | SmallTest | Level2)
+HWTEST_F(PictureInPictureOptionTest, PipTemplate, TestSize.Level1)
 {
     sptr<PipOption> option = new PipOption();
     option->SetPipTemplate(100);
@@ -72,7 +72,7 @@ HWTEST_F(PictureInPictureOptionTest, PipTemplate, Function | SmallTest | Level2)
  * @tc.desc: SetPiPControlStatus/GetControlStatus
  * @tc.type: FUNC
  */
-HWTEST_F(PictureInPictureOptionTest, SetPiPControlStatus, Function | SmallTest | Level2)
+HWTEST_F(PictureInPictureOptionTest, SetPiPControlStatus, TestSize.Level1)
 {
     auto option = sptr<PipOption>::MakeSptr();
     ASSERT_NE(nullptr, option);
@@ -89,7 +89,7 @@ HWTEST_F(PictureInPictureOptionTest, SetPiPControlStatus, Function | SmallTest |
  * @tc.desc: SetPiPControlEnabled/GetControlEnable
  * @tc.type: FUNC
  */
-HWTEST_F(PictureInPictureOptionTest, SetPiPControlEnabled, Function | SmallTest | Level2)
+HWTEST_F(PictureInPictureOptionTest, SetPiPControlEnabled, TestSize.Level1)
 {
     auto option = sptr<PipOption>::MakeSptr();
     ASSERT_NE(nullptr, option);
@@ -106,7 +106,7 @@ HWTEST_F(PictureInPictureOptionTest, SetPiPControlEnabled, Function | SmallTest 
  * @tc.desc: SetNavigationId/GetNavigationId
  * @tc.type: FUNC
  */
-HWTEST_F(PictureInPictureOptionTest, NavigationId, Function | SmallTest | Level2)
+HWTEST_F(PictureInPictureOptionTest, NavigationId, TestSize.Level1)
 {
     sptr<PipOption> option = new PipOption();
     std::string navigationId = "abc";
@@ -119,7 +119,7 @@ HWTEST_F(PictureInPictureOptionTest, NavigationId, Function | SmallTest | Level2
  * @tc.desc: SetControlGroup/GetControlGroup
  * @tc.type: FUNC
  */
-HWTEST_F(PictureInPictureOptionTest, SetGetControlGroupTest, Function | SmallTest | Level2)
+HWTEST_F(PictureInPictureOptionTest, SetGetControlGroupTest, TestSize.Level1)
 {
     sptr<PipOption> option = new PipOption();
     std::vector<std::uint32_t> controlGroup;
@@ -135,7 +135,7 @@ HWTEST_F(PictureInPictureOptionTest, SetGetControlGroupTest, Function | SmallTes
  * @tc.desc: SetContentSize/GetContentSize
  * @tc.type: FUNC
  */
-HWTEST_F(PictureInPictureOptionTest, ContentSize, Function | SmallTest | Level2)
+HWTEST_F(PictureInPictureOptionTest, ContentSize, TestSize.Level1)
 {
     sptr<PipOption> option = new PipOption();
     uint32_t width = 800;
@@ -153,7 +153,7 @@ HWTEST_F(PictureInPictureOptionTest, ContentSize, Function | SmallTest | Level2)
  * @tc.desc: SetNodeControllerRef/GetNodeControllerRef
  * @tc.type: FUNC
  */
-HWTEST_F(PictureInPictureOptionTest, NodeController, Function | SmallTest | Level2)
+HWTEST_F(PictureInPictureOptionTest, NodeController, TestSize.Level1)
 {
     sptr<PipOption> option = sptr<PipOption>::MakeSptr();
     option->SetNodeControllerRef(nullptr);
@@ -165,7 +165,7 @@ HWTEST_F(PictureInPictureOptionTest, NodeController, Function | SmallTest | Leve
  * @tc.desc: SetTypeNodeRef/GetTypeNodeRef
  * @tc.type: FUNC
  */
-HWTEST_F(PictureInPictureOptionTest, TypeNodeRef, Function | SmallTest | Level2)
+HWTEST_F(PictureInPictureOptionTest, TypeNodeRef, TestSize.Level1)
 {
     sptr<PipOption> option = sptr<PipOption>::MakeSptr();
     option->SetTypeNodeRef(nullptr);
@@ -177,7 +177,7 @@ HWTEST_F(PictureInPictureOptionTest, TypeNodeRef, Function | SmallTest | Level2)
  * @tc.desc: RegisterPipContentListenerWithType/GetPipContentCallbackRef
  * @tc.type: FUNC
  */
-HWTEST_F(PictureInPictureOptionTest, GetPipContentCallbackRef, Function | SmallTest | Level2)
+HWTEST_F(PictureInPictureOptionTest, GetPipContentCallbackRef, TestSize.Level1)
 {
     sptr<PipOption> option = sptr<PipOption>::MakeSptr();
     option->RegisterPipContentListenerWithType("nodeUpdate", nullptr);
@@ -189,7 +189,7 @@ HWTEST_F(PictureInPictureOptionTest, GetPipContentCallbackRef, Function | SmallT
  * @tc.desc: SetTypeNodeEnabled/IsTypeNodeEnabled
  * @tc.type: FUNC
  */
-HWTEST_F(PictureInPictureOptionTest, TypeNodeEnabled, Function | SmallTest | Level2)
+HWTEST_F(PictureInPictureOptionTest, TypeNodeEnabled, TestSize.Level1)
 {
     sptr<PipOption> option = sptr<PipOption>::MakeSptr();
     option->SetTypeNodeEnabled(true);

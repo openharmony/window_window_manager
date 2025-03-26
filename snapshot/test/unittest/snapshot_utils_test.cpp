@@ -169,7 +169,7 @@ HWTEST_F(SnapshotUtilsTest, WriteRgb888ToJpeg02, TestSize.Level1)
  * @tc.desc: Write default jpeg using valid file names and valid PixelMap
  * @tc.type: FUNC
  */
-HWTEST_F(SnapshotUtilsTest, Write01, Function | MediumTest | Level3)
+HWTEST_F(SnapshotUtilsTest, Write01, TestSize.Level1)
 {
     DisplayId id = DisplayManager::GetInstance().GetDefaultDisplayId();
     std::shared_ptr<Media::PixelMap> pixelMap = DisplayManager::GetInstance().GetScreenshot(id);
@@ -182,7 +182,7 @@ HWTEST_F(SnapshotUtilsTest, Write01, Function | MediumTest | Level3)
  * @tc.desc: Write default jpeg using valid file names and valid WriteToJpegParam
  * @tc.type: FUNC
  */
-HWTEST_F(SnapshotUtilsTest, Write02, Function | MediumTest | Level3)
+HWTEST_F(SnapshotUtilsTest, Write02, TestSize.Level1)
 {
     DisplayId id = DisplayManager::GetInstance().GetDefaultDisplayId();
     std::shared_ptr<Media::PixelMap> pixelMap = DisplayManager::GetInstance().GetScreenshot(id);
@@ -202,7 +202,7 @@ HWTEST_F(SnapshotUtilsTest, Write02, Function | MediumTest | Level3)
  * @tc.desc: Write custom jpeg using valid file names and valid WriteToJpegParam
  * @tc.type: FUNC
  */
-HWTEST_F(SnapshotUtilsTest, Write03, Function | MediumTest | Level3)
+HWTEST_F(SnapshotUtilsTest, Write03, TestSize.Level1)
 {
     DisplayId id = DisplayManager::GetInstance().GetDefaultDisplayId();
     std::shared_ptr<Media::PixelMap> pixelMap = DisplayManager::GetInstance().GetScreenshot(id);
@@ -222,7 +222,7 @@ HWTEST_F(SnapshotUtilsTest, Write03, Function | MediumTest | Level3)
  * @tc.desc: Write pixel map with jpeg, using fd
  * @tc.type: FUNC
  */
-HWTEST_F(SnapshotUtilsTest, Write04, Function | MediumTest | Level3)
+HWTEST_F(SnapshotUtilsTest, Write04, TestSize.Level1)
 {
     DisplayId id = DisplayManager::GetInstance().GetDefaultDisplayId();
     std::shared_ptr<Media::PixelMap> pixelMap = DisplayManager::GetInstance().GetScreenshot(id);
@@ -240,7 +240,7 @@ HWTEST_F(SnapshotUtilsTest, Write04, Function | MediumTest | Level3)
  * @tc.desc: Write custom jpeg using invalid file names and valid WriteToJpegParam
  * @tc.type: FUNC
  */
-HWTEST_F(SnapshotUtilsTest, Write05, Function | MediumTest | Level3)
+HWTEST_F(SnapshotUtilsTest, Write05, TestSize.Level1)
 {
     WriteToJpegParam param = {
         .width = 256,
@@ -257,7 +257,7 @@ HWTEST_F(SnapshotUtilsTest, Write05, Function | MediumTest | Level3)
  * @tc.desc: Write custom jpeg using valid file names and invalid WriteToJpegParam
  * @tc.type: FUNC
  */
-HWTEST_F(SnapshotUtilsTest, Write06, Function | MediumTest | Level3)
+HWTEST_F(SnapshotUtilsTest, Write06, TestSize.Level1)
 {
     WriteToJpegParam param = {
         .width = 256,
@@ -274,7 +274,7 @@ HWTEST_F(SnapshotUtilsTest, Write06, Function | MediumTest | Level3)
  * @tc.desc: Write custom jpeg using valid fd and invalid WriteToJpegParam
  * @tc.type: FUNC
  */
-HWTEST_F(SnapshotUtilsTest, Write07, Function | MediumTest | Level3)
+HWTEST_F(SnapshotUtilsTest, Write07, TestSize.Level1)
 {
     WriteToJpegParam param = {
         .width = 256,
@@ -291,7 +291,7 @@ HWTEST_F(SnapshotUtilsTest, Write07, Function | MediumTest | Level3)
  * @tc.desc: Write custom jpeg using invalid file names and valid WriteToJpegParam
  * @tc.type: FUNC
  */
-HWTEST_F(SnapshotUtilsTest, Write08, Function | MediumTest | Level3)
+HWTEST_F(SnapshotUtilsTest, Write08, TestSize.Level1)
 {
     WriteToJpegParam param = {
         .width = 256,
@@ -308,7 +308,7 @@ HWTEST_F(SnapshotUtilsTest, Write08, Function | MediumTest | Level3)
  * @tc.desc: Write custom jpeg using valid file names and invalid WriteToJpegParam
  * @tc.type: FUNC
  */
-HWTEST_F(SnapshotUtilsTest, Write09, Function | MediumTest | Level3)
+HWTEST_F(SnapshotUtilsTest, Write09, TestSize.Level1)
 {
     WriteToJpegParam param = {
         .width = 256,
@@ -325,7 +325,7 @@ HWTEST_F(SnapshotUtilsTest, Write09, Function | MediumTest | Level3)
  * @tc.desc: Write custom jpeg using valid fd and invalid WriteToJpegParam
  * @tc.type: FUNC
  */
-HWTEST_F(SnapshotUtilsTest, Write10, Function | MediumTest | Level3)
+HWTEST_F(SnapshotUtilsTest, Write10, TestSize.Level1)
 {
     WriteToJpegParam param = {
         .width = 256,

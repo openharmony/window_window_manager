@@ -53,7 +53,7 @@ namespace {
  * @tc.desc: Check default display id is valid
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayMinimalTest, BasicDisplay01, Function | MediumTest | Level1)
+HWTEST_F(DisplayMinimalTest, BasicDisplay01, TestSize.Level1)
 {
     ASSERT_NE(DISPLAY_ID_INVALID, DisplayManager::GetInstance().GetDefaultDisplayId());
 }
@@ -63,7 +63,7 @@ HWTEST_F(DisplayMinimalTest, BasicDisplay01, Function | MediumTest | Level1)
  * @tc.desc: Check default display exists
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayMinimalTest, BasicDisplay02, Function | MediumTest | Level1)
+HWTEST_F(DisplayMinimalTest, BasicDisplay02, TestSize.Level1)
 {
     const sptr<Display>& display = DisplayManager::GetInstance().GetDefaultDisplay();
     ASSERT_NE(nullptr, display);
@@ -74,7 +74,7 @@ HWTEST_F(DisplayMinimalTest, BasicDisplay02, Function | MediumTest | Level1)
  * @tc.desc: Check all displays are valid
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayMinimalTest, BasicDisplay03, Function | MediumTest | Level1)
+HWTEST_F(DisplayMinimalTest, BasicDisplay03, TestSize.Level1)
 {
     std::vector<DisplayId> ids = DisplayManager::GetInstance().GetAllDisplayIds();
     for (DisplayId id : ids) {

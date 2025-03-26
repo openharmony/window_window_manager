@@ -251,7 +251,7 @@ HWTEST_F(DisplayChangeTest, CheckDisplayStateChange01, TestSize.Level1)
  * @tc.desc: Check screen size change as screen mode set if screen sets another mode
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayChangeTest, CheckDisplaySizeChange01, Function | MediumTest | Level2)
+HWTEST_F(DisplayChangeTest, CheckDisplaySizeChange01, TestSize.Level1)
 {
     WLOGI("CheckDisplaySizeChange01");
     auto modes = defaultScreen_->GetSupportedModes();
@@ -278,7 +278,7 @@ HWTEST_F(DisplayChangeTest, CheckDisplaySizeChange01, Function | MediumTest | Le
  * @tc.desc: Check display size change as screen mode set if screen sets another mode
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayChangeTest, CheckDisplaySizeChange02, Function | MediumTest | Level2)
+HWTEST_F(DisplayChangeTest, CheckDisplaySizeChange02, TestSize.Level1)
 {
     WLOGI("CheckDisplaySizeChange02");
     auto modes = defaultScreen_->GetSupportedModes();

@@ -99,7 +99,7 @@ namespace {
  * @tc.desc: SetAspectRatio test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplLayoutTest, SetAspectRatio01, Function | SmallTest | Level3)
+HWTEST_F(WindowSceneSessionImplLayoutTest, SetAspectRatio01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetAspectRatio01");
@@ -113,7 +113,7 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, SetAspectRatio01, Function | SmallTes
  * @tc.desc: SetAspectRatio test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplLayoutTest, SetAspectRatio02, Function | SmallTest | Level3)
+HWTEST_F(WindowSceneSessionImplLayoutTest, SetAspectRatio02, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetAspectRatio02");
@@ -139,7 +139,7 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, SetAspectRatio02, Function | SmallTes
  * @tc.desc: SetAspectRatio
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplLayoutTest, SetAspectRatio03, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplLayoutTest, SetAspectRatio03, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetAspectRatio03");
@@ -167,7 +167,7 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, SetAspectRatio03, Function | SmallTes
  * @tc.desc: ResetAspectRatio test GetAvoidAreaByType
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplLayoutTest, ResetAspectRatio01, Function | SmallTest | Level3)
+HWTEST_F(WindowSceneSessionImplLayoutTest, ResetAspectRatio01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("ResetAspectRatio01");
@@ -185,7 +185,7 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, ResetAspectRatio01, Function | SmallT
  * @tc.desc: ResetAspectRatio
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplLayoutTest, ResetAspectRatio02, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplLayoutTest, ResetAspectRatio02, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("ResetAspectRatio02");
@@ -207,7 +207,7 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, ResetAspectRatio02, Function | SmallT
  * @tc.desc: SetWindowLimits
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplLayoutTest, SetWindowLimits01, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplLayoutTest, SetWindowLimits01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetWindowLimits01");
@@ -255,7 +255,7 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, SetWindowLimits01, Function | SmallTe
  * @tc.desc: SetWindowLimits
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplLayoutTest, SetWindowLimits06, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplLayoutTest, SetWindowLimits06, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetWindowLimits06");
@@ -312,7 +312,7 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, SetWindowLimits06, Function | SmallTe
  * @tc.desc: SetWindowLimits
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplLayoutTest, SetWindowLimits02, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplLayoutTest, SetWindowLimits02, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetWindowLimits02");
@@ -331,7 +331,7 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, SetWindowLimits02, Function | SmallTe
  * @tc.desc: SetWindowLimits
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplLayoutTest, SetWindowLimits03, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplLayoutTest, SetWindowLimits03, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetWindowLimits03");
@@ -355,7 +355,7 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, SetWindowLimits03, Function | SmallTe
  * @tc.desc: SetWindowLimits
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplLayoutTest, SetWindowLimits04, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplLayoutTest, SetWindowLimits04, TestSize.Level1)
 {
     sptr<WindowOption> subWindow = sptr<WindowOption>::MakeSptr();
     subWindow->SetWindowName("SetWindowLimits04");
@@ -380,7 +380,7 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, SetWindowLimits04, Function | SmallTe
  * @tc.desc: SetWindowLimits
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplLayoutTest, SetWindowLimits05, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplLayoutTest, SetWindowLimits05, TestSize.Level1)
 {
     sptr<WindowOption> subWindow = sptr<WindowOption>::MakeSptr();
     subWindow->SetWindowName("SetWindowLimits05");
@@ -408,7 +408,7 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, SetWindowLimits05, Function | SmallTe
  * @tc.desc: CalculateNewLimitsByRatio
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplLayoutTest, CalculateNewLimitsByRatio01, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplLayoutTest, CalculateNewLimitsByRatio01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("CalculateNewLimitsByRatio01");
@@ -432,7 +432,7 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, CalculateNewLimitsByRatio01, Function
  * @tc.desc: CalculateNewLimitsByRatio
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplLayoutTest, CalculateNewLimitsByRatio02, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplLayoutTest, CalculateNewLimitsByRatio02, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("CalculateNewLimitsByRatio02");
@@ -456,7 +456,7 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, CalculateNewLimitsByRatio02, Function
  * @tc.desc: MoveToAsync
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplLayoutTest, MoveToAsync01, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplLayoutTest, MoveToAsync01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("MoveToAsync01");
@@ -477,7 +477,7 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, MoveToAsync01, Function | SmallTest |
  * @tc.desc: MoveToAsync
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplLayoutTest, MoveToAsync02, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplLayoutTest, MoveToAsync02, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("MoveToAsync02");
@@ -516,7 +516,7 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, MoveToAsync02, Function | SmallTest |
  * @tc.desc: ResizeAsync
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplLayoutTest, ResizeAsync01, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplLayoutTest, ResizeAsync01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("ResizeAsync01");
@@ -535,7 +535,7 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, ResizeAsync01, Function | SmallTest |
  * @tc.desc: ResizeAsync
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplLayoutTest, ResizeAsync02, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplLayoutTest, ResizeAsync02, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("ResizeAsync02");
@@ -577,7 +577,7 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, ResizeAsync02, Function | SmallTest |
  * @tc.desc: MoveTo
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplLayoutTest, MoveTo01, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplLayoutTest, MoveTo01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("MoveTo01");
@@ -596,7 +596,7 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, MoveTo01, Function | SmallTest | Leve
  * @tc.desc: MoveTo
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplLayoutTest, MoveTo02, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplLayoutTest, MoveTo02, TestSize.Level1)
 {
     sptr<WindowOption> subOption = sptr<WindowOption>::MakeSptr();
     subOption->SetWindowName("MoveTo02SubWindow");
@@ -635,7 +635,7 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, MoveTo02, Function | SmallTest | Leve
  * @tc.desc: MoveTo
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplLayoutTest, MoveTo03, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplLayoutTest, MoveTo03, TestSize.Level1)
 {
     sptr<WindowOption> subOption = sptr<WindowOption>::MakeSptr();
     subOption->SetWindowName("MoveTo01SubWindow");

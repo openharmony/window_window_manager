@@ -55,7 +55,7 @@ namespace {
  * @tc.desc: setHandwritingFlag
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPCTest, setHandwritingFlag01, Function | MediumTest | Level0)
+HWTEST_F(WindowPCTest, setHandwritingFlag01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window2_1");
@@ -81,7 +81,7 @@ HWTEST_F(WindowPCTest, setHandwritingFlag01, Function | MediumTest | Level0)
  * @tc.desc: setHandwritingFlag
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPCTest, setHandwritingFlag02, Function | MediumTest | Level0)
+HWTEST_F(WindowPCTest, setHandwritingFlag02, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window2_2");
@@ -107,7 +107,7 @@ HWTEST_F(WindowPCTest, setHandwritingFlag02, Function | MediumTest | Level0)
  * @tc.desc: setHandwritingFlag
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPCTest, setHandwritingFlag03, Function | MediumTest | Level0)
+HWTEST_F(WindowPCTest, setHandwritingFlag03, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window2_3");
@@ -133,7 +133,7 @@ HWTEST_F(WindowPCTest, setHandwritingFlag03, Function | MediumTest | Level0)
  * @tc.desc: SetResizeByDragEnabled MAIN_WINDOW
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPCTest, SetResizeByDragEnabled01, Function | MediumTest | Level0)
+HWTEST_F(WindowPCTest, SetResizeByDragEnabled01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window5_1");
@@ -171,7 +171,7 @@ HWTEST_F(WindowPCTest, SetResizeByDragEnabled01, Function | MediumTest | Level0)
  * @tc.desc: SetResizeByDragEnabled SUB_WINDOW
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPCTest, SetResizeByDragEnabled02, Function | MediumTest | Level0)
+HWTEST_F(WindowPCTest, SetResizeByDragEnabled02, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window5_2");
@@ -210,7 +210,7 @@ HWTEST_F(WindowPCTest, SetResizeByDragEnabled02, Function | MediumTest | Level0)
  * @tc.desc: SetResizeByDragEnabled SYSTEM_SUB_WINDOW
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPCTest, SetResizeByDragEnabled03, Function | MediumTest | Level0)
+HWTEST_F(WindowPCTest, SetResizeByDragEnabled03, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window5_3");
@@ -244,7 +244,7 @@ HWTEST_F(WindowPCTest, SetResizeByDragEnabled03, Function | MediumTest | Level0)
  * @tc.desc: SetWindowTitleMoveEnabled MAIN_WINDOW
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPCTest, SetWindowTitleMoveEnabled01, Function | MediumTest | Level0)
+HWTEST_F(WindowPCTest, SetWindowTitleMoveEnabled01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window6_1");
@@ -277,7 +277,7 @@ HWTEST_F(WindowPCTest, SetWindowTitleMoveEnabled01, Function | MediumTest | Leve
  * @tc.desc: SetWindowTitleMoveEnabled SUB_WINDOW
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPCTest, SetWindowTitleMoveEnabled02, Function | MediumTest | Level0)
+HWTEST_F(WindowPCTest, SetWindowTitleMoveEnabled02, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window6_2");
@@ -310,7 +310,7 @@ HWTEST_F(WindowPCTest, SetWindowTitleMoveEnabled02, Function | MediumTest | Leve
  * @tc.desc: SetWindowTitleMoveEnabled SYSTEM_SUB_WINDOW
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPCTest, SetWindowTitleMoveEnabled03, Function | MediumTest | Level0)
+HWTEST_F(WindowPCTest, SetWindowTitleMoveEnabled03, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window6_3");
@@ -343,7 +343,7 @@ HWTEST_F(WindowPCTest, SetWindowTitleMoveEnabled03, Function | MediumTest | Leve
  * @tc.desc: startMoving MAIN_WINDOW
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPCTest, StartMoveWindow01, Function | MediumTest | Level0)
+HWTEST_F(WindowPCTest, StartMoveWindow01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window7_1");
@@ -376,7 +376,7 @@ HWTEST_F(WindowPCTest, StartMoveWindow01, Function | MediumTest | Level0)
  * @tc.desc: startMoving SUB_WINDOW
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPCTest, StartMoveWindow02, Function | MediumTest | Level0)
+HWTEST_F(WindowPCTest, StartMoveWindow02, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window7_2");
@@ -409,7 +409,7 @@ HWTEST_F(WindowPCTest, StartMoveWindow02, Function | MediumTest | Level0)
  * @tc.desc: startMoving SYSTEM_SUB_WINDOW
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPCTest, StartMoveWindow03, Function | MediumTest | Level0)
+HWTEST_F(WindowPCTest, StartMoveWindow03, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window7_3");
@@ -442,7 +442,7 @@ HWTEST_F(WindowPCTest, StartMoveWindow03, Function | MediumTest | Level0)
  * @tc.desc: SetMainWindowTopmost MAIN_WINDOW
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPCTest, SetMainWindowTopmost01, Function | MediumTest | Level0)
+HWTEST_F(WindowPCTest, SetMainWindowTopmost01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window8_1");
@@ -473,7 +473,7 @@ HWTEST_F(WindowPCTest, SetMainWindowTopmost01, Function | MediumTest | Level0)
  * @tc.desc: SetMainWindowTopmost SUB_WINDOW
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPCTest, SetMainWindowTopmost02, Function | MediumTest | Level0)
+HWTEST_F(WindowPCTest, SetMainWindowTopmost02, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window8_2");
@@ -504,7 +504,7 @@ HWTEST_F(WindowPCTest, SetMainWindowTopmost02, Function | MediumTest | Level0)
  * @tc.desc: SetMainWindowTopmost SYSTEM_SUB_WINDOW
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPCTest, SetMainWindowTopmost03, Function | MediumTest | Level0)
+HWTEST_F(WindowPCTest, SetMainWindowTopmost03, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window8_3");
