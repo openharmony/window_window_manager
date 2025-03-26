@@ -361,6 +361,15 @@
           },
           {
             "type": "so",
+            "name": "//foundation/window/window_manager/interfaces/kits/ani/embeddable_window_stage:embeddablewindowstageani_kit",
+            "header": {
+              "header_files": [
+              ],
+              "header_base": "//foundation/window/window_manager/interfaces/kits/ani/embeddable_window_stage/embeddable_window_stage_ani"
+            }
+          },
+          {
+            "type": "so",
             "name": "//foundation/window/window_manager/interfaces/kits/napi/extension_window:extensionwindow_napi",
             "header": {
               "header_files": [
