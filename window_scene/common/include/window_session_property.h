@@ -50,6 +50,7 @@ public:
     void SetTouchable(bool isTouchable);
     void SetDragEnabled(bool dragEnabled);
     void SetHideNonSystemFloatingWindows(bool hide);
+    void SetSkipSelfWhenShowOnVirtualScreen(bool isSkip);
     void SetSkipEventOnCastPlus(bool isSkip);
     void SetForceHide(bool hide);
     void SetRaiseEnabled(bool raiseEnabled);
@@ -122,6 +123,7 @@ public:
     bool GetDragEnabled() const;
     bool GetTouchable() const;
     bool GetHideNonSystemFloatingWindows() const;
+    bool GetSkipSelfWhenShowOnVirtualScreen() const;
     bool GetSkipEventOnCastPlus() const;
     bool GetForceHide() const;
     bool GetRaiseEnabled() const;
@@ -403,6 +405,7 @@ private:
     std::vector<Rect> touchHotAreas_;  // coordinates relative to window.
     KeyboardTouchHotAreas keyboardTouchHotAreas_;  // coordinates relative to window.
     bool hideNonSystemFloatingWindows_ = false;
+    bool isSkipSelfWhenShowOnVirtualScreen_ = false;
     bool isSkipEventOnCastPlus_ = false;
     bool forceHide_ = false;
     bool keepKeyboardFlag_ = false;

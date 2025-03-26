@@ -812,4 +812,22 @@ void KeyboardSession::SetSkipSelfWhenShowOnVirtualScreen(bool isSkip)
         }
     }, __func__);
 }
+
+void KeyboardSession::SetSkipEventOnCastPlus(bool isSkip)
+{
+    TLOGD(WmsLogTag::WMS_SCB, "Set skip event on cast plus, wid: %{public}d, isSkip: %{public}d",
+        GetPersistentId(), isSkip);
+    PostTask([weakThis = wptr(this), isSkip, where = __func__]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_SCB, "%{public}s session is null", where);
+            return;
+        }
+        if (session->specificCallback_ != nullptr &&
+            session->specificCallback_->onSetSkipEventOnCastPlus_ != nullptr) {
+            session->specificCallback_->onSetSkipEventOnCastPlus_(session->GetPersistentId(), isSkip);
+        }
+        return;
+    }, __func__);
+}
 } // namespace OHOS::Rosen
