@@ -3042,9 +3042,10 @@ bool SceneSessionManager::CheckSystemWindowPermission(const sptr<WindowSessionPr
     }
     if (type == WindowType::WINDOW_TYPE_FLOAT &&
         SessionPermission::VerifyCallingPermission("ohos.permission.SYSTEM_FLOAT_WINDOW")) {
+        bool isPadAndNotPcApp = systemConfig_.uiType_ == UI_TYPE_PAD && !property->GetIsPcAppInPad();
         // WINDOW_TYPE_FLOAT could be created with the corresponding permission
-        if (systemConfig_.supportTypeFloatWindow_) {
-            WLOGFD("check create float window permission success on 2in1 device.");
+        if (systemConfig_.supportTypeFloatWindow_ && !isPadAndNotPcApp) {
+            TLOGD(WmsLogTag::WMS_PC, "check create float window permission success.");
             return true;
         }
     }
