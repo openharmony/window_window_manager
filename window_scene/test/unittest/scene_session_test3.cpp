@@ -1496,20 +1496,38 @@ HWTEST_F(SceneSessionTest3, SetStartingWindowExitAnimationFlag, Function | Small
 }
 
 /**
- * @tc.name: SetSkipSelfWhenShowOnVirtualScreen
+ * @tc.name: SetSkipSelfWhenShowOnVirtualScreen01
  * @tc.desc: SetSkipSelfWhenShowOnVirtualScreen
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest3, SetSkipSelfWhenShowOnVirtualScreen, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest3, SetSkipSelfWhenShowOnVirtualScreen01, Function | SmallTest | Level2)
 {
     bool isSkip = true;
     SessionInfo info;
     info.abilityName_ = "SetSkipSelfWhenShowOnVirtualScreen";
     info.bundleName_ = "SetSkipSelfWhenShowOnVirtualScreen";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    bool skipResult = false;
+    auto callFunc = [&skipResult](uint64_t surfaceNodeId, bool isSkip) {
+        skipResult = isSkip;
+    };
+    sceneSession->SetSkipSelfWhenShowOnVirtualScreen(true);
+    usleep(SLEEP_TIME_US);
+    ASSERT_EQ(skipResult, false);
 
-    sceneSession->SetSkipSelfWhenShowOnVirtualScreen(isSkip);
-    EXPECT_NE(sceneSession, nullptr);
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    surfaceNode->id_ = 1;
+    sceneSession->surfaceNode_ = surfaceNode;
+
+    sceneSession->SetSkipSelfWhenShowOnVirtualScreen(true);
+    usleep(SLEEP_TIME_US);
+    ASSERT_EQ(skipResult, false);
+
+    sceneSession->specificCallback_->onSetSkipSelfWhenShowOnVirtualScreen_ = callFunc;
+    sceneSession->SetSkipSelfWhenShowOnVirtualScreen(true);
+    usleep(SLEEP_TIME_US);
+    ASSERT_EQ(skipResult, true);
 }
 
 /**
