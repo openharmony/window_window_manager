@@ -1403,7 +1403,7 @@ void SceneSessionManager::CreateRootSceneSession()
     AAFwk::AbilityManagerClient::GetInstance()->SetRootSceneSession(rootSceneSession_->AsObject());
     rootSceneSession_->RegisterGetStatusBarAvoidHeightFunc([this](WSRect& barArea) {
         return this->GetStatusBarAvoidHeight(barArea);
-    })
+    });
 }
 
 sptr<RootSceneSession> SceneSessionManager::GetRootSceneSession()
