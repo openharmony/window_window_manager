@@ -492,8 +492,7 @@ napi_value JsScreenSessionManager::OnRegisterCallback(napi_env env, const napi_c
     return NapiGetUndefined(env);
 }
 
-napi_value JsScreenSessionManager::OnUpdateScreenRotationProperty(napi_env env,
-    const napi_callback_info info)
+napi_value JsScreenSessionManager::OnUpdateScreenRotationProperty(napi_env env, const napi_callback_info info)
 {
     TLOGD(WmsLogTag::DMS, "[NAPI]OnUpdateScreenRotationProperty");
     size_t argc = 4;
@@ -541,8 +540,7 @@ napi_value JsScreenSessionManager::OnUpdateScreenRotationProperty(napi_env env,
             return NapiGetUndefined(env);
         }
     }
-    ScreenSessionManagerClient::GetInstance().UpdateScreenRotationProperty(screenId, bounds, directionInfo,
-        type);
+    ScreenSessionManagerClient::GetInstance().UpdateScreenRotationProperty(screenId, bounds, directionInfo, type);
     return NapiGetUndefined(env);
 }
 
