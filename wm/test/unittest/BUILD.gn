@@ -48,11 +48,8 @@ group("unittest") {
     ":wm_window_option_test",
     ":wm_window_scene_effect_test",
     ":wm_window_scene_session_impl_layout_test",
-    ":wm_window_scene_session_impl_test",
     ":wm_window_scene_session_impl_test2",
     ":wm_window_scene_session_impl_test3",
-    ":wm_window_scene_session_impl_test4",
-    ":wm_window_scene_session_impl_test5",
     ":wm_window_scene_test",
     ":wm_window_session_impl_layout_test",
     ":wm_window_session_impl_test",
@@ -61,7 +58,6 @@ group("unittest") {
     ":wm_window_session_impl_test4",
     ":wm_window_stub_test",
     ":wm_window_test",
-    "special_window:window_scene_session_impl_special_window_test",
     "ui_extension:wm_extension_window_impl_test",
     "ui_extension:wm_window_extension_session_impl_test",
   ]
@@ -69,7 +65,13 @@ group("unittest") {
     deps += [ ":wm_window_proxy_test" ]
   }
   if (window_manager_use_sceneboard) {
-    deps += [ ":wm_window_manager_lite_test" ]
+    deps += [
+      ":wm_window_manager_lite_test",
+      ":wm_window_scene_session_impl_test",
+      ":wm_window_scene_session_impl_test4",
+      ":wm_window_scene_session_impl_test5",
+      "special_window:window_scene_session_impl_special_window_test",
+    ]
   }
 }
 

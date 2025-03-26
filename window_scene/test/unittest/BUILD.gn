@@ -1103,6 +1103,9 @@ ohos_unittest("ws_scene_session_test") {
 
   deps = [ ":ws_unittest_common" ]
 
+  public_deps =
+      [ "${window_base_path}/window_scene/interfaces/innerkits:libwsutils" ]
+
   external_deps = [
     "ability_base:session_info",
     "ability_runtime:app_context",

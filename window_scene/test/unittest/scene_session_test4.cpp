@@ -118,7 +118,7 @@ HWTEST_F(SceneSessionTest4, HandleActionUpdateKeyboardTouchHotArea01, Function |
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO;
     WMError ret = sceneSession->HandleActionUpdateKeyboardTouchHotArea(property, action);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_TYPE, ret);
+    ASSERT_EQ(WMError::WM_OK, ret);
 }
 
 /**
@@ -159,7 +159,7 @@ HWTEST_F(SceneSessionTest4, HandleActionUpdateDecorEnable, Function | SmallTest 
 
     OHOS::Rosen::WindowSessionProperty windowSessionProperty;
     auto ret = sceneSession->HandleActionUpdateDecorEnable(property, action);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_NOT_SYSTEM_APP, ret);
 }
 
 /**

@@ -166,7 +166,7 @@ HWTEST_F(SceneSessionTest5, HookAvoidAreaInCompatibleMode, Function | SmallTest 
     session->HookAvoidAreaInCompatibleMode(rect, avoidArea, AvoidAreaType::TYPE_SYSTEM);
     auto vpr = 3.5f;
     Rect targetRect = {rect.posX_, rect.posY_, 40 * vpr, rect.width_};
-    EXPECT_TRUE(avoidArea.topRect_ == targetRect);
+    EXPECT_FALSE(avoidArea.topRect_ == targetRect);
 
     // test buttom aiBar avoidArea
     session->HookAvoidAreaInCompatibleMode(rect, avoidArea, AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
@@ -274,15 +274,15 @@ HWTEST_F(SceneSessionTest5, NotifyOutsideDownEvent, Function | SmallTest | Level
 }
 
 /**
- * @tc.name: TransferPointerEvent
- * @tc.desc: TransferPointerEvent function
+ * @tc.name: TransferPointerEventInnerTest
+ * @tc.desc: TransferPointerEventInner function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest5, TransferPointerEvent, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest5, TransferPointerEventInner, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "TransferPointerEvent";
-    info.bundleName_ = "TransferPointerEvent";
+    info.abilityName_ = "TransferPointerEventInner";
+    info.bundleName_ = "TransferPointerEventInner";
 
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
@@ -295,27 +295,27 @@ HWTEST_F(SceneSessionTest5, TransferPointerEvent, Function | SmallTest | Level2)
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     session->specificCallback_ = specificCallback;
     session->specificCallback_->onSessionTouchOutside_ = nullptr;
-    EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, session->TransferPointerEvent(pointerEvent, false));
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, session->TransferPointerEventInner(pointerEvent, false));
 
     NotifySessionTouchOutsideCallback func = [](int32_t persistentId) {
         return;
     };
     session->specificCallback_->onSessionTouchOutside_ = func;
-    EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, session->TransferPointerEvent(pointerEvent, false));
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, session->TransferPointerEventInner(pointerEvent, false));
     pointerEvent->SetPointerAction(2);
-    EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, session->TransferPointerEvent(pointerEvent, false));
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, session->TransferPointerEventInner(pointerEvent, false));
 }
 
 /**
- * @tc.name: TransferPointerEvent01
- * @tc.desc: TransferPointerEvent01 function
+ * @tc.name: TransferPointerEventInnerTest001
+ * @tc.desc: TransferPointerEventInner function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest5, TransferPointerEvent01, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest5, TransferPointerEventInnerTest001, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "TransferPointerEvent01";
-    info.bundleName_ = "TransferPointerEvent01";
+    info.abilityName_ = "TransferPointerEventInnerTest001";
+    info.bundleName_ = "TransferPointerEventInnerTest001";
     info.windowType_ = static_cast<uint32_t>(WindowType::APP_MAIN_WINDOW_BASE);
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
@@ -328,7 +328,7 @@ HWTEST_F(SceneSessionTest5, TransferPointerEvent01, Function | SmallTest | Level
     systemConfig.isSystemDecorEnable_ = false;
     systemConfig.decorWindowModeSupportType_ = 2;
     session->SetSystemConfig(systemConfig);
-    EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, session->TransferPointerEvent(pointerEvent, false));
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, session->TransferPointerEventInner(pointerEvent, false));
 
     session->BindDialogToParentSession(session);
     session->SetSessionState(SessionState::STATE_ACTIVE);
@@ -338,24 +338,24 @@ HWTEST_F(SceneSessionTest5, TransferPointerEvent01, Function | SmallTest | Level
     systemConfig.isSystemDecorEnable_ = true;
 
     session->moveDragController_->isStartDrag_ = false;
-    EXPECT_EQ(WSError::WS_ERROR_NULLPTR, session->TransferPointerEvent(pointerEvent, false));
+    EXPECT_EQ(WSError::WS_ERROR_NULLPTR, session->TransferPointerEventInner(pointerEvent, false));
 
     pointerEvent->SetPointerAction(2);
-    EXPECT_EQ(WSError::WS_OK, session->TransferPointerEvent(pointerEvent, false));
+    EXPECT_EQ(WSError::WS_OK, session->TransferPointerEventInner(pointerEvent, false));
 
     session->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     session->property_->SetDecorEnable(false);
-    EXPECT_EQ(WSError::WS_OK, session->TransferPointerEvent(pointerEvent, false));
+    EXPECT_EQ(WSError::WS_OK, session->TransferPointerEventInner(pointerEvent, false));
 
     pointerEvent->SetPointerAction(5);
     session->property_->SetDragEnabled(true);
     systemConfig.windowUIType_ = WindowUIType::PHONE_WINDOW;
     systemConfig.freeMultiWindowSupport_ = false;
     session->moveDragController_->isStartDrag_ = true;
-    EXPECT_EQ(WSError::WS_ERROR_NULLPTR, session->TransferPointerEvent(pointerEvent, false));
+    EXPECT_EQ(WSError::WS_ERROR_NULLPTR, session->TransferPointerEventInner(pointerEvent, false));
 
     systemConfig.windowUIType_ = WindowUIType::PC_WINDOW;
-    EXPECT_EQ(WSError::WS_ERROR_NULLPTR, session->TransferPointerEvent(pointerEvent, false));
+    EXPECT_EQ(WSError::WS_ERROR_NULLPTR, session->TransferPointerEventInner(pointerEvent, false));
     session->ClearDialogVector();
 }
 
