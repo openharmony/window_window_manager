@@ -49,6 +49,8 @@ public:
         const sptr<IRemoteObject>& displayManagerAgent) = 0;
     virtual DMError DestroyVirtualScreen(ScreenId screenId) = 0;
     virtual DMError SetVirtualScreenSurface(ScreenId screenId, sptr<IBufferProducer> surface) = 0;
+    virtual DMError AddVirtualScreenBlackList(const std::vector<int32_t>& persistentIds) { return DMError::DM_OK };
+    virtual DMError RemoveVirtualScreenBlackList(const std::vector<int32_t>& persistentIds) { return DMError::DM_OK };
     virtual DMError SetScreenPrivacyMaskImage(ScreenId screenId, const std::shared_ptr<Media::PixelMap>& privacyMaskImg)
     {
         return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
