@@ -1944,7 +1944,7 @@ HWTEST_F(SceneSessionManagerTest, SkipSnapshotForAppProcess, Function | SmallTes
     ssm_->sceneSessionMap_.insert({-1, nullptr});
     skip = true;
     result = ssm_->SkipSnapshotForAppProcess(pid, skip);
-    usleep(WAIT_SYNC_IN_NS_ONE);
+    usleep(500000); // 500000: wait in 500000 ns
     ASSERT_EQ(result, WMError::WM_OK);
     skip = false;
     result = ssm_->SkipSnapshotForAppProcess(pid, skip);
