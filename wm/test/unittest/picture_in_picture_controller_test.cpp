@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 
 #include <gmock/gmock.h>
+#include "parameters.h"
 #include "ability_context_impl.h"
 #include "picture_in_picture_controller.h"
 #include "picture_in_picture_manager.h"
