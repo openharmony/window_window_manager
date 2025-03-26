@@ -2820,9 +2820,9 @@ WSError Session::NotifyHighlightChange(bool isHighlight)
     return WSError::WS_OK;
 }
 
-WSError GetIsHighlighted(bool& isHighlighted)
+WSError Session::GetIsHighlighted(bool& isHighlighted)
 {
-    isHighlight_ = isHighlight;
+    isHighlighted = isHighlight_;
     TLOGD(WmsLogTag::WMS_FOCUS, "windowId: %{public}d, isHighlighted: %{public}d",
         GetPersistentId(), isHighlighted_);
     return WSError::WS_OK;
