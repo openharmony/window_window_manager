@@ -65,7 +65,7 @@ namespace {
  * @tc.desc: call WakeUpBegin and check return value
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayLitePowerUnitTest, wake_up_begin_001, Function | SmallTest | Level2)
+HWTEST_F(DisplayLitePowerUnitTest, wake_up_begin_001, TestSize.Level1)
 {
     Mocker m;
     EXPECT_CALL(m.Mock(), WakeUpBegin(PowerStateChangeReason::POWER_BUTTON)).Times(1).WillOnce(Return(true));
@@ -82,7 +82,7 @@ HWTEST_F(DisplayLitePowerUnitTest, wake_up_begin_001, Function | SmallTest | Lev
  * @tc.desc: call WakeUpEnd and check return value
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayLitePowerUnitTest, wake_up_end_001, Function | SmallTest | Level2)
+HWTEST_F(DisplayLitePowerUnitTest, wake_up_end_001, TestSize.Level1)
 {
     Mocker m;
     EXPECT_CALL(m.Mock(), WakeUpEnd()).Times(1).WillOnce(Return(true));
@@ -99,7 +99,7 @@ HWTEST_F(DisplayLitePowerUnitTest, wake_up_end_001, Function | SmallTest | Level
  * @tc.desc: call SuspendBegin and check return value
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayLitePowerUnitTest, suspend_begin_001, Function | SmallTest | Level2)
+HWTEST_F(DisplayLitePowerUnitTest, suspend_begin_001, TestSize.Level1)
 {
     Mocker m;
     EXPECT_CALL(m.Mock(), SuspendBegin(PowerStateChangeReason::POWER_BUTTON)).Times(1).WillOnce(Return(true));
@@ -116,7 +116,7 @@ HWTEST_F(DisplayLitePowerUnitTest, suspend_begin_001, Function | SmallTest | Lev
  * @tc.desc: call SuspendEnd and check return value
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayLitePowerUnitTest, suspend_end_001, Function | SmallTest | Level2)
+HWTEST_F(DisplayLitePowerUnitTest, suspend_end_001, TestSize.Level1)
 {
     Mocker m;
     EXPECT_CALL(m.Mock(), SuspendEnd()).Times(1).WillOnce(Return(true));
@@ -144,7 +144,7 @@ HWTEST_F(DisplayLitePowerUnitTest, set_screen_brightness_001, Function | MediumT
  * @tc.desc: test SetSpecifiedScreenPower
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayLitePowerUnitTest, set_specified_screen_power_001, Function | SmallTest | Level2)
+HWTEST_F(DisplayLitePowerUnitTest, set_specified_screen_power_001, TestSize.Level1)
 {
     ScreenPowerState state = ScreenPowerState{0};
     PowerStateChangeReason reason = PowerStateChangeReason{0};

@@ -70,7 +70,7 @@ namespace {
  * @tc.desc: Get screen mode
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractScreenTest, GetScreenMode, Function | SmallTest | Level3)
+HWTEST_F(AbstractScreenTest, GetScreenMode, TestSize.Level1)
 {
     sptr<SupportedScreenModes> mode0 = new SupportedScreenModes();
     sptr<SupportedScreenModes> mode1 = new SupportedScreenModes();
@@ -94,7 +94,7 @@ HWTEST_F(AbstractScreenTest, GetScreenMode, Function | SmallTest | Level3)
  * @tc.desc: Convert to screen info
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractScreenTest, ConvertToScreenInfo, Function | SmallTest | Level3)
+HWTEST_F(AbstractScreenTest, ConvertToScreenInfo, TestSize.Level1)
 {
     ASSERT_NE(nullptr, absScreen_->ConvertToScreenInfo());
 }
@@ -104,7 +104,7 @@ HWTEST_F(AbstractScreenTest, ConvertToScreenInfo, Function | SmallTest | Level3)
  * @tc.desc: RS tree
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractScreenTest, RSTree, Function | SmallTest | Level3)
+HWTEST_F(AbstractScreenTest, RSTree, TestSize.Level1)
 {
     std::shared_ptr<RSSurfaceNode> surfaceNode;
     absScreen_->rsDisplayNode_ = nullptr;
@@ -142,7 +142,7 @@ HWTEST_F(AbstractScreenTest, RSTree, Function | SmallTest | Level3)
  * @tc.desc: InitRSDisplayNode
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractScreenTest, InitRSDisplayNode, Function | SmallTest | Level3)
+HWTEST_F(AbstractScreenTest, InitRSDisplayNode, TestSize.Level1)
 {
     struct RSDisplayNodeConfig config;
     absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
@@ -159,7 +159,7 @@ HWTEST_F(AbstractScreenTest, InitRSDisplayNode, Function | SmallTest | Level3)
  * @tc.desc: InitRSDefaultDisplayNode
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractScreenTest, InitRSDefaultDisplayNode, Function | SmallTest | Level3)
+HWTEST_F(AbstractScreenTest, InitRSDefaultDisplayNode, TestSize.Level1)
 {
     struct RSDisplayNodeConfig config;
     absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
@@ -176,7 +176,7 @@ HWTEST_F(AbstractScreenTest, InitRSDefaultDisplayNode, Function | SmallTest | Le
  * @tc.desc: SetScreenColorGamut
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractScreenTest, SetScreenColorGamut, Function | SmallTest | Level3)
+HWTEST_F(AbstractScreenTest, SetScreenColorGamut, TestSize.Level1)
 {
     int32_t colorGamutIdx = 0;
     auto result = absScreen_->SetScreenColorGamut(colorGamutIdx);
@@ -188,7 +188,7 @@ HWTEST_F(AbstractScreenTest, SetScreenColorGamut, Function | SmallTest | Level3)
  * @tc.desc: Screen color gamut
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractScreenTest, ColorGamut, Function | SmallTest | Level3)
+HWTEST_F(AbstractScreenTest, ColorGamut, TestSize.Level1)
 {
     sptr<AbstractScreenController> absScreenController0 = new AbstractScreenController(mutex_);
     sptr<AbstractScreen> absScreen0 = new AbstractScreen(absScreenController0, name_, 0, -1ULL);
@@ -211,7 +211,7 @@ HWTEST_F(AbstractScreenTest, ColorGamut, Function | SmallTest | Level3)
  * @tc.desc: Fill screen info
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractScreenTest, FillScreenInfo, Function | SmallTest | Level3)
+HWTEST_F(AbstractScreenTest, FillScreenInfo, TestSize.Level1)
 {
     absScreen_->FillScreenInfo(nullptr);
     sptr<ScreenInfo> info = new ScreenInfo();
@@ -231,7 +231,7 @@ HWTEST_F(AbstractScreenTest, FillScreenInfo, Function | SmallTest | Level3)
  * @tc.desc: Calc rotation
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractScreenTest, CalcRotation, Function | SmallTest | Level3)
+HWTEST_F(AbstractScreenTest, CalcRotation, TestSize.Level1)
 {
     absScreen_->modes_.clear();
     absScreen_->activeIdx_ = 0;
@@ -256,7 +256,7 @@ HWTEST_F(AbstractScreenTest, CalcRotation, Function | SmallTest | Level3)
  * @tc.desc: get screen groupId
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractScreenTest, GetScreenGroupId, Function | SmallTest | Level3)
+HWTEST_F(AbstractScreenTest, GetScreenGroupId, TestSize.Level1)
 {
     ScreenId result = absScreen_->GetScreenGroupId();
     EXPECT_EQ(result, SCREEN_ID_INVALID);
@@ -270,7 +270,7 @@ HWTEST_F(AbstractScreenTest, GetScreenGroupId, Function | SmallTest | Level3)
  * @tc.desc: set screen gamut map
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractScreenTest, SetScreenGamutMap, Function | SmallTest | Level3)
+HWTEST_F(AbstractScreenTest, SetScreenGamutMap, TestSize.Level1)
 {
     ScreenGamutMap gamutMap = ScreenGamutMap::GAMUT_MAP_HDR_CONSTANT;
     DMError result = absScreen_->SetScreenGamutMap(gamutMap);
@@ -286,7 +286,7 @@ HWTEST_F(AbstractScreenTest, SetScreenGamutMap, Function | SmallTest | Level3)
  * @tc.desc: set screen color transform
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractScreenTest, SetScreenColorTransform, Function | SmallTest | Level3)
+HWTEST_F(AbstractScreenTest, SetScreenColorTransform, TestSize.Level1)
 {
     DMError result = absScreen_->SetScreenColorTransform();
     EXPECT_EQ(result, DMError::DM_OK);
@@ -297,7 +297,7 @@ HWTEST_F(AbstractScreenTest, SetScreenColorTransform, Function | SmallTest | Lev
  * @tc.desc: get virtual pixel ratio
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractScreenTest, GetVirtualPixelRatio, Function | SmallTest | Level3)
+HWTEST_F(AbstractScreenTest, GetVirtualPixelRatio, TestSize.Level1)
 {
     float result = absScreen_->GetVirtualPixelRatio();
     EXPECT_EQ(result, 2.0f);
@@ -308,7 +308,7 @@ HWTEST_F(AbstractScreenTest, GetVirtualPixelRatio, Function | SmallTest | Level3
  * @tc.desc: get source mode
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractScreenTest, GetSourceMode, Function | SmallTest | Level3)
+HWTEST_F(AbstractScreenTest, GetSourceMode, TestSize.Level1)
 {
     absScreenGroup_->combination_ = ScreenCombination::SCREEN_MIRROR;
     absScreen_->screenController_->dmsScreenGroupMap_.insert({10086, absScreenGroup_});
@@ -337,7 +337,7 @@ HWTEST_F(AbstractScreenTest, GetSourceMode, Function | SmallTest | Level3)
  * @tc.desc: convert to screen group info
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractScreenTest, ConvertToScreenGroupInfo, Function | SmallTest | Level3)
+HWTEST_F(AbstractScreenTest, ConvertToScreenGroupInfo, TestSize.Level1)
 {
     Point point_(159, 357);
     absScreen_->startPoint_ = point_;
@@ -351,7 +351,7 @@ HWTEST_F(AbstractScreenTest, ConvertToScreenGroupInfo, Function | SmallTest | Le
  * @tc.desc: Get RSDisplay node config
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractScreenTest, GetRSDisplayNodeConfig01, Function | SmallTest | Level3)
+HWTEST_F(AbstractScreenTest, GetRSDisplayNodeConfig01, TestSize.Level1)
 {
     sptr<AbstractScreen> absTest = nullptr;
     RSDisplayNodeConfig config_;
@@ -378,7 +378,7 @@ HWTEST_F(AbstractScreenTest, GetRSDisplayNodeConfig01, Function | SmallTest | Le
  * @tc.desc: Get RSDisplay node config
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractScreenTest, GetRSDisplayNodeConfig02, Function | SmallTest | Level3)
+HWTEST_F(AbstractScreenTest, GetRSDisplayNodeConfig02, TestSize.Level1)
 {
     sptr<AbstractScreen> absTest = absScreen_;
     RSDisplayNodeConfig config_;
@@ -407,7 +407,7 @@ HWTEST_F(AbstractScreenTest, GetRSDisplayNodeConfig02, Function | SmallTest | Le
  * @tc.desc: GetChildPosition
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractScreenTest, GetChildPosition, Function | SmallTest | Level3)
+HWTEST_F(AbstractScreenTest, GetChildPosition, TestSize.Level1)
 {
     ScreenId screenId = -1;
     absScreenGroup_->GetChildPosition(screenId);
@@ -423,7 +423,7 @@ HWTEST_F(AbstractScreenTest, GetChildPosition, Function | SmallTest | Level3)
  * @tc.desc: Add child
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractScreenTest, AddChild01, Function | SmallTest | Level3)
+HWTEST_F(AbstractScreenTest, AddChild01, TestSize.Level1)
 {
     absScreenGroup_->screenMap_.clear();
     sptr<AbstractScreen> absTest = nullptr;
@@ -453,7 +453,7 @@ HWTEST_F(AbstractScreenTest, AddChild01, Function | SmallTest | Level3)
  * @tc.desc: Add child
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractScreenTest, AddChild02, Function | SmallTest | Level3)
+HWTEST_F(AbstractScreenTest, AddChild02, TestSize.Level1)
 {
     absScreenGroup_->screenMap_.clear();
     Point point_(159, 357);
@@ -478,7 +478,7 @@ HWTEST_F(AbstractScreenTest, AddChild02, Function | SmallTest | Level3)
  * @tc.desc: Add children
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractScreenTest, AddChildren, Function | SmallTest | Level3)
+HWTEST_F(AbstractScreenTest, AddChildren, TestSize.Level1)
 {
     Point point_(159, 357);
     std::vector<Point> vecPoint({point_});
@@ -496,7 +496,7 @@ HWTEST_F(AbstractScreenTest, AddChildren, Function | SmallTest | Level3)
  * @tc.desc: Remove child
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractScreenTest, RemoveChild01, Function | SmallTest | Level3)
+HWTEST_F(AbstractScreenTest, RemoveChild01, TestSize.Level1)
 {
     sptr<AbstractScreen> absTest = nullptr;
     bool result = absScreenGroup_->RemoveChild(absTest);
@@ -513,7 +513,7 @@ HWTEST_F(AbstractScreenTest, RemoveChild01, Function | SmallTest | Level3)
  * @tc.desc: Remove child
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractScreenTest, RemoveChild02, Function | SmallTest | Level3)
+HWTEST_F(AbstractScreenTest, RemoveChild02, TestSize.Level1)
 {
     Point point_(159, 357);
     struct RSDisplayNodeConfig config;
@@ -529,7 +529,7 @@ HWTEST_F(AbstractScreenTest, RemoveChild02, Function | SmallTest | Level3)
  * @tc.desc: Remove default screen
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractScreenTest, RemoveDefaultScreen, Function | SmallTest | Level3)
+HWTEST_F(AbstractScreenTest, RemoveDefaultScreen, TestSize.Level1)
 {
     sptr<AbstractScreen> absTest = nullptr;
     bool result = absScreenGroup_->RemoveDefaultScreen(absTest);
@@ -550,7 +550,7 @@ HWTEST_F(AbstractScreenTest, RemoveDefaultScreen, Function | SmallTest | Level3)
  * @tc.desc: Get children
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractScreenTest, GetChildren, Function | SmallTest | Level3)
+HWTEST_F(AbstractScreenTest, GetChildren, TestSize.Level1)
 {
     Point point_(159, 357);
     absScreen_->startPoint_ = point_;
@@ -564,7 +564,7 @@ HWTEST_F(AbstractScreenTest, GetChildren, Function | SmallTest | Level3)
  * @tc.desc: Get children position
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractScreenTest, GetChildrenPosition, Function | SmallTest | Level3)
+HWTEST_F(AbstractScreenTest, GetChildrenPosition, TestSize.Level1)
 {
     Point point_(159, 357);
     absScreen_->startPoint_ = point_;
@@ -579,7 +579,7 @@ HWTEST_F(AbstractScreenTest, GetChildrenPosition, Function | SmallTest | Level3)
  * @tc.desc: Abstract screen group
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractScreenTest, AbstractScreenGroup, Function | SmallTest | Level3)
+HWTEST_F(AbstractScreenTest, AbstractScreenGroup, TestSize.Level1)
 {
     sptr<AbstractScreenController> absScreenController = new AbstractScreenController(mutex_);
     absScreenGroup_ = new AbstractScreenGroup(absScreenController,
@@ -592,7 +592,7 @@ HWTEST_F(AbstractScreenTest, AbstractScreenGroup, Function | SmallTest | Level3)
  * @tc.desc: AddSurfaceNode
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractScreenTest, AddSurfaceNode, Function | SmallTest | Level3)
+HWTEST_F(AbstractScreenTest, AddSurfaceNode, TestSize.Level1)
 {
     struct RSDisplayNodeConfig config;
     absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
@@ -626,7 +626,7 @@ HWTEST_F(AbstractScreenTest, AddSurfaceNode, Function | SmallTest | Level3)
  * @tc.desc: RemoveSurfaceNode
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractScreenTest, RemoveSurfaceNode, Function | SmallTest | Level3)
+HWTEST_F(AbstractScreenTest, RemoveSurfaceNode, TestSize.Level1)
 {
     struct RSDisplayNodeConfig config;
     absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
@@ -653,7 +653,7 @@ HWTEST_F(AbstractScreenTest, RemoveSurfaceNode, Function | SmallTest | Level3)
  * @tc.desc: Get screen mode
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractScreenTest, GetScreenMode01, Function | SmallTest | Level3)
+HWTEST_F(AbstractScreenTest, GetScreenMode01, TestSize.Level1)
 {
     sptr<SupportedScreenModes> mode0 = new SupportedScreenModes();
     sptr<SupportedScreenModes> mode1 = new SupportedScreenModes();
@@ -677,7 +677,7 @@ HWTEST_F(AbstractScreenTest, GetScreenMode01, Function | SmallTest | Level3)
  * @tc.desc: Add child
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractScreenTest, AddChild03, Function | SmallTest | Level3)
+HWTEST_F(AbstractScreenTest, AddChild03, TestSize.Level1)
 {
     absScreenGroup_->screenMap_.clear();
     Point point_(159, 357);
@@ -702,7 +702,7 @@ HWTEST_F(AbstractScreenTest, AddChild03, Function | SmallTest | Level3)
  * @tc.desc: Calc rotation
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractScreenTest, CalcRotation01, Function | SmallTest | Level3)
+HWTEST_F(AbstractScreenTest, CalcRotation01, TestSize.Level1)
 {
     absScreen_->modes_.clear();
     absScreen_->activeIdx_ = 0;
@@ -727,7 +727,7 @@ HWTEST_F(AbstractScreenTest, CalcRotation01, Function | SmallTest | Level3)
  * @tc.desc: Remove default screen
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractScreenTest, RemoveDefaultScreen02, Function | SmallTest | Level3)
+HWTEST_F(AbstractScreenTest, RemoveDefaultScreen02, TestSize.Level1)
 {
     sptr<AbstractScreen> absTest = nullptr;
     bool result = absScreenGroup_->RemoveDefaultScreen(absTest);
@@ -748,7 +748,7 @@ HWTEST_F(AbstractScreenTest, RemoveDefaultScreen02, Function | SmallTest | Level
  * @tc.desc: UpdateRSTree
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractScreenTest, UpdateRSTree01, Function | SmallTest | Level3)
+HWTEST_F(AbstractScreenTest, UpdateRSTree01, TestSize.Level1)
 {
     std::shared_ptr<RSSurfaceNode> surfaceNode;
     absScreen_->rsDisplayNode_ = nullptr;
@@ -764,7 +764,7 @@ HWTEST_F(AbstractScreenTest, UpdateRSTree01, Function | SmallTest | Level3)
  * @tc.desc: UpdateRSTree
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractScreenTest, UpdateRSTree02, Function | SmallTest | Level3)
+HWTEST_F(AbstractScreenTest, UpdateRSTree02, TestSize.Level1)
 {
     std::shared_ptr<RSSurfaceNode> surfaceNode;
     struct RSDisplayNodeConfig config;
@@ -782,7 +782,7 @@ HWTEST_F(AbstractScreenTest, UpdateRSTree02, Function | SmallTest | Level3)
  * @tc.desc: UpdateRSTree
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractScreenTest, UpdateRSTree03, Function | SmallTest | Level3)
+HWTEST_F(AbstractScreenTest, UpdateRSTree03, TestSize.Level1)
 {
     std::shared_ptr<RSSurfaceNode> surfaceNode;
     struct RSDisplayNodeConfig config;
@@ -800,7 +800,7 @@ HWTEST_F(AbstractScreenTest, UpdateRSTree03, Function | SmallTest | Level3)
  * @tc.desc: UpdateRSTree
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractScreenTest, UpdateRSTree04, Function | SmallTest | Level3)
+HWTEST_F(AbstractScreenTest, UpdateRSTree04, TestSize.Level1)
 {
     std::shared_ptr<RSSurfaceNode> surfaceNode;
     struct RSDisplayNodeConfig config;
@@ -818,7 +818,7 @@ HWTEST_F(AbstractScreenTest, UpdateRSTree04, Function | SmallTest | Level3)
  * @tc.desc: UpdateRSTree
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractScreenTest, UpdateRSTree05, Function | SmallTest | Level3)
+HWTEST_F(AbstractScreenTest, UpdateRSTree05, TestSize.Level1)
 {
     std::shared_ptr<RSSurfaceNode> surfaceNode;
     struct RSDisplayNodeConfig config;
@@ -836,7 +836,7 @@ HWTEST_F(AbstractScreenTest, UpdateRSTree05, Function | SmallTest | Level3)
  * @tc.desc: UpdateRSTree
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractScreenTest, UpdateRSTree06, Function | SmallTest | Level3)
+HWTEST_F(AbstractScreenTest, UpdateRSTree06, TestSize.Level1)
 {
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig,
@@ -856,7 +856,7 @@ HWTEST_F(AbstractScreenTest, UpdateRSTree06, Function | SmallTest | Level3)
  * @tc.desc: UpdateRSTree
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractScreenTest, UpdateRSTree07, Function | SmallTest | Level3)
+HWTEST_F(AbstractScreenTest, UpdateRSTree07, TestSize.Level1)
 {
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig,
@@ -876,7 +876,7 @@ HWTEST_F(AbstractScreenTest, UpdateRSTree07, Function | SmallTest | Level3)
  * @tc.desc: UpdateRSTree
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractScreenTest, UpdateRSTree08, Function | SmallTest | Level3)
+HWTEST_F(AbstractScreenTest, UpdateRSTree08, TestSize.Level1)
 {
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig,
@@ -896,7 +896,7 @@ HWTEST_F(AbstractScreenTest, UpdateRSTree08, Function | SmallTest | Level3)
  * @tc.desc: UpdateRSTree
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractScreenTest, UpdateRSTree09, Function | SmallTest | Level3)
+HWTEST_F(AbstractScreenTest, UpdateRSTree09, TestSize.Level1)
 {
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig,
@@ -916,7 +916,7 @@ HWTEST_F(AbstractScreenTest, UpdateRSTree09, Function | SmallTest | Level3)
  * @tc.desc: UpdateDisplayGroupRSTree
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractScreenTest, UpdateDisplayGroupRSTree01, Function | SmallTest | Level3)
+HWTEST_F(AbstractScreenTest, UpdateDisplayGroupRSTree01, TestSize.Level1)
 {
     std::shared_ptr<RSSurfaceNode> surfaceNode;
     NodeId parentNodeId = 0;
@@ -931,7 +931,7 @@ HWTEST_F(AbstractScreenTest, UpdateDisplayGroupRSTree01, Function | SmallTest | 
  * @tc.desc: UpdateDisplayGroupRSTree
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractScreenTest, UpdateDisplayGroupRSTree02, Function | SmallTest | Level3)
+HWTEST_F(AbstractScreenTest, UpdateDisplayGroupRSTree02, TestSize.Level1)
 {
     std::shared_ptr<RSSurfaceNode> surfaceNode;
     NodeId parentNodeId = 0;
@@ -949,7 +949,7 @@ HWTEST_F(AbstractScreenTest, UpdateDisplayGroupRSTree02, Function | SmallTest | 
  * @tc.desc: UpdateDisplayGroupRSTree
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractScreenTest, UpdateDisplayGroupRSTree03, Function | SmallTest | Level3)
+HWTEST_F(AbstractScreenTest, UpdateDisplayGroupRSTree03, TestSize.Level1)
 {
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig,
@@ -969,7 +969,7 @@ HWTEST_F(AbstractScreenTest, UpdateDisplayGroupRSTree03, Function | SmallTest | 
  * @tc.desc: UpdateDisplayGroupRSTree
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractScreenTest, UpdateDisplayGroupRSTree04, Function | SmallTest | Level3)
+HWTEST_F(AbstractScreenTest, UpdateDisplayGroupRSTree04, TestSize.Level1)
 {
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig,
@@ -989,7 +989,7 @@ HWTEST_F(AbstractScreenTest, UpdateDisplayGroupRSTree04, Function | SmallTest | 
  * @tc.desc: UpdateDisplayGroupRSTree
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractScreenTest, UpdateDisplayGroupRSTree05, Function | SmallTest | Level3)
+HWTEST_F(AbstractScreenTest, UpdateDisplayGroupRSTree05, TestSize.Level1)
 {
     std::shared_ptr<RSSurfaceNode> surfaceNode;
     NodeId parentNodeId = 0;

@@ -98,7 +98,7 @@ namespace {
  * @tc.desc: DMS dump
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerServiceTest, Dump, Function | SmallTest | Level3)
+HWTEST_F(DisplayManagerServiceTest, Dump, TestSize.Level1)
 {
     std::vector<std::u16string> args;
     ASSERT_EQ(static_cast<int>(DMError::DM_ERROR_INVALID_PARAM), dms_->Dump(-1, args));
@@ -109,7 +109,7 @@ HWTEST_F(DisplayManagerServiceTest, Dump, Function | SmallTest | Level3)
  * @tc.desc: DMS config
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerServiceTest, Config, Function | SmallTest | Level3)
+HWTEST_F(DisplayManagerServiceTest, Config, TestSize.Level1)
 {
     DisplayManagerConfig::intNumbersConfig_.clear();
     DisplayManagerConfig::enableConfig_.clear();
@@ -144,7 +144,7 @@ HWTEST_F(DisplayManagerServiceTest, Config, Function | SmallTest | Level3)
  * @tc.desc: DMS display change
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerServiceTest, DisplayChange, Function | SmallTest | Level3)
+HWTEST_F(DisplayManagerServiceTest, DisplayChange, TestSize.Level1)
 {
     std::map<DisplayId, sptr<DisplayInfo>> displayInfoMap;
     sptr<DisplayInfo> displayInfo = new DisplayInfo();
@@ -163,7 +163,7 @@ HWTEST_F(DisplayManagerServiceTest, DisplayChange, Function | SmallTest | Level3
  * @tc.desc: DMS has private window
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerServiceTest, HasPrivateWindow, Function | SmallTest | Level3)
+HWTEST_F(DisplayManagerServiceTest, HasPrivateWindow, TestSize.Level1)
 {
     bool hasPrivateWindow = false;
     dms_->abstractDisplayController_->abstractDisplayMap_.clear();
@@ -181,7 +181,7 @@ HWTEST_F(DisplayManagerServiceTest, HasPrivateWindow, Function | SmallTest | Lev
  * @tc.desc: DMS get display info
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerServiceTest, GetDisplayInfo, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerServiceTest, GetDisplayInfo, TestSize.Level1)
 {
     // build abstractDisplayController_ env
     std::string name = "testDisplay";
@@ -229,7 +229,7 @@ HWTEST_F(DisplayManagerServiceTest, GetDisplayInfo, Function | SmallTest | Level
  * @tc.desc: DMS virtual screen
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerServiceTest, VirtualScreen, Function | SmallTest | Level3)
+HWTEST_F(DisplayManagerServiceTest, VirtualScreen, TestSize.Level1)
 {
     VirtualScreenOption option;
     ASSERT_EQ(-1, dms_->CreateVirtualScreen(option, nullptr));
@@ -249,7 +249,7 @@ HWTEST_F(DisplayManagerServiceTest, VirtualScreen, Function | SmallTest | Level3
  * @tc.desc: DMS set oritation and rotation
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerServiceTest, OrientationAndRotation, Function | SmallTest | Level3)
+HWTEST_F(DisplayManagerServiceTest, OrientationAndRotation, TestSize.Level1)
 {
     Orientation orientation = Orientation::VERTICAL;
     ASSERT_TRUE(DMError::DM_OK != dms_->SetOrientation(0, orientation));
@@ -268,7 +268,7 @@ HWTEST_F(DisplayManagerServiceTest, OrientationAndRotation, Function | SmallTest
  * @tc.desc: DMS screen color
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerServiceTest, ScreenColor, Function | SmallTest | Level3)
+HWTEST_F(DisplayManagerServiceTest, ScreenColor, TestSize.Level1)
 {
     std::vector<ScreenColorGamut> colorGamuts;
     ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, dms_->GetScreenSupportedColorGamuts(SCREEN_ID_INVALID, colorGamuts));
@@ -301,7 +301,7 @@ HWTEST_F(DisplayManagerServiceTest, ScreenColor, Function | SmallTest | Level3)
  * @tc.desc: DMS rigister display manager agent
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerServiceTest, RegisterDisplayManagerAgent, Function | SmallTest | Level3)
+HWTEST_F(DisplayManagerServiceTest, RegisterDisplayManagerAgent, TestSize.Level1)
 {
     DisplayManagerAgentType type = DisplayManagerAgentType::DISPLAY_STATE_LISTENER;
 
@@ -314,7 +314,7 @@ HWTEST_F(DisplayManagerServiceTest, RegisterDisplayManagerAgent, Function | Smal
  * @tc.desc: DMS screen power
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerServiceTest, ScreenPower, Function | SmallTest | Level3)
+HWTEST_F(DisplayManagerServiceTest, ScreenPower, TestSize.Level1)
 {
     PowerStateChangeReason reason = PowerStateChangeReason::POWER_BUTTON;
     ScreenPowerState state = ScreenPowerState::POWER_ON;
@@ -341,7 +341,7 @@ HWTEST_F(DisplayManagerServiceTest, ScreenPower, Function | SmallTest | Level3)
  * @tc.desc: DMS rs display node
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerServiceTest, RsDisplayNode, Function | SmallTest | Level3)
+HWTEST_F(DisplayManagerServiceTest, RsDisplayNode, TestSize.Level1)
 {
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
@@ -355,7 +355,7 @@ HWTEST_F(DisplayManagerServiceTest, RsDisplayNode, Function | SmallTest | Level3
  * @tc.desc: DMS mirror
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerServiceTest, MirrorAndExpand, Function | SmallTest | Level3)
+HWTEST_F(DisplayManagerServiceTest, MirrorAndExpand, TestSize.Level1)
 {
     std::vector<ScreenId> mirrorScreenIds;
     ScreenId screenGroupId1 = DISPLAY_ID_INVALID;
@@ -376,7 +376,7 @@ HWTEST_F(DisplayManagerServiceTest, MirrorAndExpand, Function | SmallTest | Leve
  * @tc.desc: DMS mirror
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerServiceTest, ScreenActiveMode, Function | SmallTest | Level3)
+HWTEST_F(DisplayManagerServiceTest, ScreenActiveMode, TestSize.Level1)
 {
     ASSERT_EQ(DMError::DM_ERROR_NULLPTR, dms_->SetScreenActiveMode(SCREEN_ID_INVALID, 0));
 }
@@ -386,7 +386,7 @@ HWTEST_F(DisplayManagerServiceTest, ScreenActiveMode, Function | SmallTest | Lev
  * @tc.desc: DMS mirror
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerServiceTest, VirtualPixelRatio, Function | SmallTest | Level3)
+HWTEST_F(DisplayManagerServiceTest, VirtualPixelRatio, TestSize.Level1)
 {
     ASSERT_TRUE(DMError::DM_OK != dms_->SetVirtualPixelRatio(SCREEN_ID_INVALID, 0.f));
 }
@@ -396,7 +396,7 @@ HWTEST_F(DisplayManagerServiceTest, VirtualPixelRatio, Function | SmallTest | Le
  * @tc.desc: add/remove surfaceNode to/from display
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerServiceTest, AddAndRemoveSurfaceNode, Function | SmallTest | Level3)
+HWTEST_F(DisplayManagerServiceTest, AddAndRemoveSurfaceNode, TestSize.Level1)
 {
     std::shared_ptr<RSSurfaceNode> surfaceNode = nullptr;
     DMError result = dms_->RemoveSurfaceNodeFromDisplay(DEFAULT_DISPLAY, surfaceNode);
@@ -414,7 +414,7 @@ HWTEST_F(DisplayManagerServiceTest, AddAndRemoveSurfaceNode, Function | SmallTes
  * @tc.desc: DMS on stop
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerServiceTest, OnStop, Function | SmallTest | Level3)
+HWTEST_F(DisplayManagerServiceTest, OnStop, TestSize.Level1)
 {
     dms_->OnStop();
     ASSERT_TRUE(true);
@@ -425,7 +425,7 @@ HWTEST_F(DisplayManagerServiceTest, OnStop, Function | SmallTest | Level3)
  * @tc.desc: NotifyDisplayEvent
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerServiceTest, NotifyDisplayEvent, Function | SmallTest | Level3)
+HWTEST_F(DisplayManagerServiceTest, NotifyDisplayEvent, TestSize.Level1)
 {
     DisplayEvent event = DisplayEvent::KEYGUARD_DRAWN;
     dms_->NotifyDisplayEvent(event);
@@ -437,7 +437,7 @@ HWTEST_F(DisplayManagerServiceTest, NotifyDisplayEvent, Function | SmallTest | L
  * @tc.desc: SetFreeze
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerServiceTest, SetFreeze, Function | SmallTest | Level3)
+HWTEST_F(DisplayManagerServiceTest, SetFreeze, TestSize.Level1)
 {
     std::vector<DisplayId> displayIds = { 0 };
     bool isFreeze = false;
@@ -450,7 +450,7 @@ HWTEST_F(DisplayManagerServiceTest, SetFreeze, Function | SmallTest | Level3)
  * @tc.desc: AddSurfaceNodeToDisplay
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerServiceTest, AddSurfaceNodeToDisplay, Function | SmallTest | Level3)
+HWTEST_F(DisplayManagerServiceTest, AddSurfaceNodeToDisplay, TestSize.Level1)
 {
     DisplayId displayId = 1;
     struct RSSurfaceNodeConfig config;
@@ -465,7 +465,7 @@ HWTEST_F(DisplayManagerServiceTest, AddSurfaceNodeToDisplay, Function | SmallTes
  * @tc.desc: IsScreenRotationLocked
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerServiceTest, IsScreenRotationLocked, Function | SmallTest | Level3)
+HWTEST_F(DisplayManagerServiceTest, IsScreenRotationLocked, TestSize.Level1)
 {
     bool isLocked = true;
     DMError ret = dms_->IsScreenRotationLocked(isLocked);
@@ -477,7 +477,7 @@ HWTEST_F(DisplayManagerServiceTest, IsScreenRotationLocked, Function | SmallTest
  * @tc.desc: SetScreenRotationLocked
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerServiceTest, SetScreenRotationLocked, Function | SmallTest | Level3)
+HWTEST_F(DisplayManagerServiceTest, SetScreenRotationLocked, TestSize.Level1)
 {
     bool isLocked = true;
     DMError ret = dms_->SetScreenRotationLocked(isLocked);
@@ -489,7 +489,7 @@ HWTEST_F(DisplayManagerServiceTest, SetScreenRotationLocked, Function | SmallTes
  * @tc.desc: SetScreenRotationLockedFromJs
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerServiceTest, SetScreenRotationLockedFromJs, Function | SmallTest | Level3)
+HWTEST_F(DisplayManagerServiceTest, SetScreenRotationLockedFromJs, TestSize.Level1)
 {
     bool isLocked = true;
     DMError ret = dms_->SetScreenRotationLockedFromJs(isLocked);
@@ -501,7 +501,7 @@ HWTEST_F(DisplayManagerServiceTest, SetScreenRotationLockedFromJs, Function | Sm
  * @tc.desc: SetGravitySensorSubscriptionEnabled
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerServiceTest, SetGravitySensorSubscriptionEnabled, Function | SmallTest | Level3)
+HWTEST_F(DisplayManagerServiceTest, SetGravitySensorSubscriptionEnabled, TestSize.Level1)
 {
     dms_->isAutoRotationOpen_ = true;
     dms_->SetGravitySensorSubscriptionEnabled();
@@ -517,7 +517,7 @@ HWTEST_F(DisplayManagerServiceTest, SetGravitySensorSubscriptionEnabled, Functio
  * @tc.desc: MakeMirror
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerServiceTest, MakeMirror, Function | SmallTest | Level3)
+HWTEST_F(DisplayManagerServiceTest, MakeMirror, TestSize.Level1)
 {
     ScreenId mainScreenId = 1;
     std::vector<ScreenId> mirrorScreenIds = { 2 };
@@ -535,7 +535,7 @@ HWTEST_F(DisplayManagerServiceTest, MakeMirror, Function | SmallTest | Level3)
  * @tc.desc: StopMirror
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerServiceTest, StopMirror, Function | SmallTest | Level3)
+HWTEST_F(DisplayManagerServiceTest, StopMirror, TestSize.Level1)
 {
     std::vector<ScreenId> mirrorScreenIds = { 2 };
     sptr<AbstractScreen> absScreen =
@@ -550,7 +550,7 @@ HWTEST_F(DisplayManagerServiceTest, StopMirror, Function | SmallTest | Level3)
  * @tc.desc: RemoveSurfaceNodeFromDisplay
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerServiceTest, RemoveSurfaceNodeFromDisplay, Function | SmallTest | Level3)
+HWTEST_F(DisplayManagerServiceTest, RemoveSurfaceNodeFromDisplay, TestSize.Level1)
 {
     DisplayId displayId = 1;
     struct RSSurfaceNodeConfig config;
@@ -564,7 +564,7 @@ HWTEST_F(DisplayManagerServiceTest, RemoveSurfaceNodeFromDisplay, Function | Sma
  * @tc.desc: DMS SetOrientation
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerServiceTest, SetOrientation, Function | SmallTest | Level3)
+HWTEST_F(DisplayManagerServiceTest, SetOrientation, TestSize.Level1)
 {
     ScreenId screenId = 0;
     Orientation orientation = Orientation::VERTICAL;
@@ -580,7 +580,7 @@ HWTEST_F(DisplayManagerServiceTest, SetOrientation, Function | SmallTest | Level
  * @tc.desc: DMS GetDisplaySnapshot
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerServiceTest, GetDisplaySnapshot, Function | SmallTest | Level3)
+HWTEST_F(DisplayManagerServiceTest, GetDisplaySnapshot, TestSize.Level1)
 {
     DisplayId displayId = -1;
     DmErrorCode* errorCode = nullptr;
@@ -593,7 +593,7 @@ HWTEST_F(DisplayManagerServiceTest, GetDisplaySnapshot, Function | SmallTest | L
  * @tc.desc: DMS AddSurfaceNodeToDisplay
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerServiceTest, AddSurfaceNodeToDisplay02, Function | SmallTest | Level3)
+HWTEST_F(DisplayManagerServiceTest, AddSurfaceNodeToDisplay02, TestSize.Level1)
 {
     DisplayId displayId = 1;
     struct RSSurfaceNodeConfig config;
@@ -608,7 +608,7 @@ HWTEST_F(DisplayManagerServiceTest, AddSurfaceNodeToDisplay02, Function | SmallT
  * @tc.desc: DMS GetAllScreenInfos
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerServiceTest, GetAllScreenInfos, Function | SmallTest | Level3)
+HWTEST_F(DisplayManagerServiceTest, GetAllScreenInfos, TestSize.Level1)
 {
     std::vector<sptr<ScreenInfo>> screenInfos;
     auto ret =dms_->GetAllScreenInfos(screenInfos);
@@ -620,7 +620,7 @@ HWTEST_F(DisplayManagerServiceTest, GetAllScreenInfos, Function | SmallTest | Le
  * @tc.desc: DMS MakeExpand
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerServiceTest, MakeExpand01, Function | SmallTest | Level3)
+HWTEST_F(DisplayManagerServiceTest, MakeExpand01, TestSize.Level1)
 {
     std::vector<ScreenId> expandScreenIds{1};
     std::vector<Point> startPoints(1);
@@ -634,7 +634,7 @@ HWTEST_F(DisplayManagerServiceTest, MakeExpand01, Function | SmallTest | Level3)
  * @tc.desc: DMS MakeExpand
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerServiceTest, MakeExpand02, Function | SmallTest | Level3)
+HWTEST_F(DisplayManagerServiceTest, MakeExpand02, TestSize.Level1)
 {
     std::vector<ScreenId> expandScreenIds{1, 2, 3, 4, 5};
     std::vector<Point> startPoints(1);
@@ -648,7 +648,7 @@ HWTEST_F(DisplayManagerServiceTest, MakeExpand02, Function | SmallTest | Level3)
  * @tc.desc: DMS StopExpand
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerServiceTest, StopExpand, Function | SmallTest | Level3)
+HWTEST_F(DisplayManagerServiceTest, StopExpand, TestSize.Level1)
 {
     std::vector<ScreenId> expandScreenIds{0, 1, 2, 3, 4, 5};
     auto ret = dms_->StopExpand(expandScreenIds);
