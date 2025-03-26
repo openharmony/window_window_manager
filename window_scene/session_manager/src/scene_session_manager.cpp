@@ -43,35 +43,35 @@
 #include "res_type.h"
 #include "res_sched_client.h"
 #endif
-#include "scene_system_ability_listener.h"
 
+#include "anomaly_detection.h"
 #include "color_parser.h"
+#include "common/include/fold_screen_state_internel.h"
 #include "common/include/session_permission.h"
 #include "display_manager.h"
+#include "distributed_client.h"
+#include "dms_reporter.h"
+#include "hidump_controller.h"
+#include "perform_reporter.h"
+#include "rdb/starting_window_rdb_manager.h"
+#include "res_sched_client.h"
 #include "scene_input_manager.h"
+#include "scene_system_ability_listener.h"
+#include "screen_session_manager_client/include/screen_session_manager_client.h"
+#include "session/host/include/ability_info_manager.h"
 #include "session/host/include/main_session.h"
+#include "session/host/include/multi_instance_manager.h"
 #include "session/host/include/scb_system_session.h"
 #include "session/host/include/scene_persistent_storage.h"
 #include "session/host/include/session_utils.h"
 #include "session/host/include/sub_session.h"
 #include "session_helper.h"
-#include "window_helper.h"
-#include "screen_session_manager_client/include/screen_session_manager_client.h"
-#include "singleton_container.h"
-#include "xcollie/watchdog.h"
 #include "session_manager_agent_controller.h"
-#include "distributed_client.h"
+#include "singleton_container.h"
 #include "softbus_bus_center.h"
-#include "perform_reporter.h"
-#include "dms_reporter.h"
-#include "rdb/starting_window_rdb_manager.h"
-#include "res_sched_client.h"
-#include "anomaly_detection.h"
-#include "session/host/include/ability_info_manager.h"
-#include "session/host/include/multi_instance_manager.h"
-#include "common/include/fold_screen_state_internel.h"
-
-#include "hidump_controller.h"
+#include "user_switch_reporter.h"
+#include "window_helper.h"
+#include "xcollie/watchdog.h"
 
 #ifdef MEMMGR_WINDOW_ENABLE
 #include "mem_mgr_client.h"
@@ -4436,6 +4436,10 @@ void SceneSessionManager::ProcessUIAbilityOnUserSwitch(bool isUserActive)
 
 void SceneSessionManager::HandleUserSwitching(bool isUserActive)
 {
+    // A brief screen freeze may occur when handling a switching event.
+    // Record the duration and report it to HiSysEvent for troubleshooting.
+    UserSwitchReporter reporter(isUserActive);
+
     isUserBackground_ = !isUserActive;
     SceneInputManager::GetInstance().SetUserBackground(!isUserActive);
     if (isUserActive) { // switch to current user
@@ -4471,14 +4475,24 @@ void SceneSessionManager::HandleUserSwitch(const UserSwitchEventType type, const
     if (type == UserSwitchEventType::SWITCHING && !isUserActive) {
         ScreenSessionManagerClient::GetInstance().DisconnectAllExternalScreen();
     }
+
     taskScheduler_->PostSyncTask([this, type, isUserActive, where = __func__] {
         TLOGNI(WmsLogTag::WMS_MULTI_USER,
                "%{public}s: currentUserId: %{public}d, switchEventType: %{public}u, isUserActive: %{public}u",
                where, currentUserId_.load(), type, isUserActive);
-        if (type == UserSwitchEventType::SWITCHING) {
-            HandleUserSwitching(isUserActive);
-        } else {
-            HandleUserSwitched(isUserActive);
+        switch (type) {
+            case UserSwitchEventType::SWITCHING: {
+                HandleUserSwitching(isUserActive);
+                break;
+            }
+            case UserSwitchEventType::SWITCHED: {
+                HandleUserSwitched(isUserActive);
+                break;
+            }
+            default: {
+                TLOGNW(WmsLogTag::WMS_MULTI_USER, "%{public}s: Invalid switchEventType: %{public}u", where, type);
+                break;
+            }
         }
         return WSError::WS_OK;
     }, __func__);
