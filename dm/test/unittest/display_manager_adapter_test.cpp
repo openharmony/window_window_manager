@@ -56,7 +56,7 @@ namespace {
  * @tc.desc: test nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, GetDisplayInfo, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterTest, GetDisplayInfo, TestSize.Level1)
 {
     sptr<DisplayInfo> info = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayInfo(DISPLAY_ID_INVALID);
     ASSERT_EQ(info, nullptr);
@@ -67,7 +67,7 @@ HWTEST_F(DisplayManagerAdapterTest, GetDisplayInfo, Function | SmallTest | Level
  * @tc.desc: test nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, GetCutoutInfo, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterTest, GetCutoutInfo, TestSize.Level1)
 {
     sptr<CutoutInfo> info = SingletonContainer::Get<DisplayManagerAdapter>().GetCutoutInfo(DISPLAY_ID_INVALID);
     ASSERT_EQ(info, nullptr);
@@ -91,7 +91,7 @@ HWTEST_F(DisplayManagerAdapterTest, GetCutoutInfoWithRotation, Function | SmallT
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, GetScreenSupportedColorGamuts, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterTest, GetScreenSupportedColorGamuts, TestSize.Level1)
 {
     std::vector<ScreenColorGamut> colorGamuts;
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().GetScreenSupportedColorGamuts(0, colorGamuts);
@@ -107,7 +107,7 @@ HWTEST_F(DisplayManagerAdapterTest, GetScreenSupportedColorGamuts, Function | Sm
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, SetScreenColorGamut, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterTest, SetScreenColorGamut, TestSize.Level1)
 {
     std::vector<ScreenColorGamut> colorGamuts;
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetScreenColorGamut(0, -1);
@@ -123,7 +123,7 @@ HWTEST_F(DisplayManagerAdapterTest, SetScreenColorGamut, Function | SmallTest | 
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, GetScreenColorGamut, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterTest, GetScreenColorGamut, TestSize.Level1)
 {
     ScreenColorGamut colorGamut;
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().GetScreenColorGamut(0, colorGamut);
@@ -139,7 +139,7 @@ HWTEST_F(DisplayManagerAdapterTest, GetScreenColorGamut, Function | SmallTest | 
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, GetScreenGamutMap, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterTest, GetScreenGamutMap, TestSize.Level1)
 {
     ScreenGamutMap gamutMap;
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().GetScreenGamutMap(0, gamutMap);
@@ -155,7 +155,7 @@ HWTEST_F(DisplayManagerAdapterTest, GetScreenGamutMap, Function | SmallTest | Le
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, SetScreenGamutMap, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterTest, SetScreenGamutMap, TestSize.Level1)
 {
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetScreenGamutMap(0, GAMUT_MAP_CONSTANT);
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
@@ -170,7 +170,7 @@ HWTEST_F(DisplayManagerAdapterTest, SetScreenGamutMap, Function | SmallTest | Le
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, SetScreenColorTransform, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterTest, SetScreenColorTransform, TestSize.Level1)
 {
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetScreenColorTransform(0);
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
@@ -185,7 +185,7 @@ HWTEST_F(DisplayManagerAdapterTest, SetScreenColorTransform, Function | SmallTes
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, SetFreeze, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterTest, SetFreeze, TestSize.Level1)
 {
     std::vector<DisplayId> displayIds;
     bool ret = SingletonContainer::Get<DisplayManagerAdapter>().SetFreeze(displayIds, false);
@@ -201,7 +201,7 @@ HWTEST_F(DisplayManagerAdapterTest, SetFreeze, Function | SmallTest | Level2)
  * @tc.desc: test nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, GetScreenGroupInfoById, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterTest, GetScreenGroupInfoById, TestSize.Level1)
 {
     auto info = SingletonContainer::Get<ScreenManagerAdapter>().GetScreenGroupInfoById(SCREEN_ID_INVALID);
     ASSERT_EQ(info, nullptr);
@@ -212,7 +212,7 @@ HWTEST_F(DisplayManagerAdapterTest, GetScreenGroupInfoById, Function | SmallTest
  * @tc.desc: test nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, GetScreenInfo, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterTest, GetScreenInfo, TestSize.Level1)
 {
     sptr<ScreenInfo> info = SingletonContainer::Get<ScreenManagerAdapter>().GetScreenInfo(SCREEN_ID_INVALID);
     ASSERT_EQ(info, nullptr);
@@ -223,7 +223,7 @@ HWTEST_F(DisplayManagerAdapterTest, GetScreenInfo, Function | SmallTest | Level2
  * @tc.desc: test nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, OnRemoteDied, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterTest, OnRemoteDied, TestSize.Level1)
 {
     sptr<IRemoteObject::DeathRecipient> dmsDeath_ = nullptr;
     dmsDeath_ = new(std::nothrow) DMSDeathRecipient(SingletonContainer::Get<ScreenManagerAdapter>());
@@ -236,7 +236,7 @@ HWTEST_F(DisplayManagerAdapterTest, OnRemoteDied, Function | SmallTest | Level2)
  * @tc.desc: test nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, OnRemoteDied01, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterTest, OnRemoteDied01, TestSize.Level1)
 {
     sptr<IRemoteObject::DeathRecipient> dmsDeath_ = nullptr;
     dmsDeath_ = new(std::nothrow) DMSDeathRecipient(SingletonContainer::Get<ScreenManagerAdapter>());
@@ -252,7 +252,7 @@ HWTEST_F(DisplayManagerAdapterTest, OnRemoteDied01, Function | SmallTest | Level
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, Clear, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterTest, Clear, TestSize.Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     SingletonContainer::Get<ScreenManagerAdapter>().Clear();
@@ -264,7 +264,7 @@ HWTEST_F(DisplayManagerAdapterTest, Clear, Function | SmallTest | Level2)
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, Clear01, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterTest, Clear01, TestSize.Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_ = nullptr;
@@ -277,7 +277,7 @@ HWTEST_F(DisplayManagerAdapterTest, Clear01, Function | SmallTest | Level2)
  * @tc.desc: DisableMirror test
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, DisableMirror, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterTest, DisableMirror, TestSize.Level1)
 {
     DMError ret = SingletonContainer::Get<ScreenManagerAdapter>().DisableMirror(false);
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
@@ -292,7 +292,7 @@ HWTEST_F(DisplayManagerAdapterTest, DisableMirror, Function | SmallTest | Level2
  * @tc.desc: test HasImmersiveWindow
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, HasImmersiveWindow, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterTest, HasImmersiveWindow, TestSize.Level1)
 {
     bool immersive = false;
     DMError ret = SingletonContainer::Get<DisplayManagerAdapter>().HasImmersiveWindow(0u, immersive);
@@ -308,7 +308,7 @@ HWTEST_F(DisplayManagerAdapterTest, HasImmersiveWindow, Function | SmallTest | L
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, GetPixelFormat, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterTest, GetPixelFormat, TestSize.Level1)
 {
     GraphicPixelFormat pixelFormat = GraphicPixelFormat{GRAPHIC_PIXEL_FMT_CLUT8};
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().GetPixelFormat(0, pixelFormat);
@@ -324,7 +324,7 @@ HWTEST_F(DisplayManagerAdapterTest, GetPixelFormat, Function | SmallTest | Level
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, SetPixelFormat, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterTest, SetPixelFormat, TestSize.Level1)
 {
     GraphicPixelFormat pixelFormat = GraphicPixelFormat{GRAPHIC_PIXEL_FMT_CLUT8};
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetPixelFormat(0, pixelFormat);
@@ -340,7 +340,7 @@ HWTEST_F(DisplayManagerAdapterTest, SetPixelFormat, Function | SmallTest | Level
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, GetSupportedHDRFormats, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterTest, GetSupportedHDRFormats, TestSize.Level1)
 {
     std::vector<ScreenHDRFormat> hdrFormats;
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().GetSupportedHDRFormats(0, hdrFormats);
@@ -356,7 +356,7 @@ HWTEST_F(DisplayManagerAdapterTest, GetSupportedHDRFormats, Function | SmallTest
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, GetScreenHDRFormat, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterTest, GetScreenHDRFormat, TestSize.Level1)
 {
     ScreenHDRFormat hdrFormat = ScreenHDRFormat{NOT_SUPPORT_HDR};
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().GetScreenHDRFormat(0, hdrFormat);
@@ -372,7 +372,7 @@ HWTEST_F(DisplayManagerAdapterTest, GetScreenHDRFormat, Function | SmallTest | L
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, SetScreenHDRFormat, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterTest, SetScreenHDRFormat, TestSize.Level1)
 {
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetScreenHDRFormat(0, 0);
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
@@ -387,7 +387,7 @@ HWTEST_F(DisplayManagerAdapterTest, SetScreenHDRFormat, Function | SmallTest | L
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, GetSupportedColorSpaces, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterTest, GetSupportedColorSpaces, TestSize.Level1)
 {
     std::vector<GraphicCM_ColorSpaceType> colorSpaces;
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().GetSupportedColorSpaces(0, colorSpaces);
@@ -403,7 +403,7 @@ HWTEST_F(DisplayManagerAdapterTest, GetSupportedColorSpaces, Function | SmallTes
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, GetScreenColorSpace, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterTest, GetScreenColorSpace, TestSize.Level1)
 {
     GraphicCM_ColorSpaceType colorSpace = GraphicCM_ColorSpaceType{GRAPHIC_CM_COLORSPACE_NONE};
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().GetScreenColorSpace(0, colorSpace);
@@ -419,7 +419,7 @@ HWTEST_F(DisplayManagerAdapterTest, GetScreenColorSpace, Function | SmallTest | 
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, SetScreenColorSpace, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterTest, SetScreenColorSpace, TestSize.Level1)
 {
     GraphicCM_ColorSpaceType colorSpace = GraphicCM_ColorSpaceType{GRAPHIC_CM_COLORSPACE_NONE};
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetScreenColorSpace(0, colorSpace);
@@ -435,7 +435,7 @@ HWTEST_F(DisplayManagerAdapterTest, SetScreenColorSpace, Function | SmallTest | 
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, DestroyVirtualScreen, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterTest, DestroyVirtualScreen, TestSize.Level1)
 {
     VirtualScreenOption defaultOption = {"virtualScreen01", 480, 320, 2.0, nullptr, 0};
     ScreenId id = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption);
@@ -448,7 +448,7 @@ HWTEST_F(DisplayManagerAdapterTest, DestroyVirtualScreen, Function | SmallTest |
  * @tc.desc: test SetVirtualMirrorScreenCanvasRotation
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, SetVirtualMirrorScreenCanvasRotation, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterTest, SetVirtualMirrorScreenCanvasRotation, TestSize.Level1)
 {
     bool canvasRotation = false;
     DMError ret = SingletonContainer::Get<ScreenManagerAdapter>().
@@ -465,7 +465,7 @@ HWTEST_F(DisplayManagerAdapterTest, SetVirtualMirrorScreenCanvasRotation, Functi
  * @tc.desc: test SetScreenRotationLocked
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, SetScreenRotationLocked, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterTest, SetScreenRotationLocked, TestSize.Level1)
 {
     bool isLocked = false;
     DMError ret = SingletonContainer::Get<ScreenManagerAdapter>().SetScreenRotationLocked(isLocked);
@@ -481,7 +481,7 @@ HWTEST_F(DisplayManagerAdapterTest, SetScreenRotationLocked, Function | SmallTes
  * @tc.desc: test IsScreenRotationLocked
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, IsScreenRotationLocked, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterTest, IsScreenRotationLocked, TestSize.Level1)
 {
     bool isLocked = false;
     DMError ret = SingletonContainer::Get<ScreenManagerAdapter>().IsScreenRotationLocked(isLocked);
@@ -497,7 +497,7 @@ HWTEST_F(DisplayManagerAdapterTest, IsScreenRotationLocked, Function | SmallTest
  * @tc.desc: test SetSpecifiedScreenPower
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, SetSpecifiedScreenPower, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterTest, SetSpecifiedScreenPower, TestSize.Level1)
 {
     ScreenPowerState state = ScreenPowerState{0};
     PowerStateChangeReason reason = PowerStateChangeReason{0};
@@ -514,7 +514,7 @@ HWTEST_F(DisplayManagerAdapterTest, SetSpecifiedScreenPower, Function | SmallTes
  * @tc.desc: SetOrientation success
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, SetOrientation, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterTest, SetOrientation, TestSize.Level1)
 {
     Orientation orientation = Orientation{0};
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetOrientation(0, orientation);
@@ -530,7 +530,7 @@ HWTEST_F(DisplayManagerAdapterTest, SetOrientation, Function | SmallTest | Level
  * @tc.desc: test WakeUpBegin
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, WakeUpBegin, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterTest, WakeUpBegin, TestSize.Level1)
 {
     PowerStateChangeReason reason = PowerStateChangeReason{0};
     bool ret = SingletonContainer::Get<DisplayManagerAdapter>().WakeUpBegin(reason);
@@ -546,7 +546,7 @@ HWTEST_F(DisplayManagerAdapterTest, WakeUpBegin, Function | SmallTest | Level2)
  * @tc.desc: test WakeUpEnd
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, WakeUpEnd, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterTest, WakeUpEnd, TestSize.Level1)
 {
     bool ret = SingletonContainer::Get<DisplayManagerAdapter>().WakeUpEnd();
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
@@ -561,7 +561,7 @@ HWTEST_F(DisplayManagerAdapterTest, WakeUpEnd, Function | SmallTest | Level2)
  * @tc.desc: test SuspendBegin
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, SuspendBegin, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterTest, SuspendBegin, TestSize.Level1)
 {
     PowerStateChangeReason reason = PowerStateChangeReason{0};
     bool ret = SingletonContainer::Get<DisplayManagerAdapter>().SuspendBegin(reason);
@@ -577,7 +577,7 @@ HWTEST_F(DisplayManagerAdapterTest, SuspendBegin, Function | SmallTest | Level2)
  * @tc.desc: test SuspendEnd
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, SuspendEnd, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterTest, SuspendEnd, TestSize.Level1)
 {
     bool ret = SingletonContainer::Get<DisplayManagerAdapter>().SuspendEnd();
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
@@ -592,7 +592,7 @@ HWTEST_F(DisplayManagerAdapterTest, SuspendEnd, Function | SmallTest | Level2)
  * @tc.desc: test SetDisplayState
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, SetDisplayState, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterTest, SetDisplayState, TestSize.Level1)
 {
     DisplayState state = DisplayState{1};
     bool ret = SingletonContainer::Get<DisplayManagerAdapter>().SetDisplayState(state);
@@ -606,7 +606,7 @@ HWTEST_F(DisplayManagerAdapterTest, SetDisplayState, Function | SmallTest | Leve
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, MakeMirror, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterTest, MakeMirror, TestSize.Level1)
 {
     std::vector<ScreenId> mirrorScreenId;
     ScreenId screenGroupId;
@@ -620,7 +620,7 @@ HWTEST_F(DisplayManagerAdapterTest, MakeMirror, Function | SmallTest | Level2)
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, StopMirror, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterTest, StopMirror, TestSize.Level1)
 {
     std::vector<ScreenId> mirrorScreenIds;
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().StopMirror(mirrorScreenIds);
@@ -632,7 +632,7 @@ HWTEST_F(DisplayManagerAdapterTest, StopMirror, Function | SmallTest | Level2)
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, HasPrivateWindow, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterTest, HasPrivateWindow, TestSize.Level1)
 {
     bool hasPrivateWindow = false;
     DMError err = SingletonContainer::Get<DisplayManagerAdapter>().HasPrivateWindow(0,
@@ -649,7 +649,7 @@ HWTEST_F(DisplayManagerAdapterTest, HasPrivateWindow, Function | SmallTest | Lev
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, AddSurfaceNodeToDisplay, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterTest, AddSurfaceNodeToDisplay, TestSize.Level1)
 {
     std::shared_ptr<class RSSurfaceNode> surfaceNode;
     DMError err = SingletonContainer::Get<DisplayManagerAdapter>().AddSurfaceNodeToDisplay(0,
@@ -666,7 +666,7 @@ HWTEST_F(DisplayManagerAdapterTest, AddSurfaceNodeToDisplay, Function | SmallTes
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, RemoveSurfaceNodeFromDisplay, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterTest, RemoveSurfaceNodeFromDisplay, TestSize.Level1)
 {
     std::shared_ptr<class RSSurfaceNode> surfaceNode;
     DMError err = SingletonContainer::Get<DisplayManagerAdapter>().RemoveSurfaceNodeFromDisplay(0,
@@ -683,7 +683,7 @@ HWTEST_F(DisplayManagerAdapterTest, RemoveSurfaceNodeFromDisplay, Function | Sma
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, MakeExpand, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterTest, MakeExpand, TestSize.Level1)
 {
     std::vector<ScreenId> screenId;
     std::vector<Point> startPoint;
@@ -698,7 +698,7 @@ HWTEST_F(DisplayManagerAdapterTest, MakeExpand, Function | SmallTest | Level2)
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, StopExpand, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterTest, StopExpand, TestSize.Level1)
 {
     std::vector<ScreenId> expandScreenIds;
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().StopExpand(expandScreenIds);
@@ -710,7 +710,7 @@ HWTEST_F(DisplayManagerAdapterTest, StopExpand, Function | SmallTest | Level2)
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, RemoveVirtualScreenFromGroup, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterTest, RemoveVirtualScreenFromGroup, TestSize.Level1)
 {
     std::vector<ScreenId> screens;
     int resultValue = 0;
@@ -727,7 +727,7 @@ HWTEST_F(DisplayManagerAdapterTest, RemoveVirtualScreenFromGroup, Function | Sma
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, SetScreenActiveMode, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterTest, SetScreenActiveMode, TestSize.Level1)
 {
     VirtualScreenOption defaultOption = {"virtualScreen02", 480, 320, 2.0, nullptr, 0};
     ScreenId id = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption);
@@ -741,7 +741,7 @@ HWTEST_F(DisplayManagerAdapterTest, SetScreenActiveMode, Function | SmallTest | 
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, SetVirtualPixelRatio, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterTest, SetVirtualPixelRatio, TestSize.Level1)
 {
     VirtualScreenOption defaultOption = {"virtualScreen03", 480, 320, 2.0, nullptr, 0};
     ScreenId id = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption);
@@ -755,7 +755,7 @@ HWTEST_F(DisplayManagerAdapterTest, SetVirtualPixelRatio, Function | SmallTest |
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, SetResolution, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterTest, SetResolution, TestSize.Level1)
 {
     VirtualScreenOption defaultOption = {"virtualScreen04", 480, 320, 2.0, nullptr, 0};
     ScreenId id = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption);
@@ -773,7 +773,7 @@ HWTEST_F(DisplayManagerAdapterTest, SetResolution, Function | SmallTest | Level2
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, ResizeVirtualScreen, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterTest, ResizeVirtualScreen, TestSize.Level1)
 {
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().ResizeVirtualScreen(0, 70, 100);
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
@@ -788,7 +788,7 @@ HWTEST_F(DisplayManagerAdapterTest, ResizeVirtualScreen, Function | SmallTest | 
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, MakeUniqueScreen, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterTest, MakeUniqueScreen, TestSize.Level1)
 {
     std::vector<ScreenId> screenIds;
     std::vector<DisplayId> displayIds;
@@ -805,7 +805,7 @@ HWTEST_F(DisplayManagerAdapterTest, MakeUniqueScreen, Function | SmallTest | Lev
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, GetAvailableArea, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterTest, GetAvailableArea, TestSize.Level1)
 {
     DMRect area;
     DMError err = SingletonContainer::Get<DisplayManagerAdapter>().GetAvailableArea(0, area);
@@ -821,7 +821,7 @@ HWTEST_F(DisplayManagerAdapterTest, GetAvailableArea, Function | SmallTest | Lev
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, GetAllDisplayPhysicalResolution, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterTest, GetAllDisplayPhysicalResolution, TestSize.Level1)
 {
     std::vector<DisplayPhysicalResolution> allSize =
         SingletonContainer::Get<DisplayManagerAdapter>().GetAllDisplayPhysicalResolution();
@@ -833,7 +833,7 @@ HWTEST_F(DisplayManagerAdapterTest, GetAllDisplayPhysicalResolution, Function | 
  * @tc.desc: SetDisplayScale test
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, SetDisplayScale, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterTest, SetDisplayScale, TestSize.Level1)
 {
     DisplayManagerAdapter& displayManagerAdapter = SingletonContainer::Get<DisplayManagerAdapter>();
     const float scaleX = 1.0f;
@@ -851,7 +851,7 @@ HWTEST_F(DisplayManagerAdapterTest, SetDisplayScale, Function | SmallTest | Leve
  * @tc.desc: GetPrimaryDisplayInfo test
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, GetPrimaryDisplayInfo, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterTest, GetPrimaryDisplayInfo, TestSize.Level1)
 {
     DisplayManagerAdapter& displayManagerAdapter = SingletonContainer::Get<DisplayManagerAdapter>();
     sptr<DisplayInfo> displayInfo = displayManagerAdapter.GetPrimaryDisplayInfo();
@@ -863,7 +863,7 @@ HWTEST_F(DisplayManagerAdapterTest, GetPrimaryDisplayInfo, Function | SmallTest 
  * @tc.desc: SetScreenSkipProtectedWindow test
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, SetScreenSkipProtectedWindow, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterTest, SetScreenSkipProtectedWindow, TestSize.Level1)
 {
     const std::vector<ScreenId> screenIds = {1001, 1002};
     bool isEnable = true;
@@ -876,7 +876,7 @@ HWTEST_F(DisplayManagerAdapterTest, SetScreenSkipProtectedWindow, Function | Sma
  * @tc.desc: GetDisplayCapability test success
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, GetDisplayCapability, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterTest, GetDisplayCapability, TestSize.Level1)
 {
     std::string capabilitInfo;
     auto result = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayCapability(capabilitInfo);

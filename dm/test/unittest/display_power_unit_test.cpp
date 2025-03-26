@@ -72,7 +72,7 @@ namespace {
  * @tc.desc: call Register/UnregisterDisplayPowerEventListener with a valid listener and check return value
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayPowerUnitTest, register_display_power_event_listener_001, Function | SmallTest | Level2)
+HWTEST_F(DisplayPowerUnitTest, register_display_power_event_listener_001, TestSize.Level1)
 {
     Mocker m;
 
@@ -92,7 +92,7 @@ HWTEST_F(DisplayPowerUnitTest, register_display_power_event_listener_001, Functi
  * @tc.desc: call Register/UnregisterDisplayPowerEventListener with nullptr and check return value
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayPowerUnitTest, register_display_power_event_listener_002, Function | SmallTest | Level2)
+HWTEST_F(DisplayPowerUnitTest, register_display_power_event_listener_002, TestSize.Level1)
 {
     Mocker m;
     EXPECT_CALL(m.Mock(), RegisterDisplayManagerAgent(_, DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER))
@@ -111,7 +111,7 @@ HWTEST_F(DisplayPowerUnitTest, register_display_power_event_listener_002, Functi
  * @tc.desc: call Register/UnregisterDisplayPowerEventListener with ipc failed and check return value
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayPowerUnitTest, register_display_power_event_listener_003, Function | SmallTest | Level2)
+HWTEST_F(DisplayPowerUnitTest, register_display_power_event_listener_003, TestSize.Level1)
 {
     Mocker m;
     EXPECT_CALL(m.Mock(), RegisterDisplayManagerAgent(_, DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER))
@@ -130,7 +130,7 @@ HWTEST_F(DisplayPowerUnitTest, register_display_power_event_listener_003, Functi
  * @tc.desc: call UnregisterDisplayPowerEventListener with a listener never registered and check return value
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayPowerUnitTest, unregister_display_power_event_listener_001, Function | SmallTest | Level2)
+HWTEST_F(DisplayPowerUnitTest, unregister_display_power_event_listener_001, TestSize.Level1)
 {
     Mocker m;
     EXPECT_CALL(m.Mock(), UnregisterDisplayManagerAgent(_, DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER))
@@ -144,7 +144,7 @@ HWTEST_F(DisplayPowerUnitTest, unregister_display_power_event_listener_001, Func
  * @tc.desc: call UnregisterDisplayPowerEventListener with nullptr and check return value
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayPowerUnitTest, unregister_display_power_event_listener_002, Function | SmallTest | Level2)
+HWTEST_F(DisplayPowerUnitTest, unregister_display_power_event_listener_002, TestSize.Level1)
 {
     Mocker m;
     EXPECT_CALL(m.Mock(), UnregisterDisplayManagerAgent(_, DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER))
@@ -158,7 +158,7 @@ HWTEST_F(DisplayPowerUnitTest, unregister_display_power_event_listener_002, Func
  * @tc.desc: call WakeUpBegin and check return value
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayPowerUnitTest, wake_up_begin_001, Function | SmallTest | Level2)
+HWTEST_F(DisplayPowerUnitTest, wake_up_begin_001, TestSize.Level1)
 {
     Mocker m;
     EXPECT_CALL(m.Mock(), WakeUpBegin(PowerStateChangeReason::POWER_BUTTON)).Times(1).WillOnce(Return(true));
@@ -175,7 +175,7 @@ HWTEST_F(DisplayPowerUnitTest, wake_up_begin_001, Function | SmallTest | Level2)
  * @tc.desc: call WakeUpEnd and check return value
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayPowerUnitTest, wake_up_end_001, Function | SmallTest | Level2)
+HWTEST_F(DisplayPowerUnitTest, wake_up_end_001, TestSize.Level1)
 {
     Mocker m;
     EXPECT_CALL(m.Mock(), WakeUpEnd()).Times(1).WillOnce(Return(true));
@@ -192,7 +192,7 @@ HWTEST_F(DisplayPowerUnitTest, wake_up_end_001, Function | SmallTest | Level2)
  * @tc.desc: call SuspendBegin and check return value
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayPowerUnitTest, suspend_begin_001, Function | SmallTest | Level2)
+HWTEST_F(DisplayPowerUnitTest, suspend_begin_001, TestSize.Level1)
 {
     Mocker m;
     EXPECT_CALL(m.Mock(), SuspendBegin(PowerStateChangeReason::POWER_BUTTON)).Times(1).WillOnce(Return(true));
@@ -209,7 +209,7 @@ HWTEST_F(DisplayPowerUnitTest, suspend_begin_001, Function | SmallTest | Level2)
  * @tc.desc: call SuspendEnd and check return value
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayPowerUnitTest, suspend_end_001, Function | SmallTest | Level2)
+HWTEST_F(DisplayPowerUnitTest, suspend_end_001, TestSize.Level1)
 {
     Mocker m;
     EXPECT_CALL(m.Mock(), SuspendEnd()).Times(1).WillOnce(Return(true));
