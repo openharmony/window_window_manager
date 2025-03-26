@@ -87,6 +87,9 @@ WSError MainSession::Reconnect(const sptr<ISessionStage>& sessionStage, const sp
                 session->scenePersistence_->SetHasSnapshot(true);
             }
         }
+        if (session->pcFoldScreenController_) {
+            session->pcFoldScreenController_->OnConnect();
+        }
         return ret;
     });
 }
@@ -291,7 +294,6 @@ WSError MainSession::OnSetWindowRectAutoSave(bool enabled, bool isSaveBySpecifie
             TLOGNE(WmsLogTag::WMS_MAIN, "session is null");
             return;
         }
-        session->GetSessionProperty()->SetIsSaveBySpecifiedFlag(isSaveBySpecifiedFlag);
         if (session->onSetWindowRectAutoSaveFunc_) {
             session->onSetWindowRectAutoSaveFunc_(enabled, isSaveBySpecifiedFlag);
             TLOGNI(WmsLogTag::WMS_MAIN, "%{public}s id %{public}d isSaveBySpecifiedFlag: %{public}d "
@@ -363,8 +365,12 @@ void MainSession::RegisterSessionLockStateChangeCallback(NotifySessionLockStateC
 
 void MainSession::NotifySubAndDialogFollowRectChange(const WSRect& rect, bool isGlobal, bool needFlush)
 {
-    std::lock_guard lock(registerNotifySurfaceBoundsChangeMutex_);
-    for (const auto& [sessionId, func] : notifySurfaceBoundsChangeFuncMap_) {
+    std::unordered_map<int32_t, NotifySurfaceBoundsChangeFunc> funcMap;
+    {
+        std::lock_guard lock(registerNotifySurfaceBoundsChangeMutex_);
+        funcMap = notifySurfaceBoundsChangeFuncMap_;
+    }
+    for (const auto& [sessionId, func] : funcMap) {
         auto subSession = GetSceneSessionById(sessionId);
         if (subSession && subSession->GetIsFollowParentLayout() && func) {
             func(rect, isGlobal, needFlush);

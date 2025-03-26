@@ -17,7 +17,9 @@
 
 #include <ability_context_impl.h>
 #include <context_impl.h>
+#include <int_wrapper.h>
 #include <transaction/rs_transaction.h>
+#include <want_params_wrapper.h>
 
 #include "accessibility_event_info.h"
 #include "display_info.h"
@@ -966,75 +968,6 @@ HWTEST_F(WindowExtensionSessionImplTest, ArkUIFrameworkSupport06, TestSize.Level
     window_->context_ = abilityContext;
     window_->isIgnoreSafeAreaNeedNotify_ = true;
     window_->ArkUIFrameworkSupport();
-}
-
-/**
- * @tc.name: NapiSetUIContent
- * @tc.desc: NapiSetUIContent Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowExtensionSessionImplTest, NapiSetUIContent, TestSize.Level1)
-{
-    ASSERT_NE(nullptr, window_);
-    std::string contentInfo = "NapiSetUIContent test";
-    napi_env env = napi_env();
-    napi_value storage = napi_value();
-    sptr<IRemoteObject> token;
-    window_->uiContent_ = nullptr;
-    window_->property_->SetUIExtensionUsage(UIExtensionUsage::UIEXTENSION_USAGE_END);
-    window_->focusState_ = std::nullopt;
-    window_->state_ = WindowState::STATE_HIDDEN;
-    ASSERT_EQ(WMError::WM_OK,
-        window_->NapiSetUIContent(contentInfo, env, storage, BackupAndRestoreType::NONE, token, nullptr));
-
-    auto uiContent = std::make_shared<Ace::UIContentMocker>();
-    ASSERT_NE(nullptr, uiContent);
-    window_->uiContent_ = uiContent;
-    window_->property_->SetUIExtensionUsage(UIExtensionUsage::CONSTRAINED_EMBEDDED);
-    window_->focusState_ = true;
-    window_->state_ = WindowState::STATE_SHOWN;
-    ASSERT_EQ(WMError::WM_OK,
-        window_->NapiSetUIContent(contentInfo, env, storage, BackupAndRestoreType::NONE, token, nullptr));
-    usleep(WAIT_SYNC_IN_NS);
-
-    window_->property_->SetUIExtensionUsage(UIExtensionUsage::MODAL);
-    ASSERT_EQ(WMError::WM_OK,
-        window_->NapiSetUIContent(contentInfo, env, storage, BackupAndRestoreType::NONE, token, nullptr));
-    window_->property_->SetUIExtensionUsage(UIExtensionUsage::EMBEDDED);
-    ASSERT_EQ(WMError::WM_OK,
-        window_->NapiSetUIContent(contentInfo, env, storage, BackupAndRestoreType::NONE, token, nullptr));
-    window_->property_->SetUIExtensionUsage(UIExtensionUsage::UIEXTENSION_USAGE_END);
-    ASSERT_EQ(WMError::WM_OK,
-        window_->NapiSetUIContent(contentInfo, env, storage, BackupAndRestoreType::NONE, token, nullptr));
-}
-
-/**
- * @tc.name: NapiSetUIContentByName
- * @tc.desc: NapiSetUIContentByName Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowExtensionSessionImplTest, NapiSetUIContentByName, TestSize.Level1)
-{
-    ASSERT_NE(nullptr, window_);
-    std::string contentInfo = "NapiSetUIContentByName test";
-    napi_env env = napi_env();
-    napi_value storage = napi_value();
-    sptr<IRemoteObject> token;
-    window_->uiContent_ = nullptr;
-    window_->property_->SetUIExtensionUsage(UIExtensionUsage::UIEXTENSION_USAGE_END);
-    window_->focusState_ = std::nullopt;
-    window_->state_ = WindowState::STATE_HIDDEN;
-    ASSERT_EQ(WMError::WM_OK,
-        window_->NapiSetUIContentByName(contentInfo, env, storage, BackupAndRestoreType::NONE, token, nullptr));
-
-    auto uiContent = std::make_shared<Ace::UIContentMocker>();
-    window_->uiContent_ = uiContent;
-    window_->property_->SetUIExtensionUsage(UIExtensionUsage::CONSTRAINED_EMBEDDED);
-    window_->focusState_ = true;
-    window_->state_ = WindowState::STATE_SHOWN;
-    ASSERT_EQ(WMError::WM_OK,
-        window_->NapiSetUIContentByName(contentInfo, env, storage, BackupAndRestoreType::NONE, token, nullptr));
-    usleep(WAIT_SYNC_IN_NS);
 }
 
 /**
@@ -2316,6 +2249,27 @@ HWTEST_F(WindowExtensionSessionImplTest, OnWaterfallModeChange, TestSize.Level1)
     std::optional<AAFwk::Want> reply = std::make_optional<AAFwk::Want>();
     want.SetParam(Extension::WATERFALL_MODE_FIELD, true);
     EXPECT_EQ(WMError::WM_OK, window_->OnWaterfallModeChange(std::move(want), reply));
+    EXPECT_TRUE(window_->IsWaterfallModeEnabled());
+}
+
+/**
+ * @tc.name: OnResyncExtensionConfig
+ * @tc.desc: OnResyncExtensionConfig Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, OnResyncExtensionConfig, Function | SmallTest | Level3)
+{
+    AAFwk::Want want;
+    AAFwk::WantParams configParam;
+    AAFwk::WantParams wantParam;
+    configParam.SetParam(Extension::CROSS_AXIS_FIELD,
+        AAFwk::Integer::Box(static_cast<int32_t>(CrossAxisState::STATE_CROSS)));
+    configParam.SetParam(Extension::WATERFALL_MODE_FIELD, AAFwk::Integer::Box(static_cast<int32_t>(1)));
+    wantParam.SetParam(Extension::UIEXTENSION_CONFIG_FIELD, AAFwk::WantParamWrapper::Box(configParam));
+    want.SetParams(wantParam);
+    std::optional<AAFwk::Want> reply = std::make_optional<AAFwk::Want>();
+    EXPECT_EQ(WMError::WM_OK, window_->OnResyncExtensionConfig(std::move(want), reply));
+    EXPECT_EQ(CrossAxisState::STATE_CROSS, window_->crossAxisState_.load());
     EXPECT_TRUE(window_->IsWaterfallModeEnabled());
 }
 }

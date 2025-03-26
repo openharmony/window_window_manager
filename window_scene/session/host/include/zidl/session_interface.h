@@ -205,7 +205,7 @@ public:
 
     // extension session
     virtual WSError TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want) { return WSError::WS_OK; }
-    virtual WSError TransferExtensionData(const AAFwk::WantParams& wantParams) { return WSError::WS_OK; }
+    virtual int32_t TransferExtensionData(const AAFwk::WantParams& wantParams) { return 0; }
     virtual WSError TransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
         int64_t uiExtensionIdLevel)
     {
@@ -338,6 +338,14 @@ public:
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError NotifyMainModalTypeChange(bool isModal) { return WSError::WS_OK; }
+
+    /**
+     * @brief Callback for setting whether the sub window supports simultaneous display on multiple screens
+     *        when the parent window is dragged to move or dragged to zoom.
+     * @param enabled Indicates the {@link bool}
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError NotifyFollowParentMultiScreenPolicy(bool enabled) { return WSError::WS_OK; }
 
     /**
      * @brief Callback for setting to automatically save the window rect.

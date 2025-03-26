@@ -574,14 +574,6 @@ void Session::UpdateSessionState(SessionState state)
         state == SessionState::STATE_BACKGROUND) {
         RemoveWindowDetectTask();
     }
-    /* The state will be set background first when destroy keyboard, there is no need to notify scb if the state is
-     * already background, which may cause performance deterioration.
-     */
-    if (GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT && state == state_ &&
-        state == SessionState::STATE_BACKGROUND) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "Keyboard is already hide");
-        return;
-    }
     state_ = state;
     SetMainSessionUIStateDirty(true);
     NotifySessionStateChange(state);
@@ -974,6 +966,12 @@ WSError Session::UpdateSizeChangeReason(SizeChangeReason reason)
     return WSError::WS_OK;
 }
 
+bool Session::IsDraggingReason(SizeChangeReason reason) const
+{
+    return reason == SizeChangeReason::DRAG || reason == SizeChangeReason::DRAG_MOVE ||
+           reason == SizeChangeReason::DRAG_START;
+}
+
 WSError Session::UpdateClientDisplayId(DisplayId displayId)
 {
     if (sessionStage_ == nullptr) {
@@ -1004,6 +1002,26 @@ DisplayId Session::TransformGlobalRectToRelativeRect(WSRect& rect) const
         rect.posY_ -= lowerScreenPosY;
     }
     return updatedDisplayId;
+}
+
+void Session::TransformRelativeRectToGlobalRect(WSRect& rect) const
+{
+    auto currScreenFoldStatus = PcFoldScreenManager::GetInstance().GetScreenFoldStatus();
+    auto needTransRect = currScreenFoldStatus != SuperFoldStatus::UNKNOWN &&
+        currScreenFoldStatus != SuperFoldStatus::FOLDED && currScreenFoldStatus != SuperFoldStatus::EXPANDED;
+    auto isSystemKeyboard = GetSessionProperty() != nullptr && GetSessionProperty()->IsSystemKeyboard();
+    if (isSystemKeyboard || !needTransRect) {
+        return;
+    }
+    const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
+        PcFoldScreenManager::GetInstance().GetDisplayRects();
+    int32_t lowerScreenPosY = defaultDisplayRect.height_ + foldCreaseRect.height_;
+    if (GetSessionGlobalRect().posY_ >= lowerScreenPosY) {
+        WSRect relativeRect = rect;
+        rect.posY_ += lowerScreenPosY;
+        TLOGI(WmsLogTag::WMS_LAYOUT, "Transform relativeRect: %{public}s to globalRect: %{public}s",
+            relativeRect.ToString().c_str(), rect.ToString().c_str());
+    }
 }
 
 void Session::UpdateClientRectPosYAndDisplayId(WSRect& rect)
@@ -1098,9 +1116,11 @@ WSError Session::UpdateRectWithLayoutInfo(const WSRect& rect, SizeChangeReason r
     if (sessionStage_ != nullptr) {
         int32_t rotateAnimationDuration = GetRotateAnimationDuration();
         SceneAnimationConfig config { .rsTransaction_ = rsTransaction, .animationDuration_ = rotateAnimationDuration };
-        WSRect updatedRect = rect;
-        UpdateClientRectPosYAndDisplayId(updatedRect);
-        sessionStage_->UpdateRect(updatedRect, reason, config, avoidAreas);
+        WSRect updateRect = rect;
+        UpdateClientRectPosYAndDisplayId(updateRect);
+        updateRect =
+            IsNeedConvertToRelativeRect(reason) ? ConvertGlobalRectToRelative(updateRect, GetDisplayId()) : updateRect;
+        sessionStage_->UpdateRect(updateRect, reason, config, avoidAreas);
         SetClientRect(rect);
         RectCheckProcess();
     } else {
@@ -3128,6 +3148,11 @@ WSRect Session::GetLayoutRect() const
     return layoutRect_;
 }
 
+void Session::SetOriginDisplayId(DisplayId displayId)
+{
+    originDisplayId_ = displayId;
+}
+
 void Session::SetSessionRequestRect(const WSRect& rect)
 {
     GetSessionProperty()->SetRequestRect(SessionHelper::TransferToRect(rect));
@@ -3524,6 +3549,22 @@ std::string Session::GetWindowDetectTaskName() const
     return "wms:WindowStateDetect" + std::to_string(persistentId_);
 }
 
+void Session::RecordWindowStateAttachExceptionEvent(bool isAttached)
+{
+    int32_t ret = HiSysEventWrite(
+        OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
+        "WINDOW_STATE_ERROR",
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
+        "TYPE", "WINDOW_STATE_ATTACH_EXCEPTION",
+        "PERSISTENT_ID", GetPersistentId(),
+        "WINDOW_NAME", GetWindowName().c_str(),
+        "ATTACH_STATE", isAttached,
+        "SESSION_STATE", static_cast<uint32_t>(GetSessionState()));
+    if (ret != 0) {
+        TLOGE(WmsLogTag::WMS_LIFE, "write HiSysEvent error, ret: %{public}d", ret);
+    }
+}
+
 void Session::CreateWindowStateDetectTask(bool isAttach, WindowMode windowMode)
 {
     if (!handler_) {
@@ -3547,6 +3588,7 @@ void Session::CreateWindowStateDetectTask(bool isAttach, WindowMode windowMode)
                     "attach:%{public}d, sessioniState:%{public}d, persistenId:%{public}d, bundleName:%{public}s",
                     isAttach, static_cast<uint32_t>(session->GetSessionState()),
                     session->GetPersistentId(), session->GetSessionInfo().bundleName_.c_str());
+                session->RecordWindowStateAttachExceptionEvent(isAttach);
             }
         }
         DetectTaskInfo detectTaskInfo;
@@ -4019,6 +4061,11 @@ DisplayId Session::GetClientDisplayId() const
 void Session::SetClientDisplayId(DisplayId displayid)
 {
     clientDisplayId_ = displayid;
+}
+
+void Session::SetDragStart(bool isDragStart)
+{
+    isDragStart_ = isDragStart;
 }
 
 void Session::SetBorderUnoccupied(bool borderUnoccupied)

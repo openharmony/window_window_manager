@@ -749,6 +749,221 @@ HWTEST_F(SceneSessionManagerTest11, IsLastPiPWindowVisible, Function | SmallTest
     auto res = ssm_->IsLastPiPWindowVisible(surfaceId, lastVisibilityState);
     ASSERT_EQ(res, false);
 }
+
+/**
+ * @tc.name: GetIconFromDesk
+ * @tc.desc: GetIconFromDesk
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, GetIconFromDesk, Function | SmallTest | Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo sessionInfo;
+    sessionInfo.abilityName_ = BUNDLE_NAME;
+    sessionInfo.bundleName_ = BUNDLE_NAME;
+    std::string startupPagePath = "test";
+    std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
+    sessionInfo.want = want;
+    ASSERT_EQ(false, ssm_->GetIconFromDesk(sessionInfo, startupPagePath));
+}
+
+/**
+ * @tc.name: GetStartingWindowInfoFromCache
+ * @tc.desc: GetStartingWindowInfoFromCache
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, GetStartingWindowInfoFromCache, Function | SmallTest | Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo sessionInfo;
+    sessionInfo.moduleName_ = "test";
+    sessionInfo.abilityName_ = BUNDLE_NAME;
+    sessionInfo.bundleName_ = BUNDLE_NAME;
+    StartingWindowInfo startingWindowInfo;
+    bool res = ssm_->GetStartingWindowInfoFromCache(sessionInfo, startingWindowInfo);
+    ASSERT_EQ(res, false);
+
+    std::map<std::string, StartingWindowInfo> startingWindowInfoMap{{ BUNDLE_NAME, startingWindowInfo }};
+    ssm_->startingWindowMap_.insert({ BUNDLE_NAME, startingWindowInfoMap });
+    res = ssm_->GetStartingWindowInfoFromCache(sessionInfo, startingWindowInfo);
+    ASSERT_EQ(res, false);
+    ssm_->startingWindowMap_.clear();
+}
+
+/**
+ * @tc.name: GetStartingWindowInfoFromCache02
+ * @tc.desc: GetStartingWindowInfoFromCache
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, GetStartingWindowInfoFromCache02, Function | SmallTest | Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo sessionInfo;
+    sessionInfo.moduleName_ = "te";
+    sessionInfo.abilityName_ = "st";
+    sessionInfo.bundleName_ = "test";
+    StartingWindowInfo startingWindowInfo;
+
+    bool res = ssm_->GetStartingWindowInfoFromCache(sessionInfo, startingWindowInfo);
+    ASSERT_EQ(res, false);
+
+    std::map<std::string, StartingWindowInfo> startingWindowInfoMap{{ "test", startingWindowInfo }};
+    ssm_->startingWindowMap_.insert({ "test", startingWindowInfoMap });
+
+    res = ssm_->GetStartingWindowInfoFromCache(sessionInfo, startingWindowInfo);
+    ASSERT_EQ(res, true);
+    ssm_->startingWindowMap_.clear();
+}
+
+/**
+ * @tc.name: GetTopNearestBlockingFocusSession
+ * @tc.desc: GetTopNearestBlockingFocusSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, GetTopNearestBlockingFocusSession, Function | SmallTest | Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->sceneSessionMap_.clear();
+    DisplayId displayId = DEFAULT_DISPLAY_ID;
+    uint32_t zOrder = 0;
+    bool includingAppSession = true;
+    ASSERT_EQ(nullptr, ssm_->GetTopNearestBlockingFocusSession(displayId, zOrder, includingAppSession));
+
+    SessionInfo info;
+    info.bundleName_ = BUNDLE_NAME;
+    info.isSystem_ = true;
+    sptr<SceneSession::SpecificSessionCallback> specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCb);
+    sptr<SceneSession> sceneSession02 = sptr<SceneSession>::MakeSptr(info, specificCb);
+    sceneSession->GetSessionProperty()->SetDisplayId(DEFAULT_DISPLAY_ID);
+    sceneSession->zOrder_ = 10;
+    sceneSession->GetSessionProperty()->SetTopmost(true);
+    sceneSession->GetSessionProperty()->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+    sceneSession->GetSessionProperty()->SetParentPersistentId(2);
+    sceneSession->SetScbCoreEnabled(true);
+    sceneSession->isVisible_ = true;
+    sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    sceneSession->blockingFocus_ = true;
+    ssm_->sceneSessionMap_.insert({ 1, sceneSession });
+    ssm_->sceneSessionMap_.insert({ 2, sceneSession02 });
+    auto res = ssm_->GetTopNearestBlockingFocusSession(displayId, zOrder, includingAppSession);
+    ASSERT_EQ(res, sceneSession);
+    ssm_->sceneSessionMap_.clear();
+}
+
+/**
+ * @tc.name: GetTopNearestBlockingFocusSession_branch02
+ * @tc.desc: GetTopNearestBlockingFocusSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, GetTopNearestBlockingFocusSession_branch02, Function | SmallTest | Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->sceneSessionMap_.clear();
+    DisplayId displayId = DEFAULT_DISPLAY_ID;
+    uint32_t zOrder = 0;
+    bool includingAppSession = true;
+    ASSERT_EQ(nullptr, ssm_->GetTopNearestBlockingFocusSession(displayId, zOrder, includingAppSession));
+
+    SessionInfo info;
+    info.bundleName_ = BUNDLE_NAME;
+    info.isSystem_ = true;
+    sptr<SceneSession::SpecificSessionCallback> specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCb);
+    sceneSession->GetSessionProperty()->SetDisplayId(100);
+    ssm_->windowFocusController_->virtualScreenDisplayIdSet_.insert(20);
+    ssm_->sceneSessionMap_.insert({ 1, sceneSession });
+    ASSERT_EQ(nullptr, ssm_->GetTopNearestBlockingFocusSession(displayId, zOrder, includingAppSession));
+    ssm_->sceneSessionMap_.clear();
+}
+
+/**
+ * @tc.name: GetTopNearestBlockingFocusSession_branch03
+ * @tc.desc: GetTopNearestBlockingFocusSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, GetTopNearestBlockingFocusSession_branch03, Function | SmallTest | Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->sceneSessionMap_.clear();
+    DisplayId displayId = DEFAULT_DISPLAY_ID;
+    uint32_t zOrder = 100;
+    bool includingAppSession = true;
+    ASSERT_EQ(nullptr, ssm_->GetTopNearestBlockingFocusSession(displayId, zOrder, includingAppSession));
+
+    SessionInfo info;
+    info.bundleName_ = BUNDLE_NAME;
+    info.isSystem_ = true;
+    sptr<SceneSession::SpecificSessionCallback> specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCb);
+    sceneSession->GetSessionProperty()->SetDisplayId(DEFAULT_DISPLAY_ID);
+    sceneSession->zOrder_ = 10;
+    ssm_->sceneSessionMap_.insert({ 1, sceneSession });
+    ASSERT_EQ(nullptr, ssm_->GetTopNearestBlockingFocusSession(displayId, zOrder, includingAppSession));
+    ssm_->sceneSessionMap_.clear();
+}
+
+/**
+ * @tc.name: GetTopNearestBlockingFocusSession_branch04
+ * @tc.desc: GetTopNearestBlockingFocusSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, GetTopNearestBlockingFocusSession_branch04, Function | SmallTest | Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->sceneSessionMap_.clear();
+    DisplayId displayId = DEFAULT_DISPLAY_ID;
+    uint32_t zOrder = 0;
+    bool includingAppSession = true;
+    ASSERT_EQ(nullptr, ssm_->GetTopNearestBlockingFocusSession(displayId, zOrder, includingAppSession));
+
+    SessionInfo info;
+    info.bundleName_ = BUNDLE_NAME;
+    info.isSystem_ = true;
+    sptr<SceneSession::SpecificSessionCallback> specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCb);
+    sceneSession->GetSessionProperty()->SetDisplayId(DEFAULT_DISPLAY_ID);
+    sceneSession->GetSessionProperty()->SetTopmost(true);
+    sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->zOrder_ = 10;
+    ssm_->sceneSessionMap_.insert({ 1, sceneSession });
+    ASSERT_EQ(nullptr, ssm_->GetTopNearestBlockingFocusSession(displayId, zOrder, includingAppSession));
+    ssm_->sceneSessionMap_.clear();
+}
+
+/**
+ * @tc.name: GetTopNearestBlockingFocusSession_branch05
+ * @tc.desc: GetTopNearestBlockingFocusSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, GetTopNearestBlockingFocusSession_branch05, Function | SmallTest | Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->sceneSessionMap_.clear();
+    DisplayId displayId = DEFAULT_DISPLAY_ID;
+    uint32_t zOrder = 0;
+    bool includingAppSession = true;
+    ASSERT_EQ(nullptr, ssm_->GetTopNearestBlockingFocusSession(displayId, zOrder, includingAppSession));
+
+    SessionInfo info;
+    info.bundleName_ = BUNDLE_NAME;
+    info.isSystem_ = true;
+    sptr<SceneSession::SpecificSessionCallback> specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCb);
+    sptr<SceneSession> sceneSession02 = sptr<SceneSession>::MakeSptr(info, specificCb);
+    sceneSession->GetSessionProperty()->SetDisplayId(DEFAULT_DISPLAY_ID);
+    sceneSession->GetSessionProperty()->SetTopmost(false);
+    sceneSession->zOrder_ = 10;
+    sceneSession->GetSessionProperty()->SetWindowType(WindowType::APP_WINDOW_BASE);
+    sceneSession->GetSessionProperty()->SetParentPersistentId(2);
+    sceneSession02->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession02->GetSessionProperty()->SetTopmost(true);
+    ssm_->sceneSessionMap_.insert({ 1, sceneSession });
+    ssm_->sceneSessionMap_.insert({ 2, sceneSession02 });
+
+    ASSERT_EQ(nullptr, ssm_->GetTopNearestBlockingFocusSession(displayId, zOrder, includingAppSession));
+    ssm_->sceneSessionMap_.clear();
+}
 }  // namespace
 }
 }

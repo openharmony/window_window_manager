@@ -1489,6 +1489,41 @@ HWTEST_F(MoveDragControllerTest, SetCurrentScreenProperty, Function | SmallTest 
     moveDragController->SetCurrentScreenProperty(0);
     ASSERT_EQ(moveDragController->screenSizeProperty_.currentDisplayStartX, 0);
 }
+
+/**
+ * @tc.name: UpdateSubWindowGravityWhenFollow
+ * @tc.desc: UpdateSubWindowGravityWhenFollow
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, UpdateSubWindowGravityWhenFollow01, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    sptr<Session> followSession = sptr<Session>::MakeSptr(info);
+
+    sptr<MoveDragController> followController =
+        sptr<MoveDragController>::MakeSptr(session_->GetPersistentId(), session_->GetWindowType());
+    struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig,
+        RSSurfaceNodeType::DEFAULT);
+
+    followController->type_ = AreaType::UNDEFINED;
+    moveDragController->UpdateSubWindowGravityWhenFollow(nullptr, nullptr);
+    auto gravityIter = surfaceNode->propertyModifiers_.find(RSModifierType::FRAME_GRAVITY);
+    ASSERT_EQ(gravityIter, surfaceNode->propertyModifiers_.end());
+
+    moveDragController->UpdateSubWindowGravityWhenFollow(nullptr, surfaceNode);
+    gravityIter = surfaceNode->propertyModifiers_.find(RSModifierType::FRAME_GRAVITY);
+    ASSERT_EQ(gravityIter, surfaceNode->propertyModifiers_.end());
+
+    moveDragController->UpdateSubWindowGravityWhenFollow(followController, surfaceNode);
+    gravityIter = surfaceNode->propertyModifiers_.find(RSModifierType::FRAME_GRAVITY);
+    ASSERT_EQ(gravityIter, surfaceNode->propertyModifiers_.end());
+
+    followController->type_ = AreaType::TOP;
+    moveDragController->UpdateSubWindowGravityWhenFollow(followController, surfaceNode);
+    gravityIter = surfaceNode->propertyModifiers_.find(RSModifierType::FRAME_GRAVITY);
+    ASSERT_NE(gravityIter, surfaceNode->propertyModifiers_.end());
+}
 }
 }
 }

@@ -282,7 +282,7 @@ public:
     WSError NotifyCloseExistPipWindow() override;
     WSError SetPipActionEvent(const std::string& action, int32_t status) override;
     WSError SetPiPControlEvent(WsPiPControlType controlType, WsPiPControlStatus status) override;
-    WSError NotifyPipWindowSizeChange(uint32_t width, uint32_t height, double scale) override;
+    WSError NotifyPipWindowSizeChange(double width, double height, double scale) override;
     void UpdatePiPRect(const Rect& rect, WindowSizeChangeReason reason) override;
     void UpdatePiPControlStatus(PiPControlType controlType, PiPControlStatus status) override;
     void SetAutoStartPiP(bool isAutoStart, uint32_t priority, uint32_t width, uint32_t height) override;
@@ -336,7 +336,10 @@ public:
     virtual WMError GetCallingWindowRect(Rect& rect) const override;
     virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
     WMError SetContinueState(int32_t continueState) override;
-    virtual WMError CheckWindowRect(uint32_t& width, uint32_t& height) { return WMError::WM_ERROR_INVALID_PARAM; }
+    virtual WMError CheckAndModifyWindowRect(uint32_t& width, uint32_t& height)
+    {
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
 
     /*
      * Multi Window
@@ -422,6 +425,7 @@ public:
     WMError UnregisterWindowRotationChangeListener(const sptr<IWindowRotationChangeListener>& listener) override;
     RotationChangeResult NotifyRotationChange(const RotationChangeInfo& rotationChangeInfo) override;
     WMError CheckMultiWindowRect(uint32_t& width, uint32_t& height);
+    WSError SetCurrentRotation(int32_t currentRotation) override;
 
 protected:
     WMError Connect();
@@ -573,6 +577,7 @@ protected:
     void FlushLayoutSize(int32_t width, int32_t height) override;
     sptr<FutureCallback> layoutCallback_ = nullptr;
     sptr<FutureCallback> getTargetInfoCallback_ = nullptr;
+    sptr<FutureCallback> getRotationResultFuture_ = nullptr;
     void UpdateVirtualPixelRatio(const sptr<Display>& display);
     WMError GetVirtualPixelRatio(float& vpr);
     mutable std::recursive_mutex transformMutex_;
@@ -860,6 +865,10 @@ private:
      * Window Rotation
      */
     void NotifyClientOrientationChange();
+    void NotifyRotationChangeResult(RotationChangeResult rotationChangeResult) override;
+    void NotifyRotationChangeResultInner(
+            const std::vector<sptr<IWindowRotationChangeListener>>& windowRotationChangeListener,
+            const RotationChangeInfo& rotationChangeInfo);
 
     /*
      * keyboard

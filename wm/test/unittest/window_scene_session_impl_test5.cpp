@@ -1092,6 +1092,63 @@ HWTEST_F(WindowSceneSessionImplTest5, IsFullScreenEnable, TestSize.Level1)
     window->property_->SetDragEnabled(false);
     ASSERT_EQ(window->IsFullScreenEnable(), true);
 }
+
+/**
+ * @tc.name: SetFollowParentWindowLayoutEnabled
+ * @tc.desc: SetFollowParentWindowLayoutEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, SetFollowParentWindowLayoutEnabled01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetFollowParentWindowLayoutEnabled01");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    auto property = window->GetProperty();
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    WMError ret = window->SetFollowParentWindowLayoutEnabled(true);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
+
+    SessionInfo sessionInfo;
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    property->persistentId_ = 100;
+    window->state_ = WindowState::STATE_CREATED;
+    ret = window->SetFollowParentWindowLayoutEnabled(true);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_OPERATION);
+
+    property->subWindowLevel_ = 100;
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    ret = window->SetFollowParentWindowLayoutEnabled(true);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_OPERATION);
+    
+    property->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    ret = window->SetFollowParentWindowLayoutEnabled(true);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_OPERATION);
+
+    property->subWindowLevel_ = 1;
+    ret = window->SetFollowParentWindowLayoutEnabled(true);
+    ASSERT_EQ(ret, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: TransferLifeCycleEventToString
+ * @tc.desc: TransferLifeCycleEventToString
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, TransferLifeCycleEventToString, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("TransferLifeCycleEventToString");
+    option->SetDisplayId(0);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window, nullptr);
+    window->RecordLifeCycleExceptionEvent(LifeCycleEvent::CREATE_EVENT, WMError::WM_ERROR_REPEAT_OPERATION);
+    ASSERT_EQ(window->TransferLifeCycleEventToString(LifeCycleEvent::CREATE_EVENT), "CREATE");
+    ASSERT_EQ(window->TransferLifeCycleEventToString(LifeCycleEvent::SHOW_EVENT), "SHOW");
+    ASSERT_EQ(window->TransferLifeCycleEventToString(LifeCycleEvent::HIDE_EVENT), "HIDE");
+    ASSERT_EQ(window->TransferLifeCycleEventToString(LifeCycleEvent::DESTROY_EVENT), "DESTROY");
+}
 }
 } // namespace Rosen
 } // namespace OHOS

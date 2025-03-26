@@ -916,6 +916,19 @@ HWTEST_F(WindowAdapterTest, MinimizeByWindowId, TestSize.Level1)
     auto ret = windowAdapter.InitWMSProxy();
     ASSERT_EQ(ret, true);
 }
+
+/**
+ * @tc.name: SetForegroundWindowNum
+ * @tc.desc: WindowAdapter/SetForegroundWindowNum
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, SetForegroundWindowNum, Function | SmallTest | Level2)
+{
+    WindowAdapter windowAdapter;
+    int32_t windowNum = 1;
+    auto err = windowAdapter.SetForegroundWindowNum(windowNum);
+    ASSERT_EQ(err, WMError::WM_OK);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

@@ -44,6 +44,7 @@ public:
     DMError UnregisterScreenModeChangeManagerAgent();
     DMError RegisterAbnormalScreenConnectChangeListener(sptr<IAbnormalScreenConnectChangeListener> listener);
     DMError UnregisterAbnormalScreenConnectChangeListener(sptr<IAbnormalScreenConnectChangeListener> listener);
+    DMError GetPhysicalScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos);
     void OnRemoteDied();
 
 private:
@@ -283,6 +284,12 @@ DMError ScreenManagerLite::Impl::RegisterScreenModeChangeListener(sptr<IScreenMo
     if (regSucc == DMError::DM_OK) {
         screenModeChangeListeners_.insert(listener);
     }
+    std::vector<sptr<ScreenInfo>> screenInfos;
+    DMError ret = GetPhysicalScreenInfos(screenInfos);
+    if (ret == DMError::DM_OK) {
+        WLOGFI("RegisterScreenListener notify");
+        listener->NotifyScreenModeChange(screenInfos);
+    }
     return regSucc;
 }
 
@@ -292,9 +299,6 @@ DMError ScreenManagerLite::RegisterScreenModeChangeListener(sptr<IScreenModeChan
         WLOGFE("RegisterScreenListener listener is nullptr.");
         return DMError::DM_ERROR_NULLPTR;
     }
-    std::vector<sptr<ScreenInfo>> screenInfos;
-    GetPhysicalScreenInfos(screenInfos);
-    listener->NotifyScreenModeChange(screenInfos);
     return pImpl_->RegisterScreenModeChangeListener(listener);
 }
 
@@ -425,11 +429,12 @@ DMError ScreenManagerLite::GetPhysicalScreenIds(std::vector<uint64_t>& screenIds
     return DMError::DM_OK;
 }
 
-DMError ScreenManagerLite::GetPhysicalScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos)
+DMError ScreenManagerLite::Impl::GetPhysicalScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos)
 {
     std::vector<sptr<ScreenInfo>> allScreenInfos;
     DMError ret = SingletonContainer::Get<ScreenManagerAdapterLite>().GetAllScreenInfos(allScreenInfos);
     if (ret != DMError::DM_OK) {
+        WLOGFE("GetPhysicalScreenInfos failed");
         return ret;
     }
     for (const auto& screenInfo : allScreenInfos) {

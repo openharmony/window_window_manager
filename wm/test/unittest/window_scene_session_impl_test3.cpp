@@ -799,9 +799,9 @@ HWTEST_F(WindowSceneSessionImplTest3, Resize, TestSize.Level1)
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     auto ret = windowSceneSessionImpl->Resize(0, 0);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
     ret = windowSceneSessionImpl->Resize(100, 100);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
     windowSceneSessionImpl->property_->SetPersistentId(1);
     windowSceneSessionImpl->hostSession_ = session;
     windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;

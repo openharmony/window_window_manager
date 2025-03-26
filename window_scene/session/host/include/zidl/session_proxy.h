@@ -83,7 +83,7 @@ public:
      * UIExtension
      */
     WSError TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want) override;
-    WSError TransferExtensionData(const AAFwk::WantParams& wantParams) override;
+    int32_t TransferExtensionData(const AAFwk::WantParams& wantParams) override;
     WSError TransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
         int64_t uiExtensionIdLevel) override;
     void NotifySyncOn() override;
@@ -153,6 +153,7 @@ public:
     WSError StartMovingWithCoordinate(int32_t offsetX, int32_t offsetY,
         int32_t pointerPosX, int32_t pointerPosY) override;
     WSError OnContainerModalEvent(const std::string& eventName, const std::string& eventValue) override;
+    WSError NotifyFollowParentMultiScreenPolicy(bool enabled) override;
     WSError UpdateFlag(const std::string& flag) override;
 
     /*

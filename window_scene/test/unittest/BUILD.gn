@@ -137,7 +137,6 @@ ohos_unittest("ws_anomaly_detection_test") {
     "ability_runtime:mission_info",
     "c_utils:utils",
     "hilog:libhilog",
-    "relational_store:native_rdb",
   ]
 }
 
@@ -531,7 +530,6 @@ ohos_unittest("ws_scene_session_manager_lifecycle_test") {
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "hilog:libhilog",
-    "relational_store:native_rdb",
   ]
 }
 
@@ -554,7 +552,6 @@ ohos_unittest("ws_scene_session_manager_lifecycle_test2") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
-    "relational_store:native_rdb",
   ]
 }
 
@@ -634,7 +631,6 @@ ohos_unittest("ws_scene_session_manager_layout_test") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
-    "relational_store:native_rdb",
   ]
 }
 
@@ -657,7 +653,6 @@ ohos_unittest("ws_scene_session_manager_test") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
-    "relational_store:native_rdb",
   ]
 }
 
@@ -678,7 +673,6 @@ ohos_unittest("ws_scene_session_manager_test2") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
-    "relational_store:native_rdb",
   ]
 }
 
@@ -701,7 +695,6 @@ ohos_unittest("ws_scene_session_manager_test3") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
-    "relational_store:native_rdb",
   ]
 }
 
@@ -725,7 +718,6 @@ ohos_unittest("ws_scene_session_manager_test4") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
-    "relational_store:native_rdb",
   ]
 }
 
@@ -752,7 +744,6 @@ ohos_unittest("ws_scene_session_manager_test5") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
-    "relational_store:native_rdb",
   ]
 }
 
@@ -775,7 +766,6 @@ ohos_unittest("ws_scene_session_manager_test6") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
-    "relational_store:native_rdb",
   ]
 }
 
@@ -796,7 +786,6 @@ ohos_unittest("ws_scene_session_manager_test7") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
-    "relational_store:native_rdb",
   ]
 }
 
@@ -844,7 +833,6 @@ ohos_unittest("ws_scene_session_manager_test9") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
-    "relational_store:native_rdb",
   ]
 }
 
@@ -865,7 +853,6 @@ ohos_unittest("ws_scene_session_manager_test10") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
-    "relational_store:native_rdb",
   ]
 }
 
@@ -888,7 +875,6 @@ ohos_unittest("ws_scene_session_manager_test11") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
-    "relational_store:native_rdb",
   ]
 }
 
@@ -910,7 +896,6 @@ ohos_unittest("ws_scene_session_manager_test12") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
-    "relational_store:native_rdb",
   ]
 }
 
@@ -933,7 +918,6 @@ ohos_unittest("ws_ssmgr_specific_window_test") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
-    "relational_store:native_rdb",
   ]
 }
 
@@ -1102,7 +1086,6 @@ ohos_unittest("ws_scene_session_manager_supplement_test") {
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "hilog:libhilog",
-    "relational_store:native_rdb",
   ]
 }
 
@@ -1116,6 +1099,7 @@ ohos_unittest("ws_scene_session_test") {
     "scene_session_test3.cpp",
     "scene_session_test4.cpp",
     "scene_session_test5.cpp",
+    "scene_session_test6.cpp",
   ]
 
   cflags_cc = [ "-Wno-thread-safety" ]
@@ -1686,7 +1670,6 @@ ohos_unittest("ws_intention_event_manager_test") {
     "eventhandler:libeventhandler",
     "hilog:libhilog",
     "input:libmmi-client",
-    "relational_store:native_rdb",
   ]
 }
 
@@ -1830,6 +1813,7 @@ ohos_static_library("ws_unittest_common") {
     "${window_base_path}/window_scene/session_manager:session_manager",
     "${window_base_path}/window_scene/session_manager:session_manager_lite",
     "${window_base_path}/wm:libwm",
+    "${window_base_path}/wm:libwm_lite",
   ]
 
   public_deps = [

@@ -2833,6 +2833,19 @@ HWTEST_F(WindowTest, GetParentWindow, TestSize.Level1)
     ASSERT_EQ(parentWindow, nullptr);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
+
+/**
+ * @tc.name: SetFollowParentMultiScreenPolicy
+ * @tc.desc: SetFollowParentMultiScreenPolicy
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, SetFollowParentMultiScreenPolicy, Function | SmallTest | Level2)
+{
+    sptr<Window> window = sptr<Window>::MakeSptr();
+    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetFollowParentMultiScreenPolicy(true));
+    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetFollowParentMultiScreenPolicy(false));
+    EXPECT_EQ(WMError::WM_OK, window->Destroy());
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

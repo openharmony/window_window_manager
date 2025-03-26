@@ -402,6 +402,7 @@ HWTEST_F(SecondaryDisplayFoldPolicyTest, SetSecondaryDisplayModeChangeStatus01, 
  */
 HWTEST_F(SecondaryDisplayFoldPolicyTest, GetScreenSnapshotRect, Function | SmallTest | Level3)
 {
+    ONLY_FOR_SECONDARY_DISPLAY_FOLD
     std::recursive_mutex displayInfoMutex;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
     SecondaryDisplayFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
@@ -434,6 +435,7 @@ HWTEST_F(SecondaryDisplayFoldPolicyTest, GetScreenSnapshotRect, Function | Small
  */
 HWTEST_F(SecondaryDisplayFoldPolicyTest, SetMainScreenRegion, Function | SmallTest | Level3)
 {
+    ONLY_FOR_SECONDARY_DISPLAY_FOLD
     std::recursive_mutex displayInfoMutex;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
     SecondaryDisplayFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
@@ -446,7 +448,7 @@ HWTEST_F(SecondaryDisplayFoldPolicyTest, SetMainScreenRegion, Function | SmallTe
 
     policy.currentDisplayMode_ = FoldDisplayMode::MAIN;
     mainScreenRegion = {0, 0, 0, 0};
-    targetMainScreenRegion = {0, 0, 2232, 3184};
+    targetMainScreenRegion = {0, 0, 2232, 1008};
     policy.SetMainScreenRegion(mainScreenRegion);
     EXPECT_EQ(mainScreenRegion, targetMainScreenRegion);
 
