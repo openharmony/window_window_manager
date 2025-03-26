@@ -99,7 +99,7 @@ constexpr int32_t INVALID_USER_ID = -1;
 constexpr int32_t INVALID_SCB_PID = -1;
 constexpr int32_t BASE_USER_RANGE = 200000;
 static bool g_foldScreenFlag = system::GetParameter("const.window.foldscreen.type", "") != "";
-static const int32_t g_screenRotationOffSet = system::GetIntParameter<int32_t>("const.fold.screen_rotation.offset", 0);
+static const int32_t SCREEN_ROTATION_OFFSET = system::GetIntParameter<int32_t>("const.fold.screen_rotation.offset", 0);
 static const int32_t g_outerOnly = system::GetIntParameter<int32_t>("persist.display.outeronly", 0);
 static const int32_t ROTATION_90 = 1;
 static const int32_t ONLY_OUTER_SCREEN_VALUE = 1;
@@ -692,11 +692,11 @@ void ScreenSessionManager::SetScreenCorrection()
         if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
             auto ret = rsInterface_.SetScreenCorrection(SCREEN_ID_MAIN,
                 static_cast<ScreenRotation>(ROTATION_90));
-            oss << "main screenRotationOffSet: " << g_screenRotationOffSet << " ret value: " << ret;
+            oss << "main screenRotationOffSet: " << SCREEN_ROTATION_OFFSET << " ret value: " << ret;
         } else {
             auto ret = rsInterface_.SetScreenCorrection(SCREEN_ID_FULL,
-                static_cast<ScreenRotation>(g_screenRotationOffSet));
-            oss << "full screenRotationOffSet: " << g_screenRotationOffSet << " ret value: " << ret;
+                static_cast<ScreenRotation>(SCREEN_ROTATION_OFFSET));
+            oss << "full screenRotationOffSet: " << SCREEN_ROTATION_OFFSET << " ret value: " << ret;
         }
     } else {
         std::vector<std::string> phyOffsets = FoldScreenStateInternel::GetPhyRotationOffset();
@@ -2121,7 +2121,7 @@ void ScreenSessionManager::CreateScreenProperty(ScreenId screenId, ScreenPropert
     property.SetDefaultDeviceRotationOffset(defaultDeviceRotationOffset_);
 #ifdef FOLD_ABILITY_ENABLE
     if (foldScreenController_ != nullptr && screenId == 0
-        && (g_screenRotationOffSet == ROTATION_90 || g_screenRotationOffSet == ROTATION_270)) {
+        && (SCREEN_ROTATION_OFFSET == ROTATION_90 || SCREEN_ROTATION_OFFSET == ROTATION_270)) {
         screenBounds = RRect({ 0, 0, screenMode.GetScreenHeight(), screenMode.GetScreenWidth() }, 0.0f, 0.0f);
         property.SetBounds(screenBounds);
     }
@@ -7284,7 +7284,7 @@ void ScreenSessionManager::GetCurrentScreenPhyBounds(float& phyWidth, float& phy
             auto phyBounds = GetPhyScreenProperty(SCREEN_ID_FULL).GetPhyBounds();
             phyWidth = phyBounds.rect_.width_;
             phyHeight = phyBounds.rect_.height_;
-            if (g_screenRotationOffSet == ROTATION_90 || g_screenRotationOffSet == ROTATION_270) {
+            if (SCREEN_ROTATION_OFFSET == ROTATION_90 || SCREEN_ROTATION_OFFSET == ROTATION_270) {
                 std::swap(phyWidth, phyHeight);
             }
         } else {
