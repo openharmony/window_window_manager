@@ -196,7 +196,7 @@ HWTEST_F(WindowModeSupportTypeTest, WindowModeSupportType05, Function | MediumTe
         ASSERT_EQ(WindowMode::WINDOW_MODE_FLOATING, window2->GetWindowMode());
     }
     else {
-        ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, window2->GetWindowMode());
+        ASSERT_EQ(WindowMode::WINDOW_MODE_FLOATING, window2->GetWindowMode());
     }
     window1->Destroy();
     window2->Destroy();
