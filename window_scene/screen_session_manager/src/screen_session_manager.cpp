@@ -617,6 +617,35 @@ void ScreenSessionManager::RegisterScreenChangeListener()
     }
 }
 
+void ScreenSessionManager::ReportFoldDisplayTime(uint64_t screenId, int64_t rsFirstFrameTime)
+{
+#ifdef FOLD_ABILITY_ENABLE
+    TLOGI(WmsLogTag::DMS, "[UL_FOLD]ReportFoldDisplayTime rsFirstFrameTime: %{public}" PRId64
+        ", screenId: %{public}" PRIu64, rsFirstFrameTime, screenId);
+    if (foldScreenController_ != nullptr && foldScreenController_->GetIsFirstFrameCommitReported() == false) {
+        int64_t foldStartTime = foldScreenController_->GetStartTimePoint().time_since_epoch().count();
+        int32_t ret = HiSysEventWrite(
+            OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
+            "DISPLAY_MODE",
+            OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+            "FOLD_TIME", rsFirstFrameTime - foldStartTime);
+        foldScreenController_->SetIsFirstFrameCommitReported(true);
+        if (ret != 0) {
+            TLOGE(WmsLogTag::DMS, "[UL_FOLD]ReportFoldDisplayTime Write HiSysEvent error, ret: %{public}d", ret);
+        }
+    }
+#endif
+}
+
+void ScreenSessionManager::RegisterFirstFrameCommitCallback()
+{
+    TLOGI(WmsLogTag::DMS, "[UL_FOLD]RegisterFirstFrameCommitCallback start");
+    auto callback = [=](uint64_t screenId, int64_t rsFirstFrameTime) {
+        ReportFoldDisplayTime(screenId, rsFirstFrameTime);
+    };
+    RSInterfaces::GetInstance().RegisterFirstFrameCommitCallback(callback);
+}
+
 void ScreenSessionManager::RegisterRefreshRateChangeListener()
 {
     static bool isRegisterRefreshRateListener = false;
@@ -753,6 +782,7 @@ void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenE
     }
 
     if (foldScreenController_ != nullptr) {
+        RegisterFirstFrameCommitCallback();
         screenSession->SetFoldScreen(true);
     }
 #endif
