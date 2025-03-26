@@ -1667,6 +1667,22 @@ HWTEST_F(WindowManagerTest, MinimizeByWindowId, TestSize.Level1)
     WMError ret_2 = windowManager.MinimizeByWindowId(windowIds);
     ASSERT_EQ(WMError::WM_OK, ret_2);
 }
+
+/**
+ * @tc.name: SetForegroundWindowNum
+ * @tc.desc: Check SetForegroundWindowNum
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, SetForegroundWindowNum, Function | SmallTest | Level2)
+{
+    auto& windowManager = WindowManager::GetInstance();
+    int32_t windowNum = -1;
+    WMError ret_1 = windowManager.SetForegroundWindowNum(windowNum);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret_1);
+    windowNum = 1;
+    WMError ret_2 = windowManager.SetForegroundWindowNum(windowNum);
+    ASSERT_EQ(WMError::WM_OK, ret_2);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

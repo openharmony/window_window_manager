@@ -803,8 +803,7 @@ WMError WindowManager::UnregisterVisibilityStateChangedListener(const sptr<IWind
         ret = SingletonContainer::Get<WindowAdapter>().UnregisterWindowManagerAgent(
             WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_VISIBILITY,
             pImpl_->windowVisibilityStateListenerAgent_);
-        if (ret == WMError::WM_OK && pImpl_->windowVisibilityStateListenerAgent_ != nullptr) {
-            delete pImpl_->windowVisibilityStateListenerAgent_;
+        if (ret == WMError::WM_OK) {
             pImpl_->windowVisibilityStateListenerAgent_ = nullptr;
         }
     }
@@ -1666,6 +1665,15 @@ WMError WindowManager::MinimizeByWindowId(const std::vector<int32_t>& windowIds)
     WMError ret = SingletonContainer::Get<WindowAdapter>().MinimizeByWindowId(windowIds);
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_LIFE, "failed");
+    }
+    return ret;
+}
+
+WMError WindowManager::SetForegroundWindowNum(int32_t windowNum)
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().SetForegroundWindowNum(windowNum);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_PC, "failed");
     }
     return ret;
 }

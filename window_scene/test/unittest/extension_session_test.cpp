@@ -155,20 +155,20 @@ HWTEST_F(ExtensionSessionTest, TransferExtensionData, Function | SmallTest | Lev
     extensionSession_->RegisterExtensionSessionEventCallback(extSessionEventCallback_);
     AAFwk::WantParams wantParams;
     EXPECT_CALL(mockTransferExtensionDataFunc, Call(_)).Times(1);
-    WSError result = extensionSession_->TransferExtensionData(wantParams);
-    ASSERT_EQ(result, WSError::WS_OK);
+    int32_t result = extensionSession_->TransferExtensionData(wantParams);
+    ASSERT_EQ(result, ERR_NONE);
 
     extSessionEventCallback_->transferExtensionDataFunc_ = nullptr;
     extensionSession_->RegisterExtensionSessionEventCallback(extSessionEventCallback_);
     EXPECT_CALL(mockTransferExtensionDataFunc, Call(_)).Times(0);
     result = extensionSession_->TransferExtensionData(wantParams);
-    ASSERT_EQ(result, WSError::WS_OK);
+    ASSERT_EQ(result, ERR_NONE);
 
     extSessionEventCallback_ = nullptr;
     extensionSession_->RegisterExtensionSessionEventCallback(extSessionEventCallback_);
     EXPECT_CALL(mockTransferExtensionDataFunc, Call(_)).Times(0);
     result = extensionSession_->TransferExtensionData(wantParams);
-    ASSERT_EQ(result, WSError::WS_OK);
+    ASSERT_EQ(result, ERR_NONE);
 }
 
 /**

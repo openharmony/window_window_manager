@@ -353,7 +353,7 @@ public:
     static void UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
     void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
     void RegisterWindowInspectorCallback();
-    uint32_t GetApiCompatibleVersion() const override;
+    uint32_t GetApiTargetVersion() const;
 
     /*
      * Keyboard
@@ -546,6 +546,7 @@ private:
     bool escKeyEventTriggered_ = false;
     bool enableImmersiveMode_ = false;
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
+    std::atomic<float> virtualPixelRatio_ = 1.0f;
 
     std::string restoredRouterStack_; // It was set and get in same thread, which is js thread.
 };

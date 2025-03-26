@@ -143,7 +143,7 @@ public:
     WSError NotifyTargetRotationInfo(OrientationInfo& info) override;
     WSError UpdateDisplayId(uint64_t displayId) override;
     WMError AdjustKeyboardLayout(const KeyboardLayoutParams params) override;
-    WMError CheckWindowRect(uint32_t& width, uint32_t& height) override;
+    WMError CheckAndModifyWindowRect(uint32_t& width, uint32_t& height) override;
 
     /*
      * Sub Window
@@ -155,6 +155,7 @@ public:
      * PC Window
      */
     WMError SetWindowMask(const std::vector<std::vector<uint32_t>>& windowMask) override;
+    WMError SetFollowParentMultiScreenPolicy(bool enabled) override;
 
     /*
      * PC Window Layout
@@ -234,7 +235,6 @@ public:
     float GetCustomDensity() const override;
     WMError SetCustomDensity(float density) override;
     WMError GetWindowDensityInfo(WindowDensityInfo& densityInfo) override;
-    uint32_t GetApiCompatibleVersion() const override;
 
     /*
      * Window Decor
@@ -268,8 +268,6 @@ public:
     WMError SetFullScreen(bool status) override;
     WMError UpdateSystemBarProperties(const std::unordered_map<WindowType, SystemBarProperty>& systemBarProperties,
         const std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags) override;
-    void UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool systemBarEnableAnimation,
-        SystemBarProperty& property) override;
 
 protected:
     WMError CreateAndConnectSpecificSession();
@@ -446,6 +444,8 @@ private:
      */
     bool isColdStart_ = true;
     void NotifyFreeMultiWindowModeResume();
+    std::string TransferLifeCycleEventToString(LifeCycleEvent type) const;
+    void RecordLifeCycleExceptionEvent(LifeCycleEvent event, WMError erCode) const;
 };
 } // namespace Rosen
 } // namespace OHOS

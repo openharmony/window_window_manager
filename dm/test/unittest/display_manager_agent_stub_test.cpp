@@ -56,7 +56,7 @@ namespace {
      * @tc.desc: TRANS_ID_ON_DISPLAY_CONNECT
      * @tc.type: FUNC
      */
-    HWTEST_F(DisplayManagerAgentStubTest, OnRemoteRequest01, Function | SmallTest | Level1)
+    HWTEST_F(DisplayManagerAgentStubTest, OnRemoteRequest01, TestSize.Level1)
     {
         MessageParcel data;
         MessageParcel reply;
@@ -75,7 +75,7 @@ namespace {
      * @tc.desc: TRANS_ID_ON_DISPLAY_DISCONNECT
      * @tc.type: FUNC
      */
-    HWTEST_F(DisplayManagerAgentStubTest, OnRemoteRequest02, Function | SmallTest | Level1)
+    HWTEST_F(DisplayManagerAgentStubTest, OnRemoteRequest02, TestSize.Level1)
     {
         MessageParcel data;
         MessageParcel reply;
@@ -94,7 +94,7 @@ namespace {
      * @tc.desc: TRANS_ID_NOTIFY_DISPLAY_POWER_EVENT
      * @tc.type: FUNC
      */
-    HWTEST_F(DisplayManagerAgentStubTest, OnRemoteRequest03, Function | SmallTest | Level1)
+    HWTEST_F(DisplayManagerAgentStubTest, OnRemoteRequest03, TestSize.Level1)
     {
         MessageParcel data;
         MessageParcel reply;
@@ -113,7 +113,7 @@ namespace {
      * @tc.desc: TRANS_ID_NOTIFY_DISPLAY_STATE_CHANGED
      * @tc.type: FUNC
      */
-    HWTEST_F(DisplayManagerAgentStubTest, OnRemoteRequest04, Function | SmallTest | Level1)
+    HWTEST_F(DisplayManagerAgentStubTest, OnRemoteRequest04, TestSize.Level1)
     {
         MessageParcel data;
         MessageParcel reply;
@@ -132,7 +132,7 @@ namespace {
      * @tc.desc: TRANS_ID_ON_SCREEN_CONNECT
      * @tc.type: FUNC
      */
-    HWTEST_F(DisplayManagerAgentStubTest, OnRemoteRequest05, Function | SmallTest | Level1)
+    HWTEST_F(DisplayManagerAgentStubTest, OnRemoteRequest05, TestSize.Level1)
     {
         MessageParcel data;
         MessageParcel reply;
@@ -149,7 +149,7 @@ namespace {
      * @tc.desc: TRANS_ID_ON_SCREEN_DISCONNECT
      * @tc.type: FUNC
      */
-    HWTEST_F(DisplayManagerAgentStubTest, OnRemoteRequest06, Function | SmallTest | Level1)
+    HWTEST_F(DisplayManagerAgentStubTest, OnRemoteRequest06, TestSize.Level1)
     {
         MessageParcel data;
         MessageParcel reply;
@@ -168,7 +168,7 @@ namespace {
      * @tc.desc: TRANS_ID_ON_SCREEN_CHANGED
      * @tc.type: FUNC
      */
-    HWTEST_F(DisplayManagerAgentStubTest, OnRemoteRequest07, Function | SmallTest | Level1)
+    HWTEST_F(DisplayManagerAgentStubTest, OnRemoteRequest07, TestSize.Level1)
     {
         MessageParcel data;
         MessageParcel reply;
@@ -189,7 +189,7 @@ namespace {
      * @tc.desc: TRANS_ID_ON_SCREENGROUP_CHANGED
      * @tc.type: FUNC
      */
-    HWTEST_F(DisplayManagerAgentStubTest, OnRemoteRequest08, Function | SmallTest | Level1)
+    HWTEST_F(DisplayManagerAgentStubTest, OnRemoteRequest08, TestSize.Level1)
     {
         MessageParcel data;
         MessageParcel reply;
@@ -215,7 +215,7 @@ namespace {
      * @tc.desc: TRANS_ID_ON_DISPLAY_CHANGED
      * @tc.type: FUNC
      */
-    HWTEST_F(DisplayManagerAgentStubTest, OnRemoteRequest09, Function | SmallTest | Level1)
+    HWTEST_F(DisplayManagerAgentStubTest, OnRemoteRequest09, TestSize.Level1)
     {
         MessageParcel data;
         MessageParcel reply;
@@ -236,7 +236,7 @@ namespace {
      * @tc.desc: TRANS_ID_ON_SCREEN_SHOT
      * @tc.type: FUNC
      */
-    HWTEST_F(DisplayManagerAgentStubTest, OnRemoteRequest10, Function | SmallTest | Level1)
+    HWTEST_F(DisplayManagerAgentStubTest, OnRemoteRequest10, TestSize.Level1)
     {
         MessageParcel data;
         MessageParcel reply;
@@ -253,7 +253,7 @@ namespace {
      * @tc.desc: TRANS_ID_ON_PRIVATE_WINDOW
      * @tc.type: FUNC
      */
-    HWTEST_F(DisplayManagerAgentStubTest, OnRemoteRequest11, Function | SmallTest | Level1)
+    HWTEST_F(DisplayManagerAgentStubTest, OnRemoteRequest11, TestSize.Level1)
     {
         MessageParcel data;
         MessageParcel reply;
@@ -271,7 +271,7 @@ namespace {
      * @tc.desc: TRANS_ID_ON_PRIVATE_WINDOW_LIST
      * @tc.type: FUNC
      */
-    HWTEST_F(DisplayManagerAgentStubTest, OnRemoteRequest12, Function | SmallTest | Level1)
+    HWTEST_F(DisplayManagerAgentStubTest, OnRemoteRequest12, TestSize.Level1)
     {
         MessageParcel data;
         MessageParcel reply;
@@ -292,7 +292,7 @@ namespace {
      * @tc.desc: TRANS_ID_ON_FOLD_STATUS_CHANGED
      * @tc.type: FUNC
      */
-    HWTEST_F(DisplayManagerAgentStubTest, OnRemoteRequest13, Function | SmallTest | Level1)
+    HWTEST_F(DisplayManagerAgentStubTest, OnRemoteRequest13, TestSize.Level1)
     {
         MessageParcel data;
         MessageParcel reply;
@@ -311,7 +311,7 @@ namespace {
      * @tc.desc: TRANS_ID_ON_DISPLAY_CHANGE_INFO_CHANGED
      * @tc.type: FUNC
      */
-    HWTEST_F(DisplayManagerAgentStubTest, OnRemoteRequest14, Function | SmallTest | Level1)
+    HWTEST_F(DisplayManagerAgentStubTest, OnRemoteRequest14, TestSize.Level1)
     {
         MessageParcel data;
         MessageParcel reply;
@@ -331,7 +331,7 @@ namespace {
      * @tc.desc: TRANS_ID_ON_DISPLAY_MODE_CHANGED
      * @tc.type: FUNC
      */
-    HWTEST_F(DisplayManagerAgentStubTest, OnRemoteRequest15, Function | SmallTest | Level1)
+    HWTEST_F(DisplayManagerAgentStubTest, OnRemoteRequest15, TestSize.Level1)
     {
         MessageParcel data;
         MessageParcel reply;
@@ -350,7 +350,7 @@ namespace {
      * @tc.desc: TRANS_ID_ON_AVAILABLE_AREA_CHANGED
      * @tc.type: FUNC
      */
-    HWTEST_F(DisplayManagerAgentStubTest, OnRemoteRequest16, Function | SmallTest | Level1)
+    HWTEST_F(DisplayManagerAgentStubTest, OnRemoteRequest16, TestSize.Level1)
     {
         MessageParcel data;
         MessageParcel reply;
@@ -371,7 +371,7 @@ namespace {
      * @tc.desc: ProcPrivateWindowList test
      * @tc.type: FUNC
      */
-    HWTEST_F(DisplayManagerAgentStubTest, ProcPrivateWindowList, Function | SmallTest | Level1)
+    HWTEST_F(DisplayManagerAgentStubTest, ProcPrivateWindowList, TestSize.Level1)
     {
         MessageParcel data;
         MessageParcel reply;

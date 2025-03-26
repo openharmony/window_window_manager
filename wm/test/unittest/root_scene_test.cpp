@@ -85,6 +85,9 @@ HWTEST_F(RootSceneTest, UpdateViewportConfig01, TestSize.Level1)
     rootScene.uiContent_ = nullptr;
     rootScene.UpdateViewportConfig(rect, WindowSizeChangeReason::UNDEFINED);
 
+    rootScene.uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    rootScene.UpdateViewportConfig(rect, WindowSizeChangeReason::UNDEFINED);
+
     rect.width_ = MOCK_LEM_SUB_WIDTH;
     rect.height_ = MOCK_LEM_SUB_HEIGHT;
     rootScene.UpdateViewportConfig(rect, WindowSizeChangeReason::UNDEFINED);
@@ -100,8 +103,10 @@ HWTEST_F(RootSceneTest, UpdateConfiguration, TestSize.Level1)
 {
     RootScene rootScene;
     std::shared_ptr<AppExecFwk::Configuration> configuration = std::make_shared<AppExecFwk::Configuration>();
-
     rootScene.uiContent_ = nullptr;
+    rootScene.UpdateConfiguration(configuration);
+
+    rootScene.uiContent_ = std::make_unique<Ace::UIContentMocker>();
     rootScene.UpdateConfiguration(configuration);
     ASSERT_EQ(1, rootScene.GetWindowId());
 }
@@ -202,8 +207,12 @@ HWTEST_F(RootSceneTest, FlushFrameRate, TestSize.Level1)
 HWTEST_F(RootSceneTest, SetFrameLayoutFinishCallback, TestSize.Level1)
 {
     RootScene rootScene;
-
     rootScene.SetFrameLayoutFinishCallback(nullptr);
+    ASSERT_EQ(rootScene.frameLayoutFinishCb_, nullptr);
+
+    rootScene.uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    rootScene.SetFrameLayoutFinishCallback(nullptr);
+    ASSERT_EQ(rootScene.frameLayoutFinishCb_, nullptr);
     ASSERT_EQ(1, rootScene.GetWindowId());
 }
 

@@ -420,8 +420,8 @@ HWTEST_F(PerformReporterTest, ReportUIExtensionException, Function | SmallTest |
     WindowDFXHelperType exceptionType = WindowDFXHelperType::WINDOW_UIEXTENSION_TRANSFER_DATA_FAIL;
     int32_t pid = 1111;
     int32_t persistentId = 1111111111;
-    // WS_ERROR_IPC_FAILED = 1005
-    int32_t errorCode = 1005;
+    // ERR_TRANSACTION_FAILED = 1
+    int32_t errorCode = 1;
     std::ostringstream oss;
     oss << "TransferExtensionData from provider to host failed" << ",";
     oss << " provider bundleName: " << "testProviderBundleName1" << ",";

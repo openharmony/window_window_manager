@@ -45,6 +45,7 @@ const std::map<std::string, WindowSceneConfig::ValueType> WindowSceneConfig::con
     { "singleHandCompatibleMode",                     WindowSceneConfig::ValueType::MAP },
     { "mainWindowSizeLimits",                         WindowSceneConfig::ValueType::MAP },
     { "subWindowSizeLimits",                          WindowSceneConfig::ValueType::MAP },
+    { "dialogWindowSizeLimits",                       WindowSceneConfig::ValueType::MAP },
     { "windowAnimation",                              WindowSceneConfig::ValueType::MAP },
     { "keyboardAnimation",                            WindowSceneConfig::ValueType::MAP },
     { "animationIn",                                  WindowSceneConfig::ValueType::MAP },

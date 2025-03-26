@@ -90,6 +90,7 @@ private:
     int HandleNotifySubModalTypeChange(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyMainModalTypeChange(MessageParcel& data, MessageParcel& reply);
     int HandleSetSessionLabelAndIcon(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyFollowParentMultiScreenPolicy(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateRotationChangeListenerRegistered(MessageParcel& data, MessageParcel& reply);
 
     // extension extension
