@@ -173,7 +173,7 @@ public:
      */
     WSError UpdateRotationChangeRegistered(int32_t persistentId, bool isRegister) override;
 
-    /**
+    /*
      * window focus
      */
     WSError RequestFocus(bool isFocused) override;
