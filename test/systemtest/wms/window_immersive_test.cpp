@@ -255,7 +255,7 @@ namespace {
  * @tc.desc: Add one immersive window and hide
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImmersiveTest, ImmersiveTest01, Function | MediumTest | Level3)
+HWTEST_F(WindowImmersiveTest, ImmersiveTest01, TestSize.Level1)
 {
     fullScreenAppinfo_.name = "immer01";
     const sptr<Window>& window = Utils::CreateTestWindow(fullScreenAppinfo_);
@@ -272,7 +272,7 @@ HWTEST_F(WindowImmersiveTest, ImmersiveTest01, Function | MediumTest | Level3)
  * @tc.desc: Add two immersive window and switch
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImmersiveTest, ImmersiveTest02, Function | MediumTest | Level3)
+HWTEST_F(WindowImmersiveTest, ImmersiveTest02, TestSize.Level1)
 {
     const sptr<Window>& window1 = Utils::CreateTestWindow(fullScreenAppinfo_);
     ASSERT_NE(window1, nullptr);
@@ -300,7 +300,7 @@ HWTEST_F(WindowImmersiveTest, ImmersiveTest02, Function | MediumTest | Level3)
  * @tc.desc: Add one no immersive window
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImmersiveTest, ImmersiveTest03, Function | MediumTest | Level3)
+HWTEST_F(WindowImmersiveTest, ImmersiveTest03, TestSize.Level1)
 {
     const sptr<Window>& window1 = Utils::CreateTestWindow(fullScreenAppinfo_);
     ASSERT_NE(window1, nullptr);
@@ -327,7 +327,7 @@ HWTEST_F(WindowImmersiveTest, ImmersiveTest03, Function | MediumTest | Level3)
  * @tc.desc: SetLayoutFullScreen
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImmersiveTest, ImmersiveTest04, Function | MediumTest | Level3)
+HWTEST_F(WindowImmersiveTest, ImmersiveTest04, TestSize.Level1)
 {
     fullScreenAppinfo_.needAvoid = true; // no immersive setting
     const sptr<Window>& window1 = Utils::CreateTestWindow(fullScreenAppinfo_);
@@ -353,7 +353,7 @@ HWTEST_F(WindowImmersiveTest, ImmersiveTest04, Function | MediumTest | Level3)
  * @tc.desc: SetFullScreen
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImmersiveTest, ImmersiveTest05, Function | MediumTest | Level3)
+HWTEST_F(WindowImmersiveTest, ImmersiveTest05, TestSize.Level1)
 {
     fullScreenAppinfo_.needAvoid = true; // no immersive setting
     const sptr<Window>& window1 = Utils::CreateTestWindow(fullScreenAppinfo_);
@@ -377,7 +377,7 @@ HWTEST_F(WindowImmersiveTest, ImmersiveTest05, Function | MediumTest | Level3)
  * @tc.desc: set systembar props with wrong window type
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImmersiveTest, ImmersiveNegativeTest01, Function | MediumTest | Level3)
+HWTEST_F(WindowImmersiveTest, ImmersiveNegativeTest01, TestSize.Level1)
 {
     const SystemBarRegionTints TEST_PROPS_NEGATIVE = {
         { WindowType::WINDOW_TYPE_KEYGUARD, SYS_BAR_PROP_1, SYS_BAR_REGION_NULL },
@@ -399,7 +399,7 @@ HWTEST_F(WindowImmersiveTest, ImmersiveNegativeTest01, Function | MediumTest | L
  * @tc.desc: Test GetAvoidArea use unsupported Type(TYPE_CUTOUT).
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImmersiveTest, GetAvoidAreaByTypeTest01, Function | MediumTest | Level3)
+HWTEST_F(WindowImmersiveTest, GetAvoidAreaByTypeTest01, TestSize.Level1)
 {
     // Add full screenwindow for call GetAvoidArea, and push_back in activeWindows_
     const sptr<Window>& win = Utils::CreateTestWindow(fullScreenAppinfo_);
@@ -422,7 +422,7 @@ HWTEST_F(WindowImmersiveTest, GetAvoidAreaByTypeTest01, Function | MediumTest | 
  * @tc.desc: Add unexistavoid and remove this avoid. Test OnAvoidAreaChanged listener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImmersiveTest, DockWindowTest01, Function | MediumTest | Level3)
+HWTEST_F(WindowImmersiveTest, DockWindowTest01, TestSize.Level1)
 {
     const sptr<Window>& dockWindow = Utils::CreateDockWindow();
     if (dockWindow == nullptr) {

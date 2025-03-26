@@ -96,7 +96,7 @@ template <typename TListener, typename MockListener> std::vector<sptr<TListener>
  * @tc.desc: GetTitleButtonVisible
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, GetTitleButtonVisible, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, GetTitleButtonVisible, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("GetTitleButtonVisible");
     ASSERT_NE(window, nullptr);
@@ -135,7 +135,7 @@ HWTEST_F(WindowSessionImplTest2, GetTitleButtonVisible, Function | SmallTest | L
  * @tc.desc: GetSystemSessionConfig
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, GetSystemSessionConfig, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, GetSystemSessionConfig, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("GetSystemSessionConfig");
     ASSERT_NE(window, nullptr);
@@ -148,7 +148,7 @@ HWTEST_F(WindowSessionImplTest2, GetSystemSessionConfig, Function | SmallTest | 
  * @tc.desc: GetColorSpaceFromSurfaceGamut
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, GetColorSpaceFromSurfaceGamut, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, GetColorSpaceFromSurfaceGamut, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("GetColorSpaceFromSurfaceGamut");
     ASSERT_NE(window, nullptr);
@@ -166,7 +166,7 @@ HWTEST_F(WindowSessionImplTest2, GetColorSpaceFromSurfaceGamut, Function | Small
  * @tc.desc: GetSurfaceGamutFromColorSpace
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, GetSurfaceGamutFromColorSpace, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, GetSurfaceGamutFromColorSpace, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("GetSurfaceGamutFromColorSpace");
     ASSERT_NE(window, nullptr);
@@ -184,7 +184,7 @@ HWTEST_F(WindowSessionImplTest2, GetSurfaceGamutFromColorSpace, Function | Small
  * @tc.desc: Create
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, Create, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, Create, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("Create");
     ASSERT_NE(window, nullptr);
@@ -199,7 +199,7 @@ HWTEST_F(WindowSessionImplTest2, Create, Function | SmallTest | Level2)
  * @tc.desc: Destroy
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, Destroy, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, Destroy, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("Destroy");
     ASSERT_NE(window, nullptr);
@@ -245,7 +245,7 @@ HWTEST_F(WindowSessionImplTest2, Destroy, Function | SmallTest | Level2)
  * @tc.desc: GetWindowState
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, GetWindowState, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, GetWindowState, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("GetWindowState");
     ASSERT_NE(window, nullptr);
@@ -259,7 +259,7 @@ HWTEST_F(WindowSessionImplTest2, GetWindowState, Function | SmallTest | Level2)
  * @tc.desc: RecoverSessionListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, RecoverSessionListener, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, RecoverSessionListener, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("RecoverSessionListener");
     ASSERT_NE(window, nullptr);
@@ -294,7 +294,7 @@ HWTEST_F(WindowSessionImplTest2, RecoverSessionListener, Function | SmallTest | 
  * @tc.desc: NotifyUIContentFocusStatus
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, NotifyUIContentFocusStatus, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, NotifyUIContentFocusStatus, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("NotifyUIContentFocusStatus");
     ASSERT_NE(window, nullptr);
@@ -314,7 +314,7 @@ HWTEST_F(WindowSessionImplTest2, NotifyUIContentFocusStatus, Function | SmallTes
  * @tc.desc: NotifyAfterFocused
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, NotifyAfterFocused, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, NotifyAfterFocused, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("NotifyAfterFocused");
     ASSERT_NE(window, nullptr);
@@ -333,7 +333,7 @@ HWTEST_F(WindowSessionImplTest2, NotifyAfterFocused, Function | SmallTest | Leve
  * @tc.desc: NotifyForegroundFailed
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, NotifyForegroundFailed, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, NotifyForegroundFailed, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("NotifyForegroundFailed");
     ASSERT_NE(window, nullptr);
@@ -346,7 +346,7 @@ HWTEST_F(WindowSessionImplTest2, NotifyForegroundFailed, Function | SmallTest | 
  * @tc.desc: NotifyTransferComponentDataSync
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, NotifyTransferComponentDataSync, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, NotifyTransferComponentDataSync, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("NotifyTransferComponentDataSync");
     ASSERT_NE(window, nullptr);
@@ -361,7 +361,7 @@ HWTEST_F(WindowSessionImplTest2, NotifyTransferComponentDataSync, Function | Sma
  * @tc.desc: UpdateAvoidArea
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, UpdateAvoidArea, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, UpdateAvoidArea, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("UpdateAvoidArea");
     ASSERT_NE(window, nullptr);
@@ -380,7 +380,7 @@ HWTEST_F(WindowSessionImplTest2, UpdateAvoidArea, Function | SmallTest | Level2)
  * @tc.desc: DispatchKeyEventCallback
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, DispatchKeyEventCallback, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, DispatchKeyEventCallback, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("DispatchKeyEventCallback");
     ASSERT_NE(window, nullptr);
@@ -415,7 +415,7 @@ HWTEST_F(WindowSessionImplTest2, DispatchKeyEventCallback, Function | SmallTest 
  * @tc.desc: HandleBackEvent
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, HandleBackEvent01, Function | SmallTest | Level3)
+HWTEST_F(WindowSessionImplTest2, HandleBackEvent01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("HandleBackEvent01");
@@ -430,7 +430,7 @@ HWTEST_F(WindowSessionImplTest2, HandleBackEvent01, Function | SmallTest | Level
  * @tc.desc: IsKeyboardEvent
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, IsKeyboardEvent, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, IsKeyboardEvent, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("IsKeyboardEvent");
     ASSERT_NE(window, nullptr);
@@ -456,7 +456,7 @@ HWTEST_F(WindowSessionImplTest2, IsKeyboardEvent, Function | SmallTest | Level2)
  * @tc.desc: GetVSyncPeriod
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, GetVSyncPeriod, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, GetVSyncPeriod, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("GetVSyncPeriod");
     ASSERT_NE(window, nullptr);
@@ -478,7 +478,7 @@ HWTEST_F(WindowSessionImplTest2, GetVSyncPeriod, Function | SmallTest | Level2)
  * @tc.desc: FlushFrameRate
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, FlushFrameRate, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, FlushFrameRate, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("FlushFrameRate");
     ASSERT_NE(window, nullptr);
@@ -500,7 +500,7 @@ HWTEST_F(WindowSessionImplTest2, FlushFrameRate, Function | SmallTest | Level2)
  * @tc.desc: FindWindowById
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, FindWindowById, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, FindWindowById, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("FindWindowById");
     ASSERT_NE(window, nullptr);
@@ -521,7 +521,7 @@ HWTEST_F(WindowSessionImplTest2, FindWindowById, Function | SmallTest | Level2)
  * @tc.desc: SetLayoutFullScreenByApiVersion
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, SetLayoutFullScreenByApiVersion, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, SetLayoutFullScreenByApiVersion, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("SetLayoutFullScreenByApiVersion");
     ASSERT_NE(window, nullptr);
@@ -535,7 +535,7 @@ HWTEST_F(WindowSessionImplTest2, SetLayoutFullScreenByApiVersion, Function | Sma
  * @tc.desc: SetSystemBarProperty
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, SetSystemBarProperty, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, SetSystemBarProperty, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("SetSystemBarProperty");
     ASSERT_NE(window, nullptr);
@@ -550,7 +550,7 @@ HWTEST_F(WindowSessionImplTest2, SetSystemBarProperty, Function | SmallTest | Le
  * @tc.desc: SetSpecificBarProperty
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, SetSpecificBarProperty, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, SetSpecificBarProperty, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("SetSpecificBarProperty");
     ASSERT_NE(window, nullptr);
@@ -565,7 +565,7 @@ HWTEST_F(WindowSessionImplTest2, SetSpecificBarProperty, Function | SmallTest | 
  * @tc.desc: NotifyOccupiedAreaChangeInfo
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, NotifyOccupiedAreaChangeInfo, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, NotifyOccupiedAreaChangeInfo, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("NotifyOccupiedAreaChangeInfo");
     ASSERT_NE(window, nullptr);
@@ -609,7 +609,7 @@ HWTEST_F(WindowSessionImplTest2, NotifyOccupiedAreaChangeInfo, Function | SmallT
  * @tc.desc: NotifyOccupiedAreaChangeInfoInner
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, NotifyOccupiedAreaChangeInfoInner, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, NotifyOccupiedAreaChangeInfoInner, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("NotifyOccupiedAreaChangeInfoInner");
     ASSERT_NE(window, nullptr);
@@ -647,7 +647,7 @@ HWTEST_F(WindowSessionImplTest2, NotifyOccupiedAreaChangeInfoInner, Function | S
  * @tc.desc: NotifyWindowStatusChange
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, NotifyWindowStatusChange, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, NotifyWindowStatusChange, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("NotifyWindowStatusChange");
     ASSERT_NE(window, nullptr);
@@ -682,7 +682,7 @@ HWTEST_F(WindowSessionImplTest2, NotifyWindowStatusChange, Function | SmallTest 
  * @tc.desc: UpdatePiPRect
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, UpdatePiPRect, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, UpdatePiPRect, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("UpdatePiPRect");
     ASSERT_NE(window, nullptr);
@@ -702,7 +702,7 @@ HWTEST_F(WindowSessionImplTest2, UpdatePiPRect, Function | SmallTest | Level2)
  * @tc.desc: NotifyTransformChange
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, NotifyTransformChange, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, NotifyTransformChange, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("NotifyTransformChange");
     ASSERT_NE(window, nullptr);
@@ -720,7 +720,7 @@ HWTEST_F(WindowSessionImplTest2, NotifyTransformChange, Function | SmallTest | L
  * @tc.desc: SubmitNoInteractionMonitorTask
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, SubmitNoInteractionMonitorTask, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, SubmitNoInteractionMonitorTask, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("SubmitNoInteractionMonitorTask");
     ASSERT_NE(window, nullptr);
@@ -741,7 +741,7 @@ HWTEST_F(WindowSessionImplTest2, SubmitNoInteractionMonitorTask, Function | Smal
  * @tc.desc: RefreshNoInteractionTimeoutMonitor
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, RefreshNoInteractionTimeoutMonitor, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, RefreshNoInteractionTimeoutMonitor, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("RefreshNoInteractionTimeoutMonitor");
     ASSERT_NE(window, nullptr);
@@ -762,7 +762,7 @@ HWTEST_F(WindowSessionImplTest2, RefreshNoInteractionTimeoutMonitor, Function | 
  * @tc.desc: IsUserOrientation
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, IsUserOrientation, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, IsUserOrientation, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("IsUserOrientation");
     ASSERT_NE(window, nullptr);
@@ -780,7 +780,7 @@ HWTEST_F(WindowSessionImplTest2, IsUserOrientation, Function | SmallTest | Level
  * @tc.desc: WindowSessionCreateCheck
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, WindowSessionCreateCheck, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, WindowSessionCreateCheck, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("WindowSessionCreateCheck");
     ASSERT_NE(window, nullptr);
@@ -818,7 +818,7 @@ HWTEST_F(WindowSessionImplTest2, WindowSessionCreateCheck, Function | SmallTest 
  * @tc.desc: NotifyForegroundInteractiveStatus
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, NotifyForegroundInteractiveStatus, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, NotifyForegroundInteractiveStatus, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("NotifyForegroundInteractiveStatus");
     ASSERT_NE(window, nullptr);
@@ -840,7 +840,7 @@ HWTEST_F(WindowSessionImplTest2, NotifyForegroundInteractiveStatus, Function | S
  * @tc.desc: UpdateDecorEnableToAce
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, UpdateDecorEnableToAce, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, UpdateDecorEnableToAce, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("UpdateDecorEnableToAce");
     ASSERT_NE(window, nullptr);
@@ -862,7 +862,7 @@ HWTEST_F(WindowSessionImplTest2, UpdateDecorEnableToAce, Function | SmallTest | 
  * @tc.desc: UpdateDecorEnable
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, UpdateDecorEnable, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, UpdateDecorEnable, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("UpdateDecorEnable");
     ASSERT_NE(window, nullptr);
@@ -884,7 +884,7 @@ HWTEST_F(WindowSessionImplTest2, UpdateDecorEnable, Function | SmallTest | Level
  * @tc.desc: NotifyModeChange
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, NotifyModeChange, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, NotifyModeChange, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("NotifyModeChange");
     ASSERT_NE(window, nullptr);
@@ -902,7 +902,7 @@ HWTEST_F(WindowSessionImplTest2, NotifyModeChange, Function | SmallTest | Level2
  * @tc.desc: SetRequestedOrientation
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, SetRequestedOrientation, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, SetRequestedOrientation, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("SetRequestedOrientation");
     ASSERT_NE(window, nullptr);
@@ -922,7 +922,7 @@ HWTEST_F(WindowSessionImplTest2, SetRequestedOrientation, Function | SmallTest |
  * @tc.desc: GetContentInfo
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, GetContentInfo, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, GetContentInfo, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("GetContentInfo");
     ASSERT_NE(window, nullptr);
@@ -940,7 +940,7 @@ HWTEST_F(WindowSessionImplTest2, GetContentInfo, Function | SmallTest | Level2)
  * @tc.desc: SetDecorHeight
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, SetDecorHeight, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, SetDecorHeight, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("SetDecorHeight");
     ASSERT_NE(window, nullptr);
@@ -966,7 +966,7 @@ HWTEST_F(WindowSessionImplTest2, SetDecorHeight, Function | SmallTest | Level2)
  * @tc.desc: GetDecorHeight
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, GetDecorHeight01, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, GetDecorHeight01, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("GetDecorHeight01");
     ASSERT_NE(window, nullptr);
@@ -988,7 +988,7 @@ HWTEST_F(WindowSessionImplTest2, GetDecorHeight01, Function | SmallTest | Level2
  * @tc.desc: GetDecorHeight
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, GetDecorHeight02, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, GetDecorHeight02, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("GetDecorHeight02");
     ASSERT_NE(window, nullptr);
@@ -1015,7 +1015,7 @@ HWTEST_F(WindowSessionImplTest2, GetDecorHeight02, Function | SmallTest | Level2
  * @tc.desc: GetDecorHeight version isolation test cases
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, GetDecorHeight03, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, GetDecorHeight03, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("GetDecorHeight03");
     ASSERT_NE(window, nullptr);
@@ -1046,7 +1046,7 @@ HWTEST_F(WindowSessionImplTest2, GetDecorHeight03, Function | SmallTest | Level2
  * @tc.desc: GetTitleButtonArea
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, GetTitleButtonArea01, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, GetTitleButtonArea01, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("GetTitleButtonArea01");
     ASSERT_NE(window, nullptr);
@@ -1069,7 +1069,7 @@ HWTEST_F(WindowSessionImplTest2, GetTitleButtonArea01, Function | SmallTest | Le
  * @tc.desc: GetTitleButtonArea
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, GetTitleButtonArea02, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, GetTitleButtonArea02, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("GetTitleButtonArea02");
     ASSERT_NE(window, nullptr);
@@ -1096,7 +1096,7 @@ HWTEST_F(WindowSessionImplTest2, GetTitleButtonArea02, Function | SmallTest | Le
  * @tc.desc: GetTitleButtonArea
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, GetTitleButtonArea03, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, GetTitleButtonArea03, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("GetTitleButtonArea03");
     ASSERT_NE(window, nullptr);
@@ -1122,7 +1122,7 @@ HWTEST_F(WindowSessionImplTest2, GetTitleButtonArea03, Function | SmallTest | Le
  * @tc.desc: RegisterWindowTitleButtonRectChangeListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, RegisterWindowTitleButtonRectChangeListener, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, RegisterWindowTitleButtonRectChangeListener, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("RegisterWindowTitleButtonRectChangeListener");
     ASSERT_NE(window, nullptr);
@@ -1137,7 +1137,7 @@ HWTEST_F(WindowSessionImplTest2, RegisterWindowTitleButtonRectChangeListener, Fu
  * @tc.desc: UnregisterWindowTitleButtonRectChangeListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, UnregisterWindowTitleButtonRectChangeListener, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, UnregisterWindowTitleButtonRectChangeListener, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("UnregisterWindowTitleButtonRectChangeListener");
     ASSERT_NE(window, nullptr);
@@ -1155,7 +1155,7 @@ HWTEST_F(WindowSessionImplTest2, UnregisterWindowTitleButtonRectChangeListener, 
  * @tc.desc: NotifyWindowTitleButtonRectChange
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, NotifyWindowTitleButtonRectChange, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, NotifyWindowTitleButtonRectChange, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("NotifyWindowTitleButtonRectChange");
     ASSERT_NE(window, nullptr);
@@ -1172,7 +1172,7 @@ HWTEST_F(WindowSessionImplTest2, NotifyWindowTitleButtonRectChange, Function | S
  * @tc.desc: RegisterWindowRectChangeListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, RegisterWindowRectChangeListener, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, RegisterWindowRectChangeListener, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("RegisterWindowRectChangeListener");
     ASSERT_NE(window, nullptr);
@@ -1192,7 +1192,7 @@ HWTEST_F(WindowSessionImplTest2, RegisterWindowRectChangeListener, Function | Sm
  * @tc.desc: UnregisterWindowRectChangeListener01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, UnregisterWindowRectChangeListener01, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, UnregisterWindowRectChangeListener01, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: UnregisterWindowRectChangeListener01 start";
     auto window = GetTestWindowImpl("UnregisterWindowRectChangeListener01");
@@ -1220,7 +1220,7 @@ HWTEST_F(WindowSessionImplTest2, UnregisterWindowRectChangeListener01, Function 
  * @tc.desc: GetVirtualPixelRatio
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, GetVirtualPixelRatio, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, GetVirtualPixelRatio, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: GetVirtualPixelRatio start";
     auto window = GetTestWindowImpl("GetVirtualPixelRatio");
@@ -1242,7 +1242,7 @@ HWTEST_F(WindowSessionImplTest2, GetVirtualPixelRatio, Function | SmallTest | Le
  * @tc.desc: NotifyScreenshot01 listener==nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, NotifyScreenshot01, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, NotifyScreenshot01, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: NotifyScreenshot01 start";
     class MockIScrenshotListener : public IScreenshotListener {
@@ -1266,7 +1266,7 @@ HWTEST_F(WindowSessionImplTest2, NotifyScreenshot01, Function | SmallTest | Leve
  * @tc.desc: NotifyScreenshot02 listener!=nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, NotifyScreenshot02, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, NotifyScreenshot02, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: NotifyScreenshot02 start";
     class ScreenshotListener : public IScreenshotListener {
@@ -1290,7 +1290,7 @@ HWTEST_F(WindowSessionImplTest2, NotifyScreenshot02, Function | SmallTest | Leve
  * @tc.desc: NotifyTouchDialogTarget01 hostSession_==nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, NotifyTouchDialogTarget01, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, NotifyTouchDialogTarget01, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: NotifyTouchDialogTarget01 start";
     window_ = GetTestWindowImpl("NotifyTouchDialogTarget01");
@@ -1308,7 +1308,7 @@ HWTEST_F(WindowSessionImplTest2, NotifyTouchDialogTarget01, Function | SmallTest
  * @tc.desc: NotifyTouchDialogTarget02 hostSession_!=nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, NotifyTouchDialogTarget02, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, NotifyTouchDialogTarget02, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: NotifyTouchDialogTarget02 start";
     window_ = GetTestWindowImpl("NotifyTouchDialogTarget02");
@@ -1328,7 +1328,7 @@ HWTEST_F(WindowSessionImplTest2, NotifyTouchDialogTarget02, Function | SmallTest
  * @tc.desc: NotifyTouchDialogTarget03 hostSession_==nullptr listener==nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, NotifyTouchDialogTarget03, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, NotifyTouchDialogTarget03, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: NotifyTouchDialogTarget03 start";
     class MockIDialogTargetTouchListener : public IDialogTargetTouchListener {
@@ -1355,7 +1355,7 @@ HWTEST_F(WindowSessionImplTest2, NotifyTouchDialogTarget03, Function | SmallTest
  * @tc.desc: NotifyTouchDialogTarget04 hostSession_==nullptr listener!=nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, NotifyTouchDialogTarget04, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, NotifyTouchDialogTarget04, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: NotifyTouchDialogTarget04 start";
     class MockIDialogTargetTouchListener : public IDialogTargetTouchListener {
@@ -1382,7 +1382,7 @@ HWTEST_F(WindowSessionImplTest2, NotifyTouchDialogTarget04, Function | SmallTest
  * @tc.desc: NotifyDisplayMove01 listener==nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, NotifyDisplayMove01, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, NotifyDisplayMove01, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: NotifyDisplayMove01 start";
     class MockIDisplayMoveListener : public IDisplayMoveListener {
@@ -1407,7 +1407,7 @@ HWTEST_F(WindowSessionImplTest2, NotifyDisplayMove01, Function | SmallTest | Lev
  * @tc.desc: NotifyDisplayMove02 listener!=nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, NotifyDisplayMove02, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, NotifyDisplayMove02, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: NotifyDisplayMove02 start";
     class MockIDisplayMoveListener : public IDisplayMoveListener {
@@ -1433,7 +1433,7 @@ HWTEST_F(WindowSessionImplTest2, NotifyDisplayMove02, Function | SmallTest | Lev
  * @tc.desc: NotifyDestroy01 listener==nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, NotifyDestroy01, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, NotifyDestroy01, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: NotifyDestroy01 start";
     class MockIDialogDeathRecipientListener : public IDialogDeathRecipientListener {
@@ -1457,7 +1457,7 @@ HWTEST_F(WindowSessionImplTest2, NotifyDestroy01, Function | SmallTest | Level2)
  * @tc.desc: NotifyDestroy02 listener!=nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, NotifyDestroy02, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, NotifyDestroy02, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: NotifyDestroy02 start";
     class MockIDialogDeathRecipientListener : public IDialogDeathRecipientListener {
@@ -1481,7 +1481,7 @@ HWTEST_F(WindowSessionImplTest2, NotifyDestroy02, Function | SmallTest | Level2)
  * @tc.desc: RegisterDialogTargetTouchListener01 listener!=nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, RegisterDialogTargetTouchListener01, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, RegisterDialogTargetTouchListener01, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: RegisterDialogTargetTouchListener01 start";
     class MockIDialogTargetTouchListener : public IDialogTargetTouchListener {
@@ -1501,7 +1501,7 @@ HWTEST_F(WindowSessionImplTest2, RegisterDialogTargetTouchListener01, Function |
  * @tc.desc: RegisterDialogDeathRecipientListener01 listener!=nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, RegisterDialogDeathRecipientListener01, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, RegisterDialogDeathRecipientListener01, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: RegisterDialogDeathRecipientListener01 start";
     class MockIDialogDeathRecipientListener : public IDialogDeathRecipientListener {
@@ -1524,7 +1524,7 @@ HWTEST_F(WindowSessionImplTest2, RegisterDialogDeathRecipientListener01, Functio
  * @tc.desc: RegisterSubWindowCloseListeners01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, RegisterSubWindowCloseListeners01, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, RegisterSubWindowCloseListeners01, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: RegisterSubWindowCloseListeners01 start";
     class MockISubWindowCloseListener : public ISubWindowCloseListener {
@@ -1553,7 +1553,7 @@ HWTEST_F(WindowSessionImplTest2, RegisterSubWindowCloseListeners01, Function | S
  * @tc.desc: GetListeners01 IWindowLifeCycle
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, GetListeners01, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, GetListeners01, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: GetListeners01 start";
     window_ = GetTestWindowImpl("GetListeners01");
@@ -1574,7 +1574,7 @@ HWTEST_F(WindowSessionImplTest2, GetListeners01, Function | SmallTest | Level2)
  * @tc.desc: GetListeners02 IOccupiedAreaChangeListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, GetListeners02, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, GetListeners02, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: GetListeners02 start";
     window_ = GetTestWindowImpl("GetListeners02");
@@ -1596,7 +1596,7 @@ HWTEST_F(WindowSessionImplTest2, GetListeners02, Function | SmallTest | Level2)
  * @tc.desc: GetListeners03 IKeyboardDidShowListener IKeyboardDidHideListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, GetListeners03, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, GetListeners03, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: GetListeners03 start";
     window_ = GetTestWindowImpl("GetListeners03");
@@ -1629,7 +1629,7 @@ HWTEST_F(WindowSessionImplTest2, GetListeners03, Function | SmallTest | Level2)
  * @tc.desc: GetUIContent
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, GetUIContent, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, GetUIContent, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("GetUIContent");
@@ -1644,7 +1644,7 @@ HWTEST_F(WindowSessionImplTest2, GetUIContent, Function | SmallTest | Level2)
  * @tc.desc: NotifySizeChange
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, NotifySizeChange, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, NotifySizeChange, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("NotifySizeChange");
@@ -1669,7 +1669,7 @@ HWTEST_F(WindowSessionImplTest2, NotifySizeChange, Function | SmallTest | Level2
  * @tc.desc: AvoidAreaChangeListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, AvoidAreaChangeListener, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, AvoidAreaChangeListener, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("AvoidAreaChangeListener");
@@ -1699,7 +1699,7 @@ HWTEST_F(WindowSessionImplTest2, AvoidAreaChangeListener, Function | SmallTest |
  * @tc.desc: TouchOutsideListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, TouchOutsideListener, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, TouchOutsideListener, TestSize.Level1)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(option, nullptr);
@@ -1734,7 +1734,7 @@ HWTEST_F(WindowSessionImplTest2, TouchOutsideListener, Function | SmallTest | Le
  * @tc.desc: NotifyDialogStateChange
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, NotifyDialogStateChange, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, NotifyDialogStateChange, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: NotifyDialogStateChange start";
     window_ = GetTestWindowImpl("NotifyDialogStateChange");
@@ -1748,7 +1748,7 @@ HWTEST_F(WindowSessionImplTest2, NotifyDialogStateChange, Function | SmallTest |
  * @tc.desc: SwitchFreeMultiWindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, SwitchFreeMultiWindow, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, SwitchFreeMultiWindow, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: SwitchFreeMultiWindow start";
     window_ = GetTestWindowImpl("SwitchFreeMultiWindow");
@@ -1762,7 +1762,7 @@ HWTEST_F(WindowSessionImplTest2, SwitchFreeMultiWindow, Function | SmallTest | L
  * @tc.desc: UpdateTitleInTargetPos
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, UpdateTitleInTargetPos, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, UpdateTitleInTargetPos, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: UpdateTitleInTargetPos start";
     window_ = GetTestWindowImpl("UpdateTitleInTargetPos");
@@ -1776,7 +1776,7 @@ HWTEST_F(WindowSessionImplTest2, UpdateTitleInTargetPos, Function | SmallTest | 
  * @tc.desc: NotifySessionBackground
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, NotifySessionBackground, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, NotifySessionBackground, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: NotifySessionBackground start";
     window_ = GetTestWindowImpl("NotifySessionBackground");
@@ -1790,7 +1790,7 @@ HWTEST_F(WindowSessionImplTest2, NotifySessionBackground, Function | SmallTest |
  * @tc.desc: UpdateMaximizeMode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, UpdateMaximizeMode, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, UpdateMaximizeMode, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: UpdateMaximizeMode start";
     window_ = GetTestWindowImpl("UpdateMaximizeMode");
@@ -1804,7 +1804,7 @@ HWTEST_F(WindowSessionImplTest2, UpdateMaximizeMode, Function | SmallTest | Leve
  * @tc.desc: DumpSessionElementInfo
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, DumpSessionElementInfo, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, DumpSessionElementInfo, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: DumpSessionElementInfo start";
     window_ = GetTestWindowImpl("DumpSessionElementInfo");
@@ -1820,7 +1820,7 @@ HWTEST_F(WindowSessionImplTest2, DumpSessionElementInfo, Function | SmallTest | 
  * @tc.desc: GetKeyboardAnimationConfig
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, GetKeyboardAnimationConfig, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, GetKeyboardAnimationConfig, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: GetKeyboardAnimationConfig start";
     window_ = GetTestWindowImpl("GetKeyboardAnimationConfig");
@@ -1834,7 +1834,7 @@ HWTEST_F(WindowSessionImplTest2, GetKeyboardAnimationConfig, Function | SmallTes
  * @tc.desc: GetSubWindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, GetSubWindow, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, GetSubWindow, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: GetSubWindow start";
     window_ = GetTestWindowImpl("GetSubWindow");
@@ -1855,7 +1855,7 @@ HWTEST_F(WindowSessionImplTest2, GetSubWindow, Function | SmallTest | Level2)
  * @tc.type: FUNC
  * @tc.require: issue
  */
-HWTEST_F(WindowSessionImplTest2, SetRestoredRouterStack_0200, Function | SmallTest | Level3)
+HWTEST_F(WindowSessionImplTest2, SetRestoredRouterStack_0200, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     ASSERT_NE(option, nullptr);
@@ -1873,7 +1873,7 @@ HWTEST_F(WindowSessionImplTest2, SetRestoredRouterStack_0200, Function | SmallTe
  * @tc.desc: SetUiDvsyncSwitch
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, SetUiDvsyncSwitch, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, SetUiDvsyncSwitch, TestSize.Level1)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(option, nullptr);
@@ -1890,7 +1890,7 @@ HWTEST_F(WindowSessionImplTest2, SetUiDvsyncSwitch, Function | SmallTest | Level
  * @tc.desc: SetUiDvsyncSwitch Test Succ
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, SetUiDvsyncSwitchSucc, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, SetUiDvsyncSwitchSucc, TestSize.Level1)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     option->SetWindowName("SetUiDvsyncSwitchSucc");
@@ -1905,7 +1905,7 @@ HWTEST_F(WindowSessionImplTest2, SetUiDvsyncSwitchSucc, Function | SmallTest | L
  * @tc.desc: SetUiDvsyncSwitch Test Err
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, SetUiDvsyncSwitchErr, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, SetUiDvsyncSwitchErr, TestSize.Level1)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     option->SetWindowName("SetUiDvsyncSwitchErr");
@@ -1922,7 +1922,7 @@ HWTEST_F(WindowSessionImplTest2, SetUiDvsyncSwitchErr, Function | SmallTest | Le
  * @tc.type: FUNC
  * @tc.require: issue
  */
-HWTEST_F(WindowSessionImplTest2, SetRestoredRouterStack_0100, Function | SmallTest | Level3)
+HWTEST_F(WindowSessionImplTest2, SetRestoredRouterStack_0100, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     ASSERT_NE(option, nullptr);

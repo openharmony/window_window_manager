@@ -121,7 +121,7 @@ static inline Rect GetRectWithVpr(int32_t x, int32_t y, uint32_t w, uint32_t h)
  * @tc.desc: AppFloatingWindow life cycle
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow01, Function | MediumTest | Level2)
+HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow01, TestSize.Level1)
 {
     sptr<WindowScene> scene = CreateWindowScene();
     ASSERT_NE(nullptr, scene);
@@ -142,7 +142,7 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow01, Function | MediumTest
  * @tc.desc: AppFloatingWindow life cycle, main window hide first
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow02, Function | MediumTest | Level3)
+HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow02, TestSize.Level1)
 {
     sptr<WindowScene> scene = CreateWindowScene();
     ASSERT_NE(nullptr, scene);
@@ -165,7 +165,7 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow02, Function | MediumTest
  * @tc.desc: AppFloatingWindow life cycle, app floating window hide first
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow03, Function | MediumTest | Level3)
+HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow03, TestSize.Level1)
 {
     sptr<WindowScene> scene = CreateWindowScene();
     ASSERT_NE(nullptr, scene);
@@ -189,7 +189,7 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow03, Function | MediumTest
  * @tc.desc: AppFloatingWindow life cycle, main window destroy first
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow04, Function | MediumTest | Level3)
+HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow04, TestSize.Level1)
 {
     sptr<WindowScene> scene = CreateWindowScene();
     ASSERT_NE(nullptr, scene);
@@ -211,7 +211,7 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow04, Function | MediumTest
  * @tc.type: FUNC
  * @tc.require: issueI5NEHO
  */
-HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow05, Function | MediumTest | Level2)
+HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow05, TestSize.Level1)
 {
     sptr<WindowScene> scene = CreateWindowScene();
     ASSERT_NE(nullptr, scene);
@@ -233,7 +233,7 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow05, Function | MediumTest
  * @tc.type: FUNC
  * @tc.require: issueI5NEHO
  */
-HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow06, Function | MediumTest | Level3)
+HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow06, TestSize.Level1)
 {
     sptr<WindowScene> scene = CreateWindowScene();
     ASSERT_NE(nullptr, scene);
@@ -258,7 +258,7 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow06, Function | MediumTest
  * @tc.type: FUNC
  * @tc.require: issueI5NEHO
  */
-HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow07, Function | MediumTest | Level3)
+HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow07, TestSize.Level1)
 {
     sptr<WindowScene> scene = CreateWindowScene();
     ASSERT_NE(nullptr, scene);
@@ -284,7 +284,7 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow07, Function | MediumTest
  * @tc.type: FUNC
  * @tc.require: issueI5NEHO
  */
-HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow08, Function | MediumTest | Level3)
+HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow08, TestSize.Level1)
 {
     sptr<WindowScene> scene = CreateWindowScene();
     ASSERT_NE(nullptr, scene);
@@ -308,7 +308,7 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow08, Function | MediumTest
  * @tc.type: FUNC
  * @tc.require: issueI5NEHO
  */
-HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow09, Function | MediumTest | Level3)
+HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow09, TestSize.Level1)
 {
     sptr<WindowScene> scene = CreateWindowScene();
     ASSERT_NE(nullptr, scene);
@@ -348,7 +348,7 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow09, Function | MediumTest
  * @tc.type: FUNC
  * @tc.require: issueI5NEHO
  */
-HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow10, Function | MediumTest | Level3)
+HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow10, TestSize.Level1)
 {
     sptr<WindowScene> scene = CreateWindowScene();
     ASSERT_NE(nullptr, scene);
@@ -374,7 +374,7 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow10, Function | MediumTest
  * @tc.type: FUNC
  * @tc.require: issueI5NEHR
  */
-HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow11, Function | MediumTest | Level2)
+HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow11, TestSize.Level1)
 {
     uint32_t tokenId = static_cast<uint32_t>(IPCSkeleton::GetCallingTokenID());
     WindowManager::GetInstance().RegisterCameraFloatWindowChangedListener(testCameraFloatWindowChangedListener_);

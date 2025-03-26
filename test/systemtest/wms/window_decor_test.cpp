@@ -55,7 +55,7 @@ namespace {
  * @tc.desc: SetDecorVisible
  * @tc.type: FUNC
  */
-HWTEST_F(WindowDecorTest, SetDecorVisible01, Function | MediumTest | Level0)
+HWTEST_F(WindowDecorTest, SetDecorVisible01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window1_1");
@@ -82,7 +82,7 @@ HWTEST_F(WindowDecorTest, SetDecorVisible01, Function | MediumTest | Level0)
  * @tc.desc: SetDecorVisible
  * @tc.type: FUNC
  */
-HWTEST_F(WindowDecorTest, SetDecorVisible02, Function | MediumTest | Level0)
+HWTEST_F(WindowDecorTest, SetDecorVisible02, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window1_2");
@@ -112,7 +112,7 @@ HWTEST_F(WindowDecorTest, SetDecorVisible02, Function | MediumTest | Level0)
  * @tc.desc: SetDecorVisible
  * @tc.type: FUNC
  */
-HWTEST_F(WindowDecorTest, SetDecorVisible03, Function | MediumTest | Level0)
+HWTEST_F(WindowDecorTest, SetDecorVisible03, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window1_3");
@@ -142,7 +142,7 @@ HWTEST_F(WindowDecorTest, SetDecorVisible03, Function | MediumTest | Level0)
  * @tc.desc: DecorHeight
  * @tc.type: FUNC
  */
-HWTEST_F(WindowDecorTest, DecorHeight01, Function | MediumTest | Level0)
+HWTEST_F(WindowDecorTest, DecorHeight01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window2_1");
@@ -175,7 +175,7 @@ HWTEST_F(WindowDecorTest, DecorHeight01, Function | MediumTest | Level0)
  * @tc.desc: DecorHeight
  * @tc.type: FUNC
  */
-HWTEST_F(WindowDecorTest, DecorHeight02, Function | MediumTest | Level0)
+HWTEST_F(WindowDecorTest, DecorHeight02, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window2_2");
@@ -208,7 +208,7 @@ HWTEST_F(WindowDecorTest, DecorHeight02, Function | MediumTest | Level0)
  * @tc.desc: DecorHeight
  * @tc.type: FUNC
  */
-HWTEST_F(WindowDecorTest, DecorHeight03, Function | MediumTest | Level0)
+HWTEST_F(WindowDecorTest, DecorHeight03, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window2_3");
@@ -241,7 +241,7 @@ HWTEST_F(WindowDecorTest, DecorHeight03, Function | MediumTest | Level0)
  * @tc.desc: TitleButtonVisible
  * @tc.type: FUNC
  */
-HWTEST_F(WindowDecorTest, TitleButtonVisible01, Function | MediumTest | Level0)
+HWTEST_F(WindowDecorTest, TitleButtonVisible01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window3_1");
@@ -284,7 +284,7 @@ HWTEST_F(WindowDecorTest, TitleButtonVisible01, Function | MediumTest | Level0)
  * @tc.desc: TitleButtonVisible
  * @tc.type: FUNC
  */
-HWTEST_F(WindowDecorTest, TitleButtonVisible02, Function | MediumTest | Level0)
+HWTEST_F(WindowDecorTest, TitleButtonVisible02, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window3_2");
@@ -318,7 +318,7 @@ HWTEST_F(WindowDecorTest, TitleButtonVisible02, Function | MediumTest | Level0)
  * @tc.desc: TitleButtonVisible
  * @tc.type: FUNC
  */
-HWTEST_F(WindowDecorTest, TitleButtonVisible03, Function | MediumTest | Level0)
+HWTEST_F(WindowDecorTest, TitleButtonVisible03, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window3_3");
@@ -352,7 +352,7 @@ HWTEST_F(WindowDecorTest, TitleButtonVisible03, Function | MediumTest | Level0)
  * @tc.desc: DisableAppWindowDecor
  * @tc.type: FUNC
  */
-HWTEST_F(WindowDecorTest, DisableAppWindowDecor01, Function | MediumTest | Level0)
+HWTEST_F(WindowDecorTest, DisableAppWindowDecor01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window4_1");
@@ -385,7 +385,7 @@ HWTEST_F(WindowDecorTest, DisableAppWindowDecor01, Function | MediumTest | Level
  * @tc.desc: DisableAppWindowDecor
  * @tc.type: FUNC
  */
-HWTEST_F(WindowDecorTest, DisableAppWindowDecor02, Function | MediumTest | Level0)
+HWTEST_F(WindowDecorTest, DisableAppWindowDecor02, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window4_2");
@@ -412,7 +412,7 @@ HWTEST_F(WindowDecorTest, DisableAppWindowDecor02, Function | MediumTest | Level
  * @tc.desc: DisableAppWindowDecor
  * @tc.type: FUNC
  */
-HWTEST_F(WindowDecorTest, DisableAppWindowDecor03, Function | MediumTest | Level0)
+HWTEST_F(WindowDecorTest, DisableAppWindowDecor03, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window4_3");

@@ -57,7 +57,7 @@ namespace {
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerProxyTest, RequestFocus, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerProxyTest, RequestFocus, TestSize.Level1)
 {
     uint32_t windowId = 0;
     WMError err = windowManagerProxy_->RequestFocus(windowId);
@@ -69,7 +69,7 @@ HWTEST_F(WindowManagerProxyTest, RequestFocus, Function | SmallTest | Level2)
  * @tc.desc: test failed
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerProxyTest, SetWindowAnimationController, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerProxyTest, SetWindowAnimationController, TestSize.Level1)
 {
     sptr<RSIWindowAnimationController> controller = nullptr;
     WMError err = windowManagerProxy_->SetWindowAnimationController(controller);
@@ -81,7 +81,7 @@ HWTEST_F(WindowManagerProxyTest, SetWindowAnimationController, Function | SmallT
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerProxyTest, SetWindowAnimationController01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerProxyTest, SetWindowAnimationController01, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
     sptr<RSIWindowAnimationController> controller = iface_cast<RSIWindowAnimationController>(iRemoteObjectMocker);
@@ -94,7 +94,7 @@ HWTEST_F(WindowManagerProxyTest, SetWindowAnimationController01, Function | Smal
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerProxyTest, ToggleShownStateForAllAppWindows, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerProxyTest, ToggleShownStateForAllAppWindows, TestSize.Level1)
 {
     WMError err = windowManagerProxy_->ToggleShownStateForAllAppWindows();
     ASSERT_EQ(err, WMError::WM_OK);
@@ -105,7 +105,7 @@ HWTEST_F(WindowManagerProxyTest, ToggleShownStateForAllAppWindows, Function | Sm
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerProxyTest, GetTopWindowId, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerProxyTest, GetTopWindowId, TestSize.Level1)
 {
     uint32_t mainWinId = 0;
     uint32_t topWinId;
@@ -118,7 +118,7 @@ HWTEST_F(WindowManagerProxyTest, GetTopWindowId, Function | SmallTest | Level2)
  * @tc.desc: test GetSnapshotByWindowId
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerProxyTest, GetSnapshotByWindowId, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerProxyTest, GetSnapshotByWindowId, TestSize.Level1)
 {
     int windowId = INVALID_WINDOW_ID;
     std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
@@ -131,7 +131,7 @@ HWTEST_F(WindowManagerProxyTest, GetSnapshotByWindowId, Function | SmallTest | L
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerProxyTest, NotifyWindowTransition, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerProxyTest, NotifyWindowTransition, TestSize.Level1)
 {
     sptr<WindowTransitionInfo> from = new WindowTransitionInfo();
     sptr<WindowTransitionInfo> to = new WindowTransitionInfo();
@@ -145,7 +145,7 @@ HWTEST_F(WindowManagerProxyTest, NotifyWindowTransition, Function | SmallTest | 
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerProxyTest, GetModeChangeHotZones, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerProxyTest, GetModeChangeHotZones, TestSize.Level1)
 {
     DisplayId displayId = 10;
     ModeChangeHotZones hotZones;
@@ -158,7 +158,7 @@ HWTEST_F(WindowManagerProxyTest, GetModeChangeHotZones, Function | SmallTest | L
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerProxyTest, MinimizeWindowsByLauncher, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerProxyTest, MinimizeWindowsByLauncher, TestSize.Level1)
 {
     std::vector<uint32_t> windowIds;
     bool isAnimated = false;
@@ -172,7 +172,7 @@ HWTEST_F(WindowManagerProxyTest, MinimizeWindowsByLauncher, Function | SmallTest
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerProxyTest, MinimizeWindowsByLauncher01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerProxyTest, MinimizeWindowsByLauncher01, TestSize.Level1)
 {
     std::vector<uint32_t> windowIds;
     windowIds.push_back(0);
@@ -188,7 +188,7 @@ HWTEST_F(WindowManagerProxyTest, MinimizeWindowsByLauncher01, Function | SmallTe
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerProxyTest, UpdateRsTree, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerProxyTest, UpdateRsTree, TestSize.Level1)
 {
     uint32_t windowId = 0;
     bool isAdd = false;
@@ -201,7 +201,7 @@ HWTEST_F(WindowManagerProxyTest, UpdateRsTree, Function | SmallTest | Level2)
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerProxyTest, BindDialogTarget, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerProxyTest, BindDialogTarget, TestSize.Level1)
 {
     uint32_t windowId = 0;
     sptr<IRemoteObject> targetToken = nullptr;
@@ -214,7 +214,7 @@ HWTEST_F(WindowManagerProxyTest, BindDialogTarget, Function | SmallTest | Level2
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerProxyTest, BindDialogTarget01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerProxyTest, BindDialogTarget01, TestSize.Level1)
 {
     uint32_t windowId = 0;
     sptr<IRemoteObject> targetToken = nullptr;
@@ -227,7 +227,7 @@ HWTEST_F(WindowManagerProxyTest, BindDialogTarget01, Function | SmallTest | Leve
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerProxyTest, GetVisibilityWindowInfo01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerProxyTest, GetVisibilityWindowInfo01, TestSize.Level1)
 {
     std::vector<sptr<WindowVisibilityInfo>> infos;
     WMError err = windowManagerProxy_->GetVisibilityWindowInfo(infos);
@@ -239,7 +239,7 @@ HWTEST_F(WindowManagerProxyTest, GetVisibilityWindowInfo01, Function | SmallTest
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerProxyTest, GetUnreliableWindowInfo01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerProxyTest, GetUnreliableWindowInfo01, TestSize.Level1)
 {
     std::vector<sptr<UnreliableWindowInfo>> infos;
     int32_t windowId = 0;
@@ -252,7 +252,7 @@ HWTEST_F(WindowManagerProxyTest, GetUnreliableWindowInfo01, Function | SmallTest
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerProxyTest, GetWindowAnimationTargets01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerProxyTest, GetWindowAnimationTargets01, TestSize.Level1)
 {
     std::vector<uint32_t> missionIds;
     missionIds.push_back(0);
@@ -267,7 +267,7 @@ HWTEST_F(WindowManagerProxyTest, GetWindowAnimationTargets01, Function | SmallTe
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerProxyTest, RemoveWindow, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerProxyTest, RemoveWindow, TestSize.Level1)
 {
     uint32_t windowId = 0;
     bool isFromInnerkits = true;
@@ -280,7 +280,7 @@ HWTEST_F(WindowManagerProxyTest, RemoveWindow, Function | SmallTest | Level2)
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerProxyTest, DestroyWindow, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerProxyTest, DestroyWindow, TestSize.Level1)
 {
     uint32_t windowId = 0;
     bool isFromInnerkits = true;
@@ -293,7 +293,7 @@ HWTEST_F(WindowManagerProxyTest, DestroyWindow, Function | SmallTest | Level2)
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerProxyTest, GetAvoidAreaByType, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerProxyTest, GetAvoidAreaByType, TestSize.Level1)
 {
     uint32_t windowId = 0;
     AvoidAreaType type = AvoidAreaType::TYPE_SYSTEM;
@@ -307,7 +307,7 @@ HWTEST_F(WindowManagerProxyTest, GetAvoidAreaByType, Function | SmallTest | Leve
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerProxyTest, RegisterWindowManagerAgent, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerProxyTest, RegisterWindowManagerAgent, TestSize.Level1)
 {
     MessageParcel reply;
     sptr<IWindowManagerAgent> windowManagerAgent = new WindowManagerAgent();
@@ -321,7 +321,7 @@ HWTEST_F(WindowManagerProxyTest, RegisterWindowManagerAgent, Function | SmallTes
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerProxyTest, UnregisterWindowManagerAgent, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerProxyTest, UnregisterWindowManagerAgent, TestSize.Level1)
 {
     MessageParcel reply;
     sptr<IWindowManagerAgent> windowManagerAgent = new WindowManagerAgent();
@@ -335,7 +335,7 @@ HWTEST_F(WindowManagerProxyTest, UnregisterWindowManagerAgent, Function | SmallT
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerProxyTest, NotifyServerReadyToMoveOrDrag, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerProxyTest, NotifyServerReadyToMoveOrDrag, TestSize.Level1)
 {
     uint32_t windowId = 0;
     sptr<WindowProperty> windowProperty;
@@ -353,7 +353,7 @@ HWTEST_F(WindowManagerProxyTest, NotifyServerReadyToMoveOrDrag, Function | Small
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerProxyTest, ProcessPointDown, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerProxyTest, ProcessPointDown, TestSize.Level1)
 {
     uint32_t windowId = 0;
     bool isPointDown = true;
@@ -370,7 +370,7 @@ HWTEST_F(WindowManagerProxyTest, ProcessPointDown, Function | SmallTest | Level2
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerProxyTest, ProcessPointUp, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerProxyTest, ProcessPointUp, TestSize.Level1)
 {
     uint32_t windowId = 0;
     MessageParcel reply;
@@ -386,7 +386,7 @@ HWTEST_F(WindowManagerProxyTest, ProcessPointUp, Function | SmallTest | Level2)
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerProxyTest, MinimizeAllAppWindows, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerProxyTest, MinimizeAllAppWindows, TestSize.Level1)
 {
     DisplayId displayId = 0;
     WMError err = windowManagerProxy_->MinimizeAllAppWindows(displayId);
@@ -398,7 +398,7 @@ HWTEST_F(WindowManagerProxyTest, MinimizeAllAppWindows, Function | SmallTest | L
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerProxyTest, SetWindowLayoutMode, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerProxyTest, SetWindowLayoutMode, TestSize.Level1)
 {
     WindowLayoutMode mode = WindowLayoutMode::BASE;
     MessageParcel reply;
@@ -411,7 +411,7 @@ HWTEST_F(WindowManagerProxyTest, SetWindowLayoutMode, Function | SmallTest | Lev
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerProxyTest, UpdateProperty, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerProxyTest, UpdateProperty, TestSize.Level1)
 {
     sptr<WindowProperty> windowProperty = new WindowProperty();
     PropertyChangeAction action = PropertyChangeAction::ACTION_UPDATE_RECT;
@@ -426,7 +426,7 @@ HWTEST_F(WindowManagerProxyTest, UpdateProperty, Function | SmallTest | Level2)
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerProxyTest, SetWindowGravity, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerProxyTest, SetWindowGravity, TestSize.Level1)
 {
     uint32_t windowId = 1;
     WindowGravity gravity = WindowGravity::WINDOW_GRAVITY_FLOAT;
@@ -441,7 +441,7 @@ HWTEST_F(WindowManagerProxyTest, SetWindowGravity, Function | SmallTest | Level2
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerProxyTest, GetSystemConfig, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerProxyTest, GetSystemConfig, TestSize.Level1)
 {
     SystemConfig systemConfig;
     MessageParcel reply;
@@ -454,7 +454,7 @@ HWTEST_F(WindowManagerProxyTest, GetSystemConfig, Function | SmallTest | Level2)
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerProxyTest, UpdateAvoidAreaListener, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerProxyTest, UpdateAvoidAreaListener, TestSize.Level1)
 {
     uint32_t windowId = 0;
     bool haveListener = true;
@@ -468,7 +468,7 @@ HWTEST_F(WindowManagerProxyTest, UpdateAvoidAreaListener, Function | SmallTest |
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerProxyTest, SetAnchorAndScale, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerProxyTest, SetAnchorAndScale, TestSize.Level1)
 {
     int32_t x = 0;
     int32_t y = 1;
@@ -485,7 +485,7 @@ HWTEST_F(WindowManagerProxyTest, SetAnchorAndScale, Function | SmallTest | Level
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerProxyTest, SetAnchorOffset, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerProxyTest, SetAnchorOffset, TestSize.Level1)
 {
     int32_t deltaX = 0;
     int32_t deltaY = 1;
@@ -501,7 +501,7 @@ HWTEST_F(WindowManagerProxyTest, SetAnchorOffset, Function | SmallTest | Level2)
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerProxyTest, OffWindowZoom, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerProxyTest, OffWindowZoom, TestSize.Level1)
 {
     SystemConfig systemConfig;
     MessageParcel reply;
@@ -515,7 +515,7 @@ HWTEST_F(WindowManagerProxyTest, OffWindowZoom, Function | SmallTest | Level2)
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerProxyTest, RaiseToAppTop, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerProxyTest, RaiseToAppTop, TestSize.Level1)
 {
     uint32_t windowId = 0;
     WMError err = windowManagerProxy_->RaiseToAppTop(windowId);
@@ -527,7 +527,7 @@ HWTEST_F(WindowManagerProxyTest, RaiseToAppTop, Function | SmallTest | Level2)
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerProxyTest, GetSnapshot, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerProxyTest, GetSnapshot, TestSize.Level1)
 {
     uint32_t windowId = 0;
     Media::InitializationOptions opts;
@@ -543,7 +543,7 @@ HWTEST_F(WindowManagerProxyTest, GetSnapshot, Function | SmallTest | Level2)
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerProxyTest, SetGestureNavigationEnabled, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerProxyTest, SetGestureNavigationEnabled, TestSize.Level1)
 {
     bool enable = true;
     MessageParcel reply;
@@ -556,7 +556,7 @@ HWTEST_F(WindowManagerProxyTest, SetGestureNavigationEnabled, Function | SmallTe
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerProxyTest, DispatchKeyEvent, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerProxyTest, DispatchKeyEvent, TestSize.Level1)
 {
     uint32_t windowId = 0;
     std::shared_ptr<MMI::KeyEvent> event = MMI::KeyEvent::Create();
@@ -572,7 +572,7 @@ HWTEST_F(WindowManagerProxyTest, DispatchKeyEvent, Function | SmallTest | Level2
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerProxyTest, NotifyDumpInfoResult, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerProxyTest, NotifyDumpInfoResult, TestSize.Level1)
 {
     std::vector<std::string> info;
     string windowName = "windowName";
@@ -589,7 +589,7 @@ HWTEST_F(WindowManagerProxyTest, NotifyDumpInfoResult, Function | SmallTest | Le
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerProxyTest, SetMaximizeMode, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerProxyTest, SetMaximizeMode, TestSize.Level1)
 {
     MaximizeMode maximizeMode = MaximizeMode::MODE_FULL_FILL;
     SystemConfig systemConfig;
@@ -604,7 +604,7 @@ HWTEST_F(WindowManagerProxyTest, SetMaximizeMode, Function | SmallTest | Level2)
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerProxyTest, GetMaximizeMode, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerProxyTest, GetMaximizeMode, TestSize.Level1)
 {
     MessageParcel reply;
     MaximizeMode mode = windowManagerProxy_->GetMaximizeMode();
@@ -616,7 +616,7 @@ HWTEST_F(WindowManagerProxyTest, GetMaximizeMode, Function | SmallTest | Level2)
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerProxyTest, GetFocusWindowInfo, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerProxyTest, GetFocusWindowInfo, TestSize.Level1)
 {
     FocusChangeInfo focusInfo;
     SystemConfig systemConfig;
