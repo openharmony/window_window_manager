@@ -2824,7 +2824,7 @@ WSError Session::GetIsHighlighted(bool& isHighlighted)
 {
     isHighlighted = isHighlight_;
     TLOGD(WmsLogTag::WMS_FOCUS, "windowId: %{public}d, isHighlighted: %{public}d",
-        GetPersistentId(), isHighlighted_);
+        GetPersistentId(), isHighlight_);
     return WSError::WS_OK;
 }
 
