@@ -227,6 +227,11 @@ void WindowSessionProperty::SetHideNonSystemFloatingWindows(bool hide)
     hideNonSystemFloatingWindows_ = hide;
 }
 
+void WindowSessionProperty::SetSkipSelfWhenShowOnVirtualScreen(bool isSkip)
+{
+    isSkipSelfWhenShowOnVirtualScreen_ = isSkip;
+}
+
 void WindowSessionProperty::SetSkipEventOnCastPlus(bool isSkip)
 {
     isSkipEventOnCastPlus_ = isSkip;
@@ -349,6 +354,11 @@ bool WindowSessionProperty::GetDragEnabled() const
 bool WindowSessionProperty::GetHideNonSystemFloatingWindows() const
 {
     return hideNonSystemFloatingWindows_;
+}
+
+bool WindowSessionProperty::GetSkipSelfWhenShowOnVirtualScreen() const
+{
+    return isSkipSelfWhenShowOnVirtualScreen_;
 }
 
 bool WindowSessionProperty::GetSkipEventOnCastPlus() const
@@ -1394,6 +1404,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     touchHotAreas_ = property->touchHotAreas_;
     keyboardTouchHotAreas_ = property->keyboardTouchHotAreas_;
     hideNonSystemFloatingWindows_ = property->hideNonSystemFloatingWindows_;
+    isSkipSelfWhenShowOnVirtualScreen_ = property->isSkipSelfWhenShowOnVirtualScreen_;
     isSkipEventOnCastPlus_ = property->isSkipEventOnCastPlus_;
     forceHide_ = property->forceHide_;
     keepKeyboardFlag_ = property->keepKeyboardFlag_;
