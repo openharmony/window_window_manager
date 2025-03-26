@@ -342,6 +342,15 @@ public:
      */
     DMError SetVirtualScreenMaxRefreshRate(ScreenId id, uint32_t refreshRate,
         uint32_t& actualRefreshRate);
+
+    /**
+     * @brief Set screen sharing protect
+     *
+     * @param screenIds screen IDs for set the screen sharing protect.
+     * @param isEnable wether to enable the screen sharing protect.
+     * @return DM_OK means set success, others means failed.
+     */
+    DMError SetScreenSkipProtectedWindow(const std::vector<ScreenId>& screenIds, bool isEnable);
 private:
     ScreenManager();
     ~ScreenManager();

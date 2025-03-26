@@ -190,6 +190,9 @@ public:
     VirtualScreenFlag GetVirtualScreenFlag();
     void SetVirtualScreenFlag(VirtualScreenFlag screenFlag);
 
+    bool GetShareProtect();
+    void SetShareProtect(bool needShareProtect);
+
     std::string name_ { "UNKNOWN" };
     ScreenId screenId_ {};
     ScreenId rsId_ {};
@@ -252,6 +255,7 @@ private:
     SetScreenSceneDpiFunc SetScreenSceneDpiCallback_ = nullptr;
     DestroyScreenSceneFunc destroyScreenSceneCallback_ = nullptr;
     void ReportNotifyModeChange(DisplayOrientation displayOrientation);
+    bool needShareProtect_ = false;
     int32_t GetApiVersion();
 };
 
