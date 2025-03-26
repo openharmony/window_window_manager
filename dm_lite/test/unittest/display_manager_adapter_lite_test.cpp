@@ -51,7 +51,7 @@ namespace {
  * @tc.desc: test nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterLiteTest, OnRemoteDied, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterLiteTest, OnRemoteDied, TestSize.Level1)
 {
     sptr<IRemoteObject::DeathRecipient> dmsDeath_ = nullptr;
     dmsDeath_ = new(std::nothrow) DMSDeathRecipientLite(SingletonContainer::Get<DisplayManagerAdapterLite>());
@@ -64,7 +64,7 @@ HWTEST_F(DisplayManagerAdapterLiteTest, OnRemoteDied, Function | SmallTest | Lev
  * @tc.desc: test nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterLiteTest, OnRemoteDied01, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterLiteTest, OnRemoteDied01, TestSize.Level1)
 {
     sptr<IRemoteObject::DeathRecipient> dmsDeath_ = nullptr;
     dmsDeath_ = new(std::nothrow) DMSDeathRecipientLite(SingletonContainer::Get<DisplayManagerAdapterLite>());
@@ -81,7 +81,7 @@ HWTEST_F(DisplayManagerAdapterLiteTest, OnRemoteDied01, Function | SmallTest | L
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterLiteTest, Clear, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterLiteTest, Clear, TestSize.Level1)
 {
     SingletonContainer::Get<DisplayManagerAdapterLite>().InitDMSProxy();
     SingletonContainer::Get<DisplayManagerAdapterLite>().Clear();
@@ -93,7 +93,7 @@ HWTEST_F(DisplayManagerAdapterLiteTest, Clear, Function | SmallTest | Level2)
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterLiteTest, Clear01, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterLiteTest, Clear01, TestSize.Level1)
 {
     SingletonContainer::Get<DisplayManagerAdapterLite>().InitDMSProxy();
     SingletonContainer::Get<DisplayManagerAdapterLite>().displayManagerServiceProxy_ = nullptr;
@@ -106,7 +106,7 @@ HWTEST_F(DisplayManagerAdapterLiteTest, Clear01, Function | SmallTest | Level2)
  * @tc.desc: test WakeUpBegin
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterLiteTest, WakeUpBegin, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterLiteTest, WakeUpBegin, TestSize.Level1)
 {
     PowerStateChangeReason reason = PowerStateChangeReason{0};
     bool ret = SingletonContainer::Get<DisplayManagerAdapterLite>().WakeUpBegin(reason);
@@ -118,7 +118,7 @@ HWTEST_F(DisplayManagerAdapterLiteTest, WakeUpBegin, Function | SmallTest | Leve
  * @tc.desc: test WakeUpEnd
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterLiteTest, WakeUpEnd, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterLiteTest, WakeUpEnd, TestSize.Level1)
 {
     bool ret = SingletonContainer::Get<DisplayManagerAdapterLite>().WakeUpEnd();
     ASSERT_TRUE(ret);
@@ -129,7 +129,7 @@ HWTEST_F(DisplayManagerAdapterLiteTest, WakeUpEnd, Function | SmallTest | Level2
  * @tc.desc: test SuspendBegin
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterLiteTest, SuspendBegin, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterLiteTest, SuspendBegin, TestSize.Level1)
 {
     PowerStateChangeReason reason = PowerStateChangeReason{0};
     bool ret = SingletonContainer::Get<DisplayManagerAdapterLite>().SuspendBegin(reason);
@@ -141,7 +141,7 @@ HWTEST_F(DisplayManagerAdapterLiteTest, SuspendBegin, Function | SmallTest | Lev
  * @tc.desc: test SuspendEnd
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterLiteTest, SuspendEnd, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterLiteTest, SuspendEnd, TestSize.Level1)
 {
     bool ret = SingletonContainer::Get<DisplayManagerAdapterLite>().SuspendEnd();
     ASSERT_TRUE(ret);
@@ -152,7 +152,7 @@ HWTEST_F(DisplayManagerAdapterLiteTest, SuspendEnd, Function | SmallTest | Level
  * @tc.desc: test SetDisplayState
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterLiteTest, SetDisplayState, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterLiteTest, SetDisplayState, TestSize.Level1)
 {
     DisplayState state = DisplayState{1};
     bool ret = SingletonContainer::Get<DisplayManagerAdapterLite>().SetDisplayState(state);
@@ -164,7 +164,7 @@ HWTEST_F(DisplayManagerAdapterLiteTest, SetDisplayState, Function | SmallTest | 
  * @tc.desc: test GetVirtualScreenFlag
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterLiteTest, GetVirtualScreenFlag, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerAdapterLiteTest, GetVirtualScreenFlag, TestSize.Level1)
 {
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         uint64_t screenId = 0;
@@ -178,7 +178,7 @@ HWTEST_F(DisplayManagerAdapterLiteTest, GetVirtualScreenFlag, Function | SmallTe
  * @tc.desc: SetSystemKeyboardStatus with true as parameter
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterLiteTest, SetSystemKeyboardStatus01, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerAdapterLiteTest, SetSystemKeyboardStatus01, TestSize.Level1)
 {
     auto ret = SingletonContainer::Get<DisplayManagerAdapterLite>().SetSystemKeyboardStatus(true);
     ASSERT_NE(ret, DMError::DM_OK);
@@ -189,7 +189,7 @@ HWTEST_F(DisplayManagerAdapterLiteTest, SetSystemKeyboardStatus01, Function | Sm
  * @tc.desc: SetSystemKeyboardStatus with false as parameter
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterLiteTest, SetSystemKeyboardStatus02, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerAdapterLiteTest, SetSystemKeyboardStatus02, TestSize.Level1)
 {
     auto ret = SingletonContainer::Get<DisplayManagerAdapterLite>().SetSystemKeyboardStatus(false);
     ASSERT_NE(ret, DMError::DM_OK);

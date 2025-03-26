@@ -108,7 +108,7 @@ namespace {
  * @tc.desc: connect window extension
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionConnectionTest, WindowExtensionConnection01, Function | SmallTest | Level2)
+HWTEST_F(ExtensionConnectionTest, WindowExtensionConnection01, TestSize.Level1)
 {
     AppExecFwk::ElementName element;
     element.SetBundleName("com.test.windowextension");
@@ -126,7 +126,7 @@ HWTEST_F(ExtensionConnectionTest, WindowExtensionConnection01, Function | SmallT
  * @tc.desc: Show Test
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionConnectionTest, Show, Function | SmallTest | Level2)
+HWTEST_F(ExtensionConnectionTest, Show, TestSize.Level1)
 {
     sptr<IRemoteObject> remoteObject = new(std::nothrow) IRemoteObjectMocker();
     ASSERT_NE(nullptr, remoteObject);
@@ -143,7 +143,7 @@ HWTEST_F(ExtensionConnectionTest, Show, Function | SmallTest | Level2)
  * @tc.desc: Hide Test
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionConnectionTest, Hide, Function | SmallTest | Level2)
+HWTEST_F(ExtensionConnectionTest, Hide, TestSize.Level1)
 {
     sptr<IRemoteObject> remoteObject = new(std::nothrow) IRemoteObjectMocker();
     ASSERT_NE(nullptr, remoteObject);
@@ -160,7 +160,7 @@ HWTEST_F(ExtensionConnectionTest, Hide, Function | SmallTest | Level2)
  * @tc.desc: RequestFocus Test
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionConnectionTest, RequestFocus, Function | SmallTest | Level2)
+HWTEST_F(ExtensionConnectionTest, RequestFocus, TestSize.Level1)
 {
     sptr<IRemoteObject> remoteObject = new(std::nothrow) IRemoteObjectMocker();
     ASSERT_NE(nullptr, remoteObject);
@@ -177,7 +177,7 @@ HWTEST_F(ExtensionConnectionTest, RequestFocus, Function | SmallTest | Level2)
  * @tc.desc: SetBounds Test
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionConnectionTest, SetBounds, Function | SmallTest | Level2)
+HWTEST_F(ExtensionConnectionTest, SetBounds, TestSize.Level1)
 {
     sptr<IRemoteObject> remoteObject = new(std::nothrow) IRemoteObjectMocker();
     ASSERT_NE(nullptr, remoteObject);
@@ -195,7 +195,7 @@ HWTEST_F(ExtensionConnectionTest, SetBounds, Function | SmallTest | Level2)
  * @tc.desc: OnRemoteDied Test
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionConnectionTest, OnRemoteDied01, Function | SmallTest | Level2)
+HWTEST_F(ExtensionConnectionTest, OnRemoteDied01, TestSize.Level1)
 {
     sptr<IRemoteObject> remoteObject = nullptr;
     ASSERT_NE(nullptr, connection_->pImpl_);
@@ -210,7 +210,7 @@ HWTEST_F(ExtensionConnectionTest, OnRemoteDied01, Function | SmallTest | Level2)
  * @tc.desc: OnRemoteDied Test
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionConnectionTest, OnRemoteDied02, Function | SmallTest | Level2)
+HWTEST_F(ExtensionConnectionTest, OnRemoteDied02, TestSize.Level1)
 {
     sptr<IRemoteObject> remoteObject = new(std::nothrow) IRemoteObjectMocker();
     ASSERT_NE(nullptr, remoteObject);
@@ -226,7 +226,7 @@ HWTEST_F(ExtensionConnectionTest, OnRemoteDied02, Function | SmallTest | Level2)
  * @tc.desc: OnRemoteDied Test
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionConnectionTest, OnRemoteDied03, Function | SmallTest | Level2)
+HWTEST_F(ExtensionConnectionTest, OnRemoteDied03, TestSize.Level1)
 {
     sptr<IRemoteObject> remoteObject = new(std::nothrow) IRemoteObjectMocker();
     ASSERT_NE(nullptr, remoteObject);
@@ -244,7 +244,7 @@ HWTEST_F(ExtensionConnectionTest, OnRemoteDied03, Function | SmallTest | Level2)
  * @tc.desc: OnAbilityConnectDone Test
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionConnectionTest, OnAbilityConnectDone01, Function | SmallTest | Level2)
+HWTEST_F(ExtensionConnectionTest, OnAbilityConnectDone01, TestSize.Level1)
 {
     AppExecFwk::ElementName element;
     sptr<IRemoteObject> remoteObject = nullptr;
@@ -258,7 +258,7 @@ HWTEST_F(ExtensionConnectionTest, OnAbilityConnectDone01, Function | SmallTest |
  * @tc.desc: OnAbilityConnectDone Test
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionConnectionTest, OnAbilityConnectDone02, Function | SmallTest | Level2)
+HWTEST_F(ExtensionConnectionTest, OnAbilityConnectDone02, TestSize.Level1)
 {
     AppExecFwk::ElementName element;
     sptr<IRemoteObject> remoteObject = new(std::nothrow) IRemoteObjectMocker();
@@ -273,7 +273,7 @@ HWTEST_F(ExtensionConnectionTest, OnAbilityConnectDone02, Function | SmallTest |
  * @tc.desc: OnAbilityConnectDone Test
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionConnectionTest, OnAbilityConnectDone03, Function | SmallTest | Level2)
+HWTEST_F(ExtensionConnectionTest, OnAbilityConnectDone03, TestSize.Level1)
 {
     AppExecFwk::ElementName element;
     sptr<IRemoteObject> remoteObject = new(std::nothrow) IRemoteObjectMocker();
@@ -294,7 +294,7 @@ HWTEST_F(ExtensionConnectionTest, OnAbilityConnectDone03, Function | SmallTest |
  * @tc.desc: OnAbilityConnectDone Test
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionConnectionTest, OnAbilityDisconnectDone01, Function | SmallTest | Level2)
+HWTEST_F(ExtensionConnectionTest, OnAbilityDisconnectDone01, TestSize.Level1)
 {
     AppExecFwk::ElementName element;
     int resultCode = 0;
@@ -307,7 +307,7 @@ HWTEST_F(ExtensionConnectionTest, OnAbilityDisconnectDone01, Function | SmallTes
  * @tc.desc: OnAbilityConnectDone Test
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionConnectionTest, OnAbilityDisconnectDone02, Function | SmallTest | Level2)
+HWTEST_F(ExtensionConnectionTest, OnAbilityDisconnectDone02, TestSize.Level1)
 {
     AppExecFwk::ElementName element;
     int resultCode = 0;
