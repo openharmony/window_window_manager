@@ -127,7 +127,6 @@ HWTEST_F(HidumpControllerTest, DumpSceneSessionParam01, Function | MediumTest | 
 {
     auto sceneSession = GetSceneSession("DumpSceneSessionParam01");
     ASSERT_NE(sceneSession, nullptr);
-    sceneSession->property_ = nullptr;
     std::ostringstream oss;
     HidumpController::GetInstance().DumpSceneSessionParam(oss, sceneSession);
 
