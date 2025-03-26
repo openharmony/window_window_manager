@@ -2292,6 +2292,36 @@ HWTEST_F(SceneSessionManagerStubTest, HandleUpdateSessionScreenLock, Function | 
 }
 
 /**
+ * @tc.name: HandleAddSkipSelfWhenShowOnVirtualScreenList
+ * @tc.desc: test HandleAddSkipSelfWhenShowOnVirtualScreenList
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleAddSkipSelfWhenShowOnVirtualScreenList, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteUint64(1u);
+    data.WriteInt32(1);
+    int res = stub_->HandleAddSkipSelfWhenShowOnVirtualScreenList(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleRemoveSkipSelfWhenShowOnVirtualScreenList
+ * @tc.desc: test HandleRemoveSkipSelfWhenShowOnVirtualScreenList
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleRemoveSkipSelfWhenShowOnVirtualScreenList, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteUint64(1u);
+    data.WriteInt32(1);
+    int res = stub_->HandleRemoveSkipSelfWhenShowOnVirtualScreenList(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
  * @tc.name: HandleIsPcWindow
  * @tc.desc: test HandleIsPcWindow
  * @tc.type: FUNC
