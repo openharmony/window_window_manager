@@ -72,7 +72,7 @@ namespace {
  * @tc.desc: to raise to app top, normal
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRaiseToAppTopTest, NormalRaise1, Function | MediumTest | Level3)
+HWTEST_F(WindowRaiseToAppTopTest, NormalRaise1, TestSize.Level1)
 {
     fullInfo_.name  = "mainWindow.1";
     sptr<Window> mainWindow = Utils::CreateTestWindow(fullInfo_);
@@ -113,7 +113,7 @@ HWTEST_F(WindowRaiseToAppTopTest, NormalRaise1, Function | MediumTest | Level3)
  * @tc.desc: to raise to app top, with dialog
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRaiseToAppTopTest, RaiseWithDialog1, Function | MediumTest | Level3)
+HWTEST_F(WindowRaiseToAppTopTest, RaiseWithDialog1, TestSize.Level1)
 {
     fullInfo_.name  = "mainWindow.1";
     sptr<Window> mainWindow = Utils::CreateTestWindow(fullInfo_);
@@ -161,7 +161,7 @@ HWTEST_F(WindowRaiseToAppTopTest, RaiseWithDialog1, Function | MediumTest | Leve
  * @tc.desc: to raise to app top, in hide
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRaiseToAppTopTest, RaiseWhenHide, Function | MediumTest | Level3)
+HWTEST_F(WindowRaiseToAppTopTest, RaiseWhenHide, TestSize.Level1)
 {
     fullInfo_.name  = "mainWindow.1";
     sptr<Window> mainWindow = Utils::CreateTestWindow(fullInfo_);
@@ -212,7 +212,7 @@ HWTEST_F(WindowRaiseToAppTopTest, RaiseWhenHide, Function | MediumTest | Level3)
  * @tc.desc: to raise to app top, not app subwindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRaiseToAppTopTest, NotAppSubWindow, Function | MediumTest | Level3)
+HWTEST_F(WindowRaiseToAppTopTest, NotAppSubWindow, TestSize.Level1)
 {
     CommonTestUtils::GuaranteeFloatWindowPermission("window_raisetoapptop_test");
     fullInfo_.name  = "mainWindow.1";

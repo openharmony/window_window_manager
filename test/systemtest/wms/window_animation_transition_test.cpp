@@ -102,7 +102,7 @@ namespace {
  * @tc.type: FUNC
  * @tc.require: issueI5NDLK
  */
-HWTEST_F(WindowAnimationTransitionTest, AnimationTransitionTest01, Function | MediumTest | Level3)
+HWTEST_F(WindowAnimationTransitionTest, AnimationTransitionTest01, TestSize.Level1)
 {
     const sptr<Window>& window = Utils::CreateTestWindow(windowInfo_);
     ASSERT_NE(window, nullptr);
@@ -123,7 +123,7 @@ HWTEST_F(WindowAnimationTransitionTest, AnimationTransitionTest01, Function | Me
  * @tc.type: FUNC
  * @tc.require: issueI5NDLK
  */
-HWTEST_F(WindowAnimationTransitionTest, AnimationTransitionTest02, Function | MediumTest | Level3)
+HWTEST_F(WindowAnimationTransitionTest, AnimationTransitionTest02, TestSize.Level1)
 {
     const sptr<Window>& window = Utils::CreateTestWindow(windowInfo_);
     ASSERT_NE(window, nullptr);
@@ -142,7 +142,7 @@ HWTEST_F(WindowAnimationTransitionTest, AnimationTransitionTest02, Function | Me
  * @tc.type: FUNC
  * @tc.require: issueI5NDLK
  */
-HWTEST_F(WindowAnimationTransitionTest, AnimationTransitionTest03, Function | MediumTest | Level3)
+HWTEST_F(WindowAnimationTransitionTest, AnimationTransitionTest03, TestSize.Level1)
 {
     const sptr<Window>& window = Utils::CreateTestWindow(windowInfo_);
     ASSERT_NE(window, nullptr);
@@ -158,7 +158,7 @@ HWTEST_F(WindowAnimationTransitionTest, AnimationTransitionTest03, Function | Me
  * @tc.type: FUNC
  * @tc.require: issueI5NDLK
  */
-HWTEST_F(WindowAnimationTransitionTest, AnimationTransitionTest04, Function | MediumTest | Level3)
+HWTEST_F(WindowAnimationTransitionTest, AnimationTransitionTest04, TestSize.Level1)
 {
     const sptr<Window>& window = Utils::CreateTestWindow(windowInfo_);
     ASSERT_NE(window, nullptr);

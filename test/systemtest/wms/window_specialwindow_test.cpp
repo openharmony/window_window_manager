@@ -54,7 +54,7 @@ namespace {
  * @tc.desc: SubWindowModal
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSpecialWindowTest, SetSubWindowModal01, Function | MediumTest | Level0)
+HWTEST_F(WindowSpecialWindowTest, SetSubWindowModal01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window1_1");
@@ -84,7 +84,7 @@ HWTEST_F(WindowSpecialWindowTest, SetSubWindowModal01, Function | MediumTest | L
  * @tc.desc: SubWindowModal
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSpecialWindowTest, SetSubWindowModal02, Function | MediumTest | Level0)
+HWTEST_F(WindowSpecialWindowTest, SetSubWindowModal02, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window1_2");
@@ -114,7 +114,7 @@ HWTEST_F(WindowSpecialWindowTest, SetSubWindowModal02, Function | MediumTest | L
  * @tc.desc: SubWindowModal
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSpecialWindowTest, SetSubWindowModal04, Function | MediumTest | Level0)
+HWTEST_F(WindowSpecialWindowTest, SetSubWindowModal04, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window1_4");
@@ -144,7 +144,7 @@ HWTEST_F(WindowSpecialWindowTest, SetSubWindowModal04, Function | MediumTest | L
  * @tc.desc: SubWindowModal
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSpecialWindowTest, SetSubWindowModal05, Function | MediumTest | Level0)
+HWTEST_F(WindowSpecialWindowTest, SetSubWindowModal05, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window1_5");
@@ -174,7 +174,7 @@ HWTEST_F(WindowSpecialWindowTest, SetSubWindowModal05, Function | MediumTest | L
  * @tc.desc: SubWindowModal
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSpecialWindowTest, SetSubWindowModal06, Function | MediumTest | Level0)
+HWTEST_F(WindowSpecialWindowTest, SetSubWindowModal06, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window1_6");
@@ -204,7 +204,7 @@ HWTEST_F(WindowSpecialWindowTest, SetSubWindowModal06, Function | MediumTest | L
  * @tc.desc: SubWindowModal
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSpecialWindowTest, SetSubWindowModal07, Function | MediumTest | Level0)
+HWTEST_F(WindowSpecialWindowTest, SetSubWindowModal07, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window1_7");
@@ -234,7 +234,7 @@ HWTEST_F(WindowSpecialWindowTest, SetSubWindowModal07, Function | MediumTest | L
  * @tc.desc: SubWindowModal
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSpecialWindowTest, SetSubWindowModal08, Function | MediumTest | Level0)
+HWTEST_F(WindowSpecialWindowTest, SetSubWindowModal08, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window1_8");
@@ -268,7 +268,7 @@ HWTEST_F(WindowSpecialWindowTest, SetSubWindowModal08, Function | MediumTest | L
  * @tc.desc: SubWindowModal
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSpecialWindowTest, SetSubWindowModal09, Function | MediumTest | Level0)
+HWTEST_F(WindowSpecialWindowTest, SetSubWindowModal09, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window1_9");
@@ -298,7 +298,7 @@ HWTEST_F(WindowSpecialWindowTest, SetSubWindowModal09, Function | MediumTest | L
  * @tc.desc: SubWindowModal
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSpecialWindowTest, SetSubWindowModal10, Function | MediumTest | Level0)
+HWTEST_F(WindowSpecialWindowTest, SetSubWindowModal10, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window1_10");
@@ -328,7 +328,7 @@ HWTEST_F(WindowSpecialWindowTest, SetSubWindowModal10, Function | MediumTest | L
  * @tc.desc: WindowModal
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSpecialWindowTest, SetWindowModal01, Function | MediumTest | Level0)
+HWTEST_F(WindowSpecialWindowTest, SetWindowModal01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window4_1");
@@ -358,7 +358,7 @@ HWTEST_F(WindowSpecialWindowTest, SetWindowModal01, Function | MediumTest | Leve
  * @tc.desc: WindowModal
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSpecialWindowTest, SetWindowModal02, Function | MediumTest | Level0)
+HWTEST_F(WindowSpecialWindowTest, SetWindowModal02, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window4_2");
@@ -388,7 +388,7 @@ HWTEST_F(WindowSpecialWindowTest, SetWindowModal02, Function | MediumTest | Leve
  * @tc.desc: WindowModal
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSpecialWindowTest, SetWindowModal03, Function | MediumTest | Level0)
+HWTEST_F(WindowSpecialWindowTest, SetWindowModal03, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window4_3");
@@ -418,7 +418,7 @@ HWTEST_F(WindowSpecialWindowTest, SetWindowModal03, Function | MediumTest | Leve
  * @tc.desc: setWindowMask
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSpecialWindowTest, setWindowMask01, Function | MediumTest | Level0)
+HWTEST_F(WindowSpecialWindowTest, setWindowMask01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window3_1");
@@ -450,7 +450,7 @@ HWTEST_F(WindowSpecialWindowTest, setWindowMask01, Function | MediumTest | Level
  * @tc.desc: setWindowMask
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSpecialWindowTest, setWindowMask02, Function | MediumTest | Level0)
+HWTEST_F(WindowSpecialWindowTest, setWindowMask02, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window3_2");
@@ -482,7 +482,7 @@ HWTEST_F(WindowSpecialWindowTest, setWindowMask02, Function | MediumTest | Level
  * @tc.desc: setWindowMask
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSpecialWindowTest, setWindowMask03, Function | MediumTest | Level0)
+HWTEST_F(WindowSpecialWindowTest, setWindowMask03, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window3_3");

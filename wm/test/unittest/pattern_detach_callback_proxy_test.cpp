@@ -50,7 +50,7 @@ namespace {
  * @tc.desc: OnPatternDetach Test
  * @tc.type: FUNC
  */
-HWTEST_F(PatternDetachCallbackProxyTest, OnPatternDetach, Function | SmallTest | Level2)
+HWTEST_F(PatternDetachCallbackProxyTest, OnPatternDetach, TestSize.Level1)
 {
     int32_t persisitentId = 0;
     int resultValue = 0;

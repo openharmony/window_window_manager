@@ -64,7 +64,7 @@ namespace {
  * @tc.desc: create window and show keyboard.
  * @tc.type: FUNC
  */
-HWTEST_F(WindowInputMethodTest, ShowKeyboard01, Function | MediumTest | Level3)
+HWTEST_F(WindowInputMethodTest, ShowKeyboard01, TestSize.Level1)
 {
     WindowTestUtils::TestWindowInfo windowInfo = {
         .name = "ShowKeyboard",

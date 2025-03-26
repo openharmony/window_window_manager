@@ -106,7 +106,7 @@ namespace {
  * @tc.desc: move missions to foreground
  * @tc.type: FUNC
  */
-HWTEST_F(WindowGroupMgrTest, MoveMissionsToForeground01, Function | SmallTest | Level2)
+HWTEST_F(WindowGroupMgrTest, MoveMissionsToForeground01, TestSize.Level1)
 {
     WLOGI("MoveMissionsToForeground01");
     auto rs = windowGroupMgr_->MoveMissionsToForeground({1, 2, 3}, 2);
@@ -120,7 +120,7 @@ HWTEST_F(WindowGroupMgrTest, MoveMissionsToForeground01, Function | SmallTest | 
  * @tc.desc: move missions to background
  * @tc.type: FUNC
  */
-HWTEST_F(WindowGroupMgrTest, MoveMissionsToBackground01, Function | SmallTest | Level2)
+HWTEST_F(WindowGroupMgrTest, MoveMissionsToBackground01, TestSize.Level1)
 {
     std::vector<int32_t> moveRs;
     auto rs = windowGroupMgr_->MoveMissionsToBackground({1, 2, 3}, moveRs);
@@ -133,7 +133,7 @@ HWTEST_F(WindowGroupMgrTest, MoveMissionsToBackground01, Function | SmallTest | 
  * @tc.desc: OnWindowDestroyed test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowGroupMgrTest, OnWindowDestroyed01, Function | SmallTest | Level2)
+HWTEST_F(WindowGroupMgrTest, OnWindowDestroyed01, TestSize.Level1)
 {
     windowGroupMgr_->OnWindowDestroyed(1);
     ASSERT_EQ(0, windowGroupMgr_->backupWindowModes_.count(1));

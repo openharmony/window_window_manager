@@ -64,7 +64,7 @@ namespace {
  * @tc.desc: Window Display Information Change
  * @tc.type: FUNC
  */
-HWTEST_F(WindowDisplayChangeAdapterTest, OnChange, Function | SmallTest | Level2)
+HWTEST_F(WindowDisplayChangeAdapterTest, OnChange, TestSize.Level1)
 {
     sptr<IRemoteObject> targetToken = new (std::nothrow) IRemoteObjectMocker();
     ASSERT_NE(nullptr, targetToken);
@@ -81,7 +81,7 @@ HWTEST_F(WindowDisplayChangeAdapterTest, OnChange, Function | SmallTest | Level2
  * @tc.desc: notify Display Information Change
  * @tc.type: FUNC
  */
-HWTEST_F(WindowDisplayChangeAdapterTest, OnDisplayInfoChange, Function | SmallTest | Level2)
+HWTEST_F(WindowDisplayChangeAdapterTest, OnDisplayInfoChange, TestSize.Level1)
 {
     sptr<IRemoteObject> targetToken = new (std::nothrow) IRemoteObjectMocker();
     ASSERT_NE(nullptr, targetToken);
