@@ -5157,7 +5157,8 @@ void WindowSceneSessionImpl::NotifyDisplayInfoChange(const sptr<DisplayInfo>& in
     float density = GetVirtualPixelRatio(displayInfo);
     DisplayOrientation orientation = displayInfo->GetDisplayOrientation();
 
-    if (context_ == nullptr) {
+    // skip scb process
+    if (context_ == nullptr || context_->GetBundleName() == AppExecFwk::Constants::SCENE_BOARD_BUNDLE_NAME) {
         TLOGE(WmsLogTag::DMS, "id:%{public}d failed, context is null.", GetPersistentId());
         return;
     }
