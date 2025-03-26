@@ -151,11 +151,12 @@ void DisplayAniListener::OnChange(DisplayId id)
         ani_boolean nullRes;
         env_->Reference_IsUndefined(oneAniCallback, &undefRes);
         env_->Reference_IsNull(oneAniCallback, &nullRes);
-        if (undefRes == 0) {
+        // judge is null or undefined
+        if (undefRes == 1) {
             TLOGE(WmsLogTag::DMS, "[ANI] oneAniCallback undefRes, return");
             return;
         }
-        if (nullRes == 0) {
+        if (nullRes == 1) {
             TLOGE(WmsLogTag::DMS, "[ANI] oneAniCallback null, return");
             return;
         }
@@ -171,6 +172,11 @@ void DisplayAniListener::OnFoldStatusChanged(FoldStatus foldStatus)
     std::lock_guard<std::mutex> lock(mtx_);
     TLOGI(WmsLogTag::DMS, "[ANI] OnFoldStatusChanged is called, foldStatus: %{public}u",
         static_cast<uint32_t>(foldStatus));
+    auto thisListener = weakRef_.promote();
+    if (thisListener == nullptr || env_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] this listener or env is nullptr");
+        return;
+    }
     if (aniCallBack_.empty()) {
         TLOGE(WmsLogTag::DMS, "[ANI] OnFoldStatusChanged not register!");
         return;
@@ -179,19 +185,13 @@ void DisplayAniListener::OnFoldStatusChanged(FoldStatus foldStatus)
         TLOGE(WmsLogTag::DMS, "[ANI] OnFoldStatusChanged not this event, return");
         return;
     }
-    auto thisListener = weakRef_.promote();
-    if (thisListener == nullptr || env_ == nullptr) {
-        TLOGE(WmsLogTag::DMS, "[ANI] this listener or env is nullptr");
-        return;
-    }
     if (env_ != nullptr) {
-        auto it = aniCallBack_.find(EVENT_ADD);
+        auto it = aniCallBack_.find(EVENT_FOLD_STATUS_CHANGED);
         for (auto oneAniCallback : it->second) {
-            // 修改实现方法（"invoke"在的这个字段）
-            ani_status ret = thisListener->CallAniMethodVoid(static_cast<ani_object>(oneAniCallback),
-                "L@ohos/display/display/Callback", "invoke", "I:V", static_cast<uint32_t>(foldStatus));
+            ani_status ret = DisplayAniUtils::CallAniFunctionVoid(env_, "L@ohos/display/display;", "foldStatusCallback",
+                "Lstd/core/Object;I:V", oneAniCallback, static_cast<ani_int>(foldStatus));
             if (ret != ANI_OK) {
-                TLOGE(WmsLogTag::DMS, "[ANI] OnCreate: Failed to SendEvent.");
+                TLOGE(WmsLogTag::DMS, "[ANI] OnFoldStatusChanged: Failed to trigger OnFoldStatusChanged.");
                 break;
             }
         }
@@ -205,30 +205,30 @@ void DisplayAniListener::OnFoldAngleChanged(std::vector<float> foldAngles)
 void DisplayAniListener::OnCaptureStatusChanged(bool isCapture)
 {
 }
-void DisplayAniListener::OnDisplayModeChanged(FoldDisplayMode displayMode)
+void DisplayAniListener::OnDisplayModeChanged(FoldDisplayMode foldDisplayMode)
 {
     std::lock_guard<std::mutex> lock(mtx_);
-    TLOGI(WmsLogTag::DMS, "[ANI] OnFoldStatusChanged is called, foldStatus: %{public}u",
-        static_cast<uint32_t>(displayMode));
-    if (aniCallBack_.empty()) {
-        TLOGE(WmsLogTag::DMS, "[ANI] OnFoldStatusChanged not register!");
-        return;
-    }
-    if (aniCallBack_.find(EVENT_DISPLAY_MODE_CHANGED) == aniCallBack_.end()) {
-        TLOGE(WmsLogTag::DMS, "[ANI] OnFoldStatusChanged not this event, return");
-        return;
-    }
+    TLOGI(WmsLogTag::DMS, "[ANI] OnDisplayModeChanged is called, foldDisplayMode: %{public}u",
+        static_cast<uint32_t>(foldDisplayMode));
     auto thisListener = weakRef_.promote();
     if (thisListener == nullptr || env_ == nullptr) {
         TLOGE(WmsLogTag::DMS, "[ANI] this listener or env is nullptr");
         return;
     }
+    if (aniCallBack_.empty()) {
+        TLOGE(WmsLogTag::DMS, "[ANI] OnDisplayModeChanged not register!");
+        return;
+    }
+    if (aniCallBack_.find(EVENT_DISPLAY_MODE_CHANGED) == aniCallBack_.end()) {
+        TLOGE(WmsLogTag::DMS, "[ANI] OnDisplayModeChanged not this event, return");
+        return;
+    }
     if (env_ != nullptr) {
-        auto it = aniCallBack_.find(EVENT_ADD);
+        auto it = aniCallBack_.find(EVENT_DISPLAY_MODE_CHANGED);
         for (auto oneAniCallback : it->second) {
-            // 修改实现方法（"invoke"在的这个字段）
-            ani_status ret = thisListener->CallAniMethodVoid(static_cast<ani_object>(oneAniCallback),
-                "L@ohos/display/display/Callback", "invoke", "I:V", static_cast<ani_int>(displayMode));
+            ani_status ret = DisplayAniUtils::CallAniFunctionVoid(env_, "L@ohos/display/display;",
+                "foldDisplayModeCallback", "Lstd/core/Object;I:V", oneAniCallback,
+                static_cast<ani_int>(foldDisplayMode));
             if (ret != ANI_OK) {
                 TLOGE(WmsLogTag::DMS, "[ANI] OnDisplayModeChanged: Failed to SendEvent.");
                 break;

@@ -226,14 +226,24 @@ void DisplayManagerAni::onRegisterCallback(ani_env* env, ani_string type, ani_re
     }
     // add listener to map
     jsCbMap_[typeString][callback] = displayAniListener;
+    // invoke callback manually
     if (typeString == EVENT_ADD) {
         displayAniListener->OnCreate(1);
+    } else if (typeString == EVENT_CHANGE) {
+        TLOGI(WmsLogTag::DMS, "exe callback type change %{public}s", typeString.c_str());
+        displayAniListener->OnChange(0);
+    } else if (typeString == EVENT_FOLD_STATUS_CHANGED) {
+        TLOGI(WmsLogTag::DMS, "exe event fold status change %{public}s", typeString.c_str());
+        displayAniListener->OnFoldStatusChanged(FoldStatus::UNKNOWN);
+    } else if (typeString == EVENT_DISPLAY_MODE_CHANGED) {
+        TLOGI(WmsLogTag::DMS, "exe event fold mode change %{public}s", typeString.c_str());
+        displayAniListener->OnDisplayModeChanged(FoldDisplayMode::UNKNOWN);
     }
 }
 
 DmErrorCode DisplayManagerAni::processRegisterCallback(ani_env* env, std::string& typeStr,
     sptr<DisplayAniListener> displayAniListener)
-    {
+{
     DmErrorCode ret = DmErrorCode::DM_ERROR_INVALID_PARAM;
     if (typeStr == EVENT_ADD || typeStr == EVENT_REMOVE || typeStr == EVENT_CHANGE) {
         TLOGI(WmsLogTag::DMS, "processRegisterCallback %{public}s", typeStr.c_str());
