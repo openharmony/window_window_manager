@@ -76,7 +76,7 @@ namespace {
  * @tc.desc: test function : RegisterPostureCallback
  * @tc.type: FUNC
  */
-HWTEST_F(SecondaryFoldSensorManagerTest, RegisterPostureCallback01, Function | SmallTest | Level3)
+HWTEST_F(SecondaryFoldSensorManagerTest, RegisterPostureCallback01, TestSize.Level1)
 {
     SecondaryFoldSensorManager::GetInstance().RegisterPostureCallback();
     EXPECT_FALSE(SecondaryFoldSensorManager::GetInstance().IsPostureUserCallbackInvalid());
@@ -87,7 +87,7 @@ HWTEST_F(SecondaryFoldSensorManagerTest, RegisterPostureCallback01, Function | S
  * @tc.desc: test function : UnRegisterPostureCallback
  * @tc.type: FUNC
  */
-HWTEST_F(SecondaryFoldSensorManagerTest, UnRegisterPostureCallback01, Function | SmallTest | Level3)
+HWTEST_F(SecondaryFoldSensorManagerTest, UnRegisterPostureCallback01, TestSize.Level1)
 {
     SecondaryFoldSensorManager::GetInstance().UnRegisterPostureCallback();
     EXPECT_FALSE(SecondaryFoldSensorManager::GetInstance().IsPostureUserCallbackInvalid());
@@ -98,7 +98,7 @@ HWTEST_F(SecondaryFoldSensorManagerTest, UnRegisterPostureCallback01, Function |
  * @tc.desc: test function : RegisterHallCallback
  * @tc.type: FUNC
  */
-HWTEST_F(SecondaryFoldSensorManagerTest, RegisterHallCallback01, Function | SmallTest | Level3)
+HWTEST_F(SecondaryFoldSensorManagerTest, RegisterHallCallback01, TestSize.Level1)
 {
     SecondaryFoldSensorManager::GetInstance().RegisterHallCallback();
     EXPECT_FALSE(SecondaryFoldSensorManager::GetInstance().IsHallUserCallbackInvalid());
@@ -109,7 +109,7 @@ HWTEST_F(SecondaryFoldSensorManagerTest, RegisterHallCallback01, Function | Smal
  * @tc.desc: test function : UnRegisterHallCallback
  * @tc.type: FUNC
  */
-HWTEST_F(SecondaryFoldSensorManagerTest, UnRegisterHallCallback01, Function | SmallTest | Level3)
+HWTEST_F(SecondaryFoldSensorManagerTest, UnRegisterHallCallback01, TestSize.Level1)
 {
     SecondaryFoldSensorManager::GetInstance().UnRegisterHallCallback();
     EXPECT_FALSE(SecondaryFoldSensorManager::GetInstance().IsHallUserCallbackInvalid());
@@ -136,7 +136,7 @@ static std::vector<float> HandlePostureData(float postureBc, float postureAb, fl
  * @tc.desc: test function : HandlePostureData
  * @tc.type: FUNC
  */
-HWTEST_F(SecondaryFoldSensorManagerTest, HandlePostureData01, Function | SmallTest | Level3)
+HWTEST_F(SecondaryFoldSensorManagerTest, HandlePostureData01, TestSize.Level1)
 {
     OHOS::Rosen::SecondaryFoldSensorManager::GetInstance().HandlePostureData(nullptr);
     std::vector<float> postures = SecondaryFoldSensorManager::GetInstance().GetGlobalAngle();
@@ -151,7 +151,7 @@ HWTEST_F(SecondaryFoldSensorManagerTest, HandlePostureData01, Function | SmallTe
  * @tc.desc: test function : HandlePostureData
  * @tc.type: FUNC
  */
-HWTEST_F(SecondaryFoldSensorManagerTest, HandlePostureData02, Function | SmallTest | Level3)
+HWTEST_F(SecondaryFoldSensorManagerTest, HandlePostureData02, TestSize.Level1)
 {
     SensorEvent postureEvent = {
         .dataLen = sizeof(PostureData),
@@ -170,7 +170,7 @@ HWTEST_F(SecondaryFoldSensorManagerTest, HandlePostureData02, Function | SmallTe
  * @tc.desc: test function : HandlePostureData
  * @tc.type: FUNC
  */
-HWTEST_F(SecondaryFoldSensorManagerTest, HandlePostureData03, Function | SmallTest | Level3)
+HWTEST_F(SecondaryFoldSensorManagerTest, HandlePostureData03, TestSize.Level1)
 {
     float postureBc = 181.0F;
     float postureAb = 160.0F;
@@ -187,7 +187,7 @@ HWTEST_F(SecondaryFoldSensorManagerTest, HandlePostureData03, Function | SmallTe
  * @tc.desc: test function : HandlePostureData
  * @tc.type: FUNC
  */
-HWTEST_F(SecondaryFoldSensorManagerTest, HandlePostureData04, Function | SmallTest | Level3)
+HWTEST_F(SecondaryFoldSensorManagerTest, HandlePostureData04, TestSize.Level1)
 {
     std::vector<float> postures = HandlePostureData(CORRECT_POSTURE_BC, CORRECT_POSTURE_AB, CORRECT_POSTURE_AB_ANTI);
     EXPECT_EQ(postures.size(), SECONDARY_POSTURE_SIZE);
@@ -217,7 +217,7 @@ static std::vector<uint16_t> HandleHallDataExt(uint16_t hallBc, uint16_t hallAb)
  * @tc.desc: test function : HandleHallDataExt
  * @tc.type: FUNC
  */
-HWTEST_F(SecondaryFoldSensorManagerTest, HandleHallDataExt01, Function | SmallTest | Level3)
+HWTEST_F(SecondaryFoldSensorManagerTest, HandleHallDataExt01, TestSize.Level1)
 {
     OHOS::Rosen::SecondaryFoldSensorManager::GetInstance().HandleHallDataExt(nullptr);
     std::vector<uint16_t> halls = SecondaryFoldSensorManager::GetInstance().GetGlobalHall();
@@ -231,7 +231,7 @@ HWTEST_F(SecondaryFoldSensorManagerTest, HandleHallDataExt01, Function | SmallTe
  * @tc.desc: test function : HandleHallDataExt
  * @tc.type: FUNC
  */
-HWTEST_F(SecondaryFoldSensorManagerTest, HandleHallDataExt02, Function | SmallTest | Level3)
+HWTEST_F(SecondaryFoldSensorManagerTest, HandleHallDataExt02, TestSize.Level1)
 {
     SensorEvent hallEvent = {
         .dataLen = sizeof(FoldScreenSensorManager::EXTHALLData),
@@ -249,7 +249,7 @@ HWTEST_F(SecondaryFoldSensorManagerTest, HandleHallDataExt02, Function | SmallTe
  * @tc.desc: test function : HandleHallDataExt
  * @tc.type: FUNC
  */
-HWTEST_F(SecondaryFoldSensorManagerTest, HandleHallDataExt03, Function | SmallTest | Level3)
+HWTEST_F(SecondaryFoldSensorManagerTest, HandleHallDataExt03, TestSize.Level1)
 {
     uint16_t hallBc = 2;
     uint16_t hallAb = 0;
@@ -264,7 +264,7 @@ HWTEST_F(SecondaryFoldSensorManagerTest, HandleHallDataExt03, Function | SmallTe
  * @tc.desc: test function : HandleHallDataExt
  * @tc.type: FUNC
  */
-HWTEST_F(SecondaryFoldSensorManagerTest, HandleHallDataExt04, Function | SmallTest | Level3)
+HWTEST_F(SecondaryFoldSensorManagerTest, HandleHallDataExt04, TestSize.Level1)
 {
     std::vector<uint16_t> halls = HandleHallDataExt(CORRECT_HALL_BC, CORRECT_HALL_AB);
     EXPECT_EQ(halls.size(), SECONDARY_HALL_SIZE);

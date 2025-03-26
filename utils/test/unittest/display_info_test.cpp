@@ -52,7 +52,7 @@ namespace {
  * @tc.desc: Marshalling Unmarshalling test
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayInfoTest, MarshallingUnmarshalling, Function | SmallTest | Level2)
+HWTEST_F(DisplayInfoTest, MarshallingUnmarshalling, TestSize.Level1)
 {
     DisplayInfo displayInfoSrc;
     displayInfoSrc.SetDisplayId(1);

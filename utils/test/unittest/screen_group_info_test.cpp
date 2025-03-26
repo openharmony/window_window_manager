@@ -52,7 +52,7 @@ namespace {
  * @tc.desc: Marshalling Unmarshalling test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenGroupInfoTest, MarshallingUnmarshalling, Function | SmallTest | Level1)
+HWTEST_F(ScreenGroupInfoTest, MarshallingUnmarshalling, TestSize.Level1)
 {
     std::vector<ScreenId> screenIds;
     screenIds.push_back(1);
@@ -78,7 +78,7 @@ HWTEST_F(ScreenGroupInfoTest, MarshallingUnmarshalling, Function | SmallTest | L
  * @tc.desc: InnerUnmarshalling test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenGroupInfoTest, InnerUnmarshalling, Function | SmallTest | Level1)
+HWTEST_F(ScreenGroupInfoTest, InnerUnmarshalling, TestSize.Level1)
 {
     ScreenGroupInfo screenGroupInfoSrc;
     Parcel parcel;
@@ -92,7 +92,7 @@ HWTEST_F(ScreenGroupInfoTest, InnerUnmarshalling, Function | SmallTest | Level1)
  * @tc.desc: Marshalling test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenGroupInfoTest, Marshalling, Function | SmallTest | Level1)
+HWTEST_F(ScreenGroupInfoTest, Marshalling, TestSize.Level1)
 {
     ScreenGroupInfo screenGroupInfoSrc;
     Parcel parcel;

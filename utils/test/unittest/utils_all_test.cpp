@@ -69,7 +69,7 @@ namespace {
  * @tc.desc: test AgentDeathRecipient::OnRemoteDied
  * @tc.type: FUNC
  */
-HWTEST_F(UtilsAllTest, ADROnRemoteDied01, Function | SmallTest | Level2)
+HWTEST_F(UtilsAllTest, ADROnRemoteDied01, TestSize.Level1)
 {
     sptr<AgentDeathRecipient> deathRecipient = new AgentDeathRecipient(nullptr);
 
@@ -91,7 +91,7 @@ HWTEST_F(UtilsAllTest, ADROnRemoteDied01, Function | SmallTest | Level2)
  * @tc.desc: test PerformReporter::count
  * @tc.type: FUNC
  */
-HWTEST_F(UtilsAllTest, PRCount01, Function | SmallTest | Level2)
+HWTEST_F(UtilsAllTest, PRCount01, TestSize.Level1)
 {
     std::vector<int64_t> timeSpiltsMs = {0, 1, 2};
     PerformReporter reporter = PerformReporter("test", timeSpiltsMs);
@@ -107,7 +107,7 @@ HWTEST_F(UtilsAllTest, PRCount01, Function | SmallTest | Level2)
  * @tc.desc: test SingletonContainer::AddSingleton
  * @tc.type: FUNC
  */
-HWTEST_F(UtilsAllTest, SCAddSingleton01, Function | SmallTest | Level2)
+HWTEST_F(UtilsAllTest, SCAddSingleton01, TestSize.Level1)
 {
     auto& singletonContainer = SingletonContainer::GetInstance();
 
@@ -130,7 +130,7 @@ HWTEST_F(UtilsAllTest, SCAddSingleton01, Function | SmallTest | Level2)
  * @tc.desc: test SingletonContainer::AddSingleton
  * @tc.type: FUNC
  */
-HWTEST_F(UtilsAllTest, SCSetSingleton01, Function | SmallTest | Level2)
+HWTEST_F(UtilsAllTest, SCSetSingleton01, TestSize.Level1)
 {
     auto& singletonContainer = SingletonContainer::GetInstance();
 
@@ -159,7 +159,7 @@ HWTEST_F(UtilsAllTest, SCSetSingleton01, Function | SmallTest | Level2)
  * @tc.desc: test SingletonContainer::DependOn
  * @tc.type: FUNC
  */
-HWTEST_F(UtilsAllTest, SCDependOn01, Function | SmallTest | Level2)
+HWTEST_F(UtilsAllTest, SCDependOn01, TestSize.Level1)
 {
     auto& singletonContainer = SingletonContainer::GetInstance();
 
@@ -186,7 +186,7 @@ HWTEST_F(UtilsAllTest, SCDependOn01, Function | SmallTest | Level2)
  * @tc.desc: test SurfaceReaderHandlerImpl::OnImageAvailable
  * @tc.type: FUNC
  */
-HWTEST_F(UtilsAllTest, SRHOnImageAvailable, Function | SmallTest | Level2)
+HWTEST_F(UtilsAllTest, SRHOnImageAvailable, TestSize.Level1)
 {
     sptr<SurfaceReaderHandlerImpl> surfaceReaderHandlerImpl = new (std::nothrow)SurfaceReaderHandlerImpl();
     surfaceReaderHandlerImpl->flag_ = false;
@@ -202,7 +202,7 @@ HWTEST_F(UtilsAllTest, SRHOnImageAvailable, Function | SmallTest | Level2)
  * @tc.desc: test SurfaceReaderHandlerImpl::GetPixelMap
  * @tc.type: FUNC
  */
-HWTEST_F(UtilsAllTest, SRHGetPixelMap, Function | SmallTest | Level2)
+HWTEST_F(UtilsAllTest, SRHGetPixelMap, TestSize.Level1)
 {
     sptr<SurfaceReaderHandlerImpl> surfaceReaderHandlerImpl = new (std::nothrow)SurfaceReaderHandlerImpl();
     surfaceReaderHandlerImpl->flag_ = false;
@@ -217,7 +217,7 @@ HWTEST_F(UtilsAllTest, SRHGetPixelMap, Function | SmallTest | Level2)
  * @tc.desc: test SysCapUtil::GetClientName
  * @tc.type: FUNC
  */
-HWTEST_F(UtilsAllTest, SysCapUtilGetClientName, Function | SmallTest | Level2)
+HWTEST_F(UtilsAllTest, SysCapUtilGetClientName, TestSize.Level1)
 {
     ASSERT_NE("", SysCapUtil::GetClientName());
 }

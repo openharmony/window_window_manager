@@ -51,7 +51,7 @@ namespace {
  * @tc.desc: WriteBoundingRectsVector test
  * @tc.type: FUNC
  */
-HWTEST_F(CutoutInfoTest, WriteBoundingRectsVector01, Function | SmallTest | Level2)
+HWTEST_F(CutoutInfoTest, WriteBoundingRectsVector01, TestSize.Level1)
 {
     sptr<CutoutInfo> info = new CutoutInfo();
     DMRect rect = {0, 0, 0, 0};
@@ -67,7 +67,7 @@ HWTEST_F(CutoutInfoTest, WriteBoundingRectsVector01, Function | SmallTest | Leve
  * @tc.desc: WriteBoundingRectsVector test
  * @tc.type: FUNC
  */
-HWTEST_F(CutoutInfoTest, WriteBoundingRectsVector02, Function | SmallTest | Level2)
+HWTEST_F(CutoutInfoTest, WriteBoundingRectsVector02, TestSize.Level1)
 {
     sptr<CutoutInfo> info = new CutoutInfo();
     std::vector<DMRect> boundingRects;
@@ -85,7 +85,7 @@ HWTEST_F(CutoutInfoTest, WriteBoundingRectsVector02, Function | SmallTest | Leve
  * @tc.desc: ReadBoundingRectsVector test
  * @tc.type: FUNC
  */
-HWTEST_F(CutoutInfoTest, ReadBoundingRectsVector01, Function | SmallTest | Level2)
+HWTEST_F(CutoutInfoTest, ReadBoundingRectsVector01, TestSize.Level1)
 {
     sptr<CutoutInfo> info = new CutoutInfo();
     DMRect rect = {0, 0, 0, 0};
@@ -101,7 +101,7 @@ HWTEST_F(CutoutInfoTest, ReadBoundingRectsVector01, Function | SmallTest | Level
  * @tc.desc: ReadBoundingRectsVector test
  * @tc.type: FUNC
  */
-HWTEST_F(CutoutInfoTest, ReadBoundingRectsVector02, Function | SmallTest | Level2)
+HWTEST_F(CutoutInfoTest, ReadBoundingRectsVector02, TestSize.Level1)
 {
     sptr<CutoutInfo> info = new CutoutInfo();
     std::vector<DMRect> boundingRects;
