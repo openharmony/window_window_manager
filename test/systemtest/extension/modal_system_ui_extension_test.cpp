@@ -55,7 +55,7 @@ namespace {
  * @tc.desc: connect modal system ui_extension
  * @tc.type: FUNC
  */
-HWTEST_F(ModalSystemUiExtensionTest, ModalSystemUiExtensionConnection01, Function | SmallTest | Level2)
+HWTEST_F(ModalSystemUiExtensionTest, ModalSystemUiExtensionConnection01, TestSize.Level1)
 {
     auto connection = new(std::nothrow)ModalSystemUiExtension();
     if (connection == nullptr) {
@@ -71,7 +71,7 @@ HWTEST_F(ModalSystemUiExtensionTest, ModalSystemUiExtensionConnection01, Functio
  * @tc.desc: ToString
  * @tc.type: FUNC
  */
-HWTEST_F(ModalSystemUiExtensionTest, ToString, Function | SmallTest | Level2)
+HWTEST_F(ModalSystemUiExtensionTest, ToString, TestSize.Level1)
 {
     AAFwk::WantParams wantParams;
     std::string ret = ModalSystemUiExtension::ToString(wantParams);
@@ -83,7 +83,7 @@ HWTEST_F(ModalSystemUiExtensionTest, ToString, Function | SmallTest | Level2)
  * @tc.desc: DialogAbilityConnectionOnAbilityConnectDone
  * @tc.type: FUNC
  */
-HWTEST_F(ModalSystemUiExtensionTest, DialogAbilityConnectionOnAbilityConnectDone, Function | SmallTest | Level2)
+HWTEST_F(ModalSystemUiExtensionTest, DialogAbilityConnectionOnAbilityConnectDone, TestSize.Level1)
 {
     AAFwk::Want want;
     auto connection = sptr<ModalSystemUiExtension::DialogAbilityConnection>::MakeSptr(want);
@@ -106,7 +106,7 @@ HWTEST_F(ModalSystemUiExtensionTest, DialogAbilityConnectionOnAbilityConnectDone
  * @tc.desc: DialogAbilityConnectionOnAbilityDisconnectDone
  * @tc.type: FUNC
  */
-HWTEST_F(ModalSystemUiExtensionTest, DialogAbilityConnectionOnAbilityDisconnectDone, Function | SmallTest | Level2)
+HWTEST_F(ModalSystemUiExtensionTest, DialogAbilityConnectionOnAbilityDisconnectDone, TestSize.Level1)
 {
     AAFwk::Want want;
     auto connection = sptr<ModalSystemUiExtension::DialogAbilityConnection>::MakeSptr(want);
@@ -120,7 +120,7 @@ HWTEST_F(ModalSystemUiExtensionTest, DialogAbilityConnectionOnAbilityDisconnectD
  * @tc.desc: DialogAbilityConnectionSendWant
  * @tc.type: FUNC
  */
-HWTEST_F(ModalSystemUiExtensionTest, DialogAbilityConnectionSendWant, Function | SmallTest | Level2)
+HWTEST_F(ModalSystemUiExtensionTest, DialogAbilityConnectionSendWant, TestSize.Level1)
 {
     AAFwk::Want want;
     auto connection = sptr<ModalSystemUiExtension::DialogAbilityConnection>::MakeSptr(want);
