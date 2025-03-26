@@ -255,6 +255,14 @@ static void UpdateKeyboardHotAreasInner(const sptr<SceneSession>& sceneSession, 
     }
     const auto& screenProperty = screensProperties[displayId];
     bool isLandscape = screenProperty.GetBounds().rect_.GetWidth() > screenProperty.GetBounds().rect_.GetHeight();
+    if (screenProperty.GetBounds().rect_.GetWidth() == screenProperty.GetBounds().rect_.GetHeight()) {
+        DisplayOrientation orientation = screenProperty.GetDisplayOrientation();
+        if (orientation == DisplayOrientation::UNKNOWN) {
+            TLOGW(WmsLogTag::WMS_KEYBOARD, "Display orientation is UNKNOWN");
+        }
+        isLandscape = (orientation == DisplayOrientation::LANDSCAPE ||
+            orientation == DisplayOrientation::LANDSCAPE_INVERTED);
+    }
     if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
         if (keyboardTouchHotAreas.isKeyboardEmpty()) {
             return;
