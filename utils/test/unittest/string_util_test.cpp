@@ -53,7 +53,7 @@ namespace {
  * @tc.type: FUNC
  * @tc.require: issueI5M2SK
  */
-HWTEST_F(StringUtilTest, Trim, Function | SmallTest | Level1)
+HWTEST_F(StringUtilTest, Trim, TestSize.Level1)
 {
     ASSERT_EQ("", StringUtil::Trim(""));
     ASSERT_EQ("", StringUtil::Trim("  "));

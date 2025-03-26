@@ -65,7 +65,7 @@ namespace {
  * @tc.desc: SwitchScrollParam test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerTest, SwitchScrollParam01, Function | SmallTest | Level3)
+HWTEST_F(ScreenSessionManagerTest, SwitchScrollParam01, TestSize.Level1)
 {
     ScreenSceneConfig::scrollableParams_.clear();
     vector<FoldDisplayMode> displayModeALL = {
@@ -114,7 +114,7 @@ HWTEST_F(ScreenSessionManagerTest, SwitchScrollParam01, Function | SmallTest | L
  * @tc.desc: SwitchScrollParam test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerTest, SwitchScrollParam02, Function | SmallTest | Level3)
+HWTEST_F(ScreenSessionManagerTest, SwitchScrollParam02, TestSize.Level1)
 {
     ScreenSceneConfig::scrollableParams_.clear();
     vector<FoldDisplayMode> displayModeALL = {
