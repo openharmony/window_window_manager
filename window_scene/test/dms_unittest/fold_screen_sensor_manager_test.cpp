@@ -203,7 +203,7 @@ HWTEST_F(FoldScreenSensorManagerTest, TriggerDisplaySwitch, Function | SmallTest
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         EXPECT_EQ(mgr.globalAngle, 25);
     } else {
-        EXPECT_NE(mgr.globalAngle, 25);
+        EXPECT_EQ(mgr.globalAngle, 25);
     }
     usleep(SLEEP_TIME_US);
 }
