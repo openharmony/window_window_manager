@@ -962,7 +962,6 @@ napi_ref PictureInPictureController::GetTypeNode() const
 void PictureInPictureController::GetPipPossible(bool& pipPossible)
 {
     const std::string multiWindowUIType = system::GetParameter("const.window.multiWindowUIType", "");
-    TLOGI(WmsLogTag::WMS_PIP, "get window type: %{public}s ", multiWindowUIType);
     pipPossible = multiWindowUIType == "HandsetSmartWindow" || multiWindowUIType == "TabletSmartWindow";
     return;
 }
