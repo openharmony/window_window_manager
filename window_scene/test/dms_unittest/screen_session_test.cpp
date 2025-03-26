@@ -57,7 +57,7 @@ namespace {
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, ScreenSession, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, ScreenSession, TestSize.Level1)
 {
     ScreenSessionConfig config = {
         .screenId = 0,
@@ -73,7 +73,7 @@ HWTEST_F(ScreenSessionTest, ScreenSession, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, ScreenSession02, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, ScreenSession02, TestSize.Level1)
 {
     ScreenSessionConfig config = {
         .screenId = 0,
@@ -89,7 +89,7 @@ HWTEST_F(ScreenSessionTest, ScreenSession02, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, ScreenSession03, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, ScreenSession03, TestSize.Level1)
 {
     ScreenSessionConfig config = {
         .screenId = 0,
@@ -105,7 +105,7 @@ HWTEST_F(ScreenSessionTest, ScreenSession03, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, ScreenSession04, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, ScreenSession04, TestSize.Level1)
 {
     ScreenSessionConfig config = {
         .screenId = 0,
@@ -121,7 +121,7 @@ HWTEST_F(ScreenSessionTest, ScreenSession04, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, ScreenSession05, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, ScreenSession05, TestSize.Level1)
 {
     ScreenSessionConfig config = {
         .screenId = 0,
@@ -137,7 +137,7 @@ HWTEST_F(ScreenSessionTest, ScreenSession05, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, CreateDisplayNode, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, CreateDisplayNode, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: CreateDisplayNode start";
     Rosen::RSDisplayNodeConfig rsConfig;
@@ -159,7 +159,7 @@ HWTEST_F(ScreenSessionTest, CreateDisplayNode, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, SetMirrorScreenType, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, SetMirrorScreenType, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SetMirrorScreenType start";
     ScreenSessionConfig config = {
@@ -182,7 +182,7 @@ HWTEST_F(ScreenSessionTest, SetMirrorScreenType, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, GetMirrorScreenType, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, GetMirrorScreenType, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "GetMirrorScreenType start";
     ScreenSessionConfig config = {
@@ -204,7 +204,7 @@ HWTEST_F(ScreenSessionTest, GetMirrorScreenType, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, SetDefaultDeviceRotationOffset, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, SetDefaultDeviceRotationOffset, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SetDefaultDeviceRotationOffset start";
     ScreenSessionConfig config = {
@@ -224,7 +224,7 @@ HWTEST_F(ScreenSessionTest, SetDefaultDeviceRotationOffset, Function | SmallTest
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, UpdateDisplayState, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, UpdateDisplayState, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "UpdateDisplayState start";
     ScreenSessionConfig config = {
@@ -244,7 +244,7 @@ HWTEST_F(ScreenSessionTest, UpdateDisplayState, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, UpdateRefreshRate, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, UpdateRefreshRate, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "UpdateRefreshRate start";
     ScreenSessionConfig config = {
@@ -264,7 +264,7 @@ HWTEST_F(ScreenSessionTest, UpdateRefreshRate, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, GetRefreshRate, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, GetRefreshRate, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "GetRefreshRate start";
     ScreenSessionConfig config = {
@@ -286,7 +286,7 @@ HWTEST_F(ScreenSessionTest, GetRefreshRate, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, UpdatePropertyByResolution, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, UpdatePropertyByResolution, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "UpdatePropertyByResolution start";
     ScreenSessionConfig config = {
@@ -307,7 +307,7 @@ HWTEST_F(ScreenSessionTest, UpdatePropertyByResolution, Function | SmallTest | L
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, HandleSensorRotation, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, HandleSensorRotation, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "HandleSensorRotation start";
     ScreenSessionConfig config = {
@@ -327,7 +327,7 @@ HWTEST_F(ScreenSessionTest, HandleSensorRotation, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, ConvertIntToRotation, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, ConvertIntToRotation, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: ConvertIntToRotation start";
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
@@ -351,7 +351,7 @@ HWTEST_F(ScreenSessionTest, ConvertIntToRotation, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, SetVirtualScreenFlag, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, SetVirtualScreenFlag, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SetVirtualScreenFlag start";
     ScreenSessionConfig config = {
@@ -371,7 +371,7 @@ HWTEST_F(ScreenSessionTest, SetVirtualScreenFlag, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, GetVirtualScreenFlag, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, GetVirtualScreenFlag, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "GetVirtualScreenFlag start";
     ScreenSessionConfig config = {
@@ -393,7 +393,7 @@ HWTEST_F(ScreenSessionTest, GetVirtualScreenFlag, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, SetPhysicalRotation, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, SetPhysicalRotation, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SetPhysicalRotation start";
     ScreenSessionConfig config = {
@@ -413,7 +413,7 @@ HWTEST_F(ScreenSessionTest, SetPhysicalRotation, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, SetScreenComponentRotation, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, SetScreenComponentRotation, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SetScreenComponentRotation start";
     ScreenSessionConfig config = {
@@ -433,7 +433,7 @@ HWTEST_F(ScreenSessionTest, SetScreenComponentRotation, Function | SmallTest | L
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, UpdateToInputManager, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, UpdateToInputManager, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "UpdateToInputManager start";
     ScreenSessionConfig config = {
@@ -461,7 +461,7 @@ HWTEST_F(ScreenSessionTest, UpdateToInputManager, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, OptimizeSecondaryDisplayMode01, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, OptimizeSecondaryDisplayMode01, TestSize.Level1)
 {
     if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
         GTEST_SKIP();
@@ -497,7 +497,7 @@ HWTEST_F(ScreenSessionTest, OptimizeSecondaryDisplayMode01, Function | SmallTest
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, UpdatePropertyAfterRotation, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, UpdatePropertyAfterRotation, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "UpdatePropertyAfterRotation start";
     ScreenSessionConfig config = {
@@ -521,7 +521,7 @@ HWTEST_F(ScreenSessionTest, UpdatePropertyAfterRotation, Function | SmallTest | 
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, ReportNotifyModeChange, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, ReportNotifyModeChange, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ReportNotifyModeChange start";
     ScreenSessionConfig config = {
@@ -545,7 +545,7 @@ HWTEST_F(ScreenSessionTest, ReportNotifyModeChange, Function | SmallTest | Level
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, SuperFoldStatusChange, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, SuperFoldStatusChange, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SuperFoldStatusChange start";
     ScreenSessionConfig config = {
@@ -574,7 +574,7 @@ HWTEST_F(ScreenSessionTest, SuperFoldStatusChange, Function | SmallTest | Level2
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, UpdateRotationAfterBoot01, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, UpdateRotationAfterBoot01, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "UpdateRotationAfterBoot start";
     ScreenSessionConfig config = {
@@ -594,7 +594,7 @@ HWTEST_F(ScreenSessionTest, UpdateRotationAfterBoot01, Function | SmallTest | Le
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, UpdateRotationAfterBoot02, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, UpdateRotationAfterBoot02, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "UpdateRotationAfterBoot start";
     ScreenSessionConfig config = {
@@ -614,7 +614,7 @@ HWTEST_F(ScreenSessionTest, UpdateRotationAfterBoot02, Function | SmallTest | Le
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, UpdateValidRotationToScb, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, UpdateValidRotationToScb, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "UpdateValidRotationToScb start";
     ScreenSessionConfig config = {
@@ -633,7 +633,7 @@ HWTEST_F(ScreenSessionTest, UpdateValidRotationToScb, Function | SmallTest | Lev
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, SetScreenSceneDpiChangeListener, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, SetScreenSceneDpiChangeListener, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SetScreenSceneDpiChangeListener start";
     ScreenSessionConfig config = {
@@ -653,7 +653,7 @@ HWTEST_F(ScreenSessionTest, SetScreenSceneDpiChangeListener, Function | SmallTes
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, SetScreenSceneDestroyListener, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, SetScreenSceneDestroyListener, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SetScreenSceneDestroyListener start";
     ScreenSessionConfig config = {
@@ -673,7 +673,7 @@ HWTEST_F(ScreenSessionTest, SetScreenSceneDestroyListener, Function | SmallTest 
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, SetScreenSceneDpi, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, SetScreenSceneDpi, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SetScreenSceneDpi start";
     ScreenSessionConfig config = {
@@ -700,7 +700,7 @@ HWTEST_F(ScreenSessionTest, SetScreenSceneDpi, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, DestroyScreenScene, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, DestroyScreenScene, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "DestroyScreenScene start";
     ScreenSessionConfig config = {
@@ -726,7 +726,7 @@ HWTEST_F(ScreenSessionTest, DestroyScreenScene, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, SetDensityInCurResolution, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, SetDensityInCurResolution, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SetDensityInCurResolution start";
     ScreenSessionConfig config = {
@@ -746,7 +746,7 @@ HWTEST_F(ScreenSessionTest, SetDensityInCurResolution, Function | SmallTest | Le
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, GetSourceMode, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, GetSourceMode, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetSourceMode start";
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
@@ -778,7 +778,7 @@ HWTEST_F(ScreenSessionTest, GetSourceMode, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, GetSourceMode02, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, GetSourceMode02, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetSourceMode02 start";
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
@@ -806,7 +806,7 @@ HWTEST_F(ScreenSessionTest, GetSourceMode02, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, GetPixelFormat, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, GetPixelFormat, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "GetPixelFormat start";
     ScreenSessionConfig config = {
@@ -827,7 +827,7 @@ HWTEST_F(ScreenSessionTest, GetPixelFormat, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, SetPixelFormat, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, SetPixelFormat, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SetPixelFormat start";
     ScreenSessionConfig config = {
@@ -848,7 +848,7 @@ HWTEST_F(ScreenSessionTest, SetPixelFormat, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, GetSupportedHDRFormats, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, GetSupportedHDRFormats, TestSize.Level1)
 {
 #ifdef WM_SCREEN_HDR_FORMAT_ENABLE
     GTEST_LOG_(INFO) << "GetSupportedHDRFormats start";
@@ -875,7 +875,7 @@ HWTEST_F(ScreenSessionTest, GetSupportedHDRFormats, Function | SmallTest | Level
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, GetScreenHDRFormat, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, GetScreenHDRFormat, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "GetScreenHDRFormat start";
     ScreenSessionConfig config = {
@@ -900,7 +900,7 @@ HWTEST_F(ScreenSessionTest, GetScreenHDRFormat, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, SetScreenHDRFormat, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, SetScreenHDRFormat, TestSize.Level1)
 {
 #ifdef WM_SCREEN_HDR_FORMAT_ENABLE
     GTEST_LOG_(INFO) << "SetScreenHDRFormat start";
@@ -930,7 +930,7 @@ HWTEST_F(ScreenSessionTest, SetScreenHDRFormat, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, GetSupportedColorSpaces, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, GetSupportedColorSpaces, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "GetSupportedColorSpaces start";
     ScreenSessionConfig config = {
@@ -955,7 +955,7 @@ HWTEST_F(ScreenSessionTest, GetSupportedColorSpaces, Function | SmallTest | Leve
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, GetScreenColorSpace, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, GetScreenColorSpace, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "GetScreenColorSpace start";
     ScreenSessionConfig config = {
@@ -980,7 +980,7 @@ HWTEST_F(ScreenSessionTest, GetScreenColorSpace, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, SetScreenColorSpace, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, SetScreenColorSpace, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SetScreenColorSpace start";
     ScreenSessionConfig config = {
@@ -1001,7 +1001,7 @@ HWTEST_F(ScreenSessionTest, SetScreenColorSpace, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, SetPrivateSessionForeground, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, SetPrivateSessionForeground, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SetPrivateSessionForeground start";
     ScreenSessionConfig config = {
@@ -1023,7 +1023,7 @@ HWTEST_F(ScreenSessionTest, SetPrivateSessionForeground, Function | SmallTest | 
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, GetScreenCombination, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, GetScreenCombination, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "GetScreenCombination start";
     ScreenSessionConfig config = {
@@ -1045,7 +1045,7 @@ HWTEST_F(ScreenSessionTest, GetScreenCombination, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, Resize, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, Resize, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "Resize start";
     ScreenSessionConfig config = {
@@ -1066,7 +1066,7 @@ HWTEST_F(ScreenSessionTest, Resize, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, UpdateAvailableArea, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, UpdateAvailableArea, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "UpdateAvailableArea start";
     ScreenSessionConfig config = {
@@ -1090,7 +1090,7 @@ HWTEST_F(ScreenSessionTest, UpdateAvailableArea, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, SetAvailableArea, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, SetAvailableArea, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SetAvailableArea start";
     ScreenSessionConfig config = {
@@ -1110,7 +1110,7 @@ HWTEST_F(ScreenSessionTest, SetAvailableArea, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, GetAvailableArea, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, GetAvailableArea, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "GetAvailableArea start";
     ScreenSessionConfig config = {
@@ -1132,7 +1132,7 @@ HWTEST_F(ScreenSessionTest, GetAvailableArea, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, SetFoldScreen, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, SetFoldScreen, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SetFoldScreen start";
     ScreenSessionConfig config = {
@@ -1152,7 +1152,7 @@ HWTEST_F(ScreenSessionTest, SetFoldScreen, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, SetHdrFormats, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, SetHdrFormats, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SetHdrFormats start";
     ScreenSessionConfig config = {
@@ -1172,7 +1172,7 @@ HWTEST_F(ScreenSessionTest, SetHdrFormats, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, SetColorSpaces, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, SetColorSpaces, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SetColorSpaces start";
     ScreenSessionConfig config = {
@@ -1192,7 +1192,7 @@ HWTEST_F(ScreenSessionTest, SetColorSpaces, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, SetDisplayNodeScreenId, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, SetDisplayNodeScreenId, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetDisplayNodeScreenId start";
     ScreenId screenId = 0;
@@ -1212,7 +1212,7 @@ HWTEST_F(ScreenSessionTest, SetDisplayNodeScreenId, Function | SmallTest | Level
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, UnregisterScreenChangeListener, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, UnregisterScreenChangeListener, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: UnregisterScreenChangeListener start";
     IScreenChangeListener* screenChangeListener = nullptr;
@@ -1228,7 +1228,7 @@ HWTEST_F(ScreenSessionTest, UnregisterScreenChangeListener, Function | SmallTest
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, UnregisterScreenChangeListener02, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, UnregisterScreenChangeListener02, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: UnregisterScreenChangeListener02 start";
     IScreenChangeListener* screenChangeListener = new ScreenSessionManager();
@@ -1244,7 +1244,7 @@ HWTEST_F(ScreenSessionTest, UnregisterScreenChangeListener02, Function | SmallTe
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, ConvertToDisplayInfo, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, ConvertToDisplayInfo, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: ConvertToDisplayInfo start";
     sptr<DisplayInfo> displayInfo = new(std::nothrow) DisplayInfo();
@@ -1263,7 +1263,7 @@ HWTEST_F(ScreenSessionTest, ConvertToDisplayInfo, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, GetScreenSupportedColorGamuts, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, GetScreenSupportedColorGamuts, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetScreenSupportedColorGamuts start";
     std::vector<ScreenColorGamut> colorGamuts;
@@ -1282,7 +1282,7 @@ HWTEST_F(ScreenSessionTest, GetScreenSupportedColorGamuts, Function | SmallTest 
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, GetActiveScreenMode, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, GetActiveScreenMode, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetActiveScreenMode start";
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
@@ -1304,7 +1304,7 @@ HWTEST_F(ScreenSessionTest, GetActiveScreenMode, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, SetScreenCombination, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, SetScreenCombination, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetScreenCombination start";
     ScreenId screenId = 2024;
@@ -1324,7 +1324,7 @@ HWTEST_F(ScreenSessionTest, SetScreenCombination, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, GetScreenColorGamut, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, GetScreenColorGamut, TestSize.Level1)
 {
 #ifdef WM_SCREEN_COLOR_GAMUT_ENABLE
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetScreenColorGamut start";
@@ -1347,7 +1347,7 @@ HWTEST_F(ScreenSessionTest, GetScreenColorGamut, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, SetScreenColorGamut01, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, SetScreenColorGamut01, TestSize.Level1)
 {
 #ifdef WM_SCREEN_COLOR_GAMUT_ENABLE
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetScreenColorGamut start";
@@ -1366,7 +1366,7 @@ HWTEST_F(ScreenSessionTest, SetScreenColorGamut01, Function | SmallTest | Level2
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, SetScreenColorGamut02, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, SetScreenColorGamut02, TestSize.Level1)
 {
 #ifdef WM_SCREEN_COLOR_GAMUT_ENABLE
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetScreenColorGamut start";
@@ -1385,7 +1385,7 @@ HWTEST_F(ScreenSessionTest, SetScreenColorGamut02, Function | SmallTest | Level2
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, GetScreenGamutMap, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, GetScreenGamutMap, TestSize.Level1)
 {
 #ifdef WM_SCREEN_COLOR_GAMUT_ENABLE
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetScreenGamutMap start";
@@ -1404,7 +1404,7 @@ HWTEST_F(ScreenSessionTest, GetScreenGamutMap, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, SetScreenGamutMap, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, SetScreenGamutMap, TestSize.Level1)
 {
 #ifdef WM_SCREEN_COLOR_GAMUT_ENABLE
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetScreenGamutMap start";
@@ -1426,7 +1426,7 @@ HWTEST_F(ScreenSessionTest, SetScreenGamutMap, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, InitRSDisplayNode, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, InitRSDisplayNode, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: InitRSDisplayNode start";
     ScreenSessionGroup sessionGroup(1, 1, "create", ScreenCombination::SCREEN_ALONE);
@@ -1445,7 +1445,7 @@ HWTEST_F(ScreenSessionTest, InitRSDisplayNode, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, GetRSDisplayNodeConfig, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, GetRSDisplayNodeConfig, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetRSDisplayNodeConfig start";
     ScreenSessionGroup sessionGroup(1, 1, "create", ScreenCombination::SCREEN_ALONE);
@@ -1475,7 +1475,7 @@ HWTEST_F(ScreenSessionTest, GetRSDisplayNodeConfig, Function | SmallTest | Level
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, AddChild, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, AddChild, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: AddChild start";
     ScreenSessionGroup sessionGroup(1, 1, "create", ScreenCombination::SCREEN_ALONE);
@@ -1496,7 +1496,7 @@ HWTEST_F(ScreenSessionTest, AddChild, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, AddChildren01, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, AddChildren01, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: AddChildren start";
     ScreenSessionGroup sessionGroup(1, 1, "create", ScreenCombination::SCREEN_ALONE);
@@ -1512,7 +1512,7 @@ HWTEST_F(ScreenSessionTest, AddChildren01, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, AddChildren02, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, AddChildren02, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: AddChildren start";
     ScreenSessionGroup sessionGroup(1, 1, "create", ScreenCombination::SCREEN_ALONE);
@@ -1528,7 +1528,7 @@ HWTEST_F(ScreenSessionTest, AddChildren02, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, RemoveChild, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, RemoveChild, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: RemoveChild start";
     ScreenSessionGroup sessionGroup(1, 1, "create", ScreenCombination::SCREEN_ALONE);
@@ -1547,7 +1547,7 @@ HWTEST_F(ScreenSessionTest, RemoveChild, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, GetChildPosition, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, GetChildPosition, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetChildPosition start";
     ScreenSessionGroup sessionGroup(1, 1, "create", ScreenCombination::SCREEN_ALONE);
@@ -1562,7 +1562,7 @@ HWTEST_F(ScreenSessionTest, GetChildPosition, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, ConvertToScreenGroupInfo, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, ConvertToScreenGroupInfo, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: ConvertToScreenGroupInfo start";
     ScreenSessionGroup sessionGroup(1, 1, "create", ScreenCombination::SCREEN_ALONE);
@@ -1576,7 +1576,7 @@ HWTEST_F(ScreenSessionTest, ConvertToScreenGroupInfo, Function | SmallTest | Lev
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, RegisterScreenChangeListener01, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, RegisterScreenChangeListener01, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: RegisterScreenChangeListener start";
     int res = 0;
@@ -1592,7 +1592,7 @@ HWTEST_F(ScreenSessionTest, RegisterScreenChangeListener01, Function | SmallTest
  * @tc.desc: Repeat to register
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, RegisterScreenChangeListener02, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, RegisterScreenChangeListener02, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: RegisterScreenChangeListener start";
     IScreenChangeListener* screenChangeListener = new MockScreenChangeListener();
@@ -1608,7 +1608,7 @@ HWTEST_F(ScreenSessionTest, RegisterScreenChangeListener02, Function | SmallTest
  * @tc.desc: screenState_ == ScreenState::CONNECTION
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, RegisterScreenChangeListener03, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, RegisterScreenChangeListener03, TestSize.Level1)
 {
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
     ASSERT_EQ(session->screenState_, ScreenState::INIT);
@@ -1624,7 +1624,7 @@ HWTEST_F(ScreenSessionTest, RegisterScreenChangeListener03, Function | SmallTest
  * @tc.desc: Connect
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, Connect, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, Connect, TestSize.Level1)
 {
     IScreenChangeListener* screenChangeListener = new MockScreenChangeListener();
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
@@ -1638,7 +1638,7 @@ HWTEST_F(ScreenSessionTest, Connect, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, UpdatePropertyByActiveMode, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, UpdatePropertyByActiveMode, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: UpdatePropertyByActiveMode start";
     int res = 0;
@@ -1653,7 +1653,7 @@ HWTEST_F(ScreenSessionTest, UpdatePropertyByActiveMode, Function | SmallTest | L
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, Disconnect, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, Disconnect, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: Disconnect start";
     int res = 0;
@@ -1668,7 +1668,7 @@ HWTEST_F(ScreenSessionTest, Disconnect, Function | SmallTest | Level2)
  * @tc.desc: !listener
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, Disconnect02, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, Disconnect02, TestSize.Level1)
 {
     IScreenChangeListener* screenChangeListener = new MockScreenChangeListener();
     IScreenChangeListener* screenChangeListener1 = new MockScreenChangeListener();
@@ -1686,7 +1686,7 @@ HWTEST_F(ScreenSessionTest, Disconnect02, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, SensorRotationChange01, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, SensorRotationChange01, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: SensorRotationChange start";
     int res = 0;
@@ -1702,7 +1702,7 @@ HWTEST_F(ScreenSessionTest, SensorRotationChange01, Function | SmallTest | Level
  * @tc.desc: run in for
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, SensorRotationChange02, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, SensorRotationChange02, TestSize.Level1)
 {
     IScreenChangeListener* screenChangeListener = new MockScreenChangeListener();
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
@@ -1717,7 +1717,7 @@ HWTEST_F(ScreenSessionTest, SensorRotationChange02, Function | SmallTest | Level
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, SetOrientation, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, SetOrientation, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetOrientation start";
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
@@ -1733,7 +1733,7 @@ HWTEST_F(ScreenSessionTest, SetOrientation, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, SetScreenRequestedOrientation, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, SetScreenRequestedOrientation, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetScreenRequestedOrientation start";
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
@@ -1749,7 +1749,7 @@ HWTEST_F(ScreenSessionTest, SetScreenRequestedOrientation, Function | SmallTest 
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, SetUpdateToInputManagerCallback, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, SetUpdateToInputManagerCallback, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetUpdateToInputManagerCallback start";
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
@@ -1774,7 +1774,7 @@ HWTEST_F(ScreenSessionTest, SetUpdateToInputManagerCallback, Function | SmallTes
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, SetScreenRotationLocked, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, SetScreenRotationLocked, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetScreenRotationLocked start";
     bool isLocked = true;
@@ -1790,7 +1790,7 @@ HWTEST_F(ScreenSessionTest, SetScreenRotationLocked, Function | SmallTest | Leve
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, SetScreenRotationLockedFromJs, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, SetScreenRotationLockedFromJs, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetScreenRotationLockedFromJs start";
     bool isLocked = true;
@@ -1806,7 +1806,7 @@ HWTEST_F(ScreenSessionTest, SetScreenRotationLockedFromJs, Function | SmallTest 
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, IsScreenRotationLocked, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, IsScreenRotationLocked, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: IsScreenRotationLocked start";
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
@@ -1820,7 +1820,7 @@ HWTEST_F(ScreenSessionTest, IsScreenRotationLocked, Function | SmallTest | Level
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, GetScreenRequestedOrientation, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, GetScreenRequestedOrientation, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetScreenRequestedOrientation start";
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
@@ -1834,7 +1834,7 @@ HWTEST_F(ScreenSessionTest, GetScreenRequestedOrientation, Function | SmallTest 
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, SetVirtualPixelRatio, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, SetVirtualPixelRatio, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetVirtualPixelRatio start";
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
@@ -1850,7 +1850,7 @@ HWTEST_F(ScreenSessionTest, SetVirtualPixelRatio, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, screen_session_test001, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, screen_session_test001, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test001 start";
     IScreenChangeListener* screenChangeListener = nullptr;
@@ -1867,7 +1867,7 @@ HWTEST_F(ScreenSessionTest, screen_session_test001, Function | SmallTest | Level
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, screen_session_test002, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, screen_session_test002, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test002 start";
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
@@ -1881,7 +1881,7 @@ HWTEST_F(ScreenSessionTest, screen_session_test002, Function | SmallTest | Level
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, screen_session_test003, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, screen_session_test003, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test003 start";
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
@@ -1895,7 +1895,7 @@ HWTEST_F(ScreenSessionTest, screen_session_test003, Function | SmallTest | Level
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, screen_session_test004, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, screen_session_test004, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test004 start";
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
@@ -1911,7 +1911,7 @@ HWTEST_F(ScreenSessionTest, screen_session_test004, Function | SmallTest | Level
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, screen_session_test005, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, screen_session_test005, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test005 start";
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
@@ -1928,7 +1928,7 @@ HWTEST_F(ScreenSessionTest, screen_session_test005, Function | SmallTest | Level
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, screen_session_test006, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, screen_session_test006, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test006 start";
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
@@ -1952,7 +1952,7 @@ HWTEST_F(ScreenSessionTest, screen_session_test006, Function | SmallTest | Level
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, screen_session_test007, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, screen_session_test007, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test007 start";
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
@@ -1968,7 +1968,7 @@ HWTEST_F(ScreenSessionTest, screen_session_test007, Function | SmallTest | Level
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, screen_session_test008, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, screen_session_test008, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test008 start";
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
@@ -1982,7 +1982,7 @@ HWTEST_F(ScreenSessionTest, screen_session_test008, Function | SmallTest | Level
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, screen_session_test009, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, screen_session_test009, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test009 start";
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
@@ -1998,7 +1998,7 @@ HWTEST_F(ScreenSessionTest, screen_session_test009, Function | SmallTest | Level
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, screen_session_test010, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, screen_session_test010, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test010 start";
     ScreenSessionGroup sessionGroup(1, 1, "create", ScreenCombination::SCREEN_ALONE);
@@ -2013,7 +2013,7 @@ HWTEST_F(ScreenSessionTest, screen_session_test010, Function | SmallTest | Level
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, screen_session_test011, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, screen_session_test011, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test011 start";
     ScreenSessionGroup sessionGroup(1, 1, "create", ScreenCombination::SCREEN_ALONE);
@@ -2027,7 +2027,7 @@ HWTEST_F(ScreenSessionTest, screen_session_test011, Function | SmallTest | Level
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, screen_session_test012, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, screen_session_test012, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test012 start";
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
@@ -2044,7 +2044,7 @@ HWTEST_F(ScreenSessionTest, screen_session_test012, Function | SmallTest | Level
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, GetName, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, GetName, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetName start";
     std::string name { "UNKNOW" };
@@ -2058,7 +2058,7 @@ HWTEST_F(ScreenSessionTest, GetName, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, SetName, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, SetName, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetName start";
     std::string name { "UNKNOWN" };
@@ -2074,7 +2074,7 @@ HWTEST_F(ScreenSessionTest, SetName, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, GetScreenSnapshot, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, GetScreenSnapshot, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetScreenSnapshot start";
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
@@ -2095,7 +2095,7 @@ HWTEST_F(ScreenSessionTest, GetScreenSnapshot, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, GetRSScreenId, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, GetRSScreenId, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetRSScreenId start";
     ScreenProperty property;
@@ -2118,7 +2118,7 @@ HWTEST_F(ScreenSessionTest, GetRSScreenId, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, CalcRotation01, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, CalcRotation01, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: CalcRotation start";
     Orientation orientation { Orientation::BEGIN };
@@ -2182,7 +2182,7 @@ HWTEST_F(ScreenSessionTest, CalcRotation01, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, CalcRotation02, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, CalcRotation02, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: CalcRotation start";
     Orientation orientation { Orientation::BEGIN };
@@ -2230,7 +2230,7 @@ HWTEST_F(ScreenSessionTest, CalcRotation02, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, CalcDisplayOrientation01, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, CalcDisplayOrientation01, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: CalcDisplayOrientation start";
     Rotation rotation { Rotation::ROTATION_0 };
@@ -2270,7 +2270,7 @@ HWTEST_F(ScreenSessionTest, CalcDisplayOrientation01, Function | SmallTest | Lev
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, CalcDisplayOrientation02, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, CalcDisplayOrientation02, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: CalcDisplayOrientation start";
     Rotation rotation { Rotation::ROTATION_0 };
@@ -2310,7 +2310,7 @@ HWTEST_F(ScreenSessionTest, CalcDisplayOrientation02, Function | SmallTest | Lev
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, FillScreenInfo, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, FillScreenInfo, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: FillScreenInfo start";
     ScreenProperty property;
@@ -2334,7 +2334,7 @@ HWTEST_F(ScreenSessionTest, FillScreenInfo, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, PropertyChange, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, PropertyChange, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: PropertyChange start";
     int res = 0;
@@ -2351,7 +2351,7 @@ HWTEST_F(ScreenSessionTest, PropertyChange, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, PowerStatusChange, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, PowerStatusChange, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: PowerStatusChange start";
     int res = 0;
@@ -2369,7 +2369,7 @@ HWTEST_F(ScreenSessionTest, PowerStatusChange, Function | SmallTest | Level2)
  * @tc.desc: SetScreenScale test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, SetScreenScale, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, SetScreenScale, TestSize.Level1)
 {
     ScreenSession session;
     float scaleX = 1.0f;
@@ -2392,7 +2392,7 @@ HWTEST_F(ScreenSessionTest, SetScreenScale, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, HoverStatusChange01, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, HoverStatusChange01, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "HoverStatusChange start";
     ScreenSessionConfig config = {
@@ -2412,7 +2412,7 @@ HWTEST_F(ScreenSessionTest, HoverStatusChange01, Function | SmallTest | Level2)
  * @tc.desc: run in for
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, HoverStatusChange02, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, HoverStatusChange02, TestSize.Level1)
 {
     IScreenChangeListener* screenChangeListener = new MockScreenChangeListener();
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
@@ -2427,7 +2427,7 @@ HWTEST_F(ScreenSessionTest, HoverStatusChange02, Function | SmallTest | Level2)
  * @tc.desc: run in for
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, HandleHoverStatusChange01, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, HandleHoverStatusChange01, TestSize.Level1)
 {
     IScreenChangeListener* screenChangeListener = new MockScreenChangeListener();
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
@@ -2442,7 +2442,7 @@ HWTEST_F(ScreenSessionTest, HandleHoverStatusChange01, Function | SmallTest | Le
  * @tc.desc: ScreenCaptureNotify test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, ScreenCaptureNotify, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, ScreenCaptureNotify, TestSize.Level1)
 {
     sptr<ScreenSession> session = new ScreenSession();
     ASSERT_NE(session, nullptr);
@@ -2457,7 +2457,7 @@ HWTEST_F(ScreenSessionTest, ScreenCaptureNotify, Function | SmallTest | Level2)
  * @tc.desc: Test when isInternal is true, GetIsInternal should return true
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, GetIsInternal01, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, GetIsInternal01, TestSize.Level1)
 {
     sptr<ScreenSession> session = new ScreenSession();
     ASSERT_NE(session, nullptr);
@@ -2470,7 +2470,7 @@ HWTEST_F(ScreenSessionTest, GetIsInternal01, Function | SmallTest | Level2)
  * @tc.desc: Test when isInternal is false, GetIsInternal should return false
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, GetIsInternal02, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, GetIsInternal02, TestSize.Level1)
 {
     sptr<ScreenSession> session = new ScreenSession();
     ASSERT_NE(session, nullptr);
@@ -2483,7 +2483,7 @@ HWTEST_F(ScreenSessionTest, GetIsInternal02, Function | SmallTest | Level2)
  * @tc.desc: Test when isFakeInUse is true, GetIsFakeInUse should return true
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, GetIsFakeInUse01, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, GetIsFakeInUse01, TestSize.Level1)
 {
     sptr<ScreenSession> session = new ScreenSession();
     ASSERT_NE(session, nullptr);
@@ -2496,7 +2496,7 @@ HWTEST_F(ScreenSessionTest, GetIsFakeInUse01, Function | SmallTest | Level2)
  * @tc.desc: Test when isFakeInUse is false, GetIsFakeInUse should return false
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, GetIsFakeInUse02, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, GetIsFakeInUse02, TestSize.Level1)
 {
     sptr<ScreenSession> session = new ScreenSession();
     ASSERT_NE(session, nullptr);
@@ -2509,7 +2509,7 @@ HWTEST_F(ScreenSessionTest, GetIsFakeInUse02, Function | SmallTest | Level2)
  * @tc.desc: Test when isReal is true, GetIsRealScreen should return true
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, GetIsRealScreen01, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, GetIsRealScreen01, TestSize.Level1)
 {
     sptr<ScreenSession> session = new ScreenSession();
     ASSERT_NE(session, nullptr);
@@ -2522,7 +2522,7 @@ HWTEST_F(ScreenSessionTest, GetIsRealScreen01, Function | SmallTest | Level2)
  * @tc.desc: Test when isReal is false, GetIsRealScreen should return false
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, GetIsRealScreen02, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, GetIsRealScreen02, TestSize.Level1)
 {
     sptr<ScreenSession> session = new ScreenSession();
     ASSERT_NE(session, nullptr);
@@ -2535,7 +2535,7 @@ HWTEST_F(ScreenSessionTest, GetIsRealScreen02, Function | SmallTest | Level2)
  * @tc.desc: Test when isPcUse is true, GetIsPcUse should return true
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, GetIsPcUse01, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, GetIsPcUse01, TestSize.Level1)
 {
     sptr<ScreenSession> session = new ScreenSession();
     ASSERT_NE(session, nullptr);
@@ -2548,7 +2548,7 @@ HWTEST_F(ScreenSessionTest, GetIsPcUse01, Function | SmallTest | Level2)
  * @tc.desc: Test when isPcUse is false, GetIsPcUse should return false
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, GetIsPcUse02, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, GetIsPcUse02, TestSize.Level1)
 {
     sptr<ScreenSession> session = new ScreenSession();
     ASSERT_NE(session, nullptr);
@@ -2561,7 +2561,7 @@ HWTEST_F(ScreenSessionTest, GetIsPcUse02, Function | SmallTest | Level2)
  * @tc.desc: Test when isBScreenHalf is true, GetIsBScreenHalf should return true
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, GetIsBScreenHalf01, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, GetIsBScreenHalf01, TestSize.Level1)
 {
     sptr<ScreenSession> session = new ScreenSession();
     ASSERT_NE(session, nullptr);
@@ -2574,7 +2574,7 @@ HWTEST_F(ScreenSessionTest, GetIsBScreenHalf01, Function | SmallTest | Level2)
  * @tc.desc: Test when isBScreenHalf is false, GetIsBScreenHalf should return false
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, GetIsBScreenHalf02, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, GetIsBScreenHalf02, TestSize.Level1)
 {
     sptr<ScreenSession> session = new ScreenSession();
     ASSERT_NE(session, nullptr);
@@ -2587,7 +2587,7 @@ HWTEST_F(ScreenSessionTest, GetIsBScreenHalf02, Function | SmallTest | Level2)
  * @tc.desc: Test when rotation is ROTATION_0 then CalcDeviceOrientation returns PORTRAIT
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, CalcDeviceOrientation01, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, CalcDeviceOrientation01, TestSize.Level1)
 {
     sptr<ScreenSession> session = new ScreenSession();
     ASSERT_NE(session, nullptr);
@@ -2600,7 +2600,7 @@ HWTEST_F(ScreenSessionTest, CalcDeviceOrientation01, Function | SmallTest | Leve
  * @tc.desc: Test when rotation is ROTATION_90 then CalcDeviceOrientation returns LANDSCAPE
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, CalcDeviceOrientation02, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, CalcDeviceOrientation02, TestSize.Level1)
 {
     sptr<ScreenSession> session = new ScreenSession();
     ASSERT_NE(session, nullptr);
@@ -2613,7 +2613,7 @@ HWTEST_F(ScreenSessionTest, CalcDeviceOrientation02, Function | SmallTest | Leve
  * @tc.desc: Test when rotation is ROTATION_180 then CalcDeviceOrientation returns PORTRAIT_INVERTED
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, CalcDeviceOrientation03, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, CalcDeviceOrientation03, TestSize.Level1)
 {
     sptr<ScreenSession> session = new ScreenSession();
     ASSERT_NE(session, nullptr);
@@ -2626,7 +2626,7 @@ HWTEST_F(ScreenSessionTest, CalcDeviceOrientation03, Function | SmallTest | Leve
  * @tc.desc: Test when rotation is ROTATION_270 then CalcDeviceOrientation returns LANDSCAPE_INVERTED
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, CalcDeviceOrientation04, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, CalcDeviceOrientation04, TestSize.Level1)
 {
     sptr<ScreenSession> session = new ScreenSession();
     ASSERT_NE(session, nullptr);
@@ -2639,7 +2639,7 @@ HWTEST_F(ScreenSessionTest, CalcDeviceOrientation04, Function | SmallTest | Leve
  * @tc.desc: Test when rotation is unknown then CalcDeviceOrientation returns UNKNOWN
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, CalcDeviceOrientation05, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, CalcDeviceOrientation05, TestSize.Level1)
 {
     sptr<ScreenSession> session = new ScreenSession();
     ASSERT_NE(session, nullptr);
@@ -2653,7 +2653,7 @@ HWTEST_F(ScreenSessionTest, CalcDeviceOrientation05, Function | SmallTest | Leve
  * @tc.desc: Test when isPhysicalMirrorSwitch is true, GetIsPhysicalMirrorSwitch should return true
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, GetIsPhysicalMirrorSwitch01, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, GetIsPhysicalMirrorSwitch01, TestSize.Level1)
 {
     sptr<ScreenSession> session = new ScreenSession();
     ASSERT_NE(session, nullptr);
@@ -2666,7 +2666,7 @@ HWTEST_F(ScreenSessionTest, GetIsPhysicalMirrorSwitch01, Function | SmallTest | 
  * @tc.desc: Test when isPhysicalMirrorSwitch is false, GetIsPhysicalMirrorSwitch should return false
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, GetIsPhysicalMirrorSwitch02, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, GetIsPhysicalMirrorSwitch02, TestSize.Level1)
 {
     sptr<ScreenSession> session = new ScreenSession();
     ASSERT_NE(session, nullptr);
@@ -2678,7 +2678,7 @@ HWTEST_F(ScreenSessionTest, GetIsPhysicalMirrorSwitch02, Function | SmallTest | 
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, GetDisplaySourceMode01, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, GetDisplaySourceMode01, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetSourceMode start";
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
@@ -2710,7 +2710,7 @@ HWTEST_F(ScreenSessionTest, GetDisplaySourceMode01, Function | SmallTest | Level
 * @tc.desc: normal function
 * @tc.type: FUNC
 */
-HWTEST_F(ScreenSessionTest, GetDisplaySourceMode02, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionTest, GetDisplaySourceMode02, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetDisplaySourceMode02 start";
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();

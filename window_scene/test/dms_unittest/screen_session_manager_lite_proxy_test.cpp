@@ -66,7 +66,7 @@ namespace {
  * @tc.desc: RegisterDisplayManagerAgent
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerLiteProxyTest, RegisterDisplayManagerAgent, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerLiteProxyTest, RegisterDisplayManagerAgent, TestSize.Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     MessageParcel reply;
@@ -82,7 +82,7 @@ HWTEST_F(ScreenSessionManagerLiteProxyTest, RegisterDisplayManagerAgent, Functio
  * @tc.desc: UnregisterDisplayManagerAgent
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerLiteProxyTest, UnregisterDisplayManagerAgent, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerLiteProxyTest, UnregisterDisplayManagerAgent, TestSize.Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
 
@@ -98,7 +98,7 @@ HWTEST_F(ScreenSessionManagerLiteProxyTest, UnregisterDisplayManagerAgent, Funct
  * @tc.desc: GetFoldDisplayMode
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerLiteProxyTest, GetFoldDisplayMode, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerLiteProxyTest, GetFoldDisplayMode, TestSize.Level1)
 {
     FoldDisplayMode res = screenSessionManagerLiteProxy_->GetFoldDisplayMode();
     EXPECT_EQ(res, FoldDisplayMode::UNKNOWN);
@@ -109,7 +109,7 @@ HWTEST_F(ScreenSessionManagerLiteProxyTest, GetFoldDisplayMode, Function | Small
  * @tc.desc: IsFoldable
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerLiteProxyTest, IsFoldable, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerLiteProxyTest, IsFoldable, TestSize.Level1)
 {
     bool res = screenSessionManagerLiteProxy_->IsFoldable();
     ASSERT_FALSE(res);
@@ -120,7 +120,7 @@ HWTEST_F(ScreenSessionManagerLiteProxyTest, IsFoldable, Function | SmallTest | L
  * @tc.desc: GetFoldStatus
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerLiteProxyTest, GetFoldStatus, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerLiteProxyTest, GetFoldStatus, TestSize.Level1)
 {
     FoldStatus res = screenSessionManagerLiteProxy_->GetFoldStatus();
     ASSERT_EQ(FoldStatus::UNKNOWN, res);
@@ -131,7 +131,7 @@ HWTEST_F(ScreenSessionManagerLiteProxyTest, GetFoldStatus, Function | SmallTest 
  * @tc.desc: GetDefaultDisplayInfo
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerLiteProxyTest, GetDefaultDisplayInfo, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerLiteProxyTest, GetDefaultDisplayInfo, TestSize.Level1)
 {
     auto res = screenSessionManagerLiteProxy_->GetDefaultDisplayInfo();
     ASSERT_EQ(nullptr, res);
@@ -142,7 +142,7 @@ HWTEST_F(ScreenSessionManagerLiteProxyTest, GetDefaultDisplayInfo, Function | Sm
  * @tc.desc: GetDisplayInfoById
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerLiteProxyTest, GetDisplayInfoById, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerLiteProxyTest, GetDisplayInfoById, TestSize.Level1)
 {
     DisplayId displayId = 1001;
     auto res = screenSessionManagerLiteProxy_->GetDisplayInfoById(displayId);
@@ -154,7 +154,7 @@ HWTEST_F(ScreenSessionManagerLiteProxyTest, GetDisplayInfoById, Function | Small
  * @tc.desc: GetCutoutInfo
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerLiteProxyTest, GetCutoutInfo, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerLiteProxyTest, GetCutoutInfo, TestSize.Level1)
 {
     DisplayId displayId = 1001;
     auto res = screenSessionManagerLiteProxy_->GetCutoutInfo(displayId);
