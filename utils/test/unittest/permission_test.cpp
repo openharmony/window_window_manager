@@ -63,7 +63,7 @@ namespace {
  * @tc.desc: test fuction : IsSystemServiceCalling
  * @tc.type: FUNC
  */
-HWTEST_F(PermissionTest, IsSystemServiceCalling, Function | SmallTest | Level2)
+HWTEST_F(PermissionTest, IsSystemServiceCalling, TestSize.Level1)
 {
     bool result = Permission::IsSystemServiceCalling(true, true);
     ASSERT_EQ(true, result);
@@ -74,7 +74,7 @@ HWTEST_F(PermissionTest, IsSystemServiceCalling, Function | SmallTest | Level2)
  * @tc.desc: test fuction : IsSystemCallingOrStartByHdcd
  * @tc.type: FUNC
  */
-HWTEST_F(PermissionTest, IsSystemCallingOrStartByHdcd, Function | SmallTest | Level2)
+HWTEST_F(PermissionTest, IsSystemCallingOrStartByHdcd, TestSize.Level1)
 {
     bool result1 = Permission::IsSystemCallingOrStartByHdcd(false);
     ASSERT_EQ(true, result1);
@@ -87,7 +87,7 @@ HWTEST_F(PermissionTest, IsSystemCallingOrStartByHdcd, Function | SmallTest | Le
  * @tc.desc: test fuction : IsStartByInputMethod
  * @tc.type: FUNC
  */
-HWTEST_F(PermissionTest, IsStartByInputMethod, Function | SmallTest | Level2)
+HWTEST_F(PermissionTest, IsStartByInputMethod, TestSize.Level1)
 {
     bool result = Permission::IsStartByInputMethod();
     ASSERT_EQ(false, result);
@@ -98,7 +98,7 @@ HWTEST_F(PermissionTest, IsStartByInputMethod, Function | SmallTest | Level2)
  * @tc.desc: test fuction : CheckIsCallingBundleName
  * @tc.type: FUNC
  */
-HWTEST_F(PermissionTest, CheckIsCallingBundleName, Function | SmallTest | Level2)
+HWTEST_F(PermissionTest, CheckIsCallingBundleName, TestSize.Level1)
 {
     bool result = Permission::CheckIsCallingBundleName("err");
     ASSERT_EQ(false, result);

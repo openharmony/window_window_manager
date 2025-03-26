@@ -61,7 +61,7 @@ namespace {
  * @tc.desc: test function : ANGLE_CHANGE_EXPANDED
  * @tc.type: FUNC
  */
-HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange01, Function | SmallTest | Level1)
+HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange01, TestSize.Level1)
 {
     ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
     SuperFoldStatusChangeEvents events = SuperFoldStatusChangeEvents::ANGLE_CHANGE_EXPANDED;
@@ -83,7 +83,7 @@ HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange01, Function | Sm
  * @tc.desc: test function : ANGLE_CHANGE_HALF_FOLDED
  * @tc.type: FUNC
  */
-HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange02, Function | SmallTest | Level1)
+HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange02, TestSize.Level1)
 {
     ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
     SuperFoldStatusChangeEvents events = SuperFoldStatusChangeEvents::ANGLE_CHANGE_HALF_FOLDED;
@@ -105,7 +105,7 @@ HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange02, Function | Sm
  * @tc.desc: test function : ANGLE_CHANGE_HALF_FOLDED
  * @tc.type: FUNC
  */
-HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange03, Function | SmallTest | Level1)
+HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange03, TestSize.Level1)
 {
     ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
     SuperFoldStatusChangeEvents events = SuperFoldStatusChangeEvents::ANGLE_CHANGE_HALF_FOLDED;
@@ -127,7 +127,7 @@ HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange03, Function | Sm
  * @tc.desc: test function : ANGLE_CHANGE_FOLDED
  * @tc.type: FUNC
  */
-HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange04, Function | SmallTest | Level1)
+HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange04, TestSize.Level1)
 {
     ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
     SuperFoldStatusChangeEvents events = SuperFoldStatusChangeEvents::ANGLE_CHANGE_FOLDED;
@@ -149,7 +149,7 @@ HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange04, Function | Sm
  * @tc.desc: test function : KEYBOARD_ON
  * @tc.type: FUNC
  */
-HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange05, Function | SmallTest | Level1)
+HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange05, TestSize.Level1)
 {
     ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
     SuperFoldStatusChangeEvents events = SuperFoldStatusChangeEvents::KEYBOARD_ON;
@@ -171,7 +171,7 @@ HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange05, Function | Sm
  * @tc.desc: test function : KEYBOARD_ON
  * @tc.type: FUNC
  */
-HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange06, Function | SmallTest | Level1)
+HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange06, TestSize.Level1)
 {
     ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
     SuperFoldStatusChangeEvents events = SuperFoldStatusChangeEvents::KEYBOARD_ON;
@@ -195,7 +195,7 @@ HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange06, Function | Sm
  * @tc.desc: test function : KEYBOARD_OFF
  * @tc.type: FUNC
  */
-HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange07, Function | SmallTest | Level1)
+HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange07, TestSize.Level1)
 {
     ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
     SuperFoldStatusChangeEvents events = SuperFoldStatusChangeEvents::KEYBOARD_OFF;
@@ -261,7 +261,7 @@ HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange09, Function | Sm
  * @tc.desc: test function : EXPANDED
  * @tc.type: FUNC
  */
-HWTEST_F(SuperFoldStateManagerTest, MatchSuperFoldStatusToFoldStatus01, Function | SmallTest | Level1)
+HWTEST_F(SuperFoldStateManagerTest, MatchSuperFoldStatusToFoldStatus01, TestSize.Level1)
 {
     ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
     SuperFoldStatus superFoldStatus = SuperFoldStatus::EXPANDED;
@@ -281,7 +281,7 @@ HWTEST_F(SuperFoldStateManagerTest, MatchSuperFoldStatusToFoldStatus01, Function
  * @tc.desc: test function : HALF_FOLDED
  * @tc.type: FUNC
  */
-HWTEST_F(SuperFoldStateManagerTest, MatchSuperFoldStatusToFoldStatus02, Function | SmallTest | Level1)
+HWTEST_F(SuperFoldStateManagerTest, MatchSuperFoldStatusToFoldStatus02, TestSize.Level1)
 {
     ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
     SuperFoldStatus superFoldStatus = SuperFoldStatus::HALF_FOLDED;
@@ -301,7 +301,7 @@ HWTEST_F(SuperFoldStateManagerTest, MatchSuperFoldStatusToFoldStatus02, Function
  * @tc.desc: test function : FOLDED
  * @tc.type: FUNC
  */
-HWTEST_F(SuperFoldStateManagerTest, MatchSuperFoldStatusToFoldStatus03, Function | SmallTest | Level1)
+HWTEST_F(SuperFoldStateManagerTest, MatchSuperFoldStatusToFoldStatus03, TestSize.Level1)
 {
     ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
     SuperFoldStatus superFoldStatus = SuperFoldStatus::FOLDED;
@@ -321,7 +321,7 @@ HWTEST_F(SuperFoldStateManagerTest, MatchSuperFoldStatusToFoldStatus03, Function
  * @tc.desc: test function : KEYBOARD
  * @tc.type: FUNC
  */
-HWTEST_F(SuperFoldStateManagerTest, MatchSuperFoldStatusToFoldStatus04, Function | SmallTest | Level1)
+HWTEST_F(SuperFoldStateManagerTest, MatchSuperFoldStatusToFoldStatus04, TestSize.Level1)
 {
     ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
     SuperFoldStatus superFoldStatus = SuperFoldStatus::KEYBOARD;
@@ -341,7 +341,7 @@ HWTEST_F(SuperFoldStateManagerTest, MatchSuperFoldStatusToFoldStatus04, Function
  * @tc.desc: test function : UNKNOWN
  * @tc.type: FUNC
  */
-HWTEST_F(SuperFoldStateManagerTest, MatchSuperFoldStatusToFoldStatus05, Function | SmallTest | Level1)
+HWTEST_F(SuperFoldStateManagerTest, MatchSuperFoldStatusToFoldStatus05, TestSize.Level1)
 {
     ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
     SuperFoldStatus superFoldStatus = SuperFoldStatus::UNKNOWN;
