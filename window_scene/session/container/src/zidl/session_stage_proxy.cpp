@@ -1095,7 +1095,7 @@ WSError SessionStageProxy::SetPipActionEvent(const std::string& action, int32_t 
     return WSError::WS_OK;
 }
 
-WSError SessionStageProxy::NotifyPipWindowSizeChange(uint32_t width, uint32_t height, double scale)
+WSError SessionStageProxy::NotifyPipWindowSizeChange(double width, double height, double scale)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1105,17 +1105,17 @@ WSError SessionStageProxy::NotifyPipWindowSizeChange(uint32_t width, uint32_t he
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
-    if (!data.WriteUint32(width)) {
+    if (!data.WriteDouble(width)) {
         WLOGFE("Write width failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
-    if (!data.WriteUint32(height)) {
+    if (!data.WriteDouble(height)) {
         WLOGFE("Write height failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
-    if (!data.WriteFloat(scale)) {
+    if (!data.WriteDouble(scale)) {
         WLOGFE("Write scale failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
