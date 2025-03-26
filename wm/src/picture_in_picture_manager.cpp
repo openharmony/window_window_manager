@@ -299,7 +299,7 @@ void PictureInPictureManager::AutoStartPipWindow()
     }
 }
 
-void PictureInPictureManager::PipSizeChange(uint32_t width, uint32_t height, double scale)
+void PictureInPictureManager::PipSizeChange(double width, double height, double scale)
 {
     TLOGI(WmsLogTag::WMS_PIP, "in");
     if (auto controller = GetActiveController()) {
