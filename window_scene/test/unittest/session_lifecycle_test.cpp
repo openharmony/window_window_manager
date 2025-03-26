@@ -137,7 +137,7 @@ namespace {
  * @tc.desc: check func Connect
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionLifecycleTest, Connect01, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionLifecycleTest, Connect01, TestSize.Level1)
 {
     auto surfaceNode = CreateRSSurfaceNode();
     session_->state_ = SessionState::STATE_CONNECT;
@@ -167,7 +167,7 @@ HWTEST_F(WindowSessionLifecycleTest, Connect01, Function | SmallTest | Level2)
  * @tc.desc: check func Reconnect01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionLifecycleTest, Reconnect01, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionLifecycleTest, Reconnect01, TestSize.Level1)
 {
     auto surfaceNode = CreateRSSurfaceNode();
 
@@ -198,7 +198,7 @@ HWTEST_F(WindowSessionLifecycleTest, Reconnect01, Function | SmallTest | Level2)
  * @tc.desc: check func Foreground
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionLifecycleTest, Foreground01, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionLifecycleTest, Foreground01, TestSize.Level1)
 {
     session_->state_ = SessionState::STATE_DISCONNECT;
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
@@ -220,7 +220,7 @@ HWTEST_F(WindowSessionLifecycleTest, Foreground01, Function | SmallTest | Level2
  * @tc.desc: Foreground Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionLifecycleTest, Foreground02, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionLifecycleTest, Foreground02, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
@@ -244,7 +244,7 @@ HWTEST_F(WindowSessionLifecycleTest, Foreground02, Function | SmallTest | Level2
  * @tc.desc: Foreground Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionLifecycleTest, Foreground03, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionLifecycleTest, Foreground03, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
@@ -273,7 +273,7 @@ HWTEST_F(WindowSessionLifecycleTest, Foreground03, Function | SmallTest | Level2
  * @tc.desc: check func Background
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionLifecycleTest, Background01, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionLifecycleTest, Background01, TestSize.Level1)
 {
     session_->state_ = SessionState::STATE_CONNECT;
     auto result = session_->Background();
@@ -290,7 +290,7 @@ HWTEST_F(WindowSessionLifecycleTest, Background01, Function | SmallTest | Level2
  * @tc.desc: Background2 Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionLifecycleTest, Background2, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionLifecycleTest, Background2, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     session_->SetSessionState(SessionState::STATE_ACTIVE);
@@ -303,7 +303,7 @@ HWTEST_F(WindowSessionLifecycleTest, Background2, Function | SmallTest | Level2)
  * @tc.desc: Background03 Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionLifecycleTest, Background03, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionLifecycleTest, Background03, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     session_->SetSessionState(SessionState::STATE_ACTIVE);
@@ -319,7 +319,7 @@ HWTEST_F(WindowSessionLifecycleTest, Background03, Function | SmallTest | Level2
  * @tc.desc: check func Disconnect
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionLifecycleTest, Disconnect01, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionLifecycleTest, Disconnect01, TestSize.Level1)
 {
     session_->state_ = SessionState::STATE_CONNECT;
     auto result = session_->Disconnect();
@@ -337,7 +337,7 @@ HWTEST_F(WindowSessionLifecycleTest, Disconnect01, Function | SmallTest | Level2
  * @tc.desc: check func TerminateSessionNew
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionLifecycleTest, TerminateSessionNew01, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionLifecycleTest, TerminateSessionNew01, TestSize.Level1)
 {
     NotifyTerminateSessionFuncNew callback =
             [](const SessionInfo& info, bool needStartCaller, bool isFromBroker)
@@ -359,7 +359,7 @@ HWTEST_F(WindowSessionLifecycleTest, TerminateSessionNew01, Function | SmallTest
  * @tc.desc: terminateSessionFuncNew_ is not nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionLifecycleTest, TerminateSessionNew02, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionLifecycleTest, TerminateSessionNew02, TestSize.Level1)
 {
     bool needStartCaller = true;
     bool isFromBroker = true;
@@ -375,7 +375,7 @@ HWTEST_F(WindowSessionLifecycleTest, TerminateSessionNew02, Function | SmallTest
  * @tc.desc: check func NotifyDestroy
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionLifecycleTest, NotifyDestroy, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionLifecycleTest, NotifyDestroy, TestSize.Level1)
 {
     sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
     ASSERT_NE(mockSessionStage, nullptr);
@@ -391,7 +391,7 @@ HWTEST_F(WindowSessionLifecycleTest, NotifyDestroy, Function | SmallTest | Level
  * @tc.desc: IsActive, normal scene
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionLifecycleTest, IsActive, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionLifecycleTest, IsActive, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     session_->isActive_ = false;
@@ -405,7 +405,7 @@ HWTEST_F(WindowSessionLifecycleTest, IsActive, Function | SmallTest | Level2)
  * @tc.desc: IsActive
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionLifecycleTest, IsActive43, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionLifecycleTest, IsActive43, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     bool res = session_->IsActive();
@@ -417,7 +417,7 @@ HWTEST_F(WindowSessionLifecycleTest, IsActive43, Function | SmallTest | Level2)
  * @tc.desc: IsSessionForeground, normal scene
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionLifecycleTest, IsSessionForeground, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionLifecycleTest, IsSessionForeground, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     session_->state_ = SessionState::STATE_FOREGROUND;
@@ -439,7 +439,7 @@ HWTEST_F(WindowSessionLifecycleTest, IsSessionForeground, Function | SmallTest |
  * @tc.desc: NotifyActivation Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionLifecycleTest, NotifyActivation, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionLifecycleTest, NotifyActivation, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     session_->state_ = SessionState::STATE_DISCONNECT;
@@ -453,7 +453,7 @@ HWTEST_F(WindowSessionLifecycleTest, NotifyActivation, Function | SmallTest | Le
  * @tc.desc: NotifyActivation
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionLifecycleTest, NotifyActivation022, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionLifecycleTest, NotifyActivation022, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     session_->NotifyActivation();
@@ -471,7 +471,7 @@ HWTEST_F(WindowSessionLifecycleTest, NotifyActivation022, Function | SmallTest |
  * @tc.desc: NotifyForeground Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionLifecycleTest, NotifyForeground, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionLifecycleTest, NotifyForeground, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     session_->state_ = SessionState::STATE_DISCONNECT;
@@ -485,7 +485,7 @@ HWTEST_F(WindowSessionLifecycleTest, NotifyForeground, Function | SmallTest | Le
  * @tc.desc: NotifyForeground
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionLifecycleTest, NotifyForeground024, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionLifecycleTest, NotifyForeground024, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     session_->NotifyForeground();
@@ -503,7 +503,7 @@ HWTEST_F(WindowSessionLifecycleTest, NotifyForeground024, Function | SmallTest |
  * @tc.desc: NotifyBackground Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionLifecycleTest, NotifyBackground, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionLifecycleTest, NotifyBackground, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     session_->state_ = SessionState::STATE_DISCONNECT;
@@ -517,7 +517,7 @@ HWTEST_F(WindowSessionLifecycleTest, NotifyBackground, Function | SmallTest | Le
  * @tc.desc: NotifyBackground
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionLifecycleTest, NotifyBackground025, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionLifecycleTest, NotifyBackground025, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     session_->NotifyBackground();
@@ -535,7 +535,7 @@ HWTEST_F(WindowSessionLifecycleTest, NotifyBackground025, Function | SmallTest |
  * @tc.desc: abilitySessionInfo is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionLifecycleTest, TerminateSessionTotal01, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionLifecycleTest, TerminateSessionTotal01, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION,
@@ -547,7 +547,7 @@ HWTEST_F(WindowSessionLifecycleTest, TerminateSessionTotal01, Function | SmallTe
  * @tc.desc: abilitySessionInfo is not nullptr, isTerminating is true
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionLifecycleTest, TerminateSessionTotal02, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionLifecycleTest, TerminateSessionTotal02, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
@@ -561,7 +561,7 @@ HWTEST_F(WindowSessionLifecycleTest, TerminateSessionTotal02, Function | SmallTe
  * @tc.desc: abilitySessionInfo is not nullptr, isTerminating is false
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionLifecycleTest, TerminateSessionTotal03, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionLifecycleTest, TerminateSessionTotal03, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
@@ -576,7 +576,7 @@ HWTEST_F(WindowSessionLifecycleTest, TerminateSessionTotal03, Function | SmallTe
  * @tc.desc: PendingSessionToBackgroundForDelegator Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionLifecycleTest, PendingSessionToBackgroundForDelegator, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionLifecycleTest, PendingSessionToBackgroundForDelegator, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     session_->SetPendingSessionToBackgroundForDelegatorListener(nullptr);
@@ -588,7 +588,7 @@ HWTEST_F(WindowSessionLifecycleTest, PendingSessionToBackgroundForDelegator, Fun
  * @tc.desc: NotifyConnect
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionLifecycleTest, NotifyConnect023, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionLifecycleTest, NotifyConnect023, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     session_->NotifyConnect();
@@ -606,7 +606,7 @@ HWTEST_F(WindowSessionLifecycleTest, NotifyConnect023, Function | SmallTest | Le
  * @tc.desc: NotifyDisconnect
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionLifecycleTest, NotifyDisconnect026, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionLifecycleTest, NotifyDisconnect026, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     session_->NotifyDisconnect();
@@ -624,7 +624,7 @@ HWTEST_F(WindowSessionLifecycleTest, NotifyDisconnect026, Function | SmallTest |
  * @tc.desc: UpdateSessionState
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionLifecycleTest, UpdateSessionState32, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionLifecycleTest, UpdateSessionState32, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     SessionState state = SessionState::STATE_CONNECT;
@@ -637,7 +637,7 @@ HWTEST_F(WindowSessionLifecycleTest, UpdateSessionState32, Function | SmallTest 
  * @tc.desc: IsSystemSession
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionLifecycleTest, IsSystemSession44, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionLifecycleTest, IsSystemSession44, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     bool res = session_->IsSystemSession();
@@ -649,7 +649,7 @@ HWTEST_F(WindowSessionLifecycleTest, IsSystemSession44, Function | SmallTest | L
  * @tc.desc: Hide
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionLifecycleTest, Hide45, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionLifecycleTest, Hide45, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     auto result = session_->Hide();
@@ -661,7 +661,7 @@ HWTEST_F(WindowSessionLifecycleTest, Hide45, Function | SmallTest | Level2)
  * @tc.desc: Show
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionLifecycleTest, Show46, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionLifecycleTest, Show46, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
@@ -675,7 +675,7 @@ HWTEST_F(WindowSessionLifecycleTest, Show46, Function | SmallTest | Level2)
  * @tc.desc: IsSystemActive
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionLifecycleTest, IsSystemActive47, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionLifecycleTest, IsSystemActive47, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     bool res = session_->IsSystemActive();
@@ -687,7 +687,7 @@ HWTEST_F(WindowSessionLifecycleTest, IsSystemActive47, Function | SmallTest | Le
  * @tc.desc: IsTerminated
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionLifecycleTest, IsTerminated49, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionLifecycleTest, IsTerminated49, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     session_->state_ = SessionState::STATE_DISCONNECT;
