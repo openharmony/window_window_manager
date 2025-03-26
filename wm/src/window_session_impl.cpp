@@ -5935,6 +5935,7 @@ void WindowSessionImpl::NotifyRotationChangeResultInner(
                     continue;
                 }
             }
+            window->NotifyRotationChangeResult(rotationChangeResult);
         }, __func__);
 }
 
