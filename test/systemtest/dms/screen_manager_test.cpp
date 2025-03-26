@@ -985,7 +985,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager17, Function | MediumTest | Level2)
  * @tc.desc: Set screen rotation lock, and check whether screen rotation lock is Locked.
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, ScreenManager18, Function | SmallTest | Level1)
+HWTEST_F(ScreenManagerTest, ScreenManager18, TestSize.Level1)
 {
     bool originalLockStatus;
     ScreenManager::GetInstance().IsScreenRotationLocked(originalLockStatus);

@@ -57,7 +57,7 @@ namespace {
  * @tc.desc: test function : Split
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerConfigTest, Split, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerConfigTest, Split, TestSize.Level1)
 {
     std::string str = "stringPatStr";
     std::string pattern = "pattern";
@@ -74,7 +74,7 @@ HWTEST_F(DisplayManagerConfigTest, Split, Function | SmallTest | Level1)
  * @tc.desc: test function : LoadConfigXml
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerConfigTest, LoadConfigXml, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerConfigTest, LoadConfigXml, TestSize.Level1)
 {
     bool result = DisplayManagerConfig::LoadConfigXml();
     EXPECT_TRUE(result);
@@ -85,7 +85,7 @@ HWTEST_F(DisplayManagerConfigTest, LoadConfigXml, Function | SmallTest | Level1)
  * @tc.desc: test function : ReadIntNumbersConfigInfo
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerConfigTest, ReadIntNumbersConfigInfo, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerConfigTest, ReadIntNumbersConfigInfo, TestSize.Level1)
 {
     DisplayManagerConfig::enableConfig_.clear();
 
@@ -109,7 +109,7 @@ HWTEST_F(DisplayManagerConfigTest, ReadIntNumbersConfigInfo, Function | SmallTes
  * @tc.desc: test function : IsNumber
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerConfigTest, IsNumber, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerConfigTest, IsNumber, TestSize.Level1)
 {
     bool result = DisplayManagerConfig::IsNumber("123");
     ASSERT_EQ(true, result);
@@ -122,7 +122,7 @@ HWTEST_F(DisplayManagerConfigTest, IsNumber, Function | SmallTest | Level1)
  * @tc.desc: test function : GetConfigPath
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerConfigTest, GetConfigPath, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerConfigTest, GetConfigPath, TestSize.Level1)
 {
     auto result = DisplayManagerConfig::GetConfigPath("");
     ASSERT_STRNE("/system/", result.c_str());
@@ -136,7 +136,7 @@ HWTEST_F(DisplayManagerConfigTest, GetConfigPath, Function | SmallTest | Level1)
  * @tc.desc: test function : ReadEnableConfigInfo
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerConfigTest, ReadEnableConfigInfo, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerConfigTest, ReadEnableConfigInfo, TestSize.Level1)
 {
     DisplayManagerConfig::enableConfig_.clear();
 
@@ -183,7 +183,7 @@ HWTEST_F(DisplayManagerConfigTest, ReadEnableConfigInfo, Function | SmallTest | 
  * @tc.desc: test function : ReadStringConfigInfo
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerConfigTest, ReadStringConfigInfo, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerConfigTest, ReadStringConfigInfo, TestSize.Level1)
 {
     DisplayManagerConfig::enableConfig_.clear();
 
