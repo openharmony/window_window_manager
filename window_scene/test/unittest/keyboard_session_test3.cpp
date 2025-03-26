@@ -102,7 +102,7 @@ namespace {
  * @tc.desc: test function : GetRSTransaction
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest3, GetRSTransaction01, Function | SmallTest | Level1)
+HWTEST_F(KeyboardSessionTest3, GetRSTransaction01, TestSize.Level1)
 {
     auto keyboardSession = GetKeyboardSession("GetRSTransaction01",
         "GetRSTransaction01");
@@ -117,7 +117,7 @@ HWTEST_F(KeyboardSessionTest3, GetRSTransaction01, Function | SmallTest | Level1
  * @tc.desc: test function : GetSessionScreenName
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest3, GetSessionScreenName01, Function | SmallTest | Level1)
+HWTEST_F(KeyboardSessionTest3, GetSessionScreenName01, TestSize.Level1)
 {
     auto keyboardSession = GetKeyboardSession("GetSessionScreenName01",
         "GetSessionScreenName01");
@@ -146,7 +146,7 @@ HWTEST_F(KeyboardSessionTest3, GetSessionScreenName01, Function | SmallTest | Le
  * @tc.desc: test function : UseFocusIdIfCallingSessionIdInvalid
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest3, UseFocusIdIfCallingSessionIdInvalid01, Function | SmallTest | Level1)
+HWTEST_F(KeyboardSessionTest3, UseFocusIdIfCallingSessionIdInvalid01, TestSize.Level1)
 {
     auto keyboardSession = GetKeyboardSession("UseFocusIdIfCallingSessionIdInvalid01",
         "UseFocusIdIfCallingSessionIdInvalid01");
@@ -185,7 +185,7 @@ HWTEST_F(KeyboardSessionTest3, UseFocusIdIfCallingSessionIdInvalid01, Function |
  * @tc.desc: test function : UpdateKeyboardAvoidArea
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest3, UpdateKeyboardAvoidArea01, Function | SmallTest | Level1)
+HWTEST_F(KeyboardSessionTest3, UpdateKeyboardAvoidArea01, TestSize.Level1)
 {
     auto keyboardSession = GetKeyboardSession("UpdateKeyboardAvoidArea01",
         "UpdateKeyboardAvoidArea01");
@@ -240,7 +240,7 @@ HWTEST_F(KeyboardSessionTest3, UpdateKeyboardAvoidArea01, Function | SmallTest |
  * @tc.desc: test function : UpdateKeyboardAvoidArea
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest3, UpdateKeyboardAvoidArea02, Function | SmallTest | Level1)
+HWTEST_F(KeyboardSessionTest3, UpdateKeyboardAvoidArea02, TestSize.Level1)
 {
     auto keyboardSession = GetKeyboardSession("UpdateKeyboardAvoidArea02",
         "UpdateKeyboardAvoidArea02");
@@ -282,7 +282,7 @@ HWTEST_F(KeyboardSessionTest3, UpdateKeyboardAvoidArea02, Function | SmallTest |
  * @tc.desc: test function : MoveAndResizeKeyboard
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest3, MoveAndResizeKeyboard01, Function | SmallTest | Level1)
+HWTEST_F(KeyboardSessionTest3, MoveAndResizeKeyboard01, TestSize.Level1)
 {
     auto keyboardSession = GetKeyboardSession("MoveAndResizeKeyboard01",
         "MoveAndResizeKeyboard01");
@@ -304,7 +304,7 @@ HWTEST_F(KeyboardSessionTest3, MoveAndResizeKeyboard01, Function | SmallTest | L
  * @tc.desc: test function : OnCallingSessionUpdated
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest3, OnCallingSessionUpdated01, Function | SmallTest | Level1)
+HWTEST_F(KeyboardSessionTest3, OnCallingSessionUpdated01, TestSize.Level1)
 {
     auto keyboardSession = GetKeyboardSession("OnCallingSessionUpdated01",
         "OnCallingSessionUpdated01");
@@ -358,7 +358,7 @@ HWTEST_F(KeyboardSessionTest3, OnCallingSessionUpdated01, Function | SmallTest |
  * @tc.desc: test function : OnCallingSessionUpdated
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest3, OnCallingSessionUpdated02, Function | SmallTest | Level1)
+HWTEST_F(KeyboardSessionTest3, OnCallingSessionUpdated02, TestSize.Level1)
 {
     auto keyboardSession = GetKeyboardSession("OnCallingSessionUpdated02",
         "OnCallingSessionUpdated02");
@@ -377,7 +377,7 @@ HWTEST_F(KeyboardSessionTest3, OnCallingSessionUpdated02, Function | SmallTest |
  * @tc.desc: test function : RecalculatePanelRectForAvoidArea
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest3, RecalculatePanelRectForAvoidArea, Function | SmallTest | Level1)
+HWTEST_F(KeyboardSessionTest3, RecalculatePanelRectForAvoidArea, TestSize.Level1)
 {
     auto keyboardSession = GetKeyboardSession("RecalculatePanelRectForAvoidArea",
         "RecalculatePanelRectForAvoidArea");
@@ -411,7 +411,7 @@ HWTEST_F(KeyboardSessionTest3, RecalculatePanelRectForAvoidArea, Function | Smal
  * @tc.desc: test function : RecalculatePanelRectForAvoidArea
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest3, RecalculatePanelRectForAvoidArea02, Function | SmallTest | Level1)
+HWTEST_F(KeyboardSessionTest3, RecalculatePanelRectForAvoidArea02, TestSize.Level1)
 {
     auto keyboardSession = GetKeyboardSession("RecalculatePanelRectForAvoidArea02",
         "RecalculatePanelRectForAvoidArea02");
@@ -443,7 +443,7 @@ HWTEST_F(KeyboardSessionTest3, RecalculatePanelRectForAvoidArea02, Function | Sm
  * @tc.desc: test function : SetSkipSelfWhenShowOnVirtualScreen
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest3, SetSkipSelfWhenShowOnVirtualScreen, Function | SmallTest | Level1)
+HWTEST_F(KeyboardSessionTest3, SetSkipSelfWhenShowOnVirtualScreen, TestSize.Level1)
 {
     auto keyboardSession = GetKeyboardSession("SetSkipSelfWhenShowOnVirtualScreen",
         "SetSkipSelfWhenShowOnVirtualScreen");

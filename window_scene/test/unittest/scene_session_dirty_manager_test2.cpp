@@ -122,7 +122,7 @@ void InitSceneSession(sptr<SceneSession> &sceneSession, int32_t pid, int windowI
  * @tc.desc: windowInfo without hotAreas information
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithoutHotArea, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithoutHotArea, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "TestWithoutHotArea";
@@ -153,7 +153,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithoutHotArea, Function | 
  * @tc.desc: windowInfo with hotAreas information
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithHotArea, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithHotArea, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "TestWithHotArea";
@@ -187,7 +187,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithHotArea, Function | Sma
  * @tc.desc: windowInfo with windowType dialog
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithWindowTypeDialog, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithWindowTypeDialog, TestSize.Level1)
 {
     // init main window info
     SessionInfo mainWindowInfo;
@@ -239,7 +239,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithWindowTypeDialog, Funct
  * @tc.desc: windowInfo with window_Type_app_sub
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithWindowTypeAppSub, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithWindowTypeAppSub, TestSize.Level1)
 {
     // init main window info
     SessionInfo mainWindowInfo;
@@ -289,7 +289,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithWindowTypeAppSub, Funct
  * @tc.desc: windowInfo with window_Type_keyboard panel
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithTypeKeyboardPanel, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithTypeKeyboardPanel, TestSize.Level1)
 {
     SessionInfo mainWindowInfo;
     mainWindowInfo.abilityName_ = "TestMainWithType";
@@ -318,7 +318,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithTypeKeyboardPanel, Func
  * @tc.desc: windowInfo without parent window
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithoutParentWindow, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithoutParentWindow, TestSize.Level1)
 {
     SessionInfo subWindowInfo;
     subWindowInfo.abilityName_ = "TestSubWithType";
@@ -347,7 +347,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithoutParentWindow, Functi
  * @tc.desc: windowInfo without parent window and state active
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithoutParentWindowAndStateActive, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithoutParentWindowAndStateActive, TestSize.Level1)
 {
     SessionInfo subWindowInfo;
     subWindowInfo.abilityName_ = "TestSubWithType";
@@ -377,7 +377,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithoutParentWindowAndState
  * @tc.desc: windowInfo with systemtouchable is false
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithNotSystemTouchable, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithNotSystemTouchable, TestSize.Level1)
 {
     SessionInfo mainWindowInfo;
     mainWindowInfo.abilityName_ = "TestMainWithType";
@@ -416,7 +416,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithNotSystemTouchable, Fun
  * @tc.desc: windowInfo with isTouchenable is false
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithNotIsTouchEnable, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithNotIsTouchEnable, TestSize.Level1)
 {
     SessionInfo mainWindowInfo;
     mainWindowInfo.abilityName_ = "TestMainWithType";
@@ -457,7 +457,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithNotIsTouchEnable, Funct
  * @tc.desc: windowInfo with isForeTouchenable is false
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithNotIsForceTouchEnable, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithNotIsForceTouchEnable, TestSize.Level1)
 {
     SessionInfo mainWindowInfo;
     mainWindowInfo.abilityName_ = "TestMainWithType";
@@ -497,7 +497,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithNotIsForceTouchEnable, 
  * @tc.desc: windowInfo with foregroundInteractiveStatus_ is false
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithNotForegroundInteractiveStatus, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithNotForegroundInteractiveStatus, TestSize.Level1)
 {
     SessionInfo mainWindowInfo;
     mainWindowInfo.abilityName_ = "TestMainWithType";
@@ -535,7 +535,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithNotForegroundInteractiv
  * @tc.desc: windowInfo with property touchable false
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithNotPropertyTouchable, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithNotPropertyTouchable, TestSize.Level1)
 {
     SessionInfo mainWindowInfo;
     mainWindowInfo.abilityName_ = "TestMainWithType";
@@ -573,7 +573,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithNotPropertyTouchable, F
  * @tc.desc: windowInfo with same displayInfos and windowInfos
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithSameInfo, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithSameInfo, TestSize.Level1)
 {
     MMI::DisplayInfo lastDisplayedInfo;
     MMI::WindowInfo lastWindowInfo;
@@ -608,7 +608,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithSameInfo, Function | Sm
  * @tc.desc: windowInfo with different pid
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithPidDiff, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithPidDiff, TestSize.Level1)
 {
     MMI::DisplayInfo lastDisplayedInfo;
     MMI::WindowInfo lastWindowInfo;
@@ -644,7 +644,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithPidDiff, Function | Sma
  * @tc.desc: windowInfo with different area
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithAreaDiff, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithAreaDiff, TestSize.Level1)
 {
     MMI::DisplayInfo lastDisplayedInfo;
     MMI::WindowInfo lastWindowInfo;
@@ -680,7 +680,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithAreaDiff, Function | Sm
  * @tc.desc: windowInfo with different zOrder
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithzOrderDiff, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithzOrderDiff, TestSize.Level1)
 {
     MMI::DisplayInfo lastDisplayedInfo;
     MMI::WindowInfo lastWindowInfo;

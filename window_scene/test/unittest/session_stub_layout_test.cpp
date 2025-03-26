@@ -74,7 +74,7 @@ namespace {
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(SessionStubLayoutTest, HandleUpdateRectChangeListenerRegistered008, Function | SmallTest | Level2)
+HWTEST_F(SessionStubLayoutTest, HandleUpdateRectChangeListenerRegistered008, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -90,7 +90,7 @@ HWTEST_F(SessionStubLayoutTest, HandleUpdateRectChangeListenerRegistered008, Fun
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(SessionStubLayoutTest, HandleUpdateSessionRect, Function | SmallTest | Level2)
+HWTEST_F(SessionStubLayoutTest, HandleUpdateSessionRect, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -110,7 +110,7 @@ HWTEST_F(SessionStubLayoutTest, HandleUpdateSessionRect, Function | SmallTest | 
  * @tc.desc: sessionStub sessionStubTest
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStubLayoutTest, HandleUpdateClientRect01, Function | SmallTest | Level2)
+HWTEST_F(SessionStubLayoutTest, HandleUpdateClientRect01, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -129,7 +129,7 @@ HWTEST_F(SessionStubLayoutTest, HandleUpdateClientRect01, Function | SmallTest |
  * @tc.desc: Check whether the enableDrag is read successfully.
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStubLayoutTest, HandleSetSystemEnableDrag_TestReadBool, Function | SmallTest | Level2)
+HWTEST_F(SessionStubLayoutTest, HandleSetSystemEnableDrag_TestReadBool, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;

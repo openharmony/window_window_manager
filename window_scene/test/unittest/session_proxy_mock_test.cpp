@@ -38,7 +38,7 @@ namespace {
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionProxyMockTest, TransferAccessibilityEvent01, Function | SmallTest | Level2)
+HWTEST_F(SessionProxyMockTest, TransferAccessibilityEvent01, TestSize.Level1)
 {
     WLOGI("TransferAccessibilityEvent01 begin");
     MockMessageParcel::ClearAllErrorFlag();
@@ -58,7 +58,7 @@ HWTEST_F(SessionProxyMockTest, TransferAccessibilityEvent01, Function | SmallTes
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionProxyMockTest, TransferAccessibilityEvent02, Function | SmallTest | Level2)
+HWTEST_F(SessionProxyMockTest, TransferAccessibilityEvent02, TestSize.Level1)
 {
     WLOGI("TransferAccessibilityEvent02 begin");
     MockMessageParcel::ClearAllErrorFlag();
@@ -79,7 +79,7 @@ HWTEST_F(SessionProxyMockTest, TransferAccessibilityEvent02, Function | SmallTes
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionProxyMockTest, TransferAccessibilityEvent03, Function | SmallTest | Level2)
+HWTEST_F(SessionProxyMockTest, TransferAccessibilityEvent03, TestSize.Level1)
 {
     WLOGI("TransferAccessibilityEvent03 begin");
     MockMessageParcel::ClearAllErrorFlag();
@@ -101,7 +101,7 @@ HWTEST_F(SessionProxyMockTest, TransferAccessibilityEvent03, Function | SmallTes
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionProxyMockTest, UpdateSessionPropertyByAction, Function | SmallTest | Level2)
+HWTEST_F(SessionProxyMockTest, UpdateSessionPropertyByAction, TestSize.Level1)
 {
     MockMessageParcel::ClearAllErrorFlag();
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();

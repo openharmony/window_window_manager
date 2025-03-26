@@ -38,7 +38,7 @@ namespace {
  * @tc.desc: UpdateSessionPropertyByAction
  * @tc.type: FUNC
  */
-HWTEST_F(SessionProxyPropertyTest, UpdateSessionPropertyByAction01, Function | SmallTest | Level2)
+HWTEST_F(SessionProxyPropertyTest, UpdateSessionPropertyByAction01, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SessionProxyPropertyTest: UpdateSessionPropertyByAction01 start";
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
@@ -56,7 +56,7 @@ HWTEST_F(SessionProxyPropertyTest, UpdateSessionPropertyByAction01, Function | S
  * @tc.desc: UpdateSessionPropertyByAction
  * @tc.type: FUNC
  */
-HWTEST_F(SessionProxyPropertyTest, UpdateSessionPropertyByAction02, Function | SmallTest | Level2)
+HWTEST_F(SessionProxyPropertyTest, UpdateSessionPropertyByAction02, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SessionProxyPropertyTest: UpdateSessionPropertyByAction02 start";
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
@@ -74,7 +74,7 @@ HWTEST_F(SessionProxyPropertyTest, UpdateSessionPropertyByAction02, Function | S
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionProxyPropertyTest, UpdateSessionPropertyByAction, Function | SmallTest | Level2)
+HWTEST_F(SessionProxyPropertyTest, UpdateSessionPropertyByAction, TestSize.Level1)
 {
     MockMessageParcel::ClearAllErrorFlag();
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();

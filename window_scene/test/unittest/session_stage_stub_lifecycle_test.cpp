@@ -69,7 +69,7 @@ namespace {
  * @tc.desc: test function : HandleNotifyDestroy
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubLifecycleTest, HandleNotifyDestroy, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubLifecycleTest, HandleNotifyDestroy, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -83,7 +83,7 @@ HWTEST_F(SessionStageStubLifecycleTest, HandleNotifyDestroy, Function | SmallTes
  * @tc.desc: test function : HandleNotifyForegroundInteractiveStatus
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubLifecycleTest, HandleNotifyForegroundInteractiveStatus, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubLifecycleTest, HandleNotifyForegroundInteractiveStatus, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -98,7 +98,7 @@ HWTEST_F(SessionStageStubLifecycleTest, HandleNotifyForegroundInteractiveStatus,
  * @tc.desc: test function : NotifySessionForeground
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubLifecycleTest, HandleNotifySessionForeground, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubLifecycleTest, HandleNotifySessionForeground, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -114,7 +114,7 @@ HWTEST_F(SessionStageStubLifecycleTest, HandleNotifySessionForeground, Function 
  * @tc.desc: test function : NotifySessionBackground
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubLifecycleTest, HandleNotifySessionBackground, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubLifecycleTest, HandleNotifySessionBackground, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;

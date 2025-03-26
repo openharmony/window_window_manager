@@ -49,7 +49,7 @@ void SceneSystemAbilityListenerTest::TearDown()
 {
 }
 
-HWTEST_F(SceneSystemAbilityListenerTest, OnAddSystemAbilityTest, Function | SmallTest | Level2)
+HWTEST_F(SceneSystemAbilityListenerTest, OnAddSystemAbilityTest, TestSize.Level1)
 {
     std::string scbUid = std::to_string(12);
     std::string scbPid = std::to_string(34);

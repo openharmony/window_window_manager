@@ -36,7 +36,7 @@ namespace {
  * @tc.desc: get one system avoid area
  * @tc.type: FUNC
  */
-HWTEST_F(SessionProxyImmersiveTest, GetAllAvoidAreasOnlyOne, Function | SmallTest | Level2)
+HWTEST_F(SessionProxyImmersiveTest, GetAllAvoidAreasOnlyOne, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SessionProxyImmersiveTest::GetAllAvoidAreasOnlyOne start";
     auto remoteObj = sptr<RemoteObjectMocker>::MakeSptr();
@@ -72,7 +72,7 @@ HWTEST_F(SessionProxyImmersiveTest, GetAllAvoidAreasOnlyOne, Function | SmallTes
  * @tc.desc: remote func return error code 1003
  * @tc.type: FUNC
  */
-HWTEST_F(SessionProxyImmersiveTest, GetAllAvoidAreasRemoteErrorPara, Function | SmallTest | Level2)
+HWTEST_F(SessionProxyImmersiveTest, GetAllAvoidAreasRemoteErrorPara, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SessionProxyImmersiveTest::GetAllAvoidAreasRemoteErrorPara start";
     auto remoteObj = sptr<RemoteObjectMocker>::MakeSptr();
@@ -92,7 +92,7 @@ HWTEST_F(SessionProxyImmersiveTest, GetAllAvoidAreasRemoteErrorPara, Function | 
  * @tc.desc: remote func return no avoid area
  * @tc.type: FUNC
  */
-HWTEST_F(SessionProxyImmersiveTest, GetAllAvoidAreasEmpty, Function | SmallTest | Level2)
+HWTEST_F(SessionProxyImmersiveTest, GetAllAvoidAreasEmpty, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SessionProxyImmersiveTest::GetAllAvoidAreasEmpty start";
     auto remoteObj = sptr<RemoteObjectMocker>::MakeSptr();
@@ -118,7 +118,7 @@ HWTEST_F(SessionProxyImmersiveTest, GetAllAvoidAreasEmpty, Function | SmallTest 
  * @tc.desc: remote func return invalid area type
  * @tc.type: FUNC
  */
-HWTEST_F(SessionProxyImmersiveTest, GetAllAvoidAreasWithInvalidAreaType, Function | SmallTest | Level2)
+HWTEST_F(SessionProxyImmersiveTest, GetAllAvoidAreasWithInvalidAreaType, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SessionProxyImmersiveTest::GetAllAvoidAreasWithInvalidAreaType start";
     auto remoteObj = sptr<RemoteObjectMocker>::MakeSptr();
@@ -147,7 +147,7 @@ HWTEST_F(SessionProxyImmersiveTest, GetAllAvoidAreasWithInvalidAreaType, Functio
  * @tc.desc: remote func return invalid area type
  * @tc.type: FUNC
  */
-HWTEST_F(SessionProxyImmersiveTest, GetAllAvoidAreasWithInvalidArea, Function | SmallTest | Level2)
+HWTEST_F(SessionProxyImmersiveTest, GetAllAvoidAreasWithInvalidArea, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SessionProxyImmersiveTest::GetAllAvoidAreasWithInvalidArea start";
     auto remoteObj = sptr<RemoteObjectMocker>::MakeSptr();
@@ -174,7 +174,7 @@ HWTEST_F(SessionProxyImmersiveTest, GetAllAvoidAreasWithInvalidArea, Function | 
  * @tc.desc: remote obj is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(SessionProxyImmersiveTest, GetAvoidAreaByTypeWithRemoteNull, Function | SmallTest | Level2)
+HWTEST_F(SessionProxyImmersiveTest, GetAvoidAreaByTypeWithRemoteNull, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SessionProxyImmersiveTest::GetAvoidAreaByTypeWithRemoteNull start";
     auto sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
@@ -188,7 +188,7 @@ HWTEST_F(SessionProxyImmersiveTest, GetAvoidAreaByTypeWithRemoteNull, Function |
  * @tc.desc: remote func return error code
  * @tc.type: FUNC
  */
-HWTEST_F(SessionProxyImmersiveTest, GetAvoidAreaByTypeWithRemoteErr, Function | SmallTest | Level2)
+HWTEST_F(SessionProxyImmersiveTest, GetAvoidAreaByTypeWithRemoteErr, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SessionProxyImmersiveTest::GetAvoidAreaByTypeWithRemoteErr start";
     auto remoteObj = sptr<RemoteObjectMocker>::MakeSptr();
@@ -205,7 +205,7 @@ HWTEST_F(SessionProxyImmersiveTest, GetAvoidAreaByTypeWithRemoteErr, Function | 
  * @tc.desc: remote func return invalid avoid area
  * @tc.type: FUNC
  */
-HWTEST_F(SessionProxyImmersiveTest, GetAvoidAreaByTypeWithAreaInvalid, Function | SmallTest | Level2)
+HWTEST_F(SessionProxyImmersiveTest, GetAvoidAreaByTypeWithAreaInvalid, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SessionProxyImmersiveTest::GetAvoidAreaByTypeWithAreaInvalid start";
     auto remoteObj = sptr<RemoteObjectMocker>::MakeSptr();
@@ -227,7 +227,7 @@ HWTEST_F(SessionProxyImmersiveTest, GetAvoidAreaByTypeWithAreaInvalid, Function 
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionProxyImmersiveTest, GetAvoidAreaByTypeWithAreaNormal, Function | SmallTest | Level2)
+HWTEST_F(SessionProxyImmersiveTest, GetAvoidAreaByTypeWithAreaNormal, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SessionProxyImmersiveTest::GetAvoidAreaByTypeWithAreaNormal start";
     auto remoteObj = sptr<RemoteObjectMocker>::MakeSptr();
@@ -254,7 +254,7 @@ HWTEST_F(SessionProxyImmersiveTest, GetAvoidAreaByTypeWithAreaNormal, Function |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionProxyImmersiveTest, GetAvoidAreaByTypeEmpty, Function | SmallTest | Level2)
+HWTEST_F(SessionProxyImmersiveTest, GetAvoidAreaByTypeEmpty, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SessionProxyImmersiveTest::GetAvoidAreaByTypeEmpty start";
     auto remoteObj = sptr<RemoteObjectMocker>::MakeSptr();
