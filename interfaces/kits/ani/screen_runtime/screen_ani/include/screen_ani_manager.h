@@ -12,44 +12,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef DISPLAY_MANAGER_ANI_H
-#define DISPLAY_MANAGER_ANI_H
+#ifndef SCREEN_MANAGER_ANI_H
+#define SCREEN_MANAGER_ANI_H
+
+#include <mutex>
+#include "dm_common.h"
+#include "refbase.h"
+#include "screen_manager.h"
 
 #include "ani.h"
-#include "display.h"
-#include "display_ani_listener.h"
+#include "screen_ani_listener.h"
 
 namespace OHOS {
 namespace Rosen {
 
-class DisplayManagerAni {
+class ScreenManagerAni {
 public:
-    explicit DisplayManagerAni();
-    static ani_status initDisplayManagerAni(ani_namespace displayNameSpace, ani_env* env);
-
-    static ani_int getFoldDisplayModeAni(ani_env* env);
-    static ani_boolean isFoldableAni(ani_env* env);
-    static ani_int getFoldStatus(ani_env* env);
-    static void getCurrentFoldCreaseRegion(ani_env* env, ani_object obj, ani_long nativeObj);
-
-    static void getAllDisplaysAni(ani_env* env, ani_object arrayObj);
-    static void getDisplayByIdSyncAni(ani_env* env, ani_object obj, ani_double displayId);
-    static void getDefaultDisplaySyncAni(ani_env* env, ani_object obj);
-
+    explicit ScreenManagerAni();
     static void registerCallback(ani_env* env, ani_string type,
         ani_ref callback, ani_long nativeObj);
     static void unRegisterCallback(ani_env* env, ani_string type,
         ani_ref callback, ani_long nativeObj);
-    DMError UnRegisterDisplayListenerWithType(std::string type, ani_env* env, ani_ref callback);
-    DMError UnregisterAllDisplayListenerWithType(std::string type);
+    static ani_status initScreenManagerAni(ani_namespace screenNameSpace, ani_env* env);
     DmErrorCode processRegisterCallback(ani_env* env, std::string& typeStr,
-        sptr<DisplayAniListener> displayAniListener);
+        sptr<ScreenAniListener> screenAniListener);
 private:
     void onRegisterCallback(ani_env* env, ani_string type, ani_ref callback);
     void onUnRegisterCallback(ani_env* env, ani_string type, ani_ref callback);
-    void onGetCurrentFoldCreaseRegion(ani_env* env, ani_object obj);
+    DMError UnRegisterScreenListenerWithType(std::string type, ani_env* env, ani_ref callback);
+    DMError UnRegisterAllScreenListenerWithType(std::string type);
     std::mutex mtx_;
-    std::map<std::string, std::map<ani_ref, sptr<DisplayAniListener>>> jsCbMap_;
+    std::map<std::string, std::map<ani_ref, sptr<ScreenAniListener>>> jsCbMap_;
 };
 }
 }
