@@ -1185,11 +1185,11 @@ HWTEST_F(PictureInPictureControllerTest, StopPictureInPictureInner, Function | S
     ASSERT_EQ(WMError::WM_OK, pipControl->StopPictureInPictureInner(StopPipType::NULL_STOP, false));
 }
 
-+/**
-+ * @tc.name: GetPipPossible
-+ * @tc.desc: GetPipPossible
-+ * @tc.type: FUNC
-+ */
+/**
+ * @tc.name: GetPipPossible
+ * @tc.desc: GetPipPossible
+ * @tc.type: FUNC
+ */
 HWTEST_F(PictureInPictureControllerTest, GetPipPossible, Function | SmallTest | Level2)
 {
     auto mw = sptr<MockWindow>::MakeSptr();
