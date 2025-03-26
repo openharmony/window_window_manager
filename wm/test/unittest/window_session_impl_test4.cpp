@@ -29,6 +29,7 @@
 #include "window_accessibility_controller.h"
 #include "window_helper.h"
 #include "window_session_impl.h"
+#include "window_scene_session_impl.h"
 #include "wm_common.h"
 
 using namespace testing;
@@ -2216,6 +2217,56 @@ HWTEST_F(WindowSessionImplTest4, ClearListenersById_occupiedAreaChangeListeners,
 }
 
 /**
+ * @tc.name: ClearListenersById_keyboardDidShowListeners
+ * @tc.desc: ClearListenersById_keyboardDidShowListeners
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, ClearListenersById_keyboardDidShowListeners, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: ClearListenersById_keyboardDidShowListeners start";
+    sptr<WindowOption> option_ = sptr<WindowOption>::MakeSptr();
+    option_->SetWindowName("ClearListenersById_keyboardDidShowListeners");
+    sptr<WindowSessionImpl> window_ = sptr<WindowSessionImpl>::MakeSptr(option_);
+
+    int persistentId = window_->GetPersistentId();
+    window_->ClearListenersById(persistentId);
+
+    sptr<IKeyboardDidShowListener> listener_ = new (std::nothrow) MockIKeyboardDidShowListener();
+    window_->RegisterKeyboardDidShowListener(listener_);
+    ASSERT_NE(window_->keyboardDidShowListeners_.find(persistentId), window_->keyboardDidShowListeners_.end());
+
+    window_->ClearListenersById(persistentId);
+    ASSERT_EQ(window_->keyboardDidShowListeners_.find(persistentId), window_->keyboardDidShowListeners_.end());
+
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: ClearListenersById_keyboardDidShowListeners end";
+}
+
+/**
+ * @tc.name: ClearListenersById_keyboardDidHideListeners
+ * @tc.desc: ClearListenersById_keyboardDidHideListeners
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, ClearListenersById_keyboardDidHideListeners, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: ClearListenersById_keyboardDidHideListeners start";
+    sptr<WindowOption> option_ = sptr<WindowOption>::MakeSptr();
+    option_->SetWindowName("ClearListenersById_keyboardDidHideListeners");
+    sptr<WindowSessionImpl> window_ = sptr<WindowSessionImpl>::MakeSptr(option_);
+
+    int persistentId = window_->GetPersistentId();
+    window_->ClearListenersById(persistentId);
+
+    sptr<IKeyboardDidHideListener> listener_ = new (std::nothrow) MockIKeyboardDidHideListener();
+    window_->RegisterKeyboardDidHideListener(listener_);
+    ASSERT_NE(window_->keyboardDidHideListeners_.find(persistentId), window_->keyboardDidHideListeners_.end());
+
+    window_->ClearListenersById(persistentId);
+    ASSERT_EQ(window_->keyboardDidHideListeners_.find(persistentId), window_->keyboardDidHideListeners_.end());
+
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: ClearListenersById_keyboardDidHideListeners end";
+}
+
+/**
  * @tc.name: ClearListenersById_switchFreeMultiWindowListeners
  * @tc.desc: ClearListenersById_switchFreeMultiWindowListeners
  * @tc.type: FUNC
@@ -2633,6 +2684,127 @@ HWTEST_F(WindowSessionImplTest4, SendContainerModalEvent, Function | SmallTest |
     ret = window->SendContainerModalEvent("win_waterfall_visibility", "true");
     EXPECT_EQ(ret, WSError::WS_OK);
     ret = window->SendContainerModalEvent("win_waterfall_visibility", "false");
+    EXPECT_EQ(ret, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: SetSubWindowZLevelToProperty
+ * @tc.desc: SetSubWindowZLevelToProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, SetSubWindowZLevelToProperty, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    option->SetSubWindowZLevel(0);
+    sptr<WindowSessionImpl> mainWindowSessionImpl = sptr<WindowSessionImpl>::MakeSptr(option);
+    option->SetSubWindowZLevel(1);
+    mainWindowSessionImpl->windowOption_ = option;
+    mainWindowSessionImpl->SetSubWindowZLevelToProperty();
+    int32_t zLevel = mainWindowSessionImpl->property_->zLevel_;
+    EXPECT_NE(1, zLevel);
+
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sptr<WindowSessionImpl> subWindowSessionImpl = sptr<WindowSessionImpl>::MakeSptr(option);
+    option->SetSubWindowZLevel(2);
+    subWindowSessionImpl->windowOption_ = option;
+    subWindowSessionImpl->SetSubWindowZLevelToProperty();
+    zLevel = subWindowSessionImpl->property_->zLevel_;
+    EXPECT_EQ(2, zLevel);
+}
+
+/**
+ * @tc.name: GetSubWindowZLevelByFlags01
+ * @tc.desc: GetSubWindowZLevelByFlags
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, GetSubWindowZLevelByFlags01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sptr<WindowSceneSessionImpl> normalSubWindow = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    int32_t ret = normalSubWindow->GetSubWindowZLevelByFlags(normalSubWindow->GetType(),
+        normalSubWindow->GetWindowFlags(), normalSubWindow->IsTopmost());
+    EXPECT_EQ(ret, NORMAL_SUB_WINDOW_Z_LEVEL);
+
+    option->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_TEXT_MENU));
+    sptr<WindowSceneSessionImpl> textMenuSubWindow = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ret = textMenuSubWindow->GetSubWindowZLevelByFlags(textMenuSubWindow->GetType(),
+        textMenuSubWindow->GetWindowFlags(), textMenuSubWindow->IsTopmost());
+    EXPECT_EQ(ret, TEXT_MENU_SUB_WINDOW_Z_LEVEL);
+
+    option->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_TOAST));
+    sptr<WindowSceneSessionImpl> toastSubWindow = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ret = toastSubWindow->GetSubWindowZLevelByFlags(toastSubWindow->GetType(),
+        toastSubWindow->GetWindowFlags(), toastSubWindow->IsTopmost());
+    EXPECT_EQ(ret, TOAST_SUB_WINDOW_Z_LEVEL);
+
+    option->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_MODAL));
+    sptr<WindowSceneSessionImpl> modalSubWindow = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ret = modalSubWindow->GetSubWindowZLevelByFlags(modalSubWindow->GetType(),
+        modalSubWindow->GetWindowFlags(), modalSubWindow->IsTopmost());
+    EXPECT_EQ(ret, MODALITY_SUB_WINDOW_Z_LEVEL);
+
+    option->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_APPLICATION_MODAL);
+    sptr<WindowSceneSessionImpl> appModalSubWindow = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ret = appModalSubWindow->GetSubWindowZLevelByFlags(appModalSubWindow->GetType(),
+        appModalSubWindow->GetWindowFlags(), appModalSubWindow->IsTopmost());
+    EXPECT_EQ(ret, APPLICATION_MODALITY_SUB_WINDOW_Z_LEVEL);
+}
+
+/**
+ * @tc.name: GetSubWindowZLevelByFlags02
+ * @tc.desc: GetSubWindowZLevelByFlags
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, GetSubWindowZLevelByFlags02, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    option->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_MODAL));
+    option->SetWindowTopmost(true);
+    sptr<WindowSceneSessionImpl> topmostModalSubWindow = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    int32_t ret = topmostModalSubWindow->GetSubWindowZLevelByFlags(topmostModalSubWindow->GetType(),
+        topmostModalSubWindow->GetWindowFlags(), topmostModalSubWindow->IsTopmost());
+    EXPECT_EQ(ret, MODALITY_SUB_WINDOW_Z_LEVEL + TOPMOST_SUB_WINDOW_Z_LEVEL);
+
+    option->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_APPLICATION_MODAL);
+    sptr<WindowSceneSessionImpl> topmostAppModalSubWindow = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ret = topmostAppModalSubWindow->GetSubWindowZLevelByFlags(topmostAppModalSubWindow->GetType(),
+        topmostAppModalSubWindow->GetWindowFlags(), topmostAppModalSubWindow->IsTopmost());
+    EXPECT_EQ(ret, APPLICATION_MODALITY_SUB_WINDOW_Z_LEVEL + TOPMOST_SUB_WINDOW_Z_LEVEL);
+}
+
+/**
+ * @tc.name: GetSubWindowZLevelByFlags03
+ * @tc.desc: GetSubWindowZLevelByFlags
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, GetSubWindowZLevelByFlags03, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    sptr<WindowSceneSessionImpl> dialogWindow = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    int32_t ret = dialogWindow->GetSubWindowZLevelByFlags(dialogWindow->GetType(),
+        dialogWindow->GetWindowFlags(), dialogWindow->IsTopmost());
+    EXPECT_EQ(ret, DIALOG_SUB_WINDOW_Z_LEVEL);
+}
+
+/**
+ * @tc.name: SetCurrentRotation
+ * @tc.desc: SetCurrentRotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, SetCurrentRotation, Function | SmallTest | Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetCurrentRotation");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    auto ret = window->SetCurrentRotation(FULL_CIRCLE_DEGREE + 1);
+    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_PARAM);
+    ret = window->SetCurrentRotation(ZERO_CIRCLE_DEGREE - 1);
+    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_PARAM);
+    ret = window->SetCurrentRotation(ONE_FOURTH_FULL_CIRCLE_DEGREE);
     EXPECT_EQ(ret, WSError::WS_OK);
 }
 } // namespace

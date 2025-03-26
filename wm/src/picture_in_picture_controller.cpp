@@ -17,10 +17,12 @@
 
 #include <refbase.h>
 #include <transaction/rs_sync_transaction_controller.h>
+#include "parameters.h"
 #include "picture_in_picture_manager.h"
+#include "singleton_container.h"
+#include "window_adapter.h"
 #include "window_manager_hilog.h"
 #include "window_option.h"
-#include "singleton_container.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -33,7 +35,7 @@ namespace {
     const std::string DESTROY_TIMEOUT_TASK = "PipDestroyTimeout";
     const std::string STATE_CHANGE = "stateChange";
     const std::string UPDATE_NODE = "nodeUpdate";
-    const int DEFAULT_ASPECT_RATIO[] = {16, 9};
+    const int DEFAULT_ASPECT_RATIOS[] = {16, 9};
 }
 
 static napi_value CallJsFunction(napi_env env, napi_value method, napi_value const * argv, size_t argc)
@@ -74,6 +76,9 @@ PictureInPictureController::PictureInPictureController(sptr<PipOption> pipOption
 
 PictureInPictureController::~PictureInPictureController()
 {
+    if (pipOption_) {
+        pipOption_->ClearNapiRefs(env_);
+    }
     TLOGI(WmsLogTag::WMS_PIP, "Destruction");
     if (!isAutoStartEnabled_) {
         return;
@@ -616,14 +621,14 @@ void PictureInPictureController::DoControlEvent(PiPControlType controlType, PiPC
     pipOption_->SetPiPControlStatus(controlType, status);
 }
 
-void PictureInPictureController::PipSizeChange(uint32_t width, uint32_t height, double scale)
+void PictureInPictureController::PipSizeChange(double width, double height, double scale)
 {
-    TLOGI(WmsLogTag::WMS_PIP, "notify size info width: %{public}u, height: %{public}u scale: %{public}f",
-          width, height, scale);
     PiPWindowSize windowSize;
-    windowSize.width = width;
-    windowSize.height = height;
+    windowSize.width = std::round(width);
+    windowSize.height = std::round(height);
     windowSize.scale = scale;
+    TLOGI(WmsLogTag::WMS_PIP, "notify size info width: %{public}u, height: %{public}u scale: %{public}f",
+          windowSize.width, windowSize.height, scale);
     for (auto& listener : pipWindowSizeListeners_) {
         listener->OnPipSizeChange(windowSize);
     }
@@ -677,8 +682,8 @@ void PictureInPictureController::UpdateWinRectByComponent()
         uint32_t contentHeight = 0;
         pipOption_->GetContentSize(contentWidth, contentHeight);
         if (contentWidth == 0 || contentHeight == 0) {
-            contentWidth = DEFAULT_ASPECT_RATIO[0];
-            contentHeight = DEFAULT_ASPECT_RATIO[1];
+            contentWidth = DEFAULT_ASPECT_RATIOS[0];
+            contentHeight = DEFAULT_ASPECT_RATIOS[1];
         }
         windowRect_.posX_ = 0;
         windowRect_.posY_ = 0;
@@ -956,5 +961,13 @@ napi_ref PictureInPictureController::GetTypeNode() const
 {
     return pipOption_ == nullptr ? nullptr : pipOption_->GetTypeNodeRef();
 }
+
+void PictureInPictureController::GetPipPossible(bool& pipPossible)
+{
+    const std::string multiWindowUIType = system::GetParameter("const.window.multiWindowUIType", "");
+    pipPossible = multiWindowUIType == "HandsetSmartWindow" || multiWindowUIType == "TabletSmartWindow";
+    return;
+}
+
 } // namespace Rosen
 } // namespace OHOS

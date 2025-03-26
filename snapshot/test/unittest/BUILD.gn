@@ -13,7 +13,7 @@
 
 import("//build/test.gni")
 
-module_out_path = "window_manager/snapshot"
+module_out_path = "window_manager/OH-DMS/snapshot"
 
 group("unittest") {
   testonly = true

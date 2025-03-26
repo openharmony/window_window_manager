@@ -60,7 +60,7 @@ namespace {
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionStubImplTest, CreateWindow, Function | SmallTest | Level2)
+HWTEST_F(WindowExtensionStubImplTest, CreateWindow, TestSize.Level1)
 {
     Rect rect;
     uint32_t parentWindowId = 0;
@@ -84,7 +84,7 @@ HWTEST_F(WindowExtensionStubImplTest, CreateWindow, Function | SmallTest | Level
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionStubImplTest, SetBounds, Function | SmallTest | Level2)
+HWTEST_F(WindowExtensionStubImplTest, SetBounds, TestSize.Level1)
 {
     WindowExtensionStubImpl windowExtensionStubImpl("windowName");
     Rect rect = { 150, 150, 400, 600 };
@@ -114,7 +114,7 @@ HWTEST_F(WindowExtensionStubImplTest, SetBounds, Function | SmallTest | Level2)
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionStubImplTest, Hide, Function | SmallTest | Level2)
+HWTEST_F(WindowExtensionStubImplTest, Hide, TestSize.Level1)
 {
     WindowExtensionStubImpl windowExtensionStubImpl("windowName");
     windowExtensionStubImpl.Hide();
@@ -132,7 +132,7 @@ HWTEST_F(WindowExtensionStubImplTest, Hide, Function | SmallTest | Level2)
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionStubImplTest, Show, Function | SmallTest | Level2)
+HWTEST_F(WindowExtensionStubImplTest, Show, TestSize.Level1)
 {
     WindowExtensionStubImpl windowExtensionStubImpl("windowName");
     windowExtensionStubImpl.Show();
@@ -150,7 +150,7 @@ HWTEST_F(WindowExtensionStubImplTest, Show, Function | SmallTest | Level2)
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionStubImplTest, RequestFocus, Function | SmallTest | Level2)
+HWTEST_F(WindowExtensionStubImplTest, RequestFocus, TestSize.Level1)
 {
     WindowExtensionStubImpl windowExtensionStubImpl("windowName");
     windowExtensionStubImpl.RequestFocus();
@@ -168,7 +168,7 @@ HWTEST_F(WindowExtensionStubImplTest, RequestFocus, Function | SmallTest | Level
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionStubImplTest, GetExtensionWindow, Function | SmallTest | Level2)
+HWTEST_F(WindowExtensionStubImplTest, GetExtensionWindow, TestSize.Level1)
 {
     sptr<IWindowExtensionClient> token;
     WindowExtensionStubImpl windowExtensionStubImpl("windowName");
@@ -187,7 +187,7 @@ HWTEST_F(WindowExtensionStubImplTest, GetExtensionWindow, Function | SmallTest |
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionStubImplTest, GetWindow, Function | SmallTest | Level2)
+HWTEST_F(WindowExtensionStubImplTest, GetWindow, TestSize.Level1)
 {
     WindowExtensionStubImpl windowExtensionStubImpl("windowName");
     auto window = windowExtensionStubImpl.window_.promote();

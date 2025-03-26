@@ -376,17 +376,15 @@ HWTEST_F(MainSessionTest, OnSetWindowRectAutoSave, Function | SmallTest | Level2
     info.abilityName_ = "OnSetWindowRectAutoSave";
     info.bundleName_ = "OnSetWindowRectAutoSave";
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(session, nullptr);
-    EXPECT_EQ(WSError::WS_OK, session->OnSetWindowRectAutoSave(true));
 
     session->onSetWindowRectAutoSaveFunc_ = nullptr;
-    EXPECT_EQ(WSError::WS_OK, session->OnSetWindowRectAutoSave(true));
+    EXPECT_EQ(nullptr, session->onSetWindowRectAutoSaveFunc_);
 
-    NotifySetWindowRectAutoSaveFunc func = [](bool enabled) {
+    NotifySetWindowRectAutoSaveFunc func = [](bool enabled, bool isSaveBySpecifiedFlag) {
         return;
     };
     session->onSetWindowRectAutoSaveFunc_ = func;
-    EXPECT_EQ(WSError::WS_OK, session->OnSetWindowRectAutoSave(true));
+    EXPECT_NE(nullptr, session->onSetWindowRectAutoSaveFunc_);
 }
 
 /**
@@ -496,6 +494,62 @@ HWTEST_F(MainSessionTest, NotifySessionLockStateChange, Function | SmallTest | L
 
     session->NotifySessionLockStateChange(true);
     EXPECT_EQ(session->GetSessionLockState(), true);
+}
+
+/**
+ * @tc.name: UpdateFlag
+ * @tc.desc: UpdateFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, UpdateFlag, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "UpdateFlag";
+    info.bundleName_ = "UpdateFlag";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    session->onUpdateFlagFunc_ = nullptr;
+    EXPECT_EQ(nullptr, session->onUpdateFlagFunc_);
+
+    NotifyUpdateFlagFunc func = [](const std::string& flag) {
+        return;
+    };
+    session->onUpdateFlagFunc_ = func;
+    EXPECT_NE(nullptr, session->onUpdateFlagFunc_);
+}
+
+/**
+ * @tc.name: NotifySubAndDialogFollowRectChange
+ * @tc.desc: NotifySubAndDialogFollowRectChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, NotifySubAndDialogFollowRectChange01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    sptr<SceneSession> subSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<MainSession> mainSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    
+    bool isCall = false;
+    auto task = [&isCall](const WSRect& rect, bool isGlobal, bool needFlush) {
+        isCall = true;
+    };
+    mainSession->RegisterNotifySurfaceBoundsChangeFunc(subSession->GetPersistentId(), std::move(task));
+    ASSERT_NE(nullptr, mainSession->notifySurfaceBoundsChangeFuncMap_[subSession->GetPersistentId()]);
+
+    WSRect rect;
+    subSession->isFollowParentLayout_ = false;
+    mainSession->NotifySubAndDialogFollowRectChange(rect, false, false);
+    ASSERT_EQ(false, isCall);
+
+    subSession->isFollowParentLayout_ = true;
+    sptr<SceneSession::SpecificSessionCallback> callBack = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    mainSession->specificCallback_ = callBack;
+    auto getSessionCallBack = [&subSession](int32_t persistentId) {
+        return subSession;
+    };
+    callBack->onGetSceneSessionByIdCallback_ = getSessionCallBack;
+    mainSession->NotifySubAndDialogFollowRectChange(rect, false, false);
+    ASSERT_EQ(true, isCall);
 }
 }
 }

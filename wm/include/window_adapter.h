@@ -138,6 +138,8 @@ public:
     virtual WMError UpdateScreenLockStatusForApp(const std::string& bundleName, bool isRelease);
     virtual WMError NotifyWatchGestureConsumeResult(int32_t keyCode, bool isConsumed);
     virtual WMError NotifyWatchFocusActiveChange(bool isActive);
+    virtual WMError MinimizeByWindowId(const std::vector<int32_t>& windowIds);
+    virtual WMError SetForegroundWindowNum(int32_t windowNum);
 
     /*
      * Window Recover
@@ -156,8 +158,13 @@ public:
      */
     virtual WMError IsPcWindow(bool& isPcWindow);
     virtual WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode);
-    virtual WMError IsWindowRectAutoSave(const std::string& key, bool& enabled);
+    virtual WMError IsWindowRectAutoSave(const std::string& key, bool& enabled, int persistentId);
     virtual WMError ShiftAppWindowPointerEvent(int32_t sourceWindowId, int32_t targetWindowId);
+
+    /*
+     * Sub Window
+     */
+    virtual WMError SetParentWindow(int32_t subWindowId, int32_t newParentWindowId);
 
     virtual WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap);
@@ -165,6 +172,7 @@ public:
     virtual WMError GetGlobalDragResizeType(DragResizeType& dragResizeType);
     virtual WMError SetAppDragResizeType(const std::string& bundleName, DragResizeType dragResizeType);
     virtual WMError GetAppDragResizeType(const std::string& bundleName, DragResizeType& dragResizeType);
+    virtual WMError SetAppKeyFramePolicy(const std::string& bundleName, const KeyFramePolicy& keyFramePolicy);
 
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;

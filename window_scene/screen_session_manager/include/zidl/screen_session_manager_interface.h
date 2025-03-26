@@ -40,7 +40,7 @@ public:
     virtual DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow) override { return DMError::DM_OK; }
     virtual bool ConvertScreenIdToRsScreenId(ScreenId screenId, ScreenId& rsScreenId) override { return true; }
     virtual void UpdateDisplayHookInfo(int32_t uid, bool enable, const DMHookInfo& hookInfo) override {};
-    virtual void GetDisplayHookInfo(int32_t uid, DMHookInfo& hookInfo) override {};
+    void GetDisplayHookInfo(int32_t uid, DMHookInfo& hookInfo) override {};
 
     virtual ScreenId CreateVirtualScreen(VirtualScreenOption option,
         const sptr<IRemoteObject>& displayManagerAgent) override { return -1; }
@@ -110,6 +110,10 @@ public:
     virtual uint32_t GetScreenBrightness(uint64_t screenId) override { return 0; }
     virtual std::vector<DisplayId> GetAllDisplayIds() override { return std::vector<DisplayId>{}; }
     virtual sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) override { return nullptr; }
+    virtual sptr<CutoutInfo> GetCutoutInfoWithRotation(DisplayId displayId, int32_t rotation) override
+    {
+        return nullptr;
+    }
     virtual void NotifyDisplayEvent(DisplayEvent event) override {}
     virtual bool SetFreeze(std::vector<DisplayId> displayIds, bool isFreeze) override { return false; }
     virtual sptr<ScreenInfo> GetScreenInfoById(ScreenId screenId) override { return nullptr; }
@@ -168,6 +172,7 @@ public:
 
     FoldStatus GetFoldStatus() override { return FoldStatus::UNKNOWN; };
     virtual SuperFoldStatus GetSuperFoldStatus() { return SuperFoldStatus::UNKNOWN; };
+    virtual void SetLandscapeLockStatus(bool isLocked) {};
     virtual ExtendScreenConnectStatus GetExtendScreenConnectStatus() { return ExtendScreenConnectStatus::UNKNOWN; }
 
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() override { return nullptr; };
@@ -214,15 +219,16 @@ public:
     }
     virtual void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList,
         std::vector<uint64_t> surfaceIdList = {}) override {}
+    virtual void SetVirtualDisplayMuteFlag(ScreenId screenId, bool muteFlag) override {}
     virtual void DisablePowerOffRenderControl(ScreenId screenId) override {}
 
     virtual std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution() override
     {
         return std::vector<DisplayPhysicalResolution> {};
     }
-    virtual std::string GetDisplayCapability() override
+    virtual DMError GetDisplayCapability(std::string& capabilitInfo) override
     {
-        return std::string {};
+        return DMError::DM_OK;
     }
     virtual bool SetVirtualScreenStatus(ScreenId screenId, VirtualScreenStatus screenStatus) override { return false; }
     virtual DMError SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid,
@@ -239,6 +245,10 @@ public:
     }
     virtual ScreenCombination GetScreenCombination(ScreenId screenId) { return ScreenCombination::SCREEN_ALONE; }
     virtual bool GetIsRealScreen(ScreenId screenId) { return false; }
+    virtual DMError SetSystemKeyboardStatus(bool isTpKeyboardOn = false) override
+    {
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 };
 } // namespace Rosen
 } // namespace OHOS

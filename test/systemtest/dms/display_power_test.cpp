@@ -130,7 +130,7 @@ namespace {
  * @tc.desc: call RegisterDisplayPowerEventListener with a valid listener and check return value
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayPowerTest, register_display_power_event_listener_001, Function | SmallTest | Level2)
+HWTEST_F(DisplayPowerTest, register_display_power_event_listener_001, TestSize.Level1)
 {
     sptr<IDisplayPowerEventListener> listener = new DisplayPowerEventListener();
     DMError ret = DisplayManager::GetInstance().RegisterDisplayPowerEventListener(listener);
@@ -143,7 +143,7 @@ HWTEST_F(DisplayPowerTest, register_display_power_event_listener_001, Function |
  * @tc.desc: call RegisterDisplayPowerEventListener with an invalid listener and check return value
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayPowerTest, register_display_power_event_listener_002, Function | SmallTest | Level2)
+HWTEST_F(DisplayPowerTest, register_display_power_event_listener_002, TestSize.Level1)
 {
     DMError ret = DisplayManager::GetInstance().RegisterDisplayPowerEventListener(nullptr);
     ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ret);
@@ -154,7 +154,7 @@ HWTEST_F(DisplayPowerTest, register_display_power_event_listener_002, Function |
  * @tc.desc: call UnregisterDisplayPowerEventListener with a valid listener and check return value
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayPowerTest, unregister_display_power_event_listener_001, Function | SmallTest | Level2)
+HWTEST_F(DisplayPowerTest, unregister_display_power_event_listener_001, TestSize.Level1)
 {
     sptr<IDisplayPowerEventListener> listener = new DisplayPowerEventListener();
     DisplayManager::GetInstance().RegisterDisplayPowerEventListener(listener);
@@ -167,7 +167,7 @@ HWTEST_F(DisplayPowerTest, unregister_display_power_event_listener_001, Function
  * @tc.desc: call UnregisterDisplayPowerEventListener with nullptr and check return value
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayPowerTest, unregister_display_power_event_listener_002, Function | SmallTest | Level2)
+HWTEST_F(DisplayPowerTest, unregister_display_power_event_listener_002, TestSize.Level1)
 {
     DMError ret = DisplayManager::GetInstance().UnregisterDisplayPowerEventListener(nullptr);
     ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ret);
@@ -178,7 +178,7 @@ HWTEST_F(DisplayPowerTest, unregister_display_power_event_listener_002, Function
  * @tc.desc: call UnregisterDisplayPowerEventListener with an invalid listener and check return value
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayPowerTest, unregister_display_power_event_listener_003, Function | SmallTest | Level2)
+HWTEST_F(DisplayPowerTest, unregister_display_power_event_listener_003, TestSize.Level1)
 {
     sptr<IDisplayPowerEventListener> listener = new DisplayPowerEventListener();
     DMError ret = DisplayManager::GetInstance().UnregisterDisplayPowerEventListener(listener);
@@ -210,11 +210,11 @@ HWTEST_F(DisplayPowerTest, set_display_state_002, Function | MediumTest | Level2
 {
     DisplayState initialState = DisplayManager::GetInstance().GetDisplayState(defaultId_);
     bool ret = DisplayManager::GetInstance().SetDisplayState(initialState, callback_);
-    ASSERT_EQ(true, ret);
+    ASSERT_EQ(false, ret);
     DisplayState stateGet = DisplayManager::GetInstance().GetDisplayState(defaultId_);
     ASSERT_EQ(stateGet, initialState);
     CheckDisplayStateCallback(false);
-    ASSERT_EQ(true, isDisplayStateCallbackCalled_);
+    ASSERT_EQ(false, isDisplayStateCallbackCalled_);
 }
 
 /**
@@ -257,7 +257,7 @@ HWTEST_F(DisplayPowerTest, set_display_state_callback_002, Function | MediumTest
     DisplayState initialState = DisplayManager::GetInstance().GetDisplayState(defaultId_);
     DisplayManager::GetInstance().SetDisplayState(initialState, callback_);
     CheckDisplayStateCallback(false);
-    ASSERT_EQ(true, isDisplayStateCallbackCalled_);
+    ASSERT_EQ(false, isDisplayStateCallbackCalled_);
 }
 
 /**

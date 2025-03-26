@@ -84,7 +84,7 @@ namespace {
  * @tc.desc: Set and get screen rotation locked
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenRotationControllerTest, ScreenRotationLocked, Function | SmallTest | Level3)
+HWTEST_F(ScreenRotationControllerTest, ScreenRotationLocked, TestSize.Level1)
 {
     ScreenRotationController::SetScreenRotationLocked(false);
     ASSERT_EQ(false, ScreenRotationController::IsScreenRotationLocked());
@@ -98,7 +98,7 @@ HWTEST_F(ScreenRotationControllerTest, ScreenRotationLocked, Function | SmallTes
  * @tc.desc: Set default device rotation offset
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenRotationControllerTest, DefaultDeviceRotationOffset, Function | SmallTest | Level3)
+HWTEST_F(ScreenRotationControllerTest, DefaultDeviceRotationOffset, TestSize.Level1)
 {
     ScreenRotationController::defaultDeviceRotationOffset_ = 90;
 
@@ -123,7 +123,7 @@ HWTEST_F(ScreenRotationControllerTest, DefaultDeviceRotationOffset, Function | S
  * @tc.desc: Calc target display rotation
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenRotationControllerTest, CalcTargetDisplayRotation, Function | SmallTest | Level3)
+HWTEST_F(ScreenRotationControllerTest, CalcTargetDisplayRotation, TestSize.Level1)
 {
     ScreenRotationController::ProcessRotationMapping();
     ScreenRotationController::currentDisplayRotation_ = Rotation::ROTATION_0;
@@ -172,7 +172,7 @@ HWTEST_F(ScreenRotationControllerTest, CalcTargetDisplayRotation, Function | Sma
  * @tc.desc: Process auto rotation
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenRotationControllerTest, ProcessAutoRotation, Function | SmallTest | Level3)
+HWTEST_F(ScreenRotationControllerTest, ProcessAutoRotation, TestSize.Level1)
 {
     ScreenRotationController::currentDisplayRotation_ = Rotation::ROTATION_90;
     ScreenRotationController::ProcessRotationMapping();
@@ -197,7 +197,7 @@ HWTEST_F(ScreenRotationControllerTest, ProcessAutoRotation, Function | SmallTest
  * @tc.desc: Calc device rotation
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenRotationControllerTest, CalcDeviceRotation, Function | SmallTest | Level3)
+HWTEST_F(ScreenRotationControllerTest, CalcDeviceRotation, TestSize.Level1)
 {
     SensorRotation rotation = SensorRotation::INVALID;
     ASSERT_EQ(DeviceRotation::INVALID, ScreenRotationController::CalcDeviceRotation(rotation));
@@ -228,7 +228,7 @@ HWTEST_F(ScreenRotationControllerTest, CalcDeviceRotation, Function | SmallTest 
  * @tc.desc: Is sensor related orientation
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenRotationControllerTest, IsSensorRelatedOrientation, Function | SmallTest | Level3)
+HWTEST_F(ScreenRotationControllerTest, IsSensorRelatedOrientation, TestSize.Level1)
 {
     ASSERT_EQ(false, ScreenRotationController::IsSensorRelatedOrientation(Orientation::LOCKED));
     ASSERT_EQ(false, ScreenRotationController::IsSensorRelatedOrientation(Orientation::UNSPECIFIED));
@@ -251,7 +251,7 @@ HWTEST_F(ScreenRotationControllerTest, IsSensorRelatedOrientation, Function | Sm
  * @tc.desc: Process switch to sensor related orientation
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenRotationControllerTest, ProcessSwitchToSensorRelatedOrientation, Function | SmallTest | Level3)
+HWTEST_F(ScreenRotationControllerTest, ProcessSwitchToSensorRelatedOrientation, TestSize.Level1)
 {
     Orientation orientation = Orientation::SENSOR;
     DeviceRotation deviceRitation = DeviceRotation::ROTATION_LANDSCAPE;
@@ -313,7 +313,7 @@ HWTEST_F(ScreenRotationControllerTest, ProcessSwitchToSensorRelatedOrientation, 
  * @tc.desc: Process switch to auto rotation
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenRotationControllerTest, ProcessSwitchToAutoRotation, Function | SmallTest | Level3)
+HWTEST_F(ScreenRotationControllerTest, ProcessSwitchToAutoRotation, TestSize.Level1)
 {
     auto defaultDisplayInfo = DisplayManagerService::GetInstance().GetDefaultDisplayInfo();
     ASSERT_NE(nullptr, defaultDisplayInfo);
@@ -351,7 +351,7 @@ HWTEST_F(ScreenRotationControllerTest, ProcessSwitchToAutoRotation, Function | S
  * @tc.desc: Convert rotation
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenRotationControllerTest, ConvertRotation, Function | SmallTest | Level3)
+HWTEST_F(ScreenRotationControllerTest, ConvertRotation, TestSize.Level1)
 {
     ScreenRotationController::sensorToDeviceRotationMap_.clear();
     SensorRotation rotation = SensorRotation::INVALID;
@@ -372,7 +372,7 @@ HWTEST_F(ScreenRotationControllerTest, ConvertRotation, Function | SmallTest | L
  * @tc.desc: Check device rotation
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenRotationControllerTest, IsDeviceRotationVerticalOrHorizontal, Function | SmallTest | Level3)
+HWTEST_F(ScreenRotationControllerTest, IsDeviceRotationVerticalOrHorizontal, TestSize.Level1)
 {
     ASSERT_EQ(true, ScreenRotationController::IsDeviceRotationVertical(DeviceRotation::ROTATION_PORTRAIT));
     ASSERT_EQ(true, ScreenRotationController::IsDeviceRotationVertical(DeviceRotation::ROTATION_PORTRAIT_INVERTED));
@@ -388,7 +388,7 @@ HWTEST_F(ScreenRotationControllerTest, IsDeviceRotationVerticalOrHorizontal, Fun
  * @tc.desc: Process orientation switch
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenRotationControllerTest, ProcessOrientationSwitch, Function | SmallTest | Level3)
+HWTEST_F(ScreenRotationControllerTest, ProcessOrientationSwitch, TestSize.Level1)
 {
     ScreenRotationController::ProcessOrientationSwitch(Orientation::UNSPECIFIED, true);
     ScreenRotationController::ProcessOrientationSwitch(Orientation::VERTICAL, true);
@@ -409,7 +409,7 @@ HWTEST_F(ScreenRotationControllerTest, ProcessOrientationSwitch, Function | Smal
  * @tc.desc: HandleSensorEventInput
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenRotationControllerTest, HandleSensorEventInput, Function | SmallTest | Level3)
+HWTEST_F(ScreenRotationControllerTest, HandleSensorEventInput, TestSize.Level1)
 {
     DeviceRotation deviceRotation = DeviceRotation::INVALID;
     ScreenRotationController::HandleSensorEventInput(deviceRotation);
@@ -425,7 +425,7 @@ HWTEST_F(ScreenRotationControllerTest, HandleSensorEventInput, Function | SmallT
  * @tc.desc: Check device rotation
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenRotationControllerTest, IsDisplayRotationVertical, Function | SmallTest | Level3)
+HWTEST_F(ScreenRotationControllerTest, IsDisplayRotationVertical, TestSize.Level1)
 {
     ASSERT_EQ(true, ScreenRotationController::IsDisplayRotationVertical(Rotation::ROTATION_0));
     ASSERT_EQ(false, ScreenRotationController::IsDisplayRotationVertical(Rotation::ROTATION_90));
@@ -441,7 +441,7 @@ HWTEST_F(ScreenRotationControllerTest, IsDisplayRotationVertical, Function | Sma
  * @tc.desc: ProcessSwitchToSensorUnrelatedOrientation
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenRotationControllerTest, ProcessSwitchToSensorUnrelatedOrientation, Function | SmallTest | Level3)
+HWTEST_F(ScreenRotationControllerTest, ProcessSwitchToSensorUnrelatedOrientation, TestSize.Level1)
 {
     Orientation orientation = Orientation::UNSPECIFIED;
     ScreenRotationController::ProcessSwitchToSensorUnrelatedOrientation(orientation, false);
@@ -479,7 +479,7 @@ HWTEST_F(ScreenRotationControllerTest, ProcessSwitchToSensorUnrelatedOrientation
  * @tc.desc: GetPreferredOrientation
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenRotationControllerTest, GetPreferredOrientation, Function | SmallTest | Level3)
+HWTEST_F(ScreenRotationControllerTest, GetPreferredOrientation, TestSize.Level1)
 {
     ScreenRotationController::defaultDisplayId_ = 1003;
     auto ret = ScreenRotationController::GetPreferredOrientation();
@@ -492,7 +492,7 @@ HWTEST_F(ScreenRotationControllerTest, GetPreferredOrientation, Function | Small
  * @tc.desc: ProcessSwitchToAutoRotationLandscapeRestricted
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenRotationControllerTest, ProcessSwitchToAutoRotationLandscapeRestricted, Function | SmallTest | Level3)
+HWTEST_F(ScreenRotationControllerTest, ProcessSwitchToAutoRotationLandscapeRestricted, TestSize.Level1)
 {
     ScreenRotationController::rotationLockedRotation_ =
         ScreenRotationController::ConvertDeviceToDisplayRotation(DeviceRotation::ROTATION_LANDSCAPE);
@@ -506,7 +506,7 @@ HWTEST_F(ScreenRotationControllerTest, ProcessSwitchToAutoRotationLandscapeRestr
  * @tc.desc: ConvertRotationToDisplayOrientation
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenRotationControllerTest, ConvertRotationToDisplayOrientation, Function | SmallTest | Level3)
+HWTEST_F(ScreenRotationControllerTest, ConvertRotationToDisplayOrientation, TestSize.Level1)
 {
     ASSERT_FALSE(ScreenRotationController::displayToDisplayOrientationMap_.empty());
     Rotation rotation = Rotation::ROTATION_0;
@@ -522,7 +522,7 @@ HWTEST_F(ScreenRotationControllerTest, ConvertRotationToDisplayOrientation, Func
  * @tc.desc: Subscribe and unsubscribe gravity sensor
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenRotationControllerTest, GravitySensor, Function | SmallTest | Level3)
+HWTEST_F(ScreenRotationControllerTest, GravitySensor, TestSize.Level1)
 {
     GravitySensorSubscriber::isGravitySensorSubscribed_ = true;
     GravitySensorSubscriber::SubscribeGravitySensor();
@@ -543,7 +543,7 @@ HWTEST_F(ScreenRotationControllerTest, GravitySensor, Function | SmallTest | Lev
  * @tc.desc: Check callbcak time interval
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenRotationControllerTest, CheckCallbackTimeInterval, Function | SmallTest | Level3)
+HWTEST_F(ScreenRotationControllerTest, CheckCallbackTimeInterval, TestSize.Level1)
 {
     std::chrono::milliseconds ms = std::chrono::time_point_cast<std::chrono::milliseconds>(
         std::chrono::steady_clock::now()).time_since_epoch();
@@ -561,7 +561,7 @@ HWTEST_F(ScreenRotationControllerTest, CheckCallbackTimeInterval, Function | Sma
  * @tc.desc: Handel gravity sensor event callback
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenRotationControllerTest, HandleGravitySensorEventCallback, Function | SmallTest | Level3)
+HWTEST_F(ScreenRotationControllerTest, HandleGravitySensorEventCallback, TestSize.Level1)
 {
     SensorEvent event;
     GravityData data = {0.f, 0.f, 0.f};
@@ -594,7 +594,7 @@ HWTEST_F(ScreenRotationControllerTest, HandleGravitySensorEventCallback, Functio
  * @tc.desc: Calc rotation degree
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenRotationControllerTest, CalcRotationDegree, Function | SmallTest | Level3)
+HWTEST_F(ScreenRotationControllerTest, CalcRotationDegree, TestSize.Level1)
 {
     GravityData data0 = {0.f, 0.f, 0.f};
     ASSERT_EQ(270, GravitySensorSubscriber::CalcRotationDegree(&data0));
@@ -611,7 +611,7 @@ HWTEST_F(ScreenRotationControllerTest, CalcRotationDegree, Function | SmallTest 
  * @tc.desc: Calc sensor rotation
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenRotationControllerTest, CalcSensorRotation, Function | SmallTest | Level3)
+HWTEST_F(ScreenRotationControllerTest, CalcSensorRotation, TestSize.Level1)
 {
     ASSERT_EQ(SensorRotation::INVALID, GravitySensorSubscriber::CalcSensorRotation(-30));
     ASSERT_EQ(SensorRotation::ROTATION_0, GravitySensorSubscriber::CalcSensorRotation(15));
@@ -629,7 +629,7 @@ HWTEST_F(ScreenRotationControllerTest, CalcSensorRotation, Function | SmallTest 
  * @tc.desc: check function MotionSubscriber::SubscribeMotionSensor
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenRotationControllerTest, SubscribeMotionSensor, Function | SmallTest | Level3)
+HWTEST_F(ScreenRotationControllerTest, SubscribeMotionSensor, TestSize.Level1)
 {
     MotionSubscriber::isMotionSensorSubscribed_ = true;
     MotionSubscriber::SubscribeMotionSensor();

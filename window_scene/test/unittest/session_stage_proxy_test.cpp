@@ -283,6 +283,18 @@ HWTEST_F(SessionStageProxyTest, NotifyOccupiedAreaChangeInfo, Function | SmallTe
 }
 
 /**
+ * @tc.name: NotifyKeyboardAnimationCompleted
+ * @tc.desc: test function : NotifyKeyboardAnimationCompleted
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, NotifyKeyboardAnimationCompleted, Function | SmallTest | Level1)
+{
+    ASSERT_TRUE((sessionStage_ != nullptr));
+    KeyboardPanelInfo keyboardPanelInfo;
+    sessionStage_->NotifyKeyboardAnimationCompleted(keyboardPanelInfo);
+}
+
+/**
  * @tc.name: UpdateAvoidArea
  * @tc.desc: test function : UpdateAvoidArea
  * @tc.type: FUNC
@@ -573,6 +585,27 @@ HWTEST_F(SessionStageProxyTest, CompatibleFullScreenClose, Function | SmallTest 
 }
 
 /**
+ * @tc.name: PcAppInPadNormalClose
+ * @tc.desc: test function : PcAppInPadNormalClose
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, PcAppInPadNormalClose, Function | SmallTest | Level1)
+{
+    ASSERT_TRUE(sessionStage_ != nullptr);
+    auto res = sessionStage_->PcAppInPadNormalClose();
+    ASSERT_NE(WSError::WS_ERROR_INVALID_WINDOW, res);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    res = sessionStage_->PcAppInPadNormalClose();
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
+
+    sptr<SessionStageProxy> sessionStage = sptr<SessionStageProxy>::MakeSptr(nullptr);
+    res = sessionStage->PcAppInPadNormalClose();
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
+    MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
  * @tc.name: SetUniqueVirtualPixelRatio
  * @tc.desc: test function : SetUniqueVirtualPixelRatio
  * @tc.type: FUNC
@@ -682,6 +715,19 @@ HWTEST_F(SessionStageProxyTest, SendContainerModalEvent, Function | SmallTest | 
 {
     ASSERT_TRUE(sessionStage_ != nullptr);
     WSError res = sessionStage_->SendContainerModalEvent("name", "value");
+    ASSERT_EQ(WSError::WS_OK, res);
+}
+
+/**
+ * @tc.name: SetCurrentRotation
+ * @tc.desc: test function : SetCurrentRotation
+ * @tc.type: FUNC
+ */
+ HWTEST_F(SessionStageProxyTest, SetCurrentRotation, Function | SmallTest | Level1)
+{
+    int32_t currentRotation = 90;
+    ASSERT_TRUE(sessionStage_ != nullptr);
+    WSError res = sessionStage_->SetCurrentRotation(currentRotation);
     ASSERT_EQ(WSError::WS_OK, res);
 }
 }

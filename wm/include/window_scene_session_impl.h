@@ -55,8 +55,14 @@ public:
         const RectAnimationConfig& rectAnimationConfig = {}) override;
     WMError SetFollowParentWindowLayoutEnabled(bool isFollow) override;
 
+    /*
+     * Window Hierarchy
+     */
     WMError RaiseToAppTop() override;
     WMError RaiseAboveTarget(int32_t subWindowId) override;
+    WMError SetSubWindowZLevel(int32_t zLevel) override;
+    WMError GetSubWindowZLevel(int32_t& zLevel) override;
+
     void PerformBack() override;
     WMError SetAspectRatio(float ratio) override;
     WMError ResetAspectRatio() override;
@@ -93,6 +99,7 @@ public:
     virtual void SetSystemPrivacyMode(bool isSystemPrivacyMode) override;
     virtual WMError SetSnapshotSkip(bool isSkip) override;
     virtual std::shared_ptr<Media::PixelMap> Snapshot() override;
+    WMError SnapshotIgnorePrivacy(std::shared_ptr<Media::PixelMap>& pixelMap) override;
     WMError SetTouchHotAreas(const std::vector<Rect>& rects) override;
     WMError SetKeyboardTouchHotAreas(const KeyboardTouchHotAreas& hotAreas) override;
     virtual WmErrorCode KeepKeyboardOnFocus(bool keepKeyboardFlag) override;
@@ -130,13 +137,25 @@ public:
     WMError HideNonSecureWindows(bool shouldHide) override;
     void UpdateDensity() override;
     WSError UpdateOrientation() override;
+    WMError GetTargetOrientationConfigInfo(Orientation targetOrientation,
+        const std::map<Rosen::WindowType, Rosen::SystemBarProperty>& properties, Ace::ViewportConfig& config,
+        std::map<AvoidAreaType, AvoidArea>& avoidAreas) override;
+    WSError NotifyTargetRotationInfo(OrientationInfo& info) override;
     WSError UpdateDisplayId(uint64_t displayId) override;
     WMError AdjustKeyboardLayout(const KeyboardLayoutParams params) override;
+    WMError CheckAndModifyWindowRect(uint32_t& width, uint32_t& height) override;
+
+    /*
+     * Sub Window
+     */
+    WMError SetParentWindow(int32_t newParentWindowId) override;
+    WMError GetParentWindow(sptr<Window>& parentWindow) override;
 
     /*
      * PC Window
      */
     WMError SetWindowMask(const std::vector<std::vector<uint32_t>>& windowMask) override;
+    WMError SetFollowParentMultiScreenPolicy(bool enabled) override;
 
     /*
      * PC Window Layout
@@ -144,7 +163,7 @@ public:
     WMError Restore() override;
     WMError SetTitleAndDockHoverShown(bool isTitleHoverShown = true,
         bool isDockHoverShown = true) override;
-    WMError SetWindowRectAutoSave(bool enabled) override;
+    WMError SetWindowRectAutoSave(bool enabled, bool isSaveBySpecifiedFlag = false) override;
     WMError IsWindowRectAutoSave(bool& enabled) override;
     WMError MaximizeFloating() override;
     WMError Maximize() override;
@@ -166,6 +185,7 @@ public:
     WSError CompatibleFullScreenMinimize() override;
     WSError CompatibleFullScreenClose() override;
     void HookDecorButtonStyleInCompatibleMode(uint32_t contentColor);
+    WSError PcAppInPadNormalClose() override;
 
     /*
      * Free Multi Window
@@ -215,7 +235,6 @@ public:
     float GetCustomDensity() const override;
     WMError SetCustomDensity(float density) override;
     WMError GetWindowDensityInfo(WindowDensityInfo& densityInfo) override;
-    uint32_t GetApiVersion() const override;
 
     /*
      * Window Decor
@@ -249,8 +268,6 @@ public:
     WMError SetFullScreen(bool status) override;
     WMError UpdateSystemBarProperties(const std::unordered_map<WindowType, SystemBarProperty>& systemBarProperties,
         const std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags) override;
-    void UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool systemBarEnableAnimation,
-        SystemBarProperty& property) override;
 
 protected:
     WMError CreateAndConnectSpecificSession();
@@ -283,7 +300,6 @@ private:
     WMError SyncDestroyAndDisconnectSpecificSession(int32_t persistentId);
     bool IsValidSystemWindowType(const WindowType& type);
     WMError CheckParmAndPermission();
-    static uint32_t maxFloatingWindowSize_;
     void TransformSurfaceNode(const Transform& trans);
     void AdjustWindowAnimationFlag(bool withAnimation = false);
     WMError UpdateAnimationFlagProperty(bool withAnimation);
@@ -291,7 +307,6 @@ private:
     uint32_t UpdateConfigVal(uint32_t minVal, uint32_t maxVal, uint32_t configVal, uint32_t defaultVal, float vpr);
     void UpdateWindowState();
     void UpdateNewSize();
-    void UpdateNewSizeForPCWindow(const sptr<DisplayInfo>& info, const DMRect& availableArea);
     void fillWindowLimits(WindowLimits& windowLimits);
     void ConsumePointerEventInner(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         MMI::PointerEvent::PointerItem& pointerItem, bool isHitTargetDraggable = false);
@@ -374,6 +389,7 @@ private:
      */
     void AddSubWindowMapForExtensionWindow();
     WMError GetParentSessionAndVerify(bool isToast, sptr<WindowSessionImpl>& parentSession);
+    WMError SetParentWindowInner(int32_t oldParentWindowId, const sptr<WindowSessionImpl>& newParentWindow);
 
     WMError RegisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener) override;
     WMError UnregisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener) override;
@@ -388,7 +404,7 @@ private:
     /*
      * PC Fold Screen
      */
-    std::atomic_bool isFullScreenWaterfallMode_ { false };
+    std::atomic_bool isWaterfallToMaximize_ { false };
     std::atomic<WindowMode> lastWindowModeBeforeWaterfall_ { WindowMode::WINDOW_MODE_UNDEFINED };
 
     /*
@@ -403,6 +419,7 @@ private:
      * only used when delay raise is enabled and hit draggable component
      */
     bool isExecuteDelayRaise_ = false;
+    bool IsFullScreenEnable() const;
 
     /*
      * Window Input Event
@@ -417,10 +434,18 @@ private:
     WSError NotifyWindowAttachStateChange(bool isAttach) override;
 
     /*
+     * Window Rotation
+     */
+    Ace::ViewportConfig FillTargetOrientationConfig(
+        const OrientationInfo& info, const sptr<DisplayInfo>& displayInfo, uint64_t displayId);
+
+    /*
      * Window Lifecycle
      */
     bool isColdStart_ = true;
     void NotifyFreeMultiWindowModeResume();
+    std::string TransferLifeCycleEventToString(LifeCycleEvent type) const;
+    void RecordLifeCycleExceptionEvent(LifeCycleEvent event, WMError erCode) const;
 };
 } // namespace Rosen
 } // namespace OHOS

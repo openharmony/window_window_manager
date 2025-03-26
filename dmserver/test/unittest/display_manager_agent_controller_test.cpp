@@ -54,7 +54,7 @@ namespace {
  * @tc.desc: NotifyDisplayStateChanged test
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAgentControllerTest, NotifyDisplayStateChanged, Function | SmallTest | Level3)
+HWTEST_F(DisplayManagerAgentControllerTest, NotifyDisplayStateChanged, TestSize.Level1)
 {
     DisplayManagerAgentController displayManagerAgentController;
     DisplayId id = 3;
@@ -76,7 +76,7 @@ HWTEST_F(DisplayManagerAgentControllerTest, NotifyDisplayStateChanged, Function 
  * @tc.desc: OnScreenConnect test
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAgentControllerTest, OnScreenConnect, Function | SmallTest | Level3)
+HWTEST_F(DisplayManagerAgentControllerTest, OnScreenConnect, TestSize.Level1)
 {
     sptr<ScreenInfo> screenInfo = nullptr;
     DisplayManagerAgentController::GetInstance().OnScreenConnect(screenInfo);
@@ -102,7 +102,7 @@ HWTEST_F(DisplayManagerAgentControllerTest, OnScreenConnect, Function | SmallTes
  * @tc.desc: OnScreenChange test
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAgentControllerTest, OnScreenChange, Function | SmallTest | Level3)
+HWTEST_F(DisplayManagerAgentControllerTest, OnScreenChange, TestSize.Level1)
 {
     sptr<ScreenInfo> screenInfo = nullptr;
     DisplayManagerAgentController::GetInstance().OnScreenChange(screenInfo, ScreenChangeEvent::UPDATE_ROTATION);
@@ -129,7 +129,7 @@ HWTEST_F(DisplayManagerAgentControllerTest, OnScreenChange, Function | SmallTest
  * @tc.desc: OnScreenChange test
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAgentControllerTest, OnScreenGroupChange, Function | SmallTest | Level3)
+HWTEST_F(DisplayManagerAgentControllerTest, OnScreenGroupChange, TestSize.Level1)
 {
     sptr<ScreenInfo> screenInfo = nullptr;
     std::string trigger;
@@ -160,7 +160,7 @@ HWTEST_F(DisplayManagerAgentControllerTest, OnScreenGroupChange, Function | Smal
  * @tc.desc: OnDisplayCreate test
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAgentControllerTest, OnDisplayCreate, Function | SmallTest | Level3)
+HWTEST_F(DisplayManagerAgentControllerTest, OnDisplayCreate, TestSize.Level1)
 {
     sptr<DisplayInfo> displayInfo;
     DisplayManagerAgentController::GetInstance().OnDisplayCreate(displayInfo);
@@ -185,7 +185,7 @@ HWTEST_F(DisplayManagerAgentControllerTest, OnDisplayCreate, Function | SmallTes
  * @tc.desc: OnDisplayDestroy test
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAgentControllerTest, OnDisplayDestroy, Function | SmallTest | Level3)
+HWTEST_F(DisplayManagerAgentControllerTest, OnDisplayDestroy, TestSize.Level1)
 {
     DisplayId displayId = 0;
     DisplayManagerAgentController::GetInstance().OnDisplayDestroy(displayId);
@@ -209,7 +209,7 @@ HWTEST_F(DisplayManagerAgentControllerTest, OnDisplayDestroy, Function | SmallTe
  * @tc.desc: OnDisplayChange test
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAgentControllerTest, OnDisplayChange, Function | SmallTest | Level3)
+HWTEST_F(DisplayManagerAgentControllerTest, OnDisplayChange, TestSize.Level1)
 {
     sptr<DisplayInfo> displayInfo = nullptr;
     DisplayManagerAgentController::GetInstance().OnDisplayChange(displayInfo, DisplayChangeEvent::UNKNOWN);
@@ -238,7 +238,7 @@ HWTEST_F(DisplayManagerAgentControllerTest, OnDisplayChange, Function | SmallTes
  * @tc.desc: OnScreenshot test
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAgentControllerTest, OnScreenshot, Function | SmallTest | Level3)
+HWTEST_F(DisplayManagerAgentControllerTest, OnScreenshot, TestSize.Level1)
 {
     sptr<ScreenshotInfo> info = nullptr;
     DisplayManagerAgentController::GetInstance().OnScreenshot(info);
@@ -264,7 +264,7 @@ HWTEST_F(DisplayManagerAgentControllerTest, OnScreenshot, Function | SmallTest |
  * @tc.desc: NotifyPrivateWindowStateChanged test
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAgentControllerTest, NotifyPrivateWindowStateChanged, Function | SmallTest | Level3)
+HWTEST_F(DisplayManagerAgentControllerTest, NotifyPrivateWindowStateChanged, TestSize.Level1)
 {
     bool hasPrivate = true;
     DisplayManagerAgentController displayManagerAgentController;
@@ -285,7 +285,7 @@ HWTEST_F(DisplayManagerAgentControllerTest, NotifyPrivateWindowStateChanged, Fun
  * @tc.desc: NotifyFoldStatusChanged test
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAgentControllerTest, NotifyFoldStatusChanged, Function | SmallTest | Level3)
+HWTEST_F(DisplayManagerAgentControllerTest, NotifyFoldStatusChanged, TestSize.Level1)
 {
     FoldStatus foldStatus = FoldStatus::UNKNOWN;
     DisplayManagerAgentController displayManagerAgentController;
@@ -306,7 +306,7 @@ HWTEST_F(DisplayManagerAgentControllerTest, NotifyFoldStatusChanged, Function | 
  * @tc.desc: NotifyDisplayModeChanged test
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAgentControllerTest, NotifyDisplayModeChanged, Function | SmallTest | Level3)
+HWTEST_F(DisplayManagerAgentControllerTest, NotifyDisplayModeChanged, TestSize.Level1)
 {
     FoldDisplayMode displayMode = FoldDisplayMode::UNKNOWN;
     DisplayManagerAgentController displayManagerAgentController;

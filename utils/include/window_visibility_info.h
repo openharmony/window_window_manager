@@ -113,6 +113,10 @@ public:
 
     void SetIsSystem(bool isSystem) { isSystem_ = isSystem; }
 
+    uint32_t GetZOrder() const { return zOrder_; }
+
+    void SetZOrder(uint32_t zOrder) { zOrder_ = zOrder; }
+
     uint32_t windowId_ { INVALID_WINDOW_ID };
     int32_t pid_ { 0 };
     int32_t uid_ { 0 };
@@ -125,6 +129,7 @@ public:
     bool isFocused_ = false;
     int32_t appIndex_ { 0 };
     bool isSystem_ = false;
+    uint32_t zOrder_ { 0 };
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_VISIBILITY_INFO_H

@@ -70,6 +70,7 @@ public:
     void RecalculatePanelRectForAvoidArea(WSRect& panelRect) override;
     WSError ChangeKeyboardViewMode(KeyboardViewMode mode) override;
     void SetKeyboardViewModeChangeListener(const NotifyKeyboarViewModeChangeFunc& func) override;
+    void SetSkipSelfWhenShowOnVirtualScreen(bool isSkip) override;
 
 protected:
     void EnableCallingSessionAvoidArea() override;
@@ -78,6 +79,7 @@ protected:
 private:
     sptr<SceneSession> GetSceneSession(uint32_t persistentId);
     int32_t GetFocusedSessionId();
+    WSRect GetPanelRect() const;
 
     void SetCallingSessionId(uint32_t callingSessionId) override;
 

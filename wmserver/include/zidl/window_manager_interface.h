@@ -260,7 +260,8 @@ public:
         const std::string& bundleName, bool isRelease) { return WMError::WM_OK; }
     virtual WMError IsPcWindow(bool& isPcWindow) { return WMError::WM_OK; }
     virtual WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode) { return WMError::WM_OK; }
-    virtual WMError IsWindowRectAutoSave(const std::string& key, bool& enabled) { return WMError::WM_OK; }
+    virtual WMError IsWindowRectAutoSave(const std::string& key, bool& enabled,
+        int persistentId) { return WMError::WM_OK; }
     virtual WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap) { return WMError::WM_OK; }
     virtual WMError SetGlobalDragResizeType(DragResizeType dragResizeType) { return WMError::WM_OK; }
@@ -269,6 +270,8 @@ public:
         DragResizeType dragResizeType) { return WMError::WM_OK; }
     virtual WMError GetAppDragResizeType(const std::string& bundleName,
         DragResizeType& dragResizeType) { return WMError::WM_OK; }
+    virtual WMError SetAppKeyFramePolicy(const std::string& bundleName,
+        const KeyFramePolicy& keyFramePolicy) { return WMError::WM_OK; }
     virtual WMError NotifyWatchGestureConsumeResult(int32_t keyCode,
         bool isConsumed) { return WMError::WM_OK; }
     virtual WMError NotifyWatchFocusActiveChange(bool isActive) { return WMError::WM_OK; }
@@ -276,6 +279,13 @@ public:
         int32_t targetPersistentId) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError HasFloatingWindowForeground(const sptr<IRemoteObject>& abilityToken,
         bool& hasOrNot) { return WMError::WM_OK; }
+    virtual WMError MinimizeByWindowId(const std::vector<int32_t>& windowIds) { return WMError::WM_OK; }
+    virtual WMError SetForegroundWindowNum(int32_t windowNum) { return WMError::WM_OK; }
+
+    /*
+     * Sub Window
+     */
+    virtual WMError SetParentWindow(int32_t subWindowId, int32_t newParentWindowId) { return WMError::WM_OK; }
 };
 }
 }

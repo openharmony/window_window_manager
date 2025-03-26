@@ -59,6 +59,9 @@ public:
     FoldDisplayMode GetScreenDisplayMode();
     FoldStatus GetFoldStatus();
     void SetFoldStatus(FoldStatus foldStatus);
+    std::chrono::steady_clock::time_point GetStartTimePoint();
+    bool GetIsFirstFrameCommitReported();
+    void SetIsFirstFrameCommitReported(bool isFirstFrameCommitReported);
     
     ScreenId screenId_ { SCREEN_ID_INVALID };
     ScreenProperty screenProperty_;
@@ -70,6 +73,7 @@ public:
     sptr<FoldCreaseRegion> currentFoldCreaseRegion_ = nullptr;
     bool lockDisplayStatus_ = false;
     bool onBootAnimation_ = false;
+    bool isFirstFrameCommitReported_ = false;
     std::vector<uint32_t> screenParams_ = {};
     /*
      *    Avoid fold to expand process queues public interface

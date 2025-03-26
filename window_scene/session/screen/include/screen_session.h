@@ -206,6 +206,7 @@ public:
     void SetName(std::string name);
     void SetInnerName(std::string innerName);
     void Resize(uint32_t width, uint32_t height, bool isFreshBoundsSync = true);
+    void SetFrameGravity(Gravity gravity);
 
     void SetHdrFormats(std::vector<uint32_t>&& hdrFormats);
     void SetColorSpaces(std::vector<uint32_t>&& colorSpaces);
@@ -242,6 +243,12 @@ public:
     void SetValidWidth(uint32_t validWidth);
     int32_t GetValidHeight() const;
     int32_t GetValidWidth() const;
+
+    void SetPointerActiveWidth(uint32_t pointerActiveWidth);
+    uint32_t GetPointerActiveWidth();
+    void SetPointerActiveHeight(uint32_t pointerActiveHeight);
+    uint32_t GetPointerActiveHeight();
+
     float GetSensorRotation() const;
     DisplaySourceMode GetDisplaySourceMode() const;
     void SetXYPosition(int32_t x, int32_t y);
@@ -306,6 +313,7 @@ private:
     std::shared_ptr<RSDisplayNode> displayNode_;
     ScreenState screenState_ { ScreenState::INIT };
     std::vector<IScreenChangeListener*> screenChangeListenerList_;
+    std::mutex screenChangeListenerListMutex_;
     ScreenCombination combination_ { ScreenCombination::SCREEN_ALONE };
     VirtualScreenFlag screenFlag_ { VirtualScreenFlag::DEFAULT };
     bool hasPrivateWindowForeground_ = false;

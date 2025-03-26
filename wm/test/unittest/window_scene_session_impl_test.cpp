@@ -448,6 +448,8 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession10, Function
     ASSERT_NE(nullptr, textMenuWindow);
     error = textMenuWindow->Create(abilityContext_, nullptr);
     ASSERT_EQ(error, WMError::WM_OK);
+    ASSERT_EQ(WMError::WM_OK, textMenuWindow->Destroy(true));
+    ASSERT_EQ(WMError::WM_OK, parentWindow->Destroy(true));
 }
 
 /**
@@ -822,6 +824,12 @@ HWTEST_F(WindowSceneSessionImplTest, StartMoveWindow_IsDeviceSupportOrNot, Funct
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
     window->windowSystemConfig_.freeMultiWindowEnable_ = true;
     window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    ASSERT_NE(window->StartMoveWindow(), WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    window->windowSystemConfig_.freeMultiWindowEnable_ = false;
+    window->windowSystemConfig_.freeMultiWindowSupport_ = false;
+    window->property_->SetIsPcAppInPad(true);
     ASSERT_NE(window->StartMoveWindow(), WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
 }
 
@@ -2045,6 +2053,28 @@ HWTEST_F(WindowSceneSessionImplTest, CompatibleFullScreenClose, Function | Small
 }
 
 /**
+ * @tc.name: PcAppInPadNormalClose
+ * @tc.desc: PcAppInPadNormalClose test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, PcAppInPadNormalClose, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("PcAppInPadNormalClose");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_WINDOW, window->PcAppInPadNormalClose());
+
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_WINDOW, window->PcAppInPadNormalClose());
+
+    window->property_->SetIsPcAppInPad(true);
+    ASSERT_EQ(WSError::WS_OK, window->PcAppInPadNormalClose());
+}
+
+/**
  * @tc.name: SetPropertySessionInfo01
  * @tc.desc: SetPropertySessionInfo test
  * @tc.type: FUNC
@@ -2094,6 +2124,44 @@ HWTEST_F(WindowSceneSessionImplTest, SetWindowDelayRaiseEnabled, Function | Smal
     ASSERT_EQ(false, window->IsWindowDelayRaiseEnabled());
     ASSERT_EQ(WMError::WM_OK, window->SetWindowDelayRaiseEnabled(true));
     ASSERT_EQ(true, window->IsWindowDelayRaiseEnabled());
+}
+
+/**
+ * @tc.name: SetFollowParentMultiScreenPolicy
+ * @tc.desc: SetFollowParentMultiScreenPolicy test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, SetFollowParentMultiScreenPolicy, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->property_->SetWindowName("SetFollowParentMultiScreenPolicy");
+    window->property_->SetPersistentId(0);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetFollowParentMultiScreenPolicy(true));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetFollowParentMultiScreenPolicy(false));
+    window->property_->SetPersistentId(1);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetFollowParentMultiScreenPolicy(true));
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetFollowParentMultiScreenPolicy(false));
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    window->windowSystemConfig_.freeMultiWindowEnable_ = false;
+    window->windowSystemConfig_.freeMultiWindowSupport_ = false;
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetFollowParentMultiScreenPolicy(true));
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetFollowParentMultiScreenPolicy(false));
+    window->windowSystemConfig_.freeMultiWindowEnable_ = true;
+    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_CALLING, window->SetFollowParentMultiScreenPolicy(true));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_CALLING, window->SetFollowParentMultiScreenPolicy(false));
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    ASSERT_EQ(WMError::WM_OK, window->SetFollowParentMultiScreenPolicy(true));
+    ASSERT_EQ(WMError::WM_OK, window->SetFollowParentMultiScreenPolicy(false));
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ASSERT_EQ(WMError::WM_OK, window->SetFollowParentMultiScreenPolicy(true));
+    ASSERT_EQ(WMError::WM_OK, window->SetFollowParentMultiScreenPolicy(false));
 }
 } // namespace
 } // namespace Rosen

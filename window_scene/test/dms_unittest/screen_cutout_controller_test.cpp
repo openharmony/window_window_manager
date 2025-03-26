@@ -99,6 +99,20 @@ namespace {
     }
 
     /**
+     * @tc.name: GetCutoutInfoWithRotation
+     * @tc.desc: GetCutoutInfoWithRotation func
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenCutoutControllerTest, GetCutoutInfoWithRotation, Function | SmallTest | Level3)
+    {
+        sptr<ScreenCutoutController> controller = new ScreenCutoutController();
+        DisplayId displayId = 0;
+        int32_t rotation = 0;
+        auto cutoutInfo = controller->GetCutoutInfoWithRotation(displayId, rotation);
+        ASSERT_NE(nullptr, cutoutInfo);
+    }
+
+    /**
      * @tc.name: GetScreenCutoutInfo02
      * @tc.desc: GetScreenCutoutInfo func
      * @tc.type: FUNC
@@ -126,7 +140,7 @@ namespace {
         DisplayId displayId = 0;
         std::vector<DMRect> boundaryRects = {emptyRect, emptyRect_};
         ASSERT_TRUE(controller != nullptr);
-        controller->ConvertBoundaryRectsByRotation(boundaryRects, displayId);
+        controller->ConvertBoundaryRectsByRotation(displayId, boundaryRects);
     }
 
     /**
@@ -149,7 +163,32 @@ namespace {
         ASSERT_NE(ScreenSessionManager::GetInstance().GetDisplayInfoById(screenId), nullptr);
         ASSERT_TRUE(controller != nullptr);
         EXPECT_EQ(screenProperty.GetScreenRotation(), Rotation::ROTATION_0);
-        controller->ConvertBoundaryRectsByRotation(boundaryRects, screenId);
+        controller->ConvertBoundaryRectsByRotation(screenId, boundaryRects);
+        ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId);
+    }
+
+    /**
+     * @tc.name: ConvertBoundaryRectsByRotation
+     * @tc.desc: Current Rotation0, Get cutoutInfo with Rotation90
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenCutoutControllerTest, ConvertBoundaryRectsWithAnotherRotation, Function | SmallTest | Level3)
+    {
+        sptr<ScreenCutoutController> controller = new ScreenCutoutController();
+        DMRect emptyRect = {0, 0, 0, 0};
+        DMRect emptyRect_ = {1, 2, 3, 3};
+        std::vector<DMRect> boundaryRects = {emptyRect, emptyRect_};
+        sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+        VirtualScreenOption virtualOption;
+        virtualOption.name_ = "createVirtualOption";
+        auto screenId = ScreenSessionManager::GetInstance().CreateVirtualScreen(
+            virtualOption, displayManagerAgent->AsObject());
+        ScreenProperty screenProperty = ScreenSessionManager::GetInstance().GetScreenProperty(screenId);
+        ASSERT_NE(ScreenSessionManager::GetInstance().GetDisplayInfoById(screenId), nullptr);
+        ASSERT_TRUE(controller != nullptr);
+        EXPECT_EQ(screenProperty.GetScreenRotation(), Rotation::ROTATION_0);
+        int32_t rotation90 = 1;
+        controller->ConvertBoundaryRectsByRotation(screenId, boundaryRects, rotation90);
         ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId);
     }
 
@@ -175,7 +214,7 @@ namespace {
         Rotation rotation = Rotation::ROTATION_90;
         screenProperty.UpdateScreenRotation(rotation);
         ASSERT_NE(screenProperty.GetScreenRotation(), Rotation::ROTATION_0);
-        controller->ConvertBoundaryRectsByRotation(boundaryRects, screenId);
+        controller->ConvertBoundaryRectsByRotation(screenId, boundaryRects);
         ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId);
     }
 
@@ -201,7 +240,7 @@ namespace {
         Rotation rotation = Rotation::ROTATION_180;
         screenProperty.UpdateScreenRotation(rotation);
         ASSERT_NE(screenProperty.GetScreenRotation(), Rotation::ROTATION_0);
-        controller->ConvertBoundaryRectsByRotation(boundaryRects, screenId);
+        controller->ConvertBoundaryRectsByRotation(screenId, boundaryRects);
         ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId);
     }
 
@@ -227,7 +266,7 @@ namespace {
         Rotation rotation = Rotation::ROTATION_270;
         screenProperty.UpdateScreenRotation(rotation);
         ASSERT_NE(screenProperty.GetScreenRotation(), Rotation::ROTATION_0);
-        controller->ConvertBoundaryRectsByRotation(boundaryRects, screenId);
+        controller->ConvertBoundaryRectsByRotation(screenId, boundaryRects);
         ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId);
     }
 

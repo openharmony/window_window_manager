@@ -21,6 +21,7 @@
 #include "display_manager.h"
 #include "window_manager_hilog.h"
 #include "scene_board_judgement.h"
+#include "fold_screen_state_internel.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -408,7 +409,10 @@ HWTEST_F(ScreenSessionManagerClientTest, SetScreenPrivacyWindowList, TestSize.Le
 HWTEST_F(ScreenSessionManagerClientTest, GetFoldDisplayMode01, TestSize.Level1)
 {
     EXPECT_NE(screenSessionManagerClient_->screenSessionManager_, nullptr);
-    if (screenSessionManagerClient_->IsFoldable()) {
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        EXPECT_NE(FoldDisplayMode::FULL, screenSessionManagerClient_->GetFoldDisplayMode());
+        EXPECT_NE(FoldStatus::UNKNOWN, screenSessionManagerClient_->GetFoldStatus());
+    } else if (screenSessionManagerClient_->IsFoldable()) {
         EXPECT_NE(FoldDisplayMode::UNKNOWN, screenSessionManagerClient_->GetFoldDisplayMode());
         EXPECT_NE(FoldStatus::UNKNOWN, screenSessionManagerClient_->GetFoldStatus());
     } else {
@@ -432,7 +436,7 @@ HWTEST_F(ScreenSessionManagerClientTest, GetFoldDisplayMode02, TestSize.Level1)
     screenSessionManagerClient_->GetPhyScreenProperty(screenId);
     screenSessionManagerClient_->UpdateAvailableArea(screenId, area);
     screenSessionManagerClient_->NotifyFoldToExpandCompletion(foldToExpand);
-    if (screenSessionManagerClient_->IsFoldable()) {
+    if (screenSessionManagerClient_->IsFoldable() && !FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
         EXPECT_NE(FoldDisplayMode::UNKNOWN, screenSessionManagerClient_->GetFoldDisplayMode());
     } else {
         EXPECT_EQ(FoldDisplayMode::UNKNOWN, screenSessionManagerClient_->GetFoldDisplayMode());
@@ -1006,6 +1010,18 @@ HWTEST_F(ScreenSessionManagerClientTest, GetSuperFoldStatus, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetLandscapeLockStatus
+ * @tc.desc: SetLandscapeLockStatus test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, SetLandscapeLockStatus, Function | SmallTest | Level2)
+{
+    bool isLocked = false;
+    ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
+    screenSessionManagerClient_->SetLandscapeLockStatus(isLocked);
+}
+
+/**
  * @tc.name: GetDefaultScreenId
  * @tc.desc: GetDefaultScreenId test
  * @tc.type: FUNC
@@ -1053,6 +1069,24 @@ HWTEST_F(ScreenSessionManagerClientTest, UpdateDisplayHookInfo, TestSize.Level1)
     DMHookInfo hookInfo;
     ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
     screenSessionManagerClient_->UpdateDisplayHookInfo(uid, enable, hookInfo);
+}
+
+HWTEST_F(ScreenSessionManagerClientTest, GetDisplayHookInfo, Function | SmallTest | Level2)
+{
+    int32_t uid = 0;
+    DMHookInfo hookInfo;
+    hookInfo.enableHookRotation_ = true;
+    hookInfo.rotation_ = true;
+    hookInfo.density_ = 1.1;
+    hookInfo.width_ = 100;
+    hookInfo.height_ = 200;
+    ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
+    screenSessionManagerClient_->UpdateDisplayHookInfo(uid, true, hookInfo);
+    screenSessionManagerClient_->GetDisplayHookInfo(uid, hookInfo);
+    ASSERT_TRUE(hookInfo.enableHookRotation_);
+    ASSERT_TRUE(hookInfo.rotation_);
+    ASSERT_EQ(hookInfo.width_, 100);
+    ASSERT_EQ(hookInfo.height_, 200);
 }
 
 /**

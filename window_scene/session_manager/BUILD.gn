@@ -68,6 +68,8 @@ ohos_shared_library("scene_session_manager") {
     "src/ffrt_queue_helper.cpp",
     "src/hidump_controller.cpp",
     "src/publish/scb_dump_subscriber.cpp",
+    "src/rdb/starting_window_rdb_manager.cpp",
+    "src/rdb/wms_rdb_open_callback.cpp",
     "src/scb_session_handler.cpp",
     "src/scene_input_manager.cpp",
     "src/scene_session_converter.cpp",
@@ -82,6 +84,7 @@ ohos_shared_library("scene_session_manager") {
     "src/window_scene_config.cpp",
     "src/zidl/scene_session_manager_lite_stub.cpp",
     "src/zidl/scene_session_manager_stub.cpp",
+    "src/zidl/session_lifecycle_listener_stub.cpp",
   ]
 
   public_configs = [ ":session_manager_public_config" ]
@@ -207,6 +210,7 @@ ohos_shared_library("session_manager") {
     "../session_manager_service/src/session_manager_service_proxy.cpp",
     "src/session_manager.cpp",
     "src/zidl/scene_session_manager_proxy.cpp",
+    "src/zidl/session_lifecycle_listener_proxy.cpp",
   ]
 
   cflags_cc = [ "-std=c++17" ]

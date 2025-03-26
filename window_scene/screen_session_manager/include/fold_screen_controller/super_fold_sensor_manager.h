@@ -69,6 +69,8 @@ private:
  
     float curAngle_ = 170.0F;
 
+    int32_t curInterval_ = 0;
+
     uint16_t curHall_ = USHRT_MAX;
  
     void NotifyFoldAngleChanged(float foldAngle);

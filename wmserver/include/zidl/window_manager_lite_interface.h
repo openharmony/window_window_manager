@@ -44,6 +44,7 @@ public:
         AppExecFwk::ExtensionAbilityType extensionAbilityType, int32_t& pid) = 0;
     virtual WMError GetWindowModeType(WindowModeType& windowModeType) { return WMError::WM_OK; }
     virtual WMError GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo) = 0;
+    virtual WMError GetCallingWindowInfo(CallingWindowInfo& callingWindowInfo) = 0;
     virtual WMError GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos) = 0;
     virtual WMError ClearMainSessions(const std::vector<int32_t>& persistentIds,
         std::vector<int32_t>& clearFailedIds) = 0;
@@ -55,6 +56,8 @@ public:
     virtual WMError GetCurrentPiPWindowInfo(std::string& bundleName) = 0;
     virtual WMError GetRootMainWindowId(int32_t persistentId, int32_t& hostWindowId) = 0;
     virtual WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) = 0;
+    virtual WMError ListWindowInfo(const WindowInfoOption& windowInfoOption,
+        std::vector<sptr<WindowInfo>>& infos) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 };
 }
 }

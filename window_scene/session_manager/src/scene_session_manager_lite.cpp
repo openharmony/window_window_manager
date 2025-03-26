@@ -217,6 +217,11 @@ WMError SceneSessionManagerLite::GetMainWindowInfos(int32_t topNum, std::vector<
     return SceneSessionManager::GetInstance().GetMainWindowInfos(topNum, topNInfo);
 }
 
+WMError SceneSessionManagerLite::GetCallingWindowInfo(CallingWindowInfo& callingWindowInfo)
+{
+    return SceneSessionManager::GetInstance().GetCallingWindowInfo(callingWindowInfo);
+}
+
 WMError SceneSessionManagerLite::GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos)
 {
     return SceneSessionManager::GetInstance().GetAllMainWindowInfos(infos);
@@ -300,5 +305,28 @@ WMError SceneSessionManagerLite::HasFloatingWindowForeground(const sptr<IRemoteO
 {
     return SceneSessionManager::GetInstance().HasFloatingWindowForeground(abilityToken,
         hasOrNot);
+}
+
+WMError SceneSessionManagerLite::RegisterSessionLifecycleListenerByIds(const sptr<ISessionLifecycleListener>& listener,
+    const std::vector<int32_t>& persistentIdList)
+{
+    return SceneSessionManager::GetInstance().RegisterSessionLifecycleListener(listener, persistentIdList);
+}
+
+WMError SceneSessionManagerLite::RegisterSessionLifecycleListenerByBundles(
+    const sptr<ISessionLifecycleListener>& listener, const std::vector<std::string>& bundleNameList)
+{
+    return SceneSessionManager::GetInstance().RegisterSessionLifecycleListener(listener, bundleNameList);
+}
+
+WMError SceneSessionManagerLite::UnregisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener)
+{
+    return SceneSessionManager::GetInstance().UnregisterSessionLifecycleListener(listener);
+}
+
+WMError SceneSessionManagerLite::ListWindowInfo(const WindowInfoOption& windowInfoOption,
+    std::vector<sptr<WindowInfo>>& infos)
+{
+    return SceneSessionManager::GetInstance().ListWindowInfo(windowInfoOption, infos);
 }
 } // namespace OHOS::Rosen

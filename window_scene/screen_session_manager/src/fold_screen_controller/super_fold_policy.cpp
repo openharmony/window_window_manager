@@ -54,7 +54,8 @@ Drawing::Rect SuperFoldPolicy::GetSnapshotRect(DisplayId displayId)
         }
     } else {
         SuperFoldStatus status = SuperFoldStateManager::GetInstance().GetCurrentStatus();
-        if (status == SuperFoldStatus::KEYBOARD || fakeInfo != nullptr) {
+        bool isSystemKeyboardOn = SuperFoldStateManager::GetInstance().GetSystemKeyboardStatus();
+        if (status == SuperFoldStatus::KEYBOARD || fakeInfo != nullptr || isSystemKeyboardOn) {
             snapshotRect = {0, 0, defaultInfo->GetWidth(), defaultInfo->GetHeight()};
         } else {
             snapshotRect = {0, 0, screenWidth, screenHeight};
@@ -91,7 +92,8 @@ DMRect SuperFoldPolicy::GetRecordRect(DisplayId displayId)
         }
     } else {
         SuperFoldStatus status = SuperFoldStateManager::GetInstance().GetCurrentStatus();
-        if (status == SuperFoldStatus::KEYBOARD || fakeInfo != nullptr) {
+        bool isSystemKeyboardOn = SuperFoldStateManager::GetInstance().GetSystemKeyboardStatus();
+        if (status == SuperFoldStatus::KEYBOARD || fakeInfo != nullptr || isSystemKeyboardOn) {
             recordRect = {0, 0, defaultInfo->GetWidth(), defaultInfo->GetHeight()};
         } else {
             recordRect = {0, 0, screenWidth, screenHeight};

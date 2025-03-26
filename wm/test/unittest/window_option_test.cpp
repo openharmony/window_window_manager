@@ -553,6 +553,30 @@ HWTEST_F(WindowOptionTest, SetIsDensityFollowHost, Function | SmallTest | Level3
 }
 
 /**
+ * @tc.name: SetSubWindowZLevel
+ * @tc.desc: test SetSubWindowZLevel
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowOptionTest, SetSubWindowZLevel, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetSubWindowZLevel(1);
+    ASSERT_EQ(1, option->zLevel_);
+}
+
+/**
+ * @tc.name: GetSubWindowZLevel
+ * @tc.desc: test GetSubWindowZLevel
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowOptionTest, GetSubWindowZLevel, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->zLevel_ = 1;
+    ASSERT_EQ(1, option->GetSubWindowZLevel());
+}
+
+/**
  * @tc.name: SetConstrainedModal
  * @tc.desc: test SetConstrainedModal and GetIsDensityFollowHost
  * @tc.type: FUNC

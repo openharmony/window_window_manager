@@ -172,6 +172,7 @@ private:
     void RegisterConsumer(Extension::Businesscode code,
         const std::function<WMError(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)>& func);
     WMError OnCrossAxisStateChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
+    WMError OnResyncExtensionConfig(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
 
     std::shared_ptr<Extension::DataHandler> dataHandler_;
     std::unordered_map<uint32_t, DataConsumeCallback> dataConsumers_;  // Read only after init
@@ -186,6 +187,11 @@ private:
     bool modalUIExtensionSelfLoadContent_ { false };
     float lastDensity_ { 0.0f };
     int32_t lastOrientation_ { 0 };
+
+    /*
+     * PC Fold Screen
+     */
+    WMError OnWaterfallModeChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
 };
 } // namespace Rosen
 } // namespace OHOS

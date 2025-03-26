@@ -1,0 +1,58 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef OHOS_ROSEN_WINDOW_SCENE_STARTING_WINDOW_RDB_MANAGER_H
+#define OHOS_ROSEN_WINDOW_SCENE_STARTING_WINDOW_RDB_MANAGER_H
+
+#include <atomic>
+#include <mutex>
+#include <utility>
+
+#include "rdb_helper.h"
+
+#include "interfaces/include/ws_common.h"
+#include "wms_rdb_open_callback.h"
+
+namespace OHOS {
+namespace Rosen {
+struct StartingWindowRdbItemKey {
+    std::string bundleName;
+    std::string moduleName;
+    std::string abilityName;
+    bool darkMode;
+};
+
+class StartingWindowRdbManager final {
+public:
+    StartingWindowRdbManager(const WmsRdbConfig& rdbConfig);
+    ~StartingWindowRdbManager();
+
+    bool Init();
+    bool InsertData(const StartingWindowRdbItemKey& key, const StartingWindowInfo& value);
+    bool BatchInsert(int64_t& outInsertNum,
+        const std::vector<std::pair<StartingWindowRdbItemKey, StartingWindowInfo>>& inputValues);
+    bool DeleteDataByBundleName(const std::string& bundleName);
+    bool QueryData(const StartingWindowRdbItemKey& key, StartingWindowInfo& value);
+    
+private:
+    std::shared_ptr<NativeRdb::RdbStore> GetRdbStore();
+    
+    std::mutex rdbMutex_;
+    std::shared_ptr<NativeRdb::RdbStore> rdbStore_;
+    WmsRdbConfig wmsRdbConfig_;
+};
+} // namespace Rosen
+} // namespace OHOS
+#endif // OHOS_ROSEN_WINDOW_SCENE_STARTING_WINDOW_RDB_MANAGER_H

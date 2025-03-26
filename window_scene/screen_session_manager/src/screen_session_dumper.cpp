@@ -68,6 +68,7 @@ const std::string ARG_SET_SECONDARY_FOLD_STATUS = "-secondary";
 const std::string ARG_CHANGE_OUTER_CMD = "outer";
 const std::string ANGLE_STR = "angle";
 const std::string HALL_STR = "hall";
+const std::string ARG_SET_LANDSCAPE_LOCK = "-landscapelock";
 #ifdef FOLD_ABILITY_ENABLE
 constexpr int SUPER_FOLD_STATUS_MAX = 2;
 const char SECONDARY_DUMPER_VALUE_BOUNDARY[] = "mfg";
@@ -153,6 +154,7 @@ void ScreenSessionDumper::ExecuteDumpCmd()
         ShowHelpInfo();
     } else if (params_[0] == ARG_DUMP_ALL) {
         ShowAllScreenInfo();
+        ShowVisibleAreaDisplayInfo();
     } else if (params_[0] == ARG_DUMP_FOLD_STATUS) {
         DumpFoldStatus();
     }
@@ -227,6 +229,8 @@ void ScreenSessionDumper::ExecuteInjectCmd2()
         SetHallAndPostureStatus(params_[0]);
     } else if (params_[0].find(ARG_SET_SECONDARY_FOLD_STATUS) != std::string::npos) {
         SetSecondaryStatusChange(params_[0]);
+    } else if (params_[0].find(ARG_SET_LANDSCAPE_LOCK) != std::string::npos) {
+        SetLandscapeLock(params_[0]);
     }
 }
 
@@ -299,6 +303,17 @@ void ScreenSessionDumper::ShowAllScreenInfo()
         DumpScreenInfoById(screenId);
         DumpScreenPropertyById(screenId);
         DumpFoldCreaseRegion();
+    }
+}
+
+void ScreenSessionDumper::ShowVisibleAreaDisplayInfo()
+{
+    std::vector<DisplayId> displayIds = ScreenSessionManager::GetInstance().GetAllDisplayIds();
+    for (auto displayId : displayIds) {
+        std::ostringstream oss;
+        oss << "-------------- Display ID: " << displayId << " --------------" << std::endl;
+        dumpInfo_.append(oss.str());
+        DumpVisibleAreaDisplayInfoById(displayId);
     }
 }
 
@@ -563,6 +578,22 @@ void ScreenSessionDumper::DumpScreenInfoById(ScreenId id)
         << static_cast<int32_t>(screenInfo->GetSourceMode()) << std::endl;
     oss << std::left << std::setw(LINE_WIDTH) << "ScreenType: "
         << static_cast<int32_t>(screenInfo->GetType()) << std::endl;
+    dumpInfo_.append(oss.str());
+}
+
+void ScreenSessionDumper::DumpVisibleAreaDisplayInfoById(DisplayId id)
+{
+    std::ostringstream oss;
+    oss << "[DISPLAY INFO]" << std::endl;
+    auto displayInfo = ScreenSessionManager::GetInstance().GetVisibleAreaDisplayInfoById(id);
+    if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::DMS, "displayInfo nullptr. display id: %{public}" PRIu64"", id);
+        return;
+    }
+    oss << std::left << std::setw(LINE_WIDTH) << "visibleAreaWidth: "
+        << displayInfo->GetWidth() << std::endl;
+    oss << std::left << std::setw(LINE_WIDTH) << "visibleAreaHeight: "
+        << displayInfo->GetHeight() << std::endl;
     dumpInfo_.append(oss.str());
 }
 
@@ -944,6 +975,32 @@ void ScreenSessionDumper::SetSecondaryStatusChange(const std::string &input)
     ScreenSessionManager::GetInstance().SetFoldDisplayMode(displayMode);
 #endif
 }
+
+void ScreenSessionDumper::SetLandscapeLock(std::string input)
+{
+#ifdef FOLD_ABILITY_ENABLE
+    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        TLOGI(WmsLogTag::DMS, "not super fold device");
+        return;
+    }
+    size_t commaPos = input.find_last_of(',');
+    if ((commaPos != std::string::npos) && (input.substr(0, commaPos) == ARG_SET_LANDSCAPE_LOCK)) {
+        std::string valueStr = input.substr(commaPos + 1, DUMPER_PARAM_INDEX_ONE);
+        if (valueStr.size() != DUMPER_PARAM_INDEX_ONE && !std::isdigit(valueStr[0])) {
+            return;
+        }
+        int32_t value = std::stoi(valueStr);
+        if (value) {
+            ScreenSessionManager::GetInstance().HandleExtendScreenConnect(0);
+        } else {
+            ScreenSessionManager::GetInstance().HandleExtendScreenDisconnect(0);
+        }
+        TLOGI(WmsLogTag::DMS, "landscape lock: %{public}d", value);
+    }
+#endif
+}
+
+
 #ifdef FOLD_ABILITY_ENABLE
 bool ScreenSessionDumper::IsAllCharDigit(const std::string &firstPostureStr)
 {
