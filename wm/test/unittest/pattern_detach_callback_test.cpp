@@ -51,7 +51,7 @@ namespace {
  * @tc.desc: GetResult Test
  * @tc.type: FUNC
  */
-HWTEST_F(PatternDetachCallbackTest, GetResult01, Function | SmallTest | Level2)
+HWTEST_F(PatternDetachCallbackTest, GetResult01, TestSize.Level1)
 {
     int32_t maxWaitTime = 300;
     auto startTime =
@@ -71,7 +71,7 @@ HWTEST_F(PatternDetachCallbackTest, GetResult01, Function | SmallTest | Level2)
  * @tc.desc: GetResult Test
  * @tc.type: FUNC
  */
-HWTEST_F(PatternDetachCallbackTest, GetResult02, Function | SmallTest | Level2)
+HWTEST_F(PatternDetachCallbackTest, GetResult02, TestSize.Level1)
 {
     int32_t maxWaitTime = 300;
     int32_t sleepTime = 200;
@@ -96,7 +96,7 @@ HWTEST_F(PatternDetachCallbackTest, GetResult02, Function | SmallTest | Level2)
  * @tc.desc: GetResult Test
  * @tc.type: FUNC
  */
-HWTEST_F(PatternDetachCallbackTest, GetResult03, Function | SmallTest | Level2)
+HWTEST_F(PatternDetachCallbackTest, GetResult03, TestSize.Level1)
 {
     int32_t maxWaitTime = 300;
     int32_t sleepTime = 400;
@@ -129,7 +129,7 @@ HWTEST_F(PatternDetachCallbackTest, GetResult03, Function | SmallTest | Level2)
  * @tc.desc: OnRemoteRequest Test
  * @tc.type: FUNC
  */
-HWTEST_F(PatternDetachCallbackTest, OnRemoteRequest01, Function | SmallTest | Level2)
+HWTEST_F(PatternDetachCallbackTest, OnRemoteRequest01, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;

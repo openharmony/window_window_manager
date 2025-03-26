@@ -72,7 +72,7 @@ namespace {
  * @tc.desc: IsAllowHaveSystemSubWindow desc
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest5, IsAllowHaveSystemSubWindow, Function | SmallTest | Level1)
+HWTEST_F(WindowImplTest5, IsAllowHaveSystemSubWindow, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("IsAllowHaveSystemSubWindow");
@@ -95,7 +95,7 @@ HWTEST_F(WindowImplTest5, IsAllowHaveSystemSubWindow, Function | SmallTest | Lev
  * @tc.desc: NotifyMemoryLevel desc
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest5, NotifyMemoryLevel, Function | SmallTest | Level1)
+HWTEST_F(WindowImplTest5, NotifyMemoryLevel, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("NotifyMemoryLevel");
@@ -121,7 +121,7 @@ HWTEST_F(WindowImplTest5, NotifyMemoryLevel, Function | SmallTest | Level1)
  * @tc.desc: SetRequestedOrientation desc
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest5, SetRequestedOrientation, Function | SmallTest | Level1)
+HWTEST_F(WindowImplTest5, SetRequestedOrientation, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetRequestedOrientation");
@@ -144,7 +144,7 @@ HWTEST_F(WindowImplTest5, SetRequestedOrientation, Function | SmallTest | Level1
  * @tc.desc: GetSystemAlarmWindowDefaultSize desc
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest5, GetSystemAlarmWindowDefaultSize, Function | SmallTest | Level1)
+HWTEST_F(WindowImplTest5, GetSystemAlarmWindowDefaultSize, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("GetSystemAlarmWindowDefaultSize");
@@ -165,7 +165,7 @@ HWTEST_F(WindowImplTest5, GetSystemAlarmWindowDefaultSize, Function | SmallTest 
  * @tc.desc: CheckCameraFloatingWindowMultiCreated desc
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest5, CheckCameraFloatingWindowMultiCreated, Function | SmallTest | Level1)
+HWTEST_F(WindowImplTest5, CheckCameraFloatingWindowMultiCreated, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("CheckCameraFloatingWindowMultiCreated");
@@ -190,7 +190,7 @@ HWTEST_F(WindowImplTest5, CheckCameraFloatingWindowMultiCreated, Function | Smal
  * @tc.desc: SetDefaultOption desc
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest5, SetDefaultOption01, Function | SmallTest | Level1)
+HWTEST_F(WindowImplTest5, SetDefaultOption01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetDefaultOption01");
@@ -241,7 +241,7 @@ HWTEST_F(WindowImplTest5, SetDefaultOption01, Function | SmallTest | Level1)
  * @tc.desc: SetDefaultOption desc
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest5, SetDefaultOption02, Function | SmallTest | Level1)
+HWTEST_F(WindowImplTest5, SetDefaultOption02, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetDefaultOption02");
@@ -286,7 +286,7 @@ HWTEST_F(WindowImplTest5, SetDefaultOption02, Function | SmallTest | Level1)
  * @tc.desc: UpdateActiveStatus desc
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest5, UpdateActiveStatus, Function | SmallTest | Level1)
+HWTEST_F(WindowImplTest5, UpdateActiveStatus, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     ASSERT_NE(option, nullptr);
@@ -306,7 +306,7 @@ HWTEST_F(WindowImplTest5, UpdateActiveStatus, Function | SmallTest | Level1)
  * @tc.desc: NotifyForegroundInteractiveStatus desc
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest5, NotifyForegroundInteractiveStatus, Function | SmallTest | Level1)
+HWTEST_F(WindowImplTest5, NotifyForegroundInteractiveStatus, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("NotifyForegroundInteractiveStatus");
@@ -332,7 +332,7 @@ HWTEST_F(WindowImplTest5, NotifyForegroundInteractiveStatus, Function | SmallTes
  * @tc.desc: UpdateWindowState desc
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest5, UpdateWindowState02, Function | SmallTest | Level1)
+HWTEST_F(WindowImplTest5, UpdateWindowState02, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("UpdateWindowState02");
@@ -379,7 +379,7 @@ HWTEST_F(WindowImplTest5, UpdateWindowState02, Function | SmallTest | Level1)
  * @tc.desc: UpdateWindowStateUnfrozen desc
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest5, UpdateWindowStateUnfrozen, Function | SmallTest | Level1)
+HWTEST_F(WindowImplTest5, UpdateWindowStateUnfrozen, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("UpdateWindowStateUnfrozen");
@@ -410,7 +410,7 @@ HWTEST_F(WindowImplTest5, UpdateWindowStateUnfrozen, Function | SmallTest | Leve
  * @tc.desc: UpdateFocusStatus desc
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest5, UpdateFocusStatus, Function | SmallTest | Level1)
+HWTEST_F(WindowImplTest5, UpdateFocusStatus, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("UpdateFocusStatus");
@@ -436,7 +436,7 @@ HWTEST_F(WindowImplTest5, UpdateFocusStatus, Function | SmallTest | Level1)
  * @tc.desc: Run successfully
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest5, RegisterListener01, Function | SmallTest | Level1)
+HWTEST_F(WindowImplTest5, RegisterListener01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("UnregisterListener");
@@ -455,7 +455,7 @@ HWTEST_F(WindowImplTest5, RegisterListener01, Function | SmallTest | Level1)
  * @tc.desc: Listener is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest5, RegisterListener02, Function | SmallTest | Level1)
+HWTEST_F(WindowImplTest5, RegisterListener02, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("UnregisterListener");
@@ -474,7 +474,7 @@ HWTEST_F(WindowImplTest5, RegisterListener02, Function | SmallTest | Level1)
  * @tc.desc: Run successfully
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest5, UnregisterListener01, Function | SmallTest | Level1)
+HWTEST_F(WindowImplTest5, UnregisterListener01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("UnregisterListener");
@@ -494,7 +494,7 @@ HWTEST_F(WindowImplTest5, UnregisterListener01, Function | SmallTest | Level1)
  * @tc.desc: Listener is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest5, UnregisterListener02, Function | SmallTest | Level1)
+HWTEST_F(WindowImplTest5, UnregisterListener02, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("UnregisterListener");
@@ -513,7 +513,7 @@ HWTEST_F(WindowImplTest5, UnregisterListener02, Function | SmallTest | Level1)
  * @tc.desc: Close test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest5, Close, Function | SmallTest | Level1)
+HWTEST_F(WindowImplTest5, Close, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Close");
@@ -535,7 +535,7 @@ HWTEST_F(WindowImplTest5, Close, Function | SmallTest | Level1)
  * @tc.desc: GetVSyncPeriod test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest5, GetVSyncPeriod, Function | SmallTest | Level1)
+HWTEST_F(WindowImplTest5, GetVSyncPeriod, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("GetVSyncPeriod");
@@ -559,7 +559,7 @@ HWTEST_F(WindowImplTest5, GetVSyncPeriod, Function | SmallTest | Level1)
  * @tc.desc: RequestVsync test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest5, RequestVsync02, Function | SmallTest | Level1)
+HWTEST_F(WindowImplTest5, RequestVsync02, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("RequestVsync02");
@@ -585,7 +585,7 @@ HWTEST_F(WindowImplTest5, RequestVsync02, Function | SmallTest | Level1)
  * @tc.desc: ConsumePointerEvent test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest5, ConsumePointerEvent02, Function | SmallTest | Level1)
+HWTEST_F(WindowImplTest5, ConsumePointerEvent02, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     ASSERT_NE(option, nullptr);
@@ -637,7 +637,7 @@ HWTEST_F(WindowImplTest5, ConsumePointerEvent02, Function | SmallTest | Level1)
  * @tc.desc: PerfLauncherHotAreaIfNeed test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest5, PerfLauncherHotAreaIfNeed, Function | SmallTest | Level1)
+HWTEST_F(WindowImplTest5, PerfLauncherHotAreaIfNeed, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     ASSERT_NE(option, nullptr);
@@ -661,7 +661,7 @@ HWTEST_F(WindowImplTest5, PerfLauncherHotAreaIfNeed, Function | SmallTest | Leve
  * @tc.desc: NotifyOccupiedAreaChange test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest5, NotifyOccupiedAreaChange, Function | SmallTest | Level1)
+HWTEST_F(WindowImplTest5, NotifyOccupiedAreaChange, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("NotifyOccupiedAreaChange");
@@ -684,7 +684,7 @@ HWTEST_F(WindowImplTest5, NotifyOccupiedAreaChange, Function | SmallTest | Level
  * @tc.desc: NotifyDragEvent test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest5, NotifyDragEvent, Function | SmallTest | Level1)
+HWTEST_F(WindowImplTest5, NotifyDragEvent, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("NotifyDragEvent");
@@ -705,7 +705,7 @@ HWTEST_F(WindowImplTest5, NotifyDragEvent, Function | SmallTest | Level1)
  * @tc.desc: TransferPointerEvent test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest5, TransferPointerEvent02, Function | SmallTest | Level1)
+HWTEST_F(WindowImplTest5, TransferPointerEvent02, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     ASSERT_NE(option, nullptr);
@@ -726,7 +726,7 @@ HWTEST_F(WindowImplTest5, TransferPointerEvent02, Function | SmallTest | Level1)
  * @tc.desc: ReadyToMoveOrDragWindow test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest5, ReadyToMoveOrDragWindow, Function | SmallTest | Level1)
+HWTEST_F(WindowImplTest5, ReadyToMoveOrDragWindow, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("ReadyToMoveOrDragWindow");
@@ -755,7 +755,7 @@ HWTEST_F(WindowImplTest5, ReadyToMoveOrDragWindow, Function | SmallTest | Level1
  * @tc.desc: StartMove test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest5, StartMove04, Function | SmallTest | Level1)
+HWTEST_F(WindowImplTest5, StartMove04, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("StartMove04");
@@ -782,7 +782,7 @@ HWTEST_F(WindowImplTest5, StartMove04, Function | SmallTest | Level1)
  * @tc.desc: IsPointInDragHotZone test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest5, IsPointInDragHotZone, Function | SmallTest | Level1)
+HWTEST_F(WindowImplTest5, IsPointInDragHotZone, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("IsPointInDragHotZone");
@@ -809,7 +809,7 @@ HWTEST_F(WindowImplTest5, IsPointInDragHotZone, Function | SmallTest | Level1)
  * @tc.desc: CalculateStartRectExceptHotZone test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest5, CalculateStartRectExceptHotZone, Function | SmallTest | Level1)
+HWTEST_F(WindowImplTest5, CalculateStartRectExceptHotZone, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("CalculateStartRectExceptHotZone");
@@ -834,7 +834,7 @@ HWTEST_F(WindowImplTest5, CalculateStartRectExceptHotZone, Function | SmallTest 
  * @tc.desc: PendingClose test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest5, PendingClose02, Function | SmallTest | Level1)
+HWTEST_F(WindowImplTest5, PendingClose02, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     ASSERT_NE(option, nullptr);
@@ -852,7 +852,7 @@ HWTEST_F(WindowImplTest5, PendingClose02, Function | SmallTest | Level1)
  * @tc.desc: Recover test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest5, Recover03, Function | SmallTest | Level1)
+HWTEST_F(WindowImplTest5, Recover03, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Recover03");
@@ -879,7 +879,7 @@ HWTEST_F(WindowImplTest5, Recover03, Function | SmallTest | Level1)
  * @tc.desc: Minimize test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest5, Minimize03, Function | SmallTest | Level1)
+HWTEST_F(WindowImplTest5, Minimize03, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Minimize03");
@@ -898,7 +898,7 @@ HWTEST_F(WindowImplTest5, Minimize03, Function | SmallTest | Level1)
  * @tc.desc: UnregisterListener | RegisterListener desc
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest5, RegisterListener, Function | SmallTest | Level1)
+HWTEST_F(WindowImplTest5, RegisterListener, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("RegisterListener");
@@ -919,7 +919,7 @@ HWTEST_F(WindowImplTest5, RegisterListener, Function | SmallTest | Level1)
  * @tc.desc: SetImmersiveModeEnabledState test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest5, SetImmersiveModeEnabledState02, Function | SmallTest | Level1)
+HWTEST_F(WindowImplTest5, SetImmersiveModeEnabledState02, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetImmersiveModeEnabledState02");
@@ -945,7 +945,7 @@ HWTEST_F(WindowImplTest5, SetImmersiveModeEnabledState02, Function | SmallTest |
  * @tc.desc: SetGlobalMaximizeMode test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest5, SetGlobalMaximizeMode, Function | SmallTest | Level1)
+HWTEST_F(WindowImplTest5, SetGlobalMaximizeMode, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetGlobalMaximizeMode");
@@ -968,7 +968,7 @@ HWTEST_F(WindowImplTest5, SetGlobalMaximizeMode, Function | SmallTest | Level1)
  * @tc.desc: MaximizeFloating test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest5, MaximizeFloating02, Function | SmallTest | Level1)
+HWTEST_F(WindowImplTest5, MaximizeFloating02, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("MaximizeFloating02");
@@ -985,7 +985,7 @@ HWTEST_F(WindowImplTest5, MaximizeFloating02, Function | SmallTest | Level1)
  * @tc.desc: SetCallingWindow test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest5, SetCallingWindow, Function | SmallTest | Level1)
+HWTEST_F(WindowImplTest5, SetCallingWindow, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     ASSERT_NE(option, nullptr);
@@ -1002,7 +1002,7 @@ HWTEST_F(WindowImplTest5, SetCallingWindow, Function | SmallTest | Level1)
  * @tc.desc: Resize test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest5, Resize, Function | SmallTest | Level1)
+HWTEST_F(WindowImplTest5, Resize, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Resize");
@@ -1033,7 +1033,7 @@ HWTEST_F(WindowImplTest5, Resize, Function | SmallTest | Level1)
  * @tc.desc: MoveTo test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest5, MoveTo, Function | SmallTest | Level1)
+HWTEST_F(WindowImplTest5, MoveTo, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("MoveTo");
@@ -1060,7 +1060,7 @@ HWTEST_F(WindowImplTest5, MoveTo, Function | SmallTest | Level1)
  * @tc.desc: AdjustWindowAnimationFlag test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest5, AdjustWindowAnimationFlag, Function | SmallTest | Level1)
+HWTEST_F(WindowImplTest5, AdjustWindowAnimationFlag, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("AdjustWindowAnimationFlag");
@@ -1091,7 +1091,7 @@ HWTEST_F(WindowImplTest5, AdjustWindowAnimationFlag, Function | SmallTest | Leve
  * @tc.desc: NeedToStopShowing test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest5, NeedToStopShowing, Function | SmallTest | Level1)
+HWTEST_F(WindowImplTest5, NeedToStopShowing, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("NeedToStopShowing");
@@ -1115,7 +1115,7 @@ HWTEST_F(WindowImplTest5, NeedToStopShowing, Function | SmallTest | Level1)
  * @tc.desc: DestroyFloatingWindow test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest5, DestroyFloatingWindow, Function | SmallTest | Level1)
+HWTEST_F(WindowImplTest5, DestroyFloatingWindow, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("DestroyFloatingWindow");
@@ -1143,7 +1143,7 @@ HWTEST_F(WindowImplTest5, DestroyFloatingWindow, Function | SmallTest | Level1)
  * @tc.desc: DestroyDialogWindow test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest5, DestroyDialogWindow, Function | SmallTest | Level1)
+HWTEST_F(WindowImplTest5, DestroyDialogWindow, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("DestroyDialogWindow");
@@ -1171,7 +1171,7 @@ HWTEST_F(WindowImplTest5, DestroyDialogWindow, Function | SmallTest | Level1)
  * @tc.desc: GetOriginalAbilityInfo test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest5, GetOriginalAbilityInfo, Function | SmallTest | Level1)
+HWTEST_F(WindowImplTest5, GetOriginalAbilityInfo, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("GetOriginalAbilityInfo");
@@ -1187,7 +1187,7 @@ HWTEST_F(WindowImplTest5, GetOriginalAbilityInfo, Function | SmallTest | Level1)
  * @tc.desc: WindowCreateCheck test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest5, WindowCreateCheck05, Function | SmallTest | Level1)
+HWTEST_F(WindowImplTest5, WindowCreateCheck05, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("WindowCreateCheck05");
@@ -1225,7 +1225,7 @@ HWTEST_F(WindowImplTest5, WindowCreateCheck05, Function | SmallTest | Level1)
  * @tc.desc: IsAppMainOrSubOrFloatingWindow test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest5, IsAppMainOrSubOrFloatingWindow, Function | SmallTest | Level1)
+HWTEST_F(WindowImplTest5, IsAppMainOrSubOrFloatingWindow, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("IsAppMainOrSubOrFloatingWindow");
@@ -1265,7 +1265,7 @@ HWTEST_F(WindowImplTest5, IsAppMainOrSubOrFloatingWindow, Function | SmallTest |
  * @tc.desc: UpdateTitleButtonVisibility test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest5, UpdateTitleButtonVisibility02, Function | SmallTest | Level1)
+HWTEST_F(WindowImplTest5, UpdateTitleButtonVisibility02, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("UpdateTitleButtonVisibility02");
@@ -1289,7 +1289,7 @@ HWTEST_F(WindowImplTest5, UpdateTitleButtonVisibility02, Function | SmallTest | 
  * @tc.desc: GetConfigurationFromAbilityInfo test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest5, GetConfigurationFromAbilityInfo02, Function | SmallTest | Level1)
+HWTEST_F(WindowImplTest5, GetConfigurationFromAbilityInfo02, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("GetConfigurationFromAbilityInfo02");
@@ -1317,7 +1317,7 @@ HWTEST_F(WindowImplTest5, GetConfigurationFromAbilityInfo02, Function | SmallTes
  * @tc.desc: GetVirtualPixelRatio test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest5, GetVirtualPixelRatio01, Function | SmallTest | Level1)
+HWTEST_F(WindowImplTest5, GetVirtualPixelRatio01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("GetVirtualPixelRatio01");

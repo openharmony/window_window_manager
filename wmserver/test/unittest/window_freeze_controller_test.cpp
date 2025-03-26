@@ -61,7 +61,7 @@ namespace {
  * @tc.desc: test FreezeDisplay/UnFreezeDisplay
  * @tc.type: FUNC
  */
-HWTEST_F(WindowFreezeControllerTest, FreezeDisplay01, Function | SmallTest | Level2)
+HWTEST_F(WindowFreezeControllerTest, FreezeDisplay01, TestSize.Level1)
 {
     DisplayId displayId = DISPLAY_ID_INVALID;
     bool res = true;

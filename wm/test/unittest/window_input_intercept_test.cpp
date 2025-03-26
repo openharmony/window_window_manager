@@ -64,7 +64,7 @@ void WindowInputInterceptTest::TearDown() {}
  * @tc.desc: when call IsInputIntercept(KeyEvent) and the callback of the deviceId is exist, return true
  * @tc.type: FUNC
  */
-HWTEST_F(WindowInputInterceptTest, IsInputIntercept01, Function | SmallTest | Level2)
+HWTEST_F(WindowInputInterceptTest, IsInputIntercept01, TestSize.Level1)
 {
     std::shared_ptr<WindowInputInterceptConsumer> consumer = std::make_shared<WindowInputInterceptConsumer>();
     WindowInputIntercept::GetInstance().RegisterInputEventIntercept(DEVICE_ID, consumer);
@@ -82,7 +82,7 @@ HWTEST_F(WindowInputInterceptTest, IsInputIntercept01, Function | SmallTest | Le
  * @tc.desc: when call IsInputIntercept(KeyEvent) and the callback of the deviceId is not exist, return false
  * @tc.type: FUNC
  */
-HWTEST_F(WindowInputInterceptTest, IsInputIntercept02, Function | SmallTest | Level2)
+HWTEST_F(WindowInputInterceptTest, IsInputIntercept02, TestSize.Level1)
 {
     std::shared_ptr<WindowInputInterceptConsumer> consumer = std::make_shared<WindowInputInterceptConsumer>();
     WindowInputIntercept::GetInstance().RegisterInputEventIntercept(DEVICE_ID, consumer);
@@ -97,7 +97,7 @@ HWTEST_F(WindowInputInterceptTest, IsInputIntercept02, Function | SmallTest | Le
  * @tc.desc: when call IsInputIntercept(PointerEvent) and the callback of the deviceId is exist, return true
  * @tc.type: FUNC
  */
-HWTEST_F(WindowInputInterceptTest, IsInputIntercept03, Function | SmallTest | Level2)
+HWTEST_F(WindowInputInterceptTest, IsInputIntercept03, TestSize.Level1)
 {
     std::shared_ptr<WindowInputInterceptConsumer> consumer = std::make_shared<WindowInputInterceptConsumer>();
     WindowInputIntercept::GetInstance().RegisterInputEventIntercept(DEVICE_ID, consumer);
@@ -112,7 +112,7 @@ HWTEST_F(WindowInputInterceptTest, IsInputIntercept03, Function | SmallTest | Le
  * @tc.desc: when call IsInputIntercept(PointerEvent) and the callback of the deviceId is not exist, return false
  * @tc.type: FUNC
  */
-HWTEST_F(WindowInputInterceptTest, IsInputIntercept04, Function | SmallTest | Level2)
+HWTEST_F(WindowInputInterceptTest, IsInputIntercept04, TestSize.Level1)
 {
     std::shared_ptr<WindowInputInterceptConsumer> consumer = std::make_shared<WindowInputInterceptConsumer>();
     WindowInputIntercept::GetInstance().RegisterInputEventIntercept(DEVICE_ID, consumer);

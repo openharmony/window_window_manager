@@ -60,7 +60,7 @@ namespace {
  * @tc.desc: GetSubWidnows
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest5, GetSubWidnows, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest5, GetSubWidnows, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest5: GetSubWidnows start";
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
@@ -98,7 +98,7 @@ HWTEST_F(WindowSessionImplTest5, GetSubWidnows, Function | SmallTest | Level2)
  * @tc.desc: RemoveSubWindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest5, RemoveSubWindow, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest5, RemoveSubWindow, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("RemoveSubWindow");
@@ -147,7 +147,7 @@ HWTEST_F(WindowSessionImplTest5, RemoveSubWindow, Function | SmallTest | Level2)
  * @tc.desc: DestroySubWindow test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest5, DestroySubWindow01, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest5, DestroySubWindow01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("DestroySubWindow01");
@@ -205,7 +205,7 @@ HWTEST_F(WindowSessionImplTest5, DestroySubWindow01, Function | SmallTest | Leve
  * @tc.desc: SetUniqueVirtualPixelRatioForSub test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest5, SetUniqueVirtualPixelRatioForSub, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest5, SetUniqueVirtualPixelRatioForSub, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetUniqueVirtualPixelRatioForSub");
