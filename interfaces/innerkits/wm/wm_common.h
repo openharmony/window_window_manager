@@ -2140,18 +2140,18 @@ enum class RectType : uint32_t {
  * @brief rotation change info to notify listener.
  */
 struct RotationChangeInfo {
-    RotationChangeType type;
-    uint32_t orientation;
-    DisplayId displayId;
-    Rect displayRect;
+    RotationChangeType type_;
+    uint32_t orientation_;
+    DisplayId displayId_;
+    Rect displayRect_;
 };
 
 /**
  * @brief rotation change result return from listener.
  */
 struct RotationChangeResult {
-    RectType rectType;
-    Rect windowRect;
+    RectType rectType_;
+    Rect windowRect_;
 };
 }
 }

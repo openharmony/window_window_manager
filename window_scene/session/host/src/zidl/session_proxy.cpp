@@ -2842,7 +2842,6 @@ WSError SessionProxy::UpdateRotationChangeRegistered(int32_t persistentId, bool 
         TLOGE(WmsLogTag::WMS_ROTATION, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    int32_t ret = reply.ReadInt32();
-    return static_cast<WSError>(ret);
+    return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen

@@ -62,6 +62,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowS
 constexpr int32_t FORCE_SPLIT_MODE = 5;
 constexpr int32_t API_VERSION_18 = 18;
 constexpr uint32_t LIFECYCLE_ISOLATE_VERSION = 18;
+constexpr int32_t  WINDOW_ROTATION_CHANGE = 20;
 
 /*
  * DFX
@@ -246,6 +247,7 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     property_->SetConstrainedModal(option->IsConstrainedModal());
     layoutCallback_ = sptr<FutureCallback>::MakeSptr();
     getTargetInfoCallback_ = sptr<FutureCallback>::MakeSptr();
+    getRotationResultFuture_ = sptr<FutureCallback>::MakeSptr();
     isMainHandlerAvailable_ = option->GetMainHandlerAvailable();
     isIgnoreSafeArea_ = WindowHelper::IsSubWindow(optionWindowType);
     windowOption_ = option;
@@ -5877,34 +5879,64 @@ WMError WindowSessionImpl::CheckMultiWindowRect(uint32_t& width, uint32_t& heigh
 
 RotationChangeResult WindowSessionImpl::NotifyRotationChange(const RotationChangeInfo& rotationChangeInfo)
 {
-    TLOGI(WmsLogTag::WMS_ROTATION, "info type: %{public}d, orientation: %{public}d, displayId: %{public}llu, "
-        "rect:[%{public}d, %{public}d, %{public}d, %{public}d]", rotationChangeInfo.type,
-        rotationChangeInfo.orientation, rotationChangeInfo.displayId, rotationChangeInfo.displayRect.posX_,
-        rotationChangeInfo.displayRect.posY_, rotationChangeInfo.displayRect.width_,
-        rotationChangeInfo.displayRect.height_);
-    RotationChangeResult rotationChangeResult = { RectType::RELATIVE_TO_SCREEN, { 0, 0, 0, 0 } };
+    TLOGI(WmsLogTag::WMS_ROTATION, "info type: %{public}d, orientation: %{public}d, "
+        "rect:[%{public}d, %{public}d, %{public}d, %{public}d]", rotationChangeInfo.type_,
+        rotationChangeInfo.orientation_, rotationChangeInfo.displayRect_.posX_,
+        rotationChangeInfo.displayRect_.posY_, rotationChangeInfo.displayRect_.width_,
+        rotationChangeInfo.displayRect_.height_);
+    std::vector<sptr<IWindowRotationChangeListener>> windowRotationChangeListeners;
     {
         std::lock_guard<std::mutex> lockListener(windowRotationChangeListenerMutex_);
-        auto windowRotationChangeListeners = GetListeners<IWindowRotationChangeListener>();
-        for (auto& listener : windowRotationChangeListeners) {
-            if (listener != nullptr) {
-                listener->OnRotationChange(rotationChangeInfo, rotationChangeResult);
-                if (rotationChangeInfo.type == RotationChangeType::WINDOW_DID_ROTATE) {
-                    break;
-                }
-                Rect resultRect = rotationChangeResult.windowRect;
-                if (CheckWindowRect(resultRect.width_, resultRect.height_) != WMError::WM_OK ||
-                    CheckMultiWindowRect(resultRect.width_, resultRect.height_) != WMError::WM_OK) {
-                    rotationChangeResult.windowRect.width_ = 0;
-                    rotationChangeResult.windowRect.height_ = 0;
-                }
-            }
-        }
+        windowRotationChangeListeners = GetListeners<IWindowRotationChangeListener>();
+    }
+    NotifyRotationChangeResultInner(windowRotationChangeListeners, rotationChangeInfo);
+    RotationChangeResult rotationChangeResult = { RectType::RELATIVE_TO_SCREEN, { 0, 0, 0, 0 } };
+    getRotationResultFuture_->ResetRotationResultLock();
+    rotationChangeResult = getRotationResultFuture_->GetRotationResult(WINDOW_ROTATION_CHANGE);
+    Rect resultRect = rotationChangeResult.windowRect_;
+    if (CheckAndModifyWindowRect(resultRect.width_, resultRect.height_) != WMError::WM_OK ||
+        CheckMultiWindowRect(resultRect.width_, resultRect.height_) != WMError::WM_OK) {
+        rotationChangeResult.windowRect_.width_ = 0;
+        rotationChangeResult.windowRect_.height_ = 0;
     }
     TLOGI(WmsLogTag::WMS_ROTATION, "result rectType: %{public}d, rect:[%{public}d, %{public}d, %{public}d, %{public}d]",
-        rotationChangeResult.rectType, rotationChangeResult.windowRect.posX_, rotationChangeResult.windowRect.posY_,
-        rotationChangeResult.windowRect.width_, rotationChangeResult.windowRect.height_);
+        rotationChangeResult.rectType_, rotationChangeResult.windowRect_.posX_, rotationChangeResult.windowRect_.posY_,
+        rotationChangeResult.windowRect_.width_, rotationChangeResult.windowRect_.height_);
     return rotationChangeResult;
+}
+
+void WindowSessionImpl::NotifyRotationChangeResult(RotationChangeResult rotationChangeResult)
+{
+    TLOGI(WmsLogTag::WMS_ROTATION, "release rotation change lock.");
+    if (getRotationResultFuture_) {
+        getRotationResultFuture_->OnUpdateRotationResult(rotationChangeResult);
+    }
+}
+
+void WindowSessionImpl::NotifyRotationChangeResultInner(
+    const std::vector<sptr<IWindowRotationChangeListener>>& windowRotationChangeListeners,
+    const RotationChangeInfo& rotationChangeInfo)
+{
+    handler_->PostTask(
+        [weakThis = wptr(this), &windowRotationChangeListeners, &rotationChangeInfo] {
+            TLOGI(WmsLogTag::WMS_ROTATION, "post task to notify listener.");
+            auto window = weakThis.promote();
+            if (window == nullptr) {
+                TLOGE(WmsLogTag::WMS_ROTATION, "window is null");
+                return;
+            }
+            RotationChangeResult rotationChangeResult = { RectType::RELATIVE_TO_SCREEN, { 0, 0, 0, 0 } };
+            for (auto& listener : windowRotationChangeListeners) {
+                if (listener == nullptr) {
+                    continue;
+                }
+                listener->OnRotationChange(rotationChangeInfo, rotationChangeResult);
+                if (rotationChangeInfo.type_ == RotationChangeType::WINDOW_DID_ROTATE) {
+                    continue;
+                }
+            }
+            window->NotifyRotationChangeResult(rotationChangeResult);
+        }, __func__);
 }
 
 WSError WindowSessionImpl::SetCurrentRotation(int32_t currentRotation)

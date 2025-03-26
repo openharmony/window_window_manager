@@ -7841,22 +7841,40 @@ void SceneSession::NotifyUpdateFlagCallback(NotifyUpdateFlagFunc&& func)
 
 WSError SceneSession::UpdateRotationChangeRegistered(int32_t persistentId, bool isRegister)
 {
-    TLOGI(WmsLogTag::WMS_ROTATION, "persistentId: %{public}d, isRegister: %{public}d", persistentId, isRegister);
-    if (isRegister) {
-        isRotationChangeCallbackRegistered = true;
-    } else {
-        isRotationChangeCallbackRegistered = false;
-    }
+    PostTask(
+        [weakThis = wptr(this), persistentId, isRegister, where = __func__] {
+            auto session = weakThis.promote();
+            if (!session) {
+                TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s session is null", where);
+                return;
+            }
+            TLOGI(
+                WmsLogTag::WMS_ROTATION, "persistentId: %{public}d, isRegister: %{public}d", persistentId, isRegister);
+            if (isRegister) {
+                session->isRotationChangeCallbackRegistered = true;
+            } else {
+                session->isRotationChangeCallbackRegistered = false;
+            }
+        }, __func__);
+
     return WSError::WS_OK;
 }
 
 RotationChangeResult SceneSession::NotifyRotationChange(const RotationChangeInfo& rotationChangeInfo)
 {
-    if (!sessionStage_ || !isRotationChangeCallbackRegistered) {
-        TLOGE(WmsLogTag::WMS_ROTATION, "sessionStage_ is null or isRotationChangeCallbackRegistered is false");
-        return { RectType::RELATIVE_TO_SCREEN, { 0, 0, 0, 0, } };
-    }
-    return sessionStage_->NotifyRotationChange(rotationChangeInfo);
+    return PostSyncTask(
+        [weakThis = wptr(this), &rotationChangeInfo, where = __func__]() -> RotationChangeResult {
+            auto session = weakThis.promote();
+            if (!session) {
+                TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s session is null", where);
+                return { RectType::RELATIVE_TO_SCREEN, { 0, 0, 0, 0 } };
+            }
+            if (!session->sessionStage_ || !session->isRotationChangeCallbackRegistered) {
+                TLOGE(WmsLogTag::WMS_ROTATION, "sessionStage_ is null or isRotationChangeCallbackRegistered is false");
+                return { RectType::RELATIVE_TO_SCREEN, { 0, 0, 0, 0 } };
+            }
+            return session->sessionStage_->NotifyRotationChange(rotationChangeInfo);
+        }, __func__);
 }
 
 WSError SceneSession::SetCurrentRotation(int32_t currentRotation)

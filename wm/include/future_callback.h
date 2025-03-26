@@ -36,10 +36,16 @@ public:
     void ResetGetTargetRotationLock();
     WSError OnUpdateTargetOrientationInfo(OrientationInfo& info);
 
+    // rotation change
+    RotationChangeResult GetRotationResult(long timeout);
+    void ResetRotationResultLock();
+    void OnUpdateRotationResult(RotationChangeResult rotationChangeResult);
+
 private:
     RunnableFuture<Rect> resizeFuture_{};
     RunnableFuture<Rect> moveToFuture_{};
     RunnableFuture<OrientationInfo> getTargetRotationFuture_{};
+    RunnableFuture<RotationChangeResult> getRotationResultFuture_{};
 };
 } // namespace Rosen
 } // namespace OHOS

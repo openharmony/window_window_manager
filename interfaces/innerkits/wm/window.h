@@ -2178,6 +2178,11 @@ public:
     virtual WMError CloseDirectly() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
+     * @brief notify rotation change result.
+     */
+    virtual void NotifyRotationChangeResult(RotationChangeResult rotationChangeResult) {}
+
+    /**
      * @brief start move main window. It is called by ACE when title is moved.
      *
      */
