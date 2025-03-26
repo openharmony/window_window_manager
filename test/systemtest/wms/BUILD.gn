@@ -26,7 +26,6 @@ group("systemtest") {
     ":wms_window_gesture_navigation_enabled_test",
     ":wms_window_input_method_test",
     ":wms_window_input_test",
-    ":wms_window_layout_integration_test",
     ":wms_window_mode_support_info_test",
     ":wms_window_multi_ability_test",
     ":wms_window_nointeraction_listener_test",
@@ -46,6 +45,7 @@ group("systemtest") {
     ":wms_window_visibility_info_test",
     ":wms_window_water_mark_test",
   ]
+
   if (!window_manager_use_sceneboard) {
     deps += [
       ":wms_window_animation_transition_test",
@@ -59,6 +59,10 @@ group("systemtest") {
       ":wms_window_layout_test",
       ":wms_window_move_drag_test",
     ]
+  }
+
+  if (window_manager_use_sceneboard) {
+    deps += [ ":wms_window_layout_integration_test" ]
   }
 }
 
