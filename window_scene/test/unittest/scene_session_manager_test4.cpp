@@ -1639,6 +1639,39 @@ HWTEST_F(SceneSessionManagerTest4, GetTopFocusableNonAppSession, Function | Smal
 }
 
 /**
+ * @tc.name: GetTopFocusableNonAppSession01
+ * @tc.desc: GetTopFocusableNonAppSession01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest4, GetTopFocusableNonAppSession01, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "bundleName";
+    sptr<SceneSession> wallpaper = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    wallpaper->property_->SetWindowType(WindowType::WINDOW_TYPE_WALLPAPER);
+    wallpaper->zOrder_ = 1;
+    sptr<SceneSession> desktop = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    desktop->property_->SetWindowType(WindowType::WINDOW_TYPE_DESKTOP);
+    desktop->zOrder_ = 2;
+    desktop->property_->SetFocusable(true);
+    desktop->isVisible_ = true;
+    desktop->state_ = SessionState::STATE_FOREGROUND;
+
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
+    sceneSession->zOrder_ = 3;
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sceneSession1->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
+    sceneSession1->zOrder_ = 0;
+    ssm_->sceneSessionMap_.insert(std::make_pair(0, sceneSession1));
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, wallpaper));
+    ssm_->sceneSessionMap_.insert(std::make_pair(2, desktop));
+    ssm_->sceneSessionMap_.insert(std::make_pair(3, sceneSession));
+    sptr<SceneSession> result = ssm_->GetTopFocusableNonAppSession();
+    EXPECT_EQ(result, desktop);
+}
+
+/**
  * @tc.name: GetNextFocusableSession
  * @tc.desc: GetNextFocusableSession
  * @tc.type: FUNC
