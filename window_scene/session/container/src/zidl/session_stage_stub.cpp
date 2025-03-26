@@ -969,24 +969,24 @@ int SessionStageStub::HandleNotifyRotationChange(MessageParcel& data, MessagePar
     }
     RotationChangeInfo rotationChangeInfo = { static_cast<RotationChangeType>(type), orientation, displayId, rect };
     RotationChangeResult rotationChangeResult = NotifyRotationChange(rotationChangeInfo);
-    if (rotationChangeInfo.type == RotationChangeType::WINDOW_DID_ROTATE) {
+    if (rotationChangeInfo.type_ == RotationChangeType::WINDOW_DID_ROTATE) {
         TLOGI(WmsLogTag::WMS_ROTATION, "WINDOW_DID_ROTATE return");
         return ERR_NONE;
     }
-    if (!reply.WriteUint32(static_cast<uint32_t>(rotationChangeResult.rectType))) {
+    if (!reply.WriteUint32(static_cast<uint32_t>(rotationChangeResult.rectType_))) {
         TLOGE(WmsLogTag::WMS_ROTATION, "send rectType failed");
         return ERR_INVALID_DATA;
     }
-    if (!reply.WriteInt32(rotationChangeResult.windowRect.posX_) ||
-        !reply.WriteInt32(rotationChangeResult.windowRect.posY_) ||
-        !reply.WriteUint32(rotationChangeResult.windowRect.width_) ||
-        !reply.WriteUint32(rotationChangeResult.windowRect.height_)) {
+    if (!reply.WriteInt32(rotationChangeResult.windowRect_.posX_) ||
+        !reply.WriteInt32(rotationChangeResult.windowRect_.posY_) ||
+        !reply.WriteUint32(rotationChangeResult.windowRect_.width_) ||
+        !reply.WriteUint32(rotationChangeResult.windowRect_.height_)) {
         TLOGE(WmsLogTag::WMS_ROTATION, "send window rect failed");
         return ERR_INVALID_DATA;
     }
     TLOGI(WmsLogTag::WMS_ROTATION, "send type:%{public}d, rect: [%{public}d, %{public}d, %{public}d, %{public}d]",
-        rotationChangeResult.rectType, rotationChangeResult.windowRect.posX_, rotationChangeResult.windowRect.posY_,
-        rotationChangeResult.windowRect.width_, rotationChangeResult.windowRect.height_);
+        rotationChangeResult.rectType_, rotationChangeResult.windowRect_.posX_, rotationChangeResult.windowRect_.posY_,
+        rotationChangeResult.windowRect_.width_, rotationChangeResult.windowRect_.height_);
     return ERR_NONE;
 }
 

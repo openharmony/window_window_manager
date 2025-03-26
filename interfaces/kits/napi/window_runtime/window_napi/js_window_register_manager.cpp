@@ -717,7 +717,7 @@ WmErrorCode JsWindowRegisterManager::ProcessWindowHighlightChangeRegister(const 
 WmErrorCode JsWindowRegisterManager::ProcessWindowRotationChangeRegister(const sptr<JsWindowListener>& listener,
     const sptr<Window>& window, bool isRegister, napi_env env, napi_value parameter)
 {
-    if (window == nullptr) {
+    if (window == nullptr || listener == nullptr) {
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     sptr<IWindowRotationChangeListener> thisListener(listener);
