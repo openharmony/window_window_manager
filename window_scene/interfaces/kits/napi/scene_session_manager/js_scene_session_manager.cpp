@@ -2650,7 +2650,7 @@ napi_value JsSceneSessionManager::OnNotifySingleHandInfoChange(napi_env env, nap
     }
     WSRect singleHandRect;
     if (!ConvertSessionRectInfoFromJs(env, argv[ARG_INDEX_TWO], singleHandRect)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to originRect");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to singleHandRect");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
@@ -2670,6 +2670,7 @@ napi_value JsSceneSessionManager::OnGetSingleHandCompatibleModeConfig(napi_env e
         TLOGE(WmsLogTag::WMS_LAYOUT, "jsSingleHandCompatibleModeConfigObj is nullptr");
         napi_throw(env, CreateJsError(env,
             static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY), "System is abnormal"));
+        return NapiGetUndefined(env);
     }
     return jsSingleHandCompatibleModeConfigObj;
 }
