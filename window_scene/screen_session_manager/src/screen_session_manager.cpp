@@ -91,6 +91,7 @@ const std::string STATUS_EXPAND = "-y";
 const std::string STATUS_FOLD = "-p";
 const std::string SETTING_LOCKED_KEY = "settings.general.accelerometer_rotation_status";
 const ScreenId SCREEN_ID_DEFAULT = 0;
+const ScreenId RS_ID_DEFAULT = 0;
 const ScreenId SCREEN_ID_FULL = 0;
 const ScreenId SCREEN_ID_MAIN = 5;
 const ScreenId SCREEN_ID_PC_MAIN = 9;
@@ -3370,6 +3371,13 @@ void ScreenSessionManager::SetDpiFromSettingData()
         cachedSettingDpi_ = settingDpi;
         float dpi = static_cast<float>(settingDpi) / BASELINE_DENSITY;
         ScreenId defaultScreenId = GetDefaultScreenId();
+        if (g_isPcDevice) {
+            ScreenId screenId = screenIdManager_.ConvertToSmsScreenId(RS_ID_DEFAULT);
+            if (screenId != SCREEN_ID_INVALID) {
+                TLOGI(WmsLogTag::DMS, "get ScreenId:%{public}" PRIu64" for rsId successful", screenId);
+                defaultScreenId = screenId;
+            }
+        }
         SetVirtualPixelRatio(defaultScreenId, dpi);
         if (g_isPcDevice) {
             SetExtendPixelRatio(dpi * g_extendScreenDpiCoef_);
