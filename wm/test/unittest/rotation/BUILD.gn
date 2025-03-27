@@ -17,7 +17,7 @@ import("//foundation/window/window_manager/windowmanager_aafwk.gni")
 module_out_path = "window_manager/window_manager/wm/rotation"
 wm_unittest_common = "../:wm_unittest_common"
 
-ohos_unittest("wm_window_scene_session_impl_rotation_test") {
+ohos_unittest("wm_window_session_impl_rotation_test") {
     module_out_path = module_out_path
     include_dirs = [ "${window_base_path}/test/common/utils/include/" ]
     sanitize = {
@@ -26,7 +26,7 @@ ohos_unittest("wm_window_scene_session_impl_rotation_test") {
         cfi_vcall_icall_only = true
         debug = false
     }
-    sources = [ "window_scene_session_impl_rotation_test.cpp" ]
+    sources = [ "window_session_impl_rotation_test.cpp" ]
 
     deps = [
         wm_unittest_common,

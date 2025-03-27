@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
- #include <gtest/gtest.h>
+#include <gtest/gtest.h>
 
 #include "iremote_object_mocker.h"
 #include "mock_message_parcel.h"

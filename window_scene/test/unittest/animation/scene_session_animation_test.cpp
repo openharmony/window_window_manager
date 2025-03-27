@@ -23,11 +23,11 @@
 
 #include "session/host/include/main_session.h"
 #include "session/host/include/keyboard_session.h"
-#define private public
-#define protected public
+#define PRIVATE public
+#define PROTECTED public
 #include "session/host/include/scene_session.h"
-#undef private
-#undef protected
+#undef PRIVATE
+#undef PROTECTED
 #include "session/host/include/sub_session.h"
 #include "session/host/include/system_session.h"
 #include "ui/rs_surface_node.h"

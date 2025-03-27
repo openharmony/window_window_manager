@@ -15,7 +15,6 @@
 
 #include <gtest/gtest.h>
 
-#include "accessibility_event_info.h"
 #include "iremote_object_mocker.h"
 #include "mock_message_parcel.h"
 #include "pointer_event.h"

@@ -137,30 +137,8 @@ void SceneSessionManagerAnimationTest::InitTestSceneSessionForListWindowInfo()
     ssm_->sceneSessionMap_.insert({ sceneSession3->GetPersistentId(), sceneSession3 });
 
     SessionInfo sessionInfo4;
-    sessionInfo4.isSystem_ = false;
-    sptr<SceneSession> sceneSession4 = sptr<SceneSession>::MakeSptr(sessionInfo4, nullptr);
-    sceneSession4->SetVisibilityState(WINDOW_VISIBILITY_STATE_NO_OCCLUSION);
-    rect = { 0, 3000, 120, 120 };
-    sceneSession4->SetSessionRect(rect);
-    sceneSession4->SetSessionGlobalRect(rect);
-    sceneSession4->SetSessionState(SessionState::STATE_FOREGROUND);
-    sceneSession4->GetSessionProperty()->SetDisplayId(0);
-    ssm_->sceneSessionMap_.insert({ sceneSession4->GetPersistentId(), sceneSession4 });
-
-    SessionInfo sessionInfo5;
-    sessionInfo5.isSystem_ = false;
-    sptr<SceneSession> sceneSession5 = sptr<SceneSession>::MakeSptr(sessionInfo5, nullptr);
-    sceneSession5->SetVisibilityState(WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
-    rect = { 0, 0, 100, 100 };
-    sceneSession5->SetSessionRect(rect);
-    sceneSession5->SetSessionGlobalRect(rect);
-    sceneSession5->SetSessionState(SessionState::STATE_BACKGROUND);
-    sceneSession5->GetSessionProperty()->SetDisplayId(0);
-    ssm_->sceneSessionMap_.insert({ sceneSession5->GetPersistentId(), sceneSession5 });
-
-    SessionInfo sessionInfo6;
-    sessionInfo6.isSystem_ = true;
-    sptr<SceneSession> sceneSession6 = sptr<SceneSession>::MakeSptr(sessionInfo6, nullptr);
+    sessionInfo4.isSystem_ = true;
+    sptr<SceneSession> sceneSession6 = sptr<SceneSession>::MakeSptr(sessionInfo4, nullptr);
     sceneSession6->SetVisibilityState(WINDOW_VISIBILITY_STATE_NO_OCCLUSION);
     rect = { 0, 200, 120, 120 };
     sceneSession6->SetSessionRect(rect);

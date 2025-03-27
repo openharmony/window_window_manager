@@ -21,7 +21,6 @@
 #include <transaction/rs_transaction.h>
 #include <want_params_wrapper.h>
 
-#include "accessibility_event_info.h"
 #include "display_info.h"
 #include "extension/extension_business_info.h"
 #include "extension_data_handler.h"
@@ -32,7 +31,6 @@
 
 using namespace testing;
 using namespace testing::ext;
-using namespace OHOS::Accessibility;
 using namespace std;
 namespace OHOS {
 namespace Rosen {
