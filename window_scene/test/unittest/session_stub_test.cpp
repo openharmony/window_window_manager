@@ -1068,6 +1068,19 @@ HWTEST_F(SessionStubTest, HandleGetTargetOrientationConfigInfo, Function | Small
     auto result1 = session_->HandleGetTargetOrientationConfigInfo(data, reply);
     EXPECT_EQ(result1, ERR_NONE);
 }
+
+/**
+ * @tc.name: GetIsHighlighted
+ * @tc.desc: sessionStub GetIsHighlighted
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, GetIsHighlighted, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto result = session_->HandleGetIsHighlighted(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
