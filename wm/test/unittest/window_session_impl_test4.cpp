@@ -1526,17 +1526,19 @@ HWTEST_F(WindowSessionImplTest4, NotifyMainWindowClose01, TestSize.Level1)
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
     window->property_->SetPersistentId(1);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
 
     bool terminateCloseProcess = false;
     WMError res = window->NotifyMainWindowClose(terminateCloseProcess);
     EXPECT_EQ(terminateCloseProcess, false);
     EXPECT_EQ(res, WMError::WM_ERROR_NULLPTR);
     sptr<IMainWindowCloseListener> listener = sptr<IMainWindowCloseListener>::MakeSptr();
-    window->RegisterMainWindowCloseListeners(listener);
+    EXPECT_EQ(window->RegisterMainWindowCloseListeners(listener), WMError::WM_OK);
     res = window->NotifyMainWindowClose(terminateCloseProcess);
     EXPECT_EQ(terminateCloseProcess, false);
-    EXPECT_EQ(res, WMError::WM_ERROR_NULLPTR);
-    window->UnregisterMainWindowCloseListeners(listener);
+    EXPECT_EQ(res, WMError::WM_OK);
+    EXPECT_EQ(window->UnregisterMainWindowCloseListeners(listener), WMError::WM_OK);
 }
 
 /**
