@@ -422,7 +422,7 @@ HWTEST_F(WindowManagerServiceDumpTest, SceneSessionDumpSessionElementInfo, Funct
 {
     SessionInfo info;
     info.abilityName_ = "Background01";
-    info.bundleName_ = "IsFloatingWindowAppType"; 
+    info.bundleName_ = "IsFloatingWindowAppType";
     info.windowType_ = 1;
     sptr<Rosen::ISession> session_;
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
