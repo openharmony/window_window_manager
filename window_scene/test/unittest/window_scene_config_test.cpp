@@ -181,7 +181,7 @@ namespace {
  * @tc.type: FUNC
  * @tc.require issueI5N26H
  */
-HWTEST_F(WindowSceneConfigTest, AnimationConfig, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneConfigTest, AnimationConfig, TestSize.Level1)
 {
     WindowSceneConfig::config_ = ReadConfig(XML_STR);
     ConfigItem item = WindowSceneConfig::config_["windowAnimation"];
@@ -219,7 +219,7 @@ HWTEST_F(WindowSceneConfigTest, AnimationConfig, Function | SmallTest | Level2)
  * @tc.desc: maxAppWindowNumber test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneConfigTest, MaxAppWindowNumber, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneConfigTest, MaxAppWindowNumber, TestSize.Level1)
 {
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
@@ -276,7 +276,7 @@ HWTEST_F(WindowSceneConfigTest, MaxAppWindowNumber, Function | SmallTest | Level
  * @tc.type: FUNC
  * @tc.require: issueI68QCO
  */
-HWTEST_F(WindowSceneConfigTest, DecorConfig01, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneConfigTest, DecorConfig01, TestSize.Level1)
 {
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
@@ -299,7 +299,7 @@ HWTEST_F(WindowSceneConfigTest, DecorConfig01, Function | SmallTest | Level2)
  * @tc.type: FUNC
  * @tc.require: issueI68QCO
  */
-HWTEST_F(WindowSceneConfigTest, DecorConfig02, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneConfigTest, DecorConfig02, TestSize.Level1)
 {
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
@@ -324,7 +324,7 @@ HWTEST_F(WindowSceneConfigTest, DecorConfig02, Function | SmallTest | Level2)
  * @tc.type: FUNC
  * @tc.require: issueI68QCO
  */
-HWTEST_F(WindowSceneConfigTest, DecorConfig03, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneConfigTest, DecorConfig03, TestSize.Level1)
 {
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
@@ -349,7 +349,7 @@ HWTEST_F(WindowSceneConfigTest, DecorConfig03, Function | SmallTest | Level2)
  * @tc.type: FUNC
  * @tc.require: issueI68QCO
  */
-HWTEST_F(WindowSceneConfigTest, DecorConfig04, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneConfigTest, DecorConfig04, TestSize.Level1)
 {
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
@@ -374,7 +374,7 @@ HWTEST_F(WindowSceneConfigTest, DecorConfig04, Function | SmallTest | Level2)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(WindowSceneConfigTest, LoadConfigXml, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneConfigTest, LoadConfigXml, TestSize.Level1)
 {
     auto result = WindowSceneConfig::LoadConfigXml();
     ASSERT_EQ(true, result);
@@ -385,7 +385,7 @@ HWTEST_F(WindowSceneConfigTest, LoadConfigXml, Function | SmallTest | Level2)
  * @tc.desc: ReadFloatNumbersConfigInfo test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneConfigTest, ReadFloatNumbersConfigInfo, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneConfigTest, ReadFloatNumbersConfigInfo, TestSize.Level1)
 {
     xmlNodePtr currNode = xmlNewNode(NULL, BAD_CAST"nodeName");
     auto result = WindowSceneConfig::ReadFloatNumbersConfigInfo(currNode, false);
@@ -397,7 +397,7 @@ HWTEST_F(WindowSceneConfigTest, ReadFloatNumbersConfigInfo, Function | SmallTest
  * @tc.desc: ReadStringConfigInfo test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneConfigTest, ReadStringConfigInfo, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneConfigTest, ReadStringConfigInfo, TestSize.Level1)
 {
     xmlNodePtr currNode = xmlNewNode(NULL, BAD_CAST"nodeName");
     auto result = WindowSceneConfig::ReadStringConfigInfo(currNode);
