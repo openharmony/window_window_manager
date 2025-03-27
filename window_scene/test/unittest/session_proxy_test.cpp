@@ -1415,6 +1415,21 @@ HWTEST_F(SessionProxyTest, GetTargetOrientationConfigInfo, Function | SmallTest 
     WSError res = sProxy->GetTargetOrientationConfigInfo(Orientation::USER_ROTATION_PORTRAIT, properties);
     ASSERT_EQ(res, WSError::WS_OK);
 }
+
+/**
+ * @tc.name: GetIsHighlighted
+ * @tc.desc: GetIsHighlighted test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, GetIsHighlighted, Function | SmallTest | Level2)
+{
+    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
+    bool isHighlighted = false;
+    ASSERT_EQ(sProxy->GetIsHighlighted(isHighlighted), WSError::WS_ERROR_IPC_FAILED);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
