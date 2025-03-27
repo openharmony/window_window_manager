@@ -1733,6 +1733,22 @@ HWTEST_F(SceneSessionTest4, SetWinRectWhenUpdateRectTest003, TestSize.Level1)
     ASSERT_EQ(sceneSession->winRect_.width_, rect.width_);
     ASSERT_EQ(sceneSession->winRect_.height_, rect.height_);
 }
+
+/**
+ * @tc.name: UpdatePiPDefaultWindowSizeTypeTest
+ * @tc.desc: UpdatePiPDefaultWindowSizeType function test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, UpdatePiPDefaultWindowSizeTypeTest, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "UpdatePiPDefaultWindowSizeType";
+    info.bundleName_ = "UpdatePiPDefaultWindowSizeType";
+    sptr<SceneSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    sceneSession->isTerminating_ = false;
+    auto result = sceneSession->UpdatePiPDefaultWindowSizeType(1);
+    ASSERT_EQ(result, WSError::WS_OK);
+}
 }
 }
 }

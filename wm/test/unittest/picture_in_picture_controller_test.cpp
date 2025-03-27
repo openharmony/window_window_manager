@@ -257,6 +257,7 @@ HWTEST_F(PictureInPictureControllerTest, CreatePictureInPictureWindow03, TestSiz
     ASSERT_NE(nullptr, option);
     auto pipControl = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
     pipControl->pipOption_ = option;
+    option->SetDefaultWindowSizeType(1);
     AbilityRuntime::AbilityContextImpl* contextPtr = new AbilityRuntime::AbilityContextImpl();
     option->SetContext(contextPtr);
     std::shared_ptr<MockXComponentController> xComponentController = std::make_shared<MockXComponentController>();
@@ -267,6 +268,7 @@ HWTEST_F(PictureInPictureControllerTest, CreatePictureInPictureWindow03, TestSiz
     StartPipType startType = StartPipType::NULL_START;
     EXPECT_CALL(*(mw), GetWindowState()).Times(2).WillOnce(Return(WindowState::STATE_CREATED));
     EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->CreatePictureInPictureWindow(startType));
+    EXPECT_EQ(1, option->GetDefaultWindowSizeType());
     startType = StartPipType::AUTO_START;
     delete contextPtr;
 }
