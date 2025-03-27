@@ -1351,6 +1351,7 @@ struct PiPTemplateInfo {
     std::vector<uint32_t> controlGroup;
     std::vector<PiPControlStatusInfo> pipControlStatusInfoList;
     std::vector<PiPControlEnableInfo> pipControlEnableInfoList;
+    uint32_t defaultWindowSizeType;
 };
 
 struct PiPWindowSize {

@@ -656,6 +656,23 @@ HWTEST_F(SessionStubTest, HandleSetAutoStartPiP, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleUpdatePiPDefaultWindowSizeType
+ * @tc.desc: sessionStub sessionStubTest
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionStubTest, HandleUpdatePiPDefaultWindowSizeType, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_EQ(ERR_INVALID_DATA, session_->HandleUpdatePiPDefaultWindowSizeType(data, reply));
+    uint32_t defaultWindowSizeType = 1;
+    data.WriteInt32(defaultWindowSizeType);
+    ASSERT_EQ(ERR_NONE, session_->HandleUpdatePiPDefaultWindowSizeType(data, reply));
+}
+
+/**
  * @tc.name: HandleProcessPointDownSession006
  * @tc.desc: sessionStub sessionStubTest
  * @tc.type: FUNC
@@ -1019,6 +1036,37 @@ HWTEST_F(SessionStubTest, HandleUpdateRotationChangeListenerRegistered, Function
     ASSERT_EQ(result, ERR_NONE);
     result = session_->HandleUpdateRotationChangeListenerRegistered(data, reply);
     ASSERT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandleGetTargetOrientationConfigInfo
+ * @tc.desc: sessionStub HandleGetTargetOrientationConfigInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleGetTargetOrientationConfigInfo, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteUint32(1);
+    data.WriteUint32(1);
+    data.WriteUint32(-1);
+    data.WriteBool(true);
+    data.WriteUint32(1);
+    data.WriteUint32(1);
+    data.WriteBool(true);
+    data.WriteUint32(1);
+    auto result = session_->HandleGetTargetOrientationConfigInfo(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+    data.WriteUint32(1);
+    data.WriteUint32(1);
+    data.WriteUint32(1);
+    data.WriteBool(true);
+    data.WriteUint32(1);
+    data.WriteUint32(1);
+    data.WriteBool(true);
+    data.WriteUint32(1);
+    auto result1 = session_->HandleGetTargetOrientationConfigInfo(data, reply);
+    EXPECT_EQ(result1, ERR_NONE);
 }
 
 /**

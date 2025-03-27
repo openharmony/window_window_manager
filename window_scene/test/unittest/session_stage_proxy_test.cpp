@@ -730,6 +730,19 @@ HWTEST_F(SessionStageProxyTest, NotifyRotationChange, Function | SmallTest | Lev
     RotationChangeResult res = sessionStage_->NotifyRotationChange(info);
     ASSERT_EQ(0, res.windowRect_.width_);
 }
+
+/**
+ * @tc.name: NotifyTargetRotationInfo
+ * @tc.desc: test function : NotifyTargetRotationInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, NotifyTargetRotationInfo, Function | SmallTest | Level1)
+{
+    OrientationInfo info;
+    ASSERT_TRUE(sessionStage_ != nullptr);
+    WSError res = sessionStage_->NotifyTargetRotationInfo(info);
+    ASSERT_EQ(WSError::WS_OK, res);
+}
 }
 }
 }
