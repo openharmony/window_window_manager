@@ -223,7 +223,10 @@ public:
 
     // unique screen
     virtual DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds,
-        std::vector<DisplayId>& displayIds) { return DMError::DM_OK; }
+        std::vector<DisplayId>& displayIds)
+    {
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 
     virtual VirtualScreenFlag GetVirtualScreenFlag(ScreenId screenId)
     {
