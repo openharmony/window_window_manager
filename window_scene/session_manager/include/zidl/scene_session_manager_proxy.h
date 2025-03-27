@@ -148,7 +148,6 @@ public:
     WMError SetAppDragResizeType(const std::string& bundleName, DragResizeType dragResizeType) override;
     WMError GetAppDragResizeType(const std::string& bundleName, DragResizeType& dragResizeType) override;
     WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId) override;
-    WMError GetWindowUIType(WindowUIType& windowUIType) override;
     WMError MinimizeByWindowId(const std::vector<int32_t>& windowIds) override;
 
 private:
