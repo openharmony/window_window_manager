@@ -1174,7 +1174,7 @@ DMError ScreenSessionManagerProxy::AddVirtualScreenBlackList(const std::vector<i
 
     MessageParcel data;
     MessageParcel reply;
-    MessageParcel option;
+    MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::DMS, "write token failed");
         return DMError::DM_ERROR_IPC_FAILED;
@@ -1208,7 +1208,7 @@ DMError ScreenSessionManagerProxy::RemoveVirtualScreenBlackList(const std::vecto
 
     MessageParcel data;
     MessageParcel reply;
-    MessageParcel option;
+    MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::DMS, "write token failed");
         return DMError::DM_ERROR_IPC_FAILED;
