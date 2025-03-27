@@ -1253,7 +1253,7 @@ private:
     void InitVsyncStation();
     void RegisterRequestVsyncFunc(const sptr<SceneSession>& sceneSession);
     bool GetDisplaySizeById(DisplayId displayId, int32_t& displayWidth, int32_t& displayHeight);
-    void UpdateSessionCrossAxisState(DisplayId displayId, SuperFoldStatus status, SuperFoldStatus prevStatus);
+    void UpdateSessionWithFoldStateChange(DisplayId displayId, SuperFoldStatus status, SuperFoldStatus prevStatus);
     void ConfigSingleHandCompatibleMode(const WindowSceneConfig::ConfigItem& configItem);
 
     /*
@@ -1366,6 +1366,7 @@ private:
     std::unordered_map<std::string, bool> isWindowRectAutoSaveMap_;
     //Whether to save rect according to specifiedFlag
     std::unordered_map<std::string, bool> isSaveBySpecifiedFlagMap_;
+    std::shared_ptr<FoldScreenStatusChangeCallback> foldChangeCallback_;
 
     /*
      * Window Lifecycle
