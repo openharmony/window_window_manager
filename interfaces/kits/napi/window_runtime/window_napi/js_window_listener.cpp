@@ -282,7 +282,7 @@ void JsWindowListener::OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info,
 void JsWindowListener::OnKeyboardDidShow(const KeyboardPanelInfo& keyboardPanelInfo)
 {
     TLOGI(WmsLogTag::WMS_KEYBOARD, "Called");
-    auto jsCallback = [self = weakRef_, env = env_, rect = keyboardPanelInfo.rect_, funcName = __func__] {
+    auto jsCallback = [self = weakRef_, env = env_, keyboardPanelInfo, funcName = __func__] {
         auto thisListener = self.promote();
         if (thisListener == nullptr || env == nullptr) {
             TLOGE(WmsLogTag::WMS_KEYBOARD, "%{public}s: this listener or env is nullptr", funcName);
@@ -295,12 +295,18 @@ void JsWindowListener::OnKeyboardDidShow(const KeyboardPanelInfo& keyboardPanelI
             TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s failed to create js object", funcName);
             return;
         }
-        napi_value rectObjValue = GetRectAndConvertToJsValue(env, rect);
-        if (rectObjValue == nullptr) {
-            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s failed to convert rect to jsObject", funcName);
+        napi_value beginRectObjValue = GetRectAndConvertToJsValue(env, keyboardPanelInfo.beginRect_);
+        if (beginRectObjValue == nullptr) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s failed to convert begin rect to jsObject", funcName);
             return;
         }
-        napi_set_named_property(env, objValue, "rect", rectObjValue);
+        napi_value endRectObjValue = GetRectAndConvertToJsValue(env, keyboardPanelInfo.endRect_);
+        if (endRectObjValue == nullptr) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s failed to convert end rect to jsObject", funcName);
+            return;
+        }
+        napi_set_named_property(env, objValue, "beginRect", beginRectObjValue);
+        napi_set_named_property(env, objValue, "endRect", endRectObjValue);
         napi_value argv[] = { objValue };
         thisListener->CallJsMethod(KEYBOARD_DID_SHOW_CB.c_str(), argv, ArraySize(argv));
     };
@@ -312,7 +318,7 @@ void JsWindowListener::OnKeyboardDidShow(const KeyboardPanelInfo& keyboardPanelI
 void JsWindowListener::OnKeyboardDidHide(const KeyboardPanelInfo& keyboardPanelInfo)
 {
     TLOGI(WmsLogTag::WMS_KEYBOARD, "Called");
-    auto jsCallback = [self = weakRef_, env = env_, rect = keyboardPanelInfo.rect_, funcName = __func__] {
+    auto jsCallback = [self = weakRef_, env = env_, keyboardPanelInfo, funcName = __func__] {
         auto thisListener = self.promote();
         if (thisListener == nullptr || env == nullptr) {
             TLOGE(WmsLogTag::WMS_KEYBOARD, "%{public}s: this listener or env is nullptr", funcName);
@@ -325,12 +331,18 @@ void JsWindowListener::OnKeyboardDidHide(const KeyboardPanelInfo& keyboardPanelI
             TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s failed to create js object", funcName);
             return;
         }
-        napi_value rectObjValue = GetRectAndConvertToJsValue(env, rect);
-        if (rectObjValue == nullptr) {
-            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s failed to convert rect to jsObject", funcName);
+        napi_value beginRectObjValue = GetRectAndConvertToJsValue(env, keyboardPanelInfo.beginRect_);
+        if (beginRectObjValue == nullptr) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s failed to convert begin rect to jsObject", funcName);
             return;
         }
-        napi_set_named_property(env, objValue, "rect", rectObjValue);
+        napi_value endRectObjValue = GetRectAndConvertToJsValue(env, keyboardPanelInfo.endRect_);
+        if (endRectObjValue == nullptr) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s failed to convert end rect to jsObject", funcName);
+            return;
+        }
+        napi_set_named_property(env, objValue, "beginRect", beginRectObjValue);
+        napi_set_named_property(env, objValue, "endRect", endRectObjValue);
         napi_value argv[] = { objValue };
         thisListener->CallJsMethod(KEYBOARD_DID_HIDE_CB.c_str(), argv, ArraySize(argv));
     };
