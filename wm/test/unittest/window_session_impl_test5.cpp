@@ -265,7 +265,7 @@ HWTEST_F(WindowSessionImplTest5, RegisterWindowRotationChangeListener, Function 
     EXPECT_EQ(ret, WMError::WM_OK);
     holder = window->windowRotationChangeListeners_[window->property_->GetPersistentId()];
     auto existsListener = std::find(holder.begin(), holder.end(), listener);
-    EXPECT_EQ(existsListener, holder.end());
+    ASSERT_NE(existsListener, holder.end());
 
     ret = window->RegisterWindowRotationChangeListener(listener);
     EXPECT_EQ(ret, WMError::WM_OK);
@@ -319,7 +319,7 @@ HWTEST_F(WindowSessionImplTest5, CheckMultiWindowRect, Function | SmallTest | Le
     auto ret = windowSessionImpl->CheckMultiWindowRect(width, height);
     EXPECT_EQ(WMError::WM_OK, ret);
 
-    windowSessionImpl->property_->SetWindowType(WindowType::WINDOW_SUB_WINDOW_BASE);
+    windowSessionImpl->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     windowSessionImpl->property_->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
     ret = windowSessionImpl->CheckMultiWindowRect(width, height);
     EXPECT_EQ(WMError::WM_OK, ret);
@@ -347,7 +347,7 @@ HWTEST_F(WindowSessionImplTest5, NotifyRotationChange, Function | SmallTest | Le
 
     sptr<IWindowRotationChangeListener> listener = sptr<IWindowRotationChangeListener>::MakeSptr();
     std::vector<sptr<IWindowRotationChangeListener>> holder;
-    windowSessionImpl->windowRotationChangeListeners_[window->property_->GetPersistentId()] = holder;
+    windowSessionImpl->windowRotationChangeListeners_[windowSessionImpl->property_->GetPersistentId()] = holder;
     WMError ret = windowSessionImpl->RegisterWindowChangeListener(listener);
     EXPECT_EQ(WMError::WM_OK, ret);
     res = windowSessionImpl->NotifyRotationChange(info);
