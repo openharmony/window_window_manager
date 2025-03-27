@@ -29,8 +29,8 @@ ohos_unittest("wm_window_scene_session_impl_animation_test") {
   sources = [ "window_scene_session_impl_animation_test.cpp" ]
 
   deps = [
-    wm_unittest_common,
     "${window_base_path}/test/common/utils:libtestutil",
+    wm_unittest_common,
   ]
 
   external_deps = [
