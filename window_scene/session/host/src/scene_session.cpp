@@ -7622,9 +7622,10 @@ void SceneSession::NotifyWindowAttachStateListenerRegistered(bool registered)
     SetNeedNotifyAttachState(registered);
 }
 
-void SceneSession::NotifyKeyboardAnimationCompleted(bool isShowAnimation, const WSRect& panelRect)
+void SceneSession::NotifyKeyboardAnimationCompleted(bool isShowAnimation,
+    const WSRect& beginRect, const WSRect& endRect)
 {
-    PostTask([weakThis = wptr(this), isShowAnimation, panelRect, where = __func__] {
+    PostTask([weakThis = wptr(this), isShowAnimation, beginRect, endRect, where = __func__] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s session is null", where);
@@ -7645,7 +7646,8 @@ void SceneSession::NotifyKeyboardAnimationCompleted(bool isShowAnimation, const 
         }
 
         KeyboardPanelInfo keyboardPanelInfo;
-        keyboardPanelInfo.rect_ = SessionHelper::TransferToRect(panelRect);
+        keyboardPanelInfo.beginRect_ = SessionHelper::TransferToRect(beginRect);
+        keyboardPanelInfo.endRect_ = SessionHelper::TransferToRect(endRect);
         keyboardPanelInfo.isShowing_ = isShowAnimation;
         session->sessionStage_->NotifyKeyboardAnimationCompleted(keyboardPanelInfo);
     }, __func__);

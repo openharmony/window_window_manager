@@ -19,7 +19,7 @@
 #include "display_manager.h"
 #include "input_event.h"
 #include "key_event.h"
-
+#include "mock/mock_session_stage.h"
 
 #include "screen_manager.h"
 #include "session/host/include/sub_session.h"
@@ -266,6 +266,36 @@ HWTEST_F(SceneSessionTest6, SetFollowParentWindowLayoutEnabled03, Function | Sma
 
     sceneSession->SetFollowParentWindowLayoutEnabled(false);
     ASSERT_EQ(nullptr, parentSession->notifySurfaceBoundsChangeFuncMap_[sceneSession->GetPersistentId()]);
+}
+
+/**
+ * @tc.name: NotifyKeyboardAnimationCompleted
+ * @tc.desc: NotifyKeyboardAnimationCompleted
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, NotifyKeyboardAnimationCompleted, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->property_ = property;
+    sceneSession->sessionStage_ = nullptr;
+    bool isShowAnimation = true;
+    WSRect beginRect = {0, 2720, 1260, 1020};
+    WSRect endRect = {0, 1700, 1260, 1020};
+    sceneSession->NotifyKeyboardAnimationCompleted(isShowAnimation, beginRect, endRect);
+    sceneSession->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
+    EXPECT_NE(nullptr, sceneSession->sessionStage_);
+
+    sceneSession->NotifyKeyboardDidShowRegistered(true);
+    sceneSession->NotifyKeyboardAnimationCompleted(isShowAnimation, beginRect, endRect);
+
+    isShowAnimation = false;
+    beginRect = {0, 1700, 1260, 1020};
+    endRect = {0, 2720, 1260, 1020};
+    sceneSession->NotifyKeyboardAnimationCompleted(isShowAnimation, beginRect, endRect);
+    sceneSession->NotifyKeyboardDidHideRegistered(true);
+    sceneSession->NotifyKeyboardAnimationCompleted(isShowAnimation, beginRect, endRect);
 }
 } // namespace
 } // namespace Rosen
