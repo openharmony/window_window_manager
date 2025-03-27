@@ -17,11 +17,11 @@
 
 #include <algorithm>
 #include <cinttypes>
-#include <hitrace_meter.h>
 #include <shared_mutex>
 
 #include "input_manager.h"
 
+#include "hitrace_meter.h"
 #include "marshalling_helper.h"
 #include "window_adapter.h"
 #include "window_manager_agent.h"
