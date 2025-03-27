@@ -1986,7 +1986,7 @@ HWTEST_F(SceneSessionManagerTest12, AddSkipSelfWhenShowOnVirtualScreenList, Func
     std::vector<int32_t> persistentIds {sceneSession->GetPersistentId()};
     auto ret = ssm_->AddSkipSelfWhenShowOnVirtualScreenList(persistentIds);
     usleep(WAIT_SYNC_IN_NS);
-    EXPECT_EQ(ret, WMError::WS_OK);
+    EXPECT_EQ(ret, WMError::WM_OK);
 }
 
 
@@ -2005,7 +2005,7 @@ HWTEST_F(SceneSessionManagerTest12, RemoveSkipSelfWhenShowOnVirtualScreenList, F
     std::vector<int32_t> persistentIds {sceneSession->GetPersistentId()};
     auto ret = ssm_->RemoveSkipSelfWhenShowOnVirtualScreenList(persistentIds);
     usleep(WAIT_SYNC_IN_NS);
-    EXPECT_EQ(ret, WMError::WS_OK);
+    EXPECT_EQ(ret, WMError::WM_OK);
 }
 
 /**
