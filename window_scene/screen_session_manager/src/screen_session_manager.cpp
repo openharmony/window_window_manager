@@ -2050,6 +2050,7 @@ sptr<ScreenSession> ScreenSessionManager::GetPhysicalScreenSession(ScreenId scre
             DMRect mainScreenRegion = {0, 0, 0, 0};
             foldScreenController_->SetMainScreenRegion(mainScreenRegion);
             screenSession->SetMirrorScreenRegion(screenId, mainScreenRegion);
+            screenSession->SetIsEnableRegionRotation(true);
             screenSession->EnableMirrorScreenRegion();
         }
 #endif
@@ -5331,9 +5332,8 @@ void ScreenSessionManager::ChangeScreenGroup(sptr<ScreenSessionGroup> group, con
             }
             // mirror mode and mirror area change
             TLOGI(WmsLogTag::DMS, "Screen: %{public}" PRIu64
-                ", apply new region, x:%{public}d y:%{public}d w:%{public}u h:%{public}u",
-                screenId, mainScreenRegion.posX_, mainScreenRegion.posY_,
-                mainScreenRegion.width_, mainScreenRegion.height_);
+                ", apply new region, x:%{public}d y:%{public}d w:%{public}u h:%{public}u", screenId,
+                mainScreenRegion.posX_, mainScreenRegion.posY_, mainScreenRegion.width_, mainScreenRegion.height_);
         }
         if (CheckScreenInScreenGroup(screen)) {
             NotifyDisplayDestroy(screenId);
@@ -5350,6 +5350,7 @@ void ScreenSessionManager::ChangeScreenGroup(sptr<ScreenSessionGroup> group, con
             } else {
                 screen->SetMirrorScreenRegion(rsScreenId, mainScreenRegion);
                 screen->SetIsPhysicalMirrorSwitch(false);
+                IsEnableRegionRotation(screen);
                 TLOGI(WmsLogTag::DMS, "Screen: %{public}" PRIu64" mirror to %{public}"
                     PRIu64" with region, x:%{public}d y:%{public}d w:%{public}u h:%{public}u",
                     screenId, mirrorScreenId, mainScreenRegion.posX_, mainScreenRegion.posY_,
@@ -5359,6 +5360,21 @@ void ScreenSessionManager::ChangeScreenGroup(sptr<ScreenSessionGroup> group, con
     }
     group->combination_ = combination;
     AddScreenToGroup(group, addScreens, addChildPos, removeChildResMap);
+}
+
+void ScreenSessionManager::IsEnableRegionRotation(sptr<ScreenSession> screenSession)
+{
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        screenSession->SetIsEnableRegionRotation(false);
+        TLOGI(WmsLogTag::DMS, "Region rotation is not supported");
+        return;
+    }
+    if (screenSession->GetName() == "screen_capture_file" || screenSession->GetName() == "screen_capture") {
+        screenSession->SetIsEnableRegionRotation(false);
+    } else {
+        screenSession->SetIsEnableRegionRotation(true);
+    }
+    TLOGI(WmsLogTag::DMS, "Screen session name: %{public}s", screenSession->GetName().c_str());
 }
 
 void ScreenSessionManager::AddScreenToGroup(sptr<ScreenSessionGroup> group,
