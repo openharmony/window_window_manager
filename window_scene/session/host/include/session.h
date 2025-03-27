@@ -431,9 +431,10 @@ public:
     void NotifyUIRequestFocus();
     virtual void NotifyUILostFocus();
     WSError NotifyFocusStatus(bool isFocused);
+    void SetExclusivelyHighlighted(bool isExclusivelyHighlighted);
     virtual WSError UpdateHighlightStatus(bool isHighlight, bool needBlockHighlightNotify);
     WSError NotifyHighlightChange(bool isHighlight);
-    void SetExclusivelyHighlighted(bool isExclusivelyHighlighted);
+    WSError GetIsHighlighted(bool& isHighlighted) override;
 
     /*
      * Multi Window
@@ -827,7 +828,7 @@ protected:
      */
     bool isFocused_ = false;
     bool blockingFocus_ { false };
-    bool isHighlight_ { false };
+    bool isHighlighted_ { false };
 
     uint32_t uiNodeId_ = 0;
     float aspectRatio_ = 0.0f;

@@ -49,6 +49,11 @@ void PipOption::SetPipTemplate(uint32_t templateType)
     templateType_ = templateType;
 }
 
+void PipOption::SetDefaultWindowSizeType(uint32_t defaultWindowSizeType)
+{
+    defaultWindowSizeType_ = defaultWindowSizeType;
+}
+
 void PipOption::SetPiPControlStatus(PiPControlType controlType, PiPControlStatus status)
 {
     for (auto& controlStatusInfo : pipControlStatusInfoList_) {
@@ -137,6 +142,11 @@ std::string PipOption::GetNavigationId() const
 uint32_t PipOption::GetPipTemplate()
 {
     return templateType_;
+}
+
+uint32_t PipOption::GetDefaultWindowSizeType() const
+{
+    return defaultWindowSizeType_;
 }
 
 void PipOption::GetContentSize(uint32_t& width, uint32_t& height)

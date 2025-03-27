@@ -1663,7 +1663,7 @@ HWTEST_F(WindowSessionTest, UpdateHighlightStatus, TestSize.Level1)
     EXPECT_EQ(session_->UpdateHighlightStatus(false, false), WSError::WS_DO_NOTHING);
  
     EXPECT_EQ(session_->UpdateHighlightStatus(true, false), WSError::WS_OK);
-    session_->isHighlight_ = false;
+    session_->isHighlighted_ = false;
     EXPECT_EQ(session_->UpdateHighlightStatus(true, true), WSError::WS_OK);
 }
  
