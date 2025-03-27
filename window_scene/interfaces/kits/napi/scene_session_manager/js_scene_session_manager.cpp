@@ -3398,14 +3398,14 @@ napi_value JsSceneSessionManager::OnGetSessionSnapshotPixelMap(napi_env env, nap
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    SnapshotNodeType snapNode = SnapshotNodeType::DEFAULT_WINDOW_NODE;
+    SnapshotNodeType snapNode = SnapshotNodeType::DEFAULT_NODE;
     if (argc > ARGC_TWO && !ConvertFromJsValue(env, argv[ARG_INDEX_TWO], snapNode)) {
         TLOGE(WmsLogTag::WMS_PATTERN, "Failed to convert parameter to snapNode");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    if (snapNode < SnapshotNodeType::DEFAULT_WINDOW_NODE || snapNode > SnapshotNodeType::APP_WINDOW_NODE) {
+    if (snapNode < SnapshotNodeType::DEFAULT_NODE || snapNode > SnapshotNodeType::APP_NODE) {
         TLOGE(WmsLogTag::WMS_PATTERN, "SnapshotNodeType invalid:%{public}d", snapNode);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
@@ -3472,14 +3472,14 @@ napi_value JsSceneSessionManager::OnGetSessionSnapshotPixelMapSync(napi_env env,
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    SnapshotNodeType snapNode = SnapshotNodeType::DEFAULT_WINDOW_NODE;
+    SnapshotNodeType snapNode = SnapshotNodeType::DEFAULT_NODE;
     if (argc > ARGC_TWO && !ConvertFromJsValue(env, argv[ARG_INDEX_TWO], snapNode)) {
         TLOGE(WmsLogTag::WMS_PATTERN, "Failed to convert parameter to snapNode");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    if (snapNode < SnapshotNodeType::DEFAULT_WINDOW_NODE || snapNode > SnapshotNodeType::APP_WINDOW_NODE) {
+    if (snapNode < SnapshotNodeType::DEFAULT_NODE || snapNode > SnapshotNodeType::APP_NODE) {
         TLOGE(WmsLogTag::WMS_PATTERN, "SnapshotNodeType invalid:%{public}d", snapNode);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
