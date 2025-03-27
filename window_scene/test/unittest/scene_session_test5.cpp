@@ -2056,6 +2056,91 @@ HWTEST_F(SceneSessionTest5, NotifyRotationChange, Function | SmallTest | Level2)
     res = session->NotifyRotationChange(rotationInfo);
     EXPECT_EQ(res.windowRect_.width_, 0);
 }
+
+/**
+ * @tc.name: SetSessionGetTargetOrientationConfigInfoCallback
+ * @tc.desc: SetSessionGetTargetOrientationConfigInfoCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, SetSessionGetTargetOrientationConfigInfoCallback, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetSessionGetTargetOrientationConfigInfoCallback";
+    info.bundleName_ = "SetSessionGetTargetOrientationConfigInfoCallback";
+
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+
+    sceneSession->SetSessionGetTargetOrientationConfigInfoCallback([](uint32_t targetOrientation) {
+        return;
+    });
+    EXPECT_NE(sceneSession->sessionGetTargetOrientationConfigInfoFunc_, nullptr);
+}
+
+/**
+ * @tc.name: GetTargetOrientationConfigInfo
+ * @tc.desc: GetTargetOrientationConfigInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, GetTargetOrientationConfigInfo, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "GetTargetOrientationConfigInfo";
+    info.bundleName_ = "GetTargetOrientationConfigInfo";
+
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+
+    Orientation orientation = Orientation::USER_ROTATION_PORTRAIT;
+    std::map<Rosen::WindowType, Rosen::SystemBarProperty> properties;
+    NotifySessionGetTargetOrientationConfigInfoFunc func = [](uint32_t targetOrientation) {};
+    sceneSession->sessionGetTargetOrientationConfigInfoFunc_ = func;
+    sceneSession->GetTargetOrientationConfigInfo(orientation, properties);
+    EXPECT_NE(sceneSession->sessionGetTargetOrientationConfigInfoFunc_, nullptr);
+}
+
+/**
+ * @tc.name: NotifyRotationProperty
+ * @tc.desc: NotifyRotationProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, NotifyRotationProperty, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "NotifyRotationProperty";
+    info.bundleName_ = "NotifyRotationProperty";
+
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+
+    WSError result = sceneSession->NotifyRotationProperty(0, 0, 0);
+    EXPECT_EQ(result, WSError::WS_OK);
+    WSError result1 = sceneSession->NotifyRotationProperty(0, 0, 1);
+    EXPECT_EQ(result1, WSError::WS_OK);
+    WSError result2 = sceneSession->NotifyRotationProperty(0, 1, 1);
+    EXPECT_EQ(result2, WSError::WS_OK);
+    WSError result3 = sceneSession->NotifyRotationProperty(90, 1, 1);
+    EXPECT_EQ(result3, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: GetSystemBarPropertyForRotation
+ * @tc.desc: GetSystemBarPropertyForRotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, GetSystemBarPropertyForRotation, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "GetSystemBarPropertyForRotation";
+    info.bundleName_ = "GetSystemBarPropertyForRotation";
+
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+
+    std::map<Rosen::WindowType, Rosen::SystemBarProperty> properties;
+    sceneSession->SetSystemBarPropertyForRotation(properties);
+    EXPECT_EQ(sceneSession->GetSystemBarPropertyForRotation(), properties);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
