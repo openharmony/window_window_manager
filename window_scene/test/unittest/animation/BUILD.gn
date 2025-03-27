@@ -18,46 +18,42 @@ module_out_path = "window_manager/window_manager/window_scene/animation"
 ws_unittest_common = "../:ws_unittest_common"
 
 ohos_unittest("ws_window_session_property_animation_test") {
-    module_out_path = module_out_path
+  module_out_path = module_out_path
 
-    sources = [ "window_session_property_animation_test.cpp" ]
+  sources = [ "window_session_property_animation_test.cpp" ]
 
-    deps = [ ws_unittest_common ]
+  deps = [ ws_unittest_common ]
 
-    external_deps = [ "c_utils:utils" ]
+  external_deps = [ "c_utils:utils" ]
 }
 
 ohos_unittest("ws_session_proxy_animation_test") {
-    module_out_path = module_out_path
+  module_out_path = module_out_path
 
-    include_dirs = [
-        "${window_base_path}/window_scene/session/host/include/zidl",
-        "${window_base_path}/window_scene/test/mock",
-    ]
-    sources = [
-        "session_proxy_animation_test.cpp",
-    ]
+  include_dirs = [
+    "${window_base_path}/window_scene/session/host/include/zidl",
+    "${window_base_path}/window_scene/test/mock",
+  ]
+  sources = [ "session_proxy_animation_test.cpp" ]
 
-    deps = [ ws_unittest_common ]
+  deps = [ ws_unittest_common ]
 
-    external_deps = [ "c_utils:utils" ]
+  external_deps = [ "c_utils:utils" ]
 }
 
 ohos_unittest("ws_scene_session_animation_test") {
-    module_out_path = module_out_path
+  module_out_path = module_out_path
 
-    sources = [
-        "scene_session_animation_test.cpp",
-    ]
+  sources = [ "scene_session_animation_test.cpp" ]
 
-    cflags_cc = [ "-Wno-thread-safety" ]
+  cflags_cc = [ "-Wno-thread-safety" ]
 
-    deps = [ ws_unittest_common ]
+  deps = [ ws_unittest_common ]
 
-    external_deps = [
-        "ability_base:session_info",
-        "ability_runtime:app_context",
-        "c_utils:utils",
-        "hilog:libhilog",
-    ]
+  external_deps = [
+    "ability_base:session_info",
+    "ability_runtime:app_context",
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
