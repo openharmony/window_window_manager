@@ -1762,6 +1762,8 @@ WMError WindowImpl::Show(uint32_t reason, bool withAnimation, bool withFocus)
             return WMError::WM_OK;
         } else {
             NotifyAfterForeground(true, false);
+        }
+        if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
             NotifyAfterDidForeground(reason);
         }
         return WMError::WM_OK;
@@ -1776,7 +1778,10 @@ WMError WindowImpl::Show(uint32_t reason, bool withAnimation, bool withFocus)
     ret = SingletonContainer::Get<WindowAdapter>().AddWindow(property_);
     RecordLifeCycleExceptionEvent(LifeCycleEvent::SHOW_EVENT, ret);
     if (ret == WMError::WM_OK) {
-        UpdateWindowStateWhenShow(reason);
+        UpdateWindowStateWhenShow();
+        if(WindowHelper::IsMainWindow(property_->GetWindowType())) {
+            NotifyAfterDidForeground(reason);
+        }
     } else {
         NotifyForegroundFailed(ret);
         WLOGFE("show window id:%{public}u errCode:%{public}d", property_->GetWindowId(), static_cast<int32_t>(ret));
@@ -1831,7 +1836,10 @@ WMError WindowImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerki
         WLOGFE("hide errCode:%{public}d for winId:%{public}u", static_cast<int32_t>(ret), property_->GetWindowId());
         return ret;
     }
-    UpdateWindowStateWhenHide(reason);
+    UpdateWindowStateWhenHide();
+    if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
+        NotifyAfterDidBackground(reason);
+    }
     uint32_t animationFlag = property_->GetAnimationFlag();
     if (animationFlag == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
         animationTransitionController_->AnimationForHidden();
@@ -3650,7 +3658,7 @@ void WindowImpl::UpdateWindowState(WindowState state)
     }
 }
 
-WmErrorCode WindowImpl::UpdateWindowStateWhenShow(uint32_t reason)
+WmErrorCode WindowImpl::UpdateWindowStateWhenShow()
 {
     state_ = WindowState::STATE_SHOWN;
     if (WindowHelper::IsMainWindow(property_->GetWindowType()) ||
@@ -3658,7 +3666,6 @@ WmErrorCode WindowImpl::UpdateWindowStateWhenShow(uint32_t reason)
         // update subwindow subWindowState_ and notify subwindow shown or not
         UpdateSubWindowStateAndNotify(GetWindowId());
         NotifyAfterForeground();
-        NotifyAfterDidForeground(reason);
     } else if (GetType() == WindowType::WINDOW_TYPE_APP_COMPONENT) {
         subWindowState_ = WindowState::STATE_SHOWN;
         NotifyAfterForeground();
@@ -3683,7 +3690,7 @@ WmErrorCode WindowImpl::UpdateWindowStateWhenShow(uint32_t reason)
     return WmErrorCode::WM_OK;
 }
 
-WmErrorCode WindowImpl::UpdateWindowStateWhenHide(uint32_t reason)
+WmErrorCode WindowImpl::UpdateWindowStateWhenHide()
 {
     state_ = WindowState::STATE_HIDDEN;
     if (WindowHelper::IsSystemMainWindow(property_->GetWindowType()) ||
@@ -3691,7 +3698,6 @@ WmErrorCode WindowImpl::UpdateWindowStateWhenHide(uint32_t reason)
         // main window need to update subwindow subWindowState_ and notify subwindow shown or not
         UpdateSubWindowStateAndNotify(GetWindowId());
         NotifyAfterBackground();
-        NotifyAfterDidBackground(reason);
     } else if (GetType() == WindowType::WINDOW_TYPE_APP_COMPONENT) {
         subWindowState_ = WindowState::STATE_HIDDEN;
         NotifyAfterBackground();
