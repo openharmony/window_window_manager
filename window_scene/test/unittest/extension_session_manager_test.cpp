@@ -55,7 +55,7 @@ namespace {
  * @tc.desc: RequestExtensionSession Test
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionManagerTest, RequestExtensionSession, Function | MediumTest | Level2)
+HWTEST_F(ExtensionSessionManagerTest, RequestExtensionSession, TestSize.Level1)
 {
     SessionInfo sessionInfo;
     sessionInfo.abilityName_ = "RequestExtensionSession";
@@ -67,7 +67,7 @@ HWTEST_F(ExtensionSessionManagerTest, RequestExtensionSession, Function | Medium
  * @tc.desc: RequestExtensionSessionActivation Test
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionManagerTest, RequestExtensionSessionActivation01, Function | MediumTest | Level2)
+HWTEST_F(ExtensionSessionManagerTest, RequestExtensionSessionActivation01, TestSize.Level1)
 {
     SessionInfo info;
     sptr<ExtensionSession> extensionSession = sptr<ExtensionSession>::MakeSptr(info);
@@ -83,7 +83,7 @@ void func(WSError we)
  * @tc.desc: RequestExtensionSessionActivation Test
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionManagerTest, RequestExtensionSessionActivation02, Function | MediumTest | Level2)
+HWTEST_F(ExtensionSessionManagerTest, RequestExtensionSessionActivation02, TestSize.Level1)
 {
     SessionInfo info;
     sptr<ExtensionSession> extensionSession = sptr<ExtensionSession>::MakeSptr(info);
@@ -104,7 +104,7 @@ HWTEST_F(ExtensionSessionManagerTest, RequestExtensionSessionActivation02, Funct
  * @tc.desc: RequestExtensionSessionBackground Test
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionManagerTest, RequestExtensionSessionBackground01, Function | MediumTest | Level2)
+HWTEST_F(ExtensionSessionManagerTest, RequestExtensionSessionBackground01, TestSize.Level1)
 {
     SessionInfo info;
     sptr<ExtensionSession> extensionSession = sptr<ExtensionSession>::MakeSptr(info);
@@ -117,7 +117,7 @@ HWTEST_F(ExtensionSessionManagerTest, RequestExtensionSessionBackground01, Funct
  * @tc.desc: RequestExtensionSessionBackground Test
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionManagerTest, RequestExtensionSessionBackground02, Function | MediumTest | Level2)
+HWTEST_F(ExtensionSessionManagerTest, RequestExtensionSessionBackground02, TestSize.Level1)
 {
     SessionInfo info;
     sptr<ExtensionSession> extensionSession = sptr<ExtensionSession>::MakeSptr(info);
@@ -138,7 +138,7 @@ HWTEST_F(ExtensionSessionManagerTest, RequestExtensionSessionBackground02, Funct
  * @tc.desc: RequestExtensionSessionDestruction Test
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionManagerTest, RequestExtensionSessionDestruction01, Function | MediumTest | Level2)
+HWTEST_F(ExtensionSessionManagerTest, RequestExtensionSessionDestruction01, TestSize.Level1)
 {
     SessionInfo info;
     sptr<ExtensionSession> extensionSession = sptr<ExtensionSession>::MakeSptr(info);
@@ -151,7 +151,7 @@ HWTEST_F(ExtensionSessionManagerTest, RequestExtensionSessionDestruction01, Func
  * @tc.desc: RequestExtensionSessionDestructionDone Test
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionManagerTest, RequestExtensionSessionDestructionDone01, Function | MediumTest | Level2)
+HWTEST_F(ExtensionSessionManagerTest, RequestExtensionSessionDestructionDone01, TestSize.Level1)
 {
     SessionInfo info;
     sptr<ExtensionSession> extensionSession = new ExtensionSession(info);
@@ -164,7 +164,7 @@ HWTEST_F(ExtensionSessionManagerTest, RequestExtensionSessionDestructionDone01, 
  * @tc.desc: RequestExtensionSessionDestruction Test
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionManagerTest, RequestExtensionSessionDestruction03, Function | MediumTest | Level2)
+HWTEST_F(ExtensionSessionManagerTest, RequestExtensionSessionDestruction03, TestSize.Level1)
 {
     SessionInfo info;
     sptr<ExtensionSession> extensionSession = sptr<ExtensionSession>::MakeSptr(info);
@@ -185,7 +185,7 @@ HWTEST_F(ExtensionSessionManagerTest, RequestExtensionSessionDestruction03, Func
  * @tc.desc: RequestExtensionSessionDestructionDone Test
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionManagerTest, RequestExtensionSessionDestructionDone03, Function | MediumTest | Level2)
+HWTEST_F(ExtensionSessionManagerTest, RequestExtensionSessionDestructionDone03, TestSize.Level1)
 {
     SessionInfo info;
     sptr<ExtensionSession> extensionSession = new ExtensionSession(info);
@@ -203,7 +203,7 @@ HWTEST_F(ExtensionSessionManagerTest, RequestExtensionSessionDestructionDone03, 
  * @tc.desc: ExtensionSessionManager get instance and init
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionManagerTest, GetInstance, Function | MediumTest | Level2)
+HWTEST_F(ExtensionSessionManagerTest, GetInstance, TestSize.Level1)
 {
     ExtensionSessionManager *instance = &ExtensionSessionManager::GetInstance();
     ASSERT_NE(nullptr, instance);
@@ -214,7 +214,7 @@ HWTEST_F(ExtensionSessionManagerTest, GetInstance, Function | MediumTest | Level
  * @tc.desc: ExtensionSessionManager set ability session info
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionManagerTest, SetAbilitySessionInfo, Function | MediumTest | Level2)
+HWTEST_F(ExtensionSessionManagerTest, SetAbilitySessionInfo, TestSize.Level1)
 {
     AAFwk::Want want;
     SessionInfo infoInput;
@@ -235,7 +235,7 @@ HWTEST_F(ExtensionSessionManagerTest, SetAbilitySessionInfo, Function | MediumTe
  * @tc.desc: RequestExtensionSessionDestruction Test
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionManagerTest, RequestExtensionSessionDestruction02, Function | MediumTest | Level2)
+HWTEST_F(ExtensionSessionManagerTest, RequestExtensionSessionDestruction02, TestSize.Level1)
 {
     AAFwk::Want want;
     SessionInfo infoInput;
@@ -251,7 +251,7 @@ HWTEST_F(ExtensionSessionManagerTest, RequestExtensionSessionDestruction02, Func
  * @tc.desc: RequestExtensionSessionDestructionDone Test
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionManagerTest, RequestExtensionSessionDestructionDone02, Function | MediumTest | Level2)
+HWTEST_F(ExtensionSessionManagerTest, RequestExtensionSessionDestructionDone02, TestSize.Level1)
 {
     AAFwk::Want want;
     SessionInfo infoInput;

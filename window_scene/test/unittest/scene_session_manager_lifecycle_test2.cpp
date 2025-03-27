@@ -120,7 +120,7 @@ namespace {
  * @tc.desc: OnSessionStateChange
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerLifecycleTest2, OnSessionStateChange, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerLifecycleTest2, OnSessionStateChange, TestSize.Level1)
 {
     SessionState state = SessionState::STATE_FOREGROUND;
     ASSERT_NE(nullptr, ssm_);
@@ -157,7 +157,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest2, OnSessionStateChange, Function | Sma
  * @tc.desc: OnSessionStateChange01
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerLifecycleTest2, OnSessionStateChange01, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerLifecycleTest2, OnSessionStateChange01, TestSize.Level1)
 {
     SessionState state = SessionState::STATE_BACKGROUND;
     ASSERT_NE(nullptr, ssm_);
@@ -186,7 +186,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest2, OnSessionStateChange01, Function | S
  * @tc.desc: OnSessionStateChange02
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerLifecycleTest2, OnSessionStateChange02, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerLifecycleTest2, OnSessionStateChange02, TestSize.Level1)
 {
     SessionState state = SessionState::STATE_FOREGROUND;
     ASSERT_NE(nullptr, ssm_);
@@ -213,7 +213,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest2, OnSessionStateChange02, Function | S
  * @tc.desc: NotifyWindowStateErrorFromMMI
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerLifecycleTest2, NotifyWindowStateErrorFromMMI, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerLifecycleTest2, NotifyWindowStateErrorFromMMI, TestSize.Level1)
 {
     int ret = 0;
     ssm_->sceneSessionMap_.clear();

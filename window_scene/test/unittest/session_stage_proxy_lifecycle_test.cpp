@@ -61,7 +61,7 @@ namespace {
  * @tc.desc: test function : SetActive
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyLifecycleTest, SetActive, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyLifecycleTest, SetActive, TestSize.Level1)
 {
     bool active = false;
     ASSERT_TRUE((sessionStage_ != nullptr));
@@ -78,7 +78,7 @@ HWTEST_F(SessionStageProxyLifecycleTest, SetActive, Function | SmallTest | Level
  * @tc.desc: test function : NotifyDestroy
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyLifecycleTest, NotifyDestroy, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyLifecycleTest, NotifyDestroy, TestSize.Level1)
 {
     ASSERT_TRUE((sessionStage_ != nullptr));
     WSError res = sessionStage_->NotifyDestroy();
@@ -90,7 +90,7 @@ HWTEST_F(SessionStageProxyLifecycleTest, NotifyDestroy, Function | SmallTest | L
  * @tc.desc: test function : NotifyForegroundInteractiveStatus
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyLifecycleTest, NotifyForegroundInteractiveStatus, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyLifecycleTest, NotifyForegroundInteractiveStatus, TestSize.Level1)
 {
     bool interactive = true;
     ASSERT_TRUE((sessionStage_ != nullptr));
@@ -102,7 +102,7 @@ HWTEST_F(SessionStageProxyLifecycleTest, NotifyForegroundInteractiveStatus, Func
  * @tc.desc: test function : NotifySessionForeground
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyLifecycleTest, NotifySessionForeground, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyLifecycleTest, NotifySessionForeground, TestSize.Level1)
 {
     uint32_t reason = 1;
     bool withAnimation = true;
@@ -115,7 +115,7 @@ HWTEST_F(SessionStageProxyLifecycleTest, NotifySessionForeground, Function | Sma
  * @tc.desc: test function : NotifySessionBackground
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyLifecycleTest, NotifySessionBackground, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyLifecycleTest, NotifySessionBackground, TestSize.Level1)
 {
     uint32_t reason = 1;
     bool withAnimation = true;
@@ -129,7 +129,7 @@ HWTEST_F(SessionStageProxyLifecycleTest, NotifySessionBackground, Function | Sma
  * @tc.desc: test function : NotifyWindowVisibility
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyLifecycleTest, NotifyWindowVisibility, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyLifecycleTest, NotifyWindowVisibility, TestSize.Level1)
 {
     ASSERT_TRUE((sessionStage_ != nullptr));
     sessionStage_->NotifyWindowVisibility(true);

@@ -65,7 +65,7 @@ namespace {
  * @tc.desc: RegisterNotifySurfaceBoundsChangeFunc
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest6, RegisterNotifySurfaceBoundsChangeFunc01, Function | SmallTest | Level1)
+HWTEST_F(SceneSessionTest6, RegisterNotifySurfaceBoundsChangeFunc01, TestSize.Level1)
 {
     SessionInfo info;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
@@ -86,7 +86,7 @@ HWTEST_F(SceneSessionTest6, RegisterNotifySurfaceBoundsChangeFunc01, Function | 
  * @tc.desc: NotifyUpdateGravity
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest6, NotifyUpdateGravity01, Function | SmallTest | Level1)
+HWTEST_F(SceneSessionTest6, NotifyUpdateGravity01, TestSize.Level1)
 {
     SessionInfo info;
     sptr<SceneSession> subSession = sptr<SceneSession>::MakeSptr(info, nullptr);
@@ -135,7 +135,7 @@ HWTEST_F(SceneSessionTest6, NotifyUpdateGravity01, Function | SmallTest | Level1
  * @tc.desc: GetSceneSessionById
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest6, GetSceneSessionById01, Function | SmallTest | Level1)
+HWTEST_F(SceneSessionTest6, GetSceneSessionById01, TestSize.Level1)
 {
     SessionInfo info;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
@@ -164,7 +164,7 @@ HWTEST_F(SceneSessionTest6, GetSceneSessionById01, Function | SmallTest | Level1
  * @tc.desc: SetFollowParentRectFunc
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest6, SetFollowParentRectFunc01, Function | SmallTest | Level1)
+HWTEST_F(SceneSessionTest6, SetFollowParentRectFunc01, TestSize.Level1)
 {
     SessionInfo info;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
@@ -182,7 +182,7 @@ HWTEST_F(SceneSessionTest6, SetFollowParentRectFunc01, Function | SmallTest | Le
  * @tc.desc: SetFollowParentWindowLayoutEnabled01, check the param
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest6, SetFollowParentWindowLayoutEnabled01, Function | SmallTest | Level1)
+HWTEST_F(SceneSessionTest6, SetFollowParentWindowLayoutEnabled01, TestSize.Level1)
 {
     SessionInfo info;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
@@ -216,7 +216,7 @@ HWTEST_F(SceneSessionTest6, SetFollowParentWindowLayoutEnabled01, Function | Sma
  * @tc.desc: SetFollowParentWindowLayoutEnabled02
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest6, SetFollowParentWindowLayoutEnabled02, Function | SmallTest | Level1)
+HWTEST_F(SceneSessionTest6, SetFollowParentWindowLayoutEnabled02, TestSize.Level1)
 {
     SessionInfo info;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
@@ -245,7 +245,7 @@ HWTEST_F(SceneSessionTest6, SetFollowParentWindowLayoutEnabled02, Function | Sma
  * @tc.desc: SetFollowParentWindowLayoutEnabled03, test register callback
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest6, SetFollowParentWindowLayoutEnabled03, Function | SmallTest | Level1)
+HWTEST_F(SceneSessionTest6, SetFollowParentWindowLayoutEnabled03, TestSize.Level1)
 {
     SessionInfo info;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);

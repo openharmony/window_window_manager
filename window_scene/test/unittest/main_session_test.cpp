@@ -83,7 +83,7 @@ namespace {
  * @tc.desc: check func MainSession
  * @tc.type: FUNC
  */
-HWTEST_F(MainSessionTest, MainSession01, Function | SmallTest | Level1)
+HWTEST_F(MainSessionTest, MainSession01, TestSize.Level1)
 {
     MainSession* pMainSession = nullptr;
     sptr<MainSession::SpecificSessionCallback> pSpecificCallback = nullptr;
@@ -118,7 +118,7 @@ HWTEST_F(MainSessionTest, MainSession01, Function | SmallTest | Level1)
  * @tc.desc: check func TransferKeyEvent
  * @tc.type: FUNC
  */
-HWTEST_F(MainSessionTest, TransferKeyEvent01, Function | SmallTest | Level1)
+HWTEST_F(MainSessionTest, TransferKeyEvent01, TestSize.Level1)
 {
     mainSession_->state_ = SessionState::STATE_END;
 
@@ -130,7 +130,7 @@ HWTEST_F(MainSessionTest, TransferKeyEvent01, Function | SmallTest | Level1)
  * @tc.desc: check func TransferKeyEvent
  * @tc.type: FUNC
  */
-HWTEST_F(MainSessionTest, TransferKeyEvent02, Function | SmallTest | Level1)
+HWTEST_F(MainSessionTest, TransferKeyEvent02, TestSize.Level1)
 {
     mainSession_->state_ = SessionState::STATE_CONNECT;
     std::shared_ptr<MMI::KeyEvent> keyEvent = nullptr;
@@ -143,7 +143,7 @@ HWTEST_F(MainSessionTest, TransferKeyEvent02, Function | SmallTest | Level1)
  * @tc.desc: check func TransferKeyEvent
  * @tc.type: FUNC
  */
-HWTEST_F(MainSessionTest, TransferKeyEvent03, Function | SmallTest | Level1)
+HWTEST_F(MainSessionTest, TransferKeyEvent03, TestSize.Level1)
 {
     mainSession_->state_ = SessionState::STATE_CONNECT;
     std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
@@ -164,7 +164,7 @@ HWTEST_F(MainSessionTest, TransferKeyEvent03, Function | SmallTest | Level1)
  * @tc.desc: check func ProcessPointDownSession
  * @tc.type: FUNC
  */
-HWTEST_F(MainSessionTest, ProcessPointDownSession01, Function | SmallTest | Level1)
+HWTEST_F(MainSessionTest, ProcessPointDownSession01, TestSize.Level1)
 {
     EXPECT_EQ(WSError::WS_OK, mainSession_->ProcessPointDownSession(100, 200));
     mainSession_->ClearDialogVector();
@@ -176,7 +176,7 @@ HWTEST_F(MainSessionTest, ProcessPointDownSession01, Function | SmallTest | Leve
  * @tc.desc: check func ProcessPointDownSession
  * @tc.type: FUNC
  */
-HWTEST_F(MainSessionTest, ProcessPointDownSession02, Function | SmallTest | Level1)
+HWTEST_F(MainSessionTest, ProcessPointDownSession02, TestSize.Level1)
 {
     mainSession_->BindDialogToParentSession(mainSession_);
     EXPECT_EQ(WSError::WS_OK, mainSession_->ProcessPointDownSession(10, 20));
@@ -187,7 +187,7 @@ HWTEST_F(MainSessionTest, ProcessPointDownSession02, Function | SmallTest | Leve
  * @tc.desc: check func SetTopmost
  * @tc.type: FUNC
  */
-HWTEST_F(MainSessionTest, SetTopmost01, Function | SmallTest | Level1)
+HWTEST_F(MainSessionTest, SetTopmost01, TestSize.Level1)
 {
     EXPECT_EQ(WSError::WS_OK, mainSession_->SetTopmost(true));
     EXPECT_EQ(WSError::WS_OK, mainSession_->SetTopmost(false));
@@ -198,7 +198,7 @@ HWTEST_F(MainSessionTest, SetTopmost01, Function | SmallTest | Level1)
  * @tc.desc: check func SetTopmost
  * @tc.type: FUNC
  */
-HWTEST_F(MainSessionTest, SetTopmost02, Function | SmallTest | Level1)
+HWTEST_F(MainSessionTest, SetTopmost02, TestSize.Level1)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     mainSession_->SetSessionProperty(property);
@@ -211,7 +211,7 @@ HWTEST_F(MainSessionTest, SetTopmost02, Function | SmallTest | Level1)
  * @tc.desc: check func UpdatePointerArea
  * @tc.type: FUNC
  */
-HWTEST_F(MainSessionTest, UpdatePointerArea, Function | SmallTest | Level1)
+HWTEST_F(MainSessionTest, UpdatePointerArea, TestSize.Level1)
 {
     WSRect Rect={0, 0, 50, 50};
     mainSession_->UpdateWindowMode(WindowMode::WINDOW_MODE_UNDEFINED);
@@ -226,7 +226,7 @@ HWTEST_F(MainSessionTest, UpdatePointerArea, Function | SmallTest | Level1)
  * @tc.desc: check func CheckPointerEventDispatch
  * @tc.type: FUNC
  */
-HWTEST_F(MainSessionTest, CheckPointerEventDispatch, Function | SmallTest | Level1)
+HWTEST_F(MainSessionTest, CheckPointerEventDispatch, TestSize.Level1)
 {
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
 
@@ -254,7 +254,7 @@ HWTEST_F(MainSessionTest, CheckPointerEventDispatch, Function | SmallTest | Leve
  * @tc.desc: check func RectCheck
  * @tc.type: FUNC
  */
-HWTEST_F(MainSessionTest, RectCheck03, Function | SmallTest | Level1)
+HWTEST_F(MainSessionTest, RectCheck03, TestSize.Level1)
 {
     ASSERT_NE(mainSession_, nullptr);
     SessionInfo info;
@@ -290,7 +290,7 @@ HWTEST_F(MainSessionTest, RectCheck03, Function | SmallTest | Level1)
  * @tc.desc: check func SetExitSplitOnBackground
  * @tc.type: FUNC
  */
-HWTEST_F(MainSessionTest, SetExitSplitOnBackground, Function | SmallTest | Level1)
+HWTEST_F(MainSessionTest, SetExitSplitOnBackground, TestSize.Level1)
 {
     bool isExitSplitOnBackground = true;
     mainSession_->SetExitSplitOnBackground(isExitSplitOnBackground);
@@ -302,7 +302,7 @@ HWTEST_F(MainSessionTest, SetExitSplitOnBackground, Function | SmallTest | Level
  * @tc.desc: check func IsExitSplitOnBackground
  * @tc.type: FUNC
  */
-HWTEST_F(MainSessionTest, IsExitSplitOnBackground01, Function | SmallTest | Level1)
+HWTEST_F(MainSessionTest, IsExitSplitOnBackground01, TestSize.Level1)
 {
     bool isExitSplitOnBackground = true;
     mainSession_->SetExitSplitOnBackground(isExitSplitOnBackground);
@@ -315,7 +315,7 @@ HWTEST_F(MainSessionTest, IsExitSplitOnBackground01, Function | SmallTest | Leve
  * @tc.desc: check func IsExitSplitOnBackground
  * @tc.type: FUNC
  */
-HWTEST_F(MainSessionTest, IsExitSplitOnBackground02, Function | SmallTest | Level1)
+HWTEST_F(MainSessionTest, IsExitSplitOnBackground02, TestSize.Level1)
 {
     bool isExitSplitOnBackground = false;
     mainSession_->SetExitSplitOnBackground(isExitSplitOnBackground);
@@ -328,7 +328,7 @@ HWTEST_F(MainSessionTest, IsExitSplitOnBackground02, Function | SmallTest | Leve
  * @tc.desc: OnTitleAndDockHoverShowChange
  * @tc.type: FUNC
  */
-HWTEST_F(MainSessionTest, OnTitleAndDockHoverShowChange, Function | SmallTest | Level2)
+HWTEST_F(MainSessionTest, OnTitleAndDockHoverShowChange, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "OnTitleAndDockHoverShowChange";
@@ -346,7 +346,7 @@ HWTEST_F(MainSessionTest, OnTitleAndDockHoverShowChange, Function | SmallTest | 
  * @tc.desc: OnRestoreMainWindow function01
  * @tc.type: FUNC
  */
-HWTEST_F(MainSessionTest, OnRestoreMainWindow, Function | SmallTest | Level2)
+HWTEST_F(MainSessionTest, OnRestoreMainWindow, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "OnRestoreMainWindow";
@@ -370,7 +370,7 @@ HWTEST_F(MainSessionTest, OnRestoreMainWindow, Function | SmallTest | Level2)
  * @tc.desc: OnSetWindowRectAutoSave
  * @tc.type: FUNC
  */
-HWTEST_F(MainSessionTest, OnSetWindowRectAutoSave, Function | SmallTest | Level2)
+HWTEST_F(MainSessionTest, OnSetWindowRectAutoSave, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "OnSetWindowRectAutoSave";
@@ -392,7 +392,7 @@ HWTEST_F(MainSessionTest, OnSetWindowRectAutoSave, Function | SmallTest | Level2
  * @tc.desc: NotifyMainModalTypeChange function01
  * @tc.type: FUNC
  */
-HWTEST_F(MainSessionTest, NotifyMainModalTypeChange, Function | SmallTest | Level2)
+HWTEST_F(MainSessionTest, NotifyMainModalTypeChange, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "NotifyMainModalTypeChange";
@@ -411,7 +411,7 @@ HWTEST_F(MainSessionTest, NotifyMainModalTypeChange, Function | SmallTest | Leve
  * @tc.desc: IsModal function01
  * @tc.type: FUNC
  */
-HWTEST_F(MainSessionTest, IsModal, Function | SmallTest | Level2)
+HWTEST_F(MainSessionTest, IsModal, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "IsModal";
@@ -431,7 +431,7 @@ HWTEST_F(MainSessionTest, IsModal, Function | SmallTest | Level2)
  * @tc.desc: IsApplicationModal function01
  * @tc.type: FUNC
  */
-HWTEST_F(MainSessionTest, IsApplicationModal, Function | SmallTest | Level2)
+HWTEST_F(MainSessionTest, IsApplicationModal, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "IsApplicationModal";
@@ -451,7 +451,7 @@ HWTEST_F(MainSessionTest, IsApplicationModal, Function | SmallTest | Level2)
  * @tc.desc: NotifySupportWindowModesChange
  * @tc.type: FUNC
  */
-HWTEST_F(MainSessionTest, NotifySupportWindowModesChange, Function | SmallTest | Level2)
+HWTEST_F(MainSessionTest, NotifySupportWindowModesChange, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "NotifySupportWindowModesChange";
@@ -482,7 +482,7 @@ HWTEST_F(MainSessionTest, NotifySupportWindowModesChange, Function | SmallTest |
  * @tc.desc: NotifySessionLockStateChange
  * @tc.type: FUNC
  */
-HWTEST_F(MainSessionTest, NotifySessionLockStateChange, Function | SmallTest | Level2)
+HWTEST_F(MainSessionTest, NotifySessionLockStateChange, TestSize.Level1)
 {
     SessionInfo info;
     info.bundleName_ = "NotifySessionLockStateChangeBundle";
@@ -501,7 +501,7 @@ HWTEST_F(MainSessionTest, NotifySessionLockStateChange, Function | SmallTest | L
  * @tc.desc: UpdateFlag
  * @tc.type: FUNC
  */
-HWTEST_F(MainSessionTest, UpdateFlag, Function | SmallTest | Level2)
+HWTEST_F(MainSessionTest, UpdateFlag, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "UpdateFlag";
@@ -523,7 +523,7 @@ HWTEST_F(MainSessionTest, UpdateFlag, Function | SmallTest | Level2)
  * @tc.desc: NotifySubAndDialogFollowRectChange
  * @tc.type: FUNC
  */
-HWTEST_F(MainSessionTest, NotifySubAndDialogFollowRectChange01, Function | SmallTest | Level2)
+HWTEST_F(MainSessionTest, NotifySubAndDialogFollowRectChange01, TestSize.Level1)
 {
     SessionInfo info;
     sptr<SceneSession> subSession = sptr<SceneSession>::MakeSptr(info, nullptr);
