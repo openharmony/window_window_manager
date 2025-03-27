@@ -4205,7 +4205,7 @@ DMError ScreenSessionManager::AddVirtualScreenBlackList(const std::vector<int32_
 {
     if (!Permission::IsSystemCalling()) {
         TLOGE(WmsLogTag::DMS, "Permission Denied! calling clientName: %{public}s, calling pid: %{public}d",
-            SystCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
+            SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
     MockSessionManagerService::GetInstance().AddSkipSelfWhenShowOnVirtualScreenList(persistentIds);
@@ -4216,7 +4216,7 @@ DMError ScreenSessionManager::RemoveVirtualScreenBlackList(const std::vector<int
 {
     if (!Permission::IsSystemCalling()) {
         TLOGE(WmsLogTag::DMS, "Permission Denied! calling clientName: %{public}s, calling pid: %{public}d",
-            SystCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
+            SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
     MockSessionManagerService::GetInstance().RemoveSkipSelfWhenShowOnVirtualScreenList(persistentIds);

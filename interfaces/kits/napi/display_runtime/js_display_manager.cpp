@@ -1171,13 +1171,14 @@ napi_value OnAddVirtualScreenBlackList(napi_env env, napi_callback_info info)
         }
         persistentIds.push_back(persistentId);
     }
-    if (persistentIds.size() == 0) {
-        TLOGD(WmsLogTag::DMS, "persistentIds size is 0, no need update");
-        return NapiGetUndefined(env);
-    }
     napi_value result = nullptr;
     std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
     auto asyncTask = [persistentIds, env, task = napiAsyncTask.get()] {
+        if (persistentIds.size() == 0) {
+            TLOGND(WmsLogTag::DMS, "RemoveVirtualScreenBlackList: persistentIds size is 0, no need update");
+            task->Resolve(env, NapiGetUndefined(env));
+            return;
+        }
         auto res = DM_JS_TO_ERROR_CODE_MAP.at(
             SingletonContainer::Get<ScreenManager>().AddVirtualScreenBlackList(persistentIds));
         res = (res == DmErrorCode::DM_ERROR_NOT_SYSTEM_APP) ? DmErrorCode::DM_ERROR_NO_PERMISSION : res;
@@ -1222,13 +1223,14 @@ napi_value OnRemoveVirtualScreenBlackList(napi_env env, napi_callback_info info)
         }
         persistentIds.push_back(persistentId);
     }
-    if (persistentIds.size() == 0) {
-        TLOGD(WmsLogTag::DMS, "persistentIds size is 0, no need update");
-        return NapiGetUndefined(env);
-    }
     napi_value result = nullptr;
     std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
     auto asyncTask = [persistentIds, env, task = napiAsyncTask.get()] {
+        if (persistentIds.size() == 0) {
+            TLOGND(WmsLogTag::DMS, "RemoveVirtualScreenBlackList: persistentIds size is 0, no need update");
+            task->Resolve(env, NapiGetUndefined(env));
+            return;
+        }
         auto res = DM_JS_TO_ERROR_CODE_MAP.at(
             SingletonContainer::Get<ScreenManager>().RemoveVirtualScreenBlackList(persistentIds));
         res = (res == DmErrorCode::DM_ERROR_NOT_SYSTEM_APP) ? DmErrorCode::DM_ERROR_NO_PERMISSION : res;

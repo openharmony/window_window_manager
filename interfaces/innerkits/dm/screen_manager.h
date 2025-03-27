@@ -233,7 +233,7 @@ public:
 
     /**
      * @brief Add black window list in virtual screen
-     * 
+     *
      * @param persistentIds Black list window ids.
      * @return DM_OK means set success, others means set failed.
      */
@@ -241,7 +241,7 @@ public:
 
     /**
      * @brief Remove black window list in virtual screen
-     * 
+     *
      * @param persistentIds Black list window ids.
      * @return DM_OK means set success, others means set failed.
      */

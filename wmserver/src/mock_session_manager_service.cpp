@@ -792,7 +792,7 @@ void MockSessionManagerService::GetProcessSurfaceNodeIdByPersistentId(const int3
 
 void MockSessionManagerService::AddSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds)
 {
-    auto sessionManagerService = GetSessionManagerServiceByUserId(currnetWMSUserId_);
+    auto sessionManagerService = GetSessionManagerServiceByUserId(currentWMSUserId_);
     if (sessionManagerService == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sessionManagerService is nullptr");
         return;
@@ -813,7 +813,7 @@ void MockSessionManagerService::AddSkipSelfWhenShowOnVirtualScreenList(const std
 
 void MockSessionManagerService::RemoveSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds)
 {
-    auto sessionManagerService = GetSessionManagerServiceByUserId(currnetWMSUserId_);
+    auto sessionManagerService = GetSessionManagerServiceByUserId(currentWMSUserId_);
     if (sessionManagerService == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sessionManagerService is nullptr");
         return;

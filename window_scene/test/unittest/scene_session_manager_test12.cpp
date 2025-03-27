@@ -1982,11 +1982,11 @@ HWTEST_F(SceneSessionManagerTest12, AddSkipSelfWhenShowOnVirtualScreenList, Func
     info.bundleName_ = "AddSkipSelfWhenShowOnVirtualScreenList";
     info.abilityName_ = "AddSkipSelfWhenShowOnVirtualScreenList";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ssm_>sceneSessionMap_.insert({SceneSession->GetPersistentId(), sceneSession});
-    std::vector<int32_t> persistentIds {SceneSession->GetPersistentId()};
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    std::vector<int32_t> persistentIds {sceneSession->GetPersistentId()};
     auto ret = ssm_->AddSkipSelfWhenShowOnVirtualScreenList(persistentIds);
     usleep(WAIT_SYNC_IN_NS);
-    EXPECT_EQ(ret, WSError::WS_OK);
+    EXPECT_EQ(ret, WMError::WS_OK);
 }
 
 
@@ -2001,11 +2001,11 @@ HWTEST_F(SceneSessionManagerTest12, RemoveSkipSelfWhenShowOnVirtualScreenList, F
     info.bundleName_ = "RemoveSkipSelfWhenShowOnVirtualScreenList";
     info.abilityName_ = "RemoveSkipSelfWhenShowOnVirtualScreenList";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ssm_>sceneSessionMap_.insert({SceneSession->GetPersistentId(), sceneSession});
-    std::vector<int32_t> persistentIds {SceneSession->GetPersistentId()};
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    std::vector<int32_t> persistentIds {sceneSession->GetPersistentId()};
     auto ret = ssm_->RemoveSkipSelfWhenShowOnVirtualScreenList(persistentIds);
     usleep(WAIT_SYNC_IN_NS);
-    EXPECT_EQ(ret, WSError::WS_OK);
+    EXPECT_EQ(ret, WMError::WS_OK);
 }
 
 /**
