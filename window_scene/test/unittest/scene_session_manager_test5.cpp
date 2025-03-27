@@ -385,8 +385,7 @@ HWTEST_F(SceneSessionManagerTest5, PrepareTerminate, Function | SmallTest | Leve
 {
     int32_t persistentId = 1;
     bool isPrepareTerminate = true;
-    SceneSessionManager* sceneSessionManager = sptr<SceneSessionManager>::MakeSptr();
-    ASSERT_NE(sceneSessionManager, nullptr);
+    sptr<SceneSessionManager> sceneSessionManager = sptr<SceneSessionManager>::MakeSptr();
     ASSERT_EQ(WSError::WS_OK, sceneSessionManager->PrepareTerminate(persistentId, isPrepareTerminate));
 }
 
@@ -399,7 +398,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestInputMethodCloseKeyboard02, Function |
 {
     int32_t persistentId = -1;
     bool isPrepareTerminate = true;
-    SceneSessionManager* sceneSessionManager = sptr<SceneSessionManager>::MakeSptr();
+    sptr<SceneSessionManager> sceneSessionManager = sptr<SceneSessionManager>::MakeSptr();
     ASSERT_NE(sceneSessionManager, nullptr);
     sceneSessionManager->PrepareTerminate(persistentId, isPrepareTerminate);
 }
