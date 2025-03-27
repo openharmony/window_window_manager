@@ -2711,7 +2711,7 @@ WMError SceneSessionManagerProxy::AddSkipSelfWhenShowOnVirtualScreenList(const s
         static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_ADD_SKIP_SELF_ON_VIRTUAL_SCREEN),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "SendRequest failed");
-        return WMError::WM_ERROR_IPC_FAILED;    
+        return WMError::WM_ERROR_IPC_FAILED;
     }
     return static_cast<WMError>(reply.ReadInt32());
 }

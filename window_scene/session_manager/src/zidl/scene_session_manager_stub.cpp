@@ -1660,10 +1660,10 @@ int SceneSessionManagerStub::HandleAddSkipSelfWhenShowOnVirtualScreenList(Messag
     for (uint64_t i = 0; i < size; i++) {
         int32_t persistentId = 0;
         if (!data.ReadInt32(persistentId)) {
-            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read persistentId failed");
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read persistentId failed.");
             return ERR_INVALID_DATA;
         }
-        persistentId.push_back(persistentId);
+        persistentIds.push_back(persistentId);
     }
     WMError errCode = AddSkipSelfWhenShowOnVirtualScreenList(persistentIds);
     reply.WriteInt32(static_cast<int32_t>(errCode));
@@ -1681,10 +1681,10 @@ int SceneSessionManagerStub::HandleRemoveSkipSelfWhenShowOnVirtualScreenList(Mes
     for (uint64_t i = 0; i < size; i++) {
         int32_t persistentId = 0;
         if (!data.ReadInt32(persistentId)) {
-            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read persistentId failed");
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read persistentId failed.");
             return ERR_INVALID_DATA;
         }
-        persistentId.push_back(persistentId);
+        persistentIds.push_back(persistentId);
     }
     WMError errCode = RemoveSkipSelfWhenShowOnVirtualScreenList(persistentIds);
     reply.WriteInt32(static_cast<int32_t>(errCode));
