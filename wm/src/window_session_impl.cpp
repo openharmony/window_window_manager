@@ -5185,8 +5185,9 @@ void WindowSessionImpl::NotifyKeyboardDidHide(const KeyboardPanelInfo& keyboardP
 
 void WindowSessionImpl::NotifyKeyboardAnimationCompleted(const KeyboardPanelInfo& keyboardPanelInfo)
 {
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "isShowAnimation: %{public}d, panelRect: %{public}s",
-        keyboardPanelInfo.isShowing_, keyboardPanelInfo.rect_.ToString().c_str());
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "isShowAnimation: %{public}d, beginRect: %{public}s, endRect: %{publc}s",
+        keyboardPanelInfo.isShowing_, keyboardPanelInfo.beginRect_.ToString().c_str(),
+        keyboardPanelInfo.endRect_.ToString().c_str());
     if (handler_ == nullptr) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "handler is nullptr");
         return;
