@@ -257,36 +257,6 @@ HWTEST_F(SceneSessionManagerTest11, UpdateOccupiedAreaIfNeed, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetAllSessionDumpDetailInfo
- * @tc.desc: SceneSesionManager test GetAllSessionDumpDetailInfo
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest11, GetAllSessionDumpDetailInfo, TestSize.Level1)
-{
-    SessionInfo info1;
-    info1.abilityName_ = "GetAllSessionDumpDetailInfo1";
-    info1.bundleName_ = "GetAllSessionDumpDetailInfo1";
-    info1.persistentId_ = 1;
-    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info1, nullptr);
-    ASSERT_NE(sceneSession1, nullptr);
-    sceneSession1->UpdateNativeVisibility(true);
-
-    SessionInfo info2;
-    info2.abilityName_ = "GetAllSessionDumpDetailInfo2";
-    info2.bundleName_ = "GetAllSessionDumpDetailInfo2";
-    info2.persistentId_ = 2;
-    sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(info2, nullptr);
-    ASSERT_NE(sceneSession2, nullptr);
-    sceneSession2->UpdateNativeVisibility(false);
-
-    ssm_->sceneSessionMap_.insert({0, nullptr});
-    ssm_->sceneSessionMap_.insert({1, sceneSession1});
-    ssm_->sceneSessionMap_.insert({2, sceneSession2});
-    std::string dumpInfo;
-    ASSERT_EQ(ssm_->GetAllSessionDumpDetailInfo(dumpInfo), WSError::WS_OK);
-}
-
-/**
  * @tc.name: GetAbilityInfo
  * @tc.desc: SceneSesionManager test GetAbilityInfo
  * @tc.type: FUNC

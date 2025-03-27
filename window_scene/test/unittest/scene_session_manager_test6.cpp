@@ -69,10 +69,6 @@ void ProcessStatusBarEnabledChangeFuncTest(bool enable)
 {
 }
 
-void DumpRootSceneElementInfoFuncTest(const std::vector<std::string>& params, std::vector<std::string>& infos)
-{
-}
-
 void SceneSessionManagerTest6::SetUpTestCase()
 {
     ssm_ = &SceneSessionManager::GetInstance();

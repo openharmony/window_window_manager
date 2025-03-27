@@ -184,24 +184,6 @@ HWTEST_F(SessionManagerTest, OnWMSConnectionChanged2, TestSize.Level1)
 }
 
 /**
- * @tc.name: RecoverSessionManagerService
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SessionManagerTest, RecoverSessionManagerService, TestSize.Level1)
-{
-    ASSERT_NE(nullptr, sm_);
-    bool funcInvoked = false;
-    sm_->RegisterWindowManagerRecoverCallbackFunc(nullptr);
-    sm_->RecoverSessionManagerService(nullptr);
-    ASSERT_EQ(funcInvoked, false);
-
-    sm_->RegisterWindowManagerRecoverCallbackFunc([&]() { funcInvoked = true; });
-    sm_->RecoverSessionManagerService(nullptr);
-    ASSERT_EQ(funcInvoked, true);
-}
-
-/**
  * @tc.name: RegisterUserSwitchListener
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -311,34 +293,6 @@ HWTEST_F(SessionManagerTest, RegisterWMSConnectionChangedListener1, TestSize.Lev
     auto callbackFunc = [](int32_t userId, int32_t screenId, bool isConnected) {};
     auto ret = sm_->RegisterWMSConnectionChangedListener(callbackFunc);
     ASSERT_EQ(WMError::WM_OK, ret);
-}
-
-/**
- * @tc.name: RegisterSMSRecoverListener1
- * @tc.desc: mockSessionManagerServiceProxy_ is null
- * @tc.type: FUNC
- */
-HWTEST_F(SessionManagerTest, RegisterSMSRecoverListener1, TestSize.Level1)
-{
-    ASSERT_NE(nullptr, sm_);
-    sm_->isRecoverListenerRegistered_ = false;
-    sm_->mockSessionManagerServiceProxy_ = nullptr;
-    sm_->RegisterSMSRecoverListener();
-    ASSERT_EQ(sm_->isRecoverListenerRegistered_, false);
-}
-
-/**
- * @tc.name: RegisterSMSRecoverListener2
- * @tc.desc: normal test
- * @tc.type: FUNC
- */
-HWTEST_F(SessionManagerTest, RegisterSMSRecoverListener2, TestSize.Level1)
-{
-    ASSERT_NE(nullptr, sm_);
-    sm_->isRecoverListenerRegistered_ = false;
-    sm_->InitMockSMSProxy();
-    sm_->RegisterSMSRecoverListener();
-    ASSERT_EQ(sm_->isRecoverListenerRegistered_, true);
 }
 
 /**

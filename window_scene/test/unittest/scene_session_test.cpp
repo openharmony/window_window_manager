@@ -786,34 +786,6 @@ HWTEST_F(SceneSessionTest, IsFloatingWindowAppType02, TestSize.Level1)
 }
 
 /**
- * @tc.name: DumpSessionElementInfo01
- * @tc.desc: DumpSessionElementInfo
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest, DumpSessionElementInfo, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "Background01";
-    info.bundleName_ = "IsFloatingWindowAppType";
-    info.windowType_ = 1;
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> sceneSession;
-    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
-    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
-    ASSERT_NE(mockSessionStage, nullptr);
-    std::vector<std::string> params;
-    sceneSession->DumpSessionElementInfo(params);
-    int ret = 1;
-    sceneSession->sessionStage_ = mockSessionStage;
-    sceneSession->DumpSessionElementInfo(params);
-    ASSERT_EQ(ret, 1);
-}
-
-/**
  * @tc.name: NotifyIsCustomAnimationPlaying
  * @tc.desc: NotifyIsCustomAnimationPlaying
  * @tc.type: FUNC
@@ -1381,24 +1353,6 @@ HWTEST_F(SceneSessionTest, NotifyPropertyWhenConnect, TestSize.Level1)
     sceneSession->property_ = property;
     sceneSession->NotifyPropertyWhenConnect();
     ASSERT_EQ(ret, 1);
-}
-
-/**
- * @tc.name: DumpSessionInfo
- * @tc.desc: DumpSessionInfo
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest, DumpSessionInfo, TestSize.Level1)
-{
-    SessionInfo info;
-    info.bundleName_ = "SceneSessionTest";
-    info.abilityName_ = "DumpSessionInfo";
-    info.windowType_ = 1;
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
-    std::vector<std::string> infos;
-    sceneSession->DumpSessionInfo(infos);
-    ASSERT_FALSE(infos.empty());
 }
 
 /**

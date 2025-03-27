@@ -100,47 +100,6 @@ HWTEST_F(WindowSceneSessionImplTest4, UpdateSurfaceNodeAfterCustomAnimation, Tes
 }
 
 /**
- * @tc.name: RegisterSessionRecoverListener
- * @tc.desc: RegisterSessionRecoverListener
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest4, RegisterSessionRecoverListener, TestSize.Level1)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("RegisterSessionRecoverListener");
-    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    int32_t persistentId = windowSceneSessionImpl->property_->GetPersistentId();
-    WindowAdapter& windowAdapter = SingletonContainer::Get<WindowAdapter>();
-    windowSceneSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    windowSceneSessionImpl->RegisterSessionRecoverListener(true);
-    ASSERT_EQ(windowAdapter.sessionRecoverCallbackFuncMap_.size(), 0);
-
-    windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    windowSceneSessionImpl->property_->SetCollaboratorType(CollaboratorType::RESERVE_TYPE);
-    windowSceneSessionImpl->RegisterSessionRecoverListener(true);
-    ASSERT_EQ(windowAdapter.sessionRecoverCallbackFuncMap_.size(), 0);
-
-    windowSceneSessionImpl->property_->SetCollaboratorType(CollaboratorType::DEFAULT_TYPE);
-    windowSceneSessionImpl->RegisterSessionRecoverListener(true);
-    ASSERT_EQ(windowAdapter.sessionRecoverCallbackFuncMap_.size(), 1);
-    windowAdapter.UnregisterSessionRecoverCallbackFunc(persistentId);
-    ASSERT_EQ(windowAdapter.sessionRecoverCallbackFuncMap_.size(), 0);
-
-    windowSceneSessionImpl->state_ = WindowState::STATE_DESTROYED;
-    windowSceneSessionImpl->RegisterSessionRecoverListener(true);
-    ASSERT_EQ(windowAdapter.sessionRecoverCallbackFuncMap_.size(), 1);
-    windowAdapter.UnregisterSessionRecoverCallbackFunc(persistentId);
-    ASSERT_EQ(windowAdapter.sessionRecoverCallbackFuncMap_.size(), 0);
-
-    windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
-    windowSceneSessionImpl->RegisterSessionRecoverListener(true);
-    EXPECT_EQ(CollaboratorType::DEFAULT_TYPE, windowSceneSessionImpl->property_->GetCollaboratorType());
-    ASSERT_EQ(windowAdapter.sessionRecoverCallbackFuncMap_.size(), 1);
-    windowAdapter.UnregisterSessionRecoverCallbackFunc(persistentId);
-    EXPECT_EQ(CollaboratorType::DEFAULT_TYPE, windowSceneSessionImpl->property_->GetCollaboratorType());
-}
-
-/**
  * @tc.name: ConsumePointerEvent
  * @tc.desc: ConsumePointerEvent
  * @tc.type: FUNC

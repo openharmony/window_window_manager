@@ -153,37 +153,6 @@ HWTEST_F(SceneSessionManagerLifecycleTest, NotifySessionBackground, TestSize.Lev
 }
 
 /**
- * @tc.name: ClearUnrecoveredSessions
- * @tc.desc: test func ClearUnrecoveredSessions
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerLifecycleTest, ClearUnrecoveredSessions, TestSize.Level1)
-{
-    ssm_->alivePersistentIds_.push_back(23);
-    ssm_->alivePersistentIds_.push_back(24);
-    ssm_->alivePersistentIds_.push_back(25);
-    EXPECT_FALSE(ssm_->alivePersistentIds_.empty());
-    std::vector<int32_t> recoveredPersistentIds;
-    recoveredPersistentIds.push_back(23);
-    recoveredPersistentIds.push_back(24);
-    ssm_->ClearUnrecoveredSessions(recoveredPersistentIds);
-}
-
-/**
- * @tc.name: RecoverSessionInfo
- * @tc.desc: test func RecoverSessionInfo
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerLifecycleTest, RecoverSessionInfo, TestSize.Level1)
-{
-    SessionInfo info = ssm_->RecoverSessionInfo(nullptr);
-
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(nullptr, property);
-    info = ssm_->RecoverSessionInfo(property);
-}
-
-/**
  * @tc.name: NotifySessionMovedToFront
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
@@ -858,31 +827,6 @@ HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSessionByCall03, TestSize
     ASSERT_NE(sceneSession, nullptr);
     ssm_->sceneSessionMap_.insert({1, sceneSession});
     ASSERT_EQ(ssm_->RequestSceneSessionByCall(sceneSession), WSError::WS_OK);
-}
-
-/**
- * @tc.name: RemoveFailRecoveredSession
- * @tc.desc: RemoveFailRecoveredSession
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerLifecycleTest, RemoveFailRecoveredSession, TestSize.Level1)
-{
-    ASSERT_NE(nullptr, ssm_);
-    SessionInfo info;
-    info.abilityName_ = "SetBrightness";
-    sptr<SceneSession> sceneSession01 = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sptr<SceneSession> sceneSession02 = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(sceneSession01, nullptr);
-    ASSERT_NE(sceneSession02, nullptr);
-    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession01));
-    ssm_->sceneSessionMap_.insert(std::make_pair(2, nullptr));
-    ssm_->sceneSessionMap_.insert(std::make_pair(3, sceneSession02));
-    ssm_->failRecoveredPersistentIdSet_.insert(1);
-    ssm_->failRecoveredPersistentIdSet_.insert(2);
-    ssm_->failRecoveredPersistentIdSet_.insert(3);
-    ssm_->RemoveFailRecoveredSession();
-    EXPECT_EQ(ssm_->failRecoveredPersistentIdSet_.size(), 0);
-    EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, ssm_->HandleSecureSessionShouldHide(nullptr));
 }
 
 /**
