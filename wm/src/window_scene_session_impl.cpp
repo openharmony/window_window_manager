@@ -5683,12 +5683,12 @@ bool WindowSceneSessionImpl::IsFullScreenEnable() const
     uint32_t displayWidth = 0;
     uint32_t displayHeight = 0;
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
-    if (display != nullptr) {
-        displayWidth = static_cast<uint32_t>(display->GetWidth());
-        displayHeight = static_cast<uint32_t>(display->GetHeight());
-    } else {
+    if (display == nullptr) {
+        TLOGE(WmsLogTag::WMS_PC, "display is null, winId=%{public}u", GetWindowId());
         return false;
     }
+    displayWidth = static_cast<uint32_t>(display->GetWidth());
+    displayHeight = static_cast<uint32_t>(display->GetHeight());
     if (property_->GetDragEnabled() && (sizeLimits.maxWidth_ < displayWidth || sizeLimits.maxHeight_ < displayHeight)) {
         return false;
     }
