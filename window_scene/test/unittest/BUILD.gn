@@ -105,19 +105,19 @@ group("unittest") {
     ":ws_window_manager_lru_test",
     ":ws_window_scene_config_test",
     ":ws_window_session_property_test",
-    "multi_user:unittest",
-    "ui_extension:unittest",
-    "window_pattern:window_pattern_snapshot_test",
-    "window_pattern:window_pattern_starting_window_rdb_test",
-    "window_pattern:window_pattern_starting_window_test",
     "animation:ws_window_session_property_animation_test",
     "animation:ws_session_proxy_animation_test",
     "animation:ws_scene_session_animation_test",
+    "multi_user:unittest",
     "rotation:ws_scene_session_rotation_test",
     "rotation:ws_session_stage_proxy_rotation_test",
     "rotation:ws_session_stage_stub_rotation_test",
     "rotation:ws_window_session_property_rotation_test",
     "rotation:ws_scene_session_manager_rotation_test",
+    "ui_extension:unittest",
+    "window_pattern:window_pattern_snapshot_test",
+    "window_pattern:window_pattern_starting_window_rdb_test",
+    "window_pattern:window_pattern_starting_window_test",
   ]
 
   if (window_manager_use_sceneboard) {
@@ -1797,11 +1797,11 @@ config("ws_unittest_common_public_config") {
 ohos_static_library("ws_unittest_common") {
   visibility = [
     ":*",
+    "animation:*",
     "multi_user:*",
+    "rotation:*",
     "ui_extension:*",
     "window_pattern:*",
-    "animation:*",
-    "rotation:*",
   ]
   testonly = true
 
