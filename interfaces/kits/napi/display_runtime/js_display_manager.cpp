@@ -1149,7 +1149,7 @@ napi_value OnAddVirtualScreenBlackList(napi_env env, napi_callback_info info)
     napi_value argv[ARGC_THREE] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_ONE) {
-        TLOGD(WmsLogTag::DMS, "[NAPI]Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::DMS, "[NAPI]Argc is invalid: %{public}zu", argc);
         return NapiThrowError(
             env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Invalid parameter count");
     }
@@ -1200,7 +1200,7 @@ napi_value OnRemoveVirtualScreenBlackList(napi_env env, napi_callback_info info)
     napi_value argv[ARGC_THREE] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_ONE) {
-        TLOGD(WmsLogTag::DMS, "[NAPI]Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::DMS, "[NAPI]Argc is invalid: %{public}zu", argc);
         return NapiThrowError(
             env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Invalid parameter count");
     }
