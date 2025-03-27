@@ -803,6 +803,7 @@ HWTEST_F(WindowSceneSessionImplTest3, Resize, TestSize.Level1)
     ret = windowSceneSessionImpl->Resize(100, 100);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
     windowSceneSessionImpl->property_->SetPersistentId(1);
+    windowSceneSessionImpl->property_->SetDisplayId(0);
     windowSceneSessionImpl->hostSession_ = session;
     windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
     windowSceneSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_PIP);
