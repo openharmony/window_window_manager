@@ -74,7 +74,7 @@ namespace {
  * @tc.desc: test function : GetNormalSingleHandTransform
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerLayoutTest, GetNormalSingleHandTransform, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerLayoutTest, GetNormalSingleHandTransform, TestSize.Level1)
 {
     SingleHandTransform preTransform = ssm_->singleHandTransform_;
     ssm_->singleHandTransform_.posX = 100;
@@ -87,7 +87,7 @@ HWTEST_F(SceneSessionManagerLayoutTest, GetNormalSingleHandTransform, Function |
  * @tc.desc: test function : NotifySingleHandInfoChange
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerLayoutTest, NotifySingleHandInfoChange_TestUIType, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerLayoutTest, NotifySingleHandInfoChange_TestUIType, TestSize.Level1)
 {
     SingleHandTransform singleHandTransform;
     ssm_->singleHandTransform_ = singleHandTransform;
@@ -118,7 +118,7 @@ HWTEST_F(SceneSessionManagerLayoutTest, NotifySingleHandInfoChange_TestUIType, F
  * @tc.desc: test function : NotifySingleHandInfoChange
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerLayoutTest, NotifySingleHandInfoChange_TestWindowName, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerLayoutTest, NotifySingleHandInfoChange_TestWindowName, TestSize.Level1)
 {
     SingleHandTransform singleHandTransform;
     ssm_->singleHandTransform_ = singleHandTransform;
@@ -149,7 +149,7 @@ HWTEST_F(SceneSessionManagerLayoutTest, NotifySingleHandInfoChange_TestWindowNam
  * @tc.desc: test function : NotifySingleHandInfoChange
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerLayoutTest, NotifySingleHandInfoChange_TestDisplayId, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerLayoutTest, NotifySingleHandInfoChange_TestDisplayId, TestSize.Level1)
 {
     SingleHandTransform singleHandTransform;
     ssm_->singleHandTransform_ = singleHandTransform;
@@ -187,7 +187,7 @@ HWTEST_F(SceneSessionManagerLayoutTest, NotifySingleHandInfoChange_TestDisplayId
  * @tc.desc: test function : NotifySingleHandInfoChange
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerLayoutTest, NotifySingleHandInfoChange_TestMode, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerLayoutTest, NotifySingleHandInfoChange_TestMode, TestSize.Level1)
 {
     SingleHandTransform singleHandTransform;
     ssm_->singleHandTransform_ = singleHandTransform;
@@ -231,7 +231,7 @@ HWTEST_F(SceneSessionManagerLayoutTest, NotifySingleHandInfoChange_TestMode, Fun
  * @tc.desc: test function : GetDisplaySizeById
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerLayoutTest, GetDisplaySizeById_TestDisplayId, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerLayoutTest, GetDisplaySizeById_TestDisplayId, TestSize.Level1)
 {
     DisplayId displayId = 2025;
     int32_t displayWidth = 0;

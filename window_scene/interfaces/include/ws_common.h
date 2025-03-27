@@ -828,6 +828,15 @@ struct PostProcessFocusState {
     }
 };
 
+/**
+ * @brief WindowNode for snapshot
+ */
+enum class SnapshotNodeType : uint32_t {
+    DEFAULT_NODE = 0,
+    LEASH_NODE,
+    APP_NODE,
+};
+
 enum class AsyncTraceTaskId: int32_t {
     THROW_SLIP_ANIMATION = 0,
 };

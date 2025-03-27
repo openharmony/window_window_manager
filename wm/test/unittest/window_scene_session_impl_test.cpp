@@ -528,11 +528,11 @@ HWTEST_F(WindowSceneSessionImplTest, InvalidWindow, TestSize.Level1)
     option->SetWindowName("InvalidWindow");
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->MoveTo(0, 0));
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->Resize(0, 0));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, window->Resize(0, 0));
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetBackgroundColor(std::string("???")));
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetTransparent(false));
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Show(2, false));
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Resize(2, 2));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, window->Resize(2, 2));
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Minimize());
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Maximize());
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->MaximizeFloating());
@@ -937,6 +937,7 @@ HWTEST_F(WindowSceneSessionImplTest, Maximize01, TestSize.Level1)
     option->SetWindowName("Maximize01");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, windowSceneSession->Maximize());
 
     windowSceneSession->property_->SetPersistentId(1);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
@@ -1036,13 +1037,21 @@ HWTEST_F(WindowSceneSessionImplTest, NotifyRemoveStartingWindow, TestSize.Level1
     option->SetWindowName("NotifyRemoveStartingWindow");
     option->SetDisplayId(0);
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    auto ret = window->NotifyRemoveStartingWindow();
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
     window->property_->SetPersistentId(1);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
 
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
-    auto ret = window->NotifyDrawingCompleted();
-    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_PERMISSION);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    ret = window->NotifyRemoveStartingWindow();
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    EXPECT_CALL(*(session), RemoveStartingWindow()).WillOnce(Return(WSError::WS_OK));
+    ret = window->NotifyRemoveStartingWindow();
+    ASSERT_EQ(ret, WMError::WM_OK);
 }
 
 /**

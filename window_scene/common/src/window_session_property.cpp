@@ -930,6 +930,17 @@ bool WindowSessionProperty::MarshallingPiPTemplateInfo(Parcel& parcel) const
             return false;
         }
     }
+    if (!MarshallingPiPControlEnableInfo(parcel)) {
+        return false;
+    }
+    if (!parcel.WriteUint32(pipTemplateInfo_.defaultWindowSizeType)) {
+        return false;
+    }
+    return true;
+}
+
+bool WindowSessionProperty::MarshallingPiPControlEnableInfo(Parcel& parcel) const
+{
     auto controlEnableSize = pipTemplateInfo_.pipControlEnableInfoList.size();
     if (controlEnableSize > MAX_SIZE_PIP_CONTROL) {
         return false;
@@ -980,6 +991,13 @@ void WindowSessionProperty::UnmarshallingPiPTemplateInfo(Parcel& parcel, WindowS
         pipControlStatusInfo.status = static_cast<PiPControlStatus>(status);
         pipTemplateInfo.pipControlStatusInfoList.push_back(pipControlStatusInfo);
     }
+    UnmarshallingPiPControlEnableInfo(parcel, pipTemplateInfo);
+    pipTemplateInfo.defaultWindowSizeType = parcel.ReadUint32();
+    property->SetPiPTemplateInfo(pipTemplateInfo);
+}
+
+void WindowSessionProperty::UnmarshallingPiPControlEnableInfo(Parcel& parcel, PiPTemplateInfo& pipTemplateInfo)
+{
     auto controlEnableSize = parcel.ReadUint32();
     if (controlEnableSize > MAX_SIZE_PIP_CONTROL) {
         return;
@@ -995,7 +1013,6 @@ void WindowSessionProperty::UnmarshallingPiPTemplateInfo(Parcel& parcel, WindowS
         pipControlEnableInfo.enabled = static_cast<PiPControlStatus>(enabled);
         pipTemplateInfo.pipControlEnableInfoList.push_back(pipControlEnableInfo);
     }
-    property->SetPiPTemplateInfo(pipTemplateInfo);
 }
 
 bool WindowSessionProperty::MarshallingWindowMask(Parcel& parcel) const

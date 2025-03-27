@@ -80,7 +80,7 @@ namespace {
  * @tc.desc: test function : Connect
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionTest, Connect, Function | SmallTest | Level1)
+HWTEST_F(ExtensionSessionTest, Connect, TestSize.Level1)
 {
     SystemSessionConfig sessionConfig;
     extensionSession_->state_ = SessionState::STATE_DISCONNECT;
@@ -98,7 +98,7 @@ HWTEST_F(ExtensionSessionTest, Connect, Function | SmallTest | Level1)
  * @tc.desc: test function : RegisterExtensionSessionEventCallback
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionTest, RegisterExtensionSessionEventCallback, Function | SmallTest | Level1)
+HWTEST_F(ExtensionSessionTest, RegisterExtensionSessionEventCallback, TestSize.Level1)
 {
     extensionSession_->RegisterExtensionSessionEventCallback(extSessionEventCallback_);
     ASSERT_NE(nullptr, extensionSession_->GetExtensionSessionEventCallback());
@@ -109,7 +109,7 @@ HWTEST_F(ExtensionSessionTest, RegisterExtensionSessionEventCallback, Function |
  * @tc.desc: test function : GetExtensionSessionEventCallback
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionTest, GetExtensionSessionEventCallback, Function | SmallTest | Level1)
+HWTEST_F(ExtensionSessionTest, GetExtensionSessionEventCallback, TestSize.Level1)
 {
     ASSERT_NE(nullptr, extensionSession_->GetExtensionSessionEventCallback());
 }
@@ -119,7 +119,7 @@ HWTEST_F(ExtensionSessionTest, GetExtensionSessionEventCallback, Function | Smal
  * @tc.desc: test function : TransferAbilityResult
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionTest, TransferAbilityResult, Function | SmallTest | Level1)
+HWTEST_F(ExtensionSessionTest, TransferAbilityResult, TestSize.Level1)
 {
     MockFunction<void(uint32_t, const AAFwk::Want&)> mockTransferAbilityResultFunc;
     extSessionEventCallback_->transferAbilityResultFunc_ = mockTransferAbilityResultFunc.AsStdFunction();
@@ -148,7 +148,7 @@ HWTEST_F(ExtensionSessionTest, TransferAbilityResult, Function | SmallTest | Lev
  * @tc.desc: test function : TransferExtensionData
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionTest, TransferExtensionData, Function | SmallTest | Level1)
+HWTEST_F(ExtensionSessionTest, TransferExtensionData, TestSize.Level1)
 {
     MockFunction<void(const AAFwk::WantParams&)> mockTransferExtensionDataFunc;
     extSessionEventCallback_->transferExtensionDataFunc_ = mockTransferExtensionDataFunc.AsStdFunction();
@@ -176,7 +176,7 @@ HWTEST_F(ExtensionSessionTest, TransferExtensionData, Function | SmallTest | Lev
  * @tc.desc: test function : TransferComponentData
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionTest, TransferComponentData, Function | SmallTest | Level1)
+HWTEST_F(ExtensionSessionTest, TransferComponentData, TestSize.Level1)
 {
     extensionSession_->sessionStage_ = mockSessionStage_;
 
@@ -197,7 +197,7 @@ HWTEST_F(ExtensionSessionTest, TransferComponentData, Function | SmallTest | Lev
  * @tc.desc: test function : TransferComponentDataSync
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionTest, TransferComponentDataSync, Function | SmallTest | Level1)
+HWTEST_F(ExtensionSessionTest, TransferComponentDataSync, TestSize.Level1)
 {
     extensionSession_->sessionStage_ = mockSessionStage_;
 
@@ -219,7 +219,7 @@ HWTEST_F(ExtensionSessionTest, TransferComponentDataSync, Function | SmallTest |
  * @tc.desc: test function : NotifySyncOn
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionTest, NotifySyncOn, Function | SmallTest | Level1)
+HWTEST_F(ExtensionSessionTest, NotifySyncOn, TestSize.Level1)
 {
     MockFunction<void()> mockNotifySyncOnFunc;
     extSessionEventCallback_->notifySyncOnFunc_ = mockNotifySyncOnFunc.AsStdFunction();
@@ -243,7 +243,7 @@ HWTEST_F(ExtensionSessionTest, NotifySyncOn, Function | SmallTest | Level1)
  * @tc.desc: test function : NotifyAsyncOn
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionTest, NotifyAsyncOn, Function | SmallTest | Level1)
+HWTEST_F(ExtensionSessionTest, NotifyAsyncOn, TestSize.Level1)
 {
     MockFunction<void()> mockNotifyAsyncOnFunc;
     extSessionEventCallback_->notifyAsyncOnFunc_ = mockNotifyAsyncOnFunc.AsStdFunction();
@@ -267,7 +267,7 @@ HWTEST_F(ExtensionSessionTest, NotifyAsyncOn, Function | SmallTest | Level1)
  * @tc.desc: normal test
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionTest, NotifyDensityFollowHost01, Function | SmallTest | Level1)
+HWTEST_F(ExtensionSessionTest, NotifyDensityFollowHost01, TestSize.Level1)
 {
     extensionSession_->state_ = SessionState::STATE_CONNECT;
     extensionSession_->sessionStage_ = mockSessionStage_;
@@ -284,7 +284,7 @@ HWTEST_F(ExtensionSessionTest, NotifyDensityFollowHost01, Function | SmallTest |
  * @tc.desc: session is invalid
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionTest, NotifyDensityFollowHost02, Function | SmallTest | Level1)
+HWTEST_F(ExtensionSessionTest, NotifyDensityFollowHost02, TestSize.Level1)
 {
     bool isFollowHost = true;
     float densityValue = 1.0f;
@@ -297,7 +297,7 @@ HWTEST_F(ExtensionSessionTest, NotifyDensityFollowHost02, Function | SmallTest |
  * @tc.desc: sessionStage_ is invalid
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionTest, NotifyDensityFollowHost03, Function | SmallTest | Level1)
+HWTEST_F(ExtensionSessionTest, NotifyDensityFollowHost03, TestSize.Level1)
 {
     extensionSession_->state_ = SessionState::STATE_CONNECT;
     extensionSession_->sessionStage_ = nullptr;
@@ -313,7 +313,7 @@ HWTEST_F(ExtensionSessionTest, NotifyDensityFollowHost03, Function | SmallTest |
  * @tc.desc: normal test
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionTest, UpdateSessionViewportConfig1, Function | SmallTest | Level1)
+HWTEST_F(ExtensionSessionTest, UpdateSessionViewportConfig1, TestSize.Level1)
 {
     ASSERT_NE(extensionSession_, nullptr);
     extensionSession_->sessionStage_ = mockSessionStage_;
@@ -329,7 +329,7 @@ HWTEST_F(ExtensionSessionTest, UpdateSessionViewportConfig1, Function | SmallTes
  * @tc.desc: session is invalid
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionTest, UpdateSessionViewportConfig2, Function | SmallTest | Level1)
+HWTEST_F(ExtensionSessionTest, UpdateSessionViewportConfig2, TestSize.Level1)
 {
     ASSERT_NE(extensionSession_, nullptr);
     SessionViewportConfig config;
@@ -342,7 +342,7 @@ HWTEST_F(ExtensionSessionTest, UpdateSessionViewportConfig2, Function | SmallTes
  * @tc.desc: sessionStage_ is null
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionTest, UpdateSessionViewportConfig3, Function | SmallTest | Level1)
+HWTEST_F(ExtensionSessionTest, UpdateSessionViewportConfig3, TestSize.Level1)
 {
     ASSERT_NE(extensionSession_, nullptr);
     extensionSession_->sessionStage_ = nullptr;
@@ -357,7 +357,7 @@ HWTEST_F(ExtensionSessionTest, UpdateSessionViewportConfig3, Function | SmallTes
  * @tc.desc: test function : TriggerBindModalUIExtension
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionTest, TriggerBindModalUIExtension, Function | SmallTest | Level1)
+HWTEST_F(ExtensionSessionTest, TriggerBindModalUIExtension, TestSize.Level1)
 {
     extensionSession_->isFirstTriggerBindModal_ = false;
     MockFunction<void()> mockNotifyBindModalFunc;
@@ -386,7 +386,7 @@ HWTEST_F(ExtensionSessionTest, TriggerBindModalUIExtension, Function | SmallTest
  * @tc.desc: test function : TransferAccessibilityEvent
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionTest, TransferAccessibilityEvent, Function | SmallTest | Level1)
+HWTEST_F(ExtensionSessionTest, TransferAccessibilityEvent, TestSize.Level1)
 {
     OHOS::Accessibility::AccessibilityEventInfo info1;
     int64_t uiExtensionIdLevel = 6;
@@ -399,7 +399,7 @@ HWTEST_F(ExtensionSessionTest, TransferAccessibilityEvent, Function | SmallTest 
  * @tc.desc: TransferAccessibilityHoverEvent01
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionTest, TransferAccessibilityHoverEvent01, Function | SmallTest | Level1)
+HWTEST_F(ExtensionSessionTest, TransferAccessibilityHoverEvent01, TestSize.Level1)
 {
     extensionSession_->windowEventChannel_ = mockEventChannel_;
     EXPECT_CALL(*mockEventChannel_, TransferAccessibilityHoverEvent);
@@ -418,7 +418,7 @@ HWTEST_F(ExtensionSessionTest, TransferAccessibilityHoverEvent01, Function | Sma
  * @tc.desc: TransferAccessibilityHoverEvent02
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionTest, TransferAccessibilityHoverEvent02, Function | SmallTest | Level1)
+HWTEST_F(ExtensionSessionTest, TransferAccessibilityHoverEvent02, TestSize.Level1)
 {
     extensionSession_->windowEventChannel_ = nullptr;
     float pointX = 0.0f;
@@ -436,7 +436,7 @@ HWTEST_F(ExtensionSessionTest, TransferAccessibilityHoverEvent02, Function | Sma
  * @tc.desc: TransferAccessibilityChildTreeRegister01
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionTest, TransferAccessibilityChildTreeRegister01, Function | SmallTest | Level1)
+HWTEST_F(ExtensionSessionTest, TransferAccessibilityChildTreeRegister01, TestSize.Level1)
 {
     extensionSession_->windowEventChannel_ = mockEventChannel_;
     EXPECT_CALL(*mockEventChannel_, TransferAccessibilityChildTreeRegister);
@@ -452,7 +452,7 @@ HWTEST_F(ExtensionSessionTest, TransferAccessibilityChildTreeRegister01, Functio
  * @tc.desc: TransferAccessibilityChildTreeRegister02
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionTest, TransferAccessibilityChildTreeRegister02, Function | SmallTest | Level1)
+HWTEST_F(ExtensionSessionTest, TransferAccessibilityChildTreeRegister02, TestSize.Level1)
 {
     extensionSession_->windowEventChannel_ = nullptr;
     uint32_t windowId = 0;
@@ -467,7 +467,7 @@ HWTEST_F(ExtensionSessionTest, TransferAccessibilityChildTreeRegister02, Functio
  * @tc.desc: TransferAccessibilityChildTreeUnregister01
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionTest, TransferAccessibilityChildTreeUnregister01, Function | SmallTest | Level1)
+HWTEST_F(ExtensionSessionTest, TransferAccessibilityChildTreeUnregister01, TestSize.Level1)
 {
     extensionSession_->windowEventChannel_ = mockEventChannel_;
     EXPECT_CALL(*mockEventChannel_, TransferAccessibilityChildTreeUnregister);
@@ -480,7 +480,7 @@ HWTEST_F(ExtensionSessionTest, TransferAccessibilityChildTreeUnregister01, Funct
  * @tc.desc: TransferAccessibilityChildTreeUnregister02
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionTest, TransferAccessibilityChildTreeUnregister02, Function | SmallTest | Level1)
+HWTEST_F(ExtensionSessionTest, TransferAccessibilityChildTreeUnregister02, TestSize.Level1)
 {
     extensionSession_->windowEventChannel_ = nullptr;
     WSError result = extensionSession_->TransferAccessibilityChildTreeUnregister();
@@ -492,7 +492,7 @@ HWTEST_F(ExtensionSessionTest, TransferAccessibilityChildTreeUnregister02, Funct
  * @tc.desc: TransferAccessibilityDumpChildInfo01
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionTest, TransferAccessibilityDumpChildInfo01, Function | SmallTest | Level1)
+HWTEST_F(ExtensionSessionTest, TransferAccessibilityDumpChildInfo01, TestSize.Level1)
 {
     extensionSession_->windowEventChannel_ = mockEventChannel_;
     EXPECT_CALL(*mockEventChannel_, TransferAccessibilityDumpChildInfo);
@@ -507,7 +507,7 @@ HWTEST_F(ExtensionSessionTest, TransferAccessibilityDumpChildInfo01, Function | 
  * @tc.desc: TransferAccessibilityDumpChildInfo02
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionTest, TransferAccessibilityDumpChildInfo02, Function | SmallTest | Level1)
+HWTEST_F(ExtensionSessionTest, TransferAccessibilityDumpChildInfo02, TestSize.Level1)
 {
     extensionSession_->windowEventChannel_ = nullptr;
     std::vector<std::string> params;
@@ -521,7 +521,7 @@ HWTEST_F(ExtensionSessionTest, TransferAccessibilityDumpChildInfo02, Function | 
  * @tc.desc: TransferKeyEventForConsumed not timeout
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionTest, TransferKeyEventForConsumed01, Function | SmallTest | Level1)
+HWTEST_F(ExtensionSessionTest, TransferKeyEventForConsumed01, TestSize.Level1)
 {
     extensionSession_->windowEventChannel_ = mockEventChannel_;
     extensionSession_->channelListener_ = sptr<WindowEventChannelListener>::MakeSptr();
@@ -550,7 +550,7 @@ HWTEST_F(ExtensionSessionTest, TransferKeyEventForConsumed01, Function | SmallTe
  * @tc.desc: TransferKeyEventForConsumed timeout
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionTest, TransferKeyEventForConsumed02, Function | SmallTest | Level1)
+HWTEST_F(ExtensionSessionTest, TransferKeyEventForConsumed02, TestSize.Level1)
 {
     extensionSession_->windowEventChannel_ = mockEventChannel_;
     EXPECT_CALL(*mockEventChannel_, TransferKeyEventForConsumedAsync);
@@ -572,7 +572,7 @@ HWTEST_F(ExtensionSessionTest, TransferKeyEventForConsumed02, Function | SmallTe
  * @tc.desc: TransferKeyEventForConsumed windowEventChannel_ nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionTest, TransferKeyEventForConsumed03, Function | SmallTest | Level1)
+HWTEST_F(ExtensionSessionTest, TransferKeyEventForConsumed03, TestSize.Level1)
 {
     auto keyEvent = MMI::KeyEvent::Create();
     ASSERT_NE(keyEvent, nullptr);
@@ -588,7 +588,7 @@ HWTEST_F(ExtensionSessionTest, TransferKeyEventForConsumed03, Function | SmallTe
  * @tc.desc: TransferKeyEventForConsumed keyEvent nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionTest, TransferKeyEventForConsumed04, Function | SmallTest | Level1)
+HWTEST_F(ExtensionSessionTest, TransferKeyEventForConsumed04, TestSize.Level1)
 {
     extensionSession_->windowEventChannel_ = mockEventChannel_;
 
@@ -605,7 +605,7 @@ HWTEST_F(ExtensionSessionTest, TransferKeyEventForConsumed04, Function | SmallTe
  * @tc.desc: TransferKeyEventForConsumed channelListener_ nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionTest, TransferKeyEventForConsumed05, Function | SmallTest | Level1)
+HWTEST_F(ExtensionSessionTest, TransferKeyEventForConsumed05, TestSize.Level1)
 {
     extensionSession_->windowEventChannel_ = mockEventChannel_;
     extensionSession_->channelListener_ = nullptr;
@@ -624,7 +624,7 @@ HWTEST_F(ExtensionSessionTest, TransferKeyEventForConsumed05, Function | SmallTe
  * @tc.desc: TransferKeyEventForConsumed not return OK
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionTest, TransferKeyEventForConsumed06, Function | SmallTest | Level1)
+HWTEST_F(ExtensionSessionTest, TransferKeyEventForConsumed06, TestSize.Level1)
 {
     extensionSession_->windowEventChannel_ = mockEventChannel_;
     extensionSession_->channelListener_ = sptr<WindowEventChannelListener>::MakeSptr();
@@ -645,7 +645,7 @@ HWTEST_F(ExtensionSessionTest, TransferKeyEventForConsumed06, Function | SmallTe
  * @tc.desc: WindowEventChannelListenerOnRemoteRequest01 test
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionTest, WindowEventChannelListenerOnRemoteRequest01, Function | SmallTest | Level1)
+HWTEST_F(ExtensionSessionTest, WindowEventChannelListenerOnRemoteRequest01, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -666,7 +666,7 @@ HWTEST_F(ExtensionSessionTest, WindowEventChannelListenerOnRemoteRequest01, Func
  * @tc.desc: WindowEventChannelListenerOnRemoteRequest02 test
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionTest, WindowEventChannelListenerOnRemoteRequest02, Function | SmallTest | Level1)
+HWTEST_F(ExtensionSessionTest, WindowEventChannelListenerOnRemoteRequest02, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -684,7 +684,7 @@ HWTEST_F(ExtensionSessionTest, WindowEventChannelListenerOnRemoteRequest02, Func
  * @tc.desc: ChannelDeathRecipientOnRemoteDied01 test
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionTest, ChannelDeathRecipientOnRemoteDied01, Function | SmallTest | Level1)
+HWTEST_F(ExtensionSessionTest, ChannelDeathRecipientOnRemoteDied01, TestSize.Level1)
 {
     sptr<WindowEventChannelListener> listener = sptr<WindowEventChannelListener>::MakeSptr();
     EXPECT_NE(nullptr, listener);
@@ -703,7 +703,7 @@ HWTEST_F(ExtensionSessionTest, ChannelDeathRecipientOnRemoteDied01, Function | S
  * @tc.desc: ChannelDeathRecipientOnRemoteDied02 test
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionTest, ChannelDeathRecipientOnRemoteDied02, Function | SmallTest | Level1)
+HWTEST_F(ExtensionSessionTest, ChannelDeathRecipientOnRemoteDied02, TestSize.Level1)
 {
     sptr<WindowEventChannelListener> listener = sptr<WindowEventChannelListener>::MakeSptr();
     EXPECT_NE(nullptr, listener);
@@ -719,7 +719,7 @@ HWTEST_F(ExtensionSessionTest, ChannelDeathRecipientOnRemoteDied02, Function | S
  * @tc.desc: TransferKeyEventAsync
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionTest, TransferKeyEventAsync, Function | SmallTest | Level1)
+HWTEST_F(ExtensionSessionTest, TransferKeyEventAsync, TestSize.Level1)
 {
     extensionSession_->windowEventChannel_ = mockEventChannel_;
     extensionSession_->channelListener_ = sptr<WindowEventChannelListener>::MakeSptr();
@@ -748,7 +748,7 @@ HWTEST_F(ExtensionSessionTest, TransferKeyEventAsync, Function | SmallTest | Lev
  * @tc.desc: test function : UpdateAvoidArea
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionTest, UpdateAvoidArea, Function | SmallTest | Level1)
+HWTEST_F(ExtensionSessionTest, UpdateAvoidArea, TestSize.Level1)
 {
     extensionSession_->sessionStage_ = mockSessionStage_;
 
@@ -771,7 +771,7 @@ HWTEST_F(ExtensionSessionTest, UpdateAvoidArea, Function | SmallTest | Level1)
  * @tc.desc: test function : GetAvoidAreaByType
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionTest, GetAvoidAreaByType, Function | SmallTest | Level1)
+HWTEST_F(ExtensionSessionTest, GetAvoidAreaByType, TestSize.Level1)
 {
     MockFunction<AvoidArea(AvoidAreaType type, int32_t apiVersion)> mockNotifyGetAvoidAreaByTypeFunc;
     extSessionEventCallback_->notifyGetAvoidAreaByTypeFunc_ = mockNotifyGetAvoidAreaByTypeFunc.AsStdFunction();
@@ -829,7 +829,7 @@ HWTEST_F(ExtensionSessionTest, GetAvoidAreaByType, Function | SmallTest | Level1
  * @tc.desc: test function : Background
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionTest, Background, Function | SmallTest | Level1)
+HWTEST_F(ExtensionSessionTest, Background, TestSize.Level1)
 {
     ASSERT_NE(extensionSession_->property_, nullptr);
     extensionSession_->state_ = SessionState::STATE_DISCONNECT;
@@ -857,7 +857,7 @@ HWTEST_F(ExtensionSessionTest, Background, Function | SmallTest | Level1)
  * @tc.desc: test function : NotifyExtensionEventAsync
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionTest, NotifyExtensionEventAsync, Function | SmallTest | Level1)
+HWTEST_F(ExtensionSessionTest, NotifyExtensionEventAsync, TestSize.Level1)
 {
     ASSERT_NE(nullptr, extSessionEventCallback_);
     MockFunction<void(uint32_t)> mockNotifyExtensionEventFunc;
@@ -882,7 +882,7 @@ HWTEST_F(ExtensionSessionTest, NotifyExtensionEventAsync, Function | SmallTest |
  * @tc.desc: test function : NotifyDumpInfo
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionTest, NotifyDumpInfo, Function | SmallTest | Level1)
+HWTEST_F(ExtensionSessionTest, NotifyDumpInfo, TestSize.Level1)
 {
     extensionSession_->sessionStage_ = mockSessionStage_;
     extensionSession_->state_ = SessionState::STATE_DISCONNECT;
@@ -906,7 +906,7 @@ HWTEST_F(ExtensionSessionTest, NotifyDumpInfo, Function | SmallTest | Level1)
  * @tc.desc: test function : GetStatusBarHeight
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionTest, GetStatusBarHeight, Function | SmallTest | Level1)
+HWTEST_F(ExtensionSessionTest, GetStatusBarHeight, TestSize.Level1)
 {
     ASSERT_NE(nullptr, extSessionEventCallback_);
     MockFunction<uint32_t()> mockGetStatusBarHeightFunc;
@@ -931,7 +931,7 @@ HWTEST_F(ExtensionSessionTest, GetStatusBarHeight, Function | SmallTest | Level1
  * @tc.desc: test function : TryUpdateExtensionPersistentId
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionTest, TryUpdateExtensionPersistentId, Function | SmallTest | Level1)
+HWTEST_F(ExtensionSessionTest, TryUpdateExtensionPersistentId, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "ExtensionSessionTest";

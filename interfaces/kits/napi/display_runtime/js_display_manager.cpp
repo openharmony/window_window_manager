@@ -1000,7 +1000,7 @@ napi_value OnMakeUnique(napi_env env, napi_callback_info info)
         }
     }
     if (errCode == DmErrorCode::DM_ERROR_INVALID_PARAM || screenId == -1LL) {
-        WLOGFE("JsDisplayManager::OnDestroyVirtualScreen failed, Invalidate params.");
+        WLOGFE("JsDisplayManager::OnMakeUnique failed, Invalidate params.");
         return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, errMsg);
     }
     std::vector<ScreenId> screenIds;

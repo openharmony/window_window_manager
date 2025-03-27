@@ -63,7 +63,7 @@ namespace {
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, RaiseAboveTarget, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, RaiseAboveTarget, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "RaiseAboveTarget";
@@ -104,7 +104,7 @@ HWTEST_F(SceneSessionTest2, RaiseAboveTarget, Function | SmallTest | Level2)
  * @tc.desc: NotifyPropertyWhenConnect1
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, NotifyPropertyWhenConnect1, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, NotifyPropertyWhenConnect1, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "ability";
@@ -132,7 +132,7 @@ HWTEST_F(SceneSessionTest2, NotifyPropertyWhenConnect1, Function | SmallTest | L
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, GetSystemAvoidArea, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, GetSystemAvoidArea, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "GetSystemAvoidArea";
@@ -162,7 +162,7 @@ HWTEST_F(SceneSessionTest2, GetSystemAvoidArea, Function | SmallTest | Level2)
  * @tc.desc: TransferPointerEvent
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, TransferPointerEvent01, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, TransferPointerEvent01, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "Background01";
@@ -208,7 +208,7 @@ HWTEST_F(SceneSessionTest2, TransferPointerEvent01, Function | SmallTest | Level
  * @tc.desc: TransferPointerEvent
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, TransferPointerEvent02, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, TransferPointerEvent02, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "Background01";
@@ -240,7 +240,7 @@ HWTEST_F(SceneSessionTest2, TransferPointerEvent02, Function | SmallTest | Level
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, RequestSessionBack, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, RequestSessionBack, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "RequestSessionBack";
@@ -274,7 +274,7 @@ HWTEST_F(SceneSessionTest2, RequestSessionBack, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, SetParentPersistentId, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, SetParentPersistentId, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "SetParentPersistentId";
@@ -305,7 +305,7 @@ HWTEST_F(SceneSessionTest2, SetParentPersistentId, Function | SmallTest | Level2
  * @tc.desc: GetMainSessionId Test
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, GetMainSessionId, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, GetMainSessionId, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "GetMainSessionId";
@@ -346,7 +346,7 @@ HWTEST_F(SceneSessionTest2, GetMainSessionId, Function | SmallTest | Level2)
  * @tc.desc: UpdateSizeChangeReason01
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, UpdateSizeChangeReason01, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, UpdateSizeChangeReason01, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "UpdateSizeChangeReason01";
@@ -372,7 +372,7 @@ HWTEST_F(SceneSessionTest2, UpdateSizeChangeReason01, Function | SmallTest | Lev
  * @tc.desc: SetMinimizedFlagByUserSwitch/IsMinimizedByUserSwitch Test
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, SetMinimizedFlagByUserSwitch, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, SetMinimizedFlagByUserSwitch, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "SetMinimizedFlagByUserSwitch";
@@ -397,7 +397,7 @@ HWTEST_F(SceneSessionTest2, SetMinimizedFlagByUserSwitch, Function | SmallTest |
  * @tc.desc: UpdatePiPRect
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, UpdatePiPRect, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, UpdatePiPRect, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "UpdatePiPRect01";
@@ -440,7 +440,7 @@ HWTEST_F(SceneSessionTest2, UpdatePiPRect, Function | SmallTest | Level2)
  * @tc.desc: UpdatePiPControlStatus
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, UpdatePiPControlStatus, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, UpdatePiPControlStatus, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "UpdatePiPControlStatus";
@@ -470,7 +470,7 @@ HWTEST_F(SceneSessionTest2, UpdatePiPControlStatus, Function | SmallTest | Level
  * @tc.desc: SetScale
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, SetScale, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, SetScale, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "SetScale";
@@ -491,7 +491,7 @@ HWTEST_F(SceneSessionTest2, SetScale, Function | SmallTest | Level2)
  * @tc.desc: SetIsDisplayStatusBarTemporarily
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, SetIsDisplayStatusBarTemporarily, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, SetIsDisplayStatusBarTemporarily, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "SetIsDisplayStatusBarTemporarily";
@@ -509,7 +509,7 @@ HWTEST_F(SceneSessionTest2, SetIsDisplayStatusBarTemporarily, Function | SmallTe
  * @tc.desc: UpdateAvoidArea
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, UpdateAvoidArea, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, UpdateAvoidArea, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "UpdateAvoidArea";
@@ -533,7 +533,7 @@ HWTEST_F(SceneSessionTest2, UpdateAvoidArea, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, ChangeSessionVisibilityWithStatusBar, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, ChangeSessionVisibilityWithStatusBar, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "ChangeSessionVisibilityWithStatusBar";
@@ -557,7 +557,7 @@ HWTEST_F(SceneSessionTest2, ChangeSessionVisibilityWithStatusBar, Function | Sma
  * @tc.desc: SetShouldHideNonSecureWindows
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, SetShouldHideNonSecureWindows, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, SetShouldHideNonSecureWindows, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "SetShouldHideNonSecureWindows";
@@ -576,7 +576,7 @@ HWTEST_F(SceneSessionTest2, SetShouldHideNonSecureWindows, Function | SmallTest 
  * @tc.desc: update uiextension window flags
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, UpdateExtWindowFlags, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, UpdateExtWindowFlags, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "UpdateExtWindowFlags";
@@ -609,7 +609,7 @@ HWTEST_F(SceneSessionTest2, UpdateExtWindowFlags, Function | SmallTest | Level2)
  * @tc.desc: get combined uiextension window flags
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, GetCombinedExtWindowFlags, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, GetCombinedExtWindowFlags, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "GetCombinedExtWindowFlags";
@@ -637,7 +637,7 @@ HWTEST_F(SceneSessionTest2, GetCombinedExtWindowFlags, Function | SmallTest | Le
  * @tc.desc: remove uiextension window flags
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, RemoveExtWindowFlags, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, RemoveExtWindowFlags, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "RemoveExtWindowFlags";
@@ -658,7 +658,7 @@ HWTEST_F(SceneSessionTest2, RemoveExtWindowFlags, Function | SmallTest | Level2)
  * @tc.desc: clear uiextension window flags
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, ClearExtWindowFlags, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, ClearExtWindowFlags, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "ClearExtWindowFlags";
@@ -680,7 +680,7 @@ HWTEST_F(SceneSessionTest2, ClearExtWindowFlags, Function | SmallTest | Level2)
  * @tc.desc: calculate combined uiextension window flags
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, CalculateCombinedExtWindowFlags, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, CalculateCombinedExtWindowFlags, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "CalculateCombinedExtWindowFlags";
@@ -701,7 +701,7 @@ HWTEST_F(SceneSessionTest2, CalculateCombinedExtWindowFlags, Function | SmallTes
  * @tc.desc: SaveUpdatedIcon
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, SaveUpdatedIcon, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, SaveUpdatedIcon, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "SaveUpdatedIcon";
@@ -718,7 +718,7 @@ HWTEST_F(SceneSessionTest2, SaveUpdatedIcon, Function | SmallTest | Level2)
  * @tc.desc: NotifyTouchOutside
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, NotifyTouchOutside, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, NotifyTouchOutside, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "NotifyTouchOutside";
@@ -747,7 +747,7 @@ HWTEST_F(SceneSessionTest2, NotifyTouchOutside, Function | SmallTest | Level2)
  * @tc.desc: CheckTouchOutsideCallbackRegistered
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, CheckTouchOutsideCallbackRegistered, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, CheckTouchOutsideCallbackRegistered, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "CheckTouchOutsideCallbackRegistered";
@@ -771,7 +771,7 @@ HWTEST_F(SceneSessionTest2, CheckTouchOutsideCallbackRegistered, Function | Smal
  * @tc.desc: test RegisterTouchOutsideCallback
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, RegisterTouchOutsideCallback, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, RegisterTouchOutsideCallback, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "RegisterTouchOutsideCallback";
@@ -789,7 +789,7 @@ HWTEST_F(SceneSessionTest2, RegisterTouchOutsideCallback, Function | SmallTest |
  * @tc.desc: UpdateRotationAvoidArea
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, UpdateRotationAvoidArea, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, UpdateRotationAvoidArea, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "UpdateRotationAvoidArea";
@@ -817,7 +817,7 @@ HWTEST_F(SceneSessionTest2, UpdateRotationAvoidArea, Function | SmallTest | Leve
  * @tc.desc: NotifyForceHideChange
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, NotifyForceHideChange, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, NotifyForceHideChange, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "NotifyForceHideChange";
@@ -839,7 +839,7 @@ HWTEST_F(SceneSessionTest2, NotifyForceHideChange, Function | SmallTest | Level2
  * @tc.desc: SendPointerEventToUI
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, SendPointerEventToUI, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, SendPointerEventToUI, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "SendPointerEventToUI";
@@ -861,7 +861,7 @@ HWTEST_F(SceneSessionTest2, SendPointerEventToUI, Function | SmallTest | Level2)
  * @tc.desc: SetFloatingScale
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, SetFloatingScale, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, SetFloatingScale, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "SetFloatingScale";
@@ -897,7 +897,7 @@ HWTEST_F(SceneSessionTest2, SetFloatingScale, Function | SmallTest | Level2)
  * @tc.desc: ProcessPointDownSession
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, ProcessPointDownSession, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, ProcessPointDownSession, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "ProcessPointDownSession";
@@ -929,7 +929,7 @@ HWTEST_F(SceneSessionTest2, ProcessPointDownSession, Function | SmallTest | Leve
  * @tc.desc: SetSelfToken
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, SetSelfToken, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, SetSelfToken, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "SetSelfToken";
@@ -968,7 +968,7 @@ HWTEST_F(SceneSessionTest2, SetSelfToken, Function | SmallTest | Level2)
  * @tc.desc: SetLastSafeRect
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, SetLastSafeRect, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, SetLastSafeRect, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "SetLastSafeRect";
@@ -991,7 +991,7 @@ HWTEST_F(SceneSessionTest2, SetLastSafeRect, Function | SmallTest | Level2)
  * @tc.desc: GetSessionTargetRectByDisplayId
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, GetSessionTargetRectByDisplayId, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, GetSessionTargetRectByDisplayId, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "GetSubSession";
@@ -1026,7 +1026,7 @@ HWTEST_F(SceneSessionTest2, GetSessionTargetRectByDisplayId, Function | SmallTes
  * @tc.desc: SetPipActionEvent
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, SetPipActionEvent, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, SetPipActionEvent, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "SetPipActionEvent";
@@ -1047,7 +1047,7 @@ HWTEST_F(SceneSessionTest2, SetPipActionEvent, Function | SmallTest | Level2)
  * @tc.desc: SetPiPControlEvent
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, SetPiPControlEvent, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, SetPiPControlEvent, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "SetPiPControlEvent";
@@ -1079,7 +1079,7 @@ HWTEST_F(SceneSessionTest2, SetPiPControlEvent, Function | SmallTest | Level2)
  * @tc.desc: SetForceHideState
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, SetForceHideState, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, SetForceHideState, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "SetForceHideState";
@@ -1100,7 +1100,7 @@ HWTEST_F(SceneSessionTest2, SetForceHideState, Function | SmallTest | Level2)
  * @tc.desc: OnSessionEvent
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, OnSessionEvent01, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, OnSessionEvent01, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "OnSessionEvent01";
@@ -1126,7 +1126,7 @@ HWTEST_F(SceneSessionTest2, OnSessionEvent01, Function | SmallTest | Level2)
  * @tc.desc: SetSessionRectChangeCallback
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, SetSessionRectChangeCallback, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, SetSessionRectChangeCallback, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "SetSessionRectChangeCallback";
@@ -1152,7 +1152,7 @@ HWTEST_F(SceneSessionTest2, SetSessionRectChangeCallback, Function | SmallTest |
  * @tc.desc: SetSessionPiPControlStatusChangeCallback
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, SetSessionPiPControlStatusChangeCallback, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, SetSessionPiPControlStatusChangeCallback, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "SetSessionPiPControlStatusChangeCallback";
@@ -1168,7 +1168,7 @@ HWTEST_F(SceneSessionTest2, SetSessionPiPControlStatusChangeCallback, Function |
  * @tc.desc: SetAutoStartPiPStatusChangeCallback
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, SetAutoStartPiPStatusChangeCallback, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, SetAutoStartPiPStatusChangeCallback, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "SetAutoStartPiPStatusChangeCallback";
@@ -1184,7 +1184,7 @@ HWTEST_F(SceneSessionTest2, SetAutoStartPiPStatusChangeCallback, Function | Smal
  * @tc.desc: RaiseAppMainWindowToTop
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, RaiseAppMainWindowToTop, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, RaiseAppMainWindowToTop, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "RaiseAppMainWindowToTop";
@@ -1212,7 +1212,7 @@ HWTEST_F(SceneSessionTest2, RaiseAppMainWindowToTop, Function | SmallTest | Leve
  * @tc.desc: GetCutoutAvoidArea
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, GetCutoutAvoidArea01, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, GetCutoutAvoidArea01, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "GetCutoutAvoidArea";
@@ -1235,7 +1235,7 @@ HWTEST_F(SceneSessionTest2, GetCutoutAvoidArea01, Function | SmallTest | Level2)
  * @tc.desc: GetAINavigationBarArea
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, GetAINavigationBarArea, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, GetAINavigationBarArea, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "GetAINavigationBarArea";
@@ -1274,7 +1274,7 @@ HWTEST_F(SceneSessionTest2, GetAINavigationBarArea, Function | SmallTest | Level
  * @tc.desc: TransferPointerEvent
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, TransferPointerEvent03, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, TransferPointerEvent03, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "TransferPointerEvent";
@@ -1315,7 +1315,7 @@ HWTEST_F(SceneSessionTest2, TransferPointerEvent03, Function | SmallTest | Level
  * @tc.desc: OnMoveDragCallback
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, OnMoveDragCallback, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, OnMoveDragCallback, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "OnMoveDragCallback";
@@ -1345,7 +1345,7 @@ HWTEST_F(SceneSessionTest2, OnMoveDragCallback, Function | SmallTest | Level2)
  * @tc.desc: OnMoveDragCallback
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, OnMoveDragCallback01, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, OnMoveDragCallback01, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "OnMoveDragCallback01";
@@ -1372,7 +1372,7 @@ HWTEST_F(SceneSessionTest2, OnMoveDragCallback01, Function | SmallTest | Level2)
  * @tc.desc: OnMoveDragCallback
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, OnMoveDragCallback02, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, OnMoveDragCallback02, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "OnMoveDragCallback02";
@@ -1412,7 +1412,7 @@ HWTEST_F(SceneSessionTest2, OnMoveDragCallback02, Function | SmallTest | Level2)
  * @tc.desc: IsStartMoving
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, IsStartMoving, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, IsStartMoving, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "IsStartMoving";
@@ -1441,7 +1441,7 @@ HWTEST_F(SceneSessionTest2, IsStartMoving, Function | SmallTest | Level2)
  * @tc.desc: SetTemporarilyShowWhenLocked
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, SetTemporarilyShowWhenLocked, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, SetTemporarilyShowWhenLocked, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "SetTemporarilyShowWhenLocked";
@@ -1467,7 +1467,7 @@ HWTEST_F(SceneSessionTest2, SetTemporarilyShowWhenLocked, Function | SmallTest |
  * @tc.desc: GetShowWhenLockedFlagValue
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, GetShowWhenLockedFlagValue, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, GetShowWhenLockedFlagValue, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "GetShowWhenLockedFlagValue";
@@ -1493,7 +1493,7 @@ HWTEST_F(SceneSessionTest2, GetShowWhenLockedFlagValue, Function | SmallTest | L
  * @tc.desc: SetClientIdentityToken
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, SetClientIdentityToken, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, SetClientIdentityToken, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "SetClientIdentityToken";
@@ -1510,7 +1510,7 @@ HWTEST_F(SceneSessionTest2, SetClientIdentityToken, Function | SmallTest | Level
  * @tc.desc: SetSkipDraw
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, SetSkipDraw, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, SetSkipDraw, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "SetSkipDraw";
@@ -1526,7 +1526,7 @@ HWTEST_F(SceneSessionTest2, SetSkipDraw, Function | SmallTest | Level2)
  * @tc.desc: GetWindowDragHotAreaType
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, GetWindowDragHotAreaType, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, GetWindowDragHotAreaType, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "HotAreaType";
@@ -1545,7 +1545,7 @@ HWTEST_F(SceneSessionTest2, GetWindowDragHotAreaType, Function | SmallTest | Lev
  * @tc.desc: RegisterSubModalTypeChangeCallback
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, RegisterSubModalTypeChangeCallback, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, RegisterSubModalTypeChangeCallback, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "RegisterSubModalTypeChangeCallback";
@@ -1563,7 +1563,7 @@ HWTEST_F(SceneSessionTest2, RegisterSubModalTypeChangeCallback, Function | Small
  * @tc.desc: NotifySubModalTypeChange
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, NotifySubModalTypeChange, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, NotifySubModalTypeChange, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "NotifySubModalTypeChange";
@@ -1582,7 +1582,7 @@ HWTEST_F(SceneSessionTest2, NotifySubModalTypeChange, Function | SmallTest | Lev
  * @tc.desc: RegisterMainModalTypeChangeCallback
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, RegisterMainModalTypeChangeCallback, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, RegisterMainModalTypeChangeCallback, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "RegisterMainModalTypeChangeCallback";
@@ -1600,7 +1600,7 @@ HWTEST_F(SceneSessionTest2, RegisterMainModalTypeChangeCallback, Function | Smal
  * @tc.desc: GetSubWindowModalType
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, GetSubWindowModalType, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, GetSubWindowModalType, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "ModalType";
@@ -1621,7 +1621,7 @@ HWTEST_F(SceneSessionTest2, GetSubWindowModalType, Function | SmallTest | Level2
  * @tc.desc: CheckGetAvoidAreaAvailable
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, CheckGetAvoidAreaAvailable, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, CheckGetAvoidAreaAvailable, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "CheckGetAvoidAreaAvailable";
@@ -1645,7 +1645,7 @@ HWTEST_F(SceneSessionTest2, CheckGetAvoidAreaAvailable, Function | SmallTest | L
  * @tc.desc: SetWindowAnimationFlag
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, SetWindowAnimationFlag, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, SetWindowAnimationFlag, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "SetWindowAnimationFlag";
@@ -1663,7 +1663,7 @@ HWTEST_F(SceneSessionTest2, SetWindowAnimationFlag, Function | SmallTest | Level
  * @tc.desc: IsFullScreenMovable
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, IsFullScreenMovable, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, IsFullScreenMovable, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "IsFullScreenMovable";
@@ -1679,7 +1679,7 @@ HWTEST_F(SceneSessionTest2, IsFullScreenMovable, Function | SmallTest | Level2)
  * @tc.desc: SetTitleAndDockHoverShowChangeCallback
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, SetTitleAndDockHoverShowChangeCallback, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, SetTitleAndDockHoverShowChangeCallback, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "SetTitleAndDockHoverShowChangeCallback";

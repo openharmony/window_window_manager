@@ -543,6 +543,13 @@ void ScreenSessionManager::ConfigureDpi()
             densityDpi_ = static_cast<float>(densityDpi) / BASELINE_DENSITY;
         }
     }
+    if (numbersConfig.count("applicationDefaultDpi") != 0) {
+        uint32_t densityDpi = static_cast<uint32_t>(numbersConfig["applicationDefaultDpi"][0]);
+        TLOGI(WmsLogTag::DMS, "densityDpi = %{public}u", densityDpi);
+        if (densityDpi >= DOT_PER_INCH_MINIMUM_VALUE && densityDpi <= DOT_PER_INCH_MAXIMUM_VALUE) {
+            applicationDefaultDpi = densityDpi;
+        }
+    }
     if (numbersConfig.count("subDpi") != 0) {
         uint32_t subDensityDpi = static_cast<uint32_t>(numbersConfig["subDpi"][0]);
         TLOGI(WmsLogTag::DMS, "subDensityDpi = %{public}u", subDensityDpi);
@@ -958,22 +965,39 @@ void ScreenSessionManager::GetAndMergeEdidInfo(sptr<ScreenSession> screenSession
 {
     ScreenId screenId = screenSession->GetScreenId();
     struct BaseEdid edid;
+    int32_t fillInfo = 4;
     if (!GetEdid(screenId, edid)) {
         TLOGE(WmsLogTag::DMS, "get EDID failed.");
         return;
     }
     std::string serialNumber = ConvertEdidToString(edid);
+    TLOGI(WmsLogTag::DMS, "serialNumber: %{public}s", serialNumber.c_str());
     screenSession->SetSerialNumber(serialNumber);
     if (g_isPcDevice) {
-        screenSession->SetName(edid.manufacturerName_ + std::to_string(screenSession->GetScreenId()));
+        if (!edid.displayProductName_.empty()) {
+            screenSession->SetName(edid.displayProductName_);
+        } else {
+            std::string productCodeStr;
+            std::string connector = "-";
+            std::ostringstream oss;
+            oss << std::hex << std::uppercase << std::setw(fillInfo) << std::setfill('0') << edid.productCode_;
+            productCodeStr = oss.str();
+            screenSession->SetName(edid.manufacturerName_ + connector + productCodeStr);
+        }
     }
 }
 
 std::string ScreenSessionManager::ConvertEdidToString(const struct BaseEdid edid)
 {
-    std::string edidInfo = "_";
-    edidInfo = edidInfo + std::to_string(edid.serialNumber_);
-    return edidInfo;
+    std::string edidInfo = edid.manufacturerName_ + std::to_string(edid.productCode_)
+        + std::to_string(edid.serialNumber_) + std::to_string(edid.weekOfManufactureOrModelYearFlag_)
+        + std::to_string(edid.yearOfManufactureOrModelYear_);
+    TLOGI(WmsLogTag::DMS, "edidInfo: %{public}s", edidInfo.c_str());
+    std::hash<std::string> hasher;
+    std::size_t hashValue = hasher(edidInfo);
+    std::ostringstream oss;
+    oss << std::hex << std::uppercase << hashValue;
+    return oss.str();
 }
 
 bool ScreenSessionManager::RecoverRestoredMultiScreenMode(sptr<ScreenSession> screenSession)
@@ -3360,8 +3384,8 @@ void ScreenSessionManager::SetDpiFromSettingData()
     uint32_t settingDpi;
     bool ret = ScreenSettingHelper::GetSettingDpi(settingDpi);
     if (!ret) {
-        TLOGW(WmsLogTag::DMS, "get setting dpi failed,use default dpi");
-        settingDpi = defaultDpi;
+        settingDpi = (applicationDefaultDpi != 0) ? applicationDefaultDpi : defaultDpi;
+        TLOGW(WmsLogTag::DMS, "get setting dpi failed,use default dpi,defaultDpi: %{public}u", settingDpi);
     } else {
         TLOGI(WmsLogTag::DMS, "get setting dpi success,settingDpi: %{public}u", settingDpi);
     }
@@ -4170,8 +4194,9 @@ ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
 
 DMError ScreenSessionManager::SetVirtualScreenSurface(ScreenId screenId, sptr<IBufferProducer> surface)
 {
+    bool isCallingByThirdParty = Permission::CheckCallingPermission(ACCESS_VIRTUAL_SCREEN_PERMISSION);
     if (!(Permission::IsSystemCalling() && Permission::CheckCallingPermission(SCREEN_CAPTURE_PERMISSION)) &&
-        !SessionPermission::IsShellCall() && !Permission::CheckCallingPermission(ACCESS_VIRTUAL_SCREEN_PERMISSION)) {
+        !SessionPermission::IsShellCall() && !isCallingByThirdParty) {
         TLOGE(WmsLogTag::DMS, "Permission Denied! calling: %{public}s, pid: %{public}d",
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
@@ -4183,7 +4208,7 @@ DMError ScreenSessionManager::SetVirtualScreenSurface(ScreenId screenId, sptr<IB
     sptr<ScreenSession> screenSession = GetScreenSession(screenId);
     if (screenSession == nullptr) {
         TLOGE(WmsLogTag::DMS, "No such screen.");
-        return DMError::DM_ERROR_INVALID_PARAM;
+        return isCallingByThirdParty ? DMError::DM_ERROR_NULLPTR : DMError::DM_ERROR_INVALID_PARAM;
     }
     TLOGW(WmsLogTag::DMS, "enter set virtual screen surface");
     ScreenId rsScreenId;
@@ -4322,8 +4347,8 @@ DMError ScreenSessionManager::ResizeVirtualScreen(ScreenId screenId, uint32_t wi
 
 DMError ScreenSessionManager::DestroyVirtualScreen(ScreenId screenId)
 {
-    if (!SessionPermission::IsSystemCalling() &&
-        !Permission::CheckCallingPermission(ACCESS_VIRTUAL_SCREEN_PERMISSION)) {
+    bool isCallingByThirdParty = Permission::CheckCallingPermission(ACCESS_VIRTUAL_SCREEN_PERMISSION);
+    if (!SessionPermission::IsSystemCalling() && !isCallingByThirdParty) {
         TLOGE(WmsLogTag::DMS, "Permission Denied! calling: %{public}s, pid: %{public}d",
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
@@ -4372,7 +4397,7 @@ DMError ScreenSessionManager::DestroyVirtualScreen(ScreenId screenId)
     NotifyCaptureStatusChanged();
     if (rsScreenId == SCREEN_ID_INVALID) {
         TLOGE(WmsLogTag::DMS, "No corresponding rsScreenId");
-        return DMError::DM_ERROR_INVALID_PARAM;
+        return isCallingByThirdParty ? DMError::DM_ERROR_NULLPTR : DMError::DM_ERROR_INVALID_PARAM;
     }
     rsInterface_.RemoveVirtualScreen(rsScreenId);
     return DMError::DM_OK;
