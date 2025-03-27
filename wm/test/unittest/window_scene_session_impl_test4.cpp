@@ -1190,7 +1190,7 @@ HWTEST_F(WindowSceneSessionImplTest4, UpdateConfigurationSyncForAll, Function | 
  * @tc.desc: TransferLifeCycleEventToString
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest5, TransferLifeCycleEventToString, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplTest4, TransferLifeCycleEventToString, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("TransferLifeCycleEventToString");
