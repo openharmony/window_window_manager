@@ -2042,18 +2042,18 @@ HWTEST_F(SceneSessionTest5, NotifyRotationChange, Function | SmallTest | Level2)
     sptr<SceneSessionMocker> session = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
     session->sessionStage_ = nullptr;
     session->isRotationChangeCallbackRegistered = false;
-    RotationChangeInfo info = { RotationChangeType::WINDOW_WILL_ROTATE, 0, 0, { 0, 0, 2720, 1270 } };
-    RotationChangeResult res = session->NotifyRotationChange(info);
+    RotationChangeInfo rotationInfo = { RotationChangeType::WINDOW_WILL_ROTATE, 0, 0, { 0, 0, 2720, 1270 } };
+    RotationChangeResult res = session->NotifyRotationChange(rotationInfo);
     EXPECT_EQ(res.windowRect_.width_, 0);
 
     session->isRotationChangeCallbackRegistered = true;
-    res = session->NotifyRotationChange(info);
+    res = session->NotifyRotationChange(rotationInfo);
     EXPECT_EQ(res.windowRect_.width_, 0);
     
     sptr<SessionStageMocker> sessionStageMocker = sptr<SessionStageMocker>::MakeSptr();
     ASSERT_NE(sessionStageMocker, nullptr);
     session->sessionStage_ = sessionStageMocker;
-    res = session->NotifyRotationChange(info);
+    res = session->NotifyRotationChange(rotationInfo);
     EXPECT_EQ(res.windowRect_.width_, 0);
 }
 }
