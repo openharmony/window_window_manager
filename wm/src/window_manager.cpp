@@ -17,6 +17,7 @@
 
 #include <algorithm>
 #include <cinttypes>
+#include <hitrace_meter.h>
 #include <shared_mutex>
 
 #include "input_manager.h"
@@ -198,6 +199,7 @@ void WindowManager::Impl::NotifySystemBarChanged(DisplayId displayId, const Syst
 void WindowManager::Impl::NotifyAccessibilityWindowInfo(const std::vector<sptr<AccessibilityWindowInfo>>& infos,
     WindowUpdateType type)
 {
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wm:NotifyAccessibilityWindowInfo");
     if (infos.empty()) {
         WLOGFE("infos is empty");
         return;
