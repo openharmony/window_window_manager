@@ -348,7 +348,7 @@ HWTEST_F(WindowSessionImplTest5, NotifyRotationChange, Function | SmallTest | Le
     sptr<IWindowRotationChangeListener> listener = sptr<IWindowRotationChangeListener>::MakeSptr();
     std::vector<sptr<IWindowRotationChangeListener>> holder;
     windowSessionImpl->windowRotationChangeListeners_[windowSessionImpl->property_->GetPersistentId()] = holder;
-    WMError ret = windowSessionImpl->RegisterWindowChangeListener(listener);
+    WMError ret = windowSessionImpl->RegisterWindowRotationChangeListener(listener);
     EXPECT_EQ(WMError::WM_OK, ret);
     res = windowSessionImpl->NotifyRotationChange(info);
     EXPECT_EQ(RectType::RELATIVE_TO_SCREEN, res.rectType_);
