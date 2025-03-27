@@ -1754,7 +1754,7 @@ WMError SceneSessionManager::RemoveSkipSelfWhenShowOnVirtualScreenList(const std
             if (!session) {
                 continue;
             }
-            TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "[win: %{public}d] remove to virtual screen black list", persistentId);
+            TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "[win: %{public}d] remove from virtual screen black list", persistentId);
             auto surfaceNode = session->GetSurfaceNode();
             if (surfaceNode) {
                 auto surfaceNodeId = surfaceNode->GetId();

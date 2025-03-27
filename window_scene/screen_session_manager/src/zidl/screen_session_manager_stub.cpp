@@ -282,7 +282,7 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
                 }
                 persistentIds.push_back(persistentId);
             }
-            DMError errCode = AddVirtualScreenBlackList(persistentIds);
+            DMError errCode = RemoveVirtualScreenBlackList(persistentIds);
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }

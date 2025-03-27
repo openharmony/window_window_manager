@@ -1190,7 +1190,7 @@ DMError ScreenSessionManagerProxy::AddVirtualScreenBlackList(const std::vector<i
         }
     }
     for (remote->SendRequest(
-        static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_ADD_VIRTUAL_SCREEN_BLCAK_LIST),
+        static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_ADD_VIRTUAL_SCREEN_BLACK_LIST),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
@@ -1224,7 +1224,7 @@ DMError ScreenSessionManagerProxy::RemoveVirtualScreenBlackList(const std::vecto
         }
     }
     for (remote->SendRequest(
-        static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_ADD_VIRTUAL_SCREEN_BLCAK_LIST),
+        static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_REMOVE_VIRTUAL_SCREEN_BLACK_LIST),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
