@@ -21,6 +21,7 @@
 #include <new>
 #include <transaction/rs_interfaces.h>
 #include "ability_context.h"
+#include "common/include/session_permission.h"
 #include "display_manager.h"
 #include "dm_common.h"
 #include "wm_common.h"
@@ -33,7 +34,6 @@
 #include "permission.h"
 #include "singleton_container.h"
 #include "sys_cap_util.h"
-#include "common/include/session_permission.h"
 
 namespace OHOS {
 namespace Rosen {
