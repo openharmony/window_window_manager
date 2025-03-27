@@ -906,16 +906,17 @@ HWTEST_F(SceneSessionTest5, OnKeyFrameNextVsync, Function | SmallTest | Level2)
     EXPECT_EQ(session->keyFrameDragPauseNoticed_, true);
     session->lastKeyFrameDragStamp_ = 0;
     session->keyFrameDragPauseNoticed_ = false;
+    session->keyFrameAnimating_ = false;
     session->OnKeyFrameNextVsync(count);
     EXPECT_EQ(session->keyFrameDragPauseNoticed_, true);
     session->keyFrameDragPauseNoticed_ = false;
+    session->keyFrameAnimating_ = false;
     uint64_t nowTimeStamp = std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now().time_since_epoch()).count();
     session->lastKeyFrameDragStamp_ = nowTimeStamp;
     session->OnKeyFrameNextVsync(count);
     EXPECT_EQ(session->keyFrameDragPauseNoticed_, false);
 }
-
 
 /**
  * @tc.name: KeyFrameNotifyFilter

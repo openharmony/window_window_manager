@@ -3517,19 +3517,7 @@ void SceneSession::UpdateKeyFrameState(SizeChangeReason reason, const WSRect& re
             keyFramePolicy_.running_ = false;
             return;
         }
-        TLOGI(WmsLogTag::WMS_LAYOUT, "key frame start");
-        keyFramePolicy_.running_ = true;
-        keyFramePolicy_.stopping_ = false;
-        keyFrameAnimating_ = false;
-        lastKeyFrameStamp_ = timeStamp;
-        lastKeyFrameRect_ = rect;
-        lastKeyFrameDragRect_ = rect;
-        keyFrameVsyncRequestStamp_ = timeStamp;
-        lastKeyFrameDragStamp_ = timeStamp;
-        keyFrameDragPauseNoticed_ = false;
-        sessionStage_->SetKeyFramePolicy(keyFramePolicy_);
-        RequestKeyFrameNextVsync(keyFrameVsyncRequestStamp_, 0);
-        return;
+        return InitKeyFrameState(timeStamp, rect);
     }
     if (!keyFramePolicy_.running_ || !keyFrameCloneNode_) {
         TLOGD(WmsLogTag::WMS_LAYOUT, "key frame not start");
@@ -3548,9 +3536,31 @@ void SceneSession::UpdateKeyFrameState(SizeChangeReason reason, const WSRect& re
         TLOGI(WmsLogTag::WMS_LAYOUT, "key frame stopping");
         keyFramePolicy_.running_ = false;
         keyFramePolicy_.stopping_ = true;
-        sessionStage_->SetKeyFramePolicy(keyFramePolicy_);
+        KeyFramePolicy dragEndPolicy = keyFramePolicy_;
+        if (keyFrameAnimating_) {
+            int32_t minDelay = 150;
+            dragEndPolicy.animationDelay_ += dragEndPolicy.animationDuration_ + minDelay;
+            TLOGI(WmsLogTag::WMS_LAYOUT, "stop with repeat animate %{public}d", dragEndPolicy.animationDelay_);
+        }
+        sessionStage_->SetKeyFramePolicy(dragEndPolicy);
         keyFrameCloneNode_ = nullptr;
     }
+}
+
+void SceneSession::InitKeyFrameState(uint64_t timeStamp, const WSRect& rect)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "key frame start init");
+    keyFramePolicy_.running_ = true;
+    keyFramePolicy_.stopping_ = false;
+    keyFrameAnimating_ = false;
+    lastKeyFrameStamp_ = timeStamp;
+    lastKeyFrameRect_ = rect;
+    lastKeyFrameDragRect_ = rect;
+    keyFrameVsyncRequestStamp_ = timeStamp;
+    lastKeyFrameDragStamp_ = timeStamp;
+    keyFrameDragPauseNoticed_ = false;
+    sessionStage_->SetKeyFramePolicy(keyFramePolicy_);
+    RequestKeyFrameNextVsync(keyFrameVsyncRequestStamp_, 0);
 }
 
 void SceneSession::RequestKeyFrameNextVsync(uint64_t requestStamp, uint64_t count)
@@ -3586,6 +3596,7 @@ void SceneSession::OnKeyFrameNextVsync(uint64_t count)
         lastKeyFrameDragStamp_ = nowTimeStamp;
         lastKeyFrameStamp_ = nowTimeStamp;
         winRect_ = lastKeyFrameDragRect_;
+        lastKeyFrameRect_ = lastKeyFrameDragRect_;
         NotifyClientToUpdateRect("OnMoveDragCallback", nullptr);
     }
 }
