@@ -300,6 +300,7 @@ napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& sessio
     BindNativeMethod(env, objValue, moduleName);
     BindNativeMethodForKeyboard(env, objValue, moduleName);
     BindNativeMethodForCompatiblePcMode(env, objValue, moduleName);
+    BindNativeMethodForPcAppInPadNormal(env, objValue, moduleName);
     BindNativeMethodForSCBSystemSession(env, objValue, moduleName);
     BindNativeMethodForFocus(env, objValue, moduleName);
     napi_ref jsRef = nullptr;
@@ -402,6 +403,12 @@ void JsSceneSession::BindNativeMethodForCompatiblePcMode(napi_env env, napi_valu
         JsSceneSession::SetCompatibleWindowSizeInPc);
     BindNativeFunction(env, objValue, "setAppSupportPhoneInPc", moduleName,
         JsSceneSession::SetAppSupportPhoneInPc);
+}
+
+void JsSceneSession::BindNativeMethodForPcAppInPadNormal(napi_env env, napi_value objValue, const char* moduleName)
+{
+    BindNativeFunction(env, objValue, "pcAppInPadNormalClose", moduleName,
+        JsSceneSession::PcAppInPadNormalClose);
 }
 
 void JsSceneSession::BindNativeMethodForSCBSystemSession(napi_env env, napi_value objValue, const char* moduleName)
@@ -1978,6 +1985,13 @@ napi_value JsSceneSession::SetAppSupportPhoneInPc(napi_env env, napi_callback_in
     TLOGD(WmsLogTag::WMS_SCB, "[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetAppSupportPhoneInPc(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::PcAppInPadNormalClose(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_COMPAT, "[NAPI]");
+    JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnPcAppInPadNormalClose(env, info) : nullptr;
 }
 
 napi_value JsSceneSession::SetUniqueDensityDpiFromSCB(napi_env env, napi_callback_info info)
@@ -4730,6 +4744,21 @@ napi_value JsSceneSession::OnSetAppSupportPhoneInPc(napi_env env, napi_callback_
         return NapiGetUndefined(env);
     }
     session->SetAppSupportPhoneInPc(isSupportPhone);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnPcAppInPadNormalClose(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_COMPAT, "[NAPI]");
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "session is nullptr, id:%{public}d", persistentId_);
+        return NapiGetUndefined(env);
+    }
+    if (!(session->GetSessionProperty()->GetIsPcAppInPad())) {
+        return NapiGetUndefined(env);
+    }
+    session->PcAppInPadNormalClose();
     return NapiGetUndefined(env);
 }
 
