@@ -11534,8 +11534,8 @@ std::shared_ptr<Media::PixelMap> SceneSessionManager::GetSessionSnapshotPixelMap
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetSessionSnapshotPixelMap(%d )", persistentId);
 
     bool isPc = systemConfig_.IsPcWindow() || systemConfig_.IsFreeMultiWindowMode();
-    bool useCurWindow = (snapNode == SnapshotNodeType::DEFAULT_WINDOW_NODE) ?
-        isPc : (snapNode == SnapshotNodeType::LEASH_WINDOW_NODE) ? false : true;
+    bool useCurWindow = (snapNode == SnapshotNodeType::DEFAULT_NODE) ?
+        isPc : (snapNode == SnapshotNodeType::LEASH_NODE) ? false : true;
     std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
     if (sceneSession->GetSessionState() != SessionState::STATE_BACKGROUND) {
         pixelMap = sceneSession->Snapshot(true, scaleParam, useCurWindow);
