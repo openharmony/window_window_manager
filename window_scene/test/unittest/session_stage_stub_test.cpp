@@ -1010,6 +1010,28 @@ HWTEST_F(SessionStageStubTest, HandleNotifyRotationChange, Function | SmallTest 
     sessionStageStub->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(sessionStageStub_->HandleNotifyRotationChange(data, reply), ERR_INVALID_DATA);
 }
+
+/**
+ * @tc.name: HandleNotifyRotationProperty
+ * @tc.desc: test function : HandleNotifyRotationProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifyRotationProperty, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    data.WriteInt32(0);
+    data.WriteInt32(1);
+    data.WriteInt32(1);
+    data.WriteUint32(1);
+    data.WriteUint32(1);
+    data.WriteUint32(0);
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_ROTATION_PROPERTY);
+    EXPECT_TRUE(sessionStageStub_ != nullptr);
+    EXPECT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
 }
 }
 }
