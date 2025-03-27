@@ -4093,6 +4093,199 @@ HWTEST_F(ScreenSessionManagerTest, CalculateXYPosition, Function | SmallTest | L
 }
 
 /**
+ * @tc.name: IsSpecialApp
+ * @tc.desc: IsSpecialApp
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, IsSpecialApp, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+
+    auto ret = ssm_->IsSpecialApp();
+    ASSERT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: IsScreenCasting
+ * @tc.desc: IsScreenCasting
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, IsScreenCasting, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+
+    ssm_->virtualScreenCount_ = 1;
+    auto ret = ssm_->IsScreenCasting();
+    ASSERT_EQ(ret, true);
+
+    ssm_->virtualScreenCount_ = 0;
+    ssm_->hdmiScreenCount_ = 0;
+    ret = ssm_->IsScreenCasting();
+    ASSERT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: GetCameraPosition
+ * @tc.desc: GetCameraPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetCameraPosition, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+
+    ssm_->cameraPosition_ = 1;
+    auto ret = ssm_->GetCameraPosition();
+    ASSERT_EQ(ret, 1);
+}
+
+/**
+ * @tc.name: GetCameraStatus
+ * @tc.desc: GetCameraStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetCameraStatus, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+
+    ssm_->cameraStatus_ = 1;
+    auto ret = ssm_->GetCameraStatus();
+    ASSERT_EQ(ret, 1);
+}
+
+/**
+ * @tc.name: OnSecondaryReflexionChange
+ * @tc.desc: OnSecondaryReflexionChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, OnSecondaryReflexionChange, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ASSERT_EQ(ssm_->clientProxy_, nullptr);
+
+    ssm_->OnSecondaryReflexionChange(0, false);
+    ASSERT_EQ(ssm_->cameraStatus_, 1);
+}
+
+/**
+ * @tc.name: OnExtendScreenConnectStatusChange
+ * @tc.desc: OnExtendScreenConnectStatusChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, OnExtendScreenConnectStatusChange, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ASSERT_EQ(ssm_->clientProxy_, nullptr);
+
+    ExtendScreenConnectStatus status = ExtendScreenConnectStatus::UNKNOWN;
+    ssm_->OnExtendScreenConnectStatusChange(0, status);
+    ASSERT_EQ(ssm_->cameraStatus_, 1);
+}
+
+/**
+ * @tc.name: OnSuperFoldStatusChange
+ * @tc.desc: OnSuperFoldStatusChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, OnSuperFoldStatusChange, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ASSERT_EQ(ssm_->clientProxy_, nullptr);
+
+    SuperFoldStatus status = SuperFoldStatus::UNKNOWN;
+    ssm_->OnSuperFoldStatusChange(0, status);
+    ASSERT_EQ(ssm_->cameraStatus_, 1);
+}
+
+/**
+ * @tc.name: GetPrimaryDisplayInfo02
+ * @tc.desc: GetPrimaryDisplayInfo02
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetPrimaryDisplayInfo02, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+
+    ssm_->screenSessionMap_.insert(std::pair<ScreenId, sptr<ScreenSession>>(4, nullptr));
+    auto ret = ssm_->GetPrimaryDisplayInfo();
+    ASSERT_NE(ret, nullptr);
+
+    auto screenSession = new ScreenSession;
+    screenSession->SetIsExtend(true);
+    ssm_->screenSessionMap_.insert(std::pair<ScreenId, sptr<ScreenSession>>(6, screenSession));
+    ret = ssm_->GetPrimaryDisplayInfo();
+    ASSERT_NE(ret, nullptr);
+
+    screenSession->SetIsExtend(false);
+    ret = ssm_->GetPrimaryDisplayInfo();
+    ASSERT_NE(ret, nullptr);
+}
+
+/**
+ * @tc.name: AddPermissionUsedRecord
+ * @tc.desc: AddPermissionUsedRecord
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, AddPermissionUsedRecord, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+
+    ssm_->AddPermissionUsedRecord("ohos.permission.CUSTOM_SCREEN_CAPTURE", 0, 1);
+    ASSERT_EQ(ssm_->cameraStatus_, 1);
+}
+
+/**
+ * @tc.name: SetVirtualScreenMaxRefreshRate
+ * @tc.desc: SetVirtualScreenMaxRefreshRate
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetVirtualScreenMaxRefreshRate, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    uint32_t actualRefreshRate = 0;
+
+    auto ret = ssm_->SetVirtualScreenMaxRefreshRate(0, 120, actualRefreshRate);
+    ASSERT_EQ(ret, DMError::DM_ERROR_INVALID_PARAM);
+
+    ret = ssm_->SetVirtualScreenMaxRefreshRate(screenId, 120, actualRefreshRate);
+    ASSERT_EQ(ret, DMError::DM_OK);
+}
+
+/**
+ * @tc.name: OnScreenExtendChange
+ * @tc.desc: OnScreenExtendChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, OnScreenExtendChange, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+
+    ssm_->OnScreenExtendChange(0, 12);
+    ASSERT_EQ(ssm_->cameraStatus_, 1);
+}
+
+/**
+ * @tc.name: GetSessionOption
+ * @tc.desc: GetSessionOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetSessionOption, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+
+    auto session = ssm_->GetScreenSession(0);
+    auto ret = ssm_->GetSessionOption(session);
+    ASSERT_EQ(ret.screenId_, 0);
+
+    ret = ssm_->GetSessionOption(session, 0);
+    ASSERT_EQ(ret.screenId_, 0);
+}
+
+/**
  * @tc.name: NotifyCastWhenSwitchScbNode
  * @tc.desc: NotifyCastWhenSwitchScbNode
  * @tc.type: FUNC
