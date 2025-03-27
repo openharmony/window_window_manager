@@ -151,7 +151,7 @@ HWTEST_F(WindowRecoverManagerTest, RecoverAndReconnectSceneSession02, Function |
  * @tc.desc: RecoverAndReconnectSceneSession
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRecoverManagerTest , RecoverAndReconnectSceneSession, Function | SmallTest | Level2)
+HWTEST_F(WindowRecoverManagerTest, RecoverAndReconnectSceneSession, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("RecoverAndReconnectSceneSession");
