@@ -59,7 +59,7 @@ namespace {
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, CreateAndConnectSpecificSession, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, CreateAndConnectSpecificSession, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
@@ -87,7 +87,7 @@ HWTEST_F(sceneSessionManagerProxyTest, CreateAndConnectSpecificSession, Function
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, CreateAndConnectSpecificSession2, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, CreateAndConnectSpecificSession2, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
@@ -114,7 +114,7 @@ HWTEST_F(sceneSessionManagerProxyTest, CreateAndConnectSpecificSession2, Functio
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, CreateAndConnectSpecificSession3, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, CreateAndConnectSpecificSession3, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
@@ -142,7 +142,7 @@ HWTEST_F(sceneSessionManagerProxyTest, CreateAndConnectSpecificSession3, Functio
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, CreateAndConnectSpecificSession4, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, CreateAndConnectSpecificSession4, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
@@ -170,12 +170,10 @@ HWTEST_F(sceneSessionManagerProxyTest, CreateAndConnectSpecificSession4, Functio
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, RecoverAndConnectSpecificSession, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, RecoverAndConnectSpecificSession, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
-        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
-    EXPECT_NE(sceneSessionManagerProxy, nullptr);
+    auto sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
 
     sptr<ISessionStage> sessionStage = sptr<SessionStageMocker>::MakeSptr();
     sptr<IWindowEventChannel> eventChannel = sptr<WindowEventChannelMocker>::MakeSptr(sessionStage);
@@ -196,12 +194,10 @@ HWTEST_F(sceneSessionManagerProxyTest, RecoverAndConnectSpecificSession, Functio
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, RecoverAndConnectSpecificSession2, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, RecoverAndConnectSpecificSession2, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
-        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
-    EXPECT_NE(sceneSessionManagerProxy, nullptr);
+    auto sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
 
     sptr<ISessionStage> sessionStage = sptr<SessionStageMocker>::MakeSptr();
     sptr<IWindowEventChannel> eventChannel = sptr<WindowEventChannelMocker>::MakeSptr(sessionStage);
@@ -222,12 +218,10 @@ HWTEST_F(sceneSessionManagerProxyTest, RecoverAndConnectSpecificSession2, Functi
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, RecoverAndConnectSpecificSession3, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, RecoverAndConnectSpecificSession3, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
-        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
-    EXPECT_NE(sceneSessionManagerProxy, nullptr);
+    auto sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
 
     sptr<ISessionStage> sessionStage = sptr<SessionStageMocker>::MakeSptr();
     sptr<IWindowEventChannel> eventChannel = sptr<WindowEventChannelMocker>::MakeSptr(sessionStage);
@@ -248,12 +242,10 @@ HWTEST_F(sceneSessionManagerProxyTest, RecoverAndConnectSpecificSession3, Functi
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, RecoverAndReconnectSceneSession, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, RecoverAndReconnectSceneSession, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
-        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
-    EXPECT_NE(sceneSessionManagerProxy, nullptr);
+    auto sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
 
     sptr<ISessionStage> sessionStage = sptr<SessionStageMocker>::MakeSptr();
     sptr<IWindowEventChannel> eventChannel = sptr<WindowEventChannelMocker>::MakeSptr(sessionStage);
@@ -274,12 +266,10 @@ HWTEST_F(sceneSessionManagerProxyTest, RecoverAndReconnectSceneSession, Function
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, RecoverAndReconnectSceneSession2, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, RecoverAndReconnectSceneSession2, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
-        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
-    EXPECT_NE(sceneSessionManagerProxy, nullptr);
+    auto sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
 
     sptr<ISessionStage> sessionStage = sptr<SessionStageMocker>::MakeSptr();
     sptr<IWindowEventChannel> eventChannel = sptr<WindowEventChannelMocker>::MakeSptr(sessionStage);
@@ -300,12 +290,10 @@ HWTEST_F(sceneSessionManagerProxyTest, RecoverAndReconnectSceneSession2, Functio
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, RecoverAndReconnectSceneSession3, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, RecoverAndReconnectSceneSession3, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
-        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
-    EXPECT_NE(sceneSessionManagerProxy, nullptr);
+    auto sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
 
     sptr<ISessionStage> sessionStage = sptr<SessionStageMocker>::MakeSptr();
     sptr<IWindowEventChannel> eventChannel = sptr<WindowEventChannelMocker>::MakeSptr(sessionStage);
@@ -326,7 +314,7 @@ HWTEST_F(sceneSessionManagerProxyTest, RecoverAndReconnectSceneSession3, Functio
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, DestroyAndDisconnectSpecificSession, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, DestroyAndDisconnectSpecificSession, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
@@ -345,7 +333,7 @@ HWTEST_F(sceneSessionManagerProxyTest, DestroyAndDisconnectSpecificSession, Func
 HWTEST_F(
     sceneSessionManagerProxyTest,
     DestroyAndDisconnectSpecificSessionWithDetachCallback,
-    Function | SmallTest | Level2
+    TestSize.Level1
 )
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
@@ -364,7 +352,7 @@ HWTEST_F(
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, UpdateSessionTouchOutsideListener, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, UpdateSessionTouchOutsideListener, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
@@ -382,12 +370,10 @@ HWTEST_F(sceneSessionManagerProxyTest, UpdateSessionTouchOutsideListener, Functi
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, SkipSnapshotForAppProcess, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, SkipSnapshotForAppProcess, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
-        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
-    EXPECT_NE(sceneSessionManagerProxy, nullptr);
+    auto sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
 
     int32_t pid = 1000;
     bool skip = false;
@@ -399,7 +385,7 @@ HWTEST_F(sceneSessionManagerProxyTest, SkipSnapshotForAppProcess, Function | Sma
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, SetGestureNavigationEnabled, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, SetGestureNavigationEnabled, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
@@ -416,7 +402,7 @@ HWTEST_F(sceneSessionManagerProxyTest, SetGestureNavigationEnabled, Function | S
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, GetFocusWindowInfo, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, GetFocusWindowInfo, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
@@ -433,7 +419,7 @@ HWTEST_F(sceneSessionManagerProxyTest, GetFocusWindowInfo, Function | SmallTest 
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, SetSessionIcon, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, SetSessionIcon, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
@@ -451,7 +437,7 @@ HWTEST_F(sceneSessionManagerProxyTest, SetSessionIcon, Function | SmallTest | Le
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, GetAccessibilityWindowInfo, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, GetAccessibilityWindowInfo, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
@@ -468,7 +454,7 @@ HWTEST_F(sceneSessionManagerProxyTest, GetAccessibilityWindowInfo, Function | Sm
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, GetUnreliableWindowInfo, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, GetUnreliableWindowInfo, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
@@ -485,7 +471,7 @@ HWTEST_F(sceneSessionManagerProxyTest, GetUnreliableWindowInfo, Function | Small
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, GetSessionInfos, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, GetSessionInfos, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
@@ -503,7 +489,7 @@ HWTEST_F(sceneSessionManagerProxyTest, GetSessionInfos, Function | SmallTest | L
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, GetSessionInfo, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, GetSessionInfo, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
@@ -521,14 +507,12 @@ HWTEST_F(sceneSessionManagerProxyTest, GetSessionInfo, Function | SmallTest | Le
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, RegisterWindowManagerAgent01, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, RegisterWindowManagerAgent01, TestSize.Level1)
 {
     sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgent>::MakeSptr();
     WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS;
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
-        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
-    EXPECT_NE(sceneSessionManagerProxy, nullptr);
+    auto sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
 
     ASSERT_EQ(WMError::WM_OK, sceneSessionManagerProxy->RegisterWindowManagerAgent(type, windowManagerAgent));
     ASSERT_EQ(WMError::WM_OK, sceneSessionManagerProxy->UnregisterWindowManagerAgent(type, windowManagerAgent));
@@ -539,7 +523,7 @@ HWTEST_F(sceneSessionManagerProxyTest, RegisterWindowManagerAgent01, Function | 
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, UpdateModalExtensionRect, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, UpdateModalExtensionRect, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     ASSERT_NE(iRemoteObjectMocker, nullptr);
@@ -559,7 +543,7 @@ HWTEST_F(sceneSessionManagerProxyTest, UpdateModalExtensionRect, Function | Smal
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, ProcessModalExtensionPointDown, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, ProcessModalExtensionPointDown, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     ASSERT_NE(iRemoteObjectMocker, nullptr);
@@ -578,7 +562,7 @@ HWTEST_F(sceneSessionManagerProxyTest, ProcessModalExtensionPointDown, Function 
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, AddExtensionWindowStageToSCB, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, AddExtensionWindowStageToSCB, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     ASSERT_NE(iRemoteObjectMocker, nullptr);
@@ -598,7 +582,7 @@ HWTEST_F(sceneSessionManagerProxyTest, AddExtensionWindowStageToSCB, Function | 
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, RemoveExtensionWindowStageFromSCB, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, RemoveExtensionWindowStageFromSCB, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     ASSERT_NE(iRemoteObjectMocker, nullptr);
@@ -618,12 +602,10 @@ HWTEST_F(sceneSessionManagerProxyTest, RemoveExtensionWindowStageFromSCB, Functi
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, AddOrRemoveSecureSession001, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, AddOrRemoveSecureSession001, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
-        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
-    EXPECT_NE(sceneSessionManagerProxy, nullptr);
+    auto sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
 
     int32_t persistentId = 12345;
     ASSERT_EQ(WSError::WS_OK, sceneSessionManagerProxy->AddOrRemoveSecureSession(persistentId, true));
@@ -634,15 +616,12 @@ HWTEST_F(sceneSessionManagerProxyTest, AddOrRemoveSecureSession001, Function | S
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, UpdateExtWindowFlags, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, UpdateExtWindowFlags, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
-        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
-    EXPECT_NE(sceneSessionManagerProxy, nullptr);
+    auto sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
 
     sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
-    ASSERT_NE(token, nullptr);
     ASSERT_EQ(WSError::WS_OK, sceneSessionManagerProxy->UpdateExtWindowFlags(token, 7, 7));
     ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, sceneSessionManagerProxy->UpdateExtWindowFlags(nullptr, 7, 7));
 }
@@ -652,12 +631,10 @@ HWTEST_F(sceneSessionManagerProxyTest, UpdateExtWindowFlags, Function | SmallTes
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, GetSessionInfoByContinueSessionId, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, GetSessionInfoByContinueSessionId, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
-        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
-    EXPECT_NE(sceneSessionManagerProxy, nullptr);
+    auto sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
 
     std::string continueSessionId = "test_01";
     SessionInfoBean missionInfo;
@@ -670,17 +647,33 @@ HWTEST_F(sceneSessionManagerProxyTest, GetSessionInfoByContinueSessionId, Functi
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, RequestFocusStatus01, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, RequestFocusStatus01, TestSize.Level1)
 {
     int32_t persistendId = 0;
     bool isFocused = true;
     bool byForeground = true;
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
-        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
-    EXPECT_NE(sceneSessionManagerProxy, nullptr);
+    auto sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
 
     ASSERT_EQ(WMError::WM_OK, sceneSessionManagerProxy->RequestFocusStatus(persistendId, isFocused, byForeground));
+}
+
+/**
+ * @tc.name: RequestFocusStatusBySA01
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, RequestFocusStatusBySA01, TestSize.Level1)
+{
+    FocusChangeReason reason = FocusChangeReason::CLICK;
+    int32_t persistendId = 0;
+    bool isFocused = true;
+    bool byForeground = true;
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    auto sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+    auto result = sceneSessionManagerProxy->SceneSessionManagerProxy::RequestFocusStatusBySA(
+        persistendId, isFocused, byForeground, reason);
+    ASSERT_EQ(WMError::WM_OK, result);
 }
 
 /**
@@ -688,13 +681,11 @@ HWTEST_F(sceneSessionManagerProxyTest, RequestFocusStatus01, Function | SmallTes
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, RaiseWindowToTop, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, RaiseWindowToTop, TestSize.Level1)
 {
     int32_t persistendId = 0;
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
-        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
-    EXPECT_NE(sceneSessionManagerProxy, nullptr);
+    auto sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
 
     ASSERT_EQ(WSError::WS_OK, sceneSessionManagerProxy->RaiseWindowToTop(persistendId));
 }
@@ -704,7 +695,7 @@ HWTEST_F(sceneSessionManagerProxyTest, RaiseWindowToTop, Function | SmallTest | 
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, BindDialogSessionTarget, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, BindDialogSessionTarget, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
@@ -721,7 +712,7 @@ HWTEST_F(sceneSessionManagerProxyTest, BindDialogSessionTarget, Function | Small
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, BindDialogSessionTarget2, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, BindDialogSessionTarget2, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
@@ -738,14 +729,12 @@ HWTEST_F(sceneSessionManagerProxyTest, BindDialogSessionTarget2, Function | Smal
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, UpdateSessionAvoidAreaListener, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, UpdateSessionAvoidAreaListener, TestSize.Level1)
 {
     int32_t persistendId = 0;
     bool haveListener = true;
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
-        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
-    EXPECT_NE(sceneSessionManagerProxy, nullptr);
+    auto sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
 
     ASSERT_EQ(WSError::WS_OK, sceneSessionManagerProxy->UpdateSessionAvoidAreaListener(persistendId,
         haveListener));
@@ -756,14 +745,12 @@ HWTEST_F(sceneSessionManagerProxyTest, UpdateSessionAvoidAreaListener, Function 
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, SetSessionLabel, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, SetSessionLabel, TestSize.Level1)
 {
     sptr<IRemoteObject> token = nullptr;
     std::string label = "SetSessionLabel";
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
-        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
-    EXPECT_NE(sceneSessionManagerProxy, nullptr);
+    auto sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
 
     ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, sceneSessionManagerProxy->SetSessionLabel(token, label));
 }
@@ -773,14 +760,12 @@ HWTEST_F(sceneSessionManagerProxyTest, SetSessionLabel, Function | SmallTest | L
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, IsValidSessionIds, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, IsValidSessionIds, TestSize.Level1)
 {
     std::vector<int32_t> sessionIds;
     std::vector<bool> results;
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
-        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
-    EXPECT_NE(sceneSessionManagerProxy, nullptr);
+    auto sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
 
     ASSERT_EQ(WSError::WS_OK, sceneSessionManagerProxy->IsValidSessionIds(sessionIds, results));
 }
@@ -790,13 +775,11 @@ HWTEST_F(sceneSessionManagerProxyTest, IsValidSessionIds, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, RegisterSessionListener01, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, RegisterSessionListener01, TestSize.Level1)
 {
     sptr<ISessionListener> listener = nullptr;
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
-        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
-    EXPECT_NE(sceneSessionManagerProxy, nullptr);
+    auto sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
 
     ASSERT_EQ(WSError::WS_ERROR_INVALID_PARAM, sceneSessionManagerProxy->RegisterSessionListener(listener));
 }
@@ -806,13 +789,11 @@ HWTEST_F(sceneSessionManagerProxyTest, RegisterSessionListener01, Function | Sma
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, UnRegisterSessionListener, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, UnRegisterSessionListener, TestSize.Level1)
 {
     sptr<ISessionListener> listener = nullptr;
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
-        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
-    EXPECT_NE(sceneSessionManagerProxy, nullptr);
+    auto sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
 
     ASSERT_EQ(WSError::WS_ERROR_INVALID_PARAM, sceneSessionManagerProxy->UnRegisterSessionListener(listener));
 }
@@ -822,13 +803,10 @@ HWTEST_F(sceneSessionManagerProxyTest, UnRegisterSessionListener, Function | Sma
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, GetSnapshotByWindowId, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, GetSnapshotByWindowId, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    ASSERT_NE(iRemoteObjectMocker, nullptr);
-    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
-        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
-    ASSERT_NE(sceneSessionManagerProxy, nullptr);
+    auto sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
     int32_t windowId = -1;
     std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
     WMError ret = sceneSessionManagerProxy->GetSnapshotByWindowId(windowId, pixelMap);
@@ -840,13 +818,10 @@ HWTEST_F(sceneSessionManagerProxyTest, GetSnapshotByWindowId, Function | SmallTe
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, GetSessionSnapshotById, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, GetSessionSnapshotById, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    ASSERT_NE(iRemoteObjectMocker, nullptr);
-    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
-        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
-    ASSERT_NE(sceneSessionManagerProxy, nullptr);
+    auto sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
     int32_t windowId = -1;
     SessionSnapshot snapshot;
     WMError ret = sceneSessionManagerProxy->GetSessionSnapshotById(windowId, snapshot);
@@ -858,13 +833,11 @@ HWTEST_F(sceneSessionManagerProxyTest, GetSessionSnapshotById, Function | SmallT
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, TerminateSessionNew, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, TerminateSessionNew, TestSize.Level1)
 {
     sptr<ISessionListener> listener = nullptr;
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
-        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
-    EXPECT_NE(sceneSessionManagerProxy, nullptr);
+    auto sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
 
     ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, sceneSessionManagerProxy->TerminateSessionNew(nullptr, true, true));
 }
@@ -874,14 +847,12 @@ HWTEST_F(sceneSessionManagerProxyTest, TerminateSessionNew, Function | SmallTest
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, GetSessionDumpInfo, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, GetSessionDumpInfo, TestSize.Level1)
 {
     std::vector<std::string> params;
     std::string info = "info";
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
-        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
-    EXPECT_NE(sceneSessionManagerProxy, nullptr);
+    auto sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
 
     ASSERT_EQ(WSError::WS_OK, sceneSessionManagerProxy->GetSessionDumpInfo(params, info));
 }
@@ -891,12 +862,10 @@ HWTEST_F(sceneSessionManagerProxyTest, GetSessionDumpInfo, Function | SmallTest 
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, LockSession, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, LockSession, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
-        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
-    EXPECT_NE(sceneSessionManagerProxy, nullptr);
+    auto sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
 
     ASSERT_EQ(WSError::WS_OK, sceneSessionManagerProxy->LockSession(0));
 }
@@ -906,12 +875,10 @@ HWTEST_F(sceneSessionManagerProxyTest, LockSession, Function | SmallTest | Level
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, GetUIContentRemoteObj, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, GetUIContentRemoteObj, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    ASSERT_NE(iRemoteObjectMocker, nullptr);
-    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
-        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+    auto sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
     sptr<IRemoteObject> remoteObj;
     ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, sceneSessionManagerProxy->GetUIContentRemoteObj(1, remoteObj));
 }
@@ -921,12 +888,10 @@ HWTEST_F(sceneSessionManagerProxyTest, GetUIContentRemoteObj, Function | SmallTe
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, ClearSession, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, ClearSession, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
-        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
-    EXPECT_NE(sceneSessionManagerProxy, nullptr);
+    auto sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
 
     ASSERT_EQ(WSError::WS_OK, sceneSessionManagerProxy->LockSession(0));
 }
@@ -936,13 +901,11 @@ HWTEST_F(sceneSessionManagerProxyTest, ClearSession, Function | SmallTest | Leve
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, RegisterIAbilityManagerCollaborator, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, RegisterIAbilityManagerCollaborator, TestSize.Level1)
 {
     sptr<AAFwk::IAbilityManagerCollaborator> impl = nullptr;
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
-        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
-    EXPECT_NE(sceneSessionManagerProxy, nullptr);
+    auto sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
 
     ASSERT_EQ(WSError::WS_ERROR_INVALID_PARAM, sceneSessionManagerProxy->RegisterIAbilityManagerCollaborator(0, impl));
 }
@@ -952,12 +915,10 @@ HWTEST_F(sceneSessionManagerProxyTest, RegisterIAbilityManagerCollaborator, Func
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, NotifyWindowExtensionVisibilityChange, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, NotifyWindowExtensionVisibilityChange, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
-        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
-    EXPECT_NE(sceneSessionManagerProxy, nullptr);
+    auto sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
 
     ASSERT_EQ(WSError::WS_OK, sceneSessionManagerProxy->NotifyWindowExtensionVisibilityChange(0, 0, true));
 }
@@ -967,12 +928,10 @@ HWTEST_F(sceneSessionManagerProxyTest, NotifyWindowExtensionVisibilityChange, Fu
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, GetTopWindowId, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, GetTopWindowId, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
-        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
-    EXPECT_NE(sceneSessionManagerProxy, nullptr);
+    auto sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
 
     uint32_t topWinId = 1;
     ASSERT_EQ(WMError::WM_OK, sceneSessionManagerProxy->GetTopWindowId(0, topWinId));
@@ -983,12 +942,10 @@ HWTEST_F(sceneSessionManagerProxyTest, GetTopWindowId, Function | SmallTest | Le
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, GetWindowStyleType, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, GetWindowStyleType, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
-            sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
-    EXPECT_NE(sceneSessionManagerProxy, nullptr);
+    auto sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
 
     WindowStyleType styleType;
     ASSERT_EQ(WMError::WM_OK, sceneSessionManagerProxy->GetWindowStyleType(styleType));
@@ -999,12 +956,10 @@ HWTEST_F(sceneSessionManagerProxyTest, GetWindowStyleType, Function | SmallTest 
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, SetProcessWatermark, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, SetProcessWatermark, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
-        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
-    EXPECT_NE(sceneSessionManagerProxy, nullptr);
+    auto sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
 
     int32_t pid = 1000;
     const std::string watermarkName = "SetProcessWatermarkName";
@@ -1013,16 +968,33 @@ HWTEST_F(sceneSessionManagerProxyTest, SetProcessWatermark, Function | SmallTest
 }
 
 /**
+ * @tc.name: GetWindowIdsByCoordinate
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, GetWindowIdsByCoordinate, TestSize.Level1)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    auto sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+
+    int64_t displayId = 1000;
+    int32_t windowNumber = 2;
+    int32_t x = 0;
+    int32_t y = 0;
+    std::vector<int32_t> windowIds;
+    WMError res = sceneSessionManagerProxy->GetWindowIdsByCoordinate(displayId, windowNumber, x, y, windowIds);
+    ASSERT_EQ(WMError::WM_OK, res);
+}
+
+/**
  * @tc.name: GetProcessSurfaceNodeIdByPersistentId
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, GetProcessSurfaceNodeIdByPersistentId, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, GetProcessSurfaceNodeIdByPersistentId, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
-            sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
-    EXPECT_NE(sceneSessionManagerProxy, nullptr);
+    auto sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
 
     int32_t pid = 123;
     std::vector<int32_t> persistentIds = {1, 2, 3};
@@ -1036,12 +1008,10 @@ HWTEST_F(sceneSessionManagerProxyTest, GetProcessSurfaceNodeIdByPersistentId, Fu
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, SkipSnapshotByUserIdAndBundleNames, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, SkipSnapshotByUserIdAndBundleNames, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
-        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
-    EXPECT_NE(sceneSessionManagerProxy, nullptr);
+    auto sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
 
     int32_t userId = 1;
     std::vector<std::string> bundleNameList = {"a", "b", "c"};
@@ -1050,17 +1020,17 @@ HWTEST_F(sceneSessionManagerProxyTest, SkipSnapshotByUserIdAndBundleNames, Funct
 }
 
 /**
- * @tc.name: ReleaseForegroundSessionScreenLock
+ * @tc.name: UpdateScreenLockStatusForApp
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, ReleaseForegroundSessionScreenLock, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, UpdateScreenLockStatusForApp, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
         sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
     EXPECT_NE(sceneSessionManagerProxy, nullptr);
-    ASSERT_EQ(sceneSessionManagerProxy->ReleaseForegroundSessionScreenLock(), WMError::WM_OK);
+    ASSERT_EQ(sceneSessionManagerProxy->UpdateScreenLockStatusForApp("", true), WMError::WM_OK);
 }
 
 /**
@@ -1068,7 +1038,7 @@ HWTEST_F(sceneSessionManagerProxyTest, ReleaseForegroundSessionScreenLock, Funct
  * @tc.desc: IsPcWindow
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, IsPcWindow, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, IsPcWindow, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     auto sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
@@ -1083,12 +1053,10 @@ HWTEST_F(sceneSessionManagerProxyTest, IsPcWindow, Function | SmallTest | Level2
  * @tc.desc: IsPcOrPadFreeMultiWindowMode
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, IsPcOrPadFreeMultiWindowMode, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, IsPcOrPadFreeMultiWindowMode, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
-        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
-    EXPECT_NE(sceneSessionManagerProxy, nullptr);
+    auto sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
     bool isPcOrPadFreeMultiWindowMode = false;
     ASSERT_EQ(sceneSessionManagerProxy->IsPcOrPadFreeMultiWindowMode(isPcOrPadFreeMultiWindowMode),
         WMError::WM_ERROR_IPC_FAILED);
@@ -1100,14 +1068,15 @@ HWTEST_F(sceneSessionManagerProxyTest, IsPcOrPadFreeMultiWindowMode, Function | 
  * @tc.desc: IsWindowRectAutoSave
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, IsWindowRectAutoSave, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, IsWindowRectAutoSave, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
         sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
     bool enabled = false;
     std::string key = "com.example.recposentryEntryAbility";
-    ASSERT_EQ(sceneSessionManagerProxy->IsWindowRectAutoSave(key, enabled), WMError::WM_ERROR_IPC_FAILED);
+    int persistentId = 1;
+    ASSERT_EQ(sceneSessionManagerProxy->IsWindowRectAutoSave(key, enabled, persistentId), WMError::WM_ERROR_IPC_FAILED);
 }
 
 /**
@@ -1115,7 +1084,7 @@ HWTEST_F(sceneSessionManagerProxyTest, IsWindowRectAutoSave, Function | SmallTes
  * @tc.desc: GetDisplayIdByWindowId
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, GetDisplayIdByWindowId, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, GetDisplayIdByWindowId, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
@@ -1131,7 +1100,7 @@ HWTEST_F(sceneSessionManagerProxyTest, GetDisplayIdByWindowId, Function | SmallT
  * @tc.desc: SetGlobalDragResizeType
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, SetGlobalDragResizeType, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, SetGlobalDragResizeType, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
@@ -1146,7 +1115,7 @@ HWTEST_F(sceneSessionManagerProxyTest, SetGlobalDragResizeType, Function | Small
  * @tc.desc: GetGlobalDragResizeType
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, GetGlobalDragResizeType, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, GetGlobalDragResizeType, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
@@ -1161,7 +1130,7 @@ HWTEST_F(sceneSessionManagerProxyTest, GetGlobalDragResizeType, Function | Small
  * @tc.desc: SetAppDragResizeType
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, SetAppDragResizeType, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, SetAppDragResizeType, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
@@ -1177,7 +1146,7 @@ HWTEST_F(sceneSessionManagerProxyTest, SetAppDragResizeType, Function | SmallTes
  * @tc.desc: GetAppDragResizeType
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, GetAppDragResizeType, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, GetAppDragResizeType, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
@@ -1189,6 +1158,342 @@ HWTEST_F(sceneSessionManagerProxyTest, GetAppDragResizeType, Function | SmallTes
     std::unordered_map<std::string, DragResizeType> appDragResizeTypeMap_;
     appDragResizeTypeMap_[bundleName] = toDragResizeType;
     sceneSessionManagerProxy->GetAppDragResizeType(bundleName, dragResizeType);
+}
+
+/**
+ * @tc.name: SetAppKeyFramePolicy
+ * @tc.desc: SetAppKeyFramePolicy
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, SetAppKeyFramePolicy, TestSize.Level1)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_TRUE(sceneSessionManagerProxy != nullptr);
+    const std::string bundleName = "test";
+    KeyFramePolicy keyFramePolicy;
+    keyFramePolicy.dragResizeType_ = DragResizeType::RESIZE_KEY_FRAME;
+    WMError res = sceneSessionManagerProxy->SetAppKeyFramePolicy(bundleName, keyFramePolicy);
+    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, res);
+}
+
+/**
+ * @tc.name: GetFocusSessionToken
+ * @tc.desc: GetFocusSessionToken
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, GetFocusSessionToken, TestSize.Level1)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+
+    sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
+    DisplayId displayId = 1000;
+    WSError res = sceneSessionManagerProxy->GetFocusSessionToken(token, displayId);
+    ASSERT_EQ(WSError::WS_OK, res);
+    sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(nullptr);
+    res = sceneSessionManagerProxy->GetFocusSessionToken(token, displayId);
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
+}
+
+/**
+ * @tc.name: GetFocusSessionElement
+ * @tc.desc: GetFocusSessionElement
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, GetFocusSessionElement, TestSize.Level1)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+
+    std::string device = "deviceTest";
+    std::string bundle = "bundleTest";
+    std::string ability = "abilityTest";
+    OHOS::AppExecFwk::ElementName element(device, bundle, ability);
+    DisplayId displayId = 1000;
+    WSError res = sceneSessionManagerProxy->GetFocusSessionElement(element, displayId);
+    ASSERT_EQ(WSError::WS_OK, res);
+    sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(nullptr);
+    res = sceneSessionManagerProxy->GetFocusSessionElement(element, displayId);
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
+}
+
+/**
+ * @tc.name: GetSessionSnapshot
+ * @tc.desc: GetSessionSnapshot
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, GetSessionSnapshot, TestSize.Level1)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+
+    std::string deviceId;
+    int32_t persistentId = 0;
+    SessionSnapshot snapshot;
+    bool isLowResolution = true;
+    WSError res = sceneSessionManagerProxy->GetSessionSnapshot(deviceId, persistentId, snapshot, isLowResolution);
+    ASSERT_EQ(WSError::WS_OK, res);
+    sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(nullptr);
+    res = sceneSessionManagerProxy->GetSessionSnapshot(deviceId, persistentId, snapshot, isLowResolution);
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
+}
+
+/**
+ * @tc.name: SetSessionContinueState
+ * @tc.desc: SetSessionContinueState
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, SetSessionContinueState, TestSize.Level1)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+
+    sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
+    int32_t tempcontinueState = 0;
+    ContinueState continueState = static_cast<ContinueState>(tempcontinueState);
+    WSError res = sceneSessionManagerProxy->SetSessionContinueState(token, continueState);
+    ASSERT_EQ(WSError::WS_OK, res);
+    sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(nullptr);
+    res = sceneSessionManagerProxy->SetSessionContinueState(token, continueState);
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
+}
+
+/**
+ * @tc.name: UnlockSession
+ * @tc.desc: UnlockSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, UnlockSession, TestSize.Level1)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+
+    int32_t sessionId = 0;
+    WSError res = sceneSessionManagerProxy->UnlockSession(sessionId);
+    ASSERT_EQ(WSError::WS_OK, res);
+    sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(nullptr);
+    res = sceneSessionManagerProxy->UnlockSession(sessionId);
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
+}
+
+/**
+ * @tc.name: MoveSessionsToForeground
+ * @tc.desc: MoveSessionsToForeground
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, MoveSessionsToForeground, TestSize.Level1)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+
+    std::vector<int32_t> sessionIds;
+    int32_t topSessionId = 0;
+    WSError res = sceneSessionManagerProxy->MoveSessionsToForeground(sessionIds, topSessionId);
+    ASSERT_EQ(WSError::WS_OK, res);
+    sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(nullptr);
+    res = sceneSessionManagerProxy->MoveSessionsToForeground(sessionIds, topSessionId);
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
+}
+
+/**
+ * @tc.name: MoveSessionsToBackground
+ * @tc.desc: MoveSessionsToBackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, MoveSessionsToBackground, TestSize.Level1)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+
+    std::vector<int32_t> sessionIds;
+    std::vector<int32_t> result;
+    WSError res = sceneSessionManagerProxy->MoveSessionsToBackground(sessionIds, result);
+    ASSERT_EQ(WSError::WS_OK, res);
+    sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(nullptr);
+    res = sceneSessionManagerProxy->MoveSessionsToBackground(sessionIds, result);
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
+}
+
+/**
+ * @tc.name: ClearAllSessions
+ * @tc.desc: ClearAllSessions
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, ClearAllSessions, TestSize.Level1)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+
+    WSError res = sceneSessionManagerProxy->ClearAllSessions();
+    ASSERT_EQ(WSError::WS_OK, res);
+    sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(nullptr);
+    res = sceneSessionManagerProxy->ClearAllSessions();
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
+}
+
+/**
+ * @tc.name: UnregisterIAbilityManagerCollaborator
+ * @tc.desc: UnregisterIAbilityManagerCollaborator
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, UnregisterIAbilityManagerCollaborator, TestSize.Level1)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+
+    int32_t type = 0;
+    WSError res = sceneSessionManagerProxy->UnregisterIAbilityManagerCollaborator(type);
+    ASSERT_EQ(WSError::WS_OK, res);
+    sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(nullptr);
+    res = sceneSessionManagerProxy->UnregisterIAbilityManagerCollaborator(type);
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
+}
+
+/**
+ * @tc.name: NotifyWatchGestureConsumeResult
+ * @tc.desc: NotifyWatchGestureConsumeResult
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, NotifyWatchGestureConsumeResult, TestSize.Level1)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+
+    int32_t keyCode = 0;
+    bool isConsumed = true;
+    WMError res = sceneSessionManagerProxy->NotifyWatchGestureConsumeResult(keyCode, isConsumed);
+    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, res);
+}
+
+/**
+ * @tc.name: NotifyWatchFocusActiveChange
+ * @tc.desc: NotifyWatchFocusActiveChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, NotifyWatchFocusActiveChange, TestSize.Level1)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+
+    bool isActive = true;
+    WMError res = sceneSessionManagerProxy->NotifyWatchFocusActiveChange(isActive);
+    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, res);
+}
+
+/**
+ * @tc.name: GetParentMainWindowId
+ * @tc.desc: GetParentMainWindowId
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, GetParentMainWindowId, TestSize.Level1)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+
+    int32_t windowId = 0;
+    int32_t mainWindowId = 0;
+    WMError res = sceneSessionManagerProxy->GetParentMainWindowId(windowId, mainWindowId);
+    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, res);
+}
+
+/**
+ * @tc.name: ListWindowInfo
+ * @tc.desc: ListWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, ListWindowInfo, TestSize.Level1)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+
+    WindowInfoOption windowInfoOption;
+    std::vector<sptr<WindowInfo>> infos;
+    WMError res = sceneSessionManagerProxy->ListWindowInfo(windowInfoOption, infos);
+    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, res);
+}
+
+/**
+ * @tc.name: GetWindowModeType
+ * @tc.desc: GetWindowModeType
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, GetWindowModeType, TestSize.Level1)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+
+    WindowModeType windowModeType;
+    WMError res = sceneSessionManagerProxy->GetWindowModeType(windowModeType);
+    ASSERT_EQ(WMError::WM_OK, res);
+    sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(nullptr);
+    res = sceneSessionManagerProxy->GetWindowModeType(windowModeType);
+    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, res);
+}
+
+/**
+ * @tc.name: SetParentWindow
+ * @tc.desc: SetParentWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, SetParentWindow, TestSize.Level1)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+
+    int32_t subWindowId = 1;
+    int32_t newParentWindowId = 2;
+    WMError res = sceneSessionManagerProxy->SetParentWindow(subWindowId, newParentWindowId);
+    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, res);
+}
+
+/**
+ * @tc.name: MinimizeByWindowId
+ * @tc.desc: MinimizeByWindowId
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, MinimizeByWindowId, TestSize.Level1)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    auto sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+    std::vector<int32_t> windowIds;
+    WMError res = sceneSessionManagerProxy->MinimizeByWindowId(windowIds);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, res);
+}
+
+/**
+ * @tc.name: SetForegroundWindowNum
+ * @tc.desc: SetForegroundWindowNum
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, SetForegroundWindowNum, TestSize.Level1)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+
+    int32_t windowNum = 1;
+    WMError res = sceneSessionManagerProxy->SetForegroundWindowNum(windowNum);
+    ASSERT_EQ(WMError::WM_OK, res);
+    sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(nullptr);
+    res = sceneSessionManagerProxy->SetForegroundWindowNum(windowNum);
+    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, res);
 }
 }  // namespace
 }

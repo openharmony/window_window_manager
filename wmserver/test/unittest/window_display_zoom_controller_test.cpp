@@ -55,7 +55,7 @@ namespace {
  * @tc.desc: test WindowDisplayZoomController
  * @tc.type: FUNC
  */
-HWTEST_F(WindowDisplayZoomControllerTest, WindowDisplayZoomControllerTest01, Function | SmallTest | Level2)
+HWTEST_F(WindowDisplayZoomControllerTest, WindowDisplayZoomControllerTest01, TestSize.Level1)
 {
     DisplayId displayId;
     uint32_t windowId;
@@ -89,7 +89,7 @@ HWTEST_F(WindowDisplayZoomControllerTest, WindowDisplayZoomControllerTest01, Fun
  * @tc.desc: test WindowDisplayZoomController
  * @tc.type: FUNC
  */
-HWTEST_F(WindowDisplayZoomControllerTest, WindowDisplayZoomControllerTest02, Function | SmallTest | Level2)
+HWTEST_F(WindowDisplayZoomControllerTest, WindowDisplayZoomControllerTest02, TestSize.Level1)
 {
     DisplayId displayId = 0;
     displayController_->SetAnchorAndScale(1, 1, -1);

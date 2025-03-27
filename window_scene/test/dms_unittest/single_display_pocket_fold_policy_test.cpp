@@ -63,7 +63,7 @@ namespace {
  * @tc.desc: test function : ChangeScreenDisplayMode
  * @tc.type: FUNC
  */
-HWTEST_F(SingleDisplayPocketFoldPolicyTest, ChangeScreenDisplayMode, Function | SmallTest | Level3)
+HWTEST_F(SingleDisplayPocketFoldPolicyTest, ChangeScreenDisplayMode, TestSize.Level1)
 {
     std::recursive_mutex displayInfoMutex;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
@@ -91,7 +91,7 @@ HWTEST_F(SingleDisplayPocketFoldPolicyTest, ChangeScreenDisplayMode, Function | 
  * @tc.desc: test function : SendSensorResult
  * @tc.type: FUNC
  */
-HWTEST_F(SingleDisplayPocketFoldPolicyTest, SendSensorResult, Function | SmallTest | Level3)
+HWTEST_F(SingleDisplayPocketFoldPolicyTest, SendSensorResult, TestSize.Level1)
 {
     std::recursive_mutex displayInfoMutex;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
@@ -107,7 +107,7 @@ HWTEST_F(SingleDisplayPocketFoldPolicyTest, SendSensorResult, Function | SmallTe
  * @tc.desc: test function : GetCurrentFoldCreaseRegion
  * @tc.type: FUNC
  */
-HWTEST_F(SingleDisplayPocketFoldPolicyTest, GetCurrentFoldCreaseRegion, Function | SmallTest | Level3)
+HWTEST_F(SingleDisplayPocketFoldPolicyTest, GetCurrentFoldCreaseRegion, TestSize.Level1)
 {
     std::recursive_mutex displayInfoMutex;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
@@ -123,7 +123,7 @@ HWTEST_F(SingleDisplayPocketFoldPolicyTest, GetCurrentFoldCreaseRegion, Function
  * @tc.desc: test function : LockDisplayStatus
  * @tc.type: FUNC
  */
-HWTEST_F(SingleDisplayPocketFoldPolicyTest, LockDisplayStatus, Function | SmallTest | Level3)
+HWTEST_F(SingleDisplayPocketFoldPolicyTest, LockDisplayStatus, TestSize.Level1)
 {
     std::recursive_mutex displayInfoMutex;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
@@ -138,7 +138,7 @@ HWTEST_F(SingleDisplayPocketFoldPolicyTest, LockDisplayStatus, Function | SmallT
  * @tc.desc: test function : SetOnBootAnimation
  * @tc.type: FUNC
  */
-HWTEST_F(SingleDisplayPocketFoldPolicyTest, SetOnBootAnimation, Function | SmallTest | Level3)
+HWTEST_F(SingleDisplayPocketFoldPolicyTest, SetOnBootAnimation, TestSize.Level1)
 {
     std::recursive_mutex displayInfoMutex;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
@@ -156,7 +156,7 @@ HWTEST_F(SingleDisplayPocketFoldPolicyTest, SetOnBootAnimation, Function | Small
  * @tc.desc: test function : RecoverWhenBootAnimationExit
  * @tc.type: FUNC
  */
-HWTEST_F(SingleDisplayPocketFoldPolicyTest, RecoverWhenBootAnimationExit, Function | SmallTest | Level3)
+HWTEST_F(SingleDisplayPocketFoldPolicyTest, RecoverWhenBootAnimationExit, TestSize.Level1)
 {
     std::recursive_mutex displayInfoMutex;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
@@ -188,7 +188,7 @@ HWTEST_F(SingleDisplayPocketFoldPolicyTest, RecoverWhenBootAnimationExit, Functi
  * @tc.desc: test function : UpdateForPhyScreenPropertyChange
  * @tc.type: FUNC
  */
-HWTEST_F(SingleDisplayPocketFoldPolicyTest, UpdateForPhyScreenPropertyChange, Function | SmallTest | Level3)
+HWTEST_F(SingleDisplayPocketFoldPolicyTest, UpdateForPhyScreenPropertyChange, TestSize.Level1)
 {
     std::recursive_mutex displayInfoMutex;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
@@ -220,7 +220,7 @@ HWTEST_F(SingleDisplayPocketFoldPolicyTest, UpdateForPhyScreenPropertyChange, Fu
  * @tc.desc: test function : GetModeMatchStatus
  * @tc.type: FUNC
  */
-HWTEST_F(SingleDisplayPocketFoldPolicyTest, GetModeMatchStatus, Function | SmallTest | Level3)
+HWTEST_F(SingleDisplayPocketFoldPolicyTest, GetModeMatchStatus, TestSize.Level1)
 {
     std::recursive_mutex displayInfoMutex;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
@@ -249,7 +249,7 @@ HWTEST_F(SingleDisplayPocketFoldPolicyTest, GetModeMatchStatus, Function | Small
  * @tc.desc: test function : ReportFoldDisplayModeChange
  * @tc.type: FUNC
  */
-HWTEST_F(SingleDisplayPocketFoldPolicyTest, ReportFoldDisplayModeChange, Function | SmallTest | Level3)
+HWTEST_F(SingleDisplayPocketFoldPolicyTest, ReportFoldDisplayModeChange, TestSize.Level1)
 {
     std::recursive_mutex displayInfoMutex;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
@@ -269,7 +269,7 @@ HWTEST_F(SingleDisplayPocketFoldPolicyTest, ReportFoldDisplayModeChange, Functio
  * @tc.desc: test function : ReportFoldStatusChangeBegin
  * @tc.type: FUNC
  */
-HWTEST_F(SingleDisplayPocketFoldPolicyTest, ReportFoldStatusChangeBegin, Function | SmallTest | Level3)
+HWTEST_F(SingleDisplayPocketFoldPolicyTest, ReportFoldStatusChangeBegin, TestSize.Level1)
 {
     std::recursive_mutex displayInfoMutex;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
@@ -289,7 +289,7 @@ HWTEST_F(SingleDisplayPocketFoldPolicyTest, ReportFoldStatusChangeBegin, Functio
  * @tc.desc: test function : ChangeScreenDisplayModeToMain
  * @tc.type: FUNC
  */
-HWTEST_F(SingleDisplayPocketFoldPolicyTest, ChangeScreenDisplayModeToMain, Function | SmallTest | Level3)
+HWTEST_F(SingleDisplayPocketFoldPolicyTest, ChangeScreenDisplayModeToMain, TestSize.Level1)
 {
     std::recursive_mutex displayInfoMutex;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
@@ -309,7 +309,7 @@ HWTEST_F(SingleDisplayPocketFoldPolicyTest, ChangeScreenDisplayModeToMain, Funct
  * @tc.desc: test function : ChangeScreenDisplayModeToFull
  * @tc.type: FUNC
  */
-HWTEST_F(SingleDisplayPocketFoldPolicyTest, ChangeScreenDisplayModeToFull, Function | SmallTest | Level3)
+HWTEST_F(SingleDisplayPocketFoldPolicyTest, ChangeScreenDisplayModeToFull, TestSize.Level1)
 {
     std::recursive_mutex displayInfoMutex;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
@@ -329,7 +329,7 @@ HWTEST_F(SingleDisplayPocketFoldPolicyTest, ChangeScreenDisplayModeToFull, Funct
  * @tc.desc: test function : ChangeScreenDisplayModePower
  * @tc.type: FUNC
  */
-HWTEST_F(SingleDisplayPocketFoldPolicyTest, ChangeScreenDisplayModePower, Function | SmallTest | Level3)
+HWTEST_F(SingleDisplayPocketFoldPolicyTest, ChangeScreenDisplayModePower, TestSize.Level1)
 {
     std::recursive_mutex displayInfoMutex;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
@@ -342,7 +342,7 @@ HWTEST_F(SingleDisplayPocketFoldPolicyTest, ChangeScreenDisplayModePower, Functi
  * @tc.desc: test function : SendPropertyChangeResult
  * @tc.type: FUNC
  */
-HWTEST_F(SingleDisplayPocketFoldPolicyTest, SendPropertyChangeResult, Function | SmallTest | Level3)
+HWTEST_F(SingleDisplayPocketFoldPolicyTest, SendPropertyChangeResult, TestSize.Level1)
 {
     std::recursive_mutex displayInfoMutex;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
@@ -360,7 +360,7 @@ HWTEST_F(SingleDisplayPocketFoldPolicyTest, SendPropertyChangeResult, Function |
  * @tc.desc: test function : ChangeScreenDisplayModeToMainOnBootAnimation
  * @tc.type: FUNC
  */
-HWTEST_F(SingleDisplayPocketFoldPolicyTest, ChangeScreenDisplayModeToMainOnBootAnimation, Function | SmallTest | Level3)
+HWTEST_F(SingleDisplayPocketFoldPolicyTest, ChangeScreenDisplayModeToMainOnBootAnimation, TestSize.Level1)
 {
     std::recursive_mutex displayInfoMutex;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
@@ -376,7 +376,7 @@ HWTEST_F(SingleDisplayPocketFoldPolicyTest, ChangeScreenDisplayModeToMainOnBootA
  * @tc.desc: test function : ChangeScreenDisplayModeToFullOnBootAnimation
  * @tc.type: FUNC
  */
-HWTEST_F(SingleDisplayPocketFoldPolicyTest, ChangeScreenDisplayModeToFullOnBootAnimation, Function | SmallTest | Level3)
+HWTEST_F(SingleDisplayPocketFoldPolicyTest, ChangeScreenDisplayModeToFullOnBootAnimation, TestSize.Level1)
 {
     std::recursive_mutex displayInfoMutex;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
@@ -392,7 +392,7 @@ HWTEST_F(SingleDisplayPocketFoldPolicyTest, ChangeScreenDisplayModeToFullOnBootA
  * @tc.desc: test function : SetdisplayModeChangeStatus
  * @tc.type: FUNC
  */
-HWTEST_F(SingleDisplayPocketFoldPolicyTest, SetdisplayModeChangeStatus01, Function | SmallTest | Level3)
+HWTEST_F(SingleDisplayPocketFoldPolicyTest, SetdisplayModeChangeStatus01, TestSize.Level1)
 {
     std::recursive_mutex displayInfoMutex;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
@@ -408,7 +408,7 @@ HWTEST_F(SingleDisplayPocketFoldPolicyTest, SetdisplayModeChangeStatus01, Functi
  * @tc.desc: test function : SetdisplayModeChangeStatus
  * @tc.type: FUNC
  */
-HWTEST_F(SingleDisplayPocketFoldPolicyTest, SetdisplayModeChangeStatus02, Function | SmallTest | Level3)
+HWTEST_F(SingleDisplayPocketFoldPolicyTest, SetdisplayModeChangeStatus02, TestSize.Level1)
 {
     std::recursive_mutex displayInfoMutex;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
@@ -424,7 +424,7 @@ HWTEST_F(SingleDisplayPocketFoldPolicyTest, SetdisplayModeChangeStatus02, Functi
  * @tc.desc: test function : ChangeScreenDisplayMode02
  * @tc.type: FUNC
  */
-HWTEST_F(SingleDisplayPocketFoldPolicyTest, ChangeScreenDisplayMode02, Function | SmallTest | Level3)
+HWTEST_F(SingleDisplayPocketFoldPolicyTest, ChangeScreenDisplayMode02, TestSize.Level1)
 {
     std::recursive_mutex displayInfoMutex;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
@@ -457,7 +457,7 @@ HWTEST_F(SingleDisplayPocketFoldPolicyTest, ChangeScreenDisplayMode02, Function 
  * @tc.desc: test function : ChangeScreenDisplayModeToCoordination
  * @tc.type: FUNC
  */
-HWTEST_F(SingleDisplayPocketFoldPolicyTest, ChangeScreenDisplayModeToCoordination, Function | SmallTest | Level3)
+HWTEST_F(SingleDisplayPocketFoldPolicyTest, ChangeScreenDisplayModeToCoordination, TestSize.Level1)
 {
     std::recursive_mutex displayInfoMutex;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
@@ -473,7 +473,7 @@ HWTEST_F(SingleDisplayPocketFoldPolicyTest, ChangeScreenDisplayModeToCoordinatio
  * @tc.desc: test function : CloseCoordinationScreen
  * @tc.type: FUNC
  */
-HWTEST_F(SingleDisplayPocketFoldPolicyTest, CloseCoordinationScreen, Function | SmallTest | Level3)
+HWTEST_F(SingleDisplayPocketFoldPolicyTest, CloseCoordinationScreen, TestSize.Level1)
 {
     if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
         std::recursive_mutex displayInfoMutex;
@@ -491,7 +491,7 @@ HWTEST_F(SingleDisplayPocketFoldPolicyTest, CloseCoordinationScreen, Function | 
  * @tc.desc: test function : ExitCoordination
  * @tc.type: FUNC
  */
-HWTEST_F(SingleDisplayPocketFoldPolicyTest, ExitCoordination, Function | SmallTest | Level3)
+HWTEST_F(SingleDisplayPocketFoldPolicyTest, ExitCoordination, TestSize.Level1)
 {
     if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
         std::recursive_mutex displayInfoMutex;
@@ -510,7 +510,7 @@ HWTEST_F(SingleDisplayPocketFoldPolicyTest, ExitCoordination, Function | SmallTe
  * @tc.desc: test function : ChangeOnTentMode
  * @tc.type: FUNC
  */
-HWTEST_F(SingleDisplayPocketFoldPolicyTest, ChangeOnTentMode, Function | SmallTest | Level3)
+HWTEST_F(SingleDisplayPocketFoldPolicyTest, ChangeOnTentMode, TestSize.Level1)
 {
     std::recursive_mutex displayInfoMutex;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
@@ -538,7 +538,7 @@ HWTEST_F(SingleDisplayPocketFoldPolicyTest, ChangeOnTentMode, Function | SmallTe
  * @tc.desc: test function : ChangeOffTentMode
  * @tc.type: FUNC
  */
-HWTEST_F(SingleDisplayPocketFoldPolicyTest, ChangeOffTentMode, Function | SmallTest | Level3)
+HWTEST_F(SingleDisplayPocketFoldPolicyTest, ChangeOffTentMode, TestSize.Level1)
 {
     std::recursive_mutex displayInfoMutex;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;

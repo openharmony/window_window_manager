@@ -114,6 +114,7 @@ void WindowManagerService::OnStart()
     AddSystemAbilityListener(RENDER_SERVICE);
     AddSystemAbilityListener(ABILITY_MGR_SERVICE_ID);
     AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
+    AddSystemAbilityListener(MULTIMODAL_INPUT_SERVICE_ID);
     sptr<WindowManagerService> wms = this;
     wms->IncStrongRef(nullptr);
     if (!Publish(sptr<WindowManagerService>(this))) {
@@ -158,11 +159,24 @@ void WindowManagerService::OnAddSystemAbility(int32_t systemAbilityId, const std
             WLOGI("COMMON_EVENT_SERVICE_ID");
             windowCommonEvent_->SubscriberEvent();
             break;
+        case MULTIMODAL_INPUT_SERVICE_ID:
+            WLOGI("MULTIMODAL_INPUT_SERVICE_ID");
+            if (windowRoot_ == nullptr) {
+                WLOGFE("windowRoot_ is nullptr.");
+                return;
+            }
+            windowRoot_->NotifyMMIServiceOnline();
+            break;
         default:
             WLOGFW("unhandled sysabilityId: %{public}d", systemAbilityId);
             break;
     }
     WLOGI("systemAbilityId: %{public}d, end", systemAbilityId);
+}
+
+void WindowManagerService::SetWindowInputEventConsumer()
+{
+    WindowInnerManager::GetInstance().SetInputEventConsumer();
 }
 
 void WindowManagerService::OnAccountSwitched(int accountId)
@@ -249,36 +263,36 @@ int32_t WindowManagerServiceHandler::GetFocusWindow(sptr<IRemoteObject>& ability
 void WindowManagerServiceHandler::StartingWindow(
     sptr<AAFwk::AbilityTransitionInfo> info, std::shared_ptr<Media::PixelMap> pixelMap)
 {
+    TLOGI(WmsLogTag::WMS_STARTUP_PAGE, "hot start is called");
     sptr<WindowTransitionInfo> windowInfo = new WindowTransitionInfo(info);
-    WLOGI("hot start is called");
     WindowManagerService::GetInstance().StartingWindow(windowInfo, pixelMap, false);
 }
 
 void WindowManagerServiceHandler::StartingWindow(
     sptr<AAFwk::AbilityTransitionInfo> info, std::shared_ptr<Media::PixelMap> pixelMap, uint32_t bgColor)
 {
+    TLOGI(WmsLogTag::WMS_STARTUP_PAGE, "cold start is called");
     sptr<WindowTransitionInfo> windowInfo = new WindowTransitionInfo(info);
-    WLOGI("cold start is called");
     WindowManagerService::GetInstance().StartingWindow(windowInfo, pixelMap, true, bgColor);
 }
 
 void WindowManagerServiceHandler::CancelStartingWindow(sptr<IRemoteObject> abilityToken)
 {
-    WLOGI("WindowManagerServiceHandler CancelStartingWindow!");
+    TLOGI(WmsLogTag::WMS_STARTUP_PAGE, "called");
     WindowManagerService::GetInstance().CancelStartingWindow(abilityToken);
 }
 
 int32_t WindowManagerServiceHandler::MoveMissionsToForeground(const std::vector<int32_t>& missionIds,
     int32_t topMissionId)
 {
-    WLOGD("WindowManagerServiceHandler MoveMissionsToForeground!");
+    TLOGD(WmsLogTag::WMS_STARTUP_PAGE, "called");
     return static_cast<int32_t>(WindowManagerService::GetInstance().MoveMissionsToForeground(missionIds, topMissionId));
 }
 
 int32_t WindowManagerServiceHandler::MoveMissionsToBackground(const std::vector<int32_t>& missionIds,
     std::vector<int32_t>& result)
 {
-    WLOGD("WindowManagerServiceHandler MoveMissionsToBackground!");
+    TLOGD(WmsLogTag::WMS_STARTUP_PAGE, "called");
     return static_cast<int32_t>(WindowManagerService::GetInstance().MoveMissionsToBackground(missionIds, result));
 }
 
@@ -818,7 +832,7 @@ void WindowManagerService::NotifyAnimationAbilityDied(sptr<WindowTransitionInfo>
     PostAsyncTask(task, "NotifyAnimationAbilityDied");
 }
 
-WMError WindowManagerService::GetFocusWindowInfo(sptr<IRemoteObject>& abilityToken)
+WMError WindowManagerService::GetFocusWindowInfo(sptr<IRemoteObject>& abilityToken, DisplayId displayId)
 {
     auto task = [this, &abilityToken]() {
         return windowController_->GetFocusWindowInfo(abilityToken);
@@ -830,7 +844,7 @@ void WindowManagerService::StartingWindow(sptr<WindowTransitionInfo> info, std::
     bool isColdStart, uint32_t bkgColor)
 {
     if (!startingOpen_) {
-        WLOGI("startingWindow not open!");
+        TLOGI(WmsLogTag::WMS_STARTUP_PAGE, "startingWindow not open!");
         return;
     }
     if (info) {
@@ -844,9 +858,9 @@ void WindowManagerService::StartingWindow(sptr<WindowTransitionInfo> info, std::
 
 void WindowManagerService::CancelStartingWindow(sptr<IRemoteObject> abilityToken)
 {
-    WLOGI("begin");
+    TLOGI(WmsLogTag::WMS_STARTUP_PAGE, "begin");
     if (!startingOpen_) {
-        WLOGI("startingWindow not open!");
+        TLOGI(WmsLogTag::WMS_STARTUP_PAGE, "startingWindow not open!");
         return;
     }
     auto task = [this, abilityToken]() {
@@ -1436,10 +1450,6 @@ WMError WindowManagerService::GetVisibilityWindowInfo(std::vector<sptr<WindowVis
 /** @note @window.hierarchy */
 WMError WindowManagerService::RaiseToAppTop(uint32_t windowId)
 {
-    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
-        WLOGFE("window raise to app top permission denied!");
-        return WMError::WM_ERROR_NOT_SYSTEM_APP;
-    }
     auto task = [this, windowId]() {
         return windowController_->RaiseToAppTop(windowId);
     };
@@ -1630,7 +1640,7 @@ MaximizeMode WindowManagerService::GetMaximizeMode()
     return maximizeMode_;
 }
 
-void WindowManagerService::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
+void WindowManagerService::GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId)
 {
     WLOGFD("Get Focus window info in wms");
     windowController_->GetFocusWindowInfo(focusInfo);

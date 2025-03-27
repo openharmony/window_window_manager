@@ -38,7 +38,7 @@ JsWindowManager::~JsWindowManager()
 
 void JsWindowManager::Finalizer(napi_env env, void* data, void* hint)
 {
-    WLOGI("Finalizer");
+    TLOGD(WmsLogTag::DEFAULT, "Enter");
     std::unique_ptr<JsWindowManager>(static_cast<JsWindowManager*>(data));
 }
 
@@ -101,6 +101,12 @@ napi_value JsWindowManager::MinimizeAll(napi_env env, napi_callback_info info)
 napi_value JsWindowManager::ToggleShownStateForAllAppWindows(napi_env env, napi_callback_info info)
 {
     WLOGI("mock: ToggleShownStateForAllAppWindows");
+    return nullptr;
+}
+
+napi_value JsWindowManager::GetAllWindowLayoutInfo(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "mock");
     return nullptr;
 }
 
@@ -242,6 +248,7 @@ napi_value JsWindowManagerInit(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "minimizeAll", moduleName, JsWindowManager::MinimizeAll);
     BindNativeFunction(env, exportObj, "toggleShownStateForAllAppWindows", moduleName,
         JsWindowManager::ToggleShownStateForAllAppWindows);
+    BindNativeFunction(env, exportObj, "getAllWindowLayoutInfo", moduleName, JsWindowManager::GetAllWindowLayoutInfo);
     BindNativeFunction(env, exportObj, "setWindowLayoutMode", moduleName, JsWindowManager::SetWindowLayoutMode);
     BindNativeFunction(env, exportObj, "setGestureNavigationEnabled", moduleName,
         JsWindowManager::SetGestureNavigationEnabled);

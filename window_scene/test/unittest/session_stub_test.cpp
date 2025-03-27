@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <gmock/gmock.h>
 #include <ipc_types.h>
 #include <pointer_event.h>
 #include "iremote_object_mocker.h"
@@ -74,7 +75,7 @@ namespace {
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(SessionStubTest, OnRemoteRequest01, Function | SmallTest | Level2)
+HWTEST_F(SessionStubTest, OnRemoteRequest01, TestSize.Level1)
 {
     uint32_t code = 1;
     MessageParcel data;
@@ -93,7 +94,7 @@ HWTEST_F(SessionStubTest, OnRemoteRequest01, Function | SmallTest | Level2)
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(SessionStubTest, ProcessRemoteRequestTest01, Function | SmallTest | Level2)
+HWTEST_F(SessionStubTest, ProcessRemoteRequestTest01, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -152,7 +153,7 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest01, Function | SmallTest | Lev
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(SessionStubTest, ProcessRemoteRequestTest02, Function | SmallTest | Level2)
+HWTEST_F(SessionStubTest, ProcessRemoteRequestTest02, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -207,7 +208,7 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest02, Function | SmallTest | Lev
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(SessionStubTest, ProcessRemoteRequestTest03, Function | SmallTest | Level2)
+HWTEST_F(SessionStubTest, ProcessRemoteRequestTest03, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -257,7 +258,7 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest03, Function | SmallTest | Lev
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(SessionStubTest, ProcessRemoteRequestTest04, Function | SmallTest | Level2)
+HWTEST_F(SessionStubTest, ProcessRemoteRequestTest04, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -296,7 +297,7 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest04, Function | SmallTest | Lev
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(SessionStubTest, ProcessRemoteRequestTest05, Function | SmallTest | Level2)
+HWTEST_F(SessionStubTest, ProcessRemoteRequestTest05, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -332,7 +333,7 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest05, Function | SmallTest | Lev
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(SessionStubTest, ProcessRemoteRequestTest06, Function | SmallTest | Level2)
+HWTEST_F(SessionStubTest, ProcessRemoteRequestTest06, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -368,7 +369,7 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest06, Function | SmallTest | Lev
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(SessionStubTest, ProcessRemoteRequestTest07, Function | SmallTest | Level2)
+HWTEST_F(SessionStubTest, ProcessRemoteRequestTest07, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -392,12 +393,26 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest07, Function | SmallTest | Lev
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_TITLE_AND_DOCK_HOVER_SHOW_CHANGE), data, reply, option);
     ASSERT_EQ(ERR_NONE, res);
     ASSERT_EQ(data.WriteBool(true), true);
+    ASSERT_EQ(data.WriteBool(false), true);
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_WINDOW_RECT_AUTO_SAVE), data, reply, option);
     ASSERT_EQ(ERR_NONE, res);
     ASSERT_EQ(data.WriteInt32(1), true);
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_EVENT_ASYNC), data, reply, option);
+    ASSERT_EQ(ERR_NONE, res);
+    ASSERT_EQ(data.WriteFloat(1.0f), true);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_WINDOW_CORNER_RADIUS), data, reply, option);
+    ASSERT_EQ(ERR_NONE, res);
+    ASSERT_EQ(data.WriteString("test"), true);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_FLAG), data, reply, option);
+    ASSERT_EQ(ERR_NONE, res);
+    ASSERT_EQ(data.WriteBool(true), true);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_FOLLOW_PARENT_MULTI_SCREEN_POLICY),
+        data, reply, option);
     ASSERT_EQ(ERR_NONE, res);
 }
 
@@ -407,7 +422,7 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest07, Function | SmallTest | Lev
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(SessionStubTest, sessionStubTest02, Function | SmallTest | Level2)
+HWTEST_F(SessionStubTest, sessionStubTest02, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -435,8 +450,6 @@ HWTEST_F(SessionStubTest, sessionStubTest02, Function | SmallTest | Level2)
     ASSERT_EQ(ERR_NONE, res);
     res = session_->HandleGetStatusBarHeight(data, reply);
     ASSERT_EQ(ERR_NONE, res);
-    res = session_->HandleSetSystemEnableDrag(data, reply);
-    ASSERT_EQ(ERR_NONE, res);
 }
 
 /**
@@ -445,7 +458,7 @@ HWTEST_F(SessionStubTest, sessionStubTest02, Function | SmallTest | Level2)
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(SessionStubTest, sessionStubTest03, Function | SmallTest | Level2)
+HWTEST_F(SessionStubTest, sessionStubTest03, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -462,6 +475,11 @@ HWTEST_F(SessionStubTest, sessionStubTest03, Function | SmallTest | Level2)
     res = session_->HandleNeedAvoid(data, reply);
     ASSERT_EQ(ERR_NONE, res);
     ASSERT_EQ(data.WriteUint32(2), true);
+    ASSERT_EQ(data.WriteInt32(0), true);
+    ASSERT_EQ(data.WriteInt32(0), true);
+    ASSERT_EQ(data.WriteInt32(10), true);
+    ASSERT_EQ(data.WriteInt32(10), true);
+    ASSERT_EQ(data.WriteInt32(12), true);
     res = session_->HandleGetAvoidAreaByType(data, reply);
     ASSERT_EQ(ERR_NONE, res);
     ASSERT_EQ(data.WriteFloat(2.0f), true);
@@ -483,7 +501,7 @@ HWTEST_F(SessionStubTest, sessionStubTest03, Function | SmallTest | Level2)
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(SessionStubTest, HandleTriggerBindModalUIExtension001, Function | SmallTest | Level2)
+HWTEST_F(SessionStubTest, HandleTriggerBindModalUIExtension001, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -499,7 +517,7 @@ HWTEST_F(SessionStubTest, HandleTriggerBindModalUIExtension001, Function | Small
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(SessionStubTest, HandleTransferAccessibilityEvent003, Function | SmallTest | Level2)
+HWTEST_F(SessionStubTest, HandleTransferAccessibilityEvent003, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -515,7 +533,7 @@ HWTEST_F(SessionStubTest, HandleTransferAccessibilityEvent003, Function | SmallT
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(SessionStubTest, HandleNotifyPiPWindowPrepareClose003, Function | SmallTest | Level2)
+HWTEST_F(SessionStubTest, HandleNotifyPiPWindowPrepareClose003, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -531,7 +549,7 @@ HWTEST_F(SessionStubTest, HandleNotifyPiPWindowPrepareClose003, Function | Small
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(SessionStubTest, HandleUpdatePiPRect001, Function | SmallTest | Level2)
+HWTEST_F(SessionStubTest, HandleUpdatePiPRect001, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -560,7 +578,7 @@ HWTEST_F(SessionStubTest, HandleUpdatePiPRect001, Function | SmallTest | Level2)
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(SessionStubTest, HandleUpdatePiPRect002, Function | SmallTest | Level2)
+HWTEST_F(SessionStubTest, HandleUpdatePiPRect002, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -583,7 +601,7 @@ HWTEST_F(SessionStubTest, HandleUpdatePiPRect002, Function | SmallTest | Level2)
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(SessionStubTest, HandleUpdatePiPControlStatus, Function | SmallTest | Level2)
+HWTEST_F(SessionStubTest, HandleUpdatePiPControlStatus, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     MessageParcel data;
@@ -618,7 +636,7 @@ HWTEST_F(SessionStubTest, HandleUpdatePiPControlStatus, Function | SmallTest | L
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(SessionStubTest, HandleSetAutoStartPiP, Function | SmallTest | Level2)
+HWTEST_F(SessionStubTest, HandleSetAutoStartPiP, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     MessageParcel data;
@@ -626,11 +644,32 @@ HWTEST_F(SessionStubTest, HandleSetAutoStartPiP, Function | SmallTest | Level2)
     ASSERT_EQ(ERR_INVALID_DATA, session_->HandleSetAutoStartPiP(data, reply));
     bool isAutoStartValid = true;
     uint32_t priority = 0;
+    uint32_t width = 0;
+    uint32_t height = 0;
     data.WriteInt32(10);
     ASSERT_EQ(ERR_INVALID_DATA, session_->HandleSetAutoStartPiP(data, reply));
     data.WriteBool(isAutoStartValid);
     data.WriteUint32(priority);
+    data.WriteUint32(width);
+    data.WriteUint32(height);
     ASSERT_EQ(ERR_NONE, session_->HandleSetAutoStartPiP(data, reply));
+}
+
+/**
+ * @tc.name: HandleUpdatePiPDefaultWindowSizeType
+ * @tc.desc: sessionStub sessionStubTest
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionStubTest, HandleUpdatePiPDefaultWindowSizeType, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_EQ(ERR_INVALID_DATA, session_->HandleUpdatePiPDefaultWindowSizeType(data, reply));
+    uint32_t defaultWindowSizeType = 1;
+    data.WriteInt32(defaultWindowSizeType);
+    ASSERT_EQ(ERR_NONE, session_->HandleUpdatePiPDefaultWindowSizeType(data, reply));
 }
 
 /**
@@ -639,7 +678,7 @@ HWTEST_F(SessionStubTest, HandleSetAutoStartPiP, Function | SmallTest | Level2)
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(SessionStubTest, HandleProcessPointDownSession006, Function | SmallTest | Level2)
+HWTEST_F(SessionStubTest, HandleProcessPointDownSession006, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -656,7 +695,7 @@ HWTEST_F(SessionStubTest, HandleProcessPointDownSession006, Function | SmallTest
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(SessionStubTest, HandleSendPointerEvenForMoveDrag007, Function | SmallTest | Level2)
+HWTEST_F(SessionStubTest, HandleSendPointerEvenForMoveDrag007, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -667,28 +706,12 @@ HWTEST_F(SessionStubTest, HandleSendPointerEvenForMoveDrag007, Function | SmallT
 }
 
 /**
- * @tc.name: HandleUpdateRectChangeListenerRegistered008
- * @tc.desc: sessionStub sessionStubTest
- * @tc.type: FUNC
- * @tc.require: #I6JLSI
- */
-HWTEST_F(SessionStubTest, HandleUpdateRectChangeListenerRegistered008, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    data.WriteBool(true);
-    sptr<IRemoteObjectMocker> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    auto res = session_->HandleUpdateRectChangeListenerRegistered(data, reply);
-    ASSERT_EQ(ERR_NONE, res);
-}
-
-/**
  * @tc.name: HandleNotifySyncOn012
  * @tc.desc: sessionStub sessionStubTest
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(SessionStubTest, HandleNotifySyncOn012, Function | SmallTest | Level2)
+HWTEST_F(SessionStubTest, HandleNotifySyncOn012, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -703,7 +726,7 @@ HWTEST_F(SessionStubTest, HandleNotifySyncOn012, Function | SmallTest | Level2)
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(SessionStubTest, HandleNotifyAsyncOn013, Function | SmallTest | Level2)
+HWTEST_F(SessionStubTest, HandleNotifyAsyncOn013, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -718,7 +741,7 @@ HWTEST_F(SessionStubTest, HandleNotifyAsyncOn013, Function | SmallTest | Level2)
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(SessionStubTest, HandleNotifyExtensionTimeout014, Function | SmallTest | Level2)
+HWTEST_F(SessionStubTest, HandleNotifyExtensionTimeout014, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -733,7 +756,7 @@ HWTEST_F(SessionStubTest, HandleNotifyExtensionTimeout014, Function | SmallTest 
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(SessionStubTest, HandleGetAppForceLandscapeConfig, Function | SmallTest | Level2)
+HWTEST_F(SessionStubTest, HandleGetAppForceLandscapeConfig, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -743,34 +766,12 @@ HWTEST_F(SessionStubTest, HandleGetAppForceLandscapeConfig, Function | SmallTest
 }
 
 /**
- * @tc.name: HandleUpdateSessionRect
- * @tc.desc: test for HandleUpdateSessionRect
- * @tc.type: FUNC
- * @tc.require: #I6JLSI
- */
-HWTEST_F(SessionStubTest, HandleUpdateSessionRect, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    ASSERT_NE(session_, nullptr);
-    data.WriteUint32(10);
-    data.WriteUint32(20);
-    data.WriteUint32(30);
-    data.WriteUint32(40);
-    data.WriteUint32(0);
-    data.WriteBool(true);
-    data.WriteBool(true);
-    auto res = session_->HandleUpdateSessionRect(data, reply);
-    ASSERT_EQ(ERR_NONE, res);
-}
-
-/**
  * @tc.name: HandleSetDialogSessionBackGestureEnabled01
  * @tc.desc: sessionStub sessionStubTest
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(SessionStubTest, HandleSetDialogSessionBackGestureEnabled01, Function | SmallTest | Level2)
+HWTEST_F(SessionStubTest, HandleSetDialogSessionBackGestureEnabled01, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -785,7 +786,7 @@ HWTEST_F(SessionStubTest, HandleSetDialogSessionBackGestureEnabled01, Function |
  * @tc.type: FUNC
  * @tc.require: #IAPLFA
  */
-HWTEST_F(SessionStubTest, HandleRequestFocus, Function | SmallTest | Level2)
+HWTEST_F(SessionStubTest, HandleRequestFocus, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -796,32 +797,11 @@ HWTEST_F(SessionStubTest, HandleRequestFocus, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: HandleUpdateClientRect01
- * @tc.desc: sessionStub sessionStubTest
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStubTest, HandleUpdateClientRect01, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    ASSERT_NE(session_, nullptr);
-    auto res = session_->HandleUpdateClientRect(data, reply);
-    ASSERT_EQ(ERR_INVALID_DATA, res);
-
-    data.WriteInt32(100);
-    data.WriteInt32(100);
-    data.WriteInt32(800);
-    data.WriteInt32(800);
-    res = session_->HandleUpdateClientRect(data, reply);
-    ASSERT_EQ(ERR_NONE, res);
-}
-
-/**
  * @tc.name: HandleSyncSessionEvent1
  * @tc.desc: sessionStub HandleSyncSessionEvent
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStubTest, HandleSyncSessionEvent1, Function | SmallTest | Level2)
+HWTEST_F(SessionStubTest, HandleSyncSessionEvent1, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -836,7 +816,7 @@ HWTEST_F(SessionStubTest, HandleSyncSessionEvent1, Function | SmallTest | Level2
  * @tc.desc: sessionStub HandleSyncSessionEvent
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStubTest, HandleSyncSessionEvent2, Function | SmallTest | Level2)
+HWTEST_F(SessionStubTest, HandleSyncSessionEvent2, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -847,6 +827,228 @@ HWTEST_F(SessionStubTest, HandleSyncSessionEvent2, Function | SmallTest | Level2
 
     result = session_->HandleSyncSessionEvent(data, reply);
     ASSERT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: GetIsMidScene
+ * @tc.desc: sessionStub GetIsMidScene
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, GetIsMidScene, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    auto result = session_->HandleGetIsMidScene(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleNotifyFrameLayoutFinish
+ * @tc.desc: sessionStub HandleNotifyFrameLayoutFinish
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleNotifyFrameLayoutFinish, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    auto result = session_->HandleNotifyFrameLayoutFinish(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleSyncSessionEvent
+ * @tc.desc: sessionStub HandleSyncSessionEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleSyncSessionEvent, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    auto result = session_->HandleSyncSessionEvent(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandlePendingSessionActivation
+ * @tc.desc: sessionStub HandlePendingSessionActivation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandlePendingSessionActivation, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    auto result = session_->HandlePendingSessionActivation(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandleGetGlobalScaledRect
+ * @tc.desc: sessionStub HandleGetGlobalScaledRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleGetGlobalScaledRect, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    auto result = session_->HandleGetGlobalScaledRect(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleGetAllAvoidAreas
+ * @tc.desc: sessionStub HandleGetAllAvoidAreas
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleGetAllAvoidAreas, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    auto result = session_->HandleGetAllAvoidAreas(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleIsStartMoving
+ * @tc.desc: sessionStub HandleIsStartMoving
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleIsStartMoving, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    auto result = session_->HandleIsStartMoving(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleSetSessionLabelAndIcon01
+ * @tc.desc: HandleSetSessionLabelAndIcon
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleSetSessionLabelAndIcon01, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    std::shared_ptr<Media::PixelMap> icon = std::make_shared<Media::PixelMap>();
+    data.WriteParcelable(icon.get());
+
+    auto res = session_->HandleSetSessionLabelAndIcon(data, reply);
+    ASSERT_EQ(ERR_INVALID_DATA, res);
+}
+
+/**
+ * @tc.name: HandleSetSessionLabelAndIcon02
+ * @tc.desc: HandleSetSessionLabelAndIcon
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleSetSessionLabelAndIcon02, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    std::string label = "demo label";
+    data.WriteString(label);
+    std::shared_ptr<Media::PixelMap> icon = nullptr;
+    data.WriteParcelable(icon.get());
+
+    auto res = session_->HandleSetSessionLabelAndIcon(data, reply);
+    ASSERT_EQ(ERR_INVALID_DATA, res);
+}
+
+/**
+ * @tc.name: HandleSetSessionLabelAndIcon03
+ * @tc.desc: HandleSetSessionLabelAndIcon
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleSetSessionLabelAndIcon03, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    std::string label = "demo label";
+    data.WriteString(label);
+    const uint32_t color[] = {0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80};
+    uint32_t len = sizeof(color) / sizeof(color[0]);
+    Media::InitializationOptions opts;
+    opts.size.width = 2;
+    opts.size.height = 3;
+    opts.pixelFormat = Media::PixelFormat::UNKNOWN;
+    opts.alphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
+    std::shared_ptr<Media::PixelMap> icon = Media::PixelMap::Create(color, len, 0, opts.size.width, opts);
+    data.WriteParcelable(icon.get());
+
+    auto res = session_->HandleSetSessionLabelAndIcon(data, reply);
+    ASSERT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleGetCrossAxisState
+ * @tc.desc: HandleGetCrossAxisState
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleGetCrossAxisState, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    sptr<SessionStubMocker> session = sptr<SessionStubMocker>::MakeSptr();
+    EXPECT_CALL(*session, GetCrossAxisState(_)).
+        WillOnce(DoAll(SetArgReferee<0>(CrossAxisState::STATE_CROSS), Return(WSError::WS_OK)));
+    session->HandleGetCrossAxisState(data, reply);
+    uint32_t state = 0;
+    reply.ReadUint32(state);
+    ASSERT_EQ(state, static_cast<uint32_t>(CrossAxisState::STATE_CROSS));
+}
+
+/**
+ * @tc.name: HandleContainerModalEvent
+ * @tc.desc: sessionStub HandleContainerModalEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleContainerModalEvent, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteString("name");
+    data.WriteString("value");
+    auto result = session_->HandleContainerModalEvent(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+    result = session_->HandleContainerModalEvent(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandleUpdateRotationChangeListenerRegistered
+ * @tc.desc: sessionStub HandleUpdateRotationChangeListenerRegistered
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleUpdateRotationChangeListenerRegistered, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteUint32(0);
+    data.WriteBool(false);
+    auto result = session_->HandleUpdateRotationChangeListenerRegistered(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+    result = session_->HandleUpdateRotationChangeListenerRegistered(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: GetIsHighlighted
+ * @tc.desc: sessionStub GetIsHighlighted
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, GetIsHighlighted, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto result = session_->HandleGetIsHighlighted(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
 }
 }
 } // namespace Rosen

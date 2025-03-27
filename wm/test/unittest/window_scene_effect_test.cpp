@@ -15,8 +15,8 @@
 
 #include <gtest/gtest.h>
 #include "mock_session.h"
-#include "window_scene_session_impl.h"
 #include "mock_uicontent.h"
+#include "window_scene_session_impl.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -32,21 +32,13 @@ public:
     void TearDown() override;
 };
 
-void WindowSceneEffectTest::SetUpTestCase()
-{
-}
+void WindowSceneEffectTest::SetUpTestCase() {}
 
-void WindowSceneEffectTest::TearDownTestCase()
-{
-}
+void WindowSceneEffectTest::TearDownTestCase() {}
 
-void WindowSceneEffectTest::SetUp()
-{
-}
+void WindowSceneEffectTest::SetUp() {}
 
-void WindowSceneEffectTest::TearDown()
-{
-}
+void WindowSceneEffectTest::TearDown() {}
 
 class WindowEffectTestUtils {
 public:
@@ -72,7 +64,7 @@ using Utils = WindowEffectTestUtils;
  * @tc.desc: Set window corner radius
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneEffectTest, WindowEffect01, Function | MediumTest | Level3)
+HWTEST_F(WindowSceneEffectTest, WindowEffect01, TestSize.Level1)
 {
     const sptr<WindowSceneSessionImpl>& window = Utils::CreateTestWindow("CornerRadius");
     ASSERT_NE(nullptr, window);
@@ -90,7 +82,7 @@ HWTEST_F(WindowSceneEffectTest, WindowEffect01, Function | MediumTest | Level3)
  * @tc.desc: Set window shadow radius
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneEffectTest, WindowEffect02, Function | MediumTest | Level3)
+HWTEST_F(WindowSceneEffectTest, WindowEffect02, TestSize.Level1)
 {
     const sptr<WindowSceneSessionImpl>& window = Utils::CreateTestWindow("shadowRadius");
     ASSERT_NE(nullptr, window);
@@ -108,7 +100,7 @@ HWTEST_F(WindowSceneEffectTest, WindowEffect02, Function | MediumTest | Level3)
  * @tc.desc: Set window shadow color
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneEffectTest, WindowEffect03, Function | MediumTest | Level3)
+HWTEST_F(WindowSceneEffectTest, WindowEffect03, TestSize.Level1)
 {
     const sptr<WindowSceneSessionImpl>& window = Utils::CreateTestWindow("WindowEffect03");
     ASSERT_NE(nullptr, window);
@@ -133,7 +125,7 @@ HWTEST_F(WindowSceneEffectTest, WindowEffect03, Function | MediumTest | Level3)
  * @tc.desc: Set window shadow offset
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneEffectTest, WindowEffect04, Function | MediumTest | Level3)
+HWTEST_F(WindowSceneEffectTest, WindowEffect04, TestSize.Level1)
 {
     const sptr<WindowSceneSessionImpl>& window = Utils::CreateTestWindow("WindowEffect04");
     ASSERT_NE(nullptr, window);
@@ -156,7 +148,7 @@ HWTEST_F(WindowSceneEffectTest, WindowEffect04, Function | MediumTest | Level3)
  * @tc.desc: Set window blur radius
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneEffectTest, WindowEffect05, Function | MediumTest | Level3)
+HWTEST_F(WindowSceneEffectTest, WindowEffect05, TestSize.Level1)
 {
     const sptr<WindowSceneSessionImpl>& window = Utils::CreateTestWindow("WindowEffect05");
     ASSERT_NE(nullptr, window);
@@ -174,7 +166,7 @@ HWTEST_F(WindowSceneEffectTest, WindowEffect05, Function | MediumTest | Level3)
  * @tc.desc: Set window backdrop blur radius
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneEffectTest, WindowEffect06, Function | MediumTest | Level3)
+HWTEST_F(WindowSceneEffectTest, WindowEffect06, TestSize.Level1)
 {
     const sptr<WindowSceneSessionImpl>& window = Utils::CreateTestWindow("WindowEffect06");
     ASSERT_NE(nullptr, window);
@@ -192,7 +184,7 @@ HWTEST_F(WindowSceneEffectTest, WindowEffect06, Function | MediumTest | Level3)
  * @tc.desc: Set window backdrop blur style
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneEffectTest, WindowEffect07, Function | MediumTest | Level3)
+HWTEST_F(WindowSceneEffectTest, WindowEffect07, TestSize.Level1)
 {
     const sptr<WindowSceneSessionImpl>& window = Utils::CreateTestWindow("WindowEffect07");
     ASSERT_NE(nullptr, window);
@@ -208,6 +200,6 @@ HWTEST_F(WindowSceneEffectTest, WindowEffect07, Function | MediumTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window->Destroy(true));
 }
 
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

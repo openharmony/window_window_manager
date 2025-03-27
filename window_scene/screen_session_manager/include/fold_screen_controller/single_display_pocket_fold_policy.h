@@ -46,11 +46,13 @@ private:
     void ChangeScreenDisplayModeToFull(sptr<ScreenSession> screenSession,
         DisplayModeChangeReason reason = DisplayModeChangeReason::DEFAULT);
     void ChangeScreenDisplayModeToCoordination();
-    void ChangeScreenDisplayModeProc(sptr<ScreenSession> screenSession, FoldDisplayMode displayMode);
+    void ChangeScreenDisplayModeProc(sptr<ScreenSession> screenSession, FoldDisplayMode displayMode,
+        DisplayModeChangeReason reason = DisplayModeChangeReason::DEFAULT);
     void ChangeScreenDisplayModeToMainWhenFoldScreenOn(sptr<ScreenSession> screenSession);
     void ChangeScreenDisplayModeToMainWhenFoldScreenOff(sptr<ScreenSession> screenSession);
     void ChangeScreenDisplayModeToFullWhenFoldScreenOn(sptr<ScreenSession> screenSession);
-    void ChangeScreenDisplayModeToFullWhenFoldScreenOff(sptr<ScreenSession> screenSession);
+    void ChangeScreenDisplayModeToFullWhenFoldScreenOff(sptr<ScreenSession> screenSession,
+        DisplayModeChangeReason reason = DisplayModeChangeReason::DEFAULT);
     void ChangeScreenDisplayModeToMainOnBootAnimation(sptr<ScreenSession> screenSession);
     void ChangeScreenDisplayModeToFullOnBootAnimation(sptr<ScreenSession> screenSession);
     void ChangeScreenDisplayModePower(ScreenId screenId, ScreenPowerStatus screenPowerStatus);
@@ -65,6 +67,7 @@ private:
     void CloseCoordinationScreen();
     void NotifyRefreshRateEvent(bool isEventStatus);
     std::recursive_mutex& displayInfoMutex_;
+    std::mutex coordinationMutex_;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler_;
 };
 } // namespace OHOS::Rosen

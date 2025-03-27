@@ -65,7 +65,7 @@ namespace {
      * @tc.desc: ChangeScreenDisplayMode
      * @tc.type: FUNC
      */
-    HWTEST_F(DualDisplayFoldPolicyTest, ChangeScreenDisplayMode, Function | SmallTest | Level3)
+    HWTEST_F(DualDisplayFoldPolicyTest, ChangeScreenDisplayMode, TestSize.Level1)
     {
         std::recursive_mutex mutex;
         DualDisplayFoldPolicy dualDisplayFoldPolicy(mutex, std::shared_ptr<TaskScheduler>());
@@ -91,7 +91,7 @@ namespace {
      * @tc.desc: ChangeScreenDisplayMode
      * @tc.type: FUNC
      */
-    HWTEST_F(DualDisplayFoldPolicyTest, ChangeScreenDisplayMode02, Function | SmallTest | Level3)
+    HWTEST_F(DualDisplayFoldPolicyTest, ChangeScreenDisplayMode02, TestSize.Level1)
     {
         std::recursive_mutex mutex;
         DualDisplayFoldPolicy dualDisplayFoldPolicy(mutex, std::shared_ptr<TaskScheduler>());
@@ -120,7 +120,7 @@ namespace {
      * @tc.desc: SendSensorResult
      * @tc.type: FUNC
      */
-    HWTEST_F(DualDisplayFoldPolicyTest, SendSensorResult, Function | SmallTest | Level3)
+    HWTEST_F(DualDisplayFoldPolicyTest, SendSensorResult, TestSize.Level1)
     {
         std::recursive_mutex mutex;
         DualDisplayFoldPolicy dualDisplayFoldPolicy(mutex, std::shared_ptr<TaskScheduler>());
@@ -134,7 +134,7 @@ namespace {
      * @tc.desc: SetOnBootAnimation
      * @tc.type: FUNC
      */
-    HWTEST_F(DualDisplayFoldPolicyTest, SetOnBootAnimation, Function | SmallTest | Level3)
+    HWTEST_F(DualDisplayFoldPolicyTest, SetOnBootAnimation, TestSize.Level1)
     {
         std::recursive_mutex mutex;
         DualDisplayFoldPolicy dualDisplayFoldPolicy(mutex, std::shared_ptr<TaskScheduler>());
@@ -150,7 +150,7 @@ namespace {
      * @tc.desc: GetCurrentFoldCreaseRegion
      * @tc.type: FUNC
      */
-    HWTEST_F(DualDisplayFoldPolicyTest, GetCurrentFoldCreaseRegion, Function | SmallTest | Level3)
+    HWTEST_F(DualDisplayFoldPolicyTest, GetCurrentFoldCreaseRegion, TestSize.Level1)
     {
         std::recursive_mutex mutex;
         DualDisplayFoldPolicy dualDisplayFoldPolicy(mutex, std::shared_ptr<TaskScheduler>());
@@ -163,7 +163,7 @@ namespace {
      * @tc.desc: LockDisplayStatus
      * @tc.type: FUNC
      */
-    HWTEST_F(DualDisplayFoldPolicyTest, LockDisplayStatus, Function | SmallTest | Level3)
+    HWTEST_F(DualDisplayFoldPolicyTest, LockDisplayStatus, TestSize.Level1)
     {
         std::recursive_mutex mutex;
         DualDisplayFoldPolicy dualDisplayFoldPolicy(mutex, std::shared_ptr<TaskScheduler>());
@@ -177,7 +177,7 @@ namespace {
      * @tc.desc: RecoverWhenBootAnimationExit0
      * @tc.type: FUNC
      */
-    HWTEST_F(DualDisplayFoldPolicyTest, RecoverWhenBootAnimationExit0, Function | SmallTest | Level3)
+    HWTEST_F(DualDisplayFoldPolicyTest, RecoverWhenBootAnimationExit0, TestSize.Level1)
     {
         std::recursive_mutex mutex;
         DualDisplayFoldPolicy dualDisplayFoldPolicy(mutex, std::shared_ptr<TaskScheduler>());
@@ -193,7 +193,7 @@ namespace {
      * @tc.desc: UpdateForPhyScreenPropertyChange0
      * @tc.type: FUNC
      */
-    HWTEST_F(DualDisplayFoldPolicyTest, UpdateForPhyScreenPropertyChange0, Function | SmallTest | Level3)
+    HWTEST_F(DualDisplayFoldPolicyTest, UpdateForPhyScreenPropertyChange0, TestSize.Level1)
     {
         std::recursive_mutex mutex;
         DualDisplayFoldPolicy dualDisplayFoldPolicy(mutex, std::shared_ptr<TaskScheduler>());
@@ -209,7 +209,7 @@ namespace {
      * @tc.desc: ChangeScreenDisplayModeInner01
      * @tc.type: FUNC
      */
-    HWTEST_F(DualDisplayFoldPolicyTest, ChangeScreenDisplayModeInner01, Function | SmallTest | Level3)
+    HWTEST_F(DualDisplayFoldPolicyTest, ChangeScreenDisplayModeInner01, TestSize.Level1)
     {
         std::recursive_mutex mutex;
         DualDisplayFoldPolicy dualDisplayFoldPolicy(mutex, std::shared_ptr<TaskScheduler>());
@@ -227,7 +227,7 @@ namespace {
      * @tc.desc: ChangeScreenDisplayModeToCoordination
      * @tc.type: FUNC
      */
-    HWTEST_F(DualDisplayFoldPolicyTest, ChangeScreenDisplayModeToCoordination, Function | SmallTest | Level3)
+    HWTEST_F(DualDisplayFoldPolicyTest, ChangeScreenDisplayModeToCoordination, TestSize.Level1)
     {
         if (FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
             std::recursive_mutex mutex;
@@ -245,7 +245,7 @@ namespace {
      * @tc.desc: UpdateForPhyScreenPropertyChange
      * @tc.type: FUNC
      */
-    HWTEST_F(DualDisplayFoldPolicyTest, UpdateForPhyScreenPropertyChange, Function | SmallTest | Level3)
+    HWTEST_F(DualDisplayFoldPolicyTest, UpdateForPhyScreenPropertyChange, TestSize.Level1)
     {
         std::recursive_mutex mutex;
         DualDisplayFoldPolicy dualDisplayFoldPolicy(mutex, std::shared_ptr<TaskScheduler>());
@@ -259,7 +259,7 @@ namespace {
      * @tc.desc: GetModeMatchStatus
      * @tc.type: FUNC
      */
-    HWTEST_F(DualDisplayFoldPolicyTest, GetModeMatchStatus, Function | SmallTest | Level3)
+    HWTEST_F(DualDisplayFoldPolicyTest, GetModeMatchStatus, TestSize.Level1)
     {
         std::recursive_mutex mutex;
         DualDisplayFoldPolicy dualDisplayFoldPolicy(mutex, std::shared_ptr<TaskScheduler>());
@@ -284,7 +284,7 @@ namespace {
      * @tc.desc: ReportFoldDisplayModeChange
      * @tc.type: FUNC
      */
-    HWTEST_F(DualDisplayFoldPolicyTest, ReportFoldDisplayModeChange, Function | SmallTest | Level3)
+    HWTEST_F(DualDisplayFoldPolicyTest, ReportFoldDisplayModeChange, TestSize.Level1)
     {
         std::recursive_mutex mutex;
         DualDisplayFoldPolicy dualDisplayFoldPolicy(mutex, std::shared_ptr<TaskScheduler>());
@@ -298,7 +298,7 @@ namespace {
      * @tc.desc: ReportFoldStatusChangeBegin
      * @tc.type: FUNC
      */
-    HWTEST_F(DualDisplayFoldPolicyTest, ReportFoldStatusChangeBegin, Function | SmallTest | Level3)
+    HWTEST_F(DualDisplayFoldPolicyTest, ReportFoldStatusChangeBegin, TestSize.Level1)
     {
         std::recursive_mutex mutex;
         DualDisplayFoldPolicy dualDisplayFoldPolicy(mutex, std::shared_ptr<TaskScheduler>());
@@ -314,7 +314,7 @@ namespace {
      * @tc.desc: ChangeScreenDisplayModeOnBootAnimation
      * @tc.type: FUNC
      */
-    HWTEST_F(DualDisplayFoldPolicyTest, ChangeScreenDisplayModeOnBootAnimation, Function | SmallTest | Level3)
+    HWTEST_F(DualDisplayFoldPolicyTest, ChangeScreenDisplayModeOnBootAnimation, TestSize.Level1)
     {
         std::recursive_mutex mutex;
         DualDisplayFoldPolicy dualDisplayFoldPolicy(mutex, std::shared_ptr<TaskScheduler>());
@@ -331,7 +331,7 @@ namespace {
      * @tc.desc: ChangeScreenDisplayModeOnBootAnimation2
      * @tc.type: FUNC
      */
-    HWTEST_F(DualDisplayFoldPolicyTest, ChangeScreenDisplayModeOnBootAnimation2, Function | SmallTest | Level3)
+    HWTEST_F(DualDisplayFoldPolicyTest, ChangeScreenDisplayModeOnBootAnimation2, TestSize.Level1)
     {
         std::recursive_mutex mutex;
         DualDisplayFoldPolicy dualDisplayFoldPolicy(mutex, std::shared_ptr<TaskScheduler>());
@@ -348,7 +348,7 @@ namespace {
      * @tc.desc: AddOrRemoveDisplayNodeToTree
      * @tc.type: FUNC
      */
-    HWTEST_F(DualDisplayFoldPolicyTest, AddOrRemoveDisplayNodeToTree, Function | SmallTest | Level3)
+    HWTEST_F(DualDisplayFoldPolicyTest, AddOrRemoveDisplayNodeToTree, TestSize.Level1)
     {
         std::recursive_mutex mutex;
         DualDisplayFoldPolicy dualDisplayFoldPolicy(mutex, std::shared_ptr<TaskScheduler>());
@@ -365,7 +365,7 @@ namespace {
      * @tc.desc: SetdisplayModeChangeStatus
      * @tc.type: FUNC
      */
-    HWTEST_F(DualDisplayFoldPolicyTest, SetdisplayModeChangeStatus01, Function | SmallTest | Level3)
+    HWTEST_F(DualDisplayFoldPolicyTest, SetdisplayModeChangeStatus01, TestSize.Level1)
     {
         std::recursive_mutex mutex;
         DualDisplayFoldPolicy dualDisplayFoldPolicy(mutex, std::shared_ptr<TaskScheduler>());
@@ -380,7 +380,7 @@ namespace {
      * @tc.desc: SetdisplayModeChangeStatus
      * @tc.type: FUNC
      */
-    HWTEST_F(DualDisplayFoldPolicyTest, SetdisplayModeChangeStatus02, Function | SmallTest | Level3)
+    HWTEST_F(DualDisplayFoldPolicyTest, SetdisplayModeChangeStatus02, TestSize.Level1)
     {
         std::recursive_mutex mutex;
         DualDisplayFoldPolicy dualDisplayFoldPolicy(mutex, std::shared_ptr<TaskScheduler>());
@@ -395,7 +395,7 @@ namespace {
      * @tc.desc: CheckDisplayMode
      * @tc.type: FUNC
      */
-    HWTEST_F(DualDisplayFoldPolicyTest, CheckDisplayMode01, Function | SmallTest | Level3)
+    HWTEST_F(DualDisplayFoldPolicyTest, CheckDisplayMode01, TestSize.Level1)
     {
         std::recursive_mutex mutex;
         DualDisplayFoldPolicy dualDisplayFoldPolicy(mutex, std::shared_ptr<TaskScheduler>());
@@ -410,7 +410,7 @@ namespace {
      * @tc.desc: CheckDisplayMode
      * @tc.type: FUNC
      */
-    HWTEST_F(DualDisplayFoldPolicyTest, CheckDisplayMode02, Function | SmallTest | Level3)
+    HWTEST_F(DualDisplayFoldPolicyTest, CheckDisplayMode02, TestSize.Level1)
     {
         std::recursive_mutex mutex;
         DualDisplayFoldPolicy dualDisplayFoldPolicy(mutex, std::shared_ptr<TaskScheduler>());
@@ -425,7 +425,7 @@ namespace {
      * @tc.desc: CheckDisplayMode
      * @tc.type: FUNC
      */
-    HWTEST_F(DualDisplayFoldPolicyTest, CheckDisplayMode03, Function | SmallTest | Level3)
+    HWTEST_F(DualDisplayFoldPolicyTest, CheckDisplayMode03, TestSize.Level1)
     {
         std::recursive_mutex mutex;
         DualDisplayFoldPolicy dualDisplayFoldPolicy(mutex, std::shared_ptr<TaskScheduler>());
@@ -440,7 +440,7 @@ namespace {
      * @tc.desc: ChangeScreenDisplayMode
      * @tc.type: FUNC
      */
-    HWTEST_F(DualDisplayFoldPolicyTest, ChangeScreenDisplayMode03, Function | SmallTest | Level3)
+    HWTEST_F(DualDisplayFoldPolicyTest, ChangeScreenDisplayMode03, TestSize.Level1)
     {
         std::recursive_mutex mutex;
         DualDisplayFoldPolicy dualDisplayFoldPolicy(mutex, std::shared_ptr<TaskScheduler>());

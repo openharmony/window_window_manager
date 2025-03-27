@@ -32,6 +32,8 @@ public:
     void ReportPiPControlEvent(int32_t templateType, PiPControlType controlType);
     void ReportPiPRatio(int32_t windowWidth, int32_t windowHeight);
     void ReportPiPRestore();
+    void ReportPiPUpdateContent(int32_t originType, int32_t templateType, int32_t isSuccess,
+        const std::string &errorReason);
 private:
     std::string GetPackageName() const;
     std::string packageName_ = "";

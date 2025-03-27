@@ -39,6 +39,10 @@ class Ability;
 enum class SupportWindowMode;
 }
 
+namespace OHOS::Global::Resource {
+class ResourceManager;
+} // namespace OHOS::Global::Resource
+
 namespace OHOS::AbilityRuntime {
 class AbilityContext;
 class Context;
@@ -101,6 +105,10 @@ public:
     virtual void AnimationForShown() = 0;
     virtual void AnimationForHidden() = 0;
 };
+class ISystemBarPropertyListener : virtual public RefBase {
+public:
+    virtual void OnSystemBarPropertyUpdate(WindowType type, const SystemBarProperty& property) {}
+};
 class IScreenshotListener : virtual public RefBase {
 };
 class IDialogTargetTouchListener : virtual public RefBase {
@@ -128,14 +136,15 @@ public:
     static sptr<Window> GetTopWindowWithContext(const std::shared_ptr<AbilityRuntime::Context>& context = nullptr);
     static sptr<Window> GetTopWindowWithId(uint32_t mainWinId);
     static std::vector<sptr<Window>> GetSubWindow(uint32_t parentId);
-    static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
+    static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration,
+       const std::vector<std::shared_ptr<AbilityRuntime::Context>>& ignoreWindowContexts = {});
     static void UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
     virtual std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const = 0;
     virtual const std::shared_ptr<AbilityRuntime::Context> GetContext() const = 0;
     virtual Rect GetRect() const = 0;
     virtual Rect GetRequestRect() const = 0;
     virtual WindowType GetType() const = 0;
-    virtual WindowMode GetMode() const = 0;
+    virtual WindowMode GetWindowMode() const = 0;
     virtual float GetAlpha() const = 0;
     virtual const std::string& GetWindowName() const = 0;
     virtual uint32_t GetWindowId() const = 0;
@@ -159,6 +168,14 @@ public:
     virtual WMError SetWindowFlags(uint32_t flags) = 0;
     virtual WMError IsWindowRectAutoSave(bool& enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea) = 0;
+    virtual WMError SetAvoidAreaOption(uint32_t avoidAreaOption) { return WMError::WM_OK; }
+    virtual WMError GetAvoidAreaOption(uint32_t& avoidAreaOption) { return WMError::WM_OK; }
+    virtual WMError UpdateSystemBarProperties(
+        const std::unordered_map<WindowType, SystemBarProperty>& systemBarProperties,
+        const std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags)
+        { return WMError::WM_OK; }
+    virtual void UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool systemBarEnableAnimation,
+        SystemBarProperty& property) {}
     virtual WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) = 0;
     virtual WMError SetSpecificBarProperty(WindowType type, const SystemBarProperty& property) = 0;
     virtual WMError SetSystemBarProperties(const std::map<WindowType, SystemBarProperty>& properties,
@@ -200,7 +217,10 @@ public:
     virtual WMError RaiseToAppTop() = 0;
     virtual WMError SetSnapshotSkip(bool isSkip) = 0;
     virtual WMError SetCornerRadius(float cornerRadius) = 0;
+    virtual WMError SetWindowCornerRadius(float radius) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError GetWindowCornerRadius(float& radius) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError SetShadowRadius(float radius) = 0;
+    virtual WMError SetWindowShadowRadius(float radius) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError SetShadowColor(std::string color) = 0;
     virtual WMError SetShadowOffsetX(float offsetX) = 0;
     virtual WMError SetShadowOffsetY(float offsetY) = 0;
@@ -218,6 +238,8 @@ public:
     virtual int64_t GetVSyncPeriod() = 0;
     virtual void FlushFrameRate(uint32_t rate, int32_t animatorExpectedFrameRate, uint32_t rateType) {}
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) = 0;
+    virtual void UpdateConfigurationForSpecified(const std::shared_ptr<AppExecFwk::Configuration>& configuration,
+        const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager) = 0;
     virtual void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) = 0;
     virtual WMError RegisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) = 0;
     virtual WMError UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) = 0;
@@ -268,6 +290,7 @@ public:
     virtual Ace::UIContent* GetUIContent() const = 0;
     virtual void OnNewWant(const AAFwk::Want& want) = 0;
     virtual void SetRequestedOrientation(Orientation) = 0;
+    virtual void NotifyPreferredOrientationChange(Orientation orientation) = 0;
     virtual Orientation GetRequestedOrientation() = 0;
     virtual void SetRequestWindowModeSupportType(uint32_t windowModeSupportType) = 0;
     virtual uint32_t GetRequestWindowModeSupportType() const = 0;
@@ -281,13 +304,18 @@ public:
     virtual WMError Maximize() = 0;
     virtual WMError Recover() = 0;
     virtual WMError Restore() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
-    virtual WMError SetWindowRectAutoSave(bool enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
-    virtual WMError SetSupportWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes)
+    virtual WMError SetWindowRectAutoSave(bool enabled,
+        bool isSaveBySpecifiedFlag = false) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError SetSupportedWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
+    virtual WMError SetFollowParentMultiScreenPolicy(bool enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual void StartMove() = 0;
     virtual WmErrorCode StartMoveWindow() { return WmErrorCode::WM_OK; }
+    virtual WmErrorCode StartMoveWindowWithCoordinate(int32_t offsetX,
+        int32_t offsetY) { return WmErrorCode::WM_OK; }
+    virtual WmErrorCode StopMoveWindow() { return WmErrorCode::WM_OK; }
     virtual WMError Close() = 0;
     virtual void SetNeedRemoveWindowInputChannel(bool needRemoveWindowInputChannel) = 0;
     virtual bool IsSupportWideGamut() = 0;
@@ -295,6 +323,7 @@ public:
     virtual ColorSpace GetColorSpace() = 0;
     virtual void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) = 0;
     virtual std::shared_ptr<Media::PixelMap> Snapshot() = 0;
+    virtual WMError SnapshotIgnorePrivacy(std::shared_ptr<Media::PixelMap>& pixelMap) = 0;
     virtual WMError NotifyMemoryLevel(int32_t level) = 0;
     virtual bool IsAllowHaveSystemSubWindow() = 0;
     virtual WMError SetAspectRatio(float ratio) = 0;
@@ -326,12 +355,14 @@ public:
     virtual bool IsMainWindowTopmost() const { return false; }
     virtual WMError HideNonSystemFloatingWindows(bool shouldHide) = 0;
     virtual bool IsFloatingWindowAppType() const { return false; }
+    virtual bool IsPcWindow() const { return false; }
     virtual bool IsPcOrPadCapabilityEnabled() const { return false; }
     virtual bool IsPcOrPadFreeMultiWindowMode() const { return false; }
+    virtual bool GetCompatibleModeInPc() const { return false; }
     virtual WmErrorCode KeepKeyboardOnFocus(bool keepKeyboardFlag) = 0;
     virtual WMError RegisterWindowVisibilityChangeListener(const WindowVisibilityListenerSptr& listener) = 0;
     virtual WMError UnregisterWindowVisibilityChangeListener(const WindowVisibilityListenerSptr& listener) = 0;
-    virtual WMError SetWindowLimits(WindowLimits& windowLimits) { return WMError::WM_OK; }
+    virtual WMError SetWindowLimits(WindowLimits& windowLimits, bool isForcible = false) { return WMError::WM_OK; }
     virtual WMError GetWindowLimits(WindowLimits& windowLimits) { return WMError::WM_OK; }
     virtual WMError EnableDrag(bool enableDrag) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError RegisterWindowNoInteractionListener(const IWindowNoInteractionListenerSptr& listener)
@@ -345,6 +376,7 @@ public:
     virtual WMError SetSingleFrameComposerEnabled(bool enable) = 0;
     virtual WMError SetLandscapeMultiWindow(bool isLandscapeMultiWindow) = 0;
     virtual WMError SetDecorVisible(bool isVisible) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError GetDecorVisible(bool& isVisible) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError SetWindowTitleMoveEnabled(bool enable) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError SetWindowTitle(const std::string& title) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError SetTitleButtonVisible(bool isMaximizeVisible, bool isMinimizeVisible, bool isSplitVisible,
@@ -397,6 +429,29 @@ public:
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
+
+    /**
+     * @brief Set sub window zLevel
+     *
+     * @param zLevel zLevel of sub window to specify the hierarchical relationship among sub windows
+     * @return WM_OK means success, others mean set failed
+     */
+    virtual WMError SetSubWindowZLevel(int32_t zLevel)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    
+    /**
+     * @brief Get sub window zLevel
+     *
+     * @param zLevel sub window zLevel
+     * @return WM_OK means success, others mean get failed
+     */
+    virtual WMError GetSubWindowZLevel(int32_t& zLevel)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
     virtual WMError Recover(uint32_t reason = 0) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     virtual WMError Maximize(MaximizePresentation present) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
@@ -452,6 +507,107 @@ public:
      * @return WMError
      */
     virtual WMError NotifyRemoveStartingWindow() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Enable or disable window delay raise
+     *
+     * @param isEnabled Enable or disable window delay raise
+     */
+    virtual WMError SetWindowDelayRaiseEnabled(bool isEnabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Get whether window delay raise is enabled
+     *
+     * @return True means window delay raise is enabled
+     */
+    virtual bool IsWindowDelayRaiseEnabled() const { return false; }
+
+    /**
+     * @brief Set whether to enable exclusively highlight.
+     *
+     * @param isExclusivelyHighlighted the value true means to exclusively highlight, and false means the opposite.
+     * @return WM_OK means set success, others means set failed.
+     */
+    virtual WMError SetExclusivelyHighlighted(bool isExclusivelyHighlighted)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Get highlight property of window.
+     *
+     * @param highlighted True means the window is highlighted, and false means the opposite.
+     * @return WM_OK means get success, others means get failed.
+     */
+    virtual WMError IsWindowHighlighted(bool& highlighted) const { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Get the api compatible version.
+     *
+     * @return Api compatible version
+     */
+    virtual uint32_t GetApiCompatibleVersion() const { return 0; }
+
+    /**
+     * @brief Register SystemBarProperty listener.
+     *
+     * @param listener ISystemBarPropertyListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterSystemBarPropertyListener(const sptr<ISystemBarPropertyListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Unregister SystemBarProperty listener.
+     *
+     * @param listener ISystemBarPropertyListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterSystemBarPropertyListener(const sptr<ISystemBarPropertyListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Notify SystemBarProperty listener.
+     *
+     * @param type The WindowType.
+     * @param property new property value setted by developer.
+     */
+    virtual void NotifySystemBarPropertyUpdate(WindowType type, const SystemBarProperty& property) {}
+
+    /**
+     * @brief Set the parent window of a sub window.
+     *
+     * @param newParentWindowId new parent window id.
+     * @return WM_OK means set parent window success, others means failed.
+     */
+    virtual WMError SetParentWindow(int32_t newParentWindowId) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Get the parent window of a sub window.
+     *
+     * @param parentWindow parent window.
+     * @return WM_OK means get parent window success, others means failed.
+     */
+    virtual WMError GetParentWindow(sptr<Window>& parentWindow) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Set the feature of subwindow follow the layout of the parent window.
+     *
+     * @param isFollow true - follow, false - not follow.
+     * @return WM_OK means set success.
+     */
+    virtual WMError SetFollowParentWindowLayoutEnabled(bool isFollow) { return WMError::WM_ERROR_SYSTEM_ABNORMALLY; }
+
+      /**
+     * @brief Get is subwindow support maximize.
+     *
+     * @return true means subwindow support maximize, others means do not support.
+     */
+    virtual bool IsSubWindowMaximizeSupported() const { return false; }
 };
 }
 }

@@ -21,9 +21,9 @@
 #include "context.h"
 #include "interfaces/include/ws_common.h"
 #include "iremote_object_mocker.h"
+#include "libxml/parser.h"
+#include "libxml/tree.h"
 #include "mock/mock_session_stage.h"
-#include "mock/mock_resource_manager.h"
-#include "mock/mock_root_scene_context.h"
 #include "mock/mock_window_event_channel.h"
 #include "session_info.h"
 #include "session_manager.h"
@@ -75,11 +75,6 @@ public:
     void TearDown() override;
 
     static sptr<SceneSessionManager> ssm_;
-    std::shared_ptr<AbilityRuntime::RootSceneContextMocker> mockRootSceneContext_;
-    std::string path;
-    uint32_t bgColor;
-    AppExecFwk::AbilityInfo abilityInfo;
-
 private:
 };
 
@@ -97,14 +92,6 @@ void SSMgrSpecificWindowTest::TearDownTestCase()
 
 void SSMgrSpecificWindowTest::SetUp()
 {
-    mockRootSceneContext_ = std::make_shared<AbilityRuntime::RootSceneContextMocker>();
-    path = "testPath";
-    bgColor = 0;
-    abilityInfo.bundleName = "testBundle";
-    abilityInfo.moduleName = "testmodule";
-    abilityInfo.resourcePath = "/test/resource/path";
-    abilityInfo.startWindowBackgroundId = 1;
-    abilityInfo.startWindowIconId = 1;
 }
 
 void SSMgrSpecificWindowTest::TearDown()
@@ -112,28 +99,13 @@ void SSMgrSpecificWindowTest::TearDown()
     usleep(WAIT_SYNC_IN_NS);
 }
 
-std::shared_ptr<Global::Resource::ResourceManagerMocker>
-    mockResourceManager_ = std::make_shared<Global::Resource::ResourceManagerMocker>();
-
-class SceneSessionManagerMocker : public SceneSessionManager {
-public:
-    SceneSessionManagerMocker() {};
-    ~SceneSessionManagerMocker() {};
-
-    std::shared_ptr<Global::Resource::ResourceManager> GetResourceManager(const AppExecFwk::AbilityInfo& abilityInfo)
-    {
-        return mockResourceManager_;
-    };
-};
-std::shared_ptr<SceneSessionManagerMocker> mockSceneSessionManager_ = std::make_shared<SceneSessionManagerMocker>();
-
 namespace {
 /**
  * @tc.name: ConfigKeyboardAnimation01
  * @tc.desc: call ConfigKeyboardAnimation default
  * @tc.type: FUNC
  */
-HWTEST_F(SSMgrSpecificWindowTest, ConfigKeyboardAnimation01, Function | SmallTest | Level3)
+HWTEST_F(SSMgrSpecificWindowTest, ConfigKeyboardAnimation01, TestSize.Level1)
 {
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
@@ -183,7 +155,7 @@ HWTEST_F(SSMgrSpecificWindowTest, ConfigKeyboardAnimation01, Function | SmallTes
  * @tc.desc: call ConfigKeyboardAnimation default
  * @tc.type: FUNC
  */
-HWTEST_F(SSMgrSpecificWindowTest, ConfigKeyboardAnimation02, Function | SmallTest | Level3)
+HWTEST_F(SSMgrSpecificWindowTest, ConfigKeyboardAnimation02, TestSize.Level1)
 {
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
@@ -211,7 +183,7 @@ HWTEST_F(SSMgrSpecificWindowTest, ConfigKeyboardAnimation02, Function | SmallTes
  * @tc.desc: call ConfigKeyboardAnimation default
  * @tc.type: FUNC
  */
-HWTEST_F(SSMgrSpecificWindowTest, ConfigKeyboardAnimation03, Function | SmallTest | Level3)
+HWTEST_F(SSMgrSpecificWindowTest, ConfigKeyboardAnimation03, TestSize.Level1)
 {
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
@@ -239,7 +211,7 @@ HWTEST_F(SSMgrSpecificWindowTest, ConfigKeyboardAnimation03, Function | SmallTes
  * @tc.desc: call ConfigKeyboardAnimation default
  * @tc.type: FUNC
  */
-HWTEST_F(SSMgrSpecificWindowTest, ConfigKeyboardAnimation04, Function | SmallTest | Level3)
+HWTEST_F(SSMgrSpecificWindowTest, ConfigKeyboardAnimation04, TestSize.Level1)
 {
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
@@ -261,7 +233,7 @@ HWTEST_F(SSMgrSpecificWindowTest, ConfigKeyboardAnimation04, Function | SmallTes
  * @tc.desc: IsKeyboardForeground
  * @tc.type: FUNC
  */
-HWTEST_F(SSMgrSpecificWindowTest, IsKeyboardForeground, Function | SmallTest | Level3)
+HWTEST_F(SSMgrSpecificWindowTest, IsKeyboardForeground, TestSize.Level1)
 {
     ASSERT_NE(nullptr, ssm_);
     SessionInfo info;
@@ -292,7 +264,7 @@ HWTEST_F(SSMgrSpecificWindowTest, IsKeyboardForeground, Function | SmallTest | L
  * @tc.desc: ProcessSubSessionForeground
  * @tc.type: FUNC
  */
-HWTEST_F(SSMgrSpecificWindowTest, ProcessSubSessionForeground, Function | SmallTest | Level3)
+HWTEST_F(SSMgrSpecificWindowTest, ProcessSubSessionForeground, TestSize.Level1)
 {
     sptr<SceneSession> sceneSession = nullptr;
     ASSERT_NE(nullptr, ssm_);
@@ -329,7 +301,7 @@ HWTEST_F(SSMgrSpecificWindowTest, ProcessSubSessionForeground, Function | SmallT
  * @tc.desc: ProcessSubSessionBackground
  * @tc.type: FUNC
  */
-HWTEST_F(SSMgrSpecificWindowTest, ProcessSubSessionBackground, Function | SmallTest | Level3)
+HWTEST_F(SSMgrSpecificWindowTest, ProcessSubSessionBackground, TestSize.Level1)
 {
     sptr<SceneSession> sceneSession = nullptr;
     ASSERT_NE(nullptr, ssm_);
@@ -363,7 +335,7 @@ HWTEST_F(SSMgrSpecificWindowTest, ProcessSubSessionBackground, Function | SmallT
  * @tc.desc: ProcessSubSessionBackground01
  * @tc.type: FUNC
  */
-HWTEST_F(SSMgrSpecificWindowTest, ProcessSubSessionBackground01, Function | SmallTest | Level3)
+HWTEST_F(SSMgrSpecificWindowTest, ProcessSubSessionBackground01, TestSize.Level1)
 {
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "SceneSessionManagerTest2";
@@ -402,7 +374,7 @@ HWTEST_F(SSMgrSpecificWindowTest, ProcessSubSessionBackground01, Function | Smal
  * @tc.desc: DestroyDialogWithMainWindow
  * @tc.type: FUNC
  */
-HWTEST_F(SSMgrSpecificWindowTest, DestroyDialogWithMainWindow, Function | SmallTest | Level3)
+HWTEST_F(SSMgrSpecificWindowTest, DestroyDialogWithMainWindow, TestSize.Level1)
 {
     sptr<SceneSession> sceneSession = nullptr;
     auto result = ssm_->DestroyDialogWithMainWindow(sceneSession);
@@ -430,7 +402,7 @@ HWTEST_F(SSMgrSpecificWindowTest, DestroyDialogWithMainWindow, Function | SmallT
  * @tc.desc: DestroyDialogWithMainWindow02
  * @tc.type: FUNC
  */
-HWTEST_F(SSMgrSpecificWindowTest, DestroyDialogWithMainWindow02, Function | SmallTest | Level3)
+HWTEST_F(SSMgrSpecificWindowTest, DestroyDialogWithMainWindow02, TestSize.Level1)
 {
     SessionInfo info;
     sptr<SceneSession::SpecificSessionCallback> specificCallback = nullptr;
@@ -461,7 +433,7 @@ HWTEST_F(SSMgrSpecificWindowTest, DestroyDialogWithMainWindow02, Function | Smal
  * @tc.desc: SceneSesionManager config keyboard animation
  * @tc.type: FUNC
  */
-HWTEST_F(SSMgrSpecificWindowTest, ConfigKeyboardAnimation, Function | SmallTest | Level3)
+HWTEST_F(SSMgrSpecificWindowTest, ConfigKeyboardAnimation, TestSize.Level1)
 {
     WindowSceneConfig::ConfigItem animationConfig;
     WindowSceneConfig::ConfigItem itemCurve;
@@ -502,7 +474,7 @@ HWTEST_F(SSMgrSpecificWindowTest, ConfigKeyboardAnimation, Function | SmallTest 
  * @tc.desc: SceneSesionManager UpdateParentSessionForDialog
  * @tc.type: FUNC
  */
-HWTEST_F(SSMgrSpecificWindowTest, UpdateParentSessionForDialog, Function | SmallTest | Level3)
+HWTEST_F(SSMgrSpecificWindowTest, UpdateParentSessionForDialog, TestSize.Level1)
 {
     WSError result = ssm_->UpdateParentSessionForDialog(nullptr, nullptr);
     EXPECT_EQ(result, WSError::WS_ERROR_NULLPTR);
@@ -542,7 +514,7 @@ HWTEST_F(SSMgrSpecificWindowTest, UpdateParentSessionForDialog, Function | Small
  * @tc.desc: SceneSesionManager destroy and disconnect specific session
  * @tc.type: FUNC
  */
-HWTEST_F(SSMgrSpecificWindowTest, DestroyAndDisconnectSpecificSession, Function | SmallTest | Level3)
+HWTEST_F(SSMgrSpecificWindowTest, DestroyAndDisconnectSpecificSession, TestSize.Level1)
 {
     int32_t persistentId = 0;
     WSError result = ssm_->DestroyAndDisconnectSpecificSession(persistentId);
@@ -556,7 +528,7 @@ HWTEST_F(SSMgrSpecificWindowTest, DestroyAndDisconnectSpecificSession, Function 
  */
 HWTEST_F(SSMgrSpecificWindowTest,
     DestroyAndDisconnectSpecificSessionWithDetachCallback,
-    Function | SmallTest | Level3)
+    TestSize.Level1)
 {
     int32_t persistentId = 0;
     WSError result = ssm_->DestroyAndDisconnectSpecificSessionWithDetachCallback(persistentId, nullptr);

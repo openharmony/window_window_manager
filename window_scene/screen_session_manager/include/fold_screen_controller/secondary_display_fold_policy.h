@@ -35,6 +35,10 @@ public:
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() override;
     void SetOnBootAnimation(bool onBootAnimation) override;
     FoldDisplayMode GetModeMatchStatus() override;
+    std::vector<uint32_t> GetScreenParams() override;
+    Drawing::Rect GetScreenSnapshotRect() override;
+    void SetMainScreenRegion(DMRect& mainScreenRegion) override;
+    void SetSecondaryDisplayModeChangeStatus(bool status) override;
 private:
     void ChangeSuperScreenDisplayMode(sptr<ScreenSession> screenSession,
         FoldDisplayMode displayMode);
@@ -49,6 +53,7 @@ private:
     std::recursive_mutex& displayInfoMutex_;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler_;
     std::vector<uint32_t> screenParams_;
+    bool isChangeScreenWhenBootCompleted = false;
 };
 } // namespace OHOS::Rosen
 #endif //OHOS_ROSEN_WINDOW_SCENE_SECONDARY_DISPLAY_FOLD_POLICY_H

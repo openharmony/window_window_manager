@@ -52,7 +52,7 @@ namespace {
  * @tc.desc: test InterfaceToken check failed
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerStubTest, OnRemoteRequest01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerStubTest, OnRemoteRequest01, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -71,7 +71,7 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest01, Function | SmallTest | Level2
  * @tc.desc: test TRANS_ID_REMOVE_WINDOW
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerStubTest, OnRemoteRequest02, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerStubTest, OnRemoteRequest02, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -101,7 +101,7 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest02, Function | SmallTest | Level2
  * @tc.desc: test TRANS_ID_REQUEST_FOCUS success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerStubTest, OnRemoteRequest03, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerStubTest, OnRemoteRequest03, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -121,7 +121,7 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest03, Function | SmallTest | Level2
  * @tc.desc: test TRANS_ID_GET_AVOID_AREA success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerStubTest, OnRemoteRequest04, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerStubTest, OnRemoteRequest04, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -142,7 +142,7 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest04, Function | SmallTest | Level2
  * @tc.desc: test TRANS_ID_UNREGISTER_WINDOW_MANAGER_AGENT success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerStubTest, OnRemoteRequest05, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerStubTest, OnRemoteRequest05, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -165,7 +165,7 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest05, Function | SmallTest | Level2
  * @tc.desc: test TRANS_ID_NOTIFY_READY_MOVE_OR_DRAG success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerStubTest, OnRemoteRequest06, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerStubTest, OnRemoteRequest06, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -189,7 +189,7 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest06, Function | SmallTest | Level2
  * @tc.desc: test TRANS_ID_PROCESS_POINT_DOWN success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerStubTest, OnRemoteRequest07, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerStubTest, OnRemoteRequest07, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -210,7 +210,7 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest07, Function | SmallTest | Level2
  * @tc.desc: test TRANS_ID_PROCESS_POINT_UP success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerStubTest, OnRemoteRequest08, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerStubTest, OnRemoteRequest08, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -230,7 +230,7 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest08, Function | SmallTest | Level2
  * @tc.desc: test TRANS_ID_GET_TOP_WINDOW_ID success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerStubTest, OnRemoteRequest09, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerStubTest, OnRemoteRequest09, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -250,7 +250,7 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest09, Function | SmallTest | Level2
  * @tc.desc: test TRANS_ID_MINIMIZE_ALL_APP_WINDOWS success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerStubTest, OnRemoteRequest10, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerStubTest, OnRemoteRequest10, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -270,7 +270,7 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest10, Function | SmallTest | Level2
  * @tc.desc: test TRANS_ID_TOGGLE_SHOWN_STATE_FOR_ALL_APP_WINDOWS success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerStubTest, OnRemoteRequest11, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerStubTest, OnRemoteRequest11, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -290,7 +290,7 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest11, Function | SmallTest | Level2
  * @tc.desc: test TRANS_ID_UPDATE_LAYOUT_MODE success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerStubTest, OnRemoteRequest12, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerStubTest, OnRemoteRequest12, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -310,7 +310,7 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest12, Function | SmallTest | Level2
  * @tc.desc: test TRANS_ID_UPDATE_PROPERTY success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerStubTest, OnRemoteRequest13, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerStubTest, OnRemoteRequest13, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -332,7 +332,7 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest13, Function | SmallTest | Level2
  * @tc.desc: test TRANS_ID_ANIMATION_SET_CONTROLLER success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerStubTest, OnRemoteRequest14, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerStubTest, OnRemoteRequest14, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -351,7 +351,7 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest14, Function | SmallTest | Level2
  * @tc.desc: test TRANS_ID_NOTIFY_WINDOW_TRANSITION success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerStubTest, OnRemoteRequest15, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerStubTest, OnRemoteRequest15, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -375,7 +375,7 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest15, Function | SmallTest | Level2
  * @tc.desc: test TRANS_ID_GET_FULLSCREEN_AND_SPLIT_HOT_ZONE success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerStubTest, OnRemoteRequest16, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerStubTest, OnRemoteRequest16, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -397,7 +397,7 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest16, Function | SmallTest | Level2
  * @tc.desc: test TRANS_ID_GET_ANIMATION_CALLBACK success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerStubTest, OnRemoteRequest17, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerStubTest, OnRemoteRequest17, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -422,7 +422,7 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest17, Function | SmallTest | Level2
  * @tc.desc: test TRANS_ID_UPDATE_RS_TREE success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerStubTest, OnRemoteRequest18, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerStubTest, OnRemoteRequest18, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -445,7 +445,7 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest18, Function | SmallTest | Level2
  * @tc.desc: test TRANS_ID_CREATE_WINDOW success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerStubTest, OnRemoteRequest19, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerStubTest, OnRemoteRequest19, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -477,7 +477,7 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest19, Function | SmallTest | Level2
  * @tc.desc: test TRANS_ID_CREATE_WINDOW success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerStubTest, OnRemoteRequest20, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerStubTest, OnRemoteRequest20, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -510,7 +510,7 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest20, Function | SmallTest | Level2
  * @tc.desc: test TRANS_ID_RAISE_WINDOW_Z_ORDER success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerStubTest, OnRemoteRequest21, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerStubTest, OnRemoteRequest21, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -530,7 +530,7 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest21, Function | SmallTest | Level2
  * @tc.desc: test TRANS_ID_RAISE_WINDOW_Z_ORDER success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerStubTest, OnRemoteRequest22, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerStubTest, OnRemoteRequest22, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -548,7 +548,7 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest22, Function | SmallTest | Level2
  * @tc.desc: test TRANS_ID_GET_UNRELIABLE_WINDOW_INFO_ID success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerStubTest, OnRemoteRequest23, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerStubTest, OnRemoteRequest23, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -567,7 +567,7 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest23, Function | SmallTest | Level2
  * @tc.desc: test TRANS_ID_GET_SNAPSHOT success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerStubTest, OnRemoteRequest24, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerStubTest, OnRemoteRequest24, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;

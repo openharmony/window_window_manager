@@ -14,6 +14,8 @@
  */
 
 #include "multi_screen_manager.h"
+#include "screen_power_utils.h"
+#include "screen_scene_config.h"
 #ifdef RES_SCHED_ENABLE
 #include "res_sched_client.h"
 #include "res_type.h"
@@ -114,6 +116,15 @@ DMError MultiScreenManager::PhysicalScreenMirrorSwitch(const std::vector<ScreenI
         }
         TLOGW(WmsLogTag::DMS, "switch to mirror physical ScreenId: %{public}" PRIu64, physicalScreenId);
         std::shared_ptr<RSDisplayNode> displayNode = screenSession->GetDisplayNode();
+        if (screenSession->GetScreenCombination() == ScreenCombination::SCREEN_MIRROR) {
+            if (mirrorRegion != screenSession->GetMirrorScreenRegion().second) {
+                screenSession->SetMirrorScreenRegion(defaultSession->GetRSScreenId(), mirrorRegion);
+                screenSession->SetIsPhysicalMirrorSwitch(true);
+                screenSession->EnableMirrorScreenRegion();
+            }
+            TLOGW(WmsLogTag::DMS, "already mirror and get a same region.");
+            return DMError::DM_OK;
+        }
         if (displayNode != nullptr) {
             displayNode->RemoveFromTree();
         }
@@ -122,6 +133,7 @@ DMError MultiScreenManager::PhysicalScreenMirrorSwitch(const std::vector<ScreenI
         screenSession->SetIsPhysicalMirrorSwitch(true);
         RSDisplayNodeConfig config = { screenSession->screenId_, true, nodeId, true };
         screenSession->CreateDisplayNode(config);
+        screenSession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
     }
     TLOGW(WmsLogTag::DMS, "physical screen switch to mirror end");
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:PhysicalScreenMirrorSwitch end");
@@ -144,6 +156,7 @@ DMError MultiScreenManager::PhysicalScreenUniqueSwitch(const std::vector<ScreenI
             displayNode->RemoveFromTree();
         }
         screenSession->ReleaseDisplayNode();
+        screenSession->SetVirtualPixelRatio(screenSession->GetScreenProperty().GetDefaultDensity());
         RSDisplayNodeConfig config = { screenSession->screenId_ };
         screenSession->CreateDisplayNode(config);
         ScreenSessionManager::GetInstance().OnVirtualScreenChange(physicalScreenId, ScreenEvent::CONNECTED);
@@ -194,7 +207,18 @@ DMError MultiScreenManager::VirtualScreenUniqueSwitch(sptr<ScreenSession> screen
     return DMError::DM_OK;
 }
 
-DMError MultiScreenManager::UniqueSwitch(const std::vector<ScreenId>& screenIds)
+static void AddUniqueScreenDisplayId(std::vector<DisplayId>& displayIds,
+    std::vector<ScreenId>& screenIds, DMError& switchStatus)
+{
+    if (switchStatus == DMError::DM_OK) {
+        for (auto screenId : screenIds) {
+            displayIds.emplace_back(static_cast<uint64_t>(screenId));
+        }
+    }
+}
+
+DMError MultiScreenManager::UniqueSwitch(const std::vector<ScreenId>& screenIds,
+    std::vector<DisplayId>& displayIds)
 {
     DMError switchStatus = DMError::DM_OK;
     std::vector<ScreenId> virtualScreenIds;
@@ -210,10 +234,24 @@ DMError MultiScreenManager::UniqueSwitch(const std::vector<ScreenId>& screenIds)
     if (!virtualScreenIds.empty()) {
         switchStatus = ScreenSessionManager::GetInstance().VirtualScreenUniqueSwitch(virtualScreenIds);
         TLOGW(WmsLogTag::DMS, "virtual screen switch to unique result: %{public}d", switchStatus);
+        AddUniqueScreenDisplayId(displayIds, virtualScreenIds, switchStatus);
     }
     if (!physicalScreenIds.empty()) {
         switchStatus = PhysicalScreenUniqueSwitch(physicalScreenIds);
+        if (switchStatus == DMError::DM_OK) {
+            for (auto screenId : physicalScreenIds) {
+                ScreenSessionManager::GetInstance().UnregisterSettingWireCastObserver(screenId);
+            }
+        }
+        if (!ScreenSessionManager::GetInstance().HasCastEngineOrPhyMirror(physicalScreenIds) &&
+            switchStatus == DMError::DM_OK && ScreenSceneConfig::GetExternalScreenDefaultMode() != "none") {
+            ScreenPowerUtils::DisablePowerForceTimingOut();
+        }
         TLOGW(WmsLogTag::DMS, "physical screen switch to unique result: %{public}d", switchStatus);
+        AddUniqueScreenDisplayId(displayIds, physicalScreenIds, switchStatus);
+    }
+    if (displayIds.empty()) {
+        switchStatus = DMError::DM_ERROR_INVALID_PARAM;
     }
     TLOGW(WmsLogTag::DMS, "mirror switch to unique end");
     return switchStatus;
@@ -239,6 +277,17 @@ DMError MultiScreenManager::MirrorSwitch(const ScreenId mainScreenId, const std:
     if (!physicalScreenIds.empty()) {
         screenGroupId = 1;
         switchStatus = PhysicalScreenMirrorSwitch(physicalScreenIds, mainScreenRegion);
+        if (switchStatus == DMError::DM_OK) {
+            for (auto screenId : physicalScreenIds) {
+                auto screenSession = ScreenSessionManager::GetInstance().GetScreenSession(screenId);
+                ScreenSessionManager::GetInstance().RegisterSettingWireCastObserver(screenSession);
+            }
+            // switchStatus is DM_OK and device is not PC
+            if (ScreenSceneConfig::GetExternalScreenDefaultMode() != "none") {
+                ScreenPowerUtils::EnablePowerForceTimingOut();
+                ScreenSessionManager::GetInstance().DisablePowerOffRenderControl(0);
+            }
+        }
         TLOGW(WmsLogTag::DMS, "physical screen switch to mirror result: %{public}d", switchStatus);
     }
     TLOGW(WmsLogTag::DMS, "end switchStatus: %{public}d", switchStatus);
@@ -275,18 +324,15 @@ void MultiScreenManager::DoFirstMainChangeExtend(sptr<IScreenSessionManagerClien
     sptr<ScreenSession> firstSession, sptr<ScreenSession> secondarySession)
 {
     TLOGW(WmsLogTag::DMS, "exec switch extend");
-    std::shared_ptr<RSDisplayNode> displayNode = secondarySession->GetDisplayNode();
-    if (displayNode != nullptr) {
-        displayNode->RemoveFromTree();
-    }
     secondarySession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
-    secondarySession->ReleaseDisplayNode();
-    RSDisplayNodeConfig config = { secondarySession->screenId_ };
+    RSDisplayNodeConfig config = { secondarySession->screenId_, false, INVALID_NODEID};
+    secondarySession->ReuseDisplayNode(config);
     secondarySession->SetIsExtend(true);
     firstSession->SetIsExtend(false);
-    secondarySession->CreateDisplayNode(config);
-    scbClient->OnScreenConnectionChanged(secondarySession->GetScreenId(), ScreenEvent::CONNECTED,
-        secondarySession->GetRSScreenId(), secondarySession->GetName(), secondarySession->GetIsExtend());
+    SessionOption secondaryOption = ScreenSessionManager::GetInstance().GetSessionOption(secondarySession);
+    scbClient->OnScreenConnectionChanged(secondaryOption, ScreenEvent::CONNECTED);
+    ScreenSessionManager::GetInstance().NotifyScreenChanged(
+        secondarySession->ConvertToScreenInfo(), ScreenChangeEvent::SCREEN_SOURCE_MODE_CHANGE);
     TLOGW(WmsLogTag::DMS, "exec switch mirror to extend 4/6 end");
 }
 
@@ -295,20 +341,17 @@ void MultiScreenManager::DoFirstMainChangeMirror(sptr<IScreenSessionManagerClien
 {
     /* move second screen windows to first screen then set second screen to mirror */
     /* create mirror */
-    scbClient->OnScreenConnectionChanged(secondarySession->GetScreenId(), ScreenEvent::DISCONNECTED,
-        secondarySession->GetRSScreenId(), secondarySession->GetName(), secondarySession->GetIsExtend());
+    SessionOption secondaryOption = ScreenSessionManager::GetInstance().GetSessionOption(secondarySession);
+    scbClient->OnScreenConnectionChanged(secondaryOption, ScreenEvent::DISCONNECTED);
     /* create first screen mirror */
-    std::shared_ptr<RSDisplayNode> displayNode = secondarySession->GetDisplayNode();
-    if (displayNode != nullptr) {
-        displayNode->RemoveFromTree();
-    }
     NodeId nodeId = firstSession->GetDisplayNode() == nullptr ? 0 : firstSession->GetDisplayNode()->GetId();
-    secondarySession->ReleaseDisplayNode();
     secondarySession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
     secondarySession->SetIsExtend(true);
     firstSession->SetIsExtend(false);
     RSDisplayNodeConfig config = { secondarySession->screenId_, true, nodeId };
-    secondarySession->CreateDisplayNode(config);
+    secondarySession->ReuseDisplayNode(config);
+    ScreenSessionManager::GetInstance().NotifyScreenChanged(
+        secondarySession->ConvertToScreenInfo(), ScreenChangeEvent::SCREEN_SOURCE_MODE_CHANGE);
     TLOGW(WmsLogTag::DMS, "exec switch mirror 12/14 end");
 }
 
@@ -364,9 +407,8 @@ void MultiScreenManager::DoFirstMirrorChangeExtend(sptr<IScreenSessionManagerCli
     firstSession->SetIsExtend(false);
     firstSession->CreateDisplayNode(config);
     ScreenSessionManager::GetInstance().SetDefaultScreenId(firstSession->GetScreenId());
-
-    scbClient->OnScreenConnectionChanged(firstSession->GetScreenId(), ScreenEvent::CONNECTED,
-        firstSession->GetRSScreenId(), firstSession->GetName(), firstSession->GetIsExtend());
+    SessionOption firstOption = ScreenSessionManager::GetInstance().GetSessionOption(firstSession);
+    scbClient->OnScreenConnectionChanged(firstOption, ScreenEvent::CONNECTED);
     /* move secondarySession windows to firstSession */
     TLOGW(WmsLogTag::DMS, "mainScreenId:%{public}" PRIu64", extendScreenId=%{public}" PRIu64,
         firstSession->GetScreenId(), secondarySession->GetScreenId());
@@ -389,24 +431,19 @@ void MultiScreenManager::DoFirstMirrorChangeMirror(sptr<IScreenSessionManagerCli
     firstSession->SetIsExtend(false);
     firstSession->CreateDisplayNode(config);
     ScreenSessionManager::GetInstance().SetDefaultScreenId(firstSession->GetScreenId());
-    scbClient->OnScreenConnectionChanged(firstSession->GetScreenId(), ScreenEvent::CONNECTED,
-        firstSession->GetRSScreenId(), firstSession->GetName(), firstSession->GetIsExtend());
+    SessionOption firstOption = ScreenSessionManager::GetInstance().GetSessionOption(firstSession);
+    scbClient->OnScreenConnectionChanged(firstOption, ScreenEvent::CONNECTED);
     /* move secondarySession windows to firstSession */
     /* change secondarySession to mirror */
     /* create mirror */
-    scbClient->OnScreenConnectionChanged(secondarySession->GetScreenId(), ScreenEvent::DISCONNECTED,
-        secondarySession->GetRSScreenId(), secondarySession->GetName(), secondarySession->GetIsExtend());
+    SessionOption secondaryOption = ScreenSessionManager::GetInstance().GetSessionOption(secondarySession);
+    scbClient->OnScreenConnectionChanged(secondaryOption, ScreenEvent::DISCONNECTED);
     /* create inner screen's mirror */
-    displayNode = secondarySession->GetDisplayNode();
-    if (displayNode != nullptr) {
-        displayNode->RemoveFromTree();
-    }
     NodeId nodeId = firstSession->GetDisplayNode() == nullptr ? 0 : firstSession->GetDisplayNode()->GetId();
-    secondarySession->ReleaseDisplayNode();
     secondarySession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
     secondarySession->SetIsExtend(true);
     config = {secondarySession->screenId_, true, nodeId };
-    secondarySession->CreateDisplayNode(config);
+    secondarySession->ReuseDisplayNode(config);
     TLOGW(WmsLogTag::DMS, "exec switch mirror 2/3/5/8 end");
 }
 
@@ -466,19 +503,14 @@ void MultiScreenManager::DoFirstExtendChangeMirror(sptr<ScreenSession> firstSess
     firstSession->ScreenExtendChange(firstSession->GetScreenId(), secondarySession->GetScreenId());
     /* move secondarySession windows to firstSession => join two screens window to firstSession */
     /* create mirror */
-    scbClient->OnScreenConnectionChanged(secondarySession->GetScreenId(), ScreenEvent::DISCONNECTED,
-        secondarySession->GetRSScreenId(), secondarySession->GetName(), secondarySession->GetIsExtend());
+    SessionOption secondaryOption = ScreenSessionManager::GetInstance().GetSessionOption(secondarySession);
+    scbClient->OnScreenConnectionChanged(secondaryOption, ScreenEvent::DISCONNECTED);
     /* create inner screen's mirror node */
-    std::shared_ptr<RSDisplayNode> displayNode = secondarySession->GetDisplayNode();
-    if (displayNode != nullptr) {
-        displayNode->RemoveFromTree();
-    }
     NodeId nodeId = firstSession->GetDisplayNode() == nullptr ? 0 : firstSession->GetDisplayNode()->GetId();
-    secondarySession->ReleaseDisplayNode();
     secondarySession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
     secondarySession->SetIsExtend(true);
     RSDisplayNodeConfig config = { secondarySession->screenId_, true, nodeId };
-    secondarySession->CreateDisplayNode(config);
+    secondarySession->ReuseDisplayNode(config);
     TLOGW(WmsLogTag::DMS, "exec switch mirror 10/16 end");
 }
 
@@ -623,6 +655,7 @@ bool MultiScreenManager::AreScreensTouching(sptr<ScreenSession> mainScreenSessio
 void MultiScreenManager::MultiScreenReportDataToRss(std::string multiScreenType, std::string status)
 {
 #ifdef RES_SCHED_ENABLE
+    TLOGI(WmsLogTag::DMS, "type:%{public}s, status:%{public}s", multiScreenType.c_str(), status.c_str());
     uint32_t type = OHOS::ResourceSchedule::ResType::RES_TYPE_DISPLAY_MULTI_SCREEN;
     std::unordered_map<std::string, std::string> payload = {
         { "type", multiScreenType },

@@ -57,7 +57,7 @@ namespace {
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(AccessibilityConnectionTest, FillAccessibilityWindowInfo01, Function | SmallTest | Level2)
+HWTEST_F(AccessibilityConnectionTest, FillAccessibilityWindowInfo01, TestSize.Level1)
 {
     uint32_t focusedWindow = 1;
     sptr<WindowProperty> windowProperty1 = new WindowProperty();
@@ -80,7 +80,7 @@ HWTEST_F(AccessibilityConnectionTest, FillAccessibilityWindowInfo01, Function | 
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(AccessibilityConnectionTest, GetAccessibilityWindowInfo01, Function | SmallTest | Level2)
+HWTEST_F(AccessibilityConnectionTest, GetAccessibilityWindowInfo01, TestSize.Level1)
 {
     std::vector<sptr<AccessibilityWindowInfo>> infos;
     accessibilityConnection_->GetAccessibilityWindowInfo(infos);
@@ -92,7 +92,7 @@ HWTEST_F(AccessibilityConnectionTest, GetAccessibilityWindowInfo01, Function | S
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(AccessibilityConnectionTest, UpdateFocusChangeEvent01, Function | SmallTest | Level2)
+HWTEST_F(AccessibilityConnectionTest, UpdateFocusChangeEvent01, TestSize.Level1)
 {
     sptr<DisplayInfo> displayInfo = new DisplayInfo();
     ScreenId displayGroupId = 0;
@@ -106,7 +106,7 @@ HWTEST_F(AccessibilityConnectionTest, UpdateFocusChangeEvent01, Function | Small
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(AccessibilityConnectionTest, UpdateFocusChangeEvent02, Function | SmallTest | Level2)
+HWTEST_F(AccessibilityConnectionTest, UpdateFocusChangeEvent02, TestSize.Level1)
 {
     sptr<DisplayInfo> displayInfo = new DisplayInfo();
     ScreenId displayGroupId = 0;
@@ -125,7 +125,7 @@ HWTEST_F(AccessibilityConnectionTest, UpdateFocusChangeEvent02, Function | Small
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(AccessibilityConnectionTest, UpdateFocusChangeEvent03, Function | SmallTest | Level2)
+HWTEST_F(AccessibilityConnectionTest, UpdateFocusChangeEvent03, TestSize.Level1)
 {
     sptr<DisplayInfo> displayInfo = new DisplayInfo();
     ScreenId displayGroupId = 0;

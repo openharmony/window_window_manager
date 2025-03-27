@@ -21,6 +21,7 @@
 #include "window_option.h"
 #include "js_window.h"
 #include "permission.h"
+#include "js_err_utils.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -149,80 +150,81 @@ JsTransitionController::~JsTransitionController()
 
 void JsTransitionController::AnimationForShown()
 {
-    WLOGFI("[NAPI]");
-    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
-        [self = weakRef_](napi_env, NapiAsyncTask&, int32_t) {
-            auto thisController = self.promote();
-            if (thisController == nullptr) {
-                WLOGFE("this transition Controller is null!");
-                return;
-            }
-            HandleScope handleScope(thisController->env_);
-            auto jsWin = thisController->jsWin_.lock();
-            auto window = thisController->windowToken_.promote();
-            if (jsWin == nullptr || window == nullptr) {
-                WLOGFE("native window or jsWindow is null!");
-                return;
-            }
-            auto state = window->GetWindowState();
-            if (state != WindowState::STATE_SHOWN) {
-                WLOGFE("animation shown configuration for state %{public}u not support!", static_cast<uint32_t>(state));
-                return;
-            }
-            napi_value jsTransContextObj = CreateJsTransitionContextObject(
-                thisController->env_, jsWin, window, true);
-            if (jsTransContextObj == nullptr) {
-                return;
-            }
-            napi_value argv[] = { jsTransContextObj };
-            thisController->CallJsMethod("animationForShown", argv, ArraySize(argv));
-            // add to rs tree before animation
-            window->UpdateSurfaceNodeAfterCustomAnimation(true);
+    TLOGI(WmsLogTag::WMS_ANIMATION, "[NAPI]");
+    napi_value lastParam = nullptr;
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env_, lastParam, &result);
+    auto asyncTask = [self = weakRef_, task = napiAsyncTask]() {
+        auto thisController = self.promote();
+        if (thisController == nullptr) {
+            TLOGE(WmsLogTag::WMS_ANIMATION, "this transition Controller is null!");
+            return;
         }
-    );
-
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsTransitionController::AnimationForShown", env_,
-        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+        HandleScope handleScope(thisController->env_);
+        auto jsWin = thisController->jsWin_.lock();
+        auto window = thisController->windowToken_.promote();
+        if (jsWin == nullptr || window == nullptr) {
+            TLOGE(WmsLogTag::WMS_ANIMATION, "native window or jsWindow is null!");
+            return;
+        }
+        auto state = window->GetWindowState();
+        if (state != WindowState::STATE_SHOWN) {
+            TLOGE(WmsLogTag::WMS_ANIMATION,
+                "animation shown configuration for state %{public}u not support!",
+                static_cast<uint32_t>(state));
+            return;
+        }
+        napi_value jsTransContextObj = CreateJsTransitionContextObject(
+            thisController->env_, jsWin, window, true);
+        if (jsTransContextObj == nullptr) {
+            return;
+        }
+        napi_value argv[] = { jsTransContextObj };
+        thisController->CallJsMethod("animationForShown", argv, ArraySize(argv));
+        // add to rs tree before animation
+        window->UpdateSurfaceNodeAfterCustomAnimation(true);
+    };
+    if (napi_status::napi_ok != napi_send_event(env_, asyncTask, napi_eprio_high)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to run napiAsyncTask for animationForShown");
+    }
 }
 
 void JsTransitionController::AnimationForHidden()
 {
-    WLOGFI("[NAPI]");
-    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
-        [self = weakRef_](napi_env, NapiAsyncTask&, int32_t) {
-            auto thisController = self.promote();
-            if (thisController == nullptr) {
-                WLOGFE("this transition Controller is null!");
-                return;
-            }
-            HandleScope handleScope(thisController->env_);
-            auto jsWin = thisController->jsWin_.lock();
-            auto window = thisController->windowToken_.promote();
-            if (jsWin == nullptr || window == nullptr) {
-                WLOGFE("native window or jsWindow is null!");
-                return;
-            }
-            auto state = window->GetWindowState();
-            if (state != WindowState::STATE_HIDDEN) {
-                WLOGFE("animation hidden configuration for state %{public}u not support!",
-                    static_cast<uint32_t>(state));
-                return;
-            }
-            napi_value jsTransContextObj = CreateJsTransitionContextObject(
-                thisController->env_, jsWin, window, false);
-            if (jsTransContextObj == nullptr) {
-                return;
-            }
-            napi_value argv[] = { jsTransContextObj };
-            thisController->CallJsMethod("animationForHidden", argv, ArraySize(argv));
+    TLOGI(WmsLogTag::WMS_ANIMATION, "[NAPI]");
+    napi_value lastParam = nullptr;
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env_, lastParam, &result);
+    auto asyncTask = [self = weakRef_, task = napiAsyncTask]() {
+        auto thisController = self.promote();
+        if (thisController == nullptr) {
+            TLOGE(WmsLogTag::WMS_ANIMATION, "this transition Controller is null!");
+            return;
         }
-    );
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsTransitionController::AnimationForHidden", env_,
-        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+        HandleScope handleScope(thisController->env_);
+        auto jsWin = thisController->jsWin_.lock();
+        auto window = thisController->windowToken_.promote();
+        if (jsWin == nullptr || window == nullptr) {
+            TLOGE(WmsLogTag::WMS_ANIMATION, "native window or jsWindow is null!");
+            return;
+        }
+        auto state = window->GetWindowState();
+        if (state != WindowState::STATE_HIDDEN) {
+            TLOGE(WmsLogTag::WMS_ANIMATION, "animation hidden configuration for state %{public}u not support!",
+                static_cast<uint32_t>(state));
+            return;
+        }
+        napi_value jsTransContextObj = CreateJsTransitionContextObject(
+            thisController->env_, jsWin, window, false);
+        if (jsTransContextObj == nullptr) {
+            return;
+        }
+        napi_value argv[] = { jsTransContextObj };
+        thisController->CallJsMethod("animationForHidden", argv, ArraySize(argv));
+    };
+    if (napi_status::napi_ok != napi_send_event(env_, asyncTask, napi_eprio_high)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to run napiAsyncTask for animationForHidden");
+    }
 }
 
 void JsTransitionController::CallJsMethod(const std::string& methodName, napi_value const * argv, size_t argc)

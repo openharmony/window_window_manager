@@ -60,7 +60,7 @@ namespace {
  * @tc.desc: gamut GetScreenSupportedColorGamuts
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenGamutTest, GetScreenSupportedColorGamuts01, Function | MediumTest | Level3)
+HWTEST_F(ScreenGamutTest, GetScreenSupportedColorGamuts01, TestSize.Level1)
 {
     ASSERT_NE(defaultScreen_, nullptr);
     DMError ret;
@@ -75,7 +75,7 @@ HWTEST_F(ScreenGamutTest, GetScreenSupportedColorGamuts01, Function | MediumTest
  * @tc.desc: gamut GetScreenColorGamut
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenGamutTest, GetScreenColorGamut01, Function | MediumTest | Level3)
+HWTEST_F(ScreenGamutTest, GetScreenColorGamut01, TestSize.Level1)
 {
     ASSERT_NE(defaultScreen_, nullptr);
     DMError ret;
@@ -90,7 +90,7 @@ HWTEST_F(ScreenGamutTest, GetScreenColorGamut01, Function | MediumTest | Level3)
  * @tc.desc: gamut SetScreenColorGamut, valid index
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenGamutTest, SetScreenColorGamut01, Function | MediumTest | Level3)
+HWTEST_F(ScreenGamutTest, SetScreenColorGamut01, TestSize.Level1)
 {
     ASSERT_NE(defaultScreen_, nullptr);
     DMError ret;
@@ -130,7 +130,7 @@ HWTEST_F(ScreenGamutTest, SetScreenColorGamut01, Function | MediumTest | Level3)
  * @tc.desc: gamut SetScreenColorGamut, invalid index < 0
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenGamutTest, SetScreenColorGamut02, Function | MediumTest | Level3)
+HWTEST_F(ScreenGamutTest, SetScreenColorGamut02, TestSize.Level1)
 {
     ASSERT_NE(defaultScreen_, nullptr);
     DMError ret;
@@ -155,7 +155,7 @@ HWTEST_F(ScreenGamutTest, SetScreenColorGamut02, Function | MediumTest | Level3)
  * @tc.desc: gamut SetScreenColorGamut, invalid index >= size
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenGamutTest, SetScreenColorGamut03, Function | MediumTest | Level3)
+HWTEST_F(ScreenGamutTest, SetScreenColorGamut03, TestSize.Level1)
 {
     ASSERT_NE(defaultScreen_, nullptr);
     DMError ret;
@@ -184,7 +184,7 @@ HWTEST_F(ScreenGamutTest, SetScreenColorGamut03, Function | MediumTest | Level3)
  * @tc.desc: gamut GetScreenGamutMap
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenGamutTest, GetScreenGamutMap01, Function | MediumTest | Level3)
+HWTEST_F(ScreenGamutTest, GetScreenGamutMap01, TestSize.Level1)
 {
     ASSERT_NE(defaultScreen_, nullptr);
     DMError ret;
@@ -199,7 +199,7 @@ HWTEST_F(ScreenGamutTest, GetScreenGamutMap01, Function | MediumTest | Level3)
  * @tc.desc: gamut SetScreenGamutMap, valid param
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenGamutTest, SetScreenGamutMap01, Function | MediumTest | Level3)
+HWTEST_F(ScreenGamutTest, SetScreenGamutMap01, TestSize.Level1)
 {
     ASSERT_NE(defaultScreen_, nullptr);
     DMError ret;
@@ -235,7 +235,7 @@ HWTEST_F(ScreenGamutTest, SetScreenGamutMap01, Function | MediumTest | Level3)
  * @tc.desc: gamut SetScreenGamutMap, invalid param
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenGamutTest, SetScreenGamutMap02, Function | MediumTest | Level3)
+HWTEST_F(ScreenGamutTest, SetScreenGamutMap02, TestSize.Level1)
 {
     ASSERT_NE(defaultScreen_, nullptr);
     DMError ret;
@@ -261,7 +261,7 @@ HWTEST_F(ScreenGamutTest, SetScreenGamutMap02, Function | MediumTest | Level3)
  * @tc.desc: gamut SetScreenColorTransform
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenGamutTest, SetScreenColorTransform01, Function | MediumTest | Level3)
+HWTEST_F(ScreenGamutTest, SetScreenColorTransform01, TestSize.Level1)
 {
     ASSERT_NE(defaultScreen_, nullptr);
     DMError ret;

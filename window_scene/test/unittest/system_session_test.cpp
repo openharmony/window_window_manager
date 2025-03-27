@@ -106,7 +106,7 @@ namespace {
  * @tc.desc: check func TransferKeyEvent
  * @tc.type: FUNC
  */
-HWTEST_F(SystemSessionTest, TransferKeyEvent01, Function | SmallTest | Level1)
+HWTEST_F(SystemSessionTest, TransferKeyEvent01, TestSize.Level1)
 {
     systemSession_->state_ = SessionState::STATE_END;
 
@@ -118,7 +118,7 @@ HWTEST_F(SystemSessionTest, TransferKeyEvent01, Function | SmallTest | Level1)
  * @tc.desc: check func TransferKeyEvent
  * @tc.type: FUNC
  */
-HWTEST_F(SystemSessionTest, TransferKeyEvent02, Function | SmallTest | Level1)
+HWTEST_F(SystemSessionTest, TransferKeyEvent02, TestSize.Level1)
 {
     systemSession_->state_ = SessionState::STATE_CONNECT;
     std::shared_ptr<MMI::KeyEvent> keyEvent = nullptr;
@@ -131,7 +131,7 @@ HWTEST_F(SystemSessionTest, TransferKeyEvent02, Function | SmallTest | Level1)
  * @tc.desc: check func ProcessBackEvent
  * @tc.type: FUNC
  */
-HWTEST_F(SystemSessionTest, ProcessBackEvent01, Function | SmallTest | Level1)
+HWTEST_F(SystemSessionTest, ProcessBackEvent01, TestSize.Level1)
 {
     systemSession_->state_ = SessionState::STATE_END;
 
@@ -143,7 +143,7 @@ HWTEST_F(SystemSessionTest, ProcessBackEvent01, Function | SmallTest | Level1)
  * @tc.desc: check func NotifyClientToUpdateRect
  * @tc.type: FUNC
  */
-HWTEST_F(SystemSessionTest, NotifyClientToUpdateRect01, Function | SmallTest | Level1)
+HWTEST_F(SystemSessionTest, NotifyClientToUpdateRect01, TestSize.Level1)
 {
     sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
     ASSERT_NE(mockSessionStage, nullptr);
@@ -157,7 +157,7 @@ HWTEST_F(SystemSessionTest, NotifyClientToUpdateRect01, Function | SmallTest | L
  * @tc.desc: check func CheckPointerEventDispatch
  * @tc.type: FUNC
  */
-HWTEST_F(SystemSessionTest, CheckPointerEventDispatch, Function | SmallTest | Level1)
+HWTEST_F(SystemSessionTest, CheckPointerEventDispatch, TestSize.Level1)
 {
     std::shared_ptr<MMI::PointerEvent> pointerEvent_ = MMI::PointerEvent::Create();
     SessionInfo info;
@@ -178,7 +178,7 @@ HWTEST_F(SystemSessionTest, CheckPointerEventDispatch, Function | SmallTest | Le
  * @tc.desc: check func UpdatePointerArea
  * @tc.type: FUNC
  */
-HWTEST_F(SystemSessionTest, UpdatePointerArea, Function | SmallTest | Level1)
+HWTEST_F(SystemSessionTest, UpdatePointerArea, TestSize.Level1)
 {
     WSRect rect = { 1, 1, 1, 1 };
     SessionInfo info;
@@ -205,7 +205,7 @@ HWTEST_F(SystemSessionTest, UpdatePointerArea, Function | SmallTest | Level1)
  * @tc.desc: test function : ProcessPointDownSession
  * @tc.type: FUNC
  */
-HWTEST_F(SystemSessionTest, ProcessPointDownSession, Function | SmallTest | Level1)
+HWTEST_F(SystemSessionTest, ProcessPointDownSession, TestSize.Level1)
 {
     ASSERT_TRUE(systemSession_ != nullptr);
 
@@ -220,7 +220,7 @@ HWTEST_F(SystemSessionTest, ProcessPointDownSession, Function | SmallTest | Leve
  * @tc.desc: test function : GetMissionId
  * @tc.type: FUNC
  */
-HWTEST_F(SystemSessionTest, GetMissionId, Function | SmallTest | Level1)
+HWTEST_F(SystemSessionTest, GetMissionId, TestSize.Level1)
 {
     ASSERT_TRUE(systemSession_ != nullptr);
     SessionInfo info;
@@ -238,7 +238,7 @@ HWTEST_F(SystemSessionTest, GetMissionId, Function | SmallTest | Level1)
  * @tc.desc: test function : RectCheck
  * @tc.type: FUNC
  */
-HWTEST_F(SystemSessionTest, RectCheck, Function | SmallTest | Level1)
+HWTEST_F(SystemSessionTest, RectCheck, TestSize.Level1)
 {
     ASSERT_TRUE(systemSession_ != nullptr);
     SessionInfo info;
@@ -274,7 +274,7 @@ HWTEST_F(SystemSessionTest, RectCheck, Function | SmallTest | Level1)
  * @tc.desc: test function : SetDialogSessionBackGestureEnabled
  * @tc.type: FUNC
  */
-HWTEST_F(SystemSessionTest, SetDialogSessionBackGestureEnabled01, Function | SmallTest | Level1)
+HWTEST_F(SystemSessionTest, SetDialogSessionBackGestureEnabled01, TestSize.Level1)
 {
     ASSERT_TRUE(systemSession_ != nullptr);
     SessionInfo info;
@@ -294,7 +294,7 @@ HWTEST_F(SystemSessionTest, SetDialogSessionBackGestureEnabled01, Function | Sma
  * @tc.desc: test function : SetDialogSessionBackGestureEnabled
  * @tc.type: FUNC
  */
-HWTEST_F(SystemSessionTest, SetDialogSessionBackGestureEnabled02, Function | SmallTest | Level1)
+HWTEST_F(SystemSessionTest, SetDialogSessionBackGestureEnabled02, TestSize.Level1)
 {
     ASSERT_TRUE(systemSession_ != nullptr);
     SessionInfo info;
@@ -314,7 +314,7 @@ HWTEST_F(SystemSessionTest, SetDialogSessionBackGestureEnabled02, Function | Sma
  * @tc.desc: test function : UpdateCameraWindowStatus
  * @tc.type: FUNC
  */
-HWTEST_F(SystemSessionTest, UpdateCameraWindowStatus01, Function | SmallTest | Level1)
+HWTEST_F(SystemSessionTest, UpdateCameraWindowStatus01, TestSize.Level1)
 {
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
@@ -345,7 +345,7 @@ HWTEST_F(SystemSessionTest, UpdateCameraWindowStatus01, Function | SmallTest | L
  * @tc.desc: test function : UpdateCameraWindowStatus
  * @tc.type: FUNC
  */
-HWTEST_F(SystemSessionTest, UpdateCameraWindowStatus02, Function | SmallTest | Level1)
+HWTEST_F(SystemSessionTest, UpdateCameraWindowStatus02, TestSize.Level1)
 {
     auto sysSession = GetSystemSession("UpdateCameraWindowStatus02");
     ASSERT_NE(sysSession, nullptr);
@@ -389,7 +389,7 @@ HWTEST_F(SystemSessionTest, UpdateCameraWindowStatus02, Function | SmallTest | L
  * @tc.desc: test function : Show
  * @tc.type: FUNC
  */
-HWTEST_F(SystemSessionTest, Show01, Function | SmallTest | Level1)
+HWTEST_F(SystemSessionTest, Show01, TestSize.Level1)
 {
     // for CheckPermissionWithPropertyAnimation;
     auto windowProperty = sptr<WindowSessionProperty>::MakeSptr();
@@ -409,7 +409,7 @@ HWTEST_F(SystemSessionTest, Show01, Function | SmallTest | Level1)
  * @tc.desc: test function : Hide
  * @tc.type: FUNC
  */
-HWTEST_F(SystemSessionTest, Hide01, Function | SmallTest | Level1)
+HWTEST_F(SystemSessionTest, Hide01, TestSize.Level1)
 {
     auto sysSession = GetSystemSession("Hide01");
     ASSERT_NE(sysSession, nullptr);
@@ -448,7 +448,7 @@ HWTEST_F(SystemSessionTest, Hide01, Function | SmallTest | Level1)
  * @tc.desc: test function : ProcessPointDownSession
  * @tc.type: FUNC
  */
-HWTEST_F(SystemSessionTest, ProcessPointDownSession01, Function | SmallTest | Level1)
+HWTEST_F(SystemSessionTest, ProcessPointDownSession01, TestSize.Level1)
 {
     auto sysSession = GetSystemSession("ProcessPointDownSession01");
     ASSERT_NE(sysSession, nullptr);
@@ -481,7 +481,7 @@ HWTEST_F(SystemSessionTest, ProcessPointDownSession01, Function | SmallTest | Le
  * @tc.desc: test function : ProcessPointDownSession
  * @tc.type: FUNC
  */
-HWTEST_F(SystemSessionTest, ProcessPointDownSession02, Function | SmallTest | Level1)
+HWTEST_F(SystemSessionTest, ProcessPointDownSession02, TestSize.Level1)
 {
     auto sysSession = GetSystemSession("ProcessPointDownSession02");
     ASSERT_NE(sysSession, nullptr);
@@ -503,7 +503,7 @@ HWTEST_F(SystemSessionTest, ProcessPointDownSession02, Function | SmallTest | Le
  * @tc.desc: test function : TransferKeyEvent
  * @tc.type: FUNC
  */
-HWTEST_F(SystemSessionTest, TransferKeyEvent04, Function | SmallTest | Level1)
+HWTEST_F(SystemSessionTest, TransferKeyEvent04, TestSize.Level1)
 {
     auto sysSession = GetSystemSession("TransferKeyEvent04");
     ASSERT_NE(sysSession, nullptr);
@@ -525,7 +525,7 @@ HWTEST_F(SystemSessionTest, TransferKeyEvent04, Function | SmallTest | Level1)
  * @tc.desc: test function : TransferKeyEvent
  * @tc.type: FUNC
  */
-HWTEST_F(SystemSessionTest, TransferKeyEvent05, Function | SmallTest | Level1)
+HWTEST_F(SystemSessionTest, TransferKeyEvent05, TestSize.Level1)
 {
     std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
 
@@ -571,7 +571,7 @@ HWTEST_F(SystemSessionTest, TransferKeyEvent05, Function | SmallTest | Level1)
  * @tc.desc: test function : ProcessBackEvent
  * @tc.type: FUNC
  */
-HWTEST_F(SystemSessionTest, ProcessBackEvent02, Function | SmallTest | Level1)
+HWTEST_F(SystemSessionTest, ProcessBackEvent02, TestSize.Level1)
 {
     auto sysSession = GetSystemSession("ProcessBackEvent02");
     ASSERT_NE(sysSession, nullptr);
@@ -597,7 +597,7 @@ HWTEST_F(SystemSessionTest, ProcessBackEvent02, Function | SmallTest | Level1)
  * @tc.desc: test function : CheckKeyEventDispatch
  * @tc.type: FUNC
  */
-HWTEST_F(SystemSessionTest, CheckKeyEventDispatch03, Function | SmallTest | Level1)
+HWTEST_F(SystemSessionTest, CheckKeyEventDispatch03, TestSize.Level1)
 {
     std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
     auto sysSession = GetSystemSession("CheckKeyEventDispatch03");
@@ -633,7 +633,7 @@ HWTEST_F(SystemSessionTest, CheckKeyEventDispatch03, Function | SmallTest | Leve
  * @tc.desc: test function : CheckKeyEventDispatch
  * @tc.type: FUNC
  */
-HWTEST_F(SystemSessionTest, CheckKeyEventDispatch04, Function | SmallTest | Level1)
+HWTEST_F(SystemSessionTest, CheckKeyEventDispatch04, TestSize.Level1)
 {
     std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
     auto sysSession = GetSystemSession("CheckKeyEventDispatch04");
@@ -676,7 +676,7 @@ HWTEST_F(SystemSessionTest, CheckKeyEventDispatch04, Function | SmallTest | Leve
  * @tc.desc: test function : NotifyClientToUpdateRect
  * @tc.type: FUNC
  */
-HWTEST_F(SystemSessionTest, NotifyClientToUpdateRect02, Function | SmallTest | Level1)
+HWTEST_F(SystemSessionTest, NotifyClientToUpdateRect02, TestSize.Level1)
 {
     auto sysSession = GetSystemSession("NotifyClientToUpdateRect02");
     ASSERT_NE(sysSession, nullptr);
@@ -704,7 +704,7 @@ HWTEST_F(SystemSessionTest, NotifyClientToUpdateRect02, Function | SmallTest | L
  * @tc.desc: test function : NotifyClientToUpdateRect
  * @tc.type: FUNC
  */
-HWTEST_F(SystemSessionTest, NotifyClientToUpdateRect03, Function | SmallTest | Level1)
+HWTEST_F(SystemSessionTest, NotifyClientToUpdateRect03, TestSize.Level1)
 {
     auto sysSession = GetSystemSession("NotifyClientToUpdateRect03");
     ASSERT_NE(sysSession, nullptr);
@@ -739,7 +739,7 @@ HWTEST_F(SystemSessionTest, NotifyClientToUpdateRect03, Function | SmallTest | L
  * @tc.desc: test function : IsVisibleForeground
  * @tc.type: FUNC
  */
-HWTEST_F(SystemSessionTest, IsVisibleForeground01, Function | SmallTest | Level1)
+HWTEST_F(SystemSessionTest, IsVisibleForeground01, TestSize.Level1)
 {
     auto sysSession = GetSystemSession("IsVisibleForeground01");
     ASSERT_NE(sysSession, nullptr);
@@ -772,7 +772,7 @@ HWTEST_F(SystemSessionTest, IsVisibleForeground01, Function | SmallTest | Level1
  * @tc.desc: test function : UpdatePiPWindowStateChanged
  * @tc.type: FUNC
  */
-HWTEST_F(SystemSessionTest, UpdatePiPWindowStateChanged, Function | SmallTest | Level1)
+HWTEST_F(SystemSessionTest, UpdatePiPWindowStateChanged, TestSize.Level1)
 {
     SessionInfo sessionInfo;
     sessionInfo.abilityName_ = "UpdatePiPWindowStateChanged";
@@ -798,6 +798,21 @@ HWTEST_F(SystemSessionTest, UpdatePiPWindowStateChanged, Function | SmallTest | 
     EXPECT_NE(nullptr, system);
     EXPECT_EQ(WindowType::WINDOW_TYPE_PIP, system->GetWindowType());
     system->UpdatePiPWindowStateChanged(true);
+}
+
+/**
+ * @tc.name: GetSubWindowZLevel
+ * @tc.desc: GetSubWindowZLevel
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemSessionTest, GetSubWindowZLevel, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "GetSubWindowZLevel";
+    info.bundleName_ = "GetSubWindowZLevel";
+    sptr<SystemSession> systemSession = sptr<SystemSession>::MakeSptr(info, nullptr);
+    systemSession->property_->zLevel_ = 1;
+    EXPECT_EQ(1, systemSession->GetSubWindowZLevel());
 }
 } // namespace
 } // namespace Rosen

@@ -35,6 +35,8 @@ enum class RegisterListenerType : uint32_t {
     LIFECYCLE_EVENT_CB,
     WINDOW_EVENT_CB,
     KEYBOARD_HEIGHT_CHANGE_CB,
+    KEYBOARD_DID_SHOW_CB,
+    KEYBOARD_DID_HIDE_CB,
     TOUCH_OUTSIDE_CB,
     SCREENSHOT_EVENT_CB,
     DIALOG_TARGET_TOUCH_CB,
@@ -47,8 +49,11 @@ enum class RegisterListenerType : uint32_t {
     WINDOW_NO_INTERACTION_DETECT_CB,
     WINDOW_RECT_CHANGE_CB,
     SUB_WINDOW_CLOSE_CB,
+    WINDOW_WILL_CLOSE_CB,
     WINDOW_STAGE_EVENT_CB,
     WINDOW_STAGE_CLOSE_CB,
+    WINDOW_HIGHLIGHT_CHANGE_CB,
+    WINDOW_ROTATION_CHANGE_CB,
 };
 
 class JsWindowRegisterManager {
@@ -71,6 +76,10 @@ private:
         napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessOccupiedAreaChangeRegister(sptr<JsWindowListener> listener, sptr<Window> window,
         bool isRegister, napi_env env, napi_value parameter = nullptr);
+    WmErrorCode ProcessKeyboardDidShowRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister,
+        napi_env env, napi_value parameter = nullptr);
+    WmErrorCode ProcessKeyboardDidHideRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister,
+        napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessSystemBarChangeRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister,
         napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessTouchOutsideRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister,
@@ -103,10 +112,16 @@ private:
         bool isRegister, napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessMainWindowCloseRegister(const sptr<JsWindowListener>& listener, const sptr<Window>& window,
         bool isRegister, napi_env env, napi_value parameter = nullptr);
+    WmErrorCode ProcessWindowWillCloseRegister(const sptr<JsWindowListener>& listener, const sptr<Window>& window,
+        bool isRegister, napi_env env, napi_value parameter = nullptr);
+    WmErrorCode ProcessWindowHighlightChangeRegister(const sptr<JsWindowListener>& listener, const sptr<Window>& window,
+        bool isRegister, napi_env env, napi_value parameter = nullptr);
+    WmErrorCode ProcessWindowRotationChangeRegister(const sptr<JsWindowListener>& listener, const sptr<Window>& window,
+        bool isRegister, napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessListener(RegisterListenerType registerListenerType, CaseType caseType,
         const sptr<JsWindowListener>& windowManagerListener, const sptr<Window>& window, bool isRegister,
         napi_env env, napi_value parameter);
-    std::map<std::string, std::map<std::shared_ptr<NativeReference>, sptr<JsWindowListener>>> jsCbMap_;
+    std::map<std::string, std::map<NativeReference*, sptr<JsWindowListener>>> jsCbMap_;
     std::mutex mtx_;
 };
 } // namespace Rosen

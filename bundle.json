@@ -22,7 +22,15 @@
         "window_manager_dayu210_resource_config",
         "window_manager_feature_subscribe_motion",
         "window_manager_feature_tp_enable",
-        "window_manager_feature_virtual_keyboard"
+        "window_manager_fold_ability",
+        "window_manager_feature_screen_active_mode",
+        "window_manager_feature_screen_color_gamut",
+        "window_manager_feature_screen_hdr_format",
+        "window_manager_feature_screen_color_space",
+        "window_manager_feature_multi_screen",
+        "window_manager_feature_multi_screen_frame_ctl",
+        "window_manager_feature_cam_mode",
+        "window_manager_feature_multi_usr"
       ],
       "adapted_system_type": [ "standard" ],
       "rom": "8000KB",
@@ -62,6 +70,7 @@
           "eventhandler",
           "c_utils",
           "soc_perf",
+          "relational_store",
           "resource_management",
           "resource_schedule_service",
           "imf",
@@ -95,6 +104,7 @@
             "//foundation/window/window_manager/interfaces/kits/js/declaration:window",
             "//foundation/window/window_manager/dm:libdm",
             "//foundation/window/window_manager/dm:libdm_ndk",
+            "//foundation/window/window_manager/edidparse:libedid_parse",
             "//foundation/window/window_manager/extension/extension_connection:libwindow_extension_client",
             "//foundation/window/window_manager/extension/modal_system_ui_extension:libmodal_system_ui_extension_client",
             "//foundation/window/window_manager/extension/window_extension:libwindow_extension",
@@ -124,7 +134,9 @@
                 "window_option.h",
                 "window_scene.h",
                 "wm_common.h",
-                "occupied_area_change_info.h"
+                "occupied_area_change_info.h",
+                "window_input_intercept_client.h",
+                "window_input_intercept_consumer.h"
               ],
               "header_base": "//foundation/window/window_manager/interfaces/innerkits/wm"
             }
@@ -194,6 +206,15 @@
               "header_files": [
               ],
               "header_base": "//foundation/window/window_manager/interfaces/kits/dmndk/dm"
+            }
+          },
+          {
+            "type": "so",
+            "name": "//foundation/window/window_manager/edidparse:libedid_parse",
+            "header": {
+              "header_files": [
+              ],
+              "header_base": "//foundation/window/window_manager/interfaces/innerkits/edidparse"
             }
           },
           {
@@ -382,6 +403,18 @@
               "header_files": [
               ],
               "header_base": "//foundation/window/window_manager/interfaces/kits/napi/window_runtime"
+            }
+          },
+          {
+            "type": "so",
+            "name": "//foundation/window/window_manager/interfaces/kits/cj/screenshot:cj_screenshot_ffi",
+            "header": {
+              "header_files": [
+                "cj_screenshot_module.h",
+                "screenshot_ffi.h",
+                "screenshot_utils.h"
+              ],
+              "header_base": "//foundation/window/window_manager/interfaces/kits/cj/screenshot"
             }
           },
           {

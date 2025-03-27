@@ -39,21 +39,13 @@ public:
     ~MockWindow() {};
 };
 
-void PictureInPictureManagerTest::SetUpTestCase()
-{
-}
+void PictureInPictureManagerTest::SetUpTestCase() {}
 
-void PictureInPictureManagerTest::TearDownTestCase()
-{
-}
+void PictureInPictureManagerTest::TearDownTestCase() {}
 
-void PictureInPictureManagerTest::SetUp()
-{
-}
+void PictureInPictureManagerTest::SetUp() {}
 
-void PictureInPictureManagerTest::TearDown()
-{
-}
+void PictureInPictureManagerTest::TearDown() {}
 
 namespace {
 
@@ -62,7 +54,7 @@ namespace {
  * @tc.desc: IsSupportPiP
  * @tc.type: FUNC
  */
-HWTEST_F(PictureInPictureManagerTest, IsSupportPiP, Function | SmallTest | Level2)
+HWTEST_F(PictureInPictureManagerTest, IsSupportPiP, TestSize.Level1)
 {
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(true, PictureInPictureManager::IsSupportPiP());
@@ -76,7 +68,7 @@ HWTEST_F(PictureInPictureManagerTest, IsSupportPiP, Function | SmallTest | Level
  * @tc.desc: PutPipControllerInfo/RemovePipControllerInfo/ReportPiPStartWindow/ReportPiPStopWindow/ReportPiPActionEvent
  * @tc.type: FUNC
  */
-HWTEST_F(PictureInPictureManagerTest, PipControllerInfo, Function | SmallTest | Level2)
+HWTEST_F(PictureInPictureManagerTest, PipControllerInfo, TestSize.Level1)
 {
     sptr<PipOption> option = new PipOption();
     sptr<PictureInPictureController> pipController = new PictureInPictureController(option, nullptr, 100, nullptr);
@@ -102,11 +94,10 @@ HWTEST_F(PictureInPictureManagerTest, PipControllerInfo, Function | SmallTest | 
  * @tc.desc: SetActiveController/IsActiveController/HasActiveController/RemoveActiveController
  * @tc.type: FUNC
  */
-HWTEST_F(PictureInPictureManagerTest, PictureInPictureController, Function | SmallTest | Level2)
+HWTEST_F(PictureInPictureManagerTest, PictureInPictureController, TestSize.Level1)
 {
     sptr<PipOption> option = new PipOption();
-    sptr<PictureInPictureController> pipController =
-        new PictureInPictureController(option, nullptr, 100, nullptr);
+    sptr<PictureInPictureController> pipController = new PictureInPictureController(option, nullptr, 100, nullptr);
     PictureInPictureManager::activeController_ = nullptr;
     ASSERT_FALSE(PictureInPictureManager::HasActiveController());
     PictureInPictureManager::RemoveActiveController(pipController);
@@ -128,7 +119,7 @@ HWTEST_F(PictureInPictureManagerTest, PictureInPictureController, Function | Sma
  * @tc.desc: ShouldAbortPipStart
  * @tc.type: FUNC
  */
-HWTEST_F(PictureInPictureManagerTest, ShouldAbortPipStart, Function | SmallTest | Level2)
+HWTEST_F(PictureInPictureManagerTest, ShouldAbortPipStart, TestSize.Level1)
 {
     ASSERT_FALSE(PictureInPictureManager::ShouldAbortPipStart());
 
@@ -148,7 +139,7 @@ HWTEST_F(PictureInPictureManagerTest, ShouldAbortPipStart, Function | SmallTest 
  * @tc.desc: GetPipControllerInfo
  * @tc.type: FUNC
  */
-HWTEST_F(PictureInPictureManagerTest, GetPipControllerInfo, Function | SmallTest | Level2)
+HWTEST_F(PictureInPictureManagerTest, GetPipControllerInfo, TestSize.Level1)
 {
     sptr<PipOption> option = new (std::nothrow) PipOption();
     ASSERT_NE(nullptr, option);
@@ -171,7 +162,7 @@ HWTEST_F(PictureInPictureManagerTest, GetPipControllerInfo, Function | SmallTest
  * @tc.desc: GetActiveController
  * @tc.type: FUNC
  */
-HWTEST_F(PictureInPictureManagerTest, GetActiveController, Function | SmallTest | Level2)
+HWTEST_F(PictureInPictureManagerTest, GetActiveController, TestSize.Level1)
 {
     sptr<PipOption> option = new (std::nothrow) PipOption();
     ASSERT_NE(nullptr, option);
@@ -190,7 +181,7 @@ HWTEST_F(PictureInPictureManagerTest, GetActiveController, Function | SmallTest 
  * @tc.desc: AttachAutoStartController
  * @tc.type: FUNC
  */
-HWTEST_F(PictureInPictureManagerTest, AttachAutoStartController, Function | SmallTest | Level2)
+HWTEST_F(PictureInPictureManagerTest, AttachAutoStartController, TestSize.Level1)
 {
     PictureInPictureManager::AttachAutoStartController(0, nullptr);
     sptr<PipOption> option = new (std::nothrow) PipOption();
@@ -211,7 +202,7 @@ HWTEST_F(PictureInPictureManagerTest, AttachAutoStartController, Function | Smal
  * @tc.desc: DetachAutoStartController
  * @tc.type: FUNC
  */
-HWTEST_F(PictureInPictureManagerTest, DetachAutoStartController, Function | SmallTest | Level2)
+HWTEST_F(PictureInPictureManagerTest, DetachAutoStartController, TestSize.Level1)
 {
     sptr<PipOption> option = new (std::nothrow) PipOption();
     ASSERT_NE(nullptr, option);
@@ -235,7 +226,7 @@ HWTEST_F(PictureInPictureManagerTest, DetachAutoStartController, Function | Smal
  * @tc.desc: IsAttachedToSameWindow
  * @tc.type: FUNC
  */
-HWTEST_F(PictureInPictureManagerTest, IsAttachedToSameWindow, Function | SmallTest | Level2)
+HWTEST_F(PictureInPictureManagerTest, IsAttachedToSameWindow, TestSize.Level1)
 {
     bool res = PictureInPictureManager::IsAttachedToSameWindow(0);
     ASSERT_EQ(res, false);
@@ -263,7 +254,7 @@ HWTEST_F(PictureInPictureManagerTest, IsAttachedToSameWindow, Function | SmallTe
  * @tc.desc: GetCurrentWindow
  * @tc.type: FUNC
  */
-HWTEST_F(PictureInPictureManagerTest, GetCurrentWindow, Function | SmallTest | Level2)
+HWTEST_F(PictureInPictureManagerTest, GetCurrentWindow, TestSize.Level1)
 {
     ASSERT_EQ(nullptr, PictureInPictureManager::GetCurrentWindow());
 
@@ -289,7 +280,7 @@ HWTEST_F(PictureInPictureManagerTest, GetCurrentWindow, Function | SmallTest | L
  * @tc.desc: DoPreRestore
  * @tc.type: FUNC
  */
-HWTEST_F(PictureInPictureManagerTest, DoPreRestore, Function | SmallTest | Level2)
+HWTEST_F(PictureInPictureManagerTest, DoPreRestore, TestSize.Level1)
 {
     auto mw = sptr<MockWindow>::MakeSptr();
     ASSERT_NE(nullptr, mw);
@@ -311,7 +302,7 @@ HWTEST_F(PictureInPictureManagerTest, DoPreRestore, Function | SmallTest | Level
  * @tc.desc: DoPrepareSource
  * @tc.type: FUNC
  */
-HWTEST_F(PictureInPictureManagerTest, DoPrepareSource, Function | SmallTest | Level2)
+HWTEST_F(PictureInPictureManagerTest, DoPrepareSource, TestSize.Level1)
 {
     auto mw = sptr<MockWindow>::MakeSptr();
     ASSERT_NE(nullptr, mw);
@@ -330,7 +321,7 @@ HWTEST_F(PictureInPictureManagerTest, DoPrepareSource, Function | SmallTest | Le
  * @tc.desc: DoLocateSource
  * @tc.type: FUNC
  */
-HWTEST_F(PictureInPictureManagerTest, DoLocateSource, Function | SmallTest | Level2)
+HWTEST_F(PictureInPictureManagerTest, DoLocateSource, TestSize.Level1)
 {
     auto mw = sptr<MockWindow>::MakeSptr();
     ASSERT_NE(nullptr, mw);
@@ -349,7 +340,7 @@ HWTEST_F(PictureInPictureManagerTest, DoLocateSource, Function | SmallTest | Lev
  * @tc.desc: DoRestore
  * @tc.type: FUNC
  */
-HWTEST_F(PictureInPictureManagerTest, DoRestore, Function | SmallTest | Level2)
+HWTEST_F(PictureInPictureManagerTest, DoRestore, TestSize.Level1)
 {
     auto mw = sptr<MockWindow>::MakeSptr();
     ASSERT_NE(nullptr, mw);
@@ -373,7 +364,7 @@ HWTEST_F(PictureInPictureManagerTest, DoRestore, Function | SmallTest | Level2)
  * @tc.desc: DoClose
  * @tc.type: FUNC
  */
-HWTEST_F(PictureInPictureManagerTest, DoClose, Function | SmallTest | Level2)
+HWTEST_F(PictureInPictureManagerTest, DoClose, TestSize.Level1)
 {
     auto mw = sptr<MockWindow>::MakeSptr();
     ASSERT_NE(nullptr, mw);
@@ -398,7 +389,7 @@ HWTEST_F(PictureInPictureManagerTest, DoClose, Function | SmallTest | Level2)
  * @tc.desc: DoActionEvent
  * @tc.type: FUNC
  */
-HWTEST_F(PictureInPictureManagerTest, DoActionEvent, Function | SmallTest | Level2)
+HWTEST_F(PictureInPictureManagerTest, DoActionEvent, TestSize.Level1)
 {
     auto option = sptr<PipOption>::MakeSptr();
     ASSERT_NE(nullptr, option);
@@ -419,7 +410,7 @@ HWTEST_F(PictureInPictureManagerTest, DoActionEvent, Function | SmallTest | Leve
  * @tc.desc: AutoStartPipWindow
  * @tc.type: FUNC
  */
-HWTEST_F(PictureInPictureManagerTest, AutoStartPipWindow, Function | SmallTest | Level2)
+HWTEST_F(PictureInPictureManagerTest, AutoStartPipWindow, TestSize.Level1)
 {
     PictureInPictureManager::autoStartController_ = nullptr;
     PictureInPictureManager::AutoStartPipWindow();
@@ -441,7 +432,7 @@ HWTEST_F(PictureInPictureManagerTest, AutoStartPipWindow, Function | SmallTest |
  * @tc.desc: DoDestroy
  * @tc.type: FUNC
  */
-HWTEST_F(PictureInPictureManagerTest, DoDestroy, Function | SmallTest | Level2)
+HWTEST_F(PictureInPictureManagerTest, DoDestroy, TestSize.Level1)
 {
     auto mw = sptr<MockWindow>::MakeSptr();
     ASSERT_NE(nullptr, mw);
@@ -461,6 +452,6 @@ HWTEST_F(PictureInPictureManagerTest, DoDestroy, Function | SmallTest | Level2)
     PictureInPictureManager::DoDestroy();
     ASSERT_EQ(pipController->curState_, PiPWindowState::STATE_STOPPED);
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

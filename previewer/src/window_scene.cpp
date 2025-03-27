@@ -129,5 +129,15 @@ void WindowScene::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configur
     WLOGFI("notify mainWindow winId:%{public}u", mainWindow_->GetWindowId());
     mainWindow_->UpdateConfiguration(configuration);
 }
+
+void WindowScene::UpdateConfigurationForSpecified(const std::shared_ptr<AppExecFwk::Configuration>& configuration,
+    const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager)
+{
+    if (mainWindow_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "main window is null");
+        return;
+    }
+    mainWindow_->UpdateConfigurationForSpecified(configuration, resourceManager);
+}
 } // namespace Rosen
 } // namespace OHOS

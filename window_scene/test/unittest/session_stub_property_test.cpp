@@ -62,7 +62,7 @@ namespace {
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(SessionStubPropertyTest, HandleUpdatePropertyByAction01, Function | SmallTest | Level2)
+HWTEST_F(SessionStubPropertyTest, HandleUpdatePropertyByAction01, TestSize.Level1)
 {
     EXPECT_CALL(*session_, UpdateSessionPropertyByAction(_, _)).WillOnce(Return(WMError::WM_OK));
 
@@ -83,7 +83,7 @@ HWTEST_F(SessionStubPropertyTest, HandleUpdatePropertyByAction01, Function | Sma
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(SessionStubPropertyTest, HandleUpdatePropertyByAction02, Function | SmallTest | Level2)
+HWTEST_F(SessionStubPropertyTest, HandleUpdatePropertyByAction02, TestSize.Level1)
 {
     EXPECT_CALL(*session_, UpdateSessionPropertyByAction(_, _)).Times(0);
 
@@ -105,7 +105,7 @@ HWTEST_F(SessionStubPropertyTest, HandleUpdatePropertyByAction02, Function | Sma
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(SessionStubPropertyTest, HandleUpdatePropertyByAction03, Function | SmallTest | Level2)
+HWTEST_F(SessionStubPropertyTest, HandleUpdatePropertyByAction03, TestSize.Level1)
 {
     EXPECT_CALL(*session_, UpdateSessionPropertyByAction(_, _)).Times(0);
 

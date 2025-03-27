@@ -38,6 +38,7 @@ public:
     sptr<DisplayLite> GetDefaultDisplay();
     FoldStatus GetFoldStatus();
     FoldDisplayMode GetFoldDisplayMode();
+    FoldDisplayMode GetFoldDisplayModeForExternal();
     void SetFoldDisplayMode(const FoldDisplayMode);
     bool IsFoldable();
 
@@ -535,9 +536,23 @@ FoldDisplayMode DisplayManagerLite::GetFoldDisplayMode()
     return pImpl_->GetFoldDisplayMode();
 }
 
+FoldDisplayMode DisplayManagerLite::GetFoldDisplayModeForExternal()
+{
+    return pImpl_->GetFoldDisplayModeForExternal();
+}
+
 FoldDisplayMode DisplayManagerLite::Impl::GetFoldDisplayMode()
 {
     return SingletonContainer::Get<DisplayManagerAdapterLite>().GetFoldDisplayMode();
+}
+
+FoldDisplayMode DisplayManagerLite::Impl::GetFoldDisplayModeForExternal()
+{
+    FoldDisplayMode displayMode = SingletonContainer::Get<DisplayManagerAdapterLite>().GetFoldDisplayMode();
+    if (displayMode == FoldDisplayMode::GLOBAL_FULL) {
+        return FoldDisplayMode::FULL;
+    }
+    return displayMode;
 }
 
 void DisplayManagerLite::SetFoldDisplayMode(const FoldDisplayMode mode)
@@ -801,4 +816,8 @@ VirtualScreenFlag DisplayManagerLite::GetVirtualScreenFlag(ScreenId screenId)
     return SingletonContainer::Get<DisplayManagerAdapterLite>().GetVirtualScreenFlag(screenId);
 }
 
+DMError DisplayManagerLite::SetSystemKeyboardStatus(bool isTpKeyboardOn)
+{
+    return SingletonContainer::Get<DisplayManagerAdapterLite>().SetSystemKeyboardStatus(isTpKeyboardOn);
+}
 } // namespace OHOS::Rosen

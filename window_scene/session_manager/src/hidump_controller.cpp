@@ -225,6 +225,7 @@ void HidumpController::DumpLayoutParam(
         << std::setprecision(precision) << session->GetAspectRatio() << "|"
         << std::setprecision(precision) << session->GetFloatingScale() << "|"
         << session->IsDirtyWindow() << "|"
+        << session->IsDragAccessible() << "|"
         << property->GetDragEnabled() << "|"
         << property->GetRaiseEnabled() << "|"
         << std::endl
@@ -375,6 +376,8 @@ void HidumpController::DumpSysconfigParam(std::ostringstream& oss, sptr<SceneSes
         << systemConfig.miniHeightOfMainWindow_ << "|"
         << systemConfig.miniWidthOfSubWindow_ << "|"
         << systemConfig.miniHeightOfSubWindow_ << "|"
+        << systemConfig.miniWidthOfDialogWindow_ << "|"
+        << systemConfig.miniHeightOfDialogWindow_ << "|"
         << systemConfig.backgroundswitch << "|"
         << systemConfig.freeMultiWindowEnable_ << "|"
         << systemConfig.freeMultiWindowSupport_ << "|"

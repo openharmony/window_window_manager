@@ -90,6 +90,12 @@ enum class PowerStateChangeReason : uint32_t {
     STATE_CHANGE_REASON_PEN = 41,
     STATE_CHANGE_REASON_SHUT_DOWN = 42,
     STATE_CHANGE_REASON_SCREEN_CONNECT = 43,
+    STATE_CHANGE_REASON_HIBERNATE = 45,
+    STATE_CHANGE_REASON_EX_SCREEN_INIT = 46,
+    STATE_CHANGE_REASON_ABNORMAL_SCREEN_CONNECT = 47,
+    STATE_CHANGE_REASON_ROLLBACK_HIBERNATE = 48,
+    STATE_CHANGE_REASON_START_DREAM = 49,
+    STATE_CHANGE_REASON_END_DREAM = 50,
     STATE_CHANGE_REASON_REMOTE = 100,
     STATE_CHANGE_REASON_UNKNOWN = 1000,
 };
@@ -116,6 +122,12 @@ enum class ScreenPropertyChangeType : uint32_t {
     ROTATION_END,
     /* Only update screen rotation property info to DMS. */
     ROTATION_UPDATE_PROPERTY_ONLY,
+    /* Only update screen rotation property info not notify. */
+    ROTATION_UPDATE_PROPERTY_ONLY_NOT_NOTIFY,
+    /* Switch single hand mode. */
+    SINGLE_HAND_SWITCH,
+    /* Undefined. */
+    UNDEFINED,
 };
 
 /**
@@ -124,6 +136,17 @@ enum class ScreenPropertyChangeType : uint32_t {
 enum class ScreenShape : uint32_t {
     RECTANGLE = 0,
     ROUND = 1,
+};
+
+/**
+ * @brief displayed soure mode
+ */
+enum class DisplaySourceMode : uint32_t {
+    NONE = 0,
+    MAIN = 1,
+    MIRROR = 2,
+    EXTEND = 3,
+    ALONE = 4,
 };
 
 /**
@@ -149,6 +172,8 @@ enum class DisplayEvent : uint32_t {
     SCREEN_LOCK_OFF,
     SCREEN_LOCK_FINGERPRINT,
     SCREEN_LOCK_DOZE_FINISH,
+    SCREEN_LOCK_START_DREAM,
+    SCREEN_LOCK_END_DREAM,
 };
 
 /**
@@ -225,6 +250,8 @@ enum class DisplayPowerEvent : uint32_t {
     DISPLAY_DOZE,
     DISPLAY_DOZE_SUSPEND,
     DISPLAY_OFF_CANCELED,
+    DISPLAY_START_DREAM,
+    DISPLAY_END_DREAM,
 };
 
 /**
@@ -257,6 +284,7 @@ enum class ScreenChangeEvent : uint32_t {
     UPDATE_ROTATION,
     CHANGE_MODE,
     VIRTUAL_PIXEL_RATIO_CHANGED,
+    SCREEN_SOURCE_MODE_CHANGE,
     SCREEN_SWITCH_CHANGE,
     UNKNOWN,
 };
@@ -332,6 +360,7 @@ enum class DisplayChangeEvent : uint32_t {
     UPDATE_ROTATION_FROM_WINDOW,
     UPDATE_REFRESHRATE,
     SUPER_FOLD_RESOLUTION_CHANGED,
+    SUPER_FOLD_AVAILABLE_AREA_UPDATE,
     UNKNOWN,
 };
 
@@ -352,6 +381,7 @@ enum class DisplayStateChangeType : uint32_t {
     DISPLAY_COMPRESS,
     UPDATE_SCALE,
     UNKNOWN,
+    RESOLUTION_CHANGE,
 };
 
 /**
@@ -391,6 +421,8 @@ enum class SuperFoldStatusChangeEvents : uint32_t {
     ANGLE_CHANGE_FOLDED,
     KEYBOARD_ON,
     KEYBOARD_OFF,
+    SYSTEM_KEYBOARD_ON,
+    SYSTEM_KEYBOARD_OFF,
     INVALID,
 };
 
@@ -403,6 +435,15 @@ enum class SuperFoldStatus : uint32_t {
     HALF_FOLDED,
     EXPANDED,
     KEYBOARD,
+};
+
+/**
+ * @brief Enumerates the extend screen connect status.
+ */
+enum class ExtendScreenConnectStatus: uint32_t {
+    UNKNOWN = 0,
+    CONNECT,
+    DISCONNECT,
 };
 
 /**
@@ -433,6 +474,26 @@ enum class ScreenCombination : uint32_t {
 enum class MultiScreenMode : uint32_t {
     SCREEN_MIRROR = 0,
     SCREEN_EXTEND = 1,
+};
+
+/**
+ * @brief Enumerates the low temp mode.
+ */
+enum class LowTempMode: int32_t {
+    UNKNOWN = -1,
+    LOW_TEMP_OFF = 0,
+    LOW_TEMP_ON = 1,
+};
+
+/**
+ * @brief Enumerates the virtual screen type.
+ */
+enum class VirtualScreenType: uint32_t {
+    UNKNOWN = 0,
+    SCREEN_CASTING,
+    SCREEN_RECORDING,
+    SUPER_DESKTOP,
+    HICAR,
 };
 
 struct Point {
@@ -497,6 +558,7 @@ struct ScreenDirectionInfo {
     int32_t notifyRotation_;
     int32_t screenRotation_;
     int32_t rotation_;
+    int32_t phyRotation_;
 };
 
 /**
@@ -532,6 +594,17 @@ struct DMRect {
     {
         return {0, 0, 0, 0};
     }
+};
+
+/**
+ * @brief Session option when connect
+ */
+struct SessionOption {
+    ScreenId rsId_;
+    std::string name_;
+    bool isExtend_;
+    std::string innerName_;
+    ScreenId screenId_;
 };
 }
 }

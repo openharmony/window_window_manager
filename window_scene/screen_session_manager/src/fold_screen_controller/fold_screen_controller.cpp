@@ -59,10 +59,10 @@ FoldScreenController::FoldScreenController(std::recursive_mutex& displayInfoMute
     if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
         SecondaryFoldSensorManager::GetInstance().SetFoldScreenPolicy(foldScreenPolicy_);
         SecondaryFoldSensorManager::GetInstance().SetSensorFoldStateManager(sensorFoldStateManager_);
-        return;
+    } else {
+        FoldScreenSensorManager::GetInstance().SetFoldScreenPolicy(foldScreenPolicy_);
+        FoldScreenSensorManager::GetInstance().SetSensorFoldStateManager(sensorFoldStateManager_);
     }
-    FoldScreenSensorManager::GetInstance().SetFoldScreenPolicy(foldScreenPolicy_);
-    FoldScreenSensorManager::GetInstance().SetSensorFoldStateManager(sensorFoldStateManager_);
 #endif
 }
 
@@ -121,8 +121,9 @@ void FoldScreenController::RecoverDisplayMode()
         TLOGI(WmsLogTag::DMS, "current displayMode is correct, skip");
         return;
     }
-    if (!FoldScreenStateInternel::IsSingleDisplayFoldDevice()) {
-        TLOGI(WmsLogTag::DMS, "not single display fold device, skip");
+    if (!FoldScreenStateInternel::IsSingleDisplayFoldDevice() &&
+        !FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
+        TLOGI(WmsLogTag::DMS, "not single display fold (pocket) device, skip");
         return;
     }
     TLOGI(WmsLogTag::DMS, "%{public}d -> %{public}d", currentDisplayMode, displayMode);
@@ -188,13 +189,22 @@ bool FoldScreenController::GetTentMode()
     return sensorFoldStateManager_->IsTentMode();
 }
 
-void FoldScreenController::OnTentModeChanged(bool isTentMode)
+bool FoldScreenController::GetCameraMode()
+{
+    if (sensorFoldStateManager_ == nullptr) {
+        TLOGW(WmsLogTag::DMS, "GetCameraMode: sensorFoldStateManager_ is null");
+        return false;
+    }
+    return sensorFoldStateManager_->IsCameraMode();
+}
+
+void FoldScreenController::OnTentModeChanged(int tentType, int32_t hall)
 {
     if (sensorFoldStateManager_ == nullptr) {
         TLOGW(WmsLogTag::DMS, "OnTentModeChanged: sensorFoldStateManager_ is null");
         return;
     }
-    return sensorFoldStateManager_->HandleTentChange(isTentMode, foldScreenPolicy_);
+    return sensorFoldStateManager_->HandleTentChange(tentType, foldScreenPolicy_, hall);
 }
 
 sptr<FoldCreaseRegion> FoldScreenController::GetCurrentFoldCreaseRegion()
@@ -259,7 +269,11 @@ bool FoldScreenController::GetModeChangeRunningStatus()
 
 void FoldScreenController::SetdisplayModeChangeStatus(bool status)
 {
-    foldScreenPolicy_->SetdisplayModeChangeStatus(status);
+    if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        foldScreenPolicy_->SetSecondaryDisplayModeChangeStatus(status);
+    } else {
+        foldScreenPolicy_->SetdisplayModeChangeStatus(status);
+    }
 }
 
 bool FoldScreenController::GetdisplayModeRunningStatus()
@@ -279,5 +293,39 @@ void FoldScreenController::AddOrRemoveDisplayNodeToTree(ScreenId screenId, int32
         return;
     }
     foldScreenPolicy_->AddOrRemoveDisplayNodeToTree(screenId, command);
+}
+
+Drawing::Rect FoldScreenController::GetScreenSnapshotRect()
+{
+    if (foldScreenPolicy_ == nullptr) {
+        TLOGW(WmsLogTag::DMS, "foldScreenPolicy_ is null");
+        Drawing::Rect snapshotRect = {0, 0, 0, 0};
+        return snapshotRect;
+    }
+    return foldScreenPolicy_->GetScreenSnapshotRect();
+}
+
+void FoldScreenController::SetMainScreenRegion(DMRect& mainScreenRegion)
+{
+    if (foldScreenPolicy_ == nullptr) {
+        TLOGW(WmsLogTag::DMS, "foldScreenPolicy_ is null");
+        return;
+    }
+    foldScreenPolicy_->SetMainScreenRegion(mainScreenRegion);
+}
+
+std::chrono::steady_clock::time_point FoldScreenController::GetStartTimePoint()
+{
+    return foldScreenPolicy_->GetStartTimePoint();
+}
+
+bool FoldScreenController::GetIsFirstFrameCommitReported()
+{
+    return foldScreenPolicy_->GetIsFirstFrameCommitReported();
+}
+
+void FoldScreenController::SetIsFirstFrameCommitReported(bool isFirstFrameCommitReported)
+{
+    foldScreenPolicy_->SetIsFirstFrameCommitReported(isFirstFrameCommitReported);
 }
 } // namespace OHOS::Rosen

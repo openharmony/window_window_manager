@@ -29,7 +29,7 @@ int32_t MockSessionManagerServiceStub::OnRemoteRequest(uint32_t code, MessagePar
     MessageOption& option)
 {
     if (data.ReadInterfaceToken() != GetDescriptor()) {
-        WLOGFE("InterfaceToken check failed");
+        TLOGE(WmsLogTag::DEFAULT, "Check failed");
         return ERR_TRANSACTION_FAILED;
     }
     auto msgId = static_cast<MockSessionManagerServiceMessage>(code);

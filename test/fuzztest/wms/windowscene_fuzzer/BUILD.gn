@@ -28,11 +28,7 @@ ohos_fuzztest("WindowSceneFuzzTest") {
     "//commonlibrary/c_utils/base/include",
 
     # for abilityContext
-    "${ability_runtime_path}/interfaces/kits/native/ability/ability_runtime",
-    "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",
     "//third_party/node/deps/icu-small/source/common",
-    "${ability_runtime_inner_api_path}/ability_manager/include",
-    "//foundation/ability/ability_base/interfaces/kits/native/configuration/include/",
 
     # abilityContext end
   ]
@@ -53,6 +49,9 @@ ohos_fuzztest("WindowSceneFuzzTest") {
     "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:ability_context_native",
+    "ability_runtime:ability_manager",
+    "ability_runtime:app_context",
+    "ability_runtime:runtime",
     "ace_engine:ace_uicontent",
     "c_utils:utils",
     "graphic_2d:librender_service_client",

@@ -15,6 +15,8 @@
 
 #include "window_impl.h"
 
+#include <unordered_set>
+
 #include "dm_common.h"
 #include "window_manager_hilog.h"
 #include "window_helper.h"
@@ -26,6 +28,8 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowImpl"};
+constexpr uint32_t API_VERSION_MOD = 1000;
+constexpr int32_t API_VERSION_18 = 18;
 }
 std::map<std::string, std::pair<uint32_t, sptr<Window>>> WindowImpl::windowMap_;
 std::map<uint32_t, std::vector<sptr<WindowImpl>>> WindowImpl::subWindowMap_;
@@ -77,7 +81,7 @@ sptr<Window> WindowImpl::Find(const std::string& name)
 
 const std::shared_ptr<AbilityRuntime::Context> WindowImpl::GetContext() const
 {
-    return nullptr;
+    return context_;
 }
 
 sptr<Window> WindowImpl::FindWindowById(uint32_t windowId)
@@ -112,12 +116,26 @@ std::vector<sptr<Window>> WindowImpl::GetSubWindow(uint32_t parentId)
     return std::vector<sptr<Window>>();
 }
 
-void WindowImpl::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+void WindowImpl::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration,
+    const std::vector<std::shared_ptr<AbilityRuntime::Context>>& ignoreWindowContexts)
 {
+    std::unordered_set<std::shared_ptr<AbilityRuntime::Context>> ignoreWindowCtxSet(
+        ignoreWindowContexts.begin(), ignoreWindowContexts.end());
     std::lock_guard<std::mutex> lock(globalMutex_);
     for (const auto& winPair : windowMap_) {
         auto window = winPair.second.second;
-        window->UpdateConfiguration(configuration);
+        if (window == nullptr) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window is null");
+            continue;
+        }
+        auto context = window->GetContext();
+        if (context == nullptr) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "context is null, winId: %{public}u", window->GetWindowId());
+            continue;
+        }
+        if (ignoreWindowCtxSet.count(context) == 0) {
+            window->UpdateConfiguration(configuration);
+        }
     }
 }
 
@@ -161,7 +179,7 @@ WindowType WindowImpl::GetType() const
     return WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
 }
 
-WindowMode WindowImpl::GetMode() const
+WindowMode WindowImpl::GetWindowMode() const
 {
     return windowMode_;
 }
@@ -389,6 +407,11 @@ std::shared_ptr<Media::PixelMap> WindowImpl::Snapshot()
     return nullptr;
 }
 
+WMError WindowImpl::SnapshotIgnorePrivacy(std::shared_ptr<Media::PixelMap>& pixelMap)
+{
+    return WMError::WM_OK;
+}
+
 void WindowImpl::DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
 {
     return;
@@ -450,6 +473,17 @@ WMError WindowImpl::SetSystemBarProperties(const std::map<WindowType, SystemBarP
 WMError WindowImpl::GetSystemBarProperties(std::map<WindowType, SystemBarProperty>& properties)
 {
     return WMError::WM_OK;
+}
+
+void WindowImpl::UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool systemBarEnableAnimation,
+    SystemBarProperty& property)
+{
+    property.enable_ = systemBarEnable;
+    property.enableAnimation_ = systemBarEnableAnimation;
+    // isolate on api 18
+    if (GetApiTargetVersion() >= API_VERSION_18) {
+        property.settingFlag_ |= SystemBarSettingFlag::ENABLE_SETTING;
+    }
 }
 
 WMError WindowImpl::SetLayoutFullScreen(bool status)
@@ -879,6 +913,17 @@ void WindowImpl::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configura
     }
 }
 
+void WindowImpl::UpdateConfigurationForSpecified(const std::shared_ptr<AppExecFwk::Configuration>& configuration,
+    const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager)
+{
+    if (uiContent_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent is null, winId: %{public}u", GetWindowId());
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "notify ace winId: %{public}u", GetWindowId());
+    uiContent_->UpdateConfiguration(configuration, resourceManager);
+}
+
 void WindowImpl::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
 {
     if (!avoidArea) {
@@ -956,6 +1001,10 @@ bool WindowImpl::IsFullScreen() const
     auto statusProperty = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
     auto naviProperty = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
     return (IsLayoutFullScreen() && !statusProperty.enable_ && !naviProperty.enable_);
+}
+
+void WindowImpl::NotifyPreferredOrientationChange(Orientation orientation)
+{
 }
 
 void WindowImpl::SetRequestedOrientation(Orientation orientation)
@@ -1201,6 +1250,15 @@ WMError WindowImpl::SetImmersiveModeEnabledState(bool enable)
 bool WindowImpl::GetImmersiveModeEnabledState() const
 {
     return true;
+}
+
+uint32_t WindowImpl::GetApiTargetVersion() const
+{
+    uint32_t version = 0;
+    if ((context_ != nullptr) && (context_->GetApplicationInfo() != nullptr)) {
+        version = context_->GetApplicationInfo()->apiTargetVersion % API_VERSION_MOD;
+    }
+    return version;
 }
 } // namespace Rosen
 } // namespace OHOS

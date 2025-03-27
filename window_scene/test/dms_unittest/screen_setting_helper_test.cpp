@@ -15,8 +15,10 @@
 
 #include <gtest/gtest.h>
 
+#include "screen_session_manager/include/screen_session_manager.h"
 #include "screen_session_manager/include/screen_setting_helper.h"
 #include "window_manager_hilog.h"
+#include "scene_board_judgement.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -58,7 +60,7 @@ namespace {
      * @tc.desc: RegisterSettingDpiObserver
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenSettingHelperTest, RegisterSettingDpiObserver, Function | SmallTest | Level3)
+    HWTEST_F(ScreenSettingHelperTest, RegisterSettingDpiObserver, TestSize.Level1)
     {
         auto func = [] (const std::string&) {
             TLOGI(WmsLogTag::DMS, "UT test");
@@ -73,7 +75,7 @@ namespace {
      * @tc.desc: UnregisterSettingDpiObserver01
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenSettingHelperTest, UnregisterSettingDpiObserver01, Function | SmallTest | Level3)
+    HWTEST_F(ScreenSettingHelperTest, UnregisterSettingDpiObserver01, TestSize.Level1)
     {
         ScreenSettingHelper::dpiObserver_ = new SettingObserver;
         ScreenSettingHelper::UnregisterSettingDpiObserver();
@@ -85,7 +87,7 @@ namespace {
      * @tc.desc: UnregisterSettingDpiObserver02
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenSettingHelperTest, UnregisterSettingDpiObserver02, Function | SmallTest | Level3)
+    HWTEST_F(ScreenSettingHelperTest, UnregisterSettingDpiObserver02, TestSize.Level1)
     {
         ScreenSettingHelper::dpiObserver_ = nullptr;
         ScreenSettingHelper::UnregisterSettingDpiObserver();
@@ -97,7 +99,7 @@ namespace {
      * @tc.desc: GetSettingDpi01
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenSettingHelperTest, GetSettingDpi01, Function | SmallTest | Level3)
+    HWTEST_F(ScreenSettingHelperTest, GetSettingDpi01, TestSize.Level1)
     {
         uint32_t dpi = 0;
         std::string key = "test";
@@ -110,7 +112,7 @@ namespace {
      * @tc.desc: RegisterSettingCastObserver
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenSettingHelperTest, RegisterSettingCastObserver01, Function | SmallTest | Level3)
+    HWTEST_F(ScreenSettingHelperTest, RegisterSettingCastObserver01, TestSize.Level1)
     {
         auto func = [] (const std::string&) {
             TLOGI(WmsLogTag::DMS, "UT test");
@@ -125,7 +127,7 @@ namespace {
      * @tc.desc: RegisterSettingCastObserver02
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenSettingHelperTest, RegisterSettingCastObserver02, Function | SmallTest | Level3)
+    HWTEST_F(ScreenSettingHelperTest, RegisterSettingCastObserver02, TestSize.Level1)
     {
         auto func = [] (const std::string&) {
             TLOGI(WmsLogTag::DMS, "UT test");
@@ -140,7 +142,7 @@ namespace {
      * @tc.desc: UnregisterSettingCastObserver01
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenSettingHelperTest, UnregisterSettingCastObserver01, Function | SmallTest | Level3)
+    HWTEST_F(ScreenSettingHelperTest, UnregisterSettingCastObserver01, TestSize.Level1)
     {
         ScreenSettingHelper::castObserver_ = nullptr;
         ScreenSettingHelper::UnregisterSettingCastObserver();
@@ -152,7 +154,7 @@ namespace {
      * @tc.desc: UnregisterSettingCastObserver02
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenSettingHelperTest, UnregisterSettingCastObserver02, Function | SmallTest | Level3)
+    HWTEST_F(ScreenSettingHelperTest, UnregisterSettingCastObserver02, TestSize.Level1)
     {
         ScreenSettingHelper::castObserver_ = new SettingObserver;
         ScreenSettingHelper::UnregisterSettingCastObserver();
@@ -164,7 +166,7 @@ namespace {
      * @tc.desc: GetSettingCast01
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenSettingHelperTest, GetSettingCast01, Function | SmallTest | Level3)
+    HWTEST_F(ScreenSettingHelperTest, GetSettingCast01, TestSize.Level1)
     {
         bool enable = true;
         std::string key = "test";
@@ -177,8 +179,11 @@ namespace {
      * @tc.desc: GetSettingCast02
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenSettingHelperTest, GetSettingCast02, Function | SmallTest | Level3)
+    HWTEST_F(ScreenSettingHelperTest, GetSettingCast02, TestSize.Level1)
     {
+        if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+            GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
+        }
         bool enable = true;
         std::string key = "default_display_dpi";
         bool ret = ScreenSettingHelper::GetSettingCast(enable, key);
@@ -190,7 +195,7 @@ namespace {
      * @tc.desc: UnregisterSettingRotationObserver01
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenSettingHelperTest, UnregisterSettingRotationObserver01, Function | SmallTest | Level3)
+    HWTEST_F(ScreenSettingHelperTest, UnregisterSettingRotationObserver01, TestSize.Level1)
     {
         ScreenSettingHelper::rotationObserver_ = nullptr;
         ASSERT_EQ(ScreenSettingHelper::rotationObserver_, nullptr);
@@ -201,7 +206,7 @@ namespace {
      * @tc.desc: UnregisterSettingRotationObserver02
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenSettingHelperTest, UnregisterSettingRotationObserver02, Function | SmallTest | Level3)
+    HWTEST_F(ScreenSettingHelperTest, UnregisterSettingRotationObserver02, TestSize.Level1)
     {
         ScreenSettingHelper::rotationObserver_ = new SettingObserver;
         ASSERT_NE(ScreenSettingHelper::rotationObserver_, nullptr);
@@ -212,7 +217,7 @@ namespace {
      * @tc.desc: SetSettingRotation
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenSettingHelperTest, SetSettingRotation, Function | SmallTest | Level3)
+    HWTEST_F(ScreenSettingHelperTest, SetSettingRotation, TestSize.Level1)
     {
         int32_t rotation = 180;
         ScreenSettingHelper::SetSettingRotation(rotation);
@@ -224,7 +229,7 @@ namespace {
      * @tc.desc: GetSettingRotation01
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenSettingHelperTest, GetSettingRotation01, Function | SmallTest | Level3)
+    HWTEST_F(ScreenSettingHelperTest, GetSettingRotation01, TestSize.Level1)
     {
         int32_t rotation = 0;
         std::string key = "test";
@@ -237,8 +242,11 @@ namespace {
      * @tc.desc: GetSettingRotation02
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenSettingHelperTest, GetSettingRotation02, Function | SmallTest | Level3)
+    HWTEST_F(ScreenSettingHelperTest, GetSettingRotation02, TestSize.Level1)
     {
+        if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+            GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
+        }
         int32_t rotation = 0;
         std::string key = "default_display_dpi";
         auto result = ScreenSettingHelper::GetSettingRotation(rotation, key);
@@ -250,7 +258,7 @@ namespace {
      * @tc.desc: SetSettingRotationScreenId
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenSettingHelperTest, SetSettingRotationScreenId, Function | SmallTest | Level3)
+    HWTEST_F(ScreenSettingHelperTest, SetSettingRotationScreenId, TestSize.Level1)
     {
         int32_t screenId = 0;
         ScreenSettingHelper::SetSettingRotationScreenId(screenId);
@@ -262,11 +270,11 @@ namespace {
      * @tc.desc: GetSettingRotationScreenID01
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenSettingHelperTest, GetSettingRotationScreenID01, Function | SmallTest | Level3)
+    HWTEST_F(ScreenSettingHelperTest, GetSettingRotationScreenID01, TestSize.Level1)
     {
         int32_t screenId = 0;
         std::string key = "test";
-        auto result = ScreenSettingHelper::GetSettingRotation(screenId, key);
+        auto result = ScreenSettingHelper::GetSettingRotationScreenID(screenId, key);
         ASSERT_EQ(result, false);
     }
 
@@ -275,11 +283,11 @@ namespace {
      * @tc.desc: GetSettingRotationScreenID02
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenSettingHelperTest, GetSettingRotationScreenID02, Function | SmallTest | Level3)
+    HWTEST_F(ScreenSettingHelperTest, GetSettingRotationScreenID02, TestSize.Level1)
     {
         int32_t screenId = 0;
         std::string key = "screen_rotation_screen_id_value";
-        auto result = ScreenSettingHelper::GetSettingRotation(screenId, key);
+        auto result = ScreenSettingHelper::GetSettingRotationScreenID(screenId, key);
         ASSERT_EQ(result, false);
     }
 
@@ -288,7 +296,7 @@ namespace {
      * @tc.desc: GetSettingValue
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenSettingHelperTest, GetSettingValue, Function | SmallTest | Level3)
+    HWTEST_F(ScreenSettingHelperTest, GetSettingValue, TestSize.Level1)
     {
         ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
         uint32_t value = 0;
@@ -302,7 +310,7 @@ namespace {
      * @tc.desc: RemoveInvalidChar Test01
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenSettingHelperTest, RemoveInvalidChar01, Function | SmallTest | Level3)
+    HWTEST_F(ScreenSettingHelperTest, RemoveInvalidChar01, TestSize.Level1)
     {
         ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
         std::string test_str = "test";
@@ -315,7 +323,7 @@ namespace {
      * @tc.desc: RemoveInvalidChar Test02
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenSettingHelperTest, RemoveInvalidChar02, Function | SmallTest | Level3)
+    HWTEST_F(ScreenSettingHelperTest, RemoveInvalidChar02, TestSize.Level1)
     {
         ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
         std::string test_str = "test 2.0 ,";
@@ -328,7 +336,7 @@ namespace {
      * @tc.desc: SplitString Test01
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenSettingHelperTest, SplitString01, Function | SmallTest | Level3)
+    HWTEST_F(ScreenSettingHelperTest, SplitString01, TestSize.Level1)
     {
         ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
         std::vector<std::string> splitValues = {"split", "test"};
@@ -343,7 +351,7 @@ namespace {
      * @tc.desc: SplitString Test02
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenSettingHelperTest, SplitString02, Function | SmallTest | Level3)
+    HWTEST_F(ScreenSettingHelperTest, SplitString02, TestSize.Level1)
     {
         ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
         std::vector<std::string> splitValues = {};
@@ -354,45 +362,444 @@ namespace {
     }
 
     /**
-     * @tc.name: GetSettingRecoveryResolutionString
-     * @tc.desc: GetSettingRecoveryResolutionString Test
+     * @tc.name: IsNumber01
+     * @tc.desc: IsNumber01 Test
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenSettingHelperTest, GetSettingRecoveryResolutionString, Function | SmallTest | Level3)
+    HWTEST_F(ScreenSettingHelperTest, IsNumber01, TestSize.Level1)
     {
         ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
-        std::vector<std::string> resolutionString = {};
-        std::string key = "test, str";
-        auto ret = screenSettingHelper.GetSettingRecoveryResolutionString(resolutionString, key);
+        std::string test_str = "12.34";
+        auto ret = screenSettingHelper.IsNumber(test_str);
+        ASSERT_TRUE(ret);
+    }
+
+    /**
+     * @tc.name: IsNumber02
+     * @tc.desc: IsNumber02 Test
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, IsNumber02, TestSize.Level1)
+    {
+        ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
+        std::string test_str = "test";
+        auto ret = screenSettingHelper.IsNumber(test_str);
         ASSERT_FALSE(ret);
     }
 
     /**
-     * @tc.name: GetSettingScreenModeString
-     * @tc.desc: GetSettingScreenModeString Test
+     * @tc.name: RegisterSettingWireCastObserver01
+     * @tc.desc: RegisterSettingWireCastObserver01
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenSettingHelperTest, GetSettingScreenModeString, Function | SmallTest | Level3)
+    HWTEST_F(ScreenSettingHelperTest, RegisterSettingWireCastObserver01, TestSize.Level1)
     {
-        ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
-        std::vector<std::string> screenModeStrings = {};
-        std::string key = "test, str";
-        auto ret = screenSettingHelper.GetSettingScreenModeString(screenModeStrings, key);
+        auto func = [] (const std::string&) {
+            TLOGI(WmsLogTag::DMS, "UT test");
+        };
+        ScreenSettingHelper::wireCastObserver_ = new SettingObserver;
+        ScreenSettingHelper::RegisterSettingWireCastObserver(func);
+        ASSERT_NE(ScreenSettingHelper::wireCastObserver_, nullptr);
+    }
+
+    /**
+     * @tc.name: UnregisterSettingWireCastObserver01
+     * @tc.desc: UnregisterSettingWireCastObserver01
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, UnregisterSettingWireCastObserver01, TestSize.Level1)
+    {
+        ScreenSettingHelper::wireCastObserver_ = nullptr;
+        ScreenSettingHelper::UnregisterSettingWireCastObserver();
+        ASSERT_EQ(ScreenSettingHelper::wireCastObserver_, nullptr);
+    }
+
+    /**
+     * @tc.name: UnregisterSettingWireCastObserver02
+     * @tc.desc: UnregisterSettingWireCastObserver02
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, UnregisterSettingWireCastObserver02, TestSize.Level1)
+    {
+        ScreenSettingHelper::wireCastObserver_ = new SettingObserver;
+        ScreenSettingHelper::UnregisterSettingWireCastObserver();
+        ASSERT_EQ(ScreenSettingHelper::wireCastObserver_, nullptr);
+    }
+
+    /**
+     * @tc.name: UpdateScreenModeTest
+     * @tc.desc: Test UpdateScreenMode for mode not equl nomal mode then return false
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, UpdateScreenMode, Function | SmallTest | Level3)
+    {
+        MultiScreenInfo info;
+        uint32_t mode = 3; //unnomal mode
+        bool isExternal = true;
+        auto ret = ScreenSettingHelper::UpdateScreenMode(info, mode, isExternal);
         ASSERT_FALSE(ret);
     }
 
     /**
-     * @tc.name: GetSettingRelativePositionString
-     * @tc.desc: GetSettingRelativePositionString Test
+     * @tc.name: UpdateScreenModeTest001
+     * @tc.desc: Test UpdateScreenMode for mode equl SCREEN_MAIN_IN_DATA then return true
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenSettingHelperTest, GetSettingRelativePositionString, Function | SmallTest | Level3)
+    HWTEST_F(ScreenSettingHelperTest, UpdateScreenModeTest001, Function | SmallTest | Level3)
+    {
+        MultiScreenInfo info;
+        uint32_t mode = 0; //mode is SCREEN_MAIN_IN_DATA
+        bool isExternal = true;
+        auto ret = ScreenSettingHelper::UpdateScreenMode(info, mode, isExternal);
+        ASSERT_TRUE(ret);
+        ASSERT_EQ(info.isExtendMain, isExternal);
+    }
+
+    /**
+     * @tc.name: UpdateScreenModeTest002
+     * @tc.desc: Test UpdateScreenMode for mode not equl SCREEN_MIRROR_IN_DATA then return true
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, UpdateScreenModeTest002, Function | SmallTest | Level3)
+    {
+        MultiScreenInfo info;
+        uint32_t mode = 1; //mode is SCREEN_MIRROR_IN_DATA
+        bool isExternal = true;
+        auto ret = ScreenSettingHelper::UpdateScreenMode(info, mode, isExternal);
+        ASSERT_TRUE(ret);
+        ASSERT_EQ(info.multiScreenMode, MultiScreenMode::SCREEN_MIRROR);
+    }
+
+    /**
+     * @tc.name: UpdateScreenModeTest003
+     * @tc.desc: Test UpdateScreenMode for mode not equl SCREEN_EXTEND_IN_DATA then return true
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, UpdateScreenModeTest003, Function | SmallTest | Level3)
+    {
+        MultiScreenInfo info;
+        uint32_t mode = 2; //mode is SCREEN_EXTEND_IN_DATA
+        bool isExternal = true;
+        auto ret = ScreenSettingHelper::UpdateScreenMode(info, mode, isExternal);
+        ASSERT_TRUE(ret);
+        ASSERT_EQ(info.multiScreenMode, MultiScreenMode::SCREEN_EXTEND);
+    }
+
+    /**
+     * @tc.name: GetScreenModeTest
+     * @tc.desc: Test GetScreenMode func
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, GetScreenModeTest, Function | SmallTest | Level3)
+    {
+        MultiScreenInfo info;
+        string inputString;
+        auto ret = ScreenSettingHelper::GetScreenMode(info, inputString);
+        ASSERT_FALSE(ret);
+    }
+
+    /**
+     * @tc.name: GetScreenModeTest001
+     * @tc.desc: Test GetScreenMode func
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, GetScreenModeTest001, Function | SmallTest | Level3)
+    {
+        MultiScreenInfo info;
+        string inputString = "1 ";
+        auto ret = ScreenSettingHelper::GetScreenMode(info, inputString);
+        ASSERT_FALSE(ret);
+    }
+
+    /**
+     * @tc.name: GetScreenModeTest002
+     * @tc.desc: Test GetScreenMode func
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, GetScreenModeTest002, Function | SmallTest | Level3)
+    {
+        MultiScreenInfo info;
+        string inputString = "1 2";
+        auto ret = ScreenSettingHelper::GetScreenMode(info, inputString);
+        ASSERT_TRUE(ret);
+    }
+
+    /**
+     * @tc.name: GetScreenModeTest003
+     * @tc.desc: Test GetScreenMode func
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, GetScreenModeTest003, Function | SmallTest | Level3)
+    {
+        MultiScreenInfo info;
+        string inputString = "1 2 3";
+        auto ret = ScreenSettingHelper::GetScreenMode(info, inputString);
+        ASSERT_FALSE(ret);
+    }
+
+    /**
+     * @tc.name: GetScreenModeTest004
+     * @tc.desc: Test GetScreenMode func
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, GetScreenModeTest004, Function | SmallTest | Level3)
+    {
+        MultiScreenInfo info;
+        string inputString = "3 2";
+        auto ret = ScreenSettingHelper::GetScreenMode(info, inputString);
+        ASSERT_FALSE(ret);
+    }
+
+    /**
+     * @tc.name: GetScreenModeTest005
+     * @tc.desc: Test GetScreenMode func
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, GetScreenModeTest005, Function | SmallTest | Level3)
+    {
+        MultiScreenInfo info;
+        string inputString = "1 3";
+        auto ret = ScreenSettingHelper::GetScreenMode(info, inputString);
+        ASSERT_FALSE(ret);
+    }
+
+    /**
+     * @tc.name: GetScreenModeTest006
+     * @tc.desc: Test GetScreenMode func
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, GetScreenModeTest006, Function | SmallTest | Level3)
+    {
+        MultiScreenInfo info;
+        string inputString = "e 1";
+        auto ret = ScreenSettingHelper::GetScreenMode(info, inputString);
+        ASSERT_FALSE(ret);
+    }
+
+    /**
+     * @tc.name: GetScreenModeTest007
+     * @tc.desc: Test GetScreenMode func
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, GetScreenModeTest007, Function | SmallTest | Level3)
+    {
+        MultiScreenInfo info;
+        string inputString = "1 e";
+        auto ret = ScreenSettingHelper::GetScreenMode(info, inputString);
+        ASSERT_FALSE(ret);
+    }
+
+    /**
+     * @tc.name: GetScreenRelativePositionTest
+     * @tc.desc: Test GetScreenRelativePosition func
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, GetScreenRelativePositionTest, Function | SmallTest | Level3)
+    {
+        MultiScreenInfo info;
+        string inputString;
+        auto ret = ScreenSettingHelper::GetScreenRelativePosition(info, inputString);
+        ASSERT_FALSE(ret);
+    }
+
+    /**
+     * @tc.name: GetScreenRelativePositionTest001
+     * @tc.desc: Test GetScreenRelativePosition func
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, GetScreenRelativePositionTest001, Function | SmallTest | Level3)
+    {
+        MultiScreenInfo info;
+        string inputString = "1 2";
+        auto ret = ScreenSettingHelper::GetScreenRelativePosition(info, inputString);
+        ASSERT_FALSE(ret);
+    }
+
+     /**
+     * @tc.name: GetScreenRelativePositionTest002
+     * @tc.desc: Test GetScreenRelativePosition func
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, GetScreenRelativePositionTest002, Function | SmallTest | Level3)
+    {
+        MultiScreenInfo info;
+        string inputString = "1 2 3";
+        auto ret = ScreenSettingHelper::GetScreenRelativePosition(info, inputString);
+        ASSERT_TRUE(ret);
+    }
+
+    /**
+     * @tc.name: GetScreenRelativePositionTest003
+     * @tc.desc: Test GetScreenRelativePosition func
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, GetScreenRelativePositionTest003, Function | SmallTest | Level3)
+    {
+        MultiScreenInfo info;
+        string inputString = "1 2 3 4";
+        auto ret = ScreenSettingHelper::GetScreenRelativePosition(info, inputString);
+        ASSERT_FALSE(ret);
+    }
+
+    /**
+     * @tc.name: GetScreenRelativePositionTest004
+     * @tc.desc: Test GetScreenRelativePosition func
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, GetScreenRelativePositionTest004, Function | SmallTest | Level3)
+    {
+        MultiScreenInfo info;
+        string inputString = "E 1 2";
+        auto ret = ScreenSettingHelper::GetScreenRelativePosition(info, inputString);
+        ASSERT_FALSE(ret);
+    }
+
+    /**
+     * @tc.name: GetScreenRelativePositionTest005
+     * @tc.desc: Test GetScreenRelativePosition func
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, GetScreenRelativePositionTest005, Function | SmallTest | Level3)
+    {
+        MultiScreenInfo info;
+        string inputString = "1 E 2";
+        auto ret = ScreenSettingHelper::GetScreenRelativePosition(info, inputString);
+        ASSERT_FALSE(ret);
+    }
+
+    /**
+     * @tc.name: GetScreenRelativePositionTest006
+     * @tc.desc: Test GetScreenRelativePosition func
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, GetScreenRelativePositionTest006, Function | SmallTest | Level3)
+    {
+        MultiScreenInfo info;
+        string inputString = "1 2 E";
+        auto ret = ScreenSettingHelper::GetScreenRelativePosition(info, inputString);
+        ASSERT_FALSE(ret);
+    }
+
+
+    /**
+     * @tc.name: GetScreenRelativePositionTest007
+     * @tc.desc: Test GetScreenRelativePosition func
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, GetScreenRelativePositionTest007, Function | SmallTest | Level3)
+    {
+        ScreenId screenId = 1001;
+        ScreenSessionConfig config = {
+            .screenId = screenId,
+            .rsId = 1001,
+            .name = "GetScreenRelativePositionTest007",
+        };
+        sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+        ScreenSessionManager::GetInstance().screenSessionMap_[screenId] = screenSession;
+        MultiScreenInfo info;
+        info.isExtendMain = true;
+        screenSession->GetScreenProperty().SetScreenType(ScreenType::REAL);
+        screenSession->isInternal_ = true;
+        string inputString = "1 2 3";
+        auto ret = ScreenSettingHelper::GetScreenRelativePosition(info, inputString);
+        ASSERT_TRUE(ret);
+        ASSERT_EQ(info.mainScreenOption.screenId_, 1);
+        ScreenSessionManager::GetInstance().screenSessionMap_.erase(screenId);
+    }
+
+    /**
+     * @tc.name: GetScreenRelativePositionTest008
+     * @tc.desc: Test GetScreenRelativePosition func
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, GetScreenRelativePositionTest008, Function | SmallTest | Level3)
+    {
+        ScreenId screenId = 1001;
+        ScreenSessionConfig config = {
+            .screenId = screenId,
+            .rsId = 1001,
+            .name = "GetScreenRelativePositionTest008",
+        };
+        sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+        ScreenSessionManager::GetInstance().screenSessionMap_[screenId] = screenSession;
+        MultiScreenInfo info;
+        screenSession->GetScreenProperty().SetScreenType(ScreenType::REAL);
+        screenSession->isInternal_ = true;
+        info.isExtendMain = false;
+        string inputString = "1001 2 3";
+        auto ret = ScreenSettingHelper::GetScreenRelativePosition(info, inputString);
+        ASSERT_TRUE(ret);
+        ASSERT_EQ(info.mainScreenOption.screenId_, 1001);
+        ScreenSessionManager::GetInstance().screenSessionMap_.erase(screenId);
+    }
+
+    /**
+     * @tc.name: GetScreenRelativePositionTest009
+     * @tc.desc: Test GetScreenRelativePosition func
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, GetScreenRelativePositionTest009, Function | SmallTest | Level3)
+    {
+        ScreenId screenId = 1001;
+        ScreenSessionConfig config = {
+            .screenId = screenId,
+            .rsId = 1001,
+            .name = "GetScreenRelativePositionTest009",
+        };
+        sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+        ScreenSessionManager::GetInstance().screenSessionMap_[screenId] = screenSession;
+        MultiScreenInfo info;
+        screenSession->GetScreenProperty().SetScreenType(ScreenType::REAL);
+        screenSession->isInternal_ = true;
+        info.isExtendMain = true;
+        string inputString = "1001 2 3";
+        auto ret = ScreenSettingHelper::GetScreenRelativePosition(info, inputString);
+        ASSERT_TRUE(ret);
+        ASSERT_EQ(info.secondaryScreenOption.screenId_, 1001);
+        ScreenSessionManager::GetInstance().screenSessionMap_.erase(screenId);
+    }
+
+    /**
+     * @tc.name: GetScreenRelativePositionTest0010
+     * @tc.desc: Test GetScreenRelativePosition func
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, GetScreenRelativePositionTest0010, Function | SmallTest | Level3)
+    {
+        ScreenId screenId = 1001;
+        ScreenSessionConfig config = {
+            .screenId = screenId,
+            .rsId = 1001,
+            .name = "GetScreenRelativePositionTest0010",
+        };
+        sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+        ScreenSessionManager::GetInstance().screenSessionMap_[screenId] = screenSession;
+        MultiScreenInfo info;
+        screenSession->GetScreenProperty().SetScreenType(ScreenType::REAL);
+        screenSession->isInternal_ = true;
+        info.isExtendMain = false;
+        string inputString = "1 2 3";
+        auto ret = ScreenSettingHelper::GetScreenRelativePosition(info, inputString);
+        ASSERT_TRUE(ret);
+        ASSERT_EQ(info.secondaryScreenOption.screenId_, 1);
+        ScreenSessionManager::GetInstance().screenSessionMap_.erase(screenId);
+    }
+
+    /**
+     * @tc.name: GetMultiScreenInfoTest
+     * @tc.desc: Test GetMultiScreenInfo func
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, GetMultiScreenInfoTest, Function | SmallTest | Level3)
     {
         ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
-        std::vector<std::string> relativePositionStrings = {};
-        std::string key = "test";
-        auto ret = screenSettingHelper.GetSettingRelativePositionString(relativePositionStrings, key);
-        ASSERT_FALSE(ret);
+        std::string value = "";
+        std::string key = "user_set_screen_mode_edid";
+        bool ret = screenSettingHelper.SetSettingValue(key, value);
+        ASSERT_TRUE(ret);
+
+        std::map<std::string, MultiScreenInfo> multiScreenInfoMap = screenSettingHelper.GetMultiScreenInfo(key);
+        ASSERT_TRUE(multiScreenInfoMap.empty());
     }
 }
 } // namespace Rosen

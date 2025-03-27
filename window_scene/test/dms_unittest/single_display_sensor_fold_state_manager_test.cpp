@@ -16,7 +16,7 @@
 #include <gtest/gtest.h>
 
 #include "screen_session_manager/include/fold_screen_controller/sensor_fold_state_manager/single_display_sensor_fold_state_manager.h"
-
+#include "scene_board_judgement.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -57,8 +57,11 @@ namespace {
  * @tc.desc: test function : HandleAngleChange
  * @tc.type: FUNC
  */
-HWTEST_F(SingleDisplaySensorFoldStateManagerTest, HandleAngleChange, Function | SmallTest | Level1)
+HWTEST_F(SingleDisplaySensorFoldStateManagerTest, HandleAngleChange, TestSize.Level1)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
+    }
     float angel = 0;
     int hall = 0;
     sptr<FoldScreenPolicy> foldScreenPolicy = nullptr;
@@ -72,8 +75,11 @@ HWTEST_F(SingleDisplaySensorFoldStateManagerTest, HandleAngleChange, Function | 
  * @tc.desc: test function : HandleHallChange
  * @tc.type: FUNC
  */
-HWTEST_F(SingleDisplaySensorFoldStateManagerTest, HandleHallChange, Function | SmallTest | Level1)
+HWTEST_F(SingleDisplaySensorFoldStateManagerTest, HandleHallChange, TestSize.Level1)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
+    }
     float angel = 0;
     int hall = 0;
     sptr<FoldScreenPolicy> foldScreenPolicy = nullptr;
@@ -88,8 +94,11 @@ HWTEST_F(SingleDisplaySensorFoldStateManagerTest, HandleHallChange, Function | S
  * @tc.type: FUNC
  */
 HWTEST_F(SingleDisplaySensorFoldStateManagerTest, UpdateSwitchScreenBoundaryForLargeFoldDevice,
-        Function | SmallTest | Level1)
+        TestSize.Level1)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
+    }
     float angel = 0;
     int hall = 0;
     SingleDisplaySensorFoldStateManager manager;
@@ -107,8 +116,11 @@ HWTEST_F(SingleDisplaySensorFoldStateManagerTest, UpdateSwitchScreenBoundaryForL
  * @tc.desc: test function : GetNextFoldState
  * @tc.type: FUNC
  */
-HWTEST_F(SingleDisplaySensorFoldStateManagerTest, GetNextFoldState01, Function | SmallTest | Level1)
+HWTEST_F(SingleDisplaySensorFoldStateManagerTest, GetNextFoldState01, TestSize.Level1)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
+    }
     float angel = -0.1;
     int hall = 0;
     SingleDisplaySensorFoldStateManager manager;
@@ -152,8 +164,11 @@ HWTEST_F(SingleDisplaySensorFoldStateManagerTest, GetNextFoldState01, Function |
  * @tc.desc: test function : GetNextFoldState
  * @tc.type: FUNC
  */
-HWTEST_F(SingleDisplaySensorFoldStateManagerTest, GetNextFoldState02, Function | SmallTest | Level1)
+HWTEST_F(SingleDisplaySensorFoldStateManagerTest, GetNextFoldState02, TestSize.Level1)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
+    }
     SingleDisplaySensorFoldStateManager manager;
     manager.allowUserSensorForLargeFoldDevice = 1;
     float angel = 25.0F;

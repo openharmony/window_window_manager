@@ -72,7 +72,7 @@ namespace {
  * @tc.desc: call Register/UnregisterDisplayPowerEventListener with a valid listener and check return value
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayPowerUnitTest, register_display_power_event_listener_001, Function | SmallTest | Level2)
+HWTEST_F(DisplayPowerUnitTest, register_display_power_event_listener_001, TestSize.Level1)
 {
     Mocker m;
 
@@ -92,7 +92,7 @@ HWTEST_F(DisplayPowerUnitTest, register_display_power_event_listener_001, Functi
  * @tc.desc: call Register/UnregisterDisplayPowerEventListener with nullptr and check return value
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayPowerUnitTest, register_display_power_event_listener_002, Function | SmallTest | Level2)
+HWTEST_F(DisplayPowerUnitTest, register_display_power_event_listener_002, TestSize.Level1)
 {
     Mocker m;
     EXPECT_CALL(m.Mock(), RegisterDisplayManagerAgent(_, DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER))
@@ -111,7 +111,7 @@ HWTEST_F(DisplayPowerUnitTest, register_display_power_event_listener_002, Functi
  * @tc.desc: call Register/UnregisterDisplayPowerEventListener with ipc failed and check return value
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayPowerUnitTest, register_display_power_event_listener_003, Function | SmallTest | Level2)
+HWTEST_F(DisplayPowerUnitTest, register_display_power_event_listener_003, TestSize.Level1)
 {
     Mocker m;
     EXPECT_CALL(m.Mock(), RegisterDisplayManagerAgent(_, DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER))
@@ -130,7 +130,7 @@ HWTEST_F(DisplayPowerUnitTest, register_display_power_event_listener_003, Functi
  * @tc.desc: call UnregisterDisplayPowerEventListener with a listener never registered and check return value
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayPowerUnitTest, unregister_display_power_event_listener_001, Function | SmallTest | Level2)
+HWTEST_F(DisplayPowerUnitTest, unregister_display_power_event_listener_001, TestSize.Level1)
 {
     Mocker m;
     EXPECT_CALL(m.Mock(), UnregisterDisplayManagerAgent(_, DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER))
@@ -144,7 +144,7 @@ HWTEST_F(DisplayPowerUnitTest, unregister_display_power_event_listener_001, Func
  * @tc.desc: call UnregisterDisplayPowerEventListener with nullptr and check return value
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayPowerUnitTest, unregister_display_power_event_listener_002, Function | SmallTest | Level2)
+HWTEST_F(DisplayPowerUnitTest, unregister_display_power_event_listener_002, TestSize.Level1)
 {
     Mocker m;
     EXPECT_CALL(m.Mock(), UnregisterDisplayManagerAgent(_, DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER))
@@ -158,14 +158,14 @@ HWTEST_F(DisplayPowerUnitTest, unregister_display_power_event_listener_002, Func
  * @tc.desc: call WakeUpBegin and check return value
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayPowerUnitTest, wake_up_begin_001, Function | SmallTest | Level2)
+HWTEST_F(DisplayPowerUnitTest, wake_up_begin_001, TestSize.Level1)
 {
     Mocker m;
-    EXPECT_CALL(m.Mock(), WakeUpBegin(PowerStateChangeReason::POWER_BUTTON)).Times(1).WillOnce(Return(true));;
+    EXPECT_CALL(m.Mock(), WakeUpBegin(PowerStateChangeReason::POWER_BUTTON)).Times(1).WillOnce(Return(true));
     bool ret  = DisplayManager::GetInstance().WakeUpBegin(PowerStateChangeReason::POWER_BUTTON);
     ASSERT_EQ(true, ret);
 
-    EXPECT_CALL(m.Mock(), WakeUpBegin(PowerStateChangeReason::POWER_BUTTON)).Times(1).WillOnce(Return(false));;
+    EXPECT_CALL(m.Mock(), WakeUpBegin(PowerStateChangeReason::POWER_BUTTON)).Times(1).WillOnce(Return(false));
     ret  = DisplayManager::GetInstance().WakeUpBegin(PowerStateChangeReason::POWER_BUTTON);
     ASSERT_EQ(false, ret);
 }
@@ -175,7 +175,7 @@ HWTEST_F(DisplayPowerUnitTest, wake_up_begin_001, Function | SmallTest | Level2)
  * @tc.desc: call WakeUpEnd and check return value
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayPowerUnitTest, wake_up_end_001, Function | SmallTest | Level2)
+HWTEST_F(DisplayPowerUnitTest, wake_up_end_001, TestSize.Level1)
 {
     Mocker m;
     EXPECT_CALL(m.Mock(), WakeUpEnd()).Times(1).WillOnce(Return(true));
@@ -192,14 +192,14 @@ HWTEST_F(DisplayPowerUnitTest, wake_up_end_001, Function | SmallTest | Level2)
  * @tc.desc: call SuspendBegin and check return value
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayPowerUnitTest, suspend_begin_001, Function | SmallTest | Level2)
+HWTEST_F(DisplayPowerUnitTest, suspend_begin_001, TestSize.Level1)
 {
     Mocker m;
-    EXPECT_CALL(m.Mock(), SuspendBegin(PowerStateChangeReason::POWER_BUTTON)).Times(1).WillOnce(Return(true));;
+    EXPECT_CALL(m.Mock(), SuspendBegin(PowerStateChangeReason::POWER_BUTTON)).Times(1).WillOnce(Return(true));
     bool ret  = DisplayManager::GetInstance().SuspendBegin(PowerStateChangeReason::POWER_BUTTON);
     ASSERT_EQ(true, ret);
 
-    EXPECT_CALL(m.Mock(), SuspendBegin(PowerStateChangeReason::POWER_BUTTON)).Times(1).WillOnce(Return(false));;
+    EXPECT_CALL(m.Mock(), SuspendBegin(PowerStateChangeReason::POWER_BUTTON)).Times(1).WillOnce(Return(false));
     ret  = DisplayManager::GetInstance().SuspendBegin(PowerStateChangeReason::POWER_BUTTON);
     ASSERT_EQ(false, ret);
 }
@@ -209,7 +209,7 @@ HWTEST_F(DisplayPowerUnitTest, suspend_begin_001, Function | SmallTest | Level2)
  * @tc.desc: call SuspendEnd and check return value
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayPowerUnitTest, suspend_end_001, Function | SmallTest | Level2)
+HWTEST_F(DisplayPowerUnitTest, suspend_end_001, TestSize.Level1)
 {
     Mocker m;
     EXPECT_CALL(m.Mock(), SuspendEnd()).Times(1).WillOnce(Return(true));
@@ -226,7 +226,7 @@ HWTEST_F(DisplayPowerUnitTest, suspend_end_001, Function | SmallTest | Level2)
  * @tc.desc: Call SetScreenBrightness with a valid value and check the GetScreenBrightness return value
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayPowerUnitTest, set_screen_brightness_001, Function | MediumTest | Level2)
+HWTEST_F(DisplayPowerUnitTest, set_screen_brightness_001, TestSize.Level1)
 {
     bool ret = DisplayManager::GetInstance().SetScreenBrightness(defaultId_, brightnessLevel_);
     ASSERT_EQ(true, ret);
@@ -237,7 +237,7 @@ HWTEST_F(DisplayPowerUnitTest, set_screen_brightness_001, Function | MediumTest 
  * @tc.desc: Call SetScreenPowerForAll with valid value and check the GetScreenPower return value
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayPowerUnitTest, set_screen_power_for_all_001, Function | MediumTest | Level2)
+HWTEST_F(DisplayPowerUnitTest, set_screen_power_for_all_001, TestSize.Level1)
 {
     SingletonMocker<ScreenManagerAdapter, MockScreenManagerAdapter> m;
     EXPECT_CALL(m.Mock(), GetScreenPower(_)).Times(1).WillOnce(Return(ScreenPowerState::POWER_OFF));
@@ -257,7 +257,7 @@ HWTEST_F(DisplayPowerUnitTest, set_screen_power_for_all_001, Function | MediumTe
  * @tc.desc: Call SetDisplayState with valid value and check the GetDisplayState return value
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayPowerUnitTest, set_display_state_001, Function | MediumTest | Level2)
+HWTEST_F(DisplayPowerUnitTest, set_display_state_001, TestSize.Level1)
 {
     DisplayState stateToSet = (initialState_ == DisplayState::OFF ? DisplayState::ON : DisplayState::OFF);
     Mocker m;
@@ -278,7 +278,7 @@ HWTEST_F(DisplayPowerUnitTest, set_display_state_001, Function | MediumTest | Le
  * @tc.desc: Call SetDisplayState with invalid callback and check the GetDisplayState return value
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayPowerUnitTest, set_display_state_002, Function | MediumTest | Level2)
+HWTEST_F(DisplayPowerUnitTest, set_display_state_002, TestSize.Level1)
 {
     Mocker m;
     EXPECT_CALL(m.Mock(), SetDisplayState(_)).Times(0);

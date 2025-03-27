@@ -16,8 +16,10 @@
 #ifndef OHOS_WM_INCLUDE_WINDOW_MANAGER_HILOG_H
 #define OHOS_WM_INCLUDE_WINDOW_MANAGER_HILOG_H
 
-#include "hilog/log.h"
+#include <cstdint>
 #include <unordered_map>
+#include "hilog/log.h"
+
 namespace OHOS {
 namespace Rosen {
 static constexpr unsigned int HILOG_DOMAIN_WINDOW = 0xD004200;
@@ -67,10 +69,12 @@ enum class WmsLogTag : uint8_t {
     WMS_LAYOUT_PC,             // C0421A
     WMS_STARTUP_PAGE,          // C0421B
     WMS_COMPAT,                // C0421C
-    END = 256,                 // Last one, do not use
+    WMS_ROTATION,              // C0421D
+    WMS_ANIMATION,             // C0421E
+    END,                       // Last one, do not use
 };
 
-extern const std::unordered_map<WmsLogTag, const char *> DOMAIN_CONTENTS_MAP;
+extern const char* g_domainContents[static_cast<uint32_t>(WmsLogTag::END)];
 #ifdef IS_RELEASE_VERSION
 #define WMS_FILE_NAME ""
 #else
@@ -85,7 +89,8 @@ extern const std::unordered_map<WmsLogTag, const char *> DOMAIN_CONTENTS_MAP;
 #define PRINT_TLOG(level, tag, ...)                                                                     \
     do {                                                                                                \
         uint32_t hilogDomain = HILOG_DOMAIN_WINDOW + static_cast<uint32_t>(tag);                        \
-        const char *domainContent = DOMAIN_CONTENTS_MAP.count(tag) ? DOMAIN_CONTENTS_MAP.at(tag) : "";  \
+        const char *domainContent = (tag >= WmsLogTag::DEFAULT && tag < WmsLogTag::END) ?               \
+            g_domainContents[static_cast<uint32_t>(tag)] : "";                                          \
         HILOG_IMPL(LOG_CORE, level, hilogDomain, domainContent, ##__VA_ARGS__);                         \
     } while (0)
 

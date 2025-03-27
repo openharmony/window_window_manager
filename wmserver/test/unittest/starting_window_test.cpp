@@ -113,7 +113,7 @@ namespace {
  * @tc.desc: stop starting window test without main App window
  * @tc.type: FUNC
  */
-HWTEST_F(StartingWindowTest, NeedToStopStartingWindow01, Function | SmallTest | Level2)
+HWTEST_F(StartingWindowTest, NeedToStopStartingWindow01, TestSize.Level1)
 {
     transitionInfo_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     sptr<WindowNode> node = new WindowNode(CreateWindowProperty());
@@ -126,7 +126,7 @@ HWTEST_F(StartingWindowTest, NeedToStopStartingWindow01, Function | SmallTest | 
  * @tc.desc: need to stop starting window test with unsupport mode
  * @tc.type: FUNC
  */
-HWTEST_F(StartingWindowTest, NeedToStopStartingWindow02, Function | SmallTest | Level2)
+HWTEST_F(StartingWindowTest, NeedToStopStartingWindow02, TestSize.Level1)
 {
     sptr<WindowNode> node = new WindowNode(CreateWindowProperty());
     node->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
@@ -140,7 +140,7 @@ HWTEST_F(StartingWindowTest, NeedToStopStartingWindow02, Function | SmallTest | 
  * @tc.desc: need to stop starting window test with support mode
  * @tc.type: FUNC
  */
-HWTEST_F(StartingWindowTest, NeedToStopStartingWindow03, Function | SmallTest | Level2)
+HWTEST_F(StartingWindowTest, NeedToStopStartingWindow03, TestSize.Level1)
 {
     sptr<WindowNode> node = new WindowNode(CreateWindowProperty());
     ASSERT_EQ(false, WindowHelper::CheckSupportWindowMode(node->GetWindowMode(),
@@ -152,7 +152,7 @@ HWTEST_F(StartingWindowTest, NeedToStopStartingWindow03, Function | SmallTest | 
  * @tc.desc: need to stop starting window test with support mode
  * @tc.type: FUNC
  */
-HWTEST_F(StartingWindowTest, NeedToStopStartingWindow04, Function | SmallTest | Level2)
+HWTEST_F(StartingWindowTest, NeedToStopStartingWindow04, TestSize.Level1)
 {
     sptr<WindowNode> node = new WindowNode(CreateWindowProperty());
     transitionInfo_->SetShowFlagWhenLocked(true);
@@ -167,7 +167,7 @@ HWTEST_F(StartingWindowTest, NeedToStopStartingWindow04, Function | SmallTest | 
  * @tc.desc: create starting window node test
  * @tc.type: FUNC
  */
-HWTEST_F(StartingWindowTest, CreateWindowNode01, Function | SmallTest | Level2)
+HWTEST_F(StartingWindowTest, CreateWindowNode01, TestSize.Level1)
 {
     sptr<WindowTransitionInfo> info = nullptr;
     ASSERT_EQ(nullptr, StartingWindow::CreateWindowNode(info, 0));
@@ -178,7 +178,7 @@ HWTEST_F(StartingWindowTest, CreateWindowNode01, Function | SmallTest | Level2)
  * @tc.desc: create starting window node test
  * @tc.type: FUNC
  */
-HWTEST_F(StartingWindowTest, CreateWindowNode02, Function | SmallTest | Level2)
+HWTEST_F(StartingWindowTest, CreateWindowNode02, TestSize.Level1)
 {
     transitionInfo_->SetWindowMode(WindowMode::WINDOW_MODE_UNDEFINED);
     sptr<WindowNode> node = StartingWindow::CreateWindowNode(transitionInfo_, 0);
@@ -191,7 +191,7 @@ HWTEST_F(StartingWindowTest, CreateWindowNode02, Function | SmallTest | Level2)
  * @tc.desc: create starting window node test
  * @tc.type: FUNC
  */
-HWTEST_F(StartingWindowTest, CreateWindowNode03, Function | SmallTest | Level2)
+HWTEST_F(StartingWindowTest, CreateWindowNode03, TestSize.Level1)
 {
     transitionInfo_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     sptr<WindowNode> node = StartingWindow::CreateWindowNode(transitionInfo_, 0);
@@ -204,7 +204,7 @@ HWTEST_F(StartingWindowTest, CreateWindowNode03, Function | SmallTest | Level2)
  * @tc.desc: create starting window node test
  * @tc.type: FUNC
  */
-HWTEST_F(StartingWindowTest, CreateWindowNode04, Function | SmallTest | Level2)
+HWTEST_F(StartingWindowTest, CreateWindowNode04, TestSize.Level1)
 {
     transitionInfo_->SetShowFlagWhenLocked(true);
     sptr<WindowNode> node = StartingWindow::CreateWindowNode(transitionInfo_, 0);
@@ -216,7 +216,7 @@ HWTEST_F(StartingWindowTest, CreateWindowNode04, Function | SmallTest | Level2)
  * @tc.desc: draw starting window node
  * @tc.type: FUNC
  */
-HWTEST_F(StartingWindowTest, DrawStartingWindow01, Function | SmallTest | Level2)
+HWTEST_F(StartingWindowTest, DrawStartingWindow01, TestSize.Level1)
 {
     std::shared_ptr<Media::PixelMap> pixelMap = ContructPixelMap();
     sptr<WindowNode> node = nullptr;
@@ -229,7 +229,7 @@ HWTEST_F(StartingWindowTest, DrawStartingWindow01, Function | SmallTest | Level2
  * @tc.desc: draw starting window node
  * @tc.type: FUNC
  */
-HWTEST_F(StartingWindowTest, DrawStartingWindow02, Function | SmallTest | Level2)
+HWTEST_F(StartingWindowTest, DrawStartingWindow02, TestSize.Level1)
 {
     node_->leashWinSurfaceNode_ = nullptr;
     std::shared_ptr<Media::PixelMap> pixelMap = ContructPixelMap();
@@ -242,7 +242,7 @@ HWTEST_F(StartingWindowTest, DrawStartingWindow02, Function | SmallTest | Level2
  * @tc.desc: draw starting window node
  * @tc.type: FUNC
  */
-HWTEST_F(StartingWindowTest, DrawStartingWindow03, Function | SmallTest | Level2)
+HWTEST_F(StartingWindowTest, DrawStartingWindow03, TestSize.Level1)
 {
     std::shared_ptr<Media::PixelMap> pixelMap = ContructPixelMap();
     ASSERT_EQ(WMError::WM_OK, StartingWindow::DrawStartingWindow(node_, pixelMap, 0x00FFFFFF, false));
@@ -254,7 +254,7 @@ HWTEST_F(StartingWindowTest, DrawStartingWindow03, Function | SmallTest | Level2
  * @tc.desc: draw starting window node
  * @tc.type: FUNC
  */
-HWTEST_F(StartingWindowTest, DrawStartingWindow04, Function | SmallTest | Level2)
+HWTEST_F(StartingWindowTest, DrawStartingWindow04, TestSize.Level1)
 {
     node_->startingWinSurfaceNode_ = nullptr;
     std::shared_ptr<Media::PixelMap> pixelMap = ContructPixelMap();
@@ -267,7 +267,7 @@ HWTEST_F(StartingWindowTest, DrawStartingWindow04, Function | SmallTest | Level2
  * @tc.desc: draw starting window node
  * @tc.type: FUNC
  */
-HWTEST_F(StartingWindowTest, DrawStartingWindow05, Function | SmallTest | Level2)
+HWTEST_F(StartingWindowTest, DrawStartingWindow05, TestSize.Level1)
 {
     ASSERT_EQ(WMError::WM_OK, StartingWindow::DrawStartingWindow(node_, nullptr, 0x00FFFFFF, true));
     usleep(10000);
@@ -278,7 +278,7 @@ HWTEST_F(StartingWindowTest, DrawStartingWindow05, Function | SmallTest | Level2
  * @tc.desc: draw starting window node
  * @tc.type: FUNC
  */
-HWTEST_F(StartingWindowTest, DrawStartingWindow06, Function | SmallTest | Level2)
+HWTEST_F(StartingWindowTest, DrawStartingWindow06, TestSize.Level1)
 {
     std::shared_ptr<Media::PixelMap> pixelMap = ContructPixelMap();
     ASSERT_EQ(WMError::WM_OK, StartingWindow::DrawStartingWindow(node_, pixelMap, 0x00FFFFFF, true));
@@ -290,7 +290,7 @@ HWTEST_F(StartingWindowTest, DrawStartingWindow06, Function | SmallTest | Level2
  * @tc.desc: handle client window create
  * @tc.type: FUNC
  */
-HWTEST_F(StartingWindowTest, HandleClientWindowCreateAndRelease01, Function | SmallTest | Level2)
+HWTEST_F(StartingWindowTest, HandleClientWindowCreateAndRelease01, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
     sptr<IWindow> iWindow = iface_cast<IWindow>(iRemoteObjectMocker);
@@ -314,7 +314,7 @@ HWTEST_F(StartingWindowTest, HandleClientWindowCreateAndRelease01, Function | Sm
  * @tc.desc: handle client window create
  * @tc.type: FUNC
  */
-HWTEST_F(StartingWindowTest, HandleClientWindowCreate02, Function | SmallTest | Level2)
+HWTEST_F(StartingWindowTest, HandleClientWindowCreate02, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
     sptr<IWindow> iWindow = iface_cast<IWindow>(iRemoteObjectMocker);
@@ -333,7 +333,7 @@ HWTEST_F(StartingWindowTest, HandleClientWindowCreate02, Function | SmallTest | 
  * @tc.desc: handle client window create and Release with null leashNode
  * @tc.type: FUNC
  */
-HWTEST_F(StartingWindowTest, HandleClientWindowCreateAndRelease03, Function | SmallTest | Level2)
+HWTEST_F(StartingWindowTest, HandleClientWindowCreateAndRelease03, TestSize.Level1)
 {
     node_->leashWinSurfaceNode_ = nullptr;
     uint32_t windowId = 0;
@@ -351,7 +351,7 @@ HWTEST_F(StartingWindowTest, HandleClientWindowCreateAndRelease03, Function | Sm
  * @tc.desc: Add node on rs tree test with surfaceNode nullptr and hot start
  * @tc.type: FUNC
  */
-HWTEST_F(StartingWindowTest, AddNodeOnRSTree01, Function | SmallTest | Level2)
+HWTEST_F(StartingWindowTest, AddNodeOnRSTree01, TestSize.Level1)
 {
     sptr<RSIWindowAnimationController> testController = nullptr;
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, RemoteAnimation::SetWindowAnimationController(testController));
@@ -365,7 +365,7 @@ HWTEST_F(StartingWindowTest, AddNodeOnRSTree01, Function | SmallTest | Level2)
  * @tc.desc: Add node on rs tree test with hot start and surfaceNode
  * @tc.type: FUNC
  */
-HWTEST_F(StartingWindowTest, AddNodeOnRSTree02, Function | SmallTest | Level2)
+HWTEST_F(StartingWindowTest, AddNodeOnRSTree02, TestSize.Level1)
 {
     auto surfaceNode = CreateRSSurfaceNode();
     ASSERT_NE(nullptr, surfaceNode);
@@ -382,7 +382,7 @@ HWTEST_F(StartingWindowTest, AddNodeOnRSTree02, Function | SmallTest | Level2)
  * @tc.desc: Add node on rs tree test
  * @tc.type: FUNC
  */
-HWTEST_F(StartingWindowTest, AddNodeOnRSTree03, Function | SmallTest | Level2)
+HWTEST_F(StartingWindowTest, AddNodeOnRSTree03, TestSize.Level1)
 {
     auto surfaceNode = CreateRSSurfaceNode();
     ASSERT_NE(nullptr, surfaceNode);
@@ -400,7 +400,7 @@ HWTEST_F(StartingWindowTest, AddNodeOnRSTree03, Function | SmallTest | Level2)
  * @tc.desc: Add node on rs tree test with surfaceNode nullptr, with animation controller
  * @tc.type: FUNC
  */
-HWTEST_F(StartingWindowTest, AddNodeOnRSTree04, Function | SmallTest | Level2)
+HWTEST_F(StartingWindowTest, AddNodeOnRSTree04, TestSize.Level1)
 {
     sptr<RSIWindowAnimationController> testController = new RSIWindowAnimationControllerMocker();
     ASSERT_EQ(WMError::WM_OK, RemoteAnimation::SetWindowAnimationController(testController));
@@ -414,7 +414,7 @@ HWTEST_F(StartingWindowTest, AddNodeOnRSTree04, Function | SmallTest | Level2)
  * @tc.desc: Add node on rs tree test
  * @tc.type: FUNC
  */
-HWTEST_F(StartingWindowTest, AddNodeOnRSTree05, Function | SmallTest | Level2)
+HWTEST_F(StartingWindowTest, AddNodeOnRSTree05, TestSize.Level1)
 {
     auto surfaceNode = CreateRSSurfaceNode();
     ASSERT_NE(nullptr, surfaceNode);
@@ -432,7 +432,7 @@ HWTEST_F(StartingWindowTest, AddNodeOnRSTree05, Function | SmallTest | Level2)
  * @tc.desc: Add node on rs tree test
  * @tc.type: FUNC
  */
-HWTEST_F(StartingWindowTest, AddNodeOnRSTree06, Function | SmallTest | Level2)
+HWTEST_F(StartingWindowTest, AddNodeOnRSTree06, TestSize.Level1)
 {
     auto surfaceNode = CreateRSSurfaceNode();
     ASSERT_NE(nullptr, surfaceNode);
@@ -450,7 +450,7 @@ HWTEST_F(StartingWindowTest, AddNodeOnRSTree06, Function | SmallTest | Level2)
  * @tc.desc: set starting window animation with different parameter
  * @tc.type: FUNC
  */
-HWTEST_F(StartingWindowTest, SetStartingWindowAnimation01, Function | SmallTest | Level2)
+HWTEST_F(StartingWindowTest, SetStartingWindowAnimation01, TestSize.Level1)
 {
     sptr<WindowNode> windowNode = nullptr;
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, StartingWindow::SetStartingWindowAnimation(windowNode));
@@ -469,7 +469,7 @@ HWTEST_F(StartingWindowTest, SetStartingWindowAnimation01, Function | SmallTest 
  * @tc.desc: IsWindowFollowParent
  * @tc.type: FUNC
  */
-HWTEST_F(StartingWindowTest, IsWindowFollowParent01, Function | SmallTest | Level2)
+HWTEST_F(StartingWindowTest, IsWindowFollowParent01, TestSize.Level1)
 {
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(false, StartingWindow::IsWindowFollowParent(WindowType::WINDOW_TYPE_DIALOG));
@@ -486,7 +486,7 @@ HWTEST_F(StartingWindowTest, IsWindowFollowParent01, Function | SmallTest | Leve
  * @tc.desc: CreateLeashAndStartingSurfaceNode
  * @tc.type: FUNC
  */
-HWTEST_F(StartingWindowTest, CreateLeashAndStartingSurfaceNode01, Function | SmallTest | Level2)
+HWTEST_F(StartingWindowTest, CreateLeashAndStartingSurfaceNode01, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "StartingWindow::CreateLeashAndStartingSurfaceNode01 start";
     node_->leashWinSurfaceNode_ = nullptr;
@@ -500,7 +500,7 @@ HWTEST_F(StartingWindowTest, CreateLeashAndStartingSurfaceNode01, Function | Sma
  * @tc.desc: CreateLeashAndStartingSurfaceNode
  * @tc.type: FUNC
  */
-HWTEST_F(StartingWindowTest, CreateLeashAndStartingSurfaceNode02, Function | SmallTest | Level2)
+HWTEST_F(StartingWindowTest, CreateLeashAndStartingSurfaceNode02, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "StartingWindow::CreateLeashAndStartingSurfaceNode02 start";
     node_->startingWinSurfaceNode_ = nullptr;
@@ -514,7 +514,7 @@ HWTEST_F(StartingWindowTest, CreateLeashAndStartingSurfaceNode02, Function | Sma
  * @tc.desc: CreateLeashAndStartingSurfaceNode
  * @tc.type: FUNC
  */
-HWTEST_F(StartingWindowTest, CreateLeashAndStartingSurfaceNode03, Function | SmallTest | Level2)
+HWTEST_F(StartingWindowTest, CreateLeashAndStartingSurfaceNode03, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "StartingWindow::CreateLeashAndStartingSurfaceNode03 start";
     ASSERT_EQ(WMError::WM_OK, StartingWindow::CreateLeashAndStartingSurfaceNode(node_));
@@ -527,7 +527,7 @@ HWTEST_F(StartingWindowTest, CreateLeashAndStartingSurfaceNode03, Function | Sma
  * @tc.desc: SetDefaultWindowMode
  * @tc.type: FUNC
  */
-HWTEST_F(StartingWindowTest, SetDefaultWindowMode, Function | SmallTest | Level2)
+HWTEST_F(StartingWindowTest, SetDefaultWindowMode, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "StartingWindow::SetDefaultWindowMode start";
     WindowMode defaultMode = WindowMode::WINDOW_MODE_FULLSCREEN;
@@ -540,7 +540,7 @@ HWTEST_F(StartingWindowTest, SetDefaultWindowMode, Function | SmallTest | Level2
  * @tc.desc: SetAnimationConfig
  * @tc.type: FUNC
  */
-HWTEST_F(StartingWindowTest, SetAnimationConfig, Function | SmallTest | Level2)
+HWTEST_F(StartingWindowTest, SetAnimationConfig, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "StartingWindow::SetAnimationConfig start";
     auto& animationConfig = WindowNodeContainer::GetAnimationConfigRef();

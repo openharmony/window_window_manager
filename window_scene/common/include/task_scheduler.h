@@ -19,6 +19,7 @@
 #include <event_handler.h>
 
 #include <unistd.h>
+#include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
 
@@ -58,7 +59,10 @@ public:
         if (pid == gettid()) {
             priority = AppExecFwk::EventQueue::Priority::VIP;
         }
-        handler_->PostSyncTask(std::move(syncTask), "wms:" + name, priority);
+        bool result = handler_->PostSyncTask(std::move(syncTask), "wms:" + name, priority);
+        if (!result) {
+            TLOGE(WmsLogTag::DEFAULT, "post task failed");
+        }
         return ret;
     }
 

@@ -62,7 +62,7 @@ namespace {
  * @tc.desc: HandleSensorChange
  * @tc.type: FUNC
  */
-HWTEST_F(SensorFoldStateManagerTest, HandleSensorChange, Function | SmallTest | Level3)
+HWTEST_F(SensorFoldStateManagerTest, HandleSensorChange, TestSize.Level1)
 {
     SensorFoldStateManager mgr = SensorFoldStateManager();
     FoldStatus nextState = FoldStatus::UNKNOWN;
@@ -85,7 +85,7 @@ HWTEST_F(SensorFoldStateManagerTest, HandleSensorChange, Function | SmallTest | 
  * @tc.desc: ReportNotifyFoldStatusChange
  * @tc.type: FUNC
  */
-HWTEST_F(SensorFoldStateManagerTest, ReportNotifyFoldStatusChange, Function | SmallTest | Level3)
+HWTEST_F(SensorFoldStateManagerTest, ReportNotifyFoldStatusChange, TestSize.Level1)
 {
     SensorFoldStateManager mgr = SensorFoldStateManager();
     int32_t currentStatus = 0;
@@ -100,7 +100,7 @@ HWTEST_F(SensorFoldStateManagerTest, ReportNotifyFoldStatusChange, Function | Sm
  * @tc.desc: ClearState
  * @tc.type: FUNC
  */
-HWTEST_F(SensorFoldStateManagerTest, ClearState, Function | SmallTest | Level3)
+HWTEST_F(SensorFoldStateManagerTest, ClearState, TestSize.Level1)
 {
     SensorFoldStateManager mgr = SensorFoldStateManager();
     sptr<FoldScreenPolicy> foldScreenPolicy = new FoldScreenPolicy();
@@ -113,7 +113,7 @@ HWTEST_F(SensorFoldStateManagerTest, ClearState, Function | SmallTest | Level3)
  * @tc.desc: NotifyReportFoldStatusToScb
  * @tc.type: FUNC
  */
-HWTEST_F(SensorFoldStateManagerTest, NotifyReportFoldStatusToScb, Function | SmallTest | Level3)
+HWTEST_F(SensorFoldStateManagerTest, NotifyReportFoldStatusToScb, TestSize.Level1)
 {
     SensorFoldStateManager mgr = SensorFoldStateManager();
     FoldStatus currentStatus = FoldStatus::UNKNOWN;
@@ -128,10 +128,10 @@ HWTEST_F(SensorFoldStateManagerTest, NotifyReportFoldStatusToScb, Function | Sma
  * @tc.desc: IsTentMode
  * @tc.type: FUNC
  */
-HWTEST_F(SensorFoldStateManagerTest, IsTentMode, Function | SmallTest | Level1)
+HWTEST_F(SensorFoldStateManagerTest, IsTentMode, TestSize.Level1)
 {
     SensorFoldStateManager mgr = SensorFoldStateManager();
-    mgr.isTentMode_ = true;
+    mgr.tentModeType_ = 1;
     bool ret = mgr.IsTentMode();
     ASSERT_EQ(ret, true);
 }
@@ -141,11 +141,11 @@ HWTEST_F(SensorFoldStateManagerTest, IsTentMode, Function | SmallTest | Level1)
  * @tc.desc: SetTentMode
  * @tc.type: FUNC
  */
-HWTEST_F(SensorFoldStateManagerTest, SetTentMode, Function | SmallTest | Level1)
+HWTEST_F(SensorFoldStateManagerTest, SetTentMode, TestSize.Level1)
 {
     SensorFoldStateManager mgr = SensorFoldStateManager();
-    mgr.isTentMode_ = false;
-    mgr.SetTentMode(false);
+    mgr.tentModeType_ = 0;
+    mgr.SetTentMode(0);
     bool ret = mgr.IsTentMode();
     ASSERT_EQ(ret, false);
 }

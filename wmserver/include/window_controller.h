@@ -50,7 +50,7 @@ public:
     WMError RequestFocus(uint32_t windowId);
     WMError SetAlpha(uint32_t windowId, float alpha);
     AvoidArea GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType,
-        const Rect& rect = {0, 0, 0, 0}) const;
+        const Rect& rect = Rect::EMPTY_RECT) const;
     WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId);
     void NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);

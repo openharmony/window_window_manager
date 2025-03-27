@@ -17,6 +17,7 @@
 
 #include "screen_session_dumper.h"
 #include "screen_session_manager.h"
+#include "fold_screen_state_internel.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -25,6 +26,7 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr uint32_t SLEEP_TIME_US = 100000;
+#ifdef FOLD_ABILITY_ENABLE
 constexpr uint32_t SIZE_TWO = 2;
 constexpr uint32_t SIZE_THREE = 3;
 constexpr float POSTURE_FIRST = 93;
@@ -33,6 +35,7 @@ constexpr float POSTURE_THIRD = 0;
 constexpr uint16_t HALL_TEST = 1;
 const std::string TEST_SECONDARY_SRNSOR_POSTURE = "posture:93,180,0";
 const std::string TEST_SECONDARY_SRNSOR_HALL = "hall:1,1";
+#endif
 }
 class ScreenSessionDumperTest : public testing::Test {
 public:
@@ -66,7 +69,7 @@ namespace {
  * @tc.desc: Dump
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, Dump01, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, Dump01, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args;
@@ -79,7 +82,7 @@ HWTEST_F(ScreenSessionDumperTest, Dump01, Function | SmallTest | Level1)
  * @tc.desc: Dump input for -h
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, Dump02, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, Dump02, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
@@ -93,7 +96,7 @@ HWTEST_F(ScreenSessionDumperTest, Dump02, Function | SmallTest | Level1)
  * @tc.desc: Dump input for -a
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, Dump03, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, Dump03, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-a"};
@@ -107,7 +110,7 @@ HWTEST_F(ScreenSessionDumperTest, Dump03, Function | SmallTest | Level1)
  * @tc.desc: Dump input for abnormal
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, Dump04, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, Dump04, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-abnormal"};
@@ -121,7 +124,7 @@ HWTEST_F(ScreenSessionDumperTest, Dump04, Function | SmallTest | Level1)
  * @tc.desc: Dump fd less 0
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, Dump05, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, Dump05, TestSize.Level1)
 {
     int fd = -1;
     std::vector<std::u16string> args = {u"-h"};
@@ -135,7 +138,7 @@ HWTEST_F(ScreenSessionDumperTest, Dump05, Function | SmallTest | Level1)
  * @tc.desc: test function : OutputDumpInfo
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, OutputDumpInfo, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, OutputDumpInfo, TestSize.Level1)
 {
     int fd = -1;
     std::vector<std::u16string> args = {u"-h"};
@@ -149,7 +152,7 @@ HWTEST_F(ScreenSessionDumperTest, OutputDumpInfo, Function | SmallTest | Level1)
  * @tc.desc: test function : ExecuteDumpCmd
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, ExecuteDumpCmd, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, ExecuteDumpCmd, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args;
@@ -205,7 +208,7 @@ HWTEST_F(ScreenSessionDumperTest, ExecuteDumpCmd, Function | SmallTest | Level1)
  * @tc.desc: test function : DumpEventTracker
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, DumpEventTracker, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, DumpEventTracker, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
@@ -220,7 +223,7 @@ HWTEST_F(ScreenSessionDumperTest, DumpEventTracker, Function | SmallTest | Level
  * @tc.desc: test function : DumpFreezedPidList
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, DumpFreezedPidList, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, DumpFreezedPidList, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
@@ -235,7 +238,7 @@ HWTEST_F(ScreenSessionDumperTest, DumpFreezedPidList, Function | SmallTest | Lev
  * @tc.desc: test function : ShowHelpInfo
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, ShowHelpInfo, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, ShowHelpInfo, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
@@ -249,7 +252,7 @@ HWTEST_F(ScreenSessionDumperTest, ShowHelpInfo, Function | SmallTest | Level1)
  * @tc.desc: test function : ShowAllScreenInfo
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, ShowAllScreenInfo, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, ShowAllScreenInfo, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
@@ -263,7 +266,7 @@ HWTEST_F(ScreenSessionDumperTest, ShowAllScreenInfo, Function | SmallTest | Leve
  * @tc.desc: test function : DumpFoldStatus
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, DumpFoldStatus, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, DumpFoldStatus, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
@@ -277,7 +280,7 @@ HWTEST_F(ScreenSessionDumperTest, DumpFoldStatus, Function | SmallTest | Level1)
  * @tc.desc: test function : DumpScreenSessionById
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, DumpScreenSessionById, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, DumpScreenSessionById, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
@@ -296,7 +299,7 @@ HWTEST_F(ScreenSessionDumperTest, DumpScreenSessionById, Function | SmallTest | 
  * @tc.desc: test function : DumpRsInfoById
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, DumpRsInfoById, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, DumpRsInfoById, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
@@ -315,7 +318,7 @@ HWTEST_F(ScreenSessionDumperTest, DumpRsInfoById, Function | SmallTest | Level1)
  * @tc.desc: test function : DumpCutoutInfoById
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, DumpCutoutInfoById, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, DumpCutoutInfoById, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
@@ -334,7 +337,7 @@ HWTEST_F(ScreenSessionDumperTest, DumpCutoutInfoById, Function | SmallTest | Lev
  * @tc.desc: test function : DumpScreenInfoById
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, DumpScreenInfoById, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, DumpScreenInfoById, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
@@ -353,7 +356,7 @@ HWTEST_F(ScreenSessionDumperTest, DumpScreenInfoById, Function | SmallTest | Lev
  * @tc.desc: test function : DumpScreenPropertyById
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, DumpScreenPropertyById, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, DumpScreenPropertyById, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
@@ -372,7 +375,7 @@ HWTEST_F(ScreenSessionDumperTest, DumpScreenPropertyById, Function | SmallTest |
  * @tc.desc: test function : ShowNotifyFoldStatusChangedInfo
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, ShowNotifyFoldStatusChangedInfo, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, ShowNotifyFoldStatusChangedInfo, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
@@ -395,7 +398,7 @@ HWTEST_F(ScreenSessionDumperTest, ShowNotifyFoldStatusChangedInfo, Function | Sm
  * @tc.desc: test function : ShowIllegalArgsInfo
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, ShowIllegalArgsInfo, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, ShowIllegalArgsInfo, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
@@ -410,7 +413,7 @@ HWTEST_F(ScreenSessionDumperTest, ShowIllegalArgsInfo, Function | SmallTest | Le
  * @tc.desc: test function : SetMotionSensorValue
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, SetMotionSensorValue01, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, SetMotionSensorValue01, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
@@ -424,7 +427,7 @@ HWTEST_F(ScreenSessionDumperTest, SetMotionSensorValue01, Function | SmallTest |
  * @tc.desc: test function : SetMotionSensorValue
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, SetMotionSensorValue02, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, SetMotionSensorValue02, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
@@ -438,7 +441,7 @@ HWTEST_F(ScreenSessionDumperTest, SetMotionSensorValue02, Function | SmallTest |
  * @tc.desc: test function : SetMotionSensorValue
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, SetMotionSensorValue03, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, SetMotionSensorValue03, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
@@ -452,7 +455,7 @@ HWTEST_F(ScreenSessionDumperTest, SetMotionSensorValue03, Function | SmallTest |
  * @tc.desc: test function : SetMotionSensorValue
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, SetMotionSensorValue04, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, SetMotionSensorValue04, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
@@ -466,7 +469,7 @@ HWTEST_F(ScreenSessionDumperTest, SetMotionSensorValue04, Function | SmallTest |
  * @tc.desc: test function : SetMotionSensorValue
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, SetMotionSensorValue05, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, SetMotionSensorValue05, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
@@ -480,7 +483,7 @@ HWTEST_F(ScreenSessionDumperTest, SetMotionSensorValue05, Function | SmallTest |
  * @tc.desc: test function : SetMotionSensorValue
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, SetMotionSensorValue06, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, SetMotionSensorValue06, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
@@ -494,7 +497,7 @@ HWTEST_F(ScreenSessionDumperTest, SetMotionSensorValue06, Function | SmallTest |
  * @tc.desc: test function : SetMotionSensorValue
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, SetMotionSensorValue07, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, SetMotionSensorValue07, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
@@ -508,7 +511,7 @@ HWTEST_F(ScreenSessionDumperTest, SetMotionSensorValue07, Function | SmallTest |
  * @tc.desc: test function : SetMotionSensorValue
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, SetMotionSensorValue07, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, SetMotionSensorValue07, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
@@ -522,7 +525,7 @@ HWTEST_F(ScreenSessionDumperTest, SetMotionSensorValue07, Function | SmallTest |
  * @tc.desc: test function : SetRotationLockedValue
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, SetMotionSensorValue01, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, SetMotionSensorValue01, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
@@ -536,7 +539,7 @@ HWTEST_F(ScreenSessionDumperTest, SetMotionSensorValue01, Function | SmallTest |
  * @tc.desc: test function : SetRotationLockedValue
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, SetMotionSensorValue02, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, SetMotionSensorValue02, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
@@ -550,7 +553,7 @@ HWTEST_F(ScreenSessionDumperTest, SetMotionSensorValue02, Function | SmallTest |
  * @tc.desc: test function : SetRotationLockedValue
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, SetMotionSensorValue03, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, SetMotionSensorValue03, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
@@ -564,7 +567,7 @@ HWTEST_F(ScreenSessionDumperTest, SetMotionSensorValue03, Function | SmallTest |
  * @tc.desc: test function : SetRotationLockedValue
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, SetMotionSensorValue04, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, SetMotionSensorValue04, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
@@ -578,7 +581,7 @@ HWTEST_F(ScreenSessionDumperTest, SetMotionSensorValue04, Function | SmallTest |
  * @tc.desc: test function : MockSendCastPublishEvent
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, MockSendCastPublishEvent01, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, MockSendCastPublishEvent01, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
@@ -592,7 +595,7 @@ HWTEST_F(ScreenSessionDumperTest, MockSendCastPublishEvent01, Function | SmallTe
  * @tc.desc: test function : MockSendCastPublishEvent
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, MockSendCastPublishEvent02, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, MockSendCastPublishEvent02, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
@@ -606,7 +609,7 @@ HWTEST_F(ScreenSessionDumperTest, MockSendCastPublishEvent02, Function | SmallTe
  * @tc.desc: test function : MockSendCastPublishEvent
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, MockSendCastPublishEvent03, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, MockSendCastPublishEvent03, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
@@ -620,7 +623,7 @@ HWTEST_F(ScreenSessionDumperTest, MockSendCastPublishEvent03, Function | SmallTe
  * @tc.desc: test function : MockSendCastPublishEvent
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, MockSendCastPublishEvent04, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, MockSendCastPublishEvent04, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
@@ -634,7 +637,7 @@ HWTEST_F(ScreenSessionDumperTest, MockSendCastPublishEvent04, Function | SmallTe
  * @tc.desc: test function : MockSendCastPublishEvent
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, MockSendCastPublishEvent05, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, MockSendCastPublishEvent05, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
@@ -648,7 +651,7 @@ HWTEST_F(ScreenSessionDumperTest, MockSendCastPublishEvent05, Function | SmallTe
  * @tc.desc: test function : MockSendCastPublishEvent
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, MockSendCastPublishEvent06, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, MockSendCastPublishEvent06, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
@@ -662,7 +665,7 @@ HWTEST_F(ScreenSessionDumperTest, MockSendCastPublishEvent06, Function | SmallTe
  * @tc.desc: test function : MockSendCastPublishEvent
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, MockSendCastPublishEvent07, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, MockSendCastPublishEvent07, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
@@ -676,7 +679,7 @@ HWTEST_F(ScreenSessionDumperTest, MockSendCastPublishEvent07, Function | SmallTe
  * @tc.desc: test function : SetHoverStatusChange
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, SetHoverStatusChange, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, SetHoverStatusChange, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
@@ -693,7 +696,7 @@ HWTEST_F(ScreenSessionDumperTest, SetHoverStatusChange, Function | SmallTest | L
  * @tc.desc: test function : IsValidDisplayModeCommand
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, IsValidDisplayModeCommand, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, IsValidDisplayModeCommand, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-f"};
@@ -720,63 +723,19 @@ HWTEST_F(ScreenSessionDumperTest, IsValidDisplayModeCommand, Function | SmallTes
 }
 
 /**
- * @tc.name: SetFoldDisplayMode
- * @tc.desc: test function : SetFoldDisplayMode
+ * @tc.name: DumpTentMode
+ * @tc.desc: test function : DumpTentMode
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, SetFoldDisplayMode, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, DumpTentMode, TestSize.Level1)
 {
     int fd = 1;
-    std::vector<std::u16string> args = {u""};
+    std::vector<std::u16string> args = {u"-h"};
     sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
-    int ret = dumper->SetFoldDisplayMode();
-    ASSERT_EQ(ret, -1);
-
-    dumper->params_[0] = "-sub";
-    ret = dumper->SetFoldDisplayMode();
-    ASSERT_EQ(ret, 0);
-
-    dumper->params_[0] = "-coor";
-    ret = dumper->SetFoldDisplayMode();
-    ASSERT_EQ(ret, 0);
-
-    dumper->params_[0] = "-m";
-    ret = dumper->SetFoldDisplayMode();
-    ASSERT_EQ(ret, 0);
-
-    dumper->params_[0] = "-f";
-    ret = dumper->SetFoldDisplayMode();
-    ASSERT_EQ(ret, 0);
-
-    dumper->params_[0] = "-test";
-    ret = dumper->SetFoldDisplayMode();
-    ASSERT_EQ(ret, -1);
-}
-
-/**
- * @tc.name: SetFoldStatusLocked
- * @tc.desc: test function : SetFoldStatusLocked
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionDumperTest, SetFoldStatusLocked, Function | SmallTest | Level1)
-{
-    int fd = 1;
-    std::vector<std::u16string> args = {u""};
-    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
-    int ret = dumper->SetFoldStatusLocked();
-    ASSERT_EQ(ret, -1);
-
-    dumper->params_[0] = "-l";
-    ret = dumper->SetFoldStatusLocked();
-    ASSERT_EQ(ret, 0);
-
-    dumper->params_[0] = "-u";
-    ret = dumper->SetFoldStatusLocked();
-    ASSERT_EQ(ret, 0);
-
-    dumper->params_[0] = "-test";
-    ret = dumper->SetFoldStatusLocked();
-    ASSERT_EQ(ret, -1);
+    dumper->SetLandscapeLock("-landscapelock,");
+    ASSERT_EQ(ScreenSessionManager::GetInstance().extendScreenConnectStatus_, ExtendScreenConnectStatus::UNKNOWN);
+    dumper->SetLandscapeLock("-landscapelock,a");
+    ASSERT_EQ(ScreenSessionManager::GetInstance().extendScreenConnectStatus_, ExtendScreenConnectStatus::UNKNOWN);
 }
 
 /**
@@ -794,27 +753,11 @@ HWTEST_F(ScreenSessionDumperTest, DumpTentMode, Function | SmallTest | Level1)
 }
 
 /**
- * @tc.name: SetEnterOrExitTentMode
- * @tc.desc: test function : SetEnterOrExitTentMode
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionDumperTest, SetEnterOrExitTentMode, Function | SmallTest | Level1)
-{
-    int fd = 1;
-    std::vector<std::u16string> args = {u"-h"};
-    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
-    
-    dumper->SetEnterOrExitTentMode("-offtent");
-    bool tentMode = ScreenSessionManager::GetInstance().GetTentMode();
-    ASSERT_EQ(tentMode, false);
-}
-
-/**
  * @tc.name: IsNumber01
  * @tc.desc: test function : IsNumber
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, IsNumber01, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, IsNumber01, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
@@ -829,7 +772,7 @@ HWTEST_F(ScreenSessionDumperTest, IsNumber01, Function | SmallTest | Level1)
  * @tc.desc: test function : IsNumber
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, IsNumber02, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, IsNumber02, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
@@ -844,7 +787,7 @@ HWTEST_F(ScreenSessionDumperTest, IsNumber02, Function | SmallTest | Level1)
  * @tc.desc: test function : IsNumber
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, IsNumber03, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, IsNumber03, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
@@ -859,7 +802,7 @@ HWTEST_F(ScreenSessionDumperTest, IsNumber03, Function | SmallTest | Level1)
  * @tc.desc: test function : ExecuteInjectCmd2
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, ExecuteInjectCmd201, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, ExecuteInjectCmd201, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-ontent"};
@@ -873,7 +816,7 @@ HWTEST_F(ScreenSessionDumperTest, ExecuteInjectCmd201, Function | SmallTest | Le
  * @tc.desc: test function : ExecuteInjectCmd2
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, ExecuteInjectCmd202, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, ExecuteInjectCmd202, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-hoverstatus"};
@@ -887,7 +830,7 @@ HWTEST_F(ScreenSessionDumperTest, ExecuteInjectCmd202, Function | SmallTest | Le
  * @tc.desc: test function : ExecuteInjectCmd2
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, ExecuteInjectCmd203, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, ExecuteInjectCmd203, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-supertrans"};
@@ -901,7 +844,7 @@ HWTEST_F(ScreenSessionDumperTest, ExecuteInjectCmd203, Function | SmallTest | Le
  * @tc.desc: test function : ExecuteInjectCmd2
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, ExecuteInjectCmd204, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, ExecuteInjectCmd204, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-posture"};
@@ -915,7 +858,7 @@ HWTEST_F(ScreenSessionDumperTest, ExecuteInjectCmd204, Function | SmallTest | Le
  * @tc.desc: test function : ExecuteInjectCmd2
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, ExecuteInjectCmd205, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, ExecuteInjectCmd205, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-registerhall"};
@@ -925,11 +868,39 @@ HWTEST_F(ScreenSessionDumperTest, ExecuteInjectCmd205, Function | SmallTest | Le
 }
 
 /**
+ * @tc.name: ExecuteInjectCmd206
+ * @tc.desc: test function : ExecuteInjectCmd2
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, ExecuteInjectCmd206, Function | SmallTest | Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-landscapelock,1"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    dumper->ExecuteInjectCmd2();
+    ASSERT_EQ(ScreenSessionManager::GetInstance().extendScreenConnectStatus_, ExtendScreenConnectStatus::CONNECT);
+}
+
+/**
+ * @tc.name: ExecuteInjectCmd207
+ * @tc.desc: test function : ExecuteInjectCmd2
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, ExecuteInjectCmd207, Function | SmallTest | Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-landscapelock,0"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    dumper->ExecuteInjectCmd2();
+    ASSERT_EQ(ScreenSessionManager::GetInstance().extendScreenConnectStatus_, ExtendScreenConnectStatus::DISCONNECT);
+}
+
+/**
  * @tc.name: DumpMultiUserInfo
  * @tc.desc: test function : DumpMultiUserInfo
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, DumpMultiUserInfo, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, DumpMultiUserInfo, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
@@ -940,13 +911,13 @@ HWTEST_F(ScreenSessionDumperTest, DumpMultiUserInfo, Function | SmallTest | Leve
     dumper->DumpMultiUserInfo(oldScbPids, userId, scbPid);
     ASSERT_NE(dumper->dumpInfo_, std::string());
 }
-
+#ifdef FOLD_ABILITY_ENABLE
 /**
  * @tc.name: DumpFoldCreaseRegion
  * @tc.desc: test function : DumpFoldCreaseRegion
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, DumpFoldCreaseRegion, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, DumpFoldCreaseRegion, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
@@ -960,7 +931,7 @@ HWTEST_F(ScreenSessionDumperTest, DumpFoldCreaseRegion, Function | SmallTest | L
  * @tc.desc: test function : SetHallAndPostureValue
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, SetHallAndPostureValue, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, SetHallAndPostureValue, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
@@ -980,7 +951,7 @@ HWTEST_F(ScreenSessionDumperTest, SetHallAndPostureValue, Function | SmallTest |
  * @tc.desc: test function : SetHallAndPostureStatus
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, SetHallAndPostureStatus01, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, SetHallAndPostureStatus01, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
@@ -994,7 +965,7 @@ HWTEST_F(ScreenSessionDumperTest, SetHallAndPostureStatus01, Function | SmallTes
  * @tc.desc: test function : SetHallAndPostureStatus
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, SetHallAndPostureStatus02, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, SetHallAndPostureStatus02, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
@@ -1008,7 +979,7 @@ HWTEST_F(ScreenSessionDumperTest, SetHallAndPostureStatus02, Function | SmallTes
  * @tc.desc: test function : SetHallAndPostureStatus
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, SetHallAndPostureStatus03, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, SetHallAndPostureStatus03, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
@@ -1022,7 +993,7 @@ HWTEST_F(ScreenSessionDumperTest, SetHallAndPostureStatus03, Function | SmallTes
  * @tc.desc: test function : SetSuperFoldStatusChange
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, SetSuperFoldStatusChange01, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, SetSuperFoldStatusChange01, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
@@ -1036,7 +1007,7 @@ HWTEST_F(ScreenSessionDumperTest, SetSuperFoldStatusChange01, Function | SmallTe
  * @tc.desc: test function : SetSuperFoldStatusChange
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, SetSuperFoldStatusChange02, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, SetSuperFoldStatusChange02, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
@@ -1050,7 +1021,7 @@ HWTEST_F(ScreenSessionDumperTest, SetSuperFoldStatusChange02, Function | SmallTe
  * @tc.desc: test function : SetSuperFoldStatusChange
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, SetSuperFoldStatusChange03, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, SetSuperFoldStatusChange03, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
@@ -1064,7 +1035,7 @@ HWTEST_F(ScreenSessionDumperTest, SetSuperFoldStatusChange03, Function | SmallTe
  * @tc.desc: test function : SetSuperFoldStatusChange
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, SetSuperFoldStatusChange04, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, SetSuperFoldStatusChange04, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
@@ -1078,7 +1049,7 @@ HWTEST_F(ScreenSessionDumperTest, SetSuperFoldStatusChange04, Function | SmallTe
  * @tc.desc: test function : SetSuperFoldStatusChange
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, SetSuperFoldStatusChange05, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, SetSuperFoldStatusChange05, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
@@ -1092,7 +1063,7 @@ HWTEST_F(ScreenSessionDumperTest, SetSuperFoldStatusChange05, Function | SmallTe
  * @tc.desc: test function : SetSuperFoldStatusChange
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, SetSuperFoldStatusChange06, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, SetSuperFoldStatusChange06, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
@@ -1106,7 +1077,7 @@ HWTEST_F(ScreenSessionDumperTest, SetSuperFoldStatusChange06, Function | SmallTe
  * @tc.desc: test function : SetSecondaryStatusChange
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, SetSecondaryStatusChange01, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, SetSecondaryStatusChange01, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
@@ -1120,7 +1091,7 @@ HWTEST_F(ScreenSessionDumperTest, SetSecondaryStatusChange01, Function | SmallTe
  * @tc.desc: test function : SetSecondaryStatusChange
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, SetSecondaryStatusChange02, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, SetSecondaryStatusChange02, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
@@ -1134,7 +1105,7 @@ HWTEST_F(ScreenSessionDumperTest, SetSecondaryStatusChange02, Function | SmallTe
  * @tc.desc: test function : SetSecondaryStatusChange
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, SetSecondaryStatusChange03, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, SetSecondaryStatusChange03, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
@@ -1148,7 +1119,7 @@ HWTEST_F(ScreenSessionDumperTest, SetSecondaryStatusChange03, Function | SmallTe
  * @tc.desc: test function : IsAllCharDigit
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, IsAllCharDigit01, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, IsAllCharDigit01, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
@@ -1164,7 +1135,7 @@ HWTEST_F(ScreenSessionDumperTest, IsAllCharDigit01, Function | SmallTest | Level
  * @tc.desc: test function : GetPostureAndHall
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, GetPostureAndHall01, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, GetPostureAndHall01, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
@@ -1188,7 +1159,7 @@ HWTEST_F(ScreenSessionDumperTest, GetPostureAndHall01, Function | SmallTest | Le
  * @tc.desc: test function : GetPostureAndHall
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, GetPostureAndHall02, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, GetPostureAndHall02, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
@@ -1218,13 +1189,32 @@ HWTEST_F(ScreenSessionDumperTest, GetPostureAndHall02, Function | SmallTest | Le
  * @tc.desc: test function : TriggerSecondarySensor
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, TriggerSecondarySensor01, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, TriggerSecondarySensor01, TestSize.Level1)
 {
-    int fd = 1;
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        return;
+    }
     std::vector<std::u16string> args = {u"-h"};
-    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(1, args);
+    dumper->TriggerSecondarySensor("posture:178,180,0/hall:1,1");
+    FoldStatus status = ScreenSessionManager::GetInstance().GetFoldStatus();
+    EXPECT_EQ(status, FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_EXPAND);
+
     dumper->TriggerSecondarySensor("posture:93,180,0/hall:1,1");
-    ASSERT_EQ(dumper->fd_, 1);
+    status = ScreenSessionManager::GetInstance().GetFoldStatus();
+    EXPECT_EQ(status, FoldStatus::FOLD_STATE_HALF_FOLDED_WITH_SECOND_EXPAND);
+
+    dumper->TriggerSecondarySensor("posture:150,88,0/hall:1,1");
+    status = ScreenSessionManager::GetInstance().GetFoldStatus();
+    EXPECT_EQ(status, FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_HALF_FOLDED);
+
+    dumper->TriggerSecondarySensor("posture:3,88,0/hall:1,1");
+    status = ScreenSessionManager::GetInstance().GetFoldStatus();
+    EXPECT_EQ(status, FoldStatus::FOLD_STATE_FOLDED_WITH_SECOND_HALF_FOLDED);
+
+    dumper->TriggerSecondarySensor("posture:88,3,0/hall:1,0");
+    status = ScreenSessionManager::GetInstance().GetFoldStatus();
+    EXPECT_EQ(status, FoldStatus::HALF_FOLD);
 }
 
 /**
@@ -1232,14 +1222,127 @@ HWTEST_F(ScreenSessionDumperTest, TriggerSecondarySensor01, Function | SmallTest
  * @tc.desc: test function : TriggerSecondaryFoldStatus
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionDumperTest, TriggerSecondaryFoldStatus01, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionDumperTest, TriggerSecondaryFoldStatus01, TestSize.Level1)
+{
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        return;
+    }
+    std::vector<std::u16string> args = {u"-h"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(1, args);
+    dumper->TriggerSecondaryFoldStatus("z=1");
+    FoldStatus status = ScreenSessionManager::GetInstance().GetFoldStatus();
+    EXPECT_EQ(status, FoldStatus::EXPAND);
+
+    dumper->TriggerSecondaryFoldStatus("z=2");
+    status = ScreenSessionManager::GetInstance().GetFoldStatus();
+    EXPECT_EQ(status, FoldStatus::FOLDED);
+
+    dumper->TriggerSecondaryFoldStatus("z=3");
+    status = ScreenSessionManager::GetInstance().GetFoldStatus();
+    EXPECT_EQ(status, FoldStatus::HALF_FOLD);
+
+    dumper->TriggerSecondaryFoldStatus("z=11");
+    status = ScreenSessionManager::GetInstance().GetFoldStatus();
+    EXPECT_EQ(status, FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_EXPAND);
+
+    dumper->TriggerSecondaryFoldStatus("z=21");
+    status = ScreenSessionManager::GetInstance().GetFoldStatus();
+    EXPECT_EQ(status, FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_HALF_FOLDED);
+
+    dumper->TriggerSecondaryFoldStatus("z=12");
+    status = ScreenSessionManager::GetInstance().GetFoldStatus();
+    EXPECT_EQ(status, FoldStatus::FOLD_STATE_FOLDED_WITH_SECOND_EXPAND);
+
+    dumper->TriggerSecondaryFoldStatus("z=22");
+    status = ScreenSessionManager::GetInstance().GetFoldStatus();
+    EXPECT_EQ(status, FoldStatus::FOLD_STATE_FOLDED_WITH_SECOND_HALF_FOLDED);
+
+    dumper->TriggerSecondaryFoldStatus("z=13");
+    status = ScreenSessionManager::GetInstance().GetFoldStatus();
+    EXPECT_EQ(status, FoldStatus::FOLD_STATE_HALF_FOLDED_WITH_SECOND_EXPAND);
+
+    dumper->TriggerSecondaryFoldStatus("z=23");
+    status = ScreenSessionManager::GetInstance().GetFoldStatus();
+    EXPECT_EQ(status, FoldStatus::FOLD_STATE_HALF_FOLDED_WITH_SECOND_HALF_FOLDED);
+}
+
+/**
+ * @tc.name: SetFoldStatusLocked
+ * @tc.desc: test function : SetFoldStatusLocked
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, SetFoldStatusLocked, TestSize.Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u""};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    int ret = dumper->SetFoldStatusLocked();
+    ASSERT_EQ(ret, -1);
+
+    dumper->params_[0] = "-l";
+    ret = dumper->SetFoldStatusLocked();
+    ASSERT_EQ(ret, 0);
+
+    dumper->params_[0] = "-u";
+    ret = dumper->SetFoldStatusLocked();
+    ASSERT_EQ(ret, 0);
+
+    dumper->params_[0] = "-test";
+    ret = dumper->SetFoldStatusLocked();
+    ASSERT_EQ(ret, -1);
+}
+
+/**
+ * @tc.name: SetFoldDisplayMode
+ * @tc.desc: test function : SetFoldDisplayMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, SetFoldDisplayMode, TestSize.Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u""};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    int ret = dumper->SetFoldDisplayMode();
+    ASSERT_EQ(ret, -1);
+
+    dumper->params_[0] = "-sub";
+    ret = dumper->SetFoldDisplayMode();
+    ASSERT_EQ(ret, 0);
+
+    dumper->params_[0] = "-coor";
+    ret = dumper->SetFoldDisplayMode();
+    ASSERT_EQ(ret, 0);
+
+    dumper->params_[0] = "-m";
+    ret = dumper->SetFoldDisplayMode();
+    ASSERT_EQ(ret, 0);
+
+    dumper->params_[0] = "-f";
+    ret = dumper->SetFoldDisplayMode();
+    ASSERT_EQ(ret, 0);
+
+    dumper->params_[0] = "-test";
+    ret = dumper->SetFoldDisplayMode();
+    ASSERT_EQ(ret, -1);
+}
+
+/**
+ * @tc.name: SetEnterOrExitTentMode
+ * @tc.desc: test function : SetEnterOrExitTentMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, SetEnterOrExitTentMode, TestSize.Level1)
 {
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
     sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
-    dumper->TriggerSecondaryFoldStatus("z=23");
-    ASSERT_EQ(dumper->fd_, 1);
+    
+    dumper->SetEnterOrExitTentMode("-offtent");
+    bool tentMode = ScreenSessionManager::GetInstance().GetTentMode();
+    ASSERT_EQ(tentMode, false);
 }
+
+#endif // FOLD_ABILITY_ENABLE
 }
 }
 }

@@ -26,6 +26,7 @@
 #include "screen_session_manager/include/screen_session_manager.h"
 #include "display_manager_agent_default.h"
 #include "screen_scene_config.h"
+#include "common_test_utils.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -42,10 +43,15 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+    void SetAceessTokenPermission(const std::string processName);
 };
 
 void ScreenCutoutControllerTest::SetUpTestCase()
 {
+    CommonTestUtils::InjectTokenInfoByHapName(0, "com.ohos.systemui", 0);
+    const char** perms = new const char *[1];
+    perms[0] = "ohos.permission.CAPTURE_SCREEN";
+    CommonTestUtils::SetAceessTokenPermission("foundation", perms, 1);
 }
 
 void ScreenCutoutControllerTest::TearDownTestCase()
@@ -68,7 +74,7 @@ namespace {
      * @tc.desc: CreateWaterfallRect func
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenCutoutControllerTest, CreateWaterfallRect, Function | SmallTest | Level3)
+    HWTEST_F(ScreenCutoutControllerTest, CreateWaterfallRect, TestSize.Level1)
     {
         DMRect emptyRect = {0, 0, 0, 0};
         DMRect emptyRect_ = {1, 2, 3, 3};
@@ -85,7 +91,7 @@ namespace {
      * @tc.desc: GetScreenCutoutInfo func
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenCutoutControllerTest, GetScreenCutoutInfo01, Function | SmallTest | Level3)
+    HWTEST_F(ScreenCutoutControllerTest, GetScreenCutoutInfo01, TestSize.Level1)
     {
         sptr<ScreenCutoutController> controller = new ScreenCutoutController();
         DisplayId displayId = 0;
@@ -93,11 +99,25 @@ namespace {
     }
 
     /**
+     * @tc.name: GetCutoutInfoWithRotation
+     * @tc.desc: GetCutoutInfoWithRotation func
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenCutoutControllerTest, GetCutoutInfoWithRotation, Function | SmallTest | Level3)
+    {
+        sptr<ScreenCutoutController> controller = new ScreenCutoutController();
+        DisplayId displayId = 0;
+        int32_t rotation = 0;
+        auto cutoutInfo = controller->GetCutoutInfoWithRotation(displayId, rotation);
+        ASSERT_NE(nullptr, cutoutInfo);
+    }
+
+    /**
      * @tc.name: GetScreenCutoutInfo02
      * @tc.desc: GetScreenCutoutInfo func
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenCutoutControllerTest, GetScreenCutoutInfo02, Function | SmallTest | Level3)
+    HWTEST_F(ScreenCutoutControllerTest, GetScreenCutoutInfo02, TestSize.Level1)
     {
         sptr<ScreenCutoutController> controller = new ScreenCutoutController();
         DisplayId displayId = 1;
@@ -112,7 +132,7 @@ namespace {
      * @tc.desc: ScreenCutoutController convert boundary rects by rotation
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenCutoutControllerTest, ConvertBoundaryRectsByRotation01, Function | SmallTest | Level3)
+    HWTEST_F(ScreenCutoutControllerTest, ConvertBoundaryRectsByRotation01, TestSize.Level1)
     {
         sptr<ScreenCutoutController> controller = new ScreenCutoutController();
         DMRect emptyRect = {0, 0, 0, 0};
@@ -120,7 +140,7 @@ namespace {
         DisplayId displayId = 0;
         std::vector<DMRect> boundaryRects = {emptyRect, emptyRect_};
         ASSERT_TRUE(controller != nullptr);
-        controller->ConvertBoundaryRectsByRotation(boundaryRects, displayId);
+        controller->ConvertBoundaryRectsByRotation(displayId, boundaryRects);
     }
 
     /**
@@ -128,7 +148,7 @@ namespace {
      * @tc.desc: ROTATION_0
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenCutoutControllerTest, ConvertBoundaryRectsByRotation02, Function | SmallTest | Level3)
+    HWTEST_F(ScreenCutoutControllerTest, ConvertBoundaryRectsByRotation02, TestSize.Level1)
     {
         sptr<ScreenCutoutController> controller = new ScreenCutoutController();
         DMRect emptyRect = {0, 0, 0, 0};
@@ -143,7 +163,32 @@ namespace {
         ASSERT_NE(ScreenSessionManager::GetInstance().GetDisplayInfoById(screenId), nullptr);
         ASSERT_TRUE(controller != nullptr);
         EXPECT_EQ(screenProperty.GetScreenRotation(), Rotation::ROTATION_0);
-        controller->ConvertBoundaryRectsByRotation(boundaryRects, screenId);
+        controller->ConvertBoundaryRectsByRotation(screenId, boundaryRects);
+        ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId);
+    }
+
+    /**
+     * @tc.name: ConvertBoundaryRectsByRotation
+     * @tc.desc: Current Rotation0, Get cutoutInfo with Rotation90
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenCutoutControllerTest, ConvertBoundaryRectsWithAnotherRotation, Function | SmallTest | Level3)
+    {
+        sptr<ScreenCutoutController> controller = new ScreenCutoutController();
+        DMRect emptyRect = {0, 0, 0, 0};
+        DMRect emptyRect_ = {1, 2, 3, 3};
+        std::vector<DMRect> boundaryRects = {emptyRect, emptyRect_};
+        sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+        VirtualScreenOption virtualOption;
+        virtualOption.name_ = "createVirtualOption";
+        auto screenId = ScreenSessionManager::GetInstance().CreateVirtualScreen(
+            virtualOption, displayManagerAgent->AsObject());
+        ScreenProperty screenProperty = ScreenSessionManager::GetInstance().GetScreenProperty(screenId);
+        ASSERT_NE(ScreenSessionManager::GetInstance().GetDisplayInfoById(screenId), nullptr);
+        ASSERT_TRUE(controller != nullptr);
+        EXPECT_EQ(screenProperty.GetScreenRotation(), Rotation::ROTATION_0);
+        int32_t rotation90 = 1;
+        controller->ConvertBoundaryRectsByRotation(screenId, boundaryRects, rotation90);
         ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId);
     }
 
@@ -152,7 +197,7 @@ namespace {
      * @tc.desc: ROTATION_90
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenCutoutControllerTest, ConvertBoundaryRectsByRotation03, Function | SmallTest | Level3)
+    HWTEST_F(ScreenCutoutControllerTest, ConvertBoundaryRectsByRotation03, TestSize.Level1)
     {
         sptr<ScreenCutoutController> controller = new ScreenCutoutController();
         DMRect emptyRect = {0, 0, 0, 0};
@@ -169,7 +214,7 @@ namespace {
         Rotation rotation = Rotation::ROTATION_90;
         screenProperty.UpdateScreenRotation(rotation);
         ASSERT_NE(screenProperty.GetScreenRotation(), Rotation::ROTATION_0);
-        controller->ConvertBoundaryRectsByRotation(boundaryRects, screenId);
+        controller->ConvertBoundaryRectsByRotation(screenId, boundaryRects);
         ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId);
     }
 
@@ -178,7 +223,7 @@ namespace {
      * @tc.desc: ROTATION_180
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenCutoutControllerTest, ConvertBoundaryRectsByRotation04, Function | SmallTest | Level3)
+    HWTEST_F(ScreenCutoutControllerTest, ConvertBoundaryRectsByRotation04, TestSize.Level1)
     {
         sptr<ScreenCutoutController> controller = new ScreenCutoutController();
         DMRect emptyRect = {0, 0, 0, 0};
@@ -195,7 +240,7 @@ namespace {
         Rotation rotation = Rotation::ROTATION_180;
         screenProperty.UpdateScreenRotation(rotation);
         ASSERT_NE(screenProperty.GetScreenRotation(), Rotation::ROTATION_0);
-        controller->ConvertBoundaryRectsByRotation(boundaryRects, screenId);
+        controller->ConvertBoundaryRectsByRotation(screenId, boundaryRects);
         ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId);
     }
 
@@ -204,7 +249,7 @@ namespace {
      * @tc.desc: ROTATION_270
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenCutoutControllerTest, ConvertBoundaryRectsByRotation05, Function | SmallTest | Level3)
+    HWTEST_F(ScreenCutoutControllerTest, ConvertBoundaryRectsByRotation05, TestSize.Level1)
     {
         sptr<ScreenCutoutController> controller = new ScreenCutoutController();
         DMRect emptyRect = {0, 0, 0, 0};
@@ -221,7 +266,7 @@ namespace {
         Rotation rotation = Rotation::ROTATION_270;
         screenProperty.UpdateScreenRotation(rotation);
         ASSERT_NE(screenProperty.GetScreenRotation(), Rotation::ROTATION_0);
-        controller->ConvertBoundaryRectsByRotation(boundaryRects, screenId);
+        controller->ConvertBoundaryRectsByRotation(screenId, boundaryRects);
         ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId);
     }
 
@@ -230,7 +275,7 @@ namespace {
      * @tc.desc: CurrentRotation90 func
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenCutoutControllerTest, CurrentRotation90, Function | SmallTest | Level3)
+    HWTEST_F(ScreenCutoutControllerTest, CurrentRotation90, TestSize.Level1)
     {
         sptr<ScreenCutoutController> controller = new ScreenCutoutController();
         std::vector<DMRect> displayBoundaryRects;
@@ -255,7 +300,7 @@ namespace {
      * @tc.desc: CurrentRotation180 func
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenCutoutControllerTest, CurrentRotation180, Function | SmallTest | Level3)
+    HWTEST_F(ScreenCutoutControllerTest, CurrentRotation180, TestSize.Level1)
     {
         sptr<ScreenCutoutController> controller = new ScreenCutoutController();
         std::vector<DMRect> displayBoundaryRects;
@@ -281,7 +326,7 @@ namespace {
      * @tc.desc: CurrentRotation270 func
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenCutoutControllerTest, CurrentRotation270, Function | SmallTest | Level3)
+    HWTEST_F(ScreenCutoutControllerTest, CurrentRotation270, TestSize.Level1)
     {
         sptr<ScreenCutoutController> controller = new ScreenCutoutController();
         std::vector<DMRect> displayBoundaryRects;
@@ -306,7 +351,7 @@ namespace {
      * @tc.desc: ScreenCutoutController check boundary rects
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenCutoutControllerTest, CheckBoundaryRects, Function | SmallTest | Level3)
+    HWTEST_F(ScreenCutoutControllerTest, CheckBoundaryRects, TestSize.Level1)
     {
         sptr<ScreenCutoutController> controller = new ScreenCutoutController();
         DMRect emptyRect = {-15, -15, 8, 8};
@@ -324,7 +369,7 @@ namespace {
      * @tc.desc: ScreenCutoutController calc waterfall rects
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenCutoutControllerTest, CalcWaterfallRects01, Function | SmallTest | Level3)
+    HWTEST_F(ScreenCutoutControllerTest, CalcWaterfallRects01, TestSize.Level1)
     {
         DisplayId displayId = 0;
         sptr<ScreenCutoutController> controller = new ScreenCutoutController();
@@ -337,7 +382,7 @@ namespace {
      * @tc.desc: ScreenCutoutController calc waterfall rects
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenCutoutControllerTest, CalcWaterfallRects02, Function | SmallTest | Level3)
+    HWTEST_F(ScreenCutoutControllerTest, CalcWaterfallRects02, TestSize.Level1)
     {
         sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
         VirtualScreenOption virtualOption;
@@ -360,7 +405,7 @@ namespace {
      * @tc.desc: ScreenCutoutController calc waterfall rects
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenCutoutControllerTest, CalcWaterfallRects03, Function | SmallTest | Level3)
+    HWTEST_F(ScreenCutoutControllerTest, CalcWaterfallRects03, TestSize.Level1)
     {
         DisplayId displayId = 1;
         ScreenSceneConfig::GetCurvedScreenBoundaryConfig() = {0, 0, 0, 0};
@@ -374,7 +419,7 @@ namespace {
      * @tc.desc: ScreenCutoutController calc waterfall rects
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenCutoutControllerTest, CalcWaterfallRects04, Function | SmallTest | Level3)
+    HWTEST_F(ScreenCutoutControllerTest, CalcWaterfallRects04, TestSize.Level1)
     {
         DisplayId displayId = 1;
         ScreenSceneConfig::GetCurvedScreenBoundaryConfig() = {};
@@ -388,7 +433,7 @@ namespace {
      * @tc.desc: ScreenCutoutController calc waterfall rects by rotation
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenCutoutControllerTest, CalcWaterfallRectsByRotation, Function | SmallTest | Level3)
+    HWTEST_F(ScreenCutoutControllerTest, CalcWaterfallRectsByRotation, TestSize.Level1)
     {
         sptr<ScreenCutoutController> controller = new ScreenCutoutController();
         Rotation rotation;
@@ -411,7 +456,7 @@ namespace {
      * @tc.desc: ScreenCutoutController calculate curved compression
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenCutoutControllerTest, CalculateCurvedCompression, Function | SmallTest | Level3)
+    HWTEST_F(ScreenCutoutControllerTest, CalculateCurvedCompression, TestSize.Level1)
     {
         sptr<ScreenCutoutController> controller = new ScreenCutoutController();
         RectF finalRect = RectF(0, 0, 0, 0);
@@ -428,7 +473,7 @@ namespace {
      * @tc.desc: IsDisplayRotationHorizontal func
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenCutoutControllerTest, IsDisplayRotationHorizontal, Function | SmallTest | Level3)
+    HWTEST_F(ScreenCutoutControllerTest, IsDisplayRotationHorizontal, TestSize.Level1)
     {
         sptr<ScreenCutoutController> controller = new ScreenCutoutController();
         ASSERT_EQ(false, controller->IsDisplayRotationHorizontal(Rotation::ROTATION_0));
@@ -442,7 +487,7 @@ namespace {
      * @tc.desc: ConvertDeviceToDisplayRotation func
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenCutoutControllerTest, ConvertDeviceToDisplayRotation01, Function | SmallTest | Level3)
+    HWTEST_F(ScreenCutoutControllerTest, ConvertDeviceToDisplayRotation01, TestSize.Level1)
     {
         sptr<ScreenCutoutController> controller = new ScreenCutoutController();
         ASSERT_EQ(Rotation::ROTATION_0, controller->ConvertDeviceToDisplayRotation(DeviceRotationValue::INVALID));
@@ -457,7 +502,7 @@ namespace {
      * @tc.desc: GetCurrentDisplayRotation func
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenCutoutControllerTest, GetCurrentDisplayRotation01, Function | SmallTest | Level3)
+    HWTEST_F(ScreenCutoutControllerTest, GetCurrentDisplayRotation01, TestSize.Level1)
     {
         DisplayId displayId = 2000;
         sptr<ScreenCutoutController> controller = new ScreenCutoutController();
@@ -472,7 +517,7 @@ namespace {
      * @tc.desc: GetCurrentDisplayRotation func
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenCutoutControllerTest, GetCurrentDisplayRotation02, Function | SmallTest | Level3)
+    HWTEST_F(ScreenCutoutControllerTest, GetCurrentDisplayRotation02, TestSize.Level1)
     {
         sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
         VirtualScreenOption virtualOption;
@@ -491,7 +536,7 @@ namespace {
      * @tc.desc: ProcessRotationMapping func
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenCutoutControllerTest, ProcessRotationMapping, Function | SmallTest | Level3)
+    HWTEST_F(ScreenCutoutControllerTest, ProcessRotationMapping, TestSize.Level1)
     {
         sptr<ScreenCutoutController> controller = new ScreenCutoutController();
         ASSERT_TRUE(controller != nullptr);
@@ -503,7 +548,7 @@ namespace {
      * @tc.desc: GetOffsetY func
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenCutoutControllerTest, GetOffsetY, Function | SmallTest | Level3)
+    HWTEST_F(ScreenCutoutControllerTest, GetOffsetY, TestSize.Level1)
     {
         sptr<ScreenCutoutController> controller = new ScreenCutoutController();
         ASSERT_EQ(0, controller->GetOffsetY());

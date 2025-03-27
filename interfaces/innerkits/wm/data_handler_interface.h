@@ -47,7 +47,7 @@ enum class DataHandlerErr : uint32_t {
 };
 
 using DataConsumeCallback =
-    std::function<int32_t(SubSystemId id, uint32_t customId, AAFwk::Want&& data, std::optional<AAFwk::Want> reply)>;
+    std::function<int32_t(SubSystemId id, uint32_t customId, AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)>;
 
 /**
  * @class IDataHandler
@@ -67,32 +67,32 @@ public:
      *
      * @param subSystemId The identifier of the target subsystem.
      * @param customId A custom identifier for the data being sent.
-     * @param data The Want object containing the data to be sent.
+     * @param toSend The Want object containing the data to be sent.
      * @param reply A reference to a Want object that will be filled with the reply data.
      * @return DataHandlerErr::OK if the data was successfully sent and a reply was received, other errcode otherwise.
      */
-    virtual DataHandlerErr SendDataSync(SubSystemId subSystemId, uint32_t customId, AAFwk::Want& data,
-        AAFwk::Want& reply) = 0;
+    virtual DataHandlerErr SendDataSync(SubSystemId subSystemId, uint32_t customId, const AAFwk::Want& toSend,
+                                        AAFwk::Want& reply) = 0;
 
     /**
      * @brief Sends data synchronously to a specified subsystem without reply.
      *
      * @param subSystemId The identifier of the target subsystem.
      * @param customId A custom identifier for the data being sent.
-     * @param data The Want object containing the data to be sent.
+     * @param toSend The Want object containing the data to be sent.
      * @return DataHandlerErr::OK if the data was successfully sent, other errcode otherwise.
      */
-    virtual DataHandlerErr SendDataSync(SubSystemId subSystemId, uint32_t customId, AAFwk::Want& data) = 0;
+    virtual DataHandlerErr SendDataSync(SubSystemId subSystemId, uint32_t customId, const AAFwk::Want& toSend) = 0;
 
     /**
      * @brief Sends data asynchronously to a specified subsystem without reply.
      *
      * @param subSystemId The identifier of the target subsystem.
      * @param customId A custom identifier for the data being sent.
-     * @param data The Want object containing the data to be sent.
+     * @param toSend The Want object containing the data to be sent.
      * @return DataHandlerErr::OK if the data was successfully sent, other errcode otherwise.
      */
-    virtual DataHandlerErr SendDataAsync(SubSystemId subSystemId, uint32_t customId, AAFwk::Want& data) = 0;
+    virtual DataHandlerErr SendDataAsync(SubSystemId subSystemId, uint32_t customId, const AAFwk::Want& toSend) = 0;
 
     /**
      * @brief Registers a data consumer for a specific subsystemId.

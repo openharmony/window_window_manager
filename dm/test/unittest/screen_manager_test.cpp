@@ -92,7 +92,7 @@ namespace {
  * @tc.desc: CreateVirtualScreen with invalid option and return invalid screen id
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, CreateAndDestroy01, Function | SmallTest | Level1)
+HWTEST_F(ScreenManagerTest, CreateAndDestroy01, TestSize.Level1)
 {
     VirtualScreenOption wrongOption = {defaultName_, defaultWidth_, defaultHeight_,
                                        defaultDensity_, nullptr, defaultFlags_};
@@ -110,7 +110,7 @@ HWTEST_F(ScreenManagerTest, CreateAndDestroy01, Function | SmallTest | Level1)
  * @tc.desc: CreateVirtualScreen with valid option and return valid screen id
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, CreateAndDestroy02, Function | SmallTest | Level1)
+HWTEST_F(ScreenManagerTest, CreateAndDestroy02, TestSize.Level1)
 {
     ScreenManagerUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
@@ -131,7 +131,7 @@ HWTEST_F(ScreenManagerTest, CreateAndDestroy02, Function | SmallTest | Level1)
  * @tc.desc: Create a virtual screen as expansion of default screen, return default screen id
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, MakeExpand_001, Function | SmallTest | Level1)
+HWTEST_F(ScreenManagerTest, MakeExpand_001, TestSize.Level1)
 {
     ScreenManagerUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
@@ -158,7 +158,7 @@ HWTEST_F(ScreenManagerTest, MakeExpand_001, Function | SmallTest | Level1)
  * @tc.desc: Makepand with empty ExpandOption, return SCREEN_ID_INVALID
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, MakeExpand_002, Function | SmallTest | Level1)
+HWTEST_F(ScreenManagerTest, MakeExpand_002, TestSize.Level1)
 {
     ScreenId invalidId = SCREEN_ID_INVALID;
     std::vector<ExpandOption> options = {};
@@ -172,7 +172,7 @@ HWTEST_F(ScreenManagerTest, MakeExpand_002, Function | SmallTest | Level1)
  * @tc.desc: Makepand with ExpandOption.size() > MAX_SCREEN_SIZE, return SCREEN_ID_INVALID
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, MakeExpand_003, Function | SmallTest | Level1)
+HWTEST_F(ScreenManagerTest, MakeExpand_003, TestSize.Level1)
 {
     std::vector<ExpandOption> options = {};
     for (uint32_t i = 0; i < 33; ++i){ // MAX_SCREEN_SIZE + 1
@@ -190,7 +190,7 @@ HWTEST_F(ScreenManagerTest, MakeExpand_003, Function | SmallTest | Level1)
  * @tc.desc: SetVirtualScreenSurface with valid option and return success
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, SetSurface01, Function | SmallTest | Level1)
+HWTEST_F(ScreenManagerTest, SetSurface01, TestSize.Level1)
 {
     ScreenManagerUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
@@ -214,7 +214,7 @@ HWTEST_F(ScreenManagerTest, SetSurface01, Function | SmallTest | Level1)
  * @tc.desc: SetVirtualScreenSurface with invalid option and return failed
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, SetSurface02, Function | SmallTest | Level1)
+HWTEST_F(ScreenManagerTest, SetSurface02, TestSize.Level1)
 {
     ScreenManagerUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
@@ -237,7 +237,7 @@ HWTEST_F(ScreenManagerTest, SetSurface02, Function | SmallTest | Level1)
  * @tc.desc: OnScreenConnect
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, OnScreenConnect01, Function | SmallTest | Level1)
+HWTEST_F(ScreenManagerTest, OnScreenConnect01, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), RegisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
@@ -262,7 +262,7 @@ HWTEST_F(ScreenManagerTest, OnScreenConnect01, Function | SmallTest | Level1)
  * @tc.desc: OnScreenDisconnect
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, OnScreenDisconnect01, Function | SmallTest | Level1)
+HWTEST_F(ScreenManagerTest, OnScreenDisconnect01, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), RegisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
@@ -283,7 +283,7 @@ HWTEST_F(ScreenManagerTest, OnScreenDisconnect01, Function | SmallTest | Level1)
  * @tc.desc: OnScreenChange
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, OnScreenChange01, Function | SmallTest | Level1)
+HWTEST_F(ScreenManagerTest, OnScreenChange01, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), RegisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
@@ -305,7 +305,7 @@ HWTEST_F(ScreenManagerTest, OnScreenChange01, Function | SmallTest | Level1)
  * @tc.desc: OnScreenGroupChange
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, OnScreenGroupChange01, Function | SmallTest | Level1)
+HWTEST_F(ScreenManagerTest, OnScreenGroupChange01, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), RegisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
@@ -334,7 +334,7 @@ HWTEST_F(ScreenManagerTest, OnScreenGroupChange01, Function | SmallTest | Level1
  * @tc.desc: for interface coverage & check func RemoveVirtualScreenFromGroup
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, RemoveVirtualScreenFromGroup, Function | SmallTest | Level1)
+HWTEST_F(ScreenManagerTest, RemoveVirtualScreenFromGroup, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     std::vector<ScreenId> testScreens(33, 1);
@@ -356,7 +356,7 @@ HWTEST_F(ScreenManagerTest, RemoveVirtualScreenFromGroup, Function | SmallTest |
  * @tc.desc: for interface coverage & check SetScreenRotationLocked
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, SetScreenRotationLocked, Function | SmallTest | Level1)
+HWTEST_F(ScreenManagerTest, SetScreenRotationLocked, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
 
@@ -370,7 +370,7 @@ HWTEST_F(ScreenManagerTest, SetScreenRotationLocked, Function | SmallTest | Leve
  * @tc.desc: for interface coverage & check IsScreenRotationLocked
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, IsScreenRotationLocked, Function | SmallTest | Level1)
+HWTEST_F(ScreenManagerTest, IsScreenRotationLocked, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
 
@@ -390,7 +390,7 @@ HWTEST_F(ScreenManagerTest, IsScreenRotationLocked, Function | SmallTest | Level
  *           check RegisterScreenGroupListener & UnregisterScreenGroupListener
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, RegisterScreenGroupListener, Function | SmallTest | Level1)
+HWTEST_F(ScreenManagerTest, RegisterScreenGroupListener, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     auto& screenManager = ScreenManager::GetInstance();
@@ -428,7 +428,7 @@ HWTEST_F(ScreenManagerTest, RegisterScreenGroupListener, Function | SmallTest | 
  *           check RegisterVirtualScreenGroupListener & UnregisterVirtualScreenGroupListener
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, RegisterVirtualScreenGroupListener, Function | SmallTest | Level1)
+HWTEST_F(ScreenManagerTest, RegisterVirtualScreenGroupListener, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     auto& screenManager = ScreenManager::GetInstance();
@@ -466,7 +466,7 @@ HWTEST_F(ScreenManagerTest, RegisterVirtualScreenGroupListener, Function | Small
  * @tc.desc: StopExpand_001 id
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, StopExpand_001, Function | SmallTest | Level1)
+HWTEST_F(ScreenManagerTest, StopExpand_001, TestSize.Level1)
 {
     std::vector<ScreenId> screenIds;
     ASSERT_EQ(DMError::DM_OK, ScreenManager::GetInstance().StopExpand(screenIds));
@@ -480,7 +480,7 @@ HWTEST_F(ScreenManagerTest, StopExpand_001, Function | SmallTest | Level1)
  * @tc.desc: StopMirror id
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, StopMirror, Function | SmallTest | Level1)
+HWTEST_F(ScreenManagerTest, StopMirror, TestSize.Level1)
 {
     ScreenManagerUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
@@ -499,7 +499,7 @@ HWTEST_F(ScreenManagerTest, StopMirror, Function | SmallTest | Level1)
  * @tc.desc: RegisterVirtualScreenGroupListener02 fun
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, RegisterVirtualScreenGroupListener02, Function | SmallTest | Level1)
+HWTEST_F(ScreenManagerTest, RegisterVirtualScreenGroupListener02, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     auto& screenManager = ScreenManager::GetInstance();
@@ -518,19 +518,15 @@ HWTEST_F(ScreenManagerTest, RegisterVirtualScreenGroupListener02, Function | Sma
  * @tc.desc: SetVirtualScreenFlag01 cast flag
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, SetVirtualScreenFlag01, Function | SmallTest | Level1)
+HWTEST_F(ScreenManagerTest, SetVirtualScreenFlag01, TestSize.Level1)
 {
     VirtualScreenOption defaultOption = {defaultName_, defaultWidth_, defaultHeight_,
                                          defaultDensity_, nullptr, defaultFlags_};
     ScreenId screenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption);
     DMError ret = ScreenManager::GetInstance().SetVirtualScreenFlag(screenId, VirtualScreenFlag::CAST);
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(DMError::DM_ERROR_DEVICE_NOT_SUPPORT, ret);
-    } else {
-        ASSERT_EQ(DMError::DM_OK, ret);
-        ret = ScreenManager::GetInstance().DestroyVirtualScreen(screenId);
-        ASSERT_EQ(DMError::DM_OK, ret);
-    }
+    ASSERT_EQ(DMError::DM_OK, ret);
+    ret = ScreenManager::GetInstance().DestroyVirtualScreen(screenId);
+    ASSERT_EQ(DMError::DM_OK, ret);
 }
 
 /**
@@ -538,7 +534,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenFlag01, Function | SmallTest | Level
  * @tc.desc: SetVirtualScreenFlag02 max flag
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, SetVirtualScreenFlag02, Function | SmallTest | Level1)
+HWTEST_F(ScreenManagerTest, SetVirtualScreenFlag02, TestSize.Level1)
 {
     VirtualScreenOption defaultOption = {defaultName_, defaultWidth_, defaultHeight_,
                                          defaultDensity_, nullptr, defaultFlags_};
@@ -554,21 +550,17 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenFlag02, Function | SmallTest | Level
  * @tc.desc: GetVirtualScreenFlag01 get cast
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, GetVirtualScreenFlag01, Function | SmallTest | Level1)
+HWTEST_F(ScreenManagerTest, GetVirtualScreenFlag01, TestSize.Level1)
 {
     VirtualScreenOption defaultOption = {defaultName_, defaultWidth_, defaultHeight_,
                                          defaultDensity_, nullptr, defaultFlags_};
     ScreenId screenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption);
     DMError ret = ScreenManager::GetInstance().SetVirtualScreenFlag(screenId, VirtualScreenFlag::CAST);
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(DMError::DM_ERROR_DEVICE_NOT_SUPPORT, ret);
-    } else {
-        ASSERT_EQ(DMError::DM_OK, ret);
-        VirtualScreenFlag screenFlag = ScreenManager::GetInstance().GetVirtualScreenFlag(screenId);
-        ASSERT_EQ(VirtualScreenFlag::CAST, screenFlag);
-        ret = ScreenManager::GetInstance().DestroyVirtualScreen(screenId);
-        ASSERT_EQ(DMError::DM_OK, ret);
-    }
+    ASSERT_EQ(DMError::DM_OK, ret);
+    VirtualScreenFlag screenFlag = ScreenManager::GetInstance().GetVirtualScreenFlag(screenId);
+    ASSERT_EQ(VirtualScreenFlag::CAST, screenFlag);
+    ret = ScreenManager::GetInstance().DestroyVirtualScreen(screenId);
+    ASSERT_EQ(DMError::DM_OK, ret);
 }
 
 /**
@@ -576,20 +568,16 @@ HWTEST_F(ScreenManagerTest, GetVirtualScreenFlag01, Function | SmallTest | Level
  * @tc.desc: SetVirtualMirrorScreenScaleMode01 fun
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, SetVirtualMirrorScreenScaleMode01, Function | SmallTest | Level1)
+HWTEST_F(ScreenManagerTest, SetVirtualMirrorScreenScaleMode01, TestSize.Level1)
 {
     VirtualScreenOption defaultOption = {defaultName_, defaultWidth_, defaultHeight_,
                                          defaultDensity_, nullptr, defaultFlags_};
     ScreenId screenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption);
     DMError ret = ScreenManager::GetInstance().SetVirtualMirrorScreenScaleMode(screenId,
         ScreenScaleMode::FILL_MODE);
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(DMError::DM_ERROR_DEVICE_NOT_SUPPORT, ret);
-    } else {
-        ASSERT_EQ(DMError::DM_OK, ret);
-        ret = ScreenManager::GetInstance().DestroyVirtualScreen(screenId);
-        ASSERT_EQ(DMError::DM_OK, ret);
-    }
+    ASSERT_EQ(DMError::DM_OK, ret);
+    ret = ScreenManager::GetInstance().DestroyVirtualScreen(screenId);
+    ASSERT_EQ(DMError::DM_OK, ret);
 }
 
 /**
@@ -597,20 +585,16 @@ HWTEST_F(ScreenManagerTest, SetVirtualMirrorScreenScaleMode01, Function | SmallT
  * @tc.desc: SetVirtualMirrorScreenScaleMode02 fun
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, SetVirtualMirrorScreenScaleMode02, Function | SmallTest | Level1)
+HWTEST_F(ScreenManagerTest, SetVirtualMirrorScreenScaleMode02, TestSize.Level1)
 {
     VirtualScreenOption defaultOption = {defaultName_, defaultWidth_, defaultHeight_,
                                          defaultDensity_, nullptr, defaultFlags_};
     ScreenId screenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption);
     DMError ret = ScreenManager::GetInstance().SetVirtualMirrorScreenScaleMode(screenId,
         ScreenScaleMode::UNISCALE_MODE);
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(DMError::DM_ERROR_DEVICE_NOT_SUPPORT, ret);
-    } else {
-        ASSERT_EQ(DMError::DM_OK, ret);
-        ret = ScreenManager::GetInstance().DestroyVirtualScreen(screenId);
-        ASSERT_EQ(DMError::DM_OK, ret);
-    }
+    ASSERT_EQ(DMError::DM_OK, ret);
+    ret = ScreenManager::GetInstance().DestroyVirtualScreen(screenId);
+    ASSERT_EQ(DMError::DM_OK, ret);
 }
 
 /**
@@ -618,19 +602,15 @@ HWTEST_F(ScreenManagerTest, SetVirtualMirrorScreenScaleMode02, Function | SmallT
  * @tc.desc: IsCaptured02 fun
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, IsCaptured02, Function | SmallTest | Level1)
+HWTEST_F(ScreenManagerTest, IsCaptured02, TestSize.Level1)
 {
     VirtualScreenOption defaultOption = {defaultName_, defaultWidth_, defaultHeight_,
                                          defaultDensity_, nullptr, defaultFlags_};
     ScreenId screenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption);
     bool isCapture = DisplayManager::GetInstance().IsCaptured();
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_FALSE(isCapture);
-    } else {
-        ASSERT_TRUE(isCapture);
-        auto ret = ScreenManager::GetInstance().DestroyVirtualScreen(screenId);
-        ASSERT_EQ(DMError::DM_OK, ret);
-    }
+    ASSERT_TRUE(isCapture);
+    auto ret = ScreenManager::GetInstance().DestroyVirtualScreen(screenId);
+    ASSERT_EQ(DMError::DM_OK, ret);
 }
 
 /**
@@ -638,7 +618,7 @@ HWTEST_F(ScreenManagerTest, IsCaptured02, Function | SmallTest | Level1)
  * @tc.desc: IsCaptured03 fun
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, IsCaptured03, Function | SmallTest | Level1)
+HWTEST_F(ScreenManagerTest, IsCaptured03, TestSize.Level1)
 {
     VirtualScreenOption defaultOption = {defaultName_, defaultWidth_, defaultHeight_,
                                          defaultDensity_, nullptr, defaultFlags_};
@@ -654,7 +634,7 @@ HWTEST_F(ScreenManagerTest, IsCaptured03, Function | SmallTest | Level1)
  * @tc.desc: UnregisterScreenListener fun
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, UnregisterScreenListener, Function | SmallTest | Level1)
+HWTEST_F(ScreenManagerTest, UnregisterScreenListener, TestSize.Level1)
 {
     auto ret = ScreenManager::GetInstance().UnregisterScreenListener(nullptr);
     ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ret);
@@ -665,7 +645,7 @@ HWTEST_F(ScreenManagerTest, UnregisterScreenListener, Function | SmallTest | Lev
  * @tc.desc: RegisterScreenListener fun
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, RegisterScreenListener, Function | SmallTest | Level1)
+HWTEST_F(ScreenManagerTest, RegisterScreenListener, TestSize.Level1)
 {
     auto ret = ScreenManager::GetInstance().RegisterScreenListener(nullptr);
     ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ret);
@@ -676,7 +656,7 @@ HWTEST_F(ScreenManagerTest, RegisterScreenListener, Function | SmallTest | Level
  * @tc.desc: UnregisterVirtualScreenGroupListener fun
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, UnregisterVirtualScreenGroupListener, Function | SmallTest | Level1)
+HWTEST_F(ScreenManagerTest, UnregisterVirtualScreenGroupListener, TestSize.Level1)
 {
     auto ret = ScreenManager::GetInstance().UnregisterVirtualScreenGroupListener(nullptr);
     ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ret);
@@ -687,7 +667,7 @@ HWTEST_F(ScreenManagerTest, UnregisterVirtualScreenGroupListener, Function | Sma
  * @tc.desc: MakeUniqueScreen_001 fun
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, MakeUniqueScreen_001, Function | SmallTest | Level1)
+HWTEST_F(ScreenManagerTest, MakeUniqueScreen_001, TestSize.Level1)
 {
     std::vector<ScreenId> screenIds;
     DMError error = ScreenManager::GetInstance().MakeUniqueScreen(screenIds);
@@ -699,7 +679,7 @@ HWTEST_F(ScreenManagerTest, MakeUniqueScreen_001, Function | SmallTest | Level1)
  * @tc.desc: MakeUniqueScreen_002 fun
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, MakeUniqueScreen_002, Function | SmallTest | Level1)
+HWTEST_F(ScreenManagerTest, MakeUniqueScreen_002, TestSize.Level1)
 {
     std::vector<ScreenId> screenIds;
     for (uint32_t i = 0; i < 33; ++i){ // MAX_SCREEN_SIZE + 1
@@ -714,7 +694,7 @@ HWTEST_F(ScreenManagerTest, MakeUniqueScreen_002, Function | SmallTest | Level1)
  * @tc.desc: MakeUniqueScreen_003 fun
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, MakeUniqueScreen_003, Function | SmallTest | Level1)
+HWTEST_F(ScreenManagerTest, MakeUniqueScreen_003, TestSize.Level1)
 {
     std::vector<ScreenId> screenIds;
     for (uint32_t i = 0; i < 32; ++i){ // MAX_SCREEN_SIZE
@@ -729,7 +709,7 @@ HWTEST_F(ScreenManagerTest, MakeUniqueScreen_003, Function | SmallTest | Level1)
  * @tc.desc: MakeMirror_001 fun
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, MakeMirror_001, Function | SmallTest | Level1)
+HWTEST_F(ScreenManagerTest, MakeMirror_001, TestSize.Level1)
 {
     std::vector<ScreenId> mirrorScreenId;
     for (uint32_t i = 0; i < 33; ++i){ // MAX_SCREEN_SIZE + 1
@@ -745,7 +725,7 @@ HWTEST_F(ScreenManagerTest, MakeMirror_001, Function | SmallTest | Level1)
  * @tc.desc: StopExpand fun
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, StopExpand, Function | SmallTest | Level1)
+HWTEST_F(ScreenManagerTest, StopExpand, TestSize.Level1)
 {
     std::vector<ScreenId> expandScreenIds;
     for (uint32_t i = 0; i < 33; ++i){ // MAX_SCREEN_SIZE + 1
@@ -760,11 +740,24 @@ HWTEST_F(ScreenManagerTest, StopExpand, Function | SmallTest | Level1)
  * @tc.desc: GetScreenInfoSrting fun
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, GetScreenInfoSrting, Function | SmallTest | Level1)
+HWTEST_F(ScreenManagerTest, GetScreenInfoSrting, TestSize.Level1)
 {
     sptr<ScreenInfo> screenInfo = nullptr;
     auto result =ScreenManager::GetInstance().pImpl_->GetScreenInfoSrting(screenInfo);
     EXPECT_EQ(result, "");
+}
+
+/**
+ * @tc.name: SetScreenSkipProtectedWindow
+ * @tc.desc: SetScreenSkipProtectedWindow fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenManagerTest, SetScreenSkipProtectedWindow, TestSize.Level1)
+{
+    const std::vector<ScreenId> screenIds;
+    bool isEnable = true;
+    auto result = ScreenManager::GetInstance().SetScreenSkipProtectedWindow(screenIds, isEnable);
+    EXPECT_EQ(result, DMError::DM_ERROR_INVALID_PARAM);
 }
 }
 } // namespace Rosen

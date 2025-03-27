@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 
 #include "screen_session_manager/include/fold_screen_controller/sensor_fold_state_manager/single_display_sensor_pocket_fold_state_manager.h"
+#include "fold_screen_state_internel.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -57,7 +58,7 @@ namespace {
  * @tc.desc: test function : HandleAngleChange
  * @tc.type: FUNC
  */
-HWTEST_F(SingleDisplaySensorPocketFoldStateManagerTest, HandleAngleChange, Function | SmallTest | Level1)
+HWTEST_F(SingleDisplaySensorPocketFoldStateManagerTest, HandleAngleChange, TestSize.Level1)
 {
     float angel = 0;
     int hall = 0;
@@ -72,7 +73,7 @@ HWTEST_F(SingleDisplaySensorPocketFoldStateManagerTest, HandleAngleChange, Funct
  * @tc.desc: test function : HandleHallChange
  * @tc.type: FUNC
  */
-HWTEST_F(SingleDisplaySensorPocketFoldStateManagerTest, HandleHallChange, Function | SmallTest | Level1)
+HWTEST_F(SingleDisplaySensorPocketFoldStateManagerTest, HandleHallChange, TestSize.Level1)
 {
     float angel = 0;
     int hall = 0;
@@ -88,7 +89,7 @@ HWTEST_F(SingleDisplaySensorPocketFoldStateManagerTest, HandleHallChange, Functi
  * @tc.type: FUNC
  */
 HWTEST_F(SingleDisplaySensorPocketFoldStateManagerTest, UpdateSwitchScreenBoundaryForLargeFoldDevice,
-        Function | SmallTest | Level1)
+        TestSize.Level1)
 {
     float angel = 0;
     int hall = 0;
@@ -107,7 +108,7 @@ HWTEST_F(SingleDisplaySensorPocketFoldStateManagerTest, UpdateSwitchScreenBounda
  * @tc.desc: test function : GetNextFoldState
  * @tc.type: FUNC
  */
-HWTEST_F(SingleDisplaySensorPocketFoldStateManagerTest, GetNextFoldState01, Function | SmallTest | Level1)
+HWTEST_F(SingleDisplaySensorPocketFoldStateManagerTest, GetNextFoldState01, TestSize.Level1)
 {
     float angel = -0.1;
     int hall = 0;
@@ -129,17 +130,17 @@ HWTEST_F(SingleDisplaySensorPocketFoldStateManagerTest, GetNextFoldState01, Func
     angel = 130.0F - 0.1;
     hall = 0;
     auto result4 = manager.GetNextFoldState(angel, hall);
-    EXPECT_EQ(static_cast<int>(result4), 2);
+    EXPECT_EQ(static_cast<int>(result4), 3);
 
     angel = 130.0F + 0.1;
     hall = 0;
     auto result5 = manager.GetNextFoldState(angel, hall);
-    EXPECT_EQ(static_cast<int>(result5), 2);
+    EXPECT_EQ(static_cast<int>(result5), 3);
 
     angel = 140.0F + 0.1;
     hall = 0;
     auto result6 = manager.GetNextFoldState(angel, hall);
-    EXPECT_EQ(static_cast<int>(result6), 2);
+    EXPECT_EQ(static_cast<int>(result6), 3);
 
     angel = 140.0F + 0.1;
     hall = 1;
@@ -152,7 +153,7 @@ HWTEST_F(SingleDisplaySensorPocketFoldStateManagerTest, GetNextFoldState01, Func
  * @tc.desc: test function : GetNextFoldState
  * @tc.type: FUNC
  */
-HWTEST_F(SingleDisplaySensorPocketFoldStateManagerTest, GetNextFoldState02, Function | SmallTest | Level1)
+HWTEST_F(SingleDisplaySensorPocketFoldStateManagerTest, GetNextFoldState02, TestSize.Level1)
 {
     SingleDisplaySensorPocketFoldStateManager manager;
     manager.allowUserSensorForLargeFoldDevice = 1;
@@ -184,11 +185,11 @@ HWTEST_F(SingleDisplaySensorPocketFoldStateManagerTest, GetNextFoldState02, Func
     angel = 70.0F + 0.1;
     hall = 0;
     auto result7 = manager.GetNextFoldState(angel, hall);
-    EXPECT_EQ(static_cast<int>(result7), 2);
+    EXPECT_EQ(static_cast<int>(result7), 3);
 
     angel = 130.0F + 0.1;
     auto result8 = manager.GetNextFoldState(angel, hall);
-    EXPECT_EQ(static_cast<int>(result8), 2);
+    EXPECT_EQ(static_cast<int>(result8), 3);
 }
 
 /**
@@ -196,7 +197,7 @@ HWTEST_F(SingleDisplaySensorPocketFoldStateManagerTest, GetNextFoldState02, Func
  * @tc.desc: test function : TriggerTentExit
  * @tc.type: FUNC
  */
-HWTEST_F(SingleDisplaySensorPocketFoldStateManagerTest, TriggerTentExit, Function | SmallTest | Level1)
+HWTEST_F(SingleDisplaySensorPocketFoldStateManagerTest, TriggerTentExit, TestSize.Level1)
 {
     float angle = 0.0F;
     int hall;
@@ -228,8 +229,11 @@ HWTEST_F(SingleDisplaySensorPocketFoldStateManagerTest, TriggerTentExit, Functio
  * @tc.desc: test function : HandleTentChange
  * @tc.type: FUNC
  */
-HWTEST_F(SingleDisplaySensorPocketFoldStateManagerTest, HandleTentChange, Function | SmallTest | Level1)
+HWTEST_F(SingleDisplaySensorPocketFoldStateManagerTest, HandleTentChange, TestSize.Level1)
 {
+    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        GTEST_SKIP();
+    }
     SingleDisplaySensorPocketFoldStateManager mgr;
     
     ASSERT_EQ(mgr.IsTentMode(), false);
@@ -252,7 +256,7 @@ HWTEST_F(SingleDisplaySensorPocketFoldStateManagerTest, HandleTentChange, Functi
  * @tc.desc: test function : TentModeHandleSensorChange
  * @tc.type: FUNC
  */
-HWTEST_F(SingleDisplaySensorPocketFoldStateManagerTest, TentModeHandleSensorChange, Function | SmallTest | Level1)
+HWTEST_F(SingleDisplaySensorPocketFoldStateManagerTest, TentModeHandleSensorChange, TestSize.Level1)
 {
     SingleDisplaySensorPocketFoldStateManager stateManager;
     
@@ -266,7 +270,7 @@ HWTEST_F(SingleDisplaySensorPocketFoldStateManagerTest, TentModeHandleSensorChan
  * @tc.desc: test function : ReportTentStatusChange
  * @tc.type: FUNC
  */
-HWTEST_F(SingleDisplaySensorPocketFoldStateManagerTest, ReportTentStatusChange, Function | SmallTest | Level1)
+HWTEST_F(SingleDisplaySensorPocketFoldStateManagerTest, ReportTentStatusChange, TestSize.Level1)
 {
     SingleDisplaySensorPocketFoldStateManager stateManager;
     ReportTentModeStatus tentStatus = ReportTentModeStatus::NORMAL_ENTER_TENT_MODE;

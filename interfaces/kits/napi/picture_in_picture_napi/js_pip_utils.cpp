@@ -16,11 +16,16 @@
 #include "js_pip_utils.h"
 
 #include <string>
+#include "window.h"
 #include "wm_common.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {
+using namespace AbilityRuntime;
+namespace {
+constexpr float MAX_PIP_SCALE = 1.0f;
+}
 napi_value NapiGetUndefined(napi_env env)
 {
     napi_value result = nullptr;
@@ -236,6 +241,45 @@ napi_status InitEnums(napi_env env, napi_value exports)
     };
     size_t count = sizeof(properties) / sizeof(napi_property_descriptor);
     return napi_define_properties(env, exports, count, properties);
+}
+
+napi_value GetPiPWindowSizeAndConvertToJsValue(napi_env env, const Rect& rect, float scale)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "Failed to get object");
+        return nullptr;
+    }
+    napi_set_named_property(env, objValue, "width", CreateJsValue(env, rect.width_));
+    napi_set_named_property(env, objValue, "height", CreateJsValue(env, rect.height_));
+    napi_set_named_property(env, objValue, "scale", CreateJsValue(env, scale));
+    return objValue;
+}
+
+napi_value CreateJsPiPWindowInfoObject(napi_env env, const sptr<Window>& window)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "Failed to get object");
+        return nullptr;
+    }
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "window is nullptr");
+        return nullptr;
+    }
+    const auto& windowRect = window->GetRect();
+    const auto& layoutTransform = window->GetLayoutTransform();
+    float maxScale = std::min(std::max(layoutTransform.scaleX_, layoutTransform.scaleY_), MAX_PIP_SCALE);
+    napi_value pipWindowSizeObj = GetPiPWindowSizeAndConvertToJsValue(env, windowRect, maxScale);
+    if (pipWindowSizeObj == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "Get window size failed!");
+        return nullptr;
+    }
+    napi_set_named_property(env, objValue, "windowId", CreateJsValue(env, window->GetWindowId()));
+    napi_set_named_property(env, objValue, "size", pipWindowSizeObj);
+    return objValue;
 }
 } // Rosen
 } // OHOS

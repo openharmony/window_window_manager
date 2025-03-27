@@ -136,12 +136,12 @@ napi_value JsRootSceneSession::OnRegisterCallback(napi_env env, napi_callback_in
 
 napi_value JsRootSceneSession::OnLoadContent(napi_env env, napi_callback_info info)
 {
-    WLOGFD("[NAPI]");
+    TLOGD(WmsLogTag::WMS_LIFE, "[NAPI]");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_TWO) {
-        WLOGFE("Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::WMS_LIFE, "Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
@@ -150,14 +150,14 @@ napi_value JsRootSceneSession::OnLoadContent(napi_env env, napi_callback_info in
     napi_value context = argv[1];
     napi_value storage = argc < 3 ? nullptr : argv[2];
     if (!ConvertFromJsValue(env, argv[0], contentUrl)) {
-        WLOGFE("Failed to convert parameter to content url");
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to content url");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
 
     if (context == nullptr) {
-        WLOGFE("Failed to get context object");
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to get context object");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY)));
         return NapiGetUndefined(env);
     }
@@ -165,7 +165,7 @@ napi_value JsRootSceneSession::OnLoadContent(napi_env env, napi_callback_info in
     napi_unwrap(env, context, &pointerResult);
     auto contextNativePointer = static_cast<std::weak_ptr<Context>*>(pointerResult);
     if (contextNativePointer == nullptr) {
-        WLOGFE("Failed to get context pointer from js object");
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to get context pointer from js object");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY)));
         return NapiGetUndefined(env);
     }
@@ -178,20 +178,26 @@ napi_value JsRootSceneSession::OnLoadContent(napi_env env, napi_callback_info in
         napi_create_reference(env, storage, 1, &ref);
         contentStorage = std::shared_ptr<NativeReference>(reinterpret_cast<NativeReference*>(ref));
     }
-
-    NapiAsyncTask::CompleteCallback complete = [rootSceneSession = rootSceneSession_,
-        contentUrl, contextWeakPtr, contentStorage](napi_env env, NapiAsyncTask& task, int32_t status) {
+    napi_value lastParam = nullptr, result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
+    auto asyncTask = [rootSceneSession = rootSceneSession_, contentUrl, contextWeakPtr, contentStorage, env,
+        task = napiAsyncTask] {
         if (rootSceneSession == nullptr) {
-            WLOGFE("rootSceneSession is nullptr");
-            task.Reject(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY)));
+            TLOGNE(WmsLogTag::WMS_LIFE, "rootSceneSession is nullptr");
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY)));
+            return;
+        }
+        auto contextLockPtr = contextWeakPtr.lock().get();
+        if (contextLockPtr == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "context lock ptr is nullptr");
             return;
         }
         napi_value nativeStorage = contentStorage ? contentStorage->GetNapiValue() : nullptr;
-        rootSceneSession->LoadContent(contentUrl, env, nativeStorage, contextWeakPtr.lock().get());
+        rootSceneSession->LoadContent(contentUrl, env, nativeStorage, contextLockPtr);
     };
-    napi_value lastParam = nullptr, result = nullptr;
-    NapiAsyncTask::Schedule("JsRootSceneSession::OnLoadContent", env,
-        CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    if (napi_send_event(env, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
+        TLOGE(WmsLogTag::WMS_LIFE, "napi send event failed, window state is abnormal");
+    }
     return result;
 }
 
@@ -234,23 +240,27 @@ void JsRootSceneSession::PendingSessionActivationInner(std::shared_ptr<SessionIn
     napi_env& env_ref = env_;
     auto task = [sessionInfo, jsCallBack = GetJSCallback(PENDING_SCENE_CB), env_ref]() {
         if (!jsCallBack) {
-            TLOGE(WmsLogTag::WMS_LIFE, "jsCallBack is nullptr");
+            TLOGNE(WmsLogTag::WMS_LIFE, "jsCallBack is nullptr");
             return;
         }
         if (sessionInfo == nullptr) {
-            TLOGE(WmsLogTag::WMS_LIFE, "sessionInfo is nullptr");
+            TLOGNE(WmsLogTag::WMS_LIFE, "sessionInfo is nullptr");
             return;
         }
         napi_value jsSessionInfo = CreateJsSessionInfo(env_ref, *sessionInfo);
         if (jsSessionInfo == nullptr) {
-            TLOGE(WmsLogTag::WMS_LIFE, "jsSessionInfo is nullptr");
+            TLOGNE(WmsLogTag::WMS_LIFE, "jsSessionInfo is nullptr");
+            SceneSessionManager::GetInstance().RemoveLifeCycleTaskByPersistentId(
+                sessionInfo->persistentId_, LifeCycleTaskType::START);
             return;
         }
         napi_value argv[] = {jsSessionInfo};
-        TLOGI(WmsLogTag::WMS_LIFE, "pend active success, id:%{public}d",
+        TLOGNI(WmsLogTag::WMS_LIFE, "pend active success, id:%{public}d",
             sessionInfo->persistentId_);
         napi_call_function(env_ref, NapiGetUndefined(env_ref),
             jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+        SceneSessionManager::GetInstance().RemoveLifeCycleTaskByPersistentId(
+            sessionInfo->persistentId_, LifeCycleTaskType::START);
     };
     taskScheduler_->PostMainThreadTask(task, "PendingSessionActivationInner");
 }
@@ -269,8 +279,9 @@ static int32_t GetRealCallerSessionId(const sptr<SceneSession>& sceneSession)
 void JsRootSceneSession::PendingSessionActivation(SessionInfo& info)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "bundleName %{public}s, moduleName %{public}s, abilityName %{public}s, "
-        "appIndex %{public}d, reuse %{public}d", info.bundleName_.c_str(), info.moduleName_.c_str(),
-        info.abilityName_.c_str(), info.appIndex_, info.reuse);
+        "appIndex %{public}d, reuse %{public}d, specifiedFlag %{public}s, requestId %{public}d",
+        info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str(), info.appIndex_,
+        info.reuse, info.specifiedFlag_.c_str(), info.requestId);
     sptr<SceneSession> sceneSession = GenSceneSession(info);
     if (sceneSession == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "sceneSession is nullptr");
@@ -326,7 +337,7 @@ void JsRootSceneSession::VerifyCallerToken(SessionInfo& info)
             SessionPermission::VerifyPermissionByBundleName(info.bundleName_,
                                                             "ohos.permission.CALLED_TRANSITION_ON_LOCK_SCREEN",
                                                             SceneSessionManager::GetInstance().GetCurrentUserId());
-        TLOGI(WmsLogTag::WMS_SCB,
+        TLOGD(WmsLogTag::WMS_SCB,
             "root isCalledRightlyByCallerId result is: %{public}d", info.isCalledRightlyByCallerId_);
     }
 }
@@ -341,13 +352,14 @@ sptr<SceneSession> JsRootSceneSession::GenSceneSession(SessionInfo& info)
             return nullptr;
         }
 
-        if (info.reuse || info.isAtomicService_) {
+        if (info.reuse || info.isAtomicService_ || !info.specifiedFlag_.empty()) {
             if (SceneSessionManager::GetInstance().CheckCollaboratorType(info.collaboratorType_)) {
                 sceneSession = SceneSessionManager::GetInstance().FindSessionByAffinity(
                     info.sessionAffinity);
             } else {
                 SessionIdentityInfo identityInfo = { info.bundleName_, info.moduleName_, info.abilityName_,
-                    info.appIndex_, info.appInstanceKey_, info.windowType_, info.isAtomicService_ };
+                    info.appIndex_, info.appInstanceKey_, info.windowType_, info.isAtomicService_,
+                    info.specifiedFlag_ };
                 sceneSession = SceneSessionManager::GetInstance().GetSceneSessionByIdentityInfo(identityInfo);
             }
         }

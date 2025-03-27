@@ -54,7 +54,7 @@ namespace {
  * @tc.desc: GetSnapshot when parameter abilityToken is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSnapshotTest, GetSnapshot01, Function | SmallTest | Level3)
+HWTEST_F(WindowSnapshotTest, GetSnapshot01, TestSize.Level1)
 {
     sptr<WindowRoot> root = nullptr;
     std::shared_ptr<AppExecFwk::EventHandler> handler = nullptr;
@@ -68,7 +68,7 @@ HWTEST_F(WindowSnapshotTest, GetSnapshot01, Function | SmallTest | Level3)
  * @tc.desc: GetSnapshot when parameter abilityToken is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSnapshotTest, GetSnapshot02, Function | SmallTest | Level3)
+HWTEST_F(WindowSnapshotTest, GetSnapshot02, TestSize.Level1)
 {
     sptr<WindowRoot> root = nullptr;
     std::shared_ptr<AppExecFwk::EventHandler> handler = nullptr;
@@ -85,7 +85,7 @@ HWTEST_F(WindowSnapshotTest, GetSnapshot02, Function | SmallTest | Level3)
  * @tc.desc: GetSnapshot when parameter abilityToken is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSnapshotTest, GetSnapshot03, Function | SmallTest | Level3)
+HWTEST_F(WindowSnapshotTest, GetSnapshot03, TestSize.Level1)
 {
     auto runner = AppExecFwk::EventRunner::Create("TestRunner");
     auto handler = std::make_shared<AppExecFwk::EventHandler>(runner);
@@ -103,7 +103,7 @@ HWTEST_F(WindowSnapshotTest, GetSnapshot03, Function | SmallTest | Level3)
  * @tc.desc: GetSnapshot when parameter abilityToken is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSnapshotTest, GetSnapshot04, Function | SmallTest | Level3)
+HWTEST_F(WindowSnapshotTest, GetSnapshot04, TestSize.Level1)
 {
     auto runner = AppExecFwk::EventRunner::Create("TestRunner");
     auto handler = std::make_shared<AppExecFwk::EventHandler>(runner);
@@ -132,7 +132,7 @@ HWTEST_F(WindowSnapshotTest, GetSnapshot04, Function | SmallTest | Level3)
  * @tc.desc: GetSnapshot when parameter abilityToken is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSnapshotTest, GetSnapshot05, Function | SmallTest | Level3)
+HWTEST_F(WindowSnapshotTest, GetSnapshot05, TestSize.Level1)
 {
     auto runner = AppExecFwk::EventRunner::Create("TestRunner");
     auto handler = std::make_shared<AppExecFwk::EventHandler>(runner);

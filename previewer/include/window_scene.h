@@ -42,6 +42,8 @@ public:
     std::vector<sptr<Window>> GetSubWindow();
     WMError GoDestroy();
     void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
+    void UpdateConfigurationForSpecified(const std::shared_ptr<AppExecFwk::Configuration>& configuration,
+        const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager);
 
 private:
     std::string GenerateMainWindowName(const std::shared_ptr<AbilityRuntime::Context>& context) const;

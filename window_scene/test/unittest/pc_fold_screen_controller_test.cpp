@@ -18,8 +18,9 @@
 #include <thread>
 #include <chrono>
 #include "mock/mock_session_stage.h"
-#include "session/host/include/pc_fold_screen_controller.h"
 #include "session/host/include/main_session.h"
+#include "session/host/include/pc_fold_screen_controller.h"
+#include "session/host/include/sub_session.h"
 #include "wm_math.h"
 
 using namespace testing;
@@ -65,11 +66,11 @@ constexpr int32_t MAX_DECOR_HEIGHT = 112; // dp
 constexpr int32_t MOVING_RECORDS_SIZE_LIMIT = 5;
 constexpr int32_t MOVING_RECORDS_TIME_LIMIT_IN_NS = 100000;
 const WSRectF B_VELOCITY = { 0.0f, 5.0f, 0.0f, 0.0f };
-const WSRectF B_VELOCITY_SLOW = { 0.0f, 0.1f, 0.0f, 0.0f };
-const WSRectF B_VELOCITY_SKEW = { 0.5f, 0.5f, 0.0f, 0.0f };
+const WSRectF B_VELOCITY_SLOW = { 0.0f, 0.01f, 0.0f, 0.0f };
+const WSRectF B_VELOCITY_SKEW = { 50.0f, 5.0f, 0.0f, 0.0f };
 const WSRectF C_VELOCITY = { 0.0f, -5.0f, 0.0f, 0.0f };
-const WSRectF C_VELOCITY_SLOW = { 0.0f, -0.1f, 0.0f, 0.0f };
-const WSRectF C_VELOCITY_SKEW = { 0.5f, -0.5f, 0.0f, 0.0f };
+const WSRectF C_VELOCITY_SLOW = { 0.0f, -0.01f, 0.0f, 0.0f };
+const WSRectF C_VELOCITY_SKEW = { 50.0f, -5.0f, 0.0f, 0.0f };
 } // namespace
 
 class PcFoldScreenManagerTest : public testing::Test {
@@ -154,6 +155,7 @@ void PcFoldScreenControllerTest::SetUp()
     controller_ = mainSession_->pcFoldScreenController_;
 
     SetExpanded();
+    manager_.UpdateSystemKeyboardStatus(false);
 }
 
 void PcFoldScreenControllerTest::TearDown()
@@ -179,7 +181,7 @@ void PcFoldScreenControllerTest::SetExpanded()
  * @tc.desc: test function : SetDisplayInfo
  * @tc.type: FUNC
  */
-HWTEST_F(PcFoldScreenManagerTest, SetDisplayInfo, Function | SmallTest | Level1)
+HWTEST_F(PcFoldScreenManagerTest, SetDisplayInfo, TestSize.Level1)
 {
     SetExpanded();
     int64_t otherDisplayId = 100;
@@ -199,7 +201,7 @@ namespace {
  * @tc.desc: test function : IsHalfFolded
  * @tc.type: FUNC
  */
-HWTEST_F(PcFoldScreenManagerTest, IsHalfFolded, Function | SmallTest | Level1)
+HWTEST_F(PcFoldScreenManagerTest, IsHalfFolded, TestSize.Level1)
 {
     SetHalfFolded();
     EXPECT_TRUE(manager_.IsHalfFolded(DEFAULT_SCREEN_ID));
@@ -212,7 +214,7 @@ HWTEST_F(PcFoldScreenManagerTest, IsHalfFolded, Function | SmallTest | Level1)
  * @tc.desc: test function : SetDisplayRects, GetDisplayRects
  * @tc.type: FUNC
  */
-HWTEST_F(PcFoldScreenManagerTest, SetDisplayRects, Function | SmallTest | Level1)
+HWTEST_F(PcFoldScreenManagerTest, SetDisplayRects, TestSize.Level1)
 {
     manager_.SetDisplayRects(DISPLAY_RECT, ZERO_RECT, ZERO_RECT);
     const auto& [rect1, rect2, rect3] = manager_.GetDisplayRects();
@@ -227,11 +229,24 @@ HWTEST_F(PcFoldScreenManagerTest, SetDisplayRects, Function | SmallTest | Level1
 }
 
 /**
+ * @tc.name: UpdateSystemKeyboardStatus
+ * @tc.desc: test function : UpdateSystemKeyboardStatus, HasSystemKeyboard
+ * @tc.type: FUNC
+ */
+HWTEST_F(PcFoldScreenManagerTest, UpdateSystemKeyboardStatus, TestSize.Level1)
+{
+    manager_.UpdateSystemKeyboardStatus(true);
+    EXPECT_TRUE(manager_.HasSystemKeyboard());
+    manager_.UpdateSystemKeyboardStatus(false);
+    EXPECT_FALSE(manager_.HasSystemKeyboard());
+}
+
+/**
  * @tc.name: CalculateScreenSide
  * @tc.desc: test function : CalculateScreenSide
  * @tc.type: FUNC
  */
-HWTEST_F(PcFoldScreenManagerTest, CalculateScreenSide, Function | SmallTest | Level1)
+HWTEST_F(PcFoldScreenManagerTest, CalculateScreenSide, TestSize.Level1)
 {
     SetHalfFolded();
     EXPECT_EQ(manager_.CalculateScreenSide(B_ACROSS_RECT), ScreenSide::FOLD_B);
@@ -239,11 +254,23 @@ HWTEST_F(PcFoldScreenManagerTest, CalculateScreenSide, Function | SmallTest | Le
 }
 
 /**
+ * @tc.name: IsCrossFoldCrease
+ * @tc.desc: test function : IsCrossFoldCrease
+ * @tc.type: FUNC
+ */
+HWTEST_F(PcFoldScreenManagerTest, IsCrossFoldCrease, TestSize.Level1)
+{
+    SetHalfFolded();
+    EXPECT_FALSE(manager_.IsCrossFoldCrease(B_RECT));
+    EXPECT_TRUE(manager_.IsCrossFoldCrease(B_ACROSS_RECT));
+}
+
+/**
  * @tc.name: ResetArrangeRule
  * @tc.desc: test function : ResetArrangeRule, including overload functions
  * @tc.type: FUNC
  */
-HWTEST_F(PcFoldScreenManagerTest, ResetArrangeRule, Function | SmallTest | Level2)
+HWTEST_F(PcFoldScreenManagerTest, ResetArrangeRule, TestSize.Level1)
 {
     SetHalfFolded();
     // param: rect
@@ -288,7 +315,7 @@ HWTEST_F(PcFoldScreenManagerTest, ResetArrangeRule, Function | SmallTest | Level
  * @tc.desc: test function : ResizeToFullScreen
  * @tc.type: FUNC
  */
-HWTEST_F(PcFoldScreenManagerTest, ResizeToFullScreen, Function | SmallTest | Level2)
+HWTEST_F(PcFoldScreenManagerTest, ResizeToFullScreen, TestSize.Level1)
 {
     SetHalfFolded();
     WSRect rect = B_RECT;
@@ -304,16 +331,107 @@ HWTEST_F(PcFoldScreenManagerTest, ResizeToFullScreen, Function | SmallTest | Lev
  * @tc.desc: test function : NeedDoThrowSlip
  * @tc.type: FUNC
  */
-HWTEST_F(PcFoldScreenManagerTest, NeedDoThrowSlip, Function | SmallTest | Level1)
+HWTEST_F(PcFoldScreenManagerTest, NeedDoThrowSlip, TestSize.Level1)
 {
+    SetHalfFolded();
     // side B
-    EXPECT_TRUE(manager_.NeedDoThrowSlip(ScreenSide::FOLD_B, B_VELOCITY));
-    EXPECT_FALSE(manager_.NeedDoThrowSlip(ScreenSide::FOLD_B, B_VELOCITY_SLOW));
-    EXPECT_FALSE(manager_.NeedDoThrowSlip(ScreenSide::FOLD_B, B_VELOCITY_SKEW));
+    ScreenSide throwSide = ScreenSide::FOLD_B;
+    EXPECT_TRUE(manager_.NeedDoThrowSlip(B_RECT, B_VELOCITY, throwSide));
+    EXPECT_FALSE(manager_.NeedDoThrowSlip(B_RECT, B_VELOCITY_SLOW, throwSide));
+    EXPECT_FALSE(manager_.NeedDoThrowSlip(B_RECT, B_VELOCITY_SKEW, throwSide));
     // side C
-    EXPECT_TRUE(manager_.NeedDoThrowSlip(ScreenSide::FOLD_C, C_VELOCITY));
-    EXPECT_FALSE(manager_.NeedDoThrowSlip(ScreenSide::FOLD_C, C_VELOCITY_SLOW));
-    EXPECT_FALSE(manager_.NeedDoThrowSlip(ScreenSide::FOLD_C, C_VELOCITY_SKEW));
+    throwSide = ScreenSide::FOLD_C;
+    EXPECT_TRUE(manager_.NeedDoThrowSlip(C_RECT, C_VELOCITY, throwSide));
+    EXPECT_FALSE(manager_.NeedDoThrowSlip(C_RECT, C_VELOCITY_SLOW, throwSide));
+    EXPECT_FALSE(manager_.NeedDoThrowSlip(C_RECT, C_VELOCITY_SKEW, throwSide));
+}
+
+/**
+ * @tc.name: NeedDoEasyThrowSlip
+ * @tc.desc: test function : NeedDoEasyThrowSlip
+ * @tc.type: FUNC
+ */
+HWTEST_F(PcFoldScreenManagerTest, NeedDoEasyThrowSlip, TestSize.Level1)
+{
+    SetHalfFolded();
+    // side B cross axis
+    WSRect startRectB = { 100, 100, 100, 20 };
+    WSRect rectB = { 100, SCREEN_HEIGHT_HALF + 90, 100, 20};
+    ScreenSide throwSide = ScreenSide::FOLD_C;
+    EXPECT_TRUE(manager_.NeedDoEasyThrowSlip(rectB, startRectB, B_VELOCITY, throwSide));
+    EXPECT_EQ(ScreenSide::FOLD_B, throwSide);
+    rectB = { 100, SCREEN_HEIGHT - 110, 100, 20};
+    throwSide = ScreenSide::FOLD_C;
+    EXPECT_FALSE(manager_.NeedDoEasyThrowSlip(rectB, startRectB, B_VELOCITY, throwSide));
+    EXPECT_EQ(ScreenSide::FOLD_C, throwSide);
+    // side C cross axis
+    WSRect startRectC = { 100, SCREEN_HEIGHT - 100, 100, 20 };
+    WSRect rectC = { 100, SCREEN_HEIGHT_HALF - 110, 100, 20};
+    throwSide = ScreenSide::FOLD_B;
+    EXPECT_TRUE(manager_.NeedDoEasyThrowSlip(rectC, startRectC, C_VELOCITY, throwSide));
+    EXPECT_EQ(ScreenSide::FOLD_C, throwSide);
+    rectC = { 100, 90, 100, 20};
+    throwSide = ScreenSide::FOLD_B;
+    EXPECT_FALSE(manager_.NeedDoEasyThrowSlip(rectC, startRectC, C_VELOCITY, throwSide));
+    EXPECT_EQ(ScreenSide::FOLD_B, throwSide);
+}
+
+/**
+ * @tc.name: CheckVelocityOrientation
+ * @tc.desc: test function : CheckVelocityOrientation
+ * @tc.type: FUNC
+ */
+HWTEST_F(PcFoldScreenManagerTest, CheckVelocityOrientation, TestSize.Level1)
+{
+    SetHalfFolded();
+    EXPECT_TRUE(manager_.CheckVelocityOrientation(B_RECT, B_VELOCITY));
+    EXPECT_FALSE(manager_.CheckVelocityOrientation(B_RECT, B_VELOCITY_SKEW));
+    WSRectF velocity1 = B_VELOCITY_SKEW;
+    velocity1.posX_ = -velocity1.posX_;
+    EXPECT_FALSE(manager_.CheckVelocityOrientation(B_RECT, velocity1));
+    EXPECT_TRUE(manager_.CheckVelocityOrientation(C_RECT, C_VELOCITY));
+    EXPECT_FALSE(manager_.CheckVelocityOrientation(C_RECT, C_VELOCITY_SKEW));
+    velocity1 = C_VELOCITY_SKEW;
+    velocity1.posX_ = -velocity1.posX_;
+    EXPECT_FALSE(manager_.CheckVelocityOrientation(C_RECT, velocity1));
+}
+
+/**
+ * @tc.name: CalculateThrowBacktracingRect
+ * @tc.desc: test function : CalculateThrowBacktracingRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(PcFoldScreenManagerTest, CalculateThrowBacktracingRect, TestSize.Level1)
+{
+    SetHalfFolded();
+    // side B
+    WSRect rectB = { 100, SCREEN_HEIGHT_HALF + 90, 100, 20};
+    EXPECT_EQ(ScreenSide::FOLD_B,
+        manager_.CalculateScreenSide(manager_.CalculateThrowBacktracingRect(rectB, B_VELOCITY)));
+    rectB = { 100, SCREEN_HEIGHT - 110, 100, 20};
+    EXPECT_EQ(rectB, manager_.CalculateThrowBacktracingRect(rectB, B_VELOCITY));
+    // side C
+    WSRect rectC = { 100, SCREEN_HEIGHT_HALF - 110, 100, 20};
+    EXPECT_EQ(ScreenSide::FOLD_C,
+        manager_.CalculateScreenSide(manager_.CalculateThrowBacktracingRect(rectC, C_VELOCITY)));
+    rectC = { 100, 90, 100, 20};
+    EXPECT_EQ(rectC, manager_.CalculateThrowBacktracingRect(rectC, C_VELOCITY));
+}
+
+/**
+ * @tc.name: CalculateThrowEnd
+ * @tc.desc: test function : CalculateThrowEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(PcFoldScreenManagerTest, CalculateThrowEnd, TestSize.Level1)
+{
+    SetHalfFolded();
+    // side B
+    EXPECT_EQ(ScreenSide::FOLD_C, manager_.CalculateScreenSide(manager_.CalculateThrowEnd(B_RECT, B_VELOCITY)));
+    EXPECT_EQ(ScreenSide::FOLD_B, manager_.CalculateScreenSide(manager_.CalculateThrowEnd(B_RECT, B_VELOCITY_SLOW)));
+    // side C
+    EXPECT_EQ(ScreenSide::FOLD_B, manager_.CalculateScreenSide(manager_.CalculateThrowEnd(C_RECT, C_VELOCITY)));
+    EXPECT_EQ(ScreenSide::FOLD_C, manager_.CalculateScreenSide(manager_.CalculateThrowEnd(C_RECT, C_VELOCITY_SLOW)));
 }
 
 /**
@@ -321,7 +439,7 @@ HWTEST_F(PcFoldScreenManagerTest, NeedDoThrowSlip, Function | SmallTest | Level1
  * @tc.desc: test function : ThrowSlipToOppositeSide
  * @tc.type: FUNC
  */
-HWTEST_F(PcFoldScreenManagerTest, ThrowSlipToOppositeSide, Function | SmallTest | Level1)
+HWTEST_F(PcFoldScreenManagerTest, ThrowSlipToOppositeSide, TestSize.Level1)
 {
     WSRect rect = B_RECT;
     EXPECT_FALSE(manager_.ThrowSlipToOppositeSide(ScreenSide::EXPAND, rect, TOP_AVOID_HEIGHT, BOT_AVOID_HEIGHT, 0));
@@ -335,7 +453,7 @@ HWTEST_F(PcFoldScreenManagerTest, ThrowSlipToOppositeSide, Function | SmallTest 
  * @tc.desc: test function : MappingRectInScreenSide
  * @tc.type: FUNC
  */
-HWTEST_F(PcFoldScreenManagerTest, MappingRectInScreenSide, Function | SmallTest | Level1)
+HWTEST_F(PcFoldScreenManagerTest, MappingRectInScreenSide, TestSize.Level1)
 {
     // half folded
     SetHalfFolded();
@@ -376,7 +494,7 @@ HWTEST_F(PcFoldScreenManagerTest, MappingRectInScreenSide, Function | SmallTest 
  * @tc.desc: test function : MappingRectInScreenSideWithArrangeRule + ApplyInitArrangeRule
  * @tc.type: FUNC
  */
-HWTEST_F(PcFoldScreenManagerTest, MappingRectInScreenSideWithArrangeRule1, Function | SmallTest | Level1)
+HWTEST_F(PcFoldScreenManagerTest, MappingRectInScreenSideWithArrangeRule1, TestSize.Level1)
 {
     int32_t decorHeight = (MIN_DECOR_HEIGHT + MAX_DECOR_HEIGHT) / 2;
 
@@ -412,7 +530,7 @@ HWTEST_F(PcFoldScreenManagerTest, MappingRectInScreenSideWithArrangeRule1, Funct
  * @tc.desc: test function : MappingRectInScreenSideWithArrangeRule + ApplyArrangeRule, normal arrange rule
  * @tc.type: FUNC
  */
-HWTEST_F(PcFoldScreenManagerTest, MappingRectInScreenSideWithArrangeRule2, Function | SmallTest | Level1)
+HWTEST_F(PcFoldScreenManagerTest, MappingRectInScreenSideWithArrangeRule2, TestSize.Level1)
 {
     int32_t decorHeight = (MIN_DECOR_HEIGHT + MAX_DECOR_HEIGHT) / 2;
 
@@ -445,7 +563,7 @@ HWTEST_F(PcFoldScreenManagerTest, MappingRectInScreenSideWithArrangeRule2, Funct
  * @tc.desc: test function : MappingRectInScreenSideWithArrangeRule + ApplyArrangeRule, special arrange rule
  * @tc.type: FUNC
  */
-HWTEST_F(PcFoldScreenManagerTest, MappingRectInScreenSideWithArrangeRule3, Function | SmallTest | Level1)
+HWTEST_F(PcFoldScreenManagerTest, MappingRectInScreenSideWithArrangeRule3, TestSize.Level1)
 {
     int32_t decorHeight = (MIN_DECOR_HEIGHT + MAX_DECOR_HEIGHT) / 2;
 
@@ -495,7 +613,7 @@ HWTEST_F(PcFoldScreenManagerTest, MappingRectInScreenSideWithArrangeRule3, Funct
  * @tc.desc: test function : RegisterFoldScreenStatusChangeCallback, UnregisterFoldScreenStatusChangeCallback
  * @tc.type: FUNC
  */
-HWTEST_F(PcFoldScreenManagerTest, RegisterFoldScreenStatusChangeCallback, Function | SmallTest | Level2)
+HWTEST_F(PcFoldScreenManagerTest, RegisterFoldScreenStatusChangeCallback, TestSize.Level1)
 {
     auto& callbacks = manager_.foldScreenStatusChangeCallbacks_;
     callbacks.clear();
@@ -515,7 +633,7 @@ HWTEST_F(PcFoldScreenManagerTest, RegisterFoldScreenStatusChangeCallback, Functi
  * @tc.desc: test function : ExecuteFoldScreenStatusChangeCallbacks
  * @tc.type: FUNC
  */
-HWTEST_F(PcFoldScreenManagerTest, ExecuteFoldScreenStatusChangeCallbacks, Function | SmallTest | Level2)
+HWTEST_F(PcFoldScreenManagerTest, ExecuteFoldScreenStatusChangeCallbacks, TestSize.Level1)
 {
     auto& callbacks = manager_.foldScreenStatusChangeCallbacks_;
     callbacks.clear();
@@ -541,14 +659,94 @@ HWTEST_F(PcFoldScreenManagerTest, ExecuteFoldScreenStatusChangeCallbacks, Functi
 }
 
 /**
+ * @tc.name: RegisterSystemKeyboardStatusChangeCallback
+ * @tc.desc: test function : RegisterSystemKeyboardStatusChangeCallback, UnregisterSystemKeyboardStatusChangeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(PcFoldScreenManagerTest, RegisterSystemKeyboardStatusChangeCallback, TestSize.Level1)
+{
+    auto& callbacks = manager_.systemKeyboardStatusChangeCallbacks_;
+    callbacks.clear();
+    EXPECT_EQ(callbacks.size(), 0);
+    int32_t persistentId = 100;
+    auto func = std::make_shared<SystemKeyboardStatusChangeCallback>(
+        [](DisplayId displayId, bool hasSystemKeyboard) {}
+    );
+    manager_.RegisterSystemKeyboardStatusChangeCallback(persistentId,
+        std::weak_ptr<SystemKeyboardStatusChangeCallback>(func));
+    EXPECT_NE(callbacks.find(persistentId), callbacks.end());
+    manager_.UnregisterSystemKeyboardStatusChangeCallback(persistentId);
+    EXPECT_EQ(callbacks.find(persistentId), callbacks.end());
+}
+
+/**
+ * @tc.name: ExecuteSystemKeyboardStatusChangeCallbacks
+ * @tc.desc: test function : ExecuteSystemKeyboardStatusChangeCallbacks
+ * @tc.type: FUNC
+ */
+HWTEST_F(PcFoldScreenManagerTest, ExecuteSystemKeyboardStatusChangeCallbacks, TestSize.Level1)
+{
+    auto& callbacks = manager_.systemKeyboardStatusChangeCallbacks_;
+    callbacks.clear();
+    EXPECT_EQ(callbacks.size(), 0);
+    int32_t persistentId = 100;
+    DisplayId testDisplayId = 0;
+    bool testStatus = false;
+    auto func = std::make_shared<SystemKeyboardStatusChangeCallback>(
+        [&testDisplayId, &testStatus](DisplayId displayId, bool hasSystemKeyboard) {
+            testDisplayId = displayId;
+            testStatus = hasSystemKeyboard;
+        }
+    );
+    manager_.RegisterSystemKeyboardStatusChangeCallback(persistentId,
+        std::weak_ptr<SystemKeyboardStatusChangeCallback>(func));
+    EXPECT_NE(callbacks.find(persistentId), callbacks.end());
+    manager_.ExecuteSystemKeyboardStatusChangeCallbacks(100, true);
+    EXPECT_EQ(testDisplayId, 100);
+    EXPECT_EQ(testStatus, true);
+}
+
+/**
  * @tc.name: GetVpr
  * @tc.desc: test function : GetVpr
  * @tc.type: FUNC
  */
-HWTEST_F(PcFoldScreenManagerTest, GetVpr, Function | SmallTest | Level2)
+HWTEST_F(PcFoldScreenManagerTest, GetVpr, TestSize.Level1)
 {
     manager_.vpr_ = 1.0;
     EXPECT_TRUE(MathHelper::NearZero(manager_.GetVpr() - 1.0));
+}
+
+/**
+ * @tc.name: IsAllowThrowSlip
+ * @tc.desc: test function : IsAllowThrowSlip, IsStartFullScreen
+ * @tc.type: FUNC
+ */
+HWTEST_F(PcFoldScreenControllerTest, IsAllowThrowSlip, TestSize.Level1)
+{
+    SetExpanded();
+    EXPECT_FALSE(controller_->IsAllowThrowSlip(DEFAULT_SCREEN_ID));
+    SetHalfFolded();
+    manager_.UpdateSystemKeyboardStatus(false);
+    EXPECT_TRUE(controller_->IsAllowThrowSlip(DEFAULT_SCREEN_ID));
+    manager_.UpdateSystemKeyboardStatus(true);
+    EXPECT_FALSE(controller_->IsAllowThrowSlip(DEFAULT_SCREEN_ID));
+
+    // sub session
+    SetHalfFolded();
+    manager_.UpdateSystemKeyboardStatus(false);
+    SessionInfo subInfo;
+    subInfo.abilityName_ = "SubSession";
+    subInfo.bundleName_ = "SubSession";
+    sptr<SubSession> subSession = sptr<SubSession>::MakeSptr(subInfo, nullptr);
+    ASSERT_NE(subSession, nullptr);
+    ASSERT_NE(subSession->pcFoldScreenController_, nullptr);
+    subSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    const auto& subController = subSession->pcFoldScreenController_;
+    subSession->property_->SetDecorEnable(true);
+    EXPECT_TRUE(subController->IsAllowThrowSlip(DEFAULT_SCREEN_ID));
+    subSession->property_->SetDecorEnable(false);
+    EXPECT_FALSE(subController->IsAllowThrowSlip(DEFAULT_SCREEN_ID));
 }
 
 /**
@@ -556,12 +754,14 @@ HWTEST_F(PcFoldScreenManagerTest, GetVpr, Function | SmallTest | Level2)
  * @tc.desc: test function : OnConnect
  * @tc.type: FUNC
  */
-HWTEST_F(PcFoldScreenControllerTest, OnConnect, Function | SmallTest | Level2)
+HWTEST_F(PcFoldScreenControllerTest, OnConnect, TestSize.Level1)
 {
-    mainSession_->sessionInfo_.screenId_ = DEFAULT_SCREEN_ID;
-    SetHalfFolded();
+    mainSession_->sessionInfo_.screenId_ = DEFAULT_DISPLAY_ID;
+    SetExpanded();
     controller_->OnConnect();
     EXPECT_TRUE(controller_->supportEnterWaterfallMode_);
+    controller_->onFoldScreenStatusChangeCallback_ = nullptr;
+    controller_->onSystemKeyboardStatusChangeCallback_ = nullptr;
     SetExpanded();
     controller_->OnConnect();
     EXPECT_FALSE(controller_->supportEnterWaterfallMode_);
@@ -572,12 +772,28 @@ HWTEST_F(PcFoldScreenControllerTest, OnConnect, Function | SmallTest | Level2)
  * @tc.desc: test function : RecordStartMoveRect, IsStartFullScreen
  * @tc.type: FUNC
  */
-HWTEST_F(PcFoldScreenControllerTest, RecordStartMoveRect, Function | SmallTest | Level2)
+HWTEST_F(PcFoldScreenControllerTest, RecordStartMoveRect, TestSize.Level1)
 {
     WSRect rect = { 100, 100, 200, 200 };
     controller_->RecordStartMoveRect(rect, true);
     EXPECT_EQ(controller_->startMoveRect_, rect);
-    EXPECT_EQ(controller_->IsStartFullScreen(), true);
+    EXPECT_TRUE(controller_->IsStartFullScreen());
+    EXPECT_FALSE(controller_->IsThrowSlipDirectly());
+}
+
+/**
+ * @tc.name: RecordStartMoveRectDirectly
+ * @tc.desc: test function : RecordStartMoveRectDirectly, IsStartFullScreen
+ * @tc.type: FUNC
+ */
+HWTEST_F(PcFoldScreenControllerTest, RecordStartMoveRectDirectly, TestSize.Level1)
+{
+    WSRect rect = { 100, 100, 200, 200 };
+    controller_->RecordStartMoveRectDirectly(rect, ThrowSlipMode::THREE_FINGERS_SWIPE, B_VELOCITY, true);
+    EXPECT_EQ(controller_->startMoveRect_, rect);
+    EXPECT_TRUE(controller_->IsStartFullScreen());
+    EXPECT_TRUE(controller_->IsThrowSlipDirectly());
+    EXPECT_TRUE(MathHelper::GreatNotEqual(controller_->startVelocity_.posY_, 0.0f));
 }
 
 /**
@@ -585,7 +801,7 @@ HWTEST_F(PcFoldScreenControllerTest, RecordStartMoveRect, Function | SmallTest |
  * @tc.desc: test function : RecordMoveRects
  * @tc.type: FUNC
  */
-HWTEST_F(PcFoldScreenControllerTest, RecordMoveRects, Function | SmallTest | Level2)
+HWTEST_F(PcFoldScreenControllerTest, RecordMoveRects, TestSize.Level1)
 {
     WSRect rect = ZERO_RECT;
     for (int i = 0; i < MOVING_RECORDS_SIZE_LIMIT; ++i) {
@@ -604,7 +820,7 @@ HWTEST_F(PcFoldScreenControllerTest, RecordMoveRects, Function | SmallTest | Lev
  * @tc.desc: test function : ThrowSlip in B
  * @tc.type: FUNC
  */
-HWTEST_F(PcFoldScreenControllerTest, ThrowSlip1, Function | SmallTest | Level1)
+HWTEST_F(PcFoldScreenControllerTest, ThrowSlip1, TestSize.Level1)
 {
     SetHalfFolded();
     WSRect rect0 = B_RECT;
@@ -635,7 +851,7 @@ HWTEST_F(PcFoldScreenControllerTest, ThrowSlip1, Function | SmallTest | Level1)
  * @tc.desc: test function : ThrowSlip in C
  * @tc.type: FUNC
  */
-HWTEST_F(PcFoldScreenControllerTest, ThrowSlip2, Function | SmallTest | Level1)
+HWTEST_F(PcFoldScreenControllerTest, ThrowSlip2, TestSize.Level1)
 {
     SetHalfFolded();
     WSRect rect0 = { 100, SCREEN_HEIGHT - 500, 400, 400 };
@@ -666,7 +882,7 @@ HWTEST_F(PcFoldScreenControllerTest, ThrowSlip2, Function | SmallTest | Level1)
  * @tc.desc: test function : ThrowSlip when flattened
  * @tc.type: FUNC
  */
-HWTEST_F(PcFoldScreenControllerTest, ThrowSlip3, Function | SmallTest | Level1)
+HWTEST_F(PcFoldScreenControllerTest, ThrowSlip3, TestSize.Level1)
 {
     SetExpanded();
     WSRect rect0 = B_RECT;
@@ -683,11 +899,60 @@ HWTEST_F(PcFoldScreenControllerTest, ThrowSlip3, Function | SmallTest | Level1)
 }
 
 /**
+ * @tc.name: ThrowSlip4
+ * @tc.desc: test function : ThrowSlip waterfall mode directly
+ * @tc.type: FUNC
+ */
+HWTEST_F(PcFoldScreenControllerTest, ThrowSlip4, TestSize.Level1)
+{
+    SetHalfFolded();
+    WSRect rect = DISPLAY_RECT;
+    // throw to B side
+    controller_->isFullScreenWaterfallMode_ = true;
+    controller_->RecordStartMoveRectDirectly(rect, ThrowSlipMode::THREE_FINGERS_SWIPE, B_VELOCITY, true);
+    EXPECT_TRUE(controller_->ThrowSlip(DEFAULT_SCREEN_ID, rect, TOP_AVOID_HEIGHT, BOT_AVOID_HEIGHT));
+    EXPECT_EQ(ScreenSide::FOLD_C, manager_.CalculateScreenSide(rect));
+    // throw to C side
+    rect = DISPLAY_RECT;
+    controller_->isFullScreenWaterfallMode_ = true;
+    controller_->RecordStartMoveRectDirectly(rect, ThrowSlipMode::THREE_FINGERS_SWIPE, C_VELOCITY, true);
+    EXPECT_TRUE(controller_->ThrowSlip(DEFAULT_SCREEN_ID, rect, TOP_AVOID_HEIGHT, BOT_AVOID_HEIGHT));
+    EXPECT_EQ(ScreenSide::FOLD_B, manager_.CalculateScreenSide(rect));
+}
+
+/**
+ * @tc.name: ThrowSlipFloatingRectDirectly
+ * @tc.desc: test function : ThrowSlipFloatingRectDirectly
+ * @tc.type: FUNC
+ */
+HWTEST_F(PcFoldScreenControllerTest, ThrowSlipFloatingRectDirectly, TestSize.Level1)
+{
+    SetHalfFolded();
+    WSRect rect = DEFAULT_FULLSCREEN_RECT;
+    controller_->ThrowSlipFloatingRectDirectly(rect, B_RECT, TOP_AVOID_HEIGHT, BOT_AVOID_HEIGHT);
+    EXPECT_EQ(B_RECT, rect);
+    rect = VIRTUAL_FULLSCREEN_RECT;
+    controller_->ThrowSlipFloatingRectDirectly(rect, B_RECT, TOP_AVOID_HEIGHT, BOT_AVOID_HEIGHT);
+    EXPECT_EQ(ScreenSide::FOLD_C, manager_.CalculateScreenSide(rect));
+}
+
+/**
+ * @tc.name: IsThrowSlipDirectly
+ * @tc.desc: test function : IsThrowSlipDirectly
+ * @tc.type: FUNC
+ */
+HWTEST_F(PcFoldScreenControllerTest, IsThrowSlipDirectly, TestSize.Level1)
+{
+    controller_->startThrowSlipMode_ = ThrowSlipMode::BUTTON;
+    EXPECT_TRUE(controller_->IsThrowSlipDirectly());
+}
+
+/**
  * @tc.name: UpdateFullScreenWaterfallMode
  * @tc.desc: test function : UpdateFullScreenWaterfallMode, IsFullScreenWaterfallMode
  * @tc.type: FUNC
  */
-HWTEST_F(PcFoldScreenControllerTest, UpdateFullScreenWaterfallMode, Function | SmallTest | Level2)
+HWTEST_F(PcFoldScreenControllerTest, UpdateFullScreenWaterfallMode, TestSize.Level1)
 {
     controller_->UpdateFullScreenWaterfallMode(true);
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -704,7 +969,7 @@ HWTEST_F(PcFoldScreenControllerTest, UpdateFullScreenWaterfallMode, Function | S
  * @tc.desc: test function : ExecuteFullScreenWaterfallModeChangeCallback
  * @tc.type: FUNC
  */
-HWTEST_F(PcFoldScreenControllerTest, RegisterFullScreenWaterfallModeChangeCallback, Function | SmallTest | Level2)
+HWTEST_F(PcFoldScreenControllerTest, RegisterFullScreenWaterfallModeChangeCallback, TestSize.Level1)
 {
     // register and unregister
     auto func1 = [](bool isWaterfallMode) {};
@@ -732,16 +997,35 @@ HWTEST_F(PcFoldScreenControllerTest, RegisterFullScreenWaterfallModeChangeCallba
  * @tc.desc: test function : UpdateSupportEnterWaterfallMode
  * @tc.type: FUNC
  */
-HWTEST_F(PcFoldScreenControllerTest, UpdateSupportEnterWaterfallMode, Function | SmallTest | Level3)
+HWTEST_F(PcFoldScreenControllerTest, UpdateSupportEnterWaterfallMode, TestSize.Level1)
 {
     controller_->lastSupportEnterWaterfallMode_ = false;
+    controller_->maskSupportEnterWaterfallMode_ = true;
     controller_->supportEnterWaterfallMode_ = true;
     controller_->UpdateSupportEnterWaterfallMode();
     EXPECT_NE(controller_->lastSupportEnterWaterfallMode_, controller_->supportEnterWaterfallMode_);
     sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
+    controller_->maskSupportEnterWaterfallMode_ = false;
     mainSession_->sessionStage_ = mockSessionStage;
     controller_->UpdateSupportEnterWaterfallMode();
     EXPECT_EQ(controller_->lastSupportEnterWaterfallMode_, controller_->supportEnterWaterfallMode_);
+}
+
+/**
+ * @tc.name: MaskSupportEnterWaterfallMode
+ * @tc.desc: test function : MaskSupportEnterWaterfallMode
+ * Test Procedure
+ * step1: test maskSupportEnterWaterfallMode_ default is false
+ * step2: test after invoking MaskSupportEnterWaterfallMode
+ *        expect maskSupportEnterWaterfallMode_ is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(PcFoldScreenControllerTest, MaskSupportEnterWaterfallMode, TestSize.Level1)
+{
+    controller_->maskSupportEnterWaterfallMode_ = false;
+    EXPECT_FALSE(controller_->maskSupportEnterWaterfallMode_);
+    controller_->MaskSupportEnterWaterfallMode();
+    EXPECT_TRUE(controller_->maskSupportEnterWaterfallMode_);
 }
 
 /**
@@ -749,23 +1033,23 @@ HWTEST_F(PcFoldScreenControllerTest, UpdateSupportEnterWaterfallMode, Function |
  * @tc.desc: test function : GetPersistentId
  * @tc.type: FUNC
  */
-HWTEST_F(PcFoldScreenControllerTest, GetPersistentId, Function | SmallTest | Level3)
+HWTEST_F(PcFoldScreenControllerTest, GetPersistentId, TestSize.Level1)
 {
     controller_->persistentId_ = 100;
     EXPECT_EQ(mainSession_->pcFoldScreenController_->GetPersistentId(), 100);
 }
 
 /**
- * @tc.name: GetScreenId
- * @tc.desc: test function : GetScreenId
+ * @tc.name: GetDisplayId
+ * @tc.desc: test function : GetDisplayId
  * @tc.type: FUNC
  */
-HWTEST_F(PcFoldScreenControllerTest, GetScreenId, Function | SmallTest | Level3)
+HWTEST_F(PcFoldScreenControllerTest, GetDisplayId, TestSize.Level1)
 {
     mainSession_->sessionInfo_.screenId_ = 100;
-    EXPECT_EQ(100, controller_->GetScreenId());
+    EXPECT_EQ(100, controller_->GetDisplayId());
     mainSession_ = nullptr;
-    EXPECT_EQ(SCREEN_ID_INVALID, controller_->GetScreenId());
+    EXPECT_EQ(SCREEN_ID_INVALID, controller_->GetDisplayId());
 }
 
 /**
@@ -773,7 +1057,7 @@ HWTEST_F(PcFoldScreenControllerTest, GetScreenId, Function | SmallTest | Level3)
  * @tc.desc: test function : GetTitleHeight
  * @tc.type: FUNC
  */
-HWTEST_F(PcFoldScreenControllerTest, GetTitleHeight, Function | SmallTest | Level2)
+HWTEST_F(PcFoldScreenControllerTest, GetTitleHeight, TestSize.Level1)
 {
     // min
     mainSession_->customDecorHeight_ = MIN_DECOR_HEIGHT - 10;
@@ -792,7 +1076,7 @@ HWTEST_F(PcFoldScreenControllerTest, GetTitleHeight, Function | SmallTest | Leve
  * @tc.desc: test function : CalculateMovingVelocity
  * @tc.type: FUNC
  */
-HWTEST_F(PcFoldScreenControllerTest, CalculateMovingVelocity, Function | SmallTest | Level1)
+HWTEST_F(PcFoldScreenControllerTest, CalculateMovingVelocity, TestSize.Level1)
 {
     SetHalfFolded();
     WSRect rect0 = { 100, SCREEN_HEIGHT - 500, 400, 400 };
@@ -818,6 +1102,22 @@ HWTEST_F(PcFoldScreenControllerTest, CalculateMovingVelocity, Function | SmallTe
     EXPECT_LE(std::abs(velocity.posY_ - ratio), err);
     EXPECT_LE(std::abs(velocity.width_ - ratio), err);
     EXPECT_LE(std::abs(velocity.height_ - ratio), err);
+
+    // throw directly
+    controller_->RecordStartMoveRectDirectly(rect0, ThrowSlipMode::THREE_FINGERS_SWIPE, B_VELOCITY, false);
+    EXPECT_EQ(controller_->startVelocity_, controller_->CalculateMovingVelocity());
+}
+
+/**
+ * @tc.name: IsSupportEnterWaterfallMode
+ * @tc.desc: test function : IsSupportEnterWaterfallMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(PcFoldScreenControllerTest, IsSupportEnterWaterfallMode, TestSize.Level1)
+{
+    EXPECT_TRUE(controller_->IsSupportEnterWaterfallMode(SuperFoldStatus::HALF_FOLDED, false));
+    EXPECT_FALSE(controller_->IsSupportEnterWaterfallMode(SuperFoldStatus::HALF_FOLDED, true));
+    EXPECT_FALSE(controller_->IsSupportEnterWaterfallMode(SuperFoldStatus::EXPANDED, false));
 }
 }
 }

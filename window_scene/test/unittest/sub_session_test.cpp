@@ -87,7 +87,7 @@ namespace {
  * @tc.desc: check func TransferKeyEvent
  * @tc.type: FUNC
  */
-HWTEST_F(SubSessionTest, TransferKeyEvent01, Function | SmallTest | Level1)
+HWTEST_F(SubSessionTest, TransferKeyEvent01, TestSize.Level1)
 {
     subSession_->state_ = SessionState::STATE_END;
 
@@ -99,7 +99,7 @@ HWTEST_F(SubSessionTest, TransferKeyEvent01, Function | SmallTest | Level1)
  * @tc.desc: check func TransferKeyEvent
  * @tc.type: FUNC
  */
-HWTEST_F(SubSessionTest, TransferKeyEvent02, Function | SmallTest | Level1)
+HWTEST_F(SubSessionTest, TransferKeyEvent02, TestSize.Level1)
 {
     subSession_->state_ = SessionState::STATE_CONNECT;
     std::shared_ptr<MMI::KeyEvent> keyEvent = nullptr;
@@ -112,7 +112,7 @@ HWTEST_F(SubSessionTest, TransferKeyEvent02, Function | SmallTest | Level1)
  * @tc.desc: check func TransferKeyEvent
  * @tc.type: FUNC
  */
-HWTEST_F(SubSessionTest, TransferKeyEvent03, Function | SmallTest | Level1)
+HWTEST_F(SubSessionTest, TransferKeyEvent03, TestSize.Level1)
 {
     ASSERT_NE(subSession_, nullptr);
     subSession_->state_ = SessionState::STATE_CONNECT;
@@ -127,7 +127,7 @@ HWTEST_F(SubSessionTest, TransferKeyEvent03, Function | SmallTest | Level1)
  * @tc.desc: check func TransferKeyEvent
  * @tc.type: FUNC
  */
-HWTEST_F(SubSessionTest, TransferKeyEvent04, Function | SmallTest | Level1)
+HWTEST_F(SubSessionTest, TransferKeyEvent04, TestSize.Level1)
 {
     SessionInfo sessionInfo;
     sessionInfo.abilityName_ = "TransferKeyEvent04";
@@ -148,7 +148,7 @@ HWTEST_F(SubSessionTest, TransferKeyEvent04, Function | SmallTest | Level1)
  * @tc.desc: check func IsTopmost
  * @tc.type: FUNC
  */
-HWTEST_F(SubSessionTest, IsTopmost01, Function | SmallTest | Level1)
+HWTEST_F(SubSessionTest, IsTopmost01, TestSize.Level1)
 {
     subSession_->GetSessionProperty()->SetTopmost(false);
     ASSERT_EQ(false, subSession_->IsTopmost());
@@ -162,7 +162,7 @@ HWTEST_F(SubSessionTest, IsTopmost01, Function | SmallTest | Level1)
  * @tc.desc: check func IsTopmost
  * @tc.type: FUNC
  */
-HWTEST_F(SubSessionTest, IsTopmost02, Function | SmallTest | Level1)
+HWTEST_F(SubSessionTest, IsTopmost02, TestSize.Level1)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     subSession_->SetSessionProperty(property);
@@ -177,7 +177,7 @@ HWTEST_F(SubSessionTest, IsTopmost02, Function | SmallTest | Level1)
  * @tc.desc: check func CheckPointerEventDispatch
  * @tc.type: FUNC
  */
-HWTEST_F(SubSessionTest, CheckPointerEventDispatch01, Function | SmallTest | Level1)
+HWTEST_F(SubSessionTest, CheckPointerEventDispatch01, TestSize.Level1)
 {
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     ASSERT_NE(nullptr, pointerEvent);
@@ -193,7 +193,7 @@ HWTEST_F(SubSessionTest, CheckPointerEventDispatch01, Function | SmallTest | Lev
  * @tc.desc: check func CheckPointerEventDispatch
  * @tc.type: FUNC
  */
-HWTEST_F(SubSessionTest, CheckPointerEventDispatch02, Function | SmallTest | Level1)
+HWTEST_F(SubSessionTest, CheckPointerEventDispatch02, TestSize.Level1)
 {
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     ASSERT_NE(nullptr, pointerEvent);
@@ -210,7 +210,7 @@ HWTEST_F(SubSessionTest, CheckPointerEventDispatch02, Function | SmallTest | Lev
  * @tc.desc: check func CheckPointerEventDispatch
  * @tc.type: FUNC
  */
-HWTEST_F(SubSessionTest, CheckPointerEventDispatch03, Function | SmallTest | Level1)
+HWTEST_F(SubSessionTest, CheckPointerEventDispatch03, TestSize.Level1)
 {
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     ASSERT_NE(nullptr, pointerEvent);
@@ -228,7 +228,7 @@ HWTEST_F(SubSessionTest, CheckPointerEventDispatch03, Function | SmallTest | Lev
  * @tc.desc: check func CheckPointerEventDispatch
  * @tc.type: FUNC
  */
-HWTEST_F(SubSessionTest, CheckPointerEventDispatch04, Function | SmallTest | Level1)
+HWTEST_F(SubSessionTest, CheckPointerEventDispatch04, TestSize.Level1)
 {
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     ASSERT_NE(nullptr, pointerEvent);
@@ -247,7 +247,7 @@ HWTEST_F(SubSessionTest, CheckPointerEventDispatch04, Function | SmallTest | Lev
  * @tc.desc: check func CheckPointerEventDispatch
  * @tc.type: FUNC
  */
-HWTEST_F(SubSessionTest, CheckPointerEventDispatch05, Function | SmallTest | Level1)
+HWTEST_F(SubSessionTest, CheckPointerEventDispatch05, TestSize.Level1)
 {
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     ASSERT_NE(nullptr, pointerEvent);
@@ -266,7 +266,7 @@ HWTEST_F(SubSessionTest, CheckPointerEventDispatch05, Function | SmallTest | Lev
  * @tc.desc: check func IsModal
  * @tc.type: FUNC
  */
-HWTEST_F(SubSessionTest, IsModal, Function | SmallTest | Level1)
+HWTEST_F(SubSessionTest, IsModal, TestSize.Level1)
 {
     ASSERT_FALSE(subSession_->IsModal());
 }
@@ -276,7 +276,7 @@ HWTEST_F(SubSessionTest, IsModal, Function | SmallTest | Level1)
  * @tc.desc: check func IsVisibleForeground
  * @tc.type: FUNC
  */
-HWTEST_F(SubSessionTest, IsVisibleForeground01, Function | SmallTest | Level1)
+HWTEST_F(SubSessionTest, IsVisibleForeground01, TestSize.Level1)
 {
     ASSERT_FALSE(subSession_->IsVisibleForeground());
 
@@ -295,7 +295,7 @@ HWTEST_F(SubSessionTest, IsVisibleForeground01, Function | SmallTest | Level1)
  * @tc.desc: test function : RectCheck
  * @tc.type: FUNC
  */
-HWTEST_F(SubSessionTest, RectCheck, Function | SmallTest | Level1)
+HWTEST_F(SubSessionTest, RectCheck, TestSize.Level1)
 {
     ASSERT_NE(subSession_, nullptr);
     SessionInfo info;
@@ -331,7 +331,7 @@ HWTEST_F(SubSessionTest, RectCheck, Function | SmallTest | Level1)
  * @tc.desc: IsModal function01
  * @tc.type: FUNC
  */
-HWTEST_F(SubSessionTest, IsModal01, Function | SmallTest | Level2)
+HWTEST_F(SubSessionTest, IsModal01, TestSize.Level1)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
@@ -346,7 +346,7 @@ HWTEST_F(SubSessionTest, IsModal01, Function | SmallTest | Level2)
  * @tc.desc: IsApplicationModal function01
  * @tc.type: FUNC
  */
-HWTEST_F(SubSessionTest, IsApplicationModal, Function | SmallTest | Level2)
+HWTEST_F(SubSessionTest, IsApplicationModal, TestSize.Level1)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
@@ -362,7 +362,7 @@ HWTEST_F(SubSessionTest, IsApplicationModal, Function | SmallTest | Level2)
  * @tc.desc: NotifySessionRectChange function01
  * @tc.type: FUNC
  */
-HWTEST_F(SubSessionTest, NotifySessionRectChange01, Function | SmallTest | Level2)
+HWTEST_F(SubSessionTest, NotifySessionRectChange01, TestSize.Level1)
 {
     subSession_->shouldFollowParentWhenShow_ = true;
     WSRect rect;
@@ -377,7 +377,7 @@ HWTEST_F(SubSessionTest, NotifySessionRectChange01, Function | SmallTest | Level
  * @tc.desc: UpdateSessionRectInner function01
  * @tc.type: FUNC
  */
-HWTEST_F(SubSessionTest, UpdateSessionRectInner01, Function | SmallTest | Level2)
+HWTEST_F(SubSessionTest, UpdateSessionRectInner01, TestSize.Level1)
 {
     subSession_->shouldFollowParentWhenShow_ = true;
     WSRect rect;
@@ -395,7 +395,7 @@ HWTEST_F(SubSessionTest, UpdateSessionRectInner01, Function | SmallTest | Level2
  * @tc.desc: IsVisibleForeground Test
  * @tc.type: FUNC
  */
-HWTEST_F(SubSessionTest, IsVisibleForeground, Function | SmallTest | Level2)
+HWTEST_F(SubSessionTest, IsVisibleForeground, TestSize.Level1)
 {
     systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     subSession_->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
@@ -417,6 +417,252 @@ HWTEST_F(SubSessionTest, IsVisibleForeground, Function | SmallTest | Level2)
     EXPECT_EQ(subSession_->IsVisibleForeground(), false);
     parentSession->isVisible_ = true;
     EXPECT_EQ(subSession_->IsVisibleForeground(), true);
+}
+
+/**
+ * @tc.name: SetParentSessionCallback
+ * @tc.desc: SetParentSessionCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubSessionTest, SetParentSessionCallback, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetParentSessionCallback";
+    info.bundleName_ = "SetParentSessionCallback";
+    sptr<SubSession> subSession = sptr<SubSession>::MakeSptr(info, nullptr);
+    subSession->SetParentSessionCallback(nullptr);
+    EXPECT_EQ(subSession->setParentSessionFunc_, nullptr);
+
+    NotifySetParentSessionFunc func = [](int32_t oldParentWindowId, int32_t newParentWindowId) {
+        return;
+    };
+    subSession->SetParentSessionCallback(std::move(func));
+    EXPECT_NE(subSession->setParentSessionFunc_, nullptr);
+}
+
+/**
+ * @tc.name: NotifySetParentSession
+ * @tc.desc: NotifySetParentSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubSessionTest, NotifySetParentSession, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "NotifySetParentSession";
+    info.bundleName_ = "NotifySetParentSession";
+    sptr<SubSession> subSession = sptr<SubSession>::MakeSptr(info, nullptr);
+    int32_t oldParentWindowId = 1;
+    int32_t newParentWindowId = 2;
+    auto res = subSession->NotifySetParentSession(oldParentWindowId, newParentWindowId);
+    EXPECT_EQ(res, WMError::WM_OK);
+
+    NotifySetParentSessionFunc func = [](int32_t oldParentWindowId, int32_t newParentWindowId) {
+        return;
+    };
+    subSession->SetParentSessionCallback(std::move(func));
+    res = subSession->NotifySetParentSession(oldParentWindowId, newParentWindowId);
+    EXPECT_EQ(res, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: NotifyFollowParentMultiScreenPolicy
+ * @tc.desc: NotifyFollowParentMultiScreenPolicy
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubSessionTest, NotifyFollowParentMultiScreenPolicy, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    subSession_->SetSessionProperty(property);
+    EXPECT_EQ(subSession_->NotifyFollowParentMultiScreenPolicy(true), WSError::WS_OK);
+    EXPECT_EQ(subSession_->NotifyFollowParentMultiScreenPolicy(false), WSError::WS_OK);
+}
+
+/**
+ * @tc.name: IsFollowParentMultiScreenPolicy
+ * @tc.desc: IsFollowParentMultiScreenPolicy
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubSessionTest, IsFollowParentMultiScreenPolicy, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    subSession_->SetSessionProperty(property);
+    EXPECT_EQ(subSession_->IsFollowParentMultiScreenPolicy(), false);
+    EXPECT_EQ(subSession_->NotifyFollowParentMultiScreenPolicy(true), WSError::WS_OK);
+    EXPECT_EQ(subSession_->IsFollowParentMultiScreenPolicy(), true);
+    EXPECT_EQ(subSession_->NotifyFollowParentMultiScreenPolicy(false), WSError::WS_OK);
+    EXPECT_EQ(subSession_->IsFollowParentMultiScreenPolicy(), false);
+}
+
+/**
+ * @tc.name: UpdateSessionRectInner02
+ * @tc.desc: UpdateSessionRectInner Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubSessionTest, UpdateSessionRectInner02, TestSize.Level1)
+{
+    subSession_->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    SessionInfo info;
+    info.abilityName_ = "UpdateSessionRectInner02";
+    info.bundleName_ = "UpdateSessionRectInner02";
+    sptr<SceneSession> parentSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    parentSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    parentSession->moveDragController_ =
+        sptr<MoveDragController>::MakeSptr(parentSession->GetPersistentId(), parentSession->GetWindowType());
+    parentSession->subSession_.emplace_back(subSession_);
+    subSession_->SetParentSession(parentSession);
+
+    parentSession->moveDragController_->isStartMove_ = false;
+    parentSession->moveDragController_->isStartDrag_ = false;
+    WSRect defaultRect;
+    WSRect rect = { 50, 50, 800, 800 };
+    MoveConfiguration config;
+    config.displayId = DISPLAY_ID_INVALID;
+    subSession_->NotifyFollowParentMultiScreenPolicy(true);
+    parentSession->moveDragController_->isStartMove_ = true;
+    subSession_->UpdateSessionRectInner(rect, SizeChangeReason::MOVE, config);
+    ASSERT_EQ(50, subSession_->GetRequestRectWhenFollowParent().posX_);
+    subSession_->UpdateSessionRectInner(rect, SizeChangeReason::RESIZE, config);
+    ASSERT_EQ(800, subSession_->GetRequestRectWhenFollowParent().width_);
+
+    subSession_->SetRequestRectWhenFollowParent(defaultRect);
+    parentSession->moveDragController_->isStartMove_ = false;
+    parentSession->moveDragController_->isStartDrag_ = true;
+    subSession_->UpdateSessionRectInner(rect, SizeChangeReason::MOVE, config);
+    ASSERT_EQ(50, subSession_->GetRequestRectWhenFollowParent().posX_);
+    rect.width_ = 0;
+    rect.height_ = 0;
+    subSession_->UpdateSessionRectInner(rect, SizeChangeReason::RESIZE, config);
+    ASSERT_NE(0, subSession_->GetRequestRectWhenFollowParent().width_);
+}
+
+/**
+ * @tc.name: HandleCrossMoveToSurfaceNode
+ * @tc.desc: HandleCrossMoveToSurfaceNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubSessionTest, HandleCrossMoveToSurfaceNode, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "HandleCrossMoveToSurfaceNode";
+    info.bundleName_ = "HandleCrossMoveToSurfaceNode";
+    sptr<SubSession> sceneSession = sptr<SubSession>::MakeSptr(info, nullptr);
+    sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sceneSession->displayIdSetDuringMoveTo_.insert(0);
+    WSRect rect = { 50, 50, 800, 800 };
+    sceneSession->HandleCrossMoveToSurfaceNode(rect);
+    struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
+    rsSurfaceNodeConfig.SurfaceNodeName = info.abilityName_;
+    RSSurfaceNodeType rsSurfaceNodeType = RSSurfaceNodeType::DEFAULT;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig, rsSurfaceNodeType);
+    ASSERT_NE(surfaceNode, nullptr);
+    sceneSession->SetSurfaceNode(surfaceNode);
+    sceneSession->HandleCrossMoveToSurfaceNode(rect);
+    ASSERT_NE(0, sceneSession->displayIdSetDuringMoveTo_.size());
+}
+
+/**
+ * @tc.name: AddSurfaceNodeToScreen
+ * @tc.desc: AddSurfaceNodeToScreen
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubSessionTest, AddSurfaceNodeToScreen, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "AddSurfaceNodeToScreen";
+    info.bundleName_ = "AddSurfaceNodeToScreen";
+    sptr<SubSession> sceneSession = sptr<SubSession>::MakeSptr(info, nullptr);
+    sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sceneSession->moveDragController_ =
+        sptr<MoveDragController>::MakeSptr(sceneSession->GetPersistentId(), sceneSession->GetWindowType());
+    sceneSession->AddSurfaceNodeToScreen();
+    struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
+    rsSurfaceNodeConfig.SurfaceNodeName = info.abilityName_;
+    RSSurfaceNodeType rsSurfaceNodeType = RSSurfaceNodeType::DEFAULT;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig, rsSurfaceNodeType);
+    ASSERT_NE(surfaceNode, nullptr);
+    sceneSession->SetSurfaceNode(surfaceNode);
+    sceneSession->SetOriginDisplayId(12);
+    sceneSession->AddSurfaceNodeToScreen();
+    ASSERT_EQ(12, sceneSession->GetOriginDisplayId());
+    sceneSession->SetOriginDisplayId(DISPLAY_ID_INVALID);
+    sceneSession->SetScreenId(0);
+    sceneSession->AddSurfaceNodeToScreen();
+    ASSERT_NE(DISPLAY_ID_INVALID, sceneSession->GetOriginDisplayId());
+    sceneSession->displayIdSetDuringMoveTo_.clear();
+    sceneSession->winRect_ = { 50, 50, 800, 800 };
+    sceneSession->AddSurfaceNodeToScreen();
+    ASSERT_NE(DISPLAY_ID_INVALID, sceneSession->GetOriginDisplayId());
+    sceneSession->winRect_ = { 10000, 10000, 800, 800 };
+    sceneSession->AddSurfaceNodeToScreen();
+    ASSERT_NE(DISPLAY_ID_INVALID, sceneSession->GetOriginDisplayId());
+}
+
+/**
+ * @tc.name: RemoveSufaceNodeFromScreen
+ * @tc.desc: RemoveSufaceNodeFromScreen
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubSessionTest, RemoveSufaceNodeFromScreen, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "RemoveSufaceNodeFromScreen";
+    info.bundleName_ = "RemoveSufaceNodeFromScreen";
+    sptr<SubSession> sceneSession = sptr<SubSession>::MakeSptr(info, nullptr);
+    sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sceneSession->RemoveSufaceNodeFromScreen();
+    struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
+    rsSurfaceNodeConfig.SurfaceNodeName = info.abilityName_;
+    RSSurfaceNodeType rsSurfaceNodeType = RSSurfaceNodeType::DEFAULT;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig, rsSurfaceNodeType);
+    ASSERT_NE(surfaceNode, nullptr);
+    sceneSession->SetSurfaceNode(surfaceNode);
+    sceneSession->SetOriginDisplayId(DISPLAY_ID_INVALID);
+    sceneSession->displayIdSetDuringMoveTo_.insert(0);
+    sceneSession->displayIdSetDuringMoveTo_.insert(888);
+    sceneSession->RemoveSufaceNodeFromScreen();
+    ASSERT_EQ(DISPLAY_ID_INVALID, sceneSession->GetOriginDisplayId());
+    sceneSession->SetOriginDisplayId(DISPLAY_ID_INVALID);
+    sceneSession->RemoveSufaceNodeFromScreen();
+    ASSERT_EQ(DISPLAY_ID_INVALID, sceneSession->GetOriginDisplayId());
+}
+
+/**
+ * @tc.name: SetSubWindowZLevel
+ * @tc.desc: SetSubWindowZLevel
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubSessionTest, SetSubWindowZLevel, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetSubWindowZLevel";
+    info.bundleName_ = "SetSubWindowZLevel";
+    sptr<SubSession> subSession = sptr<SubSession>::MakeSptr(info, nullptr);
+    int32_t testZLevel = 0;
+    subSession->onSubSessionZLevelChange_ = [&testZLevel](int32_t zLevel) {
+        testZLevel = zLevel;
+    };
+    subSession->property_->zLevel_ = 0;
+    WSError ret = subSession->SetSubWindowZLevel(1);
+    EXPECT_EQ(1, subSession->property_->zLevel_);
+    EXPECT_EQ(1, testZLevel);
+    EXPECT_EQ(ret, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: GetSubWindowZLevel
+ * @tc.desc: GetSubWindowZLevel
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubSessionTest, GetSubWindowZLevel, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "GetSubWindowZLevel";
+    info.bundleName_ = "GetSubWindowZLevel";
+    sptr<SubSession> subSession = sptr<SubSession>::MakeSptr(info, nullptr);
+    subSession->property_->zLevel_ = 1;
+    EXPECT_EQ(1, subSession->GetSubWindowZLevel());
 }
 }
 }

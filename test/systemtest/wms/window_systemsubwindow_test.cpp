@@ -129,7 +129,7 @@ static sptr<Window> CreateSystemSubWindow(sptr<Window> parentWindow, struct Rect
  * @tc.desc: create sub windows with below system Windows
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow01, Function | MediumTest | Level2)
+HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow01, TestSize.Level1)
 {
     std::vector<WindowType> windowTypes = {
         WindowType::WINDOW_TYPE_WALLPAPER,
@@ -167,7 +167,7 @@ HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow01, Function | MediumTest | L
  * @tc.desc: create sub windows with above system Windows except WINDOW_TYPE_DIALOG
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow02, Function | MediumTest | Level2)
+HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow02, TestSize.Level1)
 {
     for (auto itor = windowTypes_.begin(); itor != windowTypes_.end(); itor++) {
         if (static_cast<WindowType>(*itor) == WindowType::WINDOW_TYPE_FLOAT) {
@@ -204,7 +204,7 @@ HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow02, Function | MediumTest | L
  * @tc.desc: create sub windows with app main Windows, no allow to add as app_main_window's subwindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow03, Function | MediumTest | Level2)
+HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow03, TestSize.Level1)
 {
 
     std::vector<WindowType> windowTypes = { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW };
@@ -232,7 +232,7 @@ HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow03, Function | MediumTest | L
  * @tc.desc: create sub windows with app sub Windows
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow04, Function | MediumTest | Level2)
+HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow04, TestSize.Level1)
 {
     std::vector<WindowType> windowTypes = {
         WindowType::WINDOW_TYPE_MEDIA,
@@ -268,7 +268,7 @@ HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow04, Function | MediumTest | L
  * @tc.desc: create sub windows with system sub Windows
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow05, Function | MediumTest | Level3)
+HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow05, TestSize.Level1)
 {
     struct Rect baseRect = {0, 0, 100, 200};
     uint32_t baseFlags = 0;
@@ -307,7 +307,7 @@ HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow05, Function | MediumTest | L
  * @tc.desc: FullScreen Main Window + 2 SubWindows
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow06, Function | MediumTest | Level3)
+HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow06, TestSize.Level1)
 {
     struct Rect baseRect = {0, 0, 100, 200};
     uint32_t baseFlags = 0;
@@ -349,7 +349,7 @@ HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow06, Function | MediumTest | L
  * @tc.desc: create sub windows with dialog
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow07, Function | MediumTest | Level3)
+HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow07, TestSize.Level1)
 {
     struct Rect baseRect = {0, 0, 100, 200};
     uint32_t baseFlags = 0;
