@@ -1502,7 +1502,6 @@ HWTEST_F(SceneSessionTest3, SetStartingWindowExitAnimationFlag, TestSize.Level1)
  */
 HWTEST_F(SceneSessionTest3, SetSkipSelfWhenShowOnVirtualScreen01, TestSize.Level1)
 {
-    bool isSkip = true;
     SessionInfo info;
     info.abilityName_ = "SetSkipSelfWhenShowOnVirtualScreen";
     info.bundleName_ = "SetSkipSelfWhenShowOnVirtualScreen";
@@ -1512,7 +1511,6 @@ HWTEST_F(SceneSessionTest3, SetSkipSelfWhenShowOnVirtualScreen01, TestSize.Level
         skipResult = isSkip;
     };
     sceneSession->SetSkipSelfWhenShowOnVirtualScreen(true);
-    usleep(SLEEP_TIME_US);
     ASSERT_EQ(skipResult, false);
 
     struct RSSurfaceNodeConfig config;
@@ -1521,12 +1519,10 @@ HWTEST_F(SceneSessionTest3, SetSkipSelfWhenShowOnVirtualScreen01, TestSize.Level
     sceneSession->surfaceNode_ = surfaceNode;
 
     sceneSession->SetSkipSelfWhenShowOnVirtualScreen(true);
-    usleep(SLEEP_TIME_US);
     ASSERT_EQ(skipResult, false);
 
     sceneSession->specificCallback_->onSetSkipSelfWhenShowOnVirtualScreen_ = callFunc;
     sceneSession->SetSkipSelfWhenShowOnVirtualScreen(true);
-    usleep(SLEEP_TIME_US);
     ASSERT_EQ(skipResult, true);
 }
 
