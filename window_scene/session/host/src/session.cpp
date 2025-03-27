@@ -2790,11 +2790,11 @@ WSError Session::UpdateHighlightStatus(bool isHighlight, bool needBlockHighlight
 {
     TLOGD(WmsLogTag::WMS_FOCUS,
         "windowId: %{public}d, currHighlight: %{public}d, nextHighlight: %{public}d, needBlockNotify:%{public}d",
-        persistentId_, isHighlight_, isHighlight, needBlockHighlightNotify);
-    if (isHighlight_ == isHighlight) {
+        persistentId_, isHighlighted_, isHighlight, needBlockHighlightNotify);
+    if (isHighlighted_ == isHighlight) {
         return WSError::WS_DO_NOTHING;
     }
-    isHighlight_ = isHighlight;
+    isHighlighted_ = isHighlight;
     if (needBlockHighlightNotify) {
         NotifyHighlightChange(isHighlight);
     }
@@ -2817,6 +2817,14 @@ WSError Session::NotifyHighlightChange(bool isHighlight)
         return WSError::WS_ERROR_NULLPTR;
     }
     sessionStage_->NotifyHighlightChange(isHighlight);
+    return WSError::WS_OK;
+}
+
+WSError Session::GetIsHighlighted(bool& isHighlighted)
+{
+    isHighlighted = isHighlighted_;
+    TLOGD(WmsLogTag::WMS_FOCUS, "windowId: %{public}d, isHighlighted: %{public}d",
+        GetPersistentId(), isHighlighted_);
     return WSError::WS_OK;
 }
 

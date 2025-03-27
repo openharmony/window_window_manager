@@ -67,7 +67,7 @@ namespace {
  * @tc.desc: check func TransferKeyEvent
  * @tc.type: FUNC
  */
-HWTEST_F(SCBSystemSessionTest, TransferKeyEvent01, Function | SmallTest | Level1)
+HWTEST_F(SCBSystemSessionTest, TransferKeyEvent01, TestSize.Level1)
 {
     ASSERT_EQ(WSError::WS_ERROR_NULLPTR, scbSystemSession_->TransferKeyEvent(nullptr));
 }
@@ -77,7 +77,7 @@ HWTEST_F(SCBSystemSessionTest, TransferKeyEvent01, Function | SmallTest | Level1
  * @tc.desc: check func TransferKeyEvent
  * @tc.type: FUNC
  */
-HWTEST_F(SCBSystemSessionTest, TransferKeyEvent02, Function | SmallTest | Level1)
+HWTEST_F(SCBSystemSessionTest, TransferKeyEvent02, TestSize.Level1)
 {
     scbSystemSession_->state_ = SessionState::STATE_CONNECT;
     std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
@@ -92,7 +92,7 @@ HWTEST_F(SCBSystemSessionTest, TransferKeyEvent02, Function | SmallTest | Level1
  * @tc.desc: check func UpdateFocus
  * @tc.type: FUNC
  */
-HWTEST_F(SCBSystemSessionTest, UpdateFocus01, Function | SmallTest | Level1)
+HWTEST_F(SCBSystemSessionTest, UpdateFocus01, TestSize.Level1)
 {
     bool isFocused = scbSystemSession_->isFocused_;
 
@@ -104,7 +104,7 @@ HWTEST_F(SCBSystemSessionTest, UpdateFocus01, Function | SmallTest | Level1)
  * @tc.desc: check func UpdateFocus
  * @tc.type: FUNC
  */
-HWTEST_F(SCBSystemSessionTest, UpdateFocus02, Function | SmallTest | Level1)
+HWTEST_F(SCBSystemSessionTest, UpdateFocus02, TestSize.Level1)
 {
     scbSystemSession_->isFocused_ = true;
     bool isFocused = scbSystemSession_->isFocused_;
@@ -122,7 +122,7 @@ HWTEST_F(SCBSystemSessionTest, UpdateFocus02, Function | SmallTest | Level1)
  * @tc.desc: check func BindKeyboardSession
  * @tc.type: FUNC
  */
-HWTEST_F(SCBSystemSessionTest, BindKeyboardSession01, Function | SmallTest | Level3)
+HWTEST_F(SCBSystemSessionTest, BindKeyboardSession01, TestSize.Level1)
 {
     ASSERT_NE(nullptr, scbSystemSession_);
     scbSystemSession_->BindKeyboardSession(nullptr);
@@ -133,7 +133,7 @@ HWTEST_F(SCBSystemSessionTest, BindKeyboardSession01, Function | SmallTest | Lev
  * @tc.desc: check func BindKeyboardSession
  * @tc.type: FUNC
  */
-HWTEST_F(SCBSystemSessionTest, BindKeyboardSession02, Function | SmallTest | Level3)
+HWTEST_F(SCBSystemSessionTest, BindKeyboardSession02, TestSize.Level1)
 {
     ASSERT_NE(nullptr, scbSystemSession_);
     SessionInfo info;
@@ -151,7 +151,7 @@ HWTEST_F(SCBSystemSessionTest, BindKeyboardSession02, Function | SmallTest | Lev
  * @tc.desc: check func SetSystemSceneBlockingFocus
  * @tc.type: FUNC
  */
-HWTEST_F(SCBSystemSessionTest, SetSystemSceneBlockingFocus01, Function | SmallTest | Level3)
+HWTEST_F(SCBSystemSessionTest, SetSystemSceneBlockingFocus01, TestSize.Level1)
 {
     ASSERT_NE(nullptr, scbSystemSession_);
     WSError ret = scbSystemSession_->SetSystemSceneBlockingFocus(true);
@@ -163,7 +163,7 @@ HWTEST_F(SCBSystemSessionTest, SetSystemSceneBlockingFocus01, Function | SmallTe
  * @tc.desc: check func PresentFocusIfPointDown
  * @tc.type: FUNC
  */
-HWTEST_F(SCBSystemSessionTest, PresentFocusIfPointDown01, Function | SmallTest | Level3)
+HWTEST_F(SCBSystemSessionTest, PresentFocusIfPointDown01, TestSize.Level1)
 {
     ASSERT_NE(nullptr, scbSystemSession_);
     scbSystemSession_->PresentFocusIfPointDown();
@@ -174,7 +174,7 @@ HWTEST_F(SCBSystemSessionTest, PresentFocusIfPointDown01, Function | SmallTest |
  * @tc.desc: check func GetKeyboardSession
  * @tc.type: FUNC
  */
-HWTEST_F(SCBSystemSessionTest, GetKeyboardSession01, Function | SmallTest | Level3)
+HWTEST_F(SCBSystemSessionTest, GetKeyboardSession01, TestSize.Level1)
 {
     ASSERT_NE(nullptr, scbSystemSession_);
     scbSystemSession_->GetKeyboardSession();
@@ -185,7 +185,7 @@ HWTEST_F(SCBSystemSessionTest, GetKeyboardSession01, Function | SmallTest | Leve
  * @tc.desc: check func ProcessPointDownSession
  * @tc.type: FUNC
  */
-HWTEST_F(SCBSystemSessionTest, ProcessPointDownSession, Function | SmallTest | Level3)
+HWTEST_F(SCBSystemSessionTest, ProcessPointDownSession, TestSize.Level1)
 {
     int32_t posX = 0;
     int32_t posY = 0;
@@ -198,7 +198,7 @@ HWTEST_F(SCBSystemSessionTest, ProcessPointDownSession, Function | SmallTest | L
  * @tc.desc: check func PresentFocusIfPointDown
  * @tc.type: FUNC
  */
-HWTEST_F(SCBSystemSessionTest, PresentFocusIfPointDown02, Function | SmallTest | Level3)
+HWTEST_F(SCBSystemSessionTest, PresentFocusIfPointDown02, TestSize.Level1)
 {
     scbSystemSession_->isFocused_ = true;
     auto ret = scbSystemSession_->SetFocusable(false);
@@ -227,7 +227,7 @@ HWTEST_F(SCBSystemSessionTest, PresentFocusIfPointDown02, Function | SmallTest |
  * @tc.desc: check func PresentFoucusIfNeed
  * @tc.type: FUNC
  */
-HWTEST_F(SCBSystemSessionTest, PresentFoucusIfNeed, Function | SmallTest | Level3)
+HWTEST_F(SCBSystemSessionTest, PresentFoucusIfNeed, TestSize.Level1)
 {
     int32_t pointerAction = 8;
     scbSystemSession_->PresentFoucusIfNeed(pointerAction);
@@ -243,7 +243,7 @@ HWTEST_F(SCBSystemSessionTest, PresentFoucusIfNeed, Function | SmallTest | Level
  * @tc.desc: check func SetSkipEventOnCastPlus
  * @tc.type: FUNC
  */
-HWTEST_F(SCBSystemSessionTest, SetSkipEventOnCastPlus01, Function | SmallTest | Level0)
+HWTEST_F(SCBSystemSessionTest, SetSkipEventOnCastPlus01, TestSize.Level1)
 {
     scbSystemSession_->SetSkipEventOnCastPlus(false);
     ASSERT_EQ(false, scbSystemSession_->GetSessionProperty()->GetSkipEventOnCastPlus());

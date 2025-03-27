@@ -56,7 +56,7 @@ namespace {
  * @tc.desc: test function : SetLoadContentFunc
  * @tc.type: FUNC
  */
-HWTEST_F(RootSceneSessionTest, SetLoadContentFunc, Function | SmallTest | Level1)
+HWTEST_F(RootSceneSessionTest, SetLoadContentFunc, TestSize.Level1)
 {
     RootSceneSession rootSceneSession;
     RootSceneSession::LoadContentFunc loadContentFunc_ = LoadContentFuncTest;
@@ -69,7 +69,7 @@ HWTEST_F(RootSceneSessionTest, SetLoadContentFunc, Function | SmallTest | Level1
  * @tc.desc: test function : LoadContentFunc
  * @tc.type: FUNC
  */
-HWTEST_F(RootSceneSessionTest, LoadContentFunc, Function | SmallTest | Level1)
+HWTEST_F(RootSceneSessionTest, LoadContentFunc, TestSize.Level1)
 {
     RootSceneSession rootSceneSession;
     std::string strTest("LoadContentFuncTest");
@@ -85,7 +85,7 @@ HWTEST_F(RootSceneSessionTest, LoadContentFunc, Function | SmallTest | Level1)
  * @tc.desc: test function : LoadContent
  * @tc.type: FUNC
  */
-HWTEST_F(RootSceneSessionTest, LoadContent, Function | SmallTest | Level1)
+HWTEST_F(RootSceneSessionTest, LoadContent, TestSize.Level1)
 {
     RootSceneSession rootSceneSession;
     std::string strTest("LoadContentFuncTest");
@@ -103,7 +103,7 @@ HWTEST_F(RootSceneSessionTest, LoadContent, Function | SmallTest | Level1)
  * @tc.desc: test function : GetSystemAvoidAreaForRoot
  * @tc.type: FUNC
  */
-HWTEST_F(RootSceneSessionTest, GetSystemAvoidAreaForRoot, Function | SmallTest | Level1)
+HWTEST_F(RootSceneSessionTest, GetSystemAvoidAreaForRoot, TestSize.Level1)
 {
     RootSceneSession rootSceneSession;
     AvoidArea avoidArea;
@@ -117,7 +117,7 @@ HWTEST_F(RootSceneSessionTest, GetSystemAvoidAreaForRoot, Function | SmallTest |
  * @tc.desc: test function : GetKeyboardAvoidAreaForRoot
  * @tc.type: FUNC
  */
-HWTEST_F(RootSceneSessionTest, GetKeyboardAvoidAreaForRoot, Function | SmallTest | Level1)
+HWTEST_F(RootSceneSessionTest, GetKeyboardAvoidAreaForRoot, TestSize.Level1)
 {
     RootSceneSession rootSceneSession;
     AvoidArea avoidArea;
@@ -131,7 +131,7 @@ HWTEST_F(RootSceneSessionTest, GetKeyboardAvoidAreaForRoot, Function | SmallTest
  * @tc.desc: test function : GetAINavigationBarAreaForRoot
  * @tc.type: FUNC
  */
-HWTEST_F(RootSceneSessionTest, GetAINavigationBarAreaForRoot, Function | SmallTest | Level1)
+HWTEST_F(RootSceneSessionTest, GetAINavigationBarAreaForRoot, TestSize.Level1)
 {
     RootSceneSession rootSceneSession;
     AvoidArea avoidArea;
@@ -145,7 +145,7 @@ HWTEST_F(RootSceneSessionTest, GetAINavigationBarAreaForRoot, Function | SmallTe
  * @tc.desc: test function : GetCutoutAvoidAreaForRoot
  * @tc.type: FUNC
  */
-HWTEST_F(RootSceneSessionTest, GetCutoutAvoidAreaForRoot, Function | SmallTest | Level1)
+HWTEST_F(RootSceneSessionTest, GetCutoutAvoidAreaForRoot, TestSize.Level1)
 {
     RootSceneSession rootSceneSession;
     AvoidArea avoidArea;
@@ -159,7 +159,7 @@ HWTEST_F(RootSceneSessionTest, GetCutoutAvoidAreaForRoot, Function | SmallTest |
  * @tc.desc: test function : SetRootSessionRect
  * @tc.type: FUNC
  */
-HWTEST_F(RootSceneSessionTest, SetRootSessionRect, Function | SmallTest | Level1)
+HWTEST_F(RootSceneSessionTest, SetRootSessionRect, TestSize.Level1)
 {
     RootSceneSession rootSceneSession;
     AvoidArea avoidArea;
@@ -173,7 +173,7 @@ HWTEST_F(RootSceneSessionTest, SetRootSessionRect, Function | SmallTest | Level1
  * @tc.desc: test function : UpdateAvoidArea
  * @tc.type: FUNC
  */
-HWTEST_F(RootSceneSessionTest, UpdateAvoidArea, Function | SmallTest | Level1)
+HWTEST_F(RootSceneSessionTest, UpdateAvoidArea, TestSize.Level1)
 {
     RootSceneSession rootSceneSession;
     AvoidArea avoidArea;

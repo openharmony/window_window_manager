@@ -68,6 +68,18 @@ HWTEST_F(PictureInPictureOptionTest, PipTemplate, TestSize.Level1)
 }
 
 /**
+ * @tc.name: DefaultWindowSizeType
+ * @tc.desc: SetDefaultWindowSizeType/GetDefaultWindowSizeType
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureOptionTest, DefaultWindowSizeType, Function | SmallTest | Level2)
+{
+    sptr<PipOption> option = new PipOption();
+    option->SetDefaultWindowSizeType(100);
+    ASSERT_EQ(100, option->GetDefaultWindowSizeType());
+}
+
+/**
  * @tc.name: PiPControlStatus
  * @tc.desc: SetPiPControlStatus/GetControlStatus
  * @tc.type: FUNC

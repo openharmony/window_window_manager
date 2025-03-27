@@ -3589,6 +3589,13 @@ public:
     virtual bool IsSubWindowMaximizeSupported() const { return false; }
 
     /**
+     * @brief update the default window size type
+     *
+     * @param defaultWindowSizeType the default window size type of pip window
+     */
+    virtual void UpdatePiPDefaultWindowSizeType(uint32_t defaultWindowSizeType) {}
+
+    /**
      * @brief Register keyboard show animation completion listener.
      *
      * @param listener IKeyboardDidShowListener.

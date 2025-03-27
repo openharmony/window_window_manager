@@ -5680,21 +5680,15 @@ bool WindowSceneSessionImpl::IsFullScreenEnable() const
         return false;
     }
     const auto& sizeLimits = property_->GetWindowLimits();
-    int32_t displayWidth = 0;
-    int32_t displayHeight = 0;
+    uint32_t displayWidth = 0;
+    uint32_t displayHeight = 0;
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
-    if (display != nullptr) {
-        displayWidth = display->GetWidth();
-        displayHeight = display->GetHeight();
-    } else {
-        auto defaultDisplayInfo = DisplayManager::GetInstance().GetDefaultDisplay();
-        if (defaultDisplayInfo != nullptr) {
-            displayWidth = defaultDisplayInfo->GetWidth();
-            displayHeight = defaultDisplayInfo->GetHeight();
-        } else {
-            return false;
-        }
+    if (display == nullptr) {
+        TLOGE(WmsLogTag::WMS_PC, "display is null, winId=%{public}u", GetWindowId());
+        return false;
     }
+    displayWidth = static_cast<uint32_t>(display->GetWidth());
+    displayHeight = static_cast<uint32_t>(display->GetHeight());
     if (property_->GetDragEnabled() && (sizeLimits.maxWidth_ < displayWidth || sizeLimits.maxHeight_ < displayHeight)) {
         return false;
     }

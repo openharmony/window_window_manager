@@ -1069,6 +1069,91 @@ HWTEST_F(WindowSceneSessionImplTest5, SetParentWindow04, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetParentWindowInner
+ * @tc.desc: SetParentWindowInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, SetParentWindowInner, TestSize.Level1)
+{
+    sptr<WindowOption> subWindowOption = sptr<WindowOption>::MakeSptr();
+    subWindowOption->SetWindowName("SetParentWindowInner_subWindow");
+    sptr<WindowSceneSessionImpl> subWindow = sptr<WindowSceneSessionImpl>::MakeSptr(subWindowOption);
+    subWindow->property_->SetPersistentId(2);
+    subWindow->property_->SetParentPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> subSession = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    subWindow->hostSession_ = subSession;
+    subWindow->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    subWindow->state_ = WindowState::STATE_SHOWN;
+
+    sptr<WindowOption> parentOption = sptr<WindowOption>::MakeSptr();
+    parentOption->SetWindowName("SetParentWindowInner_parentWindow");
+    parentOption->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<WindowSceneSessionImpl> parentWindow = sptr<WindowSceneSessionImpl>::MakeSptr(parentOption);
+    parentWindow->property_->SetPersistentId(3);
+    sptr<SessionMocker> parentSession = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    parentWindow->hostSession_ = parentSession;
+    parentWindow->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    parentWindow->state_ = WindowState::STATE_HIDDEN;
+
+    WindowAdapterMocker mocker;
+    EXPECT_CALL(mocker.Mock(), SetParentWindow(_, _)).WillRepeatedly(Return(WMError::WM_OK));
+    WindowSceneSessionImpl::subWindowSessionMap_.clear();
+    EXPECT_EQ(WMError::WM_OK, subWindow->SetParentWindowInner(1, parentWindow));
+    EXPECT_EQ(subWindow->state_, WindowState::STATE_HIDDEN);
+    EXPECT_EQ(WMError::WM_OK, subWindow->Destroy(true));
+    EXPECT_EQ(WMError::WM_OK, parentWindow->Destroy(true));
+}
+
+/**
+ * @tc.name: SetSubWindowModal01
+ * @tc.desc: SetSubWindowModal
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, SetSubWindowModal01, TestSize.Level1)
+{
+    sptr<WindowOption> subOption = sptr<WindowOption>::MakeSptr();
+    subOption->SetWindowName("SetSubWindowModal01");
+    subOption->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    sptr<WindowSceneSessionImpl> subWindow = sptr<WindowSceneSessionImpl>::MakeSptr(subOption);
+    subWindow->property_->SetPersistentId(2);
+    subWindow->property_->SetParentPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    subWindow->hostSession_ = session;
+    EXPECT_CALL(*(session), UpdateSessionPropertyByAction(_, _))
+        .WillOnce(Return(WMError::WM_ERROR_NULLPTR));
+    subWindow->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ModalityType modalityType = ModalityType::APPLICATION_MODALITY;
+    auto ret = subWindow->SetSubWindowModal(true, modalityType);
+    ASSERT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+    EXPECT_EQ(WMError::WM_OK, subWindow->Destroy(true));
+}
+
+/**
+ * @tc.name: SetWindowModal01
+ * @tc.desc: SetWindowModal
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, SetWindowModal01, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetWindowModal01");
+    option->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    EXPECT_CALL(*(session), UpdateSessionPropertyByAction(_, _))
+        .WillOnce(Return(WMError::WM_ERROR_NULLPTR));
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    auto ret = window->SetWindowModal(true);
+    ASSERT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+    EXPECT_EQ(WMError::WM_OK, window->Destroy(true));
+}
+
+/**
  * @tc.name: IsFullScreenEnable
  * @tc.desc: IsFullScreenEnable
  * @tc.type: FUNC
