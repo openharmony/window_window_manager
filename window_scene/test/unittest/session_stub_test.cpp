@@ -409,6 +409,11 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest07, Function | SmallTest | Lev
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_FLAG), data, reply, option);
     ASSERT_EQ(ERR_NONE, res);
+    ASSERT_EQ(data.WriteBool(true), true);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_FOLLOW_PARENT_MULTI_SCREEN_POLICY),
+        data, reply, option);
+    ASSERT_EQ(ERR_NONE, res);
 }
 
 /**

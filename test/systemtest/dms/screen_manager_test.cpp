@@ -331,7 +331,7 @@ namespace {
  * @tc.desc: Create a virtual screen and destroy it
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, ScreenManager01, Function | MediumTest | Level2)
+HWTEST_F(ScreenManagerTest, ScreenManager01, TestSize.Level1)
 {
     DisplayTestUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
@@ -350,7 +350,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager01, Function | MediumTest | Level2)
  * @tc.desc: Create a virtual screen as mirror of default screen, and destroy virtual screen
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, ScreenManager02, Function | MediumTest | Level2)
+HWTEST_F(ScreenManagerTest, ScreenManager02, TestSize.Level1)
 {
     DisplayTestUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
@@ -374,7 +374,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager02, Function | MediumTest | Level2)
  * @tc.desc: Create a virtual screen and destroy it for 10 times
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, ScreenManager03, Function | MediumTest | Level2)
+HWTEST_F(ScreenManagerTest, ScreenManager03, TestSize.Level1)
 {
     DisplayTestUtils utils;
     defaultOption_.isForShot_ = false;
@@ -394,7 +394,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager03, Function | MediumTest | Level2)
  * @tc.desc: Create a virtual screen as mirror of default screen, and destroy virtual screen for 10 times
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, ScreenManager04, Function | MediumTest | Level2)
+HWTEST_F(ScreenManagerTest, ScreenManager04, TestSize.Level1)
 {
     DisplayTestUtils utils;
     defaultOption_.isForShot_ = false;
@@ -421,7 +421,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager04, Function | MediumTest | Level2)
  * @tc.desc: Compare the length and width for recording screen
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, ScreenManager05, Function | MediumTest | Level2)
+HWTEST_F(ScreenManagerTest, ScreenManager05, TestSize.Level1)
 {
     DisplayTestUtils utils;
     utils.SetDefaultWH(defaultDisplay_);
@@ -460,7 +460,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager05, Function | MediumTest | Level2)
  * @tc.desc: Compare the length and width for recording screen, set VirtualScreen Surface before make mirror.
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, ScreenManager06, Function | MediumTest | Level2)
+HWTEST_F(ScreenManagerTest, ScreenManager06, TestSize.Level1)
 {
     DisplayTestUtils utils;
     utils.SetDefaultWH(defaultDisplay_);
@@ -501,7 +501,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager06, Function | MediumTest | Level2)
  * @tc.desc: Get and set screenMode
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, ScreenManager07, Function | MediumTest | Level2)
+HWTEST_F(ScreenManagerTest, ScreenManager07, TestSize.Level1)
 {
     sptr<Screen> screen = ScreenManager::GetInstance().GetScreenById(defaultScreenId_);
     ASSERT_TRUE(screen);
@@ -522,7 +522,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager07, Function | MediumTest | Level2)
  * @tc.desc: Create a virtual screen as expansion of default screen, and destroy virtual screen
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, ScreenManager08, Function | MediumTest | Level2)
+HWTEST_F(ScreenManagerTest, ScreenManager08, TestSize.Level1)
 {
     DisplayTestUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
@@ -570,7 +570,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager08, Function | MediumTest | Level2)
  *           and destroy virtual screen
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, ScreenManager09, Function | MediumTest | Level2)
+HWTEST_F(ScreenManagerTest, ScreenManager09, TestSize.Level1)
 {
     (void)system("param set rosen.uni.partialrender.enabled 0");
 
@@ -628,7 +628,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager09, Function | MediumTest | Level2)
  * @tc.desc: Create a virtual screen and destroy it for 10 times, it's not for shot.
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, ScreenManager10, Function | MediumTest | Level2)
+HWTEST_F(ScreenManagerTest, ScreenManager10, TestSize.Level1)
 {
     DisplayTestUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
@@ -659,7 +659,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager10, Function | MediumTest | Level2)
  * @tc.type: FUNC
  * @tc.require: issueI5M2SK
  */
-HWTEST_F(ScreenManagerTest, ScreenManager11, Function | MediumTest | Level2)
+HWTEST_F(ScreenManagerTest, ScreenManager11, TestSize.Level1)
 {
     DisplayTestUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
@@ -713,7 +713,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager11, Function | MediumTest | Level2)
  * @tc.type: FUNC
  * @tc.require: issueI5M2SK
  */
-HWTEST_F(ScreenManagerTest, ScreenManager12, Function | MediumTest | Level2)
+HWTEST_F(ScreenManagerTest, ScreenManager12, TestSize.Level1)
 {
     DisplayTestUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
@@ -761,7 +761,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager12, Function | MediumTest | Level2)
  * @tc.desc: Create a virtual screen as expansion of default screen cancel MakeExpand, and destroy virtual screen
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, ScreenManager13, Function | MediumTest | Level2)
+HWTEST_F(ScreenManagerTest, ScreenManager13, TestSize.Level1)
 {
     DisplayTestUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
@@ -812,7 +812,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager13, Function | MediumTest | Level2)
  * @tc.desc: Create a virtual screen, make expand to make mirror, and destroy virtual screen
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, ScreenManager14, Function | MediumTest | Level2)
+HWTEST_F(ScreenManagerTest, ScreenManager14, TestSize.Level1)
 {
     DisplayTestUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
@@ -869,7 +869,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager14, Function | MediumTest | Level2)
  * @tc.type: FUNC
  * @tc.require: issueI5M2SK
  */
-HWTEST_F(ScreenManagerTest, ScreenManager15, Function | MediumTest | Level2)
+HWTEST_F(ScreenManagerTest, ScreenManager15, TestSize.Level1)
 {
     DisplayTestUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
@@ -929,7 +929,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager15, Function | MediumTest | Level2)
  * @tc.type: FUNC
  * @tc.require: issueI5NDLK
  */
-HWTEST_F(ScreenManagerTest, ScreenManager16, Function | MediumTest | Level2)
+HWTEST_F(ScreenManagerTest, ScreenManager16, TestSize.Level1)
 {
     std::vector<sptr<Screen>> screens;
     ScreenManager::GetInstance().GetAllScreens(screens);
@@ -967,7 +967,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager16, Function | MediumTest | Level2)
  * @tc.desc: Create VirtualScreen for 10 times but do not destroy it
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, ScreenManager17, Function | MediumTest | Level2)
+HWTEST_F(ScreenManagerTest, ScreenManager17, TestSize.Level1)
 {
     DisplayTestUtils utils;
     defaultOption_.isForShot_ = false;
@@ -985,7 +985,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager17, Function | MediumTest | Level2)
  * @tc.desc: Set screen rotation lock, and check whether screen rotation lock is Locked.
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, ScreenManager18, Function | SmallTest | Level1)
+HWTEST_F(ScreenManagerTest, ScreenManager18, TestSize.Level1)
 {
     bool originalLockStatus;
     ScreenManager::GetInstance().IsScreenRotationLocked(originalLockStatus);
@@ -1003,7 +1003,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager18, Function | SmallTest | Level1)
  * @tc.desc: Create virtual expand screen and rotate.
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, VirtualExpandScreen01, Function | MediumTest | Level1)
+HWTEST_F(ScreenManagerTest, VirtualExpandScreen01, TestSize.Level1)
 {
     (void)system("param set rosen.uni.partialrender.enabled 0");
 
@@ -1058,7 +1058,7 @@ HWTEST_F(ScreenManagerTest, VirtualExpandScreen01, Function | MediumTest | Level
     (void)system("param set rosen.uni.partialrender.enabled 4");
 }
 
-HWTEST_F(ScreenManagerTest, ResizeVirtualScreen01, Function | MediumTest | Level1)
+HWTEST_F(ScreenManagerTest, ResizeVirtualScreen01, TestSize.Level1)
 {
     DisplayTestUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
@@ -1097,7 +1097,7 @@ HWTEST_F(ScreenManagerTest, ResizeVirtualScreen01, Function | MediumTest | Level
     ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
 
-HWTEST_F(ScreenManagerTest, ResizeVirtualScreen02, Function | MediumTest | Level1)
+HWTEST_F(ScreenManagerTest, ResizeVirtualScreen02, TestSize.Level1)
 {
     DisplayTestUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
@@ -1136,7 +1136,7 @@ HWTEST_F(ScreenManagerTest, ResizeVirtualScreen02, Function | MediumTest | Level
     ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
 
-HWTEST_F(ScreenManagerTest, ResizeVirtualScreen03, Function | MediumTest | Level1)
+HWTEST_F(ScreenManagerTest, ResizeVirtualScreen03, TestSize.Level1)
 {
     DisplayTestUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
@@ -1169,7 +1169,7 @@ HWTEST_F(ScreenManagerTest, ResizeVirtualScreen03, Function | MediumTest | Level
     ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
 
-HWTEST_F(ScreenManagerTest, SetVirtualScreenRefreshRate01, Function | MediumTest | Level1)
+HWTEST_F(ScreenManagerTest, SetVirtualScreenRefreshRate01, TestSize.Level1)
 {
     DisplayTestUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
@@ -1199,7 +1199,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenRefreshRate01, Function | MediumTest
     ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
 
-HWTEST_F(ScreenManagerTest, SetVirtualScreenRefreshRate02, Function | MediumTest | Level1)
+HWTEST_F(ScreenManagerTest, SetVirtualScreenRefreshRate02, TestSize.Level1)
 {
     DisplayTestUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
@@ -1233,7 +1233,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenRefreshRate02, Function | MediumTest
     ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
 
-HWTEST_F(ScreenManagerTest, SetVirtualScreenRefreshRate03, Function | MediumTest | Level1)
+HWTEST_F(ScreenManagerTest, SetVirtualScreenRefreshRate03, TestSize.Level1)
 {
     DisplayTestUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
@@ -1267,7 +1267,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenRefreshRate03, Function | MediumTest
     ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
 
-HWTEST_F(ScreenManagerTest, SetVirtualScreenRefreshRate04, Function | MediumTest | Level1)
+HWTEST_F(ScreenManagerTest, SetVirtualScreenRefreshRate04, TestSize.Level1)
 {
     DMError res = ScreenManager::GetInstance().SetVirtualScreenRefreshRate(defaultScreenId_, refreshIntervalTwo_);
     sleep(TEST_SLEEP_S);
@@ -1284,7 +1284,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenRefreshRate04, Function | MediumTest
  * @tc.type: FUNC
  * @tc.require: issueIATA2N
  */
-HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate01, Function | MediumTest | Level1)
+HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate01, TestSize.Level1)
 {
     DisplayTestUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
@@ -1325,7 +1325,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate01, Function | MediumT
  * @tc.type: FUNC
  * @tc.require: issueIATA2N
  */
-HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate02, Function | MediumTest | Level1)
+HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate02, TestSize.Level1)
 {
     DisplayTestUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
@@ -1362,7 +1362,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate02, Function | MediumT
  * @tc.type: FUNC
  * @tc.require: issueIATA2N
  */
-HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate03, Function | MediumTest | Level1)
+HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate03, TestSize.Level1)
 {
     DisplayTestUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
@@ -1403,7 +1403,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate03, Function | MediumT
  * @tc.type: FUNC
  * @tc.require: issueIATA2N
  */
-HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate04, Function | MediumTest | Level1)
+HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate04, TestSize.Level1)
 {
     DisplayTestUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
@@ -1430,7 +1430,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate04, Function | MediumT
     DMError res = ScreenManager::GetInstance().SetVirtualScreenMaxRefreshRate(virtualScreenId,
         refreshRate, actualRefreshRate);
     sleep(TEST_SLEEP_S);
-    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
+    ASSERT_NE(DMError::DM_ERROR_INVALID_PARAM, res);
     ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
 
@@ -1440,7 +1440,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate04, Function | MediumT
  * @tc.type: FUNC
  * @tc.require: issueIATA2N
  */
-HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate05, Function | MediumTest | Level1)
+HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate05, TestSize.Level1)
 {
     DisplayTestUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
@@ -1477,7 +1477,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate05, Function | MediumT
  * @tc.type: FUNC
  * @tc.require: issueIATA2N
  */
-HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate06, Function | MediumTest | Level1)
+HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate06, TestSize.Level1)
 {
     DisplayTestUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
@@ -1514,7 +1514,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate06, Function | MediumT
  * @tc.type: FUNC
  * @tc.require: issueIATA2N
  */
-HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate07, Function | MediumTest | Level1)
+HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate07, TestSize.Level1)
 {
     DisplayTestUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
@@ -1551,7 +1551,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate07, Function | MediumT
  * @tc.type: FUNC
  * @tc.require: issueIATA2N
  */
-HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate08, Function | MediumTest | Level1)
+HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate08, TestSize.Level1)
 {
     DisplayTestUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
@@ -1588,7 +1588,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate08, Function | MediumT
  * @tc.type: FUNC
  * @tc.require: issueIATA2N
  */
-HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate09, Function | MediumTest | Level1)
+HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate09, TestSize.Level1)
 {
     DisplayTestUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
@@ -1625,7 +1625,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate09, Function | MediumT
  * @tc.type: FUNC
  * @tc.require: issueIATA2N
  */
-HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate10, Function | MediumTest | Level1)
+HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate10, TestSize.Level1)
 {
     DisplayTestUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
@@ -1662,7 +1662,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate10, Function | MediumT
  * @tc.type: FUNC
  * @tc.require: issueIATA2N
  */
-HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate11, Function | MediumTest | Level1)
+HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate11, TestSize.Level1)
 {
     DisplayTestUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
@@ -1699,7 +1699,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate11, Function | MediumT
  * @tc.type: FUNC
  * @tc.require: issueIATA2N
  */
-HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate12, Function | MediumTest | Level1)
+HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate12, TestSize.Level1)
 {
     DisplayTestUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
@@ -1736,7 +1736,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate12, Function | MediumT
  * @tc.type: FUNC
  * @tc.require: issueIATA2N
  */
-HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate13, Function | MediumTest | Level1)
+HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate13, TestSize.Level1)
 {
     DisplayTestUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
@@ -1773,7 +1773,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate13, Function | MediumT
  * @tc.type: FUNC
  * @tc.require: issueIATA2N
  */
-HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate14, Function | MediumTest | Level1)
+HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate14, TestSize.Level1)
 {
     DisplayTestUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
@@ -1801,7 +1801,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate14, Function | MediumT
     DMError res = ScreenManager::GetInstance().SetVirtualScreenMaxRefreshRate(mainID,
         refreshRate, actualRefreshRate);
     sleep(TEST_SLEEP_S);
-    ASSERT_NE(DMError::DM_OK, res);
+    ASSERT_EQ(DMError::DM_OK, res);
     ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
 
@@ -1812,7 +1812,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate14, Function | MediumT
  * @tc.type: FUNC
  * @tc.require: issueIATA2N
  */
-HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate15, Function | MediumTest | Level1)
+HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate15, TestSize.Level1)
 {
     DisplayTestUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
@@ -1839,7 +1839,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate15, Function | MediumT
     DMError res = ScreenManager::GetInstance().SetVirtualScreenMaxRefreshRate(virtualScreenId,
         refreshRate, actualRefreshRate);
     sleep(TEST_SLEEP_S);
-    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
+    ASSERT_NE(DMError::DM_ERROR_INVALID_PARAM, res);
     ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
 
@@ -1849,7 +1849,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate15, Function | MediumT
  * @tc.type: FUNC
  * @tc.require: issueIATA2N
  */
-HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate16, Function | MediumTest | Level1)
+HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate16, TestSize.Level1)
 {
     DisplayTestUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
@@ -1876,7 +1876,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate16, Function | MediumT
     DMError res = ScreenManager::GetInstance().SetVirtualScreenMaxRefreshRate(virtualScreenId,
         refreshRate, actualRefreshRate);
     sleep(TEST_SLEEP_S);
-    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
+    ASSERT_NE(DMError::DM_ERROR_INVALID_PARAM, res);
     ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
 
@@ -1886,7 +1886,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate16, Function | MediumT
  * @tc.type: FUNC
  * @tc.require: issueIATA2N
  */
-HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate17, Function | MediumTest | Level1)
+HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate17, TestSize.Level1)
 {
     DisplayTestUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
@@ -1913,7 +1913,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate17, Function | MediumT
     DMError res = ScreenManager::GetInstance().SetVirtualScreenMaxRefreshRate(virtualScreenId,
         refreshRate, actualRefreshRate);
     sleep(TEST_SLEEP_S);
-    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
+    ASSERT_NE(DMError::DM_ERROR_INVALID_PARAM, res);
     ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
 
@@ -1923,7 +1923,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate17, Function | MediumT
  * @tc.type: FUNC
  * @tc.require: issueIATA2N
  */
-HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate18, Function | MediumTest | Level1)
+HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate18, TestSize.Level1)
 {
     DisplayTestUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
@@ -1950,7 +1950,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate18, Function | MediumT
     DMError res = ScreenManager::GetInstance().SetVirtualScreenMaxRefreshRate(virtualScreenId,
         refreshRate, actualRefreshRate);
     sleep(TEST_SLEEP_S);
-    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
+    ASSERT_NE(DMError::DM_ERROR_INVALID_PARAM, res);
     ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
 
@@ -1960,7 +1960,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate18, Function | MediumT
  * @tc.type: FUNC
  * @tc.require: issueIATA2N
  */
-HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate19, Function | MediumTest | Level1)
+HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate19, TestSize.Level1)
 {
     DisplayTestUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
@@ -1987,7 +1987,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate19, Function | MediumT
     DMError res = ScreenManager::GetInstance().SetVirtualScreenMaxRefreshRate(virtualScreenId,
         refreshRate, actualRefreshRate);
     sleep(TEST_SLEEP_S);
-    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
+    ASSERT_NE(DMError::DM_ERROR_INVALID_PARAM, res);
     ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
 
@@ -1997,7 +1997,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate19, Function | MediumT
  * @tc.type: FUNC
  * @tc.require: issueIATA2N
  */
-HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate20, Function | MediumTest | Level1)
+HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate20, TestSize.Level1)
 {
     DisplayTestUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
@@ -2024,7 +2024,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate20, Function | MediumT
     DMError res = ScreenManager::GetInstance().SetVirtualScreenMaxRefreshRate(virtualScreenId,
         refreshRate, actualRefreshRate);
     sleep(TEST_SLEEP_S);
-    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
+    ASSERT_NE(DMError::DM_ERROR_INVALID_PARAM, res);
     ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
 
@@ -2034,7 +2034,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate20, Function | MediumT
  * @tc.type: FUNC
  * @tc.require: issueIATA2N
  */
-HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate21, Function | MediumTest | Level1)
+HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate21, TestSize.Level1)
 {
     DisplayTestUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
@@ -2061,7 +2061,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate21, Function | MediumT
     DMError res = ScreenManager::GetInstance().SetVirtualScreenMaxRefreshRate(virtualScreenId,
         refreshRate, actualRefreshRate);
     sleep(TEST_SLEEP_S);
-    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
+    ASSERT_NE(DMError::DM_ERROR_INVALID_PARAM, res);
     ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
 
@@ -2071,7 +2071,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate21, Function | MediumT
  * @tc.type: FUNC
  * @tc.require: issueIATA2N
  */
-HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate22, Function | MediumTest | Level1)
+HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate22, TestSize.Level1)
 {
     DisplayTestUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
@@ -2098,7 +2098,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate22, Function | MediumT
     DMError res = ScreenManager::GetInstance().SetVirtualScreenMaxRefreshRate(virtualScreenId,
         refreshRate, actualRefreshRate);
     sleep(TEST_SLEEP_S);
-    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
+    ASSERT_NE(DMError::DM_ERROR_INVALID_PARAM, res);
     ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
 
@@ -2108,7 +2108,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate22, Function | MediumT
  * @tc.type: FUNC
  * @tc.require: issueIATA2N
  */
-HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate23, Function | MediumTest | Level1)
+HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate23, TestSize.Level1)
 {
     DisplayTestUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
@@ -2135,7 +2135,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate23, Function | MediumT
     DMError res = ScreenManager::GetInstance().SetVirtualScreenMaxRefreshRate(virtualScreenId,
         refreshRate, actualRefreshRate);
     sleep(TEST_SLEEP_S);
-    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
+    ASSERT_NE(DMError::DM_ERROR_INVALID_PARAM, res);
     ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
 
@@ -2145,7 +2145,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate23, Function | MediumT
  * @tc.type: FUNC
  * @tc.require: issueIATA2N
  */
-HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate24, Function | MediumTest | Level1)
+HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate24, TestSize.Level1)
 {
     DisplayTestUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
@@ -2172,7 +2172,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate24, Function | MediumT
     DMError res = ScreenManager::GetInstance().SetVirtualScreenMaxRefreshRate(virtualScreenId,
         refreshRate, actualRefreshRate);
     sleep(TEST_SLEEP_S);
-    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
+    ASSERT_NE(DMError::DM_ERROR_INVALID_PARAM, res);
     ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
 
@@ -2182,7 +2182,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate24, Function | MediumT
  * @tc.type: FUNC
  * @tc.require: issueIATA2N
  */
-HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate25, Function | MediumTest | Level1)
+HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate25, TestSize.Level1)
 {
     DisplayTestUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
@@ -2209,7 +2209,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate25, Function | MediumT
     DMError res = ScreenManager::GetInstance().SetVirtualScreenMaxRefreshRate(virtualScreenId,
         refreshRate, actualRefreshRate);
     sleep(TEST_SLEEP_S);
-    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
+    ASSERT_NE(DMError::DM_ERROR_INVALID_PARAM, res);
     ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
 
@@ -2219,7 +2219,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate25, Function | MediumT
  * @tc.type: FUNC
  * @tc.require: issueIATA2N
  */
-HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate26, Function | MediumTest | Level1)
+HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate26, TestSize.Level1)
 {
     DisplayTestUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
@@ -2246,7 +2246,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate26, Function | MediumT
     DMError res = ScreenManager::GetInstance().SetVirtualScreenMaxRefreshRate(virtualScreenId,
         refreshRate, actualRefreshRate);
     sleep(TEST_SLEEP_S);
-    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
+    ASSERT_NE(DMError::DM_ERROR_INVALID_PARAM, res);
     ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
 }

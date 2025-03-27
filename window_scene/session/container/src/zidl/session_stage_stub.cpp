@@ -212,6 +212,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyRotationProperty(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_ROTATION_CHANGE):
             return HandleNotifyRotationChange(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_CURRENT_ROTATION):
+            return HandleSetCurrentRotation(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -855,16 +857,16 @@ int SessionStageStub::HandleNotifyWindowCrossAxisChange(MessageParcel& data, Mes
 int SessionStageStub::HandleNotifyPipSizeChange(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_PIP, "in");
-    uint32_t width;
-    if (!data.ReadUint32(width)) {
+    double width;
+    if (!data.ReadDouble(width)) {
         return ERR_INVALID_VALUE;
     }
-    uint32_t height;
-    if (!data.ReadUint32(height)) {
+    double height;
+    if (!data.ReadDouble(height)) {
         return ERR_INVALID_VALUE;
     }
-    float scale;
-    if (!data.ReadFloat(scale)) {
+    double scale;
+    if (!data.ReadDouble(scale)) {
         return ERR_INVALID_VALUE;
     }
     NotifyPipWindowSizeChange(width, height, scale);
@@ -967,24 +969,35 @@ int SessionStageStub::HandleNotifyRotationChange(MessageParcel& data, MessagePar
     }
     RotationChangeInfo rotationChangeInfo = { static_cast<RotationChangeType>(type), orientation, displayId, rect };
     RotationChangeResult rotationChangeResult = NotifyRotationChange(rotationChangeInfo);
-    if (rotationChangeInfo.type == RotationChangeType::WINDOW_DID_ROTATE) {
+    if (rotationChangeInfo.type_ == RotationChangeType::WINDOW_DID_ROTATE) {
         TLOGI(WmsLogTag::WMS_ROTATION, "WINDOW_DID_ROTATE return");
         return ERR_NONE;
     }
-    if (!reply.WriteUint32(static_cast<uint32_t>(rotationChangeResult.rectType))) {
+    if (!reply.WriteUint32(static_cast<uint32_t>(rotationChangeResult.rectType_))) {
         TLOGE(WmsLogTag::WMS_ROTATION, "send rectType failed");
         return ERR_INVALID_DATA;
     }
-    if (!reply.WriteInt32(rotationChangeResult.windowRect.posX_) ||
-        !reply.WriteInt32(rotationChangeResult.windowRect.posY_) ||
-        !reply.WriteUint32(rotationChangeResult.windowRect.width_) ||
-        !reply.WriteUint32(rotationChangeResult.windowRect.height_)) {
+    if (!reply.WriteInt32(rotationChangeResult.windowRect_.posX_) ||
+        !reply.WriteInt32(rotationChangeResult.windowRect_.posY_) ||
+        !reply.WriteUint32(rotationChangeResult.windowRect_.width_) ||
+        !reply.WriteUint32(rotationChangeResult.windowRect_.height_)) {
         TLOGE(WmsLogTag::WMS_ROTATION, "send window rect failed");
         return ERR_INVALID_DATA;
     }
     TLOGI(WmsLogTag::WMS_ROTATION, "send type:%{public}d, rect: [%{public}d, %{public}d, %{public}d, %{public}d]",
-        rotationChangeResult.rectType, rotationChangeResult.windowRect.posX_, rotationChangeResult.windowRect.posY_,
-        rotationChangeResult.windowRect.width_, rotationChangeResult.windowRect.height_);
+        rotationChangeResult.rectType_, rotationChangeResult.windowRect_.posX_, rotationChangeResult.windowRect_.posY_,
+        rotationChangeResult.windowRect_.width_, rotationChangeResult.windowRect_.height_);
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleSetCurrentRotation(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_ROTATION, "in");
+    int32_t currentRotation;
+    if (!data.ReadInt32(currentRotation)) {
+        return ERR_INVALID_VALUE;
+    }
+    SetCurrentRotation(currentRotation);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

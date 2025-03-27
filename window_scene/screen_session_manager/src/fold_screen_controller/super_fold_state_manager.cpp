@@ -37,6 +37,7 @@ const char* KEYBOARD_ON_CONFIG = "version:3+main";
 const char* KEYBOARD_OFF_CONFIG = "version:3+whole";
 #endif
 static bool isKeyboardOn_ = false;
+static bool isSystemKeyboardOn_ = false;
 }
 
 void SuperFoldStateManager::DoAngleChangeFolded(SuperFoldStatusChangeEvents event)
@@ -374,6 +375,7 @@ void SuperFoldStateManager::HandleHalfFoldToExtendDisplayNotify(sptr<ScreenSessi
 void SuperFoldStateManager::HandleKeyboardOnDisplayNotify(sptr<ScreenSession> screenSession)
 {
     auto screeBounds = screenSession->GetScreenProperty().GetBounds();
+    bool currFakeInUse = screenSession->GetScreenProperty().GetIsFakeInUse();
     screenSession->UpdatePropertyByFakeInUse(false);
     screenSession->SetIsBScreenHalf(true);
     int32_t validheight = GetCurrentValidHeight(screenSession);
@@ -391,7 +393,9 @@ void SuperFoldStateManager::HandleKeyboardOnDisplayNotify(sptr<ScreenSession> sc
         return;
     }
     DisplayId fakeDisplayId = fakeDisplayInfo->GetDisplayId();
-    ScreenSessionManager::GetInstance().NotifyDisplayDestroy(fakeDisplayId);
+    if (currFakeInUse) {
+        ScreenSessionManager::GetInstance().NotifyDisplayDestroy(fakeDisplayId);
+    }
     screenSession->PropertyChange(screenSession->GetScreenProperty(),
         ScreenPropertyChangeReason::SUPER_FOLD_STATUS_CHANGE);
     ScreenSessionManager::GetInstance().UpdateValidArea(
@@ -417,25 +421,35 @@ void SuperFoldStateManager::HandleKeyboardOffDisplayNotify(sptr<ScreenSession> s
         screenSession->GetValidHeight());
 }
 
-void SuperFoldStateManager::SetSystemKeyboardStatus(bool isOn)
+void SuperFoldStateManager::SetSystemKeyboardStatus(bool isTpKeyboardOn)
 {
-    SuperFoldStatusChangeEvents events = isOn ? SuperFoldStatusChangeEvents::SYSTEM_KEYBOARD_ON
+    SuperFoldStatusChangeEvents events = isTpKeyboardOn ? SuperFoldStatusChangeEvents::SYSTEM_KEYBOARD_ON
         : SuperFoldStatusChangeEvents::SYSTEM_KEYBOARD_OFF;
+    isSystemKeyboardOn_ = isTpKeyboardOn;
     HandleDisplayNotify(events);
 }
 
-void SuperFoldStateManager::HandleSystemKeyboardStatusDisplayNotify(
-    sptr<ScreenSession> screenSession, bool isOn)
+bool SuperFoldStateManager::GetSystemKeyboardStatus()
 {
-    screenSession->UpdatePropertyByFakeInUse(!isOn);
-    screenSession->SetIsBScreenHalf(true);
+    return isSystemKeyboardOn_;
+}
+
+void SuperFoldStateManager::HandleSystemKeyboardStatusDisplayNotify(
+    sptr<ScreenSession> screenSession, bool isTpKeyboardOn)
+{
+    SuperFoldStatus curFoldState = curState_.load();
+    TLOGD(WmsLogTag::DMS, "curFoldState: %{public}u", curFoldState);
+    if (!isKeyboardOn_ && curFoldState == SuperFoldStatus::HALF_FOLDED) {
+        screenSession->UpdatePropertyByFakeInUse(!isTpKeyboardOn);
+        screenSession->SetIsBScreenHalf(true);
+    }
     sptr<ScreenSession> fakeScreenSession = screenSession->GetFakeScreenSession();
     sptr<DisplayInfo> fakeDisplayInfo = fakeScreenSession->ConvertToDisplayInfo();
     if (fakeDisplayInfo == nullptr) {
         TLOGE(WmsLogTag::DMS, "get fake display failed");
         return;
     }
-    if (isOn) {
+    if (isTpKeyboardOn) {
         DisplayId fakeDisplayId = fakeDisplayInfo->GetDisplayId();
         ScreenSessionManager::GetInstance().NotifyDisplayDestroy(fakeDisplayId);
 
@@ -451,7 +465,6 @@ void SuperFoldStateManager::HandleSystemKeyboardStatusDisplayNotify(
         TLOGD(WmsLogTag::DMS, "vh: %{public}d, paw: %{public}u, pah: %{public}u", validheight,
             screenSession->GetPointerActiveWidth(), screenSession->GetPointerActiveHeight());
     } else {
-        SuperFoldStatus curFoldState = ScreenSessionManager::GetInstance().GetSuperFoldStatus();
         if (curFoldState == SuperFoldStatus::HALF_FOLDED) {
             ScreenSessionManager::GetInstance().NotifyDisplayCreate(fakeDisplayInfo);
         }

@@ -65,7 +65,7 @@ namespace {
  * @tc.desc: call WakeUpBegin and check return value
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayLitePowerUnitTest, wake_up_begin_001, Function | SmallTest | Level2)
+HWTEST_F(DisplayLitePowerUnitTest, wake_up_begin_001, TestSize.Level1)
 {
     Mocker m;
     EXPECT_CALL(m.Mock(), WakeUpBegin(PowerStateChangeReason::POWER_BUTTON)).Times(1).WillOnce(Return(true));
@@ -82,7 +82,7 @@ HWTEST_F(DisplayLitePowerUnitTest, wake_up_begin_001, Function | SmallTest | Lev
  * @tc.desc: call WakeUpEnd and check return value
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayLitePowerUnitTest, wake_up_end_001, Function | SmallTest | Level2)
+HWTEST_F(DisplayLitePowerUnitTest, wake_up_end_001, TestSize.Level1)
 {
     Mocker m;
     EXPECT_CALL(m.Mock(), WakeUpEnd()).Times(1).WillOnce(Return(true));
@@ -99,7 +99,7 @@ HWTEST_F(DisplayLitePowerUnitTest, wake_up_end_001, Function | SmallTest | Level
  * @tc.desc: call SuspendBegin and check return value
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayLitePowerUnitTest, suspend_begin_001, Function | SmallTest | Level2)
+HWTEST_F(DisplayLitePowerUnitTest, suspend_begin_001, TestSize.Level1)
 {
     Mocker m;
     EXPECT_CALL(m.Mock(), SuspendBegin(PowerStateChangeReason::POWER_BUTTON)).Times(1).WillOnce(Return(true));
@@ -116,7 +116,7 @@ HWTEST_F(DisplayLitePowerUnitTest, suspend_begin_001, Function | SmallTest | Lev
  * @tc.desc: call SuspendEnd and check return value
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayLitePowerUnitTest, suspend_end_001, Function | SmallTest | Level2)
+HWTEST_F(DisplayLitePowerUnitTest, suspend_end_001, TestSize.Level1)
 {
     Mocker m;
     EXPECT_CALL(m.Mock(), SuspendEnd()).Times(1).WillOnce(Return(true));
@@ -133,7 +133,7 @@ HWTEST_F(DisplayLitePowerUnitTest, suspend_end_001, Function | SmallTest | Level
  * @tc.desc: Call SetScreenBrightness with a valid value and check the GetScreenBrightness return value
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayLitePowerUnitTest, set_screen_brightness_001, Function | MediumTest | Level2)
+HWTEST_F(DisplayLitePowerUnitTest, set_screen_brightness_001, TestSize.Level1)
 {
     bool ret = DisplayManagerLite::GetInstance().SetScreenBrightness(defaultId_, brightnessLevel_);
     ASSERT_EQ(true, ret);
@@ -144,7 +144,7 @@ HWTEST_F(DisplayLitePowerUnitTest, set_screen_brightness_001, Function | MediumT
  * @tc.desc: test SetSpecifiedScreenPower
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayLitePowerUnitTest, set_specified_screen_power_001, Function | SmallTest | Level2)
+HWTEST_F(DisplayLitePowerUnitTest, set_specified_screen_power_001, TestSize.Level1)
 {
     ScreenPowerState state = ScreenPowerState{0};
     PowerStateChangeReason reason = PowerStateChangeReason{0};
@@ -157,7 +157,7 @@ HWTEST_F(DisplayLitePowerUnitTest, set_specified_screen_power_001, Function | Sm
  * @tc.desc: Call SetScreenPowerForAll with valid value and check the GetScreenPower return value
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayLitePowerUnitTest, set_screen_power_for_all_001, Function | MediumTest | Level2)
+HWTEST_F(DisplayLitePowerUnitTest, set_screen_power_for_all_001, TestSize.Level1)
 {
     SingletonMocker<ScreenManagerAdapterLite, MockScreenManagerAdapterLite> m;
     EXPECT_CALL(m.Mock(), GetScreenPower(_)).Times(1).WillOnce(Return(ScreenPowerState::POWER_OFF));
@@ -177,7 +177,7 @@ HWTEST_F(DisplayLitePowerUnitTest, set_screen_power_for_all_001, Function | Medi
  * @tc.desc: Call SetDisplayState with valid value and check the GetDisplayState return value
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayLitePowerUnitTest, set_display_state_001, Function | MediumTest | Level2)
+HWTEST_F(DisplayLitePowerUnitTest, set_display_state_001, TestSize.Level1)
 {
     DisplayState stateToSet = (initialState_ == DisplayState::OFF ? DisplayState::ON : DisplayState::OFF);
     Mocker m;
@@ -198,7 +198,7 @@ HWTEST_F(DisplayLitePowerUnitTest, set_display_state_001, Function | MediumTest 
  * @tc.desc: Call SetDisplayState with invalid callback and check the GetDisplayState return value
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayLitePowerUnitTest, set_display_state_002, Function | MediumTest | Level2)
+HWTEST_F(DisplayLitePowerUnitTest, set_display_state_002, TestSize.Level1)
 {
     Mocker m;
     EXPECT_CALL(m.Mock(), SetDisplayState(_)).Times(0);

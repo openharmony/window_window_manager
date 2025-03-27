@@ -64,7 +64,7 @@ namespace {
  * @tc.desc: test function : RegisterPostureCallback
  * @tc.type: FUNC
  */
-HWTEST_F(FoldScreenSensorManagerTest, RegisterPostureCallback, Function | SmallTest | Level3)
+HWTEST_F(FoldScreenSensorManagerTest, RegisterPostureCallback, TestSize.Level1)
 {
     FoldScreenSensorManager mgr = FoldScreenSensorManager();
     mgr.RegisterPostureCallback();
@@ -76,7 +76,7 @@ HWTEST_F(FoldScreenSensorManagerTest, RegisterPostureCallback, Function | SmallT
  * @tc.desc: test function : UnRegisterPostureCallback
  * @tc.type: FUNC
  */
-HWTEST_F(FoldScreenSensorManagerTest, UnRegisterPostureCallback, Function | SmallTest | Level3)
+HWTEST_F(FoldScreenSensorManagerTest, UnRegisterPostureCallback, TestSize.Level1)
 {
     FoldScreenSensorManager mgr = FoldScreenSensorManager();
     mgr.UnRegisterPostureCallback();
@@ -88,7 +88,7 @@ HWTEST_F(FoldScreenSensorManagerTest, UnRegisterPostureCallback, Function | Smal
  * @tc.desc: test function : RegisterHallCallback
  * @tc.type: FUNC
  */
-HWTEST_F(FoldScreenSensorManagerTest, RegisterHallCallback, Function | SmallTest | Level3)
+HWTEST_F(FoldScreenSensorManagerTest, RegisterHallCallback, TestSize.Level1)
 {
     FoldScreenSensorManager mgr = FoldScreenSensorManager();
     mgr.RegisterHallCallback();
@@ -100,7 +100,7 @@ HWTEST_F(FoldScreenSensorManagerTest, RegisterHallCallback, Function | SmallTest
  * @tc.desc: test function : UnRegisterHallCallback
  * @tc.type: FUNC
  */
-HWTEST_F(FoldScreenSensorManagerTest, UnRegisterHallCallback, Function | SmallTest | Level3)
+HWTEST_F(FoldScreenSensorManagerTest, UnRegisterHallCallback, TestSize.Level1)
 {
     FoldScreenSensorManager mgr = FoldScreenSensorManager();
     mgr.UnRegisterHallCallback();
@@ -112,7 +112,7 @@ HWTEST_F(FoldScreenSensorManagerTest, UnRegisterHallCallback, Function | SmallTe
  * @tc.desc: test function : HandlePostureData
  * @tc.type: FUNC
  */
-HWTEST_F(FoldScreenSensorManagerTest, HandlePostureData, Function | SmallTest | Level3)
+HWTEST_F(FoldScreenSensorManagerTest, HandlePostureData, TestSize.Level1)
 {
     FoldScreenSensorManager mgr = FoldScreenSensorManager();
     mgr.HandlePostureData(nullptr);
@@ -139,7 +139,7 @@ HWTEST_F(FoldScreenSensorManagerTest, HandlePostureData, Function | SmallTest | 
  * @tc.desc: test function : NotifyFoldAngleChanged
  * @tc.type: FUNC
  */
-HWTEST_F(FoldScreenSensorManagerTest, NotifyFoldAngleChanged, Function | SmallTest | Level3)
+HWTEST_F(FoldScreenSensorManagerTest, NotifyFoldAngleChanged, TestSize.Level1)
 {
     FoldScreenSensorManager mgr = FoldScreenSensorManager();
     float foldAngle = 0.0F;
@@ -157,7 +157,7 @@ HWTEST_F(FoldScreenSensorManagerTest, NotifyFoldAngleChanged, Function | SmallTe
  * @tc.desc: test function : HandleHallData
  * @tc.type: FUNC
  */
-HWTEST_F(FoldScreenSensorManagerTest, HandleHallData, Function | SmallTest | Level3)
+HWTEST_F(FoldScreenSensorManagerTest, HandleHallData, TestSize.Level1)
 {
     FoldScreenSensorManager mgr = FoldScreenSensorManager();
     mgr.HandleHallData(nullptr);
@@ -190,7 +190,7 @@ HWTEST_F(FoldScreenSensorManagerTest, HandleHallData, Function | SmallTest | Lev
  * @tc.desc: test function : TriggerDisplaySwitch
  * @tc.type: FUNC
  */
-HWTEST_F(FoldScreenSensorManagerTest, TriggerDisplaySwitch, Function | SmallTest | Level3)
+HWTEST_F(FoldScreenSensorManagerTest, TriggerDisplaySwitch, TestSize.Level1)
 {
     FoldScreenSensorManager mgr = FoldScreenSensorManager();
     mgr.SetSensorFoldStateManager(new SensorFoldStateManager());
@@ -200,10 +200,12 @@ HWTEST_F(FoldScreenSensorManagerTest, TriggerDisplaySwitch, Function | SmallTest
 
     mgr.registerPosture_ = true;
     mgr.TriggerDisplaySwitch();
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+    if (FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
+        EXPECT_EQ(mgr.globalAngle, 85);
+    } else if (SceneBoardJudgement::IsSceneBoardEnabled() || FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
         EXPECT_EQ(mgr.globalAngle, 25);
     } else {
-        EXPECT_NE(mgr.globalAngle, 25);
+        EXPECT_EQ(mgr.globalAngle, 25);
     }
     usleep(SLEEP_TIME_US);
 }

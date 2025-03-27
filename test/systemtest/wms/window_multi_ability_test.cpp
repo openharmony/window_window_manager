@@ -64,7 +64,7 @@ static void DoSceneResource(sptr<WindowScene> windowscene)
  * @tc.desc: Five scene process in one thread
  * @tc.type: FUNC
  */
-HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow01, Function | MediumTest | Level2)
+HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow01, TestSize.Level1)
 {
     sptr<WindowScene> scene1 = Utils::CreateWindowScene();
     sptr<WindowScene> scene2 = Utils::CreateWindowScene();
@@ -118,7 +118,7 @@ HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow01, Function | MediumTest | L
  * @tc.desc: Five scene process in one thread, create/show/hide/destroy in order
  * @tc.type: FUNC
  */
-HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow02, Function | MediumTest | Level3)
+HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow02, TestSize.Level1)
 {
     sptr<WindowScene> scene1 = Utils::CreateWindowScene();
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
@@ -173,7 +173,7 @@ HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow02, Function | MediumTest | L
  * @tc.desc: Five scene process in one thread, create/show/hide/destroy in order
  * @tc.type: FUNC
  */
-HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow2, Function | MediumTest | Level3)
+HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow2, TestSize.Level1)
 {
     sptr<WindowScene> scene4 = Utils::CreateWindowScene();
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
@@ -214,7 +214,7 @@ HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow2, Function | MediumTest | Le
  * @tc.desc: Five scene process in one thread, create/show/hide/destroy out of order
  * @tc.type: FUNC
  */
-HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow03, Function | MediumTest | Level3)
+HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow03, TestSize.Level1)
 {
     sptr<WindowScene> scene1 = Utils::CreateWindowScene();
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {

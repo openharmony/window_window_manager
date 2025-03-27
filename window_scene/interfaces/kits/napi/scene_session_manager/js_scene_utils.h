@@ -155,6 +155,8 @@ const std::map<JsSessionType, WindowType> JS_SESSION_TO_WINDOW_TYPE_MAP {
     { JsSessionType::TYPE_FLOAT_NAVIGATION,         WindowType::WINDOW_TYPE_FLOAT_NAVIGATION        },
 };
 
+enum class ThrowSlipMode;
+
 JsSessionType GetApiType(WindowType type);
 bool ConvertSessionInfoFromJs(napi_env env, napi_value jsObject, SessionInfo& sessionInfo);
 bool ConvertPointerEventFromJs(napi_env env, napi_value jsObject, MMI::PointerEvent& pointerEvent);
@@ -216,6 +218,7 @@ bool ConvertRotateAnimationConfigFromJs(napi_env env, napi_value value, RotateAn
 bool ConvertDragResizeTypeFromJs(napi_env env, napi_value value, DragResizeType& dragResizeType);
 bool ConvertRectFromJsValue(napi_env env, napi_value jsObject, Rect& displayRect);
 bool ConvertInfoFromJsValue(napi_env env, napi_value jsObject, RotationChangeInfo& rotationChangeInfo);
+bool ConvertThrowSlipModeFromJs(napi_env env, napi_value value, ThrowSlipMode& throwSlipMode);
 WSError GetIntValueFromString(const std::string& str, uint32_t& value);
 constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
@@ -228,6 +231,7 @@ public:
     using Task = std::function<void()>;
     explicit MainThreadScheduler(napi_env env);
     void PostMainThreadTask(Task&& localTask, std::string traceInfo = "Unnamed", int64_t delayTime = 0);
+    void RemoveMainThreadTaskByName(const std::string taskName);
 
 private:
     void GetMainEventHandler();

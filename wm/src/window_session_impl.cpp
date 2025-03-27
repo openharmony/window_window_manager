@@ -62,6 +62,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowS
 constexpr int32_t FORCE_SPLIT_MODE = 5;
 constexpr int32_t API_VERSION_18 = 18;
 constexpr uint32_t LIFECYCLE_ISOLATE_VERSION = 18;
+constexpr int32_t  WINDOW_ROTATION_CHANGE = 20;
 
 /*
  * DFX
@@ -246,6 +247,7 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     property_->SetConstrainedModal(option->IsConstrainedModal());
     layoutCallback_ = sptr<FutureCallback>::MakeSptr();
     getTargetInfoCallback_ = sptr<FutureCallback>::MakeSptr();
+    getRotationResultFuture_ = sptr<FutureCallback>::MakeSptr();
     isMainHandlerAvailable_ = option->GetMainHandlerAvailable();
     isIgnoreSafeArea_ = WindowHelper::IsSubWindow(optionWindowType);
     windowOption_ = option;
@@ -1374,6 +1376,9 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
               rect.width_, rect.height_, GetPersistentId());
         return;
     }
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
+        "WindowSessionimpl::UpdateViewportConfig id:%d [%d, %d, %u, %u] reason:%u", GetPersistentId(),
+        rect.posX_, rect.posY_, rect.width_, rect.height_, reason);
     auto rotation =  ONE_FOURTH_FULL_CIRCLE_DEGREE * static_cast<uint32_t>(displayInfo->GetOriginRotation());
     auto deviceRotation = static_cast<uint32_t>(displayInfo->GetDefaultDeviceRotationOffset());
     uint32_t transformHint = (rotation + deviceRotation) % FULL_CIRCLE_DEGREE;
@@ -4284,9 +4289,9 @@ WSError WindowSessionImpl::SetPiPControlEvent(WsPiPControlType controlType, WsPi
     return WSError::WS_OK;
 }
 
-WSError WindowSessionImpl::NotifyPipWindowSizeChange(uint32_t width, uint32_t height, double scale)
+WSError WindowSessionImpl::NotifyPipWindowSizeChange(double width, double height, double scale)
 {
-    TLOGI(WmsLogTag::WMS_PIP, "width: %{public}u, height: %{public}u scale: %{public}f", width, height, scale);
+    TLOGI(WmsLogTag::WMS_PIP, "width: %{public}f, height: %{public}f scale: %{public}f", width, height, scale);
     auto task = [width, height, scale]() {
         PictureInPictureManager::PipSizeChange(width, height, scale);
     };
@@ -5105,7 +5110,10 @@ void WindowSessionImpl::UpdateSpecificSystemBarEnabled(bool systemBarEnable, boo
 {
     property.enable_ = systemBarEnable;
     property.enableAnimation_ = systemBarEnableAnimation;
-    property.settingFlag_ |= SystemBarSettingFlag::ENABLE_SETTING;
+    // isolate on api 18
+    if (GetTargetAPIVersion() >= API_VERSION_18) {
+        property.settingFlag_ |= SystemBarSettingFlag::ENABLE_SETTING;
+    }
 }
 
 WMError WindowSessionImpl::SetSpecificBarProperty(WindowType type, const SystemBarProperty& property)
@@ -5871,34 +5879,75 @@ WMError WindowSessionImpl::CheckMultiWindowRect(uint32_t& width, uint32_t& heigh
 
 RotationChangeResult WindowSessionImpl::NotifyRotationChange(const RotationChangeInfo& rotationChangeInfo)
 {
-    TLOGI(WmsLogTag::WMS_ROTATION, "info type: %{public}d, orientation: %{public}d, displayId: %{public}llu, "
-        "rect:[%{public}d, %{public}d, %{public}d, %{public}d]", rotationChangeInfo.type,
-        rotationChangeInfo.orientation, rotationChangeInfo.displayId, rotationChangeInfo.displayRect.posX_,
-        rotationChangeInfo.displayRect.posY_, rotationChangeInfo.displayRect.width_,
-        rotationChangeInfo.displayRect.height_);
-    RotationChangeResult rotationChangeResult = { RectType::RELATIVE_TO_SCREEN, { 0, 0, 0, 0 } };
+    TLOGI(WmsLogTag::WMS_ROTATION, "info type: %{public}d, orientation: %{public}d, "
+        "rect:[%{public}d, %{public}d, %{public}d, %{public}d]", rotationChangeInfo.type_,
+        rotationChangeInfo.orientation_, rotationChangeInfo.displayRect_.posX_,
+        rotationChangeInfo.displayRect_.posY_, rotationChangeInfo.displayRect_.width_,
+        rotationChangeInfo.displayRect_.height_);
+    std::vector<sptr<IWindowRotationChangeListener>> windowRotationChangeListeners;
     {
         std::lock_guard<std::mutex> lockListener(windowRotationChangeListenerMutex_);
-        auto windowRotationChangeListeners = GetListeners<IWindowRotationChangeListener>();
-        for (auto& listener : windowRotationChangeListeners) {
-            if (listener != nullptr) {
-                listener->OnRotationChange(rotationChangeInfo, rotationChangeResult);
-                if (rotationChangeInfo.type == RotationChangeType::WINDOW_DID_ROTATE) {
-                    break;
-                }
-                Rect resultRect = rotationChangeResult.windowRect;
-                if (CheckWindowRect(resultRect.width_, resultRect.height_) != WMError::WM_OK ||
-                    CheckMultiWindowRect(resultRect.width_, resultRect.height_) != WMError::WM_OK) {
-                    rotationChangeResult.windowRect.width_ = 0;
-                    rotationChangeResult.windowRect.height_ = 0;
-                }
-            }
-        }
+        windowRotationChangeListeners = GetListeners<IWindowRotationChangeListener>();
+    }
+    NotifyRotationChangeResultInner(windowRotationChangeListeners, rotationChangeInfo);
+    RotationChangeResult rotationChangeResult = { RectType::RELATIVE_TO_SCREEN, { 0, 0, 0, 0 } };
+    getRotationResultFuture_->ResetRotationResultLock();
+    rotationChangeResult = getRotationResultFuture_->GetRotationResult(WINDOW_ROTATION_CHANGE);
+    Rect resultRect = rotationChangeResult.windowRect_;
+    if (CheckAndModifyWindowRect(resultRect.width_, resultRect.height_) != WMError::WM_OK ||
+        CheckMultiWindowRect(resultRect.width_, resultRect.height_) != WMError::WM_OK) {
+        rotationChangeResult.windowRect_.width_ = 0;
+        rotationChangeResult.windowRect_.height_ = 0;
     }
     TLOGI(WmsLogTag::WMS_ROTATION, "result rectType: %{public}d, rect:[%{public}d, %{public}d, %{public}d, %{public}d]",
-        rotationChangeResult.rectType, rotationChangeResult.windowRect.posX_, rotationChangeResult.windowRect.posY_,
-        rotationChangeResult.windowRect.width_, rotationChangeResult.windowRect.height_);
+        rotationChangeResult.rectType_, rotationChangeResult.windowRect_.posX_, rotationChangeResult.windowRect_.posY_,
+        rotationChangeResult.windowRect_.width_, rotationChangeResult.windowRect_.height_);
     return rotationChangeResult;
+}
+
+void WindowSessionImpl::NotifyRotationChangeResult(RotationChangeResult rotationChangeResult)
+{
+    TLOGI(WmsLogTag::WMS_ROTATION, "release rotation change lock.");
+    if (getRotationResultFuture_) {
+        getRotationResultFuture_->OnUpdateRotationResult(rotationChangeResult);
+    }
+}
+
+void WindowSessionImpl::NotifyRotationChangeResultInner(
+    const std::vector<sptr<IWindowRotationChangeListener>>& windowRotationChangeListeners,
+    const RotationChangeInfo& rotationChangeInfo)
+{
+    handler_->PostTask(
+        [weakThis = wptr(this), &windowRotationChangeListeners, &rotationChangeInfo] {
+            TLOGI(WmsLogTag::WMS_ROTATION, "post task to notify listener.");
+            auto window = weakThis.promote();
+            if (window == nullptr) {
+                TLOGE(WmsLogTag::WMS_ROTATION, "window is null");
+                return;
+            }
+            RotationChangeResult rotationChangeResult = { RectType::RELATIVE_TO_SCREEN, { 0, 0, 0, 0 } };
+            for (auto& listener : windowRotationChangeListeners) {
+                if (listener == nullptr) {
+                    continue;
+                }
+                listener->OnRotationChange(rotationChangeInfo, rotationChangeResult);
+                if (rotationChangeInfo.type_ == RotationChangeType::WINDOW_DID_ROTATE) {
+                    continue;
+                }
+            }
+            window->NotifyRotationChangeResult(rotationChangeResult);
+        }, __func__);
+}
+
+WSError WindowSessionImpl::SetCurrentRotation(int32_t currentRotation)
+{
+    TLOGI(WmsLogTag::WMS_ROTATION, "currentRotation: %{public}d", currentRotation);
+    if (currentRotation > FULL_CIRCLE_DEGREE || currentRotation < ZERO_CIRCLE_DEGREE) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "currentRotation is invalid: %{public}d", currentRotation);
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    property_->EditSessionInfo().currentRotation_ = currentRotation;
+    return WSError::WS_OK;
 }
 } // namespace Rosen
 } // namespace OHOS

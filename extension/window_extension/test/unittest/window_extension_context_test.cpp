@@ -56,7 +56,7 @@ namespace {
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionContextTest, StartAbility, Function | SmallTest | Level2)
+HWTEST_F(WindowExtensionContextTest, StartAbility, TestSize.Level1)
 {
     AAFwk::Want want;
     AAFwk::StartOptions startOptions;

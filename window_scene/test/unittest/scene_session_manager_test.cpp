@@ -2395,10 +2395,13 @@ HWTEST_F(SceneSessionManagerTest, IsWindowRectAutoSave, Function | SmallTest | L
  */
 HWTEST_F(SceneSessionManagerTest, SetIsWindowRectAutoSave, Function | SmallTest | Level3)
 {
-    std::string key = "com.example.recposentryEntryAbility";
+    std::string key = "com.example.recposentryEntryAbilityTest";
     bool enabled = true;
-    ssm_->SetIsWindowRectAutoSave(key, enabled);
+    std::string abilityKey = "com.example.recposentryEntryAbility";
+    bool isSaveSpecifiedFlag = true;
+    ssm_->SetIsWindowRectAutoSave(key, enabled, abilityKey, isSaveSpecifiedFlag);
     ASSERT_EQ(ssm_->isWindowRectAutoSaveMap_.at(key), true);
+    ASSERT_EQ(ssm_->isSaveBySpecifiedFlagMap_.at(abilityKey), true);
 }
 
 /**
@@ -2565,6 +2568,18 @@ HWTEST_F(SceneSessionManagerTest, MinimizeByWindowId, Function | SmallTest | Lev
 {
     std::vector<int32_t> windowIds;
     WMError res = ssm_->MinimizeByWindowId(windowIds);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, res);
+}
+
+/**
+ * @tc.name: SetForegroundWindowNum
+ * @tc.desc: test function : SetForegroundWindowNum
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, SetForegroundWindowNum, Function | SmallTest | Level3)
+{
+    int32_t windowNum = 0;
+    WMError res = ssm_->SetForegroundWindowNum(windowNum);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, res);
 }
 }

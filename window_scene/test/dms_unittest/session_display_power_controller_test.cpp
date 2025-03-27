@@ -60,7 +60,7 @@ namespace {
  * @tc.desc: NotifyDisplayEvent_Unlock func
  * @tc.type: FUNC
  */
-HWTEST_F(SessionDisplayPowerControllerTest, NotifyDisplayEvent_Unlock, Function | SmallTest | Level1)
+HWTEST_F(SessionDisplayPowerControllerTest, NotifyDisplayEvent_Unlock, TestSize.Level1)
 {
     DisplayEvent event = DisplayEvent::UNLOCK;
     SessionDisplayPowerController controller([](DisplayId id, sptr<DisplayInfo> info, const std::map<DisplayId,
@@ -78,7 +78,7 @@ HWTEST_F(SessionDisplayPowerControllerTest, NotifyDisplayEvent_Unlock, Function 
  * @tc.desc: NotifyDisplayEvent_KeyguardDrawn func
  * @tc.type: FUNC
  */
-    HWTEST_F(SessionDisplayPowerControllerTest, NotifyDisplayEvent_KeyguardDrawn, Function | SmallTest | Level1)
+    HWTEST_F(SessionDisplayPowerControllerTest, NotifyDisplayEvent_KeyguardDrawn, TestSize.Level1)
     {
         DisplayEvent event = DisplayEvent::KEYGUARD_DRAWN;
         SessionDisplayPowerController controller([](DisplayId id, sptr<DisplayInfo> info, const std::map<DisplayId,
@@ -93,7 +93,7 @@ HWTEST_F(SessionDisplayPowerControllerTest, NotifyDisplayEvent_Unlock, Function 
  * @tc.desc: SetDisplayState func
  * @tc.type: FUNC
  */
-HWTEST_F(SessionDisplayPowerControllerTest, SetDisplayState, Function | SmallTest | Level1)
+HWTEST_F(SessionDisplayPowerControllerTest, SetDisplayState, TestSize.Level1)
 {
     DisplayState state = DisplayState::UNKNOWN;
     SessionDisplayPowerController controller([](DisplayId id, sptr<DisplayInfo> info, const std::map<DisplayId,
@@ -121,7 +121,7 @@ HWTEST_F(SessionDisplayPowerControllerTest, SetDisplayState, Function | SmallTes
  * @tc.desc: HandleSetDisplayStateOff func
  * @tc.type: FUNC
  */
-HWTEST_F(SessionDisplayPowerControllerTest, HandleSetDisplayStateOff, Function | SmallTest | Level1)
+HWTEST_F(SessionDisplayPowerControllerTest, HandleSetDisplayStateOff, TestSize.Level1)
 {
     DisplayState state = DisplayState::UNKNOWN;
     SessionDisplayPowerController controller([](DisplayId id, sptr<DisplayInfo> info, const std::map<DisplayId,
@@ -149,7 +149,7 @@ HWTEST_F(SessionDisplayPowerControllerTest, HandleSetDisplayStateOff, Function |
  * @tc.desc: SuspendBegin func
  * @tc.type: FUNC
  */
-HWTEST_F(SessionDisplayPowerControllerTest, SuspendBegin, Function | SmallTest | Level1)
+HWTEST_F(SessionDisplayPowerControllerTest, SuspendBegin, TestSize.Level1)
 {
     PowerStateChangeReason reason = PowerStateChangeReason::POWER_BUTTON;
     SessionDisplayPowerController controller([](DisplayId id, sptr<DisplayInfo> info, const std::map<DisplayId,
@@ -164,7 +164,7 @@ HWTEST_F(SessionDisplayPowerControllerTest, SuspendBegin, Function | SmallTest |
  * @tc.desc: WaitScreenOffNotify func
  * @tc.type: FUNC
  */
-HWTEST_F(SessionDisplayPowerControllerTest, WaitScreenOffNotify, Function | SmallTest | Level1)
+HWTEST_F(SessionDisplayPowerControllerTest, WaitScreenOffNotify, TestSize.Level1)
 {
     DisplayState state = DisplayState::ON_SUSPEND;
     ScreenSessionManager::GetInstance().sessionDisplayPowerController_->WaitScreenOffNotify(state);

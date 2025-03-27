@@ -339,6 +339,8 @@ public:
     bool IsCameraBackSelfie() { return isCameraBackSelfie_; };
     void UpdateCameraBackSelfie(bool isCameraBackSelfie);
     void SetScreenCorrection();
+    void ReportFoldDisplayTime(uint64_t screenId, int64_t rsFirstFrameTime);
+    void RegisterFirstFrameCommitCallback();
 
     VirtualScreenFlag GetVirtualScreenFlag(ScreenId screenId) override;
     DMError SetVirtualScreenFlag(ScreenId screenId, VirtualScreenFlag screenFlag) override;
@@ -374,6 +376,7 @@ public:
     void SetDefaultScreenId(ScreenId defaultId);
     sptr<IScreenSessionManagerClient> GetClientProxy();
     void NotifyCastWhenScreenConnectChange(bool isConnected);
+    void NotifyCastWhenSwitchScbNode();
     void MultiScreenModeChange(const std::string& mainScreenId, const std::string& secondaryScreenId,
         const std::string& secondaryScreenMode);
     void SwitchScrollParam(FoldDisplayMode displayMode);
@@ -416,7 +419,7 @@ public:
     void RegisterSettingWireCastObserver(sptr<ScreenSession>& screenSession);
     SessionOption GetSessionOption(sptr<ScreenSession> screenSession);
     SessionOption GetSessionOption(sptr<ScreenSession> screenSession, ScreenId screenId);
-    virtual DMError SetSystemKeyboardStatus(bool isOn = false) override;
+    virtual DMError SetSystemKeyboardStatus(bool isTpKeyboardOn = false) override;
 
 protected:
     ScreenSessionManager();
@@ -497,6 +500,7 @@ private:
     std::shared_ptr<RSDisplayNode> GetDisplayNodeByDisplayId(DisplayId displayId);
     void RefreshMirrorScreenRegion(ScreenId screenId);
     void CalculateXYPosition(sptr<ScreenSession> screenSession);
+    bool IsSpecialApp();
 #ifdef DEVICE_STATUS_ENABLE
     void SetDragWindowScreenId(ScreenId screenId, ScreenId displayNodeScreenId);
 #endif // DEVICE_STATUS_ENABLE
@@ -511,6 +515,7 @@ private:
     bool IsExtendMode();
     bool IsScreenCasting();
     void SetScreenSkipProtectedWindowInner();
+    const std::set<std::string> g_packageNames_ {};
 
     /**
      * On/Off screen

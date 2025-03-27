@@ -621,14 +621,14 @@ void PictureInPictureController::DoControlEvent(PiPControlType controlType, PiPC
     pipOption_->SetPiPControlStatus(controlType, status);
 }
 
-void PictureInPictureController::PipSizeChange(uint32_t width, uint32_t height, double scale)
+void PictureInPictureController::PipSizeChange(double width, double height, double scale)
 {
-    TLOGI(WmsLogTag::WMS_PIP, "notify size info width: %{public}u, height: %{public}u scale: %{public}f",
-          width, height, scale);
     PiPWindowSize windowSize;
-    windowSize.width = width;
-    windowSize.height = height;
+    windowSize.width = std::round(width);
+    windowSize.height = std::round(height);
     windowSize.scale = scale;
+    TLOGI(WmsLogTag::WMS_PIP, "notify size info width: %{public}u, height: %{public}u scale: %{public}f",
+          windowSize.width, windowSize.height, scale);
     for (auto& listener : pipWindowSizeListeners_) {
         listener->OnPipSizeChange(windowSize);
     }
@@ -965,8 +965,7 @@ napi_ref PictureInPictureController::GetTypeNode() const
 void PictureInPictureController::GetPipPossible(bool& pipPossible)
 {
     const std::string multiWindowUIType = system::GetParameter("const.window.multiWindowUIType", "");
-    pipPossible = multiWindowUIType == "HandsetSmartWindow" || multiWindowUIType == "FreeFormMultiWindow" ||
-        multiWindowUIType == "TabletSmartWindow";
+    pipPossible = multiWindowUIType == "HandsetSmartWindow" || multiWindowUIType == "TabletSmartWindow";
     return;
 }
 

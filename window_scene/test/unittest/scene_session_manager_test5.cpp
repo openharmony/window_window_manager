@@ -1701,6 +1701,48 @@ HWTEST_F(SceneSessionManagerTest5, RequestSessionUnfocus02, Function | SmallTest
     ASSERT_EQ(focusGroup->GetFocusedSessionId(), 1);
     ASSERT_EQ(focusGroup->GetNeedBlockNotifyFocusStatusUntilForeground(), false);
 }
+
+/**
+ * @tc.name: RegisterSaveSnapshotFunc
+ * @tc.desc: RegisterSaveSnapshotFunc Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, RegisterSaveSnapshotFunc, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr<SceneSession> sceneSession = nullptr;
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, ssm_->RegisterSaveSnapshotFunc(sceneSession));
+
+    SessionInfo info;
+    info.windowType_ = 1000;
+    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->property_->SetPersistentId(1);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_WINDOW, ssm_->RegisterSaveSnapshotFunc(sceneSession));
+
+    sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    ASSERT_EQ(WSError::WS_OK, ssm_->RegisterSaveSnapshotFunc(sceneSession));
+}
+
+/**
+ * @tc.name: RegisterRemoveSnapshotFunc
+ * @tc.desc: RegisterRemoveSnapshotFunc Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, RegisterRemoveSnapshotFunc, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr<SceneSession> sceneSession = nullptr;
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, ssm_->RegisterSaveSnapshotFunc(sceneSession));
+
+    SessionInfo info;
+    info.windowType_ = 1000;
+    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->property_->SetPersistentId(1);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_WINDOW, ssm_->RegisterSaveSnapshotFunc(sceneSession));
+
+    sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    ASSERT_EQ(WSError::WS_OK, ssm_->RegisterSaveSnapshotFunc(sceneSession));
+}
 }
 } // namespace Rosen
 } // namespace OHOS

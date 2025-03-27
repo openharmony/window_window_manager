@@ -227,6 +227,11 @@ void WindowSessionProperty::SetHideNonSystemFloatingWindows(bool hide)
     hideNonSystemFloatingWindows_ = hide;
 }
 
+void WindowSessionProperty::SetSkipEventOnCastPlus(bool isSkip)
+{
+    isSkipEventOnCastPlus_ = isSkip;
+}
+
 void WindowSessionProperty::SetForceHide(bool hide)
 {
     forceHide_ = hide;
@@ -344,6 +349,11 @@ bool WindowSessionProperty::GetDragEnabled() const
 bool WindowSessionProperty::GetHideNonSystemFloatingWindows() const
 {
     return hideNonSystemFloatingWindows_;
+}
+
+bool WindowSessionProperty::GetSkipEventOnCastPlus() const
+{
+    return isSkipEventOnCastPlus_;
 }
 
 bool WindowSessionProperty::GetForceHide() const
@@ -1020,7 +1030,7 @@ void WindowSessionProperty::UnmarshallingMainWindowTopmost(Parcel& parcel, Windo
 bool WindowSessionProperty::MarshallingSessionInfo(Parcel& parcel) const
 {
     if (!parcel.WriteString(sessionInfo_.bundleName_) || !parcel.WriteString(sessionInfo_.moduleName_) ||
-        !parcel.WriteString(sessionInfo_.abilityName_) ||
+        !parcel.WriteString(sessionInfo_.abilityName_) || !parcel.WriteInt32(sessionInfo_.currentRotation_) ||
         !parcel.WriteInt32(static_cast<int32_t>(sessionInfo_.continueState))) {
         return false;
     }
@@ -1045,6 +1055,12 @@ bool WindowSessionProperty::UnmarshallingSessionInfo(Parcel& parcel, WindowSessi
         return false;
     }
     SessionInfo info = { bundleName, moduleName, abilityName };
+    int32_t currentRotation;
+    if (!parcel.ReadInt32(currentRotation)) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to read currentRotation!");
+        return false;
+    }
+    info.currentRotation_ = currentRotation;
     int32_t continueState;
     if (!parcel.ReadInt32(continueState)) {
         TLOGE(WmsLogTag::DEFAULT, "Failed to read continueState!");
@@ -1181,16 +1197,6 @@ bool WindowSessionProperty::GetIsAtomicService() const
     return isAtomicService_;
 }
 
-void WindowSessionProperty::SetIsSaveBySpecifiedFlag(bool isSaveBySpecifiedFlag)
-{
-    isSaveBySpecifiedFlag_ = isSaveBySpecifiedFlag;
-}
-
-bool WindowSessionProperty::GetIsSaveBySpecifiedFlag() const
-{
-    return isSaveBySpecifiedFlag_;
-}
-
 bool WindowSessionProperty::Marshalling(Parcel& parcel) const
 {
     return parcel.WriteString(windowName_) && parcel.WriteInt32(windowRect_.posX_) &&
@@ -1244,8 +1250,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint8(backgroundAlpha_) && parcel.WriteUint32(static_cast<uint32_t>(keyboardViewMode_)) &&
         parcel.WriteFloat(cornerRadius_) && parcel.WriteBool(isExclusivelyHighlighted_) &&
         parcel.WriteBool(isAtomicService_) && parcel.WriteUint32(apiVersion_) &&
-        parcel.WriteBool(isFullScreenWaterfallMode_) &&
-        parcel.WriteBool(isSaveBySpecifiedFlag_);
+        parcel.WriteBool(isFullScreenWaterfallMode_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -1336,7 +1341,6 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetIsAtomicService(parcel.ReadBool());
     property->SetApiVersion(parcel.ReadUint32());
     property->SetIsFullScreenWaterfallMode(parcel.ReadBool());
-    property->SetIsSaveBySpecifiedFlag(parcel.ReadBool());
     return property;
 }
 
@@ -1390,6 +1394,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     touchHotAreas_ = property->touchHotAreas_;
     keyboardTouchHotAreas_ = property->keyboardTouchHotAreas_;
     hideNonSystemFloatingWindows_ = property->hideNonSystemFloatingWindows_;
+    isSkipEventOnCastPlus_ = property->isSkipEventOnCastPlus_;
     forceHide_ = property->forceHide_;
     keepKeyboardFlag_ = property->keepKeyboardFlag_;
     callingSessionId_ = property->callingSessionId_;
@@ -1429,7 +1434,6 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     isAtomicService_ = property->isAtomicService_;
     apiVersion_ = property->apiVersion_;
     isFullScreenWaterfallMode_ = property->isFullScreenWaterfallMode_;
-    isSaveBySpecifiedFlag_ = property->isSaveBySpecifiedFlag_;
 }
 
 bool WindowSessionProperty::Write(Parcel& parcel, WSPropertyChangeAction action)

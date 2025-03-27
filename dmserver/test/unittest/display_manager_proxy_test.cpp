@@ -60,7 +60,7 @@ namespace {
  * @tc.desc: test DisplayManagerProxy::GetDefaultDisplayInfo
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, GetDefaultDisplayInfo01, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, GetDefaultDisplayInfo01, TestSize.Level1)
 {
     DisplayManagerProxy proxy1(nullptr);
     ASSERT_EQ(nullptr, proxy1.remoteObject_);
@@ -83,7 +83,7 @@ HWTEST_F(DisplayManagerProxyTest, GetDefaultDisplayInfo01, Function | SmallTest 
  * @tc.desc: test DisplayManagerProxy::GetDisplayInfoById
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, GetDisplayInfoById01, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, GetDisplayInfoById01, TestSize.Level1)
 {
     DisplayManagerProxy proxy1(nullptr);
     ASSERT_EQ(nullptr, proxy1.remoteObject_);
@@ -107,7 +107,7 @@ HWTEST_F(DisplayManagerProxyTest, GetDisplayInfoById01, Function | SmallTest | L
  * @tc.desc: test DisplayManagerProxy::GetDisplayInfoByScreen
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, GetDisplayInfoByScreen01, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, GetDisplayInfoByScreen01, TestSize.Level1)
 {
     DisplayManagerProxy proxy1(nullptr);
     ASSERT_EQ(nullptr, proxy1.remoteObject_);
@@ -131,7 +131,7 @@ HWTEST_F(DisplayManagerProxyTest, GetDisplayInfoByScreen01, Function | SmallTest
  * @tc.desc: test DisplayManagerProxy::CreateVirtualScreen
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, CreateVirtualScreen01, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, CreateVirtualScreen01, TestSize.Level1)
 {
     DisplayManagerProxy proxy1(nullptr);
     ASSERT_EQ(nullptr, proxy1.remoteObject_);
@@ -161,7 +161,7 @@ HWTEST_F(DisplayManagerProxyTest, CreateVirtualScreen01, Function | SmallTest | 
  * @tc.desc: test DisplayManagerProxy::DestroyVirtualScreen
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, DestroyVirtualScreen01, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, DestroyVirtualScreen01, TestSize.Level1)
 {
     DisplayManagerProxy proxy1(nullptr);
     ASSERT_EQ(nullptr, proxy1.remoteObject_);
@@ -185,7 +185,7 @@ HWTEST_F(DisplayManagerProxyTest, DestroyVirtualScreen01, Function | SmallTest |
  * @tc.desc: test DisplayManagerProxy::SetVirtualScreenSurface
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, SetVirtualScreenSurface01, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, SetVirtualScreenSurface01, TestSize.Level1)
 {
     DisplayManagerProxy proxy1(nullptr);
     ASSERT_EQ(nullptr, proxy1.remoteObject_);
@@ -212,7 +212,7 @@ HWTEST_F(DisplayManagerProxyTest, SetVirtualScreenSurface01, Function | SmallTes
  * @tc.desc: test DisplayManagerProxy::SetOrientation
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, SetOrientation01, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, SetOrientation01, TestSize.Level1)
 {
     DisplayManagerProxy proxy1(nullptr);
     ASSERT_EQ(nullptr, proxy1.remoteObject_);
@@ -236,7 +236,7 @@ HWTEST_F(DisplayManagerProxyTest, SetOrientation01, Function | SmallTest | Level
  * @tc.desc: test DisplayManagerProxy::GetDisplaySnapshot
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, GetDisplaySnapshot01, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, GetDisplaySnapshot01, TestSize.Level1)
 {
     DisplayManagerProxy proxy1(nullptr);
     ASSERT_EQ(nullptr, proxy1.remoteObject_);
@@ -259,7 +259,7 @@ HWTEST_F(DisplayManagerProxyTest, GetDisplaySnapshot01, Function | SmallTest | L
  * @tc.desc: test DisplayManagerProxy::GetScreenSupportedColorGamuts
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, GetScreenSupportedColorGamuts01, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, GetScreenSupportedColorGamuts01, TestSize.Level1)
 {
     std::vector<ScreenColorGamut> gamutVector;
     DisplayManagerProxy proxy1(nullptr);
@@ -283,7 +283,7 @@ HWTEST_F(DisplayManagerProxyTest, GetScreenSupportedColorGamuts01, Function | Sm
  * @tc.desc: test DisplayManagerProxy::GetScreenColorGamut
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, GetScreenColorGamut01, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, GetScreenColorGamut01, TestSize.Level1)
 {
     DisplayManagerProxy proxy1(nullptr);
     ASSERT_EQ(nullptr, proxy1.remoteObject_);
@@ -311,7 +311,7 @@ HWTEST_F(DisplayManagerProxyTest, GetScreenColorGamut01, Function | SmallTest | 
  * @tc.desc: test DisplayManagerProxy::SetScreenColorGamut
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, SetScreenColorGamut01, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, SetScreenColorGamut01, TestSize.Level1)
 {
     DisplayManagerProxy proxy1(nullptr);
     EXPECT_EQ(nullptr, proxy1.remoteObject_);
@@ -334,7 +334,7 @@ HWTEST_F(DisplayManagerProxyTest, SetScreenColorGamut01, Function | SmallTest | 
  * @tc.desc: test DisplayManagerProxy::GetScreenGamutMap
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, GetScreenGamutMap01, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, GetScreenGamutMap01, TestSize.Level1)
 {
     DisplayManagerProxy proxy1(nullptr);
     EXPECT_EQ(nullptr, proxy1.remoteObject_);
@@ -362,7 +362,7 @@ HWTEST_F(DisplayManagerProxyTest, GetScreenGamutMap01, Function | SmallTest | Le
  * @tc.desc: test DisplayManagerProxy::SetScreenGamutMap
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, SetScreenGamutMap01, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, SetScreenGamutMap01, TestSize.Level1)
 {
     DisplayManagerProxy proxy1(nullptr);
     EXPECT_EQ(nullptr, proxy1.remoteObject_);
@@ -390,7 +390,7 @@ HWTEST_F(DisplayManagerProxyTest, SetScreenGamutMap01, Function | SmallTest | Le
  * @tc.desc: test DisplayManagerProxy::SetScreenColorTransform
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, SetScreenColorTransform01, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, SetScreenColorTransform01, TestSize.Level1)
 {
     DisplayManagerProxy proxy1(nullptr);
     EXPECT_EQ(nullptr, proxy1.remoteObject_);
@@ -414,7 +414,7 @@ HWTEST_F(DisplayManagerProxyTest, SetScreenColorTransform01, Function | SmallTes
  * @tc.desc: test DisplayManagerProxy::RegisterDisplayManagerAgent
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, RegisterDisplayManagerAgent01, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, RegisterDisplayManagerAgent01, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObject = new IRemoteObjectMocker();
     DisplayManagerProxy proxy1(iRemoteObject);
@@ -430,7 +430,7 @@ HWTEST_F(DisplayManagerProxyTest, RegisterDisplayManagerAgent01, Function | Smal
  * @tc.desc: test DisplayManagerProxy::UnregisterDisplayManagerAgent
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, UnregisterDisplayManagerAgent01, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, UnregisterDisplayManagerAgent01, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObject = new IRemoteObjectMocker();
     DisplayManagerProxy proxy1(iRemoteObject);
@@ -446,7 +446,7 @@ HWTEST_F(DisplayManagerProxyTest, UnregisterDisplayManagerAgent01, Function | Sm
  * @tc.desc: test DisplayManagerProxy::WakeUpBegin
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, WakeUpBegin01, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, WakeUpBegin01, TestSize.Level1)
 {
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy1(remoteMocker);
@@ -466,7 +466,7 @@ HWTEST_F(DisplayManagerProxyTest, WakeUpBegin01, Function | SmallTest | Level1)
  * @tc.desc: test DisplayManagerProxy::WakeUpEnd
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, WakeUpEnd01, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, WakeUpEnd01, TestSize.Level1)
 {
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy1(remoteMocker);
@@ -485,7 +485,7 @@ HWTEST_F(DisplayManagerProxyTest, WakeUpEnd01, Function | SmallTest | Level1)
  * @tc.desc: test DisplayManagerProxy::GetPixelFormat
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, GetPixelFormat, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, GetPixelFormat, TestSize.Level1)
 {
     GraphicPixelFormat pixelFormat = GraphicPixelFormat{GRAPHIC_PIXEL_FMT_CLUT1};
     DisplayManagerProxy proxy1(nullptr);
@@ -510,7 +510,7 @@ HWTEST_F(DisplayManagerProxyTest, GetPixelFormat, Function | SmallTest | Level1)
  * @tc.desc: test DisplayManagerProxy::SetPixelFormat
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, SetPixelFormat, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, SetPixelFormat, TestSize.Level1)
 {
     GraphicPixelFormat pixelFormat = GraphicPixelFormat{GRAPHIC_PIXEL_FMT_CLUT1};
     DisplayManagerProxy proxy1(nullptr);
@@ -535,7 +535,7 @@ HWTEST_F(DisplayManagerProxyTest, SetPixelFormat, Function | SmallTest | Level1)
  * @tc.desc: test DisplayManagerProxy::GetSupportedHDRFormats
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, GetSupportedHDRFormats, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, GetSupportedHDRFormats, TestSize.Level1)
 {
     std::vector<ScreenHDRFormat> hdrFormats;
     DisplayManagerProxy proxy1(nullptr);
@@ -560,7 +560,7 @@ HWTEST_F(DisplayManagerProxyTest, GetSupportedHDRFormats, Function | SmallTest |
  * @tc.desc: test DisplayManagerProxy::SetScreenHDRFormat
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, SetScreenHDRFormat, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, SetScreenHDRFormat, TestSize.Level1)
 {
     DisplayManagerProxy proxy1(nullptr);
     EXPECT_EQ(nullptr, proxy1.remoteObject_);
@@ -584,7 +584,7 @@ HWTEST_F(DisplayManagerProxyTest, SetScreenHDRFormat, Function | SmallTest | Lev
  * @tc.desc: test DisplayManagerProxy::GetScreenHDRFormat
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, GetScreenHDRFormat, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, GetScreenHDRFormat, TestSize.Level1)
 {
     ScreenHDRFormat hdrFormats = ScreenHDRFormat{VIDEO_HLG};
     DisplayManagerProxy proxy1(nullptr);
@@ -609,7 +609,7 @@ HWTEST_F(DisplayManagerProxyTest, GetScreenHDRFormat, Function | SmallTest | Lev
  * @tc.desc: test DisplayManagerProxy::GetSupportedColorSpaces
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, GetSupportedColorSpaces, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, GetSupportedColorSpaces, TestSize.Level1)
 {
     std::vector<GraphicCM_ColorSpaceType> colorSpaces;
     DisplayManagerProxy proxy1(nullptr);
@@ -634,7 +634,7 @@ HWTEST_F(DisplayManagerProxyTest, GetSupportedColorSpaces, Function | SmallTest 
  * @tc.desc: test DisplayManagerProxy::GetScreenColorSpace
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, GetScreenColorSpace, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, GetScreenColorSpace, TestSize.Level1)
 {
     GraphicCM_ColorSpaceType colorSpaces;
     DisplayManagerProxy proxy1(nullptr);
@@ -659,7 +659,7 @@ HWTEST_F(DisplayManagerProxyTest, GetScreenColorSpace, Function | SmallTest | Le
  * @tc.desc: test DisplayManagerProxy::SetScreenColorSpace
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, SetScreenColorSpace, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, SetScreenColorSpace, TestSize.Level1)
 {
     GraphicCM_ColorSpaceType colorSpaces = GraphicCM_ColorSpaceType{GRAPHIC_CM_BT601_EBU_FULL};
     DisplayManagerProxy proxy1(nullptr);
@@ -684,7 +684,7 @@ HWTEST_F(DisplayManagerProxyTest, SetScreenColorSpace, Function | SmallTest | Le
  * @tc.desc: test DisplayManagerProxy::SuspendBegin
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, SuspendBegin, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, SuspendBegin, TestSize.Level1)
 {
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy1(remoteMocker);
@@ -704,7 +704,7 @@ HWTEST_F(DisplayManagerProxyTest, SuspendBegin, Function | SmallTest | Level1)
  * @tc.desc: test DisplayManagerProxy::SuspendEnd
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, SuspendEnd, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, SuspendEnd, TestSize.Level1)
 {
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy1(remoteMocker);
@@ -723,7 +723,7 @@ HWTEST_F(DisplayManagerProxyTest, SuspendEnd, Function | SmallTest | Level1)
  * @tc.desc: test DisplayManagerProxy::SetScreenPowerForAll
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, SetScreenPowerForAll, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, SetScreenPowerForAll, TestSize.Level1)
 {
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy1(remoteMocker);
@@ -744,7 +744,7 @@ HWTEST_F(DisplayManagerProxyTest, SetScreenPowerForAll, Function | SmallTest | L
  * @tc.desc: test DisplayManagerProxy::SetSpecifiedScreenPower
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, SetSpecifiedScreenPower, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, SetSpecifiedScreenPower, TestSize.Level1)
 {
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy1(remoteMocker);
@@ -765,7 +765,7 @@ HWTEST_F(DisplayManagerProxyTest, SetSpecifiedScreenPower, Function | SmallTest 
  * @tc.desc: test DisplayManagerProxy::SetDisplayState
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, SetDisplayState, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, SetDisplayState, TestSize.Level1)
 {
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy1(remoteMocker);
@@ -785,7 +785,7 @@ HWTEST_F(DisplayManagerProxyTest, SetDisplayState, Function | SmallTest | Level1
  * @tc.desc: test DisplayManagerProxy::AddSurfaceNodeToDisplay
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, AddSurfaceNodeToDisplay, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, AddSurfaceNodeToDisplay, TestSize.Level1)
 {
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy1(remoteMocker);
@@ -805,7 +805,7 @@ HWTEST_F(DisplayManagerProxyTest, AddSurfaceNodeToDisplay, Function | SmallTest 
  * @tc.desc: test DisplayManagerProxy::RemoveSurfaceNodeFromDisplay
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, RemoveSurfaceNodeFromDisplay, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, RemoveSurfaceNodeFromDisplay, TestSize.Level1)
 {
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy1(remoteMocker);
@@ -825,7 +825,7 @@ HWTEST_F(DisplayManagerProxyTest, RemoveSurfaceNodeFromDisplay, Function | Small
  * @tc.desc: test DisplayManagerProxy::HasPrivateWindow
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, HasPrivateWindow, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, HasPrivateWindow, TestSize.Level1)
 {
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy1(remoteMocker);
@@ -845,7 +845,7 @@ HWTEST_F(DisplayManagerProxyTest, HasPrivateWindow, Function | SmallTest | Level
  * @tc.desc: test DisplayManagerProxy::SetFreeze
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, SetFreeze, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, SetFreeze, TestSize.Level1)
 {
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy1(remoteMocker);
@@ -865,7 +865,7 @@ HWTEST_F(DisplayManagerProxyTest, SetFreeze, Function | SmallTest | Level1)
  * @tc.desc: test DisplayManagerProxy::GetDisplayState
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, GetDisplayState, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, GetDisplayState, TestSize.Level1)
 {
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy1(remoteMocker);
@@ -885,7 +885,7 @@ HWTEST_F(DisplayManagerProxyTest, GetDisplayState, Function | SmallTest | Level1
  * @tc.desc: test DisplayManagerProxy::GetScreenPower
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, GetScreenPower, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, GetScreenPower, TestSize.Level1)
 {
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy1(remoteMocker);
@@ -904,7 +904,7 @@ HWTEST_F(DisplayManagerProxyTest, GetScreenPower, Function | SmallTest | Level1)
  * @tc.desc: test DisplayManagerProxy::GetAllDisplayIds
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, GetAllDisplayIds, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, GetAllDisplayIds, TestSize.Level1)
 {
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy1(remoteMocker);
@@ -923,7 +923,7 @@ HWTEST_F(DisplayManagerProxyTest, GetAllDisplayIds, Function | SmallTest | Level
  * @tc.desc: test DisplayManagerProxy::GetCutoutInfo
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, GetCutoutInfo, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, GetCutoutInfo, TestSize.Level1)
 {
     DisplayManagerProxy proxy1(nullptr);
     EXPECT_EQ(nullptr, proxy1.remoteObject_);
@@ -947,7 +947,7 @@ HWTEST_F(DisplayManagerProxyTest, GetCutoutInfo, Function | SmallTest | Level1)
  * @tc.desc: test DisplayManagerProxy::NotifyDisplayEvent
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, NotifyDisplayEvent, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, NotifyDisplayEvent, TestSize.Level1)
 {
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy1(remoteMocker);
@@ -967,7 +967,7 @@ HWTEST_F(DisplayManagerProxyTest, NotifyDisplayEvent, Function | SmallTest | Lev
  * @tc.desc: test DisplayManagerProxy::MakeMirror
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, MakeMirror, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, MakeMirror, TestSize.Level1)
 {
     ScreenId mainScreenId = static_cast<ScreenId>(0);
     std::vector<ScreenId> mirrorScreenId;
@@ -996,7 +996,7 @@ HWTEST_F(DisplayManagerProxyTest, MakeMirror, Function | SmallTest | Level1)
  * @tc.desc: test DisplayManagerProxy::StopMirror
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, StopMirror, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, StopMirror, TestSize.Level1)
 {
     std::vector<ScreenId> mirrorScreenId;
     mirrorScreenId.emplace_back(1001);
@@ -1023,7 +1023,7 @@ HWTEST_F(DisplayManagerProxyTest, StopMirror, Function | SmallTest | Level1)
  * @tc.desc: test DisplayManagerProxy::GetScreenInfoById
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, GetScreenInfoById, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, GetScreenInfoById, TestSize.Level1)
 {
     ScreenId screenId = static_cast<ScreenId>(0);
     DisplayManagerProxy proxy1(nullptr);
@@ -1049,7 +1049,7 @@ HWTEST_F(DisplayManagerProxyTest, GetScreenInfoById, Function | SmallTest | Leve
  * @tc.desc: test DisplayManagerProxy::GetScreenGroupInfoById
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, GetScreenGroupInfoById, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, GetScreenGroupInfoById, TestSize.Level1)
 {
     ScreenId screenId = static_cast<ScreenId>(0);
     DisplayManagerProxy proxy1(nullptr);
@@ -1075,7 +1075,7 @@ HWTEST_F(DisplayManagerProxyTest, GetScreenGroupInfoById, Function | SmallTest |
  * @tc.desc: test DisplayManagerProxy::GetAllScreenInfos
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, GetAllScreenInfos, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, GetAllScreenInfos, TestSize.Level1)
 {
     std::vector<sptr<ScreenInfo>> screenInfos{nullptr};
     DisplayManagerProxy proxy1(nullptr);
@@ -1101,7 +1101,7 @@ HWTEST_F(DisplayManagerProxyTest, GetAllScreenInfos, Function | SmallTest | Leve
  * @tc.desc: test DisplayManagerProxy::MakeExpand
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, MakeExpand, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, MakeExpand, TestSize.Level1)
 {
     ScreenId screenId_ = static_cast<ScreenId>(0);
     std::vector<ScreenId> screenId;
@@ -1133,7 +1133,7 @@ HWTEST_F(DisplayManagerProxyTest, MakeExpand, Function | SmallTest | Level1)
  * @tc.desc: test DisplayManagerProxy::StopExpand
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, StopExpand, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, StopExpand, TestSize.Level1)
 {
     ScreenId screenId_ = static_cast<ScreenId>(0);
     std::vector<ScreenId> screenId;
@@ -1161,7 +1161,7 @@ HWTEST_F(DisplayManagerProxyTest, StopExpand, Function | SmallTest | Level1)
  * @tc.desc: test DisplayManagerProxy::RemoveVirtualScreenFromGroup
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, RemoveVirtualScreenFromGroup, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, RemoveVirtualScreenFromGroup, TestSize.Level1)
 {
     ScreenId screenId_ = static_cast<ScreenId>(0);
     std::vector<ScreenId> screenId;
@@ -1189,7 +1189,7 @@ HWTEST_F(DisplayManagerProxyTest, RemoveVirtualScreenFromGroup, Function | Small
  * @tc.desc: test DisplayManagerProxy::SetScreenActiveMode
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, SetScreenActiveMode, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, SetScreenActiveMode, TestSize.Level1)
 {
     ScreenId screenId = static_cast<ScreenId>(0);
     DisplayManagerProxy proxy1(nullptr);
@@ -1215,7 +1215,7 @@ HWTEST_F(DisplayManagerProxyTest, SetScreenActiveMode, Function | SmallTest | Le
  * @tc.desc: test DisplayManagerProxy::SetVirtualPixelRatio
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, SetVirtualPixelRatio, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, SetVirtualPixelRatio, TestSize.Level1)
 {
     ScreenId screenId = static_cast<ScreenId>(0);
     float virtualPixelRatio = 0;
@@ -1242,7 +1242,7 @@ HWTEST_F(DisplayManagerProxyTest, SetVirtualPixelRatio, Function | SmallTest | L
  * @tc.desc: test DisplayManagerProxy::SetResolution
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, SetResolution, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, SetResolution, TestSize.Level1)
 {
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy(remoteMocker);
@@ -1257,7 +1257,7 @@ HWTEST_F(DisplayManagerProxyTest, SetResolution, Function | SmallTest | Level1)
  * @tc.desc: test DisplayManagerProxy::GetDensityInCurResolution
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, GetDensityInCurResolution, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, GetDensityInCurResolution, TestSize.Level1)
 {
     ScreenId screenId = static_cast<ScreenId>(0);
     float virtualPixelRatio = 0;
@@ -1284,7 +1284,7 @@ HWTEST_F(DisplayManagerProxyTest, GetDensityInCurResolution, Function | SmallTes
  * @tc.desc: test DisplayManagerProxy::IsScreenRotationLocked
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, IsScreenRotationLocked, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, IsScreenRotationLocked, TestSize.Level1)
 {
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy(remoteMocker);
@@ -1299,7 +1299,7 @@ HWTEST_F(DisplayManagerProxyTest, IsScreenRotationLocked, Function | SmallTest |
  * @tc.desc: test DisplayManagerProxy::SetScreenRotationLocked
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, SetScreenRotationLocked, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, SetScreenRotationLocked, TestSize.Level1)
 {
     DisplayManagerProxy proxy1(nullptr);
     EXPECT_EQ(nullptr, proxy1.remoteObject_);
@@ -1324,7 +1324,7 @@ HWTEST_F(DisplayManagerProxyTest, SetScreenRotationLocked, Function | SmallTest 
  * @tc.desc: test DisplayManagerProxy::SetScreenRotationLockedFromJs
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, SetScreenRotationLockedFromJs, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, SetScreenRotationLockedFromJs, TestSize.Level1)
 {
     DisplayManagerProxy proxy1(nullptr);
     EXPECT_EQ(nullptr, proxy1.remoteObject_);
@@ -1349,7 +1349,7 @@ HWTEST_F(DisplayManagerProxyTest, SetScreenRotationLockedFromJs, Function | Smal
  * @tc.desc: test DisplayManagerProxy::ResizeVirtualScreen
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, ResizeVirtualScreen, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, ResizeVirtualScreen, TestSize.Level1)
 {
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy(remoteMocker);
@@ -1364,7 +1364,7 @@ HWTEST_F(DisplayManagerProxyTest, ResizeVirtualScreen, Function | SmallTest | Le
  * @tc.desc: test DisplayManagerProxy::MakeUniqueScreen
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, MakeUniqueScreen, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, MakeUniqueScreen, TestSize.Level1)
 {
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy(remoteMocker);
@@ -1380,7 +1380,7 @@ HWTEST_F(DisplayManagerProxyTest, MakeUniqueScreen, Function | SmallTest | Level
  * @tc.desc: test DisplayManagerProxy::RemoveVirtualScreenFromGroup02
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, RemoveVirtualScreenFromGroup02, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, RemoveVirtualScreenFromGroup02, TestSize.Level1)
 {
     ScreenId screenId_ = static_cast<ScreenId>(0);
     std::vector<ScreenId> screenId;
@@ -1408,7 +1408,7 @@ HWTEST_F(DisplayManagerProxyTest, RemoveVirtualScreenFromGroup02, Function | Sma
  * @tc.desc: test DisplayManagerProxy::SetScreenActiveMode02
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, SetScreenActiveMode02, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, SetScreenActiveMode02, TestSize.Level1)
 {
     ScreenId screenId = static_cast<ScreenId>(0);
     DisplayManagerProxy proxy1(nullptr);
@@ -1434,7 +1434,7 @@ HWTEST_F(DisplayManagerProxyTest, SetScreenActiveMode02, Function | SmallTest | 
  * @tc.desc: test DisplayManagerProxy::SetVirtualPixelRatio02
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, SetVirtualPixelRatio02, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, SetVirtualPixelRatio02, TestSize.Level1)
 {
     ScreenId screenId = static_cast<ScreenId>(0);
     float virtualPixelRatio = 0;
@@ -1461,7 +1461,7 @@ HWTEST_F(DisplayManagerProxyTest, SetVirtualPixelRatio02, Function | SmallTest |
  * @tc.desc: test DisplayManagerProxy::SetResolution02
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, SetResolution02, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, SetResolution02, TestSize.Level1)
 {
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy(remoteMocker);
@@ -1476,7 +1476,7 @@ HWTEST_F(DisplayManagerProxyTest, SetResolution02, Function | SmallTest | Level1
  * @tc.desc: test DisplayManagerProxy::GetDensityInCurResolution02
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, GetDensityInCurResolution02, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, GetDensityInCurResolution02, TestSize.Level1)
 {
     ScreenId screenId = static_cast<ScreenId>(0);
     float virtualPixelRatio = 0;
@@ -1503,7 +1503,7 @@ HWTEST_F(DisplayManagerProxyTest, GetDensityInCurResolution02, Function | SmallT
  * @tc.desc: test DisplayManagerProxy::IsScreenRotationLocked02
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, IsScreenRotationLocked02, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, IsScreenRotationLocked02, TestSize.Level1)
 {
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy(remoteMocker);
@@ -1518,7 +1518,7 @@ HWTEST_F(DisplayManagerProxyTest, IsScreenRotationLocked02, Function | SmallTest
  * @tc.desc: test DisplayManagerProxy::SetScreenRotationLocked02
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, SetScreenRotationLocked02, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, SetScreenRotationLocked02, TestSize.Level1)
 {
     DisplayManagerProxy proxy1(nullptr);
     EXPECT_EQ(nullptr, proxy1.remoteObject_);
@@ -1543,7 +1543,7 @@ HWTEST_F(DisplayManagerProxyTest, SetScreenRotationLocked02, Function | SmallTes
  * @tc.desc: test DisplayManagerProxy::SetScreenRotationLockedFromJs02
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, SetScreenRotationLockedFromJs02, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, SetScreenRotationLockedFromJs02, TestSize.Level1)
 {
     DisplayManagerProxy proxy1(nullptr);
     EXPECT_EQ(nullptr, proxy1.remoteObject_);
@@ -1568,7 +1568,7 @@ HWTEST_F(DisplayManagerProxyTest, SetScreenRotationLockedFromJs02, Function | Sm
  * @tc.desc: test DisplayManagerProxy::ResizeVirtualScreen02
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, ResizeVirtualScreen02, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, ResizeVirtualScreen02, TestSize.Level1)
 {
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy(remoteMocker);
@@ -1583,7 +1583,7 @@ HWTEST_F(DisplayManagerProxyTest, ResizeVirtualScreen02, Function | SmallTest | 
  * @tc.desc: test DisplayManagerProxy::MakeUniqueScreen02
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerProxyTest, MakeUniqueScreen02, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerProxyTest, MakeUniqueScreen02, TestSize.Level1)
 {
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy(remoteMocker);

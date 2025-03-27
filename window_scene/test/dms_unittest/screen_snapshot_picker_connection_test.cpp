@@ -59,7 +59,7 @@ namespace {
  * @tc.desc: SnapshotPickerConnectExtension func
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSnapshotPickerConnectionTest, SnapshotPickerConnectExtension01, Function | SmallTest | Level1)
+HWTEST_F(ScreenSnapshotPickerConnectionTest, SnapshotPickerConnectExtension01, TestSize.Level1)
 {
     ScreenSceneConfig::LoadConfigXml();
     auto strConfig = ScreenSceneConfig::GetStringConfig();
@@ -76,7 +76,7 @@ HWTEST_F(ScreenSnapshotPickerConnectionTest, SnapshotPickerConnectExtension01, F
  * @tc.desc: SnapshotPickerConnectExtension func
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSnapshotPickerConnectionTest, SnapshotPickerConnectExtension02, Function | SmallTest | Level1)
+HWTEST_F(ScreenSnapshotPickerConnectionTest, SnapshotPickerConnectExtension02, TestSize.Level1)
 {
     ScreenSceneConfig::LoadConfigXml();
     auto strConfig = ScreenSceneConfig::GetStringConfig();
@@ -93,7 +93,7 @@ HWTEST_F(ScreenSnapshotPickerConnectionTest, SnapshotPickerConnectExtension02, F
  * @tc.desc: SnapshotPickerConnectExtension func
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSnapshotPickerConnectionTest, SnapshotPickerConnectExtension03, Function | SmallTest | Level1)
+HWTEST_F(ScreenSnapshotPickerConnectionTest, SnapshotPickerConnectExtension03, TestSize.Level1)
 {
     ScreenSceneConfig::LoadConfigXml();
     auto strConfig = ScreenSceneConfig::GetStringConfig();
@@ -110,7 +110,7 @@ HWTEST_F(ScreenSnapshotPickerConnectionTest, SnapshotPickerConnectExtension03, F
  * @tc.desc: SnapshotPickerConnectExtension func
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSnapshotPickerConnectionTest, SnapshotPickerConnectExtension04, Function | SmallTest | Level1)
+HWTEST_F(ScreenSnapshotPickerConnectionTest, SnapshotPickerConnectExtension04, TestSize.Level1)
 {
     ScreenSceneConfig::LoadConfigXml();
     auto strConfig = ScreenSceneConfig::GetStringConfig();
@@ -127,7 +127,7 @@ HWTEST_F(ScreenSnapshotPickerConnectionTest, SnapshotPickerConnectExtension04, F
  * @tc.desc: SnapshotPickerConnectExtension func
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSnapshotPickerConnectionTest, SnapshotPickerConnectExtension05, Function | SmallTest | Level1)
+HWTEST_F(ScreenSnapshotPickerConnectionTest, SnapshotPickerConnectExtension05, TestSize.Level1)
 {
     ScreenSceneConfig::LoadConfigXml();
     auto strConfig = ScreenSceneConfig::GetStringConfig();
@@ -146,7 +146,7 @@ HWTEST_F(ScreenSnapshotPickerConnectionTest, SnapshotPickerConnectExtension05, F
  * @tc.desc: SnapshotPickerConnectExtension func
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSnapshotPickerConnectionTest, SnapshotPickerConnectExtension06, Function | SmallTest | Level1)
+HWTEST_F(ScreenSnapshotPickerConnectionTest, SnapshotPickerConnectExtension06, TestSize.Level1)
 {
     std::string bundleName = "testScreenSnapshotBundleName";
     std::string abilityName = "testScreenSnapshotAbilityName";
@@ -163,7 +163,7 @@ HWTEST_F(ScreenSnapshotPickerConnectionTest, SnapshotPickerConnectExtension06, F
  * @tc.desc: GetScreenSnapshotInfo func
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSnapshotPickerConnectionTest, GetScreenSnapshotInfo01, Function | SmallTest | Level1)
+HWTEST_F(ScreenSnapshotPickerConnectionTest, GetScreenSnapshotInfo01, TestSize.Level1)
 {
     ScreenSnapshotPickerConnection::GetInstance().abilityConnection_ = nullptr;
     Media::Rect rect{};
@@ -177,7 +177,7 @@ HWTEST_F(ScreenSnapshotPickerConnectionTest, GetScreenSnapshotInfo01, Function |
  * @tc.desc: GetScreenSnapshotInfo func
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSnapshotPickerConnectionTest, GetScreenSnapshotInfo02, Function | SmallTest | Level1)
+HWTEST_F(ScreenSnapshotPickerConnectionTest, GetScreenSnapshotInfo02, TestSize.Level1)
 {
     ScreenSnapshotPickerConnection::GetInstance().abilityConnection_ =
         std::make_unique<ScreenSessionAbilityConnection>();
@@ -194,7 +194,7 @@ HWTEST_F(ScreenSnapshotPickerConnectionTest, GetScreenSnapshotInfo02, Function |
  * @tc.desc: GetScreenSnapshotInfo func
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSnapshotPickerConnectionTest, GetScreenSnapshotInfo03, Function | SmallTest | Level1)
+HWTEST_F(ScreenSnapshotPickerConnectionTest, GetScreenSnapshotInfo03, TestSize.Level1)
 {
     std::string bundleName = "testScreenSnapshotBundleName";
     std::string abilityName = "testScreenSnapshotAbilityName";
@@ -213,7 +213,7 @@ HWTEST_F(ScreenSnapshotPickerConnectionTest, GetScreenSnapshotInfo03, Function |
  * @tc.desc: SnapshotPickerDisconnectExtension func
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSnapshotPickerConnectionTest, SnapshotPickerDisconnectExtension01, Function | SmallTest | Level1)
+HWTEST_F(ScreenSnapshotPickerConnectionTest, SnapshotPickerDisconnectExtension01, TestSize.Level1)
 {
     ScreenSnapshotPickerConnection::GetInstance().SnapshotPickerDisconnectExtension();
     EXPECT_EQ(ScreenSnapshotPickerConnection::GetInstance().abilityConnection_, nullptr);
@@ -224,7 +224,7 @@ HWTEST_F(ScreenSnapshotPickerConnectionTest, SnapshotPickerDisconnectExtension01
  * @tc.desc: SnapshotPickerDisconnectExtension func
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSnapshotPickerConnectionTest, SnapshotPickerDisconnectExtension02, Function | SmallTest | Level1)
+HWTEST_F(ScreenSnapshotPickerConnectionTest, SnapshotPickerDisconnectExtension02, TestSize.Level1)
 {
     std::unique_ptr<ScreenSessionAbilityConnection> abilityConnection_ =
         std::make_unique<ScreenSessionAbilityConnection>();
@@ -237,7 +237,7 @@ HWTEST_F(ScreenSnapshotPickerConnectionTest, SnapshotPickerDisconnectExtension02
  * @tc.desc: GetScreenSnapshotRect func
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSnapshotPickerConnectionTest, GetScreenSnapshotRect, Function | SmallTest | Level1)
+HWTEST_F(ScreenSnapshotPickerConnectionTest, GetScreenSnapshotRect, TestSize.Level1)
 {
     Media::Rect rect{};
     ScreenId screenId = SCREEN_ID_INVALID;
@@ -262,7 +262,7 @@ HWTEST_F(ScreenSnapshotPickerConnectionTest, GetScreenSnapshotRect, Function | S
  * @tc.desc: GetScreenSessionAbilityConnectionStub func
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSnapshotPickerConnectionTest, GetScreenSessionAbilityConnectionStub, Function | SmallTest | Level1)
+HWTEST_F(ScreenSnapshotPickerConnectionTest, GetScreenSessionAbilityConnectionStub, TestSize.Level1)
 {
     std::string bundleName = "testScreenSnapshotBundleName";
     std::string abilityName = "testScreenSnapshotAbilityName";

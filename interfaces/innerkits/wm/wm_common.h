@@ -595,6 +595,14 @@ enum class GestureBackType : uint8_t {
 };
 
 /**
+ * @brief Crease Region Name
+ */
+enum class CreaseRegionName : uint8_t {
+    FIRST_CREASE_REGION = 0,    // posX_ from left to right. Otherwise posY_ from top to bottom.
+    SECOND_CREASE_REGION = 1,
+};
+
+/**
  * @struct PointInfo.
  *
  * @brief point Info.
@@ -704,6 +712,7 @@ constexpr int32_t INVALID_USER_ID = -1;
 constexpr int32_t SYSTEM_USERID = 0;
 constexpr int32_t BASE_USER_RANGE = 200000;
 constexpr int32_t DEFAULT_SCREEN_ID = 0;
+constexpr int32_t ZERO_CIRCLE_DEGREE = 0;
 constexpr int32_t FULL_CIRCLE_DEGREE = 360;
 constexpr int32_t ONE_FOURTH_FULL_CIRCLE_DEGREE = 90;
 constexpr float UNDEFINED_DENSITY = -1.0f;
@@ -2131,18 +2140,18 @@ enum class RectType : uint32_t {
  * @brief rotation change info to notify listener.
  */
 struct RotationChangeInfo {
-    RotationChangeType type;
-    uint32_t orientation;
-    DisplayId displayId;
-    Rect displayRect;
+    RotationChangeType type_;
+    uint32_t orientation_;
+    DisplayId displayId_;
+    Rect displayRect_;
 };
 
 /**
  * @brief rotation change result return from listener.
  */
 struct RotationChangeResult {
-    RectType rectType;
-    Rect windowRect;
+    RectType rectType_;
+    Rect windowRect_;
 };
 }
 }

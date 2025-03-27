@@ -60,7 +60,7 @@ namespace {
  * @tc.desc: ConnectToServer
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerLiteTest, ConnectToServer, Function | SmallTest | Level3)
+HWTEST_F(ScreenSessionManagerLiteTest, ConnectToServer, TestSize.Level1)
 {
     ScreenSessionManagerLite screenSessionManagerLite = ScreenSessionManagerLite();
     screenSessionManagerLite.ConnectToServer();
@@ -72,7 +72,7 @@ HWTEST_F(ScreenSessionManagerLiteTest, ConnectToServer, Function | SmallTest | L
  * @tc.desc: RegisterDisplayManagerAgent
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerLiteTest, RegisterDisplayManagerAgent, Function | SmallTest | Level3)
+HWTEST_F(ScreenSessionManagerLiteTest, RegisterDisplayManagerAgent, TestSize.Level1)
 {
     ScreenSessionManagerLite screenSessionManagerLite = ScreenSessionManagerLite();
     sptr<IDisplayManagerAgent> displayManagerAgent= new DisplayManagerAgentDefault();
@@ -86,7 +86,7 @@ HWTEST_F(ScreenSessionManagerLiteTest, RegisterDisplayManagerAgent, Function | S
  * @tc.desc: UnregisterDisplayManagerAgent
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerLiteTest, UnregisterDisplayManagerAgent, Function | SmallTest | Level3)
+HWTEST_F(ScreenSessionManagerLiteTest, UnregisterDisplayManagerAgent, TestSize.Level1)
 {
     ScreenSessionManagerLite screenSessionManagerLite = ScreenSessionManagerLite();
     sptr<IDisplayManagerAgent> displayManagerAgent= new DisplayManagerAgentDefault();
@@ -100,7 +100,7 @@ HWTEST_F(ScreenSessionManagerLiteTest, UnregisterDisplayManagerAgent, Function |
  * @tc.desc: GetFoldDisplayMode
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerLiteTest, GetFoldDisplayMode, Function | SmallTest | Level3)
+HWTEST_F(ScreenSessionManagerLiteTest, GetFoldDisplayMode, TestSize.Level1)
 {
     ScreenSessionManagerLite screenSessionManagerLite = ScreenSessionManagerLite();
     FoldDisplayMode ret = screenSessionManagerLite.GetFoldDisplayMode();
@@ -112,7 +112,7 @@ HWTEST_F(ScreenSessionManagerLiteTest, GetFoldDisplayMode, Function | SmallTest 
  * @tc.desc: IsFoldable
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerLiteTest, IsFoldable, Function | SmallTest | Level3)
+HWTEST_F(ScreenSessionManagerLiteTest, IsFoldable, TestSize.Level1)
 {
     ScreenSessionManagerLite screenSessionManagerLite = ScreenSessionManagerLite();
     bool ret = screenSessionManagerLite.IsFoldable();
@@ -124,7 +124,7 @@ HWTEST_F(ScreenSessionManagerLiteTest, IsFoldable, Function | SmallTest | Level3
  * @tc.desc: GetFoldStatus
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerLiteTest, GetFoldStatus, Function | SmallTest | Level3)
+HWTEST_F(ScreenSessionManagerLiteTest, GetFoldStatus, TestSize.Level1)
 {
     ScreenSessionManagerLite screenSessionManagerLite = ScreenSessionManagerLite();
     FoldStatus ret = screenSessionManagerLite.GetFoldStatus();
@@ -136,7 +136,7 @@ HWTEST_F(ScreenSessionManagerLiteTest, GetFoldStatus, Function | SmallTest | Lev
  * @tc.desc: GetDefaultDisplayInfo
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerLiteTest, GetDefaultDisplayInfo, Function | SmallTest | Level3)
+HWTEST_F(ScreenSessionManagerLiteTest, GetDefaultDisplayInfo, TestSize.Level1)
 {
     ScreenSessionManagerLite screenSessionManagerLite = ScreenSessionManagerLite();
     sptr<DisplayInfo> ret = screenSessionManagerLite.GetDefaultDisplayInfo();
@@ -148,7 +148,7 @@ HWTEST_F(ScreenSessionManagerLiteTest, GetDefaultDisplayInfo, Function | SmallTe
  * @tc.desc: GetDisplayInfoById
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerLiteTest, GetDisplayInfoById, Function | SmallTest | Level3)
+HWTEST_F(ScreenSessionManagerLiteTest, GetDisplayInfoById, TestSize.Level1)
 {
     ScreenSessionManagerLite screenSessionManagerLite = ScreenSessionManagerLite();
     DisplayId displayId = 0;
@@ -161,7 +161,7 @@ HWTEST_F(ScreenSessionManagerLiteTest, GetDisplayInfoById, Function | SmallTest 
  * @tc.desc: GetCutoutInfo
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerLiteTest, GetCutoutInfo, Function | SmallTest | Level3)
+HWTEST_F(ScreenSessionManagerLiteTest, GetCutoutInfo, TestSize.Level1)
 {
     ScreenSessionManagerLite screenSessionManagerLite = ScreenSessionManagerLite();
     DisplayId displayId = 0;
@@ -174,7 +174,7 @@ HWTEST_F(ScreenSessionManagerLiteTest, GetCutoutInfo, Function | SmallTest | Lev
  * @tc.desc: Clear
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerLiteTest, Clear, Function | SmallTest | Level3)
+HWTEST_F(ScreenSessionManagerLiteTest, Clear, TestSize.Level1)
 {
     ScreenSessionManagerLite screenSessionManagerLite = ScreenSessionManagerLite();
     screenSessionManagerLite.Clear();

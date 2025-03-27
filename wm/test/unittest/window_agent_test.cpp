@@ -55,7 +55,7 @@ namespace {
  * @tc.desc: UpdateWindowRect
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAgentTest, UpdateWindowRect, Function | SmallTest | Level2)
+HWTEST_F(WindowAgentTest, UpdateWindowRect, TestSize.Level1)
 {
     Rect rect = Rect{ 0, 0, 0, 0 };
     bool status = true;
@@ -72,7 +72,7 @@ HWTEST_F(WindowAgentTest, UpdateWindowRect, Function | SmallTest | Level2)
  * @tc.desc: UpdateWindowMode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAgentTest, UpdateWindowMode, Function | SmallTest | Level2)
+HWTEST_F(WindowAgentTest, UpdateWindowMode, TestSize.Level1)
 {
     WMError err = windowAgent_->UpdateWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     ASSERT_EQ(err, WMError::WM_OK);
@@ -87,7 +87,7 @@ HWTEST_F(WindowAgentTest, UpdateWindowMode, Function | SmallTest | Level2)
  * @tc.desc: UpdateWindowModeSupportType
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAgentTest, UpdateWindowModeSupportType, Function | SmallTest | Level2)
+HWTEST_F(WindowAgentTest, UpdateWindowModeSupportType, TestSize.Level1)
 {
     WMError err = windowAgent_->UpdateWindowModeSupportType(WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN);
     ASSERT_EQ(err, WMError::WM_OK);
@@ -102,7 +102,7 @@ HWTEST_F(WindowAgentTest, UpdateWindowModeSupportType, Function | SmallTest | Le
  * @tc.desc: UpdateFocusStatus
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAgentTest, UpdateFocusStatus, Function | SmallTest | Level2)
+HWTEST_F(WindowAgentTest, UpdateFocusStatus, TestSize.Level1)
 {
     WMError err = windowAgent_->UpdateFocusStatus(true);
     ASSERT_EQ(err, WMError::WM_OK);
@@ -117,7 +117,7 @@ HWTEST_F(WindowAgentTest, UpdateFocusStatus, Function | SmallTest | Level2)
  * @tc.desc: UpdateAvoidArea
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAgentTest, UpdateAvoidArea, Function | SmallTest | Level2)
+HWTEST_F(WindowAgentTest, UpdateAvoidArea, TestSize.Level1)
 {
     const sptr<AvoidArea>& avoidArea = new AvoidArea();
     WMError err = windowAgent_->UpdateAvoidArea(avoidArea, AvoidAreaType::TYPE_SYSTEM);
@@ -133,7 +133,7 @@ HWTEST_F(WindowAgentTest, UpdateAvoidArea, Function | SmallTest | Level2)
  * @tc.desc: UpdateWindowState
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAgentTest, UpdateWindowState, Function | SmallTest | Level2)
+HWTEST_F(WindowAgentTest, UpdateWindowState, TestSize.Level1)
 {
     WMError err = windowAgent_->UpdateWindowState(WindowState::STATE_BOTTOM);
     ASSERT_EQ(err, WMError::WM_OK);
@@ -148,7 +148,7 @@ HWTEST_F(WindowAgentTest, UpdateWindowState, Function | SmallTest | Level2)
  * @tc.desc: UpdateWindowDragInfo
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAgentTest, UpdateWindowDragInfo, Function | SmallTest | Level2)
+HWTEST_F(WindowAgentTest, UpdateWindowDragInfo, TestSize.Level1)
 {
     PointInfo point;
     point.x = 1;
@@ -166,7 +166,7 @@ HWTEST_F(WindowAgentTest, UpdateWindowDragInfo, Function | SmallTest | Level2)
  * @tc.desc: UpdateDisplayId
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAgentTest, UpdateDisplayId, Function | SmallTest | Level2)
+HWTEST_F(WindowAgentTest, UpdateDisplayId, TestSize.Level1)
 {
     WMError err = windowAgent_->UpdateDisplayId(0, 1);
     ASSERT_EQ(err, WMError::WM_OK);
@@ -181,7 +181,7 @@ HWTEST_F(WindowAgentTest, UpdateDisplayId, Function | SmallTest | Level2)
  * @tc.desc: UpdateOccupiedAreaChangeInfo
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAgentTest, UpdateOccupiedAreaChangeInfo, Function | SmallTest | Level2)
+HWTEST_F(WindowAgentTest, UpdateOccupiedAreaChangeInfo, TestSize.Level1)
 {
     Rect overlapRect = { 0, 0, 0, 0 };
     sptr<OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo(OccupiedAreaType::TYPE_INPUT, overlapRect);
@@ -198,7 +198,7 @@ HWTEST_F(WindowAgentTest, UpdateOccupiedAreaChangeInfo, Function | SmallTest | L
  * @tc.desc: UpdateOccupiedAreaAndRect
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAgentTest, UpdateOccupiedAreaAndRect, Function | SmallTest | Level2)
+HWTEST_F(WindowAgentTest, UpdateOccupiedAreaAndRect, TestSize.Level1)
 {
     Rect overlapRect = { 0, 0, 0, 0 };
     sptr<OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo(OccupiedAreaType::TYPE_INPUT, overlapRect);
@@ -218,7 +218,7 @@ HWTEST_F(WindowAgentTest, UpdateOccupiedAreaAndRect, Function | SmallTest | Leve
  * @tc.desc: UpdateActiveStatus
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAgentTest, UpdateActiveStatus, Function | SmallTest | Level2)
+HWTEST_F(WindowAgentTest, UpdateActiveStatus, TestSize.Level1)
 {
     WMError err = windowAgent_->UpdateActiveStatus(false);
     ASSERT_EQ(err, WMError::WM_OK);
@@ -233,7 +233,7 @@ HWTEST_F(WindowAgentTest, UpdateActiveStatus, Function | SmallTest | Level2)
  * @tc.desc: GetWindowProperty
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAgentTest, GetWindowProperty, Function | SmallTest | Level2)
+HWTEST_F(WindowAgentTest, GetWindowProperty, TestSize.Level1)
 {
     auto windowProperty = windowAgent_->GetWindowProperty();
     ASSERT_NE(windowProperty, nullptr);
@@ -248,7 +248,7 @@ HWTEST_F(WindowAgentTest, GetWindowProperty, Function | SmallTest | Level2)
  * @tc.desc: RestoreSplitWindowMode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAgentTest, RestoreSplitWindowMode, Function | SmallTest | Level2)
+HWTEST_F(WindowAgentTest, RestoreSplitWindowMode, TestSize.Level1)
 {
     WMError err = windowAgent_->RestoreSplitWindowMode(static_cast<uint32_t>(WindowMode::WINDOW_MODE_SPLIT_PRIMARY));
     ASSERT_EQ(err, WMError::WM_OK);
@@ -263,7 +263,7 @@ HWTEST_F(WindowAgentTest, RestoreSplitWindowMode, Function | SmallTest | Level2)
  * @tc.desc: NotifyTouchOutside
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAgentTest, NotifyTouchOutside, Function | SmallTest | Level2)
+HWTEST_F(WindowAgentTest, NotifyTouchOutside, TestSize.Level1)
 {
     WMError err = windowAgent_->NotifyTouchOutside();
     ASSERT_EQ(err, WMError::WM_OK);
@@ -278,7 +278,7 @@ HWTEST_F(WindowAgentTest, NotifyTouchOutside, Function | SmallTest | Level2)
  * @tc.desc: NotifyScreenshot
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAgentTest, NotifyScreenshot, Function | SmallTest | Level2)
+HWTEST_F(WindowAgentTest, NotifyScreenshot, TestSize.Level1)
 {
     WMError err = windowAgent_->NotifyScreenshot();
     ASSERT_EQ(err, WMError::WM_OK);
@@ -293,7 +293,7 @@ HWTEST_F(WindowAgentTest, NotifyScreenshot, Function | SmallTest | Level2)
  * @tc.desc: DumpInfo
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAgentTest, DumpInfo, Function | SmallTest | Level2)
+HWTEST_F(WindowAgentTest, DumpInfo, TestSize.Level1)
 {
     std::vector<std::string> params;
     WMError err = windowAgent_->DumpInfo(params);
@@ -309,7 +309,7 @@ HWTEST_F(WindowAgentTest, DumpInfo, Function | SmallTest | Level2)
  * @tc.desc: UpdateZoomTransform
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAgentTest, UpdateZoomTransform, Function | SmallTest | Level2)
+HWTEST_F(WindowAgentTest, UpdateZoomTransform, TestSize.Level1)
 {
     Transform transform;
     WMError err = windowAgent_->UpdateZoomTransform(transform, false);
@@ -325,7 +325,7 @@ HWTEST_F(WindowAgentTest, UpdateZoomTransform, Function | SmallTest | Level2)
  * @tc.desc: NotifyDestroy
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAgentTest, NotifyDestroy, Function | SmallTest | Level2)
+HWTEST_F(WindowAgentTest, NotifyDestroy, TestSize.Level1)
 {
     WMError err = windowAgent_->NotifyDestroy();
     ASSERT_EQ(err, WMError::WM_OK);
@@ -340,7 +340,7 @@ HWTEST_F(WindowAgentTest, NotifyDestroy, Function | SmallTest | Level2)
  * @tc.desc: NotifyForeground
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAgentTest, NotifyForeground, Function | SmallTest | Level2)
+HWTEST_F(WindowAgentTest, NotifyForeground, TestSize.Level1)
 {
     WMError err = windowAgent_->NotifyForeground();
     ASSERT_EQ(err, WMError::WM_OK);
@@ -355,7 +355,7 @@ HWTEST_F(WindowAgentTest, NotifyForeground, Function | SmallTest | Level2)
  * @tc.desc: NotifyBackground
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAgentTest, NotifyBackground, Function | SmallTest | Level2)
+HWTEST_F(WindowAgentTest, NotifyBackground, TestSize.Level1)
 {
     WMError err = windowAgent_->NotifyBackground();
     ASSERT_EQ(err, WMError::WM_OK);
@@ -370,7 +370,7 @@ HWTEST_F(WindowAgentTest, NotifyBackground, Function | SmallTest | Level2)
  * @tc.desc: NotifyWindowClientPointUp
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAgentTest, NotifyWindowClientPointUp, Function | SmallTest | Level2)
+HWTEST_F(WindowAgentTest, NotifyWindowClientPointUp, TestSize.Level1)
 {
     auto pointerEvent = MMI::PointerEvent::Create();
     WMError err = windowAgent_->NotifyWindowClientPointUp(pointerEvent);
@@ -386,7 +386,7 @@ HWTEST_F(WindowAgentTest, NotifyWindowClientPointUp, Function | SmallTest | Leve
  * @tc.desc: ConsumeKeyEvent
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAgentTest, ConsumeKeyEvent, Function | SmallTest | Level2)
+HWTEST_F(WindowAgentTest, ConsumeKeyEvent, TestSize.Level1)
 {
     auto res = 0;
     auto keyEvent = MMI::KeyEvent::Create();
@@ -403,7 +403,7 @@ HWTEST_F(WindowAgentTest, ConsumeKeyEvent, Function | SmallTest | Level2)
  * @tc.desc: NotifyForegroundInteractiveStatus
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAgentTest, NotifyForegroundInteractiveStatus, Function | SmallTest | Level2)
+HWTEST_F(WindowAgentTest, NotifyForegroundInteractiveStatus, TestSize.Level1)
 {
     auto res = 0;
     bool interactive = false;

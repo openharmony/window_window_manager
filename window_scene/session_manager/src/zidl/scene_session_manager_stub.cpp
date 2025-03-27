@@ -215,6 +215,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleMinimizeByWindowId(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_PARENT_WINDOW):
             return HandleSetParentWindow(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_FOREGROUND_WINDOW_NUM):
+            return HandleSetForegroundWindowNum(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1853,6 +1855,21 @@ int SceneSessionManagerStub::HandleMinimizeByWindowId(MessageParcel& data, Messa
     WMError errCode = MinimizeByWindowId(windowIds);
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_LIFE, "Write errCode failed.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleSetForegroundWindowNum(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t windowNum = 0;
+    if (!data.ReadInt32(windowNum)) {
+        TLOGE(WmsLogTag::WMS_PC, "read windowNum failed");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = SetForegroundWindowNum(windowNum);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_PC, "Write errCode failed.");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;
