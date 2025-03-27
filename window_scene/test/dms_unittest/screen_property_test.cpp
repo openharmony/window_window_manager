@@ -918,13 +918,13 @@ HWTEST_F(ScreenPropertyTest, GetVirtualPixelRatio, Function | SmallTest | Level2
 }
 
 /**
- * @tc.name: GetVirtualPixelRatio
- * @tc.desc: GetVirtualPixelRatio test
+ * @tc.name: SetRotationAndScreenRotationOnly
+ * @tc.desc: SetRotationAndScreenRotationOnly test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenPropertyTest, GetVirtualPixelRatio, Function | SmallTest | Level2)
+HWTEST_F(ScreenPropertyTest, SetRotationAndScreenRotationOnly, Function | SmallTest | Level2)
 {
-    GTEST_LOG_(INFO) << "ScreenPropertyTest: GetVirtualPixelRatio start";
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: SetRotationAndScreenRotationOnly start";
     ScreenProperty* property = new(std::nothrow) ScreenProperty();
     ASSERT_NE(property, nullptr);
     property->SetRotationAndScreenRotationOnly(Rotation::ROTATION_0);
@@ -939,7 +939,7 @@ HWTEST_F(ScreenPropertyTest, GetVirtualPixelRatio, Function | SmallTest | Level2
     property->SetRotationAndScreenRotationOnly(Rotation::ROTATION_270);
     ASSERT_EQ(property->GetScreenRotation(), Rotation::ROTATION_270);
     delete property;
-    GTEST_LOG_(INFO) << "ScreenPropertyTest: GetVirtualPixelRatio end";
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: SetRotationAndScreenRotationOnly end";
 }
 } // namespace
 } // namespace Rosen
