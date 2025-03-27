@@ -81,7 +81,7 @@ namespace {
  * @tc.desc: WindowExtensionSessionImpl contructor
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, WindowExtensionSessionImpl, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, WindowExtensionSessionImpl, TestSize.Level1)
 {
     sptr<WindowOption> option = new(std::nothrow) WindowOption();
     ASSERT_NE(nullptr, option);
@@ -99,7 +99,7 @@ HWTEST_F(WindowExtensionSessionImplTest, WindowExtensionSessionImpl, Function | 
  * @tc.desc: normal test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, Create01, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, Create01, TestSize.Level1)
 {
     auto abilityContext = std::make_shared<AbilityRuntime::AbilityContextImpl>();
     ASSERT_NE(nullptr, abilityContext);
@@ -117,7 +117,7 @@ HWTEST_F(WindowExtensionSessionImplTest, Create01, Function | SmallTest | Level3
  * @tc.desc: context is nullptr, session is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, Create02, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, Create02, TestSize.Level1)
 {
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window_->Create(nullptr, nullptr));
 }
@@ -127,7 +127,7 @@ HWTEST_F(WindowExtensionSessionImplTest, Create02, Function | SmallTest | Level3
  * @tc.desc: context is not nullptr, session is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, Create03, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, Create03, TestSize.Level1)
 {
     auto abilityContext = std::make_shared<AbilityRuntime::AbilityContextImpl>();
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window_->Create(abilityContext, nullptr));
@@ -138,7 +138,7 @@ HWTEST_F(WindowExtensionSessionImplTest, Create03, Function | SmallTest | Level3
  * @tc.desc: connet failed
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, Create04, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, Create04, TestSize.Level1)
 {
     auto abilityContext = std::make_shared<AbilityRuntime::AbilityContextImpl>();
     ASSERT_NE(nullptr, abilityContext);
@@ -156,7 +156,7 @@ HWTEST_F(WindowExtensionSessionImplTest, Create04, Function | SmallTest | Level3
  * @tc.desc: Destroy Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, Destroy01, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, Destroy01, TestSize.Level1)
 {
     SessionInfo sessionInfo;
     sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
@@ -172,7 +172,7 @@ HWTEST_F(WindowExtensionSessionImplTest, Destroy01, Function | SmallTest | Level
  * @tc.desc: Destroy Test, window session is invalid
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, Destroy02, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, Destroy02, TestSize.Level1)
 {
     ASSERT_NE(nullptr, window_->property_);
     window_->hostSession_ = nullptr;
@@ -186,7 +186,7 @@ HWTEST_F(WindowExtensionSessionImplTest, Destroy02, Function | SmallTest | Level
  * @tc.desc: AddExtensionWindowStageToSCB Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, AddExtensionWindowStageToSCB, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, AddExtensionWindowStageToSCB, TestSize.Level1)
 {
     ASSERT_NE(nullptr, window_);
     window_->AddExtensionWindowStageToSCB();
@@ -205,7 +205,7 @@ HWTEST_F(WindowExtensionSessionImplTest, AddExtensionWindowStageToSCB, Function 
  * @tc.desc: RemoveExtensionWindowStageFromSCB Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, RemoveExtensionWindowStageFromSCB, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, RemoveExtensionWindowStageFromSCB, TestSize.Level1)
 {
     ASSERT_NE(nullptr, window_);
     window_->RemoveExtensionWindowStageFromSCB();
@@ -221,7 +221,7 @@ HWTEST_F(WindowExtensionSessionImplTest, RemoveExtensionWindowStageFromSCB, Func
  * @tc.desc: UpdateConfiguration Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, UpdateConfiguration01, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, UpdateConfiguration01, TestSize.Level1)
 {
     std::shared_ptr<AppExecFwk::Configuration> configuration;
     ASSERT_NE(nullptr, window_);
@@ -233,7 +233,7 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateConfiguration01, Function | Small
  * @tc.desc: UpdateConfiguration Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, UpdateConfiguration02, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, UpdateConfiguration02, TestSize.Level1)
 {
     window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     ASSERT_NE(nullptr, window_->uiContent_);
@@ -247,7 +247,7 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateConfiguration02, Function | Small
  * @tc.desc: UpdateConfigurationForAll01 Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, UpdateConfigurationForAll01, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, UpdateConfigurationForAll01, TestSize.Level1)
 {
     std::shared_ptr<AppExecFwk::Configuration> configuration = std::make_shared<AppExecFwk::Configuration>();
     ASSERT_NE(nullptr, window_);
@@ -259,7 +259,7 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateConfigurationForAll01, Function |
  * @tc.desc: UpdateConfigurationForAll02 Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, UpdateConfigurationForAll02, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, UpdateConfigurationForAll02, TestSize.Level1)
 {
     std::shared_ptr<AppExecFwk::Configuration> configuration = std::make_shared<AppExecFwk::Configuration>();
     ASSERT_NE(nullptr, window_);
@@ -273,7 +273,7 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateConfigurationForAll02, Function |
  * @tc.desc: UpdateConfigurationForAll03 Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, UpdateConfigurationForAll03, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, UpdateConfigurationForAll03, TestSize.Level1)
 {
     auto abilityContext = std::make_shared<AbilityRuntime::AbilityContextImpl>();
     ASSERT_NE(nullptr, abilityContext);
@@ -297,7 +297,7 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateConfigurationForAll03, Function |
  * @tc.desc: MoveTo
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, MoveTo01, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, MoveTo01, TestSize.Level1)
 {
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window_->MoveTo(0, 1));
 }
@@ -307,7 +307,7 @@ HWTEST_F(WindowExtensionSessionImplTest, MoveTo01, Function | SmallTest | Level3
  * @tc.desc: MoveTo
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, MoveTo02, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, MoveTo02, TestSize.Level1)
 {
     SessionInfo sessionInfo;
     window_->hostSession_ = new(std::nothrow) SessionMocker(sessionInfo);
@@ -322,7 +322,7 @@ HWTEST_F(WindowExtensionSessionImplTest, MoveTo02, Function | SmallTest | Level3
  * @tc.desc: Resize
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, Resize01, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, Resize01, TestSize.Level1)
 {
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window_->Resize(0, 1));
 }
@@ -332,7 +332,7 @@ HWTEST_F(WindowExtensionSessionImplTest, Resize01, Function | SmallTest | Level3
  * @tc.desc: Resize
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, Resize02, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, Resize02, TestSize.Level1)
 {
     SessionInfo sessionInfo;
     window_->hostSession_ = new(std::nothrow) SessionMocker(sessionInfo);
@@ -347,7 +347,7 @@ HWTEST_F(WindowExtensionSessionImplTest, Resize02, Function | SmallTest | Level3
  * @tc.desc: TransferAbilityResult
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, TransferAbilityResult01, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, TransferAbilityResult01, TestSize.Level1)
 {
     AAFwk::Want want;
     ASSERT_EQ(WMError::WM_ERROR_REPEAT_OPERATION, window_->TransferAbilityResult(1, want));
@@ -358,7 +358,7 @@ HWTEST_F(WindowExtensionSessionImplTest, TransferAbilityResult01, Function | Sma
  * @tc.desc: TransferAbilityResult
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, TransferAbilityResult02, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, TransferAbilityResult02, TestSize.Level1)
 {
     SessionInfo sessionInfo;
     window_->hostSession_ = new(std::nothrow) SessionMocker(sessionInfo);
@@ -374,7 +374,7 @@ HWTEST_F(WindowExtensionSessionImplTest, TransferAbilityResult02, Function | Sma
  * @tc.desc: TransferExtensionData
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, TransferExtensionData01, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, TransferExtensionData01, TestSize.Level1)
 {
     AAFwk::WantParams wantParams;
     ASSERT_EQ(WMError::WM_ERROR_REPEAT_OPERATION, window_->TransferExtensionData(wantParams));
@@ -385,7 +385,7 @@ HWTEST_F(WindowExtensionSessionImplTest, TransferExtensionData01, Function | Sma
  * @tc.desc: TransferExtensionData
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, TransferExtensionData02, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, TransferExtensionData02, TestSize.Level1)
 {
     SessionInfo sessionInfo;
     window_->hostSession_ = new(std::nothrow) SessionMocker(sessionInfo);
@@ -401,7 +401,7 @@ HWTEST_F(WindowExtensionSessionImplTest, TransferExtensionData02, Function | Sma
  * @tc.desc: RegisterTransferComponentDataListener Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, RegisterTransferComponentDataListener01, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, RegisterTransferComponentDataListener01, TestSize.Level1)
 {
     NotifyTransferComponentDataFunc func;
     window_->RegisterTransferComponentDataListener(func);
@@ -413,7 +413,7 @@ HWTEST_F(WindowExtensionSessionImplTest, RegisterTransferComponentDataListener01
  * @tc.desc: RegisterTransferComponentDataListener Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, RegisterTransferComponentDataListener02, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, RegisterTransferComponentDataListener02, TestSize.Level1)
 {
     SessionInfo sessionInfo;
     window_->hostSession_ = new(std::nothrow) SessionMocker(sessionInfo);
@@ -429,7 +429,7 @@ HWTEST_F(WindowExtensionSessionImplTest, RegisterTransferComponentDataListener02
  * @tc.desc: NotifyTransferComponentData Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, NotifyTransferComponentData01, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, NotifyTransferComponentData01, TestSize.Level1)
 {
     AAFwk::WantParams wantParams;
     ASSERT_EQ(WSError::WS_OK, window_->NotifyTransferComponentData(wantParams));
@@ -440,7 +440,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyTransferComponentData01, Function
  * @tc.desc: NotifyTransferComponentData Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, NotifyTransferComponentData02, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, NotifyTransferComponentData02, TestSize.Level1)
 {
     SessionInfo sessionInfo;
     window_->hostSession_ = new(std::nothrow) SessionMocker(sessionInfo);
@@ -461,7 +461,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyTransferComponentData02, Function
  * @tc.desc: NotifyTransferComponentDataSync Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, NotifyTransferComponentDataSync01, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, NotifyTransferComponentDataSync01, TestSize.Level1)
 {
     AAFwk::WantParams wantParams;
     AAFwk::WantParams reWantParams;
@@ -474,7 +474,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyTransferComponentDataSync01, Func
  * @tc.desc: NotifyTransferComponentDataSync Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, NotifyTransferComponentDataSync02, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, NotifyTransferComponentDataSync02, TestSize.Level1)
 {
     SessionInfo sessionInfo;
     window_->hostSession_ = new(std::nothrow) SessionMocker(sessionInfo);
@@ -497,7 +497,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyTransferComponentDataSync02, Func
  * @tc.desc: RegisterTransferComponentDataForResultListener Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, RegisterTransferComponentDataForResultListen01, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, RegisterTransferComponentDataForResultListen01, TestSize.Level1)
 {
     NotifyTransferComponentDataForResultFunc func;
     window_->RegisterTransferComponentDataForResultListener(func);
@@ -509,7 +509,7 @@ HWTEST_F(WindowExtensionSessionImplTest, RegisterTransferComponentDataForResultL
  * @tc.desc: RegisterTransferComponentDataForResultListener Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, RegisterTransferComponentDataForResultListen02, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, RegisterTransferComponentDataForResultListen02, TestSize.Level1)
 {
     SessionInfo sessionInfo;
     window_->hostSession_ = new(std::nothrow) SessionMocker(sessionInfo);
@@ -525,7 +525,7 @@ HWTEST_F(WindowExtensionSessionImplTest, RegisterTransferComponentDataForResultL
  * @tc.desc: TriggerBindModalUIExtension01 Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, TriggerBindModalUIExtension01, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, TriggerBindModalUIExtension01, TestSize.Level1)
 {
     ASSERT_NE(nullptr, window_);
     window_->TriggerBindModalUIExtension();
@@ -536,7 +536,7 @@ HWTEST_F(WindowExtensionSessionImplTest, TriggerBindModalUIExtension01, Function
  * @tc.desc: TriggerBindModalUIExtension02 Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, TriggerBindModalUIExtension02, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, TriggerBindModalUIExtension02, TestSize.Level1)
 {
     SessionInfo sessionInfo;
     window_->hostSession_ = new (std::nothrow) SessionMocker(sessionInfo);
@@ -549,7 +549,7 @@ HWTEST_F(WindowExtensionSessionImplTest, TriggerBindModalUIExtension02, Function
  * @tc.desc: SetPrivacyMode Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, SetPrivacyMode01, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, SetPrivacyMode01, TestSize.Level1)
 {
     ASSERT_EQ(WMError::WM_OK, window_->SetPrivacyMode(false));
     ASSERT_FALSE(window_->extensionWindowFlags_.privacyModeFlag);
@@ -562,7 +562,7 @@ HWTEST_F(WindowExtensionSessionImplTest, SetPrivacyMode01, Function | SmallTest 
  * @tc.desc: SetPrivacyMod
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, SetPrivacyMod02, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, SetPrivacyMod02, TestSize.Level1)
 {
     bool isPrivacyMode = true;
     window_->surfaceNode_ = nullptr;
@@ -581,7 +581,7 @@ HWTEST_F(WindowExtensionSessionImplTest, SetPrivacyMod02, Function | SmallTest |
  * @tc.desc: SetPrivacyMod03
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, SetPrivacyMod03, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, SetPrivacyMod03, TestSize.Level1)
 {
     struct RSSurfaceNodeConfig config;
     window_->surfaceNode_ = RSSurfaceNode::Create(config);
@@ -594,7 +594,7 @@ HWTEST_F(WindowExtensionSessionImplTest, SetPrivacyMod03, Function | SmallTest |
  * @tc.desc: SetPrivacyMod04
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, SetPrivacyMod04, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, SetPrivacyMod04, TestSize.Level1)
 {
     struct RSSurfaceNodeConfig config;
     window_->surfaceNode_ = RSSurfaceNode::Create(config);
@@ -607,7 +607,7 @@ HWTEST_F(WindowExtensionSessionImplTest, SetPrivacyMod04, Function | SmallTest |
  * @tc.desc: SetPrivacyMod05
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, SetPrivacyMod05, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, SetPrivacyMod05, TestSize.Level1)
 {
     struct RSSurfaceNodeConfig config;
     window_->surfaceNode_ = RSSurfaceNode::Create(config);
@@ -618,7 +618,7 @@ HWTEST_F(WindowExtensionSessionImplTest, SetPrivacyMod05, Function | SmallTest |
     ASSERT_NE(WMError::WM_OK, window_->SetPrivacyMode(true));
 }
 
-HWTEST_F(WindowExtensionSessionImplTest, HidePrivacyContentForHost, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, HidePrivacyContentForHost, TestSize.Level1)
 {
     struct RSSurfaceNodeConfig config;
     window_->surfaceNode_ = RSSurfaceNode::Create(config);
@@ -633,7 +633,7 @@ HWTEST_F(WindowExtensionSessionImplTest, HidePrivacyContentForHost, Function | S
  * @tc.desc: NotifyFocusStateEvent Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, NotifyFocusStateEvent01, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, NotifyFocusStateEvent01, TestSize.Level1)
 {
     ASSERT_NE(nullptr, window_);
     window_->NotifyFocusStateEvent(false);
@@ -644,7 +644,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyFocusStateEvent01, Function | Sma
  * @tc.desc: NotifyFocusStateEvent Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, NotifyFocusStateEvent02, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, NotifyFocusStateEvent02, TestSize.Level1)
 {
     window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     ASSERT_NE(nullptr, window_->uiContent_);
@@ -657,7 +657,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyFocusStateEvent02, Function | Sma
  * @tc.desc: NotifyFocusActiveEvent Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, NotifyFocusActiveEvent01, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, NotifyFocusActiveEvent01, TestSize.Level1)
 {
     ASSERT_NE(nullptr, window_);
     window_->NotifyFocusActiveEvent(false);
@@ -668,7 +668,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyFocusActiveEvent01, Function | Sm
  * @tc.desc: NotifyFocusActiveEvent Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, NotifyFocusActiveEvent02, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, NotifyFocusActiveEvent02, TestSize.Level1)
 {
     window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     ASSERT_NE(nullptr, window_->uiContent_);
@@ -681,7 +681,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyFocusActiveEvent02, Function | Sm
  * @tc.desc: NotifyFocusActiveEvent Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, NotifyBackpressedEvent01, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, NotifyBackpressedEvent01, TestSize.Level1)
 {
     window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     ASSERT_NE(nullptr, window_->uiContent_);
@@ -695,7 +695,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyBackpressedEvent01, Function | Sm
  * @tc.desc: NotifyFocusActiveEvent Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, NotifyBackpressedEvent02, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, NotifyBackpressedEvent02, TestSize.Level1)
 {
     window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     ASSERT_NE(nullptr, window_->uiContent_);
@@ -709,7 +709,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyBackpressedEvent02, Function | Sm
  * @tc.desc: NotifyFocusActiveEvent Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, NotifyBackpressedEvent03, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, NotifyBackpressedEvent03, TestSize.Level1)
 {
     ASSERT_NE(nullptr, window_);
     window_->uiContent_ = nullptr;
@@ -723,7 +723,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyBackpressedEvent03, Function | Sm
  * @tc.desc: InputMethodKeyEventResultCallback01 Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, InputMethodKeyEventResultCallback01, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, InputMethodKeyEventResultCallback01, TestSize.Level1)
 {
     std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
     bool consumed = false;
@@ -738,7 +738,7 @@ HWTEST_F(WindowExtensionSessionImplTest, InputMethodKeyEventResultCallback01, Fu
  * @tc.desc: InputMethodKeyEventResultCallback02 Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, InputMethodKeyEventResultCallback02, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, InputMethodKeyEventResultCallback02, TestSize.Level1)
 {
     bool consumed = false;
     auto isConsumedPromise = std::make_shared<std::promise<bool>>();
@@ -752,7 +752,7 @@ HWTEST_F(WindowExtensionSessionImplTest, InputMethodKeyEventResultCallback02, Fu
  * @tc.desc: InputMethodKeyEventResultCallback03 Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, InputMethodKeyEventResultCallback03, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, InputMethodKeyEventResultCallback03, TestSize.Level1)
 {
     bool consumed = false;
     auto isTimeout = std::make_shared<bool>(false);
@@ -765,7 +765,7 @@ HWTEST_F(WindowExtensionSessionImplTest, InputMethodKeyEventResultCallback03, Fu
  * @tc.desc: InputMethodKeyEventResultCallback04 Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, InputMethodKeyEventResultCallback04, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, InputMethodKeyEventResultCallback04, TestSize.Level1)
 {
     std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
     bool consumed = false;
@@ -779,7 +779,7 @@ HWTEST_F(WindowExtensionSessionImplTest, InputMethodKeyEventResultCallback04, Fu
  * @tc.desc: InputMethodKeyEventResultCallback05 Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, InputMethodKeyEventResultCallback05, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, InputMethodKeyEventResultCallback05, TestSize.Level1)
 {
     std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
     bool consumed = false;
@@ -793,7 +793,7 @@ HWTEST_F(WindowExtensionSessionImplTest, InputMethodKeyEventResultCallback05, Fu
  * @tc.desc: InputMethodKeyEventResultCallback06 Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, InputMethodKeyEventResultCallback06, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, InputMethodKeyEventResultCallback06, TestSize.Level1)
 {
     std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
     auto isConsumedPromise = std::make_shared<std::promise<bool>>();
@@ -807,7 +807,7 @@ HWTEST_F(WindowExtensionSessionImplTest, InputMethodKeyEventResultCallback06, Fu
  * @tc.desc: InputMethodKeyEventResultCallback07 Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, InputMethodKeyEventResultCallback07, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, InputMethodKeyEventResultCallback07, TestSize.Level1)
 {
     std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
     auto isConsumedPromise = std::make_shared<std::promise<bool>>();
@@ -821,7 +821,7 @@ HWTEST_F(WindowExtensionSessionImplTest, InputMethodKeyEventResultCallback07, Fu
  * @tc.desc: NotifyKeyEvent01 Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, NotifyKeyEvent01, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, NotifyKeyEvent01, TestSize.Level1)
 {
     std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
     keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_FN);
@@ -836,7 +836,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyKeyEvent01, Function | SmallTest 
  * @tc.desc: NotifyKeyEvent02 Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, NotifyKeyEvent02, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, NotifyKeyEvent02, TestSize.Level1)
 {
     bool consumed = false;
     bool notifyInputMethod = true;
@@ -849,7 +849,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyKeyEvent02, Function | SmallTest 
  * @tc.desc: NotifyKeyEvent03 Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, NotifyKeyEvent03, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, NotifyKeyEvent03, TestSize.Level1)
 {
     std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
     bool consumed = false;
@@ -863,7 +863,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyKeyEvent03, Function | SmallTest 
  * @tc.desc: NotifyKeyEvent04 Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, NotifyKeyEvent04, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, NotifyKeyEvent04, TestSize.Level1)
 {
     std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
     keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_FN);
@@ -878,7 +878,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyKeyEvent04, Function | SmallTest 
  * @tc.desc: ArkUIFrameworkSupport01 Test, context_ is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, ArkUIFrameworkSupport01, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, ArkUIFrameworkSupport01, TestSize.Level1)
 {
     ASSERT_NE(nullptr, window_);
     window_->context_ = nullptr;
@@ -890,7 +890,7 @@ HWTEST_F(WindowExtensionSessionImplTest, ArkUIFrameworkSupport01, Function | Sma
  * @tc.desc: ArkUIFrameworkSupport02 Test, context_->GetApplicationInfo() == nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, ArkUIFrameworkSupport02, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, ArkUIFrameworkSupport02, TestSize.Level1)
 {
     ASSERT_NE(nullptr, window_);
     auto abilityContext = std::make_shared<AbilityRuntime::AbilityContextImpl>();
@@ -905,7 +905,7 @@ HWTEST_F(WindowExtensionSessionImplTest, ArkUIFrameworkSupport02, Function | Sma
  * @tc.desc: ArkUIFrameworkSupport03 Test, version < 10 and isSystembarPropertiesSet_ is true
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, ArkUIFrameworkSupport03, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, ArkUIFrameworkSupport03, TestSize.Level1)
 {
     ASSERT_NE(nullptr, window_);
     window_->context_ = nullptr;
@@ -918,7 +918,7 @@ HWTEST_F(WindowExtensionSessionImplTest, ArkUIFrameworkSupport03, Function | Sma
  * @tc.desc: ArkUIFrameworkSupport04 Test, version < 10 and isSystembarPropertiesSet_ is false
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, ArkUIFrameworkSupport04, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, ArkUIFrameworkSupport04, TestSize.Level1)
 {
     ASSERT_NE(nullptr, window_);
     window_->context_ = nullptr;
@@ -931,7 +931,7 @@ HWTEST_F(WindowExtensionSessionImplTest, ArkUIFrameworkSupport04, Function | Sma
  * @tc.desc: ArkUIFrameworkSupport05 Test, version >= 10 and isIgnoreSafeAreaNeedNotify_ is false
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, ArkUIFrameworkSupport05, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, ArkUIFrameworkSupport05, TestSize.Level1)
 {
     ASSERT_NE(nullptr, window_);
     auto abilityContext = std::make_shared<AbilityRuntime::AbilityContextImpl>();
@@ -953,7 +953,7 @@ HWTEST_F(WindowExtensionSessionImplTest, ArkUIFrameworkSupport05, Function | Sma
  * @tc.desc: ArkUIFrameworkSupport06 Test, version >= 10 and isIgnoreSafeAreaNeedNotify_ is true
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, ArkUIFrameworkSupport06, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, ArkUIFrameworkSupport06, TestSize.Level1)
 {
     ASSERT_NE(nullptr, window_);
     auto abilityContext = std::make_shared<AbilityRuntime::AbilityContextImpl>();
@@ -971,80 +971,11 @@ HWTEST_F(WindowExtensionSessionImplTest, ArkUIFrameworkSupport06, Function | Sma
 }
 
 /**
- * @tc.name: NapiSetUIContent
- * @tc.desc: NapiSetUIContent Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowExtensionSessionImplTest, NapiSetUIContent, Function | SmallTest | Level3)
-{
-    ASSERT_NE(nullptr, window_);
-    std::string contentInfo = "NapiSetUIContent test";
-    napi_env env = napi_env();
-    napi_value storage = napi_value();
-    sptr<IRemoteObject> token;
-    window_->uiContent_ = nullptr;
-    window_->property_->SetUIExtensionUsage(UIExtensionUsage::UIEXTENSION_USAGE_END);
-    window_->focusState_ = std::nullopt;
-    window_->state_ = WindowState::STATE_HIDDEN;
-    ASSERT_EQ(WMError::WM_OK,
-        window_->NapiSetUIContent(contentInfo, env, storage, BackupAndRestoreType::NONE, token, nullptr));
-
-    auto uiContent = std::make_shared<Ace::UIContentMocker>();
-    ASSERT_NE(nullptr, uiContent);
-    window_->uiContent_ = uiContent;
-    window_->property_->SetUIExtensionUsage(UIExtensionUsage::CONSTRAINED_EMBEDDED);
-    window_->focusState_ = true;
-    window_->state_ = WindowState::STATE_SHOWN;
-    ASSERT_EQ(WMError::WM_OK,
-        window_->NapiSetUIContent(contentInfo, env, storage, BackupAndRestoreType::NONE, token, nullptr));
-    usleep(WAIT_SYNC_IN_NS);
-
-    window_->property_->SetUIExtensionUsage(UIExtensionUsage::MODAL);
-    ASSERT_EQ(WMError::WM_OK,
-        window_->NapiSetUIContent(contentInfo, env, storage, BackupAndRestoreType::NONE, token, nullptr));
-    window_->property_->SetUIExtensionUsage(UIExtensionUsage::EMBEDDED);
-    ASSERT_EQ(WMError::WM_OK,
-        window_->NapiSetUIContent(contentInfo, env, storage, BackupAndRestoreType::NONE, token, nullptr));
-    window_->property_->SetUIExtensionUsage(UIExtensionUsage::UIEXTENSION_USAGE_END);
-    ASSERT_EQ(WMError::WM_OK,
-        window_->NapiSetUIContent(contentInfo, env, storage, BackupAndRestoreType::NONE, token, nullptr));
-}
-
-/**
- * @tc.name: NapiSetUIContentByName
- * @tc.desc: NapiSetUIContentByName Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowExtensionSessionImplTest, NapiSetUIContentByName, Function | SmallTest | Level3)
-{
-    ASSERT_NE(nullptr, window_);
-    std::string contentInfo = "NapiSetUIContentByName test";
-    napi_env env = napi_env();
-    napi_value storage = napi_value();
-    sptr<IRemoteObject> token;
-    window_->uiContent_ = nullptr;
-    window_->property_->SetUIExtensionUsage(UIExtensionUsage::UIEXTENSION_USAGE_END);
-    window_->focusState_ = std::nullopt;
-    window_->state_ = WindowState::STATE_HIDDEN;
-    ASSERT_EQ(WMError::WM_OK,
-        window_->NapiSetUIContentByName(contentInfo, env, storage, BackupAndRestoreType::NONE, token, nullptr));
-
-    auto uiContent = std::make_shared<Ace::UIContentMocker>();
-    window_->uiContent_ = uiContent;
-    window_->property_->SetUIExtensionUsage(UIExtensionUsage::CONSTRAINED_EMBEDDED);
-    window_->focusState_ = true;
-    window_->state_ = WindowState::STATE_SHOWN;
-    ASSERT_EQ(WMError::WM_OK,
-        window_->NapiSetUIContentByName(contentInfo, env, storage, BackupAndRestoreType::NONE, token, nullptr));
-    usleep(WAIT_SYNC_IN_NS);
-}
-
-/**
  * @tc.name: UpdateRect01
  * @tc.desc: UpdateRect Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, UpdateRect01, Function | SmallTest | Level2)
+HWTEST_F(WindowExtensionSessionImplTest, UpdateRect01, TestSize.Level1)
 {
     WSRect rect;
     rect.posX_ = 0;
@@ -1087,7 +1018,7 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateRect01, Function | SmallTest | Le
  * @tc.desc: UpdateRect Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, UpdateRectForRotation01, Function | SmallTest | Level2)
+HWTEST_F(WindowExtensionSessionImplTest, UpdateRectForRotation01, TestSize.Level1)
 {
     Rect rect;
     WindowSizeChangeReason wmReason = WindowSizeChangeReason{0};
@@ -1120,7 +1051,7 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateRectForRotation01, Function | Sma
  * @tc.desc: NotifyAccessibilityHoverEvent Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, NotifyAccessibilityHoverEvent01, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, NotifyAccessibilityHoverEvent01, TestSize.Level1)
 {
     float pointX = 0.0f;
     float pointY = 0.0f;
@@ -1139,7 +1070,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyAccessibilityHoverEvent01, Functi
  * @tc.desc: NotifyAccessibilityHoverEvent Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, NotifyAccessibilityHoverEvent02, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, NotifyAccessibilityHoverEvent02, TestSize.Level1)
 {
     float pointX = 0.0f;
     float pointY = 0.0f;
@@ -1157,7 +1088,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyAccessibilityHoverEvent02, Functi
  * @tc.desc: TransferAccessibilityEvent Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, TransferAccessibilityEvent, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, TransferAccessibilityEvent, TestSize.Level1)
 {
     SessionInfo sessionInfo;
     window_->hostSession_ = new(std::nothrow) SessionMocker(sessionInfo);
@@ -1175,7 +1106,7 @@ HWTEST_F(WindowExtensionSessionImplTest, TransferAccessibilityEvent, Function | 
  * @tc.desc: Normal test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, UpdateSessionViewportConfig1, Function | SmallTest | Level2)
+HWTEST_F(WindowExtensionSessionImplTest, UpdateSessionViewportConfig1, TestSize.Level1)
 {
     ASSERT_NE(nullptr, window_);
     ASSERT_NE(nullptr, window_->property_);
@@ -1220,7 +1151,7 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateSessionViewportConfig1, Function 
  * @tc.desc: invalid density
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, UpdateSessionViewportConfig2, Function | SmallTest | Level2)
+HWTEST_F(WindowExtensionSessionImplTest, UpdateSessionViewportConfig2, TestSize.Level1)
 {
     ASSERT_NE(nullptr, window_);
     SessionViewportConfig config;
@@ -1234,7 +1165,7 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateSessionViewportConfig2, Function 
  * @tc.desc: handler_ is null
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, UpdateSessionViewportConfig3, Function | SmallTest | Level2)
+HWTEST_F(WindowExtensionSessionImplTest, UpdateSessionViewportConfig3, TestSize.Level1)
 {
     ASSERT_NE(nullptr, window_);
     SessionViewportConfig config;
@@ -1247,7 +1178,7 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateSessionViewportConfig3, Function 
  * @tc.desc: handler_ is null
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, UpdateSystemViewportConfig1, Function | SmallTest | Level2)
+HWTEST_F(WindowExtensionSessionImplTest, UpdateSystemViewportConfig1, TestSize.Level1)
 {
     ASSERT_NE(nullptr, window_);
     window_->handler_ = nullptr;
@@ -1259,7 +1190,7 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateSystemViewportConfig1, Function |
  * @tc.desc: Follow host
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, UpdateSystemViewportConfig2, Function | SmallTest | Level2)
+HWTEST_F(WindowExtensionSessionImplTest, UpdateSystemViewportConfig2, TestSize.Level1)
 {
     ASSERT_NE(nullptr, window_);
     window_->isDensityFollowHost_ = true;
@@ -1272,7 +1203,7 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateSystemViewportConfig2, Function |
  * @tc.desc: Do not follow host
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, UpdateSystemViewportConfig3, Function | SmallTest | Level2)
+HWTEST_F(WindowExtensionSessionImplTest, UpdateSystemViewportConfig3, TestSize.Level1)
 {
     ASSERT_NE(nullptr, window_->property_);
     window_->isDensityFollowHost_ = false;
@@ -1286,7 +1217,7 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateSystemViewportConfig3, Function |
  * @tc.desc: Normal test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, NotifyDisplayInfoChange1, Function | SmallTest | Level2)
+HWTEST_F(WindowExtensionSessionImplTest, NotifyDisplayInfoChange1, TestSize.Level1)
 {
     ASSERT_NE(nullptr, window_);
     auto abilityContext = std::make_shared<AbilityRuntime::AbilityContextImpl>();
@@ -1301,7 +1232,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyDisplayInfoChange1, Function | Sm
  * @tc.desc: context_ is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, NotifyDisplayInfoChange2, Function | SmallTest | Level2)
+HWTEST_F(WindowExtensionSessionImplTest, NotifyDisplayInfoChange2, TestSize.Level1)
 {
     ASSERT_NE(nullptr, window_);
     window_->context_ = nullptr;
@@ -1314,7 +1245,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyDisplayInfoChange2, Function | Sm
  * @tc.desc: NotifyAccessibilityChildTreeRegister Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, NotifyAccessibilityChildTreeRegister01, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, NotifyAccessibilityChildTreeRegister01, TestSize.Level1)
 {
     uint32_t windowId = 0;
     int32_t treeId = 0;
@@ -1339,7 +1270,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyAccessibilityChildTreeRegister01,
  * @tc.desc: NotifyAccessibilityChildTreeUnregister Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, NotifyAccessibilityChildTreeUnregister01, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, NotifyAccessibilityChildTreeUnregister01, TestSize.Level1)
 {
     window_->uiContent_ = nullptr;
     ASSERT_EQ(WSError::WS_OK, window_->NotifyAccessibilityChildTreeUnregister());
@@ -1358,7 +1289,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyAccessibilityChildTreeUnregister0
  * @tc.desc: NotifyAccessibilityDumpChildInfo Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, NotifyAccessibilityDumpChildInfo01, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, NotifyAccessibilityDumpChildInfo01, TestSize.Level1)
 {
     std::vector<std::string> params;
     std::vector<std::string> info;
@@ -1379,7 +1310,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyAccessibilityDumpChildInfo01, Fun
  * @tc.desc: UpdateAccessibilityTreeInfo Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, UpdateAccessibilityTreeInfo, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, UpdateAccessibilityTreeInfo, TestSize.Level1)
 {
     std::optional<AccessibilityChildTreeInfo> accessibilityChildTreeInfo =
 		std::make_optional<AccessibilityChildTreeInfo>();
@@ -1402,7 +1333,7 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateAccessibilityTreeInfo, Function |
  * @tc.desc: NotifyExecuteAction Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, NotifyOccupiedAreaChangeInfo01, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, NotifyOccupiedAreaChangeInfo01, TestSize.Level1)
 {
     sptr<OccupiedAreaChangeInfo> info = new(std::nothrow) OccupiedAreaChangeInfo();
     ASSERT_NE(nullptr, info);
@@ -1414,7 +1345,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyOccupiedAreaChangeInfo01, Functio
  * @tc.desc: NotifyExecuteAction Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, NotifyOccupiedAreaChangeInfo02, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, NotifyOccupiedAreaChangeInfo02, TestSize.Level1)
 {
     sptr<IOccupiedAreaChangeListener> iOccupiedAreaChangeListener = new(std::nothrow) IOccupiedAreaChangeListener();
     ASSERT_NE(nullptr, iOccupiedAreaChangeListener);
@@ -1429,7 +1360,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyOccupiedAreaChangeInfo02, Functio
  * @tc.desc: UnregisterOccupiedAreaChangeListener Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, UnregisterOccupiedAreaChangeListener, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, UnregisterOccupiedAreaChangeListener, TestSize.Level1)
 {
     ASSERT_EQ(WMError::WM_OK, window_->UnregisterOccupiedAreaChangeListener(nullptr));
 }
@@ -1439,7 +1370,7 @@ HWTEST_F(WindowExtensionSessionImplTest, UnregisterOccupiedAreaChangeListener, F
  * @tc.desc: NotifyExecuteAction Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, GetAvoidAreaByType01, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, GetAvoidAreaByType01, TestSize.Level1)
 {
     AvoidAreaType avoidAreaType = AvoidAreaType::TYPE_SYSTEM;
     AvoidArea avoidArea;
@@ -1459,7 +1390,7 @@ HWTEST_F(WindowExtensionSessionImplTest, GetAvoidAreaByType01, Function | SmallT
  * @tc.desc: NotifyExecuteAction Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, GetAvoidAreaByType02, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, GetAvoidAreaByType02, TestSize.Level1)
 {
     SessionInfo sessionInfo;
     sptr<SessionMocker> mockHostSession = sptr<SessionMocker>::MakeSptr(sessionInfo);
@@ -1490,7 +1421,7 @@ HWTEST_F(WindowExtensionSessionImplTest, GetAvoidAreaByType02, Function | SmallT
  * @tc.desc: RegisterAvoidAreaChangeListener Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, RegisterAvoidAreaChangeListener, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, RegisterAvoidAreaChangeListener, TestSize.Level1)
 {
     sptr<IAvoidAreaChangedListener> listener = nullptr;
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window_->RegisterAvoidAreaChangeListener(listener));
@@ -1501,7 +1432,7 @@ HWTEST_F(WindowExtensionSessionImplTest, RegisterAvoidAreaChangeListener, Functi
  * @tc.desc: UnregisterAvoidAreaChangeListener Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, UnregisterAvoidAreaChangeListener, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, UnregisterAvoidAreaChangeListener, TestSize.Level1)
 {
     sptr<IAvoidAreaChangedListener> listener = nullptr;
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window_->UnregisterAvoidAreaChangeListener(listener));
@@ -1512,7 +1443,7 @@ HWTEST_F(WindowExtensionSessionImplTest, UnregisterAvoidAreaChangeListener, Func
  * @tc.desc: Show
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, Show, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, Show, TestSize.Level1)
 {
     ASSERT_NE(nullptr, window_->property_);
     window_->property_->persistentId_ = 12345;
@@ -1534,7 +1465,7 @@ HWTEST_F(WindowExtensionSessionImplTest, Show, Function | SmallTest | Level3)
  * @tc.desc: Hide
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, Hide, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, Hide, TestSize.Level1)
 {
     ASSERT_NE(nullptr, window_->property_);
 
@@ -1576,7 +1507,7 @@ HWTEST_F(WindowExtensionSessionImplTest, Hide, Function | SmallTest | Level3)
  * @tc.desc: test isFollowHost is true
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, NotifyDensityFollowHost01, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, NotifyDensityFollowHost01, TestSize.Level1)
 {
     DisplayId displayId = 0;
     ASSERT_NE(nullptr, window_->property_);
@@ -1605,7 +1536,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyDensityFollowHost01, Function | S
  * @tc.desc: test isFollowHost is true -> false
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, NotifyDensityFollowHost02, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, NotifyDensityFollowHost02, TestSize.Level1)
 {
     DisplayId displayId = 0;
     ASSERT_NE(nullptr, window_->property_);
@@ -1640,7 +1571,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyDensityFollowHost02, Function | S
  * @tc.desc: test isFollowHost not change
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, NotifyDensityFollowHost03, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, NotifyDensityFollowHost03, TestSize.Level1)
 {
     DisplayId displayId = 0;
     ASSERT_NE(nullptr, window_->property_);
@@ -1662,7 +1593,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyDensityFollowHost03, Function | S
  * @tc.desc: test densityValue invalid
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, NotifyDensityFollowHost04, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, NotifyDensityFollowHost04, TestSize.Level1)
 {
     DisplayId displayId = 0;
     ASSERT_NE(nullptr, window_->property_);
@@ -1680,7 +1611,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyDensityFollowHost04, Function | S
  * @tc.desc: test densityValue not change
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, NotifyDensityFollowHost05, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, NotifyDensityFollowHost05, TestSize.Level1)
 {
     DisplayId displayId = 0;
     ASSERT_NE(nullptr, window_->property_);
@@ -1721,7 +1652,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyDensityFollowHost05, Function | S
  * @tc.desc: follow host density value
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, GetVirtualPixelRatio01, Function | SmallTest | Level2)
+HWTEST_F(WindowExtensionSessionImplTest, GetVirtualPixelRatio01, TestSize.Level1)
 {
     sptr<DisplayInfo> displayInfo = new DisplayInfo();
     displayInfo->SetVirtualPixelRatio(3.25f);
@@ -1735,7 +1666,7 @@ HWTEST_F(WindowExtensionSessionImplTest, GetVirtualPixelRatio01, Function | Smal
  * @tc.desc: follow system density value
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, GetVirtualPixelRatio02, Function | SmallTest | Level2)
+HWTEST_F(WindowExtensionSessionImplTest, GetVirtualPixelRatio02, TestSize.Level1)
 {
     auto systemDensity = 3.25;
     sptr<DisplayInfo> displayInfo = new DisplayInfo();
@@ -1750,7 +1681,7 @@ HWTEST_F(WindowExtensionSessionImplTest, GetVirtualPixelRatio02, Function | Smal
  * @tc.desc: hostDensityValue_ is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, GetVirtualPixelRatio03, Function | SmallTest | Level2)
+HWTEST_F(WindowExtensionSessionImplTest, GetVirtualPixelRatio03, TestSize.Level1)
 {
     auto systemDensity = 3.25;
     sptr<DisplayInfo> displayInfo = new DisplayInfo();
@@ -1764,7 +1695,7 @@ HWTEST_F(WindowExtensionSessionImplTest, GetVirtualPixelRatio03, Function | Smal
  * @tc.desc: GetVirtualPixelRatio04 test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, GetVirtualPixelRatio04, Function | SmallTest | Level2)
+HWTEST_F(WindowExtensionSessionImplTest, GetVirtualPixelRatio04, TestSize.Level1)
 {
     ASSERT_EQ(1.0f, window_->GetVirtualPixelRatio(nullptr));
 }
@@ -1774,7 +1705,7 @@ HWTEST_F(WindowExtensionSessionImplTest, GetVirtualPixelRatio04, Function | Smal
  * @tc.desc: HideNonSecureWindows Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows01, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows01, TestSize.Level1)
 {
     ASSERT_EQ(WMError::WM_OK, window_->HideNonSecureWindows(false));
     ASSERT_FALSE(window_->extensionWindowFlags_.hideNonSecureWindowsFlag);
@@ -1787,7 +1718,7 @@ HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows01, Function | Smal
  * @tc.desc: HideNonSecureWindows Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows02, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows02, TestSize.Level1)
 {
     window_->state_ = WindowState::STATE_SHOWN;
     ASSERT_EQ(WMError::WM_OK, window_->HideNonSecureWindows(false));
@@ -1809,7 +1740,7 @@ HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows02, Function | Smal
  * @tc.desc: HideNonSecureWindows Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows03, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows03, TestSize.Level1)
 {
     window_->state_ = WindowState::STATE_SHOWN;
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window_->HideNonSecureWindows(true));
@@ -1820,7 +1751,7 @@ HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows03, Function | Smal
  * @tc.desc: HideNonSecureWindows Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows04, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows04, TestSize.Level1)
 {
     SessionInfo sessionInfo;
     window_->hostSession_ = new(std::nothrow) SessionMocker(sessionInfo);
@@ -1836,7 +1767,7 @@ HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows04, Function | Smal
  * @tc.desc: HideNonSecureWindows Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows06, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows06, TestSize.Level1)
 {
     ASSERT_NE(nullptr, window_->property_);
     window_->property_->SetUIExtensionUsage(UIExtensionUsage::MODAL);
@@ -1848,7 +1779,7 @@ HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows06, Function | Smal
  * @tc.desc: SetWaterMarkFlag Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, SetWaterMarkFlag01, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, SetWaterMarkFlag01, TestSize.Level1)
 {
     ASSERT_EQ(WMError::WM_OK, window_->SetWaterMarkFlag(false));
     ASSERT_FALSE(window_->extensionWindowFlags_.waterMarkFlag);
@@ -1861,7 +1792,7 @@ HWTEST_F(WindowExtensionSessionImplTest, SetWaterMarkFlag01, Function | SmallTes
  * @tc.desc: SetWaterMarkFlag Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, SetWaterMarkFlag02, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, SetWaterMarkFlag02, TestSize.Level1)
 {
     window_->state_ = WindowState::STATE_SHOWN;
     ASSERT_EQ(WMError::WM_OK, window_->SetWaterMarkFlag(false));
@@ -1872,7 +1803,7 @@ HWTEST_F(WindowExtensionSessionImplTest, SetWaterMarkFlag02, Function | SmallTes
  * @tc.desc: SetWaterMarkFlag Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, SetWaterMarkFlag03, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, SetWaterMarkFlag03, TestSize.Level1)
 {
     window_->state_ = WindowState::STATE_SHOWN;
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window_->SetWaterMarkFlag(true));
@@ -1883,7 +1814,7 @@ HWTEST_F(WindowExtensionSessionImplTest, SetWaterMarkFlag03, Function | SmallTes
  * @tc.desc: SetWaterMarkFlag Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, SetWaterMarkFlag04, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, SetWaterMarkFlag04, TestSize.Level1)
 {
     SessionInfo sessionInfo;
     window_->hostSession_ = new(std::nothrow) SessionMocker(sessionInfo);
@@ -1899,7 +1830,7 @@ HWTEST_F(WindowExtensionSessionImplTest, SetWaterMarkFlag04, Function | SmallTes
  * @tc.desc: CheckAndAddExtWindowFlags01 Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, CheckAndAddExtWindowFlags01, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, CheckAndAddExtWindowFlags01, TestSize.Level1)
 {
     ASSERT_NE(nullptr, window_);
     window_->CheckAndAddExtWindowFlags();
@@ -1910,7 +1841,7 @@ HWTEST_F(WindowExtensionSessionImplTest, CheckAndAddExtWindowFlags01, Function |
  * @tc.desc: CheckAndAddExtWindowFlags02 Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, CheckAndAddExtWindowFlags02, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, CheckAndAddExtWindowFlags02, TestSize.Level1)
 {
     ASSERT_NE(nullptr, window_);
     window_->extensionWindowFlags_.bitData = 1;
@@ -1922,7 +1853,7 @@ HWTEST_F(WindowExtensionSessionImplTest, CheckAndAddExtWindowFlags02, Function |
  * @tc.desc: CheckAndRemoveExtWindowFlags01 Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, CheckAndRemoveExtWindowFlags01, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, CheckAndRemoveExtWindowFlags01, TestSize.Level1)
 {
     ASSERT_NE(nullptr, window_);
     window_->CheckAndRemoveExtWindowFlags();
@@ -1933,7 +1864,7 @@ HWTEST_F(WindowExtensionSessionImplTest, CheckAndRemoveExtWindowFlags01, Functio
  * @tc.desc: CheckAndRemoveExtWindowFlags02 Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, CheckAndRemoveExtWindowFlags02, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, CheckAndRemoveExtWindowFlags02, TestSize.Level1)
 {
     ASSERT_NE(nullptr, window_);
     window_->extensionWindowFlags_.bitData = 1;
@@ -1945,7 +1876,7 @@ HWTEST_F(WindowExtensionSessionImplTest, CheckAndRemoveExtWindowFlags02, Functio
  * @tc.desc: UpdateExtWindowFlags Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, UpdateExtWindowFlags01, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, UpdateExtWindowFlags01, TestSize.Level1)
 {
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window_->UpdateExtWindowFlags(ExtensionWindowFlags(),
         ExtensionWindowFlags()));
@@ -1956,7 +1887,7 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateExtWindowFlags01, Function | Smal
  * @tc.desc: UpdateExtWindowFlags Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, UpdateExtWindowFlags02, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, UpdateExtWindowFlags02, TestSize.Level1)
 {
     SessionInfo sessionInfo;
     window_->hostSession_ = new(std::nothrow) SessionMocker(sessionInfo);
@@ -1976,7 +1907,7 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateExtWindowFlags02, Function | Smal
  * @tc.desc: GetHostWindowRect Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, GetHostWindowRect01, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, GetHostWindowRect01, TestSize.Level1)
 {
     Rect rect;
     ASSERT_EQ(rect, window_->GetHostWindowRect(-1));
@@ -1987,7 +1918,7 @@ HWTEST_F(WindowExtensionSessionImplTest, GetHostWindowRect01, Function | SmallTe
  * @tc.desc: GetHostWindowRect Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, GetHostWindowRect02, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, GetHostWindowRect02, TestSize.Level1)
 {
     Rect rect;
     ASSERT_EQ(rect, window_->GetHostWindowRect(0));
@@ -1998,7 +1929,7 @@ HWTEST_F(WindowExtensionSessionImplTest, GetHostWindowRect02, Function | SmallTe
  * @tc.desc: ConsumePointerEvent Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, ConsumePointerEvent, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, ConsumePointerEvent, TestSize.Level1)
 {
     struct RSSurfaceNodeConfig config;
     window_->surfaceNode_ = RSSurfaceNode::Create(config);
@@ -2043,7 +1974,7 @@ HWTEST_F(WindowExtensionSessionImplTest, ConsumePointerEvent, Function | SmallTe
  * @tc.desc: PreNotifyKeyEvent Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, PreNotifyKeyEvent, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, PreNotifyKeyEvent, TestSize.Level1)
 {
     bool ret = window_->PreNotifyKeyEvent(nullptr);
     ASSERT_EQ(ret, false);
@@ -2082,7 +2013,7 @@ HWTEST_F(WindowExtensionSessionImplTest, PreNotifyKeyEvent, Function | SmallTest
  * @tc.desc: GetFreeMultiWindowModeEnabledState Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, GetFreeMultiWindowModeEnabledState, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, GetFreeMultiWindowModeEnabledState, TestSize.Level1)
 {
     ASSERT_EQ(false, window_->GetFreeMultiWindowModeEnabledState());
 }
@@ -2092,7 +2023,7 @@ HWTEST_F(WindowExtensionSessionImplTest, GetFreeMultiWindowModeEnabledState, Fun
  * @tc.desc: NotifyExtensionTimeout Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, NotifyExtensionTimeout, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, NotifyExtensionTimeout, TestSize.Level1)
 {
     ASSERT_NE(nullptr, window_);
     SessionInfo sessionInfo;
@@ -2113,7 +2044,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyExtensionTimeout, Function | Smal
  * @tc.desc: GetRealParentId Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, GetRealParentId, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, GetRealParentId, TestSize.Level1)
 {
     ASSERT_NE(window_->property_, nullptr);
     window_->property_->SetRealParentId(12345);
@@ -2125,7 +2056,7 @@ HWTEST_F(WindowExtensionSessionImplTest, GetRealParentId, Function | SmallTest |
  * @tc.desc: GetParentWindowType Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, GetParentWindowType, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, GetParentWindowType, TestSize.Level1)
 {
     ASSERT_NE(window_->property_, nullptr);
     window_->property_->SetParentWindowType(WindowType::WINDOW_TYPE_TOAST);
@@ -2137,7 +2068,7 @@ HWTEST_F(WindowExtensionSessionImplTest, GetParentWindowType, Function | SmallTe
  * @tc.desc: CheckHideNonSecureWindowsPermission Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, CheckHideNonSecureWindowsPermission, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, CheckHideNonSecureWindowsPermission, TestSize.Level1)
 {
     ASSERT_NE(window_->property_, nullptr);
 
@@ -2160,7 +2091,7 @@ HWTEST_F(WindowExtensionSessionImplTest, CheckHideNonSecureWindowsPermission, Fu
  * @tc.desc: NotifyModalUIExtensionMayBeCovered Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, NotifyModalUIExtensionMayBeCovered, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, NotifyModalUIExtensionMayBeCovered, TestSize.Level1)
 {
     ASSERT_NE(window_, nullptr);
     ASSERT_NE(window_->property_, nullptr);
@@ -2186,7 +2117,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyModalUIExtensionMayBeCovered, Fun
  * @tc.desc: ReportModalUIExtensionMayBeCovered Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, ReportModalUIExtensionMayBeCovered, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, ReportModalUIExtensionMayBeCovered, TestSize.Level1)
 {
     ASSERT_NE(window_, nullptr);
     window_->ReportModalUIExtensionMayBeCovered(true);
@@ -2198,7 +2129,7 @@ HWTEST_F(WindowExtensionSessionImplTest, ReportModalUIExtensionMayBeCovered, Fun
  * @tc.desc: NotifyExtensionEventAsync Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, NotifyExtensionEventAsync, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, NotifyExtensionEventAsync, TestSize.Level1)
 {
     window_->NotifyExtensionEventAsync(0);
 
@@ -2214,7 +2145,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyExtensionEventAsync, Function | S
  * @tc.desc: NotifyDumpInfo Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, NotifyDumpInfo, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, NotifyDumpInfo, TestSize.Level1)
 {
     ASSERT_NE(nullptr, window_);
     window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
@@ -2235,7 +2166,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyDumpInfo, Function | SmallTest | 
  * @tc.desc: UpdateConfigurationSyncForAll Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, UpdateConfigurationSyncForAll, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, UpdateConfigurationSyncForAll, TestSize.Level1)
 {
     std::shared_ptr<AppExecFwk::Configuration> configuration = std::make_shared<AppExecFwk::Configuration>();
     ASSERT_NE(nullptr, window_);
@@ -2249,7 +2180,7 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateConfigurationSyncForAll, Function
  * @tc.desc: Test NotifyExtensionDataConsumer with valid window mode data
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, NotifyExtensionDataConsumer01, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, NotifyExtensionDataConsumer01, TestSize.Level1)
 {
     // Prepare and write config
     MessageParcel data;
@@ -2284,7 +2215,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyExtensionDataConsumer01, Function
  * @tc.desc: RegisterConsumer Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, RegisterConsumer, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, RegisterConsumer, TestSize.Level1)
 {
     window_->RegisterConsumer(Extension::Businesscode::SYNC_CROSS_AXIS_STATE,
         std::bind(&WindowExtensionSessionImpl::OnCrossAxisStateChange,
@@ -2298,7 +2229,7 @@ HWTEST_F(WindowExtensionSessionImplTest, RegisterConsumer, Function | SmallTest 
  * @tc.desc: OnCrossAxisStateChange Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, OnCrossAxisStateChange, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, OnCrossAxisStateChange, TestSize.Level1)
 {
     AAFwk::Want want;
     std::optional<AAFwk::Want> reply = std::make_optional<AAFwk::Want>();
@@ -2312,7 +2243,7 @@ HWTEST_F(WindowExtensionSessionImplTest, OnCrossAxisStateChange, Function | Smal
  * @tc.desc: OnWaterfallModeChange Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, OnWaterfallModeChange, Function | SmallTest | Level3)
+HWTEST_F(WindowExtensionSessionImplTest, OnWaterfallModeChange, TestSize.Level1)
 {
     AAFwk::Want want;
     std::optional<AAFwk::Want> reply = std::make_optional<AAFwk::Want>();

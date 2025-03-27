@@ -51,7 +51,7 @@ namespace {
  * @tc.desc: ReportRegisterSessionListener test
  * @tc.type: FUNC
  */
-HWTEST_F(DmsReporterTest, ReportRegisterSessionListener, Function | SmallTest | Level2)
+HWTEST_F(DmsReporterTest, ReportRegisterSessionListener, TestSize.Level1)
 {
     int res = 0;
     DmsReporter dmsReporter;
@@ -64,7 +64,7 @@ HWTEST_F(DmsReporterTest, ReportRegisterSessionListener, Function | SmallTest | 
  * @tc.desc: ReportQuerySessionInfo test
  * @tc.type: FUNC
  */
-HWTEST_F(DmsReporterTest, ReportQuerySessionInfo, Function | SmallTest | Level2)
+HWTEST_F(DmsReporterTest, ReportQuerySessionInfo, TestSize.Level1)
 {
     int res = 0;
     DmsReporter dmsReporter;
@@ -77,7 +77,7 @@ HWTEST_F(DmsReporterTest, ReportQuerySessionInfo, Function | SmallTest | Level2)
  * @tc.desc: ReportContinueApp test
  * @tc.type: FUNC
  */
-HWTEST_F(DmsReporterTest, ReportContinueApp, Function | SmallTest | Level2)
+HWTEST_F(DmsReporterTest, ReportContinueApp, TestSize.Level1)
 {
     int res = 0;
     DmsReporter dmsReporter;

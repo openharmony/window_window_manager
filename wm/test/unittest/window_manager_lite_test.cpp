@@ -132,7 +132,7 @@ namespace {
  * @tc.desc: using windowManagerLite to get focus info
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerLiteTest, GetFocusWindowInfo, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerLiteTest, GetFocusWindowInfo, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     FocusChangeInfo infosInput;
@@ -154,7 +154,7 @@ HWTEST_F(WindowManagerLiteTest, GetFocusWindowInfo, Function | SmallTest | Level
  * @tc.desc: UpdateCameraWindowStatus
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerLiteTest, UpdateCameraWindowStatus01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerLiteTest, UpdateCameraWindowStatus01, TestSize.Level1)
 {
     uint32_t accessTokenId = 0;
     bool isShowing = true;
@@ -168,7 +168,7 @@ HWTEST_F(WindowManagerLiteTest, UpdateCameraWindowStatus01, Function | SmallTest
  * @tc.desc: UpdateCameraWindowStatus
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerLiteTest, UpdateCameraWindowStatus02, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerLiteTest, UpdateCameraWindowStatus02, TestSize.Level1)
 {
     auto& windowManager = WindowManagerLite::GetInstance();
     sptr<TestCameraWindowChangedListener> listener = sptr<TestCameraWindowChangedListener>::MakeSptr();
@@ -188,7 +188,7 @@ HWTEST_F(WindowManagerLiteTest, UpdateCameraWindowStatus02, Function | SmallTest
  * @tc.desc: check RegisterCameraWindowChangedListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerLiteTest, RegisterCameraWindowChangedListener01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerLiteTest, RegisterCameraWindowChangedListener01, TestSize.Level1)
 {
     auto& windowManager = WindowManagerLite::GetInstance();
     auto oldWindowManagerAgent = windowManager.pImpl_->cameraWindowChangedListenerAgent_;
@@ -220,7 +220,7 @@ HWTEST_F(WindowManagerLiteTest, RegisterCameraWindowChangedListener01, Function 
  * @tc.desc: check UnregisterCameraWindowChangedListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerLiteTest, UnregisterCameraWindowChangedListener01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerLiteTest, UnregisterCameraWindowChangedListener01, TestSize.Level1)
 {
     auto& windowManager = WindowManagerLite::GetInstance();
     auto oldWindowManagerAgent = windowManager.pImpl_->cameraWindowChangedListenerAgent_;
@@ -261,7 +261,7 @@ HWTEST_F(WindowManagerLiteTest, UnregisterCameraWindowChangedListener01, Functio
  * @tc.desc: check UnregisterCameraWindowChangedListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerLiteTest, Test01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerLiteTest, Test01, TestSize.Level1)
 {
     sptr<IFocusChangedListener> listener = nullptr;
     auto ret1 = WindowManagerLite::GetInstance().RegisterFocusChangedListener(listener);
@@ -297,7 +297,7 @@ HWTEST_F(WindowManagerLiteTest, Test01, Function | SmallTest | Level2)
  * @tc.desc: Test04
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerLiteTest, Test04, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerLiteTest, Test04, TestSize.Level1)
 {
     WindowManagerLite lite;
     sptr<FocusChangeInfo> focusChangeInfo = nullptr;
@@ -319,7 +319,7 @@ HWTEST_F(WindowManagerLiteTest, Test04, Function | SmallTest | Level2)
  * @tc.desc: check RegisterWindowModeChangedListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerLiteTest, RegisterWindowModeChangedListener02, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerLiteTest, RegisterWindowModeChangedListener02, TestSize.Level1)
 {
     auto& windowManager = WindowManagerLite::GetInstance();
     auto oldWindowManagerAgent = windowManager.pImpl_->windowModeListenerAgent_;
@@ -351,7 +351,7 @@ HWTEST_F(WindowManagerLiteTest, RegisterWindowModeChangedListener02, Function | 
  * @tc.desc: check UnregisterWindowModeChangedListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerLiteTest, UnregisterWindowModeChangedListener02, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerLiteTest, UnregisterWindowModeChangedListener02, TestSize.Level1)
 {
     auto& windowManager = WindowManagerLite::GetInstance();
     auto oldWindowManagerAgent = windowManager.pImpl_->windowModeListenerAgent_;
@@ -392,7 +392,7 @@ HWTEST_F(WindowManagerLiteTest, UnregisterWindowModeChangedListener02, Function 
  * @tc.desc: check RegisterWMSConnectionChangedListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerLiteTest, RegisterWMSConnectionChangedListener02, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerLiteTest, RegisterWMSConnectionChangedListener02, TestSize.Level1)
 {
     auto& windowManager = WindowManagerLite::GetInstance();
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterWMSConnectionChangedListener(nullptr));
@@ -410,7 +410,7 @@ HWTEST_F(WindowManagerLiteTest, RegisterWMSConnectionChangedListener02, Function
  * @tc.desc: get top main window info
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerLiteTest, GetMainWindowInfos, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerLiteTest, GetMainWindowInfos, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     std::vector<MainWindowInfo> topNInfo;
@@ -452,7 +452,7 @@ HWTEST_F(WindowManagerLiteTest, GetMainWindowInfos, Function | SmallTest | Level
  * @tc.desc: TestUpdateFocusChangeInfo
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerLiteTest, TestUpdateFocusChangeInfo, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerLiteTest, TestUpdateFocusChangeInfo, TestSize.Level1)
 {
     sptr<FocusChangeInfo> focusChangeInfo = nullptr;
     WindowManagerLite::GetInstance().UpdateFocusChangeInfo(focusChangeInfo, true);
@@ -478,7 +478,7 @@ HWTEST_F(WindowManagerLiteTest, TestUpdateFocusChangeInfo, Function | SmallTest 
  * @tc.desc: NotifyFocused With MotifyUnFocused
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerLiteTest, NotifyFocusedWithUn, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerLiteTest, NotifyFocusedWithUn, TestSize.Level1)
 {
     WindowManagerLite lite;
     sptr<FocusChangeInfo> focusChangeInfo = nullptr;
@@ -499,7 +499,7 @@ HWTEST_F(WindowManagerLiteTest, NotifyFocusedWithUn, Function | SmallTest | Leve
  * @tc.desc: NotifyWindowDrawingContentInfoChanged
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerLiteTest, NotifyWindowDrawingContentInfoChanged02, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerLiteTest, NotifyWindowDrawingContentInfoChanged02, TestSize.Level1)
 {
     WindowManagerLite lite;
     auto& windowManager = WindowManagerLite::GetInstance();
@@ -517,7 +517,7 @@ HWTEST_F(WindowManagerLiteTest, NotifyWindowDrawingContentInfoChanged02, Functio
  * @tc.desc: NotifyWindowModeChange
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerLiteTest, NotifyWindowModeChange02, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerLiteTest, NotifyWindowModeChange02, TestSize.Level1)
 {
     WindowManagerLite lite;
     auto& windowManager = WindowManagerLite::GetInstance();
@@ -534,7 +534,7 @@ HWTEST_F(WindowManagerLiteTest, NotifyWindowModeChange02, Function | SmallTest |
  * @tc.desc: NotifyWindowVisibilityInfoChanged
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerLiteTest, NotifyWindowVisibilityInfoChanged02, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerLiteTest, NotifyWindowVisibilityInfoChanged02, TestSize.Level1)
 {
     WindowManagerLite lite;
     auto& windowManager = WindowManagerLite::GetInstance();
@@ -552,7 +552,7 @@ HWTEST_F(WindowManagerLiteTest, NotifyWindowVisibilityInfoChanged02, Function | 
  * @tc.desc: NotifyUnfocused
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerLiteTest, NotifyUnfocused01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerLiteTest, NotifyUnfocused01, TestSize.Level1)
 {
     WindowManagerLite lite;
     auto& windowManager = WindowManagerLite::GetInstance();
@@ -571,7 +571,7 @@ HWTEST_F(WindowManagerLiteTest, NotifyUnfocused01, Function | SmallTest | Level2
  * @tc.desc: GetAllMainWindowInfos001
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerLiteTest, GetAllMainWindowInfos001, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerLiteTest, GetAllMainWindowInfos001, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     std::vector<MainWindowInfo> infos;
@@ -613,7 +613,7 @@ HWTEST_F(WindowManagerLiteTest, GetAllMainWindowInfos001, Function | SmallTest |
  * @tc.desc: GetAllMainWindowInfos002
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerLiteTest, GetAllMainWindowInfos002, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerLiteTest, GetAllMainWindowInfos002, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     std::vector<MainWindowInfo> infos;
@@ -633,7 +633,7 @@ HWTEST_F(WindowManagerLiteTest, GetAllMainWindowInfos002, Function | SmallTest |
  * @tc.desc: ClearMainSessions001
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerLiteTest, ClearMainSessions001, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerLiteTest, ClearMainSessions001, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     std::vector<int32_t> persistentIds;
@@ -649,7 +649,7 @@ HWTEST_F(WindowManagerLiteTest, ClearMainSessions001, Function | SmallTest | Lev
  * @tc.desc: ClearMainSessions002
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerLiteTest, ClearMainSessions002, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerLiteTest, ClearMainSessions002, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     std::vector<int32_t> persistentIds = { 1, 2 };
@@ -665,7 +665,7 @@ HWTEST_F(WindowManagerLiteTest, ClearMainSessions002, Function | SmallTest | Lev
  * @tc.desc: ClearMainSessions003
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerLiteTest, ClearMainSessions003, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerLiteTest, ClearMainSessions003, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     std::vector<int32_t> persistentIds;
@@ -681,7 +681,7 @@ HWTEST_F(WindowManagerLiteTest, ClearMainSessions003, Function | SmallTest | Lev
  * @tc.desc: ClearMainSessions004
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerLiteTest, ClearMainSessions004, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerLiteTest, ClearMainSessions004, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     std::vector<int32_t> persistentIds = { 1, 2 };
@@ -697,7 +697,7 @@ HWTEST_F(WindowManagerLiteTest, ClearMainSessions004, Function | SmallTest | Lev
  * @tc.desc: GetWindowModeType
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerLiteTest, GetWindowModeType, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerLiteTest, GetWindowModeType, TestSize.Level1)
 {
     WindowModeType windowModeType = WindowModeType::WINDOW_MODE_SPLIT_FLOATING;
     auto ret = WindowManagerLite::GetInstance().GetWindowModeType(windowModeType);
@@ -709,7 +709,7 @@ HWTEST_F(WindowManagerLiteTest, GetWindowModeType, Function | SmallTest | Level2
  * @tc.desc: RaiseWindowToTop
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerLiteTest, RaiseWindowToTop, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerLiteTest, RaiseWindowToTop, TestSize.Level1)
 {
     auto ret = WindowManagerLite::GetInstance().RaiseWindowToTop(0);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
@@ -720,7 +720,7 @@ HWTEST_F(WindowManagerLiteTest, RaiseWindowToTop, Function | SmallTest | Level2)
  * @tc.desc: NotifyWMSConnected
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerLiteTest, NotifyWMSConnected01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerLiteTest, NotifyWMSConnected01, TestSize.Level1)
 {
     WindowManagerLite::GetInstance().pImpl_->wmsConnectionChangedListener_ = nullptr;
     WindowManagerLite::GetInstance().pImpl_->NotifyWMSConnected(0, 0);
@@ -749,7 +749,7 @@ HWTEST_F(WindowManagerLiteTest, NotifyWMSConnected01, Function | SmallTest | Lev
  * @tc.desc: NotifyWMSConnected
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerLiteTest, NotifyWMSConnected02, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerLiteTest, NotifyWMSConnected02, TestSize.Level1)
 {
     auto& windowManager = WindowManagerLite::GetInstance();
     sptr<TestWMSConnectionChangedListener> listener = sptr<TestWMSConnectionChangedListener>::MakeSptr();
@@ -767,7 +767,7 @@ HWTEST_F(WindowManagerLiteTest, NotifyWMSConnected02, Function | SmallTest | Lev
  * @tc.desc: NotifyWMSConnected
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerLiteTest, NotifyWMSConnected03, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerLiteTest, NotifyWMSConnected03, TestSize.Level1)
 {
     WindowManagerLite::GetInstance().pImpl_->wmsConnectionChangedListener_ =
         sptr<IWMSConnectionChangedListenerSon>::MakeSptr();
@@ -782,7 +782,7 @@ HWTEST_F(WindowManagerLiteTest, NotifyWMSConnected03, Function | SmallTest | Lev
  * @tc.desc: check RegisterWindowStyleChangedListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerLiteTest, RegisterWindowStyleChangedListener, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerLiteTest, RegisterWindowStyleChangedListener, TestSize.Level1)
 {
     auto& windowManager = WindowManagerLite::GetInstance();
     auto oldWindowManagerAgent = windowManager.pImpl_->windowStyleListenerAgent_;
@@ -814,7 +814,7 @@ HWTEST_F(WindowManagerLiteTest, RegisterWindowStyleChangedListener, Function | S
  * @tc.desc: check UnregisterWindowStyleChangedListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerLiteTest, UnregisterWindowStyleChangedListener, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerLiteTest, UnregisterWindowStyleChangedListener, TestSize.Level1)
 {
     auto& windowManager = WindowManagerLite::GetInstance();
     auto oldWindowManagerAgent = windowManager.pImpl_->windowStyleListenerAgent_;
@@ -853,7 +853,7 @@ HWTEST_F(WindowManagerLiteTest, UnregisterWindowStyleChangedListener, Function |
  * @tc.desc: check NotifyWindowStyleChange
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerLiteTest, NotifyWindowStyleChange01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerLiteTest, NotifyWindowStyleChange01, TestSize.Level1)
 {
     WindowStyleType type = Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT;
     auto ret = WindowManagerLite::GetInstance().NotifyWindowStyleChange(type);
@@ -865,7 +865,7 @@ HWTEST_F(WindowManagerLiteTest, NotifyWindowStyleChange01, Function | SmallTest 
  * @tc.desc: check NotifyWindowStyleChange
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerLiteTest, NotifyWindowStyleChange02, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerLiteTest, NotifyWindowStyleChange02, TestSize.Level1)
 {
     auto& windowManager = WindowManagerLite::GetInstance();
     sptr<IWindowStyleChangedListener> listener = sptr<TestWindowStyleChangedListener>::MakeSptr();
@@ -883,7 +883,7 @@ HWTEST_F(WindowManagerLiteTest, NotifyWindowStyleChange02, Function | SmallTest 
  * @tc.desc: check GetWindowStyleType
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerLiteTest, GetWindowStyleType, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerLiteTest, GetWindowStyleType, TestSize.Level1)
 {
     WindowStyleType type = WindowManagerLite::GetInstance().GetWindowStyleType();
     ASSERT_EQ(Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT, type);
@@ -894,7 +894,7 @@ HWTEST_F(WindowManagerLiteTest, GetWindowStyleType, Function | SmallTest | Level
  * @tc.desc: TerminateSessionByPersistentId001
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerLiteTest, TerminateSessionByPersistentId001, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerLiteTest, TerminateSessionByPersistentId001, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     int32_t persistentId = 1;
@@ -909,7 +909,7 @@ HWTEST_F(WindowManagerLiteTest, TerminateSessionByPersistentId001, Function | Sm
  * @tc.desc: TerminateSessionByPersistentId002
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerLiteTest, TerminateSessionByPersistentId002, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerLiteTest, TerminateSessionByPersistentId002, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     int32_t persistentId = 0;
@@ -922,7 +922,7 @@ HWTEST_F(WindowManagerLiteTest, TerminateSessionByPersistentId002, Function | Sm
  * @tc.desc: OnRemoteDied01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerLiteTest, OnRemoteDied01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerLiteTest, OnRemoteDied01, TestSize.Level1)
 {
     WindowManagerLite::GetInstance().destroyed_ = true;
     WindowManagerLite::GetInstance().OnRemoteDied();
@@ -934,7 +934,7 @@ HWTEST_F(WindowManagerLiteTest, OnRemoteDied01, Function | SmallTest | Level2)
  * @tc.desc: check CloseTargetFloatWindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerLiteTest, CloseTargetFloatWindow, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerLiteTest, CloseTargetFloatWindow, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     std::string bundleName = "test";
@@ -949,7 +949,7 @@ HWTEST_F(WindowManagerLiteTest, CloseTargetFloatWindow, Function | SmallTest | L
  * @tc.desc: check RegisterPiPStateChangedListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerLiteTest, RegisterPiPStateChangedListener, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerLiteTest, RegisterPiPStateChangedListener, TestSize.Level1)
 {
     auto& windowManager = WindowManagerLite::GetInstance();
     auto oldWindowManagerAgent = windowManager.pImpl_->pipStateChangedListenerAgent_;
@@ -982,7 +982,7 @@ HWTEST_F(WindowManagerLiteTest, RegisterPiPStateChangedListener, Function | Smal
  * @tc.desc: check UnregisterPiPStateChangedListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerLiteTest, UnregisterPiPStateChangedListener, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerLiteTest, UnregisterPiPStateChangedListener, TestSize.Level1)
 {
     auto& windowManager = WindowManagerLite::GetInstance();
     auto oldWindowManagerAgent = windowManager.pImpl_->pipStateChangedListenerAgent_;
@@ -1021,7 +1021,7 @@ HWTEST_F(WindowManagerLiteTest, UnregisterPiPStateChangedListener, Function | Sm
  * @tc.desc: check CloseTargetPiPWindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerLiteTest, CloseTargetPiPWindow, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerLiteTest, CloseTargetPiPWindow, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     std::string bundleName = "test";
@@ -1036,7 +1036,7 @@ HWTEST_F(WindowManagerLiteTest, CloseTargetPiPWindow, Function | SmallTest | Lev
  * @tc.desc: check GetCurrentPiPWindowInfo
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerLiteTest, GetCurrentPiPWindowInfo01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerLiteTest, GetCurrentPiPWindowInfo01, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), GetCurrentPiPWindowInfo(_)).Times(1).WillOnce(Return(WMError::WM_OK));
@@ -1052,7 +1052,7 @@ HWTEST_F(WindowManagerLiteTest, GetCurrentPiPWindowInfo01, Function | SmallTest 
  * @tc.desc: check GetCurrentPiPWindowInfo
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerLiteTest, GetCurrentPiPWindowInfo02, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerLiteTest, GetCurrentPiPWindowInfo02, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     std::string testBundleName = "test";
@@ -1072,7 +1072,7 @@ HWTEST_F(WindowManagerLiteTest, GetCurrentPiPWindowInfo02, Function | SmallTest 
  * @tc.desc: check GetAccessibilityWindowInfo
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerLiteTest, GetAccessibilityWindowInfo01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerLiteTest, GetAccessibilityWindowInfo01, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     std::vector<sptr<AccessibilityWindowInfo>> infos;
@@ -1088,7 +1088,7 @@ HWTEST_F(WindowManagerLiteTest, GetAccessibilityWindowInfo01, Function | SmallTe
  * @tc.desc: check RegisterWindowUpdateListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerLiteTest, RegisterWindowUpdateListener01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerLiteTest, RegisterWindowUpdateListener01, TestSize.Level1)
 {
     auto& windowManager = WindowManagerLite::GetInstance();
     auto oldWindowManagerAgent = windowManager.pImpl_->windowUpdateListenerAgent_;
@@ -1121,7 +1121,7 @@ HWTEST_F(WindowManagerLiteTest, RegisterWindowUpdateListener01, Function | Small
  * @tc.desc: check UnregisterWindowUpdateListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerLiteTest, UnregisterWindowUpdateListener01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerLiteTest, UnregisterWindowUpdateListener01, TestSize.Level1)
 {
     auto& windowManager = WindowManagerLite::GetInstance();
     auto oldWindowManagerAgent = windowManager.pImpl_->windowUpdateListenerAgent_;

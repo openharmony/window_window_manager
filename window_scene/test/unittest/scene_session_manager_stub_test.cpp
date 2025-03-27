@@ -2477,6 +2477,21 @@ HWTEST_F(SceneSessionManagerStubTest, HandleMinimizeByWindowId, Function | Small
     int res = stub_->HandleMinimizeByWindowId(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
+
+/**
+ * @tc.name: HandleSetForegroundWindowNum
+ * @tc.desc: test HandleSetForegroundWindowNum
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleSetForegroundWindowNum, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t windowNum = 1;
+    data.WriteInt32(windowNum);
+    int res = stub_->HandleSetForegroundWindowNum(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
 }
 }
 }

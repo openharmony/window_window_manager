@@ -65,7 +65,7 @@ namespace {
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest01, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest01, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -89,7 +89,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest01, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest02, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest02, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -113,7 +113,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest02, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest03, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest03, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -137,7 +137,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest03, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest04, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest04, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -161,7 +161,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest04, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest05, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest05, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -185,7 +185,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest05, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest06, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest06, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -209,7 +209,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest06, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest07, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest07, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -233,7 +233,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest07, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest08, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest08, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -257,7 +257,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest08, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest09, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest09, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -281,7 +281,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest09, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest10, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest10, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -305,7 +305,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest10, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest11, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest11, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -329,7 +329,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest11, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest12, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest12, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -353,7 +353,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest12, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest13, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest13, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -377,7 +377,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest13, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest14, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest14, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -401,7 +401,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest14, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest15, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest15, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -425,7 +425,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest15, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest16, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest16, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -449,7 +449,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest16, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest17, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest17, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -473,7 +473,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest17, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest18, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest18, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -497,7 +497,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest18, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest19, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest19, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -521,7 +521,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest19, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest20, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest20, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -545,7 +545,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest20, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest21, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest21, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -569,7 +569,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest21, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest22, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest22, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -593,7 +593,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest22, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest23, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest23, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -617,7 +617,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest23, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest24, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest24, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -641,7 +641,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest24, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest25, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest25, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -665,7 +665,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest25, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest26, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest26, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -689,7 +689,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest26, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest27, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest27, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -713,7 +713,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest27, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest28, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest28, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -737,7 +737,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest28, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest29, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest29, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -761,7 +761,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest29, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest30, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest30, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -785,7 +785,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest30, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest32, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest32, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -804,7 +804,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest32, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest33, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest33, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -823,7 +823,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest33, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest34, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest34, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -842,7 +842,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest34, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest35, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest35, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -861,7 +861,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest35, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest36, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest36, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -883,7 +883,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest36, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest37, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest37, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -901,7 +901,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest37, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest38, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest38, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -920,7 +920,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest38, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest39, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest39, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -939,7 +939,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest39, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest40, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest40, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -958,7 +958,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest40, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest41, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest41, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -977,7 +977,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest41, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest42, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest42, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -996,7 +996,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest42, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest43, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest43, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1015,7 +1015,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest43, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest44, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest44, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1034,7 +1034,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest44, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest45, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest45, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1053,7 +1053,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest45, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest46, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest46, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1072,7 +1072,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest46, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest47, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest47, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1091,7 +1091,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest47, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest48, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest48, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1110,7 +1110,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest48, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest49, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest49, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1129,7 +1129,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest49, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest050, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest050, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1148,7 +1148,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest050, Function | SmallTest 
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest051, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest051, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1167,7 +1167,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest051, Function | SmallTest 
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest052, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest052, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1186,7 +1186,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest052, Function | SmallTest 
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest053, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest053, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1205,7 +1205,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest053, Function | SmallTest 
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest054, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest054, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1224,7 +1224,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest054, Function | SmallTest 
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest055, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest055, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1243,7 +1243,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest055, Function | SmallTest 
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest056, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest056, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1262,7 +1262,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest056, Function | SmallTest 
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest057, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest057, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1280,7 +1280,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest057, Function | SmallTest 
  * @tc.desc: normal function, TRANS_ID_SET_SCREENID_PRIVACY_STATE test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest58, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest58, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1301,7 +1301,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest58, Function | SmallTest |
  * @tc.desc: normal function, TRANS_ID_SET_SCREEN_PRIVACY_WINDOW_LIST test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest59, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest59, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1323,7 +1323,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest59, Function | SmallTest |
  * @tc.desc: normal function, TRANS_ID_SET_SCREEN_OFF_DELAY_TIME test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest60, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest60, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1342,7 +1342,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest60, Function | SmallTest |
  * @tc.desc: normal function, TRANS_ID_SET_VIRTUAL_SCREEN_BLACK_LIST test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest61, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest61, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1364,7 +1364,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest61, Function | SmallTest |
  * @tc.desc: normal function, TRANS_ID_NOTIFY_DISPLAY_HOOK_INFO test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest62, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest62, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1388,7 +1388,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest62, Function | SmallTest |
  * @tc.desc: normal function, TRANS_ID_RESET_ALL_FREEZE_STATUS test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest63, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest63, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1407,7 +1407,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest63, Function | SmallTest |
  * @tc.desc: normal function, TRANS_ID_PROXY_FOR_FREEZE test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest64, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest64, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1432,7 +1432,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest64, Function | SmallTest |
  * @tc.desc: normal function, TRANS_ID_DISABLE_POWEROFF_RENDER_CONTROL test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest65, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest65, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1452,7 +1452,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest65, Function | SmallTest |
  * @tc.desc: normal function, TRANS_ID_SWITCH_USER test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest66, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest66, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1471,7 +1471,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest66, Function | SmallTest |
  * @tc.desc: normal function, TRANS_ID_SET_VIRTUAL_SCREEN_REFRESH_RATE test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest67, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest67, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1492,7 +1492,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest67, Function | SmallTest |
  * @tc.desc: normal function, TRANS_ID_SET_VIRTUAL_SCREEN_FLAG test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest68, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest68, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1513,7 +1513,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest68, Function | SmallTest |
  * @tc.desc: normal function, TRANS_ID_GET_VIRTUAL_SCREEN_FLAG test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest69, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest69, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1533,7 +1533,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest69, Function | SmallTest |
  * @tc.desc: normal function, TRANS_ID_NOTIFY_FOLD_TO_EXPAND_COMPLETION test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest70, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest70, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1553,7 +1553,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest70, Function | SmallTest |
  * @tc.desc: normal function, TRANS_ID_GET_AVAILABLE_AREA test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest71, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest71, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1573,7 +1573,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest71, Function | SmallTest |
  * @tc.desc: normal function, TRANS_ID_UPDATE_AVAILABLE_AREA test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest72, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest72, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1597,7 +1597,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest72, Function | SmallTest |
  * @tc.desc: normal function, TRANS_ID_RESIZE_VIRTUAL_SCREEN test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest73, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest73, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1619,7 +1619,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest73, Function | SmallTest |
  * @tc.desc: normal function, TRANS_ID_NOTIFY_DISPLAY_CHANGE_INFO test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest74, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest74, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1649,7 +1649,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest74, Function | SmallTest |
  * @tc.desc: normal function, TRANS_ID_SCENE_BOARD_MAKE_UNIQUE_SCREEN test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest75, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest75, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1671,7 +1671,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest75, Function | SmallTest |
  * @tc.desc: normal function, TRANS_ID_SCENE_BOARD_GET_CURRENT_FOLD_CREASE_REGION test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest76, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest76, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1690,7 +1690,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest76, Function | SmallTest |
  * @tc.desc: normal function, TRANS_ID_SCENE_BOARD_GET_FOLD_STATUS test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest77, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest77, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1709,7 +1709,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest77, Function | SmallTest |
  * @tc.desc: normal function, TRANS_ID_SCENE_BOARD_IS_FOLDABLE test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest78, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest78, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1728,7 +1728,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest78, Function | SmallTest |
  * @tc.desc: normal function, TRANS_ID_SCENE_BOARD_GET_FOLD_DISPLAY_MODE test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest79, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest79, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1747,7 +1747,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest79, Function | SmallTest |
  * @tc.desc: normal function, TRANS_ID_SCENE_BOARD_LOCK_FOLD_DISPLAY_STATUS test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest80, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest80, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1766,7 +1766,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest80, Function | SmallTest |
  * @tc.desc: normal function, TRANS_ID_SCENE_BOARD_SET_FOLD_DISPLAY_MODE test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest81, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest81, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1785,7 +1785,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest81, Function | SmallTest |
  * @tc.desc: normal function, TRANS_ID_DEVICE_IS_CAPTURE test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest82, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest82, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1804,7 +1804,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest82, Function | SmallTest |
  * @tc.desc: normal function, TRANS_ID_SCENE_BOARD_DUMP_SPECIAL_SCREEN test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest83, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest83, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1823,7 +1823,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest83, Function | SmallTest |
  * @tc.desc: normal function, TRANS_ID_SCENE_BOARD_DUMP_ALL_SCREEN test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest84, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest84, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1842,7 +1842,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest84, Function | SmallTest |
  * @tc.desc: normal function, TRANS_ID_HAS_IMMERSIVE_WINDOW test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest85, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest85, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1862,7 +1862,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest85, Function | SmallTest |
  * @tc.desc: normal function, TRANS_ID_CONVERT_SCREENID_TO_RSSCREENID test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest86, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest86, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1882,7 +1882,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest86, Function | SmallTest |
  * @tc.desc: normal function, TRANS_ID_HAS_PRIVATE_WINDOW test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest87, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest87, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1902,7 +1902,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest87, Function | SmallTest |
  * @tc.desc: normal function, TRANS_ID_GET_CUTOUT_INFO test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest88, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest88, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1922,7 +1922,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest88, Function | SmallTest |
  * @tc.desc: normal function, TRANS_ID_IS_SCREEN_ROTATION_LOCKED test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest89, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest89, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1941,7 +1941,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest89, Function | SmallTest |
  * @tc.desc: normal function, TRANS_ID_SET_SCREEN_ROTATION_LOCKED_FROM_JS test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest90, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest90, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1961,7 +1961,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest90, Function | SmallTest |
  * @tc.desc: normal function, TRANS_ID_SET_SCREEN_ROTATION_LOCKED test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest91, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest91, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1981,7 +1981,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest91, Function | SmallTest |
  * @tc.desc: normal function, TRANS_ID_SET_ORIENTATION test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest92, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest92, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2002,7 +2002,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest92, Function | SmallTest |
  * @tc.desc: normal function, TRANS_ID_SET_VIRTUAL_PIXEL_RATIO_SYSTEM test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest93, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest93, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2023,7 +2023,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest93, Function | SmallTest |
  * @tc.desc: normal function, TRANS_ID_GET_SNAPSHOT_BY_PICKER test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest94, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest94, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2042,7 +2042,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest94, Function | SmallTest |
  * @tc.desc: normal function, TRANS_ID_SET_VIRTUAL_SCREEN_SCALE_MODE test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest95, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest95, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2063,7 +2063,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest95, Function | SmallTest |
  * @tc.desc: normal function, TRANS_ID_SET_VIRTUAL_SCREEN_SURFACE test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest96, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest96, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2082,7 +2082,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest96, Function | SmallTest |
  * @tc.desc: normal function, TRANS_ID_SET_SPECIFIED_SCREEN_POWER test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest97, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest97, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2104,7 +2104,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest97, Function | SmallTest |
  * @tc.desc: normal function, TRANS_ID_PROXY_FOR_FREEZE test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest98, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest98, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2128,7 +2128,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest98, Function | SmallTest |
  * @tc.desc: normal function, invalid TRANS_ID test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest99, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest99, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2146,7 +2146,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest99, Function | SmallTest |
  * @tc.desc: normal function, TRANS_ID_SET_VIRTUAL_SCREEN_BLACK_LIST test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest100, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest100, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2168,7 +2168,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest100, Function | SmallTest 
  * @tc.desc: normal function, TRANS_ID_NOTIFY_DISPLAY_CHANGE_INFO test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest101, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest101, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2189,7 +2189,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest101, Function | SmallTest 
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest102, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest102, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2208,7 +2208,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest102, Function | SmallTest 
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest103, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest103, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2227,7 +2227,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest103, Function | SmallTest 
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest104, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest104, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2246,7 +2246,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest104, Function | SmallTest 
  * @tc.desc: normal function, TRANS_ID_SCENE_BOARD_MAKE_UNIQUE_SCREEN test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest105, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest105, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2272,7 +2272,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest105, Function | SmallTest 
  * @tc.desc: normal function, TRANS_ID_SCENE_BOARD_MAKE_UNIQUE_SCREEN test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest106, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest106, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2295,7 +2295,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest106, Function | SmallTest 
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest107, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest107, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2314,7 +2314,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest107, Function | SmallTest 
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest108, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest108, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2333,7 +2333,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest108, Function | SmallTest 
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest109, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest109, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2352,7 +2352,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest109, Function | SmallTest 
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest110, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest110, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2371,7 +2371,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest110, Function | SmallTest 
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest111, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest111, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2390,7 +2390,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest111, Function | SmallTest 
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest112, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest112, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2409,7 +2409,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest112, Function | SmallTest 
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest113, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest113, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2428,7 +2428,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest113, Function | SmallTest 
  * @tc.desc: normal function, TRANS_ID_GET_ALL_PHYSICAL_DISPLAY_RESOLUTION test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest114, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest114, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2446,7 +2446,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest114, Function | SmallTest 
  * @tc.desc: normal function, TRANS_ID_GET_SCREEN_POWER
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest115, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest115, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2468,7 +2468,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest115, Function | SmallTest 
  * @tc.desc: normal function, TRANS_ID_SET_VIRTUAL_SCREEN_CANVAS_ROTATION
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest116, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest116, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2489,7 +2489,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest116, Function | SmallTest 
  * @tc.desc: normal function, TRANS_ID_SET_RESOLUTION
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest117, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest117, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2515,7 +2515,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest117, Function | SmallTest 
  * @tc.desc: normal function, TRANS_ID_GET_DENSITY_IN_CURRENT_RESOLUTION
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest118, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest118, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2535,7 +2535,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest118, Function | SmallTest 
  * @tc.desc: normal function, TRANS_ID_SCREEN_SET_COLOR_GAMUT
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest119, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest119, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2557,7 +2557,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest119, Function | SmallTest 
  * @tc.desc: normal function, TRANS_ID_SCREEN_SET_GAMUT_MAP
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest120, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest120, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2579,7 +2579,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest120, Function | SmallTest 
  * @tc.desc: normal function, TRANS_ID_SCREEN_SET_COLOR_TRANSFORM
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest121, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest121, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2599,7 +2599,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest121, Function | SmallTest 
  * @tc.desc: normal function, TRANS_ID_SCREEN_SET_PIXEL_FORMAT
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest122, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest122, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2621,7 +2621,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest122, Function | SmallTest 
  * @tc.desc: normal function, TRANS_ID_SCREEN_SET_HDR_FORMAT
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest123, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest123, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2643,7 +2643,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest123, Function | SmallTest 
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest124, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest124, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2665,7 +2665,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest124, Function | SmallTest 
  * @tc.desc: TRANS_ID_SCENE_BOARD_SET_DISPLAY_SCALE test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest125, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest125, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2690,7 +2690,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest125, Function | SmallTest 
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest126, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest126, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2708,7 +2708,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest126, Function | SmallTest 
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest127, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest127, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2732,7 +2732,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest127, Function | SmallTest 
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest128, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest128, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2750,7 +2750,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest128, Function | SmallTest 
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest129, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest129, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2774,7 +2774,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest129, Function | SmallTest 
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest130, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest130, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2798,7 +2798,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest130, Function | SmallTest 
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest131, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest131, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2819,7 +2819,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest131, Function | SmallTest 
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest132, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest132, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2841,7 +2841,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest132, Function | SmallTest 
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest133, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest133, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2862,7 +2862,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest133, Function | SmallTest 
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest134, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest134, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2879,7 +2879,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest134, Function | SmallTest 
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest135, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest135, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2899,7 +2899,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest135, Function | SmallTest 
  * @tc.desc: normal function, TRANS_ID_GET_SCREEN_POWER
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest136, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest136, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2920,7 +2920,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest136, Function | SmallTest 
  * @tc.desc: normal function, TRANS_ID_SET_VIRTUAL_SCREEN_CANVAS_ROTATION
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest137, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest137, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2940,7 +2940,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest137, Function | SmallTest 
  * @tc.desc: normal function, TRANS_ID_SET_RESOLUTION
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest138, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest138, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2965,7 +2965,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest138, Function | SmallTest 
  * @tc.desc: normal function, TRANS_ID_GET_DENSITY_IN_CURRENT_RESOLUTION
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest139, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest139, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2984,7 +2984,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest139, Function | SmallTest 
  * @tc.desc: normal function, TRANS_ID_SCREEN_SET_COLOR_GAMUT
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest140, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest140, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -3005,7 +3005,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest140, Function | SmallTest 
  * @tc.desc: normal function, TRANS_ID_SCREEN_SET_GAMUT_MAP
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest141, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest141, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -3026,7 +3026,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest141, Function | SmallTest 
  * @tc.desc: normal function, TRANS_ID_SCREEN_SET_COLOR_TRANSFORM
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest142, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest142, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -3045,7 +3045,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest142, Function | SmallTest 
  * @tc.desc: normal function, TRANS_ID_SCREEN_SET_PIXEL_FORMAT
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest143, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest143, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -3066,7 +3066,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest143, Function | SmallTest 
  * @tc.desc: normal function, TRANS_ID_SCREEN_SET_HDR_FORMAT
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest144, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest144, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -3087,7 +3087,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest144, Function | SmallTest 
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest145, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest145, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -3108,7 +3108,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest145, Function | SmallTest 
  * @tc.desc: normal function, TRANS_ID_SCENE_BOARD_GET_SUPER_FOLD_STATUS test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest146, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest146, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -3127,7 +3127,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest146, Function | SmallTest 
  * @tc.desc: normal function, TRANS_ID_SCENE_BOARD_GET_SUPER_FOLD_STATUS test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest147, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest147, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -3147,7 +3147,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest147, Function | SmallTest 
  * @tc.desc: normal function, TRANS_ID_GET_DISPLAY_CAPABILITY test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest148, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest148, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -3160,7 +3160,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest148, Function | SmallTest 
 
 /**
  * @tc.name: OnRemoteRequest149
- * @tc.desc: normal function, TRANS_ID_SET_SYSTEM_KEYBOARD_ON test
+ * @tc.desc: normal function, TRANS_ID_SET_SYSTEM_KEYBOARD_STATUS test
  * @tc.type: FUNC
  */
 HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest149, Function | SmallTest | Level2)
@@ -3168,10 +3168,10 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest149, Function | SmallTest 
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    bool isOn = true;
+    bool isTpKeyboardOn = true;
     data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
-    data.WriteBool(isOn);
-    uint32_t code = static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SYSTEM_KEYBOARD_ON);
+    data.WriteBool(isTpKeyboardOn);
+    uint32_t code = static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SYSTEM_KEYBOARD_STATUS);
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
 }

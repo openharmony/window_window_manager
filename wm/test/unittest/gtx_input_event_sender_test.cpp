@@ -46,7 +46,7 @@ namespace {
  * @tc.desc: GetTouchEvent.
  * @tc.type: FUNC
  */
-HWTEST_F(GtxInputEventSenderTest, GetTouchEvent, Function | SmallTest | Level2)
+HWTEST_F(GtxInputEventSenderTest, GetTouchEvent, TestSize.Level1)
 {
     int32_t testPointerId = 1234;
     auto pointerEvent = MMI::PointerEvent::Create();

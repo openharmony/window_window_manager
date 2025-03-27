@@ -313,4 +313,19 @@ void FoldScreenController::SetMainScreenRegion(DMRect& mainScreenRegion)
     }
     foldScreenPolicy_->SetMainScreenRegion(mainScreenRegion);
 }
+
+std::chrono::steady_clock::time_point FoldScreenController::GetStartTimePoint()
+{
+    return foldScreenPolicy_->GetStartTimePoint();
+}
+
+bool FoldScreenController::GetIsFirstFrameCommitReported()
+{
+    return foldScreenPolicy_->GetIsFirstFrameCommitReported();
+}
+
+void FoldScreenController::SetIsFirstFrameCommitReported(bool isFirstFrameCommitReported)
+{
+    foldScreenPolicy_->SetIsFirstFrameCommitReported(isFirstFrameCommitReported);
+}
 } // namespace OHOS::Rosen

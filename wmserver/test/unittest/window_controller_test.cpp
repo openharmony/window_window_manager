@@ -83,7 +83,7 @@ namespace {
  * @tc.desc: test GetSnapshot
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, GetSnapshot, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, GetSnapshot, TestSize.Level1)
 {
     int windowId = INVALID_WINDOW_ID;
     ASSERT_EQ(nullptr, windowController_->GetSnapshot(windowId));
@@ -94,7 +94,7 @@ HWTEST_F(WindowControllerTest, GetSnapshot, Function | SmallTest | Level3)
  * @tc.desc: Window controller starting window
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, StartingWindow, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, StartingWindow, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     windowController_->StartingWindow(nullptr, nullptr, 0, false);
@@ -220,7 +220,7 @@ HWTEST_F(WindowControllerTest, NotifyWindowTransition, Function | SmallTest | Le
  * @tc.desc: Window controller focus window
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, FocusWindow, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, FocusWindow, TestSize.Level1)
 {
     sptr<IRemoteObject> abilityToken = nullptr;
     windowController_->GetFocusWindowInfo(abilityToken);
@@ -248,7 +248,7 @@ HWTEST_F(WindowControllerTest, FocusWindow, Function | SmallTest | Level3)
  * @tc.desc: Window controller create window
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, CreateWindow, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, CreateWindow, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<IWindow> window;
@@ -310,7 +310,7 @@ HWTEST_F(WindowControllerTest, CreateWindow, Function | SmallTest | Level3)
  * @tc.desc: Window controller notify after add window
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, NotifyAfterAddWindow, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, NotifyAfterAddWindow, TestSize.Level1)
 {
     ASSERT_NE(nullptr, windowController_);
     sptr<WindowNode> node0 = new WindowNode();
@@ -334,7 +334,7 @@ HWTEST_F(WindowControllerTest, NotifyAfterAddWindow, Function | SmallTest | Leve
  * @tc.desc: Window controller add window node
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, AddWindowNode, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, AddWindowNode, TestSize.Level1)
 {
     sptr<WindowProperty> property = new WindowProperty();
     property->SetWindowId(0);
@@ -365,7 +365,7 @@ HWTEST_F(WindowControllerTest, AddWindowNode, Function | SmallTest | Level3)
  * @tc.desc: Window controller input calling window
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, InputCallingWindow, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, InputCallingWindow, TestSize.Level1)
 {
     windowController_->callingWindowId_ = 0;
     windowRoot_->windowNodeMap_.clear();
@@ -425,7 +425,7 @@ HWTEST_F(WindowControllerTest, InputCallingWindow, Function | SmallTest | Level3
  * @tc.desc: Window controller set default display info
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, SetDefaultDisplayInfo, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, SetDefaultDisplayInfo, TestSize.Level1)
 {
     const int32_t displayWidth = 100;
     const int32_t displayHeight = 200;
@@ -456,7 +456,7 @@ HWTEST_F(WindowControllerTest, SetDefaultDisplayInfo, Function | SmallTest | Lev
  * @tc.desc: Window controller process display compression
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, ProcessDisplayCompression, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, ProcessDisplayCompression, TestSize.Level1)
 {
     ASSERT_NE(nullptr, windowController_);
     DisplayId defaultDisplayId = 0;
@@ -480,7 +480,7 @@ HWTEST_F(WindowControllerTest, ProcessDisplayCompression, Function | SmallTest |
  * @tc.desc: Window controller stop boot animation if need
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, StopBootAnimationIfNeed, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, StopBootAnimationIfNeed, TestSize.Level1)
 {
     ASSERT_NE(nullptr, windowController_);
 
@@ -508,7 +508,7 @@ HWTEST_F(WindowControllerTest, StopBootAnimationIfNeed, Function | SmallTest | L
  * @tc.desc: Window controller get embed node id
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, GetEmbedNodeId, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, GetEmbedNodeId, TestSize.Level1)
 {
     std::vector<sptr<WindowNode>> windowNodes;
     sptr<WindowNode> node0 = nullptr;
@@ -541,7 +541,7 @@ HWTEST_F(WindowControllerTest, GetEmbedNodeId, Function | SmallTest | Level3)
  * @tc.desc: Window controller bind dialog target
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, BindDialogTarget, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, BindDialogTarget, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
 
@@ -560,7 +560,7 @@ HWTEST_F(WindowControllerTest, BindDialogTarget, Function | SmallTest | Level3)
  * @tc.desc: check app subwindow raise to top
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, RaiseToAppTop, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, RaiseToAppTop, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
 
@@ -590,7 +590,7 @@ HWTEST_F(WindowControllerTest, RaiseToAppTop, Function | SmallTest | Level3)
  * @tc.desc: Window controller focus window
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, GetFocusWindowInfo, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, GetFocusWindowInfo, TestSize.Level1)
 {
     sptr<DisplayInfo> displayInfo = new DisplayInfo();
     sptr<WindowNodeContainer> container = new WindowNodeContainer(displayInfo, 0);
@@ -607,7 +607,7 @@ HWTEST_F(WindowControllerTest, GetFocusWindowInfo, Function | SmallTest | Level3
  * @tc.desc: Window controller CheckParentWindowValid
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, CreateWindow01, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, CreateWindow01, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<IWindow> window;
@@ -646,7 +646,7 @@ HWTEST_F(WindowControllerTest, CreateWindow01, Function | SmallTest | Level3)
  * @tc.desc: Window controller CheckParentWindowValid
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, CreateWindow02, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, CreateWindow02, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<IWindow> window;
@@ -671,7 +671,7 @@ HWTEST_F(WindowControllerTest, CreateWindow02, Function | SmallTest | Level3)
  * @tc.desc: Window controller CheckParentWindowValid
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, CreateWindow03, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, CreateWindow03, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<IWindow> window;
@@ -697,7 +697,7 @@ HWTEST_F(WindowControllerTest, CreateWindow03, Function | SmallTest | Level3)
  * @tc.desc: Window controller RemoveWindowNode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, RemoveWindowNode, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, RemoveWindowNode, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<IWindow> window;
@@ -721,7 +721,7 @@ HWTEST_F(WindowControllerTest, RemoveWindowNode, Function | SmallTest | Level3)
  * @tc.desc: Window controller RemoveWindowNode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, RemoveWindowNode1, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, RemoveWindowNode1, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<IWindow> window;
@@ -745,7 +745,7 @@ HWTEST_F(WindowControllerTest, RemoveWindowNode1, Function | SmallTest | Level3)
  * @tc.desc: Window controller RemoveWindowNode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, RemoveWindowNode2, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, RemoveWindowNode2, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<IWindow> window;
@@ -769,7 +769,7 @@ HWTEST_F(WindowControllerTest, RemoveWindowNode2, Function | SmallTest | Level3)
  * @tc.desc: Window controller DestroyWindow true
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, DestroyWindow, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, DestroyWindow, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<IWindow> window;
@@ -796,7 +796,7 @@ HWTEST_F(WindowControllerTest, DestroyWindow, Function | SmallTest | Level3)
  * @tc.desc: Window controller DestroyWindow false
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, DestroyWindow1, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, DestroyWindow1, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<IWindow> window;
@@ -823,7 +823,7 @@ HWTEST_F(WindowControllerTest, DestroyWindow1, Function | SmallTest | Level3)
  * @tc.desc: Window controller RequestFocus false
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, RequestFocus, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, RequestFocus, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<IWindow> window;
@@ -857,7 +857,7 @@ HWTEST_F(WindowControllerTest, RequestFocus, Function | SmallTest | Level3)
  * @tc.desc: Window controller NotifyDisplayStateChange
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, NotifyDisplayStateChange, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, NotifyDisplayStateChange, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<IWindow> window;
@@ -899,7 +899,7 @@ HWTEST_F(WindowControllerTest, NotifyDisplayStateChange, Function | SmallTest | 
  * @tc.desc: Window controller NotifyDisplayStateChange
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, NotifyDisplayStateChange1, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, NotifyDisplayStateChange1, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<IWindow> window;
@@ -931,7 +931,7 @@ HWTEST_F(WindowControllerTest, NotifyDisplayStateChange1, Function | SmallTest |
  * @tc.desc: Window controller ProcessDisplayChange
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, ProcessDisplayChange, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, ProcessDisplayChange, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<IWindow> window;
@@ -968,7 +968,7 @@ HWTEST_F(WindowControllerTest, ProcessDisplayChange, Function | SmallTest | Leve
  * @tc.desc: Window controller ChangeMouseStyle width > height
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, ChangeMouseStyle1, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, ChangeMouseStyle1, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<IWindow> window;
@@ -1001,7 +1001,7 @@ HWTEST_F(WindowControllerTest, ChangeMouseStyle1, Function | SmallTest | Level3)
  * @tc.desc: Window controller ChangeMouseStyle width < height
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, ChangeMouseStyle2, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, ChangeMouseStyle2, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<IWindow> window;
@@ -1034,7 +1034,7 @@ HWTEST_F(WindowControllerTest, ChangeMouseStyle2, Function | SmallTest | Level3)
  * @tc.desc: Window controller ChangeMouseStyle
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, ChangeMouseStyle3, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, ChangeMouseStyle3, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<IWindow> window;
@@ -1068,7 +1068,7 @@ HWTEST_F(WindowControllerTest, ChangeMouseStyle3, Function | SmallTest | Level3)
  * @tc.desc: Window controller NotifyServerReadyToMoveOrDrag1
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, NotifyServerReadyToMoveOrDrag1, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, NotifyServerReadyToMoveOrDrag1, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<IWindow> window;
@@ -1105,7 +1105,7 @@ HWTEST_F(WindowControllerTest, NotifyServerReadyToMoveOrDrag1, Function | SmallT
  * @tc.desc: Window controller NotifyServerReadyToMoveOrDrag2
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, NotifyServerReadyToMoveOrDrag2, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, NotifyServerReadyToMoveOrDrag2, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<IWindow> window;
@@ -1149,7 +1149,7 @@ HWTEST_F(WindowControllerTest, NotifyServerReadyToMoveOrDrag2, Function | SmallT
  * @tc.desc: Window controller NotifyServerReadyToMoveOrDrag WindowType = WINDOW_TYPE_DOCK_SLICE
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, NotifyServerReadyToMoveOrDrag3, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, NotifyServerReadyToMoveOrDrag3, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<IWindow> window;
@@ -1193,7 +1193,7 @@ HWTEST_F(WindowControllerTest, NotifyServerReadyToMoveOrDrag3, Function | SmallT
  * @tc.desc: Window controller ProcessPointDown
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, ProcessPointDown1, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, ProcessPointDown1, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<IWindow> window;
@@ -1229,7 +1229,7 @@ HWTEST_F(WindowControllerTest, ProcessPointDown1, Function | SmallTest | Level3)
  * @tc.desc: Window controller ProcessPointDown
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, ProcessPointDown2, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, ProcessPointDown2, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<IWindow> window;
@@ -1262,7 +1262,7 @@ HWTEST_F(WindowControllerTest, ProcessPointDown2, Function | SmallTest | Level3)
  * @tc.desc: Window controller ProcessPointUp WindowType = WINDOW_TYPE_DOCK_SLICE
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, ProcessPointUp, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, ProcessPointUp, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<IWindow> window;
@@ -1292,7 +1292,7 @@ HWTEST_F(WindowControllerTest, ProcessPointUp, Function | SmallTest | Level3)
  * @tc.desc: Window controller ProcessPointUp2 WindowType = WINDOW_TYPE_APP_MAIN_WINDOW
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, ProcessPointUp2, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, ProcessPointUp2, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<IWindow> window;
@@ -1319,7 +1319,7 @@ HWTEST_F(WindowControllerTest, ProcessPointUp2, Function | SmallTest | Level3)
  * @tc.desc: Window controller ProcessPointUp3 WindowType = APP_WINDOW_BASE
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, ProcessPointUp3, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, ProcessPointUp3, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<IWindow> window;
@@ -1346,7 +1346,7 @@ HWTEST_F(WindowControllerTest, ProcessPointUp3, Function | SmallTest | Level3)
  * @tc.desc: Window controller InterceptInputEventToServer
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, InterceptInputEventToServer, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, InterceptInputEventToServer, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<IWindow> window;
@@ -1376,7 +1376,7 @@ HWTEST_F(WindowControllerTest, InterceptInputEventToServer, Function | SmallTest
  * @tc.desc: Window controller RecoverInputEventToClient
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, RecoverInputEventToClient, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, RecoverInputEventToClient, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<IWindow> window;
@@ -1408,7 +1408,7 @@ HWTEST_F(WindowControllerTest, RecoverInputEventToClient, Function | SmallTest |
  * @tc.desc: Window controller RecoverInputEventToClient2
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, RecoverInputEventToClient2, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, RecoverInputEventToClient2, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<IWindow> window;
@@ -1437,7 +1437,7 @@ HWTEST_F(WindowControllerTest, RecoverInputEventToClient2, Function | SmallTest 
  * @tc.desc: Window controller RecoverDefaultMouseStyle
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, RecoverDefaultMouseStyle, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, RecoverDefaultMouseStyle, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<IWindow> window;
@@ -1464,7 +1464,7 @@ HWTEST_F(WindowControllerTest, RecoverDefaultMouseStyle, Function | SmallTest | 
  * @tc.desc: Window controller DispatchKeyEvent
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, DispatchKeyEvent, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, DispatchKeyEvent, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<IWindow> window;
@@ -1493,7 +1493,7 @@ HWTEST_F(WindowControllerTest, DispatchKeyEvent, Function | SmallTest | Level3)
  * @tc.desc: Window controller DispatchKeyEvent WindowType = WINDOW_TYPE_APP_COMPONENT
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, DispatchKeyEvent2, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, DispatchKeyEvent2, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<IWindow> window;
@@ -1522,7 +1522,7 @@ HWTEST_F(WindowControllerTest, DispatchKeyEvent2, Function | SmallTest | Level3)
  * @tc.desc: Window controller NotifyWindowClientPointUp
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, NotifyWindowClientPointUp, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, NotifyWindowClientPointUp, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<IWindow> window;
@@ -1553,7 +1553,7 @@ HWTEST_F(WindowControllerTest, NotifyWindowClientPointUp, Function | SmallTest |
  * @tc.desc: Window controller MinimizeAllAppWindows
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, MinimizeAllAppWindows, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, MinimizeAllAppWindows, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<IWindow> window;
@@ -1578,7 +1578,7 @@ HWTEST_F(WindowControllerTest, MinimizeAllAppWindows, Function | SmallTest | Lev
  * @tc.desc: Window controller ToggleShownStateForAllAppWindows
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, ToggleShownStateForAllAppWindows, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, ToggleShownStateForAllAppWindows, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<IWindow> window;
@@ -1605,7 +1605,7 @@ HWTEST_F(WindowControllerTest, ToggleShownStateForAllAppWindows, Function | Smal
  * @tc.desc: Window controller window is unreliable window
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, GetUnreliableWindowInfo1, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, GetUnreliableWindowInfo1, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<WindowProperty> property = new WindowProperty();
@@ -1646,7 +1646,7 @@ HWTEST_F(WindowControllerTest, GetUnreliableWindowInfo1, Function | SmallTest | 
  * @tc.desc: Window controller windowId is equal to the parameter
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, GetUnreliableWindowInfo2, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, GetUnreliableWindowInfo2, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<WindowProperty> property = new WindowProperty();
@@ -1664,7 +1664,7 @@ HWTEST_F(WindowControllerTest, GetUnreliableWindowInfo2, Function | SmallTest | 
  * @tc.desc: Window controller window type is not correct, window is invisible
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, GetUnreliableWindowInfo3, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, GetUnreliableWindowInfo3, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<WindowProperty> property = new WindowProperty();
@@ -1690,7 +1690,7 @@ HWTEST_F(WindowControllerTest, GetUnreliableWindowInfo3, Function | SmallTest | 
  * @tc.desc: Window controller UpdateProperty property is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, UpdateProperty1, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, UpdateProperty1, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<WindowProperty> property = nullptr;
@@ -1704,7 +1704,7 @@ HWTEST_F(WindowControllerTest, UpdateProperty1, Function | SmallTest | Level3)
  * @tc.desc: Window controller UpdateProperty windowRoot_ is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, UpdateProperty2, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, UpdateProperty2, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<IWindow> window;
@@ -1728,7 +1728,7 @@ HWTEST_F(WindowControllerTest, UpdateProperty2, Function | SmallTest | Level3)
  * @tc.desc: Window controller UpdateProperty ACTION_UPDATE_RECT
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, UpdateProperty3, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, UpdateProperty3, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<IWindow> window;
@@ -1779,7 +1779,7 @@ HWTEST_F(WindowControllerTest, UpdateProperty3, Function | SmallTest | Level3)
  * @tc.desc: Window controller UpdateProperty ACTION_UPDATE_MODE
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, UpdateProperty4, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, UpdateProperty4, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<IWindow> window;
@@ -1809,7 +1809,7 @@ HWTEST_F(WindowControllerTest, UpdateProperty4, Function | SmallTest | Level3)
  * @tc.desc: Window controller UpdateProperty ACTION_UPDATE_FLAGS
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, UpdateProperty5, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, UpdateProperty5, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<IWindow> window;
@@ -1839,7 +1839,7 @@ HWTEST_F(WindowControllerTest, UpdateProperty5, Function | SmallTest | Level3)
  * @tc.desc: Window controller UpdateProperty ACTION_UPDATE_OTHER_PROPS
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, UpdateProperty6, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, UpdateProperty6, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<IWindow> window;
@@ -1869,7 +1869,7 @@ HWTEST_F(WindowControllerTest, UpdateProperty6, Function | SmallTest | Level3)
  * @tc.desc: Window controller UpdateProperty ACTION_UPDATE_FOCUSABLE
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, UpdateProperty7, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, UpdateProperty7, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<IWindow> window;
@@ -1899,7 +1899,7 @@ HWTEST_F(WindowControllerTest, UpdateProperty7, Function | SmallTest | Level3)
  * @tc.desc: Window controller UpdateProperty ACTION_UPDATE_TOUCHABLE
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, UpdateProperty8, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, UpdateProperty8, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<IWindow> window;
@@ -1929,7 +1929,7 @@ HWTEST_F(WindowControllerTest, UpdateProperty8, Function | SmallTest | Level3)
  * @tc.desc: Window controller UpdateProperty ACTION_UPDATE_CALLING_WINDOW
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, UpdateProperty9, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, UpdateProperty9, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<IWindow> window;
@@ -1959,7 +1959,7 @@ HWTEST_F(WindowControllerTest, UpdateProperty9, Function | SmallTest | Level3)
  * @tc.desc: Window controller UpdateProperty ACTION_UPDATE_ORIENTATION
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, UpdateProperty10, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, UpdateProperty10, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<IWindow> window;
@@ -1989,7 +1989,7 @@ HWTEST_F(WindowControllerTest, UpdateProperty10, Function | SmallTest | Level3)
  * @tc.desc: Window controller UpdateProperty ACTION_UPDATE_TURN_SCREEN_ON
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, UpdateProperty11, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, UpdateProperty11, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<IWindow> window;
@@ -2019,7 +2019,7 @@ HWTEST_F(WindowControllerTest, UpdateProperty11, Function | SmallTest | Level3)
  * @tc.desc: Window controller UpdateProperty ACTION_UPDATE_KEEP_SCREEN_ON
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, UpdateProperty12, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, UpdateProperty12, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<IWindow> window;
@@ -2049,7 +2049,7 @@ HWTEST_F(WindowControllerTest, UpdateProperty12, Function | SmallTest | Level3)
  * @tc.desc: Window controller UpdateProperty ACTION_UPDATE_SET_BRIGHTNESS
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, UpdateProperty13, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, UpdateProperty13, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<IWindow> window;
@@ -2079,7 +2079,7 @@ HWTEST_F(WindowControllerTest, UpdateProperty13, Function | SmallTest | Level3)
  * @tc.desc: Window controller UpdateProperty ACTION_UPDATE_MODE_SUPPORT_INFO
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, UpdateProperty14, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, UpdateProperty14, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<IWindow> window;
@@ -2109,7 +2109,7 @@ HWTEST_F(WindowControllerTest, UpdateProperty14, Function | SmallTest | Level3)
  * @tc.desc: Window controller UpdateProperty ACTION_UPDATE_TOUCH_HOT_AREA
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, UpdateProperty15, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, UpdateProperty15, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<IWindow> window;
@@ -2139,7 +2139,7 @@ HWTEST_F(WindowControllerTest, UpdateProperty15, Function | SmallTest | Level3)
  * @tc.desc: Window controller UpdateProperty ACTION_UPDATE_ANIMATION_FLAG
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, UpdateProperty16, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, UpdateProperty16, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<IWindow> window;
@@ -2169,7 +2169,7 @@ HWTEST_F(WindowControllerTest, UpdateProperty16, Function | SmallTest | Level3)
  * @tc.desc: Window controller UpdateProperty ACTION_UPDATE_TRANSFORM_PROPERTY
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, UpdateProperty17, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, UpdateProperty17, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<IWindow> window;
@@ -2199,7 +2199,7 @@ HWTEST_F(WindowControllerTest, UpdateProperty17, Function | SmallTest | Level3)
  * @tc.desc: Window controller UpdateProperty ACTION_UPDATE_ASPECT_RATIO
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, UpdateProperty19, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, UpdateProperty19, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<IWindow> window;
@@ -2229,7 +2229,7 @@ HWTEST_F(WindowControllerTest, UpdateProperty19, Function | SmallTest | Level3)
  * @tc.desc: Window controller UpdateProperty ACTION_UPDATE_MAXIMIZE_STATE ResizeRect
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, UpdateProperty20, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, UpdateProperty20, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<IWindow> window;
@@ -2283,7 +2283,7 @@ HWTEST_F(WindowControllerTest, UpdateProperty20, Function | SmallTest | Level3)
  * @tc.desc: Window controller MinimizeWindowsByLauncher
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, MinimizeWindowsByLauncher, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, MinimizeWindowsByLauncher, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<IWindow> window;
@@ -2315,7 +2315,7 @@ HWTEST_F(WindowControllerTest, MinimizeWindowsByLauncher, Function | SmallTest |
  * @tc.desc: Window controller OnScreenshot
  * @tc.type: FUNC
  */
-HWTEST_F(WindowControllerTest, OnScreenshot, Function | SmallTest | Level3)
+HWTEST_F(WindowControllerTest, OnScreenshot, TestSize.Level1)
 {
     windowRoot_->windowNodeMap_.clear();
     sptr<IWindow> window;

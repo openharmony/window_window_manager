@@ -52,7 +52,7 @@ namespace {
  * @tc.desc: test all interfaces listener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplListenerTest, InterfacesRegisterUnregister, Function | SmallTest | Level2)
+HWTEST_F(WindowImplListenerTest, InterfacesRegisterUnregister, TestSize.Level1)
 {
     sptr<IWindowLifeCycle> windowLifeCycle = new IWindowLifeCycle();
     window_->RegisterLifeCycleListener(windowLifeCycle);

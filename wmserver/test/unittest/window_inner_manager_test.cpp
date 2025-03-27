@@ -65,7 +65,7 @@ namespace {
  * @tc.desc: test WindowInnerManager Stop
  * @tc.type: FUNC
  */
-HWTEST_F(WindowInnerManagerTest, Stop, Function | SmallTest | Level2)
+HWTEST_F(WindowInnerManagerTest, Stop, TestSize.Level1)
 {
     WindowInnerManager& windowInnerManager = WindowInnerManager::GetInstance();
     windowInnerManager.state_ = InnerWMRunningState::STATE_RUNNING;
@@ -88,7 +88,7 @@ HWTEST_F(WindowInnerManagerTest, Stop, Function | SmallTest | Level2)
  * @tc.desc: test WindowInnerManager NotifyServerReadyToMoveOrDrag
  * @tc.type: FUNC
  */
-HWTEST_F(WindowInnerManagerTest, NotifyServerReadyToMoveOrDrag, Function | SmallTest | Level2)
+HWTEST_F(WindowInnerManagerTest, NotifyServerReadyToMoveOrDrag, TestSize.Level1)
 {
     WindowInnerManager& windowInnerManager = WindowInnerManager::GetInstance();
     windowInnerManager.eventHandler_ = nullptr;
@@ -112,7 +112,7 @@ HWTEST_F(WindowInnerManagerTest, NotifyServerReadyToMoveOrDrag, Function | Small
  * @tc.desc: test WindowInnerManager NotifyWindowEndUpMovingOrDragging
  * @tc.type: FUNC
  */
-HWTEST_F(WindowInnerManagerTest, NotifyWindowEndUpMovingOrDragging, Function | SmallTest | Level2)
+HWTEST_F(WindowInnerManagerTest, NotifyWindowEndUpMovingOrDragging, TestSize.Level1)
 {
     WindowInnerManager& windowInnerManager = WindowInnerManager::GetInstance();
     windowInnerManager.eventHandler_ = nullptr;
@@ -133,7 +133,7 @@ HWTEST_F(WindowInnerManagerTest, NotifyWindowEndUpMovingOrDragging, Function | S
  * @tc.desc: test WindowInnerManager NotifyWindowRemovedOrDestroyed
  * @tc.type: FUNC
  */
-HWTEST_F(WindowInnerManagerTest, NotifyWindowRemovedOrDestroyed, Function | SmallTest | Level2)
+HWTEST_F(WindowInnerManagerTest, NotifyWindowRemovedOrDestroyed, TestSize.Level1)
 {
     WindowInnerManager& windowInnerManager = WindowInnerManager::GetInstance();
     windowInnerManager.eventHandler_ = nullptr;
@@ -158,7 +158,7 @@ HWTEST_F(WindowInnerManagerTest, NotifyWindowRemovedOrDestroyed, Function | Smal
  * @tc.desc: SetWindowRoot Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowInnerManagerTest, SetWindowRoot, Function | SmallTest | Level2)
+HWTEST_F(WindowInnerManagerTest, SetWindowRoot, TestSize.Level1)
 {
     wim_->isRecentHolderEnable_ = true;
     WindowInnerManager& windowInnerManager = WindowInnerManager::GetInstance();
@@ -172,7 +172,7 @@ HWTEST_F(WindowInnerManagerTest, SetWindowRoot, Function | SmallTest | Level2)
  * @tc.desc: test WindowInnerManager ConsumePointerEvent
  * @tc.type: FUNC
  */
-HWTEST_F(WindowInnerManagerTest, ConsumePointerEvent, Function | SmallTest | Level2)
+HWTEST_F(WindowInnerManagerTest, ConsumePointerEvent, TestSize.Level1)
 {
     WindowInnerManager& windowInnerManager = WindowInnerManager::GetInstance();
     windowInnerManager.eventHandler_ = nullptr;
@@ -206,7 +206,7 @@ HWTEST_F(WindowInnerManagerTest, ConsumePointerEvent, Function | SmallTest | Lev
  * @tc.desc: test WindowInnerManager Start
  * @tc.type: FUNC
  */
-HWTEST_F(WindowInnerManagerTest, Start, Function | SmallTest | Level2)
+HWTEST_F(WindowInnerManagerTest, Start, TestSize.Level1)
 {
     wim_->state_ = InnerWMRunningState::STATE_RUNNING;
     bool enableRecentholder = false;
@@ -219,7 +219,7 @@ HWTEST_F(WindowInnerManagerTest, Start, Function | SmallTest | Level2)
  * @tc.desc: test WindowInnerManager CreateInnerWindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowInnerManagerTest, CreateInnerWindow, Function | SmallTest | Level2)
+HWTEST_F(WindowInnerManagerTest, CreateInnerWindow, TestSize.Level1)
 {
     wim_->isRecentHolderEnable_ = true;
     std::string name = "test";
@@ -236,7 +236,7 @@ HWTEST_F(WindowInnerManagerTest, CreateInnerWindow, Function | SmallTest | Level
  * @tc.desc: test WindowInnerManager DestroyInnerWindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowInnerManagerTest, DestroyInnerWindow, Function | SmallTest | Level2)
+HWTEST_F(WindowInnerManagerTest, DestroyInnerWindow, TestSize.Level1)
 {
     wim_->isRecentHolderEnable_ = true;
     DisplayId displayId = 1;
@@ -250,7 +250,7 @@ HWTEST_F(WindowInnerManagerTest, DestroyInnerWindow, Function | SmallTest | Leve
  * @tc.desc: test WindowInnerManager UpdateInnerWindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowInnerManagerTest, UpdateInnerWindow, Function | SmallTest | Level2)
+HWTEST_F(WindowInnerManagerTest, UpdateInnerWindow, TestSize.Level1)
 {
     wim_->isRecentHolderEnable_ = true;
     DisplayId displayId = 1;
@@ -266,7 +266,7 @@ HWTEST_F(WindowInnerManagerTest, UpdateInnerWindow, Function | SmallTest | Level
  * @tc.desc: test WindowInnerManager TerminateAbility
  * @tc.type: FUNC
  */
-HWTEST_F(WindowInnerManagerTest, TerminateAbility, Function | SmallTest | Level2)
+HWTEST_F(WindowInnerManagerTest, TerminateAbility, TestSize.Level1)
 {
     wim_->isRecentHolderEnable_ = true;
     sptr<WindowNode> node = new WindowNode();
@@ -280,7 +280,7 @@ HWTEST_F(WindowInnerManagerTest, TerminateAbility, Function | SmallTest | Level2
  * @tc.desc: test WindowInnerManager CloseAbility
  * @tc.type: FUNC
  */
-HWTEST_F(WindowInnerManagerTest, CloseAbility, Function | SmallTest | Level2)
+HWTEST_F(WindowInnerManagerTest, CloseAbility, TestSize.Level1)
 {
     wim_->isRecentHolderEnable_ = true;
     sptr<WindowNode> node = new WindowNode();
@@ -294,7 +294,7 @@ HWTEST_F(WindowInnerManagerTest, CloseAbility, Function | SmallTest | Level2)
  * @tc.desc: test WindowInnerManager CompleteFirstFrameDrawing
  * @tc.type: FUNC
  */
-HWTEST_F(WindowInnerManagerTest, CompleteFirstFrameDrawing, Function | SmallTest | Level2)
+HWTEST_F(WindowInnerManagerTest, CompleteFirstFrameDrawing, TestSize.Level1)
 {
     wim_->isRecentHolderEnable_ = true;
     sptr<WindowNode> node = new WindowNode();
@@ -308,7 +308,7 @@ HWTEST_F(WindowInnerManagerTest, CompleteFirstFrameDrawing, Function | SmallTest
  * @tc.desc: test WindowInnerManager UpdateMissionSnapShot
  * @tc.type: FUNC
  */
-HWTEST_F(WindowInnerManagerTest, UpdateMissionSnapShot, Function | SmallTest | Level2)
+HWTEST_F(WindowInnerManagerTest, UpdateMissionSnapShot, TestSize.Level1)
 {
     wim_->isRecentHolderEnable_ = true;
     sptr<WindowNode> node = new WindowNode();
@@ -323,7 +323,7 @@ HWTEST_F(WindowInnerManagerTest, UpdateMissionSnapShot, Function | SmallTest | L
  * @tc.desc: test WindowInnerManager GetPid
  * @tc.type: FUNC
  */
-HWTEST_F(WindowInnerManagerTest, GetPid, Function | SmallTest | Level2)
+HWTEST_F(WindowInnerManagerTest, GetPid, TestSize.Level1)
 {
     ASSERT_EQ(wim_->GetPid(), INVALID_PID);
 }
@@ -333,7 +333,7 @@ HWTEST_F(WindowInnerManagerTest, GetPid, Function | SmallTest | Level2)
  * @tc.desc: test WindowInnerManager SetInputEventConsumer
  * @tc.type: FUNC
  */
-HWTEST_F(WindowInnerManagerTest, SetInputEventConsumer, Function | SmallTest | Level2)
+HWTEST_F(WindowInnerManagerTest, SetInputEventConsumer, TestSize.Level1)
 {
     wim_->moveDragController_ = nullptr;
     wim_->SetInputEventConsumer();
@@ -348,7 +348,7 @@ HWTEST_F(WindowInnerManagerTest, SetInputEventConsumer, Function | SmallTest | L
  * @tc.desc: test WindowInnerManager StartWindowInfoReportLoop
  * @tc.type: FUNC
  */
-HWTEST_F(WindowInnerManagerTest, StartWindowInfoReportLoop, Function | SmallTest | Level2)
+HWTEST_F(WindowInnerManagerTest, StartWindowInfoReportLoop, TestSize.Level1)
 {
     wim_->isReportTaskStart_ = true;
     wim_->eventHandler_ = nullptr;

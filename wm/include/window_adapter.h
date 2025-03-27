@@ -139,6 +139,7 @@ public:
     virtual WMError NotifyWatchGestureConsumeResult(int32_t keyCode, bool isConsumed);
     virtual WMError NotifyWatchFocusActiveChange(bool isActive);
     virtual WMError MinimizeByWindowId(const std::vector<int32_t>& windowIds);
+    virtual WMError SetForegroundWindowNum(int32_t windowNum);
 
     /*
      * Window Recover

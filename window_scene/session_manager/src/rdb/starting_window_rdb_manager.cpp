@@ -95,7 +95,7 @@ StartingWindowRdbManager::StartingWindowRdbManager(const WmsRdbConfig& wmsRdbCon
     std::string uniqueConstraint = std::string("CONSTRAINT uniqueConstraint UNIQUE (" +
         DB_BUNDLE_NAME + ", " + DB_MODULE_NAME + ", " + DB_ABILITY_NAME + ", " + DB_DARK_MODE + ")");
     wmsRdbConfig_.createTableSql = std::string("CREATE TABLE IF NOT EXISTS " + wmsRdbConfig_.tableName +
-        "(" + DB_PRIMARY_KEY + "INTEGER PRIMARY KEY AUTOINCREMENT, " + DB_BUNDLE_NAME + " TEXT NOT NULL, " +
+        "(" + DB_PRIMARY_KEY + " INTEGER PRIMARY KEY AUTOINCREMENT, " + DB_BUNDLE_NAME + " TEXT NOT NULL, " +
         DB_MODULE_NAME + " TEXT NOT NULL, " + DB_ABILITY_NAME + " TEXT NOT NULL, " + DB_DARK_MODE + " BOOLEAN, " +
         DB_BACKGROUND_COLOR_EARLY_VERSION + " INTEGER, " + DB_ICON_PATH_EARLY_VERSION + " TEXT, " +
         DB_CONFIG_FILE_ENABLED + " BOOLEAN, " + DB_BACKGROUND_COLOR + " INTEGER, " + DB_ICON_PATH + " TEXT, " +

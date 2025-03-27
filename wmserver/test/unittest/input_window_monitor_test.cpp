@@ -58,7 +58,7 @@ namespace {
  * @tc.desc: Update Input Window
  * @tc.type: FUNC
  */
-HWTEST_F(InputWindowMonitorTest, UpdateInputWindow01, Function | SmallTest | Level2)
+HWTEST_F(InputWindowMonitorTest, UpdateInputWindow01, TestSize.Level1)
 {
     input_monitor_->windowRoot_ = nullptr;
     input_monitor_->UpdateInputWindow(0);
@@ -75,7 +75,7 @@ HWTEST_F(InputWindowMonitorTest, UpdateInputWindow01, Function | SmallTest | Lev
  * @tc.desc: get display direction
  * @tc.type: FUNC
  */
-HWTEST_F(InputWindowMonitorTest, GetDisplayDirectionForMmi01, Function | SmallTest | Level2)
+HWTEST_F(InputWindowMonitorTest, GetDisplayDirectionForMmi01, TestSize.Level1)
 {
     Rotation rotate = Rotation::ROTATION_0;
     ASSERT_EQ(MMI::DIRECTION0, input_monitor_->GetDisplayDirectionForMmi(rotate));
@@ -86,7 +86,7 @@ HWTEST_F(InputWindowMonitorTest, GetDisplayDirectionForMmi01, Function | SmallTe
  * @tc.desc: update displayinfo
  * @tc.type: FUNC
  */
-HWTEST_F(InputWindowMonitorTest, UpdateDisplayInfo01, Function | SmallTest | Level2)
+HWTEST_F(InputWindowMonitorTest, UpdateDisplayInfo01, TestSize.Level1)
 {
     std::vector<sptr<DisplayInfo>> displayInfos;
     std::vector<MMI::DisplayInfo> displayInfoVector;
@@ -103,7 +103,7 @@ HWTEST_F(InputWindowMonitorTest, UpdateDisplayInfo01, Function | SmallTest | Lev
  * @tc.desc: UpdateDisplayInfo
  * @tc.type: FUNC
  */
-HWTEST_F(InputWindowMonitorTest, UpdateDisplayInfo02, Function | SmallTest | Level2)
+HWTEST_F(InputWindowMonitorTest, UpdateDisplayInfo02, TestSize.Level1)
 {
     std::vector<sptr<DisplayInfo>> displayInfos;
     std::vector<MMI::DisplayInfo> displayInfoVector;
@@ -121,7 +121,7 @@ HWTEST_F(InputWindowMonitorTest, UpdateDisplayInfo02, Function | SmallTest | Lev
  * @tc.desc: TransformWindowRects
  * @tc.type: FUNC
  */
-HWTEST_F(InputWindowMonitorTest, TransformWindowRects, Function | SmallTest | Level2)
+HWTEST_F(InputWindowMonitorTest, TransformWindowRects, TestSize.Level1)
 {
     sptr<WindowNode> windowNode = new WindowNode();
     Rect areaRect;
@@ -138,7 +138,7 @@ HWTEST_F(InputWindowMonitorTest, TransformWindowRects, Function | SmallTest | Le
  * @tc.desc: get display direction
  * @tc.type: FUNC
  */
-HWTEST_F(InputWindowMonitorTest, GetDisplayDirectionForMmi02, Function | SmallTest | Level2)
+HWTEST_F(InputWindowMonitorTest, GetDisplayDirectionForMmi02, TestSize.Level1)
 {
     MMI::Direction direction = MMI::DIRECTION0;
     Rotation rotate = Rotation::ROTATION_90;

@@ -97,7 +97,7 @@ namespace {
  * @tc.desc: set window corner radius with different parameter
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSystemEffectTest, SetWindowEffectAndCornerRadius01, Function | SmallTest | Level2)
+HWTEST_F(WindowSystemEffectTest, SetWindowEffectAndCornerRadius01, TestSize.Level1)
 {
     ASSERT_EQ(WMError::WM_OK, WindowSystemEffect::SetWindowEffect(node_));
     // fullscreen

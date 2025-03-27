@@ -50,7 +50,7 @@ const float SCREEN_HEIGHT = 2232;
 constexpr uint32_t SECONDARY_ROTATION_90 = 1;
 constexpr uint32_t SECONDARY_ROTATION_270 = 3;
 constexpr uint32_t SECONDARY_ROTATION_MOD = 4;
-ScreenCache g_uidVersionMap(MAP_SIZE, NO_EXIST_UID_VERSION);
+ScreenCache<int32_t, int32_t> g_uidVersionMap(MAP_SIZE, NO_EXIST_UID_VERSION);
 }
 
 ScreenSession::ScreenSession(const ScreenSessionConfig& config, ScreenSessionReason reason)
@@ -1941,6 +1941,19 @@ void ScreenSession::Resize(uint32_t width, uint32_t height, bool isFreshBoundsSy
         }
         displayNode_->SetFrame(0, 0, static_cast<float>(width), static_cast<float>(height));
         displayNode_->SetBounds(0, 0, static_cast<float>(width), static_cast<float>(height));
+    }
+    RSTransaction::FlushImplicitTransaction();
+}
+
+void ScreenSession::SetFrameGravity(Gravity gravity)
+{
+    {
+        std::unique_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
+        if (displayNode_ == nullptr) {
+            TLOGE(WmsLogTag::DMS, "displayNode_ is null, setFrameGravity failed");
+            return;
+        }
+        displayNode_->SetFrameGravity(gravity);
     }
     RSTransaction::FlushImplicitTransaction();
 }

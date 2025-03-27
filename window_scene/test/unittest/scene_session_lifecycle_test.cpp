@@ -905,6 +905,11 @@ HWTEST_F(SceneSessionLifecycleTest, ReconnectInner, Function | SmallTest | Level
     property->windowState_ = WindowState::STATE_DESTROYED;
     res = sceneSession->ReconnectInner(property);
     ASSERT_EQ(res, WSError::WS_ERROR_INVALID_PARAM);
+
+    property->windowState_ = WindowState::STATE_SHOWN;
+    sceneSession->pcFoldScreenController_ = nullptr;
+    res = sceneSession->ReconnectInner(property);
+    ASSERT_EQ(res, WSError::WS_OK);
 }
 
 /**

@@ -54,7 +54,7 @@ namespace {
  * @tc.desc: SetCurvedScreenBoundary size < 4
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayCutoutControllerTest, SetCurvedScreenBoundary, Function | SmallTest | Level1)
+HWTEST_F(DisplayCutoutControllerTest, SetCurvedScreenBoundary, TestSize.Level1)
 {
     sptr<DisplayCutoutController> controller = new DisplayCutoutController();
     std::vector<int> curvedScreenBoundary;
@@ -68,7 +68,7 @@ HWTEST_F(DisplayCutoutControllerTest, SetCurvedScreenBoundary, Function | SmallT
  * @tc.desc: SetCutoutSvgPath
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayCutoutControllerTest, SetCutoutSvgPath, Function | SmallTest | Level1)
+HWTEST_F(DisplayCutoutControllerTest, SetCutoutSvgPath, TestSize.Level1)
 {
     sptr<DisplayCutoutController> controller = new DisplayCutoutController();
     DisplayId displayId = 1;
@@ -84,7 +84,7 @@ HWTEST_F(DisplayCutoutControllerTest, SetCutoutSvgPath, Function | SmallTest | L
  * @tc.desc: GetCutoutInfo
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayCutoutControllerTest, GetCutoutInfo, Function | SmallTest | Level1)
+HWTEST_F(DisplayCutoutControllerTest, GetCutoutInfo, TestSize.Level1)
 {
     sptr<DisplayCutoutController> controller = new DisplayCutoutController();
     DisplayId displayId = DisplayManagerServiceInner::GetInstance().GetDefaultDisplayId();
@@ -100,7 +100,7 @@ HWTEST_F(DisplayCutoutControllerTest, GetCutoutInfo, Function | SmallTest | Leve
  * @tc.desc: CalcBuiltInDisplayWaterfallRects
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayCutoutControllerTest, CalcBuiltInDisplayWaterfallRects, Function | SmallTest | Level1)
+HWTEST_F(DisplayCutoutControllerTest, CalcBuiltInDisplayWaterfallRects, TestSize.Level1)
 {
     sptr<DisplayCutoutController> controller = new DisplayCutoutController();
     controller->SetIsWaterfallDisplay(true);
@@ -122,7 +122,7 @@ HWTEST_F(DisplayCutoutControllerTest, CalcBuiltInDisplayWaterfallRects, Function
  * @tc.desc: CalcBuiltInDisplayWaterfallRectsByRotation
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayCutoutControllerTest, CalcBuiltInDisplayWaterfallRectsByRotation, Function | SmallTest | Level1)
+HWTEST_F(DisplayCutoutControllerTest, CalcBuiltInDisplayWaterfallRectsByRotation, TestSize.Level1)
 {
     sptr<DisplayCutoutController> controller = new DisplayCutoutController();
     uint32_t displayHeight = 300;
@@ -146,7 +146,7 @@ HWTEST_F(DisplayCutoutControllerTest, CalcBuiltInDisplayWaterfallRectsByRotation
  * @tc.desc: CheckBoundingRectsBoundary
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayCutoutControllerTest, CheckBoundingRectsBoundary01, Function | SmallTest | Level1)
+HWTEST_F(DisplayCutoutControllerTest, CheckBoundingRectsBoundary01, TestSize.Level1)
 {
     sptr<DisplayCutoutController> controller = new DisplayCutoutController();
     DisplayId displayId = DisplayManagerServiceInner::GetInstance().GetDefaultDisplayId();
@@ -160,7 +160,7 @@ HWTEST_F(DisplayCutoutControllerTest, CheckBoundingRectsBoundary01, Function | S
  * @tc.desc: CheckBoundingRectsBoundary
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayCutoutControllerTest, CheckBoundingRectsBoundary02, Function | SmallTest | Level1)
+HWTEST_F(DisplayCutoutControllerTest, CheckBoundingRectsBoundary02, TestSize.Level1)
 {
     sptr<DisplayCutoutController> controller = new DisplayCutoutController();
     DisplayId displayId = DisplayManagerServiceInner::GetInstance().GetDefaultDisplayId();
@@ -178,7 +178,7 @@ HWTEST_F(DisplayCutoutControllerTest, CheckBoundingRectsBoundary02, Function | S
  * @tc.desc: CheckBoundingRectsBoundary
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayCutoutControllerTest, CheckBoundingRectsBoundary03, Function | SmallTest | Level1)
+HWTEST_F(DisplayCutoutControllerTest, CheckBoundingRectsBoundary03, TestSize.Level1)
 {
     sptr<DisplayCutoutController> controller = new DisplayCutoutController();
     DisplayId displayId = 0;
@@ -194,7 +194,7 @@ HWTEST_F(DisplayCutoutControllerTest, CheckBoundingRectsBoundary03, Function | S
  * @tc.desc: CheckBoundingRectsBoundary
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayCutoutControllerTest, CheckBoundingRectsBoundary04, Function | SmallTest | Level1)
+HWTEST_F(DisplayCutoutControllerTest, CheckBoundingRectsBoundary04, TestSize.Level1)
 {
     sptr<DisplayCutoutController> controller = new DisplayCutoutController();
     DisplayId displayId = DisplayManagerServiceInner::GetInstance().GetDefaultDisplayId();
@@ -212,7 +212,7 @@ HWTEST_F(DisplayCutoutControllerTest, CheckBoundingRectsBoundary04, Function | S
  * @tc.desc: CalcCutoutBoundingRect success
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayCutoutControllerTest, CalcCutoutBoundingRect, Function | SmallTest | Level1)
+HWTEST_F(DisplayCutoutControllerTest, CalcCutoutBoundingRect, TestSize.Level1)
 {
     sptr<DisplayCutoutController> controller = new DisplayCutoutController();
     std::string svgPath = "M 100,100 m -75,0 a 75,75 0 1,0 150,0 a 75,75 0 1,0 -150,0 z";
@@ -226,7 +226,7 @@ HWTEST_F(DisplayCutoutControllerTest, CalcCutoutBoundingRect, Function | SmallTe
  * @tc.desc: TransferBoundingRectsByRotation empty
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayCutoutControllerTest, TransferBoundingRectsByRotation01, Function | SmallTest | Level1)
+HWTEST_F(DisplayCutoutControllerTest, TransferBoundingRectsByRotation01, TestSize.Level1)
 {
     sptr<DisplayCutoutController> controller = new DisplayCutoutController();
     DisplayId id = 10;
@@ -240,7 +240,7 @@ HWTEST_F(DisplayCutoutControllerTest, TransferBoundingRectsByRotation01, Functio
  * @tc.desc: TransferBoundingRectsByRotation empty
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayCutoutControllerTest, TransferBoundingRectsByRotation02, Function | SmallTest | Level1)
+HWTEST_F(DisplayCutoutControllerTest, TransferBoundingRectsByRotation02, TestSize.Level1)
 {
     sptr<DisplayCutoutController> controller = new DisplayCutoutController();
     DisplayId id = 10;
@@ -256,7 +256,7 @@ HWTEST_F(DisplayCutoutControllerTest, TransferBoundingRectsByRotation02, Functio
  * @tc.desc: TransferBoundingRectsByRotation success
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayCutoutControllerTest, TransferBoundingRectsByRotation03, Function | SmallTest | Level1)
+HWTEST_F(DisplayCutoutControllerTest, TransferBoundingRectsByRotation03, TestSize.Level1)
 {
     DisplayId id = 11;
     ScreenId sid = 12;

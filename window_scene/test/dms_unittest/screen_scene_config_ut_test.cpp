@@ -63,7 +63,7 @@ namespace {
  * @tc.desc: test function : IsNumber
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, IsNumber, Function | SmallTest | Level1)
+HWTEST_F(ScreenSceneConfigUtTest, IsNumber, TestSize.Level1)
 {
     bool result = ScreenSceneConfig::IsNumber("123");
     ASSERT_EQ(true, result);
@@ -82,7 +82,7 @@ HWTEST_F(ScreenSceneConfigUtTest, IsNumber, Function | SmallTest | Level1)
  * @tc.desc: test function : GetConfigPath
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, GetConfigPath1, Function | SmallTest | Level1)
+HWTEST_F(ScreenSceneConfigUtTest, GetConfigPath1, TestSize.Level1)
 {
     auto result = ScreenSceneConfig::GetConfigPath("");
     ASSERT_STRNE("/system/", result.c_str());
@@ -93,7 +93,7 @@ HWTEST_F(ScreenSceneConfigUtTest, GetConfigPath1, Function | SmallTest | Level1)
  * @tc.desc: test function : GetConfigPath
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, GetConfigPath2, Function | SmallTest | Level1)
+HWTEST_F(ScreenSceneConfigUtTest, GetConfigPath2, TestSize.Level1)
 {
     auto result = ScreenSceneConfig::GetConfigPath("a.xml");
     ASSERT_STREQ("/system/a.xml", result.c_str());
@@ -104,7 +104,7 @@ HWTEST_F(ScreenSceneConfigUtTest, GetConfigPath2, Function | SmallTest | Level1)
  * @tc.desc: test function : loadConfigXml
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, LoadConfigXml, Function | SmallTest | Level1)
+HWTEST_F(ScreenSceneConfigUtTest, LoadConfigXml, TestSize.Level1)
 {
     auto result = ScreenSceneConfig::LoadConfigXml();
     ASSERT_EQ(true, result);
@@ -115,7 +115,7 @@ HWTEST_F(ScreenSceneConfigUtTest, LoadConfigXml, Function | SmallTest | Level1)
  * @tc.desc: test function : IsValidNode
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, IsValidNode1, Function | SmallTest | Level1)
+HWTEST_F(ScreenSceneConfigUtTest, IsValidNode1, TestSize.Level1)
 {
     xmlNode node;
     auto result = ScreenSceneConfig::IsValidNode(node);
@@ -127,7 +127,7 @@ HWTEST_F(ScreenSceneConfigUtTest, IsValidNode1, Function | SmallTest | Level1)
  * @tc.desc: test function : IsValidNode
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, IsValidNode2, Function | SmallTest | Level1)
+HWTEST_F(ScreenSceneConfigUtTest, IsValidNode2, TestSize.Level1)
 {
     const xmlChar xmlStringText[] = { 't', 'e', 'x', 't', 0 };
     xmlNode node;
@@ -142,7 +142,7 @@ HWTEST_F(ScreenSceneConfigUtTest, IsValidNode2, Function | SmallTest | Level1)
  * @tc.desc: test function : IsValidNode
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, IsValidNode3, Function | SmallTest | Level1)
+HWTEST_F(ScreenSceneConfigUtTest, IsValidNode3, TestSize.Level1)
 {
     const xmlChar xmlStringText[] = { 't', 'e', 'x', 't', 0 };
     xmlNode node;
@@ -157,7 +157,7 @@ HWTEST_F(ScreenSceneConfigUtTest, IsValidNode3, Function | SmallTest | Level1)
  * @tc.desc: test function : ReadIntNumbersConfigInfo
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, ReadIntNumbersConfigInfo, Function | SmallTest | Level1)
+HWTEST_F(ScreenSceneConfigUtTest, ReadIntNumbersConfigInfo, TestSize.Level1)
 {
     ScreenSceneConfig::enableConfig_.clear();
 
@@ -198,7 +198,7 @@ HWTEST_F(ScreenSceneConfigUtTest, ReadIntNumbersConfigInfo, Function | SmallTest
  * @tc.desc: Test ReadIntNumbersConfigInfo method when node content is nullptr.
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, ReadIntNumbersConfigInfo02, Function | SmallTest | Level1)
+HWTEST_F(ScreenSceneConfigUtTest, ReadIntNumbersConfigInfo02, TestSize.Level1)
 {
     xmlNodePtr currNode = xmlNewNode(nullptr, BAD_CAST "testNode");
     ASSERT_NE(currNode, nullptr);
@@ -211,7 +211,7 @@ HWTEST_F(ScreenSceneConfigUtTest, ReadIntNumbersConfigInfo02, Function | SmallTe
  * @tc.desc: Test ReadIntNumbersConfigInfo method when node content is empty.
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, ReadIntNumbersConfigInfo03, Function | SmallTest | Level1)
+HWTEST_F(ScreenSceneConfigUtTest, ReadIntNumbersConfigInfo03, TestSize.Level1)
 {
     xmlNodePtr currNode = xmlNewNode(nullptr, BAD_CAST "testNode");
     ASSERT_NE(currNode, nullptr);
@@ -225,7 +225,7 @@ HWTEST_F(ScreenSceneConfigUtTest, ReadIntNumbersConfigInfo03, Function | SmallTe
  * @tc.desc: Test ReadIntNumbersConfigInfo method when node content contains non-number.
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, ReadIntNumbersConfigInfo04, Function | SmallTest | Level1)
+HWTEST_F(ScreenSceneConfigUtTest, ReadIntNumbersConfigInfo04, TestSize.Level1)
 {
     xmlNodePtr currNode = xmlNewNode(nullptr, BAD_CAST "testNode");
     ASSERT_NE(currNode, nullptr);
@@ -239,7 +239,7 @@ HWTEST_F(ScreenSceneConfigUtTest, ReadIntNumbersConfigInfo04, Function | SmallTe
  * @tc.desc: Test ReadIntNumbersConfigInfo method when node content is valid.
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, ReadIntNumbersConfigInfo05, Function | SmallTest | Level1)
+HWTEST_F(ScreenSceneConfigUtTest, ReadIntNumbersConfigInfo05, TestSize.Level1)
 {
     xmlNodePtr currNode = xmlNewNode(nullptr, BAD_CAST "testNode");
     ASSERT_NE(currNode, nullptr);
@@ -253,7 +253,7 @@ HWTEST_F(ScreenSceneConfigUtTest, ReadIntNumbersConfigInfo05, Function | SmallTe
  * @tc.desc: test function : ReadEnableConfigInfo
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, ReadEnableConfigInfo, Function | SmallTest | Level1)
+HWTEST_F(ScreenSceneConfigUtTest, ReadEnableConfigInfo, TestSize.Level1)
 {
     ScreenSceneConfig::enableConfig_.clear();
 
@@ -300,7 +300,7 @@ HWTEST_F(ScreenSceneConfigUtTest, ReadEnableConfigInfo, Function | SmallTest | L
  * @tc.desc: test function : ReadStringConfigInfo
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, ReadStringConfigInfo, Function | SmallTest | Level1)
+HWTEST_F(ScreenSceneConfigUtTest, ReadStringConfigInfo, TestSize.Level1)
 {
     ScreenSceneConfig::enableConfig_.clear();
 
@@ -359,7 +359,7 @@ HWTEST_F(ScreenSceneConfigUtTest, ReadStringConfigInfo, Function | SmallTest | L
  * @tc.desc: test function : GetEnableConfig
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, GetEnableConfig, Function | SmallTest | Level1)
+HWTEST_F(ScreenSceneConfigUtTest, GetEnableConfig, TestSize.Level1)
 {
     auto result = ScreenSceneConfig::GetEnableConfig();
     ASSERT_EQ(true, result.size() == 0);
@@ -370,7 +370,7 @@ HWTEST_F(ScreenSceneConfigUtTest, GetEnableConfig, Function | SmallTest | Level1
  * @tc.desc: test function : GetIntNumbersConfig
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, GetIntNumbersConfig, Function | SmallTest | Level1)
+HWTEST_F(ScreenSceneConfigUtTest, GetIntNumbersConfig, TestSize.Level1)
 {
     auto result = ScreenSceneConfig::GetIntNumbersConfig();
     ASSERT_NE(true, result.size() == 0);
@@ -381,7 +381,7 @@ HWTEST_F(ScreenSceneConfigUtTest, GetIntNumbersConfig, Function | SmallTest | Le
  * @tc.desc: test function : GetStringConfig
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, GetStringConfig, Function | SmallTest | Level1)
+HWTEST_F(ScreenSceneConfigUtTest, GetStringConfig, TestSize.Level1)
 {
     auto result = ScreenSceneConfig::GetStringConfig();
     ASSERT_NE(0, result.size());
@@ -392,7 +392,7 @@ HWTEST_F(ScreenSceneConfigUtTest, GetStringConfig, Function | SmallTest | Level1
  * @tc.desc: test function : GetStringListConfig
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, GetStringListConfig, Function | SmallTest | Level1)
+HWTEST_F(ScreenSceneConfigUtTest, GetStringListConfig, TestSize.Level1)
 {
     auto result = ScreenSceneConfig::GetStringListConfig();
     ASSERT_EQ(0, result.size());
@@ -403,7 +403,7 @@ HWTEST_F(ScreenSceneConfigUtTest, GetStringListConfig, Function | SmallTest | Le
  * @tc.desc: test function : GetCurvedScreenBoundaryConfig
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, GetCurvedScreenBoundaryConfig, Function | SmallTest | Level1)
+HWTEST_F(ScreenSceneConfigUtTest, GetCurvedScreenBoundaryConfig, TestSize.Level1)
 {
     auto result = ScreenSceneConfig::GetCurvedScreenBoundaryConfig();
     if ((ScreenSessionManager::GetInstance().GetCurvedCompressionArea() == 0) &&
@@ -419,7 +419,7 @@ HWTEST_F(ScreenSceneConfigUtTest, GetCurvedScreenBoundaryConfig, Function | Smal
  * @tc.desc: GetCutoutBoundaryRect func
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, GetCutoutBoundaryRect, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneConfigUtTest, GetCutoutBoundaryRect, TestSize.Level1)
 {
     uint64_t displayId = -1;
     auto result = ScreenSceneConfig::GetCutoutBoundaryRect(displayId);
@@ -431,7 +431,7 @@ HWTEST_F(ScreenSceneConfigUtTest, GetCutoutBoundaryRect, Function | SmallTest | 
  * @tc.desc: GetSubCutoutBoundaryRect func
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, GetSubCutoutBoundaryRect, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneConfigUtTest, GetSubCutoutBoundaryRect, TestSize.Level1)
 {
     auto result = ScreenSceneConfig::GetSubCutoutBoundaryRect();
     if (ScreenSessionManager::GetInstance().IsFoldable()) {
@@ -446,7 +446,7 @@ HWTEST_F(ScreenSceneConfigUtTest, GetSubCutoutBoundaryRect, Function | SmallTest
  * @tc.desc: IsWaterfallDisplay func
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, IsWaterfallDisplay, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneConfigUtTest, IsWaterfallDisplay, TestSize.Level1)
 {
     auto result = ScreenSceneConfig::IsWaterfallDisplay();
     if (result) {
@@ -459,7 +459,7 @@ HWTEST_F(ScreenSceneConfigUtTest, IsWaterfallDisplay, Function | SmallTest | Lev
  * @tc.desc: GetCurvedCompressionAreaInLandscape func
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, GetCurvedCompressionAreaInLandscape, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneConfigUtTest, GetCurvedCompressionAreaInLandscape, TestSize.Level1)
 {
     auto result = ScreenSceneConfig::GetCurvedCompressionAreaInLandscape();
     ASSERT_TRUE(result == 0);
@@ -470,7 +470,7 @@ HWTEST_F(ScreenSceneConfigUtTest, GetCurvedCompressionAreaInLandscape, Function 
  * @tc.desc: Split func
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, Split, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneConfigUtTest, Split, TestSize.Level1)
 {
     auto result = ScreenSceneConfig::Split("oo", "+9");
     ASSERT_NE(0, result.size());
@@ -481,7 +481,7 @@ HWTEST_F(ScreenSceneConfigUtTest, Split, Function | SmallTest | Level3)
  * @tc.desc: CalcCutoutBoundaryRect func
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, CalcCutoutBoundaryRect, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneConfigUtTest, CalcCutoutBoundaryRect, TestSize.Level1)
 {
     DMRect emptyRect = {0, 0, 0, 0};
     auto result = ScreenSceneConfig::CalcCutoutBoundaryRect("oo");
@@ -493,7 +493,7 @@ HWTEST_F(ScreenSceneConfigUtTest, CalcCutoutBoundaryRect, Function | SmallTest |
  * @tc.desc: Test scenario where svg parsing fails and an empty rectangle is expected.
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, CalcCutoutBoundaryRect02, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneConfigUtTest, CalcCutoutBoundaryRect02, TestSize.Level1)
 {
     std::string invalidSvgPath = "invalid_svg_path";
     DMRect result = ScreenSceneConfig::CalcCutoutBoundaryRect(invalidSvgPath);
@@ -508,7 +508,7 @@ HWTEST_F(ScreenSceneConfigUtTest, CalcCutoutBoundaryRect02, Function | SmallTest
  * @tc.desc: Test scenario where SkRect is empty and an empty rectangle is expected.
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, CalcCutoutBoundaryRect03, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneConfigUtTest, CalcCutoutBoundaryRect03, TestSize.Level1)
 {
     std::string emptySvgPath = "M0 0";
     DMRect result = ScreenSceneConfig::CalcCutoutBoundaryRect(emptySvgPath);
@@ -523,7 +523,7 @@ HWTEST_F(ScreenSceneConfigUtTest, CalcCutoutBoundaryRect03, Function | SmallTest
  * @tc.desc: Test scenario where svg is valid and a valid rectangle is expected.
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, CalcCutoutBoundaryRect04, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneConfigUtTest, CalcCutoutBoundaryRect04, TestSize.Level1)
 {
     std::string validSvgPath = "M10 10 L20 20";
     DMRect result = ScreenSceneConfig::CalcCutoutBoundaryRect(validSvgPath);
@@ -538,7 +538,7 @@ HWTEST_F(ScreenSceneConfigUtTest, CalcCutoutBoundaryRect04, Function | SmallTest
  * @tc.desc: SetCutoutSvgPath func
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, SetCutoutSvgPath, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneConfigUtTest, SetCutoutSvgPath, TestSize.Level1)
 {
     uint64_t displayId = 0;
     ScreenSceneConfig::SetCutoutSvgPath(displayId, "oo");
@@ -551,7 +551,7 @@ HWTEST_F(ScreenSceneConfigUtTest, SetCutoutSvgPath, Function | SmallTest | Level
  * @tc.desc: SetSubCutoutSvgPath func
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, SetSubCutoutSvgPath, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneConfigUtTest, SetSubCutoutSvgPath, TestSize.Level1)
 {
     ScreenSceneConfig::SetSubCutoutSvgPath("oo");
     auto result = ScreenSceneConfig::GetSubCutoutBoundaryRect();
@@ -563,7 +563,7 @@ HWTEST_F(ScreenSceneConfigUtTest, SetSubCutoutSvgPath, Function | SmallTest | Le
  * @tc.desc: SetSubCutoutSvgPath func
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, SetSubCutoutSvgPath01, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneConfigUtTest, SetSubCutoutSvgPath01, TestSize.Level1)
 {
     ScreenSceneConfig::SetSubCutoutSvgPath("M507 18 L573 18 v 66 h -66 Z");
     std::vector<DMRect> result = ScreenSceneConfig::GetSubCutoutBoundaryRect();
@@ -582,7 +582,7 @@ HWTEST_F(ScreenSceneConfigUtTest, SetSubCutoutSvgPath01, Function | SmallTest | 
  * @tc.desc: SetCurvedCompressionAreaInLandscape func
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, SetCurvedCompressionAreaInLandscape, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneConfigUtTest, SetCurvedCompressionAreaInLandscape, TestSize.Level1)
 {
     int res = 0;
     ScreenSceneConfig::SetCurvedCompressionAreaInLandscape();
@@ -594,7 +594,7 @@ HWTEST_F(ScreenSceneConfigUtTest, SetCurvedCompressionAreaInLandscape, Function 
  * @tc.desc: IsSupportRotateWithSensor
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, IsSupportRotateWithSensor01, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneConfigUtTest, IsSupportRotateWithSensor01, TestSize.Level1)
 {
     ScreenSceneConfig::enableConfig_["supportRotateWithSensor"] = true;
     bool res = ScreenSceneConfig::IsSupportRotateWithSensor();
@@ -606,7 +606,7 @@ HWTEST_F(ScreenSceneConfigUtTest, IsSupportRotateWithSensor01, Function | SmallT
  * @tc.desc: IsSupportRotateWithSensor
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, IsSupportRotateWithSensor02, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneConfigUtTest, IsSupportRotateWithSensor02, TestSize.Level1)
 {
     ScreenSceneConfig::enableConfig_.erase("supportRotateWithSensor");
     bool res = ScreenSceneConfig::IsSupportRotateWithSensor();
@@ -618,7 +618,7 @@ HWTEST_F(ScreenSceneConfigUtTest, IsSupportRotateWithSensor02, Function | SmallT
  * @tc.desc: GetExternalScreenDefaultMode
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, GetExternalScreenDefaultMode01, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneConfigUtTest, GetExternalScreenDefaultMode01, TestSize.Level1)
 {
     ScreenSceneConfig::stringConfig_["externalScreenDefaultMode"] = "mirror";
     std::string res = ScreenSceneConfig::GetExternalScreenDefaultMode();
@@ -630,7 +630,7 @@ HWTEST_F(ScreenSceneConfigUtTest, GetExternalScreenDefaultMode01, Function | Sma
  * @tc.desc: GetExternalScreenDefaultMode
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, GetExternalScreenDefaultMode02, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneConfigUtTest, GetExternalScreenDefaultMode02, TestSize.Level1)
 {
     ScreenSceneConfig::stringConfig_.erase("externalScreenDefaultMode");
     std::string res = ScreenSceneConfig::GetExternalScreenDefaultMode();
@@ -642,7 +642,7 @@ HWTEST_F(ScreenSceneConfigUtTest, GetExternalScreenDefaultMode02, Function | Sma
  * @tc.desc: GetCurvedCompressionAreaInLandscape
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, GetCurvedCompressionAreaInLandscape01, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneConfigUtTest, GetCurvedCompressionAreaInLandscape01, TestSize.Level1)
 {
     ScreenSceneConfig::isWaterfallDisplay_ = false;
     ScreenSceneConfig::isScreenCompressionEnableInLandscape_ = false;
@@ -655,7 +655,7 @@ HWTEST_F(ScreenSceneConfigUtTest, GetCurvedCompressionAreaInLandscape01, Functio
  * @tc.desc: GetCurvedCompressionAreaInLandscape
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, GetCurvedCompressionAreaInLandscape02, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneConfigUtTest, GetCurvedCompressionAreaInLandscape02, TestSize.Level1)
 {
     ScreenSceneConfig::isWaterfallDisplay_ = true;
     ScreenSceneConfig::isScreenCompressionEnableInLandscape_ = false;
@@ -668,7 +668,7 @@ HWTEST_F(ScreenSceneConfigUtTest, GetCurvedCompressionAreaInLandscape02, Functio
  * @tc.desc: Test GetCurvedCompressionAreaInLandscape method
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, GetCurvedCompressionAreaInLandscape03, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneConfigUtTest, GetCurvedCompressionAreaInLandscape03, TestSize.Level1)
 {
     ScreenSceneConfig::isWaterfallDisplay_ = true;
     ScreenSceneConfig::isScreenCompressionEnableInLandscape_ = true;
@@ -693,7 +693,7 @@ HWTEST_F(ScreenSceneConfigUtTest, ReadStringListConfigInfo01, Function | SmallTe
  * @tc.desc: ReadStringListConfigInfo
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, ReadStringListConfigInfo02, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneConfigUtTest, ReadStringListConfigInfo02, TestSize.Level1)
 {
     xmlNodePtr rootNode = xmlNewNode(nullptr, BAD_CAST "testNode");
     ASSERT_NE(rootNode, nullptr);
@@ -708,7 +708,7 @@ HWTEST_F(ScreenSceneConfigUtTest, ReadStringListConfigInfo02, Function | SmallTe
  * @tc.desc: ReadStringListConfigInfo
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, ReadStringListConfigInfo03, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneConfigUtTest, ReadStringListConfigInfo03, TestSize.Level1)
 {
     xmlNodePtr rootNode = xmlNewNode(nullptr, BAD_CAST "testNode");
     ASSERT_NE(rootNode, nullptr);
@@ -722,7 +722,7 @@ HWTEST_F(ScreenSceneConfigUtTest, ReadStringListConfigInfo03, Function | SmallTe
  * @tc.desc: ReadStringListConfigInfo
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, ReadStringListConfigInfo04, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneConfigUtTest, ReadStringListConfigInfo04, TestSize.Level1)
 {
     xmlNodePtr rootNode = xmlNewNode(nullptr, BAD_CAST "testNode");
     ASSERT_NE(rootNode, nullptr);
@@ -738,7 +738,7 @@ HWTEST_F(ScreenSceneConfigUtTest, ReadStringListConfigInfo04, Function | SmallTe
  * @tc.desc: ReadStringListConfigInfo
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, ReadStringListConfigInfo05, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneConfigUtTest, ReadStringListConfigInfo05, TestSize.Level1)
 {
     xmlNodePtr rootNode = xmlNewNode(nullptr, BAD_CAST "testNode");
     ASSERT_NE(rootNode, nullptr);
@@ -755,7 +755,7 @@ HWTEST_F(ScreenSceneConfigUtTest, ReadStringListConfigInfo05, Function | SmallTe
  * @tc.desc: ReadPhysicalDisplayConfigInfo
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, ReadPhysicalDisplayConfigInfo01, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneConfigUtTest, ReadPhysicalDisplayConfigInfo01, TestSize.Level1)
 {
     xmlNodePtr currNode = xmlNewNode(nullptr, reinterpret_cast<const xmlChar*> ("displayMode"));
     ASSERT_NE(currNode, nullptr);
@@ -768,7 +768,7 @@ HWTEST_F(ScreenSceneConfigUtTest, ReadPhysicalDisplayConfigInfo01, Function | Sm
  * @tc.desc: ReadPhysicalDisplayConfigInfo
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, ReadPhysicalDisplayConfigInfo02, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneConfigUtTest, ReadPhysicalDisplayConfigInfo02, TestSize.Level1)
 {
     xmlNodePtr currNode = xmlNewNode(nullptr, reinterpret_cast<const xmlChar*>("displayMode"));
     ASSERT_NE(currNode, nullptr);
@@ -782,7 +782,7 @@ HWTEST_F(ScreenSceneConfigUtTest, ReadPhysicalDisplayConfigInfo02, Function | Sm
  * @tc.desc: ReadPhysicalDisplayConfigInfo
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, ReadPhysicalDisplayConfigInfo03, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneConfigUtTest, ReadPhysicalDisplayConfigInfo03, TestSize.Level1)
 {
     xmlNodePtr currNode = xmlNewNode(nullptr, reinterpret_cast<const xmlChar*>("displayMode"));
     ASSERT_NE(currNode, nullptr);
@@ -796,7 +796,7 @@ HWTEST_F(ScreenSceneConfigUtTest, ReadPhysicalDisplayConfigInfo03, Function | Sm
  * @tc.desc: ReadPhysicalDisplayConfigInfo
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, ReadPhysicalDisplayConfigInfo04, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneConfigUtTest, ReadPhysicalDisplayConfigInfo04, TestSize.Level1)
 {
     xmlNodePtr currNode = xmlNewNode(nullptr, reinterpret_cast<const xmlChar*>("displayMode"));
     ASSERT_NE(currNode, nullptr);
@@ -810,7 +810,7 @@ HWTEST_F(ScreenSceneConfigUtTest, ReadPhysicalDisplayConfigInfo04, Function | Sm
  * @tc.desc: ReadPhysicalDisplayConfigInfo
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, ReadPhysicalDisplayConfigInfo05, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneConfigUtTest, ReadPhysicalDisplayConfigInfo05, TestSize.Level1)
 {
     xmlNodePtr currNode = xmlNewNode(nullptr, reinterpret_cast<const xmlChar*>("displayMode"));
     ASSERT_NE(currNode, nullptr);
@@ -824,7 +824,7 @@ HWTEST_F(ScreenSceneConfigUtTest, ReadPhysicalDisplayConfigInfo05, Function | Sm
  * @tc.desc: ReadPhysicalDisplayConfigInfo
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, ReadPhysicalDisplayConfigInfo0, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneConfigUtTest, ReadPhysicalDisplayConfigInfo0, TestSize.Level1)
 {
     xmlNodePtr currNode = xmlNewNode(nullptr, reinterpret_cast<const xmlChar*>("displayMode"));
     ASSERT_NE(currNode, nullptr);
@@ -838,7 +838,7 @@ HWTEST_F(ScreenSceneConfigUtTest, ReadPhysicalDisplayConfigInfo0, Function | Sma
  * @tc.desc: ReadPhysicalDisplayConfigInfo
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, ReadPhysicalDisplayConfigInfo07, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneConfigUtTest, ReadPhysicalDisplayConfigInfo07, TestSize.Level1)
 {
     xmlNodePtr currNode = xmlNewNode(nullptr, reinterpret_cast<const xmlChar*>("displayMode"));
     ASSERT_NE(currNode, nullptr);
@@ -852,7 +852,7 @@ HWTEST_F(ScreenSceneConfigUtTest, ReadPhysicalDisplayConfigInfo07, Function | Sm
  * @tc.desc: ReadPhysicalDisplayConfigInfo
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, ReadPhysicalDisplayConfigInfo08, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneConfigUtTest, ReadPhysicalDisplayConfigInfo08, TestSize.Level1)
 {
     xmlNodePtr currNode = xmlNewNode(nullptr, reinterpret_cast<const xmlChar*>("displayMode"));
     ASSERT_NE(currNode, nullptr);
@@ -866,7 +866,7 @@ HWTEST_F(ScreenSceneConfigUtTest, ReadPhysicalDisplayConfigInfo08, Function | Sm
  * @tc.desc: ReadScrollableParam
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, ReadScrollableParam01, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneConfigUtTest, ReadScrollableParam01, TestSize.Level1)
 {
     xmlNodePtr currNode = xmlNewNode(nullptr, reinterpret_cast<const xmlChar*>("displayMode"));
     ASSERT_NE(currNode, nullptr);
@@ -879,7 +879,7 @@ HWTEST_F(ScreenSceneConfigUtTest, ReadScrollableParam01, Function | SmallTest | 
  * @tc.desc: ReadScrollableParam
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, ReadScrollableParam02, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneConfigUtTest, ReadScrollableParam02, TestSize.Level1)
 {
     xmlNodePtr currNode = xmlNewNode(nullptr, reinterpret_cast<const xmlChar*>("displayMode"));
     ASSERT_NE(currNode, nullptr);
@@ -893,7 +893,7 @@ HWTEST_F(ScreenSceneConfigUtTest, ReadScrollableParam02, Function | SmallTest | 
  * @tc.desc: ReadScrollableParam
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, ReadScrollableParam03, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneConfigUtTest, ReadScrollableParam03, TestSize.Level1)
 {
     xmlNodePtr currNode = xmlNewNode(nullptr, reinterpret_cast<const xmlChar*>("displayMode"));
     ASSERT_NE(currNode, nullptr);
@@ -907,7 +907,7 @@ HWTEST_F(ScreenSceneConfigUtTest, ReadScrollableParam03, Function | SmallTest | 
  * @tc.desc: ReadScrollableParam
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, ReadScrollableParam04, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneConfigUtTest, ReadScrollableParam04, TestSize.Level1)
 {
     xmlNodePtr currNode = xmlNewNode(nullptr, reinterpret_cast<const xmlChar*>("displayMode"));
     ASSERT_NE(currNode, nullptr);
@@ -921,7 +921,7 @@ HWTEST_F(ScreenSceneConfigUtTest, ReadScrollableParam04, Function | SmallTest | 
  * @tc.desc: ReadScrollableParam
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, ReadScrollableParam05, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneConfigUtTest, ReadScrollableParam05, TestSize.Level1)
 {
     xmlNodePtr currNode = xmlNewNode(nullptr, reinterpret_cast<const xmlChar*>("displayMode"));
     ASSERT_NE(currNode, nullptr);
@@ -935,7 +935,7 @@ HWTEST_F(ScreenSceneConfigUtTest, ReadScrollableParam05, Function | SmallTest | 
  * @tc.desc: ReadScrollableParam
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, ReadScrollableParam06, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneConfigUtTest, ReadScrollableParam06, TestSize.Level1)
 {
     xmlNodePtr currNode = xmlNewNode(nullptr, reinterpret_cast<const xmlChar*>("displayMode"));
     ASSERT_NE(currNode, nullptr);
@@ -949,7 +949,7 @@ HWTEST_F(ScreenSceneConfigUtTest, ReadScrollableParam06, Function | SmallTest | 
  * @tc.desc: ReadScrollableParam
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, ReadScrollableParam07, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneConfigUtTest, ReadScrollableParam07, TestSize.Level1)
 {
     xmlNodePtr currNode = xmlNewNode(nullptr, reinterpret_cast<const xmlChar*>("displayMode"));
     ASSERT_NE(currNode, nullptr);
@@ -963,7 +963,7 @@ HWTEST_F(ScreenSceneConfigUtTest, ReadScrollableParam07, Function | SmallTest | 
  * @tc.desc: ReadScrollableParam
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, ReadScrollableParam08, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneConfigUtTest, ReadScrollableParam08, TestSize.Level1)
 {
     xmlNodePtr currNode = xmlNewNode(nullptr, reinterpret_cast<const xmlChar*>("displayMode"));
     ASSERT_NE(currNode, nullptr);
@@ -977,7 +977,7 @@ HWTEST_F(ScreenSceneConfigUtTest, ReadScrollableParam08, Function | SmallTest | 
  * @tc.desc: ReadScrollableParam
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, ReadScrollableParam09, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneConfigUtTest, ReadScrollableParam09, TestSize.Level1)
 {
     xmlNodePtr currNode = xmlNewNode(nullptr, reinterpret_cast<const xmlChar*>("displayMode"));
     ASSERT_NE(currNode, nullptr);
@@ -991,7 +991,7 @@ HWTEST_F(ScreenSceneConfigUtTest, ReadScrollableParam09, Function | SmallTest | 
  * @tc.desc: Test if ParseNodeConfig correctly calls ReadEnableConfigInfo when node name matches.
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, ParseNodeConfig01, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneConfigUtTest, ParseNodeConfig01, TestSize.Level1)
 {
     xmlNodePtr currNode = xmlNewNode(nullptr, reinterpret_cast<const xmlChar*>("IS_WATERFALL_DISPLAY"));
     ASSERT_NE(currNode, nullptr);
@@ -1004,7 +1004,7 @@ HWTEST_F(ScreenSceneConfigUtTest, ParseNodeConfig01, Function | SmallTest | Leve
  * @tc.desc: Test if ParseNodeConfig correctly calls ReadIntNumbersConfigInfo when node name matches.
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, ParseNodeConfig02, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneConfigUtTest, ParseNodeConfig02, TestSize.Level1)
 {
     xmlNodePtr currNode = xmlNewNode(nullptr, reinterpret_cast<const xmlChar*>("DPI"));
     ASSERT_NE(currNode, nullptr);
@@ -1017,7 +1017,7 @@ HWTEST_F(ScreenSceneConfigUtTest, ParseNodeConfig02, Function | SmallTest | Leve
  * @tc.desc: Test if ParseNodeConfig correctly calls ReadStringConfigInfo when node name matches.
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, ParseNodeConfig03, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneConfigUtTest, ParseNodeConfig03, TestSize.Level1)
 {
     xmlNodePtr currNode = xmlNewNode(nullptr, reinterpret_cast<const xmlChar*>("DEFAULT_DISPLAY_CUTOUT_PATH"));
     ASSERT_NE(currNode, nullptr);
@@ -1030,7 +1030,7 @@ HWTEST_F(ScreenSceneConfigUtTest, ParseNodeConfig03, Function | SmallTest | Leve
  * @tc.desc: Test if ParseNodeConfig correctly calls ReadStringListConfigInfo when node name matches.
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, ParseNodeConfig04, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneConfigUtTest, ParseNodeConfig04, TestSize.Level1)
 {
     xmlNodePtr currNode = xmlNewNode(nullptr, reinterpret_cast<const xmlChar*>("HALL_SWITCH_APP"));
     ASSERT_NE(currNode, nullptr);
@@ -1043,7 +1043,7 @@ HWTEST_F(ScreenSceneConfigUtTest, ParseNodeConfig04, Function | SmallTest | Leve
  * @tc.desc: Test if ParseNodeConfig correctly calls ReadPhysicalDisplayConfigInfo when node name matches.
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, ParseNodeConfig05, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneConfigUtTest, ParseNodeConfig05, TestSize.Level1)
 {
     xmlNodePtr currNode = xmlNewNode(nullptr, reinterpret_cast<const xmlChar*>("PHYSICAL_DISPLAY_RESOLUTION"));
     ASSERT_NE(currNode, nullptr);
@@ -1056,7 +1056,7 @@ HWTEST_F(ScreenSceneConfigUtTest, ParseNodeConfig05, Function | SmallTest | Leve
  * @tc.desc: Test if ParseNodeConfig correctly calls ReadScrollableParam when node name matches.
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, ParseNodeConfig06, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneConfigUtTest, ParseNodeConfig06, TestSize.Level1)
 {
     xmlNodePtr currNode = xmlNewNode(nullptr, reinterpret_cast<const xmlChar*>("SCROLLABLE_PARAM"));
     ASSERT_NE(currNode, nullptr);
@@ -1069,7 +1069,7 @@ HWTEST_F(ScreenSceneConfigUtTest, ParseNodeConfig06, Function | SmallTest | Leve
  * @tc.desc: Test if ParseNodeConfig logs a warning when node name does not match any known node.
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigUtTest, ParseNodeConfig07, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneConfigUtTest, ParseNodeConfig07, TestSize.Level1)
 {
     xmlNodePtr currNode = xmlNewNode(nullptr, reinterpret_cast<const xmlChar*>("UNKNOWN_NODE"));
     ASSERT_NE(currNode, nullptr);
