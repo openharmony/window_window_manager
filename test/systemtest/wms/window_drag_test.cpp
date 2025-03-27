@@ -114,7 +114,7 @@ namespace {
  * @tc.desc: Drag a window to another window
  * @tc.type: FUNC
  */
-HWTEST_F(WindowDragTest, DragIn, Function | MediumTest | Level3) {
+HWTEST_F(WindowDragTest, DragIn, TestSize.Level1) {
     const sptr<Window> &firstWindow = Utils::CreateTestWindow(firstWindowInfo_);
     ASSERT_NE(firstWindow, nullptr);
     activeWindows_.push_back(firstWindow);
@@ -141,7 +141,7 @@ HWTEST_F(WindowDragTest, DragIn, Function | MediumTest | Level3) {
  * @tc.desc: Window Move
  * @tc.type: FUNC
  */
-HWTEST_F(WindowDragTest, DragMove, Function | MediumTest | Level3) {
+HWTEST_F(WindowDragTest, DragMove, TestSize.Level1) {
     const sptr<Window> &firstWindow = Utils::CreateTestWindow(firstWindowInfo_);
     ASSERT_NE(firstWindow, nullptr);
     activeWindows_.push_back(firstWindow);
@@ -174,7 +174,7 @@ HWTEST_F(WindowDragTest, DragMove, Function | MediumTest | Level3) {
  * @tc.desc: Drag the drag window out of the current window
  * @tc.type: FUNC
  */
-HWTEST_F(WindowDragTest, DragOut, Function | MediumTest | Level3) {
+HWTEST_F(WindowDragTest, DragOut, TestSize.Level1) {
     const sptr<Window> &firstWindow = Utils::CreateTestWindow(firstWindowInfo_);
     ASSERT_NE(firstWindow, nullptr);
     activeWindows_.push_back(firstWindow);
@@ -222,7 +222,7 @@ HWTEST_F(WindowDragTest, DragOut, Function | MediumTest | Level3) {
  * @tc.desc: End window drag
  * @tc.type: FUNC
  */
-HWTEST_F(WindowDragTest, DragEnd, Function | MediumTest | Level3) {
+HWTEST_F(WindowDragTest, DragEnd, TestSize.Level1) {
     const sptr<Window> firstWindow = Utils::CreateTestWindow(firstWindowInfo_);
     ASSERT_NE(nullptr, firstWindow);
     firstWindow->RegisterDragListener(firstWindowDragListener_);

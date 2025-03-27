@@ -36,6 +36,7 @@ SCBSystemSession::SCBSystemSession(const SessionInfo& info, const sptr<SpecificS
         config.SurfaceNodeName = name;
         config.surfaceWindowType = SurfaceWindowType::SYSTEM_SCB_WINDOW;
         surfaceNode_ = Rosen::RSSurfaceNode::Create(config, Rosen::RSSurfaceNodeType::APP_WINDOW_NODE);
+        SetIsUseControlSession(info.isUseControlSession);
     }
     WLOGFD("Create SCBSystemSession");
 }
@@ -114,8 +115,8 @@ void SCBSystemSession::PresentFocusIfPointDown()
     if (!isFocused_ && GetFocusable()) {
         FocusChangeReason reason = FocusChangeReason::CLICK;
         NotifyRequestFocusStatusNotifyManager(true, false, reason);
-        NotifyClick();
     }
+    NotifyClick();
 }
 
 WSError SCBSystemSession::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
@@ -137,8 +138,8 @@ void SCBSystemSession::PresentFoucusIfNeed(int32_t pointerAction)
         if (!isFocused_ && GetFocusable()) {
             FocusChangeReason reason = FocusChangeReason::CLICK;
             NotifyRequestFocusStatusNotifyManager(true, false, reason);
-            NotifyClick();
         }
+        NotifyClick();
     }
 }
 
@@ -189,24 +190,42 @@ void SCBSystemSession::UpdatePointerArea(const WSRect& rect)
 
 void SCBSystemSession::SetSkipSelfWhenShowOnVirtualScreen(bool isSkip)
 {
-    TLOGD(WmsLogTag::WMS_SCB, "Set Skip Self, isSkip: %{public}d", isSkip);
-    PostTask([weakThis = wptr(this), isSkip]() {
+    TLOGD(WmsLogTag::WMS_SCB, "Set skip Self, isSkip: %{public}d", isSkip);
+    PostTask([weakThis = wptr(this), isSkip, where = __func__]() {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGE(WmsLogTag::WMS_SCB, "session is null");
-            return WSError::WS_ERROR_DESTROYED_OBJECT;
+            TLOGNE(WmsLogTag::WMS_SCB, "%{public}s session is null", where);
+            return;
         }
         std::shared_ptr<RSSurfaceNode> surfaceNode = session->GetSurfaceNode();
         if (!surfaceNode) {
-            TLOGE(WmsLogTag::WMS_SCB, "surfaceNode_ is null");
-            return WSError::WS_OK;
+            TLOGNE(WmsLogTag::WMS_SCB, "%{public}s surfaceNode_ is null", where);
+            return;
         }
-        if (session->specificCallback_ != nullptr
-            && session->specificCallback_->onSetSkipSelfWhenShowOnVirtualScreen_ != nullptr) {
+        if (session->specificCallback_ != nullptr &&
+            session->specificCallback_->onSetSkipSelfWhenShowOnVirtualScreen_ != nullptr) {
             session->specificCallback_->onSetSkipSelfWhenShowOnVirtualScreen_(surfaceNode->GetId(), isSkip);
         }
-        return WSError::WS_OK;
-    }, "SetSkipSelf");
+        return;
+    }, __func__);
+}
+
+void SCBSystemSession::SetSkipEventOnCastPlus(bool isSkip)
+{
+    TLOGD(WmsLogTag::WMS_SCB, "Set skip event on cast plus, wid: %{public}d, isSkip: %{public}d",
+        GetPersistentId(), isSkip);
+    PostTask([weakThis = wptr(this), isSkip, where = __func__]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_SCB, "%{public}s session is null", where);
+            return;
+        }
+        if (session->specificCallback_ != nullptr &&
+            session->specificCallback_->onSetSkipEventOnCastPlus_ != nullptr) {
+            session->specificCallback_->onSetSkipEventOnCastPlus_(session->GetPersistentId(), isSkip);
+        }
+        return;
+    }, __func__);
 }
 
 bool SCBSystemSession::IsVisibleForeground() const
@@ -228,5 +247,15 @@ void SCBSystemSession::SyncScenePanelGlobalPosition(bool needSync)
     TLOGI(WmsLogTag::WMS_PIPELINE, "change isNeedSyncGlobalPos from %{public}d to %{public}d",
         isNeedSyncGlobalPos_, needSync);
     isNeedSyncGlobalPos_ = needSync;
+}
+
+bool SCBSystemSession::GetIsUseControlSession() const
+{
+    return isUseControlSession_;
+}
+
+void SCBSystemSession::SetIsUseControlSession(bool isUseControlSession)
+{
+    isUseControlSession_ = isUseControlSession;
 }
 } // namespace OHOS::Rosen

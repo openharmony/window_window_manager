@@ -120,7 +120,7 @@ namespace {
  * @tc.desc: OnSessionStateChange
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerLifecycleTest2, OnSessionStateChange, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerLifecycleTest2, OnSessionStateChange, TestSize.Level1)
 {
     SessionState state = SessionState::STATE_FOREGROUND;
     ASSERT_NE(nullptr, ssm_);
@@ -137,7 +137,8 @@ HWTEST_F(SceneSessionManagerLifecycleTest2, OnSessionStateChange, Function | Sma
     sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
     ASSERT_NE(nullptr, ssm_);
     ssm_->OnSessionStateChange(1, state);
-    ssm_->focusedSessionId_ = 1;
+    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
+    focusGroup->SetFocusedSessionId(1);
     ssm_->OnSessionStateChange(1, state);
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     ASSERT_NE(nullptr, ssm_);
@@ -146,7 +147,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest2, OnSessionStateChange, Function | Sma
     ASSERT_NE(nullptr, ssm_);
     ssm_->needBlockNotifyFocusStatusUntilForeground_ = false;
     ssm_->OnSessionStateChange(1, state);
-    ssm_->focusedSessionId_ = 0;
+    focusGroup->SetFocusedSessionId(0);
     ASSERT_NE(nullptr, ssm_);
     ssm_->OnSessionStateChange(1, state);
 }
@@ -156,7 +157,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest2, OnSessionStateChange, Function | Sma
  * @tc.desc: OnSessionStateChange01
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerLifecycleTest2, OnSessionStateChange01, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerLifecycleTest2, OnSessionStateChange01, TestSize.Level1)
 {
     SessionState state = SessionState::STATE_BACKGROUND;
     ASSERT_NE(nullptr, ssm_);
@@ -185,7 +186,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest2, OnSessionStateChange01, Function | S
  * @tc.desc: OnSessionStateChange02
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerLifecycleTest2, OnSessionStateChange02, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerLifecycleTest2, OnSessionStateChange02, TestSize.Level1)
 {
     SessionState state = SessionState::STATE_FOREGROUND;
     ASSERT_NE(nullptr, ssm_);
@@ -212,7 +213,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest2, OnSessionStateChange02, Function | S
  * @tc.desc: NotifyWindowStateErrorFromMMI
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerLifecycleTest2, NotifyWindowStateErrorFromMMI, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerLifecycleTest2, NotifyWindowStateErrorFromMMI, TestSize.Level1)
 {
     int ret = 0;
     ssm_->sceneSessionMap_.clear();

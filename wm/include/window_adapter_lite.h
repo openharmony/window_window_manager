@@ -36,7 +36,7 @@ class WindowAdapterLite {
 WM_DECLARE_SINGLE_INSTANCE(WindowAdapterLite);
 public:
     using WMSConnectionChangedCallbackFunc = std::function<void(int32_t, int32_t, bool)>;
-    virtual void GetFocusWindowInfo(FocusChangeInfo& focusInfo);
+    virtual void GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId = DEFAULT_DISPLAY_ID);
     virtual WMError RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent);
     virtual WMError UnregisterWindowManagerAgent(WindowManagerAgentType type,
@@ -47,6 +47,7 @@ public:
     virtual WMError GetWindowModeType(WindowModeType& windowModeType);
     virtual WMError RaiseWindowToTop(int32_t persistentId);
     virtual WMError GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo);
+    virtual WMError GetCallingWindowInfo(CallingWindowInfo& callingWindowInfo);
     WMError RegisterWMSConnectionChangedListener(const WMSConnectionChangedCallbackFunc& callbackFunc);
     virtual WMError GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos);
     virtual WMError ClearMainSessions(const std::vector<int32_t>& persistentIds);
@@ -57,10 +58,15 @@ public:
     virtual WMError CloseTargetPiPWindow(const std::string& bundleName);
     virtual WMError GetCurrentPiPWindowInfo(std::string& bundleName);
     virtual WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos);
+    virtual WMError ListWindowInfo(const WindowInfoOption& windowInfoOption, std::vector<sptr<WindowInfo>>& infos);
 
 private:
     static inline SingletonDelegator<WindowAdapterLite> delegator;
     bool InitSSMProxy();
+
+    /*
+     * Multi User
+     */
     void OnUserSwitch();
     void ReregisterWindowManagerLiteAgent();
 

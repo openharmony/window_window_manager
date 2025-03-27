@@ -87,6 +87,39 @@ sptr<DisplayInfo> DisplayManagerProxy::GetDisplayInfoById(DisplayId displayId)
     return info;
 }
 
+sptr<DisplayInfo> DisplayManagerProxy::GetVisibleAreaDisplayInfoById(DisplayId displayId)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("remote is nullptr");
+        return nullptr;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return nullptr;
+    }
+    if (!data.WriteUint64(displayId)) {
+        WLOGFW("WriteUint64 displayId failed");
+        return nullptr;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_VISIBLE_AREA_DISPLAY_INFO_BY_ID),
+        data, reply, option) != ERR_NONE) {
+        WLOGFW("SendRequest failed");
+        return nullptr;
+    }
+
+    sptr<DisplayInfo> info = reply.ReadParcelable<DisplayInfo>();
+    if (info == nullptr) {
+        WLOGFW("SendRequest nullptr.");
+        return nullptr;
+    }
+    return info;
+}
+
 sptr<DisplayInfo> DisplayManagerProxy::GetDisplayInfoByScreen(ScreenId screenId)
 {
     sptr<IRemoteObject> remote = Remote();
@@ -261,7 +294,8 @@ DMError DisplayManagerProxy::SetOrientation(ScreenId screenId, Orientation orien
     return static_cast<DMError>(reply.ReadInt32());
 }
 
-std::shared_ptr<Media::PixelMap> DisplayManagerProxy::GetDisplaySnapshot(DisplayId displayId, DmErrorCode* errorCode)
+std::shared_ptr<Media::PixelMap> DisplayManagerProxy::GetDisplaySnapshot(DisplayId displayId,
+    DmErrorCode* errorCode, bool isUseDma)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -1756,7 +1790,8 @@ DMError DisplayManagerProxy::ResizeVirtualScreen(ScreenId screenId, uint32_t wid
     return static_cast<DMError>(reply.ReadInt32());
 }
 
-DMError DisplayManagerProxy::MakeUniqueScreen(const std::vector<ScreenId>& screenIds)
+DMError DisplayManagerProxy::MakeUniqueScreen(const std::vector<ScreenId>& screenIds,
+    std::vector<DisplayId>& displayIds)
 {
     WLOGFI("DisplayManagerProxy::MakeUniqueScreen");
     sptr<IRemoteObject> remote = Remote();
@@ -1787,6 +1822,7 @@ DMError DisplayManagerProxy::MakeUniqueScreen(const std::vector<ScreenId>& scree
         WLOGFE("MakeUniqueScreen fail: SendRequest failed");
         return DMError::DM_ERROR_NULLPTR;
     }
+    reply.ReadUInt64Vector(&displayIds);
     return static_cast<DMError>(reply.ReadInt32());
 }
 

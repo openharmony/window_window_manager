@@ -13,12 +13,25 @@
  * limitations under the License.
  */
 
+#include "js_runtime_utils.h"
 #include "picture_in_picture_option.h"
 
 namespace OHOS {
 namespace Rosen {
 PipOption::PipOption()
 {
+}
+
+void PipOption::ClearNapiRefs(napi_env env)
+{
+    if (customNodeController_) {
+        napi_delete_reference(env, customNodeController_);
+        customNodeController_ = nullptr;
+    }
+    if (typeNode_) {
+        napi_delete_reference(env, typeNode_);
+        typeNode_ = nullptr;
+    }
 }
 
 void PipOption::SetContext(void* contextPtr)
@@ -34,6 +47,11 @@ void PipOption::SetNavigationId(const std::string& navigationId)
 void PipOption::SetPipTemplate(uint32_t templateType)
 {
     templateType_ = templateType;
+}
+
+void PipOption::SetDefaultWindowSizeType(uint32_t defaultWindowSizeType)
+{
+    defaultWindowSizeType_ = defaultWindowSizeType;
 }
 
 void PipOption::SetPiPControlStatus(PiPControlType controlType, PiPControlStatus status)
@@ -91,6 +109,26 @@ napi_ref PipOption::GetTypeNodeRef() const
     return typeNode_;
 }
 
+void PipOption::RegisterPipContentListenerWithType(const std::string& type,
+    std::shared_ptr<NativeReference> updateNodeCallbackRef)
+{
+    pipContentlistenerMap_[type] = updateNodeCallbackRef;
+}
+
+void PipOption::UnRegisterPipContentListenerWithType(const std::string& type)
+{
+    pipContentlistenerMap_.erase(type);
+}
+
+std::shared_ptr<NativeReference> PipOption::GetPipContentCallbackRef(const std::string& type)
+{
+    auto iter = pipContentlistenerMap_.find(type);
+    if (iter == pipContentlistenerMap_.end()) {
+        return nullptr;
+    }
+    return iter->second;
+}
+
 void* PipOption::GetContext() const
 {
     return contextPtr_;
@@ -104,6 +142,11 @@ std::string PipOption::GetNavigationId() const
 uint32_t PipOption::GetPipTemplate()
 {
     return templateType_;
+}
+
+uint32_t PipOption::GetDefaultWindowSizeType() const
+{
+    return defaultWindowSizeType_;
 }
 
 void PipOption::GetContentSize(uint32_t& width, uint32_t& height)

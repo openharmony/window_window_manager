@@ -38,6 +38,8 @@ const std::string LIFECYCLE_EVENT_CB = "lifeCycleEvent";
 const std::string WINDOW_STAGE_EVENT_CB = "windowStageEvent";
 const std::string WINDOW_EVENT_CB = "windowEvent";
 const std::string KEYBOARD_HEIGHT_CHANGE_CB = "keyboardHeightChange";
+const std::string KEYBOARD_DID_SHOW_CB = "keyboardDidShow";
+const std::string KEYBOARD_DID_HIDE_CB = "keyboardDidHide";
 const std::string TOUCH_OUTSIDE_CB = "touchOutside";
 const std::string SCREENSHOT_EVENT_CB = "screenshot";
 const std::string DIALOG_TARGET_TOUCH_CB = "dialogTargetTouch";
@@ -53,12 +55,17 @@ const std::string WINDOW_NO_INTERACTION_DETECT_CB = "noInteractionDetected";
 const std::string WINDOW_RECT_CHANGE_CB = "windowRectChange";
 const std::string SUB_WINDOW_CLOSE_CB = "subWindowClose";
 const std::string WINDOW_STAGE_CLOSE_CB = "windowStageClose";
+const std::string WINDOW_HIGHLIGHT_CHANGE_CB = "windowHighlightChange";
+const std::string WINDOW_WILL_CLOSE_CB = "windowWillClose";
+const std::string WINDOW_ROTATION_CHANGE_CB = "rotationChange";
 
 class JsWindowListener : public IWindowChangeListener,
                          public ISystemBarChangedListener,
                          public IAvoidAreaChangedListener,
                          public IWindowLifeCycle,
                          public IOccupiedAreaChangeListener,
+                         public IKeyboardDidShowListener,
+                         public IKeyboardDidHideListener,
                          public ITouchOutsideListener,
                          public IScreenshotListener,
                          public IDialogTargetTouchListener,
@@ -72,10 +79,13 @@ class JsWindowListener : public IWindowChangeListener,
                          public IWindowStatusChangeListener,
                          public IWindowNoInteractionListener,
                          public IWindowRectChangeListener,
+                         public IWindowWillCloseListener,
                          public IMainWindowCloseListener,
-                         public ISubWindowCloseListener {
+                         public ISubWindowCloseListener,
+                         public IWindowHighlightChangeListener,
+                         public IWindowRotationChangeListener {
 public:
-    JsWindowListener(napi_env env, std::shared_ptr<NativeReference> callback, CaseType caseType)
+    JsWindowListener(napi_env env, NativeReference* callback, CaseType caseType)
         : env_(env), jsCallBack_(callback), caseType_(caseType), weakRef_(wptr<JsWindowListener> (this)) {}
     ~JsWindowListener();
     void OnSystemBarPropertyChange(DisplayId displayId, const SystemBarRegionTints& tints) override;
@@ -92,6 +102,8 @@ public:
     void AfterDestroyed() override;
     void OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
+    void OnKeyboardDidShow(const KeyboardPanelInfo& keyboardPanelInfo) override;
+    void OnKeyboardDidHide(const KeyboardPanelInfo& keyboardPanelInfo) override;
     void OnTouchOutside() const override;
     void OnScreenshot() override;
     void OnDialogTargetTouch() const override;
@@ -110,23 +122,47 @@ public:
     void SetTimeout(int64_t timeout) override;
     int64_t GetTimeout() const override;
     void OnRectChange(Rect rect, WindowSizeChangeReason reason) override;
+    void OnWindowHighlightChange(bool isHighlight) override;
+    void OnRotationChange(const RotationChangeInfo& rotationChangeInfo,
+        RotationChangeResult& rotationChangeResult) override;
+
+    /*
+     * Window Decor listener
+     */
     void OnSubWindowClose(bool& terminateCloseProcess) override;
     void OnMainWindowClose(bool& terminateCloseProcess) override;
+    void OnWindowWillClose(sptr<Window> window) override;
+    WmErrorCode CanCancelUnregister(const std::string& eventType);
+
+    /*
+     * Window Decor listener
+     */
+    std::atomic<uint32_t> asyncCloseExecuteCount_ { 0 };
 
 private:
     void OnLastStrongRef(const void *) override;
+
+    /*
+     * Window Decor listener
+     */
+    void InitAsyncCloseCallback(sptr<Window> window);
 
     Rect currRect_ = {0, 0, 0, 0};
     WindowState state_ {WindowState::STATE_INITIAL};
     void LifeCycleCallBack(LifeCycleEventType eventType);
     int64_t noInteractionTimeout_ = 0;
     napi_env env_ = nullptr;
-    std::shared_ptr<NativeReference> jsCallBack_;
+    NativeReference* jsCallBack_ = nullptr;
     CaseType caseType_ = CaseType::CASE_WINDOW;
     wptr<JsWindowListener> weakRef_ = nullptr;
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_ = nullptr;
     DEFINE_VAR_DEFAULT_FUNC_SET(bool, IsDeprecatedInterface, isDeprecatedInterface, false)
     RectChangeReason currentReason_ = RectChangeReason::UNDEFINED;
+
+    /*
+     * Window Decor listener
+     */
+    sptr<AsyncCallback> closeAsyncCallback_ = nullptr;
 };
 }  // namespace Rosen
 }  // namespace OHOS

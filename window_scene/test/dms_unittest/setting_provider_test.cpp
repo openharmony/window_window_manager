@@ -58,7 +58,7 @@ namespace {
  * @tc.desc: test function : GetIntValue
  * @tc.type: FUNC
  */
-HWTEST_F(SettingProviderTest, GetIntValue, Function | SmallTest | Level1)
+HWTEST_F(SettingProviderTest, GetIntValue, TestSize.Level1)
 {
     std::string key = "";
     int32_t value = 0;
@@ -70,7 +70,7 @@ HWTEST_F(SettingProviderTest, GetIntValue, Function | SmallTest | Level1)
  * @tc.desc: test function : GetLongValue
  * @tc.type: FUNC
  */
-HWTEST_F(SettingProviderTest, GetLongValue, Function | SmallTest | Level1)
+HWTEST_F(SettingProviderTest, GetLongValue, TestSize.Level1)
 {
     std::string key = "";
     int64_t value = 0;
@@ -82,7 +82,7 @@ HWTEST_F(SettingProviderTest, GetLongValue, Function | SmallTest | Level1)
  * @tc.desc: test function : GetBoolValue
  * @tc.type: FUNC
  */
-HWTEST_F(SettingProviderTest, GetBoolValue, Function | SmallTest | Level1)
+HWTEST_F(SettingProviderTest, GetBoolValue, TestSize.Level1)
 {
     std::string key = "";
     bool value = false;
@@ -94,7 +94,7 @@ HWTEST_F(SettingProviderTest, GetBoolValue, Function | SmallTest | Level1)
  * @tc.desc: test function : ExecRegisterCb
  * @tc.type: FUNC
  */
-HWTEST_F(SettingProviderTest, ExecRegisterCb01, Function | SmallTest | Level1)
+HWTEST_F(SettingProviderTest, ExecRegisterCb01, TestSize.Level1)
 {
     sptr<SettingObserver> observer = nullptr;
     SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID).ExecRegisterCb(observer);
@@ -106,7 +106,7 @@ HWTEST_F(SettingProviderTest, ExecRegisterCb01, Function | SmallTest | Level1)
  * @tc.desc: test function : ExecRegisterCb
  * @tc.type: FUNC
  */
-HWTEST_F(SettingProviderTest, ExecRegisterCb02, Function | SmallTest | Level1)
+HWTEST_F(SettingProviderTest, ExecRegisterCb02, TestSize.Level1)
 {
     SettingObserver::UpdateFunc updateFunc = [&](const std::string&) {};
     auto observer = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID).CreateObserver(
@@ -120,7 +120,7 @@ HWTEST_F(SettingProviderTest, ExecRegisterCb02, Function | SmallTest | Level1)
  * @tc.desc: test function : UnregisterObserver
  * @tc.type: FUNC
  */
-HWTEST_F(SettingProviderTest, UnregisterObserver, Function | SmallTest | Level1)
+HWTEST_F(SettingProviderTest, UnregisterObserver, TestSize.Level1)
 {
     SettingObserver::UpdateFunc updateFunc = [&](const std::string&) {};
     auto observer = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID).CreateObserver(
@@ -133,7 +133,7 @@ HWTEST_F(SettingProviderTest, UnregisterObserver, Function | SmallTest | Level1)
  * @tc.desc: test function : PutStringValue
  * @tc.type: FUNC
  */
-HWTEST_F(SettingProviderTest, PutStringValue01, Function | SmallTest | Level1)
+HWTEST_F(SettingProviderTest, PutStringValue01, TestSize.Level1)
 {
     SettingObserver::UpdateFunc updateFunc = [&](const std::string&) {};
     std::string key = "key";
@@ -149,7 +149,7 @@ HWTEST_F(SettingProviderTest, PutStringValue01, Function | SmallTest | Level1)
  * @tc.desc: test function : PutStringValue
  * @tc.type: FUNC
  */
-HWTEST_F(SettingProviderTest, PutStringValue02, Function | SmallTest | Level1)
+HWTEST_F(SettingProviderTest, PutStringValue02, TestSize.Level1)
 {
     SettingObserver::UpdateFunc updateFunc = [&](const std::string&) {};
     std::string key = "key";

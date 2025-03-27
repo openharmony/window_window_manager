@@ -81,45 +81,11 @@ void SessionSpecificWindowTest::TearDown()
 
 namespace {
 /**
- * @tc.name: UpdateInputMethodSessionRect
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SessionSpecificWindowTest, UpdateInputMethodSessionRect, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "UpdateInputMethodSessionRect";
-    info.bundleName_ = "UpdateInputMethodSessionRect";
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sceneSession->isActive_ = true;
-
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();;
-    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    property->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
-
-    sceneSession->SetSessionProperty(property);
-    WSRect rect({1, 1, 1, 1});
-    WSRect newWinRect;
-    WSRect newRequestRect;
-
-    sceneSession->UpdateInputMethodSessionRect(rect, newWinRect, newRequestRect);
-
-    property->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_FLOAT;
-    sceneSession->SetSessionProperty(property);
-    auto res = sceneSession->UpdateInputMethodSessionRect(rect, newWinRect, newRequestRect);
-    ASSERT_EQ(res, true);
-}
-
-
-/**
  * @tc.name: BindDialogSessionTarget
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionSpecificWindowTest, BindDialogSessionTarget, Function | SmallTest | Level2)
+HWTEST_F(SessionSpecificWindowTest, BindDialogSessionTarget, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "BindDialogSessionTarget";
@@ -150,7 +116,7 @@ HWTEST_F(SessionSpecificWindowTest, BindDialogSessionTarget, Function | SmallTes
  * @tc.desc: AddSubSession Test
  * @tc.type: FUNC
  */
-HWTEST_F(SessionSpecificWindowTest, AddSubSession, Function | SmallTest | Level2)
+HWTEST_F(SessionSpecificWindowTest, AddSubSession, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "NotifySessionException";
@@ -174,7 +140,7 @@ HWTEST_F(SessionSpecificWindowTest, AddSubSession, Function | SmallTest | Level2
  * @tc.desc: RemoveSubSession Test
  * @tc.type: FUNC
  */
-HWTEST_F(SessionSpecificWindowTest, RemoveSubSession, Function | SmallTest | Level2)
+HWTEST_F(SessionSpecificWindowTest, RemoveSubSession, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "NotifySessionException";
@@ -197,7 +163,7 @@ HWTEST_F(SessionSpecificWindowTest, RemoveSubSession, Function | SmallTest | Lev
  * @tc.desc: ClearSpecificSessionCbMap
  * @tc.type: FUNC
  */
-HWTEST_F(SessionSpecificWindowTest, ClearSpecificSessionCbMap, Function | SmallTest | Level2)
+HWTEST_F(SessionSpecificWindowTest, ClearSpecificSessionCbMap, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "ClearSpecificSessionCbMap";
@@ -217,7 +183,7 @@ HWTEST_F(SessionSpecificWindowTest, ClearSpecificSessionCbMap, Function | SmallT
  * @tc.desc: ClearSpecificSessionCbMap
  * @tc.type: FUNC
  */
-HWTEST_F(SessionSpecificWindowTest, ClearSpecificSessionCbMap01, Function | SmallTest | Level2)
+HWTEST_F(SessionSpecificWindowTest, ClearSpecificSessionCbMap01, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "ClearSpecificSessionCbMap01";
@@ -237,7 +203,7 @@ HWTEST_F(SessionSpecificWindowTest, ClearSpecificSessionCbMap01, Function | Smal
  * @tc.desc: ClearSpecificSessionCbMap
  * @tc.type: FUNC
  */
-HWTEST_F(SessionSpecificWindowTest, SpecificCallback01, Function | SmallTest | Level2)
+HWTEST_F(SessionSpecificWindowTest, SpecificCallback01, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "ClearSpecificSessionCbMap01";
@@ -266,7 +232,7 @@ HWTEST_F(SessionSpecificWindowTest, SpecificCallback01, Function | SmallTest | L
  * @tc.desc: ClearSpecificSessionCbMap
  * @tc.type: FUNC
  */
-HWTEST_F(SessionSpecificWindowTest, SpecificCallback02, Function | SmallTest | Level2)
+HWTEST_F(SessionSpecificWindowTest, SpecificCallback02, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "ClearSpecificSessionCbMap01";
@@ -295,7 +261,7 @@ HWTEST_F(SessionSpecificWindowTest, SpecificCallback02, Function | SmallTest | L
  * @tc.desc: GetKeyboardAvoidArea01
  * @tc.type: FUNC
  */
-HWTEST_F(SessionSpecificWindowTest, GetKeyboardAvoidArea01, Function | SmallTest | Level2)
+HWTEST_F(SessionSpecificWindowTest, GetKeyboardAvoidArea01, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "GetKeyboardAvoidArea";
@@ -315,7 +281,7 @@ HWTEST_F(SessionSpecificWindowTest, GetKeyboardAvoidArea01, Function | SmallTest
  * @tc.desc: IsSystemSpecificSession
  * @tc.type: FUNC
  */
-HWTEST_F(SessionSpecificWindowTest, IsSystemSpecificSession, Function | SmallTest | Level2)
+HWTEST_F(SessionSpecificWindowTest, IsSystemSpecificSession, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "IsSystemSpecificSession";
@@ -332,7 +298,7 @@ HWTEST_F(SessionSpecificWindowTest, IsSystemSpecificSession, Function | SmallTes
  * @tc.desc: test SetIsSystemKeyboard and IsSystemKeyboard func
  * @tc.type: FUNC
  */
-HWTEST_F(SessionSpecificWindowTest, SetAndIsSystemKeyboard, Function | SmallTest | Level2)
+HWTEST_F(SessionSpecificWindowTest, SetAndIsSystemKeyboard, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "SetAndIsSystemKeyboard";
@@ -349,7 +315,7 @@ HWTEST_F(SessionSpecificWindowTest, SetAndIsSystemKeyboard, Function | SmallTest
  * @tc.desc: check func CheckDialogOnForeground
  * @tc.type: FUNC
  */
-HWTEST_F(SessionSpecificWindowTest, CheckDialogOnForeground, Function | SmallTest | Level2)
+HWTEST_F(SessionSpecificWindowTest, CheckDialogOnForeground, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     session_->dialogVec_.clear();
@@ -370,7 +336,7 @@ HWTEST_F(SessionSpecificWindowTest, CheckDialogOnForeground, Function | SmallTes
  * @tc.desc: check func IsTopDialog
  * @tc.type: FUNC
  */
-HWTEST_F(SessionSpecificWindowTest, IsTopDialog, Function | SmallTest | Level2)
+HWTEST_F(SessionSpecificWindowTest, IsTopDialog, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     session_->dialogVec_.clear();
@@ -408,7 +374,7 @@ HWTEST_F(SessionSpecificWindowTest, IsTopDialog, Function | SmallTest | Level2)
  * @tc.desc: IsTopDialog Test
  * @tc.type: FUNC
  */
-HWTEST_F(SessionSpecificWindowTest, IsTopDialog02, Function | SmallTest | Level2)
+HWTEST_F(SessionSpecificWindowTest, IsTopDialog02, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     session_->SetParentSession(nullptr);
@@ -430,7 +396,7 @@ HWTEST_F(SessionSpecificWindowTest, IsTopDialog02, Function | SmallTest | Level2
  * @tc.desc: IsTopDialog Test
  * @tc.type: FUNC
  */
-HWTEST_F(SessionSpecificWindowTest, IsTopDialog03, Function | SmallTest | Level2)
+HWTEST_F(SessionSpecificWindowTest, IsTopDialog03, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     session_->dialogVec_.clear();
@@ -454,7 +420,7 @@ HWTEST_F(SessionSpecificWindowTest, IsTopDialog03, Function | SmallTest | Level2
  * @tc.desc: BindDialogToParentSession Test
  * @tc.type: FUNC
  */
-HWTEST_F(SessionSpecificWindowTest, BindDialogToParentSession, Function | SmallTest | Level2)
+HWTEST_F(SessionSpecificWindowTest, BindDialogToParentSession, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     SessionInfo info;
@@ -485,7 +451,7 @@ HWTEST_F(SessionSpecificWindowTest, BindDialogToParentSession, Function | SmallT
  * @tc.desc: HandlePointDownDialog Test
  * @tc.type: FUNC
  */
-HWTEST_F(SessionSpecificWindowTest, HandlePointDownDialog, Function | SmallTest | Level2)
+HWTEST_F(SessionSpecificWindowTest, HandlePointDownDialog, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     SessionInfo info;
@@ -513,7 +479,7 @@ HWTEST_F(SessionSpecificWindowTest, HandlePointDownDialog, Function | SmallTest 
  * @tc.desc: RemoveDialogToParentSession Test
  * @tc.type: FUNC
  */
-HWTEST_F(SessionSpecificWindowTest, RemoveDialogToParentSession, Function | SmallTest | Level2)
+HWTEST_F(SessionSpecificWindowTest, RemoveDialogToParentSession, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     SessionInfo info;
@@ -544,7 +510,7 @@ HWTEST_F(SessionSpecificWindowTest, RemoveDialogToParentSession, Function | Smal
  * @tc.desc: IsSystemSession
  * @tc.type: FUNC
  */
-HWTEST_F(SessionSpecificWindowTest, IsSystemSession, Function | SmallTest | Level2)
+HWTEST_F(SessionSpecificWindowTest, IsSystemSession, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     bool res = session_->IsSystemSession();
@@ -556,7 +522,7 @@ HWTEST_F(SessionSpecificWindowTest, IsSystemSession, Function | SmallTest | Leve
  * @tc.desc: HandleDialogBackground Test
  * @tc.type: FUNC
  */
-HWTEST_F(SessionSpecificWindowTest, HandleDialogBackground, Function | SmallTest | Level2)
+HWTEST_F(SessionSpecificWindowTest, HandleDialogBackground, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     session_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
@@ -590,7 +556,7 @@ HWTEST_F(SessionSpecificWindowTest, HandleDialogBackground, Function | SmallTest
  * @tc.desc: HandleDialogForeground Test
  * @tc.type: FUNC
  */
-HWTEST_F(SessionSpecificWindowTest, HandleDialogForeground, Function | SmallTest | Level2)
+HWTEST_F(SessionSpecificWindowTest, HandleDialogForeground, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     session_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
@@ -624,7 +590,7 @@ HWTEST_F(SessionSpecificWindowTest, HandleDialogForeground, Function | SmallTest
  * @tc.desc: parentSession and property is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(SessionSpecificWindowTest, HandleSubWindowClick01, Function | SmallTest | Level2)
+HWTEST_F(SessionSpecificWindowTest, HandleSubWindowClick01, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     auto result = session_->HandleSubWindowClick(MMI::PointerEvent::POINTER_ACTION_DOWN);
@@ -636,7 +602,7 @@ HWTEST_F(SessionSpecificWindowTest, HandleSubWindowClick01, Function | SmallTest
  * @tc.desc: parentSession->dialogVec_ is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(SessionSpecificWindowTest, HandleSubWindowClick03, Function | SmallTest | Level2)
+HWTEST_F(SessionSpecificWindowTest, HandleSubWindowClick03, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     SessionInfo info;
@@ -650,6 +616,26 @@ HWTEST_F(SessionSpecificWindowTest, HandleSubWindowClick03, Function | SmallTest
     EXPECT_EQ(result, WSError::WS_OK);
 
     result = session_->HandleSubWindowClick(MMI::PointerEvent::POINTER_ACTION_MOVE);
+    EXPECT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: HandleSubWindowClick03
+ * @tc.desc: isExecuteDelayRaise is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionSpecificWindowTest, HandleSubWindowClick04, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "testSession1";
+    info.moduleName_ = "testSession2";
+    info.bundleName_ = "testSession3";
+    sptr<Session> dialogSession = sptr<Session>::MakeSptr(info);
+    session_->SetParentSession(dialogSession);
+
+    bool isExecuteDelayRaise = false;
+    auto result = session_->HandleSubWindowClick(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN, isExecuteDelayRaise);
     EXPECT_EQ(result, WSError::WS_OK);
 }
 }

@@ -119,16 +119,16 @@ WSError SceneSessionManagerLite::PendingSessionToBackgroundForDelegator(const sp
     return SceneSessionManager::GetInstance().PendingSessionToBackgroundForDelegator(token, shouldBackToCaller);
 }
 
-WSError SceneSessionManagerLite::GetFocusSessionToken(sptr<IRemoteObject>& token)
+WSError SceneSessionManagerLite::GetFocusSessionToken(sptr<IRemoteObject>& token, DisplayId displayId)
 {
     WLOGFD("in");
-    return SceneSessionManager::GetInstance().GetFocusSessionToken(token);
+    return SceneSessionManager::GetInstance().GetFocusSessionToken(token, displayId);
 }
 
-WSError SceneSessionManagerLite::GetFocusSessionElement(AppExecFwk::ElementName& element)
+WSError SceneSessionManagerLite::GetFocusSessionElement(AppExecFwk::ElementName& element, DisplayId displayId)
 {
     WLOGFD("in");
-    return SceneSessionManager::GetInstance().GetFocusSessionElement(element);
+    return SceneSessionManager::GetInstance().GetFocusSessionElement(element, displayId);
 }
 
 WSError SceneSessionManagerLite::ClearSession(int32_t persistentId)
@@ -168,9 +168,9 @@ WSError SceneSessionManagerLite::MoveSessionsToBackground(const std::vector<int3
     return SceneSessionManager::GetInstance().MoveSessionsToBackground(sessionIds, result);
 }
 
-void SceneSessionManagerLite::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
+void SceneSessionManagerLite::GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId)
 {
-    return SceneSessionManager::GetInstance().GetFocusWindowInfo(focusInfo);
+    return SceneSessionManager::GetInstance().GetFocusWindowInfo(focusInfo, displayId);
 }
 
 WMError SceneSessionManagerLite::RegisterWindowManagerAgent(WindowManagerAgentType type,
@@ -215,6 +215,11 @@ WMError SceneSessionManagerLite::GetWindowModeType(WindowModeType& windowModeTyp
 WMError SceneSessionManagerLite::GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo)
 {
     return SceneSessionManager::GetInstance().GetMainWindowInfos(topNum, topNInfo);
+}
+
+WMError SceneSessionManagerLite::GetCallingWindowInfo(CallingWindowInfo& callingWindowInfo)
+{
+    return SceneSessionManager::GetInstance().GetCallingWindowInfo(callingWindowInfo);
 }
 
 WMError SceneSessionManagerLite::GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos)
@@ -288,5 +293,40 @@ WSError SceneSessionManagerLite::NotifyAppUseControlList(
 WMError SceneSessionManagerLite::MinimizeMainSession(const std::string& bundleName, int32_t appIndex, int32_t userId)
 {
     return SceneSessionManager::GetInstance().MinimizeMainSession(bundleName, appIndex, userId);
+}
+
+WMError SceneSessionManagerLite::LockSessionByAbilityInfo(const AbilityInfoBase& abilityInfo, bool isLock)
+{
+    return SceneSessionManager::GetInstance().LockSessionByAbilityInfo(abilityInfo, isLock);
+}
+
+WMError SceneSessionManagerLite::HasFloatingWindowForeground(const sptr<IRemoteObject>& abilityToken,
+    bool& hasOrNot)
+{
+    return SceneSessionManager::GetInstance().HasFloatingWindowForeground(abilityToken,
+        hasOrNot);
+}
+
+WMError SceneSessionManagerLite::RegisterSessionLifecycleListenerByIds(const sptr<ISessionLifecycleListener>& listener,
+    const std::vector<int32_t>& persistentIdList)
+{
+    return SceneSessionManager::GetInstance().RegisterSessionLifecycleListener(listener, persistentIdList);
+}
+
+WMError SceneSessionManagerLite::RegisterSessionLifecycleListenerByBundles(
+    const sptr<ISessionLifecycleListener>& listener, const std::vector<std::string>& bundleNameList)
+{
+    return SceneSessionManager::GetInstance().RegisterSessionLifecycleListener(listener, bundleNameList);
+}
+
+WMError SceneSessionManagerLite::UnregisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener)
+{
+    return SceneSessionManager::GetInstance().UnregisterSessionLifecycleListener(listener);
+}
+
+WMError SceneSessionManagerLite::ListWindowInfo(const WindowInfoOption& windowInfoOption,
+    std::vector<sptr<WindowInfo>>& infos)
+{
+    return SceneSessionManager::GetInstance().ListWindowInfo(windowInfoOption, infos);
 }
 } // namespace OHOS::Rosen

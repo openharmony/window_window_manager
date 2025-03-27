@@ -24,6 +24,8 @@
 #include "session/host/include/session.h"
 
 namespace OHOS::Rosen {
+    bool IsExtensionSessionInvalid(int32_t persistentId);
+
 class WindowEventChannelListener : public IRemoteStub<IWindowEventChannelListener> {
 public:
     explicit WindowEventChannelListener() = default;
@@ -57,7 +59,7 @@ using NotifyTransferExtensionDataFunc = std::function<void(const AAFwk::WantPara
 using NotifyRemoteReadyFunc = std::function<void()>;
 using NotifySyncOnFunc = std::function<void()>;
 using NotifyAsyncOnFunc = std::function<void()>;
-using NotifyGetAvoidAreaByTypeFunc = std::function<AvoidArea(AvoidAreaType type)>;
+using NotifyGetAvoidAreaByTypeFunc = std::function<AvoidArea(AvoidAreaType type, int32_t apiVersion)>;
 using NotifyBindModalFunc = std::function<void()>;
 using NotifyExtensionEventFunc = std::function<void(uint32_t notifyEvent)>;
 using GetStatusBarHeightFunc = std::function<int32_t()>;
@@ -80,6 +82,8 @@ public:
     virtual ~ExtensionSession();
 
     std::shared_ptr<IDataHandler> GetExtensionDataHandler() const;
+    void SetEventHandler(const std::shared_ptr<AppExecFwk::EventHandler>& handler,
+        const std::shared_ptr<AppExecFwk::EventHandler>& exportHandler) override;
     WSError Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
         sptr<WindowSessionProperty> property, sptr<IRemoteObject> token,
@@ -89,12 +93,13 @@ public:
         sptr<WindowSessionProperty> property, sptr<IRemoteObject> token, int32_t pid, int32_t uid,
         const std::string& identityToken = "") override;
 
-    AvoidArea GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect = {0, 0, 0, 0}) override;
+    AvoidArea GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect = WSRect::EMPTY_RECT,
+        int32_t apiVersion = API_VERSION_INVALID) override;
     int32_t GetStatusBarHeight() override;
 
     WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
     WSError TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want) override;
-    WSError TransferExtensionData(const AAFwk::WantParams& wantParams) override;
+    int32_t TransferExtensionData(const AAFwk::WantParams& wantParams) override;
     WSError TransferComponentData(const AAFwk::WantParams& wantParams);
     WSErrorCode TransferComponentDataSync(const AAFwk::WantParams& wantParams,
                                           AAFwk::WantParams& reWantParams);
@@ -118,13 +123,14 @@ public:
     WSError Background(bool isFromClient = false, const std::string& identityToken = "") override;
     void NotifyExtensionEventAsync(uint32_t notifyEvent) override;
     WSError NotifyDumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info);
+    WSError SendExtensionData(MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
 
 private:
     sptr<ExtensionSessionEventCallback> extSessionEventCallback_ = nullptr;
     bool isFirstTriggerBindModal_ = true;
     sptr<ChannelDeathRecipient> channelDeath_ = nullptr;
     sptr<WindowEventChannelListener> channelListener_ = nullptr;
-    std::shared_ptr<IDataHandler> dataHandler_;
+    std::shared_ptr<Extension::DataHandler> dataHandler_;
 };
 } // namespace OHOS::Rosen
 

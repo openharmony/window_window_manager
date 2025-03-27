@@ -21,12 +21,16 @@
 #include "mock_display_manager_adapter.h"
 #include "singleton_mocker.h"
 #include "scene_board_judgement.h"
+#include "../../../window_scene/screen_session_manager/include/screen_scene_config.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+    constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
+}
 using Mocker = SingletonMocker<ScreenManagerAdapter, MockScreenManagerAdapter>;
 class ScreenTest : public testing::Test {
 public:
@@ -42,12 +46,14 @@ public:
 sptr<Display> ScreenTest::defaultDisplay_ = nullptr;
 ScreenId ScreenTest::defaultScreenId_ = SCREEN_ID_INVALID;
 sptr<Screen> ScreenTest::screen_ = nullptr;
+bool g_isPcDevice = ScreenSceneConfig::GetExternalScreenDefaultMode() == "none";
 
 void ScreenTest::SetUpTestCase()
 {
     defaultDisplay_ = DisplayManager::GetInstance().GetDefaultDisplay();
     defaultScreenId_ = static_cast<ScreenId>(defaultDisplay_->GetId());
     screen_ = ScreenManager::GetInstance().GetScreenById(defaultScreenId_);
+    usleep(SLEEP_TIME_IN_US);
 }
 
 void ScreenTest::TearDownTestCase()
@@ -70,7 +76,7 @@ namespace {
  * @tc.desc: Basic property getter test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenTest, GetBasicProperty01, Function | SmallTest | Level1)
+HWTEST_F(ScreenTest, GetBasicProperty01, TestSize.Level1)
 {
     ASSERT_GT(screen_->GetName().size(), 0);
     ASSERT_GT(screen_->GetWidth(), 0);
@@ -87,7 +93,7 @@ HWTEST_F(ScreenTest, GetBasicProperty01, Function | SmallTest | Level1)
  * @tc.desc: SetScreenActiveMode with valid modeId and return success
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenTest, SetScreenActiveMode01, Function | SmallTest | Level1)
+HWTEST_F(ScreenTest, SetScreenActiveMode01, TestSize.Level1)
 {
     auto supportedModes = screen_->GetSupportedModes();
     ASSERT_GT(supportedModes.size(), 0);
@@ -102,7 +108,7 @@ HWTEST_F(ScreenTest, SetScreenActiveMode01, Function | SmallTest | Level1)
  * @tc.desc: SetScreenActiveMode with valid modeId and return failed
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenTest, SetScreenActiveMode02, Function | SmallTest | Level1)
+HWTEST_F(ScreenTest, SetScreenActiveMode02, TestSize.Level1)
 {
     auto supportedModes = screen_->GetSupportedModes();
     ASSERT_GT(supportedModes.size(), 0);
@@ -117,7 +123,7 @@ HWTEST_F(ScreenTest, SetScreenActiveMode02, Function | SmallTest | Level1)
  * @tc.desc: GetScreenSupportedColorGamuts
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenTest, GetScreenSupportedColorGamuts01, Function | SmallTest | Level2)
+HWTEST_F(ScreenTest, GetScreenSupportedColorGamuts01, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), GetScreenSupportedColorGamuts(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
@@ -131,7 +137,7 @@ HWTEST_F(ScreenTest, GetScreenSupportedColorGamuts01, Function | SmallTest | Lev
  * @tc.desc: GetScreenColorGamut
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenTest, GetScreenColorGamut01, Function | SmallTest | Level2)
+HWTEST_F(ScreenTest, GetScreenColorGamut01, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), GetScreenColorGamut(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
@@ -145,7 +151,7 @@ HWTEST_F(ScreenTest, GetScreenColorGamut01, Function | SmallTest | Level2)
  * @tc.desc: SetScreenColorGamut
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenTest, SetScreenColorGamut01, Function | SmallTest | Level2)
+HWTEST_F(ScreenTest, SetScreenColorGamut01, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), SetScreenColorGamut(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
@@ -159,7 +165,7 @@ HWTEST_F(ScreenTest, SetScreenColorGamut01, Function | SmallTest | Level2)
  * @tc.desc: GetScreenGamutMap
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenTest, GetScreenGamutMap01, Function | SmallTest | Level2)
+HWTEST_F(ScreenTest, GetScreenGamutMap01, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), GetScreenGamutMap(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
@@ -173,7 +179,7 @@ HWTEST_F(ScreenTest, GetScreenGamutMap01, Function | SmallTest | Level2)
  * @tc.desc: SetScreenGamutMap
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenTest, SetScreenGamutMap01, Function | SmallTest | Level2)
+HWTEST_F(ScreenTest, SetScreenGamutMap01, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), SetScreenGamutMap(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
@@ -187,7 +193,7 @@ HWTEST_F(ScreenTest, SetScreenGamutMap01, Function | SmallTest | Level2)
  * @tc.desc: SetScreenColorTransform
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenTest, SetScreenColorTransform01, Function | SmallTest | Level2)
+HWTEST_F(ScreenTest, SetScreenColorTransform01, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), SetScreenColorTransform(_)).Times(1).WillOnce(Return(DMError::DM_OK));
@@ -200,7 +206,7 @@ HWTEST_F(ScreenTest, SetScreenColorTransform01, Function | SmallTest | Level2)
  * @tc.desc: for interface coverage and check IsGroup
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenTest, IsGroup, Function | SmallTest | Level2)
+HWTEST_F(ScreenTest, IsGroup, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<ScreenInfo> screenInfo = screen_->GetScreenInfo();
@@ -217,7 +223,7 @@ HWTEST_F(ScreenTest, IsGroup, Function | SmallTest | Level2)
  * @tc.desc: for interface coverage and check GetParentId
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenTest, GetParentId, Function | SmallTest | Level2)
+HWTEST_F(ScreenTest, GetParentId, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<ScreenInfo> screenInfo = screen_->GetScreenInfo();
@@ -234,7 +240,7 @@ HWTEST_F(ScreenTest, GetParentId, Function | SmallTest | Level2)
  * @tc.desc: for interface coverage and check GetRotation
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenTest, GetRotation, Function | SmallTest | Level2)
+HWTEST_F(ScreenTest, GetRotation, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<ScreenInfo> screenInfo = screen_->GetScreenInfo();
@@ -248,13 +254,17 @@ HWTEST_F(ScreenTest, GetRotation, Function | SmallTest | Level2)
  * @tc.desc: for interface coverage and check GetOrientation
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenTest, GetOrientation, Function | SmallTest | Level2)
+HWTEST_F(ScreenTest, GetOrientation, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<ScreenInfo> screenInfo = screen_->GetScreenInfo();
     screenInfo->SetParentId(0);
     EXPECT_CALL(m->Mock(), GetScreenInfo(_)).Times(1).WillOnce(Return(screenInfo));
-    ASSERT_EQ(Orientation::BEGIN, screen_->GetOrientation());
+    if (g_isPcDevice) {
+        ASSERT_EQ(Orientation::VERTICAL, screen_->GetOrientation());
+    } else {
+        ASSERT_EQ(Orientation::BEGIN, screen_->GetOrientation());
+    }
 }
 
 /**
@@ -262,7 +272,7 @@ HWTEST_F(ScreenTest, GetOrientation, Function | SmallTest | Level2)
  * @tc.desc: SetOrientation
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenTest, SetOrientation, Function | SmallTest | Level2)
+HWTEST_F(ScreenTest, SetOrientation, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), SetOrientation(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
@@ -276,7 +286,7 @@ HWTEST_F(ScreenTest, SetOrientation, Function | SmallTest | Level2)
  * @tc.desc: GetPixelFormat
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenTest, GetPixelFormat, Function | SmallTest | Level2)
+HWTEST_F(ScreenTest, GetPixelFormat, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), GetPixelFormat(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
@@ -290,7 +300,7 @@ HWTEST_F(ScreenTest, GetPixelFormat, Function | SmallTest | Level2)
  * @tc.desc: SetPixelFormat
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenTest, SetPixelFormat, Function | SmallTest | Level2)
+HWTEST_F(ScreenTest, SetPixelFormat, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), SetPixelFormat(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
@@ -304,7 +314,7 @@ HWTEST_F(ScreenTest, SetPixelFormat, Function | SmallTest | Level2)
  * @tc.desc: GetSupportedHDRFormats
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenTest, GetSupportedHDRFormats, Function | SmallTest | Level2)
+HWTEST_F(ScreenTest, GetSupportedHDRFormats, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), GetSupportedHDRFormats(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
@@ -318,7 +328,7 @@ HWTEST_F(ScreenTest, GetSupportedHDRFormats, Function | SmallTest | Level2)
  * @tc.desc: GetScreenHDRFormat
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenTest, GetScreenHDRFormat, Function | SmallTest | Level2)
+HWTEST_F(ScreenTest, GetScreenHDRFormat, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), GetScreenHDRFormat(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
@@ -332,7 +342,7 @@ HWTEST_F(ScreenTest, GetScreenHDRFormat, Function | SmallTest | Level2)
  * @tc.desc: SetScreenHDRFormat
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenTest, SetScreenHDRFormat, Function | SmallTest | Level2)
+HWTEST_F(ScreenTest, SetScreenHDRFormat, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), SetScreenHDRFormat(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
@@ -345,7 +355,7 @@ HWTEST_F(ScreenTest, SetScreenHDRFormat, Function | SmallTest | Level2)
  * @tc.desc: GetSupportedColorSpaces
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenTest, GetSupportedColorSpaces, Function | SmallTest | Level2)
+HWTEST_F(ScreenTest, GetSupportedColorSpaces, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), GetSupportedColorSpaces(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
@@ -359,7 +369,7 @@ HWTEST_F(ScreenTest, GetSupportedColorSpaces, Function | SmallTest | Level2)
  * @tc.desc: GetScreenColorSpace
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenTest, GetScGetScreenColorSpacereenHDRFormat, Function | SmallTest | Level2)
+HWTEST_F(ScreenTest, GetScGetScreenColorSpacereenHDRFormat, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), GetScreenColorSpace(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
@@ -373,7 +383,7 @@ HWTEST_F(ScreenTest, GetScGetScreenColorSpacereenHDRFormat, Function | SmallTest
  * @tc.desc: SetScreenColorSpace
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenTest, SetScreenColorSpace, Function | SmallTest | Level2)
+HWTEST_F(ScreenTest, SetScreenColorSpace, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), SetScreenColorSpace(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
@@ -387,7 +397,7 @@ HWTEST_F(ScreenTest, SetScreenColorSpace, Function | SmallTest | Level2)
  * @tc.desc: SetDensityDpi
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenTest, SetDensityDpi, Function | SmallTest | Level2)
+HWTEST_F(ScreenTest, SetDensityDpi, TestSize.Level1)
 {
     auto res = screen_->SetDensityDpi(DOT_PER_INCH_MAXIMUM_VALUE + 1);
     ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
@@ -401,7 +411,7 @@ HWTEST_F(ScreenTest, SetDensityDpi, Function | SmallTest | Level2)
  * @tc.desc: SetResolution
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenTest, SetResolution, Function | SmallTest | Level2)
+HWTEST_F(ScreenTest, SetResolution, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), SetResolution(_, _, _, _)).Times(1).WillOnce(Return(DMError::DM_OK));
@@ -417,7 +427,7 @@ HWTEST_F(ScreenTest, SetResolution, Function | SmallTest | Level2)
  * @tc.desc: SetDensityDpiSystem
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenTest, SetDensityDpiSystem, Function | SmallTest | Level2)
+HWTEST_F(ScreenTest, SetDensityDpiSystem, TestSize.Level1)
 {
     auto res = screen_->SetDensityDpiSystem(DOT_PER_INCH_MAXIMUM_VALUE + 1);
     ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
@@ -435,13 +445,43 @@ HWTEST_F(ScreenTest, SetDensityDpiSystem, Function | SmallTest | Level2)
  * @tc.desc: GetDensityInCurResolution
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenTest, GetDensityInCurResolution, Function | SmallTest | Level2)
+HWTEST_F(ScreenTest, GetDensityInCurResolution, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), GetDensityInCurResolution(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
     float virtualPixelRatio;
     auto res = screen_->GetDensityInCurResolution(virtualPixelRatio);
     ASSERT_EQ(DMError::DM_OK, res);
+}
+
+/**
+ * @tc.name: SetDefaultDensityDpi01
+ * @tc.desc: SetDefaultDensityDpi
+ * @tc.type: FUNC
+ *
+ */
+HWTEST_F(ScreenTest, SetDefaultDensityDpi, TestSize.Level1)
+{
+    auto res = screen_->SetDefaultDensityDpi(DOT_PER_INCH_MAXIMUM_VALUE + 1);
+    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
+
+    res = screen_->SetDefaultDensityDpi(100);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(DMError::DM_OK, res);
+    } else {
+        ASSERT_NE(DMError::DM_OK, res);
+    }
+}
+
+/**
+ * @tc.name: GetSerialNumber
+ * @tc.desc: GetSerialNumber
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenTest, GetSerialNumber, Function | SmallTest | Level2)
+{
+    auto res = screen_->GetSerialNumber();
+    ASSERT_EQ(res, "");
 }
 }
 } // namespace Rosen

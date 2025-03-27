@@ -147,7 +147,7 @@ namespace {
  * @tc.desc: IsRemoteAnimationEnabledAndFirst return false since animationFirst false
  * @tc.type: FUNC
  */
-HWTEST_F(RemoteAnimationTest, IsRemoteAnimationEnabledAndFirst01, Function | SmallTest | Level2)
+HWTEST_F(RemoteAnimationTest, IsRemoteAnimationEnabledAndFirst01, TestSize.Level1)
 {
     RemoteAnimation::SetAnimationFirst(false);
     EXPECT_EQ(false, RemoteAnimation::animationFirst_);
@@ -159,7 +159,7 @@ HWTEST_F(RemoteAnimationTest, IsRemoteAnimationEnabledAndFirst01, Function | Sma
  * @tc.desc: IsRemoteAnimationEnabledAndFirst return true since animationFirst true
  * @tc.type: FUNC
  */
-HWTEST_F(RemoteAnimationTest, IsRemoteAnimationEnabledAndFirst02, Function | SmallTest | Level2)
+HWTEST_F(RemoteAnimationTest, IsRemoteAnimationEnabledAndFirst02, TestSize.Level1)
 {
     EXPECT_EQ(true, RemoteAnimation::animationFirst_);
     EXPECT_EQ(true, RemoteAnimation::IsRemoteAnimationEnabledAndFirst(0));
@@ -170,7 +170,7 @@ HWTEST_F(RemoteAnimationTest, IsRemoteAnimationEnabledAndFirst02, Function | Sma
  * @tc.desc: IsRemoteAnimationEnabledAndFirst return false since CheckRemoteAnimationEnabled false
  * @tc.type: FUNC
  */
-HWTEST_F(RemoteAnimationTest, IsRemoteAnimationEnabledAndFirst03, Function | SmallTest | Level2)
+HWTEST_F(RemoteAnimationTest, IsRemoteAnimationEnabledAndFirst03, TestSize.Level1)
 {
     RemoteAnimation::windowRoot_ = nullptr;
     EXPECT_EQ(false, RemoteAnimation::CheckRemoteAnimationEnabled(0));
@@ -187,7 +187,7 @@ HWTEST_F(RemoteAnimationTest, IsRemoteAnimationEnabledAndFirst03, Function | Sma
  * @tc.desc: return false since CheckRemoteAnimationEnabled false, set animationController nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(RemoteAnimationTest, IsRemoteAnimationEnabledAndFirst04, Function | SmallTest | Level2)
+HWTEST_F(RemoteAnimationTest, IsRemoteAnimationEnabledAndFirst04, TestSize.Level1)
 {
     sptr<RSIWindowAnimationController> controller = nullptr;
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, RemoteAnimation::SetWindowAnimationController(controller));
@@ -211,7 +211,7 @@ HWTEST_F(RemoteAnimationTest, IsRemoteAnimationEnabledAndFirst04, Function | Sma
  * @tc.desc: CheckTransition return false
  * @tc.type: FUNC
  */
-HWTEST_F(RemoteAnimationTest, CheckTransition01, Function | SmallTest | Level2)
+HWTEST_F(RemoteAnimationTest, CheckTransition01, TestSize.Level1)
 {
     const sptr<WindowNode> node = nullptr;
     EXPECT_EQ(false, RemoteAnimation::CheckTransition(transitionInfo_, node, transitionInfo_, node));
@@ -238,7 +238,7 @@ HWTEST_F(RemoteAnimationTest, CheckTransition01, Function | SmallTest | Level2)
  * @tc.desc: CheckTransition return false since windowMode not support
  * @tc.type: FUNC
  */
-HWTEST_F(RemoteAnimationTest, CheckTransition02, Function | SmallTest | Level2)
+HWTEST_F(RemoteAnimationTest, CheckTransition02, TestSize.Level1)
 {
     sptr<WindowNode> srcNode = StartingWindow::CreateWindowNode(transitionInfo_, 0);
     ASSERT_NE(nullptr, srcNode);
@@ -256,7 +256,7 @@ HWTEST_F(RemoteAnimationTest, CheckTransition02, Function | SmallTest | Level2)
  * @tc.desc: CheckTransition return true
  * @tc.type: FUNC
  */
-HWTEST_F(RemoteAnimationTest, CheckTransition03, Function | SmallTest | Level2)
+HWTEST_F(RemoteAnimationTest, CheckTransition03, TestSize.Level1)
 {
     sptr<WindowNode> srcNode = StartingWindow::CreateWindowNode(transitionInfo_, 0);
     ASSERT_NE(nullptr, srcNode);
@@ -271,7 +271,7 @@ HWTEST_F(RemoteAnimationTest, CheckTransition03, Function | SmallTest | Level2)
  * @tc.desc: OnRemoteDie and setAnimationController nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(RemoteAnimationTest, OnRemoteDieAndCallbackTimeOutProcess01, Function | SmallTest | Level2)
+HWTEST_F(RemoteAnimationTest, OnRemoteDieAndCallbackTimeOutProcess01, TestSize.Level1)
 {
     auto testController = RemoteAnimation::windowAnimationController_;
     ASSERT_EQ(true, RemoteAnimation::windowAnimationController_->AsObject() == animationController_->AsObject());
@@ -287,7 +287,7 @@ HWTEST_F(RemoteAnimationTest, OnRemoteDieAndCallbackTimeOutProcess01, Function |
  * @tc.desc: OnRemoteDie and not set animation controller
  * @tc.type: FUNC
  */
-HWTEST_F(RemoteAnimationTest, OnRemoteDieAndCallbackTimeOutProcess02, Function | SmallTest | Level2)
+HWTEST_F(RemoteAnimationTest, OnRemoteDieAndCallbackTimeOutProcess02, TestSize.Level1)
 {
     sptr<IRemoteObject> remoteObject = nullptr;
     RemoteAnimation::windowRoot_ = nullptr;
@@ -300,7 +300,7 @@ HWTEST_F(RemoteAnimationTest, OnRemoteDieAndCallbackTimeOutProcess02, Function |
  * @tc.desc: OnRemoteDie and timeout process success
  * @tc.type: FUNC
  */
-HWTEST_F(RemoteAnimationTest, OnRemoteDieAndCallbackTimeOutProcess03, Function | SmallTest | Level2)
+HWTEST_F(RemoteAnimationTest, OnRemoteDieAndCallbackTimeOutProcess03, TestSize.Level1)
 {
     auto root = RemoteAnimation::windowRoot_;
     node_->stateMachine_.TransitionTo(WindowNodeState::SHOW_ANIMATION_PLAYING);
@@ -315,7 +315,7 @@ HWTEST_F(RemoteAnimationTest, OnRemoteDieAndCallbackTimeOutProcess03, Function |
  * @tc.desc: CreateWindowAnimationTarget with null node/different windowType
  * @tc.type: FUNC
  */
-HWTEST_F(RemoteAnimationTest, CreateWindowAnimationTarget01, Function | SmallTest | Level2)
+HWTEST_F(RemoteAnimationTest, CreateWindowAnimationTarget01, TestSize.Level1)
 {
     sptr<WindowNode> node = nullptr;
     EXPECT_EQ(nullptr, RemoteAnimation::CreateWindowAnimationTarget(transitionInfo_, node));
@@ -333,7 +333,7 @@ HWTEST_F(RemoteAnimationTest, CreateWindowAnimationTarget01, Function | SmallTes
  * @tc.desc: CreateShowAnimationFinishedCallback with animationFirst false
  * @tc.type: FUNC
  */
-HWTEST_F(RemoteAnimationTest, CreateShowAnimationFinishedCallback01, Function | SmallTest | Level2)
+HWTEST_F(RemoteAnimationTest, CreateShowAnimationFinishedCallback01, TestSize.Level1)
 {
     RemoteAnimation::SetAnimationFirst(false);
     auto finishCallback = RemoteAnimation::CreateShowAnimationFinishedCallback(node_, node_, true);
@@ -366,7 +366,7 @@ HWTEST_F(RemoteAnimationTest, CreateShowAnimationFinishedCallback01, Function | 
  * @tc.desc: CreateShowAnimationFinishedCallback with animationFirst true
  * @tc.type: FUNC
  */
-HWTEST_F(RemoteAnimationTest, CreateShowAnimationFinishedCallback02, Function | SmallTest | Level2)
+HWTEST_F(RemoteAnimationTest, CreateShowAnimationFinishedCallback02, TestSize.Level1)
 {
     sptr<WindowNode> dstNode = nullptr;
     auto finishCallback = RemoteAnimation::CreateShowAnimationFinishedCallback(node_, dstNode, true);
@@ -393,7 +393,7 @@ HWTEST_F(RemoteAnimationTest, CreateShowAnimationFinishedCallback02, Function | 
  * @tc.desc: CreateHideAnimationFinishedCallback with animationFirst false
  * @tc.type: FUNC
  */
-HWTEST_F(RemoteAnimationTest, CreateHideAnimationFinishedCallback01, Function | SmallTest | Level2)
+HWTEST_F(RemoteAnimationTest, CreateHideAnimationFinishedCallback01, TestSize.Level1)
 {
     RemoteAnimation::SetAnimationFirst(false);
     sptr<WindowNode> srcNode = nullptr;
@@ -436,7 +436,7 @@ HWTEST_F(RemoteAnimationTest, CreateHideAnimationFinishedCallback01, Function | 
  * @tc.desc: CreateHideAnimationFinishedCallback with animationFirst true
  * @tc.type: FUNC
  */
-HWTEST_F(RemoteAnimationTest, CreateHideAnimationFinishedCallback02, Function | SmallTest | Level2)
+HWTEST_F(RemoteAnimationTest, CreateHideAnimationFinishedCallback02, TestSize.Level1)
 {
     sptr<WindowNode> srcNode = nullptr;
     auto finishCallback = RemoteAnimation::CreateHideAnimationFinishedCallback(srcNode, TransitionEvent::CLOSE);
@@ -480,7 +480,7 @@ HWTEST_F(RemoteAnimationTest, CreateHideAnimationFinishedCallback02, Function | 
  * @tc.desc: ProcessNodeStateTask with different node state
  * @tc.type: FUNC
  */
-HWTEST_F(RemoteAnimationTest, ProcessNodeStateTask01, Function | SmallTest | Level2)
+HWTEST_F(RemoteAnimationTest, ProcessNodeStateTask01, TestSize.Level1)
 {
     // ExecuteFinalStateTask with task is nullptr
     node_->stateMachine_.ResetAnimationTaskCount(1);
@@ -534,7 +534,7 @@ HWTEST_F(RemoteAnimationTest, ProcessNodeStateTask01, Function | SmallTest | Lev
  * @tc.desc: PostProcessShowCallback with different leashWinSurfaceNode
  * @tc.type: FUNC
  */
-HWTEST_F(RemoteAnimationTest, PostProcessShowCallback01, Function | SmallTest | Level2)
+HWTEST_F(RemoteAnimationTest, PostProcessShowCallback01, TestSize.Level1)
 {
     sptr<WindowNode> dstNode = nullptr;
     RemoteAnimation::PostProcessShowCallback(dstNode);
@@ -555,7 +555,7 @@ HWTEST_F(RemoteAnimationTest, PostProcessShowCallback01, Function | SmallTest | 
  * @tc.desc: GetTransitionEvent with reason not ability_transition
  * @tc.type: FUNC
  */
-HWTEST_F(RemoteAnimationTest, GetTransitionEvent01, Function | SmallTest | Level2)
+HWTEST_F(RemoteAnimationTest, GetTransitionEvent01, TestSize.Level1)
 {
     transitionInfo_->SetTransitionReason(TransitionReason::MINIMIZE);
     auto event = RemoteAnimation::GetTransitionEvent(transitionInfo_, transitionInfo_, node_, node_);
@@ -580,7 +580,7 @@ HWTEST_F(RemoteAnimationTest, GetTransitionEvent01, Function | SmallTest | Level
  * @tc.desc: GetTransitionEvent with reason ability_transition
  * @tc.type: FUNC
  */
-HWTEST_F(RemoteAnimationTest, GetTransitionEvent02, Function | SmallTest | Level2)
+HWTEST_F(RemoteAnimationTest, GetTransitionEvent02, TestSize.Level1)
 {
     sptr<WindowNode> srcNode = nullptr;
     transitionInfo_->SetTransitionReason(TransitionReason::ABILITY_TRANSITION);
@@ -613,7 +613,7 @@ HWTEST_F(RemoteAnimationTest, GetTransitionEvent02, Function | SmallTest | Level
  * @tc.desc: GetExpectRect
  * @tc.type: FUNC
  */
-HWTEST_F(RemoteAnimationTest, GetExpectRect01, Function | SmallTest | Level2)
+HWTEST_F(RemoteAnimationTest, GetExpectRect01, TestSize.Level1)
 {
     auto target = RemoteAnimation::CreateWindowAnimationTarget(transitionInfo_, node_);
     RemoteAnimation::GetExpectRect(node_, target);
@@ -654,7 +654,7 @@ HWTEST_F(RemoteAnimationTest, GetExpectRect01, Function | SmallTest | Level2)
  * @tc.desc: NotifyAnimationTransition failed
  * @tc.type: FUNC
  */
-HWTEST_F(RemoteAnimationTest, NotifyAnimationTransition01, Function | SmallTest | Level2)
+HWTEST_F(RemoteAnimationTest, NotifyAnimationTransition01, TestSize.Level1)
 {
     sptr<WindowNode> dstNode = nullptr;
     WMError ret = RemoteAnimation::NotifyAnimationTransition(transitionInfo_, transitionInfo_, node_, dstNode);
@@ -669,7 +669,7 @@ HWTEST_F(RemoteAnimationTest, NotifyAnimationTransition01, Function | SmallTest 
  * @tc.desc: NotifyAnimationTransition with OnAppTransition
  * @tc.type: FUNC
  */
-HWTEST_F(RemoteAnimationTest, NotifyAnimationTransition02, Function | SmallTest | Level2)
+HWTEST_F(RemoteAnimationTest, NotifyAnimationTransition02, TestSize.Level1)
 {
     sptr<WindowNode> srcNode = new WindowNode(CreateWindowProperty(2)); // 2 is windowId
     MinimizeApp::AddNeedMinimizeApp(srcNode, MinimizeReason::OTHER_WINDOW);
@@ -695,7 +695,7 @@ HWTEST_F(RemoteAnimationTest, NotifyAnimationTransition02, Function | SmallTest 
  * @tc.desc: NotifyAnimationTransition with NotifyAnimationStartApp
  * @tc.type: FUNC
  */
-HWTEST_F(RemoteAnimationTest, NotifyAnimationTransition03, Function | SmallTest | Level2)
+HWTEST_F(RemoteAnimationTest, NotifyAnimationTransition03, TestSize.Level1)
 {
     sptr<WindowNode> srcNode = new WindowNode(CreateWindowProperty(2)); // 2 is windowId
     srcNode->GetWindowProperty()->SetWindowType(WindowType::WINDOW_TYPE_DESKTOP);
@@ -727,7 +727,7 @@ HWTEST_F(RemoteAnimationTest, NotifyAnimationTransition03, Function | SmallTest 
  * @tc.desc: NotifyAnimationMinimize
  * @tc.type: FUNC
  */
-HWTEST_F(RemoteAnimationTest, NotifyAnimationMinimize01, Function | SmallTest | Level2)
+HWTEST_F(RemoteAnimationTest, NotifyAnimationMinimize01, TestSize.Level1)
 {
     WMError ret = RemoteAnimation::NotifyAnimationMinimize(transitionInfo_, node_);
     EXPECT_EQ(WMError::WM_OK, ret);
@@ -746,7 +746,7 @@ HWTEST_F(RemoteAnimationTest, NotifyAnimationMinimize01, Function | SmallTest | 
  * @tc.desc: NotifyAnimationClose
  * @tc.type: FUNC
  */
-HWTEST_F(RemoteAnimationTest, NotifyAnimationClose01, Function | SmallTest | Level2)
+HWTEST_F(RemoteAnimationTest, NotifyAnimationClose01, TestSize.Level1)
 {
     WMError ret = RemoteAnimation::NotifyAnimationClose(transitionInfo_, node_, TransitionEvent::CLOSE);
     EXPECT_EQ(WMError::WM_OK, ret);
@@ -765,7 +765,7 @@ HWTEST_F(RemoteAnimationTest, NotifyAnimationClose01, Function | SmallTest | Lev
  * @tc.desc: NotifyAnimationBackTransition failed
  * @tc.type: FUNC
  */
-HWTEST_F(RemoteAnimationTest, NotifyAnimationBackTransition01, Function | SmallTest | Level2)
+HWTEST_F(RemoteAnimationTest, NotifyAnimationBackTransition01, TestSize.Level1)
 {
     sptr<WindowNode> srcNode = new WindowNode(CreateWindowProperty(2)); // 2 is windowId
     TransitionEvent event = TransitionEvent::BACK_TRANSITION;
@@ -803,7 +803,7 @@ HWTEST_F(RemoteAnimationTest, NotifyAnimationBackTransition01, Function | SmallT
  * @tc.desc: NotifyAnimationBackTransition success
  * @tc.type: FUNC
  */
-HWTEST_F(RemoteAnimationTest, NotifyAnimationBackTransition02, Function | SmallTest | Level2)
+HWTEST_F(RemoteAnimationTest, NotifyAnimationBackTransition02, TestSize.Level1)
 {
     sptr<WindowNode> srcNode = new WindowNode(CreateWindowProperty(2)); // 2 is windowId
     TransitionEvent event = TransitionEvent::BACK_TRANSITION;
@@ -832,7 +832,7 @@ HWTEST_F(RemoteAnimationTest, NotifyAnimationBackTransition02, Function | SmallT
  * @tc.desc: NotifyAnimationByHome with animationFirst false and create animationTarget failed
  * @tc.type: FUNC
  */
-HWTEST_F(RemoteAnimationTest, NotifyAnimationByHome01, Function | SmallTest | Level2)
+HWTEST_F(RemoteAnimationTest, NotifyAnimationByHome01, TestSize.Level1)
 {
     RemoteAnimation::SetAnimationFirst(false);
     WMError ret = RemoteAnimation::NotifyAnimationByHome();
@@ -868,7 +868,7 @@ HWTEST_F(RemoteAnimationTest, NotifyAnimationByHome01, Function | SmallTest | Le
  * @tc.desc: NotifyAnimationByHome with animationFirst false and create animationTarget success
  * @tc.type: FUNC
  */
-HWTEST_F(RemoteAnimationTest, NotifyAnimationByHome02, Function | SmallTest | Level2)
+HWTEST_F(RemoteAnimationTest, NotifyAnimationByHome02, TestSize.Level1)
 {
     RemoteAnimation::SetAnimationFirst(false);
     sptr<WindowNode> srcNode = new WindowNode(CreateWindowProperty(2)); // 2 is windowId
@@ -890,7 +890,7 @@ HWTEST_F(RemoteAnimationTest, NotifyAnimationByHome02, Function | SmallTest | Le
  * @tc.desc: NotifyAnimationByHome with animationFirst true and create animationTarget success
  * @tc.type: FUNC
  */
-HWTEST_F(RemoteAnimationTest, NotifyAnimationByHome03, Function | SmallTest | Level2)
+HWTEST_F(RemoteAnimationTest, NotifyAnimationByHome03, TestSize.Level1)
 {
     sptr<WindowNode> srcNode = new WindowNode(CreateWindowProperty(2)); // 2 is windowId
     srcNode->leashWinSurfaceNode_ = CreateRSSurfaceNode(2); // 2 is windowId
@@ -913,7 +913,7 @@ HWTEST_F(RemoteAnimationTest, NotifyAnimationByHome03, Function | SmallTest | Le
  * @tc.desc: NotifyAnimationTargetsUpdate failed
  * @tc.type: FUNC
  */
-HWTEST_F(RemoteAnimationTest, NotifyAnimationTargetsUpdate01, Function | SmallTest | Level2)
+HWTEST_F(RemoteAnimationTest, NotifyAnimationTargetsUpdate01, TestSize.Level1)
 {
     std::vector<uint32_t> fullScreenWinIds;
     std::vector<uint32_t> floatWinIds;
@@ -955,7 +955,7 @@ HWTEST_F(RemoteAnimationTest, NotifyAnimationTargetsUpdate01, Function | SmallTe
  * @tc.desc: NotifyAnimationTargetsUpdate success
  * @tc.type: FUNC
  */
-HWTEST_F(RemoteAnimationTest, NotifyAnimationTargetsUpdate02, Function | SmallTest | Level2)
+HWTEST_F(RemoteAnimationTest, NotifyAnimationTargetsUpdate02, TestSize.Level1)
 {
     std::vector<uint32_t> fullScreenWinIds;
     std::vector<uint32_t> floatWinIds;
@@ -983,7 +983,7 @@ HWTEST_F(RemoteAnimationTest, NotifyAnimationTargetsUpdate02, Function | SmallTe
  * @tc.desc: NotifyAnimationScreenUnlock success
  * @tc.type: FUNC
  */
-HWTEST_F(RemoteAnimationTest, NotifyAnimationScreenUnlock01, Function | SmallTest | Level2)
+HWTEST_F(RemoteAnimationTest, NotifyAnimationScreenUnlock01, TestSize.Level1)
 {
     std::function<void(void)> callback = nullptr;
     WMError ret = RemoteAnimation::NotifyAnimationScreenUnlock(callback, nullptr);
@@ -1003,7 +1003,7 @@ HWTEST_F(RemoteAnimationTest, NotifyAnimationScreenUnlock01, Function | SmallTes
  * @tc.desc: NotifyAnimationUpdateWallpaper success
  * @tc.type: FUNC
  */
-HWTEST_F(RemoteAnimationTest, NotifyAnimationUpdateWallpaper01, Function | SmallTest | Level2)
+HWTEST_F(RemoteAnimationTest, NotifyAnimationUpdateWallpaper01, TestSize.Level1)
 {
     RemoteAnimation::NotifyAnimationUpdateWallpaper(node_);
     RSIWindowAnimationControllerMocker* testController = reinterpret_cast<RSIWindowAnimationControllerMocker*>(
@@ -1021,7 +1021,7 @@ HWTEST_F(RemoteAnimationTest, NotifyAnimationUpdateWallpaper01, Function | Small
  * @tc.desc: CreateAnimationFinishedCallback
  * @tc.type: FUNC
  */
-HWTEST_F(RemoteAnimationTest, CreateAnimationFinishedCallback01, Function | SmallTest | Level2)
+HWTEST_F(RemoteAnimationTest, CreateAnimationFinishedCallback01, TestSize.Level1)
 {
     std::function<void(void)> callback = nullptr;
     EXPECT_EQ(nullptr, RemoteAnimation::CreateAnimationFinishedCallback(callback, node_));
@@ -1049,7 +1049,7 @@ HWTEST_F(RemoteAnimationTest, CreateAnimationFinishedCallback01, Function | Smal
  * @tc.desc: GetWindowAnimationTargets for null window root
  * @tc.type: FUNC
  */
-HWTEST_F(RemoteAnimationTest, GetWindowAnimationTargets01, Function | SmallTest | Level2)
+HWTEST_F(RemoteAnimationTest, GetWindowAnimationTargets01, TestSize.Level1)
 {
     RemoteAnimation::windowRoot_ = nullptr;
     std::vector<uint32_t> missionIds;
@@ -1062,7 +1062,7 @@ HWTEST_F(RemoteAnimationTest, GetWindowAnimationTargets01, Function | SmallTest 
  * @tc.desc: GetWindowAnimationTargets for not exit mission
  * @tc.type: FUNC
  */
-HWTEST_F(RemoteAnimationTest, GetWindowAnimationTargets02, Function | SmallTest | Level2)
+HWTEST_F(RemoteAnimationTest, GetWindowAnimationTargets02, TestSize.Level1)
 {
     std::vector<uint32_t> missionIds;
     missionIds.push_back(1);
@@ -1077,7 +1077,7 @@ HWTEST_F(RemoteAnimationTest, GetWindowAnimationTargets02, Function | SmallTest 
  * @tc.desc: GetWindowAnimationTargets successful
  * @tc.type: FUNC
  */
-HWTEST_F(RemoteAnimationTest, GetWindowAnimationTargets03, Function | SmallTest | Level2)
+HWTEST_F(RemoteAnimationTest, GetWindowAnimationTargets03, TestSize.Level1)
 {
     sptr<WindowNode> srcNode = new WindowNode(CreateWindowProperty(1)); // 1 is windowId
     srcNode->abilityInfo_.missionId_ = 1;
@@ -1099,7 +1099,7 @@ HWTEST_F(RemoteAnimationTest, GetWindowAnimationTargets03, Function | SmallTest 
  * @tc.desc: GetWindowAnimationTargets successful
  * @tc.type: FUNC
  */
-HWTEST_F(RemoteAnimationTest, GetAndDrawSnapShot, Function | SmallTest | Level2)
+HWTEST_F(RemoteAnimationTest, GetAndDrawSnapShot, TestSize.Level1)
 {
     sptr<WindowNode> srcNode = new WindowNode();
     std::shared_ptr<Media::PixelMap> pixelMap = std::make_shared<Media::PixelMap>();
@@ -1112,7 +1112,7 @@ HWTEST_F(RemoteAnimationTest, GetAndDrawSnapShot, Function | SmallTest | Level2)
  * @tc.desc: GetWindowAnimationTargets successful
  * @tc.type: FUNC
  */
-HWTEST_F(RemoteAnimationTest, GetExpectRect, Function | SmallTest | Level2)
+HWTEST_F(RemoteAnimationTest, GetExpectRect, TestSize.Level1)
 {
     sptr<WindowNode> dstNode = new WindowNode();
     std::vector<uint32_t> missionIds;
@@ -1129,7 +1129,7 @@ HWTEST_F(RemoteAnimationTest, GetExpectRect, Function | SmallTest | Level2)
  * @tc.desc: NotifyAnimationAbilityDied for null window root
  * @tc.type: FUNC
  */
-HWTEST_F(RemoteAnimationTest, NotifyAnimationAbilityDied, Function | SmallTest | Level2)
+HWTEST_F(RemoteAnimationTest, NotifyAnimationAbilityDied, TestSize.Level1)
 {
     sptr<WindowTransitionInfo> info = new WindowTransitionInfo();
     RemoteAnimation::NotifyAnimationAbilityDied(info);
@@ -1142,7 +1142,7 @@ HWTEST_F(RemoteAnimationTest, NotifyAnimationAbilityDied, Function | SmallTest |
  * @tc.desc: NotifyAnimationMinimize
  * @tc.type: FUNC
  */
-HWTEST_F(RemoteAnimationTest, NotifyAnimationMinimize, Function | SmallTest | Level2)
+HWTEST_F(RemoteAnimationTest, NotifyAnimationMinimize, TestSize.Level1)
 {
     sptr<WindowTransitionInfo> srcInfo = new WindowTransitionInfo();
     sptr<WindowNode> srcNode = new WindowNode();
@@ -1159,7 +1159,7 @@ HWTEST_F(RemoteAnimationTest, NotifyAnimationMinimize, Function | SmallTest | Le
  * @tc.desc: CreateAnimationFinishedCallback
  * @tc.type: FUNC
  */
-HWTEST_F(RemoteAnimationTest, CreateAnimationFinishedCallback02, Function | SmallTest | Level2)
+HWTEST_F(RemoteAnimationTest, CreateAnimationFinishedCallback02, TestSize.Level1)
 {
     std::function<void(void)> callback;
     sptr<WindowNode> windowNode = new WindowNode();

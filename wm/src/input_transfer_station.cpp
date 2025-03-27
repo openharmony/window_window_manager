@@ -21,6 +21,7 @@
 #include "wm_common_inner.h"
 #include "gtx_input_event_sender.h"
 #include <hitrace_meter.h>
+#include "window_input_intercept.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -35,7 +36,7 @@ InputTransferStation::~InputTransferStation()
     destroyed_ = true;
 }
 
-void InputEventListener::OnInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent) const
+void InputEventListener::HandleInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent) const
 {
     if (keyEvent == nullptr) {
         TLOGE(WmsLogTag::WMS_INPUT_KEY_FLOW, "KeyEvent is nullptr");
@@ -57,17 +58,7 @@ void InputEventListener::OnInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent) c
     channel->HandleKeyEvent(keyEvent);
 }
 
-void InputEventListener::OnInputEvent(std::shared_ptr<MMI::AxisEvent> axisEvent) const
-{
-    if (axisEvent == nullptr) {
-        TLOGE(WmsLogTag::WMS_INPUT_KEY_FLOW, "AxisEvent is nullptr");
-        return;
-    }
-    TLOGD(WmsLogTag::WMS_INPUT_KEY_FLOW, "Receive axisEvent, windowId: %{public}d", axisEvent->GetAgentWindowId());
-    axisEvent->MarkProcessed();
-}
-
-void InputEventListener::OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent) const
+void InputEventListener::HandleInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent) const
 {
     if (pointerEvent == nullptr) {
         TLOGE(WmsLogTag::WMS_INPUT_KEY_FLOW, "PointerEvent is nullptr");
@@ -82,7 +73,7 @@ void InputEventListener::OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointer
     if (action != MMI::PointerEvent::POINTER_ACTION_MOVE) {
         static uint32_t eventId = 0;
         TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW, "eid:%{public}d,InputId:%{public}d"
-            ",wid:%{public}u,action:%{public}d", eventId++, pointerEvent->GetId(), windowId,
+            ",wid:%{public}u,ac:%{public}d", eventId++, pointerEvent->GetId(), windowId,
             pointerEvent->GetPointerAction());
     }
     auto channel = InputTransferStation::GetInstance().GetInputChannel(windowId);
@@ -99,12 +90,34 @@ void InputEventListener::OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointer
     GtxInputEventSender::GetInstance().SetTouchEvent(channel->GetWindowRect(), pointerEvent);
 }
 
-void InputTransferStation::AddInputWindow(const sptr<Window>& window)
+void InputEventListener::OnInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent) const
 {
-    if (IsRegisterToMMI()) {
+    if (WindowInputIntercept::GetInstance().IsInputIntercept(keyEvent)) {
         return;
     }
+    HandleInputEvent(keyEvent);
+}
 
+void InputEventListener::OnInputEvent(std::shared_ptr<MMI::AxisEvent> axisEvent) const
+{
+    if (axisEvent == nullptr) {
+        TLOGE(WmsLogTag::WMS_INPUT_KEY_FLOW, "AxisEvent is nullptr");
+        return;
+    }
+    TLOGD(WmsLogTag::WMS_INPUT_KEY_FLOW, "Receive axisEvent, windowId: %{public}d", axisEvent->GetAgentWindowId());
+    axisEvent->MarkProcessed();
+}
+
+void InputEventListener::OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent) const
+{
+    if (WindowInputIntercept::GetInstance().IsInputIntercept(pointerEvent)) {
+        return;
+    }
+    HandleInputEvent(pointerEvent);
+}
+
+void InputTransferStation::AddInputWindow(const sptr<Window>& window)
+{
     uint32_t windowId = window->GetWindowId();
     TLOGD(WmsLogTag::WMS_EVENT, "Add input window, windowId: %{public}u", windowId);
 
@@ -114,17 +127,21 @@ void InputTransferStation::AddInputWindow(const sptr<Window>& window)
             windowId, window->GetType());
         return;
     }
-    sptr<WindowInputChannel> inputChannel = new WindowInputChannel(window);
-    std::lock_guard<std::mutex> lock(mtx_);
-    if (destroyed_) {
-        TLOGW(WmsLogTag::WMS_EVENT, "Already destroyed");
-        return;
+
+    if (windowInputChannels_.count(windowId) == 0) {
+        sptr<WindowInputChannel> inputChannel = new WindowInputChannel(window);
+        std::lock_guard<std::mutex> lock(mtx_);
+        if (destroyed_) {
+            TLOGW(WmsLogTag::WMS_EVENT, "Already destroyed");
+            return;
+        }
+        windowInputChannels_.insert(std::make_pair(windowId, inputChannel));
     }
-    windowInputChannels_.insert(std::make_pair(windowId, inputChannel));
+
     if (inputListener_ == nullptr) {
         TLOGD(WmsLogTag::WMS_EVENT, "Init input listener, IsMainHandlerAvailable: %{public}u",
             window->IsMainHandlerAvailable());
-        std::shared_ptr<MMI::IInputEventConsumer> listener = std::make_shared<InputEventListener>(InputEventListener());
+        std::shared_ptr<InputEventListener> listener = std::make_shared<InputEventListener>();
         auto mainEventRunner = AppExecFwk::EventRunner::GetMainEventRunner();
         if (mainEventRunner != nullptr && window->IsMainHandlerAvailable()) {
             TLOGD(WmsLogTag::WMS_EVENT, "MainEventRunner is available");
@@ -140,8 +157,11 @@ void InputTransferStation::AddInputWindow(const sptr<Window>& window)
             }
         }
         MMI::InputManager::GetInstance()->SetWindowInputEventConsumer(listener, eventHandler_);
-        TLOGI(WmsLogTag::WMS_EVENT, "SetWindowInputEventConsumer success, windowid:%{public}u", windowId);
+        TLOGI(WmsLogTag::WMS_EVENT, "SetWindowInputEventConsumer success, wid:%{public}u", windowId);
         inputListener_ = listener;
+    } else {
+        auto ret = MMI::InputManager::GetInstance()->SetWindowInputEventConsumer(inputListener_, eventHandler_);
+        TLOGI(WmsLogTag::WMS_EVENT, "SetWindowInputEventConsumer %{public}u, wid:%{public}u", ret, windowId);
     }
 }
 
@@ -180,6 +200,22 @@ sptr<WindowInputChannel> InputTransferStation::GetInputChannel(uint32_t windowId
         return nullptr;
     }
     return iter->second;
+}
+
+void InputTransferStation::HandleInputEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
+{
+    if (inputListener_ == nullptr) {
+        return;
+    }
+    inputListener_->HandleInputEvent(keyEvent);
+}
+
+void InputTransferStation::HandleInputEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    if (inputListener_ == nullptr) {
+        return;
+    }
+    inputListener_->HandleInputEvent(pointerEvent);
 }
 }
 }

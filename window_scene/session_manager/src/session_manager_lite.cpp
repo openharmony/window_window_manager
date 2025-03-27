@@ -235,7 +235,7 @@ void SessionManagerLite::ReregisterSessionListener()
 
 void SessionManagerLite::RegisterUserSwitchListener(const UserSwitchCallbackFunc& callbackFunc)
 {
-    TLOGI(WmsLogTag::WMS_MULTI_USER, "enter");
+    TLOGD(WmsLogTag::WMS_MULTI_USER, "enter");
     userSwitchCallbackFunc_ = callbackFunc;
 }
 
@@ -260,9 +260,9 @@ void SessionManagerLite::OnWMSConnectionChanged(
             isWMSConnected_ = isConnected;
         }
     }
-    TLOGI(WmsLogTag::WMS_MULTI_USER,
-        "Lite: curUserId=%{public}d, oldUserId=%{public}d, screenId=%{public}d, isConnected=%{public}d", userId,
-        lastUserId, screenId, isConnected);
+    TLOGD(WmsLogTag::WMS_MULTI_USER,
+          "Lite: curUserId=%{public}d, oldUserId=%{public}d, screenId=%{public}d, isConnected=%{public}d",
+          userId, lastUserId, screenId, isConnected);
     if (isConnected && lastUserId > INVALID_USER_ID && lastUserId != userId) {
         // Notify the user that the old wms has been disconnected.
         OnWMSConnectionChangedCallback(lastUserId, lastScreenId, false, isCallbackRegistered);
@@ -274,7 +274,7 @@ void SessionManagerLite::OnWMSConnectionChanged(
 
 void SessionManagerLite::OnUserSwitch(const sptr<ISessionManagerService>& sessionManagerService)
 {
-    TLOGI(WmsLogTag::WMS_MULTI_USER, "User switched Lite");
+    TLOGD(WmsLogTag::WMS_MULTI_USER, "User switched Lite");
     {
         Clear();
         std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -380,7 +380,7 @@ void SSMDeathRecipientLite::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
 
 WMError SessionManagerLite::RegisterWMSConnectionChangedListener(const WMSConnectionChangedCallbackFunc& callbackFunc)
 {
-    TLOGI(WmsLogTag::WMS_MULTI_USER, "Lite in");
+    TLOGD(WmsLogTag::WMS_MULTI_USER, "Lite in");
     if (callbackFunc == nullptr) {
         TLOGE(WmsLogTag::WMS_MULTI_USER, "Lite callbackFunc is null");
         return WMError::WM_ERROR_NULLPTR;
@@ -397,7 +397,7 @@ WMError SessionManagerLite::RegisterWMSConnectionChangedListener(const WMSConnec
         screenId = currentScreenId_;
     }
     if (isWMSAlreadyConnected) {
-        TLOGI(WmsLogTag::WMS_MULTI_USER, "Lite WMS already connected, notify immediately");
+        TLOGD(WmsLogTag::WMS_MULTI_USER, "Lite WMS already connected, notify immediately");
         OnWMSConnectionChangedCallback(userId, screenId, true, true);
     }
     {
@@ -453,7 +453,7 @@ void SessionManagerLite::RegisterSMSRecoverListener()
             return;
         }
         recoverListenerRegistered_ = true;
-        TLOGI(WmsLogTag::WMS_RECOVER, "Register recover listener");
+        TLOGD(WmsLogTag::WMS_RECOVER, "Register recover listener");
         smsRecoverListener_ = sptr<SessionManagerServiceLiteRecoverListener>::MakeSptr();
         std::string identity = IPCSkeleton::ResetCallingIdentity();
         mockSessionManagerServiceProxy_->RegisterSMSLiteRecoverListener(smsRecoverListener_);

@@ -54,18 +54,42 @@ public:
     WSError OnTitleAndDockHoverShowChange(bool isTitleHoverShown = true,
         bool isDockHoverShown = true) override;
     WSError OnRestoreMainWindow() override;
-    WSError OnSetWindowRectAutoSave(bool enabled) override;
+    WSError OnSetWindowRectAutoSave(bool enabled, bool isSaveBySpecifiedFlag) override;
     bool IsModal() const override;
     bool IsApplicationModal() const override;
     WSError NotifyMainModalTypeChange(bool isModal) override;
     WSError NotifySupportWindowModesChange(
-        const std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes) override;
+        const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes) override;
+    WSError UpdateFlag(const std::string& flag) override;
+
+    /*
+     * Window LifeCycle
+     */
+    void RegisterSessionLockStateChangeCallback(NotifySessionLockStateChangeCallback&& callback) override;
+    void NotifySessionLockStateChange(bool isLockedState) override;
+    void SetSessionLockState(bool isLockedState);
+    bool GetSessionLockState() const;
+    WSError SetSessionLabelAndIcon(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon) override;
+    void SetUpdateSessionLabelAndIconListener(NofitySessionLabelAndIconUpdatedFunc&& func) override;
 
 protected:
     void UpdatePointerArea(const WSRect& rect) override;
     bool CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const override;
     void NotifyClientToUpdateInteractive(bool interactive) override;
     bool isClientInteractive_ = true;
+
+private:
+    /*
+     * Window LifeCycle
+     */
+    WSError SetSessionLabelAndIconInner(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon);
+
+    NotifySessionLockStateChangeCallback onSessionLockStateChangeCallback_;
+    bool isLockedState_ = false;
+    /*
+     * Window Layout
+     */
+    void NotifySubAndDialogFollowRectChange(const WSRect& rect, bool isGlobal, bool needFlush) override;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_MAIN_SESSION_H

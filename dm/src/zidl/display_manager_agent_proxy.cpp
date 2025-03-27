@@ -567,6 +567,29 @@ void DisplayManagerAgentProxy::NotifyScreenModeChange(const std::vector<sptr<Scr
         WLOGFE("SendRequest failed");
     }
 }
+
+void DisplayManagerAgentProxy::NotifyAbnormalScreenConnectChange(ScreenId screenId)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("NotifyAbnormalScreenConnectChange: remote is nullptr");
+        return;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteUint64(screenId)) {
+        WLOGFE("Write screenId failed");
+        return;
+    }
+    if (remote->SendRequest(TRANS_ID_NOTIFY_ABNORMAL_SCREEN_CONNECT_CHANGED, data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+    }
+}
 } // namespace Rosen
 } // namespace OHOS
 

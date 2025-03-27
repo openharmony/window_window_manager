@@ -248,6 +248,13 @@ VirtualScreenFlag DisplayManagerAdapterLite::GetVirtualScreenFlag(ScreenId scree
     return displayManagerServiceProxy_->GetVirtualScreenFlag(screenId);
 }
 
+DMError DisplayManagerAdapterLite::SetSystemKeyboardStatus(bool isTpKeyboardOn)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+    
+    return displayManagerServiceProxy_->SetSystemKeyboardStatus(isTpKeyboardOn);
+}
+
 bool ScreenManagerAdapterLite::SetSpecifiedScreenPower(ScreenId screenId, ScreenPowerState state,
     PowerStateChangeReason reason)
 {
@@ -268,6 +275,20 @@ ScreenPowerState ScreenManagerAdapterLite::GetScreenPower(ScreenId dmsScreenId)
     INIT_PROXY_CHECK_RETURN(ScreenPowerState::INVALID_STATE);
 
     return displayManagerServiceProxy_->GetScreenPower(dmsScreenId);
+}
+
+ScreenPowerState ScreenManagerAdapterLite::GetScreenPower()
+{
+    INIT_PROXY_CHECK_RETURN(ScreenPowerState::INVALID_STATE);
+
+    return displayManagerServiceProxy_->GetScreenPower();
+}
+
+DMError ScreenManagerAdapterLite::GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+
+    return displayManagerServiceProxy_->GetAllScreenInfos(screenInfos);
 }
 
 DMSDeathRecipientLite::DMSDeathRecipientLite(BaseAdapterLite& adapter) : adapter_(adapter)

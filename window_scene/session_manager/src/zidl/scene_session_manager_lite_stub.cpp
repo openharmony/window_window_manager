@@ -97,6 +97,8 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
             return HandleCheckWindowId(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_UI_EXTENSION_CREATION_CHECK):
             return HandleCheckUIExtensionCreation(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_LIST_WINDOW_INFO):
+            return HandleListWindowInfo(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_VISIBILITY_WINDOW_INFO_ID):
             return HandleGetVisibilityWindowInfo(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_WINDOW_MODE_TYPE):
@@ -131,6 +133,20 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
             return HandleNotifyAppUseControlList(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_MINIMIZE_MAIN_SESSION):
             return HandleMinimizeMainSession(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_HAS_FLOAT_FOREGROUND):
+            return HandleHasFloatingWindowForeground(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_LOCK_SESSION_BY_ABILITY_INFO):
+            return HandleLockSessionByAbilityInfo(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_CALLING_WINDOW_INFO):
+            return HandleGetCallingWindowInfo(data, reply);
+        case static_cast<uint32_t>(
+            SceneSessionManagerLiteMessage::TRANS_ID_REGISTER_SESSION_LIFECYCLE_LISTENER_BY_IDS):
+            return HandleRegisterSessionLifecycleListenerByIds(data, reply);
+        case static_cast<uint32_t>(
+            SceneSessionManagerLiteMessage::TRANS_ID_REGISTER_SESSION_LIFECYCLE_LISTENER_BY_BUNDLES):
+            return HandleRegisterSessionLifecycleListenerByBundles(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_UNREGISTER_SESSION_LIFECYCLE_LISTENER):
+            return HandleUnregisterSessionLifecycleListener(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -365,9 +381,14 @@ int SceneSessionManagerLiteStub::HandleTerminateSessionNew(MessageParcel& data, 
 
 int SceneSessionManagerLiteStub::HandleGetFocusSessionToken(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFD("run HandleGetFocusSessionToken!");
+    TLOGD(WmsLogTag::WMS_FOCUS, "run");
+    uint64_t displayId = 0;
+    if (!data.ReadUint64(displayId)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Failed to read displayId");
+        return ERR_INVALID_DATA;
+    }
     sptr<IRemoteObject> token = nullptr;
-    WSError errCode = GetFocusSessionToken(token);
+    WSError errCode = GetFocusSessionToken(token, displayId);
     reply.WriteRemoteObject(token);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
@@ -375,9 +396,14 @@ int SceneSessionManagerLiteStub::HandleGetFocusSessionToken(MessageParcel& data,
 
 int SceneSessionManagerLiteStub::HandleGetFocusSessionElement(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFD("run HandleGetFocusSessionElement!");
+    TLOGD(WmsLogTag::WMS_FOCUS, "run");
+    uint64_t displayId = 0;
+    if (!data.ReadUint64(displayId)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Failed to read displayId");
+        return ERR_INVALID_DATA;
+    }
     AppExecFwk::ElementName element;
-    WSError errCode = GetFocusSessionElement(element);
+    WSError errCode = GetFocusSessionElement(element, displayId);
     reply.WriteParcelable(&element);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
@@ -506,9 +532,15 @@ int SceneSessionManagerLiteStub::HandleMoveSessionsToBackground(MessageParcel& d
 
 int SceneSessionManagerLiteStub::HandleGetFocusSessionInfo(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFD("run");
+    TLOGI(WmsLogTag::WMS_FOCUS, "run");
+    uint64_t displayId = 0;
+    if (!data.ReadUint64(displayId)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Failed to read displayId");
+        return ERR_INVALID_DATA;
+    }
     FocusChangeInfo focusInfo;
-    GetFocusWindowInfo(focusInfo);
+    GetFocusWindowInfo(focusInfo, displayId);
+    TLOGI(WmsLogTag::WMS_FOCUS, "start reply");
     reply.WriteParcelable(&focusInfo);
     return ERR_NONE;
 }
@@ -569,7 +601,7 @@ int SceneSessionManagerLiteStub::HandleCheckUIExtensionCreation(MessageParcel& d
 
     int32_t pid = INVALID_PID;
     WMError errCode = CheckUIExtensionCreation(windowId, token, *element, extAbilityType, pid);
-    TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: ret %{public}u", errCode);
+    TLOGD(WmsLogTag::WMS_UIEXT, "UIExtOnLock: ret %{public}u", errCode);
 
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: Failed to write errcode");
@@ -617,6 +649,42 @@ int SceneSessionManagerLiteStub::HandleUnregisterWindowManagerAgent(MessageParce
             iface_cast<IWindowManagerAgent>(windowManagerAgentObject);
     WMError errCode = UnregisterWindowManagerAgent(type, windowManagerAgentProxy);
     reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleListWindowInfo(MessageParcel& data, MessageParcel& reply)
+{
+    WindowInfoOption windowInfoOption;
+    uint8_t windowInfoFilterOptionValue = static_cast<WindowInfoFilterOptionDataType>(WindowInfoFilterOption::ALL);
+    if (!data.ReadUint8(windowInfoFilterOptionValue)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to read windowInfoFilterOption");
+        return ERR_INVALID_DATA;
+    }
+    windowInfoOption.windowInfoFilterOption = static_cast<WindowInfoFilterOption>(windowInfoFilterOptionValue);
+    uint8_t windowInfoTypeOptionValue = static_cast<WindowInfoTypeOptionDataType>(WindowInfoTypeOption::ALL);
+    if (!data.ReadUint8(windowInfoTypeOptionValue)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to read windowInfoTypeOption");
+        return ERR_INVALID_DATA;
+    }
+    windowInfoOption.windowInfoTypeOption = static_cast<WindowInfoTypeOption>(windowInfoTypeOptionValue);
+    if (!data.ReadUint64(windowInfoOption.displayId)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to read displayId");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.ReadInt32(windowInfoOption.windowId)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to read windowId");
+        return ERR_INVALID_DATA;
+    }
+    std::vector<sptr<WindowInfo>> infos;
+    WMError errCode = ListWindowInfo(windowInfoOption, infos);
+    if (!MarshallingHelper::MarshallingVectorParcelableObj<WindowInfo>(reply, infos)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to write window info");
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write errCode fail");
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 
@@ -674,6 +742,28 @@ int SceneSessionManagerLiteStub::HandleGetMainWinodowInfo(MessageParcel& data, M
         return ERR_INVALID_DATA;
     }
 
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleGetCallingWindowInfo(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "In");
+    sptr<CallingWindowInfo> callingWindowInfo = data.ReadParcelable<CallingWindowInfo>();
+    if (callingWindowInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Read callingWindowInfo failed");
+        return ERR_INVALID_DATA;
+    }
+    WMError ret = GetCallingWindowInfo(*callingWindowInfo);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Get callingWindowInfo failed, id: %{public}d, userId: %{public}d",
+            callingWindowInfo->windowId_, callingWindowInfo->userId_);
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteInt32(static_cast<int32_t>(ret)) || !reply.WriteParcelable(callingWindowInfo)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Write callingWindowInfo failed, id: %{public}d, userId: %{public}d",
+            callingWindowInfo->windowId_, callingWindowInfo->userId_);
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 
@@ -877,7 +967,8 @@ int SceneSessionManagerLiteStub::HandleNotifyAppUseControlList(MessageParcel& da
     for (int32_t i = 0; i < size; i++) {
         if (!data.ReadString(controlList[i].bundleName_) ||
             !data.ReadInt32(controlList[i].appIndex_) ||
-            !data.ReadBool(controlList[i].isNeedControl_)) {
+            !data.ReadBool(controlList[i].isNeedControl_) ||
+            !data.ReadBool(controlList[i].isControlRecentOnly_)) {
             TLOGE(WmsLogTag::WMS_LIFE, "Read controlList failed");
             return ERR_INVALID_DATA;
         }
@@ -907,7 +998,134 @@ int SceneSessionManagerLiteStub::HandleMinimizeMainSession(MessageParcel& data, 
         return ERR_INVALID_DATA;
     }
     WMError ret = MinimizeMainSession(bundleName, appIndex, userId);
-    reply.WriteInt32(static_cast<int32_t>(ret));
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write ret failed.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleLockSessionByAbilityInfo(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
+    AbilityInfoBase abilityInfo;
+    if (!data.ReadString(abilityInfo.bundleName)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read bundleName");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.ReadString(abilityInfo.moduleName)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read moduleName");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.ReadString(abilityInfo.abilityName)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read abilityName");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.ReadInt32(abilityInfo.appIndex)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read appIndex");
+        return ERR_INVALID_DATA;
+    }
+    bool isLock = false;
+    if (!data.ReadBool(isLock)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read isLock");
+        return ERR_INVALID_DATA;
+    }
+    WMError ret = LockSessionByAbilityInfo(abilityInfo, isLock);
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleHasFloatingWindowForeground(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_SYSTEM, "in");
+    sptr<IRemoteObject> abilityToken = data.ReadRemoteObject();
+    if (!abilityToken) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "AbilityToken is null.");
+        return ERR_INVALID_DATA;
+    }
+    bool hasOrNot = false;
+    WMError errCode = HasFloatingWindowForeground(abilityToken, hasOrNot);
+    if (!reply.WriteBool(hasOrNot)) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Write hasOrNot failed.");
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteUint32(static_cast<uint32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Write errCode failed.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleRegisterSessionLifecycleListenerByIds(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
+    sptr<IRemoteObject> listenerObject = data.ReadRemoteObject();
+    if (listenerObject == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "remote object is nullptr!");
+        return ERR_INVALID_DATA;
+    }
+    sptr<ISessionLifecycleListener> listener = iface_cast<ISessionLifecycleListener>(listenerObject);
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "listener is nullptr!");
+        return ERR_INVALID_DATA;
+    }
+    std::vector<int32_t> persistentIdList;
+    if (!data.ReadInt32Vector(&persistentIdList)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read persistentIdList");
+        return ERR_INVALID_DATA;
+    }
+    WMError ret = RegisterSessionLifecycleListenerByIds(listener, persistentIdList);
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleRegisterSessionLifecycleListenerByBundles(
+    MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
+    sptr<IRemoteObject> listenerObject = data.ReadRemoteObject();
+    if (listenerObject == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "remote object is nullptr!");
+        return ERR_INVALID_DATA;
+    }
+    sptr<ISessionLifecycleListener> listener = iface_cast<ISessionLifecycleListener>(listenerObject);
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "listener is nullptr!");
+        return ERR_INVALID_DATA;
+    }
+    std::vector<std::string> bundleNameList;
+    if (!data.ReadStringVector(&bundleNameList)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read bundleNameList");
+        return ERR_INVALID_DATA;
+    }
+    WMError ret = RegisterSessionLifecycleListenerByBundles(listener, bundleNameList);
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleUnregisterSessionLifecycleListener(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
+    sptr<IRemoteObject> listenerObject = data.ReadRemoteObject();
+    if (listenerObject == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "remote object is nullptr!");
+        return ERR_INVALID_DATA;
+    }
+    sptr<ISessionLifecycleListener> listener = iface_cast<ISessionLifecycleListener>(listenerObject);
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "listener is nullptr!");
+        return ERR_INVALID_DATA;
+    }
+    WMError ret = UnregisterSessionLifecycleListener(listener);
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

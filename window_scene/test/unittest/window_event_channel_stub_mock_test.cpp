@@ -66,7 +66,7 @@ void WindowEventChannelMockStubTest::TearDown()
  * @tc.desc: test function : HandleTransferAccessibilityChildTreeRegister01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelMockStubTest, HandleTransferAccessibilityChildTreeRegister01, Function | SmallTest | Level1)
+HWTEST_F(WindowEventChannelMockStubTest, HandleTransferAccessibilityChildTreeRegister01, TestSize.Level1)
 {
     WLOGI("HandleTransferAccessibilityChildTreeRegister01 begin");
     MockMessageParcel::ClearAllErrorFlag();
@@ -88,7 +88,7 @@ HWTEST_F(WindowEventChannelMockStubTest, HandleTransferAccessibilityChildTreeReg
  * @tc.desc: test function : HandleTransferAccessibilityChildTreeRegister02
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelMockStubTest, HandleTransferAccessibilityChildTreeRegister02, Function | SmallTest | Level1)
+HWTEST_F(WindowEventChannelMockStubTest, HandleTransferAccessibilityChildTreeRegister02, TestSize.Level1)
 {
     WLOGI("HandleTransferAccessibilityChildTreeRegister02 begin");
     MockMessageParcel::ClearAllErrorFlag();
@@ -110,7 +110,7 @@ HWTEST_F(WindowEventChannelMockStubTest, HandleTransferAccessibilityChildTreeReg
  * @tc.desc: test function : HandleTransferAccessibilityChildTreeUnregister
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelMockStubTest, HandleTransferAccessibilityChildTreeUnregister, Function | SmallTest | Level1)
+HWTEST_F(WindowEventChannelMockStubTest, HandleTransferAccessibilityChildTreeUnregister, TestSize.Level1)
 {
     WLOGI("HandleTransferAccessibilityChildTreeUnregister begin");
     MockMessageParcel::ClearAllErrorFlag();
@@ -127,7 +127,7 @@ HWTEST_F(WindowEventChannelMockStubTest, HandleTransferAccessibilityChildTreeUnr
  * @tc.desc: test function : HandleTransferAccessibilityDumpChildInfo
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelMockStubTest, HandleTransferAccessibilityDumpChildInfo, Function | SmallTest | Level1)
+HWTEST_F(WindowEventChannelMockStubTest, HandleTransferAccessibilityDumpChildInfo, TestSize.Level1)
 {
     WLOGI("HandleTransferAccessibilityDumpChildInfo begin");
     MockMessageParcel::ClearAllErrorFlag();

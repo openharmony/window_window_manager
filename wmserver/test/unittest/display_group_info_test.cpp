@@ -97,7 +97,7 @@ namespace {
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupInfoTest, AddDisplayInfo01, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupInfoTest, AddDisplayInfo01, TestSize.Level1)
 {
     sptr<DisplayInfo> displayInfo = new DisplayInfo();
     displayInfo->SetDisplayId(0);
@@ -110,7 +110,7 @@ HWTEST_F(DisplayGroupInfoTest, AddDisplayInfo01, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupInfoTest, AddDisplayInfo02, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupInfoTest, AddDisplayInfo02, TestSize.Level1)
 {
     sptr<DisplayInfo> displayInfo = new DisplayInfo();
     displayInfo->SetDisplayId(3);
@@ -123,7 +123,7 @@ HWTEST_F(DisplayGroupInfoTest, AddDisplayInfo02, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupInfoTest, RemoveDisplayInfo01, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupInfoTest, RemoveDisplayInfo01, TestSize.Level1)
 {
     DisplayId displayId = 0;
     displayGroupInfo_->RemoveDisplayInfo(displayId);
@@ -135,7 +135,7 @@ HWTEST_F(DisplayGroupInfoTest, RemoveDisplayInfo01, Function | SmallTest | Level
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupInfoTest, RemoveDisplayInfo02, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupInfoTest, RemoveDisplayInfo02, TestSize.Level1)
 {
     DisplayId displayId = 3;
     displayGroupInfo_->RemoveDisplayInfo(displayId);
@@ -147,7 +147,7 @@ HWTEST_F(DisplayGroupInfoTest, RemoveDisplayInfo02, Function | SmallTest | Level
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupInfoTest, GetAllDisplayRects01, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupInfoTest, GetAllDisplayRects01, TestSize.Level1)
 {
     ASSERT_EQ(3u, displayGroupInfo_->GetAllDisplayRects().size());
 }
@@ -157,7 +157,7 @@ HWTEST_F(DisplayGroupInfoTest, GetAllDisplayRects01, Function | SmallTest | Leve
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupInfoTest, UpdateLeftAndRightDisplayId01, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupInfoTest, UpdateLeftAndRightDisplayId01, TestSize.Level1)
 {
     displayGroupInfo_->UpdateLeftAndRightDisplayId();
     ASSERT_EQ(1u, displayGroupInfo_->GetLeftDisplayId());
@@ -169,7 +169,7 @@ HWTEST_F(DisplayGroupInfoTest, UpdateLeftAndRightDisplayId01, Function | SmallTe
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupInfoTest, SetDisplayRotation01, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupInfoTest, SetDisplayRotation01, TestSize.Level1)
 {
     DisplayId displayId = 0;
     displayGroupInfo_->SetDisplayRotation(displayId, Rotation::ROTATION_90);
@@ -181,7 +181,7 @@ HWTEST_F(DisplayGroupInfoTest, SetDisplayRotation01, Function | SmallTest | Leve
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupInfoTest, SetDisplayRotation02, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupInfoTest, SetDisplayRotation02, TestSize.Level1)
 {
     DisplayId displayId = 3;
     displayGroupInfo_->SetDisplayRotation(displayId, Rotation::ROTATION_90);
@@ -193,7 +193,7 @@ HWTEST_F(DisplayGroupInfoTest, SetDisplayRotation02, Function | SmallTest | Leve
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupInfoTest, SetDisplayVirtualPixelRatio01, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupInfoTest, SetDisplayVirtualPixelRatio01, TestSize.Level1)
 {
     DisplayId displayId = 0;
     displayGroupInfo_->SetDisplayVirtualPixelRatio(displayId, 0.1f);
@@ -205,7 +205,7 @@ HWTEST_F(DisplayGroupInfoTest, SetDisplayVirtualPixelRatio01, Function | SmallTe
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupInfoTest, SetDisplayVirtualPixelRatio02, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupInfoTest, SetDisplayVirtualPixelRatio02, TestSize.Level1)
 {
     DisplayId displayId = 3;
     displayGroupInfo_->SetDisplayVirtualPixelRatio(displayId, 0.1f);
@@ -217,7 +217,7 @@ HWTEST_F(DisplayGroupInfoTest, SetDisplayVirtualPixelRatio02, Function | SmallTe
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupInfoTest, SetDisplayRect01, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupInfoTest, SetDisplayRect01, TestSize.Level1)
 {
     DisplayId displayId = 0;
     Rect rect = {3, 3, 3, 3};
@@ -230,7 +230,7 @@ HWTEST_F(DisplayGroupInfoTest, SetDisplayRect01, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupInfoTest, SetDisplayRect02, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupInfoTest, SetDisplayRect02, TestSize.Level1)
 {
     DisplayId displayId = 3;
     Rect rect1 = {3, 3, 3, 3};
@@ -244,7 +244,7 @@ HWTEST_F(DisplayGroupInfoTest, SetDisplayRect02, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupInfoTest, UpdateDisplayInfo01, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupInfoTest, UpdateDisplayInfo01, TestSize.Level1)
 {
     sptr<DisplayInfo> displayInfo = new DisplayInfo();
     DisplayId displayId = 0;
@@ -260,7 +260,7 @@ HWTEST_F(DisplayGroupInfoTest, UpdateDisplayInfo01, Function | SmallTest | Level
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupInfoTest, UpdateDisplayInfo02, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupInfoTest, UpdateDisplayInfo02, TestSize.Level1)
 {
     sptr<DisplayInfo> displayInfo = new DisplayInfo();
     DisplayId displayId = 3;

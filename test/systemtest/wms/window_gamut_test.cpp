@@ -66,7 +66,7 @@ namespace {
  * @tc.desc: IsSupportWideGamut
  * @tc.type: FUNC
  */
-HWTEST_F(WindowGamutTest, IsSupportWideGamut01, Function | MediumTest | Level3)
+HWTEST_F(WindowGamutTest, IsSupportWideGamut01, TestSize.Level1)
 {
     fullScreenAppInfo_.name = "window_isSupportWideGamut01";
     sptr<Window> window = Utils::CreateTestWindow(fullScreenAppInfo_);
@@ -82,7 +82,7 @@ HWTEST_F(WindowGamutTest, IsSupportWideGamut01, Function | MediumTest | Level3)
  * @tc.desc: Get ColorSpace
  * @tc.type: FUNC
  */
-HWTEST_F(WindowGamutTest, GetColorSpace01, Function | MediumTest | Level3)
+HWTEST_F(WindowGamutTest, GetColorSpace01, TestSize.Level1)
 {
     fullScreenAppInfo_.name = "window_getColorSpace01";
     sptr<Window> window = Utils::CreateTestWindow(fullScreenAppInfo_);
@@ -98,7 +98,7 @@ HWTEST_F(WindowGamutTest, GetColorSpace01, Function | MediumTest | Level3)
  * @tc.desc: Set ColorSpace, valid param
  * @tc.type: FUNC
  */
-HWTEST_F(WindowGamutTest, SetColorSpace01, Function | MediumTest | Level3)
+HWTEST_F(WindowGamutTest, SetColorSpace01, TestSize.Level1)
 {
     uint32_t i, j;
     const ColorSpace colorSpacesToTest[] = {
@@ -135,7 +135,7 @@ HWTEST_F(WindowGamutTest, SetColorSpace01, Function | MediumTest | Level3)
  * @tc.desc: Set ColorSpace, invalid param
  * @tc.type: FUNC
  */
-HWTEST_F(WindowGamutTest, SetColorSpace02, Function | MediumTest | Level3)
+HWTEST_F(WindowGamutTest, SetColorSpace02, TestSize.Level1)
 {
     fullScreenAppInfo_.name = "window_setColorSpace02";
     sptr<Window> window = Utils::CreateTestWindow(fullScreenAppInfo_);

@@ -132,7 +132,7 @@ namespace {
  * @tc.type: FUNC
  * @tc.require issueI5HF6V
  */
-HWTEST_F(DisplayManagerTest, HasPrivateWindow, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerTest, HasPrivateWindow, TestSize.Level1)
 {
     sptr<Window> window = CreateWindow("test", WindowMode::WINDOW_MODE_FULLSCREEN, Rect {0, 0, 0, 0});
     if (window == nullptr) {
@@ -158,7 +158,7 @@ HWTEST_F(DisplayManagerTest, HasPrivateWindow, Function | SmallTest | Level2)
  * @tc.type: FUNC
  * @tc.require issueI5HF6V
  */
-HWTEST_F(DisplayManagerTest, HasPrivateWindowCovered, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerTest, HasPrivateWindowCovered, TestSize.Level1)
 {
     auto displayWidth = DisplayManagerTest::displayWidth_;
     auto displayHeight = DisplayManagerTest::displayHeight_;
@@ -203,7 +203,7 @@ HWTEST_F(DisplayManagerTest, HasPrivateWindowCovered, Function | SmallTest | Lev
  * @tc.type: FUNC
  * @tc.require issueI5HF6V
  */
-HWTEST_F(DisplayManagerTest, HasPrivateWindowCovered01, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerTest, HasPrivateWindowCovered01, TestSize.Level1)
 {
     sptr<Window> window1 = CreateWindow("test", WindowMode::WINDOW_MODE_FULLSCREEN, Rect{0, 0, 0, 0});
 
@@ -241,7 +241,7 @@ HWTEST_F(DisplayManagerTest, HasPrivateWindowCovered01, Function | SmallTest | L
  * @tc.type: FUNC
  * @tc.require issueI5HF6V
  */
-HWTEST_F(DisplayManagerTest, HasPrivateWindowCovered02, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerTest, HasPrivateWindowCovered02, TestSize.Level1)
 {
     auto displayWidth = DisplayManagerTest::displayWidth_;
     auto displayHeight = DisplayManagerTest::displayHeight_;
@@ -294,7 +294,7 @@ HWTEST_F(DisplayManagerTest, HasPrivateWindowCovered02, Function | SmallTest | L
  * @tc.type: FUNC
  * @tc.require issueI5HF6V
  */
-HWTEST_F(DisplayManagerTest, HasPrivateWindowCovered03, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerTest, HasPrivateWindowCovered03, TestSize.Level1)
 {
     sptr<Window> window1 = CreateWindow("test", WindowMode::WINDOW_MODE_FULLSCREEN, Rect {0, 0, 0, 0});
    
@@ -335,7 +335,7 @@ HWTEST_F(DisplayManagerTest, HasPrivateWindowCovered03, Function | SmallTest | L
  * @tc.type: FUNC
  * @tc.require issueI5HF6V
  */
-HWTEST_F(DisplayManagerTest, HasPrivateWindowSkipSnapShot, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerTest, HasPrivateWindowSkipSnapShot, TestSize.Level1)
 {
     sptr<Window> window1 = CreateWindow("test", WindowMode::WINDOW_MODE_FULLSCREEN, Rect {0, 0, 0, 0});
     if (window1 == nullptr) {
@@ -363,7 +363,7 @@ HWTEST_F(DisplayManagerTest, HasPrivateWindowSkipSnapShot, Function | SmallTest 
  * @tc.desc: add/remove surfaceNode to/from display
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, AddAndRemoveSurfaceNode, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerTest, AddAndRemoveSurfaceNode, TestSize.Level1)
 {
     RSSurfaceNodeConfig config;
     config.SurfaceNodeName = "TestSurfaceNode";
@@ -379,7 +379,7 @@ HWTEST_F(DisplayManagerTest, AddAndRemoveSurfaceNode, Function | SmallTest | Lev
  * @tc.desc: add/remove surfaceNode to/from display
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, SetVirtualScreenSecurityExemption, Function | SmallTest | Level2)
+HWTEST_F(DisplayManagerTest, SetVirtualScreenSecurityExemption, TestSize.Level1)
 {
     ScreenId id = 0;
     uint32_t pid = 0;

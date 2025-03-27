@@ -20,6 +20,7 @@
 
 #include "vsync_station.h"
 #include "window.h"
+#include "window_helper.h"
 #include "ws_common.h"
 
 typedef struct napi_env__* napi_env;
@@ -35,9 +36,11 @@ class UIContent;
 
 namespace OHOS {
 namespace Rosen {
+class RSNode;
 using GetSessionAvoidAreaByTypeCallback = std::function<AvoidArea(AvoidAreaType)>;
 using UpdateRootSceneRectCallback = std::function<void(const Rect& rect)>;
 using UpdateRootSceneAvoidAreaCallback = std::function<void()>;
+using NotifyWatchFocusActiveChangeCallback = std::function<void(bool isFocusActive)>;
 
 class RootScene : public Window {
 public:
@@ -47,8 +50,11 @@ public:
     void LoadContent(const std::string& contentUrl, napi_env env, napi_value storage,
         AbilityRuntime::Context* context);
     void UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason);
-    static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
+    static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration,
+        const std::vector<std::shared_ptr<AbilityRuntime::Context>>& ignoreWindowContexts = {});
     void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
+    void UpdateConfigurationForSpecified(const std::shared_ptr<AppExecFwk::Configuration>& configuration,
+        const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager) override;
 
     void RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback) override;
     int64_t GetVSyncPeriod() override;
@@ -59,7 +65,8 @@ public:
      */
     bool IsLastFrameLayoutFinished();
     void OnFlushUIParams();
-    WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect = {0, 0, 0, 0}) override;
+    WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect = Rect::EMPTY_RECT,
+        int32_t apiVersion = API_VERSION_INVALID) override;
     void RegisterGetSessionAvoidAreaByTypeCallback(GetSessionAvoidAreaByTypeCallback&& callback);
     void RegisterUpdateRootSceneRectCallback(UpdateRootSceneRectCallback&& callback);
     WMError RegisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener) override;
@@ -67,6 +74,20 @@ public:
     void NotifyAvoidAreaChangeForRoot(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
     void RegisterUpdateRootSceneAvoidAreaCallback(UpdateRootSceneAvoidAreaCallback&& callback);
     std::string GetClassType() const override { return "RootScene"; }
+    bool IsSystemWindow() const override { return WindowHelper::IsSystemWindow(GetType()); }
+    bool IsAppWindow() const override { return WindowHelper::IsAppWindow(GetType()); }
+
+    /*
+     * Keyboard Window
+     */
+    WMError RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
+    WMError UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
+    void NotifyOccupiedAreaChangeForRoot(const sptr<OccupiedAreaChangeInfo>& info);
+
+    /*
+     * watch
+     */
+    void RegisterNotifyWatchFocusActiveChangeCallback(NotifyWatchFocusActiveChangeCallback&& callback);
 
     const std::shared_ptr<AbilityRuntime::Context> GetContext() const override { return context_.lock(); }
 
@@ -98,6 +119,12 @@ public:
     void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
 
     /*
+     * Window Layout
+     */
+    std::shared_ptr<Rosen::RSNode> GetRSNodeByStringID(const std::string& stringId);
+    void SetTopWindowBoundaryByID(const std::string& stringId);
+
+    /*
      * Window Property
      */
     static void UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
@@ -121,6 +148,7 @@ private:
     std::function<void()> frameLayoutFinishCb_ = nullptr;
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
     std::weak_ptr<AbilityRuntime::Context> context_;
+    std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
 
     /*
      * Window Immersive
@@ -130,7 +158,18 @@ private:
     UpdateRootSceneAvoidAreaCallback updateRootSceneAvoidAreaCallback_ = nullptr;
     mutable std::mutex mutex_;
     std::unordered_set<sptr<IAvoidAreaChangedListener>, SptrHash<IAvoidAreaChangedListener>> avoidAreaChangeListeners_;
-    // Above guarded by mutex_
+
+    /*
+     * Keyboard Window
+     */
+    mutable std::mutex occupiedAreaMutex_;
+    std::unordered_set<sptr<IOccupiedAreaChangeListener>, SptrHash<IOccupiedAreaChangeListener>>
+        occupiedAreaChangeListeners_;
+
+    /*
+     * watch
+     */
+    NotifyWatchFocusActiveChangeCallback notifyWatchFocusActiveChangeCallback_ = nullptr;
 };
 } // namespace Rosen
 } // namespace OHOS

@@ -159,6 +159,18 @@ WMError WindowScene::GoForeground(uint32_t reason)
     return mainWindow->Show(reason);
 }
 
+WMError WindowScene::GoResume()
+{
+    TLOGI(WmsLogTag::WMS_MAIN, "in");
+    auto mainWindow = GetMainWindow();
+    if (mainWindow == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "failed, because main window is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    mainWindow->Resume();
+    return WMError::WM_OK;
+}
+
 WMError WindowScene::GoBackground(uint32_t reason)
 {
     TLOGI(WmsLogTag::WMS_MAIN, "reason: %{public}u", reason);
@@ -226,6 +238,17 @@ void WindowScene::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configur
         mainWindow->UpdateConfiguration(configuration);
     } else {
         TLOGE(WmsLogTag::WMS_MAIN, "failed, because main window is null");
+    }
+}
+
+void WindowScene::UpdateConfigurationForSpecified(const std::shared_ptr<AppExecFwk::Configuration>& configuration,
+    const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager)
+{
+    if (auto mainWindow = GetMainWindow()) {
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u", mainWindow->GetWindowId());
+        mainWindow->UpdateConfigurationForSpecified(configuration, resourceManager);
+    } else {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "main window is null");
     }
 }
 

@@ -30,10 +30,10 @@ const std::unordered_map<WindowType, SystemBarProperty>& SYS_BAR_PROPS_TEST = {
     { WindowType::WINDOW_TYPE_NAVIGATION_BAR, SYS_BAR_PROP_2 },
 };
 const std::unordered_map<WindowType, SystemBarProperty>& SYS_BAR_PROPS_DEFAULT = {
-    { WindowType::WINDOW_TYPE_STATUS_BAR,     SYS_BAR_PROP_DEFAULT },
+    { WindowType::WINDOW_TYPE_STATUS_BAR, SYS_BAR_PROP_DEFAULT },
     { WindowType::WINDOW_TYPE_NAVIGATION_BAR, SYS_BAR_PROP_DEFAULT },
 };
-}
+} // namespace
 class WindowOptionTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -41,21 +41,13 @@ public:
     virtual void SetUp() override;
     virtual void TearDown() override;
 };
-void WindowOptionTest::SetUpTestCase()
-{
-}
+void WindowOptionTest::SetUpTestCase() {}
 
-void WindowOptionTest::TearDownTestCase()
-{
-}
+void WindowOptionTest::TearDownTestCase() {}
 
-void WindowOptionTest::SetUp()
-{
-}
+void WindowOptionTest::SetUp() {}
 
-void WindowOptionTest::TearDown()
-{
-}
+void WindowOptionTest::TearDown() {}
 
 namespace {
 /**
@@ -63,10 +55,10 @@ namespace {
  * @tc.desc: SetWindowRect/GetWindowRect
  * @tc.type: FUNC
  */
-HWTEST_F(WindowOptionTest, WindowRect01, Function | SmallTest | Level2)
+HWTEST_F(WindowOptionTest, WindowRect01, TestSize.Level1)
 {
     sptr<WindowOption> option = new WindowOption();
-    struct Rect rect = {1, 2, 3u, 4u};
+    struct Rect rect = { 1, 2, 3u, 4u };
     option->SetWindowRect(rect);
 
     ASSERT_EQ(1, option->GetWindowRect().posX_);
@@ -80,7 +72,7 @@ HWTEST_F(WindowOptionTest, WindowRect01, Function | SmallTest | Level2)
  * @tc.desc: SetWindowType/GetWindowType
  * @tc.type: FUNC
  */
-HWTEST_F(WindowOptionTest, WindowType01, Function | SmallTest | Level2)
+HWTEST_F(WindowOptionTest, WindowType01, TestSize.Level1)
 {
     sptr<WindowOption> option = new WindowOption();
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
@@ -92,7 +84,7 @@ HWTEST_F(WindowOptionTest, WindowType01, Function | SmallTest | Level2)
  * @tc.desc: SetWindowMode/GetWindowMode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowOptionTest, WindowMode01, Function | SmallTest | Level2)
+HWTEST_F(WindowOptionTest, WindowMode01, TestSize.Level1)
 {
     sptr<WindowOption> option = new WindowOption();
     option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
@@ -104,7 +96,7 @@ HWTEST_F(WindowOptionTest, WindowMode01, Function | SmallTest | Level2)
  * @tc.desc: SetWindowMode/GetWindowMode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowOptionTest, WindowMode02, Function | SmallTest | Level2)
+HWTEST_F(WindowOptionTest, WindowMode02, TestSize.Level1)
 {
     sptr<WindowOption> option = new WindowOption();
     WindowMode defaultMode = option->GetWindowMode();
@@ -117,7 +109,7 @@ HWTEST_F(WindowOptionTest, WindowMode02, Function | SmallTest | Level2)
  * @tc.desc: SetWindowMode/GetWindowMode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowOptionTest, WindowMode03, Function | SmallTest | Level2)
+HWTEST_F(WindowOptionTest, WindowMode03, TestSize.Level1)
 {
     sptr<WindowOption> option = new WindowOption();
     option->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
@@ -129,7 +121,7 @@ HWTEST_F(WindowOptionTest, WindowMode03, Function | SmallTest | Level2)
  * @tc.desc: SetWindowMode/GetWindowMode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowOptionTest, WindowMode04, Function | SmallTest | Level2)
+HWTEST_F(WindowOptionTest, WindowMode04, TestSize.Level1)
 {
     sptr<WindowOption> option = new WindowOption();
     option->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
@@ -141,7 +133,7 @@ HWTEST_F(WindowOptionTest, WindowMode04, Function | SmallTest | Level2)
  * @tc.desc: SetWindowMode/GetWindowMode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowOptionTest, WindowMode05, Function | SmallTest | Level2)
+HWTEST_F(WindowOptionTest, WindowMode05, TestSize.Level1)
 {
     sptr<WindowOption> option = new WindowOption();
     option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
@@ -153,7 +145,7 @@ HWTEST_F(WindowOptionTest, WindowMode05, Function | SmallTest | Level2)
  * @tc.desc: SetWindowMode/GetWindowMode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowOptionTest, WindowMode06, Function | SmallTest | Level2)
+HWTEST_F(WindowOptionTest, WindowMode06, TestSize.Level1)
 {
     sptr<WindowOption> option = new WindowOption();
     option->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
@@ -165,7 +157,7 @@ HWTEST_F(WindowOptionTest, WindowMode06, Function | SmallTest | Level2)
  * @tc.desc: SetFocusable/GetFocusable
  * @tc.type: FUNC
  */
-HWTEST_F(WindowOptionTest, Focusable01, Function | SmallTest | Level2)
+HWTEST_F(WindowOptionTest, Focusable01, TestSize.Level1)
 {
     sptr<WindowOption> option = new WindowOption();
     option->SetFocusable(true);
@@ -177,7 +169,7 @@ HWTEST_F(WindowOptionTest, Focusable01, Function | SmallTest | Level2)
  * @tc.desc: SetTouchable/GetTouchable
  * @tc.type: FUNC
  */
-HWTEST_F(WindowOptionTest, Touchable01, Function | SmallTest | Level2)
+HWTEST_F(WindowOptionTest, Touchable01, TestSize.Level1)
 {
     sptr<WindowOption> option = new WindowOption();
     option->SetTouchable(true);
@@ -189,7 +181,7 @@ HWTEST_F(WindowOptionTest, Touchable01, Function | SmallTest | Level2)
  * @tc.desc: SetDisplayId/GetDisplayId
  * @tc.type: FUNC
  */
-HWTEST_F(WindowOptionTest, DisplayId01, Function | SmallTest | Level2)
+HWTEST_F(WindowOptionTest, DisplayId01, TestSize.Level1)
 {
     sptr<WindowOption> option = new WindowOption();
     option->SetDisplayId(1);
@@ -201,7 +193,7 @@ HWTEST_F(WindowOptionTest, DisplayId01, Function | SmallTest | Level2)
  * @tc.desc: SetParentId/GetParentId
  * @tc.type: FUNC
  */
-HWTEST_F(WindowOptionTest, ParentId01, Function | SmallTest | Level2)
+HWTEST_F(WindowOptionTest, ParentId01, TestSize.Level1)
 {
     sptr<WindowOption> option = new WindowOption();
     option->SetParentId(1);
@@ -213,7 +205,7 @@ HWTEST_F(WindowOptionTest, ParentId01, Function | SmallTest | Level2)
  * @tc.desc: SetWindowName/GetWindowName
  * @tc.type: FUNC
  */
-HWTEST_F(WindowOptionTest, WindowName01, Function | SmallTest | Level2)
+HWTEST_F(WindowOptionTest, WindowName01, TestSize.Level1)
 {
     sptr<WindowOption> option = new WindowOption();
     option->SetWindowName("Sub Window");
@@ -225,7 +217,7 @@ HWTEST_F(WindowOptionTest, WindowName01, Function | SmallTest | Level2)
  * @tc.desc: SetBundleName/GetBundleName
  * @tc.type: FUNC
  */
-HWTEST_F(WindowOptionTest, BundleName01, Function | SmallTest | Level2)
+HWTEST_F(WindowOptionTest, BundleName01, TestSize.Level1)
 {
     sptr<WindowOption> option = new WindowOption();
     option->SetBundleName("settings");
@@ -237,7 +229,7 @@ HWTEST_F(WindowOptionTest, BundleName01, Function | SmallTest | Level2)
  * @tc.desc: SetWindowFlags/GetWindowFlags
  * @tc.type: FUNC
  */
-HWTEST_F(WindowOptionTest, WindowFlag01, Function | SmallTest | Level2)
+HWTEST_F(WindowOptionTest, WindowFlag01, TestSize.Level1)
 {
     sptr<WindowOption> option = new WindowOption();
     option->SetWindowFlags(1u);
@@ -249,7 +241,7 @@ HWTEST_F(WindowOptionTest, WindowFlag01, Function | SmallTest | Level2)
  * @tc.desc: AddWindowFlag/GetWindowFlags
  * @tc.type: FUNC
  */
-HWTEST_F(WindowOptionTest, WindowFlag02, Function | SmallTest | Level2)
+HWTEST_F(WindowOptionTest, WindowFlag02, TestSize.Level1)
 {
     sptr<WindowOption> option = new WindowOption();
     option->AddWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
@@ -261,7 +253,7 @@ HWTEST_F(WindowOptionTest, WindowFlag02, Function | SmallTest | Level2)
  * @tc.desc: AddWindowFlag/RemoveWindowFlag/GetWindowFlags
  * @tc.type: FUNC
  */
-HWTEST_F(WindowOptionTest, WindowFlag03, Function | SmallTest | Level2)
+HWTEST_F(WindowOptionTest, WindowFlag03, TestSize.Level1)
 {
     sptr<WindowOption> option = new WindowOption();
     option->AddWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
@@ -275,7 +267,7 @@ HWTEST_F(WindowOptionTest, WindowFlag03, Function | SmallTest | Level2)
  * @tc.desc: SetSystemBarProperty with test param and get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowOptionTest, SetGetSystemBarProperty01, Function | SmallTest | Level3)
+HWTEST_F(WindowOptionTest, SetGetSystemBarProperty01, TestSize.Level1)
 {
     sptr<WindowOption> option = new WindowOption();
     option->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, SYS_BAR_PROP_1);
@@ -288,7 +280,7 @@ HWTEST_F(WindowOptionTest, SetGetSystemBarProperty01, Function | SmallTest | Lev
  * @tc.desc: SetSystemBarProperty with invalid type and get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowOptionTest, SetGetSystemBarProperty02, Function | SmallTest | Level3)
+HWTEST_F(WindowOptionTest, SetGetSystemBarProperty02, TestSize.Level1)
 {
     sptr<WindowOption> option = new WindowOption();
     option->SetSystemBarProperty(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, SYS_BAR_PROP_1);
@@ -301,7 +293,7 @@ HWTEST_F(WindowOptionTest, SetGetSystemBarProperty02, Function | SmallTest | Lev
  * @tc.desc: GetSystemBarProperty with no set
  * @tc.type: FUNC
  */
-HWTEST_F(WindowOptionTest, SetGetSystemBarProperty03, Function | SmallTest | Level3)
+HWTEST_F(WindowOptionTest, SetGetSystemBarProperty03, TestSize.Level1)
 {
     sptr<WindowOption> option = new WindowOption();
     ASSERT_EQ(SYS_BAR_PROPS_DEFAULT, option->GetSystemBarProperty());
@@ -312,11 +304,11 @@ HWTEST_F(WindowOptionTest, SetGetSystemBarProperty03, Function | SmallTest | Lev
  * @tc.desc: HitOffset setter/getter test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowOptionTest, HitOffset, Function | SmallTest | Level3)
+HWTEST_F(WindowOptionTest, HitOffset, TestSize.Level1)
 {
     sptr<WindowOption> option = new WindowOption();
     option->SetHitOffset(1, 1);
-    PointInfo point = {1, 1};
+    PointInfo point = { 1, 1 };
     ASSERT_EQ(point.x, option->GetHitOffset().x);
     ASSERT_EQ(point.y, option->GetHitOffset().y);
 }
@@ -326,7 +318,7 @@ HWTEST_F(WindowOptionTest, HitOffset, Function | SmallTest | Level3)
  * @tc.desc: KeepScreenOn setter/getter test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowOptionTest, KeepScreenOn, Function | SmallTest | Level3)
+HWTEST_F(WindowOptionTest, KeepScreenOn, TestSize.Level1)
 {
     sptr<WindowOption> option = new WindowOption();
     option->SetKeepScreenOn(true);
@@ -340,7 +332,7 @@ HWTEST_F(WindowOptionTest, KeepScreenOn, Function | SmallTest | Level3)
  * @tc.desc: TurnScreenOn setter/getter test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowOptionTest, TurnScreenOn, Function | SmallTest | Level3)
+HWTEST_F(WindowOptionTest, TurnScreenOn, TestSize.Level1)
 {
     sptr<WindowOption> option = new WindowOption();
     option->SetTurnScreenOn(true);
@@ -354,7 +346,7 @@ HWTEST_F(WindowOptionTest, TurnScreenOn, Function | SmallTest | Level3)
  * @tc.desc: Brightness setter/getter test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowOptionTest, Brightness, Function | SmallTest | Level3)
+HWTEST_F(WindowOptionTest, Brightness, TestSize.Level1)
 {
     sptr<WindowOption> option = new WindowOption();
     option->SetBrightness(MINIMUM_BRIGHTNESS);
@@ -375,7 +367,7 @@ HWTEST_F(WindowOptionTest, Brightness, Function | SmallTest | Level3)
  * @tc.desc: CallingWindow setter/getter test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowOptionTest, CallingWindow, Function | SmallTest | Level3)
+HWTEST_F(WindowOptionTest, CallingWindow, TestSize.Level1)
 {
     sptr<WindowOption> option = new WindowOption();
     option->SetCallingWindow(1);
@@ -387,7 +379,7 @@ HWTEST_F(WindowOptionTest, CallingWindow, Function | SmallTest | Level3)
  * @tc.desc: SetWindowSessionType fun
  * @tc.type: FUNC
  */
-HWTEST_F(WindowOptionTest, SetWindowSessionType, Function | SmallTest | Level3)
+HWTEST_F(WindowOptionTest, SetWindowSessionType, TestSize.Level1)
 {
     sptr<WindowOption> option = new WindowOption();
     auto ret = true;
@@ -400,7 +392,7 @@ HWTEST_F(WindowOptionTest, SetWindowSessionType, Function | SmallTest | Level3)
  * @tc.desc: GetWindowSessionType fun
  * @tc.type: FUNC
  */
-HWTEST_F(WindowOptionTest, GetWindowSessionType, Function | SmallTest | Level3)
+HWTEST_F(WindowOptionTest, GetWindowSessionType, TestSize.Level1)
 {
     sptr<WindowOption> option = new WindowOption();
     option->SetWindowSessionType(WindowSessionType::SCENE_SESSION);
@@ -413,7 +405,7 @@ HWTEST_F(WindowOptionTest, GetWindowSessionType, Function | SmallTest | Level3)
  * @tc.desc: Test01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowOptionTest, Test01, Function | SmallTest | Level3)
+HWTEST_F(WindowOptionTest, Test01, TestSize.Level1)
 {
     sptr<WindowOption> option = new WindowOption();
     ASSERT_NE(nullptr, option);
@@ -434,7 +426,7 @@ HWTEST_F(WindowOptionTest, Test01, Function | SmallTest | Level3)
  * @tc.desc: RealParentId setter and getter test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowOptionTest, SetRealParentId, Function | SmallTest | Level3)
+HWTEST_F(WindowOptionTest, SetRealParentId, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     ASSERT_NE(nullptr, option);
@@ -449,7 +441,7 @@ HWTEST_F(WindowOptionTest, SetRealParentId, Function | SmallTest | Level3)
  * @tc.desc: SetParentWindowType setter and getter test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowOptionTest, SetParentWindowType, Function | SmallTest | Level3)
+HWTEST_F(WindowOptionTest, SetParentWindowType, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     ASSERT_NE(nullptr, option);
@@ -464,7 +456,7 @@ HWTEST_F(WindowOptionTest, SetParentWindowType, Function | SmallTest | Level3)
  * @tc.desc: UIExtensionUsage setter and getter test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowOptionTest, SetUIExtensionUsage, Function | SmallTest | Level3)
+HWTEST_F(WindowOptionTest, SetUIExtensionUsage, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     ASSERT_NE(nullptr, option);
@@ -479,7 +471,7 @@ HWTEST_F(WindowOptionTest, SetUIExtensionUsage, Function | SmallTest | Level3)
  * @tc.desc: SetDialogDecorEnable
  * @tc.type: FUNC
  */
-HWTEST_F(WindowOptionTest, SetDialogDecorEnable, Function | SmallTest | Level3)
+HWTEST_F(WindowOptionTest, SetDialogDecorEnable, TestSize.Level1)
 {
     sptr<WindowOption> option = new WindowOption();
     ASSERT_NE(nullptr, option);
@@ -494,7 +486,7 @@ HWTEST_F(WindowOptionTest, SetDialogDecorEnable, Function | SmallTest | Level3)
  * @tc.desc: SetDialogTitle
  * @tc.type: FUNC
  */
-HWTEST_F(WindowOptionTest, SetDialogTitle, Function | SmallTest | Level3)
+HWTEST_F(WindowOptionTest, SetDialogTitle, TestSize.Level1)
 {
     sptr<WindowOption> option = new WindowOption();
     ASSERT_NE(nullptr, option);
@@ -508,7 +500,7 @@ HWTEST_F(WindowOptionTest, SetDialogTitle, Function | SmallTest | Level3)
  * @tc.desc: SetWindowTopmost
  * @tc.type: FUNC
  */
-HWTEST_F(WindowOptionTest, SetWindowTopmost, Function | SmallTest | Level3)
+HWTEST_F(WindowOptionTest, SetWindowTopmost, TestSize.Level1)
 {
     sptr<WindowOption> option = new WindowOption();
     ASSERT_NE(nullptr, option);
@@ -523,10 +515,9 @@ HWTEST_F(WindowOptionTest, SetWindowTopmost, Function | SmallTest | Level3)
  * @tc.desc: test SetIsSystemKeyboard and IsSystemKeyboard
  * @tc.type: FUNC
  */
-HWTEST_F(WindowOptionTest, SetAndIsSystemKeyboard, Function | SmallTest | Level3)
+HWTEST_F(WindowOptionTest, SetAndIsSystemKeyboard, TestSize.Level1)
 {
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    ASSERT_NE(nullptr, option);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     ASSERT_EQ(false, option->IsSystemKeyboard());
     option->SetIsSystemKeyboard(true);
     ASSERT_EQ(true, option->IsSystemKeyboard());
@@ -537,7 +528,7 @@ HWTEST_F(WindowOptionTest, SetAndIsSystemKeyboard, Function | SmallTest | Level3
  * @tc.desc: test SetDensity and GetDensity
  * @tc.type: FUNC
  */
-HWTEST_F(WindowOptionTest, SetDensity, Function | SmallTest | Level3)
+HWTEST_F(WindowOptionTest, SetDensity, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     ASSERT_NE(nullptr, option);
@@ -552,7 +543,7 @@ HWTEST_F(WindowOptionTest, SetDensity, Function | SmallTest | Level3)
  * @tc.desc: test SetIsDensityFollowHost and GetIsDensityFollowHost
  * @tc.type: FUNC
  */
-HWTEST_F(WindowOptionTest, SetIsDensityFollowHost, Function | SmallTest | Level3)
+HWTEST_F(WindowOptionTest, SetIsDensityFollowHost, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     ASSERT_NE(nullptr, option);
@@ -560,6 +551,46 @@ HWTEST_F(WindowOptionTest, SetIsDensityFollowHost, Function | SmallTest | Level3
     option->SetIsDensityFollowHost(true);
     ASSERT_EQ(true, option->GetIsDensityFollowHost());
 }
+
+/**
+ * @tc.name: SetSubWindowZLevel
+ * @tc.desc: test SetSubWindowZLevel
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowOptionTest, SetSubWindowZLevel, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetSubWindowZLevel(1);
+    ASSERT_EQ(1, option->zLevel_);
 }
+
+/**
+ * @tc.name: GetSubWindowZLevel
+ * @tc.desc: test GetSubWindowZLevel
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowOptionTest, GetSubWindowZLevel, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->zLevel_ = 1;
+    ASSERT_EQ(1, option->GetSubWindowZLevel());
+}
+
+/**
+ * @tc.name: SetConstrainedModal
+ * @tc.desc: test SetConstrainedModal and GetIsDensityFollowHost
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowOptionTest, SetConstrainedModal, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_EQ(false, option->IsConstrainedModal());
+    option->SetConstrainedModal(true);
+    ASSERT_EQ(false, option->IsConstrainedModal());
+    option->SetUIExtensionUsage(static_cast<uint32_t>(UIExtensionUsage::MODAL));
+    option->SetConstrainedModal(true);
+    ASSERT_EQ(false, option->IsConstrainedModal());
+}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

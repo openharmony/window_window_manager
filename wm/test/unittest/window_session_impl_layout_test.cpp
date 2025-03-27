@@ -21,12 +21,12 @@
 #include "accessibility_event_info.h"
 #include "color_parser.h"
 #include "mock_session.h"
-#include "window_helper.h"
-#include "window_session_impl.h"
-#include "wm_common.h"
 #include "mock_uicontent.h"
 #include "mock_window.h"
 #include "parameters.h"
+#include "window_helper.h"
+#include "window_session_impl.h"
+#include "wm_common.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -41,17 +41,14 @@ public:
     void TearDown() override;
 
     std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext_;
+
 private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 50000;
 };
 
-void WindowSessionImplLayoutTest::SetUpTestCase()
-{
-}
+void WindowSessionImplLayoutTest::SetUpTestCase() {}
 
-void WindowSessionImplLayoutTest::TearDownTestCase()
-{
-}
+void WindowSessionImplLayoutTest::TearDownTestCase() {}
 
 void WindowSessionImplLayoutTest::SetUp()
 {
@@ -70,7 +67,7 @@ namespace {
  * @tc.desc: UpdateRect
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplLayoutTest, UpdateRect01, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplLayoutTest, UpdateRect01, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplLayoutTest: UpdateRect01 start";
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
@@ -117,7 +114,7 @@ HWTEST_F(WindowSessionImplLayoutTest, UpdateRect01, Function | SmallTest | Level
  * @tc.desc: UpdateRect
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplLayoutTest, UpdateRect02, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplLayoutTest, UpdateRect02, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplLayoutTest: UpdateRect02 start";
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
@@ -161,7 +158,7 @@ HWTEST_F(WindowSessionImplLayoutTest, UpdateRect02, Function | SmallTest | Level
  * @tc.desc: SetResizeByDragEnabled and check the retCode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplLayoutTest, SetResizeByDragEnabled01, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplLayoutTest, SetResizeByDragEnabled01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetResizeByDragEnabled01");
@@ -175,7 +172,7 @@ HWTEST_F(WindowSessionImplLayoutTest, SetResizeByDragEnabled01, Function | Small
  * @tc.desc: SetResizeByDragEnabled and check the retCode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplLayoutTest, SetResizeByDragEnabled02, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplLayoutTest, SetResizeByDragEnabled02, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetResizeByDragEnabled02");
@@ -196,7 +193,7 @@ HWTEST_F(WindowSessionImplLayoutTest, SetResizeByDragEnabled02, Function | Small
  * @tc.desc: SetResizeByDragEnabled and check the retCode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplLayoutTest, SetResizeByDragEnabled03, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplLayoutTest, SetResizeByDragEnabled03, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetResizeByDragEnabled03");
@@ -226,7 +223,7 @@ HWTEST_F(WindowSessionImplLayoutTest, SetResizeByDragEnabled03, Function | Small
  * @tc.desc: UpdateViewportConfig
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplLayoutTest, UpdateViewportConfig, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplLayoutTest, UpdateViewportConfig, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplLayoutTest: UpdateViewportConfig start";
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
@@ -265,7 +262,7 @@ HWTEST_F(WindowSessionImplLayoutTest, UpdateViewportConfig, Function | SmallTest
  * @tc.desc: UpdateViewportConfig
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplLayoutTest, UpdateViewportConfig01, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplLayoutTest, UpdateViewportConfig01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("UpdateViewportConfig01");
@@ -285,6 +282,29 @@ HWTEST_F(WindowSessionImplLayoutTest, UpdateViewportConfig01, Function | SmallTe
     rectW.height_ = 10;
     window->UpdateViewportConfig(rectW, reason, nullptr, displayInfo);
     ASSERT_NE(window, nullptr);
+}
+
+/**
+ * @tc.name: NotifySingleHandTransformChange_TestUIContent
+ * @tc.desc: NotifySingleHandTransformChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplLayoutTest, NotifySingleHandTransformChange_TestUIContent, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplLayoutTest: NotifySingleHandTransformChange_TestUIContent start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifySingleHandTransformChange_TestUIContent");
+    option->SetIsUIExtFirstSubWindow(true);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(2025);
+    std::string url = "";
+    window->SetUIContentInner(
+        url, nullptr, nullptr, WindowSetUIContentType::DEFAULT, BackupAndRestoreType::NONE, nullptr);
+    SingleHandTransform testTransform;
+    testTransform.posX = 100;
+    window->NotifySingleHandTransformChange(testTransform);
+    ASSERT_EQ(testTransform.posX, window->singleHandTransform_.posX);
+    GTEST_LOG_(INFO) << "WindowSessionImplLayoutTest: NotifySingleHandTransformChange_TestUIContent end";
 }
 }
 } // namespace Rosen

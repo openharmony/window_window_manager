@@ -55,6 +55,7 @@ private:
     int HandleNeedAvoid(MessageParcel& data, MessageParcel& reply);
     int HandleGetAvoidAreaByType(MessageParcel& data, MessageParcel& reply);
     int HandleGetAllAvoidAreas(MessageParcel& data, MessageParcel& reply);
+    int HandleGetTargetOrientationConfigInfo(MessageParcel& data, MessageParcel& reply);
     int HandleSetAspectRatio(MessageParcel& data, MessageParcel& reply);
     int HandleSetWindowAnimationFlag(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateWindowSceneAfterCustomAnimation(MessageParcel& data, MessageParcel& reply);
@@ -68,6 +69,7 @@ private:
     int HandleSendPointerEvenForMoveDrag(MessageParcel& data, MessageParcel& reply);
     int HandleIsStartMoving(MessageParcel& data, MessageParcel& reply);
     int HandleSetLandscapeMultiWindow(MessageParcel& data, MessageParcel& reply);
+    int HandleGetIsMidScene(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateRectChangeListenerRegistered(MessageParcel& data, MessageParcel& reply);
     int HandleSetCallingSessionId(MessageParcel& data, MessageParcel& reply);
     int HandleSetCustomDecorHeight(MessageParcel& data, MessageParcel& reply);
@@ -87,6 +89,10 @@ private:
     int HandleSetGestureBackEnabled(MessageParcel& data, MessageParcel& reply);
     int HandleNotifySubModalTypeChange(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyMainModalTypeChange(MessageParcel& data, MessageParcel& reply);
+    int HandleSetSessionLabelAndIcon(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyFollowParentMultiScreenPolicy(MessageParcel& data, MessageParcel& reply);
+    int HandleUpdateRotationChangeListenerRegistered(MessageParcel& data, MessageParcel& reply);
+    int HandleGetIsHighlighted(MessageParcel& data, MessageParcel& reply);
 
     // extension extension
     int HandleTransferAbilityResult(MessageParcel& data, MessageParcel& reply);
@@ -99,18 +105,45 @@ private:
     int HandleTransferAccessibilityEvent(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyExtensionEventAsync(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyExtensionDetachToDisplay(MessageParcel& data, MessageParcel& reply);
+    int HandleExtensionProviderData(MessageParcel& data, MessageParcel& reply, MessageOption& option);
 
     // PictureInPicture
     int HandleNotifyPiPWindowPrepareClose(MessageParcel& data, MessageParcel& reply);
     int HandleUpdatePiPRect(MessageParcel& data, MessageParcel& reply);
     int HandleUpdatePiPControlStatus(MessageParcel& data, MessageParcel& reply);
     int HandleSetAutoStartPiP(MessageParcel& data, MessageParcel& reply);
+    int HandleUpdatePiPDefaultWindowSizeType(MessageParcel& data, MessageParcel& reply);
+
+    // Window Pattern
+    int HandleNotifyWindowAttachStateListenerRegistered(MessageParcel& data, MessageParcel& reply);
 
     // PC Window
     int HandleSetWindowRectAutoSave(MessageParcel& data, MessageParcel& reply);
-    int HandleSetSupportWindowModes(MessageParcel& data, MessageParcel& reply);
+    int HandleSetSupportedWindowModes(MessageParcel& data, MessageParcel& reply);
+    int HandleStartMovingWithCoordinate(MessageParcel& data, MessageParcel& reply);
+    int HandleContainerModalEvent(MessageParcel& data, MessageParcel& reply);
+    int HandleUpdateFlag(MessageParcel& data, MessageParcel& reply);
+
+    // PC Fold Screen
+    int HandleGetWaterfallMode(MessageParcel& data, MessageParcel& reply);
+
+    // Keyboard
+    int HandleChangeKeyboardViewMode(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyKeyboardDidShowRegistered(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyKeyboardDidHideRegistered(MessageParcel& data, MessageParcel& reply);
+
+    // Window Property
+    int HandleSetWindowCornerRadius(MessageParcel& data, MessageParcel& reply);
+    // Layout
+    int HandleGetCrossAxisState(MessageParcel& data, MessageParcel& reply);
+
+    // KeyFrame
+    int HandleKeyFrameAnimateEnd(MessageParcel& data, MessageParcel& reply);
+    int HandleUpdateKeyFrameCloneNode(MessageParcel& data, MessageParcel& reply);
 
     int ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
+
+    int HandleSetFollowParentWindowLayoutEnabled(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 

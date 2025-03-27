@@ -80,7 +80,7 @@ static sptr<Window> CreateSubWindow(sptr<WindowScene> scene, WindowType type,
  * @tc.desc: FullScreen Main Window + Floating SubWindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSubWindowTest, SubWindow01, Function | MediumTest | Level2)
+HWTEST_F(WindowSubWindowTest, SubWindow01, TestSize.Level1)
 {
     sptr<WindowScene> scene = CreateWindowScene();
 
@@ -108,7 +108,7 @@ HWTEST_F(WindowSubWindowTest, SubWindow01, Function | MediumTest | Level2)
  * @tc.desc: FullScreen Main Window + Floating SubWindow & Parent Limit work
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSubWindowTest, SubWindow02, Function | MediumTest | Level2)
+HWTEST_F(WindowSubWindowTest, SubWindow02, TestSize.Level1)
 {
     sptr<WindowScene> scene = CreateWindowScene();
 
@@ -136,7 +136,7 @@ HWTEST_F(WindowSubWindowTest, SubWindow02, Function | MediumTest | Level2)
  * @tc.desc: FullScreen Main Window + Floating MediaWindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSubWindowTest, SubWindow03, Function | MediumTest | Level2)
+HWTEST_F(WindowSubWindowTest, SubWindow03, TestSize.Level1)
 {
     sptr<WindowScene> scene = CreateWindowScene();
 
@@ -164,7 +164,7 @@ HWTEST_F(WindowSubWindowTest, SubWindow03, Function | MediumTest | Level2)
  * @tc.desc: FullScreen Main Window + Floating MediaWindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSubWindowTest, SubWindow04, Function | MediumTest | Level2)
+HWTEST_F(WindowSubWindowTest, SubWindow04, TestSize.Level1)
 {
     sptr<WindowScene> scene = CreateWindowScene();
 
@@ -192,7 +192,7 @@ HWTEST_F(WindowSubWindowTest, SubWindow04, Function | MediumTest | Level2)
  * @tc.desc: FullScreen Main Window + Floating MediaWindow + Floating SubWindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSubWindowTest, SubWindow05, Function | MediumTest | Level3)
+HWTEST_F(WindowSubWindowTest, SubWindow05, TestSize.Level1)
 {
     sptr<WindowScene> scene = CreateWindowScene();
 
@@ -226,7 +226,7 @@ HWTEST_F(WindowSubWindowTest, SubWindow05, Function | MediumTest | Level3)
  * @tc.desc: FullScreen Main Window + 2 SubWindows
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSubWindowTest, SubWindow06, Function | MediumTest | Level3)
+HWTEST_F(WindowSubWindowTest, SubWindow06, TestSize.Level1)
 {
     sptr<WindowScene> scene = CreateWindowScene();
 
@@ -259,7 +259,7 @@ HWTEST_F(WindowSubWindowTest, SubWindow06, Function | MediumTest | Level3)
  * @tc.desc: FullScreen Main Window + Floating SubWindow & MainWindow First GoBackground
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSubWindowTest, SubWindow07, Function | MediumTest | Level4)
+HWTEST_F(WindowSubWindowTest, SubWindow07, TestSize.Level1)
 {
     sptr<WindowScene> scene = CreateWindowScene();
 
@@ -287,7 +287,7 @@ HWTEST_F(WindowSubWindowTest, SubWindow07, Function | MediumTest | Level4)
  * @tc.desc: FullScreen Main Window + Floating SubWindow & only show SubWindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSubWindowTest, SubWindow08, Function | MediumTest | Level4)
+HWTEST_F(WindowSubWindowTest, SubWindow08, TestSize.Level1)
 {
     sptr<WindowScene> scene = CreateWindowScene();
 
@@ -307,7 +307,7 @@ HWTEST_F(WindowSubWindowTest, SubWindow08, Function | MediumTest | Level4)
  * @tc.desc: FullScreen Main Window + Floating SubWindow & first destroy SubWindow, then destroy MainWindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSubWindowTest, SubWindow09, Function | MediumTest | Level2)
+HWTEST_F(WindowSubWindowTest, SubWindow09, TestSize.Level1)
 {
     sptr<WindowScene> scene = CreateWindowScene();
 
@@ -337,7 +337,7 @@ HWTEST_F(WindowSubWindowTest, SubWindow09, Function | MediumTest | Level2)
  * @tc.desc: FullScreen Main Window + Floating SubWindow & first destroy MainWindow, then destroy SubWindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSubWindowTest, SubWindow10, Function | MediumTest | Level2)
+HWTEST_F(WindowSubWindowTest, SubWindow10, TestSize.Level1)
 {
     sptr<WindowScene> scene = CreateWindowScene();
 
@@ -365,7 +365,7 @@ HWTEST_F(WindowSubWindowTest, SubWindow10, Function | MediumTest | Level2)
  * @tc.desc: FullScreen Main Window + 5 subWindows
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSubWindowTest, SubWindow11, Function | MediumTest | Level3)
+HWTEST_F(WindowSubWindowTest, SubWindow11, TestSize.Level1)
 {
     sptr<WindowScene> scene = CreateWindowScene();
 
@@ -430,7 +430,7 @@ HWTEST_F(WindowSubWindowTest, SubWindow11, Function | MediumTest | Level3)
  * @tc.desc: FullScreen Main Window + 2 SubWindows with the same name
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSubWindowTest, SubWindow12, Function | MediumTest | Level3)
+HWTEST_F(WindowSubWindowTest, SubWindow12, TestSize.Level1)
 {
     sptr<WindowScene> scene = CreateWindowScene();
 
@@ -462,7 +462,7 @@ HWTEST_F(WindowSubWindowTest, SubWindow12, Function | MediumTest | Level3)
  * @tc.desc: FullScreen Main Window + 2 subwindows with the same name but one create after another destroyed
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSubWindowTest, SubWindow13, Function | MediumTest | Level3)
+HWTEST_F(WindowSubWindowTest, SubWindow13, TestSize.Level1)
 {
     sptr<WindowScene> scene = CreateWindowScene();
     if (scene->GoForeground() == WMError::WM_OK) {

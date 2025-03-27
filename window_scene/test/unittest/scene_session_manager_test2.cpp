@@ -18,6 +18,8 @@
 #include <bundle_mgr_interface.h>
 #include <bundlemgr/launcher_service.h>
 #include "interfaces/include/ws_common.h"
+#include "libxml/parser.h"
+#include "libxml/tree.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "session_info.h"
 #include "session/host/include/scene_session.h"
@@ -123,7 +125,7 @@ namespace {
  * @tc.desc: SceneSessionManager set gesture navigation enabled
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, SetGestureNavigationEnabled, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, SetGestureNavigationEnabled, TestSize.Level1)
 {
     ASSERT_NE(callbackFunc_, nullptr);
 
@@ -151,7 +153,7 @@ HWTEST_F(SceneSessionManagerTest2, SetGestureNavigationEnabled, Function | Small
  * @tc.desc: SceneSesionManager rigister window manager agent
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, RegisterWindowManagerAgent, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, RegisterWindowManagerAgent, TestSize.Level1)
 {
     sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgent>::MakeSptr();
     WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS;
@@ -166,7 +168,7 @@ HWTEST_F(SceneSessionManagerTest2, RegisterWindowManagerAgent, Function | SmallT
  * @tc.desc: call ConfigWindowSizeLimits and check the systemConfig_.
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, ConfigWindowSizeLimits01, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, ConfigWindowSizeLimits01, TestSize.Level1)
 {
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
@@ -192,7 +194,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowSizeLimits01, Function | SmallTes
  * @tc.desc: call ConfigWindowEffect all success focused
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, ConfigWindowEffect01, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, ConfigWindowEffect01, TestSize.Level1)
 {
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
@@ -213,6 +215,16 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowEffect01, Function | SmallTest | 
                             "<radius>0.5</radius>"
                         "</focused>"
                     "</shadow>"
+                    "<shadowDark>"
+                        "<focused>"
+                            "<elevation>0</elevation>"
+                            "<color>#111111</color>"
+                            "<offsetX>2</offsetX>"
+                            "<offsetY>2</offsetY>"
+                            "<alpha>1</alpha>"
+                            "<radius>1</radius>"
+                        "</focused>"
+                    "</shadowDark>"
                 "</appWindows>"
             "</windowEffect>"
         "</Configs>";
@@ -222,6 +234,11 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowEffect01, Function | SmallTest | 
     ASSERT_EQ(ssm_->appWindowSceneConfig_.focusedShadow_.offsetX_, 1);
     ASSERT_EQ(ssm_->appWindowSceneConfig_.focusedShadow_.offsetY_, 1);
     ASSERT_EQ(ssm_->appWindowSceneConfig_.focusedShadow_.radius_, 0.5);
+    ASSERT_EQ(ssm_->appWindowSceneConfig_.focusedShadowDark_.alpha_, 1);
+    ASSERT_EQ(ssm_->appWindowSceneConfig_.focusedShadowDark_.offsetX_, 2);
+    ASSERT_EQ(ssm_->appWindowSceneConfig_.focusedShadowDark_.offsetY_, 2);
+    ASSERT_EQ(ssm_->appWindowSceneConfig_.focusedShadowDark_.radius_, 1);
+    ASSERT_EQ(ssm_->appWindowSceneConfig_.focusedShadowDark_.color_, "#ff111111");
 }
 
 /**
@@ -229,7 +246,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowEffect01, Function | SmallTest | 
  * @tc.desc: call ConfigWindowEffect
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, ConfigWindowEffect02, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, ConfigWindowEffect02, TestSize.Level1)
 {
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
@@ -261,7 +278,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowEffect02, Function | SmallTest | 
  * @tc.desc: call ConfigWindowEffect ConfigAppWindowShadow unfocused
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, ConfigWindowEffect03, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, ConfigWindowEffect03, TestSize.Level1)
 {
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
@@ -277,6 +294,16 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowEffect03, Function | SmallTest | 
                             "<radius>0.5</radius>"
                         "</unfocused>"
                     "</shadow>"
+                    "<shadowDark>"
+                        "<unfocused>"
+                            "<elevation>0</elevation>"
+                            "<color>#111111</color>"
+                            "<offsetX>2</offsetX>"
+                            "<offsetY>2</offsetY>"
+                            "<alpha>1</alpha>"
+                            "<radius>1</radius>"
+                        "</unfocused>"
+                    "</shadowDark>"
                 "</appWindows>"
             "</windowEffect>"
         "</Configs>";
@@ -286,6 +313,11 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowEffect03, Function | SmallTest | 
     ASSERT_EQ(ssm_->appWindowSceneConfig_.unfocusedShadow_.offsetX_, 1);
     ASSERT_EQ(ssm_->appWindowSceneConfig_.unfocusedShadow_.offsetY_, 1);
     ASSERT_EQ(ssm_->appWindowSceneConfig_.unfocusedShadow_.radius_, 0.5);
+    ASSERT_EQ(ssm_->appWindowSceneConfig_.unfocusedShadowDark_.alpha_, 1);
+    ASSERT_EQ(ssm_->appWindowSceneConfig_.unfocusedShadowDark_.offsetX_, 2);
+    ASSERT_EQ(ssm_->appWindowSceneConfig_.unfocusedShadowDark_.offsetY_, 2);
+    ASSERT_EQ(ssm_->appWindowSceneConfig_.unfocusedShadowDark_.radius_, 1);
+    ASSERT_EQ(ssm_->appWindowSceneConfig_.unfocusedShadowDark_.color_, "#ff111111");
 }
 
 /**
@@ -293,7 +325,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowEffect03, Function | SmallTest | 
  * @tc.desc: call ConfigWindowEffect all
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, ConfigWindowEffect04, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, ConfigWindowEffect04, TestSize.Level1)
 {
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
@@ -342,7 +374,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowEffect04, Function | SmallTest | 
  * @tc.desc: call ConfigWindowEffect all offsetX.size is not 1
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, ConfigWindowEffect05, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, ConfigWindowEffect05, TestSize.Level1)
 {
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
@@ -379,7 +411,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowEffect05, Function | SmallTest | 
  * @tc.desc: call ConfigWindowEffect offsetY.size is not 1
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, ConfigWindowEffect06, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, ConfigWindowEffect06, TestSize.Level1)
 {
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
@@ -416,7 +448,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowEffect06, Function | SmallTest | 
  * @tc.desc: call ConfigWindowEffect alpha.size is not 1
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, ConfigWindowEffect07, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, ConfigWindowEffect07, TestSize.Level1)
 {
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
@@ -453,7 +485,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowEffect07, Function | SmallTest | 
  * @tc.desc: call ConfigWindowEffect radius.size is not 1
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, ConfigWindowEffect08, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, ConfigWindowEffect08, TestSize.Level1)
 {
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
@@ -490,7 +522,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowEffect08, Function | SmallTest | 
  * @tc.desc: call ConfigDecor fullscreen
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, ConfigDecor01, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, ConfigDecor01, TestSize.Level1)
 {
     std::string xmlStr1 = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
@@ -518,7 +550,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigDecor01, Function | SmallTest | Level3)
  * @tc.desc: call ConfigDecor
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, ConfigDecor02, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, ConfigDecor02, TestSize.Level1)
 {
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
@@ -536,7 +568,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigDecor02, Function | SmallTest | Level3)
  * @tc.desc: call ConfigDecor floating
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, ConfigDecor03, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, ConfigDecor03, TestSize.Level1)
 {
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
@@ -555,7 +587,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigDecor03, Function | SmallTest | Level3)
  * @tc.desc: call ConfigDecor pip
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, ConfigDecor04, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, ConfigDecor04, TestSize.Level1)
 {
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
@@ -574,7 +606,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigDecor04, Function | SmallTest | Level3)
  * @tc.desc: call ConfigDecor split
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, ConfigDecor05, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, ConfigDecor05, TestSize.Level1)
 {
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
@@ -594,7 +626,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigDecor05, Function | SmallTest | Level3)
  * @tc.desc: call ConfigDecor default
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, ConfigDecor06, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, ConfigDecor06, TestSize.Level1)
 {
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
@@ -613,7 +645,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigDecor06, Function | SmallTest | Level3)
  * @tc.desc: call defaultWindowMode
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, ConfigWindowSceneXml01, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, ConfigWindowSceneXml01, TestSize.Level1)
 {
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
@@ -637,7 +669,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowSceneXml01, Function | SmallTest 
  * @tc.desc: call defaultWindowMode
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, ConfigWindowSceneXml02, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, ConfigWindowSceneXml02, TestSize.Level1)
 {
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
@@ -665,7 +697,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowSceneXml02, Function | SmallTest 
  * @tc.desc: call defaultMaximizeMode
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, ConfigWindowSceneXml03, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, ConfigWindowSceneXml03, TestSize.Level1)
 {
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
@@ -689,7 +721,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowSceneXml03, Function | SmallTest 
  * @tc.desc: call defaultMaximizeMode
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, ConfigWindowSceneXml04, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, ConfigWindowSceneXml04, TestSize.Level1)
 {
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
@@ -713,7 +745,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowSceneXml04, Function | SmallTest 
  * @tc.desc: call maxFloatingWindowSize
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, ConfigWindowSceneXml05, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, ConfigWindowSceneXml05, TestSize.Level1)
 {
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
@@ -737,7 +769,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowSceneXml05, Function | SmallTest 
  * @tc.desc: call backgroundScreenLock
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, ConfigWindowSceneXml07, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, ConfigWindowSceneXml07, TestSize.Level1)
 {
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
@@ -753,7 +785,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowSceneXml07, Function | SmallTest 
  * @tc.desc: call rotationMode
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, ConfigWindowSceneXml08, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, ConfigWindowSceneXml08, TestSize.Level1)
 {
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
@@ -769,7 +801,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowSceneXml08, Function | SmallTest 
  * @tc.desc: call ConfigWindowAnimation default
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, ConfigWindowAnimation01, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, ConfigWindowAnimation01, TestSize.Level1)
 {
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
@@ -803,7 +835,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowAnimation01, Function | SmallTest
  * @tc.desc: call ConfigWindowAnimation no change
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, ConfigWindowAnimation02, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, ConfigWindowAnimation02, TestSize.Level1)
 {
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
@@ -824,7 +856,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowAnimation02, Function | SmallTest
  * @tc.desc: call ConfigWindowAnimation no timing
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, ConfigWindowAnimation03, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, ConfigWindowAnimation03, TestSize.Level1)
 {
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
@@ -855,7 +887,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowAnimation03, Function | SmallTest
  * @tc.desc: call ConfigWindowAnimation default timing is not int
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, ConfigWindowAnimation04, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, ConfigWindowAnimation04, TestSize.Level1)
 {
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
@@ -888,7 +920,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowAnimation04, Function | SmallTest
  * @tc.desc: call ConfigWindowAnimation default timing is error size
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, ConfigWindowAnimation05, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, ConfigWindowAnimation05, TestSize.Level1)
 {
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
@@ -921,7 +953,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowAnimation05, Function | SmallTest
  * @tc.desc: call ConfigWindowAnimation default change is not int
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, ConfigWindowAnimation06, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, ConfigWindowAnimation06, TestSize.Level1)
 {
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
@@ -946,7 +978,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowAnimation06, Function | SmallTest
  * @tc.desc: call ConfigWindowAnimation default change error size
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, ConfigWindowAnimation07, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, ConfigWindowAnimation07, TestSize.Level1)
 {
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
@@ -971,7 +1003,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowAnimation07, Function | SmallTest
  * @tc.desc: call ConfigStartingWindowAnimation default
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, ConfigStartingWindowAnimation01, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, ConfigStartingWindowAnimation01, TestSize.Level1)
 {
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
@@ -997,7 +1029,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigStartingWindowAnimation01, Function | S
  * @tc.desc: call ConfigStartingWindowAnimation default
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, ConfigStartingWindowAnimation02, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, ConfigStartingWindowAnimation02, TestSize.Level1)
 {
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
@@ -1022,7 +1054,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigStartingWindowAnimation02, Function | S
  * @tc.desc: call ConfigStartingWindowAnimation default
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, ConfigStartingWindowAnimation03, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, ConfigStartingWindowAnimation03, TestSize.Level1)
 {
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
@@ -1045,7 +1077,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigStartingWindowAnimation03, Function | S
  * @tc.desc: call ConfigStartingWindowAnimation default
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, ConfigStartingWindowAnimation04, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, ConfigStartingWindowAnimation04, TestSize.Level1)
 {
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
@@ -1068,7 +1100,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigStartingWindowAnimation04, Function | S
  * @tc.desc: call ConfigStartingWindowAnimation default
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, ConfigStartingWindowAnimation05, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, ConfigStartingWindowAnimation05, TestSize.Level1)
 {
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
@@ -1091,7 +1123,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigStartingWindowAnimation05, Function | S
  * @tc.desc: call ConfigSnapshotScale and check the snapshotScale_.
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, ConfigSnapshotScale01, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, ConfigSnapshotScale01, TestSize.Level1)
 {
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
@@ -1107,7 +1139,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigSnapshotScale01, Function | SmallTest |
  * @tc.desc: call ConfigSnapshotScale and check the snapshotScale_.
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, ConfigSnapshotScale02, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, ConfigSnapshotScale02, TestSize.Level1)
 {
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
@@ -1123,7 +1155,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigSnapshotScale02, Function | SmallTest |
  * @tc.desc: call ConfigSnapshotScale and check the snapshotScale_.
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, ConfigSnapshotScale03, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, ConfigSnapshotScale03, TestSize.Level1)
 {
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
@@ -1139,7 +1171,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigSnapshotScale03, Function | SmallTest |
  * @tc.desc: call ConfigSnapshotScale and check the snapshotScale_.
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, ConfigSnapshotScale04, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, ConfigSnapshotScale04, TestSize.Level1)
 {
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
@@ -1155,7 +1187,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigSnapshotScale04, Function | SmallTest |
  * @tc.desc: call ConfigSnapshotScale and check the snapshotScale_.
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, ConfigSnapshotScale05, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, ConfigSnapshotScale05, TestSize.Level1)
 {
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
@@ -1171,7 +1203,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigSnapshotScale05, Function | SmallTest |
  * @tc.desc: call ConfigSystemUIStatusBar default.
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, ConfigSystemUIStatusBar01, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, ConfigSystemUIStatusBar01, TestSize.Level1)
 {
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
@@ -1196,7 +1228,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigSystemUIStatusBar01, Function | SmallTe
  * @tc.desc: ScreenSesionManager dump all session info
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, DumpSessionAll, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, DumpSessionAll, TestSize.Level1)
 {
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "SceneSessionManagerTest2";
@@ -1215,7 +1247,7 @@ HWTEST_F(SceneSessionManagerTest2, DumpSessionAll, Function | SmallTest | Level3
  * @tc.desc: ScreenSesionManager dump session with id
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, DumpSessionWithId, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, DumpSessionWithId, TestSize.Level1)
 {
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "SceneSessionManagerTest2";
@@ -1234,7 +1266,7 @@ HWTEST_F(SceneSessionManagerTest2, DumpSessionWithId, Function | SmallTest | Lev
  * @tc.desc: SceneSesionManager init
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, Init, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, Init, TestSize.Level1)
 {
     int ret = 0;
     ssm_->Init();
@@ -1247,7 +1279,7 @@ HWTEST_F(SceneSessionManagerTest2, Init, Function | SmallTest | Level3)
  * @tc.desc: SceneSesionManager load window scene xml
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, LoadWindowSceneXml, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, LoadWindowSceneXml, TestSize.Level1)
 {
     int ret = 0;
     ssm_->LoadWindowSceneXml();
@@ -1263,7 +1295,7 @@ HWTEST_F(SceneSessionManagerTest2, LoadWindowSceneXml, Function | SmallTest | Le
  * @tc.desc: SceneSessionManager load window scene xml
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, UpdateRecoveredSessionInfo, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, UpdateRecoveredSessionInfo, TestSize.Level1)
 {
     ASSERT_NE(nullptr, ssm_);
     std::vector<int32_t> recoveredPersistentIds;
@@ -1285,7 +1317,7 @@ HWTEST_F(SceneSessionManagerTest2, UpdateRecoveredSessionInfo, Function | SmallT
  * @tc.desc: Test if failRecoverPersistentSet exist or not exist
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, UpdateRecoveredSessionInfo02, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, UpdateRecoveredSessionInfo02, TestSize.Level1)
 {
     int ret = 0;
     ASSERT_NE(ssm_, nullptr);
@@ -1310,7 +1342,7 @@ HWTEST_F(SceneSessionManagerTest2, UpdateRecoveredSessionInfo02, Function | Smal
  * @tc.desc: Test if createSubSessionFuncMap_ exist
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, NotifyCreateSubSession, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, NotifyCreateSubSession, TestSize.Level1)
 {
     int ret = 0;
     ASSERT_NE(ssm_, nullptr);
@@ -1331,7 +1363,7 @@ HWTEST_F(SceneSessionManagerTest2, NotifyCreateSubSession, Function | SmallTest 
  * @tc.desc: SceneSesionManager config window scene xml run
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, ConfigWindowSceneXml, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, ConfigWindowSceneXml, TestSize.Level1)
 {
     int ret = 0;
     ssm_->ConfigWindowSceneXml();
@@ -1343,7 +1375,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowSceneXml, Function | SmallTest | 
  * @tc.desc: SceneSesionManager set session continue state
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, SetSessionContinueState, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, SetSessionContinueState, TestSize.Level1)
 {
     MessageParcel *data = new MessageParcel();
     sptr <IRemoteObject> token = data->ReadRemoteObject();
@@ -1360,7 +1392,7 @@ HWTEST_F(SceneSessionManagerTest2, SetSessionContinueState, Function | SmallTest
  * @tc.desc: SceneSesionManager set session continue state
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, SetSessionContinueState002, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, SetSessionContinueState002, TestSize.Level1)
 {
     MessageParcel *data = new MessageParcel();
     sptr<IRemoteObject> token = data->ReadRemoteObject();
@@ -1384,7 +1416,7 @@ HWTEST_F(SceneSessionManagerTest2, SetSessionContinueState002, Function | SmallT
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, StartWindowInfoReportLoop, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, StartWindowInfoReportLoop, TestSize.Level1)
 {
     ASSERT_NE(nullptr, ssm_);
     ssm_->StartWindowInfoReportLoop();
@@ -1399,7 +1431,7 @@ HWTEST_F(SceneSessionManagerTest2, StartWindowInfoReportLoop, Function | SmallTe
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, GetFocusWindowInfo, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, GetFocusWindowInfo, TestSize.Level1)
 {
     ASSERT_NE(nullptr, ssm_);
     FocusChangeInfo info;
@@ -1411,7 +1443,7 @@ HWTEST_F(SceneSessionManagerTest2, GetFocusWindowInfo, Function | SmallTest | Le
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, GetFocusWindowInfo2, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, GetFocusWindowInfo2, TestSize.Level1)
 {
     ASSERT_NE(nullptr, ssm_);
     FocusChangeInfo fcinfo;
@@ -1430,7 +1462,7 @@ HWTEST_F(SceneSessionManagerTest2, GetFocusWindowInfo2, Function | SmallTest | L
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, SetSessionLabel, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, SetSessionLabel, TestSize.Level1)
 {
     ASSERT_NE(nullptr, ssm_);
     ssm_->SetSessionLabel(nullptr, "test");
@@ -1448,7 +1480,7 @@ HWTEST_F(SceneSessionManagerTest2, SetSessionLabel, Function | SmallTest | Level
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, SetSessionIcon, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, SetSessionIcon, TestSize.Level1)
 {
     ASSERT_NE(nullptr, ssm_);
     ssm_->SetSessionIcon(nullptr, nullptr);
@@ -1466,7 +1498,7 @@ HWTEST_F(SceneSessionManagerTest2, SetSessionIcon, Function | SmallTest | Level3
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, InitWithRenderServiceAdded, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, InitWithRenderServiceAdded, TestSize.Level1)
 {
     ASSERT_NE(nullptr, ssm_);
     ssm_->InitWithRenderServiceAdded();
@@ -1477,7 +1509,7 @@ HWTEST_F(SceneSessionManagerTest2, InitWithRenderServiceAdded, Function | SmallT
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, PendingSessionToForeground, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, PendingSessionToForeground, TestSize.Level1)
 {
     ASSERT_NE(nullptr, ssm_);
     ssm_->PendingSessionToForeground(nullptr);
@@ -1495,7 +1527,7 @@ HWTEST_F(SceneSessionManagerTest2, PendingSessionToForeground, Function | SmallT
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, GetFocusSessionToken, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, GetFocusSessionToken, TestSize.Level1)
 {
     WSError ret;
     sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
@@ -1516,7 +1548,7 @@ HWTEST_F(SceneSessionManagerTest2, GetFocusSessionToken, Function | SmallTest | 
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, GetFocusSessionElement, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, GetFocusSessionElement, TestSize.Level1)
 {
     ASSERT_NE(nullptr, ssm_);
     AppExecFwk::ElementName element;
@@ -1535,7 +1567,7 @@ HWTEST_F(SceneSessionManagerTest2, GetFocusSessionElement, Function | SmallTest 
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, GetAllAbilityInfos, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, GetAllAbilityInfos, TestSize.Level1)
 {
     WSError ret;
     AAFwk::Want want;
@@ -1568,7 +1600,7 @@ HWTEST_F(SceneSessionManagerTest2, GetAllAbilityInfos, Function | SmallTest | Le
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, GetIsLayoutFullScreen, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, GetIsLayoutFullScreen, TestSize.Level1)
 {
     WSError ret;
     bool isLayoutFullScreen = true;
@@ -1598,7 +1630,7 @@ HWTEST_F(SceneSessionManagerTest2, GetIsLayoutFullScreen, Function | SmallTest |
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, UpdateSessionAvoidAreaListener, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, UpdateSessionAvoidAreaListener, TestSize.Level1)
 {
     ASSERT_NE(nullptr, ssm_);
     {
@@ -1622,7 +1654,7 @@ HWTEST_F(SceneSessionManagerTest2, UpdateSessionAvoidAreaListener, Function | Sm
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, UpdateSessionTouchOutsideListener, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, UpdateSessionTouchOutsideListener, TestSize.Level1)
 {
     ASSERT_NE(nullptr, ssm_);
     {
@@ -1647,7 +1679,7 @@ HWTEST_F(SceneSessionManagerTest2, UpdateSessionTouchOutsideListener, Function |
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, GetSessionSnapshotById, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, GetSessionSnapshotById, TestSize.Level1)
 {
     ASSERT_NE(nullptr, ssm_);
     SessionSnapshot snapshot;
@@ -1659,7 +1691,7 @@ HWTEST_F(SceneSessionManagerTest2, GetSessionSnapshotById, Function | SmallTest 
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, ClearSession, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, ClearSession, TestSize.Level1)
 {
     WSError ret;
     ret = ssm_->ClearSession(100);
@@ -1671,7 +1703,7 @@ HWTEST_F(SceneSessionManagerTest2, ClearSession, Function | SmallTest | Level3)
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, ClearAllSessions, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, ClearAllSessions, TestSize.Level1)
 {
     WSError ret;
     ret = ssm_->ClearAllSessions();
@@ -1683,7 +1715,7 @@ HWTEST_F(SceneSessionManagerTest2, ClearAllSessions, Function | SmallTest | Leve
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, GetTopWindowId, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, GetTopWindowId, TestSize.Level1)
 {
     WMError ret;
     {
@@ -1709,7 +1741,7 @@ HWTEST_F(SceneSessionManagerTest2, GetTopWindowId, Function | SmallTest | Level3
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, InitPersistentStorage, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, InitPersistentStorage, TestSize.Level1)
 {
     ASSERT_NE(nullptr, ssm_);
     {
@@ -1720,35 +1752,11 @@ HWTEST_F(SceneSessionManagerTest2, InitPersistentStorage, Function | SmallTest |
 }
 
 /**
- * @tc.name: GetSessionSnapshotFilePath
- * @tc.desc: Test if pip window can be created;
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest2, GetSessionSnapshotFilePath, Function | SmallTest | Level3)
-{
-    string ret;
-    {
-        std::unique_lock<std::shared_mutex> lock(ssm_->sceneSessionMapMutex_);
-        ssm_->sceneSessionMap_.clear();
-    }
-    ret = ssm_->GetSessionSnapshotFilePath(100);
-    ASSERT_EQ("", ret);
-
-    SessionInfo info;
-    info.abilityName_ = "BackgroundTask02";
-    info.bundleName_ = "BackgroundTask02";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ssm_->sceneSessionMap_.insert({100, sceneSession});
-    ret = ssm_->GetSessionSnapshotFilePath(100);
-    ASSERT_EQ("", ret);
-}
-
-/**
  * @tc.name: GetAccessibilityWindowInfo
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, GetAccessibilityWindowInfo, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, GetAccessibilityWindowInfo, TestSize.Level1)
 {
     WMError ret;
     {
@@ -1773,7 +1781,7 @@ HWTEST_F(SceneSessionManagerTest2, GetAccessibilityWindowInfo, Function | SmallT
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, OnScreenshot, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, OnScreenshot, TestSize.Level1)
 {
     ASSERT_NE(nullptr, ssm_);
     {
@@ -1805,7 +1813,7 @@ HWTEST_F(SceneSessionManagerTest2, OnScreenshot, Function | SmallTest | Level3)
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, ProcessSubSessionForeground, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, ProcessSubSessionForeground, TestSize.Level1)
 {
     {
         std::unique_lock<std::shared_mutex> lock(ssm_->sceneSessionMapMutex_);
@@ -1858,7 +1866,7 @@ HWTEST_F(SceneSessionManagerTest2, ProcessSubSessionForeground, Function | Small
  * @tc.desc: call ConfigSystemUIStatusBar default.
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, ConfigSystemUIStatusBar02, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, ConfigSystemUIStatusBar02, TestSize.Level1)
 {
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
@@ -1876,7 +1884,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigSystemUIStatusBar02, Function | SmallTe
  * @tc.desc: ClosePipWindowIfExist
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, ClosePipWindowIfExist, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, ClosePipWindowIfExist, TestSize.Level1)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(property, nullptr);
@@ -1895,7 +1903,7 @@ HWTEST_F(SceneSessionManagerTest2, ClosePipWindowIfExist, Function | SmallTest |
  * @tc.desc: RecoverAndConnectSpecificSession
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, RecoverAndConnectSpecificSession, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, RecoverAndConnectSpecificSession, TestSize.Level1)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(property, nullptr);
@@ -1915,7 +1923,7 @@ HWTEST_F(SceneSessionManagerTest2, RecoverAndConnectSpecificSession, Function | 
  * @tc.desc: RecoverAndConnectSpecificSession02
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, RecoverAndConnectSpecificSession02, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, RecoverAndConnectSpecificSession02, TestSize.Level1)
 {
     SessionInfo sessionInfo;
     sessionInfo.abilityName_ = "RecoverAndConnectSpecificSession02";
@@ -1942,7 +1950,7 @@ HWTEST_F(SceneSessionManagerTest2, RecoverAndConnectSpecificSession02, Function 
  * @tc.desc: CacheSpecificSessionForRecovering
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, CacheSpecificSessionForRecovering, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, CacheSpecificSessionForRecovering, TestSize.Level1)
 {
     sptr<WindowSessionProperty> property;
     ASSERT_NE(ssm_, nullptr);
@@ -1979,7 +1987,7 @@ HWTEST_F(SceneSessionManagerTest2, CacheSpecificSessionForRecovering, Function |
  * @tc.desc: SetAlivePersistentIds
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, SetAlivePersistentIds, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, SetAlivePersistentIds, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     std::vector<int32_t> recoveredPersistentIds = {0, 1, 2};
@@ -1992,7 +2000,7 @@ HWTEST_F(SceneSessionManagerTest2, SetAlivePersistentIds, Function | SmallTest |
  * @tc.desc: NotifyCreateToastSession
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, NotifyCreateToastSession, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, NotifyCreateToastSession, TestSize.Level1)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(property, nullptr);
@@ -2011,7 +2019,7 @@ HWTEST_F(SceneSessionManagerTest2, NotifyCreateToastSession, Function | SmallTes
  * @tc.desc: RecoverCachedDialogSession
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, RecoverCachedDialogSession, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, RecoverCachedDialogSession, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     ssm_->recoveringFinished_ = false;

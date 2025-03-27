@@ -39,6 +39,10 @@ class Ability;
 enum class SupportWindowMode;
 }
 
+namespace OHOS::Global::Resource {
+class ResourceManager;
+} // namespace OHOS::Global::Resource
+
 namespace OHOS::AbilityRuntime {
 class AbilityContext;
 class Context;
@@ -51,6 +55,7 @@ class WantParams;
 
 namespace OHOS::Ace {
 class UIContent;
+class ViewportConfig;
 }
 
 namespace OHOS::Media {
@@ -65,10 +70,13 @@ namespace Rosen {
 using NotifyNativeWinDestroyFunc = std::function<void(std::string windowName)>;
 using NotifyTransferComponentDataFunc = std::function<void(const AAFwk::WantParams& wantParams)>;
 using NotifyTransferComponentDataForResultFunc = std::function<AAFwk::WantParams(const AAFwk::WantParams& wantParams)>;
-using KeyEventFilterFunc = std::function<bool(MMI::KeyEvent&)>;
+using KeyEventFilterFunc = std::function<bool(const MMI::KeyEvent&)>;
+using MouseEventFilterFunc = std::function<bool(const MMI::PointerEvent&)>;
+using TouchEventFilterFunc = std::function<bool(const MMI::PointerEvent&)>;
 class RSSurfaceNode;
 class RSTransaction;
 class ISession;
+class Window;
 
 /**
  * @class IWindowLifeCycle
@@ -135,6 +143,27 @@ public:
      * @brief Notify caller that window is destroyed.
      */
     virtual void AfterDestroyed() {}
+
+    /**
+     * @brief Notify caller that window is already foreground.
+     */
+    virtual void AfterDidForeground() {}
+
+    /**
+     * @brief Notify caller that window is already background.
+     */
+    virtual void AfterDidBackground() {}
+};
+
+/**
+ * @class IWindowAttachStateChangeListner
+ *
+ * @brief IWindowAttachStateChangeListner is used to observe the window attach or detach state changed.
+ */
+class IWindowAttachStateChangeListner : virtual public RefBase {
+public:
+    virtual void AfterAttached() {}
+    virtual void AfterDetached() {}
 };
 
 /**
@@ -161,6 +190,16 @@ public:
      * @param hasDeco Window has decoration or not.
      */
     virtual void OnModeChange(WindowMode mode, bool hasDeco = true) {}
+};
+
+class IWindowCrossAxisListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when window cross screen axis state changed.
+     *
+     * @param state is window across screen axis.
+     */
+    virtual void OnCrossAxisChange(CrossAxisState state) {}
 };
 
 /**
@@ -525,6 +564,35 @@ public:
 };
 
 /**
+ * @class IWindowWillCloseListener
+ *
+ * @brief IWindowWillCloseListener is used for async preprocessing when the window exits.
+ */
+class IWindowWillCloseListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when window closed.
+     *
+     * @param terminateCloseProcess Whether need to terminate the window close process.
+     */
+    virtual void OnWindowWillClose(sptr<Window> window) {}
+};
+/**
+ * @class IWindowHighlightChangeListener
+ *
+ * @brief IWindowHighlightChangeListener is a listener to observe event when highlight change of window.
+ */
+class IWindowHighlightChangeListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when highlight status changes.
+     *
+     * @param isHighlight Whether the window is highlighted.
+     */
+    virtual void OnWindowHighlightChange(bool isHighlight) {}
+};
+
+/**
  * @class ISwitchFreeMultiWindowListener
  *
  * @brief ISwitchFreeMultiWindowListener is used to observe the free multi window state when it changed.
@@ -552,6 +620,106 @@ public:
      * @param KeyboardPanelInfo keyboardPanelInfo of the keyboard panel;
      */
     virtual void OnKeyboardPanelInfoChanged(const KeyboardPanelInfo& keyboardPanelInfo) {}
+};
+
+/**
+ * @class IKeyboardDidShowListener
+ *
+ * @brief IKeyboardDidShowListener is used to observe keyboard show animation completion.
+ */
+class IKeyboardDidShowListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify the caller when keyboard show animation is completed.
+     */
+    virtual void OnKeyboardDidShow(const KeyboardPanelInfo& keyboardPanelInfo) {}
+};
+
+/**
+ * @class IKeyboardDidHideListener
+ *
+ * @brief IKeyboardDidHideListener is used to observe keyboard hide animation completion.
+ */
+class IKeyboardDidHideListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify the caller when keyboard hide animation is completed.
+     */
+    virtual void OnKeyboardDidHide(const KeyboardPanelInfo& keyboardPanelInfo) {}
+};
+
+/**
+ * @class IWaterfallModeChangeListener
+ *
+ * @brief IWaterfallModeChangeListener is used to observe the waterfall mode.
+ */
+class IWaterfallModeChangeListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when waterfall mode changed.
+     *
+     * @param isWaterfallMode new waterfall mode.
+     */
+    virtual void OnWaterfallModeChange(bool isWaterfallMode) {}
+};
+
+/**
+ * @class IPreferredOrientationChangeListener
+ *
+ * @brief listener of preferred orientation change which set by developer.
+ */
+class IPreferredOrientationChangeListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when orientation set by developer.
+     *
+     * @param ori the orientation set by developer.
+     */
+    virtual void OnPreferredOrientationChange(Orientation orientation) {}
+};
+
+/**
+ * @class IWindowOrientationChangeListener
+ *
+ * @brief IWindowOrientationChangeListener is used to notify while window rotate.
+ */
+class IWindowOrientationChangeListener : virtual public RefBase {
+public:
+    /**
+     * @brief Innerapi, notify caller while window rotate.
+     */
+    virtual void OnOrientationChange() {}
+};
+
+/**
+ * @class ISystemBarPropertyListener
+ *
+ * @brief ISystemBarPropertyListener is used to notify while developer set SystemBarProperty.
+ */
+class ISystemBarPropertyListener : virtual public RefBase {
+public:
+    /**
+     * @brief Innerapi, notify caller when developer set SystemBarProperty.
+     */
+    virtual void OnSystemBarPropertyUpdate(WindowType type, const SystemBarProperty& property) {}
+};
+
+/*
+ * @class IWindowRotationChangeListener
+ *
+ * @brief IWindowRotationChangeListener is used to observe the window rotation change.
+ */
+class IWindowRotationChangeListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when window rotate
+     *
+     * @param rotationChangeInfo information of rotation
+     * @param rotationChangeResult result of rotation
+     *
+     */
+    virtual void OnRotationChange(const RotationChangeInfo& rotationChangeInfo,
+        RotationChangeResult& rotationChangeResult) {}
 };
 
 static WMError DefaultCreateErrCode = WMError::WM_OK;
@@ -647,8 +815,10 @@ public:
      * @brief Update configuration for all windows
      *
      * @param configuration configuration for app
+     * @param ignoreWindowContexts context of window which will be ignored
      */
-    static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
+    static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration,
+        const std::vector<std::shared_ptr<AbilityRuntime::Context>>& ignoreWindowContexts = {});
 
     /**
      * @brief Update theme configuration for all windows
@@ -696,7 +866,7 @@ public:
      *
      * @return Mode of window.
      */
-    virtual WindowMode GetMode() const { return WindowMode::WINDOW_MODE_UNDEFINED; }
+    virtual WindowMode GetWindowMode() const { return WindowMode::WINDOW_MODE_UNDEFINED; }
 
     /**
      * @brief Get alpha of window.
@@ -845,6 +1015,22 @@ public:
     virtual bool IsMainWindowTopmost() const { return false; }
 
     /**
+     * @brief Set sub window zLevel
+     *
+     * @param zLevel zLevel of sub window to specify the hierarchical relationship among sub windows
+     * @return WM_OK means success, others mean set failed
+     */
+    virtual WMError SetSubWindowZLevel(int32_t zLevel) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Get sub window zLevel
+     *
+     * @param zLevel sub window zLevel
+     * @return WM_OK means success, others mean get failed
+     */
+    virtual WMError GetSubWindowZLevel(int32_t& zLevel) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
      * @brief Set alpha of window.
      *
      * @param alpha Alpha of window.
@@ -913,7 +1099,7 @@ public:
      * @return WMError
      */
     virtual WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea,
-        const Rect& rect = {0, 0, 0, 0}) { return WMError::WM_OK; }
+        const Rect& rect = Rect::EMPTY_RECT, int32_t apiVersion = API_VERSION_INVALID) { return WMError::WM_OK; }
 
     /**
      * @brief Set whether the system or app sub window can obtain area
@@ -930,6 +1116,20 @@ public:
      * @return WMError
      */
     virtual WMError GetAvoidAreaOption(uint32_t& avoidAreaOption) { return WMError::WM_OK; }
+
+    /**
+     * @brief Is system window or not
+     *
+     * @return True means the window is system window, false means the window is not system window
+     */
+    virtual bool IsSystemWindow() const { return false; }
+
+    /**
+     * @brief Is app window or not
+     *
+     * @return True means the window is app window, false means the window is not app window
+     */
+    virtual bool IsAppWindow() const { return false; }
 
     /**
      * @brief Set this window layout full screen, with hide status bar and nav bar above on this window
@@ -977,6 +1177,11 @@ public:
      */
     virtual WMError Show(uint32_t reason = 0, bool withAnimation = false,
                          bool withFocus = true) { return WMError::WM_OK; }
+
+    /**
+     * @brief resume window
+     */
+    virtual void Resume() {}
 
     /**
      * @brief Hide window
@@ -1218,12 +1423,36 @@ public:
     virtual WMError SetCornerRadius(float cornerRadius) { return WMError::WM_OK; }
 
     /**
+     * @brief Sets corner radius of window.
+     *
+     * @param cornerRadius Corner radius of window.
+     * @return WM_OK means set success, others means set failed.
+     */
+    virtual WMError SetWindowCornerRadius(float cornerRadius) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Get corner radius of window.
+     *
+     * @param cornerRadius Corner radius of window.
+     * @return WM_OK means set success, others means set failed.
+     */
+    virtual WMError GetWindowCornerRadius(float& cornerRadius) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
      * @brief Set shadow radius of window.
      *
      * @param radius Shadow radius of window
      * @return WM_OK means set success, others means set failed.
      */
     virtual WMError SetShadowRadius(float radius) { return WMError::WM_OK; }
+
+    /**
+     * @brief Set shadow radius of window.
+     *
+     * @param radius Shadow radius of window.
+     * @return WM_OK means set success, others means set failed.
+     */
+    virtual WMError SetWindowShadowRadius(float radius) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Set shadow color of window.
@@ -1360,6 +1589,15 @@ public:
      * @param configuration Window configuration.
      */
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) {}
+
+    /**
+     * @brief Update configuration for specified window.
+     *
+     * @param configuration Window configuration.
+     * @param resourceManager The resource manager
+     */
+    virtual void UpdateConfigurationForSpecified(const std::shared_ptr<AppExecFwk::Configuration>& configuration,
+        const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager) {}
 
     /**
      * @brief Update theme configuration.
@@ -1697,8 +1935,108 @@ public:
      * @brief Set requested orientation.
      *
      * @param Orientation Screen orientation.
+     * @param animation true means window rotation needs animation. Otherwise not needed.
      */
-    virtual void SetRequestedOrientation(Orientation) {}
+    virtual void SetRequestedOrientation(Orientation orientation, bool needAnimation = true) {}
+
+    /**
+     * @brief Get the Target Orientation ConfigInfo.
+     *
+     * @param targetOrientation target Orientation.
+     * @param properties systemBar properties
+     * @param config Viewport config.
+     * @param avoidAreas avoidArea information
+     * @return WMError
+     */
+    virtual WMError GetTargetOrientationConfigInfo(Orientation targetOrientation,
+        const std::map<WindowType, SystemBarProperty>& properties, Ace::ViewportConfig& config,
+        std::map<AvoidAreaType, AvoidArea>& avoidAreas)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Register window orientation set by developer
+     *
+     * @param listener IPreferredOrientationChangeListener.
+     * @return WM_OK means register success, others means register failed
+     */
+    virtual WMError RegisterPreferredOrientationChangeListener(
+        const sptr<IPreferredOrientationChangeListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Unregister window orientation set by developer
+     *
+     * @param listener IPreferredOrientationChangeListener.
+     * @return WM_OK means register success, others means unregister failed
+     */
+    virtual WMError UnregisterPreferredOrientationChangeListener(
+        const sptr<IPreferredOrientationChangeListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Register window orientation change listener
+     *
+     * @param listener IWindowOrientationChangeListener.
+     * @return WM_OK means register success, others means register failed
+     */
+    virtual WMError RegisterOrientationChangeListener(const sptr<IWindowOrientationChangeListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Unregister window orientation change listener
+     *
+     * @param listener IWindowOrientationChangeListener.
+     * @return WM_OK means unregister success, others means unregister failed
+     */
+    virtual WMError UnregisterOrientationChangeListener(const sptr<IWindowOrientationChangeListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Notify caller window orientation set by developer
+     *
+     * @param ori Orientation set by developer
+     */
+    virtual void NotifyPreferredOrientationChange(Orientation orientation) {}
+
+    /**
+     * @brief Register SystemBarProperty listener.
+     *
+     * @param listener ISystemBarPropertyListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterSystemBarPropertyListener(const sptr<ISystemBarPropertyListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Unregister SystemBarProperty listener.
+     *
+     * @param listener ISystemBarPropertyListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterSystemBarPropertyListener(const sptr<ISystemBarPropertyListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Notify SystemBarProperty listener.
+     *
+     * @param type The WindowType.
+     * @param property new property value setted by developer.
+     */
+    virtual void NotifySystemBarPropertyUpdate(WindowType type, const SystemBarProperty& property) {}
 
     /**
      * @brief Get requested orientation.
@@ -1826,11 +2164,23 @@ public:
     virtual WMError Restore() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
-     * @brief close the main window. It is called by ACE when close button is clicked.
+     * @brief close the window. It is called by ACE when close button is clicked.
      *
      * @return WMError
      */
     virtual WMError Close() { return WMError::WM_OK; }
+
+    /**
+     * @brief close the window. There is no pre-close process.
+     *
+     * @return WMError
+     */
+    virtual WMError CloseDirectly() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief notify rotation change result.
+     */
+    virtual void NotifyRotationChangeResult(RotationChangeResult rotationChangeResult) {}
 
     /**
      * @brief start move main window. It is called by ACE when title is moved.
@@ -1846,11 +2196,28 @@ public:
     virtual bool IsStartMoving() { return false; }
 
     /**
-     * @brief Start move window. It is called by application.
+     * @brief Start moving window. It is called by application.
      *
      * @return Errorcode of window.
      */
     virtual WmErrorCode StartMoveWindow() { return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Start moving window. It is called by application.
+     *
+     * @param offsetX expected pointer position x-axis offset in window when start moving.
+     * @param offsetY expected pointer position y-axis offset in window when start moving.
+     * @return Error code of window.
+     */
+    virtual WmErrorCode StartMoveWindowWithCoordinate(int32_t offsetX,
+        int32_t offsetY) { return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Stop moving window. It is called by application. Support pc window and pad free multi-window.
+     *
+     * @return Error code of window.
+     */
+    virtual WmErrorCode StopMoveWindow() { return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Set flag that need remove window input channel.
@@ -1905,6 +2272,14 @@ public:
      * @return std::shared_ptr<Media::PixelMap> snapshot pixel
      */
     virtual std::shared_ptr<Media::PixelMap> Snapshot() { return nullptr; }
+
+    /**
+     * @brief window SnapshotIgnorePrivacy
+     *
+     * @param pixelMap pixel map
+     * @return the error code of this operation
+     */
+    virtual WMError SnapshotIgnorePrivacy(std::shared_ptr<Media::PixelMap>& pixelMap) { return WMError::WM_OK; }
 
     /**
      * @brief Handle and notify memory level.
@@ -2039,6 +2414,13 @@ public:
     virtual bool IsPcOrPadFreeMultiWindowMode() const { return false; }
 
     /**
+     * @brief get compatible mode in pc.
+     *
+     * @return True means window is compatible mode in pc, false means the opposite.
+     */
+    virtual bool GetCompatibleModeInPc() const { return false; }
+
+    /**
      * @brief Register transfer component data callback.
      *
      * @param func Function to notify transfer component data.
@@ -2089,8 +2471,10 @@ public:
      *
      * @param isAutoStart true means auto start pip window when background, otherwise means the opposite.
      * @param priority 1 means height priority, 0 means low priority.
+     * @param width width means width of the video content.
+     * @param height height means height of the video content.
      */
-    virtual void SetAutoStartPiP(bool isAutoStart, uint32_t priority) {}
+    virtual void SetAutoStartPiP(bool isAutoStart, uint32_t priority, uint32_t width, uint32_t height) {}
 
     /**
      * @brief When get focused, keep the keyboard created by other windows, support system window and app subwindow.
@@ -2175,7 +2559,10 @@ public:
      * @param windowLimits.
      * @return WMError.
      */
-    virtual WMError SetWindowLimits(WindowLimits& windowLimits) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError SetWindowLimits(WindowLimits& windowLimits, bool isForcible = false)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 
     /**
      * @brief Register listener, if timeout(seconds) pass with no interaction, the listener will be executed.
@@ -2222,6 +2609,16 @@ public:
     }
 
     /**
+     * @brief Set Specific System Bar(include status bar and nav bar) Enable and Animation Properties
+     *
+     * @param systemBarEnable is system bar enabled
+     * @param systemBarEnableAnimation is animation enabled
+     * @param SystemBarProperty WINDOW_TYPE_STATUS_BAR or WINDOW_TYPE_NAVIGATION_BAR
+     */
+    virtual void UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool systemBarEnableAnimation,
+        SystemBarProperty& property) {}
+
+    /**
      * @brief Set Specific System Bar(include status bar and nav bar) Property
      *
      * @param type WINDOW_TYPE_STATUS_BAR or WINDOW_TYPE_NAVIGATION_BAR
@@ -2258,6 +2655,20 @@ public:
     }
 
     /**
+     * @brief Update System Bar (include status bar and nav bar) Properties by Flags
+     *
+     * @param systemBarProperties map of status bar and nav bar properties
+     * @param systemBarPropertyFlags map of status bar and nav bar properties to be changed
+     * @return WMError
+     */
+    virtual WMError UpdateSystemBarProperties(
+        const std::unordered_map<WindowType, SystemBarProperty>& systemBarProperties,
+        const std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
      * @brief Set the single frame composer enabled flag of a window.
      *
      * @param enable true means the single frame composer is enabled, otherwise means the opposite.
@@ -2272,6 +2683,14 @@ public:
      * @return Errorcode of window.
      */
     virtual WMError SetDecorVisible(bool isVisible) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Get the visibility of window decor.
+     *
+     * @param isVisible whether the window decor is visible.
+     * @return Errorcode of window.
+     */
+    virtual WMError GetDecorVisible(bool& isVisible) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Enable or disable move window by title bar.
@@ -2505,7 +2924,8 @@ public:
      * @param enabled Enable the window rect auto-save if true, otherwise means the opposite.
      * @return WM_OK means set success, others means failed.
      */
-    virtual WMError SetWindowRectAutoSave(bool enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError SetWindowRectAutoSave(bool enabled,
+        bool isSaveBySpecifiedFlag = false) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Get whether the auto-save the window rect is enabled or not.
@@ -2516,15 +2936,25 @@ public:
     virtual WMError IsWindowRectAutoSave(bool& enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
-     * @brief Set support window modes.
+     * @brief Sets the supported window modes.
      *
-     * @param supportWindowModes Support window modes of the window.
+     * @param supportedWindowModes Supported window modes of the window.
      * @return WM_OK means set success, others means failed.
      */
-    virtual WMError SetSupportWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes)
+    virtual WMError SetSupportedWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
+
+    /**
+     * @brief Set whether the sub window supports simultaneous display on multiple screens
+     *        when the parent window is dragged to move or dragged to zoom.
+     *
+     * @param enabled The value true means sub window supports simultaneous display on multiple screens
+     *                when the parent window is dragged to move or dragged to zoom, and false means the opposite.
+     * @return WM_OK means set success, others means failed.
+     */
+    virtual WMError SetFollowParentMultiScreenPolicy(bool enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;}
 
     /**
      * @brief Get the rect of host window.
@@ -2577,6 +3007,24 @@ public:
      */
     virtual WMError UnregisterMainWindowCloseListeners(
         const sptr<IMainWindowCloseListener>& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Register window close async process listener.
+     *
+     * @param listener IWindowWillCloseListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterWindowWillCloseListeners(
+        const sptr<IWindowWillCloseListener>& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Unregister window close async process listener.
+     *
+     * @param listener IWindowWillCloseListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnRegisterWindowWillCloseListeners(
+        const sptr<IWindowWillCloseListener>& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Register switch free multi-window listener.
@@ -2656,6 +3104,42 @@ public:
     virtual WMError ClearKeyEventFilter() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;}
 
     /**
+     * @brief register mouseEvent filter.
+     *
+     * @param mouseEventFilterFunc callback func when window receive mouseEvent
+     * @return WMError
+     */
+    virtual WMError SetMouseEventFilter(MouseEventFilterFunc mouseEventFilterFunc)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief clear mouseEvent filter.
+     *
+     * @return WMError
+     */
+    virtual WMError ClearMouseEventFilter() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief register touchEvent filter.
+     *
+     * @param touchEventFilterFunc callback func when window receive touchEvent
+     * @return WMError
+     */
+    virtual WMError SetTouchEventFilter(TouchEventFilterFunc touchEventFilterFunc)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief clear touchEvent filter.
+     *
+     * @return WMError
+     */
+    virtual WMError ClearTouchEventFilter() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
      * @brief Register window rect change listener.
      *
      * @param listener IWindowRectChangeListener.
@@ -2717,7 +3201,7 @@ public:
      * @param params
      * @return WM_OK means set success, others means set failed
      */
-    virtual WMError AdjustKeyboardLayout(const KeyboardLayoutParams& params) { return WMError::WM_OK; }
+    virtual WMError AdjustKeyboardLayout(const KeyboardLayoutParams params) { return WMError::WM_OK; }
 
     /**
      * @brief Set the Dvsync Switch
@@ -2855,6 +3339,305 @@ public:
      * @return The string corresponding to the window.
      */
     virtual std::string GetClassType() const { return "Window"; }
+
+    /**
+     * @brief Enable or disable window delay raise
+     *
+     * @param isEnabled Enable or disable window delay raise
+     */
+    virtual WMError SetWindowDelayRaiseEnabled(bool isEnabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Get whether window delay raise is enabled
+     *
+     * @return True means window delay raise is enabled
+     */
+    virtual bool IsWindowDelayRaiseEnabled() const { return false; }
+
+    /**
+     * @brief Get whether is mid scene.
+     *
+     * @return True - is mid scene, false - is not mid scene.
+     */
+    virtual WMError GetIsMidScene(bool& isMidScene) { return WMError::WM_OK; }
+
+    /**
+     * @brief Get layoutTransform of window uiContent.
+     *
+     * @return UiContent of layoutTransform.
+     */
+    virtual Transform GetLayoutTransform() const
+    {
+        static Transform trans;
+        return trans;
+    }
+
+    /**
+     * @brief Show keyboard window
+     *
+     * @param mode Keyboard will show with special mode.
+     * @return WM_OK means window show success, others means failed.
+     */
+    virtual WMError ShowKeyboard(KeyboardViewMode mode)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Change keyboard view mode
+     *
+     * @param mode Keyboard will update to the special mode.
+     * @return WM_OK means view mode update success, others means failed.
+     */
+    virtual WMError ChangeKeyboardViewMode(KeyboardViewMode mode)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Register window highlight change listener.
+     *
+     * @param listener IWindowHighlightChangeListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterWindowHighlightChangeListeners(const sptr<IWindowHighlightChangeListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Unregister window highlight change listener.
+     *
+     * @param listener IWindowHighlightChangeListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterWindowHighlightChangeListeners(const sptr<IWindowHighlightChangeListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Set whether to enable exclusively highlight.
+     *
+     * @param isExclusivelyHighlighted the value true means to exclusively highlight, and false means the opposite.
+     * @return WM_OK means set success, others means set failed.
+     */
+    virtual WMError SetExclusivelyHighlighted(bool isExclusivelyHighlighted)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Get highlight property of window.
+     *
+     * @param highlighted True means the window is highlighted, and false means the opposite.
+     * @return WM_OK means get success, others means get failed.
+     */
+    virtual WMError IsWindowHighlighted(bool& highlighted) const { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Get cross screen axis state.
+     *
+     * @return The cross screen axis state of the Window.
+     */
+    virtual CrossAxisState GetCrossAxisState() { return CrossAxisState::STATE_INVALID; }
+
+    /**
+     * @brief Register window screen axis state change listener.
+     *
+     * @param listener IWindowCrossAxisChangeListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterWindowCrossAxisListener(const sptr<IWindowCrossAxisListener>& listener)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Unregister window screen axis state change listener.
+     *
+     * @param listener IWindowCrossAxisChangeListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterWindowCrossAxisListener(const sptr<IWindowCrossAxisListener>& listener)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Get custom extension param.
+     *
+     * @param want the want to store param.
+     */
+    virtual void GetExtensionConfig(AAFwk::WantParams& want) const {}
+
+    /**
+     * @brief Update custom extension param.
+     *
+     * @param want the want to update param.
+     */
+    virtual void UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>& want) {}
+
+    /**
+     * @brief Query whether the waterfall mode is enabled or not.
+     *
+     * @return true means the waterfall mode is enabled, and false means the opposite.
+     */
+    virtual bool IsWaterfallModeEnabled() { return false; }
+
+    /**
+     * @brief Register waterfall mode change listener.
+     *
+     * @param listener IWaterfallModeChangeListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterWaterfallModeChangeListener(const sptr<IWaterfallModeChangeListener>& listener)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Unregister waterfall mode change listener.
+     *
+     * @param listener IWaterfallModeChangeListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterWaterfallModeChangeListener(const sptr<IWaterfallModeChangeListener>& listener)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Register window scene attach or detach framenode listener.
+     *
+     * @param listener IWindowAttachStateChangeListner.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterWindowAttachStateChangeListener(const sptr<IWindowAttachStateChangeListner>& listener)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Unregister window scene attach or detach framenode listener.
+     *
+     * @return WM_OK means unregister success
+     */
+    virtual WMError UnregisterWindowAttachStateChangeListener()
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Register window rotation change listener.
+     *
+     * @param listener IWindowRotationChangeListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterWindowRotationChangeListener(const sptr<IWindowRotationChangeListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Unregister window rotation change listener.
+     *
+     * @param listener IWindowRotationChangeListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterWindowRotationChangeListener(const sptr<IWindowRotationChangeListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Get the api compatible version.
+     *
+     * @return Api compatible version
+     */
+    virtual uint32_t GetApiCompatibleVersion() const { return 0; }
+
+    /**
+     * @brief Set the parent window of a sub window.
+     *
+     * @param newParentWindowId new parent window id.
+     * @return WM_OK means set parent window success, others means failed.
+     */
+    virtual WMError SetParentWindow(int32_t newParentWindowId) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Get the parent window of a sub window.
+     *
+     * @param parentWindow parent window.
+     * @return WM_OK means get parent window success, others means failed.
+     */
+    virtual WMError GetParentWindow(sptr<Window>& parentWindow) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Set the feature of subwindow follow the layout of the parent window.
+     *
+     * @param isFollow true - follow, false - not follow.
+     * @return WM_OK means set success.
+     */
+    virtual WMError SetFollowParentWindowLayoutEnabled(bool isFollow) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+     /**
+     * @brief Get is subwindow support maximize.
+     *
+     * @return true means subwindow support maximize, others means do not support.
+     */
+    virtual bool IsSubWindowMaximizeSupported() const { return false; }
+
+    /**
+     * @brief update the default window size type
+     *
+     * @param defaultWindowSizeType the default window size type of pip window
+     */
+    virtual void UpdatePiPDefaultWindowSizeType(uint32_t defaultWindowSizeType) {}
+
+    /**
+     * @brief Register keyboard show animation completion listener.
+     *
+     * @param listener IKeyboardDidShowListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterKeyboardDidShowListener(const sptr<IKeyboardDidShowListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Unregister keyboard show animation completion listener.
+     *
+     * @param listener IKeyboardDidShowListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterKeyboardDidShowListener(const sptr<IKeyboardDidShowListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Register keyboard hide animation completion listener.
+     *
+     * @param listener IKeyboardDidHideListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterKeyboardDidHideListener(const sptr<IKeyboardDidHideListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Unregister keyboard hide animation completion listener.
+     *
+     * @param listener IKeyboardDidHideListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterKeyboardDidHideListener(const sptr<IKeyboardDidHideListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 };
 }
 }

@@ -40,7 +40,7 @@ private:
     std::recursive_mutex mutex_;
     sptr<AbstractScreenController> absScreenController_ = nullptr;
     sptr<AbstractDisplayController> absDisplayController_ = nullptr;
-    sptr<AbstractScreen> absScreen_ = nullptr;;
+    sptr<AbstractScreen> absScreen_ = nullptr;
     ScreenId defaultScreenId_ = 0;
     DisplayId defaultDisplayId_ = 0;
     sptr<AbstractDisplay> absDisplay_ = nullptr;
@@ -102,7 +102,7 @@ namespace {
  * @tc.desc: OnAbstractScreenConnectAndDisConnect with nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractDisplayControllerTest, OnAbstractScreenConnectAndDisConnect01, Function | SmallTest | Level3)
+HWTEST_F(AbstractDisplayControllerTest, OnAbstractScreenConnectAndDisConnect01, TestSize.Level1)
 {
     sptr<AbstractScreen> absScreen = nullptr;
     absDisplayController_->OnAbstractScreenConnect(absScreen);
@@ -118,7 +118,7 @@ HWTEST_F(AbstractDisplayControllerTest, OnAbstractScreenConnectAndDisConnect01, 
  * @tc.desc: OnAbstractScreenConnectAndDisConnect02 with different ScreenCombination
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractDisplayControllerTest, OnAbstractScreenConnectAndDisConnect02, Function | SmallTest | Level3)
+HWTEST_F(AbstractDisplayControllerTest, OnAbstractScreenConnectAndDisConnect02, TestSize.Level1)
 {
     auto group = absScreen_->GetGroup();
     EXPECT_NE(nullptr, group);
@@ -133,7 +133,7 @@ HWTEST_F(AbstractDisplayControllerTest, OnAbstractScreenConnectAndDisConnect02, 
  * @tc.desc: OnAbstractScreenConnectAndDisConnect03 with different ScreenCombination
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractDisplayControllerTest, OnAbstractScreenConnectAndDisConnect03, Function | SmallTest | Level3)
+HWTEST_F(AbstractDisplayControllerTest, OnAbstractScreenConnectAndDisConnect03, TestSize.Level1)
 {
     auto group = absScreen_->GetGroup();
     EXPECT_NE(nullptr, group);
@@ -152,7 +152,7 @@ HWTEST_F(AbstractDisplayControllerTest, OnAbstractScreenConnectAndDisConnect03, 
  * @tc.desc: ProcessNormalScreenDisconnected01 failed
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractDisplayControllerTest, ProcessNormalScreenDisconnected01, Function | SmallTest | Level3)
+HWTEST_F(AbstractDisplayControllerTest, ProcessNormalScreenDisconnected01, TestSize.Level1)
 {
     sptr<AbstractScreen> absScreen = nullptr;
     sptr<AbstractScreenGroup> screenGroup = nullptr;
@@ -173,7 +173,7 @@ HWTEST_F(AbstractDisplayControllerTest, ProcessNormalScreenDisconnected01, Funct
  * @tc.desc: ProcessExpandScreenDisconnected01 failed
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractDisplayControllerTest, ProcessExpandScreenDisconnected01, Function | SmallTest | Level3)
+HWTEST_F(AbstractDisplayControllerTest, ProcessExpandScreenDisconnected01, TestSize.Level1)
 {
     sptr<AbstractScreen> absScreen = nullptr;
     sptr<AbstractScreenGroup> screenGroup = nullptr;
@@ -194,7 +194,7 @@ HWTEST_F(AbstractDisplayControllerTest, ProcessExpandScreenDisconnected01, Funct
  * @tc.desc: OnAbstractScreenChange01
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractDisplayControllerTest, OnAbstractScreenChange01, Function | SmallTest | Level3)
+HWTEST_F(AbstractDisplayControllerTest, OnAbstractScreenChange01, TestSize.Level1)
 {
     sptr<AbstractScreen> absScreen = nullptr;
     absDisplayController_->OnAbstractScreenChange(absScreen, DisplayChangeEvent::UNKNOWN);
@@ -213,7 +213,7 @@ HWTEST_F(AbstractDisplayControllerTest, OnAbstractScreenChange01, Function | Sma
  * @tc.desc: ProcessDisplayRotationChange01
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractDisplayControllerTest, ProcessDisplayRotationChange01, Function | SmallTest | Level3)
+HWTEST_F(AbstractDisplayControllerTest, ProcessDisplayRotationChange01, TestSize.Level1)
 {
     sptr<AbstractScreen> absScreen = new AbstractScreen(absScreenController_, name_, 1, 1);
     EXPECT_EQ(nullptr, absDisplayController_->GetAbstractDisplayByAbsScreen(absScreen));
@@ -234,7 +234,7 @@ HWTEST_F(AbstractDisplayControllerTest, ProcessDisplayRotationChange01, Function
  * @tc.desc: ProcessDisplayCompression01
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractDisplayControllerTest, ProcessDisplayCompression01, Function | SmallTest | Level3)
+HWTEST_F(AbstractDisplayControllerTest, ProcessDisplayCompression01, TestSize.Level1)
 {
     bool isWaterfallDisplayOrigin = DisplayCutoutController::IsWaterfallDisplay();
     bool isCompressionEnableOrigin =
@@ -278,7 +278,7 @@ HWTEST_F(AbstractDisplayControllerTest, ProcessDisplayCompression01, Function | 
  * @tc.desc: GetAbstractDisplayByAbsScreen01
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractDisplayControllerTest, GetAbstractDisplayByAbsScreen01, Function | SmallTest | Level3)
+HWTEST_F(AbstractDisplayControllerTest, GetAbstractDisplayByAbsScreen01, TestSize.Level1)
 {
     EXPECT_NE(nullptr, absDisplayController_->GetAbstractDisplayByAbsScreen(absScreen_));
 
@@ -310,7 +310,7 @@ HWTEST_F(AbstractDisplayControllerTest, GetAbstractDisplayByAbsScreen01, Functio
  * @tc.desc: ProcessDisplayUpdateOrientation01
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractDisplayControllerTest, ProcessDisplayUpdateOrientation01, Function | SmallTest | Level3)
+HWTEST_F(AbstractDisplayControllerTest, ProcessDisplayUpdateOrientation01, TestSize.Level1)
 {
     absDisplayController_->ProcessDisplayUpdateOrientation(absScreen_, DisplayStateChangeType::UPDATE_ROTATION);
 
@@ -346,7 +346,7 @@ HWTEST_F(AbstractDisplayControllerTest, ProcessDisplayUpdateOrientation01, Funct
  * @tc.desc: ProcessDisplaySizeChange01
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractDisplayControllerTest, ProcessDisplaySizeChange01, Function | SmallTest | Level3)
+HWTEST_F(AbstractDisplayControllerTest, ProcessDisplaySizeChange01, TestSize.Level1)
 {
     absDisplayController_->ProcessDisplaySizeChange(absScreen_);
     auto display = absDisplayController_->abstractDisplayMap_.at(defaultDisplayId_);
@@ -378,7 +378,7 @@ HWTEST_F(AbstractDisplayControllerTest, ProcessDisplaySizeChange01, Function | S
  * @tc.desc: UpdateDisplaySize01
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractDisplayControllerTest, UpdateDisplaySize01, Function | SmallTest | Level3)
+HWTEST_F(AbstractDisplayControllerTest, UpdateDisplaySize01, TestSize.Level1)
 {
     EXPECT_EQ(false, absDisplayController_->UpdateDisplaySize(nullptr, modesInfo_));
 
@@ -410,7 +410,7 @@ HWTEST_F(AbstractDisplayControllerTest, UpdateDisplaySize01, Function | SmallTes
  * @tc.desc: ProcessVirtualPixelRatioChange01
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractDisplayControllerTest, ProcessVirtualPixelRatioChange01, Function | SmallTest | Level3)
+HWTEST_F(AbstractDisplayControllerTest, ProcessVirtualPixelRatioChange01, TestSize.Level1)
 {
     auto display = absDisplayController_->abstractDisplayMap_.at(defaultDisplayId_);
     EXPECT_NE(nullptr, display);
@@ -426,7 +426,7 @@ HWTEST_F(AbstractDisplayControllerTest, ProcessVirtualPixelRatioChange01, Functi
  * @tc.desc: BindAloneScreenLocked01
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractDisplayControllerTest, BindAloneScreenLocked01, Function | SmallTest | Level3)
+HWTEST_F(AbstractDisplayControllerTest, BindAloneScreenLocked01, TestSize.Level1)
 {
     absDisplayController_->BindAloneScreenLocked(nullptr);
 
@@ -466,7 +466,7 @@ HWTEST_F(AbstractDisplayControllerTest, BindAloneScreenLocked01, Function | Smal
  * @tc.desc: AddScreenToExpandLocked01
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractDisplayControllerTest, AddScreenToExpandLocked01, Function | SmallTest | Level3)
+HWTEST_F(AbstractDisplayControllerTest, AddScreenToExpandLocked01, TestSize.Level1)
 {
     absDisplayController_->AddScreenToExpandLocked(nullptr);
 
@@ -489,7 +489,7 @@ HWTEST_F(AbstractDisplayControllerTest, AddScreenToExpandLocked01, Function | Sm
  * @tc.desc: SetFreeze01
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractDisplayControllerTest, SetFreeze01, Function | SmallTest | Level3)
+HWTEST_F(AbstractDisplayControllerTest, SetFreeze01, TestSize.Level1)
 {
     absDisplayController_->abstractDisplayMap_.clear();
     std::vector<DisplayId> displayIds(1, 0);
@@ -503,7 +503,7 @@ HWTEST_F(AbstractDisplayControllerTest, SetFreeze01, Function | SmallTest | Leve
  * @tc.desc: GetAllDisplayInfoOfGroup01
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractDisplayControllerTest, GetAllDisplayInfoOfGroup01, Function | SmallTest | Level3)
+HWTEST_F(AbstractDisplayControllerTest, GetAllDisplayInfoOfGroup01, TestSize.Level1)
 {
     sptr<DisplayInfo> displayInfo = new DisplayInfo();
     EXPECT_NE(nullptr, displayInfo);
@@ -517,7 +517,7 @@ HWTEST_F(AbstractDisplayControllerTest, GetAllDisplayInfoOfGroup01, Function | S
  * @tc.desc: GetDefaultDisplayId01
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractDisplayControllerTest, GetDefaultDisplayId01, Function | SmallTest | Level3)
+HWTEST_F(AbstractDisplayControllerTest, GetDefaultDisplayId01, TestSize.Level1)
 {
     auto absDisplayController = new AbstractDisplayController(mutex_, [](DisplayId, sptr<DisplayInfo>,
         const std::map<DisplayId, sptr<DisplayInfo>>&, DisplayStateChangeType) {});
@@ -535,7 +535,7 @@ HWTEST_F(AbstractDisplayControllerTest, GetDefaultDisplayId01, Function | SmallT
  * @tc.desc: GetAbstractDisplayByScreen
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractDisplayControllerTest, GetAbstractDisplayByScreen, Function | SmallTest | Level3)
+HWTEST_F(AbstractDisplayControllerTest, GetAbstractDisplayByScreen, TestSize.Level1)
 {
     ScreenId screenId = SCREEN_ID_INVALID;
     auto ret = absDisplayController_->GetAbstractDisplayByScreen(screenId);
@@ -547,7 +547,7 @@ HWTEST_F(AbstractDisplayControllerTest, GetAbstractDisplayByScreen, Function | S
  * @tc.desc: GetScreenSnapshot
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractDisplayControllerTest, GetScreenSnapshot01, Function | SmallTest | Level3)
+HWTEST_F(AbstractDisplayControllerTest, GetScreenSnapshot01, TestSize.Level1)
 {
     ScreenId screenId = SCREEN_ID_INVALID;
     auto ret = absDisplayController_->GetScreenSnapshot(screenId);
@@ -559,7 +559,7 @@ HWTEST_F(AbstractDisplayControllerTest, GetScreenSnapshot01, Function | SmallTes
  * @tc.desc: GetScreenSnapshot
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractDisplayControllerTest, GetScreenSnapshot02, Function | SmallTest | Level3)
+HWTEST_F(AbstractDisplayControllerTest, GetScreenSnapshot02, TestSize.Level1)
 {
     ScreenId screenId = 2;
     auto ret = absDisplayController_->GetScreenSnapshot(screenId);
@@ -571,7 +571,7 @@ HWTEST_F(AbstractDisplayControllerTest, GetScreenSnapshot02, Function | SmallTes
  * @tc.desc: GetScreenSnapshot
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractDisplayControllerTest, GetScreenSnapshot03, Function | SmallTest | Level3)
+HWTEST_F(AbstractDisplayControllerTest, GetScreenSnapshot03, TestSize.Level1)
 {
     ScreenId screenId = 1;
     auto ret = absDisplayController_->GetScreenSnapshot(screenId);

@@ -36,7 +36,7 @@ namespace {
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionProxyLifecycleTest, Foreground, Function | SmallTest | Level2)
+HWTEST_F(SessionProxyLifecycleTest, Foreground, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SessionProxyLifecycleTest: Foreground start";
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
@@ -52,7 +52,7 @@ HWTEST_F(SessionProxyLifecycleTest, Foreground, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionProxyLifecycleTest, Foreground1, Function | SmallTest | Level2)
+HWTEST_F(SessionProxyLifecycleTest, Foreground1, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SessionProxyLifecycleTest: Foreground start";
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
@@ -69,7 +69,7 @@ HWTEST_F(SessionProxyLifecycleTest, Foreground1, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionProxyLifecycleTest, Background, Function | SmallTest | Level2)
+HWTEST_F(SessionProxyLifecycleTest, Background, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SessionProxyLifecycleTest: Background start";
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
@@ -84,7 +84,7 @@ HWTEST_F(SessionProxyLifecycleTest, Background, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionProxyLifecycleTest, Disconnect, Function | SmallTest | Level2)
+HWTEST_F(SessionProxyLifecycleTest, Disconnect, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SessionProxyLifecycleTest: Disconnect start";
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
@@ -99,7 +99,7 @@ HWTEST_F(SessionProxyLifecycleTest, Disconnect, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionProxyLifecycleTest, DrawingCompleted, Function | SmallTest | Level2)
+HWTEST_F(SessionProxyLifecycleTest, DrawingCompleted, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SessionProxyLifecycleTest: DrawingCompleted start";
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
@@ -116,7 +116,7 @@ HWTEST_F(SessionProxyLifecycleTest, DrawingCompleted, Function | SmallTest | Lev
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionProxyLifecycleTest, RemoveStartingWindow, Function | SmallTest | Level2)
+HWTEST_F(SessionProxyLifecycleTest, RemoveStartingWindow, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SessionProxyLifecycleTest: RemoveStartingWindow start";
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
@@ -133,7 +133,7 @@ HWTEST_F(SessionProxyLifecycleTest, RemoveStartingWindow, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionProxyLifecycleTest, PendingSessionActivation, Function | SmallTest | Level2)
+HWTEST_F(SessionProxyLifecycleTest, PendingSessionActivation, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SessionProxyLifecycleTest: PendingSessionActivation start";
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
@@ -154,7 +154,7 @@ HWTEST_F(SessionProxyLifecycleTest, PendingSessionActivation, Function | SmallTe
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionProxyLifecycleTest, TerminateSession, Function | SmallTest | Level2)
+HWTEST_F(SessionProxyLifecycleTest, TerminateSession, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SessionProxyLifecycleTest: TerminateSession start";
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
@@ -175,18 +175,19 @@ HWTEST_F(SessionProxyLifecycleTest, TerminateSession, Function | SmallTest | Lev
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionProxyLifecycleTest, NotifySessionException, Function | SmallTest | Level2)
+HWTEST_F(SessionProxyLifecycleTest, NotifySessionException, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SessionProxyLifecycleTest: NotifySessionException start";
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     sptr<AAFwk::SessionInfo> abilitySessionInfo = nullptr;
-    WSError res = sProxy->NotifySessionException(abilitySessionInfo);
+    ExceptionInfo exceptionInfo;
+    WSError res = sProxy->NotifySessionException(abilitySessionInfo, exceptionInfo);
     ASSERT_EQ(res, WSError::WS_ERROR_INVALID_SESSION);
 
     sptr<AAFwk::SessionInfo> abilitySessionInfo1 = sptr<AAFwk::SessionInfo>::MakeSptr();
     ASSERT_NE(abilitySessionInfo1, nullptr);
-    res = sProxy->NotifySessionException(abilitySessionInfo1);
+    res = sProxy->NotifySessionException(abilitySessionInfo1, exceptionInfo);
     ASSERT_EQ(res, WSError::WS_OK);
     GTEST_LOG_(INFO) << "SessionProxyLifecycleTest: NotifySessionException end";
 }

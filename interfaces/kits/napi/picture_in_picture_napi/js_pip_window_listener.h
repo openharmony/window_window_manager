@@ -24,7 +24,8 @@ namespace OHOS {
 namespace Rosen {
 class JsPiPWindowListener : public IPiPLifeCycle,
                             public IPiPActionObserver,
-                            public IPiPControlObserver {
+                            public IPiPControlObserver,
+                            public IPiPWindowSize {
 public:
     JsPiPWindowListener(napi_env env, const std::shared_ptr<NativeReference>& callback)
         : env_(env), jsCallBack_(callback) {}
@@ -38,6 +39,7 @@ public:
     void OnRestoreUserInterface() override;
     void OnActionEvent(const std::string& actionEvent, int32_t statusCode) override;
     void OnControlEvent(PiPControlType controlType, PiPControlStatus statusCode) override;
+    void OnPipSizeChange(const PiPWindowSize& size) override;
 
 private:
     void OnPipListenerCallback(PiPState state, int32_t errorCode);
