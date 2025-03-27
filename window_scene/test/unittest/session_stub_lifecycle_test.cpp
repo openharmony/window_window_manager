@@ -68,7 +68,7 @@ namespace {
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(SessionStubLifecycleTest, HandleShow009, Function | SmallTest | Level2)
+HWTEST_F(SessionStubLifecycleTest, HandleShow009, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -83,7 +83,7 @@ HWTEST_F(SessionStubLifecycleTest, HandleShow009, Function | SmallTest | Level2)
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(SessionStubLifecycleTest, HandleHide010, Function | SmallTest | Level2)
+HWTEST_F(SessionStubLifecycleTest, HandleHide010, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -97,7 +97,7 @@ HWTEST_F(SessionStubLifecycleTest, HandleHide010, Function | SmallTest | Level2)
  * @tc.desc: sessionStub SessionStubLifecycleTest
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStubLifecycleTest, HandleDrawingCompleted, Function | SmallTest | Level2)
+HWTEST_F(SessionStubLifecycleTest, HandleDrawingCompleted, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -112,7 +112,7 @@ HWTEST_F(SessionStubLifecycleTest, HandleDrawingCompleted, Function | SmallTest 
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(SessionStubLifecycleTest, HandlePendingSessionActivation011, Function | SmallTest | Level2)
+HWTEST_F(SessionStubLifecycleTest, HandlePendingSessionActivation011, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;

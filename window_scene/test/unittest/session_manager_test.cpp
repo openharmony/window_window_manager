@@ -66,7 +66,7 @@ namespace {
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionManagerTest, OnRemoteRequest, Function | SmallTest | Level2)
+HWTEST_F(SessionManagerTest, OnRemoteRequest, TestSize.Level1)
 {
     OHOS::MessageParcel data;
     OHOS::MessageParcel reply;
@@ -93,7 +93,7 @@ HWTEST_F(SessionManagerTest, OnRemoteRequest, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionManagerTest, GetSceneSessionManagerProxy, Function | SmallTest | Level2)
+HWTEST_F(SessionManagerTest, GetSceneSessionManagerProxy, TestSize.Level1)
 {
     ASSERT_NE(nullptr, sm_);
     sm_->Clear();
@@ -112,7 +112,7 @@ HWTEST_F(SessionManagerTest, GetSceneSessionManagerProxy, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionManagerTest, ClearSessionManagerProxy, Function | SmallTest | Level2)
+HWTEST_F(SessionManagerTest, ClearSessionManagerProxy, TestSize.Level1)
 {
     ASSERT_NE(nullptr, sm_);
     sm_->ClearSessionManagerProxy();
@@ -129,7 +129,7 @@ HWTEST_F(SessionManagerTest, ClearSessionManagerProxy, Function | SmallTest | Le
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionManagerTest, OnWMSConnectionChangedCallback, Function | SmallTest | Level2)
+HWTEST_F(SessionManagerTest, OnWMSConnectionChangedCallback, TestSize.Level1)
 {
     ASSERT_NE(nullptr, sm_);
     bool funcInvoked = false;
@@ -147,7 +147,7 @@ HWTEST_F(SessionManagerTest, OnWMSConnectionChangedCallback, Function | SmallTes
  * @tc.desc: wms disconnected
  * @tc.type: FUNC
  */
-HWTEST_F(SessionManagerTest, OnWMSConnectionChanged1, Function | SmallTest | Level2)
+HWTEST_F(SessionManagerTest, OnWMSConnectionChanged1, TestSize.Level1)
 {
     ASSERT_NE(nullptr, sm_);
     sptr<ISessionManagerService> sessionManagerService;
@@ -167,7 +167,7 @@ HWTEST_F(SessionManagerTest, OnWMSConnectionChanged1, Function | SmallTest | Lev
  * @tc.desc: wms connected
  * @tc.type: FUNC
  */
-HWTEST_F(SessionManagerTest, OnWMSConnectionChanged2, Function | SmallTest | Level2)
+HWTEST_F(SessionManagerTest, OnWMSConnectionChanged2, TestSize.Level1)
 {
     ASSERT_NE(nullptr, sm_);
     sptr<ISessionManagerService> sessionManagerService;
@@ -188,7 +188,7 @@ HWTEST_F(SessionManagerTest, OnWMSConnectionChanged2, Function | SmallTest | Lev
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionManagerTest, RecoverSessionManagerService, Function | SmallTest | Level2)
+HWTEST_F(SessionManagerTest, RecoverSessionManagerService, TestSize.Level1)
 {
     ASSERT_NE(nullptr, sm_);
     bool funcInvoked = false;
@@ -206,7 +206,7 @@ HWTEST_F(SessionManagerTest, RecoverSessionManagerService, Function | SmallTest 
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionManagerTest, RegisterUserSwitchListener, Function | SmallTest | Level2)
+HWTEST_F(SessionManagerTest, RegisterUserSwitchListener, TestSize.Level1)
 {
     ASSERT_NE(nullptr, sm_);
     sm_->RegisterUserSwitchListener(nullptr);
@@ -221,7 +221,7 @@ HWTEST_F(SessionManagerTest, RegisterUserSwitchListener, Function | SmallTest | 
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionManagerTest, OnUserSwitch, Function | SmallTest | Level2)
+HWTEST_F(SessionManagerTest, OnUserSwitch, TestSize.Level1)
 {
     ASSERT_NE(nullptr, sm_);
     sm_->OnUserSwitch(nullptr);
@@ -239,7 +239,7 @@ HWTEST_F(SessionManagerTest, OnUserSwitch, Function | SmallTest | Level2)
  * @tc.desc: foundation died
  * @tc.type: FUNC
  */
-HWTEST_F(SessionManagerTest, OnRemoteDied1, Function | SmallTest | Level2)
+HWTEST_F(SessionManagerTest, OnRemoteDied1, TestSize.Level1)
 {
     ASSERT_NE(nullptr, sm_);
     FoundationDeathRecipient foundationDeathRecipient;
@@ -258,7 +258,7 @@ HWTEST_F(SessionManagerTest, OnRemoteDied1, Function | SmallTest | Level2)
  * @tc.desc: scb died
  * @tc.type: FUNC
  */
-HWTEST_F(SessionManagerTest, OnRemoteDied2, Function | SmallTest | Level2)
+HWTEST_F(SessionManagerTest, OnRemoteDied2, TestSize.Level1)
 {
     ASSERT_NE(nullptr, sm_);
     SSMDeathRecipient sSMDeathRecipient;
@@ -272,7 +272,7 @@ HWTEST_F(SessionManagerTest, OnRemoteDied2, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionManagerTest, OnFoundationDied, Function | SmallTest | Level2)
+HWTEST_F(SessionManagerTest, OnFoundationDied, TestSize.Level1)
 {
     ASSERT_NE(nullptr, sm_);
     sm_->OnFoundationDied();
@@ -289,7 +289,7 @@ HWTEST_F(SessionManagerTest, OnFoundationDied, Function | SmallTest | Level2)
  * @tc.desc: WMSConnectionChangedCallbackFunc is null
  * @tc.type: FUNC
  */
-HWTEST_F(SessionManagerTest, RegisterWMSConnectionChangedListener, Function | SmallTest | Level2)
+HWTEST_F(SessionManagerTest, RegisterWMSConnectionChangedListener, TestSize.Level1)
 {
     ASSERT_NE(nullptr, sm_);
     auto ret = sm_->RegisterWMSConnectionChangedListener(nullptr);
@@ -301,7 +301,7 @@ HWTEST_F(SessionManagerTest, RegisterWMSConnectionChangedListener, Function | Sm
  * @tc.desc: normal test
  * @tc.type: FUNC
  */
-HWTEST_F(SessionManagerTest, RegisterWMSConnectionChangedListener1, Function | SmallTest | Level2)
+HWTEST_F(SessionManagerTest, RegisterWMSConnectionChangedListener1, TestSize.Level1)
 {
     ASSERT_NE(nullptr, sm_);
     sm_->isRecoverListenerRegistered_ = true;
@@ -318,7 +318,7 @@ HWTEST_F(SessionManagerTest, RegisterWMSConnectionChangedListener1, Function | S
  * @tc.desc: mockSessionManagerServiceProxy_ is null
  * @tc.type: FUNC
  */
-HWTEST_F(SessionManagerTest, RegisterSMSRecoverListener1, Function | SmallTest | Level2)
+HWTEST_F(SessionManagerTest, RegisterSMSRecoverListener1, TestSize.Level1)
 {
     ASSERT_NE(nullptr, sm_);
     sm_->isRecoverListenerRegistered_ = false;
@@ -332,7 +332,7 @@ HWTEST_F(SessionManagerTest, RegisterSMSRecoverListener1, Function | SmallTest |
  * @tc.desc: normal test
  * @tc.type: FUNC
  */
-HWTEST_F(SessionManagerTest, RegisterSMSRecoverListener2, Function | SmallTest | Level2)
+HWTEST_F(SessionManagerTest, RegisterSMSRecoverListener2, TestSize.Level1)
 {
     ASSERT_NE(nullptr, sm_);
     sm_->isRecoverListenerRegistered_ = false;
@@ -346,7 +346,7 @@ HWTEST_F(SessionManagerTest, RegisterSMSRecoverListener2, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionManagerTest, InitMockSMSProxy, Function | SmallTest | Level2)
+HWTEST_F(SessionManagerTest, InitMockSMSProxy, TestSize.Level1)
 {
     ASSERT_NE(nullptr, sm_);
     sm_->InitMockSMSProxy();
@@ -358,7 +358,7 @@ HWTEST_F(SessionManagerTest, InitMockSMSProxy, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionManagerTest, RegisterWindowManagerRecoverCallbackFunc, Function | SmallTest | Level2)
+HWTEST_F(SessionManagerTest, RegisterWindowManagerRecoverCallbackFunc, TestSize.Level1)
 {
     ASSERT_NE(nullptr, sm_);
     auto testFunc = []() { return; };

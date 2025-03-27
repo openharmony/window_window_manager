@@ -120,7 +120,7 @@ namespace {
  * @tc.desc: AdjustKeyboardLayout
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest2, AdjustKeyboardLayout01, Function | SmallTest | Level1)
+HWTEST_F(KeyboardSessionTest2, AdjustKeyboardLayout01, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "AdjustKeyboardLayout01";
@@ -152,7 +152,7 @@ HWTEST_F(KeyboardSessionTest2, AdjustKeyboardLayout01, Function | SmallTest | Le
  * @tc.desc: AdjustKeyboardLayout
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest2, AdjustKeyboardLayout02, Function | SmallTest | Level1)
+HWTEST_F(KeyboardSessionTest2, AdjustKeyboardLayout02, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "AdjustKeyboardLayout02";
@@ -182,7 +182,7 @@ HWTEST_F(KeyboardSessionTest2, AdjustKeyboardLayout02, Function | SmallTest | Le
  * @tc.desc: CheckIfNeedRaiseCallingSession
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest2, CheckIfNeedRaiseCallingSession, Function | SmallTest | Level1)
+HWTEST_F(KeyboardSessionTest2, CheckIfNeedRaiseCallingSession, TestSize.Level1)
 {
     WLOGFI("CheckIfNeedRaiseCallingSession begin!");
     SessionInfo info;
@@ -228,7 +228,7 @@ HWTEST_F(KeyboardSessionTest2, CheckIfNeedRaiseCallingSession, Function | SmallT
  * @tc.desc: OpenKeyboardSyncTransaction
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest2, OpenKeyboardSyncTransaction, Function | SmallTest | Level1)
+HWTEST_F(KeyboardSessionTest2, OpenKeyboardSyncTransaction, TestSize.Level1)
 {
     std::string abilityName = "OpenKeyboardSyncTransaction";
     std::string bundleName = "OpenKeyboardSyncTransaction";
@@ -253,7 +253,7 @@ HWTEST_F(KeyboardSessionTest2, OpenKeyboardSyncTransaction, Function | SmallTest
  * @tc.desc: BindKeyboardPanelSession
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest2, BindKeyboardPanelSession, Function | SmallTest | Level1)
+HWTEST_F(KeyboardSessionTest2, BindKeyboardPanelSession, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "BindKeyboardPanelSession";
@@ -276,7 +276,7 @@ HWTEST_F(KeyboardSessionTest2, BindKeyboardPanelSession, Function | SmallTest | 
  * @tc.desc: GetKeyboardGravity01
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest2, GetKeyboardGravity01, Function | SmallTest | Level1)
+HWTEST_F(KeyboardSessionTest2, GetKeyboardGravity01, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "GetKeyboardGravity";
@@ -294,7 +294,7 @@ HWTEST_F(KeyboardSessionTest2, GetKeyboardGravity01, Function | SmallTest | Leve
  * @tc.desc: NotifyKeyboardPanelInfoChange
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest2, NotifyKeyboardPanelInfoChange, Function | SmallTest | Level1)
+HWTEST_F(KeyboardSessionTest2, NotifyKeyboardPanelInfoChange, TestSize.Level1)
 {
     WSRect rect = {800, 800, 1200, 1200};
     SessionInfo info;
@@ -319,7 +319,7 @@ HWTEST_F(KeyboardSessionTest2, NotifyKeyboardPanelInfoChange, Function | SmallTe
  * @tc.desc: CheckIfNeedRaiseCallingSession01
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest2, CheckIfNeedRaiseCallingSession01, Function | SmallTest | Level1)
+HWTEST_F(KeyboardSessionTest2, CheckIfNeedRaiseCallingSession01, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "CheckIfNeedRaiseCallingSession";
@@ -361,7 +361,7 @@ HWTEST_F(KeyboardSessionTest2, CheckIfNeedRaiseCallingSession01, Function | Smal
  * @tc.desc: UpdateCallingSessionIdAndPosition01
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest2, UpdateCallingSessionIdAndPosition01, Function | SmallTest | Level1)
+HWTEST_F(KeyboardSessionTest2, UpdateCallingSessionIdAndPosition01, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "UpdateCallingSessionIdAndPosition";
@@ -382,7 +382,7 @@ HWTEST_F(KeyboardSessionTest2, UpdateCallingSessionIdAndPosition01, Function | S
  * @tc.desc: OpenKeyboardSyncTransaction
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest2, OpenKeyboardSyncTransaction01, Function | SmallTest | Level1)
+HWTEST_F(KeyboardSessionTest2, OpenKeyboardSyncTransaction01, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "UpdateCallingSessionIdAndPosition";
@@ -403,7 +403,7 @@ HWTEST_F(KeyboardSessionTest2, OpenKeyboardSyncTransaction01, Function | SmallTe
  * @tc.desc: test function : Hide
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest2, Hide01, Function | SmallTest | Level1)
+HWTEST_F(KeyboardSessionTest2, Hide01, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "Hide";
@@ -445,7 +445,7 @@ HWTEST_F(KeyboardSessionTest2, Hide01, Function | SmallTest | Level1)
  * @tc.desc: test function : RaiseCallingSession
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest2, RaiseCallingSession01, Function | SmallTest | Level1)
+HWTEST_F(KeyboardSessionTest2, RaiseCallingSession01, TestSize.Level1)
 {
     auto keyboardSession = GetKeyboardSession("RaiseCallingSession01",
         "RaiseCallingSession01");
@@ -498,7 +498,7 @@ HWTEST_F(KeyboardSessionTest2, RaiseCallingSession01, Function | SmallTest | Lev
  * @tc.desc: test function : RaiseCallingSession
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest2, RaiseCallingSession02, Function | SmallTest | Level1)
+HWTEST_F(KeyboardSessionTest2, RaiseCallingSession02, TestSize.Level1)
 {
     Rosen::WSRect keyboardPanelRect{ 1, 1, 1, 1 };
     auto keyboardSession = GetKeyboardSession("RaiseCallingSession02",
@@ -536,7 +536,7 @@ HWTEST_F(KeyboardSessionTest2, RaiseCallingSession02, Function | SmallTest | Lev
  * @tc.desc: test function : RaiseCallingSession
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest2, RaiseCallingSession03, Function | SmallTest | Level1)
+HWTEST_F(KeyboardSessionTest2, RaiseCallingSession03, TestSize.Level1)
 {
     Rosen::WSRect keyboardPanelRect{ 1, 1, 1, 1 };
     auto keyboardSession = GetKeyboardSession("RaiseCallingSession03",
@@ -585,7 +585,7 @@ HWTEST_F(KeyboardSessionTest2, RaiseCallingSession03, Function | SmallTest | Lev
  * @tc.desc: test function : IsCallingSessionSplitMode
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest2, IsCallingSessionSplitMode01, Function | SmallTest | Level1)
+HWTEST_F(KeyboardSessionTest2, IsCallingSessionSplitMode01, TestSize.Level1)
 {
     Rosen::WSRect keyboardPanelRect{ 0, 0, 0, 0 };
     auto keyboardSession = GetKeyboardSession("IsCallingSessionSplitMode01",
@@ -636,7 +636,7 @@ HWTEST_F(KeyboardSessionTest2, IsCallingSessionSplitMode01, Function | SmallTest
  * @tc.desc: test function : CloseKeyBoardSyncTransaction
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest2, CloseKeyBoardSyncTransaction3, Function | SmallTest | Level1)
+HWTEST_F(KeyboardSessionTest2, CloseKeyBoardSyncTransaction3, TestSize.Level1)
 {
     std::string abilityName = "CloseKeyBoardSyncTransaction3";
     std::string bundleName = "CloseKeyBoardSyncTransaction3";
@@ -661,7 +661,7 @@ HWTEST_F(KeyboardSessionTest2, CloseKeyBoardSyncTransaction3, Function | SmallTe
  * @tc.desc: test function : CloseKeyboardSyncTransaction
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest2, CloseKeyboardSyncTransaction4, Function | SmallTest | Level1)
+HWTEST_F(KeyboardSessionTest2, CloseKeyboardSyncTransaction4, TestSize.Level1)
 {
     std::string abilityName = "CloseKeyboardSyncTransaction4";
     std::string bundleName = "CloseKeyboardSyncTransaction4";
