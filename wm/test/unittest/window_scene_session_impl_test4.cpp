@@ -1187,6 +1187,13 @@ HWTEST_F(WindowSceneSessionImplTest4, PreLayoutOnShow01, TestSize.Level1)
     window->PreLayoutOnShow(WindowType::WINDOW_TYPE_APP_SUB_WINDOW, displayInfo);
     window->hostSession_ = session;
     window->PreLayoutOnShow(WindowType::WINDOW_TYPE_APP_SUB_WINDOW, displayInfo);
+    Rect originRect = window->GetRect();
+    Rect testRect = {10, 20, 100, 200};
+    window->GetProperty()->SetRequestRect(testRect);
+    window->PreLayoutOnShow(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, displayInfo);
+    ASSERT_EQ(window->GetRect(), originRect);
+    window->PreLayoutOnShow(WindowType::WINDOW_TYPE_APP_SUB_WINDOW, displayInfo);
+    ASSERT_EQ(window->GetRect(), testRect);
 }
 
 /**
