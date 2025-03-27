@@ -1003,6 +1003,23 @@ HWTEST_F(SessionStubTest, HandleContainerModalEvent, TestSize.Level1)
     result = session_->HandleContainerModalEvent(data, reply);
     ASSERT_EQ(result, ERR_INVALID_DATA);
 }
+
+/**
+ * @tc.name: HandleUpdateRotationChangeListenerRegistered
+ * @tc.desc: sessionStub HandleUpdateRotationChangeListenerRegistered
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleUpdateRotationChangeListenerRegistered, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteUint32(0);
+    data.WriteBool(false);
+    auto result = session_->HandleUpdateRotationChangeListenerRegistered(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+    result = session_->HandleUpdateRotationChangeListenerRegistered(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_DATA);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
