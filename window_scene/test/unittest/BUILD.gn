@@ -67,6 +67,7 @@ group("unittest") {
     ":ws_scene_session_manager_test7",
     ":ws_scene_session_manager_test8",
     ":ws_scene_session_manager_test9",
+    ":ws_window_manager_service_dump_test",
     ":ws_scene_session_test",
     ":ws_scene_system_ability_listener_test",
     ":ws_session_lifecycle_test",
@@ -110,6 +111,7 @@ group("unittest") {
     "window_pattern:window_pattern_snapshot_test",
     "window_pattern:window_pattern_starting_window_rdb_test",
     "window_pattern:window_pattern_starting_window_test",
+    "window_recover:ws_window_recover_session_test",
   ]
 
   if (window_manager_use_sceneboard) {
@@ -897,6 +899,28 @@ ohos_unittest("ws_scene_session_manager_test12") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("ws_window_manager_service_dump_test") {
+  module_out_path = module_out_path
+  include_dirs = [ "${window_base_path}/test/common/utils/include/" ]
+
+  sources = [ "window_manager_service_dump_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "ability_base:configuration",
+    "ability_base:session_info",
+    "ability_runtime:ability_context_native",
+    "ability_runtime:mission_info",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "hilog:libhilog",
+    "relational_store:native_rdb",
   ]
 }
 
@@ -1792,6 +1816,7 @@ ohos_static_library("ws_unittest_common") {
     "multi_user:*",
     "ui_extension:*",
     "window_pattern:*",
+    "window_recover:*",
   ]
   testonly = true
 

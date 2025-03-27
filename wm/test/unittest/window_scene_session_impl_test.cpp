@@ -479,20 +479,6 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession11, TestSize
 }
 
 /**
- * @tc.name: RecoverAndReconnectSceneSession
- * @tc.desc: RecoverAndReconnectSceneSession
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest, RecoverAndReconnectSceneSession, TestSize.Level1)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("RecoverAndReconnectSceneSession");
-    sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    ASSERT_NE(nullptr, windowSceneSession);
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowSceneSession->RecoverAndReconnectSceneSession());
-}
-
-/**
  * @tc.name: IsValidSystemWindowType01
  * @tc.desc: IsValidSystemWindowType
  * @tc.type: FUNC

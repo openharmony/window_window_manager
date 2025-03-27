@@ -74,10 +74,6 @@ void ProcessStatusBarEnabledChangeFuncTest(bool enable)
 {
 }
 
-void DumpRootSceneElementInfoFuncTest(const std::vector<std::string>& params, std::vector<std::string>& infos)
-{
-}
-
 void SceneSessionManagerTest4::SetUpTestCase()
 {
     ssm_ = &SceneSessionManager::GetInstance();
@@ -240,55 +236,6 @@ HWTEST_F(SceneSessionManagerTest4, DestroyAndDisconnectSpecificSession01, TestSi
     ASSERT_NE(sceneSession, nullptr);
     ssm_->sceneSessionMap_.insert({1, sceneSession});
     ASSERT_NE(ssm_->DestroyAndDisconnectSpecificSession(1), WSError::WS_ERROR_NULLPTR);
-}
-
-/**
- * @tc.name: GetAllSessionDumpInfo
- * @tc.desc: SceneSesionManager test GetAllSessionDumpInfo
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest4, GetAllSessionDumpInfo, TestSize.Level1)
-{
-    SessionInfo info1;
-    info1.abilityName_ = "GetAllSessionDumpInfo1";
-    info1.bundleName_ = "GetAllSessionDumpInfo1";
-    info1.persistentId_ = 1;
-    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info1, nullptr);
-    ASSERT_NE(sceneSession1, nullptr);
-    sceneSession1->UpdateNativeVisibility(true);
-
-    SessionInfo info2;
-    info2.abilityName_ = "GetAllSessionDumpInfo2";
-    info2.bundleName_ = "GetAllSessionDumpInfo2";
-    info2.persistentId_ = 2;
-    sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(info2, nullptr);
-    ASSERT_NE(sceneSession2, nullptr);
-    sceneSession2->UpdateNativeVisibility(false);
-
-    ssm_->sceneSessionMap_.insert({1, sceneSession1});
-    ssm_->sceneSessionMap_.insert({2, sceneSession2});
-    std::string dumpInfo;
-    ASSERT_EQ(ssm_->GetAllSessionDumpInfo(dumpInfo), WSError::WS_OK);
-}
-
-/**
- * @tc.name: GetSpecifiedSessionDumpInfo
- * @tc.desc: SceneSesionManager test GetSpecifiedSessionDumpInfo
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest4, GetSpecifiedSessionDumpInfo, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "GetSpecifiedSessionDumpInfo";
-    info.bundleName_ = "GetSpecifiedSessionDumpInfo";
-    info.persistentId_ = 1234;
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
-    ssm_->sceneSessionMap_.insert({1234, sceneSession});
-    std::string dumpInfo;
-    std::string strId = "1234";
-    std::vector<std::string> params_(5, "");
-    ASSERT_EQ(ssm_->GetSpecifiedSessionDumpInfo(dumpInfo, params_, strId), WSError::WS_OK);
 }
 
 /**
@@ -1637,50 +1584,6 @@ HWTEST_F(SceneSessionManagerTest4, RegisterSessionSnapshotFunc, TestSize.Level1)
     sessionInfo.persistentId_ = 2;
     EXPECT_EQ(sceneSession->Snapshot(1.f), nullptr);
     usleep(WAIT_SYNC_IN_NS);
-}
-
-/**
- * @tc.name: GetSessionDumpInfo
- * @tc.desc: GetSessionDumpInfo
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest4, GetSessionDumpInfo, TestSize.Level1)
-{
-    ASSERT_NE(ssm_, nullptr);
-    std::string dumpInfo = "testDumpInfo";
-    std::vector<std::string> params = {"testDumpInfo"};
-    WSError result = ssm_->GetSessionDumpInfo(params, dumpInfo);
-    EXPECT_EQ(result, WSError::WS_ERROR_INVALID_OPERATION);
-
-    params.clear();
-    params.push_back("-w");
-    params.push_back("a");
-    result = ssm_->GetSessionDumpInfo(params, dumpInfo);
-    EXPECT_EQ(result, WSError::WS_ERROR_INVALID_OPERATION);
-
-    params.clear();
-    params.push_back("-b");
-    params.push_back("a");
-    result = ssm_->GetSessionDumpInfo(params, dumpInfo);
-    EXPECT_EQ(result, WSError::WS_OK);
-
-    params.clear();
-    params.push_back("-p");
-    params.push_back("1");
-    result = ssm_->GetSessionDumpInfo(params, dumpInfo);
-    EXPECT_EQ(result, WSError::WS_OK);
-
-    params.clear();
-    params.push_back("-b");
-    params.push_back("a");
-    result = ssm_->GetSessionDumpInfo(params, dumpInfo);
-    EXPECT_EQ(result, WSError::WS_OK);
-
-    params.clear();
-    params.push_back("testDumpInfo");
-    params.push_back("a");
-    result = ssm_->GetSessionDumpInfo(params, dumpInfo);
-    EXPECT_EQ(result, WSError::WS_ERROR_INVALID_OPERATION);
 }
 
 /**
