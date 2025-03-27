@@ -5687,13 +5687,7 @@ bool WindowSceneSessionImpl::IsFullScreenEnable() const
         displayWidth = static_cast<uint32_t>(display->GetWidth());
         displayHeight = static_cast<uint32_t>(display->GetHeight());
     } else {
-        auto defaultDisplayInfo = DisplayManager::GetInstance().GetDefaultDisplay();
-        if (defaultDisplayInfo != nullptr) {
-            displayWidth = static_cast<uint32_t>(defaultDisplayInfo->GetWidth());
-            displayHeight = static_cast<uint32_t>(defaultDisplayInfo->GetHeight());
-        } else {
-            return false;
-        }
+        return false;
     }
     if (property_->GetDragEnabled() && (sizeLimits.maxWidth_ < displayWidth || sizeLimits.maxHeight_ < displayHeight)) {
         return false;
