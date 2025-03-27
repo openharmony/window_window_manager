@@ -1001,6 +1001,34 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetScreenPower, TestSize.Level1)
 }
 
 /**
+ * @tc.name: AddVirtualScreenBlackList
+ * @tc.desc: AddVirtualScreenBlackList
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, AddVirtualScreenBlackList, TestSize.Level1)
+{
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+    std::vector<int32_t> persistentIds {0, 1, 2};
+    EXPECT_NE(DMError::DM_ERROR_IPC_FAILED, screenSessionManagerProxy->AddVirtualScreenBlackList(persistentIds));
+}
+
+/**
+ * @tc.name: RemoveVirtualScreenBlackList
+ * @tc.desc: RemoveVirtualScreenBlackList
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, RemoveVirtualScreenBlackList, TestSize.Level1)
+{
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+    std::vector<int32_t> persistentIds {0, 1, 2};
+    EXPECT_NE(DMError::DM_ERROR_IPC_FAILED, screenSessionManagerProxy->RemoveVirtualScreenBlackList(persistentIds));
+}
+
+/**
  * @tc.name: SetVirtualMirrorScreenCanvasRotation
  * @tc.desc: SetVirtualMirrorScreenCanvasRotation
  * @tc.type: FUNC
