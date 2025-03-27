@@ -62,12 +62,12 @@ group("unittest") {
     ":wm_window_session_impl_test5",
     ":wm_window_stub_test",
     ":wm_window_test",
-    "special_window:window_scene_session_impl_special_window_test",
-    "ui_extension:wm_extension_window_impl_test",
-    "ui_extension:wm_window_extension_session_impl_test",
     "animation:wm_window_scene_session_impl_animation_test",
     "rotation:wm_window_session_impl_rotation_test",
     "rotation:wm_window_extension_session_impl_rotation_test",
+    "special_window:window_scene_session_impl_special_window_test",
+    "ui_extension:wm_extension_window_impl_test",
+    "ui_extension:wm_window_extension_session_impl_test",
   ]
   if (!window_manager_use_sceneboard) {
     deps += [ ":wm_window_proxy_test" ]
@@ -791,10 +791,10 @@ config("wm_unittest_common_public_config") {
 ohos_static_library("wm_unittest_common") {
   visibility = [
     ":*",
-    "special_window:*",
-    "ui_extension:*",
     "animation:*",
     "rotation:*",
+    "special_window:*",
+    "ui_extension:*",
   ]
 
   testonly = true
