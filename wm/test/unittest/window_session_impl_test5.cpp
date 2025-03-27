@@ -363,7 +363,7 @@ HWTEST_F(WindowSessionImplTest5, NotifyRotationChange, Function | SmallTest | Le
  * @tc.desc: UpdateRectForPageRotation
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest4, UpdateRectForPageRotation, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest5, UpdateRectForPageRotation, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: UpdateRectForPageRotation start";
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
@@ -400,7 +400,7 @@ HWTEST_F(WindowSessionImplTest4, UpdateRectForPageRotation, Function | SmallTest
  * @tc.desc: RegisterPreferredOrientationChangeListener Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest4, RegisterPreferredOrientationChangeListener, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest5, RegisterPreferredOrientationChangeListener, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: RegisterPreferredOrientationChangeListener start";
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
@@ -429,7 +429,7 @@ HWTEST_F(WindowSessionImplTest4, RegisterPreferredOrientationChangeListener, Fun
  * @tc.desc: UnregisterPreferredOrientationChangeListener Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest4, UnregisterPreferredOrientationChangeListener, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest5, UnregisterPreferredOrientationChangeListener, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: UnregisterPreferredOrientationChangeListener start";
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
@@ -457,7 +457,7 @@ HWTEST_F(WindowSessionImplTest4, UnregisterPreferredOrientationChangeListener, F
  * @tc.desc: NotifyPreferredOrientationChange
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest4, NotifyPreferredOrientationChange, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest5, NotifyPreferredOrientationChange, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("NotifyPreferredOrientationChange");
@@ -484,7 +484,7 @@ HWTEST_F(WindowSessionImplTest4, NotifyPreferredOrientationChange, Function | Sm
  * @tc.desc: RegisterOrientationChangeListener Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest4, RegisterOrientationChangeListener, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest5, RegisterOrientationChangeListener, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: RegisterOrientationChangeListener start";
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
@@ -513,7 +513,7 @@ HWTEST_F(WindowSessionImplTest4, RegisterOrientationChangeListener, Function | S
  * @tc.desc: UnregisterOrientationChangeListener Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest4, UnregisterOrientationChangeListener, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest5, UnregisterOrientationChangeListener, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: UnregisterOrientationChangeListener start";
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
@@ -541,7 +541,7 @@ HWTEST_F(WindowSessionImplTest4, UnregisterOrientationChangeListener, Function |
  * @tc.desc: NotifyClientOrientationChange
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest4, NotifyClientOrientationChange, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest5, NotifyClientOrientationChange, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("NotifyClientOrientationChange");
