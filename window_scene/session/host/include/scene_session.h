@@ -654,6 +654,7 @@ public:
         std::shared_ptr<RSTransaction>& rsTransaction) override;
     void SetKeyFramePolicy(const KeyFramePolicy& keyFramePolicy);
     void UpdateKeyFrameState(SizeChangeReason reason, const WSRect& rect);
+    void InitKeyFrameState(uint64_t timeStamp, const WSRect& rect);
     void RequestKeyFrameNextVsync(uint64_t requestStamp, uint64_t count);
     void OnKeyFrameNextVsync(uint64_t count);
     bool KeyFrameNotifyFilter(const WSRect& rect, SizeChangeReason reason);
