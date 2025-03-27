@@ -54,6 +54,8 @@ public:
     static sptr<SceneSessionManager> ssm_;
 private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
+    static constexpr uint32_t WAIT_SYNC_FOR_SNAPSHOT_SKIP_IN_NS = 500000;
+    static constexpr uint32_t WAIT_SYNC_FOR_TEST_END_IN_NS = 1000000;
 };
 
 sptr<SceneSessionManager> SceneSessionManagerTest::ssm_ = nullptr;
@@ -1923,15 +1925,13 @@ HWTEST_F(SceneSessionManagerTest, SkipSnapshotForAppProcess, TestSize.Level1)
     bool skip = true;
     auto result = ssm_->SkipSnapshotForAppProcess(pid, skip);
     ASSERT_EQ(result, WMError::WM_OK);
-    constexpr uint32_t WAIT_SYNC_IN_NS_ZERO = 500000;
-    usleep(WAIT_SYNC_IN_NS_ZERO);
+    usleep(WAIT_SYNC_FOR_SNAPSHOT_SKIP_IN_NS);
     ASSERT_NE(ssm_->snapshotSkipPidSet_.find(pid), ssm_->snapshotSkipPidSet_.end());
 
     skip = false;
     result = ssm_->SkipSnapshotForAppProcess(pid, skip);
     ASSERT_EQ(result, WMError::WM_OK);
-    constexpr uint32_t WAIT_SYNC_IN_NS_ONE = 500000;
-    usleep(WAIT_SYNC_IN_NS_ONE);
+    usleep(WAIT_SYNC_FOR_SNAPSHOT_SKIP_IN_NS);
     ASSERT_EQ(ssm_->snapshotSkipPidSet_.find(pid), ssm_->snapshotSkipPidSet_.end());
 
     SessionInfo info;
@@ -1946,7 +1946,7 @@ HWTEST_F(SceneSessionManagerTest, SkipSnapshotForAppProcess, TestSize.Level1)
     ssm_->sceneSessionMap_.insert({-1, nullptr});
     skip = true;
     result = ssm_->SkipSnapshotForAppProcess(pid, skip);
-    usleep(WAIT_SYNC_IN_NS_ONE);
+    usleep(WAIT_SYNC_FOR_SNAPSHOT_SKIP_IN_NS);
     ASSERT_EQ(result, WMError::WM_OK);
     skip = false;
     result = ssm_->SkipSnapshotForAppProcess(pid, skip);
@@ -1954,8 +1954,7 @@ HWTEST_F(SceneSessionManagerTest, SkipSnapshotForAppProcess, TestSize.Level1)
     ssm_->sceneSessionMap_.erase(sceneSession1->GetPersistentId());
     ssm_->sceneSessionMap_.erase(sceneSession2->GetPersistentId());
     ssm_->sceneSessionMap_.erase(-1);
-    constexpr uint32_t WAIT_SYNC_IN_NS_TWO = 1000000;
-    usleep(WAIT_SYNC_IN_NS_TWO);
+    usleep(WAIT_SYNC_FOR_TEST_END_IN_NS);
 }
 
 /**
@@ -2180,14 +2179,12 @@ HWTEST_F(SceneSessionManagerTest, SkipSnapshotByUserIdAndBundleNames, TestSize.L
     ASSERT_NE(nullptr, ssm_);
     auto result = ssm_->SkipSnapshotByUserIdAndBundleNames(100, {"TestName"});
     ASSERT_EQ(result, WMError::WM_OK);
-    constexpr uint32_t WAIT_SYNC_IN_NS_ZERO = 500000;
-    usleep(WAIT_SYNC_IN_NS_ZERO);
+    usleep(WAIT_SYNC_FOR_SNAPSHOT_SKIP_IN_NS);
     ASSERT_NE(ssm_->snapshotSkipBundleNameSet_.find("TestName"), ssm_->snapshotSkipBundleNameSet_.end());
 
     result = ssm_->SkipSnapshotByUserIdAndBundleNames(100, {});
     ASSERT_EQ(result, WMError::WM_OK);
-    constexpr uint32_t WAIT_SYNC_IN_NS_ONE = 500000;
-    usleep(WAIT_SYNC_IN_NS_ONE);
+    usleep(WAIT_SYNC_FOR_SNAPSHOT_SKIP_IN_NS);
     ASSERT_EQ(ssm_->snapshotSkipBundleNameSet_.find("TestName"), ssm_->snapshotSkipBundleNameSet_.end());
 
     SessionInfo info1;
@@ -2208,8 +2205,7 @@ HWTEST_F(SceneSessionManagerTest, SkipSnapshotByUserIdAndBundleNames, TestSize.L
     ssm_->sceneSessionMap_.erase(sceneSession1->GetPersistentId());
     ssm_->sceneSessionMap_.erase(sceneSession2->GetPersistentId());
     ssm_->sceneSessionMap_.erase(-1);
-    constexpr uint32_t WAIT_SYNC_IN_NS_TWO = 1000000;
-    usleep(WAIT_SYNC_IN_NS_TWO);
+    usleep(WAIT_SYNC_FOR_TEST_END_IN_NS);
 }
 
 /**
