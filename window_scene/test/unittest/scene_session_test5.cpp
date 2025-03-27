@@ -2044,17 +2044,17 @@ HWTEST_F(SceneSessionTest5, NotifyRotationChange, Function | SmallTest | Level2)
     session->isRotationChangeCallbackRegistered = false;
     RotationChangeInfo info = { RotationChangeType::WINDOW_WILL_ROTATE, 0, 0, { 0, 0, 2720, 1270 } };
     RotationChangeResult res = session->NotifyRotationChange(info);
-    EXPECT_EQ(res.winRect_.width_, 0);
+    EXPECT_EQ(res.windowRect_.width_, 0);
 
     session->isRotationChangeCallbackRegistered = true;
     res = session->NotifyRotationChange(info);
-    EXPECT_EQ(res.winRect_.width_, 0);
+    EXPECT_EQ(res.windowRect_.width_, 0);
     
     sptr<SessionStageMocker> sessionStageMocker = sptr<SessionStageMocker>::MakeSptr();
     ASSERT_NE(sessionStageMocker, nullptr);
     session->sessionStage_ = sessionStageMocker;
-    RotationChangeResult res = session->NotifyRotationChange(info);
-    EXPECT_EQ(res.winRect_.width_, 0);
+    res = session->NotifyRotationChange(info);
+    EXPECT_EQ(res.windowRect_.width_, 0);
 }
 }
 } // namespace Rosen

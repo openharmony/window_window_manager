@@ -740,7 +740,7 @@ HWTEST_F(SessionStageProxyTest, NotifyRotationChange, Function | SmallTest | Lev
 {
     ASSERT_TRUE(sessionStage_ != nullptr);
     RotationChangeInfo info = { RotationChangeType::WINDOW_WILL_ROTATE, 0, 0, { 0, 0, 2720, 1270 } };
-    WSError res = sessionStage_->NotifyRotationChange(info);
+    RotationChangeResult res = sessionStage_->NotifyRotationChange(info);
     ASSERT_EQ(0, res.windowRect_.width_);
 }
 }
