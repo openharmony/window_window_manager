@@ -2120,6 +2120,9 @@ HWTEST_F(WindowSceneSessionImplTest, SetWindowDelayRaiseEnabled, TestSize.Level1
     window->windowSystemConfig_.freeMultiWindowSupport_ = false;
     ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetWindowDelayRaiseEnabled(false));
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_TOAST);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_TYPE, window->SetWindowDelayRaiseEnabled(false));
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     ASSERT_EQ(WMError::WM_OK, window->SetWindowDelayRaiseEnabled(false));
     ASSERT_EQ(false, window->IsWindowDelayRaiseEnabled());
     ASSERT_EQ(WMError::WM_OK, window->SetWindowDelayRaiseEnabled(true));
