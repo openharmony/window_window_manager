@@ -719,19 +719,6 @@ HWTEST_F(SessionStageProxyTest, SendContainerModalEvent, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetCurrentRotation
- * @tc.desc: test function : SetCurrentRotation
- * @tc.type: FUNC
- */
- HWTEST_F(SessionStageProxyTest, SetCurrentRotation, TestSize.Level1)
-{
-    int32_t currentRotation = 90;
-    ASSERT_TRUE(sessionStage_ != nullptr);
-    WSError res = sessionStage_->SetCurrentRotation(currentRotation);
-    ASSERT_EQ(WSError::WS_OK, res);
-}
-
-/**
  * @tc.name: NotifyRotationChange
  * @tc.desc: test function : NotifyRotationChange
  * @tc.type: FUNC

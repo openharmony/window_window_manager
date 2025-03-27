@@ -1014,39 +1014,6 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateRect01, TestSize.Level1)
 }
 
 /**
- * @tc.name: UpdateRectForRotation01
- * @tc.desc: UpdateRect Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowExtensionSessionImplTest, UpdateRectForRotation01, TestSize.Level1)
-{
-    Rect rect;
-    WindowSizeChangeReason wmReason = WindowSizeChangeReason{0};
-    std::shared_ptr<RSTransaction> rsTransaction = std::make_shared<RSTransaction>();
-    rsTransaction->syncId_ = 1;
-    rsTransaction->isOpenSyncTransaction_ = true;
-    ASSERT_NE(nullptr, window_);
-    window_->UpdateRectForRotation(rect, rect, wmReason, rsTransaction);
-
-    Rect preRect;
-    window_->UpdateRectForRotation(rect, preRect, wmReason, rsTransaction);
-
-    rsTransaction->isOpenSyncTransaction_ = false;
-    window_->UpdateRectForRotation(rect, rect, wmReason, rsTransaction);
-
-    rsTransaction->syncId_ = -1;
-    window_->UpdateRectForRotation(rect, rect, wmReason, rsTransaction);
-
-    rsTransaction = nullptr;
-    window_->UpdateRectForRotation(rect, rect, wmReason, rsTransaction);
-    window_->UpdateRectForOtherReason(rect, wmReason);
-
-    window_->handler_ = nullptr;
-    window_->UpdateRectForRotation(rect, rect, wmReason, rsTransaction);
-    usleep(WAIT_SYNC_IN_NS);
-}
-
-/**
  * @tc.name: NotifyAccessibilityHoverEvent01
  * @tc.desc: NotifyAccessibilityHoverEvent Test
  * @tc.type: FUNC

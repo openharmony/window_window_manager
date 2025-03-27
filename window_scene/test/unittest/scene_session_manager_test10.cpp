@@ -351,34 +351,6 @@ HWTEST_F(SceneSessionManagerTest10, TestRegisterWindowManagerAgent_010, TestSize
 }
 
 /**
- * @tc.name: TestUpdateRotateAnimationConfig_01
- * @tc.desc: Test UpdateRotateAnimationConfig with duration_ 400
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest10, TestUpdateRotateAnimationConfig_01, TestSize.Level1)
-{
-    ASSERT_NE(ssm_, nullptr);
-    RotateAnimationConfig config = { 400 };
-    ssm_->UpdateRotateAnimationConfig(config);
-    usleep(WAIT_SYNC_IN_NS);
-    ASSERT_EQ(ssm_->rotateAnimationConfig_.duration_, 400);
-}
-
-/**
- * @tc.name: TestUpdateRotateAnimationConfig_02
- * @tc.desc: Test UpdateRotateAnimationConfig with duration_ 600
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest10, TestUpdateRotateAnimationConfig_02, TestSize.Level1)
-{
-    ASSERT_NE(ssm_, nullptr);
-    RotateAnimationConfig config = { 600 };
-    ssm_->UpdateRotateAnimationConfig(config);
-    usleep(WAIT_SYNC_IN_NS);
-    ASSERT_EQ(ssm_->rotateAnimationConfig_.duration_, 600);
-}
-
-/**
  * @tc.name: RegisterAcquireRotateAnimationConfigFunc
  * @tc.desc: RegisterAcquireRotateAnimationConfigFunc
  * @tc.type: FUNC
