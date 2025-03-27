@@ -831,7 +831,7 @@ struct PostProcessFocusState {
 /**
  * @brief WindowNode for snapshot
  */
-enum class SnapshotWindowNode : int32_t {
+enum class SnapshotNodeType : uint32_t {
     DEFAULT_WINDOW_NODE = 0,
     LEASH_WINDOW_NODE,
     APP_WINDOW_NODE,
