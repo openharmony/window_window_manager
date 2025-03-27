@@ -255,6 +255,16 @@ uint32_t ScreenProperty::GetRefreshRate() const
     return refreshRate_;
 }
 
+void ScreenProperty::SetRsId(ScreenId rsId)
+{
+    rsId_ = rsId;
+}
+
+ScreenId ScreenProperty::GetRsId() const
+{
+    return rsId_;
+}
+
 void ScreenProperty::SetPropertyChangeReason(std::string propertyChangeReason)
 {
     propertyChangeReason_ = propertyChangeReason;

@@ -1585,6 +1585,37 @@ void SceneSession::SetSessionPiPControlStatusChangeCallback(const NotifySessionP
     }, __func__);
 }
 
+void SceneSession::SetUpdatePiPDefaultWindowSizeTypeCallback(const NotifyUpdatePiPDefaultWindowSizeTypeFunc& func)
+{
+    auto task = [weakThis = wptr(this), func, where = __func__] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_PIP, "%{public}s session is null", where);
+            return;
+        }
+        session->updatePiPDefaultWindowSizeTypeCallbackFunc_ = func;
+    };
+    PostTask(task, __func__);
+}
+
+WSError SceneSession::UpdatePiPDefaultWindowSizeType(uint32_t defaultWindowSizeType)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "defaultWindowSizeType:%{public}u", defaultWindowSizeType);
+    auto task = [weakThis = wptr(this), defaultWindowSizeType, where = __func__] {
+        auto session = weakThis.promote();
+        if (!session || session->isTerminating_) {
+            TLOGNE(WmsLogTag::WMS_PIP, "%{public}s session is null or is terminating", where);
+            return;
+        }
+        if (session->updatePiPDefaultWindowSizeTypeCallbackFunc_) {
+            HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::NotifyUpdatePiPDefaultWindowSizeType");
+            session->updatePiPDefaultWindowSizeTypeCallbackFunc_(defaultWindowSizeType);
+        }
+    };
+    PostTask(task, __func__);
+    return WSError::WS_OK;
+}
+
 void SceneSession::SetAutoStartPiPStatusChangeCallback(const NotifyAutoStartPiPStatusChangeFunc& func)
 {
     PostTask([weakThis = wptr(this), func, where = __func__] {
@@ -1751,9 +1782,11 @@ void SceneSession::UpdateCrossAxis()
         PcFoldScreenManager::GetInstance().GetDisplayId() != GetSessionProperty()->GetDisplayId()) {
         return;
     }
-    if (PcFoldScreenManager::GetInstance().GetScreenFoldStatus() != SuperFoldStatus::UNKNOWN) {
-        if (PcFoldScreenManager::GetInstance().GetScreenFoldStatus() == SuperFoldStatus::HALF_FOLDED &&
-            isCrossAxisOfLayout_) {
+    SuperFoldStatus foldStatus = PcFoldScreenManager::GetInstance().GetScreenFoldStatus();
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "id: %{public}d, status %{public}d, cross %{public}d", GetPersistentId(),
+        foldStatus, isCrossAxisOfLayout_.load());
+    if (foldStatus != SuperFoldStatus::UNKNOWN) {
+        if (foldStatus == SuperFoldStatus::HALF_FOLDED && isCrossAxisOfLayout_) {
             crossAxisState = CrossAxisState::STATE_CROSS;
         } else {
             crossAxisState = CrossAxisState::STATE_NO_CROSS;
@@ -1763,7 +1796,7 @@ void SceneSession::UpdateCrossAxis()
         crossAxisState_ = static_cast<uint32_t>(crossAxisState);
         sessionStage_->NotifyWindowCrossAxisChange(crossAxisState);
     } else if (sessionStage_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "sessionStage_ is nullptr, id: %{public}d", GetPersistentId());
+        TLOGD(WmsLogTag::WMS_LAYOUT_PC, "sessionStage_ is nullptr, id: %{public}d", GetPersistentId());
     }
 }
 

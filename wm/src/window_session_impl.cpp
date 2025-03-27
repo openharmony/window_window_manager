@@ -5287,6 +5287,17 @@ void WindowSessionImpl::SetAutoStartPiP(bool isAutoStart, uint32_t priority, uin
     }
 }
 
+void WindowSessionImpl::UpdatePiPDefaultWindowSizeType(uint32_t defaultWindowSizeType)
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_PIP, "session is invalid");
+        return;
+    }
+    if (auto hostSession = GetHostSession()) {
+        hostSession->UpdatePiPDefaultWindowSizeType(defaultWindowSizeType);
+    }
+}
+
 WindowStatus WindowSessionImpl::GetWindowStatusInner(WindowMode mode)
 {
     auto windowStatus = WindowStatus::WINDOW_STATUS_UNDEFINED;

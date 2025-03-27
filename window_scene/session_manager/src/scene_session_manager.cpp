@@ -414,10 +414,10 @@ void SceneSessionManager::Init()
     InitVsyncStation();
     UpdateDarkColorModeToRS();
     CreateRootSceneSession();
-    std::shared_ptr<FoldScreenStatusChangeCallback> callback = std::make_shared<FoldScreenStatusChangeCallback>(
-        std::bind(&SceneSessionManager::UpdateSessionCrossAxisState, this, std::placeholders::_1,
+    foldChangeCallback_ = std::make_shared<FoldScreenStatusChangeCallback>(
+        std::bind(&SceneSessionManager::UpdateSessionWithFoldStateChange, this, std::placeholders::_1,
         std::placeholders::_2, std::placeholders::_3));
-    PcFoldScreenManager::GetInstance().RegisterFoldScreenStatusChangeCallback(0, callback);
+    PcFoldScreenManager::GetInstance().RegisterFoldScreenStatusChangeCallback(0, foldChangeCallback_);
 
     InitSnapshotCache();
 }
@@ -481,17 +481,20 @@ void SceneSessionManager::InitScheduleUtils()
 #endif
 }
 
-void SceneSessionManager::UpdateSessionCrossAxisState(DisplayId displayId, SuperFoldStatus status,
+void SceneSessionManager::UpdateSessionWithFoldStateChange(DisplayId displayId, SuperFoldStatus status,
     SuperFoldStatus prevStatus)
 {
-    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-    for (const auto& [_, sceneSession] : sceneSessionMap_) {
-        if (sceneSession == nullptr) {
-            TLOGE(WmsLogTag::WMS_MAIN, "session is nullptr");
-            continue;
+    auto task = [this]() {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        for (const auto& [_, sceneSession] : sceneSessionMap_) {
+            if (sceneSession == nullptr) {
+                TLOGE(WmsLogTag::WMS_MAIN, "session is nullptr");
+                continue;
+            }
+            sceneSession->UpdateCrossAxis();
         }
-        sceneSession->UpdateCrossAxis();
-    }
+    };
+    taskScheduler_->PostAsyncTask(task, __func__);
 }
 
 void SceneSessionManager::RegisterAppListener()
@@ -5868,9 +5871,16 @@ WSError SceneSessionManager::GetSpecifiedSessionDumpInfo(std::string& dumpInfo, 
 
 WSError SceneSessionManager::GetSCBDebugDumpInfo(std::string&& cmd, std::string& dumpInfo)
 {
+    std::string filePath;
+    {
+        auto rootContext = rootSceneContextWeak_.lock();
+        filePath = rootContext != nullptr ? rootContext->GetFilesDir() + "/wms.dump" : "";
+    }
     // publish data
     bool ret = eventHandler_->PostSyncTask(
-        [this, cmd = std::move(cmd)] { return scbDumpSubscriber_->Publish(cmd); }, "PublishSCBDumper");
+        [this, filePath = std::move(filePath), cmd = std::move(cmd)] {
+            return scbDumpSubscriber_->Publish(cmd, filePath);
+        }, "PublishSCBDumper");
     if (!ret) {
         return WSError::WS_ERROR_INVALID_OPERATION;
     }
@@ -11767,10 +11777,6 @@ bool SceneSessionManager::IsGetWindowLayoutInfoNeeded(const sptr<SceneSession>& 
 
 WMError SceneSessionManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos)
 {
-    if (!SessionPermission::IsSystemCalling()) {
-        TLOGE(WmsLogTag::DEFAULT, "permission denied!");
-        return WMError::WM_ERROR_NOT_SYSTEM_APP;
-    }
     auto task = [this, &infos]() {
         for (auto [surfaceId, _] : lastVisibleData_) {
             sptr<SceneSession> session = SelectSesssionFromMap(surfaceId);

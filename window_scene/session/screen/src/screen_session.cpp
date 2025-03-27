@@ -65,6 +65,7 @@ ScreenSession::ScreenSession(const ScreenSessionConfig& config, ScreenSessionRea
         name_.c_str(), defaultScreenId_, config.mirrorNodeId);
     Rosen::RSDisplayNodeConfig rsConfig;
     bool isNeedCreateDisplayNode = true;
+    property_.SetRsId(rsId_);
     switch (reason) {
         case ScreenSessionReason::CREATE_SESSION_FOR_CLIENT: {
             TLOGI(WmsLogTag::DMS, "create screen session for client. noting to do.");
@@ -145,6 +146,7 @@ ScreenSession::ScreenSession(ScreenId screenId, ScreenId rsId, const std::string
 {
     TLOGI(WmsLogTag::DMS, "Success to create screenSession in constructor_0, screenid is %{public}" PRIu64"",
         screenId_);
+    property_.SetRsId(rsId_);
 }
 
 ScreenSession::ScreenSession(ScreenId screenId, const ScreenProperty& property, ScreenId defaultScreenId)
@@ -152,6 +154,7 @@ ScreenSession::ScreenSession(ScreenId screenId, const ScreenProperty& property, 
 {
     Rosen::RSDisplayNodeConfig config = { .screenId = screenId_ };
     displayNode_ = Rosen::RSDisplayNode::Create(config);
+    property_.SetRsId(rsId_);
     if (displayNode_) {
         TLOGI(WmsLogTag::DMS, "Success to create displayNode in constructor_1, screenid is %{public}" PRIu64"",
             screenId_);
@@ -170,6 +173,7 @@ ScreenSession::ScreenSession(ScreenId screenId, const ScreenProperty& property,
     : screenId_(screenId), defaultScreenId_(defaultScreenId), property_(property)
 {
     rsId_ = screenId;
+    property_.SetRsId(rsId_);
     Rosen::RSDisplayNodeConfig config = { .screenId = screenId_, .isMirrored = true, .mirrorNodeId = nodeId,
         .isSync = true};
     displayNode_ = Rosen::RSDisplayNode::Create(config);
@@ -190,6 +194,7 @@ ScreenSession::ScreenSession(const std::string& name, ScreenId smsId, ScreenId r
     : name_(name), screenId_(smsId), rsId_(rsId), defaultScreenId_(defaultScreenId)
 {
     (void)rsId_;
+    property_.SetRsId(rsId_);
     // 虚拟屏的screen id和rs id不一致，displayNode的创建应使用rs id
     Rosen::RSDisplayNodeConfig config = { .screenId = rsId_ };
     displayNode_ = Rosen::RSDisplayNode::Create(config);
@@ -1413,6 +1418,7 @@ void ScreenSession::FillScreenInfo(sptr<ScreenInfo> info) const
         TLOGE(WmsLogTag::DMS, "FillScreenInfo failed! info is nullptr");
         return;
     }
+    info->SetRsId(rsId_);
     info->SetScreenId(screenId_);
     info->SetName(name_);
     info->SetIsExtend(GetIsExtend());
