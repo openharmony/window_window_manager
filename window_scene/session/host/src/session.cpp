@@ -2639,6 +2639,11 @@ void Session::SetSessionFocusableChangeListener(const NotifySessionFocusableChan
     NotifySessionFocusableChange(GetFocusable());
 }
 
+bool Session::GetSkipSelfWhenShowOnVirtualScreen() const
+{
+    return GetSessionProperty()->GetSkipSelfWhenShowOnVirtualScreen();
+}
+
 void Session::SetSessionTouchableChangeListener(const NotifySessionTouchableChangeFunc& func)
 {
     sessionTouchableChangeFunc_ = func;
