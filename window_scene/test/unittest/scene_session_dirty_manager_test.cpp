@@ -74,7 +74,7 @@ namespace {
  * @tc.desc: NotifyWindowInfoChange
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest, NotifyWindowInfoChange, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionDirtyManagerTest, NotifyWindowInfoChange, TestSize.Level1)
 {
     int ret = 0;
     manager_->NotifyWindowInfoChange(nullptr, WindowUpdateType::WINDOW_UPDATE_ADDED, true);
@@ -97,7 +97,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, NotifyWindowInfoChange, Function | SmallT
  * @tc.desc: GetFullWindowInfoList
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest, GetFullWindowInfoList, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionDirtyManagerTest, GetFullWindowInfoList, TestSize.Level1)
 {
     auto [windowInfoList, pixelMapList] = manager_->GetFullWindowInfoList();
     SessionInfo info;
@@ -137,7 +137,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, GetFullWindowInfoList, Function | SmallTe
  * @tc.desc: IsFilterSession
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest, IsFilterSession, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionDirtyManagerTest, IsFilterSession, TestSize.Level1)
 {
     bool ret = manager_->IsFilterSession(nullptr);
     ASSERT_EQ(ret, true);
@@ -189,7 +189,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, IsFilterSession, Function | SmallTest | L
  * @tc.desc: IsFilterSession02
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest, IsFilterSession02, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionDirtyManagerTest, IsFilterSession02, TestSize.Level1)
 {
     bool ret = manager_->IsFilterSession(nullptr);
     ASSERT_EQ(ret, true);
@@ -241,7 +241,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, IsFilterSession02, Function | SmallTest |
  * @tc.desc: GetWindowInfo
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest, GetWindowInfo, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionDirtyManagerTest, GetWindowInfo, TestSize.Level1)
 {
     manager_->GetWindowInfo(nullptr, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
     SessionInfo info;
@@ -283,7 +283,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, GetWindowInfo, Function | SmallTest | Lev
  * @tc.desc: CalNotRotateTransform
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest, CalNotRotateTransform, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionDirtyManagerTest, CalNotRotateTransform, TestSize.Level1)
 {
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "CalNotRotateTransform";
@@ -330,7 +330,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, CalNotRotateTransform, Function | SmallTe
  * @tc.desc: CalNotRotateTransform2
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest, CalNotRotateTransform2, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionDirtyManagerTest, CalNotRotateTransform2, TestSize.Level1)
 {
     SessionInfo sessionInfo;
     Matrix3f transform;
@@ -362,7 +362,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, CalNotRotateTransform2, Function | SmallT
  * @tc.desc: CalTransform
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest, CalTransform, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionDirtyManagerTest, CalTransform, TestSize.Level1)
 {
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "CalTransform";
@@ -415,7 +415,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, CalTransform, Function | SmallTest | Leve
  * @tc.desc: UpdateHotAreas
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest, UpdateHotAreas, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionDirtyManagerTest, UpdateHotAreas, TestSize.Level1)
 {
     std::vector<MMI::Rect> touchHotAreas(0);
     std::vector<MMI::Rect> pointerHotAreas(0);
@@ -468,7 +468,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, UpdateHotAreas, Function | SmallTest | Le
  * @tc.desc: UpdateHotAreas2
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest, UpdateHotAreas2, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionDirtyManagerTest, UpdateHotAreas2, TestSize.Level1)
 {
     std::vector<MMI::Rect> touchHotAreas(0);
     std::vector<MMI::Rect> pointerHotAreas(0);
@@ -490,7 +490,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, UpdateHotAreas2, Function | SmallTest | L
  * @tc.desc: UpdateDefaultHotAreas
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest, UpdateDefaultHotAreas, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionDirtyManagerTest, UpdateDefaultHotAreas, TestSize.Level1)
 {
     std::vector<MMI::Rect> empty(0);
     manager_->UpdateDefaultHotAreas(nullptr, empty, empty);
@@ -525,7 +525,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, UpdateDefaultHotAreas, Function | SmallTe
  * @tc.desc: ConvertDegreeToMMIRotation
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest, ConvertDegreeToMMIRotation, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionDirtyManagerTest, ConvertDegreeToMMIRotation, TestSize.Level1)
 {
     MMI::Direction dirction = MMI::DIRECTION0;
     dirction = ConvertDegreeToMMIRotation(0.0);
@@ -545,7 +545,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, ConvertDegreeToMMIRotation, Function | Sm
  * @tc.desc: GetDialogSessionMap
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest, GetDialogSessionMap, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionDirtyManagerTest, GetDialogSessionMap, TestSize.Level1)
 {
     std::map<int32_t, sptr<SceneSession>> sessionMap;
     SessionInfo info;
@@ -591,7 +591,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, GetDialogSessionMap, Function | SmallTest
  * @tc.desc: GetDialogSessionMap
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest, GetDialogSessionMap02, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionDirtyManagerTest, GetDialogSessionMap02, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "TestAbilityName";
@@ -618,7 +618,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, GetDialogSessionMap02, Function | SmallTe
  * @tc.desc: UpdatePointerAreas
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest, UpdatePointerAreas, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionDirtyManagerTest, UpdatePointerAreas, TestSize.Level1)
 {
     std::vector<int32_t> pointerChangeAreas;
     SessionInfo info;
@@ -674,7 +674,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, UpdatePointerAreas, Function | SmallTest 
  * @tc.desc: UpdatePrivacyMode
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest, UpdatePrivacyMode, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionDirtyManagerTest, UpdatePrivacyMode, TestSize.Level1)
 {
     SessionInfo info;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
@@ -706,7 +706,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, UpdatePrivacyMode, Function | SmallTest |
  * @tc.desc: UpdateWindowFlags
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest, UpdateWindowFlags, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionDirtyManagerTest, UpdateWindowFlags, TestSize.Level1)
 {
     SessionInfo info;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
@@ -740,7 +740,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, UpdateWindowFlags, Function | SmallTest |
  * @tc.desc: AddModalExtensionWindowInfo
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest, AddModalExtensionWindowInfo, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionDirtyManagerTest, AddModalExtensionWindowInfo, TestSize.Level1)
 {
     SessionInfo info;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
@@ -774,7 +774,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, AddModalExtensionWindowInfo, Function | S
  * @tc.desc: GetHostComponentWindowInfo
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest, GetHostComponentWindowInfo, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionDirtyManagerTest, GetHostComponentWindowInfo, TestSize.Level1)
 {
     MMI::WindowInfo hostWindowinfo;
     SecSurfaceInfo secSurfaceInfo;
@@ -800,7 +800,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, GetHostComponentWindowInfo, Function | Sm
  * @tc.desc: GetSecComponentWindowInfo
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest, GetSecComponentWindowInfo, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionDirtyManagerTest, GetSecComponentWindowInfo, TestSize.Level1)
 {
     MMI::WindowInfo hostWindowinfo;
     SecSurfaceInfo secSurfaceInfo;
@@ -835,7 +835,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, GetSecComponentWindowInfo, Function | Sma
  * @tc.desc: GetSecSurfaceWindowinfoList
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest, GetSecSurfaceWindowinfoList, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionDirtyManagerTest, GetSecSurfaceWindowinfoList, TestSize.Level1)
 {
     MMI::WindowInfo hostWindowinfo;
     SecSurfaceInfo secSurfaceInfo;
@@ -881,7 +881,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, GetSecSurfaceWindowinfoList, Function | S
  * @tc.desc: UpdateSecSurfaceInfo
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest, UpdateSecSurfaceInfo, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionDirtyManagerTest, UpdateSecSurfaceInfo, TestSize.Level1)
 {
     std::map<uint64_t, std::vector<SecSurfaceInfo>> secSurfaceInfoMap;
     SecRectInfo secRectInfo1;
@@ -921,7 +921,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, UpdateSecSurfaceInfo, Function | SmallTes
  * @tc.desc: GetLastConstrainedModalUIExtInfo
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest, GetLastConstrainedModalUIExtInfo, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionDirtyManagerTest, GetLastConstrainedModalUIExtInfo, TestSize.Level1)
 {
     SecSurfaceInfo constrainedModalUIExtInfo;
     bool ret = manager_->GetLastConstrainedModalUIExtInfo(nullptr, constrainedModalUIExtInfo);
@@ -958,7 +958,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, GetLastConstrainedModalUIExtInfo, Functio
  * @tc.desc: GetModalUIExtensionInfo
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest, GetModalUIExtensionInfo, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionDirtyManagerTest, GetModalUIExtensionInfo, TestSize.Level1)
 {
     std::vector<MMI::WindowInfo> windowInfoList;
     MMI::WindowInfo windowInfo;
@@ -998,7 +998,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, GetModalUIExtensionInfo, Function | Small
  * @tc.desc: ResetFlushWindowInfoTask
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest, ResetFlushWindowInfoTask, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionDirtyManagerTest, ResetFlushWindowInfoTask, TestSize.Level1)
 {
     auto preFlushWindowInfoCallback = manager_->flushWindowInfoCallback_;
     manager_->flushWindowInfoCallback_ = nullptr;
@@ -1012,7 +1012,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, ResetFlushWindowInfoTask, Function | Smal
  * @tc.desc: ResetFlushWindowInfoTask1
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest, ResetFlushWindowInfoTask1, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionDirtyManagerTest, ResetFlushWindowInfoTask1, TestSize.Level1)
 {
     manager_->ResetFlushWindowInfoTask();
     EXPECT_TRUE(manager_->hasPostTask_.load());
@@ -1023,7 +1023,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, ResetFlushWindowInfoTask1, Function | Sma
  * @tc.desc: DumpRect
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest, DumpRect, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionDirtyManagerTest, DumpRect, TestSize.Level1)
 {
     std::vector<MMI::Rect> rects(0);
     for (int i = 0; i < 2 ; i++) {
@@ -1048,7 +1048,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, DumpRect, Function | SmallTest | Level2)
  * @tc.desc: CheckDragActivatedInUpdatePointerAreas
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest, CheckDragActivatedInUpdatePointerAreas, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionDirtyManagerTest, CheckDragActivatedInUpdatePointerAreas, TestSize.Level1)
 {
     std::vector<int32_t> pointerChangeAreas;
     SessionInfo info;
@@ -1093,7 +1093,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, CheckDragActivatedInUpdatePointerAreas, F
  * @tc.desc: get session data in single hand mode
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest, GetSingleHandData, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionDirtyManagerTest, GetSingleHandData, TestSize.Level1)
 {
     SingleHandData testSingleHandData;
     SessionInfo mainWindowInfo;

@@ -59,7 +59,7 @@ namespace {
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyLifecycleTest, UpdateSessionWindowVisibilityListener001, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyLifecycleTest, UpdateSessionWindowVisibilityListener001, TestSize.Level1)
 {
     int32_t persistentId = 0;
     bool haveListener = true;
@@ -77,7 +77,7 @@ HWTEST_F(sceneSessionManagerProxyLifecycleTest, UpdateSessionWindowVisibilityLis
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyLifecycleTest, PendingSessionToForeground, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyLifecycleTest, PendingSessionToForeground, TestSize.Level1)
 {
     sptr<IRemoteObject> token = nullptr;
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
@@ -93,7 +93,7 @@ HWTEST_F(sceneSessionManagerProxyLifecycleTest, PendingSessionToForeground, Func
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyLifecycleTest, PendingSessionToBackgroundForDelegator, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyLifecycleTest, PendingSessionToBackgroundForDelegator, TestSize.Level1)
 {
     sptr<IRemoteObject> token = nullptr;
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
@@ -110,7 +110,7 @@ HWTEST_F(sceneSessionManagerProxyLifecycleTest, PendingSessionToBackgroundForDel
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyLifecycleTest, GetVisibilityWindowInfo, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyLifecycleTest, GetVisibilityWindowInfo, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =

@@ -73,7 +73,7 @@ namespace {
  * @tc.desc: NotifyClientToUpdateRect
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionLayoutTest, NotifyClientToUpdateRect01, Function | SmallTest | Level2)
+HWTEST_F(KeyboardSessionLayoutTest, NotifyClientToUpdateRect01, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "NotifyClientToUpdateRect01";
@@ -93,7 +93,7 @@ HWTEST_F(KeyboardSessionLayoutTest, NotifyClientToUpdateRect01, Function | Small
  * @tc.desc: NotifyClientToUpdateRect
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionLayoutTest, NotifyClientToUpdateRect02, Function | SmallTest | Level2)
+HWTEST_F(KeyboardSessionLayoutTest, NotifyClientToUpdateRect02, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "NotifyClientToUpdateRect02";
@@ -116,7 +116,7 @@ HWTEST_F(KeyboardSessionLayoutTest, NotifyClientToUpdateRect02, Function | Small
  * @tc.desc: NotifyClientToUpdateRect
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionLayoutTest, NotifyClientToUpdateRect03, Function | SmallTest | Level2)
+HWTEST_F(KeyboardSessionLayoutTest, NotifyClientToUpdateRect03, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "NotifyClientToUpdateRect03";

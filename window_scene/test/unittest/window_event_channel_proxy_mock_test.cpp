@@ -65,7 +65,7 @@ namespace {
  * @tc.desc: test function : TransferAccessibilityHoverEvent
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityHoverEvent, Function | SmallTest | Level1)
+HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityHoverEvent, TestSize.Level1)
 {
     WLOGI("TransferAccessibilityHoverEvent begin");
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
@@ -86,7 +86,7 @@ HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityHoverEvent, Funct
  * @tc.desc: test function : TransferAccessibilityHoverEvent1
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityHoverEvent1, Function | SmallTest | Level1)
+HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityHoverEvent1, TestSize.Level1)
 {
     WLOGI("TransferAccessibilityHoverEvent1 begin");
     float pointX = -1.0f;
@@ -106,7 +106,7 @@ HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityHoverEvent1, Func
  * @tc.desc: test function : TransferAccessibilityHoverEvent2
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityHoverEvent2, Function | SmallTest | Level1)
+HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityHoverEvent2, TestSize.Level1)
 {
     WLOGI("TransferAccessibilityHoverEvent2 begin");
     float pointX = 0.0f;
@@ -126,7 +126,7 @@ HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityHoverEvent2, Func
  * @tc.desc: test function : TransferAccessibilityHoverEvent3
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityHoverEvent3, Function | SmallTest | Level1)
+HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityHoverEvent3, TestSize.Level1)
 {
     WLOGI("TransferAccessibilityHoverEvent3 begin");
     float pointX = 0.0f;
@@ -146,7 +146,7 @@ HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityHoverEvent3, Func
  * @tc.desc: test function : TransferAccessibilityHoverEvent4
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityHoverEvent4, Function | SmallTest | Level1)
+HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityHoverEvent4, TestSize.Level1)
 {
     WLOGI("TransferAccessibilityHoverEvent4 begin");
     float pointX = 0.0f;
@@ -166,7 +166,7 @@ HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityHoverEvent4, Func
  * @tc.desc: test function : TransferAccessibilityHoverEvent5
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityHoverEvent5, Function | SmallTest | Level1)
+HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityHoverEvent5, TestSize.Level1)
 {
     WLOGI("TransferAccessibilityHoverEvent5 begin");
     float pointX = 0.0f;
@@ -186,7 +186,7 @@ HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityHoverEvent5, Func
  * @tc.desc: test function : TransferAccessibilityChildTreeRegister
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityChildTreeRegister, Function | SmallTest | Level1)
+HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityChildTreeRegister, TestSize.Level1)
 {
     WLOGI("TransferAccessibilityChildTreeRegister begin");
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
@@ -204,7 +204,7 @@ HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityChildTreeRegister
  * @tc.desc: test function : TransferAccessibilityChildTreeRegister
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityChildTreeRegister1, Function | SmallTest | Level1)
+HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityChildTreeRegister1, TestSize.Level1)
 {
     WLOGI("TransferAccessibilityChildTreeRegister1 begin");
     uint32_t windowId = 0;
@@ -220,7 +220,7 @@ HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityChildTreeRegister
  * @tc.desc: test function : TransferAccessibilityChildTreeRegister
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityChildTreeRegister2, Function | SmallTest | Level1)
+HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityChildTreeRegister2, TestSize.Level1)
 {
     WLOGI("TransferAccessibilityChildTreeRegister2 begin");
     uint32_t windowId = 0;
@@ -236,7 +236,7 @@ HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityChildTreeRegister
  * @tc.desc: test function : TransferAccessibilityChildTreeRegister
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityChildTreeRegister3, Function | SmallTest | Level1)
+HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityChildTreeRegister3, TestSize.Level1)
 {
     WLOGI("TransferAccessibilityChildTreeRegister3 begin");
     MockMessageParcel::SetWriteUint32ErrorFlag(true);
@@ -254,7 +254,7 @@ HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityChildTreeRegister
  * @tc.desc: test function : TransferAccessibilityChildTreeUnregister
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityChildTreeUnregister, Function | SmallTest | Level1)
+HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityChildTreeUnregister, TestSize.Level1)
 {
     WLOGI("TransferAccessibilityChildTreeUnregister begin");
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
@@ -269,7 +269,7 @@ HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityChildTreeUnregist
  * @tc.desc: test function : TransferAccessibilityChildTreeUnregister
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityChildTreeUnregister1, Function | SmallTest | Level1)
+HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityChildTreeUnregister1, TestSize.Level1)
 {
     WLOGI("TransferAccessibilityChildTreeUnregister1 begin");
     WSError res = windowEventChannelProxy_->TransferAccessibilityChildTreeUnregister();
@@ -282,7 +282,7 @@ HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityChildTreeUnregist
  * @tc.desc: test function : TransferAccessibilityDumpChildInfo
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityDumpChildInfo, Function | SmallTest | Level1)
+HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityDumpChildInfo, TestSize.Level1)
 {
     WLOGI("TransferAccessibilityDumpChildInfo begin");
     std::vector<std::string> params;
@@ -299,7 +299,7 @@ HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityDumpChildInfo, Fu
  * @tc.desc: test function : TransferAccessibilityDumpChildInfo
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityDumpChildInfo1, Function | SmallTest | Level1)
+HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityDumpChildInfo1, TestSize.Level1)
 {
     WLOGI("TransferAccessibilityDumpChildInfo1 begin");
     std::vector<std::string> params;
@@ -314,7 +314,7 @@ HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityDumpChildInfo1, F
  * @tc.desc: test function : TransferAccessibilityDumpChildInfo
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityDumpChildInfo2, Function | SmallTest | Level1)
+HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityDumpChildInfo2, TestSize.Level1)
 {
     WLOGI("TransferAccessibilityDumpChildInfo2 begin");
     std::vector<std::string> params;

@@ -138,7 +138,7 @@ namespace {
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(SessionLayoutTest, UpdateRect01, Function | SmallTest | Level2)
+HWTEST_F(SessionLayoutTest, UpdateRect01, TestSize.Level1)
 {
     bool preBackgroundUpdateRectNotifyEnabled = Session::IsBackgroundUpdateRectNotifyEnabled();
     Session::SetBackgroundUpdateRectNotifyEnabled(true);
@@ -178,7 +178,7 @@ HWTEST_F(SessionLayoutTest, UpdateRect01, Function | SmallTest | Level2)
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(SessionLayoutTest, UpdateRect_TestForeground, Function | SmallTest | Level2)
+HWTEST_F(SessionLayoutTest, UpdateRect_TestForeground, TestSize.Level1)
 {
     bool preBackgroundUpdateRectNotifyEnabled = Session::IsBackgroundUpdateRectNotifyEnabled();
     Session::SetBackgroundUpdateRectNotifyEnabled(false);
@@ -198,7 +198,7 @@ HWTEST_F(SessionLayoutTest, UpdateRect_TestForeground, Function | SmallTest | Le
  * @tc.desc: UpdateSessionRect
  * @tc.type: FUNC
  */
-HWTEST_F(SessionLayoutTest, UpdateSessionRect01, Function | SmallTest | Level2)
+HWTEST_F(SessionLayoutTest, UpdateSessionRect01, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "testSession1";
@@ -217,7 +217,7 @@ HWTEST_F(SessionLayoutTest, UpdateSessionRect01, Function | SmallTest | Level2)
  * @tc.desc: SetSingleHandTransform
  * @tc.type: FUNC
  */
-HWTEST_F(SessionLayoutTest, SetSingleHandTransform, Function | SmallTest | Level2)
+HWTEST_F(SessionLayoutTest, SetSingleHandTransform, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "SetSingleHandTransform";
@@ -233,7 +233,7 @@ HWTEST_F(SessionLayoutTest, SetSingleHandTransform, Function | SmallTest | Level
  * @tc.desc: IsDraggingReason
  * @tc.type: FUNC
  */
-HWTEST_F(SessionLayoutTest, IsDraggingReason, Function | SmallTest | Level2)
+HWTEST_F(SessionLayoutTest, IsDraggingReason, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "IsDraggingReason";
@@ -250,7 +250,7 @@ HWTEST_F(SessionLayoutTest, IsDraggingReason, Function | SmallTest | Level2)
  * @tc.desc: SetDragStart
  * @tc.type: FUNC
  */
-HWTEST_F(SessionLayoutTest, SetDragStart, Function | SmallTest | Level2)
+HWTEST_F(SessionLayoutTest, SetDragStart, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "SetDragStart";
@@ -267,7 +267,7 @@ HWTEST_F(SessionLayoutTest, SetDragStart, Function | SmallTest | Level2)
  * @tc.desc: SetOriginDisplayId
  * @tc.type: FUNC
  */
-HWTEST_F(SessionLayoutTest, SetOriginDisplayId, Function | SmallTest | Level2)
+HWTEST_F(SessionLayoutTest, SetOriginDisplayId, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "SetOriginDisplayId";

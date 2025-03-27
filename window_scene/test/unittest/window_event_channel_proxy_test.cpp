@@ -66,7 +66,7 @@ namespace {
  * @tc.desc: test function : TransferKeyEvent
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelProxyTest, TransferKeyEvent, Function | SmallTest | Level1)
+HWTEST_F(WindowEventChannelProxyTest, TransferKeyEvent, TestSize.Level1)
 {
     std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
     MMI::KeyEvent::KeyItem item = {};
@@ -83,7 +83,7 @@ HWTEST_F(WindowEventChannelProxyTest, TransferKeyEvent, Function | SmallTest | L
  * @tc.desc: test function : TransferPointerEvent
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelProxyTest, TransferPointerEvent, Function | SmallTest | Level1)
+HWTEST_F(WindowEventChannelProxyTest, TransferPointerEvent, TestSize.Level1)
 {
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_DOWN);
@@ -99,7 +99,7 @@ HWTEST_F(WindowEventChannelProxyTest, TransferPointerEvent, Function | SmallTest
  * @tc.desc: test function : TransferKeyEventForConsumed
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelProxyTest, TransferKeyEventForConsumed, Function | SmallTest | Level1)
+HWTEST_F(WindowEventChannelProxyTest, TransferKeyEventForConsumed, TestSize.Level1)
 {
     std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
     MMI::KeyEvent::KeyItem item = {};
@@ -116,7 +116,7 @@ HWTEST_F(WindowEventChannelProxyTest, TransferKeyEventForConsumed, Function | Sm
  * @tc.desc: test function : TransferKeyEventForConsumedAsync
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelProxyTest, TransferKeyEventForConsumedAsync, Function | SmallTest | Level1)
+HWTEST_F(WindowEventChannelProxyTest, TransferKeyEventForConsumedAsync, TestSize.Level1)
 {
     auto keyEvent = MMI::KeyEvent::Create();
     ASSERT_NE(keyEvent, nullptr);
@@ -132,7 +132,7 @@ HWTEST_F(WindowEventChannelProxyTest, TransferKeyEventForConsumedAsync, Function
  * @tc.desc: test function : TransferFocusActiveEvent
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelProxyTest, TransferFocusActiveEvent, Function | SmallTest | Level1)
+HWTEST_F(WindowEventChannelProxyTest, TransferFocusActiveEvent, TestSize.Level1)
 {
     bool isFocusActive = false;
     WSError res = windowEventChannelProxy_->TransferFocusActiveEvent(isFocusActive);
@@ -147,7 +147,7 @@ HWTEST_F(WindowEventChannelProxyTest, TransferFocusActiveEvent, Function | Small
  * @tc.desc: test function : TransferFocusState
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelProxyTest, TransferFocusState, Function | SmallTest | Level1)
+HWTEST_F(WindowEventChannelProxyTest, TransferFocusState, TestSize.Level1)
 {
     bool focusState = false;
     WSError res = windowEventChannelProxy_->TransferFocusActiveEvent(focusState);
@@ -162,7 +162,7 @@ HWTEST_F(WindowEventChannelProxyTest, TransferFocusState, Function | SmallTest |
  * @tc.desc: test function : TransferAccessibilityHoverEvent
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelProxyTest, TransferAccessibilityHoverEvent, Function | SmallTest | Level1)
+HWTEST_F(WindowEventChannelProxyTest, TransferAccessibilityHoverEvent, TestSize.Level1)
 {
     float pointX = 0.0f;
     float pointY = 0.0f;
@@ -179,7 +179,7 @@ HWTEST_F(WindowEventChannelProxyTest, TransferAccessibilityHoverEvent, Function 
  * @tc.desc: test function : TransferAccessibilityChildTreeRegister
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelProxyTest, TransferAccessibilityChildTreeRegister, Function | SmallTest | Level1)
+HWTEST_F(WindowEventChannelProxyTest, TransferAccessibilityChildTreeRegister, TestSize.Level1)
 {
     uint32_t windowId = 0;
     int32_t treeId = 0;
@@ -194,7 +194,7 @@ HWTEST_F(WindowEventChannelProxyTest, TransferAccessibilityChildTreeRegister, Fu
  * @tc.desc: test function : TransferAccessibilityChildTreeUnregister
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelProxyTest, TransferAccessibilityChildTreeUnregister, Function | SmallTest | Level1)
+HWTEST_F(WindowEventChannelProxyTest, TransferAccessibilityChildTreeUnregister, TestSize.Level1)
 {
     WSError res = windowEventChannelProxy_->TransferAccessibilityChildTreeUnregister();
     ASSERT_EQ(WSError::WS_OK, res);
@@ -205,7 +205,7 @@ HWTEST_F(WindowEventChannelProxyTest, TransferAccessibilityChildTreeUnregister, 
  * @tc.desc: test function : TransferAccessibilityDumpChildInfo
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelProxyTest, TransferAccessibilityDumpChildInfo, Function | SmallTest | Level1)
+HWTEST_F(WindowEventChannelProxyTest, TransferAccessibilityDumpChildInfo, TestSize.Level1)
 {
     std::vector<std::string> params;
     std::vector<std::string> info;
