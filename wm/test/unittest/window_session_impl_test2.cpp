@@ -951,6 +951,7 @@ HWTEST_F(WindowSessionImplTest2, SetDecorHeight, TestSize.Level1)
     EXPECT_EQ(window->SetDecorHeight(height), WMError::WM_ERROR_NULLPTR);
 
     window->property_->SetDisplayId(0);
+    EXPECT_EQ(window->SetDecorHeight(height), WMError::WM_ERROR_NULLPTR);
     auto uiContent = std::make_unique<Ace::UIContentMocker>();
     window->uiContent_ = std::move(uiContent);
     EXPECT_EQ(window->SetDecorHeight(height), WMError::WM_OK);
@@ -1126,9 +1127,20 @@ HWTEST_F(WindowSessionImplTest2, RegisterWindowTitleButtonRectChangeListener, Te
 {
     auto window = GetTestWindowImpl("RegisterWindowTitleButtonRectChangeListener");
     ASSERT_NE(window, nullptr);
+    sptr<IWindowTitleButtonRectChangedListener> listener = nullptr;
+    auto ret = window->RegisterWindowTitleButtonRectChangeListener(listener);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
+    window->property_->SetPersistentId(1);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ret = window->RegisterWindowTitleButtonRectChangeListener(listener);
+    EXPECT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+    listener = sptr<MockWindowTitleButtonRectChangedListener>::MakeSptr();
+    ret = window->RegisterWindowTitleButtonRectChangeListener(listener);
+    EXPECT_EQ(ret, WMError::WM_OK);
+    listener = sptr<MockWindowTitleButtonRectChangedListener>::MakeSptr();
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
-    sptr<IWindowTitleButtonRectChangedListener> listener = sptr<MockWindowTitleButtonRectChangedListener>::MakeSptr();
-    window->RegisterWindowTitleButtonRectChangeListener(listener);
+    ret = window->RegisterWindowTitleButtonRectChangeListener(listener);
+    EXPECT_EQ(ret, WMError::WM_OK);
     window->Destroy();
 }
 
@@ -1141,12 +1153,18 @@ HWTEST_F(WindowSessionImplTest2, UnregisterWindowTitleButtonRectChangeListener, 
 {
     auto window = GetTestWindowImpl("UnregisterWindowTitleButtonRectChangeListener");
     ASSERT_NE(window, nullptr);
-    sptr<IWindowTitleButtonRectChangedListener> listener = sptr<MockWindowTitleButtonRectChangedListener>::MakeSptr();
-    ASSERT_NE(listener, nullptr);
-    window->UnregisterWindowTitleButtonRectChangeListener(listener);
-
+    sptr<IWindowTitleButtonRectChangedListener> listener =  nullptr;
+    auto ret = window->UnregisterWindowTitleButtonRectChangeListener(listener);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
+    window->property_->SetPersistentId(1);
+    ret = window->UnregisterWindowTitleButtonRectChangeListener(listener);
+    EXPECT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+    listener = sptr<MockWindowTitleButtonRectChangedListener>::MakeSptr();
+    ret = window->UnregisterWindowTitleButtonRectChangeListener(listener);
+    EXPECT_EQ(ret, WMError::WM_OK);
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
-    window->UnregisterWindowTitleButtonRectChangeListener(listener);
+    ret = window->UnregisterWindowTitleButtonRectChangeListener(listener);
+    EXPECT_EQ(ret, WMError::WM_OK);
     window->Destroy();
 }
 
