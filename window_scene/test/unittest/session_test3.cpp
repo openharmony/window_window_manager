@@ -1161,6 +1161,19 @@ HWTEST_F(WindowSessionTest3, SetFreezeImmediately, TestSize.Level1)
     session_->surfaceNode_ = nullptr;
     ASSERT_EQ(nullptr, session_->SetFreezeImmediately(1.0f, false, 1.0f));
 }
+
+/**
+ * @tc.name: GetIsHighlighted
+ * @tc.desc: GetIsHighlighted Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, GetIsHighlighted, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    bool isHighlighted = false;
+    ASSERT_EQ(session_->GetIsHighlighted(isHighlighted), WSError::WS_OK);
+    ASSERT_EQ(isHighlighted, false);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

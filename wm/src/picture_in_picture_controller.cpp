@@ -118,6 +118,7 @@ WMError PictureInPictureController::CreatePictureInPictureWindow(StartPipType st
     pipTemplateInfo.pipTemplateType = pipOption_->GetPipTemplate();
     pipTemplateInfo.controlGroup = pipOption_->GetControlGroup();
     pipTemplateInfo.priority = GetPipPriority(pipOption_->GetPipTemplate());
+    pipTemplateInfo.defaultWindowSizeType = pipOption_->GetDefaultWindowSizeType();
     pipTemplateInfo.pipControlStatusInfoList = pipOption_->GetControlStatus();
     pipTemplateInfo.pipControlEnableInfoList = pipOption_->GetControlEnable();
     auto context = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(pipOption_->GetContext());

@@ -1465,6 +1465,28 @@ HWTEST_F(WindowSessionImplTest4, SetAutoStartPiP, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdatePiPDefaultWindowSizeType
+ * @tc.desc: UpdatePiPDefaultWindowSizeType
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, UpdatePiPDefaultWindowSizeType, Function | SmallTest | Level2)
+{
+    auto option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(option, nullptr);
+    std::string testName = "UpdatePiPDefaultWindowSizeType";
+    option->SetWindowName(testName);
+    auto window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window, nullptr);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { testName, testName, testName };
+    auto session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    uint32_t defaultWindowSizeType = 1;
+    window->UpdatePiPDefaultWindowSizeType(defaultWindowSizeType);
+}
+
+/**
  * @tc.name: NotifyWindowVisibility01
  * @tc.desc: NotifyWindowVisibility
  * @tc.type: FUNC
@@ -2617,15 +2639,13 @@ HWTEST_F(WindowSessionImplTest4, IsWindowHighlighted, TestSize.Level1)
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+    bool isHighlighted = false;
     window->hostSession_ = session;
     window->property_->SetPersistentId(INVALID_SESSION_ID);
-    bool isHighlighted = false;
-    window->IsWindowHighlighted(isHighlighted);
-    ASSERT_EQ(isHighlighted, false);
+    ASSERT_EQ(window->IsWindowHighlighted(isHighlighted), WMError::WM_ERROR_INVALID_WINDOW);
     window->property_->SetPersistentId(1);
-    window->isHighlighted_ = true;
-    window->IsWindowHighlighted(isHighlighted);
-    ASSERT_EQ(isHighlighted, true);
+    ASSERT_EQ(window->IsWindowHighlighted(isHighlighted), WMError::WM_OK);
+    ASSERT_EQ(isHighlighted, false);
 }
 
 /**

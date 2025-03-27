@@ -206,6 +206,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleUpdatePiPControlStatus(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_AUTOSTART_PIP):
             return HandleSetAutoStartPiP(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_PIP_DEFAULT_WINDOW_SIZE_TYPE):
+            return HandleUpdatePiPDefaultWindowSizeType(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_LAYOUT_FULL_SCREEN_CHANGE):
             return HandleLayoutFullScreenChange(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_DEFAULT_DENSITY_ENABLED):
@@ -270,6 +272,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleUpdateFlag(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_ROTATION_CHANGE):
             return HandleUpdateRotationChangeListenerRegistered(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_IS_HIGHLIGHTED):
+            return HandleGetIsHighlighted(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1224,6 +1228,23 @@ int SessionStub::HandleSetAutoStartPiP(MessageParcel& data, MessageParcel& reply
     return ERR_NONE;
 }
 
+int SessionStub::HandleUpdatePiPDefaultWindowSizeType(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_PIP, "in");
+    uint32_t defaultWindowSizeType = 0;
+    if (!data.ReadUint32(defaultWindowSizeType)) {
+        TLOGE(WmsLogTag::WMS_PIP, "read defaultWindowSizeType error");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = UpdatePiPDefaultWindowSizeType(defaultWindowSizeType);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_PIP, "write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
+    TLOGI(WmsLogTag::WMS_PIP, "in HandleUpdatePiPDefaultWindowSizeType %{public}u", defaultWindowSizeType);
+    return ERR_NONE;
+}
+
 int SessionStub::HandleSetSystemEnableDrag(MessageParcel& data, MessageParcel& reply)
 {
     bool enableDrag = false;
@@ -1730,6 +1751,16 @@ int SessionStub::HandleUpdateRotationChangeListenerRegistered(MessageParcel& dat
     }
     WSError errCode = UpdateRotationChangeRegistered(persistentId, isRegister);
     TLOGD(WmsLogTag::WMS_ROTATION, "persistentId: %{public}d, register: %{public}d", persistentId, isRegister);
+    return ERR_NONE;
+}
+
+int SessionStub::HandleGetIsHighlighted(MessageParcel& data, MessageParcel& reply)
+{
+    bool isHighlighted = false;
+    GetIsHighlighted(isHighlighted);
+    if (!reply.WriteBool(isHighlighted)) {
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen
