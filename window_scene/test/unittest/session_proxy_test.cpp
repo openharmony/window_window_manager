@@ -1399,6 +1399,24 @@ HWTEST_F(SessionProxyTest, UpdateRotationChangeRegistered, Function | SmallTest 
 }
 
 /**
+ * @tc.name: GetTargetOrientationConfigInfo
+ * @tc.desc: GetTargetOrientationConfigInfo test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, GetTargetOrientationConfigInfo, Function | SmallTest | Level2)
+{
+    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
+    std::map<Rosen::WindowType, Rosen::SystemBarProperty> properties;
+    Rosen::SystemBarProperty statusBarProperty;
+    properties[Rosen::WindowType::WINDOW_TYPE_STATUS_BAR] = statusBarProperty;
+    WSError res = sProxy->GetTargetOrientationConfigInfo(Orientation::USER_ROTATION_PORTRAIT, properties);
+    ASSERT_EQ(res, WSError::WS_OK);
+}
+
+/**
  * @tc.name: GetIsHighlighted
  * @tc.desc: GetIsHighlighted test
  * @tc.type: FUNC

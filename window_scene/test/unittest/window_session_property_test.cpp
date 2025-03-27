@@ -109,33 +109,47 @@ HWTEST_F(WindowSessionPropertyTest, SetRequestedOrientation, TestSize.Level1)
     Orientation orientation = Orientation::REVERSE_HORIZONTAL;
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
-    property->SetRequestedOrientation(orientation);
+    property->SetRequestedOrientation(orientation, true);
     Orientation ret = property->GetRequestedOrientation();
-    ASSERT_EQ(ret, orientation);
+    bool needAnimation = property->GetRequestedAnimation();
+    EXPECT_EQ(ret, orientation);
+    EXPECT_EQ(needAnimation, true);
 
-    property->SetRequestedOrientation(Orientation::AUTO_ROTATION_UNSPECIFIED);
+    property->SetRequestedOrientation(Orientation::AUTO_ROTATION_UNSPECIFIED, false);
     Orientation ret1 = property->GetRequestedOrientation();
-    ASSERT_EQ(ret1, Orientation::AUTO_ROTATION_UNSPECIFIED);
+    bool needAnimation1 = property->GetRequestedAnimation();
+    EXPECT_EQ(ret1, Orientation::AUTO_ROTATION_UNSPECIFIED);
+    EXPECT_EQ(needAnimation1, false);
 
-    property->SetRequestedOrientation(Orientation::USER_ROTATION_PORTRAIT);
+    property->SetRequestedOrientation(Orientation::USER_ROTATION_PORTRAIT, true);
     Orientation ret2 = property->GetRequestedOrientation();
-    ASSERT_EQ(ret2, Orientation::USER_ROTATION_PORTRAIT);
+    bool needAnimation2 = property->GetRequestedAnimation();
+    EXPECT_EQ(ret2, Orientation::USER_ROTATION_PORTRAIT);
+    EXPECT_EQ(needAnimation2, true);
 
-    property->SetRequestedOrientation(Orientation::USER_ROTATION_LANDSCAPE);
+    property->SetRequestedOrientation(Orientation::USER_ROTATION_LANDSCAPE, false);
     Orientation ret3 = property->GetRequestedOrientation();
-    ASSERT_EQ(ret3, Orientation::USER_ROTATION_LANDSCAPE);
+    bool needAnimation3 = property->GetRequestedAnimation();
+    EXPECT_EQ(ret3, Orientation::USER_ROTATION_LANDSCAPE);
+    EXPECT_EQ(needAnimation3, false);
 
-    property->SetRequestedOrientation(Orientation::USER_ROTATION_PORTRAIT_INVERTED);
+    property->SetRequestedOrientation(Orientation::USER_ROTATION_PORTRAIT_INVERTED, true);
     Orientation ret4 = property->GetRequestedOrientation();
-    ASSERT_EQ(ret4, Orientation::USER_ROTATION_PORTRAIT_INVERTED);
+    bool needAnimation4 = property->GetRequestedAnimation();
+    EXPECT_EQ(ret4, Orientation::USER_ROTATION_PORTRAIT_INVERTED);
+    EXPECT_EQ(needAnimation4, true);
 
-    property->SetRequestedOrientation(Orientation::USER_ROTATION_LANDSCAPE_INVERTED);
+    property->SetRequestedOrientation(Orientation::USER_ROTATION_LANDSCAPE_INVERTED, false);
     Orientation ret5 = property->GetRequestedOrientation();
-    ASSERT_EQ(ret5, Orientation::USER_ROTATION_LANDSCAPE_INVERTED);
+    bool needAnimation5 = property->GetRequestedAnimation();
+    EXPECT_EQ(ret5, Orientation::USER_ROTATION_LANDSCAPE_INVERTED);
+    EXPECT_EQ(needAnimation5, false);
 
-    property->SetRequestedOrientation(Orientation::FOLLOW_DESKTOP);
+    property->SetRequestedOrientation(Orientation::FOLLOW_DESKTOP, true);
     Orientation ret6 = property->GetRequestedOrientation();
-    ASSERT_EQ(ret6, Orientation::FOLLOW_DESKTOP);
+    bool needAnimation6 = property->GetRequestedAnimation();
+    EXPECT_EQ(ret6, Orientation::FOLLOW_DESKTOP);
+    EXPECT_EQ(needAnimation6, true);
 }
 
 /**

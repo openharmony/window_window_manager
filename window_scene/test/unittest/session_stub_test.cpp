@@ -1039,6 +1039,37 @@ HWTEST_F(SessionStubTest, HandleUpdateRotationChangeListenerRegistered, Function
 }
 
 /**
+ * @tc.name: HandleGetTargetOrientationConfigInfo
+ * @tc.desc: sessionStub HandleGetTargetOrientationConfigInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleGetTargetOrientationConfigInfo, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteUint32(1);
+    data.WriteUint32(1);
+    data.WriteUint32(-1);
+    data.WriteBool(true);
+    data.WriteUint32(1);
+    data.WriteUint32(1);
+    data.WriteBool(true);
+    data.WriteUint32(1);
+    auto result = session_->HandleGetTargetOrientationConfigInfo(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+    data.WriteUint32(1);
+    data.WriteUint32(1);
+    data.WriteUint32(1);
+    data.WriteBool(true);
+    data.WriteUint32(1);
+    data.WriteUint32(1);
+    data.WriteBool(true);
+    data.WriteUint32(1);
+    auto result1 = session_->HandleGetTargetOrientationConfigInfo(data, reply);
+    EXPECT_EQ(result1, ERR_NONE);
+}
+
+/**
  * @tc.name: GetIsHighlighted
  * @tc.desc: sessionStub GetIsHighlighted
  * @tc.type: FUNC
