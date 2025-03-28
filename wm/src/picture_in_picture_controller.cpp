@@ -151,7 +151,12 @@ WMError PictureInPictureController::ShowPictureInPictureWindow(StartPipType star
     for (auto& listener : pipLifeCycleListeners_) {
         listener->OnPreparePictureInPictureStart();
     }
-    window_->SetUIContentByAbc(PIP_CONTENT_PATH, env_, nullptr, nullptr);
+    napi_value storage =  nullptr;
+    napi_ref storageRef = pipOption_->GetStorageRef();
+    if (storageRef != nullptr) {
+        napi_get_reference_value(env_, storageRef, &storage);
+    }
+    window_->SetUIContentByAbc(PIP_CONTENT_PATH, env_, storage, nullptr);
     WMError errCode = window_->Show(0, false);
     if (errCode != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_PIP, "window show failed, err: %{public}u", errCode);

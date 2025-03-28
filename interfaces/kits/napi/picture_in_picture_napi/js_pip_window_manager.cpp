@@ -146,7 +146,9 @@ static int32_t GetPictureInPictureOptionFromJs(napi_env env, napi_value optionOb
     napi_value xComponentControllerValue = nullptr;
     napi_value controlGroup = nullptr;
     napi_value nodeController = nullptr;
+    napi_value storage = nullptr;
     napi_ref nodeControllerRef = nullptr;
+    napi_ref storageRef = nullptr;
     void* contextPtr = nullptr;
     std::string navigationId = "";
     uint32_t templateType = static_cast<uint32_t>(PiPTemplateType::VIDEO_PLAY);
@@ -162,7 +164,14 @@ static int32_t GetPictureInPictureOptionFromJs(napi_env env, napi_value optionOb
     napi_get_named_property(env, optionObject, "componentController", &xComponentControllerValue);
     napi_get_named_property(env, optionObject, "controlGroups", &controlGroup);
     napi_get_named_property(env, optionObject, "customUIController", &nodeController);
+    napi_get_named_property(env, optionObject, "localStorage", &storage);
     napi_create_reference(env, nodeController, 1, &nodeControllerRef);
+    napi_create_reference(env, storage, 1, &storageRef);
+    napi_valuetype valueType;
+    napi_typeof(env, storage, &valueType);
+    if (valueType != napi_object) {
+        storageRef = nullptr;
+    }
     napi_unwrap(env, contextPtrValue, &contextPtr);
     ConvertFromJsValue(env, navigationIdValue, navigationId);
     ConvertFromJsValue(env, templateTypeValue, templateType);
@@ -178,6 +187,7 @@ static int32_t GetPictureInPictureOptionFromJs(napi_env env, napi_value optionOb
     option.SetControlGroup(controls);
     option.SetXComponentController(xComponentControllerResult);
     option.SetNodeControllerRef(nodeControllerRef);
+    option.SetStorageRef(storageRef);
     return checkOptionParams(option);
 }
 
