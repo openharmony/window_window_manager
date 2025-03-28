@@ -113,7 +113,7 @@ static const int NOTIFY_EVENT_FOR_DUAL_FAILED = 0;
 static const int NOTIFY_EVENT_FOR_DUAL_SUCESS = 1;
 static const int NO_NEED_NOTIFY_EVENT_FOR_DUAL = 2;
 static bool g_isPcDevice = false;
-static float g_extendScreenDpiCoef_ = 0.85f;
+static float g_extendScreenDpiCoef_ = 1.00f;
 static uint32_t g_internalWidth = 3120;
 const unsigned int XCOLLIE_TIMEOUT_10S = 10;
 constexpr int32_t CAST_WIRED_PROJECTION_START = 1005;
@@ -3290,6 +3290,7 @@ void ScreenSessionManager::BootFinishedCallback(const char *key, const char *val
         auto &that = *reinterpret_cast<ScreenSessionManager *>(context);
         that.SetRotateLockedFromSettingData();
         that.SetDpiFromSettingData();
+        that.SetExtendScreenDpi();
         that.SetDisplayState(DisplayState::ON);
         that.RegisterSettingDpiObserver();
         that.RegisterSettingExtendScreenDpiObserver();
@@ -8938,9 +8939,12 @@ void ScreenSessionManager::SetExtendScreenDpi()
     bool ret = ScreenSettingHelper::GetSettingExtendScreenDpi(extendScreenDpi);
     if (!ret) {
         TLOGE(WmsLogTag::DMS, "get setting extend screen dpi failed");
+        g_extendScreenDpiCoef_ = EXTEND_SCREEN_DPI_MAX_PARAMETER;
+    } else {
+        g_extendScreenDpiCoef_ = extendScreenDpi ? EXTEND_SCREEN_DPI_MAX_PARAMETER : EXTEND_SCREEN_DPI_MIN_PARAMETER;
     }
-    g_extendScreenDpiCoef_ = extendScreenDpi ? EXTEND_SCREEN_DPI_MAX_PARAMETER : EXTEND_SCREEN_DPI_MIN_PARAMETER;
-    SetDpiFromSettingData();
+    float dpi = static_cast<float>(cachedSettingDpi_) / BASELINE_DENSITY;
+    SetExtendPixelRatio(dpi * g_extendScreenDpiCoef_);
     TLOGI(WmsLogTag::DMS, "get setting extend screen dpi is : %{public}f", g_extendScreenDpiCoef_);
 }
 } // namespace OHOS::Rosen
