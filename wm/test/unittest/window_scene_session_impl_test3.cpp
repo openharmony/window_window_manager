@@ -234,24 +234,6 @@ HWTEST_F(WindowSceneSessionImplTest3, PerformBack, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetShadowOffsetX02
- * @tc.desc: SetShadowOffsetX02
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest3, SetShadowOffsetX02, TestSize.Level1)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SetShadowOffsetX02");
-    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-
-    auto ret = windowSceneSessionImpl->SetShadowOffsetX(1.0f);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    std::string color = "#ff22ee44";
-    ret = windowSceneSessionImpl->SetShadowColor(color);
-    EXPECT_EQ(WMError::WM_OK, ret);
-}
-
-/**
  * @tc.name: AdjustKeyboardLayout
  * @tc.desc: AdjustKeyboardLayout
  * @tc.type: FUNC
@@ -510,26 +492,6 @@ HWTEST_F(WindowSceneSessionImplTest3, RaiseToAppTop, TestSize.Level1)
     windowSceneSessionImpl->hostSession_ = session;
     ret = windowSceneSessionImpl->RaiseToAppTop();
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARENT, ret);
-}
-
-/**
- * @tc.name: SetBlur
- * @tc.desc: SetBlur
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest3, SetBlur, TestSize.Level1)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SetBlur");
-    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-
-    windowSceneSessionImpl->surfaceNode_ = nullptr;
-    auto ret = windowSceneSessionImpl->SetBlur(1.0f);
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
-    ret = windowSceneSessionImpl->SetBackdropBlur(1.0f);
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
-    ret = windowSceneSessionImpl->SetBackdropBlurStyle(WindowBlurStyle::WINDOW_BLUR_OFF);
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
 }
 
 /**
@@ -1333,36 +1295,6 @@ HWTEST_F(WindowSceneSessionImplTest3, DisableAppWindowDecor, TestSize.Level1)
     windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
     ret = windowSceneSessionImpl->DisableAppWindowDecor();
     EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
-}
-
-/**
- * @tc.name: SetShadowRadius
- * @tc.desc: SetShadowRadius
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest3, SetShadowRadius, TestSize.Level1)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SetShadowRadius");
-    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-
-    windowSceneSessionImpl->surfaceNode_ = nullptr;
-    auto ret = windowSceneSessionImpl->SetShadowRadius(1.0f);
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
-    ret = windowSceneSessionImpl->SetShadowOffsetY(1.0f);
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
-
-    Transform trans;
-    windowSceneSessionImpl->hostSession_ = nullptr;
-    ret = windowSceneSessionImpl->SetTransform(trans);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
-    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    windowSceneSessionImpl->property_->SetPersistentId(1);
-    windowSceneSessionImpl->hostSession_ = session;
-    windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
-    ret = windowSceneSessionImpl->SetTransform(trans);
-    EXPECT_EQ(WMError::WM_OK, ret);
 }
 
 /**
