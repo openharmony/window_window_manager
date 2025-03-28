@@ -21,7 +21,6 @@
 
 #include "input_manager.h"
 
-#include "hitrace_meter.h"
 #include "marshalling_helper.h"
 #include "window_adapter.h"
 #include "window_manager_agent.h"
@@ -199,7 +198,6 @@ void WindowManager::Impl::NotifySystemBarChanged(DisplayId displayId, const Syst
 void WindowManager::Impl::NotifyAccessibilityWindowInfo(const std::vector<sptr<AccessibilityWindowInfo>>& infos,
     WindowUpdateType type)
 {
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wm:NotifyAccessibilityWindowInfo");
     if (infos.empty()) {
         WLOGFE("infos is empty");
         return;
