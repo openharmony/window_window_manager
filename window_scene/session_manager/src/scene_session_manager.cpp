@@ -4443,7 +4443,6 @@ void SceneSessionManager::HandleUserSwitching(bool isUserActive)
     isUserBackground_ = !isUserActive;
     SceneInputManager::GetInstance().SetUserBackground(!isUserActive);
     if (isUserActive) { // switch to current user
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:HandleUserSwitching user active");
         SceneInputManager::GetInstance().SetCurrentUserId(currentUserId_);
         if (MultiInstanceManager::IsSupportMultiInstance(systemConfig_)) {
             MultiInstanceManager::GetInstance().SetCurrentUserId(currentUserId_);
@@ -9031,14 +9030,13 @@ void SceneSessionManager::InitPersistentStorage()
 
 WMError SceneSessionManager::GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos)
 {
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetAccessibilityWindowInfo");
     TLOGD(WmsLogTag::DEFAULT, "in.");
     if (!SessionPermission::IsSystemServiceCalling()) {
         TLOGE(WmsLogTag::DEFAULT, "Only support for system service.");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
     auto task = [this, &infos]() {
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetAccessibilityWindowInfo inner");
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetAccessibilityWindowInfo");
         std::map<int32_t, sptr<SceneSession>>::iterator iter;
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (iter = sceneSessionMap_.begin(); iter != sceneSessionMap_.end(); iter++) {
@@ -9160,7 +9158,6 @@ void SceneSessionManager::NotifyWindowInfoChange(int32_t persistentId, WindowUpd
         return;
     }
     auto task = [this, weakSceneSession, type]() {
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:NotifyWindowInfoChange inner");
         auto sceneSession = weakSceneSession.promote();
         NotifyAllAccessibilityInfo();
         if (WindowChangedFunc_ != nullptr && sceneSession != nullptr &&
@@ -9182,7 +9179,6 @@ void SceneSessionManager::NotifyWindowInfoChange(int32_t persistentId, WindowUpd
 bool SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos,
     const sptr<SceneSession>& sceneSession)
 {
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:FillWindowInfo");
     if (sceneSession == nullptr) {
         TLOGW(WmsLogTag::WMS_ATTRIBUTE, "null scene session.");
         return false;
@@ -11208,7 +11204,6 @@ void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<in
                     item.second.rect_.ToString().c_str(), item.second.transX_, item.second.transY_,
                     item.second.needSync_, item.second.interactive_);
             }
-            HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:FlushUIParams inner");
             ProcessUpdateLastFocusedAppId(startingAppZOrderList);
             ProcessFocusZOrderChange(sessionMapDirty_);
             PostProcessFocus();
@@ -12532,8 +12527,6 @@ bool SceneSessionManager::GetDisplaySizeById(DisplayId displayId, int32_t& displ
 
 void SceneSessionManager::GetAllSceneSessionForAccessibility(std::vector<sptr<SceneSession>>& sceneSessionList)
 {
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetAllSceneSessionForAccessibility");
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "in");
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (const auto& [_, sceneSession] : sceneSessionMap_) {
         if (sceneSession == nullptr) {
@@ -12573,7 +12566,7 @@ void SceneSessionManager::GetAllSceneSessionForAccessibility(std::vector<sptr<Sc
         if (sceneSession->GetSessionInfo().bundleName_.find("SCBDragScale") != std::string::npos) {
             continue;
         }
-        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "isSys=%{public}d, inWid=%{public}d, bundle=%{public}s, zOrder=%{public}u",
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "isSys=%{public}d, inWid=%{public}d, bundle=%{public}s, zOrder=%{public}u",
             sceneSession->GetSessionInfo().isSystem_, static_cast<int32_t>(sceneSession->GetPersistentId()),
             sceneSession->GetSessionInfo().bundleName_.c_str(), sceneSession->GetZOrder());
         sceneSessionList.push_back(sceneSession);
@@ -12583,7 +12576,6 @@ void SceneSessionManager::GetAllSceneSessionForAccessibility(std::vector<sptr<Sc
 void SceneSessionManager::FillAccessibilityInfo(std::vector<sptr<SceneSession>>& sceneSessionList,
     std::vector<sptr<AccessibilityWindowInfo>>& accessibilityInfo)
 {
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:FillAccessibilityInfo");
     for (const auto& sceneSession : sceneSessionList) {
         if (!FillWindowInfo(accessibilityInfo, sceneSession)) {
             TLOGW(WmsLogTag::WMS_MAIN, "fill accessibilityInfo failed");
@@ -12593,8 +12585,6 @@ void SceneSessionManager::FillAccessibilityInfo(std::vector<sptr<SceneSession>>&
 
 void SceneSessionManager::FilterSceneSessionCovered(std::vector<sptr<SceneSession>>& sceneSessionList)
 {
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:FilterSceneSessionCovered");
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "in");
     std::sort(sceneSessionList.begin(), sceneSessionList.end(), [](sptr<SceneSession> a, sptr<SceneSession> b) {
         return a->GetZOrder() > b->GetZOrder();
     });
@@ -12622,19 +12612,19 @@ void SceneSessionManager::FilterSceneSessionCovered(std::vector<sptr<SceneSessio
                               .fRight = wsRect.posX_ + wsRect.width_, .fBottom = wsRect.posY_ + wsRect.height_};
         SkRegion windowRegion(windowBounds);
         if (unaccountedSpace->quickReject(windowRegion)) {
-            TLOGI(WmsLogTag::WMS_MAIN, "quick reject: [l=%{public}d,t=%{public}d,r=%{public}d,b=%{public}d]",
+            TLOGD(WmsLogTag::WMS_MAIN, "quick reject: [l=%{public}d,t=%{public}d,r=%{public}d,b=%{public}d]",
                 windowBounds.fLeft, windowBounds.fTop, windowBounds.fRight, windowBounds.fBottom);
             continue;
         }
         if (!unaccountedSpace->intersects(windowRegion)) {
-            TLOGI(WmsLogTag::WMS_MAIN, "no intersects: [l=%{public}d,t=%{public}d,r=%{public}d,b=%{public}d]",
+            TLOGD(WmsLogTag::WMS_MAIN, "no intersects: [l=%{public}d,t=%{public}d,r=%{public}d,b=%{public}d]",
                 windowBounds.fLeft, windowBounds.fTop, windowBounds.fRight, windowBounds.fBottom);
             continue;
         }
         result.push_back(sceneSession);
         unaccountedSpace->op(windowRegion, SkRegion::Op::kDifference_Op);
         if (unaccountedSpace->isEmpty()) {
-            TLOGI(WmsLogTag::WMS_ATTRIBUTE, "break after: inWid=%{public}d, zOrder=%{public}u",
+            TLOGD(WmsLogTag::WMS_ATTRIBUTE, "break after: inWid=%{public}d, zOrder=%{public}u",
                 static_cast<int32_t>(sceneSession->GetPersistentId()), sceneSession->GetZOrder());
             break;
         }
@@ -12645,7 +12635,6 @@ void SceneSessionManager::FilterSceneSessionCovered(std::vector<sptr<SceneSessio
 void SceneSessionManager::NotifyAllAccessibilityInfo()
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:NotifyAllAccessibilityInfo");
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "in");
     if (isUserBackground_) {
         TLOGD(WmsLogTag::WMS_MULTI_USER, "The user is in the background");
         return;
