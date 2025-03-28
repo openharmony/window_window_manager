@@ -925,7 +925,7 @@ HWTEST_F(ScreenPropertyTest, GetVirtualPixelRatio, Function | SmallTest | Level2
 HWTEST_F(ScreenPropertyTest, SetRotationAndScreenRotationOnly, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "ScreenPropertyTest: SetRotationAndScreenRotationOnly start";
-    ScreenProperty* property = new(std::nothrow) ScreenProperty();
+    std::shared_ptr<ScreenProperty> property = std::make_shared<ScreenProperty>();
     ASSERT_NE(property, nullptr);
     property->SetRotationAndScreenRotationOnly(Rotation::ROTATION_0);
     ASSERT_EQ(property->GetScreenRotation(), Rotation::ROTATION_0);
@@ -938,7 +938,6 @@ HWTEST_F(ScreenPropertyTest, SetRotationAndScreenRotationOnly, Function | SmallT
 
     property->SetRotationAndScreenRotationOnly(Rotation::ROTATION_270);
     ASSERT_EQ(property->GetScreenRotation(), Rotation::ROTATION_270);
-    delete property;
     GTEST_LOG_(INFO) << "ScreenPropertyTest: SetRotationAndScreenRotationOnly end";
 }
 } // namespace
