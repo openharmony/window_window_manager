@@ -161,7 +161,6 @@ static int32_t GetPictureInPictureOptionFromJs(napi_env env, napi_value optionOb
     napi_value nodeController = nullptr;
     napi_value storage = nullptr;
     napi_ref nodeControllerRef = nullptr;
-    napi_ref storageRef = nullptr;
     void* contextPtr = nullptr;
     std::string navigationId = "";
     uint32_t templateType = static_cast<uint32_t>(PiPTemplateType::VIDEO_PLAY);
