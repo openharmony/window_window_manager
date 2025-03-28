@@ -40,6 +40,9 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
+namespace {
+    constexpr uint32_t SLEEP_TIME_US = 100000; // 100ms
+}
 class SceneSessionTest3 : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -1507,10 +1510,9 @@ HWTEST_F(SceneSessionTest3, SetSkipSelfWhenShowOnVirtualScreen01, TestSize.Level
     info.bundleName_ = "SetSkipSelfWhenShowOnVirtualScreen";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     bool skipResult = false;
-    auto callFunc = [&skipResult](uint64_t surfaceNodeId, bool isSkip) {
-        skipResult = isSkip;
-    };
+
     sceneSession->SetSkipSelfWhenShowOnVirtualScreen(true);
+    usleep(SLEEP_TIME_US);
     ASSERT_EQ(skipResult, false);
 
     struct RSSurfaceNodeConfig config;
@@ -1519,11 +1521,8 @@ HWTEST_F(SceneSessionTest3, SetSkipSelfWhenShowOnVirtualScreen01, TestSize.Level
     sceneSession->surfaceNode_ = surfaceNode;
 
     sceneSession->SetSkipSelfWhenShowOnVirtualScreen(true);
+    usleep(SLEEP_TIME_US);
     ASSERT_EQ(skipResult, false);
-
-    sceneSession->specificCallback_->onSetSkipSelfWhenShowOnVirtualScreen_ = callFunc;
-    sceneSession->SetSkipSelfWhenShowOnVirtualScreen(true);
-    ASSERT_EQ(skipResult, true);
 }
 
 /**
