@@ -119,6 +119,7 @@ private:
     WMError StartPictureInPictureInner(StartPipType startType);
     WMError StopPictureInPictureInner(StopPipType stopType, bool withAnim);
     void UpdateWinRectByComponent();
+    void SetUIContent() const;
     void UpdatePiPSourceRect() const;
     void ResetExtController();
     bool IsPullPiPAndHandleNavigation();
