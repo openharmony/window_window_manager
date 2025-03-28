@@ -12537,7 +12537,7 @@ void SceneSessionManager::GetAllSceneSessionForAccessibility(std::vector<sptr<Sc
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (const auto& [_, sceneSession] : sceneSessionMap_) {
         if (sceneSession == nullptr) {
-            TLOGD(WmsLogTag::WMS_ATTRIBUTE, "session is null");
+            TLOGW(WmsLogTag::WMS_ATTRIBUTE, "session is null");
             continue;
         }
         if (Session::IsScbCoreEnabled()) {
