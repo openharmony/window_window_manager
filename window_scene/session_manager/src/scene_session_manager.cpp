@@ -4443,6 +4443,7 @@ void SceneSessionManager::HandleUserSwitching(bool isUserActive)
     isUserBackground_ = !isUserActive;
     SceneInputManager::GetInstance().SetUserBackground(!isUserActive);
     if (isUserActive) { // switch to current user
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:HandleUserSwitching user active");
         SceneInputManager::GetInstance().SetCurrentUserId(currentUserId_);
         if (MultiInstanceManager::IsSupportMultiInstance(systemConfig_)) {
             MultiInstanceManager::GetInstance().SetCurrentUserId(currentUserId_);
@@ -9159,6 +9160,7 @@ void SceneSessionManager::NotifyWindowInfoChange(int32_t persistentId, WindowUpd
         return;
     }
     auto task = [this, weakSceneSession, type]() {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:NotifyWindowInfoChange inner");
         auto sceneSession = weakSceneSession.promote();
         NotifyAllAccessibilityInfo();
         if (WindowChangedFunc_ != nullptr && sceneSession != nullptr &&
@@ -11206,6 +11208,7 @@ void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<in
                     item.second.rect_.ToString().c_str(), item.second.transX_, item.second.transY_,
                     item.second.needSync_, item.second.interactive_);
             }
+            HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:FlushUIParams inner");
             ProcessUpdateLastFocusedAppId(startingAppZOrderList);
             ProcessFocusZOrderChange(sessionMapDirty_);
             PostProcessFocus();
