@@ -26,12 +26,10 @@ ohos_unittest("wm_window_recover_manager_test") {
     cfi_vcall_icall_only = true
     debug = false
   }
-  sources = [
-    "window_recover_manager_test.cpp",
-  ]
+  sources = [ "window_recover_manager_test.cpp" ]
   deps = [
-    wm_unittest_common,
     "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+    wm_unittest_common,
   ]
   external_deps = [
     "c_utils:utils",

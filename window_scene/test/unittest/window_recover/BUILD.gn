@@ -14,7 +14,8 @@
 import("//build/test.gni")
 import("../../../../windowmanager_aafwk.gni")
 
-module_out_path = "window_manager/window_manager/window_scene/test/unittest/window_recover"
+module_out_path =
+    "window_manager/window_manager/window_scene/test/unittest/window_recover"
 ws_unittest_common = "../:ws_unittest_common"
 
 ohos_unittest("ws_window_recover_session_test") {
@@ -23,8 +24,8 @@ ohos_unittest("ws_window_recover_session_test") {
   cflags_cc = [ "-Wno-thread-safety" ]
   include_dirs = [ "${window_base_path}/window_scene/session/host/include" ]
   deps = [
-    ws_unittest_common,
     "${window_base_path}/test/common/utils:libtestutil",
+    ws_unittest_common,
   ]
   external_deps = [
     "ability_base:configuration",
