@@ -52,6 +52,26 @@ void WindowSessionImplTest3::TearDown()
 }
 
 namespace {
+sptr<WindowSessionImpl> GetTestWindowImpl(const std::string& name)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    if (option == nullptr) {
+        return nullptr;
+    }
+    option->SetWindowName(name);
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    if (window == nullptr) {
+        return nullptr;
+    }
+    SessionInfo sessionInfo = { name, name, name };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    if (session == nullptr) {
+        return nullptr;
+    }
+    window->hostSession_ = session;
+    return window;
+}
+
 /**
  * @tc.name: SetInputEventConsumer
  * @tc.desc: SetInputEventConsumer01
