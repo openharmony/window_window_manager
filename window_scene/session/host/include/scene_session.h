@@ -839,6 +839,7 @@ protected:
     std::mutex registerNotifySurfaceBoundsChangeMutex_;
     std::unordered_map<int32_t, NotifySurfaceBoundsChangeFunc> notifySurfaceBoundsChangeFuncMap_;
     bool isFollowParentLayout_ = false;
+    int32_t cloneNodeCount_ = 0;
 
     virtual void NotifySessionRectChange(const WSRect& rect,
         SizeChangeReason reason = SizeChangeReason::UNDEFINED, DisplayId displayId = DISPLAY_ID_INVALID,
@@ -853,6 +854,8 @@ protected:
     WSRect ConvertRelativeRectToGlobal(const WSRect& relativeRect, DisplayId currentDisplayId) const override;
     WSRect ConvertGlobalRectToRelative(const WSRect& globalRect, DisplayId targetDisplayId) const override;
     bool IsNeedConvertToRelativeRect(SizeChangeReason reason = SizeChangeReason::UNDEFINED) const override;
+    void SetRequestMoveConfiguration(const MoveConfiguration& config) { requestMoveConfiguration_ = config; }
+    MoveConfiguration GetRequestMoveConfiguration() const { return requestMoveConfiguration_; }
 
     /*
      * Window Lifecycle
@@ -1082,7 +1085,7 @@ private:
     void UpdateSessionRectPosYFromClient(SizeChangeReason reason, DisplayId& configDisplayId, WSRect& rect);
     void HandleSubSessionSurfaceNode(bool isAdd);
     virtual void AddSurfaceNodeToScreen() {}
-    virtual void RemoveSufaceNodeFromScreen() {}
+    virtual void RemoveSurfaceNodeFromScreen() {}
 
     /*
      * Window Decor
@@ -1181,6 +1184,7 @@ private:
     virtual void UpdateCrossAxisOfLayout(const WSRect& rect);
     NotifyLayoutFullScreenChangeFunc onLayoutFullScreenChangeFunc_;
     WSRect requestRectWhenFollowParent_;
+    MoveConfiguration requestMoveConfiguration_;
     virtual void NotifySubAndDialogFollowRectChange(const WSRect& rect, bool isGlobal, bool needFlush) {};
     std::atomic<bool> shouldFollowParentWhenShow_ = true;
     bool isDragging_ = false;

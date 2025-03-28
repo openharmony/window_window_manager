@@ -744,7 +744,7 @@ WSError SceneSession::InitializeMoveInputBar()
 
 bool SceneSession::IsNeedConvertToRelativeRect(SizeChangeReason reason) const
 {
-    if (IsDraggingReason(reason)) {
+    if (reason == SizeChangeReason::DRAG_MOVE) {
         return true;
     }
     if (WindowHelper::IsSubWindow(GetWindowType())) {
@@ -768,8 +768,8 @@ WSRect SceneSession::ConvertRelativeRectToGlobal(const WSRect& relativeRect, Dis
     const ScreenProperty& screenProperty = screenSession->GetScreenProperty();
     int32_t currentDisplayOffsetX = static_cast<int32_t>(screenProperty.GetStartX());
     int32_t currentDisplayOffsetY = static_cast<int32_t>(screenProperty.GetStartY());
-    TLOGI(WmsLogTag::WMS_LAYOUT, "relativeRect:%{public}s, offsetX:%{public}d, offsetY:%{public}d",
-        relativeRect.ToString().c_str(), currentDisplayOffsetX, currentDisplayOffsetY);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "id:%{public}d, relativeRect:%{public}s, offsetX:%{public}d, offsetY:%{public}d",
+        GetPersistentId(), relativeRect.ToString().c_str(), currentDisplayOffsetX, currentDisplayOffsetY);
     return {relativeRect.posX_ + currentDisplayOffsetX,
             relativeRect.posY_ + currentDisplayOffsetY,
             relativeRect.width_, relativeRect.height_};
@@ -790,8 +790,8 @@ WSRect SceneSession::ConvertGlobalRectToRelative(const WSRect& globalRect, Displ
     const ScreenProperty& screenProperty = screenSession->GetScreenProperty();
     int32_t targetDisplayOffsetX = static_cast<int32_t>(screenProperty.GetStartX());
     int32_t targetDisplayOffsetY = static_cast<int32_t>(screenProperty.GetStartY());
-    TLOGI(WmsLogTag::WMS_LAYOUT, "globalRect:%{public}s, offsetX:%{public}d, offsetY:%{public}d",
-        globalRect.ToString().c_str(), targetDisplayOffsetX, targetDisplayOffsetY);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "id:%{public}d, globalRect:%{public}s, offsetX:%{public}d, offsetY:%{public}d",
+        GetPersistentId(), globalRect.ToString().c_str(), targetDisplayOffsetX, targetDisplayOffsetY);
     return {globalRect.posX_ - targetDisplayOffsetX,
             globalRect.posY_ - targetDisplayOffsetY,
             globalRect.width_, globalRect.height_};
@@ -1755,6 +1755,7 @@ WSError SceneSession::UpdateSessionRect(
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s session is null", where);
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
+        session->SetRequestMoveConfiguration(newMoveConfiguration);
         session->UpdateSessionRectInner(newRect, reason, newMoveConfiguration, rectAnimationConfig);
         return WSError::WS_OK;
     }, __func__ + GetRectInfo(rect));
@@ -3587,7 +3588,7 @@ void SceneSession::OnMoveDragCallback(SizeChangeReason reason)
 
 void SceneSession::HandleSubSessionCrossNode(SizeChangeReason reason)
 {
-    if ((reason == SizeChangeReason::DRAG || reason == SizeChangeReason::DRAG_MOVE) && !Session::IsDragStart()) {
+    if (IsDraggingReason(reason) && !Session::IsDragStart()) {
         Session::SetDragStart(true);
         if (Session::GetOriginDisplayId() == DISPLAY_ID_INVALID) {
             Session::SetOriginDisplayId(moveDragController_->GetMoveDragStartDisplayId());
@@ -3865,7 +3866,8 @@ void SceneSession::HandleSubSessionSurfaceNode(bool isAdd)
         }
     }
 
-    if (WindowHelper::IsSubWindow(GetWindowType()) && IsFollowParentMultiScreenPolicy()) {
+    if (WindowHelper::IsSubWindow(GetWindowType()) &&
+        (IsFollowParentMultiScreenPolicy() || (!isAdd && cloneNodeCount_ > 0))) {
         WSRect targetRect = isAdd ? ConvertRelativeRectToGlobal(winRect_, GetScreenId()) :
             ConvertGlobalRectToRelative(winRect_, GetScreenId());
         TLOGI(WmsLogTag::WMS_LAYOUT, "isAdd:%{public}d targetRect:%{public}s", isAdd, targetRect.ToString().c_str());
@@ -3873,7 +3875,7 @@ void SceneSession::HandleSubSessionSurfaceNode(bool isAdd)
             AddSurfaceNodeToScreen();
             SetSurfaceBounds(targetRect, true, true);
         } else {
-            RemoveSufaceNodeFromScreen();
+            RemoveSurfaceNodeFromScreen();
             SetSurfaceBounds(targetRect, false, false);
             {
                 std::lock_guard<std::mutex> lock(displayIdSetDuringMoveToMutex_);
@@ -3883,8 +3885,10 @@ void SceneSession::HandleSubSessionSurfaceNode(bool isAdd)
             if (lastRect.IsInvalid()) {
                 return;
             }
-            NotifySessionRectChange(lastRect, SizeChangeReason::UNDEFINED);
+            auto moveConfiguration = GetRequestMoveConfiguration();
+            NotifySessionRectChange(lastRect, SizeChangeReason::UNDEFINED, moveConfiguration.displayId);
             SetRequestRectWhenFollowParent({0, 0, 0, 0});
+            SetRequestMoveConfiguration({DISPLAY_ID_INVALID});
         }
     }
 }
@@ -3955,8 +3959,8 @@ void SceneSession::SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool need
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::SetSurfaceBounds id:%d [%d, %d, %d, %d] reason:%u",
         GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_, reason_);
-    TLOGD(WmsLogTag::WMS_LAYOUT, "rect: %{public}s isGlobal: %{public}d needFlush: %{public}d",
-        rect.ToString().c_str(), isGlobal, needFlush);
+    TLOGD(WmsLogTag::WMS_LAYOUT, "id: %{public}d, rect: %{public}s isGlobal: %{public}d needFlush: %{public}d",
+        GetPersistentId(), rect.ToString().c_str(), isGlobal, needFlush);
     auto rsTransaction = RSTransactionProxy::GetInstance();
     if (rsTransaction != nullptr && needFlush) {
         rsTransaction->Begin();
@@ -7740,8 +7744,8 @@ void SceneSession::UpdateNewSizeForPCWindow()
             sessionStage_->UpdateRect(winRect, SizeChangeReason::UPDATE_DPI_SYNC);
             NotifySessionRectChange(winRect, SizeChangeReason::UPDATE_DPI_SYNC);
             TLOGI(WmsLogTag::WMS_LAYOUT_PC, "left: %{public}d, top: %{public}d, width: %{public}u, "
-                "height: %{public}u, Id: %{public}u", winRect.posX_, winRect.posY_, winRect.width_,
-                winRect.height_, GetPersistentId());
+                "height: %{public}u, Id: %{public}u, displayId: %{public}" PRIu64, winRect.posX_, winRect.posY_,
+                winRect.width_, winRect.height_, GetPersistentId(), GetDisplayId());
         }
     }
     displayChangedByMoveDrag_ = false;
