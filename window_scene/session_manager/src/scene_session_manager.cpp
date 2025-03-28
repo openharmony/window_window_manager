@@ -1740,6 +1740,7 @@ WMError SceneSessionManager::AddSkipSelfWhenShowOnVirtualScreenList(const std::v
                     skipSurfaceNodeIds_.push_back(leashWinSurfaceNodeId);
                 }
             }
+            SetSkipEventOnCastPlusInner(persistentId, true);
         }
         rsInterface_.SetVirtualScreenBlackList(INVALID_SCREEN_ID, skipSurfaceNodeIds_);
         return WMError::WM_OK;
@@ -1773,6 +1774,7 @@ WMError SceneSessionManager::RemoveSkipSelfWhenShowOnVirtualScreenList(const std
                     skipSurfaceNodeIds_.erase(iter);
                 }
             }
+            SetSkipEventOnCastPlusInner(persistentId, false);
         }
         rsInterface_.SetVirtualScreenBlackList(INVALID_SCREEN_ID, skipSurfaceNodeIds_);
         return WMError::WM_OK;
