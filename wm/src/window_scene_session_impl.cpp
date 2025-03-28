@@ -4996,6 +4996,7 @@ WMError WindowSceneSessionImpl::SetFollowParentMultiScreenPolicy(bool enabled)
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
     hostSession->NotifyFollowParentMultiScreenPolicy(enabled);
+    property_->EditSessionInfo().isFollowParentMultiScreenPolicy = enabled;
     return WMError::WM_OK;
 }
 
