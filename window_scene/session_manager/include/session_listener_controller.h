@@ -57,9 +57,9 @@ public:
 
     WMError UnregisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener);
 
-    bool IsListenerMapSizeReachLimit();
+    bool IsListenerMapByIdSizeReachLimit() const;
 
-    bool IsListenerMapSizeReachLimit(bool isBundleNameListEmpty);
+    bool IsListenerMapByBundleSizeReachLimit(bool isBundleNameListEmpty) const;
 
     void NotifySessionClosed(const SessionInfo& sessionInfo);
 
@@ -113,7 +113,6 @@ private:
    /*
     * Window Lifecycle
     */
-    std::mutex lifecycleListenerLock_;
     void ConstructPayload(ISessionLifecycleListener::LifecycleEventPayload& payload, const SessionInfo& sessionInfo);
     void OnSessionLifecycleListenerDied(const wptr<IRemoteObject>& remote);
     void RemoveSessionLifecycleListener(const sptr<IRemoteObject>& target);
