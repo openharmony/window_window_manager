@@ -748,6 +748,12 @@ private:
     bool IsGetWindowLayoutInfoNeeded(const sptr<SceneSession>& session) const;
 
     /**
+     * UIExtension
+     */
+    void ReportSubWindowCreationFailure(const int32_t& pid, const std::string& parentBundleName,
+        const std::string& hostBundleName);
+
+    /**
      * PiP Window
      */
     void RegisterConstrainedModalUIExtInfoListener();
