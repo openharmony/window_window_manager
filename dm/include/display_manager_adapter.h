@@ -122,8 +122,8 @@ public:
         const sptr<IDisplayManagerAgent>& displayManagerAgent);
     virtual DMError DestroyVirtualScreen(ScreenId screenId);
     virtual DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface);
-    virtual DMError AddVirtualScreenBlackList(const std::vector<int32_t>& persistentIds);
-    virtual DMError RemoveVirtualScreenBlackList(const std::vector<int32_t>& persistentIds);
+    virtual DMError AddVirtualScreenBlockList(const std::vector<int32_t>& persistentIds);
+    virtual DMError RemoveVirtualScreenBlockList(const std::vector<int32_t>& persistentIds);
     virtual DMError SetScreenPrivacyMaskImage(ScreenId screenId,
         const std::shared_ptr<Media::PixelMap>& privacyMaskImg);
     virtual DMError SetVirtualMirrorScreenCanvasRotation(ScreenId screenId, bool canvasRotation);

@@ -170,27 +170,27 @@ HWTEST_F(ScreenSessionManagerTest, WakeUpPictureFrameBlock, Function | SmallTest
 }
 
 /**
- * @tc.name: AddVirtualScreenBlackList
- * @tc.desc: AddVirtualScreenBlackList test
+ * @tc.name: AddVirtualScreenBlockList
+ * @tc.desc: AddVirtualScreenBlockList test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerTest, AddVirtualScreenBlackList, Function | SmallTest | Level3)
+HWTEST_F(ScreenSessionManagerTest, AddVirtualScreenBlockList, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
     std::vector<int32_t> persistentIds {0, 1, 2};
-    ASSERT_EQ(DMError::DM_OK, ssm_->AddVirtualScreenBlackList(persistentIds));
+    ASSERT_EQ(DMError::DM_OK, ssm_->AddVirtualScreenBlockList(persistentIds));
 }
 
 /**
- * @tc.name: RemoveVirtualScreenBlackList
- * @tc.desc: RemoveVirtualScreenBlackList test
+ * @tc.name: RemoveVirtualScreenBlockList
+ * @tc.desc: RemoveVirtualScreenBlockList test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerTest, RemoveVirtualScreenBlackList, Function | SmallTest | Level3)
+HWTEST_F(ScreenSessionManagerTest, RemoveVirtualScreenBlockList, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
     std::vector<int32_t> persistentIds {0, 1, 2};
-    ASSERT_EQ(DMError::DM_OK, ssm_->RemoveVirtualScreenBlackList(persistentIds));
+    ASSERT_EQ(DMError::DM_OK, ssm_->RemoveVirtualScreenBlockList(persistentIds));
 }
 
 /**

@@ -237,7 +237,7 @@ public:
      * @param persistentIds Black list window ids.
      * @return DM_OK means set success, others means set failed.
      */
-    DMError AddVirtualScreenBlackList(const std::vector<int32_t>& peristentIds);
+    DMError AddVirtualScreenBlockList(const std::vector<int32_t>& peristentIds);
 
     /**
      * @brief Remove black window list in virtual screen
@@ -245,7 +245,7 @@ public:
      * @param persistentIds Black list window ids.
      * @return DM_OK means set success, others means set failed.
      */
-    DMError RemoveVirtualScreenBlackList(const std::vector<int32_t>& peristentIds);
+    DMError RemoveVirtualScreenBlockList(const std::vector<int32_t>& peristentIds);
 
     /**
      * @brief Set privacy image.

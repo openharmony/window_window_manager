@@ -4201,7 +4201,7 @@ DMError ScreenSessionManager::SetVirtualScreenSurface(ScreenId screenId, sptr<IB
     return DMError::DM_OK;
 }
 
-DMError ScreenSessionManager::AddVirtualScreenBlackList(const std::vector<int32_t>& persistentIds)
+DMError ScreenSessionManager::AddVirtualScreenBlockList(const std::vector<int32_t>& persistentIds)
 {
     if (!Permission::IsSystemCalling()) {
         TLOGE(WmsLogTag::DMS, "Permission Denied! calling clientName: %{public}s, calling pid: %{public}d",
@@ -4212,7 +4212,7 @@ DMError ScreenSessionManager::AddVirtualScreenBlackList(const std::vector<int32_
     return DMError::DM_OK;
 }
 
-DMError ScreenSessionManager::RemoveVirtualScreenBlackList(const std::vector<int32_t>& persistentIds)
+DMError ScreenSessionManager::RemoveVirtualScreenBlockList(const std::vector<int32_t>& persistentIds)
 {
     if (!Permission::IsSystemCalling()) {
         TLOGE(WmsLogTag::DMS, "Permission Denied! calling clientName: %{public}s, calling pid: %{public}d",
