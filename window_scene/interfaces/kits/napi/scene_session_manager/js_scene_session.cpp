@@ -263,7 +263,7 @@ static napi_value CreatePipTemplateInfo(napi_env env, const sptr<SceneSession>& 
     return pipTemplateInfoValue;
 }
 
-static void SetWindowSizeAndPosition(napi_env env, napi_value objValue, const sptr<SceneSession>& session)
+static void ParseMetadataConfiguration(napi_env env, napi_value objValue, const sptr<SceneSession>& session)
 {
     auto abilityInfo = session->GetSessionInfo().abilityInfo;
     if (!abilityInfo) {
@@ -292,6 +292,10 @@ static void SetWindowSizeAndPosition(napi_env env, napi_value objValue, const sp
                 TLOGI(WmsLogTag::WMS_LAYOUT_PC, "ohos.ability.window.top=%{public}s", item.value.c_str());
                 napi_set_named_property(env, objValue, "windowTop", CreateJsValue(env, item.value));
             }
+        } else if (item.name == "ohos.ability.window.isMaximize") {
+            TLOGI(WmsLogTag::WMS_LAYOUT_PC, "ohos.ability.window.isMaximize=%{public}s", item.value.c_str());
+            bool isMaximize = (item.value == "true");
+            napi_set_named_property(env, objValue, "isMaximize", CreateJsValue(env, isMaximize));
         }
     }
 }
@@ -332,7 +336,7 @@ napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& sessio
         CreateJsValue(env, session->GetSessionInfo().bundleName_));
     napi_set_named_property(env, objValue, "zLevel",
         CreateJsValue(env, static_cast<int32_t>(session->GetSubWindowZLevel())));
-    SetWindowSizeAndPosition(env, objValue, session);
+    ParseMetadataConfiguration(env, objValue, session);
     sptr<WindowSessionProperty> sessionProperty = session->GetSessionProperty();
     if (sessionProperty != nullptr) {
         napi_set_named_property(env, objValue, "screenId",
