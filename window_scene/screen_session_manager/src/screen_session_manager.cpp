@@ -2437,7 +2437,9 @@ bool ScreenSessionManager::HandleFoldScreenSessionCreate(ScreenId screenId)
         /* folder screen outer screenId is 5 */
         if (screenId == SCREEN_ID_MAIN) {
             SetPostureAndHallSensorEnabled();
-            ScreenSensorConnector::SubscribeTentSensor();
+            if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
+                ScreenSensorConnector::SubscribeTentSensor();
+            }
             isFoldScreenOuterScreenReady_ = true;
             if (!FoldScreenStateInternel::IsDualDisplayFoldDevice() && isCoordinationFlag_ == false) {
                 return false;
