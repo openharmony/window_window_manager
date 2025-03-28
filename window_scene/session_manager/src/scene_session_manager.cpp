@@ -2375,8 +2375,7 @@ void SceneSessionManager::InitSnapshotCache()
     if (SNAPSHOT_CACHE_CAPACITY_MAP.find(uiType) != SNAPSHOT_CACHE_CAPACITY_MAP.end()) {
         snapshotCapacity_ = SNAPSHOT_CACHE_CAPACITY_MAP.at(systemConfig_.uiType_);
     }
-    TLOGI(WmsLogTag::WMS_PATTERN, "type: %{public}s, capacity: %{public}u",
-        systemConfig_.uiType_.c_str(), snapshotCapacity_);
+    TLOGI(WmsLogTag::WMS_PATTERN, "type: %{public}s", systemConfig_.uiType_.c_str());
     snapshotLRUCache_ = std::make_unique<LRUCache>(snapshotCapacity_);
 }
 
