@@ -266,7 +266,6 @@ WMError SessionListenerController::RegisterSessionLifecycleListener(const sptr<I
         TLOGE(WmsLogTag::WMS_LIFE, "listener is invalid.");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    std::lock_guard guard(lifecycleListenerLock_);
     for (const int32_t id : persistentIdList) {
         if (!SceneSessionManager::GetInstance().IsMainWindowByPersistentId(id)) {
             TLOGW(WmsLogTag::WMS_LIFE, "invalid persistentId");
@@ -312,7 +311,6 @@ WMError SessionListenerController::RegisterSessionLifecycleListener(const sptr<I
         TLOGE(WmsLogTag::WMS_LIFE, "listener is invalid.");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    std::lock_guard guard(lifecycleListenerLock_);
     if (bundleNameList.empty()) {
         listenersOfAllBundles_.emplace_back(listener);
         TLOGI(WmsLogTag::WMS_LIFE, "Register SessionLifecycleListener By All Bundles Finished.");
@@ -362,7 +360,6 @@ void SessionListenerController::RemoveSessionLifecycleListener(const sptr<IRemot
         return (item != nullptr) && (item->AsObject() == target);
     };
 
-    std::lock_guard guard(lifecycleListenerLock_);
     for (auto it = listenerMapById_.begin(); it != listenerMapById_.end();) {
         auto& listeners = it->second;
         listeners.erase(std::remove_if(listeners.begin(), listeners.end(), compareByAsObject), listeners.end());
@@ -400,18 +397,24 @@ void SessionListenerController::NotifySessionLifecycleEvent(
     ISessionLifecycleListener::LifecycleEventPayload payload;
     ConstructPayload(payload, sessionInfo);
     NotifyMissionEvent(event, persistentId);
-    TLOGI(WmsLogTag::WMS_LIFE, "start notify listeners, bundleName:%{public}s, Id:%{public}d, state:%{public}d",
-        bundleName.c_str(), persistentId, event);
-
-    std::lock_guard guard(lifecycleListenerLock_);
-    NotifyListeners(listenerMapById_, persistentId, event, payload);
-    NotifyListeners(listenerMapByBundle_, bundleName, event, payload);
-
-    for (const auto& listener : listenersOfAllBundles_) {
-        if (listener != nullptr) {
-            listener->OnLifecycleEvent(event, payload);
-        }
-    }
+    taskScheduler_->PostAsyncTask(
+        [weakThis = weak_from_this(), event, payload, bundleName, persistentId, where = __func__] {
+            auto controller = weakThis.lock();
+            if (controller == nullptr) {
+                TLOGE(WmsLogTag::WMS_LIFE, "controller is null.");
+                return;
+            }
+            TLOGI(WmsLogTag::WMS_LIFE, "start notify listeners, bundleName:%{public}s, Id:%{public}d, state:%{public}d",
+                bundleName.c_str(), persistentId, event);
+        
+            controller->NotifyListeners(controller->listenerMapById_, persistentId, event, payload);
+            controller->NotifyListeners(controller->listenerMapByBundle_, bundleName, event, payload);
+            for (const auto& listener : controller->listenersOfAllBundles_) {
+                if (listener != nullptr) {
+                    listener->OnLifecycleEvent(event, payload);
+                }
+            }
+        }, __func__);
 }
 
 template <typename KeyType, typename MapType>
@@ -445,19 +448,21 @@ void SessionListenerController::NotifyMissionEvent(
     }
 }
 
-bool SessionListenerController::IsListenerMapSizeReachLimit()
+bool SessionListenerController::IsListenerMapByIdSizeReachLimit() const
 {
-    std::lock_guard guard(lifecycleListenerLock_);
-    return listenerMapById_.size() > MAX_LISTEN_TARGET_LIMIT;
+    return taskScheduler_->PostSyncTask([this] {
+        return listenerMapById_.size() >= MAX_LISTEN_TARGET_LIMIT;
+    }, __func__);
 }
 
-bool SessionListenerController::IsListenerMapSizeReachLimit(bool isBundleNameListEmpty)
+bool SessionListenerController::IsListenerMapByBundleSizeReachLimit(bool isBundleNameListEmpty) const
 {
-    std::lock_guard guard(lifecycleListenerLock_);
-    if (isBundleNameListEmpty) {
-        return listenersOfAllBundles_.size() > MAX_LIFECYCLE_LISTENER_LIMIT;
-    }
-    return listenerMapByBundle_.size() > MAX_LISTEN_TARGET_LIMIT;
+    return taskScheduler_->PostSyncTask([this, isBundleNameListEmpty] {
+        if (isBundleNameListEmpty) {
+            return listenersOfAllBundles_.size() >= MAX_LIFECYCLE_LISTENER_LIMIT;
+        }
+        return listenerMapByBundle_.size() >= MAX_LISTEN_TARGET_LIMIT;
+    }, __func__);
 }
 } // namespace Rosen
 } // namespace OHOS

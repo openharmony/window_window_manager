@@ -13530,7 +13530,7 @@ WMError SceneSessionManager::RegisterSessionLifecycleListener(const sptr<ISessio
         TLOGE(WmsLogTag::WMS_LIFE, "listener is nullptr!");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    if (listenerController_->IsListenerMapSizeReachLimit()) {
+    if (listenerController_->IsListenerMapByIdSizeReachLimit()) {
         TLOGW(WmsLogTag::WMS_LIFE, "The number of listeners has reached the upper limit.");
         return WMError::WM_ERROR_NO_MEM;
     }
@@ -13552,7 +13552,7 @@ WMError SceneSessionManager::RegisterSessionLifecycleListener(const sptr<ISessio
         TLOGE(WmsLogTag::WMS_LIFE, "listener is nullptr!");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    if (listenerController_->IsListenerMapSizeReachLimit(bundleNameList.empty())) {
+    if (listenerController_->IsListenerMapByBundleSizeReachLimit(bundleNameList.empty())) {
         TLOGW(WmsLogTag::WMS_LIFE, "The number of listeners has reached the upper limit.");
         return WMError::WM_ERROR_NO_MEM;
     }
