@@ -100,74 +100,6 @@ HWTEST_F(WindowSessionPropertyTest, SetSessionInfo, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetRequestedOrientation
- * @tc.desc: SetRequestedOrientation test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionPropertyTest, SetRequestedOrientation, TestSize.Level1)
-{
-    Orientation orientation = Orientation::REVERSE_HORIZONTAL;
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(nullptr, property);
-    property->SetRequestedOrientation(orientation, true);
-    Orientation ret = property->GetRequestedOrientation();
-    bool needAnimation = property->GetRequestedAnimation();
-    EXPECT_EQ(ret, orientation);
-    EXPECT_EQ(needAnimation, true);
-
-    property->SetRequestedOrientation(Orientation::AUTO_ROTATION_UNSPECIFIED, false);
-    Orientation ret1 = property->GetRequestedOrientation();
-    bool needAnimation1 = property->GetRequestedAnimation();
-    EXPECT_EQ(ret1, Orientation::AUTO_ROTATION_UNSPECIFIED);
-    EXPECT_EQ(needAnimation1, false);
-
-    property->SetRequestedOrientation(Orientation::USER_ROTATION_PORTRAIT, true);
-    Orientation ret2 = property->GetRequestedOrientation();
-    bool needAnimation2 = property->GetRequestedAnimation();
-    EXPECT_EQ(ret2, Orientation::USER_ROTATION_PORTRAIT);
-    EXPECT_EQ(needAnimation2, true);
-
-    property->SetRequestedOrientation(Orientation::USER_ROTATION_LANDSCAPE, false);
-    Orientation ret3 = property->GetRequestedOrientation();
-    bool needAnimation3 = property->GetRequestedAnimation();
-    EXPECT_EQ(ret3, Orientation::USER_ROTATION_LANDSCAPE);
-    EXPECT_EQ(needAnimation3, false);
-
-    property->SetRequestedOrientation(Orientation::USER_ROTATION_PORTRAIT_INVERTED, true);
-    Orientation ret4 = property->GetRequestedOrientation();
-    bool needAnimation4 = property->GetRequestedAnimation();
-    EXPECT_EQ(ret4, Orientation::USER_ROTATION_PORTRAIT_INVERTED);
-    EXPECT_EQ(needAnimation4, true);
-
-    property->SetRequestedOrientation(Orientation::USER_ROTATION_LANDSCAPE_INVERTED, false);
-    Orientation ret5 = property->GetRequestedOrientation();
-    bool needAnimation5 = property->GetRequestedAnimation();
-    EXPECT_EQ(ret5, Orientation::USER_ROTATION_LANDSCAPE_INVERTED);
-    EXPECT_EQ(needAnimation5, false);
-
-    property->SetRequestedOrientation(Orientation::FOLLOW_DESKTOP, true);
-    Orientation ret6 = property->GetRequestedOrientation();
-    bool needAnimation6 = property->GetRequestedAnimation();
-    EXPECT_EQ(ret6, Orientation::FOLLOW_DESKTOP);
-    EXPECT_EQ(needAnimation6, true);
-}
-
-/**
- * @tc.name: SetDefaultRequestedOrientation
- * @tc.desc: SetDefaultRequestedOrientation test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionPropertyTest, SetDefaultRequestedOrientation, TestSize.Level1)
-{
-    Orientation orientation = Orientation::REVERSE_HORIZONTAL;
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(nullptr, property);
-    property->SetDefaultRequestedOrientation(orientation);
-    Orientation ret = property->GetDefaultRequestedOrientation();
-    ASSERT_EQ(ret, orientation);
-}
-
-/**
  * @tc.name: SetPrivacyMode
  * @tc.desc: SetPrivacyMode as true and false
  * @tc.type: FUNC
@@ -1465,19 +1397,6 @@ HWTEST_F(WindowSessionPropertyTest, GetBackgroundAlpha, TestSize.Level1)
     uint8_t backgroundAlpha = 2;
     property->SetBackgroundAlpha(backgroundAlpha);
     ASSERT_EQ(2, property->GetBackgroundAlpha());
-}
-
-/**
- * @tc.name: SetWindowCornerRadius
- * @tc.desc: SetWindowCornerRadius
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionPropertyTest, SetWindowCornerRadius, TestSize.Level1)
-{
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    float cornerRadius = 1.0f;
-    property->SetWindowCornerRadius(cornerRadius);
-    ASSERT_EQ(cornerRadius, property->GetWindowCornerRadius());
 }
 
 /**

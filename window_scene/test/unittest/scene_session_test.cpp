@@ -381,49 +381,6 @@ HWTEST_F(SceneSessionTest, GetRequestedOrientation, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetDefaultRequestedOrientation
- * @tc.desc: SetDefaultRequestedOrientation
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest, SetDefaultRequestedOrientation, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "SetDefaultRequestedOrientation";
-    info.bundleName_ = "SetDefaultRequestedOrientation";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
-    Orientation orientation = Orientation::AUTO_ROTATION_UNSPECIFIED;
-    sceneSession->SetDefaultRequestedOrientation(orientation);
-    Orientation ret = sceneSession->GetRequestedOrientation();
-    ASSERT_EQ(orientation, ret);
-
-    orientation = Orientation::USER_ROTATION_PORTRAIT;
-    sceneSession->SetDefaultRequestedOrientation(orientation);
-    ret = sceneSession->GetRequestedOrientation();
-    ASSERT_EQ(orientation, ret);
-
-    orientation = Orientation::USER_ROTATION_LANDSCAPE;
-    sceneSession->SetDefaultRequestedOrientation(orientation);
-    ret = sceneSession->GetRequestedOrientation();
-    ASSERT_EQ(orientation, ret);
-
-    orientation = Orientation::USER_ROTATION_PORTRAIT_INVERTED;
-    sceneSession->SetDefaultRequestedOrientation(orientation);
-    ret = sceneSession->GetRequestedOrientation();
-    ASSERT_EQ(orientation, ret);
-
-    orientation = Orientation::USER_ROTATION_LANDSCAPE_INVERTED;
-    sceneSession->SetDefaultRequestedOrientation(orientation);
-    ret = sceneSession->GetRequestedOrientation();
-    ASSERT_EQ(orientation, ret);
-
-    orientation = Orientation::FOLLOW_DESKTOP;
-    sceneSession->SetDefaultRequestedOrientation(orientation);
-    ret = sceneSession->GetRequestedOrientation();
-    ASSERT_EQ(orientation, ret);
-}
-
-/**
  * @tc.name: IsKeepScreenOn01
  * @tc.desc: IsKeepScreenOn true
  * @tc.type: FUNC

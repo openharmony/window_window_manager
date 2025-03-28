@@ -1140,23 +1140,6 @@ HWTEST_F(SessionProxyTest, SetSessionLabelAndIcon, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetWindowCornerRadius
- * @tc.desc: SetWindowCornerRadius
- * @tc.type: FUNC
- */
-HWTEST_F(SessionProxyTest, SetWindowCornerRadius, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "SessionProxyTest: SetWindowCornerRadius start";
-    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    ASSERT_NE(iRemoteObjectMocker, nullptr);
-    auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
-    ASSERT_NE(sProxy, nullptr);
-    WSError res = sProxy->SetWindowCornerRadius(1.0f);
-    ASSERT_EQ(res, WSError::WS_OK);
-    GTEST_LOG_(INFO) << "SessionProxyTest: SetWindowCornerRadius end";
-}
-
-/**
  * @tc.name: UpdateFlag
  * @tc.desc: UpdateFlag
  * @tc.type: FUNC

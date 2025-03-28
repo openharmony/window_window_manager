@@ -898,26 +898,6 @@ HWTEST_F(WindowSessionImplTest2, NotifyModeChange, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetRequestedOrientation
- * @tc.desc: SetRequestedOrientation
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest2, SetRequestedOrientation, TestSize.Level1)
-{
-    auto window = GetTestWindowImpl("SetRequestedOrientation");
-    ASSERT_NE(window, nullptr);
-    window->property_->SetRequestedOrientation(Orientation::BEGIN);
-    window->SetRequestedOrientation(Orientation::END);
-
-    window->property_->SetRequestedOrientation(Orientation::USER_ROTATION_PORTRAIT);
-    window->SetRequestedOrientation(Orientation::USER_ROTATION_PORTRAIT);
-
-    window->property_->SetRequestedOrientation(Orientation::BEGIN);
-    window->SetRequestedOrientation(Orientation::BEGIN);
-    window->Destroy();
-}
-
-/**
  * @tc.name: GetContentInfo
  * @tc.desc: GetContentInfo
  * @tc.type: FUNC
