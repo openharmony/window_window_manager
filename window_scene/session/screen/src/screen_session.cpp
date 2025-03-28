@@ -270,21 +270,22 @@ void ScreenSession::EnableMirrorScreenRegion()
     const auto& mirrorScreenRegionPair = GetMirrorScreenRegion();
     const auto& rect = mirrorScreenRegionPair.second;
     ScreenId screenId = INVALID_SCREEN_ID;
+    bool isEnableRegionRotation = GetIsEnableRegionRotation();
     if (isPhysicalMirrorSwitch_) {
         screenId = screenId_;
     } else {
         screenId = rsId_;
     }
     auto ret = RSInterfaces::GetInstance().SetMirrorScreenVisibleRect(screenId,
-        { rect.posX_, rect.posY_, rect.width_, rect.height_ });
+        { rect.posX_, rect.posY_, rect.width_, rect.height_ }, isEnableRegionRotation);
     if (ret != StatusCode::SUCCESS) {
         TLOGE(WmsLogTag::DMS, "Fail! rsId %{public}" PRIu64", ret:%{public}d," PRIu64
-        ", x:%{public}d y:%{public}d w:%{public}u h:%{public}u", screenId, ret,
-        rect.posX_, rect.posY_, rect.width_, rect.height_);
+        ", x:%{public}d y:%{public}d w:%{public}u h:%{public}u, isEnableRegionRotation:%{public}d", screenId, ret,
+        rect.posX_, rect.posY_, rect.width_, rect.height_, isEnableRegionRotation);
     } else {
         TLOGE(WmsLogTag::DMS, "Success! rsId %{public}" PRIu64", ret:%{public}d," PRIu64
-        ", x:%{public}d y:%{public}d w:%{public}u h:%{public}u", screenId, ret,
-        rect.posX_, rect.posY_, rect.width_, rect.height_);
+        ", x:%{public}d y:%{public}d w:%{public}u h:%{public}u, isEnableRegionRotation:%{public}d", screenId, ret,
+        rect.posX_, rect.posY_, rect.width_, rect.height_, isEnableRegionRotation);
     }
 }
 
@@ -2200,5 +2201,17 @@ bool ScreenSession::GetShareProtect()
 float ScreenSession::GetSensorRotation() const
 {
     return currentSensorRotation_;
+}
+
+void ScreenSession::SetIsEnableRegionRotation(bool isEnableRegionRotation)
+{
+    std::lock_guard<std::mutex> lock(isEnableRegionRotationMutex_);
+    isEnableRegionRotation_ = isEnableRegionRotation;
+}
+ 
+bool ScreenSession::GetIsEnableRegionRotation()
+{
+    std::lock_guard<std::mutex> lock(isEnableRegionRotationMutex_);
+    return isEnableRegionRotation_;
 }
 } // namespace OHOS::Rosen

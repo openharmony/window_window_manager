@@ -307,6 +307,8 @@ public:
     void SecondaryReflexionChange(ScreenId screenId, bool isSecondaryReflexion);
     void EnableMirrorScreenRegion();
     void ExtendScreenConnectStatusChange(ScreenId screenId, ExtendScreenConnectStatus extendScreenConnectStatus);
+    void SetIsEnableRegionRotation(bool isEnableRegionRotation);
+    bool GetIsEnableRegionRotation();
 
 private:
     ScreenProperty property_;
@@ -343,6 +345,8 @@ private:
     std::mutex mirrorScreenRegionMutex_;
     void OptimizeSecondaryDisplayMode(const RRect &bounds, FoldDisplayMode &foldDisplayMode);
     std::string innerName_ {"UNKOWN"};
+    bool isEnableRegionRotation_ = false;
+    std::mutex isEnableRegionRotationMutex_;
 };
 
 class ScreenSessionGroup : public ScreenSession {
