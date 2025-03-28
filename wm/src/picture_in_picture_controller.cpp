@@ -718,7 +718,7 @@ void PictureInPictureController::UpdateWinRectByComponent()
 
 void PictureInPictureController::SetUIContent() const
 {
-    napi_value storage =  nullptr;
+    napi_value storage = nullptr;
     napi_ref storageRef = pipOption_->GetStorageRef();
     if (storageRef != nullptr) {
         napi_get_reference_value(env_, storageRef, &storage);
