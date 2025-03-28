@@ -43,6 +43,29 @@ void PictureInPictureOptionTest::TearDown() {}
 namespace {
 
 /**
+ * @tc.name: ClearNapiRefs
+ * @tc.desc: ClearNapiRefs
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureOptionTest, ClearNapiRefs, Function | SmallTest | Level2)
+{
+    int num = 0;
+    napi_ref ref = reinterpret_cast<napi_ref>(&num);
+    ASSERT_NE(nullptr, ref);
+    sptr<PipOption> option = new PipOption();
+    option->SetNodeControllerRef(ref);
+    ASSERT_NE(nullptr, option->GetNodeControllerRef());
+    option->SetTypeNodeRef(ref);
+    ASSERT_NE(nullptr, option->GetTypeNodeRef());
+    option->SetStorageRef(ref);
+    ASSERT_NE(nullptr, option->GetStorageRef());
+    option->ClearNapiRefs(nullptr);
+    ASSERT_EQ(nullptr, option->GetNodeControllerRef());
+    ASSERT_EQ(nullptr, option->GetTypeNodeRef());
+    ASSERT_EQ(nullptr, option->GetStorageRef());
+}
+
+/**
  * @tc.name: Context
  * @tc.desc: SetContext/GetContext
  * @tc.type: FUNC
@@ -182,6 +205,21 @@ HWTEST_F(PictureInPictureOptionTest, TypeNodeRef, TestSize.Level1)
     sptr<PipOption> option = sptr<PipOption>::MakeSptr();
     option->SetTypeNodeRef(nullptr);
     ASSERT_EQ(option->GetTypeNodeRef(), nullptr);
+}
+
+/**
+ * @tc.name: StorageRef
+ * @tc.desc: SetStorageRef/GetStorageRef
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureOptionTest, StorageRef, Function | SmallTest | Level2)
+{
+    int num = 0;
+    napi_ref ref = reinterpret_cast<napi_ref>(&num);
+    ASSERT_NE(nullptr, ref);
+    sptr<PipOption> option = sptr<PipOption>::MakeSptr();
+    option->SetStorageRef(ref);
+    ASSERT_EQ(option->GetStorageRef(), ref);
 }
 
 /**
