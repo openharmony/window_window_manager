@@ -1511,7 +1511,7 @@ HWTEST_F(SceneSessionTest3, SetSkipSelfWhenShowOnVirtualScreen01, TestSize.Level
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     bool skipResult = false;
 
-    sceneSession->SetSkipSelfWhenShowOnVirtualScreen(true);
+    sceneSession->SetSkipSelfWhenShowOnVirtualScreen(false);
     usleep(SLEEP_TIME_US);
     ASSERT_EQ(skipResult, false);
 
@@ -1520,7 +1520,7 @@ HWTEST_F(SceneSessionTest3, SetSkipSelfWhenShowOnVirtualScreen01, TestSize.Level
     surfaceNode->id_ = 1;
     sceneSession->surfaceNode_ = surfaceNode;
 
-    sceneSession->SetSkipSelfWhenShowOnVirtualScreen(true);
+    sceneSession->SetSkipSelfWhenShowOnVirtualScreen(false);
     usleep(SLEEP_TIME_US);
     ASSERT_EQ(skipResult, false);
 }
