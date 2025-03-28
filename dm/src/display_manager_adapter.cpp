@@ -236,16 +236,16 @@ DMError ScreenManagerAdapter::SetVirtualScreenSurface(ScreenId screenId, sptr<Su
     return displayManagerServiceProxy_->SetVirtualScreenSurface(screenId, surface->GetProducer());
 }
 
-DMError ScreenManagerAdapter::AddVirtualScreenBlackList(const std::vector<int32_t>& persistentIds)
+DMError ScreenManagerAdapter::AddVirtualScreenBlockList(const std::vector<int32_t>& persistentIds)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
-    return displayManagerServiceProxy_->AddVirtualScreenBlackList(persistentIds);
+    return displayManagerServiceProxy_->AddVirtualScreenBlockList(persistentIds);
 }
 
-DMError ScreenManagerAdapter::RemoveVirtualScreenBlackList(const std::vector<int32_t>& persistentIds)
+DMError ScreenManagerAdapter::RemoveVirtualScreenBlockList(const std::vector<int32_t>& persistentIds)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
-    return displayManagerServiceProxy_->RemoveVirtualScreenBlackList(persistentIds);
+    return displayManagerServiceProxy_->RemoveVirtualScreenBlockList(persistentIds);
 }
 
 DMError ScreenManagerAdapter::SetScreenPrivacyMaskImage(ScreenId screenId,

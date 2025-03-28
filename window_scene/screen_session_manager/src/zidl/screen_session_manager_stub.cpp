@@ -248,7 +248,7 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             static_cast<void>(reply.WriteInt32(static_cast<int32_t>(result)));
             break;
         }
-        case DisplayManagerMessage::TRANS_ID_ADD_VIRTUAL_SCREEN_BLACK_LIST: {
+        case DisplayManagerMessage::TRANS_ID_ADD_VIRTUAL_SCREEN_BLOCK_LIST: {
             uint64_t size = 0;
             if (!data.ReadUint64(size)) {
                 TLOGE(WmsLogTag::DMS, "Read size failed.");
@@ -263,11 +263,11 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
                 }
                 persistentIds.push_back(persistentId);
             }
-            DMError errCode = AddVirtualScreenBlackList(persistentIds);
+            DMError errCode = AddVirtualScreenBlockList(persistentIds);
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
-        case DisplayManagerMessage::TRANS_ID_REMOVE_VIRTUAL_SCREEN_BLACK_LIST: {
+        case DisplayManagerMessage::TRANS_ID_REMOVE_VIRTUAL_SCREEN_BLOCK_LIST: {
             uint64_t size = 0;
             if (!data.ReadUint64(size)) {
                 TLOGE(WmsLogTag::DMS, "Read size failed.");
@@ -282,7 +282,7 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
                 }
                 persistentIds.push_back(persistentId);
             }
-            DMError errCode = RemoveVirtualScreenBlackList(persistentIds);
+            DMError errCode = RemoveVirtualScreenBlockList(persistentIds);
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }

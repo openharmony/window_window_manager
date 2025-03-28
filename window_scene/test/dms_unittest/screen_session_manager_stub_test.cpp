@@ -3209,7 +3209,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest151, Function | SmallTest 
     data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
     data.WriteUint64(1u);
     data.WriteInt32(1);
-    uint32_t code = static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_ADD_VIRTUAL_SCREEN_BLACK_LIST);
+    uint32_t code = static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_ADD_VIRTUAL_SCREEN_BLOCK_LIST);
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
 }
@@ -3228,7 +3228,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest152, Function | SmallTest 
     data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
     data.WriteUint64(1u);
     data.WriteInt32(1);
-    uint32_t code = static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_REMOVE_VIRTUAL_SCREEN_BLACK_LIST);
+    uint32_t code = static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_REMOVE_VIRTUAL_SCREEN_BLOCK_LIST);
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
 }

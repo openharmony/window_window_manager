@@ -1164,7 +1164,7 @@ DMError ScreenSessionManagerProxy::SetVirtualScreenSurface(ScreenId screenId, sp
     return static_cast<DMError>(reply.ReadInt32());
 }
 
-DMError ScreenSessionManagerProxy::AddVirtualScreenBlackList(const std::vector<int32_t>& persistentIds)
+DMError ScreenSessionManagerProxy::AddVirtualScreenBlockList(const std::vector<int32_t>& persistentIds)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -1190,7 +1190,7 @@ DMError ScreenSessionManagerProxy::AddVirtualScreenBlackList(const std::vector<i
         }
     }
     if (remote->SendRequest(
-        static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_ADD_VIRTUAL_SCREEN_BLACK_LIST),
+        static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_ADD_VIRTUAL_SCREEN_BLOCK_LIST),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
@@ -1198,7 +1198,7 @@ DMError ScreenSessionManagerProxy::AddVirtualScreenBlackList(const std::vector<i
     return static_cast<DMError>(reply.ReadInt32());
 }
 
-DMError ScreenSessionManagerProxy::RemoveVirtualScreenBlackList(const std::vector<int32_t>& persistentIds)
+DMError ScreenSessionManagerProxy::RemoveVirtualScreenBlockList(const std::vector<int32_t>& persistentIds)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -1224,7 +1224,7 @@ DMError ScreenSessionManagerProxy::RemoveVirtualScreenBlackList(const std::vecto
         }
     }
     if (remote->SendRequest(
-        static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_REMOVE_VIRTUAL_SCREEN_BLACK_LIST),
+        static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_REMOVE_VIRTUAL_SCREEN_BLOCK_LIST),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;

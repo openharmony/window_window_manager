@@ -179,16 +179,16 @@ static napi_value SetVirtualScreenSurface(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnSetVirtualScreenSurface(env, info) : nullptr;
 }
 
-static napi_value AddVirtualScreenBlackList(napi_env env, napi_callback_info info)
+static napi_value AddVirtualScreenBlockList(napi_env env, napi_callback_info info)
 {
     auto* me = CheckParamsAndGetThis<JsDisplayManager>(env, info);
-    return (me != nullptr) ? me->OnAddVirtualScreenBlackList(env, info) : nullptr;
+    return (me != nullptr) ? me->OnAddVirtualScreenBlockList(env, info) : nullptr;
 }
 
-static napi_value RemoveVirtualScreenBlackList(napi_env env, napi_callback_info info)
+static napi_value RemoveVirtualScreenBlockList(napi_env env, napi_callback_info info)
 {
     auto* me = CheckParamsAndGetThis<JsDisplayManager>(env, info);
-    return (me != nullptr) ? me->OnRemoveVirtualScreenBlackList(env, info) : nullptr;
+    return (me != nullptr) ? me->OnRemoveVirtualScreenBlockList(env, info) : nullptr;
 }
 
 private:
@@ -1142,7 +1142,7 @@ napi_value OnSetVirtualScreenSurface(napi_env env, napi_callback_info info)
     return result;
 }
 
-napi_value OnAddVirtualScreenBlackList(napi_env env, napi_callback_info info)
+napi_value OnAddVirtualScreenBlockList(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::DMS, "in");
     size_t argc = ARGC_THREE;
@@ -1175,12 +1175,12 @@ napi_value OnAddVirtualScreenBlackList(napi_env env, napi_callback_info info)
     std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
     auto asyncTask = [persistentIds, env, task = napiAsyncTask.get()] {
         if (persistentIds.size() == 0) {
-            TLOGND(WmsLogTag::DMS, "RemoveVirtualScreenBlackList: persistentIds size is 0, no need update");
+            TLOGND(WmsLogTag::DMS, "RemoveVirtualScreenBlockList: persistentIds size is 0, no need update");
             task->Resolve(env, NapiGetUndefined(env));
             return;
         }
         auto res = DM_JS_TO_ERROR_CODE_MAP.at(
-            SingletonContainer::Get<ScreenManager>().AddVirtualScreenBlackList(persistentIds));
+            SingletonContainer::Get<ScreenManager>().AddVirtualScreenBlockList(persistentIds));
         res = (res == DmErrorCode::DM_ERROR_NOT_SYSTEM_APP) ? DmErrorCode::DM_ERROR_NO_PERMISSION : res;
         if (res != DmErrorCode::DM_OK) {
             TLOGE(WmsLogTag::DMS, "failed");
@@ -1190,11 +1190,11 @@ napi_value OnAddVirtualScreenBlackList(napi_env env, napi_callback_info info)
         }
         delete task;
     };
-    NapiSendDmsEvent(env, asyncTask, napiAsyncTask, "AddVirtualScreenBlackList");
+    NapiSendDmsEvent(env, asyncTask, napiAsyncTask, "AddVirtualScreenBlockList");
     return result;
 }
 
-napi_value OnRemoveVirtualScreenBlackList(napi_env env, napi_callback_info info)
+napi_value OnRemoveVirtualScreenBlockList(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::DMS, "in");
     size_t argc = ARGC_THREE;
@@ -1227,12 +1227,12 @@ napi_value OnRemoveVirtualScreenBlackList(napi_env env, napi_callback_info info)
     std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
     auto asyncTask = [persistentIds, env, task = napiAsyncTask.get()] {
         if (persistentIds.size() == 0) {
-            TLOGND(WmsLogTag::DMS, "RemoveVirtualScreenBlackList: persistentIds size is 0, no need update");
+            TLOGND(WmsLogTag::DMS, "RemoveVirtualScreenBlockList: persistentIds size is 0, no need update");
             task->Resolve(env, NapiGetUndefined(env));
             return;
         }
         auto res = DM_JS_TO_ERROR_CODE_MAP.at(
-            SingletonContainer::Get<ScreenManager>().RemoveVirtualScreenBlackList(persistentIds));
+            SingletonContainer::Get<ScreenManager>().RemoveVirtualScreenBlockList(persistentIds));
         res = (res == DmErrorCode::DM_ERROR_NOT_SYSTEM_APP) ? DmErrorCode::DM_ERROR_NO_PERMISSION : res;
         if (res != DmErrorCode::DM_OK) {
             TLOGE(WmsLogTag::DMS, "failed");
@@ -1242,7 +1242,7 @@ napi_value OnRemoveVirtualScreenBlackList(napi_env env, napi_callback_info info)
         }
         delete task;
     };
-    NapiSendDmsEvent(env, asyncTask, napiAsyncTask, "RemoveVirtualScreenBlackList");
+    NapiSendDmsEvent(env, asyncTask, napiAsyncTask, "RemoveVirtualScreenBlockList");
     return result;
 }
 
@@ -1702,10 +1702,10 @@ napi_value JsDisplayManagerInit(napi_env env, napi_value exportObj)
         JsDisplayManager::DestroyVirtualScreen);
     BindNativeFunction(env, exportObj, "setVirtualScreenSurface", moduleName,
         JsDisplayManager::SetVirtualScreenSurface);
-    BindNativeFunction(env, exportObj, "addVirtualScreenBlackList", moduleName,
-        JsDisplayManager::AddVirtualScreenBlackList);
-    BindNativeFunction(env, exportObj, "removeVirtualScreenBlackList", moduleName,
-        JsDisplayManager::RemoveVirtualScreenBlackList);
+    BindNativeFunction(env, exportObj, "addVirtualScreenBlockList", moduleName,
+        JsDisplayManager::AddVirtualScreenBlockList);
+    BindNativeFunction(env, exportObj, "removeVirtualScreenBlockList", moduleName,
+        JsDisplayManager::RemoveVirtualScreenBlockList);
     return NapiGetUndefined(env);
 }
 }  // namespace Rosen
