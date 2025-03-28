@@ -6497,14 +6497,12 @@ void SceneSession::SetSkipSelfWhenShowOnVirtualScreen(bool isSkip)
             return;
         }
         std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode = session->GetLeashWinSurfaceNode();
-        if (!leashWinSurfaceNode) {
-            TLOGNE(WmsLogTag::WMS_SCB, "%{public}s leashWinSurfaceNode_ is null", where);
-            return;
-        }
         if (session->specificCallback_ != nullptr &&
             session->specificCallback_->onSetSkipSelfWhenShowOnVirtualScreen_ != nullptr) {
             session->specificCallback_->onSetSkipSelfWhenShowOnVirtualScreen_(surfaceNode->GetId(), isSkip);
-            session->specificCallback_->onSetSkipSelfWhenShowOnVirtualScreen_(leashWinSurfaceNode->GetId(), isSkip);
+            if (leashWinSurfaceNode) {
+                session->specificCallback_->onSetSkipSelfWhenShowOnVirtualScreen_(leashWinSurfaceNode->GetId(), isSkip);
+            }
         }
         return;
     }, __func__);
