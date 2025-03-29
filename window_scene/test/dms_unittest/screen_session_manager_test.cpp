@@ -910,6 +910,9 @@ HWTEST_F(ScreenSessionManagerTest, ScreenChange, Function | SmallTest | Level3)
  */
 HWTEST_F(ScreenSessionManagerTest, ScreenPower, Function | SmallTest | Level3)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
+    }
     PowerStateChangeReason reason = PowerStateChangeReason::POWER_BUTTON;
     ScreenPowerState state = ScreenPowerState::POWER_ON;
     DisplayState displayState = DisplayState::ON;
@@ -1008,6 +1011,9 @@ HWTEST_F(ScreenSessionManagerTest, GetDisplaySnapshot, Function | SmallTest | Le
  */
 HWTEST_F(ScreenSessionManagerTest, VirtualScreen, Function | SmallTest | Level3)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
+    }
     sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption;
     virtualOption.name_ = "testVirtualOption";
@@ -1919,6 +1925,9 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenRotationLocked, Function | SmallTest
  */
 HWTEST_F(ScreenSessionManagerTest, UpdateScreenRotationProperty, Function | SmallTest | Level3)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
+    }
     sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption;
     virtualOption.name_ = "UpdateScreenRotationProperty";
@@ -2956,6 +2965,9 @@ HWTEST_F(ScreenSessionManagerTest, SetVirtualScreenStatus, Function | SmallTest 
  */
 HWTEST_F(ScreenSessionManagerTest, SetClient, Function | SmallTest | Level3)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
+    }
     ScreenSessionManager* ssm = new ScreenSessionManager();
     ASSERT_NE(ssm, nullptr);
     sptr<IScreenSessionManagerClient> client = nullptr;
@@ -2969,6 +2981,9 @@ HWTEST_F(ScreenSessionManagerTest, SetClient, Function | SmallTest | Level3)
  */
 HWTEST_F(ScreenSessionManagerTest, SwitchUser, Function | SmallTest | Level3)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
+    }
     ScreenSessionManager* ssm = new ScreenSessionManager();
     ASSERT_NE(ssm, nullptr);
     ssm->SwitchUser();
@@ -2993,6 +3008,9 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenPrivacyMaskImage001, Function | Smal
  */
 HWTEST_F(ScreenSessionManagerTest, ScbClientDeathCallback, Function | SmallTest | Level3)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
+    }
     ScreenSessionManager* ssm = new ScreenSessionManager();
     ASSERT_NE(ssm, nullptr);
     int32_t deathScbPid = ssm->currentScbPId_;
@@ -3023,6 +3041,9 @@ HWTEST_F(ScreenSessionManagerTest, ScbClientDeathCallback, Function | SmallTest 
  */
 HWTEST_F(ScreenSessionManagerTest, NotifyClientProxyUpdateFoldDisplayMode, Function | SmallTest | Level3)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
+    }
     ScreenSessionManager* ssm = new ScreenSessionManager();
     ASSERT_NE(ssm, nullptr);
     FoldDisplayMode displayMode = FoldDisplayMode::FULL;
@@ -3037,6 +3058,9 @@ HWTEST_F(ScreenSessionManagerTest, NotifyClientProxyUpdateFoldDisplayMode, Funct
  */
 HWTEST_F(ScreenSessionManagerTest, OnScreenRotationLockedChange, Function | SmallTest | Level3)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
+    }
     ScreenSessionManager* ssm = new ScreenSessionManager();
     ASSERT_NE(ssm, nullptr);
     bool isLocked = false;
@@ -3052,6 +3076,9 @@ HWTEST_F(ScreenSessionManagerTest, OnScreenRotationLockedChange, Function | Smal
  */
 HWTEST_F(ScreenSessionManagerTest, OnScreenOrientationChange, Function | SmallTest | Level3)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
+    }
     ScreenSessionManager* ssm = new ScreenSessionManager();
     ASSERT_NE(ssm, nullptr);
     float screenOrientation = 75.2f;
@@ -3067,6 +3094,9 @@ HWTEST_F(ScreenSessionManagerTest, OnScreenOrientationChange, Function | SmallTe
  */
 HWTEST_F(ScreenSessionManagerTest, NotifyDisplayModeChanged, Function | SmallTest | Level3)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
+    }
     ScreenSessionManager* ssm = new ScreenSessionManager();
     ASSERT_NE(ssm, nullptr);
     ssm->NotifyDisplayModeChanged(FoldDisplayMode::MAIN);
@@ -3341,6 +3371,9 @@ HWTEST_F(ScreenSessionManagerTest, SetMultiScreenRelativePosition06, Function | 
  */
 HWTEST_F(ScreenSessionManagerTest, SetCoordinationFlag, Function | SmallTest | Level3)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
+    }
     ScreenSessionManager* ssm = new ScreenSessionManager();
     ASSERT_NE(ssm, nullptr);
     ASSERT_EQ(ssm->isCoordinationFlag_, false);
@@ -3355,6 +3388,9 @@ HWTEST_F(ScreenSessionManagerTest, SetCoordinationFlag, Function | SmallTest | L
  */
 HWTEST_F(ScreenSessionManagerTest, GetTentMode, Function | SmallTest | Level1)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
+    }
     auto tentMode = ssm_->GetTentMode();
     ASSERT_EQ(tentMode, false);
 }
@@ -3366,6 +3402,9 @@ HWTEST_F(ScreenSessionManagerTest, GetTentMode, Function | SmallTest | Level1)
  */
 HWTEST_F(ScreenSessionManagerTest, OnTentModeChanged, Function | SmallTest | Level1)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
+    }
     bool isTentMode = false;
     ssm_->OnTentModeChanged(isTentMode);
     ASSERT_EQ(ssm_->GetTentMode(), false);
@@ -3378,6 +3417,9 @@ HWTEST_F(ScreenSessionManagerTest, OnTentModeChanged, Function | SmallTest | Lev
  */
 HWTEST_F(ScreenSessionManagerTest, GetScreenCapture, Function | SmallTest | Level3)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
+    }
     ScreenSessionManager* ssm = new ScreenSessionManager();
     ASSERT_NE(ssm, nullptr);
     CaptureOption option;
@@ -3398,6 +3440,9 @@ HWTEST_F(ScreenSessionManagerTest, GetScreenCapture, Function | SmallTest | Leve
  */
 HWTEST_F(ScreenSessionManagerTest, OnScreenCaptureNotify, Function | SmallTest | Level3)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
+    }
     ScreenSessionManager* ssm = new ScreenSessionManager();
     ASSERT_NE(ssm, nullptr);
     ScreenId screenId = 0;
@@ -3424,6 +3469,9 @@ HWTEST_F(ScreenSessionManagerTest, GetPrimaryDisplayInfo, Function | SmallTest |
  */
 HWTEST_F(ScreenSessionManagerTest, TransferTypeToString1, Function | SmallTest | Level3)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
+    }
     ScreenSessionManager* ssm = new ScreenSessionManager();
     ASSERT_NE(ssm, nullptr);
     std::string screenType = ssm->TransferTypeToString(ScreenType::REAL);
@@ -3438,6 +3486,9 @@ HWTEST_F(ScreenSessionManagerTest, TransferTypeToString1, Function | SmallTest |
  */
 HWTEST_F(ScreenSessionManagerTest, TransferTypeToString2, Function | SmallTest | Level3)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
+    }
     ScreenSessionManager* ssm = new ScreenSessionManager();
     ASSERT_NE(ssm, nullptr);
     std::string screenType = ssm->TransferTypeToString(ScreenType::VIRTUAL);
@@ -3452,6 +3503,9 @@ HWTEST_F(ScreenSessionManagerTest, TransferTypeToString2, Function | SmallTest |
  */
 HWTEST_F(ScreenSessionManagerTest, TransferTypeToString3, Function | SmallTest | Level3)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
+    }
     ScreenSessionManager* ssm = new ScreenSessionManager();
     ASSERT_NE(ssm, nullptr);
     std::string screenType = ssm->TransferTypeToString(ScreenType::UNDEFINED);
@@ -3466,6 +3520,9 @@ HWTEST_F(ScreenSessionManagerTest, TransferTypeToString3, Function | SmallTest |
  */
 HWTEST_F(ScreenSessionManagerTest, TransferPropertyChangeTypeToString1, Function | SmallTest | Level3)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
+    }
     ScreenSessionManager* ssm = new ScreenSessionManager();
     ASSERT_NE(ssm, nullptr);
     std::string screenType = ssm->TransferPropertyChangeTypeToString(ScreenPropertyChangeType::UNSPECIFIED);
@@ -3480,6 +3537,9 @@ HWTEST_F(ScreenSessionManagerTest, TransferPropertyChangeTypeToString1, Function
  */
 HWTEST_F(ScreenSessionManagerTest, TransferPropertyChangeTypeToString2, Function | SmallTest | Level3)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
+    }
     ScreenSessionManager* ssm = new ScreenSessionManager();
     ASSERT_NE(ssm, nullptr);
     std::string screenType = ssm->TransferPropertyChangeTypeToString(ScreenPropertyChangeType::ROTATION_BEGIN);
@@ -3494,6 +3554,9 @@ HWTEST_F(ScreenSessionManagerTest, TransferPropertyChangeTypeToString2, Function
  */
 HWTEST_F(ScreenSessionManagerTest, TransferPropertyChangeTypeToString3, Function | SmallTest | Level3)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
+    }
     ScreenSessionManager* ssm = new ScreenSessionManager();
     ASSERT_NE(ssm, nullptr);
     std::string screenType = ssm->TransferPropertyChangeTypeToString(ScreenPropertyChangeType::ROTATION_END);
@@ -3508,6 +3571,9 @@ HWTEST_F(ScreenSessionManagerTest, TransferPropertyChangeTypeToString3, Function
  */
 HWTEST_F(ScreenSessionManagerTest, TransferPropertyChangeTypeToString4, Function | SmallTest | Level3)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
+    }
     ScreenSessionManager* ssm = new ScreenSessionManager();
     ASSERT_NE(ssm, nullptr);
     std::string screenType = ssm->TransferPropertyChangeTypeToString(
@@ -3700,6 +3766,9 @@ HWTEST_F(ScreenSessionManagerTest, SetLowTemp, Function | SmallTest | Level3)
  */
 HWTEST_F(ScreenSessionManagerTest, SetScreenSkipProtectedWindow, Function | SmallTest | Level3)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
+    }
     ASSERT_NE(ssm_, nullptr);
     sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
     ASSERT_NE(displayManagerAgent, nullptr);
@@ -3723,6 +3792,9 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenSkipProtectedWindow, Function | Smal
  */
 HWTEST_F(ScreenSessionManagerTest, SetScreenSkipProtectedWindowInner, Function | SmallTest | Level3)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
+    }
     ASSERT_NE(ssm_, nullptr);
     sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
     ASSERT_NE(displayManagerAgent, nullptr);
@@ -3781,6 +3853,9 @@ HWTEST_F(ScreenSessionManagerTest, GetSecondaryDisplayCapability, Function | Sma
  */
 HWTEST_F(ScreenSessionManagerTest, GetSuperFoldCapability, Function | SmallTest | Level3)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
+    }
     std::string info {""};
     if (ssm_ != nullptr) {
         info = ssm_->GetSuperFoldCapability();
@@ -3797,6 +3872,9 @@ HWTEST_F(ScreenSessionManagerTest, GetSuperFoldCapability, Function | SmallTest 
  */
 HWTEST_F(ScreenSessionManagerTest, GetFoldableDeviceCapability, Function | SmallTest | Level3)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
+    }
     std::string info {""};
     if (ssm_ != nullptr) {
         info = ssm_->GetFoldableDeviceCapability();
