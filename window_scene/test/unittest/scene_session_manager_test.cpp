@@ -769,6 +769,7 @@ HWTEST_F(SceneSessionManagerTest, NotifyAINavigationBarShowStatus, TestSize.Leve
     bool isVisible = false;
     WSRect barArea = { 0, 0, 320, 240}; // width: 320, height: 240
     uint64_t displayId = 0;
+    ssm_->rootSceneSession_ = sptr<RootSceneSession>::MakeSptr();
     WSError result = ssm_->NotifyAINavigationBarShowStatus(isVisible, barArea, displayId);
     ASSERT_EQ(result, WSError::WS_OK);
 }
