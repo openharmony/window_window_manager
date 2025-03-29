@@ -5822,7 +5822,8 @@ void WindowSessionImpl::GetExtensionConfig(AAFwk::WantParams& want) const
     want.SetParam(Extension::WATERFALL_MODE_FIELD, AAFwk::Integer::Box(static_cast<int32_t>(isWaterfallMode)));
     WindowType rootHostWindowType = (GetType() == WindowType::WINDOW_TYPE_UI_EXTENSION) ?
                                     GetRootHostWindowType() : GetType();
-    want.SetParam(Extension::ROOT_HOST_WINDOW_TYPE_FIELD, AAFwk::Integer::Box(static_cast<int32_t>(rootHostWindowType)));
+    want.SetParam(Extension::ROOT_HOST_WINDOW_TYPE_FIELD,
+            AAFwk::Integer::Box(static_cast<int32_t>(rootHostWindowType)));
 }
 
 void WindowSessionImpl::UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>& want)
