@@ -267,6 +267,34 @@ HWTEST_F(SceneSessionManagerTest7, FlushUIParams01, TestSize.Level1)
 }
 
 /**
+ * @tc.name: FlushUIParams02
+ * @tc.desc: FlushUIParams Multi-screen
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, FlushUIParams02, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest7";
+    sessionInfo.abilityName_ = "FlushUIParams02";
+    sessionInfo.screenId_ = 2;
+    ScreenId screenId = 2;
+    std::unordered_map<int32_t, SessionUIParam> uiParams;
+    uiParams.clear();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sceneSession->persistentId_ = 1;
+    sceneSession->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    SessionUIParam sessionUIParam;
+    uiParams.insert(std::make_pair(1, sessionUIParam));
+    ssm_->FlushUIParams(screenId, std::move(uiParams));
+    sessionInfo.screenId_ = -1ULL;
+    ssm_->FlushUIParams(screenId, std::move(uiParams));
+    ASSERT_NE(sceneSession->dirtyFlags_, 0);
+}
+
+/**
  * @tc.name: RegisterIAbilityManagerCollaborator
  * @tc.desc: RegisterIAbilityManagerCollaborator
  * @tc.type: FUNC
