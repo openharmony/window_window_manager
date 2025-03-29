@@ -2323,7 +2323,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
                 TLOGW(WmsLogTag::WMS_LIFE, "session is still in hook procedure, return directly");
                 return session;
             }
-            RegisterHookSceneSessionActicationFunc(sceneSession);
+            RegisterHookSceneSessionActivationFunc(sceneSession);
         }
         if (MultiInstanceManager::IsSupportMultiInstance(systemConfig_) &&
             WindowHelper::IsMainWindow(sceneSession->GetWindowType()) &&

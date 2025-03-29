@@ -7950,21 +7950,22 @@ WMError SceneSession::NotifyDisableDelegatorChange()
         TLOGE(WmsLogTag::WMS_LIFE, "The caller is neither a system app nor an SA.");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
-    TLOGI(WmsLogTag::WMS_LIFE, "set session id %{public}d disableDelegator true", persistentId_);
-    sessionInfo_.disableDelegator = true;
+    PostTask([weakThis = wptr(this), where = __func__] {
+        TLOGI(WmsLogTag::WMS_LIFE, "set session id %{public}d disableDelegator true", persistentId_);
+        sessionInfo_.disableDelegator = true;
+    }, __func__)
     return WMError::WM_OK;
 }
 
 void SceneSession::HookSceneSessionActivation(NotifyHookSceneSessionActivationFunc&& func)
 {
-    const char* const where = __func__;
-    PostTask([weatThis = wptr(this), where, func = std::move(func)] {
+    PostTask([weatThis = wptr(this), where = __func__, func = std::move(func)] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
             return;
         }
         session->hookSceneSessionActivationFunc_ = std::move(func);
-    }, where);
+    }, __func__);
 }
 } // namespace OHOS::Rosen
