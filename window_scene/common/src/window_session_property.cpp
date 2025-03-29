@@ -1069,6 +1069,9 @@ bool WindowSessionProperty::MarshallingSessionInfo(Parcel& parcel) const
     if (hasWant && !parcel.WriteParcelable(want.get())) {
         return false;
     }
+    if (!parcel.WriteBool(sessionInfo_.isFollowParentMultiScreenPolicy)) {
+        return false;
+    }
     return true;
 }
 
@@ -1107,6 +1110,12 @@ bool WindowSessionProperty::UnmarshallingSessionInfo(Parcel& parcel, WindowSessi
         }
         info.want = want;
     }
+    bool isFollowParentMultiScreenPolicy = false;
+    if (!parcel.ReadBool(isFollowParentMultiScreenPolicy)) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to read isFollowParentMultiScreenPolicy!");
+        return false;
+    }
+    info.isFollowParentMultiScreenPolicy = isFollowParentMultiScreenPolicy;
     property->SetSessionInfo(info);
     return true;
 }

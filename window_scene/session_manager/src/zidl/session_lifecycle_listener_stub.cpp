@@ -33,7 +33,11 @@ int SessionLifecycleListenerStub::OnRemoteRequest(
 int SessionLifecycleListenerStub::HandleOnLifecycleEvent(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "in");
-    auto event = data.ReadInt32();
+    int32_t event = 0;
+    if (!data.ReadInt32(event)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read event");
+        return ERR_INVALID_DATA;
+    }
     if (event < static_cast<int32_t>(SessionLifecycleEvent::CREATED) ||
         event >= static_cast<int32_t>(SessionLifecycleEvent::EVENT_END)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Invalid lifecycle event");

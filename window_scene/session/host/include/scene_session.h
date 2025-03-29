@@ -669,10 +669,6 @@ public:
     WSError UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode,
         std::shared_ptr<RSTransaction>& rsTransaction) override;
     void SetKeyFramePolicy(const KeyFramePolicy& keyFramePolicy);
-    void UpdateKeyFrameState(SizeChangeReason reason, const WSRect& rect);
-    void RequestKeyFrameNextVsync(uint64_t requestStamp, uint64_t count);
-    void OnKeyFrameNextVsync(uint64_t count);
-    bool KeyFrameNotifyFilter(const WSRect& rect, SizeChangeReason reason);
     WSError KeyFrameAnimateEnd() override;
 
     /*
@@ -727,7 +723,7 @@ public:
     virtual void SetKeyboardViewModeChangeListener(const NotifyKeyboarViewModeChangeFunc& func) {};
     void GetKeyboardOccupiedAreaWithRotation(
         int32_t persistentId, uint32_t rotation, std::vector<std::pair<bool, WSRect>>& avoidAreas);
-    void NotifyKeyboardAnimationCompleted(bool isShowAnimation, const WSRect& panelRect);
+    void NotifyKeyboardAnimationCompleted(bool isShowAnimation, const WSRect& beginRect, const WSRect& endRect);
     void NotifyKeyboardDidShowRegistered(bool registered) override;
     void NotifyKeyboardDidHideRegistered(bool registered) override;
 
@@ -839,6 +835,7 @@ protected:
     std::mutex registerNotifySurfaceBoundsChangeMutex_;
     std::unordered_map<int32_t, NotifySurfaceBoundsChangeFunc> notifySurfaceBoundsChangeFuncMap_;
     bool isFollowParentLayout_ = false;
+    int32_t cloneNodeCount_ = 0;
 
     virtual void NotifySessionRectChange(const WSRect& rect,
         SizeChangeReason reason = SizeChangeReason::UNDEFINED, DisplayId displayId = DISPLAY_ID_INVALID,
@@ -853,6 +850,8 @@ protected:
     WSRect ConvertRelativeRectToGlobal(const WSRect& relativeRect, DisplayId currentDisplayId) const override;
     WSRect ConvertGlobalRectToRelative(const WSRect& globalRect, DisplayId targetDisplayId) const override;
     bool IsNeedConvertToRelativeRect(SizeChangeReason reason = SizeChangeReason::UNDEFINED) const override;
+    void SetRequestMoveConfiguration(const MoveConfiguration& config) { requestMoveConfiguration_ = config; }
+    MoveConfiguration GetRequestMoveConfiguration() const { return requestMoveConfiguration_; }
 
     /*
      * Window Lifecycle
@@ -1082,7 +1081,7 @@ private:
     void UpdateSessionRectPosYFromClient(SizeChangeReason reason, DisplayId& configDisplayId, WSRect& rect);
     void HandleSubSessionSurfaceNode(bool isAdd);
     virtual void AddSurfaceNodeToScreen() {}
-    virtual void RemoveSufaceNodeFromScreen() {}
+    virtual void RemoveSurfaceNodeFromScreen() {}
 
     /*
      * Window Decor
@@ -1131,6 +1130,11 @@ private:
     DragResizeType dragResizeTypeDuringDrag_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
     NotifyWindowMovingFunc notifyWindowMovingFunc_;
     // KeyFrame
+    void UpdateKeyFrameState(SizeChangeReason reason, const WSRect& rect);
+    void InitKeyFrameState(uint64_t timeStamp, const WSRect& rect);
+    void RequestKeyFrameNextVsync(uint64_t requestStamp, uint64_t count);
+    void OnKeyFrameNextVsync(uint64_t count);
+    bool KeyFrameNotifyFilter(const WSRect& rect, SizeChangeReason reason);
     KeyFramePolicy keyFramePolicy_;
     std::shared_ptr<RSCanvasNode> keyFrameCloneNode_ = nullptr;
     bool keyFrameAnimating_ = false;
@@ -1181,6 +1185,7 @@ private:
     virtual void UpdateCrossAxisOfLayout(const WSRect& rect);
     NotifyLayoutFullScreenChangeFunc onLayoutFullScreenChangeFunc_;
     WSRect requestRectWhenFollowParent_;
+    MoveConfiguration requestMoveConfiguration_;
     virtual void NotifySubAndDialogFollowRectChange(const WSRect& rect, bool isGlobal, bool needFlush) {};
     std::atomic<bool> shouldFollowParentWhenShow_ = true;
     bool isDragging_ = false;

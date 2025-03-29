@@ -719,19 +719,6 @@ HWTEST_F(SessionStageProxyTest, SendContainerModalEvent, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetCurrentRotation
- * @tc.desc: test function : SetCurrentRotation
- * @tc.type: FUNC
- */
- HWTEST_F(SessionStageProxyTest, SetCurrentRotation, TestSize.Level1)
-{
-    int32_t currentRotation = 90;
-    ASSERT_TRUE(sessionStage_ != nullptr);
-    WSError res = sessionStage_->SetCurrentRotation(currentRotation);
-    ASSERT_EQ(WSError::WS_OK, res);
-}
-
-/**
  * @tc.name: NotifyRotationChange
  * @tc.desc: test function : NotifyRotationChange
  * @tc.type: FUNC
@@ -742,6 +729,19 @@ HWTEST_F(SessionStageProxyTest, NotifyRotationChange, Function | SmallTest | Lev
     RotationChangeInfo info = { RotationChangeType::WINDOW_WILL_ROTATE, 0, 0, { 0, 0, 2720, 1270 } };
     RotationChangeResult res = sessionStage_->NotifyRotationChange(info);
     ASSERT_EQ(0, res.windowRect_.width_);
+}
+
+/**
+ * @tc.name: NotifyTargetRotationInfo
+ * @tc.desc: test function : NotifyTargetRotationInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, NotifyTargetRotationInfo, Function | SmallTest | Level1)
+{
+    OrientationInfo info;
+    ASSERT_TRUE(sessionStage_ != nullptr);
+    WSError res = sessionStage_->NotifyTargetRotationInfo(info);
+    ASSERT_EQ(WSError::WS_OK, res);
 }
 }
 }

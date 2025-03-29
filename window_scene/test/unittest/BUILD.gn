@@ -103,13 +103,23 @@ group("unittest") {
     ":ws_window_event_channel_stub_test",
     ":ws_window_event_channel_test",
     ":ws_window_manager_lru_test",
+    ":ws_window_manager_service_dump_test",
     ":ws_window_scene_config_test",
     ":ws_window_session_property_test",
+    "animation:ws_scene_session_animation_test",
+    "animation:ws_session_proxy_animation_test",
+    "animation:ws_window_session_property_animation_test",
     "multi_user:unittest",
+    "rotation:ws_scene_session_manager_rotation_test",
+    "rotation:ws_scene_session_rotation_test",
+    "rotation:ws_session_stage_proxy_rotation_test",
+    "rotation:ws_session_stage_stub_rotation_test",
+    "rotation:ws_window_session_property_rotation_test",
     "ui_extension:unittest",
     "window_pattern:window_pattern_snapshot_test",
     "window_pattern:window_pattern_starting_window_rdb_test",
     "window_pattern:window_pattern_starting_window_test",
+    "window_recover:ws_window_recover_session_test",
   ]
 
   if (window_manager_use_sceneboard) {
@@ -897,6 +907,28 @@ ohos_unittest("ws_scene_session_manager_test12") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("ws_window_manager_service_dump_test") {
+  module_out_path = module_out_path
+  include_dirs = [ "${window_base_path}/test/common/utils/include/" ]
+
+  sources = [ "window_manager_service_dump_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "ability_base:configuration",
+    "ability_base:session_info",
+    "ability_runtime:ability_context_native",
+    "ability_runtime:mission_info",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "hilog:libhilog",
+    "relational_store:native_rdb",
   ]
 }
 
@@ -1789,9 +1821,12 @@ config("ws_unittest_common_public_config") {
 ohos_static_library("ws_unittest_common") {
   visibility = [
     ":*",
+    "animation:*",
     "multi_user:*",
+    "rotation:*",
     "ui_extension:*",
     "window_pattern:*",
+    "window_recover:*",
   ]
   testonly = true
 

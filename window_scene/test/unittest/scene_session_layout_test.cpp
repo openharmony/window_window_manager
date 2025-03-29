@@ -765,7 +765,7 @@ HWTEST_F(SceneSessionLayoutTest, IsNeedConvertToRelativeRect, TestSize.Level1)
     subSceneSession->parentSession_ = sceneSession;
 
     ASSERT_EQ(sceneSession->IsNeedConvertToRelativeRect(SizeChangeReason::MAXIMIZE), false);
-    ASSERT_EQ(sceneSession->IsNeedConvertToRelativeRect(SizeChangeReason::DRAG_START), true);
+    ASSERT_EQ(sceneSession->IsNeedConvertToRelativeRect(SizeChangeReason::DRAG_MOVE), true);
 
     sceneSession->moveDragController_->isStartMove_ = true;
     sceneSession->moveDragController_->isStartDrag_ = false;

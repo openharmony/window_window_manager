@@ -537,6 +537,8 @@ public:
     WMError ListWindowInfo(const WindowInfoOption& windowInfoOption, std::vector<sptr<WindowInfo>>& infos) override;
     WMError GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos) override;
     void SetSkipSelfWhenShowOnVirtualScreen(uint64_t surfaceNodeId, bool isSkip);
+    WMError AddSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds) override;
+    WMError RemoveSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds) override;
 
     /*
      * Multi Window
@@ -677,6 +679,11 @@ private:
     std::atomic<bool> enterRecent_ { false };
     bool isKeyboardPanelEnabled_ = false;
     static sptr<SceneSessionManager> CreateInstance();
+    static inline bool isNotCurrentScreen(sptr<SceneSession> sceneSession, ScreenId screenId)
+    {
+        return sceneSession->GetSessionInfo().screenId_ != screenId &&
+               sceneSession->GetSessionInfo().screenId_ != SCREEN_ID_INVALID;
+    }
     void Init();
     void RegisterAppListener();
     void InitPrepareTerminateConfig();
@@ -1253,7 +1260,7 @@ private:
     void InitVsyncStation();
     void RegisterRequestVsyncFunc(const sptr<SceneSession>& sceneSession);
     bool GetDisplaySizeById(DisplayId displayId, int32_t& displayWidth, int32_t& displayHeight);
-    void UpdateSessionCrossAxisState(DisplayId displayId, SuperFoldStatus status, SuperFoldStatus prevStatus);
+    void UpdateSessionWithFoldStateChange(DisplayId displayId, SuperFoldStatus status, SuperFoldStatus prevStatus);
     void ConfigSingleHandCompatibleMode(const WindowSceneConfig::ConfigItem& configItem);
 
     /*
@@ -1366,6 +1373,7 @@ private:
     std::unordered_map<std::string, bool> isWindowRectAutoSaveMap_;
     //Whether to save rect according to specifiedFlag
     std::unordered_map<std::string, bool> isSaveBySpecifiedFlagMap_;
+    std::shared_ptr<FoldScreenStatusChangeCallback> foldChangeCallback_;
 
     /*
      * Window Lifecycle

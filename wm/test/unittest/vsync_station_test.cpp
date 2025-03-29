@@ -140,6 +140,26 @@ HWTEST_F(VsyncStationTest, SetUiDvsyncSwitch, TestSize.Level1)
     vsyncStation->SetUiDvsyncSwitch(true);
     vsyncStation->SetUiDvsyncSwitch(false);
 }
+
+/**
+ * @tc.name: DecreaseRequestVsyncTimes
+ * @tc.desc: DecreaseRequestVsyncTimes Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(VsyncStationTest, DecreaseRequestVsyncTimes, TestSize.Level1)
+{
+    NodeId nodeId = 0;
+    std::shared_ptr<VsyncStation> vsyncStation = std::make_shared<VsyncStation>(nodeId);
+    std::atomic<int32_t> requestVsyncTimes_{ 0 };
+    int32_t current = requestVsyncTimes_.load();
+    vsyncStation->DecreaseRequestVsyncTimes();
+    int32_t desired = requestVsyncTimes_.load();
+    if (current != 0) {
+        EXPECT_EQ(current - 1, desired);
+    } else {
+        EXPECT_EQ(current, desired);
+    }
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

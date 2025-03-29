@@ -1280,7 +1280,9 @@ void WindowSceneSessionImpl::PreLayoutOnShow(WindowType type, const sptr<Display
         UpdateViewportConfig(requestRect, WindowSizeChangeReason::RESIZE, nullptr, info);
         if (auto hostSession = GetHostSession()) {
             WSRect wsRect = { requestRect.posX_, requestRect.posY_, requestRect.width_, requestRect.height_ };
-            property_->SetWindowRect(requestRect);
+            if (type != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+                property_->SetWindowRect(requestRect);
+            }
             hostSession->UpdateClientRect(wsRect);
         } else {
             TLOGE(WmsLogTag::WMS_LAYOUT, "hostSession is null");
@@ -4994,6 +4996,7 @@ WMError WindowSceneSessionImpl::SetFollowParentMultiScreenPolicy(bool enabled)
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
     hostSession->NotifyFollowParentMultiScreenPolicy(enabled);
+    property_->EditSessionInfo().isFollowParentMultiScreenPolicy = enabled;
     return WMError::WM_OK;
 }
 
@@ -5157,7 +5160,8 @@ void WindowSceneSessionImpl::NotifyDisplayInfoChange(const sptr<DisplayInfo>& in
     float density = GetVirtualPixelRatio(displayInfo);
     DisplayOrientation orientation = displayInfo->GetDisplayOrientation();
 
-    if (context_ == nullptr) {
+    // skip scb process
+    if (context_ == nullptr || context_->GetBundleName() == AppExecFwk::Constants::SCENE_BOARD_BUNDLE_NAME) {
         TLOGE(WmsLogTag::DMS, "id:%{public}d failed, context is null.", GetPersistentId());
         return;
     }

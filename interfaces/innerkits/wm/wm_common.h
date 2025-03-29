@@ -993,6 +993,8 @@ struct ExtensionWindowAbilityInfo {
  */
 struct KeyboardPanelInfo : public Parcelable {
     Rect rect_ = {0, 0, 0, 0};
+    Rect beginRect_ = {0, 0, 0, 0};
+    Rect endRect_ = {0, 0, 0, 0};
     WindowGravity gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
     bool isShowing_ = false;
 
@@ -1000,27 +1002,30 @@ struct KeyboardPanelInfo : public Parcelable {
     {
         return parcel.WriteInt32(rect_.posX_) && parcel.WriteInt32(rect_.posY_) &&
                parcel.WriteUint32(rect_.width_) && parcel.WriteUint32(rect_.height_) &&
-               parcel.WriteUint32(static_cast<uint32_t>(gravity_)) &&
-               parcel.WriteBool(isShowing_);
+               parcel.WriteInt32(beginRect_.posX_) && parcel.WriteInt32(beginRect_.posY_) &&
+               parcel.WriteUint32(beginRect_.width_) && parcel.WriteUint32(beginRect_.height_) &&
+               parcel.WriteInt32(endRect_.posX_) && parcel.WriteInt32(endRect_.posY_) &&
+               parcel.WriteUint32(endRect_.width_) && parcel.WriteUint32(endRect_.height_) &&
+               parcel.WriteUint32(static_cast<uint32_t>(gravity_)) && parcel.WriteBool(isShowing_);
     }
 
     static KeyboardPanelInfo* Unmarshalling(Parcel& parcel)
     {
-        KeyboardPanelInfo* keyboardPanelInfo = new(std::nothrow)KeyboardPanelInfo;
-        if (keyboardPanelInfo == nullptr) {
-            return nullptr;
-        }
-        bool res = parcel.ReadInt32(keyboardPanelInfo->rect_.posX_) &&
-            parcel.ReadInt32(keyboardPanelInfo->rect_.posY_) && parcel.ReadUint32(keyboardPanelInfo->rect_.width_) &&
-            parcel.ReadUint32(keyboardPanelInfo->rect_.height_);
+        KeyboardPanelInfo* panelInfo = new KeyboardPanelInfo;
+        bool res = parcel.ReadInt32(panelInfo->rect_.posX_) && parcel.ReadInt32(panelInfo->rect_.posY_) &&
+            parcel.ReadUint32(panelInfo->rect_.width_) && parcel.ReadUint32(panelInfo->rect_.height_) &&
+            parcel.ReadInt32(panelInfo->beginRect_.posX_) && parcel.ReadInt32(panelInfo->beginRect_.posY_) &&
+            parcel.ReadUint32(panelInfo->beginRect_.width_) && parcel.ReadUint32(panelInfo->beginRect_.height_) &&
+            parcel.ReadInt32(panelInfo->endRect_.posX_) && parcel.ReadInt32(panelInfo->endRect_.posY_) &&
+            parcel.ReadUint32(panelInfo->endRect_.width_) && parcel.ReadUint32(panelInfo->endRect_.height_);
         if (!res) {
-            delete keyboardPanelInfo;
+            delete panelInfo;
             return nullptr;
         }
-        keyboardPanelInfo->gravity_ = static_cast<WindowGravity>(parcel.ReadUint32());
-        keyboardPanelInfo->isShowing_ = parcel.ReadBool();
+        panelInfo->gravity_ = static_cast<WindowGravity>(parcel.ReadUint32());
+        panelInfo->isShowing_ = parcel.ReadBool();
 
-        return keyboardPanelInfo;
+        return panelInfo;
     }
 };
 
@@ -1578,18 +1583,19 @@ struct WindowMetaInfo : public Parcelable {
     std::string bundleName;
     std::string abilityName;
     int32_t appIndex = 0;
+    int32_t pid = -1;
 
     bool Marshalling(Parcel& parcel) const override
     {
         return parcel.WriteInt32(windowId) && parcel.WriteString(windowName) && parcel.WriteString(bundleName) &&
-               parcel.WriteString(abilityName) && parcel.WriteInt32(appIndex);
+               parcel.WriteString(abilityName) && parcel.WriteInt32(appIndex) && parcel.WriteInt32(pid);
     }
     static WindowMetaInfo* Unmarshalling(Parcel& parcel)
     {
         WindowMetaInfo* windowMetaInfo = new WindowMetaInfo();
         if (!parcel.ReadInt32(windowMetaInfo->windowId) || !parcel.ReadString(windowMetaInfo->windowName) ||
             !parcel.ReadString(windowMetaInfo->bundleName) || !parcel.ReadString(windowMetaInfo->abilityName) ||
-            !parcel.ReadInt32(windowMetaInfo->appIndex)) {
+            !parcel.ReadInt32(windowMetaInfo->appIndex) || !parcel.ReadInt32(windowMetaInfo->pid)) {
             delete windowMetaInfo;
             return nullptr;
         }

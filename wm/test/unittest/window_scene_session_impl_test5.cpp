@@ -1234,6 +1234,59 @@ HWTEST_F(WindowSceneSessionImplTest5, TransferLifeCycleEventToString, Function |
     ASSERT_EQ(window->TransferLifeCycleEventToString(LifeCycleEvent::HIDE_EVENT), "HIDE");
     ASSERT_EQ(window->TransferLifeCycleEventToString(LifeCycleEvent::DESTROY_EVENT), "DESTROY");
 }
+
+/**
+ * @tc.name: FillTargetOrientationConfig
+ * @tc.desc: FillTargetOrientationConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, FillTargetOrientationConfig, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    OrientationInfo info;
+    info.rotation = 90;
+    info.rect = {0, 0, 50, 50};
+    std::map<AvoidAreaType, AvoidArea> avoidAreas;
+    info.avoidAreas = avoidAreas;
+
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->property_->SetWindowName("FillTargetOrientationConfig");
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    window->property_->SetDisplayId(3);
+    window->state_ = WindowState::STATE_CREATED;
+    sptr<DisplayInfo> displayInfo = sptr<DisplayInfo>::MakeSptr();
+    Ace::ViewportConfig config = window->FillTargetOrientationConfig(info, displayInfo, 3);
+    EXPECT_EQ(3, config.DisplayId());
+}
+
+/**
+ * @tc.name: NotifyTargetRotationInfo
+ * @tc.desc: NotifyTargetRotationInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, NotifyTargetRotationInfo, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    OrientationInfo info;
+    info.rotation = 90;
+    info.rect = {0, 0, 50, 50};
+    std::map<AvoidAreaType, AvoidArea> avoidAreas;
+    info.avoidAreas = avoidAreas;
+
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->property_->SetWindowName("NotifyTargetRotationInfo");
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    window->state_ = WindowState::STATE_CREATED;
+    EXPECT_EQ(WSError::WS_DO_NOTHING, window->NotifyTargetRotationInfo(info));
+}
 }
 } // namespace Rosen
 } // namespace OHOS

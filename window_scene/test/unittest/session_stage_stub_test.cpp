@@ -967,26 +967,6 @@ HWTEST_F(SessionStageStubTest, HandleNotifyWindowCrossAxisChange, TestSize.Level
 }
 
 /**
- * @tc.name: HandleSetCurrentRotation
- * @tc.desc: test function : HandleSetCurrentRotation
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStageStubTest, HandleSetCurrentRotation, TestSize.Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_CURRENT_ROTATION);
-    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
-    ASSERT_TRUE(sessionStageStub_ != nullptr);
-    EXPECT_EQ(ERR_INVALID_VALUE, sessionStageStub_->HandleSetCurrentRotation(data, reply));
-
-    data.WriteInt32(ONE_FOURTH_FULL_CIRCLE_DEGREE);
-    EXPECT_EQ(ERR_NONE, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
-    EXPECT_EQ(ERR_NONE, sessionStageStub_->HandleSetCurrentRotation(data, reply));
-}
-
-/**
  * @tc.name: HandleNotifyRotationChange
  * @tc.desc: test function : HandleNotifyRotationChange
  * @tc.type: FUNC
@@ -1009,6 +989,28 @@ HWTEST_F(SessionStageStubTest, HandleNotifyRotationChange, Function | SmallTest 
     data.WriteUint32(info.displayRect_.height_);
     sessionStageStub->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(sessionStageStub_->HandleNotifyRotationChange(data, reply), ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandleNotifyRotationProperty
+ * @tc.desc: test function : HandleNotifyRotationProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifyRotationProperty, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    data.WriteInt32(0);
+    data.WriteInt32(1);
+    data.WriteInt32(1);
+    data.WriteUint32(1);
+    data.WriteUint32(1);
+    data.WriteUint32(0);
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_ROTATION_PROPERTY);
+    EXPECT_TRUE(sessionStageStub_ != nullptr);
+    EXPECT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
 }
 }
 }

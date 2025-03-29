@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
+#include "hilog_tag_wrapper.h"
 #include "session_manager/include/zidl/session_lifecycle_listener_proxy.h"
 #include "window_manager_hilog.h"
-#include "hilog_tag_wrapper.h"
 
 namespace OHOS::Rosen {
 void SessionLifecycleListenerProxy::OnLifecycleEvent(SessionLifecycleEvent event, const LifecycleEventPayload& payload)
@@ -47,7 +47,8 @@ void SessionLifecycleListenerProxy::SendRequestCommon(
         TLOGE(WmsLogTag::WMS_LIFE, "remote is null");
         return;
     }
-    if (remote->SendRequest(0, data, reply, option) != NO_ERROR) {
+    if (remote->SendRequest(static_cast<uint32_t>(
+        ISessionLifecycleListenerMessage::TRANS_ON_LIFECYCLE_EVENT), data, reply, option) != NO_ERROR) {
         TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed.");
         return;
     }
