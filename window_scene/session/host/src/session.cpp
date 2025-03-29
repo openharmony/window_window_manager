@@ -1251,6 +1251,8 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
     if (SessionHelper::IsMainWindow(GetWindowType())) {
         property->SetIsPcAppInPad(GetSessionProperty()->GetIsPcAppInPad());
     }
+    property->SetSkipSelfWhenShowOnVirtualScreen(GetSessionProperty()->GetSkipSelfWhenShowOnVirtualScreen());
+    property->SetSkipEventOnCastPlus(GetSessionProperty()->GetSkipEventOnCastPlus());
     SetSessionProperty(property);
 }
 
@@ -2638,6 +2640,11 @@ void Session::SetSessionFocusableChangeListener(const NotifySessionFocusableChan
 {
     sessionFocusableChangeFunc_ = func;
     NotifySessionFocusableChange(GetFocusable());
+}
+
+bool Session::GetSkipSelfWhenShowOnVirtualScreen() const
+{
+    return GetSessionProperty()->GetSkipSelfWhenShowOnVirtualScreen();
 }
 
 void Session::SetSessionTouchableChangeListener(const NotifySessionTouchableChangeFunc& func)

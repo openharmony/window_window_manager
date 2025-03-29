@@ -536,6 +536,7 @@ public:
     void DealwithDrawingContentChange(const std::vector<std::pair<uint64_t, bool>>& drawingContentChangeInfo);
     WMError ListWindowInfo(const WindowInfoOption& windowInfoOption, std::vector<sptr<WindowInfo>>& infos) override;
     WMError GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos) override;
+    void SetSkipSelfWhenShowOnVirtualScreen(uint64_t surfaceNodeId, bool isSkip);
     WMError AddSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds) override;
     WMError RemoveSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds) override;
 
@@ -940,7 +941,6 @@ private:
         std::vector<sptr<AccessibilityWindowInfo>>& accessibilityInfo);
     void FilterSceneSessionCovered(std::vector<sptr<SceneSession>>& sceneSessionList);
     void NotifyAllAccessibilityInfo();
-    void SetSkipSelfWhenShowOnVirtualScreen(uint64_t surfaceNodeId, bool isSkip);
     void RegisterSecSurfaceInfoListener();
     void RegisterConstrainedModalUIExtInfoListener();
     void UpdatePiPWindowStateChanged(const std::string& bundleName, bool isForeground);
