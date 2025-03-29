@@ -25,6 +25,10 @@ class ISessionLifecycleListener : public IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISessionLifecycleListener");
 
+    enum class ISessionLifecycleListenerMessage : uint32_t {
+        TRANS_ON_LIFECYCLE_EVENT = 0,
+    };
+
     enum SessionLifecycleEvent {
         CREATED = 0,
         DESTROYED,
