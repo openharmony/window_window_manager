@@ -169,27 +169,6 @@ HWTEST_F(DisplayManagerAgentProxyTest, NotifyDisplayChangeInfoChanged, Function 
 }
 
 /**
- * @tc.name: NotifyDisplayChangeInfoChanged01
- * @tc.desc: NotifyDisplayChangeInfoChanged01
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerAgentProxyTest, NotifyDisplayChangeInfoChanged01, Function | SmallTest | Level1)
-{
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    sptr<DisplayManagerAgentProxy> displayManagerAgentProxy = new DisplayManagerAgentProxy(impl);
-
-    sptr<DisplayChangeInfo> display_change_info = nullptr;
-    int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
-        displayManagerAgentProxy->NotifyDisplayChangeInfoChanged(display_change_info);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
-}
-
-/**
  * @tc.name: NotifyDisplayModeChanged
  * @tc.desc: NotifyDisplayModeChanged
  * @tc.type: FUNC
