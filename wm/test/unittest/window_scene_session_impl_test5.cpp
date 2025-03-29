@@ -1054,16 +1054,16 @@ HWTEST_F(WindowSceneSessionImplTest5, SetParentWindow04, TestSize.Level1)
         std::pair<uint64_t, sptr<WindowSessionImpl>>(parentWindow2->GetWindowId(), parentWindow2)));
 
     std::vector<sptr<WindowSessionImpl>> subWindows;
-    parentWindow1->GetSubWidnows(1, subWindows);
+    parentWindow1->GetSubWindows(1, subWindows);
     EXPECT_EQ(subWindows.size(), 1);
     WindowAdapterMocker mocker;
     EXPECT_CALL(mocker.Mock(), SetParentWindow(_, _)).WillOnce(Return(WMError::WM_OK));
     int32_t newParentWindowId = 3;
     EXPECT_EQ(subWindow->SetParentWindow(newParentWindowId), WMError::WM_OK);
-    parentWindow1->GetSubWidnows(1, subWindows);
+    parentWindow1->GetSubWindows(1, subWindows);
     EXPECT_EQ(subWindows.size(), 0);
     subWindows.clear();
-    parentWindow1->GetSubWidnows(3, subWindows);
+    parentWindow1->GetSubWindows(3, subWindows);
     EXPECT_EQ(subWindows.size(), 1);
     EXPECT_EQ(WMError::WM_OK, subWindow->Destroy(true));
 }

@@ -275,11 +275,12 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
     sptr<IWindowEventChannel> eventChannel = sptr<WindowEventChannel>::MakeSptr(iSessionStage);
     auto persistentId = INVALID_SESSION_ID;
     sptr<Rosen::ISession> session;
-    sptr<IRemoteObject> token = context_ ? context_->GetToken() : nullptr;
+    auto context = GetContext();
+    sptr<IRemoteObject> token = context ? context->GetToken() : nullptr;
     if (token) {
         property_->SetTokenState(true);
     }
-    AdjustPropertySessionInfo(context_, property_->EditSessionInfo());
+    AdjustPropertySessionInfo(context, property_->EditSessionInfo());
 
     const WindowType type = GetType();
     bool hasToastFlag = property_->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_TOAST);
@@ -394,7 +395,8 @@ WMError WindowSceneSessionImpl::RecoverAndConnectSpecificSession()
     sptr<ISessionStage> iSessionStage(this);
     sptr<IWindowEventChannel> eventChannel = sptr<WindowEventChannel>::MakeSptr(iSessionStage);
     sptr<Rosen::ISession> session = nullptr;
-    sptr<IRemoteObject> token = context_ ? context_->GetToken() : nullptr;
+    auto context = GetContext();
+    sptr<IRemoteObject> token = context ? context->GetToken() : nullptr;
     if (token) {
         property_->SetTokenState(true);
     }
@@ -441,12 +443,13 @@ WMError WindowSceneSessionImpl::RecoverAndReconnectSceneSession()
     if (isFocused_) {
         UpdateFocus(false);
     }
-    auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
-    if (context_ && context_->GetHapModuleInfo() && abilityContext && abilityContext->GetAbilityInfo()) {
+    auto context = GetContext();
+    auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context);
+    if (context && context->GetHapModuleInfo() && abilityContext && abilityContext->GetAbilityInfo()) {
         property_->EditSessionInfo().abilityName_ = abilityContext->GetAbilityInfo()->name;
-        property_->EditSessionInfo().moduleName_ = context_->GetHapModuleInfo()->moduleName;
+        property_->EditSessionInfo().moduleName_ = context->GetHapModuleInfo()->moduleName;
     } else {
-        TLOGE(WmsLogTag::WMS_RECOVER, "context_ or abilityContext is null, recovered session failed");
+        TLOGE(WmsLogTag::WMS_RECOVER, "context or abilityContext is null, recovered session failed");
         return WMError::WM_ERROR_NULLPTR;
     }
     auto& info = property_->EditSessionInfo();
@@ -459,7 +462,7 @@ WMError WindowSceneSessionImpl::RecoverAndReconnectSceneSession()
     property_->SetIsFullScreenWaterfallMode(isFullScreenWaterfallMode_.load());
     sptr<ISessionStage> iSessionStage(this);
     sptr<IWindowEventChannel> iWindowEventChannel = sptr<WindowEventChannel>::MakeSptr(iSessionStage);
-    sptr<IRemoteObject> token = context_ ? context_->GetToken() : nullptr;
+    sptr<IRemoteObject> token = context ? context->GetToken() : nullptr;
     sptr<Rosen::ISession> session = nullptr;
     auto ret = SingletonContainer::Get<WindowAdapter>().RecoverAndReconnectSceneSession(
         iSessionStage, iWindowEventChannel, surfaceNode_, session, property_, token);
@@ -571,7 +574,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
     }
     // Since here is init of this window, no other threads will rw it.
     hostSession_ = iSession;
-    context_ = context;
+    SetContext(context);
     identityToken_ = identityToken;
     AdjustWindowAnimationFlag();
     if (context && context->GetApplicationInfo() &&
@@ -655,7 +658,8 @@ WMError WindowSceneSessionImpl::SetParentWindowInner(int32_t oldParentWindowId,
         subWindowSessionMap_[newParentWindowId].push_back(this);
     }
     property_->SetParentPersistentId(newParentWindowId);
-    UpdateSubWindowLevel(newParentWindow->GetProperty()->GetSubWindowLevel() + 1);
+    UpdateSubWindowInfo(newParentWindow->GetProperty()->GetSubWindowLevel() + 1,
+        newParentWindow->GetContext());
     if (state_ == WindowState::STATE_SHOWN &&
         newParentWindow->GetWindowState() == WindowState::STATE_HIDDEN) {
         UpdateSubWindowStateAndNotify(newParentWindowId, WindowState::STATE_HIDDEN);
@@ -1047,7 +1051,7 @@ static void GetWindowSizeLimits(std::shared_ptr<AppExecFwk::AbilityInfo> ability
 
 void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()
 {
-    auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
+    auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(GetContext());
     if (abilityContext == nullptr) {
         WLOGFE("abilityContext is nullptr");
         return;
@@ -1702,8 +1706,9 @@ WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearLis
     if (needClearListener) {
         ClearListenersById(GetPersistentId());
     }
-    if (context_) {
-        context_.reset();
+    auto context = GetContext();
+    if (context) {
+        context.reset();
     }
     ClearVsyncStation();
     SetUIContentComplete();
@@ -2320,8 +2325,9 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreenByApiVersion(bool status)
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     uint32_t version = 0;
-    if ((context_ != nullptr) && (context_->GetApplicationInfo() != nullptr)) {
-        version = context_->GetApplicationInfo()->apiCompatibleVersion;
+    auto context = GetContext();
+    if ((context != nullptr) && (context->GetApplicationInfo() != nullptr)) {
+        version = context->GetApplicationInfo()->apiCompatibleVersion;
     }
     isIgnoreSafeArea_ = status;
     isIgnoreSafeAreaNeedNotify_ = true;
@@ -2716,7 +2722,7 @@ WMError WindowSceneSessionImpl::SetWindowTitle(const std::string& title)
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (WindowHelper::IsMainWindow(GetType())) {
-        auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
+        auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(GetContext());
         if (abilityContext == nullptr) {
             return WMError::WM_ERROR_NULLPTR;
         }
@@ -3009,22 +3015,22 @@ WMError WindowSceneSessionImpl::IsWindowRectAutoSave(bool& enabled)
         TLOGE(WmsLogTag::WMS_MAIN, "This is not main window, not supported");
         return WMError::WM_ERROR_INVALID_CALLING;
     }
-
-    if (context_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "context_ is nullptr");
+    auto context = GetContext();
+    if (context == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "context is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
-    auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
+    auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context);
     std::string bundleName = property_->GetSessionInfo().bundleName_;
     std::string moduleName = property_->GetSessionInfo().moduleName_;
     std::string abilityName = property_->GetSessionInfo().abilityName_;
     if (abilityContext && abilityContext->GetAbilityInfo()) {
         abilityName = abilityContext->GetAbilityInfo()->name;
-        moduleName = context_->GetHapModuleInfo() ? context_->GetHapModuleInfo()->moduleName : "";
+        moduleName = context->GetHapModuleInfo() ? context->GetHapModuleInfo()->moduleName : "";
         bundleName = abilityContext->GetAbilityInfo()->bundleName;
-    } else if (context_) {
-        moduleName = context_->GetHapModuleInfo() ? context_->GetHapModuleInfo()->moduleName : "";
-        bundleName = context_->GetBundleName();
+    } else if (context) {
+        moduleName = context->GetHapModuleInfo() ? context->GetHapModuleInfo()->moduleName : "";
+        bundleName = context->GetBundleName();
     }
     std::string key = bundleName + moduleName + abilityName;
     int persistentId = GetPersistentId();
@@ -3259,7 +3265,7 @@ WMError WindowSceneSessionImpl::MainWindowCloseInner()
 {
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
-    auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
+    auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(GetContext());
     if (!abilityContext) {
         return Destroy(true);
     }
@@ -3365,7 +3371,7 @@ void WindowSceneSessionImpl::PerformBack()
     }
     if (auto hostSession = GetHostSession()) {
         bool needMoveToBackground = false;
-        auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
+        auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(GetContext());
         if (abilityContext != nullptr) {
             abilityContext->OnBackPressedCallBack(needMoveToBackground);
         }
@@ -3495,8 +3501,9 @@ WMError WindowSceneSessionImpl::AddWindowFlag(WindowFlag flag)
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (flag == WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED && context_ && context_->GetApplicationInfo() &&
-        context_->GetApplicationInfo()->apiCompatibleVersion >= 9 && // 9: api version
+    auto context = GetContext();
+    if (flag == WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED && context && context->GetApplicationInfo() &&
+        context->GetApplicationInfo()->apiCompatibleVersion >= 9 && // 9: api version
         !SessionPermission::IsSystemCalling()) {
         TLOGI(WmsLogTag::DEFAULT, "Can not set show when locked, PersistentId: %{public}u", GetPersistentId());
         return WMError::WM_ERROR_INVALID_PERMISSION;
@@ -3557,7 +3564,7 @@ void WindowSceneSessionImpl::UpdateConfiguration(const std::shared_ptr<AppExecFw
     }
     UpdateDefaultStatusBarColor();
     std::vector<sptr<WindowSessionImpl>> subWindows;
-    GetSubWidnows(GetPersistentId(), subWindows);
+    GetSubWindows(GetPersistentId(), subWindows);
     for (auto& subWindowSession : subWindows) {
         if (subWindowSession != nullptr) {
             subWindowSession->UpdateConfiguration(configuration);
@@ -3578,7 +3585,7 @@ void WindowSceneSessionImpl::UpdateConfigurationForSpecified(
     }
     UpdateDefaultStatusBarColor();
     std::vector<sptr<WindowSessionImpl>> subWindows;
-    GetSubWidnows(GetPersistentId(), subWindows);
+    GetSubWindows(GetPersistentId(), subWindows);
     if (subWindows.empty()) {
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "no subSession, winId: %{public}u", GetWindowId());
         return;
@@ -3621,7 +3628,7 @@ void WindowSceneSessionImpl::UpdateConfigurationSync(const std::shared_ptr<AppEx
         uiContent->UpdateConfigurationSyncForAll(configuration);
     }
     std::vector<sptr<WindowSessionImpl>> subWindows;
-    GetSubWidnows(GetPersistentId(), subWindows);
+    GetSubWindows(GetPersistentId(), subWindows);
     if (subWindows.empty()) {
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "no subSession, winId: %{public}u", GetWindowId());
         return;
@@ -5161,11 +5168,12 @@ void WindowSceneSessionImpl::NotifyDisplayInfoChange(const sptr<DisplayInfo>& in
     DisplayOrientation orientation = displayInfo->GetDisplayOrientation();
 
     // skip scb process
-    if (context_ == nullptr || context_->GetBundleName() == AppExecFwk::Constants::SCENE_BOARD_BUNDLE_NAME) {
+    auto context = GetContext();
+    if (context == nullptr || context->GetBundleName() == AppExecFwk::Constants::SCENE_BOARD_BUNDLE_NAME) {
         TLOGE(WmsLogTag::DMS, "id:%{public}d failed, context is null.", GetPersistentId());
         return;
     }
-    auto token = context_->GetToken();
+    auto token = context->GetToken();
     if (token == nullptr) {
         TLOGE(WmsLogTag::DMS, "get token window:%{public}d failed.", GetPersistentId());
         return;
