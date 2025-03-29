@@ -3796,6 +3796,11 @@ void ScreenSessionManager::SetPostureAndHallSensorEnabled()
         FoldScreenSensorManager::GetInstance().RegisterPostureCallback();
         FoldScreenSensorManager::GetInstance().RegisterHallCallback();
     }
+    if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() &&
+        !FoldScreenSensorManager::GetInstance().GetSensorRegisterStatus()) {
+        TLOGI(WmsLogTag::DMS, "subscribe hall and posture failed, force change to full screen!");
+        TriggerFoldStatusChange(FoldStatus::EXPAND);
+    }
     TLOGI(WmsLogTag::DMS, "successful");
     screenEventTracker_.RecordEvent("Dms subscribe Posture and Hall sensor finished.");
 #endif
