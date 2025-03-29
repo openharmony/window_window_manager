@@ -2872,6 +2872,9 @@ WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::Point
             TLOGD(WmsLogTag::WMS_LAYOUT, "moveDragController_ is null");
             return Session::TransferPointerEvent(pointerEvent, needNotifyClient, isExecuteDelayRaise);
         }
+        if (isFollowParentLayout_) {
+            return WSError::WS_OK;
+        }
         if ((property->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING && IsDragAccessible()) ||
             isDragAccessibleSystemWindow) {
             if ((systemConfig_.IsPcWindow() || IsFreeMultiWindowMode() ||
@@ -2879,7 +2882,6 @@ WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::Point
                 moveDragController_->ConsumeDragEvent(pointerEvent, winRect_, property, systemConfig_)) {
                 auto surfaceNode = GetSurfaceNode();
                 moveDragController_->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
-                NotifyUpdateGravity();
                 PresentFoucusIfNeed(pointerEvent->GetPointerAction());
                 pointerEvent->MarkProcessed();
                 return WSError::WS_OK;
@@ -3582,6 +3584,7 @@ void SceneSession::OnMoveDragCallback(SizeChangeReason reason)
         SetUIFirstSwitch(RSUIFirstSwitch::NONE);
     } else if (reason == SizeChangeReason::DRAG_START) {
         OnSessionEvent(SessionEvent::EVENT_DRAG_START);
+        NotifyUpdateGravity();
         SetUIFirstSwitch(RSUIFirstSwitch::FORCE_DISABLE);
     }
 }
