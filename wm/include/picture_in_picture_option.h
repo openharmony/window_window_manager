@@ -55,6 +55,8 @@ public:
     napi_ref GetNodeControllerRef() const;
     void SetTypeNodeRef(napi_ref ref);
     napi_ref GetTypeNodeRef() const;
+    void SetStorageRef(napi_ref ref);
+    napi_ref GetStorageRef() const;
     void SetTypeNodeEnabled(bool enable);
     bool IsTypeNodeEnabled() const;
 private:
@@ -72,6 +74,7 @@ private:
     napi_ref customNodeController_ = nullptr;
     napi_ref typeNode_ = nullptr;
     bool useTypeNode_ = false;
+    napi_ref storage_ = nullptr;
 };
 }
 }

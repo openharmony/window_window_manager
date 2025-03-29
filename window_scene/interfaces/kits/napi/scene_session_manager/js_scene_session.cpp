@@ -3220,24 +3220,15 @@ napi_value JsSceneSession::OnNotifyKeyboardAnimationCompleted(napi_env env, napi
     size_t argc = ARG_COUNT_4;
     napi_value argv[ARG_COUNT_4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < ARG_COUNT_3) {
+    if (argc < ARG_COUNT_4) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
 
-    WSRect keyboardPanelRect = { 0, 0, 0, 0 };
-    napi_value nativeObj = argv[ARG_INDEX_0];
-    if (nativeObj == nullptr || !ConvertRectInfoFromJs(env, nativeObj, keyboardPanelRect)) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to convert parameter to keyboardPanelRect");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
-        return NapiGetUndefined(env);
-    }
-
     uint32_t callingId = 0;
-    if (!ConvertFromJsValue(env, argv[ARG_INDEX_1], callingId)) {
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_0], callingId)) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to convert parameter to uint32_t");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
@@ -3245,8 +3236,26 @@ napi_value JsSceneSession::OnNotifyKeyboardAnimationCompleted(napi_env env, napi
     }
 
     bool isShowAnimation = false;
-    if (!ConvertFromJsValue(env, argv[ARG_INDEX_2], isShowAnimation)) {
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_1], isShowAnimation)) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to convert parameter to bool");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    WSRect beginRect;
+    napi_value nativeObj = argv[ARG_INDEX_2];
+    if (nativeObj == nullptr || !ConvertSessionRectInfoFromJs(env, nativeObj, beginRect)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to convert parameter to beginRect");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    WSRect endRect;
+    nativeObj = argv[ARG_INDEX_3];
+    if (nativeObj == nullptr || !ConvertSessionRectInfoFromJs(env, nativeObj, endRect)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to convert parameter to endRect");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
@@ -3257,7 +3266,7 @@ napi_value JsSceneSession::OnNotifyKeyboardAnimationCompleted(napi_env env, napi
         TLOGI(WmsLogTag::WMS_KEYBOARD, "callingSession is null, id: %{public}d", callingId);
         return NapiGetUndefined(env);
     }
-    callingSession->NotifyKeyboardAnimationCompleted(isShowAnimation, keyboardPanelRect);
+    callingSession->NotifyKeyboardAnimationCompleted(isShowAnimation, beginRect, endRect);
     return NapiGetUndefined(env);
 }
 

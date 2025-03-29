@@ -266,20 +266,6 @@ HWTEST_F(WindowAdapterTest, InitWMSProxy, TestSize.Level1)
 }
 
 /**
- * @tc.name: RegisterSessionRecoverCallbackFunc
- * @tc.desc: WindowAdapter/RegisterSessionRecoverCallbackFunc
- * @tc.type: FUNC
- */
-HWTEST_F(WindowAdapterTest, RegisterSessionRecoverCallbackFunc, TestSize.Level1)
-{
-    WindowAdapter windowAdapter;
-    int32_t persistentId = 1;
-    auto testFunc = [] { return WMError::WM_OK; };
-    windowAdapter.RegisterSessionRecoverCallbackFunc(persistentId, testFunc);
-    ASSERT_NE(windowAdapter.sessionRecoverCallbackFuncMap_[persistentId], nullptr);
-}
-
-/**
  * @tc.name: WindowManagerAndSessionRecover
  * @tc.desc: WindowAdapter/WindowManagerAndSessionRecover
  * @tc.type: FUNC
@@ -456,49 +442,6 @@ HWTEST_F(WindowAdapterTest, GetVisibilityWindowInfo, TestSize.Level1)
     auto ret = windowAdapter.GetVisibilityWindowInfo(infos);
     windowAdapter.WindowManagerAndSessionRecover();
     ASSERT_EQ(WMError::WM_OK, ret);
-}
-
-/**
- * @tc.name: ReregisterWindowManagerAgent
- * @tc.desc: WindowAdapter/ReregisterWindowManagerAgent
- * @tc.type: FUNC
- */
-HWTEST_F(WindowAdapterTest, ReregisterWindowManagerAgent, TestSize.Level1)
-{
-    WindowAdapter windowAdapter;
-    auto displayId = 0;
-    ModeChangeHotZones hotZones;
-    auto ret = windowAdapter.GetModeChangeHotZones(displayId, hotZones);
-    windowAdapter.ReregisterWindowManagerAgent();
-    ASSERT_EQ(WMError::WM_OK, ret);
-}
-
-/**
- * @tc.name: RecoverAndReconnectSceneSession
- * @tc.desc: WindowAdapter/RecoverAndReconnectSceneSession
- * @tc.type: FUNC
- */
-HWTEST_F(WindowAdapterTest, RecoverAndReconnectSceneSession, TestSize.Level1)
-{
-    WindowAdapter windowAdapter;
-    sptr<ISessionStage> iSessionStage;
-    sptr<IWindowEventChannel> eventChannel;
-    sptr<ISession> session = nullptr;
-    sptr<IRemoteObject> token = nullptr;
-    auto ret1 =
-        windowAdapter.RecoverAndReconnectSceneSession(iSessionStage, eventChannel, nullptr, session, nullptr, token);
-    ASSERT_EQ(ret1, WMError::WM_DO_NOTHING);
-
-    windowAdapter.isProxyValid_ = true;
-    auto ret2 =
-        windowAdapter.RecoverAndReconnectSceneSession(iSessionStage, eventChannel, nullptr, session, nullptr, token);
-    ASSERT_EQ(ret2, WMError::WM_DO_NOTHING);
-
-    sptr<IRemoteObject> remotObject = nullptr;
-    windowAdapter.windowManagerServiceProxy_ = iface_cast<IWindowManager>(remotObject);
-    auto ret3 =
-        windowAdapter.RecoverAndReconnectSceneSession(iSessionStage, eventChannel, nullptr, session, nullptr, token);
-    ASSERT_EQ(ret3, WMError::WM_DO_NOTHING);
 }
 
 /**

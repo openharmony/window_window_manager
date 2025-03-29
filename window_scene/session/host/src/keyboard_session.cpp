@@ -556,7 +556,10 @@ void KeyboardSession::UpdateCallingSessionIdAndPosition(uint32_t newCallingSessi
     WSRect panelRect = GetPanelRect();
     if (callingSession != nullptr && GetKeyboardGravity() == SessionGravity::SESSION_GRAVITY_BOTTOM) {
         RecalculatePanelRectForAvoidArea(panelRect);
-        callingSession->NotifyKeyboardAnimationCompleted(false, panelRect);
+        WSRect endRect = {panelRect.posX_, panelRect.posY_ + panelRect.height_, panelRect.width_,
+            panelRect.height_};
+        // panelRect as beginRect
+        callingSession->NotifyKeyboardAnimationCompleted(false, panelRect, endRect);
     }
 
     GetSessionProperty()->SetCallingSessionId(newCallingSessionId);

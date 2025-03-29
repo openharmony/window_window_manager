@@ -392,6 +392,7 @@ void SubSession::HandleCrossMoveToSurfaceNode(WSRect& globalRect)
         }
         movedSurfaceNode->SetPositionZ(GetZOrder());
         screenSession->GetDisplayNode()->AddCrossScreenChild(movedSurfaceNode, SUFFIX_INDEX, true);
+        cloneNodeCount_++;
         movedSurfaceNode->SetIsCrossNode(true);
         TLOGI(WmsLogTag::WMS_LAYOUT, "Add sub window to display:%{public}" PRIu64 " persistentId:%{public}d",
             displayId, GetPersistentId());
@@ -441,10 +442,10 @@ void SubSession::AddSurfaceNodeToScreen()
         originDisplayId = GetScreenId();
         Session::SetOriginDisplayId(originDisplayId);
     }
-    WSRect currRect = winRect_;
+    WSRect targetRect = ConvertRelativeRectToGlobal(winRect_, GetScreenId());
     TLOGI(WmsLogTag::WMS_LAYOUT, "originDisplayId:%{public}" PRIu64 ", originalPositionZ:%{public}f, "
         "winRect:%{public}s", GetOriginDisplayId(), originalPositionZ, winRect_.ToString().c_str());
-    for (const auto displayId : GetNewDisplayIdsDuringMoveTo(currRect)) {
+    for (const auto displayId : GetNewDisplayIdsDuringMoveTo(targetRect)) {
         if (displayId == originDisplayId) {
             continue;
         }
@@ -463,6 +464,7 @@ void SubSession::AddSurfaceNodeToScreen()
         }
         currSurfacedNode->SetPositionZ(GetZOrder());
         screenSession->GetDisplayNode()->AddCrossScreenChild(currSurfacedNode, SUFFIX_INDEX, true);
+        cloneNodeCount_++;
         currSurfacedNode->SetIsCrossNode(true);
         TLOGI(WmsLogTag::WMS_LAYOUT, "Add sub window to display:%{public}" PRIu64 " persistentId:%{public}d",
             displayId, GetPersistentId());
@@ -470,7 +472,7 @@ void SubSession::AddSurfaceNodeToScreen()
     RSTransaction::FlushImplicitTransaction();
 }
 
-void SubSession::RemoveSufaceNodeFromScreen()
+void SubSession::RemoveSurfaceNodeFromScreen()
 {
     auto currSurfacedNode = GetSurfaceNodeForMoveDrag();
     if (currSurfacedNode == nullptr) {
@@ -497,6 +499,7 @@ void SubSession::RemoveSufaceNodeFromScreen()
         }
         currSurfacedNode->SetPositionZ(moveDragController_->GetOriginalPositionZ());
         screenSession->GetDisplayNode()->RemoveCrossScreenChild(currSurfacedNode);
+        cloneNodeCount_--;
         currSurfacedNode->SetIsCrossNode(false);
         TLOGI(WmsLogTag::WMS_LAYOUT, "Remove sub window to display:%{public}" PRIu64 " persistentId:%{public}d",
             displayId, GetPersistentId());

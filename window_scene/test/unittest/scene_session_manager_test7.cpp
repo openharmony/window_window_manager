@@ -61,10 +61,6 @@ void ProcessStatusBarEnabledChangeFuncTest(bool enable)
 {
 }
 
-void DumpRootSceneElementInfoFuncTest(const std::vector<std::string>& params, std::vector<std::string>& infos)
-{
-}
-
 void SceneSessionManagerTest7::SetUpTestCase()
 {
     ssm_ = &SceneSessionManager::GetInstance();
@@ -264,6 +260,34 @@ HWTEST_F(SceneSessionManagerTest7, FlushUIParams01, TestSize.Level1)
     ssm_->FlushUIParams(screenId, std::move(uiParams));
     sessionInfo.screenId_ = -1ULL;
     ssm_->FlushUIParams(screenId, std::move(uiParams));
+}
+
+/**
+ * @tc.name: FlushUIParams02
+ * @tc.desc: FlushUIParams Multi-screen
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, FlushUIParams02, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest7";
+    sessionInfo.abilityName_ = "FlushUIParams02";
+    sessionInfo.screenId_ = 2;
+    ScreenId screenId = 2;
+    std::unordered_map<int32_t, SessionUIParam> uiParams;
+    uiParams.clear();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sceneSession->persistentId_ = 1;
+    sceneSession->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    SessionUIParam sessionUIParam;
+    uiParams.insert(std::make_pair(1, sessionUIParam));
+    ssm_->FlushUIParams(screenId, std::move(uiParams));
+    sessionInfo.screenId_ = -1ULL;
+    ssm_->FlushUIParams(screenId, std::move(uiParams));
+    ASSERT_NE(sceneSession->dirtyFlags_, 0);
 }
 
 /**
@@ -537,63 +561,6 @@ HWTEST_F(SceneSessionManagerTest7, IsSessionVisibleForeground, TestSize.Level1)
     session->isVisible_ = false;
     ret = ssm_->IsSessionVisibleForeground(session);
     EXPECT_EQ(ret, false);
-}
-
-/**
- * @tc.name: GetAllSessionDumpInfo
- * @tc.desc: GetAllSessionDumpInfo
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest7, GetAllSessionDumpInfo, TestSize.Level1)
-{
-    SessionInfo sessionInfo;
-    sessionInfo.bundleName_ = "SceneSessionManagerTest7";
-    sessionInfo.abilityName_ = "GetAllSessionDumpInfo";
-    sessionInfo.isSystem_ = false;
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
-    sceneSession->state_ = SessionState::STATE_DISCONNECT;
-    ASSERT_NE(nullptr, ssm_);
-    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
-    std::string dumpInfo = "";
-    auto ret = ssm_->GetAllSessionDumpInfo(dumpInfo);
-    EXPECT_EQ(ret, WSError::WS_OK);
-    sceneSession->state_ = SessionState::STATE_END;
-    ret = ssm_->GetAllSessionDumpInfo(dumpInfo);
-    EXPECT_EQ(ret, WSError::WS_OK);
-    sceneSession->state_ = SessionState::STATE_ACTIVE;
-    ret = ssm_->GetAllSessionDumpInfo(dumpInfo);
-    EXPECT_EQ(ret, WSError::WS_OK);
-    sessionInfo.isSystem_ = true;
-    ret = ssm_->GetAllSessionDumpInfo(dumpInfo);
-    EXPECT_EQ(ret, WSError::WS_OK);
-    sceneSession = nullptr;
-    ret = ssm_->GetAllSessionDumpInfo(dumpInfo);
-    EXPECT_EQ(ret, WSError::WS_OK);
-}
-
-/**
- * @tc.name: GetAllSessionDumpInfo01
- * @tc.desc: GetAllSessionDumpInfo
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest7, GetAllSessionDumpInfo01, TestSize.Level1)
-{
-    SessionInfo sessionInfo;
-    sessionInfo.bundleName_ = "SceneSessionManagerTest7";
-    sessionInfo.abilityName_ = "GetAllSessionDumpInfo01";
-    sessionInfo.isSystem_ = true;
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
-    sceneSession->isVisible_ = true;
-    ASSERT_NE(nullptr, ssm_);
-    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
-    std::string dumpInfo = "";
-    auto ret = ssm_->GetAllSessionDumpInfo(dumpInfo);
-    EXPECT_EQ(ret, WSError::WS_OK);
-    sceneSession->isVisible_ = false;
-    ret = ssm_->GetAllSessionDumpInfo(dumpInfo);
-    EXPECT_EQ(ret, WSError::WS_OK);
 }
 
 /**

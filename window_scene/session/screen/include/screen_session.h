@@ -248,7 +248,6 @@ public:
     uint32_t GetPointerActiveWidth();
     void SetPointerActiveHeight(uint32_t pointerActiveHeight);
     uint32_t GetPointerActiveHeight();
-
     float GetSensorRotation() const;
     DisplaySourceMode GetDisplaySourceMode() const;
     void SetXYPosition(int32_t x, int32_t y);
@@ -307,6 +306,8 @@ public:
     void SecondaryReflexionChange(ScreenId screenId, bool isSecondaryReflexion);
     void EnableMirrorScreenRegion();
     void ExtendScreenConnectStatusChange(ScreenId screenId, ExtendScreenConnectStatus extendScreenConnectStatus);
+    void SetIsEnableRegionRotation(bool isEnableRegionRotation);
+    bool GetIsEnableRegionRotation();
 
 private:
     ScreenProperty property_;
@@ -343,6 +344,8 @@ private:
     std::mutex mirrorScreenRegionMutex_;
     void OptimizeSecondaryDisplayMode(const RRect &bounds, FoldDisplayMode &foldDisplayMode);
     std::string innerName_ {"UNKOWN"};
+    bool isEnableRegionRotation_ = false;
+    std::mutex isEnableRegionRotationMutex_;
 };
 
 class ScreenSessionGroup : public ScreenSession {

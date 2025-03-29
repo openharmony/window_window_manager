@@ -93,6 +93,9 @@ public:
     void SetRefreshRate(uint32_t refreshRate);
     uint32_t GetRefreshRate() const;
 
+    void SetRsId(ScreenId rsId);
+    ScreenId GetRsId() const;
+
     void SetPropertyChangeReason(std::string propertyChangeReason);
     std::string GetPropertyChangeReason() const;
 
@@ -260,6 +263,8 @@ private:
 
     uint32_t refreshRate_ { 0 };
     uint32_t defaultDeviceRotationOffset_ { 0 };
+
+    ScreenId rsId_ = SCREEN_ID_INVALID;
 
     std::string propertyChangeReason_ { "" };
 
