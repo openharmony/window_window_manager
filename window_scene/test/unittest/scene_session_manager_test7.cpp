@@ -61,10 +61,6 @@ void ProcessStatusBarEnabledChangeFuncTest(bool enable)
 {
 }
 
-void DumpRootSceneElementInfoFuncTest(const std::vector<std::string>& params, std::vector<std::string>& infos)
-{
-}
-
 void SceneSessionManagerTest7::SetUpTestCase()
 {
     ssm_ = &SceneSessionManager::GetInstance();
@@ -565,63 +561,6 @@ HWTEST_F(SceneSessionManagerTest7, IsSessionVisibleForeground, TestSize.Level1)
     session->isVisible_ = false;
     ret = ssm_->IsSessionVisibleForeground(session);
     EXPECT_EQ(ret, false);
-}
-
-/**
- * @tc.name: GetAllSessionDumpInfo
- * @tc.desc: GetAllSessionDumpInfo
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest7, GetAllSessionDumpInfo, TestSize.Level1)
-{
-    SessionInfo sessionInfo;
-    sessionInfo.bundleName_ = "SceneSessionManagerTest7";
-    sessionInfo.abilityName_ = "GetAllSessionDumpInfo";
-    sessionInfo.isSystem_ = false;
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
-    sceneSession->state_ = SessionState::STATE_DISCONNECT;
-    ASSERT_NE(nullptr, ssm_);
-    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
-    std::string dumpInfo = "";
-    auto ret = ssm_->GetAllSessionDumpInfo(dumpInfo);
-    EXPECT_EQ(ret, WSError::WS_OK);
-    sceneSession->state_ = SessionState::STATE_END;
-    ret = ssm_->GetAllSessionDumpInfo(dumpInfo);
-    EXPECT_EQ(ret, WSError::WS_OK);
-    sceneSession->state_ = SessionState::STATE_ACTIVE;
-    ret = ssm_->GetAllSessionDumpInfo(dumpInfo);
-    EXPECT_EQ(ret, WSError::WS_OK);
-    sessionInfo.isSystem_ = true;
-    ret = ssm_->GetAllSessionDumpInfo(dumpInfo);
-    EXPECT_EQ(ret, WSError::WS_OK);
-    sceneSession = nullptr;
-    ret = ssm_->GetAllSessionDumpInfo(dumpInfo);
-    EXPECT_EQ(ret, WSError::WS_OK);
-}
-
-/**
- * @tc.name: GetAllSessionDumpInfo01
- * @tc.desc: GetAllSessionDumpInfo
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest7, GetAllSessionDumpInfo01, TestSize.Level1)
-{
-    SessionInfo sessionInfo;
-    sessionInfo.bundleName_ = "SceneSessionManagerTest7";
-    sessionInfo.abilityName_ = "GetAllSessionDumpInfo01";
-    sessionInfo.isSystem_ = true;
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
-    sceneSession->isVisible_ = true;
-    ASSERT_NE(nullptr, ssm_);
-    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
-    std::string dumpInfo = "";
-    auto ret = ssm_->GetAllSessionDumpInfo(dumpInfo);
-    EXPECT_EQ(ret, WSError::WS_OK);
-    sceneSession->isVisible_ = false;
-    ret = ssm_->GetAllSessionDumpInfo(dumpInfo);
-    EXPECT_EQ(ret, WSError::WS_OK);
 }
 
 /**

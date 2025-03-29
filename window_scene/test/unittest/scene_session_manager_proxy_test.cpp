@@ -843,21 +843,6 @@ HWTEST_F(sceneSessionManagerProxyTest, TerminateSessionNew, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetSessionDumpInfo
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(sceneSessionManagerProxyTest, GetSessionDumpInfo, TestSize.Level1)
-{
-    std::vector<std::string> params;
-    std::string info = "info";
-    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    auto sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
-
-    ASSERT_EQ(WSError::WS_OK, sceneSessionManagerProxy->GetSessionDumpInfo(params, info));
-}
-
-/**
  * @tc.name: LockSession
  * @tc.desc: normal function
  * @tc.type: FUNC
