@@ -594,7 +594,7 @@ protected:
      */
     std::map<AvoidAreaType, AvoidArea> lastAvoidAreaMap_;
     uint32_t GetStatusBarHeight() override;
-    WindowType rootHostWindowType_ = windowType::APP_MAIN_WINDOW_BASE;
+    WindowType rootHostWindowType_ = WindowType::APP_MAIN_WINDOW_BASE;
 
     /*
      * PC Fold Screen

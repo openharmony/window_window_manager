@@ -4234,7 +4234,7 @@ void WindowSessionImpl::NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, 
     auto avoidAreaChangeListeners = GetListeners<IAvoidAreaChangedListener>();
     bool isUIExtensionWithSystemHost =
         WindowHelper::IsUIExtensionWindow(GetType()) && WindowHelper::IsSystemWindow(GetRootHostWindowType());
-    bool isSystemWindow = WindowHeler::IsSystemWindow(GetType());
+    bool isSystemWindow = WindowHelper::IsSystemWindow(GetType());
     uint32_t currentApiVersion = 0;
     if (context_ != nullptr && context_->GetApplicationInfo() != nullptr) {
         currentApiVersion = context_->GetApplicationInfo()->apiTargetVersion % API_VERSION_MOD;
@@ -5822,7 +5822,7 @@ void WindowSessionImpl::GetExtensionConfig(AAFwk::WantParams& want) const
     want.SetParam(Extension::WATERFALL_MODE_FIELD, AAFwk::Integer::Box(static_cast<int32_t>(isWaterfallMode)));
     WindowType rootHostWindowType = (GetType() == WindowType::WINDOW_TYPE_UI_EXTENSION) ?
                                     GetRootHostWindowType() : GetType();
-    want.SetParam(Extension::HOST_WINDOW_TYPE_FIELD, AAFwk::Integer::Box(static_cast<int32_t>(rootHostWindowType)));
+    want.SetParam(Extension::ROOT_HOST_WINDOW_TYPE_FIELD, AAFwk::Integer::Box(static_cast<int32_t>(rootHostWindowType)));
 }
 
 void WindowSessionImpl::UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>& want)
