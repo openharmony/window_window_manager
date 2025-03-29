@@ -44,7 +44,6 @@ public:
 private:
     sptr<SceneSession> GetSceneSession(const std::string& abilityName, const std::string& bundleName);
     static constexpr uint32_t SPLIT_TEST_SLEEP_S = 1;
-    static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
 
 void KeyboardSessionTest::SetUpTestCase()
@@ -80,7 +79,7 @@ sptr<SceneSession> KeyboardSessionTest::GetSceneSession(const std::string& abili
 namespace {
 /**
  * @tc.name: Show
- * @tc.desc: test function : Show
+ * @tc.desc: test function: Show
  * @tc.type: FUNC
  */
 HWTEST_F(KeyboardSessionTest, GetKeyboardGravity, TestSize.Level1)
@@ -98,7 +97,7 @@ HWTEST_F(KeyboardSessionTest, GetKeyboardGravity, TestSize.Level1)
 
 /**
  * @tc.name: Show01
- * @tc.desc: test function : Show
+ * @tc.desc: test function: Show
  * @tc.type: FUNC
  */
 HWTEST_F(KeyboardSessionTest, Show01, TestSize.Level1)
@@ -127,7 +126,7 @@ HWTEST_F(KeyboardSessionTest, Show01, TestSize.Level1)
 
 /**
  * @tc.name: Show02
- * @tc.desc: test function : Show
+ * @tc.desc: test function: Show
  * @tc.type: FUNC
  */
 HWTEST_F(KeyboardSessionTest, Show02, TestSize.Level1)
@@ -148,7 +147,7 @@ HWTEST_F(KeyboardSessionTest, Show02, TestSize.Level1)
 
 /**
  * @tc.name: Show03
- * @tc.desc: test function : Show
+ * @tc.desc: test function: Show
  * @tc.type: FUNC
  */
 HWTEST_F(KeyboardSessionTest, Show03, TestSize.Level1)
@@ -172,7 +171,7 @@ HWTEST_F(KeyboardSessionTest, Show03, TestSize.Level1)
 
 /**
  * @tc.name: Hide
- * @tc.desc: test function : Hide
+ * @tc.desc: test function: Hide
  * @tc.type: FUNC
  */
 HWTEST_F(KeyboardSessionTest, Hide, TestSize.Level1)
