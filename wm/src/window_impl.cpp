@@ -1733,7 +1733,7 @@ WMError WindowImpl::PreProcessShow(uint32_t reason, bool withAnimation)
     return WMError::WM_OK;
 }
 
-void WindowImpl::NotifyMainWindowDidForeground()
+void WindowImpl::NotifyMainWindowDidForeground(uint32_t reason)
 {
     if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
         NotifyAfterDidForeground(reason);
@@ -1770,7 +1770,7 @@ WMError WindowImpl::Show(uint32_t reason, bool withAnimation, bool withFocus)
         } else {
             NotifyAfterForeground(true, false);
         }
-        NotifyMainWindowDidForeground();
+        NotifyMainWindowDidForeground(reason);
         return WMError::WM_OK;
     }
     WMError ret = PreProcessShow(reason, withAnimation);
@@ -1784,7 +1784,7 @@ WMError WindowImpl::Show(uint32_t reason, bool withAnimation, bool withFocus)
     RecordLifeCycleExceptionEvent(LifeCycleEvent::SHOW_EVENT, ret);
     if (ret == WMError::WM_OK) {
         UpdateWindowStateWhenShow();
-        NotifyMainWindowDidForeground();
+        NotifyMainWindowDidForeground(reason);
     } else {
         NotifyForegroundFailed(ret);
         WLOGFE("show window id:%{public}u errCode:%{public}d", property_->GetWindowId(), static_cast<int32_t>(ret));
