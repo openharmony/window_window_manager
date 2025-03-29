@@ -444,6 +444,7 @@ public:
      * 
      * @return Successful call returns WMError::WS_OK, otherwise it indicates failure
      */
+    virtual WMError NotifyDisableDelegatorChange() { return WMError::WM_OK; }
 };
 } // namespace OHOS::Rosen
 
