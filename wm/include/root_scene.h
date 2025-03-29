@@ -76,7 +76,7 @@ public:
     std::string GetClassType() const override { return "RootScene"; }
     bool IsSystemWindow() const override { return WindowHelper::IsSystemWindow(GetType()); }
     bool IsAppWindow() const override { return WindowHelper::IsAppWindow(GetType()); }
-    void GetExtensionConfig(AAwk::WantParams& want) const override;
+    void GetExtensionConfig(AAFwk::WantParams& want) const override;
 
     /*
      * Keyboard Window
