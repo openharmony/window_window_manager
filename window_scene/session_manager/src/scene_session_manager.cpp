@@ -1719,6 +1719,72 @@ void SceneSessionManager::SetSkipSelfWhenShowOnVirtualScreen(uint64_t surfaceNod
     rsInterface_.SetVirtualScreenBlackList(INVALID_SCREEN_ID, skipSurfaceNodeIds_);
 }
 
+WMError SceneSessionManager::AddSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds)
+{
+    auto task = [this, &persistentIds] {
+        for (const auto persistentId : persistentIds) {
+            auto session = GetSceneSession(persistentId);
+            if (!session || !SessionHelper::IsMainWindow(session->GetWindowType())) {
+                TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "[win: %{public}d] not found or is not main window", persistentId);
+                continue;
+            }
+            TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "[win: %{public}d] add to virtual screen black list", persistentId);
+            auto surfaceNode = session->GetSurfaceNode();
+            if (surfaceNode) {
+                auto surfaceNodeId = surfaceNode->GetId();
+                if (std::count(skipSurfaceNodeIds_.begin(), skipSurfaceNodeIds_.end(), surfaceNodeId) == 0) {
+                    skipSurfaceNodeIds_.push_back(surfaceNodeId);
+                }
+            }
+            auto leashWinSurfaceNode = session->GetLeashWinSurfaceNode();
+            if (leashWinSurfaceNode) {
+                auto leashWinSurfaceNodeId = leashWinSurfaceNode->GetId();
+                if (std::count(skipSurfaceNodeIds_.begin(), skipSurfaceNodeIds_.end(), leashWinSurfaceNodeId) == 0) {
+                    skipSurfaceNodeIds_.push_back(leashWinSurfaceNodeId);
+                }
+            }
+            SetSkipEventOnCastPlusInner(persistentId, true);
+        }
+        rsInterface_.SetVirtualScreenBlackList(INVALID_SCREEN_ID, skipSurfaceNodeIds_);
+        return WMError::WM_OK;
+    };
+    return taskScheduler_->PostSyncTask(task, __func__);
+}
+
+WMError SceneSessionManager::RemoveSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds)
+{
+    auto task = [this, &persistentIds] {
+        for (const auto persistentId : persistentIds) {
+            auto session = GetSceneSession(persistentId);
+            if (!session || !SessionHelper::IsMainWindow(session->GetWindowType())) {
+                TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "[win: %{public}d] not found or is not main window", persistentId);
+                continue;
+            }
+            TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "[win: %{public}d] remove from virtual screen black list", persistentId);
+            auto surfaceNode = session->GetSurfaceNode();
+            if (surfaceNode) {
+                auto surfaceNodeId = surfaceNode->GetId();
+                auto iter = std::find(skipSurfaceNodeIds_.begin(), skipSurfaceNodeIds_.end(), surfaceNodeId);
+                if (iter != skipSurfaceNodeIds_.end()) {
+                    skipSurfaceNodeIds_.erase(iter);
+                }
+            }
+            auto leashWinSurfaceNode = session->GetLeashWinSurfaceNode();
+            if (leashWinSurfaceNode) {
+                auto leashWinSurfaceNodeId = leashWinSurfaceNode->GetId();
+                auto iter = std::find(skipSurfaceNodeIds_.begin(), skipSurfaceNodeIds_.end(), leashWinSurfaceNodeId);
+                if (iter != skipSurfaceNodeIds_.end()) {
+                    skipSurfaceNodeIds_.erase(iter);
+                }
+            }
+            SetSkipEventOnCastPlusInner(persistentId, false);
+        }
+        rsInterface_.SetVirtualScreenBlackList(INVALID_SCREEN_ID, skipSurfaceNodeIds_);
+        return WMError::WM_OK;
+    };
+    return taskScheduler_->PostSyncTask(task, __func__);
+}
+
 void SceneSessionManager::SetSkipEventOnCastPlusInner(int32_t windowId, bool isSkip)
 {
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Wid: %{public}d, isSkip: %{public}d", windowId, isSkip);
