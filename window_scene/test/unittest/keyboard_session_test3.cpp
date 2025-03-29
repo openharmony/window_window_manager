@@ -99,13 +99,12 @@ sptr<SceneSession> KeyboardSessionTest3::GetSceneSession(const std::string& abil
 namespace {
 /**
  * @tc.name: GetRSTransaction01
- * @tc.desc: test function : GetRSTransaction
+ * @tc.desc: test function: GetRSTransaction
  * @tc.type: FUNC
  */
 HWTEST_F(KeyboardSessionTest3, GetRSTransaction01, TestSize.Level1)
 {
-    auto keyboardSession = GetKeyboardSession("GetRSTransaction01",
-        "GetRSTransaction01");
+    auto keyboardSession = GetKeyboardSession("GetRSTransaction01", "GetRSTransaction01");
     ASSERT_NE(keyboardSession, nullptr);
 
     auto rsTransaction = keyboardSession->GetRSTransaction();
@@ -114,13 +113,12 @@ HWTEST_F(KeyboardSessionTest3, GetRSTransaction01, TestSize.Level1)
 
 /**
  * @tc.name: GetSessionScreenName01
- * @tc.desc: test function : GetSessionScreenName
+ * @tc.desc: test function: GetSessionScreenName
  * @tc.type: FUNC
  */
 HWTEST_F(KeyboardSessionTest3, GetSessionScreenName01, TestSize.Level1)
 {
-    auto keyboardSession = GetKeyboardSession("GetSessionScreenName01",
-        "GetSessionScreenName01");
+    auto keyboardSession = GetKeyboardSession("GetSessionScreenName01", "GetSessionScreenName01");
     ASSERT_NE(keyboardSession, nullptr);
     keyboardSession->property_ = nullptr;
     auto resultStr = keyboardSession->GetSessionScreenName();
@@ -143,7 +141,7 @@ HWTEST_F(KeyboardSessionTest3, GetSessionScreenName01, TestSize.Level1)
 
 /**
  * @tc.name: UseFocusIdIfCallingSessionIdInvalid01
- * @tc.desc: test function : UseFocusIdIfCallingSessionIdInvalid
+ * @tc.desc: test function: UseFocusIdIfCallingSessionIdInvalid
  * @tc.type: FUNC
  */
 HWTEST_F(KeyboardSessionTest3, UseFocusIdIfCallingSessionIdInvalid01, TestSize.Level1)
@@ -182,13 +180,12 @@ HWTEST_F(KeyboardSessionTest3, UseFocusIdIfCallingSessionIdInvalid01, TestSize.L
 
 /**
  * @tc.name: UpdateKeyboardAvoidArea01
- * @tc.desc: test function : UpdateKeyboardAvoidArea
+ * @tc.desc: test function: UpdateKeyboardAvoidArea
  * @tc.type: FUNC
  */
 HWTEST_F(KeyboardSessionTest3, UpdateKeyboardAvoidArea01, TestSize.Level1)
 {
-    auto keyboardSession = GetKeyboardSession("UpdateKeyboardAvoidArea01",
-        "UpdateKeyboardAvoidArea01");
+    auto keyboardSession = GetKeyboardSession("UpdateKeyboardAvoidArea01", "UpdateKeyboardAvoidArea01");
     ASSERT_NE(keyboardSession, nullptr);
 
     // not foreground
@@ -237,13 +234,12 @@ HWTEST_F(KeyboardSessionTest3, UpdateKeyboardAvoidArea01, TestSize.Level1)
 
 /**
  * @tc.name: UpdateKeyboardAvoidArea02
- * @tc.desc: test function : UpdateKeyboardAvoidArea
+ * @tc.desc: test function: UpdateKeyboardAvoidArea
  * @tc.type: FUNC
  */
 HWTEST_F(KeyboardSessionTest3, UpdateKeyboardAvoidArea02, TestSize.Level1)
 {
-    auto keyboardSession = GetKeyboardSession("UpdateKeyboardAvoidArea02",
-        "UpdateKeyboardAvoidArea02");
+    auto keyboardSession = GetKeyboardSession("UpdateKeyboardAvoidArea02", "UpdateKeyboardAvoidArea02");
     ASSERT_NE(keyboardSession, nullptr);
 
     // not foreground and visiable
@@ -279,13 +275,12 @@ HWTEST_F(KeyboardSessionTest3, UpdateKeyboardAvoidArea02, TestSize.Level1)
 
 /**
  * @tc.name: MoveAndResizeKeyboard01
- * @tc.desc: test function : MoveAndResizeKeyboard
+ * @tc.desc: test function: MoveAndResizeKeyboard
  * @tc.type: FUNC
  */
 HWTEST_F(KeyboardSessionTest3, MoveAndResizeKeyboard01, TestSize.Level1)
 {
-    auto keyboardSession = GetKeyboardSession("MoveAndResizeKeyboard01",
-        "MoveAndResizeKeyboard01");
+    auto keyboardSession = GetKeyboardSession("MoveAndResizeKeyboard01", "MoveAndResizeKeyboard01");
     ASSERT_NE(keyboardSession, nullptr);
 
     KeyboardLayoutParams param;
@@ -301,13 +296,12 @@ HWTEST_F(KeyboardSessionTest3, MoveAndResizeKeyboard01, TestSize.Level1)
 
 /**
  * @tc.name: OnCallingSessionUpdated01
- * @tc.desc: test function : OnCallingSessionUpdated
+ * @tc.desc: test function: OnCallingSessionUpdated
  * @tc.type: FUNC
  */
 HWTEST_F(KeyboardSessionTest3, OnCallingSessionUpdated01, TestSize.Level1)
 {
-    auto keyboardSession = GetKeyboardSession("OnCallingSessionUpdated01",
-        "OnCallingSessionUpdated01");
+    auto keyboardSession = GetKeyboardSession("OnCallingSessionUpdated01", "OnCallingSessionUpdated01");
     ASSERT_NE(keyboardSession, nullptr);
 
     // keyboardSession is not foreground
@@ -355,13 +349,12 @@ HWTEST_F(KeyboardSessionTest3, OnCallingSessionUpdated01, TestSize.Level1)
 
 /**
  * @tc.name: OnCallingSessionUpdated02
- * @tc.desc: test function : OnCallingSessionUpdated
+ * @tc.desc: test function: OnCallingSessionUpdated
  * @tc.type: FUNC
  */
 HWTEST_F(KeyboardSessionTest3, OnCallingSessionUpdated02, TestSize.Level1)
 {
-    auto keyboardSession = GetKeyboardSession("OnCallingSessionUpdated02",
-        "OnCallingSessionUpdated02");
+    auto keyboardSession = GetKeyboardSession("OnCallingSessionUpdated02", "OnCallingSessionUpdated02");
     ASSERT_EQ(true, keyboardSession->keyboardAvoidAreaActive_);
     keyboardSession->OnCallingSessionUpdated();
     ASSERT_EQ(keyboardSession->state_, SessionState::STATE_DISCONNECT);
@@ -374,13 +367,12 @@ HWTEST_F(KeyboardSessionTest3, OnCallingSessionUpdated02, TestSize.Level1)
 
 /**
  * @tc.name: RecalculatePanelRectForAvoidArea
- * @tc.desc: test function : RecalculatePanelRectForAvoidArea
+ * @tc.desc: test function: RecalculatePanelRectForAvoidArea
  * @tc.type: FUNC
  */
 HWTEST_F(KeyboardSessionTest3, RecalculatePanelRectForAvoidArea, TestSize.Level1)
 {
-    auto keyboardSession = GetKeyboardSession("RecalculatePanelRectForAvoidArea",
-        "RecalculatePanelRectForAvoidArea");
+    auto keyboardSession = GetKeyboardSession("RecalculatePanelRectForAvoidArea", "RecalculatePanelRectForAvoidArea");
     
     // if landscapeAvoidHeight_ or portraitAvoidHeight_ < 0
     WSRect panelRect = { 0, 0, 0, 0 };
@@ -408,14 +400,14 @@ HWTEST_F(KeyboardSessionTest3, RecalculatePanelRectForAvoidArea, TestSize.Level1
 
 /**
  * @tc.name: RecalculatePanelRectForAvoidArea02
- * @tc.desc: test function : RecalculatePanelRectForAvoidArea
+ * @tc.desc: test function: RecalculatePanelRectForAvoidArea
  * @tc.type: FUNC
  */
 HWTEST_F(KeyboardSessionTest3, RecalculatePanelRectForAvoidArea02, TestSize.Level1)
 {
     auto keyboardSession = GetKeyboardSession("RecalculatePanelRectForAvoidArea02",
         "RecalculatePanelRectForAvoidArea02");
-    
+
     // if the landscape width is not same to the portrait
     KeyboardLayoutParams params;
     params.landscapeAvoidHeight_ = 1;
@@ -440,7 +432,7 @@ HWTEST_F(KeyboardSessionTest3, RecalculatePanelRectForAvoidArea02, TestSize.Leve
 
 /**
  * @tc.name: SetSkipSelfWhenShowOnVirtualScreen
- * @tc.desc: test function : SetSkipSelfWhenShowOnVirtualScreen
+ * @tc.desc: test function: SetSkipSelfWhenShowOnVirtualScreen
  * @tc.type: FUNC
  */
 HWTEST_F(KeyboardSessionTest3, SetSkipSelfWhenShowOnVirtualScreen, TestSize.Level1)
