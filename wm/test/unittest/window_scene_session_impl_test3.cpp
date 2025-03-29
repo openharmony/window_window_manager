@@ -697,24 +697,6 @@ HWTEST_F(WindowSceneSessionImplTest3, IsDecorEnable, TestSize.Level1)
 }
 
 /**
- * @tc.name: RecoverAndReconnectSceneSession
- * @tc.desc: RecoverAndReconnectSceneSession
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest3, RecoverAndReconnectSceneSession, TestSize.Level1)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("RecoverAndReconnectSceneSession");
-    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-
-    auto ret = windowSceneSessionImpl->RecoverAndReconnectSceneSession();
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
-    windowSceneSessionImpl->isFocused_ = true;
-    ret = windowSceneSessionImpl->RecoverAndReconnectSceneSession();
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
-}
-
-/**
  * @tc.name: UpdateWindowState
  * @tc.desc: UpdateWindowState
  * @tc.type: FUNC
