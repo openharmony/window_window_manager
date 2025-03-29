@@ -549,6 +549,20 @@ public:
     virtual uint32_t GetApiCompatibleVersion() const { return 0; }
 
     /**
+     * @brief Get the root host window type of UIExtension.
+     * 
+     * @return WindowType of the root host window.
+     */
+    virtual WindowType GetRootHostWindowType() const { return WindowType::WINDOW_TYPE_APP_MAIN_WINDOW; }
+
+    /**
+     * @brief Set the root host window type of UIExtension.
+     * 
+     * @param WindowType of the root host window.
+     */
+    virtual void SetRootHostWindowType(WindowType& rootHostWindowType) {}
+
+    /**
      * @brief Register SystemBarProperty listener.
      *
      * @param listener ISystemBarPropertyListener.

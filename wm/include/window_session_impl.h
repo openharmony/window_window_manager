@@ -379,10 +379,12 @@ public:
     WMError UnregisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener) override;
     WMError SetAvoidAreaOption(uint32_t avoidAreaOption) override;
     WMError GetAvoidAreaOption(uint32_t& avoidAreaOption) override;
-    virtual void NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
+    void NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
     WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
     bool IsSystemWindow() const override { return WindowHelper::IsSystemWindow(GetType()); }
     bool IsAppWindow() const override { return WindowHelper::IsAppWindow(GetType()); }
+    WindowType GetRootHostWindowType() const override { return rootHostWindowType_; }
+    void SetRootHostWindowType(WindowType& rootHostWindowType) override { rootHostWindowType_ = rootHostWindowType; }
     WMError UpdateSystemBarProperties(const std::unordered_map<WindowType, SystemBarProperty>& systemBarProperties,
         const std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags) override;
     void UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool systemBarEnableAnimation,
@@ -592,6 +594,7 @@ protected:
      */
     std::map<AvoidAreaType, AvoidArea> lastAvoidAreaMap_;
     uint32_t GetStatusBarHeight() override;
+    WindowType rootHostWindowType_ = windowType::APP_MAIN_WINDOW_BASE;
 
     /*
      * PC Fold Screen
