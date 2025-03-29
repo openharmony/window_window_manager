@@ -401,6 +401,8 @@ struct SessionInfo {
     bool isFoundationCall_ = false;
     int32_t requestId = 0;
     std::string specifiedFlag_ = "";
+    bool disableDelegator = false;
+    bool reuseDelegatorWindow = false;
 
     /*
      * App Use Control

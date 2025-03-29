@@ -4878,6 +4878,7 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
     info.canStartAbilityFromBackground_ = abilitySessionInfo->canStartAbilityFromBackground;
     info.isFoundationCall_ = isFoundationCall;
     info.specifiedFlag_ = abilitySessionInfo->specifiedFlag;
+    info.reuseDelegatorWindow = abilitySessionInfo->reuseDelegatorWindow;
     if (session->IsPcOrPadEnableActivation()) {
         info.startWindowOption = abilitySessionInfo->startWindowOption;
         int32_t maxWindowWidth = abilitySessionInfo->want.GetIntParam(AAFwk::Want::PARAM_RESV_MAX_WINDOW_WIDTH, 0);
@@ -4942,6 +4943,7 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
         session->sessionInfo_.startMethod = StartMethod::START_CALL;
+        session->sessionInfo_.reuseDelegatorWindow = abilitySessionInfo.reuseDelegatorWindow;
         SessionInfo info = MakeSessionInfoDuringPendingActivation(abilitySessionInfo, session, isFoundationCall);
         if (MultiInstanceManager::IsSupportMultiInstance(session->systemConfig_) &&
             MultiInstanceManager::GetInstance().IsMultiInstance(info.bundleName_)) {
@@ -4953,6 +4955,12 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
             }
         }
         session->HandleCastScreenConnection(info, session);
+        if (info.reuseDelegatorWindow) {
+            if (session->hookSceneSessionActivationFunc_) {
+                session->hookSceneSessionActivationFunc_(session, false);
+                return WSError::WS_OK;
+            }
+        }
         if (session->pendingSessionActivationFunc_) {
             session->pendingSessionActivationFunc_(info);
         }
@@ -7923,5 +7931,40 @@ WSError SceneSession::SetCurrentRotation(int32_t currentRotation)
         return WSError::WS_ERROR_NULLPTR;
     }
     return sessionStage_->SetCurrentRotation(currentRotation);
+}
+
+void SceneSession::SetIsAbilityHook(bool isAbilityHook)
+{
+    TLOGI(WmsLogTag::WMS_MAIN, "set session id %{public}d isAbilityHook %{public}d", persistentId_, isAbilityHook);
+    isAbilityHook_ = isAbilityHook;
+}
+
+bool SceneSession::GetIsAbilityHook() const
+{
+    return isAbilityHook_;
+}
+
+WMError SceneSession::NotifyDisableDelegatorChange()
+{
+    if (!SessionPermission::IsSystemAppCall() && !SessionPermission::IsSACalling()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller is neither a system app nor an SA.");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    TLOGI(WmsLogTag::WMS_LIFE, "set session id %{public}d disableDelegator true", persistentId_);
+    sessionInfo_.disableDelegator = true;
+    return WMError::WM_OK;
+}
+
+void SceneSession::HookSceneSessionActivation(NotifyHookSceneSessionActivationFunc&& func)
+{
+    const char* const where = __func__;
+    PostTask([weatThis = wptr(this), where, func = std::move(func)] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
+            return;
+        }
+        session->hookSceneSessionActivationFunc_ = std::move(func);
+    }, where);
 }
 } // namespace OHOS::Rosen

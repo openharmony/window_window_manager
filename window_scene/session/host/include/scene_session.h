@@ -126,6 +126,7 @@ using GetSceneSessionByIdCallback = std::function<sptr<SceneSession>(int32_t ses
 using NotifySetParentSessionFunc = std::function<void(int32_t oldParentWindowId, int32_t newParentWindowId)>;
 using NotifyUpdateFlagFunc = std::function<void(const std::string& flag)>;
 using NotifyRotationChangeFunc = std::function<void(int32_t persistentId, bool isRegister)>;
+using NotifyHookSceneSessionActivationFunc = std::function<void(const sptr<SceneSession>& session, bool isNewWant)>;
 
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
@@ -580,6 +581,10 @@ public:
     static uint32_t GetWindowDragHotAreaType(DisplayId displayId, uint32_t type, int32_t pointerX, int32_t pointerY);
     static void AddOrUpdateWindowDragHotArea(DisplayId displayId, uint32_t type, const WSRect& area);
     WSError UpdateRectChangeListenerRegistered(bool isRegister) override;
+    WMError NotifyDisableDelegatorChange();
+    void SetIsAbilityHook(bool isAbilityHook);
+    bool GetIsAbilityHook() const;
+    void HookSceneSessionActivation(NotifyHookSceneSessionActivationFunc&& func);
 
     /*
      * Window Decor
@@ -1223,6 +1228,12 @@ private:
     std::shared_ptr<Rosen::RSAnimatableProperty<float>> blurSaturationValue_;
     std::shared_ptr<Rosen::RSAnimatableProperty<float>> blurBrightnessValue_;
     std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::RSColor>> blurMaskColorValue_;
+
+   /*
+    * Window Lifecycle
+    */
+    bool isAbilityHook = false;
+    NotifyHookSceneSessionActivationFunc hookSceneSessionActivationFunc_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
