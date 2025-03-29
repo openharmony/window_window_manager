@@ -3538,7 +3538,7 @@ void SceneSession::UpdateKeyFrameState(SizeChangeReason reason, const WSRect& re
         keyFramePolicy_.stopping_ = true;
         KeyFramePolicy dragEndPolicy = keyFramePolicy_;
         if (keyFrameAnimating_) {
-            int32_t minDelay = 150;
+            const int32_t minDelay = 150;
             dragEndPolicy.animationDelay_ += dragEndPolicy.animationDuration_ + minDelay;
             TLOGI(WmsLogTag::WMS_LAYOUT, "stop with repeat animate %{public}d", dragEndPolicy.animationDelay_);
         }
@@ -3589,7 +3589,7 @@ void SceneSession::OnKeyFrameNextVsync(uint64_t count)
     uint64_t nowTimeStamp = std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now().time_since_epoch()).count();
     uint64_t duration = nowTimeStamp - lastKeyFrameDragStamp_;
-    uint64_t minDelay = 100;
+    const uint64_t minDelay = 100;
     if (!keyFrameDragPauseNoticed_ && !keyFrameAnimating_ && duration >= minDelay) {
         TLOGNI(WmsLogTag::WMS_LAYOUT, "to notice for key frame drag paused");
         keyFrameDragPauseNoticed_ = true;
