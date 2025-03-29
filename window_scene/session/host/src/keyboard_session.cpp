@@ -816,12 +816,13 @@ void KeyboardSession::SetSkipSelfWhenShowOnVirtualScreen(bool isSkip)
 void KeyboardSession::SetSkipEventOnCastPlus(bool isSkip)
 {
     PostTask([weakThis = wptr(this), isSkip, where = __func__]() {
-        TLOGNI(WmsLogTag::WMS_SCB, "%{public}s wid: %{public}d, isSkip: %{public}d", where, GetPersistentId(), isSkip);
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_SCB, "%{public}s session is null", where);
             return;
         }
+        TLOGNI(WmsLogTag::WMS_SCB, "%{public}s wid: %{public}d, isSkip: %{public}d", where,
+            session->GetPersistentId(), isSkip);
         if (session->specificCallback_ != nullptr &&
             session->specificCallback_->onSetSkipEventOnCastPlus_ != nullptr) {
             session->specificCallback_->onSetSkipEventOnCastPlus_(session->GetPersistentId(), isSkip);
