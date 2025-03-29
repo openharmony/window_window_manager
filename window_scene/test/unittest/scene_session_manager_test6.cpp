@@ -219,7 +219,7 @@ HWTEST_F(SceneSessionManagerTest6, GetWindowVisibilityChangeInfo02, TestSize.Lev
  * @tc.desc: GetWindowVisibilityChangeInfo03
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest6, GetWindowVisibilityChangeInfo03, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest6, GetWindowVisibilityChangeInfo03, TestSize.Level0)
 {
     ASSERT_NE(nullptr, ssm_);
     ssm_->lastVisibleData_.clear();
@@ -271,7 +271,7 @@ HWTEST_F(SceneSessionManagerTest6, GetWindowVisibilityChangeInfo04, TestSize.Lev
  * @tc.desc: DealwithVisibilityChange01
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest6, DealwithVisibilityChange01, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest6, DealwithVisibilityChange01, TestSize.Level0)
 {
     ASSERT_NE(nullptr, ssm_);
     ssm_->sceneSessionMap_.clear();
@@ -322,7 +322,7 @@ HWTEST_F(SceneSessionManagerTest6, DealwithVisibilityChange01, TestSize.Level1)
  * @tc.desc: DealwithVisibilityChange02
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest6, DealwithVisibilityChange02, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest6, DealwithVisibilityChange02, TestSize.Level0)
 {
     ASSERT_NE(nullptr, ssm_);
     ssm_->sceneSessionMap_.clear();
@@ -1571,7 +1571,7 @@ HWTEST_F(SceneSessionManagerTest6, RequestInputMethodCloseKeyboard, TestSize.Lev
  * @tc.desc: RequestSceneSession
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest6, RequestSceneSession, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest6, RequestSceneSession, TestSize.Level0)
 {
     SessionInfo info1;
     info1.persistentId_ = 1;

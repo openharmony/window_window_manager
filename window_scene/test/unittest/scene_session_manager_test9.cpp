@@ -491,7 +491,7 @@ HWTEST_F(SceneSessionManagerTest9, TestRequestSessionFocus_010, TestSize.Level1)
  * @tc.desc: RequestSessionUnfocus
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest9, RequestSessionUnfocus02, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest9, RequestSessionUnfocus02, TestSize.Level0)
 {
     ASSERT_NE(nullptr, ssm_);
     ssm_->sceneSessionMap_.clear();
@@ -976,7 +976,7 @@ HWTEST_F(SceneSessionManagerTest9, RecoverAndReconnectSceneSession02, TestSize.L
  * @tc.desc: RefreshPcZorder
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest9, RefreshPcZorder, TestSize.Level1) {
+HWTEST_F(SceneSessionManagerTest9, RefreshPcZorder, TestSize.Level0) {
     std::vector<int32_t> persistentIds;
     SessionInfo info1;
     info1.abilityName_ = "RefreshPcZorder1";

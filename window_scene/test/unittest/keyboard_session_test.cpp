@@ -101,7 +101,7 @@ HWTEST_F(KeyboardSessionTest, GetKeyboardGravity, TestSize.Level1)
  * @tc.desc: test function : Show
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest, Show01, TestSize.Level1)
+HWTEST_F(KeyboardSessionTest, Show01, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "Show01";
@@ -130,7 +130,7 @@ HWTEST_F(KeyboardSessionTest, Show01, TestSize.Level1)
  * @tc.desc: test function : Show
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest, Show02, TestSize.Level1)
+HWTEST_F(KeyboardSessionTest, Show02, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "Show02";
@@ -151,7 +151,7 @@ HWTEST_F(KeyboardSessionTest, Show02, TestSize.Level1)
  * @tc.desc: test function : Show
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest, Show03, TestSize.Level1)
+HWTEST_F(KeyboardSessionTest, Show03, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "Show03";
@@ -175,7 +175,7 @@ HWTEST_F(KeyboardSessionTest, Show03, TestSize.Level1)
  * @tc.desc: test function : Hide
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest, Hide, TestSize.Level1)
+HWTEST_F(KeyboardSessionTest, Hide, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "Hide";
@@ -197,7 +197,7 @@ HWTEST_F(KeyboardSessionTest, Hide, TestSize.Level1)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest, Disconnect, TestSize.Level1)
+HWTEST_F(KeyboardSessionTest, Disconnect, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "Disconnect";
@@ -217,7 +217,7 @@ HWTEST_F(KeyboardSessionTest, Disconnect, TestSize.Level1)
  * @tc.desc: test system keyboard disconnect
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest, DisConnect01, TestSize.Level1)
+HWTEST_F(KeyboardSessionTest, DisConnect01, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "DisConnect01";
@@ -246,7 +246,7 @@ HWTEST_F(KeyboardSessionTest, DisConnect01, TestSize.Level1)
  * @tc.desc: GetSceneSession
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest, GetSceneSession01, TestSize.Level1)
+HWTEST_F(KeyboardSessionTest, GetSceneSession01, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "GetSceneSession01";
@@ -278,7 +278,7 @@ HWTEST_F(KeyboardSessionTest, GetSceneSession01, TestSize.Level1)
  * @tc.desc: NotifyOccupiedAreaChangeInfo
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest, NotifyOccupiedAreaChangeInfo, TestSize.Level1)
+HWTEST_F(KeyboardSessionTest, NotifyOccupiedAreaChangeInfo, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "NotifyOccupiedAreaChangeInfo";
@@ -381,7 +381,7 @@ HWTEST_F(KeyboardSessionTest, NotifyRootSceneOccupiedAreaChange, TestSize.Level1
  * @tc.desc: NotifyRootSceneOccupiedAreaChange
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest, NotifyRootSceneOccupiedAreaChange02, TestSize.Level1)
+HWTEST_F(KeyboardSessionTest, NotifyRootSceneOccupiedAreaChange02, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "NotifyRootSceneOccupiedAreaChange02";
@@ -411,7 +411,7 @@ HWTEST_F(KeyboardSessionTest, NotifyRootSceneOccupiedAreaChange02, TestSize.Leve
  * @tc.desc: RestoreCallingSession
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest, RestoreCallingSession, TestSize.Level1)
+HWTEST_F(KeyboardSessionTest, RestoreCallingSession, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "RestoreCallingSession";
@@ -452,7 +452,7 @@ HWTEST_F(KeyboardSessionTest, RestoreCallingSession, TestSize.Level1)
  * @tc.desc: RestoreCallingSession
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest, RestoreCallingSession02, TestSize.Level1)
+HWTEST_F(KeyboardSessionTest, RestoreCallingSession02, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "RestoreCallingSession02";
@@ -602,7 +602,7 @@ HWTEST_F(KeyboardSessionTest, OnKeyboardPanelUpdated, TestSize.Level1)
  * @tc.desc: SetCallingSessionId
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest, SetCallingSessionId, TestSize.Level1)
+HWTEST_F(KeyboardSessionTest, SetCallingSessionId, TestSize.Level0)
 {
     WLOGFI("SetCallingSessionId begin!");
     SessionInfo info;
@@ -651,7 +651,7 @@ HWTEST_F(KeyboardSessionTest, SetCallingSessionId, TestSize.Level1)
  * @tc.desc: SetCallingSessionId
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest, SetCallingSessionId02, TestSize.Level1)
+HWTEST_F(KeyboardSessionTest, SetCallingSessionId02, TestSize.Level0)
 {
     TLOGI(WmsLogTag::WMS_KEYBOARD, "SetCallingSessionId02 begin!");
     SessionInfo info;
@@ -691,7 +691,7 @@ HWTEST_F(KeyboardSessionTest, SetCallingSessionId02, TestSize.Level1)
  * @tc.desc: GetCallingSessionId
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest, GetCallingSessionId, TestSize.Level1)
+HWTEST_F(KeyboardSessionTest, GetCallingSessionId, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "GetCallingSessionId";
