@@ -362,15 +362,11 @@ public:
     WMError UpdateScreenLockStatusForApp(const std::string& bundleName,
         bool isRelease) override { return WMError::WM_OK; }
 
-    virtual WMError AddSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds)
-    {
-        return WMError::WM_OK;
-    }
+    virtual WMError AddSkipSelfWhenShowOnVirtualScreenList(
+        const std::vector<int32_t>& persistentIds) { return WMError::WM_OK; }
 
-    virtual WMError RemoveSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds)
-    {
-        return WMError::WM_OK;
-    }
+    virtual WMError RemoveSkipSelfWhenShowOnVirtualScreenList(
+        const std::vector<int32_t>& persistentIds) { return WMError::WM_OK; }
 
     WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode) override { return WMError::WM_OK; }
 
