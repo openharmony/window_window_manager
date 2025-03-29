@@ -3283,7 +3283,7 @@ public:
 
     /**
      * @brief Get the root host window type of UIExtension.
-     * 
+     *
      * @return WindowType of the root host window.
      */
     virtual WindowType GetRootHostWindowType() const { return WindowType::WINDOW_TYPE_APP_MAIN_WINDOW; }
