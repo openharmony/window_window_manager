@@ -292,6 +292,7 @@ public:
     std::string GetWindowName() const;
     WSRect GetLastLayoutRect() const;
     WSRect GetLayoutRect() const;
+    bool GetSkipSelfWhenShowOnVirtualScreen() const;
     DisplayId GetDisplayId() const { return GetSessionProperty()->GetDisplayId(); }
     DisplayId GetOriginDisplayId() const { return originDisplayId_; }
     void SetOriginDisplayId(DisplayId displayId);

@@ -40,6 +40,9 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
+namespace {
+    constexpr uint32_t SLEEP_TIME_US = 100000; // 100ms
+}
 class SceneSessionTest3 : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -1070,20 +1073,30 @@ HWTEST_F(SceneSessionTest3, SetStartingWindowExitAnimationFlag, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetSkipSelfWhenShowOnVirtualScreen
+ * @tc.name: SetSkipSelfWhenShowOnVirtualScreen01
  * @tc.desc: SetSkipSelfWhenShowOnVirtualScreen
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest3, SetSkipSelfWhenShowOnVirtualScreen, TestSize.Level1)
+HWTEST_F(SceneSessionTest3, SetSkipSelfWhenShowOnVirtualScreen01, TestSize.Level1)
 {
-    bool isSkip = true;
     SessionInfo info;
     info.abilityName_ = "SetSkipSelfWhenShowOnVirtualScreen";
     info.bundleName_ = "SetSkipSelfWhenShowOnVirtualScreen";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    bool skipResult = false;
 
-    sceneSession->SetSkipSelfWhenShowOnVirtualScreen(isSkip);
-    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->SetSkipSelfWhenShowOnVirtualScreen(false);
+    usleep(SLEEP_TIME_US);
+    ASSERT_EQ(skipResult, false);
+
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    surfaceNode->id_ = 1;
+    sceneSession->surfaceNode_ = surfaceNode;
+
+    sceneSession->SetSkipSelfWhenShowOnVirtualScreen(false);
+    usleep(SLEEP_TIME_US);
+    ASSERT_EQ(skipResult, false);
 }
 
 /**
