@@ -557,7 +557,7 @@ public:
 
     /**
      * @brief Set the root host window type of UIExtension.
-     * 
+     *
      * @param WindowType of the root host window.
      */
     virtual void SetRootHostWindowType(WindowType& rootHostWindowType) {}
