@@ -302,7 +302,9 @@ HWTEST_F(WindowSessionTest2, TransferPointerEvent07, TestSize.Level1)
 
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     ASSERT_NE(pointerEvent, nullptr);
-    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);
+    session_->UpdateFocus(false);
+    session_->property_->SetFocusable(true);
     bool needNotifyClient = true;
     bool isExecuteDelayRaise = true;
     ASSERT_EQ(WSError::WS_OK, session_->TransferPointerEvent(pointerEvent, needNotifyClient, isExecuteDelayRaise));

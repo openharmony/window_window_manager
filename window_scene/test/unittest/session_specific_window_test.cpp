@@ -634,8 +634,14 @@ HWTEST_F(SessionSpecificWindowTest, HandleSubWindowClick04, TestSize.Level1)
     sptr<Session> dialogSession = sptr<Session>::MakeSptr(info);
     session_->SetParentSession(dialogSession);
 
-    bool isExecuteDelayRaise = false;
-    auto result = session_->HandleSubWindowClick(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN, isExecuteDelayRaise);
+    session_->property_->SetRaiseEnabled(true);
+    int32_t action = MMI::PointerEvent::POINTER_ACTION_BUTTON_UP;
+    bool isExecuteDelayRaise = true;
+    auto result = session_->HandleSubWindowClick(action, isExecuteDelayRaise);
+    EXPECT_EQ(result, WSError::WS_OK);
+
+    session_->property_->SetRaiseEnabled(false);
+    result = session_->HandleSubWindowClick(action, isExecuteDelayRaise);
     EXPECT_EQ(result, WSError::WS_OK);
 }
 

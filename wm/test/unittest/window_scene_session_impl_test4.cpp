@@ -128,6 +128,38 @@ HWTEST_F(WindowSceneSessionImplTest4, ConsumePointerEvent, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ConsumePointerEvent02
+ * @tc.desc: ConsumePointerEvent02
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, ConsumePointerEvent02, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("ConsumePointerEvent");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    windowSceneSessionImpl->hostSession_ = session;
+    windowSceneSessionImpl->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+
+    int32_t pointerId = 0;
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    pointerEvent->SetPointerId(pointerId);
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
+    MMI::PointerEvent::PointerItem pointerItem;
+    pointerItem.SetPointerId(pointerId);
+    pointerEvent->AddPointerItem(pointerItem);
+
+    windowSceneSessionImpl->property_->SetWindowDelayRaiseEnabled(false);
+    ASSERT_EQ(false, windowSceneSessionImpl->property_->IsWindowDelayRaiseEnabled());
+    windowSceneSessionImpl->ConsumePointerEvent(pointerEvent);
+    windowSceneSessionImpl->property_->SetWindowDelayRaiseEnabled(true);
+    ASSERT_EQ(true, windowSceneSessionImpl->property_->IsWindowDelayRaiseEnabled());
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);
+    windowSceneSessionImpl->ConsumePointerEvent(pointerEvent);
+}
+
+/**
  * @tc.name: GetSystemSizeLimits01
  * @tc.desc: GetSystemSizeLimits
  * @tc.type: FUNC
@@ -404,6 +436,30 @@ HWTEST_F(WindowSceneSessionImplTest4, ConsumePointerEventInner, TestSize.Level1)
     windowSceneSessionImpl->ConsumePointerEventInner(pointerEvent, pointerItem);
     pointerEvent->SetPointerAction(2);
     windowSceneSessionImpl->ConsumePointerEventInner(pointerEvent, pointerItem);
+}
+
+/**
+ * @tc.name: ConsumePointerEventInner02
+ * @tc.desc: ConsumePointerEventInner02
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, ConsumePointerEventInner02, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("ConsumePointerEventInner");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    windowSceneSessionImpl->hostSession_ = session;
+    windowSceneSessionImpl->property_->SetWindowDelayRaiseEnabled(true);
+    windowSceneSessionImpl->property_->SetPersistentId(1);
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(nullptr, pointerEvent);
+    MMI::PointerEvent::PointerItem pointerItem;
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
+    windowSceneSessionImpl->ConsumePointerEventInner(pointerEvent, pointerItem, true);
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);
+    windowSceneSessionImpl->ConsumePointerEventInner(pointerEvent, pointerItem, true);
 }
 
 /**
