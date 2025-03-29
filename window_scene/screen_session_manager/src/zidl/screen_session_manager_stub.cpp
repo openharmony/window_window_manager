@@ -1067,6 +1067,12 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             reply.WriteInt32(static_cast<int32_t>(ret));
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_DISPLAY_MUTE_FLAG: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            bool muteFlag = data.ReadBool();
+            SetVirtualDisplayMuteFlag(screenId, muteFlag);
+            break;
+        }
         default:
             WLOGFW("unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);

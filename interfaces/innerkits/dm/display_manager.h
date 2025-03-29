@@ -743,6 +743,14 @@ public:
         std::vector<uint64_t> surfaceIdList = {});
 
     /**
+     * @brief Set virtual display mute flag to RS.
+     *
+     * @param screenId ScreenId used in virtual screen.
+     * @param muteFlag The mute flag.
+    */
+    void SetVirtualDisplayMuteFlag(ScreenId screenId, bool muteFlag);
+
+    /**
      * @brief When casting the screen, the display not be skipped after the physical screen is turned off.
      *
      * @param screenId ScreenId used in virtual screen.
