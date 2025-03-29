@@ -3834,10 +3834,10 @@ napi_value JsSceneSessionManager::OnNotifyAboveLockScreen(napi_env env, napi_cal
 
 napi_value JsSceneSessionManager::OnCloneWindow(napi_env env, napi_callback_info info)
 {
-    size_t argc = ARGC_TWO;
-    napi_value argv[ARGC_TWO] = { nullptr };
+    size_t argc = 4;
+    napi_value argv[4] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < ARGC_TWO) {
+    if (argc < 3) {
         TLOGE(WmsLogTag::WMS_PC, "Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
@@ -3857,8 +3857,15 @@ napi_value JsSceneSessionManager::OnCloneWindow(napi_env env, napi_callback_info
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
+    bool needOffScreen = false;
+    if (!ConvertFromJsValue(env, argv[2], needOffScreen)) {
+        TLOGE(WmsLogTag::WMS_PC, "Failed to convert parameter fromPersistentId");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
     TLOGI(WmsLogTag::WMS_PC, "from:%{public}d to:%{public}d", fromPersistentId, toPersistentId);
-    SceneSessionManager::GetInstance().CloneWindow(fromPersistentId, toPersistentId);
+    SceneSessionManager::GetInstance().CloneWindow(fromPersistentId, toPersistentId, needOffScreen);
     return NapiGetUndefined(env);
 }
 
