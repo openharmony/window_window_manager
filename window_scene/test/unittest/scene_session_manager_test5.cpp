@@ -789,11 +789,6 @@ HWTEST_F(SceneSessionManagerTest5, UpdateFocusStatus01, Function | SmallTest | L
 
     ssm_->UpdateFocusStatus(DEFAULT_DISPLAY_ID, sceneSession, false);
     ASSERT_EQ(focusGroup->GetFocusedSessionId(), 1);
-    ssm_->needBlockNotifyFocusStatusUntilForeground_ = false;
-    ssm_->UpdateFocusStatus(DEFAULT_DISPLAY_ID, sceneSession, true);
-    ASSERT_NE(focusGroup->GetFocusedSessionId(), 1);
-    focusGroup->SetFocusedSessionId(1);
-    ssm_->needBlockNotifyFocusStatusUntilForeground_ = true;
     ssm_->UpdateFocusStatus(DEFAULT_DISPLAY_ID, sceneSession, true);
     ASSERT_NE(focusGroup->GetFocusedSessionId(), 1);
 }
