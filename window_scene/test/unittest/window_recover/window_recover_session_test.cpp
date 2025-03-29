@@ -110,7 +110,7 @@ namespace {
  * @tc.desc: check func Reconnect
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRecoverSessionTest, Reconnect01, Function | SmallTest | Level1)
+HWTEST_F(WindowRecoverSessionTest, Reconnect01, TestSize.Level1)
 {
     auto surfaceNode = CreateRSSurfaceNode();
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
@@ -149,7 +149,7 @@ HWTEST_F(WindowRecoverSessionTest, Reconnect01, Function | SmallTest | Level1)
  * @tc.desc: Reconnect02
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRecoverSessionTest, Reconnect02, Function | SmallTest | Level2)
+HWTEST_F(WindowRecoverSessionTest, Reconnect02, TestSize.Level1)
 {
     auto surfaceNode = CreateRSSurfaceNode();
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
@@ -200,7 +200,7 @@ HWTEST_F(WindowRecoverSessionTest, Reconnect02, Function | SmallTest | Level2)
  * @tc.desc: ReconnectInner
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRecoverSessionTest, ReconnectInner, Function | SmallTest | Level2)
+HWTEST_F(WindowRecoverSessionTest, ReconnectInner, TestSize.Level1)
 {
     sptr<WindowSessionProperty> property = nullptr;
     WSError res = sceneSession_->ReconnectInner(property);
@@ -233,7 +233,7 @@ HWTEST_F(WindowRecoverSessionTest, ReconnectInner, Function | SmallTest | Level2
  * @tc.desc: CheckSessionPropertyOnRecovery
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRecoverSessionTest, CheckSessionPropertyOnRecovery, Function | SmallTest | Level3)
+HWTEST_F(WindowRecoverSessionTest, CheckSessionPropertyOnRecovery, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     sptr<WindowSessionProperty> property = nullptr;
@@ -274,7 +274,7 @@ HWTEST_F(WindowRecoverSessionTest, CheckSessionPropertyOnRecovery, Function | Sm
  * @tc.desc: RecoverAndReconnectSceneSession
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRecoverSessionTest, RecoverAndReconnectSceneSession, Function | SmallTest | Level3)
+HWTEST_F(WindowRecoverSessionTest, RecoverAndReconnectSceneSession, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     sptr<WindowSessionProperty> property = nullptr;
@@ -335,7 +335,7 @@ HWTEST_F(WindowRecoverSessionTest, RecoverAndReconnectSceneSession, Function | S
  * @tc.desc: RecoverAndConnectSpecificSession
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRecoverSessionTest, RecoverAndConnectSpecificSession, Function | SmallTest | Level3)
+HWTEST_F(WindowRecoverSessionTest, RecoverAndConnectSpecificSession, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     sptr<WindowSessionProperty> property = nullptr;
@@ -395,7 +395,7 @@ HWTEST_F(WindowRecoverSessionTest, RecoverAndConnectSpecificSession, Function | 
  * @tc.desc: GetBatchAbilityInfos01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRecoverSessionTest, GetBatchAbilityInfos01, Function | SmallTest | Level3)
+HWTEST_F(WindowRecoverSessionTest, GetBatchAbilityInfos01, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     auto bundleMgr = ssm_->bundleMgr_;
@@ -412,7 +412,7 @@ HWTEST_F(WindowRecoverSessionTest, GetBatchAbilityInfos01, Function | SmallTest 
  * @tc.desc: GetBatchAbilityInfos02
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRecoverSessionTest, GetBatchAbilityInfos02, Function | SmallTest | Level3)
+HWTEST_F(WindowRecoverSessionTest, GetBatchAbilityInfos02, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
@@ -429,7 +429,7 @@ HWTEST_F(WindowRecoverSessionTest, GetBatchAbilityInfos02, Function | SmallTest 
  * @tc.desc: GetBatchAbilityInfos03
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRecoverSessionTest, GetBatchAbilityInfos03, Function | SmallTest | Level3)
+HWTEST_F(WindowRecoverSessionTest, GetBatchAbilityInfos03, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
@@ -446,7 +446,7 @@ HWTEST_F(WindowRecoverSessionTest, GetBatchAbilityInfos03, Function | SmallTest 
  * @tc.desc: GetBatchAbilityInfos04
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRecoverSessionTest, GetBatchAbilityInfos04, Function | SmallTest | Level3)
+HWTEST_F(WindowRecoverSessionTest, GetBatchAbilityInfos04, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
@@ -463,7 +463,7 @@ HWTEST_F(WindowRecoverSessionTest, GetBatchAbilityInfos04, Function | SmallTest 
  * @tc.desc: test function : IsWindowSupportCacheForRecovering
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRecoverSessionTest, IsWindowSupportCacheForRecovering, Function | SmallTest | Level3)
+HWTEST_F(WindowRecoverSessionTest, IsWindowSupportCacheForRecovering, TestSize.Level1)
 {
     std::vector<int32_t> recoveredPersistentIds = {1};
     ssm_->alivePersistentIds_.clear();
@@ -497,7 +497,7 @@ HWTEST_F(WindowRecoverSessionTest, IsWindowSupportCacheForRecovering, Function |
  * @tc.desc: test function : IsWindowSupportCacheForRecovering
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRecoverSessionTest, IsWindowSupportCacheForRecovering01, Function | SmallTest | Level3)
+HWTEST_F(WindowRecoverSessionTest, IsWindowSupportCacheForRecovering01, TestSize.Level1)
 {
     std::vector<int32_t> windowIds = {0, 1};
     sptr<SceneSession> sceneSession = nullptr;
@@ -530,7 +530,7 @@ HWTEST_F(WindowRecoverSessionTest, IsWindowSupportCacheForRecovering01, Function
  * @tc.desc: test function : IsWindowSupportCacheForRecovering
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRecoverSessionTest, IsWindowSupportCacheForRecovering02, Function | SmallTest | Level3)
+HWTEST_F(WindowRecoverSessionTest, IsWindowSupportCacheForRecovering02, TestSize.Level1)
 {
     SessionInfo info;
     info.bundleName_ = "IsWindowSupportCacheForRecovering02";
@@ -553,7 +553,7 @@ HWTEST_F(WindowRecoverSessionTest, IsWindowSupportCacheForRecovering02, Function
  * @tc.desc: CacheSpecificSessionForRecovering
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRecoverSessionTest, CacheSpecificSessionForRecovering, Function | SmallTest | Level3)
+HWTEST_F(WindowRecoverSessionTest, CacheSpecificSessionForRecovering, TestSize.Level1)
 {
     sptr<WindowSessionProperty> property;
     ASSERT_NE(ssm_, nullptr);
@@ -585,7 +585,7 @@ HWTEST_F(WindowRecoverSessionTest, CacheSpecificSessionForRecovering, Function |
     ssm_->recoverSubSessionCacheMap_.clear();
 }
 
-HWTEST_F(WindowRecoverSessionTest, RecoverCachedSubSession, Function | SmallTest | Level3)
+HWTEST_F(WindowRecoverSessionTest, RecoverCachedSubSession, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     // 1. 没有缓存的子窗
@@ -602,7 +602,7 @@ HWTEST_F(WindowRecoverSessionTest, RecoverCachedSubSession, Function | SmallTest
     ASSERT_EQ(ssm_->recoverSubSessionCacheMap_.size(), 0);
 }
 
-HWTEST_F(WindowRecoverSessionTest, RecoverCachedDialogSession, Function | SmallTest | Level3)
+HWTEST_F(WindowRecoverSessionTest, RecoverCachedDialogSession, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     // 1. 没有缓存的模态窗
@@ -624,7 +624,7 @@ HWTEST_F(WindowRecoverSessionTest, RecoverCachedDialogSession, Function | SmallT
  * @tc.desc: RemoveFailRecoveredSession
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRecoverSessionTest, RemoveFailRecoveredSession, Function | SmallTest | Level3)
+HWTEST_F(WindowRecoverSessionTest, RemoveFailRecoveredSession, TestSize.Level1)
 {
     ASSERT_NE(nullptr, ssm_);
     SessionInfo info;
@@ -649,7 +649,7 @@ HWTEST_F(WindowRecoverSessionTest, RemoveFailRecoveredSession, Function | SmallT
  * @tc.desc: test func ClearUnrecoveredSessions
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRecoverSessionTest, ClearUnrecoveredSessions, Function | SmallTest | Level1)
+HWTEST_F(WindowRecoverSessionTest, ClearUnrecoveredSessions, TestSize.Level1)
 {
     ssm_->alivePersistentIds_.push_back(23);
     ssm_->alivePersistentIds_.push_back(24);
@@ -679,7 +679,7 @@ HWTEST_F(WindowRecoverSessionTest, ClearUnrecoveredSessions, Function | SmallTes
  * @tc.desc: test func RecoverSessionInfo
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRecoverSessionTest, RecoverSessionInfo, Function | SmallTest | Level1)
+HWTEST_F(WindowRecoverSessionTest, RecoverSessionInfo, TestSize.Level1)
 {
     SessionInfo info = ssm_->RecoverSessionInfo(nullptr);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
@@ -696,7 +696,7 @@ HWTEST_F(WindowRecoverSessionTest, RecoverSessionInfo, Function | SmallTest | Le
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRecoverSessionTest, UpdateRecoverPropertyForSuperFold, Function | SmallTest | Level1)
+HWTEST_F(WindowRecoverSessionTest, UpdateRecoverPropertyForSuperFold, TestSize.Level1)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     Rect rect = {static_cast<int32_t>(10), static_cast<int32_t>(10),
@@ -717,7 +717,7 @@ HWTEST_F(WindowRecoverSessionTest, UpdateRecoverPropertyForSuperFold, Function |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRecoverSessionTest, RecoverSessionManagerService, Function | SmallTest | Level2)
+HWTEST_F(WindowRecoverSessionTest, RecoverSessionManagerService, TestSize.Level1)
 {
     ASSERT_NE(nullptr, sm_);
     bool funcInvoked = false;
@@ -735,7 +735,7 @@ HWTEST_F(WindowRecoverSessionTest, RecoverSessionManagerService, Function | Smal
  * @tc.desc: mockSessionManagerServiceProxy_ is null
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRecoverSessionTest, RegisterSMSRecoverListener1, Function | SmallTest | Level2)
+HWTEST_F(WindowRecoverSessionTest, RegisterSMSRecoverListener1, TestSize.Level1)
 {
     ASSERT_NE(nullptr, sm_);
     sm_->isRecoverListenerRegistered_ = false;
@@ -749,7 +749,7 @@ HWTEST_F(WindowRecoverSessionTest, RegisterSMSRecoverListener1, Function | Small
  * @tc.desc: normal test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRecoverSessionTest, RegisterSMSRecoverListener2, Function | SmallTest | Level2)
+HWTEST_F(WindowRecoverSessionTest, RegisterSMSRecoverListener2, TestSize.Level1)
 {
     ASSERT_NE(nullptr, sm_);
     sm_->isRecoverListenerRegistered_ = false;

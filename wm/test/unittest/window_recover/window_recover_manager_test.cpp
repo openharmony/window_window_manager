@@ -50,7 +50,7 @@ namespace {
  * @tc.desc: WindowAdapter/RegisterSessionRecoverCallbackFunc
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRecoverManagerTest, RegisterSessionRecoverCallbackFunc, Function | SmallTest | Level2)
+HWTEST_F(WindowRecoverManagerTest, RegisterSessionRecoverCallbackFunc, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
     int32_t persistentId = 1;
@@ -64,7 +64,7 @@ HWTEST_F(WindowRecoverManagerTest, RegisterSessionRecoverCallbackFunc, Function 
  * @tc.desc: RegisterSessionRecoverListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRecoverManagerTest, RegisterSessionRecoverListener, Function | SmallTest | Level2)
+HWTEST_F(WindowRecoverManagerTest, RegisterSessionRecoverListener, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("RegisterSessionRecoverListener");
@@ -105,7 +105,7 @@ HWTEST_F(WindowRecoverManagerTest, RegisterSessionRecoverListener, Function | Sm
  * @tc.desc: WindowAdapter/RecoverAndReconnectSceneSession
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRecoverManagerTest, RecoverAndReconnectSceneSession01, Function | SmallTest | Level2)
+HWTEST_F(WindowRecoverManagerTest, RecoverAndReconnectSceneSession01, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
     sptr<ISessionStage> iSessionStage;
@@ -133,7 +133,7 @@ HWTEST_F(WindowRecoverManagerTest, RecoverAndReconnectSceneSession01, Function |
  * @tc.desc: RecoverAndReconnectSceneSession
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRecoverManagerTest, RecoverAndReconnectSceneSession02, Function | SmallTest | Level2)
+HWTEST_F(WindowRecoverManagerTest, RecoverAndReconnectSceneSession02, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("RecoverAndReconnectSceneSession");
@@ -151,7 +151,7 @@ HWTEST_F(WindowRecoverManagerTest, RecoverAndReconnectSceneSession02, Function |
  * @tc.desc: RecoverAndReconnectSceneSession
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRecoverManagerTest, RecoverAndReconnectSceneSession, Function | SmallTest | Level2)
+HWTEST_F(WindowRecoverManagerTest, RecoverAndReconnectSceneSession, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("RecoverAndReconnectSceneSession");
@@ -165,7 +165,7 @@ HWTEST_F(WindowRecoverManagerTest, RecoverAndReconnectSceneSession, Function | S
  * @tc.desc: Register session recover listener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRecoverManagerTest, RegisterSessionRecoverListenerInputMethodFloat, Function | SmallTest | Level2)
+HWTEST_F(WindowRecoverManagerTest, RegisterSessionRecoverListenerInputMethodFloat, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
@@ -180,8 +180,7 @@ HWTEST_F(WindowRecoverManagerTest, RegisterSessionRecoverListenerInputMethodFloa
  * @tc.type: FUNC
  */
 HWTEST_F(WindowRecoverManagerTest,
-         RegisterSessionRecoverListenerNonDefaultCollaboratorType01,
-         Function | SmallTest | Level2)
+         RegisterSessionRecoverListenerNonDefaultCollaboratorType01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
@@ -197,8 +196,7 @@ HWTEST_F(WindowRecoverManagerTest,
  * @tc.type: FUNC
  */
 HWTEST_F(WindowRecoverManagerTest,
-         RegisterSessionRecoverListenerNonDefaultCollaboratorType02,
-         Function | SmallTest | Level2)
+         RegisterSessionRecoverListenerNonDefaultCollaboratorType02, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
@@ -213,7 +211,7 @@ HWTEST_F(WindowRecoverManagerTest,
  * @tc.desc: Register session recover listener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRecoverManagerTest, RegisterSessionRecoverListenerSuccess01, Function | SmallTest | Level2)
+HWTEST_F(WindowRecoverManagerTest, RegisterSessionRecoverListenerSuccess01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
@@ -229,7 +227,7 @@ HWTEST_F(WindowRecoverManagerTest, RegisterSessionRecoverListenerSuccess01, Func
  * @tc.desc: Register session recover listener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRecoverManagerTest, RegisterSessionRecoverListenerSuccess02, Function | SmallTest | Level2)
+HWTEST_F(WindowRecoverManagerTest, RegisterSessionRecoverListenerSuccess02, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
