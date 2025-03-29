@@ -617,6 +617,16 @@ DMError ScreenManager::SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> 
     return SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualScreenSurface(screenId, surface);
 }
 
+DMError ScreenManager::AddVirtualScreenBlockList(const std::vector<int32_t>& persistentIds)
+{
+    return SingletonContainer::Get<ScreenManagerAdapter>().AddVirtualScreenBlockList(persistentIds);
+}
+
+DMError ScreenManager::RemoveVirtualScreenBlockList(const std::vector<int32_t>& persistentIds)
+{
+    return SingletonContainer::Get<ScreenManagerAdapter>().RemoveVirtualScreenBlockList(persistentIds);
+}
+
 DMError ScreenManager::SetScreenPrivacyMaskImage(ScreenId screenId,
     const std::shared_ptr<Media::PixelMap>& privacyMaskImg)
 {
