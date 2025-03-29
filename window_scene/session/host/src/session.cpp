@@ -312,6 +312,8 @@ void Session::SetSessionInfo(const SessionInfo& info)
     sessionInfo_.isAtomicService_ = info.isAtomicService_;
     sessionInfo_.callState_ = info.callState_;
     sessionInfo_.processOptions = info.processOptions;
+    sessionInfo_.disableDelegator = info.disableDelegator;
+    sessionInfo_.reuseDelegatorWindow = info.reuseDelegatorWindow;
 }
 
 DisplayId Session::GetScreenId() const

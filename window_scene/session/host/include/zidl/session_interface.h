@@ -433,6 +433,17 @@ public:
     virtual WSError UpdateFlag(const std::string& flag) { return WSError::WS_OK; };
     virtual WSError UpdateRotationChangeRegistered(int32_t persistentId, bool isRegister) { return WSError::WS_OK; }
     virtual WSError GetIsHighlighted(bool& isHighlighted) { return WSError::WS_OK; }
+
+    /**
+     * @brief Notify when disableDelegator change to true
+     * 
+     * This function is used to notify disableDelegator change.<unnamed>
+     * 
+     * @caller SA
+     * @permission SA permission
+     * 
+     * @return Successful call returns WMError::WS_OK, otherwise it indicates failure
+     */
 };
 } // namespace OHOS::Rosen
 

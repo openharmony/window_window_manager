@@ -106,6 +106,7 @@ private:
     int HandleNotifyExtensionEventAsync(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyExtensionDetachToDisplay(MessageParcel& data, MessageParcel& reply);
     int HandleExtensionProviderData(MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    int HandleNotifyDisableDelegatorChange(MessageParcel& data, MessageParcel& reply);
 
     // PictureInPicture
     int HandleNotifyPiPWindowPrepareClose(MessageParcel& data, MessageParcel& reply);
