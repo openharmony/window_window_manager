@@ -6501,7 +6501,7 @@ void SceneSessionManager::UpdateFocusStatus(DisplayId displayId, const sptr<Scen
         NotifyFocusStatus(sceneSession, isFocused, focusGroup);
     }
     // notify listenerController
-    auto prevSession = GetSceneSession(lastFocusedSessionId);
+    auto prevSession = GetSceneSession(focusGroup->GetLastFocusedSessionId());
     if (isFocused && MissionChanged(prevSession, sceneSession)) {
         NotifyFocusStatusByMission(prevSession, sceneSession);
     }
