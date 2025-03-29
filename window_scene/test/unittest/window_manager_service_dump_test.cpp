@@ -69,7 +69,7 @@ namespace {
  * @tc.desc: GetSessionDumpInfo
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceDumpTest, GetSessionDumpInfo01, Function | SmallTest | Level3)
+HWTEST_F(WindowManagerServiceDumpTest, GetSessionDumpInfo01, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     std::string dumpInfo = "testDumpInfo";
@@ -113,7 +113,7 @@ HWTEST_F(WindowManagerServiceDumpTest, GetSessionDumpInfo01, Function | SmallTes
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceDumpTest, GetSessionDumpInfo02, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceDumpTest, GetSessionDumpInfo02, TestSize.Level1)
 {
     std::vector<std::string> params;
     std::string info = "info";
@@ -128,7 +128,7 @@ HWTEST_F(WindowManagerServiceDumpTest, GetSessionDumpInfo02, Function | SmallTes
  * @tc.desc: SceneSesionManager dump session info
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceDumpTest, DumpSessionInfo, Function | SmallTest | Level3)
+HWTEST_F(WindowManagerServiceDumpTest, DumpSessionInfo, TestSize.Level1)
 {
     SessionInfo info;
     std::ostringstream oss;
@@ -158,7 +158,7 @@ HWTEST_F(WindowManagerServiceDumpTest, DumpSessionInfo, Function | SmallTest | L
  * @tc.desc: ScreenSesionManager dump all session info
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceDumpTest, DumpSessionAll, Function | SmallTest | Level3)
+HWTEST_F(WindowManagerServiceDumpTest, DumpSessionAll, TestSize.Level1)
 {
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "WindowManagerServiceDumpTest";
@@ -177,7 +177,7 @@ HWTEST_F(WindowManagerServiceDumpTest, DumpSessionAll, Function | SmallTest | Le
  * @tc.desc: ScreenSesionManager dump session with id
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceDumpTest, DumpSessionWithId, Function | SmallTest | Level3)
+HWTEST_F(WindowManagerServiceDumpTest, DumpSessionWithId, TestSize.Level1)
 {
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "WindowManagerServiceDumpTest";
@@ -196,7 +196,7 @@ HWTEST_F(WindowManagerServiceDumpTest, DumpSessionWithId, Function | SmallTest |
  * @tc.desc: SceneSesionManager dump session element info
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceDumpTest, DumpSessionElementInfo, Function | SmallTest | Level3)
+HWTEST_F(WindowManagerServiceDumpTest, DumpSessionElementInfo, TestSize.Level1)
 {
     DumpRootSceneElementInfoFunc func_ = DumpRootSceneElementInfoFuncTest;
     ssm_->SetDumpRootSceneElementInfoListener(func_);
@@ -225,7 +225,7 @@ HWTEST_F(WindowManagerServiceDumpTest, DumpSessionElementInfo, Function | SmallT
  * @tc.desc: SceneSesionManager notify dump info result
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceDumpTest, NotifyDumpInfoResult, Function | SmallTest | Level3)
+HWTEST_F(WindowManagerServiceDumpTest, NotifyDumpInfoResult, TestSize.Level1)
 {
     std::vector<std::string> info = {"std::", "vector", "<std::string>"};
     ssm_->NotifyDumpInfoResult(info);
@@ -248,7 +248,7 @@ HWTEST_F(WindowManagerServiceDumpTest, NotifyDumpInfoResult, Function | SmallTes
  * @tc.desc: SceneSesionManager test GetAllSessionDumpInfo
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceDumpTest, GetAllSessionDumpInfo01, Function | SmallTest | Level3)
+HWTEST_F(WindowManagerServiceDumpTest, GetAllSessionDumpInfo01, TestSize.Level1)
 {
     SessionInfo info1;
     info1.abilityName_ = "GetAllSessionDumpInfo1";
@@ -277,7 +277,7 @@ HWTEST_F(WindowManagerServiceDumpTest, GetAllSessionDumpInfo01, Function | Small
  * @tc.desc: GetAllSessionDumpInfo
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceDumpTest, GetAllSessionDumpInfo02, Function | SmallTest | Level3)
+HWTEST_F(WindowManagerServiceDumpTest, GetAllSessionDumpInfo02, TestSize.Level1)
 {
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "SceneSessionManagerTest7";
@@ -310,7 +310,7 @@ HWTEST_F(WindowManagerServiceDumpTest, GetAllSessionDumpInfo02, Function | Small
  * @tc.desc: GetAllSessionDumpInfo
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceDumpTest, GetAllSessionDumpInfo03, Function | SmallTest | Level3)
+HWTEST_F(WindowManagerServiceDumpTest, GetAllSessionDumpInfo03, TestSize.Level1)
 {
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "SceneSessionManagerTest7";
@@ -334,7 +334,7 @@ HWTEST_F(WindowManagerServiceDumpTest, GetAllSessionDumpInfo03, Function | Small
  * @tc.desc: SceneSesionManager test GetAllSessionDumpDetailInfo
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceDumpTest, GetAllSessionDumpDetailInfo, Function | SmallTest | Level1)
+HWTEST_F(WindowManagerServiceDumpTest, GetAllSessionDumpDetailInfo, TestSize.Level1)
 {
     SessionInfo info1;
     info1.abilityName_ = "GetAllSessionDumpDetailInfo1";
@@ -364,7 +364,7 @@ HWTEST_F(WindowManagerServiceDumpTest, GetAllSessionDumpDetailInfo, Function | S
  * @tc.desc: SceneSesionManager test GetSpecifiedSessionDumpInfo
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceDumpTest, GetSpecifiedSessionDumpInfo, Function | SmallTest | Level3)
+HWTEST_F(WindowManagerServiceDumpTest, GetSpecifiedSessionDumpInfo, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "GetSpecifiedSessionDumpInfo";
@@ -383,7 +383,7 @@ HWTEST_F(WindowManagerServiceDumpTest, GetSpecifiedSessionDumpInfo, Function | S
  * @tc.desc: GetTotalUITreeInfo set gesture navigation enabled
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceDumpTest, GetTotalUITreeInfo, Function | SmallTest | Level3)
+HWTEST_F(WindowManagerServiceDumpTest, GetTotalUITreeInfo, TestSize.Level1)
 {
     std::string dumpInfo = "dumpInfo";
     ssm_->SetDumpUITreeFunc(nullptr);
@@ -400,7 +400,7 @@ HWTEST_F(WindowManagerServiceDumpTest, GetTotalUITreeInfo, Function | SmallTest 
  * @tc.desc: DumpSessionInfo
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceDumpTest, SceneSessionDumpSessionInfo, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceDumpTest, SceneSessionDumpSessionInfo, TestSize.Level1)
 {
     SessionInfo info;
     info.bundleName_ = "SceneSessionTest";
@@ -418,7 +418,7 @@ HWTEST_F(WindowManagerServiceDumpTest, SceneSessionDumpSessionInfo, Function | S
  * @tc.desc: DumpSessionElementInfo
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceDumpTest, SceneSessionDumpSessionElementInfo, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceDumpTest, SceneSessionDumpSessionElementInfo, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "Background01";
