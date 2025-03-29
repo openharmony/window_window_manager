@@ -2064,7 +2064,7 @@ sptr<Session> Session::GetMainOrFloatSession() const
     }
 }
 
-bool Session::IsAncestorsSession(int ancestorsId) const
+bool Session::IsAncestorsSession(int32_t ancestorsId) const
 {
     if (GetSessionProperty()->GetParentPersistentId() == ancestorsId) {
         return true;

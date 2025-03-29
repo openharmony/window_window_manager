@@ -642,7 +642,7 @@ public:
     sptr<Session> GetMainSession() const;
     sptr<Session> GetMainOrFloatSession() const;
     bool IsPcWindow() const;
-    bool IsAncestorsSession(int ancestorsId) const;
+    bool IsAncestorsSession(int32_t ancestorsId) const;
 
     /**
      * Window Property
