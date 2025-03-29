@@ -74,7 +74,7 @@ namespace {
  * @tc.desc: EnableInputEventListener Test
  * @tc.type: FUNC
  */
-HWTEST_F(IntentionEventManagerTest, EnableInputEventListener, TestSize.Level1)
+HWTEST_F(IntentionEventManagerTest, EnableInputEventListener, TestSize.Level0)
 {
     bool enable = DelayedSingleton<IntentionEventManager>::GetInstance()->
         EnableInputEventListener(nullptr, nullptr);
@@ -145,7 +145,7 @@ HWTEST_F(IntentionEventManagerTest, OnInputEvent0, TestSize.Level1)
  * @tc.desc: OnInputEvent1 Test
  * @tc.type: FUNC
  */
-HWTEST_F(IntentionEventManagerTest, OnInputEvent1, TestSize.Level1)
+HWTEST_F(IntentionEventManagerTest, OnInputEvent1, TestSize.Level0)
 {
     std::shared_ptr<MMI::KeyEvent> keyEvent = nullptr;
     inputEventListener_->OnInputEvent(keyEvent);
@@ -292,7 +292,7 @@ HWTEST_F(IntentionEventManagerTest, IsKeyboardEvent, TestSize.Level1)
  * @tc.desc: DispatchKeyEventCallback Test
  * @tc.type: FUNC
  */
-HWTEST_F(IntentionEventManagerTest, DispatchKeyEventCallback, TestSize.Level1)
+HWTEST_F(IntentionEventManagerTest, DispatchKeyEventCallback, TestSize.Level0)
 {
     std::shared_ptr<MMI::KeyEvent> keyEvent = nullptr;
     inputEventListener_->DispatchKeyEventCallback(2024, keyEvent, true);
@@ -320,7 +320,7 @@ HWTEST_F(IntentionEventManagerTest, DispatchKeyEventCallback, TestSize.Level1)
  * @tc.desc: CheckPointerEvent Test
  * @tc.type: FUNC
  */
-HWTEST_F(IntentionEventManagerTest, CheckPointerEvent, TestSize.Level1)
+HWTEST_F(IntentionEventManagerTest, CheckPointerEvent, TestSize.Level0)
 {
     std::shared_ptr<MMI::PointerEvent> pointerEvent = nullptr;
     std::shared_ptr<IntentionEventManager::InputEventListener> inputEventListener =
@@ -342,7 +342,7 @@ HWTEST_F(IntentionEventManagerTest, CheckPointerEvent, TestSize.Level1)
  * @tc.desc: OnInputEventPointer1 Test
  * @tc.type: FUNC
  */
-HWTEST_F(IntentionEventManagerTest, OnInputEventPointer1, TestSize.Level1)
+HWTEST_F(IntentionEventManagerTest, OnInputEventPointer1, TestSize.Level0)
 {
     auto pointerEvent = MMI::PointerEvent::Create();
     EXPECT_NE(nullptr, pointerEvent);

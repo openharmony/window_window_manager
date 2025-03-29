@@ -1308,7 +1308,7 @@ HWTEST_F(SceneSessionTest5, ProcessUpdatePropertyByAction, TestSize.Level1)
  * @tc.desc: HandleActionUpdateTurnScreenOn function01
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest5, HandleActionUpdateTurnScreenOn, TestSize.Level1)
+HWTEST_F(SceneSessionTest5, HandleActionUpdateTurnScreenOn, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "HandleActionUpdateTurnScreenOn";
@@ -1334,7 +1334,7 @@ HWTEST_F(SceneSessionTest5, HandleActionUpdateTurnScreenOn, TestSize.Level1)
  * @tc.desc: HandleActionUpdatePrivacyMode1
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest5, HandleActionUpdatePrivacyMode1, TestSize.Level1)
+HWTEST_F(SceneSessionTest5, HandleActionUpdatePrivacyMode1, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "HandleActionUpdatePrivacyMode1";

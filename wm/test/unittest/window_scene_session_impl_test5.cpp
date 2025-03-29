@@ -694,7 +694,7 @@ HWTEST_F(WindowSceneSessionImplTest5, StartMoveWindowWithCoordinate_02, TestSize
  * @tc.desc: UpdateSystemBarProperties test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest5, UpdateSystemBarProperties, TestSize.Level1)
+HWTEST_F(WindowSceneSessionImplTest5, UpdateSystemBarProperties, TestSize.Level0)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("UpdateSystemBarProperties");

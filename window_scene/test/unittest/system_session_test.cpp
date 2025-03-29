@@ -409,7 +409,7 @@ HWTEST_F(SystemSessionTest, Show01, TestSize.Level1)
  * @tc.desc: test function : Hide
  * @tc.type: FUNC
  */
-HWTEST_F(SystemSessionTest, Hide01, TestSize.Level1)
+HWTEST_F(SystemSessionTest, Hide01, TestSize.Level0)
 {
     auto sysSession = GetSystemSession("Hide01");
     ASSERT_NE(sysSession, nullptr);

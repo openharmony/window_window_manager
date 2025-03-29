@@ -1727,7 +1727,7 @@ HWTEST_F(SceneSessionManagerTest4, IsParentSessionVisible, TestSize.Level1)
  * @tc.desc: GetTopFocusableNonAppSession
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest4, GetTopFocusableNonAppSession, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest4, GetTopFocusableNonAppSession, TestSize.Level0)
 {
     ASSERT_NE(ssm_, nullptr);
     SessionInfo sessionInfo;
@@ -1795,7 +1795,7 @@ HWTEST_F(SceneSessionManagerTest4, GetTopFocusableNonAppSession01, TestSize.Leve
  * @tc.desc: GetNextFocusableSession
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest4, GetNextFocusableSession, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest4, GetNextFocusableSession, TestSize.Level0)
 {
     ASSERT_NE(ssm_, nullptr);
     SessionInfo sessionInfo;
@@ -1844,7 +1844,7 @@ HWTEST_F(SceneSessionManagerTest4, GetNextFocusableSession, TestSize.Level1)
  * @tc.desc: GetTopNearestBlockingFocusSession
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest4, GetTopNearestBlockingFocusSession, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest4, GetTopNearestBlockingFocusSession, TestSize.Level0)
 {
     ASSERT_NE(ssm_, nullptr);
     SessionInfo sessionInfo;
@@ -1897,7 +1897,7 @@ HWTEST_F(SceneSessionManagerTest4, GetTopNearestBlockingFocusSession, TestSize.L
  * @tc.desc: RequestFocusSpecificCheck
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest4, RequestFocusSpecificCheck, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest4, RequestFocusSpecificCheck, TestSize.Level0)
 {
     ASSERT_NE(ssm_, nullptr);
     SessionInfo sessionInfo;

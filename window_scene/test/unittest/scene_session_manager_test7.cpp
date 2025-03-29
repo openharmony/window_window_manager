@@ -347,7 +347,7 @@ HWTEST_F(SceneSessionManagerTest7, DestroySpecificSession, TestSize.Level1)
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerTest7, DestroyAndDisconnectSpecificSessionWithDetachCallback,
-    TestSize.Level1)
+    TestSize.Level0)
 {
     int32_t persistentId = 1;
     sptr<IRemoteObject> callback = sptr<IRemoteObjectMocker>::MakeSptr();
@@ -369,7 +369,7 @@ HWTEST_F(SceneSessionManagerTest7, DestroyAndDisconnectSpecificSessionWithDetach
  * @tc.desc: DestroyAndDisconnectSpecificSessionInner
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest7, DestroyAndDisconnectSpecificSessionInner, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest7, DestroyAndDisconnectSpecificSessionInner, TestSize.Level0)
 {
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "SceneSessionManagerTest7";
@@ -399,7 +399,7 @@ HWTEST_F(SceneSessionManagerTest7, DestroyAndDisconnectSpecificSessionInner, Tes
  * @tc.desc: DestroyAndDisconnectSpecificSessionInner
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest7, DestroyAndDisconnectSpecificSessionInner01, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest7, DestroyAndDisconnectSpecificSessionInner01, TestSize.Level0)
 {
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "SceneSessionManagerTest7";
@@ -429,7 +429,7 @@ HWTEST_F(SceneSessionManagerTest7, DestroyAndDisconnectSpecificSessionInner01, T
  * @tc.desc: DestroyAndDisconnectSpecificSessionInner
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest7, DestroyAndDisconnectSpecificSessionInner02, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest7, DestroyAndDisconnectSpecificSessionInner02, TestSize.Level0)
 {
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "SceneSessionManagerTest7";
@@ -459,7 +459,7 @@ HWTEST_F(SceneSessionManagerTest7, DestroyAndDisconnectSpecificSessionInner02, T
  * @tc.desc: DestroyAndDisconnectSpecificSessionInner
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest7, DestroyAndDisconnectSpecificSessionInner03, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest7, DestroyAndDisconnectSpecificSessionInner03, TestSize.Level0)
 {
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "SceneSessionManagerTest7";

@@ -253,7 +253,7 @@ HWTEST_F(KeyboardSessionTest2, OpenKeyboardSyncTransaction, TestSize.Level1)
  * @tc.desc: BindKeyboardPanelSession
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest2, BindKeyboardPanelSession, TestSize.Level1)
+HWTEST_F(KeyboardSessionTest2, BindKeyboardPanelSession, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "BindKeyboardPanelSession";
@@ -276,7 +276,7 @@ HWTEST_F(KeyboardSessionTest2, BindKeyboardPanelSession, TestSize.Level1)
  * @tc.desc: GetKeyboardGravity01
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest2, GetKeyboardGravity01, TestSize.Level1)
+HWTEST_F(KeyboardSessionTest2, GetKeyboardGravity01, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "GetKeyboardGravity";
@@ -403,7 +403,7 @@ HWTEST_F(KeyboardSessionTest2, OpenKeyboardSyncTransaction01, TestSize.Level1)
  * @tc.desc: test function : Hide
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest2, Hide01, TestSize.Level1)
+HWTEST_F(KeyboardSessionTest2, Hide01, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "Hide";
@@ -445,7 +445,7 @@ HWTEST_F(KeyboardSessionTest2, Hide01, TestSize.Level1)
  * @tc.desc: test function : RaiseCallingSession
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest2, RaiseCallingSession01, TestSize.Level1)
+HWTEST_F(KeyboardSessionTest2, RaiseCallingSession01, TestSize.Level0)
 {
     auto keyboardSession = GetKeyboardSession("RaiseCallingSession01",
         "RaiseCallingSession01");
@@ -498,7 +498,7 @@ HWTEST_F(KeyboardSessionTest2, RaiseCallingSession01, TestSize.Level1)
  * @tc.desc: test function : RaiseCallingSession
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest2, RaiseCallingSession02, TestSize.Level1)
+HWTEST_F(KeyboardSessionTest2, RaiseCallingSession02, TestSize.Level0)
 {
     Rosen::WSRect keyboardPanelRect{ 1, 1, 1, 1 };
     auto keyboardSession = GetKeyboardSession("RaiseCallingSession02",
@@ -536,7 +536,7 @@ HWTEST_F(KeyboardSessionTest2, RaiseCallingSession02, TestSize.Level1)
  * @tc.desc: test function : RaiseCallingSession
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest2, RaiseCallingSession03, TestSize.Level1)
+HWTEST_F(KeyboardSessionTest2, RaiseCallingSession03, TestSize.Level0)
 {
     Rosen::WSRect keyboardPanelRect{ 1, 1, 1, 1 };
     auto keyboardSession = GetKeyboardSession("RaiseCallingSession03",
