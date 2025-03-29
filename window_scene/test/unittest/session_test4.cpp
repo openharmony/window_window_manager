@@ -1058,6 +1058,7 @@ HWTEST_F(WindowSessionTest4, GetWindowMetaInfoForWindowInfo01, TestSize.Level1)
     sceneSession->SetSessionGlobalRect(rect);
     sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
     sceneSession->GetSessionProperty()->SetDisplayId(0);
+    sceneSession->callingPid_ = 123;
     SessionInfo sessionInfo1;
     sessionInfo1.isSystem_ = true;
     sessionInfo1.abilityName_ = "abilityName1";
@@ -1074,6 +1075,7 @@ HWTEST_F(WindowSessionTest4, GetWindowMetaInfoForWindowInfo01, TestSize.Level1)
     ASSERT_EQ(windowMetaInfo.windowName, sceneSession->GetSessionProperty()->GetWindowName());
     ASSERT_EQ(windowMetaInfo.bundleName, sceneSession->GetSessionInfo().bundleName_);
     ASSERT_EQ(windowMetaInfo.abilityName, sceneSession->GetSessionInfo().abilityName_);
+    ASSERT_EQ(windowMetaInfo.pid, sceneSession->GetCallingPid());
     WindowMetaInfo windowMetaInfo1 = sceneSession1->GetWindowMetaInfoForWindowInfo();
     ASSERT_EQ(windowMetaInfo1 .windowName, sceneSession1->GetSessionInfo().abilityName_);
 }
