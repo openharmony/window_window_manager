@@ -3834,8 +3834,8 @@ napi_value JsSceneSessionManager::OnNotifyAboveLockScreen(napi_env env, napi_cal
 
 napi_value JsSceneSessionManager::OnCloneWindow(napi_env env, napi_callback_info info)
 {
-    size_t argc = ARGC_TWO;
-    napi_value argv[ARGC_TWO] = { nullptr };
+    size_t argc = ARGC_THREE;
+    napi_value argv[ARGC_THREE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_TWO) {
         TLOGE(WmsLogTag::WMS_PC, "Argc is invalid: %{public}zu", argc);
@@ -3858,7 +3858,13 @@ napi_value JsSceneSessionManager::OnCloneWindow(napi_env env, napi_callback_info
         return NapiGetUndefined(env);
     }
     TLOGI(WmsLogTag::WMS_PC, "from:%{public}d to:%{public}d", fromPersistentId, toPersistentId);
-    SceneSessionManager::GetInstance().CloneWindow(fromPersistentId, toPersistentId);
+    if (argc >= ARGC_THREE && GetType(env, argv[ARGC_TWO]) == napi_boolean) {
+        bool needOffScreen = true;
+        ConvertFromJsValue(env, argv[ARGC_TWO], needOffScreen);
+        SceneSessionManager::GetInstance().CloneWindow(fromPersistentId, toPersistentId, needOffScreen);
+    } else {
+        SceneSessionManager::GetInstance().CloneWindow(fromPersistentId, toPersistentId);
+    }
     return NapiGetUndefined(env);
 }
 

@@ -14027,9 +14027,9 @@ void SceneSessionManager::GetStatusBarAvoidHeight(WSRect& barArea)
         barArea.height_ : statusBarAvoidHeight_;
 }
 
-WSError SceneSessionManager::CloneWindow(int32_t fromPersistentId, int32_t toPersistentId)
+WSError SceneSessionManager::CloneWindow(int32_t fromPersistentId, int32_t toPersistentId, bool needOffScreen)
 {
-    return taskScheduler_->PostSyncTask([this, fromPersistentId, toPersistentId]() {
+    return taskScheduler_->PostSyncTask([this, fromPersistentId, toPersistentId, needOffScreen]() {
         auto toSceneSession = GetSceneSession(toPersistentId);
         if (toSceneSession == nullptr) {
             TLOGNE(WmsLogTag::WMS_PC, "Session is nullptr, id: %{public}d", toPersistentId);
@@ -14046,7 +14046,7 @@ WSError SceneSessionManager::CloneWindow(int32_t fromPersistentId, int32_t toPer
                 return WSError::WS_ERROR_NULLPTR;
             }
         }
-        toSceneSession->CloneWindow(nodeId);
+        toSceneSession->CloneWindow(nodeId, needOffScreen);
         TLOGNI(WmsLogTag::WMS_PC, "fromSurfaceId: %{public}" PRIu64, nodeId);
         return WSError::WS_OK;
     }, __func__);
