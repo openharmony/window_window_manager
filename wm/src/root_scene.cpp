@@ -17,8 +17,8 @@
 
 #include <bundlemgr/launcher_service.h>
 #include <event_handler.h>
-#include <int_wrapper.h>
 #include <input_manager.h>
+#include <int_wrapper.h>
 #include <iremote_stub.h>
 #include <transaction/rs_interfaces.h>
 #include <ui_content.h>
