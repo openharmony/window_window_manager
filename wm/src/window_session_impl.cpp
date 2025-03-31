@@ -2523,15 +2523,6 @@ WMError WindowSessionImpl::GetDecorHeight(int32_t& height)
         return err;
     }
     height = static_cast<int32_t>(height / vpr);
-    if (GetTargetAPIVersion() >= API_VERSION_18) { // 18: isolated version
-        // SetDecorHeight and GetDecorHeight round down twice, resulting in a 1vp precision loss.
-        if (decorHeight_ - height == 1) {
-            height = decorHeight_;
-        } else if (decorHeight_ == 0) {
-            // There is also a loss of precision when the display size changes.
-            decorHeight_ = height;
-        }
-    }
     TLOGD(WmsLogTag::WMS_DECOR, "end, height: %{public}d", height);
     return WMError::WM_OK;
 }
@@ -2592,9 +2583,7 @@ WMError WindowSessionImpl::GetTitleButtonArea(TitleButtonRect& titleButtonRect)
     res = uiContent->GetContainerModalButtonsRect(decorRect, titleButtonLeftRect);
     if (!res) {
         TLOGE(WmsLogTag::WMS_DECOR, "GetContainerModalButtonsRect failed");
-        if (GetTargetAPIVersion() >= API_VERSION_18) { // 18: isolated version
-            titleButtonRect.ResetRect();
-        }
+        titleButtonRect.IsUninitializedRect();
         return WMError::WM_OK;
     }
     float vpr = 0.f;
@@ -2652,17 +2641,12 @@ WMError WindowSessionImpl::RegisterWindowTitleButtonRectChangeListener(
                 TLOGNE(WmsLogTag::WMS_DECOR, "%{public}s window is null", where);
                 return;
             }
-            TitleButtonRect titleButtonRect;
-            if (window->GetTargetAPIVersion() >= API_VERSION_18 && // 18: isolated version
-                titleButtonLeftRect.IsUninitializedRect()) {
-                window->NotifyWindowTitleButtonRectChange(titleButtonRect);
-                return;
-            }
             float vpr = 0.f;
             auto err = window->GetVirtualPixelRatio(vpr);
             if (err != WMError::WM_OK) {
                 return;
             }
+            TitleButtonRect titleButtonRect;
             titleButtonRect.posX_ = static_cast<int32_t>(decorRect.width_) -
                 static_cast<int32_t>(titleButtonLeftRect.width_) - titleButtonLeftRect.posX_;
             titleButtonRect.posX_ = static_cast<int32_t>(titleButtonRect.posX_ / vpr);
