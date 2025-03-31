@@ -417,7 +417,7 @@ HWTEST_F(WindowSceneSessionImplTest4, ResetSuperFoldDisplayY, TestSize.Level1)
  * @tc.desc: ConsumePointerEventInner
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest4, ConsumePointerEventInner, TestSize.Level1)
+HWTEST_F(WindowSceneSessionImplTest4, ConsumePointerEventInner, TestSize.Level0)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("ConsumePointerEventInner");
@@ -696,7 +696,7 @@ HWTEST_F(WindowSceneSessionImplTest4, GetSystemBarPropertyByType, TestSize.Level
  * @tc.desc: SetSpecificBarProperty
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest4, SetSpecificBarProperty, TestSize.Level1)
+HWTEST_F(WindowSceneSessionImplTest4, SetSpecificBarProperty, TestSize.Level0)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetSpecificBarProperty");

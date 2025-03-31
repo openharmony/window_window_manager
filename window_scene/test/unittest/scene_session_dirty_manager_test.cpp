@@ -97,7 +97,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, NotifyWindowInfoChange, TestSize.Level1)
  * @tc.desc: GetFullWindowInfoList
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest, GetFullWindowInfoList, TestSize.Level1)
+HWTEST_F(SceneSessionDirtyManagerTest, GetFullWindowInfoList, TestSize.Level0)
 {
     auto [windowInfoList, pixelMapList] = manager_->GetFullWindowInfoList();
     SessionInfo info;
@@ -241,7 +241,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, IsFilterSession02, TestSize.Level1)
  * @tc.desc: GetWindowInfo
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest, GetWindowInfo, TestSize.Level1)
+HWTEST_F(SceneSessionDirtyManagerTest, GetWindowInfo, TestSize.Level0)
 {
     manager_->GetWindowInfo(nullptr, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
     SessionInfo info;
@@ -283,7 +283,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, GetWindowInfo, TestSize.Level1)
  * @tc.desc: CalNotRotateTransform
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest, CalNotRotateTransform, TestSize.Level1)
+HWTEST_F(SceneSessionDirtyManagerTest, CalNotRotateTransform, TestSize.Level0)
 {
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "CalNotRotateTransform";
@@ -415,7 +415,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, CalTransform, TestSize.Level1)
  * @tc.desc: UpdateHotAreas
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest, UpdateHotAreas, TestSize.Level1)
+HWTEST_F(SceneSessionDirtyManagerTest, UpdateHotAreas, TestSize.Level0)
 {
     std::vector<MMI::Rect> touchHotAreas(0);
     std::vector<MMI::Rect> pointerHotAreas(0);
@@ -618,7 +618,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, GetDialogSessionMap02, TestSize.Level1)
  * @tc.desc: UpdatePointerAreas
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest, UpdatePointerAreas, TestSize.Level1)
+HWTEST_F(SceneSessionDirtyManagerTest, UpdatePointerAreas, TestSize.Level0)
 {
     std::vector<int32_t> pointerChangeAreas;
     SessionInfo info;

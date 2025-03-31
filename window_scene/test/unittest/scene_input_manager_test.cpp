@@ -141,7 +141,7 @@ void MaxWindowInfoTest(sptr<SceneSessionManager> ssm_)
  * @tc.desc: check func FlushDisplayInfoToMMI
  * @tc.type: FUNC
  */
-HWTEST_F(SceneInputManagerTest, FlushDisplayInfoToMMI, TestSize.Level1)
+HWTEST_F(SceneInputManagerTest, FlushDisplayInfoToMMI, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "SceneInputManagerTest: FlushDisplayInfoToMMI start";
     int ret = 0;
@@ -176,7 +176,7 @@ HWTEST_F(SceneInputManagerTest, FlushDisplayInfoToMMI, TestSize.Level1)
  * @tc.desc: check func NotifyWindowInfoChange
  * @tc.type: FUNC
  */
-HWTEST_F(SceneInputManagerTest, NotifyWindowInfoChange, TestSize.Level1)
+HWTEST_F(SceneInputManagerTest, NotifyWindowInfoChange, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "SceneInputManagerTest: NotifyWindowInfoChange start";
     SessionInfo info;
@@ -208,7 +208,7 @@ HWTEST_F(SceneInputManagerTest, NotifyWindowInfoChange, TestSize.Level1)
  * @tc.desc: check func NotifyWindowInfoChangeFromSession
  * @tc.type: FUNC
  */
-HWTEST_F(SceneInputManagerTest, NotifyWindowInfoChangeFromSession, TestSize.Level1)
+HWTEST_F(SceneInputManagerTest, NotifyWindowInfoChangeFromSession, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "SceneInputManagerTest: NotifyWindowInfoChangeFromSession start";
     SessionInfo info;
@@ -372,7 +372,7 @@ HWTEST_F(SceneInputManagerTest, CheckNeedUpdate1, TestSize.Level1)
  * @tc.desc: CheckNeedUpdate
  * @tc.type: FUNC
  */
-HWTEST_F(SceneInputManagerTest, CheckNeedUpdate2, TestSize.Level1)
+HWTEST_F(SceneInputManagerTest, CheckNeedUpdate2, TestSize.Level0)
 {
     std::vector<MMI::DisplayInfo> displayInfos;
     std::vector<MMI::WindowInfo> windowInfoList;
@@ -546,7 +546,7 @@ HWTEST_F(SceneInputManagerTest, CheckNeedUpdate4, TestSize.Level1)
  * @tc.desc: CheckNeedUpdate
  * @tc.type: FUNC
  */
-HWTEST_F(SceneInputManagerTest, CheckNeedUpdate5, TestSize.Level1)
+HWTEST_F(SceneInputManagerTest, CheckNeedUpdate5, TestSize.Level0)
 {
     std::vector<MMI::DisplayInfo> displayInfos;
     std::vector<MMI::WindowInfo> windowInfoList;

@@ -982,7 +982,7 @@ HWTEST_F(WindowImplTest2, DumpInfo, TestSize.Level1)
  * @tc.desc: SetLayoutFullScreen test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest2, SetLayoutFullScreen, TestSize.Level1)
+HWTEST_F(WindowImplTest2, SetLayoutFullScreen, TestSize.Level0)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetLayoutFullScreen");

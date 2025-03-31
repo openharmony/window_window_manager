@@ -107,7 +107,7 @@ namespace {
  * @tc.desc: Create window and destroy window
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest, CreateWindowAndDestroy01, TestSize.Level1)
+HWTEST_F(WindowSceneSessionImplTest, CreateWindowAndDestroy01, TestSize.Level0)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("CreateWindowAndDestroy01");
@@ -129,7 +129,7 @@ HWTEST_F(WindowSceneSessionImplTest, CreateWindowAndDestroy01, TestSize.Level1)
  * @tc.desc: Create window and destroy window
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest, CreateWindowAndDestroy02, TestSize.Level1)
+HWTEST_F(WindowSceneSessionImplTest, CreateWindowAndDestroy02, TestSize.Level0)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("CreateWindowAndDestroy02");
@@ -150,7 +150,7 @@ HWTEST_F(WindowSceneSessionImplTest, CreateWindowAndDestroy02, TestSize.Level1)
  * @tc.desc: CreateAndConnectSpecificSession
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession01, TestSize.Level1)
+HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession01, TestSize.Level0)
 {
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
@@ -349,7 +349,7 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession07, TestSize
  * @tc.desc: CreateAndConnectSpecificSession
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession08, TestSize.Level1)
+HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession08, TestSize.Level0)
 {
     constexpr int parentId = 10000;
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
@@ -394,7 +394,7 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession08, TestSize
  * @tc.desc: CreateAndConnectSpecificSession
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession09, TestSize.Level1)
+HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession09, TestSize.Level0)
 {
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
@@ -457,7 +457,7 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession10, TestSize
  * @tc.desc: CreateAndConnectSpecificSession
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession11, TestSize.Level1)
+HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession11, TestSize.Level0)
 {
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
@@ -938,7 +938,7 @@ HWTEST_F(WindowSceneSessionImplTest, Maximize01, TestSize.Level1)
  * @tc.desc: Hide session
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest, Hide01, TestSize.Level1)
+HWTEST_F(WindowSceneSessionImplTest, Hide01, TestSize.Level0)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Hide01");
@@ -970,7 +970,7 @@ HWTEST_F(WindowSceneSessionImplTest, Hide01, TestSize.Level1)
  * @tc.desc: Show session
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest, Show01, TestSize.Level1)
+HWTEST_F(WindowSceneSessionImplTest, Show01, TestSize.Level0)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Show01");
@@ -1455,7 +1455,7 @@ HWTEST_F(WindowSceneSessionImplTest, NotifyWindowNeedAvoid, TestSize.Level1)
  * @tc.desc: SetLayoutFullScreenByApiVersion test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest, SetLayoutFullScreenByApiVersion, TestSize.Level1)
+HWTEST_F(WindowSceneSessionImplTest, SetLayoutFullScreenByApiVersion, TestSize.Level0)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetLayoutFullScreenByApiVersion");
@@ -1699,7 +1699,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetSnapshotSkip, TestSize.Level1)
  * @tc.desc: SetImmersiveModeEnabledState test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest, SetImmersiveModeEnabledState, TestSize.Level1)
+HWTEST_F(WindowSceneSessionImplTest, SetImmersiveModeEnabledState, TestSize.Level0)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
@@ -1743,7 +1743,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetImmersiveModeEnabledState, TestSize.Leve
  * @tc.desc: SetLayoutFullScreen test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest, SetLayoutFullScreen01, TestSize.Level1)
+HWTEST_F(WindowSceneSessionImplTest, SetLayoutFullScreen01, TestSize.Level0)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
@@ -1802,7 +1802,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetTitleAndDockHoverShown, TestSize.Level1)
  * @tc.desc: SetLayoutFullScreen test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest, SetLayoutFullScreen02, TestSize.Level1)
+HWTEST_F(WindowSceneSessionImplTest, SetLayoutFullScreen02, TestSize.Level0)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
@@ -1847,7 +1847,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetLayoutFullScreen03, TestSize.Level1)
  * @tc.desc: SetFullScreen test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest, SetFullScreen, TestSize.Level1)
+HWTEST_F(WindowSceneSessionImplTest, SetFullScreen, TestSize.Level0)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);

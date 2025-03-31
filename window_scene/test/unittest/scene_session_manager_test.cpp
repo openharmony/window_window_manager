@@ -2094,7 +2094,7 @@ HWTEST_F(SceneSessionManagerTest, RemoveProcessWatermarkPid, TestSize.Level1)
  * @tc.desc: SceneSesionManager SetSessionWatermarkForAppProcess
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest, SetSessionWatermarkForAppProcess, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest, SetSessionWatermarkForAppProcess, TestSize.Level0)
 {
     SessionInfo info;
     sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, nullptr);

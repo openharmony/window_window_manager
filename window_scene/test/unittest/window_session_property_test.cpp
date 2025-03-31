@@ -104,7 +104,7 @@ HWTEST_F(WindowSessionPropertyTest, SetSessionInfo, TestSize.Level1)
  * @tc.desc: SetPrivacyMode as true and false
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionPropertyTest, SetPrivacyMode, TestSize.Level1)
+HWTEST_F(WindowSessionPropertyTest, SetPrivacyMode, TestSize.Level0)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
@@ -418,7 +418,7 @@ HWTEST_F(WindowSessionPropertyTest, IsFloatingWindowAppType, TestSize.Level1)
  * @tc.desc: SetTouchHotAreas test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionPropertyTest, SetTouchHotAreas, TestSize.Level1)
+HWTEST_F(WindowSessionPropertyTest, SetTouchHotAreas, TestSize.Level0)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     Rect rect { 4, 4, 4, 4 };

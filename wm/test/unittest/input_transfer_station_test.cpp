@@ -61,7 +61,7 @@ namespace {
  * @tc.type: FUNC
  * @tc.require: issueI5I5L4
  */
-HWTEST_F(InputTransferStationTest, AddInputWindow, TestSize.Level1)
+HWTEST_F(InputTransferStationTest, AddInputWindow, TestSize.Level0)
 {
     if (!window_) {
         GTEST_LOG_(INFO) << "Null Pointer";
@@ -85,7 +85,7 @@ HWTEST_F(InputTransferStationTest, AddInputWindow, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: issueI5I5L4
  */
-HWTEST_F(InputTransferStationTest, RemoveInputWindow, TestSize.Level1)
+HWTEST_F(InputTransferStationTest, RemoveInputWindow, TestSize.Level0)
 {
     InputTransferStation::GetInstance().destroyed_ = true;
     InputTransferStation::GetInstance().RemoveInputWindow(window_->GetWindowId());
@@ -172,7 +172,7 @@ HWTEST_F(InputTransferStationTest, OnInputEvent3, TestSize.Level1)
  * @tc.desc: GetInputChannel
  * @tc.type: FUNC
  */
-HWTEST_F(InputTransferStationTest, GetInputChannel, TestSize.Level1)
+HWTEST_F(InputTransferStationTest, GetInputChannel, TestSize.Level0)
 {
     InputTransferStation::GetInstance().destroyed_ = true;
     auto channel = InputTransferStation::GetInstance().GetInputChannel(0);
