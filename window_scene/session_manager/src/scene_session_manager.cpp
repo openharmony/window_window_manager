@@ -8044,6 +8044,11 @@ void SceneSessionManager::NotifyCompleteFirstFrameDrawing(int32_t persistentId)
         }
         ProcessPreload(*abilityInfo);
     };
+
+    if (sceneSession->GetLeashWinSurfaceNode()) {
+        SetSkipSelfWhenShowOnVirtualScreen(sceneSession->GetLeashWinSurfaceNode()->GetId(),
+            sceneSession->GetSkipSelfWhenShowOnVirtualScreen());
+    }
     return taskScheduler_->PostAsyncTask(task, "NotifyCompleteFirstFrameDrawing" + std::to_string(persistentId));
 }
 
