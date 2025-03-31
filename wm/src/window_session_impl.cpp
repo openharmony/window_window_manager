@@ -61,6 +61,7 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowSessionImpl"};
 constexpr int32_t FORCE_SPLIT_MODE = 5;
 constexpr int32_t API_VERSION_18 = 18;
+constexpr uint32_t API_VERSION_MOD = 1000;
 constexpr uint32_t LIFECYCLE_ISOLATE_VERSION = 18;
 constexpr int32_t  WINDOW_ROTATION_CHANGE = 20;
 
@@ -4229,14 +4230,29 @@ EnableIfSame<T, IAvoidAreaChangedListener,
 
 void WindowSessionImpl::NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
 {
-    TLOGI(WmsLogTag::WMS_IMMS,
-          "win [%{public}d %{public}s] type %{public}d area %{public}s",
-          GetPersistentId(), GetWindowName().c_str(), type, avoidArea->ToString().c_str());
     std::lock_guard<std::recursive_mutex> lockListener(avoidAreaChangeListenerMutex_);
     auto avoidAreaChangeListeners = GetListeners<IAvoidAreaChangedListener>();
+    bool isUIExtensionWithSystemHost =
+        WindowHelper::IsUIExtensionWindow(GetType()) && WindowHelper::IsSystemWindow(GetRootHostWindowType());
+    bool isSystemWindow = WindowHelper::IsSystemWindow(GetType());
+    uint32_t currentApiVersion = 0;
+    if (context_ != nullptr && context_->GetApplicationInfo() != nullptr) {
+        currentApiVersion = context_->GetApplicationInfo()->apiTargetVersion % API_VERSION_MOD;
+    }
+    AvoidArea newAvoidArea;
+    // api 18 isolation for UEC with system host window
+    if ((isUIExtensionWithSystemHost || isSystemWindow) && currentApiVersion < API_VERSION_18) {
+        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d api %{public}u type %{public}d not supported",
+            GetPersistentId(), currentApiVersion, type);
+    } else {
+        newAvoidArea = *avoidArea;
+        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d api %{public}u type %{public}d area %{public}s",
+            GetPersistentId(), currentApiVersion, type, newAvoidArea.ToString().c_str());
+    }
+
     for (auto& listener : avoidAreaChangeListeners) {
         if (listener != nullptr) {
-            listener->OnAvoidAreaChanged(*avoidArea, type);
+            listener->OnAvoidAreaChanged(newAvoidArea, type);
         }
     }
 }
@@ -5804,6 +5820,10 @@ void WindowSessionImpl::GetExtensionConfig(AAFwk::WantParams& want) const
     bool isWaterfallMode = isFullScreenWaterfallMode_.load();
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "waterfall: %{public}d, winId: %{public}u", isWaterfallMode, GetWindowId());
     want.SetParam(Extension::WATERFALL_MODE_FIELD, AAFwk::Integer::Box(static_cast<int32_t>(isWaterfallMode)));
+    WindowType rootHostWindowType = (GetType() == WindowType::WINDOW_TYPE_UI_EXTENSION) ?
+                                    GetRootHostWindowType() : GetType();
+    want.SetParam(Extension::ROOT_HOST_WINDOW_TYPE_FIELD,
+                  AAFwk::Integer::Box(static_cast<int32_t>(rootHostWindowType)));
 }
 
 void WindowSessionImpl::UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>& want)
@@ -5822,8 +5842,12 @@ void WindowSessionImpl::UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>
     isFullScreenWaterfallMode_.store(static_cast<bool>(waterfallModeValue));
     isValidWaterfallMode_.store(true);
     want->RemoveParam(Extension::UIEXTENSION_CONFIG_FIELD);
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "CrossAxisState: %{public}d, waterfall: %{public}d, winId: %{public}u",
-        state, isFullScreenWaterfallMode_.load(), GetWindowId());
+    auto rootHostWindowType =
+        static_cast<WindowType>(configParam.GetIntParam(Extension::ROOT_HOST_WINDOW_TYPE_FIELD, 0));
+    SetRootHostWindowType(rootHostWindowType);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "CrossAxisState: %{public}d, waterfall: %{public}d, "
+        "rootHostWindowType: %{public}u, winId: %{public}u",
+        state, isFullScreenWaterfallMode_.load(), rootHostWindowType, GetWindowId());
 }
 
 bool WindowSessionImpl::IsValidCrossState(int32_t state) const
