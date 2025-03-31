@@ -805,6 +805,10 @@ void MockSessionManagerService::AddSkipSelfWhenShowOnVirtualScreenList(const std
         }
     }
     sptr<ISceneSessionManager> sceneSessionManagerProxy = iface_cast<ISceneSessionManager>(sceneSessionManager_);
+    if (sceneSessionManagerProxy == nullptr) {
+        WLOGFE("sessionManagerServiceProxy is nullptr");
+        return;
+    }
     WMError ret = sceneSessionManagerProxy->AddSkipSelfWhenShowOnVirtualScreenList(persistentIds);
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "add virtual screen black list failed!");
@@ -826,6 +830,10 @@ void MockSessionManagerService::RemoveSkipSelfWhenShowOnVirtualScreenList(const 
         }
     }
     sptr<ISceneSessionManager> sceneSessionManagerProxy = iface_cast<ISceneSessionManager>(sceneSessionManager_);
+    if (sceneSessionManagerProxy == nullptr) {
+        WLOGFE("sessionManagerServiceProxy is nullptr");
+        return;
+    }
     WMError ret = sceneSessionManagerProxy->RemoveSkipSelfWhenShowOnVirtualScreenList(persistentIds);
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "remove virtual screen black list failed!");
