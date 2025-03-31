@@ -413,6 +413,38 @@ HWTEST_F(SceneSessionTest, IsKeepScreenOn02, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsViewKeepScreenOn01
+ * @tc.desc: IsViewKeepScreenOn true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, IsViewKeepScreenOn01, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsViewKeepScreenOn01";
+    info.bundleName_ = "IsViewKeepScreenOn01";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    ASSERT_EQ(WSError::WS_OK, sceneSession->SetViewKeepScreenOn(true));
+    ASSERT_EQ(true, sceneSession->IsViewKeepScreenOn());
+}
+
+/**
+ * @tc.name: IsViewKeepScreenOn02
+ * @tc.desc: IsViewKeepScreenOn false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, IsViewKeepScreenOn02, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsViewKeepScreenOn02";
+    info.bundleName_ = "IsViewKeepScreenOn02";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    ASSERT_EQ(WSError::WS_OK, sceneSession->SetViewKeepScreenOn(false));
+    ASSERT_EQ(false, sceneSession->IsViewKeepScreenOn());
+}
+
+/**
  * @tc.name: IsAppSession
  * @tc.desc: IsAppSession true
  * @tc.type: FUNC

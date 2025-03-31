@@ -4109,6 +4109,17 @@ bool SceneSession::IsKeepScreenOn() const
     return GetSessionProperty()->IsKeepScreenOn();
 }
 
+WSError SceneSession::SetViewKeepScreenOn(bool keepScreenOn)
+{
+    GetSessionProperty()->SetViewKeepScreenOn(keepScreenOn);
+    return WSError::WS_OK;
+}
+
+bool SceneSession::IsViewKeepScreenOn() const
+{
+    return GetSessionProperty()->IsViewKeepScreenOn();
+}
+
 void SceneSession::SaveUpdatedIcon(const std::shared_ptr<Media::PixelMap>& icon)
 {
     WLOGFI("run SaveUpdatedIcon");
@@ -5259,6 +5270,8 @@ WMError SceneSession::ProcessUpdatePropertyByAction(const sptr<WindowSessionProp
             return HandleActionUpdateTurnScreenOn(property, action);
         case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON):
             return HandleActionUpdateKeepScreenOn(property, action);
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_VIEW_KEEP_SCREEN_ON):
+            return HandleActionUpdateViewKeepScreenOn(property, action);
         case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE):
             return HandleActionUpdateFocusable(property, action);
         case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE):
@@ -5358,6 +5371,16 @@ WMError SceneSession::HandleActionUpdateKeepScreenOn(const sptr<WindowSessionPro
     WSPropertyChangeAction action)
 {
     SetKeepScreenOn(property->IsKeepScreenOn());
+    NotifySessionChangeByActionNotifyManager(property, action);
+    return WMError::WM_OK;
+}
+
+WMError SceneSession::HandleActionUpdateViewKeepScreenOn(const sptr<WindowSessionProperty>& property,
+    WSPropertyChangeAction action)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "id: %{public}d, enabled: %{public}u",
+        GetPersistentId(), property->IsViewKeepScreenOn());
+    SetViewKeepScreenOn(property->IsViewKeepScreenOn());
     NotifySessionChangeByActionNotifyManager(property, action);
     return WMError::WM_OK;
 }
