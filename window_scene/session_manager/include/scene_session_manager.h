@@ -313,7 +313,8 @@ public:
     WSError SetSessionIcon(const sptr<IRemoteObject>& token, const std::shared_ptr<Media::PixelMap>& icon) override;
     WSError IsValidSessionIds(const std::vector<int32_t>& sessionIds, std::vector<bool>& results) override;
     void HandleTurnScreenOn(const sptr<SceneSession>& sceneSession);
-    void HandleKeepScreenOn(const sptr<SceneSession>& sceneSession, bool requireLock);
+    void HandleKeepScreenOn(const sptr<SceneSession>& sceneSession, bool requireLock,
+        const std::string& screenLockPrefix, std::shared_ptr<PowerMgr::RunningLock>& screenLock);
     void InitWithRenderServiceAdded();
 
     WSError RegisterSessionListener(const sptr<ISessionListener>& listener) override;

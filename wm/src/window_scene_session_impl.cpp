@@ -4169,6 +4169,21 @@ bool WindowSceneSessionImpl::IsKeepScreenOn() const
     return property_->IsKeepScreenOn();
 }
 
+WMError WindowSceneSessionImpl::SetViewKeepScreenOn(bool keepScreenOn)
+{
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "id: %{public}d, enabled: %{public}u", GetPersistentId(), keepScreenOn);
+    property_->SetViewKeepScreenOn(keepScreenOn);
+    return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_VIEW_KEEP_SCREEN_ON);
+}
+
+bool WindowSceneSessionImpl::IsViewKeepScreenOn() const
+{
+    return property_->IsViewKeepScreenOn();
+}
+
 WMError WindowSceneSessionImpl::SetTransform(const Transform& trans)
 {
     TLOGI(WmsLogTag::DEFAULT, "Id: %{public}d", property_->GetPersistentId());
