@@ -806,7 +806,7 @@ void MockSessionManagerService::AddSkipSelfWhenShowOnVirtualScreenList(const std
     }
     sptr<ISceneSessionManager> sceneSessionManagerProxy = iface_cast<ISceneSessionManager>(sceneSessionManager_);
     if (sceneSessionManagerProxy == nullptr) {
-        WLOGFE("sessionManagerServiceProxy is nullptr");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sessionManagerServiceProxy is nullptr");
         return;
     }
     WMError ret = sceneSessionManagerProxy->AddSkipSelfWhenShowOnVirtualScreenList(persistentIds);
@@ -831,7 +831,7 @@ void MockSessionManagerService::RemoveSkipSelfWhenShowOnVirtualScreenList(const 
     }
     sptr<ISceneSessionManager> sceneSessionManagerProxy = iface_cast<ISceneSessionManager>(sceneSessionManager_);
     if (sceneSessionManagerProxy == nullptr) {
-        WLOGFE("sessionManagerServiceProxy is nullptr");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sessionManagerServiceProxy is nullptr");
         return;
     }
     WMError ret = sceneSessionManagerProxy->RemoveSkipSelfWhenShowOnVirtualScreenList(persistentIds);
