@@ -1480,6 +1480,9 @@ int32_t SessionProxy::TransferExtensionData(const AAFwk::WantParams& wantParams)
         TLOGE(WmsLogTag::WMS_UIEXT, "SendRequest failed, code: %{public}d", sendCode);
     }
     int32_t ret = reply.ReadInt32();
+    if (ret != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Ret value read by ReadInt32 is abnormal, ret: %{public}d", ret);
+    }
     return sendCode;
 }
 
