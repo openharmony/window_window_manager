@@ -6521,9 +6521,7 @@ void SceneSession::SetSkipSelfWhenShowOnVirtualScreen(bool isSkip)
         if (session->specificCallback_ != nullptr &&
             session->specificCallback_->onSetSkipSelfWhenShowOnVirtualScreen_ != nullptr) {
             session->specificCallback_->onSetSkipSelfWhenShowOnVirtualScreen_(surfaceNode->GetId(), isSkip);
-            if (leashWinSurfaceNode) {
-                session->specificCallback_->onSetSkipSelfWhenShowOnVirtualScreen_(leashWinSurfaceNode->GetId(), isSkip);
-            }
+            session->specificCallback_->onSetSkipSelfWhenShowOnVirtualScreen_(session->GetMissionId(), isSkip);
         }
         return;
     }, __func__);
