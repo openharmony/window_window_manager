@@ -3858,8 +3858,8 @@ napi_value JsSceneSessionManager::OnCloneWindow(napi_env env, napi_callback_info
         return NapiGetUndefined(env);
     }
     TLOGI(WmsLogTag::WMS_PC, "from:%{public}d to:%{public}d", fromPersistentId, toPersistentId);
-    bool needOffScreen = true;
     if (argc >= ARGC_THREE && GetType(env, argv[ARGC_TWO]) == napi_boolean) {
+        bool needOffScreen = true;
         ConvertFromJsValue(env, argv[ARGC_TWO], needOffScreen);
         SceneSessionManager::GetInstance().CloneWindow(fromPersistentId, toPersistentId, needOffScreen);
     } else {
