@@ -89,6 +89,7 @@ public:
     WMError RegisterSessionLifecycleListenerByBundles(const sptr<ISessionLifecycleListener>& listener,
         const std::vector<std::string>& bundleNameList) override;
     WMError UnregisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener) override;
+    WMError ListWindowInfo(const WindowInfoOption& windowInfoOption, std::vector<sptr<WindowInfo>>& infos) override;
 };
 } // namespace OHOS::Rosen
 
