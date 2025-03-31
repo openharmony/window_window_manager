@@ -1727,8 +1727,8 @@ WMError SceneSessionManager::AddSkipSelfWhenShowOnVirtualScreenList(const std::v
     auto task = [this, &persistentIds] {
         for (const auto persistentId : persistentIds) {
             auto session = GetSceneSession(persistentId);
-            if (!session || !SessionHelper::IsMainWindow(session->GetWindowType())) {
-                TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "[win: %{public}d] not found or is not main window", persistentId);
+            if (!session || SessionHelper::IsSubWindow(session->GetWindowType())) {
+                TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "[win: %{public}d] not found or is sub window", persistentId);
                 continue;
             }
             TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "[win: %{public}d] add to virtual screen black list", persistentId);
@@ -1759,8 +1759,8 @@ WMError SceneSessionManager::RemoveSkipSelfWhenShowOnVirtualScreenList(const std
     auto task = [this, &persistentIds] {
         for (const auto persistentId : persistentIds) {
             auto session = GetSceneSession(persistentId);
-            if (!session || !SessionHelper::IsMainWindow(session->GetWindowType())) {
-                TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "[win: %{public}d] not found or is not main window", persistentId);
+            if (!session || SessionHelper::IsSubWindow(session->GetWindowType())) {
+                TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "[win: %{public}d] not found or is sub window", persistentId);
                 continue;
             }
             TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "[win: %{public}d] remove from virtual screen black list", persistentId);
