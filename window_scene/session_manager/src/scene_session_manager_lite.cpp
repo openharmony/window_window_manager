@@ -323,4 +323,10 @@ WMError SceneSessionManagerLite::UnregisterSessionLifecycleListener(const sptr<I
 {
     return SceneSessionManager::GetInstance().UnregisterSessionLifecycleListener(listener);
 }
+
+WMError SceneSessionManagerLite::ListWindowInfo(const WindowInfoOption& windowInfoOption,
+    std::vector<sptr<WindowInfo>>& infos)
+{
+    return SceneSessionManager::GetInstance().ListWindowInfo(windowInfoOption, infos);
+}
 } // namespace OHOS::Rosen
