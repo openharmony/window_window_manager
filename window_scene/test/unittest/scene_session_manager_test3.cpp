@@ -1228,11 +1228,11 @@ HWTEST_F(SceneSessionManagerTest3, HandleTurnScreenOn, TestSize.Level0)
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     ssm_->HandleTurnScreenOn(sceneSession);
-    const std::string WINDOW_SCREEN_LOCK_PREFIX = "windowLock";
+    std::string lockName = "windowLock";
     bool requireLock = true;
-    ssm_->HandleKeepScreenOn(sceneSession, requireLock, WINDOW_SCREEN_LOCK_PREFIX, sceneSession->keepScreenLock_);
+    ssm_->HandleKeepScreenOn(sceneSession, requireLock, lockName, sceneSession->keepScreenLock_);
     requireLock = false;
-    ssm_->HandleKeepScreenOn(sceneSession, requireLock, WINDOW_SCREEN_LOCK_PREFIX, sceneSession->keepScreenLock_);
+    ssm_->HandleKeepScreenOn(sceneSession, requireLock, lockName, sceneSession->keepScreenLock_);
 }
 
 /**
