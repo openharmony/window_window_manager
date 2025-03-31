@@ -42,7 +42,7 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowExtensionSessionImpl"};
 constexpr int64_t DISPATCH_KEY_EVENT_TIMEOUT_TIME_MS = 1000;
 constexpr int32_t UIEXTENTION_ROTATION_ANIMATION_TIME = 400;
-constexpr uint32_t API_VERSION_18 = 18;
+constexpr uint32_t API_VERSION_MOD = 1000;
 }
 
 #define CHECK_HOST_SESSION_RETURN_IF_NULL(hostSession)                         \
@@ -966,26 +966,17 @@ WMError WindowExtensionSessionImpl::UnregisterOccupiedAreaChangeListener(
 WMError WindowExtensionSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea,
     const Rect& rect, int32_t apiVersion)
 {
-    apiVersion = apiVersion == API_VERSION_INVALID ?
-        static_cast<int32_t>(SysCapUtil::GetApiCompatibleVersion()) : apiVersion;
-    TLOGI(WmsLogTag::WMS_IMMS, "type %{public}d api %{public}d", type, apiVersion);
+    uint32_t currentApiVersion = 0;
+    if (context_ != nullptr && context_->GetApplicationInfo() != nullptr) {
+        currentApiVersion = context_->GetApplicationInfo()->apiTargetVersion % API_VERSION_MOD;
+    }
+    apiVersion = apiVersion == API_VERSION_INVALID ? currentApiVersion : apiVersion;
+    TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d type %{public}d api %{public}d", GetPersistentId(), type, apiVersion);
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
     WSRect sessionRect = { rect.posX_, rect.posY_, rect.width_, rect.height_ };
     avoidArea = hostSession->GetAvoidAreaByType(type, sessionRect, apiVersion);
     return WMError::WM_OK;
-}
-
-void WindowExtensionSessionImpl::NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
-{
-    int32_t version = static_cast<int32_t>(SysCapUtil::GetApiCompatibleVersion());
-    if (version < API_VERSION_18 && WindowHelper::IsSystemWindow(GetParentWindowType())) {
-        TLOGI(WmsLogTag::WMS_IMMS,
-            "win [%{public}d %{public}s] type %{public}d api %{public}d not supported",
-            GetPersistentId(), GetWindowName().c_str(), type, version);
-        return;
-    }
-    WindowSessionImpl::NotifyAvoidAreaChange(avoidArea, type);
 }
 
 WMError WindowExtensionSessionImpl::RegisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener)
