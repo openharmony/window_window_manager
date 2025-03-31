@@ -664,19 +664,19 @@ bool WindowSceneSessionImpl::IsFullScreenSizeWindow(uint32_t width, uint32_t hei
         DisplayManager::GetInstance().GetFoldStatus() != FoldStatus::HALF_FOLD) {
         return false;
     }
-    // if is super fold device and in half fold state, check c side screen
-    auto display_c = SingletonContainer::Get<DisplayManager>().GetDisplayById(DISPLAY_ID_C);
-    if (display_c == nullptr) {
+    // if is super fold device and in half fold state, check virtual screen
+    auto virtual_display = SingletonContainer::Get<DisplayManager>().GetDisplayById(DISPLAY_ID_C);
+    if (virtual_display == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "display c is null");
         return false;
     }
-    auto displayInfo_c = display_c->GetDisplayInfo();
-    if (displayInfo_c == nullptr) {
+    auto virtual_displayInfo = virtual_display->GetDisplayInfo();
+    if (virtual_displayInfo == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "displayInfo c is null");
         return false;
     }
-    displayWidth = static_cast<uint32_t>(displayInfo_c->GetWidth());
-    displayHeight = static_cast<uint32_t>(displayInfo_c->GetHeight());
+    displayWidth = static_cast<uint32_t>(virtual_displayInfo->GetWidth());
+    displayHeight = static_cast<uint32_t>(virtual_displayInfo->GetHeight());
     if (displayWidth == width && displayHeight == height) {
         return true;
     }
