@@ -722,7 +722,7 @@ void PictureInPictureController::SetUIContent() const
     napi_ref storageRef = pipOption_->GetStorageRef();
     if (storageRef != nullptr) {
         napi_get_reference_value(env_, storageRef, &storage);
-        TLOGI(WmsLogTag::WMS_PIP, "localStorage is sent to arkui");
+        TLOGI(WmsLogTag::WMS_PIP, "startPiP with localStorage");
     }
     window_->SetUIContentByAbc(PIP_CONTENT_PATH, env_, storage, nullptr);
 }
