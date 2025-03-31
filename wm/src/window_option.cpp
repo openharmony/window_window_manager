@@ -189,6 +189,16 @@ bool WindowOption::IsKeepScreenOn() const
     return keepScreenOn_;
 }
 
+void WindowOption::SetViewKeepScreenOn(bool keepScreenOn)
+{
+    viewKeepScreenOn_ = keepScreenOn;
+}
+
+bool WindowOption::IsViewKeepScreenOn() const
+{
+    return viewKeepScreenOn_;
+}
+
 void WindowOption::SetTurnScreenOn(bool turnScreenOn)
 {
     turnScreenOn_ = turnScreenOn;

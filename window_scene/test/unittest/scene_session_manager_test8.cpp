@@ -515,9 +515,10 @@ HWTEST_F(SceneSessionManagerTest8, HandleKeepScreenOn, TestSize.Level1)
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     EXPECT_NE(nullptr, sceneSession);
 
-    ssm_->HandleKeepScreenOn(sceneSession, false);
+    const std::string WINDOW_SCREEN_LOCK_PREFIX = "windowLock";
+    ssm_->HandleKeepScreenOn(sceneSession, false, WINDOW_SCREEN_LOCK_PREFIX, sceneSession->keepScreenLock_);
     sceneSession->keepScreenLock_ = nullptr;
-    ssm_->HandleKeepScreenOn(sceneSession, true);
+    ssm_->HandleKeepScreenOn(sceneSession, true, WINDOW_SCREEN_LOCK_PREFIX, sceneSession->keepScreenLock_);
     bool enable = true;
     EXPECT_EQ(WSError::WS_OK, ssm_->GetFreeMultiWindowEnableState(enable));
 }
