@@ -343,6 +343,7 @@ ohos_unittest("ws_scene_persistent_storage_test") {
     "ability_base:want",
     "c_utils:utils",
     "hilog:libhilog",
+    "preferences:native_preferences",
   ]
 }
 
