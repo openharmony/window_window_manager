@@ -4717,7 +4717,7 @@ WSError WindowSessionImpl::SetCurrentRotation(int32_t currentRotation)
 
 bool WindowSessionImpl::IsFullScreenPcAppInPadMode() const
 {
-    return property_->GetIsPcAppInPad() && GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN
+    return property_->GetIsPcAppInPad() && GetMode() == WindowMode::WINDOW_MODE_FULLSCREEN
         && !IsFreeMultiWindowMode();
 }
 
