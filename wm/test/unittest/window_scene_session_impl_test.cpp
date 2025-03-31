@@ -1575,6 +1575,44 @@ HWTEST_F(WindowSceneSessionImplTest, SetKeepScreenOn02, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetViewKeepScreenOn01
+ * @tc.desc: Window is Invalid
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, SetViewKeepScreenOn01, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+
+    window->property_->SetWindowName("SetViewKeepScreenOn");
+    window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetViewKeepScreenOn(false));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetViewKeepScreenOn(true));
+}
+
+/**
+ * @tc.name: SetViewKeepScreenOn02
+ * @tc.desc: Window is Valid
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, SetViewKeepScreenOn02, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+
+    window->property_->SetWindowName("SetViewKeepScreenOn");
+    window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    ASSERT_EQ(WMError::WM_OK, window->SetViewKeepScreenOn(true));
+    ASSERT_TRUE(window->IsViewKeepScreenOn());
+    ASSERT_EQ(WMError::WM_OK, window->SetViewKeepScreenOn(false));
+    ASSERT_FALSE(window->IsViewKeepScreenOn());
+}
+
+/**
  * @tc.name: SetPrivacyMode01
  * @tc.desc: SetPrivacyMode as true
  * @tc.type: FUNC

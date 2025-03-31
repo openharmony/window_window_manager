@@ -1093,6 +1093,23 @@ HWTEST_F(WindowSessionPropertyTest, SetKeepScreenOn, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetViewKeepScreenOn
+ * @tc.desc: SetViewKeepScreenOn And IsViewKeepScreenOn
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetViewKeepScreenOn, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    bool keepScreenOn = true;
+    property->SetViewKeepScreenOn(keepScreenOn);
+    ASSERT_EQ(keepScreenOn, property->IsViewKeepScreenOn());
+    keepScreenOn = false;
+    property->SetViewKeepScreenOn(keepScreenOn);
+    ASSERT_EQ(keepScreenOn, property->IsViewKeepScreenOn());
+}
+
+/**
  * @tc.name: MarshallingSessionInfo
  * @tc.desc: MarshallingSessionInfo test
  * @tc.type: FUNC
