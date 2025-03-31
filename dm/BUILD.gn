@@ -73,14 +73,12 @@ ohos_static_library("libdm_static") {
     "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
   ]
 
-  public_external_deps = [
-    "graphic_2d:color_manager",
-    "image_framework:image_native",
-  ]
+  public_external_deps = [ "graphic_2d:color_manager" ]
 
   external_deps = [
     "ability_runtime:ability_manager",
     "c_utils:utils",
+    "graphic_2d:color_manager",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "image_framework:image_native",
@@ -112,10 +110,7 @@ ohos_shared_library("libdm") {
     "../resources/config/build:coverage_flags",
   ]
 
-  public_configs = [
-    ":for_libdm_public_config",
-    ":libdm_public_config",
-  ]
+  public_configs = [ ":libdm_public_config" ]
 
   deps = [
     "${window_base_path}/utils:libwmutil",
