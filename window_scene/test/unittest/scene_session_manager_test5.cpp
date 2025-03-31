@@ -794,6 +794,23 @@ HWTEST_F(SceneSessionManagerTest5, UpdateFocusStatus01, Function | SmallTest | L
 }
 
 /**
+ * @tc.name: UpdateFocusStatus02
+ * @tc.desc: Verify that the NotifyFocusStatusByMission function is called.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, UpdateFocusStatus02, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "UpdateFocusStatus02";
+    info.bundleName_ = "UpdateFocusStatus02";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
+    focusGroup->SetNeedBlockNotifyFocusStatusUntilForeground(true);
+    ssm_->UpdateFocusStatus(DEFAULT_DISPLAY_ID, sceneSession, true);
+}
+
+/**
  * @tc.name: RequestSessionUnfocus
  * @tc.desc: RequestSessionUnfocus
  * @tc.type: FUNC
