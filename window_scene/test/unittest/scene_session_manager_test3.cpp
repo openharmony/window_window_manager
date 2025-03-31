@@ -1220,7 +1220,7 @@ HWTEST_F(SceneSessionManagerTest3, IsSessionClearable, TestSize.Level1)
  * @tc.desc: SceneSesionManager handle turn screen on and keep screen on
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest3, HandleTurnScreenOn, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest3, HandleTurnScreenOn, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "HandleTurnScreenOn";

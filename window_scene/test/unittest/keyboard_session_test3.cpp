@@ -183,7 +183,7 @@ HWTEST_F(KeyboardSessionTest3, UseFocusIdIfCallingSessionIdInvalid01, TestSize.L
  * @tc.desc: test function: UpdateKeyboardAvoidArea
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest3, UpdateKeyboardAvoidArea01, TestSize.Level1)
+HWTEST_F(KeyboardSessionTest3, UpdateKeyboardAvoidArea01, TestSize.Level0)
 {
     auto keyboardSession = GetKeyboardSession("UpdateKeyboardAvoidArea01", "UpdateKeyboardAvoidArea01");
     ASSERT_NE(keyboardSession, nullptr);
@@ -237,7 +237,7 @@ HWTEST_F(KeyboardSessionTest3, UpdateKeyboardAvoidArea01, TestSize.Level1)
  * @tc.desc: test function: UpdateKeyboardAvoidArea
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest3, UpdateKeyboardAvoidArea02, TestSize.Level1)
+HWTEST_F(KeyboardSessionTest3, UpdateKeyboardAvoidArea02, TestSize.Level0)
 {
     auto keyboardSession = GetKeyboardSession("UpdateKeyboardAvoidArea02", "UpdateKeyboardAvoidArea02");
     ASSERT_NE(keyboardSession, nullptr);

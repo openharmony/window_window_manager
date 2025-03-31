@@ -415,7 +415,7 @@ HWTEST_F(WindowSessionImplTest2, DispatchKeyEventCallback, TestSize.Level1)
  * @tc.desc: HandleBackEvent
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, HandleBackEvent01, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest2, HandleBackEvent01, TestSize.Level0)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("HandleBackEvent01");
@@ -550,7 +550,7 @@ HWTEST_F(WindowSessionImplTest2, SetSystemBarProperty, TestSize.Level1)
  * @tc.desc: SetSpecificBarProperty
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, SetSpecificBarProperty, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest2, SetSpecificBarProperty, TestSize.Level0)
 {
     auto window = GetTestWindowImpl("SetSpecificBarProperty");
     ASSERT_NE(window, nullptr);

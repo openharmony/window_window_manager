@@ -1007,7 +1007,7 @@ HWTEST_F(SceneSessionManagerTest12, HandleKeyboardAvoidChange, TestSize.Level1)
  * @tc.desc: HALF_FOLDED
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest12, GetAllWindowLayoutInfo01, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest12, GetAllWindowLayoutInfo01, TestSize.Level0)
 {
     PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::HALF_FOLDED,
         { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
@@ -1036,7 +1036,7 @@ HWTEST_F(SceneSessionManagerTest12, GetAllWindowLayoutInfo01, TestSize.Level1)
  * @tc.desc: test return by zOrder
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest12, FilterForGetAllWindowLayoutInfo01, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest12, FilterForGetAllWindowLayoutInfo01, TestSize.Level0)
 {
     SessionInfo sessionInfo;
     sessionInfo.isSystem_ = false;
@@ -1072,7 +1072,7 @@ HWTEST_F(SceneSessionManagerTest12, FilterForGetAllWindowLayoutInfo01, TestSize.
  * @tc.desc: test system window
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest12, FilterForGetAllWindowLayoutInfo02, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest12, FilterForGetAllWindowLayoutInfo02, TestSize.Level0)
 {
     SessionInfo sessionInfo;
     sessionInfo.isSystem_ = false;
@@ -1118,7 +1118,7 @@ HWTEST_F(SceneSessionManagerTest12, FilterForGetAllWindowLayoutInfo02, TestSize.
  * @tc.desc: test VisibilityState
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest12, FilterForGetAllWindowLayoutInfo03, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest12, FilterForGetAllWindowLayoutInfo03, TestSize.Level0)
 {
     SessionInfo sessionInfo;
     sessionInfo.isSystem_ = false;
@@ -1161,7 +1161,7 @@ HWTEST_F(SceneSessionManagerTest12, FilterForGetAllWindowLayoutInfo03, TestSize.
  * @tc.desc: HALF_FOLDED
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest12, FilterForGetAllWindowLayoutInfo04, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest12, FilterForGetAllWindowLayoutInfo04, TestSize.Level0)
 {
     PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::HALF_FOLDED,
         { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
@@ -1210,7 +1210,7 @@ HWTEST_F(SceneSessionManagerTest12, FilterForGetAllWindowLayoutInfo04, TestSize.
  * @tc.desc: session is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest12, FilterForGetAllWindowLayoutInfo05, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest12, FilterForGetAllWindowLayoutInfo05, TestSize.Level0)
 {
     sptr<SceneSession> sceneSession = nullptr;
     ssm_->sceneSessionMap_.insert({ 1, sceneSession });
@@ -1226,7 +1226,7 @@ HWTEST_F(SceneSessionManagerTest12, FilterForGetAllWindowLayoutInfo05, TestSize.
  * @tc.desc: test get fold lower screen posY
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest12, GetFoldLowerScreenPosY01, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest12, GetFoldLowerScreenPosY01, TestSize.Level0)
 {
     PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::HALF_FOLDED,
         { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
@@ -2064,7 +2064,7 @@ HWTEST_F(SceneSessionManagerTest12, GetCallingWindowInfo3, TestSize.Level1)
  * @tc.desc: test function : UpdateSessionDisplayId
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest12, UpdateSessionDisplayId1, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest12, UpdateSessionDisplayId1, TestSize.Level0)
 {
     sptr<WindowManagerAgentLiteMocker> wmAgentLiteMocker = sptr<WindowManagerAgentLiteMocker>::MakeSptr();
     SessionManagerAgentController::GetInstance().RegisterWindowManagerAgent(
@@ -2087,7 +2087,7 @@ HWTEST_F(SceneSessionManagerTest12, UpdateSessionDisplayId1, TestSize.Level1)
  * @tc.desc: test function : UpdateSessionDisplayId
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest12, UpdateSessionDisplayId2, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest12, UpdateSessionDisplayId2, TestSize.Level0)
 {
     sptr<WindowManagerAgentLiteMocker> wmAgentLiteMocker = sptr<WindowManagerAgentLiteMocker>::MakeSptr();
     SessionManagerAgentController::GetInstance().RegisterWindowManagerAgent(

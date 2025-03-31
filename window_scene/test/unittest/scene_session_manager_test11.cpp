@@ -678,7 +678,7 @@ HWTEST_F(SceneSessionManagerTest11, DestroyToastSession, TestSize.Level1)
  * @tc.desc: CreateAndConnectSpecificSession
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest11, CreateAndConnectSpecificSession01, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest11, CreateAndConnectSpecificSession01, TestSize.Level0)
 {
     sptr<ISessionStage> sessionStage = sptr<SessionStageMocker>::MakeSptr();
     sptr<IWindowEventChannel> eventChannel = sptr<WindowEventChannelMocker>::MakeSptr(sessionStage);

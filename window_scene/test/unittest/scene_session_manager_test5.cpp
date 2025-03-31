@@ -366,7 +366,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestFocusStatus01, TestSize.Level1)
  * @tc.desc: RequestSessionFocus
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, RequestSessionFocus, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest5, RequestSessionFocus, TestSize.Level0)
 {
     FocusChangeReason reason = FocusChangeReason::DEFAULT;
     WSError ret = ssm_->RequestSessionFocus(0, true, reason);
@@ -406,7 +406,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestSessionFocus, TestSize.Level1)
  * @tc.desc: RequestFocusClient
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, RequestFocusClient, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest5, RequestFocusClient, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "RequestFocusTest1";
@@ -609,7 +609,7 @@ HWTEST_F(SceneSessionManagerTest5, UpdateFocusStatus01, TestSize.Level1)
  * @tc.desc: RequestSessionUnfocus
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, RequestSessionUnfocus, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest5, RequestSessionUnfocus, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "test1";
@@ -801,7 +801,7 @@ HWTEST_F(SceneSessionManagerTest5, CheckFocusIsDownThroughBlockingType, TestSize
  * @tc.desc: CheckFocusIsDownThroughBlockingType
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, CheckFocusIsDownThroughBlockingType01, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest5, CheckFocusIsDownThroughBlockingType01, TestSize.Level0)
 {
     ASSERT_NE(ssm_, nullptr);
     SessionInfo info;
@@ -857,7 +857,7 @@ HWTEST_F(SceneSessionManagerTest5, CheckTopmostWindowFocus, TestSize.Level1)
  * @tc.desc: CheckRequestFocusImmdediately
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, CheckRequestFocusImmdediately, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest5, CheckRequestFocusImmdediately, TestSize.Level0)
 {
     ASSERT_NE(ssm_, nullptr);
     SessionInfo info;
@@ -1149,7 +1149,7 @@ HWTEST_F(SceneSessionManagerTest5, ConfigAppWindowShadow03, TestSize.Level1)
  * @tc.desc: CreateAndConnectSpecificSession
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, CreateAndConnectSpecificSession02, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest5, CreateAndConnectSpecificSession02, TestSize.Level0)
 {
     ASSERT_NE(ssm_, nullptr);
     sptr<ISessionStage> sessionStage = sptr<SessionStageMocker>::MakeSptr();

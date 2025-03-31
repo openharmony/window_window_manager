@@ -670,7 +670,7 @@ HWTEST_F(SceneSessionTest, UpdateNativeVisibility, TestSize.Level1)
  * @tc.desc: Set PrivacyMode as false
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest, SetPrivacyMode01, TestSize.Level1)
+HWTEST_F(SceneSessionTest, SetPrivacyMode01, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "SetPrivacyMode01";
@@ -691,7 +691,7 @@ HWTEST_F(SceneSessionTest, SetPrivacyMode01, TestSize.Level1)
  * @tc.desc: Set PrivacyMode as true
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest, SetPrivacyMode02, TestSize.Level1)
+HWTEST_F(SceneSessionTest, SetPrivacyMode02, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "SetPrivacyMode02";
@@ -896,7 +896,7 @@ HWTEST_F(SceneSessionTest, GetCutoutAvoidArea, TestSize.Level1)
  * @tc.desc: SetSystemBarProperty
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest, SetSystemBarProperty, TestSize.Level1)
+HWTEST_F(SceneSessionTest, SetSystemBarProperty, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "Background01";
@@ -918,7 +918,7 @@ HWTEST_F(SceneSessionTest, SetSystemBarProperty, TestSize.Level1)
  * @tc.desc: SetSystemBarProperty02
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest, SetSystemBarProperty02, TestSize.Level1)
+HWTEST_F(SceneSessionTest, SetSystemBarProperty02, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "Background01";
@@ -1815,7 +1815,7 @@ HWTEST_F(SceneSessionTest, GetScreenWidthAndHeightFromServer, TestSize.Level1)
  * @tc.desc: SetDefaultDisplayIdIfNeed
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest, SetDefaultDisplayIdIfNeed, TestSize.Level1)
+HWTEST_F(SceneSessionTest, SetDefaultDisplayIdIfNeed, TestSize.Level0)
 {
     SessionInfo info;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
@@ -1851,7 +1851,7 @@ HWTEST_F(SceneSessionTest, SetSessionGlobalRect, TestSize.Level1)
  * @tc.desc: SetSessionGlobalRect
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest, SetIsStatusBarVisibleInner01, TestSize.Level1)
+HWTEST_F(SceneSessionTest, SetIsStatusBarVisibleInner01, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "SetIsStatusBarVisibleInner01";
