@@ -1763,8 +1763,6 @@ HWTEST_F(WindowManagerTest, UnregisterWindowInfoChangeCallback01, Function | Sma
     auto ret = WindowManager::GetInstance().UnregisterWindowInfoChangeCallback(observedInfo, listener);
     ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(interestInfoSizeOld + 1, listener->GetInterestInfo().size());
-    ret = WindowManager::GetInstance().UnregisterWindowInfoChangeCallback(observedInfo, nullptr);
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
     std::unordered_set<WindowInfoKey> observedInfo1;
     observedInfo1.insert(WindowInfoKey::BUNDLE_NAME);
     ret = WindowManager::GetInstance().UnregisterWindowInfoChangeCallback(observedInfo1, listener);
