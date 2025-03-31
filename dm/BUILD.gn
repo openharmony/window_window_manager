@@ -36,11 +36,6 @@ config("libdm_public_config") {
   ]
 }
 
-config("for_libdm_public_config") {
-  include_dirs =
-      [ "../../../multimedia/image_framework/interfaces/innerkits/include" ]
-}
-
 ## Build libdm_static.a
 ohos_static_library("libdm_static") {
   branch_protector_ret = "pac_ret"
