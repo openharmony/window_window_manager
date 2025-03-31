@@ -1744,9 +1744,9 @@ WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height)
         TLOGW(WmsLogTag::WMS_LAYOUT, "Fullscreen window could not resize, winId: %{public}u", GetWindowId());
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
-    if (isFullScreenPcAppInPadMode() && SupportFullScreen()) {
+    if (IsFullScreenPcAppInPadMode() && SupportFullScreen()) {
         auto win = GetMainWindowWithId(property_->GetPersistentId());
-        win->NotifySize();
+        win->NotifyClientWindowSize();
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
 
@@ -4966,7 +4966,7 @@ bool WindowSceneSessionImpl::IsFullScreenEnable() const
     if (!WindowHelper::IsWindowModeSupported(property_->GetWindowModeSupportType(),
         WindowMode::WINDOW_MODE_FULLSCREEN)) {
         return false;
-        }
+    }
     const auto& sizeLimits = property_->GetWindowLimits();
     uint32_t displayWidth = 0;
     uint32_t displayHeight = 0;
