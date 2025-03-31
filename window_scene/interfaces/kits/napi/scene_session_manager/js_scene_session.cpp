@@ -3868,33 +3868,26 @@ void JsSceneSession::OnShowWhenLocked(bool showWhenLocked)
 
 void JsSceneSession::OnReuqestedOrientationChange(uint32_t orientation)
 {
-    if (windowRotation_ != orientation) {
-        {
-            TLOGNI(WmsLogTag::WMS_ROTATION, "[NAPI]OnReuqestedOrientationChange %{public}u", orientation);
-            std::lock_guard guard(windowRotationMutex_);
-            windowRotation_ = orientation;
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, rotation = orientation, env = env_] {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
+            TLOGE(WmsLogTag::WMS_ROTATION,
+                "OnReuqestedOrientationChange jsSceneSession id:%{public}d has been destroyed", persistentId);
+            return;
         }
-        auto task = [weakThis = wptr(this), persistentId = persistentId_, rotation = orientation, env = env_] {
-            auto jsSceneSession = weakThis.promote();
-            if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
-                TLOGE(WmsLogTag::WMS_ROTATION,
-                    "OnReuqestedOrientationChange jsSceneSession id:%{public}d has been destroyed", persistentId);
-                return;
-            }
-            auto jsCallBack = jsSceneSession->GetJSCallback(REQUESTED_ORIENTATION_CHANGE_CB);
-            if (jsCallBack == nullptr) {
-                WLOGFE("[NAPI]jsCallBack is nullptr");
-                return;
-            }
-            napi_value jsSessionRotationObj = CreateJsValue(env, rotation);
-            napi_value argv[] = {jsSessionRotationObj};
-            napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
-            WLOGFI("[NAPI]change rotation success %{public}u", rotation);
-        };
-        std::string taskName = "OnReuqestedOrientationChange:orientation";
-        taskScheduler_->RemoveMainThreadTaskByName(taskName);
-        taskScheduler_->PostMainThreadTask(task, taskName);
-    }
+        auto jsCallBack = jsSceneSession->GetJSCallback(REQUESTED_ORIENTATION_CHANGE_CB);
+        if (jsCallBack == nullptr) {
+            WLOGFE("[NAPI]jsCallBack is nullptr");
+            return;
+        }
+        napi_value jsSessionRotationObj = CreateJsValue(env, rotation);
+        napi_value argv[] = {jsSessionRotationObj};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+        WLOGFI("[NAPI]change rotation success %{public}u", rotation);
+    };
+    std::string taskName = "OnReuqestedOrientationChange:orientation";
+    taskScheduler_->RemoveMainThreadTaskByName(taskName);
+    taskScheduler_->PostMainThreadTask(task, taskName);
 }
 
 napi_value JsSceneSession::OnSetShowRecent(napi_env env, napi_callback_info info)
