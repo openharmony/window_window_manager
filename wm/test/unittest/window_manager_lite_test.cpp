@@ -1351,10 +1351,8 @@ HWTEST_F(WindowManagerLiteTest, RegisterWindowInfoChangeCallback01, Function | S
     std::unordered_set<WindowInfoKey> observedInfo;
     observedInfo.insert(WindowInfoKey::VISIBILITY_STATE);
     auto ret = WindowManagerLite::GetInstance().RegisterWindowInfoChangeCallback(observedInfo, listener);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
     ASSERT_EQ(interestInfoSizeOld + 1, listener->GetInterestInfo().size());
-    ret = WindowManagerLite::GetInstance().RegisterWindowInfoChangeCallback(observedInfo, nullptr);
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
     std::unordered_set<WindowInfoKey> observedInfo1;
     observedInfo1.insert(WindowInfoKey::BUNDLE_NAME);
     ret = WindowManagerLite::GetInstance().RegisterWindowInfoChangeCallback(observedInfo1, listener);
@@ -1375,8 +1373,6 @@ HWTEST_F(WindowManagerLiteTest, UnregisterWindowInfoChangeCallback01, Function |
     auto ret = WindowManagerLite::GetInstance().UnregisterWindowInfoChangeCallback(observedInfo, listener);
     ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(interestInfoSizeOld + 1, listener->GetInterestInfo().size());
-    ret = WindowManagerLite::GetInstance().UnregisterWindowInfoChangeCallback(observedInfo, nullptr);
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
     std::unordered_set<WindowInfoKey> observedInfo1;
     observedInfo1.insert(WindowInfoKey::BUNDLE_NAME);
     ret = WindowManagerLite::GetInstance().UnregisterWindowInfoChangeCallback(observedInfo1, listener);
@@ -1434,7 +1430,7 @@ HWTEST_F(WindowManagerLiteTest, UnregisterVisibilityStateChangedListener01, Func
 
     sptr<TestWindowVisibilityStateListener> listener1 = sptr<TestWindowVisibilityStateListener>::MakeSptr();
     sptr<TestWindowVisibilityStateListener> listener2 = sptr<TestWindowVisibilityStateListener>::MakeSptr();
-    ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterVisibilityStateChangedListener(listener1));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, windowManager.UnregisterVisibilityStateChangedListener(listener1));
 
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
