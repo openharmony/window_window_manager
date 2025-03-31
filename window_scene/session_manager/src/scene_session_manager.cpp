@@ -5206,11 +5206,11 @@ void SceneSessionManager::HandleTurnScreenOn(const sptr<SceneSession>& sceneSess
 }
 
 void SceneSessionManager::HandleKeepScreenOn(const sptr<SceneSession>& sceneSession, bool requireLock,
-    std::string screenLockPrefix, std::shared_ptr<PowerMgr::RunningLock>& screenLock)
+    const std::string& screenLockPrefix, std::shared_ptr<PowerMgr::RunningLock>& screenLock)
 {
 #ifdef POWER_MANAGER_ENABLE
     wptr<SceneSession> weakSceneSession(sceneSession);
-    auto task = [this, weakSceneSession, requireLock, screenLockPrefix, &screenLock]() {
+    auto task = [this, weakSceneSession, requireLock, &screenLockPrefix, &screenLock]() {
         auto sceneSession = weakSceneSession.promote();
         if (sceneSession == nullptr) {
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "session is invalid");
