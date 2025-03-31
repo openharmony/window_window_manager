@@ -1744,9 +1744,8 @@ WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height)
         TLOGW(WmsLogTag::WMS_LAYOUT, "Fullscreen window could not resize, winId: %{public}u", GetWindowId());
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
-    if (IsFullScreenPcAppInPadMode() && SupportFullScreen()) {
-        auto win = GetMainWindowWithId(property_->GetPersistentId());
-        win->NotifyClientWindowSize();
+    if (IsFullScreenPcAppInPadMode() && IsFullScreenEnable()) {
+        NotifyClientWindowSize();
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
 
