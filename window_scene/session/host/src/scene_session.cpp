@@ -4385,7 +4385,7 @@ void SceneSession::SetUIFirstSwitch(RSUIFirstSwitch uiFirstSwitch)
     rsTransaction->Commit();
 }
 
-void SceneSession::CloneWindow(NodeId surfaceNodeId)
+void SceneSession::CloneWindow(NodeId surfaceNodeId, bool needOffScreen)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::CloneWindow");
     auto rsTransaction = RSTransactionProxy::GetInstance();
@@ -4395,7 +4395,7 @@ void SceneSession::CloneWindow(NodeId surfaceNodeId)
     if (auto surfaceNode = GetSurfaceNode()) {
         TLOGI(WmsLogTag::WMS_PC, "%{public}s this: %{public}" PRIu64 " cloned: %{public}" PRIu64,
             surfaceNode->GetName().c_str(), surfaceNode->GetId(), surfaceNodeId);
-        surfaceNode->SetClonedNodeId(surfaceNodeId);
+        surfaceNode->SetClonedNodeInfo(surfaceNodeId, needOffScreen);
     }
     if (rsTransaction != nullptr) {
         rsTransaction->Commit();
