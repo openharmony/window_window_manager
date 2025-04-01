@@ -1174,9 +1174,13 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
     TLOGI(WmsLogTag::WMS_LIFE, "ConnectInner session, id: %{public}d, state: %{public}u,"
         "isTerminating:%{public}d, callingPid:%{public}d", GetPersistentId(),
         static_cast<uint32_t>(GetSessionState()), isTerminating_, pid);
-    if (GetSessionState() != SessionState::STATE_DISCONNECT && !isTerminating_) {
-        TLOGE(WmsLogTag::WMS_LIFE, "state is not disconnect state:%{public}u id:%{public}u!",
-            GetSessionState(), GetPersistentId());
+    if (GetSessionState() != SessionState::STATE_DISCONNECT && !GetSessionInfo().reuseDelegatorWindow) {
+        TLOGE(WmsLogTag::WMS_LIFE, "state is not disconnect state:%{public}u id:%{public}u!, reuse %{public}d",
+            GetSessionState(), GetPersistentId(), GetSessionInfo().reuseDelegatorWindow);
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    if (!isTerminating_) {
+        TLOGE(WmsLogTag::WMS_LIFE, "session isTerminating is: %{public}d", isTerminating_);
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     if (sessionStage == nullptr || eventChannel == nullptr) {

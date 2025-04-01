@@ -552,6 +552,9 @@ public:
     virtual void NotifySessionLockStateChange(bool isLockedState) {}
     virtual void SetUpdateSessionLabelAndIconListener(NofitySessionLabelAndIconUpdatedFunc&& func) {}
     bool UpdateInteractiveInner(bool interactive);
+    void SetIsAbilityHook(bool isAbilityHook);
+    bool GetIsAbilityHook() const;
+    void HookSceneSessionActivation(NotifyHookSceneSessionActivationFunc&& func);
 
     void SendPointerEventToUI(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     bool SendKeyEventToUI(std::shared_ptr<MMI::KeyEvent> keyEvent, bool isPreImeEvent = false);
@@ -582,9 +585,6 @@ public:
     static void AddOrUpdateWindowDragHotArea(DisplayId displayId, uint32_t type, const WSRect& area);
     WSError UpdateRectChangeListenerRegistered(bool isRegister) override;
     WMError NotifyDisableDelegatorChange();
-    void SetIsAbilityHook(bool isAbilityHook);
-    bool GetIsAbilityHook() const;
-    void HookSceneSessionActivation(NotifyHookSceneSessionActivationFunc&& func);
 
     /*
      * Window Decor

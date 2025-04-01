@@ -22,6 +22,7 @@
 #include "context.h"
 #include "interfaces/include/ws_common.h"
 #include "iremote_object_mocker.h"
+#include "mock/mock_ibundle_mgr.h"
 #include "mock/mock_session_stage.h"
 #include "mock/mock_scene_session.h"
 #include "mock/mock_window_event_channel.h"
@@ -2107,6 +2108,97 @@ HWTEST_F(SceneSessionManagerTest12, GetActiveSceneSessionCopy, Function | SmallT
     EXPECT_CALL(*sceneSession, UpdateCrossAxis()).Times(1);
     std::vector<sptr<SceneSession>> activeSession = ssm_->GetActiveSceneSessionCopy();
     EXPECT_EQ(activeSession.empty(), false);
+}
+
+/**
+ * @tc.name: GetMainSessionByModuleName
+ * @tc.desc: test function : GetMainSessionByModuleName
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetMainSessionByModuleName, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.bundleName_ = "testBundleName1";
+    info.moduleName_ = "testModuleName1";
+    info.appIndex_ = 1;
+    info.appInstanceKey_ = "";
+    sptr<SceneSession> sceneSession = sptr<MainSession>MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    auto res = ssm_->GetMainSessionByModuleName(info);
+    ASSERT_EQ(res, nullptr);
+
+    ssm_->sceneSessionMap_.insert({101, sceneSession});
+    res = ssm_->GetMainSessionByModuleName(info);
+    ASSERT_EQ(res, sceneSession);
+
+    info.appInstanceKey_ = "testAppInstanceKey1";
+    res = ssm_->GetMainSessionByModuleName(info);
+    ASSERT_EQ(res, nullptr);
+
+    info.appIndex_ = 2;
+    res = ssm_->GetMainSessionByModuleName(info);
+    ASSERT_EQ(res, nullptr);
+
+    info.moduleName_ = "testModuleName2";
+    res = ssm_->GetMainSessionByModuleName(info);
+    ASSERT_EQ(res, nullptr);
+
+    info.bundleName_ = "testBundleName2";
+    res = ssm_->GetMainSessionByModuleName(info);
+    ASSERT_EQ(res, nullptr);
+}
+
+/**
+ * @tc.name: SetSceneSessionIsAbilityHook
+ * @tc.desc: test function : SetSceneSessionIsAbilityHook
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, SetSceneSessionIsAbilityHook, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.bundleName_ = "testBundleName1";
+    info.moduleName_ = "testModuleName1";
+    info.abilityName_ = "testAbilityName1";
+    sptr<SceneSession> sceneSession = sptr<MainSession>MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sptr<IBundleMgrMocker> bundleMgrMocker = sptr<IBundleMgrMocker>::MakeSptr();
+    EXPECT_CALL(*bundleMgrMocker, GetBundleInfoV9(_, _, _, _)).WillOnce([](
+        const std::string& bundleName, int32_t flags, AppExecFwk::BundleInfo& bundleInfo, int32_t userId) {
+            AppExecFwk::HapModuleInfo hapModuleInfo;
+            hapModuleInfo.moduleName = "testModuleName1";
+            hapModuleInfo.abilitySrcEntryDelegator = "needHook";
+            hapModuleInfo.abilityStageSrcEntryDelegator = "needHook";
+            bundleInfo.hapModuleInfos = { hapModuleInfo };
+            return 0;
+        });
+    ssm_->bundleMgr_ = bundleMgrMocker;
+    ssm_->SetSceneSessionIsAbilityHook(sceneSession);
+    ASSERT_EQ(sceneSession->GetIsAbilityHook(), true);
+}
+
+/**
+ * @tc.name: RequestSceneSession
+ * @tc.desc: test function : RequestSceneSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, RequestSceneSession, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.bundleName_ = "testBundleName1";
+    info.moduleName_ = "testModuleName1";
+    info.abilityName_ = "testAbilityName1";
+    info.persistentId_ = 101;
+    info.appIndex_ = 0;
+    sptr<SceneSession> sceneSession = sptr<MainSession>MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->SetIsAbilityHook(true);
+    sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
+    ssm_->sceneSessionMap_.insert({101, sceneSession});
+
+    auto result = ssm_->RequestSceneSession(info, windowSessionProperty);
+    ASSERT_EQ(result, sceneSession);
 }
 }
 } // namespace Rosen

@@ -437,7 +437,7 @@ public:
     /**
      * @brief Notify when disableDelegator change to true
      * 
-     * This function is used to notify disableDelegator change.<unnamed>
+     * This function is used to notify disableDelegator change.
      * 
      * @caller SA
      * @permission SA permission

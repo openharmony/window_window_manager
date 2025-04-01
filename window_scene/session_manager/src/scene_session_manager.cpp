@@ -2319,9 +2319,14 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
         SetSceneSessionIsAbilityHook(sceneSession);
         if (sceneSession->GetIsAbilityHook()) {
             auto session = GetMainSessionByModuleName(sessionInfo);
-            if (!session && !session->GetSessionInfo().disableDelegator) {
-                TLOGW(WmsLogTag::WMS_LIFE, "session is still in hook procedure, return directly");
+            if (session && !session->GetSessionInfo().disableDelegator) {
+                TLOGNW(WmsLogTag::WMS_LIFE, "session disableDelegator %{public}d is still hook, return hook session",
+                    session->GetSessionInfo().disableDelegator);
                 return session;
+            } else if (session && session->GetSessionInfo().disableDelegator) {
+                sceneSession->EditSessionInfo().disableDelegator = true;
+                TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s: set session id %{public}d disableDelegator true",
+                    where, sceneSession->GetPersistentId());
             }
             RegisterHookSceneSessionActivationFunc(sceneSession);
         }
@@ -2500,6 +2505,7 @@ sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<S
     abilitySessionInfo->isClearSession = sessionInfo.isClearSession;
     abilitySessionInfo->processOptions = sessionInfo.processOptions;
     abilitySessionInfo->requestId = sessionInfo.requestId;
+    abilitySessionInfo->reuseDelegatorWindow = sessionInfo.reuseDelegatorWindow;
     if (sessionInfo.want != nullptr) {
         abilitySessionInfo->want = *sessionInfo.want;
     } else {
@@ -2711,23 +2717,16 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
         errCode = StartUIAbilityBySCBTimeoutCheck(sceneSessionInfo,
             static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL), isColdStart);
     } else {
-        TLOGI(WmsLogTag::WMS_MAIN, "Background switch on, isNewActive %{public}d state %{public}u",
-            isNewActive, sceneSession->GetSessionState());
+        TLOGI(WmsLogTag::WMS_MAIN, "Background switch on, isNewActive %{public}d state %{public}u "
+            "reuseDelegatorWindow %{public}d",
+            isNewActive, sceneSession->GetSessionState(), sceneSession->GetSessionInfo().reuseDelegatorWindow);
         if (isNewActive || sceneSession->GetSessionState() == SessionState::STATE_DISCONNECT ||
-            sceneSession->GetSessionState() == SessionState::STATE_END) {
+            sceneSession->GetSessionState() == SessionState::STATE_END||
+            sceneSession->GetSessionInfo().reuseDelegatorWindow) {
             TLOGI(WmsLogTag::WMS_MAIN, "Call StartUIAbility: %{public}d system: %{public}u", persistentId,
                 static_cast<uint32_t>(sceneSession->GetSessionInfo().isSystem_));
             errCode = StartUIAbilityBySCBTimeoutCheck(sceneSessionInfo,
                 static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL), isColdStart);
-        } else if (sceneSession->GetSessionState() == SessionState::STATE_CONNECT &&
-                   sceneSession->GetSessionInfo().reuseDelegatorWindow) {
-            TLOGI(WmsLogTag::WMS_MAIN,
-                "Call StartUIAbility: %{public}d system: %{public}u reuseDelegatorWindow: %{public}d",
-                persistentId,
-                static_cast<uint32_t>(sceneSession->GetSessionInfo().isSystem_),
-                sceneSession->GetSessionInfo().reuseDelegatorWindow);
-                errCode = StartUIAbilityBySCBTimeoutCheck(sceneSessionInfo,
-                    static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL), isColdStart);
         } else {
             TLOGI(WmsLogTag::WMS_MAIN, "NotifySessionForeground: %{public}d", persistentId);
             sceneSession->NotifySessionForeground(1, true);
@@ -14270,6 +14269,7 @@ const std::vector<sptr<SceneSession>> SceneSessionManager::GetActiveSceneSession
 
 void SceneSessionManager::RegisterHookSceneSessionActivationFunc(const sptr<SceneSession>& sceneSession)
 {
+    TLOGI(WmsLogTag::WMS_LIFE, "in");
     sceneSession->HookSceneSessionActivation([](const sptr<SceneSession>& session, bool isNewWant) {
         SceneSessionManager::GetInstance().RequestSceneSessionActivation(session, isNewWant);
     });
