@@ -95,6 +95,7 @@ static void checkLocalStorage(napi_env env, PipOption& option, napi_value storag
         napi_ref storageRef;
         napi_create_reference(env, storage, 1, &storageRef);
         option.SetStorageRef(storageRef);
+        TLOGI(WmsLogTag::WMS_PIP, "localStorage is set");
     }
 }
 
