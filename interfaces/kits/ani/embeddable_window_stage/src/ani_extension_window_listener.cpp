@@ -79,11 +79,13 @@ void AniExtensionWindowListener::CallBack()
 void AniExtensionWindowListener::SetSizeInfo(uint32_t width, uint32_t height)
 {
     ani_status ret {};
-    if ((ret = env_->Object_SetFieldByName_Int((ani_object)callBackData_, "<property>width", width)) != ANI_OK) {
+    if ((ret = env_->Object_SetFieldByName_Double((ani_object)callBackData_, "<property>width",
+        (double)width)) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]canot set width %{public}d", ret);
         return;
     };
-    if ((ret = env_->Object_SetFieldByName_Int((ani_object)callBackData_, "<property>height", width)) != ANI_OK) {
+    if ((ret = env_->Object_SetFieldByName_Double((ani_object)callBackData_, "<property>height",
+        (double)height)) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]canot set height %{public}d", ret);
         return;
     }
