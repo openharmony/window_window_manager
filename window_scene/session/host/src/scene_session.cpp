@@ -7946,6 +7946,7 @@ WSError SceneSession::SetCurrentRotation(int32_t currentRotation)
     if (!sessionStage_) {
         return WSError::WS_ERROR_NULLPTR;
     }
-    return sessionStage_->SetCurrentRotation(currentRotation);
+    sptr<ISessionStage> sessionStage = sessionStage_;
+    return sessionStage->SetCurrentRotation(currentRotation);
 }
 } // namespace OHOS::Rosen
