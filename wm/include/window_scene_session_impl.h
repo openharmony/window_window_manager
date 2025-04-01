@@ -353,6 +353,7 @@ private:
      * PC Window Layout
      */
     std::shared_ptr<MMI::PointerEvent> lastPointerEvent_ = nullptr;
+    bool IsFullScreenSizeWindow(uint32_t width, uint32_t height);
 
     /*
      * Window Immersive

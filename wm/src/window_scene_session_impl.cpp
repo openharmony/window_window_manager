@@ -626,6 +626,12 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         SetSubWindowZLevelToProperty();
         InputTransferStation::GetInstance().AddInputWindow(this);
         if (WindowHelper::IsSubWindow(GetType()) && !initRect.IsUninitializedRect()) {
+            auto hostSession = GetHostSession();
+            if (IsFullScreenSizeWindow(initRect.width_, initRect.height_) && (hostSession != nullptr)) {
+                // Full screen size sub window don't need to resize when dpi change
+                TLOGI(WmsLogTag::WMS_LIFE, "Full screen size sub window set isDefaultDensityEnabled true");
+                hostSession->OnDefaultDensityEnabled(true);
+            }
             Resize(initRect.width_, initRect.height_);
         }
         RegisterWindowInspectorCallback();
@@ -635,6 +641,47 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         property_->GetWindowName().c_str(), property_->GetPersistentId(),
         state_, GetWindowMode(), property_->GetDisplayId());
     return ret;
+}
+
+bool WindowSceneSessionImpl::IsFullScreenSizeWindow(uint32_t width, uint32_t height)
+{
+    DisplayId displayId = 0;
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(displayId);
+    if (display == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "display is null");
+        return false;
+    }
+    auto displayInfo = display->GetDisplayInfo();
+    if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "displayInfo is null");
+        return false;
+    }
+    uint32_t displayWidth = static_cast<uint32_t>(displayInfo->GetWidth());
+    uint32_t displayHeight = static_cast<uint32_t>(displayInfo->GetHeight());
+    if (displayWidth == width && displayHeight == height) {
+        return true;
+    }
+    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice() ||
+        DisplayManager::GetInstance().GetFoldStatus() != FoldStatus::HALF_FOLD) {
+        return false;
+    }
+    // if is super fold device and in half fold state, check virtual screen
+    auto virtual_display = SingletonContainer::Get<DisplayManager>().GetDisplayById(DISPLAY_ID_C);
+    if (virtual_display == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "virtual display is null");
+        return false;
+    }
+    auto virtual_displayInfo = virtual_display->GetDisplayInfo();
+    if (virtual_displayInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "virtual displayInfo is null");
+        return false;
+    }
+    displayWidth = static_cast<uint32_t>(virtual_displayInfo->GetWidth());
+    displayHeight = static_cast<uint32_t>(virtual_displayInfo->GetHeight());
+    if (displayWidth == width && displayHeight == height) {
+        return true;
+    }
+    return false;
 }
 
 WMError WindowSceneSessionImpl::SetParentWindowInner(int32_t oldParentWindowId,

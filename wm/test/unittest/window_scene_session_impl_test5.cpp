@@ -1179,6 +1179,28 @@ HWTEST_F(WindowSceneSessionImplTest5, IsFullScreenEnable, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsFullScreenSizeWindow
+ * @tc.desc: IsFullScreenSizeWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, IsFullScreenSizeWindow, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetDisplayId(0);
+    uint32_t width = 0;
+    uint32_t height = 0;
+    ASSERT_EQ(window->IsFullScreenSizeWindow(width, height), false);
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(0);
+    ASSERT_NE(display, nullptr);
+    auto displayInfo = display->GetDisplayInfo();
+    ASSERT_NE(displayInfo, nullptr);
+    width = static_cast<uint32_t>(displayInfo->GetWidth());
+    height = static_cast<uint32_t>(displayInfo->GetHeight());
+    ASSERT_EQ(window->IsFullScreenSizeWindow(width, height), true);
+}
+
+/**
  * @tc.name: SetFollowParentWindowLayoutEnabled
  * @tc.desc: SetFollowParentWindowLayoutEnabled
  * @tc.type: FUNC
