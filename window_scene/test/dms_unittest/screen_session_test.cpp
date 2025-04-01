@@ -1326,6 +1326,9 @@ HWTEST_F(ScreenSessionTest, SetScreenCombination, Function | SmallTest | Level2)
  */
 HWTEST_F(ScreenSessionTest, GetScreenColorGamut, Function | SmallTest | Level2)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
+    }
 #ifdef WM_SCREEN_COLOR_GAMUT_ENABLE
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetScreenColorGamut start";
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
@@ -1371,6 +1374,9 @@ HWTEST_F(ScreenSessionTest, SetScreenColorGamut01, Function | SmallTest | Level2
  */
 HWTEST_F(ScreenSessionTest, SetScreenColorGamut02, Function | SmallTest | Level2)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
+    }
 #ifdef WM_SCREEN_COLOR_GAMUT_ENABLE
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetScreenColorGamut start";
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
