@@ -1297,7 +1297,7 @@ public:
     virtual bool IsKeepScreenOn() const { return false; }
 
     /**
-     * @brief Set the view screen always on
+     * @brief Set the view screen always on or not.
      *
      * @param keepScreenOn
      * @return WMError
