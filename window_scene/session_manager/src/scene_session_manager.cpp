@@ -6074,7 +6074,7 @@ WSError SceneSessionManager::SendTouchEvent(const std::shared_ptr<MMI::PointerEv
 #ifdef SECURITY_COMPONENT_MANAGER_ENABLE
     FillSecCompEnhanceData(pointerEvent, pointerItem);
 #endif
-    TLOGI(WmsLogTag::WMS_EVENT, "PointerId=%{public}d,action=%{public}d,deviceId=%{public}d,zIndex=%{public}ud",
+    TLOGI(WmsLogTag::WMS_EVENT, "eid=%{public}d,ac=%{public}d,deviceId=%{public}d,zIndex=%{public}ud",
         pointerEvent->GetPointerId(), pointerEvent->GetPointerAction(), pointerEvent->GetDeviceId(), zIndex);
     pointerEvent->AddFlag(MMI::PointerEvent::EVENT_FLAG_NO_INTERCEPT);
     MMI::InputManager::GetInstance()->SimulateInputEvent(pointerEvent, static_cast<float>(zIndex));
@@ -8867,7 +8867,7 @@ void SceneSessionManager::NotifyMMIWindowPidChange(int32_t windowId, bool startM
     }
 
     wptr<SceneSession> weakSceneSession(sceneSession);
-    WLOGFI("SceneSessionManager NotifyMMIWindowPidChange to notify window: %{public}d, pid: %{public}d", windowId, pid);
+    TLOGI(WmsLogTag::WMS_EVENT, "Notify window:%{public}d, pid:%{public}d", windowId, pid);
     auto task = [weakSceneSession, startMoving]() -> WSError {
         auto scnSession = weakSceneSession.promote();
         if (scnSession == nullptr) {
