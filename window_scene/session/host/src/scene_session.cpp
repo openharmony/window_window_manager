@@ -4908,13 +4908,14 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
         "uiAbilityId:%{public}" PRIu64 ", windowMode:%{public}d, callerId:%{public}d, "
         "needClearInNotShowRecent:%{public}u, appInstanceKey: %{public}s, isFromIcon:%{public}d, "
         "supportedWindowModes.size:%{public}zu, requestId:%{public}d, "
-        "maxWindowWidth:%{public}d, minWindowWidth:%{public}d, maxWindowHeight:%{public}d, minWindowHeight:%{public}d",
+        "maxWindowWidth:%{public}d, minWindowWidth:%{public}d, maxWindowHeight:%{public}d, minWindowHeight:%{public}d, "
+        "reuseDelegatorWindow:%{public}d",
         info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str(), info.appIndex_,
         info.sessionAffinity.c_str(), info.callState_, info.persistentId_, info.uiAbilityId_, info.windowMode,
         info.callerPersistentId_, info.needClearInNotShowRecent_, info.appInstanceKey_.c_str(), info.isFromIcon_,
         info.supportedWindowModes.size(), info.requestId,
         info.windowSizeLimits.maxWindowWidth, info.windowSizeLimits.minWindowWidth,
-        info.windowSizeLimits.maxWindowHeight, info.windowSizeLimits.minWindowHeight);
+        info.windowSizeLimits.maxWindowHeight, info.windowSizeLimits.minWindowHeight, info.reuseDelegatorWindow);
     return info;
 }
 
@@ -4943,7 +4944,6 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
         session->sessionInfo_.startMethod = StartMethod::START_CALL;
-        session->sessionInfo_.reuseDelegatorWindow = abilitySessionInfo.reuseDelegatorWindow;
         SessionInfo info = MakeSessionInfoDuringPendingActivation(abilitySessionInfo, session, isFoundationCall);
         if (MultiInstanceManager::IsSupportMultiInstance(session->systemConfig_) &&
             MultiInstanceManager::GetInstance().IsMultiInstance(info.bundleName_)) {
@@ -4957,9 +4957,10 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
         session->HandleCastScreenConnection(info, session);
         if (info.reuseDelegatorWindow) {
             if (session->hookSceneSessionActivationFunc_) {
+                TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s hookSceneSessionActivationFunc execute", where);
                 session->hookSceneSessionActivationFunc_(session, false);
-                return WSError::WS_OK;
             }
+            return WSError::WS_OK;
         }
         if (session->pendingSessionActivationFunc_) {
             session->pendingSessionActivationFunc_(info);
@@ -7946,26 +7947,28 @@ bool SceneSession::GetIsAbilityHook() const
 
 WMError SceneSession::NotifyDisableDelegatorChange()
 {
-    if (!SessionPermission::IsSystemAppCall() && !SessionPermission::IsSACalling()) {
-        TLOGE(WmsLogTag::WMS_LIFE, "The caller is neither a system app nor an SA.");
-        return WMError::WM_ERROR_INVALID_PERMISSION;
-    }
     PostTask([weakThis = wptr(this), where = __func__] {
-        TLOGI(WmsLogTag::WMS_LIFE, "set session id %{public}d disableDelegator true", persistentId_);
-        sessionInfo_.disableDelegator = true;
-    }, __func__)
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
+            return;
+        }
+        TLOGNI(WmsLogTag::WMS_LIFE, "set session id %{public}d disableDelegator true", session->persistentId_);
+        session->sessionInfo_.disableDelegator = true;
+    }, __func__);
     return WMError::WM_OK;
 }
 
 void SceneSession::HookSceneSessionActivation(NotifyHookSceneSessionActivationFunc&& func)
 {
-    PostTask([weatThis = wptr(this), where = __func__, func = std::move(func)] {
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), where, func = std::move(func)] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
             return;
         }
         session->hookSceneSessionActivationFunc_ = std::move(func);
-    }, __func__);
+    }, where);
 }
 } // namespace OHOS::Rosen
