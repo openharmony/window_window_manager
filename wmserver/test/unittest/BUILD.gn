@@ -64,6 +64,7 @@ test_external_deps = [
   "ipc:ipc_single",
   "napi:ace_napi",
   "power_manager:powermgr_client",
+  "preferences:native_preferences",
   "safwk:system_ability_fwk",
 ]
 
