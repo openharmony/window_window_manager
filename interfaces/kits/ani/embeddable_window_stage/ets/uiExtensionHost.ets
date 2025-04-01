@@ -12,8 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+import { BusinessError } from '@ohos.base';
 import window from '@ohos.window';
+import { Callback } from '@ohos.base';
+
+
 
 /**
  * uiExtensionHost.
@@ -29,6 +32,9 @@ namespace uiExtensionHost {
   // internal class and function
   export type CallbackSize = (size: window.Size) => void;
   export type CallbackArea = (area: window.AvoidAreaOptions) => void;
+
+  const WMS_UIEXT: int = 0xC0420D;
+  const WMS_UIEXT_TAG: string = "WMSUiext";
 
   function callBack(fn: object, fnArg: object): void {
       let f = fn as (d: object) => void;
@@ -83,6 +89,8 @@ namespace uiExtensionHost {
     public native getProperties(nativeObj: long, property: object): int;
     public native setProperties(nativeObj: long, property: object): int;
     public native getWindowAvoidArea(nativeObj: long, type: int, area: object): int;
+    public native setWaterMarkFlag(nativeObj: long, enable: boolean): void;
+    public native hidePrivacyContentForHost(nativeObj: long, shouldHide: boolean): void;
     public native onAvoidAreaChange(nativeObj: long, callback: object, callbackData: object): int;
     public native offAvoidAreaChange(nativeObj: long, callback?: object): int;
     public native onWindowSizeChange(nativeObj: long, callback: object, callbackData: object): int;
@@ -96,16 +104,16 @@ namespace uiExtensionHost {
     set properties(property: UIExtensionHostWindowProxyProperties) {
         this.setProperties(this.nativeObj, property as object);
     }
-    public on(type: 'avoidAreaChange' | 'windowSizeChange', callback: CallbackSize | CallbackArea) : void {
+    public on<T>(type: string, callback: Callback<T>): void {
         if (type == 'avoidAreaChange') {
             let area = new UIEAreaAndType();
             this.onAvoidAreaChange(this.nativeObj, callback as object, area as object);
         } else {
-            let size: window.Size = new UIESize();
+            let size = new UIESize();
             this.onWindowSizeChange(this.nativeObj, callback as object, size as object);
         }
     }
-    public off(type: 'windowSizeChange' | 'avoidAreaChange', callback?: CallbackArea | CallbackSize): void {
+    public off<T>(type: string, callback?: Callback<T>): void {
         if (type == 'avoidAreaChange') {
             this.offAvoidAreaChange(this.nativeObj, callback);
         } else {
@@ -116,6 +124,29 @@ namespace uiExtensionHost {
         let area: window.AvoidArea = new UIEAvoidArea();
         let ret = this.getWindowAvoidArea(this.nativeObj, type as int, area as object);
         return area;
+    }
+    setWaterMarkFlag(enable: boolean): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+          this.setWaterMarkFlag(this.nativeObj, enable);
+        }).then((ret: NullishType) :void => {
+          resolve(undefined);
+        }).catch((err: NullishType) :void => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
+    hidePrivacyContentForHost(shouldHide: boolean): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+          this.hidePrivacyContentForHost(this.nativeObj, shouldHide);
+        }).then((ret: NullishType) :void => {
+          resolve(undefined);
+        }).catch((err: NullishType) :void => {
+          reject(err as BusinessError);
+        });
+      });
     }
   }
   /**
@@ -128,8 +159,10 @@ namespace uiExtensionHost {
    */
   export interface UIExtensionHostWindowProxy {
     getWindowAvoidArea(type: window.AvoidAreaType): window.AvoidArea;
-    on(type: 'avoidAreaChange' | 'windowSizeChange', callback: CallbackSize | CallbackArea): void;
-    off(type: 'avoidAreaChange' | 'windowSizeChange', callback?: CallbackArea | CallbackSize): void;
+    setWaterMarkFlag(enable: boolean): Promise<void>;
+    hidePrivacyContentForHost(shouldHide: boolean): Promise<void>;
+    on<T>(type: string, callback: Callback<T>): void;
+    off<T>(type: string, callback?: Callback<T>): void;
     properties: UIExtensionHostWindowProxyProperties;
   }
 

@@ -206,7 +206,7 @@ WMError AniExtensionWindowRegisterManager::ProcessRegister(CaseType caseType,
 {
     WMError ret = WMError::WM_OK;
     if (caseType == CaseType::CASE_WINDOW) {
-        switch (ListenerType::WINDOW_SIZE_CHANGE_CB) {
+        switch (listenerCodeMap_[caseType][type]) {
             case ListenerType::WINDOW_SIZE_CHANGE_CB:
                 ret = ProcessWindowChangeRegister(listener, window, isRegister);
                 break;
