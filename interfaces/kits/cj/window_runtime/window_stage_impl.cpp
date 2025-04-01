@@ -128,7 +128,7 @@ int32_t CJWindowStageImpl::OnLoadContent(const std::string &contexUrl,
     if (isLoadedByName) {
         ret = window->SetUIContentByName(contexUrl, nullptr, nullptr);
     } else {
-        ret = window->NapiSetUIContent(contexUrl, nullptr, nullptr);
+        ret = window->NapiSetUIContent(contexUrl, (napi_env)nullptr, nullptr);
     }
     TLOGI(WmsLogTag::WMS_DIALOG,
         "[WindowStage] [%{public}u, %{public}s] end, ret=%{public}d",
