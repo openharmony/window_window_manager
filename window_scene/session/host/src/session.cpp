@@ -1321,7 +1321,6 @@ WSError Session::Foreground(sptr<WindowSessionProperty> property, bool isFromCli
     NotifyForeground();
 
     isTerminating_ = false;
-    isNeedSyncSessionRect_ = true;
     return WSError::WS_OK;
 }
 
