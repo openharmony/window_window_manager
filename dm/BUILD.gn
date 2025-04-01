@@ -73,7 +73,10 @@ ohos_static_library("libdm_static") {
     "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
   ]
 
-  public_external_deps = [ "graphic_2d:color_manager" ]
+  public_external_deps = [
+    "graphic_2d:color_manager",
+    "image_framework:image_native",
+  ]
 
   external_deps = [
     "ability_runtime:ability_manager",
