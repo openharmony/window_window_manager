@@ -6694,7 +6694,10 @@ sptr<SceneSession> SceneSessionManager::GetTopNearestBlockingFocusSession(Displa
             return false;
         }
         bool isPhoneOrPad = systemConfig_.IsPhoneWindow() || systemConfig_.IsPadWindow();
-        bool isBlockingType = (includingAppSession && session->IsAppSession()) ||
+        bool isPcOrPcMode = systemConfig_.IsPcWindow() ||
+            (systemConfig_.IsPadWindow() && systemConfig_.IsFreeMultiWindowMode());
+        bool isBlockingType = (includingAppSession && session->IsAppSession() &&
+                               !(isPcOrPcMode && session->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT)) ||
                               (session->GetSessionInfo().isSystem_ && session->GetBlockingFocus()) ||
                               (isPhoneOrPad && session->GetWindowType() == WindowType::WINDOW_TYPE_VOICE_INTERACTION);
         if (IsSessionVisibleForeground(session) && isBlockingType)  {
