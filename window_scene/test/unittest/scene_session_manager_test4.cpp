@@ -1796,6 +1796,39 @@ HWTEST_F(SceneSessionManagerTest4, GetTopNearestBlockingFocusSession, TestSize.L
 }
 
 /**
+ * @tc.name: GetTopNearestBlockingFocusSession01
+ * @tc.desc: GetTopNearestBlockingFocusSession01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest4, GetTopNearestBlockingFocusSession01, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "bundleName";
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    sptr<SceneSession> sceneSession01 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sptr<SceneSession> sceneSession02 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sceneSession01->SetZOrder(1);
+    sceneSession01->persistentId_ = 1;
+    sceneSession01->isVisible_ = true;
+    sceneSession01->SetSessionState(SessionState::STATE_FOREGROUND);
+    sceneSession02->SetZOrder(3);
+    sceneSession02->isVisible_ = true;
+    sceneSession02->SetSessionState(SessionState::STATE_FOREGROUND);
+    sceneSession02->SetParentSession(sceneSession01);
+    sceneSession02->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession01));
+    ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession02));
+    sptr<SceneSession> ret = ssm_->GetTopNearestBlockingFocusSession(DEFAULT_DISPLAY_ID, 0, true);
+    EXPECT_EQ(ret, sceneSession01);
+
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    sceneSession02->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    ret = ssm_->GetTopNearestBlockingFocusSession(DEFAULT_DISPLAY_ID, 2, true);
+    EXPECT_EQ(ret, nullptr);
+}
+
+/**
  * @tc.name: RequestFocusSpecificCheck
  * @tc.desc: RequestFocusSpecificCheck
  * @tc.type: FUNC
