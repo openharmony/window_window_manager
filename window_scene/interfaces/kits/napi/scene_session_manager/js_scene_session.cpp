@@ -5056,7 +5056,10 @@ napi_value JsSceneSession::OnNotifyPipOcclusionChange(napi_env env, napi_callbac
     }
     TLOGI(WmsLogTag::WMS_PIP, "persistId:%{public}d, occluded:%{public}d", persistentId_, occluded);
     // Maybe expand with session visibility&state change
-    SceneSessionManager::GetInstance().HandleKeepScreenOn(session, !occluded);
+    SceneSessionManager::GetInstance().HandleKeepScreenOn(session, !occluded, WINDOW_SCREEN_LOCK_PREFIX,
+                                                          session->keepScreenLock_);
+    SceneSessionManager::GetInstance().HandleKeepScreenOn(session, !occluded, VIEW_SCREEN_LOCK_PREFIX,
+                                                          session->viewKeepScreenLock_);
     return NapiGetUndefined(env);
 }
 

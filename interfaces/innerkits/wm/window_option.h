@@ -169,6 +169,20 @@ public:
     bool IsKeepScreenOn() const;
 
     /**
+     * @brief Set view keep screen on.
+     *
+     * @param keepScreenOn The view keep screen on or not.
+     */
+    void SetViewKeepScreenOn(bool keepScreenOn);
+
+    /**
+     * @brief Is view keep screen on.
+     *
+     * @return Return true means the view would keep screen on, otherwise not.
+     */
+    bool IsViewKeepScreenOn() const;
+
+    /**
      * @brief Set screen on.
      *
      * @param turnScreenOn mark the window to turn the screen on or not.
@@ -593,6 +607,7 @@ private:
     WindowTag windowTag_;
     WindowSessionType sessionType_ { WindowSessionType::SCENE_SESSION };
     bool keepScreenOn_ = false;
+    bool viewKeepScreenOn_ = false;
     bool turnScreenOn_ = false;
     bool isMainHandlerAvailable_ = true;
     float brightness_ = UNDEFINED_BRIGHTNESS;
