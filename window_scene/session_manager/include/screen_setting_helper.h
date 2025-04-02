@@ -38,15 +38,21 @@ public:
     static void SetSettingRotationScreenId(int32_t screenId);
     static bool GetSettingRotation(int32_t& rotation, const std::string& key = SETTING_ROTATION_KEY);
     static bool GetSettingRotationScreenId(int32_t& screenId, const std::string& key = SETTING_ROTATION_SCREEN_ID_KEY);
+    static void RegisterSettingscreenSkipProtectedWindowObserver(SettingObserver::UpdateFunc func);
+    static void UnregisterSettingscreenSkipProtectedWindowObserver();
+    static bool GetSettingscreenSkipProtectedWindow(bool& enable,
+        const std::string& key = SETTING_SCREEN_SHARE_PROTECT_KEY);
 
 private:
     static const constexpr char* SETTING_DPI_KEY {"user_set_dpi_value"};
     static const constexpr char* SETTING_CAST_KEY {"huaweicast.data.privacy_projection_state"};
     static const constexpr char* SETTING_ROTATION_KEY {"screen_rotation_value"};
     static const constexpr char* SETTING_ROTATION_SCREEN_ID_KEY {"screen_rotation_screen_id_value"};
+    static const constexpr char* SETTING_SCREEN_SHARE_PROTECT_KEY {"spamshield_screenshare_protect"};
     static sptr<SettingObserver> dpiObserver_;
     static sptr<SettingObserver> castObserver_;
     static sptr<SettingObserver> rotationObserver_;
+    static sptr<SettingObserver> screenSkipProtectedWindowObserver_;
 };
 } // namespace Rosen
 } // namespace OHOS

@@ -68,6 +68,7 @@ enum class JsSessionType : uint32_t {
     TYPE_TRANSPARENT_VIEW,
     TYPE_WALLET_SWIPE_CARD,
     TYPE_SCREEN_CONTROL,
+    TYPE_FLOAT_NAVIGATION
 };
 
 const std::map<WindowType, JsSessionType> WINDOW_TO_JS_SESSION_TYPE_MAP {
@@ -109,6 +110,7 @@ const std::map<WindowType, JsSessionType> WINDOW_TO_JS_SESSION_TYPE_MAP {
     { WindowType::WINDOW_TYPE_TRANSPARENT_VIEW,         JsSessionType::TYPE_TRANSPARENT_VIEW        },
     { WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD,        JsSessionType::TYPE_WALLET_SWIPE_CARD       },
     { WindowType::WINDOW_TYPE_SCREEN_CONTROL,           JsSessionType::TYPE_SCREEN_CONTROL          },
+    { WindowType::WINDOW_TYPE_FLOAT_NAVIGATION,         JsSessionType::TYPE_FLOAT_NAVIGATION        },
 };
 
 const std::map<JsSessionType, WindowType> JS_SESSION_TO_WINDOW_TYPE_MAP {
@@ -150,6 +152,7 @@ const std::map<JsSessionType, WindowType> JS_SESSION_TO_WINDOW_TYPE_MAP {
     { JsSessionType::TYPE_TRANSPARENT_VIEW,         WindowType::WINDOW_TYPE_TRANSPARENT_VIEW        },
     { JsSessionType::TYPE_WALLET_SWIPE_CARD,        WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD       },
     { JsSessionType::TYPE_SCREEN_CONTROL,           WindowType::WINDOW_TYPE_SCREEN_CONTROL          },
+    { JsSessionType::TYPE_FLOAT_NAVIGATION,         WindowType::WINDOW_TYPE_FLOAT_NAVIGATION        },
 };
 
 JsSessionType GetApiType(WindowType type);
@@ -211,7 +214,8 @@ public:
     using Task = std::function<void()>;
     explicit MainThreadScheduler(napi_env env);
     void PostMainThreadTask(Task&& localTask, std::string traceInfo = "Unnamed", int64_t delayTime = 0);
-
+    void RemoveMainThreadTaskByName(const std::string taskName);
+    
 private:
     void GetMainEventHandler();
     napi_env env_;

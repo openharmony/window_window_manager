@@ -365,6 +365,11 @@ struct SessionInfo {
      * PC Window
      */
     std::vector<AppExecFwk::SupportWindowMode> supportedWindowModes;
+
+    /*
+     * Window Rotation
+     */
+    int32_t currentRotation_ = 0;
 };
 
 enum class SessionFlag : uint32_t {
@@ -400,6 +405,7 @@ enum class SizeChangeReason : uint32_t {
     PIP_RESTORE,
     UPDATE_DPI_SYNC,
     DRAG_MOVE,
+    AVOID_AREA_CHANGE,
     END,
 };
 

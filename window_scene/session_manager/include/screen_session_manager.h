@@ -247,6 +247,7 @@ public:
     void OnTentModeChanged(bool isTentMode, int32_t hall = -1);
     void RegisterSettingDpiObserver();
     void RegisterSettingRotationObserver();
+    void RegisterSettingscreenSkipProtectedWindowObserver();
 
     void OnConnect(ScreenId screenId) override {}
     void OnDisconnect(ScreenId screenId) override {}
@@ -330,6 +331,8 @@ public:
     void AddScbClientDeathRecipient(const sptr<IScreenSessionManagerClient>& scbClient, int32_t scbPid);
     void ScbClientDeathCallback(int32_t deathScbPid);
     void ScbStatusRecoveryWhenSwitchUser(std::vector<int32_t> oldScbPids, int32_t newScbPid);
+    int32_t GetCurrentUserId();
+
     std::shared_ptr<Media::PixelMap> GetScreenCapture(const CaptureOption& captureOption,
         DmErrorCode* errorCode = nullptr) override;
     void OnScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) override;
@@ -337,6 +340,7 @@ public:
     std::shared_ptr<Media::PixelMap> GetDisplaySnapshotWithOption(const CaptureOption& captureOption,
         DmErrorCode* errorCode) override;
     ScreenCombination GetScreenCombination(ScreenId screenId) override;
+    DMError SetScreenSkipProtectedWindow(const std::vector<ScreenId>& screenIds, bool isEnable) override;
 
 protected:
     ScreenSessionManager();
@@ -402,6 +406,7 @@ private:
     int NotifyPowerEventForDualDisplay(DisplayPowerEvent event, EventStatus status,
         PowerStateChangeReason reason);
     bool IsScreenCasting();
+    void SetScreenSkipProtectedWindowInner();
     class ScreenIdManager {
     friend class ScreenSessionGroup;
     public:
@@ -455,6 +460,7 @@ private:
     std::recursive_mutex mutex_;
     std::recursive_mutex displayInfoMutex_;
     std::shared_mutex hookInfoMutex_;
+    std::mutex shareProtectMutex_;
 
     ScreenId defaultScreenId_ = SCREEN_ID_INVALID;
     ScreenIdManager screenIdManager_;

@@ -56,8 +56,6 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowSessionImpl"};
-constexpr int32_t FULL_CIRCLE_DEGREE = 360;
-constexpr int32_t ONE_FOURTH_FULL_CIRCLE_DEGREE = 90;
 constexpr int32_t FORCE_SPLIT_MODE = 5;
 
 /**
@@ -737,7 +735,7 @@ WSError WindowSessionImpl::SetActive(bool active)
 }
 
 WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reason,
-    const SceneAnimationConfig& config)
+    const SceneAnimationConfig& config, const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
     // delete after replace ws_common.h with wm_common.h
     auto wmReason = static_cast<WindowSizeChangeReason>(reason);
@@ -758,9 +756,9 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
         wmRect.posX_, wmRect.posY_, wmRect.width_, wmRect.height_, wmReason, config.rsTransaction_ != nullptr);
     if (handler_ != nullptr && wmReason == WindowSizeChangeReason::ROTATION) {
         postTaskDone_ = false;
-        UpdateRectForRotation(wmRect, preRect, wmReason, config);
+        UpdateRectForRotation(wmRect, preRect, wmReason, config, avoidAreas);
     } else {
-        UpdateRectForOtherReason(wmRect, preRect, wmReason, config.rsTransaction_);
+        UpdateRectForOtherReason(wmRect, preRect, wmReason, config.rsTransaction_, avoidAreas);
     }
 
     if (wmReason == WindowSizeChangeReason::MOVE || wmReason == WindowSizeChangeReason::RESIZE) {
@@ -787,9 +785,10 @@ void WindowSessionImpl::UpdateVirtualPixelRatio(const sptr<Display>& display)
 }
 
 void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& preRect,
-    WindowSizeChangeReason wmReason, const SceneAnimationConfig& config)
+    WindowSizeChangeReason wmReason, const SceneAnimationConfig& config,
+    const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
-    handler_->PostTask([weak = wptr(this), wmReason, wmRect, preRect, config]() mutable {
+    handler_->PostTask([weak = wptr(this), wmReason, wmRect, preRect, config, avoidAreas]() mutable {
         HITRACE_METER_NAME(HITRACE_TAG_WINDOW_MANAGER, "WindowSessionImpl::UpdateRectForRotation");
         auto window = weak.promote();
         if (!window) {
@@ -822,7 +821,7 @@ void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& pr
             window->NotifySizeChange(wmRect, wmReason);
             window->lastSizeChangeReason_ = wmReason;
         }
-        window->UpdateViewportConfig(wmRect, wmReason, rsTransaction, displayInfo);
+        window->UpdateViewportConfig(wmRect, wmReason, rsTransaction, displayInfo, avoidAreas);
         RSNode::CloseImplicitAnimation();
         if (rsTransaction) {
             rsTransaction->Commit();
@@ -834,26 +833,28 @@ void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& pr
 }
 
 void WindowSessionImpl::UpdateRectForOtherReasonTask(const Rect& wmRect, const Rect& preRect,
-    WindowSizeChangeReason wmReason, const std::shared_ptr<RSTransaction>& rsTransaction)
+    WindowSizeChangeReason wmReason, const std::shared_ptr<RSTransaction>& rsTransaction,
+    const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
     if ((wmRect != preRect) || (wmReason != lastSizeChangeReason_) || !postTaskDone_) {
         NotifySizeChange(wmRect, wmReason);
         lastSizeChangeReason_ = wmReason;
         postTaskDone_ = true;
     }
-    UpdateViewportConfig(wmRect, wmReason, rsTransaction);
+    UpdateViewportConfig(wmRect, wmReason, rsTransaction, nullptr, avoidAreas);
     UpdateFrameLayoutCallbackIfNeeded(wmReason);
 }
 
 void WindowSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, const Rect& preRect,
-    WindowSizeChangeReason wmReason, const std::shared_ptr<RSTransaction>& rsTransaction)
+    WindowSizeChangeReason wmReason, const std::shared_ptr<RSTransaction>& rsTransaction,
+    const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
     if (handler_ == nullptr) {
-        UpdateRectForOtherReasonTask(wmRect, preRect, wmReason, rsTransaction);
+        UpdateRectForOtherReasonTask(wmRect, preRect, wmReason, rsTransaction, avoidAreas);
         return;
     }
 
-    auto task = [weak = wptr(this), wmReason, wmRect, preRect, rsTransaction] {
+    auto task = [weak = wptr(this), wmReason, wmRect, preRect, rsTransaction, avoidAreas] {
         auto window = weak.promote();
         if (!window) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "window is null, updateViewPortConfig failed");
@@ -864,7 +865,7 @@ void WindowSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, const Rect&
             RSTransaction::FlushImplicitTransaction();
             rsTransaction->Begin();
         }
-        window->UpdateRectForOtherReasonTask(wmRect, preRect, wmReason, rsTransaction);
+        window->UpdateRectForOtherReasonTask(wmRect, preRect, wmReason, rsTransaction, avoidAreas);
         if (rsTransaction && ifNeedCommitRsTransaction) {
             rsTransaction->Commit();
         }
@@ -1144,6 +1145,16 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
     const std::shared_ptr<RSTransaction>& rsTransaction, const sptr<DisplayInfo>& info,
     const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
+    // update avoid areas to listeners
+    for (const auto& [type, avoidArea] : avoidAreas) {
+        TLOGD(WmsLogTag::WMS_IMMS, "avoid type %{public}u area %{public}s",
+            type, avoidArea.ToString().c_str());
+        if (lastAvoidAreaMap_[type] != avoidArea) {
+            lastAvoidAreaMap_[type] = avoidArea;
+            NotifyAvoidAreaChange(new AvoidArea(avoidArea), type);
+        }
+    }
+
     sptr<DisplayInfo> displayInfo;
     if (info == nullptr) {
         auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
@@ -1173,25 +1184,13 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
     TLOGI(WmsLogTag::WMS_LAYOUT, "[rotation,deviceRotation,transformHint,virtualPixelRatio]:[%{public}u,"
         "%{public}u,%{public}u,%{public}f]", rotation, deviceRotation, transformHint, virtualPixelRatio_);
     auto config = FillViewportConfig(rect, density, orientation, transformHint);
-    std::map<AvoidAreaType, AvoidArea> avoidAreasToUpdate;
-    if (reason == WindowSizeChangeReason::ROTATION) {
-        if (auto hostSession = GetHostSession()) {
-            hostSession->GetAllAvoidAreas(avoidAreasToUpdate);
-        }
-    } else {
-        avoidAreasToUpdate = avoidAreas;
-    }
-    for (const auto& [type, avoidArea] : avoidAreasToUpdate) {
-        TLOGD(WmsLogTag::WMS_IMMS, "avoid type %{public}u area %{public}s",
-            type, avoidArea.ToString().c_str());
-    }
     {
         std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
         if (uiContent == nullptr) {
             WLOGFW("uiContent is null!");
             return;
         }
-        uiContent->UpdateViewportConfig(config, reason, rsTransaction, avoidAreasToUpdate);
+        uiContent->UpdateViewportConfig(config, reason, rsTransaction, lastAvoidAreaMap_);
     }
     if (WindowHelper::IsUIExtensionWindow(GetType())) {
         TLOGD(WmsLogTag::WMS_LAYOUT, "Id:%{public}d reason:%{public}d windowRect:[%{public}d,%{public}d,"
@@ -2514,8 +2513,7 @@ WMError WindowSessionImpl::RegisterMainWindowCloseListeners(const sptr<IMainWind
         TLOGE(WmsLogTag::DEFAULT, "window type is not supported");
         return WMError::WM_ERROR_INVALID_CALLING;
     }
-    auto isPC = windowSystemConfig_.uiType_ == UI_TYPE_PC;
-    if (!(isPC || IsFreeMultiWindowMode())) {
+    if (!IsPcOrPadCapabilityEnabled()) {
         TLOGE(WmsLogTag::DEFAULT, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -2533,8 +2531,7 @@ WMError WindowSessionImpl::UnregisterMainWindowCloseListeners(const sptr<IMainWi
         TLOGE(WmsLogTag::DEFAULT, "listener could not be null");
         return WMError::WM_ERROR_NULLPTR;
     }
-    auto isPC = windowSystemConfig_.uiType_ == UI_TYPE_PC;
-    if (!(isPC || IsFreeMultiWindowMode())) {
+    if (!IsPcOrPadCapabilityEnabled()) {
         TLOGE(WmsLogTag::DEFAULT, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -2854,7 +2851,7 @@ void WindowSessionImpl::ClearVsyncStation()
 
 void WindowSessionImpl::SetInputEventConsumer(const std::shared_ptr<IInputEventConsumer>& inputEventConsumer)
 {
-    TLOGI(WmsLogTag::WMS_EVENT, "called");
+    TLOGI(WmsLogTag::WMS_EVENT, "in");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     inputEventConsumer_ = inputEventConsumer;
 }
@@ -3449,8 +3446,18 @@ WSErrorCode WindowSessionImpl::NotifyTransferComponentDataSync(const AAFwk::Want
 
 WSError WindowSessionImpl::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
 {
-    UpdateViewportConfig(GetRect(), WindowSizeChangeReason::UNDEFINED, nullptr, nullptr, {{type, *avoidArea}});
-    NotifyAvoidAreaChange(avoidArea, type);
+    auto task = [weak = wptr(this), avoidArea, type] {
+        auto window = weak.promote();
+        if (!window) {
+            return;
+        }
+        if (window->lastAvoidAreaMap_[type] != *avoidArea) {
+            window->lastAvoidAreaMap_[type] = *avoidArea;
+            window->NotifyAvoidAreaChange(avoidArea, type);
+            window->UpdateViewportConfig(window->GetRect(), WindowSizeChangeReason::AVOID_AREA_CHANGE);
+        }
+    };
+    handler_->PostTask(std::move(task), __func__);
     return WSError::WS_OK;
 }
 
@@ -3490,7 +3497,7 @@ WMError WindowSessionImpl::RegisterTouchOutsideListener(const sptr<ITouchOutside
     bool isUpdate = false;
     WMError ret = WMError::WM_OK;
     auto persistentId = GetPersistentId();
-    TLOGI(WmsLogTag::WMS_EVENT, "Start register touchOutside listener, window: name=%{public}s, id=%{public}u",
+    TLOGI(WmsLogTag::WMS_EVENT, "name=%{public}s, id=%{public}u",
         GetWindowName().c_str(), GetPersistentId());
     if (listener == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "listener is nullptr");
@@ -3519,7 +3526,7 @@ WMError WindowSessionImpl::UnregisterTouchOutsideListener(const sptr<ITouchOutsi
     bool isUpdate = false;
     WMError ret = WMError::WM_OK;
     auto persistentId = GetPersistentId();
-    TLOGI(WmsLogTag::WMS_EVENT, "Start unregister touchOutside listener, window: name=%{public}s, id=%{public}u",
+    TLOGI(WmsLogTag::WMS_EVENT, "name=%{public}s, id=%{public}u",
         GetWindowName().c_str(), GetPersistentId());
     if (listener == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "listener is nullptr");
@@ -3762,9 +3769,7 @@ void WindowSessionImpl::NotifyPointerEvent(const std::shared_ptr<MMI::PointerEve
     if (inputEventConsumer != nullptr) {
         WLOGFD("Transfer pointer event to inputEventConsumer");
         if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
-            TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW,
-                "Transfer pointer event to inputEventConsumer InputTracking id:%{public}d",
-                pointerEvent->GetId());
+            TLOGI(WmsLogTag::WMS_EVENT, "eid:%{public}d", pointerEvent->GetId());
         }
         if (!(inputEventConsumer->OnInputEvent(pointerEvent))) {
             pointerEvent->MarkProcessed();
@@ -3778,10 +3783,9 @@ void WindowSessionImpl::NotifyPointerEvent(const std::shared_ptr<MMI::PointerEve
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
     if (uiContent != nullptr) {
         if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
-            TLOGI(WmsLogTag::WMS_EVENT, "Input id:%{public}d",
-                pointerEvent->GetId());
+            TLOGD(WmsLogTag::WMS_EVENT, "eid:%{public}d", pointerEvent->GetId());
         }
-        TLOGI(WmsLogTag::WMS_EVENT, "Start to process pointerEvent, id: %{public}d", pointerEvent->GetId());
+        TLOGD(WmsLogTag::WMS_EVENT, "Start to process pointerEvent, id: %{public}d", pointerEvent->GetId());
         if (!(uiContent->ProcessPointerEvent(pointerEvent))) {
             TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW, "UI content dose not consume this pointer event");
             pointerEvent->MarkProcessed();
@@ -4695,6 +4699,34 @@ Transform WindowSessionImpl::GetLayoutTransform() const
 {
     std::lock_guard<std::recursive_mutex> lock(transformMutex_);
     return layoutTransform_;
+}
+
+WSError WindowSessionImpl::SetCurrentRotation(int32_t currentRotation)
+{
+    TLOGI(WmsLogTag::WMS_ROTATION, "currentRotation: %{public}d", currentRotation);
+    if (currentRotation > FULL_CIRCLE_DEGREE || currentRotation < ZERO_CIRCLE_DEGREE) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "currentRotation is invalid: %{public}d", currentRotation);
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    property_->EditSessionInfo().currentRotation_ = currentRotation;
+    return WSError::WS_OK;
+}
+
+bool WindowSessionImpl::IsFullScreenPcAppInPadMode() const
+{
+    return property_->GetIsPcAppInPad() && GetMode() == WindowMode::WINDOW_MODE_FULLSCREEN
+        && !IsFreeMultiWindowMode();
+}
+
+void WindowSessionImpl::NotifyClientWindowSize()
+{
+    if (IsFullScreenPcAppInPadMode()) {
+        const auto& windowRect = GetRect();
+        NotifySizeChange(windowRect, WindowSizeChangeReason::MOVE);
+        auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
+        sptr<DisplayInfo> displayInfo = display ? display->GetDisplayInfo() : nullptr;
+        UpdateViewportConfig(windowRect, WindowSizeChangeReason::UNDEFINED, nullptr, displayInfo);
+    }
 }
 } // namespace Rosen
 } // namespace OHOS

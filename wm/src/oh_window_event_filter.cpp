@@ -73,10 +73,10 @@ KeyEventFilterFunc convert2Func(OH_NativeWindowManager_KeyEventFilter filter)
 WindowManager_ErrorCode OH_NativeWindowManager_RegisterKeyEventFilter(int32_t windowId,
     OH_NativeWindowManager_KeyEventFilter filter)
 {
-    TLOGI(WmsLogTag::WMS_EVENT, "register keyEventCallback, windowId:%{public}d", windowId);
+    TLOGI(WmsLogTag::WMS_EVENT, "register keyEventCallback, wid:%{public}d", windowId);
     auto mainWindow = OHOS::Rosen::Window::GetWindowWithId(windowId);
     if (mainWindow == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "window is null, windowId:%{public}d", windowId);
+        TLOGE(WmsLogTag::WMS_EVENT, "window is null, wid:%{public}d", windowId);
         return WindowManager_ErrorCode::INVAILD_WINDOW_ID;
     }
     auto res = mainWindow->SetKeyEventFilter(convert2Func(filter));
@@ -86,10 +86,10 @@ WindowManager_ErrorCode OH_NativeWindowManager_RegisterKeyEventFilter(int32_t wi
 
 WindowManager_ErrorCode OH_NativeWindowManager_UnregisterKeyEventFilter(int32_t windowId)
 {
-    TLOGI(WmsLogTag::WMS_EVENT, "clear keyEventCallback, windowId:%{public}d", windowId);
+    TLOGI(WmsLogTag::WMS_EVENT, "clear keyEventCallback, wid:%{public}d", windowId);
     auto mainWindow = OHOS::Rosen::Window::GetWindowWithId(windowId);
     if (mainWindow == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "window is null, windowId:%{public}d", windowId);
+        TLOGE(WmsLogTag::WMS_EVENT, "window is null, wid:%{public}d", windowId);
         return WindowManager_ErrorCode::INVAILD_WINDOW_ID;
     }
     auto res = mainWindow->ClearKeyEventFilter();
@@ -138,10 +138,10 @@ MouseEventFilterFunc convert2MouseEventFilterFunc(OH_NativeWindowManager_MouseEv
 WindowManager_ErrorCode OH_NativeWindowManager_RegisterMouseEventFilter(int32_t windowId,
     OH_NativeWindowManager_MouseEventFilter mouseEventFilter)
 {
-    TLOGI(WmsLogTag::WMS_EVENT, "register mouseEventCallback, windowId:%{public}d", windowId);
+    TLOGI(WmsLogTag::WMS_EVENT, "register mouseEventCallback, wid:%{public}d", windowId);
     auto window = OHOS::Rosen::Window::GetWindowWithId(windowId);
     if (window == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "window is null, windowId:%{public}d", windowId);
+        TLOGE(WmsLogTag::WMS_EVENT, "window is null, wid:%{public}d", windowId);
         return WindowManager_ErrorCode::INVAILD_WINDOW_ID;
     }
     auto res = window->SetMouseEventFilter(convert2MouseEventFilterFunc(mouseEventFilter));
@@ -150,10 +150,10 @@ WindowManager_ErrorCode OH_NativeWindowManager_RegisterMouseEventFilter(int32_t 
 
 WindowManager_ErrorCode OH_NativeWindowManager_UnregisterMouseEventFilter(int32_t windowId)
 {
-    TLOGI(WmsLogTag::WMS_EVENT, "clear mouseEventCallback, windowId:%{public}d", windowId);
+    TLOGI(WmsLogTag::WMS_EVENT, "clear mouseEventCallback, wid:%{public}d", windowId);
     auto window = OHOS::Rosen::Window::GetWindowWithId(windowId);
     if (window == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "window is null, windowId:%{public}d", windowId);
+        TLOGE(WmsLogTag::WMS_EVENT, "window is null, wid:%{public}d", windowId);
         return WindowManager_ErrorCode::INVAILD_WINDOW_ID;
     }
     auto res = window->ClearMouseEventFilter();
@@ -196,10 +196,10 @@ TouchEventFilterFunc convert2TouchEventFilterFunc(OH_NativeWindowManager_TouchEv
 WindowManager_ErrorCode OH_NativeWindowManager_RegisterTouchEventFilter(int32_t windowId,
     OH_NativeWindowManager_TouchEventFilter touchEventFilter)
 {
-    TLOGI(WmsLogTag::WMS_EVENT, "register touchEventCallback, windowId:%{public}d", windowId);
+    TLOGI(WmsLogTag::WMS_EVENT, "register touchEventCallback, wid:%{public}d", windowId);
     auto window = OHOS::Rosen::Window::GetWindowWithId(windowId);
     if (window == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "window is null, windowId:%{public}d", windowId);
+        TLOGE(WmsLogTag::WMS_EVENT, "window is null, wid:%{public}d", windowId);
         return WindowManager_ErrorCode::INVAILD_WINDOW_ID;
     }
     auto res = window->SetTouchEventFilter(convert2TouchEventFilterFunc(touchEventFilter));
@@ -208,10 +208,10 @@ WindowManager_ErrorCode OH_NativeWindowManager_RegisterTouchEventFilter(int32_t 
 
 WindowManager_ErrorCode OH_NativeWindowManager_UnregisterTouchEventFilter(int32_t windowId)
 {
-    TLOGI(WmsLogTag::WMS_EVENT, "clear touchEventCallback, windowId:%{public}d", windowId);
+    TLOGI(WmsLogTag::WMS_EVENT, "clear touchEventCallback, wid:%{public}d", windowId);
     auto window = OHOS::Rosen::Window::GetWindowWithId(windowId);
     if (window == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "window is null, windowId:%{public}d", windowId);
+        TLOGE(WmsLogTag::WMS_EVENT, "window is null, wid:%{public}d", windowId);
         return WindowManager_ErrorCode::INVAILD_WINDOW_ID;
     }
     auto res = window->ClearTouchEventFilter();

@@ -41,7 +41,8 @@ public:
     // IPC interface
     virtual WSError SetActive(bool active) = 0;
     virtual WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
-        const SceneAnimationConfig& config = { nullptr, ROTATE_ANIMATION_DURATION }) = 0;
+        const SceneAnimationConfig& config = { nullptr, ROTATE_ANIMATION_DURATION },
+        const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {}) = 0;
     virtual void UpdateDensity() = 0;
     virtual WSError UpdateOrientation() = 0;
     virtual WSError SendExtensionData(MessageParcel& data, MessageParcel& reply, MessageOption& option)
@@ -127,6 +128,10 @@ public:
     virtual WSError UpdateDisplayId(uint64_t displayId) = 0;
     virtual void NotifyDisplayMove(DisplayId from, DisplayId to) = 0;
     virtual WSError SwitchFreeMultiWindow(bool enable) = 0;
+    virtual WSError PcAppInPadNormalClose()
+    {
+        return WSError::WS_OK;
+    }
     virtual WSError NotifyCompatibleModeEnableInPad(bool enable)
     {
         return WSError::WS_OK;
@@ -179,6 +184,7 @@ public:
     virtual WSError SetEnableDragBySystem(bool dragEnable) = 0;
     virtual WSError SetDragActivated(bool dragActivated) = 0;
     virtual WSError NotifyWindowAttachStateChange(bool isAttach) { return WSError::WS_DO_NOTHING; }
+    virtual WSError SetCurrentRotation(int32_t currentRotation) = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_INTERFACE_H

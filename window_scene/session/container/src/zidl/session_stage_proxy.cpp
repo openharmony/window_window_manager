@@ -172,7 +172,7 @@ WSError SessionStageProxy::UpdateDisplayId(uint64_t displayId)
 }
 
 WSError SessionStageProxy::UpdateRect(const WSRect& rect, SizeChangeReason reason,
-    const SceneAnimationConfig& config)
+    const SceneAnimationConfig& config, const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -212,6 +212,21 @@ WSError SessionStageProxy::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     if (!data.WriteInt32(config.animationDuration_)) {
         TLOGE(WmsLogTag::DEFAULT, "Write animation duration failed");
         return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteUint32(avoidAreas.size())) {
+        TLOGE(WmsLogTag::WMS_IMMS, "Write avoid area size failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    for (const auto& [type, avoidArea] : avoidAreas) {
+        if (!data.WriteUint32(static_cast<uint32_t>(type))) {
+            TLOGE(WmsLogTag::WMS_IMMS, "Write avoid area type failed");
+            return WSError::WS_ERROR_IPC_FAILED;
+        }
+        if (!data.WriteParcelable(&avoidArea)) {
+            TLOGE(WmsLogTag::WMS_IMMS, "Write avoid area failed");
+            return WSError::WS_ERROR_IPC_FAILED;
+        }
     }
 
     sptr<IRemoteObject> remote = Remote();
@@ -1182,6 +1197,30 @@ void SessionStageProxy::NotifyKeyboardPanelInfoChange(const KeyboardPanelInfo& k
     }
 }
 
+WSError SessionStageProxy::PcAppInPadNormalClose()
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC | MessageOption::TF_ASYNC_WAKEUP_LATER);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (remote->SendRequest(
+        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_PCAPPINPADNORMAL_CLOSE),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return WSError::WS_OK;
+}
+
 WSError SessionStageProxy::NotifyCompatibleModeEnableInPad(bool enable)
 {
     sptr<IRemoteObject> remote = Remote();
@@ -1407,6 +1446,36 @@ WSError SessionStageProxy::NotifyWindowAttachStateChange(bool isAttach)
         static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_WINDOW_ATTACH_STATE_CHANGE),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_SUB, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return WSError::WS_OK;
+}
+
+WSError SessionStageProxy::SetCurrentRotation(int32_t currentRotation)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteInt32(currentRotation)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Write params failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (remote->SendRequest(
+        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_CURRENT_ROTATION),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     return WSError::WS_OK;

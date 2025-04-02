@@ -1087,6 +1087,31 @@ HWTEST_F(WindowSessionTest3, SetCompatibleModeEnableInPad, Function | SmallTest 
 }
 
 /**
+ * @tc.name: PcAppInPadNormalClose
+ * @tc.desc: PcAppInPadNormalClose Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, PcAppInPadNormalClose, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+
+    session_->sessionInfo_.isSystem_ = true;
+    auto result = session_->PcAppInPadNormalClose();
+    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_SESSION);
+
+    session_->sessionInfo_.isSystem_ = false;
+    session_->SetSessionState(SessionState::STATE_FOREGROUND);
+    result = session_->PcAppInPadNormalClose();
+    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
+
+    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
+    ASSERT_NE(nullptr, mockSessionStage);
+    session_->sessionStage_ = mockSessionStage;
+    result = session_->PcAppInPadNormalClose();
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
  * @tc.name: SetStartingBeforeVisible
  * @tc.desc: test SetStartingBeforeVisible
  * @tc.type: FUNC

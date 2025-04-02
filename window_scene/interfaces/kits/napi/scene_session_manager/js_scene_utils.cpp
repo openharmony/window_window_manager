@@ -964,6 +964,7 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
     }
     napi_set_named_property(env, objValue, "supportWindowModes",
         CreateSupportWindowModes(env, sessionInfo.supportedWindowModes));
+    napi_set_named_property(env, objValue, "currentRotation", CreateJsValue(env, sessionInfo.currentRotation_));
     return objValue;
 }
 
@@ -1618,6 +1619,7 @@ napi_value SessionTypeInit(napi_env env)
     SetTypeProperty(objValue, env, "TYPE_TRANSPARENT_VIEW", JsSessionType::TYPE_TRANSPARENT_VIEW);
     SetTypeProperty(objValue, env, "TYPE_WALLET_SWIPE_CARD", JsSessionType::TYPE_WALLET_SWIPE_CARD);
     SetTypeProperty(objValue, env, "TYPE_SCREEN_CONTROL", JsSessionType::TYPE_SCREEN_CONTROL);
+    SetTypeProperty(objValue, env, "TYPE_FLOAT_NAVIGATION", JsSessionType::TYPE_FLOAT_NAVIGATION);
     return objValue;
 }
 
@@ -1715,6 +1717,13 @@ void MainThreadScheduler::PostMainThreadTask(Task&& localTask, std::string trace
             OHOS::AppExecFwk::EventQueue::Priority::IMMEDIATE);
     } else {
         NapiAsyncWork(env_, task);
+    }
+}
+
+void MainThreadScheduler::RemoveMainThreadTaskByName(const std::string taskName)
+{
+    if (handler_ && !handler_->GetEventRunner()->IsCurrentRunnerThread()) {
+        handler_->RemoveTask("wms:" + taskName);
     }
 }
 } // namespace OHOS::Rosen

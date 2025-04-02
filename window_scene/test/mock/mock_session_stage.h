@@ -27,8 +27,8 @@ public:
     ~SessionStageMocker() {};
 
     MOCK_METHOD1(SetActive, WSError(bool active));
-    MOCK_METHOD3(UpdateRect, WSError(const WSRect& rect, SizeChangeReason reason,
-        const SceneAnimationConfig& config));
+    MOCK_METHOD4(UpdateRect, WSError(const WSRect& rect, SizeChangeReason reason,
+        const SceneAnimationConfig& config, const std::map<AvoidAreaType, AvoidArea>& avoidAreas));
     MOCK_METHOD0(UpdateDensity, void(void));
     MOCK_METHOD0(UpdateOrientation, WSError(void));
     MOCK_METHOD0(HandleBackEvent, WSError(void));
@@ -63,6 +63,7 @@ public:
     MOCK_METHOD1(SwitchFreeMultiWindow, WSError(bool enable));
     MOCK_METHOD1(NotifyCompatibleModeEnableInPad, WSError(bool enable));
     MOCK_METHOD2(SetUniqueVirtualPixelRatio, void(bool useUniqueDensity, float virtualPixelRatio));
+    MOCK_METHOD0(PcAppInPadNormalClose, WSError(void));
     MOCK_METHOD1(NotifySessionFullScreen, void(bool fullScreen));
     MOCK_METHOD1(GetUIContentRemoteObj, WSError(sptr<IRemoteObject>& uiContentRemoteObj));
     MOCK_METHOD2(NotifyDumpInfo, WSError(const std::vector<std::string>& params,
@@ -71,6 +72,7 @@ public:
     MOCK_METHOD1(SetDragActivated, WSError(bool dragActivated));
     MOCK_METHOD1(NotifyHighlightChange, WSError(bool isHighlight));
     MOCK_METHOD3(NotifyPipWindowSizeChange, WSError(uint32_t width, uint32_t height, double scale));
+    MOCK_METHOD1(SetCurrentRotation, WSError(int32_t currentRotation));
 };
 } // namespace Rosen
 } // namespace OHOS

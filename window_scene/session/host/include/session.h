@@ -270,6 +270,9 @@ public:
     SizeChangeReason GetSizeChangeReason() const { return reason_; }
     virtual WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
         const std::string& updateReason, const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
+    virtual WSError UpdateRectWithLayoutInfo(const WSRect& rect, SizeChangeReason reason,
+        const std::string& updateReason, const std::shared_ptr<RSTransaction>& rsTransaction = nullptr,
+        const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {});
     WSError UpdateDensity();
     WSError UpdateOrientation();
 
@@ -337,6 +340,7 @@ public:
         int32_t landscapeWidth, int32_t landscapeHeight);
     WSError SetAppSupportPhoneInPc(bool isSupportPhone);
     WSError SetCompatibleModeEnableInPad(bool enable);
+    WSError PcAppInPadNormalClose();
     bool NeedNotify() const;
     void SetNeedNotify(bool needNotify);
     void SetStartingBeforeVisible(bool isStartingBeforeVisible);

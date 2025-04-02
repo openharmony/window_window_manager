@@ -32,7 +32,8 @@ public:
 
     WSError SetActive(bool active) override;
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
-        const SceneAnimationConfig& config = { nullptr, ROTATE_ANIMATION_DURATION }) override;
+        const SceneAnimationConfig& config = { nullptr, ROTATE_ANIMATION_DURATION },
+        const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {}) override;
     void UpdateDensity() override;
     WSError UpdateOrientation() override;
     WSError HandleBackEvent() override;
@@ -68,6 +69,7 @@ public:
     WSError SwitchFreeMultiWindow(bool enable) override;
     WSError GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj) override;
     void NotifyKeyboardPanelInfoChange(const KeyboardPanelInfo& keyboardPanelInfo) override;
+    WSError PcAppInPadNormalClose() override;
     WSError NotifyCompatibleModeEnableInPad(bool enable) override;
     void SetUniqueVirtualPixelRatio(bool useUniqueDensity, float virtualPixelRatio) override;
     void NotifySessionFullScreen(bool fullScreen) override;
@@ -80,6 +82,7 @@ public:
     WSError SetEnableDragBySystem(bool dragEnable) override;
     WSError NotifyHighlightChange(bool isHighlight) override;
     WSError NotifyWindowAttachStateChange(bool isAttach) override;
+    WSError SetCurrentRotation(int32_t currentRotation) override;
 
 private:
     static inline BrokerDelegator<SessionStageProxy> delegator_;

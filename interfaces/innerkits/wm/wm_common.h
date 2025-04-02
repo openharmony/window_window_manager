@@ -93,6 +93,7 @@ enum class WindowType : uint32_t {
     WINDOW_TYPE_TRANSPARENT_VIEW,
     WINDOW_TYPE_WALLET_SWIPE_CARD,
     WINDOW_TYPE_SCREEN_CONTROL,
+    WINDOW_TYPE_FLOAT_NAVIGATION,
     ABOVE_APP_SYSTEM_WINDOW_END,
 
     SYSTEM_SUB_WINDOW_BASE = 2500,
@@ -403,6 +404,7 @@ enum class WindowSizeChangeReason : uint32_t {
     PIP_RESTORE,
     UPDATE_DPI_SYNC,
     DRAG_MOVE,
+    AVOID_AREA_CHANGE,
     END,
 };
 
@@ -613,6 +615,9 @@ constexpr int32_t INVALID_USER_ID = -1;
 constexpr int32_t SYSTEM_USERID = 0;
 constexpr int32_t BASE_USER_RANGE = 200000;
 constexpr int32_t DEFAULT_SCREEN_ID = 0;
+constexpr int32_t ZERO_CIRCLE_DEGREE = 0;
+constexpr int32_t FULL_CIRCLE_DEGREE = 360;
+constexpr int32_t ONE_FOURTH_FULL_CIRCLE_DEGREE = 90;
 constexpr float UNDEFINED_DENSITY = -1.0f;
 constexpr float MINIMUM_CUSTOM_DENSITY = 0.5f;
 constexpr float MAXIMUM_CUSTOM_DENSITY = 4.0f;

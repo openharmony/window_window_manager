@@ -283,7 +283,7 @@ void SceneInputManager::FlushEmptyInfoToMMI()
             .currentUserId = currentUserId_,
             .displaysInfo = displayInfos
         };
-        TLOGI(WmsLogTag::WMS_EVENT, "currUserId:%{public}d width:%{public}d height:%{public}d",
+        TLOGI(WmsLogTag::WMS_EVENT, "userId:%{public}d width:%{public}d height:%{public}d",
             currentUserId_, mainScreenWidth, mainScreenHeight);
         MMI::InputManager::GetInstance()->UpdateDisplayInfo(displayGroupInfo);
     };

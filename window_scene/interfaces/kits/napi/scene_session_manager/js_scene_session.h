@@ -143,6 +143,7 @@ private:
     static void BindNativeMethod(napi_env env, napi_value objValue, const char* moduleName);
     static void BindNativeMethodForKeyboard(napi_env env, napi_value objValue, const char* moduleName);
     static void BindNativeMethodForCompatiblePcMode(napi_env env, napi_value objValue, const char* moduleName);
+    static void BindNativeMethodForPcAppInPadNormal(napi_env env, napi_value objValue, const char* moduleName);
     static void BindNativeMethodForSCBSystemSession(napi_env env, napi_value objValue, const char* moduleName);
     static void BindNativeMethodForFocus(napi_env env, napi_value objValue, const char* moduleName);
     static napi_value SetSkipSelfWhenShowOnVirtualScreen(napi_env env, napi_callback_info info);
@@ -158,6 +159,7 @@ private:
     static napi_value SyncDefaultRequestedOrientation(napi_env env, napi_callback_info info);
     static napi_value SetIsPcAppInPad(napi_env env, napi_callback_info info);
     static napi_value SetStartingWindowExitAnimationFlag(napi_env env, napi_callback_info info);
+    static napi_value PcAppInPadNormalClose(napi_env env, napi_callback_info info);
     static napi_value SetIsActivatedAfterScreenLocked(napi_env env, napi_callback_info info);
     static napi_value SetFrameGravity(napi_env env, napi_callback_info info);
     static napi_value SetWindowEnableDragBySystem(napi_env env, napi_callback_info info);
@@ -166,6 +168,7 @@ private:
     static napi_value SetColorSpace(napi_env env, napi_callback_info info);
     static napi_value SetSnapshotSkip(napi_env env, napi_callback_info info);
     static napi_value SetExclusivelyHighlighted(napi_env env, napi_callback_info info);
+    static napi_value SetCurrentRotation(napi_env env, napi_callback_info info);
 
     napi_value OnActivateDragBySystem(napi_env env, napi_callback_info info);
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
@@ -215,6 +218,7 @@ private:
     napi_value OnSyncDefaultRequestedOrientation(napi_env env, napi_callback_info info);
     napi_value OnSetIsPcAppInPad(napi_env env, napi_callback_info info);
     napi_value OnSetStartingWindowExitAnimationFlag(napi_env env, napi_callback_info info);
+    napi_value OnPcAppInPadNormalClose(napi_env env, napi_callback_info info);
     napi_value OnSyncScenePanelGlobalPosition(napi_env env, napi_callback_info info);
     napi_value OnUnSyncScenePanelGlobalPosition(napi_env env, napi_callback_info info);
     napi_value OnSetNeedSyncSessionRect(napi_env env, napi_callback_info info);
@@ -226,6 +230,7 @@ private:
     napi_value OnSetColorSpace(napi_env env, napi_callback_info info);
     napi_value OnSetSnapshotSkip(napi_env env, napi_callback_info info);
     napi_value OnSetExclusivelyHighlighted(napi_env env, napi_callback_info info);
+    napi_value OnSetCurrentRotation(napi_env env, napi_callback_info info);
 
     bool IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);
     void ProcessChangeSessionVisibilityWithStatusBarRegister();
@@ -368,6 +373,8 @@ private:
     std::map<std::string, std::shared_ptr<NativeReference>> jsCbMap_;
     std::shared_ptr<MainThreadScheduler> taskScheduler_;
     static std::map<int32_t, napi_ref> jsSceneSessionMap_;
+    std::mutex windowRotationMutex_;
+    uint32_t windowRotation_ = 0;
 };
 } // namespace OHOS::Rosen
 

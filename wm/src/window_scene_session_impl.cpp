@@ -377,6 +377,10 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         if (createSystemWindowRet != WMError::WM_OK) {
             return createSystemWindowRet;
         }
+        auto parentSession = FindParentSessionByParentId(property_->GetParentPersistentId());
+        if (parentSession != nullptr) {
+            property_->SetIsPcAppInPad(parentSession->GetProperty()->GetIsPcAppInPad());
+        }
         PreProcessCreate();
         SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
             surfaceNode_, property_, persistentId, session, windowSystemConfig_, token);
@@ -1357,7 +1361,8 @@ void WindowSceneSessionImpl::SetDefaultProperty()
         case WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR:
         case WindowType::WINDOW_TYPE_DOCK_SLICE:
         case WindowType::WINDOW_TYPE_STATUS_BAR:
-        case WindowType::WINDOW_TYPE_NAVIGATION_BAR: {
+        case WindowType::WINDOW_TYPE_NAVIGATION_BAR:
+        case WindowType::WINDOW_TYPE_FLOAT_NAVIGATION: {
             property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
             property_->SetFocusable(false);
             break;
@@ -1735,8 +1740,12 @@ WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height)
         TLOGW(WmsLogTag::WMS_LAYOUT, "Unsupported operation for pip window");
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
-    if (GetMode() != WindowMode::WINDOW_MODE_FLOATING) {
+    if (GetMode() != WindowMode::WINDOW_MODE_FLOATING && !IsFullScreenPcAppInPadMode()) {
         TLOGW(WmsLogTag::WMS_LAYOUT, "Fullscreen window could not resize, winId: %{public}u", GetWindowId());
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
+    if (IsFullScreenPcAppInPadMode() && IsFullScreenEnable()) {
+        NotifyClientWindowSize();
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
 
@@ -1781,7 +1790,7 @@ WMError WindowSceneSessionImpl::ResizeAsync(uint32_t width, uint32_t height)
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
-    if (GetMode() != WindowMode::WINDOW_MODE_FLOATING) {
+    if (GetMode() != WindowMode::WINDOW_MODE_FLOATING && !IsFullScreenPcAppInPadMode()) {
         TLOGW(WmsLogTag::WMS_LAYOUT, "window should not resize, winId:%{public}u, mode:%{public}u",
             GetWindowId(), GetMode());
         return WMError::WM_ERROR_INVALID_OP_IN_CUR_STATUS;
@@ -2626,9 +2635,9 @@ WMError WindowSceneSessionImpl::SetSupportedWindowModesInner(
     bool onlySupportFullScreen =
         WindowHelper::IsWindowModeSupported(windowModeSupportType, WindowMode::WINDOW_MODE_FULLSCREEN) &&
         !WindowHelper::IsWindowModeSupported(windowModeSupportType, WindowMode::WINDOW_MODE_FLOATING);
-    if (onlySupportFullScreen && !property_->IsLayoutFullScreen()) {
+    if (onlySupportFullScreen && !IsLayoutFullScreen()) {
         TLOGI(WmsLogTag::WMS_LAYOUT_PC, "onlySupportFullScreen:%{public}d IsLayoutFullScreen:%{public}d",
-            onlySupportFullScreen, property_->IsLayoutFullScreen());
+            onlySupportFullScreen, IsLayoutFullScreen());
         Maximize(MaximizePresentation::ENTER_IMMERSIVE);
         return WMError::WM_OK;
     }
@@ -2719,7 +2728,7 @@ bool WindowSceneSessionImpl::CalcWindowShouldMove()
         }
     }
 
-    if (IsPcOrPadFreeMultiWindowMode()) {
+    if (IsPcOrPadCapabilityEnabled()) {
         return true;
     }
     return false;
@@ -2730,6 +2739,11 @@ WmErrorCode WindowSceneSessionImpl::StartMoveWindow()
     if (!CalcWindowShouldMove()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "The device is not supported");
         return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (property_->GetIsPcAppInPad() &&
+        property_->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
+        !IsFreeMultiWindowMode()) {
+        return WmErrorCode::WM_OK;
     }
     if (auto hostSession = GetHostSession()) {
         WSError errorCode = hostSession->SyncSessionEvent(SessionEvent::EVENT_START_MOVE);
@@ -2754,9 +2768,14 @@ WmErrorCode WindowSceneSessionImpl::StartMoveWindow()
 
 WmErrorCode WindowSceneSessionImpl::StartMoveWindowWithCoordinate(int32_t offsetX, int32_t offsetY)
 {
-    if (!IsPcOrPadFreeMultiWindowMode()) {
+    if (!IsPcOrPadCapabilityEnabled()) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "The device is not supported");
         return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (property_->GetIsPcAppInPad() &&
+        property_->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
+        !IsFreeMultiWindowMode()) {
+        return WmErrorCode::WM_OK;
     }
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "session is invalid");
@@ -3974,6 +3993,20 @@ bool WindowSceneSessionImpl::GetFreeMultiWindowModeEnabledState()
         windowSystemConfig_.freeMultiWindowSupport_;
 }
 
+WSError WindowSceneSessionImpl::PcAppInPadNormalClose()
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "window session invalid!");
+        return WSError::WS_ERROR_INVALID_WINDOW;
+    }
+    if (!property_->GetIsPcAppInPad()) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "is not pcAppInPad, can not Close");
+        return WSError::WS_ERROR_INVALID_WINDOW;
+    }
+    Close();
+    return WSError::WS_OK;
+}
+
 WSError WindowSceneSessionImpl::NotifyCompatibleModeEnableInPad(bool enable)
 {
     TLOGI(WmsLogTag::DEFAULT, "id: %{public}d, enable: %{public}d", GetPersistentId(), enable);
@@ -4925,6 +4958,28 @@ WMError WindowSceneSessionImpl::GetWindowDensityInfo(WindowDensityInfo& densityI
     }
     densityInfo.customDensity = customDensity;
     return WMError::WM_OK;
+}
+
+bool WindowSceneSessionImpl::IsFullScreenEnable() const
+{
+    if (!WindowHelper::IsWindowModeSupported(property_->GetWindowModeSupportType(),
+        WindowMode::WINDOW_MODE_FULLSCREEN)) {
+        return false;
+    }
+    const auto& sizeLimits = property_->GetWindowLimits();
+    uint32_t displayWidth = 0;
+    uint32_t displayHeight = 0;
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
+    if (display == nullptr) {
+        TLOGE(WmsLogTag::WMS_PC, "display is null, winId=%{public}u", GetWindowId());
+        return false;
+    }
+    displayWidth = static_cast<uint32_t>(display->GetWidth());
+    displayHeight = static_cast<uint32_t>(display->GetHeight());
+    if (property_->GetDragEnabled() && (sizeLimits.maxWidth_ < displayWidth || sizeLimits.maxHeight_ < displayHeight)) {
+        return false;
+    }
+    return true;
 }
 } // namespace Rosen
 } // namespace OHOS
