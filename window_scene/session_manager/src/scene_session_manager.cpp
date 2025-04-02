@@ -2284,7 +2284,7 @@ void SceneSessionManager::SetSceneSessionIsAbilityHook(sptr<SceneSession> sceneS
     }
     auto& hapModulesList = bundleInfo.hapModuleInfos;
     if (hapModulesList.empty()) {
-        TLOGW(WmsLogTag::WMS_LIFE, "hapModulesLisst is empty");
+        TLOGW(WmsLogTag::WMS_LIFE, "hapModulesList is empty");
         return;
     }
     for (auto& hapModule : hapModulesList) {
@@ -2293,6 +2293,7 @@ void SceneSessionManager::SetSceneSessionIsAbilityHook(sptr<SceneSession> sceneS
         }
         if (!hapModule.abilitySrcEntryDelegator.empty() && !hapModule.abilityStageSrcEntryDelegator.empty()) {
             sceneSession->SetIsAbilityHook(true);
+            break;
         }
     }
 }
@@ -2721,7 +2722,7 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
             "reuseDelegatorWindow %{public}d",
             isNewActive, sceneSession->GetSessionState(), sceneSession->GetSessionInfo().reuseDelegatorWindow);
         if (isNewActive || sceneSession->GetSessionState() == SessionState::STATE_DISCONNECT ||
-            sceneSession->GetSessionState() == SessionState::STATE_END||
+            sceneSession->GetSessionState() == SessionState::STATE_END ||
             sceneSession->GetSessionInfo().reuseDelegatorWindow) {
             TLOGI(WmsLogTag::WMS_MAIN, "Call StartUIAbility: %{public}d system: %{public}u", persistentId,
                 static_cast<uint32_t>(sceneSession->GetSessionInfo().isSystem_));
