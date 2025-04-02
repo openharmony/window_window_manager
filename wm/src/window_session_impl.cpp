@@ -4711,5 +4711,22 @@ WSError WindowSessionImpl::SetCurrentRotation(int32_t currentRotation)
     property_->EditSessionInfo().currentRotation_ = currentRotation;
     return WSError::WS_OK;
 }
+
+bool WindowSessionImpl::IsFullScreenPcAppInPadMode() const
+{
+    return property_->GetIsPcAppInPad() && GetMode() == WindowMode::WINDOW_MODE_FULLSCREEN
+        && !IsFreeMultiWindowMode();
+}
+
+void WindowSessionImpl::NotifyClientWindowSize()
+{
+    if (IsFullScreenPcAppInPadMode()) {
+        const auto& windowRect = GetRect();
+        NotifySizeChange(windowRect, WindowSizeChangeReason::MOVE);
+        auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
+        sptr<DisplayInfo> displayInfo = display ? display->GetDisplayInfo() : nullptr;
+        UpdateViewportConfig(windowRect, WindowSizeChangeReason::UNDEFINED, nullptr, displayInfo);
+    }
+}
 } // namespace Rosen
 } // namespace OHOS

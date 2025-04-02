@@ -277,6 +277,7 @@ private:
      */
     WMError SetSupportedWindowModesInner(const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes);
     std::shared_ptr<MMI::PointerEvent> lastPointerEvent_ = nullptr;
+    bool IsFullScreenEnable() const;
 
     /**
      * Window Immersive

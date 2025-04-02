@@ -1740,8 +1740,12 @@ WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height)
         TLOGW(WmsLogTag::WMS_LAYOUT, "Unsupported operation for pip window");
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
-    if (GetMode() != WindowMode::WINDOW_MODE_FLOATING) {
+    if (GetMode() != WindowMode::WINDOW_MODE_FLOATING && !IsFullScreenPcAppInPadMode()) {
         TLOGW(WmsLogTag::WMS_LAYOUT, "Fullscreen window could not resize, winId: %{public}u", GetWindowId());
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
+    if (IsFullScreenPcAppInPadMode() && IsFullScreenEnable()) {
+        NotifyClientWindowSize();
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
 
@@ -1786,7 +1790,7 @@ WMError WindowSceneSessionImpl::ResizeAsync(uint32_t width, uint32_t height)
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
-    if (GetMode() != WindowMode::WINDOW_MODE_FLOATING) {
+    if (GetMode() != WindowMode::WINDOW_MODE_FLOATING && !IsFullScreenPcAppInPadMode()) {
         TLOGW(WmsLogTag::WMS_LAYOUT, "window should not resize, winId:%{public}u, mode:%{public}u",
             GetWindowId(), GetMode());
         return WMError::WM_ERROR_INVALID_OP_IN_CUR_STATUS;
@@ -4954,6 +4958,28 @@ WMError WindowSceneSessionImpl::GetWindowDensityInfo(WindowDensityInfo& densityI
     }
     densityInfo.customDensity = customDensity;
     return WMError::WM_OK;
+}
+
+bool WindowSceneSessionImpl::IsFullScreenEnable() const
+{
+    if (!WindowHelper::IsWindowModeSupported(property_->GetWindowModeSupportType(),
+        WindowMode::WINDOW_MODE_FULLSCREEN)) {
+        return false;
+    }
+    const auto& sizeLimits = property_->GetWindowLimits();
+    uint32_t displayWidth = 0;
+    uint32_t displayHeight = 0;
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
+    if (display == nullptr) {
+        TLOGE(WmsLogTag::WMS_PC, "display is null, winId=%{public}u", GetWindowId());
+        return false;
+    }
+    displayWidth = static_cast<uint32_t>(display->GetWidth());
+    displayHeight = static_cast<uint32_t>(display->GetHeight());
+    if (property_->GetDragEnabled() && (sizeLimits.maxWidth_ < displayWidth || sizeLimits.maxHeight_ < displayHeight)) {
+        return false;
+    }
+    return true;
 }
 } // namespace Rosen
 } // namespace OHOS
