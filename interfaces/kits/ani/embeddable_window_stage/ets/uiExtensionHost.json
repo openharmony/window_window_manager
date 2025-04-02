@@ -19,6 +19,9 @@
       ],
       "@ohos.base": [
         "../../../../../../../../interface/sdk-js/api/@ohos.base.d.ets"
+      ],
+      "@ohos.hilog": [
+        "../../../../../../../../interface/sdk-js/api/@ohos.hilog.d.ets"
       ]
     },
     "outDir": "./cache/uiExtensionHost",
