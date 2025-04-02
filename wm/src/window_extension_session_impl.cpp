@@ -1437,7 +1437,7 @@ WindowMode WindowExtensionSessionImpl::GetWindowMode() const
     return property_->GetWindowMode();
 }
 
-void WindowSessionImpl::UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>& want)
+void WindowExtensionSessionImpl::UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>& want)
 {
     if (want == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "null want ptr");
