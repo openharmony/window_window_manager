@@ -4673,6 +4673,7 @@ void SceneSession::NotifyForceHideChange(bool hide)
     }
 }
 
+
 Orientation SceneSession::GetRequestedOrientation() const
 {
     return GetSessionProperty()->GetRequestedOrientation();
