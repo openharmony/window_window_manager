@@ -1219,7 +1219,6 @@ void ScreenSessionManager::HandleScreenDisconnectEvent(sptr<ScreenSession> scree
 {
     bool phyMirrorEnable = IsDefaultMirrorMode(screenId);
     if (phyMirrorEnable) {
-        NotifyDisplayDestroy(screenSession->GetScreenId());
         NotifyCastWhenScreenConnectChange(false);
         FreeDisplayMirrorNodeInner(screenSession);
         if (!g_isPcDevice) {
@@ -1253,6 +1252,7 @@ void ScreenSessionManager::HandleScreenDisconnectEvent(sptr<ScreenSession> scree
     }
     if (phyMirrorEnable) {
         NotifyScreenDisconnected(screenSession->GetScreenId());
+        NotifyDisplayDestroy(screenSession->GetScreenId());
         isPhyScreenConnected_ = false;
     }
     if (!g_isPcDevice && phyMirrorEnable) {
@@ -1785,14 +1785,6 @@ DMError ScreenSessionManager::SetVirtualPixelRatio(ScreenId screenId, float virt
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:SetVirtualPixelRatio(%" PRIu64", %f)", screenId,
         virtualPixelRatio);
     screenSession->SetVirtualPixelRatio(virtualPixelRatio);
-    std::map<DisplayId, sptr<DisplayInfo>> emptyMap;
-    OnPropertyChange(screenSession->GetScreenProperty(), ScreenPropertyChangeReason::VIRTUAL_PIXEL_RATIO_CHANGE,
-        screenId);
-    NotifyDisplayStateChange(screenId, screenSession->ConvertToDisplayInfo(),
-        emptyMap, DisplayStateChangeType::VIRTUAL_PIXEL_RATIO_CHANGE);
-    NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::VIRTUAL_PIXEL_RATIO_CHANGED);
-    NotifyDisplayChanged(screenSession->ConvertToDisplayInfo(),
-        DisplayChangeEvent::DISPLAY_VIRTUAL_PIXEL_RATIO_CHANGED);
     if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
         sptr<ScreenSession> fakeScreenSession = screenSession->GetFakeScreenSession();
         if (fakeScreenSession == nullptr) {
@@ -1801,6 +1793,14 @@ DMError ScreenSessionManager::SetVirtualPixelRatio(ScreenId screenId, float virt
         }
         fakeScreenSession->SetVirtualPixelRatio(virtualPixelRatio);
     }
+    std::map<DisplayId, sptr<DisplayInfo>> emptyMap;
+    OnPropertyChange(screenSession->GetScreenProperty(), ScreenPropertyChangeReason::VIRTUAL_PIXEL_RATIO_CHANGE,
+        screenId);
+    NotifyDisplayStateChange(screenId, screenSession->ConvertToDisplayInfo(),
+        emptyMap, DisplayStateChangeType::VIRTUAL_PIXEL_RATIO_CHANGE);
+    NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::VIRTUAL_PIXEL_RATIO_CHANGED);
+    NotifyDisplayChanged(screenSession->ConvertToDisplayInfo(),
+        DisplayChangeEvent::DISPLAY_VIRTUAL_PIXEL_RATIO_CHANGED);
     return DMError::DM_OK;
 }
 
