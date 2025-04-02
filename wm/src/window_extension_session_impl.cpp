@@ -16,6 +16,7 @@
 #include "window_extension_session_impl.h"
 
 #include <hitrace_meter.h>
+#include <int_wrapper.h>
 #include <ipc_types.h>
 #include <parameters.h>
 #include <transaction/rs_interfaces.h>
@@ -627,6 +628,7 @@ WMError WindowExtensionSessionImpl::SetUIContentInner(const std::string& content
         } else if (usage == UIExtensionUsage::MODAL) {
             uiContent->SetUIContentType(Ace::UIContentType::MODAL_UI_EXTENSION);
         }
+        uiContent->SetHostParams(extensionConfig_);
         if (initByName) {
             uiContent->InitializeByName(this, contentInfo, storage, property_->GetParentId());
         } else {
@@ -1433,6 +1435,35 @@ WSError WindowExtensionSessionImpl::SendExtensionData(MessageParcel& data, Messa
 WindowMode WindowExtensionSessionImpl::GetWindowMode() const
 {
     return property_->GetWindowMode();
+}
+
+void WindowSessionImpl::UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>& want)
+{
+    if (want == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "null want ptr");
+        return;
+    }
+
+    const auto& configParam = want->GetParams().GetWantParams(Extension::UIEXTENSION_CONFIG_FIELD);
+    auto state = configParam.GetIntParam(Extension::CROSS_AXIS_FIELD, 0);
+    if (IsValidCrossState(state)) {
+        crossAxisState_ = static_cast<CrossAxisState>(state);
+    }
+    auto waterfallModeValue = configParam.GetIntParam(Extension::WATERFALL_MODE_FIELD, 0);
+    isFullScreenWaterfallMode_.store(static_cast<bool>(waterfallModeValue));
+    isValidWaterfallMode_.store(true);
+
+    extensionConfig_ = AAFwk::WantParams(configParam);
+    if (auto uiContent = GetUIContentSharedPtr()) {
+        uiContent->SetHostParams(extensionConfig_);
+    }
+    want->RemoveParam(Extension::UIEXTENSION_CONFIG_FIELD);
+    auto rootHostWindowType =
+        static_cast<WindowType>(configParam.GetIntParam(Extension::ROOT_HOST_WINDOW_TYPE_FIELD, 0));
+    SetRootHostWindowType(rootHostWindowType);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "CrossAxisState: %{public}d, waterfall: %{public}d, "
+        "rootHostWindowType: %{public}u, winId: %{public}u",
+        state, isFullScreenWaterfallMode_.load(), rootHostWindowType, GetWindowId());
 }
 
 WMError WindowExtensionSessionImpl::SetWindowMode(WindowMode mode)
