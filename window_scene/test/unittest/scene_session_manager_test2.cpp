@@ -96,6 +96,7 @@ void ProcessStatusBarEnabledChangeFuncTest(bool enable)
 
 void SceneSessionManagerTest2::SetUpTestCase()
 {
+    ssm_ = &SceneSessionManager::GetInstance();
 }
 
 void SceneSessionManagerTest2::TearDownTestCase()
