@@ -28,7 +28,10 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+    static sptr<SceneSessionManager> ssm_;
 };
+
+sptr<SceneSessionManager> SceneSessionManagerTest10::ssm_ = nullptr;
 
 void LoadContentFuncTest(const std::string&, napi_env, napi_value, AbilityRuntime::Context*)
 {
@@ -36,10 +39,12 @@ void LoadContentFuncTest(const std::string&, napi_env, napi_value, AbilityRuntim
 
 void RootSceneSessionTest::SetUpTestCase()
 {
+    ssm_ = &SceneSessionManager::GetInstance();
 }
 
 void RootSceneSessionTest::TearDownTestCase()
 {
+    ssm_ = nullptr;
 }
 
 void RootSceneSessionTest::SetUp()
@@ -179,6 +184,196 @@ HWTEST_F(RootSceneSessionTest, UpdateAvoidArea, TestSize.Level1)
     AvoidArea avoidArea;
     auto ret = rootSceneSession.UpdateAvoidArea(sptr<AvoidArea>::MakeSptr(avoidArea), AvoidAreaType::TYPE_SYSTEM);
     ASSERT_EQ(WSError::WS_ERROR_NULLPTR, ret);
+}
+
+/**
+ * @tc.name: GetAvoidAreaByType
+ * @tc.desc: test function : GetAvoidAreaByType
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneSessionTest, GetAvoidAreaByType, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->rootSceneSession_ = sptr<RootSceneSession>::MakeSptr();
+    auto avoidArea = GetAvoidAreaByType(AvoidAreaType TYPE_SYSTEM, { 0, 0, 0, 0 }, 1);
+    EXPECT_TRUE(avoidArea.isEmptyAvoidArea());
+    avoidArea = ssm_->rootSceneSession_->GetAvoidAreaByType(AvoidAreaType TYPE_CUTOUT, { 0, 0, 0, 0 }, 1);
+    EXPECT_TRUE(avoidArea.isEmptyAvoidArea());
+    avoidArea = ssm_->rootSceneSession_->GetAvoidAreaByType(AvoidAreaType TYPE_SYSTEM_GESTURE, { 0, 0, 0, 0 }, 1);
+    EXPECT_TRUE(avoidArea.isEmptyAvoidArea());
+    avoidArea = ssm_->rootSceneSession_->GetAvoidAreaByType(AvoidAreaType TYPE_KEYBOARD, { 0, 0, 0, 0 }, 1);
+    EXPECT_TRUE(avoidArea.isEmptyAvoidArea());
+    avoidArea = ssm_->rootSceneSession_->GetAvoidAreaByType(
+        AvoidAreaType TYPE_NAVIGATION_INDICATOR, { 0, 0, 0, 0 }, 1);
+    EXPECT_TRUE(avoidArea.isEmptyAvoidArea());
+    avoidArea = ssm_->rootSceneSession_->GetAvoidAreaByType(AvoidAreaType TYPE_END, { 0, 0, 0, 0 }, 1);
+    EXPECT_TRUE(avoidArea.isEmptyAvoidArea());
+}
+
+/**
+ * @tc.name: GetSystemAvoidAreaForRoot_01
+ * @tc.desc: test function : GetSystemAvoidAreaForRoot_01
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneSessionTest, GetSystemAvoidAreaForRoot_01, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    SessionInfo rootsceneInfo;
+    rootsceneInfo.abilityName_ = "rootscene";
+    rootsceneInfo.bundleName_ = "rootscene";
+    rootsceneInfo.screenId_ = 0;
+    auto specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    specificCb->onGetSceneSessionVectorByTypeAndDisplayId_ = [this](WindowType type, uint64_t displayId) {
+        return ssm_->GetSceneSessionVectorByTypeAndDisplayId(type, displayId);
+    };
+    ssm_->rootSceneSession_ = sptr<RootSceneSession>::MakeSptr(rootsceneInfo, specificCb);
+    ssm_->rootSceneSession_->winRect_ = { 0, 0, 1260, 2720 };
+    ssm_->rootSceneSession_->onGetStatusBarAvoidHeightFunc_ = [] {};
+    SessionInfo statusBarSessionInfo;
+    statusBarSessionInfo.abilityName_ = "statusBar";
+    statusBarSessionInfo.bundleName_ = "statusBar";
+    statusBarSessionInfo.screenId_ = 0;
+    sptr<SceneSession> statusBarSession = sptr<SceneSession>::MakeSptr(statusBarSessionInfo, nullptr);
+    statusBarSession->property_->SetPersistentId(2);
+    statusBarSession->property_->type_ = WindowType::WINDOW_TYPE_STATUS_BAR;
+    statusBarSession->winRect_ = { 0, 0, 1260, 123 };
+    statusBarSession->isVisible_ = true;
+    ssm_->sceneSessionMap_.insert({ statusBarSession->GetPersistentId(), statusBarSession });
+    AvoidArea avoidArea;
+    ssm_->rootSceneSession_->GetSystemAvoidAreaForRoot(ssm_->rootSceneSession_->winRect_, avoidArea);
+    ASSERT_EQ(avoidArea.topRect_, { 0, 0, 1260, 123 });
+    statusBarSession->isVisible_ = false;
+    avoidArea.topRect_ = { 0, 0, 0, 0 };
+    ssm_->rootSceneSession_->GetSystemAvoidAreaForRoot(ssm_->rootSceneSession_->winRect_, avoidArea);
+    EXPECT_TRUE(avoidArea.isEmptyAvoidArea());
+}
+
+/**
+ * @tc.name: GetKeyboardAvoidAreaForRoot_01
+ * @tc.desc: test function : GetKeyboardAvoidAreaForRoot_01
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneSessionTest, GetKeyboardAvoidAreaForRoot_01, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    SessionInfo rootsceneInfo;
+    rootsceneInfo.abilityName_ = "rootscene";
+    rootsceneInfo.bundleName_ = "rootscene";
+    rootsceneInfo.screenId_ = 0;
+    auto specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    specificCb->onGetSceneSessionVectorByType_ = [this](WindowType type) {
+        return ssm_->GetSceneSessionVectorByType(type, displayId);
+    };
+    ssm_->rootSceneSession_ = sptr<RootSceneSession>::MakeSptr(rootsceneInfo, specificCb);
+    ssm_->rootSceneSession_->winRect_ = { 0, 0, 1260, 2720 };
+    ssm_->rootSceneSession_->isKeyboardPanelEnabled_ = true;
+    SessionInfo keyboardSessionInfo;
+    keyboardSessionInfo.abilityName_ = "keyboard";
+    keyboardSessionInfo.bundleName_ = "keyboard";
+    keyboardSessionInfo.screenId_ = 0;
+    sptr<SceneSession> keyboardSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    keyboardSession->state_ = SessionState::STATE_FOREGROUND;
+    keyboardSession->property_->type_ = WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT;
+    keyboardSession->winRect_ = { 0, 1700, 1260, 1020 };
+    keyboardSession->property_->SetPersistentId(2);
+    keyboardSession->isVisible_ = true;
+    AvoidArea avoidArea;
+    ssm_->rootSceneSession_->GetKeyboardAvoidAreaForRoot(ssm_->rootSceneSession_->winRect_, avoidArea);
+    ASSERT_EQ(avoidArea.bottomRect_, { 0, 1700, 1260, 1020 });
+    keyboardSession->isVisible_ = false;
+    avoidArea.bottomRect_ = { 0, 0, 0, 0 };
+    ssm_->rootSceneSession_->GetKeyboardAvoidAreaForRoot(ssm_->rootSceneSession_->winRect_, avoidArea);
+    EXPECT_TRUE(avoidArea.isEmptyAvoidArea());
+    ssm_->rootSceneSession_->isKeyboardPanelEnabled_ = false;
+    ssm_->rootSceneSession_->GetKeyboardAvoidAreaForRoot(ssm_->rootSceneSession_->winRect_, avoidArea);
+}
+
+/**
+ * @tc.name: GetCutoutAvoidAreaForRoot_01
+ * @tc.desc: test function : GetCutoutAvoidAreaForRoot_01
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneSessionTest, GetCutoutAvoidAreaForRoot_01, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    SessionInfo rootsceneInfo;
+    rootsceneInfo.abilityName_ = "rootscene";
+    rootsceneInfo.bundleName_ = "rootscene";
+    rootsceneInfo.screenId_ = 0;
+    ssm_->rootSceneSession_ = sptr<RootSceneSession>::MakeSptr(rootsceneInfo, nullptr);
+    ssm_->rootSceneSession_->winRect_ = { 0, 0, 1260, 2720 };
+    ssm_->rootSceneSession_->property_->displayId_ = -1;
+    AvoidArea avoidArea;
+    ssm_->rootSceneSession_->GetCutoutAvoidAreaForRoot(ssm_->rootSceneSession_->winRect_, avoidArea);
+    EXPECT_TRUE(avoidArea.isEmptyAvoidArea());
+    ssm_->rootSceneSession_->property_->displayId_ = 0;
+    ssm_->rootSceneSession_->GetCutoutAvoidAreaForRoot(ssm_->rootSceneSession_->winRect_, avoidArea);
+}
+
+/**
+ * @tc.name: GetAINavigationBarAreaForRoot_01
+ * @tc.desc: test function : GetAINavigationBarAreaForRoot_01
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneSessionTest, GetAINavigationBarAreaForRoot_01, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    SessionInfo rootsceneInfo;
+    rootsceneInfo.abilityName_ = "rootscene";
+    rootsceneInfo.bundleName_ = "rootscene";
+    rootsceneInfo.screenId_ = 0;
+    auto specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    specificCb->onGetAINavigationBarArea_ = [this](uint64_t displayId) {
+        return ssm_->GetAINavigationBarArea(displayId);
+    };
+    ssm_->rootSceneSession_ = sptr<RootSceneSession>::MakeSptr(rootsceneInfo, specificCb);
+    ssm_->rootSceneSession_->winRect_ = { 0, 0, 1260, 2720 };
+    AvoidArea avoidArea;
+    ssm_->rootSceneSession_->GetAINavigationBarAreaForRoot(ssm_->rootSceneSession_->winRect_, avoidArea);
+    EXPECT_TRUE(avoidArea.isEmptyAvoidArea());
+    ssm_->currAINavigationBarAreaMap_[0] = { 409, 2629, 442, 91 };
+    ssm_->rootSceneSession_->GetAINavigationBarAreaForRoot(ssm_->rootSceneSession_->winRect_, avoidArea);
+    ASSERT_EQ(avoidArea.bottomRect_, { 409, 2629, 442, 91 });
+}
+
+/**
+ * @tc.name: SetRootSessionRect_01
+ * @tc.desc: test function : SetRootSessionRect_01
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneSessionTest, SetRootSessionRect_01, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    SessionInfo rootsceneInfo;
+    rootsceneInfo.abilityName_ = "rootscene";
+    rootsceneInfo.bundleName_ = "rootscene";
+    rootsceneInfo.screenId_ = 0;
+    ssm_->rootSceneSession_ = sptr<RootSceneSession>::MakeSptr(rootsceneInfo, nullptr);
+    ssm_->rootSceneSession_->winRect_ = { 0, 0, 1260, 2720 };
+    ssm_->rootSceneSession_->SetRootSessionRect({ 0, 0, 1260, 2720 });
+    ASSERT_EQ(ssm_->rootSceneSession_->winRect_, { 0, 0, 1260, 2720 });
+    ssm_->rootSceneSession_->winRect_ = { 0, 0, 2720, 1260 };
+    ssm_->rootSceneSession_->SetRootSessionRect({ 0, 0, 1260, 2720 });
+    ASSERT_EQ(ssm_->rootSceneSession_->winRect_, { 0, 0, 1260, 2720 });
+}
+
+/**
+ * @tc.name: UpdateAvoidArea_01
+ * @tc.desc: test function : UpdateAvoidArea_01
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneSessionTest, UpdateAvoidArea_01, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    SessionInfo rootsceneInfo;
+    rootsceneInfo.abilityName_ = "rootscene";
+    rootsceneInfo.bundleName_ = "rootscene";
+    rootsceneInfo.screenId_ = 0;
+    auto specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    specificCb->onNotifyAvoidAreaChange_ = [this](const sptr<AvoidArea>& avoidArea, AvoidAreaType type) {};
+    ssm_->rootSceneSession_ = sptr<RootSceneSession>::MakeSptr(rootsceneInfo, specificCb);
+    auto ret = ssm_->rootSceneSession_->UpdateAvoidArea(new AvoidArea(avoidArea), AvoidAreaType::TYPE_SYSTEM);
+    ASSERT_EQ(ret, WSError::WS_OK);
 }
 }
 }
