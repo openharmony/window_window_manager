@@ -56,6 +56,8 @@ public:
     virtual WMError GetCurrentPiPWindowInfo(std::string& bundleName) = 0;
     virtual WMError GetRootMainWindowId(int32_t persistentId, int32_t& hostWindowId) = 0;
     virtual WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) = 0;
+    virtual WMError ListWindowInfo(const WindowInfoOption& windowInfoOption,
+        std::vector<sptr<WindowInfo>>& infos) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 };
 }
 }
