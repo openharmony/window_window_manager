@@ -2614,15 +2614,13 @@ HWTEST_F(WindowSessionImplTest4, IsWindowHighlighted, Function | SmallTest | Lev
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+    bool isHighlighted = false;
     window->hostSession_ = session;
     window->property_->SetPersistentId(INVALID_SESSION_ID);
-    bool isHighlighted = false;
-    window->IsWindowHighlighted(isHighlighted);
-    ASSERT_EQ(isHighlighted, false);
+    ASSERT_EQ(window->IsWindowHighlighted(isHighlighted), WMError::WM_ERROR_INVALID_WINDOW);
     window->property_->SetPersistentId(1);
-    window->isHighlighted_ = true;
-    window->IsWindowHighlighted(isHighlighted);
-    ASSERT_EQ(isHighlighted, true);
+    ASSERT_EQ(window->IsWindowHighlighted(isHighlighted), WMError::WM_OK);
+    ASSERT_EQ(isHighlighted, false);
 }
 
 /**
