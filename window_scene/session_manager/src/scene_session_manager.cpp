@@ -11649,7 +11649,7 @@ WSError SceneSessionManager::GetAppMainSceneSession(int32_t persistentId, sptr<S
 }
 
 std::shared_ptr<Media::PixelMap> SceneSessionManager::GetSessionSnapshotPixelMap(const int32_t persistentId,
-    const float scaleParam, SnapshotNodeType snapNode)
+    const float scaleParam, SnapshotNodeType snapNode, bool needSnap)
 {
     auto sceneSession = GetSceneSession(persistentId);
     if (!sceneSession) {
@@ -11663,7 +11663,7 @@ std::shared_ptr<Media::PixelMap> SceneSessionManager::GetSessionSnapshotPixelMap
     bool useCurWindow = (snapNode == SnapshotNodeType::DEFAULT_NODE) ?
         isPc : (snapNode == SnapshotNodeType::LEASH_NODE) ? false : true;
     std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
-    if (sceneSession->GetSessionState() != SessionState::STATE_BACKGROUND) {
+    if (needSnap) {
         pixelMap = sceneSession->Snapshot(true, scaleParam, useCurWindow);
     }
     if (!pixelMap) {
