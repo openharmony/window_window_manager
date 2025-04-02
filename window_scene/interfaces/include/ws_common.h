@@ -43,6 +43,8 @@ const std::string UI_TYPE_PHONE = "phone";
 const std::string UI_TYPE_PC = "pc";
 const std::string UI_TYPE_PAD = "pad";
 constexpr int32_t WINDOW_SUPPORT_MODE_MAX_SIZE = 4;
+const std::string WINDOW_SCREEN_LOCK_PREFIX = "windowLock_";
+const std::string VIEW_SCREEN_LOCK_PREFIX = "viewLock_";
 
 enum class WSError : int32_t {
     WS_OK = 0,
