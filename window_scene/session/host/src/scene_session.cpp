@@ -3102,6 +3102,17 @@ bool SceneSession::IsKeepScreenOn() const
     return GetSessionProperty()->IsKeepScreenOn();
 }
 
+WSError SceneSession::SetViewKeepScreenOn(bool keepScreenOn)
+{
+    GetSessionProperty()->SetViewKeepScreenOn(keepScreenOn);
+    return WSError::WS_OK;
+}
+
+bool SceneSession::IsViewKeepScreenOn() const
+{
+    return GetSessionProperty()->IsViewKeepScreenOn();
+}
+
 std::string SceneSession::GetSessionSnapshotFilePath() const
 {
     WLOGFI("GetSessionSnapshotFilePath id %{public}d", GetPersistentId());
