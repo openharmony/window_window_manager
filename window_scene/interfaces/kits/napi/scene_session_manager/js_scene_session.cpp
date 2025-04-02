@@ -436,6 +436,8 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
         JsSceneSession::SetUseStartingWindowAboveLocked);
     BindNativeFunction(env, objValue, "saveSnapshotSync", moduleName,
         JsSceneSession::SaveSnapshotSync);
+    BindNativeFunction(env, objValue, "saveSnapshotAsync", moduleName,
+        JsSceneSession::SaveSnapshotAsync);
     BindNativeFunction(env, objValue, "setBorderUnoccupied", moduleName,
         JsSceneSession::SetBorderUnoccupied);
     BindNativeFunction(env, objValue, "setFreezeImmediately", moduleName,
@@ -2418,6 +2420,13 @@ napi_value JsSceneSession::SaveSnapshotSync(napi_env env, napi_callback_info inf
     TLOGD(WmsLogTag::WMS_SCB, "[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSaveSnapshotSync(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::SaveSnapshotAsync(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_SCB, "[NAPI]");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnSaveSnapshotAsync(env, info) : nullptr;
 }
 
 napi_value JsSceneSession::SetBorderUnoccupied(napi_env env, napi_callback_info info)
@@ -6206,6 +6215,17 @@ napi_value JsSceneSession::OnSaveSnapshotSync(napi_env env, napi_callback_info i
         return NapiGetUndefined(env);
     }
     session->SaveSnapshot(false);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnSaveSnapshotAsync(napi_env env, napi_callback_info info)
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "session is nullptr, id:%{public}d", persistentId_);
+        return NapiGetUndefined(env);
+    }
+    session->SaveSnapshot(true);
     return NapiGetUndefined(env);
 }
 
