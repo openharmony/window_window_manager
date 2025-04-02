@@ -4957,7 +4957,8 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
         session->HandleCastScreenConnection(info, session);
         if (info.reuseDelegatorWindow) {
             if (session->hookSceneSessionActivationFunc_) {
-                TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s hookSceneSessionActivationFunc execute", where);
+                TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s hookSceneSessionActivationFunc execute, id: %{public}d",
+                    where, session->persistentId_);
                 session->hookSceneSessionActivationFunc_(session, false);
             }
             return WSError::WS_OK;
