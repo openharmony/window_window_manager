@@ -436,12 +436,12 @@ public:
 
     /**
      * @brief Notify when disableDelegator change to true
-     * 
+     *
      * This function is used to notify disableDelegator change.
-     * 
+     *
      * @caller SA
      * @permission SA permission
-     * 
+     *
      * @return Successful call returns WMError::WS_OK, otherwise it indicates failure
      */
     virtual WMError NotifyDisableDelegatorChange() { return WMError::WM_OK; }
