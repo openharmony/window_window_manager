@@ -557,7 +557,7 @@ napi_value JsWindow::SetTouchable(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::SetTouchableAreas(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_EVENT, "SetTouchableAreas");
+    TLOGD(WmsLogTag::WMS_EVENT, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetTouchableAreas(env, info) : nullptr;
 }

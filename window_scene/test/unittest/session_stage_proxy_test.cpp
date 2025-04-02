@@ -374,6 +374,27 @@ HWTEST_F(SessionStageProxyTest, SetPiPControlEvent, Function | SmallTest | Level
 }
 
 /**
+ * @tc.name: PcAppInPadNormalClose
+ * @tc.desc: test function : PcAppInPadNormalClose
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, PcAppInPadNormalClose, Function | SmallTest | Level1)
+{
+    ASSERT_TRUE(sessionStage_ != nullptr);
+    auto res = sessionStage_->PcAppInPadNormalClose();
+    ASSERT_NE(WSError::WS_ERROR_INVALID_WINDOW, res);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    res = sessionStage_->PcAppInPadNormalClose();
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
+
+    sptr<SessionStageProxy> sessionStage = sptr<SessionStageProxy>::MakeSptr(nullptr);
+    res = sessionStage->PcAppInPadNormalClose();
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
+    MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
  * @tc.name: NotifyDumpInfo
  * @tc.desc: test function : NotifyDumpInfo
  * @tc.type: FUNC
@@ -408,6 +429,19 @@ HWTEST_F(SessionStageProxyTest, SetEnableDragBySystem, Function | SmallTest | Le
 {
     ASSERT_TRUE(sessionStage_ != nullptr);
     WSError res = sessionStage_->SetEnableDragBySystem(false);
+    ASSERT_EQ(WSError::WS_OK, res);
+}
+
+/**
+ * @tc.name: SetCurrentRotation
+ * @tc.desc: test function : SetCurrentRotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, SetCurrentRotation, Function | SmallTest | Level1)
+{
+    int32_t currentRotation = 90;
+    ASSERT_TRUE(sessionStage_ != nullptr);
+    WSError res = sessionStage_->SetCurrentRotation(currentRotation);
     ASSERT_EQ(WSError::WS_OK, res);
 }
 }

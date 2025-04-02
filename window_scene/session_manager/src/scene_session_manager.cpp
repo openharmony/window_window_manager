@@ -204,7 +204,7 @@ bool GetEnableRemoveStartingWindowFromBMS(const std::shared_ptr<AppExecFwk::Abil
 bool IsUIExtCanShowOnLockScreen(const AppExecFwk::ElementName& element, uint32_t callingTokenId,
     AppExecFwk::ExtensionAbilityType extensionAbilityType)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: bundleName: %{public}s, moduleName: %{public}s, ablilityName: %{public}s",
+    TLOGD(WmsLogTag::WMS_UIEXT, "UIExtOnLock: bundleName: %{public}s, moduleName: %{public}s, ablilityName: %{public}s",
           element.GetBundleName().c_str(), element.GetModuleName().c_str(), element.GetAbilityName().c_str());
     static const std::unordered_set<AppExecFwk::ExtensionAbilityType> extensionAbilityTypeWhitelist = {
         AppExecFwk::ExtensionAbilityType::LIVEVIEW_LOCKSCREEN
@@ -233,7 +233,7 @@ bool IsUIExtCanShowOnLockScreen(const AppExecFwk::ElementName& element, uint32_t
     };
 
     if (extensionAbilityTypeWhitelist.find(extensionAbilityType) != extensionAbilityTypeWhitelist.end()) {
-        TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: extensionAbilityType in white list");
+        TLOGI(WmsLogTag::WMS_UIEXT, "ability in white list");
         return true;
     }
 
@@ -245,7 +245,7 @@ bool IsUIExtCanShowOnLockScreen(const AppExecFwk::ElementName& element, uint32_t
         return true;
     }
 
-    TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: not in white list");
+    TLOGD(WmsLogTag::WMS_UIEXT, "UIExtOnLock: not in white list");
     return SessionPermission::VerifyPermissionByCallerToken(callingTokenId,
         PermissionConstants::PERMISSION_CALLED_EXTENSION_ON_LOCK_SCREEN);
 }
@@ -273,6 +273,20 @@ public:
         SceneSessionManager::GetInstance().OnBundleUpdated(bundleName, userId);
     }
 };
+
+bool CheckAvoidAreaForAINavigationBar(bool isVisible, const AvoidArea& avoidArea, int32_t sessionBottom)
+{
+    if (!avoidArea.topRect_.IsUninitializedRect() || !avoidArea.leftRect_.IsUninitializedRect() ||
+        !avoidArea.rightRect_.IsUninitializedRect()) {
+        return false;
+    }
+    if (avoidArea.bottomRect_.IsUninitializedRect()) {
+        return true;
+    }
+    auto diff =
+        std::abs(avoidArea.bottomRect_.posY_ + static_cast<int32_t>(avoidArea.bottomRect_.height_) - sessionBottom);
+    return isVisible && diff <= 1;
+}
 } // namespace
 
 sptr<SceneSessionManager> SceneSessionManager::CreateInstance()
@@ -1483,9 +1497,6 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
     specificCb->onUpdateAvoidArea_ = [this](int32_t persistentId) {
         this->UpdateAvoidArea(persistentId);
     };
-    specificCb->onUpdateAvoidAreaByType_ = [this](int32_t persistentId, AvoidAreaType type) {
-        this->UpdateAvoidAreaByType(persistentId, type);
-    };
     specificCb->onGetStatusBarDefaultVisibilityByDisplayId_ = [this](DisplayId displayId) {
         return this->GetStatusBarDefaultVisibilityByDisplayId(displayId);
     };
@@ -1596,7 +1607,7 @@ uint32_t SceneSessionManager::GetLockScreenZOrder()
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (const auto& [persistentId, session] : sceneSessionMap_) {
         if (session && session->IsScreenLockWindow()) {
-            TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: found window %{public}d", persistentId);
+            TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: window %{public}d", persistentId);
             return session->GetZOrder() < DEFAULT_LOCK_SCREEN_ZORDER ? DEFAULT_LOCK_SCREEN_ZORDER :
                 session->GetZOrder();
         }
@@ -1608,6 +1619,10 @@ uint32_t SceneSessionManager::GetLockScreenZOrder()
 WMError SceneSessionManager::CheckUIExtensionCreation(int32_t windowId, uint32_t callingTokenId,
     const AppExecFwk::ElementName& element, AppExecFwk::ExtensionAbilityType extensionAbilityType, int32_t& pid)
 {
+    if (!SessionPermission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "permission denied!");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
     std::ostringstream ss;
     ss << "UIExtOnLockCheck" << "_" << windowId << "_" << callingTokenId;
     return taskScheduler_->PostSyncTask([this, windowId, callingTokenId, &element, extensionAbilityType, &pid]() {
@@ -1619,7 +1634,7 @@ WMError SceneSessionManager::CheckUIExtensionCreation(int32_t windowId, uint32_t
         }
         pid = sceneSession->GetCallingPid();
         if (!IsScreenLocked()) {
-            TLOGNI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: not in lock screen");
+            TLOGND(WmsLogTag::WMS_UIEXT, "UIExtOnLock: not in lock screen");
             return WMError::WM_OK;
         }
         if (IsUserAuthPassed()) {
@@ -1637,7 +1652,7 @@ WMError SceneSessionManager::CheckUIExtensionCreation(int32_t windowId, uint32_t
                 callingTokenId);
             return WMError::WM_ERROR_INVALID_PERMISSION;
         }
-        TLOGNI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: IsShowOnLockScreen: The caller permission has granted");
+        TLOGNI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: pass");
         return WMError::WM_OK;
     }, ss.str());
 }
@@ -1770,6 +1785,9 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         });
         sceneSession->SetIsLastFrameLayoutFinishedFunc([this](bool& isLayoutFinished) {
             return this->IsLastFrameLayoutFinished(isLayoutFinished);
+        });
+        sceneSession->SetIsAINavigationBarAvoidAreaValidFunc([this](const AvoidArea& avoidArea, int32_t sessionBottom) {
+            return CheckAvoidAreaForAINavigationBar(isAINavigationBarVisible_, avoidArea, sessionBottom);
         });
         DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
         GetAppDragResizeType(sessionInfo.bundleName_, dragResizeType);
@@ -2379,8 +2397,7 @@ void SceneSessionManager::InitSnapshotCache()
     if (SNAPSHOT_CACHE_CAPACITY_MAP.find(uiType) != SNAPSHOT_CACHE_CAPACITY_MAP.end()) {
         snapshotCapacity_ = SNAPSHOT_CACHE_CAPACITY_MAP.at(systemConfig_.uiType_);
     }
-    TLOGI(WmsLogTag::WMS_PATTERN, "type: %{public}s, capacity: %{public}u",
-        systemConfig_.uiType_.c_str(), snapshotCapacity_);
+    TLOGI(WmsLogTag::WMS_PATTERN, "type: %{public}s", systemConfig_.uiType_.c_str());
     snapshotLRUCache_ = std::make_unique<LRUCache>(snapshotCapacity_);
 }
 
@@ -2462,7 +2479,7 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
             isPcAppInpad = property->GetIsPcAppInPad();
             isAppSupportPhoneInPc = property->GetIsAppSupportPhoneInPc();
         }
-        if ((systemConfig_.backgroundswitch && !isAppSupportPhoneInPc) || isPcAppInpad) {
+        if ((systemConfig_.backgroundswitch && !isAppSupportPhoneInPc) || (isPcAppInpad && !IsScreenLocked())) {
             TLOGI(WmsLogTag::WMS_MAIN, "NotifySessionBackground: %{public}d", persistentId);
             scnSession->NotifySessionBackground(1, true, true);
         } else {
@@ -2675,7 +2692,7 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
         auto persistentId = scnSession->GetPersistentId();
         TLOGI(WmsLogTag::WMS_MAIN, "Destruct session id:%{public}d unfocus", persistentId);
         RequestSessionUnfocus(persistentId, FocusChangeReason::SCB_SESSION_REQUEST_UNFOCUS);
-        lastUpdatedAvoidArea_.erase(persistentId);
+        avoidAreaListenerSessionSet_.erase(persistentId);
         DestroyDialogWithMainWindow(scnSession);
         DestroyToastSession(scnSession);
         DestroySubSession(scnSession); // destroy sub session by destruction
@@ -2863,6 +2880,8 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
             WLOGE("The hostWindow is not this parentwindow ! parentwindow bundleName: %{public}s, "
                 "hostwindow bundleName: %{public}s", sessionInfo.bundleName_.c_str(),
                 hostInfo.elementName_.GetBundleName().c_str());
+            auto pid = IPCSkeleton::GetCallingRealPid();
+            ReportSubWindowCreationFailure(pid, sessionInfo.bundleName_, hostInfo.elementName_.GetBundleName());
             return WSError::WS_ERROR_INVALID_WINDOW;
         }
     }
@@ -2923,6 +2942,18 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
     };
 
     return taskScheduler_->PostSyncTask(task, "CreateAndConnectSpecificSession");
+}
+
+void SceneSessionManager::ReportSubWindowCreationFailure(const int32_t& pid, const std::string& parentBundleName,
+    const std::string& hostBundleName)
+{
+    taskScheduler_->PostAsyncTask([pid, parentBundleName, hostBundleName]() {
+        std::ostringstream oss;
+        oss << "The hostWindow is not this parentwindow ! parentwindow bundleName: " << parentBundleName;
+        oss << ", hostwindow bundleName: " << hostBundleName;
+        SingletonContainer::Get<WindowInfoReporter>().ReportWindowException(
+            static_cast<int32_t>(WindowDFXHelperType::WINDOW_CREATE_SUB_WINDOW_FAILED), pid, oss.str());
+    }, __func__);
 }
 
 void SceneSessionManager::ClosePipWindowIfExist(WindowType type)
@@ -3024,9 +3055,10 @@ bool SceneSessionManager::CheckSystemWindowPermission(const sptr<WindowSessionPr
     }
     if (type == WindowType::WINDOW_TYPE_FLOAT &&
         SessionPermission::VerifyCallingPermission("ohos.permission.SYSTEM_FLOAT_WINDOW")) {
+        bool isPadAndNotPcApp = systemConfig_.uiType_ == UI_TYPE_PAD && !property->GetIsPcAppInPad();
         // WINDOW_TYPE_FLOAT could be created with the corresponding permission
-        if (systemConfig_.supportTypeFloatWindow_) {
-            WLOGFD("check create float window permission success on 2in1 device.");
+        if (systemConfig_.supportTypeFloatWindow_ && !isPadAndNotPcApp) {
+            TLOGD(WmsLogTag::WMS_PC, "check create float window permission success.");
             return true;
         }
     }
@@ -5521,7 +5553,7 @@ sptr<SceneSession> SceneSessionManager::GetTopFocusableNonAppSession()
             return false;
         }
         if (session->IsAppSession()) {
-            return true;
+            return session->GetZOrder() == 0 ? false : true;
         }
         if (session->GetFocusable() && IsSessionVisibleForeground(session)) {
             ret = session;
@@ -6042,7 +6074,7 @@ WSError SceneSessionManager::SendTouchEvent(const std::shared_ptr<MMI::PointerEv
 #ifdef SECURITY_COMPONENT_MANAGER_ENABLE
     FillSecCompEnhanceData(pointerEvent, pointerItem);
 #endif
-    TLOGI(WmsLogTag::WMS_EVENT, "PointerId=%{public}d,action=%{public}d,deviceId=%{public}d,zIndex=%{public}ud",
+    TLOGI(WmsLogTag::WMS_EVENT, "eid=%{public}d,ac=%{public}d,deviceId=%{public}d,zIndex=%{public}ud",
         pointerEvent->GetPointerId(), pointerEvent->GetPointerAction(), pointerEvent->GetDeviceId(), zIndex);
     pointerEvent->AddFlag(MMI::PointerEvent::EVENT_FLAG_NO_INTERCEPT);
     MMI::InputManager::GetInstance()->SimulateInputEvent(pointerEvent, static_cast<float>(zIndex));
@@ -8783,7 +8815,6 @@ WSError SceneSessionManager::UpdateSessionAvoidAreaListener(int32_t& persistentI
             avoidAreaListenerSessionSet_.insert(persistentId);
             UpdateAvoidArea(persistentId);
         } else {
-            lastUpdatedAvoidArea_.erase(persistentId);
             avoidAreaListenerSessionSet_.erase(persistentId);
         }
         return WSError::WS_OK;
@@ -8791,38 +8822,7 @@ WSError SceneSessionManager::UpdateSessionAvoidAreaListener(int32_t& persistentI
     return taskScheduler_->PostSyncTask(task, "UpdateSessionAvoidAreaListener:PID:" + std::to_string(persistentId));
 }
 
-bool SceneSessionManager::UpdateSessionAvoidAreaIfNeed(const int32_t& persistentId,
-    const sptr<SceneSession>& sceneSession, const AvoidArea& avoidArea, AvoidAreaType avoidAreaType)
-{
-    if (sceneSession == nullptr) {
-        TLOGI(WmsLogTag::WMS_IMMS, "scene session null no need update avoid area");
-        return false;
-    }
-    if (lastUpdatedAvoidArea_.find(persistentId) == lastUpdatedAvoidArea_.end()) {
-        lastUpdatedAvoidArea_[persistentId] = {};
-    }
-
-    bool needUpdate = true;
-    if (auto iter = lastUpdatedAvoidArea_[persistentId].find(avoidAreaType);
-        iter != lastUpdatedAvoidArea_[persistentId].end()) {
-        needUpdate = iter->second != avoidArea;
-    } else {
-        if (avoidArea.isEmptyAvoidArea()) {
-            TLOGI(WmsLogTag::WMS_IMMS, "window %{public}d type %{public}d empty avoid area",
-                persistentId, avoidAreaType);
-            needUpdate = false;
-            return needUpdate;
-        }
-    }
-    if (needUpdate) {
-        lastUpdatedAvoidArea_[persistentId][avoidAreaType] = avoidArea;
-        sceneSession->UpdateAvoidArea(new AvoidArea(avoidArea), avoidAreaType);
-    }
-
-    return needUpdate;
-}
-
-void SceneSessionManager::UpdateAvoidSessionAvoidArea(WindowType type, bool& needUpdate)
+void SceneSessionManager::UpdateAvoidSessionAvoidArea(WindowType type)
 {
     bool ret = true;
     AvoidAreaType avoidType = (type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) ?
@@ -8832,27 +8832,9 @@ void SceneSessionManager::UpdateAvoidSessionAvoidArea(WindowType type, bool& nee
         if (sceneSession == nullptr || !IsSessionVisibleForeground(sceneSession)) {
             continue;
         }
-        AvoidArea avoidArea = sceneSession->GetAvoidAreaByType(static_cast<AvoidAreaType>(avoidType));
-        ret = UpdateSessionAvoidAreaIfNeed(
-            persistentId, sceneSession, avoidArea, static_cast<AvoidAreaType>(avoidType));
-        needUpdate = needUpdate || ret;
+        AvoidArea avoidArea = sceneSession->GetAvoidAreaByType(avoidType);
+        sceneSession->UpdateAvoidArea(new AvoidArea(avoidArea), avoidType);
     }
-
-    return;
-}
-
-static bool CheckAvoidAreaForAINavigationBar(bool isVisible, const AvoidArea& avoidArea, int32_t sessionBottom)
-{
-    if (!avoidArea.topRect_.IsUninitializedRect() || !avoidArea.leftRect_.IsUninitializedRect() ||
-        !avoidArea.rightRect_.IsUninitializedRect()) {
-        return false;
-    }
-    if (avoidArea.bottomRect_.IsUninitializedRect()) {
-        return true;
-    }
-    auto diff =
-        std::abs(avoidArea.bottomRect_.posY_ + static_cast<int32_t>(avoidArea.bottomRect_.height_) - sessionBottom);
-    return isVisible && diff <= 1;
 }
 
 void SceneSessionManager::UpdateNormalSessionAvoidArea(
@@ -8871,21 +8853,8 @@ void SceneSessionManager::UpdateNormalSessionAvoidArea(
         needUpdate = false;
         return;
     }
-    uint32_t start = static_cast<uint32_t>(AvoidAreaType::TYPE_SYSTEM);
-    uint32_t end = static_cast<uint32_t>(AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
-    for (uint32_t avoidType = start; avoidType <= end; avoidType++) {
-        AvoidArea avoidArea = sceneSession->GetAvoidAreaByType(static_cast<AvoidAreaType>(avoidType));
-        if (avoidType == static_cast<uint32_t>(AvoidAreaType::TYPE_NAVIGATION_INDICATOR) &&
-            !CheckAvoidAreaForAINavigationBar(isAINavigationBarVisible_, avoidArea,
-                sceneSession->GetSessionRect().height_)) {
-            continue;
-        }
-        ret = UpdateSessionAvoidAreaIfNeed(
-            persistentId, sceneSession, avoidArea, static_cast<AvoidAreaType>(avoidType));
-        needUpdate = needUpdate || ret;
-    }
-
-    return;
+    sceneSession->UpdateSizeChangeReason(SizeChangeReason::AVOID_AREA_CHANGE);
+    sceneSession->NotifyClientToUpdateRect("AvoidAreaChange", nullptr);
 }
 
 void SceneSessionManager::NotifyMMIWindowPidChange(int32_t windowId, bool startMoving)
@@ -8898,7 +8867,7 @@ void SceneSessionManager::NotifyMMIWindowPidChange(int32_t windowId, bool startM
     }
 
     wptr<SceneSession> weakSceneSession(sceneSession);
-    WLOGFI("SceneSessionManager NotifyMMIWindowPidChange to notify window: %{public}d, pid: %{public}d", windowId, pid);
+    TLOGI(WmsLogTag::WMS_EVENT, "Notify window:%{public}d, pid:%{public}d", windowId, pid);
     auto task = [weakSceneSession, startMoving]() -> WSError {
         auto scnSession = weakSceneSession.promote();
         if (scnSession == nullptr) {
@@ -8928,7 +8897,7 @@ void SceneSessionManager::UpdateAvoidArea(int32_t persistentId)
         }
         WindowType type = sceneSession->GetWindowType();
         if (sceneSession->IsImmersiveType()) {
-            UpdateAvoidSessionAvoidArea(type, needUpdate);
+            UpdateAvoidSessionAvoidArea(type);
         } else {
             UpdateNormalSessionAvoidArea(persistentId, sceneSession, needUpdate);
         }
@@ -8939,32 +8908,6 @@ void SceneSessionManager::UpdateAvoidArea(int32_t persistentId)
     };
     taskScheduler_->PostAsyncTask(task, "UpdateAvoidArea:PID:" + std::to_string(persistentId));
     return;
-}
-
-void SceneSessionManager::UpdateAvoidAreaByType(int32_t persistentId, AvoidAreaType type)
-{
-    auto task = [this, persistentId, type] {
-        auto sceneSession = GetSceneSession(persistentId);
-        if (sceneSession == nullptr || !IsSessionVisibleForeground(sceneSession)) {
-            TLOGND(WmsLogTag::WMS_IMMS, "window %{public}d is nullptr or invisible", persistentId);
-            return;
-        }
-        if (avoidAreaListenerSessionSet_.find(persistentId) == avoidAreaListenerSessionSet_.end()) {
-            TLOGND(WmsLogTag::WMS_IMMS, "window %{public}d has no listener, no need update", persistentId);
-            return;
-        }
-        if (sceneSession->IsImmersiveType()) {
-            TLOGND(WmsLogTag::WMS_IMMS, "window %{public}d is immersive type", persistentId);
-            return;
-        }
-        auto avoidArea = sceneSession->GetAvoidAreaByType(type);
-        if (type == AvoidAreaType::TYPE_NAVIGATION_INDICATOR && !CheckAvoidAreaForAINavigationBar(
-            isAINavigationBarVisible_, avoidArea, sceneSession->GetSessionRect().height_)) {
-            return;
-        }
-        UpdateSessionAvoidAreaIfNeed(persistentId, sceneSession, avoidArea, type);
-    };
-    taskScheduler_->PostAsyncTask(task, "UpdateAvoidAreaByType:PID:" + std::to_string(persistentId));
 }
 
 void SceneSessionManager::UpdateGestureBackEnabled(int32_t persistentId)
@@ -9087,14 +9030,8 @@ void SceneSessionManager::NotifySessionAINavigationBarChange(int32_t persistentI
     TLOGI(WmsLogTag::WMS_IMMS, "window [%{public}d] is layout finished: %{public}d",
         persistentId, isLastFrameLayoutFinished);
     if (isLastFrameLayoutFinished) {
-        AvoidArea avoidArea = sceneSession->GetAvoidAreaByType(AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
-        if (!CheckAvoidAreaForAINavigationBar(isAINavigationBarVisible_, avoidArea,
-            sceneSession->GetSessionRect().height_)) {
-            return;
-        }
-        TLOGI(WmsLogTag::WMS_IMMS, "window [%{public}d] immediate update aibar area %{public}s",
-            persistentId, avoidArea.ToString().c_str());
-        UpdateSessionAvoidAreaIfNeed(persistentId, sceneSession, avoidArea,
+        sceneSession->UpdateAvoidArea(
+            new AvoidArea(sceneSession->GetAvoidAreaByType(AvoidAreaType::TYPE_NAVIGATION_INDICATOR)),
             AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
     } else {
         sceneSession->MarkAvoidAreaAsDirty();
@@ -10549,8 +10486,8 @@ void SceneSessionManager::UpdateModalExtensionRect(const sptr<IRemoteObject>& to
             pid, persistentId, parentId, rect.posX_, rect.posY_, rect.width_, rect.height_);
         auto parentSession = GetSceneSession(parentId);
         if (parentSession) {
-            auto parentTransX = parentSession->GetSessionGlobalRect().posX_ - parentSession->GetSessionRect().posX_;
-            auto parentTransY = parentSession->GetSessionGlobalRect().posY_ - parentSession->GetSessionRect().posY_;
+            auto parentTransX = parentSession->GetSessionGlobalRect().posX_ - parentSession->GetClientRect().posX_;
+            auto parentTransY = parentSession->GetSessionGlobalRect().posY_ - parentSession->GetClientRect().posY_;
             Rect globalRect = { rect.posX_ + parentTransX, rect.posY_ + parentTransY, rect.width_, rect.height_ };
             ExtensionWindowEventInfo extensionInfo { persistentId, pid, globalRect, rect, true };
             TLOGNI(WmsLogTag::WMS_UIEXT, "UpdateModalExtensionRect: pid: %{public}d, persistentId: %{public}d, "

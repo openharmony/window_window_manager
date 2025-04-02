@@ -166,6 +166,11 @@ public:
     WmErrorCode StartMoveWindowWithCoordinate(int32_t offsetX, int32_t offsetY) override;
     WmErrorCode StopMoveWindow() override;
 
+    /*
+     * Compatible Mode
+     */
+    WSError PcAppInPadNormalClose() override;
+
     WSError SwitchFreeMultiWindow(bool enable) override;
     virtual bool GetFreeMultiWindowModeEnabledState() override;
     void NotifyKeyboardPanelInfoChange(const KeyboardPanelInfo& keyboardPanelInfo) override;
@@ -272,6 +277,7 @@ private:
      */
     WMError SetSupportedWindowModesInner(const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes);
     std::shared_ptr<MMI::PointerEvent> lastPointerEvent_ = nullptr;
+    bool IsFullScreenEnable() const;
 
     /**
      * Window Immersive

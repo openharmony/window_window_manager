@@ -65,7 +65,7 @@ WindowExtensionSessionImpl::WindowExtensionSessionImpl(const sptr<WindowOption>&
         property_->GetUIExtensionUsage() == UIExtensionUsage::CONSTRAINED_EMBEDDED) {
         extensionWindowFlags_.hideNonSecureWindowsFlag = true;
     }
-    TLOGI(WmsLogTag::WMS_UIEXT, "UIExtension usage=%{public}u, the default state of hideNonSecureWindows is %{public}d",
+    TLOGI(WmsLogTag::WMS_UIEXT, "UIExtension usage=%{public}u, hideNonSecureWindows=%{public}d",
         property_->GetUIExtensionUsage(), extensionWindowFlags_.hideNonSecureWindowsFlag);
     dataHandler_ = std::make_shared<Extension::ProviderDataHandler>();
 }
@@ -303,7 +303,7 @@ void WindowExtensionSessionImpl::RegisterTransferComponentDataListener(const Not
 
 WSError WindowExtensionSessionImpl::NotifyTransferComponentData(const AAFwk::WantParams& wantParams)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "id: %{public}d", GetPersistentId());
+    TLOGD(WmsLogTag::WMS_UIEXT, "id: %{public}d", GetPersistentId());
     if (notifyTransferComponentDataFunc_) {
         notifyTransferComponentDataFunc_(wantParams);
     }
@@ -585,7 +585,7 @@ WMError WindowExtensionSessionImpl::NapiSetUIContent(const std::string& contentI
 }
 
 WSError WindowExtensionSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reason,
-    const SceneAnimationConfig& config)
+    const SceneAnimationConfig& config, const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
     auto wmReason = static_cast<WindowSizeChangeReason>(reason);
     Rect wmRect = {rect.posX_, rect.posY_, rect.width_, rect.height_};
@@ -609,23 +609,24 @@ WSError WindowExtensionSessionImpl::UpdateRect(const WSRect& rect, SizeChangeRea
 
     if (wmReason == WindowSizeChangeReason::ROTATION) {
         const std::shared_ptr<RSTransaction>& rsTransaction = config.rsTransaction_;
-        UpdateRectForRotation(wmRect, preRect, wmReason, rsTransaction);
+        UpdateRectForRotation(wmRect, preRect, wmReason, rsTransaction, avoidAreas);
     } else if (handler_ != nullptr) {
-        UpdateRectForOtherReason(wmRect, wmReason);
+        UpdateRectForOtherReason(wmRect, wmReason, avoidAreas);
     } else {
         NotifySizeChange(wmRect, wmReason);
-        UpdateViewportConfig(wmRect, wmReason);
+        UpdateViewportConfig(wmRect, wmReason, nullptr, nullptr, avoidAreas);
     }
     return WSError::WS_OK;
 }
 
 void WindowExtensionSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& preRect,
-    WindowSizeChangeReason wmReason, const std::shared_ptr<RSTransaction>& rsTransaction)
+    WindowSizeChangeReason wmReason, const std::shared_ptr<RSTransaction>& rsTransaction,
+    const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
     if (!handler_) {
         return;
     }
-    auto task = [weak = wptr(this), wmReason, wmRect, preRect, rsTransaction]() mutable {
+    auto task = [weak = wptr(this), wmReason, wmRect, preRect, rsTransaction, avoidAreas]() mutable {
         HITRACE_METER_NAME(HITRACE_TAG_WINDOW_MANAGER, "WindowExtensionSessionImpl::UpdateRectForRotation");
         auto window = weak.promote();
         if (!window) {
@@ -654,7 +655,7 @@ void WindowExtensionSessionImpl::UpdateRectForRotation(const Rect& wmRect, const
         if (wmRect != preRect) {
             window->NotifySizeChange(wmRect, wmReason);
         }
-        window->UpdateViewportConfig(wmRect, wmReason, rsTransaction);
+        window->UpdateViewportConfig(wmRect, wmReason, rsTransaction, nullptr, avoidAreas);
         RSNode::CloseImplicitAnimation();
         if (needSync) {
             rsTransaction->Commit();
@@ -665,16 +666,17 @@ void WindowExtensionSessionImpl::UpdateRectForRotation(const Rect& wmRect, const
     handler_->PostTask(task, "WMS_WindowExtensionSessionImpl_UpdateRectForRotation");
 }
 
-void WindowExtensionSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, WindowSizeChangeReason wmReason)
+void WindowExtensionSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, WindowSizeChangeReason wmReason,
+    const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
-    auto task = [weak = wptr(this), wmReason, wmRect] {
+    auto task = [weak = wptr(this), wmReason, wmRect, avoidAreas] {
         auto window = weak.promote();
         if (!window) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "window is null, updateViewPortConfig failed");
             return;
         }
         window->NotifySizeChange(wmRect, wmReason);
-        window->UpdateViewportConfig(wmRect, wmReason);
+        window->UpdateViewportConfig(wmRect, wmReason, nullptr, nullptr, avoidAreas);
     };
     if (handler_) {
         handler_->PostTask(task, "WMS_WindowExtensionSessionImpl_UpdateRectForOtherReason");
@@ -1066,7 +1068,7 @@ void WindowExtensionSessionImpl::ConsumePointerEvent(const std::shared_ptr<MMI::
             pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
     }
     if (action != MMI::PointerEvent::POINTER_ACTION_MOVE) {
-        TLOGI(WmsLogTag::WMS_EVENT, "InputTracking id:%{public}d,windowId:%{public}u,"
+        TLOGI(WmsLogTag::WMS_EVENT, "eid:%{public}d,wid:%{public}u,"
             "pointId:%{public}d,sourceType:%{public}d", pointerEvent->GetId(), GetWindowId(),
             pointerEvent->GetPointerId(), pointerEvent->GetSourceType());
     }
@@ -1090,12 +1092,12 @@ bool WindowExtensionSessionImpl::PreNotifyKeyEvent(const std::shared_ptr<MMI::Ke
             keyEvent->MarkProcessed();
             return true;
         }
-        TLOGI(WmsLogTag::WMS_EVENT, "InputTracking:%{public}d wid:%{public}d",
+        TLOGI(WmsLogTag::WMS_EVENT, "eid:%{public}d wid:%{public}d",
             keyEvent->GetId(), keyEvent->GetAgentWindowId());
     }
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
     if (uiContent != nullptr) {
-        TLOGI(WmsLogTag::WMS_EVENT, "Start to process keyEvent, id: %{public}d", keyEvent->GetId());
+        TLOGD(WmsLogTag::WMS_EVENT, "Start to process keyEvent, id: %{public}d", keyEvent->GetId());
         return uiContent->ProcessKeyEvent(keyEvent, true);
     }
     return false;

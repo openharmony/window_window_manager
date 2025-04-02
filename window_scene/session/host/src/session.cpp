@@ -656,8 +656,7 @@ WSError Session::SetTouchable(bool touchable)
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     if (touchable != GetSessionProperty()->GetTouchable()) {
-        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d touchable:%{public}d", GetPersistentId(),
-            static_cast<int>(touchable));
+        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d, %{public}d", GetPersistentId(), touchable);
     }
     UpdateSessionTouchable(touchable);
     return WSError::WS_OK;
@@ -676,8 +675,7 @@ bool Session::GetTouchable() const
 void Session::SetForceTouchable(bool forceTouchable)
 {
     if (forceTouchable != forceTouchable_) {
-        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d forceTouchable:%{public}d", GetPersistentId(),
-            static_cast<int>(forceTouchable));
+        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d, %{public}d", GetPersistentId(), forceTouchable);
     }
     forceTouchable_ = forceTouchable;
 }
@@ -685,8 +683,7 @@ void Session::SetForceTouchable(bool forceTouchable)
 void Session::SetSystemTouchable(bool touchable)
 {
     if (touchable != systemTouchable_) {
-        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d systemTouchable_:%{public}d", GetPersistentId(),
-            static_cast<int>(touchable));
+        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d, %{public}d", GetPersistentId(), touchable);
     }
     systemTouchable_ = touchable;
     NotifySessionInfoChange();
@@ -753,7 +750,7 @@ int32_t Session::GetWindowId() const
 
 void Session::SetCallingPid(int32_t id)
 {
-    TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d, callingPid:%{public}u", persistentId_, id);
+    TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d, %{public}d", persistentId_, id);
     callingPid_ = id;
 }
 
@@ -963,6 +960,13 @@ SingleHandTransform Session::GetSingleHandTransform() const
 WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason,
     const std::string& updateReason, const std::shared_ptr<RSTransaction>& rsTransaction)
 {
+    return UpdateRectWithLayoutInfo(rect, reason, updateReason, rsTransaction, {});
+}
+
+WSError Session::UpdateRectWithLayoutInfo(const WSRect& rect, SizeChangeReason reason,
+    const std::string& updateReason, const std::shared_ptr<RSTransaction>& rsTransaction,
+    const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
+{
     TLOGD(WmsLogTag::WMS_LAYOUT, "session update rect: id: %{public}d, rect:%{public}s, "
         "reason:%{public}u %{public}s", GetPersistentId(), rect.ToString().c_str(), reason, updateReason.c_str());
     if (!IsSessionValid()) {
@@ -976,7 +980,7 @@ WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason,
         int32_t rotateAnimationDuration = GetRotateAnimationDuration();
         SceneAnimationConfig config { .rsTransaction_ = rsTransaction,
             .animationDuration_ = rotateAnimationDuration };
-        sessionStage_->UpdateRect(rect, reason, config);
+        sessionStage_->UpdateRect(rect, reason, config, avoidAreas);
         SetClientRect(rect);
         RectCheckProcess();
     } else {
@@ -1395,7 +1399,7 @@ void Session::NotifyForegroundInteractiveStatus(bool interactive)
 void Session::SetForegroundInteractiveStatus(bool interactive)
 {
     if (interactive != GetForegroundInteractiveStatus()) {
-        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d interactive:%{public}d", GetPersistentId(),
+        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d, %{public}d", GetPersistentId(),
             static_cast<int>(interactive));
     }
     foregroundInteractiveStatus_.store(interactive);
@@ -2687,6 +2691,22 @@ WSError Session::SetIsPcAppInPad(bool enable)
     }
     property->SetIsPcAppInPad(enable);
     return WSError::WS_OK;
+}
+
+WSError Session::PcAppInPadNormalClose()
+{
+    TLOGD(WmsLogTag::WMS_COMPAT, "windowId:%{public}d", GetPersistentId());
+    if (!IsSessionValid()) {
+        TLOGD(WmsLogTag::WMS_COMPAT, "Session is invalid, id: %{public}d state: %{public}u",
+            GetPersistentId(), GetSessionState());
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    if (sessionStage_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "session stage is nullptr id: %{public}d state: %{public}u",
+              GetPersistentId(), GetSessionState());
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return sessionStage_->PcAppInPadNormalClose();
 }
 
 WSError Session::UpdateWindowMode(WindowMode mode)

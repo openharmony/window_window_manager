@@ -961,7 +961,7 @@ bool operator==(const SecSurfaceInfo& a, const SecSurfaceInfo& b)
 
 void DumpSecSurfaceInfoMap(const std::map<uint64_t, std::vector<SecSurfaceInfo>>& secSurfaceInfoMap)
 {
-    TLOGI(WmsLogTag::WMS_EVENT, "secSurfaceInfoMap size:%{public}d", static_cast<int>(secSurfaceInfoMap.size()));
+    TLOGI(WmsLogTag::WMS_EVENT, "size:%{public}d", static_cast<int>(secSurfaceInfoMap.size()));
     for (auto& e : secSurfaceInfoMap) {
         auto hostNodeId = e.first;
         TLOGI(WmsLogTag::WMS_EVENT, "hostNodeId:%{public}" PRIu64 " secSurfaceInfoList size:%{public}d",

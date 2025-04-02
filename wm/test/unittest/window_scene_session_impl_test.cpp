@@ -407,6 +407,32 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession09, Function
 }
 
 /**
+ * @tc.name: CreateAndConnectSpecificSession11
+ * @tc.desc: CreateAndConnectSpecificSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession11, Function | SmallTest | Level2)
+{
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
+    }
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("CreateAndConnectSpecificSession10");
+    sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+
+    windowSceneSession->SetWindowType(WindowType::WINDOW_TYPE_FLOAT_NAVIGATION);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowSceneSession->CreateAndConnectSpecificSession());
+    windowSceneSession->property_->SetPersistentId(102);
+    windowSceneSession->property_->SetParentPersistentId(100);
+    windowSceneSession->property_->SetParentId(100);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+
+    ASSERT_EQ(WMError::WM_OK, windowSceneSession->Create(abilityContext_, session));
+    ASSERT_EQ(WMError::WM_OK, windowSceneSession->Destroy(true));
+}
+
+/**
  * @tc.name: RecoverAndReconnectSceneSession
  * @tc.desc: RecoverAndReconnectSceneSession
  * @tc.type: FUNC
@@ -695,6 +721,12 @@ HWTEST_F(WindowSceneSessionImplTest, StartMoveWindow_IsDeviceSupportOrNot, Funct
     window->windowSystemConfig_.uiType_ = UI_TYPE_PAD;
     window->windowSystemConfig_.freeMultiWindowEnable_ = true;
     window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    ASSERT_NE(window->StartMoveWindow(), WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
+
+    window->windowSystemConfig_.uiType_ = UI_TYPE_PAD;
+    window->windowSystemConfig_.freeMultiWindowEnable_ = false;
+    window->windowSystemConfig_.freeMultiWindowSupport_ = false;
+    window->property_->SetIsPcAppInPad(true);
     ASSERT_NE(window->StartMoveWindow(), WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
 }
 
@@ -1837,6 +1869,28 @@ HWTEST_F(WindowSceneSessionImplTest, SetShadowOffsetX, Function | SmallTest | Le
     } else {
         ASSERT_EQ(WMError::WM_OK, window->SetShadowOffsetX(1.0));
     }
+}
+
+/**
+ * @tc.name: PcAppInPadNormalClose
+ * @tc.desc: PcAppInPadNormalClose test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, PcAppInPadNormalClose, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("PcAppInPadNormalClose");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_WINDOW, window->PcAppInPadNormalClose());
+
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_WINDOW, window->PcAppInPadNormalClose());
+
+    window->property_->SetIsPcAppInPad(true);
+    ASSERT_EQ(WSError::WS_OK, window->PcAppInPadNormalClose());
 }
 
 /*

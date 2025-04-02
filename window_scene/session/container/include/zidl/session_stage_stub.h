@@ -67,6 +67,7 @@ private:
     int HandleSwitchFreeMultiWindow(MessageParcel& data, MessageParcel& reply);
     int HandleGetUIContentRemoteObj(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyKeyboardPanelInfoChange(MessageParcel& data, MessageParcel& reply);
+    int HandlePcAppInPadNormalClose(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyCompatibleModeEnableInPad(MessageParcel& data, MessageParcel& reply);
     int HandleSetUniqueVirtualPixelRatio(MessageParcel& data, MessageParcel& reply);
     int HandleNotifySessionFullScreen(MessageParcel& data, MessageParcel& reply);
@@ -77,6 +78,7 @@ private:
     int HandleNotifyHighlightChange(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyPipSizeChange(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyWindowAttachStateChange(MessageParcel& data, MessageParcel& reply);
+    int HandleSetCurrentRotation(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_STUB_H
