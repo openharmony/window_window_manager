@@ -3738,7 +3738,7 @@ void SceneSessionManager::UpdateRecoverPropertyForSuperFold(const sptr<WindowSes
         "WindowRect: %{public}s, RequestRect: %{public}s, DisplayId: %{public}d",
         recoverWindowRect.ToString().c_str(), recoverRequestRect.ToString().c_str(),
         static_cast<uint32_t>(property->GetDisplayId()));
-    
+
     auto foldCrease = foldCreaseRegion->GetCreaseRects().front();
     recoverWindowRect.posY_ += foldCrease.posY_ + foldCrease.height_;
     recoverRequestRect.posY_ += foldCrease.posY_ + foldCrease.height_;
@@ -11401,9 +11401,10 @@ bool SceneSessionManager::IsGetWindowLayoutInfoNeeded(const sptr<SceneSession>& 
 
 WMError SceneSessionManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos)
 {
-    if (!SessionPermission::IsSystemCalling()) {
-        TLOGE(WmsLogTag::DEFAULT, "permission denied!");
-        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    if (!SessionPermission::IsSystemCalling() &&
+        !SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_VISIBLE_WINDOW_INFO)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied!");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
     }
     auto task = [this, &infos]() {
         for (auto [surfaceId, _] : lastVisibleData_) {
