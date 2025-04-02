@@ -2160,7 +2160,7 @@ HWTEST_F(SceneSessionManagerTest12, SetSceneSessionIsAbilityHook, Function | Sma
     info.bundleName_ = "testBundleName1";
     info.moduleName_ = "testModuleName1";
     info.abilityName_ = "testAbilityName1";
-    sptr<SceneSession> sceneSession = sptr<MainSession>MakeSptr(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     sptr<IBundleMgrMocker> bundleMgrMocker = sptr<IBundleMgrMocker>::MakeSptr();
     EXPECT_CALL(*bundleMgrMocker, GetBundleInfoV9(_, _, _, _)).WillOnce([](
