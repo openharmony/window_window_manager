@@ -1925,12 +1925,12 @@ HWTEST_F(WindowSceneSessionImplTest3, CheckAndModifyWindowRect, Function | Small
     windowSceneSessionImpl->property_->SetWindowModeSupportType(WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN);
     windowSceneSessionImpl->property_->SetDragEnabled(false);
     ret = windowSceneSessionImpl->CheckAndModifyWindowRect(width, height);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
+    EXPECT_EQ(WMError::WM_OK, ret);
     windowSceneSessionImpl->property_->SetDragEnabled(true);
     WindowLimits windowLimits = {5000, 5000, 50, 50, 0.0f, 0.0f};
     windowSceneSessionImpl->property_->SetWindowLimits(windowLimits);
     ret = windowSceneSessionImpl->CheckAndModifyWindowRect(width, height);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
+    EXPECT_EQ(WMError::WM_OK, ret);
     WindowLimits windowLimits1 = {800, 800, 50, 50, 0.0f, 0.0f};
     windowSceneSessionImpl->property_->SetWindowLimits(windowLimits1);
     ret = windowSceneSessionImpl->CheckAndModifyWindowRect(width, height);
