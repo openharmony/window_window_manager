@@ -259,21 +259,22 @@ static ani_int ExtWindowSetWaterMarkFlag(ani_env* env, ani_object obj, ani_long 
 {
     AniExtensionWindow* winPtr = reinterpret_cast<AniExtensionWindow*>(nativeObj);
     WMError ret = WMError::WM_DO_NOTHING;
-    if(winPtr != nullptr){
+    if (winPtr != nullptr) {
         ret = winPtr->OnSetWaterMarkFlag(env, enable);
-    } else{
+    } else {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] AniExtensionWindow is nullptr");
     }
     return (ani_int)ret;
 }
 
-static ani_int ExtWindowHidePrivacyContentForHost(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean shouldHide)
+static ani_int ExtWindowHidePrivacyContentForHost(ani_env* env, ani_object obj, ani_long nativeObj,
+    ani_boolean shouldHide)
 {
     AniExtensionWindow* winPtr = reinterpret_cast<AniExtensionWindow*>(nativeObj);
     WMError ret = WMError::WM_DO_NOTHING;
-    if(winPtr != nullptr){
+    if (winPtr != nullptr) {
         ret = winPtr->OnHidePrivacyContentForHost(env, shouldHide);
-    } else{
+    } else {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] AniExtensionWindow is nullptr");
     }
     return (ani_int)ret;
@@ -341,7 +342,7 @@ ANI_EXPORT ani_status ExtensionWindow_ANI_Constructor(ani_vm *vm, uint32_t *resu
         ani_native_function {"setWaterMarkFlag", "JZ:V",
             reinterpret_cast<void *>(ExtWindowSetWaterMarkFlag)},
         ani_native_function {"hidePrivacyContentForHost", "JZ:V",
-            reinterpret_cast<void *>(ExtWindowHidePrivacyContentForHost)},   
+            reinterpret_cast<void *>(ExtWindowHidePrivacyContentForHost)},
         ani_native_function {"onAvoidAreaChange", "JLstd/core/Object;Lstd/core/Object;:I",
             reinterpret_cast<void *>(ExtWindowOnAvoidAreaChange)},
         ani_native_function {"onWindowSizeChange", "JLstd/core/Object;Lstd/core/Object;:I",
