@@ -318,6 +318,25 @@ ani_object createExtentionWindow(ani_env* env, ani_long win, ani_int hostId)
 } // namespace
 
 extern "C" {
+using namespace OHOS::Rosen;
+std::array extensionWindowNativeMethods = {
+    ani_native_function {"getProperties", "JLstd/core/Object;:I", reinterpret_cast<void *>(ExtWindowGetProperties)},
+    ani_native_function {"setProperties", "JLstd/core/Object;:I", reinterpret_cast<void *>(ExtWindowSetProperties)},
+    ani_native_function {"getWindowAvoidArea", "JILstd/core/Object;:I",
+        reinterpret_cast<void *>(ExtWindowGetWindowAvoidArea)},
+    ani_native_function {"setWaterMarkFlag", "JZ:V",
+        reinterpret_cast<void *>(ExtWindowSetWaterMarkFlag)},
+    ani_native_function {"hidePrivacyContentForHost", "JZ:V",
+        reinterpret_cast<void *>(ExtWindowHidePrivacyContentForHost)},
+    ani_native_function {"onAvoidAreaChange", "JLstd/core/Object;Lstd/core/Object;:I",
+        reinterpret_cast<void *>(ExtWindowOnAvoidAreaChange)},
+    ani_native_function {"onWindowSizeChange", "JLstd/core/Object;Lstd/core/Object;:I",
+        reinterpret_cast<void *>(ExtWindowOnWindowSizeChange)},
+    ani_native_function {"offAvoidAreaChange", "JLstd/core/Object;:I",
+        reinterpret_cast<void *>(ExtWindowOffAvoidAreaChange)},
+    ani_native_function {"offWindowSizeChange", "JLstd/core/Object;:I",
+        reinterpret_cast<void *>(ExtWindowOffWindowSizeChange)},
+    };
 ANI_EXPORT ani_status ExtensionWindow_ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
     using namespace OHOS::Rosen;
@@ -334,26 +353,9 @@ ANI_EXPORT ani_status ExtensionWindow_ANI_Constructor(ani_vm *vm, uint32_t *resu
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] null env %{public}u", ret);
         return ANI_NOT_FOUND;
     }
-    std::array methods = {
-        ani_native_function {"getProperties", "JLstd/core/Object;:I", reinterpret_cast<void *>(ExtWindowGetProperties)},
-        ani_native_function {"setProperties", "JLstd/core/Object;:I", reinterpret_cast<void *>(ExtWindowSetProperties)},
-        ani_native_function {"getWindowAvoidArea", "JILstd/core/Object;:I",
-            reinterpret_cast<void *>(ExtWindowGetWindowAvoidArea)},
-        ani_native_function {"setWaterMarkFlag", "JZ:V",
-            reinterpret_cast<void *>(ExtWindowSetWaterMarkFlag)},
-        ani_native_function {"hidePrivacyContentForHost", "JZ:V",
-            reinterpret_cast<void *>(ExtWindowHidePrivacyContentForHost)},
-        ani_native_function {"onAvoidAreaChange", "JLstd/core/Object;Lstd/core/Object;:I",
-            reinterpret_cast<void *>(ExtWindowOnAvoidAreaChange)},
-        ani_native_function {"onWindowSizeChange", "JLstd/core/Object;Lstd/core/Object;:I",
-            reinterpret_cast<void *>(ExtWindowOnWindowSizeChange)},
-        ani_native_function {"offAvoidAreaChange", "JLstd/core/Object;:I",
-            reinterpret_cast<void *>(ExtWindowOffAvoidAreaChange)},
-        ani_native_function {"offWindowSizeChange", "JLstd/core/Object;:I",
-            reinterpret_cast<void *>(ExtWindowOffWindowSizeChange)},
-    };
 
-    if ((ret = env->Class_BindNativeMethods(cls, methods.data(), methods.size())) != ANI_OK) {
+    if ((ret = env->Class_BindNativeMethods(cls, extensionWindowNativeMethods.data(),
+        extensionWindowNativeMethods.size())) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] bind fail %{public}u", ret);
         return ANI_NOT_FOUND;
     }
