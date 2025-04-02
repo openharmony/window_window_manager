@@ -1574,6 +1574,42 @@ HWTEST_F(SceneSessionManagerTest12, SetStatusBarAvoidHeight, Function | SmallTes
 }
 
 /**
+ * @tc.name: AddSkipSelfWhenShowOnVirtualScreenList
+ * @tc.desc: test function : AddSkipSelfWhenShowOnVirtualScreenList
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, AddSkipSelfWhenShowOnVirtualScreenList, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.bundleName_ = "AddSkipSelfWhenShowOnVirtualScreenList";
+    info.abilityName_ = "AddSkipSelfWhenShowOnVirtualScreenList";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    std::vector<int32_t> persistentIds {sceneSession->GetPersistentId()};
+    auto ret = ssm_->AddSkipSelfWhenShowOnVirtualScreenList(persistentIds);
+    usleep(WAIT_SYNC_IN_NS);
+    EXPECT_EQ(ret, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: RemoveSkipSelfWhenShowOnVirtualScreenList
+ * @tc.desc: test function : RemoveSkipSelfWhenShowOnVirtualScreenList
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, RemoveSkipSelfWhenShowOnVirtualScreenList, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.bundleName_ = "RemoveSkipSelfWhenShowOnVirtualScreenList";
+    info.abilityName_ = "RemoveSkipSelfWhenShowOnVirtualScreenList";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    std::vector<int32_t> persistentIds {sceneSession->GetPersistentId()};
+    auto ret = ssm_->RemoveSkipSelfWhenShowOnVirtualScreenList(persistentIds);
+    usleep(WAIT_SYNC_IN_NS);
+    EXPECT_EQ(ret, WMError::WM_OK);
+}
+
+/**
  * @tc.name: GetCallingWindowInfo1
  * @tc.desc: test function : GetCallingWindowInfo
  * @tc.type: FUNC

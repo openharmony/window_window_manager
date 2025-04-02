@@ -185,6 +185,18 @@ static napi_value SetVirtualScreenSurface(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnSetVirtualScreenSurface(env, info) : nullptr;
 }
 
+static napi_value AddVirtualScreenBlockList(napi_env env, napi_callback_info info)
+{
+    auto* me = CheckParamsAndGetThis<JsDisplayManager>(env, info);
+    return (me != nullptr) ? me->OnAddVirtualScreenBlockList(env, info) : nullptr;
+}
+
+static napi_value RemoveVirtualScreenBlockList(napi_env env, napi_callback_info info)
+{
+    auto* me = CheckParamsAndGetThis<JsDisplayManager>(env, info);
+    return (me != nullptr) ? me->OnRemoveVirtualScreenBlockList(env, info) : nullptr;
+}
+
 private:
 std::map<std::string, std::map<std::unique_ptr<NativeReference>, sptr<JsDisplayListener>>> jsCbMap_;
 std::mutex mtx_;
@@ -1151,6 +1163,110 @@ napi_value OnSetVirtualScreenSurface(napi_env env, napi_callback_info info)
     return result;
 }
 
+napi_value OnAddVirtualScreenBlockList(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DMS, "in");
+    size_t argc = ARGC_THREE;
+    napi_value argv[ARGC_THREE] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_ONE) {
+        TLOGE(WmsLogTag::DMS, "[NAPI]Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(
+            env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Invalid parameter count");
+    }
+    napi_value nativeArray = argv[0];
+    uint32_t size = 0;
+    if (GetType(env, nativeArray) != napi_object ||
+        napi_get_array_length(env, nativeArray, &size) == napi_invalid_arg) {
+            return NapiThrowError(
+                env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to convert parameter to black list array");
+    }
+    std::vector<int32_t> persistentIds;
+    for (uint32_t i = 0; i < size; i++) {
+        int32_t persistentId = 0;
+        napi_value element = nullptr;
+        napi_get_element(env, nativeArray, i, &element);
+        if (!ConvertFromJsValue(env, element, persistentId)) {
+            return NapiThrowError(
+                env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to convert parameter to persistent id");
+        }
+        persistentIds.push_back(persistentId);
+    }
+    napi_value result = nullptr;
+    std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    auto asyncTask = [persistentIds, env, task = napiAsyncTask.get()] {
+        if (persistentIds.size() == 0) {
+            TLOGND(WmsLogTag::DMS, "RemoveVirtualScreenBlockList: persistentIds size is 0, no need update");
+            task->Resolve(env, NapiGetUndefined(env));
+            return;
+        }
+        auto res = DM_JS_TO_ERROR_CODE_MAP.at(
+            SingletonContainer::Get<ScreenManager>().AddVirtualScreenBlockList(persistentIds));
+        res = (res == DmErrorCode::DM_ERROR_NOT_SYSTEM_APP) ? DmErrorCode::DM_ERROR_NO_PERMISSION : res;
+        if (res != DmErrorCode::DM_OK) {
+            TLOGE(WmsLogTag::DMS, "failed");
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(res), "add black list failed"));
+        } else {
+            task->Resolve(env, NapiGetUndefined(env));
+        }
+        delete task;
+    };
+    NapiSendDmsEvent(env, asyncTask, napiAsyncTask, "AddVirtualScreenBlockList");
+    return result;
+}
+
+napi_value OnRemoveVirtualScreenBlockList(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DMS, "in");
+    size_t argc = ARGC_THREE;
+    napi_value argv[ARGC_THREE] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_ONE) {
+        TLOGE(WmsLogTag::DMS, "[NAPI]Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(
+            env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Invalid parameter count");
+    }
+    napi_value nativeArray = argv[0];
+    uint32_t size = 0;
+    if (GetType(env, nativeArray) != napi_object ||
+        napi_get_array_length(env, nativeArray, &size) == napi_invalid_arg) {
+            return NapiThrowError(
+                env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to convert parameter to black list array");
+    }
+    std::vector<int32_t> persistentIds;
+    for (uint32_t i = 0; i < size; i++) {
+        int32_t persistentId = 0;
+        napi_value element = nullptr;
+        napi_get_element(env, nativeArray, i, &element);
+        if (!ConvertFromJsValue(env, element, persistentId)) {
+            return NapiThrowError(
+                env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to convert parameter to persistent id");
+        }
+        persistentIds.push_back(persistentId);
+    }
+    napi_value result = nullptr;
+    std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    auto asyncTask = [persistentIds, env, task = napiAsyncTask.get()] {
+        if (persistentIds.size() == 0) {
+            TLOGND(WmsLogTag::DMS, "RemoveVirtualScreenBlockList: persistentIds size is 0, no need update");
+            task->Resolve(env, NapiGetUndefined(env));
+            return;
+        }
+        auto res = DM_JS_TO_ERROR_CODE_MAP.at(
+            SingletonContainer::Get<ScreenManager>().RemoveVirtualScreenBlockList(persistentIds));
+        res = (res == DmErrorCode::DM_ERROR_NOT_SYSTEM_APP) ? DmErrorCode::DM_ERROR_NO_PERMISSION : res;
+        if (res != DmErrorCode::DM_OK) {
+            TLOGE(WmsLogTag::DMS, "failed");
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(res), "remove black list failed"));
+        } else {
+            task->Resolve(env, NapiGetUndefined(env));
+        }
+        delete task;
+    };
+    NapiSendDmsEvent(env, asyncTask, napiAsyncTask, "RemoveVirtualScreenBlockList");
+    return result;
+}
+
 DmErrorCode GetVirtualScreenOptionFromJs(napi_env env, napi_value optionObject, VirtualScreenOption& option)
 {
     napi_value name = nullptr;
@@ -1555,6 +1671,10 @@ napi_value JsDisplayManagerInit(napi_env env, napi_value exportObj)
         JsDisplayManager::DestroyVirtualScreen);
     BindNativeFunction(env, exportObj, "setVirtualScreenSurface", moduleName,
         JsDisplayManager::SetVirtualScreenSurface);
+    BindNativeFunction(env, exportObj, "addVirtualScreenBlocklist", moduleName,
+        JsDisplayManager::AddVirtualScreenBlockList);
+    BindNativeFunction(env, exportObj, "removeVirtualScreenBlocklist", moduleName,
+        JsDisplayManager::RemoveVirtualScreenBlockList);
     return NapiGetUndefined(env);
 }
 }  // namespace Rosen
