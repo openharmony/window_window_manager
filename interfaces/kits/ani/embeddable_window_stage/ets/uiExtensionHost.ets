@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import { BusinessError } from '@ohos.base';
 import window from '@ohos.window';
 import { Callback } from '@ohos.base'
 
@@ -87,6 +88,8 @@ namespace uiExtensionHost {
     public native getProperties(nativeObj: long, property: object): int;
     public native setProperties(nativeObj: long, property: object): int;
     public native getWindowAvoidArea(nativeObj: long, type: int, area: object): int;
+    public native setWaterMarkFlag(nativeObj: long, enable: boolean): void;
+    public native hidePrivacyContentForHost(nativeObj: long, shouldHide: boolean): void;
     public native onAvoidAreaChange(nativeObj: long, callback: object, callbackData: object): int;
     public native offAvoidAreaChange(nativeObj: long, callback?: object): int;
     public native onWindowSizeChange(nativeObj: long, callback: object, callbackData: object): int;
@@ -121,6 +124,30 @@ namespace uiExtensionHost {
         let ret = this.getWindowAvoidArea(this.nativeObj, type as int, area as object);
         return area;
     }
+
+    setWaterMarkFlag(enable: boolean): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+          this.setWaterMarkFlag(this.nativeObj, enable);
+        }).then((ret: NullishType) :void => {
+          resolve(undefined);
+        }).catch((err: NullishType) :void => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
+    hidePrivacyContentForHost(shouldHide: boolean): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+          this.hidePrivacyContentForHost(this.nativeObj, shouldHide);
+        }).then((ret: NullishType) :void => {
+          resolve(undefined);
+        }).catch((err: NullishType) :void => {
+          reject(err as BusinessError);
+        });
+      });
+    }
   }
   /**
    * Transition Controller
@@ -132,6 +159,8 @@ namespace uiExtensionHost {
    */
   export interface UIExtensionHostWindowProxy {
     getWindowAvoidArea(type: window.AvoidAreaType): window.AvoidArea;
+    setWaterMarkFlag(enable: boolean): Promise<void>;
+    hidePrivacyContentForHost(shouldHide: boolean): Promise<void>;
     on<T>(type: string, callback: Callback<T>): void;
     off<T>(type: string, callback?: Callback<T>): void;
     properties: UIExtensionHostWindowProxyProperties;
