@@ -275,6 +275,7 @@ public:
     void RegisterDefaultDensityEnabledCallback(NotifyDefaultDensityEnabledFunc&& callback);
 
     WSError SetKeepScreenOn(bool keepScreenOn);
+    WSError SetViewKeepScreenOn(bool keepScreenOn);
     void SetParentPersistentId(int32_t parentId);
     WSError SetTurnScreenOn(bool turnScreenOn);
     void SetPrivacyMode(bool isPrivacy);
