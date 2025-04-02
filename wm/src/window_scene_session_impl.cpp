@@ -1383,9 +1383,12 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool w
         }
     }
     if (display == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Window show failed, display is null, name: %{public}s, id: %{public}d",
-            property_->GetWindowName().c_str(), GetPersistentId());
-        return WMError::WM_ERROR_NULLPTR;
+        display = SingletonContainer::Get<DisplayManager>().GetDefaultDisplay();
+        if (display == nullptr) {
+            TLOGE(WmsLogTag::WMS_LIFE, "Window show failed, display is null, name: %{public}s, id: %{public}d",
+                property_->GetWindowName().c_str(), GetPersistentId());
+            return WMError::WM_ERROR_NULLPTR;
+        }
     }
     auto displayInfo = display->GetDisplayInfo();
     if (displayInfo == nullptr) {
