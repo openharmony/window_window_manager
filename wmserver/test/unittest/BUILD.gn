@@ -78,7 +78,6 @@ test_inner_deps = [
   "../..:libwms",
   "../../../dmserver:libdms",
   "../../../test/common/utils:libtestutil",
-  "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
 ]
 
 config("wmserver_unittest_common_public_config") {
@@ -164,7 +163,7 @@ ohos_unittest("wmserver_window_manager_config_test") {
   deps = test_inner_deps
   external_deps = test_external_deps
 
-  deps += [ "//third_party/libxml2:libxml2" ]
+  external_deps += [ "libxml2:libxml2" ]
 }
 
 ohos_unittest("wmserver_window_snapshot_test") {
