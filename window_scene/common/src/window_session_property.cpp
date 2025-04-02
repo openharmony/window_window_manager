@@ -31,6 +31,8 @@ const std::map<uint64_t, HandlWritePropertyFunc> WindowSessionProperty::writeFun
         &WindowSessionProperty::WriteActionUpdateTurnScreenOn),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON),
         &WindowSessionProperty::WriteActionUpdateKeepScreenOn),
+    std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_VIEW_KEEP_SCREEN_ON),
+        &WindowSessionProperty::WriteActionUpdateViewKeepScreenOn),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE),
         &WindowSessionProperty::WriteActionUpdateFocusable),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE),
@@ -100,6 +102,8 @@ const std::map<uint64_t, HandlReadPropertyFunc> WindowSessionProperty::readFuncM
         &WindowSessionProperty::ReadActionUpdateTurnScreenOn),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON),
         &WindowSessionProperty::ReadActionUpdateKeepScreenOn),
+    std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_VIEW_KEEP_SCREEN_ON),
+        &WindowSessionProperty::ReadActionUpdateViewKeepScreenOn),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE),
         &WindowSessionProperty::ReadActionUpdateFocusable),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE),
@@ -498,6 +502,16 @@ void WindowSessionProperty::SetKeepScreenOn(bool keepScreenOn)
 bool WindowSessionProperty::IsKeepScreenOn() const
 {
     return keepScreenOn_;
+}
+
+void WindowSessionProperty::SetViewKeepScreenOn(bool keepScreenOn)
+{
+    viewKeepScreenOn_ = keepScreenOn;
+}
+
+bool WindowSessionProperty::IsViewKeepScreenOn() const
+{
+    return viewKeepScreenOn_;
 }
 
 void WindowSessionProperty::SetAccessTokenId(uint32_t accessTokenId)
@@ -1198,7 +1212,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint32(static_cast<uint32_t>(type_)) &&
         parcel.WriteBool(focusable_) && parcel.WriteBool(focusableOnShow_) &&
         parcel.WriteBool(touchable_) && parcel.WriteBool(tokenState_) &&
-        parcel.WriteBool(turnScreenOn_) && parcel.WriteBool(keepScreenOn_) &&
+        parcel.WriteBool(turnScreenOn_) && parcel.WriteBool(keepScreenOn_) && parcel.WriteBool(viewKeepScreenOn_) &&
         parcel.WriteBool(isPrivacyMode_) && parcel.WriteBool(isSystemPrivacyMode_) &&
         parcel.WriteBool(isSnapshotSkip_) &&
         parcel.WriteUint64(displayId_) && parcel.WriteInt32(persistentId_) &&
@@ -1262,6 +1276,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetTokenState(parcel.ReadBool());
     property->SetTurnScreenOn(parcel.ReadBool());
     property->SetKeepScreenOn(parcel.ReadBool());
+    property->SetViewKeepScreenOn(parcel.ReadBool());
     property->SetPrivacyMode(parcel.ReadBool());
     property->SetSystemPrivacyMode(parcel.ReadBool());
     property->SetSnapshotSkip(parcel.ReadBool());
@@ -1350,6 +1365,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     tokenState_ = property->tokenState_;
     turnScreenOn_ = property->turnScreenOn_;
     keepScreenOn_ = property->keepScreenOn_;
+    viewKeepScreenOn_ = property->viewKeepScreenOn_;
     topmost_ = property->topmost_;
     mainWindowTopmost_ = property->mainWindowTopmost_;
     zLevel_ = property->zLevel_;
@@ -1444,6 +1460,11 @@ bool WindowSessionProperty::WriteActionUpdateTurnScreenOn(Parcel& parcel)
 bool WindowSessionProperty::WriteActionUpdateKeepScreenOn(Parcel& parcel)
 {
     return parcel.WriteBool(keepScreenOn_);
+}
+
+bool WindowSessionProperty::WriteActionUpdateViewKeepScreenOn(Parcel& parcel)
+{
+    return parcel.WriteBool(viewKeepScreenOn_);
 }
 
 bool WindowSessionProperty::WriteActionUpdateFocusable(Parcel& parcel)
@@ -1602,6 +1623,11 @@ void WindowSessionProperty::ReadActionUpdateTurnScreenOn(Parcel& parcel)
 void WindowSessionProperty::ReadActionUpdateKeepScreenOn(Parcel& parcel)
 {
     SetKeepScreenOn(parcel.ReadBool());
+}
+
+void WindowSessionProperty::ReadActionUpdateViewKeepScreenOn(Parcel& parcel)
+{
+    SetViewKeepScreenOn(parcel.ReadBool());
 }
 
 void WindowSessionProperty::ReadActionUpdateFocusable(Parcel& parcel)
