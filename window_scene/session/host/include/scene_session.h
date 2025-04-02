@@ -1232,7 +1232,7 @@ private:
    /*
     * Window Lifecycle
     */
-    bool isAbilityHook = false;
+    bool isAbilityHook_ = false;
     NotifyHookSceneSessionActivationFunc hookSceneSessionActivationFunc_;
 };
 } // namespace OHOS::Rosen
