@@ -1583,7 +1583,7 @@ int SessionStub::HandleSetFollowParentWindowLayoutEnabled(MessageParcel& data, M
 int SessionStub::HandleKeyFrameAnimateEnd(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "In");
-    const WSError errCode = KeyFrameAnimateEnd();
+    WSError errCode = KeyFrameAnimateEnd();
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "write errCode fail.");
         return ERR_INVALID_DATA;
@@ -1604,7 +1604,7 @@ int SessionStub::HandleUpdateKeyFrameCloneNode(MessageParcel& data, MessageParce
         TLOGE(WmsLogTag::WMS_LAYOUT, "fail get tranaction");
         return ERR_INVALID_DATA;
     }
-    const WSError errCode = UpdateKeyFrameCloneNode(rsCanvasNode, tranaction);
+    WSError errCode = UpdateKeyFrameCloneNode(rsCanvasNode, tranaction);
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "write errCode fail.");
         return ERR_INVALID_DATA;
