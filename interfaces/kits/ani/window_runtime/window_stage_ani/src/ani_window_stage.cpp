@@ -53,7 +53,7 @@ void AniWindowStage::LoadContent(ani_env* env, const std::string& content)
         TLOGE(WmsLogTag::DEFAULT, "[NAPI]Get window failed");
         return;
     }
-    win->NapiSetUIContent(content, (void*)env, nullptr);
+    win->NapiSetUIContent(content, (napi_env)env, nullptr);
 }
 
 ani_object AniWindowStage::GetMainWindow(ani_env* env)

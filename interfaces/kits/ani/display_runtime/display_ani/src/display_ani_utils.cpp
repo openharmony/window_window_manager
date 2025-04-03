@@ -81,7 +81,7 @@ void DisplayAniUtils::convertWaterArea(WaterfallDisplayAreaRects waterfallDispla
 
 ani_status DisplayAniUtils::cvtDisplay(sptr<Display> display, ani_env* env, ani_object obj)
 {
-    sptr<DisplayInfo> info = display->GetDisplayInfoByJs();
+    sptr<DisplayInfo> info = display->GetDisplayInfoWithCache();
     int setfieldid = env->Object_SetFieldByName_Double(obj, "<property>id", info->GetDisplayId());
     if (ANI_OK != setfieldid) {
         TLOGE(WmsLogTag::DMS, "[ANI] set id failed: %{public}d", setfieldid);

@@ -60,7 +60,7 @@ ani_object AniSceneSessionManager::OnGetRootSceneUIContext(ani_env* env)
         TLOGE(WmsLogTag::DEFAULT, "[ANI] uiContent is nullptr");
         return AniSceneSessionUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    ani_object uiContext = uiContent->GetUIAniContext();
+    ani_object uiContext = nullptr; // use GetUIAniContext;
     if (uiContext == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] uiContext obtained from jsEngine is nullptr");
         return AniSceneSessionUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
