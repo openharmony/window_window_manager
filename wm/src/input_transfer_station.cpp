@@ -30,6 +30,8 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "InputTransferStation"};
 }
 
+const std::string GAME_CONTROLLER_SO_PATH = "/system/lib64/libgamecontroller_event.z.so";
+
 static std::unique_ptr<void, void(*)(void*)> gameControllerHandle_{nullptr, [](void* handle) {
     if(handle) {
         dlclose(handle);
@@ -129,12 +131,12 @@ void InputTransferStation::LoadGameController()
 {
     TLOGI(WmsLogTag::WMS_EVENT, "in");
     isGameControllerLoaded_ = true;
-    void* handle = dlopen(GAME_CONTROLLER_SO_PATH.c_str(), RTLD_LAZY|RTLD_GLOBAL);
+    void* handle = dlopen(GAME_CONTROLLER_SO_PATH.c_str(), RTLD_LAZY | RTLD_GLOBAL);
     if (handle) {
-        TLOGI(WmsLogTag::WMS_EVENT, "dlopen %{public}s success", GAME_CONTROLLER_SO_PATH.c_str());
+        TLOGI(WmsLogTag::WMS_EVENT, "dlopen GameController success");
         gameControllerHandle_.reset(handle);
     } else {
-        TLOGI(WmsLogTag::WMS_EVENT, "dlopen %{public}s failed", GAME_CONTROLLER_SO_PATH.c_str());
+        TLOGW(WmsLogTag::WMS_EVENT, "dlopen %{public}s failed", dlerror());
     }
 }
 
