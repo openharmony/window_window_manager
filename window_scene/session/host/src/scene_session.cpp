@@ -7515,6 +7515,10 @@ void SceneSession::AddSidebarBlur()
         TLOGE(WmsLogTag::WMS_PC, "surfaceNode is null");
         return;
     }
+    if (blurRadiusValue_ && blurSaturationValue_ && blurBrightnessValue_ && blurMaskColorValue_) {
+        TLOGE(WmsLogTag::WMS_PC, "RSAnimatableProperty has value");
+        return;
+    }
     auto rsNodeTemp = Rosen::RSNodeMap::Instance().GetNode(surfaceNode->GetId());
     if (rsNodeTemp) {
         std::shared_ptr<AbilityRuntime::ApplicationContext> appContext =
@@ -7647,9 +7651,10 @@ void SceneSession::AddRSNodeModifier(bool isDark, const std::shared_ptr<RSBaseNo
     rsNode->AddModifier(modifier);
 }
 
-void SceneSession::SetSidebarBlur(bool isDefaultSidebarBlur)
+void SceneSession::SetSidebarBlur(bool isDefaultSidebarBlur, bool isNeedAnimation)
 {
-    TLOGI(WmsLogTag::WMS_PC, "isDefaultSidebarBlur: %{public}d", isDefaultSidebarBlur);
+    TLOGI(WmsLogTag::WMS_PC, "isDefaultSidebarBlur: %{public}d, isNeedAnimation: %{public}d",
+        isDefaultSidebarBlur, isNeedAnimation);
     auto surfaceNode = GetSurfaceNode();
     if (!surfaceNode) {
         TLOGE(WmsLogTag::WMS_PC, "surfaceNode is null");
@@ -7673,23 +7678,24 @@ void SceneSession::SetSidebarBlur(bool isDefaultSidebarBlur)
     }
     std::string colorMode = config->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
     bool isDark = (colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_DARK);
-    ModifyRSAnimatableProperty(isDefaultSidebarBlur, isDark);
+    ModifyRSAnimatableProperty(isDefaultSidebarBlur, isDark, isNeedAnimation);
 }
 
-void SceneSession::ModifyRSAnimatableProperty(bool isDefaultSidebarBlur, bool isDark)
+void SceneSession::ModifyRSAnimatableProperty(bool isDefaultSidebarBlur, bool isDark, bool isNeedAnimation)
 {
-    TLOGI(WmsLogTag::WMS_PC, "isDefaultSidebarBlur: %{public}d, isDark: %{public}d",
-        isDefaultSidebarBlur, isDark);
+    TLOGI(WmsLogTag::WMS_PC, "isDefaultSidebarBlur: %{public}d, isDark: %{public}d, isNeedAnimation: %{public}d",
+        isDefaultSidebarBlur, isDark, isNeedAnimation);
     // sidebar animation duration
     constexpr int32_t duration = 150;
     if (isDefaultSidebarBlur) {
-        Rosen::RSAnimationTimingProtocol timingProtocol;
-        timingProtocol.SetDuration(duration);
-        timingProtocol.SetDirection(true);
-        timingProtocol.SetFillMode(Rosen::FillMode::FORWARDS);
-        timingProtocol.SetFinishCallbackType(Rosen::FinishCallbackType::LOGICALLY);
-
-        Rosen::RSNode::OpenImplicitAnimation(timingProtocol, Rosen::RSAnimationTimingCurve::LINEAR, nullptr);
+        if (isNeedAnimation) {
+            Rosen::RSAnimationTimingProtocol timingProtocol;
+            timingProtocol.SetDuration(duration);
+            timingProtocol.SetDirection(true);
+            timingProtocol.SetFillMode(Rosen::FillMode::FORWARDS);
+            timingProtocol.SetFinishCallbackType(Rosen::FinishCallbackType::LOGICALLY);
+            Rosen::RSNode::OpenImplicitAnimation(timingProtocol, Rosen::RSAnimationTimingCurve::LINEAR, nullptr);
+        }
         if (isDark) {
             blurRadiusValue_->Set(SIDEBAR_DEFAULT_RADIUS_DARK);
             blurSaturationValue_->Set(SIDEBAR_DEFAULT_SATURATION_DARK);
@@ -7701,7 +7707,9 @@ void SceneSession::ModifyRSAnimatableProperty(bool isDefaultSidebarBlur, bool is
             blurBrightnessValue_->Set(SIDEBAR_DEFAULT_BRIGHTNESS_LIGHT);
             blurMaskColorValue_->Set(Rosen::RSColor::FromArgbInt(SIDEBAR_DEFAULT_MASKCOLOR_LIGHT));
         }
-        Rosen::RSNode::CloseImplicitAnimation();
+        if (isNeedAnimation) {
+            Rosen::RSNode::CloseImplicitAnimation();
+        }
     } else {
         blurRadiusValue_->Set(SIDEBAR_BLUR_NUMBER_ZERO);
         blurSaturationValue_->Set(SIDEBAR_BLUR_NUMBER_ZERO);
@@ -8022,5 +8030,73 @@ void SceneSession::HookSceneSessionActivation(NotifyHookSceneSessionActivationFu
         }
         session->hookSceneSessionActivationFunc_ = std::move(func);
     }, where);
+}
+
+void SceneSession::SetSidebarBlurMaximize(bool isMaximize)
+{
+    TLOGI(WmsLogTag::WMS_PC, "isMaximize: %{public}d", isMaximize);
+    auto surfaceNode = GetSurfaceNode();
+    if (!surfaceNode) {
+        TLOGE(WmsLogTag::WMS_PC, "surfaceNode is null");
+        return;
+    }
+    if (!blurRadiusValue_ || !blurSaturationValue_ || !blurBrightnessValue_ || !blurMaskColorValue_) {
+        TLOGE(WmsLogTag::WMS_PC, "RSAnimatableProperty is null");
+        return;
+    }
+
+    std::shared_ptr<AbilityRuntime::ApplicationContext> appContext =
+        AbilityRuntime::Context::GetApplicationContext();
+    if (appContext == nullptr) {
+        TLOGE(WmsLogTag::WMS_PC, "app context is nullptr");
+        return;
+    }
+    std::shared_ptr<AppExecFwk::Configuration> config = appContext->GetConfiguration();
+    if (config == nullptr) {
+        TLOGE(WmsLogTag::WMS_PC, "app configuration is nullptr");
+        return;
+    }
+    std::string colorMode = config->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+    bool isDark = (colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_DARK);
+    ModifyRSAnimatablePropertyMaximize(isMaximize, isDark);
+}
+
+void SceneSession::ModifyRSAnimatablePropertyMaximize(bool isMaximize, bool isDark)
+{
+    TLOGI(WmsLogTag::WMS_PC, "isMaximize: %{public}d, isDark: %{public}d", isMaximize, isDark);
+    // sidebar maximize animation duration
+    constexpr int32_t duration = 150;
+    Rosen::RSAnimationTimingProtocol timingProtocol;
+    timingProtocol.SetDuration(duration);
+    timingProtocol.SetDirection(true);
+    timingProtocol.SetFillMode(Rosen::FillMode::FORWARDS);
+    timingProtocol.SetFinishCallbackType(Rosen::FinishCallbackType::LOGICALLY);
+    Rosen::RSNode::OpenImplicitAnimation(timingProtocol, Rosen::RSAnimationTimingCurve::LINEAR, nullptr);
+    if (isMaximize) {
+        if (isDark) {
+            blurRadiusValue_->Set(SIDEBAR_MAXIMIZE_RADIUS_DARK);
+            blurSaturationValue_->Set(SIDEBAR_MAXIMIZE_SATURATION_DARK);
+            blurBrightnessValue_->Set(SIDEBAR_MAXIMIZE_BRIGHTNESS_DARK);
+            blurMaskColorValue_->Set(Rosen::RSColor::FromArgbInt(SIDEBAR_MAXIMIZE_MASKCOLOR_DARK));
+        } else {
+            blurRadiusValue_->Set(SIDEBAR_MAXIMIZE_RADIUS_LIGHT);
+            blurSaturationValue_->Set(SIDEBAR_MAXIMIZE_SATURATION_LIGHT);
+            blurBrightnessValue_->Set(SIDEBAR_MAXIMIZE_BRIGHTNESS_LIGHT);
+            blurMaskColorValue_->Set(Rosen::RSColor::FromArgbInt(SIDEBAR_MAXIMIZE_MASKCOLOR_LIGHT));
+        }
+    } else {
+        if (isDark) {
+            blurRadiusValue_->Set(SIDEBAR_DEFAULT_RADIUS_DARK);
+            blurSaturationValue_->Set(SIDEBAR_DEFAULT_SATURATION_DARK);
+            blurBrightnessValue_->Set(SIDEBAR_DEFAULT_BRIGHTNESS_DARK);
+            blurMaskColorValue_->Set(Rosen::RSColor::FromArgbInt(SIDEBAR_DEFAULT_MASKCOLOR_DARK));
+        } else {
+            blurRadiusValue_->Set(SIDEBAR_DEFAULT_RADIUS_LIGHT);
+            blurSaturationValue_->Set(SIDEBAR_DEFAULT_SATURATION_LIGHT);
+            blurBrightnessValue_->Set(SIDEBAR_DEFAULT_BRIGHTNESS_LIGHT);
+            blurMaskColorValue_->Set(Rosen::RSColor::FromArgbInt(SIDEBAR_DEFAULT_MASKCOLOR_LIGHT));
+        }
+    }
+    Rosen::RSNode::CloseImplicitAnimation();
 }
 } // namespace OHOS::Rosen

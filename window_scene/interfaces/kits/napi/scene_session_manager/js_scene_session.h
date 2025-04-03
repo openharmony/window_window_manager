@@ -225,6 +225,7 @@ private:
     static napi_value SetSidebarBlur(napi_env env, napi_callback_info info);
     static napi_value NotifyRotationProperty(napi_env env, napi_callback_info info);
     static napi_value SetCurrentRotation(napi_env env, napi_callback_info info);
+    static napi_value SetSidebarBlurMaximize(napi_env env, napi_callback_info info);
 
     napi_value OnActivateDragBySystem(napi_env env, napi_callback_info info);
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
@@ -308,6 +309,7 @@ private:
     napi_value OnNotifyRotationProperty(napi_env env, napi_callback_info info);
     napi_value OnNotifyRotationChange(napi_env env, napi_callback_info info);
     napi_value OnSetCurrentRotation(napi_env env, napi_callback_info info);
+    napi_value OnSetSidebarBlurMaximize(napi_env env, napi_callback_info info);
 
     bool IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);
     void ProcessChangeSessionVisibilityWithStatusBarRegister();

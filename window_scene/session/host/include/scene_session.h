@@ -363,8 +363,8 @@ public:
     void CloneWindow(NodeId surfaceNodeId, bool needOffScreen);
     void AddSidebarBlur();
     void AddRSNodeModifier(bool isDark, const std::shared_ptr<RSBaseNode>& rsNode);
-    void SetSidebarBlur(bool isDefaultSidebarBlur);
-    void ModifyRSAnimatableProperty(bool isDefaultSidebarBlur, bool isDark);
+    void SetSidebarBlur(bool isDefaultSidebarBlur, bool isNeedAnimation);
+    void ModifyRSAnimatableProperty(bool isDefaultSidebarBlur, bool isDark, bool isNeedAnimation);
     WSError UpdateDensity();
     void UpdateNewSizeForPCWindow();
     bool CalcNewWindowRectIfNeed(DMRect& availableArea, float newVpr, WSRect& winRect);
@@ -374,6 +374,8 @@ public:
     WSRect GetCreaseRegion(CreaseRegionName regionName) const;
     virtual bool IsFollowParentMultiScreenPolicy() const { return false; }
     void NotifyUpdateFlagCallback(NotifyUpdateFlagFunc&& func);
+    void SetSidebarBlurMaximize(bool isMaximize);
+    void ModifyRSAnimatablePropertyMaximize(bool isMaximize, bool isDark);
 
     /*
      * PC Window Layout
