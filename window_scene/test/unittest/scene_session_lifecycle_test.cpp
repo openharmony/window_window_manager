@@ -958,6 +958,25 @@ HWTEST_F(SceneSessionLifecycleTest, PendingSessionActivation, TestSize.Level0)
 }
 
 /**
+ * @tc.name: PendingSessionActivation02
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLifecycleTest, PendingSessionActivation02, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "PendingSessionActivation";
+    info.bundleName_ = "PendingSessionActivation";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->isActive_ = true;
+    sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
+    abilitySessionInfo->reuseDelegatorWindow = true;
+    auto result = sceneSession->PendingSessionActivation(abilitySessionInfo);
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
  * @tc.name: TerminateSession
  * @tc.desc: normal function
  * @tc.type: FUNC

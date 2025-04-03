@@ -758,6 +758,9 @@ private:
     void ResetSceneSessionInfoWant(const sptr<AAFwk::SessionInfo>& sceneSessionInfo);
     int32_t StartUIAbilityBySCBTimeoutCheck(const sptr<AAFwk::SessionInfo>& abilitySessionInfo,
         const uint32_t& windowStateChangeReason, bool& isColdStart);
+    sptr<SceneSession> GetMainSessionByModuleName(const SessionInfo& sessionInfo);
+    void SetSceneSessionIsAbilityHook(sptr<SceneSession> sceneSession);
+    void RegisterHookSceneSessionActivationFunc(const sptr<SceneSession>& sceneSession);
 
     /*
      * Window Focus
