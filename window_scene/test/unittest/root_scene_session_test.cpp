@@ -260,7 +260,7 @@ HWTEST_F(RootSceneSessionTest, GetKeyboardAvoidAreaForRoot_01, TestSize.Level1)
     };
     ssm_->rootSceneSession_ = sptr<RootSceneSession>::MakeSptr(specificCb);
     ssm_->rootSceneSession_->winRect_ = { 0, 0, 1260, 2720 };
-    ssm_->rootSceneSession_->isKeyboardPanelEnabled_ = fasle;
+    ssm_->rootSceneSession_->isKeyboardPanelEnabled_ = false;
     SessionInfo keyboardSessionInfo;
     keyboardSessionInfo.abilityName_ = "keyboard";
     keyboardSessionInfo.bundleName_ = "keyboard";
@@ -273,7 +273,7 @@ HWTEST_F(RootSceneSessionTest, GetKeyboardAvoidAreaForRoot_01, TestSize.Level1)
     keyboardSession->winRect_ = { 0, 1700, 1260, 1020 };
     keyboardSession->property_->SetPersistentId(2);
     keyboardSession->isVisible_ = true;
-    ssm_sceneSessionMap_.insert({keyboardSession->GetPersistentId(), keyboardSession});
+    ssm_->sceneSessionMap_.insert({keyboardSession->GetPersistentId(), keyboardSession});
     AvoidArea avoidArea;
     ssm_->rootSceneSession_->GetKeyboardAvoidAreaForRoot(ssm_->rootSceneSession_->winRect_, avoidArea);
     Rect rect = { 0, 1700, 1260, 1020 };
@@ -338,7 +338,7 @@ HWTEST_F(RootSceneSessionTest, SetRootSessionRect_01, TestSize.Level1)
     ssm_->rootSceneSession_ = sptr<RootSceneSession>::MakeSptr();
     ssm_->rootSceneSession_->winRect_ = { 0, 0, 1260, 2720 };
     ssm_->rootSceneSession_->SetRootSessionRect({ 0, 0, 1260, 2720 });
-    Rect rect = { 0, 0, 1260, 2720 };
+    WSRect rect = { 0, 0, 1260, 2720 };
     ASSERT_EQ(ssm_->rootSceneSession_->winRect_, rect);
     ssm_->rootSceneSession_->winRect_ = { 0, 0, 2720, 1260 };
     ssm_->rootSceneSession_->SetRootSessionRect({ 0, 0, 1260, 2720 });
