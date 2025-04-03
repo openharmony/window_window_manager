@@ -10928,7 +10928,7 @@ BrokerStates SceneSessionManager::NotifyStartAbility(
         }, NOTIFY_START_ABILITY_TIMEOUT);
 
         if (isTimeout) {
-            TLOGE(WmsLogTag::WMS_LIFE, "notify start ability timeout, current userId: %{public}d", currentUserId_.load());
+            TLOGE(WmsLogTag::WMS_LIFE, "notify start ability timeout, id: %{public}d", persistentId);
             return BrokerStates::BROKER_NOT_START;
         }
         *(sessionInfo.want) = *notifyWant;
