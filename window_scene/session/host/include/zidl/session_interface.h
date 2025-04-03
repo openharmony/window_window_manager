@@ -288,12 +288,12 @@ public:
     }
 
     /**
-     * @brief update the default window size type
+     * @brief Update pipTemplateInfo.
      *
-     * @param defaultWindowSizeType Indicates the {@link uint32_t} default window size type of pip window
+     * @param pipTemplateInfo Indicates the {@link PiPTemplateInfo} pipTemplateInfo of pip window
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
-    virtual WSError UpdatePiPDefaultWindowSizeType(uint32_t defaultWindowSizeType)
+    virtual WSError UpdatePiPTemplateInfo(PiPTemplateInfo& pipTemplateInfo)
     {
         return WSError::WS_OK;
     }

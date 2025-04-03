@@ -96,7 +96,7 @@ enum class ListenerFuncType : uint32_t {
     UPDATE_FLAG_CB,
     Z_LEVEL_CHANGE_CB,
     SESSION_GET_TARGET_ORIENTATION_CONFIG_INFO_CB,
-    PIP_DEFAULT_WINDOW_SIZE_TYPE_CHANGE_CB,
+    UPDATE_PIP_TEMPLATE_INFO_CB,
 };
 
 class SceneSession;
@@ -364,7 +364,7 @@ private:
     void ProcessSetHighlightChangeRegister();
     void ProcessFollowParentRectRegister();
     void ProcessGetTargetOrientationConfigInfoRegister();
-    void ProcessUpdatePiPDefaultWindowSizeTypeRegister();
+    void ProcessUpdatePiPTemplateInfoRegister();
 
     /*
      * Window Property
@@ -442,7 +442,7 @@ private:
     void NotifyFollowParentRect(bool isFollow);
     void OnGetTargetOrientationConfigInfo(uint32_t targetOrientation);
     void OnRotationChange(int32_t persistentId, bool isRegister);
-    void OnUpdatePiPDefaultWindowSizeType(uint32_t defaultWindowSizeType);
+    void OnUpdatePiPTemplateInfo(PiPTemplateInfo& pipTemplateInfo);
 
     /*
      * Window Property

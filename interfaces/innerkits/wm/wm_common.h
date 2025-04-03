@@ -50,6 +50,8 @@ constexpr uint32_t MAX_BUTTON_BACKGROUND_SIZE = 40;
 constexpr uint32_t MIN_CLOSE_BUTTON_RIGHT_MARGIN = 8;
 constexpr uint32_t MAX_CLOSE_BUTTON_RIGHT_MARGIN = 22;
 constexpr int32_t API_VERSION_INVALID = -1;
+constexpr uint32_t MAX_SIZE_PIP_CONTROL_GROUP = 8;
+constexpr uint32_t MAX_SIZE_PIP_CONTROL = 9;
 /*
  * PC Window Sidebar Blur
  */
@@ -1350,13 +1352,97 @@ struct PiPControlEnableInfo {
     PiPControlStatus enabled;
 };
 
-struct PiPTemplateInfo {
+struct PiPTemplateInfo : public Parcelable {
     uint32_t pipTemplateType;
     uint32_t priority;
     std::vector<uint32_t> controlGroup;
     std::vector<PiPControlStatusInfo> pipControlStatusInfoList;
     std::vector<PiPControlEnableInfo> pipControlEnableInfoList;
     uint32_t defaultWindowSizeType;
+
+    PiPTemplateInfo() {}
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        if (!(parcel.WriteUint32(pipTemplateType) && parcel.WriteUint32(priority))) {
+            return false;
+        }
+        if (controlGroup.size() > MAX_SIZE_PIP_CONTROL_GROUP || !parcel.WriteUInt32Vector(controlGroup)) {
+            return false;
+        }
+        auto controlStatusSize = pipControlStatusInfoList.size();
+        if (controlStatusSize > MAX_SIZE_PIP_CONTROL || !parcel.WriteUint32(static_cast<uint32_t>(controlStatusSize))) {
+            return false;
+        }
+        for (auto& info : pipControlStatusInfoList) {
+            if (!parcel.WriteUint32(static_cast<uint32_t>(info.controlType)) ||
+                !parcel.WriteInt32(static_cast<int32_t>(info.status))) {
+                return false;
+            }
+        }
+        auto controlEnableSize = pipControlEnableInfoList.size();
+        if (controlEnableSize > MAX_SIZE_PIP_CONTROL || !parcel.WriteUint32(static_cast<uint32_t>(controlEnableSize))) {
+            return false;
+        }
+        for (auto& info : pipControlEnableInfoList) {
+            if (!parcel.WriteUint32(static_cast<uint32_t>(info.controlType)) ||
+                !parcel.WriteInt32(static_cast<int32_t>(info.enabled))) {
+                return false;
+            }
+        }
+        if (!parcel.WriteUint32(defaultWindowSizeType)) {
+            return false;
+        }
+        return true;
+    }
+
+    static PiPTemplateInfo* Unmarshalling(Parcel& parcel)
+    {
+        auto* pipTemplateInfo = new PiPTemplateInfo();
+        if (!parcel.ReadUint32(pipTemplateInfo->pipTemplateType) || !parcel.ReadUint32(pipTemplateInfo->priority)) {
+            delete pipTemplateInfo;
+            return nullptr;
+        }
+        uint32_t controlStatusSize = 0;
+        if (!parcel.ReadUInt32Vector(&pipTemplateInfo->controlGroup) ||
+            pipTemplateInfo->controlGroup.size() > MAX_SIZE_PIP_CONTROL_GROUP ||
+            !parcel.ReadUint32(controlStatusSize) || controlStatusSize > MAX_SIZE_PIP_CONTROL) {
+            delete pipTemplateInfo;
+            return nullptr;
+        }
+        for (uint32_t i = 0; i < controlStatusSize; i++) {
+            uint32_t controlType;
+            int32_t status;
+            if (!parcel.ReadUint32(controlType) || !parcel.ReadInt32(status)) {
+                break;
+            }
+            PiPControlStatusInfo info{};
+            info.controlType = static_cast<PiPControlType>(controlType);
+            info.status = static_cast<PiPControlStatus>(status);
+            pipTemplateInfo->pipControlStatusInfoList.emplace_back(info);
+        }
+        uint32_t controlEnableSize = 0;
+        if (!parcel.ReadUint32(controlEnableSize) || controlEnableSize > MAX_SIZE_PIP_CONTROL) {
+            delete pipTemplateInfo;
+            return nullptr;
+        }
+        for (uint32_t i = 0; i < controlEnableSize; i++) {
+            uint32_t controlType;
+            int32_t enabled;
+            if (!parcel.ReadUint32(controlType) || !parcel.ReadInt32(enabled)) {
+                break;
+            }
+            PiPControlEnableInfo info{};
+            info.controlType = static_cast<PiPControlType>(controlType);
+            info.enabled = static_cast<PiPControlStatus>(enabled);
+            pipTemplateInfo->pipControlEnableInfoList.emplace_back(info);
+        }
+        if (!parcel.ReadUint32(pipTemplateInfo->defaultWindowSizeType)) {
+            delete pipTemplateInfo;
+            return nullptr;
+        }
+        return pipTemplateInfo;
+    }
 };
 
 struct PiPWindowSize {

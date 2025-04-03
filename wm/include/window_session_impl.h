@@ -286,7 +286,7 @@ public:
     void UpdatePiPRect(const Rect& rect, WindowSizeChangeReason reason) override;
     void UpdatePiPControlStatus(PiPControlType controlType, PiPControlStatus status) override;
     void SetAutoStartPiP(bool isAutoStart, uint32_t priority, uint32_t width, uint32_t height) override;
-    void UpdatePiPDefaultWindowSizeType(uint32_t defaultWindowSizeType) override;
+    void UpdatePiPTemplateInfo(PiPTemplateInfo& pipTemplateInfo) override;
 
     void SetDrawingContentState(bool drawingContentState);
     WMError RegisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
