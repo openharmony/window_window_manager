@@ -77,6 +77,11 @@ HWTEST_F(InputTransferStationTest, AddInputWindow, TestSize.Level0)
     InputTransferStation::GetInstance().AddInputWindow(window_);
     InputTransferStation::GetInstance().inputListener_ = listener;
     InputTransferStation::GetInstance().AddInputWindow(window_);
+    InputTransferStation::GetInstance().isGameControllerLoaded_ = true;
+    InputTransferStation::GetInstance().AddInputWindow(window_);
+    InputTransferStation::GetInstance().isGameControllerLoaded_ = false;
+    InputTransferStation::GetInstance().AddInputWindow(window_);
+    ASSERT_EQ(true, InputTransferStation::GetInstance().isGameControllerLoaded_);
 }
 
 /**
