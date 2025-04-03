@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-#include "root_scene_session.h"
 #include <gtest/gtest.h>
-#include "session_info.h"
+#include "root_scene_session.h"
 #include "scene_session_manager.h"
+#include "session_info.h"
 
 using namespace testing;
 using namespace testing::ext;
