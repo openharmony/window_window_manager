@@ -179,6 +179,7 @@ public:
      */
     WSError RequestFocus(bool isFocused) override;
     WSError GetIsHighlighted(bool& isHighlighted) override;
+    WMError NotifyDisableDelegatorChange() override;
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;
 };

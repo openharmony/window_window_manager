@@ -2317,6 +2317,58 @@ sptr<SceneSession> SceneSessionManager::GetSceneSessionBySessionInfo(const Sessi
     return nullptr;
 }
 
+sptr<SceneSession> SceneSessionManager::GetMainSessionByModuleName(const SessionInfo& sessionInfo)
+{
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    for (const auto &[_, sceneSession] : sceneSessionMap_) {
+        if (!sceneSession || !SessionHelper::IsMainWindow(sceneSession->GetWindowType())) {
+            continue;
+        }
+        if (sceneSession->GetSessionInfo().bundleName_ != sessionInfo.bundleName_ ||
+            sceneSession->GetSessionInfo().moduleName_ != sessionInfo.moduleName_ ||
+            sceneSession->GetSessionInfo().appIndex_ != sessionInfo.appIndex_ ||
+            sceneSession->GetSessionInfo().appInstanceKey_ != sessionInfo.appInstanceKey_) {
+            continue;
+        }
+        return sceneSession;
+    }
+    return nullptr;
+}
+
+void SceneSessionManager::SetSceneSessionIsAbilityHook(sptr<SceneSession> sceneSession)
+{
+    if (bundleMgr_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "bundleMgr_ is nullptr");
+        return;
+    }
+    int32_t userId = GetUserIdByUid(getuid());
+    auto flags = (AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION |
+        AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_PERMISSION |
+        AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_METADATA |
+        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_ABILITY) |
+        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION) |
+        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE));
+    AppExecFwk::BundleInfo bundleInfo;
+    if (bundleMgr_->GetBundleInfoV9(sceneSession->GetSessionInfo().bundleName_, flags, bundleInfo, userId)) {
+        TLOGW(WmsLogTag::WMS_LIFE, "Query ability info from BMS failed.");
+        return;
+    }
+    auto& hapModulesList = bundleInfo.hapModuleInfos;
+    if (hapModulesList.empty()) {
+        TLOGW(WmsLogTag::WMS_LIFE, "hapModulesList is empty");
+        return;
+    }
+    for (auto& hapModule : hapModulesList) {
+        if (hapModule.moduleName != sceneSession->GetSessionInfo().moduleName_) {
+            continue;
+        }
+        if (!hapModule.abilitySrcEntryDelegator.empty() && !hapModule.abilityStageSrcEntryDelegator.empty()) {
+            sceneSession->SetIsAbilityHook(true);
+            break;
+        }
+    }
+}
+
 sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& sessionInfo,
     sptr<WindowSessionProperty> property)
 {
@@ -2335,6 +2387,20 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
         if (sceneSession == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "sceneSession is nullptr!");
             return sceneSession;
+        }
+        SetSceneSessionIsAbilityHook(sceneSession);
+        if (sceneSession->GetIsAbilityHook()) {
+            auto session = GetMainSessionByModuleName(sessionInfo);
+            if (session && !session->GetSessionInfo().disableDelegator) {
+                TLOGNW(WmsLogTag::WMS_LIFE, "session disableDelegator %{public}d is still hook, return hook session",
+                    session->GetSessionInfo().disableDelegator);
+                return session;
+            } else if (session && session->GetSessionInfo().disableDelegator) {
+                sceneSession->EditSessionInfo().disableDelegator = true;
+                TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s: set session id %{public}d disableDelegator true",
+                    where, sceneSession->GetPersistentId());
+            }
+            RegisterHookSceneSessionActivationFunc(sceneSession);
         }
         if (MultiInstanceManager::IsSupportMultiInstance(systemConfig_) &&
             WindowHelper::IsMainWindow(sceneSession->GetWindowType()) &&
@@ -2511,6 +2577,7 @@ sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<S
     abilitySessionInfo->isClearSession = sessionInfo.isClearSession;
     abilitySessionInfo->processOptions = sessionInfo.processOptions;
     abilitySessionInfo->requestId = sessionInfo.requestId;
+    abilitySessionInfo->reuseDelegatorWindow = sessionInfo.reuseDelegatorWindow;
     if (sessionInfo.want != nullptr) {
         abilitySessionInfo->want = *sessionInfo.want;
     } else {
@@ -2722,10 +2789,12 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
         errCode = StartUIAbilityBySCBTimeoutCheck(sceneSessionInfo,
             static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL), isColdStart);
     } else {
-        TLOGI(WmsLogTag::WMS_MAIN, "Background switch on, isNewActive %{public}d state %{public}u",
-            isNewActive, sceneSession->GetSessionState());
+        TLOGI(WmsLogTag::WMS_MAIN, "Background switch on, isNewActive %{public}d state %{public}u "
+            "reuseDelegatorWindow %{public}d",
+            isNewActive, sceneSession->GetSessionState(), sceneSession->GetSessionInfo().reuseDelegatorWindow);
         if (isNewActive || sceneSession->GetSessionState() == SessionState::STATE_DISCONNECT ||
-            sceneSession->GetSessionState() == SessionState::STATE_END) {
+            sceneSession->GetSessionState() == SessionState::STATE_END ||
+            sceneSession->GetSessionInfo().reuseDelegatorWindow) {
             TLOGI(WmsLogTag::WMS_MAIN, "Call StartUIAbility: %{public}d system: %{public}u", persistentId,
                 static_cast<uint32_t>(sceneSession->GetSessionInfo().isSystem_));
             errCode = StartUIAbilityBySCBTimeoutCheck(sceneSessionInfo,
@@ -14305,5 +14374,13 @@ const std::vector<sptr<SceneSession>> SceneSessionManager::GetActiveSceneSession
         activeSession.push_back(curSession);
     }
     return activeSession;
+}
+
+void SceneSessionManager::RegisterHookSceneSessionActivationFunc(const sptr<SceneSession>& sceneSession)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "in");
+    sceneSession->HookSceneSessionActivation([](const sptr<SceneSession>& session, bool isNewWant) {
+        SceneSessionManager::GetInstance().RequestSceneSessionActivation(session, isNewWant);
+    });
 }
 } // namespace OHOS::Rosen
