@@ -62,10 +62,6 @@ void ProcessStatusBarEnabledChangeFuncTest(bool enable)
 {
 }
 
-void DumpRootSceneElementInfoFuncTest(const std::vector<std::string>& params, std::vector<std::string>& infos)
-{
-}
-
 bool GetCutoutInfoByRotation(Rotation rotation, Rect& rect)
 {
     auto cutoutInfo = DisplayManager::GetInstance().GetCutoutInfoWithRotation(rotation);
@@ -371,34 +367,6 @@ HWTEST_F(SceneSessionManagerTest10, TestRegisterWindowManagerAgent_010, TestSize
     sptr<IWindowManagerAgent> windowManagerAgent;
     auto res = ssm_->RegisterWindowManagerAgent(type, windowManagerAgent);
     ASSERT_EQ(res, WMError::WM_ERROR_INVALID_PERMISSION);
-}
-
-/**
- * @tc.name: TestUpdateRotateAnimationConfig_01
- * @tc.desc: Test UpdateRotateAnimationConfig with duration_ 400
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest10, TestUpdateRotateAnimationConfig_01, TestSize.Level1)
-{
-    ASSERT_NE(ssm_, nullptr);
-    RotateAnimationConfig config = { 400 };
-    ssm_->UpdateRotateAnimationConfig(config);
-    usleep(WAIT_SYNC_IN_NS);
-    ASSERT_EQ(ssm_->rotateAnimationConfig_.duration_, 400);
-}
-
-/**
- * @tc.name: TestUpdateRotateAnimationConfig_02
- * @tc.desc: Test UpdateRotateAnimationConfig with duration_ 600
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest10, TestUpdateRotateAnimationConfig_02, TestSize.Level1)
-{
-    ASSERT_NE(ssm_, nullptr);
-    RotateAnimationConfig config = { 600 };
-    ssm_->UpdateRotateAnimationConfig(config);
-    usleep(WAIT_SYNC_IN_NS);
-    ASSERT_EQ(ssm_->rotateAnimationConfig_.duration_, 600);
 }
 
 /**
@@ -1094,7 +1062,7 @@ HWTEST_F(SceneSessionManagerTest10, TestIsNeedSkipWindowModeTypeCheck_04, TestSi
  * @tc.desc: test NotifyStatusBarShowStatus
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest10, NotifyStatusBarShowStatus, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest10, NotifyStatusBarShowStatus, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "test";
@@ -1364,7 +1332,7 @@ HWTEST_F(SceneSessionManagerTest10, FilterForListWindowInfo08, TestSize.Level1)
  * @tc.desc: SceneSesionManager test NotifyNextAvoidRectInfo
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo, TestSize.Level0)
 {
     ASSERT_NE(ssm_, nullptr);
     WSRect portraitRect = { 0, 0, 1260, 123 };
@@ -1383,7 +1351,7 @@ HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo, TestSize.Level1)
  * @tc.desc: SceneSesionManager test NotifyNextAvoidRectInfo_01
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_01, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_01, TestSize.Level0)
 {
     ASSERT_NE(ssm_, nullptr);
     WSRect portraitRect = { 0, 0, 1260, 123 };
@@ -1417,7 +1385,7 @@ HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_01, TestSize.Level1)
  * @tc.desc: SceneSesionManager test NotifyNextAvoidRectInfo_statusBar
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_statusBar, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_statusBar, TestSize.Level0)
 {
     ASSERT_NE(ssm_, nullptr);
     WSRect portraitRect = { 0, 0, 1260, 123 };
@@ -1456,7 +1424,7 @@ HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_statusBar, TestSize.
  * @tc.desc: SceneSesionManager test NotifyNextAvoidRectInfo_statusBar_01
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_statusBar_01, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_statusBar_01, TestSize.Level0)
 {
     ASSERT_NE(ssm_, nullptr);
     WSRect portraitRect = { 0, 0, 1260, 123 };
@@ -1495,7 +1463,7 @@ HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_statusBar_01, TestSi
  * @tc.desc: SceneSesionManager test NotifyNextAvoidRectInfo_keyboard
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_keyboard, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_keyboard, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "NotifyNextAvoidRectInfo_keyboard";
@@ -1521,7 +1489,7 @@ HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_keyboard, TestSize.L
  * @tc.desc: SceneSesionManager test NotifyNextAvoidRectInfo_keyboard_01
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_keyboard_01, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_keyboard_01, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "NotifyNextAvoidRectInfo_keyboard_01";
@@ -1608,7 +1576,7 @@ HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_cutOut, TestSize.Lev
  * @tc.desc: SceneSesionManager test NotifyNextAvoidRectInfo_AIBar
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_AIBar, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_AIBar, TestSize.Level0)
 {
     ASSERT_NE(ssm_, nullptr);
     WSRect portraitRect = { 409, 2629, 442, 91 };

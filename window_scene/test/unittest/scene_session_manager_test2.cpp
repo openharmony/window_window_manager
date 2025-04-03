@@ -94,10 +94,6 @@ void ProcessStatusBarEnabledChangeFuncTest(bool enable)
 {
 }
 
-void DumpRootSceneElementInfoFuncTest(const std::vector<std::string>& params, std::vector<std::string>& infos)
-{
-}
-
 void SceneSessionManagerTest2::SetUpTestCase()
 {
     ssm_ = &SceneSessionManager::GetInstance();
@@ -1224,44 +1220,6 @@ HWTEST_F(SceneSessionManagerTest2, ConfigSystemUIStatusBar01, TestSize.Level1)
 }
 
 /**
- * @tc.name: DumpSessionAll
- * @tc.desc: ScreenSesionManager dump all session info
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest2, DumpSessionAll, TestSize.Level1)
-{
-    SessionInfo sessionInfo;
-    sessionInfo.bundleName_ = "SceneSessionManagerTest2";
-    sessionInfo.abilityName_ = "DumpSessionAll";
-    sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
-    sptr<SceneSession> sceneSession = ssm_->RequestSceneSession(sessionInfo, windowSessionProperty);
-    ASSERT_EQ(nullptr, sceneSession);
-    std::vector<std::string> infos;
-    WSError result = ssm_->DumpSessionAll(infos);
-    ASSERT_EQ(WSError::WS_OK, result);
-    ASSERT_FALSE(infos.empty());
-}
-
-/**
- * @tc.name: DumpSessionWithId
- * @tc.desc: ScreenSesionManager dump session with id
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest2, DumpSessionWithId, TestSize.Level1)
-{
-    SessionInfo sessionInfo;
-    sessionInfo.bundleName_ = "SceneSessionManagerTest2";
-    sessionInfo.abilityName_ = "DumpSessionWithId";
-    sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
-    sptr<SceneSession> sceneSession = ssm_->RequestSceneSession(sessionInfo, windowSessionProperty);
-    ASSERT_EQ(nullptr, sceneSession);
-    std::vector<std::string> infos;
-    WSError result = ssm_->DumpSessionWithId(windowSessionProperty->GetPersistentId(), infos);
-    ASSERT_EQ(WSError::WS_OK, result);
-    ASSERT_FALSE(infos.empty());
-}
-
-/**
  * @tc.name: Init
  * @tc.desc: SceneSesionManager init
  * @tc.type: FUNC
@@ -1943,43 +1901,6 @@ HWTEST_F(SceneSessionManagerTest2, RecoverAndConnectSpecificSession02, TestSize.
     auto result = ssm_->RecoverAndConnectSpecificSession(sessionStage, eventChannel,
         surfaceNode, property, session, token);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
-}
-
-/**
- * @tc.name: CacheSpecificSessionForRecovering
- * @tc.desc: CacheSpecificSessionForRecovering
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest2, CacheSpecificSessionForRecovering, TestSize.Level1)
-{
-    sptr<WindowSessionProperty> property;
-    ASSERT_NE(ssm_, nullptr);
-    ssm_->recoveringFinished_ = false;
-    SessionInfo info;
-    info.abilityName_ = "test1";
-    info.bundleName_ = "test2";
-    sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, property);
-    ASSERT_NE(sceneSession, nullptr);
-    ssm_->CacheSpecificSessionForRecovering(nullptr, property);
-    ssm_->CacheSpecificSessionForRecovering(sceneSession, property);
-
-    property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(property, nullptr);
-    ssm_->CacheSpecificSessionForRecovering(nullptr, property);
-    ssm_->CacheSpecificSessionForRecovering(sceneSession, property);
-    property->SetWindowType(WindowType::APP_WINDOW_BASE);
-    ssm_->CacheSpecificSessionForRecovering(sceneSession, property);
-    property->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
-    ssm_->CacheSpecificSessionForRecovering(sceneSession, property);
-    int32_t parentPersistentId = 1;
-    property->SetParentPersistentId(parentPersistentId);
-    ssm_->CacheSpecificSessionForRecovering(sceneSession, property);
-    ASSERT_EQ(ssm_->recoverSubSessionCacheMap_[parentPersistentId].size(), 1);
-    ssm_->CacheSpecificSessionForRecovering(sceneSession, property);
-    ASSERT_EQ(ssm_->recoverSubSessionCacheMap_[parentPersistentId].size(), 2);
-    ssm_->RecoverCachedSubSession(parentPersistentId);
-    ASSERT_EQ(ssm_->recoverSubSessionCacheMap_[parentPersistentId].size(), 0);
-    ssm_->recoverSubSessionCacheMap_.clear();
 }
 
 /**

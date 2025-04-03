@@ -91,7 +91,7 @@ HWTEST_F(SceneSessionLayoutTest, UpdateRect01, TestSize.Level1)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLayoutTest, UpdateRect02, TestSize.Level1)
+HWTEST_F(SceneSessionLayoutTest, UpdateRect02, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "UpdateRect02";
@@ -126,7 +126,7 @@ HWTEST_F(SceneSessionLayoutTest, UpdateRect02, TestSize.Level1)
  * @tc.desc: UpdateRect
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLayoutTest, UpdateRect03, TestSize.Level1)
+HWTEST_F(SceneSessionLayoutTest, UpdateRect03, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "UpdateRect03";
@@ -153,7 +153,7 @@ HWTEST_F(SceneSessionLayoutTest, UpdateRect03, TestSize.Level1)
  * @tc.desc: NotifyClientToUpdateRect
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLayoutTest, NotifyClientToUpdateRect01, TestSize.Level1)
+HWTEST_F(SceneSessionLayoutTest, NotifyClientToUpdateRect01, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "NotifyClientToUpdateRect01";
@@ -172,7 +172,7 @@ HWTEST_F(SceneSessionLayoutTest, NotifyClientToUpdateRect01, TestSize.Level1)
  * @tc.desc: UpdateRectInner
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLayoutTest, UpdateRectInner01, TestSize.Level1)
+HWTEST_F(SceneSessionLayoutTest, UpdateRectInner01, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "UpdateRectInner01";
@@ -226,7 +226,7 @@ HWTEST_F(SceneSessionLayoutTest, NotifyClientToUpdateRect, TestSize.Level1)
  * @tc.desc: CheckAspectRatioValid function01
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLayoutTest, CheckAspectRatioValid, TestSize.Level1)
+HWTEST_F(SceneSessionLayoutTest, CheckAspectRatioValid, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "CheckAspectRatioValid";
@@ -277,7 +277,7 @@ HWTEST_F(SceneSessionLayoutTest, CheckAspectRatioValid, TestSize.Level1)
  * @tc.desc: CheckAspectRatioValid
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLayoutTest, CheckAspectRatioValid02, TestSize.Level1)
+HWTEST_F(SceneSessionLayoutTest, CheckAspectRatioValid02, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "CheckAspectRatioValid02";
@@ -317,7 +317,7 @@ HWTEST_F(SceneSessionLayoutTest, CheckAspectRatioValid02, TestSize.Level1)
  * @tc.desc: NotifyClientToUpdateRectTask function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLayoutTest, NotifyClientToUpdateRectTask, TestSize.Level1)
+HWTEST_F(SceneSessionLayoutTest, NotifyClientToUpdateRectTask, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "NotifyClientToUpdateRectTask";
@@ -392,7 +392,7 @@ HWTEST_F(SceneSessionLayoutTest, HandleActionUpdateWindowLimits, TestSize.Level1
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLayoutTest, SetAspectRatio2, TestSize.Level1)
+HWTEST_F(SceneSessionLayoutTest, SetAspectRatio2, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "SetAspectRatio2";
@@ -475,7 +475,7 @@ HWTEST_F(SceneSessionLayoutTest, SetAspectRatio4, TestSize.Level1)
  * @tc.desc: test for aspectRatio NearZero
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLayoutTest, SetAspectRatio5, TestSize.Level1)
+HWTEST_F(SceneSessionLayoutTest, SetAspectRatio5, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "SetAspectRatio5";
@@ -500,7 +500,7 @@ HWTEST_F(SceneSessionLayoutTest, SetAspectRatio5, TestSize.Level1)
  * @tc.desc: test for aspectRatio is smaller than minWidth/maxHeight
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLayoutTest, SetAspectRatio6, TestSize.Level1)
+HWTEST_F(SceneSessionLayoutTest, SetAspectRatio6, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "SetAspectRatio6";
@@ -527,7 +527,7 @@ HWTEST_F(SceneSessionLayoutTest, SetAspectRatio6, TestSize.Level1)
  * @tc.desc: test for aspectRatio is smaller than minWidth/maxHeight
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLayoutTest, SetAspectRatio7, TestSize.Level1)
+HWTEST_F(SceneSessionLayoutTest, SetAspectRatio7, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "SetAspectRatio7";
@@ -765,7 +765,7 @@ HWTEST_F(SceneSessionLayoutTest, IsNeedConvertToRelativeRect, TestSize.Level1)
     subSceneSession->parentSession_ = sceneSession;
 
     ASSERT_EQ(sceneSession->IsNeedConvertToRelativeRect(SizeChangeReason::MAXIMIZE), false);
-    ASSERT_EQ(sceneSession->IsNeedConvertToRelativeRect(SizeChangeReason::DRAG_START), true);
+    ASSERT_EQ(sceneSession->IsNeedConvertToRelativeRect(SizeChangeReason::DRAG_MOVE), true);
 
     sceneSession->moveDragController_->isStartMove_ = true;
     sceneSession->moveDragController_->isStartDrag_ = false;

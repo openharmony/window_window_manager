@@ -313,7 +313,8 @@ public:
     WSError SetSessionIcon(const sptr<IRemoteObject>& token, const std::shared_ptr<Media::PixelMap>& icon) override;
     WSError IsValidSessionIds(const std::vector<int32_t>& sessionIds, std::vector<bool>& results) override;
     void HandleTurnScreenOn(const sptr<SceneSession>& sceneSession);
-    void HandleKeepScreenOn(const sptr<SceneSession>& sceneSession, bool requireLock);
+    void HandleKeepScreenOn(const sptr<SceneSession>& sceneSession, bool requireLock,
+        const std::string& screenLockPrefix, std::shared_ptr<PowerMgr::RunningLock>& screenLock);
     void InitWithRenderServiceAdded();
 
     WSError RegisterSessionListener(const sptr<ISessionListener>& listener) override;
@@ -381,7 +382,7 @@ public:
 
     void SetRootSceneProcessBackEventFunc(const RootSceneProcessBackEventFunc& processBackEventFunc);
     void RegisterWindowChanged(const WindowChangedFunc& func);
-    WSError CloneWindow(int32_t fromPersistentId, int32_t toPersistentId);
+    WSError CloneWindow(int32_t fromPersistentId, int32_t toPersistentId, bool needOffScreen = true);
 
     /*
      * Collaborator
@@ -536,6 +537,9 @@ public:
     void DealwithDrawingContentChange(const std::vector<std::pair<uint64_t, bool>>& drawingContentChangeInfo);
     WMError ListWindowInfo(const WindowInfoOption& windowInfoOption, std::vector<sptr<WindowInfo>>& infos) override;
     WMError GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos) override;
+    void SetSkipSelfWhenShowOnVirtualScreen(uint64_t surfaceNodeId, bool isSkip);
+    WMError AddSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds) override;
+    WMError RemoveSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds) override;
 
     /*
      * Multi Window
@@ -676,6 +680,11 @@ private:
     std::atomic<bool> enterRecent_ { false };
     bool isKeyboardPanelEnabled_ = false;
     static sptr<SceneSessionManager> CreateInstance();
+    static inline bool isNotCurrentScreen(sptr<SceneSession> sceneSession, ScreenId screenId)
+    {
+        return sceneSession->GetSessionInfo().screenId_ != screenId &&
+               sceneSession->GetSessionInfo().screenId_ != SCREEN_ID_INVALID;
+    }
     void Init();
     void RegisterAppListener();
     void InitPrepareTerminateConfig();
@@ -749,6 +758,9 @@ private:
     void ResetSceneSessionInfoWant(const sptr<AAFwk::SessionInfo>& sceneSessionInfo);
     int32_t StartUIAbilityBySCBTimeoutCheck(const sptr<AAFwk::SessionInfo>& abilitySessionInfo,
         const uint32_t& windowStateChangeReason, bool& isColdStart);
+    sptr<SceneSession> GetMainSessionByModuleName(const SessionInfo& sessionInfo);
+    void SetSceneSessionIsAbilityHook(sptr<SceneSession> sceneSession);
+    void RegisterHookSceneSessionActivationFunc(const sptr<SceneSession>& sceneSession);
 
     /*
      * Window Focus
@@ -933,7 +945,6 @@ private:
         std::vector<sptr<AccessibilityWindowInfo>>& accessibilityInfo);
     void FilterSceneSessionCovered(std::vector<sptr<SceneSession>>& sceneSessionList);
     void NotifyAllAccessibilityInfo();
-    void SetSkipSelfWhenShowOnVirtualScreen(uint64_t surfaceNodeId, bool isSkip);
     void RegisterSecSurfaceInfoListener();
     void RegisterConstrainedModalUIExtInfoListener();
     void UpdatePiPWindowStateChanged(const std::string& bundleName, bool isForeground);

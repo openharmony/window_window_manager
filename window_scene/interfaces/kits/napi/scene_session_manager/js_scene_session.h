@@ -96,7 +96,7 @@ enum class ListenerFuncType : uint32_t {
     UPDATE_FLAG_CB,
     Z_LEVEL_CHANGE_CB,
     SESSION_GET_TARGET_ORIENTATION_CONFIG_INFO_CB,
-    PIP_DEFAULT_WINDOW_SIZE_TYPE_CHANGE_CB,
+    UPDATE_PIP_TEMPLATE_INFO_CB,
 };
 
 class SceneSession;
@@ -213,6 +213,7 @@ private:
     static napi_value SetFrameGravity(napi_env env, napi_callback_info info);
     static napi_value SetUseStartingWindowAboveLocked(napi_env env, napi_callback_info info);
     static napi_value SaveSnapshotSync(napi_env env, napi_callback_info info);
+    static napi_value SaveSnapshotAsync(napi_env env, napi_callback_info info);
     static napi_value SetBorderUnoccupied(napi_env env, napi_callback_info info);
     static napi_value SetFreezeImmediately(napi_env env, napi_callback_info info);
     static napi_value SendContainerModalEvent(napi_env env, napi_callback_info info);
@@ -292,6 +293,7 @@ private:
     napi_value OnSetFrameGravity(napi_env env, napi_callback_info info);
     napi_value OnSetUseStartingWindowAboveLocked(napi_env env, napi_callback_info info);
     napi_value OnSaveSnapshotSync(napi_env env, napi_callback_info info);
+    napi_value OnSaveSnapshotAsync(napi_env env, napi_callback_info info);
     napi_value OnSetBorderUnoccupied(napi_env env, napi_callback_info info);
     napi_value OnSetFreezeImmediately(napi_env env, napi_callback_info info);
     napi_value OnMaskSupportEnterWaterfallMode(napi_env env, napi_callback_info info);
@@ -362,7 +364,7 @@ private:
     void ProcessSetHighlightChangeRegister();
     void ProcessFollowParentRectRegister();
     void ProcessGetTargetOrientationConfigInfoRegister();
-    void ProcessUpdatePiPDefaultWindowSizeTypeRegister();
+    void ProcessUpdatePiPTemplateInfoRegister();
 
     /*
      * Window Property
@@ -440,7 +442,7 @@ private:
     void NotifyFollowParentRect(bool isFollow);
     void OnGetTargetOrientationConfigInfo(uint32_t targetOrientation);
     void OnRotationChange(int32_t persistentId, bool isRegister);
-    void OnUpdatePiPDefaultWindowSizeType(uint32_t defaultWindowSizeType);
+    void OnUpdatePiPTemplateInfo(PiPTemplateInfo& pipTemplateInfo);
 
     /*
      * Window Property
@@ -465,8 +467,6 @@ private:
     std::map<std::string, std::shared_ptr<NativeReference>> jsCbMap_;
     std::shared_ptr<MainThreadScheduler> taskScheduler_;
     static std::map<int32_t, napi_ref> jsSceneSessionMap_;
-    std::mutex windowRotationMutex_;
-    uint32_t  windowRotation_ = 0;
 };
 } // namespace OHOS::Rosen
 
