@@ -145,7 +145,7 @@ const std::map<std::string, OHOS::AppExecFwk::DisplayOrientation> STRING_TO_DISP
     {"follow_desktop",                      OHOS::AppExecFwk::DisplayOrientation::FOLLOW_DESKTOP},
 };
 
-const std::unordered_set<std::string> LAYOUT_INFO_WHITELIST = { 
+const std::unordered_set<std::string> LAYOUT_INFO_WHITELIST = {
     "SCBSmartDock",
     "SCBExtScreenDock",
     "status_bar_tray",
@@ -4385,16 +4385,16 @@ WSError SceneSessionManager::UpdateBrightness(int32_t persistentId)
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Brightness: [%{public}f, %{public}f]", GetDisplayBrightness(), brightness);
     bool isPC = systemConfig_.uiType_ == UI_TYPE_PC;
     if (std::fabs(brightness - UNDEFINED_BRIGHTNESS) < std::numeric_limits<float>::min()) {
-        if (GetDisplayBrightness() != brightness) {
+        if (IsNeedUpdateBrightness(brightness)) {
             TLOGI(WmsLogTag::WMS_ATTRIBUTE, "adjust brightness with default value");
             if (!isPC) {
                 DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().RestoreBrightness();
             }
             SetDisplayBrightness(UNDEFINED_BRIGHTNESS); // UNDEFINED_BRIGHTNESS means system default brightness
+            brightnessSessionId_ = INVALID_WINDOW_ID;
         }
-        brightnessSessionId_ = INVALID_WINDOW_ID;
     } else {
-        if (GetDisplayBrightness() != brightness) {
+        if (std::fabs(brightness - GetDisplayBrightness()) > std::numeric_limits<float>::min()) {
             TLOGI(WmsLogTag::WMS_ATTRIBUTE, "adjust brightness with value");
             if (isPC) {
                 DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().SetBrightness(
@@ -4409,6 +4409,19 @@ WSError SceneSessionManager::UpdateBrightness(int32_t persistentId)
     }
     return WSError::WS_OK;
 }
+
+bool SceneSessionManager::IsNeedUpdateBrightness(float brightness)
+{
+    if (std::fabs(brightness - GetDisplayBrightness()) < std::numeric_limits<float>::min()) {
+        return false;
+    }
+    auto sceneSession = GetSceneSession(brightnessSessionId_);
+    if (sceneSession != nullptr && sceneSession->IsSessionForeground()) {
+        return false;
+    }
+    return true;
+}
+
 
 int32_t SceneSessionManager::GetCurrentUserId() const
 {
