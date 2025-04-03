@@ -2246,7 +2246,7 @@ sptr<SceneSession> SceneSessionManager::GetSceneSessionBySessionInfo(const Sessi
     return nullptr;
 }
 
-sptr<SceneSession> SceneSessionManager::GetMainSessionByModuleName(const sessionInfo& sessionInfo)
+sptr<SceneSession> SceneSessionManager::GetMainSessionByModuleName(const SessionInfo& sessionInfo)
 {
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (const auto &[_, sceneSession] : sceneSessionMap_) {
@@ -2277,7 +2277,7 @@ void SceneSessionManager::SetSceneSessionIsAbilityHook(sptr<SceneSession> sceneS
         static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_ABILITY) |
         static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION) |
         static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE));
-    std::vector<AppExecFwk::BundleInfo> bundleInfos;
+    AppExecFwk::BundleInfo bundleInfo;
     if (bundleMgr_->GetBundleInfoV9(sceneSession->GetSessionInfo().bundleName_, flags, bundleInfo, userId)) {
         TLOGW(WmsLogTag::WMS_LIFE, "Query ability info from BMS failed.");
         return;
