@@ -15,9 +15,12 @@
 
 #include "js_runtime_utils.h"
 #include "picture_in_picture_option.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {
+constexpr uint32_t PIP_LOW_PRIORITY = 0;
+constexpr uint32_t PIP_HIGH_PRIORITY = 1;
 PipOption::PipOption()
 {
 }
@@ -202,6 +205,30 @@ void PipOption::SetTypeNodeEnabled(bool enable)
 bool PipOption::IsTypeNodeEnabled() const
 {
     return useTypeNode_;
+}
+
+uint32_t PipOption::GetPipPriority(uint32_t pipTemplateType) const
+{
+    if (pipTemplateType >= static_cast<uint32_t>(PiPTemplateType::END)) {
+        TLOGE(WmsLogTag::WMS_PIP, "param invalid, pipTemplateType is %{public}d", pipTemplateType);
+        return PIP_LOW_PRIORITY;
+    }
+    if (pipTemplateType == static_cast<uint32_t>(PiPTemplateType::VIDEO_PLAY) ||
+        pipTemplateType == static_cast<uint32_t>(PiPTemplateType::VIDEO_LIVE)) {
+        return PIP_LOW_PRIORITY;
+    } else {
+        return PIP_HIGH_PRIORITY;
+    }
+}
+
+void PipOption::GetPiPTemplateInfo(PiPTemplateInfo& pipTemplateInfo)
+{
+    pipTemplateInfo.pipTemplateType = templateType_;
+    pipTemplateInfo.controlGroup = controlGroup_;
+    pipTemplateInfo.priority = GetPipPriority(templateType_);
+    pipTemplateInfo.defaultWindowSizeType = defaultWindowSizeType_;
+    pipTemplateInfo.pipControlStatusInfoList = pipControlStatusInfoList_;
+    pipTemplateInfo.pipControlEnableInfoList = pipControlEnableInfoList_;
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -62,7 +62,7 @@ using NotifySessionPiPControlStatusChangeFunc = std::function<void(WsPiPControlT
     WsPiPControlStatus status)>;
 using NotifyAutoStartPiPStatusChangeFunc = std::function<void(bool isAutoStart, uint32_t priority,
     uint32_t width, uint32_t height)>;
-using NotifyUpdatePiPDefaultWindowSizeTypeFunc = std::function<void(uint32_t defaultWindowSizeType)>;
+using NotifyUpdatePiPTemplateInfoFunc = std::function<void(PiPTemplateInfo& pipTemplateInfo)>;
 using NotifySessionEventFunc = std::function<void(int32_t eventId, SessionEventParam param)>;
 using NotifySessionTopmostChangeFunc = std::function<void(const bool topmost)>;
 using NotifySubSessionZLevelChangeFunc = std::function<void(const int32_t zLevel)>;
@@ -287,8 +287,8 @@ public:
     WSError UpdatePiPRect(const Rect& rect, SizeChangeReason reason) override;
     WSError UpdatePiPControlStatus(WsPiPControlType controlType, WsPiPControlStatus status) override;
     WSError SetAutoStartPiP(bool isAutoStart, uint32_t priority, uint32_t width, uint32_t height) override;
-    void SetUpdatePiPDefaultWindowSizeTypeCallback(const NotifyUpdatePiPDefaultWindowSizeTypeFunc& func);
-    WSError UpdatePiPDefaultWindowSizeType(uint32_t defaultWindowSizeType) override;
+    void SetUpdatePiPTemplateInfoCallback(NotifyUpdatePiPTemplateInfoFunc&& func);
+    WSError UpdatePiPTemplateInfo(PiPTemplateInfo& pipTemplateInfo) override;
     void NotifyPiPWindowPrepareClose() override;
     void SetSessionPiPControlStatusChangeCallback(const NotifySessionPiPControlStatusChangeFunc& func);
     void SetAutoStartPiPStatusChangeCallback(const NotifyAutoStartPiPStatusChangeFunc& func);
@@ -1055,8 +1055,8 @@ private:
      */
     NotifySessionPiPControlStatusChangeFunc sessionPiPControlStatusChangeFunc_;
     NotifyAutoStartPiPStatusChangeFunc autoStartPiPStatusChangeFunc_;
-    NotifyUpdatePiPDefaultWindowSizeTypeFunc updatePiPDefaultWindowSizeTypeCallbackFunc_;
-    PiPTemplateInfo pipTemplateInfo_ = {0, 0, {}};
+    NotifyUpdatePiPTemplateInfoFunc updatePiPTemplateInfoCallbackFunc_;
+    PiPTemplateInfo pipTemplateInfo_ = {};
 
     NotifyForceSplitFunc forceSplitFunc_;
     UpdatePrivateStateAndNotifyFunc updatePrivateStateAndNotifyFunc_;

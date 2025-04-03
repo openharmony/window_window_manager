@@ -5305,14 +5305,17 @@ void WindowSessionImpl::SetAutoStartPiP(bool isAutoStart, uint32_t priority, uin
     }
 }
 
-void WindowSessionImpl::UpdatePiPDefaultWindowSizeType(uint32_t defaultWindowSizeType)
+void WindowSessionImpl::UpdatePiPTemplateInfo(PiPTemplateInfo& pipTemplateInfo)
 {
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_PIP, "session is invalid");
         return;
     }
+    TLOGI(WmsLogTag::WMS_PIP, "UpdatePiPTemplateInfo, pipTemplateType: %{public}u, priority: %{public}d, "
+        "defaultWindowSizeType: %{public}d", pipTemplateInfo.pipTemplateType, pipTemplateInfo.priority,
+        pipTemplateInfo.defaultWindowSizeType);
     if (auto hostSession = GetHostSession()) {
-        hostSession->UpdatePiPDefaultWindowSizeType(defaultWindowSizeType);
+        hostSession->UpdatePiPTemplateInfo(pipTemplateInfo);
     }
 }
 
