@@ -41,6 +41,8 @@ constexpr int32_t ROTATE_ANIMATION_DURATION = 400;
 constexpr int32_t INVALID_SESSION_ID = 0;
 constexpr int32_t WINDOW_SUPPORT_MODE_MAX_SIZE = 4;
 constexpr int32_t DEFAULT_SCALE_RATIO = 100;
+const std::string WINDOW_SCREEN_LOCK_PREFIX = "windowLock_";
+const std::string VIEW_SCREEN_LOCK_PREFIX = "viewLock_";
 
 enum class WSError : int32_t {
     WS_OK = 0,
@@ -401,6 +403,8 @@ struct SessionInfo {
     bool isFoundationCall_ = false;
     int32_t requestId = 0;
     std::string specifiedFlag_ = "";
+    bool disableDelegator = false;
+    bool reuseDelegatorWindow = false;
 
     /*
      * App Use Control
@@ -427,6 +431,7 @@ struct SessionInfo {
      */
     std::vector<AppExecFwk::SupportWindowMode> supportedWindowModes;
     WindowSizeLimits windowSizeLimits;
+    bool isFollowParentMultiScreenPolicy = false;
 
     /*
      * Window Rotation

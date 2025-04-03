@@ -6899,8 +6899,8 @@ napi_value JsWindow::OnSetSubWindowModal(napi_env env, napi_callback_info info)
     return result;
 }
 
-static std::function<void()> SetFollowParentMultiScreenPolicyTask(const wptr<Window>& weakToken, bool enabled,
-    napi_env env, std::shared_ptr<NapiAsyncTask> napiAsyncTask)
+static std::function<void()> GetFollowParentMultiScreenPolicyTask(const wptr<Window>& weakToken, bool enabled,
+    napi_env env, std::shared_ptr<NapiAsyncTask>& napiAsyncTask)
 {
     return [weakToken, enabled, env, task = napiAsyncTask] {
         auto window = weakToken.promote();
@@ -6955,7 +6955,7 @@ napi_value JsWindow::OnSetFollowParentMultiScreenPolicy(napi_env env, napi_callb
     }
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
-    auto asyncTask = SetFollowParentMultiScreenPolicyTask(wptr<Window>(windowToken_), enabled, env, napiAsyncTask);
+    auto asyncTask = GetFollowParentMultiScreenPolicyTask(wptr<Window>(windowToken_), enabled, env, napiAsyncTask);
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
         napiAsyncTask->Reject(env,
             CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));

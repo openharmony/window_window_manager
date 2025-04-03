@@ -381,49 +381,6 @@ HWTEST_F(SceneSessionTest, GetRequestedOrientation, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetDefaultRequestedOrientation
- * @tc.desc: SetDefaultRequestedOrientation
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest, SetDefaultRequestedOrientation, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "SetDefaultRequestedOrientation";
-    info.bundleName_ = "SetDefaultRequestedOrientation";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
-    Orientation orientation = Orientation::AUTO_ROTATION_UNSPECIFIED;
-    sceneSession->SetDefaultRequestedOrientation(orientation);
-    Orientation ret = sceneSession->GetRequestedOrientation();
-    ASSERT_EQ(orientation, ret);
-
-    orientation = Orientation::USER_ROTATION_PORTRAIT;
-    sceneSession->SetDefaultRequestedOrientation(orientation);
-    ret = sceneSession->GetRequestedOrientation();
-    ASSERT_EQ(orientation, ret);
-
-    orientation = Orientation::USER_ROTATION_LANDSCAPE;
-    sceneSession->SetDefaultRequestedOrientation(orientation);
-    ret = sceneSession->GetRequestedOrientation();
-    ASSERT_EQ(orientation, ret);
-
-    orientation = Orientation::USER_ROTATION_PORTRAIT_INVERTED;
-    sceneSession->SetDefaultRequestedOrientation(orientation);
-    ret = sceneSession->GetRequestedOrientation();
-    ASSERT_EQ(orientation, ret);
-
-    orientation = Orientation::USER_ROTATION_LANDSCAPE_INVERTED;
-    sceneSession->SetDefaultRequestedOrientation(orientation);
-    ret = sceneSession->GetRequestedOrientation();
-    ASSERT_EQ(orientation, ret);
-
-    orientation = Orientation::FOLLOW_DESKTOP;
-    sceneSession->SetDefaultRequestedOrientation(orientation);
-    ret = sceneSession->GetRequestedOrientation();
-    ASSERT_EQ(orientation, ret);
-}
-
-/**
  * @tc.name: IsKeepScreenOn01
  * @tc.desc: IsKeepScreenOn true
  * @tc.type: FUNC
@@ -453,6 +410,38 @@ HWTEST_F(SceneSessionTest, IsKeepScreenOn02, TestSize.Level1)
     ASSERT_NE(sceneSession, nullptr);
     ASSERT_EQ(WSError::WS_OK, sceneSession->SetKeepScreenOn(false));
     ASSERT_EQ(false, sceneSession->IsKeepScreenOn());
+}
+
+/**
+ * @tc.name: IsViewKeepScreenOn01
+ * @tc.desc: IsViewKeepScreenOn true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, IsViewKeepScreenOn01, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsViewKeepScreenOn01";
+    info.bundleName_ = "IsViewKeepScreenOn01";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    ASSERT_EQ(WSError::WS_OK, sceneSession->SetViewKeepScreenOn(true));
+    ASSERT_EQ(true, sceneSession->IsViewKeepScreenOn());
+}
+
+/**
+ * @tc.name: IsViewKeepScreenOn02
+ * @tc.desc: IsViewKeepScreenOn false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, IsViewKeepScreenOn02, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsViewKeepScreenOn02";
+    info.bundleName_ = "IsViewKeepScreenOn02";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    ASSERT_EQ(WSError::WS_OK, sceneSession->SetViewKeepScreenOn(false));
+    ASSERT_EQ(false, sceneSession->IsViewKeepScreenOn());
 }
 
 /**
@@ -713,7 +702,7 @@ HWTEST_F(SceneSessionTest, UpdateNativeVisibility, TestSize.Level1)
  * @tc.desc: Set PrivacyMode as false
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest, SetPrivacyMode01, TestSize.Level1)
+HWTEST_F(SceneSessionTest, SetPrivacyMode01, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "SetPrivacyMode01";
@@ -734,7 +723,7 @@ HWTEST_F(SceneSessionTest, SetPrivacyMode01, TestSize.Level1)
  * @tc.desc: Set PrivacyMode as true
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest, SetPrivacyMode02, TestSize.Level1)
+HWTEST_F(SceneSessionTest, SetPrivacyMode02, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "SetPrivacyMode02";
@@ -783,34 +772,6 @@ HWTEST_F(SceneSessionTest, IsFloatingWindowAppType02, TestSize.Level1)
     EXPECT_NE(sceneSession, nullptr);
     EXPECT_NE(sceneSession->property_, nullptr);
     ASSERT_EQ(false, sceneSession->IsFloatingWindowAppType());
-}
-
-/**
- * @tc.name: DumpSessionElementInfo01
- * @tc.desc: DumpSessionElementInfo
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest, DumpSessionElementInfo, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "Background01";
-    info.bundleName_ = "IsFloatingWindowAppType";
-    info.windowType_ = 1;
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> sceneSession;
-    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
-    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
-    ASSERT_NE(mockSessionStage, nullptr);
-    std::vector<std::string> params;
-    sceneSession->DumpSessionElementInfo(params);
-    int ret = 1;
-    sceneSession->sessionStage_ = mockSessionStage;
-    sceneSession->DumpSessionElementInfo(params);
-    ASSERT_EQ(ret, 1);
 }
 
 /**
@@ -967,7 +928,7 @@ HWTEST_F(SceneSessionTest, GetCutoutAvoidArea, TestSize.Level1)
  * @tc.desc: SetSystemBarProperty
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest, SetSystemBarProperty, TestSize.Level1)
+HWTEST_F(SceneSessionTest, SetSystemBarProperty, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "Background01";
@@ -989,7 +950,7 @@ HWTEST_F(SceneSessionTest, SetSystemBarProperty, TestSize.Level1)
  * @tc.desc: SetSystemBarProperty02
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest, SetSystemBarProperty02, TestSize.Level1)
+HWTEST_F(SceneSessionTest, SetSystemBarProperty02, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "Background01";
@@ -1381,24 +1342,6 @@ HWTEST_F(SceneSessionTest, NotifyPropertyWhenConnect, TestSize.Level1)
     sceneSession->property_ = property;
     sceneSession->NotifyPropertyWhenConnect();
     ASSERT_EQ(ret, 1);
-}
-
-/**
- * @tc.name: DumpSessionInfo
- * @tc.desc: DumpSessionInfo
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest, DumpSessionInfo, TestSize.Level1)
-{
-    SessionInfo info;
-    info.bundleName_ = "SceneSessionTest";
-    info.abilityName_ = "DumpSessionInfo";
-    info.windowType_ = 1;
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
-    std::vector<std::string> infos;
-    sceneSession->DumpSessionInfo(infos);
-    ASSERT_FALSE(infos.empty());
 }
 
 /**
@@ -1904,7 +1847,7 @@ HWTEST_F(SceneSessionTest, GetScreenWidthAndHeightFromServer, TestSize.Level1)
  * @tc.desc: SetDefaultDisplayIdIfNeed
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest, SetDefaultDisplayIdIfNeed, TestSize.Level1)
+HWTEST_F(SceneSessionTest, SetDefaultDisplayIdIfNeed, TestSize.Level0)
 {
     SessionInfo info;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
@@ -1940,7 +1883,7 @@ HWTEST_F(SceneSessionTest, SetSessionGlobalRect, TestSize.Level1)
  * @tc.desc: SetSessionGlobalRect
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest, SetIsStatusBarVisibleInner01, TestSize.Level1)
+HWTEST_F(SceneSessionTest, SetIsStatusBarVisibleInner01, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "SetIsStatusBarVisibleInner01";

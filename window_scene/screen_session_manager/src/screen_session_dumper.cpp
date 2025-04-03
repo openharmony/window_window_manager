@@ -986,7 +986,7 @@ void ScreenSessionDumper::SetLandscapeLock(std::string input)
     size_t commaPos = input.find_last_of(',');
     if ((commaPos != std::string::npos) && (input.substr(0, commaPos) == ARG_SET_LANDSCAPE_LOCK)) {
         std::string valueStr = input.substr(commaPos + 1, DUMPER_PARAM_INDEX_ONE);
-        if (valueStr.size() != DUMPER_PARAM_INDEX_ONE && !std::isdigit(valueStr[0])) {
+        if (valueStr.size() != DUMPER_PARAM_INDEX_ONE || !std::isdigit(valueStr[0])) {
             return;
         }
         int32_t value = std::stoi(valueStr);

@@ -292,6 +292,7 @@ public:
     std::string GetWindowName() const;
     WSRect GetLastLayoutRect() const;
     WSRect GetLayoutRect() const;
+    bool GetSkipSelfWhenShowOnVirtualScreen() const;
     DisplayId GetDisplayId() const { return GetSessionProperty()->GetDisplayId(); }
     DisplayId GetOriginDisplayId() const { return originDisplayId_; }
     void SetOriginDisplayId(DisplayId displayId);
@@ -566,8 +567,7 @@ public:
     void RemoveWindowDetectTask();
     WSError SwitchFreeMultiWindow(bool enable);
 
-    virtual bool CheckGetAvoidAreaAvailable(AvoidAreaType type,
-        int32_t apiVersion = API_VERSION_INVALID) { return true; }
+    virtual bool CheckGetAvoidAreaAvailable(AvoidAreaType type) { return true; }
 
     virtual bool IsVisibleForeground() const;
     void SetIsStarting(bool isStarting);

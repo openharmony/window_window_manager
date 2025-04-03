@@ -69,31 +69,6 @@ void PictureInPictureControllerTest::SetUp() {}
 void PictureInPictureControllerTest::TearDown() {}
 
 namespace {
-
-/**
- * @tc.name: GetPipPriority
- * @tc.desc: GetPipPriority
- * @tc.type: FUNC
- */
-HWTEST_F(PictureInPictureControllerTest, GetPipPriority, TestSize.Level1)
-{
-    auto mw = sptr<MockWindow>::MakeSptr();
-    ASSERT_NE(nullptr, mw);
-    auto option = sptr<PipOption>::MakeSptr();
-    ASSERT_NE(nullptr, option);
-    auto pipControl = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
-    uint32_t pipTypeTemplate = 5;
-    uint32_t testValue = 0;
-    ASSERT_EQ(testValue, pipControl->GetPipPriority(pipTypeTemplate));
-    pipTypeTemplate = 3;
-    ASSERT_EQ(testValue, pipControl->GetPipPriority(pipTypeTemplate));
-    pipTypeTemplate = 0;
-    ASSERT_EQ(testValue, pipControl->GetPipPriority(pipTypeTemplate));
-    pipTypeTemplate = 1;
-    testValue = 1;
-    ASSERT_EQ(testValue, pipControl->GetPipPriority(pipTypeTemplate));
-}
-
 /**
  * @tc.name: ShowPictureInPictureWindow01
  * @tc.desc: ShowPictureInPictureWindow

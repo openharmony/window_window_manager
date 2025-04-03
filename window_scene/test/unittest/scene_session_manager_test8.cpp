@@ -63,22 +63,6 @@ void SceneSessionManagerTest8::TearDown()
 }
 
 namespace {
-/**
- * @tc.name: GetTotalUITreeInfo
- * @tc.desc: GetTotalUITreeInfo set gesture navigation enabled
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest8, GetTotalUITreeInfo, TestSize.Level1)
-{
-    std::string dumpInfo = "dumpInfo";
-    ssm_->SetDumpUITreeFunc(nullptr);
-    EXPECT_EQ(WSError::WS_OK, ssm_->GetTotalUITreeInfo(dumpInfo));
-    DumpUITreeFunc func = [](std::string& dumpInfo) {
-        return;
-    };
-    ssm_->SetDumpUITreeFunc(func);
-    EXPECT_EQ(WSError::WS_OK, ssm_->GetTotalUITreeInfo(dumpInfo));
-}
 
 /**
  * @tc.name: GetRemoteSessionSnapshotInfo
@@ -531,9 +515,10 @@ HWTEST_F(SceneSessionManagerTest8, HandleKeepScreenOn, TestSize.Level1)
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     EXPECT_NE(nullptr, sceneSession);
 
-    ssm_->HandleKeepScreenOn(sceneSession, false);
+    std::string lockName = "windowLock";
+    ssm_->HandleKeepScreenOn(sceneSession, false, lockName, sceneSession->keepScreenLock_);
     sceneSession->keepScreenLock_ = nullptr;
-    ssm_->HandleKeepScreenOn(sceneSession, true);
+    ssm_->HandleKeepScreenOn(sceneSession, true, lockName, sceneSession->keepScreenLock_);
     bool enable = true;
     EXPECT_EQ(WSError::WS_OK, ssm_->GetFreeMultiWindowEnableState(enable));
 }
@@ -923,96 +908,6 @@ HWTEST_F(SceneSessionManagerTest8, OnSessionStateChange01, TestSize.Level1)
     EXPECT_EQ(WSError::WS_OK, ret);
     constexpr uint32_t NOT_WAIT_SYNC_IN_NS = 500000;
     usleep(NOT_WAIT_SYNC_IN_NS);
-}
-
-/**
- * @tc.name: IsWindowSupportCacheForRecovering
- * @tc.desc: test function : IsWindowSupportCacheForRecovering
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest8, IsWindowSupportCacheForRecovering, TestSize.Level1)
-{
-    std::vector<int32_t> recoveredPersistentIds = {1};
-    ssm_->alivePersistentIds_.clear();
-    ssm_->alivePersistentIds_.push_back(1);
-    ssm_->alivePersistentIds_.push_back(2);
-    ssm_->alivePersistentIds_.push_back(3);
-    SessionInfo info;
-    info.bundleName_ = "IsWindowSupportCacheForRecovering";
-    info.abilityName_ = "IsWindowSupportCacheForRecovering";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
-    sceneSession->isRecovered_ = true;
-    ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession));
-    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(sceneSession1, nullptr);
-    sceneSession1->isRecovered_ = false;
-    ssm_->sceneSessionMap_.insert(std::make_pair(3, sceneSession1));
-    sptr<SceneSession> sceneSession2 = nullptr;
-    ssm_->sceneSessionMap_.insert(std::make_pair(4, sceneSession2));
-    ssm_->ClearUnrecoveredSessions(recoveredPersistentIds);
-
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(property, nullptr);
-    ssm_->recoveringFinished_ = true;
-    auto ret = ssm_->IsWindowSupportCacheForRecovering(sceneSession, property);
-    EXPECT_EQ(false, ret);
-}
-
-/**
- * @tc.name: IsWindowSupportCacheForRecovering01
- * @tc.desc: test function : IsWindowSupportCacheForRecovering
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest8, IsWindowSupportCacheForRecovering01, TestSize.Level1)
-{
-    std::vector<int32_t> windowIds = {0, 1};
-    sptr<SceneSession> sceneSession = nullptr;
-    ssm_->sceneSessionMap_.clear();
-    ssm_->sceneSessionMap_.insert(std::make_pair(0, sceneSession));
-    ssm_->OnNotifyAboveLockScreen(windowIds);
-
-    SessionInfo info;
-    info.bundleName_ = "IsWindowSupportCacheForRecovering01";
-    info.abilityName_ = "IsWindowSupportCacheForRecovering01";
-    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(sceneSession1, nullptr);
-    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession1));
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(property, nullptr);
-    ssm_->recoveringFinished_ = false;
-    property->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
-    auto ret = ssm_->IsWindowSupportCacheForRecovering(sceneSession1, property);
-    EXPECT_EQ(true, ret);
-    property->SetWindowType(WindowType::APP_SUB_WINDOW_END);
-    ret = ssm_->IsWindowSupportCacheForRecovering(sceneSession1, property);
-    EXPECT_EQ(false, ret);
-    property->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
-    ret = ssm_->IsWindowSupportCacheForRecovering(sceneSession1, property);
-    EXPECT_EQ(true, ret);
-}
-
-/**
- * @tc.name: IsWindowSupportCacheForRecovering02
- * @tc.desc: test function : IsWindowSupportCacheForRecovering
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest8, IsWindowSupportCacheForRecovering02, TestSize.Level1)
-{
-    SessionInfo info;
-    info.bundleName_ = "IsWindowSupportCacheForRecovering02";
-    info.abilityName_ = "IsWindowSupportCacheForRecovering02";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(property, nullptr);
-    ssm_->recoveringFinished_ = false;
-    property->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
-    property->parentPersistentId_ = 1;
-    NotifyBindDialogSessionFunc func = [](const sptr<SceneSession>& sceneSession) {};
-    ssm_->bindDialogTargetFuncMap_.insert(std::make_pair(1, func));
-    auto ret = ssm_->IsWindowSupportCacheForRecovering(sceneSession, property);
-    EXPECT_EQ(false, ret);
 }
 
 /**
