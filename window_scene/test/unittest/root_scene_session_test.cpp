@@ -32,7 +32,7 @@ public:
     static sptr<SceneSessionManager> ssm_;
 };
 
-sptr<SceneSessionManager> SceneSessionManagerTest10::ssm_ = nullptr;
+sptr<SceneSessionManager> RootSceneSessionTest::ssm_ = nullptr;
 
 void LoadContentFuncTest(const std::string&, napi_env, napi_value, AbilityRuntime::Context*)
 {
