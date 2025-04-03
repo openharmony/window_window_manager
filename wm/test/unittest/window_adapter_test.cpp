@@ -445,6 +445,21 @@ HWTEST_F(WindowAdapterTest, GetVisibilityWindowInfo, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ReregisterWindowManagerAgent
+ * @tc.desc: WindowAdapter/ReregisterWindowManagerAgent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, ReregisterWindowManagerAgent, TestSize.Level1)
+{
+    WindowAdapter windowAdapter;
+    auto displayId = 0;
+    ModeChangeHotZones hotZones;
+    auto ret = windowAdapter.GetModeChangeHotZones(displayId, hotZones);
+    windowAdapter.ReregisterWindowManagerAgent();
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
  * @tc.name: UpdateProperty
  * @tc.desc: WindowAdapter/UpdateProperty
  * @tc.type: FUNC

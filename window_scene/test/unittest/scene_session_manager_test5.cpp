@@ -1298,6 +1298,27 @@ HWTEST_F(SceneSessionManagerTest5, GetAllAbilityInfos02, TestSize.Level1)
 }
 
 /**
+ * @tc.name: FindMainWindowWithToken
+ * @tc.desc: SceneSesionManager find main window with token
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, FindMainWindowWithToken02, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test2";
+    info.persistentId_ = 123;
+    sptr<IRemoteObject> targetToken = nullptr;
+    ssm_->FindMainWindowWithToken(targetToken);
+    targetToken = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(targetToken, nullptr);
+    ssm_->FindMainWindowWithToken(targetToken);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ssm_->FindMainWindowWithToken(targetToken);
+}
+
+/**
  * @tc.name: FindSessionByToken
  * @tc.desc: SceneSesionManager FindSessionByToken
  * @tc.type: FUNC
