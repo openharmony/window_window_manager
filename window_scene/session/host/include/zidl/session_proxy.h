@@ -161,7 +161,7 @@ public:
      * window focus
      */
     WSError RequestFocus(bool isFocused) override;
-    WSError GetIsHighlighted(bool& isHighlighted) override;    
+    WSError GetIsHighlighted(bool& isHighlighted) override;
 
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;
