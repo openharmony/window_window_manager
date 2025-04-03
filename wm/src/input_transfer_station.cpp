@@ -33,7 +33,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "InputTr
 const std::string GAME_CONTROLLER_SO_PATH = "/system/lib64/libgamecontroller_event.z.so";
 
 static std::unique_ptr<void, void(*)(void*)> gameControllerHandle_{nullptr, [](void* handle) {
-    if(handle) {
+    if (handle) {
         dlclose(handle);
         TLOGI(WmsLogTag::WMS_EVENT, "[dlclose] GameController unloaded");
     }
