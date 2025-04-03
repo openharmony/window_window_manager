@@ -130,7 +130,8 @@ constexpr float INVALID_DEFAULT_DENSITY = 1.0f;
 constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_WIDTH = 40;
 constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_HEIGHT = 40;
 constexpr int32_t API_VERSION_18 = 18;
-constexpr uint32_t LIFECYCLE_ISOLATE_VERSION = 18;
+constexpr uint32_t API_VERSION_MOD = 1000;
+constexpr uint32_t LIFECYCLE_ISOLATE_VERSION = 20;
 constexpr uint32_t SNAPSHOT_TIMEOUT = 2000; // MS
 }
 std::mutex WindowSceneSessionImpl::keyboardPanelInfoChangeListenerMutex_;
@@ -625,6 +626,12 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         SetSubWindowZLevelToProperty();
         InputTransferStation::GetInstance().AddInputWindow(this);
         if (WindowHelper::IsSubWindow(GetType()) && !initRect.IsUninitializedRect()) {
+            auto hostSession = GetHostSession();
+            if (IsFullScreenSizeWindow(initRect.width_, initRect.height_) && (hostSession != nullptr)) {
+                // Full screen size sub window don't need to resize when dpi change
+                TLOGI(WmsLogTag::WMS_LIFE, "Full screen size sub window set isDefaultDensityEnabled true");
+                hostSession->OnDefaultDensityEnabled(true);
+            }
             Resize(initRect.width_, initRect.height_);
         }
         RegisterWindowInspectorCallback();
@@ -634,6 +641,47 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         property_->GetWindowName().c_str(), property_->GetPersistentId(),
         state_, GetWindowMode(), property_->GetDisplayId());
     return ret;
+}
+
+bool WindowSceneSessionImpl::IsFullScreenSizeWindow(uint32_t width, uint32_t height)
+{
+    DisplayId displayId = 0;
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(displayId);
+    if (display == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "display is null");
+        return false;
+    }
+    auto displayInfo = display->GetDisplayInfo();
+    if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "displayInfo is null");
+        return false;
+    }
+    uint32_t displayWidth = static_cast<uint32_t>(displayInfo->GetWidth());
+    uint32_t displayHeight = static_cast<uint32_t>(displayInfo->GetHeight());
+    if (displayWidth == width && displayHeight == height) {
+        return true;
+    }
+    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice() ||
+        DisplayManager::GetInstance().GetFoldStatus() != FoldStatus::HALF_FOLD) {
+        return false;
+    }
+    // if is super fold device and in half fold state, check virtual screen
+    auto virtual_display = SingletonContainer::Get<DisplayManager>().GetDisplayById(DISPLAY_ID_C);
+    if (virtual_display == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "virtual display is null");
+        return false;
+    }
+    auto virtual_displayInfo = virtual_display->GetDisplayInfo();
+    if (virtual_displayInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "virtual displayInfo is null");
+        return false;
+    }
+    displayWidth = static_cast<uint32_t>(virtual_displayInfo->GetWidth());
+    displayHeight = static_cast<uint32_t>(virtual_displayInfo->GetHeight());
+    if (displayWidth == width && displayHeight == height) {
+        return true;
+    }
+    return false;
 }
 
 WMError WindowSceneSessionImpl::SetParentWindowInner(int32_t oldParentWindowId,
@@ -2277,11 +2325,14 @@ WMError WindowSceneSessionImpl::GetSubWindowZLevel(int32_t& zLevel)
 WMError WindowSceneSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea,
     const Rect& rect, int32_t apiVersion)
 {
-    apiVersion = apiVersion == API_VERSION_INVALID ?
-        static_cast<int32_t>(SysCapUtil::GetApiCompatibleVersion()) : apiVersion;
+    uint32_t currentApiVersion = 0;
+    if (context_ != nullptr && context_->GetApplicationInfo() != nullptr) {
+        currentApiVersion = context_->GetApplicationInfo()->apiTargetVersion % API_VERSION_MOD;
+    }
+    apiVersion = apiVersion == API_VERSION_INVALID ? currentApiVersion : apiVersion;
     if (apiVersion < API_VERSION_18 && WindowHelper::IsSystemWindow(property_->GetWindowType())) {
-        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u type %{public}d api version not supported",
-            GetWindowId(), type);
+        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u type %{public}d api %{public}u not supported",
+            GetWindowId(), type, currentApiVersion);
         return WMError::WM_OK;
     }
     if (IsWindowSessionInvalid()) {
@@ -4165,6 +4216,21 @@ bool WindowSceneSessionImpl::IsKeepScreenOn() const
     return property_->IsKeepScreenOn();
 }
 
+WMError WindowSceneSessionImpl::SetViewKeepScreenOn(bool keepScreenOn)
+{
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "id: %{public}d, enabled: %{public}u", GetPersistentId(), keepScreenOn);
+    property_->SetViewKeepScreenOn(keepScreenOn);
+    return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_VIEW_KEEP_SCREEN_ON);
+}
+
+bool WindowSceneSessionImpl::IsViewKeepScreenOn() const
+{
+    return property_->IsViewKeepScreenOn();
+}
+
 WMError WindowSceneSessionImpl::SetTransform(const Transform& trans)
 {
     TLOGI(WmsLogTag::DEFAULT, "Id: %{public}d", property_->GetPersistentId());
@@ -4996,6 +5062,7 @@ WMError WindowSceneSessionImpl::SetFollowParentMultiScreenPolicy(bool enabled)
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
     hostSession->NotifyFollowParentMultiScreenPolicy(enabled);
+    property_->EditSessionInfo().isFollowParentMultiScreenPolicy = enabled;
     return WMError::WM_OK;
 }
 
@@ -5159,7 +5226,8 @@ void WindowSceneSessionImpl::NotifyDisplayInfoChange(const sptr<DisplayInfo>& in
     float density = GetVirtualPixelRatio(displayInfo);
     DisplayOrientation orientation = displayInfo->GetDisplayOrientation();
 
-    if (context_ == nullptr) {
+    // skip scb process
+    if (context_ == nullptr || context_->GetBundleName() == AppExecFwk::Constants::SCENE_BOARD_BUNDLE_NAME) {
         TLOGE(WmsLogTag::DMS, "id:%{public}d failed, context is null.", GetPersistentId());
         return;
     }

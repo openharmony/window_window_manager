@@ -35,6 +35,8 @@ public:
     int Dump(int fd, const std::vector<std::u16string>& args) override;
     void GetProcessSurfaceNodeIdByPersistentId(const int32_t pid,
         const std::vector<uint64_t>& windowIdList, std::vector<uint64_t>& surfaceNodeIds);
+    void AddSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds);
+    void RemoveSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds);
 
     /*
      * Multi User

@@ -634,8 +634,45 @@ HWTEST_F(SessionSpecificWindowTest, HandleSubWindowClick04, TestSize.Level1)
     sptr<Session> dialogSession = sptr<Session>::MakeSptr(info);
     session_->SetParentSession(dialogSession);
 
-    bool isExecuteDelayRaise = false;
-    auto result = session_->HandleSubWindowClick(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN, isExecuteDelayRaise);
+    session_->property_->SetRaiseEnabled(true);
+    int32_t action = MMI::PointerEvent::POINTER_ACTION_BUTTON_UP;
+    bool isExecuteDelayRaise = true;
+    auto result = session_->HandleSubWindowClick(action, isExecuteDelayRaise);
+    EXPECT_EQ(result, WSError::WS_OK);
+
+    session_->property_->SetRaiseEnabled(false);
+    result = session_->HandleSubWindowClick(action, isExecuteDelayRaise);
+    EXPECT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: HandleSubWindowClick05
+ * @tc.desc: HandleSubWindowClick
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionSpecificWindowTest, HandleSubWindowClick05, Function | SmallTest | Level2)
+{
+    SessionInfo info1;
+    info1.abilityName_ = "testSession1";
+    info1.moduleName_ = "testSession1";
+    info1.bundleName_ = "testSession1";
+    sptr<Session> dialogSession = sptr<Session>::MakeSptr(info1);
+
+    SessionInfo info2;
+    info2.abilityName_ = "testSession2";
+    info2.moduleName_ = "testSession2";
+    info2.bundleName_ = "testSession2";
+    auto session = sptr<Session>::MakeSptr(info2);
+    session->SetParentSession(dialogSession);
+
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetRaiseEnabled(false);
+    session->SetSessionProperty(property);
+
+    auto result = session->HandleSubWindowClick(MMI::PointerEvent::POINTER_ACTION_DOWN, false);
+    EXPECT_EQ(result, WSError::WS_OK);
+
+    result = session->HandleSubWindowClick(MMI::PointerEvent::POINTER_ACTION_DOWN, true);
     EXPECT_EQ(result, WSError::WS_OK);
 }
 }

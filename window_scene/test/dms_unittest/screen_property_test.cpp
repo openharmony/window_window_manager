@@ -916,6 +916,30 @@ HWTEST_F(ScreenPropertyTest, GetVirtualPixelRatio, Function | SmallTest | Level2
     delete property;
     GTEST_LOG_(INFO) << "ScreenPropertyTest: GetVirtualPixelRatio end";
 }
+
+/**
+ * @tc.name: SetRotationAndScreenRotationOnly
+ * @tc.desc: SetRotationAndScreenRotationOnly test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenPropertyTest, SetRotationAndScreenRotationOnly, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: SetRotationAndScreenRotationOnly start";
+    std::shared_ptr<ScreenProperty> property = std::make_shared<ScreenProperty>();
+    ASSERT_NE(property, nullptr);
+    property->SetRotationAndScreenRotationOnly(Rotation::ROTATION_0);
+    ASSERT_EQ(property->GetScreenRotation(), Rotation::ROTATION_0);
+    
+    property->SetRotationAndScreenRotationOnly(Rotation::ROTATION_90);
+    ASSERT_EQ(property->GetScreenRotation(), Rotation::ROTATION_90);
+
+    property->SetRotationAndScreenRotationOnly(Rotation::ROTATION_180);
+    ASSERT_EQ(property->GetScreenRotation(), Rotation::ROTATION_180);
+
+    property->SetRotationAndScreenRotationOnly(Rotation::ROTATION_270);
+    ASSERT_EQ(property->GetScreenRotation(), Rotation::ROTATION_270);
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: SetRotationAndScreenRotationOnly end";
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

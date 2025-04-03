@@ -114,7 +114,7 @@ static const int NOTIFY_EVENT_FOR_DUAL_FAILED = 0;
 static const int NOTIFY_EVENT_FOR_DUAL_SUCESS = 1;
 static const int NO_NEED_NOTIFY_EVENT_FOR_DUAL = 2;
 static bool g_isPcDevice = false;
-static float g_extendScreenDpiCoef_ = 0.85f;
+static float g_extendScreenDpiCoef_ = 1.00f;
 static uint32_t g_internalWidth = 3120;
 const unsigned int XCOLLIE_TIMEOUT_10S = 10;
 constexpr int32_t CAST_WIRED_PROJECTION_START = 1005;
@@ -1005,7 +1005,7 @@ bool ScreenSessionManager::RecoverRestoredMultiScreenMode(sptr<ScreenSession> sc
 {
 #ifdef WM_MULTI_SCREEN_ENABLE
     if (screenSession->GetScreenProperty().GetScreenType() != ScreenType::REAL) {
-        TLOGI(WmsLogTag::DMS, "not real screen, no need recover");
+        TLOGI(WmsLogTag::DMS, "not real screen, return before recover.");
         return true;
     }
     std::map<std::string, MultiScreenInfo> multiScreenInfoMap = ScreenSettingHelper::GetMultiScreenInfo();
@@ -1219,7 +1219,6 @@ void ScreenSessionManager::HandleScreenDisconnectEvent(sptr<ScreenSession> scree
 {
     bool phyMirrorEnable = IsDefaultMirrorMode(screenId);
     if (phyMirrorEnable) {
-        NotifyDisplayDestroy(screenSession->GetScreenId());
         NotifyCastWhenScreenConnectChange(false);
         FreeDisplayMirrorNodeInner(screenSession);
         if (!g_isPcDevice) {
@@ -1253,6 +1252,7 @@ void ScreenSessionManager::HandleScreenDisconnectEvent(sptr<ScreenSession> scree
     }
     if (phyMirrorEnable) {
         NotifyScreenDisconnected(screenSession->GetScreenId());
+        NotifyDisplayDestroy(screenSession->GetScreenId());
         isPhyScreenConnected_ = false;
     }
     if (!g_isPcDevice && phyMirrorEnable) {
@@ -1785,6 +1785,14 @@ DMError ScreenSessionManager::SetVirtualPixelRatio(ScreenId screenId, float virt
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:SetVirtualPixelRatio(%" PRIu64", %f)", screenId,
         virtualPixelRatio);
     screenSession->SetVirtualPixelRatio(virtualPixelRatio);
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        sptr<ScreenSession> fakeScreenSession = screenSession->GetFakeScreenSession();
+        if (fakeScreenSession == nullptr) {
+            TLOGE(WmsLogTag::DMS, "error,fakeScreenSession is nullptr.");
+            return DMError::DM_OK;
+        }
+        fakeScreenSession->SetVirtualPixelRatio(virtualPixelRatio);
+    }
     std::map<DisplayId, sptr<DisplayInfo>> emptyMap;
     OnPropertyChange(screenSession->GetScreenProperty(), ScreenPropertyChangeReason::VIRTUAL_PIXEL_RATIO_CHANGE,
         screenId);
@@ -1793,14 +1801,6 @@ DMError ScreenSessionManager::SetVirtualPixelRatio(ScreenId screenId, float virt
     NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::VIRTUAL_PIXEL_RATIO_CHANGED);
     NotifyDisplayChanged(screenSession->ConvertToDisplayInfo(),
         DisplayChangeEvent::DISPLAY_VIRTUAL_PIXEL_RATIO_CHANGED);
-    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() && screenSession->GetScreenProperty().GetIsFakeInUse()) {
-        sptr<ScreenSession> fakeScreenSession = screenSession->GetFakeScreenSession();
-        if (fakeScreenSession == nullptr) {
-            TLOGE(WmsLogTag::DMS, "error,fakeScreenSession is nullptr.");
-            return DMError::DM_OK;
-        }
-        fakeScreenSession->SetVirtualPixelRatio(virtualPixelRatio);
-    }
     return DMError::DM_OK;
 }
 
@@ -2437,7 +2437,9 @@ bool ScreenSessionManager::HandleFoldScreenSessionCreate(ScreenId screenId)
         /* folder screen outer screenId is 5 */
         if (screenId == SCREEN_ID_MAIN) {
             SetPostureAndHallSensorEnabled();
-            ScreenSensorConnector::SubscribeTentSensor();
+            if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
+                ScreenSensorConnector::SubscribeTentSensor();
+            }
             isFoldScreenOuterScreenReady_ = true;
             if (!FoldScreenStateInternel::IsDualDisplayFoldDevice() && isCoordinationFlag_ == false) {
                 return false;
@@ -3316,6 +3318,7 @@ void ScreenSessionManager::BootFinishedCallback(const char *key, const char *val
         auto &that = *reinterpret_cast<ScreenSessionManager *>(context);
         that.SetRotateLockedFromSettingData();
         that.SetDpiFromSettingData();
+        that.SetExtendScreenDpi();
         that.SetDisplayState(DisplayState::ON);
         that.RegisterSettingDpiObserver();
         that.RegisterSettingExtendScreenDpiObserver();
@@ -3793,6 +3796,11 @@ void ScreenSessionManager::SetPostureAndHallSensorEnabled()
         FoldScreenSensorManager::GetInstance().RegisterPostureCallback();
         FoldScreenSensorManager::GetInstance().RegisterHallCallback();
     }
+    if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() &&
+        !FoldScreenSensorManager::GetInstance().GetSensorRegisterStatus()) {
+        TLOGI(WmsLogTag::DMS, "subscribe hall and posture failed, force change to full screen!");
+        TriggerFoldStatusChange(FoldStatus::EXPAND);
+    }
     TLOGI(WmsLogTag::DMS, "successful");
     screenEventTracker_.RecordEvent("Dms subscribe Posture and Hall sensor finished.");
 #endif
@@ -4232,6 +4240,28 @@ DMError ScreenSessionManager::SetVirtualScreenSurface(ScreenId screenId, sptr<IB
         TLOGE(WmsLogTag::DMS, "fail to set virtual screen surface in RenderService");
         return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
     }
+    return DMError::DM_OK;
+}
+
+DMError ScreenSessionManager::AddVirtualScreenBlockList(const std::vector<int32_t>& persistentIds)
+{
+    if (!Permission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::DMS, "Permission Denied! calling clientName: %{public}s, calling pid: %{public}d",
+            SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
+    MockSessionManagerService::GetInstance().AddSkipSelfWhenShowOnVirtualScreenList(persistentIds);
+    return DMError::DM_OK;
+}
+
+DMError ScreenSessionManager::RemoveVirtualScreenBlockList(const std::vector<int32_t>& persistentIds)
+{
+    if (!Permission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::DMS, "Permission Denied! calling clientName: %{public}s, calling pid: %{public}d",
+            SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
+    MockSessionManagerService::GetInstance().RemoveSkipSelfWhenShowOnVirtualScreenList(persistentIds);
     return DMError::DM_OK;
 }
 
@@ -8987,9 +9017,12 @@ void ScreenSessionManager::SetExtendScreenDpi()
     bool ret = ScreenSettingHelper::GetSettingExtendScreenDpi(extendScreenDpi);
     if (!ret) {
         TLOGE(WmsLogTag::DMS, "get setting extend screen dpi failed");
+        g_extendScreenDpiCoef_ = EXTEND_SCREEN_DPI_MAX_PARAMETER;
+    } else {
+        g_extendScreenDpiCoef_ = extendScreenDpi ? EXTEND_SCREEN_DPI_MAX_PARAMETER : EXTEND_SCREEN_DPI_MIN_PARAMETER;
     }
-    g_extendScreenDpiCoef_ = extendScreenDpi ? EXTEND_SCREEN_DPI_MAX_PARAMETER : EXTEND_SCREEN_DPI_MIN_PARAMETER;
-    SetDpiFromSettingData();
+    float dpi = static_cast<float>(cachedSettingDpi_) / BASELINE_DENSITY;
+    SetExtendPixelRatio(dpi * g_extendScreenDpiCoef_);
     TLOGI(WmsLogTag::DMS, "get setting extend screen dpi is : %{public}f", g_extendScreenDpiCoef_);
 }
 } // namespace OHOS::Rosen

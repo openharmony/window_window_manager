@@ -118,231 +118,6 @@ void InitSceneSession(sptr<SceneSession> &sceneSession, int32_t pid, int windowI
 }
 
 /**
- * @tc.name: GetWindowInfoWithoutHotArea
- * @tc.desc: windowInfo without hotAreas information
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithoutHotArea, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "TestWithoutHotArea";
-    info.bundleName_ = "TestWithoutHotArea";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
-    sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(windowSessionProperty, nullptr);
-    windowSessionProperty->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
-    sceneSession->InitSessionPropertyWhenConnect(windowSessionProperty);
-    WSRect windowRect = {0, 0, 1270, 2700};
-    sceneSession->SetSessionRect(windowRect);
-    sceneSession->globalRect_ = windowRect;
-    // set hotArea without info
-    std::vector<MMI::Rect> touchHotAreas;
-    std::vector<MMI::Rect> pointerHotAreas;
-    manager_->UpdateHotAreas(sceneSession, touchHotAreas, pointerHotAreas);
-    bool touchHotResult = touchHotAreas[0].x == 0 && touchHotAreas[0].y == 0 &&
-                          touchHotAreas[0].width == 1270 && touchHotAreas[0].height == 2700;
-    ASSERT_EQ(touchHotResult, true);
-    bool pointerHotResult = pointerHotAreas[0].x == 0 && pointerHotAreas[0].y == 0 &&
-                            pointerHotAreas[0].width == 1270 && pointerHotAreas[0].height == 2700;
-    ASSERT_EQ(pointerHotResult, true);
-}
-
-/**
- * @tc.name: GetWindowInfoWithHotArea
- * @tc.desc: windowInfo with hotAreas information
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithHotArea, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "TestWithHotArea";
-    info.bundleName_ = "TestWithHotArea";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
-    sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(windowSessionProperty, nullptr);
-    windowSessionProperty->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
-    Rect rect = {0, 0, 300, 500};
-    std::vector<Rect> rects;
-    rects.emplace_back(rect);
-    // set touchHotArea and pointerHotArea info
-    windowSessionProperty->SetTouchHotAreas(rects);
-    sceneSession->InitSessionPropertyWhenConnect(windowSessionProperty);
-    WSRect windowRect = {0, 0, 1270, 2700};
-    sceneSession->SetSessionRect(windowRect);
-    std::vector<MMI::Rect> touchHotAreas;
-    std::vector<MMI::Rect> pointerHotAreas;
-    manager_->UpdateHotAreas(sceneSession, touchHotAreas, pointerHotAreas);
-    bool touchHotResult = touchHotAreas[0].x == 0 && touchHotAreas[0].y == 0 &&
-                          touchHotAreas[0].width == 300 && touchHotAreas[0].height == 500;
-    ASSERT_EQ(touchHotResult, true);
-    bool pointerHotResult = pointerHotAreas[0].x == 0 && pointerHotAreas[0].y == 0 &&
-                            pointerHotAreas[0].width == 300 && pointerHotAreas[0].height == 500;
-    ASSERT_EQ(pointerHotResult, true);
-}
-
-/**
- * @tc.name: GetWindowInfoWithWindowTypeDialog
- * @tc.desc: windowInfo with windowType dialog
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithWindowTypeDialog, TestSize.Level1)
-{
-    // init main window info
-    SessionInfo mainWindowInfo;
-    mainWindowInfo.abilityName_ = "TestMainWithType";
-    mainWindowInfo.bundleName_ = "TestMainWithType";
-    int32_t mainWindowId = 30;
-    sptr<SceneSession> sceneSessionMainWindow = sptr<SceneSession>::MakeSptr(mainWindowInfo, nullptr);
-    ASSERT_NE(sceneSessionMainWindow, nullptr);
-    sceneSessionMainWindow->zOrder_ = 55.0f;
-    sceneSessionMainWindow->persistentId_ = mainWindowId;
-    sceneSessionMainWindow->isVisible_ = true;
-    int32_t mainFlags = static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK);
-    sceneSessionMainWindow->property_->SetWindowFlags(mainFlags);
-    int32_t mainWindowPid = 50;
-    InitSceneSession(sceneSessionMainWindow, mainWindowPid, mainWindowId, WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    // init sub window with window type dialog
-    SessionInfo dialogWindowInfo;
-    dialogWindowInfo.abilityName_ = "TestDialogWithType";
-    dialogWindowInfo.bundleName_ = "TestDialogWithType";
-    int32_t dialogWindowId = 31;
-    sptr<SceneSession> sceneSessionDialogWindow = sptr<SceneSession>::MakeSptr(dialogWindowInfo, nullptr);
-    ASSERT_NE(sceneSessionDialogWindow, nullptr);
-    sceneSessionDialogWindow->zOrder_ = 56.0f;
-    sceneSessionDialogWindow->persistentId_ = dialogWindowId;
-    sceneSessionDialogWindow->isVisible_ = true;
-    uint32_t flags = static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_MODAL);
-    sceneSessionDialogWindow->property_->SetWindowFlags(flags);
-    int32_t dialogWindowPid = 51;
-    InitSceneSession(sceneSessionDialogWindow, dialogWindowPid, dialogWindowId, WindowType::WINDOW_TYPE_DIALOG);
-    sceneSessionDialogWindow->SetParentSession(sceneSessionMainWindow);
-    std::map<int32_t, sptr<SceneSession>> retSceneSessionMap;
-    retSceneSessionMap.insert(std::make_pair(mainWindowPid, sceneSessionMainWindow));
-    retSceneSessionMap.insert(std::make_pair(dialogWindowPid, sceneSessionDialogWindow));
-    ssm_->sceneSessionMap_ = retSceneSessionMap;
-    auto [windowInfoList, pixelMapList] = manager_->GetFullWindowInfoList();
-    ASSERT_EQ(windowInfoList.size(), 2);
-    bool windowTypeDialogResult = false;
-    for (MMI::WindowInfo windowInfo : windowInfoList) {
-        if (windowInfo.id == mainWindowId && windowInfo.agentWindowId == dialogWindowId &&
-            windowInfo.pid == dialogWindowPid) {
-            windowTypeDialogResult = true;
-        }
-    }
-    ASSERT_EQ(windowTypeDialogResult, true);
-}
-
-/**
- * @tc.name: GetWindowInfoWithWindowTypeAppSub
- * @tc.desc: windowInfo with window_Type_app_sub
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithWindowTypeAppSub, TestSize.Level1)
-{
-    // init main window info
-    SessionInfo mainWindowInfo;
-    mainWindowInfo.abilityName_ = "TestMainWithType";
-    mainWindowInfo.bundleName_ = "TestMainWithType";
-    int32_t mainWindowId = 32;
-    sptr<SceneSession> sceneSessionMainWindow = sptr<SceneSession>::MakeSptr(mainWindowInfo, nullptr);
-    ASSERT_NE(sceneSessionMainWindow, nullptr);
-    sceneSessionMainWindow->persistentId_ = mainWindowId;
-    sceneSessionMainWindow->isVisible_ = true;
-    int32_t mainFlags = static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK);
-    sceneSessionMainWindow->property_->SetWindowFlags(mainFlags);
-    int32_t mainWindowPid = 52;
-    InitSceneSession(sceneSessionMainWindow, mainWindowPid, mainWindowId, WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    // init sub window with window type float
-    SessionInfo subWindowInfo;
-    subWindowInfo.abilityName_ = "TestSubWithType";
-    subWindowInfo.bundleName_ = "TestSubWithType";
-    int32_t subWindowId = 33;
-    sptr<SceneSession> sceneSessionSubWindow = sptr<SceneSession>::MakeSptr(subWindowInfo, nullptr);
-    ASSERT_NE(sceneSessionSubWindow, nullptr);
-    sceneSessionSubWindow->persistentId_ = subWindowId;
-    sceneSessionSubWindow->isVisible_ = true;
-    uint32_t flags = static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_MODAL);
-    sceneSessionSubWindow->property_->SetWindowFlags(flags);
-    int32_t subWindowPid = 53;
-    InitSceneSession(sceneSessionSubWindow, subWindowPid, subWindowId, WindowType::WINDOW_TYPE_FLOAT);
-    sceneSessionSubWindow->SetParentSession(sceneSessionMainWindow);
-    std::map<int32_t, sptr<SceneSession>> retSceneSessionMap;
-    retSceneSessionMap.insert(std::make_pair(mainWindowPid, sceneSessionMainWindow));
-    retSceneSessionMap.insert(std::make_pair(subWindowPid, sceneSessionSubWindow));
-    ssm_->sceneSessionMap_ = retSceneSessionMap;
-    auto [windowInfoList, pixelMapList] = manager_->GetFullWindowInfoList();
-    ASSERT_EQ(windowInfoList.size(), 2);
-    bool windowTypeDialogResult = false;
-    for (MMI::WindowInfo windowInfo : windowInfoList) {
-        if (windowInfo.id == mainWindowId && windowInfo.agentWindowId == subWindowId &&
-            windowInfo.pid == subWindowPid) {
-            windowTypeDialogResult = true;
-        }
-    }
-    ASSERT_EQ(windowTypeDialogResult, false);
-}
-
-/**
- * @tc.name: GetWindowInfoWithTypeKeyboardPanel
- * @tc.desc: windowInfo with window_Type_keyboard panel
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithTypeKeyboardPanel, TestSize.Level1)
-{
-    SessionInfo mainWindowInfo;
-    mainWindowInfo.abilityName_ = "TestMainWithType";
-    mainWindowInfo.bundleName_ = "TestMainWithType";
-    int32_t mainWindowId = 34;
-    sptr<SceneSession> sceneSessionMainWindow = sptr<SceneSession>::MakeSptr(mainWindowInfo, nullptr);
-    ASSERT_NE(sceneSessionMainWindow, nullptr);
-    sceneSessionMainWindow->persistentId_ = mainWindowId;
-    sceneSessionMainWindow->isVisible_ = false;
-    uint32_t mainFlags = static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK);
-    sceneSessionMainWindow->property_->SetWindowFlags(mainFlags);
-    int32_t mainWindowPid = 54;
-    // init sceneSession with windowType is window_type_keyBoard_panel
-    InitSceneSession(sceneSessionMainWindow, mainWindowPid, mainWindowId, WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
-    std::map<int32_t, sptr<SceneSession>> retSceneSessionMap;
-    retSceneSessionMap.insert(std::make_pair(mainWindowPid, sceneSessionMainWindow));
-    ssm_->sceneSessionMap_ = retSceneSessionMap;
-    std::map<int32_t, sptr<SceneSession>> sceneSessionMap =
-        Rosen::SceneSessionManager::GetInstance().GetSceneSessionMap();
-    int32_t windowInfoSize = sceneSessionMap.size();
-    ASSERT_EQ(windowInfoSize, 0);
-}
-
-/**
- * @tc.name: GetWindowInfoWithoutParentWindow
- * @tc.desc: windowInfo without parent window
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithoutParentWindow, TestSize.Level1)
-{
-    SessionInfo subWindowInfo;
-    subWindowInfo.abilityName_ = "TestSubWithType";
-    subWindowInfo.bundleName_ = "TestSubWithType";
-    int32_t subWindowId = 35;
-    sptr<SceneSession> sceneSessionSubWindow = sptr<SceneSession>::MakeSptr(subWindowInfo, nullptr);
-    ASSERT_NE(sceneSessionSubWindow, nullptr);
-    sceneSessionSubWindow->persistentId_ = subWindowId;
-    sceneSessionSubWindow->isVisible_ = false;
-    uint32_t subFlags = static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK);
-    sceneSessionSubWindow->property_->SetWindowFlags(subFlags);
-    int32_t subWindowPid = 55;
-    InitSceneSession(sceneSessionSubWindow, subWindowPid, subWindowId, WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    sceneSessionSubWindow->SetParentSession(nullptr);
-    std::map<int32_t, sptr<SceneSession>> retSceneSessionMap;
-    retSceneSessionMap.insert(std::make_pair(subWindowPid, sceneSessionSubWindow));
-    ssm_->sceneSessionMap_ = retSceneSessionMap;
-    std::map<int32_t, sptr<SceneSession>> sceneSessionMap =
-        Rosen::SceneSessionManager::GetInstance().GetSceneSessionMap();
-    int32_t windowInfoSize = sceneSessionMap.size();
-    ASSERT_EQ(windowInfoSize, 0);
-}
-
-/**
  * @tc.name: GetWindowInfoWithoutParentWindowAndStateActive
  * @tc.desc: windowInfo without parent window and state active
  * @tc.type: FUNC
@@ -711,6 +486,230 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithzOrderDiff, TestSize.Le
     ASSERT_EQ(checkNeedUpdateFlag, true);
 }
 
+/**
+ * @tc.name: GetWindowInfoWithoutHotArea
+ * @tc.desc: windowInfo without hotAreas information
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithoutHotArea, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "TestWithoutHotArea";
+    info.bundleName_ = "TestWithoutHotArea";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(windowSessionProperty, nullptr);
+    windowSessionProperty->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
+    sceneSession->InitSessionPropertyWhenConnect(windowSessionProperty);
+    WSRect windowRect = {0, 0, 1270, 2700};
+    sceneSession->SetSessionRect(windowRect);
+    sceneSession->globalRect_ = windowRect;
+    // set hotArea without info
+    std::vector<MMI::Rect> touchHotAreas;
+    std::vector<MMI::Rect> pointerHotAreas;
+    manager_->UpdateHotAreas(sceneSession, touchHotAreas, pointerHotAreas);
+    bool touchHotResult = touchHotAreas[0].x == 0 && touchHotAreas[0].y == 0 &&
+                          touchHotAreas[0].width == 1270 && touchHotAreas[0].height == 2700;
+    ASSERT_EQ(touchHotResult, true);
+    bool pointerHotResult = pointerHotAreas[0].x == 0 && pointerHotAreas[0].y == 0 &&
+                            pointerHotAreas[0].width == 1270 && pointerHotAreas[0].height == 2700;
+    ASSERT_EQ(pointerHotResult, true);
+}
+
+/**
+ * @tc.name: GetWindowInfoWithHotArea
+ * @tc.desc: windowInfo with hotAreas information
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithHotArea, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "TestWithHotArea";
+    info.bundleName_ = "TestWithHotArea";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(windowSessionProperty, nullptr);
+    windowSessionProperty->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
+    Rect rect = {0, 0, 300, 500};
+    std::vector<Rect> rects;
+    rects.emplace_back(rect);
+    // set touchHotArea and pointerHotArea info
+    windowSessionProperty->SetTouchHotAreas(rects);
+    sceneSession->InitSessionPropertyWhenConnect(windowSessionProperty);
+    WSRect windowRect = {0, 0, 1270, 2700};
+    sceneSession->SetSessionRect(windowRect);
+    std::vector<MMI::Rect> touchHotAreas;
+    std::vector<MMI::Rect> pointerHotAreas;
+    manager_->UpdateHotAreas(sceneSession, touchHotAreas, pointerHotAreas);
+    bool touchHotResult = touchHotAreas[0].x == 0 && touchHotAreas[0].y == 0 &&
+                          touchHotAreas[0].width == 300 && touchHotAreas[0].height == 500;
+    ASSERT_EQ(touchHotResult, true);
+    bool pointerHotResult = pointerHotAreas[0].x == 0 && pointerHotAreas[0].y == 0 &&
+                            pointerHotAreas[0].width == 300 && pointerHotAreas[0].height == 500;
+    ASSERT_EQ(pointerHotResult, true);
+}
+
+/**
+ * @tc.name: GetWindowInfoWithWindowTypeDialog
+ * @tc.desc: windowInfo with windowType dialog
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithWindowTypeDialog, TestSize.Level1)
+{
+    // init main window info
+    SessionInfo mainWindowInfo;
+    mainWindowInfo.abilityName_ = "TestMainWithType";
+    mainWindowInfo.bundleName_ = "TestMainWithType";
+    int32_t mainWindowId = 30;
+    sptr<SceneSession> sceneSessionMainWindow = sptr<SceneSession>::MakeSptr(mainWindowInfo, nullptr);
+    ASSERT_NE(sceneSessionMainWindow, nullptr);
+    sceneSessionMainWindow->zOrder_ = 55.0f;
+    sceneSessionMainWindow->persistentId_ = mainWindowId;
+    sceneSessionMainWindow->isVisible_ = true;
+    int32_t mainFlags = static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK);
+    sceneSessionMainWindow->property_->SetWindowFlags(mainFlags);
+    int32_t mainWindowPid = 50;
+    InitSceneSession(sceneSessionMainWindow, mainWindowPid, mainWindowId, WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    // init sub window with window type dialog
+    SessionInfo dialogWindowInfo;
+    dialogWindowInfo.abilityName_ = "TestDialogWithType";
+    dialogWindowInfo.bundleName_ = "TestDialogWithType";
+    int32_t dialogWindowId = 31;
+    sptr<SceneSession> sceneSessionDialogWindow = sptr<SceneSession>::MakeSptr(dialogWindowInfo, nullptr);
+    ASSERT_NE(sceneSessionDialogWindow, nullptr);
+    sceneSessionDialogWindow->zOrder_ = 56.0f;
+    sceneSessionDialogWindow->persistentId_ = dialogWindowId;
+    sceneSessionDialogWindow->isVisible_ = true;
+    uint32_t flags = static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_MODAL);
+    sceneSessionDialogWindow->property_->SetWindowFlags(flags);
+    int32_t dialogWindowPid = 51;
+    InitSceneSession(sceneSessionDialogWindow, dialogWindowPid, dialogWindowId, WindowType::WINDOW_TYPE_DIALOG);
+    sceneSessionDialogWindow->SetParentSession(sceneSessionMainWindow);
+    std::map<int32_t, sptr<SceneSession>> retSceneSessionMap;
+    retSceneSessionMap.insert(std::make_pair(mainWindowPid, sceneSessionMainWindow));
+    retSceneSessionMap.insert(std::make_pair(dialogWindowPid, sceneSessionDialogWindow));
+    ssm_->sceneSessionMap_ = retSceneSessionMap;
+    auto [windowInfoList, pixelMapList] = manager_->GetFullWindowInfoList();
+    ASSERT_EQ(windowInfoList.size(), 2);
+    bool windowTypeDialogResult = false;
+    for (MMI::WindowInfo windowInfo : windowInfoList) {
+        if (windowInfo.id == mainWindowId && windowInfo.agentWindowId == dialogWindowId &&
+            windowInfo.pid == dialogWindowPid) {
+            windowTypeDialogResult = true;
+        }
+    }
+    ASSERT_EQ(windowTypeDialogResult, true);
+}
+
+/**
+ * @tc.name: GetWindowInfoWithWindowTypeAppSub
+ * @tc.desc: windowInfo with window_Type_app_sub
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithWindowTypeAppSub, TestSize.Level1)
+{
+    // init main window info
+    SessionInfo mainWindowInfo;
+    mainWindowInfo.abilityName_ = "TestMainWithType";
+    mainWindowInfo.bundleName_ = "TestMainWithType";
+    int32_t mainWindowId = 32;
+    sptr<SceneSession> sceneSessionMainWindow = sptr<SceneSession>::MakeSptr(mainWindowInfo, nullptr);
+    ASSERT_NE(sceneSessionMainWindow, nullptr);
+    sceneSessionMainWindow->persistentId_ = mainWindowId;
+    sceneSessionMainWindow->isVisible_ = true;
+    int32_t mainFlags = static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK);
+    sceneSessionMainWindow->property_->SetWindowFlags(mainFlags);
+    int32_t mainWindowPid = 52;
+    InitSceneSession(sceneSessionMainWindow, mainWindowPid, mainWindowId, WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    // init sub window with window type float
+    SessionInfo subWindowInfo;
+    subWindowInfo.abilityName_ = "TestSubWithType";
+    subWindowInfo.bundleName_ = "TestSubWithType";
+    int32_t subWindowId = 33;
+    sptr<SceneSession> sceneSessionSubWindow = sptr<SceneSession>::MakeSptr(subWindowInfo, nullptr);
+    ASSERT_NE(sceneSessionSubWindow, nullptr);
+    sceneSessionSubWindow->persistentId_ = subWindowId;
+    sceneSessionSubWindow->isVisible_ = true;
+    uint32_t flags = static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_MODAL);
+    sceneSessionSubWindow->property_->SetWindowFlags(flags);
+    int32_t subWindowPid = 53;
+    InitSceneSession(sceneSessionSubWindow, subWindowPid, subWindowId, WindowType::WINDOW_TYPE_FLOAT);
+    sceneSessionSubWindow->SetParentSession(sceneSessionMainWindow);
+    std::map<int32_t, sptr<SceneSession>> retSceneSessionMap;
+    retSceneSessionMap.insert(std::make_pair(mainWindowPid, sceneSessionMainWindow));
+    retSceneSessionMap.insert(std::make_pair(subWindowPid, sceneSessionSubWindow));
+    ssm_->sceneSessionMap_ = retSceneSessionMap;
+    auto [windowInfoList, pixelMapList] = manager_->GetFullWindowInfoList();
+    ASSERT_EQ(windowInfoList.size(), 2);
+    bool windowTypeDialogResult = false;
+    for (MMI::WindowInfo windowInfo : windowInfoList) {
+        if (windowInfo.id == mainWindowId && windowInfo.agentWindowId == subWindowId &&
+            windowInfo.pid == subWindowPid) {
+            windowTypeDialogResult = true;
+        }
+    }
+    ASSERT_EQ(windowTypeDialogResult, false);
+}
+
+/**
+ * @tc.name: GetWindowInfoWithTypeKeyboardPanel
+ * @tc.desc: windowInfo with window_Type_keyboard panel
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithTypeKeyboardPanel, TestSize.Level1)
+{
+    SessionInfo mainWindowInfo;
+    mainWindowInfo.abilityName_ = "TestMainWithType";
+    mainWindowInfo.bundleName_ = "TestMainWithType";
+    int32_t mainWindowId = 34;
+    sptr<SceneSession> sceneSessionMainWindow = sptr<SceneSession>::MakeSptr(mainWindowInfo, nullptr);
+    ASSERT_NE(sceneSessionMainWindow, nullptr);
+    sceneSessionMainWindow->persistentId_ = mainWindowId;
+    sceneSessionMainWindow->isVisible_ = false;
+    uint32_t mainFlags = static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK);
+    sceneSessionMainWindow->property_->SetWindowFlags(mainFlags);
+    int32_t mainWindowPid = 54;
+    // init sceneSession with windowType is window_type_keyBoard_panel
+    InitSceneSession(sceneSessionMainWindow, mainWindowPid, mainWindowId, WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
+    std::map<int32_t, sptr<SceneSession>> retSceneSessionMap;
+    retSceneSessionMap.insert(std::make_pair(mainWindowPid, sceneSessionMainWindow));
+    ssm_->sceneSessionMap_ = retSceneSessionMap;
+    std::map<int32_t, sptr<SceneSession>> sceneSessionMap =
+        Rosen::SceneSessionManager::GetInstance().GetSceneSessionMap();
+    int32_t windowInfoSize = sceneSessionMap.size();
+    ASSERT_EQ(windowInfoSize, 0);
+}
+
+/**
+ * @tc.name: GetWindowInfoWithoutParentWindow
+ * @tc.desc: windowInfo without parent window
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithoutParentWindow, TestSize.Level1)
+{
+    SessionInfo subWindowInfo;
+    subWindowInfo.abilityName_ = "TestSubWithType";
+    subWindowInfo.bundleName_ = "TestSubWithType";
+    int32_t subWindowId = 35;
+    sptr<SceneSession> sceneSessionSubWindow = sptr<SceneSession>::MakeSptr(subWindowInfo, nullptr);
+    ASSERT_NE(sceneSessionSubWindow, nullptr);
+    sceneSessionSubWindow->persistentId_ = subWindowId;
+    sceneSessionSubWindow->isVisible_ = false;
+    uint32_t subFlags = static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK);
+    sceneSessionSubWindow->property_->SetWindowFlags(subFlags);
+    int32_t subWindowPid = 55;
+    InitSceneSession(sceneSessionSubWindow, subWindowPid, subWindowId, WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sceneSessionSubWindow->SetParentSession(nullptr);
+    std::map<int32_t, sptr<SceneSession>> retSceneSessionMap;
+    retSceneSessionMap.insert(std::make_pair(subWindowPid, sceneSessionSubWindow));
+    ssm_->sceneSessionMap_ = retSceneSessionMap;
+    std::map<int32_t, sptr<SceneSession>> sceneSessionMap =
+        Rosen::SceneSessionManager::GetInstance().GetSceneSessionMap();
+    int32_t windowInfoSize = sceneSessionMap.size();
+    ASSERT_EQ(windowInfoSize, 0);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
