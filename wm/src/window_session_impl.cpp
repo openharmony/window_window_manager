@@ -1816,9 +1816,10 @@ WMError WindowSessionImpl::IsWindowHighlighted(bool& highlighted) const
         TLOGE(WmsLogTag::WMS_FOCUS, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    highlighted = isHighlighted_.load();
+    auto hostSession = GetHostSession();
+    hostSession->GetIsHighlighted(highlighted);
     TLOGD(WmsLogTag::WMS_FOCUS, "windowId: %{public}d, isWindowHighlighted: %{public}d",
-        GetPersistentId(), isHighlighted_.load());
+        GetPersistentId(), highlighted);
     return WMError::WM_OK;
 }
 

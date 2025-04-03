@@ -256,6 +256,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyKeyboardDidHideRegistered(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_FLAG):
             return HandleUpdateFlag(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_IS_HIGHLIGHTED):
+            return HandleGetIsHighlighted(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1619,6 +1621,16 @@ int SessionStub::HandleUpdateFlag(MessageParcel& data, MessageParcel& reply)
     }
     TLOGD(WmsLogTag::WMS_MAIN, "specifiedFlag: %{public}s", flag.c_str());
     UpdateFlag(flag);
+    return ERR_NONE;
+}
+
+int SessionStub::HandleGetIsHighlighted(MessageParcel& data, MessageParcel& reply)
+{
+    bool isHighlighted = false;
+    GetIsHighlighted(isHighlighted);
+    if (!reply.WriteBool(isHighlighted)) {
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen
