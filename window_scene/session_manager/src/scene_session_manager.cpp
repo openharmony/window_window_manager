@@ -10919,10 +10919,11 @@ BrokerStates SceneSessionManager::NotifyStartAbility(
         }
         sessionInfo.want->SetParam("oh_persistentId", persistentId);
         std::shared_ptr<int32_t> ret = std::make_shared<int32_t>(0);
-        bool isTimeout = ffrtQueueHelper_->SubmitTaskAndWait([this, collaborator, &sessionInfo, accessTokenIDEx,
-            ret] {
-            auto result = collaborator->NotifyStartAbility(*(sessionInfo.abilityInfo), currentUserId_,
-                *(sessionInfo.want), static_cast<uint64_t>(accessTokenIDEx));
+        std::shared_ptr<AAFwk::Want> notifyWant = std::make_shared<AAFwk::Want>(*(sessionInfo.want));
+        bool isTimeout = ffrtQueueHelper_->SubmitTaskAndWait([this, collaborator, accessTokenIDEx,
+            notifyWant, abilityInfo = sessionInfo.abilityInfo, ret] {
+            auto result = collaborator->NotifyStartAbility(*abilityInfo, currentUserId_, *notifyWant,
+                static_cast<uint64_t>(accessTokenIDEx));
             *ret = static_cast<int32_t>(result);
         }, NOTIFY_START_ABILITY_TIMEOUT);
 
@@ -10930,6 +10931,7 @@ BrokerStates SceneSessionManager::NotifyStartAbility(
             TLOGE(WmsLogTag::WMS_LIFE, "notify start ability timeout, current userId: %{public}d", currentUserId_.load());
             return BrokerStates::BROKER_NOT_START;
         }
+        *(sessionInfo.want) = *notifyWant;
         TLOGI(WmsLogTag::WMS_LIFE, "collaborator ret: %{public}d", *ret);
         if (*ret == 0) {
             return BrokerStates::BROKER_STARTED;
