@@ -30,7 +30,7 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "InputTransferStation"};
 }
 
-static inline std::unique_ptr<void, void(*)(void*)> gameControllerHandle_{nullptr, [](void* handle) {
+static std::unique_ptr<void, void(*)(void*)> gameControllerHandle_{nullptr, [](void* handle) {
     if(handle) {
         dlclose(handle);
         TLOGI(WmsLogTag::WMS_EVENT, "[dlclose] GameController unloaded");
