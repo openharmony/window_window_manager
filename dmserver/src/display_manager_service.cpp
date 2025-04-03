@@ -234,17 +234,13 @@ sptr<DisplayInfo> DisplayManagerService::GetDisplayInfoByScreen(ScreenId screenI
 ScreenId DisplayManagerService::CreateVirtualScreen(VirtualScreenOption option,
     const sptr<IRemoteObject>& displayManagerAgent)
 {
-    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd() &&
-        !Permission::CheckCallingPermission(ACCESS_VIRTUAL_SCREEN_PERMISSION)) {
-        return ERROR_ID_NOT_SYSTEM_APP;
-    }
     if (displayManagerAgent == nullptr) {
         WLOGFE("displayManagerAgent invalid");
         return SCREEN_ID_INVALID;
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:CreateVirtualScreen(%s)", option.name_.c_str());
     if (option.surface_ != nullptr && !Permission::CheckCallingPermission(SCREEN_CAPTURE_PERMISSION) &&
-        !Permission::IsStartByHdcd()) {
+        !Permission::IsStartByHdcd() && !Permission::CheckCallingPermission(ACCESS_VIRTUAL_SCREEN_PERMISSION)) {
         WLOGFE("permission denied");
         return SCREEN_ID_INVALID;
     }

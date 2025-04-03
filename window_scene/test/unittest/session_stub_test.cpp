@@ -656,20 +656,20 @@ HWTEST_F(SessionStubTest, HandleSetAutoStartPiP, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleUpdatePiPDefaultWindowSizeType
+ * @tc.name: HandleUpdatePiPTemplateInfo
  * @tc.desc: sessionStub sessionStubTest
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(SessionStubTest, HandleUpdatePiPDefaultWindowSizeType, Function | SmallTest | Level2)
+HWTEST_F(SessionStubTest, HandleUpdatePiPTemplateInfo, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
     MessageParcel data;
     MessageParcel reply;
-    ASSERT_EQ(ERR_INVALID_DATA, session_->HandleUpdatePiPDefaultWindowSizeType(data, reply));
-    uint32_t defaultWindowSizeType = 1;
-    data.WriteInt32(defaultWindowSizeType);
-    ASSERT_EQ(ERR_NONE, session_->HandleUpdatePiPDefaultWindowSizeType(data, reply));
+    ASSERT_EQ(ERR_INVALID_DATA, session_->HandleUpdatePiPTemplateInfo(data, reply));
+    PiPTemplateInfo templateInfo;
+    data.WriteParcelable(&templateInfo);
+    ASSERT_EQ(ERR_NONE, session_->HandleUpdatePiPTemplateInfo(data, reply));
 }
 
 /**

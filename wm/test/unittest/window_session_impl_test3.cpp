@@ -277,22 +277,6 @@ HWTEST_F(WindowSessionImplTest3, SetMainWindowTopmost, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetRequestedOrientation
- * @tc.desc: GetRequestedOrientation
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest3, GetRequestedOrientation, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: GetRequestedOrientation start";
-    window_ = GetTestWindowImpl("GetRequestedOrientation");
-    ASSERT_NE(window_, nullptr);
-    window_->property_->SetPersistentId(INVALID_SESSION_ID);
-    auto ret = window_->GetRequestedOrientation();
-    ASSERT_EQ(ret, Orientation::UNSPECIFIED);
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: GetRequestedOrientation end";
-}
-
-/**
  * @tc.name: SetDecorVisible
  * @tc.desc: SetDecorVisible
  * @tc.type: FUNC
@@ -774,28 +758,6 @@ HWTEST_F(WindowSessionImplTest3, UpdateFrameLayoutCallbackIfNeeded, TestSize.Lev
     window_->windowSystemConfig_.freeMultiWindowSupport_ = false;
     window_->UpdateFrameLayoutCallbackIfNeeded(wmReason);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateFrameLayoutCallbackIfNeeded end";
-}
-
-/**
- * @tc.name: SetRequestedOrientation
- * @tc.desc: SetRequestedOrientation
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest3, SetRequestedOrientation, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetRequestedOrientation start";
-    window_ = GetTestWindowImpl("SetRequestedOrientation");
-    ASSERT_NE(window_, nullptr);
-    window_->property_->SetPersistentId(1);
-    window_->state_ = WindowState::STATE_CREATED;
-    Orientation orientation = Orientation::VERTICAL;
-    window_->property_->requestedOrientation_ = Orientation::VERTICAL;
-    window_->SetRequestedOrientation(orientation);
-    orientation = Orientation::USER_ROTATION_PORTRAIT;
-    window_->SetRequestedOrientation(orientation);
-    auto ret = window_->GetRequestedOrientation();
-    ASSERT_EQ(ret, orientation);
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetRequestedOrientation end";
 }
 
 /**

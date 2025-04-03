@@ -79,6 +79,7 @@ void FoldScreenSensorManager::RegisterPostureCallback()
         "RegisterPostureCallback, subscribeRet: %{public}d, setBatchRet: %{public}d, activateRet: %{public}d",
         subscribeRet, setBatchRet, activateRet);
     if (subscribeRet != SENSOR_SUCCESS || setBatchRet != SENSOR_SUCCESS || activateRet != SENSOR_SUCCESS) {
+        registerPosture_ = false;
         TLOGE(WmsLogTag::DMS, "RegisterPostureCallback failed.");
     } else {
         registerPosture_ = true;
@@ -108,7 +109,11 @@ void FoldScreenSensorManager::RegisterHallCallback()
     int32_t activateRet = ActivateSensor(SENSOR_TYPE_ID_HALL_EXT, &hallUser);
     TLOGI(WmsLogTag::DMS, "RegisterHallCallback, activateRet: %{public}d", activateRet);
     if (subscribeRet != SENSOR_SUCCESS || setBatchRet != SENSOR_SUCCESS || activateRet != SENSOR_SUCCESS) {
+        registerHall_ = false;
         TLOGE(WmsLogTag::DMS, "RegisterHallCallback failed.");
+    } else {
+        registerHall_ = true;
+        TLOGI(WmsLogTag::DMS, "RegisterHallCallback success.");
     }
 }
 
@@ -118,6 +123,7 @@ void FoldScreenSensorManager::UnRegisterHallCallback()
     int32_t unsubscribeRet1 = UnsubscribeSensor(SENSOR_TYPE_ID_HALL_EXT, &hallUser);
     if (deactivateRet1 == SENSOR_SUCCESS && unsubscribeRet1 == SENSOR_SUCCESS) {
         TLOGI(WmsLogTag::DMS, "FoldScreenSensorManager.UnRegisterHallCallback success.");
+        registerHall_ = false;
     }
 }
 
@@ -216,6 +222,11 @@ void FoldScreenSensorManager::TriggerDisplaySwitch()
         }
     }
     sensorFoldStateManager_->HandleAngleChange(globalAngle, globalHall, foldScreenPolicy_);
+}
+
+bool FoldScreenSensorManager::GetSensorRegisterStatus()
+{
+    return registerHall_ || registerPosture_;
 }
 } // Rosen
 } // OHOS

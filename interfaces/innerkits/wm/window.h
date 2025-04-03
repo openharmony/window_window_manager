@@ -1297,6 +1297,21 @@ public:
     virtual bool IsKeepScreenOn() const { return false; }
 
     /**
+     * @brief Set the view screen always on
+     *
+     * @param keepScreenOn
+     * @return WMError
+     */
+    virtual WMError SetViewKeepScreenOn(bool keepScreenOn) { return WMError::WM_OK; }
+
+    /**
+     * @brief Get the view screen is always on or not.
+     *
+     * @return True means view screen is always on, false means the opposite.
+     */
+    virtual bool IsViewKeepScreenOn() const { return false; }
+
+    /**
      * @brief Set the screen on
      *
      * @param turnScreenOn True means turn screen on, false means the opposite.
@@ -3282,6 +3297,20 @@ public:
     virtual WindowType GetParentWindowType() const { return WindowType::WINDOW_TYPE_APP_MAIN_WINDOW; }
 
     /**
+     * @brief Get the root host window type of UIExtension.
+     *
+     * @return WindowType of the root host window.
+     */
+    virtual WindowType GetRootHostWindowType() const { return WindowType::WINDOW_TYPE_APP_MAIN_WINDOW; }
+
+    /**
+     * @brief Set the root host window type of UIExtension.
+     *
+     * @param WindowType of the root host window.
+     */
+    virtual void SetRootHostWindowType(WindowType& rootHostWindowType) {}
+
+    /**
      * @brief Notify modal UIExtension it may be covered
      *
      * @param byLoadContent True when called by loading content, false when called by creating non topmost subwindow
@@ -3589,11 +3618,11 @@ public:
     virtual bool IsSubWindowMaximizeSupported() const { return false; }
 
     /**
-     * @brief update the default window size type
+     * @brief Update the pipTemplateInfo.
      *
-     * @param defaultWindowSizeType the default window size type of pip window
+     * @param pipTemplateInfo the pipTemplateInfo of pip window
      */
-    virtual void UpdatePiPDefaultWindowSizeType(uint32_t defaultWindowSizeType) {}
+    virtual void UpdatePiPTemplateInfo(PiPTemplateInfo& pipTemplateInfo) {}
 
     /**
      * @brief Register keyboard show animation completion listener.
