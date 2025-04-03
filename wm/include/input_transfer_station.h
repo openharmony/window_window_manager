@@ -62,8 +62,12 @@ private:
     std::shared_ptr<InputEventListener> inputListener_ = nullptr;
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_ = nullptr;
     const std::string INPUT_AND_VSYNC_THREAD = "InputAndVsyncThread";
+    const std::string GAME_CONTROLLER_SO_PATH = "/system/lib64/libgamecontroller_event.z.so";
+    static inline bool isGameControllerLoaded_ {false};
 
     bool isRegisteredMMI_ { false };
+
+    void LoadGameController();
 };
 
 class InputEventListener : public MMI::IInputEventConsumer {
