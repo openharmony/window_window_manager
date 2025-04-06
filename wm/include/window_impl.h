@@ -474,6 +474,9 @@ private:
     Ace::UIContentErrorCode UIContentInitByName(Ace::UIContent*, const std::string&, void* storage, int isAni);
     template<typename T>
     Ace::UIContentErrorCode UIContentInit(Ace::UIContent*, T contentInfo, void* storage, int isAni);
+    template<typename T>
+    Ace::UIContentErrorCode UIContentInit(Ace::UIContent*, T contentInfo, void* storage, const std::string& contentName,
+        int isAni);
     Ace::UIContentErrorCode UIContentRestore(Ace::UIContent*, const std::string& contentInfo, void* storage,
         Ace::ContentInfoType infoType, int isAni);
     WMError SetUIContentInner(const std::string& contentInfo, void* env, void* storage,
