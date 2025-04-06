@@ -13,15 +13,13 @@
  * limitations under the License.
  */
 import { AsyncCallback, BusinessError, Callback } from '@ohos.base';
-import BaseContext from 'application/BaseContext';
+import { LocalStorage } from 'arkui.stateManagement.storage';
+import { UIContext } from '@ohos.arkui.UIContext';
+import BaseContext from 'application.BaseContext';
 export type AsyncCallbackVoid = (err: BusinessError) => void;
 export type WindowEventCallback = (data: window.WindowEventType) => void;
 export type WindowSizeCallback = (data: window.Size) => void;
 export type WindowStatusCallback = (data: window.WindowStatusType) => void;
-export class LocalStorage {
-}
-export class UIContext {
-}
 
 namespace window {
   export interface Size {
