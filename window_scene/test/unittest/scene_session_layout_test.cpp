@@ -904,12 +904,12 @@ HWTEST_F(SceneSessionLayoutTest, HandleSubSessionSurfaceNode, TestSize.Level1)
     subSceneSession->displayIdSetDuringMoveTo_.insert(888);
 
     subSceneSession->NotifyFollowParentMultiScreenPolicy(false);
-    sceneSession->HandleSubSessionSurfaceNode(false);
+    sceneSession->HandleSubSessionSurfaceNode(false, 0);
     ASSERT_NE(0, subSceneSession->displayIdSetDuringMoveTo_.size());
     subSceneSession->NotifyFollowParentMultiScreenPolicy(true);
-    sceneSession->HandleSubSessionSurfaceNode(true);
+    sceneSession->HandleSubSessionSurfaceNode(true, 0);
     ASSERT_NE(0, subSceneSession->displayIdSetDuringMoveTo_.size());
-    sceneSession->HandleSubSessionSurfaceNode(false);
+    sceneSession->HandleSubSessionSurfaceNode(false, 0);
     ASSERT_EQ(0, subSceneSession->displayIdSetDuringMoveTo_.size());
 }
 
@@ -925,28 +925,21 @@ HWTEST_F(SceneSessionLayoutTest, HandleSubSessionCrossNode, TestSize.Level1)
     info.bundleName_ = "HandleSubSessionCrossNode";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    sceneSession->moveDragController_ =
-        sptr<MoveDragController>::MakeSptr(sceneSession->GetPersistentId(), sceneSession->GetWindowType());
     info.abilityName_ = "HandleSubSessionCrossNode_subSession";
     info.bundleName_ = "HandleSubSessionCrossNode_subSession";
     sptr<SceneSession> subSceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     subSceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
 
     sceneSession->SetDragStart(true);
-    sceneSession->moveDragController_->moveDragStartDisplayId_ = 888;
-    sceneSession->SetOriginDisplayId(DISPLAY_ID_INVALID);
     sceneSession->HandleSubSessionCrossNode(SizeChangeReason::UNDEFINED);
     ASSERT_EQ(sceneSession->IsDragStart(), true);
-    ASSERT_EQ(sceneSession->GetOriginDisplayId(), DISPLAY_ID_INVALID);
     sceneSession->HandleSubSessionCrossNode(SizeChangeReason::DRAG);
     ASSERT_EQ(sceneSession->IsDragStart(), true);
-    ASSERT_EQ(sceneSession->GetOriginDisplayId(), DISPLAY_ID_INVALID);
     sceneSession->HandleSubSessionCrossNode(SizeChangeReason::DRAG_END);
     ASSERT_EQ(sceneSession->IsDragStart(), false);
 
     sceneSession->HandleSubSessionCrossNode(SizeChangeReason::DRAG);
     ASSERT_EQ(sceneSession->IsDragStart(), true);
-    ASSERT_EQ(sceneSession->GetOriginDisplayId(), 888);
     sceneSession->subSession_.emplace_back(subSceneSession);
     subSceneSession->parentSession_ = sceneSession;
     sceneSession->HandleSubSessionCrossNode(SizeChangeReason::DRAG_END);

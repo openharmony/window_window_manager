@@ -576,7 +576,7 @@ HWTEST_F(SubSessionTest, AddSurfaceNodeToScreen, TestSize.Level1)
     sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     sceneSession->moveDragController_ =
         sptr<MoveDragController>::MakeSptr(sceneSession->GetPersistentId(), sceneSession->GetWindowType());
-    sceneSession->AddSurfaceNodeToScreen();
+    sceneSession->AddSurfaceNodeToScreen(0);
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
     rsSurfaceNodeConfig.SurfaceNodeName = info.abilityName_;
     RSSurfaceNodeType rsSurfaceNodeType = RSSurfaceNodeType::DEFAULT;
@@ -584,18 +584,18 @@ HWTEST_F(SubSessionTest, AddSurfaceNodeToScreen, TestSize.Level1)
     ASSERT_NE(surfaceNode, nullptr);
     sceneSession->SetSurfaceNode(surfaceNode);
     sceneSession->SetOriginDisplayId(12);
-    sceneSession->AddSurfaceNodeToScreen();
+    sceneSession->AddSurfaceNodeToScreen(0);
     ASSERT_EQ(12, sceneSession->GetOriginDisplayId());
     sceneSession->SetOriginDisplayId(DISPLAY_ID_INVALID);
     sceneSession->SetScreenId(0);
-    sceneSession->AddSurfaceNodeToScreen();
+    sceneSession->AddSurfaceNodeToScreen(0);
     ASSERT_NE(DISPLAY_ID_INVALID, sceneSession->GetOriginDisplayId());
     sceneSession->displayIdSetDuringMoveTo_.clear();
     sceneSession->winRect_ = { 50, 50, 800, 800 };
-    sceneSession->AddSurfaceNodeToScreen();
+    sceneSession->AddSurfaceNodeToScreen(0);
     ASSERT_NE(DISPLAY_ID_INVALID, sceneSession->GetOriginDisplayId());
     sceneSession->winRect_ = { 10000, 10000, 800, 800 };
-    sceneSession->AddSurfaceNodeToScreen();
+    sceneSession->AddSurfaceNodeToScreen(0);
     ASSERT_NE(DISPLAY_ID_INVALID, sceneSession->GetOriginDisplayId());
 }
 

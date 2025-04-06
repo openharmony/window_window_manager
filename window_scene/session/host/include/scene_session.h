@@ -1090,8 +1090,8 @@ private:
     bool SaveAspectRatio(float ratio);
     WSError UpdateRectForDrag(const WSRect& rect);
     void UpdateSessionRectPosYFromClient(SizeChangeReason reason, DisplayId& configDisplayId, WSRect& rect);
-    void HandleSubSessionSurfaceNode(bool isAdd);
-    virtual void AddSurfaceNodeToScreen() {}
+    void HandleSubSessionSurfaceNode(bool isAdd, DisplayId draggingOrMovingParentDisplayId);
+    virtual void AddSurfaceNodeToScreen(DisplayId draggingOrMovingParentDisplayId) {}
     virtual void RemoveSurfaceNodeFromScreen() {}
 
     /*
