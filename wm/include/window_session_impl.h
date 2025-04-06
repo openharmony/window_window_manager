@@ -838,8 +838,6 @@ private:
     EnableIfSame<T, IMainWindowCloseListener, sptr<IMainWindowCloseListener>> GetListeners();
     template<typename T>
     EnableIfSame<T, IWindowWillCloseListener, std::vector<sptr<IWindowWillCloseListener>>> GetListeners();
-
-         WindowSetUIContentType setUIContentType, BackupAndRestoreType restoreType, AppExecFwk::Ability* ability,
     std::unique_ptr<Ace::UIContent> UIContentCreate(AppExecFwk::Ability* ability, void* env, int isAni);
     Ace::UIContentErrorCode UIContentInitByName(Ace::UIContent*, const std::string&, void* storage, int isAni);
     template<typename T>
@@ -852,7 +850,7 @@ private:
     void UpdateConfigWhenSetUIContent();
     WMError SetUIContentInner(const std::string& contentInfo, void* env, void* storage,
         WindowSetUIContentType setUIContentType, BackupAndRestoreType restoreType, AppExecFwk::Ability* ability,
-+        int isAni = 0);
+        int isAni = 0);
     std::shared_ptr<std::vector<uint8_t>> GetAbcContent(const std::string& abcPath);
     void RegisterUIContenCallback();
     inline void DestroyExistUIContent();
