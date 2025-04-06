@@ -712,7 +712,7 @@ WMError WindowExtensionSessionImpl::NapiSetUIContent(const std::string& contentI
 WMError WindowExtensionSessionImpl::NapiSetUIContentInner(const std::string& contentInfo, void* env, void* storage,
     BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability, int isAni)
 {
-    return SetUIContentInner(contentInfo, env, storage, token, ability);
+    return SetUIContentInner(contentInfo, env, storage, token, ability, false, isAni);
 }
 
 WMError WindowExtensionSessionImpl::NapiSetUIContentByName(const std::string& contentName, napi_env env,
@@ -722,8 +722,8 @@ WMError WindowExtensionSessionImpl::NapiSetUIContentByName(const std::string& co
     return SetUIContentInner(contentName, env, storage, token, ability, true);
 }
 
-WMError WindowExtensionSessionImpl::SetUIContentInner(const std::string& contentInfo, napi_env env, napi_value storage,
-    sptr<IRemoteObject> token, AppExecFwk::Ability* ability, bool initByName)
+WMError WindowExtensionSessionImpl::SetUIContentInner(const std::string& contentInfo, void* env, void* storage,
+    sptr<IRemoteObject> token, AppExecFwk::Ability* ability, bool initByName, int isAni)
 {
     WLOGFD("%{public}s state:%{public}u", contentInfo.c_str(), state_);
     if (auto uiContent = GetUIContentSharedPtr()) {
@@ -746,7 +746,11 @@ WMError WindowExtensionSessionImpl::SetUIContentInner(const std::string& content
         }
         uiContent->SetHostParams(extensionConfig_);
         if (initByName) {
-            uiContent->InitializeByName(this, contentInfo, storage, property_->GetParentId());
+            if (isAni) {
+                uiContent->InitializeByNameWithAniStorage(this, contentInfo, (ani_object)storage);
+            } else {
+                uiContent->InitializeByName(this, contentInfo, (napi_value)storage, property_->GetParentId());
+            }
         } else {
             if (isAni) {
                 uiContent->InitializeWithAniStorage(this, contentInfo, (ani_object)storage, property_->GetParentId());

@@ -206,8 +206,8 @@ private:
     void ArkUIFrameworkSupport();
     WMError CheckHideNonSecureWindowsPermission(bool shouldHide);
     void ReportModalUIExtensionMayBeCovered(bool byLoadContent) const;
-    WMError SetUIContentInner(const std::string& contentInfo, napi_env env, napi_value storage,
-        sptr<IRemoteObject> token, AppExecFwk::Ability* ability, bool initByName = false);
+    WMError SetUIContentInner(const std::string& contentInfo, void* env, void* storage,
+        sptr<IRemoteObject> token, AppExecFwk::Ability* ability, bool initByName = false, int isAni = 0);
     void RegisterDataConsumer();
     void RegisterConsumer(Extension::Businesscode code,
         const std::function<WMError(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)>& func);
