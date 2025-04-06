@@ -3595,16 +3595,13 @@ void SceneSession::HandleSubSessionCrossNode(SizeChangeReason reason)
 {
     if (IsDraggingReason(reason) && !Session::IsDragStart()) {
         Session::SetDragStart(true);
-        if (Session::GetOriginDisplayId() == DISPLAY_ID_INVALID) {
-            Session::SetOriginDisplayId(moveDragController_->GetMoveDragStartDisplayId());
-        }
         if (!subSession_.empty()) {
-            HandleSubSessionSurfaceNode(true);
+            HandleSubSessionSurfaceNode(true, GetDisplayId());
         }
     } else if (reason == SizeChangeReason::DRAG_END) {
         Session::SetDragStart(false);
         if (!subSession_.empty()) {
-            HandleSubSessionSurfaceNode(false);
+            HandleSubSessionSurfaceNode(false, GetDisplayId());
         }
     }
 }
@@ -3877,11 +3874,11 @@ void SceneSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
     }
 }
 
-void SceneSession::HandleSubSessionSurfaceNode(bool isAdd)
+void SceneSession::HandleSubSessionSurfaceNode(bool isAdd, DisplayId draggingOrMovingParentDisplayId)
 {
     for (const auto& session : subSession_) {
         if (session) {
-            session->HandleSubSessionSurfaceNode(isAdd);
+            session->HandleSubSessionSurfaceNode(isAdd, draggingOrMovingParentDisplayId);
         }
     }
 
@@ -3891,7 +3888,7 @@ void SceneSession::HandleSubSessionSurfaceNode(bool isAdd)
             ConvertGlobalRectToRelative(winRect_, GetScreenId());
         TLOGI(WmsLogTag::WMS_LAYOUT, "isAdd:%{public}d targetRect:%{public}s", isAdd, targetRect.ToString().c_str());
         if (isAdd) {
-            AddSurfaceNodeToScreen();
+            AddSurfaceNodeToScreen(draggingOrMovingParentDisplayId);
             SetSurfaceBounds(targetRect, true, true);
         } else {
             RemoveSurfaceNodeFromScreen();
