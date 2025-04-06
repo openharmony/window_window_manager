@@ -1023,7 +1023,7 @@ bool WindowSessionProperty::UnmarshallingSessionInfo(Parcel& parcel, WindowSessi
     }
     bool isFollowParentMultiScreenPolicy = false;
     if (!parcel.ReadBool(isFollowParentMultiScreenPolicy)) {
-        TLOGE(WmsLogTag::DEFAULT, "Failed to read isFollowParentMultiScreenPolicy!");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to read isFollowParentMultiScreenPolicy!");
         return false;
     }
     info.isFollowParentMultiScreenPolicy = isFollowParentMultiScreenPolicy;
