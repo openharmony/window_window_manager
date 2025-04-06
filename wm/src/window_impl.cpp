@@ -650,6 +650,16 @@ Ace::UIContentErrorCode WindowImpl::UIContentInit(Ace::UIContent* uiContent, T c
         return uiContent->Initialize(this, contentInfo, (napi_value)storage);
     }
 }
+template<typename T>
+Ace::UIContentErrorCode WindowImpl::UIContentInit(Ace::UIContent* uiContent, T contentInfo,
+    void* storage, const std::string& contentName, int isAni)
+{
+    if (isAni) {
+        return uiContent->InitializeWithAniStorage(this, contentInfo, (ani_object)storage, contentName);
+    } else {
+        return uiContent->Initialize(this, contentInfo, (napi_value)storage, contentName);
+    }
+}
 
 Ace::UIContentErrorCode WindowImpl::UIContentRestore(Ace::UIContent* uiContent, const std::string& contentInfo,
     void* storage, Ace::ContentInfoType infoType, int isAni)
@@ -701,7 +711,7 @@ WMError WindowImpl::SetUIContentInner(const std::string& contentInfo, void* env,
             aceRet = UIContentInitByName(uiContent.get(), contentInfo, storage, isAni);
             break;
         case WindowSetUIContentType::BY_ABC:
-            aceRet = UIContentInit(uiContent.get(), GetAbcContent(contentInfo), storage, isAni);
+            aceRet = UIContentInit(uiContent.get(), GetAbcContent(contentInfo), storage, contentInfo, isAni);
             break;
     }
     // make uiContent available after Initialize/Restore
