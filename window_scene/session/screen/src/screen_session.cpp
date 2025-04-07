@@ -1209,6 +1209,11 @@ void ScreenSession::SetDensityInCurResolution(float densityInCurResolution)
     property_.SetDensityInCurResolution(densityInCurResolution);
 }
 
+float ScreenSession::GetDensityInCurResolution()
+{
+    return property_.GetDensityInCurResolution();
+}
+
 void ScreenSession::SetDefaultDensity(float defaultDensity)
 {
     property_.SetDefaultDensity(defaultDensity);
