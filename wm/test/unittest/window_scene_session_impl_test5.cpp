@@ -664,6 +664,13 @@ HWTEST_F(WindowSceneSessionImplTest5, StartMoveWindowWithCoordinate_01, TestSize
     window->windowSystemConfig_.freeMultiWindowSupport_ = false;
     window->property_->SetIsPcAppInPad(true);
     ASSERT_NE(window->StartMoveWindowWithCoordinate(100, 50), WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    window->windowSystemConfig_.freeMultiWindowEnable_ = true;
+    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    window->property_->SetIsPcAppInPad(true);
+    ASSERT_NE(window->StartMoveWindowWithCoordinate(100, 50), WmErrorCode::WM_OK);
 }
 
 /**
@@ -675,18 +682,47 @@ HWTEST_F(WindowSceneSessionImplTest5, StartMoveWindowWithCoordinate_02, TestSize
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    window->property_->SetPersistentId(1);
     Rect windowRect = { 200, 200, 1000, 1000 };
     window->property_->SetWindowRect(windowRect);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->property_->SetPersistentId(0);
+    ASSERT_EQ(window->StartMoveWindowWithCoordinate(-1, 50), WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
 
+    window->property_->SetPersistentId(1);
     ASSERT_EQ(window->StartMoveWindowWithCoordinate(-1, 50), WmErrorCode::WM_ERROR_INVALID_PARAM);
     ASSERT_EQ(window->StartMoveWindowWithCoordinate(100, -1), WmErrorCode::WM_ERROR_INVALID_PARAM);
     ASSERT_EQ(window->StartMoveWindowWithCoordinate(1500, 50), WmErrorCode::WM_ERROR_INVALID_PARAM);
     ASSERT_EQ(window->StartMoveWindowWithCoordinate(100, 1500), WmErrorCode::WM_ERROR_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: StartMoveWindowWithCoordinate_03
+ * @tc.desc: StartMoveWindowWithCoordinate
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, StartMoveWindowWithCoordinate_03, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    Rect windowRect = { 200, 200, 1000, 1000 };
+    window->property_->SetWindowRect(windowRect);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+
+    EXPECT_CALL(*session, SyncSessionEvent(_)).Times(1).WillOnce(Return(WSError::WS_ERROR_REPEAT_OPERATION));
+    ASSERT_EQ(window->StartMoveWindowWithCoordinate(100, 50), WmErrorCode::WM_ERROR_REPEAT_OPERATION);
+
+    EXPECT_CALL(*session, SyncSessionEvent(_)).Times(1).WillOnce(Return(WSError::WS_ERROR_NULLPTR));
+    ASSERT_EQ(window->StartMoveWindowWithCoordinate(100, 50), WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+
+    EXPECT_CALL(*session, SyncSessionEvent(_)).Times(1).WillOnce(Return(WSError::WS_OK));
+    ASSERT_EQ(window->StartMoveWindowWithCoordinate(100, 50), WmErrorCode::WM_OK);
 }
 
 /**
@@ -1286,6 +1322,34 @@ HWTEST_F(WindowSceneSessionImplTest5, NotifyTargetRotationInfo, Function | Small
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     window->state_ = WindowState::STATE_CREATED;
     EXPECT_EQ(WSError::WS_DO_NOTHING, window->NotifyTargetRotationInfo(info));
+}
+
+/**
+ * @tc.name: StopMoveWindow
+ * @tc.desc: StopMoveWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, StopMoveWindow, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    ASSERT_EQ(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT, window->StopMoveWindow());
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->state_ = WindowState::STATE_DESTROYED;
+    ASSERT_EQ(WmErrorCode::WM_ERROR_STATE_ABNORMALLY, window->StopMoveWindow());
+
+    window->state_ = WindowState::STATE_CREATED;
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    EXPECT_CALL(*session, SyncSessionEvent(_)).Times(1).WillOnce(Return(WSError::WS_ERROR_NULLPTR));
+    ASSERT_EQ(WmErrorCode::WM_ERROR_STATE_ABNORMALLY, window->StopMoveWindow());
+
+    EXPECT_CALL(*session, SyncSessionEvent(_)).Times(1).WillOnce(Return(WSError::WS_OK));
+    ASSERT_EQ(WmErrorCode::WM_OK, window->StopMoveWindow());
 }
 }
 } // namespace Rosen
