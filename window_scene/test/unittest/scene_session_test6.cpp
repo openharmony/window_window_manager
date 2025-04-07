@@ -310,7 +310,6 @@ HWTEST_F(SceneSessionTest6, UpdateNewSizeForPCWindow, Function | SmallTest | Lev
     info.abilityName_ = "UpdateNewSizeForPCWindow";
     info.bundleName_ = "UpdateNewSizeForPCWindow";
     info.windowType_ = 1;
-    sptr<Rosen::ISession> session_;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(12, WindowType::WINDOW_TYPE_FLOAT);
     sceneSession->moveDragController_->SetMoveDragHotAreaCrossDisplay(true);
@@ -329,7 +328,6 @@ HWTEST_F(SceneSessionTest6, CalcNewWindowRectIfNeed, Function | SmallTest | Leve
     info.abilityName_ = "CalcNewWindowRectIfNeed";
     info.bundleName_ = "CalcNewWindowRectIfNeed";
     info.windowType_ = 1;
-    sptr<Rosen::ISession> session_;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetLastLimitsVpr(1.9);
