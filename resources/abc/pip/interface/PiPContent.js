@@ -89,12 +89,8 @@ class PiPContent extends ViewPU {
         if (c2 === null || c2 === undefined) {
             return;
         }
-        if (this.__useNode && this.__useNode.purgeDependencyOnElmtId === 'function') {
-            this.__useNode.purgeDependencyOnElmtId(c2);
-        }
-        if (this.__nodeChange && this.nodeChange.purgeDependencyOnElmtId === 'function') {
-            this.__nodeChange.purgeDependencyOnElmtId(c2);
-        }
+        this.__useNode.purgeDependencyOnElmtId(c2);
+        this.__nodeChange.purgeDependencyOnElmtId(c2);
     }
     aboutToBeDeleted() {
         this.__useNode.aboutToBeDeleted();
