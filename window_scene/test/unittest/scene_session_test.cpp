@@ -1997,6 +1997,26 @@ HWTEST_F(SceneSessionTest, IsFollowParentMultiScreenPolicy, TestSize.Level1)
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback);
     EXPECT_EQ(sceneSession->IsFollowParentMultiScreenPolicy(), false);
 }
+
+/**
+ * @tc.name: CloneWindow
+ * @tc.desc: CloneWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, CloneWindow, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "CloneWindow";
+    info.bundleName_ = "CloneWindow";
+    info.windowType_ = 1;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback);
+    EXPECT_NE(sceneSession, nullptr);
+    uint64_t surfaceNodeId = 1;
+    bool needOffScreen = false;
+    sceneSession->CloneWindow(surfaceNodeId, needOffScreen);
+}
 } // namespace
 } // Rosen
 } // OHOS
