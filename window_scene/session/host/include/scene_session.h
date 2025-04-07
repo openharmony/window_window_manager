@@ -520,6 +520,8 @@ public:
     RotationChangeResult NotifyRotationChange(const RotationChangeInfo& rotationChangeInfo);
     bool isRotationChangeCallbackRegistered = false;
     WSError SetCurrentRotation(int32_t currentRotation);
+    std::mutex sessionStageMutex_;
+    sptr<ISessionStage> CheckSessionStage();
 
     /*
      * Window Animation
