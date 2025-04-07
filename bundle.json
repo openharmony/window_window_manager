@@ -407,6 +407,20 @@
           },
           {
             "type": "so",
+            "name": "//foundation/window/window_manager/interfaces/kits/cj/display_runtime:cj_display_ffi",
+            "header": {
+              "header_files": [
+                "cj_display_impl.h",
+                "cj_display_listener.h",
+                "cj_display_manager.h",
+                "display_ffi.h",
+                "display_utils.h"
+              ],
+              "header_base": "//foundation/window/window_manager/interfaces/kits/cj/display_runtime"
+            }
+          },
+          {
+            "type": "so",
             "name": "//foundation/window/window_manager/interfaces/kits/cj/screenshot:cj_screenshot_ffi",
             "header": {
               "header_files": [
