@@ -7819,7 +7819,8 @@ void SceneSession::UpdateNewSizeForPCWindow()
 bool SceneSession::CalcNewWindowRectIfNeed(DMRect& availableArea, float newVpr, WSRect& winRect)
 {
     float currVpr = 0.0f;
-    if (auto property = GetSessionProperty()) {
+    auto property = GetSessionProperty();
+    if (property) {
         currVpr = property->GetLastLimitsVpr();
         TLOGI(WmsLogTag::WMS_LAYOUT_PC, "currVpr: %{public}f, newVpr: %{public}f, Id: %{public}u",
             currVpr, newVpr, GetPersistentId());
@@ -7831,8 +7832,13 @@ bool SceneSession::CalcNewWindowRectIfNeed(DMRect& availableArea, float newVpr, 
     }
     int32_t left = winRect.posX_;
     int32_t top = winRect.posY_;
-    uint32_t width = static_cast<uint32_t>(winRect.width_ * newVpr / currVpr);
-    uint32_t height = static_cast<uint32_t>(winRect.height_ * newVpr / currVpr);
+    float scaleRatio = newVpr / currVpr;
+    // PC上兼容模式应用窗口大小不变化
+    if (property->GetCompatibleModeInPc()) {
+        return false;
+    }
+    uint32_t width = static_cast<uint32_t>(winRect.width_ * scaleRatio);
+    uint32_t height = static_cast<uint32_t>(winRect.height_ * scaleRatio);
     int32_t topThreshold = availableArea.posY_;
     int32_t bottomThreshold = static_cast<int32_t>(availableArea.posY_ + availableArea.height_);
 
@@ -7844,7 +7850,7 @@ bool SceneSession::CalcNewWindowRectIfNeed(DMRect& availableArea, float newVpr, 
         left > static_cast<int32_t>(availableArea.width_ - width) || displayChangedByMoveDrag_;
     if (displayChangedByMoveDrag_ && moveDragController_) {
         int32_t pointerPosX = moveDragController_->GetLastMovePointerPosX();
-        left = pointerPosX - static_cast<int32_t>((pointerPosX -left) * newVpr / currVpr);
+        left = pointerPosX - static_cast<int32_t>((pointerPosX -left) * scaleRatio);
     } else {
         top = MathHelper::Min(top, static_cast<int32_t>(bottomThreshold - height));
         top = MathHelper::Max(top, topThreshold);
