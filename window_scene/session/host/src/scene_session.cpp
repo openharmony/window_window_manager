@@ -7833,9 +7833,14 @@ bool SceneSession::CalcNewWindowRectIfNeed(DMRect& availableArea, float newVpr, 
     int32_t left = winRect.posX_;
     int32_t top = winRect.posY_;
     float scaleRatio = newVpr / currVpr;
+<<<<<<< HEAD
     // PC上兼容模式应用窗口大小不变化
     if (property->GetCompatibleModeInPc()) {
         return false;
+=======
+    if (property->GetCompatibleModeInPc()) {
+        scaleRatio = 1.0f;
+>>>>>>> 290ad4b14455883d64f5e6d98334be515d55282c
     }
     uint32_t width = static_cast<uint32_t>(winRect.width_ * scaleRatio);
     uint32_t height = static_cast<uint32_t>(winRect.height_ * scaleRatio);
