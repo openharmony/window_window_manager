@@ -1329,7 +1329,7 @@ HWTEST_F(WindowSceneSessionImplTest5, NotifyTargetRotationInfo, Function | Small
  * @tc.desc: StopMoveWindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest5, StopMoveWindow, Function | SmallTest | Level1)
+HWTEST_F(WindowSceneSessionImplTest5, StopMoveWindow, Function | SmallTest | TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
