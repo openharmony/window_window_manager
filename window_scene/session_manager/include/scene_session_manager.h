@@ -917,6 +917,7 @@ private:
     void SetSkipEventOnCastPlusInner(int32_t windowId, bool isSkip);
     void UpdateSessionDisplayIdBySessionInfo(sptr<SceneSession> sceneSession, const SessionInfo& sessionInfo);
     bool IsNeedUpdateBrightness(float brightness);
+    bool SubtractIntersectArea(std::shared_ptr<SkRegion>& unaccountedSpace, const sptr<SceneSession>& sceneSession);
 
     /*
      * Window Rotate Animation
