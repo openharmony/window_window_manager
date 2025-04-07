@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 import { AsyncCallback, BusinessError, Callback } from '@ohos.base';
-import { LocalStorage } from 'arkui.stateManagement.storage';
+import { LocalStorage } from '@ohos.arkui.stateManagement';
 import { UIContext } from '@ohos.arkui.UIContext';
 import BaseContext from 'application.BaseContext';
 export type AsyncCallbackVoid = (err: BusinessError) => void;
