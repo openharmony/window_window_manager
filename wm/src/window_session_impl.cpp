@@ -533,7 +533,8 @@ WMError WindowSessionImpl::Connect()
     windowEventChannel->SetIsUIExtension(property_->GetWindowType() == WindowType::WINDOW_TYPE_UI_EXTENSION);
     windowEventChannel->SetUIExtensionUsage(property_->GetUIExtensionUsage());
     sptr<IWindowEventChannel> iWindowEventChannel(windowEventChannel);
-    sptr<IRemoteObject> token = context_ ? context_->GetToken() : nullptr;
+    auto context = GetContext();
+    sptr<IRemoteObject> token = context ? context->GetToken() : nullptr;
     if (token) {
         property_->SetTokenState(true);
     }
@@ -570,7 +571,7 @@ bool WindowSessionImpl::NotifyOnKeyPreImeEvent(const std::shared_ptr<MMI::KeyEve
     return PreNotifyKeyEvent(keyEvent);
 }
 
-void WindowSessionImpl::GetSubWidnows(int32_t parentPersistentId, std::vector<sptr<WindowSessionImpl>>& subWindows)
+void WindowSessionImpl::GetSubWindows(int32_t parentPersistentId, std::vector<sptr<WindowSessionImpl>>& subWindows)
 {
     std::lock_guard<std::recursive_mutex> lock(subWindowSessionMutex_);
     auto iter = subWindowSessionMap_.find(parentPersistentId);
@@ -584,7 +585,7 @@ void WindowSessionImpl::GetSubWidnows(int32_t parentPersistentId, std::vector<sp
 void WindowSessionImpl::UpdateSubWindowStateAndNotify(int32_t parentPersistentId, const WindowState newState)
 {
     std::vector<sptr<WindowSessionImpl>> subWindows;
-    GetSubWidnows(parentPersistentId, subWindows);
+    GetSubWindows(parentPersistentId, subWindows);
     if (subWindows.empty()) {
         TLOGD(WmsLogTag::WMS_SUB, "parent window: %{public}d, its subWindowMap is empty", parentPersistentId);
         return;
@@ -714,7 +715,7 @@ void WindowSessionImpl::DestroySubWindow()
     }
     // remove from subWindowMap_ when destroy parent window
     std::vector<sptr<WindowSessionImpl>> subWindows;
-    GetSubWidnows(persistentId, subWindows);
+    GetSubWindows(persistentId, subWindows);
     for (auto iter = subWindows.begin(); iter != subWindows.end(); iter = subWindows.begin()) {
         auto subWindow = *iter;
         if (subWindow == nullptr) {
@@ -771,8 +772,9 @@ WMError WindowSessionImpl::Destroy(bool needNotifyServer, bool needClearListener
     if (needClearListener) {
         ClearListenersById(GetPersistentId());
     }
-    if (context_) {
-        context_.reset();
+    auto context = GetContext();
+    if (context) {
+        context.reset();
     }
     ClearVsyncStation();
     return WMError::WM_OK;
@@ -1156,14 +1158,15 @@ void WindowSessionImpl::CopyUniqueDensityParameter(sptr<WindowSessionImpl> paren
 
 sptr<WindowSessionImpl> WindowSessionImpl::FindMainWindowWithContext()
 {
-    if (context_ == nullptr) {
+    auto context = GetContext();
+    if (context == nullptr) {
         return nullptr;
     }
     std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
     for (const auto& winPair : windowSessionMap_) {
         auto win = winPair.second.second;
         if (win && win->GetType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
-            context_.get() == win->GetContext().get()) {
+            context.get() == win->GetContext().get()) {
             return win;
         }
     }
@@ -1173,12 +1176,13 @@ sptr<WindowSessionImpl> WindowSessionImpl::FindMainWindowWithContext()
 
 sptr<WindowSessionImpl> WindowSessionImpl::FindExtensionWindowWithContext()
 {
-    if (context_ == nullptr) {
+    auto context = GetContext();
+    if (context == nullptr) {
         return nullptr;
     }
     std::shared_lock<std::shared_mutex> lock(windowExtensionSessionMutex_);
     for (const auto& window : windowExtensionSessionSet_) {
-        if (window && context_.get() == window->GetContext().get()) {
+        if (window && context.get() == window->GetContext().get()) {
             return window;
         }
     }
@@ -1188,7 +1192,7 @@ sptr<WindowSessionImpl> WindowSessionImpl::FindExtensionWindowWithContext()
 void WindowSessionImpl::SetUniqueVirtualPixelRatioForSub(bool useUniqueDensity, float virtualPixelRatio)
 {
     std::vector<sptr<WindowSessionImpl>> subWindows;
-    GetSubWidnows(GetPersistentId(), subWindows);
+    GetSubWindows(GetPersistentId(), subWindows);
     for (auto& subWindowSession : subWindows) {
         if (subWindowSession != nullptr) {
             subWindowSession->SetUniqueVirtualPixelRatio(useUniqueDensity, virtualPixelRatio);
@@ -1418,13 +1422,14 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
 
 int32_t WindowSessionImpl::GetFloatingWindowParentId()
 {
-    if (context_.get() == nullptr) {
+    auto context = GetContext();
+    if (context.get() == nullptr) {
         return INVALID_SESSION_ID;
     }
     std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
     for (const auto& winPair : windowSessionMap_) {
         if (winPair.second.second && WindowHelper::IsMainWindow(winPair.second.second->GetType()) &&
-            context_.get() == winPair.second.second->GetContext().get()) {
+            context.get() == winPair.second.second->GetContext().get()) {
             WLOGFD("Find parent, [parentName: %{public}s, selfPersistentId: %{public}d]",
                 winPair.second.second->GetProperty()->GetWindowName().c_str(), GetPersistentId());
             return winPair.second.second->GetProperty()->GetPersistentId();
@@ -1524,8 +1529,13 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
     OHOS::Ace::UIContentErrorCode& aceRet)
 {
     DestroyExistUIContent();
-    std::unique_ptr<Ace::UIContent> uiContent = ability != nullptr ? Ace::UIContent::Create(ability) :
-        Ace::UIContent::Create(context_.get(), reinterpret_cast<NativeEngine*>(env));
+    std::unique_ptr<Ace::UIContent> uiContent = nullptr;
+    auto context = GetContext();
+    if (ability != nullptr) {
+        uiContent = Ace::UIContent::Create(ability);
+    } else if (context != nullptr) {
+        uiContent = Ace::UIContent::Create(context.get(), reinterpret_cast<NativeEngine*>(env));
+    }
     if (uiContent == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "uiContent nullptr id: %{public}d", GetPersistentId());
         return WMError::WM_ERROR_NULLPTR;
@@ -1699,8 +1709,9 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
     }
 
     uint32_t version = 0;
-    if ((context_ != nullptr) && (context_->GetApplicationInfo() != nullptr)) {
-        version = context_->GetApplicationInfo()->apiCompatibleVersion;
+    auto context = GetContext();
+    if ((context != nullptr) && (context->GetApplicationInfo() != nullptr)) {
+        version = context->GetApplicationInfo()->apiCompatibleVersion;
     }
     // 10 ArkUI new framework support after API10
     if (version < 10) {
@@ -1860,7 +1871,14 @@ const std::shared_ptr<AbilityRuntime::Context> WindowSessionImpl::GetContext() c
 {
     TLOGI(WmsLogTag::DEFAULT, "name:%{public}s, id:%{public}d",
         property_->GetWindowName().c_str(), GetPersistentId());
+    std::shared_lock<std::shared_mutex> lock(contextMutex_);
     return context_;
+}
+
+void WindowSessionImpl::SetContext(const std::shared_ptr<AbilityRuntime::Context>& context)
+{
+    std::unique_lock<std::shared_mutex> lock(contextMutex_);
+    context_ = context;
 }
 
 Rect WindowSessionImpl::GetRequestRect() const
@@ -5039,9 +5057,10 @@ WMError WindowSessionImpl::SetBackgroundColor(uint32_t color)
     const bool isAlphaZero = !(color & 0xff000000);
     std::string bundleName;
     std::string abilityName;
-    if ((context_ != nullptr) && (context_->GetApplicationInfo() != nullptr)) {
-        bundleName = context_->GetBundleName();
-        abilityName = context_->GetApplicationInfo()->name;
+    auto context = GetContext();
+    if ((context != nullptr) && (context->GetApplicationInfo() != nullptr)) {
+        bundleName = context->GetBundleName();
+        abilityName = context->GetApplicationInfo()->name;
     }
 
     if (isAlphaZero && WindowHelper::IsMainWindow(GetType())) {
@@ -5669,10 +5688,11 @@ void WindowSessionImpl::AddSetUIContentTimeoutCheck()
         std::ostringstream oss;
         oss << "SetUIContent timeout uid: " << getuid();
         oss << ", windowName: " << window->GetWindowName();
-        if (window->context_) {
-            oss << ", bundleName: " << window->context_->GetBundleName();
-            if (window->context_->GetApplicationInfo()) {
-                oss << ", abilityName: " << window->context_->GetApplicationInfo()->name;
+        auto context = window->GetContext();
+        if (context) {
+            oss << ", bundleName: " << context->GetBundleName();
+            if (context->GetApplicationInfo()) {
+                oss << ", abilityName: " << context->GetApplicationInfo()->name;
             }
         }
         SingletonContainer::Get<WindowInfoReporter>().ReportWindowException(
@@ -5742,10 +5762,11 @@ void WindowSessionImpl::AddSetUIExtensionDestroyTimeoutCheck()
         std::ostringstream oss;
         oss << "SetUIExtDestroy timeout uid: " << getuid();
         oss << ", windowName: " << window->GetWindowName();
-        if (window->context_) {
-            oss << ", bundleName: " << window->context_->GetBundleName();
-            if (window->context_->GetApplicationInfo()) {
-                oss << ", abilityName: " << window->context_->GetApplicationInfo()->name;
+        auto context = window->GetContext();
+        if (context) {
+            oss << ", bundleName: " << context->GetBundleName();
+            if (context->GetApplicationInfo()) {
+                oss << ", abilityName: " << context->GetApplicationInfo()->name;
             }
         }
         SingletonContainer::Get<WindowInfoReporter>().ReportWindowException(
@@ -5836,14 +5857,16 @@ bool WindowSessionImpl::IsValidCrossState(int32_t state) const
         state < static_cast<int32_t>(CrossAxisState::STATE_END);
 }
 
-void WindowSessionImpl::UpdateSubWindowLevel(uint32_t subWindowLevel)
+void WindowSessionImpl::UpdateSubWindowInfo(uint32_t subWindowLevel,
+    const std::shared_ptr<AbilityRuntime::Context>& context)
 {
     property_->SetSubWindowLevel(subWindowLevel);
+    SetContext(context);
     std::vector<sptr<WindowSessionImpl>> subWindows;
-    GetSubWidnows(GetPersistentId(), subWindows);
+    GetSubWindows(GetPersistentId(), subWindows);
     for (auto& subWindow : subWindows) {
         if (subWindow != nullptr) {
-            subWindow->UpdateSubWindowLevel(subWindowLevel + 1);
+            subWindow->UpdateSubWindowInfo(subWindowLevel + 1, context);
         }
     }
 }

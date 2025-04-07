@@ -14288,6 +14288,10 @@ WMError SceneSessionManager::SetParentWindowInner(const sptr<SceneSession>& subS
             subSession->SetFollowParentWindowLayoutEnabled(true);
         }
     }
+    if (!oldParentSession->IsSameMainSession(newParentSession) && subSession->IsFocused() &&
+        !subSession->GetSessionProperty()->GetExclusivelyHighlighted()) {
+        SetHighlightSessionIds(subSession, true);
+    }
     return WMError::WM_OK;
 }
 
