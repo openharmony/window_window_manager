@@ -314,6 +314,7 @@ HWTEST_F(SceneSessionTest6, UpdateNewSizeForPCWindow, Function | SmallTest | Lev
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(12, WindowType::WINDOW_TYPE_FLOAT);
     sceneSession->moveDragController_->SetMoveDragHotAreaCrossDisplay(true);
+    sceneSession->UpdateNewSizeForPCWindow();
     ASSERT_EQ(false, sceneSession->moveDragController_->IsMoveDragHotAreaCrossDisplay());
 }
 
