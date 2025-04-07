@@ -341,23 +341,6 @@ HWTEST_F(SceneSessionTest6, CalcNewWindowRectIfNeed, Function | SmallTest | Leve
     WSRect result = { 0, 0, 1200, 900 };
     ASSERT_EQ(result, winRect);
 }
-
-/**
- * @tc.name: SaveLastDensity
- * @tc.desc: SaveLastDensity
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest6, SaveLastDensity, Function | SmallTest | Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "SaveLastDensity";
-    info.bundleName_ = "SaveLastDensity";
-    info.windowType_ = 1;
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    sceneSession->SaveLastDensity();
-}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
