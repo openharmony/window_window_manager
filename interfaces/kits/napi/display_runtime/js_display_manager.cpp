@@ -1620,6 +1620,29 @@ napi_value InitHDRFormat(napi_env env)
     return objValue;
 }
 
+napi_value InitScreenShape(napi_env env)
+{
+    TLOGD(WmsLogTag::DMS, "InitScreenShape called");
+
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::DMS, "env is nullptr");
+        return nullptr;
+    }
+
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::DMS, "Failed to get object");
+        return nullptr;
+    }
+
+    napi_set_named_property(env, objValue, "RECTANGLE",
+        CreateJsValue(env, static_cast<uint32_t>(ScreenShape::RECTANGLE)));
+    napi_set_named_property(env, objValue, "ROUND",
+        CreateJsValue(env, static_cast<uint32_t>(ScreenShape::ROUND)));
+    return objValue;
+}
+
 napi_value JsDisplayManagerInit(napi_env env, napi_value exportObj)
 {
     WLOGD("JsDisplayManagerInit is called");
@@ -1640,6 +1663,7 @@ napi_value JsDisplayManagerInit(napi_env env, napi_value exportObj)
     napi_set_named_property(env, exportObj, "FoldDisplayMode", InitFoldDisplayMode(env));
     napi_set_named_property(env, exportObj, "ColorSpace", InitColorSpace(env));
     napi_set_named_property(env, exportObj, "HDRFormat", InitHDRFormat(env));
+    napi_set_named_property(env, exportObj, "ScreenShape", InitScreenShape(env));
 
     const char *moduleName = "JsDisplayManager";
     BindNativeFunction(env, exportObj, "getDefaultDisplay", moduleName, JsDisplayManager::GetDefaultDisplay);
@@ -1661,14 +1685,10 @@ napi_value JsDisplayManagerInit(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "off", moduleName, JsDisplayManager::UnregisterDisplayManagerCallback);
     BindNativeFunction(env, exportObj, "getAllDisplayPhysicalResolution", moduleName,
         JsDisplayManager::GetAllDisplayPhysicalResolution);
-    BindNativeFunction(env, exportObj, "getDisplayCapability", moduleName,
-        JsDisplayManager::GetDisplayCapability);
-    BindNativeFunction(env, exportObj, "createVirtualScreen", moduleName,
-        JsDisplayManager::CreateVirtualScreen);
-    BindNativeFunction(env, exportObj, "makeUnique", moduleName,
-        JsDisplayManager::MakeUnique);
-    BindNativeFunction(env, exportObj, "destroyVirtualScreen", moduleName,
-        JsDisplayManager::DestroyVirtualScreen);
+    BindNativeFunction(env, exportObj, "getDisplayCapability", moduleName, JsDisplayManager::GetDisplayCapability);
+    BindNativeFunction(env, exportObj, "createVirtualScreen", moduleName, JsDisplayManager::CreateVirtualScreen);
+    BindNativeFunction(env, exportObj, "makeUnique", moduleName, JsDisplayManager::MakeUnique);
+    BindNativeFunction(env, exportObj, "destroyVirtualScreen", moduleName, JsDisplayManager::DestroyVirtualScreen);
     BindNativeFunction(env, exportObj, "setVirtualScreenSurface", moduleName,
         JsDisplayManager::SetVirtualScreenSurface);
     BindNativeFunction(env, exportObj, "addVirtualScreenBlocklist", moduleName,
