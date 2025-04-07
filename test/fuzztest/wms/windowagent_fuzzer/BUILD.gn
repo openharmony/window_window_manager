@@ -47,7 +47,6 @@ ohos_fuzztest("WindowAgentFuzzTest") {
     "${window_base_path}/wm:libwm",
   ]
 
-  public_deps = [ "//foundation/arkui/napi:ace_napi" ]
   external_deps = [
     "ability_base:base",
     "ability_base:want",
@@ -64,6 +63,7 @@ ohos_fuzztest("WindowAgentFuzzTest") {
     "image_framework:image_native",
     "input:libmmi-client",
     "ipc:ipc_single",
+    "napi:ace_napi",
     "resource_management:global_resmgr",
   ]
 }
