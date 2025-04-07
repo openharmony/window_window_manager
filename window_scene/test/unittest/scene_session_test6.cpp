@@ -298,19 +298,65 @@ HWTEST_F(SceneSessionTest6, NotifyKeyboardAnimationCompleted, Function | SmallTe
     sceneSession->NotifyKeyboardAnimationCompleted(isShowAnimation, beginRect, endRect);
 }
 
+
 /**
- * @tc.name: UpdateNewSizeForPcWindow
- * @tc.desc: UpdateNewSizeForPcWindow
+ * @tc.name: UpdateNewSizeForPCWindow
+ * @tc.desc: UpdateNewSizeForPCWindow
  * @tc.type: FUNC
  */
- HWTEST_F(SceneSessionTest6, UpdateNewSizeForPcWindow, Function | SmallTest | Level1)
- {
-     SessionInfo info;
-     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-     sceneSession->property_ = property;
+HWTEST_F(SceneSessionTest6, UpdateNewSizeForPCWindow, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "UpdateNewSizeForPCWindow";
+    info.bundleName_ = "UpdateNewSizeForPCWindow";
+    info.windowType_ = 1;
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(12, WindowType::WINDOW_TYPE_FLOAT);
+    sceneSession->moveDragController_->SetMoveDragHotAreaCrossDisplay(true);
+    ASSERT_EQ(false, sceneSession->moveDragController_->IsMoveDragHotAreaCrossDisplay());
+}
 
- }
+/**
+ * @tc.name: CalcNewWindowRectIfNeed
+ * @tc.desc: CalcNewWindowRectIfNeed
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, CalcNewWindowRectIfNeed, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "CalcNewWindowRectIfNeed";
+    info.bundleName_ = "CalcNewWindowRectIfNeed";
+    info.windowType_ = 1;
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetLastLimitsVpr(1.9);
+    sceneSession->property_ = property;
+    DMRect availableArea = { 0, 0, 1920, 1080 };
+    float newVpr = 2.85;
+    WSRect winRect = { 0, 0, 800, 600 };
+    sceneSession->CalcNewWindowRectIfNeed(availableArea, newVpr, winRect);
+    WSRect result = { 0, 0, 1200, 900 };
+    ASSERT_EQ(result, winRect);
+}
+
+/**
+ * @tc.name: SaveLastDensity
+ * @tc.desc: SaveLastDensity
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, SaveLastDensity, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "SaveLastDensity";
+    info.bundleName_ = "SaveLastDensity";
+    info.windowType_ = 1;
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->SaveLastDensity();
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
