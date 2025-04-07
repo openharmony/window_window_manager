@@ -7984,11 +7984,21 @@ RotationChangeResult SceneSession::NotifyRotationChange(const RotationChangeInfo
 WSError SceneSession::SetCurrentRotation(int32_t currentRotation)
 {
     TLOGI(WmsLogTag::WMS_ROTATION, "currentRotation: %{public}d", currentRotation);
-    if (!sessionStage_) {
+    sptr<ISessionStage> sessionStage = CheckSessionStage();
+    if (!sessionStage) {
         return WSError::WS_ERROR_NULLPTR;
     }
-    sptr<ISessionStage> sessionStage = sessionStage_;
     return sessionStage->SetCurrentRotation(currentRotation);
+}
+
+sptr<ISessionStage> SceneSession::CheckSessionStage()
+{
+    std::lock_guard<std::mutex> lockGuard(sessionStageMutex_);
+    if (sessionStage_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "sessionStage is null!");
+        return nullptr;
+    }
+    return sessionStage_;
 }
 
 void SceneSession::SetIsAbilityHook(bool isAbilityHook)
