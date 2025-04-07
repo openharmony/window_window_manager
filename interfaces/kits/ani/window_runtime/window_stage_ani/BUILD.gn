@@ -14,24 +14,16 @@
 import("//build/config/components/ets_frontend/ets2abc_config.gni")
 
 # abc generate
-generate_static_abc("window_stage_abc") {
-  arktsconfig = "./main.json"
-  dst_file = "$target_out_dir/window_stage_ani.abc"
-  in_puts = [
-    "./main.json",
-    "./ets/window.ets",
-    "./ets/window_entry.ets",
-  ]
-  out_puts = [ "$target_out_dir/window_stage_ani.abc" ]
-
+generate_static_abc("window_stage_ani") {
+  base_url = "./ets"
+  files = [ "./ets/@ohos.window.ets" ]
   is_boot_abc = "True"
   device_dst_file = "/system/framework/window_stage_ani.abc"
-  extra_visibility = [ ":*" ]
 }
 
 ohos_prebuilt_etc("window_stage_etc") {
   source = "$target_out_dir/window_stage_ani.abc"
-  deps = [ ":window_stage_abc" ]
+  deps = [ ":window_stage_ani" ]
   part_name = "window_manager"
   subsystem_name = "window"
   module_install_dir = "framework"
