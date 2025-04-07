@@ -297,6 +297,20 @@ HWTEST_F(SceneSessionTest6, NotifyKeyboardAnimationCompleted, Function | SmallTe
     sceneSession->NotifyKeyboardDidHideRegistered(true);
     sceneSession->NotifyKeyboardAnimationCompleted(isShowAnimation, beginRect, endRect);
 }
+
+/**
+ * @tc.name: UpdateNewSizeForPcWindow
+ * @tc.desc: UpdateNewSizeForPcWindow
+ * @tc.type: FUNC
+ */
+ HWTEST_F(SceneSessionTest6, UpdateNewSizeForPcWindow, Function | SmallTest | Level1)
+ {
+     SessionInfo info;
+     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+     sceneSession->property_ = property;
+
+ }
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
