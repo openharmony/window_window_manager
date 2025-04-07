@@ -324,6 +324,28 @@ HWTEST_F(SceneSessionManagerTest8, FilterSceneSessionCovered, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SubtractIntersectArea
+ * @tc.desc: test function : SubtractIntersectArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, SubtractIntersectArea, TestSize.Level1)
+{
+    SkIRect rect {.fLeft = 0, .fTop = 0, .fRight = 2880, .fBottom = 1920};
+    auto unaccountedSpace = std::make_shared<SkRegion>(rect);
+    EXPECT_NE(unaccountedSpace, nullptr);
+
+    sptr<SceneSession> sceneSession = nullptr;
+    EXPECT_EQ(ssm_->SubtractIntersectArea(unaccountedSpace, sceneSession), false);
+
+    SessionInfo sessionInfo;
+    sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    WSRect wsRect {.posX_ = 0, .posY_ = 0, .width_ = 100, .height_ = 100};
+    sceneSession->winRect_ = wsRect;
+    EXPECT_EQ(ssm_->SubtractIntersectArea(unaccountedSpace, sceneSession), true);
+}
+
+/**
  * @tc.name: UpdateSubWindowVisibility
  * @tc.desc: test function : UpdateSubWindowVisibility
  * @tc.type: FUNC
