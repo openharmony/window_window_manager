@@ -2008,6 +2008,26 @@ HWTEST_F(WindowSessionImplTest, UnregisterWaterfallModeChangeListener, TestSize.
 }
 
 /**
+ * @tc.name: IsWaterfallModeEnabled
+ * @tc.desc: IsWaterfallModeEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, IsWaterfallModeEnabled, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("IsWaterfallModeEnabled");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->hostSession_ = nullptr;
+    EXPECT_EQ(window->IsWaterfallModeEnabled(), false);
+
+    auto mockHostSession = sptr<SessionStubMocker>::MakeSptr();
+    window->hostSession_ = mockHostSession;
+    window->property_->persistentId_ = 1234;
+    EXPECT_CALL(*mockHostSession, GetWaterfallMode(_)).WillOnce(DoAll(SetArgReferee<0>(true), Return(WSError::WS_OK)));
+    EXPECT_EQ(window->IsWaterfallModeEnabled(), true);
+}
+
+/**
  * @tc.name: NotifyWaterfallModeChange
  * @tc.desc: NotifyWaterfallModeChange Test
  * @tc.type: FUNC
