@@ -11649,7 +11649,7 @@ WSError SceneSessionManager::GetAppMainSceneSession(int32_t persistentId, sptr<S
 }
 
 std::shared_ptr<Media::PixelMap> SceneSessionManager::GetSessionSnapshotPixelMap(const int32_t persistentId,
-    const float scaleParam, SnapshotNodeType snapNode, bool needSnapshot)
+    const float scaleParam, SnapshotNodeType snapshotNode, bool needSnapshot)
 {
     auto sceneSession = GetSceneSession(persistentId);
     if (!sceneSession) {
@@ -11660,8 +11660,8 @@ std::shared_ptr<Media::PixelMap> SceneSessionManager::GetSessionSnapshotPixelMap
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetSessionSnapshotPixelMap(%d )", persistentId);
 
     bool isPc = systemConfig_.IsPcWindow() || systemConfig_.IsFreeMultiWindowMode();
-    bool useCurWindow = (snapNode == SnapshotNodeType::DEFAULT_NODE) ?
-        isPc : (snapNode == SnapshotNodeType::LEASH_NODE) ? false : true;
+    bool useCurWindow = (snapshotNode == SnapshotNodeType::DEFAULT_NODE) ?
+        isPc : (snapshotNode == SnapshotNodeType::LEASH_NODE) ? false : true;
     std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
     if (needSnapshot) {
         pixelMap = sceneSession->Snapshot(true, scaleParam, useCurWindow);

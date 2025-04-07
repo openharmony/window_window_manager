@@ -3399,15 +3399,15 @@ napi_value JsSceneSessionManager::OnGetSessionSnapshotPixelMap(napi_env env, nap
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    SnapshotNodeType snapNode = SnapshotNodeType::DEFAULT_NODE;
-    if (argc > ARGC_TWO && !ConvertFromJsValue(env, argv[ARG_INDEX_TWO], snapNode)) {
-        TLOGE(WmsLogTag::WMS_PATTERN, "Failed to convert parameter to snapNode");
+    SnapshotNodeType snapshotNode = SnapshotNodeType::DEFAULT_NODE;
+    if (argc > ARGC_TWO && !ConvertFromJsValue(env, argv[ARG_INDEX_TWO], snapshotNode)) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Failed to convert parameter to snapshotNode");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    if (snapNode < SnapshotNodeType::DEFAULT_NODE || snapNode > SnapshotNodeType::APP_NODE) {
-        TLOGE(WmsLogTag::WMS_PATTERN, "SnapshotNodeType invalid:%{public}d", snapNode);
+    if (snapshotNode < SnapshotNodeType::DEFAULT_NODE || snapshotNode > SnapshotNodeType::APP_NODE) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "SnapshotNodeType invalid:%{public}d", snapshotNode);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
@@ -3423,12 +3423,12 @@ napi_value JsSceneSessionManager::OnGetSessionSnapshotPixelMap(napi_env env, nap
     float scaleParam = GreatOrEqual(scaleValue, 0.0f) && LessOrEqual(scaleValue, 1.0f) ?
         static_cast<float>(scaleValue) : 0.0f;
     std::shared_ptr<std::shared_ptr<Media::PixelMap>> pixelPtr = std::make_shared<std::shared_ptr<Media::PixelMap>>();
-    NapiAsyncTask::ExecuteCallback execute = [persistentId, scaleParam, pixelPtr, snapNode, needSnapshot]() {
+    NapiAsyncTask::ExecuteCallback execute = [persistentId, scaleParam, pixelPtr, snapshotNode, needSnapshot]() {
         if (pixelPtr == nullptr) {
             return;
         }
         *pixelPtr = SceneSessionManager::GetInstance().GetSessionSnapshotPixelMap(
-            persistentId, scaleParam, snapNode, needSnapshot);
+            persistentId, scaleParam, snapshotNode, needSnapshot);
     };
     NapiAsyncTask::CompleteCallback complete =
         [persistentId, scaleParam, pixelPtr](napi_env env, NapiAsyncTask& task, int32_t status) {
@@ -3481,15 +3481,15 @@ napi_value JsSceneSessionManager::OnGetSessionSnapshotPixelMapSync(napi_env env,
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    SnapshotNodeType snapNode = SnapshotNodeType::DEFAULT_NODE;
-    if (argc > ARGC_TWO && !ConvertFromJsValue(env, argv[ARG_INDEX_TWO], snapNode)) {
-        TLOGE(WmsLogTag::WMS_PATTERN, "Failed to convert parameter to snapNode");
+    SnapshotNodeType snapshotNode = SnapshotNodeType::DEFAULT_NODE;
+    if (argc > ARGC_TWO && !ConvertFromJsValue(env, argv[ARG_INDEX_TWO], snapshotNode)) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Failed to convert parameter to snapshotNode");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    if (snapNode < SnapshotNodeType::DEFAULT_NODE || snapNode > SnapshotNodeType::APP_NODE) {
-        TLOGE(WmsLogTag::WMS_PATTERN, "SnapshotNodeType invalid:%{public}d", snapNode);
+    if (snapshotNode < SnapshotNodeType::DEFAULT_NODE || snapshotNode > SnapshotNodeType::APP_NODE) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "SnapshotNodeType invalid:%{public}d", snapshotNode);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
@@ -3504,7 +3504,7 @@ napi_value JsSceneSessionManager::OnGetSessionSnapshotPixelMapSync(napi_env env,
     float scaleParam = GreatOrEqual(scaleValue, 0.0f) && LessOrEqual(scaleValue, 1.0f) ?
         static_cast<float>(scaleValue) : 0.0f;
     std::shared_ptr<Media::PixelMap> pixelPtr =
-        SceneSessionManager::GetInstance().GetSessionSnapshotPixelMap(persistentId, scaleParam, snapNode, needSnapshot);
+        SceneSessionManager::GetInstance().GetSessionSnapshotPixelMap(persistentId, scaleParam, snapshotNode, needSnapshot);
     if (pixelPtr == nullptr) {
         TLOGE(WmsLogTag::WMS_MAIN, "Failed to create pixlePtr");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY),
