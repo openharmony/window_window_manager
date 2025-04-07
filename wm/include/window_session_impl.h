@@ -90,6 +90,7 @@ public:
         AppExecFwk::Ability* ability) override;
     std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const override;
     const std::shared_ptr<AbilityRuntime::Context> GetContext() const override;
+    void SetContext(const std::shared_ptr<AbilityRuntime::Context>& context);
     Rect GetRequestRect() const override;
     WindowType GetType() const override;
     const std::string& GetWindowName() const override;
@@ -496,8 +497,8 @@ protected:
     void UpdateSubWindowStateAndNotify(int32_t parentPersistentId, const WindowState newState);
     void DestroySubWindow();
     bool IsSubWindowMaximizeSupported() const override;
-    void UpdateSubWindowLevel(uint32_t subWindowLevel);
-    void GetSubWidnows(int32_t parentPersistentId, std::vector<sptr<WindowSessionImpl>>& subWindows);
+    void UpdateSubWindowInfo(uint32_t subWindowLevel, const std::shared_ptr<AbilityRuntime::Context>& context);
+    void GetSubWindows(int32_t parentPersistentId, std::vector<sptr<WindowSessionImpl>>& subWindows);
     void RemoveSubWindow(int32_t parentPersistentId);
 
     sptr<WindowOption> windowOption_;
@@ -506,6 +507,7 @@ protected:
     std::shared_ptr<Ace::UIContent> uiContent_;
     mutable std::shared_mutex uiContentMutex_;
     std::shared_ptr<AbilityRuntime::Context> context_;
+    mutable std::shared_mutex contextMutex_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
 
     sptr<WindowSessionProperty> property_;
