@@ -12,15 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+import { UIContext } from '@ohos.arkui.UIContext';
 loadLibrary('scenesessionmanagerani_kit.z');
- 
-export class UIContext {
-}
- 
-export class BusinessError extends Error {
-    code: number;
-}
  
 export default namespace sceneSessionManager {
     loadLibrary('scenesessionmanagerani_kit.z');

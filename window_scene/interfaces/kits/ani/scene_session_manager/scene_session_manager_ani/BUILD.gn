@@ -15,22 +15,14 @@ import("//build/config/components/ets_frontend/ets2abc_config.gni")
 
 # abc generate
 generate_static_abc("scene_session_manager_abc") {
-  arktsconfig = "./main.json"
-  in_puts = [
-    "./main.json",
-    "./ets/sceneSessionManager.ets",
-    "./ets/sceneSessionManager_entry.ets",
-  ]
-  dst_file = "$target_out_dir/scene_session_manager.abc"
-  out_puts = [ "$target_out_dir/scene_session_manager.abc" ]
-  timeout_limit = "120"
-  extra_visibility = [ ":*" ]
+  base_url = "./ets"
+  files = [ "./ets/@ohos.sceneSessionManager.ets" ]
   is_boot_abc = "True"
-  device_dst_file = "/system/framework/scene_session_manager.abc"
+  device_dst_file = "/system/framework/scene_session_manager_abc.abc"
 }
 
 ohos_prebuilt_etc("scene_session_manager_etc") {
-  source = "$target_out_dir/scene_session_manager.abc"
+  source = "$target_out_dir/scene_session_manager_abc.abc"
   deps = [ ":scene_session_manager_abc" ]
   part_name = "window_manager"
   subsystem_name = "window"
