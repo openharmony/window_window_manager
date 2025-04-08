@@ -64,6 +64,16 @@ class IPiPWindowSize : virtual public RefBase {
 public:
     virtual void OnPipSizeChange(const PiPWindowSize& size) {}
 };
+
+/**
+ * @class IPiPTypeNodeObserver
+ *
+ * @brief Pip typeNode observer.
+ */
+class IPiPTypeNodeObserver : virtual public RefBase {
+public:
+    virtual void OnPipTypeNodeChange(const napi_ref nodeRef) {}
+};
 } // namespace Rosen
 } // namespace OHOS
 #endif //OHOS_PICTURE_IN_PICTURE_INTERFACE_H
