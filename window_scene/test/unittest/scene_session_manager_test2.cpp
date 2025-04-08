@@ -2040,6 +2040,58 @@ HWTEST_F(SceneSessionManagerTest2, RecoverCachedDialogSession, Function | SmallT
     ssm_->RecoverCachedDialogSession(parentPersistentId);
     ASSERT_EQ(ssm_->recoverDialogSessionCacheMap_[parentPersistentId].size(), 0);
 }
+
+/**
+ * @tc.name: ExtractSupportWindowModeFromMetaData
+ * @tc.desc: ExtractSupportWindowModeFromMetaData
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, ExtractSupportWindowModeFromMetaData, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->recoveringFinished_ = false;
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test2";
+    sptr<WindowSessionProperty> property;
+    sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, property);
+    ASSERT_NE(sceneSession, nullptr);
+
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    AppExecFwk::AbilityInfo abilityInfo;
+    int ret = 0;
+    std::vector<AppExecFwk::SupportWindowMode> updateWindowModes =
+        ssm_->ExtractSupportWindowModeFromMetaData(std::make_shared<OHOS::AppExecFwk::AbilityInfo>(abilityInfo));
+    ASSERT_EQ(ret, 0);
+
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    ssm_->systemConfig_.freeMultiWindowEnable_ = false;
+    updateWindowModes =
+        ssm_->ExtractSupportWindowModeFromMetaData(std::make_shared<OHOS::AppExecFwk::AbilityInfo>(abilityInfo));
+    ASSERT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: ParseWindowModeFromMetaData
+ * @tc.desc: ParseWindowModeFromMetaData
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, ParseWindowModeFromMetaData, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->recoveringFinished_ = false;
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test2";
+    sptr<WindowSessionProperty> property;
+    sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, property);
+    ASSERT_NE(sceneSession, nullptr);
+
+    std::vector<AppExecFwk::SupportWindowMode> updateWindowModes =
+        {AppExecFwk::SupportWindowMode::FULLSCREEN, AppExecFwk::SupportWindowMode::SPLIT,
+        AppExecFwk::SupportWindowMode::FLOATING};
+    ASSERT_EQ(updateWindowModes, ssm_->ParseWindowModeFromMetaData("fullscreen,split,floating"));
+}
 }
 } // namespace Rosen
 } // namespace OHOS
