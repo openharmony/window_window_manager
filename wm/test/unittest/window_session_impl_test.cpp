@@ -2111,6 +2111,68 @@ HWTEST_F(WindowSessionImplTest, UpdateExtensionConfig, Function | SmallTest | Le
     window->UpdateExtensionConfig(want);
     EXPECT_EQ(window->crossAxisState_.load(), CrossAxisState::STATE_NO_CROSS);
 }
+
+/**
+ * @tc.name: RegisterWaterfallModeChangeListener
+ * @tc.desc: RegisterWaterfallModeChangeListener Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, RegisterWaterfallModeChangeListener, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("waterfall");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    sptr<IWaterfallModeChangeListener> listener = sptr<IWaterfallModeChangeListener>::MakeSptr();
+    auto ret = window->RegisterWaterfallModeChangeListener(listener);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    listener = nullptr;
+    ret = window->RegisterWaterfallModeChangeListener(listener);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+    auto listeners = window->GetWaterfallModeChangeListeners();
+    ASSERT_EQ(listeners.size(), 1);
+}
+
+/**
+ * @tc.name: UnregisterWaterfallModeChangeListener
+ * @tc.desc: UnregisterWaterfallModeChangeListener Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, UnregisterWaterfallModeChangeListener, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("waterfall");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->waterfallModeChangeListeners_.clear();
+    sptr<IWaterfallModeChangeListener> listener = sptr<IWaterfallModeChangeListener>::MakeSptr();
+    auto ret = window->RegisterWaterfallModeChangeListener(listener);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    auto listeners = window->GetWaterfallModeChangeListeners();
+    ASSERT_EQ(listeners.size(), 1);
+    ret = window->UnregisterWaterfallModeChangeListener(listener);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    listeners = window->GetWaterfallModeChangeListeners();
+    ASSERT_EQ(listeners.size(), 0);
+    listener = nullptr;
+    ret = window->UnregisterWaterfallModeChangeListener(listener);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+}
+
+/**
+ * @tc.name: NotifyWaterfallModeChange
+ * @tc.desc: NotifyWaterfallModeChange Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, NotifyWaterfallModeChange, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("waterfall");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->state_ = WindowState::STATE_SHOWN;
+    sptr<IWaterfallModeChangeListener> listener = sptr<IWaterfallModeChangeListener>::MakeSptr();
+    auto ret = window->RegisterWaterfallModeChangeListener(listener);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    window->NotifyWaterfallModeChange(true);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
