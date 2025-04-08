@@ -296,7 +296,7 @@ HWTEST_F(WindowHelperTest, CheckButtonStyleValid, TestSize.Level1)
 
     // checkout the side of buttonIconSize
     style.buttonIconSize = MIN_BUTTON_ICON_SIZE - 1;
-    ASSERT_FALSE(WindowHelpler::CheckButtonStyleValid(style));
+    ASSERT_FALSE(WindowHelper::CheckButtonStyleValid(style));
     style.buttonIconSize = MAX_BUTTON_ICON_SIZE + 1;
     ASSERT_FALSE(WindowHelper::CheckButtonStyleValid(style));
     style.buttonIconSize = MAX_BUTTON_ICON_SIZE;
