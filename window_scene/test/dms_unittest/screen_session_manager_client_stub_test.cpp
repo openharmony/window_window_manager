@@ -852,5 +852,65 @@ HWTEST_F(ScreenSessionManagerClientStubTest, HandleScreenCaptureNotify, TestSize
     int ret = screenSessionManagerClientStub_->HandleScreenCaptureNotify(data, reply);
     EXPECT_EQ(ret, 0);
 }
+
+/**
+ * @tc.name: HandleOnExtendDisplayNodeChange
+ * @tc.desc: HandleOnExtendDisplayNodeChange test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientStubTest, HandleOnExtendDisplayNodeChange, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteInterfaceToken(ScreenSessionManagerClientStub::GetDescriptor());
+
+    ScreenId mainScreenId = 50;
+    ScreenId extendScreenId = 51;
+    data.WriteUint64(mainScreenId);
+    data.WriteUint64(extendScreenId);
+    ASSERT_TRUE(screenSessionManagerClientStub_ != nullptr);
+    auto ret = screenSessionManagerClientStub_->HandleOnExtendDisplayNodeChange(data, reply);
+    EXPECT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: HandleOnDumperClientScreenSessions
+ * @tc.desc: HandleOnDumperClientScreenSessions test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientStubTest, HandleOnDumperClientScreenSessions, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteInterfaceToken(ScreenSessionManagerClientStub::GetDescriptor());
+    ASSERT_TRUE(screenSessionManagerClientStub_ != nullptr);
+    auto ret = screenSessionManagerClientStub_->HandleOnDumperClientScreenSessions(data, reply);
+    EXPECT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: HandleSyncScreenCombination
+ * @tc.desc: HandleSyncScreenCombination test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientStubTest, HandleSyncScreenCombination, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteInterfaceToken(ScreenSessionManagerClientStub::GetDescriptor());
+
+    ScreenId mainScreenId = 50;
+    ScreenId extendScreenId = 51;
+    ScreenCombination extendCombination = ScreenCombination::SCREEN_ALONE;
+    data.WriteUint64(mainScreenId);
+    data.WriteUint64(extendScreenId);
+    data.WriteUint32(static_cast<u_int32_t>(extendCombination));
+    ASSERT_TRUE(screenSessionManagerClientStub_ != nullptr);
+    auto ret = screenSessionManagerClientStub_->HandleSyncScreenCombination(data, reply);
+    EXPECT_EQ(ret, 0);
+}
 } // namespace Rosen
 } // namespace OHOS
