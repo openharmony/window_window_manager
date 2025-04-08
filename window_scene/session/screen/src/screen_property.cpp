@@ -287,6 +287,7 @@ void ScreenProperty::SetRotationAndScreenRotationOnly(Rotation rotation)
             break;
     }
     screenRotation_ = rotation;
+    deviceRotation_ = rotation;
 }
 
 void ScreenProperty::UpdateScreenRotation(Rotation rotation)
