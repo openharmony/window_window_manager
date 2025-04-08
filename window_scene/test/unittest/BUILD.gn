@@ -1638,7 +1638,6 @@ ohos_unittest("ws_mock_session_manager_service_test") {
   ]
 
   external_deps = [
-    "c_utils:utils",
     "hilog:libhilog",
     "safwk:system_ability_fwk",
   ]
