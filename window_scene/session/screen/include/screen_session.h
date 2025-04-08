@@ -309,6 +309,7 @@ public:
     void ExtendScreenConnectStatusChange(ScreenId screenId, ExtendScreenConnectStatus extendScreenConnectStatus);
     void SetIsEnableRegionRotation(bool isEnableRegionRotation);
     bool GetIsEnableRegionRotation();
+    void UpdateDisplayNodeRotation(int rotation);
 
 private:
     ScreenProperty property_;
