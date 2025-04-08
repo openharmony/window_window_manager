@@ -286,12 +286,28 @@ HWTEST_F(WindowHelperTest, CheckButtonStyleValid, TestSize.Level1)
     style.closeButtonRightMargin = MIN_CLOSE_BUTTON_RIGHT_MARGIN;
     ASSERT_TRUE(WindowHelper::CheckButtonStyleValid(style));
 
-    // checkout the side of closeButtonRightMargin
+    // checkout the side of spacingBetweenButtons
     style.spacingBetweenButtons = MIN_SPACING_BETWEEN_BUTTONS - 1;
     ASSERT_FALSE(WindowHelper::CheckButtonStyleValid(style));
     style.spacingBetweenButtons = MAX_SPACING_BETWEEN_BUTTONS + 1;
     ASSERT_FALSE(WindowHelper::CheckButtonStyleValid(style));
     style.spacingBetweenButtons = MAX_SPACING_BETWEEN_BUTTONS;
+    ASSERT_TRUE(WindowHelper::CheckButtonStyleValid(style));
+
+    // checkout the side of buttonIconSize
+    style.buttonIconSize = MIN_BUTTON_ICON_SIZE - 1;
+    ASSERT_FALSE(WindowHelpler::CheckButtonStyleValid(style));
+    style.buttonIconSize = MAX_BUTTON_ICON_SIZE + 1;
+    ASSERT_FALSE(WindowHelper::CheckButtonStyleValid(style));
+    style.buttonIconSize = MAX_BUTTON_ICON_SIZE;
+    ASSERT_TRUE(WindowHelper::CheckButtonStyleValid(style));
+
+    // checkout the side of buttonBackgroundCornerRadius
+    style.buttonBackgroundCornerRadius = MIN_BUTTON_BACKGROUND_CORNER_RADIUS - 1;
+    ASSERT_FALSE(WindowHelper::CheckButtonStyleValid(style));
+    style.buttonBackgroundCornerRadius = MAX_BUTTON_BACKGROUND_CORNER_RADIUS + 1;
+    ASSERT_FALSE(WindowHelper::CheckButtonStyleValid(style));
+    style.buttonBackgroundCornerRadius = MAX_BUTTON_BACKGROUND_CORNER_RADIUS;
     ASSERT_TRUE(WindowHelper::CheckButtonStyleValid(style));
 }
 }
