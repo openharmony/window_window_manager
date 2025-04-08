@@ -24,6 +24,7 @@
 #include "color_parser.h"
 #include "extension/extension_business_info.h"
 #include "mock_session.h"
+#include "mock_session_stub.h"
 #include "mock_uicontent.h"
 #include "mock_window.h"
 #include "parameters.h"
