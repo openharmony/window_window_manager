@@ -16,6 +16,7 @@
 #include "session/host/include/session.h"
 
 #include <regex>
+#include <string>
 
 #include "ability_info.h"
 #include "input_manager.h"
@@ -228,6 +229,12 @@ void Session::SetSessionInfoAbilityInfo(const std::shared_ptr<AppExecFwk::Abilit
 {
     std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
     sessionInfo_.abilityInfo = abilityInfo;
+}
+
+void Session::SetSessionInfoSupportedWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& updatedWindowModes)
+{
+    std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
+    sessionInfo_.supportedWindowModes = updatedWindowModes;
 }
 
 void Session::SetSessionInfoWant(const std::shared_ptr<AAFwk::Want>& want)

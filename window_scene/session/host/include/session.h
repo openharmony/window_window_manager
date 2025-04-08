@@ -255,6 +255,8 @@ public:
 
     SessionState GetSessionState() const;
     virtual void SetSessionState(SessionState state);
+    void SetSessionInfoSupportedWindowModes(
+        const std::vector<AppExecFwk::SupportWindowMode>& updatedWindowModes);
     void SetSessionInfoAncoSceneState(int32_t ancoSceneState);
     void SetSessionInfoTime(const std::string& time);
     void SetSessionInfoAbilityInfo(const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo);
@@ -390,7 +392,7 @@ public:
     void SetContextTransparentFunc(const NotifyContextTransparentFunc& func);
     void NotifyContextTransparent();
     bool NeedCheckContextTransparent() const;
-    
+
     /*
      * Window Rotate Animation
      */

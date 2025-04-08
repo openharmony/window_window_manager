@@ -4420,6 +4420,43 @@ void SceneSessionManager::OnConfigurationUpdated(const std::shared_ptr<AppExecFw
     }, __func__);
 }
 
+std::vector<AppExecFwk::SupportWindowMode> SceneSessionManager::ExtractSupportWindowModeFromMetaData(
+    const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo)
+{
+    std::vector<AppExecFwk::SupportWindowMode> updateWindowModes = {};
+    if (systemConfig_.IsPcWindow() || systemConfig_.IsFreeMultiWindowMode()) {
+        auto metadata = abilityInfo->metadata;
+        for (auto item : metadata) {
+            if (item.name == "ohos.ability.window.supportWindowModeInFreeMultiWindow") {
+                updateWindowModes = ParseWindowModeFromMetaData(item.value);
+            }
+        }
+    }
+    if (updateWindowModes.empty()) {
+        updateWindowModes = abilityInfo->windowModes;
+    }
+    return updateWindowModes;
+}
+
+std::vector<AppExecFwk::SupportWindowMode> SceneSessionManager::ParseWindowModeFromMetaData(
+    const std::string& supportModesInFreeMultiWindow)
+{
+    std::vector<AppExecFwk::SupportWindowMode> updateWindowModes = {};
+    std::stringstream supportModes(supportModesInFreeMultiWindow);
+    std::string supportWindowMode;
+    while (getline(supportModes, supportWindowMode, ',')) {
+        if (supportWindowMode == "fullscreen") {
+            updateWindowModes.push_back(AppExecFwk::SupportWindowMode::FULLSCREEN);
+        } else if (supportWindowMode == "split") {
+            updateWindowModes.push_back(AppExecFwk::SupportWindowMode::SPLIT);
+        } else if (supportWindowMode == "floating") {
+            updateWindowModes.push_back(AppExecFwk::SupportWindowMode::FLOATING);
+        }
+    }
+    return updateWindowModes;
+}
+
+
 void SceneSessionManager::FillSessionInfo(sptr<SceneSession>& sceneSession)
 {
     const auto& sessionInfo = sceneSession->GetSessionInfo();
@@ -4437,6 +4474,7 @@ void SceneSessionManager::FillSessionInfo(sptr<SceneSession>& sceneSession)
         TLOGE(WmsLogTag::DEFAULT, "abilityInfo is nullptr!");
         return;
     }
+    sceneSession->SetSessionInfoSupportedWindowModes(ExtractSupportWindowModeFromMetaData(abilityInfo));
     sceneSession->SetEnableRemoveStartingWindow(GetEnableRemoveStartingWindowFromBMS(abilityInfo));
     sceneSession->SetSessionInfoAbilityInfo(abilityInfo);
     sceneSession->SetSessionInfoTime(GetCurrentTime());
@@ -8002,6 +8040,8 @@ WSError SceneSessionManager::GetAbilityInfo(const std::string& bundleName, const
     for (auto& hapModule : hapModulesList) {
         auto& abilityInfoList = hapModule.abilityInfos;
         for (auto& abilityInfo : abilityInfoList) {
+            abilityInfo.windowModes = ExtractSupportWindowModeFromMetaData(
+                std::make_shared<OHOS::AppExecFwk::AbilityInfo>(abilityInfo));
             if (abilityInfo.moduleName == moduleName && abilityInfo.name == abilityName) {
                 scbAbilityInfo.abilityInfo_ = abilityInfo;
                 scbAbilityInfo.sdkVersion_ = sdkVersion;
@@ -8048,6 +8088,8 @@ WSError SceneSessionManager::GetAbilityInfosFromBundleInfo(const std::vector<App
             for (auto& abilityInfo : abilityInfoList) {
                 SCBAbilityInfo scbAbilityInfo;
                 scbAbilityInfo.abilityInfo_ = abilityInfo;
+                scbAbilityInfo.abilityInfo_.windowModes = ExtractSupportWindowModeFromMetaData(
+                    std::make_shared<OHOS::AppExecFwk::AbilityInfo>(abilityInfo));
                 scbAbilityInfo.sdkVersion_ = sdkVersion;
                 GetOrientationFromResourceManager(scbAbilityInfo.abilityInfo_);
                 scbAbilityInfos.push_back(scbAbilityInfo);
