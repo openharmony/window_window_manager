@@ -74,6 +74,8 @@ constexpr WSRectF VELOCITY_RELOCATION_TO_BOTTOM = {0.0f, 10.0f, 0.0f, 0.0f};
 constexpr int32_t API_VERSION_18 = 18;
 constexpr int32_t HOOK_SYSTEM_BAR_HEIGHT = 40;
 constexpr int32_t HOOK_AI_BAR_HEIGHT = 28;
+constexpr int32_t MULTI_WINDOW_FLOATING_TITLE_BAR_HEIGHT_VP = 46;
+constexpr int32_t MULTI_WINDOW_TITLE_BAR_DEFAULT_HEIGHT_VP = 32;
 
 bool CheckIfRectElementIsTooLarge(const WSRect& rect)
 {
@@ -2011,8 +2013,9 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
             return;
         }
         vpr = display->GetVirtualPixelRatio();
-        int32_t floatingBarHeight = 32; // 32: floating windowBar Height
-        avoidArea.topRect_.height_ = vpr * floatingBarHeight;
+        bool isFloat = windowMode == WindowMode::WINDOW_MODE_FLOATING && !GetIsMidScene();
+        int32_t height = isFloat ? MULTI_WINDOW_FLOATING_TITLE_BAR_HEIGHT_VP : MULTI_WINDOW_TITLE_BAR_DEFAULT_HEIGHT_VP;
+        avoidArea.topRect_.height_ = vpr * height;
         avoidArea.topRect_.width_ = static_cast<uint32_t>(display->GetWidth());
         return;
     }
@@ -2472,9 +2475,9 @@ WSError SceneSession::SetPiPControlEvent(WsPiPControlType controlType, WsPiPCont
     return sessionStage_->SetPiPControlEvent(controlType, status);
 }
 
-WSError SceneSession::NotifyPipWindowSizeChange(uint32_t width, uint32_t height, double scale)
+WSError SceneSession::NotifyPipWindowSizeChange(double width, double height, double scale)
 {
-    TLOGI(WmsLogTag::WMS_PIP, "width: %{public}u, height: %{public}u scale: %{public}f", width, height, scale);
+    TLOGI(WmsLogTag::WMS_PIP, "width: %{public}f, height: %{public}f scale: %{public}f", width, height, scale);
     if (!sessionStage_) {
         return WSError::WS_ERROR_NULLPTR;
     }
@@ -2654,8 +2657,12 @@ WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::Point
 
 void SceneSession::NotifyUpdateGravity()
 {
-    std::lock_guard lock(registerNotifySurfaceBoundsChangeMutex_);
-    for (const auto& [sessionId, _] : notifySurfaceBoundsChangeFuncMap_) {
+    std::unordered_map<int32_t, NotifySurfaceBoundsChangeFunc> funcMap;
+    {
+        std::lock_guard lock(registerNotifySurfaceBoundsChangeMutex_);
+        funcMap = notifySurfaceBoundsChangeFuncMap_;
+    }
+    for (const auto& [sessionId, _] : funcMap) {
         auto subSession = GetSceneSessionById(sessionId);
         if (!subSession || !subSession->GetIsFollowParentLayout()) {
             return;
@@ -3567,6 +3574,17 @@ WSError SceneSession::SetKeepScreenOn(bool keepScreenOn)
 bool SceneSession::IsKeepScreenOn() const
 {
     return GetSessionProperty()->IsKeepScreenOn();
+}
+
+WSError SceneSession::SetViewKeepScreenOn(bool keepScreenOn)
+{
+    GetSessionProperty()->SetViewKeepScreenOn(keepScreenOn);
+    return WSError::WS_OK;
+}
+
+bool SceneSession::IsViewKeepScreenOn() const
+{
+    return GetSessionProperty()->IsViewKeepScreenOn();
 }
 
 void SceneSession::SaveUpdatedIcon(const std::shared_ptr<Media::PixelMap>& icon)
@@ -4719,6 +4737,8 @@ WMError SceneSession::ProcessUpdatePropertyByAction(const sptr<WindowSessionProp
             return HandleActionUpdateTurnScreenOn(property, action);
         case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON):
             return HandleActionUpdateKeepScreenOn(property, action);
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_VIEW_KEEP_SCREEN_ON):
+            return HandleActionUpdateViewKeepScreenOn(property, action);
         case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE):
             return HandleActionUpdateFocusable(property, action);
         case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE):
@@ -4818,6 +4838,16 @@ WMError SceneSession::HandleActionUpdateKeepScreenOn(const sptr<WindowSessionPro
     WSPropertyChangeAction action)
 {
     SetKeepScreenOn(property->IsKeepScreenOn());
+    NotifySessionChangeByActionNotifyManager(property, action);
+    return WMError::WM_OK;
+}
+
+WMError SceneSession::HandleActionUpdateViewKeepScreenOn(const sptr<WindowSessionProperty>& property,
+    WSPropertyChangeAction action)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "id: %{public}d, enabled: %{public}u",
+        GetPersistentId(), property->IsViewKeepScreenOn());
+    SetViewKeepScreenOn(property->IsViewKeepScreenOn());
     NotifySessionChangeByActionNotifyManager(property, action);
     return WMError::WM_OK;
 }
@@ -7060,9 +7090,10 @@ void SceneSession::NotifyWindowAttachStateListenerRegistered(bool registered)
     SetNeedNotifyAttachState(registered);
 }
 
-void SceneSession::NotifyKeyboardAnimationCompleted(bool isShowAnimation, const WSRect& panelRect)
+void SceneSession::NotifyKeyboardAnimationCompleted(bool isShowAnimation,
+    const WSRect& beginRect, const WSRect& endRect)
 {
-    PostTask([weakThis = wptr(this), isShowAnimation, panelRect, where = __func__] {
+    PostTask([weakThis = wptr(this), isShowAnimation, beginRect, endRect, where = __func__] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s session is null", where);
@@ -7083,7 +7114,8 @@ void SceneSession::NotifyKeyboardAnimationCompleted(bool isShowAnimation, const 
         }
     
         KeyboardPanelInfo keyboardPanelInfo;
-        keyboardPanelInfo.rect_ = SessionHelper::TransferToRect(panelRect);
+        keyboardPanelInfo.beginRect_ = SessionHelper::TransferToRect(beginRect);
+        keyboardPanelInfo.endRect_ = SessionHelper::TransferToRect(endRect);
         keyboardPanelInfo.isShowing_ = isShowAnimation;
         session->sessionStage_->NotifyKeyboardAnimationCompleted(keyboardPanelInfo);
     }, __func__);

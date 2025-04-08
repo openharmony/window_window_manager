@@ -32,18 +32,23 @@
 #include "session/host/include/main_session.h"
 #include "window_manager_agent.h"
 #include "zidl/window_manager_agent_interface.h"
+#include "mock/mock_window_manager_agent_lite.h"
+#include "session_manager/include/session_manager_agent_controller.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+class KeyboardTestData;
 class SceneSessionManagerTest12 : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+
+    void ConstructKeyboardCallingWindowTestData(const KeyboardTestData& keyboardTestData);
 
     static sptr<SceneSessionManager> ssm_;
 private:
@@ -69,6 +74,55 @@ void SceneSessionManagerTest12::SetUp()
 void SceneSessionManagerTest12::TearDown()
 {
     usleep(WAIT_SYNC_IN_NS);
+}
+
+class KeyboardTestData {
+public:
+    KeyboardTestData(uint64_t cScreenId, int32_t cPid, int32_t kScreenId, WindowType keyboardWindowType,
+        bool isSysKeyboard) : cScreenId_(cScreenId), cPid_(cPid), kScreenId_(kScreenId),
+        keyboardWindowType_(keyboardWindowType), isSysKeyboard_(isSysKeyboard) {}
+    
+    void SetCallingSessionId(uint32_t callingSessionId)
+    {
+        callingSessionId_ = callingSessionId;
+    }
+    
+private:
+    uint64_t cScreenId_; // screenId of callingWindow
+    int32_t cPid_; // callingPid of callingWindow
+    int32_t kScreenId_; // screenId of keyboard
+    WindowType keyboardWindowType_;
+    bool isSysKeyboard_;
+    uint32_t callingSessionId_;
+};
+    
+void SceneSessionManagerTest12::ConstructKeyboardCallingWindowTestData(const KeyboardTestData& keyboardTestData)
+{
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo callingSessionInfo;
+    callingSessionInfo.abilityName_ = "callingSession";
+    callingSessionInfo.bundleName_ = "callingSession";
+    callingSessionInfo.screenId_ = keyboardTestData.cScreenId_;
+    sptr<SceneSession> callingSession = sptr<SceneSession>::MakeSptr(callingSessionInfo, nullptr);
+    callingSession->callingPid_ = keyboardTestData.cPid_;
+    sptr<WindowSessionProperty> callingSessionProperties = sptr<WindowSessionProperty>::MakeSptr();
+    callingSessionProperties->SetDisplayId(keyboardTestData.cScreenId_);
+    callingSession->SetSessionProperty(callingSessionProperties);
+    
+    SessionInfo keyboardSessionInfo;
+    keyboardSessionInfo.abilityName_ = "keyboardSession";
+    keyboardSessionInfo.bundleName_ = "keyboardSession";
+    sptr<SceneSession> keyboardSession = sptr<SceneSession>::MakeSptr(keyboardSessionInfo, nullptr);
+    
+    keyboardSession->SetScreenId(keyboardTestData.kScreenId_);
+    sptr<WindowSessionProperty> keyboardProperties = sptr<WindowSessionProperty>::MakeSptr();
+    keyboardProperties->SetWindowType(keyboardTestData.keyboardWindowType_);
+    keyboardProperties->SetIsSystemKeyboard(keyboardTestData.isSysKeyboard_);
+    keyboardProperties->SetCallingSessionId(keyboardTestData.callingSessionId_);
+    keyboardSession->SetSessionProperty(keyboardProperties);
+    
+    ssm_->sceneSessionMap_.insert({keyboardTestData.callingSessionId_, callingSession});
+    ssm_->sceneSessionMap_.insert({2, keyboardSession});
 }
 
 namespace {
@@ -1517,6 +1571,162 @@ HWTEST_F(SceneSessionManagerTest12, SetStatusBarAvoidHeight, Function | SmallTes
     WSRect barArea;
     ssm_->GetStatusBarAvoidHeight(barArea);
     ASSERT_EQ(barArea.height_, height);
+}
+
+/**
+ * @tc.name: AddSkipSelfWhenShowOnVirtualScreenList
+ * @tc.desc: test function : AddSkipSelfWhenShowOnVirtualScreenList
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, AddSkipSelfWhenShowOnVirtualScreenList, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.bundleName_ = "AddSkipSelfWhenShowOnVirtualScreenList";
+    info.abilityName_ = "AddSkipSelfWhenShowOnVirtualScreenList";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    std::vector<int32_t> persistentIds {sceneSession->GetPersistentId()};
+    auto ret = ssm_->AddSkipSelfWhenShowOnVirtualScreenList(persistentIds);
+    usleep(WAIT_SYNC_IN_NS);
+    EXPECT_EQ(ret, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: RemoveSkipSelfWhenShowOnVirtualScreenList
+ * @tc.desc: test function : RemoveSkipSelfWhenShowOnVirtualScreenList
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, RemoveSkipSelfWhenShowOnVirtualScreenList, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.bundleName_ = "RemoveSkipSelfWhenShowOnVirtualScreenList";
+    info.abilityName_ = "RemoveSkipSelfWhenShowOnVirtualScreenList";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    std::vector<int32_t> persistentIds {sceneSession->GetPersistentId()};
+    auto ret = ssm_->RemoveSkipSelfWhenShowOnVirtualScreenList(persistentIds);
+    usleep(WAIT_SYNC_IN_NS);
+    EXPECT_EQ(ret, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: GetCallingWindowInfo1
+ * @tc.desc: test function : GetCallingWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetCallingWindowInfo1, Function | SmallTest | Level2)
+{
+    KeyboardTestData keyboardTestData(0, 57256, 0, WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, false);
+    keyboardTestData.SetCallingSessionId(86);
+    ConstructKeyboardCallingWindowTestData(keyboardTestData);
+    // Invalid callingWindowId
+    CallingWindowInfo info(0, -1, 0, GetUserIdByUid(getuid())); // windowId_ callingPid_ displayId_ userId_
+    WMError ret = ssm_->GetCallingWindowInfo(info);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+}
+
+/**
+ * @tc.name: GetCallingWindowInfo2
+ * @tc.desc: test function : GetCallingWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetCallingWindowInfo2, Function | SmallTest | Level2)
+{
+    KeyboardTestData keyboardTestData(0, 57256, 0, WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, false);
+    keyboardTestData.SetCallingSessionId(86);
+    ConstructKeyboardCallingWindowTestData(keyboardTestData);
+    // Invalid userId
+    int32_t userId = GetUserIdByUid(getuid()) + 1;
+    CallingWindowInfo info(86, -1, 0, userId); // windowId_ callingPid_ displayId_ userId_
+    WMError ret = ssm_->GetCallingWindowInfo(info);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+}
+
+/**
+ * @tc.name: GetCallingWindowInfo3
+ * @tc.desc: test function : GetCallingWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetCallingWindowInfo3, Function | SmallTest | Level2)
+{
+    KeyboardTestData keyboardTestData(12, 57256, 0, WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, false);
+    keyboardTestData.SetCallingSessionId(86);
+    ConstructKeyboardCallingWindowTestData(keyboardTestData);
+    int32_t userId = GetUserIdByUid(getuid());
+    CallingWindowInfo info(86, -1, 0, userId); // windowId_ callingPid_ displayId_ userId_
+    WMError ret = ssm_->GetCallingWindowInfo(info);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(57256, info.callingPid_);
+    ASSERT_EQ(12, info.displayId_);
+}
+
+/**
+ * @tc.name: UpdateSessionDisplayId1
+ * @tc.desc: test function : UpdateSessionDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, UpdateSessionDisplayId1, Function | SmallTest | Level2)
+{
+    sptr<WindowManagerAgentLiteMocker> wmAgentLiteMocker = sptr<WindowManagerAgentLiteMocker>::MakeSptr();
+    SessionManagerAgentController::GetInstance().RegisterWindowManagerAgent(
+        wmAgentLiteMocker, WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_CALLING_DISPLAY, 12345);
+    KeyboardTestData keyboardTestData(0, 57256, 0, WindowType::WINDOW_TYPE_APP_SUB_WINDOW, false);
+    keyboardTestData.SetCallingSessionId(86);
+    ConstructKeyboardCallingWindowTestData(keyboardTestData);
+    EXPECT_CALL(*wmAgentLiteMocker, NotifyCallingWindowDisplayChanged(_)).Times(0);
+    ssm_->UpdateSessionDisplayId(86, 12);
+    
+    keyboardTestData = {0, 57256, 0, WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, true};
+    keyboardTestData.SetCallingSessionId(86);
+    ConstructKeyboardCallingWindowTestData(keyboardTestData);
+    EXPECT_CALL(*wmAgentLiteMocker, NotifyCallingWindowDisplayChanged(_)).Times(0);
+    ssm_->UpdateSessionDisplayId(86, 12);
+}
+
+/**
+ * @tc.name: UpdateSessionDisplayId2
+ * @tc.desc: test function : UpdateSessionDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, UpdateSessionDisplayId2, Function | SmallTest | Level2)
+{
+    sptr<WindowManagerAgentLiteMocker> wmAgentLiteMocker = sptr<WindowManagerAgentLiteMocker>::MakeSptr();
+    SessionManagerAgentController::GetInstance().RegisterWindowManagerAgent(
+        wmAgentLiteMocker, WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_CALLING_DISPLAY, 12345);
+    KeyboardTestData keyboardTestData(0, 57256, 0, WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, false);
+    keyboardTestData.SetCallingSessionId(86);
+    ConstructKeyboardCallingWindowTestData(keyboardTestData);
+    SessionInfo info;
+    info.abilityName_ = "non-callingSession";
+    info.bundleName_ = "non-callingSession";
+    info.screenId_ = 0;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->callingPid_ = 54321;
+    sptr<WindowSessionProperty> sceneSessionProperties = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSessionProperties->SetDisplayId(0);
+    sceneSession->SetSessionProperty(sceneSessionProperties);
+    // Add non-callingWindow
+    ssm_->sceneSessionMap_.insert({90, sceneSession});
+    // Change display id of non-callingWindow
+    EXPECT_CALL(*wmAgentLiteMocker, NotifyCallingWindowDisplayChanged(_)).Times(0);
+    ssm_->UpdateSessionDisplayId(90, 12);
+}
+
+/**
+ * @tc.name: UpdateSessionDisplayId3
+ * @tc.desc: test function : UpdateSessionDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, UpdateSessionDisplayId3, Function | SmallTest | Level2)
+{
+    sptr<WindowManagerAgentLiteMocker> wmAgentLiteMocker = sptr<WindowManagerAgentLiteMocker>::MakeSptr();
+    SessionManagerAgentController::GetInstance().RegisterWindowManagerAgent(
+        wmAgentLiteMocker, WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_CALLING_DISPLAY, 12345);
+    KeyboardTestData keyboardTestData(0, 57256, 0, WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, false);
+    keyboardTestData.SetCallingSessionId(86);
+    ConstructKeyboardCallingWindowTestData(keyboardTestData);
+    EXPECT_CALL(*wmAgentLiteMocker, NotifyCallingWindowDisplayChanged(_)).Times(1);
+    ssm_->UpdateSessionDisplayId(86, 12);
 }
 }
 } // namespace Rosen

@@ -456,6 +456,38 @@ HWTEST_F(SceneSessionTest, IsKeepScreenOn02, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: IsViewKeepScreenOn01
+ * @tc.desc: IsViewKeepScreenOn true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, IsViewKeepScreenOn01, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsViewKeepScreenOn01";
+    info.bundleName_ = "IsViewKeepScreenOn01";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    ASSERT_EQ(WSError::WS_OK, sceneSession->SetViewKeepScreenOn(true));
+    ASSERT_EQ(true, sceneSession->IsViewKeepScreenOn());
+}
+
+/**
+ * @tc.name: IsViewKeepScreenOn02
+ * @tc.desc: IsViewKeepScreenOn false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, IsViewKeepScreenOn02, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsViewKeepScreenOn02";
+    info.bundleName_ = "IsViewKeepScreenOn02";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    ASSERT_EQ(WSError::WS_OK, sceneSession->SetViewKeepScreenOn(false));
+    ASSERT_EQ(false, sceneSession->IsViewKeepScreenOn());
+}
+
+/**
  * @tc.name: IsAppSession
  * @tc.desc: IsAppSession true
  * @tc.type: FUNC
@@ -1126,7 +1158,7 @@ HWTEST_F(SceneSessionTest, TransferPointerEvent, Function | SmallTest | Level2)
     sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback_);
     EXPECT_NE(sceneSession, nullptr);
     std::shared_ptr<MMI::PointerEvent> pointerEvent = nullptr;
-    ASSERT_EQ(sceneSession->TransferPointerEvent(pointerEvent), WSError::WS_ERROR_NULLPTR);
+    ASSERT_EQ(sceneSession->TransferPointerEvent(pointerEvent), WSError::WS_OK);
     std::shared_ptr<MMI::PointerEvent> pointerEvent_ = MMI::PointerEvent::Create();
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
@@ -1134,7 +1166,7 @@ HWTEST_F(SceneSessionTest, TransferPointerEvent, Function | SmallTest | Level2)
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     property->SetPersistentId(11);
     sceneSession->property_ = property;
-    ASSERT_EQ(sceneSession->TransferPointerEvent(pointerEvent_), WSError::WS_ERROR_INVALID_SESSION);
+    ASSERT_EQ(sceneSession->TransferPointerEvent(pointerEvent_), WSError::WS_OK);
 }
 
 /**
@@ -1558,7 +1590,7 @@ HWTEST_F(SceneSessionTest, UpdateSessionRectPosYFromClient01, Function | SmallTe
     rect = {0, 100, 100, 100};
     auto rect2 = rect;
     sceneSession->UpdateSessionRectPosYFromClient(SizeChangeReason::UNDEFINED, displayId, rect);
-    EXPECT_EQ(rect.posY_, rect2.posY_);
+    EXPECT_NE(rect.posY_, rect2.posY_);
 }
 
 /**

@@ -29,6 +29,7 @@ class PipOption : virtual public RefBase {
 public:
     explicit PipOption();
     virtual ~PipOption() = default;
+    void ClearNapiRefs(napi_env env);
     void SetContext(void* contextPtr);
     void SetNavigationId(const std::string& navigationId);
     void SetPipTemplate(uint32_t templateType);
@@ -52,6 +53,8 @@ public:
     napi_ref GetNodeControllerRef() const;
     void SetTypeNodeRef(napi_ref ref);
     napi_ref GetTypeNodeRef() const;
+    void SetStorageRef(napi_ref ref);
+    napi_ref GetStorageRef() const;
     void SetTypeNodeEnabled(bool enable);
     bool IsTypeNodeEnabled() const;
 private:
@@ -68,6 +71,7 @@ private:
     napi_ref customNodeController_ = nullptr;
     napi_ref typeNode_ = nullptr;
     bool useTypeNode_ = false;
+    napi_ref storage_ = nullptr;
 };
 }
 }

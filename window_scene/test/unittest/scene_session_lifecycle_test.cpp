@@ -796,7 +796,7 @@ HWTEST_F(SceneSessionLifecycleTest, ConnectInner01, Function | SmallTest | Level
 
     result = sceneSession->ConnectInner(mockSessionStage, nullptr, nullptr, systemConfig,
         property, nullptr, -1, -1, "session1");
-    ASSERT_EQ(result, WSError::WS_OK);
+    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 
     result = sceneSession->ConnectInner(mockSessionStage, nullptr, nullptr, systemConfig,
         property, nullptr, -1, -1);

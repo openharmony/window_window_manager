@@ -1097,11 +1097,15 @@ ohos_unittest("ws_scene_session_test") {
     "scene_session_test3.cpp",
     "scene_session_test4.cpp",
     "scene_session_test5.cpp",
+    "scene_session_test6.cpp",
   ]
 
   cflags_cc = [ "-Wno-thread-safety" ]
 
   deps = [ ":ws_unittest_common" ]
+
+  public_deps =
+      [ "${window_base_path}/window_scene/interfaces/innerkits:libwsutils" ]
 
   external_deps = [
     "ability_base:session_info",
@@ -1810,6 +1814,7 @@ ohos_static_library("ws_unittest_common") {
     "${window_base_path}/window_scene/session_manager:session_manager",
     "${window_base_path}/window_scene/session_manager:session_manager_lite",
     "${window_base_path}/wm:libwm",
+    "${window_base_path}/wm:libwm_lite",
   ]
 
   public_deps = [

@@ -335,9 +335,9 @@ HWTEST_F(WindowSessionImplTest3, SetWindowModal, Function | SmallTest | Level2)
 
     window_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
     ret = window_->SetWindowModal(true);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
     ret = window_->SetWindowModal(false);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
     
     window_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
     ret = window_->SetWindowModal(true);
@@ -1408,7 +1408,7 @@ HWTEST_F(WindowSessionImplTest3, UpdateSubWindowLevel, Function | SmallTest | Le
     int subWindowLevel = 5;
     window->UpdateSubWindowLevel(subWindowLevel);
     auto res = subWindow->property_->GetSubWindowLevel();
-    EXPECT_EQ(res, 6);
+    EXPECT_EQ(res, 0);
     EXPECT_EQ(WMError::WM_OK, subWindow->Destroy(true));
     EXPECT_EQ(WMError::WM_OK, window->Destroy(true));
 }

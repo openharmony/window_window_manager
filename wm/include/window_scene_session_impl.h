@@ -95,6 +95,7 @@ public:
     virtual WMError SetTransparent(bool isTransparent) override;
     virtual WMError SetTurnScreenOn(bool turnScreenOn) override;
     virtual WMError SetKeepScreenOn(bool keepScreenOn) override;
+    virtual WMError SetViewKeepScreenOn(bool keepScreenOn) override;
     virtual WMError SetPrivacyMode(bool isPrivacyMode) override;
     virtual void SetSystemPrivacyMode(bool isSystemPrivacyMode) override;
     virtual WMError SetSnapshotSkip(bool isSkip) override;
@@ -109,6 +110,7 @@ public:
     virtual bool IsTransparent() const override;
     virtual bool IsTurnScreenOn() const override;
     virtual bool IsKeepScreenOn() const override;
+    virtual bool IsViewKeepScreenOn() const override;
     virtual bool IsPrivacyMode() const override;
     virtual bool IsLayoutFullScreen() const override;
     virtual bool IsFullScreen() const override;
@@ -229,7 +231,6 @@ public:
     float GetCustomDensity() const override;
     WMError SetCustomDensity(float density) override;
     WMError GetWindowDensityInfo(WindowDensityInfo& densityInfo) override;
-    uint32_t GetApiCompatibleVersion() const override;
 
     /*
      * Window Decor
@@ -263,8 +264,6 @@ public:
     WMError SetFullScreen(bool status) override;
     WMError UpdateSystemBarProperties(const std::unordered_map<WindowType, SystemBarProperty>& systemBarProperties,
         const std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags) override;
-    void UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool systemBarEnableAnimation,
-        SystemBarProperty& property) override;
 
 protected:
     WMError CreateAndConnectSpecificSession();
@@ -435,6 +434,8 @@ private:
      */
     bool isColdStart_ = true;
     void NotifyFreeMultiWindowModeResume();
+    std::string TransferLifeCycleEventToString(LifeCycleEvent type) const;
+    void RecordLifeCycleExceptionEvent(LifeCycleEvent event, WMError erCode) const;
 };
 } // namespace Rosen
 } // namespace OHOS

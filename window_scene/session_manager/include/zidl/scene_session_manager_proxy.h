@@ -138,6 +138,8 @@ public:
     WMError GetWindowIdsByCoordinate(DisplayId displayId, int32_t windowNumber,
         int32_t x, int32_t y, std::vector<int32_t>& windowIds) override;
     WMError UpdateScreenLockStatusForApp(const std::string& bundleName, bool isRelease) override;
+    WMError AddSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds) override;
+    WMError RemoveSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds) override;
     WMError IsPcWindow(bool& isPcWindow) override;
     WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode) override;
     WMError IsWindowRectAutoSave(const std::string& key, bool& enabled, int persistentId) override;
@@ -148,7 +150,6 @@ public:
     WMError SetAppDragResizeType(const std::string& bundleName, DragResizeType dragResizeType) override;
     WMError GetAppDragResizeType(const std::string& bundleName, DragResizeType& dragResizeType) override;
     WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId) override;
-    WMError GetWindowUIType(WindowUIType& windowUIType) override;
     WMError MinimizeByWindowId(const std::vector<int32_t>& windowIds) override;
 
 private:

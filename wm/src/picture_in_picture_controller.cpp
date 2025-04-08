@@ -17,6 +17,7 @@
 
 #include <refbase.h>
 #include <transaction/rs_sync_transaction_controller.h>
+#include "parameters.h"
 #include "picture_in_picture_manager.h"
 #include "singleton_container.h"
 #include "window_adapter.h"
@@ -75,6 +76,9 @@ PictureInPictureController::PictureInPictureController(sptr<PipOption> pipOption
 
 PictureInPictureController::~PictureInPictureController()
 {
+    if (pipOption_) {
+        pipOption_->ClearNapiRefs(env_);
+    }
     TLOGI(WmsLogTag::WMS_PIP, "Destruction");
     if (!isAutoStartEnabled_) {
         return;
@@ -147,7 +151,7 @@ WMError PictureInPictureController::ShowPictureInPictureWindow(StartPipType star
     for (auto& listener : pipLifeCycleListeners_) {
         listener->OnPreparePictureInPictureStart();
     }
-    window_->SetUIContentByAbc(PIP_CONTENT_PATH, env_, nullptr, nullptr);
+    SetUIContent();
     WMError errCode = window_->Show(0, false);
     if (errCode != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_PIP, "window show failed, err: %{public}u", errCode);
@@ -617,14 +621,14 @@ void PictureInPictureController::DoControlEvent(PiPControlType controlType, PiPC
     pipOption_->SetPiPControlStatus(controlType, status);
 }
 
-void PictureInPictureController::PipSizeChange(uint32_t width, uint32_t height, double scale)
+void PictureInPictureController::PipSizeChange(double width, double height, double scale)
 {
-    TLOGI(WmsLogTag::WMS_PIP, "notify size info width: %{public}u, height: %{public}u scale: %{public}f",
-          width, height, scale);
     PiPWindowSize windowSize;
-    windowSize.width = width;
-    windowSize.height = height;
+    windowSize.width = std::round(width);
+    windowSize.height = std::round(height);
     windowSize.scale = scale;
+    TLOGI(WmsLogTag::WMS_PIP, "notify size info width: %{public}u, height: %{public}u scale: %{public}f",
+          windowSize.width, windowSize.height, scale);
     for (auto& listener : pipWindowSizeListeners_) {
         listener->OnPipSizeChange(windowSize);
     }
@@ -710,6 +714,17 @@ void PictureInPictureController::UpdateWinRectByComponent()
     windowRect_.posY_ = static_cast<int32_t>(posY);
     TLOGD(WmsLogTag::WMS_PIP, "position width: %{public}u, height: %{public}u, posX: %{public}d, posY: %{public}d",
         windowRect_.width_, windowRect_.height_, windowRect_.posX_, windowRect_.posY_);
+}
+
+void PictureInPictureController::SetUIContent() const
+{
+    napi_value storage = nullptr;
+    napi_ref storageRef = pipOption_->GetStorageRef();
+    if (storageRef != nullptr) {
+        napi_get_reference_value(env_, storageRef, &storage);
+        TLOGI(WmsLogTag::WMS_PIP, "startPiP with localStorage");
+    }
+    window_->SetUIContentByAbc(PIP_CONTENT_PATH, env_, storage, nullptr);
 }
 
 void PictureInPictureController::UpdatePiPSourceRect() const
@@ -960,20 +975,8 @@ napi_ref PictureInPictureController::GetTypeNode() const
 
 void PictureInPictureController::GetPipPossible(bool& pipPossible)
 {
-    TLOGI(WmsLogTag::WMS_PIP, "called");
-    if (pipOption_ == nullptr || pipOption_->GetContext() == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "pipOption is null or Get PictureInPictureOption failed");
-        return;
-    }
-    WindowUIType type = WindowUIType::INVALID_WINDOW;
-    WMError ret = SingletonContainer::Get<WindowAdapter>().GetWindowUIType(type);
-    if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "can't find GetWindowUIType, err: %{public}u",
-            static_cast<uint32_t>(ret));
-        return;
-    }
-    pipPossible = type == WindowUIType::PHONE_WINDOW || type == WindowUIType::PC_WINDOW ||
-        type == WindowUIType::PAD_WINDOW;
+    const std::string multiWindowUIType = system::GetParameter("const.window.multiWindowUIType", "");
+    pipPossible = multiWindowUIType == "HandsetSmartWindow" || multiWindowUIType == "TabletSmartWindow";
     return;
 }
 

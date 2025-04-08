@@ -96,6 +96,7 @@ public:
     virtual sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
     virtual void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList,
         std::vector<uint64_t> surfaceIdList = {});
+    virtual void SetVirtualDisplayMuteFlag(ScreenId screenId, bool muteFlag);
     virtual void DisablePowerOffRenderControl(ScreenId screenId);
     virtual DMError ProxyForFreeze(const std::set<int32_t>& pidList, bool isProxy);
     virtual DMError ResetAllFreezeStatus();
@@ -120,6 +121,8 @@ public:
         const sptr<IDisplayManagerAgent>& displayManagerAgent);
     virtual DMError DestroyVirtualScreen(ScreenId screenId);
     virtual DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface);
+    virtual DMError AddVirtualScreenBlockList(const std::vector<int32_t>& persistentIds);
+    virtual DMError RemoveVirtualScreenBlockList(const std::vector<int32_t>& persistentIds);
     virtual DMError SetScreenPrivacyMaskImage(ScreenId screenId,
         const std::shared_ptr<Media::PixelMap>& privacyMaskImg);
     virtual DMError SetVirtualMirrorScreenCanvasRotation(ScreenId screenId, bool canvasRotation);

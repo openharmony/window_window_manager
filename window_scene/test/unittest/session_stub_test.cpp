@@ -998,6 +998,19 @@ HWTEST_F(SessionStubTest, HandleContainerModalEvent, Function | SmallTest | Leve
     result = session_->HandleContainerModalEvent(data, reply);
     ASSERT_EQ(result, ERR_INVALID_DATA);
 }
+
+/**
+ * @tc.name: GetIsHighlighted
+ * @tc.desc: sessionStub GetIsHighlighted
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, GetIsHighlighted, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto result = session_->HandleGetIsHighlighted(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

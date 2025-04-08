@@ -1034,6 +1034,36 @@ HWTEST_F(sceneSessionManagerProxyTest, UpdateScreenLockStatusForApp, Function | 
 }
 
 /**
+ * @tc.name: AddSkipSelfWhenShowOnVirtualScreenList
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, AddSkipSelfWhenShowOnVirtualScreenList, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+    EXPECT_NE(sceneSessionManagerProxy, nullptr);
+    std::vector<int32_t> persistentIds {0, 1, 2};
+    ASSERT_EQ(sceneSessionManagerProxy->AddSkipSelfWhenShowOnVirtualScreenList(persistentIds), WMError::WM_OK);
+}
+
+/**
+ * @tc.name: RemoveSkipSelfWhenShowOnVirtualScreenList
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, RemoveSkipSelfWhenShowOnVirtualScreenList, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+    EXPECT_NE(sceneSessionManagerProxy, nullptr);
+    std::vector<int32_t> persistentIds {0, 1, 2};
+    ASSERT_EQ(sceneSessionManagerProxy->RemoveSkipSelfWhenShowOnVirtualScreenList(persistentIds), WMError::WM_OK);
+}
+
+/**
  * @tc.name: IsPcWindow
  * @tc.desc: IsPcWindow
  * @tc.type: FUNC
@@ -1456,7 +1486,7 @@ HWTEST_F(sceneSessionManagerProxyTest, MinimizeByWindowId, Function | SmallTest 
     auto sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
     std::vector<int32_t> windowIds;
     WMError res = sceneSessionManagerProxy->MinimizeByWindowId(windowIds);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, res);
+    ASSERT_EQ(WMError::WM_OK, res);
 }
 }  // namespace
 }

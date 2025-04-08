@@ -309,7 +309,8 @@ public:
     WSError SetSessionIcon(const sptr<IRemoteObject>& token, const std::shared_ptr<Media::PixelMap>& icon) override;
     WSError IsValidSessionIds(const std::vector<int32_t>& sessionIds, std::vector<bool>& results) override;
     void HandleTurnScreenOn(const sptr<SceneSession>& sceneSession);
-    void HandleKeepScreenOn(const sptr<SceneSession>& sceneSession, bool requireLock);
+    void HandleKeepScreenOn(const sptr<SceneSession>& sceneSession, bool requireLock,
+        const std::string& screenLockPrefix, std::shared_ptr<PowerMgr::RunningLock>& screenLock);
     void InitWithRenderServiceAdded();
 
     WSError RegisterSessionListener(const sptr<ISessionListener>& listener) override;
@@ -520,7 +521,8 @@ public:
     void DealwithDrawingContentChange(const std::vector<std::pair<uint64_t, bool>>& drawingContentChangeInfo);
     WMError ListWindowInfo(const WindowInfoOption& windowInfoOption, std::vector<sptr<WindowInfo>>& infos) override;
     WMError GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos) override;
-    WMError GetWindowUIType(WindowUIType& windowUIType) override;
+    WMError AddSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds) override;
+    WMError RemoveSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds) override;
 
     /*
      * Multi Window
@@ -680,6 +682,7 @@ private:
     void ConfigWindowSizeLimits();
     void ConfigMainWindowSizeLimits(const WindowSceneConfig::ConfigItem& mainWindowSizeConifg);
     void ConfigSubWindowSizeLimits(const WindowSceneConfig::ConfigItem& subWindowSizeConifg);
+    void ConfigDialogWindowSizeLimits(const WindowSceneConfig::ConfigItem& dialogWindowSizeConifg);
     void ConfigSnapshotScale();
     void ConfigFreeMultiWindow();
     void LoadFreeMultiWindowConfig(bool enable);
@@ -928,6 +931,8 @@ private:
     void DestroyUIServiceExtensionSubWindow(const sptr<SceneSession>& sceneSession);
     WSError CheckSubSessionStartedByExtensionAndSetDisplayId(const sptr<IRemoteObject>& token,
         const sptr<WindowSessionProperty>& property, const sptr<ISessionStage>& sessionStage);
+    void ReportSubWindowCreationFailure(int32_t pid, const std::string& abilityName,
+        const std::string& parentBundleName, const std::string& hostBundleName);
 
     /*
      * Multi User

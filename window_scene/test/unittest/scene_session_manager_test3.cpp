@@ -1232,10 +1232,11 @@ HWTEST_F(SceneSessionManagerTest3, HandleTurnScreenOn, Function | SmallTest | Le
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     ssm_->HandleTurnScreenOn(sceneSession);
+    std::string lockName = "windowLock";
     bool requireLock = true;
-    ssm_->HandleKeepScreenOn(sceneSession, requireLock);
+    ssm_->HandleKeepScreenOn(sceneSession, requireLock, lockName, sceneSession->keepScreenLock_);
     requireLock = false;
-    ssm_->HandleKeepScreenOn(sceneSession, requireLock);
+    ssm_->HandleKeepScreenOn(sceneSession, requireLock, lockName, sceneSession->keepScreenLock_);
 }
 
 /**
@@ -1907,6 +1908,38 @@ HWTEST_F(SceneSessionManagerTest3, ConfigSubWindowSizeLimits02, Function | Small
     ssm_->ConfigSubWindowSizeLimits(mainFloat02);
 }
 
+/**
+ * @tc.name: ConfigDialogWindowSizeLimits
+ * @tc.desc: call ConfigDialogWindowSizeLimits
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest3, ConfigDialogWindowSizeLimits01, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    std::vector<int> subInt = {1, 2, 3, 4};
+    WindowSceneConfig::ConfigItem subleInt;
+    subleInt.SetValue(subInt);
+    subleInt.SetValue({{"miniWidth", subleInt}});
+    ssm_->ConfigDialogWindowSizeLimits(subleInt);
+    subleInt.ClearValue();
+
+    std::vector<float> subFloat = {0.1f};
+    WindowSceneConfig::ConfigItem mainFloat;
+    mainFloat.SetValue(subFloat);
+    mainFloat.SetValue({{"miniWidth", mainFloat}});
+    ssm_->ConfigDialogWindowSizeLimits(mainFloat);
+    mainFloat.ClearValue();
+
+    WindowSceneConfig::ConfigItem subleInt02;
+    subleInt02.SetValue(subInt);
+    subleInt02.SetValue({{"miniHeight", subleInt02}});
+    ssm_->ConfigDialogWindowSizeLimits(subleInt02);
+
+    WindowSceneConfig::ConfigItem mainFloat02;
+    mainFloat02.SetValue(subFloat);
+    mainFloat02.SetValue({{"miniHeight", mainFloat02}});
+    ssm_->ConfigDialogWindowSizeLimits(mainFloat02);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

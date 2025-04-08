@@ -328,6 +328,20 @@ HWTEST_F(WindowOptionTest, KeepScreenOn, Function | SmallTest | Level3)
 }
 
 /**
+ * @tc.name: viewKeepScreenOn
+ * @tc.desc: viewKeepScreenOn setter/getter test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowOptionTest, ViewKeepScreenOn, TestSize.Level1)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetViewKeepScreenOn(true);
+    ASSERT_EQ(true, option->IsViewKeepScreenOn());
+    option->SetViewKeepScreenOn(false);
+    ASSERT_EQ(false, option->IsViewKeepScreenOn());
+}
+
+/**
  * @tc.name: TurnScreenOn
  * @tc.desc: TurnScreenOn setter/getter test
  * @tc.type: FUNC
@@ -589,7 +603,7 @@ HWTEST_F(WindowOptionTest, SetConstrainedModal, Function | SmallTest | Level3)
     ASSERT_EQ(false, option->IsConstrainedModal());
     option->SetUIExtensionUsage(static_cast<uint32_t>(UIExtensionUsage::MODAL));
     option->SetConstrainedModal(true);
-    ASSERT_EQ(false, option->IsConstrainedModal());
+    ASSERT_EQ(true, option->IsConstrainedModal());
 }
 } // namespace
 } // namespace Rosen

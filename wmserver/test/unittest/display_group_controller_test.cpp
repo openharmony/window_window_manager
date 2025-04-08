@@ -509,25 +509,6 @@ HWTEST_F(DisplayGroupControllerTest, PostProcessWindowNode01, Function | SmallTe
 }
 
 /**
- * @tc.name: UpdateWindowDisplayId01
- * @tc.desc: UpdateWindowDisplayId with windowToken
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayGroupControllerTest, UpdateWindowDisplayId01, Function | SmallTest | Level2)
-{
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    sptr<IWindow> iWindow = iface_cast<IWindow>(iRemoteObjectMocker);
-    ASSERT_NE(nullptr, iWindow);
-    sptr<WindowNode> node1 = new WindowNode();
-    node1->SetWindowProperty(CreateWindowProperty(100));
-    ASSERT_NE(nullptr, node1);
-    node1->SetWindowToken(iWindow);
-    ASSERT_NE(nullptr, node1->GetWindowToken());
-    displayGroupController_->UpdateWindowDisplayId(node1, 1);
-    ASSERT_EQ(1, node1->GetDisplayId());
-}
-
-/**
  * @tc.name: MoveCrossNodeToTargetDisplay01
  * @tc.desc: TargetDisplayId equals to default displayId
  * @tc.type: FUNC
@@ -868,6 +849,25 @@ HWTEST_F(DisplayGroupControllerTest, PreProcessWindowNode05, Function | SmallTes
     }
     std::vector<uint32_t> windowIds;
     ASSERT_EQ(0, windowIds.size());
+}
+
+/**
+ * @tc.name: UpdateWindowDisplayId01
+ * @tc.desc: UpdateWindowDisplayId with windowToken
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayGroupControllerTest, UpdateWindowDisplayId01, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
+    sptr<IWindow> iWindow = iface_cast<IWindow>(iRemoteObjectMocker);
+    ASSERT_NE(nullptr, iWindow);
+    sptr<WindowNode> node1 = new WindowNode();
+    node1->SetWindowProperty(CreateWindowProperty(100));
+    ASSERT_NE(nullptr, node1);
+    node1->SetWindowToken(iWindow);
+    ASSERT_NE(nullptr, node1->GetWindowToken());
+    displayGroupController_->UpdateWindowDisplayId(node1, 1);
+    ASSERT_EQ(1, node1->GetDisplayId());
 }
 }
 }

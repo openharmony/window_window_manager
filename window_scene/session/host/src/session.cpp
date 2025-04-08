@@ -2770,12 +2770,12 @@ WSError Session::UpdateHighlightStatus(bool isHighlight, bool needBlockHighlight
 {
     TLOGD(WmsLogTag::WMS_FOCUS,
         "windowId: %{public}d, currHighlight: %{public}d, nextHighlight: %{public}d, needBlockNotify:%{public}d",
-        persistentId_, isHighlight_, isHighlight, needBlockHighlightNotify);
-    if (isHighlight_ == isHighlight) {
+        persistentId_, isHighlighted_, isHighlight, needBlockHighlightNotify);
+    if (isHighlighted_ == isHighlight) {
         return WSError::WS_DO_NOTHING;
     }
-    isHighlight_ = isHighlight;
-    if (needBlockHighlightNotify) {
+    isHighlighted_ = isHighlight;
+    if (!needBlockHighlightNotify) {
         NotifyHighlightChange(isHighlight);
     }
     std::lock_guard lock(highlightChangeFuncMutex_);
@@ -2797,6 +2797,14 @@ WSError Session::NotifyHighlightChange(bool isHighlight)
         return WSError::WS_ERROR_NULLPTR;
     }
     sessionStage_->NotifyHighlightChange(isHighlight);
+    return WSError::WS_OK;
+}
+
+WSError Session::GetIsHighlighted(bool& isHighlighted)
+{
+    isHighlighted = isHighlighted_;
+    TLOGD(WmsLogTag::WMS_FOCUS, "windowId: %{public}d, isHighlighted: %{public}d",
+        GetPersistentId(), isHighlighted_);
     return WSError::WS_OK;
 }
 
@@ -3524,6 +3532,22 @@ std::string Session::GetWindowDetectTaskName() const
     return "wms:WindowStateDetect" + std::to_string(persistentId_);
 }
 
+void Session::RecordWindowStateAttachExceptionEvent(bool isAttached)
+{
+    int32_t ret = HiSysEventWrite(
+        OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
+        "WINDOW_STATE_ERROR",
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
+        "TYPE", "WINDOW_STATE_ATTACH_EXCEPTION",
+        "PERSISTENT_ID", GetPersistentId(),
+        "WINDOW_NAME", GetWindowName().c_str(),
+        "ATTACH_STATE", isAttached,
+        "SESSION_STATE", static_cast<uint32_t>(GetSessionState()));
+    if (ret != 0) {
+        TLOGE(WmsLogTag::WMS_LIFE, "write HiSysEvent error, ret: %{public}d", ret);
+    }
+}
+
 void Session::CreateWindowStateDetectTask(bool isAttach, WindowMode windowMode)
 {
     if (!handler_) {
@@ -3547,6 +3571,7 @@ void Session::CreateWindowStateDetectTask(bool isAttach, WindowMode windowMode)
                     "attach:%{public}d, sessioniState:%{public}d, persistenId:%{public}d, bundleName:%{public}s",
                     isAttach, static_cast<uint32_t>(session->GetSessionState()),
                     session->GetPersistentId(), session->GetSessionInfo().bundleName_.c_str());
+                session->RecordWindowStateAttachExceptionEvent(isAttach);
             }
         }
         DetectTaskInfo detectTaskInfo;

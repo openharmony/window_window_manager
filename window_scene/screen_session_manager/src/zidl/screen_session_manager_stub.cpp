@@ -248,6 +248,44 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             static_cast<void>(reply.WriteInt32(static_cast<int32_t>(result)));
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_ADD_VIRTUAL_SCREEN_BLOCK_LIST: {
+            uint64_t size = 0;
+            if (!data.ReadUint64(size)) {
+                TLOGE(WmsLogTag::DMS, "Read size failed.");
+                break;
+            }
+            std::vector<int32_t> persistentIds;
+            for (uint64_t i = 0; i < size; i++) {
+                int32_t persistentId = 0;
+                if (!data.ReadInt32(persistentId)) {
+                    TLOGE(WmsLogTag::DMS, "Read persistentId failed.");
+                    break;
+                }
+                persistentIds.push_back(persistentId);
+            }
+            DMError errCode = AddVirtualScreenBlockList(persistentIds);
+            reply.WriteInt32(static_cast<int32_t>(errCode));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_REMOVE_VIRTUAL_SCREEN_BLOCK_LIST: {
+            uint64_t size = 0;
+            if (!data.ReadUint64(size)) {
+                TLOGE(WmsLogTag::DMS, "Read size failed.");
+                break;
+            }
+            std::vector<int32_t> persistentIds;
+            for (uint64_t i = 0; i < size; i++) {
+                int32_t persistentId = 0;
+                if (!data.ReadInt32(persistentId)) {
+                    TLOGE(WmsLogTag::DMS, "Read persistentId failed.");
+                    break;
+                }
+                persistentIds.push_back(persistentId);
+            }
+            DMError errCode = RemoveVirtualScreenBlockList(persistentIds);
+            reply.WriteInt32(static_cast<int32_t>(errCode));
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_SET_SCREEN_PRIVACY_MASKIMAGE: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             std::shared_ptr<Media::PixelMap> privacyMaskImg{nullptr};
@@ -1065,6 +1103,12 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             bool isOn = static_cast<bool>(data.ReadBool());
             DMError ret = SetSystemKeyboardStatus(isOn);
             reply.WriteInt32(static_cast<int32_t>(ret));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_DISPLAY_MUTE_FLAG: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            bool muteFlag = data.ReadBool();
+            SetVirtualDisplayMuteFlag(screenId, muteFlag);
             break;
         }
         default:

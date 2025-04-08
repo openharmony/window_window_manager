@@ -77,7 +77,7 @@ public:
     bool IsContentSizeChanged(float width, float height, float posX, float posY);
     void DoActionEvent(const std::string& actionName, int32_t status);
     void DoControlEvent(PiPControlType controlType, PiPControlStatus status);
-    void PipSizeChange(uint32_t width, uint32_t height, double scale);
+    void PipSizeChange(double width, double height, double scale);
     void PreRestorePictureInPicture();
     void RestorePictureInPictureWindow();
     void PrepareSource();
@@ -119,6 +119,7 @@ private:
     WMError StartPictureInPictureInner(StartPipType startType);
     WMError StopPictureInPictureInner(StopPipType stopType, bool withAnim);
     void UpdateWinRectByComponent();
+    void SetUIContent() const;
     void UpdatePiPSourceRect() const;
     void ResetExtController();
     bool IsPullPiPAndHandleNavigation();

@@ -1326,6 +1326,9 @@ HWTEST_F(ScreenSessionTest, SetScreenCombination, Function | SmallTest | Level2)
  */
 HWTEST_F(ScreenSessionTest, GetScreenColorGamut, Function | SmallTest | Level2)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
+    }
 #ifdef WM_SCREEN_COLOR_GAMUT_ENABLE
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetScreenColorGamut start";
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
@@ -1349,6 +1352,9 @@ HWTEST_F(ScreenSessionTest, GetScreenColorGamut, Function | SmallTest | Level2)
  */
 HWTEST_F(ScreenSessionTest, SetScreenColorGamut01, Function | SmallTest | Level2)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
+    }
 #ifdef WM_SCREEN_COLOR_GAMUT_ENABLE
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetScreenColorGamut start";
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
@@ -1368,6 +1374,9 @@ HWTEST_F(ScreenSessionTest, SetScreenColorGamut01, Function | SmallTest | Level2
  */
 HWTEST_F(ScreenSessionTest, SetScreenColorGamut02, Function | SmallTest | Level2)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
+    }
 #ifdef WM_SCREEN_COLOR_GAMUT_ENABLE
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetScreenColorGamut start";
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
@@ -2046,6 +2055,9 @@ HWTEST_F(ScreenSessionTest, screen_session_test012, Function | SmallTest | Level
  */
 HWTEST_F(ScreenSessionTest, GetName, Function | SmallTest | Level2)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
+    }
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetName start";
     std::string name { "UNKNOW" };
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
@@ -2120,20 +2132,20 @@ HWTEST_F(ScreenSessionTest, GetRSScreenId, Function | SmallTest | Level2)
  */
 HWTEST_F(ScreenSessionTest, CalcRotation01, Function | SmallTest | Level2)
 {
-    GTEST_LOG_(INFO) << "ScreenSessionTest: CalcRotation start";
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
+    }
     Orientation orientation { Orientation::BEGIN };
     FoldDisplayMode foldDisplayMode { FoldDisplayMode::COORDINATION };
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
     session->activeIdx_ = -1;
     auto res = session->CalcRotation(orientation, foldDisplayMode);
     EXPECT_EQ(Rotation::ROTATION_0, res);
-
     sptr<SupportedScreenModes> supportedScreenModes = new SupportedScreenModes;
     supportedScreenModes->width_ = 40;
     supportedScreenModes->height_ = 20;
     session->modes_ = { supportedScreenModes };
     session->activeIdx_ = 0;
-
     orientation = Orientation::UNSPECIFIED;
     res = session->CalcRotation(orientation, foldDisplayMode);
     EXPECT_EQ(Rotation::ROTATION_0, res);
@@ -2161,7 +2173,6 @@ HWTEST_F(ScreenSessionTest, CalcRotation01, Function | SmallTest | Level2)
     } else {
         EXPECT_EQ(Rotation::ROTATION_270, res);
     }
-
     orientation = Orientation::REVERSE_HORIZONTAL;
     res = session->CalcRotation(orientation, foldDisplayMode);
     if (ScreenSessionManager::GetInstance().IsFoldable()) {
@@ -2169,12 +2180,9 @@ HWTEST_F(ScreenSessionTest, CalcRotation01, Function | SmallTest | Level2)
     } else {
         EXPECT_EQ(Rotation::ROTATION_180, res);
     }
-
     orientation = Orientation::LOCKED;
     res = session->CalcRotation(orientation, foldDisplayMode);
     EXPECT_EQ(Rotation::ROTATION_0, res);
-
-    GTEST_LOG_(INFO) << "ScreenSessionTest: CalcRotation end";
 }
 
 /**
@@ -2184,6 +2192,9 @@ HWTEST_F(ScreenSessionTest, CalcRotation01, Function | SmallTest | Level2)
  */
 HWTEST_F(ScreenSessionTest, CalcRotation02, Function | SmallTest | Level2)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
+    }
     GTEST_LOG_(INFO) << "ScreenSessionTest: CalcRotation start";
     Orientation orientation { Orientation::BEGIN };
     FoldDisplayMode foldDisplayMode { FoldDisplayMode::UNKNOWN };
@@ -2197,31 +2208,24 @@ HWTEST_F(ScreenSessionTest, CalcRotation02, Function | SmallTest | Level2)
     supportedScreenModes->height_ = 20;
     session->modes_ = { supportedScreenModes };
     session->activeIdx_ = 0;
-
     orientation = Orientation::UNSPECIFIED;
     res = session->CalcRotation(orientation, foldDisplayMode);
     EXPECT_EQ(Rotation::ROTATION_0, res);
-
     orientation = Orientation::VERTICAL;
     res = session->CalcRotation(orientation, foldDisplayMode);
     EXPECT_EQ(Rotation::ROTATION_90, res);
-    
     orientation = Orientation::HORIZONTAL;
     res = session->CalcRotation(orientation, foldDisplayMode);
     EXPECT_EQ(Rotation::ROTATION_0, res);
-
     orientation = Orientation::REVERSE_VERTICAL;
     res = session->CalcRotation(orientation, foldDisplayMode);
     EXPECT_EQ(Rotation::ROTATION_270, res);
-
     orientation = Orientation::REVERSE_HORIZONTAL;
     res = session->CalcRotation(orientation, foldDisplayMode);
     EXPECT_EQ(Rotation::ROTATION_180, res);
-
     orientation = Orientation::LOCKED;
     res = session->CalcRotation(orientation, foldDisplayMode);
     EXPECT_EQ(Rotation::ROTATION_0, res);
-
     GTEST_LOG_(INFO) << "ScreenSessionTest: CalcRotation end";
 }
 

@@ -103,6 +103,7 @@ constexpr int ARG_INDEX_0 = 0;
 constexpr int ARG_INDEX_1 = 1;
 constexpr int ARG_INDEX_2 = 2;
 constexpr int ARG_INDEX_3 = 3;
+constexpr uint32_t DISALLOW_ACTIVATION_ISOLATE_VERSION = 20;
 
 const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {PENDING_SCENE_CB,                      ListenerFuncType::PENDING_SCENE_CB},
@@ -3143,24 +3144,15 @@ napi_value JsSceneSession::OnNotifyKeyboardAnimationCompleted(napi_env env, napi
     size_t argc = ARG_COUNT_4;
     napi_value argv[ARG_COUNT_4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < ARG_COUNT_3) {
+    if (argc < ARG_COUNT_4) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
 
-    WSRect keyboardPanelRect = { 0, 0, 0, 0 };
-    napi_value nativeObj = argv[ARG_INDEX_0];
-    if (nativeObj == nullptr || !ConvertRectInfoFromJs(env, nativeObj, keyboardPanelRect)) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to convert parameter to keyboardPanelRect");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
-        return NapiGetUndefined(env);
-    }
-
     uint32_t callingId = 0;
-    if (!ConvertFromJsValue(env, argv[ARG_INDEX_1], callingId)) {
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_0], callingId)) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to convert parameter to uint32_t");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
@@ -3168,8 +3160,26 @@ napi_value JsSceneSession::OnNotifyKeyboardAnimationCompleted(napi_env env, napi
     }
 
     bool isShowAnimation = false;
-    if (!ConvertFromJsValue(env, argv[ARG_INDEX_2], isShowAnimation)) {
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_1], isShowAnimation)) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to convert parameter to bool");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    WSRect beginRect;
+    napi_value nativeObj = argv[ARG_INDEX_2];
+    if (nativeObj == nullptr || !ConvertSessionRectInfoFromJs(env, nativeObj, beginRect)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to convert parameter to beginRect");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    WSRect endRect;
+    nativeObj = argv[ARG_INDEX_3];
+    if (nativeObj == nullptr || !ConvertSessionRectInfoFromJs(env, nativeObj, endRect)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to convert parameter to endRect");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
@@ -3180,7 +3190,7 @@ napi_value JsSceneSession::OnNotifyKeyboardAnimationCompleted(napi_env env, napi
         TLOGI(WmsLogTag::WMS_KEYBOARD, "callingSession is null, id: %{public}d", callingId);
         return NapiGetUndefined(env);
     }
-    callingSession->NotifyKeyboardAnimationCompleted(isShowAnimation, keyboardPanelRect);
+    callingSession->NotifyKeyboardAnimationCompleted(isShowAnimation, beginRect, endRect);
     return NapiGetUndefined(env);
 }
 
@@ -3932,13 +3942,15 @@ void JsSceneSession::PendingSessionActivationInner(std::shared_ptr<SessionInfo> 
                 sessionInfo->persistentId_, LifeCycleTaskType::START);
             return;
         }
-        bool isFromAncoAndToAnco = session->IsAnco() && AbilityInfoManager::GetInstance().IsAnco(
-            sessionInfo->bundleName_, sessionInfo->abilityName_, sessionInfo->moduleName_);
-        if (session->DisallowActivationFromPendingBackground(sessionInfo->isPcOrPadEnableActivation_,
-            sessionInfo->isFoundationCall_, sessionInfo->canStartAbilityFromBackground_, isFromAncoAndToAnco)) {
-            SceneSessionManager::GetInstance().RemoveLifeCycleTaskByPersistentId(
-                sessionInfo->persistentId_, LifeCycleTaskType::START);
-            return;
+        if (session->GetSessionProperty()->GetApiVersion() >= DISALLOW_ACTIVATION_ISOLATE_VERSION) {
+            bool isFromAncoAndToAnco = session->IsAnco() && AbilityInfoManager::GetInstance().IsAnco(
+                sessionInfo->bundleName_, sessionInfo->abilityName_, sessionInfo->moduleName_);
+            if (session->DisallowActivationFromPendingBackground(sessionInfo->isPcOrPadEnableActivation_,
+                sessionInfo->isFoundationCall_, sessionInfo->canStartAbilityFromBackground_, isFromAncoAndToAnco)) {
+                SceneSessionManager::GetInstance().RemoveLifeCycleTaskByPersistentId(
+                    sessionInfo->persistentId_, LifeCycleTaskType::START);
+                return;
+            }
         }
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
@@ -5044,7 +5056,10 @@ napi_value JsSceneSession::OnNotifyPipOcclusionChange(napi_env env, napi_callbac
     }
     TLOGI(WmsLogTag::WMS_PIP, "persistId:%{public}d, occluded:%{public}d", persistentId_, occluded);
     // Maybe expand with session visibility&state change
-    SceneSessionManager::GetInstance().HandleKeepScreenOn(session, !occluded);
+    SceneSessionManager::GetInstance().HandleKeepScreenOn(session, !occluded, WINDOW_SCREEN_LOCK_PREFIX,
+                                                          session->keepScreenLock_);
+    SceneSessionManager::GetInstance().HandleKeepScreenOn(session, !occluded, VIEW_SCREEN_LOCK_PREFIX,
+                                                          session->viewKeepScreenLock_);
     return NapiGetUndefined(env);
 }
 
@@ -5059,8 +5074,8 @@ napi_value JsSceneSession::OnNotifyPipSizeChange(napi_env env, napi_callback_inf
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    uint32_t width = 0;
-    uint32_t height = 0;
+    double width = 0.0;
+    double height = 0.0;
     double scale = 0.0;
     if (!ConvertFromJsValue(env, argv[ARG_INDEX_0], width) || !ConvertFromJsValue(env, argv[ARG_INDEX_1], height) ||
         !ConvertFromJsValue(env, argv[ARG_INDEX_2], scale)) {
@@ -5076,7 +5091,7 @@ napi_value JsSceneSession::OnNotifyPipSizeChange(napi_env env, napi_callback_inf
         return NapiGetUndefined(env);
     }
 
-    TLOGI(WmsLogTag::WMS_PIP, "persistId:%{public}d, width:%{public}u height:%{public}u scale:%{public}f",
+    TLOGI(WmsLogTag::WMS_PIP, "persistId:%{public}d, width:%{public}f height:%{public}f scale:%{public}f",
           persistentId_, width, height, scale);
     // Maybe expand with session visibility&state change
     session->NotifyPipWindowSizeChange(width, height, scale);
