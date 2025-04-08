@@ -37,9 +37,9 @@
 #include "string_ex.h"
 #include "wm_common.h"
 #include "ws_common.h"
-#include "session_manager_service_interface.h"
 #include "scene_board_judgement.h"
 #include "scene_session_manager_interface.h"
+#include "session_manager_service_interface.h"
 #include "screen_session_manager_lite.h"
 #include "common/include/session_permission.h"
 
