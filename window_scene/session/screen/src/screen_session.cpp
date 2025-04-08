@@ -1027,7 +1027,9 @@ void ScreenSession::UpdateDisplayNodeRotation(int rotation)
         transactionProxy->Begin();
         {
             std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
-            displayNode_->SetScreenRotation(static_cast<uint32_t>(property_.GetDeviceRotation()));
+            if (displayNode_ != nullptr) {
+                displayNode_->SetScreenRotation(static_cast<uint32_t>(property_.GetDeviceRotation()));
+            }
         }
         transactionProxy->Commit();
     }
