@@ -3043,6 +3043,22 @@ std::string Session::GetWindowDetectTaskName() const
     return "wms:WindowStateDetect" + std::to_string(persistentId_);
 }
 
+void Session::RecordWindowStateAttachExceptionEvent(bool isAttached)
+{
+    int32_t ret = HiSysEventWrite(
+        OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
+        "WINDOW_STATE_ERROR",
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
+        "TYPE", "WINDOW_STATE_ATTACH_EXCEPTION",
+        "PERSISTENT_ID", GetPersistentId(),
+        "WINDOW_NAME", GetWindowName().c_str(),
+        "ATTACH_STATE", isAttached,
+        "SESSION_STATE", static_cast<uint32_t>(GetSessionState()));
+    if (ret != 0) {
+        TLOGE(WmsLogTag::WMS_LIFE, "write HiSysEvent error, ret: %{public}d", ret);
+    }
+}
+
 void Session::CreateWindowStateDetectTask(bool isAttach, WindowMode windowMode)
 {
     if (!handler_) {
@@ -3066,6 +3082,7 @@ void Session::CreateWindowStateDetectTask(bool isAttach, WindowMode windowMode)
                     "attach:%{public}d, sessioniState:%{public}d, persistenId:%{public}d, bundleName:%{public}s",
                     isAttach, static_cast<uint32_t>(session->GetSessionState()),
                     session->GetPersistentId(), session->GetSessionInfo().bundleName_.c_str());
+                session->RecordWindowStateAttachExceptionEvent(isAttach);
             }
         }
         DetectTaskInfo detectTaskInfo;
