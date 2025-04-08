@@ -7818,17 +7818,19 @@ void SceneSession::UpdateNewSizeForPCWindow()
 
 bool SceneSession::CalcNewWindowRectIfNeed(DMRect& availableArea, float newVpr, WSRect& winRect)
 {
-    float currVpr = 0.0f;
     auto property = GetSessionProperty();
-    if (property) {
-        currVpr = property->GetLastLimitsVpr();
-        TLOGI(WmsLogTag::WMS_LAYOUT_PC, "currVpr: %{public}f, newVpr: %{public}f, Id: %{public}u",
-            currVpr, newVpr, GetPersistentId());
-        // PC上兼容模式应用窗口大小不变化
-        if (property->GetCompatibleModeInPc()) {
-            return false;
-        }
+    if (property == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "property is nullptr");
+        return false;
     }
+    // PC上兼容模式应用窗口大小不变化
+    if (property->GetCompatibleModeInPc()) {
+        return false;
+    }
+    float currVpr = 0.0f;
+    currVpr = property->GetLastLimitsVpr();
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "currVpr: %{public}f, newVpr: %{public}f, Id: %{public}u",
+        currVpr, newVpr, GetPersistentId());
     if (MathHelper::NearZero(currVpr - newVpr) || MathHelper::NearZero(currVpr)) {
         TLOGW(WmsLogTag::WMS_LAYOUT_PC, "need not update new rect, currVpr: %{public}f newVpr: %{public}f "
             "Id: %{public}u", currVpr, newVpr, GetPersistentId());
