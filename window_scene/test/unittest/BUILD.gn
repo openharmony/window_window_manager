@@ -29,7 +29,6 @@ group("unittest") {
     ":ws_keyboard_session_test",
     ":ws_main_session_lifecycle_test",
     ":ws_main_session_test",
-    ":ws_mock_session_manager_service_test",
     ":ws_move_drag_controller_test",
     ":ws_multi_instance_manager_test",
     ":ws_pc_fold_screen_controller_test",
@@ -123,6 +122,7 @@ group("unittest") {
 
   if (window_manager_use_sceneboard) {
     deps += [
+      ":ws_mock_session_manager_service_test",
       ":ws_session_manager_lite_test",
       ":ws_session_manager_test",
     ]

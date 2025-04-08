@@ -38,8 +38,8 @@
 #include "wm_common.h"
 #include "ws_common.h"
 #include "session_manager_service_interface.h"
-#include "scene_session_manager_interface.h"
 #include "scene_board_judgement.h"
+#include "scene_session_manager_interface.h"
 #include "screen_session_manager_lite.h"
 #include "common/include/session_permission.h"
 
@@ -891,7 +891,7 @@ int32_t MockSessionManagerService::SetSnapshotSkipByUserIdAndBundleNames(int32_t
     const std::vector<std::string>& bundleNameList)
 {
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        TLOGE(WmsLogTag::WMS_MULTI_USER, "scb not enabled!");
+        TLOGE(WmsLogTag::WMS_MULTI_USER, "service not supported!");
         return ERR_INVALID_STATE;
     }
     if (!SessionPermission::VerifyCallingPermission("ohos.permission.MANAGE_EDM_POLICY")) {
@@ -920,7 +920,7 @@ int32_t MockSessionManagerService::SetSnapshotSkipByIdNamesMap(
     const std::unordered_map<int32_t, std::vector<std::string>>& userIdAndBunldeNames)
 {
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        TLOGE(WmsLogTag::WMS_MULTI_USER, "scb not enabled!");
+        TLOGE(WmsLogTag::WMS_MULTI_USER, "service not supported!");
         return ERR_INVALID_STATE;
     }
     if (!SessionPermission::VerifyCallingPermission("ohos.permission.MANAGE_EDM_POLICY")) {
