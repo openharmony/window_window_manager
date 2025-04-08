@@ -114,6 +114,7 @@ group("unittest") {
     "rotation:ws_session_stage_stub_rotation_test",
     "rotation:ws_window_session_property_rotation_test",
     "ui_extension:unittest",
+    "window_focus:unittest",
     "window_pattern:window_pattern_snapshot_test",
     "window_pattern:window_pattern_starting_window_rdb_test",
     "window_pattern:window_pattern_starting_window_test",
@@ -1708,6 +1709,7 @@ ohos_static_library("ws_unittest_common") {
     "multi_user:*",
     "rotation:*",
     "ui_extension:*",
+    "window_focus:*",
     "window_pattern:*",
     "window_recover:*",
   ]
