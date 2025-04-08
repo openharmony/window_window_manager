@@ -31,24 +31,7 @@ namespace {
     constexpr int32_t FAILED = 0;
     const std::string PIP_CONTENT_PATH = "/system/etc/window/resources/pip_content.abc";
     const std::string DESTROY_TIMEOUT_TASK = "PipDestroyTimeout";
-    const std::string STATE_CHANGE = "stateChange";
-    const std::string UPDATE_NODE = "nodeUpdate";
     const int DEFAULT_ASPECT_RATIOS[] = {16, 9};
-}
-
-static napi_value CallJsFunction(napi_env env, napi_value method, napi_value const * argv, size_t argc)
-{
-    TLOGD(WmsLogTag::WMS_PIP, "called.");
-    if (env == nullptr || method == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "env nullptr or method is nullptr");
-        return nullptr;
-    }
-    napi_value result = nullptr;
-    napi_value callResult = nullptr;
-    napi_get_undefined(env, &result);
-    napi_get_undefined(env, &callResult);
-    napi_call_function(env, result, method, argc, argv, &callResult);
-    return callResult;
 }
 
 PictureInPictureController::PictureInPictureController(sptr<PipOption> pipOption, sptr<Window> mainWindow,
@@ -127,7 +110,6 @@ WMError PictureInPictureController::ShowPictureInPictureWindow(StartPipType star
             pipOption_->GetPipTemplate(), FAILED, "window is nullptr");
         return WMError::WM_ERROR_PIP_STATE_ABNORMALLY;
     }
-    NotifyStateChangeInner(env_, PiPState::ABOUT_TO_START);
     for (auto& listener : pipLifeCycleListeners_) {
         listener->OnPreparePictureInPictureStart();
     }
@@ -282,14 +264,12 @@ WMError PictureInPictureController::StopPictureInPicture(bool destroyWindow, Sto
         return WMError::WM_ERROR_PIP_STATE_ABNORMALLY;
     }
     curState_ = PiPWindowState::STATE_STOPPING;
-    NotifyStateChangeInner(env_, PiPState::ABOUT_TO_STOP);
     for (auto& listener : pipLifeCycleListeners_) {
         listener->OnPreparePictureInPictureStop();
     }
     if (!destroyWindow) {
         ResetExtController();
         curState_ = PiPWindowState::STATE_STOPPED;
-        NotifyStateChangeInner(env_, PiPState::STOPPED);
         for (auto& listener : pipLifeCycleListeners_) {
             listener->OnPictureInPictureStop();
         }
@@ -365,7 +345,6 @@ WMError PictureInPictureController::DestroyPictureInPictureWindow()
     mainWindowLifeCycleListener_ = nullptr;
     PictureInPictureManager::RemovePipControllerInfo(window_->GetWindowId());
     window_ = nullptr;
-    NotifyStateChangeInner(env_, PiPState::STOPPED);
     PictureInPictureManager::RemoveActiveController(this);
     return WMError::WM_OK;
 }
@@ -521,17 +500,9 @@ void PictureInPictureController::NotifyNodeUpdate(napi_ref nodeRef)
         return;
     }
     if (PictureInPictureManager::IsActiveController(weakRef_)) {
-        std::shared_ptr<NativeReference> updateNodeCallbackRef = GetPipContentCallbackRef(UPDATE_NODE);
-        if (updateNodeCallbackRef == nullptr) {
-            TLOGE(WmsLogTag::WMS_PIP, "updateNodeCallbackRef is null");
-            SingletonContainer::Get<PiPReporter>().ReportPiPUpdateContent(static_cast<int32_t>(IsTypeNodeEnabled()),
-                pipOption_->GetPipTemplate(), FAILED, "updateNodeCallbackRef is null");
-            return;
+        for (auto& listener : pipTypeNodeObserver_) {
+            listener->OnPipTypeNodeChange(nodeRef);
         }
-        napi_value typeNode = nullptr;
-        napi_get_reference_value(env_, nodeRef, &typeNode);
-        napi_value value[] = { typeNode };
-        CallJsFunction(env_, updateNodeCallbackRef->GetNapiValue(), value, 1);
         SingletonContainer::Get<PiPReporter>().ReportPiPUpdateContent(static_cast<int32_t>(IsTypeNodeEnabled()),
             pipOption_->GetPipTemplate(), PIP_SUCCESS, "updateNode success");
     }
@@ -581,7 +552,6 @@ void PictureInPictureController::PreRestorePictureInPicture()
 {
     TLOGI(WmsLogTag::WMS_PIP, "called");
     curState_ = PiPWindowState::STATE_RESTORING;
-    NotifyStateChangeInner(env_, PiPState::ABOUT_TO_RESTORE);
     for (auto& listener : pipLifeCycleListeners_) {
         listener->OnRestoreUserInterface();
     }
@@ -775,47 +745,8 @@ WMError PictureInPictureController::SetXComponentController(std::shared_ptr<XCom
     return WMError::WM_OK;
 }
 
-WMError PictureInPictureController::RegisterPipContentListenerWithType(const std::string& type,
-    std::shared_ptr<NativeReference> callbackRef)
-{
-    TLOGI(WmsLogTag::WMS_PIP, "Register type:%{public}s", type.c_str());
-    if (pipOption_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "Get PictureInPicture option failed");
-        return WMError::WM_ERROR_PIP_STATE_ABNORMALLY;
-    }
-    pipOption_->RegisterPipContentListenerWithType(type, callbackRef);
-    return WMError::WM_OK;
-}
-
-WMError PictureInPictureController::UnRegisterPipContentListenerWithType(const std::string& type)
-{
-    TLOGI(WmsLogTag::WMS_PIP, "Unregister type:%{public}s", type.c_str());
-    if (pipOption_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "Get PictureInPicture option failed");
-        return WMError::WM_ERROR_PIP_STATE_ABNORMALLY;
-    }
-    pipOption_->UnRegisterPipContentListenerWithType(type);
-    return WMError::WM_OK;
-}
-
-std::shared_ptr<NativeReference> PictureInPictureController::GetPipContentCallbackRef(const std::string& type)
-{
-    return pipOption_ == nullptr ? nullptr : pipOption_->GetPipContentCallbackRef(type);
-}
-
-void PictureInPictureController::NotifyStateChangeInner(napi_env env, PiPState state)
-{
-    std::shared_ptr<NativeReference> innerCallbackRef = GetPipContentCallbackRef(STATE_CHANGE);
-    if (innerCallbackRef == nullptr) {
-        return;
-    }
-    napi_value value[] = {AbilityRuntime::CreateJsValue(env, static_cast<uint32_t>(state))};
-    CallJsFunction(env, innerCallbackRef->GetNapiValue(), value, 1);
-}
-
 void PictureInPictureController::OnPictureInPictureStart()
 {
-    NotifyStateChangeInner(env_, PiPState::STARTED);
     for (auto& listener : pipLifeCycleListeners_) {
         listener->OnPictureInPictureStart();
     }
@@ -846,6 +777,11 @@ WMError PictureInPictureController::RegisterPiPWindowSize(const sptr<IPiPWindowS
     return RegisterListener(pipWindowSizeListeners_, listener);
 }
 
+WMError PictureInPictureController::RegisterPiPTypeNodeChange(const sptr<IPiPTypeNodeObserver>& listener)
+{
+    return RegisterListener(pipTypeNodeObserver_, listener);
+}
+
 WMError PictureInPictureController::UnregisterPiPLifecycle(const sptr<IPiPLifeCycle>& listener)
 {
     return UnregisterListener(pipLifeCycleListeners_, listener);
@@ -864,6 +800,11 @@ WMError PictureInPictureController::UnregisterPiPControlObserver(const sptr<IPiP
 WMError PictureInPictureController::UnregisterPiPWindowSize(const sptr<IPiPWindowSize>& listener)
 {
     return UnregisterListener(pipWindowSizeListeners_, listener);
+}
+
+WMError PictureInPictureController::UnRegisterPiPTypeNodeChange(const sptr<IPiPTypeNodeObserver>& listener)
+{
+    return UnregisterListener(pipTypeNodeObserver_, listener);
 }
 
 template<typename T>

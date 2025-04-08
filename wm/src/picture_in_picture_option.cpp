@@ -126,26 +126,6 @@ napi_ref PipOption::GetTypeNodeRef() const
     return typeNode_;
 }
 
-void PipOption::RegisterPipContentListenerWithType(const std::string& type,
-    std::shared_ptr<NativeReference> updateNodeCallbackRef)
-{
-    pipContentlistenerMap_[type] = updateNodeCallbackRef;
-}
-
-void PipOption::UnRegisterPipContentListenerWithType(const std::string& type)
-{
-    pipContentlistenerMap_.erase(type);
-}
-
-std::shared_ptr<NativeReference> PipOption::GetPipContentCallbackRef(const std::string& type)
-{
-    auto iter = pipContentlistenerMap_.find(type);
-    if (iter == pipContentlistenerMap_.end()) {
-        return nullptr;
-    }
-    return iter->second;
-}
-
 void* PipOption::GetContext() const
 {
     return contextPtr_;
