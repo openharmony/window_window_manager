@@ -41,10 +41,10 @@ namespace {
  * @tc.desc: test the core function of SetSnapshotSkipByUserIdAndBundleNames
  * @tc.type: FUNC
  */
-HWTEST_F(MockSessionManagerServiceTest, SetSnapshotSkipByUserIdAndBundleNamesInner, TestSize.Level1)
+HWTEST(MockSessionManagerServiceTest, SetSnapshotSkipByUserIdAndBundleNamesInner, TestSize.Level1)
 {
     MockMockSessionManagerService mockMockSms;
-    sptr<IRemoteObject> mockRemoteObject = sptr<IRemoteObjectMocker>::MakeSptr<>();
+    sptr<IRemoteObject> mockRemoteObject = sptr<IRemoteObjectMocker>::MakeSptr();
     EXPECT_CALL(mockMockSms, GetSceneSessionManagerByUserId(_))
         .Times(3)
         .WillOnce(Return(nullptr))
@@ -53,14 +53,15 @@ HWTEST_F(MockSessionManagerServiceTest, SetSnapshotSkipByUserIdAndBundleNamesInn
         .Times(2)
         .WillOnce(Return(ERR_TRANSACTION_FAILED))
         .WillRepeatedly(Return(ERR_NONE));
+
     int32_t ret = mockMockSms.SetSnapshotSkipByUserIdAndBundleNamesInner(100, {"com.huawei.hmos.notepad"});
-    ASSERT_EQ(ERR_NONE, ret);
+    EXPECT_EQ(ERR_NONE, ret);
 
     ret = mockMockSms.SetSnapshotSkipByUserIdAndBundleNamesInner(100, {"com.huawei.hmos.notepad"});
-    ASSERT_EQ(ERR_TRANSACTION_FAILED, ret);
+    EXPECT_EQ(ERR_TRANSACTION_FAILED, ret);
 
     ret = mockMockSms.SetSnapshotSkipByUserIdAndBundleNamesInner(100, {"com.huawei.hmos.notepad"});
-    ASSERT_EQ(ERR_NONE, ret);
+    EXPECT_EQ(ERR_NONE, ret);
 }
 
 /**
@@ -68,10 +69,10 @@ HWTEST_F(MockSessionManagerServiceTest, SetSnapshotSkipByUserIdAndBundleNamesInn
  * @tc.desc: test the core function of SetSnapshotSkipByIdNamesMap
  * @tc.type: FUNC
  */
-HWTEST_F(MockSessionManagerServiceTest, SetSnapshotSkipByIdNamesMapInner, TestSize.Level1)
+HWTEST(MockSessionManagerServiceTest, SetSnapshotSkipByIdNamesMapInner, TestSize.Level1)
 {
     MockMockSessionManagerService mockMockSms;
-    sptr<IRemoteObject> mockRemoteObject = sptr<IRemoteObjectMocker>::MakeSptr<>();
+    sptr<IRemoteObject> mockRemoteObject = sptr<IRemoteObjectMocker>::MakeSptr();
     EXPECT_CALL(mockMockSms, GetSceneSessionManagerByUserId(_))
         .Times(3)
         .WillOnce(Return(nullptr))
@@ -80,14 +81,15 @@ HWTEST_F(MockSessionManagerServiceTest, SetSnapshotSkipByIdNamesMapInner, TestSi
         .Times(2)
         .WillOnce(Return(ERR_TRANSACTION_FAILED))
         .WillRepeatedly(Return(ERR_NONE));
+
     int32_t ret = mockMockSms.SetSnapshotSkipByIdNamesMapInner({{100, {"com.huawei.hmos.notepad"}}});
-    ASSERT_EQ(ERR_NONE, ret);
+    EXPECT_EQ(ERR_NONE, ret);
 
     ret = mockMockSms.SetSnapshotSkipByIdNamesMapInner({{100, {"com.huawei.hmos.notepad"}}});
-    ASSERT_EQ(ERR_TRANSACTION_FAILED, ret);
+    EXPECT_EQ(ERR_TRANSACTION_FAILED, ret);
 
     ret = mockMockSms.SetSnapshotSkipByIdNamesMapInner({{100, {"com.huawei.hmos.notepad"}}});
-    ASSERT_EQ(ERR_NONE, ret);
+    EXPECT_EQ(ERR_NONE, ret);
 }
 
 /**
@@ -95,10 +97,10 @@ HWTEST_F(MockSessionManagerServiceTest, SetSnapshotSkipByIdNamesMapInner, TestSi
  * @tc.desc: test the function of RecoverSCBSnapshotSkipByUserId
  * @tc.type: FUNC
  */
-HWTEST_F(MockSessionManagerServiceTest, RecoverSCBSnapshotSkipByUserId, TestSize.Level1)
+HWTEST(MockSessionManagerServiceTest, RecoverSCBSnapshotSkipByUserId, TestSize.Level1)
 {
     MockMockSessionManagerService mockMockSms;
-    sptr<IRemoteObject> mockRemoteObject = sptr<IRemoteObjectMocker>::MakeSptr<>();
+    sptr<IRemoteObject> mockRemoteObject = sptr<IRemoteObjectMocker>::MakeSptr();
     EXPECT_CALL(mockMockSms, GetSceneSessionManagerByUserId(_))
         .Times(4)
         .WillOnce(Return(mockRemoteObject))
@@ -109,20 +111,21 @@ HWTEST_F(MockSessionManagerServiceTest, RecoverSCBSnapshotSkipByUserId, TestSize
         .WillOnce(Return(ERR_NONE))
         .WillOnce(Return(ERR_TRANSACTION_FAILED))
         .WillOnce(Return(ERR_NONE));
-    int32_t ret = mockMockSms.SetSnapshotSkipByUserIdAndBundleNamesInner({{100, {"com.huawei.hmos.notepad"}}});
-    ASSERT_EQ(ERR_NONE, ret);
+
+    int32_t ret = mockMockSms.SetSnapshotSkipByUserIdAndBundleNamesInner(100, {"com.huawei.hmos.notepad"});
+    EXPECT_EQ(ERR_NONE, ret);
 
     ret = mockMockSms.RecoverSCBSnapshotSkipByUserId(-1);
-    ASSERT_EQ(ERR_INVALID_VALUE, ret);
+    EXPECT_EQ(ERR_INVALID_VALUE, ret);
 
     ret = mockMockSms.RecoverSCBSnapshotSkipByUserId(100);
-    ASSERT_EQ(ERR_NULL_OBJECT, ret);
+    EXPECT_EQ(ERR_NULL_OBJECT, ret);
 
     ret = mockMockSms.RecoverSCBSnapshotSkipByUserId(100);
-    ASSERT_EQ(ERR_TRANSACTION_FAILED, ret);
+    EXPECT_EQ(ERR_TRANSACTION_FAILED, ret);
 
     ret = mockMockSms.RecoverSCBSnapshotSkipByUserId(100);
-    ASSERT_EQ(ERR_NONE, ret);
+    EXPECT_EQ(ERR_NONE, ret);
 }
 }
 }
