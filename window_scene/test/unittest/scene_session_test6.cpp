@@ -352,7 +352,7 @@ HWTEST_F(SceneSessionTest6, CalcNewWindowRectIfNeed, Function | SmallTest | Leve
      info.bundleName_ = "UpdateDisplayNodeRotation";
      info.windowType_ = 1;
      sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-     sceneSession->UpdateDisplayNodeRotation();
+     sceneSession->UpdateDisplayNodeRotation(1);
      ASSERT_EQ(sceneSession->isExtended_, false);
  }
 } // namespace
