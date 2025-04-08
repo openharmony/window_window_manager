@@ -3186,20 +3186,16 @@ void ScreenSessionManager::SetScreenPowerForFold(ScreenId screenId, ScreenPowerS
         rsInterface_.SetScreenPowerStatus(screenId, status);
         return;
     }
-    ScreenPowerStatus preStatus = rsInterface_.GetScreenPowerStatus(screenId);
-    if (preStatus != ScreenPowerStatus::POWER_STATUS_ON_ADVANCED) {
-        rsInterface_.SetScreenPowerStatus(screenId, status);
-        return;
-    }
-    TLOGW(WmsLogTag::DMS,
-        "screenId = %{public}" PRIu64\
-        ", prepare set power status %{public}u, set %{public}u instead because preStatus is %{public}u",
-        screenId,
-        ScreenPowerStatus::POWER_STATUS_OFF,
-        ScreenPowerStatus::POWER_STATUS_OFF_ADVANCED,
-        preStatus
-    );
-    rsInterface_.SetScreenPowerStatus(screenId, ScreenPowerStatus::POWER_STATUS_OFF_ADVANCED);
+    if ((lastPowerForAllStatus_.load() == ScreenPowerStatus::POWER_STATUS_ON_ADVANCED ||
+        lastPowerForAllStatus_.load() == ScreenPowerStatus::POWER_STATUS_SUSPEND) &&
+        screenId == SCREEN_ID_MAIN && lastScreenId_.load() == SCREEN_ID_MAIN &&
+        FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
+            TLOGW(WmsLogTag::DMS, "status:%{public}d", lastPowerForAllStatus_.load());
+            rsInterface_.SetScreenPowerStatus(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_ON);
+            lastScreenId_ = SCREEN_ID_INVALID;
+            lastPowerForAllStatus_ = ScreenPowerStatus::INVALID_POWER_STATUS;
+        }
+    rsInterface_.SetScreenPowerStatus(screenId, status);
 }
 
 void ScreenSessionManager::TriggerDisplayModeUpdate(FoldDisplayMode targetDisplayMode)
@@ -3245,7 +3241,10 @@ void ScreenSessionManager::CallRsSetScreenPowerStatusSyncForFold(ScreenPowerStat
             TLOGNW(WmsLogTag::DMS, "foldScreenController_ is null");
             return;
         }
-        rsInterface_.SetScreenPowerStatus(foldScreenController_->GetCurrentScreenId(), status);
+        ScreenId screenId = foldScreenController_->GetCurrentScreenId();
+        lastPowerForAllStatus_.store(status);
+        lastScreenId_.store(screenId);
+        rsInterface_.SetScreenPowerStatus(screenId, status);
     };
     screenPowerTaskScheduler_->PostVoidSyncTask(rsSetScreenPowerStatusTask, "rsInterface_.SetScreenPowerStatus task");
 #endif
