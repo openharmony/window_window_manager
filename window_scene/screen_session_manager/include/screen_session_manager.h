@@ -653,6 +653,8 @@ private:
     std::atomic<bool> isScreenLockSuspend_ = false;
     std::atomic<bool> gotScreenlockFingerprint_ = false;
     std::atomic<bool> isPhyScreenConnected_ = false;
+    std::atomic<ScreenPowerStatus> lastPowerForAllStatus_ = ScreenPowerStatus::INVALID_POWER_STATUS;
+    std::atomic<ScreenId> lastScreenId_ = SCREEN_ID_INVALID;
     int32_t cameraStatus_ = {0};
     int32_t cameraPosition_ = {0};
     PowerStateChangeReason powerStateChangeReason_ = PowerStateChangeReason::STATE_CHANGE_REASON_UNKNOWN;
