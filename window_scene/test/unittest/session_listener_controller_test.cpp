@@ -119,11 +119,13 @@ private:
 };
 
 class SessionListenerControllerTest : public testing::Test {
-  public:
+public:
     static void SetUpTestCase();
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+    const std::string LISTENER_CONTROLLER_TEST_THREAD = "OS_ListenerControllerTest";
+    std::shared_ptr<TaskScheduler> taskScheduler_ = std::make_shared<TaskScheduler>(LISTENER_CONTROLLER_TEST_THREAD);
     std::shared_ptr<SessionListenerController> slController;
 
 private:
@@ -152,7 +154,7 @@ void SessionListenerControllerTest::TearDownTestCase()
 
 void SessionListenerControllerTest::SetUp()
 {
-    slController = std::make_shared<SessionListenerController>();
+    slController = std::make_shared<SessionListenerController>(taskScheduler_);
 }
 
 void SessionListenerControllerTest::TearDown()
@@ -520,12 +522,14 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionLifecycleEvent01, Function 
     info.appIndex_ = 0;
 
     slController->NotifySessionLifecycleEvent(ISessionLifecycleListener::SessionLifecycleEvent::CREATED, info);
+    usleep(WAIT_SYNC_IN_NS);
     ASSERT_EQ(myListener->event_, ISessionLifecycleListener::SessionLifecycleEvent::CREATED);
 
     slController->UnregisterSessionLifecycleListener(listener);
     bundleNameList.emplace_back("com.example.myapp");
     slController->RegisterSessionLifecycleListener(listener, bundleNameList);
     slController->NotifySessionLifecycleEvent(ISessionLifecycleListener::SessionLifecycleEvent::BACKGROUND, info);
+    usleep(WAIT_SYNC_IN_NS);
     ASSERT_EQ(myListener->event_, ISessionLifecycleListener::SessionLifecycleEvent::BACKGROUND);
 }
 
