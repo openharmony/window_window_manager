@@ -1923,6 +1923,8 @@ struct DecorButtonStyle {
     uint32_t spacingBetweenButtons = DEFAULT_SPACING_BETWEEN_BUTTONS;
     uint32_t closeButtonRightMargin = DEFAULT_CLOSE_BUTTON_RIGHT_MARGIN;
     uint32_t buttonBackgroundSize = DEFAULT_BUTTON_BACKGROUND_SIZE;
+    uint32_t buttonIconSize = DEFAULT_BUTTON_ICON_SIZE;
+    uint32_t buttonBackgroundCornerRadius = DEFAULT_BUTTON_BACKGROUND_CORNER_RADIUS;
 };
 
 struct ExtensionWindowConfig {
