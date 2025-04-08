@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,29 +13,22 @@
  * limitations under the License.
  */
 
+#include "mock_session_manager_service.h"
+
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
+
 #include "iremote_object_mocker.h"
-#include "mock_session_manager_service.h"
-#include "wm_common.h"
+
 #include "scene_session_manager.h"
+#include "wm_common.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
-class MockSessionManagerServiceTest : public Test {
-public :
-    void SetUp() override;
-    void TearDown() override;
-};
-
-void MockSessionManagerServiceTest::SetUp() {}
-
-void MockSessionManagerServiceTest::TearDown() {}
-
-class MockTest : public MockSessionManagerServiceTest {
+class MockMockSessionManagerService : public MockSessionManagerService {
 public:
     MOCK_METHOD(sptr<IRemoteObject>, GetSceneSessionManagerByUserId, (int32_t), (override));
     MOCK_METHOD(int32_t, NotifySCBSnapshotSkipByUserIdAndBundleNames,
@@ -50,23 +43,23 @@ namespace {
  */
 HWTEST_F(MockSessionManagerServiceTest, SetSnapshotSkipByUserIdAndBundleNamesInner, TestSize.Level1)
 {
-    MockTest mockTest;
-    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr<>();
-    EXPECT_CALL(mockTest, GetSceneSessionManagerByUserId(_))
+    MockMockSessionManagerService mockMockSms;
+    sptr<IRemoteObject> mockRemoteObject = sptr<IRemoteObjectMocker>::MakeSptr<>();
+    EXPECT_CALL(mockMockSms, GetSceneSessionManagerByUserId(_))
         .Times(3)
         .WillOnce(Return(nullptr))
-        .WillRepeatedly(Return(iRemoteObjectMocker));
-    EXPECT_CALL(mockTest, NotifySCBSnapshotSkipByUserIdAndBundleNames(_, _, _))
+        .WillRepeatedly(Return(mockRemoteObject));
+    EXPECT_CALL(mockMockSms, NotifySCBSnapshotSkipByUserIdAndBundleNames(_, _, _))
         .Times(2)
         .WillOnce(Return(ERR_TRANSACTION_FAILED))
         .WillRepeatedly(Return(ERR_NONE));
-    int32_t ret = mockTest.SetSnapshotSkipByUserIdAndBundleNamesInner(100, {"com.huawei.hmos.notepad"});
+    int32_t ret = mockMockSms.SetSnapshotSkipByUserIdAndBundleNamesInner(100, {"com.huawei.hmos.notepad"});
     ASSERT_EQ(ERR_NONE, ret);
 
-    ret = mockTest.SetSnapshotSkipByUserIdAndBundleNamesInner(100, {"com.huawei.hmos.notepad"});
+    ret = mockMockSms.SetSnapshotSkipByUserIdAndBundleNamesInner(100, {"com.huawei.hmos.notepad"});
     ASSERT_EQ(ERR_TRANSACTION_FAILED, ret);
 
-    ret = mockTest.SetSnapshotSkipByUserIdAndBundleNamesInner(100, {"com.huawei.hmos.notepad"});
+    ret = mockMockSms.SetSnapshotSkipByUserIdAndBundleNamesInner(100, {"com.huawei.hmos.notepad"});
     ASSERT_EQ(ERR_NONE, ret);
 }
 
@@ -77,58 +70,58 @@ HWTEST_F(MockSessionManagerServiceTest, SetSnapshotSkipByUserIdAndBundleNamesInn
  */
 HWTEST_F(MockSessionManagerServiceTest, SetSnapshotSkipByIdNamesMapInner, TestSize.Level1)
 {
-    MockTest mockTest;
-    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr<>();
-    EXPECT_CALL(mockTest, GetSceneSessionManagerByUserId(_))
+    MockMockSessionManagerService mockMockSms;
+    sptr<IRemoteObject> mockRemoteObject = sptr<IRemoteObjectMocker>::MakeSptr<>();
+    EXPECT_CALL(mockMockSms, GetSceneSessionManagerByUserId(_))
         .Times(3)
         .WillOnce(Return(nullptr))
-        .WillRepeatedly(Return(iRemoteObjectMocker));
-    EXPECT_CALL(mockTest, NotifySCBSnapshotSkipByUserIdAndBundleNames(_, _, _))
+        .WillRepeatedly(Return(mockRemoteObject));
+    EXPECT_CALL(mockMockSms, NotifySCBSnapshotSkipByUserIdAndBundleNames(_, _, _))
         .Times(2)
         .WillOnce(Return(ERR_TRANSACTION_FAILED))
         .WillRepeatedly(Return(ERR_NONE));
-    int32_t ret = mockTest.SetSnapshotSkipByIdNamesMapInner({{100, {"com.huawei.hmos.notepad"}}});
+    int32_t ret = mockMockSms.SetSnapshotSkipByIdNamesMapInner({{100, {"com.huawei.hmos.notepad"}}});
     ASSERT_EQ(ERR_NONE, ret);
 
-    ret = mockTest.SetSnapshotSkipByIdNamesMapInner({{100, {"com.huawei.hmos.notepad"}}});
+    ret = mockMockSms.SetSnapshotSkipByIdNamesMapInner({{100, {"com.huawei.hmos.notepad"}}});
     ASSERT_EQ(ERR_TRANSACTION_FAILED, ret);
 
-    ret = mockTest.SetSnapshotSkipByIdNamesMapInner({{100, {"com.huawei.hmos.notepad"}}});
+    ret = mockMockSms.SetSnapshotSkipByIdNamesMapInner({{100, {"com.huawei.hmos.notepad"}}});
     ASSERT_EQ(ERR_NONE, ret);
 }
 
 /**
  * @tc.name: RecoverSCBSnapshotSkipByUserId
- * @tc.desc: RecoverSCBSnapshotSkipByUserId
+ * @tc.desc: test the function of RecoverSCBSnapshotSkipByUserId
  * @tc.type: FUNC
  */
 HWTEST_F(MockSessionManagerServiceTest, RecoverSCBSnapshotSkipByUserId, TestSize.Level1)
 {
-    MockTest mockTest;
-    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr<>();
-    EXPECT_CALL(mockTest, GetSceneSessionManagerByUserId(_))
+    MockMockSessionManagerService mockMockSms;
+    sptr<IRemoteObject> mockRemoteObject = sptr<IRemoteObjectMocker>::MakeSptr<>();
+    EXPECT_CALL(mockMockSms, GetSceneSessionManagerByUserId(_))
         .Times(4)
-        .WillOnce(Return(iRemoteObjectMocker))
+        .WillOnce(Return(mockRemoteObject))
         .WillOnce(Return(nullptr))
-        .WillRepeatedly(Return(iRemoteObjectMocker));
-    EXPECT_CALL(mockTest, NotifySCBSnapshotSkipByUserIdAndBundleNames(_, _, _))
+        .WillRepeatedly(Return(mockRemoteObject));
+    EXPECT_CALL(mockMockSms, NotifySCBSnapshotSkipByUserIdAndBundleNames(_, _, _))
         .Times(3)
         .WillOnce(Return(ERR_NONE))
         .WillOnce(Return(ERR_TRANSACTION_FAILED))
         .WillOnce(Return(ERR_NONE));
-    int32_t ret = mockTest.SetSnapshotSkipByUserIdAndBundleNamesInner({{100, {"com.huawei.hmos.notepad"}}});
+    int32_t ret = mockMockSms.SetSnapshotSkipByUserIdAndBundleNamesInner({{100, {"com.huawei.hmos.notepad"}}});
     ASSERT_EQ(ERR_NONE, ret);
 
-    ret = mockTest.RecoverSCBSnapshotSkipByUserId(-1);
+    ret = mockMockSms.RecoverSCBSnapshotSkipByUserId(-1);
     ASSERT_EQ(ERR_INVALID_VALUE, ret);
 
-    ret = mockTest.RecoverSCBSnapshotSkipByUserId(100);
+    ret = mockMockSms.RecoverSCBSnapshotSkipByUserId(100);
     ASSERT_EQ(ERR_NULL_OBJECT, ret);
 
-    ret = mockTest.RecoverSCBSnapshotSkipByUserId(100);
+    ret = mockMockSms.RecoverSCBSnapshotSkipByUserId(100);
     ASSERT_EQ(ERR_TRANSACTION_FAILED, ret);
 
-    ret = mockTest.RecoverSCBSnapshotSkipByUserId(100);
+    ret = mockMockSms.RecoverSCBSnapshotSkipByUserId(100);
     ASSERT_EQ(ERR_NONE, ret);
 }
 }

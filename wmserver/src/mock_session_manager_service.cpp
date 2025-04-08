@@ -892,7 +892,7 @@ int32_t MockSessionManagerService::SetSnapshotSkipByUserIdAndBundleNames(int32_t
 {
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         TLOGE(WmsLogTag::WMS_MULTI_USER, "scb not enabled!");
-        return ERR_INVALID_REPLY;
+        return ERR_INVALID_STATE;
     }
     if (!SessionPermission::VerifyCallingPermission("ohos.permission.MANAGE_EDM_POLICY")) {
         TLOGE(WmsLogTag::WMS_MULTI_USER, "permission denied!");
@@ -921,7 +921,7 @@ int32_t MockSessionManagerService::SetSnapshotSkipByIdNamesMap(
 {
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         TLOGE(WmsLogTag::WMS_MULTI_USER, "scb not enabled!");
-        return ERR_INVALID_REPLY;
+        return ERR_INVALID_STATE;
     }
     if (!SessionPermission::VerifyCallingPermission("ohos.permission.MANAGE_EDM_POLICY")) {
         TLOGE(WmsLogTag::WMS_MULTI_USER, "permission denied");
