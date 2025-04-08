@@ -1051,6 +1051,22 @@ public:
      * @return True means screen is always on, false means the opposite.
      */
     virtual bool IsKeepScreenOn() const { return false; }
+
+    /**
+     * @brief Set the view screen always on or not.
+     *
+     * @param keepScreenOn
+     * @return WMError
+     */
+    virtual WMError SetViewKeepScreenOn(bool keepScreenOn) { return WMError::WM_OK; }
+
+    /**
+     * @brief Get the view screen is always on or not.
+     *
+     * @return True means view screen is always on, false means the opposite.
+     */
+    virtual bool IsViewKeepScreenOn() const { return false; }
+
     /**
      * @brief Set the screen on
      *

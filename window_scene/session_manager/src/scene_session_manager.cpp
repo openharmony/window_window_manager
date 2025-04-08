@@ -4261,26 +4261,27 @@ void SceneSessionManager::HandleTurnScreenOn(const sptr<SceneSession>& sceneSess
 #endif
 }
 
-void SceneSessionManager::HandleKeepScreenOn(const sptr<SceneSession>& sceneSession, bool requireLock)
+void SceneSessionManager::HandleKeepScreenOn(const sptr<SceneSession>& sceneSession, bool requireLock,
+    const std::string& screenLockPrefix, std::shared_ptr<PowerMgr::RunningLock>& screenLock)
 {
 #ifdef POWER_MANAGER_ENABLE
     wptr<SceneSession> weakSceneSession(sceneSession);
-    auto task = [this, weakSceneSession, requireLock]() {
+    auto task = [this, weakSceneSession, requireLock, &screenLockPrefix, &screenLock]() {
         auto scnSession = weakSceneSession.promote();
         if (scnSession == nullptr) {
             WLOGFE("session is invalid");
             return;
         }
-        if (requireLock && scnSession->keepScreenLock_ == nullptr) {
+        if (requireLock && screenLock == nullptr) {
             // reset ipc identity
             std::string identity = IPCSkeleton::ResetCallingIdentity();
-            scnSession->keepScreenLock_ =
-                PowerMgr::PowerMgrClient::GetInstance().CreateRunningLock(scnSession->GetWindowName(),
+            screenLock = PowerMgr::PowerMgrClient::GetInstance().CreateRunningLock(
+                screenLockPrefix + std::to_string(scnSession->GetPersistentId()),
                 PowerMgr::RunningLockType::RUNNINGLOCK_SCREEN);
             // set ipc identity to raw
             IPCSkeleton::SetCallingIdentity(identity);
         }
-        if (scnSession->keepScreenLock_ == nullptr) {
+        if (screenLock == nullptr) {
             return;
         }
         auto curScreenId = scnSession->GetSessionInfo().screenId_;
@@ -4297,9 +4298,9 @@ void SceneSessionManager::HandleKeepScreenOn(const sptr<SceneSession>& sceneSess
         ErrCode res;
         std::string identity = IPCSkeleton::ResetCallingIdentity();
         if (shouldLock) {
-            res = scnSession->keepScreenLock_->Lock();
+            res = screenLock->Lock();
         } else {
-            res = scnSession->keepScreenLock_->UnLock();
+            res = screenLock->UnLock();
         }
         // set ipc identity to raw
         IPCSkeleton::SetCallingIdentity(identity);
@@ -4320,7 +4321,10 @@ bool SceneSessionManager::NotifyVisibleChange(int32_t persistentId)
     if (sceneSession == nullptr) {
         return false;
     }
-    HandleKeepScreenOn(sceneSession, sceneSession->IsKeepScreenOn());
+    HandleKeepScreenOn(sceneSession, sceneSession->IsKeepScreenOn(), WINDOW_SCREEN_LOCK_PREFIX,
+                       sceneSession->keepScreenLock_);
+    HandleKeepScreenOn(sceneSession, sceneSession->IsViewKeepScreenOn(), VIEW_SCREEN_LOCK_PREFIX,
+                       sceneSession->viewKeepScreenLock_);
     ProcessWindowModeType();
     return true;
 }
@@ -6339,7 +6343,12 @@ void SceneSessionManager::RegisterSessionChangeByActionNotifyManagerFunc(sptr<Sc
         }
         switch (action) {
             case WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON:
-                HandleKeepScreenOn(sceneSession, property->IsKeepScreenOn());
+                HandleKeepScreenOn(sceneSession, property->IsKeepScreenOn(), WINDOW_SCREEN_LOCK_PREFIX,
+                                   sceneSession->keepScreenLock_);
+                break;
+            case WSPropertyChangeAction::ACTION_UPDATE_VIEW_KEEP_SCREEN_ON:
+                HandleKeepScreenOn(sceneSession, property->IsViewKeepScreenOn(), VIEW_SCREEN_LOCK_PREFIX,
+                                   sceneSession->viewKeepScreenLock_);
                 break;
             case WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE:
             case WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE:
@@ -6400,7 +6409,10 @@ __attribute__((no_sanitize("cfi"))) void SceneSessionManager::OnSessionStateChan
             }
             UpdateForceHideState(sceneSession, sceneSession->GetSessionProperty(), true);
             NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_ADDED);
-            HandleKeepScreenOn(sceneSession, sceneSession->IsKeepScreenOn());
+            HandleKeepScreenOn(sceneSession, sceneSession->IsKeepScreenOn(), WINDOW_SCREEN_LOCK_PREFIX,
+                               sceneSession->keepScreenLock_);
+            HandleKeepScreenOn(sceneSession, sceneSession->IsViewKeepScreenOn(), VIEW_SCREEN_LOCK_PREFIX,
+                               sceneSession->viewKeepScreenLock_);
             UpdatePrivateStateAndNotify(persistentId);
             if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
                 ProcessSubSessionForeground(sceneSession);
@@ -6411,7 +6423,8 @@ __attribute__((no_sanitize("cfi"))) void SceneSessionManager::OnSessionStateChan
             RequestSessionUnfocus(persistentId, FocusChangeReason::APP_BACKGROUND);
             UpdateForceHideState(sceneSession, sceneSession->GetSessionProperty(), false);
             NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_REMOVED);
-            HandleKeepScreenOn(sceneSession, false);
+            HandleKeepScreenOn(sceneSession, false, WINDOW_SCREEN_LOCK_PREFIX, sceneSession->keepScreenLock_);
+            HandleKeepScreenOn(sceneSession, false, VIEW_SCREEN_LOCK_PREFIX, sceneSession->viewKeepScreenLock_);
             UpdatePrivateStateAndNotify(persistentId);
             if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
                 ProcessSubSessionBackground(sceneSession);
@@ -6582,7 +6595,10 @@ void SceneSessionManager::ProcessSubSessionForeground(sptr<SceneSession>& sceneS
         }
         RequestSessionFocus(subSession->GetPersistentId(), true);
         NotifyWindowInfoChange(subSession->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_ADDED);
-        HandleKeepScreenOn(subSession, subSession->IsKeepScreenOn());
+        HandleKeepScreenOn(subSession, subSession->IsKeepScreenOn(), WINDOW_SCREEN_LOCK_PREFIX,
+                           subSession->keepScreenLock_);
+        HandleKeepScreenOn(subSession, subSession->IsViewKeepScreenOn(), VIEW_SCREEN_LOCK_PREFIX,
+                           subSession->viewKeepScreenLock_);
     }
 
     for (const auto& modal : modalVec) {
@@ -6606,7 +6622,10 @@ void SceneSessionManager::ProcessSubSessionForeground(sptr<SceneSession>& sceneS
             needBlockNotifyFocusStatusUntilForeground_ = false;
             NotifyFocusStatus(modalSession, true);
         }
-        HandleKeepScreenOn(modalSession, modalSession->IsKeepScreenOn());
+        HandleKeepScreenOn(modalSession, modalSession->IsKeepScreenOn(), WINDOW_SCREEN_LOCK_PREFIX,
+                           modalSession->keepScreenLock_);
+        HandleKeepScreenOn(modalSession, modalSession->IsViewKeepScreenOn(), VIEW_SCREEN_LOCK_PREFIX,
+                           modalSession->viewKeepScreenLock_);
     }
 }
 
@@ -6699,7 +6718,8 @@ void SceneSessionManager::ProcessSubSessionBackground(sptr<SceneSession>& sceneS
             continue;
         }
         NotifyWindowInfoChange(subSession->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_REMOVED);
-        HandleKeepScreenOn(subSession, false);
+        HandleKeepScreenOn(subSession, false, WINDOW_SCREEN_LOCK_PREFIX, subSession->keepScreenLock_);
+        HandleKeepScreenOn(subSession, false, VIEW_SCREEN_LOCK_PREFIX, subSession->viewKeepScreenLock_);
         UpdatePrivateStateAndNotify(subSession->GetPersistentId());
     }
     std::vector<sptr<Session>> dialogVec = sceneSession->GetDialogVector();
@@ -6714,7 +6734,8 @@ void SceneSessionManager::ProcessSubSessionBackground(sptr<SceneSession>& sceneS
             continue;
         }
         NotifyWindowInfoChange(dialog->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_REMOVED);
-        HandleKeepScreenOn(dialogSession, false);
+        HandleKeepScreenOn(dialogSession, false, WINDOW_SCREEN_LOCK_PREFIX, dialogSession->keepScreenLock_);
+        HandleKeepScreenOn(dialogSession, false, VIEW_SCREEN_LOCK_PREFIX, dialogSession->viewKeepScreenLock_);
         UpdatePrivateStateAndNotify(dialog->GetPersistentId());
     }
     for (const auto& toastSession : sceneSession->GetToastSession()) {
@@ -6727,7 +6748,8 @@ void SceneSessionManager::ProcessSubSessionBackground(sptr<SceneSession>& sceneS
             continue;
         }
         NotifyWindowInfoChange(toastSession->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_REMOVED);
-        HandleKeepScreenOn(toastSession, false);
+        HandleKeepScreenOn(toastSession, false, WINDOW_SCREEN_LOCK_PREFIX, toastSession->keepScreenLock_);
+        HandleKeepScreenOn(toastSession, false, VIEW_SCREEN_LOCK_PREFIX, toastSession->viewKeepScreenLock_);
         UpdatePrivateStateAndNotify(toastSession->GetPersistentId());
         toastSession->SetActive(false);
         toastSession->BackgroundTask();
@@ -10109,7 +10131,9 @@ void SceneSessionManager::PostProcessProperty(uint32_t dirty)
         }
         TLOGD(WmsLogTag::WMS_PIPELINE, "id: %{public}d", session->GetPersistentId());
         UpdateForceHideState(session, session->GetSessionProperty(), true);
-        HandleKeepScreenOn(session, session->IsKeepScreenOn());
+        HandleKeepScreenOn(session, session->IsKeepScreenOn(), WINDOW_SCREEN_LOCK_PREFIX, session->keepScreenLock_);
+        HandleKeepScreenOn(session, session->IsViewKeepScreenOn(), VIEW_SCREEN_LOCK_PREFIX,
+                           session->viewKeepScreenLock_);
         UpdatePrivateStateAndNotify(session->GetPersistentId());
         if (session->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
             ProcessSubSessionForeground(session);
