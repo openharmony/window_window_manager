@@ -7824,6 +7824,10 @@ bool SceneSession::CalcNewWindowRectIfNeed(DMRect& availableArea, float newVpr, 
         currVpr = property->GetLastLimitsVpr();
         TLOGI(WmsLogTag::WMS_LAYOUT_PC, "currVpr: %{public}f, newVpr: %{public}f, Id: %{public}u",
             currVpr, newVpr, GetPersistentId());
+        // PC上兼容模式应用窗口大小不变化
+        if (property->GetCompatibleModeInPc()) {
+            return false;
+        }
     }
     if (MathHelper::NearZero(currVpr - newVpr) || MathHelper::NearZero(currVpr)) {
         TLOGW(WmsLogTag::WMS_LAYOUT_PC, "need not update new rect, currVpr: %{public}f newVpr: %{public}f "
@@ -7833,10 +7837,6 @@ bool SceneSession::CalcNewWindowRectIfNeed(DMRect& availableArea, float newVpr, 
     int32_t left = winRect.posX_;
     int32_t top = winRect.posY_;
     float scaleRatio = newVpr / currVpr;
-    // PC上兼容模式应用窗口大小不变化
-    if (property->GetCompatibleModeInPc()) {
-        return false;
-    }
     uint32_t width = static_cast<uint32_t>(winRect.width_ * scaleRatio);
     uint32_t height = static_cast<uint32_t>(winRect.height_ * scaleRatio);
     int32_t topThreshold = availableArea.posY_;
