@@ -630,8 +630,8 @@ public:
                decorButtonStyle.spacingBetweenButtons <= MAX_SPACING_BETWEEN_BUTTONS &&
                decorButtonStyle.colorMode >= MIN_COLOR_MODE &&
                decorButtonStyle.colorMode <= MAX_COLOR_MODE &&
-               decorButtonStyle.buttonBackgroundCornerRedius >= MIN_BUTTON_BACKGROUND_CORNER_RADIUS &&
-               decorButtonStyle.buttonBackgroundCornerRedius <= MAX_BUTTON_BACKGROUND_CORNER_RADIUS &&
+               decorButtonStyle.buttonBackgroundCornerRadius >= MIN_BUTTON_BACKGROUND_CORNER_RADIUS &&
+               decorButtonStyle.buttonBackgroundCornerRadius <= MAX_BUTTON_BACKGROUND_CORNER_RADIUS &&
                decorButtonStyle.spacingBetweenButtons +
                 decorButtonStyle.buttonBackgroundSize >= MIN_BUTTON_BETWEEN;
     }
