@@ -30,6 +30,12 @@ namespace OHOS {
 namespace Rosen {
 
 namespace {
+    std::string logMsg;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
+                    const char *msg)
+    {
+        logMsg = msg;
+    }
 // screen const
 constexpr int32_t SCREEN_WIDTH = 2472;
 constexpr int32_t SCREEN_HEIGHT = 3296;
@@ -456,6 +462,7 @@ HWTEST_F(PcFoldScreenManagerTest, ThrowSlipToOppositeSide, TestSize.Level1)
 HWTEST_F(PcFoldScreenManagerTest, MappingRectInScreenSide, TestSize.Level1)
 {
     // half folded
+    LOG_SetCallback(MyLogCallback);
     SetHalfFolded();
     WSRect rect = B_ACROSS_RECT;
     WSRect rectMapped = rect;
@@ -484,9 +491,8 @@ HWTEST_F(PcFoldScreenManagerTest, MappingRectInScreenSide, TestSize.Level1)
     // flattened
     SetExpanded();
     rect = B_ACROSS_RECT;
-    rectMapped = rect;
     manager_.MappingRectInScreenSide(ScreenSide::EXPAND, rect, TOP_AVOID_HEIGHT, BOT_AVOID_HEIGHT);
-    EXPECT_EQ(rect, rectMapped);
+    EXPECT_TRUE(logMsg.find("invalid side") != std::string::npos);
 }
 
 /**
