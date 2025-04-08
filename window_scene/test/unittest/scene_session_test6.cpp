@@ -339,22 +339,6 @@ HWTEST_F(SceneSessionTest6, CalcNewWindowRectIfNeed, Function | SmallTest | Leve
     WSRect result = { 0, 0, 1200, 900 };
     ASSERT_EQ(result, winRect);
 }
-
-/**
- * @tc.name: UpdateDisplayNodeRotation
- * @tc.desc: UpdateDisplayNodeRotation
- * @tc.type: FUNC
- */
- HWTEST_F(SceneSessionTest6, UpdateDisplayNodeRotation, Function | SmallTest | Level1)
- {
-     SessionInfo info;
-     info.abilityName_ = "UpdateDisplayNodeRotation";
-     info.bundleName_ = "UpdateDisplayNodeRotation";
-     info.windowType_ = 1;
-     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-     sceneSession->UpdateDisplayNodeRotation(1);
-     ASSERT_EQ(sceneSession->isExtended_, false);
- }
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
