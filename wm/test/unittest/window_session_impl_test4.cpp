@@ -608,7 +608,7 @@ HWTEST_F(WindowSessionImplTest4, SetDecorButtonStyle, TestSize.Level1)
     ASSERT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
 
     // check uiContent is null
-    style.buttonBackgroundSize = 24;
+    style.buttonBackgroundSize = 40;
     res = window->SetDecorButtonStyle(style);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
 
