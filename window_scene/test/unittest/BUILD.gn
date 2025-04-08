@@ -29,6 +29,7 @@ group("unittest") {
     ":ws_keyboard_session_test",
     ":ws_main_session_lifecycle_test",
     ":ws_main_session_test",
+    ":ws_mock_session_manager_service_test",
     ":ws_move_drag_controller_test",
     ":ws_multi_instance_manager_test",
     ":ws_pc_fold_screen_controller_test",
@@ -1618,6 +1619,28 @@ ohos_unittest("ws_session_manager_service_recover_proxy_test") {
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("ws_mock_session_manager_service_test") {
+  module_out_path = module_out_path
+
+  include_dirs = [ "../mock" ]
+
+  sources = [
+    "mock_session_manager_service_test.cpp",
+  ]
+
+  deps = [
+    ":ws_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+    "${window_base_path}/wmserver:sms",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "safwk:system_ability_fwk",
   ]
 }
 
