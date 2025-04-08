@@ -571,6 +571,8 @@ HWTEST_F(WindowSessionImplTest4, GetDecorButtonStyle, TestSize.Level1)
     ASSERT_EQ(style.closeButtonRightMargin, DEFAULT_CLOSE_BUTTON_RIGHT_MARGIN);
     ASSERT_EQ(style.spacingBetweenButtons, DEFAULT_SPACING_BETWEEN_BUTTONS);
     ASSERT_EQ(style.colorMode, DEFAULT_COLOR_MODE);
+    ASSERT_EQ(style.buttonIconSize, DEFAULT_BUTTON_ICON_SIZE);
+    ASSERT_EQ(style.buttonBackgroundCornerRadius, DEFAULT_BUTTON_BACKGROUND_CORNER_RADIUS);
     ASSERT_EQ(res, WMError::WM_OK);
 }
 
