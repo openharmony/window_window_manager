@@ -635,10 +635,12 @@ bool ConvertDecorButtonStyleFromJs(napi_env env, napi_value jsObject, DecorButto
         style.closeButtonRightMargin = closeButtonRightMargin;
         emptyParam = false;
     }
+    uint32_t buttonIconSize;
     if (ParseJsValue(jsObject, env, "buttonIconSize", buttonIconSize)) {
         style.buttonIconSize = buttonIconSize;
         emptyParam = false;
     }
+    uint32_t buttonBackgroundCornerRadius;
     if (ParseJsValue(jsObject, env, "buttonBackgroundCornerRadius", buttonBackgroundCornerRadius)) {
         style.buttonBackgroundCornerRadius = buttonBackgroundCornerRadius;
         emptyParam = false;
