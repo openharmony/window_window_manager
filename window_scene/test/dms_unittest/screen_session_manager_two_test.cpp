@@ -19,6 +19,7 @@
 
 #include "screen_session_manager/include/screen_session_manager.h"
 #include "screen_scene_config.h"
+#include "scene_board_judgement.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -67,6 +68,9 @@ namespace {
  */
 HWTEST_F(ScreenSessionManagerTest, SwitchScrollParam01, Function | SmallTest | Level3)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
+    }
     ScreenSceneConfig::scrollableParams_.clear();
     vector<FoldDisplayMode> displayModeALL = {
         FoldDisplayMode::SUB,
@@ -114,6 +118,9 @@ HWTEST_F(ScreenSessionManagerTest, SwitchScrollParam01, Function | SmallTest | L
  */
 HWTEST_F(ScreenSessionManagerTest, SwitchScrollParam02, Function | SmallTest | Level3)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
+    }
     ScreenSceneConfig::scrollableParams_.clear();
     vector<FoldDisplayMode> displayModeALL = {
         FoldDisplayMode::SUB,
@@ -153,6 +160,8 @@ HWTEST_F(ScreenSessionManagerTest, SwitchScrollParam02, Function | SmallTest | L
  */
 HWTEST_F(ScreenSessionManagerTest, WakeUpPictureFrameBlock, Function | SmallTest | Level3)
 {
+    ssm_->WakeUpPictureFrameBlock(DisplayEvent::SCREEN_LOCK_OFF);
+    ASSERT_EQ(ssm_->pictureFrameBreak_, false);
     ASSERT_NE(ssm_, nullptr);
     ssm_->pictureFrameReady_ = false;
     ssm_->pictureFrameBreak_ = false;
@@ -160,6 +169,30 @@ HWTEST_F(ScreenSessionManagerTest, WakeUpPictureFrameBlock, Function | SmallTest
     ASSERT_EQ(ssm_->pictureFrameReady_, true);
     ssm_->WakeUpPictureFrameBlock(DisplayEvent::SCREEN_LOCK_END_DREAM);
     ASSERT_EQ(ssm_->pictureFrameBreak_, true);
+}
+
+/**
+ * @tc.name: AddVirtualScreenBlockList
+ * @tc.desc: AddVirtualScreenBlockList test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, AddVirtualScreenBlockList, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    std::vector<int32_t> persistentIds {0, 1, 2};
+    ASSERT_EQ(DMError::DM_OK, ssm_->AddVirtualScreenBlockList(persistentIds));
+}
+
+/**
+ * @tc.name: RemoveVirtualScreenBlockList
+ * @tc.desc: RemoveVirtualScreenBlockList test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, RemoveVirtualScreenBlockList, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    std::vector<int32_t> persistentIds {0, 1, 2};
+    ASSERT_EQ(DMError::DM_OK, ssm_->RemoveVirtualScreenBlockList(persistentIds));
 }
 
 /**

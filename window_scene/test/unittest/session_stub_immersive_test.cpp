@@ -99,6 +99,7 @@ HWTEST_F(SessionStubImmersiveTest, HandleGetAvoidAreaByTypeWithSystemType, Funct
     data.WriteInt32(rect.posY_);
     data.WriteInt32(rect.width_);
     data.WriteInt32(rect.height_);
+    data.WriteInt32(16);
     uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_AVOID_AREA);
     int ret = session_->OnRemoteRequest(code, data, reply, option);
 

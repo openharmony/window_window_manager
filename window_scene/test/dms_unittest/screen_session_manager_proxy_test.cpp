@@ -983,6 +983,34 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetScreenPower, Function | SmallTest | L
 }
 
 /**
+ * @tc.name: AddVirtualScreenBlockList
+ * @tc.desc: AddVirtualScreenBlockList
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, AddVirtualScreenBlockList, TestSize.Level1)
+{
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+    std::vector<int32_t> persistentIds {0, 1, 2};
+    EXPECT_NE(DMError::DM_ERROR_IPC_FAILED, screenSessionManagerProxy->AddVirtualScreenBlockList(persistentIds));
+}
+
+/**
+ * @tc.name: RemoveVirtualScreenBlockList
+ * @tc.desc: RemoveVirtualScreenBlockList
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, RemoveVirtualScreenBlockList, TestSize.Level1)
+{
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+    std::vector<int32_t> persistentIds {0, 1, 2};
+    EXPECT_NE(DMError::DM_ERROR_IPC_FAILED, screenSessionManagerProxy->RemoveVirtualScreenBlockList(persistentIds));
+}
+
+/**
  * @tc.name: SetVirtualMirrorScreenCanvasRotation
  * @tc.desc: SetVirtualMirrorScreenCanvasRotation
  * @tc.type: FUNC
@@ -1741,28 +1769,6 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetFoldStatusLocked, Function | SmallTes
 }
 
 /**
- * @tc.name: SetFoldStatusLockedFromJs
- * @tc.desc: SetFoldStatusLockedFromJs
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerProxyTest, SetFoldStatusLockedFromJs, Function | SmallTest | Level1)
-{
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
-
-    int resultValue = 0;
-    bool locked = true;
-    std::function<void()> func = [&]()
-    {
-        screenSessionManagerProxy->SetFoldStatusLockedFromJs(locked);
-        resultValue = 1;
-    };
-    func();
-    EXPECT_EQ(resultValue, 1);
-}
-
-/**
  * @tc.name: GetFoldDisplayMode
  * @tc.desc: GetFoldDisplayMode
  * @tc.type: FUNC
@@ -1926,374 +1932,6 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetScreenProperty, Function | SmallTest 
     screenSessionManagerProxy->GetScreenProperty(screenId);
     auto screenSession = ScreenSessionManager::GetInstance().GetScreenSession(2000);
     EXPECT_EQ(screenSession, nullptr);
-}
-
-/**
- * @tc.name: GetDisplayNode
- * @tc.desc: GetDisplayNode
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayNode, Function | SmallTest | Level1)
-{
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
-
-    int resultValue = 0;
-    ScreenId screenId = 0;
-    std::function<void()> func = [&]()
-    {
-        screenSessionManagerProxy->GetDisplayNode(screenId);
-        resultValue = 1;
-    };
-    func();
-    EXPECT_EQ(resultValue, 1);
-}
-
-/**
- * @tc.name: GetCurvedCompressionArea
- * @tc.desc: GetCurvedCompressionArea
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerProxyTest, GetCurvedCompressionArea, Function | SmallTest | Level1)
-{
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
-
-    int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
-        screenSessionManagerProxy->GetCurvedCompressionArea();
-        resultValue = 1;
-    };
-    func();
-    EXPECT_EQ(resultValue, 1);
-}
-
-/**
- * @tc.name: SetScreenPrivacyState
- * @tc.desc: SetScreenPrivacyState
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerProxyTest, SetScreenPrivacyState, Function | SmallTest | Level1)
-{
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
-
-    int resultValue = 0;
-    bool hasPrivate = true;
-    std::function<void()> func = [&]()
-    {
-        screenSessionManagerProxy->SetScreenPrivacyState(hasPrivate);
-        resultValue = 1;
-    };
-    func();
-    EXPECT_EQ(resultValue, 1);
-}
-
-/**
- * @tc.name: UpdateAvailableArea
- * @tc.desc: UpdateAvailableArea
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerProxyTest, UpdateAvailableArea, Function | SmallTest | Level1)
-{
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
-
-    int resultValue = 0;
-    ScreenId screenId = 0;
-    DMRect area;
-    area.height_ = 2772;
-    area.width_ = 1344;
-    area.posX_ = 0;
-    area.posY_ = 0;
-    std::function<void()> func = [&]()
-    {
-        screenSessionManagerProxy->UpdateAvailableArea(screenId, area);
-        resultValue = 1;
-    };
-    func();
-    EXPECT_EQ(resultValue, 1);
-}
-
-/**
- * @tc.name: SetScreenOffDelayTime
- * @tc.desc: SetScreenOffDelayTime
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerProxyTest, SetScreenOffDelayTime, Function | SmallTest | Level1)
-{
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
-
-    int resultValue = 0;
-    int32_t delay = 5;
-    std::function<void()> func = [&]()
-    {
-        screenSessionManagerProxy->SetScreenOffDelayTime(delay);
-        resultValue = 1;
-    };
-    func();
-    EXPECT_EQ(resultValue, 1);
-}
-
-/**
- * @tc.name: GetAvailableArea
- * @tc.desc: GetAvailableArea
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerProxyTest, GetAvailableArea, Function | SmallTest | Level1)
-{
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
-
-    int resultValue = 0;
-    DisplayId displayId = 0;
-    DMRect area;
-    area.height_ = 2772;
-    area.width_ = 1344;
-    area.posX_ = 0;
-    area.posY_ = 0;
-    std::function<void()> func = [&]()
-    {
-        screenSessionManagerProxy->GetAvailableArea(displayId, area);
-        resultValue = 1;
-    };
-    func();
-    EXPECT_EQ(resultValue, 1);
-}
-
-/**
- * @tc.name: NotifyFoldToExpandCompletion
- * @tc.desc: NotifyFoldToExpandCompletion
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerProxyTest, NotifyFoldToExpandCompletion, Function | SmallTest | Level1)
-{
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
-
-    int resultValue = 0;
-    bool foldToExpand = true;
-    std::function<void()> func = [&]()
-    {
-        screenSessionManagerProxy->NotifyFoldToExpandCompletion(foldToExpand);
-        resultValue = 1;
-    };
-    func();
-    EXPECT_EQ(resultValue, 1);
-}
-
-/**
- * @tc.name: GetVirtualScreenFlag
- * @tc.desc: GetVirtualScreenFlag
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerProxyTest, GetVirtualScreenFlag, Function | SmallTest | Level1)
-{
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
-
-    int resultValue = 0;
-    ScreenId screenId = 0;
-    std::function<void()> func = [&]()
-    {
-        screenSessionManagerProxy->GetVirtualScreenFlag(screenId);
-        resultValue = 1;
-    };
-    func();
-    EXPECT_EQ(resultValue, 1);
-}
-
-/**
- * @tc.name: SetVirtualScreenFlag
- * @tc.desc: SetVirtualScreenFlag
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualScreenFlag, Function | SmallTest | Level1)
-{
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
-
-    int resultValue = 0;
-    ScreenId screenId = 0;
-    VirtualScreenFlag screenFlag = VirtualScreenFlag::CAST;
-    std::function<void()> func = [&]()
-    {
-        screenSessionManagerProxy->SetVirtualScreenFlag(screenId, screenFlag);
-        resultValue = 1;
-    };
-    func();
-    EXPECT_EQ(resultValue, 1);
-}
-
-/**
- * @tc.name: GetDeviceScreenConfig
- * @tc.desc: GetDeviceScreenConfig
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerProxyTest, GetDeviceScreenConfig, Function | SmallTest | Level1)
-{
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
-
-    int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
-        screenSessionManagerProxy->GetDeviceScreenConfig();
-        resultValue = 1;
-    };
-    func();
-    EXPECT_EQ(resultValue, 1);
-}
-
-/**
- * @tc.name: SetVirtualScreenRefreshRate
- * @tc.desc: SetVirtualScreenRefreshRate
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualScreenRefreshRate, Function | SmallTest | Level1)
-{
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
-
-    int resultValue = 0;
-    ScreenId screenId = 0;
-    uint32_t refreshInterval = 1;
-    std::function<void()> func = [&]()
-    {
-        screenSessionManagerProxy->SetVirtualScreenRefreshRate(screenId, refreshInterval);
-        resultValue = 1;
-    };
-    func();
-    EXPECT_EQ(resultValue, 1);
-}
-
-/**
- * @tc.name: ResetAllFreezeStatus
- * @tc.desc: ResetAllFreezeStatus
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerProxyTest, ResetAllFreezeStatus, Function | SmallTest | Level1)
-{
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
-
-    int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
-        screenSessionManagerProxy->ResetAllFreezeStatus();
-        resultValue = 1;
-    };
-    func();
-    EXPECT_EQ(resultValue, 1);
-}
-
-/**
- * @tc.name: UpdateDisplayHookInfo
- * @tc.desc: UpdateDisplayHookInfo
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerProxyTest, UpdateDisplayHookInfo, Function | SmallTest | Level1)
-{
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
-
-    int resultValue = 0;
-    int32_t uid = 0;
-    bool enable = true;
-    DMHookInfo hookInfo;
-    hookInfo.density_ = 160;
-    hookInfo.height_ = 1344;
-    hookInfo.width_ = 2772;
-    std::function<void()> func = [&]()
-    {
-        screenSessionManagerProxy->UpdateDisplayHookInfo(uid, enable, hookInfo);
-        resultValue = 1;
-    };
-    func();
-    EXPECT_EQ(resultValue, 1);
-}
-
-/**
- * @tc.name: GetSupportedColorSpaces
- * @tc.desc: GetSupportedColorSpaces
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerProxyTest, GetSupportedColorSpaces, Function | SmallTest | Level1)
-{
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
-
-    int resultValue = 0;
-    ScreenId screenId = 0;
-    std::vector<GraphicCM_ColorSpaceType> colorSpaces = {};
-    std::function<void()> func = [&]()
-    {
-        screenSessionManagerProxy->GetSupportedColorSpaces(screenId, colorSpaces);
-        resultValue = 1;
-    };
-    func();
-    EXPECT_EQ(resultValue, 1);
-}
-
-/**
- * @tc.name: GetScreenColorSpace
- * @tc.desc: GetScreenColorSpace
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerProxyTest, GetScreenColorSpace, Function | SmallTest | Level1)
-{
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
-
-    int resultValue = 0;
-    ScreenId screenId = 0;
-    GraphicCM_ColorSpaceType colorSpace;
-    std::function<void()> func = [&]()
-    {
-        screenSessionManagerProxy->GetScreenColorSpace(screenId, colorSpace);
-        resultValue = 1;
-    };
-    func();
-    EXPECT_EQ(resultValue, 1);
-}
-
-/**
- * @tc.name: SetScreenColorSpace
- * @tc.desc: SetScreenColorSpace
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerProxyTest, SetScreenColorSpace, Function | SmallTest | Level1)
-{
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
-
-    int resultValue = 0;
-    ScreenId screenId = 0;
-    GraphicCM_ColorSpaceType colorSpace;
-    std::function<void()> func = [&]() {
-        screenSessionManagerProxy->SetScreenColorSpace(screenId, colorSpace);
-        resultValue = 1;
-    };
-    func();
-    EXPECT_EQ(resultValue, 1);
 }
 
 /**

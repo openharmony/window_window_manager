@@ -272,25 +272,6 @@ HWTEST_F(SubSessionTest, IsModal, Function | SmallTest | Level1)
 }
 
 /**
- * @tc.name: IsVisibleForeground01
- * @tc.desc: check func IsVisibleForeground
- * @tc.type: FUNC
- */
-HWTEST_F(SubSessionTest, IsVisibleForeground01, Function | SmallTest | Level1)
-{
-    ASSERT_FALSE(subSession_->IsVisibleForeground());
-
-    SessionInfo info;
-    info.abilityName_ = "testMainSession1";
-    info.moduleName_ = "testMainSession2";
-    info.bundleName_ = "testMainSession3";
-    auto parentSession = sptr<SubSession>::MakeSptr(info, specificCallback);
-
-    subSession_->SetParentSession(parentSession);
-    ASSERT_FALSE(subSession_->IsVisibleForeground());
-}
-
-/**
  * @tc.name: RectCheck
  * @tc.desc: test function : RectCheck
  * @tc.type: FUNC

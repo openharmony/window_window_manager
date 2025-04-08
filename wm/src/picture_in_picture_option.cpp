@@ -22,6 +22,22 @@ PipOption::PipOption()
 {
 }
 
+void PipOption::ClearNapiRefs(napi_env env)
+{
+    if (customNodeController_) {
+        napi_delete_reference(env, customNodeController_);
+        customNodeController_ = nullptr;
+    }
+    if (typeNode_) {
+        napi_delete_reference(env, typeNode_);
+        typeNode_ = nullptr;
+    }
+    if (storage_) {
+        napi_delete_reference(env, storage_);
+        storage_ = nullptr;
+    }
+}
+
 void PipOption::SetContext(void* contextPtr)
 {
     contextPtr_ = contextPtr;
@@ -77,11 +93,21 @@ void PipOption::SetNodeControllerRef(napi_ref ref)
     customNodeController_ = ref;
 }
 
+void PipOption::SetStorageRef(napi_ref ref)
+{
+    storage_ = ref;
+}
+ 
 napi_ref PipOption::GetNodeControllerRef() const
 {
     return customNodeController_;
 }
 
+napi_ref PipOption::GetStorageRef() const
+{
+    return storage_;
+}
+ 
 void PipOption::SetTypeNodeRef(napi_ref ref)
 {
     typeNode_ = ref;

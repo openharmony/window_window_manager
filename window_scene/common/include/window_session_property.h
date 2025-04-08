@@ -55,6 +55,7 @@ public:
     void SetSystemCalling(bool isSystemCalling);
     void SetTurnScreenOn(bool turnScreenOn);
     void SetKeepScreenOn(bool keepScreenOn);
+    void SetViewKeepScreenOn(bool keepScreenOn);
     void SetRequestedOrientation(Orientation orientation);
     void SetDefaultRequestedOrientation(Orientation orientation);
     void SetPrivacyMode(bool isPrivate);
@@ -126,6 +127,7 @@ public:
     bool GetSystemCalling() const;
     bool IsTurnScreenOn() const;
     bool IsKeepScreenOn() const;
+    bool IsViewKeepScreenOn() const;
     Orientation GetRequestedOrientation() const;
     Orientation GetDefaultRequestedOrientation() const;
     bool GetPrivacyMode() const;
@@ -291,6 +293,7 @@ private:
     static void UnmarshallingKeyboardTouchHotAreas(Parcel& parcel, WindowSessionProperty* property);
     bool WriteActionUpdateTurnScreenOn(Parcel& parcel);
     bool WriteActionUpdateKeepScreenOn(Parcel& parcel);
+    bool WriteActionUpdateViewKeepScreenOn(Parcel& parcel);
     bool WriteActionUpdateFocusable(Parcel& parcel);
     bool WriteActionUpdateTouchable(Parcel& parcel);
     bool WriteActionUpdateSetBrightness(Parcel& parcel);
@@ -320,6 +323,7 @@ private:
     bool WriteActionUpdateExclusivelyHighlighted(Parcel& parcel);
     void ReadActionUpdateTurnScreenOn(Parcel& parcel);
     void ReadActionUpdateKeepScreenOn(Parcel& parcel);
+    void ReadActionUpdateViewKeepScreenOn(Parcel& parcel);
     void ReadActionUpdateFocusable(Parcel& parcel);
     void ReadActionUpdateTouchable(Parcel& parcel);
     void ReadActionUpdateSetBrightness(Parcel& parcel);
@@ -363,6 +367,7 @@ private:
     bool tokenState_ { false };
     bool turnScreenOn_ = false;
     bool keepScreenOn_ = false;
+    bool viewKeepScreenOn_ = false;
     bool topmost_ = false;
     bool mainWindowTopmost_ = false;
     Orientation requestedOrientation_ = Orientation::UNSPECIFIED;
@@ -572,6 +577,10 @@ struct SystemSessionConfig : public Parcelable {
     uint32_t miniWidthOfSubWindow_ = 320;
     // 240: default minHeight sub window size
     uint32_t miniHeightOfSubWindow_ = 240;
+    // 320: default minWidth dialog window size
+    uint32_t miniWidthOfDialogWindow_ = 320;
+    // 240: default minHeight dialog window size
+    uint32_t miniHeightOfDialogWindow_ = 240;
     bool backgroundswitch = false;
     bool freeMultiWindowEnable_ = false;
     bool freeMultiWindowSupport_ = false;
@@ -592,8 +601,11 @@ struct SystemSessionConfig : public Parcelable {
             return false;
         }
 
-        if (!parcel.WriteUint32(miniWidthOfMainWindow_) || !parcel.WriteUint32(miniHeightOfMainWindow_) ||
-            !parcel.WriteUint32(miniWidthOfSubWindow_) || !parcel.WriteUint32(miniHeightOfSubWindow_)) {
+        bool parcelWriteFail = !parcel.WriteUint32(miniWidthOfMainWindow_) ||
+            !parcel.WriteUint32(miniHeightOfMainWindow_) || !parcel.WriteUint32(miniWidthOfSubWindow_) ||
+            !parcel.WriteUint32(miniHeightOfSubWindow_) || !parcel.WriteUint32(miniWidthOfDialogWindow_) ||
+            !parcel.WriteUint32(miniHeightOfDialogWindow_);
+        if (parcelWriteFail) {
             return false;
         }
 
@@ -647,6 +659,8 @@ struct SystemSessionConfig : public Parcelable {
         config->miniHeightOfMainWindow_ = parcel.ReadUint32();
         config->miniWidthOfSubWindow_ = parcel.ReadUint32();
         config->miniHeightOfSubWindow_ = parcel.ReadUint32();
+        config->miniWidthOfDialogWindow_ = parcel.ReadUint32();
+        config->miniHeightOfDialogWindow_ = parcel.ReadUint32();
         config->backgroundswitch = parcel.ReadBool();
         config->freeMultiWindowEnable_ = parcel.ReadBool();
         config->freeMultiWindowSupport_ = parcel.ReadBool();

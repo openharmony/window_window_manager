@@ -136,7 +136,8 @@ HWTEST_F(SceneSessionTest3, BindDialogSessionTarget1, Function | SmallTest | Lev
     result = sceneSession->BindDialogSessionTarget(sceneSession2);
     ASSERT_EQ(result, WSError::WS_OK);
 
-    sceneSession1->onBindDialogTarget_ = [](const sptr<SceneSession>&) {};
+    sceneSession->onBindDialogTarget_ = [](const sptr<SceneSession>&) {};
+    sceneSession1 = sptr<SceneSession>::MakeSptr(info, nullptr);
     result = sceneSession->BindDialogSessionTarget(sceneSession1);
     ASSERT_EQ(result, WSError::WS_OK);
 }
@@ -1227,8 +1228,8 @@ HWTEST_F(SceneSessionTest3, GetAllAvoidAreas, Function | SmallTest | Level2)
  */
 HWTEST_F(SceneSessionTest3, NotifyPipWindowSizeChange, Function | SmallTest | Level2)
 {
-    uint32_t width = 10;
-    uint32_t height = 10;
+    double width = 10;
+    double height = 10;
     double scale = 10;
     SessionInfo info;
     info.abilityName_ = "NotifyPipWindowSizeChange";

@@ -187,6 +187,10 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleGetWindowIdsByCoordinate(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UPDATE_SESSION_SCREEN_LOCK):
             return HandleUpdateSessionScreenLock(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_ADD_SKIP_SELF_ON_VIRTUAL_SCREEN):
+            return HandleAddSkipSelfWhenShowOnVirtualScreenList(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_REMOVE_SKIP_SELF_ON_VIRTUAL_SCREEN):
+            return HandleRemoveSkipSelfWhenShowOnVirtualScreenList(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_IS_PC_WINDOW):
             return HandleIsPcWindow(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_IS_PC_OR_PAD_FREE_MULTI_WINDOW_MODE):
@@ -209,8 +213,6 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleWatchFocusActiveChange(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SHIFT_APP_WINDOW_POINTER_EVENT):
             return HandleShiftAppWindowPointerEvent(data, reply);
-        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_UI_TYPE):
-            return HandleGetWindowUIType(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_MINIMIZE_BY_WINDOW_ID):
             return HandleMinimizeByWindowId(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_PARENT_WINDOW):
@@ -1643,6 +1645,48 @@ int SceneSessionManagerStub::HandleUpdateSessionScreenLock(MessageParcel& data, 
     return ERR_NONE;
 }
 
+int SceneSessionManagerStub::HandleAddSkipSelfWhenShowOnVirtualScreenList(MessageParcel& data, MessageParcel& reply)
+{
+    uint64_t size = 0;
+    if (!data.ReadUint64(size)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read size failed.");
+        return ERR_INVALID_DATA;
+    }
+    std::vector<int32_t> persistentIds;
+    for (uint64_t i = 0; i < size; i++) {
+        int32_t persistentId = 0;
+        if (!data.ReadInt32(persistentId)) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read persistentId failed.");
+            return ERR_INVALID_DATA;
+        }
+        persistentIds.push_back(persistentId);
+    }
+    WMError errCode = AddSkipSelfWhenShowOnVirtualScreenList(persistentIds);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleRemoveSkipSelfWhenShowOnVirtualScreenList(MessageParcel& data, MessageParcel& reply)
+{
+    uint64_t size = 0;
+    if (!data.ReadUint64(size)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read size failed.");
+        return ERR_INVALID_DATA;
+    }
+    std::vector<int32_t> persistentIds;
+    for (uint64_t i = 0; i < size; i++) {
+        int32_t persistentId = 0;
+        if (!data.ReadInt32(persistentId)) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read persistentId failed.");
+            return ERR_INVALID_DATA;
+        }
+        persistentIds.push_back(persistentId);
+    }
+    WMError errCode = RemoveSkipSelfWhenShowOnVirtualScreenList(persistentIds);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
 int SceneSessionManagerStub::HandleIsPcWindow(MessageParcel& data, MessageParcel& reply)
 {
     bool isPcWindow = false;
@@ -1820,22 +1864,6 @@ int SceneSessionManagerStub::HandleShiftAppWindowPointerEvent(MessageParcel& dat
     }
     WMError errCode = ShiftAppWindowPointerEvent(sourcePersistentId, targetPersistentId);
     reply.WriteInt32(static_cast<int32_t>(errCode));
-    return ERR_NONE;
-}
-
-int SceneSessionManagerStub::HandleGetWindowUIType(MessageParcel& data, MessageParcel& reply)
-{
-    WindowUIType type = WindowUIType::INVALID_WINDOW;
-    WMError errCode = GetWindowUIType(type);
-    TLOGI(WmsLogTag::WMS_MULTI_WINDOW, "WindowUIType:%{public}d!", static_cast<int32_t>(type));
-    if (!reply.WriteUint32(static_cast<int32_t>(type))) {
-        TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "Write WindowUIType failed");
-        return ERR_INVALID_DATA;
-    }
-    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "Write errCode fail.");
-        return ERR_INVALID_DATA;
-    }
     return ERR_NONE;
 }
 

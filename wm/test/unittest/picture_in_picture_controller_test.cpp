@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 
 #include <gmock/gmock.h>
+#include "parameters.h"
 #include "ability_context_impl.h"
 #include "picture_in_picture_controller.h"
 #include "picture_in_picture_manager.h"
@@ -1182,6 +1183,28 @@ HWTEST_F(PictureInPictureControllerTest, StopPictureInPictureInner, Function | S
     pipControl->window_ = window;
     ASSERT_EQ(WMError::WM_OK, pipControl->StopPictureInPictureInner(StopPipType::NULL_STOP, true));
     ASSERT_EQ(WMError::WM_OK, pipControl->StopPictureInPictureInner(StopPipType::NULL_STOP, false));
+}
+
+/**
+ * @tc.name: GetPipPossible
+ * @tc.desc: GetPipPossible
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureControllerTest, GetPipPossible, Function | SmallTest | Level2)
+{
+    auto mw = sptr<MockWindow>::MakeSptr();
+    ASSERT_NE(nullptr, mw);
+    auto option = sptr<PipOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    auto pipControl = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
+
+    const std::string multiWindowUIType = system::GetParameter("const.window.multiWindowUIType", "");
+    bool isDeviceSupported = multiWindowUIType == "HandsetSmartWindow" || multiWindowUIType == "TabletSmartWindow";
+
+    bool pipSupported = false;
+    pipControl->pipOption_ = option;
+    pipControl->GetPipPossible(pipSupported);
+    ASSERT_EQ(isDeviceSupported, pipSupported);
 }
 } // namespace
 } // namespace Rosen

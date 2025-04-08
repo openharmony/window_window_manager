@@ -116,7 +116,6 @@ public:
     int32_t GetStatusBarHeight() override;
     WMError SetSystemWindowEnableDrag(bool enableDrag) override;
     void NotifyExtensionDetachToDisplay() override;
-    WSError RequestFocus(bool isFocused) override;
     
     /*
      * Gesture Back
@@ -162,6 +161,12 @@ public:
      * Window layout
      */
     WSError SetFollowParentWindowLayoutEnabled(bool isFollow) override;
+    
+    /*
+     * window focus
+     */
+    WSError RequestFocus(bool isFocused) override;
+    WSError GetIsHighlighted(bool& isHighlighted) override;
 
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;

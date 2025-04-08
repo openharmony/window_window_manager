@@ -328,6 +328,35 @@ public:
      */
     WMError UnregisterWindowUpdateListener(const sptr<IWindowUpdateListener>& listener);
 
+    /**
+     * @brief Register window info change callback.
+     *
+     * @param observedInfo Property which to observe.
+     * @param listener Listener to observe window info.
+     * @return WM_OK means register success, others means failed.
+     */
+    WMError RegisterWindowInfoChangeCallback(const std::unordered_set<WindowInfoKey>& observedInfo,
+        const sptr<IWindowInfoChangedListener>& listener);
+    
+    /**
+     * @brief Unregister window info change callback.
+     *
+     * @param observedInfo Property which to observe.
+     * @param listener Listener to observe window info.
+     * @return WM_OK means unregister success, others means failed.
+     */
+    WMError UnregisterWindowInfoChangeCallback(const std::unordered_set<WindowInfoKey>& observedInfo,
+        const sptr<IWindowInfoChangedListener>& listener);
+
+    /**
+     * @brief List window info.
+     *
+     * @param windowInfoOption Option for selecting window info.
+     * @param infos Window info.
+     * @return WM_OK means get success, others means get failed.
+     */
+    WMError ListWindowInfo(const WindowInfoOption& windowInfoOption, std::vector<sptr<WindowInfo>>& infos) const;
+
 private:
     WindowManagerLite();
     ~WindowManagerLite();
@@ -352,6 +381,12 @@ private:
     void NotifyAccessibilityWindowInfo(const std::vector<sptr<AccessibilityWindowInfo>>& infos,
         WindowUpdateType type) const;
     WMError NotifyCallingWindowDisplayChanged(const CallingWindowInfo& callingWindowInfo);
+    WMError ProcessRegisterWindowInfoChangeCallback(WindowInfoKey observedInfo,
+        const sptr<IWindowInfoChangedListener>& listener);
+    WMError ProcessUnregisterWindowInfoChangeCallback(WindowInfoKey observedInfo,
+        const sptr<IWindowInfoChangedListener>& listener);
+    WMError RegisterVisibilityStateChangedListener(const sptr<IWindowInfoChangedListener>& listener);
+    WMError UnregisterVisibilityStateChangedListener(const sptr<IWindowInfoChangedListener>& listener);
 };
 } // namespace Rosen
 } // namespace OHOS

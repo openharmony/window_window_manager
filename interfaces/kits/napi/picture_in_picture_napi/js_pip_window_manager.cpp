@@ -85,6 +85,20 @@ static int32_t checkControlsRules(uint32_t pipTemplateType, std::vector<std::uin
     return 0;
 }
 
+static void checkLocalStorage(napi_env env, PipOption& option, napi_value storage)
+{
+    napi_valuetype valueType;
+    napi_typeof(env, storage, &valueType);
+    if (valueType != napi_object) {
+        option.SetStorageRef(nullptr);
+    } else {
+        napi_ref storageRef;
+        napi_create_reference(env, storage, 1, &storageRef);
+        option.SetStorageRef(storageRef);
+        TLOGI(WmsLogTag::WMS_PIP, "localStorage is set");
+    }
+}
+
 static int32_t checkOptionParams(PipOption& option)
 {
     if (option.GetContext() == nullptr) {
@@ -146,6 +160,7 @@ static int32_t GetPictureInPictureOptionFromJs(napi_env env, napi_value optionOb
     napi_value xComponentControllerValue = nullptr;
     napi_value controlGroup = nullptr;
     napi_value nodeController = nullptr;
+    napi_value storage = nullptr;
     napi_ref nodeControllerRef = nullptr;
     void* contextPtr = nullptr;
     std::string navigationId = "";
@@ -162,7 +177,9 @@ static int32_t GetPictureInPictureOptionFromJs(napi_env env, napi_value optionOb
     napi_get_named_property(env, optionObject, "componentController", &xComponentControllerValue);
     napi_get_named_property(env, optionObject, "controlGroups", &controlGroup);
     napi_get_named_property(env, optionObject, "customUIController", &nodeController);
+    napi_get_named_property(env, optionObject, "localStorage", &storage);
     napi_create_reference(env, nodeController, 1, &nodeControllerRef);
+    checkLocalStorage(env, option, storage);
     napi_unwrap(env, contextPtrValue, &contextPtr);
     ConvertFromJsValue(env, navigationIdValue, navigationId);
     ConvertFromJsValue(env, templateTypeValue, templateType);

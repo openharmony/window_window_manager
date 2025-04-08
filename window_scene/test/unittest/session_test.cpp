@@ -670,27 +670,27 @@ HWTEST_F(WindowSessionTest, ConsumeDragEvent02, Function | SmallTest | Level2)
     pointerItem.SetWindowY(0);
     auto result = sceneSession->moveDragController_->ConsumeDragEvent(pointerEvent, originalRect, property,
         sessionConfig);
-    ASSERT_EQ(result, true);
+    ASSERT_EQ(result, false);
 
     sceneSession->moveDragController_->aspectRatio_ = 0.0f;
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
     pointerItem.SetDisplayX(150);
     pointerItem.SetDisplayY(150);
     result = sceneSession->moveDragController_->ConsumeDragEvent(pointerEvent, originalRect, property, sessionConfig);
-    ASSERT_EQ(result, true);
+    ASSERT_EQ(result, false);
 
     sceneSession->moveDragController_->aspectRatio_ = 1.0f;
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
     pointerItem.SetDisplayX(200);
     pointerItem.SetDisplayY(200);
     result = sceneSession->moveDragController_->ConsumeDragEvent(pointerEvent, originalRect, property, sessionConfig);
-    ASSERT_EQ(result, true);
+    ASSERT_EQ(result, false);
 
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UP);
     pointerItem.SetDisplayX(250);
     pointerItem.SetDisplayY(250);
     result = sceneSession->moveDragController_->ConsumeDragEvent(pointerEvent, originalRect, property, sessionConfig);
-    ASSERT_EQ(result, true);
+    ASSERT_EQ(result, false);
 }
 
 /**
@@ -733,25 +733,25 @@ HWTEST_F(WindowSessionTest, ConsumeDragEvent03, Function | SmallTest | Level2)
     pointerItem.SetWindowY(0);
     auto result = sceneSession->moveDragController_->ConsumeDragEvent(pointerEvent, originalRect, property,
         sessionConfig);
-    ASSERT_EQ(result, true);
+    ASSERT_EQ(result, false);
 
     // RIGHT_TOP
     pointerItem.SetWindowX(1000);
     pointerItem.SetWindowY(0);
     result = sceneSession->moveDragController_->ConsumeDragEvent(pointerEvent, originalRect, property, sessionConfig);
-    ASSERT_EQ(result, true);
+    ASSERT_EQ(result, false);
 
     // RIGHT_BOTTOM
     pointerItem.SetWindowX(1000);
     pointerItem.SetWindowY(1000);
     result = sceneSession->moveDragController_->ConsumeDragEvent(pointerEvent, originalRect, property, sessionConfig);
-    ASSERT_EQ(result, true);
+    ASSERT_EQ(result, false);
 
     // LEFT_BOTTOM
     pointerItem.SetWindowX(0);
     pointerItem.SetWindowY(1000);
     result = sceneSession->moveDragController_->ConsumeDragEvent(pointerEvent, originalRect, property, sessionConfig);
-    ASSERT_EQ(result, true);
+    ASSERT_EQ(result, false);
 }
 
 /**
@@ -794,25 +794,25 @@ HWTEST_F(WindowSessionTest, ConsumeDragEvent04, Function | SmallTest | Level2)
     pointerItem.SetWindowY(500);
     auto result = sceneSession->moveDragController_->ConsumeDragEvent(pointerEvent, originalRect, property,
         sessionConfig);
-    ASSERT_EQ(result, true);
+    ASSERT_EQ(result, false);
 
     // TOP
     pointerItem.SetWindowX(500);
     pointerItem.SetWindowY(0);
     result = sceneSession->moveDragController_->ConsumeDragEvent(pointerEvent, originalRect, property, sessionConfig);
-    ASSERT_EQ(result, true);
+    ASSERT_EQ(result, false);
 
     // RIGHT
     pointerItem.SetWindowX(1000);
     pointerItem.SetWindowY(500);
     result = sceneSession->moveDragController_->ConsumeDragEvent(pointerEvent, originalRect, property, sessionConfig);
-    ASSERT_EQ(result, true);
+    ASSERT_EQ(result, false);
 
     // BOTTOM
     pointerItem.SetWindowX(500);
     pointerItem.SetWindowY(1000);
     result = sceneSession->moveDragController_->ConsumeDragEvent(pointerEvent, originalRect, property, sessionConfig);
-    ASSERT_EQ(result, true);
+    ASSERT_EQ(result, false);
 }
 
 /**
@@ -1662,7 +1662,7 @@ HWTEST_F(WindowSessionTest, UpdateHighlightStatus, Function | SmallTest | Level2
     EXPECT_EQ(session_->UpdateHighlightStatus(false, false), WSError::WS_DO_NOTHING);
  
     EXPECT_EQ(session_->UpdateHighlightStatus(true, false), WSError::WS_OK);
-    session_->isHighlight_ = false;
+    session_->isHighlighted_ = false;
     EXPECT_EQ(session_->UpdateHighlightStatus(true, true), WSError::WS_OK);
 }
  

@@ -398,6 +398,7 @@ public:
     virtual void NotifyWindowAttachStateListenerRegistered(bool registered) { }
     virtual WSError SetFollowParentWindowLayoutEnabled(bool isFollow) { return WSError::WS_OK; };
     virtual WSError UpdateFlag(const std::string& flag) { return WSError::WS_OK; };
+    virtual WSError GetIsHighlighted(bool& isHighlighted) { return WSError::WS_OK; }
 };
 } // namespace OHOS::Rosen
 
