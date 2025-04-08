@@ -1324,7 +1324,8 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool w
         return WMError::WM_OK;
     }
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
-    if (display == nullptr && type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+    if (display == nullptr && (type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT ||
+        type == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW)) {
         display = SingletonContainer::Get<DisplayManager>().GetDefaultDisplay();
         if (display != nullptr) {
             property_->SetDisplayId(display->GetId());
