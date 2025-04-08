@@ -76,6 +76,9 @@ PictureInPictureController::PictureInPictureController(sptr<PipOption> pipOption
 
 PictureInPictureController::~PictureInPictureController()
 {
+    if (pipOption_) {
+        pipOption_->ClearNapiRefs(env_);
+    }
     TLOGI(WmsLogTag::WMS_PIP, "Destruction");
     if (!isAutoStartEnabled_) {
         return;
@@ -148,7 +151,7 @@ WMError PictureInPictureController::ShowPictureInPictureWindow(StartPipType star
     for (auto& listener : pipLifeCycleListeners_) {
         listener->OnPreparePictureInPictureStart();
     }
-    window_->SetUIContentByAbc(PIP_CONTENT_PATH, env_, nullptr, nullptr);
+    SetUIContent();
     WMError errCode = window_->Show(0, false);
     if (errCode != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_PIP, "window show failed, err: %{public}u", errCode);
@@ -711,6 +714,17 @@ void PictureInPictureController::UpdateWinRectByComponent()
     windowRect_.posY_ = static_cast<int32_t>(posY);
     TLOGD(WmsLogTag::WMS_PIP, "position width: %{public}u, height: %{public}u, posX: %{public}d, posY: %{public}d",
         windowRect_.width_, windowRect_.height_, windowRect_.posX_, windowRect_.posY_);
+}
+
+void PictureInPictureController::SetUIContent() const
+{
+    napi_value storage = nullptr;
+    napi_ref storageRef = pipOption_->GetStorageRef();
+    if (storageRef != nullptr) {
+        napi_get_reference_value(env_, storageRef, &storage);
+        TLOGI(WmsLogTag::WMS_PIP, "startPiP with localStorage");
+    }
+    window_->SetUIContentByAbc(PIP_CONTENT_PATH, env_, storage, nullptr);
 }
 
 void PictureInPictureController::UpdatePiPSourceRect() const
