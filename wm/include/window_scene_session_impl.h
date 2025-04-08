@@ -100,6 +100,7 @@ public:
     virtual WMError SetTransparent(bool isTransparent) override;
     virtual WMError SetTurnScreenOn(bool turnScreenOn) override;
     virtual WMError SetKeepScreenOn(bool keepScreenOn) override;
+    virtual WMError SetViewKeepScreenOn(bool keepScreenOn) override;
     virtual WMError SetPrivacyMode(bool isPrivacyMode) override;
     virtual void SetSystemPrivacyMode(bool isSystemPrivacyMode) override;
     virtual WMError SetSnapshotSkip(bool isSkip) override;
@@ -113,6 +114,7 @@ public:
     virtual bool IsTransparent() const override;
     virtual bool IsTurnScreenOn() const override;
     virtual bool IsKeepScreenOn() const override;
+    virtual bool IsViewKeepScreenOn() const override;
     virtual bool IsPrivacyMode() const override;
     virtual bool IsLayoutFullScreen() const override;
     virtual bool IsFullScreen() const override;

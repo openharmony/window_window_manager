@@ -275,6 +275,7 @@ public:
     void RegisterDefaultDensityEnabledCallback(NotifyDefaultDensityEnabledFunc&& callback);
 
     WSError SetKeepScreenOn(bool keepScreenOn);
+    WSError SetViewKeepScreenOn(bool keepScreenOn);
     void SetParentPersistentId(int32_t parentId);
     WSError SetTurnScreenOn(bool turnScreenOn);
     void SetPrivacyMode(bool isPrivacy);
@@ -387,6 +388,7 @@ public:
     bool IsSystemSessionAboveApp() const;
     bool IsTurnScreenOn() const;
     bool IsKeepScreenOn() const;
+    bool IsViewKeepScreenOn() const;
     bool IsShowWhenLocked() const;
     bool GetShowWhenLockedFlagValue() const;
     bool IsFloatingWindowAppType() const;
@@ -489,6 +491,7 @@ public:
     void SetTemporarilyShowWhenLocked(bool isTemporarilyShowWhenLocked);
 
     std::shared_ptr<PowerMgr::RunningLock> keepScreenLock_;
+    std::shared_ptr<PowerMgr::RunningLock> viewKeepScreenLock_;
 
     static const wptr<SceneSession> GetEnterWindow();
     static void ClearEnterWindow();
@@ -746,6 +749,8 @@ private:
     WMError HandleActionUpdateTurnScreenOn(const sptr<WindowSessionProperty>& property,
         const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
     WMError HandleActionUpdateKeepScreenOn(const sptr<WindowSessionProperty>& property,
+        const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
+    WMError HandleActionUpdateViewKeepScreenOn(const sptr<WindowSessionProperty>& property,
         const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
     WMError HandleActionUpdateFocusable(const sptr<WindowSessionProperty>& property,
         const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);

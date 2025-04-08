@@ -1915,7 +1915,8 @@ WMError SessionProxy::UpdateSessionPropertyByAction(const sptr<WindowSessionProp
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
-    if (action == WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON) {
+    if (action == WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON ||
+        action == WSPropertyChangeAction::ACTION_UPDATE_VIEW_KEEP_SCREEN_ON) {
         option.SetFlags(MessageOption::TF_ASYNC);
     }
     if (!data.WriteInterfaceToken(GetDescriptor())) {

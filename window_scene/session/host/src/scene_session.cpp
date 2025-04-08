@@ -3102,6 +3102,17 @@ bool SceneSession::IsKeepScreenOn() const
     return GetSessionProperty()->IsKeepScreenOn();
 }
 
+WSError SceneSession::SetViewKeepScreenOn(bool keepScreenOn)
+{
+    GetSessionProperty()->SetViewKeepScreenOn(keepScreenOn);
+    return WSError::WS_OK;
+}
+
+bool SceneSession::IsViewKeepScreenOn() const
+{
+    return GetSessionProperty()->IsViewKeepScreenOn();
+}
+
 std::string SceneSession::GetSessionSnapshotFilePath() const
 {
     WLOGFI("GetSessionSnapshotFilePath id %{public}d", GetPersistentId());
@@ -4071,6 +4082,8 @@ WMError SceneSession::ProcessUpdatePropertyByAction(const sptr<WindowSessionProp
             return HandleActionUpdateTurnScreenOn(property, sceneSession, action);
         case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON):
             return HandleActionUpdateKeepScreenOn(property, sceneSession, action);
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_VIEW_KEEP_SCREEN_ON):
+            return HandleActionUpdateViewKeepScreenOn(property, sceneSession, action);
         case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE):
             return HandleActionUpdateFocusable(property, sceneSession, action);
         case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE):
@@ -4164,6 +4177,16 @@ WMError SceneSession::HandleActionUpdateKeepScreenOn(const sptr<WindowSessionPro
     const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
 {
     sceneSession->SetKeepScreenOn(property->IsKeepScreenOn());
+    sceneSession->NotifySessionChangeByActionNotifyManager(sceneSession, property, action);
+    return WMError::WM_OK;
+}
+
+WMError SceneSession::HandleActionUpdateViewKeepScreenOn(const sptr<WindowSessionProperty>& property,
+    const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "id: %{public}d, enabled: %{public}u", sceneSession->GetPersistentId(),
+        property->IsViewKeepScreenOn());
+    sceneSession->SetViewKeepScreenOn(property->IsViewKeepScreenOn());
     sceneSession->NotifySessionChangeByActionNotifyManager(sceneSession, property, action);
     return WMError::WM_OK;
 }
