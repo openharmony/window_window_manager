@@ -401,7 +401,6 @@ private:
     /*
      * PC Fold Screen
      */
-    std::atomic_bool isFullScreenWaterfallMode_ { false };
     std::atomic_bool isWaterfallToMaximize_ { false };
     std::atomic<WindowMode> lastWindowModeBeforeWaterfall_ { WindowMode::WINDOW_MODE_UNDEFINED };
 

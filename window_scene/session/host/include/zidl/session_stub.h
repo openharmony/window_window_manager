@@ -120,6 +120,9 @@ private:
     int HandleContainerModalEvent(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateFlag(MessageParcel& data, MessageParcel& reply);
 
+    // PC Fold Screen
+    int HandleGetWaterfallMode(MessageParcel& data, MessageParcel& reply);
+
     // Keyboard
     int HandleChangeKeyboardViewMode(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyKeyboardDidShowRegistered(MessageParcel& data, MessageParcel& reply);
