@@ -685,7 +685,7 @@ private:
      */
     void GetTitleButtonVisible(bool& hideMaximizeButton, bool& hideMinimizeButton, bool& hideSplitButton,
         bool& hideCloseButton);
-    
+ 
     /*
      * PC Fold Screen
      */
