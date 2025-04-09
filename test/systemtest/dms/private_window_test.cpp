@@ -66,7 +66,7 @@ namespace {
  * @tc.desc: Register private window listener test
  * @tc.type: FUNC
  */
-HWTEST_F(PrivateWindowTest, RegisterPrivateWindowListener, Function | MediumTest | Level2)
+HWTEST_F(PrivateWindowTest, RegisterPrivateWindowListener, TestSize.Level1)
 {
     auto& dm = DisplayManager::GetInstance();
     sptr<PrivateWindowListener> listener_ = new PrivateWindowListener();

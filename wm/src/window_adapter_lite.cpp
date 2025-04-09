@@ -341,5 +341,14 @@ WMError WindowAdapterLite::GetAccessibilityWindowInfo(std::vector<sptr<Accessibi
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
     return wmsProxy->GetAccessibilityWindowInfo(infos);
 }
+
+WMError WindowAdapterLite::ListWindowInfo(const WindowInfoOption& windowInfoOption,
+    std::vector<sptr<WindowInfo>>& infos)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->ListWindowInfo(windowInfoOption, infos);
+}
 } // namespace Rosen
 } // namespace OHOS

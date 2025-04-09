@@ -59,7 +59,7 @@ namespace {
  * @tc.desc: test function : SetUpdateFunc
  * @tc.type: FUNC
  */
-HWTEST_F(SettingObserverTest, SetUpdateFunc, Function | SmallTest | Level1)
+HWTEST_F(SettingObserverTest, SetUpdateFunc, TestSize.Level1)
 {
     UpdateFunc func = [this](const std::string& key) {
         settingObserver_->SetKey(key);
@@ -74,7 +74,7 @@ HWTEST_F(SettingObserverTest, SetUpdateFunc, Function | SmallTest | Level1)
  * @tc.desc: test function : SetKey
  * @tc.type: FUNC
  */
-HWTEST_F(SettingObserverTest, SetKey, Function | SmallTest | Level1)
+HWTEST_F(SettingObserverTest, SetKey, TestSize.Level1)
 {
     const char* s = "";
     EXPECT_EQ(settingObserver_->key_, s);
@@ -88,7 +88,7 @@ HWTEST_F(SettingObserverTest, SetKey, Function | SmallTest | Level1)
  * @tc.desc: test function : OnChange
  * @tc.type: FUNC
  */
-HWTEST_F(SettingObserverTest, OnChange, Function | SmallTest | Level1)
+HWTEST_F(SettingObserverTest, OnChange, TestSize.Level1)
 {
     EXPECT_EQ(settingObserver_->update_, nullptr);
     settingObserver_->SetKey("OnChange");

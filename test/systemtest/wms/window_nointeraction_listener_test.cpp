@@ -134,7 +134,7 @@ namespace {
  * @tc.name: RegisterUnregisterNormal
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNoInteractionTest, RegisterUnregisterNormal, Function | MediumTest | Level1)
+HWTEST_F(WindowNoInteractionTest, RegisterUnregisterNormal, TestSize.Level1)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     option->SetWindowName("CreateWindow");
@@ -150,7 +150,7 @@ HWTEST_F(WindowNoInteractionTest, RegisterUnregisterNormal, Function | MediumTes
     ASSERT_EQ(WMError::WM_OK, result);
 }
 
-HWTEST_F(WindowNoInteractionTest, RegisterUnregisterNull, Function | MediumTest | Level1)
+HWTEST_F(WindowNoInteractionTest, RegisterUnregisterNull, TestSize.Level1)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     option->SetWindowName("CreateWindow");
@@ -165,7 +165,7 @@ HWTEST_F(WindowNoInteractionTest, RegisterUnregisterNull, Function | MediumTest 
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, result);
 }
 
-HWTEST_F(WindowNoInteractionTest, UnregisterNotReg, Function | MediumTest | Level1)
+HWTEST_F(WindowNoInteractionTest, UnregisterNotReg, TestSize.Level1)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     option->SetWindowName("CreateWindow");
@@ -181,7 +181,7 @@ HWTEST_F(WindowNoInteractionTest, UnregisterNotReg, Function | MediumTest | Leve
  * @tc.name: KeyEventDownWindowShow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNoInteractionTest, KeyEventDownWindowShow, Function | MediumTest | Level1)
+HWTEST_F(WindowNoInteractionTest, KeyEventDownWindowShow, TestSize.Level1)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     option->SetWindowName("CreateWindow");
@@ -218,7 +218,7 @@ HWTEST_F(WindowNoInteractionTest, KeyEventDownWindowShow, Function | MediumTest 
  * @tc.name: KeyEventDownWindowHide
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNoInteractionTest, KeyEventDownWindowHide, Function | MediumTest | Level1)
+HWTEST_F(WindowNoInteractionTest, KeyEventDownWindowHide, TestSize.Level1)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     option->SetWindowName("CreateWindow");
@@ -253,7 +253,7 @@ HWTEST_F(WindowNoInteractionTest, KeyEventDownWindowHide, Function | MediumTest 
  * @tc.name: KeyEventUpWindowShow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNoInteractionTest, KeyEventUpWindowShow, Function | MediumTest | Level1)
+HWTEST_F(WindowNoInteractionTest, KeyEventUpWindowShow, TestSize.Level1)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     option->SetWindowName("CreateWindow");
@@ -288,7 +288,7 @@ HWTEST_F(WindowNoInteractionTest, KeyEventUpWindowShow, Function | MediumTest | 
  * @tc.name: KeyEventUpWindowHide
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNoInteractionTest, KeyEventUpWindowHide, Function | MediumTest | Level1)
+HWTEST_F(WindowNoInteractionTest, KeyEventUpWindowHide, TestSize.Level1)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     option->SetWindowName("CreateWindow");
@@ -323,7 +323,7 @@ HWTEST_F(WindowNoInteractionTest, KeyEventUpWindowHide, Function | MediumTest | 
  * @tc.name: PointerEventDown
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNoInteractionTest, PointerEventDown, Function | MediumTest | Level1)
+HWTEST_F(WindowNoInteractionTest, PointerEventDown, TestSize.Level1)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     option->SetWindowName("CreateWindow");
@@ -359,7 +359,7 @@ HWTEST_F(WindowNoInteractionTest, PointerEventDown, Function | MediumTest | Leve
  * @tc.name: PointerEventUp
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNoInteractionTest, PointerEventUp, Function | MediumTest | Level1)
+HWTEST_F(WindowNoInteractionTest, PointerEventUp, TestSize.Level1)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     option->SetWindowName("CreateWindow");
@@ -390,7 +390,7 @@ HWTEST_F(WindowNoInteractionTest, PointerEventUp, Function | MediumTest | Level1
     ASSERT_EQ(WMError::WM_OK, result);
 }
 
-HWTEST_F(WindowNoInteractionTest, NoInteraction, Function | MediumTest | Level1)
+HWTEST_F(WindowNoInteractionTest, NoInteraction, TestSize.Level1)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     option->SetWindowName("CreateWindow");

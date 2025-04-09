@@ -73,7 +73,6 @@ public:
 
     WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect = Rect::EMPTY_RECT,
         int32_t apiVersion = API_VERSION_INVALID) override;
-    void NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
     WSError NotifyAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType, int32_t eventType,
         int64_t timeMs) override;
     WSError NotifyAccessibilityChildTreeRegister(
@@ -139,6 +138,7 @@ public:
     static void UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
     void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
     CrossAxisState GetCrossAxisState() override;
+    void UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>& want) override;
 
 protected:
     NotifyTransferComponentDataFunc notifyTransferComponentDataFunc_;
@@ -172,6 +172,7 @@ private:
     void RegisterConsumer(Extension::Businesscode code,
         const std::function<WMError(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)>& func);
     WMError OnCrossAxisStateChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
+    WMError OnResyncExtensionConfig(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
 
     std::shared_ptr<Extension::DataHandler> dataHandler_;
     std::unordered_map<uint32_t, DataConsumeCallback> dataConsumers_;  // Read only after init
@@ -186,6 +187,12 @@ private:
     bool modalUIExtensionSelfLoadContent_ { false };
     float lastDensity_ { 0.0f };
     int32_t lastOrientation_ { 0 };
+    AAFwk::WantParams extensionConfig_ {};
+
+    /*
+     * PC Fold Screen
+     */
+    WMError OnWaterfallModeChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
 };
 } // namespace Rosen
 } // namespace OHOS

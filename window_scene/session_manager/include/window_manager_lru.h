@@ -26,7 +26,7 @@ constexpr int32_t UNDEFINED_REMOVED_KEY = -1;
 } // namespace
 class LruCache {
 public:
-    LruCache(std::size_t capacity) : capacity_(capacity) {}
+    explicit LruCache(std::size_t capacity) : capacity_(capacity) {}
 
     bool Visit(int32_t key);
     int32_t Put(int32_t key);

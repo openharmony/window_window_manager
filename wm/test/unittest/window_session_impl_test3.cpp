@@ -77,7 +77,7 @@ sptr<WindowSessionImpl> GetTestWindowImpl(const std::string& name)
  * @tc.desc: SetInputEventConsumer01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, SetInputEventConsumer01, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, SetInputEventConsumer01, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest3: SetInputEventConsumer01 start";
     window_ = GetTestWindowImpl("SetInputEventConsumer01");
@@ -94,7 +94,7 @@ HWTEST_F(WindowSessionImplTest3, SetInputEventConsumer01, Function | SmallTest |
  * @tc.desc: SetContinueState test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, SetContinueState, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, SetContinueState, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest3: SetContinueState start";
     window_ = GetTestWindowImpl("SetContinueState");
@@ -113,7 +113,7 @@ HWTEST_F(WindowSessionImplTest3, SetContinueState, Function | SmallTest | Level2
  * @tc.desc: GetListeners01 IDisplayMoveListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, GetListeners01, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, GetListeners01, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest3: GetListeners01 start";
     window_ = GetTestWindowImpl("GetListeners01");
@@ -134,7 +134,7 @@ HWTEST_F(WindowSessionImplTest3, GetListeners01, Function | SmallTest | Level2)
  * @tc.desc: RegisterWindowNoInteractionListener01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, RegisterWindowNoInteractionListener01, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, RegisterWindowNoInteractionListener01, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest3: RegisterWindowNoInteractionListener01 start";
     window_ = GetTestWindowImpl("RegisterWindowNoInteractionListener01");
@@ -154,7 +154,7 @@ HWTEST_F(WindowSessionImplTest3, RegisterWindowNoInteractionListener01, Function
  * @tc.desc: SetForceSplitEnable
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, SetForceSplitEnable, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, SetForceSplitEnable, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetForceSplitEnable start";
     window_ = GetTestWindowImpl("SetForceSplitEnable");
@@ -177,7 +177,7 @@ HWTEST_F(WindowSessionImplTest3, SetForceSplitEnable, Function | SmallTest | Lev
  * @tc.desc: GetAppForceLandscapeConfig
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, GetAppForceLandscapeConfig01, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, GetAppForceLandscapeConfig01, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest: GetAppForceLandscapeConfig start";
     window_ = GetTestWindowImpl("GetAppForceLandscapeConfig01");
@@ -203,7 +203,7 @@ HWTEST_F(WindowSessionImplTest3, GetAppForceLandscapeConfig01, Function | SmallT
  * @tc.desc: GetAppForceLandscapeConfig
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, GetAppForceLandscapeConfig02, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, GetAppForceLandscapeConfig02, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest: GetAppForceLandscapeConfig start";
     window_ = GetTestWindowImpl("GetAppForceLandscapeConfig");
@@ -225,7 +225,7 @@ HWTEST_F(WindowSessionImplTest3, GetAppForceLandscapeConfig02, Function | SmallT
  * @tc.desc: IsFocused
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, IsFocused, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, IsFocused, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest: IsFocused start";
     window_ = GetTestWindowImpl("IsFocused");
@@ -247,7 +247,7 @@ HWTEST_F(WindowSessionImplTest3, IsFocused, Function | SmallTest | Level2)
  * @tc.desc: IsNotifyInteractiveDuplicative
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, IsNotifyInteractiveDuplicative, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, IsNotifyInteractiveDuplicative, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest: IsNotifyInteractiveDuplicative start";
     window_ = GetTestWindowImpl("IsNotifyInteractiveDuplicative");
@@ -265,7 +265,7 @@ HWTEST_F(WindowSessionImplTest3, IsNotifyInteractiveDuplicative, Function | Smal
  * @tc.desc: SetMainWindowTopmost
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, SetMainWindowTopmost, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, SetMainWindowTopmost, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetMainWindowTopmost start";
     window_ = GetTestWindowImpl("SetMainWindowTopmost");
@@ -277,27 +277,11 @@ HWTEST_F(WindowSessionImplTest3, SetMainWindowTopmost, Function | SmallTest | Le
 }
 
 /**
- * @tc.name: GetRequestedOrientation
- * @tc.desc: GetRequestedOrientation
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest3, GetRequestedOrientation, Function | SmallTest | Level2)
-{
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: GetRequestedOrientation start";
-    window_ = GetTestWindowImpl("GetRequestedOrientation");
-    ASSERT_NE(window_, nullptr);
-    window_->property_->SetPersistentId(INVALID_SESSION_ID);
-    auto ret = window_->GetRequestedOrientation();
-    ASSERT_EQ(ret, Orientation::UNSPECIFIED);
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: GetRequestedOrientation end";
-}
-
-/**
  * @tc.name: SetDecorVisible
  * @tc.desc: SetDecorVisible
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, SetDecorVisible, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, SetDecorVisible, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetDecorVisible start";
     window_ = GetTestWindowImpl("SetDecorVisible");
@@ -313,7 +297,7 @@ HWTEST_F(WindowSessionImplTest3, SetDecorVisible, Function | SmallTest | Level2)
  * @tc.desc: SetWindowModal
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, SetWindowModal, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, SetWindowModal, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetWindowModal start";
     window_ = GetTestWindowImpl("SetWindowModal");
@@ -358,7 +342,7 @@ HWTEST_F(WindowSessionImplTest3, SetWindowModal, Function | SmallTest | Level2)
  * @tc.desc: SetDecorButtonStyle
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, SetDecorButtonStyle, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, SetDecorButtonStyle, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetDecorButtonStyle start";
     window_ = GetTestWindowImpl("SetDecorButtonStyle");
@@ -375,7 +359,7 @@ HWTEST_F(WindowSessionImplTest3, SetDecorButtonStyle, Function | SmallTest | Lev
  * @tc.desc: GetDecorButtonStyle
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, GetDecorButtonStyle, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, GetDecorButtonStyle, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest: GetDecorButtonStyle start";
     window_ = GetTestWindowImpl("GetDecorButtonStyle");
@@ -392,7 +376,7 @@ HWTEST_F(WindowSessionImplTest3, GetDecorButtonStyle, Function | SmallTest | Lev
  * @tc.desc: RegisterMainWindowCloseListeners
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, RegisterMainWindowCloseListeners, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, RegisterMainWindowCloseListeners, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterMainWindowCloseListeners start";
     window_ = GetTestWindowImpl("RegisterMainWindowCloseListeners");
@@ -413,6 +397,10 @@ HWTEST_F(WindowSessionImplTest3, RegisterMainWindowCloseListeners, Function | Sm
     window_->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     ret = window_->RegisterMainWindowCloseListeners(listener);
     ASSERT_EQ(ret, WMError::WM_OK);
+
+    window_->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    ret = window_->RegisterMainWindowCloseListeners(listener);
+    ASSERT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterMainWindowCloseListeners end";
 }
 
@@ -421,7 +409,7 @@ HWTEST_F(WindowSessionImplTest3, RegisterMainWindowCloseListeners, Function | Sm
  * @tc.desc: UnregisterMainWindowCloseListeners
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, UnregisterMainWindowCloseListeners, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, UnregisterMainWindowCloseListeners, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest: UnregisterMainWindowCloseListeners start";
     window_ = GetTestWindowImpl("UnregisterMainWindowCloseListeners");
@@ -442,6 +430,10 @@ HWTEST_F(WindowSessionImplTest3, UnregisterMainWindowCloseListeners, Function | 
     window_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     ret = window_->UnregisterMainWindowCloseListeners(listener);
     ASSERT_EQ(ret, WMError::WM_OK);
+
+    window_->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    ret = window_->UnregisterMainWindowCloseListeners(listener);
+    ASSERT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: UnregisterMainWindowCloseListeners end";
 }
 
@@ -450,7 +442,7 @@ HWTEST_F(WindowSessionImplTest3, UnregisterMainWindowCloseListeners, Function | 
  * @tc.desc: RegisterWindowWillCloseListeners
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, RegisterWindowWillCloseListeners, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, RegisterWindowWillCloseListeners, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterWindowWillCloseListeners start";
     window_ = GetTestWindowImpl("RegisterWindowWillCloseListeners");
@@ -482,7 +474,7 @@ HWTEST_F(WindowSessionImplTest3, RegisterWindowWillCloseListeners, Function | Sm
  * @tc.desc: UnRegisterWindowWillCloseListeners
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, UnRegisterWindowWillCloseListeners, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, UnRegisterWindowWillCloseListeners, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest: UnRegisterWindowWillCloseListeners start";
     window_ = GetTestWindowImpl("UnRegisterWindowWillCloseListeners");
@@ -514,7 +506,7 @@ HWTEST_F(WindowSessionImplTest3, UnRegisterWindowWillCloseListeners, Function | 
  * @tc.desc: RegisterSwitchFreeMultiWindowListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, RegisterSwitchFreeMultiWindowListener, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, RegisterSwitchFreeMultiWindowListener, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterSwitchFreeMultiWindowListener start";
     window_ = GetTestWindowImpl("RegisterSwitchFreeMultiWindowListener");
@@ -532,7 +524,7 @@ HWTEST_F(WindowSessionImplTest3, RegisterSwitchFreeMultiWindowListener, Function
  * @tc.desc: UnregisterSwitchFreeMultiWindowListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, UnregisterSwitchFreeMultiWindowListener, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, UnregisterSwitchFreeMultiWindowListener, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest: UnregisterSwitchFreeMultiWindowListener start";
     window_ = GetTestWindowImpl("UnregisterSwitchFreeMultiWindowListener");
@@ -553,7 +545,7 @@ HWTEST_F(WindowSessionImplTest3, UnregisterSwitchFreeMultiWindowListener, Functi
  * @tc.desc: SetSplitButtonVisible
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, SetSplitButtonVisible, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, SetSplitButtonVisible, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetSplitButtonVisible start";
     window_ = GetTestWindowImpl("SetSplitButtonVisible");
@@ -568,7 +560,7 @@ HWTEST_F(WindowSessionImplTest3, SetSplitButtonVisible, Function | SmallTest | L
  * @tc.desc: NotifyNoInteractionTimeout
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, NotifyNoInteractionTimeout, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, NotifyNoInteractionTimeout, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest: NotifyNoInteractionTimeout start";
     window_ = GetTestWindowImpl("NotifyNoInteractionTimeout");
@@ -584,7 +576,7 @@ HWTEST_F(WindowSessionImplTest3, NotifyNoInteractionTimeout, Function | SmallTes
  * @tc.desc: IsVerticalOrientation
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, IsVerticalOrientation, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, IsVerticalOrientation, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest: IsVerticalOrientation start";
     window_ = GetTestWindowImpl("IsVerticalOrientation");
@@ -618,7 +610,7 @@ HWTEST_F(WindowSessionImplTest3, IsVerticalOrientation, Function | SmallTest | L
  * @tc.desc: MarkProcessed
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, MarkProcessed, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, MarkProcessed, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest: MarkProcessed start";
     window_ = GetTestWindowImpl("MarkProcessed");
@@ -635,7 +627,7 @@ HWTEST_F(WindowSessionImplTest3, MarkProcessed, Function | SmallTest | Level2)
  * @tc.desc: UpdateRectForOtherReasonTask
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, UpdateRectForOtherReasonTask, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, UpdateRectForOtherReasonTask, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateRectForOtherReasonTask start";
     window_ = GetTestWindowImpl("UpdateRectForOtherReasonTask");
@@ -664,7 +656,7 @@ HWTEST_F(WindowSessionImplTest3, UpdateRectForOtherReasonTask, Function | SmallT
  * @tc.desc: CopyUniqueDensityParameter
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, CopyUniqueDensityParameter, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, CopyUniqueDensityParameter, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest: CopyUniqueDensityParameter start";
     window_ = GetTestWindowImpl("CopyUniqueDensityParameter");
@@ -687,7 +679,7 @@ HWTEST_F(WindowSessionImplTest3, CopyUniqueDensityParameter, Function | SmallTes
  * @tc.desc: SetRaiseByClickEnabled
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, SetRaiseByClickEnabled, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, SetRaiseByClickEnabled, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetRaiseByClickEnabled start";
     window_ = GetTestWindowImpl("SetRaiseByClickEnabled");
@@ -706,7 +698,7 @@ HWTEST_F(WindowSessionImplTest3, SetRaiseByClickEnabled, Function | SmallTest | 
  * @tc.desc: SetSubWindowModal
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, SetSubWindowModal, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, SetSubWindowModal, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetSubWindowModal start";
     window_ = GetTestWindowImpl("SetSubWindowModal");
@@ -731,7 +723,7 @@ HWTEST_F(WindowSessionImplTest3, SetSubWindowModal, Function | SmallTest | Level
  * @tc.desc: UpdateFrameLayoutCallbackIfNeeded
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, UpdateFrameLayoutCallbackIfNeeded, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, UpdateFrameLayoutCallbackIfNeeded, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateFrameLayoutCallbackIfNeeded start";
     window_ = GetTestWindowImpl("UpdateFrameLayoutCallbackIfNeeded");
@@ -769,33 +761,11 @@ HWTEST_F(WindowSessionImplTest3, UpdateFrameLayoutCallbackIfNeeded, Function | S
 }
 
 /**
- * @tc.name: SetRequestedOrientation
- * @tc.desc: SetRequestedOrientation
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest3, SetRequestedOrientation, Function | SmallTest | Level2)
-{
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetRequestedOrientation start";
-    window_ = GetTestWindowImpl("SetRequestedOrientation");
-    ASSERT_NE(window_, nullptr);
-    window_->property_->SetPersistentId(1);
-    window_->state_ = WindowState::STATE_CREATED;
-    Orientation orientation = Orientation::VERTICAL;
-    window_->property_->requestedOrientation_ = Orientation::VERTICAL;
-    window_->SetRequestedOrientation(orientation);
-    orientation = Orientation::USER_ROTATION_PORTRAIT;
-    window_->SetRequestedOrientation(orientation);
-    auto ret = window_->GetRequestedOrientation();
-    ASSERT_EQ(ret, orientation);
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetRequestedOrientation end";
-}
-
-/**
  * @tc.name: SetTargetAPIVersion
  * @tc.desc: SetTargetAPIVersion
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, SetTargetAPIVersion, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, SetTargetAPIVersion, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetTargetAPIVersion start";
     window_ = GetTestWindowImpl("SetAPPWindowIcon");
@@ -811,7 +781,7 @@ HWTEST_F(WindowSessionImplTest3, SetTargetAPIVersion, Function | SmallTest | Lev
  * @tc.desc: SetAPPWindowIcon
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, GetTargetAPIVersion, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, GetTargetAPIVersion, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest: GetTargetAPIVersion start";
     window_ = GetTestWindowImpl("GetTargetAPIVersion");
@@ -825,7 +795,7 @@ HWTEST_F(WindowSessionImplTest3, GetTargetAPIVersion, Function | SmallTest | Lev
  * @tc.desc: SetAPPWindowIcon
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, SetAPPWindowIcon, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, SetAPPWindowIcon, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetAPPWindowIcon start";
     window_ = GetTestWindowImpl("SetAPPWindowIcon");
@@ -843,7 +813,7 @@ HWTEST_F(WindowSessionImplTest3, SetAPPWindowIcon, Function | SmallTest | Level2
  * @tc.desc: SetBackgroundColor
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, SetBackgroundColor, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, SetBackgroundColor, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetBackgroundColor start";
     window_ = GetTestWindowImpl("SetBackgroundColor");
@@ -865,7 +835,7 @@ HWTEST_F(WindowSessionImplTest3, SetBackgroundColor, Function | SmallTest | Leve
  * @tc.desc: Find
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, Find, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, Find, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest: Find start";
     window_ = GetTestWindowImpl("Find");
@@ -885,7 +855,7 @@ HWTEST_F(WindowSessionImplTest3, Find, Function | SmallTest | Level2)
  * @tc.desc: RegisterWindowTitleButtonRectChangeListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, RegisterWindowTitleButtonRectChangeListener, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, RegisterWindowTitleButtonRectChangeListener, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterWindowTitleButtonRectChangeListener start";
     window_ = GetTestWindowImpl("RegisterWindowTitleButtonRectChangeListener");
@@ -907,7 +877,7 @@ HWTEST_F(WindowSessionImplTest3, RegisterWindowTitleButtonRectChangeListener, Fu
  * @tc.desc: GetUIContentWithId
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, GetUIContentWithId, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, GetUIContentWithId, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest: GetUIContentWithId start";
     window_ = GetTestWindowImpl("GetUIContentWithId");
@@ -927,7 +897,7 @@ HWTEST_F(WindowSessionImplTest3, GetUIContentWithId, Function | SmallTest | Leve
  * @tc.desc: UnregisterWindowRectChangeListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, UnregisterWindowRectChangeListener, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, UnregisterWindowRectChangeListener, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest: UnregisterWindowRectChangeListener start";
     window_ = GetTestWindowImpl("UnregisterWindowRectChangeListener");
@@ -946,7 +916,7 @@ HWTEST_F(WindowSessionImplTest3, UnregisterWindowRectChangeListener, Function | 
  * @tc.desc: IsFloatingWindowAppType
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, IsFloatingWindowAppType, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, IsFloatingWindowAppType, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest: IsFloatingWindowAppType start";
     window_ = GetTestWindowImpl("IsFloatingWindowAppType");
@@ -964,7 +934,7 @@ HWTEST_F(WindowSessionImplTest3, IsFloatingWindowAppType, Function | SmallTest |
  * @tc.desc: GetCompatibleModeInPc
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, GetCompatibleModeInPc, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, GetCompatibleModeInPc, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest3: GetCompatibleModeInPc start";
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
@@ -981,7 +951,7 @@ HWTEST_F(WindowSessionImplTest3, GetCompatibleModeInPc, Function | SmallTest | L
  * @tc.desc: SetWindowContainerColor
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, SetWindowContainerColor, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, SetWindowContainerColor, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetWindowContainerColor start";
     window_ = GetTestWindowImpl("SetWindowContainerColor");
@@ -1002,7 +972,7 @@ HWTEST_F(WindowSessionImplTest3, SetWindowContainerColor, Function | SmallTest |
  * @tc.desc: SetAvoidAreaOption
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, SetAvoidAreaOption, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, SetAvoidAreaOption, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetAvoidAreaOption");
@@ -1022,7 +992,7 @@ HWTEST_F(WindowSessionImplTest3, SetAvoidAreaOption, Function | SmallTest | Leve
  * @tc.desc: GetAvoidAreaOption
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, GetAvoidAreaOption, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, GetAvoidAreaOption, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("GetAvoidAreaOption");
@@ -1043,7 +1013,7 @@ HWTEST_F(WindowSessionImplTest3, GetAvoidAreaOption, Function | SmallTest | Leve
  * @tc.desc: SetWatchGestureConsumed test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, SetWatchGestureConsumed, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, SetWatchGestureConsumed, TestSize.Level1)
 {
     window_ = GetTestWindowImpl("SetWatchGestureConsumed");
     ASSERT_NE(window_, nullptr);
@@ -1057,7 +1027,7 @@ HWTEST_F(WindowSessionImplTest3, SetWatchGestureConsumed, Function | SmallTest |
  * @tc.desc: NotifyConsumeResultToFloatWindow test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, NotifyConsumeResultToFloatWindow, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, NotifyConsumeResultToFloatWindow, TestSize.Level1)
 {
     window_ = GetTestWindowImpl("NotifyConsumeResultToFloatWindow");
     ASSERT_NE(window_, nullptr);
@@ -1075,7 +1045,7 @@ HWTEST_F(WindowSessionImplTest3, NotifyConsumeResultToFloatWindow, Function | Sm
  * @tc.desc: IsSystemWindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, IsSystemWindow, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, IsSystemWindow, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("IsSystemWindow");
@@ -1096,7 +1066,7 @@ HWTEST_F(WindowSessionImplTest3, IsSystemWindow, Function | SmallTest | Level2)
  * @tc.desc: IsAppWindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, IsAppWindow, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, IsAppWindow, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("IsAppWindow");
@@ -1117,7 +1087,7 @@ HWTEST_F(WindowSessionImplTest3, IsAppWindow, Function | SmallTest | Level2)
  * @tc.desc: SetMouseEventFilter
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, SetMouseEventFilter, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, SetMouseEventFilter, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetMouseEventFilter");
@@ -1138,7 +1108,7 @@ HWTEST_F(WindowSessionImplTest3, SetMouseEventFilter, Function | SmallTest | Lev
  * @tc.desc: ClearMouseEventFilter
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, ClearMouseEventFilter, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, ClearMouseEventFilter, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("ClearMouseEventFilter");
@@ -1157,7 +1127,7 @@ HWTEST_F(WindowSessionImplTest3, ClearMouseEventFilter, Function | SmallTest | L
  * @tc.desc: SetTouchEventFilter
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, SetTouchEventFilter, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, SetTouchEventFilter, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetTouchEventFilter");
@@ -1178,7 +1148,7 @@ HWTEST_F(WindowSessionImplTest3, SetTouchEventFilter, Function | SmallTest | Lev
  * @tc.desc: ClearTouchEventFilter
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, ClearTouchEventFilter, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, ClearTouchEventFilter, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("ClearTouchEventFilter");
@@ -1197,7 +1167,7 @@ HWTEST_F(WindowSessionImplTest3, ClearTouchEventFilter, Function | SmallTest | L
  * @tc.desc: FilterPointerEvent
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, FilterPointerEvent, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, FilterPointerEvent, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("FilterPointerEvent");
@@ -1218,7 +1188,7 @@ HWTEST_F(WindowSessionImplTest3, FilterPointerEvent, Function | SmallTest | Leve
  * @tc.desc: FilterPointerEvent
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, FilterPointerEvent01, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, FilterPointerEvent01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("FilterPointerEvent01");
@@ -1240,7 +1210,7 @@ HWTEST_F(WindowSessionImplTest3, FilterPointerEvent01, Function | SmallTest | Le
  * @tc.desc: NotifyPointerEvent
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, NotifyPointerEvent, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, NotifyPointerEvent, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("NotifyPointerEvent");
@@ -1266,7 +1236,7 @@ HWTEST_F(WindowSessionImplTest3, NotifyPointerEvent, Function | SmallTest | Leve
  * @tc.desc: SetWindowContainerColor01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, SetWindowContainerColor01, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, SetWindowContainerColor01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetWindowContainerColor01");
@@ -1291,7 +1261,7 @@ HWTEST_F(WindowSessionImplTest3, SetWindowContainerColor01, Function | SmallTest
  * @tc.desc: SetAvoidAreaOption
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, SetAvoidAreaOption01, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, SetAvoidAreaOption01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetAvoidAreaOption01");
@@ -1307,7 +1277,7 @@ HWTEST_F(WindowSessionImplTest3, SetAvoidAreaOption01, Function | SmallTest | Le
  * @tc.desc: GetAvoidAreaOption
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, GetAvoidAreaOption01, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, GetAvoidAreaOption01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("GetAvoidAreaOption01");
@@ -1324,7 +1294,7 @@ HWTEST_F(WindowSessionImplTest3, GetAvoidAreaOption01, Function | SmallTest | Le
  * @tc.desc: SetWindowDelayRaiseEnabled
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, SetWindowDelayRaiseEnabled, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, SetWindowDelayRaiseEnabled, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetWindowDelayRaiseEnabled");
@@ -1353,7 +1323,7 @@ HWTEST_F(WindowSessionImplTest3, SetWindowDelayRaiseEnabled, Function | SmallTes
  * @tc.desc: NotifyWatchFocusActiveChange
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, NotifyWatchFocusActiveChange, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, NotifyWatchFocusActiveChange, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("NotifyWatchFocusActiveChange");
@@ -1368,6 +1338,44 @@ HWTEST_F(WindowSessionImplTest3, NotifyWatchFocusActiveChange, Function | SmallT
     window->hostSession_ = sptr<SessionMocker>::MakeSptr(info);
     window->property_->persistentId_ = ROTATE_ANIMATION_DURATION;
     ret = window->SetWindowDelayRaiseEnabled(true);
+}
+
+/**
+ * @tc.name: UpdateSubWindowInfo
+ * @tc.desc: UpdateSubWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, UpdateSubWindowInfo, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateSubWindowInfo");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+
+    sptr<WindowOption> subWindowOption = sptr<WindowOption>::MakeSptr();
+    subWindowOption->SetWindowName("UpdateSubWindowInfo_subWindow");
+    sptr<WindowSessionImpl> subWindow = sptr<WindowSessionImpl>::MakeSptr(subWindowOption);
+    subWindow->property_->SetPersistentId(2);
+    subWindow->property_->SetParentPersistentId(1);
+    subWindow->hostSession_ = session;
+    subWindow->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    subWindow->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    subWindow->context_ = std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    WindowSessionImpl::subWindowSessionMap_.insert(std::pair<int32_t,
+        std::vector<sptr<WindowSessionImpl>>>(1, { subWindow }));
+
+    EXPECT_NE(subWindow->context_, nullptr);
+    EXPECT_EQ(subWindow->property_->GetSubWindowLevel(), 0);
+    int subWindowLevel = 5;
+    window->UpdateSubWindowInfo(subWindowLevel, nullptr);
+    EXPECT_EQ(subWindow->property_->GetSubWindowLevel(), 6);
+    EXPECT_EQ(subWindow->context_, nullptr);
+    EXPECT_EQ(WMError::WM_OK, subWindow->Destroy(true));
+    EXPECT_EQ(WMError::WM_OK, window->Destroy(true));
 }
 } // namespace
 } // namespace Rosen

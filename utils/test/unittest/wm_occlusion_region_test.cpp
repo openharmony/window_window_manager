@@ -53,7 +53,7 @@ namespace {
  * @tc.desc: test WmOcclusion::EventSortByY
  * @tc.type: FUNC
  */
-HWTEST_F(WmOcclusionRegionTest, EventSortByY, Function | SmallTest | Level2)
+HWTEST_F(WmOcclusionRegionTest, EventSortByY, TestSize.Level1)
 {
     Event event1{ 0, Event::Type::OPEN, 0, 0 };
     Event event2{ 0, Event::Type::OPEN, 0, 0 };
@@ -89,7 +89,7 @@ HWTEST_F(WmOcclusionRegionTest, EventSortByY, Function | SmallTest | Level2)
  * @tc.desc: test WmOcclusion::Node::Update
  * @tc.type: FUNC
  */
-HWTEST_F(WmOcclusionRegionTest, Update01, Function | SmallTest | Level2)
+HWTEST_F(WmOcclusionRegionTest, Update01, TestSize.Level1)
 {
     Node* rootNode = new Node(0, 2);
     ASSERT_NE(rootNode, nullptr);
@@ -133,7 +133,7 @@ HWTEST_F(WmOcclusionRegionTest, Update01, Function | SmallTest | Level2)
  * @tc.desc: test WmOcclusionRegion WmOcclusion::Node::GetAndRange
  * @tc.type: FUNC
  */
-HWTEST_F(WmOcclusionRegionTest, GetAndRange01, Function | SmallTest | Level2)
+HWTEST_F(WmOcclusionRegionTest, GetAndRange01, TestSize.Level1)
 {
     Node* rootNode = new Node(0, 2);
     ASSERT_NE(rootNode, nullptr);
@@ -178,7 +178,7 @@ HWTEST_F(WmOcclusionRegionTest, GetAndRange01, Function | SmallTest | Level2)
  * @tc.desc: test WmOcclusionRegion WmOcclusion::Node::GetOrRange
  * @tc.type: FUNC
  */
-HWTEST_F(WmOcclusionRegionTest, GetOrRange01, Function | SmallTest | Level2)
+HWTEST_F(WmOcclusionRegionTest, GetOrRange01, TestSize.Level1)
 {
     std::vector<Range> res;
     Node* rootNode = new Node(0, 2);
@@ -233,7 +233,7 @@ HWTEST_F(WmOcclusionRegionTest, GetOrRange01, Function | SmallTest | Level2)
  * @tc.desc: test WmOcclusionRegion WmOcclusion::Node::GetXOrRange
  * @tc.type: FUNC
  */
-HWTEST_F(WmOcclusionRegionTest, GetXOrRange01, Function | SmallTest | Level2)
+HWTEST_F(WmOcclusionRegionTest, GetXOrRange01, TestSize.Level1)
 {
     std::vector<Range> res;
     Node* rootNode = new Node(0, 2);
@@ -286,7 +286,7 @@ HWTEST_F(WmOcclusionRegionTest, GetXOrRange01, Function | SmallTest | Level2)
  * @tc.desc: test WmOcclusionRegion WmOcclusion::Node::GetSubRange
  * @tc.type: FUNC
  */
-HWTEST_F(WmOcclusionRegionTest, GetSubRange01, Function | SmallTest | Level2)
+HWTEST_F(WmOcclusionRegionTest, GetSubRange01, TestSize.Level1)
 {
     std::vector<Range> res;
     Node* rootNode = new Node(0, 2);
@@ -336,7 +336,7 @@ HWTEST_F(WmOcclusionRegionTest, GetSubRange01, Function | SmallTest | Level2)
  * @tc.desc: test WmOcclusionRegion WmOcclusion::Region::UpdateRects
  * @tc.type: FUNC
  */
-HWTEST_F(WmOcclusionRegionTest, UpdateRects01, Function | SmallTest | Level2)
+HWTEST_F(WmOcclusionRegionTest, UpdateRects01, TestSize.Level1)
 {
     Region* region = new Region();
     ASSERT_NE(region, nullptr);
@@ -376,7 +376,7 @@ HWTEST_F(WmOcclusionRegionTest, UpdateRects01, Function | SmallTest | Level2)
  * @tc.desc: test WmOcclusionRegion WmOcclusion::Region::MakeBound
  * @tc.type: FUNC
  */
-HWTEST_F(WmOcclusionRegionTest, MakeBound01, Function | SmallTest | Level2)
+HWTEST_F(WmOcclusionRegionTest, MakeBound01, TestSize.Level1)
 {
     Region* region = new Region();
     ASSERT_NE(region, nullptr);
@@ -408,7 +408,7 @@ HWTEST_F(WmOcclusionRegionTest, MakeBound01, Function | SmallTest | Level2)
  * @tc.desc: test WmOcclusionRegion WmOcclusion::Region::RegionOpLocal
  * @tc.type: FUNC
  */
-HWTEST_F(WmOcclusionRegionTest, RegionOpLocal01, Function | SmallTest | Level2)
+HWTEST_F(WmOcclusionRegionTest, RegionOpLocal01, TestSize.Level1)
 {
     Region regionBase;
     Region region1;

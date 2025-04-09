@@ -71,24 +71,7 @@ struct PiPContent {
   }
 
   private registerUpdateNodeListener() {
-    pip.on('nodeUpdate', (newNode: typeNode.XComponent) => {
-      console.info(TAG, `nodeUpdate`);
-      if (!this.validateNode(newNode)) {
-        return;
-      }
-      if (this.useNode) {
-        pip.setPipNodeType(this.xComponent, false);
-        this.updatePipNodeType(newNode);
-        this.mXCNodeController?.replaceNode(newNode);
-        this.nodeChange = true;
-      } else {
-        this.updatePipNodeType(newNode);
-        this.mXCNodeController = new XCNodeController(newNode);
-        console.info(TAG, 'update to Node Controller');
-        this.registerStateChangeListener();
-        this.useNode = true;
-      }
-    });
+    pip.on('nodeUpdate', this.nodeUpdateListener);
   }
 
   private updatePipNodeType(newNode: typeNode.XComponent) {
@@ -102,13 +85,34 @@ struct PiPContent {
   }
 
   private registerStateChangeListener() {
-    pip.on('stateChange', (state: number) => {
-      console.info(TAG, `stateChange state:${state}`);
-      if (state === ABOUT_TO_STOP) {
-        this.mXCNodeController?.removeNode();
-      }
-    })
+    pip.on('stateChange', this.stateChangeListener)
   }
+
+  private nodeUpdateListener = (newNode: typeNode.XComponent) => {
+    console.info(TAG, `nodeUpdate`);
+    if (!this.validateNode(newNode)) {
+      return;
+    }
+    if (this.useNode) {
+      pip.setPipNodeType(this.xComponent, false);
+      this.updatePipNodeType(newNode);
+      this.mXCNodeController?.replaceNode(newNode);
+      this.nodeChange = true;
+    } else {
+      this.updatePipNodeType(newNode);
+      this.mXCNodeController = new XCNodeController(newNode);
+      console.info(TAG, 'update to Node Controller');
+      this.registerStateChangeListener();
+      this.useNode = true;
+    }
+  };
+
+  private stateChangeListener = (state: number) => {
+    console.info(TAG, `stateChange state:${state}`);
+    if (state === ABOUT_TO_STOP) {
+      this.mXCNodeController?.removeNode();
+    }
+  };
 
   aboutToAppear(): void {
     this.nodeController = pip.getCustomUIController();
@@ -130,8 +134,8 @@ struct PiPContent {
   }
 
   aboutToDisappear(): void {
-    pip.off('stateChange');
-    pip.off('nodeUpdate');
+    pip.off('stateChange', this.stateChangeListener);
+    pip.off('nodeUpdate', this.nodeUpdateListener);
   }
 
   build() {

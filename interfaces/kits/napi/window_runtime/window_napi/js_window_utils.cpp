@@ -22,6 +22,7 @@
 #include "ipc_skeleton.h"
 #include "window_manager_hilog.h"
 #include "js_window.h"
+#include "wm_common.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -100,6 +101,8 @@ napi_value WindowTypeInit(napi_env env)
         static_cast<int32_t>(ApiWindowType::TYPE_SCREEN_CONTROL)));
     napi_set_named_property(env, objValue, "TYPE_FLOAT_NAVIGATION", CreateJsValue(env,
         static_cast<int32_t>(ApiWindowType::TYPE_FLOAT_NAVIGATION)));
+    napi_set_named_property(env, objValue, "TYPE_MAIN", CreateJsValue(env,
+        static_cast<int32_t>(ApiWindowType::TYPE_MAIN)));
 
     return objValue;
 }
@@ -673,6 +676,17 @@ napi_value CreateJsSystemBarRegionTintArrayObject(napi_env env, const SystemBarR
     return objValue;
 }
 
+napi_value CreateRotationChangeInfoObject(napi_env env, const RotationChangeInfo& info)
+{
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+    napi_set_named_property(env, objValue, "type", CreateJsValue(env, static_cast<uint32_t>(info.type_)));
+    napi_set_named_property(env, objValue, "orientation", CreateJsValue(env, info.orientation_));
+    napi_set_named_property(env, objValue, "displayId", CreateJsValue(env, static_cast<uint32_t>(info.displayId_)));
+    napi_set_named_property(env, objValue, "displayRect", GetRectAndConvertToJsValue(env, info.displayRect_));
+    return objValue;
+}
+
 bool GetSystemBarStatus(napi_env env, napi_callback_info info,
     std::unordered_map<WindowType, SystemBarProperty>& systemBarProperties,
     std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarpropertyFlags)
@@ -1194,6 +1208,61 @@ bool ParseRectAnimationConfig(napi_env env, napi_value jsObject, RectAnimationCo
     return true;
 }
 
+bool ConvertRectFromJsValue(napi_env env, napi_value jsObject, Rect& displayRect)
+{
+    if (!ParseJsValue(jsObject, env, "left", displayRect.posX_)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "[NAPI]Failed to convert parameter to posX_");
+        return false;
+    }
+
+    if (!ParseJsValue(jsObject, env, "top", displayRect.posY_)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "[NAPI]Failed to convert parameter to posY_");
+        return false;
+    }
+
+    if (!ParseJsValue(jsObject, env, "width", displayRect.width_)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "[NAPI]Failed to convert parameter to width_");
+        return false;
+    }
+
+    if (!ParseJsValue(jsObject, env, "height", displayRect.height_)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "[NAPI]Failed to convert parameter to height_");
+        return false;
+    }
+    return true;
+}
+
+bool GetRotationResultFromJs(napi_env env, napi_value jsObject, RotationChangeResult& rotationChangeResult)
+{
+    napi_value jsRectType = nullptr;
+    napi_value jsWindowRect = nullptr;
+    napi_get_named_property(env, jsObject, "rectType", &jsRectType);
+    napi_get_named_property(env, jsObject, "windowRect", &jsWindowRect);
+    if (GetType(env, jsRectType) != napi_undefined) {
+        uint32_t rectType;
+        if (!ConvertFromJsValue(env, jsRectType, rectType)) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "[NAPI]Failed to convert parameter to rectType");
+            return false;
+        }
+        rotationChangeResult.rectType_ = static_cast<RectType>(rectType);
+    } else {
+        TLOGE(WmsLogTag::WMS_ROTATION, "[NAPI]Failed to get object rectType");
+        return false;
+    }
+    if (GetType(env, jsWindowRect) != napi_undefined) {
+        Rect windowRect;
+        if (!ConvertRectFromJsValue(env, jsWindowRect, windowRect)) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "[NAPI]Failed to convert parameter to windowRect");
+            return false;
+        }
+        rotationChangeResult.windowRect_ = windowRect;
+    } else {
+        TLOGE(WmsLogTag::WMS_ROTATION, "[NAPI]Failed to get object windowRect");
+        return false;
+    }
+    return true;
+}
+
 napi_value ExtensionWindowAttributeInit(napi_env env)
 {
     if (env == nullptr) {
@@ -1262,6 +1331,30 @@ napi_value ModalityTypeInit(napi_env env)
         CreateJsValue(env, ApiModalityType::WINDOW_MODALITY));
     napi_set_named_property(env, objValue, "APPLICATION_MODALITY",
         CreateJsValue(env, ApiModalityType::APPLICATION_MODALITY));
+    return objValue;
+}
+
+napi_value RotationChangeTypeInit(napi_env env)
+{
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+    napi_set_named_property(env, objValue, "WINDOW_WILL_ROTATE",
+        CreateJsValue(env, static_cast<uint32_t>(RotationChangeType::WINDOW_WILL_ROTATE)));
+    napi_set_named_property(env, objValue, "WINDOW_DID_ROTATE",
+        CreateJsValue(env, static_cast<uint32_t>(RotationChangeType::WINDOW_DID_ROTATE)));
+    return objValue;
+}
+
+napi_value RectTypeInit(napi_env env)
+{
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+    napi_set_named_property(env, objValue, "RELATIVE_TO_SCREEN",
+        CreateJsValue(env, static_cast<uint32_t>(RectType::RELATIVE_TO_SCREEN)));
+    napi_set_named_property(env, objValue, "RELATIVE_TO_PARENT_WINDOW",
+        CreateJsValue(env, static_cast<uint32_t>(RectType::RELATIVE_TO_PARENT_WINDOW)));
     return objValue;
 }
 
@@ -1342,6 +1435,27 @@ static bool ParseRectParam(napi_env env, napi_value jsObject, const sptr<WindowO
     return true;
 }
 
+static bool ParseZLevelParam(napi_env env, napi_value jsObject, const sptr<WindowOption>& windowOption)
+{
+    int32_t zLevel = 0;
+    bool isModal = false;
+    if (ParseJsValue(jsObject, env, "zLevel", zLevel)) {
+        if (zLevel < MINIMUM_Z_LEVEL || zLevel > MAXIMUM_Z_LEVEL) {
+            TLOGE(WmsLogTag::WMS_SUB, "zLevel value %{public}d exceeds valid range [-10000, 10000]!", zLevel);
+            return false;
+        }
+        if (ParseJsValue(jsObject, env, "isModal", isModal)) {
+            if (isModal) {
+                TLOGE(WmsLogTag::WMS_SUB, "modal window not support custom zLevel");
+                return false;
+            }
+        }
+        windowOption->SetSubWindowZLevel(zLevel);
+    }
+    TLOGI(WmsLogTag::WMS_SUB, "zLevel: %{public}d", zLevel);
+    return true;
+}
+
 bool ParseSubWindowOptions(napi_env env, napi_value jsObject, const sptr<WindowOption>& windowOption)
 {
     if (jsObject == nullptr || windowOption == nullptr) {
@@ -1370,7 +1484,10 @@ bool ParseSubWindowOptions(napi_env env, napi_value jsObject, const sptr<WindowO
     if (!ParseRectParam(env, jsObject, windowOption)) {
         return false;
     }
-    return ParseModalityParam(env, jsObject, windowOption);
+    if (!ParseModalityParam(env, jsObject, windowOption)) {
+        return false;
+    }
+    return ParseZLevelParam(env, jsObject, windowOption);
 }
 
 bool CheckPromise(napi_env env, napi_value promiseObj)

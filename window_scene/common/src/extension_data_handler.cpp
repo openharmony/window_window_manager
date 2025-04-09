@@ -79,7 +79,7 @@ void DataHandler::UnregisterDataConsumer(SubSystemId subSystemId)
 {
     std::lock_guard lock(mutex_);
     consumers_.erase(subSystemId);
-    TLOGI(WmsLogTag::WMS_UIEXT, "Unregister consumer for subSystemId: %{public}hhu", subSystemId);
+    TLOGD(WmsLogTag::WMS_UIEXT, "Unregister consumer for subSystemId: %{public}hhu", subSystemId);
 }
 
 bool DataHandler::IsProxyObject() const
@@ -225,7 +225,7 @@ DataHandlerErr DataHandler::NotifyDataConsumer(AAFwk::Want&& data, std::optional
     // sync mode
     if (config.needSyncSend) {
         auto ret = callback(config.subSystemId, config.customId, std::move(data), reply);
-        TLOGI(WmsLogTag::WMS_UIEXT, "subSystemId: %{public}hhu, customId: %{public}u, ret: %{public}d",
+        TLOGD(WmsLogTag::WMS_UIEXT, "subSystemId: %{public}hhu, customId: %{public}u, ret: %{public}d",
               config.subSystemId, config.customId, ret);
         return DataHandlerErr::OK;
     }

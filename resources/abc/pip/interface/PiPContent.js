@@ -55,6 +55,31 @@ class PiPContent extends ViewPU {
         this.xComponent = null;
         this.xComponentId = 'pipContent';
         this.xComponentType = 'surface';
+        this.nodeUpdateListener = (y1) => {
+            console.info(TAG, `nodeUpdate`);
+            if (!this.validateNode(y1)) {
+                return;
+            }
+            if (this.useNode) {
+                pip.setPipNodeType(this.xComponent, false);
+                this.updatePipNodeType(y1);
+                this.mXCNodeController?.replaceNode(y1);
+                this.nodeChange = true;
+            }
+            else {
+                this.updatePipNodeType(y1);
+                this.mXCNodeController = new XCNodeController(y1);
+                console.info(TAG, 'update to Node Controller');
+                this.registerStateChangeListener();
+                this.useNode = true;
+            }
+        };
+        this.stateChangeListener = (x1) => {
+            console.info(TAG, `stateChange state:${x1}`);
+            if (x1 === ABOUT_TO_STOP) {
+                this.mXCNodeController?.removeNode();
+            }
+        };
         this.setInitiallyProvidedValue(g2);
     }
     setInitiallyProvidedValue(e2) {
@@ -86,6 +111,9 @@ class PiPContent extends ViewPU {
     updateStateVars(d2) {
     }
     purgeVariableDependenciesOnElmtId(c2) {
+        if (c2 === null || c2 === undefined) {
+            return;
+        }
         this.__useNode.purgeDependencyOnElmtId(c2);
         this.__nodeChange.purgeDependencyOnElmtId(c2);
     }
@@ -120,25 +148,7 @@ class PiPContent extends ViewPU {
         return true;
     }
     registerUpdateNodeListener() {
-        pip.on('nodeUpdate', (f) => {
-            console.info(TAG, `nodeUpdate`);
-            if (!this.validateNode(f)) {
-                return;
-            }
-            if (this.useNode) {
-                pip.setPipNodeType(this.xComponent, false);
-                this.updatePipNodeType(f);
-                this.mXCNodeController?.replaceNode(f);
-                this.nodeChange = true;
-            }
-            else {
-                this.updatePipNodeType(f);
-                this.mXCNodeController = new XCNodeController(f);
-                console.info(TAG, 'update to Node Controller');
-                this.registerStateChangeListener();
-                this.useNode = true;
-            }
-        });
+        pip.on('nodeUpdate', this.nodeUpdateListener);
     }
     updatePipNodeType(c) {
         let d = c.getParent();
@@ -151,12 +161,7 @@ class PiPContent extends ViewPU {
         }
     }
     registerStateChangeListener() {
-        pip.on('stateChange', (b) => {
-            console.info(TAG, `stateChange state:${b}`);
-            if (b === ABOUT_TO_STOP) {
-                this.mXCNodeController?.removeNode();
-            }
-        });
+        pip.on('stateChange', this.stateChangeListener);
     }
     aboutToAppear() {
         this.nodeController = pip.getCustomUIController();
@@ -189,8 +194,8 @@ class PiPContent extends ViewPU {
 
 
     aboutToDisappear() {
-        pip.off('stateChange');
-        pip.off('nodeUpdate');
+        pip.off('stateChange', this.stateChangeListener);
+        pip.off('nodeUpdate', this.nodeUpdateListener);
     }
 
     initialRender() {

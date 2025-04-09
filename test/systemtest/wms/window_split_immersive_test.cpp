@@ -90,7 +90,7 @@ namespace {
  * @tc.desc: one primary window and one fullscreen window, test enter and out split immersive
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSplitImmersiveTest, SplitImmersive01, Function | MediumTest | Level3)
+HWTEST_F(WindowSplitImmersiveTest, SplitImmersive01, TestSize.Level1)
 {
     // create fullscreen win and show
     fullInfo_.mode = WindowMode::WINDOW_MODE_SPLIT_SECONDARY;

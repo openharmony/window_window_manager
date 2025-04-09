@@ -19,6 +19,7 @@
 #include <map>
 
 #include <iremote_stub.h>
+#include <ui/rs_canvas_node.h>
 
 #include "session/container/include/zidl/session_stage_interface.h"
 
@@ -71,11 +72,14 @@ private:
     int HandleCompatibleFullScreenRecover(MessageParcel& data, MessageParcel& reply);
     int HandleCompatibleFullScreenMinimize(MessageParcel& data, MessageParcel& reply);
     int HandleCompatibleFullScreenClose(MessageParcel& data, MessageParcel& reply);
+    int HandlePcAppInPadNormalClose(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyCompatibleModeEnableInPad(MessageParcel& data, MessageParcel& reply);
     int HandleSetUniqueVirtualPixelRatio(MessageParcel& data, MessageParcel& reply);
     int HandleNotifySessionFullScreen(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyDumpInfo(MessageParcel& data, MessageParcel& reply);
     int HandleExtensionHostData(MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    int HandleLinkKeyFrameCanvasNode(MessageParcel& data, MessageParcel& reply);
+    int HandleSetKeyFramePolicy(MessageParcel& data, MessageParcel& reply);
     int HandleSetDragActivated(MessageParcel& data, MessageParcel& reply);
     int HandleSetSplitButtonVisible(MessageParcel& data, MessageParcel& reply);
     int HandleSetEnableDragBySystem(MessageParcel& data, MessageParcel& reply);
@@ -85,8 +89,11 @@ private:
     int HandleNotifyHighlightChange(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyWindowCrossAxisChange(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyPipSizeChange(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyRotationProperty(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyWindowAttachStateChange(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyKeyboardAnimationCompleted(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyRotationChange(MessageParcel& data, MessageParcel& reply);
+    int HandleSetCurrentRotation(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_STUB_H

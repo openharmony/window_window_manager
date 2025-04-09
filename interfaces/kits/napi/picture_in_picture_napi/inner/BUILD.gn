@@ -28,6 +28,7 @@ ohos_shared_library("pip_napi") {
     debug = false
   }
   sources = [
+    "../js_pip_window_listener.cpp",
     "js_pip_manager.cpp",
     "js_pip_module.cpp",
   ]

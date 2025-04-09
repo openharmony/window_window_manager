@@ -62,7 +62,7 @@ namespace {
  * @tc.desc: test function : SetActive
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyTest, SetActive, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyTest, SetActive, TestSize.Level1)
 {
     bool active = false;
     ASSERT_TRUE((sessionStage_ != nullptr));
@@ -79,7 +79,7 @@ HWTEST_F(SessionStageProxyTest, SetActive, Function | SmallTest | Level1)
  * @tc.desc: test function : UpdateDisplayId
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyTest, UpdateDisplayId, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyTest, UpdateDisplayId, TestSize.Level1)
 {
     uint64_t displayID = 0;
     ASSERT_TRUE((sessionStage_ != nullptr));
@@ -95,7 +95,7 @@ HWTEST_F(SessionStageProxyTest, UpdateDisplayId, Function | SmallTest | Level1)
  * @tc.desc: test function : UpdateRect
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyTest, UpdateRect, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyTest, UpdateRect, TestSize.Level1)
 {
     WSRect rect;
     SizeChangeReason reason = SizeChangeReason::UNDEFINED;
@@ -113,7 +113,7 @@ HWTEST_F(SessionStageProxyTest, UpdateRect, Function | SmallTest | Level1)
  * @tc.desc: test function : UpdateDensity
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyTest, UpdateDensity, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyTest, UpdateDensity, TestSize.Level1)
 {
     ASSERT_TRUE((sessionStage_ != nullptr));
     sessionStage_->UpdateDensity();
@@ -124,7 +124,7 @@ HWTEST_F(SessionStageProxyTest, UpdateDensity, Function | SmallTest | Level1)
  * @tc.desc: test function : UpdateOrientation
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyTest, UpdateOrientation, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyTest, UpdateOrientation, TestSize.Level1)
 {
     ASSERT_TRUE((sessionStage_ != nullptr));
     WSError res = sessionStage_->UpdateOrientation();
@@ -136,7 +136,7 @@ HWTEST_F(SessionStageProxyTest, UpdateOrientation, Function | SmallTest | Level1
  * @tc.desc: test function : UpdateSessionViewportConfig
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyTest, UpdateSessionViewportConfig, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyTest, UpdateSessionViewportConfig, TestSize.Level1)
 {
     ASSERT_TRUE((sessionStage_ != nullptr));
     SessionViewportConfig config;
@@ -149,7 +149,7 @@ HWTEST_F(SessionStageProxyTest, UpdateSessionViewportConfig, Function | SmallTes
  * @tc.desc: test function : HandleBackEvent
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyTest, HandleBackEvent, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyTest, HandleBackEvent, TestSize.Level1)
 {
     ASSERT_TRUE((sessionStage_ != nullptr));
     WSError res = sessionStage_->HandleBackEvent();
@@ -161,7 +161,7 @@ HWTEST_F(SessionStageProxyTest, HandleBackEvent, Function | SmallTest | Level1)
  * @tc.desc: test function : SwitchFreeMultiWindow
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyTest, SwitchFreeMultiWindow, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyTest, SwitchFreeMultiWindow, TestSize.Level1)
 {
     ASSERT_TRUE((sessionStage_ != nullptr));
     bool enable = true;
@@ -177,7 +177,7 @@ HWTEST_F(SessionStageProxyTest, SwitchFreeMultiWindow, Function | SmallTest | Le
  * @tc.desc: test function : GetUIContentRemoteObj
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyTest, GetUIContentRemoteObj, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyTest, GetUIContentRemoteObj, TestSize.Level1)
 {
     ASSERT_NE(sessionStage_, nullptr);
     sptr<IRemoteObject> remoteObj;
@@ -190,7 +190,7 @@ HWTEST_F(SessionStageProxyTest, GetUIContentRemoteObj, Function | SmallTest | Le
  * @tc.desc: test function : MarkProcessed
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyTest, MarkProcessed, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyTest, MarkProcessed, TestSize.Level1)
 {
     int32_t eventId = 1;
     ASSERT_TRUE((sessionStage_ != nullptr));
@@ -203,7 +203,7 @@ HWTEST_F(SessionStageProxyTest, MarkProcessed, Function | SmallTest | Level1)
  * @tc.desc: test function : UpdateFocus
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyTest, UpdateFocus, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyTest, UpdateFocus, TestSize.Level1)
 {
     bool focus = false;
     ASSERT_TRUE((sessionStage_ != nullptr));
@@ -220,7 +220,7 @@ HWTEST_F(SessionStageProxyTest, UpdateFocus, Function | SmallTest | Level1)
  * @tc.desc: test function : NotifyDestroy
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyTest, NotifyDestroy, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyTest, NotifyDestroy, TestSize.Level1)
 {
     ASSERT_TRUE((sessionStage_ != nullptr));
     WSError res = sessionStage_->NotifyDestroy();
@@ -232,7 +232,7 @@ HWTEST_F(SessionStageProxyTest, NotifyDestroy, Function | SmallTest | Level1)
  * @tc.desc: test function : NotifyCloseExistPipWindow
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyTest, NotifyCloseExistPipWindow, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyTest, NotifyCloseExistPipWindow, TestSize.Level1)
 {
     ASSERT_TRUE((sessionStage_ != nullptr));
     WSError res = sessionStage_->NotifyCloseExistPipWindow();
@@ -244,7 +244,7 @@ HWTEST_F(SessionStageProxyTest, NotifyCloseExistPipWindow, Function | SmallTest 
  * @tc.desc: test function : NotifyTransferComponentData
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyTest, NotifyTransferComponentData, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyTest, NotifyTransferComponentData, TestSize.Level1)
 {
     AAFwk::WantParams wantParams;
     std::string testValue = "testValue";
@@ -259,7 +259,7 @@ HWTEST_F(SessionStageProxyTest, NotifyTransferComponentData, Function | SmallTes
  * @tc.desc: test function : NotifyTransferComponentDataSync
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyTest, NotifyTransferComponentDataSync, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyTest, NotifyTransferComponentDataSync, TestSize.Level1)
 {
     AAFwk::WantParams wantParams;
     std::string testValue = "testValue";
@@ -275,7 +275,7 @@ HWTEST_F(SessionStageProxyTest, NotifyTransferComponentDataSync, Function | Smal
  * @tc.desc: test function : NotifyOccupiedAreaChangeInfo
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyTest, NotifyOccupiedAreaChangeInfo, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyTest, NotifyOccupiedAreaChangeInfo, TestSize.Level1)
 {
     sptr<OccupiedAreaChangeInfo> info = sptr<OccupiedAreaChangeInfo>::MakeSptr();
     ASSERT_TRUE((sessionStage_ != nullptr));
@@ -287,7 +287,7 @@ HWTEST_F(SessionStageProxyTest, NotifyOccupiedAreaChangeInfo, Function | SmallTe
  * @tc.desc: test function : NotifyKeyboardAnimationCompleted
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyTest, NotifyKeyboardAnimationCompleted, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyTest, NotifyKeyboardAnimationCompleted, TestSize.Level1)
 {
     ASSERT_TRUE((sessionStage_ != nullptr));
     KeyboardPanelInfo keyboardPanelInfo;
@@ -299,7 +299,7 @@ HWTEST_F(SessionStageProxyTest, NotifyKeyboardAnimationCompleted, Function | Sma
  * @tc.desc: test function : UpdateAvoidArea
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyTest, UpdateAvoidArea, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyTest, UpdateAvoidArea, TestSize.Level1)
 {
     sptr<AvoidArea> avoidArea = sptr<AvoidArea>::MakeSptr();
     AvoidAreaType type = AvoidAreaType::TYPE_SYSTEM;
@@ -313,7 +313,7 @@ HWTEST_F(SessionStageProxyTest, UpdateAvoidArea, Function | SmallTest | Level1)
  * @tc.desc: test function : DumpSessionElementInfo
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyTest, DumpSessionElementInfo, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyTest, DumpSessionElementInfo, TestSize.Level1)
 {
     std::vector<std::string> params;
     params.push_back("test1");
@@ -327,7 +327,7 @@ HWTEST_F(SessionStageProxyTest, DumpSessionElementInfo, Function | SmallTest | L
  * @tc.desc: test function : NotifyScreenshot
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyTest, NotifyScreenshot, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyTest, NotifyScreenshot, TestSize.Level1)
 {
     ASSERT_TRUE((sessionStage_ != nullptr));
     sessionStage_->NotifyScreenshot();
@@ -338,7 +338,7 @@ HWTEST_F(SessionStageProxyTest, NotifyScreenshot, Function | SmallTest | Level1)
  * @tc.desc: test function : NotifyTouchOutside
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyTest, NotifyTouchOutside, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyTest, NotifyTouchOutside, TestSize.Level1)
 {
     ASSERT_TRUE((sessionStage_ != nullptr));
     WSError res = sessionStage_->NotifyTouchOutside();
@@ -350,7 +350,7 @@ HWTEST_F(SessionStageProxyTest, NotifyTouchOutside, Function | SmallTest | Level
  * @tc.desc: test function : UpdateWindowMode
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyTest, UpdateWindowMode, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyTest, UpdateWindowMode, TestSize.Level1)
 {
     WindowMode mode = WindowMode::WINDOW_MODE_UNDEFINED;
     ASSERT_TRUE((sessionStage_ != nullptr));
@@ -363,7 +363,7 @@ HWTEST_F(SessionStageProxyTest, UpdateWindowMode, Function | SmallTest | Level1)
  * @tc.desc: test function : NotifySessionFullScreen
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyTest, NotifySessionFullScreen, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyTest, NotifySessionFullScreen, TestSize.Level1)
 {
     bool fullScreen = true;
     ASSERT_TRUE((sessionStage_ != nullptr));
@@ -377,7 +377,7 @@ HWTEST_F(SessionStageProxyTest, NotifySessionFullScreen, Function | SmallTest | 
  * @tc.desc: test function : NotifyForegroundInteractiveStatus
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyTest, NotifyForegroundInteractiveStatus, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyTest, NotifyForegroundInteractiveStatus, TestSize.Level1)
 {
     bool interactive = true;
     ASSERT_TRUE((sessionStage_ != nullptr));
@@ -391,7 +391,7 @@ HWTEST_F(SessionStageProxyTest, NotifyForegroundInteractiveStatus, Function | Sm
  * @tc.desc: test function : UpdateMaximizeMode
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyTest, UpdateMaximizeMode, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyTest, UpdateMaximizeMode, TestSize.Level1)
 {
     MaximizeMode mode = MaximizeMode::MODE_FULL_FILL;
     ASSERT_TRUE((sessionStage_ != nullptr));
@@ -404,7 +404,7 @@ HWTEST_F(SessionStageProxyTest, UpdateMaximizeMode, Function | SmallTest | Level
  * @tc.desc: test function : NotifySessionForeground
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyTest, NotifySessionForeground, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyTest, NotifySessionForeground, TestSize.Level1)
 {
     uint32_t reason = 1;
     bool withAnimation = true;
@@ -417,7 +417,7 @@ HWTEST_F(SessionStageProxyTest, NotifySessionForeground, Function | SmallTest | 
  * @tc.desc: test function : NotifySessionBackground
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyTest, NotifySessionBackground, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyTest, NotifySessionBackground, TestSize.Level1)
 {
     uint32_t reason = 1;
     bool withAnimation = true;
@@ -431,7 +431,7 @@ HWTEST_F(SessionStageProxyTest, NotifySessionBackground, Function | SmallTest | 
  * @tc.desc: test function : NotifyCompatibleModeEnableInPad
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyTest, NotifyCompatibleModeEnableInPad, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyTest, NotifyCompatibleModeEnableInPad, TestSize.Level1)
 {
     ASSERT_TRUE((sessionStage_ != nullptr));
     WSError res = sessionStage_->NotifyCompatibleModeEnableInPad(true);
@@ -443,7 +443,7 @@ HWTEST_F(SessionStageProxyTest, NotifyCompatibleModeEnableInPad, Function | Smal
  * @tc.desc: test function : UpdateTitleInTargetPos
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyTest, UpdateTitleInTargetPos, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyTest, UpdateTitleInTargetPos, TestSize.Level1)
 {
     ASSERT_TRUE((sessionStage_ != nullptr));
     WSError res = sessionStage_->UpdateTitleInTargetPos(true, 1);
@@ -455,7 +455,7 @@ HWTEST_F(SessionStageProxyTest, UpdateTitleInTargetPos, Function | SmallTest | L
  * @tc.desc: test function : NotifyTransformChange
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyTest, NotifyTransformChange, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyTest, NotifyTransformChange, TestSize.Level1)
 {
     Transform transform;
     ASSERT_TRUE((sessionStage_ != nullptr));
@@ -467,7 +467,7 @@ HWTEST_F(SessionStageProxyTest, NotifyTransformChange, Function | SmallTest | Le
  * @tc.desc: test function : NotifyWindowVisibility
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyTest, NotifyWindowVisibility, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyTest, NotifyWindowVisibility, TestSize.Level1)
 {
     ASSERT_TRUE((sessionStage_ != nullptr));
     WSError res = sessionStage_->NotifyWindowVisibility(true);
@@ -479,7 +479,7 @@ HWTEST_F(SessionStageProxyTest, NotifyWindowVisibility, Function | SmallTest | L
  * @tc.desc: test function : NotifyDensityFollowHost
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyTest, NotifyDensityFollowHost, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyTest, NotifyDensityFollowHost, TestSize.Level1)
 {
     ASSERT_TRUE((sessionStage_ != nullptr));
     ASSERT_EQ(WSError::WS_OK, sessionStage_->NotifyDensityFollowHost(true, 1.0f));
@@ -490,7 +490,7 @@ HWTEST_F(SessionStageProxyTest, NotifyDensityFollowHost, Function | SmallTest | 
  * @tc.desc: test function : NotifyDialogStateChange
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyTest, NotifyDialogStateChange, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyTest, NotifyDialogStateChange, TestSize.Level1)
 {
     ASSERT_TRUE((sessionStage_ != nullptr));
     WSError res = sessionStage_->NotifyDialogStateChange(true);
@@ -502,7 +502,7 @@ HWTEST_F(SessionStageProxyTest, NotifyDialogStateChange, Function | SmallTest | 
  * @tc.desc: test function : SetPipActionEvent
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyTest, SetPipActionEvent, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyTest, SetPipActionEvent, TestSize.Level1)
 {
     ASSERT_TRUE((sessionStage_ != nullptr));
     WSError res = sessionStage_->SetPipActionEvent("close", 0);
@@ -514,7 +514,7 @@ HWTEST_F(SessionStageProxyTest, SetPipActionEvent, Function | SmallTest | Level1
  * @tc.desc: test function : SetPiPControlEvent
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyTest, SetPiPControlEvent, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyTest, SetPiPControlEvent, TestSize.Level1)
 {
     ASSERT_TRUE(sessionStage_ != nullptr);
     auto controlType = WsPiPControlType::VIDEO_PLAY_PAUSE;
@@ -528,7 +528,7 @@ HWTEST_F(SessionStageProxyTest, SetPiPControlEvent, Function | SmallTest | Level
  * @tc.desc: test function : NotifyDisplayMove
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyTest, NotifyDisplayMove, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyTest, NotifyDisplayMove, TestSize.Level1)
 {
     ASSERT_TRUE(sessionStage_ != nullptr);
     DisplayId from = 0;
@@ -541,7 +541,7 @@ HWTEST_F(SessionStageProxyTest, NotifyDisplayMove, Function | SmallTest | Level1
  * @tc.desc: test function : NotifyKeyboardPanelInfoChange
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyTest, NotifyKeyboardPanelInfoChange, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyTest, NotifyKeyboardPanelInfoChange, TestSize.Level1)
 {
     ASSERT_TRUE(sessionStage_ != nullptr);
     KeyboardPanelInfo keyboardPanelInfo;
@@ -553,7 +553,7 @@ HWTEST_F(SessionStageProxyTest, NotifyKeyboardPanelInfoChange, Function | SmallT
  * @tc.desc: test function : CompatibleFullScreenRecover
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyTest, CompatibleFullScreenRecover, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyTest, CompatibleFullScreenRecover, TestSize.Level1)
 {
     ASSERT_TRUE(sessionStage_ != nullptr);
     WSError res = sessionStage_->CompatibleFullScreenRecover();
@@ -565,7 +565,7 @@ HWTEST_F(SessionStageProxyTest, CompatibleFullScreenRecover, Function | SmallTes
  * @tc.desc: test function : CompatibleFullScreenMinimize
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyTest, CompatibleFullScreenMinimize, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyTest, CompatibleFullScreenMinimize, TestSize.Level1)
 {
     ASSERT_TRUE(sessionStage_ != nullptr);
     WSError res = sessionStage_->CompatibleFullScreenMinimize();
@@ -577,7 +577,7 @@ HWTEST_F(SessionStageProxyTest, CompatibleFullScreenMinimize, Function | SmallTe
  * @tc.desc: test function : CompatibleFullScreenClose
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyTest, CompatibleFullScreenClose, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyTest, CompatibleFullScreenClose, TestSize.Level1)
 {
     ASSERT_TRUE(sessionStage_ != nullptr);
     WSError res = sessionStage_->CompatibleFullScreenClose();
@@ -585,11 +585,32 @@ HWTEST_F(SessionStageProxyTest, CompatibleFullScreenClose, Function | SmallTest 
 }
 
 /**
+ * @tc.name: PcAppInPadNormalClose
+ * @tc.desc: test function : PcAppInPadNormalClose
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, PcAppInPadNormalClose, TestSize.Level1)
+{
+    ASSERT_TRUE(sessionStage_ != nullptr);
+    auto res = sessionStage_->PcAppInPadNormalClose();
+    ASSERT_NE(WSError::WS_ERROR_INVALID_WINDOW, res);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    res = sessionStage_->PcAppInPadNormalClose();
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
+
+    sptr<SessionStageProxy> sessionStage = sptr<SessionStageProxy>::MakeSptr(nullptr);
+    res = sessionStage->PcAppInPadNormalClose();
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
+    MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
  * @tc.name: SetUniqueVirtualPixelRatio
  * @tc.desc: test function : SetUniqueVirtualPixelRatio
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyTest, SetUniqueVirtualPixelRatio, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyTest, SetUniqueVirtualPixelRatio, TestSize.Level1)
 {
     ASSERT_TRUE(sessionStage_ != nullptr);
     sessionStage_->SetUniqueVirtualPixelRatio(true, 0.1f);
@@ -600,7 +621,7 @@ HWTEST_F(SessionStageProxyTest, SetUniqueVirtualPixelRatio, Function | SmallTest
  * @tc.desc: test function : NotifyDumpInfo
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyTest, NotifyDumpInfo, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyTest, NotifyDumpInfo, TestSize.Level1)
 {
     ASSERT_TRUE(sessionStage_ != nullptr);
     std::vector<std::string> params;
@@ -626,7 +647,7 @@ HWTEST_F(SessionStageProxyTest, NotifyDumpInfo, Function | SmallTest | Level1)
  * @tc.desc: test function : SetSplitButtonVisible
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyTest, SetSplitButtonVisible, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyTest, SetSplitButtonVisible, TestSize.Level1)
 {
     ASSERT_TRUE(sessionStage_ != nullptr);
     WSError res = sessionStage_->SetSplitButtonVisible(false);
@@ -638,7 +659,7 @@ HWTEST_F(SessionStageProxyTest, SetSplitButtonVisible, Function | SmallTest | Le
  * @tc.desc: test function : SetEnableDragBySystem
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyTest, SetEnableDragBySystem, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyTest, SetEnableDragBySystem, TestSize.Level1)
 {
     ASSERT_TRUE(sessionStage_ != nullptr);
     WSError res = sessionStage_->SetEnableDragBySystem(false);
@@ -650,7 +671,7 @@ HWTEST_F(SessionStageProxyTest, SetEnableDragBySystem, Function | SmallTest | Le
  * @tc.desc: test function : SetFullScreenWaterfallMode
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyTest, SetFullScreenWaterfallMode, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyTest, SetFullScreenWaterfallMode, TestSize.Level1)
 {
     ASSERT_TRUE(sessionStage_ != nullptr);
     WSError res = sessionStage_->SetFullScreenWaterfallMode(false);
@@ -662,7 +683,7 @@ HWTEST_F(SessionStageProxyTest, SetFullScreenWaterfallMode, Function | SmallTest
  * @tc.desc: test function : SetSupportEnterWaterfallMode
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyTest, SetSupportEnterWaterfallMode, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyTest, SetSupportEnterWaterfallMode, TestSize.Level1)
 {
     ASSERT_TRUE(sessionStage_ != nullptr);
     WSError res = sessionStage_->SetSupportEnterWaterfallMode(false);
@@ -674,7 +695,7 @@ HWTEST_F(SessionStageProxyTest, SetSupportEnterWaterfallMode, Function | SmallTe
  * @tc.desc: test function : SendExtensionData
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyTest, SendExtensionData, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyTest, SendExtensionData, TestSize.Level1)
 {
     ASSERT_TRUE(sessionStage_ != nullptr);
     MessageParcel data;
@@ -690,10 +711,36 @@ HWTEST_F(SessionStageProxyTest, SendExtensionData, Function | SmallTest | Level1
  * @tc.desc: test function : SendContainerModalEvent
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyTest, SendContainerModalEvent, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyTest, SendContainerModalEvent, TestSize.Level1)
 {
     ASSERT_TRUE(sessionStage_ != nullptr);
     WSError res = sessionStage_->SendContainerModalEvent("name", "value");
+    ASSERT_EQ(WSError::WS_OK, res);
+}
+
+/**
+ * @tc.name: NotifyRotationChange
+ * @tc.desc: test function : NotifyRotationChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, NotifyRotationChange, Function | SmallTest | Level1)
+{
+    ASSERT_TRUE(sessionStage_ != nullptr);
+    RotationChangeInfo info = { RotationChangeType::WINDOW_WILL_ROTATE, 0, 0, { 0, 0, 2720, 1270 } };
+    RotationChangeResult res = sessionStage_->NotifyRotationChange(info);
+    ASSERT_EQ(0, res.windowRect_.width_);
+}
+
+/**
+ * @tc.name: NotifyTargetRotationInfo
+ * @tc.desc: test function : NotifyTargetRotationInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, NotifyTargetRotationInfo, Function | SmallTest | Level1)
+{
+    OrientationInfo info;
+    ASSERT_TRUE(sessionStage_ != nullptr);
+    WSError res = sessionStage_->NotifyTargetRotationInfo(info);
     ASSERT_EQ(WSError::WS_OK, res);
 }
 }

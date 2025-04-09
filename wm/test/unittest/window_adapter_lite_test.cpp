@@ -45,7 +45,7 @@ namespace {
  * @tc.desc: WindowAdapterLite/UnregisterWindowManagerAgent
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterLiteTest, UnregisterWindowManagerAgent, Function | SmallTest | Level2)
+HWTEST_F(WindowAdapterLiteTest, UnregisterWindowManagerAgent, TestSize.Level1)
 {
     std::shared_ptr<WindowAdapterLite> windowAdapterLite_ = std::make_shared<WindowAdapterLite>();
     if (!windowAdapterLite_) {
@@ -67,7 +67,7 @@ HWTEST_F(WindowAdapterLiteTest, UnregisterWindowManagerAgent, Function | SmallTe
  * @tc.desc: WindowAdapterLite/UnregisterWindowManagerAgent
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterLiteTest, UnregisterWindowManagerAgent01, Function | SmallTest | Level2)
+HWTEST_F(WindowAdapterLiteTest, UnregisterWindowManagerAgent01, TestSize.Level1)
 {
     std::shared_ptr<WindowAdapterLite> windowAdapterLite_ = std::make_shared<WindowAdapterLite>();
     if (!windowAdapterLite_) {
@@ -99,7 +99,7 @@ HWTEST_F(WindowAdapterLiteTest, UnregisterWindowManagerAgent01, Function | Small
  * @tc.desc: WindowAdapterLite/GetWindowStyleType
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterLiteTest, GetWindowStyleType, Function | SmallTest | Level2)
+HWTEST_F(WindowAdapterLiteTest, GetWindowStyleType, TestSize.Level1)
 {
     std::shared_ptr<WindowAdapterLite> windowAdapterLite_ = std::make_shared<WindowAdapterLite>();
     WindowStyleType windowStyleType = Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT;
@@ -107,6 +107,19 @@ HWTEST_F(WindowAdapterLiteTest, GetWindowStyleType, Function | SmallTest | Level
     ASSERT_EQ(Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT, windowStyleType);
 }
 
+/**
+ * @tc.name: ListWindowInfo01
+ * @tc.desc: WindowAdapter/ListWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterLiteTest, ListWindowInfo01, Function | SmallTest | Level2)
+{
+    WindowAdapterLite WindowAdapterLite;
+    WindowInfoOption windowInfoOption;
+    std::vector<sptr<WindowInfo>> infos;
+    auto err = WindowAdapterLite.ListWindowInfo(windowInfoOption, infos);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, err);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

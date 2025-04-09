@@ -101,7 +101,7 @@ namespace {
  * @tc.desc: add system sub window to system window
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeContainerTest, AddWindowNodeOnWindowTree01, Function | SmallTest | Level2)
+HWTEST_F(WindowNodeContainerTest, AddWindowNodeOnWindowTree01, TestSize.Level1)
 {
     sptr<WindowProperty> parentProperty = CreateWindowProperty(110u, "test1",
         WindowType::WINDOW_TYPE_APP_LAUNCHING, WindowMode::WINDOW_MODE_FLOATING, windowRect_);
@@ -121,7 +121,7 @@ HWTEST_F(WindowNodeContainerTest, AddWindowNodeOnWindowTree01, Function | SmallT
  * @tc.desc: add system sub window to system sub window
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeContainerTest, AddWindowNodeOnWindowTree02, Function | SmallTest | Level2)
+HWTEST_F(WindowNodeContainerTest, AddWindowNodeOnWindowTree02, TestSize.Level1)
 {
     sptr<WindowProperty> parentProperty = CreateWindowProperty(110u, "test1",
         WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW, WindowMode::WINDOW_MODE_FLOATING, windowRect_);
@@ -139,7 +139,7 @@ HWTEST_F(WindowNodeContainerTest, AddWindowNodeOnWindowTree02, Function | SmallT
  * @tc.desc: add system sub window without parent
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeContainerTest, AddWindowNodeOnWindowTree03, Function | SmallTest | Level2)
+HWTEST_F(WindowNodeContainerTest, AddWindowNodeOnWindowTree03, TestSize.Level1)
 {
     sptr<WindowProperty> subProperty = CreateWindowProperty(110u, "test1",
         WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW, WindowMode::WINDOW_MODE_FLOATING, windowRect_);
@@ -153,7 +153,7 @@ HWTEST_F(WindowNodeContainerTest, AddWindowNodeOnWindowTree03, Function | SmallT
  * @tc.desc: minimize app node
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeContainerTest, MinimizeAppNodeExceptOptions, Function | SmallTest | Level2)
+HWTEST_F(WindowNodeContainerTest, MinimizeAppNodeExceptOptions, TestSize.Level1)
 {
     std::vector<uint32_t> exceptionalIds;
     std::vector<WindowMode> exceptionalModes;
@@ -179,7 +179,7 @@ HWTEST_F(WindowNodeContainerTest, MinimizeAppNodeExceptOptions, Function | Small
  * @tc.desc: drop show when locken window
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeContainerTest, DropShowWhenLockedWindowIfNeeded, Function | SmallTest | Level2)
+HWTEST_F(WindowNodeContainerTest, DropShowWhenLockedWindowIfNeeded, TestSize.Level1)
 {
     sptr<WindowProperty> property = CreateWindowProperty(110u, "test1",
         WindowType::WINDOW_TYPE_KEYGUARD, WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
@@ -194,7 +194,7 @@ HWTEST_F(WindowNodeContainerTest, DropShowWhenLockedWindowIfNeeded, Function | S
  * @tc.desc: get mode change hot zones
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeContainerTest, GetModeChangeHotZones, Function | SmallTest | Level2)
+HWTEST_F(WindowNodeContainerTest, GetModeChangeHotZones, TestSize.Level1)
 {
     ModeChangeHotZonesConfig hotZonesConfig { true, 10, 20, 30 };
     ModeChangeHotZones hotZones;
@@ -209,7 +209,7 @@ HWTEST_F(WindowNodeContainerTest, GetModeChangeHotZones, Function | SmallTest | 
  * @tc.desc: update camera float window status
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeContainerTest, UpdateCameraFloatWindowStatus, Function | SmallTest | Level2)
+HWTEST_F(WindowNodeContainerTest, UpdateCameraFloatWindowStatus, TestSize.Level1)
 {
     sptr<WindowProperty> property = CreateWindowProperty(110u, "test1",
         WindowType::WINDOW_TYPE_FLOAT_CAMERA, WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
@@ -224,7 +224,7 @@ HWTEST_F(WindowNodeContainerTest, UpdateCameraFloatWindowStatus, Function | Smal
  * @tc.desc: preprocess node and update RSTree
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeContainerTest, UpdateWindowNode, Function | SmallTest | Level2)
+HWTEST_F(WindowNodeContainerTest, UpdateWindowNode, TestSize.Level1)
 {
     sptr<WindowProperty> property = CreateWindowProperty(110u, "test1",
         WindowType::SYSTEM_WINDOW_BASE, WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
@@ -239,7 +239,7 @@ HWTEST_F(WindowNodeContainerTest, UpdateWindowNode, Function | SmallTest | Level
  * @tc.desc: show starting window
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeContainerTest, ShowStartingWindow, Function | SmallTest | Level2)
+HWTEST_F(WindowNodeContainerTest, ShowStartingWindow, TestSize.Level1)
 {
     sptr<WindowNodeContainer> container = sptr<WindowNodeContainer>::MakeSptr(defaultDisplay_->GetDisplayInfo(),
         defaultDisplay_->GetScreenId());
@@ -255,7 +255,7 @@ HWTEST_F(WindowNodeContainerTest, ShowStartingWindow, Function | SmallTest | Lev
  * @tc.desc: show starting window
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeContainerTest, ShowStartingWindow02, Function | SmallTest | Level2)
+HWTEST_F(WindowNodeContainerTest, ShowStartingWindow02, TestSize.Level1)
 {
     sptr<WindowNodeContainer> container = sptr<WindowNodeContainer>::MakeSptr(defaultDisplay_->GetDisplayInfo(),
         defaultDisplay_->GetScreenId());
@@ -272,7 +272,7 @@ HWTEST_F(WindowNodeContainerTest, ShowStartingWindow02, Function | SmallTest | L
  * @tc.desc: show starting window
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeContainerTest, ShowStartingWindow03, Function | SmallTest | Level2)
+HWTEST_F(WindowNodeContainerTest, ShowStartingWindow03, TestSize.Level1)
 {
     sptr<WindowNodeContainer> container = sptr<WindowNodeContainer>::MakeSptr(defaultDisplay_->GetDisplayInfo(),
         defaultDisplay_->GetScreenId());
@@ -291,7 +291,7 @@ HWTEST_F(WindowNodeContainerTest, ShowStartingWindow03, Function | SmallTest | L
  * @tc.desc: forbid dock slice move
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeContainerTest, IsForbidDockSliceMove, Function | SmallTest | Level2)
+HWTEST_F(WindowNodeContainerTest, IsForbidDockSliceMove, TestSize.Level1)
 {
     sptr<WindowNodeContainer> container = new WindowNodeContainer(defaultDisplay_->GetDisplayInfo(),
         defaultDisplay_->GetScreenId());
@@ -305,7 +305,7 @@ HWTEST_F(WindowNodeContainerTest, IsForbidDockSliceMove, Function | SmallTest | 
  * @tc.desc: get window count
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeContainerTest, GetWindowCountByType01, Function | SmallTest | Level2)
+HWTEST_F(WindowNodeContainerTest, GetWindowCountByType01, TestSize.Level1)
 {
     sptr<WindowNodeContainer> container = sptr<WindowNodeContainer>::MakeSptr(defaultDisplay_->GetDisplayInfo(),
         defaultDisplay_->GetScreenId());
@@ -327,7 +327,7 @@ HWTEST_F(WindowNodeContainerTest, GetWindowCountByType01, Function | SmallTest |
  * @tc.desc: get window count
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeContainerTest, GetWindowCountByType02, Function | SmallTest | Level2)
+HWTEST_F(WindowNodeContainerTest, GetWindowCountByType02, TestSize.Level1)
 {
     sptr<WindowNodeContainer> container = sptr<WindowNodeContainer>::MakeSptr(defaultDisplay_->GetDisplayInfo(),
         defaultDisplay_->GetScreenId());
@@ -349,7 +349,7 @@ HWTEST_F(WindowNodeContainerTest, GetWindowCountByType02, Function | SmallTest |
  * @tc.desc: get window count
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeContainerTest, GetWindowCountByType03, Function | SmallTest | Level2)
+HWTEST_F(WindowNodeContainerTest, GetWindowCountByType03, TestSize.Level1)
 {
     sptr<WindowNodeContainer> container = sptr<WindowNodeContainer>::MakeSptr(defaultDisplay_->GetDisplayInfo(),
         defaultDisplay_->GetScreenId());
@@ -370,7 +370,7 @@ HWTEST_F(WindowNodeContainerTest, GetWindowCountByType03, Function | SmallTest |
  * @tc.desc: judge tile rect satisfied with size limits
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeContainerTest, IsTileRectSatisfiedWithSizeLimits, Function | SmallTest | Level2)
+HWTEST_F(WindowNodeContainerTest, IsTileRectSatisfiedWithSizeLimits, TestSize.Level1)
 {
     sptr<WindowNodeContainer> container = new WindowNodeContainer(defaultDisplay_->GetDisplayInfo(),
         defaultDisplay_->GetScreenId());
@@ -390,7 +390,7 @@ HWTEST_F(WindowNodeContainerTest, IsTileRectSatisfiedWithSizeLimits, Function | 
  * @tc.desc: add main window
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeContainerTest, AddWindowNode01, Function | SmallTest | Level2)
+HWTEST_F(WindowNodeContainerTest, AddWindowNode01, TestSize.Level1)
 {
     sptr<WindowNodeContainer> container = new WindowNodeContainer(defaultDisplay_->GetDisplayInfo(),
         defaultDisplay_->GetScreenId());
@@ -411,7 +411,7 @@ HWTEST_F(WindowNodeContainerTest, AddWindowNode01, Function | SmallTest | Level2
  * @tc.desc: add sub window
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeContainerTest, AddWindowNode02, Function | SmallTest | Level2)
+HWTEST_F(WindowNodeContainerTest, AddWindowNode02, TestSize.Level1)
 {
     sptr<WindowNodeContainer> container = new WindowNodeContainer(defaultDisplay_->GetDisplayInfo(),
         defaultDisplay_->GetScreenId());
@@ -434,7 +434,7 @@ HWTEST_F(WindowNodeContainerTest, AddWindowNode02, Function | SmallTest | Level2
  * @tc.desc: add system window
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeContainerTest, AddWindowNode03, Function | SmallTest | Level2)
+HWTEST_F(WindowNodeContainerTest, AddWindowNode03, TestSize.Level1)
 {
     sptr<WindowNodeContainer> container = new WindowNodeContainer(defaultDisplay_->GetDisplayInfo(),
         defaultDisplay_->GetScreenId());
@@ -451,7 +451,7 @@ HWTEST_F(WindowNodeContainerTest, AddWindowNode03, Function | SmallTest | Level2
  * @tc.desc: remove sub window from window tree
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeContainerTest, RemoveWindowNodeFromWindowTree, Function | SmallTest | Level2)
+HWTEST_F(WindowNodeContainerTest, RemoveWindowNodeFromWindowTree, TestSize.Level1)
 {
     sptr<WindowNodeContainer> container = new WindowNodeContainer(defaultDisplay_->GetDisplayInfo(),
         defaultDisplay_->GetScreenId());
@@ -477,7 +477,7 @@ HWTEST_F(WindowNodeContainerTest, RemoveWindowNodeFromWindowTree, Function | Sma
  * @tc.desc: remove main window
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeContainerTest, RemoveWindowNode01, Function | SmallTest | Level2)
+HWTEST_F(WindowNodeContainerTest, RemoveWindowNode01, TestSize.Level1)
 {
     sptr<WindowNodeContainer> container = new WindowNodeContainer(defaultDisplay_->GetDisplayInfo(),
         defaultDisplay_->GetScreenId());
@@ -499,7 +499,7 @@ HWTEST_F(WindowNodeContainerTest, RemoveWindowNode01, Function | SmallTest | Lev
  * @tc.desc: remove sub window
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeContainerTest, RemoveWindowNode02, Function | SmallTest | Level2)
+HWTEST_F(WindowNodeContainerTest, RemoveWindowNode02, TestSize.Level1)
 {
     sptr<WindowNodeContainer> container = new WindowNodeContainer(defaultDisplay_->GetDisplayInfo(),
         defaultDisplay_->GetScreenId());
@@ -524,7 +524,7 @@ HWTEST_F(WindowNodeContainerTest, RemoveWindowNode02, Function | SmallTest | Lev
  * @tc.desc: remove keyguard window
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeContainerTest, RemoveWindowNode03, Function | SmallTest | Level2)
+HWTEST_F(WindowNodeContainerTest, RemoveWindowNode03, TestSize.Level1)
 {
     sptr<WindowNodeContainer> container = new WindowNodeContainer(defaultDisplay_->GetDisplayInfo(),
         defaultDisplay_->GetScreenId());
@@ -542,7 +542,7 @@ HWTEST_F(WindowNodeContainerTest, RemoveWindowNode03, Function | SmallTest | Lev
  * @tc.desc: remove boot animation window
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeContainerTest, RemoveWindowNode04, Function | SmallTest | Level2)
+HWTEST_F(WindowNodeContainerTest, RemoveWindowNode04, TestSize.Level1)
 {
     sptr<WindowNodeContainer> container = new WindowNodeContainer(defaultDisplay_->GetDisplayInfo(),
         defaultDisplay_->GetScreenId());
@@ -560,7 +560,7 @@ HWTEST_F(WindowNodeContainerTest, RemoveWindowNode04, Function | SmallTest | Lev
  * @tc.desc: remove status bar
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeContainerTest, HandleRemoveWindow01, Function | SmallTest | Level2)
+HWTEST_F(WindowNodeContainerTest, HandleRemoveWindow01, TestSize.Level1)
 {
     sptr<WindowNodeContainer> container = new WindowNodeContainer(defaultDisplay_->GetDisplayInfo(),
         defaultDisplay_->GetScreenId());
@@ -578,7 +578,7 @@ HWTEST_F(WindowNodeContainerTest, HandleRemoveWindow01, Function | SmallTest | L
  * @tc.desc: remove navigation bar
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeContainerTest, HandleRemoveWindow02, Function | SmallTest | Level2)
+HWTEST_F(WindowNodeContainerTest, HandleRemoveWindow02, TestSize.Level1)
 {
     sptr<WindowNodeContainer> container = new WindowNodeContainer(defaultDisplay_->GetDisplayInfo(),
         defaultDisplay_->GetScreenId());
@@ -596,7 +596,7 @@ HWTEST_F(WindowNodeContainerTest, HandleRemoveWindow02, Function | SmallTest | L
  * @tc.desc: find divider node
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeContainerTest, FindDividerNode, Function | SmallTest | Level2)
+HWTEST_F(WindowNodeContainerTest, FindDividerNode, TestSize.Level1)
 {
     sptr<WindowNodeContainer> container = new WindowNodeContainer(defaultDisplay_->GetDisplayInfo(),
         defaultDisplay_->GetScreenId());
@@ -623,7 +623,7 @@ HWTEST_F(WindowNodeContainerTest, FindDividerNode, Function | SmallTest | Level2
  * @tc.desc: raise main window z order
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeContainerTest, RaiseZOrderForAppWindow01, Function | SmallTest | Level2)
+HWTEST_F(WindowNodeContainerTest, RaiseZOrderForAppWindow01, TestSize.Level1)
 {
     sptr<WindowNodeContainer> container = new WindowNodeContainer(defaultDisplay_->GetDisplayInfo(),
         defaultDisplay_->GetScreenId());
@@ -648,7 +648,7 @@ HWTEST_F(WindowNodeContainerTest, RaiseZOrderForAppWindow01, Function | SmallTes
  * @tc.desc: raise sub window z order
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeContainerTest, RaiseZOrderForAppWindow02, Function | SmallTest | Level2)
+HWTEST_F(WindowNodeContainerTest, RaiseZOrderForAppWindow02, TestSize.Level1)
 {
     sptr<WindowNodeContainer> container = new WindowNodeContainer(defaultDisplay_->GetDisplayInfo(),
         defaultDisplay_->GetScreenId());
@@ -670,7 +670,7 @@ HWTEST_F(WindowNodeContainerTest, RaiseZOrderForAppWindow02, Function | SmallTes
  * @tc.desc: raise dialog z order
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeContainerTest, RaiseZOrderForAppWindow03, Function | SmallTest | Level2)
+HWTEST_F(WindowNodeContainerTest, RaiseZOrderForAppWindow03, TestSize.Level1)
 {
     sptr<WindowNodeContainer> container = new WindowNodeContainer(defaultDisplay_->GetDisplayInfo(),
         defaultDisplay_->GetScreenId());
@@ -692,7 +692,7 @@ HWTEST_F(WindowNodeContainerTest, RaiseZOrderForAppWindow03, Function | SmallTes
  * @tc.desc: if dock slice in exit split mode area
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeContainerTest, IsDockSliceInExitSplitModeArea, Function | SmallTest | Level2)
+HWTEST_F(WindowNodeContainerTest, IsDockSliceInExitSplitModeArea, TestSize.Level1)
 {
     sptr<WindowNodeContainer> container = new WindowNodeContainer(defaultDisplay_->GetDisplayInfo(),
         defaultDisplay_->GetScreenId());
@@ -706,7 +706,7 @@ HWTEST_F(WindowNodeContainerTest, IsDockSliceInExitSplitModeArea, Function | Sma
  * @tc.desc: exit split mode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeContainerTest, ExitSplitMode, Function | SmallTest | Level2)
+HWTEST_F(WindowNodeContainerTest, ExitSplitMode, TestSize.Level1)
 {
     sptr<WindowNodeContainer> container = new WindowNodeContainer(defaultDisplay_->GetDisplayInfo(),
         defaultDisplay_->GetScreenId());
@@ -720,7 +720,7 @@ HWTEST_F(WindowNodeContainerTest, ExitSplitMode, Function | SmallTest | Level2)
  * @tc.desc: minimize main window
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeContainerTest, MinimizeOldestAppWindow01, Function | SmallTest | Level2)
+HWTEST_F(WindowNodeContainerTest, MinimizeOldestAppWindow01, TestSize.Level1)
 {
     sptr<WindowNodeContainer> container = new WindowNodeContainer(defaultDisplay_->GetDisplayInfo(),
         defaultDisplay_->GetScreenId());
@@ -742,7 +742,7 @@ HWTEST_F(WindowNodeContainerTest, MinimizeOldestAppWindow01, Function | SmallTes
  * @tc.desc: minimize above main window
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeContainerTest, MinimizeOldestAppWindow02, Function | SmallTest | Level2)
+HWTEST_F(WindowNodeContainerTest, MinimizeOldestAppWindow02, TestSize.Level1)
 {
     sptr<WindowNodeContainer> container = new WindowNodeContainer(defaultDisplay_->GetDisplayInfo(),
         defaultDisplay_->GetScreenId());
@@ -764,7 +764,7 @@ HWTEST_F(WindowNodeContainerTest, MinimizeOldestAppWindow02, Function | SmallTes
  * @tc.desc: toggle shown state for status bar
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeContainerTest, ToggleShownStateForAllAppWindows01, Function | SmallTest | Level2)
+HWTEST_F(WindowNodeContainerTest, ToggleShownStateForAllAppWindows01, TestSize.Level1)
 {
     sptr<WindowNodeContainer> container = new WindowNodeContainer(defaultDisplay_->GetDisplayInfo(),
         defaultDisplay_->GetScreenId());
@@ -786,7 +786,7 @@ HWTEST_F(WindowNodeContainerTest, ToggleShownStateForAllAppWindows01, Function |
  * @tc.desc: toggle shown state for launcher recent
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeContainerTest, ToggleShownStateForAllAppWindows02, Function | SmallTest | Level2)
+HWTEST_F(WindowNodeContainerTest, ToggleShownStateForAllAppWindows02, TestSize.Level1)
 {
     sptr<WindowNodeContainer> container = new WindowNodeContainer(defaultDisplay_->GetDisplayInfo(),
         defaultDisplay_->GetScreenId());
@@ -808,7 +808,7 @@ HWTEST_F(WindowNodeContainerTest, ToggleShownStateForAllAppWindows02, Function |
  * @tc.desc: set main window mode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeContainerTest, SetWindowMode01, Function | SmallTest | Level2)
+HWTEST_F(WindowNodeContainerTest, SetWindowMode01, TestSize.Level1)
 {
     sptr<WindowNodeContainer> container = new WindowNodeContainer(defaultDisplay_->GetDisplayInfo(),
         defaultDisplay_->GetScreenId());
@@ -832,7 +832,7 @@ HWTEST_F(WindowNodeContainerTest, SetWindowMode01, Function | SmallTest | Level2
  * @tc.desc: set main window mode with show when locked
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeContainerTest, SetWindowMode02, Function | SmallTest | Level2)
+HWTEST_F(WindowNodeContainerTest, SetWindowMode02, TestSize.Level1)
 {
     sptr<WindowNodeContainer> container = new WindowNodeContainer(defaultDisplay_->GetDisplayInfo(),
         defaultDisplay_->GetScreenId());
@@ -854,7 +854,7 @@ HWTEST_F(WindowNodeContainerTest, SetWindowMode02, Function | SmallTest | Level2
  * @tc.desc: remove single user window node
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeContainerTest, RemoveSingleUserWindowNodes, Function | SmallTest | Level2)
+HWTEST_F(WindowNodeContainerTest, RemoveSingleUserWindowNodes, TestSize.Level1)
 {
     sptr<WindowNodeContainer> container = new WindowNodeContainer(defaultDisplay_->GetDisplayInfo(),
         defaultDisplay_->GetScreenId());
@@ -875,7 +875,7 @@ HWTEST_F(WindowNodeContainerTest, RemoveSingleUserWindowNodes, Function | SmallT
  * @tc.desc: take window pair snapshot
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeContainerTest, TakeWindowPairSnapshot, Function | SmallTest | Level2)
+HWTEST_F(WindowNodeContainerTest, TakeWindowPairSnapshot, TestSize.Level1)
 {
     sptr<WindowNodeContainer> container = new WindowNodeContainer(defaultDisplay_->GetDisplayInfo(),
         defaultDisplay_->GetScreenId());
@@ -898,7 +898,7 @@ HWTEST_F(WindowNodeContainerTest, TakeWindowPairSnapshot, Function | SmallTest |
  * @tc.desc: clear vector cache completely, swap with empty vector
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeContainerTest, Destroy, Function | SmallTest | Level2)
+HWTEST_F(WindowNodeContainerTest, Destroy, TestSize.Level1)
 {
     ASSERT_EQ(0, container_->Destroy().size());
 }
@@ -908,7 +908,7 @@ HWTEST_F(WindowNodeContainerTest, Destroy, Function | SmallTest | Level2)
  * @tc.desc: update private window count
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeContainerTest, UpdatePrivateStateAndNotify, Function | SmallTest | Level2)
+HWTEST_F(WindowNodeContainerTest, UpdatePrivateStateAndNotify, TestSize.Level1)
 {
     container_->belowAppWindowNode_->children_.clear();
     container_->appWindowNode_->children_.clear();
@@ -934,7 +934,7 @@ HWTEST_F(WindowNodeContainerTest, UpdatePrivateStateAndNotify, Function | SmallT
  * @tc.desc: check function MinimizeOldestMainFloatingWindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeContainerTest, MinimizeOldestMainFloatingWindow, Function | SmallTest | Level2)
+HWTEST_F(WindowNodeContainerTest, MinimizeOldestMainFloatingWindow, TestSize.Level1)
 {
     sptr<WindowNodeContainer> container = new WindowNodeContainer(defaultDisplay_->GetDisplayInfo(),
         defaultDisplay_->GetScreenId());
@@ -997,7 +997,7 @@ HWTEST_F(WindowNodeContainerTest, MinimizeOldestMainFloatingWindow, Function | S
  * @tc.desc: check GetMainFloatingWindowCount
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeContainerTest, GetMainFloatingWindowCount, Function | SmallTest | Level2)
+HWTEST_F(WindowNodeContainerTest, GetMainFloatingWindowCount, TestSize.Level1)
 {
     sptr<WindowNodeContainer> container = new WindowNodeContainer(defaultDisplay_->GetDisplayInfo(),
         defaultDisplay_->GetScreenId());
@@ -1037,7 +1037,7 @@ HWTEST_F(WindowNodeContainerTest, GetMainFloatingWindowCount, Function | SmallTe
  * @tc.desc: check function ResetWindowZOrderPriorityWhenSetMode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeContainerTest, ResetWindowZOrderPriorityWhenSetMode, Function | SmallTest | Level2)
+HWTEST_F(WindowNodeContainerTest, ResetWindowZOrderPriorityWhenSetMode, TestSize.Level1)
 {
     sptr<WindowNodeContainer> container = new WindowNodeContainer(defaultDisplay_->GetDisplayInfo(),
         defaultDisplay_->GetScreenId());
@@ -1092,7 +1092,7 @@ HWTEST_F(WindowNodeContainerTest, ResetWindowZOrderPriorityWhenSetMode, Function
  * @tc.desc: check function ResetMainFloatingWindowPriorityIfNeeded
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeContainerTest, ResetMainFloatingWindowPriorityIfNeeded, Function | SmallTest | Level2)
+HWTEST_F(WindowNodeContainerTest, ResetMainFloatingWindowPriorityIfNeeded, TestSize.Level1)
 {
     sptr<WindowNodeContainer> container = new WindowNodeContainer(defaultDisplay_->GetDisplayInfo(),
         defaultDisplay_->GetScreenId());
@@ -1139,7 +1139,7 @@ HWTEST_F(WindowNodeContainerTest, ResetMainFloatingWindowPriorityIfNeeded, Funct
  * @tc.desc: check function ResetAllMainFloatingWindowZOrder
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeContainerTest, ResetAllMainFloatingWindowZOrder, Function | SmallTest | Level2)
+HWTEST_F(WindowNodeContainerTest, ResetAllMainFloatingWindowZOrder, TestSize.Level1)
 {
     sptr<WindowNodeContainer> container = new WindowNodeContainer(defaultDisplay_->GetDisplayInfo(),
         defaultDisplay_->GetScreenId());

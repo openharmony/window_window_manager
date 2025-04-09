@@ -68,7 +68,7 @@ namespace {
  * @tc.desc: Init Scene with null abilityContext, null listener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneTest, Init01, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneTest, Init01, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<WindowOption> optionTest = new WindowOption();
@@ -85,7 +85,7 @@ HWTEST_F(WindowSceneTest, Init01, Function | SmallTest | Level2)
  * @tc.desc: Mock window Create Static Method return nullptr, init Scene with null abilityContext, null listener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneTest, Init02, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneTest, Init02, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<WindowOption> optionTest = new WindowOption();
@@ -102,7 +102,7 @@ HWTEST_F(WindowSceneTest, Init02, Function | SmallTest | Level2)
  * @tc.desc: Init Scene with abilityContext, null listener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneTest, Init03, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneTest, Init03, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<WindowOption> optionTest = new WindowOption();
@@ -118,7 +118,7 @@ HWTEST_F(WindowSceneTest, Init03, Function | SmallTest | Level2)
  * @tc.desc: Init Scene with abilityContext, null listener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneTest, Init04, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneTest, Init04, TestSize.Level1)
 {
     sptr<WindowOption> optionTest = nullptr;
     DisplayId displayId = 0;
@@ -133,7 +133,7 @@ HWTEST_F(WindowSceneTest, Init04, Function | SmallTest | Level2)
  * @tc.desc: Init Scene with abilityContext, null listener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneTest, Init05, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneTest, Init05, TestSize.Level1)
 {
     sptr<WindowOption> optionTest = new WindowOption();
     DisplayId displayId = 0;
@@ -149,7 +149,7 @@ HWTEST_F(WindowSceneTest, Init05, Function | SmallTest | Level2)
  * @tc.desc: Init Scene with abilityContext, null listener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneTest, Init06, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneTest, Init06, TestSize.Level1)
 {
     std::string identityToken = "testToken";
     sptr<WindowScene> scene = new WindowScene();
@@ -167,7 +167,7 @@ HWTEST_F(WindowSceneTest, Init06, Function | SmallTest | Level2)
  * @tc.desc: CreateWindow without windowName
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneTest, Create01, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneTest, Create01, TestSize.Level1)
 {
     sptr<WindowOption> optionTest = new WindowOption();
     sptr<WindowScene> scene = new WindowScene();
@@ -179,7 +179,7 @@ HWTEST_F(WindowSceneTest, Create01, Function | SmallTest | Level2)
  * @tc.desc: CreateWindow with windowName and without mainWindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneTest, Create02, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneTest, Create02, TestSize.Level1)
 {
     sptr<WindowOption> optionTest = new WindowOption();
     sptr<WindowScene> scene = new WindowScene();
@@ -191,7 +191,7 @@ HWTEST_F(WindowSceneTest, Create02, Function | SmallTest | Level2)
  * @tc.desc: CreateWindow with windowName and mainWindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneTest, Create03, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneTest, Create03, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<WindowOption> optionTest = new WindowOption();
@@ -204,7 +204,7 @@ HWTEST_F(WindowSceneTest, Create03, Function | SmallTest | Level2)
  * @tc.desc: Mock window Create Static Method return nullptr, createWindow with windowName and mainWindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneTest, Create04, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneTest, Create04, TestSize.Level1)
 {
     sptr<WindowOption> optionTest = new WindowOption();
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
@@ -217,7 +217,7 @@ HWTEST_F(WindowSceneTest, Create04, Function | SmallTest | Level2)
  * @tc.desc: createWindow with windowName and null option
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneTest, Create05, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneTest, Create05, TestSize.Level1)
 {
     sptr<WindowOption> optionTest = nullptr;
     ASSERT_EQ(nullptr, scene_->CreateWindow("WindowSceneTest05", optionTest));
@@ -228,7 +228,7 @@ HWTEST_F(WindowSceneTest, Create05, Function | SmallTest | Level2)
  * @tc.desc: GetMainWindow without scene init
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneTest, GetMainWindow01, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneTest, GetMainWindow01, TestSize.Level1)
 {
     sptr<WindowScene> scene = new WindowScene();
     ASSERT_EQ(nullptr, scene->GetMainWindow());
@@ -239,7 +239,7 @@ HWTEST_F(WindowSceneTest, GetMainWindow01, Function | SmallTest | Level2)
  * @tc.desc: GetMainWindow01 with nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneTest, GetMainWindow02, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneTest, GetMainWindow02, TestSize.Level1)
 {
     ASSERT_NE(nullptr, scene_->GetMainWindow());
 }
@@ -249,7 +249,7 @@ HWTEST_F(WindowSceneTest, GetMainWindow02, Function | SmallTest | Level2)
  * @tc.desc: GetSubWindow without scene init
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneTest, GetSubWindow01, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneTest, GetSubWindow01, TestSize.Level1)
 {
     sptr<WindowScene> scene = new WindowScene();
     std::vector<sptr<Window>> subWindows = scene->GetSubWindow();
@@ -261,7 +261,7 @@ HWTEST_F(WindowSceneTest, GetSubWindow01, Function | SmallTest | Level2)
  * @tc.desc: GetSubWindow without scene init
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneTest, GetSubWindow02, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneTest, GetSubWindow02, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<WindowOption> optionTest = new WindowOption();
@@ -280,7 +280,7 @@ HWTEST_F(WindowSceneTest, GetSubWindow02, Function | SmallTest | Level2)
  * @tc.desc: OnNewWant nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneTest, OnNewWant01, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneTest, OnNewWant01, TestSize.Level1)
 {
     sptr<WindowScene> scene = new WindowScene();
     AAFwk::Want want;
@@ -292,7 +292,7 @@ HWTEST_F(WindowSceneTest, OnNewWant01, Function | SmallTest | Level2)
  * @tc.desc: OnNewWant without scene init
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneTest, OnNewWant02, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneTest, OnNewWant02, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<WindowOption> optionTest = new WindowOption();
@@ -312,7 +312,7 @@ HWTEST_F(WindowSceneTest, OnNewWant02, Function | SmallTest | Level2)
  * @tc.type: FUNC
  * @tc.require: issueI5JQ04
  */
-HWTEST_F(WindowSceneTest, UpdateConfiguration01, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneTest, UpdateConfiguration01, TestSize.Level1)
 {
     sptr<WindowScene> scene = new WindowScene();
     std::shared_ptr<AppExecFwk::Configuration> configuration = nullptr;
@@ -326,7 +326,7 @@ HWTEST_F(WindowSceneTest, UpdateConfiguration01, Function | SmallTest | Level2)
  * @tc.desc: UpdateConfiguration without scene init
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneTest, UpdateConfiguration02, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneTest, UpdateConfiguration02, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<WindowOption> optionTest = new WindowOption();
@@ -345,7 +345,7 @@ HWTEST_F(WindowSceneTest, UpdateConfiguration02, Function | SmallTest | Level2)
  * @tc.desc: UpdateConfigurationForSpecified Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneTest, UpdateConfigurationForSpecified, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneTest, UpdateConfigurationForSpecified, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<WindowOption> optionTest = new WindowOption();
@@ -365,7 +365,7 @@ HWTEST_F(WindowSceneTest, UpdateConfigurationForSpecified, Function | SmallTest 
  * @tc.desc: GetContentInfo nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneTest, GetContentInfo01, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneTest, GetContentInfo01, TestSize.Level1)
 {
     sptr<WindowScene> scene = new WindowScene();
     ASSERT_EQ("", scene->GetContentInfo());
@@ -376,7 +376,7 @@ HWTEST_F(WindowSceneTest, GetContentInfo01, Function | SmallTest | Level2)
  * @tc.desc: GetContentInfo without scene init
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneTest, GetContentInfo02, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneTest, GetContentInfo02, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<WindowOption> optionTest = new WindowOption();
@@ -394,7 +394,7 @@ HWTEST_F(WindowSceneTest, GetContentInfo02, Function | SmallTest | Level2)
  * @tc.desc: SetSystemBarProperty nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneTest, SetSystemBarProperty01, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneTest, SetSystemBarProperty01, TestSize.Level1)
 {
     sptr<WindowScene> scene = new WindowScene();
     WindowType type = WindowType::WINDOW_TYPE_DIALOG;
@@ -407,7 +407,7 @@ HWTEST_F(WindowSceneTest, SetSystemBarProperty01, Function | SmallTest | Level2)
  * @tc.desc: SetSystemBarProperty without scene init
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneTest, SetSystemBarProperty02, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneTest, SetSystemBarProperty02, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<WindowOption> optionTest = new WindowOption();
@@ -427,7 +427,7 @@ HWTEST_F(WindowSceneTest, SetSystemBarProperty02, Function | SmallTest | Level2)
  * @tc.desc: GoForeground01 without mainWindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneTest, GoForeground01, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneTest, GoForeground01, TestSize.Level1)
 {
     sptr<WindowScene> scene = new WindowScene();
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->GoForeground());
@@ -438,7 +438,7 @@ HWTEST_F(WindowSceneTest, GoForeground01, Function | SmallTest | Level2)
  * @tc.desc: GoForeground02 without mainWindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneTest, GoForeground02, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneTest, GoForeground02, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<WindowOption> optionTest = new WindowOption();
@@ -456,7 +456,7 @@ HWTEST_F(WindowSceneTest, GoForeground02, Function | SmallTest | Level2)
  * @tc.desc: GoBackground01 without mainWindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneTest, GoBackground01, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneTest, GoBackground01, TestSize.Level1)
 {
     sptr<WindowScene> scene = new WindowScene();
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->GoBackground());
@@ -467,7 +467,7 @@ HWTEST_F(WindowSceneTest, GoBackground01, Function | SmallTest | Level2)
  * @tc.desc: GoBackground02 without mainWindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneTest, GoBackground02, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneTest, GoBackground02, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<WindowOption> optionTest = new WindowOption();
@@ -481,11 +481,39 @@ HWTEST_F(WindowSceneTest, GoBackground02, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: GoResume01
+ * @tc.desc: GoResume01 without mainWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, GoResume01, TestSize.Level1)
+{
+    sptr<WindowScene> scene = new WindowScene();
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->GoResume());
+}
+
+/**
+ * @tc.name: GoResume02
+ * @tc.desc: GoResume02 with mainWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, GoResume02, TestSize.Level1)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    sptr<WindowOption> optionTest = new WindowOption();
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _)).Times(1).WillOnce(Return(new WindowImpl(optionTest)));
+    DisplayId displayId = 0;
+    sptr<IWindowLifeCycle> listener = nullptr;
+    sptr<WindowScene> scene = new WindowScene();
+    ASSERT_EQ(WMError::WM_OK, scene->Init(displayId, abilityContext_, listener));
+    ASSERT_EQ(WMError::WM_OK, scene->GoResume());
+}
+
+/**
  * @tc.name: RequestFocus01
  * @tc.desc: RequestFocus01 without mainWindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneTest, RequestFocus01, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneTest, RequestFocus01, TestSize.Level1)
 {
     sptr<WindowScene> scene = new WindowScene();
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->RequestFocus());
@@ -496,7 +524,7 @@ HWTEST_F(WindowSceneTest, RequestFocus01, Function | SmallTest | Level2)
  * @tc.desc: RequestFocus02 without mainWindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneTest, RequestFocus02, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneTest, RequestFocus02, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<WindowOption> optionTest = new WindowOption();
@@ -514,7 +542,7 @@ HWTEST_F(WindowSceneTest, RequestFocus02, Function | SmallTest | Level2)
  * @tc.type: FUNC
  * @tc.require: issueI5JQ04
  */
-HWTEST_F(WindowSceneTest, NotifyMemoryLevel01, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneTest, NotifyMemoryLevel01, TestSize.Level1)
 {
     sptr<WindowScene> scene = new WindowScene();
     int32_t level = 0;
@@ -527,7 +555,7 @@ HWTEST_F(WindowSceneTest, NotifyMemoryLevel01, Function | SmallTest | Level2)
  * @tc.type: FUNC
  * @tc.require: issueI5JQ04
  */
-HWTEST_F(WindowSceneTest, NotifyMemoryLevel02, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneTest, NotifyMemoryLevel02, TestSize.Level1)
 {
     DisplayId displayId = 0;
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
@@ -545,7 +573,7 @@ HWTEST_F(WindowSceneTest, NotifyMemoryLevel02, Function | SmallTest | Level2)
  * @tc.type: FUNC
  * @tc.require: issueI5JQ04
  */
-HWTEST_F(WindowSceneTest, NotifyMemoryLevel03, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneTest, NotifyMemoryLevel03, TestSize.Level1)
 {
     DisplayId displayId = 0;
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();

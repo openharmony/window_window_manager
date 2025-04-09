@@ -60,7 +60,7 @@ namespace {
  * @tc.desc: test function : SuspendBegin
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayPowerControllerTest, SuspendBegin, Function | SmallTest | Level1)
+HWTEST_F(DisplayPowerControllerTest, SuspendBegin, TestSize.Level1)
 {
     dpc_ = new DisplayPowerController(mutex_, [](DisplayId, sptr<DisplayInfo>,
         const std::map<DisplayId, sptr<DisplayInfo>>&, DisplayStateChangeType) {});
@@ -75,7 +75,7 @@ HWTEST_F(DisplayPowerControllerTest, SuspendBegin, Function | SmallTest | Level1
  * @tc.desc: test function : SetDisplayState
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayPowerControllerTest, SetDisplayState01, Function | SmallTest | Level1)
+HWTEST_F(DisplayPowerControllerTest, SetDisplayState01, TestSize.Level1)
 {
     dpc_ = new DisplayPowerController(mutex_, [](DisplayId, sptr<DisplayInfo>,
         const std::map<DisplayId, sptr<DisplayInfo>>&, DisplayStateChangeType) {});
@@ -90,7 +90,7 @@ HWTEST_F(DisplayPowerControllerTest, SetDisplayState01, Function | SmallTest | L
  * @tc.desc: test function : SetDisplayState
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayPowerControllerTest, SetDisplayState02, Function | SmallTest | Level1)
+HWTEST_F(DisplayPowerControllerTest, SetDisplayState02, TestSize.Level1)
 {
     dpc_ = new DisplayPowerController(mutex_, [](DisplayId, sptr<DisplayInfo>,
         const std::map<DisplayId, sptr<DisplayInfo>>&, DisplayStateChangeType) {});
@@ -105,7 +105,7 @@ HWTEST_F(DisplayPowerControllerTest, SetDisplayState02, Function | SmallTest | L
  * @tc.desc: test function : SetDisplayState
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayPowerControllerTest, SetDisplayState03, Function | SmallTest | Level1)
+HWTEST_F(DisplayPowerControllerTest, SetDisplayState03, TestSize.Level1)
 {
     dpc_ = new DisplayPowerController(mutex_, [](DisplayId, sptr<DisplayInfo>,
         const std::map<DisplayId, sptr<DisplayInfo>>&, DisplayStateChangeType) {});
@@ -120,7 +120,7 @@ HWTEST_F(DisplayPowerControllerTest, SetDisplayState03, Function | SmallTest | L
  * @tc.desc: test function : GetDisplayState
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayPowerControllerTest, GetDisplayState, Function | SmallTest | Level1)
+HWTEST_F(DisplayPowerControllerTest, GetDisplayState, TestSize.Level1)
 {
     dpc_ = new DisplayPowerController(mutex_, [](DisplayId, sptr<DisplayInfo>,
         const std::map<DisplayId, sptr<DisplayInfo>>&, DisplayStateChangeType) {});
@@ -135,7 +135,7 @@ HWTEST_F(DisplayPowerControllerTest, GetDisplayState, Function | SmallTest | Lev
  * @tc.desc: test function : NotifyDisplayEvent
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayPowerControllerTest, NotifyDisplayEvent01, Function | SmallTest | Level1)
+HWTEST_F(DisplayPowerControllerTest, NotifyDisplayEvent01, TestSize.Level1)
 {
     dpc_ = new DisplayPowerController(mutex_, [](DisplayId, sptr<DisplayInfo>,
         const std::map<DisplayId, sptr<DisplayInfo>>&, DisplayStateChangeType) {});
@@ -150,7 +150,7 @@ HWTEST_F(DisplayPowerControllerTest, NotifyDisplayEvent01, Function | SmallTest 
  * @tc.desc: test function : NotifyDisplayEvent
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayPowerControllerTest, NotifyDisplayEvent02, Function | SmallTest | Level1)
+HWTEST_F(DisplayPowerControllerTest, NotifyDisplayEvent02, TestSize.Level1)
 {
     dpc_ = new DisplayPowerController(mutex_, [](DisplayId, sptr<DisplayInfo>,
         const std::map<DisplayId, sptr<DisplayInfo>>&, DisplayStateChangeType) {});

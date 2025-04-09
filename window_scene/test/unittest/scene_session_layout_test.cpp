@@ -67,7 +67,7 @@ namespace {
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLayoutTest, UpdateRect01, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLayoutTest, UpdateRect01, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "UpdateRect01";
@@ -91,7 +91,7 @@ HWTEST_F(SceneSessionLayoutTest, UpdateRect01, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLayoutTest, UpdateRect02, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLayoutTest, UpdateRect02, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "UpdateRect02";
@@ -126,7 +126,7 @@ HWTEST_F(SceneSessionLayoutTest, UpdateRect02, Function | SmallTest | Level2)
  * @tc.desc: UpdateRect
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLayoutTest, UpdateRect03, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLayoutTest, UpdateRect03, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "UpdateRect03";
@@ -153,7 +153,7 @@ HWTEST_F(SceneSessionLayoutTest, UpdateRect03, Function | SmallTest | Level2)
  * @tc.desc: NotifyClientToUpdateRect
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLayoutTest, NotifyClientToUpdateRect01, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLayoutTest, NotifyClientToUpdateRect01, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "NotifyClientToUpdateRect01";
@@ -172,7 +172,7 @@ HWTEST_F(SceneSessionLayoutTest, NotifyClientToUpdateRect01, Function | SmallTes
  * @tc.desc: UpdateRectInner
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLayoutTest, UpdateRectInner01, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLayoutTest, UpdateRectInner01, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "UpdateRectInner01";
@@ -196,7 +196,7 @@ HWTEST_F(SceneSessionLayoutTest, UpdateRectInner01, Function | SmallTest | Level
  * @tc.desc: NotifyClientToUpdateRect function01
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLayoutTest, NotifyClientToUpdateRect, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLayoutTest, NotifyClientToUpdateRect, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "NotifyClientToUpdateRect";
@@ -226,7 +226,7 @@ HWTEST_F(SceneSessionLayoutTest, NotifyClientToUpdateRect, Function | SmallTest 
  * @tc.desc: CheckAspectRatioValid function01
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLayoutTest, CheckAspectRatioValid, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLayoutTest, CheckAspectRatioValid, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "CheckAspectRatioValid";
@@ -277,7 +277,7 @@ HWTEST_F(SceneSessionLayoutTest, CheckAspectRatioValid, Function | SmallTest | L
  * @tc.desc: CheckAspectRatioValid
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLayoutTest, CheckAspectRatioValid02, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLayoutTest, CheckAspectRatioValid02, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "CheckAspectRatioValid02";
@@ -317,7 +317,7 @@ HWTEST_F(SceneSessionLayoutTest, CheckAspectRatioValid02, Function | SmallTest |
  * @tc.desc: NotifyClientToUpdateRectTask function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLayoutTest, NotifyClientToUpdateRectTask, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLayoutTest, NotifyClientToUpdateRectTask, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "NotifyClientToUpdateRectTask";
@@ -376,7 +376,7 @@ HWTEST_F(SceneSessionLayoutTest, NotifyClientToUpdateRectTask, Function | SmallT
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLayoutTest, HandleActionUpdateWindowLimits, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLayoutTest, HandleActionUpdateWindowLimits, TestSize.Level1)
 {
     SessionInfo info;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
@@ -392,7 +392,7 @@ HWTEST_F(SceneSessionLayoutTest, HandleActionUpdateWindowLimits, Function | Smal
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLayoutTest, SetAspectRatio2, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLayoutTest, SetAspectRatio2, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "SetAspectRatio2";
@@ -424,7 +424,7 @@ HWTEST_F(SceneSessionLayoutTest, SetAspectRatio2, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLayoutTest, SetAspectRatio3, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLayoutTest, SetAspectRatio3, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "SetAspectRatio3";
@@ -450,7 +450,7 @@ HWTEST_F(SceneSessionLayoutTest, SetAspectRatio3, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLayoutTest, SetAspectRatio4, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLayoutTest, SetAspectRatio4, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "SetAspectRatio4";
@@ -475,7 +475,7 @@ HWTEST_F(SceneSessionLayoutTest, SetAspectRatio4, Function | SmallTest | Level2)
  * @tc.desc: test for aspectRatio NearZero
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLayoutTest, SetAspectRatio5, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLayoutTest, SetAspectRatio5, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "SetAspectRatio5";
@@ -500,7 +500,7 @@ HWTEST_F(SceneSessionLayoutTest, SetAspectRatio5, Function | SmallTest | Level2)
  * @tc.desc: test for aspectRatio is smaller than minWidth/maxHeight
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLayoutTest, SetAspectRatio6, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLayoutTest, SetAspectRatio6, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "SetAspectRatio6";
@@ -527,7 +527,7 @@ HWTEST_F(SceneSessionLayoutTest, SetAspectRatio6, Function | SmallTest | Level2)
  * @tc.desc: test for aspectRatio is smaller than minWidth/maxHeight
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLayoutTest, SetAspectRatio7, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLayoutTest, SetAspectRatio7, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "SetAspectRatio7";
@@ -554,7 +554,7 @@ HWTEST_F(SceneSessionLayoutTest, SetAspectRatio7, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLayoutTest, SetAspectRatio8, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLayoutTest, SetAspectRatio8, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "SetAspectRatio8";
@@ -579,7 +579,7 @@ HWTEST_F(SceneSessionLayoutTest, SetAspectRatio8, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLayoutTest, SetAspectRatio9, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLayoutTest, SetAspectRatio9, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "SetAspectRatio9";
@@ -604,7 +604,7 @@ HWTEST_F(SceneSessionLayoutTest, SetAspectRatio9, Function | SmallTest | Level2)
  * @tc.desc: SaveAspectRatio
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLayoutTest, SaveAspectRatio, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLayoutTest, SaveAspectRatio, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "Background01";
@@ -625,7 +625,7 @@ HWTEST_F(SceneSessionLayoutTest, SaveAspectRatio, Function | SmallTest | Level2)
  * @tc.desc: AdjustRectByAspectRatio
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLayoutTest, AdjustRectByAspectRatio, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLayoutTest, AdjustRectByAspectRatio, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "Background01";
@@ -644,7 +644,7 @@ HWTEST_F(SceneSessionLayoutTest, AdjustRectByAspectRatio, Function | SmallTest |
  * @tc.desc: ActivateDragBySystem function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLayoutTest, ActivateDragBySystem, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLayoutTest, ActivateDragBySystem, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "ActivateDragBySystem";
@@ -666,7 +666,7 @@ HWTEST_F(SceneSessionLayoutTest, ActivateDragBySystem, Function | SmallTest | Le
  * @tc.desc: CheckDragActivatedSettings
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLayoutTest, CheckDragActivatedSettings, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLayoutTest, CheckDragActivatedSettings, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "CheckDragActivatedSettings";
@@ -693,7 +693,7 @@ HWTEST_F(SceneSessionLayoutTest, CheckDragActivatedSettings, Function | SmallTes
  * @tc.desc: NotifySingleHandTransformChange
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLayoutTest, NotifySingleHandTransformChange, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLayoutTest, NotifySingleHandTransformChange, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "NotifySingleHandTransformChange";
@@ -720,7 +720,7 @@ HWTEST_F(SceneSessionLayoutTest, NotifySingleHandTransformChange, Function | Sma
  * @tc.desc: GetSessionGlobalRectWithSingleHandScale
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLayoutTest, GetSessionGlobalRectWithSingleHandScale, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLayoutTest, GetSessionGlobalRectWithSingleHandScale, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "GetSessionGlobalRectWithSingleHandScale";
@@ -741,6 +741,211 @@ HWTEST_F(SceneSessionLayoutTest, GetSessionGlobalRectWithSingleHandScale, Functi
     sceneSession->SetSingleHandTransform(testTransform);
     ASSERT_NE(sceneSession->GetSessionGlobalRect().posX_,
               sceneSession->GetSessionGlobalRectWithSingleHandScale().posX_);
+}
+
+/**
+ * @tc.name: IsNeedConvertToRelativeRect
+ * @tc.desc: IsNeedConvertToRelativeRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLayoutTest, IsNeedConvertToRelativeRect, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsNeedConvertToRelativeRect";
+    info.bundleName_ = "IsNeedConvertToRelativeRect";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->moveDragController_ =
+        sptr<MoveDragController>::MakeSptr(sceneSession->GetPersistentId(), sceneSession->GetWindowType());
+    info.abilityName_ = "IsNeedConvertToRelativeRect_subSession";
+    info.bundleName_ = "IsNeedConvertToRelativeRect_subSession";
+    sptr<SceneSession> subSceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    subSceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sceneSession->subSession_.emplace_back(subSceneSession);
+    subSceneSession->parentSession_ = sceneSession;
+
+    ASSERT_EQ(sceneSession->IsNeedConvertToRelativeRect(SizeChangeReason::MAXIMIZE), false);
+    ASSERT_EQ(sceneSession->IsNeedConvertToRelativeRect(SizeChangeReason::DRAG_MOVE), true);
+
+    sceneSession->moveDragController_->isStartMove_ = true;
+    sceneSession->moveDragController_->isStartDrag_ = false;
+    ASSERT_EQ(subSceneSession->IsNeedConvertToRelativeRect(SizeChangeReason::MAXIMIZE), false);
+
+    sceneSession->moveDragController_->isStartMove_ = false;
+    sceneSession->moveDragController_->isStartDrag_ = true;
+    ASSERT_EQ(subSceneSession->IsNeedConvertToRelativeRect(SizeChangeReason::MAXIMIZE), false);
+}
+
+/**
+ * @tc.name: ConvertRelativeRectToGlobal
+ * @tc.desc: ConvertRelativeRectToGlobal
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLayoutTest, ConvertRelativeRectToGlobal, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "ConvertRelativeRectToGlobal";
+    info.bundleName_ = "ConvertRelativeRectToGlobal";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    DisplayId defaultDisplayId = 0;
+    DisplayId invalidDisplayId = -1ULL;
+    WSRect relativeRect = { 500, 500, 800, 800 };
+    sceneSession->GetSessionProperty()->SetDisplayId(invalidDisplayId);
+    ASSERT_EQ(sceneSession->ConvertRelativeRectToGlobal(relativeRect, invalidDisplayId), relativeRect);
+
+    sceneSession->GetSessionProperty()->SetDisplayId(defaultDisplayId);
+    ASSERT_EQ(sceneSession->ConvertRelativeRectToGlobal(relativeRect, invalidDisplayId), relativeRect);
+    ASSERT_EQ(sceneSession->ConvertRelativeRectToGlobal(relativeRect, defaultDisplayId), relativeRect);
+}
+
+/**
+ * @tc.name: ConvertGlobalRectToRelative
+ * @tc.desc: ConvertGlobalRectToRelative
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLayoutTest, ConvertGlobalRectToRelative, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "ConvertGlobalRectToRelative";
+    info.bundleName_ = "ConvertGlobalRectToRelative";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    DisplayId defaultDisplayId = 0;
+    DisplayId invalidDisplayId = -1ULL;
+    WSRect globalRect = { 500, 500, 800, 800 };
+    sceneSession->GetSessionProperty()->SetDisplayId(invalidDisplayId);
+    ASSERT_EQ(sceneSession->ConvertGlobalRectToRelative(globalRect, invalidDisplayId), globalRect);
+
+    sceneSession->GetSessionProperty()->SetDisplayId(defaultDisplayId);
+    ASSERT_EQ(sceneSession->ConvertGlobalRectToRelative(globalRect, invalidDisplayId), globalRect);
+    ASSERT_EQ(sceneSession->ConvertGlobalRectToRelative(globalRect, defaultDisplayId), globalRect);
+}
+
+/**
+ * @tc.name: IsAnyParentSessionDragMoving
+ * @tc.desc: IsAnyParentSessionDragMoving
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLayoutTest, IsAnyParentSessionDragMoving, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsAnyParentSessionDragMoving";
+    info.bundleName_ = "IsAnyParentSessionDragMoving";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->moveDragController_ =
+        sptr<MoveDragController>::MakeSptr(sceneSession->GetPersistentId(), sceneSession->GetWindowType());
+    info.abilityName_ = "IsAnyParentSessionDragMoving_subSession";
+    info.bundleName_ = "IsAnyParentSessionDragMoving_subSession";
+    sptr<SceneSession> subSceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    subSceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+
+    subSceneSession->parentSession_ = nullptr;
+    ASSERT_EQ(subSceneSession->IsAnyParentSessionDragMoving(), false);
+    sceneSession->moveDragController_->isStartMove_ = true;
+    ASSERT_EQ(sceneSession->IsAnyParentSessionDragMoving(), true);
+
+    sceneSession->subSession_.emplace_back(subSceneSession);
+    subSceneSession->parentSession_ = sceneSession;
+    ASSERT_EQ(subSceneSession->IsAnyParentSessionDragMoving(), true);
+}
+
+/**
+ * @tc.name: IsAnyParentSessionDragZooming
+ * @tc.desc: IsAnyParentSessionDragZooming
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLayoutTest, IsAnyParentSessionDragZooming, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsAnyParentSessionDragZooming";
+    info.bundleName_ = "IsAnyParentSessionDragZooming";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->moveDragController_ =
+        sptr<MoveDragController>::MakeSptr(sceneSession->GetPersistentId(), sceneSession->GetWindowType());
+    info.abilityName_ = "IsAnyParentSessionDragZooming_subSession";
+    info.bundleName_ = "IsAnyParentSessionDragZooming_subSession";
+    sptr<SceneSession> subSceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    subSceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+
+    subSceneSession->parentSession_ = nullptr;
+    ASSERT_EQ(subSceneSession->IsAnyParentSessionDragZooming(), false);
+    sceneSession->moveDragController_->isStartDrag_ = true;
+    ASSERT_EQ(sceneSession->IsAnyParentSessionDragZooming(), true);
+
+    sceneSession->subSession_.emplace_back(subSceneSession);
+    subSceneSession->parentSession_ = sceneSession;
+    ASSERT_EQ(subSceneSession->IsAnyParentSessionDragZooming(), true);
+}
+
+/**
+ * @tc.name: HandleSubSessionSurfaceNode
+ * @tc.desc: HandleSubSessionSurfaceNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLayoutTest, HandleSubSessionSurfaceNode, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "HandleSubSessionSurfaceNode";
+    info.bundleName_ = "HandleSubSessionSurfaceNode";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->moveDragController_ =
+        sptr<MoveDragController>::MakeSptr(sceneSession->GetPersistentId(), sceneSession->GetWindowType());
+    info.abilityName_ = "HandleSubSessionSurfaceNode_subSession";
+    info.bundleName_ = "HandleSubSessionSurfaceNode_subSession";
+    sptr<SubSession> subSceneSession = sptr<SubSession>::MakeSptr(info, nullptr);
+    subSceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sceneSession->subSession_.emplace_back(subSceneSession);
+    subSceneSession->parentSession_ = sceneSession;
+    sceneSession->displayIdSetDuringMoveTo_.insert(888);
+    subSceneSession->displayIdSetDuringMoveTo_.insert(888);
+
+    subSceneSession->NotifyFollowParentMultiScreenPolicy(false);
+    sceneSession->HandleSubSessionSurfaceNode(false, 0);
+    ASSERT_NE(0, subSceneSession->displayIdSetDuringMoveTo_.size());
+    subSceneSession->NotifyFollowParentMultiScreenPolicy(true);
+    sceneSession->HandleSubSessionSurfaceNode(true, 0);
+    ASSERT_NE(0, subSceneSession->displayIdSetDuringMoveTo_.size());
+    sceneSession->HandleSubSessionSurfaceNode(false, 0);
+    ASSERT_EQ(0, subSceneSession->displayIdSetDuringMoveTo_.size());
+}
+
+/**
+ * @tc.name: HandleSubSessionCrossNode
+ * @tc.desc: HandleSubSessionCrossNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLayoutTest, HandleSubSessionCrossNode, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "HandleSubSessionCrossNode";
+    info.bundleName_ = "HandleSubSessionCrossNode";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    info.abilityName_ = "HandleSubSessionCrossNode_subSession";
+    info.bundleName_ = "HandleSubSessionCrossNode_subSession";
+    sptr<SceneSession> subSceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    subSceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+
+    sceneSession->SetDragStart(true);
+    sceneSession->HandleSubSessionCrossNode(SizeChangeReason::UNDEFINED);
+    ASSERT_EQ(sceneSession->IsDragStart(), true);
+    sceneSession->HandleSubSessionCrossNode(SizeChangeReason::DRAG);
+    ASSERT_EQ(sceneSession->IsDragStart(), true);
+    sceneSession->HandleSubSessionCrossNode(SizeChangeReason::DRAG_END);
+    ASSERT_EQ(sceneSession->IsDragStart(), false);
+
+    sceneSession->HandleSubSessionCrossNode(SizeChangeReason::DRAG);
+    ASSERT_EQ(sceneSession->IsDragStart(), true);
+    sceneSession->subSession_.emplace_back(subSceneSession);
+    subSceneSession->parentSession_ = sceneSession;
+    sceneSession->HandleSubSessionCrossNode(SizeChangeReason::DRAG_END);
+    ASSERT_EQ(sceneSession->IsDragStart(), false);
+    sceneSession->HandleSubSessionCrossNode(SizeChangeReason::DRAG_MOVE);
+    ASSERT_EQ(sceneSession->IsDragStart(), true);
 }
 } // namespace
 } // Rosen

@@ -189,6 +189,16 @@ bool WindowOption::IsKeepScreenOn() const
     return keepScreenOn_;
 }
 
+void WindowOption::SetViewKeepScreenOn(bool keepScreenOn)
+{
+    viewKeepScreenOn_ = keepScreenOn;
+}
+
+bool WindowOption::IsViewKeepScreenOn() const
+{
+    return viewKeepScreenOn_;
+}
+
 void WindowOption::SetTurnScreenOn(bool turnScreenOn)
 {
     turnScreenOn_ = turnScreenOn;
@@ -361,6 +371,16 @@ void WindowOption::SetWindowTopmost(bool isTopmost)
 bool WindowOption::GetWindowTopmost() const
 {
     return isTopmost_;
+}
+
+void WindowOption::SetSubWindowZLevel(int32_t zLevel)
+{
+    zLevel_ = zLevel;
+}
+
+int32_t WindowOption::GetSubWindowZLevel() const
+{
+    return zLevel_;
 }
 
 void WindowOption::SetIsSystemKeyboard(bool isSystemKeyboard)

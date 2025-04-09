@@ -953,7 +953,7 @@ WMError SceneSessionManagerLiteProxy::CheckUIExtensionCreation(int32_t windowId,
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
-    TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: errcode %{public}u", errCode);
+    TLOGD(WmsLogTag::WMS_UIEXT, "UIExtOnLock: errcode %{public}u", errCode);
     return static_cast<WMError>(errCode);
 }
 
@@ -1057,8 +1057,8 @@ WMError SceneSessionManagerLiteProxy::GetCallingWindowInfo(CallingWindowInfo& ca
         TLOGE(WmsLogTag::WMS_KEYBOARD, "WriteInterfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (!data.WriteInt32(callingWindowInfo.windowId_) || !data.WriteInt32(callingWindowInfo.userId_)) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "persistentId and userId write failed, id: %{public}d, userId: %{public}d",
+    if (!data.WriteParcelable(&callingWindowInfo)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Write callingWindowInfo failed, id: %{public}d, userId: %{public}d",
             callingWindowInfo.windowId_, callingWindowInfo.userId_);
         return WMError::WM_ERROR_IPC_FAILED;
     }
@@ -1074,10 +1074,12 @@ WMError SceneSessionManagerLiteProxy::GetCallingWindowInfo(CallingWindowInfo& ca
     }
     auto ret = static_cast<WMError>(reply.ReadInt32());
     if (ret == WMError::WM_OK) {
-        callingWindowInfo.windowId_ = reply.ReadInt32();
-        callingWindowInfo.callingPid_ = reply.ReadInt32();
-        callingWindowInfo.displayId_ = reply.ReadUint64();
-        callingWindowInfo.userId_ = reply.ReadInt32();
+        sptr<CallingWindowInfo> info = reply.ReadParcelable<CallingWindowInfo>();
+        if (info == nullptr) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "Read callingWindowInfo failed");
+            return WMError::WM_ERROR_IPC_FAILED;
+        }
+        callingWindowInfo = *info;
     }
     return ret;
 }
@@ -1454,7 +1456,7 @@ WSError SceneSessionManagerLiteProxy::NotifyAppUseControlList(
 
     for (const auto& control : controlList) {
         if (!data.WriteString(control.bundleName_) || !data.WriteInt32(control.appIndex_) ||
-            !data.WriteBool(control.isNeedControl_)) {
+            !data.WriteBool(control.isNeedControl_) || !data.WriteBool(control.isControlRecentOnly_)) {
             TLOGE(WmsLogTag::WMS_LIFE, "Write controlList failed");
             return WSError::WS_ERROR_INVALID_PARAM;
         }
@@ -1610,7 +1612,7 @@ WMError SceneSessionManagerLiteProxy::RegisterSessionLifecycleListenerByIds(
     TLOGD(WmsLogTag::WMS_LIFE, "in");
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::WMS_LIFE, "Write interfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
@@ -1652,7 +1654,7 @@ WMError SceneSessionManagerLiteProxy::RegisterSessionLifecycleListenerByBundles(
     TLOGD(WmsLogTag::WMS_LIFE, "in");
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::WMS_LIFE, "Write interfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
@@ -1694,7 +1696,7 @@ WMError SceneSessionManagerLiteProxy::UnregisterSessionLifecycleListener(
     TLOGD(WmsLogTag::WMS_LIFE, "in");
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::WMS_LIFE, "Write interfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
@@ -1724,5 +1726,52 @@ WMError SceneSessionManagerLiteProxy::UnregisterSessionLifecycleListener(
         return WMError::WM_ERROR_IPC_FAILED;
     }
     return static_cast<WMError>(ret);
+}
+
+WMError SceneSessionManagerLiteProxy::ListWindowInfo(const WindowInfoOption& windowInfoOption,
+    std::vector<sptr<WindowInfo>>& infos)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write interfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint8(static_cast<WindowInfoFilterOptionDataType>(windowInfoOption.windowInfoFilterOption))) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write windowInfoFilterOption failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint8(static_cast<WindowInfoTypeOptionDataType>(windowInfoOption.windowInfoTypeOption))) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write windowInfoTypeOption failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint64(windowInfoOption.displayId)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write displayId failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(windowInfoOption.windowId)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write windowId failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(
+        SceneSessionManagerLiteMessage::TRANS_ID_LIST_WINDOW_INFO), data, reply, option) != ERR_NONE) {
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!MarshallingHelper::UnmarshallingVectorParcelableObj<WindowInfo>(reply, infos)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read window info failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    int32_t errCode = 0;
+    if (!reply.ReadInt32(errCode)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read errcode failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(errCode);
 }
 } // namespace OHOS::Rosen

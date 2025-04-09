@@ -80,6 +80,7 @@ public:
     virtual DMError GetExpandAvailableArea(DisplayId displayId, DMRect& area);
     virtual DMError GetAvailableArea(DisplayId displayId, DMRect& area);
     virtual sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId);
+    virtual sptr<CutoutInfo> GetCutoutInfoWithRotation(DisplayId displayId, int32_t rotation);
     virtual DMError AddSurfaceNodeToDisplay(DisplayId displayId, std::shared_ptr<class RSSurfaceNode>& surfaceNode);
     virtual DMError RemoveSurfaceNodeFromDisplay(DisplayId displayId,
         std::shared_ptr<class RSSurfaceNode>& surfaceNode);
@@ -96,11 +97,12 @@ public:
     virtual sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
     virtual void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList,
         std::vector<uint64_t> surfaceIdList = {});
+    virtual void SetVirtualDisplayMuteFlag(ScreenId screenId, bool muteFlag);
     virtual void DisablePowerOffRenderControl(ScreenId screenId);
     virtual DMError ProxyForFreeze(const std::set<int32_t>& pidList, bool isProxy);
     virtual DMError ResetAllFreezeStatus();
     virtual std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution();
-    virtual std::string GetDisplayCapability();
+    virtual DMError GetDisplayCapability(std::string& capabilitInfo);
     virtual DMError SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid,
         std::vector<uint64_t>& windowIdList);
     virtual std::shared_ptr<Media::PixelMap> GetScreenCapture(const CaptureOption& captureOption,
@@ -120,6 +122,8 @@ public:
         const sptr<IDisplayManagerAgent>& displayManagerAgent);
     virtual DMError DestroyVirtualScreen(ScreenId screenId);
     virtual DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface);
+    virtual DMError AddVirtualScreenBlockList(const std::vector<int32_t>& persistentIds);
+    virtual DMError RemoveVirtualScreenBlockList(const std::vector<int32_t>& persistentIds);
     virtual DMError SetScreenPrivacyMaskImage(ScreenId screenId,
         const std::shared_ptr<Media::PixelMap>& privacyMaskImg);
     virtual DMError SetVirtualMirrorScreenCanvasRotation(ScreenId screenId, bool canvasRotation);

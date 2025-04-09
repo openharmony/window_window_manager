@@ -77,7 +77,7 @@ public:
     bool IsContentSizeChanged(float width, float height, float posX, float posY);
     void DoActionEvent(const std::string& actionName, int32_t status);
     void DoControlEvent(PiPControlType controlType, PiPControlStatus status);
-    void PipSizeChange(uint32_t width, uint32_t height, double scale);
+    void PipSizeChange(double width, double height, double scale);
     void PreRestorePictureInPicture();
     void RestorePictureInPictureWindow();
     void PrepareSource();
@@ -87,17 +87,15 @@ public:
     WMError RegisterPiPActionObserver(const sptr<IPiPActionObserver>& listener);
     WMError RegisterPiPControlObserver(const sptr<IPiPControlObserver>& listener);
     WMError RegisterPiPWindowSize(const sptr<IPiPWindowSize>& listener);
-    WMError RegisterPipContentListenerWithType(const std::string&,
-        std::shared_ptr<NativeReference> updateNodeCallbackRef);
+    WMError RegisterPiPTypeNodeChange(const sptr<IPiPTypeNodeObserver>& listener);
     WMError UnregisterPiPLifecycle(const sptr<IPiPLifeCycle>& listener);
     WMError UnregisterPiPActionObserver(const sptr<IPiPActionObserver>& listener);
     WMError UnregisterPiPControlObserver(const sptr<IPiPControlObserver>& listener);
     WMError UnregisterPiPWindowSize(const sptr<IPiPWindowSize>& listener);
-    WMError UnRegisterPipContentListenerWithType(const std::string&);
+    WMError UnRegisterPiPTypeNodeChange(const sptr<IPiPTypeNodeObserver>& listener);
     sptr<IPiPLifeCycle> GetPictureInPictureLifecycle() const;
     sptr<IPiPActionObserver> GetPictureInPictureActionObserver() const;
     sptr<IPiPControlObserver> GetPictureInPictureControlObserver() const;
-    std::shared_ptr<NativeReference> GetPipContentCallbackRef(const std::string&);
     WMError SetXComponentController(std::shared_ptr<XComponentController> xComponentController);
     PiPWindowState GetControllerState();
     std::string GetPiPNavigationId();
@@ -113,25 +111,25 @@ private:
     };
 
 private:
-    uint32_t GetPipPriority(uint32_t pipTemplateType);
     WMError CreatePictureInPictureWindow(StartPipType startType);
     WMError ShowPictureInPictureWindow(StartPipType startType);
     WMError StartPictureInPictureInner(StartPipType startType);
     WMError StopPictureInPictureInner(StopPipType stopType, bool withAnim);
     void UpdateWinRectByComponent();
+    void SetUIContent() const;
     void UpdatePiPSourceRect() const;
     void ResetExtController();
     bool IsPullPiPAndHandleNavigation();
     template<typename T> WMError RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
     template<typename T> WMError UnregisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
     void NotifyNodeUpdate(napi_ref nodeRef);
-    void NotifyStateChangeInner(napi_env env, PiPState state);
     wptr<PictureInPictureController> weakRef_ = nullptr;
     sptr<PipOption> pipOption_ = nullptr;
     std::vector<sptr<IPiPLifeCycle>> pipLifeCycleListeners_;
     std::vector<sptr<IPiPActionObserver>> pipActionObservers_;
     std::vector<sptr<IPiPControlObserver>> pipControlObservers_;
     std::vector<sptr<IPiPWindowSize>> pipWindowSizeListeners_;
+    std::vector<sptr<IPiPTypeNodeObserver>> pipTypeNodeObserver_;
     sptr<Window> window_ = nullptr;
     sptr<Window> mainWindow_ = nullptr;
     sptr<IWindowLifeCycle> mainWindowLifeCycleListener_ = nullptr;

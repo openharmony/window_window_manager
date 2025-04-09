@@ -80,7 +80,7 @@ namespace {
  * @tc.desc: BindAbstractScreen test
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractDisplayTest, BindAbstractScreen01, Function | SmallTest | Level3)
+HWTEST_F(AbstractDisplayTest, BindAbstractScreen01, TestSize.Level1)
 {
     sptr<AbstractScreen> abstractScreen = nullptr;
     ASSERT_EQ(false, absDisplay->BindAbstractScreen(abstractScreen));
@@ -91,7 +91,7 @@ HWTEST_F(AbstractDisplayTest, BindAbstractScreen01, Function | SmallTest | Level
  * @tc.desc: BindAbstractScreen test
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractDisplayTest, BindAbstractScreen02, Function | SmallTest | Level3)
+HWTEST_F(AbstractDisplayTest, BindAbstractScreen02, TestSize.Level1)
 {
     sptr<AbstractScreen> abstractScreen = absScreen;
     abstractScreen->activeIdx_ = -1;
@@ -103,7 +103,7 @@ HWTEST_F(AbstractDisplayTest, BindAbstractScreen02, Function | SmallTest | Level
  * @tc.desc: CalculateXYDpi test
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractDisplayTest, CalculateXYDpi, Function | SmallTest | Level3)
+HWTEST_F(AbstractDisplayTest, CalculateXYDpi, TestSize.Level1)
 {
     uint32_t phyWidth = 0;
     uint32_t phyHeight = 0;
@@ -122,7 +122,7 @@ HWTEST_F(AbstractDisplayTest, CalculateXYDpi, Function | SmallTest | Level3)
  * @tc.desc: GetRefreshRate test
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractDisplayTest, GetRefreshRate, Function | SmallTest | Level3)
+HWTEST_F(AbstractDisplayTest, GetRefreshRate, TestSize.Level1)
 {
     uint32_t refreshRate = 1;
     absDisplay->SetRefreshRate(refreshRate);
@@ -135,7 +135,7 @@ HWTEST_F(AbstractDisplayTest, GetRefreshRate, Function | SmallTest | Level3)
  * @tc.desc: GetOffsetX test
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractDisplayTest, GetOffsetX, Function | SmallTest | Level3)
+HWTEST_F(AbstractDisplayTest, GetOffsetX, TestSize.Level1)
 {
     int32_t offsetX = 1;
     absDisplay->SetOffsetX(offsetX);
@@ -147,7 +147,7 @@ HWTEST_F(AbstractDisplayTest, GetOffsetX, Function | SmallTest | Level3)
  * @tc.desc: GetOffsetX test
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractDisplayTest, GetOffsetY, Function | SmallTest | Level3)
+HWTEST_F(AbstractDisplayTest, GetOffsetY, TestSize.Level1)
 {
     int32_t offsetY = 1;
     absDisplay->SetOffsetY(offsetY);
@@ -159,7 +159,7 @@ HWTEST_F(AbstractDisplayTest, GetOffsetY, Function | SmallTest | Level3)
  * @tc.desc: UpdateXDpi test
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractDisplayTest, UpdateXDpi, Function | SmallTest | Level3)
+HWTEST_F(AbstractDisplayTest, UpdateXDpi, TestSize.Level1)
 {
     uint32_t phyWidth = UINT32_MAX;
     uint32_t phyHeight = 0;
@@ -173,7 +173,7 @@ HWTEST_F(AbstractDisplayTest, UpdateXDpi, Function | SmallTest | Level3)
  * @tc.desc: UpdateYDpi test
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractDisplayTest, UpdateYDpi, Function | SmallTest | Level3)
+HWTEST_F(AbstractDisplayTest, UpdateYDpi, TestSize.Level1)
 {
     uint32_t phyWidth = UINT32_MAX;
     uint32_t phyHeight = UINT32_MAX;
@@ -187,7 +187,7 @@ HWTEST_F(AbstractDisplayTest, UpdateYDpi, Function | SmallTest | Level3)
  * @tc.desc: SetId test
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractDisplayTest, SetId, Function | SmallTest | Level3)
+HWTEST_F(AbstractDisplayTest, SetId, TestSize.Level1)
 {
     DisplayId id = 1;
     absDisplay->SetId(id);
@@ -199,7 +199,7 @@ HWTEST_F(AbstractDisplayTest, SetId, Function | SmallTest | Level3)
  * @tc.desc: SetDisplayOrientation test
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractDisplayTest, SetDisplayOrientation, Function | SmallTest | Level3)
+HWTEST_F(AbstractDisplayTest, SetDisplayOrientation, TestSize.Level1)
 {
     DisplayOrientation displayOrientation = DisplayOrientation::PORTRAIT;
     absDisplay->SetDisplayOrientation(displayOrientation);
@@ -211,7 +211,7 @@ HWTEST_F(AbstractDisplayTest, SetDisplayOrientation, Function | SmallTest | Leve
  * @tc.desc: GetRotationAndGetOrientation test
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractDisplayTest, GetRotationAndGetOrientation, Function | SmallTest | Level3)
+HWTEST_F(AbstractDisplayTest, GetRotationAndGetOrientation, TestSize.Level1)
 {
     DisplayId id = 1;
     absDisplay->SetId(id);
@@ -225,7 +225,7 @@ HWTEST_F(AbstractDisplayTest, GetRotationAndGetOrientation, Function | SmallTest
  * @tc.desc: SetFreezeFlag test
  * @tc.type: FUNC
  */
-HWTEST_F(AbstractDisplayTest, SetFreezeFlag, Function | SmallTest | Level3)
+HWTEST_F(AbstractDisplayTest, SetFreezeFlag, TestSize.Level1)
 {
     FreezeFlag freezeFlag = FreezeFlag::FREEZING;
     absDisplay->SetFreezeFlag(freezeFlag);

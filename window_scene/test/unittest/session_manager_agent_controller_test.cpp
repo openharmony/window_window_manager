@@ -55,7 +55,7 @@ void SessionManagerAgentControllerTest::TearDown()
  * @tc.desc: SesionManagerAgentController rigister window manager agent
  * @tc.type: FUNC
  */
-HWTEST_F(SessionManagerAgentControllerTest, RegisterWindowManagerAgent, Function | SmallTest | Level3)
+HWTEST_F(SessionManagerAgentControllerTest, RegisterWindowManagerAgent, TestSize.Level1)
 {
     sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgent>::MakeSptr();
     WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS;
@@ -71,7 +71,7 @@ HWTEST_F(SessionManagerAgentControllerTest, RegisterWindowManagerAgent, Function
  * @tc.desc: UpdateCameraFloatWindowStatus Test
  * @tc.type: FUNC
  */
-HWTEST_F(SessionManagerAgentControllerTest, UpdateCameraFloatWindowStatus, Function | SmallTest | Level3)
+HWTEST_F(SessionManagerAgentControllerTest, UpdateCameraFloatWindowStatus, TestSize.Level1)
 {
     sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgent>::MakeSptr();
     WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS;
@@ -88,7 +88,7 @@ HWTEST_F(SessionManagerAgentControllerTest, UpdateCameraFloatWindowStatus, Funct
  * @tc.desc: UpdateFocusChangeInfo Test
  * @tc.type: FUNC
  */
-HWTEST_F(SessionManagerAgentControllerTest, UpdateFocusChangeInfo, Function | SmallTest | Level3)
+HWTEST_F(SessionManagerAgentControllerTest, UpdateFocusChangeInfo, TestSize.Level1)
 {
     sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgent>::MakeSptr();
     WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS;
@@ -106,7 +106,7 @@ HWTEST_F(SessionManagerAgentControllerTest, UpdateFocusChangeInfo, Function | Sm
  * @tc.desc: UpdateWindowModeTypeInfo Test
  * @tc.type: FUNC
  */
-HWTEST_F(SessionManagerAgentControllerTest, UpdateWindowModeTypeInfo, Function | SmallTest | Level3)
+HWTEST_F(SessionManagerAgentControllerTest, UpdateWindowModeTypeInfo, TestSize.Level1)
 {
     int32_t pid = 65535;
     sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgent>::MakeSptr();
@@ -123,7 +123,7 @@ HWTEST_F(SessionManagerAgentControllerTest, UpdateWindowModeTypeInfo, Function |
  * @tc.desc: NotifyAccessibilityWindowInfo Test
  * @tc.type: FUNC
  */
-HWTEST_F(SessionManagerAgentControllerTest, NotifyAccessibilityWindowInfo, Function | SmallTest | Level3)
+HWTEST_F(SessionManagerAgentControllerTest, NotifyAccessibilityWindowInfo, TestSize.Level1)
 {
     sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgent>::MakeSptr();
     WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS;
@@ -142,7 +142,7 @@ HWTEST_F(SessionManagerAgentControllerTest, NotifyAccessibilityWindowInfo, Funct
  * @tc.desc: NotifyWaterMarkFlagChangedResult Test
  * @tc.type: FUNC
  */
-HWTEST_F(SessionManagerAgentControllerTest, NotifyWaterMarkFlagChangedResult, Function | SmallTest | Level3)
+HWTEST_F(SessionManagerAgentControllerTest, NotifyWaterMarkFlagChangedResult, TestSize.Level1)
 {
     sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgent>::MakeSptr();
     WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS;
@@ -159,7 +159,7 @@ HWTEST_F(SessionManagerAgentControllerTest, NotifyWaterMarkFlagChangedResult, Fu
  * @tc.desc: UpdateWindowVisibilityInfo Test
  * @tc.type: FUNC
  */
-HWTEST_F(SessionManagerAgentControllerTest, UpdateWindowVisibilityInfo, Function | SmallTest | Level3)
+HWTEST_F(SessionManagerAgentControllerTest, UpdateWindowVisibilityInfo, TestSize.Level1)
 {
     sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgent>::MakeSptr();
     WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS;
@@ -177,7 +177,7 @@ HWTEST_F(SessionManagerAgentControllerTest, UpdateWindowVisibilityInfo, Function
  * @tc.desc: UpdateVisibleWindowNum Test
  * @tc.type: FUNC
  */
-HWTEST_F(SessionManagerAgentControllerTest, UpdateVisibleWindowNum, Function | SmallTest | Level3)
+HWTEST_F(SessionManagerAgentControllerTest, UpdateVisibleWindowNum, TestSize.Level1)
 {
     std::vector<VisibleWindowNumInfo> visibleWindowNumInfo;
     SessionManagerAgentController::GetInstance().UpdateVisibleWindowNum(visibleWindowNumInfo);
@@ -193,7 +193,7 @@ HWTEST_F(SessionManagerAgentControllerTest, UpdateVisibleWindowNum, Function | S
  * @tc.desc: UpdateWindowDrawingContentInfo Test
  * @tc.type: FUNC
  */
-HWTEST_F(SessionManagerAgentControllerTest, UpdateWindowDrawingContentInfo, Function | SmallTest | Level3)
+HWTEST_F(SessionManagerAgentControllerTest, UpdateWindowDrawingContentInfo, TestSize.Level1)
 {
     std::vector<sptr<WindowDrawingContentInfo>> windowDrawingContentInfos;
     SessionManagerAgentController::GetInstance().UpdateWindowDrawingContentInfo(windowDrawingContentInfos);
@@ -209,7 +209,7 @@ HWTEST_F(SessionManagerAgentControllerTest, UpdateWindowDrawingContentInfo, Func
  * @tc.desc: UpdateCameraWindowStatus Test
  * @tc.type: FUNC
  */
-HWTEST_F(SessionManagerAgentControllerTest, UpdateCameraWindowStatus, Function | SmallTest | Level3)
+HWTEST_F(SessionManagerAgentControllerTest, UpdateCameraWindowStatus, TestSize.Level1)
 {
     sptr<IWindowManagerAgent> windowMangerAgent = sptr<WindowManagerAgent>::MakeSptr();
     WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_CAMERA_WINDOW;
@@ -226,7 +226,7 @@ HWTEST_F(SessionManagerAgentControllerTest, UpdateCameraWindowStatus, Function |
  * @tc.desc: NotifyWindowStyleChange Test
  * @tc.type: FUNC
  */
-HWTEST_F(SessionManagerAgentControllerTest, NotifyWindowStyleChange, Function | SmallTest | Level3)
+HWTEST_F(SessionManagerAgentControllerTest, NotifyWindowStyleChange, TestSize.Level1)
 {
     int32_t pid = 65535;
     sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgent>::MakeSptr();

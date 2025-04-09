@@ -34,6 +34,8 @@ constexpr int DEFALUT_DISPLAYID = 0;
 constexpr int EMPTY_FOCUS_WINDOW_ID = -1;
 constexpr int INVALID_PERSISTENT_ID = 0;
 constexpr int DEFAULT_SCREEN_POS = 0;
+constexpr int DEFAULT_SCREEN_SCALE = 100;
+constexpr int DEFAULT_EXPAND_HEIGHT = 0;
 
 bool IsEqualUiExtentionWindowInfo(const std::vector<MMI::WindowInfo>& a, const std::vector<MMI::WindowInfo>& b);
 constexpr unsigned int TRANSFORM_DATA_LEN = 9;
@@ -228,9 +230,17 @@ void SceneInputManager::ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& dis
         std::vector<float> transformData(transform.GetData(), transform.GetData() + TRANSFORM_DATA_LEN);
         int32_t screenOneHandX = DEFAULT_SCREEN_POS;
         int32_t screenOneHandY = DEFAULT_SCREEN_POS;
-        if (screenId == ScreenSessionManagerClient::GetInstance().GetDefaultScreenId()) {
-            screenOneHandX = SceneSessionManager::GetInstance().GetNormalSingleHandTransform().posX;
-            screenOneHandY = SceneSessionManager::GetInstance().GetNormalSingleHandTransform().posY;
+        int32_t scalePercent = DEFAULT_SCREEN_SCALE;
+        int32_t expandHeight = DEFAULT_EXPAND_HEIGHT;
+        const SingleHandScreenInfo& singleHandScreenInfo = SceneSessionManager::GetInstance().GetSingleHandScreenInfo();
+        if (screenId == ScreenSessionManagerClient::GetInstance().GetDefaultScreenId() &&
+            singleHandScreenInfo.mode != SingleHandMode::MIDDLE) {
+            SingleHandTransform singleHandTransform = SceneSessionManager::GetInstance().GetNormalSingleHandTransform();
+            WSRect originRect = SceneSessionManager::GetInstance().GetOriginRect();
+            screenOneHandX = singleHandTransform.posX;
+            screenOneHandY = singleHandTransform.posY;
+            scalePercent = singleHandTransform.scaleX * DEFAULT_SCREEN_SCALE;
+            expandHeight = screenProperty.GetBounds().rect_.GetHeight() - originRect.height_;
         }
         MMI::DisplayInfo displayInfo = {
             .id = screenId,
@@ -240,7 +250,7 @@ void SceneInputManager::ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& dis
             .height = screenHeight,
             .dpi = screenProperty.GetDensity() *  DOT_PER_INCH,
             .name = "display" + std::to_string(screenId),
-            .uniq = "default" + std::to_string(screenId),
+            .uniq = "default" + std::to_string(screenProperty.GetRsId()),
             .direction = ConvertDegreeToMMIRotation(screenProperty.GetPhysicalRotation()),
             .displayDirection = ConvertDegreeToMMIRotation(screenProperty.GetScreenComponentRotation()),
             .displayMode = static_cast<MMI::DisplayMode>(displayMode),
@@ -256,11 +266,16 @@ void SceneInputManager::ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& dis
             .screenCombination = static_cast<MMI::ScreenCombination>(screenCombination),
             .oneHandX = screenOneHandX,
             .oneHandY = screenOneHandY,
+            .scalePercent = scalePercent,
+            .expandHeight = expandHeight,
             .validWidth = screenProperty.GetValidWidth(),
             .validHeight = screenProperty.GetValidHeight(),
             .fixedDirection = ConvertDegreeToMMIRotation(screenProperty.GetDefaultDeviceRotationOffset()),
             .physicalWidth = screenProperty.GetPhyWidth(),
-            .physicalHeight = screenProperty.GetPhyHeight()
+            .physicalHeight = screenProperty.GetPhyHeight(),
+            .pointerActiveWidth = screenProperty.GetPointerActiveWidth(),
+            .pointerActiveHeight = screenProperty.GetPointerActiveHeight(),
+            .uniqueId = screenProperty.GetRsId()
         };
         displayInfos.emplace_back(displayInfo);
     }
@@ -496,7 +511,9 @@ void SceneInputManager::PrintDisplayInfo(const std::vector<MMI::DisplayInfo>& di
                           << static_cast<int32_t>(displayInfo.screenCombination) << "|"
                           << displayInfo.validWidth << "|" << displayInfo.validHeight << "|"
                           << displayInfo.fixedDirection << "|" << displayInfo.physicalWidth << "|"
-                          << displayInfo.physicalHeight << ",";
+                          << displayInfo.physicalHeight << "|" << displayInfo.oneHandX << "|"
+                          << displayInfo.oneHandY << "|" << displayInfo.scalePercent << "|"
+                          << displayInfo.expandHeight << "|" << displayInfo.uniqueId << ",";
     }
 
     std::string displayList = displayListStream.str();

@@ -54,12 +54,13 @@ public:
     WSError OnTitleAndDockHoverShowChange(bool isTitleHoverShown = true,
         bool isDockHoverShown = true) override;
     WSError OnRestoreMainWindow() override;
-    WSError OnSetWindowRectAutoSave(bool enabled) override;
+    WSError OnSetWindowRectAutoSave(bool enabled, bool isSaveBySpecifiedFlag) override;
     bool IsModal() const override;
     bool IsApplicationModal() const override;
     WSError NotifyMainModalTypeChange(bool isModal) override;
     WSError NotifySupportWindowModesChange(
         const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes) override;
+    WSError UpdateFlag(const std::string& flag) override;
 
     /*
      * Window LifeCycle

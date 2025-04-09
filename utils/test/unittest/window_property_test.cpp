@@ -53,7 +53,7 @@ namespace {
  * @tc.desc: Marshalling Unmarshalling test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPropertyTest, MarshallingUnmarshalling, Function | SmallTest | Level2)
+HWTEST_F(WindowPropertyTest, MarshallingUnmarshalling, TestSize.Level1)
 {
     WindowProperty winPropSrc;
     winPropSrc.SetPrivacyMode(true);
@@ -75,7 +75,7 @@ HWTEST_F(WindowPropertyTest, MarshallingUnmarshalling, Function | SmallTest | Le
  * @tc.desc: CopyFrom test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPropertyTest, CopyFrom, Function | SmallTest | Level2)
+HWTEST_F(WindowPropertyTest, CopyFrom, TestSize.Level1)
 {
     const sptr<WindowProperty> winPropSrc = new(std::nothrow) WindowProperty();
     winPropSrc->SetPrivacyMode(true);
@@ -94,7 +94,7 @@ HWTEST_F(WindowPropertyTest, CopyFrom, Function | SmallTest | Level2)
  * @tc.desc: Read test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPropertyTest, Read, Function | SmallTest | Level2)
+HWTEST_F(WindowPropertyTest, Read, TestSize.Level1)
 {
     WindowProperty winPropSrc;
     winPropSrc.SetPrivacyMode(true);
@@ -131,7 +131,7 @@ HWTEST_F(WindowPropertyTest, Read, Function | SmallTest | Level2)
  * @tc.desc: Write test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPropertyTest, Write, Function | SmallTest | Level2)
+HWTEST_F(WindowPropertyTest, Write, TestSize.Level1)
 {
     Parcel parcel;
     WindowProperty winPropDst;
@@ -157,7 +157,7 @@ HWTEST_F(WindowPropertyTest, Write, Function | SmallTest | Level2)
  * @tc.desc: Test SetAbilityInfo and GetAbilityInfo
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPropertyTest, SetAbilityInfo, Function | SmallTest | Level2)
+HWTEST_F(WindowPropertyTest, SetAbilityInfo, TestSize.Level1)
 {
     WindowProperty winPropDst;
     AbilityInfo info;
@@ -173,7 +173,7 @@ HWTEST_F(WindowPropertyTest, SetAbilityInfo, Function | SmallTest | Level2)
  * @tc.desc: Test ResumeLastWindowMode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPropertyTest, ResumeLastWindowMode, Function | SmallTest | Level2)
+HWTEST_F(WindowPropertyTest, ResumeLastWindowMode, TestSize.Level1)
 {
     WindowProperty winPropDst;
     winPropDst.windowModeSupportType_ = WindowModeSupport::WINDOW_MODE_SUPPORT_PIP;
@@ -200,7 +200,7 @@ HWTEST_F(WindowPropertyTest, ResumeLastWindowMode, Function | SmallTest | Level2
  * @tc.desc: AddWindowFlag test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPropertyTest, AddWindowFlag001, Function | SmallTest | Level2)
+HWTEST_F(WindowPropertyTest, AddWindowFlag001, TestSize.Level1)
 {
     WindowProperty winPropSrc;
     int resultValue = 0;
@@ -218,7 +218,7 @@ HWTEST_F(WindowPropertyTest, AddWindowFlag001, Function | SmallTest | Level2)
  * @tc.desc: GetRequestRect test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPropertyTest, GetRequestRect001, Function | SmallTest | Level2)
+HWTEST_F(WindowPropertyTest, GetRequestRect001, TestSize.Level1)
 {
     WindowProperty winPropSrc;
     Rect requestRect { 0, 0, 0, 0 };
@@ -232,7 +232,7 @@ HWTEST_F(WindowPropertyTest, GetRequestRect001, Function | SmallTest | Level2)
  * @tc.desc: GetWindowSizeChangeReason test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPropertyTest, GetWindowSizeChangeReason003, Function | SmallTest | Level2)
+HWTEST_F(WindowPropertyTest, GetWindowSizeChangeReason003, TestSize.Level1)
 {
     WindowProperty winPropSrc;
     WindowSizeChangeReason reason = WindowSizeChangeReason::UNDEFINED;
@@ -246,7 +246,7 @@ HWTEST_F(WindowPropertyTest, GetWindowSizeChangeReason003, Function | SmallTest 
  * @tc.desc: GetFullScreen test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPropertyTest, GetFullScreen004, Function | SmallTest | Level2)
+HWTEST_F(WindowPropertyTest, GetFullScreen004, TestSize.Level1)
 {
     WindowProperty winPropSrc;
     bool isFullScreen = true;
@@ -260,7 +260,7 @@ HWTEST_F(WindowPropertyTest, GetFullScreen004, Function | SmallTest | Level2)
  * @tc.desc: GetFocusable test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPropertyTest, GetFocusable005, Function | SmallTest | Level2)
+HWTEST_F(WindowPropertyTest, GetFocusable005, TestSize.Level1)
 {
     WindowProperty winPropSrc;
     bool isFocusable = true;
@@ -274,7 +274,7 @@ HWTEST_F(WindowPropertyTest, GetFocusable005, Function | SmallTest | Level2)
  * @tc.desc: GetTouchable test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPropertyTest, GetTouchable006, Function | SmallTest | Level2)
+HWTEST_F(WindowPropertyTest, GetTouchable006, TestSize.Level1)
 {
     WindowProperty winPropSrc;
     bool isTouchable = true;
@@ -288,7 +288,7 @@ HWTEST_F(WindowPropertyTest, GetTouchable006, Function | SmallTest | Level2)
  * @tc.desc: GetCallingWindow test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPropertyTest, GetCallingWindow007, Function | SmallTest | Level2)
+HWTEST_F(WindowPropertyTest, GetCallingWindow007, TestSize.Level1)
 {
     WindowProperty winPropSrc;
     uint32_t windowId = 1;
@@ -302,7 +302,7 @@ HWTEST_F(WindowPropertyTest, GetCallingWindow007, Function | SmallTest | Level2)
  * @tc.desc: GetPrivacyMode test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPropertyTest, GetPrivacyMode008, Function | SmallTest | Level2)
+HWTEST_F(WindowPropertyTest, GetPrivacyMode008, TestSize.Level1)
 {
     WindowProperty winPropSrc;
     bool isPrivate = true;
@@ -316,7 +316,7 @@ HWTEST_F(WindowPropertyTest, GetPrivacyMode008, Function | SmallTest | Level2)
  * @tc.desc: GetSystemPrivacyMode test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPropertyTest, GetSystemPrivacyMode009, Function | SmallTest | Level2)
+HWTEST_F(WindowPropertyTest, GetSystemPrivacyMode009, TestSize.Level1)
 {
     WindowProperty winPropSrc;
     bool isSystemPrivate = true;
@@ -330,7 +330,7 @@ HWTEST_F(WindowPropertyTest, GetSystemPrivacyMode009, Function | SmallTest | Lev
  * @tc.desc: GetSnapshotSkip test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPropertyTest, GetSnapshotSkip010, Function | SmallTest | Level2)
+HWTEST_F(WindowPropertyTest, GetSnapshotSkip010, TestSize.Level1)
 {
     WindowProperty winPropSrc;
     bool isSkip = true;
@@ -344,7 +344,7 @@ HWTEST_F(WindowPropertyTest, GetSnapshotSkip010, Function | SmallTest | Level2)
  * @tc.desc: GetAlpha test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPropertyTest, GetAlpha011, Function | SmallTest | Level2)
+HWTEST_F(WindowPropertyTest, GetAlpha011, TestSize.Level1)
 {
     WindowProperty winPropSrc;
     float alpha = 1;
@@ -358,7 +358,7 @@ HWTEST_F(WindowPropertyTest, GetAlpha011, Function | SmallTest | Level2)
  * @tc.desc: GetBrightness test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPropertyTest, GetBrightness012, Function | SmallTest | Level2)
+HWTEST_F(WindowPropertyTest, GetBrightness012, TestSize.Level1)
 {
     WindowProperty winPropSrc;
     float brightness = 1;
@@ -372,7 +372,7 @@ HWTEST_F(WindowPropertyTest, GetBrightness012, Function | SmallTest | Level2)
  * @tc.desc: IsTurnScreenOn test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPropertyTest, IsTurnScreenOn013, Function | SmallTest | Level2)
+HWTEST_F(WindowPropertyTest, IsTurnScreenOn013, TestSize.Level1)
 {
     WindowProperty winPropSrc;
     bool turnScreenOn = true;
@@ -386,7 +386,7 @@ HWTEST_F(WindowPropertyTest, IsTurnScreenOn013, Function | SmallTest | Level2)
  * @tc.desc: IsKeepScreenOn test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPropertyTest, IsKeepScreenOn014, Function | SmallTest | Level2)
+HWTEST_F(WindowPropertyTest, IsKeepScreenOn014, TestSize.Level1)
 {
     WindowProperty winPropSrc;
     bool keepScreenOn = true;
@@ -400,7 +400,7 @@ HWTEST_F(WindowPropertyTest, IsKeepScreenOn014, Function | SmallTest | Level2)
  * @tc.desc: GetWindowFlags test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPropertyTest, GetWindowFlags015, Function | SmallTest | Level2)
+HWTEST_F(WindowPropertyTest, GetWindowFlags015, TestSize.Level1)
 {
     WindowProperty winPropSrc;
     uint32_t flags = 1;
@@ -414,7 +414,7 @@ HWTEST_F(WindowPropertyTest, GetWindowFlags015, Function | SmallTest | Level2)
  * @tc.desc: GetSystemBarProperty test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPropertyTest, GetSystemBarProperty016, Function | SmallTest | Level2)
+HWTEST_F(WindowPropertyTest, GetSystemBarProperty016, TestSize.Level1)
 {
     WindowProperty winPropSrc;
     SystemBarProperty property;
@@ -429,7 +429,7 @@ HWTEST_F(WindowPropertyTest, GetSystemBarProperty016, Function | SmallTest | Lev
  * @tc.desc: GetHitOffset test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPropertyTest, GetStretchable017, Function | SmallTest | Level2)
+HWTEST_F(WindowPropertyTest, GetStretchable017, TestSize.Level1)
 {
     WindowProperty winPropSrc;
     bool stretchable = true;
@@ -443,7 +443,7 @@ HWTEST_F(WindowPropertyTest, GetStretchable017, Function | SmallTest | Level2)
  * @tc.desc: GetAnimationFlag test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPropertyTest, GetAnimationFlag018, Function | SmallTest | Level2)
+HWTEST_F(WindowPropertyTest, GetAnimationFlag018, TestSize.Level1)
 {
     WindowProperty winPropSrc;
     uint32_t animationFlag = 1;
@@ -457,7 +457,7 @@ HWTEST_F(WindowPropertyTest, GetAnimationFlag018, Function | SmallTest | Level2)
  * @tc.desc: GetWindowModeSupportType test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPropertyTest, GetWindowModeSupportType019, Function | SmallTest | Level2)
+HWTEST_F(WindowPropertyTest, GetWindowModeSupportType019, TestSize.Level1)
 {
     WindowProperty winPropSrc;
     uint32_t windowModeSupportType = 1;
@@ -471,7 +471,7 @@ HWTEST_F(WindowPropertyTest, GetWindowModeSupportType019, Function | SmallTest |
  * @tc.desc: GetRequestWindowModeSupportType test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPropertyTest, GetRequestWindowModeSupportType020, Function | SmallTest | Level2)
+HWTEST_F(WindowPropertyTest, GetRequestWindowModeSupportType020, TestSize.Level1)
 {
     WindowProperty winPropSrc;
     uint32_t requestWindowModeSupportType = 1;
@@ -485,7 +485,7 @@ HWTEST_F(WindowPropertyTest, GetRequestWindowModeSupportType020, Function | Smal
  * @tc.desc: GetTokenState test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPropertyTest, GetTokenState021, Function | SmallTest | Level2)
+HWTEST_F(WindowPropertyTest, GetTokenState021, TestSize.Level1)
 {
     WindowProperty winPropSrc;
     bool hasToken = true;
@@ -499,7 +499,7 @@ HWTEST_F(WindowPropertyTest, GetTokenState021, Function | SmallTest | Level2)
  * @tc.desc: GetDragType test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPropertyTest, GetDragType022, Function | SmallTest | Level2)
+HWTEST_F(WindowPropertyTest, GetDragType022, TestSize.Level1)
 {
     WindowProperty winPropSrc;
     DragType dragType = DragType::DRAG_UNDEFINED;
@@ -513,7 +513,7 @@ HWTEST_F(WindowPropertyTest, GetDragType022, Function | SmallTest | Level2)
  * @tc.desc: GetOriginRect test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPropertyTest, GetOriginRect023, Function | SmallTest | Level2)
+HWTEST_F(WindowPropertyTest, GetOriginRect023, TestSize.Level1)
 {
     WindowProperty winPropSrc;
     Rect rect = { 0, 0, 0, 0 };
@@ -527,7 +527,7 @@ HWTEST_F(WindowPropertyTest, GetOriginRect023, Function | SmallTest | Level2)
  * @tc.desc: SetTouchHotAreas test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPropertyTest, SetTouchHotAreas028, Function | SmallTest | Level2)
+HWTEST_F(WindowPropertyTest, SetTouchHotAreas028, TestSize.Level1)
 {
     WindowProperty winPropSrc;
     std::vector<Rect> rects;
@@ -541,7 +541,7 @@ HWTEST_F(WindowPropertyTest, SetTouchHotAreas028, Function | SmallTest | Level2)
  * @tc.desc: SetAspectRatio test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPropertyTest, SetAspectRatio029, Function | SmallTest | Level2)
+HWTEST_F(WindowPropertyTest, SetAspectRatio029, TestSize.Level1)
 {
     WindowProperty winPropSrc;
     float ratio = 1;
@@ -555,7 +555,7 @@ HWTEST_F(WindowPropertyTest, SetAspectRatio029, Function | SmallTest | Level2)
  * @tc.desc: SetMaximizeMode test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPropertyTest, SetMaximizeMode030, Function | SmallTest | Level2)
+HWTEST_F(WindowPropertyTest, SetMaximizeMode030, TestSize.Level1)
 {
     WindowProperty winPropSrc;
     MaximizeMode maximizeMode = { MaximizeMode::MODE_RECOVER };
@@ -569,7 +569,7 @@ HWTEST_F(WindowPropertyTest, SetMaximizeMode030, Function | SmallTest | Level2)
  * @tc.desc: GetAccessTokenId test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPropertyTest, GetAccessTokenId031, Function | SmallTest | Level2)
+HWTEST_F(WindowPropertyTest, GetAccessTokenId031, TestSize.Level1)
 {
     WindowProperty winPropSrc;
     uint32_t accessTokenId = 1;
@@ -583,7 +583,7 @@ HWTEST_F(WindowPropertyTest, GetAccessTokenId031, Function | SmallTest | Level2)
  * @tc.desc: SetWindowGravity test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPropertyTest, GetAccessTokenId032, Function | SmallTest | Level2)
+HWTEST_F(WindowPropertyTest, GetAccessTokenId032, TestSize.Level1)
 {
     WindowProperty winPropSrc;
     WindowGravity gravity = WindowGravity::WINDOW_GRAVITY_FLOAT;
@@ -599,7 +599,7 @@ HWTEST_F(WindowPropertyTest, GetAccessTokenId032, Function | SmallTest | Level2)
  * @tc.desc: Write test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPropertyTest, Write033, Function | SmallTest | Level2)
+HWTEST_F(WindowPropertyTest, Write033, TestSize.Level1)
 {
     WindowProperty winPropDst;
     Parcel parcel;
@@ -615,7 +615,7 @@ HWTEST_F(WindowPropertyTest, Write033, Function | SmallTest | Level2)
  * @tc.desc: Read test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPropertyTest, Read034, Function | SmallTest | Level2)
+HWTEST_F(WindowPropertyTest, Read034, TestSize.Level1)
 {
     WindowProperty winPropSrc;
     winPropSrc.SetPrivacyMode(true);
@@ -638,7 +638,7 @@ HWTEST_F(WindowPropertyTest, Read034, Function | SmallTest | Level2)
  * @tc.desc: GetTextFieldPositionY test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPropertyTest, GetTextFieldPositionY035, Function | SmallTest | Level2)
+HWTEST_F(WindowPropertyTest, GetTextFieldPositionY035, TestSize.Level1)
 {
     WindowProperty winPropSrc;
     double textFieldPositionY = 1;
@@ -652,7 +652,7 @@ HWTEST_F(WindowPropertyTest, GetTextFieldPositionY035, Function | SmallTest | Le
  * @tc.desc: GetTextFieldHeight test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPropertyTest, GetTextFieldHeight36, Function | SmallTest | Level2)
+HWTEST_F(WindowPropertyTest, GetTextFieldHeight36, TestSize.Level1)
 {
     WindowProperty winPropSrc;
     double textFieldHeight = 1;

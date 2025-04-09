@@ -61,7 +61,7 @@ namespace {
  * @tc.desc: consume pointer event when receive callback from input
  * @tc.type: FUNC
  */
-HWTEST_F(WindowInputChannelTest, HandlePointerEvent, Function | SmallTest | Level2)
+HWTEST_F(WindowInputChannelTest, HandlePointerEvent, TestSize.Level1)
 {
     auto pointerEvent = MMI::PointerEvent::Create();
     sptr<WindowInputChannel> inputChannel = new WindowInputChannel(window_);
@@ -114,7 +114,7 @@ HWTEST_F(WindowInputChannelTest, HandlePointerEvent, Function | SmallTest | Leve
  * @tc.desc: consume key event when receive callback from input
  * @tc.type: FUNC
  */
-HWTEST_F(WindowInputChannelTest, HandleKeyEvent, Function | SmallTest | Level2)
+HWTEST_F(WindowInputChannelTest, HandleKeyEvent, TestSize.Level1)
 {
     auto keyEvent = MMI::KeyEvent::Create();
     sptr<WindowInputChannel> inputChannel = new WindowInputChannel(window_);
@@ -145,7 +145,7 @@ HWTEST_F(WindowInputChannelTest, HandleKeyEvent, Function | SmallTest | Level2)
  * @tc.desc: DispatchKeyEventCallback
  * @tc.type: FUNC
  */
-HWTEST_F(WindowInputChannelTest, DispatchKeyEventCallback, Function | SmallTest | Level2)
+HWTEST_F(WindowInputChannelTest, DispatchKeyEventCallback, TestSize.Level1)
 {
     sptr<WindowInputChannel> inputChannel = new WindowInputChannel(window_);
     auto keyEvent = MMI::KeyEvent::Create();
@@ -168,7 +168,7 @@ HWTEST_F(WindowInputChannelTest, DispatchKeyEventCallback, Function | SmallTest 
  * @tc.desc: GetWindowRect
  * @tc.type: FUNC
  */
-HWTEST_F(WindowInputChannelTest, GetWindowRect, Function | SmallTest | Level2)
+HWTEST_F(WindowInputChannelTest, GetWindowRect, TestSize.Level1)
 {
     sptr<WindowInputChannel> inputChannel = new WindowInputChannel(window_);
     ASSERT_NE(inputChannel, nullptr);

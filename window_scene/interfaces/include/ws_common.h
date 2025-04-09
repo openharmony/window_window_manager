@@ -40,6 +40,9 @@ class RSTransaction;
 constexpr int32_t ROTATE_ANIMATION_DURATION = 400;
 constexpr int32_t INVALID_SESSION_ID = 0;
 constexpr int32_t WINDOW_SUPPORT_MODE_MAX_SIZE = 4;
+constexpr int32_t DEFAULT_SCALE_RATIO = 100;
+const std::string WINDOW_SCREEN_LOCK_PREFIX = "windowLock_";
+const std::string VIEW_SCREEN_LOCK_PREFIX = "viewLock_";
 
 enum class WSError : int32_t {
     WS_OK = 0,
@@ -400,6 +403,8 @@ struct SessionInfo {
     bool isFoundationCall_ = false;
     int32_t requestId = 0;
     std::string specifiedFlag_ = "";
+    bool disableDelegator = false;
+    bool reuseDelegatorWindow = false;
 
     /*
      * App Use Control
@@ -426,6 +431,12 @@ struct SessionInfo {
      */
     std::vector<AppExecFwk::SupportWindowMode> supportedWindowModes;
     WindowSizeLimits windowSizeLimits;
+    bool isFollowParentMultiScreenPolicy = false;
+
+    /*
+     * Window Rotation
+     */
+    int32_t currentRotation_ = 0;
 };
 
 enum class SessionFlag : uint32_t {
@@ -466,6 +477,10 @@ enum class SizeChangeReason : uint32_t {
     AVOID_AREA_CHANGE,
     MAXIMIZE_TO_SPLIT,
     SPLIT_TO_MAXIMIZE,
+    PAGE_ROTATION,
+    SPLIT_DRAG_START,
+    SPLIT_DRAG,
+    SPLIT_DRAG_END,
     END,
 };
 
@@ -491,6 +506,7 @@ enum class SessionEvent : uint32_t {
     EVENT_DRAG,
     EVENT_MAXIMIZE_WITHOUT_ANIMATION,
     EVENT_MAXIMIZE_WATERFALL,
+    EVENT_WATERFALL_TO_MAXIMIZE,
     EVENT_END
 };
 
@@ -635,10 +651,15 @@ struct WindowAnimationConfig {
 };
 
 struct StartingWindowInfo {
-    int32_t startingWindowBackgroundId_;
-    int32_t startingWindowIconId_;
-    uint32_t startingWindowBackgroundColor_;
-    std::string startingWindowIconPath_;
+    uint32_t backgroundColorEarlyVersion_;
+    std::string iconPathEarlyVersion_;
+    bool configFileEnabled_;
+    uint32_t backgroundColor_;
+    std::string iconPath_;
+    std::string illustrationPath_;
+    std::string brandingPath_;
+    std::string backgroundImagePath_;
+    std::string backgroundImageFit_;
 };
 
 struct StartingWindowAnimationConfig {
@@ -682,6 +703,20 @@ struct AppWindowSceneConfig {
     StartingWindowAnimationConfig startingWindowAnimationConfig_;
     SystemUIStatusBarConfig systemUIStatusBarConfig_;
     WindowImmersive windowImmersive_;
+};
+
+struct SingleHandCompatibleModeConfig {
+    bool enabled = false;
+    float singleHandScale = 1.0f;
+    float heightChangeRatio = 1.0f;
+    float widthChangeRatio = 1.0f;
+};
+
+struct SingleHandScreenInfo {
+    int32_t scaleRatio = DEFAULT_SCALE_RATIO;
+    int32_t scalePivotX = 0;
+    int32_t scalePivotY = 0;
+    SingleHandMode mode = SingleHandMode::MIDDLE;
 };
 
 struct DeviceScreenConfig {
@@ -799,6 +834,19 @@ struct PostProcessFocusState {
         byForeground_ = true;
         reason_ = FocusChangeReason::DEFAULT;
     }
+};
+
+/**
+ * @brief WindowNode for snapshot
+ */
+enum class SnapshotNodeType : uint32_t {
+    DEFAULT_NODE = 0,
+    LEASH_NODE,
+    APP_NODE,
+};
+
+enum class AsyncTraceTaskId: int32_t {
+    THROW_SLIP_ANIMATION = 0,
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H

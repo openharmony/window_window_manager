@@ -53,7 +53,7 @@ namespace {
  * @tc.desc: Dump
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayDumperTest, Dump01, Function | SmallTest | Level1)
+HWTEST_F(DisplayDumperTest, Dump01, TestSize.Level1)
 {
     sptr<DisplayDumper> displayDumper;
     displayDumper = new DisplayDumper(DisplayManagerService::GetInstance().abstractDisplayController_,
@@ -70,7 +70,7 @@ HWTEST_F(DisplayDumperTest, Dump01, Function | SmallTest | Level1)
  * @tc.desc: Dump fd less 0
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayDumperTest, Dump02, Function | SmallTest | Level1)
+HWTEST_F(DisplayDumperTest, Dump02, TestSize.Level1)
 {
     sptr<DisplayDumper> displayDumper;
     displayDumper = new DisplayDumper(DisplayManagerService::GetInstance().abstractDisplayController_,
@@ -87,7 +87,7 @@ HWTEST_F(DisplayDumperTest, Dump02, Function | SmallTest | Level1)
  * @tc.desc: Dump one param with '-h'
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayDumperTest, Dump03, Function | SmallTest | Level1)
+HWTEST_F(DisplayDumperTest, Dump03, TestSize.Level1)
 {
     sptr<DisplayDumper> displayDumper;
     displayDumper = new DisplayDumper(DisplayManagerService::GetInstance().abstractDisplayController_,
@@ -106,7 +106,7 @@ HWTEST_F(DisplayDumperTest, Dump03, Function | SmallTest | Level1)
  * @tc.desc: Dump one param with '-x'
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayDumperTest, Dump04, Function | SmallTest | Level1)
+HWTEST_F(DisplayDumperTest, Dump04, TestSize.Level1)
 {
     sptr<DisplayDumper> displayDumper;
     displayDumper = new DisplayDumper(DisplayManagerService::GetInstance().abstractDisplayController_,
@@ -125,7 +125,7 @@ HWTEST_F(DisplayDumperTest, Dump04, Function | SmallTest | Level1)
  * @tc.desc: Dump two param with '-s -a'
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayDumperTest, Dump05, Function | SmallTest | Level1)
+HWTEST_F(DisplayDumperTest, Dump05, TestSize.Level1)
 {
     sptr<DisplayDumper> displayDumper;
     displayDumper = new DisplayDumper(DisplayManagerService::GetInstance().abstractDisplayController_,
@@ -146,7 +146,7 @@ HWTEST_F(DisplayDumperTest, Dump05, Function | SmallTest | Level1)
  * @tc.desc: Dump two param with '-d -a'
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayDumperTest, Dump06, Function | SmallTest | Level1)
+HWTEST_F(DisplayDumperTest, Dump06, TestSize.Level1)
 {
     sptr<DisplayDumper> displayDumper;
     displayDumper = new DisplayDumper(DisplayManagerService::GetInstance().abstractDisplayController_,
@@ -167,7 +167,7 @@ HWTEST_F(DisplayDumperTest, Dump06, Function | SmallTest | Level1)
  * @tc.desc: Dump two param with '-s 1'
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayDumperTest, Dump071, Function | SmallTest | Level1)
+HWTEST_F(DisplayDumperTest, Dump071, TestSize.Level1)
 {
     sptr<DisplayDumper> displayDumper;
     displayDumper = new DisplayDumper(DisplayManagerService::GetInstance().abstractDisplayController_,
@@ -188,7 +188,7 @@ HWTEST_F(DisplayDumperTest, Dump071, Function | SmallTest | Level1)
  * @tc.desc: Dump two param with '-s -1'
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayDumperTest, Dump07, Function | SmallTest | Level1)
+HWTEST_F(DisplayDumperTest, Dump07, TestSize.Level1)
 {
     sptr<DisplayDumper> displayDumper;
     displayDumper = new DisplayDumper(DisplayManagerService::GetInstance().abstractDisplayController_,
@@ -209,7 +209,7 @@ HWTEST_F(DisplayDumperTest, Dump07, Function | SmallTest | Level1)
  * @tc.desc: Dump two param with '-d 1'
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayDumperTest, Dump08, Function | SmallTest | Level1)
+HWTEST_F(DisplayDumperTest, Dump08, TestSize.Level1)
 {
     sptr<DisplayDumper> displayDumper;
     displayDumper = new DisplayDumper(DisplayManagerService::GetInstance().abstractDisplayController_,
@@ -230,7 +230,7 @@ HWTEST_F(DisplayDumperTest, Dump08, Function | SmallTest | Level1)
  * @tc.desc: Dump two param with '-d -1'
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayDumperTest, Dump09, Function | SmallTest | Level1)
+HWTEST_F(DisplayDumperTest, Dump09, TestSize.Level1)
 {
     sptr<DisplayDumper> displayDumper;
     displayDumper = new DisplayDumper(DisplayManagerService::GetInstance().abstractDisplayController_,
@@ -251,7 +251,7 @@ HWTEST_F(DisplayDumperTest, Dump09, Function | SmallTest | Level1)
  * @tc.desc: Dump three param with '-d -a 1'
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayDumperTest, Dump10, Function | SmallTest | Level1)
+HWTEST_F(DisplayDumperTest, Dump10, TestSize.Level1)
 {
     sptr<DisplayDumper> displayDumper;
     displayDumper = new DisplayDumper(DisplayManagerService::GetInstance().abstractDisplayController_,
@@ -274,7 +274,7 @@ HWTEST_F(DisplayDumperTest, Dump10, Function | SmallTest | Level1)
  * @tc.desc: IsValidDigitString "06w"
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayDumperTest, IsValidDigitString01, Function | SmallTest | Level1)
+HWTEST_F(DisplayDumperTest, IsValidDigitString01, TestSize.Level1)
 {
     sptr<DisplayDumper> displayDumper;
     displayDumper = new DisplayDumper(DisplayManagerService::GetInstance().abstractDisplayController_,
@@ -290,7 +290,7 @@ HWTEST_F(DisplayDumperTest, IsValidDigitString01, Function | SmallTest | Level1)
  * @tc.desc: IsValidDigitString "96+"
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayDumperTest, IsValidDigitString02, Function | SmallTest | Level1)
+HWTEST_F(DisplayDumperTest, IsValidDigitString02, TestSize.Level1)
 {
     sptr<DisplayDumper> displayDumper;
     displayDumper = new DisplayDumper(DisplayManagerService::GetInstance().abstractDisplayController_,
@@ -306,7 +306,7 @@ HWTEST_F(DisplayDumperTest, IsValidDigitString02, Function | SmallTest | Level1)
  * @tc.desc: IsValidDigitString empty
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayDumperTest, IsValidDigitString03, Function | SmallTest | Level1)
+HWTEST_F(DisplayDumperTest, IsValidDigitString03, TestSize.Level1)
 {
     sptr<DisplayDumper> displayDumper;
     displayDumper = new DisplayDumper(DisplayManagerService::GetInstance().abstractDisplayController_,
@@ -322,7 +322,7 @@ HWTEST_F(DisplayDumperTest, IsValidDigitString03, Function | SmallTest | Level1)
  * @tc.desc: DumpAllScreenInfo
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayDumperTest, DumpAllScreenInfo01, Function | SmallTest | Level1)
+HWTEST_F(DisplayDumperTest, DumpAllScreenInfo01, TestSize.Level1)
 {
     sptr<DisplayDumper> displayDumper;
     displayDumper = new DisplayDumper(DisplayManagerService::GetInstance().abstractDisplayController_,
@@ -338,7 +338,7 @@ HWTEST_F(DisplayDumperTest, DumpAllScreenInfo01, Function | SmallTest | Level1)
  * @tc.desc: DumpScreenInfo
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayDumperTest, DumpScreenInfo01, Function | SmallTest | Level1)
+HWTEST_F(DisplayDumperTest, DumpScreenInfo01, TestSize.Level1)
 {
     sptr<DisplayDumper> displayDumper;
     displayDumper = new DisplayDumper(DisplayManagerService::GetInstance().abstractDisplayController_,
@@ -355,7 +355,7 @@ HWTEST_F(DisplayDumperTest, DumpScreenInfo01, Function | SmallTest | Level1)
  * @tc.desc: DumpScreenInfo
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayDumperTest, DumpScreenInfo02, Function | SmallTest | Level1)
+HWTEST_F(DisplayDumperTest, DumpScreenInfo02, TestSize.Level1)
 {
     sptr<DisplayDumper> displayDumper;
     displayDumper = new DisplayDumper(DisplayManagerService::GetInstance().abstractDisplayController_,
@@ -383,7 +383,7 @@ HWTEST_F(DisplayDumperTest, DumpScreenInfo02, Function | SmallTest | Level1)
  * @tc.desc: TransferTypeToString
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayDumperTest, TransferTypeToString, Function | SmallTest | Level1)
+HWTEST_F(DisplayDumperTest, TransferTypeToString, TestSize.Level1)
 {
     sptr<DisplayDumper> displayDumper;
     displayDumper = new DisplayDumper(DisplayManagerService::GetInstance().abstractDisplayController_,
@@ -404,7 +404,7 @@ HWTEST_F(DisplayDumperTest, TransferTypeToString, Function | SmallTest | Level1)
  * @tc.desc: GetScreenInfo
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayDumperTest, GetScreenInfo01, Function | SmallTest | Level1)
+HWTEST_F(DisplayDumperTest, GetScreenInfo01, TestSize.Level1)
 {
     sptr<DisplayDumper> displayDumper;
     displayDumper = new DisplayDumper(DisplayManagerService::GetInstance().abstractDisplayController_,
@@ -421,7 +421,7 @@ HWTEST_F(DisplayDumperTest, GetScreenInfo01, Function | SmallTest | Level1)
  * @tc.desc: GetScreenInfo
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayDumperTest, GetScreenInfo02, Function | SmallTest | Level1)
+HWTEST_F(DisplayDumperTest, GetScreenInfo02, TestSize.Level1)
 {
     sptr<DisplayDumper> displayDumper;
     displayDumper = new DisplayDumper(DisplayManagerService::GetInstance().abstractDisplayController_,
@@ -447,7 +447,7 @@ HWTEST_F(DisplayDumperTest, GetScreenInfo02, Function | SmallTest | Level1)
  * @tc.desc: GetDisplayInfo
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayDumperTest, GetDisplayInfo01, Function | SmallTest | Level1)
+HWTEST_F(DisplayDumperTest, GetDisplayInfo01, TestSize.Level1)
 {
     sptr<DisplayDumper> displayDumper;
     displayDumper = new DisplayDumper(DisplayManagerService::GetInstance().abstractDisplayController_,
@@ -464,7 +464,7 @@ HWTEST_F(DisplayDumperTest, GetDisplayInfo01, Function | SmallTest | Level1)
  * @tc.desc: GetDisplayInfo
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayDumperTest, GetDisplayInfo02, Function | SmallTest | Level1)
+HWTEST_F(DisplayDumperTest, GetDisplayInfo02, TestSize.Level1)
 {
     sptr<DisplayDumper> displayDumper;
     displayDumper = new DisplayDumper(DisplayManagerService::GetInstance().abstractDisplayController_,
@@ -493,7 +493,7 @@ HWTEST_F(DisplayDumperTest, GetDisplayInfo02, Function | SmallTest | Level1)
  * @tc.desc: ShowIllegalArgsInfo
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayDumperTest, ShowIllegalArgsInfo, Function | SmallTest | Level1)
+HWTEST_F(DisplayDumperTest, ShowIllegalArgsInfo, TestSize.Level1)
 {
     sptr<DisplayDumper> displayDumper;
     displayDumper = new DisplayDumper(DisplayManagerService::GetInstance().abstractDisplayController_,

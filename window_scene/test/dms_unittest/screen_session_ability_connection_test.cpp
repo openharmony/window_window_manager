@@ -74,7 +74,7 @@ namespace {
  * @tc.desc: OnAbilityConnectDone func test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionAbilityConnectionTest, OnAbilityConnectDone, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionAbilityConnectionTest, OnAbilityConnectDone, TestSize.Level1)
 {
     sptr<ScreenSessionAbilityConnectionStub> abilityConnectionStub(
         new (std::nothrow) ScreenSessionAbilityConnectionStub());
@@ -106,7 +106,7 @@ HWTEST_F(ScreenSessionAbilityConnectionTest, OnAbilityConnectDone, Function | Sm
  * @tc.desc: OnAbilityDisconnectDone func
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionAbilityConnectionTest, OnAbilityDisconnectDone, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionAbilityConnectionTest, OnAbilityDisconnectDone, TestSize.Level1)
 {
     sptr<ScreenSessionAbilityConnectionStub> abilityConnectionStub(
         new (std::nothrow) ScreenSessionAbilityConnectionStub());
@@ -134,7 +134,7 @@ HWTEST_F(ScreenSessionAbilityConnectionTest, OnAbilityDisconnectDone, Function |
  * @tc.desc: AddObjectDeathRecipient func
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionAbilityConnectionTest, AddObjectDeathRecipient, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionAbilityConnectionTest, AddObjectDeathRecipient, TestSize.Level1)
 {
     sptr<ScreenSessionAbilityConnectionStub> abilityConnectionStub(
         new (std::nothrow) ScreenSessionAbilityConnectionStub());
@@ -149,7 +149,7 @@ HWTEST_F(ScreenSessionAbilityConnectionTest, AddObjectDeathRecipient, Function |
  * @tc.desc: SendMessage func test02
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionAbilityConnectionTest, SendMessage02, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionAbilityConnectionTest, SendMessage02, TestSize.Level1)
 {
     ScreenSessionAbilityConnection screenSessionAbilityConnection;
     int32_t transCode = 0;
@@ -164,7 +164,7 @@ HWTEST_F(ScreenSessionAbilityConnectionTest, SendMessage02, Function | SmallTest
  * @tc.desc: IsConnected func
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionAbilityConnectionTest, IsConnected, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionAbilityConnectionTest, IsConnected, TestSize.Level1)
 {
     ScreenSessionAbilityConnection screenSessionAbilityConnection;
     auto ret = screenSessionAbilityConnection.IsConnected();
@@ -176,7 +176,7 @@ HWTEST_F(ScreenSessionAbilityConnectionTest, IsConnected, Function | SmallTest |
  * @tc.desc: IsAbilityConnected func
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionAbilityConnectionTest, IsAbilityConnected, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionAbilityConnectionTest, IsAbilityConnected, TestSize.Level1)
 {
     sptr<ScreenSessionAbilityConnectionStub> abilityConnectionStub(
         new (std::nothrow) ScreenSessionAbilityConnectionStub());
@@ -191,7 +191,7 @@ HWTEST_F(ScreenSessionAbilityConnectionTest, IsAbilityConnected, Function | Smal
  * @tc.desc: SendMessageSync func
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionAbilityConnectionTest, SendMessageSync, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionAbilityConnectionTest, SendMessageSync, TestSize.Level1)
 {
     sptr<ScreenSessionAbilityConnectionStub> abilityConnectionStub(
         new (std::nothrow) ScreenSessionAbilityConnectionStub());
@@ -233,7 +233,7 @@ HWTEST_F(ScreenSessionAbilityConnectionTest, SendMessageSync, Function | SmallTe
  * @tc.desc: OnRemoteDied func
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionAbilityConnectionTest, OnRemoteDied, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionAbilityConnectionTest, OnRemoteDied, TestSize.Level1)
 {
     sptr<ScreenSessionAbilityConnectionStub> abilityConnectionStub(
         new (std::nothrow) ScreenSessionAbilityConnectionStub());
@@ -261,7 +261,7 @@ HWTEST_F(ScreenSessionAbilityConnectionTest, OnRemoteDied, Function | SmallTest 
  * @tc.desc: IsAbilityConnectedSync func
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionAbilityConnectionTest, IsAbilityConnectedSync, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionAbilityConnectionTest, IsAbilityConnectedSync, TestSize.Level1)
 {
     sptr<ScreenSessionAbilityConnectionStub> abilityConnectionStub(
         new (std::nothrow) ScreenSessionAbilityConnectionStub());
@@ -276,7 +276,7 @@ HWTEST_F(ScreenSessionAbilityConnectionTest, IsAbilityConnectedSync, Function | 
  * @tc.desc: ScreenSessionConnectExtension func
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionAbilityConnectionTest, ScreenSessionConnectExtension, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionAbilityConnectionTest, ScreenSessionConnectExtension, TestSize.Level1)
 {
     sptr<ScreenSessionAbilityConnectionStub> abilityConnectionStub(
         new (std::nothrow) ScreenSessionAbilityConnectionStub());
@@ -303,7 +303,7 @@ HWTEST_F(ScreenSessionAbilityConnectionTest, ScreenSessionConnectExtension, Func
  * @tc.desc: ScreenSessionConnectExtension02 func
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionAbilityConnectionTest, ScreenSessionConnectExtension02, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionAbilityConnectionTest, ScreenSessionConnectExtension02, TestSize.Level1)
 {
     sptr<ScreenSessionAbilityConnectionStub> abilityConnectionStub(
         new (std::nothrow) ScreenSessionAbilityConnectionStub());
@@ -333,7 +333,7 @@ HWTEST_F(ScreenSessionAbilityConnectionTest, ScreenSessionConnectExtension02, Fu
  * @tc.desc: ScreenSessionDisconnectExtension func test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionAbilityConnectionTest, ScreenSessionDisconnectExtension, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionAbilityConnectionTest, ScreenSessionDisconnectExtension, TestSize.Level1)
 {
     sptr<ScreenSessionAbilityConnectionStub> abilityConnectionStub(
         new (std::nothrow) ScreenSessionAbilityConnectionStub());
@@ -365,7 +365,7 @@ HWTEST_F(ScreenSessionAbilityConnectionTest, ScreenSessionDisconnectExtension, F
  * @tc.desc: SendMessage func test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionAbilityConnectionTest, SendMessage, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionAbilityConnectionTest, SendMessage, TestSize.Level1)
 {
     sptr<ScreenSessionAbilityConnectionStub> abilityConnectionStub(
         new (std::nothrow) ScreenSessionAbilityConnectionStub());
@@ -407,7 +407,7 @@ HWTEST_F(ScreenSessionAbilityConnectionTest, SendMessage, Function | SmallTest |
  * @tc.desc: SendMessageBlock func test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionAbilityConnectionTest, SendMessageBlock, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionAbilityConnectionTest, SendMessageBlock, TestSize.Level1)
 {
     sptr<ScreenSessionAbilityConnectionStub> abilityConnectionStub(
         new (std::nothrow) ScreenSessionAbilityConnectionStub());
@@ -449,7 +449,7 @@ HWTEST_F(ScreenSessionAbilityConnectionTest, SendMessageBlock, Function | SmallT
  * @tc.desc: OnRemoteRequest func test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionAbilityConnectionTest, OnRemoteRequest, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionAbilityConnectionTest, OnRemoteRequest, TestSize.Level1)
 {
     sptr<ScreenSessionAbilityConnectionStub> abilityConnectionStub(
         new (std::nothrow) ScreenSessionAbilityConnectionStub());
@@ -492,7 +492,7 @@ HWTEST_F(ScreenSessionAbilityConnectionTest, OnRemoteRequest, Function | SmallTe
  * @tc.desc: GetScreenId func test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionAbilityConnectionTest, GetScreenId, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionAbilityConnectionTest, GetScreenId, TestSize.Level1)
 {
     sptr<ScreenSessionAbilityConnectionStub> abilityConnectionStub(
         new (std::nothrow) ScreenSessionAbilityConnectionStub());
@@ -508,7 +508,7 @@ HWTEST_F(ScreenSessionAbilityConnectionTest, GetScreenId, Function | SmallTest |
  * @tc.desc: GetLeft func test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionAbilityConnectionTest, GetLeft, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionAbilityConnectionTest, GetLeft, TestSize.Level1)
 {
     sptr<ScreenSessionAbilityConnectionStub> abilityConnectionStub(
         new (std::nothrow) ScreenSessionAbilityConnectionStub());
@@ -524,7 +524,7 @@ HWTEST_F(ScreenSessionAbilityConnectionTest, GetLeft, Function | SmallTest | Lev
  * @tc.desc: GetTop func test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionAbilityConnectionTest, GetTop, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionAbilityConnectionTest, GetTop, TestSize.Level1)
 {
     sptr<ScreenSessionAbilityConnectionStub> abilityConnectionStub(
         new (std::nothrow) ScreenSessionAbilityConnectionStub());
@@ -540,7 +540,7 @@ HWTEST_F(ScreenSessionAbilityConnectionTest, GetTop, Function | SmallTest | Leve
  * @tc.desc: GetWidth func test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionAbilityConnectionTest, GetWidth, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionAbilityConnectionTest, GetWidth, TestSize.Level1)
 {
     sptr<ScreenSessionAbilityConnectionStub> abilityConnectionStub(
         new (std::nothrow) ScreenSessionAbilityConnectionStub());
@@ -556,7 +556,7 @@ HWTEST_F(ScreenSessionAbilityConnectionTest, GetWidth, Function | SmallTest | Le
  * @tc.desc: GetHeight func test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionAbilityConnectionTest, GetHeight, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionAbilityConnectionTest, GetHeight, TestSize.Level1)
 {
     sptr<ScreenSessionAbilityConnectionStub> abilityConnectionStub(
         new (std::nothrow) ScreenSessionAbilityConnectionStub());
@@ -572,7 +572,7 @@ HWTEST_F(ScreenSessionAbilityConnectionTest, GetHeight, Function | SmallTest | L
  * @tc.desc: GetErrCode func test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionAbilityConnectionTest, GetErrCode, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionAbilityConnectionTest, GetErrCode, TestSize.Level1)
 {
     sptr<ScreenSessionAbilityConnectionStub> abilityConnectionStub(
         new (std::nothrow) ScreenSessionAbilityConnectionStub());
@@ -588,7 +588,7 @@ HWTEST_F(ScreenSessionAbilityConnectionTest, GetErrCode, Function | SmallTest | 
  * @tc.desc: EraseErrCode func test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionAbilityConnectionTest, EraseErrCode, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionAbilityConnectionTest, EraseErrCode, TestSize.Level1)
 {
     sptr<ScreenSessionAbilityConnectionStub> abilityConnectionStub(
         new (std::nothrow) ScreenSessionAbilityConnectionStub());

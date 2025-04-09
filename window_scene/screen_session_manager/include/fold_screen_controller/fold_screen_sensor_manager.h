@@ -55,6 +55,8 @@ public:
 
     void TriggerDisplaySwitch();
 
+    bool GetSensorRegisterStatus(void);
+
     typedef struct EXTHALLData {
         float flag = 0.0F;
         float hall = 0.0F; // BC axis angle
@@ -106,6 +108,8 @@ private:
     uint16_t globalHall = USHRT_MAX;
 
     bool registerPosture_ = false;
+
+    bool registerHall_ = false;
 };
 } // namespace Rosen
 } // namespace OHOS

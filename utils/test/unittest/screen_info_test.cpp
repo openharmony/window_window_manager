@@ -52,7 +52,7 @@ namespace {
  * @tc.desc: Marshalling Unmarshalling test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenInfoTest, MarshallingUnmarshalling, Function | SmallTest | Level2)
+HWTEST_F(ScreenInfoTest, MarshallingUnmarshalling, TestSize.Level1)
 {
     ScreenInfo screenInfoSrc;
     screenInfoSrc.SetScreenId(1);
@@ -70,7 +70,7 @@ HWTEST_F(ScreenInfoTest, MarshallingUnmarshalling, Function | SmallTest | Level2
  * @tc.desc: Marshalling  test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenInfoTest, Marshalling, Function | SmallTest | Level2)
+HWTEST_F(ScreenInfoTest, Marshalling, TestSize.Level1)
 {
     ScreenInfo screenInfoSrc;
     screenInfoSrc.SetScreenId(1);
@@ -85,7 +85,7 @@ HWTEST_F(ScreenInfoTest, Marshalling, Function | SmallTest | Level2)
  * @tc.desc: InnerUnmarshalling  test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenInfoTest, InnerUnmarshalling, Function | SmallTest | Level2)
+HWTEST_F(ScreenInfoTest, InnerUnmarshalling, TestSize.Level1)
 {
     ScreenInfo screenInfoSrc;
     Parcel parcel;

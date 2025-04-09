@@ -51,7 +51,7 @@ namespace {
  * @tc.desc: HasKey test
  * @tc.type: FUNC
  */
-HWTEST_F(PersistentStorageTest, HasKey, Function | SmallTest | Level3)
+HWTEST_F(PersistentStorageTest, HasKey, TestSize.Level1)
 {
     const std::string keyName = "name";
     auto result = PersistentStorage::HasKey(keyName, PersistentStorageType::UKNOWN);
@@ -66,7 +66,7 @@ HWTEST_F(PersistentStorageTest, HasKey, Function | SmallTest | Level3)
  * @tc.desc: Insert/Get/Delete test
  * @tc.type: FUNC
  */
-HWTEST_F(PersistentStorageTest, StorageOperate, Function | SmallTest | Level3)
+HWTEST_F(PersistentStorageTest, StorageOperate, TestSize.Level1)
 {
     const std::string keyName = "/data/service/el1/public/window/window_aspect_ratio.xml";
     float ratio = 1;

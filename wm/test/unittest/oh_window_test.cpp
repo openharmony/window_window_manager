@@ -75,7 +75,7 @@ namespace {
  * @tc.desc: return OK when show window
  * @tc.type: FUNC
  */
-HWTEST_F(OHWindowTest, ShowWindow01, Function | SmallTest | Level2)
+HWTEST_F(OHWindowTest, ShowWindow01, TestSize.Level1)
 {
     ASSERT_NE(nullptr, scene_);
     ASSERT_NE(nullptr, scene_->GetMainWindow());
@@ -88,13 +88,39 @@ HWTEST_F(OHWindowTest, ShowWindow01, Function | SmallTest | Level2)
  * @tc.desc: return OK when window is shown
  * @tc.type: FUNC
  */
-HWTEST_F(OHWindowTest, IsWindowShowing01, Function | SmallTest | Level2)
+HWTEST_F(OHWindowTest, IsWindowShowing01, TestSize.Level1)
 {
     ASSERT_NE(nullptr, scene_);
     ASSERT_NE(nullptr, scene_->GetMainWindow());
     bool isShow;
     auto ret = OH_WindowManager_IsWindowShown(scene_->GetMainWindow()->GetWindowId(), &isShow);
     EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::OK), ret);
+}
+
+/**
+ * @tc.name: OH_WindowManager_GetAllWindowLayoutInfoList
+ * @tc.desc: OH_WindowManager_GetAllWindowLayoutInfoList test
+ * @tc.type: FUNC
+ */
+HWTEST_F(OHWindowTest, OH_WindowManager_GetAllWindowLayoutInfoList, TestSize.Level0)
+{
+    int64_t displayId = -1;
+    WindowManager_Rect** windowLayoutInfo = nullptr;
+    size_t* windowLayoutInfoSize = nullptr;
+    auto ret = OH_WindowManager_GetAllWindowLayoutInfoList(displayId, windowLayoutInfo, windowLayoutInfoSize);
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM), ret);
+    displayId = 0;
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM), ret);
+    windowLayoutInfo = (WindowManager_Rect**)malloc(sizeof(WindowManager_Rect**));
+    windowLayoutInfoSize = (size_t*)malloc(sizeof(size_t*));
+    ret = OH_WindowManager_GetAllWindowLayoutInfoList(displayId, windowLayoutInfo, windowLayoutInfoSize);
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::OK), ret);
+    OH_WindowManager_ReleaseAllWindowLayoutInfoList(*windowLayoutInfo);
+    *windowLayoutInfo = NULL;
+    free(windowLayoutInfo);
+    windowLayoutInfo = NULL;
+    free(windowLayoutInfoSize);
+    windowLayoutInfoSize = NULL;
 }
 }
 } // namespace Rosen

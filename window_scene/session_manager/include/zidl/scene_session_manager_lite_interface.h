@@ -67,6 +67,7 @@ public:
         TRANS_ID_UNREGISTER_WINDOW_MANAGER_AGENT,
         TRANS_ID_GET_WINDOW_INFO,
         TRANS_ID_CHECK_WINDOW_ID,
+        TRANS_ID_LIST_WINDOW_INFO,
         TRANS_ID_GET_VISIBILITY_WINDOW_INFO_ID,
         TRANS_ID_GET_WINDOW_MODE_TYPE,
         TRANS_ID_GET_TOPN_MAIN_WINDOW_INFO,
@@ -129,6 +130,8 @@ public:
     virtual WSError UnlockSession(int32_t sessionId) = 0;
     virtual WSError RaiseWindowToTop(int32_t persistentId) = 0;
     virtual WMError GetWindowStyleType(WindowStyleType& windowStyleType) = 0;
+    virtual WMError ListWindowInfo(const WindowInfoOption& windowInfoOption,
+        std::vector<sptr<WindowInfo>>& infos) = 0;
 
     /**
      * @brief Application Control SA Notification Window Control Application Information

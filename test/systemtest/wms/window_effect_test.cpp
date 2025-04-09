@@ -70,7 +70,7 @@ namespace {
  * @tc.desc: Set window corner radius
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEffectTest, WindowEffect01, Function | MediumTest | Level3)
+HWTEST_F(WindowEffectTest, WindowEffect01, TestSize.Level1)
 {
     const sptr<Window>& window = Utils::CreateTestWindow(windowInfo_);
     ASSERT_NE(nullptr, window);
@@ -88,7 +88,7 @@ HWTEST_F(WindowEffectTest, WindowEffect01, Function | MediumTest | Level3)
  * @tc.desc: Set window shadow radius
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEffectTest, WindowEffect02, Function | MediumTest | Level3)
+HWTEST_F(WindowEffectTest, WindowEffect02, TestSize.Level1)
 {
     const sptr<Window>& window = Utils::CreateTestWindow(windowInfo_);
     ASSERT_NE(nullptr, window);
@@ -106,7 +106,7 @@ HWTEST_F(WindowEffectTest, WindowEffect02, Function | MediumTest | Level3)
  * @tc.desc: Set window shadow color
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEffectTest, WindowEffect03, Function | MediumTest | Level3)
+HWTEST_F(WindowEffectTest, WindowEffect03, TestSize.Level1)
 {
     const sptr<Window>& window = Utils::CreateTestWindow(windowInfo_);
     ASSERT_NE(nullptr, window);
@@ -131,7 +131,7 @@ HWTEST_F(WindowEffectTest, WindowEffect03, Function | MediumTest | Level3)
  * @tc.desc: Set window shadow offset
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEffectTest, WindowEffect04, Function | MediumTest | Level3)
+HWTEST_F(WindowEffectTest, WindowEffect04, TestSize.Level1)
 {
     const sptr<Window>& window = Utils::CreateTestWindow(windowInfo_);
     ASSERT_NE(nullptr, window);
@@ -154,7 +154,7 @@ HWTEST_F(WindowEffectTest, WindowEffect04, Function | MediumTest | Level3)
  * @tc.desc: Set window blur radius
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEffectTest, WindowEffect05, Function | MediumTest | Level3)
+HWTEST_F(WindowEffectTest, WindowEffect05, TestSize.Level1)
 {
     const sptr<Window>& window = Utils::CreateTestWindow(windowInfo_);
     ASSERT_NE(nullptr, window);
@@ -172,7 +172,7 @@ HWTEST_F(WindowEffectTest, WindowEffect05, Function | MediumTest | Level3)
  * @tc.desc: Set window backdrop blur radius
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEffectTest, WindowEffect06, Function | MediumTest | Level3)
+HWTEST_F(WindowEffectTest, WindowEffect06, TestSize.Level1)
 {
     const sptr<Window>& window = Utils::CreateTestWindow(windowInfo_);
     ASSERT_NE(nullptr, window);
@@ -190,7 +190,7 @@ HWTEST_F(WindowEffectTest, WindowEffect06, Function | MediumTest | Level3)
  * @tc.desc: Set window backdrop blur style
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEffectTest, WindowEffect07, Function | MediumTest | Level3)
+HWTEST_F(WindowEffectTest, WindowEffect07, TestSize.Level1)
 {
     const sptr<Window>& window = Utils::CreateTestWindow(windowInfo_);
     ASSERT_NE(nullptr, window);

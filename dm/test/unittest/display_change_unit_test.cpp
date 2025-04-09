@@ -91,7 +91,7 @@ namespace {
  * @tc.desc: Register and Unregister displayChangeListener with valid listener and check return true
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayChangeUnitTest, RegisterDisplayChangeListener01, Function | SmallTest | Level2)
+HWTEST_F(DisplayChangeUnitTest, RegisterDisplayChangeListener01, TestSize.Level1)
 {
     Mocker m;
     EXPECT_CALL(m.Mock(), RegisterDisplayManagerAgent(_, DisplayManagerAgentType::DISPLAY_EVENT_LISTENER))
@@ -110,7 +110,7 @@ HWTEST_F(DisplayChangeUnitTest, RegisterDisplayChangeListener01, Function | Smal
  * @tc.desc: Register and Unregister displayChangeListener with nullptr and check return false
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayChangeUnitTest, RegisterDisplayChangeListener02, Function | SmallTest | Level2)
+HWTEST_F(DisplayChangeUnitTest, RegisterDisplayChangeListener02, TestSize.Level1)
 {
     Mocker m;
     EXPECT_CALL(m.Mock(), RegisterDisplayManagerAgent(_, DisplayManagerAgentType::DISPLAY_EVENT_LISTENER))
@@ -129,7 +129,7 @@ HWTEST_F(DisplayChangeUnitTest, RegisterDisplayChangeListener02, Function | Smal
  * @tc.desc: Register and Unregister displayChangeListener when ipc fails and check return false
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayChangeUnitTest, RegisterDisplayChangeListener03, Function | SmallTest | Level2)
+HWTEST_F(DisplayChangeUnitTest, RegisterDisplayChangeListener03, TestSize.Level1)
 {
     Mocker m;
     EXPECT_CALL(m.Mock(), RegisterDisplayManagerAgent(_, DisplayManagerAgentType::DISPLAY_EVENT_LISTENER))

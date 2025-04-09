@@ -74,11 +74,11 @@ namespace {
  * @tc.desc: test function : GetNormalSingleHandTransform
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerLayoutTest, GetNormalSingleHandTransform, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerLayoutTest, GetNormalSingleHandTransform, TestSize.Level1)
 {
     SingleHandTransform preTransform = ssm_->singleHandTransform_;
     ssm_->singleHandTransform_.posX = 100;
-    ASSERT_EQ(100, ssm_->GetNormalSingleHandTransform().posX);
+    EXPECT_EQ(100, ssm_->GetNormalSingleHandTransform().posX);
     ssm_->singleHandTransform_ = preTransform;
 }
 
@@ -87,26 +87,29 @@ HWTEST_F(SceneSessionManagerLayoutTest, GetNormalSingleHandTransform, Function |
  * @tc.desc: test function : NotifySingleHandInfoChange
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerLayoutTest, NotifySingleHandInfoChange_TestUIType, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerLayoutTest, NotifySingleHandInfoChange_TestUIType, TestSize.Level1)
 {
     SingleHandTransform singleHandTransform;
     ssm_->singleHandTransform_ = singleHandTransform;
-    float singleHandScaleX = SINGLE_HAND_SCALE;
-    float singleHandScaleY = SINGLE_HAND_SCALE;
-    SingleHandMode singleHandMode = SingleHandMode::LEFT;
+    SingleHandScreenInfo singleHandScreenInfo;
+    WSRect originRect, singleHandRect;
+    singleHandScreenInfo.scaleRatio = SINGLE_HAND_SCALE;
+    singleHandScreenInfo.mode = SingleHandMode::LEFT;
+    originRect = {0, 0, 400, 600};
+    singleHandRect = {0, 100, 200, 300};
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
     sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert(std::make_pair(0, screenSession));
 
     ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
-    ssm_->NotifySingleHandInfoChange(singleHandScaleX, singleHandScaleY, singleHandMode);
+    ssm_->NotifySingleHandInfoChange(singleHandScreenInfo, originRect, singleHandRect);
     usleep(WAIT_SYNC_IN_NS);
-    ASSERT_NE(singleHandScaleX, ssm_->singleHandTransform_.scaleX);
+    EXPECT_NE(singleHandScreenInfo.scaleRatio, ssm_->singleHandTransform_.scaleX);
 
     ssm_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    ssm_->NotifySingleHandInfoChange(singleHandScaleX, singleHandScaleY, singleHandMode);
+    ssm_->NotifySingleHandInfoChange(singleHandScreenInfo, originRect, singleHandRect);
     usleep(WAIT_SYNC_IN_NS);
-    ASSERT_EQ(singleHandScaleX, ssm_->singleHandTransform_.scaleX);
+    EXPECT_EQ(singleHandScreenInfo.scaleRatio, ssm_->singleHandTransform_.scaleX);
     ssm_->singleHandTransform_ = singleHandTransform;
 }
 
@@ -115,7 +118,7 @@ HWTEST_F(SceneSessionManagerLayoutTest, NotifySingleHandInfoChange_TestUIType, F
  * @tc.desc: test function : NotifySingleHandInfoChange
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerLayoutTest, NotifySingleHandInfoChange_TestWindowName, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerLayoutTest, NotifySingleHandInfoChange_TestWindowName, TestSize.Level1)
 {
     SingleHandTransform singleHandTransform;
     ssm_->singleHandTransform_ = singleHandTransform;
@@ -123,19 +126,22 @@ HWTEST_F(SceneSessionManagerLayoutTest, NotifySingleHandInfoChange_TestWindowNam
     sessionInfo.bundleName_ = "OneHandModeBackground_testWindow";
     sessionInfo.abilityName_ = "OneHandModeBackground_testWindow";
     sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(sessionInfo, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
     sceneSession->property_->SetWindowName("OneHandModeBackground_testWindow");
     ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
     sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert(std::make_pair(0, screenSession));
-    float singleHandScaleX = SINGLE_HAND_SCALE;
-    float singleHandScaleY = SINGLE_HAND_SCALE;
-    SingleHandMode singleHandMode = SingleHandMode::LEFT;
+    SingleHandScreenInfo singleHandScreenInfo;
+    WSRect originRect, singleHandRect;
+    originRect = {0, 0, 400, 600};
+    singleHandRect = {0, 100, 200, 300};
+    singleHandScreenInfo.scaleRatio = SINGLE_HAND_SCALE;
+    singleHandScreenInfo.mode = SingleHandMode::LEFT;
     ssm_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    ssm_->NotifySingleHandInfoChange(singleHandScaleX, singleHandScaleY, singleHandMode);
+    ssm_->NotifySingleHandInfoChange(singleHandScreenInfo, originRect, singleHandRect);
     usleep(WAIT_SYNC_IN_NS);
-    ASSERT_NE(singleHandScaleX, sceneSession->singleHandTransform_.scaleX);
+    EXPECT_NE(singleHandScreenInfo.scaleRatio, sceneSession->singleHandTransform_.scaleX);
 }
 
 /**
@@ -143,13 +149,16 @@ HWTEST_F(SceneSessionManagerLayoutTest, NotifySingleHandInfoChange_TestWindowNam
  * @tc.desc: test function : NotifySingleHandInfoChange
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerLayoutTest, NotifySingleHandInfoChange_TestDisplayId, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerLayoutTest, NotifySingleHandInfoChange_TestDisplayId, TestSize.Level1)
 {
     SingleHandTransform singleHandTransform;
     ssm_->singleHandTransform_ = singleHandTransform;
-    float singleHandScaleX = SINGLE_HAND_SCALE;
-    float singleHandScaleY = SINGLE_HAND_SCALE;
-    SingleHandMode singleHandMode = SingleHandMode::LEFT;
+    SingleHandScreenInfo singleHandScreenInfo;
+    WSRect originRect, singleHandRect;
+    originRect = {0, 0, 400, 600};
+    singleHandRect = {0, 100, 200, 300};
+    singleHandScreenInfo.scaleRatio = SINGLE_HAND_SCALE;
+    singleHandScreenInfo.mode = SingleHandMode::LEFT;
     ssm_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
     sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
@@ -158,18 +167,18 @@ HWTEST_F(SceneSessionManagerLayoutTest, NotifySingleHandInfoChange_TestDisplayId
     sessionInfo.bundleName_ = "NotifySingleHandInfoChange_TestDisplayId";
     sessionInfo.abilityName_ = "NotifySingleHandInfoChange_TestDisplayId";
     sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(sessionInfo, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
 
     sceneSession->GetSessionProperty()->SetDisplayId(2025);
     ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
-    ssm_->NotifySingleHandInfoChange(singleHandScaleX, singleHandScaleY, singleHandMode);
+    ssm_->NotifySingleHandInfoChange(singleHandScreenInfo, originRect, singleHandRect);
     usleep(WAIT_SYNC_IN_NS);
-    ASSERT_NE(singleHandScaleX, sceneSession->singleHandTransform_.scaleX);
+    EXPECT_NE(singleHandScreenInfo.scaleRatio, sceneSession->singleHandTransform_.scaleX);
 
     sceneSession->GetSessionProperty()->SetDisplayId(0);
-    ssm_->NotifySingleHandInfoChange(singleHandScaleX, singleHandScaleY, singleHandMode);
+    ssm_->NotifySingleHandInfoChange(singleHandScreenInfo, originRect, singleHandRect);
     usleep(WAIT_SYNC_IN_NS);
-    ASSERT_EQ(singleHandScaleX, sceneSession->singleHandTransform_.scaleX);
+    EXPECT_EQ(singleHandScreenInfo.scaleRatio, sceneSession->singleHandTransform_.scaleY);
     ssm_->singleHandTransform_ = singleHandTransform;
 }
 
@@ -178,7 +187,7 @@ HWTEST_F(SceneSessionManagerLayoutTest, NotifySingleHandInfoChange_TestDisplayId
  * @tc.desc: test function : NotifySingleHandInfoChange
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerLayoutTest, NotifySingleHandInfoChange_TestMode, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerLayoutTest, NotifySingleHandInfoChange_TestMode, TestSize.Level1)
 {
     SingleHandTransform singleHandTransform;
     ssm_->singleHandTransform_ = singleHandTransform;
@@ -187,31 +196,33 @@ HWTEST_F(SceneSessionManagerLayoutTest, NotifySingleHandInfoChange_TestMode, Fun
     sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert(std::make_pair(0, screenSession));
 
-    float singleHandScaleX = SINGLE_HAND_SCALE;
-    float singleHandScaleY = SINGLE_HAND_SCALE;
-    SingleHandMode singleHandMode = SingleHandMode::LEFT;
-    ssm_->NotifySingleHandInfoChange(singleHandScaleX, singleHandScaleY, singleHandMode);
+    SingleHandScreenInfo singleHandScreenInfo;
+    WSRect originRect, singleHandRect;
+    originRect = {0, 0, 400, 600};
+    singleHandRect = {0, 100, 200, 300};
+    singleHandScreenInfo.scaleRatio = SINGLE_HAND_SCALE;
+    singleHandScreenInfo.mode = SingleHandMode::LEFT;
+    ssm_->NotifySingleHandInfoChange(singleHandScreenInfo, originRect, singleHandRect);
     usleep(WAIT_SYNC_IN_NS);
-    ASSERT_NE(0, ssm_->singleHandTransform_.posY);
-    ASSERT_EQ(0, ssm_->singleHandTransform_.posX);
+    EXPECT_EQ(100, ssm_->singleHandTransform_.posY);
+    EXPECT_EQ(0, ssm_->singleHandTransform_.posX);
     ssm_->singleHandTransform_ = singleHandTransform;
 
-    singleHandScaleX = SINGLE_HAND_SCALE;
-    singleHandScaleY = SINGLE_HAND_SCALE;
-    singleHandMode = SingleHandMode::RIGHT;
-    ssm_->NotifySingleHandInfoChange(singleHandScaleX, singleHandScaleY, singleHandMode);
+    singleHandScreenInfo.mode = SingleHandMode::RIGHT;
+    singleHandRect = {50, 100, 200, 300};
+    ssm_->NotifySingleHandInfoChange(singleHandScreenInfo, originRect, singleHandRect);
     usleep(WAIT_SYNC_IN_NS);
-    ASSERT_NE(0, ssm_->singleHandTransform_.posY);
-    ASSERT_NE(0, ssm_->singleHandTransform_.posX);
+    EXPECT_EQ(100, ssm_->singleHandTransform_.posY);
+    EXPECT_EQ(50, ssm_->singleHandTransform_.posX);
     ssm_->singleHandTransform_ = singleHandTransform;
 
-    singleHandScaleX = SINGLE_HAND_DEFAULT_SCALE;
-    singleHandScaleY = SINGLE_HAND_DEFAULT_SCALE;
-    singleHandMode = SingleHandMode::MIDDLE;
-    ssm_->NotifySingleHandInfoChange(singleHandScaleX, singleHandScaleY, singleHandMode);
+    singleHandScreenInfo.scaleRatio = SINGLE_HAND_DEFAULT_SCALE;
+    singleHandScreenInfo.mode = SingleHandMode::MIDDLE;
+    singleHandRect = {0, 0, 200, 300};
+    ssm_->NotifySingleHandInfoChange(singleHandScreenInfo, originRect, singleHandRect);
     usleep(WAIT_SYNC_IN_NS);
-    ASSERT_EQ(0, ssm_->singleHandTransform_.posY);
-    ASSERT_EQ(0, ssm_->singleHandTransform_.posX);
+    EXPECT_EQ(0, ssm_->singleHandTransform_.posY);
+    EXPECT_EQ(0, ssm_->singleHandTransform_.posX);
     ssm_->singleHandTransform_ = singleHandTransform;
 }
 
@@ -220,15 +231,15 @@ HWTEST_F(SceneSessionManagerLayoutTest, NotifySingleHandInfoChange_TestMode, Fun
  * @tc.desc: test function : GetDisplaySizeById
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerLayoutTest, GetDisplaySizeById_TestDisplayId, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerLayoutTest, GetDisplaySizeById_TestDisplayId, TestSize.Level1)
 {
     DisplayId displayId = 2025;
     int32_t displayWidth = 0;
     int32_t displayHeight = 0;
-    ASSERT_EQ(false, ssm_->GetDisplaySizeById(displayId, displayWidth, displayHeight));
+    EXPECT_EQ(false, ssm_->GetDisplaySizeById(displayId, displayWidth, displayHeight));
 
     displayId = 0;
-    ASSERT_EQ(true, ssm_->GetDisplaySizeById(displayId, displayWidth, displayHeight));
+    EXPECT_EQ(true, ssm_->GetDisplaySizeById(displayId, displayWidth, displayHeight));
 }
 }
 } // namespace Rosen

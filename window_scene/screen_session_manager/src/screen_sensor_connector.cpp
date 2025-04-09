@@ -165,8 +165,8 @@ void TentMotionEventCallback(const MotionSensorEvent& motionData)
         TLOGE(WmsLogTag::DMS, "tent mode datalen %{public}d", motionData.dataLen);
         return;
     }
-    int32_t tentData = motionData.data[0];
-    int realHall = static_cast<int>(tentData & 0*FF);
+    uint32_t tentData = static_cast<uint32_t>(motionData.data[0]);
+    int realHall = static_cast<int>(tentData & 0xFF);
     if (realHall != 0 && realHall != 1) {
         TLOGW(WmsLogTag::DMS, "tent mode invalid hall : %{public}d", realHall);
         realHall = -1;
@@ -174,7 +174,7 @@ void TentMotionEventCallback(const MotionSensorEvent& motionData)
 
     if (motionData.status == MOTION_ACTION_TENT_MODE_OFF || motionData.status == MOTION_ACTION_TENT_MODE_ON ||
         motionData.status == MOTION_ACTION_TENT_MODE_HOVER) {
-        ScreenTentProperty::HandleSensorEventInput(motionData.status, realhall);
+        ScreenTentProperty::HandleSensorEventInput(motionData.status, realHall);
     } else {
         TLOGE(WmsLogTag::DMS, "tent motion:%{public}d invalid", motionData.status);
     }

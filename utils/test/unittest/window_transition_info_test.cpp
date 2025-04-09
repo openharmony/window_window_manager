@@ -67,7 +67,7 @@ namespace {
  * @tc.desc: WindowTransitionInfo::WindowTransitionInfo test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTransitionInfoTest, WindowTransitionInfo01, Function | SmallTest | Level2)
+HWTEST_F(WindowTransitionInfoTest, WindowTransitionInfo01, TestSize.Level1)
 {
     sptr<AAFwk::AbilityTransitionInfo> info = new(std::nothrow) AAFwk::AbilityTransitionInfo();
     ASSERT_NE(nullptr, info);
@@ -94,7 +94,7 @@ HWTEST_F(WindowTransitionInfoTest, WindowTransitionInfo01, Function | SmallTest 
  * @tc.desc: WindowTransitionInfo::Marshalling test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTransitionInfoTest, Marshalling01, Function | SmallTest | Level2)
+HWTEST_F(WindowTransitionInfoTest, Marshalling01, TestSize.Level1)
 {
     sptr<AAFwk::AbilityTransitionInfo> info = new(std::nothrow) AAFwk::AbilityTransitionInfo();
     ASSERT_NE(nullptr, info);
@@ -120,7 +120,7 @@ HWTEST_F(WindowTransitionInfoTest, Marshalling01, Function | SmallTest | Level2)
  * @tc.desc: WindowTransitionInfo::Unmarshalling test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTransitionInfoTest, Unmarshalling, Function | SmallTest | Level2)
+HWTEST_F(WindowTransitionInfoTest, Unmarshalling, TestSize.Level1)
 {
     sptr<AAFwk::AbilityTransitionInfo> info = new(std::nothrow) AAFwk::AbilityTransitionInfo();
     ASSERT_NE(nullptr, info);
@@ -149,7 +149,7 @@ HWTEST_F(WindowTransitionInfoTest, Unmarshalling, Function | SmallTest | Level2)
  * @tc.desc: WindowTransitionInfo::GetBundleName test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTransitionInfoTest, GetBundleName, Function | SmallTest | Level2)
+HWTEST_F(WindowTransitionInfoTest, GetBundleName, TestSize.Level1)
 {
     sptr<AAFwk::AbilityTransitionInfo> info = new(std::nothrow) AAFwk::AbilityTransitionInfo();
     ASSERT_NE(nullptr, info);
@@ -168,7 +168,7 @@ HWTEST_F(WindowTransitionInfoTest, GetBundleName, Function | SmallTest | Level2)
  * @tc.desc: WindowTransitionInfo::GetAbilityName test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTransitionInfoTest, GetAbilityName, Function | SmallTest | Level2)
+HWTEST_F(WindowTransitionInfoTest, GetAbilityName, TestSize.Level1)
 {
     sptr<AAFwk::AbilityTransitionInfo> info = new(std::nothrow) AAFwk::AbilityTransitionInfo();
     ASSERT_NE(nullptr, info);
@@ -187,7 +187,7 @@ HWTEST_F(WindowTransitionInfoTest, GetAbilityName, Function | SmallTest | Level2
  * @tc.desc: WindowTransitionInfo::GetWindowMode test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTransitionInfoTest, GetWindowMode, Function | SmallTest | Level2)
+HWTEST_F(WindowTransitionInfoTest, GetWindowMode, TestSize.Level1)
 {
     sptr<AAFwk::AbilityTransitionInfo> info = new(std::nothrow) AAFwk::AbilityTransitionInfo();
     ASSERT_NE(nullptr, info);
@@ -206,7 +206,7 @@ HWTEST_F(WindowTransitionInfoTest, GetWindowMode, Function | SmallTest | Level2)
  * @tc.desc: WindowTransitionInfo::GetWindowRect test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTransitionInfoTest, GetWindowRect, Function | SmallTest | Level2)
+HWTEST_F(WindowTransitionInfoTest, GetWindowRect, TestSize.Level1)
 {
     sptr<AAFwk::AbilityTransitionInfo> info = new(std::nothrow) AAFwk::AbilityTransitionInfo();
     ASSERT_NE(nullptr, info);
@@ -225,7 +225,7 @@ HWTEST_F(WindowTransitionInfoTest, GetWindowRect, Function | SmallTest | Level2)
  * @tc.desc: WindowTransitionInfo::GetAbilityToken test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTransitionInfoTest, GetAbilityToken, Function | SmallTest | Level2)
+HWTEST_F(WindowTransitionInfoTest, GetAbilityToken, TestSize.Level1)
 {
     sptr<AAFwk::AbilityTransitionInfo> info = new(std::nothrow) AAFwk::AbilityTransitionInfo();
     ASSERT_NE(nullptr, info);
@@ -244,7 +244,7 @@ HWTEST_F(WindowTransitionInfoTest, GetAbilityToken, Function | SmallTest | Level
  * @tc.desc: WindowTransitionInfo::GetDisplayId test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTransitionInfoTest, GetDisplayId, Function | SmallTest | Level2)
+HWTEST_F(WindowTransitionInfoTest, GetDisplayId, TestSize.Level1)
 {
     sptr<AAFwk::AbilityTransitionInfo> info = new(std::nothrow) AAFwk::AbilityTransitionInfo();
     ASSERT_NE(nullptr, info);
@@ -262,7 +262,7 @@ HWTEST_F(WindowTransitionInfoTest, GetDisplayId, Function | SmallTest | Level2)
  * @tc.desc: WindowTransitionInfo::GetWindowType test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTransitionInfoTest, GetWindowType, Function | SmallTest | Level2)
+HWTEST_F(WindowTransitionInfoTest, GetWindowType, TestSize.Level1)
 {
     sptr<AAFwk::AbilityTransitionInfo> info = new(std::nothrow) AAFwk::AbilityTransitionInfo();
     ASSERT_NE(nullptr, info);
@@ -281,7 +281,7 @@ HWTEST_F(WindowTransitionInfoTest, GetWindowType, Function | SmallTest | Level2)
  * @tc.desc: WindowTransitionInfo::GetShowFlagWhenLocked test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTransitionInfoTest, GetShowFlagWhenLocked, Function | SmallTest | Level2)
+HWTEST_F(WindowTransitionInfoTest, GetShowFlagWhenLocked, TestSize.Level1)
 {
     sptr<AAFwk::AbilityTransitionInfo> info = new(std::nothrow) AAFwk::AbilityTransitionInfo();
     ASSERT_NE(nullptr, info);
@@ -299,7 +299,7 @@ HWTEST_F(WindowTransitionInfoTest, GetShowFlagWhenLocked, Function | SmallTest |
  * @tc.desc: WindowTransitionInfo::GetWindowSupportModes test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTransitionInfoTest, GetWindowSupportModes, Function | SmallTest | Level2)
+HWTEST_F(WindowTransitionInfoTest, GetWindowSupportModes, TestSize.Level1)
 {
     sptr<AAFwk::AbilityTransitionInfo> info = new(std::nothrow) AAFwk::AbilityTransitionInfo();
     ASSERT_NE(nullptr, info);
@@ -323,7 +323,7 @@ HWTEST_F(WindowTransitionInfoTest, GetWindowSupportModes, Function | SmallTest |
  * @tc.desc: WindowTransitionInfo::GetWindowSizeLimits test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTransitionInfoTest, GetWindowSizeLimits, Function | SmallTest | Level2)
+HWTEST_F(WindowTransitionInfoTest, GetWindowSizeLimits, TestSize.Level1)
 {
     sptr<AAFwk::AbilityTransitionInfo> info = new(std::nothrow) AAFwk::AbilityTransitionInfo();
     ASSERT_NE(nullptr, info);
@@ -349,7 +349,7 @@ HWTEST_F(WindowTransitionInfoTest, GetWindowSizeLimits, Function | SmallTest | L
  * @tc.desc: WindowTransitionInfo::GetTransitionReason test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTransitionInfoTest, GetTransitionReason, Function | SmallTest | Level2)
+HWTEST_F(WindowTransitionInfoTest, GetTransitionReason, TestSize.Level1)
 {
     sptr<AAFwk::AbilityTransitionInfo> info = new(std::nothrow) AAFwk::AbilityTransitionInfo();
     ASSERT_NE(nullptr, info);
@@ -392,7 +392,7 @@ HWTEST_F(WindowTransitionInfoTest, GetTransitionReason, Function | SmallTest | L
  * @tc.desc: WindowTransitionInfo::GetOrientation test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTransitionInfoTest, GetOrientation01, Function | SmallTest | Level2)
+HWTEST_F(WindowTransitionInfoTest, GetOrientation01, TestSize.Level1)
 {
     sptr<AAFwk::AbilityTransitionInfo> info = new(std::nothrow) AAFwk::AbilityTransitionInfo();
     ASSERT_NE(nullptr, info);
@@ -440,7 +440,7 @@ HWTEST_F(WindowTransitionInfoTest, GetOrientation01, Function | SmallTest | Leve
  * @tc.desc: WindowTransitionInfo::GetOrientation test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTransitionInfoTest, GetOrientation02, Function | SmallTest | Level2)
+HWTEST_F(WindowTransitionInfoTest, GetOrientation02, TestSize.Level1)
 {
     sptr<AAFwk::AbilityTransitionInfo> info = new(std::nothrow) AAFwk::AbilityTransitionInfo();
     ASSERT_NE(nullptr, info);
@@ -483,7 +483,7 @@ HWTEST_F(WindowTransitionInfoTest, GetOrientation02, Function | SmallTest | Leve
  * @tc.desc: WindowTransitionInfo::GetIsRecent test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTransitionInfoTest, GetIsRecent, Function | SmallTest | Level2)
+HWTEST_F(WindowTransitionInfoTest, GetIsRecent, TestSize.Level1)
 {
     sptr<AAFwk::AbilityTransitionInfo> info = new(std::nothrow) AAFwk::AbilityTransitionInfo();
     ASSERT_NE(nullptr, info);
@@ -501,7 +501,7 @@ HWTEST_F(WindowTransitionInfoTest, GetIsRecent, Function | SmallTest | Level2)
  * @tc.desc: WindowTransitionInfo::GetApiCompatibleVersion test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTransitionInfoTest, GetApiCompatibleVersion, Function | SmallTest | Level2)
+HWTEST_F(WindowTransitionInfoTest, GetApiCompatibleVersion, TestSize.Level1)
 {
     sptr<AAFwk::AbilityTransitionInfo> info = new(std::nothrow) AAFwk::AbilityTransitionInfo();
     ASSERT_NE(nullptr, info);
@@ -519,7 +519,7 @@ HWTEST_F(WindowTransitionInfoTest, GetApiCompatibleVersion, Function | SmallTest
  * @tc.desc: WindowTransitionInfo::GetMissionId test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTransitionInfoTest, GetMissionId, Function | SmallTest | Level2)
+HWTEST_F(WindowTransitionInfoTest, GetMissionId, TestSize.Level1)
 {
     sptr<AAFwk::AbilityTransitionInfo> info = new(std::nothrow) AAFwk::AbilityTransitionInfo();
     ASSERT_NE(nullptr, info);
