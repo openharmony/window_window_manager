@@ -2870,6 +2870,28 @@ HWTEST_F(ScreenSessionTest, UpdateExpandAvailableArea, Function | SmallTest | Le
     ASSERT_EQ(res, true);
     GTEST_LOG_(INFO) << "ScreenSessionTest: UpdateExpandAvailableArea end";
 }
+
+/**
+ * @tc.name: UpdateDisplayNodeRotation
+ * @tc.desc: UpdateDisplayNodeRotation test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, UpdateDisplayNodeRotation, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: UpdateDisplayNodeRotation start";
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(screenSession, nullptr);
+    screenSession->UpdateDisplayNodeRotation(1);
+    ASSERT_EQ(screenSession->isExtended_, false);
+
+    Rosen::RSDisplayNodeConfig rsConfig;
+    rsConfig.isMirrored = true;
+    rsConfig.screenId = 101;
+    screenSession->CreateDisplayNode(rsConfig);
+    screenSession->UpdateDisplayNodeRotation(1);
+    ASSERT_EQ(screenSession->isExtended_, false);
+    GTEST_LOG_(INFO) << "ScreenSessionTest: UpdateDisplayNodeRotation end";
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
