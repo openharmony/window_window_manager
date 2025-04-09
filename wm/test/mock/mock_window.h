@@ -159,7 +159,8 @@ public:
 class MockIWaterfallModeChangeListener : public IWaterfallModeChangeListener {
 public:
     bool isWaterfallMode_ = false;
-    void OnWaterfallModeChange(bool isWaterfallMode) override {
+    void OnWaterfallModeChange(bool isWaterfallMode) override
+    {
         isWaterfallMode_ = isWaterfallMode;
     }
 };
