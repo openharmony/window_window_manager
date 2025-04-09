@@ -649,6 +649,21 @@ public:
 };
 
 /**
+ * @class IWaterfallModeChangeListener
+ *
+ * @brief IWaterfallModeChangeListener is used to observe the waterfall mode.
+ */
+class IWaterfallModeChangeListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when waterfall mode changed.
+     *
+     * @param isWaterfallMode new waterfall mode.
+     */
+    virtual void OnWaterfallModeChange(bool isWaterfallMode) {}
+};
+
+/**
  * @class IPreferredOrientationChangeListener
  *
  * @brief listener of preferred orientation change which set by developer.
@@ -3401,6 +3416,35 @@ public:
      * @param want the want to update param.
      */
     virtual void UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>& want) {}
+
+    /**
+     * @brief Query whether the waterfall mode is enabled or not.
+     *
+     * @return true means the waterfall mode is enabled, and false means the opposite.
+     */
+    virtual bool IsWaterfallModeEnabled() { return false; }
+
+    /**
+     * @brief Register waterfall mode change listener.
+     *
+     * @param listener IWaterfallModeChangeListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterWaterfallModeChangeListener(const sptr<IWaterfallModeChangeListener>& listener)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Unregister waterfall mode change listener.
+     *
+     * @param listener IWaterfallModeChangeListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterWaterfallModeChangeListener(const sptr<IWaterfallModeChangeListener>& listener)
+    {
+        return WMError::WM_OK;
+    }
 
     /**
      * @brief Register window scene attach or detach framenode listener.
