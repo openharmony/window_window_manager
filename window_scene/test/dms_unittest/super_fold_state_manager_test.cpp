@@ -397,6 +397,22 @@ HWTEST_F(SuperFoldStateManagerTest, SetSystemKeyboardStatus02, Function | SmallT
  
     EXPECT_EQ(curState, expState);
 }
+
+/**
+ * @tc.name: GetCurrentStatus_ShouldReturnKeyboard_WhenHalfScreenIsFalse
+ * @tc.desc: Test GetCurrentStatus function when isHalfScreen_ is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SuperFoldStateManagerTest, GetCurrentStatus_ShouldReturnKeyboard_WhenHalfScreenIsFalse, TestSize.Level1)
+{
+    SuperFoldStateManager superFoldStateManager = SuperFoldStateManager();
+    superFoldStateManager.SetCurrentStatus(SuperFoldStatus::UNKNOWN);
+    superFoldStateManager.ChangeScreenState(false);
+
+    SuperFoldStatus curState = superFoldStateManager.GetCurrentStatus();
+
+    EXPECT_EQ(curState, SuperFoldStatus::UNKNOWN);
+}
 }
 }
 }
