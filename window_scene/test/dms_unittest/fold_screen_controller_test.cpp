@@ -25,7 +25,13 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
+    constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
+    std::string g_errLog;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
+        const char *msg)
+    {
+        g_errLog = msg;
+    }
 }
 class FoldScreenControllerTest : public testing::Test {
 public:
@@ -593,6 +599,139 @@ namespace {
             ssm_.foldScreenController_->OnTentModeChanged(isTentMode);
             ASSERT_EQ(ssm_.foldScreenController_->GetTentMode(), true);
         }
+    }
+
+    /**
+     * @tc.name: GetModeMatchStatus_ShouldReturnUnknow_WhenFoldScreenPolicyNull
+     * @tc.desc: Test GetModeMatchStatu method when foldScreenPolicy_ is null
+     * @tc.type: FUNC
+     */
+    HWTEST_F(FoldScreenControllerTest, GetModeMatchStatus_ShouldReturnUnknow_WhenFoldScreenPolicyNull,
+        TestSize.Level1)
+    {
+        //Arrange
+        std::recursive_mutex displayInfoMutex;
+        auto screenPowerTaskScheduler = std::shared_ptr<TaskScheduler>();
+        FoldScreenController foldScreenController(displayInfoMutex, screenPowerTaskScheduler);
+        foldScreenController.foldScreenPolicy_ = nullptr;
+
+        //Act
+        auto result = foldScreenController.GetModeMatchStatus();
+
+        //Assert
+        EXPECT_EQ(result, FoldDisplayMode::UNKNOWN);
+    }
+
+    /**
+     * @tc.name: GetModeMatchStatus_ShouldReturnMode_WhenFoldScreenPolicyIsNoNull
+     * @tc.desc: Test GetModeMatchStatu method when foldScreenPolicy_ is not null
+     * @tc.type: FUNC
+     */
+    HWTEST_F(FoldScreenControllerTest, GetModeMatchStatus_ShouldReturnUnknow_WhenFoldScreenPolicyIsNotNull,
+        TestSize.Level1)
+    {
+        //Arrange
+        std::recursive_mutex displayInfoMutex;
+        auto screenPowerTaskScheduler = std::shared_ptr<TaskScheduler>();
+        FoldScreenController foldScreenController(displayInfoMutex, screenPowerTaskScheduler);
+
+        //Set a mock foldScreenPolicy_
+        auto foldScreenPolicy = sptr<FoldScreenPolicy>::MakeSptr();
+        foldScreenController.foldScreenPolicy_ = foldScreenPolicy;
+
+        //Act
+        auto result = foldScreenController.GetModeMatchStatus();
+
+        //Assert
+        EXPECT_EQ(result, foldScreenPolicy->GetModeMatchStatus());
+    }
+
+    /**
+     * @tc.name: GetScreenSnapshotRect_NullPolicy
+     * @tc.desc: test function :GetScreenSnapshotRect
+     * @tc.type: FUNC
+     */
+    HWTEST_F(FoldScreenControllerTest, GetScreenSnapshotRect_NullPolicy, TestSize.Level1)
+    {
+        std::recursive_mutex mutex;
+        auto screenPowerTaskScheduler = std::shared_ptr<TaskScheduler>();
+        FoldScreenController controller(mutex, screenPowerTaskScheduler);
+        controller.foldScreenPolicy_ = nullptr;
+
+        Drawing::Rect expectedRect = {0, 0, 0, 0};
+        Drawing::Rect actualRect = controller.GetScreenSnapshotRect();
+
+        EXPECT_EQ(expectedRect.left_, actualRect.left_);
+        EXPECT_EQ(expectedRect.top_, actualRect.top_);
+        EXPECT_EQ(expectedRect.right_, actualRect.right_);
+        EXPECT_EQ(expectedRect.bottom_, actualRect.bottom_);
+    }
+
+    /**
+     * @tc.name: GetScreenSnapshotRect_ValidPolicy
+     * @tc.desc: test function :GetScreenSnapshotRect
+     * @tc.type: FUNC
+     */
+    HWTEST_F(FoldScreenControllerTest, GetScreenSnapshotRect_ValidPolicy, TestSize.Level1)
+    {
+        std::recursive_mutex mutex;
+        auto screenPowerTaskScheduler = std::shared_ptr<TaskScheduler>();
+        FoldScreenController controller(mutex, screenPowerTaskScheduler);
+        auto mockPolicy = sptr<FoldScreenPolicy>::MakeSptr();
+        controller.foldScreenPolicy_ = mockPolicy;
+        Drawing::Rect expectedRect = {0, 0, 0, 0};
+        Drawing::Rect actualRect = controller.GetScreenSnapshotRect();
+        EXPECT_EQ(expectedRect.left_, actualRect.left_);
+        EXPECT_EQ(expectedRect.top_, actualRect.top_);
+        EXPECT_EQ(expectedRect.right_, actualRect.right_);
+        EXPECT_EQ(expectedRect.bottom_, actualRect.bottom_);
+    }
+
+    /**
+     * @tc.name: SetMainScreenRegion_ShouldSetMainScreenRegion_WhenFoldScreenPolicyIsNotNull
+     * @tc.desc: Test SetMainScreenRegion method when foldScreenPolicy_ is not null
+     * @tc.type: FUNC
+     */
+    HWTEST_F(FoldScreenControllerTest, SetMainScreenRegion_ShouldSetMainScreenRegion_WhenFoldScreenPolicyIsNotNull,
+        TestSize.Level1)
+    {
+        //Arrange
+        LOG_SetCallback(MyLogCallback);
+        std::recursive_mutex displayInfoMutex;
+        std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = std::shared_ptr<TaskScheduler>();
+        FoldScreenController foldScreenController(displayInfoMutex, screenPowerTaskScheduler);
+        DMRect mainScreenRegion = {0, 0, 1920, 1080};
+        foldScreenController.foldScreenPolicy_ = nullptr;
+
+        //Act
+        foldScreenController.SetMainScreenRegion(mainScreenRegion);
+
+        //Assert
+        EXPECT_TRUE(g_errLog.find("foldScreenPolicy_ is null") != std::string::npos);
+    }
+
+    /**
+     * @tc.name: SetMainScreenRegion_ShouldSetMainScreenRegion_WhenFoldScreenPolicyIsNotNull
+     * @tc.desc: Test SetMainScreenRegion method when foldScreenPolicy_ is null
+     * @tc.type: FUNC
+     */
+    HWTEST_F(FoldScreenControllerTest, SetMainScreenRegion_ShouldSetMainScreenRegion_WhenFoldScreenPolicyIsNull,
+        TestSize.Level1)
+    {
+        //Arrange
+        LOG_SetCallback(MyLogCallback);
+        std::recursive_mutex displayInfoMutex;
+        std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = std::shared_ptr<TaskScheduler>();
+        FoldScreenController foldScreenController(displayInfoMutex, screenPowerTaskScheduler);
+        DMRect mainScreenRegion = {0, 0, 1920, 1080};
+        auto mockPolicy = sptr<FoldScreenPolicy>::MakeSptr();
+        foldScreenController.foldScreenPolicy_ = mockPolicy;
+
+        //Act
+        foldScreenController.SetMainScreenRegion(mainScreenRegion);
+
+        //Assert
+        EXPECT_TRUE(g_errLog.find("foldScreenPolicy_ is null") == std::string::npos);
     }
 }
 } // namespace Rosen
