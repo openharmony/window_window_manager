@@ -598,18 +598,18 @@ void JsSceneSessionManager::ProcessShiftFocus()
         TLOGND(WmsLogTag::WMS_FOCUS, "ProcessShiftFocus called");
         this->OnShiftFocus(persistentId, displayGroupId);
     };
-    NotifySCBAfterUpdateFocusFunc focusedCallback = [this]() {
-        TLOGND(WmsLogTag::WMS_FOCUS, "scb uicontent focus");
-        const auto& uiContent = RootScene::staticRootScene_->GetUIContent();
+    NotifySCBAfterUpdateFocusFunc focusedCallback = [this](DisplayId displayId) {
+        TLOGND(WmsLogTag::WMS_FOCUS, "scb uicontent focus, displayId: %{public}" PRIu64, displayId);
+        const auto& uiContent = rootScene_->GetUIContentByDisplayId(displayId);
         if (uiContent == nullptr) {
             TLOGNE(WmsLogTag::WMS_FOCUS, "[WMSComm]uiContent is nullptr");
             return;
         }
         uiContent->Focus();
     };
-    NotifySCBAfterUpdateFocusFunc unfocusedCallback = [this]() {
-        TLOGND(WmsLogTag::WMS_FOCUS, "scb uicontent unfocus");
-        const auto& uiContent = RootScene::staticRootScene_->GetUIContent();
+    NotifySCBAfterUpdateFocusFunc unfocusedCallback = [this](DisplayId displayId) {
+        TLOGND(WmsLogTag::WMS_FOCUS, "scb uicontent unfocus, displayId: %{public}" PRIu64, displayId);
+        const auto& uiContent = rootScene_->GetUIContentByDisplayId(displayId);
         if (uiContent == nullptr) {
             TLOGNE(WmsLogTag::WMS_FOCUS, "[WMSComm]uiContent is nullptr");
             return;

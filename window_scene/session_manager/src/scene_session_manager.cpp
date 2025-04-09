@@ -6721,11 +6721,11 @@ WSError SceneSessionManager::ShiftFocus(DisplayId displayId, const sptr<SceneSes
     bool scbCurrFocus = nextSession && nextSession->GetSessionInfo().isSystem_;
     if (!scbPrevFocus && scbCurrFocus) {
         if (notifySCBAfterFocusedFunc_ != nullptr) {
-            notifySCBAfterFocusedFunc_();
+            notifySCBAfterFocusedFunc_(nextSession->GetSessionProperty()->GetDisplayId());
         }
     } else if (scbPrevFocus && !scbCurrFocus) {
         if (notifySCBAfterUnfocusedFunc_ != nullptr) {
-            notifySCBAfterUnfocusedFunc_();
+            notifySCBAfterUnfocusedFunc_(focusedSession->GetSessionProperty()->GetDisplayId());
         }
     }
     TLOGI(WmsLogTag::WMS_FOCUS, "displayId: %{public}" PRIu64
@@ -13706,7 +13706,7 @@ WMError SceneSessionManager::IsWindowRectAutoSave(const std::string& key, bool& 
         }
         return WMError::WM_OK;
     });
-    
+
 }
 
 void SceneSessionManager::SetIsWindowRectAutoSave(const std::string& key, bool enabled,

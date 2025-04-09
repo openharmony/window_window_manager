@@ -115,7 +115,13 @@ public:
     uint32_t GetWindowId() const override { return 1; } // 1 for root
 
     Ace::UIContent* GetUIContent() const override { return uiContent_.get(); }
-    
+
+    Ace::UIContent* GetUIContentByDisplayId(DisplayId displayId);
+
+    void AddRootScene(DisplayId displayId, wptr<Window> window);
+
+    void RemoveRootScene(DisplayId displayId);
+
     void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
 
     /*
@@ -136,10 +142,11 @@ private:
     void RegisterInputEventListener();
 
     std::unique_ptr<Ace::UIContent> uiContent_;
+    std::unordered_map<DisplayId, wptr<Window>> rootSceneMap_;
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_;
     sptr<AppExecFwk::LauncherService> launcherService_;
     float density_ = 1.0f;
-    DisplayId displayId_ = DISPLAY_ID_INVALID;
+    DisplayId displayId_ = DEFAULT_DISPLAY_ID;
     int32_t orientation_ = 0;
     WindowType type_ = WindowType::WINDOW_TYPE_SCENE_BOARD;
     std::string name_ = "EntryView";
