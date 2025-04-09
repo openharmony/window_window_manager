@@ -25,7 +25,8 @@ namespace Rosen {
 class JsPiPWindowListener : public IPiPLifeCycle,
                             public IPiPActionObserver,
                             public IPiPControlObserver,
-                            public IPiPWindowSize {
+                            public IPiPWindowSize,
+                            public IPiPTypeNodeObserver {
 public:
     JsPiPWindowListener(napi_env env, const std::shared_ptr<NativeReference>& callback)
         : env_(env), jsCallBack_(callback) {}
@@ -40,6 +41,7 @@ public:
     void OnActionEvent(const std::string& actionEvent, int32_t statusCode) override;
     void OnControlEvent(PiPControlType controlType, PiPControlStatus statusCode) override;
     void OnPipSizeChange(const PiPWindowSize& size) override;
+    void OnPipTypeNodeChange(const napi_ref nodeRef) override;
 
 private:
     void OnPipListenerCallback(PiPState state, int32_t errorCode);

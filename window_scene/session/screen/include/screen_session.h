@@ -129,6 +129,7 @@ public:
     void SetScreenSceneDpiChangeListener(const SetScreenSceneDpiFunc& func);
     void SetScreenSceneDpi(float density);
     void SetDensityInCurResolution(float densityInCurResolution);
+    float GetDensityInCurResolution();
     void SetDefaultDensity(float defaultDensity);
     void UpdateVirtualPixelRatio(const RRect& bounds);
     void SetScreenType(ScreenType type);
@@ -248,7 +249,6 @@ public:
     uint32_t GetPointerActiveWidth();
     void SetPointerActiveHeight(uint32_t pointerActiveHeight);
     uint32_t GetPointerActiveHeight();
-
     float GetSensorRotation() const;
     DisplaySourceMode GetDisplaySourceMode() const;
     void SetXYPosition(int32_t x, int32_t y);

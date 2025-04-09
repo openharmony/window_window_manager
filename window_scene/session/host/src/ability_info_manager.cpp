@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "../include/ability_info_manager.h"
+#include "ability_info_manager.h"
 
 #include <bundlemgr/launcher_service.h>
 

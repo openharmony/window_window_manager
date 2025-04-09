@@ -61,7 +61,8 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowSessionImpl"};
 constexpr int32_t FORCE_SPLIT_MODE = 5;
 constexpr int32_t API_VERSION_18 = 18;
-constexpr uint32_t LIFECYCLE_ISOLATE_VERSION = 18;
+constexpr uint32_t API_VERSION_MOD = 1000;
+constexpr uint32_t LIFECYCLE_ISOLATE_VERSION = 20;
 constexpr int32_t  WINDOW_ROTATION_CHANGE = 20;
 
 /*
@@ -233,6 +234,7 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     property_->SetParentId(option->GetParentId());
     property_->SetTurnScreenOn(option->IsTurnScreenOn());
     property_->SetKeepScreenOn(option->IsKeepScreenOn());
+    property_->SetViewKeepScreenOn(option->IsViewKeepScreenOn());
     property_->SetWindowMode(option->GetWindowMode());
     property_->SetWindowFlags(option->GetWindowFlags());
     property_->SetCallingSessionId(option->GetCallingWindow());
@@ -531,7 +533,8 @@ WMError WindowSessionImpl::Connect()
     windowEventChannel->SetIsUIExtension(property_->GetWindowType() == WindowType::WINDOW_TYPE_UI_EXTENSION);
     windowEventChannel->SetUIExtensionUsage(property_->GetUIExtensionUsage());
     sptr<IWindowEventChannel> iWindowEventChannel(windowEventChannel);
-    sptr<IRemoteObject> token = context_ ? context_->GetToken() : nullptr;
+    auto context = GetContext();
+    sptr<IRemoteObject> token = context ? context->GetToken() : nullptr;
     if (token) {
         property_->SetTokenState(true);
     }
@@ -568,7 +571,7 @@ bool WindowSessionImpl::NotifyOnKeyPreImeEvent(const std::shared_ptr<MMI::KeyEve
     return PreNotifyKeyEvent(keyEvent);
 }
 
-void WindowSessionImpl::GetSubWidnows(int32_t parentPersistentId, std::vector<sptr<WindowSessionImpl>>& subWindows)
+void WindowSessionImpl::GetSubWindows(int32_t parentPersistentId, std::vector<sptr<WindowSessionImpl>>& subWindows)
 {
     std::lock_guard<std::recursive_mutex> lock(subWindowSessionMutex_);
     auto iter = subWindowSessionMap_.find(parentPersistentId);
@@ -582,7 +585,7 @@ void WindowSessionImpl::GetSubWidnows(int32_t parentPersistentId, std::vector<sp
 void WindowSessionImpl::UpdateSubWindowStateAndNotify(int32_t parentPersistentId, const WindowState newState)
 {
     std::vector<sptr<WindowSessionImpl>> subWindows;
-    GetSubWidnows(parentPersistentId, subWindows);
+    GetSubWindows(parentPersistentId, subWindows);
     if (subWindows.empty()) {
         TLOGD(WmsLogTag::WMS_SUB, "parent window: %{public}d, its subWindowMap is empty", parentPersistentId);
         return;
@@ -712,7 +715,7 @@ void WindowSessionImpl::DestroySubWindow()
     }
     // remove from subWindowMap_ when destroy parent window
     std::vector<sptr<WindowSessionImpl>> subWindows;
-    GetSubWidnows(persistentId, subWindows);
+    GetSubWindows(persistentId, subWindows);
     for (auto iter = subWindows.begin(); iter != subWindows.end(); iter = subWindows.begin()) {
         auto subWindow = *iter;
         if (subWindow == nullptr) {
@@ -769,8 +772,9 @@ WMError WindowSessionImpl::Destroy(bool needNotifyServer, bool needClearListener
     if (needClearListener) {
         ClearListenersById(GetPersistentId());
     }
-    if (context_) {
-        context_.reset();
+    auto context = GetContext();
+    if (context) {
+        context.reset();
     }
     ClearVsyncStation();
     return WMError::WM_OK;
@@ -1154,14 +1158,15 @@ void WindowSessionImpl::CopyUniqueDensityParameter(sptr<WindowSessionImpl> paren
 
 sptr<WindowSessionImpl> WindowSessionImpl::FindMainWindowWithContext()
 {
-    if (context_ == nullptr) {
+    auto context = GetContext();
+    if (context == nullptr) {
         return nullptr;
     }
     std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
     for (const auto& winPair : windowSessionMap_) {
         auto win = winPair.second.second;
         if (win && win->GetType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
-            context_.get() == win->GetContext().get()) {
+            context.get() == win->GetContext().get()) {
             return win;
         }
     }
@@ -1171,12 +1176,13 @@ sptr<WindowSessionImpl> WindowSessionImpl::FindMainWindowWithContext()
 
 sptr<WindowSessionImpl> WindowSessionImpl::FindExtensionWindowWithContext()
 {
-    if (context_ == nullptr) {
+    auto context = GetContext();
+    if (context == nullptr) {
         return nullptr;
     }
     std::shared_lock<std::shared_mutex> lock(windowExtensionSessionMutex_);
     for (const auto& window : windowExtensionSessionSet_) {
-        if (window && context_.get() == window->GetContext().get()) {
+        if (window && context.get() == window->GetContext().get()) {
             return window;
         }
     }
@@ -1186,7 +1192,7 @@ sptr<WindowSessionImpl> WindowSessionImpl::FindExtensionWindowWithContext()
 void WindowSessionImpl::SetUniqueVirtualPixelRatioForSub(bool useUniqueDensity, float virtualPixelRatio)
 {
     std::vector<sptr<WindowSessionImpl>> subWindows;
-    GetSubWidnows(GetPersistentId(), subWindows);
+    GetSubWindows(GetPersistentId(), subWindows);
     for (auto& subWindowSession : subWindows) {
         if (subWindowSession != nullptr) {
             subWindowSession->SetUniqueVirtualPixelRatio(useUniqueDensity, virtualPixelRatio);
@@ -1376,9 +1382,6 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
               rect.width_, rect.height_, GetPersistentId());
         return;
     }
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
-        "WindowSessionimpl::UpdateViewportConfig id:%d [%d, %d, %u, %u] reason:%u", GetPersistentId(),
-        rect.posX_, rect.posY_, rect.width_, rect.height_, reason);
     auto rotation =  ONE_FOURTH_FULL_CIRCLE_DEGREE * static_cast<uint32_t>(displayInfo->GetOriginRotation());
     auto deviceRotation = static_cast<uint32_t>(displayInfo->GetDefaultDeviceRotationOffset());
     uint32_t transformHint = (rotation + deviceRotation) % FULL_CIRCLE_DEGREE;
@@ -1399,6 +1402,9 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
         WLOGFW("uiContent is null!");
         return;
     }
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
+        "WindowSessionimpl::UpdateViewportConfig id:%d [%d, %d, %u, %u] reason:%u orientation:%d", GetPersistentId(),
+        rect.posX_, rect.posY_, rect.width_, rect.height_, reason, orientation);
     uiContent->UpdateViewportConfig(config, reason, rsTransaction, lastAvoidAreaMap_);
 
     if (WindowHelper::IsUIExtensionWindow(GetType())) {
@@ -1416,13 +1422,14 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
 
 int32_t WindowSessionImpl::GetFloatingWindowParentId()
 {
-    if (context_.get() == nullptr) {
+    auto context = GetContext();
+    if (context.get() == nullptr) {
         return INVALID_SESSION_ID;
     }
     std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
     for (const auto& winPair : windowSessionMap_) {
         if (winPair.second.second && WindowHelper::IsMainWindow(winPair.second.second->GetType()) &&
-            context_.get() == winPair.second.second->GetContext().get()) {
+            context.get() == winPair.second.second->GetContext().get()) {
             WLOGFD("Find parent, [parentName: %{public}s, selfPersistentId: %{public}d]",
                 winPair.second.second->GetProperty()->GetWindowName().c_str(), GetPersistentId());
             return winPair.second.second->GetProperty()->GetPersistentId();
@@ -1522,8 +1529,13 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
     OHOS::Ace::UIContentErrorCode& aceRet)
 {
     DestroyExistUIContent();
-    std::unique_ptr<Ace::UIContent> uiContent = ability != nullptr ? Ace::UIContent::Create(ability) :
-        Ace::UIContent::Create(context_.get(), reinterpret_cast<NativeEngine*>(env));
+    std::unique_ptr<Ace::UIContent> uiContent = nullptr;
+    auto context = GetContext();
+    if (ability != nullptr) {
+        uiContent = Ace::UIContent::Create(ability);
+    } else if (context != nullptr) {
+        uiContent = Ace::UIContent::Create(context.get(), reinterpret_cast<NativeEngine*>(env));
+    }
     if (uiContent == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "uiContent nullptr id: %{public}d", GetPersistentId());
         return WMError::WM_ERROR_NULLPTR;
@@ -1697,8 +1709,9 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
     }
 
     uint32_t version = 0;
-    if ((context_ != nullptr) && (context_->GetApplicationInfo() != nullptr)) {
-        version = context_->GetApplicationInfo()->apiCompatibleVersion;
+    auto context = GetContext();
+    if ((context != nullptr) && (context->GetApplicationInfo() != nullptr)) {
+        version = context->GetApplicationInfo()->apiCompatibleVersion;
     }
     // 10 ArkUI new framework support after API10
     if (version < 10) {
@@ -1858,7 +1871,14 @@ const std::shared_ptr<AbilityRuntime::Context> WindowSessionImpl::GetContext() c
 {
     TLOGI(WmsLogTag::DEFAULT, "name:%{public}s, id:%{public}d",
         property_->GetWindowName().c_str(), GetPersistentId());
+    std::shared_lock<std::shared_mutex> lock(contextMutex_);
     return context_;
+}
+
+void WindowSessionImpl::SetContext(const std::shared_ptr<AbilityRuntime::Context>& context)
+{
+    std::unique_lock<std::shared_mutex> lock(contextMutex_);
+    context_ = context;
 }
 
 Rect WindowSessionImpl::GetRequestRect() const
@@ -3108,7 +3128,7 @@ WMError WindowSessionImpl::RegisterSwitchFreeMultiWindowListener(const sptr<ISwi
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "listener is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (!WindowHelper::IsMainWindow(GetType())) {
+    if (!WindowHelper::IsMainWindow(GetType()) && !WindowHelper::IsSubWindow(GetType())) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "window type is not supported");
         return WMError::WM_ERROR_INVALID_CALLING;
     }
@@ -3123,7 +3143,7 @@ WMError WindowSessionImpl::UnregisterSwitchFreeMultiWindowListener(const sptr<IS
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "listener could not be null");
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (!WindowHelper::IsMainWindow(GetType())) {
+    if (!WindowHelper::IsMainWindow(GetType()) && !WindowHelper::IsSubWindow(GetType())) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "window type is not supported");
         return WMError::WM_ERROR_INVALID_CALLING;
     }
@@ -4229,14 +4249,29 @@ EnableIfSame<T, IAvoidAreaChangedListener,
 
 void WindowSessionImpl::NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
 {
-    TLOGI(WmsLogTag::WMS_IMMS,
-          "win [%{public}d %{public}s] type %{public}d area %{public}s",
-          GetPersistentId(), GetWindowName().c_str(), type, avoidArea->ToString().c_str());
     std::lock_guard<std::recursive_mutex> lockListener(avoidAreaChangeListenerMutex_);
     auto avoidAreaChangeListeners = GetListeners<IAvoidAreaChangedListener>();
+    bool isUIExtensionWithSystemHost =
+        WindowHelper::IsUIExtensionWindow(GetType()) && WindowHelper::IsSystemWindow(GetRootHostWindowType());
+    bool isSystemWindow = WindowHelper::IsSystemWindow(GetType());
+    uint32_t currentApiVersion = 0;
+    if (context_ != nullptr && context_->GetApplicationInfo() != nullptr) {
+        currentApiVersion = context_->GetApplicationInfo()->apiTargetVersion % API_VERSION_MOD;
+    }
+    AvoidArea newAvoidArea;
+    // api 18 isolation for UEC with system host window
+    if ((isUIExtensionWithSystemHost || isSystemWindow) && currentApiVersion < API_VERSION_18) {
+        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d api %{public}u type %{public}d not supported",
+            GetPersistentId(), currentApiVersion, type);
+    } else {
+        newAvoidArea = *avoidArea;
+        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d api %{public}u type %{public}d area %{public}s",
+            GetPersistentId(), currentApiVersion, type, newAvoidArea.ToString().c_str());
+    }
+
     for (auto& listener : avoidAreaChangeListeners) {
         if (listener != nullptr) {
-            listener->OnAvoidAreaChanged(*avoidArea, type);
+            listener->OnAvoidAreaChanged(newAvoidArea, type);
         }
     }
 }
@@ -5022,9 +5057,10 @@ WMError WindowSessionImpl::SetBackgroundColor(uint32_t color)
     const bool isAlphaZero = !(color & 0xff000000);
     std::string bundleName;
     std::string abilityName;
-    if ((context_ != nullptr) && (context_->GetApplicationInfo() != nullptr)) {
-        bundleName = context_->GetBundleName();
-        abilityName = context_->GetApplicationInfo()->name;
+    auto context = GetContext();
+    if ((context != nullptr) && (context->GetApplicationInfo() != nullptr)) {
+        bundleName = context->GetBundleName();
+        abilityName = context->GetApplicationInfo()->name;
     }
 
     if (isAlphaZero && WindowHelper::IsMainWindow(GetType())) {
@@ -5288,14 +5324,17 @@ void WindowSessionImpl::SetAutoStartPiP(bool isAutoStart, uint32_t priority, uin
     }
 }
 
-void WindowSessionImpl::UpdatePiPDefaultWindowSizeType(uint32_t defaultWindowSizeType)
+void WindowSessionImpl::UpdatePiPTemplateInfo(PiPTemplateInfo& pipTemplateInfo)
 {
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_PIP, "session is invalid");
         return;
     }
+    TLOGI(WmsLogTag::WMS_PIP, "UpdatePiPTemplateInfo, pipTemplateType: %{public}u, priority: %{public}d, "
+        "defaultWindowSizeType: %{public}d", pipTemplateInfo.pipTemplateType, pipTemplateInfo.priority,
+        pipTemplateInfo.defaultWindowSizeType);
     if (auto hostSession = GetHostSession()) {
-        hostSession->UpdatePiPDefaultWindowSizeType(defaultWindowSizeType);
+        hostSession->UpdatePiPTemplateInfo(pipTemplateInfo);
     }
 }
 
@@ -5649,10 +5688,11 @@ void WindowSessionImpl::AddSetUIContentTimeoutCheck()
         std::ostringstream oss;
         oss << "SetUIContent timeout uid: " << getuid();
         oss << ", windowName: " << window->GetWindowName();
-        if (window->context_) {
-            oss << ", bundleName: " << window->context_->GetBundleName();
-            if (window->context_->GetApplicationInfo()) {
-                oss << ", abilityName: " << window->context_->GetApplicationInfo()->name;
+        auto context = window->GetContext();
+        if (context) {
+            oss << ", bundleName: " << context->GetBundleName();
+            if (context->GetApplicationInfo()) {
+                oss << ", abilityName: " << context->GetApplicationInfo()->name;
             }
         }
         SingletonContainer::Get<WindowInfoReporter>().ReportWindowException(
@@ -5722,10 +5762,11 @@ void WindowSessionImpl::AddSetUIExtensionDestroyTimeoutCheck()
         std::ostringstream oss;
         oss << "SetUIExtDestroy timeout uid: " << getuid();
         oss << ", windowName: " << window->GetWindowName();
-        if (window->context_) {
-            oss << ", bundleName: " << window->context_->GetBundleName();
-            if (window->context_->GetApplicationInfo()) {
-                oss << ", abilityName: " << window->context_->GetApplicationInfo()->name;
+        auto context = window->GetContext();
+        if (context) {
+            oss << ", bundleName: " << context->GetBundleName();
+            if (context->GetApplicationInfo()) {
+                oss << ", abilityName: " << context->GetApplicationInfo()->name;
             }
         }
         SingletonContainer::Get<WindowInfoReporter>().ReportWindowException(
@@ -5804,26 +5845,10 @@ void WindowSessionImpl::GetExtensionConfig(AAFwk::WantParams& want) const
     bool isWaterfallMode = isFullScreenWaterfallMode_.load();
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "waterfall: %{public}d, winId: %{public}u", isWaterfallMode, GetWindowId());
     want.SetParam(Extension::WATERFALL_MODE_FIELD, AAFwk::Integer::Box(static_cast<int32_t>(isWaterfallMode)));
-}
-
-void WindowSessionImpl::UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>& want)
-{
-    if (want == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "null want ptr");
-        return;
-    }
-
-    const auto& configParam = want->GetParams().GetWantParams(Extension::UIEXTENSION_CONFIG_FIELD);
-    auto state = configParam.GetIntParam(Extension::CROSS_AXIS_FIELD, 0);
-    if (IsValidCrossState(state)) {
-        crossAxisState_ = static_cast<CrossAxisState>(state);
-    }
-    auto waterfallModeValue = configParam.GetIntParam(Extension::WATERFALL_MODE_FIELD, 0);
-    isFullScreenWaterfallMode_.store(static_cast<bool>(waterfallModeValue));
-    isValidWaterfallMode_.store(true);
-    want->RemoveParam(Extension::UIEXTENSION_CONFIG_FIELD);
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "CrossAxisState: %{public}d, waterfall: %{public}d, winId: %{public}u",
-        state, isFullScreenWaterfallMode_.load(), GetWindowId());
+    WindowType rootHostWindowType = (GetType() == WindowType::WINDOW_TYPE_UI_EXTENSION) ?
+                                    GetRootHostWindowType() : GetType();
+    want.SetParam(Extension::ROOT_HOST_WINDOW_TYPE_FIELD,
+                  AAFwk::Integer::Box(static_cast<int32_t>(rootHostWindowType)));
 }
 
 bool WindowSessionImpl::IsValidCrossState(int32_t state) const
@@ -5832,14 +5857,16 @@ bool WindowSessionImpl::IsValidCrossState(int32_t state) const
         state < static_cast<int32_t>(CrossAxisState::STATE_END);
 }
 
-void WindowSessionImpl::UpdateSubWindowLevel(uint32_t subWindowLevel)
+void WindowSessionImpl::UpdateSubWindowInfo(uint32_t subWindowLevel,
+    const std::shared_ptr<AbilityRuntime::Context>& context)
 {
     property_->SetSubWindowLevel(subWindowLevel);
+    SetContext(context);
     std::vector<sptr<WindowSessionImpl>> subWindows;
-    GetSubWidnows(GetPersistentId(), subWindows);
+    GetSubWindows(GetPersistentId(), subWindows);
     for (auto& subWindow : subWindows) {
         if (subWindow != nullptr) {
-            subWindow->UpdateSubWindowLevel(subWindowLevel + 1);
+            subWindow->UpdateSubWindowInfo(subWindowLevel + 1, context);
         }
     }
 }

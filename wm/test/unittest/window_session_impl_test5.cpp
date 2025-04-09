@@ -56,15 +56,15 @@ void WindowSessionImplTest5::TearDown()
 
 namespace {
 /**
- * @tc.name: GetSubWidnows
- * @tc.desc: GetSubWidnows
+ * @tc.name: GetSubWindows
+ * @tc.desc: GetSubWindows
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest5, GetSubWidnows, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest5, GetSubWindows, TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "WindowSessionImplTest5: GetSubWidnows start";
+    GTEST_LOG_(INFO) << "WindowSessionImplTest5: GetSubWindows start";
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("GetSubWidnows");
+    option->SetWindowName("GetSubWindows");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
@@ -72,11 +72,11 @@ HWTEST_F(WindowSessionImplTest5, GetSubWidnows, TestSize.Level1)
     window->property_->SetPersistentId(1);
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     std::vector<sptr<WindowSessionImpl>> subWindows;
-    window->GetSubWidnows(1, subWindows);
+    window->GetSubWindows(1, subWindows);
     EXPECT_EQ(subWindows.size(), 0);
 
     sptr<WindowOption> subWindowOption = sptr<WindowOption>::MakeSptr();
-    subWindowOption->SetWindowName("GetSubWidnows_subWindow");
+    subWindowOption->SetWindowName("GetSubWindows_subWindow");
     sptr<WindowSessionImpl> subWindow = sptr<WindowSessionImpl>::MakeSptr(subWindowOption);
     subWindow->property_->SetPersistentId(2);
     subWindow->property_->SetParentPersistentId(1);
@@ -87,10 +87,10 @@ HWTEST_F(WindowSessionImplTest5, GetSubWidnows, TestSize.Level1)
         std::vector<sptr<WindowSessionImpl>>>(1, { subWindow }));
 
     subWindows.clear();
-    window->GetSubWidnows(1, subWindows);
+    window->GetSubWindows(1, subWindows);
     ASSERT_EQ(subWindows.size(), 1);
     EXPECT_EQ(subWindows[0], subWindow);
-    GTEST_LOG_(INFO) << "WindowSessionImplTest5: GetSubWidnows end";
+    GTEST_LOG_(INFO) << "WindowSessionImplTest5: GetSubWindows end";
 }
 
 /**
@@ -132,12 +132,12 @@ HWTEST_F(WindowSessionImplTest5, RemoveSubWindow, TestSize.Level1)
 
     subWindow->RemoveSubWindow(2);
     std::vector<sptr<WindowSessionImpl>> subWindows;
-    window->GetSubWidnows(1, subWindows);
+    window->GetSubWindows(1, subWindows);
     ASSERT_EQ(subWindows.size(), 2);
     EXPECT_EQ(subWindows[0], subWindow);
     subWindow->RemoveSubWindow(1);
     subWindows.clear();
-    window->GetSubWidnows(1, subWindows);
+    window->GetSubWindows(1, subWindows);
     ASSERT_EQ(subWindows.size(), 1);
     EXPECT_NE(subWindows[0], subWindow);
 }
@@ -182,10 +182,10 @@ HWTEST_F(WindowSessionImplTest5, DestroySubWindow01, TestSize.Level1)
         std::vector<sptr<WindowSessionImpl>>>(2, { subWindow02 }));
 
     std::vector<sptr<WindowSessionImpl>> subWindows;
-    window->GetSubWidnows(1, subWindows);
+    window->GetSubWindows(1, subWindows);
     EXPECT_EQ(subWindows.size(), 1);
     subWindows.clear();
-    window->GetSubWidnows(2, subWindows);
+    window->GetSubWindows(2, subWindows);
     EXPECT_EQ(subWindows.size(), 1);
     window->DestroySubWindow();
     EXPECT_EQ(subWindow01->state_, WindowState::STATE_DESTROYED);
@@ -193,10 +193,10 @@ HWTEST_F(WindowSessionImplTest5, DestroySubWindow01, TestSize.Level1)
     EXPECT_EQ(subWindow01->hostSession_, nullptr);
     EXPECT_EQ(subWindow02->hostSession_, nullptr);
     subWindows.clear();
-    window->GetSubWidnows(1, subWindows);
+    window->GetSubWindows(1, subWindows);
     EXPECT_EQ(subWindows.size(), 0);
     subWindows.clear();
-    window->GetSubWidnows(2, subWindows);
+    window->GetSubWindows(2, subWindows);
     EXPECT_EQ(subWindows.size(), 0);
 }
 

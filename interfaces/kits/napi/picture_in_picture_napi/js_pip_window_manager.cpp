@@ -85,6 +85,20 @@ static int32_t checkControlsRules(uint32_t pipTemplateType, std::vector<std::uin
     return 0;
 }
 
+static void checkLocalStorage(napi_env env, PipOption& option, napi_value storage)
+{
+    napi_valuetype valueType;
+    napi_typeof(env, storage, &valueType);
+    if (valueType != napi_object) {
+        option.SetStorageRef(nullptr);
+    } else {
+        napi_ref storageRef;
+        napi_create_reference(env, storage, 1, &storageRef);
+        option.SetStorageRef(storageRef);
+        TLOGI(WmsLogTag::WMS_PIP, "localStorage is set");
+    }
+}
+
 static int32_t checkOptionParams(PipOption& option)
 {
     if (option.GetContext() == nullptr) {
@@ -155,6 +169,7 @@ static int32_t GetPictureInPictureOptionFromJs(napi_env env, napi_value optionOb
     napi_value xComponentControllerValue = nullptr;
     napi_value controlGroup = nullptr;
     napi_value nodeController = nullptr;
+    napi_value storage = nullptr;
     napi_ref nodeControllerRef = nullptr;
     void* contextPtr = nullptr;
     std::string navigationId = "";
@@ -173,7 +188,9 @@ static int32_t GetPictureInPictureOptionFromJs(napi_env env, napi_value optionOb
     napi_get_named_property(env, optionObject, "componentController", &xComponentControllerValue);
     napi_get_named_property(env, optionObject, "controlGroups", &controlGroup);
     napi_get_named_property(env, optionObject, "customUIController", &nodeController);
+    napi_get_named_property(env, optionObject, "localStorage", &storage);
     napi_create_reference(env, nodeController, 1, &nodeControllerRef);
+    checkLocalStorage(env, option, storage);
     napi_unwrap(env, contextPtrValue, &contextPtr);
     ConvertFromJsValue(env, navigationIdValue, navigationId);
     ConvertFromJsValue(env, templateTypeValue, templateType);
@@ -238,7 +255,7 @@ napi_value JsPipWindowManager::NapiSendTask(napi_env env, PipOption& pipOption)
 {
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, &result);
-    auto asyncTask = [this, env, task = napiAsyncTask, pipOption]() {
+    auto asyncTask = [this, env, task = napiAsyncTask, pipOption]() mutable {
         if (!PictureInPictureManager::IsSupportPiP()) {
             task->Reject(env, CreateJsError(env, static_cast<int32_t>(
                 WMError::WM_ERROR_DEVICE_NOT_SUPPORT), "device not support pip."));
@@ -260,7 +277,9 @@ napi_value JsPipWindowManager::NapiSendTask(napi_env env, PipOption& pipOption)
         sptr<PictureInPictureController> pipController =
             new PictureInPictureController(pipOptionPtr, mainWindow, mainWindow->GetWindowId(), env);
         task->Resolve(env, CreateJsPipControllerObject(env, pipController));
-        mainWindow->UpdatePiPDefaultWindowSizeType(pipOption.GetDefaultWindowSizeType());
+        PiPTemplateInfo pipTemplateInfo;
+        pipOption.GetPiPTemplateInfo(pipTemplateInfo);
+        mainWindow->UpdatePiPTemplateInfo(pipTemplateInfo);
     };
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
         napiAsyncTask->Reject(env, CreateJsError(env,

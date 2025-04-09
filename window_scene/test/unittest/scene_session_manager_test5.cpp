@@ -77,10 +77,6 @@ void ProcessStatusBarEnabledChangeFuncTest(bool enable)
 {
 }
 
-void DumpRootSceneElementInfoFuncTest(const std::vector<std::string>& params, std::vector<std::string>& infos)
-{
-}
-
 void SceneSessionManagerTest5::SetUpTestCase()
 {
     ssm_ = &SceneSessionManager::GetInstance();
@@ -370,7 +366,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestFocusStatus01, TestSize.Level1)
  * @tc.desc: RequestSessionFocus
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, RequestSessionFocus, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest5, RequestSessionFocus, TestSize.Level0)
 {
     FocusChangeReason reason = FocusChangeReason::DEFAULT;
     WSError ret = ssm_->RequestSessionFocus(0, true, reason);
@@ -410,7 +406,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestSessionFocus, TestSize.Level1)
  * @tc.desc: RequestFocusClient
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, RequestFocusClient, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest5, RequestFocusClient, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "RequestFocusTest1";
@@ -599,13 +595,25 @@ HWTEST_F(SceneSessionManagerTest5, UpdateFocusStatus01, TestSize.Level1)
 
     ssm_->UpdateFocusStatus(DEFAULT_DISPLAY_ID, sceneSession, false);
     ASSERT_EQ(focusGroup->GetFocusedSessionId(), 1);
-    ssm_->needBlockNotifyFocusStatusUntilForeground_ = false;
     ssm_->UpdateFocusStatus(DEFAULT_DISPLAY_ID, sceneSession, true);
     ASSERT_NE(focusGroup->GetFocusedSessionId(), 1);
-    focusGroup->SetFocusedSessionId(1);
-    ssm_->needBlockNotifyFocusStatusUntilForeground_ = true;
+}
+
+/**
+ * @tc.name: UpdateFocusStatus02
+ * @tc.desc: Verify that the NotifyFocusStatusByMission function is called.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, UpdateFocusStatus02, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "UpdateFocusStatus02";
+    info.bundleName_ = "UpdateFocusStatus02";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
+    focusGroup->SetNeedBlockNotifyFocusStatusUntilForeground(true);
     ssm_->UpdateFocusStatus(DEFAULT_DISPLAY_ID, sceneSession, true);
-    ASSERT_NE(focusGroup->GetFocusedSessionId(), 1);
 }
 
 /**
@@ -613,7 +621,7 @@ HWTEST_F(SceneSessionManagerTest5, UpdateFocusStatus01, TestSize.Level1)
  * @tc.desc: RequestSessionUnfocus
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, RequestSessionUnfocus, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest5, RequestSessionUnfocus, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "test1";
@@ -803,7 +811,7 @@ HWTEST_F(SceneSessionManagerTest5, CheckFocusIsDownThroughBlockingType, TestSize
  * @tc.desc: CheckFocusIsDownThroughBlockingType
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, CheckFocusIsDownThroughBlockingType01, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest5, CheckFocusIsDownThroughBlockingType01, TestSize.Level0)
 {
     ASSERT_NE(ssm_, nullptr);
     SessionInfo info;
@@ -859,7 +867,7 @@ HWTEST_F(SceneSessionManagerTest5, CheckTopmostWindowFocus, TestSize.Level1)
  * @tc.desc: CheckRequestFocusImmdediately
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, CheckRequestFocusImmdediately, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest5, CheckRequestFocusImmdediately, TestSize.Level0)
 {
     ASSERT_NE(ssm_, nullptr);
     SessionInfo info;
@@ -970,30 +978,6 @@ HWTEST_F(SceneSessionManagerTest5, NotifyMMIWindowPidChange, TestSize.Level1)
     sceneSession = ssm_->CreateSceneSession(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
     ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
-}
-
-/**
- * @tc.name: CheckSessionPropertyOnRecovery
- * @tc.desc: CheckSessionPropertyOnRecovery
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest5, CheckSessionPropertyOnRecovery, TestSize.Level1)
-{
-    ASSERT_NE(ssm_, nullptr);
-    SessionInfo info;
-    info.abilityName_ = "test1";
-    info.bundleName_ = "test2";
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(property, nullptr);
-    property->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
-    property->SetWindowFlags(123);
-    WSError result = ssm_->CheckSessionPropertyOnRecovery(property, false);
-    ASSERT_EQ(result, WSError::WS_ERROR_NOT_SYSTEM_APP);
-
-    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    property->SetParentPersistentId(111);
-    result = ssm_->CheckSessionPropertyOnRecovery(property, true);
-    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
 }
 
 /**
@@ -1175,7 +1159,7 @@ HWTEST_F(SceneSessionManagerTest5, ConfigAppWindowShadow03, TestSize.Level1)
  * @tc.desc: CreateAndConnectSpecificSession
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, CreateAndConnectSpecificSession02, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest5, CreateAndConnectSpecificSession02, TestSize.Level0)
 {
     ASSERT_NE(ssm_, nullptr);
     sptr<ISessionStage> sessionStage = sptr<SessionStageMocker>::MakeSptr();
@@ -1309,74 +1293,6 @@ HWTEST_F(SceneSessionManagerTest5, GetAllAbilityInfos02, TestSize.Level1)
 
     elementName.bundleName_ = "";
     ssm_->GetAllAbilityInfos(want, userId, scbAbilityInfos);
-}
-
-/**
- * @tc.name: GetBatchAbilityInfos01
- * @tc.desc: GetBatchAbilityInfos01
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest5, GetBatchAbilityInfos01, TestSize.Level1)
-{
-    ASSERT_NE(ssm_, nullptr);
-    auto bundleMgr = ssm_->bundleMgr_;
-    ssm_->bundleMgr_ = nullptr;
-    int32_t userId = 100;
-    std::vector<std::string> bundleNames = { "test1", "test2" };
-    auto scbAbilityInfos = std::make_shared<std::vector<SCBAbilityInfo>>();
-    WSError ret = ssm_->GetBatchAbilityInfos(bundleNames, userId, *scbAbilityInfos);
-    ASSERT_EQ(ret, WSError::WS_ERROR_NULLPTR);
-}
-
-/**
- * @tc.name: GetBatchAbilityInfos02
- * @tc.desc: GetBatchAbilityInfos02
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest5, GetBatchAbilityInfos02, TestSize.Level1)
-{
-    ASSERT_NE(ssm_, nullptr);
-    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    ssm_->bundleMgr_ = sptr<AppExecFwk::BundleMgrProxy>::MakeSptr(iRemoteObjectMocker);
-    int32_t userId = 100;
-    std::vector<std::string> bundleNames = {};
-    auto scbAbilityInfos = std::make_shared<std::vector<SCBAbilityInfo>>();
-    WSError ret = ssm_->GetBatchAbilityInfos(bundleNames, userId, *scbAbilityInfos);
-    ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_PARAM);
-}
-
-/**
- * @tc.name: GetBatchAbilityInfos03
- * @tc.desc: GetBatchAbilityInfos03
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest5, GetBatchAbilityInfos03, TestSize.Level1)
-{
-    ASSERT_NE(ssm_, nullptr);
-    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    ssm_->bundleMgr_ = sptr<AppExecFwk::BundleMgrProxy>::MakeSptr(iRemoteObjectMocker);
-    int32_t userId = 100;
-    std::vector<std::string> bundleNames = { "" };
-    auto scbAbilityInfos = std::make_shared<std::vector<SCBAbilityInfo>>();
-    WSError ret = ssm_->GetBatchAbilityInfos(bundleNames, userId, *scbAbilityInfos);
-    ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_PARAM);
-}
-
-/**
- * @tc.name: GetBatchAbilityInfos04
- * @tc.desc: GetBatchAbilityInfos04
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest5, GetBatchAbilityInfos04, TestSize.Level1)
-{
-    ASSERT_NE(ssm_, nullptr);
-    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    ssm_->bundleMgr_ = sptr<AppExecFwk::BundleMgrProxy>::MakeSptr(iRemoteObjectMocker);
-    int32_t userId = 100;
-    std::vector<std::string> bundleNames = { "test1", "test2" };
-    auto scbAbilityInfos = std::make_shared<std::vector<SCBAbilityInfo>>();
-    WSError ret = ssm_->GetBatchAbilityInfos(bundleNames, userId, *scbAbilityInfos);
-    ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_PARAM);
 }
 
 /**

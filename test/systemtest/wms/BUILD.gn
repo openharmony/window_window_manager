@@ -62,6 +62,31 @@ group("systemtest") {
   }
 }
 
+test_external_deps = [
+  "ability_base:base",
+  "ability_base:want",
+  "ability_base:zuri",
+  "ability_runtime:ability_context_native",
+  "ability_runtime:ability_manager",
+  "ability_runtime:app_context",
+  "accessibility:accessibility_common",
+  "ace_engine:ace_uicontent",
+  "bundle_framework:appexecfwk_base",
+  "c_utils:utils",
+  "common_event_service:cesfwk_innerkits",
+  "googletest:gmock",
+  "googletest:gtest",
+  "googletest:gtest_main",
+  "graphic_2d:librender_service_client",
+  "graphic_2d:window_animation",
+  "hilog:libhilog",
+  "init:libbegetutil",
+  "input:libmmi-client",
+  "ipc:ipc_single",
+  "napi:ace_napi",
+  "power_manager:powermgr_client",
+]
+
 ohos_systemtest("wms_window_layout_test") {
   module_out_path = module_out_path
 
@@ -80,11 +105,7 @@ ohos_systemtest("wms_window_layout_test") {
     "${window_base_path}/window_scene/session:scene_session",
   ]
 
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-    "power_manager:powermgr_client",
-  ]
+  external_deps = test_external_deps
 }
 
 ohos_systemtest("wms_window_layout_integration_test") {
@@ -105,11 +126,7 @@ ohos_systemtest("wms_window_layout_integration_test") {
     "${window_base_path}/window_scene/session:scene_session",
   ]
 
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-    "power_manager:powermgr_client",
-  ]
+  external_deps = test_external_deps
 }
 
 ohos_systemtest("wms_window_effect_test") {
@@ -122,11 +139,7 @@ ohos_systemtest("wms_window_effect_test") {
     "${window_base_path}/test/common/utils:libtestutil",
   ]
 
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-    "power_manager:powermgr_client",
-  ]
+  external_deps = test_external_deps
 }
 
 ohos_systemtest("wms_window_multi_ability_test") {
@@ -136,11 +149,7 @@ ohos_systemtest("wms_window_multi_ability_test") {
 
   deps = [ ":wms_systemtest_common" ]
 
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-    "power_manager:powermgr_client",
-  ]
+  external_deps = test_external_deps
 }
 
 ohos_systemtest("wms_window_subwindow_test") {
@@ -150,11 +159,7 @@ ohos_systemtest("wms_window_subwindow_test") {
 
   deps = [ ":wms_systemtest_common" ]
 
-  external_deps = [
-    "bundle_framework:appexecfwk_base",
-    "c_utils:utils",
-    "hilog:libhilog",
-  ]
+  external_deps = test_external_deps
 }
 
 ohos_systemtest("wms_window_systemsubwindow_test") {
@@ -167,12 +172,7 @@ ohos_systemtest("wms_window_systemsubwindow_test") {
     "${window_base_path}/test/common/utils:libtestutil",
   ]
 
-  external_deps = [
-    "bundle_framework:appexecfwk_base",
-    "c_utils:utils",
-    "hilog:libhilog",
-    "power_manager:powermgr_client",
-  ]
+  external_deps = test_external_deps
 }
 
 ohos_systemtest("wms_window_dialogwindow_test") {
@@ -182,12 +182,7 @@ ohos_systemtest("wms_window_dialogwindow_test") {
 
   deps = [ ":wms_systemtest_common" ]
 
-  external_deps = [
-    "bundle_framework:appexecfwk_base",
-    "c_utils:utils",
-    "common_event_service:cesfwk_innerkits",
-    "hilog:libhilog",
-  ]
+  external_deps = test_external_deps
 }
 
 ohos_systemtest("wms_window_immersive_test") {
@@ -197,11 +192,7 @@ ohos_systemtest("wms_window_immersive_test") {
 
   deps = [ ":wms_systemtest_common" ]
 
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-    "power_manager:powermgr_client",
-  ]
+  external_deps = test_external_deps
 }
 
 ohos_systemtest("wms_window_focus_test") {
@@ -211,11 +202,7 @@ ohos_systemtest("wms_window_focus_test") {
 
   deps = [ ":wms_systemtest_common" ]
 
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-    "power_manager:powermgr_client",
-  ]
+  external_deps = test_external_deps
 }
 
 ohos_systemtest("wms_window_split_immersive_test") {
@@ -225,11 +212,7 @@ ohos_systemtest("wms_window_split_immersive_test") {
 
   deps = [ ":wms_systemtest_common" ]
 
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-    "power_manager:powermgr_client",
-  ]
+  external_deps = test_external_deps
 }
 
 ohos_systemtest("wms_window_split_test") {
@@ -239,11 +222,7 @@ ohos_systemtest("wms_window_split_test") {
 
   deps = [ ":wms_systemtest_common" ]
 
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-    "power_manager:powermgr_client",
-  ]
+  external_deps = test_external_deps
 }
 
 ohos_systemtest("wms_window_move_drag_test") {
@@ -253,12 +232,7 @@ ohos_systemtest("wms_window_move_drag_test") {
 
   deps = [ ":wms_systemtest_common" ]
 
-  external_deps = [
-    "bundle_framework:appexecfwk_base",
-    "c_utils:utils",
-    "hilog:libhilog",
-    "power_manager:powermgr_client",
-  ]
+  external_deps = test_external_deps
 }
 
 ohos_systemtest("wms_window_input_method_test") {
@@ -268,11 +242,7 @@ ohos_systemtest("wms_window_input_method_test") {
 
   deps = [ ":wms_systemtest_common" ]
 
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-    "power_manager:powermgr_client",
-  ]
+  external_deps = test_external_deps
 }
 
 ohos_systemtest("wms_window_gamut_test") {
@@ -282,11 +252,7 @@ ohos_systemtest("wms_window_gamut_test") {
 
   deps = [ ":wms_systemtest_common" ]
 
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-    "power_manager:powermgr_client",
-  ]
+  external_deps = test_external_deps
 }
 
 ohos_systemtest("wms_window_gesture_navigation_enabled_test") {
@@ -296,10 +262,7 @@ ohos_systemtest("wms_window_gesture_navigation_enabled_test") {
 
   deps = [ ":wms_systemtest_common" ]
 
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-  ]
+  external_deps = test_external_deps
 }
 
 ohos_systemtest("wms_window_input_test") {
@@ -309,11 +272,7 @@ ohos_systemtest("wms_window_input_test") {
 
   deps = [ ":wms_systemtest_common" ]
 
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-    "power_manager:powermgr_client",
-  ]
+  external_deps = test_external_deps
 }
 
 ohos_systemtest("wms_window_visibility_info_test") {
@@ -323,11 +282,7 @@ ohos_systemtest("wms_window_visibility_info_test") {
 
   deps = [ ":wms_systemtest_common" ]
 
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-    "power_manager:powermgr_client",
-  ]
+  external_deps = test_external_deps
 }
 
 ohos_systemtest("wms_window_display_zoom_test") {
@@ -337,11 +292,7 @@ ohos_systemtest("wms_window_display_zoom_test") {
 
   deps = [ ":wms_systemtest_common" ]
 
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-    "power_manager:powermgr_client",
-  ]
+  external_deps = test_external_deps
 }
 
 ohos_systemtest("wms_window_drag_test") {
@@ -351,11 +302,7 @@ ohos_systemtest("wms_window_drag_test") {
 
   deps = [ ":wms_systemtest_common" ]
 
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-    "power_manager:powermgr_client",
-  ]
+  external_deps = test_external_deps
 }
 
 ohos_systemtest("wms_window_raisetoapptop_test") {
@@ -368,11 +315,7 @@ ohos_systemtest("wms_window_raisetoapptop_test") {
     "${window_base_path}/test/common/utils:libtestutil",
   ]
 
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-    "power_manager:powermgr_client",
-  ]
+  external_deps = test_external_deps
 }
 
 ohos_systemtest("wms_window_rotation_test") {
@@ -382,11 +325,7 @@ ohos_systemtest("wms_window_rotation_test") {
 
   deps = [ ":wms_systemtest_common" ]
 
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-    "power_manager:powermgr_client",
-  ]
+  external_deps = test_external_deps
 }
 
 ohos_systemtest("wms_window_recover_test") {
@@ -407,13 +346,7 @@ ohos_systemtest("wms_window_recover_test") {
     "${window_base_path}/window_scene/session:scene_session",
   ]
 
-  external_deps = [
-    "ability_runtime:app_context",
-    "accessibility:accessibility_common",
-    "c_utils:utils",
-    "hilog:libhilog",
-    "init:libbegetutil",
-  ]
+  external_deps = test_external_deps
 }
 
 ohos_systemtest("wms_window_occupied_area_change_test") {
@@ -423,11 +356,7 @@ ohos_systemtest("wms_window_occupied_area_change_test") {
 
   deps = [ ":wms_systemtest_common" ]
 
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-    "power_manager:powermgr_client",
-  ]
+  external_deps = test_external_deps
 }
 
 ohos_systemtest("wms_window_touch_outside_test") {
@@ -437,11 +366,7 @@ ohos_systemtest("wms_window_touch_outside_test") {
 
   deps = [ ":wms_systemtest_common" ]
 
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-    "power_manager:powermgr_client",
-  ]
+  external_deps = test_external_deps
 }
 
 ohos_systemtest("wms_window_mode_support_info_test") {
@@ -451,11 +376,7 @@ ohos_systemtest("wms_window_mode_support_info_test") {
 
   deps = [ ":wms_systemtest_common" ]
 
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-    "power_manager:powermgr_client",
-  ]
+  external_deps = test_external_deps
 }
 
 ohos_systemtest("wms_window_app_floating_window_test") {
@@ -479,12 +400,7 @@ ohos_systemtest("wms_window_app_floating_window_test") {
     "${window_base_path}/test/common/utils:libtestutil",
   ]
 
-  external_deps = [
-    "c_utils:utils",
-    "common_event_service:cesfwk_innerkits",
-    "hilog:libhilog",
-    "power_manager:powermgr_client",
-  ]
+  external_deps = test_external_deps
 }
 
 ohos_systemtest("wms_window_system_toast_window_test") {
@@ -494,12 +410,7 @@ ohos_systemtest("wms_window_system_toast_window_test") {
 
   deps = [ ":wms_systemtest_common" ]
 
-  external_deps = [
-    "c_utils:utils",
-    "common_event_service:cesfwk_innerkits",
-    "hilog:libhilog",
-    "power_manager:powermgr_client",
-  ]
+  external_deps = test_external_deps
 }
 
 ohos_systemtest("wms_window_animation_transition_test") {
@@ -517,11 +428,7 @@ ohos_systemtest("wms_window_animation_transition_test") {
     "${window_base_path}/test/common/utils:libtestutil",
   ]
 
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-    "power_manager:powermgr_client",
-  ]
+  external_deps = test_external_deps
 }
 
 ohos_systemtest("wms_window_water_mark_test") {
@@ -531,11 +438,7 @@ ohos_systemtest("wms_window_water_mark_test") {
 
   deps = [ ":wms_systemtest_common" ]
 
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-    "power_manager:powermgr_client",
-  ]
+  external_deps = test_external_deps
 }
 
 ohos_systemtest("wms_window_nointeraction_listener_test") {
@@ -545,11 +448,7 @@ ohos_systemtest("wms_window_nointeraction_listener_test") {
 
   deps = [ ":wms_systemtest_common" ]
 
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-    "power_manager:powermgr_client",
-  ]
+  external_deps = test_external_deps
 }
 
 ohos_systemtest("wms_window_status_change_test") {
@@ -565,11 +464,7 @@ ohos_systemtest("wms_window_status_change_test") {
     "${window_base_path}/window_scene/session:scene_session",
   ]
 
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-    "power_manager:powermgr_client",
-  ]
+  external_deps = test_external_deps
 }
 
 ohos_systemtest("wms_window_callback_test") {
@@ -585,11 +480,7 @@ ohos_systemtest("wms_window_callback_test") {
     "${window_base_path}/window_scene/session:scene_session",
   ]
 
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-    "power_manager:powermgr_client",
-  ]
+  external_deps = test_external_deps
 }
 
 ohos_systemtest("wms_window_decor_test") {
@@ -608,11 +499,7 @@ ohos_systemtest("wms_window_decor_test") {
     "${window_base_path}/window_scene/session:scene_session",
   ]
 
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-    "power_manager:powermgr_client",
-  ]
+  external_deps = test_external_deps
 }
 
 ohos_systemtest("wms_window_specialwindow_test") {
@@ -628,11 +515,7 @@ ohos_systemtest("wms_window_specialwindow_test") {
     "${window_base_path}/window_scene/session:scene_session",
   ]
 
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-    "power_manager:powermgr_client",
-  ]
+  external_deps = test_external_deps
 }
 
 ohos_systemtest("wms_window_pc_test") {
@@ -651,11 +534,7 @@ ohos_systemtest("wms_window_pc_test") {
     "${window_base_path}/window_scene/session:scene_session",
   ]
 
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-    "power_manager:powermgr_client",
-  ]
+  external_deps = test_external_deps
 }
 
 ## Build wms_systemtest_common.a {{{
@@ -716,17 +595,7 @@ ohos_static_library("wms_systemtest_common") {
     "//third_party/googletest:gmock",
     "//third_party/googletest:gtest_main",
   ]
-  external_deps = [
-    "ability_base:base",
-    "ability_base:want",
-    "ability_base:zuri",
-    "ability_runtime:ability_context_native",
-    "bundle_framework:appexecfwk_base",
-    "c_utils:utils",
-    "hilog:libhilog",
-    "ipc:ipc_single",
-    "power_manager:powermgr_client",
-  ]
+  external_deps = test_external_deps
 
   part_name = "window_manager"
   subsystem_name = "window"

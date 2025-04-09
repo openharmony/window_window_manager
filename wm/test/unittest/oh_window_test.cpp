@@ -102,7 +102,7 @@ HWTEST_F(OHWindowTest, IsWindowShowing01, TestSize.Level1)
  * @tc.desc: OH_WindowManager_GetAllWindowLayoutInfoList test
  * @tc.type: FUNC
  */
-HWTEST_F(OHWindowTest, OH_WindowManager_GetAllWindowLayoutInfoList, TestSize.Level1)
+HWTEST_F(OHWindowTest, OH_WindowManager_GetAllWindowLayoutInfoList, TestSize.Level0)
 {
     int64_t displayId = -1;
     WindowManager_Rect** windowLayoutInfo = nullptr;

@@ -78,7 +78,7 @@ private:
     /*
      * Window Layout
      */
-    void AddSurfaceNodeToScreen() override;
+    void AddSurfaceNodeToScreen(DisplayId draggingOrMovingParentDisplayId) override;
     void RemoveSurfaceNodeFromScreen() override;
 };
 } // namespace OHOS::Rosen

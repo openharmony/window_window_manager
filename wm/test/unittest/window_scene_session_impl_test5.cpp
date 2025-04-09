@@ -694,7 +694,7 @@ HWTEST_F(WindowSceneSessionImplTest5, StartMoveWindowWithCoordinate_02, TestSize
  * @tc.desc: UpdateSystemBarProperties test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest5, UpdateSystemBarProperties, TestSize.Level1)
+HWTEST_F(WindowSceneSessionImplTest5, UpdateSystemBarProperties, TestSize.Level0)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("UpdateSystemBarProperties");
@@ -781,7 +781,7 @@ HWTEST_F(WindowSceneSessionImplTest5, Resume, TestSize.Level1)
     window->property_->SetPersistentId(1);
     window->hostSession_ = session;
     ASSERT_EQ(WMError::WM_OK, window->RegisterLifeCycleListener(listener));
-    window->SetTargetAPIVersion(18);
+    window->SetTargetAPIVersion(20);
     window->isDidForeground_ = false;
     window->isColdStart_ = true;
     window->state_ = WindowState::STATE_SHOWN;
@@ -1054,16 +1054,16 @@ HWTEST_F(WindowSceneSessionImplTest5, SetParentWindow04, TestSize.Level1)
         std::pair<uint64_t, sptr<WindowSessionImpl>>(parentWindow2->GetWindowId(), parentWindow2)));
 
     std::vector<sptr<WindowSessionImpl>> subWindows;
-    parentWindow1->GetSubWidnows(1, subWindows);
+    parentWindow1->GetSubWindows(1, subWindows);
     EXPECT_EQ(subWindows.size(), 1);
     WindowAdapterMocker mocker;
     EXPECT_CALL(mocker.Mock(), SetParentWindow(_, _)).WillOnce(Return(WMError::WM_OK));
     int32_t newParentWindowId = 3;
     EXPECT_EQ(subWindow->SetParentWindow(newParentWindowId), WMError::WM_OK);
-    parentWindow1->GetSubWidnows(1, subWindows);
+    parentWindow1->GetSubWindows(1, subWindows);
     EXPECT_EQ(subWindows.size(), 0);
     subWindows.clear();
-    parentWindow1->GetSubWidnows(3, subWindows);
+    parentWindow1->GetSubWindows(3, subWindows);
     EXPECT_EQ(subWindows.size(), 1);
     EXPECT_EQ(WMError::WM_OK, subWindow->Destroy(true));
 }
@@ -1176,6 +1176,28 @@ HWTEST_F(WindowSceneSessionImplTest5, IsFullScreenEnable, TestSize.Level1)
     ASSERT_EQ(window->IsFullScreenEnable(), false);
     window->property_->SetDragEnabled(false);
     ASSERT_EQ(window->IsFullScreenEnable(), true);
+}
+
+/**
+ * @tc.name: IsFullScreenSizeWindow
+ * @tc.desc: IsFullScreenSizeWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, IsFullScreenSizeWindow, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetDisplayId(0);
+    uint32_t width = 0;
+    uint32_t height = 0;
+    ASSERT_EQ(window->IsFullScreenSizeWindow(width, height), false);
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(0);
+    ASSERT_NE(display, nullptr);
+    auto displayInfo = display->GetDisplayInfo();
+    ASSERT_NE(displayInfo, nullptr);
+    width = static_cast<uint32_t>(displayInfo->GetWidth());
+    height = static_cast<uint32_t>(displayInfo->GetHeight());
+    ASSERT_EQ(window->IsFullScreenSizeWindow(width, height), true);
 }
 
 /**

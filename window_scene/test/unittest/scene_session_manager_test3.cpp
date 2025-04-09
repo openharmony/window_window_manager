@@ -91,10 +91,6 @@ void ProcessStatusBarEnabledChangeFuncTest(bool enable, const std::string& bundl
 {
 }
 
-void DumpRootSceneElementInfoFuncTest(const std::vector<std::string>& params, std::vector<std::string>& infos)
-{
-}
-
 void SceneSessionManagerTest3::SetUpTestCase()
 {
     ssm_ = &SceneSessionManager::GetInstance();
@@ -1224,7 +1220,7 @@ HWTEST_F(SceneSessionManagerTest3, IsSessionClearable, TestSize.Level1)
  * @tc.desc: SceneSesionManager handle turn screen on and keep screen on
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest3, HandleTurnScreenOn, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest3, HandleTurnScreenOn, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "HandleTurnScreenOn";
@@ -1232,10 +1228,11 @@ HWTEST_F(SceneSessionManagerTest3, HandleTurnScreenOn, TestSize.Level1)
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     ssm_->HandleTurnScreenOn(sceneSession);
+    std::string lockName = "windowLock";
     bool requireLock = true;
-    ssm_->HandleKeepScreenOn(sceneSession, requireLock);
+    ssm_->HandleKeepScreenOn(sceneSession, requireLock, lockName, sceneSession->keepScreenLock_);
     requireLock = false;
-    ssm_->HandleKeepScreenOn(sceneSession, requireLock);
+    ssm_->HandleKeepScreenOn(sceneSession, requireLock, lockName, sceneSession->keepScreenLock_);
 }
 
 /**
@@ -1488,88 +1485,6 @@ HWTEST_F(SceneSessionManagerTest3, RegisterSessionExceptionFunc, TestSize.Level1
     ssm_->RegisterSessionExceptionFunc(sceneSession);
     bool result01 = ssm_->IsSessionVisibleForeground(sceneSession);
     EXPECT_FALSE(result01);
-}
-
-/**
- * @tc.name: DumpSessionInfo
- * @tc.desc: SceneSesionManager dump session info
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest3, DumpSessionInfo, TestSize.Level1)
-{
-    SessionInfo info;
-    std::ostringstream oss;
-    std::string dumpInfo;
-    info.abilityName_ = "DumpSessionInfo";
-    info.bundleName_ = "DumpSessionInfo";
-    info.isSystem_ = false;
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
-    ssm_->DumpSessionInfo(sceneSession, oss);
-    EXPECT_FALSE(sceneSession->IsVisible());
-
-    sptr<SceneSession::SpecificSessionCallback> specific = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    EXPECT_NE(nullptr, specific);
-    sceneSession = sptr<SceneSession>::MakeSptr(info, specific);
-    ASSERT_NE(nullptr, sceneSession);
-    ssm_->DumpSessionInfo(sceneSession, oss);
-    EXPECT_FALSE(sceneSession->IsVisible());
-    sceneSession = nullptr;
-    info.isSystem_ = true;
-    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ssm_->DumpSessionInfo(sceneSession, oss);
-}
-
-/**
- * @tc.name: DumpSessionElementInfo
- * @tc.desc: SceneSesionManager dump session element info
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest3, DumpSessionElementInfo, TestSize.Level1)
-{
-    DumpRootSceneElementInfoFunc func_ = DumpRootSceneElementInfoFuncTest;
-    ssm_->SetDumpRootSceneElementInfoListener(func_);
-    SessionInfo info;
-    info.abilityName_ = "DumpSessionElementInfo";
-    info.bundleName_ = "DumpSessionElementInfo";
-    info.isSystem_ = false;
-    std::string strId = "10086";
-    sptr<SceneSession> sceneSession = nullptr;
-    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
-    std::vector<std::string> params_(5, "");
-    std::string dumpInfo;
-    ssm_->DumpSessionElementInfo(sceneSession, params_, dumpInfo);
-    sceneSession = nullptr;
-    info.isSystem_ = true;
-    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
-    ssm_->DumpSessionElementInfo(sceneSession, params_, dumpInfo);
-    WSError result01 = ssm_->GetSpecifiedSessionDumpInfo(dumpInfo, params_, strId);
-    EXPECT_EQ(result01, WSError::WS_ERROR_INVALID_PARAM);
-}
-
-/**
- * @tc.name: NotifyDumpInfoResult
- * @tc.desc: SceneSesionManager notify dump info result
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest3, NotifyDumpInfoResult, TestSize.Level1)
-{
-    std::vector<std::string> info = {"std::", "vector", "<std::string>"};
-    ssm_->NotifyDumpInfoResult(info);
-    std::vector<std::string> params = {"-a"};
-    std::string dumpInfo = "";
-    WSError result01 = ssm_->GetSessionDumpInfo(params, dumpInfo);
-    EXPECT_EQ(result01, WSError::WS_OK);
-    params.clear();
-    params.push_back("-w");
-    params.push_back("23456");
-    WSError result02 = ssm_->GetSessionDumpInfo(params, dumpInfo);
-    EXPECT_NE(result02, WSError::WS_OK);
-    params.clear();
-    WSError result03 = ssm_->GetSessionDumpInfo(params, dumpInfo);
-    EXPECT_NE(result03, WSError::WS_OK);
 }
 
 /**

@@ -104,7 +104,7 @@ HWTEST_F(WindowSessionPropertyTest, SetSessionInfo, TestSize.Level1)
  * @tc.desc: SetPrivacyMode as true and false
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionPropertyTest, SetPrivacyMode, TestSize.Level1)
+HWTEST_F(WindowSessionPropertyTest, SetPrivacyMode, TestSize.Level0)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
@@ -418,7 +418,7 @@ HWTEST_F(WindowSessionPropertyTest, IsFloatingWindowAppType, TestSize.Level1)
  * @tc.desc: SetTouchHotAreas test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionPropertyTest, SetTouchHotAreas, TestSize.Level1)
+HWTEST_F(WindowSessionPropertyTest, SetTouchHotAreas, TestSize.Level0)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     Rect rect { 4, 4, 4, 4 };
@@ -1090,6 +1090,23 @@ HWTEST_F(WindowSessionPropertyTest, SetKeepScreenOn, TestSize.Level1)
     keepScreenOn = false;
     property->SetKeepScreenOn(keepScreenOn);
     ASSERT_EQ(keepScreenOn, property->IsKeepScreenOn());
+}
+
+/**
+ * @tc.name: SetViewKeepScreenOn
+ * @tc.desc: SetViewKeepScreenOn And IsViewKeepScreenOn
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetViewKeepScreenOn, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    bool keepScreenOn = true;
+    property->SetViewKeepScreenOn(keepScreenOn);
+    ASSERT_EQ(keepScreenOn, property->IsViewKeepScreenOn());
+    keepScreenOn = false;
+    property->SetViewKeepScreenOn(keepScreenOn);
+    ASSERT_EQ(keepScreenOn, property->IsViewKeepScreenOn());
 }
 
 /**

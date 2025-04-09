@@ -22,8 +22,6 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr uint32_t TOUCH_HOT_AREA_MAX_NUM = 50;
-constexpr uint32_t MAX_SIZE_PIP_CONTROL_GROUP = 8;
-constexpr uint32_t MAX_SIZE_PIP_CONTROL = 9;
 }
 
 const std::map<uint64_t, HandlWritePropertyFunc> WindowSessionProperty::writeFuncMap_ {
@@ -31,6 +29,8 @@ const std::map<uint64_t, HandlWritePropertyFunc> WindowSessionProperty::writeFun
         &WindowSessionProperty::WriteActionUpdateTurnScreenOn),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON),
         &WindowSessionProperty::WriteActionUpdateKeepScreenOn),
+    std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_VIEW_KEEP_SCREEN_ON),
+        &WindowSessionProperty::WriteActionUpdateViewKeepScreenOn),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE),
         &WindowSessionProperty::WriteActionUpdateFocusable),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE),
@@ -100,6 +100,8 @@ const std::map<uint64_t, HandlReadPropertyFunc> WindowSessionProperty::readFuncM
         &WindowSessionProperty::ReadActionUpdateTurnScreenOn),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON),
         &WindowSessionProperty::ReadActionUpdateKeepScreenOn),
+    std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_VIEW_KEEP_SCREEN_ON),
+        &WindowSessionProperty::ReadActionUpdateViewKeepScreenOn),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE),
         &WindowSessionProperty::ReadActionUpdateFocusable),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE),
@@ -227,6 +229,11 @@ void WindowSessionProperty::SetHideNonSystemFloatingWindows(bool hide)
     hideNonSystemFloatingWindows_ = hide;
 }
 
+void WindowSessionProperty::SetSkipSelfWhenShowOnVirtualScreen(bool isSkip)
+{
+    isSkipSelfWhenShowOnVirtualScreen_ = isSkip;
+}
+
 void WindowSessionProperty::SetSkipEventOnCastPlus(bool isSkip)
 {
     isSkipEventOnCastPlus_ = isSkip;
@@ -349,6 +356,11 @@ bool WindowSessionProperty::GetDragEnabled() const
 bool WindowSessionProperty::GetHideNonSystemFloatingWindows() const
 {
     return hideNonSystemFloatingWindows_;
+}
+
+bool WindowSessionProperty::GetSkipSelfWhenShowOnVirtualScreen() const
+{
+    return isSkipSelfWhenShowOnVirtualScreen_;
 }
 
 bool WindowSessionProperty::GetSkipEventOnCastPlus() const
@@ -514,6 +526,16 @@ void WindowSessionProperty::SetKeepScreenOn(bool keepScreenOn)
 bool WindowSessionProperty::IsKeepScreenOn() const
 {
     return keepScreenOn_;
+}
+
+void WindowSessionProperty::SetViewKeepScreenOn(bool keepScreenOn)
+{
+    viewKeepScreenOn_ = keepScreenOn;
+}
+
+bool WindowSessionProperty::IsViewKeepScreenOn() const
+{
+    return viewKeepScreenOn_;
 }
 
 void WindowSessionProperty::SetAccessTokenId(uint32_t accessTokenId)
@@ -889,62 +911,7 @@ bool WindowSessionProperty::MarshallingPiPTemplateInfo(Parcel& parcel) const
     if (!WindowHelper::IsPipWindow(type_)) {
         return true;
     }
-    if (!parcel.WriteUint32(pipTemplateInfo_.pipTemplateType)) {
-        return false;
-    }
-    if (!parcel.WriteUint32(pipTemplateInfo_.priority)) {
-        return false;
-    }
-    auto size = pipTemplateInfo_.controlGroup.size();
-    if (size > MAX_SIZE_PIP_CONTROL_GROUP) {
-        return false;
-    }
-    if (!parcel.WriteUint32(static_cast<uint32_t>(size))) {
-        return false;
-    }
-    for (uint32_t i = 0; i < size; i++) {
-        if (!parcel.WriteUint32(pipTemplateInfo_.controlGroup[i])) {
-            return false;
-        }
-    }
-    auto controlStatusSize = pipTemplateInfo_.pipControlStatusInfoList.size();
-    if (controlStatusSize > MAX_SIZE_PIP_CONTROL) {
-        return false;
-    }
-    if (!parcel.WriteUint32(static_cast<uint32_t>(controlStatusSize))) {
-        return false;
-    }
-    for (uint32_t i = 0; i < controlStatusSize; i++) {
-        if (!parcel.WriteUint32(static_cast<uint32_t>(pipTemplateInfo_.pipControlStatusInfoList[i].controlType)) ||
-            !parcel.WriteInt32(static_cast<int32_t>(pipTemplateInfo_.pipControlStatusInfoList[i].status))) {
-            return false;
-        }
-    }
-    if (!MarshallingPiPControlEnableInfo(parcel)) {
-        return false;
-    }
-    if (!parcel.WriteUint32(pipTemplateInfo_.defaultWindowSizeType)) {
-        return false;
-    }
-    return true;
-}
-
-bool WindowSessionProperty::MarshallingPiPControlEnableInfo(Parcel& parcel) const
-{
-    auto controlEnableSize = pipTemplateInfo_.pipControlEnableInfoList.size();
-    if (controlEnableSize > MAX_SIZE_PIP_CONTROL) {
-        return false;
-    }
-    if (!parcel.WriteUint32(static_cast<uint32_t>(controlEnableSize))) {
-        return false;
-    }
-    for (uint32_t i = 0; i < controlEnableSize; i++) {
-        if (!parcel.WriteUint32(static_cast<uint32_t>(pipTemplateInfo_.pipControlEnableInfoList[i].controlType)) ||
-            !parcel.WriteInt32(static_cast<int32_t>(pipTemplateInfo_.pipControlEnableInfoList[i].enabled))) {
-            return false;
-        }
-    }
-    return true;
+    return parcel.WriteParcelable(&pipTemplateInfo_);
 }
 
 void WindowSessionProperty::UnmarshallingPiPTemplateInfo(Parcel& parcel, WindowSessionProperty* property)
@@ -952,57 +919,11 @@ void WindowSessionProperty::UnmarshallingPiPTemplateInfo(Parcel& parcel, WindowS
     if (!WindowHelper::IsPipWindow(property->GetWindowType())) {
         return;
     }
-    PiPTemplateInfo pipTemplateInfo;
-    pipTemplateInfo.pipTemplateType = parcel.ReadUint32();
-    pipTemplateInfo.priority = parcel.ReadUint32();
-    auto size = parcel.ReadUint32();
-    if (size > MAX_SIZE_PIP_CONTROL_GROUP) {
+    sptr<PiPTemplateInfo> pipTemplateInfo = parcel.ReadParcelable<PiPTemplateInfo>();
+    if (pipTemplateInfo == nullptr) {
         return;
     }
-    for (uint32_t i = 0; i < size; i++) {
-        uint32_t controlGroupId = 0;
-        if (!parcel.ReadUint32(controlGroupId)) {
-            return;
-        }
-        pipTemplateInfo.controlGroup.push_back(controlGroupId);
-    }
-    auto controlStatusSize = parcel.ReadUint32();
-    if (controlStatusSize > MAX_SIZE_PIP_CONTROL) {
-        return;
-    }
-    for (uint32_t i = 0; i < controlStatusSize; i++) {
-        PiPControlStatusInfo pipControlStatusInfo;
-        uint32_t controlType = 0;
-        int32_t status = 0;
-        if (!parcel.ReadUint32(controlType) || !parcel.ReadInt32(status)) {
-            return;
-        }
-        pipControlStatusInfo.controlType = static_cast<PiPControlType>(controlType);
-        pipControlStatusInfo.status = static_cast<PiPControlStatus>(status);
-        pipTemplateInfo.pipControlStatusInfoList.push_back(pipControlStatusInfo);
-    }
-    UnmarshallingPiPControlEnableInfo(parcel, pipTemplateInfo);
-    pipTemplateInfo.defaultWindowSizeType = parcel.ReadUint32();
-    property->SetPiPTemplateInfo(pipTemplateInfo);
-}
-
-void WindowSessionProperty::UnmarshallingPiPControlEnableInfo(Parcel& parcel, PiPTemplateInfo& pipTemplateInfo)
-{
-    auto controlEnableSize = parcel.ReadUint32();
-    if (controlEnableSize > MAX_SIZE_PIP_CONTROL) {
-        return;
-    }
-    for (uint32_t i = 0; i < controlEnableSize; i++) {
-        PiPControlEnableInfo pipControlEnableInfo;
-        uint32_t controlType = 0;
-        int32_t enabled = 0;
-        if (!parcel.ReadUint32(controlType) || !parcel.ReadInt32(enabled)) {
-            return;
-        }
-        pipControlEnableInfo.controlType = static_cast<PiPControlType>(controlType);
-        pipControlEnableInfo.enabled = static_cast<PiPControlStatus>(enabled);
-        pipTemplateInfo.pipControlEnableInfoList.push_back(pipControlEnableInfo);
-    }
+    property->SetPiPTemplateInfo(*pipTemplateInfo);
 }
 
 bool WindowSessionProperty::MarshallingWindowMask(Parcel& parcel) const
@@ -1102,7 +1023,7 @@ bool WindowSessionProperty::UnmarshallingSessionInfo(Parcel& parcel, WindowSessi
     }
     bool isFollowParentMultiScreenPolicy = false;
     if (!parcel.ReadBool(isFollowParentMultiScreenPolicy)) {
-        TLOGE(WmsLogTag::DEFAULT, "Failed to read isFollowParentMultiScreenPolicy!");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to read isFollowParentMultiScreenPolicy!");
         return false;
     }
     info.isFollowParentMultiScreenPolicy = isFollowParentMultiScreenPolicy;
@@ -1236,7 +1157,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint32(static_cast<uint32_t>(type_)) &&
         parcel.WriteBool(focusable_) && parcel.WriteBool(focusableOnShow_) &&
         parcel.WriteBool(touchable_) && parcel.WriteBool(tokenState_) &&
-        parcel.WriteBool(turnScreenOn_) && parcel.WriteBool(keepScreenOn_) &&
+        parcel.WriteBool(turnScreenOn_) && parcel.WriteBool(keepScreenOn_) && parcel.WriteBool(viewKeepScreenOn_) &&
         parcel.WriteBool(isPrivacyMode_) && parcel.WriteBool(isSystemPrivacyMode_) &&
         parcel.WriteBool(isSnapshotSkip_) &&
         parcel.WriteUint64(displayId_) && parcel.WriteInt32(persistentId_) &&
@@ -1300,6 +1221,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetTokenState(parcel.ReadBool());
     property->SetTurnScreenOn(parcel.ReadBool());
     property->SetKeepScreenOn(parcel.ReadBool());
+    property->SetViewKeepScreenOn(parcel.ReadBool());
     property->SetPrivacyMode(parcel.ReadBool());
     property->SetSystemPrivacyMode(parcel.ReadBool());
     property->SetSnapshotSkip(parcel.ReadBool());
@@ -1387,6 +1309,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     tokenState_ = property->tokenState_;
     turnScreenOn_ = property->turnScreenOn_;
     keepScreenOn_ = property->keepScreenOn_;
+    viewKeepScreenOn_ = property->viewKeepScreenOn_;
     topmost_ = property->topmost_;
     mainWindowTopmost_ = property->mainWindowTopmost_;
     zLevel_ = property->zLevel_;
@@ -1420,6 +1343,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     touchHotAreas_ = property->touchHotAreas_;
     keyboardTouchHotAreas_ = property->keyboardTouchHotAreas_;
     hideNonSystemFloatingWindows_ = property->hideNonSystemFloatingWindows_;
+    isSkipSelfWhenShowOnVirtualScreen_ = property->isSkipSelfWhenShowOnVirtualScreen_;
     isSkipEventOnCastPlus_ = property->isSkipEventOnCastPlus_;
     forceHide_ = property->forceHide_;
     keepKeyboardFlag_ = property->keepKeyboardFlag_;
@@ -1481,6 +1405,11 @@ bool WindowSessionProperty::WriteActionUpdateTurnScreenOn(Parcel& parcel)
 bool WindowSessionProperty::WriteActionUpdateKeepScreenOn(Parcel& parcel)
 {
     return parcel.WriteBool(keepScreenOn_);
+}
+
+bool WindowSessionProperty::WriteActionUpdateViewKeepScreenOn(Parcel& parcel)
+{
+    return parcel.WriteBool(viewKeepScreenOn_);
 }
 
 bool WindowSessionProperty::WriteActionUpdateFocusable(Parcel& parcel)
@@ -1640,6 +1569,11 @@ void WindowSessionProperty::ReadActionUpdateTurnScreenOn(Parcel& parcel)
 void WindowSessionProperty::ReadActionUpdateKeepScreenOn(Parcel& parcel)
 {
     SetKeepScreenOn(parcel.ReadBool());
+}
+
+void WindowSessionProperty::ReadActionUpdateViewKeepScreenOn(Parcel& parcel)
+{
+    SetViewKeepScreenOn(parcel.ReadBool());
 }
 
 void WindowSessionProperty::ReadActionUpdateFocusable(Parcel& parcel)

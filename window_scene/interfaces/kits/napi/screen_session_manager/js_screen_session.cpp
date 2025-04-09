@@ -95,7 +95,8 @@ JsScreenSession::JsScreenSession(napi_env env, const sptr<ScreenSession>& screen
     if (screenSession_) {
         screenScene_->SetDisplayId(screenSession_->GetScreenId());
         bool isRealScreen = screenSession_->GetIsRealScreen();
-        SetScreenSceneDpiFunc func = [this, isRealScreen](float density) {
+        float densityInCurResolution = screenSession_->GetDensityInCurResolution();
+        SetScreenSceneDpiFunc func = [this, isRealScreen, densityInCurResolution](float density) {
             TLOGNI(WmsLogTag::DMS, "Screen Scene Dpi change, new density = %{public}f", density);
             if (!screenScene_ || !screenSession_) {
                 TLOGNE(WmsLogTag::DMS, "[NAPI]screenScene or screenSession is nullptr");
@@ -106,6 +107,9 @@ JsScreenSession::JsScreenSession(napi_env env, const sptr<ScreenSession>& screen
                 screenBounds.rect_.width_, screenBounds.rect_.height_ };
             screenScene_->SetDisplayDensity(density);
             if (!isRealScreen) {
+                screenScene_->UpdateViewportConfig(rect, WindowSizeChangeReason::UPDATE_DPI_SYNC);
+            } else {
+                screenScene_->SetDisplayDensity(densityInCurResolution);
                 screenScene_->UpdateViewportConfig(rect, WindowSizeChangeReason::UPDATE_DPI_SYNC);
             }
             OnScreenDensityChange();

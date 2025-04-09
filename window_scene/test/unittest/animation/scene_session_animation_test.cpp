@@ -413,7 +413,7 @@ HWTEST_F(SceneSessionAnimationTest, SetSidebarBlur03, TestSize.Level1)
         AppExecFwk::ConfigurationInner::COLOR_MODE_DARK);
 
     session->AddSidebarBlur();
-    session->SetSidebarBlur(false);
+    session->SetSidebarBlur(false, false);
     float radiusCloseDark = session->blurRadiusValue_->Get();
     float saturationCloseDark = session->blurSaturationValue_->Get();
     float brightnessCloseDark = session->blurBrightnessValue_->Get();
@@ -423,7 +423,7 @@ HWTEST_F(SceneSessionAnimationTest, SetSidebarBlur03, TestSize.Level1)
     EXPECT_EQ(SIDEBAR_BLUR_NUMBER_ZERO, brightnessCloseDark);
     EXPECT_EQ(SIDEBAR_SNAPSHOT_MASKCOLOR_DARK, colorCloseDark.AsArgbInt());
     
-    session->SetSidebarBlur(true);
+    session->SetSidebarBlur(true, true);
     float radiusOpenDark = session->blurRadiusValue_->Get();
     float saturationOpenDark = session->blurSaturationValue_->Get();
     float brightnessOpenDark = session->blurBrightnessValue_->Get();
@@ -468,7 +468,7 @@ HWTEST_F(SceneSessionAnimationTest, SetSidebarBlur04, TestSize.Level1)
         AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT);
 
     session->AddSidebarBlur();
-    session->SetSidebarBlur(false);
+    session->SetSidebarBlur(false, false);
     float radiusCloseLight = session->blurRadiusValue_->Get();
     float saturationCloseLight = session->blurSaturationValue_->Get();
     float brightnessCloseLight = session->blurBrightnessValue_->Get();
@@ -478,7 +478,7 @@ HWTEST_F(SceneSessionAnimationTest, SetSidebarBlur04, TestSize.Level1)
     EXPECT_EQ(SIDEBAR_BLUR_NUMBER_ZERO, brightnessCloseLight);
     EXPECT_EQ(SIDEBAR_SNAPSHOT_MASKCOLOR_LIGHT, colorCloseLight.AsArgbInt());
     
-    session->SetSidebarBlur(true);
+    session->SetSidebarBlur(true, true);
     float radiusOpenLight = session->blurRadiusValue_->Get();
     float saturationOpenLight = session->blurSaturationValue_->Get();
     float brightnessOpenLight = session->blurBrightnessValue_->Get();
@@ -487,6 +487,116 @@ HWTEST_F(SceneSessionAnimationTest, SetSidebarBlur04, TestSize.Level1)
     EXPECT_EQ(SIDEBAR_DEFAULT_SATURATION_LIGHT, saturationOpenLight);
     EXPECT_EQ(SIDEBAR_DEFAULT_BRIGHTNESS_LIGHT, brightnessOpenLight);
     EXPECT_EQ(SIDEBAR_DEFAULT_MASKCOLOR_LIGHT, colorOpenLight.AsArgbInt());
+}
+
+/**
+ * @tc.name: SetSidebarBlurMaximize01
+ * @tc.desc: SetSidebarBlurMaximize01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionAnimationTest, SetSidebarBlurMaximize01, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetSidebarBlurMaximize01";
+    info.bundleName_ = "SetSidebarBlurMaximize01";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+     
+    struct RSSurfaceNodeConfig surfaceNodeConfig;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig);
+    EXPECT_EQ(nullptr, session->GetSurfaceNode());
+    session->surfaceNode_ = surfaceNode;
+    EXPECT_NE(nullptr, session->GetSurfaceNode());
+
+    AbilityRuntime::Context::applicationContext_ = std::make_shared<
+        AbilityRuntime::ApplicationContext>();
+    std::shared_ptr<AbilityRuntime::ApplicationContext> appContext =
+        AbilityRuntime::Context::GetApplicationContext();
+    EXPECT_NE(nullptr, appContext);
+ 
+    appContext->contextImpl_ = std::make_shared<AbilityRuntime::ContextImpl>();
+    appContext->contextImpl_->config_ = std::make_shared<AppExecFwk::Configuration>();
+    std::shared_ptr<AppExecFwk::Configuration> appContextConfig = appContext->GetConfiguration();
+    EXPECT_NE(nullptr, appContextConfig);
+ 
+    appContextConfig->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE,
+        AppExecFwk::ConfigurationInner::COLOR_MODE_DARK);
+
+    session->AddSidebarBlur();
+    session->SetSidebarBlurMaximize(false);
+    float radiusRecoverDark = session->blurRadiusValue_->Get();
+    float saturationRecoverDark = session->blurSaturationValue_->Get();
+    float brightnessRecoverDark = session->blurBrightnessValue_->Get();
+    Rosen::RSColor colorRecoverDark = session->blurMaskColorValue_->Get();
+    EXPECT_EQ(SIDEBAR_DEFAULT_RADIUS_DARK, radiusRecoverDark);
+    EXPECT_EQ(SIDEBAR_DEFAULT_SATURATION_DARK, saturationRecoverDark);
+    EXPECT_EQ(SIDEBAR_DEFAULT_BRIGHTNESS_DARK, brightnessRecoverDark);
+    EXPECT_EQ(SIDEBAR_DEFAULT_MASKCOLOR_DARK, colorRecoverDark.AsArgbInt());
+    
+    session->SetSidebarBlurMaximize(true);
+    float radiusMaximizeDark = session->blurRadiusValue_->Get();
+    float saturationMaximizeDark = session->blurSaturationValue_->Get();
+    float brightnessMaximizeDark = session->blurBrightnessValue_->Get();
+    Rosen::RSColor colorMaximizeDark = session->blurMaskColorValue_->Get();
+    EXPECT_EQ(SIDEBAR_MAXIMIZE_RADIUS_DARK, radiusMaximizeDark);
+    EXPECT_EQ(SIDEBAR_MAXIMIZE_SATURATION_DARK, saturationMaximizeDark);
+    EXPECT_EQ(SIDEBAR_MAXIMIZE_BRIGHTNESS_DARK, brightnessMaximizeDark);
+    EXPECT_EQ(SIDEBAR_MAXIMIZE_MASKCOLOR_DARK, colorMaximizeDark.AsArgbInt());
+}
+
+/**
+ * @tc.name: SetSidebarBlurMaximize02
+ * @tc.desc: SetSidebarBlurMaximize02
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionAnimationTest, SetSidebarBlurMaximize02, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetSidebarBlurMaximize02";
+    info.bundleName_ = "SetSidebarBlurMaximize02";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+     
+    struct RSSurfaceNodeConfig surfaceNodeConfig;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig);
+    EXPECT_EQ(nullptr, session->GetSurfaceNode());
+    session->surfaceNode_ = surfaceNode;
+    EXPECT_NE(nullptr, session->GetSurfaceNode());
+
+    AbilityRuntime::Context::applicationContext_ = std::make_shared<
+        AbilityRuntime::ApplicationContext>();
+    std::shared_ptr<AbilityRuntime::ApplicationContext> appContext =
+        AbilityRuntime::Context::GetApplicationContext();
+    EXPECT_NE(nullptr, appContext);
+ 
+    appContext->contextImpl_ = std::make_shared<AbilityRuntime::ContextImpl>();
+    appContext->contextImpl_->config_ = std::make_shared<AppExecFwk::Configuration>();
+    std::shared_ptr<AppExecFwk::Configuration> appContextConfig = appContext->GetConfiguration();
+    EXPECT_NE(nullptr, appContextConfig);
+ 
+    appContextConfig->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE,
+        AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT);
+
+    session->AddSidebarBlur();
+    session->SetSidebarBlurMaximize(false);
+    float radiusRecoverLight = session->blurRadiusValue_->Get();
+    float saturationRecoverLight = session->blurSaturationValue_->Get();
+    float brightnessRecoverLight = session->blurBrightnessValue_->Get();
+    Rosen::RSColor colorRecoverLight = session->blurMaskColorValue_->Get();
+    EXPECT_EQ(SIDEBAR_DEFAULT_RADIUS_LIGHT, radiusRecoverLight);
+    EXPECT_EQ(SIDEBAR_DEFAULT_SATURATION_LIGHT, saturationRecoverLight);
+    EXPECT_EQ(SIDEBAR_DEFAULT_BRIGHTNESS_LIGHT, brightnessRecoverLight);
+    EXPECT_EQ(SIDEBAR_DEFAULT_MASKCOLOR_LIGHT, colorRecoverLight.AsArgbInt());
+    
+    session->SetSidebarBlurMaximize(true);
+    float radiusMaximizeLight = session->blurRadiusValue_->Get();
+    float saturationMaximizeLight = session->blurSaturationValue_->Get();
+    float brightnessMaximizeLight = session->blurBrightnessValue_->Get();
+    Rosen::RSColor colorMaximizeLight = session->blurMaskColorValue_->Get();
+    EXPECT_EQ(SIDEBAR_MAXIMIZE_RADIUS_LIGHT, radiusMaximizeLight);
+    EXPECT_EQ(SIDEBAR_MAXIMIZE_SATURATION_LIGHT, saturationMaximizeLight);
+    EXPECT_EQ(SIDEBAR_MAXIMIZE_BRIGHTNESS_LIGHT, brightnessMaximizeLight);
+    EXPECT_EQ(SIDEBAR_MAXIMIZE_MASKCOLOR_LIGHT, colorMaximizeLight.AsArgbInt());
 }
 }
 }
