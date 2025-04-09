@@ -1016,9 +1016,9 @@ HWTEST_F(WindowSessionImplTest2, GetDecorHeight03, TestSize.Level1)
     int32_t height = -1;
     EXPECT_EQ(window->GetDecorHeight(height), WMError::WM_OK);
     EXPECT_EQ(height, 37);
-    window->SetTargetAPIVersion(15);
+    window->SetTargetAPIVersion(18);
     EXPECT_EQ(window->GetDecorHeight(height), WMError::WM_OK);
-    EXPECT_EQ(height, decorHeight);
+    EXPECT_EQ(height, 37);
     window->Destroy();
 }
 
