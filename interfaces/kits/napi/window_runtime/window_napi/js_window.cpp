@@ -7591,13 +7591,6 @@ napi_value JsWindow::OnStartMoving(napi_env env, napi_callback_info info)
             *err = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
             return;
         }
-        if (!WindowHelper::IsSystemWindow(windowToken_->GetType()) &&
-            !WindowHelper::IsMainWindow(windowToken_->GetType()) &&
-            !WindowHelper::IsSubWindow(windowToken_->GetType())) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: This is not valid window.", funcName);
-            *err = WmErrorCode::WM_ERROR_INVALID_CALLING;
-            return;
-        }
         *err = window->StartMoveWindow();
     };
 
@@ -7649,12 +7642,6 @@ napi_value JsWindow::OnStartMoveWindowWithCoordinate(napi_env env, size_t argc, 
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
             return;
         }
-        WindowType windowType = window->GetType();
-        if (!WindowHelper::IsSystemWindow(windowType) && !WindowHelper::IsAppWindow(windowType)) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s invalid window type:%{public}u", where, windowType);
-            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_CALLING));
-            return;
-        }
         WmErrorCode ret = window->StartMoveWindowWithCoordinate(offsetX, offsetY);
         if (ret == WmErrorCode::WM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
@@ -7683,13 +7670,6 @@ napi_value JsWindow::OnStopMoving(napi_env env, napi_callback_info info)
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s window is nullptr.", where);
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
-            return;
-        }
-        if (!WindowHelper::IsSystemWindow(window->GetType()) &&
-            !WindowHelper::IsMainWindow(window->GetType()) &&
-            !WindowHelper::IsSubWindow(window->GetType())) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s This is not valid window.", where);
-            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_CALLING));
             return;
         }
         WmErrorCode ret = window->StopMoveWindow();

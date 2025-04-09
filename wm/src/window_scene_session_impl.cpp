@@ -3212,6 +3212,13 @@ bool WindowSceneSessionImpl::CalcWindowShouldMove()
 
 WmErrorCode WindowSceneSessionImpl::StartMoveWindow()
 {
+    WindowType windowType = GetType();
+    if (!WindowHelper::IsSystemWindow(windowType) &&
+        !WindowHelper::IsMainWindow(windowType) &&
+        !WindowHelper::IsSubWindow(windowType)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "invalid window type:%{public}u", windowType);
+        return WmErrorCode::WM_ERROR_INVALID_CALLING;
+    }
     if (!CalcWindowShouldMove()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "The device is not supported");
         return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
@@ -3244,6 +3251,13 @@ WmErrorCode WindowSceneSessionImpl::StartMoveWindow()
 
 WmErrorCode WindowSceneSessionImpl::StartMoveWindowWithCoordinate(int32_t offsetX, int32_t offsetY)
 {
+    WindowType windowType = GetType();
+    if (!WindowHelper::IsSystemWindow(windowType) &&
+        !WindowHelper::IsMainWindow(windowType) &&
+        !WindowHelper::IsSubWindow(windowType)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "invalid window type:%{public}u", windowType);
+        return WmErrorCode::WM_ERROR_INVALID_CALLING;
+    }
     if (!IsPcOrPadCapabilityEnabled()) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "The device is not supported");
         return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
@@ -3294,6 +3308,13 @@ WmErrorCode WindowSceneSessionImpl::StartMoveWindowWithCoordinate(int32_t offset
 
 WmErrorCode WindowSceneSessionImpl::StopMoveWindow()
 {
+    WindowType windowType = GetType();
+    if (!WindowHelper::IsSystemWindow(windowType) &&
+        !WindowHelper::IsMainWindow(windowType) &&
+        !WindowHelper::IsSubWindow(windowType)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "invalid window type:%{public}u", windowType);
+        return WmErrorCode::WM_ERROR_INVALID_CALLING;
+    }
     if (!IsPcOrPadFreeMultiWindowMode()) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "The device is not supported");
         return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
