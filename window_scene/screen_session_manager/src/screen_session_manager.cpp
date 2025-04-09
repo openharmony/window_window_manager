@@ -2050,6 +2050,7 @@ sptr<ScreenSession> ScreenSessionManager::GetPhysicalScreenSession(ScreenId scre
             .defaultScreenId = defScreenId,
             .mirrorNodeId = nodeId,
             .property = property,
+            .rsId = screenId,
         };
         screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_MIRROR);
         screenSession->SetIsPhysicalMirrorSwitch(true);
