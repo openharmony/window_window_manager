@@ -30,11 +30,11 @@ namespace OHOS {
 namespace Rosen {
 
 namespace {
-    std::string logMsg;
+    std::string g_errLog;
     void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
         const char *msg)
     {
-        logMsg = msg;
+        g_errLog = msg;
     }
 // screen const
 constexpr int32_t SCREEN_WIDTH = 2472;
