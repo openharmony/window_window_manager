@@ -201,7 +201,7 @@ public:
     void NotifyDisconnect();
     void NotifyLayoutFinished();
     void NotifyRemoveBlank();
-    void NotifyAddSnapshot();
+    void NotifyAddSnapshot(bool useFfrt = false, bool needPersist = false);
     void NotifyRemoveSnapshot();
     void NotifyExtensionDied() override;
     void NotifyExtensionTimeout(int32_t errorCode) override;
@@ -245,13 +245,22 @@ public:
     void SetSaveSnapshotCallback(Task&& task)
     {
         if (task) {
+            std::lock_guard lock(saveSnapshotCallbackMutex_);
             saveSnapshotCallback_ = std::move(task);
         }
     }
     void SetRemoveSnapshotCallback(Task&& task)
     {
         if (task) {
+            std::lock_guard lock(removeSnapshotCallbackMutex_);
             removeSnapshotCallback_ = std::move(task);
+        }
+    }
+    void SetAddSnapshotCallback(Task&& task)
+    {
+        if (task) {
+            std::lock_guard lock(addSnapshotCallbackMutex_);
+            addSnapshotCallback_ = std::move(task);
         }
     }
 
@@ -998,8 +1007,10 @@ private:
      */
     Task saveSnapshotCallback_ = []() {};
     Task removeSnapshotCallback_ = []() {};
+    Task addSnapshotCallback_ = []() {};
     std::mutex saveSnapshotCallbackMutex_;
     std::mutex removeSnapshotCallbackMutex_;
+    std::mutex addSnapshotCallbackMutex_;
     std::atomic<bool> needNotifyAttachState_ = { false };
 
     /*
