@@ -578,12 +578,17 @@ void PcFoldScreenManager::UnregisterFoldScreenStatusChangeCallback(int32_t persi
 void PcFoldScreenManager::ExecuteFoldScreenStatusChangeCallbacks(DisplayId displayId,
     SuperFoldStatus status, SuperFoldStatus prevStatus)
 {
-    std::unique_lock<std::mutex> lock(callbackMutex_);
-    for (auto iter = foldScreenStatusChangeCallbacks_.begin(); iter != foldScreenStatusChangeCallbacks_.end();) {
+    std::unordered_map<int32_t, std::weak_ptr<FoldScreenStatusChangeCallback>> foldScreenStatusChangeCallbacksCopy;
+    {
+        std::unique_lock<std::mutex> lock(callbackMutex_);
+        foldScreenStatusChangeCallbacksCopy = foldScreenStatusChangeCallbacks_;
+
+    }
+    for (auto iter = foldScreenStatusChangeCallbacksCopy.begin(); iter != foldScreenStatusChangeCallbacksCopy.end();) {
         auto callback = iter->second.lock();
         if (callback == nullptr) {
             TLOGW(WmsLogTag::WMS_LAYOUT_PC, "callback invalid, id: %{public}d", iter->first);
-            iter = foldScreenStatusChangeCallbacks_.erase(iter);
+            iter = foldScreenStatusChangeCallbacksCopy.erase(iter);
             continue;
         }
         (*callback)(displayId, status, prevStatus);
