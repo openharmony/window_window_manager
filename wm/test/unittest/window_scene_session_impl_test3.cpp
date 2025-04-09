@@ -697,24 +697,6 @@ HWTEST_F(WindowSceneSessionImplTest3, IsDecorEnable, TestSize.Level1)
 }
 
 /**
- * @tc.name: RecoverAndReconnectSceneSession
- * @tc.desc: RecoverAndReconnectSceneSession
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest3, RecoverAndReconnectSceneSession, TestSize.Level1)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("RecoverAndReconnectSceneSession");
-    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-
-    auto ret = windowSceneSessionImpl->RecoverAndReconnectSceneSession();
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
-    windowSceneSessionImpl->isFocused_ = true;
-    ret = windowSceneSessionImpl->RecoverAndReconnectSceneSession();
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
-}
-
-/**
  * @tc.name: UpdateWindowState
  * @tc.desc: UpdateWindowState
  * @tc.type: FUNC
@@ -1943,12 +1925,12 @@ HWTEST_F(WindowSceneSessionImplTest3, CheckAndModifyWindowRect, Function | Small
     windowSceneSessionImpl->property_->SetWindowModeSupportType(WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN);
     windowSceneSessionImpl->property_->SetDragEnabled(false);
     ret = windowSceneSessionImpl->CheckAndModifyWindowRect(width, height);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
+    EXPECT_EQ(WMError::WM_OK, ret);
     windowSceneSessionImpl->property_->SetDragEnabled(true);
     WindowLimits windowLimits = {5000, 5000, 50, 50, 0.0f, 0.0f};
     windowSceneSessionImpl->property_->SetWindowLimits(windowLimits);
     ret = windowSceneSessionImpl->CheckAndModifyWindowRect(width, height);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
+    EXPECT_EQ(WMError::WM_OK, ret);
     WindowLimits windowLimits1 = {800, 800, 50, 50, 0.0f, 0.0f};
     windowSceneSessionImpl->property_->SetWindowLimits(windowLimits1);
     ret = windowSceneSessionImpl->CheckAndModifyWindowRect(width, height);

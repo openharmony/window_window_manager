@@ -528,6 +528,10 @@ WSError SessionProxy::PendingSessionActivation(sptr<AAFwk::SessionInfo> abilityS
         TLOGE(WmsLogTag::WMS_LIFE, "Write specifiedFlag failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
+    if (!data.WriteBool(abilitySessionInfo->reuseDelegatorWindow)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write reuseDelegatorWindow failed.");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         WLOGFE("remote is null");
@@ -2044,7 +2048,8 @@ WMError SessionProxy::UpdateSessionPropertyByAction(const sptr<WindowSessionProp
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
-    if (action == WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON) {
+    if (action == WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON ||
+        action == WSPropertyChangeAction::ACTION_UPDATE_VIEW_KEEP_SCREEN_ON) {
         option.SetFlags(MessageOption::TF_ASYNC);
     }
     if (!data.WriteInterfaceToken(GetDescriptor())) {
@@ -2787,9 +2792,11 @@ WSError SessionProxy::UpdateFlag(const std::string& flag)
     return WSError::WS_OK;
 }
 
-WSError SessionProxy::UpdatePiPDefaultWindowSizeType(uint32_t defaultWindowSizeType)
+WSError SessionProxy::UpdatePiPTemplateInfo(PiPTemplateInfo& pipTemplateInfo)
 {
-    TLOGD(WmsLogTag::WMS_PIP, "defaultWindowSizeType:%{public}u", defaultWindowSizeType);
+    TLOGD(WmsLogTag::WMS_PIP, "UpdatePiPTemplateInfo, pipTemplateType: %{public}u, priority: %{public}d, "
+        "defaultWindowSizeType: %{public}d", pipTemplateInfo.pipTemplateType, pipTemplateInfo.priority,
+        pipTemplateInfo.defaultWindowSizeType);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -2797,8 +2804,8 @@ WSError SessionProxy::UpdatePiPDefaultWindowSizeType(uint32_t defaultWindowSizeT
         TLOGE(WmsLogTag::WMS_PIP, "writeInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!data.WriteUint32(defaultWindowSizeType)) {
-        TLOGE(WmsLogTag::WMS_PIP, "write defaultWindowSizeType failed");
+    if (!data.WriteParcelable(&pipTemplateInfo)) {
+        TLOGE(WmsLogTag::WMS_PIP, "write pipTemplateInfo failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();
@@ -2806,7 +2813,7 @@ WSError SessionProxy::UpdatePiPDefaultWindowSizeType(uint32_t defaultWindowSizeT
         TLOGE(WmsLogTag::WMS_PIP, "remote is null");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_PIP_DEFAULT_WINDOW_SIZE_TYPE),
+    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_PIP_TEMPLATE_INFO),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_PIP, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
@@ -2903,5 +2910,34 @@ WSError SessionProxy::GetIsHighlighted(bool& isHighlighted)
         return WSError::WS_ERROR_IPC_FAILED;
     }
     return WSError::WS_OK;
+}
+
+WMError SessionProxy::NotifyDisableDelegatorChange()
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_LIFE, "WriteInterfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_DISABLE_DELEGATOR_CHANGE),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read ret failed.");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(ret);
 }
 } // namespace OHOS::Rosen

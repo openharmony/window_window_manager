@@ -67,7 +67,7 @@ namespace {
  * @tc.desc: UpdateRect
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplLayoutTest, UpdateRect01, TestSize.Level1)
+HWTEST_F(WindowSessionImplLayoutTest, UpdateRect01, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplLayoutTest: UpdateRect01 start";
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
@@ -114,7 +114,7 @@ HWTEST_F(WindowSessionImplLayoutTest, UpdateRect01, TestSize.Level1)
  * @tc.desc: UpdateRect
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplLayoutTest, UpdateRect02, TestSize.Level1)
+HWTEST_F(WindowSessionImplLayoutTest, UpdateRect02, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplLayoutTest: UpdateRect02 start";
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
@@ -158,7 +158,7 @@ HWTEST_F(WindowSessionImplLayoutTest, UpdateRect02, TestSize.Level1)
  * @tc.desc: SetResizeByDragEnabled and check the retCode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplLayoutTest, SetResizeByDragEnabled01, TestSize.Level1)
+HWTEST_F(WindowSessionImplLayoutTest, SetResizeByDragEnabled01, TestSize.Level0)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetResizeByDragEnabled01");
@@ -172,7 +172,7 @@ HWTEST_F(WindowSessionImplLayoutTest, SetResizeByDragEnabled01, TestSize.Level1)
  * @tc.desc: SetResizeByDragEnabled and check the retCode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplLayoutTest, SetResizeByDragEnabled02, TestSize.Level1)
+HWTEST_F(WindowSessionImplLayoutTest, SetResizeByDragEnabled02, TestSize.Level0)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetResizeByDragEnabled02");
@@ -193,7 +193,7 @@ HWTEST_F(WindowSessionImplLayoutTest, SetResizeByDragEnabled02, TestSize.Level1)
  * @tc.desc: SetResizeByDragEnabled and check the retCode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplLayoutTest, SetResizeByDragEnabled03, TestSize.Level1)
+HWTEST_F(WindowSessionImplLayoutTest, SetResizeByDragEnabled03, TestSize.Level0)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetResizeByDragEnabled03");
@@ -223,7 +223,7 @@ HWTEST_F(WindowSessionImplLayoutTest, SetResizeByDragEnabled03, TestSize.Level1)
  * @tc.desc: UpdateViewportConfig
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplLayoutTest, UpdateViewportConfig, TestSize.Level1)
+HWTEST_F(WindowSessionImplLayoutTest, UpdateViewportConfig, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplLayoutTest: UpdateViewportConfig start";
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();

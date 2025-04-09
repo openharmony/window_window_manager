@@ -74,7 +74,7 @@ namespace {
  * @tc.desc: EnableInputEventListener Test
  * @tc.type: FUNC
  */
-HWTEST_F(IntentionEventManagerTest, EnableInputEventListener, TestSize.Level1)
+HWTEST_F(IntentionEventManagerTest, EnableInputEventListener, TestSize.Level0)
 {
     bool enable = DelayedSingleton<IntentionEventManager>::GetInstance()->
         EnableInputEventListener(nullptr, nullptr);
@@ -85,6 +85,145 @@ HWTEST_F(IntentionEventManagerTest, EnableInputEventListener, TestSize.Level1)
     enable = DelayedSingleton<IntentionEventManager>::GetInstance()->
         EnableInputEventListener(uIContent_.get(), eventHandler_);
     EXPECT_EQ(true, enable);
+}
+
+/**
+ * @tc.name: DispatchKeyEventCallback
+ * @tc.desc: DispatchKeyEventCallback Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(IntentionEventManagerTest, DispatchKeyEventCallback, TestSize.Level0)
+{
+    std::shared_ptr<MMI::KeyEvent> keyEvent = nullptr;
+    inputEventListener_->DispatchKeyEventCallback(2024, keyEvent, true);
+    keyEvent = MMI::KeyEvent::Create();
+    EXPECT_NE(nullptr, keyEvent);
+    inputEventListener_->DispatchKeyEventCallback(2024, keyEvent, true);
+    inputEventListener_->DispatchKeyEventCallback(2024, keyEvent, false);
+    SessionInfo info;
+    info.bundleName_ = "IntentionEventManager";
+    info.moduleName_ = "InputEventListener";
+    sptr<SceneSession::SpecificSessionCallback> callback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    EXPECT_NE(nullptr, callback);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, callback);
+    EXPECT_NE(nullptr, sceneSession);
+    SceneSessionManager::GetInstance().sceneSessionMap_.emplace(std::make_pair(2024, sceneSession));
+    std::shared_ptr<IntentionEventManager::InputEventListener> inputEventListener =
+        std::make_shared<IntentionEventManager::InputEventListener>(nullptr, nullptr);
+    inputEventListener->DispatchKeyEventCallback(2024, keyEvent, false);
+    inputEventListener_->DispatchKeyEventCallback(2024, keyEvent, false);
+}
+
+/**
+ * @tc.name: CheckPointerEvent
+ * @tc.desc: CheckPointerEvent Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(IntentionEventManagerTest, CheckPointerEvent, TestSize.Level0)
+{
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = nullptr;
+    std::shared_ptr<IntentionEventManager::InputEventListener> inputEventListener =
+        std::make_shared<IntentionEventManager::InputEventListener>(nullptr, nullptr);
+    EXPECT_NE(nullptr, inputEventListener);
+    EXPECT_EQ(false, inputEventListener->CheckPointerEvent(pointerEvent));
+    pointerEvent = MMI::PointerEvent::Create();
+    EXPECT_EQ(false, inputEventListener->CheckPointerEvent(pointerEvent));
+    SceneSessionManager::GetInstance().SetEnableInputEvent(false);
+    EXPECT_EQ(false, inputEventListener_->CheckPointerEvent(pointerEvent));
+    SceneSessionManager::GetInstance().SetEnableInputEvent(true);
+    pointerEvent->SetDispatchTimes(10);
+    EXPECT_EQ(10, pointerEvent->GetDispatchTimes());
+    EXPECT_EQ(true, inputEventListener_->CheckPointerEvent(pointerEvent));
+}
+
+/**
+ * @tc.name: OnInputEventPointer1
+ * @tc.desc: OnInputEventPointer1 Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(IntentionEventManagerTest, OnInputEventPointer1, TestSize.Level0)
+{
+    auto pointerEvent = MMI::PointerEvent::Create();
+    EXPECT_NE(nullptr, pointerEvent);
+    SessionInfo info;
+    info.bundleName_ = "IntentionEventManager";
+    info.moduleName_ = "InputEventListener";
+    info.isSystem_ = true;
+    sptr<SceneSession::SpecificSessionCallback> callback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    EXPECT_NE(nullptr, callback);
+    sptr<SceneSession> sceneSession0 = sptr<SceneSession>::MakeSptr(info, callback);
+    EXPECT_NE(nullptr, sceneSession0);
+    SceneSessionManager::GetInstance().sceneSessionMap_.emplace(std::make_pair(0, sceneSession0));
+    pointerEvent->SetDispatchTimes(-1);
+    EXPECT_EQ(-1, pointerEvent->GetDispatchTimes());
+    pointerEvent->SetPointerId(10);
+    EXPECT_EQ(10, pointerEvent->GetPointerId());
+    MMI::PointerEvent::PointerItem item;
+    item.SetPointerId(10);
+    EXPECT_EQ(10, item.GetPointerId());
+    pointerEvent->AddPointerItem(item);
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
+    EXPECT_EQ(MMI::PointerEvent::POINTER_ACTION_MOVE, pointerEvent->GetPointerAction());
+    inputEventListener_->OnInputEvent(pointerEvent);
+
+    pointerEvent->pointers_.clear();
+    pointerEvent->SetDispatchTimes(10);
+    inputEventListener_->OnInputEvent(pointerEvent);
+
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_DOWN);
+    inputEventListener_->OnInputEvent(pointerEvent);
+    pointerEvent->AddPointerItem(item);
+    inputEventListener_->OnInputEvent(pointerEvent);
+}
+
+/**
+ * @tc.name: SetPointerEventStatus
+ * @tc.desc: SetPointerEventStatus Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(IntentionEventManagerTest, SetPointerEventStatus, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetPointerEventStatus";
+    info.bundleName_ = "SetPointerEventStatus";
+    info.windowType_ = 1;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback);
+    EXPECT_NE(sceneSession, nullptr);
+
+    int32_t action = MMI::PointerEvent::POINTER_ACTION_DOWN;
+    inputEventListener_->SetPointerEventStatus(0, action, MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, sceneSession);
+    auto fingerPointerDownStatusList = sceneSession->GetFingerPointerDownStatusList();
+    EXPECT_EQ(1, fingerPointerDownStatusList.size());
+
+    action = MMI::PointerEvent::POINTER_ACTION_UP;
+    inputEventListener_->SetPointerEventStatus(0, action, MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, sceneSession);
+    fingerPointerDownStatusList = sceneSession->GetFingerPointerDownStatusList();
+    EXPECT_EQ(0, fingerPointerDownStatusList.size());
+
+    action = MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN;
+    inputEventListener_->SetPointerEventStatus(1, action, MMI::PointerEvent::SOURCE_TYPE_MOUSE, sceneSession);
+    EXPECT_EQ(true, sceneSession->GetMousePointerDownEventStatus());
+
+    action = MMI::PointerEvent::POINTER_ACTION_BUTTON_UP;
+    inputEventListener_->SetPointerEventStatus(1, action, MMI::PointerEvent::SOURCE_TYPE_MOUSE, sceneSession);
+    EXPECT_EQ(false, sceneSession->GetMousePointerDownEventStatus());
+
+    action = MMI::PointerEvent::POINTER_ACTION_DOWN;
+    inputEventListener_->SetPointerEventStatus(0, action, MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, sceneSession);
+    action = MMI::PointerEvent::POINTER_ACTION_CANCEL;
+    inputEventListener_->SetPointerEventStatus(0, action, MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, sceneSession);
+    fingerPointerDownStatusList = sceneSession->GetFingerPointerDownStatusList();
+    EXPECT_EQ(0, fingerPointerDownStatusList.size());
+
+    action = MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN;
+    inputEventListener_->SetPointerEventStatus(1, action, MMI::PointerEvent::SOURCE_TYPE_MOUSE, sceneSession);
+    action = MMI::PointerEvent::POINTER_ACTION_CANCEL;
+    inputEventListener_->SetPointerEventStatus(0, action, MMI::PointerEvent::SOURCE_TYPE_MOUSE, sceneSession);
+    EXPECT_EQ(false, sceneSession->GetMousePointerDownEventStatus());
 }
 
 /**
@@ -145,7 +284,7 @@ HWTEST_F(IntentionEventManagerTest, OnInputEvent0, TestSize.Level1)
  * @tc.desc: OnInputEvent1 Test
  * @tc.type: FUNC
  */
-HWTEST_F(IntentionEventManagerTest, OnInputEvent1, TestSize.Level1)
+HWTEST_F(IntentionEventManagerTest, OnInputEvent1, TestSize.Level0)
 {
     std::shared_ptr<MMI::KeyEvent> keyEvent = nullptr;
     inputEventListener_->OnInputEvent(keyEvent);
@@ -285,145 +424,6 @@ HWTEST_F(IntentionEventManagerTest, IsKeyboardEvent, TestSize.Level1)
     keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_BACK);
     EXPECT_EQ(true, inputEventListener_->IsKeyboardEvent(keyEvent));
     usleep(WAIT_SYNC_IN_NS);
-}
-
-/**
- * @tc.name: DispatchKeyEventCallback
- * @tc.desc: DispatchKeyEventCallback Test
- * @tc.type: FUNC
- */
-HWTEST_F(IntentionEventManagerTest, DispatchKeyEventCallback, TestSize.Level1)
-{
-    std::shared_ptr<MMI::KeyEvent> keyEvent = nullptr;
-    inputEventListener_->DispatchKeyEventCallback(2024, keyEvent, true);
-    keyEvent = MMI::KeyEvent::Create();
-    EXPECT_NE(nullptr, keyEvent);
-    inputEventListener_->DispatchKeyEventCallback(2024, keyEvent, true);
-    inputEventListener_->DispatchKeyEventCallback(2024, keyEvent, false);
-    SessionInfo info;
-    info.bundleName_ = "IntentionEventManager";
-    info.moduleName_ = "InputEventListener";
-    sptr<SceneSession::SpecificSessionCallback> callback =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    EXPECT_NE(nullptr, callback);
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, callback);
-    EXPECT_NE(nullptr, sceneSession);
-    SceneSessionManager::GetInstance().sceneSessionMap_.emplace(std::make_pair(2024, sceneSession));
-    std::shared_ptr<IntentionEventManager::InputEventListener> inputEventListener =
-        std::make_shared<IntentionEventManager::InputEventListener>(nullptr, nullptr);
-    inputEventListener->DispatchKeyEventCallback(2024, keyEvent, false);
-    inputEventListener_->DispatchKeyEventCallback(2024, keyEvent, false);
-}
-
-/**
- * @tc.name: CheckPointerEvent
- * @tc.desc: CheckPointerEvent Test
- * @tc.type: FUNC
- */
-HWTEST_F(IntentionEventManagerTest, CheckPointerEvent, TestSize.Level1)
-{
-    std::shared_ptr<MMI::PointerEvent> pointerEvent = nullptr;
-    std::shared_ptr<IntentionEventManager::InputEventListener> inputEventListener =
-        std::make_shared<IntentionEventManager::InputEventListener>(nullptr, nullptr);
-    EXPECT_NE(nullptr, inputEventListener);
-    EXPECT_EQ(false, inputEventListener->CheckPointerEvent(pointerEvent));
-    pointerEvent = MMI::PointerEvent::Create();
-    EXPECT_EQ(false, inputEventListener->CheckPointerEvent(pointerEvent));
-    SceneSessionManager::GetInstance().SetEnableInputEvent(false);
-    EXPECT_EQ(false, inputEventListener_->CheckPointerEvent(pointerEvent));
-    SceneSessionManager::GetInstance().SetEnableInputEvent(true);
-    pointerEvent->SetDispatchTimes(10);
-    EXPECT_EQ(10, pointerEvent->GetDispatchTimes());
-    EXPECT_EQ(true, inputEventListener_->CheckPointerEvent(pointerEvent));
-}
-
-/**
- * @tc.name: OnInputEventPointer1
- * @tc.desc: OnInputEventPointer1 Test
- * @tc.type: FUNC
- */
-HWTEST_F(IntentionEventManagerTest, OnInputEventPointer1, TestSize.Level1)
-{
-    auto pointerEvent = MMI::PointerEvent::Create();
-    EXPECT_NE(nullptr, pointerEvent);
-    SessionInfo info;
-    info.bundleName_ = "IntentionEventManager";
-    info.moduleName_ = "InputEventListener";
-    info.isSystem_ = true;
-    sptr<SceneSession::SpecificSessionCallback> callback =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    EXPECT_NE(nullptr, callback);
-    sptr<SceneSession> sceneSession0 = sptr<SceneSession>::MakeSptr(info, callback);
-    EXPECT_NE(nullptr, sceneSession0);
-    SceneSessionManager::GetInstance().sceneSessionMap_.emplace(std::make_pair(0, sceneSession0));
-    pointerEvent->SetDispatchTimes(-1);
-    EXPECT_EQ(-1, pointerEvent->GetDispatchTimes());
-    pointerEvent->SetPointerId(10);
-    EXPECT_EQ(10, pointerEvent->GetPointerId());
-    MMI::PointerEvent::PointerItem item;
-    item.SetPointerId(10);
-    EXPECT_EQ(10, item.GetPointerId());
-    pointerEvent->AddPointerItem(item);
-    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
-    EXPECT_EQ(MMI::PointerEvent::POINTER_ACTION_MOVE, pointerEvent->GetPointerAction());
-    inputEventListener_->OnInputEvent(pointerEvent);
-
-    pointerEvent->pointers_.clear();
-    pointerEvent->SetDispatchTimes(10);
-    inputEventListener_->OnInputEvent(pointerEvent);
-
-    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_DOWN);
-    inputEventListener_->OnInputEvent(pointerEvent);
-    pointerEvent->AddPointerItem(item);
-    inputEventListener_->OnInputEvent(pointerEvent);
-}
-
-/**
- * @tc.name: SetPointerEventStatus
- * @tc.desc: SetPointerEventStatus Test
- * @tc.type: FUNC
- */
-HWTEST_F(IntentionEventManagerTest, SetPointerEventStatus, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "SetPointerEventStatus";
-    info.bundleName_ = "SetPointerEventStatus";
-    info.windowType_ = 1;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback);
-    EXPECT_NE(sceneSession, nullptr);
-
-    int32_t action = MMI::PointerEvent::POINTER_ACTION_DOWN;
-    inputEventListener_->SetPointerEventStatus(0, action, MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, sceneSession);
-    auto fingerPointerDownStatusList = sceneSession->GetFingerPointerDownStatusList();
-    EXPECT_EQ(1, fingerPointerDownStatusList.size());
-
-    action = MMI::PointerEvent::POINTER_ACTION_UP;
-    inputEventListener_->SetPointerEventStatus(0, action, MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, sceneSession);
-    fingerPointerDownStatusList = sceneSession->GetFingerPointerDownStatusList();
-    EXPECT_EQ(0, fingerPointerDownStatusList.size());
-
-    action = MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN;
-    inputEventListener_->SetPointerEventStatus(1, action, MMI::PointerEvent::SOURCE_TYPE_MOUSE, sceneSession);
-    EXPECT_EQ(true, sceneSession->GetMousePointerDownEventStatus());
-
-    action = MMI::PointerEvent::POINTER_ACTION_BUTTON_UP;
-    inputEventListener_->SetPointerEventStatus(1, action, MMI::PointerEvent::SOURCE_TYPE_MOUSE, sceneSession);
-    EXPECT_EQ(false, sceneSession->GetMousePointerDownEventStatus());
-
-    action = MMI::PointerEvent::POINTER_ACTION_DOWN;
-    inputEventListener_->SetPointerEventStatus(0, action, MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, sceneSession);
-    action = MMI::PointerEvent::POINTER_ACTION_CANCEL;
-    inputEventListener_->SetPointerEventStatus(0, action, MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, sceneSession);
-    fingerPointerDownStatusList = sceneSession->GetFingerPointerDownStatusList();
-    EXPECT_EQ(0, fingerPointerDownStatusList.size());
-
-    action = MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN;
-    inputEventListener_->SetPointerEventStatus(1, action, MMI::PointerEvent::SOURCE_TYPE_MOUSE, sceneSession);
-    action = MMI::PointerEvent::POINTER_ACTION_CANCEL;
-    inputEventListener_->SetPointerEventStatus(0, action, MMI::PointerEvent::SOURCE_TYPE_MOUSE, sceneSession);
-    EXPECT_EQ(false, sceneSession->GetMousePointerDownEventStatus());
 }
 }
 }

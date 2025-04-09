@@ -18,6 +18,7 @@
 #include <bundlemgr/launcher_service.h>
 #include <event_handler.h>
 #include <input_manager.h>
+#include <int_wrapper.h>
 #include <iremote_stub.h>
 #include <transaction/rs_interfaces.h>
 #include <ui_content.h>
@@ -26,6 +27,7 @@
 
 #include "ability_context.h"
 #include "app_mgr_client.h"
+#include "extension/extension_business_info.h"
 #include "fold_screen_state_internel.h"
 #include "input_transfer_station.h"
 #include "singleton.h"
@@ -299,7 +301,8 @@ WMError RootScene::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, 
         return WMError::WM_ERROR_NULLPTR;
     }
     if (apiVersion != API_VERSION_INVALID && apiVersion < API_VERSION_18) {
-        TLOGI(WmsLogTag::WMS_IMMS, "api version not supported");
+        TLOGI(WmsLogTag::WMS_IMMS, "root scene UIExtension type %{public}u api %{public}d not supported",
+            type, apiVersion);
         return WMError::WM_DO_NOTHING;
     }
     avoidArea = getSessionAvoidAreaByTypeCallback_(type);
@@ -445,6 +448,12 @@ void RootScene::SetTopWindowBoundaryByID(const std::string& stringId)
     }
     TLOGI(WmsLogTag::WMS_LAYOUT, "end");
     uiContent_->SetTopWindowBoundaryByID(stringId);
+}
+
+void RootScene::GetExtensionConfig(AAFwk::WantParams& want) const
+{
+    int32_t rootHostWindowType = static_cast<int32_t>(WindowType::WINDOW_TYPE_SCENE_BOARD);
+    want.SetParam(Extension::ROOT_HOST_WINDOW_TYPE_FIELD, AAFwk::Integer::Box(rootHostWindowType));
 }
 
 Ace::UIContent* RootScene::GetUIContentByDisplayId(DisplayId displayId)

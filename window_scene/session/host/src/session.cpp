@@ -312,6 +312,8 @@ void Session::SetSessionInfo(const SessionInfo& info)
     sessionInfo_.isAtomicService_ = info.isAtomicService_;
     sessionInfo_.callState_ = info.callState_;
     sessionInfo_.processOptions = info.processOptions;
+    sessionInfo_.disableDelegator = info.disableDelegator;
+    sessionInfo_.reuseDelegatorWindow = info.reuseDelegatorWindow;
 }
 
 DisplayId Session::GetScreenId() const
@@ -1172,9 +1174,10 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
     TLOGI(WmsLogTag::WMS_LIFE, "ConnectInner session, id: %{public}d, state: %{public}u,"
         "isTerminating:%{public}d, callingPid:%{public}d", GetPersistentId(),
         static_cast<uint32_t>(GetSessionState()), isTerminating_, pid);
-    if (GetSessionState() != SessionState::STATE_DISCONNECT && !isTerminating_) {
-        TLOGE(WmsLogTag::WMS_LIFE, "state is not disconnect state:%{public}u id:%{public}u!",
-            GetSessionState(), GetPersistentId());
+    if (GetSessionState() != SessionState::STATE_DISCONNECT && !isTerminating_ &&
+        !GetSessionInfo().reuseDelegatorWindow) {
+        TLOGE(WmsLogTag::WMS_LIFE, "state is not disconnect state:%{public}u id:%{public}u!, reuse %{public}d",
+            GetSessionState(), GetPersistentId(), GetSessionInfo().reuseDelegatorWindow);
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     if (sessionStage == nullptr || eventChannel == nullptr) {
@@ -1251,6 +1254,8 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
     if (SessionHelper::IsMainWindow(GetWindowType())) {
         property->SetIsPcAppInPad(GetSessionProperty()->GetIsPcAppInPad());
     }
+    property->SetSkipSelfWhenShowOnVirtualScreen(GetSessionProperty()->GetSkipSelfWhenShowOnVirtualScreen());
+    property->SetSkipEventOnCastPlus(GetSessionProperty()->GetSkipEventOnCastPlus());
     SetSessionProperty(property);
 }
 
@@ -1311,7 +1316,7 @@ WSError Session::Foreground(sptr<WindowSessionProperty> property, bool isFromCli
     }
 
     UpdateSessionState(SessionState::STATE_FOREGROUND);
-    if (!isActive_) {
+    if (!isActive_ || (isActive_ && GetSessionInfo().reuseDelegatorWindow)) {
         SetActive(true);
     }
     isStarting_ = false;
@@ -1319,7 +1324,6 @@ WSError Session::Foreground(sptr<WindowSessionProperty> property, bool isFromCli
     NotifyForeground();
 
     isTerminating_ = false;
-    isNeedSyncSessionRect_ = true;
     return WSError::WS_OK;
 }
 
@@ -1487,7 +1491,7 @@ WSError Session::SetActive(bool active)
             GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
-    if (active == isActive_) {
+    if (active == isActive_ && !GetSessionInfo().reuseDelegatorWindow) {
         TLOGD(WmsLogTag::WMS_LIFE, "Session active do not change: [%{public}d]", active);
         return WSError::WS_DO_NOTHING;
     }
@@ -2064,7 +2068,7 @@ sptr<Session> Session::GetMainOrFloatSession() const
     }
 }
 
-bool Session::IsAncestorsSession(int ancestorsId) const
+bool Session::IsAncestorsSession(int32_t ancestorsId) const
 {
     if (GetSessionProperty()->GetParentPersistentId() == ancestorsId) {
         return true;
@@ -2232,18 +2236,19 @@ WSError Session::HandleSubWindowClick(int32_t action, bool isExecuteDelayRaise)
     bool raiseEnabled = GetSessionProperty()->GetRaiseEnabled();
     bool isPointDown = action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
         action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN;
+    bool isPointMove = action == MMI::PointerEvent::POINTER_ACTION_MOVE;
     if (isExecuteDelayRaise) {
         if (raiseEnabled && action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP) {
             RaiseToAppTopForPointDown();
         }
-        if (!raiseEnabled && parentSession) {
+        if (!raiseEnabled && parentSession && !isPointMove) {
             parentSession->NotifyClick(!IsScbCoreEnabled());
         }
         return WSError::WS_OK;
     }
     if (raiseEnabled && isPointDown) {
         RaiseToAppTopForPointDown();
-    } else if (parentSession) {
+    } else if (parentSession && !isPointMove) {
         // sub window is forbidden to raise to top after click, but its parent should raise
         parentSession->NotifyClick(!IsScbCoreEnabled());
     }
@@ -2637,6 +2642,11 @@ void Session::SetSessionFocusableChangeListener(const NotifySessionFocusableChan
 {
     sessionFocusableChangeFunc_ = func;
     NotifySessionFocusableChange(GetFocusable());
+}
+
+bool Session::GetSkipSelfWhenShowOnVirtualScreen() const
+{
+    return GetSessionProperty()->GetSkipSelfWhenShowOnVirtualScreen();
 }
 
 void Session::SetSessionTouchableChangeListener(const NotifySessionTouchableChangeFunc& func)
@@ -4058,6 +4068,7 @@ WindowMetaInfo Session::GetWindowMetaInfoForWindowInfo() const
     windowMetaInfo.bundleName = GetSessionInfo().bundleName_;
     windowMetaInfo.abilityName = GetSessionInfo().abilityName_;
     windowMetaInfo.appIndex = GetSessionInfo().appIndex_;
+    windowMetaInfo.pid = GetCallingPid();
     return windowMetaInfo;
 }
 

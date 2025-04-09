@@ -37,8 +37,9 @@
 #include "string_ex.h"
 #include "wm_common.h"
 #include "ws_common.h"
-#include "session_manager_service_interface.h"
+#include "scene_board_judgement.h"
 #include "scene_session_manager_interface.h"
+#include "session_manager_service_interface.h"
 #include "screen_session_manager_lite.h"
 #include "common/include/session_permission.h"
 
@@ -790,6 +791,56 @@ void MockSessionManagerService::GetProcessSurfaceNodeIdByPersistentId(const int3
     }
 }
 
+void MockSessionManagerService::AddSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds)
+{
+    auto sessionManagerService = GetSessionManagerServiceByUserId(currentWMSUserId_);
+    if (sessionManagerService == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sessionManagerService is nullptr");
+        return;
+    }
+    if (!sceneSessionManager_) {
+        GetSceneSessionManager();
+        if (!sceneSessionManager_) {
+            TLOGW(WmsLogTag::WMS_ATTRIBUTE, "get scene session manager proxy failed, nullptr");
+            return;
+        }
+    }
+    sptr<ISceneSessionManager> sceneSessionManagerProxy = iface_cast<ISceneSessionManager>(sceneSessionManager_);
+    if (sceneSessionManagerProxy == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sessionManagerServiceProxy is nullptr");
+        return;
+    }
+    WMError ret = sceneSessionManagerProxy->AddSkipSelfWhenShowOnVirtualScreenList(persistentIds);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "add virtual screen black list failed!");
+    }
+}
+
+void MockSessionManagerService::RemoveSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds)
+{
+    auto sessionManagerService = GetSessionManagerServiceByUserId(currentWMSUserId_);
+    if (sessionManagerService == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sessionManagerService is nullptr");
+        return;
+    }
+    if (!sceneSessionManager_) {
+        GetSceneSessionManager();
+        if (!sceneSessionManager_) {
+            TLOGW(WmsLogTag::WMS_ATTRIBUTE, "get scene session manager proxy failed, nullptr");
+            return;
+        }
+    }
+    sptr<ISceneSessionManager> sceneSessionManagerProxy = iface_cast<ISceneSessionManager>(sceneSessionManager_);
+    if (sceneSessionManagerProxy == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sessionManagerServiceProxy is nullptr");
+        return;
+    }
+    WMError ret = sceneSessionManagerProxy->RemoveSkipSelfWhenShowOnVirtualScreenList(persistentIds);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "remove virtual screen black list failed!");
+    }
+}
+
 sptr<IRemoteObject> MockSessionManagerService::GetSceneSessionManagerByUserId(int32_t userId)
 {
     auto sessionManagerService = GetSessionManagerServiceByUserId(userId);
@@ -839,10 +890,20 @@ int32_t MockSessionManagerService::NotifySCBSnapshotSkipByUserIdAndBundleNames(i
 int32_t MockSessionManagerService::SetSnapshotSkipByUserIdAndBundleNames(int32_t userId,
     const std::vector<std::string>& bundleNameList)
 {
-    if (!SessionPermission::IsSystemCalling()) {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        TLOGE(WmsLogTag::WMS_MULTI_USER, "service not supported!");
+        return ERR_INVALID_STATE;
+    }
+    if (!SessionPermission::VerifyCallingPermission("ohos.permission.MANAGE_EDM_POLICY")) {
         TLOGE(WmsLogTag::WMS_MULTI_USER, "permission denied!");
         return ERR_UNKNOWN_TRANSACTION;
     }
+    return SetSnapshotSkipByUserIdAndBundleNamesInner(userId, bundleNameList);
+}
+
+int32_t MockSessionManagerService::SetSnapshotSkipByUserIdAndBundleNamesInner(int32_t userId,
+    const std::vector<std::string>& bundleNameList)
+{
     {
         std::unique_lock<std::mutex> lock(userIdBundleNamesMapLock_);
         userIdBundleNamesMap_[userId] = bundleNameList;
@@ -858,18 +919,29 @@ int32_t MockSessionManagerService::SetSnapshotSkipByUserIdAndBundleNames(int32_t
 int32_t MockSessionManagerService::SetSnapshotSkipByIdNamesMap(
     const std::unordered_map<int32_t, std::vector<std::string>>& userIdAndBunldeNames)
 {
-    if (!SessionPermission::IsSystemCalling()) {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        TLOGE(WmsLogTag::WMS_MULTI_USER, "service not supported!");
+        return ERR_INVALID_STATE;
+    }
+    if (!SessionPermission::VerifyCallingPermission("ohos.permission.MANAGE_EDM_POLICY")) {
         TLOGE(WmsLogTag::WMS_MULTI_USER, "permission denied");
         return ERR_UNKNOWN_TRANSACTION;
     }
+    return SetSnapshotSkipByIdNamesMapInner(userIdAndBunldeNames);
+}
+
+int32_t MockSessionManagerService::SetSnapshotSkipByIdNamesMapInner(
+    const std::unordered_map<int32_t, std::vector<std::string>>& userIdAndBunldeNames)
+{
     std::unique_lock<std::mutex> lock(userIdBundleNamesMapLock_);
     userIdBundleNamesMap_ = userIdAndBunldeNames;
-    for (auto it = userIdBundleNamesMap_.begin(); it != userIdBundleNamesMap_.end(); ++it) {
-        sptr<IRemoteObject> remoteObject = GetSceneSessionManagerByUserId(it->first);
+    for (const auto& [userId, bundleNameList] : userIdBundleNamesMap_) {
+        sptr<IRemoteObject> remoteObject = GetSceneSessionManagerByUserId(userId);
         if (!remoteObject) {
-            return ERR_NULL_OBJECT;
+            TLOGW(WmsLogTag::WMS_MULTI_USER, "user:%{public}d isn't active", userId);
+            continue;
         }
-        int32_t err = NotifySCBSnapshotSkipByUserIdAndBundleNames(it->first, it->second, remoteObject);
+        int32_t err = NotifySCBSnapshotSkipByUserIdAndBundleNames(userId, bundleNameList, remoteObject);
         if (err != ERR_NONE) {
             TLOGE(WmsLogTag::DEFAULT, "failed");
             return err;

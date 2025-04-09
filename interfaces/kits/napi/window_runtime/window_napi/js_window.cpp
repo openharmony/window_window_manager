@@ -6933,14 +6933,6 @@ static std::function<void()> GetFollowParentMultiScreenPolicyTask(const wptr<Win
 
 napi_value JsWindow::OnSetFollowParentMultiScreenPolicy(napi_env env, napi_callback_info info)
 {
-    if (windowToken_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_SUB, "windowToken is null");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
-    }
-    if (!windowToken_->IsPcOrPadFreeMultiWindowMode()) {
-        TLOGE(WmsLogTag::WMS_SUB, "device not support");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
-    }
     size_t argc = ONE_PARAMS_SIZE;
     napi_value argv[ONE_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
