@@ -2039,10 +2039,12 @@ HWTEST_F(WindowSessionImplTest, NotifyWaterfallModeChange, TestSize.Level1)
     option->SetWindowName("waterfall");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     window->state_ = WindowState::STATE_SHOWN;
-    sptr<IWaterfallModeChangeListener> listener = sptr<IWaterfallModeChangeListener>::MakeSptr();
+    sptr<MockIWaterfallModeChangeListener> listener = sptr<MockIWaterfallModeChangeListener>::MakeSptr();
+    EXPECT_NE(listener, nullptr);
     auto ret = window->RegisterWaterfallModeChangeListener(listener);
     ASSERT_EQ(WMError::WM_OK, ret);
     window->NotifyWaterfallModeChange(true);
+    EXPECT_EQ(listener->isWaterfallMode_, true);
 }
 } // namespace
 } // namespace Rosen
