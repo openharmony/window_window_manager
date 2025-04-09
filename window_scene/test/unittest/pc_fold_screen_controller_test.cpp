@@ -492,7 +492,7 @@ HWTEST_F(PcFoldScreenManagerTest, MappingRectInScreenSide, TestSize.Level1)
     SetExpanded();
     rect = B_ACROSS_RECT;
     manager_.MappingRectInScreenSide(ScreenSide::EXPAND, rect, TOP_AVOID_HEIGHT, BOT_AVOID_HEIGHT);
-    EXPECT_TRUE(logMsg.find("invalid side") != std::string::npos);
+    EXPECT_TRUE(g_errLog.find("invalid side") != std::string::npos);
 }
 
 /**
