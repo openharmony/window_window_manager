@@ -158,7 +158,10 @@ public:
 
 class MockIWaterfallModeChangeListener : public IWaterfallModeChangeListener {
 public:
-    MOCK_METHOD1(OnWaterfallModeChange, void(bool isWaterfallMode));
+    bool isWaterfallMode_ = false;
+    void OnWaterfallModeChange(bool isWaterfallMode) override {
+        isWaterfallMode_ = isWaterfallMode;
+    }
 };
 } // Rosen
 } // OHOS
