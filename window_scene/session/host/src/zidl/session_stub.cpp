@@ -1561,17 +1561,6 @@ int SessionStub::HandleGetCrossAxisState(MessageParcel& data, MessageParcel& rep
     return ERR_NONE;
 }
 
-int SessionStub::HandleGetWaterfallMode(MessageParcel& data, MessageParcel& reply)
-{
-    bool isWaterfallMode = false;
-    GetWaterfallMode(isWaterfallMode);
-    if (!reply.WriteBool(isWaterfallMode)) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write fail.");
-        return ERR_INVALID_DATA;
-    }
-    return ERR_NONE;
-}
-
 int SessionStub::HandleContainerModalEvent(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_EVENT, "In");
