@@ -2879,7 +2879,7 @@ HWTEST_F(ScreenSessionTest, UpdateExpandAvailableArea, Function | SmallTest | Le
 HWTEST_F(ScreenSessionTest, UpdateDisplayNodeRotation, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: UpdateDisplayNodeRotation start";
-    sptr<ScreenSession> screenSession = sptr<ScreenSession>.MakeSptr();
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
     ASSERT_NE(screenSession, nullptr);
     screenSession->UpdateDisplayNodeRotation(1);
     ASSERT_EQ(screenSession->isExtended_, false);
