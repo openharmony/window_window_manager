@@ -1309,6 +1309,121 @@ HWTEST_F(WindowSceneSessionImplTest5, NotifyTargetRotationInfo, Function | Small
     window->state_ = WindowState::STATE_CREATED;
     EXPECT_EQ(WSError::WS_DO_NOTHING, window->NotifyTargetRotationInfo(info));
 }
+
+/**
+ * @tc.name: HandleWindowLimitsInCompatibleMode01
+ * @tc.desc: HandleWindowLimitsInCompatibleMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, HandleWindowLimitsInCompatibleMode01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->property_->SetCompatibleModeInPc(true);
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    WindowSizeLimits windowSizeLimits = {0, 0, 0, 0};
+    window->HandleWindowLimitsInCompatibleMode(windowSizeLimits);
+    EXPECT_EQ(windowSizeLimits.maxWindowWidth, window->windowSystemConfig_.maxFloatingWindowSize_);
+    EXPECT_EQ(windowSizeLimits.maxWindowHeight, window->windowSystemConfig_.maxFloatingWindowSize_);
+    EXPECT_EQ(windowSizeLimits.minWindowWidth, window->windowSystemConfig_.miniWidthOfMainWindow_);
+    EXPECT_EQ(windowSizeLimits.minWindowHeight, window->windowSystemConfig_.miniHeightOfMainWindow_);
+}
+
+/**
+ * @tc.name: HandleWindowLimitsInCompatibleMode02
+ * @tc.desc: HandleWindowLimitsInCompatibleMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, HandleWindowLimitsInCompatibleMode02, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->property_->SetCompatibleModeInPc(true);
+    window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    WindowSizeLimits windowSizeLimits = {0, 0, 0, 0};
+    window->HandleWindowLimitsInCompatibleMode(windowSizeLimits);
+    EXPECT_EQ(windowSizeLimits.maxWindowWidth, window->windowSystemConfig_.maxFloatingWindowSize_);
+    EXPECT_EQ(windowSizeLimits.maxWindowHeight, window->windowSystemConfig_.maxFloatingWindowSize_);
+    EXPECT_EQ(windowSizeLimits.minWindowWidth, window->windowSystemConfig_.miniWidthOfSubWindow_);
+    EXPECT_EQ(windowSizeLimits.minWindowHeight, window->windowSystemConfig_.miniHeightOfSubWindow_);
+}
+
+/**
+ * @tc.name: HandleWindowLimitsInCompatibleMode03
+ * @tc.desc: HandleWindowLimitsInCompatibleMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, HandleWindowLimitsInCompatibleMode03, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->property_->SetCompatibleModeInPc(true);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    WindowSizeLimits windowSizeLimits = {0, 0, 0, 0};
+    window->HandleWindowLimitsInCompatibleMode(windowSizeLimits);
+    EXPECT_EQ(windowSizeLimits.maxWindowWidth, window->windowSystemConfig_.maxFloatingWindowSize_);
+    EXPECT_EQ(windowSizeLimits.maxWindowHeight, window->windowSystemConfig_.maxFloatingWindowSize_);
+    EXPECT_EQ(windowSizeLimits.minWindowWidth, window->windowSystemConfig_.miniWidthOfDialogWindow_);
+    EXPECT_EQ(windowSizeLimits.minWindowHeight, window->windowSystemConfig_.miniHeightOfDialogWindow_);
+}
+
+/**
+ * @tc.name: HandleWindowLimitsInCompatibleMode04
+ * @tc.desc: HandleWindowLimitsInCompatibleMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, HandleWindowLimitsInCompatibleMode04, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->property_->SetCompatibleModeInPc(true);
+    window->property_->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+    WindowSizeLimits windowSizeLimits = {0, 0, 0, 0};
+    window->HandleWindowLimitsInCompatibleMode(windowSizeLimits);
+    EXPECT_EQ(windowSizeLimits.maxWindowWidth, window->windowSystemConfig_.maxFloatingWindowSize_);
+    EXPECT_EQ(windowSizeLimits.maxWindowHeight, window->windowSystemConfig_.maxFloatingWindowSize_);
+    EXPECT_EQ(windowSizeLimits.minWindowWidth, MIN_FLOATING_WIDTH);
+    EXPECT_EQ(windowSizeLimits.minWindowHeight, MIN_FLOATING_HEIGHT);
+}
+
+/**
+ * @tc.name: HandleWindowLimitsInCompatibleMode05
+ * @tc.desc: HandleWindowLimitsInCompatibleMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, HandleWindowLimitsInCompatibleMode05, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->property_->SetCompatibleModeInPc(false);
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    WindowSizeLimits windowSizeLimits = {0, 0, 0, 0};
+    window->HandleWindowLimitsInCompatibleMode(windowSizeLimits);
+    EXPECT_EQ(windowSizeLimits.maxWindowWidth, 0);
+    EXPECT_EQ(windowSizeLimits.maxWindowHeight, 0);
+    EXPECT_EQ(windowSizeLimits.minWindowWidth, 0);
+    EXPECT_EQ(windowSizeLimits.minWindowHeight, 0);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
