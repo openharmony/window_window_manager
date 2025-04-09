@@ -62,7 +62,7 @@ namespace {
  * @tc.desc: SetWindowRect/GetWindowRect
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenshotTest, GetScreenshot_default, Function | SmallTest | Level2)
+HWTEST_F(ScreenshotTest, GetScreenshot_default, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
 
@@ -75,7 +75,7 @@ HWTEST_F(ScreenshotTest, GetScreenshot_default, Function | SmallTest | Level2)
     ASSERT_EQ(nullptr, DisplayManager::GetInstance().GetScreenshot(0));
 }
 
-HWTEST_F(ScreenshotTest, GetScreenshot_01, Function | MediumTest | Level2)
+HWTEST_F(ScreenshotTest, GetScreenshot_01, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
 

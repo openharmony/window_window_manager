@@ -65,7 +65,7 @@ namespace {
  * @tc.desc: test WindowRoot GetTotalWindowNum
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, WindowRootTest01, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, WindowRootTest01, TestSize.Level1)
 {
     uint32_t size = windowRoot_->GetTotalWindowNum();
     ASSERT_EQ(size, 0);
@@ -76,7 +76,7 @@ HWTEST_F(WindowRootTest, WindowRootTest01, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot GetWindowForDumpAceHelpInfo
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, WindowRootTest02, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, WindowRootTest02, TestSize.Level1)
 {
     windowRoot_->GetWindowForDumpAceHelpInfo();
     sptr<WindowProperty> property = new WindowProperty();
@@ -121,7 +121,7 @@ HWTEST_F(WindowRootTest, WindowRootTest02, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot CreateWindowNodeContainer
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, WindowRootTest03, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, WindowRootTest03, TestSize.Level1)
 {
     sptr<DisplayInfo> displayInfo = new DisplayInfo();
 
@@ -148,7 +148,7 @@ HWTEST_F(WindowRootTest, WindowRootTest03, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot GetWindowNodeContainer
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, WindowRootTest04, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, WindowRootTest04, TestSize.Level1)
 {
     auto display = DisplayManager::GetInstance().GetDefaultDisplay();
     ASSERT_NE(display, nullptr);
@@ -167,7 +167,7 @@ HWTEST_F(WindowRootTest, WindowRootTest04, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot GetBackgroundNodesByScreenId
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, WindowRootTest05, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, WindowRootTest05, TestSize.Level1)
 {
     std::vector<sptr<WindowNode>> windowNodes;
 
@@ -200,7 +200,7 @@ HWTEST_F(WindowRootTest, WindowRootTest05, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot AddDeathRecipient
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, WindowRootTest06, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, WindowRootTest06, TestSize.Level1)
 {
     windowRoot_->AddDeathRecipient(nullptr);
 
@@ -220,7 +220,7 @@ HWTEST_F(WindowRootTest, WindowRootTest06, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot SaveWindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, WindowRootTest07, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, WindowRootTest07, TestSize.Level1)
 {
     windowRoot_->SaveWindow(nullptr);
 
@@ -232,7 +232,7 @@ HWTEST_F(WindowRootTest, WindowRootTest07, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot MinimizeStructuredAppWindowsExceptSelf
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, WindowRootTest08, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, WindowRootTest08, TestSize.Level1)
 {
     sptr<WindowProperty> property = new WindowProperty();
     property->SetDisplayId(DISPLAY_ID_INVALID);
@@ -248,7 +248,7 @@ HWTEST_F(WindowRootTest, WindowRootTest08, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot MinimizeTargetWindows
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, WindowRootTest09, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, WindowRootTest09, TestSize.Level1)
 {
     std::vector<uint32_t> windowIds;
 
@@ -279,7 +279,7 @@ HWTEST_F(WindowRootTest, WindowRootTest09, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot GetSplitScreenWindowNodes
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, WindowRootTest10, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, WindowRootTest10, TestSize.Level1)
 {
     std::vector<sptr<WindowNode>> windowNodes = windowRoot_->GetSplitScreenWindowNodes(DISPLAY_ID_INVALID);
     ASSERT_EQ(windowNodes.empty(), true);
@@ -293,7 +293,7 @@ HWTEST_F(WindowRootTest, WindowRootTest10, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot IsForbidDockSliceMove
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, WindowRootTest11, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, WindowRootTest11, TestSize.Level1)
 {
     bool ret = windowRoot_->IsForbidDockSliceMove(DISPLAY_ID_INVALID);
     ASSERT_EQ(ret, true);
@@ -307,7 +307,7 @@ HWTEST_F(WindowRootTest, WindowRootTest11, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot IsDockSliceInExitSplitModeArea
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, WindowRootTest12, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, WindowRootTest12, TestSize.Level1)
 {
     bool ret = windowRoot_->IsDockSliceInExitSplitModeArea(DISPLAY_ID_INVALID);
     ASSERT_EQ(ret, false);
@@ -325,7 +325,7 @@ HWTEST_F(WindowRootTest, WindowRootTest12, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot ExitSplitMode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, WindowRootTest13, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, WindowRootTest13, TestSize.Level1)
 {
     windowRoot_->ExitSplitMode(DISPLAY_ID_INVALID);
 
@@ -341,7 +341,7 @@ HWTEST_F(WindowRootTest, WindowRootTest13, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot AddSurfaceNodeIdWindowNodePair
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, WindowRootTest14, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, WindowRootTest14, TestSize.Level1)
 {
     windowRoot_->AddSurfaceNodeIdWindowNodePair(INVALID_WINDOW_ID, nullptr);
 
@@ -353,7 +353,7 @@ HWTEST_F(WindowRootTest, WindowRootTest14, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot GetVisibilityWindowInfo
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, WindowRootTest15, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, WindowRootTest15, TestSize.Level1)
 {
     std::vector<sptr<WindowVisibilityInfo>> infos = {};
 
@@ -372,7 +372,7 @@ HWTEST_F(WindowRootTest, WindowRootTest15, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot GetAvoidAreaByType
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, WindowRootTest16, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, WindowRootTest16, TestSize.Level1)
 {
     AvoidArea emptyArea;
     AvoidArea area;
@@ -395,7 +395,7 @@ HWTEST_F(WindowRootTest, WindowRootTest16, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot MinimizeAllAppWindows
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, WindowRootTest17, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, WindowRootTest17, TestSize.Level1)
 {
     auto display = DisplayManager::GetInstance().GetDefaultDisplay();
     ASSERT_TRUE((display != nullptr));
@@ -411,7 +411,7 @@ HWTEST_F(WindowRootTest, WindowRootTest17, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot DestroyLeakStartingWindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, WindowRootTest18, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, WindowRootTest18, TestSize.Level1)
 {
     windowRoot_->DestroyLeakStartingWindow();
 
@@ -428,7 +428,7 @@ HWTEST_F(WindowRootTest, WindowRootTest18, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot LayoutWhenAddWindowNode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, WindowRootTest20, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, WindowRootTest20, TestSize.Level1)
 {
     sptr<WindowNode> node = nullptr;
     windowRoot_->LayoutWhenAddWindowNode(node, true);
@@ -444,7 +444,7 @@ HWTEST_F(WindowRootTest, WindowRootTest20, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot AddWindowNode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, WindowRootTest21, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, WindowRootTest21, TestSize.Level1)
 {
     WMError ret;
     sptr<WindowNode> node = nullptr;
@@ -458,7 +458,7 @@ HWTEST_F(WindowRootTest, WindowRootTest21, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot RemoveWindowNode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, WindowRootTest22, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, WindowRootTest22, TestSize.Level1)
 {
     WMError ret;
     sptr<WindowNode> node = new WindowNode();
@@ -477,7 +477,7 @@ HWTEST_F(WindowRootTest, WindowRootTest22, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot UpdateWindowNode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, WindowRootTest23, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, WindowRootTest23, TestSize.Level1)
 {
     WMError ret;
 
@@ -501,7 +501,7 @@ HWTEST_F(WindowRootTest, WindowRootTest23, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot UpdateSizeChangeReason
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, WindowRootTest24, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, WindowRootTest24, TestSize.Level1)
 {
     WMError ret;
 
@@ -525,7 +525,7 @@ HWTEST_F(WindowRootTest, WindowRootTest24, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot SetBrightness
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, WindowRootTest25, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, WindowRootTest25, TestSize.Level1)
 {
     windowRoot_->SetBrightness(INVALID_WINDOW_ID, 0);
 
@@ -541,7 +541,7 @@ HWTEST_F(WindowRootTest, WindowRootTest25, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot CheckAndNotifyWaterMarkChangedResult
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, CheckAndNotifyWaterMarkChangedResult, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, CheckAndNotifyWaterMarkChangedResult, TestSize.Level1)
 {
     auto display = DisplayManager::GetInstance().GetDefaultDisplay();
     ASSERT_NE(display, nullptr);
@@ -573,7 +573,7 @@ HWTEST_F(WindowRootTest, CheckAndNotifyWaterMarkChangedResult, Function | SmallT
  * @tc.desc: test WindowRoot SetGestureNavigationEnabled
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, SetGestureNavigationEnabled, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, SetGestureNavigationEnabled, TestSize.Level1)
 {
     windowRoot_->lastGestureNativeEnabled_ = false;
     auto ret = windowRoot_->SetGestureNavigationEnabled(false);
@@ -590,7 +590,7 @@ HWTEST_F(WindowRootTest, SetGestureNavigationEnabled, Function | SmallTest | Lev
  * @tc.desc: test WindowRoot GetWindowVisibilityChangeInfo
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, GetWindowVisibilityChangeInfo, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, GetWindowVisibilityChangeInfo, TestSize.Level1)
 {
     std::shared_ptr<RSOcclusionData> occlusionData = std::make_shared<RSOcclusionData>();
     ASSERT_NE(occlusionData, nullptr);
@@ -607,7 +607,7 @@ HWTEST_F(WindowRootTest, GetWindowVisibilityChangeInfo, Function | SmallTest | L
  * @tc.desc: test WindowRoot NotifyWindowVisibilityChange
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, NotifyWindowVisibilityChange, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, NotifyWindowVisibilityChange, TestSize.Level1)
 {
     std::shared_ptr<RSOcclusionData> occlusionData = std::make_shared<RSOcclusionData>();
     ASSERT_NE(occlusionData, nullptr);
@@ -624,7 +624,7 @@ HWTEST_F(WindowRootTest, NotifyWindowVisibilityChange, Function | SmallTest | Le
  * @tc.desc: test WindowRoot ToggleShownStateForAllAppWindows
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, ToggleShownStateForAllAppWindows, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, ToggleShownStateForAllAppWindows, TestSize.Level1)
 {
     ScreenId displayGroupId = 1;
     auto display = DisplayManager::GetInstance().GetDefaultDisplay();
@@ -640,7 +640,7 @@ HWTEST_F(WindowRootTest, ToggleShownStateForAllAppWindows, Function | SmallTest 
  * @tc.desc: test WindowRoot PostProcessAddWindowNode01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, PostProcessAddWindowNode01, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, PostProcessAddWindowNode01, TestSize.Level1)
 {
     sptr<WindowNode> node = new WindowNode();
     sptr<WindowNode> parentNode = new WindowNode();
@@ -658,7 +658,7 @@ HWTEST_F(WindowRootTest, PostProcessAddWindowNode01, Function | SmallTest | Leve
  * @tc.desc: test WindowRoot PostProcessAddWindowNode02
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, PostProcessAddWindowNode02, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, PostProcessAddWindowNode02, TestSize.Level1)
 {
     sptr<WindowNode> node = new WindowNode();
     sptr<WindowNode> parentNode = nullptr;
@@ -675,7 +675,7 @@ HWTEST_F(WindowRootTest, PostProcessAddWindowNode02, Function | SmallTest | Leve
  * @tc.desc: test WindowRoot PostProcessAddWindowNode03
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, PostProcessAddWindowNode03, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, PostProcessAddWindowNode03, TestSize.Level1)
 {
     sptr<WindowNode> node = new WindowNode();
     sptr<WindowNode> parentNode = new WindowNode();
@@ -695,7 +695,7 @@ HWTEST_F(WindowRootTest, PostProcessAddWindowNode03, Function | SmallTest | Leve
  * @tc.desc: test WindowRoot PostProcessAddWindowNode04
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, PostProcessAddWindowNode04, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, PostProcessAddWindowNode04, TestSize.Level1)
 {
     sptr<WindowNode> node = new WindowNode();
     sptr<WindowNode> parentNode = new WindowNode();
@@ -717,7 +717,7 @@ HWTEST_F(WindowRootTest, PostProcessAddWindowNode04, Function | SmallTest | Leve
  * @tc.desc: test WindowRoot BindDialogToParent01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, BindDialogToParent01, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, BindDialogToParent01, TestSize.Level1)
 {
     sptr<WindowNode> node = new WindowNode();
     node->dialogTargetToken_ = nullptr;
@@ -731,7 +731,7 @@ HWTEST_F(WindowRootTest, BindDialogToParent01, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot BindDialogToParent02
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, BindDialogToParent02, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, BindDialogToParent02, TestSize.Level1)
 {
     sptr<WindowNode> node = new WindowNode();
     sptr<WindowNode> parentNode = new WindowNode();
@@ -751,7 +751,7 @@ HWTEST_F(WindowRootTest, BindDialogToParent02, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot UpdateFocusableProperty
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, UpdateFocusableProperty, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, UpdateFocusableProperty, TestSize.Level1)
 {
     uint32_t windowId = 1;
     windowRoot_->UpdateFocusableProperty(windowId);
@@ -764,7 +764,7 @@ HWTEST_F(WindowRootTest, UpdateFocusableProperty, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot SetWindowMode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, SetWindowMode, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, SetWindowMode, TestSize.Level1)
 {
     sptr<WindowNode> node = new WindowNode();
     WindowMode dstMode = WindowMode::WINDOW_MODE_UNDEFINED;
@@ -780,7 +780,7 @@ HWTEST_F(WindowRootTest, SetWindowMode, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot DestroyWindowSelf
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, DestroyWindowSelf, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, DestroyWindowSelf, TestSize.Level1)
 {
     auto display = DisplayManager::GetInstance().GetDefaultDisplay();
     ASSERT_TRUE((display != nullptr));
@@ -795,7 +795,7 @@ HWTEST_F(WindowRootTest, DestroyWindowSelf, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot IsVerticalDisplay
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, IsVerticalDisplay, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, IsVerticalDisplay, TestSize.Level1)
 {
     sptr<WindowNode> node = new WindowNode();
     ASSERT_EQ(false, windowRoot_->IsVerticalDisplay(node));
@@ -806,7 +806,7 @@ HWTEST_F(WindowRootTest, IsVerticalDisplay, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot RequestFocus
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, RequestFocus, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, RequestFocus, TestSize.Level1)
 {
     uint32_t windowId = 1;
     auto ret = windowRoot_->RequestFocus(windowId);
@@ -818,7 +818,7 @@ HWTEST_F(WindowRootTest, RequestFocus, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot RequestActiveWindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, RequestActiveWindow, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, RequestActiveWindow, TestSize.Level1)
 {
     uint32_t windowId = 1;
     auto ret = windowRoot_->RequestActiveWindow(windowId);
@@ -830,7 +830,7 @@ HWTEST_F(WindowRootTest, RequestActiveWindow, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot ProcessWindowStateChange
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, ProcessWindowStateChange, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, ProcessWindowStateChange, TestSize.Level1)
 {
     WindowState state = WindowState::STATE_INITIAL;
     WindowStateChangeReason reason = WindowStateChangeReason::NORMAL;
@@ -843,7 +843,7 @@ HWTEST_F(WindowRootTest, ProcessWindowStateChange, Function | SmallTest | Level2
  * @tc.desc: test WindowRoot NotifySystemBarTints
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, NotifySystemBarTints, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, NotifySystemBarTints, TestSize.Level1)
 {
     ScreenId displayGroupId = 1;
     auto display = DisplayManager::GetInstance().GetDefaultDisplay();
@@ -862,7 +862,7 @@ HWTEST_F(WindowRootTest, NotifySystemBarTints, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot NotifyDesktopUnfrozen
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, NotifyDesktopUnfrozen, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, NotifyDesktopUnfrozen, TestSize.Level1)
 {
     sptr<WindowNode> windowNode3 = new WindowNode();
     windowRoot_->SaveWindow(windowNode3);
@@ -876,7 +876,7 @@ HWTEST_F(WindowRootTest, NotifyDesktopUnfrozen, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot RaiseZOrderForAppWindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, RaiseZOrderForAppWindow, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, RaiseZOrderForAppWindow, TestSize.Level1)
 {
     sptr<WindowNode> windowNode2 = nullptr;
     auto ret = windowRoot_->RaiseZOrderForAppWindow(windowNode2);
@@ -891,7 +891,7 @@ HWTEST_F(WindowRootTest, RaiseZOrderForAppWindow, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot DispatchKeyEvent
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, DispatchKeyEvent, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, DispatchKeyEvent, TestSize.Level1)
 {
     sptr<WindowNode> windowNode = new WindowNode();
     std::shared_ptr<MMI::KeyEvent> event = nullptr;
@@ -904,7 +904,7 @@ HWTEST_F(WindowRootTest, DispatchKeyEvent, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot GetTopWindowId
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, GetTopWindowId, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, GetTopWindowId, TestSize.Level1)
 {
     uint32_t mainWinId = 0;
     uint32_t topWinId = 1;
@@ -917,7 +917,7 @@ HWTEST_F(WindowRootTest, GetTopWindowId, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot SetWindowLayoutMode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, SetWindowLayoutMode, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, SetWindowLayoutMode, TestSize.Level1)
 {
     DisplayId displayId = 1;
     WindowLayoutMode mode = WindowLayoutMode::BASE;
@@ -930,7 +930,7 @@ HWTEST_F(WindowRootTest, SetWindowLayoutMode, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot GetAllDisplayIds,RemoveSingleUserWindowNodes
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, GetAllDisplayIds, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, GetAllDisplayIds, TestSize.Level1)
 {
     ScreenId displayGroupId = 1;
     auto display = DisplayManager::GetInstance().GetDefaultDisplay();
@@ -953,7 +953,7 @@ HWTEST_F(WindowRootTest, GetAllDisplayIds, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot GenAllWindowsLogInfo
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, GenAllWindowsLogInfo, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, GenAllWindowsLogInfo, TestSize.Level1)
 {
     ScreenId displayGroupId = 1;
     auto display = DisplayManager::GetInstance().GetDefaultDisplay();
@@ -974,7 +974,7 @@ HWTEST_F(WindowRootTest, GenAllWindowsLogInfo, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot FocusFaultDetection
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, FocusFaultDetection, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, FocusFaultDetection, TestSize.Level1)
 {
     ScreenId displayGroupId = 1;
     auto display = DisplayManager::GetInstance().GetDefaultDisplay();
@@ -997,7 +997,7 @@ HWTEST_F(WindowRootTest, FocusFaultDetection, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot ProcessExpandDisplayCreate
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, ProcessExpandDisplayCreate, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, ProcessExpandDisplayCreate, TestSize.Level1)
 {
     ScreenId displayGroupId = 1;
     auto display = DisplayManager::GetInstance().GetDefaultDisplay();
@@ -1021,7 +1021,7 @@ HWTEST_F(WindowRootTest, ProcessExpandDisplayCreate, Function | SmallTest | Leve
  * @tc.desc: test WindowRoot GetAllDisplayRectsByDisplayInfo
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, GetAllDisplayRectsByDisplayInfo, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, GetAllDisplayRectsByDisplayInfo, TestSize.Level1)
 {
     std::map<DisplayId, sptr<DisplayInfo>> displayInfoMap;
     ASSERT_TRUE((windowRoot_ != nullptr));
@@ -1033,7 +1033,7 @@ HWTEST_F(WindowRootTest, GetAllDisplayRectsByDisplayInfo, Function | SmallTest |
  * @tc.desc: test WindowRoot ProcessDisplayCreate
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, ProcessDisplayCreate, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, ProcessDisplayCreate, TestSize.Level1)
 {
     DisplayId defaultDisplayId = DisplayGroupInfo::GetInstance().GetDefaultDisplayId();
     auto display = DisplayManager::GetInstance().GetDefaultDisplay();
@@ -1048,7 +1048,7 @@ HWTEST_F(WindowRootTest, ProcessDisplayCreate, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot MoveNotShowingWindowToDefaultDisplay
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, MoveNotShowingWindowToDefaultDisplay, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, MoveNotShowingWindowToDefaultDisplay, TestSize.Level1)
 {
     DisplayId defaultDisplayId = DisplayGroupInfo::GetInstance().GetDefaultDisplayId();
     ASSERT_TRUE((windowRoot_ != nullptr));
@@ -1063,7 +1063,7 @@ HWTEST_F(WindowRootTest, MoveNotShowingWindowToDefaultDisplay, Function | SmallT
  * @tc.desc: test WindowRoot ProcessDisplayDestroy
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, ProcessDisplayDestroy, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, ProcessDisplayDestroy, TestSize.Level1)
 {
     DisplayId defaultDisplayId = DisplayGroupInfo::GetInstance().GetDefaultDisplayId();
     auto display = DisplayManager::GetInstance().GetDefaultDisplay();
@@ -1078,7 +1078,7 @@ HWTEST_F(WindowRootTest, ProcessDisplayDestroy, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot ProcessDisplayChange
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, ProcessDisplayChange, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, ProcessDisplayChange, TestSize.Level1)
 {
     DisplayId defaultDisplayId = DisplayGroupInfo::GetInstance().GetDefaultDisplayId();
     auto display = DisplayManager::GetInstance().GetDefaultDisplay();
@@ -1097,7 +1097,7 @@ HWTEST_F(WindowRootTest, ProcessDisplayChange, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot GetDisplayGroupRect
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, GetDisplayGroupRect, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, GetDisplayGroupRect, TestSize.Level1)
 {
     DisplayId displayId = DisplayGroupInfo::GetInstance().GetDefaultDisplayId();
     ASSERT_TRUE((windowRoot_ != nullptr));
@@ -1109,7 +1109,7 @@ HWTEST_F(WindowRootTest, GetDisplayGroupRect, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot RemoveSingleUserWindowNodes
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, RemoveSingleUserWindowNodes, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, RemoveSingleUserWindowNodes, TestSize.Level1)
 {
     int accountId = 1;
     ASSERT_TRUE((windowRoot_ != nullptr));
@@ -1121,7 +1121,7 @@ HWTEST_F(WindowRootTest, RemoveSingleUserWindowNodes, Function | SmallTest | Lev
  * @tc.desc: test WindowRoot TakeWindowPairSnapshot
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, TakeWindowPairSnapshot, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, TakeWindowPairSnapshot, TestSize.Level1)
 {
     DisplayId displayId = DisplayGroupInfo::GetInstance().GetDefaultDisplayId();
     bool flag = windowRoot_->TakeWindowPairSnapshot(displayId);
@@ -1133,7 +1133,7 @@ HWTEST_F(WindowRootTest, TakeWindowPairSnapshot, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot ClearWindowPairSnapshot
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, ClearWindowPairSnapshot, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, ClearWindowPairSnapshot, TestSize.Level1)
 {
     DisplayId displayId = DisplayGroupInfo::GetInstance().GetDefaultDisplayId();
     ASSERT_TRUE((windowRoot_ != nullptr));
@@ -1145,7 +1145,7 @@ HWTEST_F(WindowRootTest, ClearWindowPairSnapshot, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot CheckAddingModeAndSize01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, CheckAddingModeAndSize01, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, CheckAddingModeAndSize01, TestSize.Level1)
 {
     sptr<WindowNode> node = new WindowNode();
     node->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
@@ -1159,7 +1159,7 @@ HWTEST_F(WindowRootTest, CheckAddingModeAndSize01, Function | SmallTest | Level2
  * @tc.desc: test WindowRoot CheckAddingModeAndSize02
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, CheckAddingModeAndSize02, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, CheckAddingModeAndSize02, TestSize.Level1)
 {
     sptr<WindowNode> node = new WindowNode();
     node->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
@@ -1177,7 +1177,7 @@ HWTEST_F(WindowRootTest, CheckAddingModeAndSize02, Function | SmallTest | Level2
  * @tc.desc: test WindowRoot CheckAddingModeAndSize03
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, CheckAddingModeAndSize03, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, CheckAddingModeAndSize03, TestSize.Level1)
 {
     sptr<WindowNode> node = new WindowNode();
     node->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
@@ -1193,7 +1193,7 @@ HWTEST_F(WindowRootTest, CheckAddingModeAndSize03, Function | SmallTest | Level2
  * @tc.desc: test WindowRoot GetDisplayRectWithoutSystemBarAreas
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, GetDisplayRectWithoutSystemBarAreas, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, GetDisplayRectWithoutSystemBarAreas, TestSize.Level1)
 {
     sptr<WindowNode> dstNode = new WindowNode();
     ASSERT_TRUE((windowRoot_ != nullptr));
@@ -1205,7 +1205,7 @@ HWTEST_F(WindowRootTest, GetDisplayRectWithoutSystemBarAreas, Function | SmallTe
  * @tc.desc: test WindowRoot AddWindowNode01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, AddWindowNode01, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, AddWindowNode01, TestSize.Level1)
 {
     WMError ret;
     sptr<WindowNode> node = new WindowNode();
@@ -1220,7 +1220,7 @@ HWTEST_F(WindowRootTest, AddWindowNode01, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot RemoveWindowNode01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, RemoveWindowNode01, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, RemoveWindowNode01, TestSize.Level1)
 {
     uint32_t windowId = 10;
     WMError ret = windowRoot_->RemoveWindowNode(windowId, true);
@@ -1232,7 +1232,7 @@ HWTEST_F(WindowRootTest, RemoveWindowNode01, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot SetBrightness01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, SetBrightness01, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, SetBrightness01, TestSize.Level1)
 {
     windowRoot_->SetBrightness(INVALID_WINDOW_ID, 0);
     sptr<WindowNode> node = new WindowNode();
@@ -1252,7 +1252,7 @@ HWTEST_F(WindowRootTest, SetBrightness01, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot SetBrightness02
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, SetBrightness02, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, SetBrightness02, TestSize.Level1)
 {
     windowRoot_->SetBrightness(INVALID_WINDOW_ID, 0);
     sptr<WindowNode> node = new WindowNode();
@@ -1272,7 +1272,7 @@ HWTEST_F(WindowRootTest, SetBrightness02, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot HandleKeepScreenOn01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, HandleKeepScreenOn01, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, HandleKeepScreenOn01, TestSize.Level1)
 {
     uint32_t windowId = 1;
     bool requireLock = false;
@@ -1285,7 +1285,7 @@ HWTEST_F(WindowRootTest, HandleKeepScreenOn01, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot UpdateFocusableProperty01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, UpdateFocusableProperty01, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, UpdateFocusableProperty01, TestSize.Level1)
 {
     sptr<WindowNode> windowNode = new WindowNode();
     windowNode->SetDisplayId(0);
@@ -1305,7 +1305,7 @@ HWTEST_F(WindowRootTest, UpdateFocusableProperty01, Function | SmallTest | Level
  * @tc.desc: test WindowRoot SetWindowMode01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, SetWindowMode01, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, SetWindowMode01, TestSize.Level1)
 {
     auto display = DisplayManager::GetInstance().GetDefaultDisplay();
     ASSERT_TRUE((display != nullptr));
@@ -1329,7 +1329,7 @@ HWTEST_F(WindowRootTest, SetWindowMode01, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot DestroyWindowSelf01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, DestroyWindowSelf01, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, DestroyWindowSelf01, TestSize.Level1)
 {
     auto display = DisplayManager::GetInstance().GetDefaultDisplay();
     ASSERT_TRUE((display != nullptr));
@@ -1354,7 +1354,7 @@ HWTEST_F(WindowRootTest, DestroyWindowSelf01, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot DestroyWindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, DestroyWindow, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, DestroyWindow, TestSize.Level1)
 {
     uint32_t windowId = 1;
     bool onlySelf = false;
@@ -1367,7 +1367,7 @@ HWTEST_F(WindowRootTest, DestroyWindow, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot UpdateFocusWindowWithWindowRemoved01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, UpdateFocusWindowWithWindowRemoved01, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, UpdateFocusWindowWithWindowRemoved01, TestSize.Level1)
 {
     sptr<WindowNode> node = nullptr;
     sptr<WindowNodeContainer> container = nullptr;
@@ -1380,7 +1380,7 @@ HWTEST_F(WindowRootTest, UpdateFocusWindowWithWindowRemoved01, Function | SmallT
  * @tc.desc: test WindowRoot UpdateFocusWindowWithWindowRemoved02
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, UpdateFocusWindowWithWindowRemoved02, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, UpdateFocusWindowWithWindowRemoved02, TestSize.Level1)
 {
     sptr<WindowNode> node = new WindowNode();
     node->property_->SetWindowType(WindowType::WINDOW_TYPE_DOCK_SLICE);
@@ -1402,7 +1402,7 @@ HWTEST_F(WindowRootTest, UpdateFocusWindowWithWindowRemoved02, Function | SmallT
  * @tc.desc: test WindowRoot UpdateBrightnessWithWindowRemoved
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, UpdateBrightnessWithWindowRemoved, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, UpdateBrightnessWithWindowRemoved, TestSize.Level1)
 {
     uint32_t windowId = 1;
     sptr<WindowNodeContainer> container;
@@ -1420,7 +1420,7 @@ HWTEST_F(WindowRootTest, UpdateBrightnessWithWindowRemoved, Function | SmallTest
  * @tc.desc: test WindowRoot IsVerticalDisplay01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, IsVerticalDisplay01, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, IsVerticalDisplay01, TestSize.Level1)
 {
     sptr<WindowNode> node = new WindowNode();
     auto display = DisplayManager::GetInstance().GetDefaultDisplay();
@@ -1438,7 +1438,7 @@ HWTEST_F(WindowRootTest, IsVerticalDisplay01, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot RequestFocus01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, RequestFocus01, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, RequestFocus01, TestSize.Level1)
 {
     sptr<WindowNode> windowNode = new WindowNode();
     windowNode->currentVisibility_ = true;
@@ -1464,7 +1464,7 @@ HWTEST_F(WindowRootTest, RequestFocus01, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot RequestActiveWindow01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, RequestActiveWindow01, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, RequestActiveWindow01, TestSize.Level1)
 {
     sptr<WindowNode> windowNode = new WindowNode();
     windowNode->property_->SetWindowType(WindowType::WINDOW_TYPE_STATUS_BAR);
@@ -1478,7 +1478,7 @@ HWTEST_F(WindowRootTest, RequestActiveWindow01, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot RequestActiveWindow02
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, RequestActiveWindow02, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, RequestActiveWindow02, TestSize.Level1)
 {
     sptr<WindowNode> windowNode = new WindowNode();
     windowNode->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
@@ -1499,7 +1499,7 @@ HWTEST_F(WindowRootTest, RequestActiveWindow02, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot ProcessWindowStateChange01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, ProcessWindowStateChange01, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, ProcessWindowStateChange01, TestSize.Level1)
 {
     sptr<WindowNode> windowNode = new WindowNode();
     WindowState state = WindowState::STATE_INITIAL;
@@ -1520,7 +1520,7 @@ HWTEST_F(WindowRootTest, ProcessWindowStateChange01, Function | SmallTest | Leve
  * @tc.desc: test WindowRoot FindWallpaperWindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, FindWallpaperWindow, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, FindWallpaperWindow, TestSize.Level1)
 {
     sptr<WindowNode> windowNode = new WindowNode();
     windowNode->property_->SetWindowType(WindowType::WINDOW_TYPE_WALLPAPER);
@@ -1534,7 +1534,7 @@ HWTEST_F(WindowRootTest, FindWallpaperWindow, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot RaiseZOrderForAppWindow01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, RaiseZOrderForAppWindow01, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, RaiseZOrderForAppWindow01, TestSize.Level1)
 {
     sptr<WindowNode> windowNode = new WindowNode();
     windowNode->property_->SetWindowType(WindowType::WINDOW_TYPE_DOCK_SLICE);
@@ -1557,7 +1557,7 @@ HWTEST_F(WindowRootTest, RaiseZOrderForAppWindow01, Function | SmallTest | Level
  * @tc.desc: test WindowRoot RaiseZOrderForAppWindow02
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, RaiseZOrderForAppWindow02, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, RaiseZOrderForAppWindow02, TestSize.Level1)
 {
     sptr<WindowNode> windowNode = new WindowNode();
     windowNode->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
@@ -1580,7 +1580,7 @@ HWTEST_F(WindowRootTest, RaiseZOrderForAppWindow02, Function | SmallTest | Level
  * @tc.desc: test WindowRoot RaiseZOrderForAppWindow03
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, RaiseZOrderForAppWindow03, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, RaiseZOrderForAppWindow03, TestSize.Level1)
 {
     sptr<WindowNode> windowNode = new WindowNode();
     windowNode->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
@@ -1593,7 +1593,7 @@ HWTEST_F(WindowRootTest, RaiseZOrderForAppWindow03, Function | SmallTest | Level
  * @tc.desc: test WindowRoot DispatchKeyEvent01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, DispatchKeyEvent01, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, DispatchKeyEvent01, TestSize.Level1)
 {
     sptr<WindowNode> windowNode = new WindowNode();
     std::shared_ptr<MMI::KeyEvent> event = nullptr;
@@ -1613,7 +1613,7 @@ HWTEST_F(WindowRootTest, DispatchKeyEvent01, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot GetTopWindowId01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, GetTopWindowId01, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, GetTopWindowId01, TestSize.Level1)
 {
     sptr<WindowNode> windowNode1 = new WindowNode();
     windowNode1->currentVisibility_ = false;
@@ -1642,7 +1642,7 @@ HWTEST_F(WindowRootTest, GetTopWindowId01, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot SetWindowLayoutMode01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, SetWindowLayoutMode01, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, SetWindowLayoutMode01, TestSize.Level1)
 {
     WindowLayoutMode mode = WindowLayoutMode::BASE;
     sptr<WindowNode> windowNode = new WindowNode();
@@ -1662,7 +1662,7 @@ HWTEST_F(WindowRootTest, SetWindowLayoutMode01, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot GetAllDisplayRectsByDMS
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, GetAllDisplayRectsByDMS, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, GetAllDisplayRectsByDMS, TestSize.Level1)
 {
     ScreenId displayGroupId = 1;
     auto display = DisplayManager::GetInstance().GetDefaultDisplay();
@@ -1681,7 +1681,7 @@ HWTEST_F(WindowRootTest, GetAllDisplayRectsByDMS, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot MoveNotShowingWindowToDefaultDisplay01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, MoveNotShowingWindowToDefaultDisplay01, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, MoveNotShowingWindowToDefaultDisplay01, TestSize.Level1)
 {
     DisplayId defaultDisplayId = DisplayGroupInfo::GetInstance().GetDefaultDisplayId();
     ASSERT_TRUE((windowRoot_ != nullptr));
@@ -1699,7 +1699,7 @@ HWTEST_F(WindowRootTest, MoveNotShowingWindowToDefaultDisplay01, Function | Smal
  * @tc.desc: test WindowRoot ProcessDisplayDestroy01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, ProcessDisplayDestroy01, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, ProcessDisplayDestroy01, TestSize.Level1)
 {
     sptr<WindowNode> windowNode = new WindowNode();
     auto display = DisplayManager::GetInstance().GetDefaultDisplay();
@@ -1721,7 +1721,7 @@ HWTEST_F(WindowRootTest, ProcessDisplayDestroy01, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot GetDisplayGroupRect,HasPrivateWindow,HasMainFullScreenWindowShown
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, GetDisplayGroupRect01, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, GetDisplayGroupRect01, TestSize.Level1)
 {
     sptr<WindowNode> windowNode = new WindowNode();
     auto display = DisplayManager::GetInstance().GetDefaultDisplay();
@@ -1744,7 +1744,7 @@ HWTEST_F(WindowRootTest, GetDisplayGroupRect01, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot UpdateRsTree
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, UpdateRsTree, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, UpdateRsTree, TestSize.Level1)
 {
     sptr<WindowNode> windowNode = new WindowNode();
     windowRoot_->windowNodeMap_.insert(std::make_pair(windowNode->GetWindowId(), windowNode));
@@ -1767,7 +1767,7 @@ HWTEST_F(WindowRootTest, UpdateRsTree, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot CheckMultiDialogWindows
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, CheckMultiDialogWindows, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, CheckMultiDialogWindows, TestSize.Level1)
 {
     sptr<WindowNode> windowNode = new WindowNode();
     windowNode->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
@@ -1784,7 +1784,7 @@ HWTEST_F(WindowRootTest, CheckMultiDialogWindows, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot GetSplitScreenWindowNodes
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, GetSplitScreenWindowNodes, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, GetSplitScreenWindowNodes, TestSize.Level1)
 {
     ScreenId displayGroupId = 1;
     auto display = DisplayManager::GetInstance().GetDefaultDisplay();
@@ -1802,7 +1802,7 @@ HWTEST_F(WindowRootTest, GetSplitScreenWindowNodes, Function | SmallTest | Level
  * @tc.desc: test WindowRoot IsForbidDockSliceMove01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, IsForbidDockSliceMove01, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, IsForbidDockSliceMove01, TestSize.Level1)
 {
     ScreenId displayGroupId = 1;
     auto display = DisplayManager::GetInstance().GetDefaultDisplay();
@@ -1821,7 +1821,7 @@ HWTEST_F(WindowRootTest, IsForbidDockSliceMove01, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot GetVisibilityWindowInfo01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, GetVisibilityWindowInfo01, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, GetVisibilityWindowInfo01, TestSize.Level1)
 {
     sptr<WindowNode> node = new WindowNode();
     windowRoot_->AddSurfaceNodeIdWindowNodePair(node->GetDisplayId(), node);
@@ -1837,7 +1837,7 @@ HWTEST_F(WindowRootTest, GetVisibilityWindowInfo01, Function | SmallTest | Level
  * @tc.desc: test WindowRoot GetUnreliableWindowInfo
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, GetUnreliableWindowInfo, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, GetUnreliableWindowInfo, TestSize.Level1)
 {
     int32_t windowId = 0;
     sptr<WindowNode> windowNode = new WindowNode();
@@ -1854,7 +1854,7 @@ HWTEST_F(WindowRootTest, GetUnreliableWindowInfo, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot AddWindowNode05
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, AddWindowNode05, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, AddWindowNode05, TestSize.Level1)
 {
     WMError ret;
     sptr<WindowNode> node = new WindowNode();
@@ -1870,7 +1870,7 @@ HWTEST_F(WindowRootTest, AddWindowNode05, Function | SmallTest | Level2)
  * @tc.desc: test WindowRoot UpdateDisplayOrientationWhenHideWindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRootTest, UpdateDisplayOrientationWhenHideWindow, Function | SmallTest | Level2)
+HWTEST_F(WindowRootTest, UpdateDisplayOrientationWhenHideWindow, TestSize.Level1)
 {
     sptr<WindowNode> node = new WindowNode();
     auto display = DisplayManager::GetInstance().GetDefaultDisplay();

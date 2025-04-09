@@ -110,7 +110,7 @@ namespace {
  * @tc.desc: can't not receive a inside touch event
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTouchOutsideTest, onTouchInside, Function | MediumTest | Level3)
+HWTEST_F(WindowTouchOutsideTest, onTouchInside, TestSize.Level1)
 {
     const sptr<Window> &firstWindow = Utils::CreateTestWindow(firstWindowInfo_);
     if (firstWindow == nullptr) {
@@ -129,7 +129,7 @@ HWTEST_F(WindowTouchOutsideTest, onTouchInside, Function | MediumTest | Level3)
  * @tc.desc: received an outside touch event when window state is show
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTouchOutsideTest, onTouchOutside, Function | MediumTest | Level3)
+HWTEST_F(WindowTouchOutsideTest, onTouchOutside, TestSize.Level1)
 {
     const sptr<Window> &firstWindow = Utils::CreateTestWindow(firstWindowInfo_);
     if (firstWindow == nullptr) {
@@ -152,7 +152,7 @@ HWTEST_F(WindowTouchOutsideTest, onTouchOutside, Function | MediumTest | Level3)
  * @tc.desc: If the window is not in the show state, the touch outside event cannot be received
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTouchOutsideTest, onTouchOutsideNotShow, Function | MediumTest | Level3)
+HWTEST_F(WindowTouchOutsideTest, onTouchOutsideNotShow, TestSize.Level1)
 {
     const sptr<Window> &firstWindow = Utils::CreateTestWindow(firstWindowInfo_);
     if (firstWindow == nullptr) {
@@ -174,7 +174,7 @@ HWTEST_F(WindowTouchOutsideTest, onTouchOutsideNotShow, Function | MediumTest | 
  * @tc.desc: All windows can receive the touch outside event
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTouchOutsideTest, onTouchOutsideForAllWindow, Function | MediumTest | Level3)
+HWTEST_F(WindowTouchOutsideTest, onTouchOutsideForAllWindow, TestSize.Level1)
 {
     const sptr<Window> &firstWindow = Utils::CreateTestWindow(firstWindowInfo_);
     if (firstWindow == nullptr) {

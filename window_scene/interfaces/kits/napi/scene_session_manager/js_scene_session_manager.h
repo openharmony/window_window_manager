@@ -44,7 +44,8 @@ enum class ListenerFunctionType : uint32_t {
     START_PIP_FAILED_CB,
     NOTIFY_APP_USE_CONTROL_LIST_CB,
     WATCH_GESTURE_CONSUME_RESULT_CB,
-    WATCH_FOCUS_ACTIVE_CHANGE_CB
+    WATCH_FOCUS_ACTIVE_CHANGE_CB,
+    SET_FOREGROUND_WINDOW_NUM_CB
 };
 
 class JsSceneSessionManager final {
@@ -84,6 +85,7 @@ public:
     static napi_value PerfRequestEx(napi_env env, napi_callback_info info);
     static napi_value UpdateWindowMode(napi_env env, napi_callback_info info);
     static napi_value NotifySingleHandInfoChange(napi_env env, napi_callback_info info);
+    static napi_value GetSingleHandCompatibleModeConfig(napi_env env, napi_callback_info info);
     static napi_value GetRootSceneUIContext(napi_env env, napi_callback_info info);
     static napi_value SendTouchEvent(napi_env env, napi_callback_info info);
     static napi_value AddWindowDragHotArea(napi_env env, napi_callback_info info);
@@ -123,6 +125,7 @@ public:
     static napi_value NotifyAboveLockScreen(napi_env env, napi_callback_info info);
     static napi_value CloneWindow(napi_env env, napi_callback_info info);
     static napi_value RegisterSingleHandContainerNode(napi_env env, napi_callback_info info);
+    static napi_value NotifyRotationChange(napi_env env, napi_callback_info info);
 
     /*
      * Multi Instance
@@ -136,6 +139,7 @@ public:
      * Window Immersive
      */
     static napi_value NotifyAINavigationBarShowStatus(napi_env env, napi_callback_info info);
+    static napi_value NotifyNextAvoidRectInfo(napi_env env, napi_callback_info info);
     static napi_value GetIsLayoutFullScreen(napi_env env, napi_callback_info info);
     static napi_value SetStatusBarDefaultVisibilityPerDisplay(napi_env env, napi_callback_info info);
     static napi_value NotifyStatusBarShowStatus(napi_env env, napi_callback_info info);
@@ -176,6 +180,7 @@ private:
     napi_value OnPerfRequestEx(napi_env env, napi_callback_info info);
     napi_value OnUpdateWindowMode(napi_env env, napi_callback_info info);
     napi_value OnNotifySingleHandInfoChange(napi_env env, napi_callback_info info);
+    napi_value OnGetSingleHandCompatibleModeConfig(napi_env env, napi_callback_info info);
     napi_value OnGetRootSceneUIContext(napi_env env, napi_callback_info info);
     napi_value OnSendTouchEvent(napi_env env, napi_callback_info info);
     napi_value OnAddWindowDragHotArea(napi_env env, napi_callback_info info);
@@ -214,6 +219,7 @@ private:
     napi_value OnNotifyAboveLockScreen(napi_env env, napi_callback_info info);
     napi_value OnCloneWindow(napi_env env, napi_callback_info info);
     napi_value OnRegisterSingleHandContainerNode(napi_env env, napi_callback_info info);
+    napi_value OnNotifyRotationChange(napi_env env, napi_callback_info info);
 
     /*
      * Multi Instance
@@ -227,6 +233,7 @@ private:
      * Window Immersive
      */
     napi_value OnNotifyAINavigationBarShowStatus(napi_env env, napi_callback_info info);
+    napi_value OnNotifyNextAvoidRectInfo(napi_env env, napi_callback_info info);
     napi_value OnGetIsLayoutFullScreen(napi_env env, napi_callback_info info);
     napi_value OnSetStatusBarDefaultVisibilityPerDisplay(napi_env env, napi_callback_info info);
     napi_value OnNotifyStatusBarShowStatus(napi_env env, napi_callback_info info);
@@ -270,6 +277,8 @@ private:
     void OnNotifyAppUseControlList(
         ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList);
     void RegisterNotifyAppUseControlListCallback();
+    void RegisterSetForegroundWindowNumCallback();
+    void OnSetForegroundWindowNum(int32_t windowNum);
 
     /*
      * Window Recover
@@ -299,6 +308,13 @@ private:
 
     sptr<RootScene> rootScene_;
     std::shared_ptr<MainThreadScheduler> taskScheduler_;
+
+    /*
+     * Window Rotation
+     */
+    std::unordered_map<int32_t, RotationChangeResult> GetRotationChangeResult(
+        const std::vector<sptr<SceneSession>>& activeSceneSessionMapCopy,
+        const RotationChangeInfo& rotationChangeInfo);
 };
 } // namespace OHOS::Rosen
 

@@ -187,6 +187,10 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleGetWindowIdsByCoordinate(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UPDATE_SESSION_SCREEN_LOCK):
             return HandleUpdateSessionScreenLock(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_ADD_SKIP_SELF_ON_VIRTUAL_SCREEN):
+            return HandleAddSkipSelfWhenShowOnVirtualScreenList(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_REMOVE_SKIP_SELF_ON_VIRTUAL_SCREEN):
+            return HandleRemoveSkipSelfWhenShowOnVirtualScreenList(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_IS_PC_WINDOW):
             return HandleIsPcWindow(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_IS_PC_OR_PAD_FREE_MULTI_WINDOW_MODE):
@@ -203,14 +207,20 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleSetAppDragResizeType(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_APP_DRAG_RESIZE_TYPE):
             return HandleGetAppDragResizeType(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_APP_KEY_FRAME_POLICY):
+            return HandleSetAppKeyFramePolicy(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_WATCH_GESTURE_CONSUME_RESULT):
             return HandleWatchGestureConsumeResult(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_WATCH_FOCUS_ACTIVE_CHANGE):
             return HandleWatchFocusActiveChange(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SHIFT_APP_WINDOW_POINTER_EVENT):
             return HandleShiftAppWindowPointerEvent(data, reply);
-        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_UI_TYPE):
-            return HandleGetWindowUIType(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_MINIMIZE_BY_WINDOW_ID):
+            return HandleMinimizeByWindowId(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_PARENT_WINDOW):
+            return HandleSetParentWindow(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_FOREGROUND_WINDOW_NUM):
+            return HandleSetForegroundWindowNum(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -367,6 +377,28 @@ int SceneSessionManagerStub::HandleDestroyAndDisconnectSpcificSessionWithDetachC
     sptr<IRemoteObject> callback = data.ReadRemoteObject();
     const WSError ret = DestroyAndDisconnectSpecificSessionWithDetachCallback(persistentId, callback);
     reply.WriteUint32(static_cast<uint32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleSetParentWindow(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t subWindowId = INVALID_WINDOW_ID;
+    if (!data.ReadInt32(subWindowId)) {
+        TLOGE(WmsLogTag::WMS_SUB, "read subWindowId failed");
+        return ERR_INVALID_DATA;
+    }
+    int32_t newParentWindowId = INVALID_WINDOW_ID;
+    if (!data.ReadInt32(newParentWindowId)) {
+        TLOGE(WmsLogTag::WMS_SUB, "read newParentWindowId failed");
+        return ERR_INVALID_DATA;
+    }
+    TLOGD(WmsLogTag::WMS_SUB, "subWindowId: %{public}d, newParentWindowId: %{public}d",
+        subWindowId, newParentWindowId);
+    WMError errCode = SetParentWindow(subWindowId, newParentWindowId);
+    if (!reply.WriteUint32(static_cast<uint32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_SUB, "Write errCode failed.");
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 
@@ -1617,6 +1649,48 @@ int SceneSessionManagerStub::HandleUpdateSessionScreenLock(MessageParcel& data, 
     return ERR_NONE;
 }
 
+int SceneSessionManagerStub::HandleAddSkipSelfWhenShowOnVirtualScreenList(MessageParcel& data, MessageParcel& reply)
+{
+    uint64_t size = 0;
+    if (!data.ReadUint64(size)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read size failed.");
+        return ERR_INVALID_DATA;
+    }
+    std::vector<int32_t> persistentIds;
+    for (uint64_t i = 0; i < size; i++) {
+        int32_t persistentId = 0;
+        if (!data.ReadInt32(persistentId)) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read persistentId failed.");
+            return ERR_INVALID_DATA;
+        }
+        persistentIds.push_back(persistentId);
+    }
+    WMError errCode = AddSkipSelfWhenShowOnVirtualScreenList(persistentIds);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleRemoveSkipSelfWhenShowOnVirtualScreenList(MessageParcel& data, MessageParcel& reply)
+{
+    uint64_t size = 0;
+    if (!data.ReadUint64(size)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read size failed.");
+        return ERR_INVALID_DATA;
+    }
+    std::vector<int32_t> persistentIds;
+    for (uint64_t i = 0; i < size; i++) {
+        int32_t persistentId = 0;
+        if (!data.ReadInt32(persistentId)) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read persistentId failed.");
+            return ERR_INVALID_DATA;
+        }
+        persistentIds.push_back(persistentId);
+    }
+    WMError errCode = RemoveSkipSelfWhenShowOnVirtualScreenList(persistentIds);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
 int SceneSessionManagerStub::HandleIsPcWindow(MessageParcel& data, MessageParcel& reply)
 {
     bool isPcWindow = false;
@@ -1684,8 +1758,13 @@ int SceneSessionManagerStub::HandleIsWindowRectAutoSave(MessageParcel& data, Mes
         TLOGE(WmsLogTag::WMS_MAIN, "Read key failed.");
         return ERR_INVALID_DATA;
     }
+    int persistentId = 0;
+    if (!data.ReadInt32(persistentId)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Read persistentId failed.");
+        return ERR_INVALID_DATA;
+    }
     bool enabled = false;
-    WMError errCode = IsWindowRectAutoSave(key, enabled);
+    WMError errCode = IsWindowRectAutoSave(key, enabled, persistentId);
     if (!reply.WriteBool(enabled)) {
         TLOGE(WmsLogTag::WMS_MAIN, "Write enabled failed.");
         return ERR_INVALID_DATA;
@@ -1704,7 +1783,7 @@ int SceneSessionManagerStub::HandleSetGlobalDragResizeType(MessageParcel& data, 
         TLOGE(WmsLogTag::WMS_LAYOUT, "Read dragResizeType failed.");
         return ERR_INVALID_DATA;
     }
-    if (dragResizeType > static_cast<uint32_t>(DragResizeType::RESIZE_WHEN_DRAG_END)) {
+    if (dragResizeType >= static_cast<uint32_t>(DragResizeType::RESIZE_MAX_VALUE)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "bad dragResizeType value");
         return ERR_INVALID_DATA;
     }
@@ -1743,7 +1822,7 @@ int SceneSessionManagerStub::HandleSetAppDragResizeType(MessageParcel& data, Mes
         TLOGE(WmsLogTag::WMS_LAYOUT, "Read dragResizeType failed.");
         return ERR_INVALID_DATA;
     }
-    if (dragResizeType > static_cast<uint32_t>(DragResizeType::RESIZE_WHEN_DRAG_END)) {
+    if (dragResizeType >= static_cast<uint32_t>(DragResizeType::RESIZE_MAX_VALUE)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "bad dragResizeType value");
         return ERR_INVALID_DATA;
     }
@@ -1775,6 +1854,26 @@ int SceneSessionManagerStub::HandleGetAppDragResizeType(MessageParcel& data, Mes
     return ERR_NONE;
 }
 
+int SceneSessionManagerStub::HandleSetAppKeyFramePolicy(MessageParcel& data, MessageParcel& reply)
+{
+    std::string bundleName;
+    if (!data.ReadString(bundleName)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Read bundleName failed.");
+        return ERR_INVALID_DATA;
+    }
+    sptr<KeyFramePolicy> keyFramePolicy = data.ReadParcelable<KeyFramePolicy>();
+    if (!keyFramePolicy) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Read keyFramePolicy failed.");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = SetAppKeyFramePolicy(bundleName, *keyFramePolicy);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
 int SceneSessionManagerStub::HandleShiftAppWindowPointerEvent(MessageParcel& data, MessageParcel& reply)
 {
     int32_t sourcePersistentId = INVALID_WINDOW_ID;
@@ -1792,17 +1891,31 @@ int SceneSessionManagerStub::HandleShiftAppWindowPointerEvent(MessageParcel& dat
     return ERR_NONE;
 }
 
-int SceneSessionManagerStub::HandleGetWindowUIType(MessageParcel& data, MessageParcel& reply)
+int SceneSessionManagerStub::HandleMinimizeByWindowId(MessageParcel& data, MessageParcel& reply)
 {
-    WindowUIType type = WindowUIType::INVALID_WINDOW;
-    WMError errCode = GetWindowUIType(type);
-    TLOGI(WmsLogTag::WMS_MULTI_WINDOW, "WindowUIType:%{public}d!", static_cast<int32_t>(type));
-    if (!reply.WriteUint32(static_cast<int32_t>(type))) {
-        TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "Write WindowUIType failed");
+    std::vector<int32_t> windowIds;
+    if (!data.ReadInt32Vector(&windowIds)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "read windowIds failed");
         return ERR_INVALID_DATA;
     }
+    WMError errCode = MinimizeByWindowId(windowIds);
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "Write errCode fail.");
+        TLOGE(WmsLogTag::WMS_LIFE, "Write errCode failed.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleSetForegroundWindowNum(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t windowNum = 0;
+    if (!data.ReadInt32(windowNum)) {
+        TLOGE(WmsLogTag::WMS_PC, "read windowNum failed");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = SetForegroundWindowNum(windowNum);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_PC, "Write errCode failed.");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;

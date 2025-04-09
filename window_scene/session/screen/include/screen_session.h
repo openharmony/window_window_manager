@@ -129,6 +129,7 @@ public:
     void SetScreenSceneDpiChangeListener(const SetScreenSceneDpiFunc& func);
     void SetScreenSceneDpi(float density);
     void SetDensityInCurResolution(float densityInCurResolution);
+    float GetDensityInCurResolution();
     void SetDefaultDensity(float defaultDensity);
     void UpdateVirtualPixelRatio(const RRect& bounds);
     void SetScreenType(ScreenType type);
@@ -206,6 +207,7 @@ public:
     void SetName(std::string name);
     void SetInnerName(std::string innerName);
     void Resize(uint32_t width, uint32_t height, bool isFreshBoundsSync = true);
+    void SetFrameGravity(Gravity gravity);
 
     void SetHdrFormats(std::vector<uint32_t>&& hdrFormats);
     void SetColorSpaces(std::vector<uint32_t>&& colorSpaces);
@@ -242,6 +244,11 @@ public:
     void SetValidWidth(uint32_t validWidth);
     int32_t GetValidHeight() const;
     int32_t GetValidWidth() const;
+
+    void SetPointerActiveWidth(uint32_t pointerActiveWidth);
+    uint32_t GetPointerActiveWidth();
+    void SetPointerActiveHeight(uint32_t pointerActiveHeight);
+    uint32_t GetPointerActiveHeight();
     float GetSensorRotation() const;
     DisplaySourceMode GetDisplaySourceMode() const;
     void SetXYPosition(int32_t x, int32_t y);
@@ -300,12 +307,16 @@ public:
     void SecondaryReflexionChange(ScreenId screenId, bool isSecondaryReflexion);
     void EnableMirrorScreenRegion();
     void ExtendScreenConnectStatusChange(ScreenId screenId, ExtendScreenConnectStatus extendScreenConnectStatus);
+    void SetIsEnableRegionRotation(bool isEnableRegionRotation);
+    bool GetIsEnableRegionRotation();
+    void UpdateDisplayNodeRotation(int rotation);
 
 private:
     ScreenProperty property_;
     std::shared_ptr<RSDisplayNode> displayNode_;
     ScreenState screenState_ { ScreenState::INIT };
     std::vector<IScreenChangeListener*> screenChangeListenerList_;
+    std::mutex screenChangeListenerListMutex_;
     ScreenCombination combination_ { ScreenCombination::SCREEN_ALONE };
     VirtualScreenFlag screenFlag_ { VirtualScreenFlag::DEFAULT };
     bool hasPrivateWindowForeground_ = false;
@@ -335,6 +346,8 @@ private:
     std::mutex mirrorScreenRegionMutex_;
     void OptimizeSecondaryDisplayMode(const RRect &bounds, FoldDisplayMode &foldDisplayMode);
     std::string innerName_ {"UNKOWN"};
+    bool isEnableRegionRotation_ = false;
+    std::mutex isEnableRegionRotationMutex_;
 };
 
 class ScreenSessionGroup : public ScreenSession {

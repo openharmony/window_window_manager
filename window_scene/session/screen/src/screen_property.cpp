@@ -255,6 +255,16 @@ uint32_t ScreenProperty::GetRefreshRate() const
     return refreshRate_;
 }
 
+void ScreenProperty::SetRsId(ScreenId rsId)
+{
+    rsId_ = rsId;
+}
+
+ScreenId ScreenProperty::GetRsId() const
+{
+    return rsId_;
+}
+
 void ScreenProperty::SetPropertyChangeReason(std::string propertyChangeReason)
 {
     propertyChangeReason_ = propertyChangeReason;
@@ -333,6 +343,7 @@ void ScreenProperty::SetRotationAndScreenRotationOnly(Rotation rotation)
             break;
     }
     screenRotation_ = rotation;
+    deviceRotation_ = rotation;
 }
 
 void ScreenProperty::UpdateScreenRotation(Rotation rotation)
@@ -646,5 +657,25 @@ float ScreenProperty::CalculatePPI()
 uint32_t ScreenProperty::CalculateDPI()
 {
     return static_cast<uint32_t>(std::round(CalculatePPI() * PPI_TO_DPI));
+}
+
+void ScreenProperty::SetPointerActiveWidth(uint32_t pointerActiveWidth)
+{
+    pointerActiveWidth_ = pointerActiveWidth;
+}
+
+uint32_t ScreenProperty::GetPointerActiveWidth()
+{
+    return pointerActiveWidth_;
+}
+
+void ScreenProperty::SetPointerActiveHeight(uint32_t pointerActiveHeight)
+{
+    pointerActiveHeight_ = pointerActiveHeight;
+}
+
+uint32_t ScreenProperty::GetPointerActiveHeight()
+{
+    return pointerActiveHeight_;
 }
 } // namespace OHOS::Rosen

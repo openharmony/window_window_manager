@@ -53,7 +53,7 @@ namespace {
  * @tc.desc: test function : GetInstance
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerLiteTest, GetInstance, Function | SmallTest | Level1)
+HWTEST_F(SceneSessionManagerLiteTest, GetInstance, TestSize.Level1)
 {
     SceneSessionManagerLite& instance1 = SceneSessionManagerLite::GetInstance();
     EXPECT_NE(nullptr, &instance1);

@@ -84,7 +84,7 @@ namespace {
  * @tc.desc: first create a secondary window, then create a primary window, test mode change
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSplitTest, SplitWindow01, Function | MediumTest | Level3)
+HWTEST_F(WindowSplitTest, SplitWindow01, TestSize.Level1)
 {
     fullInfo_.name  = "fullscreen.1";
     fullInfo_.mode = WindowMode::WINDOW_MODE_FULLSCREEN;
@@ -127,7 +127,7 @@ HWTEST_F(WindowSplitTest, SplitWindow01, Function | MediumTest | Level3)
  * @tc.desc: first create a primary window, then create a secondary window, test mode change
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSplitTest, SplitWindow02, Function | MediumTest | Level3)
+HWTEST_F(WindowSplitTest, SplitWindow02, TestSize.Level1)
 {
     fullInfo_.name  = "fullscreen.2";
     fullInfo_.mode = WindowMode::WINDOW_MODE_FULLSCREEN;
@@ -168,7 +168,7 @@ HWTEST_F(WindowSplitTest, SplitWindow02, Function | MediumTest | Level3)
  * @tc.desc: first create a secondary window, then create a primary window, test rects
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSplitTest, SplitScreen03, Function | MediumTest | Level3)
+HWTEST_F(WindowSplitTest, SplitScreen03, TestSize.Level1)
 {
     fullInfo_.name  = "fullscreen.3";
     fullInfo_.mode = WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
@@ -205,7 +205,7 @@ HWTEST_F(WindowSplitTest, SplitScreen03, Function | MediumTest | Level3)
  * @tc.desc: first create a primary window, then create a secondary window, test rects
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSplitTest, SplitScreen04, Function | MediumTest | Level3)
+HWTEST_F(WindowSplitTest, SplitScreen04, TestSize.Level1)
 {
     fullInfo_.name  = "fullscreen.4";
     splitInfo_.name = "secondary.4";

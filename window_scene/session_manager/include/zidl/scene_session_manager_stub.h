@@ -60,6 +60,11 @@ private:
     int HandleGetSessionInfo(MessageParcel& data, MessageParcel& reply);
     int HandleGetSessionInfoByContinueSessionId(MessageParcel& data, MessageParcel& reply);
 
+    /*
+     * Sub Window
+     */
+    int HandleSetParentWindow(MessageParcel& data, MessageParcel& reply);
+
     int HandleDumpSessionAll(MessageParcel& data, MessageParcel& reply);
     int HandleDumpSessionWithId(MessageParcel& data, MessageParcel& reply);
     int HandleSetSessionContinueState(MessageParcel& data, MessageParcel& reply);
@@ -109,6 +114,8 @@ private:
     int HandleSetProcessWatermark(MessageParcel& data, MessageParcel& reply);
     int HandleGetWindowIdsByCoordinate(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateSessionScreenLock(MessageParcel& data, MessageParcel& reply);
+    int HandleAddSkipSelfWhenShowOnVirtualScreenList(MessageParcel& data, MessageParcel& reply);
+    int HandleRemoveSkipSelfWhenShowOnVirtualScreenList(MessageParcel& data, MessageParcel& reply);
     int HandleIsPcWindow(MessageParcel& data, MessageParcel& reply);
     int HandleIsPcOrPadFreeMultiWindowMode(MessageParcel& data, MessageParcel& reply);
     int HandleIsWindowRectAutoSave(MessageParcel& data, MessageParcel& reply);
@@ -117,10 +124,12 @@ private:
     int HandleGetGlobalDragResizeType(MessageParcel& data, MessageParcel& reply);
     int HandleSetAppDragResizeType(MessageParcel& data, MessageParcel& reply);
     int HandleGetAppDragResizeType(MessageParcel& data, MessageParcel& reply);
+    int HandleSetAppKeyFramePolicy(MessageParcel& data, MessageParcel& reply);
     int HandleShiftAppWindowPointerEvent(MessageParcel& data, MessageParcel& reply);
-    int HandleGetWindowUIType(MessageParcel& data, MessageParcel& reply);
 
     int ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    int HandleMinimizeByWindowId(MessageParcel& data, MessageParcel& reply);
+    int HandleSetForegroundWindowNum(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_STUB_H

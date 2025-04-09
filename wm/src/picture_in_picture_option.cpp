@@ -15,11 +15,30 @@
 
 #include "js_runtime_utils.h"
 #include "picture_in_picture_option.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {
+constexpr uint32_t PIP_LOW_PRIORITY = 0;
+constexpr uint32_t PIP_HIGH_PRIORITY = 1;
 PipOption::PipOption()
 {
+}
+
+void PipOption::ClearNapiRefs(napi_env env)
+{
+    if (customNodeController_) {
+        napi_delete_reference(env, customNodeController_);
+        customNodeController_ = nullptr;
+    }
+    if (typeNode_) {
+        napi_delete_reference(env, typeNode_);
+        typeNode_ = nullptr;
+    }
+    if (storage_) {
+        napi_delete_reference(env, storage_);
+        storage_ = nullptr;
+    }
 }
 
 void PipOption::SetContext(void* contextPtr)
@@ -35,6 +54,11 @@ void PipOption::SetNavigationId(const std::string& navigationId)
 void PipOption::SetPipTemplate(uint32_t templateType)
 {
     templateType_ = templateType;
+}
+
+void PipOption::SetDefaultWindowSizeType(uint32_t defaultWindowSizeType)
+{
+    defaultWindowSizeType_ = defaultWindowSizeType;
 }
 
 void PipOption::SetPiPControlStatus(PiPControlType controlType, PiPControlStatus status)
@@ -77,9 +101,19 @@ void PipOption::SetNodeControllerRef(napi_ref ref)
     customNodeController_ = ref;
 }
 
+void PipOption::SetStorageRef(napi_ref ref)
+{
+    storage_ = ref;
+}
+
 napi_ref PipOption::GetNodeControllerRef() const
 {
     return customNodeController_;
+}
+
+napi_ref PipOption::GetStorageRef() const
+{
+    return storage_;
 }
 
 void PipOption::SetTypeNodeRef(napi_ref ref)
@@ -90,26 +124,6 @@ void PipOption::SetTypeNodeRef(napi_ref ref)
 napi_ref PipOption::GetTypeNodeRef() const
 {
     return typeNode_;
-}
-
-void PipOption::RegisterPipContentListenerWithType(const std::string& type,
-    std::shared_ptr<NativeReference> updateNodeCallbackRef)
-{
-    pipContentlistenerMap_[type] = updateNodeCallbackRef;
-}
-
-void PipOption::UnRegisterPipContentListenerWithType(const std::string& type)
-{
-    pipContentlistenerMap_.erase(type);
-}
-
-std::shared_ptr<NativeReference> PipOption::GetPipContentCallbackRef(const std::string& type)
-{
-    auto iter = pipContentlistenerMap_.find(type);
-    if (iter == pipContentlistenerMap_.end()) {
-        return nullptr;
-    }
-    return iter->second;
 }
 
 void* PipOption::GetContext() const
@@ -125,6 +139,11 @@ std::string PipOption::GetNavigationId() const
 uint32_t PipOption::GetPipTemplate()
 {
     return templateType_;
+}
+
+uint32_t PipOption::GetDefaultWindowSizeType() const
+{
+    return defaultWindowSizeType_;
 }
 
 void PipOption::GetContentSize(uint32_t& width, uint32_t& height)
@@ -166,6 +185,30 @@ void PipOption::SetTypeNodeEnabled(bool enable)
 bool PipOption::IsTypeNodeEnabled() const
 {
     return useTypeNode_;
+}
+
+uint32_t PipOption::GetPipPriority(uint32_t pipTemplateType) const
+{
+    if (pipTemplateType >= static_cast<uint32_t>(PiPTemplateType::END)) {
+        TLOGE(WmsLogTag::WMS_PIP, "param invalid, pipTemplateType is %{public}d", pipTemplateType);
+        return PIP_LOW_PRIORITY;
+    }
+    if (pipTemplateType == static_cast<uint32_t>(PiPTemplateType::VIDEO_PLAY) ||
+        pipTemplateType == static_cast<uint32_t>(PiPTemplateType::VIDEO_LIVE)) {
+        return PIP_LOW_PRIORITY;
+    } else {
+        return PIP_HIGH_PRIORITY;
+    }
+}
+
+void PipOption::GetPiPTemplateInfo(PiPTemplateInfo& pipTemplateInfo)
+{
+    pipTemplateInfo.pipTemplateType = templateType_;
+    pipTemplateInfo.controlGroup = controlGroup_;
+    pipTemplateInfo.priority = GetPipPriority(templateType_);
+    pipTemplateInfo.defaultWindowSizeType = defaultWindowSizeType_;
+    pipTemplateInfo.pipControlStatusInfoList = pipControlStatusInfoList_;
+    pipTemplateInfo.pipControlEnableInfoList = pipControlEnableInfoList_;
 }
 } // namespace Rosen
 } // namespace OHOS

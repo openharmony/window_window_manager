@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 #include "screen_session_manager/include/fold_screen_controller/sensor_fold_state_manager/secondary_display_sensor_fold_state_manager.h"
+#include "screen_session_manager/include/fold_screen_controller/secondary_display_fold_policy.h"
 #include "fold_screen_state_internel.h"
 
 using namespace testing;
@@ -52,11 +53,29 @@ void SecondaryDisplaySensorFoldStateManagerTest::TearDown()
 
 namespace {
 /**
- * @tc.name: HandleAngleOrHallChange
+ * @tc.name: HandleAngleOrHallChange01
  * @tc.desc: test function : HandleAngleOrHallChange
  * @tc.type: FUNC
  */
-HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, HandleAngleOrHallChange, Function | SmallTest | Level1)
+HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, HandleAngleOrHallChange01, TestSize.Level1)
+{
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        return;
+    }
+    std::vector<float> angels = {0, 0, 0};
+    std::vector<uint16_t> halls = {0, 0};
+    sptr<FoldScreenPolicy> foldScreenPolicy = nullptr;
+    SecondaryDisplaySensorFoldStateManager manager;
+    manager.HandleAngleOrHallChange(angels, halls, foldScreenPolicy);
+    EXPECT_EQ(manager.GetNextFoldState(angels, halls), FoldStatus::FOLDED);
+}
+
+/**
+ * @tc.name: HandleAngleOrHallChange02
+ * @tc.desc: test angles.size() != 3
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, HandleAngleOrHallChange02, TestSize.Level1)
 {
     if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
         return;
@@ -66,7 +85,52 @@ HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, HandleAngleOrHallChange, Fu
     sptr<FoldScreenPolicy> foldScreenPolicy = nullptr;
     SecondaryDisplaySensorFoldStateManager manager;
     manager.HandleAngleOrHallChange(angels, halls, foldScreenPolicy);
-    EXPECT_TRUE(true);
+    angels = {0, 0, 0};
+    EXPECT_EQ(manager.GetNextFoldState(angels, halls), FoldStatus::FOLDED);
+}
+
+/**
+ * @tc.name: HandleAngleOrHallChange03
+ * @tc.desc: test isSecondaryReflexion
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, HandleAngleOrHallChange03, TestSize.Level1)
+{
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        return;
+    }
+    std::vector<float> angels = {180, 180, 1};
+    std::vector<uint16_t> halls = {1, 1};
+    std::recursive_mutex displayInfoMutex;
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+    sptr<FoldScreenPolicy> foldScreenPolicy = new SecondaryDisplayFoldPolicy(displayInfoMutex,
+        screenPowerTaskScheduler);
+    EXPECT_NE(foldScreenPolicy, nullptr);
+    SecondaryDisplaySensorFoldStateManager manager;
+    manager.HandleAngleOrHallChange(angels, halls, foldScreenPolicy);
+    EXPECT_EQ(manager.GetNextFoldState(angels, halls), FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_EXPAND);
+}
+
+/**
+ * @tc.name: HandleAngleOrHallChange04
+ * @tc.desc: test isHasReflexioned && !isSecondaryReflexion
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, HandleAngleOrHallChange04, TestSize.Level1)
+{
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        return;
+    }
+    std::vector<float> angels = {180, 180, 0};
+    std::vector<uint16_t> halls = {1, 1};
+    std::recursive_mutex displayInfoMutex;
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+    sptr<FoldScreenPolicy> foldScreenPolicy = new SecondaryDisplayFoldPolicy(displayInfoMutex,
+        screenPowerTaskScheduler);
+    EXPECT_NE(foldScreenPolicy, nullptr);
+    SecondaryDisplaySensorFoldStateManager manager;
+    manager.HandleAngleOrHallChange(angels, halls, foldScreenPolicy);
+    EXPECT_EQ(manager.GetNextFoldState(angels, halls), FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_EXPAND);
 }
 
 /**
@@ -75,7 +139,7 @@ HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, HandleAngleOrHallChange, Fu
  * @tc.type: FUNC
  */
 HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, UpdateSwitchScreenBoundaryForLargeFoldDeviceAB,
-        Function | SmallTest | Level1)
+        TestSize.Level1)
 {
     if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
         return;
@@ -99,7 +163,7 @@ HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, UpdateSwitchScreenBoundaryF
  * @tc.type: FUNC
  */
 HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, UpdateSwitchScreenBoundaryForLargeFoldDeviceBC,
-        Function | SmallTest | Level1)
+        TestSize.Level1)
 {
     if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
         return;
@@ -122,7 +186,7 @@ HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, UpdateSwitchScreenBoundaryF
  * @tc.desc: test function : GetNextFoldStateHalf
  * @tc.type: FUNC
  */
-HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, GetNextFoldStateHalf01, Function | SmallTest | Level1)
+HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, GetNextFoldStateHalf01, TestSize.Level1)
 {
     if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
         return;
@@ -171,7 +235,7 @@ HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, GetNextFoldStateHalf01, Fun
  * @tc.desc: test function : GetNextFoldStateHalf
  * @tc.type: FUNC
  */
-HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, GetNextFoldStateHalf02, Function | SmallTest | Level1)
+HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, GetNextFoldStateHalf02, TestSize.Level1)
 {
     if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
         return;
@@ -179,7 +243,7 @@ HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, GetNextFoldStateHalf02, Fun
     SecondaryDisplaySensorFoldStateManager manager;
     int32_t allowUserSensorForLargeFoldDevice = 1;
     FoldStatus state = FoldStatus::UNKNOWN;
-    float angel = 25.0F;
+    float angel = 45.0F;
     uint16_t hall = 1;
     auto result1 = manager.GetNextFoldStateHalf(angel, hall, state, allowUserSensorForLargeFoldDevice);
     EXPECT_EQ(static_cast<int>(result1), 0);
@@ -219,7 +283,7 @@ HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, GetNextFoldStateHalf02, Fun
  * @tc.desc: test function : GetGlobalFoldState
  * @tc.type: FUNC
  */
-HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, GetGlobalFoldState, Function | SmallTest | Level1)
+HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, GetGlobalFoldState, TestSize.Level1)
 {
     if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
         return;

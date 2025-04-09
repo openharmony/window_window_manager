@@ -291,6 +291,7 @@ public:
     void NotifyTouchDialogTarget(int32_t posX = 0, int32_t posY = 0) override;
     void NotifyDestroy();
     void NotifyForeground();
+    void NotifyMainWindowDidForeground(uint32_t reason);
     void NotifyBackground();
     void UpdateZoomTransform(const Transform& trans, bool isDisplayZoomOn);
     void PerformBack() override;
@@ -309,7 +310,7 @@ public:
     virtual Ace::UIContent* GetUIContent() const override;
     virtual Ace::UIContent* GetUIContentWithId(uint32_t winId) const override;
     virtual void OnNewWant(const AAFwk::Want& want) override;
-    virtual void SetRequestedOrientation(Orientation) override;
+    virtual void SetRequestedOrientation(Orientation orientation, bool needAnimation = true) override;
     virtual Orientation GetRequestedOrientation() override;
     virtual void SetNeedRemoveWindowInputChannel(bool needRemoveWindowInputChannel) override;
     virtual WMError SetTouchHotAreas(const std::vector<Rect>& rects) override;
@@ -324,6 +325,7 @@ public:
 
     virtual void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
     virtual std::shared_ptr<Media::PixelMap> Snapshot() override;
+    WMError SnapshotIgnorePrivacy(std::shared_ptr<Media::PixelMap>& pixelMap) override;
     virtual WMError NotifyMemoryLevel(int32_t level) override;
     virtual bool IsAllowHaveSystemSubWindow() override;
     virtual KeyboardAnimationConfig GetKeyboardAnimationConfig() override;
@@ -352,7 +354,7 @@ public:
     static void UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
     void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
     void RegisterWindowInspectorCallback();
-    uint32_t GetApiCompatibleVersion() const override;
+    uint32_t GetApiTargetVersion() const;
 
     /*
      * Keyboard
@@ -389,6 +391,8 @@ private:
 
     void NotifyAfterForeground(bool needNotifyListeners = true, bool needNotifyUiContent = true);
     void NotifyAfterBackground(bool needNotifyListeners = true, bool needNotifyUiContent = true);
+    void NotifyAfterDidForeground(uint32_t reason);
+    void NotifyAfterDidBackground(uint32_t reason);
     void NotifyAfterFocused();
     void NotifyAfterUnfocused(bool needNotifyUiContent = true);
     void NotifyAfterResumed();
@@ -545,6 +549,7 @@ private:
     bool escKeyEventTriggered_ = false;
     bool enableImmersiveMode_ = false;
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
+    std::atomic<float> virtualPixelRatio_ = 1.0f;
 
     std::string restoredRouterStack_; // It was set and get in same thread, which is js thread.
 };

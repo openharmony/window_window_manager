@@ -62,6 +62,8 @@ public:
     MOCK_METHOD6(RecoverAndConnectSpecificSession, void(const sptr<ISessionStage>& sessionStage,
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
         sptr<WindowSessionProperty> property, sptr<ISession>& session, sptr<IRemoteObject> token));
+    MOCK_METHOD2(SetParentWindow, WMError(int32_t subWindowId, int32_t newParentWindowId));
+    MOCK_METHOD3(IsWindowRectAutoSave, WMError(const std::string& key, bool& enabled, int persistentId));
 };
 }
 } // namespace OHOS

@@ -59,7 +59,6 @@ public:
     bool IsFoldable();
     bool IsCaptured();
     FoldStatus GetFoldStatus();
-    std::string GetDisplayCapability();
     FoldDisplayMode GetFoldDisplayMode();
     FoldDisplayMode GetFoldDisplayModeForExternal();
     void SetFoldDisplayMode(const FoldDisplayMode);
@@ -71,6 +70,7 @@ public:
     DMError RegisterDisplayListener(sptr<IDisplayListener> listener);
     DMError UnregisterDisplayListener(sptr<IDisplayListener> listener);
     bool SetDisplayState(DisplayState state, DisplayStateCallback callback);
+    void SetVirtualDisplayMuteFlag(ScreenId screenId, bool muteFlag);
     DMError RegisterDisplayPowerEventListener(sptr<IDisplayPowerEventListener> listener);
     DMError UnregisterDisplayPowerEventListener(sptr<IDisplayPowerEventListener> listener);
     DMError RegisterScreenshotListener(sptr<IScreenshotListener> listener);
@@ -101,6 +101,8 @@ public:
     DMError SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid, std::vector<uint64_t>& windowIdList);
     sptr<Display> GetPrimaryDisplaySync();
     void OnRemoteDied();
+    sptr<CutoutInfo> GetCutoutInfoWithRotation(Rotation rotation);
+    
 private:
     void ClearDisplayStateCallback();
     void ClearFoldStatusCallback();
@@ -1050,16 +1052,6 @@ FoldStatus DisplayManager::GetFoldStatus()
 FoldStatus DisplayManager::Impl::GetFoldStatus()
 {
     return SingletonContainer::Get<DisplayManagerAdapter>().GetFoldStatus();
-}
-
-std::string DisplayManager::GetDisplayCapability()
-{
-    return pImpl_->GetDisplayCapability();
-}
-
-std::string DisplayManager::Impl::GetDisplayCapability()
-{
-    return SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayCapability();
 }
 
 FoldDisplayMode DisplayManager::GetFoldDisplayMode()
@@ -2311,15 +2303,14 @@ bool DisplayManager::Impl::ConvertScreenIdToRsScreenId(ScreenId screenId, Screen
     return res;
 }
 
-void DisplayManager::SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList,
-    std::vector<uint64_t> surfaceIdList)
+void DisplayManager::SetVirtualDisplayMuteFlag(ScreenId screenId, bool muteFlag)
 {
-    SingletonContainer::Get<DisplayManagerAdapter>().SetVirtualScreenBlackList(screenId, windowIdList, surfaceIdList);
+    return pImpl_->SetVirtualDisplayMuteFlag(screenId, muteFlag);
 }
 
-void DisplayManager::DisablePowerOffRenderControl(ScreenId screenId)
+void DisplayManager::Impl::SetVirtualDisplayMuteFlag(ScreenId screenId, bool muteFlag)
 {
-    SingletonContainer::Get<DisplayManagerAdapter>().DisablePowerOffRenderControl(screenId);
+    return SingletonContainer::Get<DisplayManagerAdapter>().SetVirtualDisplayMuteFlag(screenId, muteFlag);
 }
 
 DMError DisplayManager::ProxyForFreeze(std::set<int32_t> pidList, bool isProxy)
@@ -2345,6 +2336,17 @@ DMError DisplayManager::ResetAllFreezeStatus()
 DMError DisplayManager::Impl::ResetAllFreezeStatus()
 {
     return SingletonContainer::Get<DisplayManagerAdapter>().ResetAllFreezeStatus();
+}
+
+void DisplayManager::SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList,
+    std::vector<uint64_t> surfaceIdList)
+{
+    SingletonContainer::Get<DisplayManagerAdapter>().SetVirtualScreenBlackList(screenId, windowIdList, surfaceIdList);
+}
+
+void DisplayManager::DisablePowerOffRenderControl(ScreenId screenId)
+{
+    SingletonContainer::Get<DisplayManagerAdapter>().DisablePowerOffRenderControl(screenId);
 }
 
 DMError DisplayManager::SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid,
@@ -2466,6 +2468,22 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshotWithOption(const C
     }
     std::shared_ptr<Media::PixelMap> dstScreenshot(pixelMap.release());
     return dstScreenshot;
+}
+
+sptr<CutoutInfo> DisplayManager::GetCutoutInfoWithRotation(Rotation rotation)
+{
+    return pImpl_->GetCutoutInfoWithRotation(rotation);
+}
+
+sptr<CutoutInfo> DisplayManager::Impl::GetCutoutInfoWithRotation(Rotation rotation)
+{
+    int32_t rotationNum = static_cast<int32_t>(rotation);
+    auto displayInfo = SingletonContainer::Get<DisplayManagerAdapter>().GetDefaultDisplayInfo();
+    if (displayInfo == nullptr) {
+        return nullptr;
+    }
+    auto displayId = displayInfo->GetDisplayId();
+    return SingletonContainer::Get<DisplayManagerAdapter>().GetCutoutInfoWithRotation(displayId, rotationNum);
 }
 } // namespace OHOS::Rosen
 

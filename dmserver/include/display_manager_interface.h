@@ -49,6 +49,10 @@ public:
         const sptr<IRemoteObject>& displayManagerAgent) = 0;
     virtual DMError DestroyVirtualScreen(ScreenId screenId) = 0;
     virtual DMError SetVirtualScreenSurface(ScreenId screenId, sptr<IBufferProducer> surface) = 0;
+    virtual DMError AddVirtualScreenBlockList(
+        const std::vector<int32_t>& persistentIds) { return DMError::DM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual DMError RemoveVirtualScreenBlockList(
+        const std::vector<int32_t>& persistentIds) { return DMError::DM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual DMError SetScreenPrivacyMaskImage(ScreenId screenId, const std::shared_ptr<Media::PixelMap>& privacyMaskImg)
     {
         return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
@@ -137,6 +141,10 @@ public:
     virtual uint32_t GetScreenBrightness(uint64_t screenId) { return 0; }
     virtual std::vector<DisplayId> GetAllDisplayIds() = 0;
     virtual sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) = 0;
+    virtual sptr<CutoutInfo> GetCutoutInfoWithRotation(DisplayId displayId, int32_t rotation)
+    {
+        return nullptr;
+    }
     virtual void NotifyDisplayEvent(DisplayEvent event) = 0;
     virtual bool SetFreeze(std::vector<DisplayId> displayIds, bool isFreeze) = 0;
     virtual sptr<ScreenInfo> GetScreenInfoById(ScreenId screenId) = 0;
@@ -219,7 +227,10 @@ public:
 
     // unique screen
     virtual DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds,
-        std::vector<DisplayId>& displayIds) { return DMError::DM_OK; }
+        std::vector<DisplayId>& displayIds)
+    {
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 
     virtual VirtualScreenFlag GetVirtualScreenFlag(ScreenId screenId)
     {
@@ -243,15 +254,16 @@ public:
     }
     virtual void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList,
         std::vector<uint64_t> surfaceIdList = {}) {}
+    virtual void SetVirtualDisplayMuteFlag(ScreenId screenId, bool muteFlag) {}
     virtual void DisablePowerOffRenderControl(ScreenId screenId) {}
 
     virtual std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution()
     {
         return std::vector<DisplayPhysicalResolution> {};
     }
-    virtual std::string GetDisplayCapability()
+    virtual DMError GetDisplayCapability(std::string& capabilitInfo)
     {
-        return std::string {};
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
     }
     virtual bool SetVirtualScreenStatus(ScreenId screenId, VirtualScreenStatus screenStatus) { return false; }
     virtual DMError SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid,
@@ -286,6 +298,11 @@ public:
     virtual DMError SetScreenSkipProtectedWindow(const std::vector<ScreenId>& screenIds, bool isEnable)
     {
         return DMError::DM_OK;
+    }
+
+    virtual DMError SetSystemKeyboardStatus(bool isTpKeyboardOn = false)
+    {
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
     }
 };
 } // namespace OHOS::Rosen

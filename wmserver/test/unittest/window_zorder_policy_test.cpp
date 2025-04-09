@@ -50,7 +50,7 @@ namespace {
  * @tc.desc: get wallpaper window zorder
  * @tc.type: FUNC
  */
-HWTEST_F(WindowZorderPolicyTest, GetWindowPriority01, Function | SmallTest | Level2)
+HWTEST_F(WindowZorderPolicyTest, GetWindowPriority01, TestSize.Level1)
 {
     sptr<WindowZorderPolicy> zorderPolicy = new WindowZorderPolicy();
     int32_t zorder = zorderPolicy->GetWindowPriority(WindowType::WINDOW_TYPE_DESKTOP);
@@ -62,7 +62,7 @@ HWTEST_F(WindowZorderPolicyTest, GetWindowPriority01, Function | SmallTest | Lev
  * @tc.desc: get invalid type window zorder
  * @tc.type: FUNC
  */
-HWTEST_F(WindowZorderPolicyTest, GetWindowPriority02, Function | SmallTest | Level2)
+HWTEST_F(WindowZorderPolicyTest, GetWindowPriority02, TestSize.Level1)
 {
     sptr<WindowZorderPolicy> zorderPolicy = new WindowZorderPolicy();
     int32_t zorder = zorderPolicy->GetWindowPriority(static_cast<WindowType>(3000));

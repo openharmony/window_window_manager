@@ -22,6 +22,9 @@
 #include "mission_listener_stub.h"
 #include "singleton_container.h"
 #include "zidl/session_lifecycle_listener_stub.h"
+#include "session/host/include/scene_session.h"
+#include "session/host/include/main_session.h"
+#include "scene_session_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -133,8 +136,10 @@ public:
     ~MySessionLifecycleListener() override = default;
     void OnLifecycleEvent(SessionLifecycleEvent event, const LifecycleEventPayload& payload) override
     {
-        return;
+        event_ = event;
     }
+private:
+    ISessionLifecycleListener::SessionLifecycleEvent event_;
 };
 
 void SessionListenerControllerTest::SetUpTestCase()
@@ -161,7 +166,7 @@ namespace {
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionListenerControllerTest, AddSessionListener, Function | SmallTest | Level2)
+HWTEST_F(SessionListenerControllerTest, AddSessionListener, TestSize.Level1)
 {
     sptr<ISessionListener> listener;
     ASSERT_EQ(listener, nullptr);
@@ -183,7 +188,7 @@ HWTEST_F(SessionListenerControllerTest, AddSessionListener, Function | SmallTest
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionListenerControllerTest, DelSessionListener, Function | SmallTest | Level2)
+HWTEST_F(SessionListenerControllerTest, DelSessionListener, TestSize.Level1)
 {
     sptr<ISessionListener> listener;
     ASSERT_EQ(listener, nullptr);
@@ -202,7 +207,7 @@ HWTEST_F(SessionListenerControllerTest, DelSessionListener, Function | SmallTest
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionListenerControllerTest, NotifySessionCreated, Function | SmallTest | Level2)
+HWTEST_F(SessionListenerControllerTest, NotifySessionCreated, TestSize.Level1)
 {
     int32_t persistentId = -1;
     slController->NotifySessionCreated(persistentId);
@@ -220,7 +225,7 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionCreated, Function | SmallTe
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionListenerControllerTest, NotifySessionDestroyed, Function | SmallTest | Level2)
+HWTEST_F(SessionListenerControllerTest, NotifySessionDestroyed, TestSize.Level1)
 {
     int32_t persistentId = -1;
     slController->NotifySessionDestroyed(persistentId);
@@ -238,7 +243,7 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionDestroyed, Function | Small
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionListenerControllerTest, HandleUnInstallApp1, Function | SmallTest | Level2)
+HWTEST_F(SessionListenerControllerTest, HandleUnInstallApp1, TestSize.Level1)
 {
     std::list<int32_t> sessions;
     slController->HandleUnInstallApp(sessions);
@@ -250,7 +255,7 @@ HWTEST_F(SessionListenerControllerTest, HandleUnInstallApp1, Function | SmallTes
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionListenerControllerTest, HandleUnInstallApp2, Function | SmallTest | Level2)
+HWTEST_F(SessionListenerControllerTest, HandleUnInstallApp2, TestSize.Level1)
 {
     std::list<int32_t> sessions;
     sessions.push_front(1);
@@ -266,7 +271,7 @@ HWTEST_F(SessionListenerControllerTest, HandleUnInstallApp2, Function | SmallTes
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionListenerControllerTest, NotifySessionSnapshotChanged, Function | SmallTest | Level2)
+HWTEST_F(SessionListenerControllerTest, NotifySessionSnapshotChanged, TestSize.Level1)
 {
     int32_t persistentId = -1;
     slController->NotifySessionSnapshotChanged(persistentId);
@@ -281,7 +286,7 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionSnapshotChanged, Function |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionListenerControllerTest, NotifySessionMovedToFront, Function | SmallTest | Level2)
+HWTEST_F(SessionListenerControllerTest, NotifySessionMovedToFront, TestSize.Level1)
 {
     int32_t persistentId = -1;
     slController->NotifySessionMovedToFront(persistentId);
@@ -296,7 +301,7 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionMovedToFront, Function | Sm
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionListenerControllerTest, NotifySessionFocused, Function | SmallTest | Level2)
+HWTEST_F(SessionListenerControllerTest, NotifySessionFocused, TestSize.Level1)
 {
     int32_t persistentId = -1;
     slController->NotifySessionFocused(persistentId);
@@ -311,7 +316,7 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionFocused, Function | SmallTe
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionListenerControllerTest, NotifySessionUnfocused, Function | SmallTest | Level2)
+HWTEST_F(SessionListenerControllerTest, NotifySessionUnfocused, TestSize.Level1)
 {
     int32_t persistentId = -1;
     slController->NotifySessionUnfocused(persistentId);
@@ -326,7 +331,7 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionUnfocused, Function | Small
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionListenerControllerTest, NotifySessionClosed, Function | SmallTest | Level2)
+HWTEST_F(SessionListenerControllerTest, NotifySessionClosed, TestSize.Level1)
 {
     SessionInfo info;
     info.bundleName_ = "bundleName";
@@ -346,7 +351,7 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionClosed, Function | SmallTes
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionListenerControllerTest, NotifySessionLabelUpdated, Function | SmallTest | Level2)
+HWTEST_F(SessionListenerControllerTest, NotifySessionLabelUpdated, TestSize.Level1)
 {
     int32_t persistentId = -1;
     slController->NotifySessionLabelUpdated(persistentId);
@@ -361,7 +366,7 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionLabelUpdated, Function | Sm
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionListenerControllerTest, OnListenerDied, Function | SmallTest | Level2)
+HWTEST_F(SessionListenerControllerTest, OnListenerDied, TestSize.Level1)
 {
     sptr<IRemoteObject> remote;
     if (slController == nullptr) {
@@ -382,7 +387,7 @@ HWTEST_F(SessionListenerControllerTest, OnListenerDied, Function | SmallTest | L
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionListenerControllerTest, NotifySessionIconChanged, Function | SmallTest | Level2)
+HWTEST_F(SessionListenerControllerTest, NotifySessionIconChanged, TestSize.Level1)
 {
 #ifndef SUPPORT_GRAPHICS
 #define SUPPORT_GRAPHICS
@@ -419,7 +424,7 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionIconChanged, Function | Sma
  * @tc.desc: ListenerDeathRecipient class test
  * @tc.type: CLASS
  */
-HWTEST_F(SessionListenerControllerTest, ListenerDeathRecipient, Function | SmallTest | Level2)
+HWTEST_F(SessionListenerControllerTest, ListenerDeathRecipient, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "TaskSchedulerText: task_scheduler_test001 start";
     EXPECT_EQ(nullptr, slController->listenerDeathRecipient_);
@@ -441,7 +446,7 @@ HWTEST_F(SessionListenerControllerTest, ListenerDeathRecipient, Function | Small
  * @tc.desc: Register By Bundle
  * @tc.type: CLASS
  */
-HWTEST_F(SessionListenerControllerTest, RegisterSessionLifecycleListenerByBundles, Function | SmallTest | Level2)
+HWTEST_F(SessionListenerControllerTest, RegisterSessionLifecycleListenerByBundles, TestSize.Level1)
 {
     std::vector<std::string> bundleNameList1 = {"bundle1", "bundle2"};
     WMError res = slController->RegisterSessionLifecycleListener(nullptr, bundleNameList1);
@@ -462,7 +467,7 @@ HWTEST_F(SessionListenerControllerTest, RegisterSessionLifecycleListenerByBundle
  * @tc.desc: Register By Id
  * @tc.type: CLASS
  */
-HWTEST_F(SessionListenerControllerTest, RegisterSessionLifecycleListenerByIds, Function | SmallTest | Level2)
+HWTEST_F(SessionListenerControllerTest, RegisterSessionLifecycleListenerByIds, TestSize.Level1)
 {
     std::vector<int32_t> persistentIdList1 = {1, 2};
     WMError res = slController->RegisterSessionLifecycleListener(nullptr, persistentIdList1);
@@ -471,7 +476,7 @@ HWTEST_F(SessionListenerControllerTest, RegisterSessionLifecycleListenerByIds, F
     sptr<ISessionLifecycleListener> listener = sptr<MySessionLifecycleListener>::MakeSptr();
     ASSERT_NE(listener, nullptr);
     res = slController->RegisterSessionLifecycleListener(listener, persistentIdList1);
-    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
+    ASSERT_EQ(res, WMError::WM_OK);
 
     std::vector<int32_t> persistentIdList2;
     res = slController->RegisterSessionLifecycleListener(listener, persistentIdList2);
@@ -483,7 +488,7 @@ HWTEST_F(SessionListenerControllerTest, RegisterSessionLifecycleListenerByIds, F
  * @tc.desc: UnregisterSessionLifecycleListener
  * @tc.type: CLASS
  */
-HWTEST_F(SessionListenerControllerTest, UnregisterSessionLifecycleListener, Function | SmallTest | Level2)
+HWTEST_F(SessionListenerControllerTest, UnregisterSessionLifecycleListener, TestSize.Level1)
 {
     WMError res = slController->UnregisterSessionLifecycleListener(nullptr);
     ASSERT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
@@ -492,6 +497,64 @@ HWTEST_F(SessionListenerControllerTest, UnregisterSessionLifecycleListener, Func
     ASSERT_NE(listener, nullptr);
     res = slController->UnregisterSessionLifecycleListener(listener);
     ASSERT_EQ(res, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: NotifySessionLifecycleEvent01
+ * @tc.desc: NotifySessionLifecycleEvent01
+ * @tc.type: CLASS
+ */
+HWTEST_F(SessionListenerControllerTest, NotifySessionLifecycleEvent01, Function | SmallTest | Level2)
+{
+    sptr<MySessionLifecycleListener> myListener = new MySessionLifecycleListener();
+    sptr<ISessionLifecycleListener> listener = iface_cast<ISessionLifecycleListener>(myListener->AsObject());
+    ASSERT_NE(listener, nullptr);
+    std::vector<std::string> bundleNameList;
+    slController->RegisterSessionLifecycleListener(listener, bundleNameList);
+
+    SessionInfo info;
+    info.bundleName_ = "com.example.myapp";
+    info.abilityName_ = "MainAbility";
+    info.moduleName_ = "entry";
+    info.persistentId_ = 101;
+    info.appIndex_ = 0;
+
+    slController->NotifySessionLifecycleEvent(ISessionLifecycleListener::SessionLifecycleEvent::CREATED, info);
+    ASSERT_EQ(myListener->event_, ISessionLifecycleListener::SessionLifecycleEvent::CREATED);
+
+    slController->UnregisterSessionLifecycleListener(listener);
+    bundleNameList.emplace_back("com.example.myapp");
+    slController->RegisterSessionLifecycleListener(listener, bundleNameList);
+    slController->NotifySessionLifecycleEvent(ISessionLifecycleListener::SessionLifecycleEvent::BACKGROUND, info);
+    ASSERT_EQ(myListener->event_, ISessionLifecycleListener::SessionLifecycleEvent::BACKGROUND);
+}
+
+/**
+ * @tc.name: NotifySessionLifecycleEvent02
+ * @tc.desc: NotifySessionLifecycleEvent02
+ * @tc.type: CLASS
+ */
+HWTEST_F(SessionListenerControllerTest, NotifySessionLifecycleEvent02, Function | SmallTest | Level2)
+{
+    sptr<MySessionLifecycleListener> myListener = new MySessionLifecycleListener();
+    sptr<ISessionLifecycleListener> listener = iface_cast<ISessionLifecycleListener>(myListener->AsObject());
+    ASSERT_NE(listener, nullptr);
+    std::vector<int32_t> persistentIdList = {102};
+    
+    SessionInfo info;
+    info.bundleName_ = "com.example.myapp";
+    info.abilityName_ = "MainAbility";
+    info.moduleName_ = "entry";
+    info.persistentId_ = 102;
+    info.appIndex_ = 0;
+    sptr<SceneSessionManager> ssm = sptr<SceneSessionManager>::MakeSptr();
+    sptr<SceneSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ssm->sceneSessionMap_.insert({102, sceneSession});
+    
+    slController->RegisterSessionLifecycleListener(listener, persistentIdList);
+    slController->NotifySessionLifecycleEvent(ISessionLifecycleListener::SessionLifecycleEvent::CREATED, info);
+    ASSERT_EQ(myListener->event_, ISessionLifecycleListener::SessionLifecycleEvent::CREATED);
 }
 } // namespace
 } // namespace Rosen

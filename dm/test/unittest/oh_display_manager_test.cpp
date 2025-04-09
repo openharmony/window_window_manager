@@ -67,7 +67,7 @@ namespace {
  * @tc.desc: displayId == nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayId01, Function | SmallTest | Level2)
+HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayId01, TestSize.Level1)
 {
     uint64_t *displayId = nullptr;
     NativeDisplayManager_ErrorCode ret = OH_NativeDisplayManager_GetDefaultDisplayId(displayId);
@@ -79,7 +79,7 @@ HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayId01, Fu
  * @tc.desc: displayId != nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayId02, Function | SmallTest | Level2)
+HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayId02, TestSize.Level1)
 {
     uint64_t testParm = 4000;
     NativeDisplayManager_ErrorCode ret = OH_NativeDisplayManager_GetDefaultDisplayId(&testParm);
@@ -91,7 +91,7 @@ HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayId02, Fu
  * @tc.desc: displayWidth == nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayWidth01, Function | SmallTest | Level2)
+HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayWidth01, TestSize.Level1)
 {
     int32_t *displayWidth = nullptr;
     NativeDisplayManager_ErrorCode ret = OH_NativeDisplayManager_GetDefaultDisplayWidth(displayWidth);
@@ -103,7 +103,7 @@ HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayWidth01,
  * @tc.desc: displayWidth != nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayWidth02, Function | SmallTest | Level2)
+HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayWidth02, TestSize.Level1)
 {
     int32_t testWidth = 200;
     NativeDisplayManager_ErrorCode ret = OH_NativeDisplayManager_GetDefaultDisplayWidth(&testWidth);
@@ -115,7 +115,7 @@ HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayWidth02,
  * @tc.desc: displayHeight == nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayHeight01, Function | SmallTest | Level2)
+HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayHeight01, TestSize.Level1)
 {
     int32_t *displayHeight = nullptr;
     NativeDisplayManager_ErrorCode ret = OH_NativeDisplayManager_GetDefaultDisplayHeight(displayHeight);
@@ -127,7 +127,7 @@ HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayHeight01
  * @tc.desc: displayHeight != nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayHeight02, Function | SmallTest | Level2)
+HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayHeight02, TestSize.Level1)
 {
     int32_t testHeight = 200;
     NativeDisplayManager_ErrorCode ret = OH_NativeDisplayManager_GetDefaultDisplayHeight(&testHeight);
@@ -139,7 +139,7 @@ HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayHeight02
  * @tc.desc: displayRotation == nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayRotation01, Function | SmallTest | Level2)
+HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayRotation01, TestSize.Level1)
 {
     NativeDisplayManager_Rotation *displayRotation = nullptr;
     NativeDisplayManager_ErrorCode ret = OH_NativeDisplayManager_GetDefaultDisplayRotation(displayRotation);
@@ -151,7 +151,7 @@ HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayRotation
  * @tc.desc: displayRotation != nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayRotation02, Function | SmallTest | Level2)
+HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayRotation02, TestSize.Level1)
 {
     NativeDisplayManager_Rotation testRotation = NativeDisplayManager_Rotation::DISPLAY_MANAGER_ROTATION_180;
     NativeDisplayManager_ErrorCode ret = OH_NativeDisplayManager_GetDefaultDisplayRotation(&testRotation);
@@ -163,7 +163,7 @@ HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayRotation
  * @tc.desc: displayOrientation == nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayOrientation01, Function | SmallTest | Level2)
+HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayOrientation01, TestSize.Level1)
 {
     NativeDisplayManager_Orientation *displayOrientation = nullptr;
     NativeDisplayManager_ErrorCode ret = OH_NativeDisplayManager_GetDefaultDisplayOrientation(displayOrientation);
@@ -175,7 +175,7 @@ HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayOrientat
  * @tc.desc: displayOrientation != nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayOrientation02, Function | SmallTest | Level2)
+HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayOrientation02, TestSize.Level1)
 {
     NativeDisplayManager_Orientation testOrientation = NativeDisplayManager_Orientation::DISPLAY_MANAGER_LANDSCAPE;
     NativeDisplayManager_ErrorCode ret = OH_NativeDisplayManager_GetDefaultDisplayOrientation(&testOrientation);
@@ -188,7 +188,7 @@ HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayOrientat
  * @tc.type: FUNC
  */
 HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayVirtualPixelRatio01,
-    Function | SmallTest | Level2)
+    TestSize.Level1)
 {
     float *virtualPixel = nullptr;
     NativeDisplayManager_ErrorCode ret = OH_NativeDisplayManager_GetDefaultDisplayVirtualPixelRatio(virtualPixel);
@@ -201,7 +201,7 @@ HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayVirtualP
  * @tc.type: FUNC
  */
 HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayVirtualPixelRatio02,
-    Function | SmallTest | Level2)
+    TestSize.Level1)
 {
     float testPixel = 3.14;
     NativeDisplayManager_ErrorCode ret = OH_NativeDisplayManager_GetDefaultDisplayVirtualPixelRatio(&testPixel);
@@ -213,7 +213,7 @@ HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayVirtualP
  * @tc.desc: refreshRate == nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayRefreshRate01, Function | SmallTest | Level2)
+HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayRefreshRate01, TestSize.Level1)
 {
     uint32_t *refreshRate = nullptr;
     NativeDisplayManager_ErrorCode ret = OH_NativeDisplayManager_GetDefaultDisplayRefreshRate(refreshRate);
@@ -225,7 +225,7 @@ HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayRefreshR
  * @tc.desc: refreshRate != nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayRefreshRate02, Function | SmallTest | Level2)
+HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayRefreshRate02, TestSize.Level1)
 {
     uint32_t testRate = 60;
     NativeDisplayManager_ErrorCode ret = OH_NativeDisplayManager_GetDefaultDisplayRefreshRate(&testRate);
@@ -237,7 +237,7 @@ HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayRefreshR
  * @tc.desc: densityDpi == nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayDensityDpi01, Function | SmallTest | Level2)
+HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayDensityDpi01, TestSize.Level1)
 {
     int32_t *densityDpi = nullptr;
     NativeDisplayManager_ErrorCode ret = OH_NativeDisplayManager_GetDefaultDisplayDensityDpi(densityDpi);
@@ -249,7 +249,7 @@ HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayDensityD
  * @tc.desc: densityDpi != nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayDensityDpi02, Function | SmallTest | Level2)
+HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayDensityDpi02, TestSize.Level1)
 {
     int32_t testDpi = 160;
     NativeDisplayManager_ErrorCode ret = OH_NativeDisplayManager_GetDefaultDisplayDensityDpi(&testDpi);
@@ -261,7 +261,7 @@ HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayDensityD
  * @tc.desc: densityPixels == nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayDensityPixels01, Function | SmallTest | Level2)
+HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayDensityPixels01, TestSize.Level1)
 {
     float *densityPixels = nullptr;
     NativeDisplayManager_ErrorCode ret = OH_NativeDisplayManager_GetDefaultDisplayDensityPixels(densityPixels);
@@ -273,7 +273,7 @@ HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayDensityP
  * @tc.desc: densityPixels != nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayDensityPixels02, Function | SmallTest | Level2)
+HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayDensityPixels02, TestSize.Level1)
 {
     float testPixels = 1.0;
     NativeDisplayManager_ErrorCode ret = OH_NativeDisplayManager_GetDefaultDisplayDensityPixels(&testPixels);
@@ -285,7 +285,7 @@ HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayDensityP
  * @tc.desc: scaledDensity == nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayScaledDensity01, Function | SmallTest | Level2)
+HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayScaledDensity01, TestSize.Level1)
 {
     float *scaledDensity = nullptr;
     NativeDisplayManager_ErrorCode ret = OH_NativeDisplayManager_GetDefaultDisplayScaledDensity(scaledDensity);
@@ -297,7 +297,7 @@ HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayScaledDe
  * @tc.desc: scaledDensity != nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayScaledDensity02, Function | SmallTest | Level2)
+HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayScaledDensity02, TestSize.Level1)
 {
     float testDensity = 1.0;
     NativeDisplayManager_ErrorCode ret = OH_NativeDisplayManager_GetDefaultDisplayScaledDensity(&testDensity);
@@ -309,7 +309,7 @@ HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayScaledDe
  * @tc.desc: xDpi == nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayDensityXdpi01, Function | SmallTest | Level2)
+HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayDensityXdpi01, TestSize.Level1)
 {
     float *xDpi = nullptr;
     NativeDisplayManager_ErrorCode ret = OH_NativeDisplayManager_GetDefaultDisplayDensityXdpi(xDpi);
@@ -321,7 +321,7 @@ HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayDensityX
  * @tc.desc: xDpi != nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayDensityXdpi02, Function | SmallTest | Level2)
+HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayDensityXdpi02, TestSize.Level1)
 {
     float testXDpi = 2.0;
     NativeDisplayManager_ErrorCode ret = OH_NativeDisplayManager_GetDefaultDisplayDensityXdpi(&testXDpi);
@@ -333,7 +333,7 @@ HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayDensityX
  * @tc.desc: yDpi == nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayDensityYdpi01, Function | SmallTest | Level2)
+HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayDensityYdpi01, TestSize.Level1)
 {
     float *yDpi = nullptr;
     NativeDisplayManager_ErrorCode ret = OH_NativeDisplayManager_GetDefaultDisplayDensityYdpi(yDpi);
@@ -345,7 +345,7 @@ HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayDensityY
  * @tc.desc: yDpi != nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayDensityYdpi02, Function | SmallTest | Level2)
+HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayDensityYdpi02, TestSize.Level1)
 {
     float testYDpi = 2.0;
     NativeDisplayManager_ErrorCode ret = OH_NativeDisplayManager_GetDefaultDisplayDensityYdpi(&testYDpi);
@@ -357,7 +357,7 @@ HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayDensityY
  * @tc.desc: foldDisplayMode == nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetFoldDisplayMode01, Function | SmallTest | Level2)
+HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetFoldDisplayMode01, TestSize.Level1)
 {
     NativeDisplayManager_FoldDisplayMode *foldDisplayMode = nullptr;
     NativeDisplayManager_ErrorCode ret = OH_NativeDisplayManager_GetFoldDisplayMode(foldDisplayMode);
@@ -369,7 +369,7 @@ HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetFoldDisplayMode01, Fun
  * @tc.desc: foldDisplayMode != nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetFoldDisplayMode02, Function | SmallTest | Level2)
+HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetFoldDisplayMode02, TestSize.Level1)
 {
     NativeDisplayManager_FoldDisplayMode testDisplayMode =
         NativeDisplayManager_FoldDisplayMode::DISPLAY_MANAGER_FOLD_DISPLAY_MODE_MAIN;
@@ -386,7 +386,7 @@ HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetFoldDisplayMode02, Fun
  * @tc.desc: register and unregister
  * @tc.type: FUNC
  */
-HWTEST_F(OHDisplayManagerTest, FoldDisplayModeChangeListener, Function | SmallTest | Level2)
+HWTEST_F(OHDisplayManagerTest, FoldDisplayModeChangeListener, TestSize.Level1)
 {
     uint32_t testIndex;
     NativeDisplayManager_ErrorCode ret = OH_NativeDisplayManager_RegisterFoldDisplayModeChangeListener(
@@ -406,7 +406,7 @@ HWTEST_F(OHDisplayManagerTest, FoldDisplayModeChangeListener, Function | SmallTe
  * @tc.desc: register and unregister
  * @tc.type: FUNC
  */
-HWTEST_F(OHDisplayManagerTest, DisplayChangeListener, Function | SmallTest | Level2)
+HWTEST_F(OHDisplayManagerTest, DisplayChangeListener, TestSize.Level1)
 {
     uint32_t testIndex;
     NativeDisplayManager_ErrorCode ret = OH_NativeDisplayManager_RegisterDisplayChangeListener(
@@ -421,7 +421,7 @@ HWTEST_F(OHDisplayManagerTest, DisplayChangeListener, Function | SmallTest | Lev
  * @tc.desc: create and destroy
  * @tc.type: FUNC
  */
-HWTEST_F(OHDisplayManagerTest, CreateAndDestroyAllDisplays, Function | SmallTest | Level2)
+HWTEST_F(OHDisplayManagerTest, CreateAndDestroyAllDisplays, TestSize.Level1)
 {
     NativeDisplayManager_DisplaysInfo *displayInfo = nullptr;
     NativeDisplayManager_ErrorCode ret = OH_NativeDisplayManager_CreateAllDisplays(&displayInfo);
@@ -436,7 +436,7 @@ HWTEST_F(OHDisplayManagerTest, CreateAndDestroyAllDisplays, Function | SmallTest
  * @tc.desc: CreateAndDestroyDisplayById
  * @tc.type: FUNC
  */
-HWTEST_F(OHDisplayManagerTest, CreateAndDestroyDisplayById, Function | SmallTest | Level2)
+HWTEST_F(OHDisplayManagerTest, CreateAndDestroyDisplayById, TestSize.Level1)
 {
     uint32_t testDisplayId = 0;
     NativeDisplayManager_DisplayInfo *testPtr = nullptr;
@@ -451,7 +451,7 @@ HWTEST_F(OHDisplayManagerTest, CreateAndDestroyDisplayById, Function | SmallTest
  * @tc.desc: CreatePrimaryDisplay
  * @tc.type: FUNC
  */
-HWTEST_F(OHDisplayManagerTest, CreatePrimaryDisplay, Function | SmallTest | Level2)
+HWTEST_F(OHDisplayManagerTest, CreatePrimaryDisplay, TestSize.Level1)
 {
     NativeDisplayManager_DisplayInfo *testPtr = nullptr;
     NativeDisplayManager_ErrorCode ret = OH_NativeDisplayManager_CreatePrimaryDisplay(&testPtr);
@@ -463,7 +463,7 @@ HWTEST_F(OHDisplayManagerTest, CreatePrimaryDisplay, Function | SmallTest | Leve
  * @tc.desc: CaptureScreenPixelmap
  * @tc.type: FUNC
  */
-HWTEST_F(OHDisplayManagerTest, CaptureScreenPixelmap, Function | SmallTest | Level2)
+HWTEST_F(OHDisplayManagerTest, CaptureScreenPixelmap, TestSize.Level1)
 {
     uint32_t testDisplayId = 1001;
     OH_PixelmapNative *pixelMap = nullptr;

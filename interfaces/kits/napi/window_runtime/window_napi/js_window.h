@@ -83,6 +83,8 @@ public:
     static napi_value SetWindowFocusable(napi_env env, napi_callback_info info);
     static napi_value SetTopmost(napi_env env, napi_callback_info info);
     static napi_value SetWindowTopmost(napi_env env, napi_callback_info info);
+    static napi_value SetSubWindowZLevel(napi_env env, napi_callback_info info);
+    static napi_value GetSubWindowZLevel(napi_env env, napi_callback_info info);
     static napi_value SetWindowDelayRaiseOnDrag(napi_env env, napi_callback_info info);
     static napi_value SetKeepScreenOn(napi_env env, napi_callback_info info);
     static napi_value SetWindowKeepScreenOn(napi_env env, napi_callback_info info);
@@ -131,6 +133,7 @@ public:
     static napi_value Dump(napi_env env, napi_callback_info info);
     static napi_value SetForbidSplitMove(napi_env env, napi_callback_info info);
     static napi_value Snapshot(napi_env env, napi_callback_info info);
+    static napi_value SnapshotIgnorePrivacy(napi_env env, napi_callback_info info);
 
     // animation config
     static napi_value Opacity(napi_env env, napi_callback_info info);
@@ -159,6 +162,8 @@ public:
      */
     static napi_value CreateSubWindowWithOptions(napi_env env, napi_callback_info info);
     static napi_value SetSubWindowModal(napi_env env, napi_callback_info info);
+    static napi_value SetParentWindow(napi_env env, napi_callback_info info);
+    static napi_value GetParentWindow(napi_env env, napi_callback_info info);
 
     /*
      * Gesture Back
@@ -171,6 +176,7 @@ public:
      */
     static napi_value GetWindowStatus(napi_env env, napi_callback_info info);
     static napi_value SetWindowMask(napi_env env, napi_callback_info info);
+    static napi_value SetFollowParentMultiScreenPolicy(napi_env env, napi_callback_info info);
 
     /*
      * Window Decor
@@ -291,6 +297,8 @@ private:
     napi_value OnSetWindowFocusable(napi_env env, napi_callback_info info);
     napi_value OnSetTopmost(napi_env env, napi_callback_info info);
     napi_value OnSetWindowTopmost(napi_env env, napi_callback_info info);
+    napi_value OnSetSubWindowZLevel(napi_env env, napi_callback_info info);
+    napi_value OnGetSubWindowZLevel(napi_env env, napi_callback_info info);
     napi_value OnSetWindowDelayRaiseOnDrag(napi_env env, napi_callback_info info);
     napi_value OnSetKeepScreenOn(napi_env env, napi_callback_info info);
     napi_value OnSetWindowKeepScreenOn(napi_env env, napi_callback_info info);
@@ -309,6 +317,7 @@ private:
     napi_value OnDump(napi_env env, napi_callback_info info);
     napi_value OnSetForbidSplitMove(napi_env env, napi_callback_info info);
     napi_value OnSnapshot(napi_env env, napi_callback_info info);
+    napi_value OnSnapshotIgnorePrivacy(napi_env env, napi_callback_info info);
     napi_value OnSetSnapshotSkip(napi_env env, napi_callback_info info);
     napi_value OnSetSingleFrameComposerEnabled(napi_env env, napi_callback_info info);
     napi_value OnEnableLandscapeMultiWindow(napi_env env, napi_callback_info info);
@@ -345,6 +354,8 @@ private:
      */
     napi_value OnCreateSubWindowWithOptions(napi_env env, napi_callback_info info);
     napi_value OnSetSubWindowModal(napi_env env, napi_callback_info info);
+    napi_value OnSetParentWindow(napi_env env, napi_callback_info info);
+    napi_value OnGetParentWindow(napi_env env, napi_callback_info info);
 
     /*
      * Gesture Back
@@ -357,6 +368,7 @@ private:
      */
     napi_value OnSetWindowMask(napi_env env, napi_callback_info info);
     napi_value OnGetWindowStatus(napi_env env, napi_callback_info info);
+    napi_value OnSetFollowParentMultiScreenPolicy(napi_env env, napi_callback_info info);
 
     /*
      * Window Decor

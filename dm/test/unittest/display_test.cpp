@@ -67,7 +67,7 @@ namespace {
  * @tc.type: FUNC
  * @tc.require: issueI5K0JP
  */
-HWTEST_F(DisplayTest, GetCutoutInfo01, Function | SmallTest | Level1)
+HWTEST_F(DisplayTest, GetCutoutInfo01, TestSize.Level1)
 {
     auto cutoutInfo = defaultDisplay_->GetCutoutInfo();
     ASSERT_NE(nullptr, cutoutInfo);
@@ -79,7 +79,7 @@ HWTEST_F(DisplayTest, GetCutoutInfo01, Function | SmallTest | Level1)
  * @tc.type: FUNC
  * @tc.require: issueI5K0JP
  */
-HWTEST_F(DisplayTest, UpdateDisplayInfo01, Function | SmallTest | Level1)
+HWTEST_F(DisplayTest, UpdateDisplayInfo01, TestSize.Level1)
 {
     auto baseInfo = defaultDisplay_->GetDisplayInfo();
     auto defaultName = baseInfo->GetName();
@@ -96,7 +96,7 @@ HWTEST_F(DisplayTest, UpdateDisplayInfo01, Function | SmallTest | Level1)
  * @tc.type: FUNC
  * @tc.require: issueI5P8CI
  */
-HWTEST_F(DisplayTest, SetWaterfallCompression01, Function | SmallTest | Level1)
+HWTEST_F(DisplayTest, SetWaterfallCompression01, TestSize.Level1)
 {
     bool isWaterfallDisplayOrigin = DisplayCutoutController::IsWaterfallDisplay();
     DisplayCutoutController::SetIsWaterfallDisplay(true);
@@ -123,7 +123,7 @@ HWTEST_F(DisplayTest, SetWaterfallCompression01, Function | SmallTest | Level1)
  * @tc.type: FUNC
  * @tc.require: issueI5P8CI
  */
-HWTEST_F(DisplayTest, SetWaterfallCompression02, Function | SmallTest | Level1)
+HWTEST_F(DisplayTest, SetWaterfallCompression02, TestSize.Level1)
 {
     bool isWaterfallDisplayOrigin = DisplayCutoutController::IsWaterfallDisplay();
     DisplayCutoutController::SetIsWaterfallDisplay(true);
@@ -160,7 +160,7 @@ HWTEST_F(DisplayTest, SetWaterfallCompression02, Function | SmallTest | Level1)
  * @tc.desc: GetName function cover
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayTest, GetName01, Function | SmallTest | Level1)
+HWTEST_F(DisplayTest, GetName01, TestSize.Level1)
 {
     auto name = defaultDisplay_->GetName();
     ASSERT_FALSE(name.empty());
@@ -171,7 +171,7 @@ HWTEST_F(DisplayTest, GetName01, Function | SmallTest | Level1)
  * @tc.desc: GetDpi function cover
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayTest, GetDpi01, Function | SmallTest | Level1)
+HWTEST_F(DisplayTest, GetDpi01, TestSize.Level1)
 {
     auto dpi = defaultDisplay_->GetDpi();
 
@@ -184,7 +184,7 @@ HWTEST_F(DisplayTest, GetDpi01, Function | SmallTest | Level1)
  * @tc.desc: test HasImmersiveWindow
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayTest, HasImmersiveWindow, Function | SmallTest | Level1)
+HWTEST_F(DisplayTest, HasImmersiveWindow, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), HasImmersiveWindow(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
@@ -198,7 +198,7 @@ HWTEST_F(DisplayTest, HasImmersiveWindow, Function | SmallTest | Level1)
  * @tc.desc: test GetPhysicalWidth
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayTest, GetPhysicalWidth, Function | SmallTest | Level1)
+HWTEST_F(DisplayTest, GetPhysicalWidth, TestSize.Level1)
 {
     auto physicalwidth = defaultDisplay_->GetPhysicalWidth();
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
@@ -213,7 +213,7 @@ HWTEST_F(DisplayTest, GetPhysicalWidth, Function | SmallTest | Level1)
  * @tc.desc: test GetPhysicalHeight
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayTest, GetPhysicalHeight, Function | SmallTest | Level1)
+HWTEST_F(DisplayTest, GetPhysicalHeight, TestSize.Level1)
 {
     auto physicalheight = defaultDisplay_->GetPhysicalHeight();
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
@@ -228,7 +228,7 @@ HWTEST_F(DisplayTest, GetPhysicalHeight, Function | SmallTest | Level1)
  * @tc.desc: test GetAvailableArea
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayTest, GetAvailableArea, Function | SmallTest | Level1)
+HWTEST_F(DisplayTest, GetAvailableArea, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), GetAvailableArea(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
@@ -242,7 +242,7 @@ HWTEST_F(DisplayTest, GetAvailableArea, Function | SmallTest | Level1)
  * @tc.desc: test GetSupportedHDRFormats
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayTest, GetSupportedHDRFormats, Function | SmallTest | Level1)
+HWTEST_F(DisplayTest, GetSupportedHDRFormats, TestSize.Level1)
 {
     std::unique_ptr<ScreenMocker> m = std::make_unique<ScreenMocker>();
     EXPECT_CALL(m->Mock(), GetSupportedHDRFormats(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
@@ -256,7 +256,7 @@ HWTEST_F(DisplayTest, GetSupportedHDRFormats, Function | SmallTest | Level1)
  * @tc.desc: test GetSupportedColorSpaces
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayTest, GetSupportedColorSpaces, Function | SmallTest | Level1)
+HWTEST_F(DisplayTest, GetSupportedColorSpaces, TestSize.Level1)
 {
     std::unique_ptr<ScreenMocker> m = std::make_unique<ScreenMocker>();
     EXPECT_CALL(m->Mock(), GetSupportedColorSpaces(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));

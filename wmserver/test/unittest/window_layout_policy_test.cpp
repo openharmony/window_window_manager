@@ -160,7 +160,7 @@ namespace {
  * @tc.type: FUNC
  * @tc.require issueI5LYDC
  */
-HWTEST_F(WindowLayoutPolicyTest, CalcEntireWindowHotZone, Function | SmallTest | Level2)
+HWTEST_F(WindowLayoutPolicyTest, CalcEntireWindowHotZone, TestSize.Level1)
 {
     TransformHelper::Vector2 hotZoneScale = {1.f, 1.f}; // ratio 1.0
     sptr<WindowProperty> property = new WindowProperty();
@@ -194,7 +194,7 @@ HWTEST_F(WindowLayoutPolicyTest, CalcEntireWindowHotZone, Function | SmallTest |
  * @tc.desc: UpdateFloatingWindowSizeForStretchableWindow test for drag width
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutPolicyTest, UpdateFloatingWindowSizeForStretchableWindow01, Function | SmallTest | Level2)
+HWTEST_F(WindowLayoutPolicyTest, UpdateFloatingWindowSizeForStretchableWindow01, TestSize.Level1)
 {
     windowInfo_.winRect_ = { 50, 50, 100, 150 };  // rect: 50, 50, 100, 150
     windowInfo_.dragType_ = DragType::DRAG_LEFT_OR_RIGHT;
@@ -211,7 +211,7 @@ HWTEST_F(WindowLayoutPolicyTest, UpdateFloatingWindowSizeForStretchableWindow01,
  * @tc.desc: UpdateFloatingWindowSizeForStretchableWindow test for drag coner
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutPolicyTest, UpdateFloatingWindowSizeForStretchableWindow02, Function | SmallTest | Level2)
+HWTEST_F(WindowLayoutPolicyTest, UpdateFloatingWindowSizeForStretchableWindow02, TestSize.Level1)
 {
     windowInfo_.winRect_ = { 50, 50, 100, 150 }; // rect: 50, 50, 100, 150
     windowInfo_.dragType_ = DragType::DRAG_LEFT_TOP_CORNER;
@@ -228,7 +228,7 @@ HWTEST_F(WindowLayoutPolicyTest, UpdateFloatingWindowSizeForStretchableWindow02,
  * @tc.desc: UpdateFloatingWindowSizeForStretchableWindow test for drag height
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutPolicyTest, UpdateFloatingWindowSizeForStretchableWindow03, Function | SmallTest | Level2)
+HWTEST_F(WindowLayoutPolicyTest, UpdateFloatingWindowSizeForStretchableWindow03, TestSize.Level1)
 {
     windowInfo_.winRect_ = { 50, 50, 100, 150 }; // rect: 50, 50, 100, 150
     windowInfo_.dragType_ = DragType::DRAG_BOTTOM_OR_TOP;
@@ -245,7 +245,7 @@ HWTEST_F(WindowLayoutPolicyTest, UpdateFloatingWindowSizeForStretchableWindow03,
  * @tc.desc: test LimitWindowToBottomRightCorner01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutPolicyTest, LimitWindowToBottomRightCorner01, Function | SmallTest | Level2)
+HWTEST_F(WindowLayoutPolicyTest, LimitWindowToBottomRightCorner01, TestSize.Level1)
 {
     auto displayRect = displayGroupInfo_.GetDisplayRect(defaultDisplayInfo_->GetDisplayId());
     ASSERT_FALSE(WindowHelper::IsEmptyRect(displayRect));
@@ -274,7 +274,7 @@ HWTEST_F(WindowLayoutPolicyTest, LimitWindowToBottomRightCorner01, Function | Sm
  * @tc.desc: test LimitWindowToBottomRightCorner02
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutPolicyTest, LimitWindowToBottomRightCorner02, Function | SmallTest | Level2)
+HWTEST_F(WindowLayoutPolicyTest, LimitWindowToBottomRightCorner02, TestSize.Level1)
 {
     auto displayRect = displayGroupInfo_.GetDisplayRect(defaultDisplayInfo_->GetDisplayId());
     ASSERT_FALSE(WindowHelper::IsEmptyRect(displayRect));
@@ -304,7 +304,7 @@ HWTEST_F(WindowLayoutPolicyTest, LimitWindowToBottomRightCorner02, Function | Sm
  * @tc.desc: test LimitWindowToBottomRightCorner03, test childNode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutPolicyTest, LimitWindowToBottomRightCorner03, Function | SmallTest | Level2)
+HWTEST_F(WindowLayoutPolicyTest, LimitWindowToBottomRightCorner03, TestSize.Level1)
 {
     auto displayRect = displayGroupInfo_.GetDisplayRect(defaultDisplayInfo_->GetDisplayId());
     ASSERT_FALSE(WindowHelper::IsEmptyRect(displayRect));
@@ -327,7 +327,7 @@ HWTEST_F(WindowLayoutPolicyTest, LimitWindowToBottomRightCorner03, Function | Sm
  * @tc.desc: test UpdateDisplayGroupRect
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutPolicyTest, UpdateDisplayGroupRect, Function | SmallTest | Level2)
+HWTEST_F(WindowLayoutPolicyTest, UpdateDisplayGroupRect, TestSize.Level1)
 {
     auto displayRect = displayGroupInfo_.GetDisplayRect(defaultDisplayInfo_->GetDisplayId());
     ASSERT_FALSE(WindowHelper::IsEmptyRect(displayRect));
@@ -352,7 +352,7 @@ HWTEST_F(WindowLayoutPolicyTest, UpdateDisplayGroupRect, Function | SmallTest | 
  * @tc.desc: test UpdateDisplayGroupLimitRect
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutPolicyTest, UpdateDisplayGroupLimitRect, Function | SmallTest | Level2)
+HWTEST_F(WindowLayoutPolicyTest, UpdateDisplayGroupLimitRect, TestSize.Level1)
 {
     auto displayRect = displayGroupInfo_.GetDisplayRect(defaultDisplayInfo_->GetDisplayId());
     ASSERT_FALSE(WindowHelper::IsEmptyRect(displayRect));
@@ -378,7 +378,7 @@ HWTEST_F(WindowLayoutPolicyTest, UpdateDisplayGroupLimitRect, Function | SmallTe
  * @tc.desc: test UpdateRectInDisplayGroup, test childNode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutPolicyTest, UpdateRectInDisplayGroup, Function | SmallTest | Level2)
+HWTEST_F(WindowLayoutPolicyTest, UpdateRectInDisplayGroup, TestSize.Level1)
 {
     auto displayRect = displayGroupInfo_.GetDisplayRect(defaultDisplayInfo_->GetDisplayId());
     ASSERT_FALSE(WindowHelper::IsEmptyRect(displayRect));
@@ -411,7 +411,7 @@ HWTEST_F(WindowLayoutPolicyTest, UpdateRectInDisplayGroup, Function | SmallTest 
  * @tc.desc: test UpdateMultiDisplayFlag
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutPolicyTest, UpdateMultiDisplayFlag, Function | SmallTest | Level2)
+HWTEST_F(WindowLayoutPolicyTest, UpdateMultiDisplayFlag, TestSize.Level1)
 {
     layoutPolicy_->UpdateMultiDisplayFlag();
 
@@ -434,7 +434,7 @@ HWTEST_F(WindowLayoutPolicyTest, UpdateMultiDisplayFlag, Function | SmallTest | 
  * @tc.desc: test UpdateRectInDisplayGroupForAllNodes01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutPolicyTest, UpdateRectInDisplayGroupForAllNodes01, Function | SmallTest | Level2)
+HWTEST_F(WindowLayoutPolicyTest, UpdateRectInDisplayGroupForAllNodes01, TestSize.Level1)
 {
     auto displayRect = displayGroupInfo_.GetDisplayRect(defaultDisplayInfo_->GetDisplayId());
     ASSERT_FALSE(WindowHelper::IsEmptyRect(displayRect));
@@ -469,7 +469,7 @@ HWTEST_F(WindowLayoutPolicyTest, UpdateRectInDisplayGroupForAllNodes01, Function
  * @tc.desc: test UpdateRectInDisplayGroupForAllNodes
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutPolicyTest, UpdateRectInDisplayGroupForAllNodes02, Function | SmallTest | Level2)
+HWTEST_F(WindowLayoutPolicyTest, UpdateRectInDisplayGroupForAllNodes02, TestSize.Level1)
 {
     auto displayRect = displayGroupInfo_.GetDisplayRect(defaultDisplayInfo_->GetDisplayId());
     ASSERT_FALSE(WindowHelper::IsEmptyRect(displayRect));
@@ -507,7 +507,7 @@ HWTEST_F(WindowLayoutPolicyTest, UpdateRectInDisplayGroupForAllNodes02, Function
  * @tc.desc: test UpdateDisplayRectAndDisplayGroupInfo
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutPolicyTest, UpdateDisplayRectAndDisplayGroupInfo, Function | SmallTest | Level2)
+HWTEST_F(WindowLayoutPolicyTest, UpdateDisplayRectAndDisplayGroupInfo, TestSize.Level1)
 {
     auto baseSize = displayGroupInfo_.displayInfosMap_.size();
     ASSERT_EQ(baseSize, 1);
@@ -540,7 +540,7 @@ HWTEST_F(WindowLayoutPolicyTest, UpdateDisplayRectAndDisplayGroupInfo, Function 
  * @tc.desc: test ProcessDisplayCreate
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutPolicyTest, ProcessDisplayCreate, Function | SmallTest | Level2)
+HWTEST_F(WindowLayoutPolicyTest, ProcessDisplayCreate, TestSize.Level1)
 {
     std::map<DisplayId, Rect> newDisplayRectMap = {};
     layoutPolicy_->ProcessDisplayCreate(0, newDisplayRectMap);
@@ -568,7 +568,7 @@ HWTEST_F(WindowLayoutPolicyTest, ProcessDisplayCreate, Function | SmallTest | Le
  * @tc.desc: test ProcessDisplayDestroy
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutPolicyTest, ProcessDisplayDestroy, Function | SmallTest | Level2)
+HWTEST_F(WindowLayoutPolicyTest, ProcessDisplayDestroy, TestSize.Level1)
 {
     std::map<DisplayId, Rect> newDisplayRectMap = {};
     layoutPolicy_->ProcessDisplayDestroy(0, newDisplayRectMap);
@@ -584,7 +584,7 @@ HWTEST_F(WindowLayoutPolicyTest, ProcessDisplayDestroy, Function | SmallTest | L
  * @tc.desc: test ProcessDisplaySizeChangeOrRotation
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutPolicyTest, ProcessDisplaySizeChangeOrRotation, Function | SmallTest | Level2)
+HWTEST_F(WindowLayoutPolicyTest, ProcessDisplaySizeChangeOrRotation, TestSize.Level1)
 {
     std::map<DisplayId, Rect> newDisplayRectMap = {};
     layoutPolicy_->ProcessDisplayDestroy(0, newDisplayRectMap);
@@ -601,7 +601,7 @@ HWTEST_F(WindowLayoutPolicyTest, ProcessDisplaySizeChangeOrRotation, Function | 
  * @tc.desc: test LayoutWindowNode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutPolicyTest, LayoutWindowNode, Function | SmallTest | Level2)
+HWTEST_F(WindowLayoutPolicyTest, LayoutWindowNode, TestSize.Level1)
 {
     sptr<WindowNode> node = nullptr;
     layoutPolicy_->LayoutWindowNode(node);
@@ -631,7 +631,7 @@ HWTEST_F(WindowLayoutPolicyTest, LayoutWindowNode, Function | SmallTest | Level2
  * @tc.desc: test CalcAndSetNodeHotZone
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutPolicyTest, CalcAndSetNodeHotZone, Function | SmallTest | Level2)
+HWTEST_F(WindowLayoutPolicyTest, CalcAndSetNodeHotZone, TestSize.Level1)
 {
     sptr<WindowNode> node = CreateWindowNode(windowInfo_);
     ASSERT_TRUE(node != nullptr);
@@ -646,7 +646,7 @@ HWTEST_F(WindowLayoutPolicyTest, CalcAndSetNodeHotZone, Function | SmallTest | L
  * @tc.desc: test FixWindowSizeByRatioIfDragBeyondLimitRegion01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutPolicyTest, FixWindowSizeByRatioIfDragBeyondLimitRegion01, Function | SmallTest | Level2)
+HWTEST_F(WindowLayoutPolicyTest, FixWindowSizeByRatioIfDragBeyondLimitRegion01, TestSize.Level1)
 {
     sptr<WindowNode> node = CreateWindowNode(windowInfo_);
     ASSERT_TRUE(node != nullptr);
@@ -692,7 +692,7 @@ HWTEST_F(WindowLayoutPolicyTest, FixWindowSizeByRatioIfDragBeyondLimitRegion01, 
  * @tc.desc: test FixWindowSizeByRatioIfDragBeyondLimitRegion02
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutPolicyTest, FixWindowSizeByRatioIfDragBeyondLimitRegion02, Function | SmallTest | Level2)
+HWTEST_F(WindowLayoutPolicyTest, FixWindowSizeByRatioIfDragBeyondLimitRegion02, TestSize.Level1)
 {
     sptr<WindowNode> node = CreateWindowNode(windowInfo_);
     ASSERT_TRUE(node != nullptr);
@@ -728,7 +728,7 @@ HWTEST_F(WindowLayoutPolicyTest, FixWindowSizeByRatioIfDragBeyondLimitRegion02, 
  * @tc.desc: test FixWindowSizeByRatioIfDragBeyondLimitRegion03
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutPolicyTest, FixWindowSizeByRatioIfDragBeyondLimitRegion03, Function | SmallTest | Level2)
+HWTEST_F(WindowLayoutPolicyTest, FixWindowSizeByRatioIfDragBeyondLimitRegion03, TestSize.Level1)
 {
     sptr<WindowNode> node = CreateWindowNode(windowInfo_);
     ASSERT_TRUE(node != nullptr);
@@ -778,7 +778,7 @@ HWTEST_F(WindowLayoutPolicyTest, FixWindowSizeByRatioIfDragBeyondLimitRegion03, 
  * @tc.desc: test FixWindowSizeByRatioIfDragBeyondLimitRegion04
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutPolicyTest, FixWindowSizeByRatioIfDragBeyondLimitRegion04, Function | SmallTest | Level2)
+HWTEST_F(WindowLayoutPolicyTest, FixWindowSizeByRatioIfDragBeyondLimitRegion04, TestSize.Level1)
 {
     sptr<WindowNode> node = CreateWindowNode(windowInfo_);
     ASSERT_TRUE(node != nullptr);
@@ -817,7 +817,7 @@ HWTEST_F(WindowLayoutPolicyTest, FixWindowSizeByRatioIfDragBeyondLimitRegion04, 
  * @tc.desc: test FixWindowSizeByRatioIfDragBeyondLimitRegion05
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutPolicyTest, FixWindowSizeByRatioIfDragBeyondLimitRegion05, Function | SmallTest | Level2)
+HWTEST_F(WindowLayoutPolicyTest, FixWindowSizeByRatioIfDragBeyondLimitRegion05, TestSize.Level1)
 {
     sptr<WindowNode> node = CreateWindowNode(windowInfo_);
     ASSERT_TRUE(node != nullptr);
@@ -861,7 +861,7 @@ HWTEST_F(WindowLayoutPolicyTest, FixWindowSizeByRatioIfDragBeyondLimitRegion05, 
  * @tc.desc: test GetSystemSizeLimits
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutPolicyTest, GetSystemSizeLimits, Function | SmallTest | Level2)
+HWTEST_F(WindowLayoutPolicyTest, GetSystemSizeLimits, TestSize.Level1)
 {
     auto displayRect = displayGroupInfo_.GetDisplayRect(defaultDisplayInfo_->GetDisplayId());
     ASSERT_FALSE(WindowHelper::IsEmptyRect(displayRect));
@@ -881,7 +881,7 @@ HWTEST_F(WindowLayoutPolicyTest, GetSystemSizeLimits, Function | SmallTest | Lev
  * @tc.desc: test UpdateWindowSizeLimits
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutPolicyTest, UpdateWindowSizeLimits, Function | SmallTest | Level2)
+HWTEST_F(WindowLayoutPolicyTest, UpdateWindowSizeLimits, TestSize.Level1)
 {
     auto displayRect = displayGroupInfo_.GetDisplayRect(defaultDisplayInfo_->GetDisplayId());
     ASSERT_FALSE(WindowHelper::IsEmptyRect(displayRect));
@@ -901,7 +901,7 @@ HWTEST_F(WindowLayoutPolicyTest, UpdateWindowSizeLimits, Function | SmallTest | 
  * @tc.desc: test UpdateFloatingWindowSizeForStretchableWindow04
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutPolicyTest, UpdateFloatingWindowSizeForStretchableWindow04, Function | SmallTest | Level2)
+HWTEST_F(WindowLayoutPolicyTest, UpdateFloatingWindowSizeForStretchableWindow04, TestSize.Level1)
 {
     auto displayRect = displayGroupInfo_.GetDisplayRect(defaultDisplayInfo_->GetDisplayId());
     ASSERT_FALSE(WindowHelper::IsEmptyRect(displayRect));
@@ -941,7 +941,7 @@ HWTEST_F(WindowLayoutPolicyTest, UpdateFloatingWindowSizeForStretchableWindow04,
  * @tc.desc: test UpdateFloatingWindowSizeForStretchableWindow05
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutPolicyTest, UpdateFloatingWindowSizeForStretchableWindow05, Function | SmallTest | Level2)
+HWTEST_F(WindowLayoutPolicyTest, UpdateFloatingWindowSizeForStretchableWindow05, TestSize.Level1)
 {
     auto displayRect = displayGroupInfo_.GetDisplayRect(defaultDisplayInfo_->GetDisplayId());
     ASSERT_FALSE(WindowHelper::IsEmptyRect(displayRect));
@@ -969,7 +969,7 @@ HWTEST_F(WindowLayoutPolicyTest, UpdateFloatingWindowSizeForStretchableWindow05,
  * @tc.desc: test UpdateFloatingWindowSizeBySizeLimits
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutPolicyTest, UpdateFloatingWindowSizeBySizeLimits, Function | SmallTest | Level2)
+HWTEST_F(WindowLayoutPolicyTest, UpdateFloatingWindowSizeBySizeLimits, TestSize.Level1)
 {
     auto displayRect = displayGroupInfo_.GetDisplayRect(defaultDisplayInfo_->GetDisplayId());
     ASSERT_FALSE(WindowHelper::IsEmptyRect(displayRect));
@@ -1015,7 +1015,7 @@ HWTEST_F(WindowLayoutPolicyTest, UpdateFloatingWindowSizeBySizeLimits, Function 
  * @tc.desc: test LimitFloatingWindowSize
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutPolicyTest, LimitFloatingWindowSize, Function | SmallTest | Level2)
+HWTEST_F(WindowLayoutPolicyTest, LimitFloatingWindowSize, TestSize.Level1)
 {
     auto displayRect = displayGroupInfo_.GetDisplayRect(defaultDisplayInfo_->GetDisplayId());
     ASSERT_FALSE(WindowHelper::IsEmptyRect(displayRect));
@@ -1046,7 +1046,7 @@ HWTEST_F(WindowLayoutPolicyTest, LimitFloatingWindowSize, Function | SmallTest |
  * @tc.desc: test LimitMainFloatingWindowPosition
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutPolicyTest, LimitMainFloatingWindowPosition, Function | SmallTest | Level2)
+HWTEST_F(WindowLayoutPolicyTest, LimitMainFloatingWindowPosition, TestSize.Level1)
 {
     sptr<WindowNode> node = CreateWindowNode(windowInfo_);
     ASSERT_TRUE(node != nullptr);
@@ -1065,7 +1065,7 @@ HWTEST_F(WindowLayoutPolicyTest, LimitMainFloatingWindowPosition, Function | Sma
  * @tc.desc: test LimitWindowPositionWhenDrag
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutPolicyTest, LimitWindowPositionWhenDrag, Function | SmallTest | Level2)
+HWTEST_F(WindowLayoutPolicyTest, LimitWindowPositionWhenDrag, TestSize.Level1)
 {
     auto displayRect = displayGroupInfo_.GetDisplayRect(defaultDisplayInfo_->GetDisplayId());
     ASSERT_FALSE(WindowHelper::IsEmptyRect(displayRect));
@@ -1101,7 +1101,7 @@ HWTEST_F(WindowLayoutPolicyTest, LimitWindowPositionWhenDrag, Function | SmallTe
  * @tc.desc: test LimitWindowPositionWhenDrag01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutPolicyTest, LimitWindowPositionWhenDrag01, Function | SmallTest | Level2)
+HWTEST_F(WindowLayoutPolicyTest, LimitWindowPositionWhenDrag01, TestSize.Level1)
 {
     auto displayRect = displayGroupInfo_.GetDisplayRect(defaultDisplayInfo_->GetDisplayId());
     ASSERT_FALSE(WindowHelper::IsEmptyRect(displayRect));
@@ -1150,7 +1150,7 @@ HWTEST_F(WindowLayoutPolicyTest, LimitWindowPositionWhenDrag01, Function | Small
  * @tc.desc: test LimitWindowPositionWhenInitRectOrMove
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutPolicyTest, LimitWindowPositionWhenInitRectOrMove, Function | SmallTest | Level2)
+HWTEST_F(WindowLayoutPolicyTest, LimitWindowPositionWhenInitRectOrMove, TestSize.Level1)
 {
     auto displayRect = displayGroupInfo_.GetDisplayRect(defaultDisplayInfo_->GetDisplayId());
     ASSERT_FALSE(WindowHelper::IsEmptyRect(displayRect));
@@ -1190,7 +1190,7 @@ HWTEST_F(WindowLayoutPolicyTest, LimitWindowPositionWhenInitRectOrMove, Function
  * @tc.desc: test GetDockWindowShowState
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutPolicyTest, GetDockWindowShowState, Function | SmallTest | Level2)
+HWTEST_F(WindowLayoutPolicyTest, GetDockWindowShowState, TestSize.Level1)
 {
     auto displayRect = displayGroupInfo_.GetDisplayRect(defaultDisplayInfo_->GetDisplayId());
     ASSERT_FALSE(WindowHelper::IsEmptyRect(displayRect));
@@ -1224,7 +1224,7 @@ HWTEST_F(WindowLayoutPolicyTest, GetDockWindowShowState, Function | SmallTest | 
  * @tc.desc: test GetAvoidPosType
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutPolicyTest, GetAvoidPosType, Function | SmallTest | Level2)
+HWTEST_F(WindowLayoutPolicyTest, GetAvoidPosType, TestSize.Level1)
 {
     auto displayRect = displayGroupInfo_.GetDisplayRect(defaultDisplayInfo_->GetDisplayId());
     ASSERT_FALSE(WindowHelper::IsEmptyRect(displayRect));
@@ -1252,7 +1252,7 @@ HWTEST_F(WindowLayoutPolicyTest, GetAvoidPosType, Function | SmallTest | Level2)
  * @tc.desc: test UpdateDisplayLimitRect
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutPolicyTest, UpdateDisplayLimitRect, Function | SmallTest | Level2)
+HWTEST_F(WindowLayoutPolicyTest, UpdateDisplayLimitRect, TestSize.Level1)
 {
     auto displayRect = displayGroupInfo_.GetDisplayRect(defaultDisplayInfo_->GetDisplayId());
     ASSERT_FALSE(WindowHelper::IsEmptyRect(displayRect));
@@ -1290,7 +1290,7 @@ HWTEST_F(WindowLayoutPolicyTest, UpdateDisplayLimitRect, Function | SmallTest | 
  * @tc.desc: test UpdateSurfaceBounds
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutPolicyTest, UpdateSurfaceBounds, Function | SmallTest | Level2)
+HWTEST_F(WindowLayoutPolicyTest, UpdateSurfaceBounds, TestSize.Level1)
 {
     sptr<WindowNode> node = CreateWindowNode(windowInfo_);
     ASSERT_TRUE(node != nullptr);
@@ -1316,7 +1316,7 @@ HWTEST_F(WindowLayoutPolicyTest, UpdateSurfaceBounds, Function | SmallTest | Lev
  * @tc.desc: test WindowLayoutPolicyTile PerformWindowLayout
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutPolicyTest, PerformWindowLayout, Function | SmallTest | Level2)
+HWTEST_F(WindowLayoutPolicyTest, PerformWindowLayout, TestSize.Level1)
 {
     sptr<WindowNode> node = CreateWindowNode(windowInfo_);
     ASSERT_TRUE(node != nullptr);
@@ -1329,7 +1329,7 @@ HWTEST_F(WindowLayoutPolicyTest, PerformWindowLayout, Function | SmallTest | Lev
  * @tc.desc: test WindowLayoutPolicyTile UpdateLayoutRect
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutPolicyTest, UpdateLayoutRect, Function | SmallTest | Level2)
+HWTEST_F(WindowLayoutPolicyTest, UpdateLayoutRect, TestSize.Level1)
 {
     sptr<WindowProperty> property = new WindowProperty();
 
@@ -1353,7 +1353,7 @@ HWTEST_F(WindowLayoutPolicyTest, UpdateLayoutRect, Function | SmallTest | Level2
  * @tc.desc: test IsFullScreenRecentWindowExist
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutPolicyTest, IsFullScreenRecentWindowExist, Function | SmallTest | Level2)
+HWTEST_F(WindowLayoutPolicyTest, IsFullScreenRecentWindowExist, TestSize.Level1)
 {
     std::vector<sptr<WindowNode>> *nodeVec = new std::vector<sptr<WindowNode>>;
     auto result = layoutPolicy_->IsFullScreenRecentWindowExist(*nodeVec);
@@ -1365,7 +1365,7 @@ HWTEST_F(WindowLayoutPolicyTest, IsFullScreenRecentWindowExist, Function | Small
  * @tc.desc: test GetDividerRect
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutPolicyTest, GetDividerRect, Function | SmallTest | Level2)
+HWTEST_F(WindowLayoutPolicyTest, GetDividerRect, TestSize.Level1)
 {
     DisplayId displayId = 0;
     auto result = layoutPolicy_->GetDividerRect(displayId);
@@ -1378,7 +1378,7 @@ HWTEST_F(WindowLayoutPolicyTest, GetDividerRect, Function | SmallTest | Level2)
  * @tc.desc: test AdjustFixedOrientationRSSurfaceNode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutPolicyTest, AdjustFixedOrientationRSSurfaceNode, Function | SmallTest | Level2)
+HWTEST_F(WindowLayoutPolicyTest, AdjustFixedOrientationRSSurfaceNode, TestSize.Level1)
 {
     std::shared_ptr<RSSurfaceNode> surfaceNode = std::shared_ptr<RSSurfaceNode>();
     sptr<DisplayInfo> displayInfo = sptr<DisplayInfo>();
@@ -1390,7 +1390,7 @@ HWTEST_F(WindowLayoutPolicyTest, AdjustFixedOrientationRSSurfaceNode, Function |
  * @tc.desc: test IsTileRectSatisfiedWithSizeLimits
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutPolicyTest, IsTileRectSatisfiedWithSizeLimits, Function | SmallTest | Level2)
+HWTEST_F(WindowLayoutPolicyTest, IsTileRectSatisfiedWithSizeLimits, TestSize.Level1)
 {
     sptr<WindowNode> windowNode = nullptr;
     auto result = layoutPolicyTile_ -> IsTileRectSatisfiedWithSizeLimits(windowNode);
@@ -1402,7 +1402,7 @@ HWTEST_F(WindowLayoutPolicyTest, IsTileRectSatisfiedWithSizeLimits, Function | S
  * @tc.desc: test SetCascadeRectBottomPosYLimit
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutPolicyTest, SetCascadeRectBottomPosYLimit, Function | SmallTest | Level2)
+HWTEST_F(WindowLayoutPolicyTest, SetCascadeRectBottomPosYLimit, TestSize.Level1)
 {
     uint32_t floatingBottomPosY = 0;
     layoutPolicy_->SetCascadeRectBottomPosYLimit(floatingBottomPosY);
@@ -1415,7 +1415,7 @@ HWTEST_F(WindowLayoutPolicyTest, SetCascadeRectBottomPosYLimit, Function | Small
  * @tc.desc: test SetMaxFloatingWindowSize
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutPolicyTest, SetMaxFloatingWindowSize, Function | SmallTest | Level2)
+HWTEST_F(WindowLayoutPolicyTest, SetMaxFloatingWindowSize, TestSize.Level1)
 {
     uint32_t maxSize = 0;
     layoutPolicy_->SetMaxFloatingWindowSize(maxSize);
@@ -1428,7 +1428,7 @@ HWTEST_F(WindowLayoutPolicyTest, SetMaxFloatingWindowSize, Function | SmallTest 
  * @tc.desc: test GetStoragedAspectRatio
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutPolicyTest, GetStoragedAspectRatio, Function | SmallTest | Level2)
+HWTEST_F(WindowLayoutPolicyTest, GetStoragedAspectRatio, TestSize.Level1)
 {
     auto display = DisplayManager::GetInstance().GetDefaultDisplay();
     sptr<WindowNode> node = CreateWindowNode(windowInfo_);
@@ -1445,7 +1445,7 @@ HWTEST_F(WindowLayoutPolicyTest, GetStoragedAspectRatio, Function | SmallTest | 
  * @tc.desc: test FixWindowRectWithinDisplay
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutPolicyTest, FixWindowRectWithinDisplay, Function | SmallTest | Level2)
+HWTEST_F(WindowLayoutPolicyTest, FixWindowRectWithinDisplay, TestSize.Level1)
 {
     auto display = DisplayManager::GetInstance().GetDefaultDisplay();
     sptr<WindowNode> node = CreateWindowNode(windowInfo_);
@@ -1459,7 +1459,7 @@ HWTEST_F(WindowLayoutPolicyTest, FixWindowRectWithinDisplay, Function | SmallTes
  * @tc.desc: test IsNeedAnimationSync
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutPolicyTest, IsNeedAnimationSync, Function | SmallTest | Level2)
+HWTEST_F(WindowLayoutPolicyTest, IsNeedAnimationSync, TestSize.Level1)
 {
     WindowType windowType = WindowType::ABOVE_APP_SYSTEM_WINDOW_END;
     auto result = layoutPolicy_->IsNeedAnimationSync(windowType);
@@ -1471,7 +1471,7 @@ HWTEST_F(WindowLayoutPolicyTest, IsNeedAnimationSync, Function | SmallTest | Lev
  * @tc.desc: test NotifyClientAndAnimation
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutPolicyTest, NotifyClientAndAnimation, Function | SmallTest | Level2)
+HWTEST_F(WindowLayoutPolicyTest, NotifyClientAndAnimation, TestSize.Level1)
 {
     sptr<WindowNode> node= CreateWindowNode(windowInfo_);
     Rect winRect;

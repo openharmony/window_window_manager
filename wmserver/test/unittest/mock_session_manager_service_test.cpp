@@ -62,7 +62,7 @@ namespace {
  * @tc.desc: OnRemoteDied
  * @tc.type: FUNC
  */
-HWTEST_F(MockSessionManagerServiceTest, OnRemoteDied, Function | SmallTest | Level2)
+HWTEST_F(MockSessionManagerServiceTest, OnRemoteDied, TestSize.Level1)
 {
     WLOGI("OnRemoteDied");
     MockSessionManagerService::SMSDeathRecipient smsDeathRecipient(100);
@@ -77,7 +77,7 @@ HWTEST_F(MockSessionManagerServiceTest, OnRemoteDied, Function | SmallTest | Lev
  * @tc.desc: OnRemoteDied
  * @tc.type: FUNC
  */
-HWTEST_F(MockSessionManagerServiceTest, OnRemoteDied1, Function | SmallTest | Level2)
+HWTEST_F(MockSessionManagerServiceTest, OnRemoteDied1, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "MockSessionManagerServiceTest: OnRemoteDied1 start";
     WLOGI("OnRemoteDied");
@@ -94,7 +94,7 @@ HWTEST_F(MockSessionManagerServiceTest, OnRemoteDied1, Function | SmallTest | Le
  * @tc.desc: set session manager service
  * @tc.type: FUNC
  */
-HWTEST_F(MockSessionManagerServiceTest, SetSessionManagerService, Function | SmallTest | Level2)
+HWTEST_F(MockSessionManagerServiceTest, SetSessionManagerService, TestSize.Level1)
 {
     WLOGI("SetSessionManagerService");
     sptr<IRemoteObject> sessionManagerService = nullptr;
@@ -107,7 +107,7 @@ HWTEST_F(MockSessionManagerServiceTest, SetSessionManagerService, Function | Sma
  * @tc.desc: get session manager service
  * @tc.type: FUNC
  */
-HWTEST_F(MockSessionManagerServiceTest, GetSessionManagerService, Function | SmallTest | Level2)
+HWTEST_F(MockSessionManagerServiceTest, GetSessionManagerService, TestSize.Level1)
 {
     WLOGI("GetSessionManagerService");
     sptr<IRemoteObject> sessionManagerService =
@@ -120,7 +120,7 @@ HWTEST_F(MockSessionManagerServiceTest, GetSessionManagerService, Function | Sma
  * @tc.desc: on start
  * @tc.type: FUNC
  */
-HWTEST_F(MockSessionManagerServiceTest, OnStart, Function | SmallTest | Level2)
+HWTEST_F(MockSessionManagerServiceTest, OnStart, TestSize.Level1)
 {
     WLOGI("onStart");
     auto ret = WMError::WM_OK;
@@ -133,7 +133,7 @@ HWTEST_F(MockSessionManagerServiceTest, OnStart, Function | SmallTest | Level2)
  * @tc.desc: on start
  * @tc.type: FUNC
  */
-HWTEST_F(MockSessionManagerServiceTest, OnStart1, Function | SmallTest | Level2)
+HWTEST_F(MockSessionManagerServiceTest, OnStart1, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "MockSessionManagerServiceTest: OnStart1 start";
     MockSessionManagerService* mService = new MockSessionManagerService();
@@ -149,7 +149,7 @@ HWTEST_F(MockSessionManagerServiceTest, OnStart1, Function | SmallTest | Level2)
  * @tc.desc: Dump
  * @tc.type: FUNC
  */
-HWTEST_F(MockSessionManagerServiceTest, Dump, Function | SmallTest | Level2)
+HWTEST_F(MockSessionManagerServiceTest, Dump, TestSize.Level1)
 {
     MockSessionManagerService* mService = new MockSessionManagerService();
     WLOGI("onStart");
@@ -162,7 +162,7 @@ HWTEST_F(MockSessionManagerServiceTest, Dump, Function | SmallTest | Level2)
  * @tc.desc: SetSessionManagerService
  * @tc.type: FUNC
  */
-HWTEST_F(MockSessionManagerServiceTest, SetSessionManagerService2, Function | SmallTest | Level2)
+HWTEST_F(MockSessionManagerServiceTest, SetSessionManagerService2, TestSize.Level1)
 {
     sptr<IRemoteObject> sessionManagerService = nullptr;
     ASSERT_EQ(false, MockSessionManagerService::GetInstance().SetSessionManagerService(sessionManagerService));
@@ -175,7 +175,7 @@ HWTEST_F(MockSessionManagerServiceTest, SetSessionManagerService2, Function | Sm
  * @tc.desc: GetSMSDeathRecipientByUserId/RemoveSMSDeathRecipientByUserId
  * @tc.type: FUNC
  */
-HWTEST_F(MockSessionManagerServiceTest, GetSMSDeathRecipientByUserId, Function | SmallTest | Level2)
+HWTEST_F(MockSessionManagerServiceTest, GetSMSDeathRecipientByUserId, TestSize.Level1)
 {
     auto smsDeathRecipient = MockSessionManagerService::GetInstance().GetSMSDeathRecipientByUserId(100);
     ASSERT_EQ(nullptr, smsDeathRecipient);
@@ -187,7 +187,7 @@ HWTEST_F(MockSessionManagerServiceTest, GetSMSDeathRecipientByUserId, Function |
  * @tc.desc: GetSessionManagerServiceByUserId/RemoveSessionManagerServiceByUserId
  * @tc.type: FUNC
  */
-HWTEST_F(MockSessionManagerServiceTest, GetSessionManagerServiceByUserId, Function | SmallTest | Level2)
+HWTEST_F(MockSessionManagerServiceTest, GetSessionManagerServiceByUserId, TestSize.Level1)
 {
     auto sessionManagerService = MockSessionManagerService::GetInstance().GetSessionManagerServiceByUserId(100);
     ASSERT_EQ(nullptr, sessionManagerService);
@@ -199,7 +199,7 @@ HWTEST_F(MockSessionManagerServiceTest, GetSessionManagerServiceByUserId, Functi
  * @tc.desc: GetSessionManagerServiceByUserId/RemoveSessionManagerServiceByUserId
  * @tc.type: FUNC
  */
-HWTEST_F(MockSessionManagerServiceTest, GetProcessSurfaceNodeIdByPersistentId, Function | SmallTest | Level2)
+HWTEST_F(MockSessionManagerServiceTest, GetProcessSurfaceNodeIdByPersistentId, TestSize.Level1)
 {
     int32_t pid = 123;
     std::vector<uint64_t> persistentIds = {1, 2, 3};

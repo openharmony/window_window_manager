@@ -138,7 +138,7 @@ namespace {
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(SessionLayoutTest, UpdateRect01, Function | SmallTest | Level2)
+HWTEST_F(SessionLayoutTest, UpdateRect01, TestSize.Level1)
 {
     bool preBackgroundUpdateRectNotifyEnabled = Session::IsBackgroundUpdateRectNotifyEnabled();
     Session::SetBackgroundUpdateRectNotifyEnabled(true);
@@ -178,7 +178,7 @@ HWTEST_F(SessionLayoutTest, UpdateRect01, Function | SmallTest | Level2)
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(SessionLayoutTest, UpdateRect_TestForeground, Function | SmallTest | Level2)
+HWTEST_F(SessionLayoutTest, UpdateRect_TestForeground, TestSize.Level1)
 {
     bool preBackgroundUpdateRectNotifyEnabled = Session::IsBackgroundUpdateRectNotifyEnabled();
     Session::SetBackgroundUpdateRectNotifyEnabled(false);
@@ -198,7 +198,7 @@ HWTEST_F(SessionLayoutTest, UpdateRect_TestForeground, Function | SmallTest | Le
  * @tc.desc: UpdateSessionRect
  * @tc.type: FUNC
  */
-HWTEST_F(SessionLayoutTest, UpdateSessionRect01, Function | SmallTest | Level2)
+HWTEST_F(SessionLayoutTest, UpdateSessionRect01, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "testSession1";
@@ -217,7 +217,7 @@ HWTEST_F(SessionLayoutTest, UpdateSessionRect01, Function | SmallTest | Level2)
  * @tc.desc: SetSingleHandTransform
  * @tc.type: FUNC
  */
-HWTEST_F(SessionLayoutTest, SetSingleHandTransform, Function | SmallTest | Level2)
+HWTEST_F(SessionLayoutTest, SetSingleHandTransform, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "SetSingleHandTransform";
@@ -226,6 +226,55 @@ HWTEST_F(SessionLayoutTest, SetSingleHandTransform, Function | SmallTest | Level
     SingleHandTransform transform;
     session->SetSingleHandTransform(transform);
     ASSERT_EQ(transform, session->GetSingleHandTransform());
+}
+
+/**
+ * @tc.name: IsDraggingReason
+ * @tc.desc: IsDraggingReason
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionLayoutTest, IsDraggingReason, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsDraggingReason";
+    info.bundleName_ = "IsDraggingReason";
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
+    ASSERT_EQ(false, session->IsDraggingReason(SizeChangeReason::UNDEFINED));
+    ASSERT_EQ(true, session->IsDraggingReason(SizeChangeReason::DRAG));
+    ASSERT_EQ(true, session->IsDraggingReason(SizeChangeReason::DRAG_START));
+    ASSERT_EQ(true, session->IsDraggingReason(SizeChangeReason::DRAG_MOVE));
+}
+
+/**
+ * @tc.name: SetDragStart
+ * @tc.desc: SetDragStart
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionLayoutTest, SetDragStart, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetDragStart";
+    info.bundleName_ = "SetDragStart";
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
+    session->SetDragStart(true);
+    ASSERT_EQ(true, session->IsDragStart());
+    session->SetDragStart(false);
+    ASSERT_EQ(false, session->IsDragStart());
+}
+
+/**
+ * @tc.name: SetOriginDisplayId
+ * @tc.desc: SetOriginDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionLayoutTest, SetOriginDisplayId, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetOriginDisplayId";
+    info.bundleName_ = "SetOriginDisplayId";
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
+    session->SetOriginDisplayId(999);
+    ASSERT_EQ(999, session->GetOriginDisplayId());
 }
 }
 } // namespace Rosen

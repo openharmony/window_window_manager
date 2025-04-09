@@ -100,7 +100,7 @@ namespace {
  * @tc.desc: FilterPhysicalAndVirtualScreen func
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, FilterPhysicalAndVirtualScreen, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, FilterPhysicalAndVirtualScreen, TestSize.Level1)
 {
     std::vector<ScreenId> allScreenIds = {2000, 2001, 0};
     std::vector<ScreenId> physicalScreenIds;
@@ -115,7 +115,7 @@ HWTEST_F(MultiScreenManagerTest, FilterPhysicalAndVirtualScreen, Function | Smal
  * @tc.desc: VirtualScreenMirrorSwitch func
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, VirtualScreenMirrorSwitch01, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, VirtualScreenMirrorSwitch01, TestSize.Level1)
 {
     ScreenId mainScreenId = 1;
     std::vector<ScreenId> ScreenIds = {2, 3};
@@ -130,7 +130,7 @@ HWTEST_F(MultiScreenManagerTest, VirtualScreenMirrorSwitch01, Function | SmallTe
  * @tc.desc: mainScreen is not nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, VirtualScreenMirrorSwitch02, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, VirtualScreenMirrorSwitch02, TestSize.Level1)
 {
     ScreenId mainScreenId = 1002;
     std::vector<ScreenId> ScreenIds = {2, 3};
@@ -147,7 +147,7 @@ HWTEST_F(MultiScreenManagerTest, VirtualScreenMirrorSwitch02, Function | SmallTe
  * @tc.desc: ret != DMError::DM_OK
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, VirtualScreenMirrorSwitch03, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, VirtualScreenMirrorSwitch03, TestSize.Level1)
 {
     ScreenId mainScreenId = 1002;
     std::vector<ScreenId> ScreenIds = {2, 3};
@@ -169,7 +169,7 @@ HWTEST_F(MultiScreenManagerTest, VirtualScreenMirrorSwitch03, Function | SmallTe
  * @tc.desc: VirtualScreenMirrorSwitch func04
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, VirtualScreenMirrorSwitch04, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, VirtualScreenMirrorSwitch04, TestSize.Level1)
 {
     ScreenId mainScreenId = 1003;
     std::vector<ScreenId> ScreenIds = {2, 3};
@@ -184,7 +184,7 @@ HWTEST_F(MultiScreenManagerTest, VirtualScreenMirrorSwitch04, Function | SmallTe
  * @tc.desc: VirtualScreenMirrorSwitch func05
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, VirtualScreenMirrorSwitch05, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, VirtualScreenMirrorSwitch05, TestSize.Level1)
 {
     ScreenId mainScreenId = 101;
     std::vector<ScreenId> ScreenIds = {1, 2};
@@ -199,7 +199,7 @@ HWTEST_F(MultiScreenManagerTest, VirtualScreenMirrorSwitch05, Function | SmallTe
  * @tc.desc: VirtualScreenMirrorSwitch func06
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, VirtualScreenMirrorSwitch06, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, VirtualScreenMirrorSwitch06, TestSize.Level1)
 {
     ScreenId mainScreenId = 102;
     std::vector<ScreenId> ScreenIds = {1, 3};
@@ -214,7 +214,7 @@ HWTEST_F(MultiScreenManagerTest, VirtualScreenMirrorSwitch06, Function | SmallTe
  * @tc.desc: VirtualScreenMirrorSwitch func DMRect not null
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, VirtualScreenMirrorSwitch07, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, VirtualScreenMirrorSwitch07, TestSize.Level1)
 {
     ScreenId mainScreenId = 1;
     std::vector<ScreenId> ScreenIds = {2, 3};
@@ -230,7 +230,7 @@ HWTEST_F(MultiScreenManagerTest, VirtualScreenMirrorSwitch07, Function | SmallTe
  * @tc.desc: mainScreen is not nullptr and DMRect not null
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, VirtualScreenMirrorSwitch08, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, VirtualScreenMirrorSwitch08, TestSize.Level1)
 {
     ScreenId mainScreenId = 1002;
     std::vector<ScreenId> ScreenIds = {2, 3};
@@ -248,7 +248,7 @@ HWTEST_F(MultiScreenManagerTest, VirtualScreenMirrorSwitch08, Function | SmallTe
  * @tc.desc: ret != DMError::DM_OK and DMRect not null
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, VirtualScreenMirrorSwitch09, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, VirtualScreenMirrorSwitch09, TestSize.Level1)
 {
     ScreenId mainScreenId = 1002;
     std::vector<ScreenId> ScreenIds = {2, 3};
@@ -271,7 +271,7 @@ HWTEST_F(MultiScreenManagerTest, VirtualScreenMirrorSwitch09, Function | SmallTe
  * @tc.desc: PhysicalScreenMirrorSwitch func
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, PhysicalScreenMirrorSwitch01, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, PhysicalScreenMirrorSwitch01, TestSize.Level1)
 {
     std::vector<ScreenId> screenIds = {2, 3};
     DMError ret = MultiScreenManager::GetInstance().PhysicalScreenMirrorSwitch(screenIds, DMRect::NONE());
@@ -283,7 +283,7 @@ HWTEST_F(MultiScreenManagerTest, PhysicalScreenMirrorSwitch01, Function | SmallT
  * @tc.desc: defaultSession != nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, PhysicalScreenMirrorSwitch02, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, PhysicalScreenMirrorSwitch02, TestSize.Level1)
 {
     std::vector<ScreenId> screenIds = {1002, 1003};
     sptr<ScreenSession> session = new ScreenSession();
@@ -298,7 +298,7 @@ HWTEST_F(MultiScreenManagerTest, PhysicalScreenMirrorSwitch02, Function | SmallT
  * @tc.desc: defaultSession != nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, PhysicalScreenMirrorSwitch03, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, PhysicalScreenMirrorSwitch03, TestSize.Level1)
 {
     std::vector<ScreenId> screenIds = {1002, 1003};
     sptr<ScreenSession> session = new ScreenSession();
@@ -315,7 +315,7 @@ HWTEST_F(MultiScreenManagerTest, PhysicalScreenMirrorSwitch03, Function | SmallT
  * @tc.desc: defaultSession != nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, PhysicalScreenMirrorSwitch04, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, PhysicalScreenMirrorSwitch04, TestSize.Level1)
 {
     std::vector<ScreenId> screenIds = {101, 102};
     sptr<ScreenSession> session = new ScreenSession();
@@ -330,7 +330,7 @@ HWTEST_F(MultiScreenManagerTest, PhysicalScreenMirrorSwitch04, Function | SmallT
  * @tc.desc: defaultSession != nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, PhysicalScreenMirrorSwitch05, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, PhysicalScreenMirrorSwitch05, TestSize.Level1)
 {
     std::vector<ScreenId> screenIds = {12, 13};
     sptr<ScreenSession> session = new ScreenSession();
@@ -347,7 +347,7 @@ HWTEST_F(MultiScreenManagerTest, PhysicalScreenMirrorSwitch05, Function | SmallT
  * @tc.desc: and DMRect not null
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, PhysicalScreenMirrorSwitch06, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, PhysicalScreenMirrorSwitch06, TestSize.Level1)
 {
     std::vector<ScreenId> screenIds = {2, 3};
     DMRect myRect = {0, 0, 400, 600};
@@ -360,7 +360,7 @@ HWTEST_F(MultiScreenManagerTest, PhysicalScreenMirrorSwitch06, Function | SmallT
  * @tc.desc: defaultSession != nullptr and DMRect not null
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, PhysicalScreenMirrorSwitch07, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, PhysicalScreenMirrorSwitch07, TestSize.Level1)
 {
     std::vector<ScreenId> screenIds = {1002, 1003};
     sptr<ScreenSession> session = new ScreenSession();
@@ -376,7 +376,7 @@ HWTEST_F(MultiScreenManagerTest, PhysicalScreenMirrorSwitch07, Function | SmallT
  * @tc.desc: defaultSession != nullptr and DMRect not null
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, PhysicalScreenMirrorSwitch08, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, PhysicalScreenMirrorSwitch08, TestSize.Level1)
 {
     std::vector<ScreenId> screenIds = {1002, 1003};
     sptr<ScreenSession> session = new ScreenSession();
@@ -394,7 +394,7 @@ HWTEST_F(MultiScreenManagerTest, PhysicalScreenMirrorSwitch08, Function | SmallT
  * @tc.desc: defaultSession != nullptr and DMRect not null
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, PhysicalScreenMirrorSwitch09, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, PhysicalScreenMirrorSwitch09, TestSize.Level1)
 {
     std::vector<ScreenId> screenIds = {101, 102};
     sptr<ScreenSession> session = new ScreenSession();
@@ -411,7 +411,7 @@ HWTEST_F(MultiScreenManagerTest, PhysicalScreenMirrorSwitch09, Function | SmallT
  * @tc.desc: defaultSession != nullptr and DMRect not null
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, PhysicalScreenMirrorSwitch10, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, PhysicalScreenMirrorSwitch10, TestSize.Level1)
 {
     std::vector<ScreenId> screenIds = {12, 13};
     sptr<ScreenSession> session = new ScreenSession();
@@ -430,7 +430,7 @@ HWTEST_F(MultiScreenManagerTest, PhysicalScreenMirrorSwitch10, Function | SmallT
  * @tc.desc: PhysicalScreenUniqueSwitch func
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, PhysicalScreenUniqueSwitch, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, PhysicalScreenUniqueSwitch, TestSize.Level1)
 {
     std::vector<ScreenId> screenIds = {2, 3};
     DMError ret = MultiScreenManager::GetInstance().PhysicalScreenUniqueSwitch(screenIds);
@@ -442,7 +442,7 @@ HWTEST_F(MultiScreenManagerTest, PhysicalScreenUniqueSwitch, Function | SmallTes
  * @tc.desc: PhysicalScreenUniqueSwitch func
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, PhysicalScreenUniqueSwitch01, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, PhysicalScreenUniqueSwitch01, TestSize.Level1)
 {
     std::vector<ScreenId> screenIds = {1002, 1003};
     DMError ret = MultiScreenManager::GetInstance().PhysicalScreenUniqueSwitch(screenIds);
@@ -454,7 +454,7 @@ HWTEST_F(MultiScreenManagerTest, PhysicalScreenUniqueSwitch01, Function | SmallT
  * @tc.desc: screenSession != nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, PhysicalScreenUniqueSwitch02, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, PhysicalScreenUniqueSwitch02, TestSize.Level1)
 {
     std::vector<ScreenId> screenIds = {1002, 1003};
     sptr<ScreenSession> session = new ScreenSession();
@@ -472,7 +472,7 @@ HWTEST_F(MultiScreenManagerTest, PhysicalScreenUniqueSwitch02, Function | SmallT
  * @tc.desc: screenSession != nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, PhysicalScreenUniqueSwitch03, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, PhysicalScreenUniqueSwitch03, TestSize.Level1)
 {
     std::vector<ScreenId> screenIds = {1002, 1003};
     sptr<ScreenSession> session = nullptr;
@@ -490,7 +490,7 @@ HWTEST_F(MultiScreenManagerTest, PhysicalScreenUniqueSwitch03, Function | SmallT
  * @tc.desc: screenSession != nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, PhysicalScreenUniqueSwitch04, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, PhysicalScreenUniqueSwitch04, TestSize.Level1)
 {
     std::vector<ScreenId> screenIds = {2, 3};
     sptr<ScreenSession> session = new ScreenSession();
@@ -508,7 +508,7 @@ HWTEST_F(MultiScreenManagerTest, PhysicalScreenUniqueSwitch04, Function | SmallT
  * @tc.desc: VirtualScreenUniqueSwitch func
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, VirtualScreenUniqueSwitch01, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, VirtualScreenUniqueSwitch01, TestSize.Level1)
 {
     sptr<ScreenSession> screenSession =new ScreenSession();
     std::vector<ScreenId> screenIds = {2, 3};
@@ -521,7 +521,7 @@ HWTEST_F(MultiScreenManagerTest, VirtualScreenUniqueSwitch01, Function | SmallTe
  * @tc.desc: VirtualScreenUniqueSwitch func
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, VirtualScreenUniqueSwitch02, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, VirtualScreenUniqueSwitch02, TestSize.Level1)
 {
     sptr<ScreenSession> screenSession =nullptr;
     std::vector<ScreenId> screenIds = {2, 3};
@@ -534,7 +534,7 @@ HWTEST_F(MultiScreenManagerTest, VirtualScreenUniqueSwitch02, Function | SmallTe
  * @tc.desc: VirtualScreenUniqueSwitch func
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, VirtualScreenUniqueSwitch03, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, VirtualScreenUniqueSwitch03, TestSize.Level1)
 {
     sptr<ScreenSession> screenSession =nullptr;
     std::vector<ScreenId> screenIds = {1012, 1002};
@@ -547,7 +547,7 @@ HWTEST_F(MultiScreenManagerTest, VirtualScreenUniqueSwitch03, Function | SmallTe
  * @tc.desc: VirtualScreenUniqueSwitch func
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, VirtualScreenUniqueSwitch04, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, VirtualScreenUniqueSwitch04, TestSize.Level1)
 {
     sptr<ScreenSession> screenSession =nullptr;
     std::vector<ScreenId> screenIds = {12, 1001};
@@ -560,7 +560,7 @@ HWTEST_F(MultiScreenManagerTest, VirtualScreenUniqueSwitch04, Function | SmallTe
  * @tc.desc: VirtualScreenUniqueSwitch func
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, VirtualScreenUniqueSwitch05, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, VirtualScreenUniqueSwitch05, TestSize.Level1)
 {
     sptr<ScreenSession> screenSession =nullptr;
     std::vector<ScreenId> screenIds = {12, 1002};
@@ -573,7 +573,7 @@ HWTEST_F(MultiScreenManagerTest, VirtualScreenUniqueSwitch05, Function | SmallTe
  * @tc.desc: VirtualScreenUniqueSwitch func
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, VirtualScreenUniqueSwitch06, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, VirtualScreenUniqueSwitch06, TestSize.Level1)
 {
     sptr<ScreenSession> screenSession =nullptr;
     std::vector<ScreenId> screenIds = {12, 1003};
@@ -586,7 +586,7 @@ HWTEST_F(MultiScreenManagerTest, VirtualScreenUniqueSwitch06, Function | SmallTe
  * @tc.desc: VirtualScreenUniqueSwitch func
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, VirtualScreenUniqueSwitch07, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, VirtualScreenUniqueSwitch07, TestSize.Level1)
 {
     sptr<ScreenSession> screenSession =nullptr;
     std::vector<ScreenId> screenIds = {1003, 1003};
@@ -599,7 +599,7 @@ HWTEST_F(MultiScreenManagerTest, VirtualScreenUniqueSwitch07, Function | SmallTe
  * @tc.desc: VirtualScreenUniqueSwitch func
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, VirtualScreenUniqueSwitch08, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, VirtualScreenUniqueSwitch08, TestSize.Level1)
 {
     sptr<ScreenSession> screenSession =nullptr;
     std::vector<ScreenId> screenIds = {1003, 1002};
@@ -612,7 +612,7 @@ HWTEST_F(MultiScreenManagerTest, VirtualScreenUniqueSwitch08, Function | SmallTe
  * @tc.desc: VirtualScreenUniqueSwitch func
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, VirtualScreenUniqueSwitch09, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, VirtualScreenUniqueSwitch09, TestSize.Level1)
 {
     sptr<ScreenSession> screenSession =nullptr;
     std::vector<ScreenId> screenIds = {1003, 1001};
@@ -625,7 +625,7 @@ HWTEST_F(MultiScreenManagerTest, VirtualScreenUniqueSwitch09, Function | SmallTe
  * @tc.desc: VirtualScreenUniqueSwitch func
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, VirtualScreenUniqueSwitch010, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, VirtualScreenUniqueSwitch010, TestSize.Level1)
 {
     sptr<ScreenSession> screenSession =nullptr;
     std::vector<ScreenId> screenIds = {1004, 1001};
@@ -638,7 +638,7 @@ HWTEST_F(MultiScreenManagerTest, VirtualScreenUniqueSwitch010, Function | SmallT
  * @tc.desc: VirtualScreenUniqueSwitch func
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, VirtualScreenUniqueSwitch11, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, VirtualScreenUniqueSwitch11, TestSize.Level1)
 {
     sptr<ScreenSession> screenSession = new ScreenSession();
     std::vector<ScreenId> screenIds = {1003, 11};
@@ -651,7 +651,7 @@ HWTEST_F(MultiScreenManagerTest, VirtualScreenUniqueSwitch11, Function | SmallTe
  * @tc.desc: VirtualScreenUniqueSwitch func
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, VirtualScreenUniqueSwitch12, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, VirtualScreenUniqueSwitch12, TestSize.Level1)
 {
     sptr<ScreenSession> screenSession = new ScreenSession();
     std::vector<ScreenId> screenIds = {1004, 1001};
@@ -664,7 +664,7 @@ HWTEST_F(MultiScreenManagerTest, VirtualScreenUniqueSwitch12, Function | SmallTe
  * @tc.desc: UniqueSwitch func
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, UniqueSwitch01, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, UniqueSwitch01, TestSize.Level1)
 {
     std::vector<ScreenId> screenIds = {};
     std::vector<DisplayId> displayIds;
@@ -677,7 +677,7 @@ HWTEST_F(MultiScreenManagerTest, UniqueSwitch01, Function | SmallTest | Level1)
  * @tc.desc: screenIds is not empty
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, UniqueSwitch02, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, UniqueSwitch02, TestSize.Level1)
 {
     std::vector<ScreenId> screenIds = {1001, 1002};
     std::vector<DisplayId> displayIds;
@@ -690,7 +690,7 @@ HWTEST_F(MultiScreenManagerTest, UniqueSwitch02, Function | SmallTest | Level1)
  * @tc.desc: MirrorSwitch func
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, MirrorSwitch, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, MirrorSwitch, TestSize.Level1)
 {
     std::vector<ScreenId> screenIds = {};
     ScreenId screenGroupId = 0;
@@ -704,7 +704,7 @@ HWTEST_F(MultiScreenManagerTest, MirrorSwitch, Function | SmallTest | Level1)
  * @tc.desc: MirrorSwitch func
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, MirrorSwitch01, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, MirrorSwitch01, TestSize.Level1)
 {
     std::vector<ScreenId> screenIds = {1001, 1002};
     ScreenId screenGroupId = 0;
@@ -717,7 +717,7 @@ HWTEST_F(MultiScreenManagerTest, MirrorSwitch01, Function | SmallTest | Level1)
  * @tc.desc: MirrorSwitch func
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, MirrorSwitch02, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, MirrorSwitch02, TestSize.Level1)
 {
     std::vector<ScreenId> screenIds = {2, 3};
     ScreenId screenGroupId = 0;
@@ -730,7 +730,7 @@ HWTEST_F(MultiScreenManagerTest, MirrorSwitch02, Function | SmallTest | Level1)
  * @tc.desc: MirrorSwitch func
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, MirrorSwitch03, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, MirrorSwitch03, TestSize.Level1)
 {
     std::vector<ScreenId> screenIds = {1003, 1002};
     ScreenId screenGroupId = 0;
@@ -743,7 +743,7 @@ HWTEST_F(MultiScreenManagerTest, MirrorSwitch03, Function | SmallTest | Level1)
  * @tc.desc: MirrorSwitch func
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, MirrorSwitch04, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, MirrorSwitch04, TestSize.Level1)
 {
     std::vector<ScreenId> screenIds = {1003, 2};
     ScreenId screenGroupId = 0;
@@ -756,7 +756,7 @@ HWTEST_F(MultiScreenManagerTest, MirrorSwitch04, Function | SmallTest | Level1)
  * @tc.desc: MirrorSwitch func
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, MirrorSwitch05, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, MirrorSwitch05, TestSize.Level1)
 {
     std::vector<ScreenId> screenIds = {};
     ScreenId screenGroupId = 0;
@@ -770,7 +770,7 @@ HWTEST_F(MultiScreenManagerTest, MirrorSwitch05, Function | SmallTest | Level1)
  * @tc.desc: firstSession == nullptr,secondarySession == nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, MultiScreenModeChange01, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, MultiScreenModeChange01, TestSize.Level1)
 {
     sptr<ScreenSession> firstSession = nullptr;
     sptr<ScreenSession> secondarySession = nullptr;
@@ -789,7 +789,7 @@ HWTEST_F(MultiScreenManagerTest, MultiScreenModeChange01, Function | SmallTest |
  * @tc.desc: firstSession == nullptr,secondarySession == nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, MultiScreenModeChange02, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, MultiScreenModeChange02, TestSize.Level1)
 {
     sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption;
@@ -831,7 +831,7 @@ HWTEST_F(MultiScreenManagerTest, MultiScreenModeChange02, Function | SmallTest |
  * @tc.desc: scbClient null
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, DoFirstMainChange01, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, DoFirstMainChange01, TestSize.Level1)
 {
     sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption;
@@ -861,7 +861,7 @@ HWTEST_F(MultiScreenManagerTest, DoFirstMainChange01, Function | SmallTest | Lev
  * @tc.desc: param error
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, DoFirstMainChange02, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, DoFirstMainChange02, TestSize.Level1)
 {
     sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption;
@@ -893,7 +893,7 @@ HWTEST_F(MultiScreenManagerTest, DoFirstMainChange02, Function | SmallTest | Lev
  * @tc.desc: DoFirstMainChangeExtend
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, DoFirstMainChange03, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, DoFirstMainChange03, TestSize.Level1)
 {
     sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption;
@@ -923,7 +923,7 @@ HWTEST_F(MultiScreenManagerTest, DoFirstMainChange03, Function | SmallTest | Lev
  * @tc.desc: main change extend, no need to change
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, DoFirstMainChange04, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, DoFirstMainChange04, TestSize.Level1)
 {
     sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption;
@@ -953,7 +953,7 @@ HWTEST_F(MultiScreenManagerTest, DoFirstMainChange04, Function | SmallTest | Lev
  * @tc.desc: DoFirstMainChangeMirror
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, DoFirstMainChange05, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, DoFirstMainChange05, TestSize.Level1)
 {
     sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption;
@@ -983,7 +983,7 @@ HWTEST_F(MultiScreenManagerTest, DoFirstMainChange05, Function | SmallTest | Lev
  * @tc.desc: main change mirror, no need to change
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, DoFirstMainChange06, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, DoFirstMainChange06, TestSize.Level1)
 {
     sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption;
@@ -1013,7 +1013,7 @@ HWTEST_F(MultiScreenManagerTest, DoFirstMainChange06, Function | SmallTest | Lev
  * @tc.desc: scbClient null
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, DoFirstMirrorChange01, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, DoFirstMirrorChange01, TestSize.Level1)
 {
     sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption;
@@ -1043,7 +1043,7 @@ HWTEST_F(MultiScreenManagerTest, DoFirstMirrorChange01, Function | SmallTest | L
  * @tc.desc: param error
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, DoFirstMirrorChange02, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, DoFirstMirrorChange02, TestSize.Level1)
 {
     sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption;
@@ -1075,7 +1075,7 @@ HWTEST_F(MultiScreenManagerTest, DoFirstMirrorChange02, Function | SmallTest | L
  * @tc.desc: DoFirstMirrorChangeExtend
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, DoFirstMirrorChange03, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, DoFirstMirrorChange03, TestSize.Level1)
 {
     sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption;
@@ -1104,7 +1104,7 @@ HWTEST_F(MultiScreenManagerTest, DoFirstMirrorChange03, Function | SmallTest | L
  * @tc.desc: DoFirstMirrorChangeMirror
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, DoFirstMirrorChange04, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, DoFirstMirrorChange04, TestSize.Level1)
 {
     sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption;
@@ -1133,7 +1133,7 @@ HWTEST_F(MultiScreenManagerTest, DoFirstMirrorChange04, Function | SmallTest | L
  * @tc.desc: param error
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, DoFirstExtendChange01, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, DoFirstExtendChange01, TestSize.Level1)
 {
     sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption;
@@ -1162,7 +1162,7 @@ HWTEST_F(MultiScreenManagerTest, DoFirstExtendChange01, Function | SmallTest | L
  * @tc.desc: extend change extend
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, DoFirstExtendChange02, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, DoFirstExtendChange02, TestSize.Level1)
 {
     sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption;
@@ -1190,7 +1190,7 @@ HWTEST_F(MultiScreenManagerTest, DoFirstExtendChange02, Function | SmallTest | L
  * @tc.desc: extend change mirror
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, DoFirstExtendChange03, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, DoFirstExtendChange03, TestSize.Level1)
 {
     sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption;
@@ -1218,7 +1218,7 @@ HWTEST_F(MultiScreenManagerTest, DoFirstExtendChange03, Function | SmallTest | L
  * @tc.desc: SetLastScreenMode func
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, SetLastScreenMode, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, SetLastScreenMode, TestSize.Level1)
 {
     ScreenId mainScreenId = 0;
     MultiScreenMode secondaryScreenMode = MultiScreenMode::SCREEN_MIRROR;
@@ -1234,7 +1234,7 @@ HWTEST_F(MultiScreenManagerTest, SetLastScreenMode, Function | SmallTest | Level
  * @tc.desc: external mirror to internal mirror
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, InternalScreenOnChange01, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, InternalScreenOnChange01, TestSize.Level1)
 {
     ScreenId internalId = 0;
     ScreenSessionConfig internalConfig = {
@@ -1288,7 +1288,7 @@ HWTEST_F(MultiScreenManagerTest, InternalScreenOnChange01, Function | SmallTest 
  * @tc.desc: no need to change or paramater error
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, InternalScreenOnChange02, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, InternalScreenOnChange02, TestSize.Level1)
 {
     ScreenId internalId = 0;
     ScreenSessionConfig internalConfig = {
@@ -1342,7 +1342,7 @@ HWTEST_F(MultiScreenManagerTest, InternalScreenOnChange02, Function | SmallTest 
  * @tc.desc: external mirror to internal extend
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, InternalScreenOnChange03, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, InternalScreenOnChange03, TestSize.Level1)
 {
     ScreenId internalId = 0;
     ScreenSessionConfig internalConfig = {
@@ -1396,7 +1396,7 @@ HWTEST_F(MultiScreenManagerTest, InternalScreenOnChange03, Function | SmallTest 
  * @tc.desc: external mirror to external extend
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, InternalScreenOnChange04, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, InternalScreenOnChange04, TestSize.Level1)
 {
     ScreenId internalId = 0;
     ScreenSessionConfig internalConfig = {
@@ -1450,7 +1450,7 @@ HWTEST_F(MultiScreenManagerTest, InternalScreenOnChange04, Function | SmallTest 
  * @tc.desc: mode not restored
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, InternalScreenOnChange05, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, InternalScreenOnChange05, TestSize.Level1)
 {
     ScreenId internalId = 0;
     ScreenSessionConfig internalConfig = {
@@ -1506,7 +1506,7 @@ HWTEST_F(MultiScreenManagerTest, InternalScreenOnChange05, Function | SmallTest 
  * @tc.desc: session nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, InternalScreenOnChange06, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, InternalScreenOnChange06, TestSize.Level1)
 {
     ScreenId internalId = 0;
     ScreenSessionConfig internalConfig = {
@@ -1544,7 +1544,7 @@ HWTEST_F(MultiScreenManagerTest, InternalScreenOnChange06, Function | SmallTest 
  * @tc.desc: internal mirror to external mirror
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, InternalScreenOffChange01, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, InternalScreenOffChange01, TestSize.Level1)
 {
     ScreenId internalId = 0;
     ScreenSessionConfig internalConfig = {
@@ -1597,7 +1597,7 @@ HWTEST_F(MultiScreenManagerTest, InternalScreenOffChange01, Function | SmallTest
  * @tc.desc: no need to change or paramater error
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, InternalScreenOffChange02, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, InternalScreenOffChange02, TestSize.Level1)
 {
     ScreenId internalId = 0;
     ScreenSessionConfig internalConfig = {
@@ -1650,7 +1650,7 @@ HWTEST_F(MultiScreenManagerTest, InternalScreenOffChange02, Function | SmallTest
  * @tc.desc: internal extend to external mirror
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, InternalScreenOffChange03, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, InternalScreenOffChange03, TestSize.Level1)
 {
     ScreenId internalId = 0;
     ScreenSessionConfig internalConfig = {
@@ -1703,7 +1703,7 @@ HWTEST_F(MultiScreenManagerTest, InternalScreenOffChange03, Function | SmallTest
  * @tc.desc: external extend to external mirror
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, InternalScreenOffChange04, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, InternalScreenOffChange04, TestSize.Level1)
 {
     ScreenId internalId = 0;
     ScreenSessionConfig internalConfig = {
@@ -1756,7 +1756,7 @@ HWTEST_F(MultiScreenManagerTest, InternalScreenOffChange04, Function | SmallTest
  * @tc.desc: session nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, InternalScreenOffChange05, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, InternalScreenOffChange05, TestSize.Level1)
 {
     ScreenId internalId = 0;
     ScreenSessionConfig internalConfig = {
@@ -1794,7 +1794,7 @@ HWTEST_F(MultiScreenManagerTest, InternalScreenOffChange05, Function | SmallTest
  * @tc.desc: paramater error
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, ExternalScreenDisconnectChange01, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, ExternalScreenDisconnectChange01, TestSize.Level1)
 {
     ScreenId internalId = 0;
     ScreenSessionConfig internalConfig = {
@@ -1845,7 +1845,7 @@ HWTEST_F(MultiScreenManagerTest, ExternalScreenDisconnectChange01, Function | Sm
  * @tc.desc: external mirror to internal mirror
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, ExternalScreenDisconnectChange02, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, ExternalScreenDisconnectChange02, TestSize.Level1)
 {
     ScreenId internalId = 0;
     ScreenSessionConfig internalConfig = {
@@ -1896,7 +1896,7 @@ HWTEST_F(MultiScreenManagerTest, ExternalScreenDisconnectChange02, Function | Sm
  * @tc.desc: internal extend to internal mirror
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, ExternalScreenDisconnectChange03, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, ExternalScreenDisconnectChange03, TestSize.Level1)
 {
     ScreenId internalId = 0;
     ScreenSessionConfig internalConfig = {
@@ -1947,7 +1947,7 @@ HWTEST_F(MultiScreenManagerTest, ExternalScreenDisconnectChange03, Function | Sm
  * @tc.desc: external extend to internal mirror
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, ExternalScreenDisconnectChange04, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, ExternalScreenDisconnectChange04, TestSize.Level1)
 {
     ScreenId internalId = 0;
     ScreenSessionConfig internalConfig = {
@@ -1998,7 +1998,7 @@ HWTEST_F(MultiScreenManagerTest, ExternalScreenDisconnectChange04, Function | Sm
  * @tc.desc: session nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, ExternalScreenDisconnectChange05, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, ExternalScreenDisconnectChange05, TestSize.Level1)
 {
     ScreenId internalId = 0;
     ScreenSessionConfig internalConfig = {
@@ -2033,7 +2033,7 @@ HWTEST_F(MultiScreenManagerTest, ExternalScreenDisconnectChange05, Function | Sm
  * @tc.desc: A is located to the left of B
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, AreScreensTouching01, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, AreScreensTouching01, TestSize.Level1)
 {
     ScreenProperty mainProperty = ScreenProperty();
     RRect mainBounds;
@@ -2065,7 +2065,7 @@ HWTEST_F(MultiScreenManagerTest, AreScreensTouching01, Function | SmallTest | Le
  * @tc.desc: B is located to the left of A
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, AreScreensTouching02, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, AreScreensTouching02, TestSize.Level1)
 {
     ScreenProperty mainProperty = ScreenProperty();
     RRect mainBounds;
@@ -2097,7 +2097,7 @@ HWTEST_F(MultiScreenManagerTest, AreScreensTouching02, Function | SmallTest | Le
  * @tc.desc: A is located to the upper of B
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, AreScreensTouching03, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, AreScreensTouching03, TestSize.Level1)
 {
     ScreenProperty mainProperty = ScreenProperty();
     RRect mainBounds;
@@ -2129,7 +2129,7 @@ HWTEST_F(MultiScreenManagerTest, AreScreensTouching03, Function | SmallTest | Le
  * @tc.desc: B is located to the upper of A
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, AreScreensTouching04, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, AreScreensTouching04, TestSize.Level1)
 {
     ScreenProperty mainProperty = ScreenProperty();
     RRect mainBounds;
@@ -2161,7 +2161,7 @@ HWTEST_F(MultiScreenManagerTest, AreScreensTouching04, Function | SmallTest | Le
  * @tc.desc: B is located in the lower right corner of A
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, AreScreensTouching05, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, AreScreensTouching05, TestSize.Level1)
 {
     ScreenProperty mainProperty = ScreenProperty();
     RRect mainBounds;
@@ -2193,7 +2193,7 @@ HWTEST_F(MultiScreenManagerTest, AreScreensTouching05, Function | SmallTest | Le
  * @tc.desc: A is located in the lower right corner of B
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, AreScreensTouching06, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, AreScreensTouching06, TestSize.Level1)
 {
     ScreenProperty mainProperty = ScreenProperty();
     RRect mainBounds;
@@ -2225,7 +2225,7 @@ HWTEST_F(MultiScreenManagerTest, AreScreensTouching06, Function | SmallTest | Le
  * @tc.desc: B has no contact with A
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, AreScreensTouching07, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, AreScreensTouching07, TestSize.Level1)
 {
     ScreenProperty mainProperty = ScreenProperty();
     RRect mainBounds;
@@ -2257,7 +2257,7 @@ HWTEST_F(MultiScreenManagerTest, AreScreensTouching07, Function | SmallTest | Le
  * @tc.desc: B has no contact with A
  * @tc.type: FUNC
  */
-HWTEST_F(MultiScreenManagerTest, AreScreensTouching08, Function | SmallTest | Level1)
+HWTEST_F(MultiScreenManagerTest, AreScreensTouching08, TestSize.Level1)
 {
     ScreenProperty mainProperty = ScreenProperty();
     RRect mainBounds;

@@ -87,6 +87,9 @@ WSError MainSession::Reconnect(const sptr<ISessionStage>& sessionStage, const sp
                 session->scenePersistence_->SetHasSnapshot(true);
             }
         }
+        if (session->pcFoldScreenController_) {
+            session->pcFoldScreenController_->OnConnect();
+        }
         return ret;
     });
 }
@@ -94,7 +97,7 @@ WSError MainSession::Reconnect(const sptr<ISessionStage>& sessionStage, const sp
 WSError MainSession::ProcessPointDownSession(int32_t posX, int32_t posY)
 {
     const auto& id = GetPersistentId();
-    WLOGFI("id: %{public}d, type: %{public}d", id, GetWindowType());
+    TLOGD(WmsLogTag::WMS_INPUT_KEY_FLOW, "id:%{public}d, type:%{public}d", id, GetWindowType());
     auto isModal = IsModal();
     if (!isModal && CheckDialogOnForeground()) {
         HandlePointDownDialog();
@@ -282,16 +285,19 @@ WSError MainSession::OnRestoreMainWindow()
     return WSError::WS_OK;
 }
 
-WSError MainSession::OnSetWindowRectAutoSave(bool enabled)
+WSError MainSession::OnSetWindowRectAutoSave(bool enabled, bool isSaveBySpecifiedFlag)
 {
-    PostTask([weakThis = wptr(this), enabled] {
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), enabled, isSaveBySpecifiedFlag, where] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_MAIN, "session is null");
             return;
         }
         if (session->onSetWindowRectAutoSaveFunc_) {
-            session->onSetWindowRectAutoSaveFunc_(enabled);
+            session->onSetWindowRectAutoSaveFunc_(enabled, isSaveBySpecifiedFlag);
+            TLOGNI(WmsLogTag::WMS_MAIN, "%{public}s id %{public}d isSaveBySpecifiedFlag: %{public}d "
+                "enable:%{public}d", where, session->GetPersistentId(), isSaveBySpecifiedFlag, enabled);
         }
     }, __func__);
     return WSError::WS_OK;
@@ -359,8 +365,12 @@ void MainSession::RegisterSessionLockStateChangeCallback(NotifySessionLockStateC
 
 void MainSession::NotifySubAndDialogFollowRectChange(const WSRect& rect, bool isGlobal, bool needFlush)
 {
-    std::lock_guard lock(registerNotifySurfaceBoundsChangeMutex_);
-    for (const auto& [sessionId, func] : notifySurfaceBoundsChangeFuncMap_) {
+    std::unordered_map<int32_t, NotifySurfaceBoundsChangeFunc> funcMap;
+    {
+        std::lock_guard lock(registerNotifySurfaceBoundsChangeMutex_);
+        funcMap = notifySurfaceBoundsChangeFuncMap_;
+    }
+    for (const auto& [sessionId, func] : funcMap) {
         auto subSession = GetSceneSessionById(sessionId);
         if (subSession && subSession->GetIsFollowParentLayout() && func) {
             func(rect, isGlobal, needFlush);
@@ -452,5 +462,24 @@ void MainSession::SetUpdateSessionLabelAndIconListener(NofitySessionLabelAndIcon
         }
         session->updateSessionLabelAndIconFunc_ = std::move(func);
     }, __func__);
+}
+
+WSError MainSession::UpdateFlag(const std::string& flag)
+{
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), flag, where] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "session is null");
+            return;
+        }
+        session->sessionInfo_.specifiedFlag_ = flag;
+        if (session->onUpdateFlagFunc_) {
+            session->onUpdateFlagFunc_(flag);
+            TLOGND(WmsLogTag::WMS_MAIN, "%{public}s id %{public}d flag: %{public}s",
+                where, session->GetPersistentId(), flag.c_str());
+        }
+    }, __func__);
+    return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen

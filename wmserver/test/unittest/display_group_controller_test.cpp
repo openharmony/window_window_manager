@@ -107,7 +107,7 @@ namespace {
  * @tc.desc: Use displayId which not exists
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupControllerTest, GetWindowNodesByDisplayIdAndRootType01, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupControllerTest, GetWindowNodesByDisplayIdAndRootType01, TestSize.Level1)
 {
     DisplayId testId = 100; // 100 test display id
     std::vector<sptr<WindowNode>>* rootNodeVectorPtr =
@@ -120,7 +120,7 @@ HWTEST_F(DisplayGroupControllerTest, GetWindowNodesByDisplayIdAndRootType01, Fun
  * @tc.desc: Use WindowRootNodeType which not exists
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupControllerTest, GetWindowNodesByDisplayIdAndRootType02, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupControllerTest, GetWindowNodesByDisplayIdAndRootType02, TestSize.Level1)
 {
     WindowRootNodeType rootType = static_cast<WindowRootNodeType>(100);
     std::vector<sptr<WindowNode>>* rootNodeVectorPtr =
@@ -133,7 +133,7 @@ HWTEST_F(DisplayGroupControllerTest, GetWindowNodesByDisplayIdAndRootType02, Fun
  * @tc.desc: Use WindowRootNodeType which not exists
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupControllerTest, AddWindowNodeOnWindowTree01, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupControllerTest, AddWindowNodeOnWindowTree01, TestSize.Level1)
 {
     sptr<WindowNode> node1 = new WindowNode();
     node1->SetWindowProperty(CreateWindowProperty(100));
@@ -147,7 +147,7 @@ HWTEST_F(DisplayGroupControllerTest, AddWindowNodeOnWindowTree01, Function | Sma
  * @tc.desc: Use appWindowNode with nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupControllerTest, UpdateDisplayGroupWindowTree01, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupControllerTest, UpdateDisplayGroupWindowTree01, TestSize.Level1)
 {
     auto originRootNode = container_->GetRootNode(WindowRootNodeType::APP_WINDOW_NODE);
     ASSERT_NE(nullptr, originRootNode);
@@ -163,7 +163,7 @@ HWTEST_F(DisplayGroupControllerTest, UpdateDisplayGroupWindowTree01, Function | 
  * @tc.desc: IsShowingOnMultiDisplays_ is true with different DisplayStateChangeType
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupControllerTest, ProcessCrossNodes02, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupControllerTest, ProcessCrossNodes02, TestSize.Level1)
 {
     sptr<WindowNode> node1 = new WindowNode();
     node1->SetWindowProperty(CreateWindowProperty(100));
@@ -184,7 +184,7 @@ HWTEST_F(DisplayGroupControllerTest, ProcessCrossNodes02, Function | SmallTest |
  * @tc.desc: IsShowingOnMultiDisplays_ is true with different DisplayStateChangeType
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupControllerTest, ProcessCrossNodes03, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupControllerTest, ProcessCrossNodes03, TestSize.Level1)
 {
     sptr<WindowNode> node1 = new WindowNode();
     node1->SetWindowProperty(CreateWindowProperty(100));
@@ -205,7 +205,7 @@ HWTEST_F(DisplayGroupControllerTest, ProcessCrossNodes03, Function | SmallTest |
  * @tc.desc: IsShowingOnMultiDisplays_ is true with multi showing display
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupControllerTest, ProcessCrossNodes04, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupControllerTest, ProcessCrossNodes04, TestSize.Level1)
 {
     sptr<WindowNode> node1 = new WindowNode();
     node1->SetWindowProperty(CreateWindowProperty(100));
@@ -227,7 +227,7 @@ HWTEST_F(DisplayGroupControllerTest, ProcessCrossNodes04, Function | SmallTest |
  * @tc.desc: Show only on left display
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupControllerTest, UpdateWindowShowingDisplays01, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupControllerTest, UpdateWindowShowingDisplays01, TestSize.Level1)
 {
     sptr<WindowNode> node1 = new WindowNode();
     node1->SetWindowProperty(CreateWindowProperty(100));
@@ -246,7 +246,7 @@ HWTEST_F(DisplayGroupControllerTest, UpdateWindowShowingDisplays01, Function | S
  * @tc.desc: Not show on any display
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupControllerTest, UpdateWindowShowingDisplays02, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupControllerTest, UpdateWindowShowingDisplays02, TestSize.Level1)
 {
     sptr<WindowNode> node1 = new WindowNode();
     node1->SetWindowProperty(CreateWindowProperty(100));
@@ -267,7 +267,7 @@ HWTEST_F(DisplayGroupControllerTest, UpdateWindowShowingDisplays02, Function | S
  * @tc.desc: Show only on right display
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupControllerTest, UpdateWindowShowingDisplays03, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupControllerTest, UpdateWindowShowingDisplays03, TestSize.Level1)
 {
     sptr<WindowNode> node1 = new WindowNode();
     node1->SetWindowProperty(CreateWindowProperty(100));
@@ -289,7 +289,7 @@ HWTEST_F(DisplayGroupControllerTest, UpdateWindowShowingDisplays03, Function | S
  * @tc.desc: Show on multi display
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupControllerTest, UpdateWindowShowingDisplays04, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupControllerTest, UpdateWindowShowingDisplays04, TestSize.Level1)
 {
     sptr<WindowNode> node1 = new WindowNode();
     node1->SetWindowProperty(CreateWindowProperty(100));
@@ -312,7 +312,7 @@ HWTEST_F(DisplayGroupControllerTest, UpdateWindowShowingDisplays04, Function | S
  * @tc.desc: Not show on any display
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupControllerTest, UpdateWindowDisplayIdIfNeeded01, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupControllerTest, UpdateWindowDisplayIdIfNeeded01, TestSize.Level1)
 {
     sptr<WindowNode> node1 = new WindowNode();
     node1->SetWindowProperty(CreateWindowProperty(100));
@@ -331,7 +331,7 @@ HWTEST_F(DisplayGroupControllerTest, UpdateWindowDisplayIdIfNeeded01, Function |
  * @tc.desc: Show on left display
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupControllerTest, UpdateWindowDisplayIdIfNeeded02, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupControllerTest, UpdateWindowDisplayIdIfNeeded02, TestSize.Level1)
 {
     sptr<WindowNode> node1 = new WindowNode();
     node1->SetWindowProperty(CreateWindowProperty(100));
@@ -351,7 +351,7 @@ HWTEST_F(DisplayGroupControllerTest, UpdateWindowDisplayIdIfNeeded02, Function |
  * @tc.desc: Window covers whole display region
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupControllerTest, UpdateWindowDisplayIdIfNeeded03, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupControllerTest, UpdateWindowDisplayIdIfNeeded03, TestSize.Level1)
 {
     sptr<WindowNode> node1 = new WindowNode();
     node1->SetWindowProperty(CreateWindowProperty(100));
@@ -371,7 +371,7 @@ HWTEST_F(DisplayGroupControllerTest, UpdateWindowDisplayIdIfNeeded03, Function |
  * @tc.desc: Current display is default display
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupControllerTest, UpdateWindowDisplayIdIfNeeded04, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupControllerTest, UpdateWindowDisplayIdIfNeeded04, TestSize.Level1)
 {
     sptr<WindowNode> node1 = new WindowNode();
     node1->SetWindowProperty(CreateWindowProperty(100));
@@ -391,7 +391,7 @@ HWTEST_F(DisplayGroupControllerTest, UpdateWindowDisplayIdIfNeeded04, Function |
  * @tc.desc: Current display is expand display
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupControllerTest, UpdateWindowDisplayIdIfNeeded05, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupControllerTest, UpdateWindowDisplayIdIfNeeded05, TestSize.Level1)
 {
     sptr<WindowNode> node1 = new WindowNode();
     node1->SetWindowProperty(CreateWindowProperty(100));
@@ -410,7 +410,7 @@ HWTEST_F(DisplayGroupControllerTest, UpdateWindowDisplayIdIfNeeded05, Function |
  * @tc.desc: Current display is expand display
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupControllerTest, UpdateWindowDisplayIdIfNeeded06, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupControllerTest, UpdateWindowDisplayIdIfNeeded06, TestSize.Level1)
 {
     sptr<WindowNode> node1 = new WindowNode();
     node1->SetWindowProperty(CreateWindowProperty(100));
@@ -429,7 +429,7 @@ HWTEST_F(DisplayGroupControllerTest, UpdateWindowDisplayIdIfNeeded06, Function |
  * @tc.desc: Change to rect in Display Group
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupControllerTest, ChangeToRectInDisplayGroup01, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupControllerTest, ChangeToRectInDisplayGroup01, TestSize.Level1)
 {
     sptr<WindowNode> node1 = new WindowNode();
     node1->SetWindowProperty(CreateWindowProperty(100));
@@ -445,7 +445,7 @@ HWTEST_F(DisplayGroupControllerTest, ChangeToRectInDisplayGroup01, Function | Sm
  * @tc.desc: PreProcessWindowNode with child
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupControllerTest, PreProcessWindowNode01, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupControllerTest, PreProcessWindowNode01, TestSize.Level1)
 {
     sptr<WindowNode> node1 = new WindowNode();
     node1->SetWindowProperty(CreateWindowProperty(100));
@@ -465,7 +465,7 @@ HWTEST_F(DisplayGroupControllerTest, PreProcessWindowNode01, Function | SmallTes
  * @tc.desc: PreProcessWindowNode with WINDOW_UPDATE_ACTIVE, and size change reason undefined
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupControllerTest, PreProcessWindowNode02, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupControllerTest, PreProcessWindowNode02, TestSize.Level1)
 {
     sptr<WindowNode> node1 = new WindowNode();
     node1->SetWindowProperty(CreateWindowProperty(100));
@@ -482,7 +482,7 @@ HWTEST_F(DisplayGroupControllerTest, PreProcessWindowNode02, Function | SmallTes
  * @tc.desc: PreProcessWindowNode with WINDOW_UPDATE_ADDED, and isShowingOnMultiDisplays_ is true
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupControllerTest, PreProcessWindowNode03, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupControllerTest, PreProcessWindowNode03, TestSize.Level1)
 {
     sptr<WindowNode> node1 = new WindowNode();
     node1->SetWindowProperty(CreateWindowProperty(100));
@@ -499,7 +499,7 @@ HWTEST_F(DisplayGroupControllerTest, PreProcessWindowNode03, Function | SmallTes
  * @tc.desc: PostProcessWindowNode with multi display is true
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupControllerTest, PostProcessWindowNode01, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupControllerTest, PostProcessWindowNode01, TestSize.Level1)
 {
     sptr<WindowNode> node1 = new WindowNode();
     node1->SetWindowProperty(CreateWindowProperty(100));
@@ -513,7 +513,7 @@ HWTEST_F(DisplayGroupControllerTest, PostProcessWindowNode01, Function | SmallTe
  * @tc.desc: UpdateWindowDisplayId with windowToken
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupControllerTest, UpdateWindowDisplayId01, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupControllerTest, UpdateWindowDisplayId01, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
     sptr<IWindow> iWindow = iface_cast<IWindow>(iRemoteObjectMocker);
@@ -532,7 +532,7 @@ HWTEST_F(DisplayGroupControllerTest, UpdateWindowDisplayId01, Function | SmallTe
  * @tc.desc: TargetDisplayId equals to default displayId
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupControllerTest, MoveCrossNodeToTargetDisplay01, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupControllerTest, MoveCrossNodeToTargetDisplay01, TestSize.Level1)
 {
     sptr<WindowNode> node1 = new WindowNode();
     node1->SetWindowProperty(CreateWindowProperty(100));
@@ -552,7 +552,7 @@ HWTEST_F(DisplayGroupControllerTest, MoveCrossNodeToTargetDisplay01, Function | 
  * @tc.desc: DisplayId equals to defaultDisplayId
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupControllerTest, ProcessNotCrossNodesOnDestroyedDisplay01, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupControllerTest, ProcessNotCrossNodesOnDestroyedDisplay01, TestSize.Level1)
 {
     std::vector<uint32_t> windowIds;
     displayGroupController_->ProcessNotCrossNodesOnDestroyedDisplay(0, windowIds);
@@ -564,7 +564,7 @@ HWTEST_F(DisplayGroupControllerTest, ProcessNotCrossNodesOnDestroyedDisplay01, F
  * @tc.desc: Node with WINDOW_TYPE_STATUS_BAR
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupControllerTest, ProcessNotCrossNodesOnDestroyedDisplay04, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupControllerTest, ProcessNotCrossNodesOnDestroyedDisplay04, TestSize.Level1)
 {
     displayGroupController_->InitNewDisplay(1);
     SetDisplayGroupInfo(1, {200, 200, 200, 200});
@@ -588,7 +588,7 @@ HWTEST_F(DisplayGroupControllerTest, ProcessNotCrossNodesOnDestroyedDisplay04, F
  * @tc.desc: Execute to move to default display
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupControllerTest, ProcessNotCrossNodesOnDestroyedDisplay06, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupControllerTest, ProcessNotCrossNodesOnDestroyedDisplay06, TestSize.Level1)
 {
     displayGroupController_->InitNewDisplay(1);
     SetDisplayGroupInfo(1, {200, 200, 200, 200});
@@ -612,7 +612,7 @@ HWTEST_F(DisplayGroupControllerTest, ProcessNotCrossNodesOnDestroyedDisplay06, F
  * @tc.desc: DisplayId not equals to defaultDisplayId, and no node on groupWindowTree
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupControllerTest, ProcessNotCrossNodesOnDestroyedDisplay07, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupControllerTest, ProcessNotCrossNodesOnDestroyedDisplay07, TestSize.Level1)
 {
     displayGroupController_->InitNewDisplay(1);
     SetDisplayGroupInfo(1, {200, 200, 200, 200});
@@ -626,7 +626,7 @@ HWTEST_F(DisplayGroupControllerTest, ProcessNotCrossNodesOnDestroyedDisplay07, F
  * @tc.desc: UpdateNodeSizeChangeReasonWithRotation failed
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupControllerTest, UpdateNodeSizeChangeReasonWithRotation02, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupControllerTest, UpdateNodeSizeChangeReasonWithRotation02, TestSize.Level1)
 {
     sptr<WindowNode> node1 = new WindowNode();
     node1->SetWindowProperty(CreateWindowProperty(100, WindowType::WINDOW_TYPE_DOCK_SLICE));
@@ -643,7 +643,7 @@ HWTEST_F(DisplayGroupControllerTest, UpdateNodeSizeChangeReasonWithRotation02, F
  * @tc.desc: UpdateNodeSizeChangeReasonWithRotation with rootNodeVectorPtr null
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupControllerTest, UpdateNodeSizeChangeReasonWithRotation03, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupControllerTest, UpdateNodeSizeChangeReasonWithRotation03, TestSize.Level1)
 {
     displayGroupController_->displayGroupWindowTree_[0].erase(WindowRootNodeType::ABOVE_WINDOW_NODE);
     ASSERT_EQ(nullptr, displayGroupController_->GetWindowNodesByDisplayIdAndRootType(
@@ -658,7 +658,7 @@ HWTEST_F(DisplayGroupControllerTest, UpdateNodeSizeChangeReasonWithRotation03, F
  * @tc.desc: ProcessDisplayChange with different DisplayStateChangeType
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupControllerTest, ProcessDisplayChange01, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupControllerTest, ProcessDisplayChange01, TestSize.Level1)
 {
     sptr<DisplayInfo> displayInfo = new DisplayInfo();
     ASSERT_NE(nullptr, displayInfo);
@@ -680,7 +680,7 @@ HWTEST_F(DisplayGroupControllerTest, ProcessDisplayChange01, Function | SmallTes
  * @tc.desc: ProcessDisplaySizeChangeOrRotation with layout policy null
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupControllerTest, ProcessDisplaySizeChangeOrRotation01, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupControllerTest, ProcessDisplaySizeChangeOrRotation01, TestSize.Level1)
 {
     auto oriLayoutPolicy = container_->GetLayoutPolicy();
     container_->layoutPolicy_ = nullptr;
@@ -695,7 +695,7 @@ HWTEST_F(DisplayGroupControllerTest, ProcessDisplaySizeChangeOrRotation01, Funct
  * @tc.desc: GetWindowPairByDisplayId with displayId 1, which not exists
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupControllerTest, GetWindowPairByDisplayId01, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupControllerTest, GetWindowPairByDisplayId01, TestSize.Level1)
 {
     ASSERT_EQ(nullptr, displayGroupController_->GetWindowPairByDisplayId(1));
 }
@@ -705,7 +705,7 @@ HWTEST_F(DisplayGroupControllerTest, GetWindowPairByDisplayId01, Function | Smal
  * @tc.desc: ProcessDisplayCreate
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupControllerTest, ProcessDisplayCreate, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupControllerTest, ProcessDisplayCreate, TestSize.Level1)
 {
     DisplayId defaultDisplayId = 0;
     sptr<DisplayInfo> displayInfo = new DisplayInfo();
@@ -720,7 +720,7 @@ HWTEST_F(DisplayGroupControllerTest, ProcessDisplayCreate, Function | SmallTest 
  * @tc.desc: ProcessDisplayDestroy
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupControllerTest, ProcessDisplayDestroy, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupControllerTest, ProcessDisplayDestroy, TestSize.Level1)
 {
     DisplayId defaultDisplayId = 0;
     sptr<DisplayInfo> displayInfo = new DisplayInfo();
@@ -737,7 +737,7 @@ HWTEST_F(DisplayGroupControllerTest, ProcessDisplayDestroy, Function | SmallTest
  * @tc.desc: ProcessSystemBarRotation
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupControllerTest, ProcessSystemBarRotation, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupControllerTest, ProcessSystemBarRotation, TestSize.Level1)
 {
     sptr<WindowNode> node = new WindowNode();
     node->SetWindowProperty(CreateWindowProperty(100));
@@ -753,7 +753,7 @@ HWTEST_F(DisplayGroupControllerTest, ProcessSystemBarRotation, Function | SmallT
  * @tc.desc: ProcessWindowPairWhenDisplayChange
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupControllerTest, ProcessWindowPairWhenDisplayChange, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupControllerTest, ProcessWindowPairWhenDisplayChange, TestSize.Level1)
 {
     bool rotateDisplay = true;
     displayGroupController_->ProcessWindowPairWhenDisplayChange(rotateDisplay);
@@ -767,7 +767,7 @@ HWTEST_F(DisplayGroupControllerTest, ProcessWindowPairWhenDisplayChange, Functio
  * @tc.desc: DisplayId not equals to defaultDisplayId, and no node on groupWindowTree
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupControllerTest, ProcessNotCrossNodesOnDestroyedDisplay08, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupControllerTest, ProcessNotCrossNodesOnDestroyedDisplay08, TestSize.Level1)
 {
     DisplayId displayId = 0;
     std::vector<uint32_t> windowIds;
@@ -782,7 +782,7 @@ HWTEST_F(DisplayGroupControllerTest, ProcessNotCrossNodesOnDestroyedDisplay08, F
  * @tc.desc:SetSplitRatioConfig
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupControllerTest, SetSplitRatioConfig, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupControllerTest, SetSplitRatioConfig, TestSize.Level1)
 {
     DisplayId displayId = 0;
     std::vector<uint32_t> windowIds;
@@ -801,7 +801,7 @@ HWTEST_F(DisplayGroupControllerTest, SetSplitRatioConfig, Function | SmallTest |
  * @tc.desc:UpdateSplitRatioPoints
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupControllerTest, UpdateSplitRatioPoints01, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupControllerTest, UpdateSplitRatioPoints01, TestSize.Level1)
 {
     DisplayId displayId = 0;
     std::vector<uint32_t> windowIds;
@@ -819,7 +819,7 @@ HWTEST_F(DisplayGroupControllerTest, UpdateSplitRatioPoints01, Function | SmallT
  * @tc.desc:UpdateSplitRatioPoints
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupControllerTest, UpdateSplitRatioPoints02, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupControllerTest, UpdateSplitRatioPoints02, TestSize.Level1)
 {
     DisplayId displayId = 0;
     std::vector<uint32_t> windowIds;
@@ -837,7 +837,7 @@ HWTEST_F(DisplayGroupControllerTest, UpdateSplitRatioPoints02, Function | SmallT
  * @tc.desc:UpdateSplitRatioPoints
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupControllerTest, UpdateSplitRatioPoints03, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupControllerTest, UpdateSplitRatioPoints03, TestSize.Level1)
 {
     DisplayId displayId = 0;
     std::vector<uint32_t> windowIds;
@@ -855,7 +855,7 @@ HWTEST_F(DisplayGroupControllerTest, UpdateSplitRatioPoints03, Function | SmallT
  * @tc.desc:UpdateSplitRatioPoints
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayGroupControllerTest, PreProcessWindowNode05, Function | SmallTest | Level2)
+HWTEST_F(DisplayGroupControllerTest, PreProcessWindowNode05, TestSize.Level1)
 {
     WindowUpdateType type = WindowUpdateType::WINDOW_UPDATE_ACTIVE;
     sptr<WindowNode> node1 = new WindowNode();

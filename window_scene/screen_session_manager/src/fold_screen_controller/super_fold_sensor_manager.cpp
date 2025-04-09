@@ -38,7 +38,9 @@ constexpr uint16_t HALL_HAVE_KEYBOARD_THRESHOLD = 0B0100;
 constexpr uint16_t HALL_REMOVE_KEYBOARD_THRESHOLD = 0B0000;
 constexpr uint16_t HALL_ACTIVE = 1 << 2;
 constexpr int32_t SENSOR_SUCCESS = 0;
-constexpr int32_t POSTURE_INTERVAL = 100000000;
+constexpr int32_t POSTURE_INTERVAL = 100000000; // 100ms
+constexpr int32_t POSTURE_INTERVAL_FOR_WIDE_ANGLE = 10000000; // 10ms
+constexpr float UNFOLD_ANGLE = 170.0F;
 constexpr uint16_t SENSOR_EVENT_FIRST_DATA = 0;
 constexpr float ACCURACY_ERROR_FOR_PC = 0.0001F;
 } // namespace
@@ -61,6 +63,7 @@ static void SensorHallDataCallback(SensorEvent *event)
 
 void SuperFoldSensorManager::RegisterPostureCallback()
 {
+    curInterval_ = POSTURE_INTERVAL;
     postureUser.callback = SensorPostureDataCallback;
     int32_t subscribeRet = SubscribeSensor(SENSOR_TYPE_ID_POSTURE, &postureUser);
     int32_t setBatchRet = SetBatch(SENSOR_TYPE_ID_POSTURE, &postureUser, POSTURE_INTERVAL, POSTURE_INTERVAL);
@@ -125,6 +128,20 @@ void SuperFoldSensorManager::HandlePostureData(const SensorEvent * const event)
     }
     PostureData *postureData = reinterpret_cast<PostureData *>(event[SENSOR_EVENT_FIRST_DATA].data);
     curAngle_ = (*postureData).angle;
+    if (curAngle_ > UNFOLD_ANGLE && curInterval_ != POSTURE_INTERVAL_FOR_WIDE_ANGLE) {
+        int32_t setBatchRet = SetBatch(SENSOR_TYPE_ID_POSTURE, &postureUser,
+            POSTURE_INTERVAL_FOR_WIDE_ANGLE, POSTURE_INTERVAL_FOR_WIDE_ANGLE);
+        int32_t activateRet = ActivateSensor(SENSOR_TYPE_ID_POSTURE, &postureUser);
+        if (setBatchRet == 0 && activateRet == 0) {
+            curInterval_ = POSTURE_INTERVAL_FOR_WIDE_ANGLE;
+        }
+    } else if (curAngle_ < UNFOLD_ANGLE && curInterval_ != POSTURE_INTERVAL) {
+        int32_t setBatchRet = SetBatch(SENSOR_TYPE_ID_POSTURE, &postureUser, POSTURE_INTERVAL, POSTURE_INTERVAL);
+        int32_t activateRet = ActivateSensor(SENSOR_TYPE_ID_POSTURE, &postureUser);
+        if (setBatchRet == 0 && activateRet == 0) {
+            curInterval_ = POSTURE_INTERVAL;
+        }
+    }
     if (std::isgreater(curAngle_, ANGLE_MAX_VAL + ACCURACY_ERROR_FOR_PC)) {
         TLOGI(WmsLogTag::DMS, "Invalid value, angle value is: %{public}f.", curAngle_);
         return;
@@ -222,12 +239,12 @@ void SuperFoldSensorManager::HandleSuperSensorChange(SuperFoldStatusChangeEvents
 void SuperFoldSensorManager::HandleScreenConnectChange()
 {
     TLOGI(WmsLogTag::DMS, "Screen connect to stop statemachine.");
-    if (SuperFoldStateManager::GetInstance().GetCurrentStatus() == SuperFoldStatus::HALF_FOLDED) {
-        SuperFoldStateManager::GetInstance().HandleSuperFoldStatusChange(
-            SuperFoldStatusChangeEvents::ANGLE_CHANGE_EXPANDED);
-    } else if (SuperFoldStateManager::GetInstance().GetCurrentStatus() == SuperFoldStatus::KEYBOARD) {
+    if (SuperFoldStateManager::GetInstance().GetCurrentStatus() == SuperFoldStatus::KEYBOARD) {
         SuperFoldStateManager::GetInstance().HandleSuperFoldStatusChange(
             SuperFoldStatusChangeEvents::KEYBOARD_OFF);
+        SuperFoldStateManager::GetInstance().HandleSuperFoldStatusChange(
+            SuperFoldStatusChangeEvents::ANGLE_CHANGE_EXPANDED);
+    } else {
         SuperFoldStateManager::GetInstance().HandleSuperFoldStatusChange(
             SuperFoldStatusChangeEvents::ANGLE_CHANGE_EXPANDED);
     }

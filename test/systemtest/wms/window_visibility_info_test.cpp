@@ -189,7 +189,7 @@ namespace {
  * @tc.type: FUNC
  * @tc.require: issueI5FSQW
  */
-HWTEST_F(WindowVisibilityInfoTest, WindowVisibilityInfoTest01, Function | MediumTest | Level1)
+HWTEST_F(WindowVisibilityInfoTest, WindowVisibilityInfoTest01, TestSize.Level1)
 {
     floatAppInfo_.name = "window1";
     floatAppInfo_.rect = {0, 0, 300, 100};

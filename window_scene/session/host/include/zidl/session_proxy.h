@@ -52,7 +52,7 @@ public:
     WSError OnTitleAndDockHoverShowChange(bool isTitleHoverShown = true,
         bool isDockHoverShown = true) override;
     WSError OnRestoreMainWindow() override;
-    WSError OnSetWindowRectAutoSave(bool enabled) override;
+    WSError OnSetWindowRectAutoSave(bool enabled, bool isSaveBySpecifiedFlag) override;
     WSError RaiseToAppTop() override;
     WSError UpdateSessionRect(const WSRect& rect, SizeChangeReason reason, bool isGlobal = false,
         bool isFromMoveToGlobal = false, const MoveConfiguration& moveConfiguration = {},
@@ -63,6 +63,8 @@ public:
     AvoidArea GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect = WSRect::EMPTY_RECT,
         int32_t apiVersion = API_VERSION_INVALID) override;
     WSError GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoidAreas) override;
+    WSError GetTargetOrientationConfigInfo(Orientation targetOrientation,
+        const std::map<Rosen::WindowType, Rosen::SystemBarProperty>& properties) override;
     WSError RequestSessionBack(bool needMoveToBackground) override;
     WSError MarkProcessed(int32_t eventId) override;
     WSError SetGlobalMaximizeMode(MaximizeMode mode) override;
@@ -81,7 +83,7 @@ public:
      * UIExtension
      */
     WSError TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want) override;
-    WSError TransferExtensionData(const AAFwk::WantParams& wantParams) override;
+    int32_t TransferExtensionData(const AAFwk::WantParams& wantParams) override;
     WSError TransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
         int64_t uiExtensionIdLevel) override;
     void NotifySyncOn() override;
@@ -96,6 +98,7 @@ public:
     WSError UpdatePiPRect(const Rect& rect, SizeChangeReason reason) override;
     WSError UpdatePiPControlStatus(WsPiPControlType controlType, WsPiPControlStatus status) override;
     WSError SetAutoStartPiP(bool isAutoStart, uint32_t priority, uint32_t width, uint32_t height) override;
+    WSError UpdatePiPTemplateInfo(PiPTemplateInfo& pipTemplateInfo) override;
 
     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
     WSError SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
@@ -116,8 +119,7 @@ public:
     int32_t GetStatusBarHeight() override;
     WMError SetSystemWindowEnableDrag(bool enableDrag) override;
     void NotifyExtensionDetachToDisplay() override;
-    WSError RequestFocus(bool isFocused) override;
-    
+
     /*
      * Gesture Back
      */
@@ -141,11 +143,18 @@ public:
     WSError GetCrossAxisState(CrossAxisState& state) override;
 
     /*
+     * PC Fold Screen
+     */
+    WSError GetWaterfallMode(bool& isWaterfallMode) override;
+
+    /*
      * PC Window
      */
     WSError StartMovingWithCoordinate(int32_t offsetX, int32_t offsetY,
         int32_t pointerPosX, int32_t pointerPosY) override;
     WSError OnContainerModalEvent(const std::string& eventName, const std::string& eventValue) override;
+    WSError NotifyFollowParentMultiScreenPolicy(bool enabled) override;
+    WSError UpdateFlag(const std::string& flag) override;
 
     /*
      * Window Pattern
@@ -156,7 +165,21 @@ public:
      * Window layout
      */
     WSError SetFollowParentWindowLayoutEnabled(bool isFollow) override;
+    WSError KeyFrameAnimateEnd() override;
+    WSError UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode,
+        std::shared_ptr<RSTransaction>& rsTransaction) override;
 
+    /**
+     * window rotation
+     */
+    WSError UpdateRotationChangeRegistered(int32_t persistentId, bool isRegister) override;
+
+    /*
+     * window focus
+     */
+    WSError RequestFocus(bool isFocused) override;
+    WSError GetIsHighlighted(bool& isHighlighted) override;
+    WMError NotifyDisableDelegatorChange() override;
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;
 };

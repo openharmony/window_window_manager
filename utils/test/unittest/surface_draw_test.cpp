@@ -115,7 +115,7 @@ namespace {
  * @tc.desc: SurfaceDraw::DrawImage test
  * @tc.type: FUNC
  */
-HWTEST_F(SurfaceDrawTest, DrawImage01, Function | SmallTest | Level1)
+HWTEST_F(SurfaceDrawTest, DrawImage01, TestSize.Level1)
 {
     ASSERT_FALSE(SurfaceDraw::DrawImage(nullptr, 0, 0, ""));
     sptr<Window> window = CreateTestWindow("testDrawImage");
@@ -141,7 +141,7 @@ HWTEST_F(SurfaceDrawTest, DrawImage01, Function | SmallTest | Level1)
  * @tc.desc: SurfaceDraw::DecodeImageToPixelMap test
  * @tc.type: FUNC
  */
-HWTEST_F(SurfaceDrawTest, DecodeImageToPixelMap01, Function | SmallTest | Level1)
+HWTEST_F(SurfaceDrawTest, DecodeImageToPixelMap01, TestSize.Level1)
 {
     ASSERT_EQ(SurfaceDraw::DecodeImageToPixelMap(""), nullptr);
     ASSERT_NE(SurfaceDraw::DecodeImageToPixelMap(IMAGE_PLACE_HOLDER_PNG_PATH), nullptr);
@@ -152,7 +152,7 @@ HWTEST_F(SurfaceDrawTest, DecodeImageToPixelMap01, Function | SmallTest | Level1
  * @tc.desc: SurfaceDraw::DrawMasking test
  * @tc.type: FUNC
  */
-HWTEST_F(SurfaceDrawTest, DrawMasking01, Function | SmallTest | Level1)
+HWTEST_F(SurfaceDrawTest, DrawMasking01, TestSize.Level1)
 {
     OHOS::Rosen::Rect screenRect = {0, 0, 0, 0};
     OHOS::Rosen::Rect transRect = {0, 0, 0, 0};
@@ -183,7 +183,7 @@ HWTEST_F(SurfaceDrawTest, DrawMasking01, Function | SmallTest | Level1)
  * @tc.desc: SurfaceDraw::DoDrawImageRect test
  * @tc.type: FUNC
  */
-HWTEST_F(SurfaceDrawTest, DoDrawImageRect01, Function | SmallTest | Level1)
+HWTEST_F(SurfaceDrawTest, DoDrawImageRect01, TestSize.Level1)
 {
     sptr<Window> window = CreateTestWindow("testDoDrawImageRect");
     if (window == nullptr) {
@@ -219,7 +219,7 @@ HWTEST_F(SurfaceDrawTest, DoDrawImageRect01, Function | SmallTest | Level1)
  * @tc.desc: SurfaceDraw::GetSurfaceSnapshot test
  * @tc.type: FUNC
  */
-HWTEST_F(SurfaceDrawTest, GetSurfaceSnapshot01, Function | SmallTest | Level1)
+HWTEST_F(SurfaceDrawTest, GetSurfaceSnapshot01, TestSize.Level1)
 {
     sptr<Window> window = CreateTestWindow("testDoDrawImageRect");
     if (window == nullptr) {
@@ -245,7 +245,7 @@ HWTEST_F(SurfaceDrawTest, GetSurfaceSnapshot01, Function | SmallTest | Level1)
  * @tc.desc: SurfaceDraw::DrawColor test
  * @tc.type: FUNC
  */
-HWTEST_F(SurfaceDrawTest, DrawColor01, Function | SmallTest | Level1)
+HWTEST_F(SurfaceDrawTest, DrawColor01, TestSize.Level1)
 {
     ASSERT_FALSE(SurfaceDraw::DrawColor(nullptr, 0, 0, 0));
     sptr<Window> window = CreateTestWindow("DrawColor");
@@ -270,7 +270,7 @@ HWTEST_F(SurfaceDrawTest, DrawColor01, Function | SmallTest | Level1)
  * @tc.desc: SurfaceDraw::DoDraw test
  * @tc.type: FUNC
  */
-HWTEST_F(SurfaceDrawTest, DoDraw01, Function | SmallTest | Level1)
+HWTEST_F(SurfaceDrawTest, DoDraw01, TestSize.Level1)
 {
     sptr<Window> window = CreateTestWindow("DoDrawTest01");
     if (window == nullptr) {
@@ -295,7 +295,7 @@ HWTEST_F(SurfaceDrawTest, DoDraw01, Function | SmallTest | Level1)
  * @tc.desc: SurfaceDraw::DoDraw02 test
  * @tc.type: FUNC
  */
-HWTEST_F(SurfaceDrawTest, DoDraw02, Function | SmallTest | Level1)
+HWTEST_F(SurfaceDrawTest, DoDraw02, TestSize.Level1)
 {
     sptr<Window> window = CreateTestWindow("DoDraw02");
     if (window == nullptr) {
@@ -324,7 +324,7 @@ HWTEST_F(SurfaceDrawTest, DoDraw02, Function | SmallTest | Level1)
  * @tc.desc: SurfaceDraw::DoDraw03 test
  * @tc.type: FUNC
  */
-HWTEST_F(SurfaceDrawTest, DoDraw03, Function | SmallTest | Level1)
+HWTEST_F(SurfaceDrawTest, DoDraw03, TestSize.Level1)
 {
     sptr<Window> window = CreateTestWindow("DoDrawTest03");
     if (window == nullptr) {
@@ -352,7 +352,7 @@ HWTEST_F(SurfaceDrawTest, DoDraw03, Function | SmallTest | Level1)
  * @tc.desc: SurfaceDraw::DoDrawImageRect test
  * @tc.type: FUNC
  */
-HWTEST_F(SurfaceDrawTest, DrawImageRect01, Function | SmallTest | Level1)
+HWTEST_F(SurfaceDrawTest, DrawImageRect01, TestSize.Level1)
 {
     sptr<Window> window = CreateTestWindow("DrawImageRect");
     if (window == nullptr) {

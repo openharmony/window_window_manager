@@ -70,6 +70,7 @@
           "eventhandler",
           "c_utils",
           "soc_perf",
+          "relational_store",
           "resource_management",
           "resource_schedule_service",
           "imf",
@@ -103,6 +104,7 @@
             "//foundation/window/window_manager/interfaces/kits/js/declaration:window",
             "//foundation/window/window_manager/dm:libdm",
             "//foundation/window/window_manager/dm:libdm_ndk",
+            "//foundation/window/window_manager/edidparse:libedid_parse",
             "//foundation/window/window_manager/extension/extension_connection:libwindow_extension_client",
             "//foundation/window/window_manager/extension/modal_system_ui_extension:libmodal_system_ui_extension_client",
             "//foundation/window/window_manager/extension/window_extension:libwindow_extension",
@@ -132,7 +134,9 @@
                 "window_option.h",
                 "window_scene.h",
                 "wm_common.h",
-                "occupied_area_change_info.h"
+                "occupied_area_change_info.h",
+                "window_input_intercept_client.h",
+                "window_input_intercept_consumer.h"
               ],
               "header_base": "//foundation/window/window_manager/interfaces/innerkits/wm"
             }
@@ -202,6 +206,15 @@
               "header_files": [
               ],
               "header_base": "//foundation/window/window_manager/interfaces/kits/dmndk/dm"
+            }
+          },
+          {
+            "type": "so",
+            "name": "//foundation/window/window_manager/edidparse:libedid_parse",
+            "header": {
+              "header_files": [
+              ],
+              "header_base": "//foundation/window/window_manager/interfaces/innerkits/edidparse"
             }
           },
           {
@@ -390,6 +403,20 @@
               "header_files": [
               ],
               "header_base": "//foundation/window/window_manager/interfaces/kits/napi/window_runtime"
+            }
+          },
+          {
+            "type": "so",
+            "name": "//foundation/window/window_manager/interfaces/kits/cj/display_runtime:cj_display_ffi",
+            "header": {
+              "header_files": [
+                "cj_display_impl.h",
+                "cj_display_listener.h",
+                "cj_display_manager.h",
+                "display_ffi.h",
+                "display_utils.h"
+              ],
+              "header_base": "//foundation/window/window_manager/interfaces/kits/cj/display_runtime"
             }
           },
           {
