@@ -25,6 +25,7 @@
 
 #include "dm_common.h"
 #include "window_manager_hilog.h"
+#include "root_scene.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -60,6 +61,7 @@ WMError ScreenScene::Destroy()
         }
         std::shared_ptr<Ace::UIContent> uiContent = std::move(uiContent_);
         uiContent_ = nullptr;
+        RootScene::staticRootScene_->RemoveRootScene(displayId_);
         vsyncStation_->Destroy();
         task = [uiContent]() {
             if (uiContent != nullptr) {
@@ -97,6 +99,8 @@ void ScreenScene::LoadContent(const std::string& contentUrl, napi_env env, napi_
     uiContent_->Initialize(this, contentUrl, storage);
     uiContent_->Foreground();
     uiContent_->SetFrameLayoutFinishCallback(std::move(frameLayoutFinishCb_));
+    wptr<Window> weakWindow(this);
+    RootScene::staticRootScene_->AddRootScene(DEFAULT_DISPLAY_ID, weakWindow);
 }
 
 void ScreenScene::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason)
