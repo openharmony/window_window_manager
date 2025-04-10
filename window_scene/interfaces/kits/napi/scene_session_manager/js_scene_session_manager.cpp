@@ -4467,14 +4467,14 @@ void JsSceneSessionManager::RegisterSceneSessionDestructCallback()
 
 void JsSceneSessionManager::OnSceneSessionDestruct(int32_t persistentId)
 {
-    taskScheduler_->PostMainThreadTask([this, persistentId, jsCallBack = GetJSCallback(SCENE_SESSION_DESTRUCT_CB),
-        env = env_] {
-        if (jsCallBack == nullptr) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "jsCallBack is nullptr");
-            return;
-        }
-        napi_value argv[] = { CreateJsValue(env, persistentId) };
-        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
-    }, "OnSceneSessionDestruct, perisistentId: " + std::to_string(persistentId));
+    taskScheduler_->PostMainThreadTask(
+        [this, persistentId, jsCallBack = GetJSCallback(SCENE_SESSION_DESTRUCT_CB), env = env_] {
+            if (jsCallBack == nullptr) {
+                TLOGNE(WmsLogTag::WMS_LIFE, "jsCallBack is nullptr");
+                return;
+            }
+            napi_value argv[] = { CreateJsValue(env, persistentId) };
+            napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+        }, "OnSceneSessionDestruct, perisistentId: " + std::to_string(persistentId));
 }
 } // namespace OHOS::Rosen

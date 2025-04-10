@@ -8112,7 +8112,7 @@ void SceneSession::ModifyRSAnimatablePropertyMaximize(bool isMaximize, bool isDa
     Rosen::RSNode::CloseImplicitAnimation();
 }
 
-void SceneSession::SetSceneSessionDestructNotifyManagerFunc(NotifySceneSessionDestructFunc&& func)
+void SceneSession::SetSceneSessionDestructNotificationFunc(NotifySceneSessionDestructFunc&& func)
 {
     notifySceneSessionDestructFunc_ = std::move(func);
 }
