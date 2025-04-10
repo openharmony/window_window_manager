@@ -38,13 +38,13 @@ KeyboardSession::KeyboardSession(const SessionInfo& info, const sptr<SpecificSes
 
 KeyboardSession::~KeyboardSession()
 {
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "~KeyboardSession");
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Destroy KeyboardSession");
 }
 
 void KeyboardSession::BindKeyboardPanelSession(sptr<SceneSession> panelSession)
 {
     if (panelSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "panelSession is nullptr");
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "PanelSession is null");
         return;
     }
     keyboardPanelSession_ = panelSession;
@@ -59,7 +59,7 @@ sptr<SceneSession> KeyboardSession::GetKeyboardPanelSession() const
 SessionGravity KeyboardSession::GetKeyboardGravity() const
 {
     SessionGravity gravity = static_cast<SessionGravity>(GetSessionProperty()->GetKeyboardLayoutParams().gravity_);
-    TLOGD(WmsLogTag::WMS_KEYBOARD, "gravity: %{public}d", gravity);
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "Gravity: %{public}d", gravity);
     return gravity;
 }
 
@@ -106,7 +106,7 @@ WSError KeyboardSession::Hide()
     PostTask([weakThis = wptr(this)]() {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGE(WmsLogTag::WMS_KEYBOARD, "Session is null, hide keyboard failed!");
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "Session is null, hide keyboard failed");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
 
@@ -123,7 +123,7 @@ WSError KeyboardSession::Hide()
         if (session->systemConfig_.IsPcWindow() || session->GetSessionScreenName() == "HiCar" ||
             session->GetSessionScreenName() == "SuperLauncher" ||
             session->GetSessionScreenName() == "PadWithCar") {
-            TLOGD(WmsLogTag::WMS_KEYBOARD, "pc or virtual screen, restore calling session");
+            TLOGD(WmsLogTag::WMS_KEYBOARD, "PC or virtual screen, restore calling session");
             !session->IsSystemKeyboard() ? session->RestoreCallingSession() :
                 session->NotifySystemKeyboardAvoidChange(SystemKeyboardAvoidChangeReason::KEYBOARD_HIDE);
             auto sessionProperty = session->GetSessionProperty();
@@ -141,7 +141,7 @@ WSError KeyboardSession::Disconnect(bool isFromClient, const std::string& identi
     PostTask([weakThis = wptr(this), isFromClient]() {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGE(WmsLogTag::WMS_KEYBOARD, "Session is null, disconnect keyboard session failed!");
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "Session is null, disconnect keyboard session failed");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         TLOGI(WmsLogTag::WMS_KEYBOARD, "Disconnect keyboard session, id: %{public}d, isFromClient: %{public}d",
@@ -166,7 +166,7 @@ WSError KeyboardSession::NotifyClientToUpdateRect(const std::string& updateReaso
     PostTask([weakThis = wptr(this), rsTransaction, updateReason]() {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGE(WmsLogTag::WMS_KEYBOARD, "session is null");
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "Session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
 
@@ -179,7 +179,7 @@ WSError KeyboardSession::NotifyClientToUpdateRect(const std::string& updateReaso
 void KeyboardSession::UpdateKeyboardAvoidArea()
 {
     if (!IsSessionForeground() || !IsVisibleForeground()) {
-        TLOGD(WmsLogTag::WMS_KEYBOARD, "Keyboard is not foreground, no need update avoid Area");
+        TLOGD(WmsLogTag::WMS_KEYBOARD, "Keyboard is not foreground, no need to update avoid area");
         return;
     }
     if (specificCallback_ != nullptr && specificCallback_->onUpdateAvoidArea_ != nullptr) {
@@ -200,19 +200,19 @@ void KeyboardSession::OnKeyboardPanelUpdated()
 void KeyboardSession::OnCallingSessionUpdated()
 {
     if (!keyboardAvoidAreaActive_) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d, isSystemKeyboard: %{public}d, state: %{public}d, "
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "Id: %{public}d, isSystemKeyboard: %{public}d, state: %{public}d, "
             "gravity: %{public}d", GetPersistentId(), IsSystemKeyboard(), GetSessionState(), GetKeyboardGravity());
         return;
     }
     if (!IsSessionForeground() || !IsVisibleForeground()) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "Keyboard is not foreground.");
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "Keyboard is not foreground");
         return;
     }
     WSRect panelRect = GetPanelRect();
     RecalculatePanelRectForAvoidArea(panelRect);
     sptr<SceneSession> callingSession = GetSceneSession(GetCallingSessionId());
     if (callingSession == nullptr) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "Calling session is nullptr");
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "Calling session is null");
         return;
     }
     bool isCallingSessionFloating = (callingSession->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING);
@@ -222,7 +222,7 @@ void KeyboardSession::OnCallingSessionUpdated()
     WSRect callingSessionRect = callingSession->GetSessionRect();
     NotifyOccupiedAreaChangeInfo(callingSession, callingSessionRect, panelRect);
 
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d, callSession Rect: %{public}s",
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Id: %{public}d, callSession Rect: %{public}s",
         GetPersistentId(), callingSessionRect.ToString().c_str());
 }
 
@@ -231,7 +231,7 @@ void KeyboardSession::SetCallingSessionId(uint32_t callingSessionId)
     PostTask([weakThis = wptr(this), callingSessionId]() mutable {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGE(WmsLogTag::WMS_KEYBOARD, "session is null");
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "Session is null");
             return;
         }
         if (session->GetSceneSession(callingSessionId) == nullptr) {
@@ -245,7 +245,7 @@ void KeyboardSession::SetCallingSessionId(uint32_t callingSessionId)
             }
         }
         uint32_t curCallingSessionId = session->GetCallingSessionId();
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "curId: %{public}d, newId: %{public}d", curCallingSessionId, callingSessionId);
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "CurId: %{public}d, newId: %{public}d", curCallingSessionId, callingSessionId);
         auto sessionProperty = session->GetSessionProperty();
         if (curCallingSessionId != INVALID_WINDOW_ID && callingSessionId != curCallingSessionId &&
             session->IsSessionForeground()) {
@@ -281,7 +281,7 @@ WSError KeyboardSession::AdjustKeyboardLayout(const KeyboardLayoutParams& params
     PostTask([weakThis = wptr(this), params]() -> WSError {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboard session is null");
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "Keyboard session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         // set keyboard layout params
@@ -309,7 +309,7 @@ WSError KeyboardSession::AdjustKeyboardLayout(const KeyboardLayoutParams& params
         if (session->adjustKeyboardLayoutFunc_) {
             session->adjustKeyboardLayoutFunc_(params);
         }
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "adjust keyboard layout, keyboardId: %{public}d, gravity: %{public}u, "
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "Adjust keyboard layout, keyboardId: %{public}d, gravity: %{public}u, "
             "landscapeAvoidHeight: %{public}d, portraitAvoidHeight: %{public}d, "
             "LandscapeKeyboardRect: %{public}s, PortraitKeyboardRect: %{public}s, LandscapePanelRect: %{public}s, "
             "PortraitPanelRect: %{public}s, requestRect: %{public}s", session->GetPersistentId(),
@@ -334,7 +334,7 @@ sptr<SceneSession> KeyboardSession::GetSceneSession(uint32_t persistentId)
 int32_t KeyboardSession::GetFocusedSessionId()
 {
     if (keyboardCallback_ == nullptr || keyboardCallback_->onGetFocusedSessionId == nullptr) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboardCallback_ is nullptr, get focusedSessionId failed!");
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboardCallback is null, get focusedSessionId failed");
         return INVALID_WINDOW_ID;
     }
     return keyboardCallback_->onGetFocusedSessionId();
@@ -401,7 +401,7 @@ void KeyboardSession::NotifyOccupiedAreaChangeInfo(const sptr<SceneSession>& cal
 void KeyboardSession::NotifyKeyboardPanelInfoChange(WSRect rect, bool isKeyboardPanelShow)
 {
     if (!sessionStage_) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "sessionStage_ is nullptr, notify keyboard panel rect change failed");
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "SessionStage is null, notify keyboard panel rect change failed");
         return;
     }
     KeyboardPanelInfo keyboardPanelInfo;
@@ -415,7 +415,7 @@ void KeyboardSession::NotifyKeyboardPanelInfoChange(WSRect rect, bool isKeyboard
 bool KeyboardSession::CheckIfNeedRaiseCallingSession(sptr<SceneSession> callingSession, bool isCallingSessionFloating)
 {
     if (callingSession == nullptr) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "Calling session is nullptr");
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "Calling session is null");
         return false;
     }
 
@@ -432,7 +432,7 @@ bool KeyboardSession::CheckIfNeedRaiseCallingSession(sptr<SceneSession> callingS
     bool isMidScene = callingSession->GetIsMidScene();
     if (isCallingSessionFloating && isMainOrParentFloating && !isMidScene &&
         (systemConfig_.IsPhoneWindow() || (systemConfig_.IsPadWindow() && !isFreeMultiWindowMode))) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "No need to raise calling session in float window.");
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "No need to raise calling session in float window");
         return false;
     }
 
@@ -443,17 +443,17 @@ void KeyboardSession::RaiseCallingSession(const WSRect& keyboardPanelRect, bool 
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
     if (!keyboardAvoidAreaActive_) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d, isSystemKeyboard: %{public}d, state: %{public}d, "
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "Id: %{public}d, isSystemKeyboard: %{public}d, state: %{public}d, "
             "gravity: %{public}d", GetPersistentId(), IsSystemKeyboard(), GetSessionState(), GetKeyboardGravity());
         return;
     }
     if (!IsSessionForeground() || (needCheckVisible && !IsVisibleForeground())) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "Keyboard is not foreground.");
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "Keyboard is not foreground");
         return;
     }
     sptr<SceneSession> callingSession = GetSceneSession(GetCallingSessionId());
     if (callingSession == nullptr) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "Calling session is nullptr");
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "Calling session is null");
         return;
     }
     NotifyKeyboardPanelInfoChange(keyboardPanelRect, true);
@@ -498,7 +498,7 @@ void KeyboardSession::RaiseCallingSession(const WSRect& keyboardPanelRect, bool 
         NotifyOccupiedAreaChangeInfo(callingSession, newRect, panelAvoidRect, rsTransaction);
     }
 
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "keyboardRect: %{public}s, callSession OriRect: %{public}s, newRect: %{public}s"
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "KeyboardRect: %{public}s, callSession OriRect: %{public}s, newRect: %{public}s"
         ", oriPosYBeforeRaisedByKeyboard: %{public}d, isCallingSessionFloating: %{public}d",
         keyboardPanelRect.ToString().c_str(), callingSessionRect.ToString().c_str(), newRect.ToString().c_str(),
         oriPosYBeforeRaisedByKeyboard, isCallingSessionFloating);
@@ -507,13 +507,13 @@ void KeyboardSession::RaiseCallingSession(const WSRect& keyboardPanelRect, bool 
 void KeyboardSession::RestoreCallingSession(const std::shared_ptr<RSTransaction>& rsTransaction)
 {
     if (!keyboardAvoidAreaActive_) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d, isSystemKeyboard: %{public}d, state: %{public}d, "
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "Id: %{public}d, isSystemKeyboard: %{public}d, state: %{public}d, "
             "gravity: %{public}d", GetPersistentId(), IsSystemKeyboard(), GetSessionState(), GetKeyboardGravity());
         return;
     }
     sptr<SceneSession> callingSession = GetSceneSession(GetCallingSessionId());
     if (callingSession == nullptr) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "Calling session is nullptr");
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "Calling session is null");
         return;
     }
     const WSRect& emptyRect = { 0, 0, 0, 0 };
@@ -525,7 +525,7 @@ void KeyboardSession::RestoreCallingSession(const std::shared_ptr<RSTransaction>
         if (oriPosYBeforeRaisedByKeyboard != 0) {
             callingSessionRestoringRect.posY_ = oriPosYBeforeRaisedByKeyboard;
         }
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "oriPosYBeforeRaisedByKeyboard: %{public}d, sessionMode: %{public}d",
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "OriPosYBeforeRaisedByKeyboard: %{public}d, sessionMode: %{public}d",
             oriPosYBeforeRaisedByKeyboard, callingSession->GetWindowMode());
         if (!IsSystemKeyboard()) {
             callingSession->UpdateSessionRect(callingSessionRestoringRect, SizeChangeReason::UNDEFINED);
@@ -574,15 +574,15 @@ void KeyboardSession::EnableCallingSessionAvoidArea()
 void KeyboardSession::NotifySystemKeyboardAvoidChange(SystemKeyboardAvoidChangeReason reason)
 {
     if (!systemConfig_.IsPcWindow()) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "this device is not pc.");
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "This device is not pc");
         return;
     }
     if (!IsSystemKeyboard()) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "this is not system keyboard, id: %{public}d.", GetPersistentId());
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "This is not system keyboard, id: %{public}d", GetPersistentId());
         return;
     }
     if (keyboardCallback_ == nullptr || keyboardCallback_->onSystemKeyboardAvoidChange == nullptr) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "SystemKeyboardAvoidChange callback is nullptr, id: %{public}d.",
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "SystemKeyboardAvoidChange callback is null, id: %{public}d",
             GetPersistentId());
         return;
     }
@@ -594,7 +594,7 @@ void KeyboardSession::OpenKeyboardSyncTransaction()
     auto task = [weakThis = wptr(this)]() {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_KEYBOARD, "keyboard session is null");
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "Keyboard session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         if (session->isKeyboardSyncTransactionOpen_) {
@@ -618,7 +618,7 @@ void KeyboardSession::CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRe
     PostTask([weakThis = wptr(this), keyboardPanelRect, isKeyboardShow, isRotating]() {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboard session is null");
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "Keyboard session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         TLOGNI(WmsLogTag::WMS_KEYBOARD, "Close keyboard sync, isKeyboardShow: %{public}d, isRotating: %{public}d",
@@ -685,14 +685,14 @@ void KeyboardSession::MoveAndResizeKeyboard(const KeyboardLayoutParams& params,
     bool ret = (isShow) ? GetScreenWidthAndHeightFromServer(sessionProperty, screenWidth, screenHeight) :
         GetScreenWidthAndHeightFromClient(sessionProperty, screenWidth, screenHeight);
     if (!ret) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "getScreenWidthAndHeight failed, isShow: %{public}d", isShow);
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Get screen width and height failed, isShow: %{public}d", isShow);
         return;
     }
     bool isLandscape = screenWidth > screenHeight ? true : false;
     WSRect rect = isLandscape ? SessionHelper::TransferToWSRect(params.LandscapeKeyboardRect_) :
         SessionHelper::TransferToWSRect(params.PortraitKeyboardRect_);
     SetSessionRequestRect(rect);
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d, rect: %{public}s, isLandscape: %{public}d"
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Id: %{public}d, rect: %{public}s, isLandscape: %{public}d"
         ", screenWidth: %{public}d, screenHeight: %{public}d", GetPersistentId(),
         rect.ToString().c_str(), isLandscape, screenWidth, screenHeight);
 }
@@ -714,13 +714,13 @@ void KeyboardSession::RecalculatePanelRectForAvoidArea(WSRect& panelRect)
         if (static_cast<uint32_t>(panelRect.width_) == params.LandscapePanelRect_.width_) {
             panelRect.posY_ += panelRect.height_ - params.landscapeAvoidHeight_;
             panelRect.height_ = params.landscapeAvoidHeight_;
-            TLOGI(WmsLogTag::WMS_KEYBOARD, "landscapeAvoidHeight %{public}d", panelRect.height_);
+            TLOGI(WmsLogTag::WMS_KEYBOARD, "LandscapeAvoidHeight %{public}d", panelRect.height_);
             return;
         }
         if (static_cast<uint32_t>(panelRect.width_) == params.PortraitPanelRect_.width_) {
             panelRect.posY_ += panelRect.height_ - params.portraitAvoidHeight_;
             panelRect.height_ = params.portraitAvoidHeight_;
-            TLOGI(WmsLogTag::WMS_KEYBOARD, "portraitAvoidHeight %{public}d", panelRect.height_);
+            TLOGI(WmsLogTag::WMS_KEYBOARD, "PortraitAvoidHeight %{public}d", panelRect.height_);
             return;
         }
     }
@@ -728,14 +728,14 @@ void KeyboardSession::RecalculatePanelRectForAvoidArea(WSRect& panelRect)
     uint32_t screenHeight = 0;
     bool result = GetScreenWidthAndHeightFromClient(sessionProperty, screenWidth, screenHeight);
     if (!result) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "getScreenWidthAndHeight failed");
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Get screen width and height failed");
         return;
     }
     bool isLandscape = screenHeight < screenWidth;
     int32_t height_ = isLandscape ? params.landscapeAvoidHeight_ : params.portraitAvoidHeight_;
     panelRect.posY_ += panelRect.height_ - height_;
     panelRect.height_ = height_;
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "isLandscape %{public}d, avoidHeight %{public}d", isLandscape, panelRect.height_);
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "IsLandscape %{public}d, avoidHeight %{public}d", isLandscape, panelRect.height_);
 }
 
 WSError KeyboardSession::ChangeKeyboardViewMode(KeyboardViewMode mode)
@@ -760,12 +760,12 @@ void KeyboardSession::NotifyRootSceneOccupiedAreaChange(const sptr<OccupiedAreaC
     ScreenId defaultScreenId = ScreenSessionManagerClient::GetInstance().GetDefaultScreenId();
     auto displayId = GetSessionProperty()->GetDisplayId();
     if (displayId != defaultScreenId) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "displayId: %{public}" PRIu64", defaultScreenId: %{public}" PRIu64"",
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "DisplayId: %{public}" PRIu64", defaultScreenId: %{public}" PRIu64"",
             displayId, defaultScreenId);
         return;
     }
     if (keyboardCallback_ == nullptr || keyboardCallback_->onNotifyOccupiedAreaChange == nullptr) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "callback is nullptr");
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Callback is null");
         return;
     }
     keyboardCallback_->onNotifyOccupiedAreaChange(info);
@@ -790,7 +790,7 @@ WSRect KeyboardSession::GetPanelRect() const
     if (keyboardPanelSession_ != nullptr) {
         panelRect = keyboardPanelSession_->GetSessionRect();
     } else {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "Panel session is nullptr, get panel rect failed.");
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Panel session is null, get panel rect failed");
     }
     return panelRect;
 }
