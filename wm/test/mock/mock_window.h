@@ -155,11 +155,6 @@ class MockIWindowCrossAxisListener : public IWindowCrossAxisListener {
 public:
     MOCK_METHOD1(OnCrossAxisChange, void(CrossAxisState));
 };
-
-class MockIWaterfallModeChangeListener : public IWaterfallModeChangeListener {
-public:
-    MOCK_METHOD1(OnWaterfallModeChange, void(bool isWaterfallMode));
-};
 } // Rosen
 } // OHOS
 

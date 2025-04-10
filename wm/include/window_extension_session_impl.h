@@ -186,11 +186,6 @@ private:
     bool modalUIExtensionSelfLoadContent_ { false };
     float lastDensity_ { 0.0f };
     int32_t lastOrientation_ { 0 };
-
-    /*
-     * PC Fold Screen
-     */
-    WMError OnWaterfallModeChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
 };
 } // namespace Rosen
 } // namespace OHOS
