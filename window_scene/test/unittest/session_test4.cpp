@@ -1118,6 +1118,78 @@ HWTEST_F(WindowSessionTest4, SafelySetWant01, TestSize.Level1)
     ASSERT_NE(nullptr, sessionInfo.want);
     EXPECT_EQ(sessionInfo.SafelyGetWant().GetBundle(), "SafelySetWantTest");
 }
+
+/**
+ * @tc.name: ReportWindowTimeout
+ * @tc.desc: ReportWindowTimeout Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, ReportWindowTimeout, TestSize.Level1)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.abilityName_ = "ReportWindowTimeout";
+    sessionInfo.bundleName_ = "ReportWindowTimeout";
+
+    sptr<Session> session = sptr<Session>::MakeSptr(sessionInfo);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->isSystemCalling_ = true;
+    session->SetSessionProperty(property);
+
+    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    EXPECT_EQ(WindowType::APP_MAIN_WINDOW_BASE, property->GetWindowType());
+    session->ReportWindowTimeout(ATTACH_EVENT_NAME);
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    EXPECT_EQ(WindowType::WINDOW_TYPE_FLOAT, property->GetWindowType());
+    session->windowAnimationDuration_ = 0;
+    session->ReportWindowTimeout(ATTACH_EVENT_NAME);
+
+    session->windowAnimationDuration_ = 1;
+    session->handler_ = nullptr;
+    session->ReportWindowTimeout(ATTACH_EVENT_NAME);
+}
+
+/**
+ * @tc.name: ReportWindowTimeout01
+ * @tc.desc: ReportWindowTimeout01 Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, ReportWindowTimeout01, TestSize.Level1)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.abilityName_ = "ReportWindowTimeout01";
+    sessionInfo.bundleName_ = "ReportWindowTimeout01";
+
+    sptr<Session> session = sptr<Session>::MakeSptr(sessionInfo);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->isSystemCalling_ = true;
+    session->SetSessionProperty(property);
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    EXPECT_EQ(WindowType::WINDOW_TYPE_FLOAT, property->GetWindowType());
+    session->windowAnimationDuration_ = 1;
+    session->ReportWindowTimeout(ATTACH_EVENT_NAME);
+
+    session->SetAttachState(false);
+    session->ReportWindowTimeout(ATTACH_EVENT_NAME);
+    bool isAttach = session->GetAttachState();
+    EXPECT_EQ(false, isAttach);
+
+    session->SetAttachState(false);
+    session->ReportWindowTimeout(DETACH_EVENT_NAME);
+    isAttach = session->GetAttachState();
+    EXPECT_EQ(false, isAttach);
+
+    session->SetAttachState(true);
+    session->ReportWindowTimeout(ATTACH_EVENT_NAME);
+    isAttach = session->GetAttachState();
+    EXPECT_EQ(true, isAttach);
+
+    session->SetAttachState(true);
+    session->ReportWindowTimeout(DETACH_EVENT_NAME);
+    isAttach = session->GetAttachState();
+    EXPECT_EQ(true, isAttach);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

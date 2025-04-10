@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "perform_reporter.h"
 #include "session/host/include/keyboard_session.h"
 
 #include <hitrace_meter.h>
@@ -634,6 +635,7 @@ void KeyboardSession::OpenKeyboardSyncTransaction()
         if (transactionController) {
             transactionController->OpenSyncTransaction(session->GetEventHandler());
         }
+        session->ReportLifeCycleException();
         return WSError::WS_OK;
     };
     PostSyncTask(task);
@@ -668,6 +670,11 @@ void KeyboardSession::CloseKeyboardSyncTransaction(uint32_t callingId, const WSR
             return WSError::WS_OK;
         }
         session->isKeyboardSyncTransactionOpen_ = false;
+        auto handler = session->GetEventHandler();
+        if (handler) {
+            TLOGI(WmsLogTag::WMS_KEYBOARD, "Keyboard anim_sync event cancelled");
+            handler->RemoveTask(KEYBOARD_ANIM_SYNC_EVENT_NAME);
+        }
         auto transactionController = RSSyncTransactionController::GetInstance();
         if (transactionController) {
             transactionController->CloseSyncTransaction(session->GetEventHandler());
@@ -884,6 +891,34 @@ void KeyboardSession::SetSkipSelfWhenShowOnVirtualScreen(bool isSkip)
             session->specificCallback_->onSetSkipSelfWhenShowOnVirtualScreen_(surfaceNode->GetId(), isSkip);
         }
     }, __func__);
+}
+
+void KeyboardSession::ReportLifeCycleException()
+{
+    // anim_sync_exception
+    int32_t const THRESHOLD = 1000;
+    auto task = [weakThis = wptr(this)]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "keyboard session is null");
+            return;
+        }
+        if (!session->GetIsKeyboardSyncTransactionOpen()) {
+            TLOGND(WmsLogTag::WMS_KEYBOARD, "closed anim_sync in time");
+            return;
+        }
+        std::string msg("close anim_sync timeout");
+        WindowInfoReporter::GetInstance().ReportKeyboardLifeCycleException(
+            session->GetPersistentId(),
+            KeyboardLifeCycleException::ANIM_SYNC_EXCEPTION,
+            msg);
+    };
+    auto handler = GetEventHandler();
+    if (!handler) {
+        TLOGNE(WmsLogTag::WMS_KEYBOARD, "handler is null");
+        return;
+    }
+    handler->PostTask(task, KEYBOARD_ANIM_SYNC_EVENT_NAME, THRESHOLD);
 }
 
 void KeyboardSession::SetSkipEventOnCastPlus(bool isSkip)
