@@ -414,6 +414,8 @@ private:
      * Move Drag
      */
     bool CalcWindowShouldMove();
+    bool CheckCanMoveWindowType();
+    bool CheckIsPcAppInPadFullScreenOnMobileWindowMode();
 
     /*
      * PC Window
