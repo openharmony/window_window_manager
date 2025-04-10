@@ -18,7 +18,7 @@
 
 #include <any>
 #include <cstdint>
-#include <map>
+#include <unordered_map>
 #include <set>
 #include <string>
 
@@ -72,9 +72,9 @@ private:
         void* value;
         int32_t refCount;
     };
-    std::map<std::string, int32_t> stringMap;
-    std::map<int32_t, SingletonContainer::Singleton> singletonMap;
-    std::map<int32_t, std::set<int32_t>> dependencySetMap;
+    std::unordered_map<std::string, int32_t> stringMap;
+    std::unordered_map<int32_t, SingletonContainer::Singleton> singletonMap;
+    std::unordered_map<int32_t, std::set<int32_t>> dependencySetMap;
     bool destroyed_ { false };
 };
 } // namespace Rosen

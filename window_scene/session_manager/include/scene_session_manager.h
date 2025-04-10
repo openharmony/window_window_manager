@@ -750,6 +750,10 @@ private:
     void NotifySessionForeground(const sptr<SceneSession>& session, uint32_t reason, bool withAnimation);
     void NotifySessionBackground(const sptr<SceneSession>& session, uint32_t reason, bool withAnimation,
         bool isFromInnerkits);
+    std::vector<AppExecFwk::SupportWindowMode> ExtractSupportWindowModeFromMetaData(
+        const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo);
+    std::vector<AppExecFwk::SupportWindowMode> ParseWindowModeFromMetaData(
+        const std::string& supportModesInFreeMultiWindow);
     WSError ClearSession(sptr<SceneSession> sceneSession);
     bool IsSessionClearable(sptr<SceneSession> sceneSession);
     void GetAllClearableSessions(std::vector<sptr<SceneSession>>& sessionVector);
