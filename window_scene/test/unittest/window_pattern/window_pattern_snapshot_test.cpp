@@ -249,6 +249,74 @@ HWTEST_F(WindowPatternSnapshotTest, HasSnapshot, TestSize.Level1)
     scenePersistence->SetHasSnapshot(false);
     ASSERT_EQ(scenePersistence->HasSnapshot(), false);
 }
+
+/**
+ * @tc.name: SetSaveSnapshotCallback
+ * @tc.desc: test function: SetSaveSnapshotCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternSnapshotTest, SetSaveSnapshotCallback, TestSize.Level1)
+{
+    std::string bundleName = "testBundleName";
+    SessionInfo info;
+    info.abilityName_ = bundleName;
+    info.bundleName_ = bundleName;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession->saveSnapshotCallback_);
+    sceneSession->SetSaveSnapshotCallback(nullptr);
+    ASSERT_NE(nullptr, sceneSession->saveSnapshotCallback_);
+}
+
+/**
+ * @tc.name: SetRemoveSnapshotCallback
+ * @tc.desc: test function: SetRemoveSnapshotCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternSnapshotTest, SetRemoveSnapshotCallback, TestSize.Level1)
+{
+    std::string bundleName = "testBundleName";
+    SessionInfo info;
+    info.abilityName_ = bundleName;
+    info.bundleName_ = bundleName;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession->removeSnapshotCallback_);
+    sceneSession->SetRemoveSnapshotCallback(nullptr);
+    ASSERT_NE(nullptr, sceneSession->removeSnapshotCallback_);
+}
+
+/**
+ * @tc.name: SetAddSnapshotCallback
+ * @tc.desc: test function: SetAddSnapshotCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternSnapshotTest, SetAddSnapshotCallback, TestSize.Level1)
+{
+    std::string bundleName = "testBundleName";
+    SessionInfo info;
+    info.abilityName_ = bundleName;
+    info.bundleName_ = bundleName;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession->addSnapshotCallback_);
+    sceneSession->SetAddSnapshotCallback(nullptr);
+    ASSERT_NE(nullptr, sceneSession->addSnapshotCallback_);
+}
+
+/**
+ * @tc.name: NotifyAddSnapshot
+ * @tc.desc: test function: NotifyAddSnapshot
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternSnapshotTest, NotifyAddSnapshot, TestSize.Level1)
+{
+    std::string bundleName = "testBundleName";
+    SessionInfo info;
+    info.abilityName_ = bundleName;
+    info.bundleName_ = bundleName;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession->addSnapshotCallback_);
+    sceneSession->NotifyAddSnapshot(true);
+    ASSERT_NE(nullptr, sceneSession->addSnapshotCallback_);
+}
 }
 }
 }
