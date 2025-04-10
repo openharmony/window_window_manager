@@ -2403,11 +2403,11 @@ HWTEST_F(SceneSessionManagerTest, SetIsWindowRectAutoSave, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetDisplayIdByWindowId
+ * @tc.name: GetDisplayIdByWindowId01
  * @tc.desc: test function : GetDisplayIdByWindowId
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest, GetDisplayIdByWindowId, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest, GetDisplayIdByWindowId01, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "test";
@@ -2425,6 +2425,37 @@ HWTEST_F(SceneSessionManagerTest, GetDisplayIdByWindowId, TestSize.Level1)
     const std::vector<uint64_t> windowIds = {1001, sceneSession1->GetPersistentId(), sceneSession2->GetPersistentId()};
     std::unordered_map<uint64_t, DisplayId> windowDisplayIdMap;
     ASSERT_EQ(ssm_->GetDisplayIdByWindowId(windowIds, windowDisplayIdMap), WMError::WM_OK);
+}
+
+/**
+ * @tc.name: GetDisplayIdByWindowId02
+ * @tc.desc: Half fold
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, GetDisplayIdByWindowId02, TestSize.Level1)
+{
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::HALF_FOLDED,
+        { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
+    SessionInfo sessionInfo;
+    sessionInfo.isSystem_ = false;
+
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sceneSession1->SetVisibilityState(WINDOW_VISIBILITY_STATE_NO_OCCLUSION);
+    WSRect rect = { 0, 4000, 120, 1000 };
+    sceneSession1->SetSessionRect(rect);
+    sceneSession1->SetSessionGlobalRect(rect);
+    sceneSession1->property_->SetDisplayId(0);
+    sceneSession1->SetClientDisplayId(999);
+    int32_t zOrder = 100;
+    sceneSession1->SetZOrder(zOrder);
+    ssm_->sceneSessionMap_.insert({ sceneSession1->GetPersistentId(), sceneSession1 });
+
+    std::vector<uint64_t> windowIds;
+    windowIds.emplace_back(sceneSession1->GetPersistentId());
+    std::unordered_map<uint64_t, DisplayId> windowDisplayIdMap;
+    ssm_->GetDisplayIdByWindowId(windowIds, windowDisplayIdMap);
+    ssm_->sceneSessionMap_.clear();
+    ASSERT_EQ(windowDisplayIdMap[sceneSession1->GetPersistentId()], 999);
 }
 
 /**
