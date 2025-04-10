@@ -5043,7 +5043,9 @@ void SceneSessionManager::FillSessionInfo(sptr<SceneSession>& sceneSession)
         TLOGE(WmsLogTag::DEFAULT, "abilityInfo is nullptr!");
         return;
     }
-    sceneSession->SetSessionInfoSupportedWindowModes(ExtractSupportWindowModeFromMetaData(abilityInfo));
+    if (sessionInfo.supportedWindowModes.empty()) {
+        sceneSession->SetSessionInfoSupportedWindowModes(ExtractSupportWindowModeFromMetaData(abilityInfo));
+    }
     sceneSession->SetEnableRemoveStartingWindow(GetEnableRemoveStartingWindowFromBMS(abilityInfo));
     sceneSession->SetSessionInfoAbilityInfo(abilityInfo);
     sceneSession->SetSessionInfoTime(GetCurrentTime());
