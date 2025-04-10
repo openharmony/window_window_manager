@@ -560,7 +560,7 @@ public:
     void SetIsAbilityHook(bool isAbilityHook);
     bool GetIsAbilityHook() const;
     void HookSceneSessionActivation(NotifyHookSceneSessionActivationFunc&& func);
-    void SetSceneSessionDestructNotifyManagerFunc(NotifySceneSessionDestructFunc&& func);
+    void SetSceneSessionDestructNotificationFunc(NotifySceneSessionDestructFunc&& func);
     void SetIsUserRequestedExit(bool isUserRequestedExit);
 
     void SendPointerEventToUI(std::shared_ptr<MMI::PointerEvent> pointerEvent);

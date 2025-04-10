@@ -1434,7 +1434,16 @@ void SceneSessionManager::CreateRootSceneSession()
     rootSceneSession_->isKeyboardPanelEnabled_ = isKeyboardPanelEnabled_;
     rootSceneSession_->SetEventHandler(taskScheduler_->GetEventHandler());
     rootSceneSession_->SetSystemConfig(systemConfig_);
-    AAFwk::AbilityManagerClient::GetInstance()->SetRootSceneSession(rootSceneSession_->AsObject());
+
+    AppExecFwk::RunningProcessInfo info;
+    DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->GetRunningProcessInfoByPid(getpid(), info);
+    TLOGI(WmsLogTag::WMS_LIFE, "pid: %{public}d processName: %{public}s", getpid(), info.processName_.c_str());
+
+    if (SCENE_BOARD_BUNDLE_NAME == info.processName_) {
+        AAFwk::AbilityManagerClient::GetInstance()->SetRootSceneSession(rootSceneSession_->AsObject());
+        TLOGI(WmsLogTag::WMS_LIFE, "SetRootSceneSession success.");
+    }
+
     rootSceneSession_->RegisterGetStatusBarAvoidHeightFunc([this](WSRect& barArea) {
         return this->GetStatusBarAvoidHeight(barArea);
     });
@@ -14407,7 +14416,7 @@ void SceneSessionManager::RegisterSceneSessionDestructNotifyManagerFunc(const sp
         TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr");
         return;
     }
-    sceneSession->SetSceneSessionDestructNotifyManagerFunc([this](int32_t persistentId) {
+    sceneSession->SetSceneSessionDestructNotificationFunc([this](int32_t persistentId) {
         if (onSceneSessionDestruct_) {
             onSceneSessionDestruct_(persistentId);
         }
