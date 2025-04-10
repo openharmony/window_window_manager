@@ -2104,6 +2104,7 @@ void SceneSessionManager::CreateKeyboardPanelSession(sptr<SceneSession> keyboard
     if (panelSession == nullptr) {
         if (panelVec.size() >= 2) { // 2 is max number of keyboard panel, one input method and one system keyboard
             TLOGE(WmsLogTag::WMS_KEYBOARD, "Error size of keyboardPanel, size: %{public}zu", panelVec.size());
+            ReportKeyboardCreateException(keyboardSession);
             return;
         }
         std::string panelName = keyboardSession->IsSystemKeyboard() ? "SCBSystemKeyboardPanel" : "SCBKeyboardPanel";
@@ -2153,6 +2154,7 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         TLOGE(WmsLogTag::WMS_LIFE, "Invalid window type");
     }
     if (sceneSession != nullptr) {
+        sceneSession->SetWindowAnimationDuration(appWindowSceneConfig_.windowAnimation_.duration_);
         sceneSession->SetSessionInfoPersistentId(sceneSession->GetPersistentId());
         sceneSession->isKeyboardPanelEnabled_ = isKeyboardPanelEnabled_;
         sceneSession->RegisterForceSplitListener([this](const std::string& bundleName) {
@@ -14612,6 +14614,30 @@ void SceneSessionManager::RegisterHookSceneSessionActivationFunc(const sptr<Scen
     sceneSession->HookSceneSessionActivation([](const sptr<SceneSession>& session, bool isNewWant) {
         SceneSessionManager::GetInstance().RequestSceneSessionActivation(session, isNewWant);
     });
+}
+
+void SceneSessionManager::ReportKeyboardCreateException(sptr<SceneSession>& keyboardSession) {
+    std::string msg = "UITYPE:" + std::to_string(static_cast<int32_t>(systemConfig_.windowUIType_)) + ",PanelId:[";
+    for (const auto& session : GetSceneSessionVectorByType(WindowType::WINDOW_TYPE_KEYBOARD_PANEL)) {
+        if (!session) {
+            TLOGW(WmsLogTag::DEFAULT, "session nullptr");
+            continue;
+        }
+        msg += std::to_string(session->GetPersistentId()) + ",";
+    }
+    msg += "],";
+    for (const auto& session : GetSceneSessionVectorByType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT)) {
+        if (!session) {
+            TLOGW(WmsLogTag::DEFAULT, "session nullptr");
+            continue;
+        }
+        msg += "id:" + std::to_string(session->GetPersistentId()) + ",";
+        msg += "screenId:" + std::to_string(session->GetScreenId()) + ",";
+    }
+    WindowInfoReporter::GetInstance().ReportKeyboardLifeCycleException(
+        keyboardSession->GetPersistentId(),
+        KeyboardLifeCycleException::CREATE_EXCEPTION,
+        msg);
 }
 
 void SceneSessionManager::RegisterSceneSessionDestructCallback(NotifySceneSessionDestructFunc&& func)

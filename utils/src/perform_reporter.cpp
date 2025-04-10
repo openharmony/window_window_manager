@@ -360,5 +360,39 @@ int32_t WindowInfoReporter::ReportEventDispatchException(int32_t exceptionType, 
     }
     return ret;
 }
+
+int32_t WindowInfoReporter::ReportKeyboardLifeCycleException(int32_t windowId, KeyboardLifeCycleException subType,
+    std::string& msg)
+{
+    std::string eventName = "KEYBOARD_LIFE_CYCLE_EXCEPTION";
+    int32_t ret = HiSysEventWrite(
+        HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER, eventName,
+        HiviewDFX::HiSysEvent::EventType::FAULT,
+        "WINDOW_ID", windowId,
+        "SUB_TYPE", KEYBOARD_LIFE_CYCLE_EXCEPTION_MAP.at(subType),
+        "MSG", msg);
+    if (ret != 0) {
+        TLOGE(WmsLogTag::DEFAULT, "write HiSysEvent error, ret: %{public}d", ret);
+    }
+    return ret;
+}
+
+int32_t WindowInfoReporter::ReportSpecWindowLifeCycleChange(WindowLifeCycleReportInfo reportInfo)
+{
+    std::string eventName = "SPEC_WINDOW_LIFE_CYCLE_CHANGE";
+    int32_t ret = HiSysEventWrite(
+        HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER, eventName,
+        HiviewDFX::HiSysEvent::EventType::FAULT,
+        "BUNDLE_NAME", reportInfo.bundleName,
+        "WINDOW_ID", reportInfo.windowId,
+        "WINDOW_TYPE", reportInfo.windowType,
+        "WINDOW_MODE", reportInfo.windowMode,
+        "WINDOW_FLAG", reportInfo.windowFlag,
+        "STAGE", reportInfo.timeoutStage);
+    if (ret != 0) {
+        TLOGE(WmsLogTag::DEFAULT, "write HiSysEvent error, ret: %{public}d", ret);
+    }
+    return ret;
+}
 } // namespace Rosen
 }
