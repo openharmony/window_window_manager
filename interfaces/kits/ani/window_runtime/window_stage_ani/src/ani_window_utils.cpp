@@ -580,24 +580,22 @@ bool AniWindowUtils::SetSystemBarPropertiesFromAni(ani_env* env,
     windowPropertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR] = SystemBarPropertyFlag();
 
     // statusBarColor
-    ani_int aniStatusBarColor = GetColorFromAni(
+    uint32_t aniStatusBarColor = GetColorFromAni(
         env,
         "statusBarColor",
         statusProperty.backgroundColor_,
         windowPropertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR].backgroundColorFlag,
         aniProperties);
-    windowBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR].backgroundColor_ =
-        static_cast<int32_t>(aniStatusBarColor);
+    windowBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR].backgroundColor_ = aniStatusBarColor;
 
     // navigationBarColor
-    ani_int aniNaviGationBarColor = GetColorFromAni(
+    uint32_t aniNaviGationBarColor = GetColorFromAni(
         env,
         "navigationBarColor",
         navProperty.backgroundColor_,
         windowPropertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR].backgroundColorFlag,
         aniProperties);
-    windowBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].backgroundColor_ =
-        static_cast<int32_t>(aniNaviGationBarColor);
+    windowBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].backgroundColor_ = aniNaviGationBarColor;
 
     // windowStatusBarContentColor
     if (!SetWindowStatusBarContentColor(env, aniProperties, windowBarProperties, windowPropertyFlags) ||
