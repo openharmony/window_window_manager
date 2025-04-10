@@ -1652,6 +1652,11 @@ int SceneSessionManagerStub::HandleAddSkipSelfWhenShowOnVirtualScreenList(Messag
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read size failed.");
         return ERR_INVALID_DATA;
     }
+    static constexpr uint64_t MAX_SIZE = 100;
+    if (size > MAX_SIZE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Size too large.");
+        return ERR_INVALID_DATA;
+    }
     std::vector<int32_t> persistentIds;
     for (uint64_t i = 0; i < size; i++) {
         int32_t persistentId = 0;
@@ -1671,6 +1676,11 @@ int SceneSessionManagerStub::HandleRemoveSkipSelfWhenShowOnVirtualScreenList(Mes
     uint64_t size = 0;
     if (!data.ReadUint64(size)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read size failed.");
+        return ERR_INVALID_DATA;
+    }
+    static constexpr uint64_t MAX_SIZE = 100;
+    if (size > MAX_SIZE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Size too large.");
         return ERR_INVALID_DATA;
     }
     std::vector<int32_t> persistentIds;
