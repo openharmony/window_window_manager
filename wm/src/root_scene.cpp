@@ -471,6 +471,7 @@ Ace::UIContent* RootScene::GetUIContentByDisplayId(DisplayId displayId)
     }
     return nullptr;
 }
+
 void RootScene::AddRootScene(DisplayId displayId, wptr<Window> window)
 {
     auto iter = rootSceneMap_.find(displayId);
