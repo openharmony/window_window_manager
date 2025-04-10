@@ -86,6 +86,7 @@ RootScene::RootScene()
 RootScene::~RootScene()
 {
     TLOGI(WmsLogTag::WMS_MAIN, "destroyed");
+    RemoveRootScene(DEFAULT_DISPLAY_ID);
     uiContent_ = nullptr;
 }
 
@@ -107,6 +108,8 @@ void RootScene::LoadContent(const std::string& contentUrl, napi_env env, napi_va
     uiContent_->Foreground();
     uiContent_->SetFrameLayoutFinishCallback(std::move(frameLayoutFinishCb_));
     uiContent_->AddFocusActiveChangeCallback(notifyWatchFocusActiveChangeCallback_);
+    wptr<Window> weakWindow(this);
+    AddRootScene(DEFAULT_DISPLAY_ID, weakWindow);
     RegisterInputEventListener();
 }
 
@@ -136,9 +139,13 @@ void RootScene::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason re
 
 void RootScene::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
-    if (uiContent_) {
-        WLOGFD("in");
-        uiContent_->UpdateConfiguration(configuration);
+    for (const auto& sceneMap : rootSceneMap_) {
+        auto uiContent = sceneMap.second->GetUIContent();
+        if (uiContent == nullptr) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent is null, winId: %{public}u", GetWindowId());
+            return;
+        }
+        uiContent->UpdateConfiguration(configuration);
         if (configuration == nullptr) {
             return;
         }
@@ -146,7 +153,7 @@ void RootScene::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configurat
         bool isDark = (colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_DARK);
         bool ret = RSInterfaces::GetInstance().SetGlobalDarkColorMode(isDark);
         if (ret == false) {
-            WLOGFE("SetGlobalDarkColorMode fail with colorMode : %{public}s", colorMode.c_str());
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "SetGlobalDarkColorMode fail, colorMode : %{public}s", colorMode.c_str());
         }
     }
 }
@@ -192,12 +199,15 @@ void RootScene::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Conf
 
 void RootScene::UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
-    if (uiContent_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent is null, winId: %{public}d", GetWindowId());
-        return;
+    for (const auto& sceneMap : rootSceneMap_) {
+        auto uiContent = sceneMap.second->GetUIContent();
+        if (uiContent == nullptr) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent is null, winId: %{public}u", GetWindowId());
+            return;
+        }
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d", GetWindowId());
+        uiContent->UpdateConfigurationSyncForAll(configuration);
     }
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d", GetWindowId());
-    uiContent_->UpdateConfigurationSyncForAll(configuration);
 }
 
 void RootScene::UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
@@ -444,6 +454,45 @@ void RootScene::GetExtensionConfig(AAFwk::WantParams& want) const
 {
     int32_t rootHostWindowType = static_cast<int32_t>(WindowType::WINDOW_TYPE_SCENE_BOARD);
     want.SetParam(Extension::ROOT_HOST_WINDOW_TYPE_FIELD, AAFwk::Integer::Box(rootHostWindowType));
+}
+
+Ace::UIContent* RootScene::GetUIContentByDisplayId(DisplayId displayId)
+{
+    auto iter = rootSceneMap_.find(displayId);
+    if (iter == rootSceneMap_.end()) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Can not find rootScene, displayId: %{public}" PRIu64, displayId);
+        return nullptr;
+    }
+    if (iter->second != nullptr) {
+        auto window = iter->second.promote();
+        if (window != nullptr) {
+            return window->GetUIContent();
+        }
+    }
+    return nullptr;
+}
+
+void RootScene::AddRootScene(DisplayId displayId, wptr<Window> window)
+{
+    auto iter = rootSceneMap_.find(displayId);
+    if (iter == rootSceneMap_.end()) {
+        rootSceneMap_.emplace(displayId, window);
+        TLOGI(WmsLogTag::WMS_FOCUS, "insert rootScene, displayId: %{public}" PRIu64, displayId);
+    } else {
+        iter->second = window;
+        TLOGI(WmsLogTag::WMS_FOCUS, "update rootScene, displayId: %{public}" PRIu64, displayId);
+    }
+}
+
+void RootScene::RemoveRootScene(DisplayId displayId)
+{
+    TLOGI(WmsLogTag::WMS_FOCUS, "displayId: %{public}" PRIu64, displayId);
+    auto iter = rootSceneMap_.find(displayId);
+    if (iter == rootSceneMap_.end()) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Can not find rootScene, displayId: %{public}" PRIu64, displayId);
+        return;
+    }
+    rootSceneMap_.erase(displayId);
 }
 } // namespace Rosen
 } // namespace OHOS
