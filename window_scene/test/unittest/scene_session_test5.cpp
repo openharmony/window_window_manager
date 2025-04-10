@@ -1991,23 +1991,6 @@ HWTEST_F(SceneSessionTest5, GetCrossAxisState, Function | SmallTest | Level2)
     sceneSession->GetCrossAxisState(state);
     EXPECT_EQ(state, CrossAxisState::STATE_CROSS);
 }
-
-/**
- * @tc.name: GetWaterfallMode
- * @tc.desc: GetWaterfallMode
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest5, GetWaterfallMode, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "GetWaterfallMode";
-    info.bundleName_ = "GetWaterfallMode";
-    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(session, nullptr);
-    bool isWaterfallMode = true;
-    session->GetWaterfallMode(isWaterfallMode);
-    EXPECT_EQ(isWaterfallMode, false);
-}
 }
 } // namespace Rosen
 } // namespace OHOS

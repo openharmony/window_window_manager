@@ -153,9 +153,6 @@ std::mutex WindowSessionImpl::mainWindowCloseListenersMutex_;
 std::mutex WindowSessionImpl::windowWillCloseListenersMutex_;
 std::mutex WindowSessionImpl::switchFreeMultiWindowListenerMutex_;
 std::mutex WindowSessionImpl::highlightChangeListenerMutex_;
-std::mutex WindowSessionImpl::waterfallModeChangeListenerMutex_;
-std::unordered_map<int32_t, std::vector<sptr<IWaterfallModeChangeListener>>>
-    WindowSessionImpl::waterfallModeChangeListeners_;
 std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>> WindowSessionImpl::windowSessionMap_;
 std::shared_mutex WindowSessionImpl::windowSessionMutex_;
 std::set<sptr<WindowSessionImpl>> WindowSessionImpl::windowExtensionSessionSet_;
@@ -3044,81 +3041,6 @@ void WindowSessionImpl::NotifyWindowCrossAxisChange(CrossAxisState state)
     }
 }
 
-bool WindowSessionImpl::IsWaterfallModeEnabled()
-{
-    if (!isValidWaterfallMode_.load() && InitWaterfallMode()) {
-        isValidWaterfallMode_.store(true);
-    }
-    bool isWaterfallMode = isFullScreenWaterfallMode_.load();
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "waterfall: %{public}d, winId: %{public}u", isWaterfallMode, GetWindowId());
-    return isWaterfallMode;
-}
-
-bool WindowSessionImpl::InitWaterfallMode()
-{
-    if (IsWindowSessionInvalid()) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "session is invalid");
-        return false;
-    }
-    auto hostSession = GetHostSession();
-    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, false);
-    bool isWaterfallMode = false;
-    if (hostSession->GetWaterfallMode(isWaterfallMode) != WSError::WS_OK) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "failed winId: %{public}u", GetWindowId());
-        return false;
-    }
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u", GetWindowId());
-    isFullScreenWaterfallMode_.store(isWaterfallMode);
-    NotifyWaterfallModeChange(isWaterfallMode);
-    return true;
-}
-
-WMError WindowSessionImpl::RegisterWaterfallModeChangeListener(const sptr<IWaterfallModeChangeListener>& listener)
-{
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u", GetWindowId());
-    std::lock_guard<std::mutex> lockListener(waterfallModeChangeListenerMutex_);
-    return RegisterListener(waterfallModeChangeListeners_[GetPersistentId()], listener);
-}
-
-WMError WindowSessionImpl::UnregisterWaterfallModeChangeListener(const sptr<IWaterfallModeChangeListener>& listener)
-{
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u", GetWindowId());
-    std::lock_guard<std::mutex> lockListener(waterfallModeChangeListenerMutex_);
-    return UnregisterListener(waterfallModeChangeListeners_[GetPersistentId()], listener);
-}
-
-std::vector<sptr<IWaterfallModeChangeListener>> WindowSessionImpl::GetWaterfallModeChangeListeners()
-{
-    std::vector<sptr<IWaterfallModeChangeListener>> listeners;
-    std::lock_guard<std::mutex> lockListener(waterfallModeChangeListenerMutex_);
-    for (auto& listener : waterfallModeChangeListeners_[GetPersistentId()]) {
-        listeners.push_back(listener);
-    }
-    return listeners;
-}
-
-void WindowSessionImpl::NotifyWaterfallModeChange(bool isWaterfallMode)
-{
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u, waterfall: %{public}d, stat: %{public}u",
-        GetWindowId(), isWaterfallMode, static_cast<uint32_t>(state_));
-    if (state_ != WindowState::STATE_SHOWN) {
-        return;
-    }
-    AAFwk::Want want;
-    want.SetParam(Extension::WATERFALL_MODE_FIELD, isWaterfallMode);
-    if (auto uiContent = GetUIContentSharedPtr()) {
-        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "send uiext winId: %{public}u", GetWindowId());
-        uiContent->SendUIExtProprty(static_cast<uint32_t>(Extension::Businesscode::SYNC_HOST_WATERFALL_MODE),
-            want, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
-    }
-    auto waterfallModeChangeListeners = GetWaterfallModeChangeListeners();
-    for (const auto& listener : waterfallModeChangeListeners) {
-        if (listener != nullptr) {
-            listener->OnWaterfallModeChange(isWaterfallMode);
-        }
-    }
-}
-
 template<typename T>
 EnableIfSame<T, IOccupiedAreaChangeListener,
     std::vector<sptr<IOccupiedAreaChangeListener>>> WindowSessionImpl::GetListeners()
@@ -3288,10 +3210,6 @@ void WindowSessionImpl::ClearListenersById(int32_t persistentId)
         std::lock_guard<std::recursive_mutex> lockListener(windowCrossAxisListenerMutex_);
         ClearUselessListeners(windowCrossAxisListeners_, persistentId);
     }
-    {
-        std::lock_guard<std::mutex> lockListener(waterfallModeChangeListenerMutex_);
-        ClearUselessListeners(waterfallModeChangeListeners_, persistentId);
-    }
     ClearSwitchFreeMultiWindowListenersById(persistentId);
     TLOGI(WmsLogTag::WMS_LIFE, "Clear success, id: %{public}d.", GetPersistentId());
 }
@@ -3457,14 +3375,6 @@ void WindowSessionImpl::NotifyAfterForeground(bool needNotifyListeners, bool nee
     } else {
         TLOGW(WmsLogTag::WMS_MAIN, "vsyncStation is null");
     }
-
-    if (!isValidWaterfallMode_.load()) {
-        if (InitWaterfallMode()) {
-            isValidWaterfallMode_.store(true);
-        }
-    } else if (isFullScreenWaterfallMode_.load() != waterfallModeWhenEnterBackground_) {
-        NotifyWaterfallModeChange(isFullScreenWaterfallMode_.load());
-    }
 }
 
 void WindowSessionImpl::NotifyAfterDidForeground(uint32_t reason)
@@ -3514,8 +3424,6 @@ void WindowSessionImpl::NotifyAfterBackground(bool needNotifyListeners, bool nee
     } else {
         TLOGW(WmsLogTag::WMS_MAIN, "vsyncStation is null");
     }
-
-    waterfallModeWhenEnterBackground_ = isFullScreenWaterfallMode_.load();
 }
 
 void WindowSessionImpl::NotifyAfterDidBackground(uint32_t reason)
@@ -5459,9 +5367,6 @@ void WindowSessionImpl::RegisterWindowInspectorCallback()
 void WindowSessionImpl::GetExtensionConfig(AAFwk::WantParams& want) const
 {
     want.SetParam(Extension::CROSS_AXIS_FIELD, AAFwk::Integer::Box(static_cast<int32_t>(crossAxisState_.load())));
-    bool isWaterfallMode = isFullScreenWaterfallMode_.load();
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "waterfall: %{public}d, winId: %{public}u", isWaterfallMode, GetWindowId());
-    want.SetParam(Extension::WATERFALL_MODE_FIELD, AAFwk::Integer::Box(static_cast<int32_t>(isWaterfallMode)));
 }
 
 void WindowSessionImpl::UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>& want)
@@ -5476,12 +5381,8 @@ void WindowSessionImpl::UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>
     if (IsValidCrossState(state)) {
         crossAxisState_ = static_cast<CrossAxisState>(state);
     }
-    auto waterfallModeValue = configParam.GetIntParam(Extension::WATERFALL_MODE_FIELD, 0);
-    isFullScreenWaterfallMode_.store(static_cast<bool>(waterfallModeValue));
-    isValidWaterfallMode_.store(true);
     want->RemoveParam(Extension::UIEXTENSION_CONFIG_FIELD);
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "CrossAxisState: %{public}d, waterfall: %{public}d, winId: %{public}u",
-        state, isFullScreenWaterfallMode_.load(), GetWindowId());
+    TLOGI(WmsLogTag::WMS_UIEXT, "CrossAxisState:%{public}d", state);
 }
 
 bool WindowSessionImpl::IsValidCrossState(int32_t state) const

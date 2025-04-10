@@ -391,13 +391,6 @@ public:
     WMError UnregisterWindowHighlightChangeListeners(const sptr<IWindowHighlightChangeListener>& listener) override;
     WSError NotifyHighlightChange(bool isHighlight) override;
 
-    /*
-     * PC Fold Screen
-     */
-    bool IsWaterfallModeEnabled() override;
-    WMError RegisterWaterfallModeChangeListener(const sptr<IWaterfallModeChangeListener>& listener) override;
-    WMError UnregisterWaterfallModeChangeListener(const sptr<IWaterfallModeChangeListener>& listener) override;
-
 protected:
     WMError Connect();
     bool IsWindowSessionInvalid() const;
@@ -552,8 +545,6 @@ protected:
     mutable std::recursive_mutex transformMutex_;
     std::atomic<CrossAxisState> crossAxisState_ = CrossAxisState::STATE_INVALID;
     bool IsValidCrossState(int32_t state) const;
-    template <typename T>
-    EnableIfSame<T, IWindowCrossAxisListener, std::vector<sptr<IWindowCrossAxisListener>>> GetListeners();
 
     /*
      * Window Immersive
@@ -565,10 +556,6 @@ protected:
      * PC Fold Screen
      */
     bool supportEnterWaterfallMode_ { false };
-    std::atomic_bool isFullScreenWaterfallMode_ { false };
-    std::atomic_bool isValidWaterfallMode_ { false };
-    void NotifyWaterfallModeChange(bool isWaterfallMode);
-    std::vector<sptr<IWaterfallModeChangeListener>> GetWaterfallModeChangeListeners();
 
     /*
      * Window Property
@@ -594,6 +581,8 @@ private:
     template<typename T> EnableIfSame<T, IDisplayMoveListener, std::vector<sptr<IDisplayMoveListener>>> GetListeners();
     template<typename T>
     EnableIfSame<T, IWindowChangeListener, std::vector<sptr<IWindowChangeListener>>> GetListeners();
+    template <typename T>
+    EnableIfSame<T, IWindowCrossAxisListener, std::vector<sptr<IWindowCrossAxisListener>>> GetListeners();
     template<typename T>
     EnableIfSame<T, IAvoidAreaChangedListener, std::vector<sptr<IAvoidAreaChangedListener>>> GetListeners();
     template<typename T>
@@ -685,14 +674,6 @@ private:
      */
     void GetTitleButtonVisible(bool& hideMaximizeButton, bool& hideMinimizeButton, bool& hideSplitButton,
         bool& hideCloseButton);
- 
-    /*
-     * PC Fold Screen
-     */
-    bool waterfallModeWhenEnterBackground_ { false };
-    static std::mutex waterfallModeChangeListenerMutex_;
-    static std::unordered_map<int32_t, std::vector<sptr<IWaterfallModeChangeListener>>> waterfallModeChangeListeners_;
-    bool InitWaterfallMode();
 
     static std::recursive_mutex lifeCycleListenerMutex_;
     static std::recursive_mutex windowChangeListenerMutex_;
