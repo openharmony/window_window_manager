@@ -491,7 +491,7 @@ void RootScene::RemoveRootScene(DisplayId displayId)
         TLOGE(WmsLogTag::WMS_FOCUS, "Can not find rootScene, displayId: %{public}" PRIu64, displayId);
         return;
     }
-    rootSceneMap_.earse(displayId);
+    rootSceneMap_.erase(displayId);
 }
 } // namespace Rosen
 } // namespace OHOS
