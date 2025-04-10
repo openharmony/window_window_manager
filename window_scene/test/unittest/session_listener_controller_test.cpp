@@ -31,6 +31,8 @@ using namespace testing::ext;
 using namespace OHOS::Media;
 namespace OHOS {
 namespace Rosen {
+static const std::string LISTENER_CONTROLLER_TEST_THREAD = "OS_ListenerControllerTest";
+
 class MyMissionListener : public AAFwk::MissionListenerStub {
 public:
     MyMissionListener() = default;
@@ -124,7 +126,6 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
-    const std::string LISTENER_CONTROLLER_TEST_THREAD = "OS_ListenerControllerTest";
     std::shared_ptr<TaskScheduler> taskScheduler_ = std::make_shared<TaskScheduler>(LISTENER_CONTROLLER_TEST_THREAD);
     std::shared_ptr<SessionListenerController> slController;
 
