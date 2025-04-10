@@ -5221,7 +5221,7 @@ void WindowSessionImpl::NotifyKeyboardDidHide(const KeyboardPanelInfo& keyboardP
 
 void WindowSessionImpl::NotifyKeyboardAnimationCompleted(const KeyboardPanelInfo& keyboardPanelInfo)
 {
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "isShowAnimation: %{public}d, beginRect: %{public}s, endRect: %{publc}s",
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "isShowAnimation: %{public}d, beginRect: %{public}s, endRect: %{public}s",
         keyboardPanelInfo.isShowing_, keyboardPanelInfo.beginRect_.ToString().c_str(),
         keyboardPanelInfo.endRect_.ToString().c_str());
     if (handler_ == nullptr) {
@@ -5231,7 +5231,7 @@ void WindowSessionImpl::NotifyKeyboardAnimationCompleted(const KeyboardPanelInfo
     auto task = [weak = wptr(this), keyboardPanelInfo]() {
         auto window = weak.promote();
         if (!window) {
-            TLOGNE(WmsLogTag::WMS_KEYBOARD, "window is nullptr, notify keyboard animation completed failed.");
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "window is nullptr, notify keyboard animation completed failed");
             return;
         }
         if (keyboardPanelInfo.isShowing_) {
