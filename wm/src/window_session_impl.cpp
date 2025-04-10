@@ -923,10 +923,10 @@ void WindowSessionImpl::UpdateRectForPageRotation(const Rect& wmRect, const Rect
     WindowSizeChangeReason wmReason, const SceneAnimationConfig& config,
     const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
-    DisplayOrientation preDisplayOrientaion = GetDisplayOrientationForRotation();
-    TLOGE(WmsLogTag::WMS_ROTATION, "predisplayOrientation: %{public}d", static_cast<int32_t>(preDisplayOrientaion));
+    DisplayOrientation windowOrientation = GetDisplayOrientationForRotation();
+    TLOGE(WmsLogTag::WMS_ROTATION, "windowOrientation: %{public}d", static_cast<int32_t>(windowOrientation));
     handler_->PostImmediateTask(
-        [weak = wptr(this), wmReason, wmRect, preRect, config, avoidAreas, preDisplayOrientaion]() mutable {
+        [weak = wptr(this), wmReason, wmRect, preRect, config, avoidAreas, windowOrientation]() mutable {
             HITRACE_METER_NAME(HITRACE_TAG_WINDOW_MANAGER, "WindowSessionImpl::UpdateRectForPageRotation");
             auto window = weak.promote();
             if (!window) {
@@ -958,7 +958,7 @@ void WindowSessionImpl::UpdateRectForPageRotation(const Rect& wmRect, const Rect
                 static_cast<int32_t>(displayOrientaion));
             TLOGE(WmsLogTag::WMS_ROTATION, "windowRect: %{public}s, preRect: %{public}s",
                 wmRect.ToString().c_str(), preRect.ToString().c_str());
-            if (wmRect != preRect || preDisplayOrientaion != displayOrientaion) {
+            if (wmRect != preRect || windowOrientation != displayOrientaion) {
                 window->UpdateViewportConfig(wmRect, wmReason, rsTransaction, displayInfo, avoidAreas);
             }
             if (rsTransaction) {
@@ -973,12 +973,12 @@ void WindowSessionImpl::UpdateRectForPageRotation(const Rect& wmRect, const Rect
 
 void WindowSessionImpl::SetDisplayOrientationForRotation(DisplayOrientation displayOrientaion)
 {
-    preDisplayOrientaion_ = displayOrientaion;
+    windowOrientation_ = displayOrientaion;
 }
 
 DisplayOrientation WindowSessionImpl::GetDisplayOrientationForRotation() const
 {
-    return preDisplayOrientaion_;
+    return windowOrientation_;
 }
 
 void WindowSessionImpl::UpdateRectForOtherReasonTask(const Rect& wmRect, const Rect& preRect,
