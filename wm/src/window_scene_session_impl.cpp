@@ -19,6 +19,8 @@
 #include <limits>
 #include <ability_manager_client.h>
 #include <parameters.h>
+#include <sstream>
+#include <string>
 #include <transaction/rs_transaction.h>
 #include <hitrace_meter.h>
 #include <hisysevent.h>
@@ -1097,6 +1099,42 @@ static void GetWindowSizeLimits(std::shared_ptr<AppExecFwk::AbilityInfo> ability
         windowSizeLimits.minWindowHeight : abilityInfo->minWindowHeight;
 }
 
+std::vector<AppExecFwk::SupportWindowMode> WindowSceneSessionImpl::ExtractSupportWindowModeFromMetaData(
+    const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo)
+{
+    std::vector<AppExecFwk::SupportWindowMode> updateWindowModes = {};
+    if (windowSystemConfig_.IsPcWindow() || IsFreeMultiWindowMode()) {
+        auto metadata = abilityInfo->metadata;
+        for (auto item : metadata) {
+            if (item.name == "ohos.ability.window.supportWindowModeInFreeMultiWindow") {
+                updateWindowModes = ParseWindowModeFromMetaData(item.value);
+            }
+        }
+    }
+    if (updateWindowModes.empty()) {
+        updateWindowModes = abilityInfo->windowModes;
+    }
+    return updateWindowModes;
+}
+
+std::vector<AppExecFwk::SupportWindowMode> WindowSceneSessionImpl::ParseWindowModeFromMetaData(
+    const std::string& supportModesInFreeMultiWindow)
+{
+    std::vector<AppExecFwk::SupportWindowMode> updateWindowModes = {};
+    std::stringstream supportModes(supportModesInFreeMultiWindow);
+    std::string supportWindowMode;
+    while (getline(supportModes, supportWindowMode, ',')) {
+        if (supportWindowMode == "fullscreen") {
+            updateWindowModes.push_back(AppExecFwk::SupportWindowMode::FULLSCREEN);
+        } else if (supportWindowMode == "split") {
+            updateWindowModes.push_back(AppExecFwk::SupportWindowMode::SPLIT);
+        } else if (supportWindowMode == "floating") {
+            updateWindowModes.push_back(AppExecFwk::SupportWindowMode::FLOATING);
+        }
+    }
+    return updateWindowModes;
+}
+
 void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()
 {
     auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(GetContext());
@@ -1123,7 +1161,12 @@ void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()
         if (size > 0 && size <= WINDOW_SUPPORT_MODE_MAX_SIZE) {
             windowModeSupportType = WindowHelper::ConvertSupportModesToSupportType(supportedWindowModes);
         } else {
-            windowModeSupportType = WindowHelper::ConvertSupportModesToSupportType(abilityInfo->windowModes);
+            std::vector<AppExecFwk::SupportWindowMode> updateWindowModes =
+                ExtractSupportWindowModeFromMetaData(abilityInfo);
+            if (auto hostSession = GetHostSession()) {
+                hostSession->NotifySupportWindowModesChange(updateWindowModes);
+            };
+            windowModeSupportType = WindowHelper::ConvertSupportModesToSupportType(updateWindowModes);
         }
         if (windowModeSupportType == 0) {
             TLOGI(WmsLogTag::WMS_LAYOUT_PC, "mode config param is 0, all modes is supported");
@@ -3136,6 +3179,7 @@ WMError WindowSceneSessionImpl::SetSupportedWindowModesInner(
         GetWindowId(), windowModeSupportType);
     property_->SetWindowModeSupportType(windowModeSupportType);
     // update windowModeSupportType to server
+    haveSetSupportedWindowModes_ = true;
     UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO);
 
     auto hostSession = GetHostSession();
@@ -4639,6 +4683,25 @@ WSError WindowSceneSessionImpl::SwitchFreeMultiWindow(bool enable)
             window->SetFreeMultiWindowMode(enable);
         }
     }
+    if (haveSetSupportedWindowModes_) {
+        TLOGI(WmsLogTag::WMS_LAYOUT, "SupportedWindowMode is already set, id: %{public}d", GetPersistentId());
+        return WSError::WS_OK;
+    }
+    auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
+    if (abilityContext == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "abilityContext is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    auto abilityInfo = abilityContext->GetAbilityInfo();
+    std::vector<AppExecFwk::SupportWindowMode> updateWindowModes =
+        ExtractSupportWindowModeFromMetaData(abilityInfo);
+    if (auto hostSession = GetHostSession()) {
+        hostSession->NotifySupportWindowModesChange(updateWindowModes);
+    };
+    auto windowModeSupportType = WindowHelper::ConvertSupportModesToSupportType(updateWindowModes);
+    property_->SetWindowModeSupportType(windowModeSupportType);
+    UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO);
+
     return WSError::WS_OK;
 }
 
