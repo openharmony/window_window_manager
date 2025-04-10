@@ -60,6 +60,13 @@ protected:
     int32_t GetSubWindowZLevel() const override;
 
     /*
+     * PC Window
+     */
+    WSError NotifyFollowParentMultiScreenPolicy(bool enabled) override;
+    bool IsFollowParentMultiScreenPolicy() const override;
+    bool isFollowParentMultiScreenPolicy_ = false;
+
+    /*
      * Sub Window
      */
     NotifySetParentSessionFunc setParentSessionFunc_;

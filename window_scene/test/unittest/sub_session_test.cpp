@@ -401,6 +401,37 @@ HWTEST_F(SubSessionTest, IsVisibleForeground, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: NotifyFollowParentMultiScreenPolicy
+ * @tc.desc: NotifyFollowParentMultiScreenPolicy
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubSessionTest, NotifyFollowParentMultiScreenPolicy, Function | SmallTest | Level2)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    subSession_->SetSessionProperty(property);
+    EXPECT_EQ(subSession_->NotifyFollowParentMultiScreenPolicy(true), WSError::WS_OK);
+    EXPECT_EQ(subSession_->NotifyFollowParentMultiScreenPolicy(false), WSError::WS_OK);
+}
+
+/**
+ * @tc.name: IsFollowParentMultiScreenPolicy
+ * @tc.desc: IsFollowParentMultiScreenPolicy
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubSessionTest, IsFollowParentMultiScreenPolicy, Function | SmallTest | Level2)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    subSession_->SetSessionProperty(property);
+    EXPECT_EQ(subSession_->IsFollowParentMultiScreenPolicy(), false);
+    EXPECT_EQ(subSession_->NotifyFollowParentMultiScreenPolicy(true), WSError::WS_OK);
+    EXPECT_EQ(subSession_->IsFollowParentMultiScreenPolicy(), true);
+    EXPECT_EQ(subSession_->NotifyFollowParentMultiScreenPolicy(false), WSError::WS_OK);
+    EXPECT_EQ(subSession_->IsFollowParentMultiScreenPolicy(), false);
+}
+
+/**
  * @tc.name: SetParentSessionCallback
  * @tc.desc: SetParentSessionCallback
  * @tc.type: FUNC
