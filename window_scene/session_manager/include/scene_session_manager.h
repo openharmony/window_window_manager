@@ -145,6 +145,7 @@ using NotifyRootSceneOccupiedAreaChangeFunc = std::function<void(const sptr<Occu
 using GetRSNodeByStringIDFunc = std::function<std::shared_ptr<Rosen::RSNode>(const std::string& id)>;
 using SetTopWindowBoundaryByIDFunc = std::function<void(const std::string& id)>;
 using SetForegroundWindowNumFunc = std::function<void(int32_t windowNum)>;
+using NotifySceneSessionDestructFunc = std::function<void(int32_t persistentId)>;
 
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
@@ -660,6 +661,7 @@ public:
     WMError UnregisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener);
     bool IsMainWindowByPersistentId(int32_t persistentId);
     WMError MinimizeByWindowId(const std::vector<int32_t>& windowIds) override;
+    void RegisterSceneSessionDestructCallback(NotifySceneSessionDestructFunc&& func);
 
     /*
      * Window Pattern
@@ -742,6 +744,7 @@ private:
      * Window Lifecycle
      */
     bool isUserAuthPassed_ {false};
+    NotifySceneSessionDestructFunc onSceneSessionDestruct_;
     sptr<SceneSession> GetSceneSessionBySessionInfo(const SessionInfo& sessionInfo);
     void CreateRootSceneSession();
     void InitSceneSession(sptr<SceneSession>& sceneSession, const SessionInfo& sessionInfo,
@@ -761,6 +764,7 @@ private:
     sptr<SceneSession> GetMainSessionByModuleName(const SessionInfo& sessionInfo);
     void SetSceneSessionIsAbilityHook(sptr<SceneSession> sceneSession);
     void RegisterHookSceneSessionActivationFunc(const sptr<SceneSession>& sceneSession);
+    void RegisterSceneSessionDestructNotifyManagerFunc(const sptr<SceneSession>& sceneSession);
 
     /*
      * Window Focus

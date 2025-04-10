@@ -127,6 +127,7 @@ using NotifySetParentSessionFunc = std::function<void(int32_t oldParentWindowId,
 using NotifyUpdateFlagFunc = std::function<void(const std::string& flag)>;
 using NotifyRotationChangeFunc = std::function<void(int32_t persistentId, bool isRegister)>;
 using NotifyHookSceneSessionActivationFunc = std::function<void(const sptr<SceneSession>& session, bool isNewWant)>;
+using NotifySceneSessionDestructFunc = std::function<void(int32_t persistentId)>;
 
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
@@ -559,6 +560,8 @@ public:
     void SetIsAbilityHook(bool isAbilityHook);
     bool GetIsAbilityHook() const;
     void HookSceneSessionActivation(NotifyHookSceneSessionActivationFunc&& func);
+    void SetSceneSessionDestructNotifyManagerFunc(NotifySceneSessionDestructFunc&& func);
+    void SetIsUserRequestedExit(bool isUserRequestedExit);
 
     void SendPointerEventToUI(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     bool SendKeyEventToUI(std::shared_ptr<MMI::KeyEvent> keyEvent, bool isPreImeEvent = false);
@@ -926,6 +929,7 @@ private:
     /*
      * Window Lifecycle
      */
+    NotifySceneSessionDestructFunc notifySceneSessionDestructFunc_;
     bool CheckIdentityTokenIfMatched(const std::string& identityToken);
     bool CheckPidIfMatched();
 
@@ -1241,6 +1245,7 @@ private:
     */
     bool isAbilityHook_ = false;
     NotifyHookSceneSessionActivationFunc hookSceneSessionActivationFunc_;
+    bool isUserRequestedExit_ = false;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
