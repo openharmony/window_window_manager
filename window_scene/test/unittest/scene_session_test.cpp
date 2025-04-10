@@ -33,6 +33,14 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
+namespace {
+std::string logMsg;
+void SceneSessionLogCallback(
+    const LogType type, const LogLevel level, const unsigned int domain, const char *tag, const char *msg)
+{
+    logMsg = msg;
+}
+}
 constexpr int WAIT_ASYNC_US = 1000000;
 class SceneSessionTest : public testing::Test {
 public:
@@ -1826,6 +1834,31 @@ HWTEST_F(SceneSessionTest, IsFollowParentMultiScreenPolicy, TestSize.Level1)
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback);
     EXPECT_EQ(sceneSession->IsFollowParentMultiScreenPolicy(), false);
+}
+
+/**
+ * @tc.name: CloneWindow
+ * @tc.desc: CloneWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, CloneWindow, TestSize.Level1)
+{
+    LOG_SetCallback(SceneSessionLogCallback);
+    SessionInfo info;
+    info.abilityName_ = "CloneWindow";
+    info.bundleName_ = "CloneWindow";
+    info.windowType_ = 1;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback);
+    EXPECT_NE(sceneSession, nullptr);
+    uint64_t surfaceNodeId = 1;
+    bool needOffScreen = false;
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    sceneSession->SetSurfaceNode(surfaceNode);
+    sceneSession->CloneWindow(surfaceNodeId, needOffScreen);
+    EXPECT_TRUE(logMsg.find("cloned") != std::string::npos);
 }
 } // namespace
 } // Rosen

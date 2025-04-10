@@ -2603,6 +2603,20 @@ HWTEST_F(SceneSessionManagerTest, SetForegroundWindowNum, TestSize.Level1)
     WMError res = ssm_->SetForegroundWindowNum(windowNum);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, res);
 }
+
+/**
+ * @tc.name: CloneWindow
+ * @tc.desc: test function : CloneWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, CloneWindow, TestSize.Level1)
+{
+    int32_t fromPersistentId = 8;
+    int32_t toPersistentId = 11;
+    bool needOffScreen = true;
+    WSError res = ssm_->CloneWindow(fromPersistentId, toPersistentId, needOffScreen);
+    EXPECT_EQ(WSError::WS_ERROR_NULLPTR, res);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
