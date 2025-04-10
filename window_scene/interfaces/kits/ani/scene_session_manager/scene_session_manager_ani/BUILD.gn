@@ -16,7 +16,10 @@ import("//build/config/components/ets_frontend/ets2abc_config.gni")
 # abc generate
 generate_static_abc("scene_session_manager_abc") {
   base_url = "./ets"
-  files = [ "./ets/@ohos.sceneSessionManager.ets" ]
+  files = [
+    "./ets/@ohos.sceneSessionManager.ets",
+    "./ets/sceneSessionManager_entry.ets",
+  ]
   is_boot_abc = "True"
   device_dst_file = "/system/framework/scene_session_manager_abc.abc"
 }
