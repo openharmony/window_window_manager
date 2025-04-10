@@ -877,7 +877,7 @@ private:
     void NotifyRotationChangeResultInner(
             const std::vector<sptr<IWindowRotationChangeListener>>& windowRotationChangeListener,
             const RotationChangeInfo& rotationChangeInfo);
-    DisplayOrientation preDisplayOrientaion_ = DisplayOrientation::UNKNOWN;
+    DisplayOrientation windowOrientation_ = DisplayOrientation::UNKNOWN;
     Orientation preferredRequestedOrientation_ = Orientation::UNSPECIFIED;
 
     /*
