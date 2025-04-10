@@ -13904,6 +13904,9 @@ WMError SceneSessionManager::GetDisplayIdByWindowId(const std::vector<uint64_t>&
                 continue;
             }
             DisplayId displayId = session->GetSessionProperty()->GetDisplayId();
+            if (PcFoldScreenManager::GetInstence().IsHalfFoldedOnMainDisplay(displayId)) {
+                displayId = session->GetClientDisplayId();
+            }
             TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "windowId:%{public}" PRIu64 ", displayId:%{public}" PRIu64,
                 windowId, displayId);
             windowDisplayIdMap.insert({windowId, displayId});
