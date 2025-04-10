@@ -13206,7 +13206,7 @@ void SceneSessionManager::SetDelayRemoveSnapshot(bool delayRemoveSnapshot)
     delayRemoveSnapshot_ = delayRemoveSnapshot;
 }
 
-bool SceneSessionManager::GetDelayRemoveSnapshot()
+bool SceneSessionManager::GetDelayRemoveSnapshot() const
 {
     return delayRemoveSnapshot_;
 }

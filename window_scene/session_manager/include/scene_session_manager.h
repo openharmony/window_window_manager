@@ -665,7 +665,7 @@ public:
      * Window Pattern
      */
     void SetDelayRemoveSnapshot(bool delayRemoveSnapshot);
-    bool GetDelayRemoveSnapshot();
+    bool GetDelayRemoveSnapshot() const;
     void InitSnapshotCache();
     void VisitSnapshotFromCache(int32_t persistentId);
     void PutSnapshotToCache(int32_t persistentId);
