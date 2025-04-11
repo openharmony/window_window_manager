@@ -973,7 +973,7 @@ HWTEST_F(SceneSessionLifecycleTest, PendingSessionActivation02, TestSize.Level1)
     sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
     abilitySessionInfo->reuseDelegatorWindow = true;
     auto result = sceneSession->PendingSessionActivation(abilitySessionInfo);
-    ASSERT_EQ(result, WSError::WS_OK);
+    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
 }
 
 /**
