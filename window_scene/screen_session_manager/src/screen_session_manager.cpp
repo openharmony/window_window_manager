@@ -8847,8 +8847,9 @@ DMError ScreenSessionManager::SetScreenSkipProtectedWindow(const std::vector<Scr
                 continue;
             }
             if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::VIRTUAL) {
-                ScreenId rsScreenId;
-                if (!screenIdManager_.ConvertToRsScreenId(screenSession->GetScreenId(), rsScreenId)) {
+                ScreenId rsScreenId = INVALID_SCREEN_ID;
+                if (!screenIdManager_.ConvertToRsScreenId(screenSession->GetScreenId(), rsScreenId) ||
+                    rsScreenId == INVALID_SCREEN_ID) {
                     TLOGE(WmsLogTag::DMS, "No corresponding rsId.");
                     continue;
                 }
