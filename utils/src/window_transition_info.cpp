@@ -250,7 +250,7 @@ bool WindowTransitionInfo::Marshalling(Parcel& parcel) const
 
 WindowTransitionInfo* WindowTransitionInfo::Unmarshalling(Parcel& parcel)
 {
-    auto windowTransitionInfo = new(std::nothrow) WindowTransitionInfo();
+    std::shared_ptr<WindowTransitionInfo> windowTransitionInfo = std::make_shared<WindowTransitionInfo>();
     if (windowTransitionInfo == nullptr) {
         return nullptr;
     }
