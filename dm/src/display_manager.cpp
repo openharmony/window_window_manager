@@ -2119,7 +2119,7 @@ std::string DisplayManager::Impl::GetDisplayInfoSrting(sptr<DisplayInfo> display
     return oss.str();
 }
 
-uint32_t DisplayManager::impl::GetDeviceStatus()
+uint32_t DisplayManager::Impl::GetDeviceStatus()
 {
     return SingletonContainer::Get<DisplayManagerAdapter>().GetDeviceStatus();
 }
