@@ -2688,6 +2688,62 @@ WMError SceneSessionManagerProxy::UpdateScreenLockStatusForApp(const std::string
     return static_cast<WMError>(reply.ReadInt32());
 }
 
+WMError SceneSessionManagerProxy::AddSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write token failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint64(persistentIds.size())) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write size failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    for (const auto persistentId: persistentIds) {
+        if (!data.WriteInt32(persistentId)) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write persistentId failed");
+            return WMError::WM_ERROR_IPC_FAILED;
+        }
+    }
+    if (Remote()->SendRequest(
+        static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_ADD_SKIP_SELF_ON_VIRTUAL_SCREEN),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(reply.ReadInt32());
+}
+
+WMError SceneSessionManagerProxy::RemoveSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write token failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint64(persistentIds.size())) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write size failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    for (const auto persistentId: persistentIds) {
+        if (!data.WriteInt32(persistentId)) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write persistentId failed");
+            return WMError::WM_ERROR_IPC_FAILED;
+        }
+    }
+    if (Remote()->SendRequest(
+        static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_REMOVE_SKIP_SELF_ON_VIRTUAL_SCREEN),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(reply.ReadInt32());
+}
+
 WMError SceneSessionManagerProxy::IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode)
 {
     MessageParcel data;

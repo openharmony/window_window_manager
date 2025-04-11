@@ -19,7 +19,7 @@
 #include "display_manager.h"
 #include "input_event.h"
 #include "key_event.h"
-
+#include "mock/mock_session_stage.h"
 
 #include "screen_manager.h"
 #include "session/host/include/sub_session.h"
@@ -266,6 +266,78 @@ HWTEST_F(SceneSessionTest6, SetFollowParentWindowLayoutEnabled03, TestSize.Level
 
     sceneSession->SetFollowParentWindowLayoutEnabled(false);
     ASSERT_EQ(nullptr, parentSession->notifySurfaceBoundsChangeFuncMap_[sceneSession->GetPersistentId()]);
+}
+
+/**
+ * @tc.name: NotifyKeyboardAnimationCompleted
+ * @tc.desc: NotifyKeyboardAnimationCompleted
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, NotifyKeyboardAnimationCompleted, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->property_ = property;
+    sceneSession->sessionStage_ = nullptr;
+    bool isShowAnimation = true;
+    WSRect beginRect = {0, 2720, 1260, 1020};
+    WSRect endRect = {0, 1700, 1260, 1020};
+    sceneSession->NotifyKeyboardAnimationCompleted(isShowAnimation, beginRect, endRect);
+    sceneSession->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
+    EXPECT_NE(nullptr, sceneSession->sessionStage_);
+
+    sceneSession->NotifyKeyboardDidShowRegistered(true);
+    sceneSession->NotifyKeyboardAnimationCompleted(isShowAnimation, beginRect, endRect);
+
+    isShowAnimation = false;
+    beginRect = {0, 1700, 1260, 1020};
+    endRect = {0, 2720, 1260, 1020};
+    sceneSession->NotifyKeyboardAnimationCompleted(isShowAnimation, beginRect, endRect);
+    sceneSession->NotifyKeyboardDidHideRegistered(true);
+    sceneSession->NotifyKeyboardAnimationCompleted(isShowAnimation, beginRect, endRect);
+}
+
+
+/**
+ * @tc.name: UpdateNewSizeForPCWindow
+ * @tc.desc: UpdateNewSizeForPCWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, UpdateNewSizeForPCWindow, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "UpdateNewSizeForPCWindow";
+    info.bundleName_ = "UpdateNewSizeForPCWindow";
+    info.windowType_ = 1;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(12, WindowType::WINDOW_TYPE_FLOAT);
+    sceneSession->moveDragController_->SetMoveDragHotAreaCrossDisplay(true);
+    sceneSession->UpdateNewSizeForPCWindow();
+    ASSERT_EQ(false, sceneSession->moveDragController_->IsMoveDragHotAreaCrossDisplay());
+}
+
+/**
+ * @tc.name: CalcNewWindowRectIfNeed
+ * @tc.desc: CalcNewWindowRectIfNeed
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, CalcNewWindowRectIfNeed, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "CalcNewWindowRectIfNeed";
+    info.bundleName_ = "CalcNewWindowRectIfNeed";
+    info.windowType_ = 1;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetLastLimitsVpr(1.9);
+    sceneSession->property_ = property;
+    DMRect availableArea = { 0, 0, 1920, 1080 };
+    float newVpr = 2.85;
+    WSRect winRect = { 0, 0, 800, 600 };
+    sceneSession->CalcNewWindowRectIfNeed(availableArea, newVpr, winRect);
+    WSRect result = { 0, 0, 1200, 900 };
+    ASSERT_EQ(result, winRect);
 }
 } // namespace
 } // namespace Rosen

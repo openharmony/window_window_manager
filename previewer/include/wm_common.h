@@ -365,6 +365,9 @@ enum class WindowSizeChangeReason : uint32_t {
     AVOID_AREA_CHANGE,
     MAXIMIZE_TO_SPLIT,
     SPLIT_TO_MAXIMIZE,
+    SPLIT_DRAG_START,
+    SPLIT_DRAG,
+    SPLIT_DRAG_END,
     END
 };
 

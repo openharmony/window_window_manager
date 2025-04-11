@@ -113,7 +113,7 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, SetAspectRatio01, TestSize.Level1)
  * @tc.desc: SetAspectRatio test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplLayoutTest, SetAspectRatio02, TestSize.Level1)
+HWTEST_F(WindowSceneSessionImplLayoutTest, SetAspectRatio02, TestSize.Level0)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetAspectRatio02");
@@ -207,7 +207,7 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, ResetAspectRatio02, TestSize.Level1)
  * @tc.desc: SetWindowLimits
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplLayoutTest, SetWindowLimits01, TestSize.Level1)
+HWTEST_F(WindowSceneSessionImplLayoutTest, SetWindowLimits01, TestSize.Level0)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetWindowLimits01");
@@ -255,7 +255,7 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, SetWindowLimits01, TestSize.Level1)
  * @tc.desc: SetWindowLimits
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplLayoutTest, SetWindowLimits06, TestSize.Level1)
+HWTEST_F(WindowSceneSessionImplLayoutTest, SetWindowLimits06, TestSize.Level0)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetWindowLimits06");
@@ -456,7 +456,7 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, CalculateNewLimitsByRatio02, TestSize
  * @tc.desc: MoveToAsync
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplLayoutTest, MoveToAsync01, TestSize.Level1)
+HWTEST_F(WindowSceneSessionImplLayoutTest, MoveToAsync01, TestSize.Level0)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("MoveToAsync01");
@@ -516,7 +516,7 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, MoveToAsync02, TestSize.Level1)
  * @tc.desc: ResizeAsync
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplLayoutTest, ResizeAsync01, TestSize.Level1)
+HWTEST_F(WindowSceneSessionImplLayoutTest, ResizeAsync01, TestSize.Level0)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("ResizeAsync01");

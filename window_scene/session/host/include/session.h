@@ -257,6 +257,8 @@ public:
 
     SessionState GetSessionState() const;
     virtual void SetSessionState(SessionState state);
+    void SetSessionInfoSupportedWindowModes(
+        const std::vector<AppExecFwk::SupportWindowMode>& updatedWindowModes);
     void SetSessionInfoAncoSceneState(int32_t ancoSceneState);
     void SetSessionInfoTime(const std::string& time);
     void SetSessionInfoAbilityInfo(const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo);
@@ -292,6 +294,7 @@ public:
     std::string GetWindowName() const;
     WSRect GetLastLayoutRect() const;
     WSRect GetLayoutRect() const;
+    bool GetSkipSelfWhenShowOnVirtualScreen() const;
     DisplayId GetDisplayId() const { return GetSessionProperty()->GetDisplayId(); }
     DisplayId GetOriginDisplayId() const { return originDisplayId_; }
     void SetOriginDisplayId(DisplayId displayId);
@@ -399,7 +402,7 @@ public:
     void SetContextTransparentFunc(const NotifyContextTransparentFunc& func);
     void NotifyContextTransparent();
     bool NeedCheckContextTransparent() const;
-    
+
     /*
      * Window Rotate Animation
      */
@@ -566,8 +569,7 @@ public:
     void RemoveWindowDetectTask();
     WSError SwitchFreeMultiWindow(bool enable);
 
-    virtual bool CheckGetAvoidAreaAvailable(AvoidAreaType type,
-        int32_t apiVersion = API_VERSION_INVALID) { return true; }
+    virtual bool CheckGetAvoidAreaAvailable(AvoidAreaType type) { return true; }
 
     virtual bool IsVisibleForeground() const;
     void SetIsStarting(bool isStarting);
@@ -642,7 +644,7 @@ public:
     sptr<Session> GetMainSession() const;
     sptr<Session> GetMainOrFloatSession() const;
     bool IsPcWindow() const;
-    bool IsAncestorsSession(int ancestorsId) const;
+    bool IsAncestorsSession(int32_t ancestorsId) const;
 
     /**
      * Window Property

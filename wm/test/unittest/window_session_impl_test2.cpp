@@ -415,7 +415,7 @@ HWTEST_F(WindowSessionImplTest2, DispatchKeyEventCallback, TestSize.Level1)
  * @tc.desc: HandleBackEvent
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, HandleBackEvent01, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest2, HandleBackEvent01, TestSize.Level0)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("HandleBackEvent01");
@@ -550,7 +550,7 @@ HWTEST_F(WindowSessionImplTest2, SetSystemBarProperty, TestSize.Level1)
  * @tc.desc: SetSpecificBarProperty
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, SetSpecificBarProperty, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest2, SetSpecificBarProperty, TestSize.Level0)
 {
     auto window = GetTestWindowImpl("SetSpecificBarProperty");
     ASSERT_NE(window, nullptr);
@@ -894,26 +894,6 @@ HWTEST_F(WindowSessionImplTest2, NotifyModeChange, TestSize.Level1)
     window->windowChangeListeners_.insert({ window->GetPersistentId(), listeners });
 
     window->NotifyModeChange(WindowMode::WINDOW_MODE_FULLSCREEN, true);
-    window->Destroy();
-}
-
-/**
- * @tc.name: SetRequestedOrientation
- * @tc.desc: SetRequestedOrientation
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest2, SetRequestedOrientation, TestSize.Level1)
-{
-    auto window = GetTestWindowImpl("SetRequestedOrientation");
-    ASSERT_NE(window, nullptr);
-    window->property_->SetRequestedOrientation(Orientation::BEGIN);
-    window->SetRequestedOrientation(Orientation::END);
-
-    window->property_->SetRequestedOrientation(Orientation::USER_ROTATION_PORTRAIT);
-    window->SetRequestedOrientation(Orientation::USER_ROTATION_PORTRAIT);
-
-    window->property_->SetRequestedOrientation(Orientation::BEGIN);
-    window->SetRequestedOrientation(Orientation::BEGIN);
     window->Destroy();
 }
 

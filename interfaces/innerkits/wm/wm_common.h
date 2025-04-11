@@ -27,7 +27,7 @@
 
 #include <parcel.h>
 
-#include "../dm/dm_common.h"
+#include "dm_common.h"
 #include "securec.h"
 #include "wm_math.h"
 #include "wm_type.h"
@@ -50,6 +50,8 @@ constexpr uint32_t MAX_BUTTON_BACKGROUND_SIZE = 40;
 constexpr uint32_t MIN_CLOSE_BUTTON_RIGHT_MARGIN = 8;
 constexpr uint32_t MAX_CLOSE_BUTTON_RIGHT_MARGIN = 22;
 constexpr int32_t API_VERSION_INVALID = -1;
+constexpr uint32_t MAX_SIZE_PIP_CONTROL_GROUP = 8;
+constexpr uint32_t MAX_SIZE_PIP_CONTROL = 9;
 /*
  * PC Window Sidebar Blur
  */
@@ -62,6 +64,14 @@ constexpr float SIDEBAR_DEFAULT_BRIGHTNESS_LIGHT = 1.0f;
 constexpr float SIDEBAR_DEFAULT_BRIGHTNESS_DARK = 0.4f;
 constexpr uint32_t SIDEBAR_DEFAULT_MASKCOLOR_LIGHT = 0xdbf1f1f1;
 constexpr uint32_t SIDEBAR_DEFAULT_MASKCOLOR_DARK = 0xe61a1a1a;
+constexpr float SIDEBAR_MAXIMIZE_RADIUS_LIGHT = 57.0f;
+constexpr float SIDEBAR_MAXIMIZE_RADIUS_DARK = 57.0f;
+constexpr float SIDEBAR_MAXIMIZE_SATURATION_LIGHT = 2.0f;
+constexpr float SIDEBAR_MAXIMIZE_SATURATION_DARK = 1.0f;
+constexpr float SIDEBAR_MAXIMIZE_BRIGHTNESS_LIGHT = 1.0f;
+constexpr float SIDEBAR_MAXIMIZE_BRIGHTNESS_DARK = 0.9f;
+constexpr uint32_t SIDEBAR_MAXIMIZE_MASKCOLOR_LIGHT = 0xf2f1f1f1;
+constexpr uint32_t SIDEBAR_MAXIMIZE_MASKCOLOR_DARK = 0xf21a1a1a;
 constexpr uint32_t SIDEBAR_SNAPSHOT_MASKCOLOR_LIGHT = 0xffe5e5e5;
 constexpr uint32_t SIDEBAR_SNAPSHOT_MASKCOLOR_DARK = 0xff414141;
 }
@@ -445,6 +455,9 @@ enum class WindowSizeChangeReason : uint32_t {
     MAXIMIZE_TO_SPLIT,
     SPLIT_TO_MAXIMIZE,
     PAGE_ROTATION,
+    SPLIT_DRAG_START,
+    SPLIT_DRAG,
+    SPLIT_DRAG_END,
     END,
 };
 
@@ -481,7 +494,7 @@ enum class DragResizeType : uint32_t {
     RESIZE_EACH_FRAME = 1,
     RESIZE_WHEN_DRAG_END = 2,
     RESIZE_KEY_FRAME = 3,
-    RESIZE_MAX_VALUE = 99,
+    RESIZE_MAX_VALUE,  // invalid value begin, add new value above
 };
 
 /**
@@ -993,6 +1006,8 @@ struct ExtensionWindowAbilityInfo {
  */
 struct KeyboardPanelInfo : public Parcelable {
     Rect rect_ = {0, 0, 0, 0};
+    Rect beginRect_ = {0, 0, 0, 0};
+    Rect endRect_ = {0, 0, 0, 0};
     WindowGravity gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
     bool isShowing_ = false;
 
@@ -1000,27 +1015,30 @@ struct KeyboardPanelInfo : public Parcelable {
     {
         return parcel.WriteInt32(rect_.posX_) && parcel.WriteInt32(rect_.posY_) &&
                parcel.WriteUint32(rect_.width_) && parcel.WriteUint32(rect_.height_) &&
-               parcel.WriteUint32(static_cast<uint32_t>(gravity_)) &&
-               parcel.WriteBool(isShowing_);
+               parcel.WriteInt32(beginRect_.posX_) && parcel.WriteInt32(beginRect_.posY_) &&
+               parcel.WriteUint32(beginRect_.width_) && parcel.WriteUint32(beginRect_.height_) &&
+               parcel.WriteInt32(endRect_.posX_) && parcel.WriteInt32(endRect_.posY_) &&
+               parcel.WriteUint32(endRect_.width_) && parcel.WriteUint32(endRect_.height_) &&
+               parcel.WriteUint32(static_cast<uint32_t>(gravity_)) && parcel.WriteBool(isShowing_);
     }
 
     static KeyboardPanelInfo* Unmarshalling(Parcel& parcel)
     {
-        KeyboardPanelInfo* keyboardPanelInfo = new(std::nothrow)KeyboardPanelInfo;
-        if (keyboardPanelInfo == nullptr) {
-            return nullptr;
-        }
-        bool res = parcel.ReadInt32(keyboardPanelInfo->rect_.posX_) &&
-            parcel.ReadInt32(keyboardPanelInfo->rect_.posY_) && parcel.ReadUint32(keyboardPanelInfo->rect_.width_) &&
-            parcel.ReadUint32(keyboardPanelInfo->rect_.height_);
+        KeyboardPanelInfo* panelInfo = new KeyboardPanelInfo;
+        bool res = parcel.ReadInt32(panelInfo->rect_.posX_) && parcel.ReadInt32(panelInfo->rect_.posY_) &&
+            parcel.ReadUint32(panelInfo->rect_.width_) && parcel.ReadUint32(panelInfo->rect_.height_) &&
+            parcel.ReadInt32(panelInfo->beginRect_.posX_) && parcel.ReadInt32(panelInfo->beginRect_.posY_) &&
+            parcel.ReadUint32(panelInfo->beginRect_.width_) && parcel.ReadUint32(panelInfo->beginRect_.height_) &&
+            parcel.ReadInt32(panelInfo->endRect_.posX_) && parcel.ReadInt32(panelInfo->endRect_.posY_) &&
+            parcel.ReadUint32(panelInfo->endRect_.width_) && parcel.ReadUint32(panelInfo->endRect_.height_);
         if (!res) {
-            delete keyboardPanelInfo;
+            delete panelInfo;
             return nullptr;
         }
-        keyboardPanelInfo->gravity_ = static_cast<WindowGravity>(parcel.ReadUint32());
-        keyboardPanelInfo->isShowing_ = parcel.ReadBool();
+        panelInfo->gravity_ = static_cast<WindowGravity>(parcel.ReadUint32());
+        panelInfo->isShowing_ = parcel.ReadBool();
 
-        return keyboardPanelInfo;
+        return panelInfo;
     }
 };
 
@@ -1345,13 +1363,97 @@ struct PiPControlEnableInfo {
     PiPControlStatus enabled;
 };
 
-struct PiPTemplateInfo {
+struct PiPTemplateInfo : public Parcelable {
     uint32_t pipTemplateType;
     uint32_t priority;
     std::vector<uint32_t> controlGroup;
     std::vector<PiPControlStatusInfo> pipControlStatusInfoList;
     std::vector<PiPControlEnableInfo> pipControlEnableInfoList;
     uint32_t defaultWindowSizeType;
+
+    PiPTemplateInfo() {}
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        if (!(parcel.WriteUint32(pipTemplateType) && parcel.WriteUint32(priority))) {
+            return false;
+        }
+        if (controlGroup.size() > MAX_SIZE_PIP_CONTROL_GROUP || !parcel.WriteUInt32Vector(controlGroup)) {
+            return false;
+        }
+        auto controlStatusSize = pipControlStatusInfoList.size();
+        if (controlStatusSize > MAX_SIZE_PIP_CONTROL || !parcel.WriteUint32(static_cast<uint32_t>(controlStatusSize))) {
+            return false;
+        }
+        for (auto& info : pipControlStatusInfoList) {
+            if (!parcel.WriteUint32(static_cast<uint32_t>(info.controlType)) ||
+                !parcel.WriteInt32(static_cast<int32_t>(info.status))) {
+                return false;
+            }
+        }
+        auto controlEnableSize = pipControlEnableInfoList.size();
+        if (controlEnableSize > MAX_SIZE_PIP_CONTROL || !parcel.WriteUint32(static_cast<uint32_t>(controlEnableSize))) {
+            return false;
+        }
+        for (auto& info : pipControlEnableInfoList) {
+            if (!parcel.WriteUint32(static_cast<uint32_t>(info.controlType)) ||
+                !parcel.WriteInt32(static_cast<int32_t>(info.enabled))) {
+                return false;
+            }
+        }
+        if (!parcel.WriteUint32(defaultWindowSizeType)) {
+            return false;
+        }
+        return true;
+    }
+
+    static PiPTemplateInfo* Unmarshalling(Parcel& parcel)
+    {
+        auto* pipTemplateInfo = new PiPTemplateInfo();
+        if (!parcel.ReadUint32(pipTemplateInfo->pipTemplateType) || !parcel.ReadUint32(pipTemplateInfo->priority)) {
+            delete pipTemplateInfo;
+            return nullptr;
+        }
+        uint32_t controlStatusSize = 0;
+        if (!parcel.ReadUInt32Vector(&pipTemplateInfo->controlGroup) ||
+            pipTemplateInfo->controlGroup.size() > MAX_SIZE_PIP_CONTROL_GROUP ||
+            !parcel.ReadUint32(controlStatusSize) || controlStatusSize > MAX_SIZE_PIP_CONTROL) {
+            delete pipTemplateInfo;
+            return nullptr;
+        }
+        for (uint32_t i = 0; i < controlStatusSize; i++) {
+            uint32_t controlType;
+            int32_t status;
+            if (!parcel.ReadUint32(controlType) || !parcel.ReadInt32(status)) {
+                break;
+            }
+            PiPControlStatusInfo info{};
+            info.controlType = static_cast<PiPControlType>(controlType);
+            info.status = static_cast<PiPControlStatus>(status);
+            pipTemplateInfo->pipControlStatusInfoList.emplace_back(info);
+        }
+        uint32_t controlEnableSize = 0;
+        if (!parcel.ReadUint32(controlEnableSize) || controlEnableSize > MAX_SIZE_PIP_CONTROL) {
+            delete pipTemplateInfo;
+            return nullptr;
+        }
+        for (uint32_t i = 0; i < controlEnableSize; i++) {
+            uint32_t controlType;
+            int32_t enabled;
+            if (!parcel.ReadUint32(controlType) || !parcel.ReadInt32(enabled)) {
+                break;
+            }
+            PiPControlEnableInfo info{};
+            info.controlType = static_cast<PiPControlType>(controlType);
+            info.enabled = static_cast<PiPControlStatus>(enabled);
+            pipTemplateInfo->pipControlEnableInfoList.emplace_back(info);
+        }
+        if (!parcel.ReadUint32(pipTemplateInfo->defaultWindowSizeType)) {
+            delete pipTemplateInfo;
+            return nullptr;
+        }
+        return pipTemplateInfo;
+    }
 };
 
 struct PiPWindowSize {
@@ -1578,18 +1680,19 @@ struct WindowMetaInfo : public Parcelable {
     std::string bundleName;
     std::string abilityName;
     int32_t appIndex = 0;
+    int32_t pid = -1;
 
     bool Marshalling(Parcel& parcel) const override
     {
         return parcel.WriteInt32(windowId) && parcel.WriteString(windowName) && parcel.WriteString(bundleName) &&
-               parcel.WriteString(abilityName) && parcel.WriteInt32(appIndex);
+               parcel.WriteString(abilityName) && parcel.WriteInt32(appIndex) && parcel.WriteInt32(pid);
     }
     static WindowMetaInfo* Unmarshalling(Parcel& parcel)
     {
         WindowMetaInfo* windowMetaInfo = new WindowMetaInfo();
         if (!parcel.ReadInt32(windowMetaInfo->windowId) || !parcel.ReadString(windowMetaInfo->windowName) ||
             !parcel.ReadString(windowMetaInfo->bundleName) || !parcel.ReadString(windowMetaInfo->abilityName) ||
-            !parcel.ReadInt32(windowMetaInfo->appIndex)) {
+            !parcel.ReadInt32(windowMetaInfo->appIndex) || !parcel.ReadInt32(windowMetaInfo->pid)) {
             delete windowMetaInfo;
             return nullptr;
         }

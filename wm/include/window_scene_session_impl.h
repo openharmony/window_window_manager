@@ -95,6 +95,7 @@ public:
     virtual WMError SetTransparent(bool isTransparent) override;
     virtual WMError SetTurnScreenOn(bool turnScreenOn) override;
     virtual WMError SetKeepScreenOn(bool keepScreenOn) override;
+    virtual WMError SetViewKeepScreenOn(bool keepScreenOn) override;
     virtual WMError SetPrivacyMode(bool isPrivacyMode) override;
     virtual void SetSystemPrivacyMode(bool isSystemPrivacyMode) override;
     virtual WMError SetSnapshotSkip(bool isSkip) override;
@@ -109,6 +110,7 @@ public:
     virtual bool IsTransparent() const override;
     virtual bool IsTurnScreenOn() const override;
     virtual bool IsKeepScreenOn() const override;
+    virtual bool IsViewKeepScreenOn() const override;
     virtual bool IsPrivacyMode() const override;
     virtual bool IsLayoutFullScreen() const override;
     virtual bool IsFullScreen() const override;
@@ -176,6 +178,7 @@ public:
     WmErrorCode StartMoveWindowWithCoordinate(int32_t offsetX, int32_t offsetY) override;
     WmErrorCode StopMoveWindow() override;
     WMError SetSupportedWindowModesInner(const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes);
+    bool haveSetSupportedWindowModes_ = false;
 
     /*
      * Compatible Mode
@@ -186,6 +189,7 @@ public:
     WSError CompatibleFullScreenClose() override;
     void HookDecorButtonStyleInCompatibleMode(uint32_t contentColor);
     WSError PcAppInPadNormalClose() override;
+    void HandleWindowLimitsInCompatibleMode(WindowSizeLimits& windowSizeLimits);
 
     /*
      * Free Multi Window
@@ -283,6 +287,10 @@ protected:
     void UpdateWindowSizeLimits();
     WindowLimits GetSystemSizeLimits(uint32_t displayWidth, uint32_t displayHeight, float vpr);
     void GetConfigurationFromAbilityInfo();
+    std::vector<AppExecFwk::SupportWindowMode> ExtractSupportWindowModeFromMetaData(
+        const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo);
+    std::vector<AppExecFwk::SupportWindowMode> ParseWindowModeFromMetaData(
+        const std::string& supportModesInFreeMultiWindow);
     float GetVirtualPixelRatio(const sptr<DisplayInfo>& displayInfo) override;
     WMError NotifySpecificWindowSessionProperty(WindowType type, const SystemBarProperty& property);
     using SessionMap = std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>>;
@@ -351,6 +359,7 @@ private:
      * PC Window Layout
      */
     std::shared_ptr<MMI::PointerEvent> lastPointerEvent_ = nullptr;
+    bool IsFullScreenSizeWindow(uint32_t width, uint32_t height);
 
     /*
      * Window Immersive

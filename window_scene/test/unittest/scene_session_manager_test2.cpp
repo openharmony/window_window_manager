@@ -94,10 +94,6 @@ void ProcessStatusBarEnabledChangeFuncTest(bool enable)
 {
 }
 
-void DumpRootSceneElementInfoFuncTest(const std::vector<std::string>& params, std::vector<std::string>& infos)
-{
-}
-
 void SceneSessionManagerTest2::SetUpTestCase()
 {
     ssm_ = &SceneSessionManager::GetInstance();
@@ -1224,44 +1220,6 @@ HWTEST_F(SceneSessionManagerTest2, ConfigSystemUIStatusBar01, TestSize.Level1)
 }
 
 /**
- * @tc.name: DumpSessionAll
- * @tc.desc: ScreenSesionManager dump all session info
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest2, DumpSessionAll, TestSize.Level1)
-{
-    SessionInfo sessionInfo;
-    sessionInfo.bundleName_ = "SceneSessionManagerTest2";
-    sessionInfo.abilityName_ = "DumpSessionAll";
-    sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
-    sptr<SceneSession> sceneSession = ssm_->RequestSceneSession(sessionInfo, windowSessionProperty);
-    ASSERT_EQ(nullptr, sceneSession);
-    std::vector<std::string> infos;
-    WSError result = ssm_->DumpSessionAll(infos);
-    ASSERT_EQ(WSError::WS_OK, result);
-    ASSERT_FALSE(infos.empty());
-}
-
-/**
- * @tc.name: DumpSessionWithId
- * @tc.desc: ScreenSesionManager dump session with id
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest2, DumpSessionWithId, TestSize.Level1)
-{
-    SessionInfo sessionInfo;
-    sessionInfo.bundleName_ = "SceneSessionManagerTest2";
-    sessionInfo.abilityName_ = "DumpSessionWithId";
-    sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
-    sptr<SceneSession> sceneSession = ssm_->RequestSceneSession(sessionInfo, windowSessionProperty);
-    ASSERT_EQ(nullptr, sceneSession);
-    std::vector<std::string> infos;
-    WSError result = ssm_->DumpSessionWithId(windowSessionProperty->GetPersistentId(), infos);
-    ASSERT_EQ(WSError::WS_OK, result);
-    ASSERT_FALSE(infos.empty());
-}
-
-/**
  * @tc.name: Init
  * @tc.desc: SceneSesionManager init
  * @tc.type: FUNC
@@ -1946,43 +1904,6 @@ HWTEST_F(SceneSessionManagerTest2, RecoverAndConnectSpecificSession02, TestSize.
 }
 
 /**
- * @tc.name: CacheSpecificSessionForRecovering
- * @tc.desc: CacheSpecificSessionForRecovering
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest2, CacheSpecificSessionForRecovering, TestSize.Level1)
-{
-    sptr<WindowSessionProperty> property;
-    ASSERT_NE(ssm_, nullptr);
-    ssm_->recoveringFinished_ = false;
-    SessionInfo info;
-    info.abilityName_ = "test1";
-    info.bundleName_ = "test2";
-    sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, property);
-    ASSERT_NE(sceneSession, nullptr);
-    ssm_->CacheSpecificSessionForRecovering(nullptr, property);
-    ssm_->CacheSpecificSessionForRecovering(sceneSession, property);
-
-    property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(property, nullptr);
-    ssm_->CacheSpecificSessionForRecovering(nullptr, property);
-    ssm_->CacheSpecificSessionForRecovering(sceneSession, property);
-    property->SetWindowType(WindowType::APP_WINDOW_BASE);
-    ssm_->CacheSpecificSessionForRecovering(sceneSession, property);
-    property->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
-    ssm_->CacheSpecificSessionForRecovering(sceneSession, property);
-    int32_t parentPersistentId = 1;
-    property->SetParentPersistentId(parentPersistentId);
-    ssm_->CacheSpecificSessionForRecovering(sceneSession, property);
-    ASSERT_EQ(ssm_->recoverSubSessionCacheMap_[parentPersistentId].size(), 1);
-    ssm_->CacheSpecificSessionForRecovering(sceneSession, property);
-    ASSERT_EQ(ssm_->recoverSubSessionCacheMap_[parentPersistentId].size(), 2);
-    ssm_->RecoverCachedSubSession(parentPersistentId);
-    ASSERT_EQ(ssm_->recoverSubSessionCacheMap_[parentPersistentId].size(), 0);
-    ssm_->recoverSubSessionCacheMap_.clear();
-}
-
-/**
  * @tc.name: SetAlivePersistentIds
  * @tc.desc: SetAlivePersistentIds
  * @tc.type: FUNC
@@ -2039,6 +1960,58 @@ HWTEST_F(SceneSessionManagerTest2, RecoverCachedDialogSession, TestSize.Level1)
     ASSERT_EQ(ssm_->recoverDialogSessionCacheMap_[parentPersistentId].size(), 2);
     ssm_->RecoverCachedDialogSession(parentPersistentId);
     ASSERT_EQ(ssm_->recoverDialogSessionCacheMap_[parentPersistentId].size(), 0);
+}
+
+/**
+ * @tc.name: ExtractSupportWindowModeFromMetaData
+ * @tc.desc: ExtractSupportWindowModeFromMetaData
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, ExtractSupportWindowModeFromMetaData, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->recoveringFinished_ = false;
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test2";
+    sptr<WindowSessionProperty> property;
+    sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, property);
+    ASSERT_NE(sceneSession, nullptr);
+
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    AppExecFwk::AbilityInfo abilityInfo;
+    int ret = 0;
+    std::vector<AppExecFwk::SupportWindowMode> updateWindowModes =
+        ssm_->ExtractSupportWindowModeFromMetaData(std::make_shared<OHOS::AppExecFwk::AbilityInfo>(abilityInfo));
+    ASSERT_EQ(ret, 0);
+
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    ssm_->systemConfig_.freeMultiWindowEnable_ = false;
+    updateWindowModes =
+        ssm_->ExtractSupportWindowModeFromMetaData(std::make_shared<OHOS::AppExecFwk::AbilityInfo>(abilityInfo));
+    ASSERT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: ParseWindowModeFromMetaData
+ * @tc.desc: ParseWindowModeFromMetaData
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, ParseWindowModeFromMetaData, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->recoveringFinished_ = false;
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test2";
+    sptr<WindowSessionProperty> property;
+    sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, property);
+    ASSERT_NE(sceneSession, nullptr);
+
+    std::vector<AppExecFwk::SupportWindowMode> updateWindowModes =
+        {AppExecFwk::SupportWindowMode::FULLSCREEN, AppExecFwk::SupportWindowMode::SPLIT,
+        AppExecFwk::SupportWindowMode::FLOATING};
+    ASSERT_EQ(updateWindowModes, ssm_->ParseWindowModeFromMetaData("fullscreen,split,floating"));
 }
 }
 } // namespace Rosen

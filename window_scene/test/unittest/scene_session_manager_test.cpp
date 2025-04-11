@@ -769,6 +769,7 @@ HWTEST_F(SceneSessionManagerTest, NotifyAINavigationBarShowStatus, TestSize.Leve
     bool isVisible = false;
     WSRect barArea = { 0, 0, 320, 240}; // width: 320, height: 240
     uint64_t displayId = 0;
+    ssm_->rootSceneSession_ = sptr<RootSceneSession>::MakeSptr();
     WSError result = ssm_->NotifyAINavigationBarShowStatus(isVisible, barArea, displayId);
     ASSERT_EQ(result, WSError::WS_OK);
 }
@@ -1621,7 +1622,7 @@ HWTEST_F(SceneSessionManagerTest, TestIsEnablePiPCreate, TestSize.Level1)
 
     reqRect = { 0, 0, 10, 10 };
     property->SetRequestRect(reqRect);
-    PiPTemplateInfo info = {0, 0, {}};
+    PiPTemplateInfo info = {};
     property->SetPiPTemplateInfo(info);
     SessionInfo info1;
     info1.abilityName_ = "test1";
@@ -1629,7 +1630,8 @@ HWTEST_F(SceneSessionManagerTest, TestIsEnablePiPCreate, TestSize.Level1)
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info1, nullptr);
     ASSERT_NE(nullptr, sceneSession);
     property->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
-    sceneSession->pipTemplateInfo_ = {0, 100, {}};
+    sceneSession->pipTemplateInfo_ = {};
+    sceneSession->pipTemplateInfo_.priority = 100;
     ssm_->sceneSessionMap_.insert({0, sceneSession});
     ASSERT_TRUE(!ssm_->IsEnablePiPCreate(property));
     ssm_->sceneSessionMap_.clear();
@@ -2093,7 +2095,7 @@ HWTEST_F(SceneSessionManagerTest, RemoveProcessWatermarkPid, TestSize.Level1)
  * @tc.desc: SceneSesionManager SetSessionWatermarkForAppProcess
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest, SetSessionWatermarkForAppProcess, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest, SetSessionWatermarkForAppProcess, TestSize.Level0)
 {
     SessionInfo info;
     sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, nullptr);
@@ -2532,9 +2534,32 @@ HWTEST_F(SceneSessionManagerTest, SetAppKeyFramePolicy, TestSize.Level1)
     info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
-    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
     KeyFramePolicy keyFramePolicy;
+    // empty map
+    ASSERT_EQ(ssm_->SetAppKeyFramePolicy(info.bundleName_, keyFramePolicy), WMError::WM_OK);
+    auto getKeyFramePolicy = ssm_->GetAppKeyFramePolicy(info.bundleName_);
+    ASSERT_EQ(getKeyFramePolicy.dragResizeType_, keyFramePolicy.dragResizeType_);
     keyFramePolicy.dragResizeType_ = DragResizeType::RESIZE_KEY_FRAME;
+    ASSERT_EQ(ssm_->SetAppKeyFramePolicy(info.bundleName_, keyFramePolicy), WMError::WM_OK);
+    getKeyFramePolicy = ssm_->GetAppKeyFramePolicy(info.bundleName_);
+    ASSERT_EQ(getKeyFramePolicy.dragResizeType_, keyFramePolicy.dragResizeType_);
+    // valid
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    ASSERT_EQ(ssm_->SetAppKeyFramePolicy(info.bundleName_, keyFramePolicy), WMError::WM_OK);
+    getKeyFramePolicy = ssm_->GetAppKeyFramePolicy(info.bundleName_);
+    ASSERT_EQ(getKeyFramePolicy.dragResizeType_, keyFramePolicy.dragResizeType_);
+    // nullptr
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), nullptr});
+    ASSERT_EQ(ssm_->SetAppKeyFramePolicy(info.bundleName_, keyFramePolicy), WMError::WM_OK);
+    getKeyFramePolicy = ssm_->GetAppKeyFramePolicy(info.bundleName_);
+    ASSERT_EQ(getKeyFramePolicy.dragResizeType_, keyFramePolicy.dragResizeType_);
+    // empty name
+    ASSERT_EQ(ssm_->SetAppKeyFramePolicy("", keyFramePolicy), WMError::WM_ERROR_INVALID_PARAM);
+    // sub window
+    info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession2);
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession2});
     ASSERT_EQ(ssm_->SetAppKeyFramePolicy(info.bundleName_, keyFramePolicy), WMError::WM_OK);
 }
 
@@ -2577,6 +2602,20 @@ HWTEST_F(SceneSessionManagerTest, SetForegroundWindowNum, TestSize.Level1)
     int32_t windowNum = 0;
     WMError res = ssm_->SetForegroundWindowNum(windowNum);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, res);
+}
+
+/**
+ * @tc.name: CloneWindow
+ * @tc.desc: test function : CloneWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, CloneWindow, TestSize.Level1)
+{
+    int32_t fromPersistentId = 8;
+    int32_t toPersistentId = 11;
+    bool needOffScreen = true;
+    WSError res = ssm_->CloneWindow(fromPersistentId, toPersistentId, needOffScreen);
+    EXPECT_EQ(WSError::WS_ERROR_NULLPTR, res);
 }
 }
 } // namespace Rosen

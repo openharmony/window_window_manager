@@ -90,6 +90,7 @@ public:
         AppExecFwk::Ability* ability) override;
     std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const override;
     const std::shared_ptr<AbilityRuntime::Context> GetContext() const override;
+    void SetContext(const std::shared_ptr<AbilityRuntime::Context>& context);
     Rect GetRequestRect() const override;
     WindowType GetType() const override;
     const std::string& GetWindowName() const override;
@@ -231,7 +232,6 @@ public:
     void SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler) override;
     void SetInputEventConsumer(const std::shared_ptr<IInputEventConsumer>& inputEventConsumer) override;
     void GetExtensionConfig(AAFwk::WantParams& want) const override;
-    void UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>& want) override;
 
     WMError SetBackgroundColor(const std::string& color) override;
     virtual Orientation GetRequestedOrientation() override;
@@ -286,7 +286,7 @@ public:
     void UpdatePiPRect(const Rect& rect, WindowSizeChangeReason reason) override;
     void UpdatePiPControlStatus(PiPControlType controlType, PiPControlStatus status) override;
     void SetAutoStartPiP(bool isAutoStart, uint32_t priority, uint32_t width, uint32_t height) override;
-    void UpdatePiPDefaultWindowSizeType(uint32_t defaultWindowSizeType) override;
+    void UpdatePiPTemplateInfo(PiPTemplateInfo& pipTemplateInfo) override;
 
     void SetDrawingContentState(bool drawingContentState);
     WMError RegisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
@@ -379,10 +379,12 @@ public:
     WMError UnregisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener) override;
     WMError SetAvoidAreaOption(uint32_t avoidAreaOption) override;
     WMError GetAvoidAreaOption(uint32_t& avoidAreaOption) override;
-    virtual void NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
+    void NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
     WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
     bool IsSystemWindow() const override { return WindowHelper::IsSystemWindow(GetType()); }
     bool IsAppWindow() const override { return WindowHelper::IsAppWindow(GetType()); }
+    WindowType GetRootHostWindowType() const override { return rootHostWindowType_; }
+    void SetRootHostWindowType(WindowType& rootHostWindowType) override { rootHostWindowType_ = rootHostWindowType; }
     WMError UpdateSystemBarProperties(const std::unordered_map<WindowType, SystemBarProperty>& systemBarProperties,
         const std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags) override;
     void UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool systemBarEnableAnimation,
@@ -495,8 +497,8 @@ protected:
     void UpdateSubWindowStateAndNotify(int32_t parentPersistentId, const WindowState newState);
     void DestroySubWindow();
     bool IsSubWindowMaximizeSupported() const override;
-    void UpdateSubWindowLevel(uint32_t subWindowLevel);
-    void GetSubWidnows(int32_t parentPersistentId, std::vector<sptr<WindowSessionImpl>>& subWindows);
+    void UpdateSubWindowInfo(uint32_t subWindowLevel, const std::shared_ptr<AbilityRuntime::Context>& context);
+    void GetSubWindows(int32_t parentPersistentId, std::vector<sptr<WindowSessionImpl>>& subWindows);
     void RemoveSubWindow(int32_t parentPersistentId);
 
     sptr<WindowOption> windowOption_;
@@ -505,6 +507,7 @@ protected:
     std::shared_ptr<Ace::UIContent> uiContent_;
     mutable std::shared_mutex uiContentMutex_;
     std::shared_ptr<AbilityRuntime::Context> context_;
+    mutable std::shared_mutex contextMutex_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
 
     sptr<WindowSessionProperty> property_;
@@ -592,6 +595,7 @@ protected:
      */
     std::map<AvoidAreaType, AvoidArea> lastAvoidAreaMap_;
     uint32_t GetStatusBarHeight() override;
+    WindowType rootHostWindowType_ = WindowType::APP_MAIN_WINDOW_BASE;
 
     /*
      * PC Fold Screen

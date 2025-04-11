@@ -16,10 +16,7 @@
 #ifndef OHOS_ROSEN_WINDOW_USER_SWITCH_REPORTER_H
 #define OHOS_ROSEN_WINDOW_USER_SWITCH_REPORTER_H
 
-#include <atomic>
 #include <cstdint>
-
-#include "wm_common.h"
 
 namespace OHOS {
 namespace Rosen {

@@ -35,6 +35,8 @@ public:
     int Dump(int fd, const std::vector<std::u16string>& args) override;
     void GetProcessSurfaceNodeIdByPersistentId(const int32_t pid,
         const std::vector<uint64_t>& windowIdList, std::vector<uint64_t>& surfaceNodeIds);
+    void AddSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds);
+    void RemoveSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds);
 
     /*
      * Multi User
@@ -104,10 +106,14 @@ private:
     /*
      * Window Snapshot
      */
-    sptr<IRemoteObject> GetSceneSessionManagerByUserId(int32_t userId);
+    virtual sptr<IRemoteObject> GetSceneSessionManagerByUserId(int32_t userId);
     int32_t RecoverSCBSnapshotSkipByUserId(int32_t userId);
-    int32_t NotifySCBSnapshotSkipByUserIdAndBundleNames(int32_t userId,
+    virtual int32_t NotifySCBSnapshotSkipByUserIdAndBundleNames(int32_t userId,
         const std::vector<std::string>& bundleNameList, const sptr<IRemoteObject>& remoteObject);
+    int32_t SetSnapshotSkipByUserIdAndBundleNamesInner(int32_t userId,
+        const std::vector<std::string>& bundleNameList);
+    int32_t SetSnapshotSkipByIdNamesMapInner(const std::unordered_map<int32_t,
+        std::vector<std::string>>& userIdAndBunldeNames);
 
     static void WriteStringToFile(int32_t pid, const char* str);
 

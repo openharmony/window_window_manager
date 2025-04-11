@@ -72,7 +72,7 @@ namespace {
  * @tc.desc: test function : SetStartMoveFlag
  * @tc.type: FUNC
  */
-HWTEST_F(MoveDragControllerTest, SetStartMoveFlag, TestSize.Level1)
+HWTEST_F(MoveDragControllerTest, SetStartMoveFlag, TestSize.Level0)
 {
     moveDragController->hasPointDown_ = false;
     moveDragController->SetStartMoveFlag(true);
@@ -88,7 +88,7 @@ HWTEST_F(MoveDragControllerTest, SetStartMoveFlag, TestSize.Level1)
  * @tc.desc: test function : GetStartMoveFlag
  * @tc.type: FUNC
  */
-HWTEST_F(MoveDragControllerTest, GetStartMoveFlag, TestSize.Level1)
+HWTEST_F(MoveDragControllerTest, GetStartMoveFlag, TestSize.Level0)
 {
     auto preIsStartMove = moveDragController->isStartMove_;
     auto preHasPointDown = moveDragController->hasPointDown_;
@@ -205,7 +205,7 @@ HWTEST_F(MoveDragControllerTest, InitMoveDragProperty, TestSize.Level1)
  * @tc.desc: test function : InitCrossDisplayProperty
  * @tc.type: FUNC
  */
-HWTEST_F(MoveDragControllerTest, InitCrossDisplayProperty, TestSize.Level1)
+HWTEST_F(MoveDragControllerTest, InitCrossDisplayProperty, TestSize.Level0)
 {
     moveDragController->InitCrossDisplayProperty(1, 2);
     ASSERT_EQ(1, moveDragController->GetMoveDragStartDisplayId());
@@ -229,7 +229,7 @@ HWTEST_F(MoveDragControllerTest, InitCrossDisplayProperty, TestSize.Level1)
  * @tc.desc: test function : SetOriginalMoveDragPos
  * @tc.type: FUNC
  */
-HWTEST_F(MoveDragControllerTest, SetOriginalMoveDragPos, TestSize.Level1)
+HWTEST_F(MoveDragControllerTest, SetOriginalMoveDragPos, TestSize.Level0)
 {
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     int32_t pointerId = pointerEvent->GetPointerId();
@@ -266,7 +266,7 @@ HWTEST_F(MoveDragControllerTest, SetAspectRatio, TestSize.Level1)
  * @tc.desc: test function : UpdateGravityWhenDrag
  * @tc.type: FUNC
  */
-HWTEST_F(MoveDragControllerTest, UpdateGravityWhenDrag, TestSize.Level1)
+HWTEST_F(MoveDragControllerTest, UpdateGravityWhenDrag, TestSize.Level0)
 {
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
@@ -515,7 +515,7 @@ HWTEST_F(MoveDragControllerTest, CalcFreeformTargetRect, TestSize.Level1)
  * @tc.desc: test function : CalcFixedAspectRatioTargetRect01
  * @tc.type: FUNC
  */
-HWTEST_F(MoveDragControllerTest, CalcFixedAspectRatioTargetRect01, TestSize.Level1)
+HWTEST_F(MoveDragControllerTest, CalcFixedAspectRatioTargetRect01, TestSize.Level0)
 {
     AreaType type = AreaType::RIGHT;
     float aspectRatio = 0.5;
@@ -573,7 +573,7 @@ HWTEST_F(MoveDragControllerTest, CalcFixedAspectRatioTargetRect02, TestSize.Leve
  * @tc.desc: test function : CalcFreeformTranslateLimits01
  * @tc.type: FUNC
  */
-HWTEST_F(MoveDragControllerTest, CalcFreeformTranslateLimits01, TestSize.Level1)
+HWTEST_F(MoveDragControllerTest, CalcFreeformTranslateLimits01, TestSize.Level0)
 {
     AreaType type = AreaType::RIGHT;
     ASSERT_TRUE((moveDragController != nullptr));

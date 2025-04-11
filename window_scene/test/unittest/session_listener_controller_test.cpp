@@ -22,12 +22,17 @@
 #include "mission_listener_stub.h"
 #include "singleton_container.h"
 #include "zidl/session_lifecycle_listener_stub.h"
+#include "session/host/include/scene_session.h"
+#include "session/host/include/main_session.h"
+#include "scene_session_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
 using namespace OHOS::Media;
 namespace OHOS {
 namespace Rosen {
+static const std::string LISTENER_CONTROLLER_TEST_THREAD = "OS_ListenerControllerTest";
+
 class MyMissionListener : public AAFwk::MissionListenerStub {
 public:
     MyMissionListener() = default;
@@ -116,11 +121,12 @@ private:
 };
 
 class SessionListenerControllerTest : public testing::Test {
-  public:
+public:
     static void SetUpTestCase();
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+    std::shared_ptr<TaskScheduler> taskScheduler_ = std::make_shared<TaskScheduler>(LISTENER_CONTROLLER_TEST_THREAD);
     std::shared_ptr<SessionListenerController> slController;
 
 private:
@@ -133,8 +139,10 @@ public:
     ~MySessionLifecycleListener() override = default;
     void OnLifecycleEvent(SessionLifecycleEvent event, const LifecycleEventPayload& payload) override
     {
-        return;
+        event_ = event;
     }
+private:
+    ISessionLifecycleListener::SessionLifecycleEvent event_;
 };
 
 void SessionListenerControllerTest::SetUpTestCase()
@@ -147,7 +155,7 @@ void SessionListenerControllerTest::TearDownTestCase()
 
 void SessionListenerControllerTest::SetUp()
 {
-    slController = std::make_shared<SessionListenerController>();
+    slController = std::make_shared<SessionListenerController>(taskScheduler_);
 }
 
 void SessionListenerControllerTest::TearDown()
@@ -471,7 +479,7 @@ HWTEST_F(SessionListenerControllerTest, RegisterSessionLifecycleListenerByIds, T
     sptr<ISessionLifecycleListener> listener = sptr<MySessionLifecycleListener>::MakeSptr();
     ASSERT_NE(listener, nullptr);
     res = slController->RegisterSessionLifecycleListener(listener, persistentIdList1);
-    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
+    ASSERT_EQ(res, WMError::WM_OK);
 
     std::vector<int32_t> persistentIdList2;
     res = slController->RegisterSessionLifecycleListener(listener, persistentIdList2);
@@ -492,6 +500,66 @@ HWTEST_F(SessionListenerControllerTest, UnregisterSessionLifecycleListener, Test
     ASSERT_NE(listener, nullptr);
     res = slController->UnregisterSessionLifecycleListener(listener);
     ASSERT_EQ(res, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: NotifySessionLifecycleEvent01
+ * @tc.desc: NotifySessionLifecycleEvent01
+ * @tc.type: CLASS
+ */
+HWTEST_F(SessionListenerControllerTest, NotifySessionLifecycleEvent01, Function | SmallTest | Level2)
+{
+    sptr<MySessionLifecycleListener> myListener = new MySessionLifecycleListener();
+    sptr<ISessionLifecycleListener> listener = iface_cast<ISessionLifecycleListener>(myListener->AsObject());
+    ASSERT_NE(listener, nullptr);
+    std::vector<std::string> bundleNameList;
+    slController->RegisterSessionLifecycleListener(listener, bundleNameList);
+
+    SessionInfo info;
+    info.bundleName_ = "com.example.myapp";
+    info.abilityName_ = "MainAbility";
+    info.moduleName_ = "entry";
+    info.persistentId_ = 101;
+    info.appIndex_ = 0;
+
+    slController->NotifySessionLifecycleEvent(ISessionLifecycleListener::SessionLifecycleEvent::CREATED, info);
+    usleep(WAIT_SYNC_IN_NS);
+    ASSERT_EQ(myListener->event_, ISessionLifecycleListener::SessionLifecycleEvent::CREATED);
+
+    slController->UnregisterSessionLifecycleListener(listener);
+    bundleNameList.emplace_back("com.example.myapp");
+    slController->RegisterSessionLifecycleListener(listener, bundleNameList);
+    slController->NotifySessionLifecycleEvent(ISessionLifecycleListener::SessionLifecycleEvent::BACKGROUND, info);
+    usleep(WAIT_SYNC_IN_NS);
+    ASSERT_EQ(myListener->event_, ISessionLifecycleListener::SessionLifecycleEvent::BACKGROUND);
+}
+
+/**
+ * @tc.name: NotifySessionLifecycleEvent02
+ * @tc.desc: NotifySessionLifecycleEvent02
+ * @tc.type: CLASS
+ */
+HWTEST_F(SessionListenerControllerTest, NotifySessionLifecycleEvent02, Function | SmallTest | Level2)
+{
+    sptr<MySessionLifecycleListener> myListener = new MySessionLifecycleListener();
+    sptr<ISessionLifecycleListener> listener = iface_cast<ISessionLifecycleListener>(myListener->AsObject());
+    ASSERT_NE(listener, nullptr);
+    std::vector<int32_t> persistentIdList = {102};
+    
+    SessionInfo info;
+    info.bundleName_ = "com.example.myapp";
+    info.abilityName_ = "MainAbility";
+    info.moduleName_ = "entry";
+    info.persistentId_ = 102;
+    info.appIndex_ = 0;
+    sptr<SceneSessionManager> ssm = sptr<SceneSessionManager>::MakeSptr();
+    sptr<SceneSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ssm->sceneSessionMap_.insert({102, sceneSession});
+    
+    slController->RegisterSessionLifecycleListener(listener, persistentIdList);
+    slController->NotifySessionLifecycleEvent(ISessionLifecycleListener::SessionLifecycleEvent::CREATED, info);
+    ASSERT_EQ(myListener->event_, ISessionLifecycleListener::SessionLifecycleEvent::CREATED);
 }
 } // namespace
 } // namespace Rosen

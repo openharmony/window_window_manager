@@ -849,10 +849,10 @@ napi_value CreateJsDisplayObject(napi_env env, sptr<Display>& display)
         std::unique_ptr<JsDisplay> jsDisplay = std::make_unique<JsDisplay>(display);
         napi_wrap(env, objValue, jsDisplay.release(), JsDisplay::Finalizer, nullptr, nullptr);
         BindNativeFunction(env, objValue, "getCutoutInfo", "JsDisplay", JsDisplay::GetCutoutInfo);
+        BindNativeFunction(env, objValue, "getAvailableArea", "JsDisplay", JsDisplay::GetAvailableArea);
         BindNativeFunction(env, objValue, "hasImmersiveWindow", "JsDisplay", JsDisplay::HasImmersiveWindow);
         BindNativeFunction(env, objValue, "getSupportedColorSpaces", "JsDisplay", JsDisplay::GetSupportedColorSpaces);
         BindNativeFunction(env, objValue, "getSupportedHDRFormats", "JsDisplay", JsDisplay::GetSupportedHDRFormats);
-        BindNativeFunction(env, objValue, "getAvailableArea", "JsDisplay", JsDisplay::GetAvailableArea);
         BindNativeFunction(env, objValue, "on", "JsDisplay", JsDisplay::RegisterDisplayManagerCallback);
         BindNativeFunction(env, objValue, "off", "JsDisplay", JsDisplay::UnregisterDisplayManagerCallback);
         BindNativeFunction(env, objValue, "getDisplayCapability", "JsDisplay", JsDisplay::GetDisplayCapability);

@@ -80,7 +80,7 @@ namespace {
  * @tc.desc: test function : Connect
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionTest, Connect, TestSize.Level1)
+HWTEST_F(ExtensionSessionTest, Connect, TestSize.Level0)
 {
     SystemSessionConfig sessionConfig;
     extensionSession_->state_ = SessionState::STATE_DISCONNECT;
@@ -119,7 +119,7 @@ HWTEST_F(ExtensionSessionTest, GetExtensionSessionEventCallback, TestSize.Level1
  * @tc.desc: test function : TransferAbilityResult
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionTest, TransferAbilityResult, TestSize.Level1)
+HWTEST_F(ExtensionSessionTest, TransferAbilityResult, TestSize.Level0)
 {
     MockFunction<void(uint32_t, const AAFwk::Want&)> mockTransferAbilityResultFunc;
     extSessionEventCallback_->transferAbilityResultFunc_ = mockTransferAbilityResultFunc.AsStdFunction();
@@ -148,7 +148,7 @@ HWTEST_F(ExtensionSessionTest, TransferAbilityResult, TestSize.Level1)
  * @tc.desc: test function : TransferExtensionData
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionTest, TransferExtensionData, TestSize.Level1)
+HWTEST_F(ExtensionSessionTest, TransferExtensionData, TestSize.Level0)
 {
     MockFunction<void(const AAFwk::WantParams&)> mockTransferExtensionDataFunc;
     extSessionEventCallback_->transferExtensionDataFunc_ = mockTransferExtensionDataFunc.AsStdFunction();
@@ -176,7 +176,7 @@ HWTEST_F(ExtensionSessionTest, TransferExtensionData, TestSize.Level1)
  * @tc.desc: test function : TransferComponentData
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionTest, TransferComponentData, TestSize.Level1)
+HWTEST_F(ExtensionSessionTest, TransferComponentData, TestSize.Level0)
 {
     extensionSession_->sessionStage_ = mockSessionStage_;
 
@@ -313,7 +313,7 @@ HWTEST_F(ExtensionSessionTest, NotifyDensityFollowHost03, TestSize.Level1)
  * @tc.desc: normal test
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionTest, UpdateSessionViewportConfig1, TestSize.Level1)
+HWTEST_F(ExtensionSessionTest, UpdateSessionViewportConfig1, TestSize.Level0)
 {
     ASSERT_NE(extensionSession_, nullptr);
     extensionSession_->sessionStage_ = mockSessionStage_;
@@ -521,7 +521,7 @@ HWTEST_F(ExtensionSessionTest, TransferAccessibilityDumpChildInfo02, TestSize.Le
  * @tc.desc: TransferKeyEventForConsumed not timeout
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionTest, TransferKeyEventForConsumed01, TestSize.Level1)
+HWTEST_F(ExtensionSessionTest, TransferKeyEventForConsumed01, TestSize.Level0)
 {
     extensionSession_->windowEventChannel_ = mockEventChannel_;
     extensionSession_->channelListener_ = sptr<WindowEventChannelListener>::MakeSptr();
@@ -719,7 +719,7 @@ HWTEST_F(ExtensionSessionTest, ChannelDeathRecipientOnRemoteDied02, TestSize.Lev
  * @tc.desc: TransferKeyEventAsync
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionTest, TransferKeyEventAsync, TestSize.Level1)
+HWTEST_F(ExtensionSessionTest, TransferKeyEventAsync, TestSize.Level0)
 {
     extensionSession_->windowEventChannel_ = mockEventChannel_;
     extensionSession_->channelListener_ = sptr<WindowEventChannelListener>::MakeSptr();
@@ -748,7 +748,7 @@ HWTEST_F(ExtensionSessionTest, TransferKeyEventAsync, TestSize.Level1)
  * @tc.desc: test function : UpdateAvoidArea
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionTest, UpdateAvoidArea, TestSize.Level1)
+HWTEST_F(ExtensionSessionTest, UpdateAvoidArea, TestSize.Level0)
 {
     extensionSession_->sessionStage_ = mockSessionStage_;
 
@@ -771,7 +771,7 @@ HWTEST_F(ExtensionSessionTest, UpdateAvoidArea, TestSize.Level1)
  * @tc.desc: test function : GetAvoidAreaByType
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionTest, GetAvoidAreaByType, TestSize.Level1)
+HWTEST_F(ExtensionSessionTest, GetAvoidAreaByType, TestSize.Level0)
 {
     MockFunction<AvoidArea(AvoidAreaType type, int32_t apiVersion)> mockNotifyGetAvoidAreaByTypeFunc;
     extSessionEventCallback_->notifyGetAvoidAreaByTypeFunc_ = mockNotifyGetAvoidAreaByTypeFunc.AsStdFunction();
@@ -829,7 +829,7 @@ HWTEST_F(ExtensionSessionTest, GetAvoidAreaByType, TestSize.Level1)
  * @tc.desc: test function : Background
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionSessionTest, Background, TestSize.Level1)
+HWTEST_F(ExtensionSessionTest, Background, TestSize.Level0)
 {
     ASSERT_NE(extensionSession_->property_, nullptr);
     extensionSession_->state_ = SessionState::STATE_DISCONNECT;
