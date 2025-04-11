@@ -3319,7 +3319,6 @@ void ScreenSessionManager::BootFinishedCallback(const char *key, const char *val
             that.foldScreenPowerInit_();
         }
         that.RegisterSettingRotationObserver();
-        that.RegisterSettingscreenSkipProtectedWindowObserver();
         if (that.defaultDpi) {
             auto ret = ScreenSettingHelper::SetSettingDefaultDpi(that.defaultDpi, SET_SETTING_DPI_KEY);
             if (!ret) {
@@ -4600,13 +4599,6 @@ void ScreenSessionManager::RegisterSettingRotationObserver()
         }
     };
     ScreenSettingHelper::RegisterSettingRotationObserver(updateFunc);
-}
-
-void ScreenSessionManager::RegisterSettingscreenSkipProtectedWindowObserver()
-{
-    TLOGI(WmsLogTag::DMS, "start");
-    SettingObserver::UpdateFunc updateFunc = [&](const std::string& key) { SetScreenSkipProtectedWindowInner(); };
-    ScreenSettingHelper::RegisterSettingscreenSkipProtectedWindowObserver(updateFunc);
 }
 
 DMError ScreenSessionManager::StopMirror(const std::vector<ScreenId>& mirrorScreenIds)
@@ -8848,44 +8840,20 @@ DMError ScreenSessionManager::SetScreenSkipProtectedWindow(const std::vector<Scr
                 continue;
             }
             if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::VIRTUAL) {
-                screenSession->SetShareProtect(isEnable);
+                ScreenId rsScreenId = INVALID_SCREEN_ID;
+                if (!screenIdManager_.ConvertToRsScreenId(screenSession->GetScreenId(), rsScreenId) ||
+                    rsScreenId == INVALID_SCREEN_ID) {
+                    TLOGE(WmsLogTag::DMS, "No corresponding rsId:%{public}" PRIu64 "", rsScreenId);
+                    continue;
+                }
+                TLOGI(WmsLogTag::DMS, "virtualScreenId:%{public}" PRIu64 "", screenId);
+                HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
+                    "SetCastScreenEnableSkipWindow(%" PRIu64")", screenId);
+                rsInterface_.SetCastScreenEnableSkipWindow(rsScreenId, isEnable);
             }
         }
     }
-    SetScreenSkipProtectedWindowInner();
     return DMError::DM_OK;
-}
-
-void ScreenSessionManager::SetScreenSkipProtectedWindowInner()
-{
-    TLOGI(WmsLogTag::DMS, "enter");
-    bool screenSkipProtectedWindowValue = false;
-    bool ret = ScreenSettingHelper::GetSettingscreenSkipProtectedWindow(screenSkipProtectedWindowValue);
-    if (!ret) {
-        TLOGE(WmsLogTag::DMS, "get setting failed, default value false");
-    }
-    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
-    for (auto sessionIt : screenSessionMap_) {
-        auto screenSession = sessionIt.second;
-        if (screenSession == nullptr) {
-            TLOGE(WmsLogTag::DMS, "screenSession is nullptr, ScreenId:%{public}" PRIu64"",
-                sessionIt.first);
-            continue;
-        }
-        if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::VIRTUAL) {
-            ScreenId rsScreenId;
-            if (!screenIdManager_.ConvertToRsScreenId(screenSession->GetScreenId(), rsScreenId)) {
-                TLOGE(WmsLogTag::DMS, "No corresponding rsId.");
-                continue;
-            }
-            bool requiredSkipWindow = screenSession->GetShareProtect() && screenSkipProtectedWindowValue;
-            TLOGI(WmsLogTag::DMS, "virtualScreenId:%{public}" PRIu64 " requiredSkipWindow:%{public}d",
-                sessionIt.first, requiredSkipWindow);
-            HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
-                "SetCastScreenEnableSkipWindow(%" PRIu64")", sessionIt.first);
-            rsInterface_.SetCastScreenEnableSkipWindow(rsScreenId, requiredSkipWindow);
-        }
-    }
 }
 
 bool ScreenSessionManager::IsSpecialApp()

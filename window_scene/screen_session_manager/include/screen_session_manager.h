@@ -296,7 +296,6 @@ public:
     void OnTentModeChanged(int tentType, int32_t hall = -1);
     void RegisterSettingDpiObserver();
     void RegisterSettingRotationObserver();
-    void RegisterSettingscreenSkipProtectedWindowObserver();
 
     void OnConnect(ScreenId screenId) override {}
     void OnDisconnect(ScreenId screenId) override {}
@@ -517,7 +516,6 @@ private:
         PowerStateChangeReason reason);
     bool IsExtendMode();
     bool IsScreenCasting();
-    void SetScreenSkipProtectedWindowInner();
     const std::set<std::string> g_packageNames_ {};
 
     /**
