@@ -286,6 +286,35 @@ HWTEST_F(MainSessionTest, RectCheck03, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NotifyClientToUpdateInteractive
+ * @tc.desc: check func NotifyClientToUpdateInteractive
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, NotifyClientToUpdateInteractive, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "NotifyClientToUpdateInteractive";
+    info.bundleName_ = "NotifyClientToUpdateInteractive";
+    sptr<MainSession> testSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(testSession, nullptr);
+    testSession->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
+    ASSERT_NE(testSession->sessionStage_, nullptr);
+
+    bool interactive = !(testSession->isClientInteractive_);
+    testSession->SetSessionState(SessionState::STATE_ACTIVE);
+    testSession->NotifyClientToUpdateInteractive(interactive);
+    ASSERT_EQ(testSession->isClientInteractive_, interactive);
+    interactive = !interactive;
+    testSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    testSession->NotifyClientToUpdateInteractive(interactive);
+    ASSERT_EQ(testSession->isClientInteractive_, interactive);
+    interactive = !interactive;
+    testSession->SetSessionState(SessionState::STATE_BACKGROUND);
+    testSession->NotifyClientToUpdateInteractive(interactive);
+    ASSERT_NE(testSession->isClientInteractive_, interactive);
+}
+
+/**
  * @tc.name: SetExitSplitOnBackground
  * @tc.desc: check func SetExitSplitOnBackground
  * @tc.type: FUNC
@@ -342,6 +371,27 @@ HWTEST_F(MainSessionTest, OnTitleAndDockHoverShowChange, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnTitleAndDockHoverShowChange02
+ * @tc.desc: check func OnTitleAndDockHoverShowChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, OnTitleAndDockHoverShowChange02, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "OnTitleAndDockHoverShowChange02";
+    info.bundleName_ = "OnTitleAndDockHoverShowChange02";
+    sptr<MainSession> testSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(testSession, nullptr);
+
+    auto callbackFlag = 1;
+    testSession->onTitleAndDockHoverShowChangeFunc_ = [&callbackFlag] (bool isTitleHoverShown, bool isDockHoverShown) {
+        callbackFlag += 1;
+    };
+    testSession->OnTitleAndDockHoverShowChange(true, true);
+    EXPECT_EQ(callbackFlag, 2);
+}
+
+/**
  * @tc.name: OnRestoreMainWindow
  * @tc.desc: OnRestoreMainWindow function01
  * @tc.type: FUNC
@@ -363,6 +413,30 @@ HWTEST_F(MainSessionTest, OnRestoreMainWindow, TestSize.Level1)
     };
     session->onRestoreMainWindowFunc_ = func;
     EXPECT_EQ(WSError::WS_OK, session->OnRestoreMainWindow());
+}
+
+/**
+ * @tc.name: OnRestoreMainWindow02
+ * @tc.desc: check func OnRestoreMainWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, OnRestoreMainWindow02, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "OnRestoreMainWindow02";
+    info.bundleName_ = "OnRestoreMainWindow02";
+    sptr<MainSession> testSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(testSession, nullptr);
+
+    testSession->onRestoreMainWindowFunc_ = nullptr;
+    EXPECT_EQ(testSession->OnRestoreMainWindow(), WSError::WS_OK);
+    
+    auto callbackFlag = 1;
+    testSession->onRestoreMainWindowFunc_ = [&callbackFlag] () {
+        callbackFlag += 1;
+    };
+    testSession->OnRestoreMainWindow();
+    EXPECT_EQ(callbackFlag, 2);
 }
 
 /**
@@ -388,6 +462,30 @@ HWTEST_F(MainSessionTest, OnSetWindowRectAutoSave, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnSetWindowRectAutoSave02
+ * @tc.desc: check func OnSetWindowRectAutoSave
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, OnSetWindowRectAutoSave02, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "OnSetWindowRectAutoSave02";
+    info.bundleName_ = "OnSetWindowRectAutoSave02";
+    sptr<MainSession> testSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(testSession, nullptr);
+
+    testSession->onSetWindowRectAutoSaveFunc_ = nullptr;
+    EXPECT_EQ(testSession->OnSetWindowRectAutoSave(true, true), WSError::WS_OK);
+
+    auto callbackFlag = 1;
+    testSession->onSetWindowRectAutoSaveFunc_ = [&callbackFlag] (bool enabled, bool isSaveBySpecifiedFlag) {
+        callbackFlag += 1;
+    };
+    testSession->OnSetWindowRectAutoSave(true, true);
+    EXPECT_EQ(callbackFlag, 2);
+}
+
+/**
  * @tc.name: NotifyMainModalTypeChange
  * @tc.desc: NotifyMainModalTypeChange function01
  * @tc.type: FUNC
@@ -404,6 +502,30 @@ HWTEST_F(MainSessionTest, NotifyMainModalTypeChange, TestSize.Level1)
     });
     EXPECT_NE(sceneSession->onMainModalTypeChange_, nullptr);
     EXPECT_EQ(WSError::WS_OK, sceneSession->NotifyMainModalTypeChange(true));
+}
+
+/**
+ * @tc.name: NotifyMainModalTypeChange02
+ * @tc.desc: check func NotifyMainModalTypeChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, NotifyMainModalTypeChange02, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "NotifyMainModalTypeChange02";
+    info.bundleName_ = "NotifyMainModalTypeChange02";
+    sptr<MainSession> testSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(testSession, nullptr);
+
+    testSession->onMainModalTypeChange_ = nullptr;
+    EXPECT_EQ(testSession->NotifyMainModalTypeChange(true), WSError::WS_OK);
+
+    auto callbackFlag = 1;
+    testSession->onMainModalTypeChange_ = [&callbackFlag] (bool isModal) {
+        callbackFlag += 1;
+    };
+    testSession->NotifyMainModalTypeChange(true);
+    EXPECT_EQ(callbackFlag, 2);
 }
 
 /**
@@ -475,6 +597,36 @@ HWTEST_F(MainSessionTest, NotifySupportWindowModesChange, TestSize.Level1)
     };
 
     EXPECT_EQ(WSError::WS_OK, session->NotifySupportWindowModesChange(supportedWindowModes));
+}
+
+/**
+ * @tc.name: NotifySupportWindowModesChange02
+ * @tc.desc: check func NotifySupportWindowModesChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, NotifySupportWindowModesChange02, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "NotifySupportWindowModesChange02";
+    info.bundleName_ = "NotifySupportWindowModesChange02";
+    sptr<MainSession> testSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(testSession, nullptr);
+    std::vector<AppExecFwk::SupportWindowMode> supportedWindowModes = {
+        AppExecFwk::SupportWindowMode::FULLSCREEN,
+        AppExecFwk::SupportWindowMode::SPLIT,
+        AppExecFwk::SupportWindowMode::FLOATING
+    };
+
+    testSession->onSetSupportedWindowModesFunc_ = nullptr;
+    EXPECT_EQ(testSession->NotifySupportWindowModesChange(supportedWindowModes), WSError::WS_OK);
+
+    auto callbackFlag = 1;
+    testSession->onSetSupportedWindowModesFunc_ = [&callbackFlag] (
+        std::vector<AppExecFwk::SupportWindowMode>&& supportedWindowModes) {
+        callbackFlag += 1;
+    };
+    testSession->NotifySupportWindowModesChange(supportedWindowModes);
+    EXPECT_EQ(callbackFlag, 2);
 }
 
 /**

@@ -2303,12 +2303,6 @@ bool DisplayManager::Impl::ConvertScreenIdToRsScreenId(ScreenId screenId, Screen
     return res;
 }
 
-void DisplayManager::SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList,
-    std::vector<uint64_t> surfaceIdList)
-{
-    SingletonContainer::Get<DisplayManagerAdapter>().SetVirtualScreenBlackList(screenId, windowIdList, surfaceIdList);
-}
-
 void DisplayManager::SetVirtualDisplayMuteFlag(ScreenId screenId, bool muteFlag)
 {
     return pImpl_->SetVirtualDisplayMuteFlag(screenId, muteFlag);
@@ -2317,11 +2311,6 @@ void DisplayManager::SetVirtualDisplayMuteFlag(ScreenId screenId, bool muteFlag)
 void DisplayManager::Impl::SetVirtualDisplayMuteFlag(ScreenId screenId, bool muteFlag)
 {
     return SingletonContainer::Get<DisplayManagerAdapter>().SetVirtualDisplayMuteFlag(screenId, muteFlag);
-}
-
-void DisplayManager::DisablePowerOffRenderControl(ScreenId screenId)
-{
-    SingletonContainer::Get<DisplayManagerAdapter>().DisablePowerOffRenderControl(screenId);
 }
 
 DMError DisplayManager::ProxyForFreeze(std::set<int32_t> pidList, bool isProxy)
@@ -2347,6 +2336,17 @@ DMError DisplayManager::ResetAllFreezeStatus()
 DMError DisplayManager::Impl::ResetAllFreezeStatus()
 {
     return SingletonContainer::Get<DisplayManagerAdapter>().ResetAllFreezeStatus();
+}
+
+void DisplayManager::SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList,
+    std::vector<uint64_t> surfaceIdList)
+{
+    SingletonContainer::Get<DisplayManagerAdapter>().SetVirtualScreenBlackList(screenId, windowIdList, surfaceIdList);
+}
+
+void DisplayManager::DisablePowerOffRenderControl(ScreenId screenId)
+{
+    SingletonContainer::Get<DisplayManagerAdapter>().DisablePowerOffRenderControl(screenId);
 }
 
 DMError DisplayManager::SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid,

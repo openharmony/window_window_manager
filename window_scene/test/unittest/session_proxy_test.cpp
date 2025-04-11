@@ -424,21 +424,21 @@ HWTEST_F(SessionProxyTest, SetAutoStartPiP, TestSize.Level1)
 }
 
 /**
- * @tc.name: UpdatePiPDefaultWindowSizeType
+ * @tc.name: UpdatePiPTemplateInfo
  * @tc.desc: sessionStub sessionStubTest
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(SessionProxyTest, UpdatePiPDefaultWindowSizeType, Function | SmallTest | Level2)
+HWTEST_F(SessionProxyTest, UpdatePiPTemplateInfo, Function | SmallTest | Level2)
 {
-    GTEST_LOG_(INFO) << "UpdatePiPDefaultWindowSizeType: UpdatePiPDefaultWindowSizeType start";
+    GTEST_LOG_(INFO) << "UpdatePiPTemplateInfo: UpdatePiPTemplateInfo start";
     auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     ASSERT_NE(iRemoteObjectMocker, nullptr);
     auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     ASSERT_NE(sProxy, nullptr);
-    uint32_t defaultWindowSizeType = 1;
-    ASSERT_EQ(WSError::WS_OK, sProxy->UpdatePiPDefaultWindowSizeType(defaultWindowSizeType));
-    GTEST_LOG_(INFO) << "UpdatePiPDefaultWindowSizeType: UpdatePiPDefaultWindowSizeType end";
+    PiPTemplateInfo templateInfo;
+    ASSERT_EQ(WSError::WS_OK, sProxy->UpdatePiPTemplateInfo(templateInfo));
+    GTEST_LOG_(INFO) << "UpdatePiPTemplateInfo: UpdatePiPTemplateInfo end";
 }
 
 /**
@@ -1140,23 +1140,6 @@ HWTEST_F(SessionProxyTest, SetSessionLabelAndIcon, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetWindowCornerRadius
- * @tc.desc: SetWindowCornerRadius
- * @tc.type: FUNC
- */
-HWTEST_F(SessionProxyTest, SetWindowCornerRadius, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "SessionProxyTest: SetWindowCornerRadius start";
-    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    ASSERT_NE(iRemoteObjectMocker, nullptr);
-    auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
-    ASSERT_NE(sProxy, nullptr);
-    WSError res = sProxy->SetWindowCornerRadius(1.0f);
-    ASSERT_EQ(res, WSError::WS_OK);
-    GTEST_LOG_(INFO) << "SessionProxyTest: SetWindowCornerRadius end";
-}
-
-/**
  * @tc.name: UpdateFlag
  * @tc.desc: UpdateFlag
  * @tc.type: FUNC
@@ -1396,6 +1379,24 @@ HWTEST_F(SessionProxyTest, UpdateRotationChangeRegistered, Function | SmallTest 
     WSError res = sProxy->UpdateRotationChangeRegistered(0, false);
     ASSERT_EQ(res, WSError::WS_OK);
     GTEST_LOG_(INFO) << "SessionProxyTest: UpdateRotationChangeRegistered start";
+}
+
+/**
+ * @tc.name: GetTargetOrientationConfigInfo
+ * @tc.desc: GetTargetOrientationConfigInfo test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, GetTargetOrientationConfigInfo, Function | SmallTest | Level2)
+{
+    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
+    std::map<Rosen::WindowType, Rosen::SystemBarProperty> properties;
+    Rosen::SystemBarProperty statusBarProperty;
+    properties[Rosen::WindowType::WINDOW_TYPE_STATUS_BAR] = statusBarProperty;
+    WSError res = sProxy->GetTargetOrientationConfigInfo(Orientation::USER_ROTATION_PORTRAIT, properties);
+    ASSERT_EQ(res, WSError::WS_OK);
 }
 
 /**

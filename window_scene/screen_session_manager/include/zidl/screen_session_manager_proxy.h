@@ -78,6 +78,10 @@ public:
     virtual DMError DestroyVirtualScreen(ScreenId screenId) override;
 
     virtual DMError SetVirtualScreenSurface(ScreenId screenId, sptr<IBufferProducer> surface) override;
+
+    DMError AddVirtualScreenBlockList(const std::vector<int32_t>& persistentIds) override;
+
+    DMError RemoveVirtualScreenBlockList(const std::vector<int32_t>& persistentIds) override;
     
     virtual DMError SetScreenPrivacyMaskImage(ScreenId screenId,
         const std::shared_ptr<Media::PixelMap>& privacyMaskImg) override;

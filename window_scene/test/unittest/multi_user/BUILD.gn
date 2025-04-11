@@ -16,14 +16,27 @@ import("../../../../windowmanager_aafwk.gni")
 
 group("unittest") {
   testonly = true
-  deps = [ ":user_switch_test" ]
+  deps = [ ":window_scene_user_switch_test" ]
 }
 
 module_out_path = "window_manager/window_manager/window_scene/multi_user"
 
-ohos_unittest("user_switch_test") {
+ohos_unittest("window_scene_user_switch_test") {
   module_out_path = module_out_path
-  sources = [ "user_switch_reporter_test.cpp" ]
+  cflags_cc = [ "-Wno-thread-safety" ]
+  include_dirs = [ "${window_base_path}/window_scene/session/host/include" ]
+  sources = [
+    "scene_session_manager_test.cpp",
+    "scene_session_test.cpp",
+    "session_manager_lite_test.cpp",
+    "session_manager_test.cpp",
+    "user_switch_reporter_test.cpp",
+  ]
   deps = [ "../:ws_unittest_common" ]
-  external_deps = [ "c_utils:utils" ]
+  external_deps = [
+    "ability_runtime:ability_context_native",
+    "ability_runtime:mission_info",
+    "ace_engine:ace_uicontent",
+    "c_utils:utils",
+  ]
 }

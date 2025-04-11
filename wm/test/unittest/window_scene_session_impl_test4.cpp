@@ -100,47 +100,6 @@ HWTEST_F(WindowSceneSessionImplTest4, UpdateSurfaceNodeAfterCustomAnimation, Tes
 }
 
 /**
- * @tc.name: RegisterSessionRecoverListener
- * @tc.desc: RegisterSessionRecoverListener
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest4, RegisterSessionRecoverListener, TestSize.Level1)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("RegisterSessionRecoverListener");
-    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    int32_t persistentId = windowSceneSessionImpl->property_->GetPersistentId();
-    WindowAdapter& windowAdapter = SingletonContainer::Get<WindowAdapter>();
-    windowSceneSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    windowSceneSessionImpl->RegisterSessionRecoverListener(true);
-    ASSERT_EQ(windowAdapter.sessionRecoverCallbackFuncMap_.size(), 0);
-
-    windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    windowSceneSessionImpl->property_->SetCollaboratorType(CollaboratorType::RESERVE_TYPE);
-    windowSceneSessionImpl->RegisterSessionRecoverListener(true);
-    ASSERT_EQ(windowAdapter.sessionRecoverCallbackFuncMap_.size(), 0);
-
-    windowSceneSessionImpl->property_->SetCollaboratorType(CollaboratorType::DEFAULT_TYPE);
-    windowSceneSessionImpl->RegisterSessionRecoverListener(true);
-    ASSERT_EQ(windowAdapter.sessionRecoverCallbackFuncMap_.size(), 1);
-    windowAdapter.UnregisterSessionRecoverCallbackFunc(persistentId);
-    ASSERT_EQ(windowAdapter.sessionRecoverCallbackFuncMap_.size(), 0);
-
-    windowSceneSessionImpl->state_ = WindowState::STATE_DESTROYED;
-    windowSceneSessionImpl->RegisterSessionRecoverListener(true);
-    ASSERT_EQ(windowAdapter.sessionRecoverCallbackFuncMap_.size(), 1);
-    windowAdapter.UnregisterSessionRecoverCallbackFunc(persistentId);
-    ASSERT_EQ(windowAdapter.sessionRecoverCallbackFuncMap_.size(), 0);
-
-    windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
-    windowSceneSessionImpl->RegisterSessionRecoverListener(true);
-    EXPECT_EQ(CollaboratorType::DEFAULT_TYPE, windowSceneSessionImpl->property_->GetCollaboratorType());
-    ASSERT_EQ(windowAdapter.sessionRecoverCallbackFuncMap_.size(), 1);
-    windowAdapter.UnregisterSessionRecoverCallbackFunc(persistentId);
-    EXPECT_EQ(CollaboratorType::DEFAULT_TYPE, windowSceneSessionImpl->property_->GetCollaboratorType());
-}
-
-/**
  * @tc.name: ConsumePointerEvent
  * @tc.desc: ConsumePointerEvent
  * @tc.type: FUNC
@@ -166,6 +125,38 @@ HWTEST_F(WindowSceneSessionImplTest4, ConsumePointerEvent, TestSize.Level1)
     windowSceneSessionImpl->property_->SetTurnScreenOn(false);
     ret = windowSceneSessionImpl->IsTurnScreenOn();
     EXPECT_EQ(false, ret);
+}
+
+/**
+ * @tc.name: ConsumePointerEvent02
+ * @tc.desc: ConsumePointerEvent02
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, ConsumePointerEvent02, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("ConsumePointerEvent");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    windowSceneSessionImpl->hostSession_ = session;
+    windowSceneSessionImpl->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+
+    int32_t pointerId = 0;
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    pointerEvent->SetPointerId(pointerId);
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
+    MMI::PointerEvent::PointerItem pointerItem;
+    pointerItem.SetPointerId(pointerId);
+    pointerEvent->AddPointerItem(pointerItem);
+
+    windowSceneSessionImpl->property_->SetWindowDelayRaiseEnabled(false);
+    ASSERT_EQ(false, windowSceneSessionImpl->property_->IsWindowDelayRaiseEnabled());
+    windowSceneSessionImpl->ConsumePointerEvent(pointerEvent);
+    windowSceneSessionImpl->property_->SetWindowDelayRaiseEnabled(true);
+    ASSERT_EQ(true, windowSceneSessionImpl->property_->IsWindowDelayRaiseEnabled());
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);
+    windowSceneSessionImpl->ConsumePointerEvent(pointerEvent);
 }
 
 /**
@@ -426,7 +417,7 @@ HWTEST_F(WindowSceneSessionImplTest4, ResetSuperFoldDisplayY, TestSize.Level1)
  * @tc.desc: ConsumePointerEventInner
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest4, ConsumePointerEventInner, TestSize.Level1)
+HWTEST_F(WindowSceneSessionImplTest4, ConsumePointerEventInner, TestSize.Level0)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("ConsumePointerEventInner");
@@ -445,6 +436,30 @@ HWTEST_F(WindowSceneSessionImplTest4, ConsumePointerEventInner, TestSize.Level1)
     windowSceneSessionImpl->ConsumePointerEventInner(pointerEvent, pointerItem);
     pointerEvent->SetPointerAction(2);
     windowSceneSessionImpl->ConsumePointerEventInner(pointerEvent, pointerItem);
+}
+
+/**
+ * @tc.name: ConsumePointerEventInner02
+ * @tc.desc: ConsumePointerEventInner02
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, ConsumePointerEventInner02, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("ConsumePointerEventInner");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    windowSceneSessionImpl->hostSession_ = session;
+    windowSceneSessionImpl->property_->SetWindowDelayRaiseEnabled(true);
+    windowSceneSessionImpl->property_->SetPersistentId(1);
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(nullptr, pointerEvent);
+    MMI::PointerEvent::PointerItem pointerItem;
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
+    windowSceneSessionImpl->ConsumePointerEventInner(pointerEvent, pointerItem, true);
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);
+    windowSceneSessionImpl->ConsumePointerEventInner(pointerEvent, pointerItem, true);
 }
 
 /**
@@ -681,7 +696,7 @@ HWTEST_F(WindowSceneSessionImplTest4, GetSystemBarPropertyByType, TestSize.Level
  * @tc.desc: SetSpecificBarProperty
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest4, SetSpecificBarProperty, TestSize.Level1)
+HWTEST_F(WindowSceneSessionImplTest4, SetSpecificBarProperty, TestSize.Level0)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetSpecificBarProperty");
@@ -1187,6 +1202,13 @@ HWTEST_F(WindowSceneSessionImplTest4, PreLayoutOnShow01, TestSize.Level1)
     window->PreLayoutOnShow(WindowType::WINDOW_TYPE_APP_SUB_WINDOW, displayInfo);
     window->hostSession_ = session;
     window->PreLayoutOnShow(WindowType::WINDOW_TYPE_APP_SUB_WINDOW, displayInfo);
+    Rect originRect = window->GetRect();
+    Rect testRect = {10, 20, 100, 200};
+    window->GetProperty()->SetRequestRect(testRect);
+    window->PreLayoutOnShow(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, displayInfo);
+    ASSERT_EQ(window->GetRect(), originRect);
+    window->PreLayoutOnShow(WindowType::WINDOW_TYPE_APP_SUB_WINDOW, displayInfo);
+    ASSERT_EQ(window->GetRect(), testRect);
 }
 
 /**

@@ -288,12 +288,12 @@ public:
     }
 
     /**
-     * @brief update the default window size type
+     * @brief Update pipTemplateInfo.
      *
-     * @param defaultWindowSizeType Indicates the {@link uint32_t} default window size type of pip window
+     * @param pipTemplateInfo Indicates the {@link PiPTemplateInfo} pipTemplateInfo of pip window
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
-    virtual WSError UpdatePiPDefaultWindowSizeType(uint32_t defaultWindowSizeType)
+    virtual WSError UpdatePiPTemplateInfo(PiPTemplateInfo& pipTemplateInfo)
     {
         return WSError::WS_OK;
     }
@@ -433,6 +433,18 @@ public:
     virtual WSError UpdateFlag(const std::string& flag) { return WSError::WS_OK; };
     virtual WSError UpdateRotationChangeRegistered(int32_t persistentId, bool isRegister) { return WSError::WS_OK; }
     virtual WSError GetIsHighlighted(bool& isHighlighted) { return WSError::WS_OK; }
+
+    /**
+     * @brief Notify when disableDelegator change to true
+     *
+     * This function is used to notify disableDelegator change.
+     *
+     * @caller SA
+     * @permission SA permission
+     *
+     * @return Successful call returns WMError::WS_OK, otherwise it indicates failure
+     */
+    virtual WMError NotifyDisableDelegatorChange() { return WMError::WM_OK; }
 };
 } // namespace OHOS::Rosen
 

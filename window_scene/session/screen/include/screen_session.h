@@ -129,6 +129,7 @@ public:
     void SetScreenSceneDpiChangeListener(const SetScreenSceneDpiFunc& func);
     void SetScreenSceneDpi(float density);
     void SetDensityInCurResolution(float densityInCurResolution);
+    float GetDensityInCurResolution();
     void SetDefaultDensity(float defaultDensity);
     void UpdateVirtualPixelRatio(const RRect& bounds);
     void SetScreenType(ScreenType type);
@@ -248,7 +249,6 @@ public:
     uint32_t GetPointerActiveWidth();
     void SetPointerActiveHeight(uint32_t pointerActiveHeight);
     uint32_t GetPointerActiveHeight();
-
     float GetSensorRotation() const;
     DisplaySourceMode GetDisplaySourceMode() const;
     void SetXYPosition(int32_t x, int32_t y);
@@ -307,6 +307,9 @@ public:
     void SecondaryReflexionChange(ScreenId screenId, bool isSecondaryReflexion);
     void EnableMirrorScreenRegion();
     void ExtendScreenConnectStatusChange(ScreenId screenId, ExtendScreenConnectStatus extendScreenConnectStatus);
+    void SetIsEnableRegionRotation(bool isEnableRegionRotation);
+    bool GetIsEnableRegionRotation();
+    void UpdateDisplayNodeRotation(int rotation);
 
 private:
     ScreenProperty property_;
@@ -343,6 +346,8 @@ private:
     std::mutex mirrorScreenRegionMutex_;
     void OptimizeSecondaryDisplayMode(const RRect &bounds, FoldDisplayMode &foldDisplayMode);
     std::string innerName_ {"UNKOWN"};
+    bool isEnableRegionRotation_ = false;
+    std::mutex isEnableRegionRotationMutex_;
 };
 
 class ScreenSessionGroup : public ScreenSession {

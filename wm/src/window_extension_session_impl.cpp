@@ -16,6 +16,7 @@
 #include "window_extension_session_impl.h"
 
 #include <hitrace_meter.h>
+#include <int_wrapper.h>
 #include <ipc_types.h>
 #include <parameters.h>
 #include <transaction/rs_interfaces.h>
@@ -42,7 +43,7 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowExtensionSessionImpl"};
 constexpr int64_t DISPATCH_KEY_EVENT_TIMEOUT_TIME_MS = 1000;
 constexpr int32_t UIEXTENTION_ROTATION_ANIMATION_TIME = 400;
-constexpr uint32_t API_VERSION_18 = 18;
+constexpr uint32_t API_VERSION_MOD = 1000;
 }
 
 #define CHECK_HOST_SESSION_RETURN_IF_NULL(hostSession)                         \
@@ -627,6 +628,7 @@ WMError WindowExtensionSessionImpl::SetUIContentInner(const std::string& content
         } else if (usage == UIExtensionUsage::MODAL) {
             uiContent->SetUIContentType(Ace::UIContentType::MODAL_UI_EXTENSION);
         }
+        uiContent->SetHostParams(extensionConfig_);
         if (initByName) {
             uiContent->InitializeByName(this, contentInfo, storage, property_->GetParentId());
         } else {
@@ -966,26 +968,17 @@ WMError WindowExtensionSessionImpl::UnregisterOccupiedAreaChangeListener(
 WMError WindowExtensionSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea,
     const Rect& rect, int32_t apiVersion)
 {
-    apiVersion = apiVersion == API_VERSION_INVALID ?
-        static_cast<int32_t>(SysCapUtil::GetApiCompatibleVersion()) : apiVersion;
-    TLOGI(WmsLogTag::WMS_IMMS, "type %{public}d api %{public}d", type, apiVersion);
+    uint32_t currentApiVersion = 0;
+    if (context_ != nullptr && context_->GetApplicationInfo() != nullptr) {
+        currentApiVersion = context_->GetApplicationInfo()->apiTargetVersion % API_VERSION_MOD;
+    }
+    apiVersion = apiVersion == API_VERSION_INVALID ? currentApiVersion : apiVersion;
+    TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d type %{public}d api %{public}d", GetPersistentId(), type, apiVersion);
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
     WSRect sessionRect = { rect.posX_, rect.posY_, rect.width_, rect.height_ };
     avoidArea = hostSession->GetAvoidAreaByType(type, sessionRect, apiVersion);
     return WMError::WM_OK;
-}
-
-void WindowExtensionSessionImpl::NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
-{
-    int32_t version = static_cast<int32_t>(SysCapUtil::GetApiCompatibleVersion());
-    if (version < API_VERSION_18 && WindowHelper::IsSystemWindow(GetParentWindowType())) {
-        TLOGI(WmsLogTag::WMS_IMMS,
-            "win [%{public}d %{public}s] type %{public}d api %{public}d not supported",
-            GetPersistentId(), GetWindowName().c_str(), type, version);
-        return;
-    }
-    WindowSessionImpl::NotifyAvoidAreaChange(avoidArea, type);
 }
 
 WMError WindowExtensionSessionImpl::RegisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener)
@@ -1442,6 +1435,35 @@ WSError WindowExtensionSessionImpl::SendExtensionData(MessageParcel& data, Messa
 WindowMode WindowExtensionSessionImpl::GetWindowMode() const
 {
     return property_->GetWindowMode();
+}
+
+void WindowExtensionSessionImpl::UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>& want)
+{
+    if (want == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "null want ptr");
+        return;
+    }
+
+    const auto& configParam = want->GetParams().GetWantParams(Extension::UIEXTENSION_CONFIG_FIELD);
+    auto state = configParam.GetIntParam(Extension::CROSS_AXIS_FIELD, 0);
+    if (IsValidCrossState(state)) {
+        crossAxisState_ = static_cast<CrossAxisState>(state);
+    }
+    auto waterfallModeValue = configParam.GetIntParam(Extension::WATERFALL_MODE_FIELD, 0);
+    isFullScreenWaterfallMode_.store(static_cast<bool>(waterfallModeValue));
+    isValidWaterfallMode_.store(true);
+
+    extensionConfig_ = AAFwk::WantParams(configParam);
+    if (auto uiContent = GetUIContentSharedPtr()) {
+        uiContent->SetHostParams(extensionConfig_);
+    }
+    want->RemoveParam(Extension::UIEXTENSION_CONFIG_FIELD);
+    auto rootHostWindowType =
+        static_cast<WindowType>(configParam.GetIntParam(Extension::ROOT_HOST_WINDOW_TYPE_FIELD, 0));
+    SetRootHostWindowType(rootHostWindowType);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "CrossAxisState: %{public}d, waterfall: %{public}d, "
+        "rootHostWindowType: %{public}u, winId: %{public}u",
+        state, isFullScreenWaterfallMode_.load(), rootHostWindowType, GetWindowId());
 }
 
 WMError WindowExtensionSessionImpl::SetWindowMode(WindowMode mode)

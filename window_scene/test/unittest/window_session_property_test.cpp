@@ -100,65 +100,11 @@ HWTEST_F(WindowSessionPropertyTest, SetSessionInfo, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetRequestedOrientation
- * @tc.desc: SetRequestedOrientation test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionPropertyTest, SetRequestedOrientation, TestSize.Level1)
-{
-    Orientation orientation = Orientation::REVERSE_HORIZONTAL;
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(nullptr, property);
-    property->SetRequestedOrientation(orientation);
-    Orientation ret = property->GetRequestedOrientation();
-    ASSERT_EQ(ret, orientation);
-
-    property->SetRequestedOrientation(Orientation::AUTO_ROTATION_UNSPECIFIED);
-    Orientation ret1 = property->GetRequestedOrientation();
-    ASSERT_EQ(ret1, Orientation::AUTO_ROTATION_UNSPECIFIED);
-
-    property->SetRequestedOrientation(Orientation::USER_ROTATION_PORTRAIT);
-    Orientation ret2 = property->GetRequestedOrientation();
-    ASSERT_EQ(ret2, Orientation::USER_ROTATION_PORTRAIT);
-
-    property->SetRequestedOrientation(Orientation::USER_ROTATION_LANDSCAPE);
-    Orientation ret3 = property->GetRequestedOrientation();
-    ASSERT_EQ(ret3, Orientation::USER_ROTATION_LANDSCAPE);
-
-    property->SetRequestedOrientation(Orientation::USER_ROTATION_PORTRAIT_INVERTED);
-    Orientation ret4 = property->GetRequestedOrientation();
-    ASSERT_EQ(ret4, Orientation::USER_ROTATION_PORTRAIT_INVERTED);
-
-    property->SetRequestedOrientation(Orientation::USER_ROTATION_LANDSCAPE_INVERTED);
-    Orientation ret5 = property->GetRequestedOrientation();
-    ASSERT_EQ(ret5, Orientation::USER_ROTATION_LANDSCAPE_INVERTED);
-
-    property->SetRequestedOrientation(Orientation::FOLLOW_DESKTOP);
-    Orientation ret6 = property->GetRequestedOrientation();
-    ASSERT_EQ(ret6, Orientation::FOLLOW_DESKTOP);
-}
-
-/**
- * @tc.name: SetDefaultRequestedOrientation
- * @tc.desc: SetDefaultRequestedOrientation test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionPropertyTest, SetDefaultRequestedOrientation, TestSize.Level1)
-{
-    Orientation orientation = Orientation::REVERSE_HORIZONTAL;
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(nullptr, property);
-    property->SetDefaultRequestedOrientation(orientation);
-    Orientation ret = property->GetDefaultRequestedOrientation();
-    ASSERT_EQ(ret, orientation);
-}
-
-/**
  * @tc.name: SetPrivacyMode
  * @tc.desc: SetPrivacyMode as true and false
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionPropertyTest, SetPrivacyMode, TestSize.Level1)
+HWTEST_F(WindowSessionPropertyTest, SetPrivacyMode, TestSize.Level0)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
@@ -472,7 +418,7 @@ HWTEST_F(WindowSessionPropertyTest, IsFloatingWindowAppType, TestSize.Level1)
  * @tc.desc: SetTouchHotAreas test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionPropertyTest, SetTouchHotAreas, TestSize.Level1)
+HWTEST_F(WindowSessionPropertyTest, SetTouchHotAreas, TestSize.Level0)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     Rect rect { 4, 4, 4, 4 };
@@ -1147,6 +1093,23 @@ HWTEST_F(WindowSessionPropertyTest, SetKeepScreenOn, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetViewKeepScreenOn
+ * @tc.desc: SetViewKeepScreenOn And IsViewKeepScreenOn
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetViewKeepScreenOn, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    bool keepScreenOn = true;
+    property->SetViewKeepScreenOn(keepScreenOn);
+    ASSERT_EQ(keepScreenOn, property->IsViewKeepScreenOn());
+    keepScreenOn = false;
+    property->SetViewKeepScreenOn(keepScreenOn);
+    ASSERT_EQ(keepScreenOn, property->IsViewKeepScreenOn());
+}
+
+/**
  * @tc.name: MarshallingSessionInfo
  * @tc.desc: MarshallingSessionInfo test
  * @tc.type: FUNC
@@ -1451,19 +1414,6 @@ HWTEST_F(WindowSessionPropertyTest, GetBackgroundAlpha, TestSize.Level1)
     uint8_t backgroundAlpha = 2;
     property->SetBackgroundAlpha(backgroundAlpha);
     ASSERT_EQ(2, property->GetBackgroundAlpha());
-}
-
-/**
- * @tc.name: SetWindowCornerRadius
- * @tc.desc: SetWindowCornerRadius
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionPropertyTest, SetWindowCornerRadius, TestSize.Level1)
-{
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    float cornerRadius = 1.0f;
-    property->SetWindowCornerRadius(cornerRadius);
-    ASSERT_EQ(cornerRadius, property->GetWindowCornerRadius());
 }
 
 /**

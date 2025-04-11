@@ -250,7 +250,7 @@ void SceneInputManager::ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& dis
             .height = screenHeight,
             .dpi = screenProperty.GetDensity() *  DOT_PER_INCH,
             .name = "display" + std::to_string(screenId),
-            .uniq = "default" + std::to_string(screenId),
+            .uniq = "default" + std::to_string(screenProperty.GetRsId()),
             .direction = ConvertDegreeToMMIRotation(screenProperty.GetPhysicalRotation()),
             .displayDirection = ConvertDegreeToMMIRotation(screenProperty.GetScreenComponentRotation()),
             .displayMode = static_cast<MMI::DisplayMode>(displayMode),
@@ -274,7 +274,8 @@ void SceneInputManager::ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& dis
             .physicalWidth = screenProperty.GetPhyWidth(),
             .physicalHeight = screenProperty.GetPhyHeight(),
             .pointerActiveWidth = screenProperty.GetPointerActiveWidth(),
-            .pointerActiveHeight = screenProperty.GetPointerActiveHeight()
+            .pointerActiveHeight = screenProperty.GetPointerActiveHeight(),
+            .uniqueId = screenProperty.GetRsId()
         };
         displayInfos.emplace_back(displayInfo);
     }
@@ -512,7 +513,7 @@ void SceneInputManager::PrintDisplayInfo(const std::vector<MMI::DisplayInfo>& di
                           << displayInfo.fixedDirection << "|" << displayInfo.physicalWidth << "|"
                           << displayInfo.physicalHeight << "|" << displayInfo.oneHandX << "|"
                           << displayInfo.oneHandY << "|" << displayInfo.scalePercent << "|"
-                          << displayInfo.expandHeight << ",";
+                          << displayInfo.expandHeight << "|" << displayInfo.uniqueId << ",";
     }
 
     std::string displayList = displayListStream.str();

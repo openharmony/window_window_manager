@@ -921,46 +921,6 @@ HWTEST_F(WindowSessionImplTest4, CheckIfNeedCommitRsTransaction, TestSize.Level1
 }
 
 /**
- * @tc.name: UpdateRectForRotation
- * @tc.desc: UpdateRectForRotation Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest4, UpdateRectForRotation, TestSize.Level1)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("WindowSessionCreateCheck");
-    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-
-    Rect wmRect;
-    wmRect.posX_ = 0;
-    wmRect.posY_ = 0;
-    wmRect.height_ = 50;
-    wmRect.width_ = 50;
-
-    WSRect rect;
-    wmRect.posX_ = 0;
-    wmRect.posY_ = 0;
-    wmRect.height_ = 50;
-    wmRect.width_ = 50;
-
-    Rect preRect;
-    preRect.posX_ = 0;
-    preRect.posY_ = 0;
-    preRect.height_ = 200;
-    preRect.width_ = 200;
-
-    window->property_->SetWindowRect(preRect);
-    WindowSizeChangeReason wmReason = WindowSizeChangeReason{ 0 };
-    std::shared_ptr<RSTransaction> rsTransaction;
-    SceneAnimationConfig config{ .rsTransaction_ = rsTransaction };
-    window->UpdateRectForRotation(wmRect, preRect, wmReason, config);
-
-    SizeChangeReason reason = SizeChangeReason::UNDEFINED;
-    auto res = window->UpdateRect(rect, reason);
-    ASSERT_EQ(res, WSError::WS_OK);
-}
-
-/**
  * @tc.name: NotifyRotationAnimationEnd
  * @tc.desc: NotifyRotationAnimationEnd Test
  * @tc.type: FUNC
@@ -1465,15 +1425,15 @@ HWTEST_F(WindowSessionImplTest4, SetAutoStartPiP, TestSize.Level1)
 }
 
 /**
- * @tc.name: UpdatePiPDefaultWindowSizeType
- * @tc.desc: UpdatePiPDefaultWindowSizeType
+ * @tc.name: UpdatePiPTemplateInfo
+ * @tc.desc: UpdatePiPTemplateInfo
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest4, UpdatePiPDefaultWindowSizeType, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest4, UpdatePiPTemplateInfo, Function | SmallTest | Level2)
 {
     auto option = sptr<WindowOption>::MakeSptr();
     ASSERT_NE(option, nullptr);
-    std::string testName = "UpdatePiPDefaultWindowSizeType";
+    std::string testName = "UpdatePiPTemplateInfo";
     option->SetWindowName(testName);
     auto window = sptr<WindowSessionImpl>::MakeSptr(option);
     ASSERT_NE(window, nullptr);
@@ -1482,8 +1442,8 @@ HWTEST_F(WindowSessionImplTest4, UpdatePiPDefaultWindowSizeType, Function | Smal
     auto session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
-    uint32_t defaultWindowSizeType = 1;
-    window->UpdatePiPDefaultWindowSizeType(defaultWindowSizeType);
+    PiPTemplateInfo templateInfo;
+    window->UpdatePiPTemplateInfo(templateInfo);
 }
 
 /**
@@ -2810,24 +2770,6 @@ HWTEST_F(WindowSessionImplTest4, GetSubWindowZLevelByFlags03, Function | SmallTe
     int32_t ret = dialogWindow->GetSubWindowZLevelByFlags(dialogWindow->GetType(),
         dialogWindow->GetWindowFlags(), dialogWindow->IsTopmost());
     EXPECT_EQ(ret, DIALOG_SUB_WINDOW_Z_LEVEL);
-}
-
-/**
- * @tc.name: SetCurrentRotation
- * @tc.desc: SetCurrentRotation
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest4, SetCurrentRotation, Function | SmallTest | Level1)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SetCurrentRotation");
-    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-    auto ret = window->SetCurrentRotation(FULL_CIRCLE_DEGREE + 1);
-    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_PARAM);
-    ret = window->SetCurrentRotation(ZERO_CIRCLE_DEGREE - 1);
-    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_PARAM);
-    ret = window->SetCurrentRotation(ONE_FOURTH_FULL_CIRCLE_DEGREE);
-    EXPECT_EQ(ret, WSError::WS_OK);
 }
 } // namespace
 } // namespace Rosen

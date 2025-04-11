@@ -598,18 +598,18 @@ void JsSceneSessionManager::ProcessShiftFocus()
         TLOGND(WmsLogTag::WMS_FOCUS, "ProcessShiftFocus called");
         this->OnShiftFocus(persistentId, displayGroupId);
     };
-    NotifySCBAfterUpdateFocusFunc focusedCallback = [this]() {
-        TLOGND(WmsLogTag::WMS_FOCUS, "scb uicontent focus");
-        const auto& uiContent = RootScene::staticRootScene_->GetUIContent();
+    NotifySCBAfterUpdateFocusFunc focusedCallback = [this](DisplayId displayId) {
+        TLOGND(WmsLogTag::WMS_FOCUS, "scb uicontent focus, displayId: %{public}" PRIu64, displayId);
+        const auto& uiContent = rootScene_->GetUIContentByDisplayId(displayId);
         if (uiContent == nullptr) {
             TLOGNE(WmsLogTag::WMS_FOCUS, "[WMSComm]uiContent is nullptr");
             return;
         }
         uiContent->Focus();
     };
-    NotifySCBAfterUpdateFocusFunc unfocusedCallback = [this]() {
-        TLOGND(WmsLogTag::WMS_FOCUS, "scb uicontent unfocus");
-        const auto& uiContent = RootScene::staticRootScene_->GetUIContent();
+    NotifySCBAfterUpdateFocusFunc unfocusedCallback = [this](DisplayId displayId) {
+        TLOGND(WmsLogTag::WMS_FOCUS, "scb uicontent unfocus, displayId: %{public}" PRIu64, displayId);
+        const auto& uiContent = rootScene_->GetUIContentByDisplayId(displayId);
         if (uiContent == nullptr) {
             TLOGNE(WmsLogTag::WMS_FOCUS, "[WMSComm]uiContent is nullptr");
             return;
@@ -2650,7 +2650,7 @@ napi_value JsSceneSessionManager::OnNotifySingleHandInfoChange(napi_env env, nap
     }
     WSRect singleHandRect;
     if (!ConvertSessionRectInfoFromJs(env, argv[ARG_INDEX_TWO], singleHandRect)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to originRect");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to singleHandRect");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
@@ -2670,6 +2670,7 @@ napi_value JsSceneSessionManager::OnGetSingleHandCompatibleModeConfig(napi_env e
         TLOGE(WmsLogTag::WMS_LAYOUT, "jsSingleHandCompatibleModeConfigObj is nullptr");
         napi_throw(env, CreateJsError(env,
             static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY), "System is abnormal"));
+        return NapiGetUndefined(env);
     }
     return jsSingleHandCompatibleModeConfigObj;
 }
@@ -3398,15 +3399,22 @@ napi_value JsSceneSessionManager::OnGetSessionSnapshotPixelMap(napi_env env, nap
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    SnapshotNodeType snapNode = SnapshotNodeType::DEFAULT_NODE;
-    if (argc > ARGC_TWO && !ConvertFromJsValue(env, argv[ARG_INDEX_TWO], snapNode)) {
-        TLOGE(WmsLogTag::WMS_PATTERN, "Failed to convert parameter to snapNode");
+    SnapshotNodeType snapshotNode = SnapshotNodeType::DEFAULT_NODE;
+    if (argc > ARGC_TWO && !ConvertFromJsValue(env, argv[ARG_INDEX_TWO], snapshotNode)) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Failed to convert parameter to snapshotNode");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    if (snapNode < SnapshotNodeType::DEFAULT_NODE || snapNode > SnapshotNodeType::APP_NODE) {
-        TLOGE(WmsLogTag::WMS_PATTERN, "SnapshotNodeType invalid:%{public}d", snapNode);
+    if (snapshotNode < SnapshotNodeType::DEFAULT_NODE || snapshotNode > SnapshotNodeType::APP_NODE) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "SnapshotNodeType invalid:%{public}d", snapshotNode);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    bool needSnapshot = true;
+    if (argc > ARGC_THREE && !ConvertFromJsValue(env, argv[ARG_INDEX_THREE], needSnapshot)) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Failed to convert parameter to needSnapshot");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
@@ -3415,11 +3423,12 @@ napi_value JsSceneSessionManager::OnGetSessionSnapshotPixelMap(napi_env env, nap
     float scaleParam = GreatOrEqual(scaleValue, 0.0f) && LessOrEqual(scaleValue, 1.0f) ?
         static_cast<float>(scaleValue) : 0.0f;
     std::shared_ptr<std::shared_ptr<Media::PixelMap>> pixelPtr = std::make_shared<std::shared_ptr<Media::PixelMap>>();
-    NapiAsyncTask::ExecuteCallback execute = [persistentId, scaleParam, pixelPtr, snapNode]() {
+    NapiAsyncTask::ExecuteCallback execute = [persistentId, scaleParam, pixelPtr, snapshotNode, needSnapshot]() {
         if (pixelPtr == nullptr) {
             return;
         }
-        *pixelPtr = SceneSessionManager::GetInstance().GetSessionSnapshotPixelMap(persistentId, scaleParam, snapNode);
+        *pixelPtr = SceneSessionManager::GetInstance().GetSessionSnapshotPixelMap(
+            persistentId, scaleParam, snapshotNode, needSnapshot);
     };
     NapiAsyncTask::CompleteCallback complete =
         [persistentId, scaleParam, pixelPtr](napi_env env, NapiAsyncTask& task, int32_t status) {
@@ -3472,15 +3481,22 @@ napi_value JsSceneSessionManager::OnGetSessionSnapshotPixelMapSync(napi_env env,
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    SnapshotNodeType snapNode = SnapshotNodeType::DEFAULT_NODE;
-    if (argc > ARGC_TWO && !ConvertFromJsValue(env, argv[ARG_INDEX_TWO], snapNode)) {
-        TLOGE(WmsLogTag::WMS_PATTERN, "Failed to convert parameter to snapNode");
+    SnapshotNodeType snapshotNode = SnapshotNodeType::DEFAULT_NODE;
+    if (argc > ARGC_TWO && !ConvertFromJsValue(env, argv[ARG_INDEX_TWO], snapshotNode)) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Failed to convert parameter to snapshotNode");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    if (snapNode < SnapshotNodeType::DEFAULT_NODE || snapNode > SnapshotNodeType::APP_NODE) {
-        TLOGE(WmsLogTag::WMS_PATTERN, "SnapshotNodeType invalid:%{public}d", snapNode);
+    if (snapshotNode < SnapshotNodeType::DEFAULT_NODE || snapshotNode > SnapshotNodeType::APP_NODE) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "SnapshotNodeType invalid:%{public}d", snapshotNode);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    bool needSnapshot = true;
+    if (argc > ARGC_THREE && !ConvertFromJsValue(env, argv[ARG_INDEX_THREE], needSnapshot)) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Failed to convert parameter to needSnapshot");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
@@ -3488,7 +3504,8 @@ napi_value JsSceneSessionManager::OnGetSessionSnapshotPixelMapSync(napi_env env,
     float scaleParam = GreatOrEqual(scaleValue, 0.0f) && LessOrEqual(scaleValue, 1.0f) ?
         static_cast<float>(scaleValue) : 0.0f;
     std::shared_ptr<Media::PixelMap> pixelPtr =
-        SceneSessionManager::GetInstance().GetSessionSnapshotPixelMap(persistentId, scaleParam, snapNode);
+        SceneSessionManager::GetInstance().GetSessionSnapshotPixelMap(
+            persistentId, scaleParam, snapshotNode, needSnapshot);
     if (pixelPtr == nullptr) {
         TLOGE(WmsLogTag::WMS_MAIN, "Failed to create pixlePtr");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY),
@@ -3833,8 +3850,8 @@ napi_value JsSceneSessionManager::OnNotifyAboveLockScreen(napi_env env, napi_cal
 
 napi_value JsSceneSessionManager::OnCloneWindow(napi_env env, napi_callback_info info)
 {
-    size_t argc = ARGC_TWO;
-    napi_value argv[ARGC_TWO] = { nullptr };
+    size_t argc = ARGC_THREE;
+    napi_value argv[ARGC_THREE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_TWO) {
         TLOGE(WmsLogTag::WMS_PC, "Argc is invalid: %{public}zu", argc);
@@ -3857,7 +3874,13 @@ napi_value JsSceneSessionManager::OnCloneWindow(napi_env env, napi_callback_info
         return NapiGetUndefined(env);
     }
     TLOGI(WmsLogTag::WMS_PC, "from:%{public}d to:%{public}d", fromPersistentId, toPersistentId);
-    SceneSessionManager::GetInstance().CloneWindow(fromPersistentId, toPersistentId);
+    if (argc >= ARGC_THREE && GetType(env, argv[ARGC_TWO]) == napi_boolean) {
+        bool needOffScreen = true;
+        ConvertFromJsValue(env, argv[ARGC_TWO], needOffScreen);
+        SceneSessionManager::GetInstance().CloneWindow(fromPersistentId, toPersistentId, needOffScreen);
+    } else {
+        SceneSessionManager::GetInstance().CloneWindow(fromPersistentId, toPersistentId);
+    }
     return NapiGetUndefined(env);
 }
 
