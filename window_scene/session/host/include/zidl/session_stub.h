@@ -90,6 +90,7 @@ private:
     int HandleNotifyMainModalTypeChange(MessageParcel& data, MessageParcel& reply);
     int HandleSetSessionLabelAndIcon(MessageParcel& data, MessageParcel& reply);
     int HandleGetIsHighlighted(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyFollowParentMultiScreenPolicy(MessageParcel& data, MessageParcel& reply);
 
     // extension extension
     int HandleTransferAbilityResult(MessageParcel& data, MessageParcel& reply);

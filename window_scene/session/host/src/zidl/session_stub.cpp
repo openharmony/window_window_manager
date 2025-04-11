@@ -258,6 +258,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleUpdateFlag(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_IS_HIGHLIGHTED):
             return HandleGetIsHighlighted(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_FOLLOW_PARENT_MULTI_SCREEN_POLICY):
+            return HandleNotifyFollowParentMultiScreenPolicy(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1631,6 +1633,17 @@ int SessionStub::HandleGetIsHighlighted(MessageParcel& data, MessageParcel& repl
     if (!reply.WriteBool(isHighlighted)) {
         return ERR_INVALID_DATA;
     }
+    return ERR_NONE;
+}
+
+int SessionStub::HandleNotifyFollowParentMultiScreenPolicy(MessageParcel& data, MessageParcel& reply)
+{
+    bool enabled = false;
+    if (!data.ReadBool(enabled)) {
+        return ERR_INVALID_DATA;
+    }
+    TLOGD(WmsLogTag::WMS_SUB, "enabled: %{public}d", enabled);
+    NotifyFollowParentMultiScreenPolicy(enabled);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

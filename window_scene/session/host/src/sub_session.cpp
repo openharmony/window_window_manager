@@ -287,6 +287,25 @@ WMError SubSession::NotifySetParentSession(int32_t oldParentWindowId, int32_t ne
     }, __func__);
 }
 
+WSError SubSession::NotifyFollowParentMultiScreenPolicy(bool enabled)
+{
+    PostTask([weakThis = wptr(this), enabled, funcName = __func__] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s: session is null", funcName);
+            return;
+        }
+        TLOGNI(WmsLogTag::WMS_SUB, "%{public}s: enabled:%{public}d", funcName, enabled);
+        session->isFollowParentMultiScreenPolicy_ = enabled;
+    }, __func__);
+    return WSError::WS_OK;
+}
+
+bool SubSession::IsFollowParentMultiScreenPolicy() const
+{
+    return isFollowParentMultiScreenPolicy_;
+}
+
 WSError SubSession::SetSubWindowZLevel(int32_t zLevel)
 {
     PostTask([weakThis = wptr(this), zLevel]() {
