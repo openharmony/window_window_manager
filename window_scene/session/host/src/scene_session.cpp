@@ -5782,6 +5782,9 @@ std::unordered_set<int32_t> SceneSession::GetFingerPointerDownStatusList() const
 
 void SceneSession::UpdateAllModalUIExtensions(const WSRect& globalRect)
 {
+    if (modalUIExtensionInfoList_.empty()) {
+        return;
+    }
     const char* const where = __func__;
     PostTask([weakThis = wptr(this), where, globalRect] {
         auto session = weakThis.promote();
@@ -5789,8 +5792,8 @@ void SceneSession::UpdateAllModalUIExtensions(const WSRect& globalRect)
             TLOGNE(WmsLogTag::WMS_UIEXT, "session is null");
             return;
         }
-        auto parentTransX = globalRect.posX_ - session->GetSessionRect().posX_;
-        auto parentTransY = globalRect.posY_ - session->GetSessionRect().posY_;
+        auto parentTransX = globalRect.posX_ - session->GetClientRect().posX_;
+        auto parentTransY = globalRect.posY_ - session->GetClientRect().posY_;
         {
             std::unique_lock<std::shared_mutex> lock(session->modalUIExtensionInfoListMutex_);
             for (auto& extensionInfo : session->modalUIExtensionInfoList_) {
@@ -5799,7 +5802,7 @@ void SceneSession::UpdateAllModalUIExtensions(const WSRect& globalRect)
                 }
                 extensionInfo.windowRect = extensionInfo.uiExtRect;
                 extensionInfo.windowRect.posX_ += parentTransX;
-                extensionInfo.windowRect.posX_ += parentTransY;
+                extensionInfo.windowRect.posY_ += parentTransY;
             }
         }
         session->NotifySessionInfoChange();
