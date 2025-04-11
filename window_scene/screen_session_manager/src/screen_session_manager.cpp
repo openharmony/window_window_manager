@@ -8852,9 +8852,9 @@ DMError ScreenSessionManager::SetScreenSkipProtectedWindow(const std::vector<Scr
                     TLOGE(WmsLogTag::DMS, "No corresponding rsId.");
                     continue;
                 }
-                TLOGI(WmsLogTag::DMS, "virtualScreenId:%{public}" PRIu64 "", sessionIt.first);
+                TLOGI(WmsLogTag::DMS, "virtualScreenId:%{public}" PRIu64 "",screenId);
                 HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
-                    "SetCastScreenEnableSkipWindow(%" PRIu64")", sessionIt.first);
+                    "SetCastScreenEnableSkipWindow(%" PRIu64")", screenId);
                 rsInterface_.SetCastScreenEnableSkipWindow(rsScreenId, requiredSkipWindow);
             }
         }
