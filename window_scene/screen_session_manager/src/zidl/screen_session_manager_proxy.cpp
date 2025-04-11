@@ -4116,7 +4116,7 @@ uint32_t ScreenSessionManagerProxy::GetDeviceStatus()
         return 0;
     }
 
-    MessageOption data;
+    MessageParcel data;
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
