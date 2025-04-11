@@ -183,11 +183,11 @@ void SingleDisplaySensorPocketFoldStateManager::HandleTentChange(int tentType,
         foldScreenPolicy->ChangeOnTentMode(FoldStatus::FOLDED);
         if (tentType == TENT_MODE_ON) {
             TLOGI(WmsLogTag::DMS, "Set device status to STATUS_TENT");
-            SetDeviceStatus(static_cast<uint32_t>(DeviceStatus::STATUS_TENT));
+            SetDeviceStatus(static_cast<uint32_t>(DMDeviceStatus::STATUS_TENT));
             ScreenRotationProperty::HandleHoverStatusEventInput(DeviceHoverStatus::TENT_STATUS);
         } else if (tentType == TENT_MODE_HOVER_ON) {
             TLOGI(WmsLogTag::DMS, "Set device status to STATUS_TENT_HOVER");
-            SetDeviceStatus(static_cast<uint32_t>(DeviceStatus::STATUS_TENT_HOVER));
+            SetDeviceStatus(static_cast<uint32_t>(DMDeviceStatus::STATUS_TENT_HOVER));
             ScreenRotationProperty::HandleHoverStatusEventInput(DeviceHoverStatus::TENT_STATUS_HOVER);
         }
     } else {
@@ -202,10 +202,10 @@ void SingleDisplaySensorPocketFoldStateManager::HandleTentChange(int tentType,
         }
         if (nextState == FoldStatus::FOLDED) {
             TLOGI(WmsLogTag::DMS, "Set device status to STATUS_FOLDED");
-            SetDeviceStatus(static_cast<uint32_t>(DeviceStatus::STATUS_FOLDED));
+            SetDeviceStatus(static_cast<uint32_t>(DMDeviceStatus::STATUS_FOLDED));
         } else {
             TLOGI(WmsLogTag::DMS, "Set device status to UNKNOWN");
-            SetDeviceStatus(static_cast<uint32_t>(DeviceStatus::UNKNOWN));
+            SetDeviceStatus(static_cast<uint32_t>(DMDeviceStatus::UNKNOWN));
         }
         HandleSensorChange(nextState, currentAngle, foldScreenPolicy);
         ReportTentStatusChange(ReportTentModeStatus::NORMAL_EXIT_TENT_MODE);

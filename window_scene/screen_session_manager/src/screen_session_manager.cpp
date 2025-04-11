@@ -3086,7 +3086,7 @@ void ScreenSessionManager::TryToRecoverFoldDisplayMode(ScreenPowerStatus status)
     }
     if (status == ScreenPowerStatus::POWER_STATUS_OFF || status == ScreenPowerStatus::POWER_STATUS_OFF_ADVANCED ||
         status == ScreenPowerStatus::POWER_STATUS_OFF_FAKE || status == ScreenPowerStatus::POWER_STATUS_SUSPEND ||
-        status == ScreenPowerStatus::POWER_STATUS_DOZE || status == ScreenPowerStatus::POWER_STATUS_DOZE_SUSPEND) {
+        status == ScreenPowerStatus::POWER_STATUS_DOZE) {
         foldScreenController_->RecoverDisplayMode();
     }
 #endif
@@ -3100,11 +3100,9 @@ bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status, PowerStateCh
         TLOGI(WmsLogTag::DMS, "[UL_POWER] screenIds empty");
         return false;
     }
-    bool isOffScreen = ((status == ScreenPowerStatus::POWER_STATUS_OFF) ||
-        (status == ScreenPowerStatus::POWER_STATUS_SUSPEND) ||
-        (status == ScreenPowerStatus::POWER_STATUS_DOZE) || (status == ScreenPowerStatus::POWER_STATUS_DOZE_SUSPEND));
 
-    if (isOffScreen) {
+    if (status == ScreenPowerStatus::POWER_STATUS_OFF || status == ScreenPowerStatus::POWER_STATUS_SUSPEND ||
+        status == ScreenPowerStatus::POWER_STATUS_DOZE) {
         ExitCoordination("Press PowerKey");
     }
     DisplayPowerEvent notifyEvent = DisplayPowerEvent::DISPLAY_OFF;
@@ -3112,7 +3110,9 @@ bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status, PowerStateCh
     if (iter != SCREEN_STATUS_POWER_EVENT_MAP.end()) {
         notifyEvent = iter->second;
     }
-    if (isOffScreen && gotScreenlockFingerprint_  &&
+    if (((status == ScreenPowerStatus::POWER_STATUS_OFF || status == ScreenPowerStatus::POWER_STATUS_SUSPEND ||
+        status == ScreenPowerStatus::POWER_STATUS_DOZE) &&
+        gotScreenlockFingerprint_ == true) &&
         prePowerStateChangeReason_ != PowerStateChangeReason::STATE_CHANGE_REASON_SHUT_DOWN) {
         gotScreenlockFingerprint_ = false;
         TLOGI(WmsLogTag::DMS, "[UL_POWER] screenlockFingerprint or shutdown");
@@ -3133,7 +3133,9 @@ bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status, PowerStateCh
     if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION) {
         return true;
     }
-    if (isOffScreen && gotScreenlockFingerprint_) {
+    if ((status == ScreenPowerStatus::POWER_STATUS_OFF || status == ScreenPowerStatus::POWER_STATUS_SUSPEND ||
+        status == ScreenPowerStatus::POWER_STATUS_DOZE) &&
+        gotScreenlockFingerprint_ == true) {
         gotScreenlockFingerprint_ = false;
     }
 
