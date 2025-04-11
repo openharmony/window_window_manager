@@ -370,7 +370,6 @@ void WindowManagerProxy::NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<W
         WLOGFE("Failed to write moveDragProperty!");
         return;
     }
-    
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         WLOGFE("remote is null");
@@ -399,7 +398,6 @@ void WindowManagerProxy::ProcessPointDown(uint32_t windowId, bool isPointDown)
         WLOGFE("Write isPointDown failed");
         return;
     }
-    
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         WLOGFE("remote is null");
@@ -1262,7 +1260,7 @@ MaximizeMode WindowManagerProxy::GetMaximizeMode()
     return static_cast<MaximizeMode>(ret);
 }
 
-void WindowManagerProxy::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
+void WindowManagerProxy::GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1271,7 +1269,10 @@ void WindowManagerProxy::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
         WLOGFE("WriteInterfaceToken failed");
         return;
     }
-
+    if (!data.WriteUint64(displayId)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "write displayId failed");
+        return;
+    }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         WLOGFE("remote is null");

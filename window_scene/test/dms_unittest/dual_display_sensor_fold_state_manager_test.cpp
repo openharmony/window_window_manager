@@ -73,7 +73,7 @@ namespace {
      * @tc.desc: DualDisplaySensorFoldStateManager
      * @tc.type: FUNC
      */
-    HWTEST_F(DualDisplaySensorFoldStateManagerTest, DualDisplaySensorFoldStateManager, Function | SmallTest | Level3)
+    HWTEST_F(DualDisplaySensorFoldStateManagerTest, DualDisplaySensorFoldStateManager, TestSize.Level1)
     {
         DualDisplaySensorFoldStateManager mgr = DualDisplaySensorFoldStateManager();
         ASSERT_EQ(mgr.packageNames_.size(), 0);
@@ -84,7 +84,7 @@ namespace {
      * @tc.desc: HandleAngleChange
      * @tc.type: FUNC
      */
-    HWTEST_F(DualDisplaySensorFoldStateManagerTest, HandleAngleChange, Function | SmallTest | Level3)
+    HWTEST_F(DualDisplaySensorFoldStateManagerTest, HandleAngleChange, TestSize.Level1)
     {
         DualDisplaySensorFoldStateManager mgr = DualDisplaySensorFoldStateManager();
         float angle = 0.0f;
@@ -115,7 +115,7 @@ namespace {
      * @tc.desc: HandleHallChange
      * @tc.type: FUNC
      */
-    HWTEST_F(DualDisplaySensorFoldStateManagerTest, HandleHallChange, Function | SmallTest | Level3)
+    HWTEST_F(DualDisplaySensorFoldStateManagerTest, HandleHallChange, TestSize.Level1)
     {
         DualDisplaySensorFoldStateManager mgr = DualDisplaySensorFoldStateManager();
         float angle = 0.0f;
@@ -143,7 +143,7 @@ namespace {
      * @tc.desc: GetNextFoldState
      * @tc.type: FUNC
      */
-    HWTEST_F(DualDisplaySensorFoldStateManagerTest, GetNextFoldState, Function | SmallTest | Level3)
+    HWTEST_F(DualDisplaySensorFoldStateManagerTest, GetNextFoldState, TestSize.Level1)
     {
         DualDisplaySensorFoldStateManager mgr = DualDisplaySensorFoldStateManager();
         float angle = 200.0f;
@@ -178,7 +178,7 @@ namespace {
      * @tc.desc: RegisterApplicationStateObserver
      * @tc.type: FUNC
      */
-    HWTEST_F(DualDisplaySensorFoldStateManagerTest, RegisterApplicationStateObserver, Function | SmallTest | Level3)
+    HWTEST_F(DualDisplaySensorFoldStateManagerTest, RegisterApplicationStateObserver, TestSize.Level1)
     {
         DualDisplaySensorFoldStateManager mgr = DualDisplaySensorFoldStateManager();
         mgr.RegisterApplicationStateObserver();

@@ -255,7 +255,8 @@ void ProxyInterfaceFuzzTestPart3(const uint8_t* data, size_t size)
     sptr<AAFwk::SessionInfo> sessionInfo = UnmarshallingDataTo<AAFwk::SessionInfo>(data, size);
     proxy->PendingSessionActivation(sessionInfo);
     proxy->TerminateSession(sessionInfo);
-    proxy->NotifySessionException(sessionInfo);
+    ExceptionInfo exceptionInfo;
+    proxy->NotifySessionException(sessionInfo, exceptionInfo);
 
     uint32_t resultCode = source.GetObject<uint32_t>();
     sptr<AAFwk::Want> want = UnmarshallingDataTo<AAFwk::Want>(data, size);

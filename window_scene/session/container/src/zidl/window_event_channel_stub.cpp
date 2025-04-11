@@ -127,7 +127,6 @@ int WindowEventChannelStub::HandleTransferKeyEventAsync(MessageParcel& data, Mes
 
 int WindowEventChannelStub::HandleTransferPointerEvent(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFD("TransferPointerEvent!");
     auto pointerEvent = MMI::PointerEvent::Create();
     if (pointerEvent == nullptr) {
         WLOGFE("Failed to create pointer event!");
@@ -137,6 +136,7 @@ int WindowEventChannelStub::HandleTransferPointerEvent(MessageParcel& data, Mess
         WLOGFE("Read Pointer Event failed");
         return ERR_INVALID_DATA;
     }
+    TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d", pointerEvent->GetId());
     WSError errCode = TransferPointerEvent(pointerEvent);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;

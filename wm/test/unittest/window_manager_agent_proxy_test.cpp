@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
+#include <functional>
 #include <gtest/gtest.h>
 #include "display_manager_adapter.h"
-#include <functional>
-#include "window_manager_agent_proxy.h"
 #include "window_manager_agent.h"
+#include "window_manager_agent_proxy.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -29,21 +29,16 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+
 private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
 
-void WindowManagerAgentProxyTest::SetUpTestCase()
-{
-}
+void WindowManagerAgentProxyTest::SetUpTestCase() {}
 
-void WindowManagerAgentProxyTest::TearDownTestCase()
-{
-}
+void WindowManagerAgentProxyTest::TearDownTestCase() {}
 
-void WindowManagerAgentProxyTest::SetUp()
-{
-}
+void WindowManagerAgentProxyTest::SetUp() {}
 
 void WindowManagerAgentProxyTest::TearDown()
 {
@@ -56,7 +51,7 @@ namespace {
  * @tc.desc: test InterfaceToken check failed
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerAgentProxyTest, UpdateFocusChangeInfo01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerAgentProxyTest, UpdateFocusChangeInfo01, TestSize.Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
@@ -68,8 +63,7 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateFocusChangeInfo01, Function | SmallT
     ASSERT_TRUE(windowManagerAgentProxy != nullptr);
 
     int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
+    std::function<void()> func = [&]() {
         windowManagerAgentProxy->UpdateFocusChangeInfo(focusChangeInfo, focused);
         resultValue = 1;
     };
@@ -82,7 +76,7 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateFocusChangeInfo01, Function | SmallT
  * @tc.desc: test InterfaceToken check failed
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerAgentProxyTest, UpdateFocusChangeInfo02, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerAgentProxyTest, UpdateFocusChangeInfo02, TestSize.Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
@@ -91,8 +85,7 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateFocusChangeInfo02, Function | SmallT
     ASSERT_TRUE(windowManagerAgentProxy != nullptr);
 
     int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
+    std::function<void()> func = [&]() {
         windowManagerAgentProxy->UpdateFocusChangeInfo(nullptr, false);
         resultValue = 1;
     };
@@ -105,7 +98,7 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateFocusChangeInfo02, Function | SmallT
  * @tc.desc: test InterfaceToken check failed
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerAgentProxyTest, UpdateWindowModeTypeInfo, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerAgentProxyTest, UpdateWindowModeTypeInfo, TestSize.Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
@@ -115,8 +108,7 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateWindowModeTypeInfo, Function | Small
 
     int resultValue = 0;
     WindowModeType type = WindowModeType::WINDOW_MODE_SPLIT_FLOATING;
-    std::function<void()> func = [&]()
-    {
+    std::function<void()> func = [&]() {
         windowManagerAgentProxy->UpdateWindowModeTypeInfo(type);
         resultValue = 1;
     };
@@ -129,7 +121,7 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateWindowModeTypeInfo, Function | Small
  * @tc.desc: test InterfaceToken check failed
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerAgentProxyTest, UpdateSystemBarRegionTints, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerAgentProxyTest, UpdateSystemBarRegionTints, TestSize.Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
@@ -141,8 +133,7 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateSystemBarRegionTints, Function | Sma
     ASSERT_TRUE(windowManagerAgentProxy != nullptr);
 
     int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
+    std::function<void()> func = [&]() {
         windowManagerAgentProxy->UpdateSystemBarRegionTints(displayId, tints);
         resultValue = 1;
     };
@@ -155,7 +146,7 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateSystemBarRegionTints, Function | Sma
  * @tc.desc: test InterfaceToken check failed
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerAgentProxyTest, NotifyAccessibilityWindowInfo, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerAgentProxyTest, NotifyAccessibilityWindowInfo, TestSize.Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
@@ -167,8 +158,7 @@ HWTEST_F(WindowManagerAgentProxyTest, NotifyAccessibilityWindowInfo, Function | 
     ASSERT_TRUE(windowManagerAgentProxy != nullptr);
 
     int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
+    std::function<void()> func = [&]() {
         windowManagerAgentProxy->NotifyAccessibilityWindowInfo(infos, type);
         resultValue = 1;
     };
@@ -181,7 +171,7 @@ HWTEST_F(WindowManagerAgentProxyTest, NotifyAccessibilityWindowInfo, Function | 
  * @tc.desc: test InterfaceToken check failed
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerAgentProxyTest, UpdateWindowVisibilityInfo, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerAgentProxyTest, UpdateWindowVisibilityInfo, TestSize.Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
@@ -192,8 +182,7 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateWindowVisibilityInfo, Function | Sma
     ASSERT_TRUE(windowManagerAgentProxy != nullptr);
 
     int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
+    std::function<void()> func = [&]() {
         windowManagerAgentProxy->UpdateWindowVisibilityInfo(visibilityInfos);
         resultValue = 1;
     };
@@ -206,7 +195,7 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateWindowVisibilityInfo, Function | Sma
  * @tc.desc: test InterfaceToken check failed
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerAgentProxyTest, UpdateWindowDrawingContentInfo, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerAgentProxyTest, UpdateWindowDrawingContentInfo, TestSize.Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
@@ -217,8 +206,7 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateWindowDrawingContentInfo, Function |
     ASSERT_TRUE(windowManagerAgentProxy != nullptr);
 
     int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
+    std::function<void()> func = [&]() {
         windowManagerAgentProxy->UpdateWindowDrawingContentInfo(windowDrawingContentInfos);
         resultValue = 1;
     };
@@ -231,7 +219,7 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateWindowDrawingContentInfo, Function |
  * @tc.desc: test InterfaceToken check failed
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerAgentProxyTest, UpdateCameraFloatWindowStatus, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerAgentProxyTest, UpdateCameraFloatWindowStatus, TestSize.Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
@@ -243,8 +231,7 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateCameraFloatWindowStatus, Function | 
     ASSERT_TRUE(windowManagerAgentProxy != nullptr);
 
     int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
+    std::function<void()> func = [&]() {
         windowManagerAgentProxy->UpdateCameraFloatWindowStatus(accessTokenId, isShowing);
         resultValue = 1;
     };
@@ -257,7 +244,7 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateCameraFloatWindowStatus, Function | 
  * @tc.desc: test InterfaceToken check failed
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerAgentProxyTest, NotifyWaterMarkFlagChangedResult, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerAgentProxyTest, NotifyWaterMarkFlagChangedResult, TestSize.Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
@@ -268,8 +255,7 @@ HWTEST_F(WindowManagerAgentProxyTest, NotifyWaterMarkFlagChangedResult, Function
     ASSERT_TRUE(windowManagerAgentProxy != nullptr);
 
     int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
+    std::function<void()> func = [&]() {
         windowManagerAgentProxy->NotifyWaterMarkFlagChangedResult(showWaterMark);
         resultValue = 1;
     };
@@ -282,7 +268,7 @@ HWTEST_F(WindowManagerAgentProxyTest, NotifyWaterMarkFlagChangedResult, Function
  * @tc.desc: test InterfaceToken check failed
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerAgentProxyTest, UpdateVisibleWindowNum, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerAgentProxyTest, UpdateVisibleWindowNum, TestSize.Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
@@ -295,8 +281,7 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateVisibleWindowNum, Function | SmallTe
     info.visibleWindowNum = 1;
     std::vector<VisibleWindowNumInfo> visibleWindowNumInfo;
     visibleWindowNumInfo.push_back(info);
-    std::function<void()> func = [&]()
-    {
+    std::function<void()> func = [&]() {
         windowManagerAgentProxy->UpdateVisibleWindowNum(visibleWindowNumInfo);
         resultValue = 1;
     };
@@ -309,7 +294,7 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateVisibleWindowNum, Function | SmallTe
  * @tc.desc: test InterfaceToken check failed
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerAgentProxyTest, NotifyGestureNavigationEnabledResult, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerAgentProxyTest, NotifyGestureNavigationEnabledResult, TestSize.Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
@@ -320,8 +305,7 @@ HWTEST_F(WindowManagerAgentProxyTest, NotifyGestureNavigationEnabledResult, Func
     ASSERT_TRUE(windowManagerAgentProxy != nullptr);
 
     int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
+    std::function<void()> func = [&]() {
         windowManagerAgentProxy->NotifyGestureNavigationEnabledResult(enable);
         resultValue = 1;
     };
@@ -334,7 +318,7 @@ HWTEST_F(WindowManagerAgentProxyTest, NotifyGestureNavigationEnabledResult, Func
  * @tc.desc: test InterfaceToken check failed
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerAgentProxyTest, UpdateCameraWindowStatus, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerAgentProxyTest, UpdateCameraWindowStatus, TestSize.Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
@@ -346,8 +330,7 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateCameraWindowStatus, Function | Small
     ASSERT_TRUE(windowManagerAgentProxy != nullptr);
 
     int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
+    std::function<void()> func = [&]() {
         windowManagerAgentProxy->UpdateCameraWindowStatus(accessTokenId, isShowing);
         resultValue = 1;
     };
@@ -360,7 +343,7 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateCameraWindowStatus, Function | Small
  * @tc.desc: test NotifyWindowStyleChange
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerAgentProxyTest, NotifyWindowStyleChange, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerAgentProxyTest, NotifyWindowStyleChange, TestSize.Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
@@ -371,8 +354,7 @@ HWTEST_F(WindowManagerAgentProxyTest, NotifyWindowStyleChange, Function | SmallT
     ASSERT_TRUE(windowManagerAgentProxy != nullptr);
 
     int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
+    std::function<void()> func = [&]() {
         windowManagerAgentProxy->NotifyWindowStyleChange(type);
         resultValue = 1;
     };
@@ -385,7 +367,7 @@ HWTEST_F(WindowManagerAgentProxyTest, NotifyWindowStyleChange, Function | SmallT
  * @tc.desc: test NotifyWindowPidVisibilityChanged
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerAgentProxyTest, NotifyWindowPidVisibilityChanged, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerAgentProxyTest, NotifyWindowPidVisibilityChanged, TestSize.Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
@@ -397,8 +379,7 @@ HWTEST_F(WindowManagerAgentProxyTest, NotifyWindowPidVisibilityChanged, Function
     sptr<WindowPidVisibilityInfo> info = new WindowPidVisibilityInfo();
 
     int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
+    std::function<void()> func = [&]() {
         windowManagerAgentProxy->NotifyWindowPidVisibilityChanged(info);
         resultValue = 1;
     };

@@ -53,7 +53,12 @@ public:
     void HandleHallData(const SensorEvent * const event);
 
     void HandleSuperSensorChange(SuperFoldStatusChangeEvents events);
-    
+
+    float GetCurAngle();
+
+    void HandleScreenConnectChange();
+    void HandleScreenDisconnectChange();
+
 private:
     
     std::recursive_mutex mutex_;
@@ -63,6 +68,8 @@ private:
     SensorUser hallUser {};
  
     float curAngle_ = 170.0F;
+
+    int32_t curInterval_ = 0;
 
     uint16_t curHall_ = USHRT_MAX;
  

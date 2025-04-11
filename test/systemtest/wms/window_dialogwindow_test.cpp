@@ -83,7 +83,7 @@ static sptr<Window> CreateDialogWindow(sptr<WindowScene> scene, WindowType type,
  * @tc.type: FUNC
  * @tc.require: issueI5GKWZ
  */
-HWTEST_F(WindowDialogWindowTest, DialogWindow01, Function | MediumTest | Level2)
+HWTEST_F(WindowDialogWindowTest, DialogWindow01, TestSize.Level1)
 {
     sptr<WindowScene> scene = CreateWindowScene();
     ASSERT_NE(scene, nullptr);
@@ -108,7 +108,7 @@ HWTEST_F(WindowDialogWindowTest, DialogWindow01, Function | MediumTest | Level2)
  * @tc.type: FUNC
  * @tc.require: issueI5GKWZ
  */
-HWTEST_F(WindowDialogWindowTest, DialogWindow02, Function | MediumTest | Level2)
+HWTEST_F(WindowDialogWindowTest, DialogWindow02, TestSize.Level1)
 {
     sptr<WindowScene> scene = CreateWindowScene();
     ASSERT_NE(scene, nullptr);
@@ -136,7 +136,7 @@ HWTEST_F(WindowDialogWindowTest, DialogWindow02, Function | MediumTest | Level2)
  * @tc.type: FUNC
  * @tc.require: issueI5GKWZ
  */
-HWTEST_F(WindowDialogWindowTest, DialogWindow03, Function | MediumTest | Level2)
+HWTEST_F(WindowDialogWindowTest, DialogWindow03, TestSize.Level1)
 {
     sptr<WindowScene> scene = CreateWindowScene();
     ASSERT_NE(scene, nullptr);
@@ -163,7 +163,7 @@ HWTEST_F(WindowDialogWindowTest, DialogWindow03, Function | MediumTest | Level2)
  * @tc.type: FUNC
  * @tc.require: issueI5GKWZ
  */
-HWTEST_F(WindowDialogWindowTest, DialogWindow04, Function | MediumTest | Level2)
+HWTEST_F(WindowDialogWindowTest, DialogWindow04, TestSize.Level1)
 {
     sptr<WindowScene> scene = CreateWindowScene();
     ASSERT_NE(scene, nullptr);
@@ -193,7 +193,7 @@ HWTEST_F(WindowDialogWindowTest, DialogWindow04, Function | MediumTest | Level2)
  * @tc.type: FUNC
  * @tc.require: issueI5GKWZ
  */
-HWTEST_F(WindowDialogWindowTest, DialogWindow05, Function | MediumTest | Level2)
+HWTEST_F(WindowDialogWindowTest, DialogWindow05, TestSize.Level1)
 {
     sptr<WindowScene> scene = CreateWindowScene();
     ASSERT_NE(scene, nullptr);
@@ -218,7 +218,7 @@ HWTEST_F(WindowDialogWindowTest, DialogWindow05, Function | MediumTest | Level2)
  * @tc.type: FUNC
  * @tc.require: issueI5GKWZ
  */
-HWTEST_F(WindowDialogWindowTest, DialogWindow06, Function | MediumTest | Level2)
+HWTEST_F(WindowDialogWindowTest, DialogWindow06, TestSize.Level1)
 {
     sptr<WindowScene> scene = CreateWindowScene();
     ASSERT_NE(scene, nullptr);
@@ -246,7 +246,7 @@ HWTEST_F(WindowDialogWindowTest, DialogWindow06, Function | MediumTest | Level2)
  * @tc.type: FUNC
  * @tc.require: issueI5GKWZ
  */
-HWTEST_F(WindowDialogWindowTest, DialogWindow07, Function | MediumTest | Level2)
+HWTEST_F(WindowDialogWindowTest, DialogWindow07, TestSize.Level1)
 {
     sptr<WindowScene> scene = CreateWindowScene();
     ASSERT_NE(scene, nullptr);

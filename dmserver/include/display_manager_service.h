@@ -56,13 +56,15 @@ public:
 
     sptr<DisplayInfo> GetDefaultDisplayInfo() override;
     sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) override;
+    sptr<DisplayInfo> GetVisibleAreaDisplayInfoById(DisplayId displayId) override;
     sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) override;
     sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) override;
     DMError SetOrientation(ScreenId screenId, Orientation orientation) override;
     DMError SetOrientationFromWindow(ScreenId screenId, Orientation orientation, bool withAnimation);
     bool SetRotationFromWindow(ScreenId screenId, Rotation targetRotation, bool withAnimation);
     void SetGravitySensorSubscriptionEnabled();
-    std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId, DmErrorCode* errorCode) override;
+    std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId,
+        DmErrorCode* errorCode, bool isUseDma) override;
     DMError HasPrivateWindow(DisplayId id, bool& hasPrivateWindow) override;
     // colorspace, gamut
     DMError GetScreenSupportedColorGamuts(ScreenId screenId, std::vector<ScreenColorGamut>& colorGamuts) override;

@@ -95,7 +95,7 @@ namespace {
  * @tc.desc: OnAddSystemAbility test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, OnAddSystemAbility01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, OnAddSystemAbility01, TestSize.Level1)
 {
     std::string str = "OnAddSystemAbility";
     wms->OnAddSystemAbility(0, str);
@@ -107,7 +107,7 @@ HWTEST_F(WindowManagerServiceTest, OnAddSystemAbility01, Function | SmallTest | 
  * @tc.desc: WindowVisibilityChangeCallback test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, WindowVisibilityChangeCallback01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, WindowVisibilityChangeCallback01, TestSize.Level1)
 {
     std::shared_ptr<RSOcclusionData> occlusionData = nullptr;
     wms->WindowVisibilityChangeCallback(occlusionData);
@@ -122,7 +122,7 @@ HWTEST_F(WindowManagerServiceTest, WindowVisibilityChangeCallback01, Function | 
  * @tc.desc: Init with ability manager service added.
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, InitWithAbilityManagerServiceAdded01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, InitWithAbilityManagerServiceAdded01, TestSize.Level1)
 {
     wms->InitWithAbilityManagerServiceAdded();
     wms->wmsHandler_ = new WindowManagerServiceHandler;
@@ -135,7 +135,7 @@ HWTEST_F(WindowManagerServiceTest, InitWithAbilityManagerServiceAdded01, Functio
  * @tc.desc: Dump info
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, Dump01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, Dump01, TestSize.Level1)
 {
     wms->windowDumper_ = nullptr;
     std::vector<std::u16string> args;
@@ -159,7 +159,7 @@ HWTEST_F(WindowManagerServiceTest, Dump01, Function | SmallTest | Level2)
  * @tc.desc: NotifyWindowTransition test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, NotifyWindowTransition01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, NotifyWindowTransition01, TestSize.Level1)
 {
     sptr<WindowTransitionInfo> fromInfo = nullptr;
     sptr<WindowTransitionInfo> toInfo = nullptr;
@@ -176,7 +176,7 @@ HWTEST_F(WindowManagerServiceTest, NotifyWindowTransition01, Function | SmallTes
  * @tc.desc: StartingWindow test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, StartingWindow01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, StartingWindow01, TestSize.Level1)
 {
     wms->startingOpen_ = false;
     wms->StartingWindow(nullptr, nullptr, false, 0);
@@ -193,7 +193,7 @@ HWTEST_F(WindowManagerServiceTest, StartingWindow01, Function | SmallTest | Leve
  * @tc.desc: MoveMissionsToForont test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, MoveMissionsToForeground01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, MoveMissionsToForeground01, TestSize.Level1)
 {
     WMError rs = wms->MoveMissionsToForeground({}, -1);
     ASSERT_EQ(WMError::WM_OK, rs);
@@ -204,7 +204,7 @@ HWTEST_F(WindowManagerServiceTest, MoveMissionsToForeground01, Function | SmallT
  * @tc.desc: MoveMissionsToBackground test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, MoveMissionsToBackground01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, MoveMissionsToBackground01, TestSize.Level1)
 {
     std::vector<int32_t> moveRs;
     WMError rs = wms->MoveMissionsToBackground({}, moveRs);
@@ -216,7 +216,7 @@ HWTEST_F(WindowManagerServiceTest, MoveMissionsToBackground01, Function | SmallT
  * @tc.desc: CreateWindow test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, CreateWindow01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, CreateWindow01, TestSize.Level1)
 {
     sptr<IWindow> window = nullptr;
     uint32_t id = 2;
@@ -232,7 +232,7 @@ HWTEST_F(WindowManagerServiceTest, CreateWindow01, Function | SmallTest | Level2
  * @tc.desc: AddWindow test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, AddWindow01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, AddWindow01, TestSize.Level1)
 {
     sptr<WindowProperty> property = nullptr;
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, wms->AddWindow(property));
@@ -243,7 +243,7 @@ HWTEST_F(WindowManagerServiceTest, AddWindow01, Function | SmallTest | Level2)
  * @tc.desc: RegisterWindowManagerAgent test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, RegisterWindowManagerAgent01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, RegisterWindowManagerAgent01, TestSize.Level1)
 {
     sptr<IWindowManagerAgent> windowManagerAgent = nullptr;
     WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_CAMERA_FLOAT;
@@ -256,7 +256,7 @@ HWTEST_F(WindowManagerServiceTest, RegisterWindowManagerAgent01, Function | Smal
  * @tc.desc: SetWindowAnimationController test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, SetWindowAnimationController01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, SetWindowAnimationController01, TestSize.Level1)
 {
     sptr<RSIWindowAnimationController> controller = nullptr;
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, wms->SetWindowAnimationController(controller));
@@ -269,7 +269,7 @@ HWTEST_F(WindowManagerServiceTest, SetWindowAnimationController01, Function | Sm
  * @tc.desc: OnWindowEvent test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, OnWindowEvent01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, OnWindowEvent01, TestSize.Level1)
 {
     sptr<IRemoteObject> remoteObject = new IRemoteObjectMocker;
     wms->OnWindowEvent(static_cast<Event>(1), remoteObject);
@@ -282,7 +282,7 @@ HWTEST_F(WindowManagerServiceTest, OnWindowEvent01, Function | SmallTest | Level
  * @tc.desc: UpdateProperty test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, UpdateProperty01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, UpdateProperty01, TestSize.Level1)
 {
     sptr<WindowProperty> windowProperty = nullptr;
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, wms->UpdateProperty(windowProperty,
@@ -294,7 +294,7 @@ HWTEST_F(WindowManagerServiceTest, UpdateProperty01, Function | SmallTest | Leve
  * @tc.desc: GetModeChangeHotZones test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, GetModeChangeHotZones01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, GetModeChangeHotZones01, TestSize.Level1)
 {
     ModeChangeHotZonesConfig config = {false, 0, 0, 0};
     DisplayId displayId = 0;
@@ -311,7 +311,7 @@ HWTEST_F(WindowManagerServiceTest, GetModeChangeHotZones01, Function | SmallTest
  * @tc.desc: UpdateAvoidAreaListener test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, UpdateAvoidAreaListener01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, UpdateAvoidAreaListener01, TestSize.Level1)
 {
     sptr<WindowProperty> property = new WindowProperty();
     sptr<WindowNode> node = new WindowNode(property);
@@ -328,7 +328,7 @@ HWTEST_F(WindowManagerServiceTest, UpdateAvoidAreaListener01, Function | SmallTe
  * @tc.desc: BindDialogTarget test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, BindDialogTarget01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, BindDialogTarget01, TestSize.Level1)
 {
     sptr<IRemoteObject> targetToken = new IRemoteObjectMocker();
     uint32_t id = 0;
@@ -345,7 +345,7 @@ HWTEST_F(WindowManagerServiceTest, BindDialogTarget01, Function | SmallTest | Le
  * @tc.require: issueI6RMUY
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, DispatchKeyEvent01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, DispatchKeyEvent01, TestSize.Level1)
 {
     wms = new WindowManagerService();
     sptr<WindowNode> compNode = new WindowNode();
@@ -380,7 +380,7 @@ HWTEST_F(WindowManagerServiceTest, DispatchKeyEvent01, Function | SmallTest | Le
  * @tc.require: issueI6RMUY
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, DispatchKeyEvent02, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, DispatchKeyEvent02, TestSize.Level1)
 {
     wms = new WindowManagerService();
     sptr<WindowNode> appNode1 = new WindowNode();
@@ -412,7 +412,7 @@ HWTEST_F(WindowManagerServiceTest, DispatchKeyEvent02, Function | SmallTest | Le
  * @tc.require: issueI6RMUY
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, DispatchKeyEvent03, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, DispatchKeyEvent03, TestSize.Level1)
 {
     wms = new WindowManagerService();
     sptr<WindowNode> compNode1 = new WindowNode();
@@ -453,7 +453,7 @@ HWTEST_F(WindowManagerServiceTest, DispatchKeyEvent03, Function | SmallTest | Le
  * @tc.desc: SetWindowGravity test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, SetWindowGravity01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, SetWindowGravity01, TestSize.Level1)
 {
     uint32_t id = 0;
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
@@ -468,7 +468,7 @@ HWTEST_F(WindowManagerServiceTest, SetWindowGravity01, Function | SmallTest | Le
  * @tc.desc: get window animation targets
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, GetWindowAnimationTargets01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, GetWindowAnimationTargets01, TestSize.Level1)
 {
     wms = new WindowManagerService();
     sptr<WindowNode> compNode = new WindowNode();
@@ -503,7 +503,7 @@ HWTEST_F(WindowManagerServiceTest, GetWindowAnimationTargets01, Function | Small
  * @tc.desc: OnAccountSwitched test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, OnAccountSwitched, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, OnAccountSwitched, TestSize.Level1)
 {
     int accountId = 0;
     ASSERT_TRUE(wms != nullptr);
@@ -518,7 +518,7 @@ HWTEST_F(WindowManagerServiceTest, OnAccountSwitched, Function | SmallTest | Lev
  * @tc.desc: InitWithRanderServiceAdded test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, InitWithRanderServiceAdded, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, InitWithRanderServiceAdded, TestSize.Level1)
 {
     ASSERT_TRUE(wms != nullptr);
     wms->InitWithRanderServiceAdded();
@@ -529,7 +529,7 @@ HWTEST_F(WindowManagerServiceTest, InitWithRanderServiceAdded, Function | SmallT
  * @tc.desc: NotifyWindowTransition02 test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, NotifyWindowTransition02, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, NotifyWindowTransition02, TestSize.Level1)
 {
     sptr<AAFwk::AbilityTransitionInfo> from = new AAFwk::AbilityTransitionInfo();
     sptr<AAFwk::AbilityTransitionInfo> to = new AAFwk::AbilityTransitionInfo();
@@ -543,7 +543,7 @@ HWTEST_F(WindowManagerServiceTest, NotifyWindowTransition02, Function | SmallTes
  * @tc.desc: NotifyAnimationAbilityDied test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, NotifyAnimationAbilityDied, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, NotifyAnimationAbilityDied, TestSize.Level1)
 {
     sptr<AAFwk::AbilityTransitionInfo> info = new AAFwk::AbilityTransitionInfo();
     ASSERT_TRUE(wmsHandler_ != nullptr);
@@ -555,7 +555,7 @@ HWTEST_F(WindowManagerServiceTest, NotifyAnimationAbilityDied, Function | SmallT
  * @tc.desc: StartingWindow02 test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, StartingWindow02, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, StartingWindow02, TestSize.Level1)
 {
     sptr<AAFwk::AbilityTransitionInfo> info = new AAFwk::AbilityTransitionInfo();
     std::shared_ptr<Media::PixelMap> pixelMap = std::make_shared<Media::PixelMap>();
@@ -568,7 +568,7 @@ HWTEST_F(WindowManagerServiceTest, StartingWindow02, Function | SmallTest | Leve
  * @tc.desc: StartingWindow03 test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, StartingWindow03, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, StartingWindow03, TestSize.Level1)
 {
     sptr<AAFwk::AbilityTransitionInfo> info = new AAFwk::AbilityTransitionInfo();
     std::shared_ptr<Media::PixelMap> pixelMap = std::make_shared<Media::PixelMap>();
@@ -582,7 +582,7 @@ HWTEST_F(WindowManagerServiceTest, StartingWindow03, Function | SmallTest | Leve
  * @tc.desc: CancelStartingWindow test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, CancelStartingWindow01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, CancelStartingWindow01, TestSize.Level1)
 {
     sptr<IRemoteObject> abilityToken = nullptr;
     wms->startingOpen_ = false;
@@ -595,7 +595,7 @@ HWTEST_F(WindowManagerServiceTest, CancelStartingWindow01, Function | SmallTest 
  * @tc.desc: MoveMissionsToForeground test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, MoveMissionsToForeground02, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, MoveMissionsToForeground02, TestSize.Level1)
 {
     const std::vector<int32_t> missionIds;
     int32_t topMissionId = 1;
@@ -609,7 +609,7 @@ HWTEST_F(WindowManagerServiceTest, MoveMissionsToForeground02, Function | SmallT
  * @tc.desc: Init test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, Init, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, Init, TestSize.Level1)
 {
     wms->windowRoot_ = new WindowRoot(nullptr);
     wms->Init();
@@ -621,7 +621,7 @@ HWTEST_F(WindowManagerServiceTest, Init, Function | SmallTest | Level2)
  * @tc.desc: Dump02 test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, Dump02, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, Dump02, TestSize.Level1)
 {
     int fd = 2;
     std::vector<std::u16string> args;
@@ -637,7 +637,7 @@ HWTEST_F(WindowManagerServiceTest, Dump02, Function | SmallTest | Level2)
  * @tc.desc: ConfigStartingWindowAnimation test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, ConfigStartingWindowAnimation, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, ConfigStartingWindowAnimation, TestSize.Level1)
 {
     WindowManagerConfig::ConfigItem animeConfig;
     ASSERT_TRUE(wms != nullptr);
@@ -649,7 +649,7 @@ HWTEST_F(WindowManagerServiceTest, ConfigStartingWindowAnimation, Function | Sma
  * @tc.desc: RequestFocus test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, RequestFocus, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, RequestFocus, TestSize.Level1)
 {
     uint32_t windowId = 1;
     WMError res = wms->RequestFocus(windowId);
@@ -665,7 +665,7 @@ HWTEST_F(WindowManagerServiceTest, RequestFocus, Function | SmallTest | Level2)
  * @tc.desc: GetAvoidAreaByType test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, GetAvoidAreaByType, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, GetAvoidAreaByType, TestSize.Level1)
 {
     uint32_t windowId = 1;
     AvoidAreaType avoidAreaType = AvoidAreaType::TYPE_SYSTEM;
@@ -678,7 +678,7 @@ HWTEST_F(WindowManagerServiceTest, GetAvoidAreaByType, Function | SmallTest | Le
  * @tc.desc: NotifyDisplayStateChange test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, NotifyDisplayStateChange, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, NotifyDisplayStateChange, TestSize.Level1)
 {
     DisplayId defaultDisplayId = DisplayGroupInfo::GetInstance().GetDefaultDisplayId();
     auto display = DisplayManager::GetInstance().GetDefaultDisplay();
@@ -694,7 +694,7 @@ HWTEST_F(WindowManagerServiceTest, NotifyDisplayStateChange, Function | SmallTes
  * @tc.desc: OnDisplayStateChange test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, OnDisplayStateChange, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, OnDisplayStateChange, TestSize.Level1)
 {
     DisplayId defaultDisplayId = DisplayGroupInfo::GetInstance().GetDefaultDisplayId();
     auto display = DisplayManager::GetInstance().GetDefaultDisplay();
@@ -710,7 +710,7 @@ HWTEST_F(WindowManagerServiceTest, OnDisplayStateChange, Function | SmallTest | 
  * @tc.desc: NotifyServerReadyToMoveOrDrag test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, NotifyServerReadyToMoveOrDrag, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, NotifyServerReadyToMoveOrDrag, TestSize.Level1)
 {
     uint32_t windowId = 1;
     sptr<WindowProperty> windowProperty;
@@ -724,7 +724,7 @@ HWTEST_F(WindowManagerServiceTest, NotifyServerReadyToMoveOrDrag, Function | Sma
  * @tc.desc: ProcessPointDown test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, ProcessPointDown, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, ProcessPointDown, TestSize.Level1)
 {
     uint32_t windowId = 1;
     bool isPointDown = false;
@@ -737,7 +737,7 @@ HWTEST_F(WindowManagerServiceTest, ProcessPointDown, Function | SmallTest | Leve
  * @tc.desc: MinimizeAllAppWindows test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, MinimizeAllAppWindows, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, MinimizeAllAppWindows, TestSize.Level1)
 {
     DisplayId displayId = 1;
     WMError res = wms->MinimizeAllAppWindows(displayId);
@@ -749,7 +749,7 @@ HWTEST_F(WindowManagerServiceTest, MinimizeAllAppWindows, Function | SmallTest |
  * @tc.desc: ToggleShownStateForAllAppWindows test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, ToggleShownStateForAllAppWindows, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, ToggleShownStateForAllAppWindows, TestSize.Level1)
 {
     WMError res = wms->ToggleShownStateForAllAppWindows();
     ASSERT_EQ(WMError::WM_OK, res);
@@ -760,7 +760,7 @@ HWTEST_F(WindowManagerServiceTest, ToggleShownStateForAllAppWindows, Function | 
  * @tc.desc: GetTopWindowId test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, GetTopWindowId, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, GetTopWindowId, TestSize.Level1)
 {
     uint32_t mainWinId = 1;
     uint32_t topWinId = 1;
@@ -777,7 +777,7 @@ HWTEST_F(WindowManagerServiceTest, GetTopWindowId, Function | SmallTest | Level2
  * @tc.desc: SetWindowLayoutMode test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, SetWindowLayoutMode, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, SetWindowLayoutMode, TestSize.Level1)
 {
     WindowLayoutMode mode = WindowLayoutMode::BASE;
     WMError res = wms->SetWindowLayoutMode(mode);
@@ -789,7 +789,7 @@ HWTEST_F(WindowManagerServiceTest, SetWindowLayoutMode, Function | SmallTest | L
  * @tc.desc: GetAccessibilityWindowInfo test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, GetAccessibilityWindowInfo, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, GetAccessibilityWindowInfo, TestSize.Level1)
 {
     std::vector<sptr<AccessibilityWindowInfo>> infos;
     WMError res = wms->GetAccessibilityWindowInfo(infos);
@@ -801,7 +801,7 @@ HWTEST_F(WindowManagerServiceTest, GetAccessibilityWindowInfo, Function | SmallT
  * @tc.desc: GetUnreliableWindowInfo test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, GetUnreliableWindowInfo, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, GetUnreliableWindowInfo, TestSize.Level1)
 {
     std::vector<sptr<UnreliableWindowInfo>> infos;
     int32_t windowId = 0;
@@ -814,7 +814,7 @@ HWTEST_F(WindowManagerServiceTest, GetUnreliableWindowInfo, Function | SmallTest
  * @tc.desc: GetVisibilityWindowInfo test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, GetVisibilityWindowInfo, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, GetVisibilityWindowInfo, TestSize.Level1)
 {
     std::vector<sptr<WindowVisibilityInfo>> infos;
     WMError res = wms->GetVisibilityWindowInfo(infos);
@@ -826,7 +826,7 @@ HWTEST_F(WindowManagerServiceTest, GetVisibilityWindowInfo, Function | SmallTest
  * @tc.desc: RaiseToAppTop test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, RaiseToAppTop, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, RaiseToAppTop, TestSize.Level1)
 {
     uint32_t windowId = 1;
     WMError res = wms->RaiseToAppTop(windowId);
@@ -842,7 +842,7 @@ HWTEST_F(WindowManagerServiceTest, RaiseToAppTop, Function | SmallTest | Level2)
  * @tc.desc: GetSnapshot test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, GetSnapshot, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, GetSnapshot, TestSize.Level1)
 {
     uint32_t windowId = 1;
     ASSERT_EQ(nullptr, wms->GetSnapshot(windowId));
@@ -853,7 +853,7 @@ HWTEST_F(WindowManagerServiceTest, GetSnapshot, Function | SmallTest | Level2)
  * @tc.desc: MinimizeWindowsByLauncher test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, MinimizeWindowsByLauncher, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, MinimizeWindowsByLauncher, TestSize.Level1)
 {
     std::vector<uint32_t> windowIds;
     bool isAnimated = false;
@@ -867,7 +867,7 @@ HWTEST_F(WindowManagerServiceTest, MinimizeWindowsByLauncher, Function | SmallTe
  * @tc.desc: SetAnchorAndScale test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, SetAnchorAndScale, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, SetAnchorAndScale, TestSize.Level1)
 {
     int32_t x = 1;
     int32_t y = 2;
@@ -881,7 +881,7 @@ HWTEST_F(WindowManagerServiceTest, SetAnchorAndScale, Function | SmallTest | Lev
  * @tc.desc: SetAnchorOffset test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, SetAnchorOffset, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, SetAnchorOffset, TestSize.Level1)
 {
     int32_t deltaX = 1;
     int32_t deltaY = 2;
@@ -894,7 +894,7 @@ HWTEST_F(WindowManagerServiceTest, SetAnchorOffset, Function | SmallTest | Level
  * @tc.desc: OffWindowZoom test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, OffWindowZoom, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, OffWindowZoom, TestSize.Level1)
 {
     ASSERT_TRUE(wms != nullptr);
     wms->OffWindowZoom();
@@ -905,7 +905,7 @@ HWTEST_F(WindowManagerServiceTest, OffWindowZoom, Function | SmallTest | Level2)
  * @tc.desc: UpdateRsTree test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, UpdateRsTree, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, UpdateRsTree, TestSize.Level1)
 {
     uint32_t windowId = 1;
     bool isAdd = false;
@@ -918,7 +918,7 @@ HWTEST_F(WindowManagerServiceTest, UpdateRsTree, Function | SmallTest | Level2)
  * @tc.desc: OnScreenshot test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, OnScreenshot, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, OnScreenshot, TestSize.Level1)
 {
     DisplayId displayId = 1;
     ASSERT_TRUE(wms != nullptr);
@@ -930,7 +930,7 @@ HWTEST_F(WindowManagerServiceTest, OnScreenshot, Function | SmallTest | Level2)
  * @tc.desc: HasPrivateWindow01 test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, HasPrivateWindow01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, HasPrivateWindow01, TestSize.Level1)
 {
     DisplayId displayId = 1;
     bool hasPrivateWindow = false;
@@ -943,7 +943,7 @@ HWTEST_F(WindowManagerServiceTest, HasPrivateWindow01, Function | SmallTest | Le
  * @tc.desc: SetGestureNavigationEnabled test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, SetGestureNavigationEnabled, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, SetGestureNavigationEnabled, TestSize.Level1)
 {
     bool enable = false;
     ASSERT_TRUE(wms != nullptr);
@@ -956,7 +956,7 @@ HWTEST_F(WindowManagerServiceTest, SetGestureNavigationEnabled, Function | Small
  * @tc.desc: HasPrivateWindow02 test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, HasPrivateWindow02, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, HasPrivateWindow02, TestSize.Level1)
 {
     DisplayId displayId = 1;
     bool hasPrivateWindow = false;
@@ -969,7 +969,7 @@ HWTEST_F(WindowManagerServiceTest, HasPrivateWindow02, Function | SmallTest | Le
  * @tc.desc: SetMaximizeMode test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, SetMaximizeMode, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, SetMaximizeMode, TestSize.Level1)
 {
     MaximizeMode maximizeMode = MaximizeMode::MODE_AVOID_SYSTEM_BAR;
     ASSERT_TRUE(wms != nullptr);
@@ -981,7 +981,7 @@ HWTEST_F(WindowManagerServiceTest, SetMaximizeMode, Function | SmallTest | Level
  * @tc.desc: GetMaximizeMode test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, GetMaximizeMode, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, GetMaximizeMode, TestSize.Level1)
 {
     ASSERT_TRUE(wms != nullptr);
     ASSERT_EQ(MaximizeMode::MODE_RECOVER, wms->GetMaximizeMode());
@@ -992,7 +992,7 @@ HWTEST_F(WindowManagerServiceTest, GetMaximizeMode, Function | SmallTest | Level
  * @tc.desc: GetFocusWindowInfo test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, GetFocusWindowInfo, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, GetFocusWindowInfo, TestSize.Level1)
 {
     FocusChangeInfo focusInfo;
     ASSERT_TRUE(wms != nullptr);
@@ -1004,7 +1004,7 @@ HWTEST_F(WindowManagerServiceTest, GetFocusWindowInfo, Function | SmallTest | Le
  * @tc.desc: PostAsyncTask test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, PostAsyncTask, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, PostAsyncTask, TestSize.Level1)
 {
     Task task;
     std::shared_ptr<AppExecFwk::EventRunner> runner = AppExecFwk::EventRunner::Create("Test");
@@ -1019,7 +1019,7 @@ HWTEST_F(WindowManagerServiceTest, PostAsyncTask, Function | SmallTest | Level2)
  * @tc.desc: OnAddSystemAbility02 test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, OnAddSystemAbility02, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, OnAddSystemAbility02, TestSize.Level1)
 {
     std::string str = "OnAddSystemAbility02";
     wms->OnAddSystemAbility(10, str);
@@ -1035,7 +1035,7 @@ HWTEST_F(WindowManagerServiceTest, OnAddSystemAbility02, Function | SmallTest | 
  * @tc.desc: GetFocusWindow test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, GetFocusWindow, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, GetFocusWindow, TestSize.Level1)
 {
     sptr<IRemoteObject> abilityToken = new IRemoteObjectMocker();
     ASSERT_TRUE(wmsHandler_ != nullptr);
@@ -1047,7 +1047,7 @@ HWTEST_F(WindowManagerServiceTest, GetFocusWindow, Function | SmallTest | Level2
  * @tc.desc: MoveMissionsToBackground02 test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, MoveMissionsToBackground02, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, MoveMissionsToBackground02, TestSize.Level1)
 {
     std::vector<int32_t> moveRs;
     int32_t rs = wmsHandler_->MoveMissionsToBackground({}, moveRs);
@@ -1059,7 +1059,7 @@ HWTEST_F(WindowManagerServiceTest, MoveMissionsToBackground02, Function | SmallT
  * @tc.desc: ConfigAppWindowCornerRadius test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, ConfigAppWindowCornerRadius, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, ConfigAppWindowCornerRadius, TestSize.Level1)
 {
     const auto& config = WindowManagerConfig::GetConfig();
     WindowManagerConfig::ConfigItem item = config["decor"];
@@ -1074,7 +1074,7 @@ HWTEST_F(WindowManagerServiceTest, ConfigAppWindowCornerRadius, Function | Small
  * @tc.desc: GetFocusWindowInfo01 test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, GetFocusWindowInfo01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, GetFocusWindowInfo01, TestSize.Level1)
 {
     sptr<IRemoteObject> abilityToken = new IRemoteObjectMocker();
     ASSERT_TRUE(wms != nullptr);
@@ -1086,7 +1086,7 @@ HWTEST_F(WindowManagerServiceTest, GetFocusWindowInfo01, Function | SmallTest | 
  * @tc.desc: OnStop test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, OnStop, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, OnStop, TestSize.Level1)
 {
     ASSERT_TRUE(wms != nullptr);
     wms->OnStop();
@@ -1097,7 +1097,7 @@ HWTEST_F(WindowManagerServiceTest, OnStop, Function | SmallTest | Level2)
  * @tc.desc: CheckSystemWindowPermission test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, CheckSystemWindowPermission, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, CheckSystemWindowPermission, TestSize.Level1)
 {
     sptr<WindowProperty> property = new WindowProperty();
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
@@ -1117,7 +1117,7 @@ HWTEST_F(WindowManagerServiceTest, CheckSystemWindowPermission, Function | Small
  * @tc.desc: CreateWindow02 test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, CreateWindow02, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, CreateWindow02, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
     sptr<IWindow> iWindow = iface_cast<IWindow>(iRemoteObjectMocker);
@@ -1139,7 +1139,7 @@ HWTEST_F(WindowManagerServiceTest, CreateWindow02, Function | SmallTest | Level2
  * @tc.desc: AddWindow02 test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, AddWindow02, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, AddWindow02, TestSize.Level1)
 {
     sptr<WindowProperty> property = new WindowProperty();
     property->SetWindowType(WindowType::WINDOW_TYPE_WALLPAPER);
@@ -1152,7 +1152,7 @@ HWTEST_F(WindowManagerServiceTest, AddWindow02, Function | SmallTest | Level2)
  * @tc.desc: RemoveWindow test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, RemoveWindow, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, RemoveWindow, TestSize.Level1)
 {
     sptr<WindowNode> appNode = new WindowNode();
     IWindowMocker* token = new IWindowMocker;
@@ -1170,7 +1170,7 @@ HWTEST_F(WindowManagerServiceTest, RemoveWindow, Function | SmallTest | Level2)
  * @tc.desc: DestroyWindow test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, DestroyWindow, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, DestroyWindow, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
     sptr<IWindow> iWindow = iface_cast<IWindow>(iRemoteObjectMocker);
@@ -1197,7 +1197,7 @@ HWTEST_F(WindowManagerServiceTest, DestroyWindow, Function | SmallTest | Level2)
  * @tc.desc: OnScreenshot01 test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, OnScreenshot01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, OnScreenshot01, TestSize.Level1)
 {
     DisplayId displayId = 1;
     ASSERT_TRUE(listener != nullptr);
@@ -1209,7 +1209,7 @@ HWTEST_F(WindowManagerServiceTest, OnScreenshot01, Function | SmallTest | Level2
  * @tc.desc: NotifyServerReadyToMoveOrDrag02 test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, NotifyServerReadyToMoveOrDrag02, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, NotifyServerReadyToMoveOrDrag02, TestSize.Level1)
 {
     sptr<WindowNode> appNode = new WindowNode();
     IWindowMocker* token = new IWindowMocker;
@@ -1226,7 +1226,7 @@ HWTEST_F(WindowManagerServiceTest, NotifyServerReadyToMoveOrDrag02, Function | S
  * @tc.desc: ProcessPointUp test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, ProcessPointUp, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, ProcessPointUp, TestSize.Level1)
 {
     uint32_t windowId = 1;
     ASSERT_TRUE(wms != nullptr);

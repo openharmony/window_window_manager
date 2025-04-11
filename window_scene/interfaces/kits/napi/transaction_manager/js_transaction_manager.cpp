@@ -37,7 +37,7 @@ napi_value NapiGetUndefined(napi_env env)
 
 napi_value JsTransactionManager::Init(napi_env env, napi_value exportObj)
 {
-    WLOGFI("[NAPI]");
+    TLOGD(WmsLogTag::DEFAULT, "JsTransactionManager Init");
     if (env == nullptr || exportObj == nullptr) {
         WLOGFE("env or exportObj is null!");
         return nullptr;
@@ -51,6 +51,8 @@ napi_value JsTransactionManager::Init(napi_env env, napi_value exportObj)
         JsTransactionManager::OpenSyncTransaction);
     BindNativeFunction(env, exportObj, "closeSyncTransaction", moduleName,
         JsTransactionManager::CloseSyncTransaction);
+    BindNativeFunction(env, exportObj, "closeSyncTransactionWithVsync", moduleName,
+        JsTransactionManager::CloseSyncTransactionWithVsync);
     return NapiGetUndefined(env);
 }
 
@@ -59,22 +61,29 @@ JsTransactionManager::JsTransactionManager(napi_env env)
 
 void JsTransactionManager::Finalizer(napi_env env, void* data, void* hint)
 {
-    WLOGFI("[NAPI]");
+    TLOGD(WmsLogTag::DEFAULT, "Enter");
     std::unique_ptr<JsTransactionManager>(static_cast<JsTransactionManager*>(data));
 }
 
 napi_value JsTransactionManager::OpenSyncTransaction(napi_env env, napi_callback_info info)
 {
-    WLOGFI("[NAPI]");
+    TLOGD(WmsLogTag::DEFAULT, "Enter");
     JsTransactionManager* me = CheckParamsAndGetThis<JsTransactionManager>(env, info);
     return (me != nullptr) ? me->OnOpenSyncTransaction(env, info) : nullptr;
 }
 
 napi_value JsTransactionManager::CloseSyncTransaction(napi_env env, napi_callback_info info)
 {
-    WLOGFI("[NAPI]");
+    TLOGD(WmsLogTag::DEFAULT, "Enter");
     JsTransactionManager* me = CheckParamsAndGetThis<JsTransactionManager>(env, info);
     return (me != nullptr) ? me->OnCloseSyncTransaction(env, info) : nullptr;
+}
+
+napi_value JsTransactionManager::CloseSyncTransactionWithVsync(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DEFAULT, "Enter");
+    JsTransactionManager* me = CheckParamsAndGetThis<JsTransactionManager>(env, info);
+    return (me != nullptr) ? me->OnCloseSyncTransactionWithVsync(env, info) : nullptr;
 }
 
 napi_value JsTransactionManager::OnOpenSyncTransaction(napi_env env, napi_callback_info info)
@@ -108,6 +117,17 @@ napi_value JsTransactionManager::OnCloseSyncTransaction(napi_env env, napi_callb
     } else {
         task();
     }
+    return NapiGetUndefined(env);
+}
+
+napi_value JsTransactionManager::OnCloseSyncTransactionWithVsync(napi_env env, napi_callback_info info)
+{
+    auto task = [] {
+        if (auto transactionController = RSSyncTransactionController::GetInstance()) {
+            transactionController->CloseSyncTransaction();
+        }
+    };
+    SceneSessionManager::GetInstance().CloseSyncTransaction(task);
     return NapiGetUndefined(env);
 }
 } // namespace OHOS::Rosen

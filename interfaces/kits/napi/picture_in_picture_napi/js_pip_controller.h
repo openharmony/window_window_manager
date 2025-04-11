@@ -34,26 +34,33 @@ public:
     static napi_value StartPictureInPicture(napi_env env, napi_callback_info info);
     static napi_value StopPictureInPicture(napi_env env, napi_callback_info info);
     static napi_value SetAutoStartEnabled(napi_env env, napi_callback_info info);
+    static napi_value UpdateContentNode(napi_env env, napi_callback_info info);
     static napi_value UpdateContentSize(napi_env env, napi_callback_info info);
     static napi_value UpdatePiPControlStatus(napi_env env, napi_callback_info info);
     static napi_value SetPiPControlEnabled(napi_env env, napi_callback_info info);
+    static napi_value GetPiPWindowInfo(napi_env env, napi_callback_info info);
     static napi_value RegisterCallback(napi_env env, napi_callback_info info);
     static napi_value UnregisterCallback(napi_env env, napi_callback_info info);
+    static napi_value PictureInPicturePossible(napi_env env, napi_callback_info info);
 private:
     enum class ListenerType : uint32_t {
         STATE_CHANGE_CB,
         CONTROL_PANEL_ACTION_EVENT_CB,
         CONTROL_EVENT_CB,
+        SIZE_CHANGE_CB,
     };
 
     napi_value OnStartPictureInPicture(napi_env env, napi_callback_info info);
     napi_value OnStopPictureInPicture(napi_env env, napi_callback_info info);
     napi_value OnSetAutoStartEnabled(napi_env env, napi_callback_info info);
+    napi_value OnUpdateContentNode(napi_env env, napi_callback_info info);
     napi_value OnUpdateContentSize(napi_env env, napi_callback_info info);
     napi_value OnUpdatePiPControlStatus(napi_env env, napi_callback_info info);
     napi_value OnSetPiPControlEnabled(napi_env env, napi_callback_info info);
+    napi_value OnGetPiPWindowInfo(napi_env env, napi_callback_info info);
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
     napi_value OnUnregisterCallback(napi_env env, napi_callback_info info);
+    napi_value OnPictureInPicturePossible(napi_env env, napi_callback_info info);
 
     bool IfCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);
     WmErrorCode RegisterListenerWithType(napi_env env, const std::string& type, napi_value value);
@@ -63,9 +70,11 @@ private:
     void ProcessStateChangeRegister(const sptr<JsPiPWindowListener>& listener);
     void ProcessActionEventRegister(const sptr<JsPiPWindowListener>& listener);
     void ProcessControlEventRegister(const sptr<JsPiPWindowListener>& listener);
+    void ProcessSizeChangeRegister(const sptr<JsPiPWindowListener>& listener);
     void ProcessStateChangeUnRegister(const sptr<JsPiPWindowListener>& listener);
     void ProcessActionEventUnRegister(const sptr<JsPiPWindowListener>& listener);
     void ProcessControlEventUnRegister(const sptr<JsPiPWindowListener>& listener);
+    void ProcessSizeChangeUnRegister(const sptr<JsPiPWindowListener>& listener);
 
     sptr<PictureInPictureController> pipController_ = nullptr;
     std::map<std::string, ListenerType> listenerCodeMap_;

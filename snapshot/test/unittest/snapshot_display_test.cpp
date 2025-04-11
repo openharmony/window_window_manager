@@ -107,7 +107,7 @@ namespace {
  * @tc.desc: Call screenshot default cmd and check if it saves image in default path
  * @tc.type: FUNC
  */
-HWTEST_F(SnapshotDisplayTest, ScreenShotCmdValid01, Function | MediumTest | Level2)
+HWTEST_F(SnapshotDisplayTest, ScreenShotCmdValid01, TestSize.Level1)
 {
     std::string imgPath[testTimeCount_];
     int i;
@@ -137,7 +137,7 @@ HWTEST_F(SnapshotDisplayTest, ScreenShotCmdValid01, Function | MediumTest | Leve
  * @tc.desc: Call screenshot with default displayID and default path
  * @tc.type: FUNC
  */
-HWTEST_F(SnapshotDisplayTest, ScreenShotCmdValid02, Function | MediumTest | Level2)
+HWTEST_F(SnapshotDisplayTest, ScreenShotCmdValid02, TestSize.Level1)
 {
     std::string imgPath[testTimeCount_];
     int i;
@@ -167,7 +167,7 @@ HWTEST_F(SnapshotDisplayTest, ScreenShotCmdValid02, Function | MediumTest | Leve
  * @tc.desc: Call screenshot with default displayID and custom path
  * @tc.type: FUNC
  */
-HWTEST_F(SnapshotDisplayTest, ScreenShotCmdValid03, Function | MediumTest | Level2)
+HWTEST_F(SnapshotDisplayTest, ScreenShotCmdValid03, TestSize.Level1)
 {
     const std::string imgPath = "/data/local/tmp/snapshot_display_test.jpeg";
     std::string extraParam = "-i " + std::to_string(defaultId_);
@@ -179,7 +179,7 @@ HWTEST_F(SnapshotDisplayTest, ScreenShotCmdValid03, Function | MediumTest | Leve
  * @tc.desc: Call screenshot with valid width/height
  * @tc.type: FUNC
  */
-HWTEST_F(SnapshotDisplayTest, ScreenShotCmdValid04, Function | MediumTest | Level2)
+HWTEST_F(SnapshotDisplayTest, ScreenShotCmdValid04, TestSize.Level1)
 {
     const std::string imgPath = "/data/local/tmp/snapshot_display_test.jpeg";
     std::string extraParam = "-i " + std::to_string(defaultId_) + " -w 100 -h 100";
@@ -191,7 +191,7 @@ HWTEST_F(SnapshotDisplayTest, ScreenShotCmdValid04, Function | MediumTest | Leve
  * @tc.desc: Call screenshot with valid width
  * @tc.type: FUNC
  */
-HWTEST_F(SnapshotDisplayTest, ScreenShotCmdValid05, Function | MediumTest | Level2)
+HWTEST_F(SnapshotDisplayTest, ScreenShotCmdValid05, TestSize.Level1)
 {
     const std::string imgPath = "/data/local/tmp/snapshot_display_test.jpeg";
     std::string extraParam = "-i " + std::to_string(defaultId_) + " -w 100";
@@ -203,7 +203,7 @@ HWTEST_F(SnapshotDisplayTest, ScreenShotCmdValid05, Function | MediumTest | Leve
  * @tc.desc: Call screenshot with valid height
  * @tc.type: FUNC
  */
-HWTEST_F(SnapshotDisplayTest, ScreenShotCmdValid06, Function | MediumTest | Level2)
+HWTEST_F(SnapshotDisplayTest, ScreenShotCmdValid06, TestSize.Level1)
 {
     const std::string imgPath = "/data/local/tmp/snapshot_display_test.jpeg";
     std::string extraParam = "-i " + std::to_string(defaultId_) + " -h 100";
@@ -215,7 +215,7 @@ HWTEST_F(SnapshotDisplayTest, ScreenShotCmdValid06, Function | MediumTest | Leve
  * @tc.desc: Call screenshot with invalid width/height
  * @tc.type: FUNC
  */
-HWTEST_F(SnapshotDisplayTest, ScreenShotCmdValid07, Function | MediumTest | Level2)
+HWTEST_F(SnapshotDisplayTest, ScreenShotCmdValid07, TestSize.Level1)
 {
     const std::string imgPath = "/data/local/tmp/snapshot_display_test.jpeg";
     std::string extraParam = "-i " + std::to_string(defaultId_) + " -w 10000 -h 10000";
@@ -227,7 +227,7 @@ HWTEST_F(SnapshotDisplayTest, ScreenShotCmdValid07, Function | MediumTest | Leve
  * @tc.desc: Call screenshot with -m
  * @tc.type: FUNC
  */
-HWTEST_F(SnapshotDisplayTest, ScreenShotCmdValid08, Function | MediumTest | Level2)
+HWTEST_F(SnapshotDisplayTest, ScreenShotCmdValid08, TestSize.Level1)
 {
     const std::string imgPath = "/data/local/tmp/snapshot_display_test.jpeg";
     std::string extraParam = "-i " + std::to_string(defaultId_) + " -m";
@@ -239,7 +239,7 @@ HWTEST_F(SnapshotDisplayTest, ScreenShotCmdValid08, Function | MediumTest | Leve
  * @tc.desc: screenshot png type
  * @tc.type: FUNC
  */
-HWTEST_F(SnapshotDisplayTest, ScreenShotCmdValid09, Function | MediumTest | Level2)
+HWTEST_F(SnapshotDisplayTest, ScreenShotCmdValid09, TestSize.Level1)
 {
     std::string imgPath[testTimeCount_];
     int i;

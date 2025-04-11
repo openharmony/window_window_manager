@@ -48,6 +48,14 @@ public:
         return (type >= WindowType::APP_SUB_WINDOW_BASE && type < WindowType::APP_SUB_WINDOW_END);
     }
 
+    static inline bool IsNormalSubWindow(WindowType type, uint32_t windowFlags)
+    {
+        const uint32_t mask = static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_MODAL) |
+            static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_TOAST) |
+            static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_TEXT_MENU);
+        return ((windowFlags & mask) == 0 && IsSubWindow(type));
+    }
+
     static inline bool IsModalSubWindow(WindowType type, uint32_t windowFlags)
     {
         return IsSubWindow(type) && (windowFlags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_MODAL));
@@ -62,6 +70,17 @@ public:
     static inline bool IsToastSubWindow(WindowType type, uint32_t windowFlags)
     {
         return IsSubWindow(type) && (windowFlags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_TOAST));
+    }
+
+    static inline bool IsModalWindow(uint32_t windowFlags)
+    {
+        return (windowFlags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_APPLICATION_MODAL)) ||
+            (windowFlags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_MODAL));
+    }
+
+    static inline bool IsTextMenuSubWindow(WindowType type, uint32_t windowFlags)
+    {
+        return IsSubWindow(type) && (windowFlags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_TEXT_MENU));
     }
 
     static inline bool IsDialogWindow(WindowType type)
@@ -156,6 +175,12 @@ public:
         return WindowHelper::IsMainFullScreenWindow(type, mode) || type == WindowType::WINDOW_TYPE_KEYGUARD ||
             type == WindowType::WINDOW_TYPE_DESKTOP ||
             ((type == WindowType::WINDOW_TYPE_LAUNCHER_RECENT) && (mode == WindowMode::WINDOW_MODE_FULLSCREEN));
+    }
+
+    static inline bool IsInputWindow(WindowType type)
+    {
+        return (type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT ||
+                type == WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR);
     }
 
     static inline bool IsFullScreenWindow(WindowMode mode)

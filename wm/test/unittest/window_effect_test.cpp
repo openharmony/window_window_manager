@@ -31,20 +31,15 @@ public:
     static void TearDownTestCase();
     virtual void SetUp() override;
     virtual void TearDown() override;
+
 private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 500000;
 };
-void WindowEffectTest::SetUpTestCase()
-{
-}
+void WindowEffectTest::SetUpTestCase() {}
 
-void WindowEffectTest::TearDownTestCase()
-{
-}
+void WindowEffectTest::TearDownTestCase() {}
 
-void WindowEffectTest::SetUp()
-{
-}
+void WindowEffectTest::SetUp() {}
 
 void WindowEffectTest::TearDown()
 {
@@ -58,7 +53,7 @@ namespace {
  * @tc.type: FUNC
  * @tc.require: issueI5IUGI
  */
-HWTEST_F(WindowEffectTest, WindowEffect01, Function | SmallTest | Level2)
+HWTEST_F(WindowEffectTest, WindowEffect01, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<WindowOption> option = new WindowOption();
@@ -83,7 +78,7 @@ HWTEST_F(WindowEffectTest, WindowEffect01, Function | SmallTest | Level2)
  * @tc.type: FUNC
  * @tc.require: issueI5IUGI
  */
-HWTEST_F(WindowEffectTest, WindowEffect02, Function | SmallTest | Level2)
+HWTEST_F(WindowEffectTest, WindowEffect02, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<WindowOption> option = new WindowOption();
@@ -108,7 +103,7 @@ HWTEST_F(WindowEffectTest, WindowEffect02, Function | SmallTest | Level2)
  * @tc.type: FUNC
  * @tc.require: issueI5IUGI
  */
-HWTEST_F(WindowEffectTest, WindowEffect03, Function | SmallTest | Level2)
+HWTEST_F(WindowEffectTest, WindowEffect03, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<WindowOption> option = new WindowOption();
@@ -140,7 +135,7 @@ HWTEST_F(WindowEffectTest, WindowEffect03, Function | SmallTest | Level2)
  * @tc.type: FUNC
  * @tc.require: issueI5IUGI
  */
-HWTEST_F(WindowEffectTest, WindowEffect04, Function | SmallTest | Level2)
+HWTEST_F(WindowEffectTest, WindowEffect04, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<WindowOption> option = new WindowOption();
@@ -170,7 +165,7 @@ HWTEST_F(WindowEffectTest, WindowEffect04, Function | SmallTest | Level2)
  * @tc.type: FUNC
  * @tc.require: issueI5IUGI
  */
-HWTEST_F(WindowEffectTest, WindowEffect05, Function | SmallTest | Level2)
+HWTEST_F(WindowEffectTest, WindowEffect05, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<WindowOption> option = new WindowOption();
@@ -195,7 +190,7 @@ HWTEST_F(WindowEffectTest, WindowEffect05, Function | SmallTest | Level2)
  * @tc.type: FUNC
  * @tc.require: issueI5IUGI
  */
-HWTEST_F(WindowEffectTest, WindowEffect06, Function | SmallTest | Level2)
+HWTEST_F(WindowEffectTest, WindowEffect06, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<WindowOption> option = new WindowOption();
@@ -220,7 +215,7 @@ HWTEST_F(WindowEffectTest, WindowEffect06, Function | SmallTest | Level2)
  * @tc.type: FUNC
  * @tc.require: issueI5IUGI
  */
-HWTEST_F(WindowEffectTest, WindowEffect07, Function | SmallTest | Level2)
+HWTEST_F(WindowEffectTest, WindowEffect07, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<WindowOption> option = new WindowOption();
@@ -241,6 +236,6 @@ HWTEST_F(WindowEffectTest, WindowEffect07, Function | SmallTest | Level2)
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

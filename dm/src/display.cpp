@@ -226,6 +226,11 @@ DMError Display::HasImmersiveWindow(bool& immersive)
     return SingletonContainer::Get<DisplayManagerAdapter>().HasImmersiveWindow(GetScreenId(), immersive);
 }
 
+DMError Display::GetAvailableArea(DMRect& area) const
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().GetAvailableArea(GetId(), area);
+}
+
 DMError Display::GetSupportedHDRFormats(std::vector<uint32_t>& hdrFormats) const
 {
     return SingletonContainer::Get<ScreenManagerAdapter>().GetSupportedHDRFormats(GetScreenId(), hdrFormats);
@@ -236,9 +241,9 @@ DMError Display::GetSupportedColorSpaces(std::vector<uint32_t>& colorSpaces) con
     return SingletonContainer::Get<ScreenManagerAdapter>().GetSupportedColorSpaces(GetScreenId(), colorSpaces);
 }
 
-DMError Display::GetAvailableArea(DMRect& area) const
+DMError Display::GetDisplayCapability(std::string& capabilitInfo) const
 {
-    return SingletonContainer::Get<DisplayManagerAdapter>().GetAvailableArea(GetId(), area);
+    return SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayCapability(capabilitInfo);
 }
 
 } // namespace OHOS::Rosen

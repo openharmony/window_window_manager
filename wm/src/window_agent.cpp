@@ -265,5 +265,15 @@ void WindowAgent::NotifyForegroundInteractiveStatus(bool interactive)
     window_->NotifyForegroundInteractiveStatus(interactive);
 }
 
+void WindowAgent::NotifyMMIServiceOnline(uint32_t winId)
+{
+    if (window_ == nullptr) {
+        WLOGFE("window_ is nullptr, Id:%{public}u", winId);
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_EVENT, "Id:%{public}u", winId);
+    window_->NotifyMMIServiceOnline(winId);
+}
+
 } // namespace Rosen
 } // namespace OHOS

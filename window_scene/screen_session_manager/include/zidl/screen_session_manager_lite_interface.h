@@ -63,6 +63,7 @@ public:
         TRANS_ID_SCENE_BOARD_GET_FOLD_STATUS,
         TRANS_ID_SCENE_BOARD_GET_CURRENT_FOLD_CREASE_REGION,
         TRANS_ID_GET_CUTOUT_INFO,
+        TRANS_ID_GET_SCREEN_POWER_AUTO,
     };
 
     virtual DMError RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,

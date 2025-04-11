@@ -42,17 +42,11 @@ private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 50000;
 };
 
-void WindowSessionImplTest2::SetUpTestCase()
-{
-}
+void WindowSessionImplTest2::SetUpTestCase() {}
 
-void WindowSessionImplTest2::TearDownTestCase()
-{
-}
+void WindowSessionImplTest2::TearDownTestCase() {}
 
-void WindowSessionImplTest2::SetUp()
-{
-}
+void WindowSessionImplTest2::SetUp() {}
 
 void WindowSessionImplTest2::TearDown()
 {
@@ -75,7 +69,7 @@ sptr<WindowSessionImpl> GetTestWindowImpl(const std::string& name)
         return nullptr;
     }
 
-    SessionInfo sessionInfo = {name, name, name};
+    SessionInfo sessionInfo = { name, name, name };
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     if (session == nullptr) {
         return nullptr;
@@ -85,8 +79,7 @@ sptr<WindowSessionImpl> GetTestWindowImpl(const std::string& name)
     return window;
 }
 
-template <typename TListener, typename MockListener>
-std::vector<sptr<TListener>> GetListenerList()
+template <typename TListener, typename MockListener> std::vector<sptr<TListener>> GetListenerList()
 {
     std::vector<sptr<TListener>> listeners;
     sptr<TListener> listener = new (std::nothrow) MockListener();
@@ -103,7 +96,7 @@ std::vector<sptr<TListener>> GetListenerList()
  * @tc.desc: GetTitleButtonVisible
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, GetTitleButtonVisible, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, GetTitleButtonVisible, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("GetTitleButtonVisible");
     ASSERT_NE(window, nullptr);
@@ -142,7 +135,7 @@ HWTEST_F(WindowSessionImplTest2, GetTitleButtonVisible, Function | SmallTest | L
  * @tc.desc: GetSystemSessionConfig
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, GetSystemSessionConfig, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, GetSystemSessionConfig, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("GetSystemSessionConfig");
     ASSERT_NE(window, nullptr);
@@ -155,16 +148,16 @@ HWTEST_F(WindowSessionImplTest2, GetSystemSessionConfig, Function | SmallTest | 
  * @tc.desc: GetColorSpaceFromSurfaceGamut
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, GetColorSpaceFromSurfaceGamut, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, GetColorSpaceFromSurfaceGamut, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("GetColorSpaceFromSurfaceGamut");
     ASSERT_NE(window, nullptr);
     ASSERT_EQ(window->GetColorSpaceFromSurfaceGamut(GraphicColorGamut::GRAPHIC_COLOR_GAMUT_SRGB),
-        ColorSpace::COLOR_SPACE_DEFAULT);
+              ColorSpace::COLOR_SPACE_DEFAULT);
     ASSERT_EQ(window->GetColorSpaceFromSurfaceGamut(GraphicColorGamut::GRAPHIC_COLOR_GAMUT_DCI_P3),
-        ColorSpace::COLOR_SPACE_WIDE_GAMUT);
+              ColorSpace::COLOR_SPACE_WIDE_GAMUT);
     ASSERT_EQ(window->GetColorSpaceFromSurfaceGamut(GraphicColorGamut::GRAPHIC_COLOR_GAMUT_INVALID),
-        ColorSpace::COLOR_SPACE_DEFAULT);
+              ColorSpace::COLOR_SPACE_DEFAULT);
     window->Destroy();
 }
 
@@ -173,16 +166,16 @@ HWTEST_F(WindowSessionImplTest2, GetColorSpaceFromSurfaceGamut, Function | Small
  * @tc.desc: GetSurfaceGamutFromColorSpace
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, GetSurfaceGamutFromColorSpace, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, GetSurfaceGamutFromColorSpace, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("GetSurfaceGamutFromColorSpace");
     ASSERT_NE(window, nullptr);
     ASSERT_EQ(window->GetSurfaceGamutFromColorSpace(ColorSpace::COLOR_SPACE_DEFAULT),
-        GraphicColorGamut::GRAPHIC_COLOR_GAMUT_SRGB);
+              GraphicColorGamut::GRAPHIC_COLOR_GAMUT_SRGB);
     ASSERT_EQ(window->GetSurfaceGamutFromColorSpace(ColorSpace::COLOR_SPACE_WIDE_GAMUT),
-        GraphicColorGamut::GRAPHIC_COLOR_GAMUT_DCI_P3);
+              GraphicColorGamut::GRAPHIC_COLOR_GAMUT_DCI_P3);
     ASSERT_EQ(window->GetSurfaceGamutFromColorSpace(ColorSpace(uint32_t(3))),
-        GraphicColorGamut::GRAPHIC_COLOR_GAMUT_SRGB);
+              GraphicColorGamut::GRAPHIC_COLOR_GAMUT_SRGB);
     window->Destroy();
 }
 
@@ -191,7 +184,7 @@ HWTEST_F(WindowSessionImplTest2, GetSurfaceGamutFromColorSpace, Function | Small
  * @tc.desc: Create
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, Create, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, Create, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("Create");
     ASSERT_NE(window, nullptr);
@@ -206,7 +199,7 @@ HWTEST_F(WindowSessionImplTest2, Create, Function | SmallTest | Level2)
  * @tc.desc: Destroy
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, Destroy, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, Destroy, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("Destroy");
     ASSERT_NE(window, nullptr);
@@ -232,7 +225,7 @@ HWTEST_F(WindowSessionImplTest2, Destroy, Function | SmallTest | Level2)
 
     window = GetTestWindowImpl("Destroy");
     ASSERT_NE(window, nullptr);
-    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> hostSession = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = hostSession;
     ASSERT_EQ(window->Destroy(true, true), WMError::WM_ERROR_INVALID_WINDOW);
@@ -252,7 +245,7 @@ HWTEST_F(WindowSessionImplTest2, Destroy, Function | SmallTest | Level2)
  * @tc.desc: GetWindowState
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, GetWindowState, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, GetWindowState, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("GetWindowState");
     ASSERT_NE(window, nullptr);
@@ -266,7 +259,7 @@ HWTEST_F(WindowSessionImplTest2, GetWindowState, Function | SmallTest | Level2)
  * @tc.desc: RecoverSessionListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, RecoverSessionListener, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, RecoverSessionListener, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("RecoverSessionListener");
     ASSERT_NE(window, nullptr);
@@ -276,8 +269,8 @@ HWTEST_F(WindowSessionImplTest2, RecoverSessionListener, Function | SmallTest | 
 
     std::vector<sptr<IAvoidAreaChangedListener>> iAvoidAreaChangedListeners;
     std::vector<sptr<ITouchOutsideListener>> iTouchOutsideListeners;
-    window->avoidAreaChangeListeners_.insert({id, iAvoidAreaChangedListeners});
-    window->touchOutsideListeners_.insert({id, iTouchOutsideListeners});
+    window->avoidAreaChangeListeners_.insert({ id, iAvoidAreaChangedListeners });
+    window->touchOutsideListeners_.insert({ id, iTouchOutsideListeners });
     window->RecoverSessionListener();
 
     window->avoidAreaChangeListeners_.clear();
@@ -286,8 +279,8 @@ HWTEST_F(WindowSessionImplTest2, RecoverSessionListener, Function | SmallTest | 
     sptr<MockTouchOutsideListener> touchOutsideListener = sptr<MockTouchOutsideListener>::MakeSptr();
     iAvoidAreaChangedListeners.insert(iAvoidAreaChangedListeners.begin(), changedListener);
     iTouchOutsideListeners.insert(iTouchOutsideListeners.begin(), touchOutsideListener);
-    window->avoidAreaChangeListeners_.insert({id, iAvoidAreaChangedListeners});
-    window->touchOutsideListeners_.insert({id, iTouchOutsideListeners});
+    window->avoidAreaChangeListeners_.insert({ id, iAvoidAreaChangedListeners });
+    window->touchOutsideListeners_.insert({ id, iTouchOutsideListeners });
     window->RecoverSessionListener();
     ASSERT_TRUE(window->avoidAreaChangeListeners_.find(id) != window->avoidAreaChangeListeners_.end() &&
                 !window->avoidAreaChangeListeners_[id].empty());
@@ -301,7 +294,7 @@ HWTEST_F(WindowSessionImplTest2, RecoverSessionListener, Function | SmallTest | 
  * @tc.desc: NotifyUIContentFocusStatus
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, NotifyUIContentFocusStatus, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, NotifyUIContentFocusStatus, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("NotifyUIContentFocusStatus");
     ASSERT_NE(window, nullptr);
@@ -321,7 +314,7 @@ HWTEST_F(WindowSessionImplTest2, NotifyUIContentFocusStatus, Function | SmallTes
  * @tc.desc: NotifyAfterFocused
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, NotifyAfterFocused, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, NotifyAfterFocused, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("NotifyAfterFocused");
     ASSERT_NE(window, nullptr);
@@ -340,7 +333,7 @@ HWTEST_F(WindowSessionImplTest2, NotifyAfterFocused, Function | SmallTest | Leve
  * @tc.desc: NotifyForegroundFailed
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, NotifyForegroundFailed, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, NotifyForegroundFailed, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("NotifyForegroundFailed");
     ASSERT_NE(window, nullptr);
@@ -353,7 +346,7 @@ HWTEST_F(WindowSessionImplTest2, NotifyForegroundFailed, Function | SmallTest | 
  * @tc.desc: NotifyTransferComponentDataSync
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, NotifyTransferComponentDataSync, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, NotifyTransferComponentDataSync, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("NotifyTransferComponentDataSync");
     ASSERT_NE(window, nullptr);
@@ -368,15 +361,15 @@ HWTEST_F(WindowSessionImplTest2, NotifyTransferComponentDataSync, Function | Sma
  * @tc.desc: UpdateAvoidArea
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, UpdateAvoidArea, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, UpdateAvoidArea, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("UpdateAvoidArea");
     ASSERT_NE(window, nullptr);
     sptr<AvoidArea> avoidArea = sptr<AvoidArea>::MakeSptr();
-    avoidArea->topRect_ = {1, 0, 0, 0};
-    avoidArea->leftRect_ = {0, 1, 0, 0};
-    avoidArea->rightRect_ = {0, 0, 1, 0};
-    avoidArea->bottomRect_ = {0, 0, 0, 1};
+    avoidArea->topRect_ = { 1, 0, 0, 0 };
+    avoidArea->leftRect_ = { 0, 1, 0, 0 };
+    avoidArea->rightRect_ = { 0, 0, 1, 0 };
+    avoidArea->bottomRect_ = { 0, 0, 0, 1 };
     AvoidAreaType type = AvoidAreaType::TYPE_SYSTEM;
     ASSERT_EQ(WSError::WS_OK, window->UpdateAvoidArea(avoidArea, type));
     window->Destroy();
@@ -387,7 +380,7 @@ HWTEST_F(WindowSessionImplTest2, UpdateAvoidArea, Function | SmallTest | Level2)
  * @tc.desc: DispatchKeyEventCallback
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, DispatchKeyEventCallback, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, DispatchKeyEventCallback, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("DispatchKeyEventCallback");
     ASSERT_NE(window, nullptr);
@@ -422,7 +415,7 @@ HWTEST_F(WindowSessionImplTest2, DispatchKeyEventCallback, Function | SmallTest 
  * @tc.desc: HandleBackEvent
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, HandleBackEvent01, Function | SmallTest | Level3)
+HWTEST_F(WindowSessionImplTest2, HandleBackEvent01, TestSize.Level0)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("HandleBackEvent01");
@@ -437,7 +430,7 @@ HWTEST_F(WindowSessionImplTest2, HandleBackEvent01, Function | SmallTest | Level
  * @tc.desc: IsKeyboardEvent
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, IsKeyboardEvent, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, IsKeyboardEvent, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("IsKeyboardEvent");
     ASSERT_NE(window, nullptr);
@@ -463,7 +456,7 @@ HWTEST_F(WindowSessionImplTest2, IsKeyboardEvent, Function | SmallTest | Level2)
  * @tc.desc: GetVSyncPeriod
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, GetVSyncPeriod, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, GetVSyncPeriod, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("GetVSyncPeriod");
     ASSERT_NE(window, nullptr);
@@ -485,7 +478,7 @@ HWTEST_F(WindowSessionImplTest2, GetVSyncPeriod, Function | SmallTest | Level2)
  * @tc.desc: FlushFrameRate
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, FlushFrameRate, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, FlushFrameRate, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("FlushFrameRate");
     ASSERT_NE(window, nullptr);
@@ -507,24 +500,18 @@ HWTEST_F(WindowSessionImplTest2, FlushFrameRate, Function | SmallTest | Level2)
  * @tc.desc: FindWindowById
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, FindWindowById, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, FindWindowById, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("FindWindowById");
     ASSERT_NE(window, nullptr);
     window->windowSessionMap_.clear();
     ASSERT_EQ(window->FindWindowById(0), nullptr);
 
-    window->windowSessionMap_.insert(
-        {"test1", std::pair<int32_t, sptr<WindowSessionImpl>>(1, window)}
-    );
-    window->windowSessionMap_.insert(
-        {"test2", std::pair<int32_t, sptr<WindowSessionImpl>>(2, window)}
-    );
+    window->windowSessionMap_.insert({ "test1", std::pair<int32_t, sptr<WindowSessionImpl>>(1, window) });
+    window->windowSessionMap_.insert({ "test2", std::pair<int32_t, sptr<WindowSessionImpl>>(2, window) });
     ASSERT_EQ(window->FindWindowById(0), nullptr);
 
-    window->windowSessionMap_.insert(
-        {"test0", std::pair<int32_t, sptr<WindowSessionImpl>>(0, window)}
-    );
+    window->windowSessionMap_.insert({ "test0", std::pair<int32_t, sptr<WindowSessionImpl>>(0, window) });
     ASSERT_NE(window->FindWindowById(0), nullptr);
     window->Destroy();
 }
@@ -534,7 +521,7 @@ HWTEST_F(WindowSessionImplTest2, FindWindowById, Function | SmallTest | Level2)
  * @tc.desc: SetLayoutFullScreenByApiVersion
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, SetLayoutFullScreenByApiVersion, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, SetLayoutFullScreenByApiVersion, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("SetLayoutFullScreenByApiVersion");
     ASSERT_NE(window, nullptr);
@@ -548,7 +535,7 @@ HWTEST_F(WindowSessionImplTest2, SetLayoutFullScreenByApiVersion, Function | Sma
  * @tc.desc: SetSystemBarProperty
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, SetSystemBarProperty, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, SetSystemBarProperty, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("SetSystemBarProperty");
     ASSERT_NE(window, nullptr);
@@ -563,7 +550,7 @@ HWTEST_F(WindowSessionImplTest2, SetSystemBarProperty, Function | SmallTest | Le
  * @tc.desc: SetSpecificBarProperty
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, SetSpecificBarProperty, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, SetSpecificBarProperty, TestSize.Level0)
 {
     auto window = GetTestWindowImpl("SetSpecificBarProperty");
     ASSERT_NE(window, nullptr);
@@ -578,7 +565,7 @@ HWTEST_F(WindowSessionImplTest2, SetSpecificBarProperty, Function | SmallTest | 
  * @tc.desc: NotifyOccupiedAreaChangeInfo
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, NotifyOccupiedAreaChangeInfo, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, NotifyOccupiedAreaChangeInfo, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("NotifyOccupiedAreaChangeInfo");
     ASSERT_NE(window, nullptr);
@@ -586,7 +573,7 @@ HWTEST_F(WindowSessionImplTest2, NotifyOccupiedAreaChangeInfo, Function | SmallT
     auto listeners = GetListenerList<IOccupiedAreaChangeListener, MockIOccupiedAreaChangeListener>();
     ASSERT_NE(listeners.size(), 0);
     listeners.insert(listeners.begin(), nullptr);
-    window->occupiedAreaChangeListeners_.insert({window->GetPersistentId(), listeners});
+    window->occupiedAreaChangeListeners_.insert({ window->GetPersistentId(), listeners });
 
     sptr<OccupiedAreaChangeInfo> info = sptr<OccupiedAreaChangeInfo>::MakeSptr();
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
@@ -598,14 +585,12 @@ HWTEST_F(WindowSessionImplTest2, NotifyOccupiedAreaChangeInfo, Function | SmallT
 
     window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     window->windowSessionMap_.insert(
-        {"test1", std::pair<int32_t, sptr<WindowSessionImpl>>(window->GetPersistentId(), nullptr)}
-    );
+        { "test1", std::pair<int32_t, sptr<WindowSessionImpl>>(window->GetPersistentId(), nullptr) });
     window->NotifyOccupiedAreaChangeInfo(info);
     window->windowSessionMap_.clear();
 
     window->windowSessionMap_.insert(
-        {"test1", std::pair<int32_t, sptr<WindowSessionImpl>>(window->GetPersistentId(), window)}
-    );
+        { "test1", std::pair<int32_t, sptr<WindowSessionImpl>>(window->GetPersistentId(), window) });
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     window->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     window->NotifyOccupiedAreaChangeInfo(info);
@@ -624,7 +609,7 @@ HWTEST_F(WindowSessionImplTest2, NotifyOccupiedAreaChangeInfo, Function | SmallT
  * @tc.desc: NotifyOccupiedAreaChangeInfoInner
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, NotifyOccupiedAreaChangeInfoInner, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, NotifyOccupiedAreaChangeInfoInner, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("NotifyOccupiedAreaChangeInfoInner");
     ASSERT_NE(window, nullptr);
@@ -632,7 +617,7 @@ HWTEST_F(WindowSessionImplTest2, NotifyOccupiedAreaChangeInfoInner, Function | S
     auto listeners = GetListenerList<IOccupiedAreaChangeListener, MockIOccupiedAreaChangeListener>();
     ASSERT_NE(listeners.size(), 0);
     listeners.insert(listeners.begin(), nullptr);
-    window->occupiedAreaChangeListeners_.insert({window->GetPersistentId(), listeners});
+    window->occupiedAreaChangeListeners_.insert({ window->GetPersistentId(), listeners });
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     sptr<OccupiedAreaChangeInfo> info = sptr<OccupiedAreaChangeInfo>::MakeSptr();
@@ -662,7 +647,7 @@ HWTEST_F(WindowSessionImplTest2, NotifyOccupiedAreaChangeInfoInner, Function | S
  * @tc.desc: NotifyWindowStatusChange
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, NotifyWindowStatusChange, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, NotifyWindowStatusChange, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("NotifyWindowStatusChange");
     ASSERT_NE(window, nullptr);
@@ -670,7 +655,7 @@ HWTEST_F(WindowSessionImplTest2, NotifyWindowStatusChange, Function | SmallTest 
     auto listeners = GetListenerList<IWindowStatusChangeListener, MockWindowStatusChangeListener>();
     ASSERT_NE(listeners.size(), 0);
     listeners.insert(listeners.begin(), nullptr);
-    window->windowStatusChangeListeners_.insert({window->GetPersistentId(), listeners});
+    window->windowStatusChangeListeners_.insert({ window->GetPersistentId(), listeners });
 
     WindowMode mode = WindowMode::WINDOW_MODE_FLOATING;
     window->state_ = WindowState::STATE_HIDDEN;
@@ -697,7 +682,7 @@ HWTEST_F(WindowSessionImplTest2, NotifyWindowStatusChange, Function | SmallTest 
  * @tc.desc: UpdatePiPRect
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, UpdatePiPRect, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, UpdatePiPRect, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("UpdatePiPRect");
     ASSERT_NE(window, nullptr);
@@ -717,7 +702,7 @@ HWTEST_F(WindowSessionImplTest2, UpdatePiPRect, Function | SmallTest | Level2)
  * @tc.desc: NotifyTransformChange
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, NotifyTransformChange, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, NotifyTransformChange, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("NotifyTransformChange");
     ASSERT_NE(window, nullptr);
@@ -735,7 +720,7 @@ HWTEST_F(WindowSessionImplTest2, NotifyTransformChange, Function | SmallTest | L
  * @tc.desc: SubmitNoInteractionMonitorTask
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, SubmitNoInteractionMonitorTask, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, SubmitNoInteractionMonitorTask, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("SubmitNoInteractionMonitorTask");
     ASSERT_NE(window, nullptr);
@@ -756,7 +741,7 @@ HWTEST_F(WindowSessionImplTest2, SubmitNoInteractionMonitorTask, Function | Smal
  * @tc.desc: RefreshNoInteractionTimeoutMonitor
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, RefreshNoInteractionTimeoutMonitor, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, RefreshNoInteractionTimeoutMonitor, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("RefreshNoInteractionTimeoutMonitor");
     ASSERT_NE(window, nullptr);
@@ -777,7 +762,7 @@ HWTEST_F(WindowSessionImplTest2, RefreshNoInteractionTimeoutMonitor, Function | 
  * @tc.desc: IsUserOrientation
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, IsUserOrientation, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, IsUserOrientation, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("IsUserOrientation");
     ASSERT_NE(window, nullptr);
@@ -795,7 +780,7 @@ HWTEST_F(WindowSessionImplTest2, IsUserOrientation, Function | SmallTest | Level
  * @tc.desc: WindowSessionCreateCheck
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, WindowSessionCreateCheck, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, WindowSessionCreateCheck, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("WindowSessionCreateCheck");
     ASSERT_NE(window, nullptr);
@@ -803,37 +788,25 @@ HWTEST_F(WindowSessionImplTest2, WindowSessionCreateCheck, Function | SmallTest 
     int32_t nullWindowTestId = 1001;
     int32_t displayId = 1003;
     int32_t cameraId = 1004;
-    
+
     window->windowSessionMap_.clear();
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT_CAMERA);
-    window->windowSessionMap_.insert(
-        std::make_pair<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>>(
-            "nullWindow",
-            std::pair<int32_t, sptr<WindowSessionImpl>>(nullWindowTestId, nullptr)
-        )
-    );
+    window->windowSessionMap_.insert(std::make_pair<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>>(
+        "nullWindow", std::pair<int32_t, sptr<WindowSessionImpl>>(nullWindowTestId, nullptr)));
 
     auto displayWindow = GetTestWindowImpl("displayWindow");
     ASSERT_NE(displayWindow, nullptr);
     displayWindow->property_->SetWindowType(WindowType::WINDOW_TYPE_FREEZE_DISPLAY);
-    window->windowSessionMap_.insert(
-        std::make_pair<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>>(
-            "displayWindow",
-            std::pair<int32_t, sptr<WindowSessionImpl>>(displayId, displayWindow)
-        )
-    );
+    window->windowSessionMap_.insert(std::make_pair<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>>(
+        "displayWindow", std::pair<int32_t, sptr<WindowSessionImpl>>(displayId, displayWindow)));
     ASSERT_EQ(window->WindowSessionCreateCheck(), WMError::WM_OK);
 
     window->windowSessionMap_.clear();
     auto cameraWindow = GetTestWindowImpl("cameraWindow");
     ASSERT_NE(cameraWindow, nullptr);
     cameraWindow->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT_CAMERA);
-    window->windowSessionMap_.insert(
-        std::make_pair<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>>(
-            "cameraWindow",
-            std::pair<int32_t, sptr<WindowSessionImpl>>(cameraId, cameraWindow)
-        )
-    );
+    window->windowSessionMap_.insert(std::make_pair<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>>(
+        "cameraWindow", std::pair<int32_t, sptr<WindowSessionImpl>>(cameraId, cameraWindow)));
     ASSERT_EQ(window->WindowSessionCreateCheck(), WMError::WM_ERROR_REPEAT_OPERATION);
     window->Destroy();
     displayWindow->Destroy();
@@ -845,7 +818,7 @@ HWTEST_F(WindowSessionImplTest2, WindowSessionCreateCheck, Function | SmallTest 
  * @tc.desc: NotifyForegroundInteractiveStatus
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, NotifyForegroundInteractiveStatus, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, NotifyForegroundInteractiveStatus, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("NotifyForegroundInteractiveStatus");
     ASSERT_NE(window, nullptr);
@@ -867,7 +840,7 @@ HWTEST_F(WindowSessionImplTest2, NotifyForegroundInteractiveStatus, Function | S
  * @tc.desc: UpdateDecorEnableToAce
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, UpdateDecorEnableToAce, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, UpdateDecorEnableToAce, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("UpdateDecorEnableToAce");
     ASSERT_NE(window, nullptr);
@@ -875,7 +848,7 @@ HWTEST_F(WindowSessionImplTest2, UpdateDecorEnableToAce, Function | SmallTest | 
     auto listeners = GetListenerList<IWindowChangeListener, MockWindowChangeListener>();
     sptr<MockWindowChangeListener> nullListener;
     listeners.insert(listeners.begin(), nullListener);
-    window->windowChangeListeners_.insert({window->GetPersistentId(), listeners});
+    window->windowChangeListeners_.insert({ window->GetPersistentId(), listeners });
     window->windowSystemConfig_.freeMultiWindowSupport_ = false;
     window->UpdateDecorEnableToAce(false);
 
@@ -889,7 +862,7 @@ HWTEST_F(WindowSessionImplTest2, UpdateDecorEnableToAce, Function | SmallTest | 
  * @tc.desc: UpdateDecorEnable
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, UpdateDecorEnable, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, UpdateDecorEnable, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("UpdateDecorEnable");
     ASSERT_NE(window, nullptr);
@@ -911,36 +884,16 @@ HWTEST_F(WindowSessionImplTest2, UpdateDecorEnable, Function | SmallTest | Level
  * @tc.desc: NotifyModeChange
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, NotifyModeChange, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, NotifyModeChange, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("NotifyModeChange");
     ASSERT_NE(window, nullptr);
     auto listeners = GetListenerList<IWindowChangeListener, MockWindowChangeListener>();
     sptr<MockWindowChangeListener> nullListener;
     listeners.insert(listeners.begin(), nullListener);
-    window->windowChangeListeners_.insert({window->GetPersistentId(), listeners});
+    window->windowChangeListeners_.insert({ window->GetPersistentId(), listeners });
 
     window->NotifyModeChange(WindowMode::WINDOW_MODE_FULLSCREEN, true);
-    window->Destroy();
-}
-
-/**
- * @tc.name: SetRequestedOrientation
- * @tc.desc: SetRequestedOrientation
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest2, SetRequestedOrientation, Function | SmallTest | Level2)
-{
-    auto window = GetTestWindowImpl("SetRequestedOrientation");
-    ASSERT_NE(window, nullptr);
-    window->property_->SetRequestedOrientation(Orientation::BEGIN);
-    window->SetRequestedOrientation(Orientation::END);
-    
-    window->property_->SetRequestedOrientation(Orientation::USER_ROTATION_PORTRAIT);
-    window->SetRequestedOrientation(Orientation::USER_ROTATION_PORTRAIT);
-    
-    window->property_->SetRequestedOrientation(Orientation::BEGIN);
-    window->SetRequestedOrientation(Orientation::BEGIN);
     window->Destroy();
 }
 
@@ -949,11 +902,11 @@ HWTEST_F(WindowSessionImplTest2, SetRequestedOrientation, Function | SmallTest |
  * @tc.desc: GetContentInfo
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, GetContentInfo, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, GetContentInfo, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("GetContentInfo");
     ASSERT_NE(window, nullptr);
-    
+
     ASSERT_EQ(window->GetContentInfo(BackupAndRestoreType::CONTINUATION), "");
     ASSERT_EQ(window->GetContentInfo(BackupAndRestoreType::APP_RECOVERY), "");
     ASSERT_EQ(window->GetContentInfo(BackupAndRestoreType::NONE), "");
@@ -967,7 +920,7 @@ HWTEST_F(WindowSessionImplTest2, GetContentInfo, Function | SmallTest | Level2)
  * @tc.desc: SetDecorHeight
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, SetDecorHeight, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, SetDecorHeight, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("SetDecorHeight");
     ASSERT_NE(window, nullptr);
@@ -978,6 +931,7 @@ HWTEST_F(WindowSessionImplTest2, SetDecorHeight, Function | SmallTest | Level2)
     EXPECT_EQ(window->SetDecorHeight(height), WMError::WM_ERROR_NULLPTR);
 
     window->property_->SetDisplayId(0);
+    EXPECT_EQ(window->SetDecorHeight(height), WMError::WM_ERROR_NULLPTR);
     auto uiContent = std::make_unique<Ace::UIContentMocker>();
     window->uiContent_ = std::move(uiContent);
     EXPECT_EQ(window->SetDecorHeight(height), WMError::WM_OK);
@@ -993,7 +947,7 @@ HWTEST_F(WindowSessionImplTest2, SetDecorHeight, Function | SmallTest | Level2)
  * @tc.desc: GetDecorHeight
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, GetDecorHeight01, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, GetDecorHeight01, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("GetDecorHeight01");
     ASSERT_NE(window, nullptr);
@@ -1015,7 +969,7 @@ HWTEST_F(WindowSessionImplTest2, GetDecorHeight01, Function | SmallTest | Level2
  * @tc.desc: GetDecorHeight
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, GetDecorHeight02, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, GetDecorHeight02, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("GetDecorHeight02");
     ASSERT_NE(window, nullptr);
@@ -1038,11 +992,42 @@ HWTEST_F(WindowSessionImplTest2, GetDecorHeight02, Function | SmallTest | Level2
 }
 
 /**
+ * @tc.name: GetDecorHeight03
+ * @tc.desc: GetDecorHeight version isolation test cases
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest2, GetDecorHeight03, TestSize.Level1)
+{
+    auto window = GetTestWindowImpl("GetDecorHeight03");
+    ASSERT_NE(window, nullptr);
+    window->property_->SetPersistentId(1);
+    window->property_->SetDisplayId(0);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->useUniqueDensity_ = true;
+    window->virtualPixelRatio_ = 1.9f;
+    auto uiContent = std::make_unique<Ace::UIContentMocker>();
+    EXPECT_CALL(*uiContent, GetContainerModalTitleHeight()).WillRepeatedly(Return(72));
+    window->uiContent_ = std::move(uiContent);
+    int32_t decorHeight = 38;
+    window->SetDecorHeight(decorHeight);
+    EXPECT_EQ(window->decorHeight_, decorHeight);
+
+    window->SetTargetAPIVersion(14);
+    int32_t height = -1;
+    EXPECT_EQ(window->GetDecorHeight(height), WMError::WM_OK);
+    EXPECT_EQ(height, 37);
+    window->SetTargetAPIVersion(15);
+    EXPECT_EQ(window->GetDecorHeight(height), WMError::WM_OK);
+    EXPECT_EQ(height, decorHeight);
+    window->Destroy();
+}
+
+/**
  * @tc.name: GetTitleButtonArea01
  * @tc.desc: GetTitleButtonArea
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, GetTitleButtonArea01, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, GetTitleButtonArea01, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("GetTitleButtonArea01");
     ASSERT_NE(window, nullptr);
@@ -1065,7 +1050,7 @@ HWTEST_F(WindowSessionImplTest2, GetTitleButtonArea01, Function | SmallTest | Le
  * @tc.desc: GetTitleButtonArea
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, GetTitleButtonArea02, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, GetTitleButtonArea02, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("GetTitleButtonArea02");
     ASSERT_NE(window, nullptr);
@@ -1088,18 +1073,54 @@ HWTEST_F(WindowSessionImplTest2, GetTitleButtonArea02, Function | SmallTest | Le
 }
 
 /**
+ * @tc.name: GetTitleButtonArea03
+ * @tc.desc: GetTitleButtonArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest2, GetTitleButtonArea03, TestSize.Level1)
+{
+    auto window = GetTestWindowImpl("GetTitleButtonArea03");
+    ASSERT_NE(window, nullptr);
+    TitleButtonRect titleButtonRect = { 1400, 0, 0, 0 };
+    window->property_->SetPersistentId(1);
+    window->property_->SetDisplayId(0);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    auto uiContent = std::make_unique<Ace::UIContentMocker>();
+    EXPECT_CALL(*uiContent, GetContainerModalButtonsRect(testing::_, testing::_)).WillRepeatedly(Return(false));
+    window->uiContent_ = std::move(uiContent);
+    window->SetTargetAPIVersion(14);
+    EXPECT_EQ(window->GetTitleButtonArea(titleButtonRect), WMError::WM_OK);
+    EXPECT_EQ(titleButtonRect.IsUninitializedRect(), false);
+
+    window->SetTargetAPIVersion(15);
+    EXPECT_EQ(window->GetTitleButtonArea(titleButtonRect), WMError::WM_OK);
+    EXPECT_EQ(titleButtonRect.IsUninitializedRect(), true);
+    window->Destroy();
+}
+
+/**
  * @tc.name: RegisterWindowTitleButtonRectChangeListener
  * @tc.desc: RegisterWindowTitleButtonRectChangeListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, RegisterWindowTitleButtonRectChangeListener, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, RegisterWindowTitleButtonRectChangeListener, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("RegisterWindowTitleButtonRectChangeListener");
     ASSERT_NE(window, nullptr);
+    sptr<IWindowTitleButtonRectChangedListener> listener = nullptr;
+    auto ret = window->RegisterWindowTitleButtonRectChangeListener(listener);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
+    window->property_->SetPersistentId(1);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ret = window->RegisterWindowTitleButtonRectChangeListener(listener);
+    EXPECT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+    listener = sptr<MockWindowTitleButtonRectChangedListener>::MakeSptr();
+    ret = window->RegisterWindowTitleButtonRectChangeListener(listener);
+    EXPECT_EQ(ret, WMError::WM_OK);
+    listener = sptr<MockWindowTitleButtonRectChangedListener>::MakeSptr();
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
-    sptr<IWindowTitleButtonRectChangedListener> listener =
-        sptr<MockWindowTitleButtonRectChangedListener>::MakeSptr();
-    window->RegisterWindowTitleButtonRectChangeListener(listener);
+    ret = window->RegisterWindowTitleButtonRectChangeListener(listener);
+    EXPECT_EQ(ret, WMError::WM_OK);
     window->Destroy();
 }
 
@@ -1108,17 +1129,22 @@ HWTEST_F(WindowSessionImplTest2, RegisterWindowTitleButtonRectChangeListener, Fu
  * @tc.desc: UnregisterWindowTitleButtonRectChangeListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, UnregisterWindowTitleButtonRectChangeListener, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, UnregisterWindowTitleButtonRectChangeListener, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("UnregisterWindowTitleButtonRectChangeListener");
     ASSERT_NE(window, nullptr);
-    sptr<IWindowTitleButtonRectChangedListener> listener =
-        sptr<MockWindowTitleButtonRectChangedListener>::MakeSptr();
-    ASSERT_NE(listener, nullptr);
-    window->UnregisterWindowTitleButtonRectChangeListener(listener);
-
+    sptr<IWindowTitleButtonRectChangedListener> listener =  nullptr;
+    auto ret = window->UnregisterWindowTitleButtonRectChangeListener(listener);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
+    window->property_->SetPersistentId(1);
+    ret = window->UnregisterWindowTitleButtonRectChangeListener(listener);
+    EXPECT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+    listener = sptr<MockWindowTitleButtonRectChangedListener>::MakeSptr();
+    ret = window->UnregisterWindowTitleButtonRectChangeListener(listener);
+    EXPECT_EQ(ret, WMError::WM_OK);
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
-    window->UnregisterWindowTitleButtonRectChangeListener(listener);
+    ret = window->UnregisterWindowTitleButtonRectChangeListener(listener);
+    EXPECT_EQ(ret, WMError::WM_OK);
     window->Destroy();
 }
 
@@ -1127,14 +1153,13 @@ HWTEST_F(WindowSessionImplTest2, UnregisterWindowTitleButtonRectChangeListener, 
  * @tc.desc: NotifyWindowTitleButtonRectChange
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, NotifyWindowTitleButtonRectChange, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, NotifyWindowTitleButtonRectChange, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("NotifyWindowTitleButtonRectChange");
     ASSERT_NE(window, nullptr);
-    auto listeners = GetListenerList<IWindowTitleButtonRectChangedListener,
-        MockWindowTitleButtonRectChangedListener>();
+    auto listeners = GetListenerList<IWindowTitleButtonRectChangedListener, MockWindowTitleButtonRectChangedListener>();
     listeners.insert(listeners.begin(), nullptr);
-    window->windowTitleButtonRectChangeListeners_.insert({window->GetPersistentId(), listeners});
+    window->windowTitleButtonRectChangeListeners_.insert({ window->GetPersistentId(), listeners });
     TitleButtonRect titleButtonRect;
     window->NotifyWindowTitleButtonRectChange(titleButtonRect);
     window->Destroy();
@@ -1145,7 +1170,7 @@ HWTEST_F(WindowSessionImplTest2, NotifyWindowTitleButtonRectChange, Function | S
  * @tc.desc: RegisterWindowRectChangeListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, RegisterWindowRectChangeListener, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, RegisterWindowRectChangeListener, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("RegisterWindowRectChangeListener");
     ASSERT_NE(window, nullptr);
@@ -1165,7 +1190,7 @@ HWTEST_F(WindowSessionImplTest2, RegisterWindowRectChangeListener, Function | Sm
  * @tc.desc: UnregisterWindowRectChangeListener01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, UnregisterWindowRectChangeListener01, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, UnregisterWindowRectChangeListener01, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: UnregisterWindowRectChangeListener01 start";
     auto window = GetTestWindowImpl("UnregisterWindowRectChangeListener01");
@@ -1179,7 +1204,7 @@ HWTEST_F(WindowSessionImplTest2, UnregisterWindowRectChangeListener01, Function 
     ASSERT_EQ(WMError::WM_OK, window->RegisterWindowRectChangeListener(listener));
     ASSERT_EQ(WMError::WM_OK, window->UnregisterWindowRectChangeListener(listener));
 
-    SessionInfo sessionInfo = {"CreateTestBunble", "CreateTestModule", "CreateTestAbility"};
+    SessionInfo sessionInfo = { "CreateTestBunble", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> hostSession = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = hostSession;
     ASSERT_EQ(WMError::WM_OK, window->RegisterWindowRectChangeListener(listener));
@@ -1193,7 +1218,7 @@ HWTEST_F(WindowSessionImplTest2, UnregisterWindowRectChangeListener01, Function 
  * @tc.desc: GetVirtualPixelRatio
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, GetVirtualPixelRatio, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, GetVirtualPixelRatio, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: GetVirtualPixelRatio start";
     auto window = GetTestWindowImpl("GetVirtualPixelRatio");
@@ -1211,50 +1236,14 @@ HWTEST_F(WindowSessionImplTest2, GetVirtualPixelRatio, Function | SmallTest | Le
 }
 
 /**
- * @tc.name: InitUIContent
- * @tc.desc: InitUIContent
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest2, InitUIContent, Function | SmallTest | Level2)
-{
-    GTEST_LOG_(INFO) << "WindowSessionImplTest2: InitUIContent start";
-    auto window = GetTestWindowImpl("InitUIContent_Default");
-    ASSERT_NE(window, nullptr);
-    std::string contentInfo = "contentInfo";
-    napi_env env = nullptr;
-    napi_value storage = nullptr;
-    WindowSetUIContentType type = WindowSetUIContentType::DEFAULT;
-    AppExecFwk::Ability* ability = nullptr;
-    OHOS::Ace::UIContentErrorCode aceRet;
-    BackupAndRestoreType restoreType = BackupAndRestoreType::NONE;
-
-    window->uiContent_ = nullptr;
-    EXPECT_EQ(window->InitUIContent(contentInfo, env, storage, type, restoreType, ability, aceRet), WMError::WM_OK);
-
-    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
-    EXPECT_EQ(window->InitUIContent(contentInfo, env, storage, type, restoreType, ability, aceRet), WMError::WM_OK);
-
-    type = WindowSetUIContentType::RESTORE;
-    EXPECT_EQ(window->InitUIContent(contentInfo, env, storage, type, restoreType, ability, aceRet), WMError::WM_OK);
-
-    type = WindowSetUIContentType::BY_NAME;
-    EXPECT_EQ(window->InitUIContent(contentInfo, env, storage, type, restoreType, ability, aceRet), WMError::WM_OK);
-
-    type = WindowSetUIContentType::BY_ABC;
-    EXPECT_EQ(window->InitUIContent(contentInfo, env, storage, type, restoreType, ability, aceRet), WMError::WM_OK);
-    GTEST_LOG_(INFO) << "WindowSessionImplTest2: InitUIContent end";
-}
-
-/**
  * @tc.name: NotifyScreenshot
  * @tc.desc: NotifyScreenshot01 listener==nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, NotifyScreenshot01, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, NotifyScreenshot01, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: NotifyScreenshot01 start";
-    class MockIScrenshotListener : public IScreenshotListener
-    {
+    class MockIScrenshotListener : public IScreenshotListener {
     public:
         MOCK_METHOD0(OnScreenshot, void());
     };
@@ -1262,7 +1251,7 @@ HWTEST_F(WindowSessionImplTest2, NotifyScreenshot01, Function | SmallTest | Leve
     auto listeners = GetListenerList<IScreenshotListener, MockIScrenshotListener>();
     listeners[0] = nullptr;
     ASSERT_EQ(listeners.size(), 1);
-    window_->screenshotListeners_.insert({window_->GetPersistentId(), listeners});
+    window_->screenshotListeners_.insert({ window_->GetPersistentId(), listeners });
     window_->NotifyScreenshot();
     std::vector<sptr<IScreenshotListener>> screenshotListeners =
         window_->screenshotListeners_[window_->GetPersistentId()];
@@ -1275,11 +1264,10 @@ HWTEST_F(WindowSessionImplTest2, NotifyScreenshot01, Function | SmallTest | Leve
  * @tc.desc: NotifyScreenshot02 listener!=nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, NotifyScreenshot02, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, NotifyScreenshot02, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: NotifyScreenshot02 start";
-    class ScreenshotListener : public IScreenshotListener
-    {
+    class ScreenshotListener : public IScreenshotListener {
     public:
         void OnScreenshot()
         {
@@ -1300,7 +1288,7 @@ HWTEST_F(WindowSessionImplTest2, NotifyScreenshot02, Function | SmallTest | Leve
  * @tc.desc: NotifyTouchDialogTarget01 hostSession_==nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, NotifyTouchDialogTarget01, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, NotifyTouchDialogTarget01, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: NotifyTouchDialogTarget01 start";
     window_ = GetTestWindowImpl("NotifyTouchDialogTarget01");
@@ -1318,11 +1306,11 @@ HWTEST_F(WindowSessionImplTest2, NotifyTouchDialogTarget01, Function | SmallTest
  * @tc.desc: NotifyTouchDialogTarget02 hostSession_!=nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, NotifyTouchDialogTarget02, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, NotifyTouchDialogTarget02, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: NotifyTouchDialogTarget02 start";
     window_ = GetTestWindowImpl("NotifyTouchDialogTarget02");
-    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> hostSession = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window_->hostSession_ = hostSession;
     int32_t posX = 100;
@@ -1338,11 +1326,10 @@ HWTEST_F(WindowSessionImplTest2, NotifyTouchDialogTarget02, Function | SmallTest
  * @tc.desc: NotifyTouchDialogTarget03 hostSession_==nullptr listener==nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, NotifyTouchDialogTarget03, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, NotifyTouchDialogTarget03, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: NotifyTouchDialogTarget03 start";
-    class MockIDialogTargetTouchListener : public IDialogTargetTouchListener
-    {
+    class MockIDialogTargetTouchListener : public IDialogTargetTouchListener {
     public:
         MOCK_CONST_METHOD0(OnDialogTargetTouch, void());
     };
@@ -1366,11 +1353,10 @@ HWTEST_F(WindowSessionImplTest2, NotifyTouchDialogTarget03, Function | SmallTest
  * @tc.desc: NotifyTouchDialogTarget04 hostSession_==nullptr listener!=nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, NotifyTouchDialogTarget04, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, NotifyTouchDialogTarget04, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: NotifyTouchDialogTarget04 start";
-    class MockIDialogTargetTouchListener : public IDialogTargetTouchListener
-    {
+    class MockIDialogTargetTouchListener : public IDialogTargetTouchListener {
     public:
         void OnDialogTargetTouch() const
         {
@@ -1394,11 +1380,10 @@ HWTEST_F(WindowSessionImplTest2, NotifyTouchDialogTarget04, Function | SmallTest
  * @tc.desc: NotifyDisplayMove01 listener==nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, NotifyDisplayMove01, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, NotifyDisplayMove01, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: NotifyDisplayMove01 start";
-    class MockIDisplayMoveListener : public IDisplayMoveListener
-    {
+    class MockIDisplayMoveListener : public IDisplayMoveListener {
     public:
         MOCK_METHOD2(OnDisplayMove, void(DisplayId from, DisplayId to));
     };
@@ -1411,8 +1396,7 @@ HWTEST_F(WindowSessionImplTest2, NotifyDisplayMove01, Function | SmallTest | Lev
     window_->NotifyTouchDialogTarget(posX, posY);
     std::vector<sptr<IDisplayMoveListener>> displayMoveListeners =
         (window_->displayMoveListeners_)[window_->GetPersistentId()];
-    ASSERT_NE(std::find(displayMoveListeners.begin(), displayMoveListeners.end(), nullptr),
-              displayMoveListeners.end());
+    ASSERT_NE(std::find(displayMoveListeners.begin(), displayMoveListeners.end(), nullptr), displayMoveListeners.end());
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: NotifyDisplayMove01 end";
 }
 
@@ -1421,11 +1405,10 @@ HWTEST_F(WindowSessionImplTest2, NotifyDisplayMove01, Function | SmallTest | Lev
  * @tc.desc: NotifyDisplayMove02 listener!=nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, NotifyDisplayMove02, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, NotifyDisplayMove02, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: NotifyDisplayMove02 start";
-    class MockIDisplayMoveListener : public IDisplayMoveListener
-    {
+    class MockIDisplayMoveListener : public IDisplayMoveListener {
     public:
         void OnDisplayMove(DisplayId from, DisplayId to)
         {
@@ -1448,11 +1431,10 @@ HWTEST_F(WindowSessionImplTest2, NotifyDisplayMove02, Function | SmallTest | Lev
  * @tc.desc: NotifyDestroy01 listener==nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, NotifyDestroy01, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, NotifyDestroy01, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: NotifyDestroy01 start";
-    class MockIDialogDeathRecipientListener : public IDialogDeathRecipientListener
-    {
+    class MockIDialogDeathRecipientListener : public IDialogDeathRecipientListener {
     public:
         MOCK_CONST_METHOD0(OnDialogDeathRecipient, void());
     };
@@ -1473,11 +1455,10 @@ HWTEST_F(WindowSessionImplTest2, NotifyDestroy01, Function | SmallTest | Level2)
  * @tc.desc: NotifyDestroy02 listener!=nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, NotifyDestroy02, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, NotifyDestroy02, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: NotifyDestroy02 start";
-    class MockIDialogDeathRecipientListener : public IDialogDeathRecipientListener
-    {
+    class MockIDialogDeathRecipientListener : public IDialogDeathRecipientListener {
     public:
         void OnDialogDeathRecipient() const
         {
@@ -1498,15 +1479,12 @@ HWTEST_F(WindowSessionImplTest2, NotifyDestroy02, Function | SmallTest | Level2)
  * @tc.desc: RegisterDialogTargetTouchListener01 listener!=nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, RegisterDialogTargetTouchListener01, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, RegisterDialogTargetTouchListener01, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: RegisterDialogTargetTouchListener01 start";
-    class MockIDialogTargetTouchListener : public IDialogTargetTouchListener
-    {
+    class MockIDialogTargetTouchListener : public IDialogTargetTouchListener {
     public:
-        void OnDialogTargetTouch() const
-        {
-        }
+        void OnDialogTargetTouch() const {}
     };
     window_ = GetTestWindowImpl("RegisterDialogTargetTouchListener01");
     sptr<IDialogTargetTouchListener> listener = sptr<MockIDialogTargetTouchListener>::MakeSptr();
@@ -1521,15 +1499,12 @@ HWTEST_F(WindowSessionImplTest2, RegisterDialogTargetTouchListener01, Function |
  * @tc.desc: RegisterDialogDeathRecipientListener01 listener!=nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, RegisterDialogDeathRecipientListener01, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, RegisterDialogDeathRecipientListener01, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: RegisterDialogDeathRecipientListener01 start";
-    class MockIDialogDeathRecipientListener : public IDialogDeathRecipientListener
-    {
+    class MockIDialogDeathRecipientListener : public IDialogDeathRecipientListener {
     public:
-        void OnDialogDeathRecipient() const
-        {
-        }
+        void OnDialogDeathRecipient() const {}
     };
     window_ = GetTestWindowImpl("RegisterDialogDeathRecipientListener01");
     sptr<IDialogDeathRecipientListener> listener = sptr<MockIDialogDeathRecipientListener>::MakeSptr();
@@ -1547,11 +1522,10 @@ HWTEST_F(WindowSessionImplTest2, RegisterDialogDeathRecipientListener01, Functio
  * @tc.desc: RegisterSubWindowCloseListeners01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, RegisterSubWindowCloseListeners01, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, RegisterSubWindowCloseListeners01, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: RegisterSubWindowCloseListeners01 start";
-    class MockISubWindowCloseListener : public ISubWindowCloseListener
-    {
+    class MockISubWindowCloseListener : public ISubWindowCloseListener {
     public:
         void OnSubWindowClose(bool& terminateCloseProcess) {}
     };
@@ -1577,7 +1551,7 @@ HWTEST_F(WindowSessionImplTest2, RegisterSubWindowCloseListeners01, Function | S
  * @tc.desc: GetListeners01 IWindowLifeCycle
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, GetListeners01, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, GetListeners01, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: GetListeners01 start";
     window_ = GetTestWindowImpl("GetListeners01");
@@ -1598,7 +1572,7 @@ HWTEST_F(WindowSessionImplTest2, GetListeners01, Function | SmallTest | Level2)
  * @tc.desc: GetListeners02 IOccupiedAreaChangeListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, GetListeners02, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, GetListeners02, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: GetListeners02 start";
     window_ = GetTestWindowImpl("GetListeners02");
@@ -1616,16 +1590,49 @@ HWTEST_F(WindowSessionImplTest2, GetListeners02, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: GetListeners
+ * @tc.desc: GetListeners03 IKeyboardDidShowListener IKeyboardDidHideListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest2, GetListeners03, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest2: GetListeners03 start";
+    window_ = GetTestWindowImpl("GetListeners03");
+    ASSERT_NE(window_, nullptr);
+    KeyboardPanelInfo keyboardPanelInfo;
+    window_->NotifyKeyboardAnimationCompleted(keyboardPanelInfo);
+    keyboardPanelInfo.isShowing_ = true;
+    window_->NotifyKeyboardAnimationCompleted(keyboardPanelInfo);
+    ASSERT_TRUE(window_->keyboardDidShowListeners_[window_->GetPersistentId()].empty());
+    ASSERT_TRUE(window_->keyboardDidHideListeners_[window_->GetPersistentId()].empty());
+    sptr<IKeyboardDidShowListener> listener = sptr<MockIKeyboardDidShowListener>::MakeSptr();
+    window_->RegisterKeyboardDidShowListener(listener);
+    keyboardPanelInfo.isShowing_ = true;
+    window_->NotifyKeyboardAnimationCompleted(keyboardPanelInfo);
+    ASSERT_FALSE(window_->keyboardDidShowListeners_[window_->GetPersistentId()].empty());
+    window_->UnregisterKeyboardDidShowListener(listener);
+
+    sptr<IKeyboardDidHideListener> listener1 = sptr<MockIKeyboardDidHideListener>::MakeSptr();
+    window_->RegisterKeyboardDidHideListener(listener1);
+    keyboardPanelInfo.isShowing_ = false;
+    window_->NotifyKeyboardAnimationCompleted(keyboardPanelInfo);
+    ASSERT_FALSE(window_->keyboardDidHideListeners_[window_->GetPersistentId()].empty());
+    window_->UnregisterKeyboardDidHideListener(listener1);
+    window_->Destroy();
+    GTEST_LOG_(INFO) << "WindowSessionImplTest2: GetListeners03 end";
+}
+
+/**
  * @tc.name: GetUIContent
  * @tc.desc: GetUIContent
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, GetUIContent, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, GetUIContent, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("GetUIContent");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-    Ace::UIContent *res = window->GetUIContent();
+    Ace::UIContent* res = window->GetUIContent();
     ASSERT_EQ(res, nullptr);
     ASSERT_EQ(window->Destroy(), WMError::WM_ERROR_INVALID_WINDOW);
 }
@@ -1635,12 +1642,12 @@ HWTEST_F(WindowSessionImplTest2, GetUIContent, Function | SmallTest | Level2)
  * @tc.desc: NotifySizeChange
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, NotifySizeChange, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, NotifySizeChange, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("NotifySizeChange");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     EXPECT_EQ(WMError::WM_OK, window->Create(nullptr, session));
 
@@ -1660,12 +1667,12 @@ HWTEST_F(WindowSessionImplTest2, NotifySizeChange, Function | SmallTest | Level2
  * @tc.desc: AvoidAreaChangeListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, AvoidAreaChangeListener, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, AvoidAreaChangeListener, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("AvoidAreaChangeListener");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     EXPECT_EQ(WMError::WM_OK, window->Create(nullptr, session));
 
@@ -1690,14 +1697,14 @@ HWTEST_F(WindowSessionImplTest2, AvoidAreaChangeListener, Function | SmallTest |
  * @tc.desc: TouchOutsideListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, TouchOutsideListener, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, TouchOutsideListener, TestSize.Level1)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(option, nullptr);
     option->SetWindowName("TouchOutsideListener");
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
-    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
     EXPECT_EQ(WMError::WM_OK, window->Create(nullptr, session));
@@ -1725,7 +1732,7 @@ HWTEST_F(WindowSessionImplTest2, TouchOutsideListener, Function | SmallTest | Le
  * @tc.desc: NotifyDialogStateChange
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, NotifyDialogStateChange, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, NotifyDialogStateChange, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: NotifyDialogStateChange start";
     window_ = GetTestWindowImpl("NotifyDialogStateChange");
@@ -1739,7 +1746,7 @@ HWTEST_F(WindowSessionImplTest2, NotifyDialogStateChange, Function | SmallTest |
  * @tc.desc: SwitchFreeMultiWindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, SwitchFreeMultiWindow, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, SwitchFreeMultiWindow, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: SwitchFreeMultiWindow start";
     window_ = GetTestWindowImpl("SwitchFreeMultiWindow");
@@ -1753,7 +1760,7 @@ HWTEST_F(WindowSessionImplTest2, SwitchFreeMultiWindow, Function | SmallTest | L
  * @tc.desc: UpdateTitleInTargetPos
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, UpdateTitleInTargetPos, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, UpdateTitleInTargetPos, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: UpdateTitleInTargetPos start";
     window_ = GetTestWindowImpl("UpdateTitleInTargetPos");
@@ -1767,7 +1774,7 @@ HWTEST_F(WindowSessionImplTest2, UpdateTitleInTargetPos, Function | SmallTest | 
  * @tc.desc: NotifySessionBackground
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, NotifySessionBackground, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, NotifySessionBackground, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: NotifySessionBackground start";
     window_ = GetTestWindowImpl("NotifySessionBackground");
@@ -1781,7 +1788,7 @@ HWTEST_F(WindowSessionImplTest2, NotifySessionBackground, Function | SmallTest |
  * @tc.desc: UpdateMaximizeMode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, UpdateMaximizeMode, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, UpdateMaximizeMode, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: UpdateMaximizeMode start";
     window_ = GetTestWindowImpl("UpdateMaximizeMode");
@@ -1795,7 +1802,7 @@ HWTEST_F(WindowSessionImplTest2, UpdateMaximizeMode, Function | SmallTest | Leve
  * @tc.desc: DumpSessionElementInfo
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, DumpSessionElementInfo, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, DumpSessionElementInfo, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: DumpSessionElementInfo start";
     window_ = GetTestWindowImpl("DumpSessionElementInfo");
@@ -1811,7 +1818,7 @@ HWTEST_F(WindowSessionImplTest2, DumpSessionElementInfo, Function | SmallTest | 
  * @tc.desc: GetKeyboardAnimationConfig
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, GetKeyboardAnimationConfig, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, GetKeyboardAnimationConfig, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: GetKeyboardAnimationConfig start";
     window_ = GetTestWindowImpl("GetKeyboardAnimationConfig");
@@ -1825,7 +1832,7 @@ HWTEST_F(WindowSessionImplTest2, GetKeyboardAnimationConfig, Function | SmallTes
  * @tc.desc: GetSubWindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, GetSubWindow, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, GetSubWindow, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: GetSubWindow start";
     window_ = GetTestWindowImpl("GetSubWindow");
@@ -1846,7 +1853,7 @@ HWTEST_F(WindowSessionImplTest2, GetSubWindow, Function | SmallTest | Level2)
  * @tc.type: FUNC
  * @tc.require: issue
  */
-HWTEST_F(WindowSessionImplTest2, SetRestoredRouterStack_0200, Function | SmallTest | Level3)
+HWTEST_F(WindowSessionImplTest2, SetRestoredRouterStack_0200, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     ASSERT_NE(option, nullptr);
@@ -1864,7 +1871,8 @@ HWTEST_F(WindowSessionImplTest2, SetRestoredRouterStack_0200, Function | SmallTe
  * @tc.desc: SetUiDvsyncSwitch
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, SetUiDvsyncSwitch, Function | SmallTest | Level2) {
+HWTEST_F(WindowSessionImplTest2, SetUiDvsyncSwitch, TestSize.Level1)
+{
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(option, nullptr);
     option->SetWindowName("SetUiDvsyncSwitch");
@@ -1880,7 +1888,7 @@ HWTEST_F(WindowSessionImplTest2, SetUiDvsyncSwitch, Function | SmallTest | Level
  * @tc.desc: SetUiDvsyncSwitch Test Succ
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, SetUiDvsyncSwitchSucc, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, SetUiDvsyncSwitchSucc, TestSize.Level1)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     option->SetWindowName("SetUiDvsyncSwitchSucc");
@@ -1895,7 +1903,7 @@ HWTEST_F(WindowSessionImplTest2, SetUiDvsyncSwitchSucc, Function | SmallTest | L
  * @tc.desc: SetUiDvsyncSwitch Test Err
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, SetUiDvsyncSwitchErr, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, SetUiDvsyncSwitchErr, TestSize.Level1)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     option->SetWindowName("SetUiDvsyncSwitchErr");
@@ -1912,7 +1920,7 @@ HWTEST_F(WindowSessionImplTest2, SetUiDvsyncSwitchErr, Function | SmallTest | Le
  * @tc.type: FUNC
  * @tc.require: issue
  */
-HWTEST_F(WindowSessionImplTest2, SetRestoredRouterStack_0100, Function | SmallTest | Level3)
+HWTEST_F(WindowSessionImplTest2, SetRestoredRouterStack_0100, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     ASSERT_NE(option, nullptr);
@@ -1921,8 +1929,8 @@ HWTEST_F(WindowSessionImplTest2, SetRestoredRouterStack_0100, Function | SmallTe
     std::string routerStack = "stackInfo:{}";
     EXPECT_EQ(window->SetRestoredRouterStack(routerStack), WMError::WM_OK);
     EXPECT_EQ(window->NapiSetUIContent("info", nullptr, nullptr, BackupAndRestoreType::NONE, nullptr, nullptr),
-        WMError::WM_ERROR_INVALID_WINDOW);
+              WMError::WM_ERROR_INVALID_WINDOW);
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

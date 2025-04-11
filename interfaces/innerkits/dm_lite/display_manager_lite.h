@@ -170,6 +170,13 @@ public:
     FoldDisplayMode GetFoldDisplayMode();
 
     /**
+     * @brief Get the display mode of the foldable device for external.
+     *
+     * @return display mode of the foldable device.
+     */
+    FoldDisplayMode GetFoldDisplayModeForExternal();
+
+    /**
      * @brief Change the display mode of the foldable device.
      *
      * @param mode target display mode to change.
@@ -297,6 +304,14 @@ public:
      * @return virtual screen flag
      */
     VirtualScreenFlag GetVirtualScreenFlag(ScreenId screenId);
+
+    /**
+     * @brief Set System Keyboard status.
+     *
+     * @param isTpKeyboardOn whether system keyboard with touchpad is shown, default is false.
+     * @return DM_OK means set system keyboard status success.
+     */
+    DMError SetSystemKeyboardStatus(bool isTpKeyboardOn = false);
 private:
     DisplayManagerLite();
     ~DisplayManagerLite();

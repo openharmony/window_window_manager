@@ -16,6 +16,7 @@ import("../../windowmanager_aafwk.gni")
 
 config("session_public_config") {
   include_dirs = [
+    "host/include",
     "${window_base_path}/window_scene",
     "${window_base_path}/window_scene/intention_event/service/anr_manager/include",
     "${window_base_path}/window_scene/intention_event/framework/anr_handler/include",
@@ -62,6 +63,7 @@ ohos_shared_library("scene_session") {
     "host/src/session.cpp",
     "host/src/sub_session.cpp",
     "host/src/system_session.cpp",
+    "host/src/ui_extension/host_data_handler.cpp",
     "host/src/ws_ffrt_helper.cpp",
     "host/src/zidl/session_proxy.cpp",
     "host/src/zidl/session_stub.cpp",
@@ -83,6 +85,7 @@ ohos_shared_library("scene_session") {
   external_deps = [
     "ability_runtime:ability_manager",
     "ability_runtime:ability_start_setting",
+    "ability_runtime:app_context",
     "ability_runtime:process_options",
     "ability_runtime:start_window_option",
     "bundle_framework:appexecfwk_base",
@@ -200,6 +203,19 @@ ohos_shared_library("screen_session") {
     "accessibility:accessibility_common",
     "input:libmmi-napi",
   ]
+
+  defines = []
+  if (window_manager_feature_screen_color_gamut) {
+    defines += [ "WM_SCREEN_COLOR_GAMUT_ENABLE" ]
+  }
+
+  if (window_manager_feature_screen_hdr_format) {
+    defines += [ "WM_SCREEN_HDR_FORMAT_ENABLE" ]
+  }
+
+  if (window_manager_feature_screen_color_space) {
+    defines += [ "WM_SCREEN_COLOR_SPACE_ENABLE" ]
+  }
 
   innerapi_tags = [ "platformsdk" ]
   part_name = "window_manager"

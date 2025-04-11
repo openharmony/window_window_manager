@@ -31,7 +31,7 @@ namespace {
  * @tc.desc: GetAvoidAreaByType Test
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionWindowImplTest, GetAvoidAreaByType, Function | SmallTest | Level2)
+HWTEST_F(ExtensionWindowImplTest, GetAvoidAreaByType, TestSize.Level1)
 {
     sptr<Window> window = new Window();
     ExtensionWindowImpl extensionWindowImpl(window);
@@ -46,7 +46,7 @@ HWTEST_F(ExtensionWindowImplTest, GetAvoidAreaByType, Function | SmallTest | Lev
  * @tc.desc: GetWindow Test
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionWindowImplTest, GetWindow, Function | SmallTest | Level2)
+HWTEST_F(ExtensionWindowImplTest, GetWindow, TestSize.Level1)
 {
     sptr<Window> window = new (std::nothrow) Window();
     ASSERT_NE(nullptr, window);
@@ -60,7 +60,7 @@ HWTEST_F(ExtensionWindowImplTest, GetWindow, Function | SmallTest | Level2)
  * @tc.desc: HideNonSecureWindows Test
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionWindowImplTest, HideNonSecureWindows, Function | SmallTest | Level2)
+HWTEST_F(ExtensionWindowImplTest, HideNonSecureWindows, TestSize.Level1)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(nullptr, option);
@@ -80,7 +80,7 @@ HWTEST_F(ExtensionWindowImplTest, HideNonSecureWindows, Function | SmallTest | L
  * @tc.desc: SetWaterMarkFlag Test
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionWindowImplTest, SetWaterMarkFlag, Function | SmallTest | Level2)
+HWTEST_F(ExtensionWindowImplTest, SetWaterMarkFlag, TestSize.Level1)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(nullptr, option);
@@ -100,7 +100,7 @@ HWTEST_F(ExtensionWindowImplTest, SetWaterMarkFlag, Function | SmallTest | Level
  * @tc.desc: IsPcWindow Test
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionWindowImplTest, IsPcWindow, Function | SmallTest | Level2)
+HWTEST_F(ExtensionWindowImplTest, IsPcWindow, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     sptr<MockWindowExtensionSessionImpl> window = sptr<MockWindowExtensionSessionImpl>::MakeSptr(option);
@@ -114,7 +114,7 @@ HWTEST_F(ExtensionWindowImplTest, IsPcWindow, Function | SmallTest | Level2)
  * @tc.desc: IsPcOrPadFreeMultiWindowMode Test
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionWindowImplTest, IsPcOrPadFreeMultiWindowMode, Function | SmallTest | Level2)
+HWTEST_F(ExtensionWindowImplTest, IsPcOrPadFreeMultiWindowMode, TestSize.Level1)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(nullptr, option);
@@ -130,7 +130,7 @@ HWTEST_F(ExtensionWindowImplTest, IsPcOrPadFreeMultiWindowMode, Function | Small
  * @tc.desc: HidePrivacyContentForHost Test
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionWindowImplTest, HidePrivacyContentForHost, Function | SmallTest | Level2)
+HWTEST_F(ExtensionWindowImplTest, HidePrivacyContentForHost, TestSize.Level1)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(nullptr, option);
@@ -140,6 +140,22 @@ HWTEST_F(ExtensionWindowImplTest, HidePrivacyContentForHost, Function | SmallTes
    
     EXPECT_EQ(WMError::WM_OK, extensionWindowImpl.HidePrivacyContentForHost(true));
     EXPECT_EQ(WMError::WM_OK, extensionWindowImpl.HidePrivacyContentForHost(false));
+}
+
+/**
+ * @tc.name: OccupyEvents
+ * @tc.desc: OccupyEvents Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionWindowImplTest, OccupyEvents, TestSize.Level1)
+{
+    auto option = sptr<WindowOption>::MakeSptr();
+    auto window = sptr<MockWindowExtensionSessionImpl>::MakeSptr(option);
+    ExtensionWindowImpl extensionWindowImpl(window);
+   
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, extensionWindowImpl.OccupyEvents(0));
+    window->mockHandler_ = std::make_shared<MockDataHandler>();
+    EXPECT_EQ(WMError::WM_OK, extensionWindowImpl.OccupyEvents(0));
 }
 } // namespace
 } // namespace Rosen

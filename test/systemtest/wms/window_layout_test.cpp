@@ -135,7 +135,7 @@ namespace {
  * @tc.desc: One FLOATING APP Window with on custom rect
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, LayoutWindow01, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, LayoutWindow01, TestSize.Level1)
 {
     WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::TILE);
     WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE);
@@ -167,7 +167,7 @@ HWTEST_F(WindowLayoutTest, LayoutWindow01, Function | MediumTest | Level3)
  * @tc.desc: One FLOATING APP Window
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, LayoutWindow02, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, LayoutWindow02, TestSize.Level1)
 {
     Rect res = Utils::GetFloatingLimitedRect(Utils::customAppRect_, virtualPixelRatio_);
     Utils::TestWindowInfo info = {
@@ -198,7 +198,7 @@ HWTEST_F(WindowLayoutTest, LayoutWindow02, Function | MediumTest | Level3)
  * @tc.desc: One FLOATING APP Window & One StatusBar Window
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, LayoutWindow04, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, LayoutWindow04, TestSize.Level1)
 {
     // app window
     Rect res = Utils::GetFloatingLimitedRect(Utils::customAppRect_, virtualPixelRatio_);
@@ -246,7 +246,7 @@ HWTEST_F(WindowLayoutTest, LayoutWindow04, Function | MediumTest | Level3)
  * @tc.desc: StatusBar Window and NaviBar & Sys Window FULLSCRENN,NOT NEEDVOID,PARENTLIMIT
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, LayoutWindow06, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, LayoutWindow06, TestSize.Level1)
 {
     sptr<Window> statBar = Utils::CreateStatusBarWindow();
     ASSERT_NE(statBar, nullptr);
@@ -300,7 +300,7 @@ HWTEST_F(WindowLayoutTest, LayoutWindow06, Function | MediumTest | Level3)
  * @tc.desc: StatusBar Window and NaviBar & One Floating Sys Window
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, LayoutWindow07, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, LayoutWindow07, TestSize.Level1)
 {
     // statusBar window
     sptr<Window> statBar = Utils::CreateStatusBarWindow();
@@ -356,7 +356,7 @@ HWTEST_F(WindowLayoutTest, LayoutWindow07, Function | MediumTest | Level3)
  * @tc.desc: One FLOATING APP Window with on custom rect
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, LayoutWindow08, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, LayoutWindow08, TestSize.Level1)
 {
     Utils::TestWindowInfo info = {
         .name = "main8",
@@ -385,7 +385,7 @@ HWTEST_F(WindowLayoutTest, LayoutWindow08, Function | MediumTest | Level3)
  * @tc.desc: Add a floating and resize(2, 2)
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, LayoutWindow09, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, LayoutWindow09, TestSize.Level1)
 {
     Utils::TestWindowInfo info = {
         .name = "main9",
@@ -420,7 +420,7 @@ HWTEST_F(WindowLayoutTest, LayoutWindow09, Function | MediumTest | Level3)
  * @tc.desc: One FLOATING APP Window do max and recovery
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, LayoutWindow10, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, LayoutWindow10, TestSize.Level1)
 {
     Utils::TestWindowInfo info = {
         .name = "main10",
@@ -456,7 +456,7 @@ HWTEST_F(WindowLayoutTest, LayoutWindow10, Function | MediumTest | Level3)
  * @tc.desc: One FLOATING APP Window into tile mode, show 4 new window
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, LayoutTile01, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, LayoutTile01, TestSize.Level1)
 {
     Utils::TestWindowInfo info = {
         .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, .mode = WindowMode::WINDOW_MODE_FLOATING, .needAvoid = true,
@@ -516,7 +516,7 @@ HWTEST_F(WindowLayoutTest, LayoutTile01, Function | MediumTest | Level3)
  * @tc.desc: negative test for tile window
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, LayoutTileNegative01, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, LayoutTileNegative01, TestSize.Level1)
 {
     WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE);
     Utils::TestWindowInfo info = {
@@ -578,7 +578,7 @@ HWTEST_F(WindowLayoutTest, LayoutTileNegative01, Function | MediumTest | Level3)
  * @tc.desc: move window out of the display
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, LayoutNegative01, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, LayoutNegative01, TestSize.Level1)
 {
     WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE);
     Utils::TestWindowInfo info = {
@@ -605,7 +605,7 @@ HWTEST_F(WindowLayoutTest, LayoutNegative01, Function | MediumTest | Level3)
  * @tc.desc: resize window to negative size
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, LayoutNegative02, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, LayoutNegative02, TestSize.Level1)
 {
     WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE);
     const uint32_t negativeW = 0;

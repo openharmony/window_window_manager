@@ -63,25 +63,11 @@ void SCBSystemSessionTest::TearDown()
 
 namespace {
 /**
- * @tc.name: NotifyClientToUpdateRect01
- * @tc.desc: check func NotifyClientToUpdateRect
- * @tc.type: FUNC
- */
-HWTEST_F(SCBSystemSessionTest, NotifyClientToUpdateRect01, Function | SmallTest | Level1)
-{
-    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
-    ASSERT_NE(mockSessionStage, nullptr);
-    scbSystemSession_->sessionStage_ = mockSessionStage;
-    auto ret = scbSystemSession_->NotifyClientToUpdateRect("SCBSystemSessionTest", nullptr);
-    ASSERT_EQ(WSError::WS_OK, ret);
-}
-
-/**
  * @tc.name: TransferKeyEvent01
  * @tc.desc: check func TransferKeyEvent
  * @tc.type: FUNC
  */
-HWTEST_F(SCBSystemSessionTest, TransferKeyEvent01, Function | SmallTest | Level1)
+HWTEST_F(SCBSystemSessionTest, TransferKeyEvent01, TestSize.Level1)
 {
     ASSERT_EQ(WSError::WS_ERROR_NULLPTR, scbSystemSession_->TransferKeyEvent(nullptr));
 }
@@ -91,7 +77,7 @@ HWTEST_F(SCBSystemSessionTest, TransferKeyEvent01, Function | SmallTest | Level1
  * @tc.desc: check func TransferKeyEvent
  * @tc.type: FUNC
  */
-HWTEST_F(SCBSystemSessionTest, TransferKeyEvent02, Function | SmallTest | Level1)
+HWTEST_F(SCBSystemSessionTest, TransferKeyEvent02, TestSize.Level1)
 {
     scbSystemSession_->state_ = SessionState::STATE_CONNECT;
     std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
@@ -106,7 +92,7 @@ HWTEST_F(SCBSystemSessionTest, TransferKeyEvent02, Function | SmallTest | Level1
  * @tc.desc: check func UpdateFocus
  * @tc.type: FUNC
  */
-HWTEST_F(SCBSystemSessionTest, UpdateFocus01, Function | SmallTest | Level1)
+HWTEST_F(SCBSystemSessionTest, UpdateFocus01, TestSize.Level1)
 {
     bool isFocused = scbSystemSession_->isFocused_;
 
@@ -118,7 +104,7 @@ HWTEST_F(SCBSystemSessionTest, UpdateFocus01, Function | SmallTest | Level1)
  * @tc.desc: check func UpdateFocus
  * @tc.type: FUNC
  */
-HWTEST_F(SCBSystemSessionTest, UpdateFocus02, Function | SmallTest | Level1)
+HWTEST_F(SCBSystemSessionTest, UpdateFocus02, TestSize.Level1)
 {
     scbSystemSession_->isFocused_ = true;
     bool isFocused = scbSystemSession_->isFocused_;
@@ -132,27 +118,11 @@ HWTEST_F(SCBSystemSessionTest, UpdateFocus02, Function | SmallTest | Level1)
 }
 
 /**
- * @tc.name: UpdateWindowMode
- * @tc.desc: check func UpdateWindowMode
- * @tc.type: FUNC
- */
-HWTEST_F(SCBSystemSessionTest, UpdateWindowMode, Function | SmallTest | Level1)
-{
-    scbSystemSession_->PresentFocusIfPointDown();
-    scbSystemSession_->PresentFoucusIfNeed(2);
-    ASSERT_EQ(WSError::WS_OK, scbSystemSession_->SetSystemSceneBlockingFocus(true));
-    WSRect rect = {0, 0, 0, 0};
-    scbSystemSession_->UpdatePointerArea(rect);
-    auto ret = scbSystemSession_->UpdateWindowMode(WindowMode::WINDOW_MODE_UNDEFINED);
-    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, ret);
-}
-
-/**
  * @tc.name: BindKeyboardSession01
  * @tc.desc: check func BindKeyboardSession
  * @tc.type: FUNC
  */
-HWTEST_F(SCBSystemSessionTest, BindKeyboardSession01, Function | SmallTest | Level3)
+HWTEST_F(SCBSystemSessionTest, BindKeyboardSession01, TestSize.Level1)
 {
     ASSERT_NE(nullptr, scbSystemSession_);
     scbSystemSession_->BindKeyboardSession(nullptr);
@@ -163,7 +133,7 @@ HWTEST_F(SCBSystemSessionTest, BindKeyboardSession01, Function | SmallTest | Lev
  * @tc.desc: check func BindKeyboardSession
  * @tc.type: FUNC
  */
-HWTEST_F(SCBSystemSessionTest, BindKeyboardSession02, Function | SmallTest | Level3)
+HWTEST_F(SCBSystemSessionTest, BindKeyboardSession02, TestSize.Level1)
 {
     ASSERT_NE(nullptr, scbSystemSession_);
     SessionInfo info;
@@ -177,22 +147,11 @@ HWTEST_F(SCBSystemSessionTest, BindKeyboardSession02, Function | SmallTest | Lev
 }
 
 /**
- * @tc.name: NotifyClientToUpdateRect
- * @tc.desc: check func NotifyClientToUpdateRect
- * @tc.type: FUNC
- */
-HWTEST_F(SCBSystemSessionTest, NotifyClientToUpdateRect, Function | SmallTest | Level3)
-{
-    ASSERT_NE(nullptr, scbSystemSession_);
-    scbSystemSession_->NotifyClientToUpdateRect("SCBSystemSessionTest", nullptr);
-}
-
-/**
  * @tc.name: SetSystemSceneBlockingFocus
  * @tc.desc: check func SetSystemSceneBlockingFocus
  * @tc.type: FUNC
  */
-HWTEST_F(SCBSystemSessionTest, SetSystemSceneBlockingFocus01, Function | SmallTest | Level3)
+HWTEST_F(SCBSystemSessionTest, SetSystemSceneBlockingFocus01, TestSize.Level1)
 {
     ASSERT_NE(nullptr, scbSystemSession_);
     WSError ret = scbSystemSession_->SetSystemSceneBlockingFocus(true);
@@ -204,7 +163,7 @@ HWTEST_F(SCBSystemSessionTest, SetSystemSceneBlockingFocus01, Function | SmallTe
  * @tc.desc: check func PresentFocusIfPointDown
  * @tc.type: FUNC
  */
-HWTEST_F(SCBSystemSessionTest, PresentFocusIfPointDown01, Function | SmallTest | Level3)
+HWTEST_F(SCBSystemSessionTest, PresentFocusIfPointDown01, TestSize.Level1)
 {
     ASSERT_NE(nullptr, scbSystemSession_);
     scbSystemSession_->PresentFocusIfPointDown();
@@ -215,7 +174,7 @@ HWTEST_F(SCBSystemSessionTest, PresentFocusIfPointDown01, Function | SmallTest |
  * @tc.desc: check func GetKeyboardSession
  * @tc.type: FUNC
  */
-HWTEST_F(SCBSystemSessionTest, GetKeyboardSession01, Function | SmallTest | Level3)
+HWTEST_F(SCBSystemSessionTest, GetKeyboardSession01, TestSize.Level1)
 {
     ASSERT_NE(nullptr, scbSystemSession_);
     scbSystemSession_->GetKeyboardSession();
@@ -226,7 +185,7 @@ HWTEST_F(SCBSystemSessionTest, GetKeyboardSession01, Function | SmallTest | Leve
  * @tc.desc: check func ProcessPointDownSession
  * @tc.type: FUNC
  */
-HWTEST_F(SCBSystemSessionTest, ProcessPointDownSession, Function | SmallTest | Level3)
+HWTEST_F(SCBSystemSessionTest, ProcessPointDownSession, TestSize.Level1)
 {
     int32_t posX = 0;
     int32_t posY = 0;
@@ -235,108 +194,11 @@ HWTEST_F(SCBSystemSessionTest, ProcessPointDownSession, Function | SmallTest | L
 }
 
 /**
- * @tc.name: NotifyClientToUpdateRect02
- * @tc.desc: check func NotifyClientToUpdateRect
- * @tc.type: FUNC
- */
-HWTEST_F(SCBSystemSessionTest, NotifyClientToUpdateRect02, Function | SmallTest | Level3)
-{
-    sptr<SCBSystemSession::SpecificSessionCallback> specificCallback1 =
-        sptr<SCBSystemSession::SpecificSessionCallback>::MakeSptr();
-    ASSERT_NE(specificCallback1, nullptr);
-    sptr<SCBSystemSession> scbSystemSession = sptr<SCBSystemSession>::MakeSptr(info, specificCallback1);
-    ASSERT_NE(scbSystemSession, nullptr);
-    UpdateAvoidAreaCallback onUpdateAvoidArea;
-    ClearDisplayStatusBarTemporarilyFlags onClearDisplayStatusBarTemporarilyFlags;
-    scbSystemSession->specificCallback_ = specificCallback1;
-    scbSystemSession->specificCallback_->onUpdateAvoidArea_ = onUpdateAvoidArea;
-    scbSystemSession->specificCallback_->onClearDisplayStatusBarTemporarilyFlags_ =
-        onClearDisplayStatusBarTemporarilyFlags;
-    auto ret = scbSystemSession->NotifyClientToUpdateRect("SCBSystemSessionTest", nullptr);
-    ASSERT_EQ(WSError::WS_OK, ret);
-
-    scbSystemSession->specificCallback_->onClearDisplayStatusBarTemporarilyFlags_ = nullptr;
-    ret = scbSystemSession->NotifyClientToUpdateRect("SCBSystemSessionTest", nullptr);
-    ASSERT_EQ(WSError::WS_OK, ret);
-
-    scbSystemSession->specificCallback_->onUpdateAvoidArea_ = nullptr;
-    ret = scbSystemSession->NotifyClientToUpdateRect("SCBSystemSessionTest", nullptr);
-    ASSERT_EQ(WSError::WS_OK, ret);
-
-    scbSystemSession->specificCallback_->onClearDisplayStatusBarTemporarilyFlags_ =
-        onClearDisplayStatusBarTemporarilyFlags;
-    ret = scbSystemSession->NotifyClientToUpdateRect("SCBSystemSessionTest", nullptr);
-    ASSERT_EQ(WSError::WS_OK, ret);
-
-    scbSystemSession->specificCallback_ = nullptr;
-    ret = scbSystemSession->NotifyClientToUpdateRect("SCBSystemSessionTest", nullptr);
-    ASSERT_EQ(WSError::WS_OK, ret);
-}
-
-/**
- * @tc.name: NotifyClientToUpdateRect03
- * @tc.desc: check func NotifyClientToUpdateRect
- * @tc.type: FUNC
- */
-HWTEST_F(SCBSystemSessionTest, NotifyClientToUpdateRect03, Function | SmallTest | Level1)
-{
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(property, nullptr);
-    KeyboardPanelRectUpdateCallback keyboardPanelRectUpdateCallback;
-    property->SetWindowType(OHOS::Rosen::WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
-
-    auto ret = scbSystemSession_->SetSessionProperty(property);
-    ASSERT_EQ(WSError::WS_OK, ret);
-    scbSystemSession_->keyboardPanelRectUpdateCallback_ = keyboardPanelRectUpdateCallback;
-    scbSystemSession_->isKeyboardPanelEnabled_ = true;
-    ret = scbSystemSession_->NotifyClientToUpdateRect("SCBSystemSessionTest", nullptr);
-    ASSERT_EQ(WSError::WS_OK, ret);
-
-    scbSystemSession_->isKeyboardPanelEnabled_ = false;
-    ret = scbSystemSession_->NotifyClientToUpdateRect("SCBSystemSessionTest", nullptr);
-    ASSERT_EQ(WSError::WS_OK, ret);
-
-    scbSystemSession_->keyboardPanelRectUpdateCallback_ = nullptr;
-    scbSystemSession_->isKeyboardPanelEnabled_ = true;
-    ret = scbSystemSession_->NotifyClientToUpdateRect("SCBSystemSessionTest", nullptr);
-    ASSERT_EQ(WSError::WS_OK, ret);
-
-    scbSystemSession_->isKeyboardPanelEnabled_ = false;
-    ret = scbSystemSession_->NotifyClientToUpdateRect("SCBSystemSessionTest", nullptr);
-    ASSERT_EQ(WSError::WS_OK, ret);
-
-    property->SetWindowType(OHOS::Rosen::WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    ret = scbSystemSession_->SetSessionProperty(property);
-    ASSERT_EQ(WSError::WS_OK, ret);
-    scbSystemSession_->keyboardPanelRectUpdateCallback_ = keyboardPanelRectUpdateCallback;
-    scbSystemSession_->isKeyboardPanelEnabled_ = true;
-    ret = scbSystemSession_->NotifyClientToUpdateRect("SCBSystemSessionTest", nullptr);
-    ASSERT_EQ(WSError::WS_OK, ret);
-
-    scbSystemSession_->isKeyboardPanelEnabled_ = false;
-    ret = scbSystemSession_->NotifyClientToUpdateRect("SCBSystemSessionTest", nullptr);
-    ASSERT_EQ(WSError::WS_OK, ret);
-
-    scbSystemSession_->keyboardPanelRectUpdateCallback_ = nullptr;
-    scbSystemSession_->isKeyboardPanelEnabled_ = true;
-    ret = scbSystemSession_->NotifyClientToUpdateRect("SCBSystemSessionTest", nullptr);
-    ASSERT_EQ(WSError::WS_OK, ret);
-
-    scbSystemSession_->isKeyboardPanelEnabled_ = false;
-    ret = scbSystemSession_->NotifyClientToUpdateRect("SCBSystemSessionTest", nullptr);
-    ASSERT_EQ(WSError::WS_OK, ret);
-
-    scbSystemSession_->reason_ = SizeChangeReason::DRAG;
-    ret = scbSystemSession_->NotifyClientToUpdateRect("SCBSystemSessionTest", nullptr);
-    ASSERT_EQ(WSError::WS_OK, ret);
-}
-
-/**
  * @tc.name: PresentFocusIfPointDown02
  * @tc.desc: check func PresentFocusIfPointDown
  * @tc.type: FUNC
  */
-HWTEST_F(SCBSystemSessionTest, PresentFocusIfPointDown02, Function | SmallTest | Level3)
+HWTEST_F(SCBSystemSessionTest, PresentFocusIfPointDown02, TestSize.Level1)
 {
     scbSystemSession_->isFocused_ = true;
     auto ret = scbSystemSession_->SetFocusable(false);
@@ -365,7 +227,7 @@ HWTEST_F(SCBSystemSessionTest, PresentFocusIfPointDown02, Function | SmallTest |
  * @tc.desc: check func PresentFoucusIfNeed
  * @tc.type: FUNC
  */
-HWTEST_F(SCBSystemSessionTest, PresentFoucusIfNeed, Function | SmallTest | Level3)
+HWTEST_F(SCBSystemSessionTest, PresentFoucusIfNeed, TestSize.Level1)
 {
     int32_t pointerAction = 8;
     scbSystemSession_->PresentFoucusIfNeed(pointerAction);
@@ -374,6 +236,17 @@ HWTEST_F(SCBSystemSessionTest, PresentFoucusIfNeed, Function | SmallTest | Level
     pointerAction = 100;
     scbSystemSession_->PresentFoucusIfNeed(pointerAction);
     ASSERT_EQ(pointerAction, 100);
+}
+
+/**
+ * @tc.name: SetSkipEventOnCastPlus01
+ * @tc.desc: check func SetSkipEventOnCastPlus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SCBSystemSessionTest, SetSkipEventOnCastPlus01, TestSize.Level1)
+{
+    scbSystemSession_->SetSkipEventOnCastPlus(false);
+    ASSERT_EQ(false, scbSystemSession_->GetSessionProperty()->GetSkipEventOnCastPlus());
 }
 } //namespace
 } //namespace Rosen

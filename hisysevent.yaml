@@ -69,6 +69,18 @@ WINDOW_LIFE_CYCLE_EXCEPTION:
   UID: {type: INT32, desc: session uid}
   MSG: {type: STRING, desc: windowmanager event message}
 
+WINDOW_STATE_ERROR:
+  __BASE: {type: FAULT, level: CRITICAL, desc: The window attach state and session state mismatch}
+  TYPE: {type: STRING, desc: error type}
+  PID: {type: INT32, desc: app pid}
+  PERSISTENT_ID: {type: INT32, desc: window id}
+  FRAME_NODE_ID: {type: INT32, desc: error frame node id}
+  RS_NODE_ID: {type: INT32, desc: error rs node id}
+  DISPLAY_ID: {type: INT32, desc: display id}
+  WINDOW_NAME: {type: STRING, desc: window name}
+  ATTACH_STATE: {type: BOOL, desc: attach_state}
+  SESSION_STATE: {type: UINT32, desc: session_state}
+
 WINDOW_BOOT_ANIMATION_DONE:
   __BASE: {type: BEHAVIOR, level: CRITICAL, desc: Boot animation done}
   MSG: {type: STRING, desc: windowmanager event message}
@@ -78,6 +90,19 @@ WINDOW_EXCEPTION_DETECTION:
   DETECTION_TYPE: {type: INT32, desc: detection type}
   PID: {type: INT32, desc: pid}
   MSG: {type: STRING, desc: detects abnormal information}
+
+UIEXTENSION_EXCEPTION:
+  __BASE: {type: FAULT, level: CRITICAL, desc: UIExtension encountered an exception}
+  EXCEPTION_TYPE: {type: INT32, desc: exception type}
+  PID: {type: INT32, desc: pid}
+  PERSISTENTID: {type: INT32, desc: persistentId}
+  MSG: {type: STRING, desc: uiextension abnormal information}
+
+EVENT_DISPATCH_EXCEPTION:
+  __BASE: {type: FAULT, level: CRITICAL, desc: Event dispatch encountered an exception}
+  EXCEPTION_TYPE: {type: INT32, desc: exception type}
+  PID: {type: INT32, desc: pid}
+  MSG: {type: STRING, desc: event dispatch abnormal information}
 
 SHOW_WINDOW_TIME:
   __BASE: {type: STATISTIC, level: MINOR, desc: Sow window time performance}
@@ -157,7 +182,21 @@ CONTAINER_START_BEGIN:
   BUNDLE_NAME: {type: STRING, desc: bundle name}
   TIMESTAMP: {type: INT64, desc: timestamp}
 
+EXTEND_DISPLAY_PLUG_IN_AND_OUT:
+  __BASE: {type: BEHAVIOR, level: CRITICAL, desc: Records the insertion and removal events of the extended display, preserve: true}
+  PLUG_IN_AND_OUT: {type: UINT32, desc: display plug in and out}
+  DISPLAY_CONNECT_NUM: {type: INT32, desc: Number of connected displays}
+  DISPLAY_INUSED_NUM: {type: INT32, desc: Number of inUsed displays}
+  EXTENSION_DISPLAY_MODE_STATUS: {type: UINT32, desc: extension display mode status}
+  MAIN_DISPLAY_ID: {type: UINT32, desc: Current main display ID}
+
 VH_MODE:
   __BASE: {type: BEHAVIOR, level: MINOR, desc: notify VH_MODE}
   MODE: {type: INT32, desc: VH MODE after rotation}
- 
+
+THROW_SLIP:
+  __BASE: {type: BEHAVIOR, level: MINOR, desc: Window throw slip}
+  BUNDLE_NAME: {type: STRING, desc: Bundle name}
+  START_SIDE: {type: INT32, desc: Start side of throw slip 1 B side 2 C side}
+  START_WINDOW_MODE: {type: INT32, desc: Start window mode of throw slip 0 float 1 fullscreen 2 waterfall mode}
+  THROW_MODE: {type: INT32, desc: Throw slip mode 0 move drag 2 button in titlebar menu 3 three fingers gesture 4 four fingers 5 five fingers}

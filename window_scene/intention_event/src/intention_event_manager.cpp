@@ -18,7 +18,6 @@
 #ifdef IMF_ENABLE
 #include <input_method_controller.h>
 #endif // IMF_ENABLE
-#include "scene_session.h"
 #include "session_helper.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "window_manager_hilog.h"
@@ -102,6 +101,34 @@ bool IntentionEventManager::EnableInputEventListener(Ace::UIContent* uiContent,
     return true;
 }
 
+void IntentionEventManager::InputEventListener::SetPointerEventStatus(
+    int32_t fingerId, int32_t action, int32_t sourceType, const sptr<SceneSession>& sceneSession) const
+{
+    switch (action) {
+        case MMI::PointerEvent::POINTER_ACTION_DOWN:
+            sceneSession->SetFingerPointerDownStatus(fingerId);
+            break;
+        case MMI::PointerEvent::POINTER_ACTION_UP:
+            sceneSession->RemoveFingerPointerDownStatus(fingerId);
+            break;
+        case MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN:
+            sceneSession->SetMousePointerDownEventStatus(true);
+            break;
+        case MMI::PointerEvent::POINTER_ACTION_BUTTON_UP:
+            sceneSession->SetMousePointerDownEventStatus(false);
+            break;
+        case MMI::PointerEvent::POINTER_ACTION_CANCEL:
+            if (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
+                sceneSession->SetMousePointerDownEventStatus(false);
+            } else {
+                sceneSession->RemoveFingerPointerDownStatus(fingerId);
+            }
+            break;
+        default:
+            break;
+    }
+}
+
 bool IntentionEventManager::InputEventListener::CheckPointerEvent(
     const std::shared_ptr<MMI::PointerEvent> pointerEvent) const
 {
@@ -149,10 +176,15 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
             pointerEvent->SetPointerId(pointerId + dispatchTimes * TRANSPARENT_FINGER_ID);
         }
     }
+    auto sourceType = pointerEvent->GetSourceType();
     if (action != MMI::PointerEvent::POINTER_ACTION_MOVE) {
+        if (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE ||
+            sourceType == MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
+            SetPointerEventStatus(pointerEvent->GetPointerId(), action, sourceType, sceneSession);
+        }
         static uint32_t eventId = 0;
         TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW, "eid:%{public}d,InputId:%{public}d,wid:%{public}u"
-            ",windowName:%{public}s,action:%{public}d,isSystem:%{public}d", eventId++, pointerEvent->GetId(), windowId,
+            ",wName:%{public}s,ac:%{public}d,sys:%{public}d", eventId++, pointerEvent->GetId(), windowId,
             sceneSession->GetSessionInfo().abilityName_.c_str(), action, sceneSession->GetSessionInfo().isSystem_);
     }
     if (sceneSession->GetSessionInfo().isSystem_) {
@@ -186,6 +218,18 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
     }
 }
 
+void IntentionEventManager::InputEventListener::SendKeyEventConsumedResultToSCB(
+    const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool isConsumed) const
+{
+    if ((keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_TAB ||
+        keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ENTER) &&
+        keyEvent->GetKeyAction() == MMI::KeyEvent::KEY_ACTION_DOWN) {
+        TLOGD(WmsLogTag::WMS_EVENT, "keyCode:%{public}d, isConsumed:%{public}d",
+            keyEvent->GetKeyCode(), isConsumed);
+        SceneSessionManager::GetInstance().NotifyWatchGestureConsumeResult(keyEvent->GetKeyCode(), isConsumed);
+    }
+}
+
 void IntentionEventManager::InputEventListener::DispatchKeyEventCallback(
     int32_t focusedSessionId, std::shared_ptr<MMI::KeyEvent> keyEvent, bool consumed) const
 {
@@ -214,7 +258,7 @@ void IntentionEventManager::InputEventListener::DispatchKeyEventCallback(
         return;
     }
 
-    focusedSceneSession->SendKeyEventToUI(keyEvent);
+    SendKeyEventConsumedResultToSCB(keyEvent, focusedSceneSession->SendKeyEventToUI(keyEvent));
 }
 
 void IntentionEventManager::InputEventListener::OnInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent) const
@@ -244,7 +288,7 @@ void IntentionEventManager::InputEventListener::OnInputEvent(std::shared_ptr<MMI
     auto isSystem = focusedSceneSession->GetSessionInfo().isSystem_;
     static uint32_t eventId = 0;
     TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW, "eid:%{public}d,InputId:%{public}d,wid:%{public}u"
-        ",focusId:%{public}d,isSystem:%{public}d",
+        ",fid:%{public}d,sys:%{public}d",
         eventId++, keyEvent->GetId(), keyEvent->GetTargetWindowId(), focusedSessionId, isSystem);
     if (!isSystem) {
         WSError ret = focusedSceneSession->TransferKeyEvent(keyEvent);
@@ -256,7 +300,8 @@ void IntentionEventManager::InputEventListener::OnInputEvent(std::shared_ptr<MMI
     }
     bool isConsumed = focusedSceneSession->SendKeyEventToUI(keyEvent, true);
     if (isConsumed) {
-        TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW, "SendKeyEventToUI id:%{public}d isConsumed:%{public}d",
+        SendKeyEventConsumedResultToSCB(keyEvent, isConsumed);
+        TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW, "SendToUI id:%{public}d isConsumed:%{public}d",
             keyEvent->GetId(), static_cast<int>(isConsumed));
         return;
     }
@@ -282,7 +327,7 @@ void IntentionEventManager::InputEventListener::OnInputEvent(std::shared_ptr<MMI
         keyEvent->MarkProcessed();
         return;
     }
-    focusedSceneSession->SendKeyEventToUI(keyEvent);
+    SendKeyEventConsumedResultToSCB(keyEvent, focusedSceneSession->SendKeyEventToUI(keyEvent));
 }
 
 bool IntentionEventManager::InputEventListener::IsKeyboardEvent(
@@ -310,7 +355,7 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
         return;
     }
     if (!(uiContent_->ProcessAxisEvent(axisEvent))) {
-        TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW, "The UI content consumes the axis event failed.");
+        TLOGE(WmsLogTag::WMS_INPUT_KEY_FLOW, "The UI content consumes the axis event failed.");
         axisEvent->MarkProcessed();
     }
 }

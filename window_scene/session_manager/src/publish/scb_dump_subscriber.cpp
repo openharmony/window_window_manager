@@ -40,7 +40,7 @@ std::string ScbDumpSubscriber::GetDebugDumpInfo(const std::chrono::milliseconds&
     return "timeout";
 }
 
-WSError ScbDumpSubscriber::Publish(const std::string& cmd)
+WSError ScbDumpSubscriber::Publish(const std::string& cmd, const std::string& filePath)
 {
     {
         std::unique_lock<std::mutex> lock(mutex_);
@@ -49,6 +49,7 @@ WSError ScbDumpSubscriber::Publish(const std::string& cmd)
 
     AAFwk::Want want;
     want.SetAction("com.ohos.sceneboard.debug.event.listener");
+    want.SetParam("dumpFilePath", filePath);
     EventFwk::CommonEventData commonEventData;
     commonEventData.SetWant(want);
     commonEventData.SetCode(0);

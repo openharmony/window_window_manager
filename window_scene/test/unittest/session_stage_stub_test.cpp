@@ -66,7 +66,7 @@ namespace {
  * @tc.desc: test function : OnRemoteRequest
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, OnRemoteRequest, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubTest, OnRemoteRequest, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -94,7 +94,7 @@ HWTEST_F(SessionStageStubTest, OnRemoteRequest, Function | SmallTest | Level1)
  * @tc.desc: test function : HandleSetActive
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleSetActive, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubTest, HandleSetActive, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -111,7 +111,7 @@ HWTEST_F(SessionStageStubTest, HandleSetActive, Function | SmallTest | Level1)
  * @tc.desc: test function : HandleUpdateRect
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleUpdateRect, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubTest, HandleUpdateRect, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -124,6 +124,7 @@ HWTEST_F(SessionStageStubTest, HandleUpdateRect, Function | SmallTest | Level1)
     data.WriteUint32(1);
     data.WriteBool(false);
     data.WriteInt32(1);
+    data.WriteUint32(0);
     uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SIZE_CHANGE);
     ASSERT_TRUE((sessionStageStub_ != nullptr));
     ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
@@ -134,7 +135,7 @@ HWTEST_F(SessionStageStubTest, HandleUpdateRect, Function | SmallTest | Level1)
  * @tc.desc: test function : HandleUpdateSessionViewportConfig
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleUpdateSessionViewportConfig, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubTest, HandleUpdateSessionViewportConfig, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -152,7 +153,7 @@ HWTEST_F(SessionStageStubTest, HandleUpdateSessionViewportConfig, Function | Sma
  * @tc.desc: test function : HandleUpdateDensity
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleUpdateDensity01, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubTest, HandleUpdateDensity01, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -168,7 +169,7 @@ HWTEST_F(SessionStageStubTest, HandleUpdateDensity01, Function | SmallTest | Lev
  * @tc.desc: test function : HandleUpdateDensity
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleUpdateDensity02, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubTest, HandleUpdateDensity02, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -181,7 +182,7 @@ HWTEST_F(SessionStageStubTest, HandleUpdateDensity02, Function | SmallTest | Lev
  * @tc.desc: test function : HandleUpdateOrientation
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleUpdateOrientation, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubTest, HandleUpdateOrientation, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -197,7 +198,7 @@ HWTEST_F(SessionStageStubTest, HandleUpdateOrientation, Function | SmallTest | L
  * @tc.desc: test function : HandleBackEventInner
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleBackEventInner, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubTest, HandleBackEventInner, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -214,7 +215,7 @@ HWTEST_F(SessionStageStubTest, HandleBackEventInner, Function | SmallTest | Leve
  * @tc.desc: test function : HandleNotifyDestroy
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleNotifyDestroy, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubTest, HandleNotifyDestroy, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -230,7 +231,7 @@ HWTEST_F(SessionStageStubTest, HandleNotifyDestroy, Function | SmallTest | Level
  * @tc.desc: test function : HandleUpdateFocus
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleUpdateFocus, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubTest, HandleUpdateFocus, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -247,7 +248,7 @@ HWTEST_F(SessionStageStubTest, HandleUpdateFocus, Function | SmallTest | Level1)
  * @tc.desc: test function : HandleNotifyTransferComponentData
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleNotifyTransferComponentData, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubTest, HandleNotifyTransferComponentData, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -264,7 +265,7 @@ HWTEST_F(SessionStageStubTest, HandleNotifyTransferComponentData, Function | Sma
  * @tc.desc: test function : HandleNotifyTransferComponentDataSync
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleNotifyTransferComponentDataSync, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubTest, HandleNotifyTransferComponentDataSync, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -282,7 +283,7 @@ HWTEST_F(SessionStageStubTest, HandleNotifyTransferComponentDataSync, Function |
  * @tc.desc: test function : HandleNotifyOccupiedAreaChange
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleNotifyOccupiedAreaChange, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubTest, HandleNotifyOccupiedAreaChange, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -295,11 +296,29 @@ HWTEST_F(SessionStageStubTest, HandleNotifyOccupiedAreaChange, Function | SmallT
 }
 
 /**
+ * @tc.name: HandleNotifyKeyboardAnimationCompleted
+ * @tc.desc: test function : HandleNotifyKeyboardAnimationCompleted
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifyKeyboardAnimationCompleted, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    sptr<KeyboardPanelInfo> keyboardPanelInfo = sptr<KeyboardPanelInfo>::MakeSptr();
+    data.WriteParcelable(keyboardPanelInfo);
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_KEYBOARD_ANIMATION_COMPLETED);
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_EQ(ERR_NONE, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
  * @tc.name: HandleUpdateAvoidArea
  * @tc.desc: test function : HandleUpdateAvoidArea
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleUpdateAvoidArea, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubTest, HandleUpdateAvoidArea, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -316,7 +335,7 @@ HWTEST_F(SessionStageStubTest, HandleUpdateAvoidArea, Function | SmallTest | Lev
  * @tc.desc: test function : HandleNotifyScreenshot
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleNotifyScreenshot, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubTest, HandleNotifyScreenshot, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -332,7 +351,7 @@ HWTEST_F(SessionStageStubTest, HandleNotifyScreenshot, Function | SmallTest | Le
  * @tc.desc: test function : HandleDumpSessionElementInfo
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleDumpSessionElementInfo, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubTest, HandleDumpSessionElementInfo, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -352,7 +371,7 @@ HWTEST_F(SessionStageStubTest, HandleDumpSessionElementInfo, Function | SmallTes
  * @tc.desc: test function : HandleNotifyTouchOutside
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleNotifyTouchOutside, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubTest, HandleNotifyTouchOutside, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -368,7 +387,7 @@ HWTEST_F(SessionStageStubTest, HandleNotifyTouchOutside, Function | SmallTest | 
  * @tc.desc: test function : HandleUpdateWindowMode
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleUpdateWindowMode, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubTest, HandleUpdateWindowMode, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -385,7 +404,7 @@ HWTEST_F(SessionStageStubTest, HandleUpdateWindowMode, Function | SmallTest | Le
  * @tc.desc: test function : HandleNotifyForegroundInteractiveStatus
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleNotifyForegroundInteractiveStatus, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubTest, HandleNotifyForegroundInteractiveStatus, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -402,7 +421,7 @@ HWTEST_F(SessionStageStubTest, HandleNotifyForegroundInteractiveStatus, Function
  * @tc.desc: test function : HandleUpdateMaximizeMode
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleUpdateMaximizeMode, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubTest, HandleUpdateMaximizeMode, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -418,7 +437,7 @@ HWTEST_F(SessionStageStubTest, HandleUpdateMaximizeMode, Function | SmallTest | 
  * @tc.desc: test function : HandleNotifyCloseExistPipWindow
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleNotifyCloseExistPipWindow, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubTest, HandleNotifyCloseExistPipWindow, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -434,7 +453,7 @@ HWTEST_F(SessionStageStubTest, HandleNotifyCloseExistPipWindow, Function | Small
  * @tc.desc: test function : HandleNotifySessionForeground
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleNotifySessionForeground, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubTest, HandleNotifySessionForeground, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -452,7 +471,7 @@ HWTEST_F(SessionStageStubTest, HandleNotifySessionForeground, Function | SmallTe
  * @tc.desc: test function : HandleNotifySessionBackground
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleNotifySessionBackground, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubTest, HandleNotifySessionBackground, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -471,7 +490,7 @@ HWTEST_F(SessionStageStubTest, HandleNotifySessionBackground, Function | SmallTe
  * @tc.desc: test function : HandleUpdateTitleInTargetPos
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleUpdateTitleInTargetPos, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubTest, HandleUpdateTitleInTargetPos, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -487,7 +506,7 @@ HWTEST_F(SessionStageStubTest, HandleUpdateTitleInTargetPos, Function | SmallTes
  * @tc.desc: test function : HandleNotifyDensityFollowHost
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleNotifyDensityFollowHost, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubTest, HandleNotifyDensityFollowHost, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -503,7 +522,7 @@ HWTEST_F(SessionStageStubTest, HandleNotifyDensityFollowHost, Function | SmallTe
  * @tc.desc: test function : HandleNotifyWindowVisibilityChange
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleNotifyWindowVisibilityChange, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubTest, HandleNotifyWindowVisibilityChange, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -520,7 +539,7 @@ HWTEST_F(SessionStageStubTest, HandleNotifyWindowVisibilityChange, Function | Sm
  * @tc.desc: test function : HandleNotifyTransformChange
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleNotifyTransformChange, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubTest, HandleNotifyTransformChange, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -537,7 +556,7 @@ HWTEST_F(SessionStageStubTest, HandleNotifyTransformChange, Function | SmallTest
  * @tc.desc: test function : HandleNotifyDialogStateChange
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleNotifyDialogStateChange, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubTest, HandleNotifyDialogStateChange, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -554,7 +573,7 @@ HWTEST_F(SessionStageStubTest, HandleNotifyDialogStateChange, Function | SmallTe
  * @tc.desc: test function : HandleSetPipActionEvent
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleSetPipActionEvent, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubTest, HandleSetPipActionEvent, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -572,7 +591,7 @@ HWTEST_F(SessionStageStubTest, HandleSetPipActionEvent, Function | SmallTest | L
  * @tc.desc: test function : HandleSetPiPControlEvent
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleSetPiPControlEvent, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubTest, HandleSetPiPControlEvent, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -592,7 +611,7 @@ HWTEST_F(SessionStageStubTest, HandleSetPiPControlEvent, Function | SmallTest | 
  * @tc.desc: test function : HandleUpdateDisplayId
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleUpdateDisplayId, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubTest, HandleUpdateDisplayId, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -609,7 +628,7 @@ HWTEST_F(SessionStageStubTest, HandleUpdateDisplayId, Function | SmallTest | Lev
  * @tc.desc: test function : HandleNotifyDisplayMove
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleNotifyDisplayMove, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubTest, HandleNotifyDisplayMove, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -627,7 +646,7 @@ HWTEST_F(SessionStageStubTest, HandleNotifyDisplayMove, Function | SmallTest | L
  * @tc.desc: test function : HandleSwitchFreeMultiWindow
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleSwitchFreeMultiWindow, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubTest, HandleSwitchFreeMultiWindow, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -644,7 +663,7 @@ HWTEST_F(SessionStageStubTest, HandleSwitchFreeMultiWindow, Function | SmallTest
  * @tc.desc: test function : HandleGetUIContentRemoteObj
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleGetUIContentRemoteObj, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubTest, HandleGetUIContentRemoteObj, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -660,7 +679,7 @@ HWTEST_F(SessionStageStubTest, HandleGetUIContentRemoteObj, Function | SmallTest
  * @tc.desc: test function : HandleNotifyKeyboardPanelInfoChange
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleNotifyKeyboardPanelInfoChange, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubTest, HandleNotifyKeyboardPanelInfoChange, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -678,7 +697,7 @@ HWTEST_F(SessionStageStubTest, HandleNotifyKeyboardPanelInfoChange, Function | S
  * @tc.desc: test function : HandleCompatibleFullScreenRecover
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleCompatibleFullScreenRecover, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubTest, HandleCompatibleFullScreenRecover, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -694,7 +713,7 @@ HWTEST_F(SessionStageStubTest, HandleCompatibleFullScreenRecover, Function | Sma
  * @tc.desc: test function : HandleCompatibleFullScreenMinimize
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleCompatibleFullScreenMinimize, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubTest, HandleCompatibleFullScreenMinimize, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -710,7 +729,7 @@ HWTEST_F(SessionStageStubTest, HandleCompatibleFullScreenMinimize, Function | Sm
  * @tc.desc: test function : HandleCompatibleFullScreenClose
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleCompatibleFullScreenClose, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubTest, HandleCompatibleFullScreenClose, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -722,11 +741,27 @@ HWTEST_F(SessionStageStubTest, HandleCompatibleFullScreenClose, Function | Small
 }
 
 /**
+ * @tc.name: HandlePcAppInPadNormalClose
+ * @tc.desc: test function : HandlePcAppInPadNormalClose
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandlePcAppInPadNormalClose, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_PCAPPINPADNORMAL_CLOSE);
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    ASSERT_NE(sessionStageStub_, nullptr);
+    ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
  * @tc.name: HandleSetUniqueVirtualPixelRatio
  * @tc.desc: test function : HandleSetUniqueVirtualPixelRatio
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleSetUniqueVirtualPixelRatio, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubTest, HandleSetUniqueVirtualPixelRatio, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -744,7 +779,7 @@ HWTEST_F(SessionStageStubTest, HandleSetUniqueVirtualPixelRatio, Function | Smal
  * @tc.desc: test function : HandleNotifySessionFullScreen
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleNotifySessionFullScreen, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubTest, HandleNotifySessionFullScreen, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -763,7 +798,7 @@ HWTEST_F(SessionStageStubTest, HandleNotifySessionFullScreen, Function | SmallTe
  * @tc.desc: test function : HandleNotifyCompatibleModeEnableInPad
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleNotifyCompatibleModeEnableInPad, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubTest, HandleNotifyCompatibleModeEnableInPad, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -780,7 +815,7 @@ HWTEST_F(SessionStageStubTest, HandleNotifyCompatibleModeEnableInPad, Function |
  * @tc.desc: test function : HandleNotifyDumpInfo
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleNotifyDumpInfo, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubTest, HandleNotifyDumpInfo, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -799,7 +834,7 @@ HWTEST_F(SessionStageStubTest, HandleNotifyDumpInfo, Function | SmallTest | Leve
  * @tc.desc: test function : HandleSetSplitButtonVisible
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleSetSplitButtonVisible, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubTest, HandleSetSplitButtonVisible, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -818,7 +853,7 @@ HWTEST_F(SessionStageStubTest, HandleSetSplitButtonVisible, Function | SmallTest
  * @tc.desc: test function : HandleSetEnableDragBySystem
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleSetEnableDragBySystem, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubTest, HandleSetEnableDragBySystem, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -837,7 +872,7 @@ HWTEST_F(SessionStageStubTest, HandleSetEnableDragBySystem, Function | SmallTest
  * @tc.desc: test function : HandleSetFullScreenWaterfallMode
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleSetFullScreenWaterfallMode, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubTest, HandleSetFullScreenWaterfallMode, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -856,7 +891,7 @@ HWTEST_F(SessionStageStubTest, HandleSetFullScreenWaterfallMode, Function | Smal
  * @tc.desc: test function : HandleSetSupportEnterWaterfallMode
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleSetSupportEnterWaterfallMode, Function | SmallTest | Level1)
+HWTEST_F(SessionStageStubTest, HandleSetSupportEnterWaterfallMode, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -868,6 +903,114 @@ HWTEST_F(SessionStageStubTest, HandleSetSupportEnterWaterfallMode, Function | Sm
     ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
     data.WriteBool(false);
     ASSERT_EQ(0, sessionStageStub_->HandleSetSupportEnterWaterfallMode(data, reply));
+}
+
+/**
+ * @tc.name: HandleSendContainerModalEvent
+ * @tc.desc: test function : HandleSendContainerModalEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleSendContainerModalEvent, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SEND_CONTAINER_MODAL_EVENT);
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    data.WriteString("name");
+    data.WriteString("value");
+    ASSERT_TRUE(sessionStageStub_ != nullptr);
+    ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+    data.WriteString("name1");
+    data.WriteString("value2");
+    ASSERT_EQ(0, sessionStageStub_->HandleSendContainerModalEvent(data, reply));
+}
+
+/**
+ * @tc.name: HandleNotifyHighlightChange
+ * @tc.desc: test function : HandleNotifyHighlightChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifyHighlightChange, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+ 
+    data.WriteBool(false);
+    ASSERT_TRUE(sessionStageStub_ != nullptr);
+    ASSERT_EQ(0, sessionStageStub_->HandleNotifyHighlightChange(data, reply));
+}
+
+/**
+ * @tc.name: HandleNotifyWindowCrossAxisChange
+ * @tc.desc: test function : HandleNotifyWindowCrossAxisChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifyWindowCrossAxisChange, TestSize.Level1)
+{
+    sptr<SessionStageMocker> sessionStageStub = sptr<SessionStageMocker>::MakeSptr();
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    CrossAxisState state  = CrossAxisState::STATE_CROSS;
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_CROSS_AXIS);
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    data.WriteUint32(static_cast<uint32_t>(state));
+    EXPECT_CALL(*sessionStageStub, NotifyWindowCrossAxisChange(state)).Times(1);
+    sessionStageStub->OnRemoteRequest(code, data, reply, option);
+    MessageParcel data2;
+    data2.WriteBool(true);
+    EXPECT_EQ(sessionStageStub->HandleNotifyWindowCrossAxisChange(data, reply), ERR_INVALID_DATA);
+    MessageParcel data3;
+    data2.WriteUint32(1000);
+    EXPECT_EQ(sessionStageStub->HandleNotifyWindowCrossAxisChange(data, reply), ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandleNotifyRotationChange
+ * @tc.desc: test function : HandleNotifyRotationChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifyRotationChange, Function | SmallTest | Level1)
+{
+    sptr<SessionStageMocker> sessionStageStub = sptr<SessionStageMocker>::MakeSptr();
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    RotationChangeInfo info = { RotationChangeType::WINDOW_WILL_ROTATE, 0, 0, { 0, 0, 2720, 1270 } };
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_ROTATION_CHANGE);
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    data.WriteUint32(static_cast<uint32_t>(info.type_));
+    data.WriteUint32(info.orientation_);
+    data.WriteUint64(info.displayId_);
+    data.WriteInt32(info.displayRect_.posX_);
+    data.WriteInt32(info.displayRect_.posY_);
+    data.WriteUint32(info.displayRect_.width_);
+    data.WriteUint32(info.displayRect_.height_);
+    sessionStageStub->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(sessionStageStub_->HandleNotifyRotationChange(data, reply), ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandleNotifyRotationProperty
+ * @tc.desc: test function : HandleNotifyRotationProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifyRotationProperty, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    data.WriteInt32(0);
+    data.WriteInt32(1);
+    data.WriteInt32(1);
+    data.WriteUint32(1);
+    data.WriteUint32(1);
+    data.WriteUint32(0);
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_ROTATION_PROPERTY);
+    EXPECT_TRUE(sessionStageStub_ != nullptr);
+    EXPECT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
 }
 }
 }

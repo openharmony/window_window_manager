@@ -16,6 +16,8 @@
 #include "window_scene_config.h"
 
 #include "config_policy_utils.h"
+#include "libxml/parser.h"
+#include "libxml/tree.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
 
@@ -40,8 +42,10 @@ const std::map<std::string, WindowSceneConfig::ValueType> WindowSceneConfig::con
     { "miniWidth",                                    WindowSceneConfig::ValueType::INTS },
     { "miniHeight",                                   WindowSceneConfig::ValueType::INTS },
     { "showInLandscapeMode",                          WindowSceneConfig::ValueType::INTS },
+    { "singleHandCompatibleMode",                     WindowSceneConfig::ValueType::MAP },
     { "mainWindowSizeLimits",                         WindowSceneConfig::ValueType::MAP },
     { "subWindowSizeLimits",                          WindowSceneConfig::ValueType::MAP },
+    { "dialogWindowSizeLimits",                       WindowSceneConfig::ValueType::MAP },
     { "windowAnimation",                              WindowSceneConfig::ValueType::MAP },
     { "keyboardAnimation",                            WindowSceneConfig::ValueType::MAP },
     { "animationIn",                                  WindowSceneConfig::ValueType::MAP },
@@ -51,6 +55,7 @@ const std::map<std::string, WindowSceneConfig::ValueType> WindowSceneConfig::con
     { "appWindows",                                   WindowSceneConfig::ValueType::MAP },
     { "cornerRadius",                                 WindowSceneConfig::ValueType::MAP },
     { "shadow",                                       WindowSceneConfig::ValueType::MAP },
+    { "shadowDark",                                   WindowSceneConfig::ValueType::MAP },
     { "focused",                                      WindowSceneConfig::ValueType::MAP },
     { "unfocused",                                    WindowSceneConfig::ValueType::MAP },
     { "decor",                                        WindowSceneConfig::ValueType::MAP },
@@ -65,6 +70,9 @@ const std::map<std::string, WindowSceneConfig::ValueType> WindowSceneConfig::con
     { "opacityEnd",                                   WindowSceneConfig::ValueType::POSITIVE_FLOATS },
     { "elevation",                                    WindowSceneConfig::ValueType::POSITIVE_FLOATS },
     { "alpha",                                        WindowSceneConfig::ValueType::POSITIVE_FLOATS },
+    { "singleHandScale",                              WindowSceneConfig::ValueType::POSITIVE_FLOATS },
+    { "heightChangeRatio",                            WindowSceneConfig::ValueType::POSITIVE_FLOATS },
+    { "widthChangeRatio",                             WindowSceneConfig::ValueType::POSITIVE_FLOATS },
     { "rotation",                                     WindowSceneConfig::ValueType::FLOATS },
     { "translate",                                    WindowSceneConfig::ValueType::FLOATS },
     { "offsetX",                                      WindowSceneConfig::ValueType::FLOATS },

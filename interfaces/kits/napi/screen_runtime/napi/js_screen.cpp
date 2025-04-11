@@ -306,10 +306,14 @@ napi_value CreateJsScreenObject(napi_env env, sptr<Screen>& screen)
     ScreenId screenId = info->GetScreenId();
     napi_set_named_property(env, objValue, "id",
         CreateJsValue(env, screenId == SCREEN_ID_INVALID ? -1 : static_cast<int64_t>(screenId)));
+    ScreenId rsId = info->GetRsId();
+    napi_set_named_property(env, objValue, "rsId",
+        CreateJsValue(env, screenId == SCREEN_ID_INVALID ? -1 : static_cast<int64_t>(rsId)));
     ScreenId parentId = info->GetParentId();
     napi_set_named_property(env, objValue, "parent",
         CreateJsValue(env, parentId == SCREEN_ID_INVALID ? -1 : static_cast<int64_t>(parentId)));
     napi_set_named_property(env, objValue, "orientation", CreateJsValue(env, info->GetOrientation()));
+    napi_set_named_property(env, objValue, "serialNumber", CreateJsValue(env, info->GetSerialNumber()));
     napi_set_named_property(env, objValue, "sourceMode", CreateJsValue(env, info->GetSourceMode()));
     napi_set_named_property(env, objValue, "activeModeIndex", CreateJsValue(env, info->GetModeId()));
     napi_set_named_property(env, objValue, "supportedModeInfo", CreateJsScreenModeArrayObject(env, info->GetModes()));

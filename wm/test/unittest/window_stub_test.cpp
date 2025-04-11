@@ -14,8 +14,8 @@
  */
 
 #include <gtest/gtest.h>
-#include "window_stub.h"
 #include "window_agent.h"
+#include "window_stub.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -30,13 +30,9 @@ public:
     sptr<WindowStub> windowStub_;
 };
 
-void WindowStubTest::SetUpTestCase()
-{
-}
+void WindowStubTest::SetUpTestCase() {}
 
-void WindowStubTest::TearDownTestCase()
-{
-}
+void WindowStubTest::TearDownTestCase() {}
 
 void WindowStubTest::SetUp()
 {
@@ -45,9 +41,7 @@ void WindowStubTest::SetUp()
     windowStub_ = new WindowAgent(window);
 }
 
-void WindowStubTest::TearDown()
-{
-}
+void WindowStubTest::TearDown() {}
 
 namespace {
 /**
@@ -55,7 +49,7 @@ namespace {
  * @tc.desc: test InterfaceToken check failed
  * @tc.type: FUNC
  */
-HWTEST_F(WindowStubTest, OnRemoteRequest01, Function | SmallTest | Level2)
+HWTEST_F(WindowStubTest, OnRemoteRequest01, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -83,7 +77,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest01, Function | SmallTest | Level2)
  * @tc.desc: test TRANS_ID_UPDATE_WINDOW_RECT
  * @tc.type: FUNC
  */
-HWTEST_F(WindowStubTest, OnRemoteRequest02, Function | SmallTest | Level2)
+HWTEST_F(WindowStubTest, OnRemoteRequest02, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -111,7 +105,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest02, Function | SmallTest | Level2)
  * @tc.desc: test TRANS_ID_UPDATE_AVOID_AREA success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowStubTest, OnRemoteRequest03, Function | SmallTest | Level2)
+HWTEST_F(WindowStubTest, OnRemoteRequest03, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -135,7 +129,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest03, Function | SmallTest | Level2)
  * @tc.desc: test TRANS_ID_UPDATE_AVOID_AREA success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowStubTest, OnRemoteRequest04, Function | SmallTest | Level2)
+HWTEST_F(WindowStubTest, OnRemoteRequest04, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -157,7 +151,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest04, Function | SmallTest | Level2)
  * @tc.desc: test TRANS_ID_DUMP_INFO success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowStubTest, OnRemoteRequest05, Function | SmallTest | Level2)
+HWTEST_F(WindowStubTest, OnRemoteRequest05, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -180,7 +174,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest05, Function | SmallTest | Level2)
  * @tc.desc: test TRANS_ID_DUMP_INFO failed
  * @tc.type: FUNC
  */
-HWTEST_F(WindowStubTest, OnRemoteRequest06, Function | SmallTest | Level2)
+HWTEST_F(WindowStubTest, OnRemoteRequest06, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -200,7 +194,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest06, Function | SmallTest | Level2)
  * @tc.desc: test TRANS_ID_NOTIFY_CLIENT_POINT_UP success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowStubTest, OnRemoteRequest07, Function | SmallTest | Level2)
+HWTEST_F(WindowStubTest, OnRemoteRequest07, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -222,7 +216,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest07, Function | SmallTest | Level2)
  * @tc.desc: test TRANS_ID_NOTIFY_CLIENT_POINT_UP success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowStubTest, OnRemoteRequest08, Function | SmallTest | Level2)
+HWTEST_F(WindowStubTest, OnRemoteRequest08, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -241,7 +235,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest08, Function | SmallTest | Level2)
  * @tc.desc: test TRANS_ID_NOTIFY_FOREGROUND_INTERACTIVE_STATUS success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowStubTest, OnRemoteRequest09, Function | SmallTest | Level2)
+HWTEST_F(WindowStubTest, OnRemoteRequest09, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -259,7 +253,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest09, Function | SmallTest | Level2)
  * @tc.desc: test TRANS_ID_NOTIFY_FOREGROUND_INTERACTIVE_STATUS success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowStubTest, OnRemoteRequest10, Function | SmallTest | Level2)
+HWTEST_F(WindowStubTest, OnRemoteRequest10, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -268,9 +262,6 @@ HWTEST_F(WindowStubTest, OnRemoteRequest10, Function | SmallTest | Level2)
 
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, static_cast<int>(ERR_TRANSACTION_FAILED));
-
-    IWindow::WindowMessage msgId = IWindow::WindowMessage::TRANS_ID_UPDATE_WINDOW_RECT;
-    EXPECT_EQ(msgId, IWindow::WindowMessage::TRANS_ID_UPDATE_WINDOW_RECT);
 }
 
 /**
@@ -278,7 +269,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest10, Function | SmallTest | Level2)
  * @tc.desc: test TRANS_ID_NOTIFY_FOREGROUND_INTERACTIVE_STATUS success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowStubTest, OnRemoteRequest11, Function | SmallTest | Level2)
+HWTEST_F(WindowStubTest, OnRemoteRequest11, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -308,7 +299,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest11, Function | SmallTest | Level2)
     code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_OCCUPIED_AREA_AND_RECT);
     windowStub_->OnRemoteRequest(code, data, reply, option);
     code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_ACTIVE_STATUS);
-    
+
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_NE(res, 10);
 }
@@ -318,7 +309,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest11, Function | SmallTest | Level2)
  * @tc.desc: test TRANS_ID_NOTIFY_FOREGROUND_INTERACTIVE_STATUS success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowStubTest, OnRemoteRequest12, Function | SmallTest | Level2)
+HWTEST_F(WindowStubTest, OnRemoteRequest12, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -358,7 +349,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest12, Function | SmallTest | Level2)
  * @tc.desc: test TRANS_ID_UPDATE_WINDOW_RECT success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowStubTest, OnRemoteRequest13, Function | SmallTest | Level2)
+HWTEST_F(WindowStubTest, OnRemoteRequest13, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -376,7 +367,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest13, Function | SmallTest | Level2)
  * @tc.desc: test TRANS_ID_UPDATE_WINDOW_MODE success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowStubTest, OnRemoteRequest14, Function | SmallTest | Level2)
+HWTEST_F(WindowStubTest, OnRemoteRequest14, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -394,7 +385,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest14, Function | SmallTest | Level2)
  * @tc.desc: test TRANS_ID_UPDATE_MODE_SUPPORT_INFO success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowStubTest, OnRemoteRequest15, Function | SmallTest | Level2)
+HWTEST_F(WindowStubTest, OnRemoteRequest15, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -412,7 +403,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest15, Function | SmallTest | Level2)
  * @tc.desc: test TRANS_ID_UPDATE_FOCUS_STATUS success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowStubTest, OnRemoteRequest16, Function | SmallTest | Level2)
+HWTEST_F(WindowStubTest, OnRemoteRequest16, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -430,7 +421,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest16, Function | SmallTest | Level2)
  * @tc.desc: test TRANS_ID_UPDATE_AVOID_AREA success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowStubTest, OnRemoteRequest17, Function | SmallTest | Level2)
+HWTEST_F(WindowStubTest, OnRemoteRequest17, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -448,7 +439,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest17, Function | SmallTest | Level2)
  * @tc.desc: test TRANS_ID_UPDATE_WINDOW_STATE success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowStubTest, OnRemoteRequest18, Function | SmallTest | Level2)
+HWTEST_F(WindowStubTest, OnRemoteRequest18, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -467,7 +458,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest18, Function | SmallTest | Level2)
  * @tc.desc: test TRANS_ID_UPDATE_DRAG_EVENT success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowStubTest, OnRemoteRequest19, Function | SmallTest | Level2)
+HWTEST_F(WindowStubTest, OnRemoteRequest19, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -488,7 +479,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest19, Function | SmallTest | Level2)
  * @tc.desc: test TRANS_ID_UPDATE_DISPLAY_ID success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowStubTest, OnRemoteRequest20, Function | SmallTest | Level2)
+HWTEST_F(WindowStubTest, OnRemoteRequest20, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -506,7 +497,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest20, Function | SmallTest | Level2)
  * @tc.desc: test TRANS_ID_UPDATE_OCCUPIED_AREA success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowStubTest, OnRemoteRequest21, Function | SmallTest | Level2)
+HWTEST_F(WindowStubTest, OnRemoteRequest21, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -524,7 +515,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest21, Function | SmallTest | Level2)
  * @tc.desc: test TRANS_ID_UPDATE_OCCUPIED_AREA_AND_RECT success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowStubTest, OnRemoteRequest22, Function | SmallTest | Level2)
+HWTEST_F(WindowStubTest, OnRemoteRequest22, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -542,7 +533,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest22, Function | SmallTest | Level2)
  * @tc.desc: test TRANS_ID_UPDATE_ACTIVE_STATUS success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowStubTest, OnRemoteRequest23, Function | SmallTest | Level2)
+HWTEST_F(WindowStubTest, OnRemoteRequest23, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -560,7 +551,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest23, Function | SmallTest | Level2)
  * @tc.desc: test TRANS_ID_GET_WINDOW_PROPERTY success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowStubTest, OnRemoteRequest24, Function | SmallTest | Level2)
+HWTEST_F(WindowStubTest, OnRemoteRequest24, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -578,7 +569,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest24, Function | SmallTest | Level2)
  * @tc.desc: test TRANS_ID_NOTIFY_OUTSIDE_PRESSED success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowStubTest, OnRemoteRequest25, Function | SmallTest | Level2)
+HWTEST_F(WindowStubTest, OnRemoteRequest25, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -596,7 +587,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest25, Function | SmallTest | Level2)
  * @tc.desc: test TRANS_ID_NOTIFY_SCREEN_SHOT success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowStubTest, OnRemoteRequest26, Function | SmallTest | Level2)
+HWTEST_F(WindowStubTest, OnRemoteRequest26, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -614,7 +605,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest26, Function | SmallTest | Level2)
  * @tc.desc: test TRANS_ID_NOTIFY_DESTROY success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowStubTest, OnRemoteRequest27, Function | SmallTest | Level2)
+HWTEST_F(WindowStubTest, OnRemoteRequest27, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -632,7 +623,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest27, Function | SmallTest | Level2)
  * @tc.desc: test TRANS_ID_NOTIFY_FOREGROUND success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowStubTest, OnRemoteRequest28, Function | SmallTest | Level2)
+HWTEST_F(WindowStubTest, OnRemoteRequest28, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -650,7 +641,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest28, Function | SmallTest | Level2)
  * @tc.desc: test TRANS_ID_NOTIFY_BACKGROUND success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowStubTest, OnRemoteRequest29, Function | SmallTest | Level2)
+HWTEST_F(WindowStubTest, OnRemoteRequest29, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -668,7 +659,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest29, Function | SmallTest | Level2)
  * @tc.desc: test TRANS_ID_DUMP_INFO success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowStubTest, OnRemoteRequest30, Function | SmallTest | Level2)
+HWTEST_F(WindowStubTest, OnRemoteRequest30, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -686,7 +677,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest30, Function | SmallTest | Level2)
  * @tc.desc: test TRANS_ID_NOTIFY_CLIENT_POINT_UP success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowStubTest, OnRemoteRequest31, Function | SmallTest | Level2)
+HWTEST_F(WindowStubTest, OnRemoteRequest31, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -704,7 +695,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest31, Function | SmallTest | Level2)
  * @tc.desc: test TRANS_ID_UPDATE_ZOOM_TRANSFORM success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowStubTest, OnRemoteRequest32, Function | SmallTest | Level2)
+HWTEST_F(WindowStubTest, OnRemoteRequest32, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -722,7 +713,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest32, Function | SmallTest | Level2)
  * @tc.desc: test TRANS_ID_RESTORE_SPLIT_WINDOW_MODE success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowStubTest, OnRemoteRequest33, Function | SmallTest | Level2)
+HWTEST_F(WindowStubTest, OnRemoteRequest33, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -740,7 +731,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest33, Function | SmallTest | Level2)
  * @tc.desc: test TRANS_ID_CONSUME_KEY_EVENT success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowStubTest, OnRemoteRequest34, Function | SmallTest | Level2)
+HWTEST_F(WindowStubTest, OnRemoteRequest34, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -758,7 +749,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest34, Function | SmallTest | Level2)
  * @tc.desc: test TRANS_ID_NOTIFY_FOREGROUND_INTERACTIVE_STATUS success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowStubTest, OnRemoteRequest35, Function | SmallTest | Level2)
+HWTEST_F(WindowStubTest, OnRemoteRequest35, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -776,7 +767,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest35, Function | SmallTest | Level2)
  * @tc.desc: test TRANS_ID_UPDATE_DRAG_EVENT fail
  * @tc.type: FUNC
  */
-HWTEST_F(WindowStubTest, OnRemoteRequest36, Function | SmallTest | Level2)
+HWTEST_F(WindowStubTest, OnRemoteRequest36, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -791,6 +782,6 @@ HWTEST_F(WindowStubTest, OnRemoteRequest36, Function | SmallTest | Level2)
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 5);
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

@@ -33,6 +33,7 @@ public:
 
     sptr<DisplayInfo> GetDefaultDisplayInfo() override;
     sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) override;
+    sptr<DisplayInfo> GetVisibleAreaDisplayInfoById(DisplayId displayId) override;
     sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) override;
     DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow) override;
 
@@ -42,7 +43,7 @@ public:
     DMError SetVirtualScreenSurface(ScreenId screenId, sptr<IBufferProducer> surface) override;
     DMError SetOrientation(ScreenId screenId, Orientation orientation) override;
     std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId,
-        DmErrorCode* errorCode = nullptr) override;
+        DmErrorCode* errorCode = nullptr, bool isUseDma = false) override;
     DMError IsScreenRotationLocked(bool& isLocked) override;
     DMError SetScreenRotationLocked(bool isLocked) override;
     DMError SetScreenRotationLockedFromJs(bool isLocked) override;
@@ -99,7 +100,7 @@ public:
     DMError RemoveSurfaceNodeFromDisplay(DisplayId displayId,
         std::shared_ptr<class RSSurfaceNode>& surfaceNode) override;
     DMError ResizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height) override;
-    DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds) override;
+    DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds, std::vector<DisplayId>& displayIds) override;
     std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution() override;
 private:
     static inline BrokerDelegator<DisplayManagerProxy> delegator_;

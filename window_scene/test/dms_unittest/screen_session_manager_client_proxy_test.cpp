@@ -61,15 +61,16 @@ void ScreenSessionManagerClientProxyTest::TearDown()
  * @tc.desc: OnScreenConnectionChanged test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerClientProxyTest, OnScreenConnectionChanged, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerClientProxyTest, OnScreenConnectionChanged, TestSize.Level1)
 {
-    ScreenId screenId = 0;
     ScreenEvent screenEvent = ScreenEvent::CONNECTED;
-    ScreenId rsId = 0;
-    std::string name;
-
+    SessionOption option = {
+        .rsId_ = 0,
+        .isExtend_ = false,
+        .screenId_ = 0,
+    };
     ASSERT_TRUE(screenSessionManagerClientProxy_ != nullptr);
-    screenSessionManagerClientProxy_->OnScreenConnectionChanged(screenId, screenEvent, rsId, name, false);
+    screenSessionManagerClientProxy_->OnScreenConnectionChanged(option, screenEvent);
 }
 
 /**
@@ -77,7 +78,7 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, OnScreenConnectionChanged, Functio
  * @tc.desc: SwitchUserCallback test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerClientProxyTest, SwitchUserCallback, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerClientProxyTest, SwitchUserCallback, TestSize.Level1)
 {
     std::vector<int32_t> oldScbPids {0, 1};
     int32_t currentScbPid = 0;
@@ -91,7 +92,7 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, SwitchUserCallback, Function | Sma
  * @tc.desc: OnScreenExtendChanged test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerClientProxyTest, OnScreenExtendChanged, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerClientProxyTest, OnScreenExtendChanged, TestSize.Level1)
 {
     ScreenId mainScreenId = 0;
     ScreenId extendScreenId = 0;
@@ -105,7 +106,7 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, OnScreenExtendChanged, Function | 
  * @tc.desc: OnPropertyChanged test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerClientProxyTest, OnPropertyChanged, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerClientProxyTest, OnPropertyChanged, TestSize.Level1)
 {
     ScreenId screenId = 0;
     ScreenProperty property;
@@ -120,7 +121,7 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, OnPropertyChanged, Function | Smal
  * @tc.desc: OnSuperFoldStatusChanged test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerClientProxyTest, OnSuperFoldStatusChanged, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerClientProxyTest, OnSuperFoldStatusChanged, TestSize.Level1)
 {
     ScreenId screenId = 0;
     SuperFoldStatus superFoldStatus = SuperFoldStatus::UNKNOWN;
@@ -134,7 +135,7 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, OnSuperFoldStatusChanged, Function
  * @tc.desc: OnPowerStatusChanged test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerClientProxyTest, OnPowerStatusChanged, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerClientProxyTest, OnPowerStatusChanged, TestSize.Level1)
 {
     DisplayPowerEvent event = DisplayPowerEvent::DISPLAY_ON;
     EventStatus status = EventStatus::BEGIN;
@@ -149,7 +150,7 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, OnPowerStatusChanged, Function | S
  * @tc.desc: OnSensorRotationChanged test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerClientProxyTest, OnSensorRotationChanged, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerClientProxyTest, OnSensorRotationChanged, TestSize.Level1)
 {
     ScreenId screenId = 0;
     float sensorRotation = 0;
@@ -163,7 +164,7 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, OnSensorRotationChanged, Function 
  * @tc.desc: OnHoverStatusChanged test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerClientProxyTest, OnHoverStatusChanged, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerClientProxyTest, OnHoverStatusChanged, TestSize.Level1)
 {
     ScreenId screenId = 0;
     int32_t hoverStatus = 0;
@@ -177,7 +178,7 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, OnHoverStatusChanged, Function | S
  * @tc.desc: OnScreenOrientationChanged test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerClientProxyTest, OnScreenOrientationChanged, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerClientProxyTest, OnScreenOrientationChanged, TestSize.Level1)
 {
     ScreenId screenId = 0;
     float screenOrientation = 0;
@@ -191,7 +192,7 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, OnScreenOrientationChanged, Functi
  * @tc.desc: OnScreenRotationLockedChanged test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerClientProxyTest, OnScreenRotationLockedChanged, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerClientProxyTest, OnScreenRotationLockedChanged, TestSize.Level1)
 {
     ScreenId screenId = 0;
     bool isLocked = false;
@@ -205,7 +206,7 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, OnScreenRotationLockedChanged, Fun
  * @tc.desc: OnDisplayStateChanged test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerClientProxyTest, OnDisplayStateChanged, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerClientProxyTest, OnDisplayStateChanged, TestSize.Level1)
 {
     ScreenId screenId = 0;
     sptr<DisplayInfo> displayInfo = new DisplayInfo();
@@ -223,7 +224,7 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, OnDisplayStateChanged, Function | 
  * @tc.desc: OnGetSurfaceNodeIdsFromMissionIdsChanged test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerClientProxyTest, OnGetSurfaceNodeIdsFromMissionIdsChanged, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerClientProxyTest, OnGetSurfaceNodeIdsFromMissionIdsChanged, TestSize.Level1)
 {
     std::vector<uint64_t> missionIds = {0, 1};
     std::vector<uint64_t> surfaceNodeIds;
@@ -237,7 +238,7 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, OnGetSurfaceNodeIdsFromMissionIdsC
  * @tc.desc: OnUpdateFoldDisplayMode test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerClientProxyTest, OnUpdateFoldDisplayMode, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerClientProxyTest, OnUpdateFoldDisplayMode, TestSize.Level1)
 {
     FoldDisplayMode displayMode = FoldDisplayMode::MAIN;
 
@@ -250,7 +251,7 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, OnUpdateFoldDisplayMode, Function 
  * @tc.desc: OnScreenshot test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerClientProxyTest, OnScreenshot, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerClientProxyTest, OnScreenshot, TestSize.Level1)
 {
     ScreenId screenId = 0;
 
@@ -263,7 +264,7 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, OnScreenshot, Function | SmallTest
  * @tc.desc: OnImmersiveStateChanged test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerClientProxyTest, OnImmersiveStateChanged, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerClientProxyTest, OnImmersiveStateChanged, TestSize.Level1)
 {
     bool immersive = false;
 
@@ -276,7 +277,7 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, OnImmersiveStateChanged, Function 
  * @tc.desc: SetDisplayNodeScreenId test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerClientProxyTest, SetDisplayNodeScreenId, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerClientProxyTest, SetDisplayNodeScreenId, TestSize.Level1)
 {
     ScreenId screenId = 0;
     ScreenId displayNodeScreenId = 0;
@@ -290,7 +291,7 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, SetDisplayNodeScreenId, Function |
  * @tc.desc: SetVirtualPixelRatioSystem test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerClientProxyTest, SetVirtualPixelRatioSystem, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerClientProxyTest, SetVirtualPixelRatioSystem, TestSize.Level1)
 {
     ScreenId screenId = 0;
     float virtualPixelRatio = 1.0f;
@@ -304,7 +305,7 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, SetVirtualPixelRatioSystem, Functi
  * @tc.desc: OnFoldStatusChangedReportUE test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerClientProxyTest, OnFoldStatusChangedReportUE, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerClientProxyTest, OnFoldStatusChangedReportUE, TestSize.Level1)
 {
     std::vector<std::string> screenFoldInfo = {"0", "0", "0", "0"};
 
@@ -317,7 +318,7 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, OnFoldStatusChangedReportUE, Funct
  * @tc.desc: ScreenCaptureNotify test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerClientProxyTest, ScreenCaptureNotify, Function | SmallTest | Level2)
+HWTEST_F(ScreenSessionManagerClientProxyTest, ScreenCaptureNotify, TestSize.Level1)
 {
     ScreenId screenId = 0;
     int32_t uid = 0;

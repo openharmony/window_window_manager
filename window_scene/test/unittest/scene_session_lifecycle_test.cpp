@@ -69,7 +69,7 @@ namespace {
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, Foreground01, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, Foreground01, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "Foreground01";
@@ -110,7 +110,7 @@ HWTEST_F(SceneSessionLifecycleTest, Foreground01, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, Foreground02, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, Foreground02, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "Foreground02";
@@ -134,7 +134,7 @@ HWTEST_F(SceneSessionLifecycleTest, Foreground02, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, Foreground03, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, Foreground03, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "Foreground03";
@@ -159,7 +159,7 @@ HWTEST_F(SceneSessionLifecycleTest, Foreground03, Function | SmallTest | Level2)
  * @tc.desc: Foreground04 function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, Foreground04, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, Foreground04, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "Foreground04";
@@ -181,7 +181,7 @@ HWTEST_F(SceneSessionLifecycleTest, Foreground04, Function | SmallTest | Level2)
  * @tc.desc: Foreground05 function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, Foreground05, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, Foreground05, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "Foreground05";
@@ -213,7 +213,7 @@ HWTEST_F(SceneSessionLifecycleTest, Foreground05, Function | SmallTest | Level2)
  * @tc.desc: Foreground06 function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, Foreground06, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, Foreground06, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "Foreground06";
@@ -250,7 +250,7 @@ HWTEST_F(SceneSessionLifecycleTest, Foreground06, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, Background01, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, Background01, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "Background01";
@@ -288,7 +288,7 @@ HWTEST_F(SceneSessionLifecycleTest, Background01, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, Background02, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, Background02, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "Background02";
@@ -313,7 +313,7 @@ HWTEST_F(SceneSessionLifecycleTest, Background02, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, Background04, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, Background04, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "Background04";
@@ -340,7 +340,7 @@ HWTEST_F(SceneSessionLifecycleTest, Background04, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, BackgroundTask01, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, BackgroundTask01, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "BackgroundTask01";
@@ -384,7 +384,7 @@ HWTEST_F(SceneSessionLifecycleTest, BackgroundTask01, Function | SmallTest | Lev
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, BackgroundTask02, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, BackgroundTask02, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "BackgroundTask02";
@@ -410,7 +410,7 @@ HWTEST_F(SceneSessionLifecycleTest, BackgroundTask02, Function | SmallTest | Lev
  * @tc.desc: BackgroundTask03 function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, BackgroundTask03, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, BackgroundTask03, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "BackgroundTask03";
@@ -458,7 +458,7 @@ HWTEST_F(SceneSessionLifecycleTest, BackgroundTask03, Function | SmallTest | Lev
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, DisconnectTask01, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, DisconnectTask01, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "DisconnectTask01";
@@ -505,7 +505,7 @@ HWTEST_F(SceneSessionLifecycleTest, DisconnectTask01, Function | SmallTest | Lev
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, DisconnectTask02, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, DisconnectTask02, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "DisconnectTask02";
@@ -533,7 +533,7 @@ HWTEST_F(SceneSessionLifecycleTest, DisconnectTask02, Function | SmallTest | Lev
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, Disconnect, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, Disconnect, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "Disconnect";
@@ -558,7 +558,7 @@ HWTEST_F(SceneSessionLifecycleTest, Disconnect, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, Disconnect2, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, Disconnect2, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "Disconnect2";
@@ -585,7 +585,7 @@ HWTEST_F(SceneSessionLifecycleTest, Disconnect2, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, Disconnect3, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, Disconnect3, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "Disconnect3";
@@ -624,7 +624,7 @@ HWTEST_F(SceneSessionLifecycleTest, Disconnect3, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, UpdateActiveStatus01, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, UpdateActiveStatus01, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "UpdateActiveStatus01";
@@ -652,7 +652,7 @@ HWTEST_F(SceneSessionLifecycleTest, UpdateActiveStatus01, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, UpdateActiveStatus02, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, UpdateActiveStatus02, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "UpdateActiveStatus02";
@@ -677,7 +677,7 @@ HWTEST_F(SceneSessionLifecycleTest, UpdateActiveStatus02, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, UpdateActiveStatus03, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, UpdateActiveStatus03, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "UpdateActiveStatus03";
@@ -726,7 +726,7 @@ HWTEST_F(SceneSessionLifecycleTest, UpdateActiveStatus03, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, UpdateActiveStatus04, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, UpdateActiveStatus04, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "UpdateActiveStatus04";
@@ -750,7 +750,7 @@ HWTEST_F(SceneSessionLifecycleTest, UpdateActiveStatus04, Function | SmallTest |
  * @tc.desc: Connect
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, Connect, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, Connect, TestSize.Level0)
 {
     SessionInfo info;
     info.bundleName_ = "Connect";
@@ -775,7 +775,7 @@ HWTEST_F(SceneSessionLifecycleTest, Connect, Function | SmallTest | Level2)
  * @tc.desc: ConnectInner01
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, ConnectInner01, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, ConnectInner01, TestSize.Level0)
 {
     SessionInfo info;
     info.bundleName_ = "ConnectInner01";
@@ -792,7 +792,7 @@ HWTEST_F(SceneSessionLifecycleTest, ConnectInner01, Function | SmallTest | Level
 
     auto result = sceneSession->ConnectInner(mockSessionStage, nullptr, nullptr, systemConfig,
         property, nullptr, -1, -1, "session2");
-    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
+    ASSERT_EQ(result, WSError::WS_OK);
 
     result = sceneSession->ConnectInner(mockSessionStage, nullptr, nullptr, systemConfig,
         property, nullptr, -1, -1, "session1");
@@ -808,7 +808,7 @@ HWTEST_F(SceneSessionLifecycleTest, ConnectInner01, Function | SmallTest | Level
  * @tc.desc: ConnectInner02
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, ConnectInner02, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, ConnectInner02, TestSize.Level0)
 {
     SessionInfo info;
     info.bundleName_ = "ConnectInner02";
@@ -840,7 +840,7 @@ HWTEST_F(SceneSessionLifecycleTest, ConnectInner02, Function | SmallTest | Level
  * @tc.desc: Reconnect
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, Reconnect, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, Reconnect, TestSize.Level0)
 {
     SessionInfo info;
     info.bundleName_ = "Reconnect";
@@ -872,7 +872,7 @@ HWTEST_F(SceneSessionLifecycleTest, Reconnect, Function | SmallTest | Level2)
  * @tc.desc: ReconnectInner
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, ReconnectInner, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, ReconnectInner, TestSize.Level0)
 {
     SessionInfo info;
     info.bundleName_ = "ReconnectInner";
@@ -905,6 +905,11 @@ HWTEST_F(SceneSessionLifecycleTest, ReconnectInner, Function | SmallTest | Level
     property->windowState_ = WindowState::STATE_DESTROYED;
     res = sceneSession->ReconnectInner(property);
     ASSERT_EQ(res, WSError::WS_ERROR_INVALID_PARAM);
+
+    property->windowState_ = WindowState::STATE_SHOWN;
+    sceneSession->pcFoldScreenController_ = nullptr;
+    res = sceneSession->ReconnectInner(property);
+    ASSERT_EQ(res, WSError::WS_OK);
 }
 
 /**
@@ -912,7 +917,7 @@ HWTEST_F(SceneSessionLifecycleTest, ReconnectInner, Function | SmallTest | Level
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, PendingSessionActivation, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, PendingSessionActivation, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "PendingSessionActivation";
@@ -953,49 +958,30 @@ HWTEST_F(SceneSessionLifecycleTest, PendingSessionActivation, Function | SmallTe
 }
 
 /**
- * @tc.name: TerminateSession
+ * @tc.name: PendingSessionActivation02
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, TerminateSession, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, PendingSessionActivation02, TestSize.Level1)
 {
     SessionInfo info;
-    info.abilityName_ = "TerminateSession";
-    info.bundleName_ = "TerminateSession";
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback =
-            sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    EXPECT_NE(specificCallback, nullptr);
+    info.abilityName_ = "PendingSessionActivation";
+    info.bundleName_ = "PendingSessionActivation";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->isActive_ = true;
-
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    property->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
-    sceneSession->SetSessionProperty(property);
-
     sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
-
-    sptr<AAFwk::SessionInfo> info1 = nullptr;
-    WSError result = sceneSession->TerminateSession(info1);
-    ASSERT_EQ(result, WSError::WS_OK);
-
-    sceneSession->isTerminating_ = true;
-    result = sceneSession->TerminateSession(abilitySessionInfo);
-    ASSERT_EQ(result, WSError::WS_OK);
-    sceneSession->isTerminating_ = false;
-
-    result = sceneSession->TerminateSession(abilitySessionInfo);
+    abilitySessionInfo->reuseDelegatorWindow = true;
+    auto result = sceneSession->PendingSessionActivation(abilitySessionInfo);
     ASSERT_EQ(result, WSError::WS_OK);
 }
 
 /**
- * @tc.name: TerminateSession01
+ * @tc.name: TerminateSession
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, TerminateSession01, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, TerminateSession, TestSize.Level0)
 {
     sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
     ASSERT_NE(nullptr, abilitySessionInfo);
@@ -1009,39 +995,13 @@ HWTEST_F(SceneSessionLifecycleTest, TerminateSession01, Function | SmallTest | L
         [](const SessionInfo& info, bool needStartCaller, bool isFromBroker){};
     session.isTerminating_ = false;
     ASSERT_EQ(WSError::WS_OK, sceneSession->TerminateSession(abilitySessionInfo));
-}
-
-/**
- * @tc.name: NotifySessionException
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionLifecycleTest, NotifySessionException, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "NotifySessionException";
-    info.bundleName_ = "NotifySessionException";
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback =
-            sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    EXPECT_NE(specificCallback, nullptr);
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
-    sceneSession->isActive_ = true;
-
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    property->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
-    sceneSession->SetSessionProperty(property);
-
-    sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
 
     sptr<AAFwk::SessionInfo> info1 = nullptr;
-    WSError result = sceneSession->NotifySessionException(info1);
-    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
-
-    result = sceneSession->NotifySessionException(abilitySessionInfo);
-    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
+    ASSERT_EQ(WSError::WS_OK, sceneSession->TerminateSession(info1));
+    sceneSession->isTerminating_ = true;
+    ASSERT_EQ(WSError::WS_OK, sceneSession->TerminateSession(abilitySessionInfo));
+    sceneSession->isTerminating_ = false;
+    ASSERT_EQ(WSError::WS_OK, sceneSession->TerminateSession(abilitySessionInfo));
 }
 
 /**
@@ -1049,17 +1009,15 @@ HWTEST_F(SceneSessionLifecycleTest, NotifySessionException, Function | SmallTest
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, NotifySessionException01, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, NotifySessionException01, TestSize.Level0)
 {
     sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
     ASSERT_NE(nullptr, abilitySessionInfo);
-    bool needRemoveSession = true;
     OHOS::Rosen::Session session(info);
     session.isTerminating_ = true;
-    sceneSession->NotifySessionException(abilitySessionInfo, needRemoveSession);
-    sceneSession->GetLastSafeRect();
-    WSRect rect;
-    sceneSession->SetLastSafeRect(rect);
+    ExceptionInfo exceptionInfo;
+    WSError ret = sceneSession->NotifySessionException(abilitySessionInfo, exceptionInfo);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_PERMISSION, ret);
 }
 
 /**
@@ -1067,7 +1025,7 @@ HWTEST_F(SceneSessionLifecycleTest, NotifySessionException01, Function | SmallTe
  * @tc.desc: NotifySessionForeground
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, NotifySessionForeground, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, NotifySessionForeground, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "Foreground01";
@@ -1096,7 +1054,7 @@ HWTEST_F(SceneSessionLifecycleTest, NotifySessionForeground, Function | SmallTes
  * @tc.desc: NotifySessionFullScreen
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, NotifySessionFullScreen, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, NotifySessionFullScreen, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "FullScreen01";
@@ -1123,7 +1081,7 @@ HWTEST_F(SceneSessionLifecycleTest, NotifySessionFullScreen, Function | SmallTes
  * @tc.desc: NotifySessionBackground
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, NotifySessionBackground, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, NotifySessionBackground, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "Background01";
@@ -1146,51 +1104,6 @@ HWTEST_F(SceneSessionLifecycleTest, NotifySessionBackground, Function | SmallTes
     sceneSession->sessionStage_ = mockSessionStage;
     sceneSession->NotifySessionBackground(reason, withAnimation, isFromInnerkits);
     ASSERT_EQ(ret, 1);
-}
-
-/**
- * @tc.name: NotifySessionExceptionInner
- * @tc.desc: NotifySessionExceptionInner
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionLifecycleTest, NotifySessionExceptionInner, Function | SmallTest | Level2)
-{
-    sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
-    ASSERT_NE(nullptr, abilitySessionInfo);
-    bool needRemoveSession = true;
-
-    SessionInfo info;
-    info.abilityName_ = "NotifySessionExceptionInner";
-    info.bundleName_ = "NotifySessionExceptionInner";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
-    sceneSession->isTerminating_ = false;
-    auto res = sceneSession->NotifySessionExceptionInner(nullptr, needRemoveSession, true);
-    ASSERT_EQ(res, WSError::WS_OK);
-
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(nullptr, property);
-    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    sceneSession->SetSessionProperty(property);
-    sceneSession->clientIdentityToken_ = "session1";
-    abilitySessionInfo->identityToken = "session2";
-    res = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, needRemoveSession, true);
-    ASSERT_EQ(res, WSError::WS_OK);
-
-    sceneSession->isTerminating_ = true;
-    res = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, needRemoveSession, false);
-    ASSERT_EQ(res, WSError::WS_OK);
-
-    sceneSession->isTerminating_ = false;
-    res = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, needRemoveSession, false);
-    ASSERT_EQ(res, WSError::WS_OK);
-
-    sceneSession->sessionExceptionFunc_ = [](const SessionInfo& info, bool removeSession, bool startFail) {};
-    ASSERT_NE(nullptr, sceneSession->sessionExceptionFunc_);
-    sceneSession->jsSceneSessionExceptionFunc_ = [](const SessionInfo& info, bool removeSession, bool startFail) {};
-    ASSERT_NE(nullptr, sceneSession->jsSceneSessionExceptionFunc_);
-    res = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, needRemoveSession, false);
-    ASSERT_EQ(res, WSError::WS_OK);
 }
 }
 }

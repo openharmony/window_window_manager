@@ -28,6 +28,7 @@ namespace {
     constexpr int32_t MOTION_ACTION_RIGHT_LANDSCAPE = 3;
     constexpr int32_t MOTION_ACTION_TENT_MODE_OFF = 0;
     constexpr int32_t MOTION_ACTION_TENT_MODE_ON = 1;
+    constexpr int32_t MOTION_ACTION_TENT_MODE_HOVER = 2;
     const int32_t MOTION_TYPE_ROTATION = 700;
     const int32_t MOTION_TYPE_TENT = 2800;
 #endif
@@ -159,12 +160,23 @@ void MotionTentSubscriber::UnsubscribeMotionSensor()
 
 void TentMotionEventCallback(const MotionSensorEvent& motionData)
 {
-    if (motionData.status == MOTION_ACTION_TENT_MODE_ON) {
-        ScreenTentProperty::HandleSensorEventInput(true);
-    } else if (motionData.status == MOTION_ACTION_TENT_MODE_OFF) {
-        ScreenTentProperty::HandleSensorEventInput(false);
+    TLOGI(WmsLogTag::DMS, "tent mode status %{public}d", motionData.status);
+    if (motionData.dataLen < 1 || motionData.data == nullptr) {
+        TLOGE(WmsLogTag::DMS, "tent mode datalen %{public}d", motionData.dataLen);
+        return;
+    }
+    uint32_t tentData = static_cast<uint32_t>(motionData.data[0]);
+    int realHall = static_cast<int>(tentData & 0xFF);
+    if (realHall != 0 && realHall != 1) {
+        TLOGW(WmsLogTag::DMS, "tent mode invalid hall : %{public}d", realHall);
+        realHall = -1;
+    }
+
+    if (motionData.status == MOTION_ACTION_TENT_MODE_OFF || motionData.status == MOTION_ACTION_TENT_MODE_ON ||
+        motionData.status == MOTION_ACTION_TENT_MODE_HOVER) {
+        ScreenTentProperty::HandleSensorEventInput(motionData.status, realHall);
     } else {
-        TLOGI(WmsLogTag::DMS, "tent motion:%{public}d invalid", motionData.status);
+        TLOGE(WmsLogTag::DMS, "tent motion:%{public}d invalid", motionData.status);
     }
 }
 #endif

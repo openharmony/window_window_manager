@@ -187,6 +187,13 @@ napi_value JsDisplay::GetCutoutInfo(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnGetCutoutInfo(env, info) : nullptr;
 }
 
+napi_value JsDisplay::GetDisplayCapability(napi_env env, napi_callback_info info)
+{
+    WLOGI("GetDisplayCapability is called");
+    JsDisplay* me = CheckParamsAndGetThis<JsDisplay>(env, info);
+    return (me != nullptr) ? me->OnGetDisplayCapability(env, info) : nullptr;
+}
+
 napi_value JsDisplay::GetAvailableArea(napi_env env, napi_callback_info info)
 {
     WLOGI("GetAvailableArea is called");
@@ -503,6 +510,23 @@ napi_value JsDisplay::OnGetAvailableArea(napi_env env, napi_callback_info info)
     return result;
 }
 
+napi_value JsDisplay::OnGetDisplayCapability(napi_env env, napi_callback_info info)
+{
+    WLOGI("OnGetDisplayCapability is called");
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    std::string capabilitInfo;
+    DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(display_->GetDisplayCapability(capabilitInfo));
+    if (ret == DmErrorCode::DM_OK) {
+        WLOGI("JsDisplay::OnGetDisplayCapability success, displayCapability = %{public}s", capabilitInfo.c_str());
+    } else {
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(ret)));
+        WLOGE("JsDisplay::OnGetDisplayCapability failed.");
+    }
+    return CreateJsValue(env, capabilitInfo);
+}
+
 napi_value JsDisplay::OnHasImmersiveWindow(napi_env env, napi_callback_info info)
 {
     WLOGI("OnHasImmersiveWindow is called");
@@ -786,6 +810,15 @@ void NapiSetNamedProperty(napi_env env, napi_value objValue, sptr<DisplayInfo> i
     napi_set_named_property(env, objValue, "availableWidth", CreateJsValue(env, info->GetAvailableWidth()));
     napi_set_named_property(env, objValue, "availableHeight", CreateJsValue(env, info->GetAvailableHeight()));
     napi_set_named_property(env, objValue, "screenShape", CreateJsValue(env, info->GetScreenShape()));
+    if (info->GetDisplaySourceMode() == DisplaySourceMode::MAIN ||
+        info->GetDisplaySourceMode() == DisplaySourceMode::EXTEND) {
+        napi_set_named_property(env, objValue, "x", CreateJsValue(env, info->GetX()));
+        napi_set_named_property(env, objValue, "y", CreateJsValue(env, info->GetY()));
+    } else {
+        napi_set_named_property(env, objValue, "x", NapiGetUndefined(env));
+        napi_set_named_property(env, objValue, "y", NapiGetUndefined(env));
+    }
+    napi_set_named_property(env, objValue, "sourceMode", CreateJsValue(env, info->GetDisplaySourceMode()));
 }
 
 napi_value CreateJsDisplayObject(napi_env env, sptr<Display>& display)
@@ -816,12 +849,13 @@ napi_value CreateJsDisplayObject(napi_env env, sptr<Display>& display)
         std::unique_ptr<JsDisplay> jsDisplay = std::make_unique<JsDisplay>(display);
         napi_wrap(env, objValue, jsDisplay.release(), JsDisplay::Finalizer, nullptr, nullptr);
         BindNativeFunction(env, objValue, "getCutoutInfo", "JsDisplay", JsDisplay::GetCutoutInfo);
+        BindNativeFunction(env, objValue, "getAvailableArea", "JsDisplay", JsDisplay::GetAvailableArea);
         BindNativeFunction(env, objValue, "hasImmersiveWindow", "JsDisplay", JsDisplay::HasImmersiveWindow);
         BindNativeFunction(env, objValue, "getSupportedColorSpaces", "JsDisplay", JsDisplay::GetSupportedColorSpaces);
         BindNativeFunction(env, objValue, "getSupportedHDRFormats", "JsDisplay", JsDisplay::GetSupportedHDRFormats);
-        BindNativeFunction(env, objValue, "getAvailableArea", "JsDisplay", JsDisplay::GetAvailableArea);
         BindNativeFunction(env, objValue, "on", "JsDisplay", JsDisplay::RegisterDisplayManagerCallback);
         BindNativeFunction(env, objValue, "off", "JsDisplay", JsDisplay::UnregisterDisplayManagerCallback);
+        BindNativeFunction(env, objValue, "getDisplayCapability", "JsDisplay", JsDisplay::GetDisplayCapability);
         std::shared_ptr<NativeReference> jsDisplayRef;
         napi_ref result = nullptr;
         napi_create_reference(env, objValue, 1, &result);

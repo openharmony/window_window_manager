@@ -723,6 +723,9 @@ void CheckWindowImplFunctionsPart8(sptr<WindowImpl> window, const uint8_t* data,
 
 void CheckWindowImplFunctionsPart9(sptr<WindowImpl> window, const uint8_t* data, size_t size)
 {
+    if (data == nullptr || size < DATA_MIN_SIZE) {
+        return;
+    }
     std::shared_ptr<IInputEventConsumer> iInputEventConsumer = std::make_shared<IInputEventConsumer>();
     window->SetInputEventConsumer(iInputEventConsumer);
     std::shared_ptr<AppExecFwk::Configuration> configuration = std::make_shared<AppExecFwk::Configuration>();
@@ -745,9 +748,12 @@ void CheckWindowImplFunctionsPart9(sptr<WindowImpl> window, const uint8_t* data,
     sptr<IWindowVisibilityChangedListener> visibilityChangeListener = new WindowVisibilityChangeListener();
     window->RegisterWindowVisibilityChangeListener(visibilityChangeListener);
     window->UnregisterWindowVisibilityChangeListener(visibilityChangeListener);
-    size_t startPos = 0;
     AAFwk::Want want;
-    startPos += GetObject<AAFwk::Want>(want, data + startPos, size - startPos);
+    std::stringstream ss;
+    for (size_t i = 0; i < size; ++i) {
+        ss << data[i];
+    }
+    want.SetParam("__startParams", ss.str());
     window->OnNewWant(want);
 }
 

@@ -55,11 +55,12 @@ public:
     SuperFoldStatus GetCurrentStatus();
 
     FoldStatus MatchSuperFoldStatusToFoldStatus(SuperFoldStatus superFoldStatus);
+
+    void SetSystemKeyboardStatus(bool isTpKeyboardOn = false);
+    bool GetSystemKeyboardStatus();
 private:
     std::atomic<SuperFoldStatus> curState_ = SuperFoldStatus::UNKNOWN;
-
     sptr<FoldCreaseRegion> currentSuperFoldCreaseRegion_ = nullptr;
-
     struct Transition {
         SuperFoldStatus nextState;
         std::function<void (SuperFoldStatusChangeEvents)> action;
@@ -93,6 +94,11 @@ private:
     void HandleHalfFoldToExtendDisplayNotify(sptr<ScreenSession> screenSession);
     void HandleKeyboardOnDisplayNotify(sptr<ScreenSession> screenSession);
     void HandleKeyboardOffDisplayNotify(sptr<ScreenSession> screenSession);
+    void HandleSystemKeyboardStatusDisplayNotify(sptr<ScreenSession> screenSession, bool isTpKeyboardOn = false);
+    void ReportNotifySuperFoldStatusChange(int32_t currentStatus, int32_t nextStatus, float postureAngle);
+
+    static bool ChangeScreenState(bool toHalf);
+    int32_t GetCurrentValidHeight(sptr<ScreenSession> screenSession);
 };
 } // Rosen
 } // OHOS

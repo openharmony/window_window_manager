@@ -71,7 +71,7 @@ namespace {
  * @tc.desc: Normal scenario testing for Window#SetTouchHotAreas
  * @tc.type: FUNC
  */
-HWTEST_F(WindowInputTest, SetTouchHotAreas01, Function | MediumTest | Level3)
+HWTEST_F(WindowInputTest, SetTouchHotAreas01, TestSize.Level1)
 {
     fullScreenWindow_.name = "window_hot_areas.1";
     const sptr<Window>& window = Utils::CreateTestWindow(fullScreenWindow_);
@@ -123,7 +123,7 @@ HWTEST_F(WindowInputTest, SetTouchHotAreas01, Function | MediumTest | Level3)
  * @tc.desc: Abnormal scenario testing for Window#SetTouchHotAreas
  * @tc.type: FUNC
  */
-HWTEST_F(WindowInputTest, SetTouchHotAreas02, Function | MediumTest | Level3)
+HWTEST_F(WindowInputTest, SetTouchHotAreas02, TestSize.Level1)
 {
     fullScreenWindow_.name = "window_hot_areas.2";
     const sptr<Window>& window = Utils::CreateTestWindow(fullScreenWindow_);

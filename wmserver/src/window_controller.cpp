@@ -61,7 +61,7 @@ void WindowController::StartingWindow(sptr<WindowTransitionInfo> info, std::shar
     uint32_t bkgColor, bool isColdStart)
 {
     if (!info || info->GetAbilityToken() == nullptr) {
-        WLOGFE("info or AbilityToken is nullptr!");
+        TLOGE(WmsLogTag::WMS_STARTUP_PAGE, "info or AbilityToken is nullptr!");
         return;
     }
     StartAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER, static_cast<int32_t>(TraceTaskId::STARTING_WINDOW),
@@ -69,7 +69,7 @@ void WindowController::StartingWindow(sptr<WindowTransitionInfo> info, std::shar
     auto node = windowRoot_->FindWindowNodeWithToken(info->GetAbilityToken());
     if (node == nullptr) {
         if (!isColdStart) {
-            WLOGFE("no windowNode exists but is hot start!");
+            TLOGE(WmsLogTag::WMS_STARTUP_PAGE, "no windowNode exists but is hot start!");
             return;
         }
         node = StartingWindow::CreateWindowNode(info, GenWindowId());
@@ -84,20 +84,21 @@ void WindowController::StartingWindow(sptr<WindowTransitionInfo> info, std::shar
         }
     } else {
         if (node->stateMachine_.IsWindowNodeShownOrShowing()) {
-            WLOGFI("WindowId:%{public}u state:%{public}u!",
+            TLOGI(WmsLogTag::WMS_STARTUP_PAGE, "WindowId: %{public}u state: %{public}u!",
                 node->GetWindowId(), static_cast<uint32_t>(node->stateMachine_.GetCurrentState()));
             return;
         }
         if (WindowHelper::IsValidWindowMode(info->GetWindowMode()) &&
             (node->GetWindowMode() != info->GetWindowMode())) {
-            WLOGFW("set starting window mode. starting mode is: %{public}u, window mode is:%{public}u.",
+            TLOGI(WmsLogTag::WMS_STARTUP_PAGE,
+                "set starting window mode. starting mode is: %{public}u, window mode is: %{public}u.",
                 node->GetWindowMode(), info->GetWindowMode());
             node->SetWindowMode(info->GetWindowMode());
         }
     }
 
     if (!WindowHelper::CheckSupportWindowMode(node->GetWindowMode(), node->GetWindowModeSupportType(), info)) {
-        WLOGFE("need to cancel starting window");
+        TLOGE(WmsLogTag::WMS_STARTUP_PAGE, "need to cancel starting window");
         return;
     }
 
@@ -107,35 +108,36 @@ void WindowController::StartingWindow(sptr<WindowTransitionInfo> info, std::shar
     StartingWindow::DrawStartingWindow(node, pixelMap, bkgColor, isColdStart);
     FlushWindowInfo(node->GetWindowId());
     node->startingWindowShown_ = true;
-    WLOGFI("Show success, id:%{public}u!", node->GetWindowId());
+    TLOGI(WmsLogTag::WMS_STARTUP_PAGE, "Show success, id:%{public}u!", node->GetWindowId());
 }
 
 void WindowController::CancelStartingWindow(sptr<IRemoteObject> abilityToken)
 {
     auto node = windowRoot_->FindWindowNodeWithToken(abilityToken);
     if (node == nullptr) {
-        WLOGFE("Node is nullptr");
+        TLOGE(WmsLogTag::WMS_STARTUP_PAGE, "Node is nullptr");
         return;
     }
     if (!node->startingWindowShown_) {
-        WLOGFE("CancelStartingWindow failed because client window has shown id:%{public}u", node->GetWindowId());
+        TLOGI(WmsLogTag::WMS_STARTUP_PAGE, "failed because client window has shown id:%{public}u",
+            node->GetWindowId());
         return;
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:CancelStartingWindow(%u)", node->GetWindowId());
     FinishAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER, static_cast<int32_t>(TraceTaskId::STARTING_WINDOW),
         "wms:async:ShowStartingWindow");
-    WLOGFI("Id:%{public}u!", node->GetWindowId());
+    TLOGI(WmsLogTag::WMS_STARTUP_PAGE, "Id:%{public}u!", node->GetWindowId());
     node->isAppCrash_ = true;
     WMError res = DestroyWindow(node->GetWindowId(), false);
     if (res != WMError::WM_OK) {
-        WLOGFE("DestroyWindow failed!");
+        TLOGE(WmsLogTag::WMS_STARTUP_PAGE, "DestroyWindow failed!");
     }
 }
 
 WMError WindowController::NotifyWindowTransition(sptr<WindowTransitionInfo>& srcInfo,
     sptr<WindowTransitionInfo>& dstInfo)
 {
-    WLOGI("NotifyWindowTransition begin!");
+    TLOGI(WmsLogTag::WMS_STARTUP_PAGE, "begin!");
     sptr<WindowNode> dstNode = nullptr;
     sptr<WindowNode> srcNode = nullptr;
     if (srcInfo) {

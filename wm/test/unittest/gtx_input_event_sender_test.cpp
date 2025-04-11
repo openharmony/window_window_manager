@@ -15,9 +15,9 @@
 
 #include <gtest/gtest.h>
 #include "gtx_input_event_sender.h"
-#include "window_impl.h"
 #include "mock_window_adapter.h"
 #include "singleton_mocker.h"
+#include "window_impl.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -32,21 +32,13 @@ public:
     void SetUp() override;
     void TearDown() override;
 };
-void GtxInputEventSenderTest::SetUpTestCase()
-{
-}
+void GtxInputEventSenderTest::SetUpTestCase() {}
 
-void GtxInputEventSenderTest::TearDownTestCase()
-{
-}
+void GtxInputEventSenderTest::TearDownTestCase() {}
 
-void GtxInputEventSenderTest::SetUp()
-{
-}
+void GtxInputEventSenderTest::SetUp() {}
 
-void GtxInputEventSenderTest::TearDown()
-{
-}
+void GtxInputEventSenderTest::TearDown() {}
 
 namespace {
 /**
@@ -54,7 +46,7 @@ namespace {
  * @tc.desc: GetTouchEvent.
  * @tc.type: FUNC
  */
-HWTEST_F(GtxInputEventSenderTest, GetTouchEvent, Function | SmallTest | Level2)
+HWTEST_F(GtxInputEventSenderTest, GetTouchEvent, TestSize.Level1)
 {
     int32_t testPointerId = 1234;
     auto pointerEvent = MMI::PointerEvent::Create();
@@ -70,6 +62,6 @@ HWTEST_F(GtxInputEventSenderTest, GetTouchEvent, Function | SmallTest | Level2)
     EXPECT_EQ(testPointerId, touchEvent.pointerId);
 }
 
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

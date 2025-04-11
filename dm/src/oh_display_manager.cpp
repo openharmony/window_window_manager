@@ -417,7 +417,7 @@ NativeDisplayManager_ErrorCode OH_NativeDisplayManager_GetFoldDisplayMode(
         TLOGE(WmsLogTag::DMS, "[DMNDK] device is not foldable.");
         return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_DEVICE_NOT_SUPPORTED;
     }
-    FoldDisplayMode foldMode = DisplayManager::GetInstance().GetFoldDisplayMode();
+    FoldDisplayMode foldMode = DisplayManager::GetInstance().GetFoldDisplayModeForExternal();
     switch (foldMode) {
         case FoldDisplayMode::SUB:
             *foldDisplayMode = NativeDisplayManager_FoldDisplayMode::DISPLAY_MANAGER_FOLD_DISPLAY_MODE_SUB;

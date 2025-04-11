@@ -17,13 +17,13 @@
 #include "mock_RSIWindowAnimationController.h"
 
 #include "remote_animation.h"
+#include "scene_board_judgement.h"
 #include "session_manager.h"
 #include "starting_window.h"
-#include "window_transition_info.h"
-#include "window_property.h"
-#include "window_agent.h"
 #include "window_adapter.h"
-#include "scene_board_judgement.h"
+#include "window_agent.h"
+#include "window_property.h"
+#include "window_transition_info.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -39,21 +39,13 @@ public:
     void TearDown() override;
 };
 
-void WindowAdapterTest::SetUpTestCase()
-{
-}
+void WindowAdapterTest::SetUpTestCase() {}
 
-void WindowAdapterTest::TearDownTestCase()
-{
-}
+void WindowAdapterTest::TearDownTestCase() {}
 
-void WindowAdapterTest::SetUp()
-{
-}
+void WindowAdapterTest::SetUp() {}
 
-void WindowAdapterTest::TearDown()
-{
-}
+void WindowAdapterTest::TearDown() {}
 
 namespace {
 /**
@@ -61,7 +53,7 @@ namespace {
  * @tc.desc: WindowAdapter/AddWindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterTest, AddWindow, Function | SmallTest | Level2)
+HWTEST_F(WindowAdapterTest, AddWindow, TestSize.Level1)
 {
     sptr<WindowProperty> windowProperty = nullptr;
     WindowAdapter windowAdapter;
@@ -76,7 +68,7 @@ HWTEST_F(WindowAdapterTest, AddWindow, Function | SmallTest | Level2)
  * @tc.desc: WindowAdapter/RemoveWindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterTest, RemoveWindow, Function | SmallTest | Level2)
+HWTEST_F(WindowAdapterTest, RemoveWindow, TestSize.Level1)
 {
     uint32_t windowId = 0;
     bool isFromInnerkits = false;
@@ -92,7 +84,7 @@ HWTEST_F(WindowAdapterTest, RemoveWindow, Function | SmallTest | Level2)
  * @tc.desc: WindowAdapter/RequestFocus
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterTest, RequestFocus, Function | SmallTest | Level2)
+HWTEST_F(WindowAdapterTest, RequestFocus, TestSize.Level1)
 {
     uint32_t windowId = 0;
     WindowAdapter windowAdapter;
@@ -103,11 +95,29 @@ HWTEST_F(WindowAdapterTest, RequestFocus, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: RequestFocusStatusBySA
+ * @tc.desc: WindowAdapter/RequestFocusStatusBySA
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, RequestFocusStatusBySA, TestSize.Level1)
+{
+    WindowAdapter windowAdapter;
+    int32_t persistentId = 1;
+    bool isFocused = true;
+    bool byForeground = true;
+    FocusChangeReason reason = FocusChangeReason::CLICK;
+ 
+    auto result = windowAdapter.RequestFocusStatusBySA(
+        persistentId, isFocused, byForeground, reason);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PERMISSION);
+}
+
+/**
  * @tc.name: GetUIContentRemoteObj
  * @tc.desc: WindowAdapter/GetUIContentRemoteObj
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterTest, GetUIContentRemoteObj, Function | SmallTest | Level2)
+HWTEST_F(WindowAdapterTest, GetUIContentRemoteObj, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
     windowAdapter.isProxyValid_ = true;
@@ -122,7 +132,7 @@ HWTEST_F(WindowAdapterTest, GetUIContentRemoteObj, Function | SmallTest | Level2
  * @tc.desc: WindowAdapter/CheckWindowId
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterTest, CheckWindowId, Function | SmallTest | Level2)
+HWTEST_F(WindowAdapterTest, CheckWindowId, TestSize.Level1)
 {
     int32_t windowId = 0;
     int32_t pid = 0;
@@ -138,7 +148,7 @@ HWTEST_F(WindowAdapterTest, CheckWindowId, Function | SmallTest | Level2)
  * @tc.desc: WindowAdapter/SkipSnapshotForAppProcess
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterTest, SkipSnapshotForAppProcess, Function | SmallTest | Level2)
+HWTEST_F(WindowAdapterTest, SkipSnapshotForAppProcess, TestSize.Level1)
 {
     int32_t pid = 1000;
     bool skip = true;
@@ -153,7 +163,7 @@ HWTEST_F(WindowAdapterTest, SkipSnapshotForAppProcess, Function | SmallTest | Le
  * @tc.desc: WindowAdapter/SetWindowAnimationController
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterTest, SetWindowAnimationController, Function | SmallTest | Level2)
+HWTEST_F(WindowAdapterTest, SetWindowAnimationController, TestSize.Level1)
 {
     sptr<RSIWindowAnimationController> controller = nullptr;
     WindowAdapter windowAdapter;
@@ -168,7 +178,7 @@ HWTEST_F(WindowAdapterTest, SetWindowAnimationController, Function | SmallTest |
  * @tc.desc: WindowAdapter/GetAvoidAreaByType
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterTest, GetAvoidAreaByType, Function | SmallTest | Level2)
+HWTEST_F(WindowAdapterTest, GetAvoidAreaByType, TestSize.Level1)
 {
     uint32_t windowId = 0;
     AvoidAreaType type = AvoidAreaType::TYPE_CUTOUT;
@@ -185,7 +195,7 @@ HWTEST_F(WindowAdapterTest, GetAvoidAreaByType, Function | SmallTest | Level2)
  * @tc.desc: WindowAdapter/NotifyServerReadyToMoveOrDrag
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterTest, NotifyServerReadyToMoveOrDrag, Function | SmallTest | Level2)
+HWTEST_F(WindowAdapterTest, NotifyServerReadyToMoveOrDrag, TestSize.Level1)
 {
     uint32_t windowId = 0;
     sptr<WindowProperty> windowProperty = nullptr;
@@ -202,7 +212,7 @@ HWTEST_F(WindowAdapterTest, NotifyServerReadyToMoveOrDrag, Function | SmallTest 
  * @tc.desc: WindowAdapter/ProcessPointDown
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterTest, ProcessPointDown, Function | SmallTest | Level2)
+HWTEST_F(WindowAdapterTest, ProcessPointDown, TestSize.Level1)
 {
     uint32_t windowId = 0;
     bool isPointDown = false;
@@ -219,7 +229,7 @@ HWTEST_F(WindowAdapterTest, ProcessPointDown, Function | SmallTest | Level2)
  * @tc.desc: WindowAdapter/ToggleShownStateForAllAppWindows
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterTest, ToggleShownStateForAllAppWindows, Function | SmallTest | Level2)
+HWTEST_F(WindowAdapterTest, ToggleShownStateForAllAppWindows, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
 
@@ -233,7 +243,7 @@ HWTEST_F(WindowAdapterTest, ToggleShownStateForAllAppWindows, Function | SmallTe
  * @tc.desc: WindowAdapter/GetSnapshotByWindowId
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterTest, GetSnapshotByWindowId, Function | SmallTest | Level2)
+HWTEST_F(WindowAdapterTest, GetSnapshotByWindowId, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
     int32_t persistentId = -1;
@@ -248,7 +258,7 @@ HWTEST_F(WindowAdapterTest, GetSnapshotByWindowId, Function | SmallTest | Level2
  * @tc.desc: WindowAdapter/InitWMSProxy
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterTest, InitWMSProxy, Function | SmallTest | Level2)
+HWTEST_F(WindowAdapterTest, InitWMSProxy, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
     auto ret = windowAdapter.InitWMSProxy();
@@ -256,27 +266,11 @@ HWTEST_F(WindowAdapterTest, InitWMSProxy, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: RegisterSessionRecoverCallbackFunc
- * @tc.desc: WindowAdapter/RegisterSessionRecoverCallbackFunc
- * @tc.type: FUNC
- */
-HWTEST_F(WindowAdapterTest, RegisterSessionRecoverCallbackFunc, Function | SmallTest | Level2)
-{
-    WindowAdapter windowAdapter;
-    int32_t persistentId = 1;
-    auto testFunc = [] {
-        return WMError::WM_OK;
-    };
-    windowAdapter.RegisterSessionRecoverCallbackFunc(persistentId, testFunc);
-    ASSERT_NE(windowAdapter.sessionRecoverCallbackFuncMap_[persistentId], nullptr);
-}
-
-/**
  * @tc.name: WindowManagerAndSessionRecover
  * @tc.desc: WindowAdapter/WindowManagerAndSessionRecover
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterTest, WindowManagerAndSessionRecover, Function | SmallTest | Level2)
+HWTEST_F(WindowAdapterTest, WindowManagerAndSessionRecover, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
     int32_t persistentId = 1;
@@ -309,7 +303,7 @@ HWTEST_F(WindowAdapterTest, WindowManagerAndSessionRecover, Function | SmallTest
  * @tc.desc: WindowAdapter/GetUnreliableWindowInfo
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterTest, GetUnreliableWindowInfo, Function | SmallTest | Level2)
+HWTEST_F(WindowAdapterTest, GetUnreliableWindowInfo, TestSize.Level1)
 {
     int32_t windowId = 0;
     std::vector<sptr<UnreliableWindowInfo>> infos;
@@ -324,7 +318,7 @@ HWTEST_F(WindowAdapterTest, GetUnreliableWindowInfo, Function | SmallTest | Leve
  * @tc.desc: WindowAdapter/DestroyAndDisconnectSpecificSession
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterTest, DestroyAndDisconnectSpecificSession, Function | SmallTest | Level2)
+HWTEST_F(WindowAdapterTest, DestroyAndDisconnectSpecificSession, TestSize.Level1)
 {
     uint32_t persistentId = 0;
     WindowAdapter windowAdapter;
@@ -338,7 +332,7 @@ HWTEST_F(WindowAdapterTest, DestroyAndDisconnectSpecificSession, Function | Smal
  * @tc.desc: WindowAdapter/DestroyAndDisconnectSpecificSessionWithDetachCallback
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterTest, DestroyAndDisconnectSpecificSessionWithDetachCallback, Function | SmallTest | Level2)
+HWTEST_F(WindowAdapterTest, DestroyAndDisconnectSpecificSessionWithDetachCallback, TestSize.Level1)
 {
     uint32_t persistentId = 0;
     WindowAdapter windowAdapter;
@@ -352,10 +346,10 @@ HWTEST_F(WindowAdapterTest, DestroyAndDisconnectSpecificSessionWithDetachCallbac
  * @tc.desc: WindowAdapter/UpdateModalExtensionRect
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterTest, UpdateModalExtensionRect, Function | SmallTest | Level2)
+HWTEST_F(WindowAdapterTest, UpdateModalExtensionRect, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
-    Rect rect { 1, 2, 3, 4 };
+    Rect rect{ 1, 2, 3, 4 };
     sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
     ASSERT_NE(token, nullptr);
     windowAdapter.UpdateModalExtensionRect(token, rect);
@@ -369,7 +363,7 @@ HWTEST_F(WindowAdapterTest, UpdateModalExtensionRect, Function | SmallTest | Lev
  * @tc.desc: WindowAdapter/ProcessModalExtensionPointDown
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterTest, ProcessModalExtensionPointDown, Function | SmallTest | Level2)
+HWTEST_F(WindowAdapterTest, ProcessModalExtensionPointDown, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
     sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
@@ -385,7 +379,7 @@ HWTEST_F(WindowAdapterTest, ProcessModalExtensionPointDown, Function | SmallTest
  * @tc.desc: WindowAdapter/AddExtensionWindowStageToSCB
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterTest, AddExtensionWindowStageToSCB, Function | SmallTest | Level2)
+HWTEST_F(WindowAdapterTest, AddExtensionWindowStageToSCB, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
     windowAdapter.AddExtensionWindowStageToSCB(nullptr, nullptr, 0);
@@ -398,7 +392,7 @@ HWTEST_F(WindowAdapterTest, AddExtensionWindowStageToSCB, Function | SmallTest |
  * @tc.desc: WindowAdapter/RemoveExtensionWindowStageFromSCB
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterTest, RemoveExtensionWindowStageFromSCB, Function | SmallTest | Level2)
+HWTEST_F(WindowAdapterTest, RemoveExtensionWindowStageFromSCB, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
     windowAdapter.RemoveExtensionWindowStageFromSCB(nullptr, nullptr);
@@ -411,7 +405,7 @@ HWTEST_F(WindowAdapterTest, RemoveExtensionWindowStageFromSCB, Function | SmallT
  * @tc.desc: WindowAdapter/AddOrRemoveSecureSession
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterTest, AddOrRemoveSecureSession, Function | SmallTest | Level2)
+HWTEST_F(WindowAdapterTest, AddOrRemoveSecureSession, TestSize.Level1)
 {
     int32_t persistentId = 0;
     WindowAdapter windowAdapter;
@@ -425,7 +419,7 @@ HWTEST_F(WindowAdapterTest, AddOrRemoveSecureSession, Function | SmallTest | Lev
  * @tc.desc: WindowAdapter/UpdateExtWindowFlags
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterTest, UpdateExtWindowFlags, Function | SmallTest | Level2)
+HWTEST_F(WindowAdapterTest, UpdateExtWindowFlags, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
     sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
@@ -441,7 +435,7 @@ HWTEST_F(WindowAdapterTest, UpdateExtWindowFlags, Function | SmallTest | Level2)
  * @tc.desc: WindowAdapter/GetVisibilityWindowInfo
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterTest, GetVisibilityWindowInfo, Function | SmallTest | Level2)
+HWTEST_F(WindowAdapterTest, GetVisibilityWindowInfo, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
     std::vector<sptr<WindowVisibilityInfo>> infos;
@@ -455,7 +449,7 @@ HWTEST_F(WindowAdapterTest, GetVisibilityWindowInfo, Function | SmallTest | Leve
  * @tc.desc: WindowAdapter/ReregisterWindowManagerAgent
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterTest, ReregisterWindowManagerAgent, Function | SmallTest | Level2)
+HWTEST_F(WindowAdapterTest, ReregisterWindowManagerAgent, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
     auto displayId = 0;
@@ -466,39 +460,11 @@ HWTEST_F(WindowAdapterTest, ReregisterWindowManagerAgent, Function | SmallTest |
 }
 
 /**
- * @tc.name: RecoverAndReconnectSceneSession
- * @tc.desc: WindowAdapter/RecoverAndReconnectSceneSession
- * @tc.type: FUNC
- */
-HWTEST_F(WindowAdapterTest, RecoverAndReconnectSceneSession, Function | SmallTest | Level2)
-{
-    WindowAdapter windowAdapter;
-    sptr<ISessionStage> iSessionStage;
-    sptr<IWindowEventChannel> eventChannel;
-    sptr<ISession> session = nullptr;
-    sptr<IRemoteObject> token = nullptr;
-    auto ret1 = windowAdapter.RecoverAndReconnectSceneSession(
-        iSessionStage, eventChannel, nullptr, session, nullptr, token);
-    ASSERT_EQ(ret1, WMError::WM_DO_NOTHING);
-
-    windowAdapter.isProxyValid_ = true;
-    auto ret2 = windowAdapter.RecoverAndReconnectSceneSession(
-        iSessionStage, eventChannel, nullptr, session, nullptr, token);
-    ASSERT_EQ(ret2, WMError::WM_DO_NOTHING);
-
-    sptr<IRemoteObject> remotObject = nullptr;
-    windowAdapter.windowManagerServiceProxy_ = iface_cast<IWindowManager>(remotObject);
-    auto ret3 = windowAdapter.RecoverAndReconnectSceneSession(
-        iSessionStage, eventChannel, nullptr, session, nullptr, token);
-    ASSERT_EQ(ret3, WMError::WM_DO_NOTHING);
-}
-
-/**
  * @tc.name: UpdateProperty
  * @tc.desc: WindowAdapter/UpdateProperty
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterTest, UpdateProperty, Function | SmallTest | Level2)
+HWTEST_F(WindowAdapterTest, UpdateProperty, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
     sptr<WindowProperty> windowProperty = sptr<WindowProperty>::MakeSptr();
@@ -514,7 +480,7 @@ HWTEST_F(WindowAdapterTest, UpdateProperty, Function | SmallTest | Level2)
  * @tc.desc: WindowAdapter/SetWindowGravity
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterTest, SetWindowGravity, Function | SmallTest | Level2)
+HWTEST_F(WindowAdapterTest, SetWindowGravity, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
     windowAdapter.isProxyValid_ = true;
@@ -531,7 +497,7 @@ HWTEST_F(WindowAdapterTest, SetWindowGravity, Function | SmallTest | Level2)
  * @tc.desc: WindowAdapter/NotifyWindowTransition
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterTest, NotifyWindowTransition, Function | SmallTest | Level2)
+HWTEST_F(WindowAdapterTest, NotifyWindowTransition, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
     windowAdapter.isProxyValid_ = true;
@@ -547,7 +513,7 @@ HWTEST_F(WindowAdapterTest, NotifyWindowTransition, Function | SmallTest | Level
  * @tc.desc: WindowAdapter/RaiseToAppTop
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterTest, RaiseToAppTop, Function | SmallTest | Level2)
+HWTEST_F(WindowAdapterTest, RaiseToAppTop, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
     uint32_t windowId = 0;
@@ -568,7 +534,7 @@ HWTEST_F(WindowAdapterTest, RaiseToAppTop, Function | SmallTest | Level2)
  * @tc.desc: WindowAdapter/GetSnapshot
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterTest, GetSnapshot, Function | SmallTest | Level2)
+HWTEST_F(WindowAdapterTest, GetSnapshot, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
     int32_t windowId = 0;
@@ -581,7 +547,7 @@ HWTEST_F(WindowAdapterTest, GetSnapshot, Function | SmallTest | Level2)
  * @tc.desc: WindowAdapter/GetWindowAnimationTargets
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterTest, GetWindowAnimationTargets, Function | SmallTest | Level2)
+HWTEST_F(WindowAdapterTest, GetWindowAnimationTargets, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
     std::vector<uint32_t> missionIds;
@@ -599,7 +565,7 @@ HWTEST_F(WindowAdapterTest, GetWindowAnimationTargets, Function | SmallTest | Le
  * @tc.desc: WindowAdapter/GetMaximizeMode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterTest, GetMaximizeMode, Function | SmallTest | Level2)
+HWTEST_F(WindowAdapterTest, GetMaximizeMode, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
     windowAdapter.isProxyValid_ = true;
@@ -613,7 +579,7 @@ HWTEST_F(WindowAdapterTest, GetMaximizeMode, Function | SmallTest | Level2)
  * @tc.desc: WindowAdapter/UpdateSessionAvoidAreaListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterTest, UpdateSessionAvoidAreaListener, Function | SmallTest | Level2)
+HWTEST_F(WindowAdapterTest, UpdateSessionAvoidAreaListener, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
     windowAdapter.isProxyValid_ = true;
@@ -629,7 +595,7 @@ HWTEST_F(WindowAdapterTest, UpdateSessionAvoidAreaListener, Function | SmallTest
  * @tc.desc: WindowAdapter/UpdateSessionTouchOutsideListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterTest, UpdateSessionTouchOutsideListener, Function | SmallTest | Level2)
+HWTEST_F(WindowAdapterTest, UpdateSessionTouchOutsideListener, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
     windowAdapter.isProxyValid_ = true;
@@ -645,7 +611,7 @@ HWTEST_F(WindowAdapterTest, UpdateSessionTouchOutsideListener, Function | SmallT
  * @tc.desc: WindowAdapter/SetSessionGravity
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterTest, SetSessionGravity, Function | SmallTest | Level2)
+HWTEST_F(WindowAdapterTest, SetSessionGravity, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
     int32_t persistentId = 0;
@@ -660,7 +626,7 @@ HWTEST_F(WindowAdapterTest, SetSessionGravity, Function | SmallTest | Level2)
  * @tc.desc: WindowAdapter/BindDialogSessionTarget
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterTest, BindDialogSessionTarget, Function | SmallTest | Level2)
+HWTEST_F(WindowAdapterTest, BindDialogSessionTarget, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
     windowAdapter.isProxyValid_ = true;
@@ -676,11 +642,11 @@ HWTEST_F(WindowAdapterTest, BindDialogSessionTarget, Function | SmallTest | Leve
  * @tc.desc: WindowAdapter/GetHostWindowRect
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterTest, GetHostWindowRect, Function | SmallTest | Level2)
+HWTEST_F(WindowAdapterTest, GetHostWindowRect, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
     int32_t hostWindowId = 0;
-    Rect rect = {0, 0, 0, 0};
+    Rect rect = { 0, 0, 0, 0 };
     auto ret = windowAdapter.GetHostWindowRect(hostWindowId, rect);
     ASSERT_EQ(WMError::WM_OK, ret);
 }
@@ -690,7 +656,7 @@ HWTEST_F(WindowAdapterTest, GetHostWindowRect, Function | SmallTest | Level2)
  * @tc.desc: WindowAdapter/GetWindowStyleType
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterTest, GetWindowStyleType, Function | SmallTest | Level2)
+HWTEST_F(WindowAdapterTest, GetWindowStyleType, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
     WindowStyleType windowStyleType = Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT;
@@ -703,7 +669,7 @@ HWTEST_F(WindowAdapterTest, GetWindowStyleType, Function | SmallTest | Level2)
  * @tc.desc: WindowAdapter/SetProcessWatermark
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterTest, SetProcessWatermark, Function | SmallTest | Level2)
+HWTEST_F(WindowAdapterTest, SetProcessWatermark, TestSize.Level1)
 {
     int32_t pid = 1000;
     const std::string watermarkName = "SetProcessWatermarkName";
@@ -715,14 +681,14 @@ HWTEST_F(WindowAdapterTest, SetProcessWatermark, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: ReleaseForegroundSessionScreenLock
- * @tc.desc: WindowAdapter/ReleaseForegroundSessionScreenLock
+ * @tc.name: UpdateScreenLockStatusForApp
+ * @tc.desc: WindowAdapter/UpdateScreenLockStatusForApp
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterTest, ReleaseForegroundSessionScreenLock, Function | SmallTest | Level2)
+HWTEST_F(WindowAdapterTest, UpdateScreenLockStatusForApp, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
-    auto err = windowAdapter.ReleaseForegroundSessionScreenLock();
+    auto err = windowAdapter.UpdateScreenLockStatusForApp("", true);
     ASSERT_EQ(err, WMError::WM_OK);
     auto ret = windowAdapter.InitWMSProxy();
     ASSERT_EQ(ret, true);
@@ -733,7 +699,7 @@ HWTEST_F(WindowAdapterTest, ReleaseForegroundSessionScreenLock, Function | Small
  * @tc.desc: WindowAdapter/CreateAndConnectSpecificSession
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterTest, CreateAndConnectSpecificSession, Function | SmallTest | Level2)
+HWTEST_F(WindowAdapterTest, CreateAndConnectSpecificSession, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
     auto ret = windowAdapter.InitWMSProxy();
@@ -747,8 +713,8 @@ HWTEST_F(WindowAdapterTest, CreateAndConnectSpecificSession, Function | SmallTes
     SystemSessionConfig systemConfig;
     sptr<IRemoteObject> token;
     int32_t id = 101; // 101 is persistentId
-    windowAdapter.CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
-        systemConfig, token);
+    windowAdapter.CreateAndConnectSpecificSession(
+        sessionStage, eventChannel, node, property, id, session, systemConfig, token);
     ASSERT_EQ(session, nullptr);
 }
 
@@ -757,7 +723,7 @@ HWTEST_F(WindowAdapterTest, CreateAndConnectSpecificSession, Function | SmallTes
  * @tc.desc: WindowAdapter/IsPcWindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterTest, IsPcWindow, Function | SmallTest | Level2)
+HWTEST_F(WindowAdapterTest, IsPcWindow, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
     bool isPcWindow = false;
@@ -770,7 +736,7 @@ HWTEST_F(WindowAdapterTest, IsPcWindow, Function | SmallTest | Level2)
  * @tc.desc: WindowAdapter/IsPcOrPadFreeMultiWindowMode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterTest, IsPcOrPadFreeMultiWindowMode, Function | SmallTest | Level2)
+HWTEST_F(WindowAdapterTest, IsPcOrPadFreeMultiWindowMode, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
     bool isPcOrPadFreeMultiWindowMode = false;
@@ -785,13 +751,14 @@ HWTEST_F(WindowAdapterTest, IsPcOrPadFreeMultiWindowMode, Function | SmallTest |
  * @tc.desc: WindowAdapter/IsWindowRectAutoSave
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterTest, IsWindowRectAutoSave, Function | SmallTest | Level2)
+HWTEST_F(WindowAdapterTest, IsWindowRectAutoSave, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
     std::string key = "com.example.recposentryEntryAbility";
     bool enabled = false;
-    auto err = windowAdapter.IsWindowRectAutoSave(key, enabled);
-    ASSERT_EQ(err, WMError::WM_OK);
+    int persistentId = 1;
+    auto err = windowAdapter.IsWindowRectAutoSave(key, enabled, persistentId);
+    ASSERT_EQ(err, WMError::WM_ERROR_INVALID_SESSION);
     auto ret = windowAdapter.InitWMSProxy();
     ASSERT_EQ(ret, true);
 }
@@ -801,10 +768,10 @@ HWTEST_F(WindowAdapterTest, IsWindowRectAutoSave, Function | SmallTest | Level2)
  * @tc.desc: WindowAdapter/GetDisplayIdByWindowId
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterTest, GetDisplayIdByWindowId, Function | SmallTest | Level2)
+HWTEST_F(WindowAdapterTest, GetDisplayIdByWindowId, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
-    const std::vector<uint64_t> windowIds = {1, 2};
+    const std::vector<uint64_t> windowIds = { 1, 2 };
     std::unordered_map<uint64_t, DisplayId> windowDisplayIdMap;
     auto err = windowAdapter.GetDisplayIdByWindowId(windowIds, windowDisplayIdMap);
     ASSERT_EQ(err, WMError::WM_OK);
@@ -815,7 +782,7 @@ HWTEST_F(WindowAdapterTest, GetDisplayIdByWindowId, Function | SmallTest | Level
  * @tc.desc: WindowAdapter/SetGlobalDragResizeType
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterTest, SetGlobalDragResizeType, Function | SmallTest | Level2)
+HWTEST_F(WindowAdapterTest, SetGlobalDragResizeType, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
     DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
@@ -828,7 +795,7 @@ HWTEST_F(WindowAdapterTest, SetGlobalDragResizeType, Function | SmallTest | Leve
  * @tc.desc: WindowAdapter/GetGlobalDragResizeType
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterTest, GetGlobalDragResizeType, Function | SmallTest | Level2)
+HWTEST_F(WindowAdapterTest, GetGlobalDragResizeType, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
     DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
@@ -841,7 +808,7 @@ HWTEST_F(WindowAdapterTest, GetGlobalDragResizeType, Function | SmallTest | Leve
  * @tc.desc: WindowAdapter/SetAppDragResizeType
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterTest, SetAppDragResizeType, Function | SmallTest | Level2)
+HWTEST_F(WindowAdapterTest, SetAppDragResizeType, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
     DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
@@ -855,7 +822,7 @@ HWTEST_F(WindowAdapterTest, SetAppDragResizeType, Function | SmallTest | Level2)
  * @tc.desc: WindowAdapter/GetAppDragResizeType
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterTest, GetAppDragResizeType, Function | SmallTest | Level2)
+HWTEST_F(WindowAdapterTest, GetAppDragResizeType, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
     DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
@@ -863,6 +830,79 @@ HWTEST_F(WindowAdapterTest, GetAppDragResizeType, Function | SmallTest | Level2)
     auto err = windowAdapter.GetAppDragResizeType(bundleName, dragResizeType);
     ASSERT_EQ(err, WMError::WM_OK);
 }
+
+/**
+ * @tc.name: SetAppKeyFramePolicy
+ * @tc.desc: WindowAdapter/SetAppKeyFramePolicy
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, SetAppKeyFramePolicy, TestSize.Level1)
+{
+    WindowAdapter windowAdapter;
+    const std::string bundleName = "test";
+    KeyFramePolicy keyFramePolicy;
+    keyFramePolicy.dragResizeType_ = DragResizeType::RESIZE_KEY_FRAME;
+    auto err = windowAdapter.SetAppKeyFramePolicy(bundleName, keyFramePolicy);
+    ASSERT_EQ(err, WMError::WM_OK);
 }
+
+/**
+ * @tc.name: SetParentWindow
+ * @tc.desc: WindowAdapter/SetParentWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, SetParentWindow, TestSize.Level1)
+{
+    WindowAdapter windowAdapter;
+    int32_t subWindowId = 1;
+    int32_t newParentWindowId = 2;
+    auto err = windowAdapter.SetParentWindow(subWindowId, newParentWindowId);
+    ASSERT_EQ(err, WMError::WM_ERROR_INVALID_WINDOW);
 }
+
+/**
+ * @tc.name: MinimizeByWindowId
+ * @tc.desc: WindowAdapter/MinimizeByWindowId
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, MinimizeByWindowId, TestSize.Level1)
+{
+    WindowAdapter windowAdapter;
+    std::vector<int32_t> windowIds;
+    auto err = windowAdapter.MinimizeByWindowId(windowIds);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, err);
+    auto ret = windowAdapter.InitWMSProxy();
+    ASSERT_EQ(ret, true);
 }
+
+/**
+ * @tc.name: SetForegroundWindowNum
+ * @tc.desc: WindowAdapter/SetForegroundWindowNum
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, SetForegroundWindowNum, Function | SmallTest | Level2)
+{
+    WindowAdapter windowAdapter;
+    int32_t windowNum = 1;
+    auto err = windowAdapter.SetForegroundWindowNum(windowNum);
+    ASSERT_EQ(err, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: ListWindowInfo01
+ * @tc.desc: WindowAdapter/ListWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, ListWindowInfo01, Function | SmallTest | Level2)
+{
+    WindowAdapter windowAdapter;
+    WindowInfoOption windowInfoOption;
+    std::vector<sptr<WindowInfo>> infos;
+    auto err = windowAdapter.ListWindowInfo(windowInfoOption, infos);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, err);
+    auto ret = windowAdapter.InitWMSProxy();
+    ASSERT_EQ(ret, true);
+}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

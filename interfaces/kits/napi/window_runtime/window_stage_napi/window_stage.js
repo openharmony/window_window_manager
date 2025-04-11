@@ -86,16 +86,16 @@ class WindowStage {
     return this.__window_stage__.removeStartingWindow();
   }
 
-  setWindowRectAutoSave(enabled) {
-    return this.__window_stage__.setWindowRectAutoSave(enabled);
+  setWindowRectAutoSave(enabled, isSaveBySpecifiedFlag) {
+    return this.__window_stage__.setWindowRectAutoSave(enabled, isSaveBySpecifiedFlag);
   }
 
   isWindowRectAutoSave() {
     return this.__window_stage__.isWindowRectAutoSave();
   }
 
-  setSupportWindowModes(supportWindowModes) {
-    return this.__window_stage__.setSupportWindowModes(supportWindowModes);
+  setSupportedWindowModes(supportedWindowModes) {
+    return this.__window_stage__.setSupportedWindowModes(supportedWindowModes);
   }
 }
 

@@ -64,7 +64,7 @@ void WSFFRTHelperTest::TearDown()
  * @tc.desc: test function SubmitTask
  * @tc.type: FUNC
  */
-HWTEST_F(WSFFRTHelperTest, SubmitTask001, Function | SmallTest | Level2)
+HWTEST_F(WSFFRTHelperTest, SubmitTask001, TestSize.Level1)
 {
     ASSERT_NE(wsFfrtHelper_, nullptr);
 
@@ -83,7 +83,7 @@ HWTEST_F(WSFFRTHelperTest, SubmitTask001, Function | SmallTest | Level2)
  * @tc.desc: test function SubmitTask in a multithreading case
  * @tc.type: FUNC
  */
-HWTEST_F(WSFFRTHelperTest, SubmitTask002, Function | SmallTest | Level2)
+HWTEST_F(WSFFRTHelperTest, SubmitTask002, TestSize.Level1)
 {
     g_wsFfrtHelper = wsFfrtHelper_;
     ASSERT_NE(g_wsFfrtHelper, nullptr);
@@ -113,7 +113,7 @@ HWTEST_F(WSFFRTHelperTest, SubmitTask002, Function | SmallTest | Level2)
  * @tc.desc: test function CancelTask
  * @tc.type: FUNC
  */
-HWTEST_F(WSFFRTHelperTest, CancelTask001, Function | SmallTest | Level2)
+HWTEST_F(WSFFRTHelperTest, CancelTask001, TestSize.Level1)
 {
     ASSERT_NE(wsFfrtHelper_, nullptr);
 
@@ -133,7 +133,7 @@ HWTEST_F(WSFFRTHelperTest, CancelTask001, Function | SmallTest | Level2)
  * @tc.desc: test function CancelTask in a multithreading case
  * @tc.type: FUNC
  */
-HWTEST_F(WSFFRTHelperTest, CancelTask002, Function | SmallTest | Level2)
+HWTEST_F(WSFFRTHelperTest, CancelTask002, TestSize.Level1)
 {
     g_wsFfrtHelper = wsFfrtHelper_;
     ASSERT_NE(g_wsFfrtHelper, nullptr);

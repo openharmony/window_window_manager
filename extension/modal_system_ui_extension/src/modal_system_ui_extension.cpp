@@ -30,7 +30,7 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr int32_t INVALID_USERID = -1;
-constexpr int32_t MESSAGE_PARCEL_KEY_SIZE = 3;
+constexpr int32_t MESSAGE_PARCEL_KEY_SIZE = 5;
 constexpr int32_t VALUE_TYPE_STRING = 9;
 constexpr uint64_t DISCONNECT_ABILITY_DELAY_TIME_MICROSECONDS = 5000000;
 } // namespace
@@ -106,6 +106,14 @@ bool ModalSystemUiExtension::DialogAbilityConnection::SendWant(const sptr<IRemot
     if (!data.WriteString16(u"parameters") ||
         !data.WriteString16(Str8ToStr16(ModalSystemUiExtension::ToString(want_.GetParams())))) {
         TLOGE(WmsLogTag::WMS_UIEXT, "write parameters failed");
+        return false;
+    }
+    if (!data.WriteString16(u"uri") || !data.WriteString16(Str8ToStr16(want_.GetUri().ToString()))) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "write uri failed");
+        return false;
+    }
+    if (!data.WriteString16(u"flags") || !data.WriteUint32(want_.GetFlags())) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "write flags failed");
         return false;
     }
     int32_t ret = remoteObject->SendRequest(AAFwk::IAbilityConnection::ON_ABILITY_CONNECT_DONE, data, reply, option);

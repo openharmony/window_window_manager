@@ -65,7 +65,7 @@ namespace {
  * @tc.desc: RegistrationTransitionCallback01 func
  * @tc.type: FUNC
  */
-HWTEST_F(FoldScreenStateMachineTest, RegistrationTransitionCallback01, Function | SmallTest | Level1)
+HWTEST_F(FoldScreenStateMachineTest, RegistrationTransitionCallback01, TestSize.Level1)
 {
     std::shared_ptr<TransitionCallback> callback;
     FoldScreenStateMachine fsm;
@@ -78,7 +78,7 @@ HWTEST_F(FoldScreenStateMachineTest, RegistrationTransitionCallback01, Function 
  * @tc.desc: RegistrationTransitionCallback02 func
  * @tc.type: FUNC
  */
-HWTEST_F(FoldScreenStateMachineTest, RegistrationTransitionCallback02, Function | SmallTest | Level1)
+HWTEST_F(FoldScreenStateMachineTest, RegistrationTransitionCallback02, TestSize.Level1)
 {
     std::shared_ptr<TransitionCallback> callback = std::make_shared<TransitionCallback>();
     FoldScreenStateMachine fsm;
@@ -91,7 +91,7 @@ HWTEST_F(FoldScreenStateMachineTest, RegistrationTransitionCallback02, Function 
  * @tc.desc: RegistrationTransitionCallback03 func
  * @tc.type: FUNC
  */
-HWTEST_F(FoldScreenStateMachineTest, RegistrationTransitionCallback03, Function | SmallTest | Level1)
+HWTEST_F(FoldScreenStateMachineTest, RegistrationTransitionCallback03, TestSize.Level1)
 {
     std::shared_ptr<TransitionCallback> callback = std::make_shared<TransitionCallback>();
     FoldScreenStateMachine fsm;
@@ -105,7 +105,7 @@ HWTEST_F(FoldScreenStateMachineTest, RegistrationTransitionCallback03, Function 
  * @tc.desc: RegistrationTransitionCallback04 func
  * @tc.type: FUNC
  */
-HWTEST_F(FoldScreenStateMachineTest, RegistrationTransitionCallback04, Function | SmallTest | Level1)
+HWTEST_F(FoldScreenStateMachineTest, RegistrationTransitionCallback04, TestSize.Level1)
 {
     std::shared_ptr<TransitionCallback> callback = std::make_shared<TransitionCallback>();
     std::shared_ptr<TransitionCallback> callback1 = std::make_shared<TransitionCallback>();
@@ -122,7 +122,7 @@ HWTEST_F(FoldScreenStateMachineTest, RegistrationTransitionCallback04, Function 
  * @tc.desc: UnRegistrationTransitionCallback01 func
  * @tc.type: FUNC
  */
-HWTEST_F(FoldScreenStateMachineTest, UnRegistrationTransitionCallback01, Function | SmallTest | Level1)
+HWTEST_F(FoldScreenStateMachineTest, UnRegistrationTransitionCallback01, TestSize.Level1)
 {
     std::shared_ptr<TransitionCallback> callback;
     FoldScreenStateMachine fsm;
@@ -135,7 +135,7 @@ HWTEST_F(FoldScreenStateMachineTest, UnRegistrationTransitionCallback01, Functio
  * @tc.desc: UnRegistrationTransitionCallback02 func
  * @tc.type: FUNC
  */
-HWTEST_F(FoldScreenStateMachineTest, UnRegistrationTransitionCallback02, Function | SmallTest | Level1)
+HWTEST_F(FoldScreenStateMachineTest, UnRegistrationTransitionCallback02, TestSize.Level1)
 {
     std::shared_ptr<TransitionCallback> callback = std::make_shared<TransitionCallback>();
     FoldScreenStateMachine fsm;
@@ -148,7 +148,7 @@ HWTEST_F(FoldScreenStateMachineTest, UnRegistrationTransitionCallback02, Functio
  * @tc.desc: UnRegistrationTransitionCallback03 func
  * @tc.type: FUNC
  */
-HWTEST_F(FoldScreenStateMachineTest, UnRegistrationTransitionCallback03, Function | SmallTest | Level1)
+HWTEST_F(FoldScreenStateMachineTest, UnRegistrationTransitionCallback03, TestSize.Level1)
 {
     std::shared_ptr<TransitionCallback> callback = std::make_shared<TransitionCallback>();
     FoldScreenStateMachine fsm;
@@ -162,7 +162,7 @@ HWTEST_F(FoldScreenStateMachineTest, UnRegistrationTransitionCallback03, Functio
  * @tc.desc: UnRegistrationTransitionCallback04 func
  * @tc.type: FUNC
  */
-HWTEST_F(FoldScreenStateMachineTest, UnRegistrationTransitionCallback04, Function | SmallTest | Level1)
+HWTEST_F(FoldScreenStateMachineTest, UnRegistrationTransitionCallback04, TestSize.Level1)
 {
     std::shared_ptr<TransitionCallback> callback = std::make_shared<TransitionCallback>();
     std::shared_ptr<TransitionCallback> callback1 = std::make_shared<TransitionCallback>();
@@ -181,7 +181,7 @@ HWTEST_F(FoldScreenStateMachineTest, UnRegistrationTransitionCallback04, Functio
  * @tc.desc: TransitionTo01 func
  * @tc.type: FUNC
  */
-HWTEST_F(FoldScreenStateMachineTest, TransitionTo01, Function | SmallTest | Level1)
+HWTEST_F(FoldScreenStateMachineTest, TransitionTo01, TestSize.Level1)
 {
     FoldScreenState state = FoldScreenState::UNKNOWN;
     FoldScreenStateMachine fsm;
@@ -197,7 +197,7 @@ HWTEST_F(FoldScreenStateMachineTest, TransitionTo01, Function | SmallTest | Leve
  * @tc.desc: TransitionTo02 func
  * @tc.type: FUNC
  */
-HWTEST_F(FoldScreenStateMachineTest, TransitionTo02, Function | SmallTest | Level1)
+HWTEST_F(FoldScreenStateMachineTest, TransitionTo02, TestSize.Level1)
 {
     std::shared_ptr<TransitionCallback> callback = std::make_shared<TransitionCallback>();
     FoldScreenState state = FoldScreenState::UNKNOWN;
@@ -215,7 +215,7 @@ HWTEST_F(FoldScreenStateMachineTest, TransitionTo02, Function | SmallTest | Leve
  * @tc.desc: TransitionTo03 func
  * @tc.type: FUNC
  */
-HWTEST_F(FoldScreenStateMachineTest, TransitionTo03, Function | SmallTest | Level1)
+HWTEST_F(FoldScreenStateMachineTest, TransitionTo03, TestSize.Level1)
 {
     std::shared_ptr<TransitionCallback> callback = std::make_shared<TransitionCallback>();
     FoldScreenState state = FoldScreenState::HALF_FOLDED;
@@ -233,7 +233,7 @@ HWTEST_F(FoldScreenStateMachineTest, TransitionTo03, Function | SmallTest | Leve
  * @tc.desc: TransitionTo04 func
  * @tc.type: FUNC
  */
-HWTEST_F(FoldScreenStateMachineTest, TransitionTo04, Function | SmallTest | Level1)
+HWTEST_F(FoldScreenStateMachineTest, TransitionTo04, TestSize.Level1)
 {
     std::shared_ptr<TransitionCallback> callback = std::make_shared<TransitionCallback>();
     FoldScreenState state = FoldScreenState::FULL;
@@ -251,7 +251,7 @@ HWTEST_F(FoldScreenStateMachineTest, TransitionTo04, Function | SmallTest | Leve
  * @tc.desc: GetCurrentState func
  * @tc.type: FUNC
  */
-HWTEST_F(FoldScreenStateMachineTest, GetCurrentState, Function | SmallTest | Level1)
+HWTEST_F(FoldScreenStateMachineTest, GetCurrentState, TestSize.Level1)
 {
     FoldScreenStateMachine fsm;
     FoldScreenState state = fsm.GetCurrentState();
@@ -263,7 +263,7 @@ HWTEST_F(FoldScreenStateMachineTest, GetCurrentState, Function | SmallTest | Lev
  * @tc.desc: GenStateMachineInfo func
  * @tc.type: FUNC
  */
-HWTEST_F(FoldScreenStateMachineTest, GenStateMachineInfo, Function | SmallTest | Level1)
+HWTEST_F(FoldScreenStateMachineTest, GenStateMachineInfo, TestSize.Level1)
 {
     FoldScreenStateMachine fsm;
     std::string info = fsm.GenStateMachineInfo();

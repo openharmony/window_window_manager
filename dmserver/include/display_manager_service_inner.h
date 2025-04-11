@@ -41,7 +41,8 @@ public:
     sptr<ScreenInfo> GetScreenInfoByDisplayId(DisplayId displayId) const;
     ScreenId GetScreenGroupIdByDisplayId(DisplayId displayId) const;
     sptr<SupportedScreenModes> GetScreenModesByDisplayId(DisplayId displayId) const;
-    std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId, DmErrorCode* errorCode = nullptr) const;
+    std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId, DmErrorCode* errorCode = nullptr,
+        bool isUseDma = false) const;
     void UpdateRSTree(DisplayId displayId, DisplayId parentDisplayId, std::shared_ptr<RSSurfaceNode>& surfaceNode,
         bool isAdd, bool isMultiDisplay);
     void RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener);

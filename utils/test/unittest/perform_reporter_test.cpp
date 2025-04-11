@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include <thread>
 
+#include "input_manager.h"
 #include "perform_reporter.h"
 #include "window_manager_hilog.h"
 
@@ -90,7 +91,7 @@ namespace {
  * @tc.desc: StartEnd test
  * @tc.type: FUNC
  */
-HWTEST_F(PerformReporterTest, StartEnd, Function | SmallTest | Level2)
+HWTEST_F(PerformReporterTest, StartEnd, TestSize.Level1)
 {
     PerformReporter pr = PerformReporter("TestTag", {100, 200, 300}, 10);
     SimuReportProcess(pr, {50, 150, 250, 350, 450});
@@ -102,7 +103,7 @@ HWTEST_F(PerformReporterTest, StartEnd, Function | SmallTest | Level2)
  * @tc.desc: StartEndClear test
  * @tc.type: FUNC
  */
-HWTEST_F(PerformReporterTest, StartEndClear, Function | SmallTest | Level2)
+HWTEST_F(PerformReporterTest, StartEndClear, TestSize.Level1)
 {
     PerformReporter pr = PerformReporter("TestTag", {100, 200, 300}, 3);
     SimuReportProcess(pr, {50, 150, 250});
@@ -114,7 +115,7 @@ HWTEST_F(PerformReporterTest, StartEndClear, Function | SmallTest | Level2)
  * @tc.desc: StartEndInvSeq test
  * @tc.type: FUNC
  */
-HWTEST_F(PerformReporterTest, StartEndInvSeq, Function | SmallTest | Level2)
+HWTEST_F(PerformReporterTest, StartEndInvSeq, TestSize.Level1)
 {
     PerformReporter pr = PerformReporter("TestTag", {100, 200, 300}, 4);
     SimuReportProcess(pr, {250, 150, 50});
@@ -126,7 +127,7 @@ HWTEST_F(PerformReporterTest, StartEndInvSeq, Function | SmallTest | Level2)
  * @tc.desc: PrivateClear test
  * @tc.type: FUNC
  */
-HWTEST_F(PerformReporterTest, PrivateClear, Function | SmallTest | Level2)
+HWTEST_F(PerformReporterTest, PrivateClear, TestSize.Level1)
 {
     PerformReporter pr = PerformReporter("TestTag", {100, 200, 300}, 10);
     SimuReportProcess(pr, {50, 150, 250, 350, 450});
@@ -141,7 +142,7 @@ HWTEST_F(PerformReporterTest, PrivateClear, Function | SmallTest | Level2)
  * @tc.desc: GetMsgString test
  * @tc.type: FUNC
  */
-HWTEST_F(PerformReporterTest, GetMsgString001, Function | SmallTest | Level2)
+HWTEST_F(PerformReporterTest, GetMsgString001, TestSize.Level1)
 {
     WindowInfoReporter windowInfoReporter;
     FullInfoMap infoMap;
@@ -154,7 +155,7 @@ HWTEST_F(PerformReporterTest, GetMsgString001, Function | SmallTest | Level2)
  * @tc.desc: GetMsgString test
  * @tc.type: FUNC
  */
-HWTEST_F(PerformReporterTest, GetMsgString002, Function | SmallTest | Level2)
+HWTEST_F(PerformReporterTest, GetMsgString002, TestSize.Level1)
 {
     WindowInfoReporter windowInfoReporter;
     FullInfoMap infoMap;
@@ -183,7 +184,7 @@ HWTEST_F(PerformReporterTest, GetMsgString002, Function | SmallTest | Level2)
  * @tc.desc: GetMsgString test
  * @tc.type: FUNC
  */
-HWTEST_F(PerformReporterTest, GetMsgString003, Function | SmallTest | Level2)
+HWTEST_F(PerformReporterTest, GetMsgString003, TestSize.Level1)
 {
     WindowInfoReporter windowInfoReporter;
     BundleNameMap infoMap;
@@ -196,7 +197,7 @@ HWTEST_F(PerformReporterTest, GetMsgString003, Function | SmallTest | Level2)
  * @tc.desc: GetMsgString test
  * @tc.type: FUNC
  */
-HWTEST_F(PerformReporterTest, GetMsgString004, Function | SmallTest | Level2)
+HWTEST_F(PerformReporterTest, GetMsgString004, TestSize.Level1)
 {
     WindowInfoReporter windowInfoReporter;
     BundleNameMap infoMap;
@@ -219,7 +220,7 @@ HWTEST_F(PerformReporterTest, GetMsgString004, Function | SmallTest | Level2)
  * @tc.desc: InsertCreateReportInfo test
  * @tc.type: FUNC
  */
-HWTEST_F(PerformReporterTest, InsertCreateReportInfo005, Function | SmallTest | Level2)
+HWTEST_F(PerformReporterTest, InsertCreateReportInfo005, TestSize.Level1)
 {
     int res = 0;
     WindowInfoReporter windowInfoReporter;
@@ -238,7 +239,7 @@ HWTEST_F(PerformReporterTest, InsertCreateReportInfo005, Function | SmallTest | 
  * @tc.desc: UpdateReportInfo test
  * @tc.type: FUNC
  */
-HWTEST_F(PerformReporterTest, UpdateReportInfo006, Function | SmallTest | Level2)
+HWTEST_F(PerformReporterTest, UpdateReportInfo006, TestSize.Level1)
 {
     WindowInfoReporter windowInfoReporter;
     FullInfoMap infoMap;
@@ -254,7 +255,7 @@ HWTEST_F(PerformReporterTest, UpdateReportInfo006, Function | SmallTest | Level2
  * @tc.desc: UpdateReportInfo test
  * @tc.type: FUNC
  */
-HWTEST_F(PerformReporterTest, UpdateReportInfo007, Function | SmallTest | Level2)
+HWTEST_F(PerformReporterTest, UpdateReportInfo007, TestSize.Level1)
 {
     int res = 0;
     WindowInfoReporter windowInfoReporter;
@@ -274,7 +275,7 @@ HWTEST_F(PerformReporterTest, UpdateReportInfo007, Function | SmallTest | Level2
  * @tc.desc: UpdateReportInfo test
  * @tc.type: FUNC
  */
-HWTEST_F(PerformReporterTest, UpdateReportInfo008, Function | SmallTest | Level2)
+HWTEST_F(PerformReporterTest, UpdateReportInfo008, TestSize.Level1)
 {
     WindowInfoReporter windowInfoReporter;
     BundleNameMap infoMap;
@@ -289,7 +290,7 @@ HWTEST_F(PerformReporterTest, UpdateReportInfo008, Function | SmallTest | Level2
  * @tc.desc: UpdateReportInfo test
  * @tc.type: FUNC
  */
-HWTEST_F(PerformReporterTest, UpdateReportInfo009, Function | SmallTest | Level2)
+HWTEST_F(PerformReporterTest, UpdateReportInfo009, TestSize.Level1)
 {
     int res = 0;
     WindowInfoReporter windowInfoReporter;
@@ -308,7 +309,7 @@ HWTEST_F(PerformReporterTest, UpdateReportInfo009, Function | SmallTest | Level2
  * @tc.desc: ReportBackButtonInfoImmediately test
  * @tc.type: FUNC
  */
-HWTEST_F(PerformReporterTest, ReportBackButtonInfoImmediately010, Function | SmallTest | Level2)
+HWTEST_F(PerformReporterTest, ReportBackButtonInfoImmediately010, TestSize.Level1)
 {
     int res = 0;
     WindowInfoReporter windowInfoReporter;
@@ -321,7 +322,7 @@ HWTEST_F(PerformReporterTest, ReportBackButtonInfoImmediately010, Function | Sma
  * @tc.desc: ReportZeroOpacityInfoImmediately test
  * @tc.type: FUNC
  */
-HWTEST_F(PerformReporterTest, ReportZeroOpacityInfoImmediately011, Function | SmallTest | Level2)
+HWTEST_F(PerformReporterTest, ReportZeroOpacityInfoImmediately011, TestSize.Level1)
 {
     int res = 0;
     std::string bundleName;
@@ -338,7 +339,7 @@ HWTEST_F(PerformReporterTest, ReportZeroOpacityInfoImmediately011, Function | Sm
  * @tc.desc: ReportStartWindow test
  * @tc.type: FUNC
  */
-HWTEST_F(PerformReporterTest, ReportStartWindow012, Function | SmallTest | Level2)
+HWTEST_F(PerformReporterTest, ReportStartWindow012, TestSize.Level1)
 {
     int res = 0;
     std::string bundleName = "bundleName";
@@ -353,7 +354,7 @@ HWTEST_F(PerformReporterTest, ReportStartWindow012, Function | SmallTest | Level
  * @tc.desc: ReportRecordedInfos test
  * @tc.type: FUNC
  */
-HWTEST_F(PerformReporterTest, ReportRecordedInfos013, Function | SmallTest | Level2)
+HWTEST_F(PerformReporterTest, ReportRecordedInfos013, TestSize.Level1)
 {
     int res = 0;
     WindowInfoReporter windowInfoReporter;
@@ -366,7 +367,7 @@ HWTEST_F(PerformReporterTest, ReportRecordedInfos013, Function | SmallTest | Lev
  * @tc.desc: ReportContainerStartBegin test
  * @tc.type: FUNC
  */
-HWTEST_F(PerformReporterTest, ReportContainerStartBegin014, Function | SmallTest | Level2)
+HWTEST_F(PerformReporterTest, ReportContainerStartBegin014, TestSize.Level1)
 {
     int res = 0;
     int32_t missionId = 1;
@@ -382,7 +383,7 @@ HWTEST_F(PerformReporterTest, ReportContainerStartBegin014, Function | SmallTest
  * @tc.desc: Report test
  * @tc.type: FUNC
  */
-HWTEST_F(PerformReporterTest, Report015, Function | SmallTest | Level2)
+HWTEST_F(PerformReporterTest, Report015, TestSize.Level1)
 {
     int res = 0;
     std::string reportTag = "reportTag";
@@ -399,7 +400,7 @@ HWTEST_F(PerformReporterTest, Report015, Function | SmallTest | Level2)
  * @tc.desc: ClearRecordedInfos test
  * @tc.type: FUNC
  */
-HWTEST_F(PerformReporterTest, ClearRecordedInfos016, Function | SmallTest | Level2)
+HWTEST_F(PerformReporterTest, ClearRecordedInfos016, TestSize.Level1)
 {
     int res = 0;
     WindowInfoReporter windowInfoReporter;
@@ -408,11 +409,78 @@ HWTEST_F(PerformReporterTest, ClearRecordedInfos016, Function | SmallTest | Leve
 }
 
 /**
+ * @tc.name: ReportUIExtensionException
+ * @tc.desc: ReportUIExtensionException test
+ * @tc.type: FUNC
+ */
+HWTEST_F(PerformReporterTest, ReportUIExtensionException, TestSize.Level1)
+{
+    int32_t res = 0;
+    WindowInfoReporter windowInfoReporter;
+    WindowDFXHelperType exceptionType = WindowDFXHelperType::WINDOW_UIEXTENSION_TRANSFER_DATA_FAIL;
+    int32_t pid = 1111;
+    int32_t persistentId = 1111111111;
+    // ERR_TRANSACTION_FAILED = 1
+    int32_t errorCode = 1;
+    std::ostringstream oss;
+    oss << "TransferExtensionData from provider to host failed" << ",";
+    oss << " provider bundleName: " << "testProviderBundleName1" << ",";
+    oss << " provider windowName: " << "testWindowName1" << ",";
+    oss << " errorCode: " << errorCode << ";";
+    res = windowInfoReporter.ReportUIExtensionException(static_cast<int32_t>(exceptionType), pid, persistentId,
+        oss.str()
+    );
+    ASSERT_EQ(res, 0);
+
+    exceptionType = WindowDFXHelperType::WINDOW_UIEXTENSION_START_ABILITY_FAIL;
+    pid = 2222;
+    persistentId = 1111122222;
+    // ERR_BASE = (-99)
+    errorCode = -99;
+    oss.str("");
+    oss << "Start UIExtensionAbility failed" << ",";
+    oss << " provider windowName: " << "testWindowName2" << ",";
+    oss << " errorCode: " << errorCode << ";";
+    res = windowInfoReporter.ReportUIExtensionException(static_cast<int32_t>(exceptionType), pid, persistentId,
+        oss.str()
+    );
+    ASSERT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: ReportEventDispatchException
+ * @tc.desc: ReportEventDispatchException test
+ * @tc.type: FUNC
+ */
+HWTEST_F(PerformReporterTest, ReportEventDispatchException, TestSize.Level1)
+{
+    int32_t res = 0;
+    WindowInfoReporter windowInfoReporter;
+    std::vector<MMI::DisplayInfo> displayInfos;
+    ASSERT_EQ(displayInfos.empty(), true);
+    WindowDFXHelperType exceptionType = WindowDFXHelperType::WINDOW_FLUSH_EMPTY_DISPLAY_INFO_TO_MMI_EXCEPTION;
+    int32_t pid = 1111;
+    std::ostringstream oss;
+    oss << "displayInfos flush to MMI is empty!";
+    res = windowInfoReporter.ReportEventDispatchException(static_cast<int32_t>(exceptionType), pid, oss.str());
+    ASSERT_EQ(res, 0);
+
+    std::vector<MMI::WindowInfo> windowInfoList;
+    ASSERT_EQ(windowInfoList.empty(), true);
+    exceptionType = WindowDFXHelperType::WINDOW_FLUSH_EMPTY_WINDOW_INFO_TO_MMI_EXCEPTION;
+    pid = 2222;
+    oss.str("");
+    oss << "windowInfoList flush to MMI is empty!";
+    res = windowInfoReporter.ReportEventDispatchException(static_cast<int32_t>(exceptionType), pid, oss.str());
+    ASSERT_EQ(res, 0);
+}
+
+/**
  * @tc.name: ReportWindowProfileInfo017
  * @tc.desc: ReportWindowProfileInfo test
  * @tc.type: FUNC
  */
-HWTEST_F(PerformReporterTest, ReportWindowProfileInfo017, Function | SmallTest | Level2)
+HWTEST_F(PerformReporterTest, ReportWindowProfileInfo017, TestSize.Level1)
 {
     int32_t res = 0;
     WindowProfileInfo windowProfileInfo;

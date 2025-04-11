@@ -22,8 +22,6 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr uint32_t TOUCH_HOT_AREA_MAX_NUM = 50;
-constexpr uint32_t MAX_SIZE_PIP_CONTROL_GROUP = 8;
-constexpr uint32_t MAX_SIZE_PIP_CONTROL = 9;
 }
 
 const std::map<uint64_t, HandlWritePropertyFunc> WindowSessionProperty::writeFuncMap_ {
@@ -31,6 +29,8 @@ const std::map<uint64_t, HandlWritePropertyFunc> WindowSessionProperty::writeFun
         &WindowSessionProperty::WriteActionUpdateTurnScreenOn),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON),
         &WindowSessionProperty::WriteActionUpdateKeepScreenOn),
+    std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_VIEW_KEEP_SCREEN_ON),
+        &WindowSessionProperty::WriteActionUpdateViewKeepScreenOn),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE),
         &WindowSessionProperty::WriteActionUpdateFocusable),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE),
@@ -81,12 +81,18 @@ const std::map<uint64_t, HandlWritePropertyFunc> WindowSessionProperty::writeFun
         &WindowSessionProperty::WriteActionUpdateWindowMask),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_TOPMOST),
         &WindowSessionProperty::WriteActionUpdateTopmost),
+    std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_SUB_WINDOW_Z_LEVEL),
+        &WindowSessionProperty::WriteActionUpdateSubWindowZLevel),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO),
         &WindowSessionProperty::WriteActionUpdateWindowModeSupportType),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST),
         &WindowSessionProperty::WriteActionUpdateMainWindowTopmost),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_AVOID_AREA_OPTION),
         &WindowSessionProperty::WriteActionUpdateAvoidAreaOption),
+    std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_BACKGROUND_ALPHA),
+        &WindowSessionProperty::WriteActionUpdateBackgroundAlpha),
+    std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_EXCLUSIVE_HIGHLIGHTED),
+        &WindowSessionProperty::WriteActionUpdateExclusivelyHighlighted),
 };
 
 const std::map<uint64_t, HandlReadPropertyFunc> WindowSessionProperty::readFuncMap_ {
@@ -94,6 +100,8 @@ const std::map<uint64_t, HandlReadPropertyFunc> WindowSessionProperty::readFuncM
         &WindowSessionProperty::ReadActionUpdateTurnScreenOn),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON),
         &WindowSessionProperty::ReadActionUpdateKeepScreenOn),
+    std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_VIEW_KEEP_SCREEN_ON),
+        &WindowSessionProperty::ReadActionUpdateViewKeepScreenOn),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE),
         &WindowSessionProperty::ReadActionUpdateFocusable),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE),
@@ -144,12 +152,18 @@ const std::map<uint64_t, HandlReadPropertyFunc> WindowSessionProperty::readFuncM
         &WindowSessionProperty::ReadActionUpdateWindowMask),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_TOPMOST),
         &WindowSessionProperty::ReadActionUpdateTopmost),
+    std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_SUB_WINDOW_Z_LEVEL),
+        &WindowSessionProperty::ReadActionUpdateSubWindowZLevel),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO),
         &WindowSessionProperty::ReadActionUpdateWindowModeSupportType),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST),
         &WindowSessionProperty::ReadActionUpdateMainWindowTopmost),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_AVOID_AREA_OPTION),
         &WindowSessionProperty::ReadActionUpdateAvoidAreaOption),
+    std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_BACKGROUND_ALPHA),
+        &WindowSessionProperty::ReadActionUpdateBackgroundAlpha),
+    std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_EXCLUSIVE_HIGHLIGHTED),
+        &WindowSessionProperty::ReadActionUpdateExclusivelyHighlighted),
 };
 
 WindowSessionProperty::WindowSessionProperty(const sptr<WindowSessionProperty>& property)
@@ -215,6 +229,16 @@ void WindowSessionProperty::SetHideNonSystemFloatingWindows(bool hide)
     hideNonSystemFloatingWindows_ = hide;
 }
 
+void WindowSessionProperty::SetSkipSelfWhenShowOnVirtualScreen(bool isSkip)
+{
+    isSkipSelfWhenShowOnVirtualScreen_ = isSkip;
+}
+
+void WindowSessionProperty::SetSkipEventOnCastPlus(bool isSkip)
+{
+    isSkipEventOnCastPlus_ = isSkip;
+}
+
 void WindowSessionProperty::SetForceHide(bool hide)
 {
     forceHide_ = hide;
@@ -225,9 +249,10 @@ void WindowSessionProperty::SetRaiseEnabled(bool raiseEnabled)
     raiseEnabled_ = raiseEnabled;
 }
 
-void WindowSessionProperty::SetRequestedOrientation(Orientation orientation)
+void WindowSessionProperty::SetRequestedOrientation(Orientation orientation, bool needAnimation)
 {
     requestedOrientation_ = orientation;
+    needRotateAnimation_ = needAnimation;
 }
 
 void WindowSessionProperty::SetDefaultRequestedOrientation(Orientation orientation)
@@ -333,6 +358,16 @@ bool WindowSessionProperty::GetHideNonSystemFloatingWindows() const
     return hideNonSystemFloatingWindows_;
 }
 
+bool WindowSessionProperty::GetSkipSelfWhenShowOnVirtualScreen() const
+{
+    return isSkipSelfWhenShowOnVirtualScreen_;
+}
+
+bool WindowSessionProperty::GetSkipEventOnCastPlus() const
+{
+    return isSkipEventOnCastPlus_;
+}
+
 bool WindowSessionProperty::GetForceHide() const
 {
     return forceHide_;
@@ -346,6 +381,11 @@ bool WindowSessionProperty::GetRaiseEnabled() const
 Orientation WindowSessionProperty::GetRequestedOrientation() const
 {
     return requestedOrientation_;
+}
+
+bool WindowSessionProperty::GetRequestedAnimation() const
+{
+    return needRotateAnimation_;
 }
 
 Orientation WindowSessionProperty::GetDefaultRequestedOrientation() const
@@ -428,6 +468,16 @@ bool WindowSessionProperty::IsMainWindowTopmost() const
     return mainWindowTopmost_;
 }
 
+void WindowSessionProperty::SetWindowDelayRaiseEnabled(bool isEnabled)
+{
+    isWindowDelayRaiseEnabled_ = isEnabled;
+}
+
+bool WindowSessionProperty::IsWindowDelayRaiseEnabled() const
+{
+    return isWindowDelayRaiseEnabled_;
+}
+
 void WindowSessionProperty::AddWindowFlag(WindowFlag flag)
 {
     flags_ |= static_cast<uint32_t>(flag);
@@ -476,6 +526,16 @@ void WindowSessionProperty::SetKeepScreenOn(bool keepScreenOn)
 bool WindowSessionProperty::IsKeepScreenOn() const
 {
     return keepScreenOn_;
+}
+
+void WindowSessionProperty::SetViewKeepScreenOn(bool keepScreenOn)
+{
+    viewKeepScreenOn_ = keepScreenOn;
+}
+
+bool WindowSessionProperty::IsViewKeepScreenOn() const
+{
+    return viewKeepScreenOn_;
 }
 
 void WindowSessionProperty::SetAccessTokenId(uint32_t accessTokenId)
@@ -588,16 +648,28 @@ uint32_t WindowSessionProperty::GetWindowModeSupportType() const
     return windowModeSupportType_;
 }
 
-void WindowSessionProperty::SetSupportWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes)
+void WindowSessionProperty::SetSupportedWindowModes(
+    const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes)
 {
     std::lock_guard<std::mutex> lock(supportWindowModesMutex_);
-    supportWindowModes_ = supportWindowModes;
+    supportedWindowModes_ = supportedWindowModes;
 }
 
-void WindowSessionProperty::GetSupportWindowModes(std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes) const
+void WindowSessionProperty::GetSupportedWindowModes(
+    std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes) const
 {
     std::lock_guard<std::mutex> lock(supportWindowModesMutex_);
-    supportWindowModes = supportWindowModes_;
+    supportedWindowModes = supportedWindowModes_;
+}
+
+void WindowSessionProperty::SetWindowSizeLimits(const WindowSizeLimits& windowSizeLimits)
+{
+    windowSizeLimits_ = windowSizeLimits;
+}
+
+WindowSizeLimits WindowSessionProperty::GetWindowSizeLimits() const
+{
+    return windowSizeLimits_;
 }
 
 void WindowSessionProperty::SetAnimationFlag(uint32_t animationFlag)
@@ -706,6 +778,18 @@ void WindowSessionProperty::SetIsNeedUpdateWindowMode(bool isNeedUpdateWindowMod
 bool WindowSessionProperty::GetIsNeedUpdateWindowMode() const
 {
     return isNeedUpdateWindowMode_;
+}
+
+void WindowSessionProperty::SetWindowCornerRadius(float cornerRadius)
+{
+    std::lock_guard<std::mutex> lock(cornerRadiusMutex_);
+    cornerRadius_ = cornerRadius;
+}
+
+float WindowSessionProperty::GetWindowCornerRadius() const
+{
+    std::lock_guard<std::mutex> lock(cornerRadiusMutex_);
+    return cornerRadius_;
 }
 
 bool WindowSessionProperty::MarshallingWindowLimits(Parcel& parcel) const
@@ -827,51 +911,7 @@ bool WindowSessionProperty::MarshallingPiPTemplateInfo(Parcel& parcel) const
     if (!WindowHelper::IsPipWindow(type_)) {
         return true;
     }
-    if (!parcel.WriteUint32(pipTemplateInfo_.pipTemplateType)) {
-        return false;
-    }
-    if (!parcel.WriteUint32(pipTemplateInfo_.priority)) {
-        return false;
-    }
-    auto size = pipTemplateInfo_.controlGroup.size();
-    if (size > MAX_SIZE_PIP_CONTROL_GROUP) {
-        return false;
-    }
-    if (!parcel.WriteUint32(static_cast<uint32_t>(size))) {
-        return false;
-    }
-    for (uint32_t i = 0; i < size; i++) {
-        if (!parcel.WriteUint32(pipTemplateInfo_.controlGroup[i])) {
-            return false;
-        }
-    }
-    auto controlStatusSize = pipTemplateInfo_.pipControlStatusInfoList.size();
-    if (controlStatusSize > MAX_SIZE_PIP_CONTROL) {
-        return false;
-    }
-    if (!parcel.WriteUint32(static_cast<uint32_t>(controlStatusSize))) {
-        return false;
-    }
-    for (uint32_t i = 0; i < controlStatusSize; i++) {
-        if (!parcel.WriteUint32(static_cast<uint32_t>(pipTemplateInfo_.pipControlStatusInfoList[i].controlType)) ||
-            !parcel.WriteInt32(static_cast<int32_t>(pipTemplateInfo_.pipControlStatusInfoList[i].status))) {
-            return false;
-        }
-    }
-    auto controlEnableSize = pipTemplateInfo_.pipControlEnableInfoList.size();
-    if (controlEnableSize > MAX_SIZE_PIP_CONTROL) {
-        return false;
-    }
-    if (!parcel.WriteUint32(static_cast<uint32_t>(controlEnableSize))) {
-        return false;
-    }
-    for (uint32_t i = 0; i < controlEnableSize; i++) {
-        if (!parcel.WriteUint32(static_cast<uint32_t>(pipTemplateInfo_.pipControlEnableInfoList[i].controlType)) ||
-            !parcel.WriteInt32(static_cast<int32_t>(pipTemplateInfo_.pipControlEnableInfoList[i].enabled))) {
-            return false;
-        }
-    }
-    return true;
+    return parcel.WriteParcelable(&pipTemplateInfo_);
 }
 
 void WindowSessionProperty::UnmarshallingPiPTemplateInfo(Parcel& parcel, WindowSessionProperty* property)
@@ -879,51 +919,11 @@ void WindowSessionProperty::UnmarshallingPiPTemplateInfo(Parcel& parcel, WindowS
     if (!WindowHelper::IsPipWindow(property->GetWindowType())) {
         return;
     }
-    PiPTemplateInfo pipTemplateInfo;
-    pipTemplateInfo.pipTemplateType = parcel.ReadUint32();
-    pipTemplateInfo.priority = parcel.ReadUint32();
-    auto size = parcel.ReadUint32();
-    if (size > MAX_SIZE_PIP_CONTROL_GROUP) {
+    sptr<PiPTemplateInfo> pipTemplateInfo = parcel.ReadParcelable<PiPTemplateInfo>();
+    if (pipTemplateInfo == nullptr) {
         return;
     }
-    for (uint32_t i = 0; i < size; i++) {
-        uint32_t controlGroupId = 0;
-        if (!parcel.ReadUint32(controlGroupId)) {
-            return;
-        }
-        pipTemplateInfo.controlGroup.push_back(controlGroupId);
-    }
-    auto controlStatusSize = parcel.ReadUint32();
-    if (controlStatusSize > MAX_SIZE_PIP_CONTROL) {
-        return;
-    }
-    for (uint32_t i = 0; i < controlStatusSize; i++) {
-        PiPControlStatusInfo pipControlStatusInfo;
-        uint32_t controlType = 0;
-        int32_t status = 0;
-        if (!parcel.ReadUint32(controlType) || !parcel.ReadInt32(status)) {
-            return;
-        }
-        pipControlStatusInfo.controlType = static_cast<PiPControlType>(controlType);
-        pipControlStatusInfo.status = static_cast<PiPControlStatus>(status);
-        pipTemplateInfo.pipControlStatusInfoList.push_back(pipControlStatusInfo);
-    }
-    auto controlEnableSize = parcel.ReadUint32();
-    if (controlEnableSize > MAX_SIZE_PIP_CONTROL) {
-        return;
-    }
-    for (uint32_t i = 0; i < controlEnableSize; i++) {
-        PiPControlEnableInfo pipControlEnableInfo;
-        uint32_t controlType = 0;
-        int32_t enabled = 0;
-        if (!parcel.ReadUint32(controlType) || !parcel.ReadInt32(enabled)) {
-            return;
-        }
-        pipControlEnableInfo.controlType = static_cast<PiPControlType>(controlType);
-        pipControlEnableInfo.enabled = static_cast<PiPControlStatus>(enabled);
-        pipTemplateInfo.pipControlEnableInfoList.push_back(pipControlEnableInfo);
-    }
-    property->SetPiPTemplateInfo(pipTemplateInfo);
+    property->SetPiPTemplateInfo(*pipTemplateInfo);
 }
 
 bool WindowSessionProperty::MarshallingWindowMask(Parcel& parcel) const
@@ -953,10 +953,7 @@ void WindowSessionProperty::UnmarshallingWindowMask(Parcel& parcel, WindowSessio
 
 bool WindowSessionProperty::MarshallingMainWindowTopmost(Parcel& parcel) const
 {
-    if (!parcel.WriteBool(mainWindowTopmost_)) {
-        return false;
-    }
-    if (!parcel.WriteUint32(accessTokenId_)) {
+    if (!parcel.WriteBool(mainWindowTopmost_) || !parcel.WriteUint32(accessTokenId_)) {
         return false;
     }
     return true;
@@ -971,7 +968,7 @@ void WindowSessionProperty::UnmarshallingMainWindowTopmost(Parcel& parcel, Windo
 bool WindowSessionProperty::MarshallingSessionInfo(Parcel& parcel) const
 {
     if (!parcel.WriteString(sessionInfo_.bundleName_) || !parcel.WriteString(sessionInfo_.moduleName_) ||
-        !parcel.WriteString(sessionInfo_.abilityName_) ||
+        !parcel.WriteString(sessionInfo_.abilityName_) || !parcel.WriteInt32(sessionInfo_.currentRotation_) ||
         !parcel.WriteInt32(static_cast<int32_t>(sessionInfo_.continueState))) {
         return false;
     }
@@ -981,6 +978,9 @@ bool WindowSessionProperty::MarshallingSessionInfo(Parcel& parcel) const
         return false;
     }
     if (hasWant && !parcel.WriteParcelable(want.get())) {
+        return false;
+    }
+    if (!parcel.WriteBool(sessionInfo_.isFollowParentMultiScreenPolicy)) {
         return false;
     }
     return true;
@@ -996,6 +996,12 @@ bool WindowSessionProperty::UnmarshallingSessionInfo(Parcel& parcel, WindowSessi
         return false;
     }
     SessionInfo info = { bundleName, moduleName, abilityName };
+    int32_t currentRotation;
+    if (!parcel.ReadInt32(currentRotation)) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to read currentRotation!");
+        return false;
+    }
+    info.currentRotation_ = currentRotation;
     int32_t continueState;
     if (!parcel.ReadInt32(continueState)) {
         TLOGE(WmsLogTag::DEFAULT, "Failed to read continueState!");
@@ -1015,6 +1021,12 @@ bool WindowSessionProperty::UnmarshallingSessionInfo(Parcel& parcel, WindowSessi
         }
         info.want = want;
     }
+    bool isFollowParentMultiScreenPolicy = false;
+    if (!parcel.ReadBool(isFollowParentMultiScreenPolicy)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to read isFollowParentMultiScreenPolicy!");
+        return false;
+    }
+    info.isFollowParentMultiScreenPolicy = isFollowParentMultiScreenPolicy;
     property->SetSessionInfo(info);
     return true;
 }
@@ -1100,6 +1112,16 @@ uint32_t WindowSessionProperty::GetSubWindowLevel() const
     return subWindowLevel_;
 }
 
+void WindowSessionProperty::SetSubWindowZLevel(int32_t zLevel)
+{
+    zLevel_ = zLevel;
+}
+
+int32_t WindowSessionProperty::GetSubWindowZLevel() const
+{
+    return zLevel_;
+}
+
 void WindowSessionProperty::SetIsSupportDragInPcCompatibleMode(bool isSupportDragInPcCompatibleMode)
 {
     isSupportDragInPcCompatibleMode_ = isSupportDragInPcCompatibleMode;
@@ -1108,6 +1130,18 @@ void WindowSessionProperty::SetIsSupportDragInPcCompatibleMode(bool isSupportDra
 bool WindowSessionProperty::GetIsSupportDragInPcCompatibleMode() const
 {
     return isSupportDragInPcCompatibleMode_;
+}
+
+void WindowSessionProperty::SetIsAtomicService(bool isAtomicService)
+{
+    std::lock_guard lock(atomicServiceMutex_);
+    isAtomicService_ = isAtomicService;
+}
+
+bool WindowSessionProperty::GetIsAtomicService() const
+{
+    std::lock_guard lock(atomicServiceMutex_);
+    return isAtomicService_;
 }
 
 bool WindowSessionProperty::Marshalling(Parcel& parcel) const
@@ -1123,7 +1157,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint32(static_cast<uint32_t>(type_)) &&
         parcel.WriteBool(focusable_) && parcel.WriteBool(focusableOnShow_) &&
         parcel.WriteBool(touchable_) && parcel.WriteBool(tokenState_) &&
-        parcel.WriteBool(turnScreenOn_) && parcel.WriteBool(keepScreenOn_) &&
+        parcel.WriteBool(turnScreenOn_) && parcel.WriteBool(keepScreenOn_) && parcel.WriteBool(viewKeepScreenOn_) &&
         parcel.WriteBool(isPrivacyMode_) && parcel.WriteBool(isSystemPrivacyMode_) &&
         parcel.WriteBool(isSnapshotSkip_) &&
         parcel.WriteUint64(displayId_) && parcel.WriteInt32(persistentId_) &&
@@ -1131,9 +1165,11 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteInt32(parentPersistentId_) &&
         parcel.WriteUint32(accessTokenId_) && parcel.WriteUint32(static_cast<uint32_t>(maximizeMode_)) &&
         parcel.WriteUint32(static_cast<uint32_t>(requestedOrientation_)) &&
+        parcel.WriteBool(needRotateAnimation_) &&
         parcel.WriteUint32(static_cast<uint32_t>(windowMode_)) &&
         parcel.WriteUint32(flags_) && parcel.WriteBool(raiseEnabled_) &&
         parcel.WriteBool(topmost_) && parcel.WriteBool(mainWindowTopmost_) &&
+        parcel.WriteInt32(zLevel_) &&
         parcel.WriteBool(isDecorEnable_) && parcel.WriteBool(dragEnabled_) &&
         parcel.WriteBool(hideNonSystemFloatingWindows_) && parcel.WriteBool(forceHide_) &&
         MarshallingWindowLimits(parcel) && parcel.WriteFloat(brightness_) &&
@@ -1151,15 +1187,17 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint32(static_cast<uint32_t>(uiExtensionUsage_)) &&
         parcel.WriteUint32(static_cast<uint32_t>(parentWindowType_)) &&
         MarshallingWindowMask(parcel) &&
-        parcel.WriteParcelable(&keyboardLayoutParams_) &&
-        parcel.WriteBool(compatibleModeInPc_) &&
+        parcel.WriteParcelable(&keyboardLayoutParams_) && parcel.WriteBool(compatibleModeInPc_) &&
         parcel.WriteInt32(compatibleInPcPortraitWidth_) && parcel.WriteInt32(compatibleInPcPortraitHeight_) &&
         parcel.WriteInt32(compatibleInPcLandscapeWidth_) && parcel.WriteInt32(compatibleInPcLandscapeHeight_) &&
-        parcel.WriteBool(isAppSupportPhoneInPc_) &&
-        parcel.WriteBool(isSupportDragInPcCompatibleMode_) &&
+        parcel.WriteBool(isAppSupportPhoneInPc_) && parcel.WriteBool(isSupportDragInPcCompatibleMode_) &&
         parcel.WriteBool(isPcAppInPad_) && parcel.WriteBool(compatibleModeEnableInPad_) &&
         parcel.WriteString(appInstanceKey_) && parcel.WriteBool(isSystemKeyboard_) &&
-        parcel.WriteUint32(avoidAreaOption_);
+        parcel.WriteUint32(avoidAreaOption_) && parcel.WriteBool(isWindowDelayRaiseEnabled_) &&
+        parcel.WriteUint8(backgroundAlpha_) && parcel.WriteUint32(static_cast<uint32_t>(keyboardViewMode_)) &&
+        parcel.WriteFloat(cornerRadius_) && parcel.WriteBool(isExclusivelyHighlighted_) &&
+        parcel.WriteBool(isAtomicService_) && parcel.WriteUint32(apiVersion_) &&
+        parcel.WriteBool(isFullScreenWaterfallMode_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -1183,6 +1221,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetTokenState(parcel.ReadBool());
     property->SetTurnScreenOn(parcel.ReadBool());
     property->SetKeepScreenOn(parcel.ReadBool());
+    property->SetViewKeepScreenOn(parcel.ReadBool());
     property->SetPrivacyMode(parcel.ReadBool());
     property->SetSystemPrivacyMode(parcel.ReadBool());
     property->SetSnapshotSkip(parcel.ReadBool());
@@ -1195,12 +1234,13 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetParentPersistentId(parcel.ReadInt32());
     property->SetAccessTokenId(parcel.ReadUint32());
     property->SetMaximizeMode(static_cast<MaximizeMode>(parcel.ReadUint32()));
-    property->SetRequestedOrientation(static_cast<Orientation>(parcel.ReadUint32()));
+    property->SetRequestedOrientation(static_cast<Orientation>(parcel.ReadUint32()), parcel.ReadBool());
     property->SetWindowMode(static_cast<WindowMode>(parcel.ReadUint32()));
     property->SetWindowFlags(parcel.ReadUint32());
     property->SetRaiseEnabled(parcel.ReadBool());
     property->SetTopmost(parcel.ReadBool());
     property->SetMainWindowTopmost(parcel.ReadBool());
+    property->SetSubWindowZLevel(parcel.ReadInt32());
     property->SetDecorEnable(parcel.ReadBool());
     property->SetDragEnabled(parcel.ReadBool());
     property->SetHideNonSystemFloatingWindows(parcel.ReadBool());
@@ -1241,6 +1281,14 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetAppInstanceKey(parcel.ReadString());
     property->SetIsSystemKeyboard(parcel.ReadBool());
     property->SetAvoidAreaOption(parcel.ReadUint32());
+    property->SetWindowDelayRaiseEnabled(parcel.ReadBool());
+    property->SetBackgroundAlpha(parcel.ReadUint8());
+    property->SetKeyboardViewMode(static_cast<KeyboardViewMode>(parcel.ReadUint32()));
+    property->SetWindowCornerRadius(parcel.ReadFloat());
+    property->SetExclusivelyHighlighted(parcel.ReadBool());
+    property->SetIsAtomicService(parcel.ReadBool());
+    property->SetApiVersion(parcel.ReadUint32());
+    property->SetIsFullScreenWaterfallMode(parcel.ReadBool());
     return property;
 }
 
@@ -1261,8 +1309,10 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     tokenState_ = property->tokenState_;
     turnScreenOn_ = property->turnScreenOn_;
     keepScreenOn_ = property->keepScreenOn_;
+    viewKeepScreenOn_ = property->viewKeepScreenOn_;
     topmost_ = property->topmost_;
     mainWindowTopmost_ = property->mainWindowTopmost_;
+    zLevel_ = property->zLevel_;
     requestedOrientation_ = property->requestedOrientation_;
     defaultRequestedOrientation_ = property->defaultRequestedOrientation_;
     isPrivacyMode_ = property->isPrivacyMode_;
@@ -1293,6 +1343,8 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     touchHotAreas_ = property->touchHotAreas_;
     keyboardTouchHotAreas_ = property->keyboardTouchHotAreas_;
     hideNonSystemFloatingWindows_ = property->hideNonSystemFloatingWindows_;
+    isSkipSelfWhenShowOnVirtualScreen_ = property->isSkipSelfWhenShowOnVirtualScreen_;
+    isSkipEventOnCastPlus_ = property->isSkipEventOnCastPlus_;
     forceHide_ = property->forceHide_;
     keepKeyboardFlag_ = property->keepKeyboardFlag_;
     callingSessionId_ = property->callingSessionId_;
@@ -1324,6 +1376,14 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     appInstanceKey_ = property->appInstanceKey_;
     isSystemKeyboard_ = property->isSystemKeyboard_;
     avoidAreaOption_ = property->avoidAreaOption_;
+    isWindowDelayRaiseEnabled_ = property->isWindowDelayRaiseEnabled_;
+    backgroundAlpha_ = property->backgroundAlpha_;
+    keyboardViewMode_ = property->keyboardViewMode_;
+    isExclusivelyHighlighted_ = property->isExclusivelyHighlighted_;
+    cornerRadius_ = property->cornerRadius_;
+    isAtomicService_ = property->isAtomicService_;
+    apiVersion_ = property->apiVersion_;
+    isFullScreenWaterfallMode_ = property->isFullScreenWaterfallMode_;
 }
 
 bool WindowSessionProperty::Write(Parcel& parcel, WSPropertyChangeAction action)
@@ -1347,6 +1407,11 @@ bool WindowSessionProperty::WriteActionUpdateKeepScreenOn(Parcel& parcel)
     return parcel.WriteBool(keepScreenOn_);
 }
 
+bool WindowSessionProperty::WriteActionUpdateViewKeepScreenOn(Parcel& parcel)
+{
+    return parcel.WriteBool(viewKeepScreenOn_);
+}
+
 bool WindowSessionProperty::WriteActionUpdateFocusable(Parcel& parcel)
 {
     return parcel.WriteBool(focusable_);
@@ -1364,7 +1429,8 @@ bool WindowSessionProperty::WriteActionUpdateSetBrightness(Parcel& parcel)
 
 bool WindowSessionProperty::WriteActionUpdateOrientation(Parcel& parcel)
 {
-    return parcel.WriteUint32(static_cast<uint32_t>(requestedOrientation_));
+    return parcel.WriteUint32(static_cast<uint32_t>(requestedOrientation_)) &&
+        parcel.WriteBool(needRotateAnimation_);
 }
 
 bool WindowSessionProperty::WriteActionUpdatePrivacyMode(Parcel& parcel)
@@ -1459,6 +1525,11 @@ bool WindowSessionProperty::WriteActionUpdateMainWindowTopmost(Parcel& parcel)
     return MarshallingMainWindowTopmost(parcel);
 }
 
+bool WindowSessionProperty::WriteActionUpdateSubWindowZLevel(Parcel& parcel)
+{
+    return parcel.WriteInt32(zLevel_);
+}
+
 bool WindowSessionProperty::WriteActionUpdateWindowModeSupportType(Parcel& parcel)
 {
     return parcel.WriteUint32(windowModeSupportType_);
@@ -1467,6 +1538,16 @@ bool WindowSessionProperty::WriteActionUpdateWindowModeSupportType(Parcel& parce
 bool WindowSessionProperty::WriteActionUpdateAvoidAreaOption(Parcel& parcel)
 {
     return parcel.WriteUint32(avoidAreaOption_);
+}
+
+bool WindowSessionProperty::WriteActionUpdateBackgroundAlpha(Parcel& parcel)
+{
+    return parcel.WriteUint8(backgroundAlpha_);
+}
+
+bool WindowSessionProperty::WriteActionUpdateExclusivelyHighlighted(Parcel& parcel)
+{
+    return parcel.WriteBool(isExclusivelyHighlighted_);
 }
 
 void WindowSessionProperty::Read(Parcel& parcel, WSPropertyChangeAction action)
@@ -1490,6 +1571,11 @@ void WindowSessionProperty::ReadActionUpdateKeepScreenOn(Parcel& parcel)
     SetKeepScreenOn(parcel.ReadBool());
 }
 
+void WindowSessionProperty::ReadActionUpdateViewKeepScreenOn(Parcel& parcel)
+{
+    SetViewKeepScreenOn(parcel.ReadBool());
+}
+
 void WindowSessionProperty::ReadActionUpdateFocusable(Parcel& parcel)
 {
     SetFocusable(parcel.ReadBool());
@@ -1507,7 +1593,7 @@ void WindowSessionProperty::ReadActionUpdateSetBrightness(Parcel& parcel)
 
 void WindowSessionProperty::ReadActionUpdateOrientation(Parcel& parcel)
 {
-    SetRequestedOrientation(static_cast<Orientation>(parcel.ReadUint32()));
+    SetRequestedOrientation(static_cast<Orientation>(parcel.ReadUint32()), parcel.ReadBool());
 }
 
 void WindowSessionProperty::ReadActionUpdatePrivacyMode(Parcel& parcel)
@@ -1605,6 +1691,11 @@ void WindowSessionProperty::ReadActionUpdateMainWindowTopmost(Parcel& parcel)
     UnmarshallingMainWindowTopmost(parcel, this);
 }
 
+void WindowSessionProperty::ReadActionUpdateSubWindowZLevel(Parcel& parcel)
+{
+    SetSubWindowZLevel(parcel.ReadInt32());
+}
+
 void WindowSessionProperty::ReadActionUpdateWindowModeSupportType(Parcel& parcel)
 {
     SetWindowModeSupportType(parcel.ReadUint32());
@@ -1613,6 +1704,16 @@ void WindowSessionProperty::ReadActionUpdateWindowModeSupportType(Parcel& parcel
 void WindowSessionProperty::ReadActionUpdateAvoidAreaOption(Parcel& parcel)
 {
     SetAvoidAreaOption(parcel.ReadUint32());
+}
+
+void WindowSessionProperty::ReadActionUpdateBackgroundAlpha(Parcel& parcel)
+{
+    SetBackgroundAlpha(parcel.ReadUint8());
+}
+
+void WindowSessionProperty::ReadActionUpdateExclusivelyHighlighted(Parcel& parcel)
+{
+    SetExclusivelyHighlighted(parcel.ReadBool());
 }
 
 void WindowSessionProperty::SetTransform(const Transform& trans)
@@ -1808,6 +1909,66 @@ void WindowSessionProperty::SetIsSystemKeyboard(bool isSystemKeyboard)
 bool WindowSessionProperty::IsSystemKeyboard() const
 {
     return isSystemKeyboard_;
+}
+
+void WindowSessionProperty::SetKeyboardViewMode(KeyboardViewMode mode)
+{
+    keyboardViewMode_ = mode;
+}
+
+KeyboardViewMode WindowSessionProperty::GetKeyboardViewMode() const
+{
+    return keyboardViewMode_;
+}
+
+uint8_t WindowSessionProperty::GetBackgroundAlpha() const
+{
+    return backgroundAlpha_;
+}
+
+void WindowSessionProperty::SetBackgroundAlpha(uint8_t alpha)
+{
+    backgroundAlpha_ = alpha;
+}
+
+void WindowSessionProperty::SetExclusivelyHighlighted(bool isExclusivelyHighlighted)
+{
+    isExclusivelyHighlighted_ = isExclusivelyHighlighted;
+}
+
+bool WindowSessionProperty::GetExclusivelyHighlighted() const
+{
+    return isExclusivelyHighlighted_;
+}
+
+void WindowSessionProperty::SetConstrainedModal(bool isConstrained)
+{
+    isConstrainedModal_ = isConstrained;
+}
+
+bool WindowSessionProperty::IsConstrainedModal() const
+{
+    return isConstrainedModal_;
+}
+
+void WindowSessionProperty::SetApiVersion(uint32_t version)
+{
+    apiVersion_ = version;
+}
+
+uint32_t WindowSessionProperty::GetApiVersion() const
+{
+    return apiVersion_;
+}
+
+void WindowSessionProperty::SetIsFullScreenWaterfallMode(bool isFullScreenWaterfallMode)
+{
+    isFullScreenWaterfallMode_ = isFullScreenWaterfallMode;
+}
+
+bool WindowSessionProperty::GetIsFullScreenWaterfallMode() const
+{
+    return isFullScreenWaterfallMode_;
 }
 } // namespace Rosen
 } // namespace OHOS

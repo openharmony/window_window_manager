@@ -64,7 +64,7 @@ namespace {
  * @tc.desc: test function : RegisterPostureCallback
  * @tc.type: FUNC
  */
-HWTEST_F(SuperFoldSensorManagerTest, RegisterPostureCallback01, Function | SmallTest | Level3)
+HWTEST_F(SuperFoldSensorManagerTest, RegisterPostureCallback01, TestSize.Level1)
 {
     SuperFoldSensorManager mgr = SuperFoldSensorManager();
     mgr.RegisterPostureCallback();
@@ -76,7 +76,7 @@ HWTEST_F(SuperFoldSensorManagerTest, RegisterPostureCallback01, Function | Small
  * @tc.desc: test function : RegisterPostureCallback
  * @tc.type: FUNC
  */
-HWTEST_F(SuperFoldSensorManagerTest, RegisterPostureCallback02, Function | SmallTest | Level3)
+HWTEST_F(SuperFoldSensorManagerTest, RegisterPostureCallback02, TestSize.Level1)
 {
     SuperFoldSensorManager mgr = SuperFoldSensorManager();
     mgr.RegisterPostureCallback();
@@ -89,7 +89,7 @@ HWTEST_F(SuperFoldSensorManagerTest, RegisterPostureCallback02, Function | Small
  * @tc.desc: test function : UnregisterPostureCallback
  * @tc.type: FUNC
  */
-HWTEST_F(SuperFoldSensorManagerTest, UnregisterPostureCallback01, Function | SmallTest | Level3)
+HWTEST_F(SuperFoldSensorManagerTest, UnregisterPostureCallback01, TestSize.Level1)
 {
     SuperFoldSensorManager mgr = SuperFoldSensorManager();
     mgr.UnregisterPostureCallback();
@@ -101,7 +101,7 @@ HWTEST_F(SuperFoldSensorManagerTest, UnregisterPostureCallback01, Function | Sma
  * @tc.desc: test function : UnregisterPostureCallback
  * @tc.type: FUNC
  */
-HWTEST_F(SuperFoldSensorManagerTest, UnregisterPostureCallback02, Function | SmallTest | Level3)
+HWTEST_F(SuperFoldSensorManagerTest, UnregisterPostureCallback02, TestSize.Level1)
 {
     SuperFoldSensorManager mgr = SuperFoldSensorManager();
     mgr.UnregisterPostureCallback();
@@ -114,7 +114,7 @@ HWTEST_F(SuperFoldSensorManagerTest, UnregisterPostureCallback02, Function | Sma
  * @tc.desc: test function : RegisterHallCallback
  * @tc.type: FUNC
  */
-HWTEST_F(SuperFoldSensorManagerTest, RegisterHallCallback01, Function | SmallTest | Level3)
+HWTEST_F(SuperFoldSensorManagerTest, RegisterHallCallback01, TestSize.Level1)
 {
     SuperFoldSensorManager mgr = SuperFoldSensorManager();
     mgr.RegisterHallCallback();
@@ -126,7 +126,7 @@ HWTEST_F(SuperFoldSensorManagerTest, RegisterHallCallback01, Function | SmallTes
  * @tc.desc: test function : RegisterHallCallback
  * @tc.type: FUNC
  */
-HWTEST_F(SuperFoldSensorManagerTest, RegisterHallCallback02, Function | SmallTest | Level3)
+HWTEST_F(SuperFoldSensorManagerTest, RegisterHallCallback02, TestSize.Level1)
 {
     SuperFoldSensorManager mgr = SuperFoldSensorManager();
     mgr.RegisterHallCallback();
@@ -139,7 +139,7 @@ HWTEST_F(SuperFoldSensorManagerTest, RegisterHallCallback02, Function | SmallTes
  * @tc.desc: test function : UnregisterHallCallback
  * @tc.type: FUNC
  */
-HWTEST_F(SuperFoldSensorManagerTest, UnregisterHallCallback01, Function | SmallTest | Level3)
+HWTEST_F(SuperFoldSensorManagerTest, UnregisterHallCallback01, TestSize.Level1)
 {
     SuperFoldSensorManager mgr = SuperFoldSensorManager();
     mgr.UnregisterHallCallback();
@@ -151,7 +151,7 @@ HWTEST_F(SuperFoldSensorManagerTest, UnregisterHallCallback01, Function | SmallT
  * @tc.desc: test function : UnregisterHallCallback
  * @tc.type: FUNC
  */
-HWTEST_F(SuperFoldSensorManagerTest, UnregisterHallCallback02, Function | SmallTest | Level3)
+HWTEST_F(SuperFoldSensorManagerTest, UnregisterHallCallback02, TestSize.Level1)
 {
     SuperFoldSensorManager mgr = SuperFoldSensorManager();
     mgr.UnregisterHallCallback();
@@ -164,7 +164,7 @@ HWTEST_F(SuperFoldSensorManagerTest, UnregisterHallCallback02, Function | SmallT
  * @tc.desc: test function : HandlePostureData
  * @tc.type: FUNC
  */
-HWTEST_F(SuperFoldSensorManagerTest, HandlePostureData01, Function | SmallTest | Level3)
+HWTEST_F(SuperFoldSensorManagerTest, HandlePostureData01, TestSize.Level1)
 {
     SuperFoldSensorManager mgr = SuperFoldSensorManager();
     mgr.HandlePostureData(nullptr);
@@ -176,7 +176,7 @@ HWTEST_F(SuperFoldSensorManagerTest, HandlePostureData01, Function | SmallTest |
  * @tc.desc: test function : HandlePostureData
  * @tc.type: FUNC
  */
-HWTEST_F(SuperFoldSensorManagerTest, HandlePostureData02, Function | SmallTest | Level3)
+HWTEST_F(SuperFoldSensorManagerTest, HandlePostureData02, TestSize.Level1)
 {
     SuperFoldSensorManager mgr = SuperFoldSensorManager();
     mgr.HandlePostureData(nullptr);
@@ -194,7 +194,7 @@ HWTEST_F(SuperFoldSensorManagerTest, HandlePostureData02, Function | SmallTest |
  * @tc.desc: test function : HandlePostureData
  * @tc.type: FUNC
  */
-HWTEST_F(SuperFoldSensorManagerTest, HandlePostureData03, Function | SmallTest | Level3)
+HWTEST_F(SuperFoldSensorManagerTest, HandlePostureData03, TestSize.Level1)
 {
     SuperFoldSensorManager mgr = SuperFoldSensorManager();
     mgr.HandlePostureData(nullptr);
@@ -217,7 +217,7 @@ HWTEST_F(SuperFoldSensorManagerTest, HandlePostureData03, Function | SmallTest |
  * @tc.desc: test function : HandlePostureData
  * @tc.type: FUNC
  */
-HWTEST_F(SuperFoldSensorManagerTest, HandlePostureData04, Function | SmallTest | Level3)
+HWTEST_F(SuperFoldSensorManagerTest, HandlePostureData04, TestSize.Level1)
 {
     SuperFoldSensorManager mgr = SuperFoldSensorManager();
     mgr.HandlePostureData(nullptr);
@@ -244,7 +244,7 @@ HWTEST_F(SuperFoldSensorManagerTest, HandlePostureData04, Function | SmallTest |
  * @tc.desc: test function : NotifyFoldAngleChanged
  * @tc.type: FUNC
  */
-HWTEST_F(SuperFoldSensorManagerTest, NotifyFoldAngleChanged01, Function | SmallTest | Level3)
+HWTEST_F(SuperFoldSensorManagerTest, NotifyFoldAngleChanged01, TestSize.Level1)
 {
     SuperFoldSensorManager mgr = SuperFoldSensorManager();
     float foldAngle = 0.0F;
@@ -258,7 +258,7 @@ HWTEST_F(SuperFoldSensorManagerTest, NotifyFoldAngleChanged01, Function | SmallT
  * @tc.desc: test function : NotifyFoldAngleChanged
  * @tc.type: FUNC
  */
-HWTEST_F(SuperFoldSensorManagerTest, NotifyFoldAngleChanged02, Function | SmallTest | Level3)
+HWTEST_F(SuperFoldSensorManagerTest, NotifyFoldAngleChanged02, TestSize.Level1)
 {
     SuperFoldSensorManager mgr = SuperFoldSensorManager();
     float foldAngle = 30.0F;
@@ -272,10 +272,38 @@ HWTEST_F(SuperFoldSensorManagerTest, NotifyFoldAngleChanged02, Function | SmallT
  * @tc.desc: test function : NotifyFoldAngleChanged
  * @tc.type: FUNC
  */
-HWTEST_F(SuperFoldSensorManagerTest, NotifyFoldAngleChanged03, Function | SmallTest | Level3)
+HWTEST_F(SuperFoldSensorManagerTest, NotifyFoldAngleChanged03, TestSize.Level1)
 {
     SuperFoldSensorManager mgr = SuperFoldSensorManager();
     float foldAngle = 165.0F;
+    mgr.NotifyFoldAngleChanged(foldAngle);
+    EXPECT_TRUE(ScreenSessionManager::GetInstance().lastFoldAngles_.empty());
+    usleep(SLEEP_TIME_US);
+}
+
+/**
+ * @tc.name: NotifyFoldAngleChanged04
+ * @tc.desc: test function : NotifyFoldAngleChanged
+ * @tc.type: FUNC
+ */
+ HWTEST_F(SuperFoldSensorManagerTest, NotifyFoldAngleChanged04, Function | SmallTest | Level3)
+ {
+     SuperFoldSensorManager mgr = SuperFoldSensorManager();
+     float foldAngle = 90.0F;
+     mgr.NotifyFoldAngleChanged(foldAngle);
+     EXPECT_TRUE(ScreenSessionManager::GetInstance().lastFoldAngles_.empty());
+     usleep(SLEEP_TIME_US);
+ }
+
+ /**
+ * @tc.name: NotifyFoldAngleChanged05
+ * @tc.desc: test function : NotifyFoldAngleChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(SuperFoldSensorManagerTest, NotifyFoldAngleChanged05, Function | SmallTest | Level3)
+{
+    SuperFoldSensorManager mgr = SuperFoldSensorManager();
+    float foldAngle = 135.0F;
     mgr.NotifyFoldAngleChanged(foldAngle);
     EXPECT_TRUE(ScreenSessionManager::GetInstance().lastFoldAngles_.empty());
     usleep(SLEEP_TIME_US);
@@ -286,7 +314,7 @@ HWTEST_F(SuperFoldSensorManagerTest, NotifyFoldAngleChanged03, Function | SmallT
  * @tc.desc: test function : HandleHallData
  * @tc.type: FUNC
  */
-HWTEST_F(SuperFoldSensorManagerTest, HandleHallData01, Function | SmallTest | Level3)
+HWTEST_F(SuperFoldSensorManagerTest, HandleHallData01, TestSize.Level1)
 {
     SuperFoldSensorManager mgr = SuperFoldSensorManager();
     mgr.HandleHallData(nullptr);
@@ -298,7 +326,7 @@ HWTEST_F(SuperFoldSensorManagerTest, HandleHallData01, Function | SmallTest | Le
  * @tc.desc: test function : HandleHallData
  * @tc.type: FUNC
  */
-HWTEST_F(SuperFoldSensorManagerTest, HandleHallData02, Function | SmallTest | Level3)
+HWTEST_F(SuperFoldSensorManagerTest, HandleHallData02, TestSize.Level1)
 {
     SuperFoldSensorManager mgr = SuperFoldSensorManager();
     mgr.HandleHallData(nullptr);
@@ -314,7 +342,7 @@ HWTEST_F(SuperFoldSensorManagerTest, HandleHallData02, Function | SmallTest | Le
  * @tc.desc: test function : HandleHallData
  * @tc.type: FUNC
  */
-HWTEST_F(SuperFoldSensorManagerTest, HandleHallData03, Function | SmallTest | Level3)
+HWTEST_F(SuperFoldSensorManagerTest, HandleHallData03, TestSize.Level1)
 {
     SuperFoldSensorManager mgr = SuperFoldSensorManager();
     mgr.HandleHallData(nullptr);
@@ -335,7 +363,7 @@ HWTEST_F(SuperFoldSensorManagerTest, HandleHallData03, Function | SmallTest | Le
  * @tc.desc: test function : HandleHallData
  * @tc.type: FUNC
  */
-HWTEST_F(SuperFoldSensorManagerTest, HandleHallData04, Function | SmallTest | Level3)
+HWTEST_F(SuperFoldSensorManagerTest, HandleHallData04, TestSize.Level1)
 {
     SuperFoldSensorManager mgr = SuperFoldSensorManager();
     mgr.HandleHallData(nullptr);
@@ -360,7 +388,7 @@ HWTEST_F(SuperFoldSensorManagerTest, HandleHallData04, Function | SmallTest | Le
  * @tc.desc: test function : HandleHallData
  * @tc.type: FUNC
  */
-HWTEST_F(SuperFoldSensorManagerTest, HandleHallData05, Function | SmallTest | Level3)
+HWTEST_F(SuperFoldSensorManagerTest, HandleHallData05, TestSize.Level1)
 {
     SuperFoldSensorManager mgr = SuperFoldSensorManager();
     mgr.HandleHallData(nullptr);
@@ -389,7 +417,7 @@ HWTEST_F(SuperFoldSensorManagerTest, HandleHallData05, Function | SmallTest | Le
  * @tc.desc: test function : HandleHallData
  * @tc.type: FUNC
  */
-HWTEST_F(SuperFoldSensorManagerTest, HandleHallData06, Function | SmallTest | Level3)
+HWTEST_F(SuperFoldSensorManagerTest, HandleHallData06, TestSize.Level1)
 {
     SuperFoldSensorManager mgr = SuperFoldSensorManager();
     mgr.HandleHallData(nullptr);
@@ -415,6 +443,78 @@ HWTEST_F(SuperFoldSensorManagerTest, HandleHallData06, Function | SmallTest | Le
     hallData.status = 132;
     mgr.HandleHallData(&event);
     ASSERT_EQ(mgr.curHall_, HALL_HAVE_KEYBOARD_THRESHOLD);
+}
+
+/**
+ * @tc.name: NotifyHallChanged
+ * @tc.desc: test function : NotifyHallChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(SuperFoldSensorManagerTest, NotifyHallChanged, Function | SmallTest | Level3)
+{
+    SuperFoldSensorManager mgr = SuperFoldSensorManager();
+    mgr.NotifyHallChanged(0B0000);
+    ASSERT_EQ(mgr.curHall_, USHRT_MAX);
+    mgr.NotifyHallChanged(0B0100);
+    ASSERT_EQ(mgr.curHall_, USHRT_MAX);
+    mgr.NotifyHallChanged(0B0101);
+    ASSERT_EQ(mgr.curHall_, USHRT_MAX);
+    mgr.curAngle_ = 165.0F;
+    mgr.NotifyHallChanged(0B0000);
+    ASSERT_EQ(mgr.curHall_, USHRT_MAX);
+}
+
+/**
+ * @tc.name: HandleSuperSensorChange
+ * @tc.desc: test function : HandleSuperSensorChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SuperFoldSensorManagerTest, HandleSuperSensorChange, Function | SmallTest | Level3)
+{
+    SuperFoldSensorManager mgr = SuperFoldSensorManager();
+    ScreenSessionManager::GetInstance().isExtendScreenConnected_ = true;
+    mgr.HandleSuperSensorChange(SuperFoldStatusChangeEvents::ANGLE_CHANGE_EXPANDED);
+    ASSERT_EQ(mgr.curHall_, USHRT_MAX);
+    ScreenSessionManager::GetInstance().isExtendScreenConnected_ = false;
+    mgr.HandleSuperSensorChange(SuperFoldStatusChangeEvents::ANGLE_CHANGE_EXPANDED);
+    ASSERT_EQ(mgr.curHall_, USHRT_MAX);
+}
+
+/**
+ * @tc.name: HandleScreenConnectChange
+ * @tc.desc: test function : HandleScreenConnectChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SuperFoldSensorManagerTest, HandleScreenConnectChange, Function | SmallTest | Level3)
+{
+    SuperFoldSensorManager mgr = SuperFoldSensorManager();
+    mgr.HandleScreenConnectChange();
+    ASSERT_EQ(mgr.curHall_, USHRT_MAX);
+}
+
+/**
+ * @tc.name: HandleScreenDisconnectChange
+ * @tc.desc: test function : HandleScreenDisconnectChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SuperFoldSensorManagerTest, HandleScreenDisconnectChange, Function | SmallTest | Level3)
+{
+    SuperFoldSensorManager mgr = SuperFoldSensorManager();
+    mgr.HandleScreenDisconnectChange();
+    ASSERT_EQ(mgr.curHall_, USHRT_MAX);
+}
+
+/**
+ * @tc.name: GetCurAngle
+ * @tc.desc: test function : GetCurAngle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SuperFoldSensorManagerTest, GetCurAngle, Function | SmallTest | Level3)
+{
+    SuperFoldSensorManager mgr = SuperFoldSensorManager();
+    mgr.curAngle_ = 110.0F;
+    float angle = mgr.GetCurAngle();
+    ASSERT_EQ(angle, 110.0F);
 }
 }
 } // namespace Rosen

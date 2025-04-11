@@ -29,9 +29,6 @@
 #include <pwd.h>
 #include "common/include/session_permission.h"
 #include "parameters.h"
-#ifdef OHOS_BUILD_ENABLE_VIRTUAL_KEYBOARD
-#include "virtual_keyboard_client.h"
-#endif // OHOS_BUILD_ENABLE_VIRTUAL_KEYBOARD
 #include "window_manager_hilog.h"
 
 namespace OHOS {
@@ -104,7 +101,7 @@ bool SessionPermission::IsSACalling()
         TLOGD(WmsLogTag::DEFAULT, "SA called, tokenId:%{private}u, flag:%{public}u", tokenId, flag);
         return true;
     }
-    TLOGI(WmsLogTag::DEFAULT, "Not SA called, tokenId:%{private}u, flag:%{public}u", tokenId, flag);
+    TLOGD(WmsLogTag::DEFAULT, "Not SA called, tokenId:%{private}u, flag:%{public}u", tokenId, flag);
     return false;
 }
 
@@ -120,7 +117,7 @@ bool SessionPermission::VerifyCallingPermission(const std::string& permissionNam
             permissionName.c_str(), callerToken, ret);
         return false;
     }
-    TLOGI(WmsLogTag::DEFAULT, "Verify AccessToken success. permission %{public}s, callingTokenID:%{private}u",
+    TLOGD(WmsLogTag::DEFAULT, "Verify AccessToken success. permission %{public}s, callingTokenID:%{private}u",
         permissionName.c_str(), callerToken);
     return true;
 }
@@ -136,7 +133,7 @@ bool SessionPermission::VerifyPermissionByCallerToken(const uint32_t callerToken
             permissionName.c_str(), callerToken, ret);
         return false;
     }
-    TLOGI(WmsLogTag::DEFAULT, "Verify AccessToken success. permission %{public}s, callingTokenID:%{private}u",
+    TLOGD(WmsLogTag::DEFAULT, "Verify AccessToken success. permission %{public}s, callingTokenID:%{private}u",
         permissionName.c_str(), callerToken);
     return true;
 }
@@ -144,11 +141,11 @@ bool SessionPermission::VerifyPermissionByCallerToken(const uint32_t callerToken
 bool SessionPermission::VerifySessionPermission()
 {
     if (IsSACalling()) {
-        WLOGFI("Is SA Call, Permission verified success.");
+        TLOGD(WmsLogTag::DEFAULT, "Is SA Call, Permission verified success.");
         return true;
     }
     if (VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_MISSION)) {
-        WLOGFI("MANAGE permission verified success.");
+        TLOGD(WmsLogTag::DEFAULT, "MANAGE permission verified success.");
         return true;
     }
     WLOGFW("Permission verified failed.");
@@ -171,7 +168,7 @@ bool SessionPermission::IsShellCall()
         TLOGD(WmsLogTag::DEFAULT, "TokenType is Shell, verify success");
         return true;
     }
-    TLOGI(WmsLogTag::DEFAULT, "Not Shell called. tokenId:%{private}u, type:%{public}u", callerToken, tokenType);
+    TLOGD(WmsLogTag::DEFAULT, "Not Shell called. tokenId:%{private}u, type:%{public}u", callerToken, tokenType);
     return false;
 }
 
@@ -196,17 +193,6 @@ bool SessionPermission::IsStartedByInputMethod()
     }
     int pid = IPCSkeleton::GetCallingPid();
     return imc->IsCurrentImeByPid(pid);
-}
-
-bool SessionPermission::IsStartedBySystemKeyboard()
-{
-#ifdef OHOS_BUILD_ENABLE_VIRTUAL_KEYBOARD
-    int pid = IPCSkeleton::GetCallingPid();
-    return VirtualKeyboard::VirtualKeyboardClient::GetInstance().IsCurrentProcess(pid);
-#else
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "This device dose not support system keyboard.");
-    return false;
-#endif
 }
 
 bool SessionPermission::IsSameBundleNameAsCalling(const std::string& bundleName)
@@ -313,7 +299,7 @@ bool SessionPermission::IsStartedByUIExtension()
 
 bool SessionPermission::CheckCallingIsUserTestMode(pid_t pid)
 {
-    TLOGI(WmsLogTag::DEFAULT, "Calling proxy func");
+    TLOGD(WmsLogTag::DEFAULT, "Calling proxy func");
     bool isUserTestMode = false;
     auto appMgrClient = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance();
     if (appMgrClient == nullptr) {

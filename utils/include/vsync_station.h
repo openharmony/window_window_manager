@@ -51,7 +51,7 @@ public:
     void SetDisplaySoloistFrameRateLinkerEnable(bool enabled);
     void SetUiDvsyncSwitch(bool dvsyncSwitch);
 
-    void DecreaseRequestVsyncTimes() { requestVsyncTimes_--; }
+    void DecreaseRequestVsyncTimes();
     int32_t GetRequestVsyncTimes() { return requestVsyncTimes_.load(); }
 
 private:
