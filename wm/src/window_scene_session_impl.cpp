@@ -2596,7 +2596,7 @@ WMError WindowSceneSessionImpl::SetSystemBarPropertyForPage(WindowType type, std
         GetWindowId(), GetWindowName().c_str(), static_cast<uint32_t>(type),
         property->enable_, property->backgroundColor_,
         property->contentColor_, property->enableAnimation_, property->settingFlag_);
-    auto lastProperty = GetSystemBarPropertyByType(type)
+    auto lastProperty = GetSystemBarPropertyByType(type);
     property_->SetSystemBarProperty(type, property.value());
     auto ret = NotifySpecificWindowSessionProperty(type, property.value());
     property_->SetSystemBarProperty(type, lastProperty);
@@ -2607,12 +2607,12 @@ WMError WindowSceneSessionImpl::SetSystemBarPropertyForPage(WindowType type, std
     return WMError::WM_OK;
 }
 
-WMError WindowSceneSessionImpl::GetSystemBarPropertyForPage(const std::map<WindowType, SystemBarProperty>& properties,
+void WindowSceneSessionImpl::GetSystemBarPropertyForPage(const std::map<WindowType, SystemBarProperty>& properties,
     std::map<WindowType, SystemBarProperty>& pageProperties)
 {
     for (auto type : { WindowType::WINDOW_TYPE_STATUS_BAR, WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR }) {
         if (properties.find(type) != properties.end()) {
-            pageProperties[type] = properties[type];
+            pageProperties[type] = properties.at(type);
         } else {
             pageProperties[type] = GetSystemBarPropertyByType(type);
         }
