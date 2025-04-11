@@ -101,7 +101,7 @@ public:
     DMError SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid, std::vector<uint64_t>& windowIdList);
     sptr<Display> GetPrimaryDisplaySync();
     void OnRemoteDied();
-    uint32_t GetDeviceStatus();
+    uint32_t GetDeviceStatus() const;
     sptr<CutoutInfo> GetCutoutInfoWithRotation(Rotation rotation);
     
 private:
