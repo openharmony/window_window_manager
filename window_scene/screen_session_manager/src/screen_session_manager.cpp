@@ -8850,7 +8850,7 @@ DMError ScreenSessionManager::SetScreenSkipProtectedWindow(const std::vector<Scr
                 ScreenId rsScreenId = INVALID_SCREEN_ID;
                 if (!screenIdManager_.ConvertToRsScreenId(screenSession->GetScreenId(), rsScreenId) ||
                     rsScreenId == INVALID_SCREEN_ID) {
-                    TLOGE(WmsLogTag::DMS, "No corresponding rsId.");
+                    TLOGE(WmsLogTag::DMS, "No corresponding rsId:%{public}" PRIu64 "", rsScreenId);
                     continue;
                 }
                 TLOGI(WmsLogTag::DMS, "virtualScreenId:%{public}" PRIu64 "", screenId);
