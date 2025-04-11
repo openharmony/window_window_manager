@@ -1135,6 +1135,10 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             SetVirtualDisplayMuteFlag(screenId, muteFlag);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_GET_DEVICE_STATUS: {
+            reply.WriteInt32(GetDeviceStatus());
+            break;
+        }
         default:
             WLOGFW("unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
