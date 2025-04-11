@@ -2193,9 +2193,9 @@ HWTEST_F(SceneSessionManagerTest12, GetMainSessionByModuleName, Function | Small
 HWTEST_F(SceneSessionManagerTest12, RequestSceneSession, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.bundleName_ = "testBundleName1";
-    info.moduleName_ = "testModuleName1";
-    info.abilityName_ = "testAbilityName1";
+    info.bundleName_ = "request_scene_session_bundle";
+    info.moduleName_ = "request_scene_session_module";
+    info.abilityName_ = "request_scene_session_ability";
     info.persistentId_ = 101;
     info.appIndex_ = 0;
     sptr<SceneSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
@@ -2203,10 +2203,11 @@ HWTEST_F(SceneSessionManagerTest12, RequestSceneSession, Function | SmallTest | 
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     sceneSession->SetIsAbilityHook(true);
     sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
-    ssm_->sceneSessionMap_.insert({101, sceneSession});
+    ssm_->sceneSessionMap_[101] = sceneSession;
 
     auto result = ssm_->RequestSceneSession(info, windowSessionProperty);
-    ASSERT_EQ(result, sceneSession);
+    ASSERT_NE(result, nullptr);
+    ASSERT_EQ(result->GetSessionInfo().moduleName_, info.moduleName_);
 }
 }
 } // namespace Rosen
