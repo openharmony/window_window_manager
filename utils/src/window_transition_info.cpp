@@ -250,7 +250,7 @@ bool WindowTransitionInfo::Marshalling(Parcel& parcel) const
 
 WindowTransitionInfo* WindowTransitionInfo::Unmarshalling(Parcel& parcel)
 {
-    std::shared_ptr<WindowTransitionInfo> windowTransitionInfo = std::make_shared<WindowTransitionInfo>();
+    auto windowTransitionInfo = new(std::nothrow) WindowTransitionInfo();
     if (windowTransitionInfo == nullptr) {
         return nullptr;
     }
@@ -264,6 +264,7 @@ WindowTransitionInfo* WindowTransitionInfo::Unmarshalling(Parcel& parcel)
     if (parcel.ReadBool()) {
         auto readObject = parcel.ReadObject<IRemoteObject>();
         if (readObject == nullptr) {
+            delete windowTransitionInfo;
             return nullptr;
         }
         windowTransitionInfo->abilityToken_ = readObject;
