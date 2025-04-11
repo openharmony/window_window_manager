@@ -2620,7 +2620,7 @@ public:
      * @param property System Bar Property
      * @return WMError
      */
-    virtual WMError SetSystemBarPropertyForPage(WindowType type, const sptr<SystemBarProperty>& property)
+    virtual WMError SetSystemBarPropertyForPage(WindowType type, std::optional<SystemBarProperty> property)
     {
         return WMError::WM_OK;
     }
