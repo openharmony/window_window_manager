@@ -1488,6 +1488,12 @@ HWTEST_F(WindowSceneSessionImplTest5, HandleWindowLimitsInCompatibleMode05, Func
     EXPECT_EQ(windowSizeLimits.minWindowWidth, 0);
     EXPECT_EQ(windowSizeLimits.minWindowHeight, 0);
 }
+
+/**
+ * @tc.name: HandleWindowLimitsInCompatibleMode05
+ * @tc.desc: HandleWindowLimitsInCompatibleMode
+ * @tc.type: FUNC
+ */
 }
 } // namespace Rosen
 } // namespace OHOS
