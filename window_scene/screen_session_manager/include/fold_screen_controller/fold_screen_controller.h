@@ -46,7 +46,7 @@ public:
     bool IsFoldable();
     FoldStatus GetFoldStatus();
     bool GetTentMode();
-    int GetCurrentTentMode();
+    int GetCurrentTentMode() const;
     FoldDisplayMode GetModeMatchStatus();
     void SetFoldStatus(FoldStatus foldStatus);
     void OnTentModeChanged(int tentType, int32_t hall = -1);

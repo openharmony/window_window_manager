@@ -4130,6 +4130,12 @@ uint32_t ScreenSessionManagerProxy::GetDeviceStatus()
         return 0;
     }
 
-    return reply.ReadUint32();
+    uint32_t status = 0;
+    if (!reply.ReadUint32(status)) {
+        WLOGFE("ScreenSessionManagerProxy::GetDeviceStatus: ReadUint32 failed");
+        return 0;
+    }
+
+    return status;
 }
 } // namespace OHOS::Rosen
