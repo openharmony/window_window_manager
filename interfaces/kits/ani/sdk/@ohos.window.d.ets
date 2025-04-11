@@ -72,32 +72,6 @@ declare namespace window {
 */
 export enum WindowType {
 /**
-    * App.
-    *
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @FAModelOnly
-    * @since 7
-    */
-TYPE_APP,
-/**
-    * System alert.
-    *
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @since 7
-    * @deprecated since 11
-    */
-TYPE_SYSTEM_ALERT,
-/**
-    * Input method.
-    *
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @systemapi Hide this for inner system use.
-    * @StageModelOnly
-    * @since 9
-    * @deprecated since 13
-    */
-TYPE_INPUT_METHOD,
-/**
     * Status bar.
     *
     * @syscap SystemCapability.WindowManager.WindowManager.Core
@@ -1428,16 +1402,6 @@ touchable: boolean;
 brightness: number;
 
 /**
-    * The dimbehind value of window.
-    *
-    * @type { number }
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @since 7
-    * @deprecated since 9
-    */
-dimBehindValue: number;
-
-/**
     * Whether keep screen on.
     *
     * @syscap SystemCapability.WindowManager.WindowManager.Core
@@ -1478,16 +1442,6 @@ isKeepScreenOn: boolean;
     * @since 12
     */
 isPrivacyMode: boolean;
-
-/**
-    * Whether is round corner or not.
-    *
-    * @type { boolean }
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @since 7
-    * @deprecated since 9
-    */
-isRoundCorner: boolean;
 
 /**
     * Whether is transparent or not.
@@ -2363,86 +2317,6 @@ export function createWindow(config: Configuration, callback: AsyncCallback<Wind
 export function createWindow(config: Configuration): Promise<Window>;
 
 /**
-* Create a sub window with a specific id and type, only support 7.
-*
-* @param { string } id - Indicates window id.
-* @param { WindowType } type - Indicates window type.
-* @param { AsyncCallback<Window> } callback - Callback used to return the subwindow created.
-* @syscap SystemCapability.WindowManager.WindowManager.Core
-* @FAModelOnly
-* @since 7
-* @deprecated since 9
-* @useinstead ohos.window#createWindow
-*/
-export function create(id: string, type: WindowType, callback: AsyncCallback<Window>): void;
-
-/**
-* Create a sub window with a specific id and type, only support 7.
-*
-* @param { string } id - Indicates window id.
-* @param { WindowType } type - Indicates window type.
-* @returns { Promise<Window> } Promise used to return the subwindow created.
-* @syscap SystemCapability.WindowManager.WindowManager.Core
-* @FAModelOnly
-* @since 7
-* @deprecated since 9
-* @useinstead ohos.window#createWindow
-*/
-export function create(id: string, type: WindowType): Promise<Window>;
-
-/**
-* Create a system or float window with a specific id and type.
-*
-* @param { BaseContext } ctx - Indicates the context on which the window depends
-* @param { string } id - Indicates window id.
-* @param { WindowType } type - Indicates window type.
-* @returns { Promise<Window> } Promise used to return the window created.
-* @syscap SystemCapability.WindowManager.WindowManager.Core
-* @since 8
-* @deprecated since 9
-* @useinstead ohos.window#createWindow
-*/
-export function create(ctx: BaseContext, id: string, type: WindowType): Promise<Window>;
-
-/**
-* Create a system or float window with a specific id and type.
-*
-* @param { BaseContext } ctx - Indicates the context on which the window depends
-* @param { string } id - Indicates window id.
-* @param { WindowType } type - Indicates window type.
-* @param { AsyncCallback<Window> } callback - Callback used to return the window created.
-* @syscap SystemCapability.WindowManager.WindowManager.Core
-* @since 8
-* @deprecated since 9
-* @useinstead ohos.window#createWindow
-*/
-export function create(ctx: BaseContext, id: string, type: WindowType, callback: AsyncCallback<Window>): void;
-
-/**
-* Find the window by id.
-*
-* @param { string } id - Indicates window id.
-* @param { AsyncCallback<Window> } callback - Callback used to return the window found.
-* @syscap SystemCapability.WindowManager.WindowManager.Core
-* @since 7
-* @deprecated since 9
-* @useinstead ohos.window#findWindow
-*/
-export function find(id: string, callback: AsyncCallback<Window>): void;
-
-/**
-* Find the window by id.
-*
-* @param { string } id - Indicates window id.
-* @returns { Promise<Window> } Window found.
-* @syscap SystemCapability.WindowManager.WindowManager.Core
-* @since 7
-* @deprecated since 9
-* @useinstead ohos.window#findWindow
-*/
-export function find(id: string): Promise<Window>;
-
-/**
 * Find the window by name.
 *
 * @param { string } name - Indicates window name.
@@ -2479,42 +2353,6 @@ export function find(id: string): Promise<Window>;
 * @since 11
 */
 export function findWindow(name: string): Window;
-
-/**
-* Get the final show window.
-*
-* @param { AsyncCallback<Window> } callback - Callback used to return the top window obtained.
-* @syscap SystemCapability.WindowManager.WindowManager.Core
-* @FAModelOnly
-* @since 6
-* @deprecated since 9
-* @useinstead ohos.window#getLastWindow
-*/
-export function getTopWindow(ctx: BaseContext | AsyncCallback<Window>): undefined | Promise<Window>;
-
-/**
-* Get the final show window.
-*
-* @returns { Promise<Window> } Promise used to return the top window obtained.
-* @syscap SystemCapability.WindowManager.WindowManager.Core
-* @FAModelOnly
-* @since 6
-* @deprecated since 9
-* @useinstead ohos.window#getLastWindow
-*/
-export function getTopWindow(): Promise<Window>;
-
-/**
-* Get the final show window.
-*
-* @param { BaseContext } ctx - Indicates the context on which the window depends
-* @param { AsyncCallback<Window> } callback - Callback used to return the top window obtained.
-* @syscap SystemCapability.WindowManager.WindowManager.Core
-* @since 8
-* @deprecated since 9
-* @useinstead ohos.window#getLastWindow
-*/
-export function getTopWindow(ctx: BaseContext, callback: AsyncCallback<Window>): void;
 
 /**
 * Get the final show window.
@@ -3610,28 +3448,6 @@ hideWithAnimation(callback: AsyncCallback<void>): void;
     */
 hideWithAnimation(): Promise<void>;
 
-    /**
-    * Show window.
-    *
-    * @param { AsyncCallback<void> } callback - Callback used to return the result.
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @since 7
-    * @deprecated since 9
-    * @useinstead ohos.window.Window#showWindow
-    */
-show(callback: AsyncCallback<void>): void;
-
-/**
-    * Show window.
-    *
-    * @returns { Promise<void> } Promise that returns no value.
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @since 7
-    * @deprecated since 9
-    * @useinstead ohos.window.Window#showWindow
-    */
-show(): Promise<void>;
-
 /**
     * Show window.
     *
@@ -3744,28 +3560,6 @@ showWithAnimation(): Promise<void>;
     * Destroy the window.
     *
     * @param { AsyncCallback<void> } callback - Callback used to return the result.
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @since 7
-    * @deprecated since 9
-    * @useinstead ohos.window.Window#destroyWindow
-    */
-destroy(callback: AsyncCallback<void>): void;
-
-/**
-    * Destroy the window.
-    *
-    * @returns { Promise<void> } Promise that returns no value.
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @since 7
-    * @deprecated since 9
-    * @useinstead ohos.window.Window#destroyWindow
-    */
-destroy(): Promise<void>;
-
-/**
-    * Destroy the window.
-    *
-    * @param { AsyncCallback<void> } callback - Callback used to return the result.
     * @throws { BusinessError } 1300002 - This window state is abnormal.
     * @throws { BusinessError } 1300003 - This window manager service works abnormally.
     * @syscap SystemCapability.WindowManager.WindowManager.Core
@@ -3825,32 +3619,6 @@ destroyWindow(callback: AsyncCallback<void>): void;
     * @since 11
     */
 destroyWindow(): Promise<void>;
-
-/**
-    * Set the position of a window.
-    *
-    * @param { number } x - Indicate the X-coordinate of the window.
-    * @param { number } y - Indicate the Y-coordinate of the window.
-    * @returns { Promise<void> } Promise that returns no value.
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @since 7
-    * @deprecated since 9
-    * @useinstead ohos.window.Window#moveWindowTo
-    */
-moveTo(x: number, y: number): Promise<void>;
-
-/**
-    * Set the position of a window.
-    *
-    * @param { number } x - Indicate the X-coordinate of the window.
-    * @param { number } y - Indicate the Y-coordinate of the window.
-    * @param { AsyncCallback<void> } callback - Callback used to return the result.
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @since 7
-    * @deprecated since 9
-    * @useinstead ohos.window.Window#moveWindowTo
-    */
-moveTo(x: number, y: number, callback: AsyncCallback<void>): void;
 
 /**
     * Set the position of a window.
@@ -3983,32 +3751,6 @@ moveWindowToGlobal(x: number, y: number): Promise<void>;
 /**
     * Set the size of a window .
     *
-    * @param { number } width - Indicates the width of the window.
-    * @param { number } height - Indicates the height of the window.
-    * @returns { Promise<void> } Promise that returns no value.
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @since 7
-    * @deprecated since 9
-    * @useinstead ohos.window.Window#resize
-    */
-resetSize(width: number, height: number): Promise<void>;
-
-/**
-    * Set the size of a window .
-    *
-    * @param { number } width - Indicates the width of the window.
-    * @param { number } height - Indicates the height of the window.
-    * @param { AsyncCallback<void> } callback - Callback used to return the result.
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @since 7
-    * @deprecated since 9
-    * @useinstead ohos.window.Window#resize
-    */
-resetSize(width: number, height: number, callback: AsyncCallback<void>): void;
-
-/**
-    * Set the size of a window .
-    *
     * @param { number } width - Indicates the width of the window. The width should be greater than 0.
     * @param { number } height - Indicates the height of the window. The height should be greater than 0.
     * @returns { Promise<void> } Promise that returns no value.
@@ -4121,30 +3863,6 @@ resize(width: number, height: number, callback: AsyncCallback<void>): void;
 resizeAsync(width: number, height: number): Promise<void>;
 
 /**
-    * Set the type of a window.
-    *
-    * @param { WindowType } type - Indicate the type of a window.
-    * @returns { Promise<void> } Promise that returns no value.
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @systemapi Hide this for inner system use.
-    * @since 7
-    * @deprecated since 9
-    */
-setWindowType(type: WindowType): Promise<void>;
-
-/**
-    * Set the type of a window.
-    *
-    * @param { WindowType } type - Indicate the type of a window.
-    * @param { AsyncCallback<void> } callback - Callback used to return the result.
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @systemapi Hide this for inner system use.
-    * @since 7
-    * @deprecated since 9
-    */
-setWindowType(type: WindowType, callback: AsyncCallback<void>): void;
-
-/**
     * Set the mode of a window.
     *
     * @param { WindowMode } mode - Indicate the mode of a window.
@@ -4207,17 +3925,6 @@ setWindowMode(mode: WindowMode): Promise<void>;
 setWindowMode(mode: WindowMode, callback: AsyncCallback<void>): void;
 
 /**
-    * Get the properties of current window
-    *
-    * @param { AsyncCallback<WindowProperties> } callback - Callback used to return the window properties.
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @since 6
-    * @deprecated since 9
-    * @useinstead ohos.window.Window#getWindowProperties
-    */
-getProperties(callback: AsyncCallback<WindowProperties>): void;
-
-/**
     * Get the window rectangular area quadruple {left,top,weight,height}, left and top represent relative
     * to screen coordinates and are affected by parent window scaling, weight and height are the scaling
     * width and height.
@@ -4234,17 +3941,6 @@ getProperties(callback: AsyncCallback<WindowProperties>): void;
     * @since 13
     */
 getGlobalRect(): Rect;
-
-/**
-    * Get the properties of current window
-    *
-    * @returns { Promise<WindowProperties> } Promise used to return the window properties.
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @since 6
-    * @deprecated since 9
-    * @useinstead ohos.window.Window#getWindowProperties
-    */
-getProperties(): Promise<WindowProperties>;
 
 /**
     * Get the properties of current window
@@ -4274,30 +3970,6 @@ getProperties(): Promise<WindowProperties>;
     * @since 11
     */
 getWindowProperties(): WindowProperties;
-
-/**
-    * Get the avoid area
-    *
-    * @param { AvoidAreaType } type - Type of the area
-    * @param { AsyncCallback<AvoidArea> } callback - Callback used to return the area.
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @since 7
-    * @deprecated since 9
-    * @useinstead ohos.window.Window#getWindowAvoidArea
-    */
-getAvoidArea(type: AvoidAreaType, callback: AsyncCallback<AvoidArea>): void;
-
-/**
-    * Get the avoid area
-    *
-    * @param { AvoidAreaType } type - Type of the area
-    * @returns { Promise<AvoidArea> } Area where the window cannot be displayed.
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @since 7
-    * @deprecated since 9
-    * @useinstead ohos.window.Window#getWindowAvoidArea
-    */
-getAvoidArea(type: AvoidAreaType): Promise<AvoidArea>;
 
 /**
     * Get the avoid area
@@ -4341,54 +4013,6 @@ getAvoidArea(type: AvoidAreaType): Promise<AvoidArea>;
 getWindowAvoidArea(type: AvoidAreaType): AvoidArea;
 
 /**
-    * Set the flag of the window is shown full screen
-    *
-    * @param { boolean } isFullScreen - The flag of the window is shown full screen
-    * @param { AsyncCallback<void> } callback - Callback used to return the result.
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @since 6
-    * @deprecated since 9
-    * @useinstead ohos.window.Window#setWindowSystemBarEnable
-    */
-setFullScreen(isFullScreen: boolean, callback: AsyncCallback<void>): void;
-
-/**
-    * Set the flag of the window is shown full screen
-    *
-    * @param { boolean } isFullScreen - The flag of the window is shown full screen
-    * @returns { Promise<void> } Promise that returns no value.
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @since 6
-    * @deprecated since 9
-    * @useinstead ohos.window.Window#setWindowSystemBarEnable
-    */
-setFullScreen(isFullScreen: boolean): Promise<void>;
-
-/**
-    * Set the property of the window can layout in full screen
-    *
-    * @param { boolean } isLayoutFullScreen - The window can layout in full screen
-    * @param { AsyncCallback<void> } callback - Callback used to return the result.
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @since 7
-    * @deprecated since 9
-    * @useinstead ohos.window.Window#setWindowLayoutFullScreen
-    */
-setLayoutFullScreen(isLayoutFullScreen: boolean, callback: AsyncCallback<void>): void;
-
-/**
-    * Set the property of the window can layout in full screen
-    *
-    * @param { boolean } isLayoutFullScreen - The window can layout in full screen
-    * @returns { Promise<void> } Promise that returns no value.
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @since 7
-    * @deprecated since 9
-    * @useinstead ohos.window.Window#setWindowLayoutFullScreen
-    */
-setLayoutFullScreen(isLayoutFullScreen: boolean): Promise<void>;
-
-/**
     * Set the property of the window can layout in full screen
     *
     * @param { boolean } isLayoutFullScreen - The window can layout in full screen
@@ -4400,23 +4024,6 @@ setLayoutFullScreen(isLayoutFullScreen: boolean): Promise<void>;
     * @syscap SystemCapability.WindowManager.WindowManager.Core
     * @since 9
     */
-/**
-    * Set the property of the window can layout in full screen
-    *
-    * @param { boolean } isLayoutFullScreen - The window can layout in full screen
-    * @param { AsyncCallback<void> } callback - Callback used to return the result.
-    * @throws { BusinessError } 401 - Parameter error. Possible cause: 1. Mandatory parameters are left unspecified;
-    *                                                                  2. Incorrect parameter types.
-    * @throws { BusinessError } 1300002 - This window state is abnormal.
-    * @throws { BusinessError } 1300003 - This window manager service works abnormally.
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @crossplatform
-    * @atomicservice
-    * @since 12
-    * @deprecated since 12
-    * @useinstead ohos.window.Window#setWindowLayoutFullScreen
-    */
-setWindowLayoutFullScreen(isLayoutFullScreen: boolean, callback: AsyncCallback<void>): void;
 
 /**
     * Set the property of the window can layout in full screen
@@ -4451,30 +4058,6 @@ setWindowLayoutFullScreen(isLayoutFullScreen: boolean): Promise<void>;
     *
     * @param { Array<'status' | 'navigation'> } names - The set of system bar
     * @param { AsyncCallback<void> } callback - Callback used to return the result.
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @since 7
-    * @deprecated since 9
-    * @useinstead ohos.window.Window#setWindowSystemBarEnable
-    */
-setSystemBarEnable(names: Array<'status' | 'navigation'>, callback: AsyncCallback<void>): void;
-
-/**
-    * Set the system bar to have visible.
-    *
-    * @param { Array<'status' | 'navigation'> } names - The set of system bar
-    * @returns { Promise<void> } Promise that returns no value.
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @since 7
-    * @deprecated since 9
-    * @useinstead ohos.window.Window#setWindowSystemBarEnable
-    */
-setSystemBarEnable(names: Array<'status' | 'navigation'>): Promise<void>;
-
-/**
-    * Set the system bar to have visible.
-    *
-    * @param { Array<'status' | 'navigation'> } names - The set of system bar
-    * @param { AsyncCallback<void> } callback - Callback used to return the result.
     * @throws { BusinessError } 401 - Parameter error. Possible cause: 1. Mandatory parameters are left unspecified;
     *                                                                  2. Incorrect parameter types.
     * @throws { BusinessError } 1300002 - This window state is abnormal.
@@ -4495,24 +4078,6 @@ setSystemBarEnable(names: Array<'status' | 'navigation'>): Promise<void>;
     * @crossplatform
     * @since 10
     */
-/**
-    * Set the system bar to have visible.
-    *
-    * @param { Array<'status' | 'navigation'> } names - The set of system bar
-    * @param { AsyncCallback<void> } callback - Callback used to return the result.
-    * @throws { BusinessError } 401 - Parameter error. Possible cause: 1.Mandatory parameters are left unspecified;
-    *                                                                  2.Incorrect parameter types.
-    * @throws { BusinessError } 1300002 - This window state is abnormal.
-    * @throws { BusinessError } 1300003 - This window manager service works abnormally.
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @crossplatform
-    * @atomicservice
-    * @since 12
-    * @deprecated since 12
-    * @useinstead ohos.window.Window#setWindowSystemBarEnable
-    */
-setWindowSystemBarEnable(names: Array<'status' | 'navigation'>, callback: AsyncCallback<void>): void;
-
 /**
     * Set the system bar to have visible.
     *
@@ -4592,30 +4157,6 @@ setSpecificSystemBarEnabled(name: SpecificSystemBar, enable: boolean, enableAnim
     *
     * @param { SystemBarProperties } systemBarProperties - The properties of system bar
     * @param { AsyncCallback<void> } callback - Callback used to return the result.
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @since 6
-    * @deprecated since 9
-    * @useinstead ohos.window.Window#setWindowSystemBarProperties
-    */
-setSystemBarProperties(systemBarProperties: SystemBarProperties, callback: AsyncCallback<void>): void;
-
-/**
-    * Set the properties of system bar
-    *
-    * @param { SystemBarProperties } systemBarProperties - The properties of system bar
-    * @returns { Promise<void> } Promise that returns no value.
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @since 6
-    * @deprecated since 9
-    * @useinstead ohos.window.Window#setWindowSystemBarProperties
-    */
-setSystemBarProperties(systemBarProperties: SystemBarProperties): Promise<void>;
-
-/**
-    * Set the properties of system bar
-    *
-    * @param { SystemBarProperties } systemBarProperties - The properties of system bar
-    * @param { AsyncCallback<void> } callback - Callback used to return the result.
     * @throws { BusinessError } 401 - Parameter error. Possible cause: 1. Mandatory parameters are left unspecified;
     *                                                                  2. Incorrect parameter types.
     * @throws { BusinessError } 801 - Capability not supported. Failed to call the API due to limited
@@ -4625,24 +4166,6 @@ setSystemBarProperties(systemBarProperties: SystemBarProperties): Promise<void>;
     * @syscap SystemCapability.WindowManager.WindowManager.Core
     * @since 9
     */
-/**
-    * Set the properties of system bar
-    *
-    * @param { SystemBarProperties } systemBarProperties - The properties of system bar
-    * @param { AsyncCallback<void> } callback - Callback used to return the result.
-    * @throws { BusinessError } 401 - Parameter error. Possible cause: 1. Mandatory parameters are left unspecified;
-    *                                                                  2. Incorrect parameter types.
-    * @throws { BusinessError } 801 - Capability not supported. Failed to call the API due to
-    * limited device capabilities.
-    * @throws { BusinessError } 1300002 - This window state is abnormal.
-    * @throws { BusinessError } 1300003 - This window manager service works abnormally.
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @atomicservice
-    * @since 12
-    * @deprecated since 12
-    * @useinstead ohos.window.Window#setWindowSystemBarProperties
-    */
-setWindowSystemBarProperties(systemBarProperties: SystemBarProperties, callback: AsyncCallback<void>): void;
 
 /**
     * Set the properties of system bar
@@ -4909,30 +4432,6 @@ getPreferredOrientation(): Orientation;
     */
 
 /**
-    * Loads content
-    *
-    * @param { string } path - Path of the page to which the content will be loaded
-    * @param { AsyncCallback<void> } callback - Callback used to return the result.
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @since 7
-    * @deprecated since 9
-    * @useinstead ohos.window.Window#setUIContent
-    */
-
-/**
-    * Loads content
-    *
-    * @param { string } path - Path of the page to which the content will be loaded
-    * @returns { Promise<void> } Promise that returns no value.
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @since 7
-    * @deprecated since 9
-    * @useinstead ohos.window.Window#setUIContent
-    */
-loadContent(path: string, storageOrCallback?: LocalStorage | AsyncCallback<void>,
-    callbackForStorage?: AsyncCallback<void>): undefined | Promise<void>;
-
-/**
     * Get the UIContext associate with the window content.
     *
     * @returns { UIContext } the object of UIContext.
@@ -5096,29 +4595,6 @@ loadContentByName(name: string, storage?: LocalStorage): Promise<void>;
 /**
     * Checks whether the window is displayed
     *
-    * @param { AsyncCallback<boolean> } callback - Callback used to return the result.
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @since 7
-    * @deprecated since 9
-    * @useinstead ohos.window.Window#isWindowShowing
-    */
-isShowing(callback: AsyncCallback<boolean>): void;
-
-/**
-    * Checks whether the window is displayed
-    *
-    * @returns { Promise<boolean> } Whether the window is displayed. The value true means that the window is displayed,
-    * and false means the opposite.
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @since 7
-    * @deprecated since 9
-    * @useinstead ohos.window.Window#isWindowShowing
-    */
-isShowing(): Promise<boolean>;
-
-/**
-    * Checks whether the window is displayed
-    *
     * @returns { boolean } Whether the window is displayed. The value true means that the window is displayed, and
     * false means the opposite.
     * @throws { BusinessError } 1300002 - This window state is abnormal.
@@ -5186,18 +4662,6 @@ isWindowShowing(): boolean;
     * @crossplatform
     * @atomicservice
     * @since 12
-    */
-
-/**
-    * Register the callback of systemAvoidAreaChange
-    *
-    * @param { 'systemAvoidAreaChange' } type - The value is fixed at 'systemAvoidAreaChange', indicating the event
-    * of changes to the avoid area.
-    * @param { Callback<AvoidArea> } callback - Callback used to return the area.
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @since 7
-    * @deprecated since 9
-    * @useinstead ohos.window.Window#on_avoidAreaChange
     */
 
 /**
@@ -5550,18 +5014,6 @@ on(type: 'screenshot' | 'dialogTargetTouch' | 'windowEvent' | 'windowStatusChang
     * @crossplatform
     * @atomicservice
     * @since 12
-    */
-
-/**
-    * Unregister the callback of systemAvoidAreaChange
-    *
-    * @param { 'systemAvoidAreaChange' } type - The value is fixed at 'systemAvoidAreaChange', indicating the event
-    * of changes to the avoid area.
-    * @param { Callback<AvoidArea> } callback - Callback used to return the area.
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @since 7
-    * @deprecated since 9
-    * @useinstead ohos.window.Window#off_avoidAreaChange
     */
 
 /**
@@ -5938,29 +5390,6 @@ setDialogBackGestureEnabled(enabled: boolean): Promise<void>;
 /**
     * Whether the window supports thr wide gamut setting.
     *
-    * @returns { Promise<boolean> } Promise used to return the result. The value true means that the wide-gamut
-    * color space is supported, and false means the opposite.
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @since 8
-    * @deprecated since 9
-    * @useinstead ohos.window.Window#isWindowSupportWideGamut
-    */
-isSupportWideGamut(): Promise<boolean>;
-
-/**
-    * Whether the window supports thr wide gamut setting.
-    *
-    * @param { AsyncCallback<boolean> } callback Callback used to return the result.
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @since 8
-    * @deprecated since 9
-    * @useinstead ohos.window.Window#isWindowSupportWideGamut
-    */
-isSupportWideGamut(callback: AsyncCallback<boolean>): void;
-
-/**
-    * Whether the window supports thr wide gamut setting.
-    *
     * @returns { Promise<boolean> } Promise used to return the result.
     *  The value true means that the wide-gamut color space is supported, and false means the opposite.
     * @throws { BusinessError } 1300002 - This window state is abnormal.
@@ -5997,30 +5426,6 @@ isWindowSupportWideGamut(): Promise<boolean>;
     * @since 12
     */
 isWindowSupportWideGamut(callback: AsyncCallback<boolean>): void;
-
-/**
-    * Sets the specified color space.
-    *
-    * @param { ColorSpace } colorSpace the specified color space.
-    * @returns { Promise<void> } Promise that returns no value.
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @since 8
-    * @deprecated since 9
-    * @useinstead ohos.window.Window#setWindowColorSpace
-    */
-setColorSpace(colorSpace: ColorSpace): Promise<void>;
-
-/**
-    * Sets the specified color space.
-    *
-    * @param { ColorSpace } colorSpace the specified color space.
-    * @param { AsyncCallback<void> } callback Callback used to return the result.
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @since 8
-    * @deprecated since 9
-    * @useinstead ohos.window.Window#setWindowColorSpace
-    */
-setColorSpace(colorSpace: ColorSpace, callback: AsyncCallback<void>): void;
 
 /**
     * Sets the specified color space.
@@ -6107,28 +5512,6 @@ setWindowColorSpace(colorSpace: ColorSpace, callback: AsyncCallback<void>): void
 /**
     * Obtains the set color space.
     *
-    * @returns { Promise<ColorSpace> } Promise used to return the current color space.
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @since 8
-    * @deprecated since 9
-    * @useinstead ohos.window.Window#getWindowColorSpace
-    */
-getColorSpace(): Promise<ColorSpace>;
-
-/**
-    * Obtains the set color space.
-    *
-    * @param { AsyncCallback<ColorSpace> } callback Callback used to return the result.
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @since 8
-    * @deprecated since 9
-    * @useinstead ohos.window.Window#getWindowColorSpace
-    */
-getColorSpace(callback: AsyncCallback<ColorSpace>): void;
-
-/**
-    * Obtains the set color space.
-    *
     * @returns { ColorSpace } Color space obtained.
     * @throws { BusinessError } 1300002 - This window state is abnormal.
     * @syscap SystemCapability.WindowManager.WindowManager.Core
@@ -6154,30 +5537,6 @@ getColorSpace(callback: AsyncCallback<ColorSpace>): void;
     * @since 12
     */
 getWindowColorSpace(): ColorSpace;
-
-/**
-    * Sets the background color of window.
-    *
-    * @param { string } color the specified color.
-    * @returns { Promise<void> } Promise that returns no value.
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @since 6
-    * @deprecated since 9
-    * @useinstead ohos.window.Window#setWindowBackgroundColor
-    */
-setBackgroundColor(color: string): Promise<void>;
-
-/**
-    * Sets the background color of window.
-    *
-    * @param { string } color the specified color.
-    * @param { AsyncCallback<void> } callback Callback used to return the result.
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @since 6
-    * @deprecated since 9
-    * @useinstead ohos.window.Window#setWindowBackgroundColor
-    */
-setBackgroundColor(color: string, callback: AsyncCallback<void>): void;
 
 /**
     * Sets the background color of window.
@@ -6213,30 +5572,6 @@ setBackgroundColor(color: string, callback: AsyncCallback<void>): void;
     * @since 11
     */
 setWindowBackgroundColor(color: string): void;
-
-/**
-    * Sets the brightness of window.
-    *
-    * @param { number } brightness the specified brightness value.
-    * @returns { Promise<void> } Promise that returns no value.
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @since 6
-    * @deprecated since 9
-    * @useinstead ohos.window.Window#setWindowBrightness
-    */
-setBrightness(brightness: number): Promise<void>;
-
-/**
-    * Sets the brightness of window.
-    *
-    * @param { number } brightness the specified brightness value.
-    * @param { AsyncCallback<void> } callback Callback used to return the result.
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @since 6
-    * @deprecated since 9
-    * @useinstead ohos.window.Window#setWindowBrightness
-    */
-setBrightness(brightness: number, callback: AsyncCallback<void>): void;
 
 /**
     * Set whether the main window is topmost.
@@ -6360,52 +5695,6 @@ setWindowBrightness(brightness: number): Promise<void>;
 setWindowBrightness(brightness: number, callback: AsyncCallback<void>): void;
 
 /**
-    * Sets the dimBehind of window.
-    *
-    * @param { number } dimBehindValue - The specified dimBehind.
-    * @param { AsyncCallback<void> } callback Callback used to return the result.
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @since 7
-    * @deprecated since 9
-    */
-setDimBehind(dimBehindValue: number, callback: AsyncCallback<void>): void;
-
-/**
-    * Sets the dimBehind of window.
-    *
-    * @param { number } dimBehindValue - The specified dimBehind.
-    * @returns { Promise<void> } Promise that returns no value.
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @since 7
-    * @deprecated since 9
-    */
-setDimBehind(dimBehindValue: number): Promise<void>;
-
-/**
-    * Sets whether focusable or not.
-    *
-    * @param { boolean } isFocusable can be focus if true, or can not be focus if false.
-    * @returns { Promise<void> } Promise that returns no value.
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @since 7
-    * @deprecated since 9
-    * @useinstead ohos.window.Window#setWindowFocusable
-    */
-setFocusable(isFocusable: boolean): Promise<void>;
-
-/**
-    * Sets whether focusable or not.
-    *
-    * @param { boolean } isFocusable can be focus if true, or can not be focus if false.
-    * @param { AsyncCallback<void> } callback Callback used to return the result.
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @since 7
-    * @deprecated since 9
-    * @useinstead ohos.window.Window#setWindowFocusable
-    */
-setFocusable(isFocusable: boolean, callback: AsyncCallback<void>): void;
-
-/**
     * Sets whether focusable or not.
     *
     * @param { boolean } isFocusable can be focus if true, or can not be focus if false.
@@ -6476,30 +5765,6 @@ setWindowFocusable(isFocusable: boolean, callback: AsyncCallback<void>): void;
     * @since 13
     */
 requestFocus(isFocused: boolean): Promise<void>;
-
-/**
-    * Sets whether keep screen on or not.
-    *
-    * @param { boolean } isKeepScreenOn keep screen on if true, or not if false.
-    * @returns { Promise<void> } that returns no value.
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @since 6
-    * @deprecated since 9
-    * @useinstead ohos.window.Window#setWindowKeepScreenOn
-    */
-setKeepScreenOn(isKeepScreenOn: boolean): Promise<void>;
-
-/**
-    * Sets whether keep screen on or not.
-    *
-    * @param { boolean } isKeepScreenOn keep screen on if true, or not if false.
-    * @param { AsyncCallback<void> } callback Callback used to return the result.
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @since 6
-    * @deprecated since 9
-    * @useinstead ohos.window.Window#setWindowKeepScreenOn
-    */
-setKeepScreenOn(isKeepScreenOn: boolean, callback: AsyncCallback<void>): void;
 
 /**
     * Sets whether keep screen on or not.
@@ -6611,52 +5876,6 @@ setWindowKeepScreenOn(isKeepScreenOn: boolean, callback: AsyncCallback<void>): v
 setWakeUpScreen(wakeUp: boolean): void;
 
 /**
-    * Sets whether outside can be touch or not.
-    *
-    * @param { boolean } touchable outside can be touch if true, or not if false.
-    * @returns { Promise<void> } Promise that returns no value.
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @since 7
-    * @deprecated since 9
-    */
-setOutsideTouchable(touchable: boolean): Promise<void>;
-
-/**
-    * Sets whether outside can be touch or not.
-    *
-    * @param { boolean } touchable outside can be touch if true, or not if false.
-    * @param { AsyncCallback<void> } callback Callback used to return the result.
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @since 7
-    * @deprecated since 9
-    */
-setOutsideTouchable(touchable: boolean, callback: AsyncCallback<void>): void;
-
-/**
-    * Sets whether is private mode or not.
-    *
-    * @param { boolean } isPrivacyMode in private mode if true, or not if false.
-    * @returns { Promise<void> } Promise that returns no value.
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @since 7
-    * @deprecated since 9
-    * @useinstead ohos.window.Window#setWindowPrivacyMode
-    */
-setPrivacyMode(isPrivacyMode: boolean): Promise<void>;
-
-/**
-    * Sets whether is private mode or not.
-    *
-    * @param { boolean } isPrivacyMode in private mode if true, or not if false.
-    * @param { AsyncCallback<void> } callback Callback used to return the result.
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @since 7
-    * @deprecated since 9
-    * @useinstead ohos.window.Window#setWindowPrivacyMode
-    */
-setPrivacyMode(isPrivacyMode: boolean, callback: AsyncCallback<void>): void;
-
-/**
     * Sets whether is private mode or not.
     *
     * @permission ohos.permission.PRIVACY_WINDOW
@@ -6742,30 +5961,6 @@ setWindowPrivacyMode(isPrivacyMode: boolean, callback: AsyncCallback<void>): voi
     * @since 12
     */
 setSnapshotSkip(isSkip: boolean): void;
-
-/**
-    * Sets whether is touchable or not.
-    *
-    * @param { boolean } isTouchable is touchable if true, or not if false.
-    * @returns { Promise<void> } Promise that returns no value.
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @since 7
-    * @deprecated since 9
-    * @useinstead ohos.window.Window#setWindowTouchable
-    */
-setTouchable(isTouchable: boolean): Promise<void>;
-
-/**
-    * Sets whether is touchable or not.
-    *
-    * @param { boolean } isTouchable is touchable if true, or not if false.
-    * @param { AsyncCallback<void> } callback Callback used to return the result.
-    * @syscap SystemCapability.WindowManager.WindowManager.Core
-    * @since 7
-    * @deprecated since 9
-    * @useinstead ohos.window.Window#setWindowTouchable
-    */
-setTouchable(isTouchable: boolean, callback: AsyncCallback<void>): void;
 
 /**
     * Sets whether is touchable or not.
