@@ -126,7 +126,7 @@ namespace {
  * @tc.desc: add main window and sub window and show it to test focus
  * @tc.type: FUNC
  */
-HWTEST_F(WindowFocusTest, FocusChangedTest01, Function | MediumTest | Level3)
+HWTEST_F(WindowFocusTest, FocusChangedTest01, TestSize.Level1)
 {
     fullScreenAppInfo_.name = "FocusChangedTest01_1";
     fullScreenAppInfo_.focusable_ = false;
@@ -181,7 +181,7 @@ HWTEST_F(WindowFocusTest, FocusChangedTest01, Function | MediumTest | Level3)
  * @tc.desc: hide focused window to test focus
  * @tc.type: FUNC
  */
-HWTEST_F(WindowFocusTest, FocusChangedTest02, Function | MediumTest | Level3)
+HWTEST_F(WindowFocusTest, FocusChangedTest02, TestSize.Level1)
 {
     floatAppInfo_.name = "FocusChangedTest02_1";
     floatAppInfo_.rect = { 10, 200, 300, 400 };
@@ -212,7 +212,7 @@ HWTEST_F(WindowFocusTest, FocusChangedTest02, Function | MediumTest | Level3)
  * @tc.desc: hide focused window to test focus
  * @tc.type: FUNC
  */
-HWTEST_F(WindowFocusTest, FocusChangedTest03, Function | MediumTest | Level3)
+HWTEST_F(WindowFocusTest, FocusChangedTest03, TestSize.Level1)
 {
     floatAppInfo_.name = "FocusChangedTest03_1";
     floatAppInfo_.rect = { 10, 200, 300, 400 };
@@ -251,7 +251,7 @@ HWTEST_F(WindowFocusTest, FocusChangedTest03, Function | MediumTest | Level3)
  * @tc.desc: hide focused window to test focus
  * @tc.type: FUNC
  */
-HWTEST_F(WindowFocusTest, FocusChangedTest04, Function | MediumTest | Level3)
+HWTEST_F(WindowFocusTest, FocusChangedTest04, TestSize.Level1)
 {
     floatAppInfo_.name = "FocusChangedTest04_1";
     floatAppInfo_.rect = { 10, 200, 300, 400 };
@@ -291,7 +291,7 @@ HWTEST_F(WindowFocusTest, FocusChangedTest04, Function | MediumTest | Level3)
  * @tc.desc: hide focused window to test focus
  * @tc.type: FUNC
  */
-HWTEST_F(WindowFocusTest, FocusChangedTest05, Function | MediumTest | Level3)
+HWTEST_F(WindowFocusTest, FocusChangedTest05, TestSize.Level1)
 {
     floatAppInfo_.name = "FocusChangedTest05_1";
     floatAppInfo_.rect = { 10, 200, 300, 400 };
@@ -340,7 +340,7 @@ HWTEST_F(WindowFocusTest, FocusChangedTest05, Function | MediumTest | Level3)
  * @tc.desc: hide unfocused window to test focus
  * @tc.type: FUNC
  */
-HWTEST_F(WindowFocusTest, FocusChangedTest06, Function | MediumTest | Level3)
+HWTEST_F(WindowFocusTest, FocusChangedTest06, TestSize.Level1)
 {
     floatAppInfo_.name = "FocusChangedTest06_1";
     floatAppInfo_.rect = { 10, 200, 300, 400 };
@@ -448,7 +448,7 @@ HWTEST_F(WindowFocusTest, FocusChangedTest07, Function | MediumTest | Level3)
  * @tc.desc: destroy unfocused window to test focus
  * @tc.type: FUNC
  */
-HWTEST_F(WindowFocusTest, FocusChangedTest08, Function | MediumTest | Level3)
+HWTEST_F(WindowFocusTest, FocusChangedTest08, TestSize.Level1)
 {
     floatAppInfo_.name = "FocusChangedTest08_1";
     floatAppInfo_.rect = { 10, 200, 300, 400 };
@@ -484,7 +484,7 @@ HWTEST_F(WindowFocusTest, FocusChangedTest08, Function | MediumTest | Level3)
  * @tc.desc: add main window and sub window and show it to test focus
  * @tc.type: FUNC
  */
-HWTEST_F(WindowFocusTest, WindowShowWithoutFocusTest, Function | MediumTest | Level3)
+HWTEST_F(WindowFocusTest, WindowShowWithoutFocusTest, TestSize.Level1)
 {
     fullScreenAppInfo_.name = "WindowShowWithoutFocusTest_1";
     const sptr<Window>& window1 = Utils::CreateTestWindow(fullScreenAppInfo_);
@@ -507,12 +507,12 @@ HWTEST_F(WindowFocusTest, WindowShowWithoutFocusTest, Function | MediumTest | Le
     ASSERT_EQ(WMError::WM_OK, window2->Show(0, false, false));
     // Await 100ms and get callback result in listener.
     usleep(WAIT_ASYNC_US);
-    ASSERT_EQ(window1->GetWindowId(), testFocusChangedListener_->focusedWindow_);
+    ASSERT_EQ(window2->GetWindowId(), testFocusChangedListener_->focusedWindow_);
 
     ASSERT_EQ(WMError::WM_OK, subWindow->Show(0, false, false));
     // Await 100ms and get callback result in listener.
     usleep(WAIT_ASYNC_US);
-    ASSERT_EQ(window1->GetWindowId(), testFocusChangedListener_->focusedWindow_);
+    ASSERT_EQ(subWindow->GetWindowId(), testFocusChangedListener_->focusedWindow_);
 
     window1->Destroy();
     window2->Destroy();

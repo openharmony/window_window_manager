@@ -16,11 +16,11 @@
 #include <gtest/gtest.h>
 #include "ability_context_impl.h"
 #include "display_manager_proxy.h"
+#include "mock_uicontent.h"
 #include "mock_window_adapter.h"
 #include "scene_board_judgement.h"
 #include "singleton_mocker.h"
 #include "window_impl.h"
-#include "mock_uicontent.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -44,20 +44,15 @@ public:
 
     static inline std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext_;
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+
 private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
-void WindowImplTest2::SetUpTestCase()
-{
-}
+void WindowImplTest2::SetUpTestCase() {}
 
-void WindowImplTest2::TearDownTestCase()
-{
-}
+void WindowImplTest2::TearDownTestCase() {}
 
-void WindowImplTest2::SetUp()
-{
-}
+void WindowImplTest2::SetUp() {}
 
 void WindowImplTest2::TearDown()
 {
@@ -88,7 +83,7 @@ namespace {
  * @tc.desc: create window but not show, test SetFocusable
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest2, SetFocusable01, Function | SmallTest | Level3)
+HWTEST_F(WindowImplTest2, SetFocusable01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetFocusable01");
@@ -122,7 +117,7 @@ HWTEST_F(WindowImplTest2, SetFocusable01, Function | SmallTest | Level3)
  * @tc.desc: create window with show, test SetFocusable
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest2, SetFocusable02, Function | SmallTest | Level3)
+HWTEST_F(WindowImplTest2, SetFocusable02, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetFocusable02");
@@ -137,7 +132,9 @@ HWTEST_F(WindowImplTest2, SetFocusable02, Function | SmallTest | Level3)
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Show());
     ASSERT_TRUE(window->GetFocusable());
-    EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(2).WillOnce(Return(WMError::WM_OK))
+    EXPECT_CALL(m->Mock(), UpdateProperty(_, _))
+        .Times(2)
+        .WillOnce(Return(WMError::WM_OK))
         .WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->SetFocusable(false));
     ASSERT_FALSE(window->GetFocusable());
@@ -153,7 +150,7 @@ HWTEST_F(WindowImplTest2, SetFocusable02, Function | SmallTest | Level3)
  * @tc.desc: create window but not show, test SetTouchable
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest2, SetTouchable01, Function | SmallTest | Level3)
+HWTEST_F(WindowImplTest2, SetTouchable01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetTouchable01");
@@ -185,7 +182,7 @@ HWTEST_F(WindowImplTest2, SetTouchable01, Function | SmallTest | Level3)
  * @tc.desc: create window with show, test SetTouchable
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest2, SetTouchable02, Function | SmallTest | Level3)
+HWTEST_F(WindowImplTest2, SetTouchable02, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetTouchable02");
@@ -200,7 +197,9 @@ HWTEST_F(WindowImplTest2, SetTouchable02, Function | SmallTest | Level3)
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Show());
     ASSERT_TRUE(window->GetTouchable());
-    EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(2).WillOnce(Return(WMError::WM_OK))
+    EXPECT_CALL(m->Mock(), UpdateProperty(_, _))
+        .Times(2)
+        .WillOnce(Return(WMError::WM_OK))
         .WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->SetTouchable(false));
     ASSERT_FALSE(window->GetTouchable());
@@ -216,7 +215,7 @@ HWTEST_F(WindowImplTest2, SetTouchable02, Function | SmallTest | Level3)
  * @tc.desc: disable app window decor
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest2, DisableAppWindowDecor01, Function | SmallTest | Level3)
+HWTEST_F(WindowImplTest2, DisableAppWindowDecor01, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
@@ -245,7 +244,7 @@ HWTEST_F(WindowImplTest2, DisableAppWindowDecor01, Function | SmallTest | Level3
  * @tc.desc: create window with show, test SetTouchHotAreas
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest2, SetTouchHotAreas01, Function | SmallTest | Level3)
+HWTEST_F(WindowImplTest2, SetTouchHotAreas01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetTouchHotAreas01");
@@ -291,7 +290,7 @@ HWTEST_F(WindowImplTest2, SetTouchHotAreas01, Function | SmallTest | Level3)
  * @tc.type: FUNC
  * @tc.require: issueI5NDLK
  */
-HWTEST_F(WindowImplTest2, SetTransform01, Function | SmallTest | Level3)
+HWTEST_F(WindowImplTest2, SetTransform01, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
@@ -321,7 +320,7 @@ HWTEST_F(WindowImplTest2, SetTransform01, Function | SmallTest | Level3)
  * @tc.type: FUNC
  * @tc.require: issueI5NDLK
  */
-HWTEST_F(WindowImplTest2, SetTransform02, Function | SmallTest | Level3)
+HWTEST_F(WindowImplTest2, SetTransform02, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
@@ -349,7 +348,7 @@ HWTEST_F(WindowImplTest2, SetTransform02, Function | SmallTest | Level3)
  * @tc.type: FUNC
  * @tc.require: issueI5NDLK
  */
-HWTEST_F(WindowImplTest2, SetTransform03, Function | SmallTest | Level3)
+HWTEST_F(WindowImplTest2, SetTransform03, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
@@ -377,7 +376,7 @@ HWTEST_F(WindowImplTest2, SetTransform03, Function | SmallTest | Level3)
  * @tc.type: FUNC
  * @tc.require: issueI5NDLK
  */
-HWTEST_F(WindowImplTest2, SetTransform04, Function | SmallTest | Level3)
+HWTEST_F(WindowImplTest2, SetTransform04, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
@@ -406,7 +405,7 @@ HWTEST_F(WindowImplTest2, SetTransform04, Function | SmallTest | Level3)
  * @tc.type: FUNC
  * @tc.require: issueI5Q2KW
  */
-HWTEST_F(WindowImplTest2, SetAPPWindowLabel, Function | SmallTest | Level3)
+HWTEST_F(WindowImplTest2, SetAPPWindowLabel, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetAPPWindowLabel");
@@ -427,7 +426,7 @@ HWTEST_F(WindowImplTest2, SetAPPWindowLabel, Function | SmallTest | Level3)
  * @tc.type: FUNC
  * @tc.require: issueI5Q2KW
  */
-HWTEST_F(WindowImplTest2, SetAPPWindowIcon, Function | SmallTest | Level3)
+HWTEST_F(WindowImplTest2, SetAPPWindowIcon, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetAPPWindowIcon");
@@ -449,7 +448,7 @@ HWTEST_F(WindowImplTest2, SetAPPWindowIcon, Function | SmallTest | Level3)
  * @tc.type: FUNC
  * @tc.require: issueI5JQ04
  */
-HWTEST_F(WindowImplTest2, NotifyMemoryLevel01, Function | SmallTest | Level2)
+HWTEST_F(WindowImplTest2, NotifyMemoryLevel01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("NotifyMemoryLevel01");
@@ -468,13 +467,13 @@ HWTEST_F(WindowImplTest2, NotifyMemoryLevel01, Function | SmallTest | Level2)
  * @tc.desc: UpdateRect test for stretchable window when drag start.
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest2, StretchableUpdateRectDragStartTest, Function | SmallTest | Level3)
+HWTEST_F(WindowImplTest2, StretchableUpdateRectDragStartTest, TestSize.Level1)
 {
-    Rect rect1 { 10, 10, 10, 10 };
+    Rect rect1{ 10, 10, 10, 10 };
     sptr<WindowImpl> window;
     CreateStretchableWindow(window, rect1);
     ASSERT_NE(window, nullptr);
-    Rect rect2 { 100, 100, 100, 100 };
+    Rect rect2{ 100, 100, 100, 100 };
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     Ace::UIContentMocker* content = reinterpret_cast<Ace::UIContentMocker*>(window->uiContent_.get());
     EXPECT_CALL(*content, UpdateViewportConfig(_, _, _, _));
@@ -490,13 +489,13 @@ HWTEST_F(WindowImplTest2, StretchableUpdateRectDragStartTest, Function | SmallTe
  * @tc.desc: UpdateRect test for stretchable window when drag.
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest2, StretchableUpdateRectDragTest, Function | SmallTest | Level3)
+HWTEST_F(WindowImplTest2, StretchableUpdateRectDragTest, TestSize.Level1)
 {
-    Rect rect1 { 10, 10, 10, 10 };
+    Rect rect1{ 10, 10, 10, 10 };
     sptr<WindowImpl> window;
     CreateStretchableWindow(window, rect1);
     ASSERT_NE(window, nullptr);
-    Rect rect2 { 100, 100, 100, 100 };
+    Rect rect2{ 100, 100, 100, 100 };
     window->UpdateRect(rect2, true, WindowSizeChangeReason::DRAG);
     ASSERT_EQ(window->GetWindowProperty()->GetOriginRect(), rect1);
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
@@ -508,13 +507,13 @@ HWTEST_F(WindowImplTest2, StretchableUpdateRectDragTest, Function | SmallTest | 
  * @tc.desc: UpdateRect test for stretchable window when drag end.
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest2, StretchableUpdateRectDragEndTest, Function | SmallTest | Level3)
+HWTEST_F(WindowImplTest2, StretchableUpdateRectDragEndTest, TestSize.Level1)
 {
-    Rect rect1 { 10, 10, 10, 10 };
+    Rect rect1{ 10, 10, 10, 10 };
     sptr<WindowImpl> window;
     CreateStretchableWindow(window, rect1);
     ASSERT_NE(window, nullptr);
-    Rect rect2 { 100, 100, 100, 100 };
+    Rect rect2{ 100, 100, 100, 100 };
     window->UpdateRect(rect2, true, WindowSizeChangeReason::DRAG_END);
     ASSERT_EQ(window->GetWindowProperty()->GetOriginRect(), rect1);
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
@@ -526,13 +525,13 @@ HWTEST_F(WindowImplTest2, StretchableUpdateRectDragEndTest, Function | SmallTest
  * @tc.desc: UpdateRect test for stretchable window when recover.
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest2, StretchableUpdateRectRecoverTest, Function | SmallTest | Level3)
+HWTEST_F(WindowImplTest2, StretchableUpdateRectRecoverTest, TestSize.Level1)
 {
-    Rect rect1 { 10, 10, 10, 10 };
+    Rect rect1{ 10, 10, 10, 10 };
     sptr<WindowImpl> window;
     CreateStretchableWindow(window, rect1);
     ASSERT_NE(window, nullptr);
-    Rect rect2 { 100, 100, 100, 100 };
+    Rect rect2{ 100, 100, 100, 100 };
     window->UpdateRect(rect2, true, WindowSizeChangeReason::RECOVER);
     ASSERT_EQ(window->GetWindowProperty()->GetOriginRect(), rect1);
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
@@ -544,13 +543,13 @@ HWTEST_F(WindowImplTest2, StretchableUpdateRectRecoverTest, Function | SmallTest
  * @tc.desc: UpdateRect test for stretchable window when move.
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest2, StretchableUpdateRectMoveTest, Function | SmallTest | Level3)
+HWTEST_F(WindowImplTest2, StretchableUpdateRectMoveTest, TestSize.Level1)
 {
-    Rect rect1 { 10, 10, 10, 10 };
+    Rect rect1{ 10, 10, 10, 10 };
     sptr<WindowImpl> window;
     CreateStretchableWindow(window, rect1);
     ASSERT_NE(window, nullptr);
-    Rect rect2 { 100, 100, 100, 100 };
+    Rect rect2{ 100, 100, 100, 100 };
     window->UpdateRect(rect2, true, WindowSizeChangeReason::MOVE);
     ASSERT_EQ(window->GetWindowProperty()->GetOriginRect(), rect1);
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
@@ -562,13 +561,13 @@ HWTEST_F(WindowImplTest2, StretchableUpdateRectMoveTest, Function | SmallTest | 
  * @tc.desc: UpdateRect test for stretchable window when resize.
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest2, StretchableUpdateRectResizeTest, Function | SmallTest | Level3)
+HWTEST_F(WindowImplTest2, StretchableUpdateRectResizeTest, TestSize.Level1)
 {
-    Rect rect1 { 110, 110, 10, 10 };
+    Rect rect1{ 110, 110, 10, 10 };
     sptr<WindowImpl> window;
     CreateStretchableWindow(window, rect1);
     ASSERT_NE(window, nullptr);
-    Rect rect2 { 100, 100, 100, 100 };
+    Rect rect2{ 100, 100, 100, 100 };
     ASSERT_EQ(true, rect1.IsInsideOf(rect2));
     ASSERT_EQ(true, rect1 != rect2);
     window->UpdateRect(rect2, true, WindowSizeChangeReason::RESIZE);
@@ -583,7 +582,7 @@ HWTEST_F(WindowImplTest2, StretchableUpdateRectResizeTest, Function | SmallTest 
  * @tc.type: FUNC
  * @tc.require: issueI5MYNX
  */
-HWTEST_F(WindowImplTest2, PrivacyMode01, Function | SmallTest | Level3)
+HWTEST_F(WindowImplTest2, PrivacyMode01, TestSize.Level1)
 {
     sptr<WindowOption> option = new WindowOption();
     option->SetWindowName("PrivacyMode01");
@@ -630,9 +629,9 @@ HWTEST_F(WindowImplTest2, PrivacyMode01, Function | SmallTest | Level3)
  * @tc.desc: calculate mouse style id
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest2, CalculatePointerDirection, Function | SmallTest | Level3)
+HWTEST_F(WindowImplTest2, CalculatePointerDirection, TestSize.Level1)
 {
-    Rect rect1 { 1, 1, 100, 100 };
+    Rect rect1{ 1, 1, 100, 100 };
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("CalculatePointerDirection");
     sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
@@ -649,7 +648,7 @@ HWTEST_F(WindowImplTest2, CalculatePointerDirection, Function | SmallTest | Leve
  * @tc.desc: FindWindowById Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest2, FindWindowById, Function | SmallTest | Level3)
+HWTEST_F(WindowImplTest2, FindWindowById, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("FindWindowById");
@@ -674,7 +673,7 @@ HWTEST_F(WindowImplTest2, FindWindowById, Function | SmallTest | Level3)
  * @tc.desc: GetSubWindow Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest2, GetSubWindow, Function | SmallTest | Level3)
+HWTEST_F(WindowImplTest2, GetSubWindow, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("main");
@@ -705,7 +704,7 @@ HWTEST_F(WindowImplTest2, GetSubWindow, Function | SmallTest | Level3)
  * @tc.desc: UpdateConfigurationForAll Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest2, UpdateConfigurationForAll, Function | SmallTest | Level3)
+HWTEST_F(WindowImplTest2, UpdateConfigurationForAll, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
@@ -723,7 +722,7 @@ HWTEST_F(WindowImplTest2, UpdateConfigurationForAll, Function | SmallTest | Leve
  * @tc.desc: SetAlpha | GetAlpha
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest2, SetAlpha, Function | SmallTest | Level3)
+HWTEST_F(WindowImplTest2, SetAlpha, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
@@ -744,7 +743,7 @@ HWTEST_F(WindowImplTest2, SetAlpha, Function | SmallTest | Level3)
  * @tc.desc: Test GetAvoidAreaByType when ret is not ok
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest2, GetAvoidAreaByType, Function | SmallTest | Level3)
+HWTEST_F(WindowImplTest2, GetAvoidAreaByType, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
@@ -765,7 +764,7 @@ HWTEST_F(WindowImplTest2, GetAvoidAreaByType, Function | SmallTest | Level3)
  * @tc.desc: SetWindowType Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest2, SetWindowType, Function | SmallTest | Level3)
+HWTEST_F(WindowImplTest2, SetWindowType, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
@@ -791,7 +790,7 @@ HWTEST_F(WindowImplTest2, SetWindowType, Function | SmallTest | Level3)
  * @tc.desc: SetWindowMode Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest2, SetWindowMode, Function | SmallTest | Level3)
+HWTEST_F(WindowImplTest2, SetWindowMode, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
@@ -812,8 +811,7 @@ HWTEST_F(WindowImplTest2, SetWindowMode, Function | SmallTest | Level3)
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Show());
     window->UpdateWindowModeSupportType(0);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW_MODE_OR_SIZE,
-        window->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW_MODE_OR_SIZE, window->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN));
     window->UpdateWindowModeSupportType(WindowModeSupport::WINDOW_MODE_SUPPORT_ALL);
     EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(1).WillOnce(Return(WMError::WM_DO_NOTHING));
     ASSERT_EQ(WMError::WM_DO_NOTHING, window->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN));
@@ -829,7 +827,7 @@ HWTEST_F(WindowImplTest2, SetWindowMode, Function | SmallTest | Level3)
  * @tc.desc: GetWindowFlags | SetWindowFlags | AddWindowFlag | RemoveWindowFlag
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest2, WindowFlag, Function | SmallTest | Level3)
+HWTEST_F(WindowImplTest2, WindowFlag, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("WindowFlag");
@@ -857,7 +855,7 @@ HWTEST_F(WindowImplTest2, WindowFlag, Function | SmallTest | Level3)
  * @tc.desc: OnNewWant test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest2, OnNewWant, Function | SmallTest | Level3)
+HWTEST_F(WindowImplTest2, OnNewWant, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("OnNewWant");
@@ -884,7 +882,7 @@ HWTEST_F(WindowImplTest2, OnNewWant, Function | SmallTest | Level3)
  * @tc.desc: GetContentInfo test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest2, GetContentInfo, Function | SmallTest | Level3)
+HWTEST_F(WindowImplTest2, GetContentInfo, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("GetContentInfo");
@@ -910,7 +908,7 @@ HWTEST_F(WindowImplTest2, GetContentInfo, Function | SmallTest | Level3)
  * @tc.desc: Snapshot test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest2, Snapshot, Function | SmallTest | Level3)
+HWTEST_F(WindowImplTest2, Snapshot, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Snapshot");
@@ -932,11 +930,27 @@ HWTEST_F(WindowImplTest2, Snapshot, Function | SmallTest | Level3)
 }
 
 /**
+ * @tc.name: SnapshotIgnorePrivacy
+ * @tc.desc: SnapshotIgnorePrivacy test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest2, SnapshotIgnorePrivacy, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SnapshotIgnorePrivacy");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SnapshotIgnorePrivacy(pixelMap));
+}
+
+/**
  * @tc.name: DumpInfo
  * @tc.desc: DumpInfo test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest2, DumpInfo, Function | SmallTest | Level3)
+HWTEST_F(WindowImplTest2, DumpInfo, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("DumpInfo");
@@ -951,8 +965,8 @@ HWTEST_F(WindowImplTest2, DumpInfo, Function | SmallTest | Level3)
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Show());
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
-    std::vector<std::string> params{"-h"};
-    std::vector<std::string> info{""};
+    std::vector<std::string> params{ "-h" };
+    std::vector<std::string> info{ "" };
     window->DumpInfo(params, info);
     params.push_back("");
     Ace::UIContentMocker* content = reinterpret_cast<Ace::UIContentMocker*>(window->uiContent_.get());
@@ -968,7 +982,7 @@ HWTEST_F(WindowImplTest2, DumpInfo, Function | SmallTest | Level3)
  * @tc.desc: SetLayoutFullScreen test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest2, SetLayoutFullScreen, Function | SmallTest | Level3)
+HWTEST_F(WindowImplTest2, SetLayoutFullScreen, TestSize.Level0)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetLayoutFullScreen");
@@ -990,29 +1004,33 @@ HWTEST_F(WindowImplTest2, SetLayoutFullScreen, Function | SmallTest | Level3)
     ASSERT_EQ(WMError::WM_DO_NOTHING, window->SetLayoutFullScreen(true));
 
     window->property_->SetWindowFlags(window->property_->GetWindowFlags() |
-        (static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID)));
-    EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(2)
+                                      (static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID)));
+    EXPECT_CALL(m->Mock(), UpdateProperty(_, _))
+        .Times(2)
         .WillOnce(Return(WMError::WM_OK))
         .WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->SetLayoutFullScreen(true));
 
     window->property_->SetWindowFlags(window->property_->GetWindowFlags() |
-        (static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID)));
-    EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(2)
+                                      (static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID)));
+    EXPECT_CALL(m->Mock(), UpdateProperty(_, _))
+        .Times(2)
         .WillOnce(Return(WMError::WM_OK))
         .WillOnce(Return(WMError::WM_DO_NOTHING));
     ASSERT_EQ(WMError::WM_DO_NOTHING, window->SetLayoutFullScreen(true));
 
     window->property_->SetWindowFlags(window->property_->GetWindowFlags() &
-        (~static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID)));
-    EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(2)
+                                      (~static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID)));
+    EXPECT_CALL(m->Mock(), UpdateProperty(_, _))
+        .Times(2)
         .WillOnce(Return(WMError::WM_OK))
         .WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->SetLayoutFullScreen(false));
 
     window->property_->SetWindowFlags(window->property_->GetWindowFlags() &
-        (~static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID)));
-    EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(2)
+                                      (~static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID)));
+    EXPECT_CALL(m->Mock(), UpdateProperty(_, _))
+        .Times(2)
         .WillOnce(Return(WMError::WM_OK))
         .WillOnce(Return(WMError::WM_DO_NOTHING));
     ASSERT_EQ(WMError::WM_DO_NOTHING, window->SetLayoutFullScreen(false));
@@ -1026,7 +1044,7 @@ HWTEST_F(WindowImplTest2, SetLayoutFullScreen, Function | SmallTest | Level3)
  * @tc.desc: SetImmersiveModeEnabledState test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest2, SetImmersiveModeEnabledState, Function | SmallTest | Level3)
+HWTEST_F(WindowImplTest2, SetImmersiveModeEnabledState, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetImmersiveModeEnabledState");
@@ -1048,31 +1066,35 @@ HWTEST_F(WindowImplTest2, SetImmersiveModeEnabledState, Function | SmallTest | L
     ASSERT_EQ(WMError::WM_DO_NOTHING, window->SetImmersiveModeEnabledState(true));
 
     window->property_->SetWindowFlags(window->property_->GetWindowFlags() |
-        (static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID)));
-    EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(2)
+                                      (static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID)));
+    EXPECT_CALL(m->Mock(), UpdateProperty(_, _))
+        .Times(2)
         .WillOnce(Return(WMError::WM_OK))
         .WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->SetImmersiveModeEnabledState(true));
     ASSERT_EQ(true, window->GetImmersiveModeEnabledState());
 
     window->property_->SetWindowFlags(window->property_->GetWindowFlags() |
-        (static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID)));
-    EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(2)
+                                      (static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID)));
+    EXPECT_CALL(m->Mock(), UpdateProperty(_, _))
+        .Times(2)
         .WillOnce(Return(WMError::WM_OK))
         .WillOnce(Return(WMError::WM_DO_NOTHING));
     ASSERT_EQ(WMError::WM_DO_NOTHING, window->SetImmersiveModeEnabledState(true));
 
     window->property_->SetWindowFlags(window->property_->GetWindowFlags() &
-        (~static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID)));
-    EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(2)
+                                      (~static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID)));
+    EXPECT_CALL(m->Mock(), UpdateProperty(_, _))
+        .Times(2)
         .WillOnce(Return(WMError::WM_OK))
         .WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->SetImmersiveModeEnabledState(false));
     ASSERT_EQ(false, window->GetImmersiveModeEnabledState());
 
     window->property_->SetWindowFlags(window->property_->GetWindowFlags() &
-        (~static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID)));
-    EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(2)
+                                      (~static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID)));
+    EXPECT_CALL(m->Mock(), UpdateProperty(_, _))
+        .Times(2)
         .WillOnce(Return(WMError::WM_OK))
         .WillOnce(Return(WMError::WM_DO_NOTHING));
     ASSERT_EQ(WMError::WM_DO_NOTHING, window->SetImmersiveModeEnabledState(false));
@@ -1086,7 +1108,7 @@ HWTEST_F(WindowImplTest2, SetImmersiveModeEnabledState, Function | SmallTest | L
  * @tc.desc: SetFullScreen test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest2, SetFullScreen, Function | SmallTest | Level3)
+HWTEST_F(WindowImplTest2, SetFullScreen, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetFullScreen");
@@ -1108,23 +1130,23 @@ HWTEST_F(WindowImplTest2, SetFullScreen, Function | SmallTest | Level3)
     window->property_->sysBarPropMap_[WindowType::WINDOW_TYPE_STATUS_BAR].enable_ = true;
     window->property_->sysBarPropMap_[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enable_ = true;
     window->property_->SetWindowFlags(window->property_->GetWindowFlags() |
-        (static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID)));
+                                      (static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID)));
     EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(3).WillRepeatedly(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->SetFullScreen(true));
 
     window->property_->sysBarPropMap_[WindowType::WINDOW_TYPE_STATUS_BAR].enable_ = false;
     window->property_->sysBarPropMap_[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enable_ = false;
     window->property_->SetWindowFlags(window->property_->GetWindowFlags() &
-        (~static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID)));
-    EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(3)
-        .WillRepeatedly(Return(WMError::WM_OK));
+                                      (~static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID)));
+    EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(3).WillRepeatedly(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->SetFullScreen(false));
 
     window->property_->sysBarPropMap_[WindowType::WINDOW_TYPE_STATUS_BAR].enable_ = true;
     window->property_->sysBarPropMap_[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enable_ = true;
     window->property_->SetWindowFlags(window->property_->GetWindowFlags() |
-        (static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID)));
-    EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(2)
+                                      (static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID)));
+    EXPECT_CALL(m->Mock(), UpdateProperty(_, _))
+        .Times(2)
         .WillOnce(Return(WMError::WM_OK))
         .WillOnce(Return(WMError::WM_DO_NOTHING));
     ASSERT_EQ(WMError::WM_DO_NOTHING, window->SetFullScreen(true));
@@ -1132,8 +1154,9 @@ HWTEST_F(WindowImplTest2, SetFullScreen, Function | SmallTest | Level3)
     window->property_->sysBarPropMap_[WindowType::WINDOW_TYPE_STATUS_BAR].enable_ = true;
     window->property_->sysBarPropMap_[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enable_ = true;
     window->property_->SetWindowFlags(window->property_->GetWindowFlags() |
-        (static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID)));
-    EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(3)
+                                      (static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID)));
+    EXPECT_CALL(m->Mock(), UpdateProperty(_, _))
+        .Times(3)
         .WillOnce(Return(WMError::WM_DO_NOTHING))
         .WillOnce(Return(WMError::WM_OK))
         .WillOnce(Return(WMError::WM_OK));
@@ -1148,7 +1171,7 @@ HWTEST_F(WindowImplTest2, SetFullScreen, Function | SmallTest | Level3)
  * @tc.desc: UpdateTitleButtonVisibility test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest2, UpdateTitleButtonVisibility, Function | SmallTest | Level3)
+HWTEST_F(WindowImplTest2, UpdateTitleButtonVisibility, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("BindDialogTarget");
@@ -1175,7 +1198,7 @@ HWTEST_F(WindowImplTest2, UpdateTitleButtonVisibility, Function | SmallTest | Le
  * @tc.desc: WindowCreateCheck test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest2, WindowCreateCheck, Function | SmallTest | Level3)
+HWTEST_F(WindowImplTest2, WindowCreateCheck, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW);
@@ -1191,7 +1214,7 @@ HWTEST_F(WindowImplTest2, WindowCreateCheck, Function | SmallTest | Level3)
  * @tc.desc: BindDialogTarget test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest2, BindDialogTarget, Function | SmallTest | Level3)
+HWTEST_F(WindowImplTest2, BindDialogTarget, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("BindDialogTarget");
@@ -1205,7 +1228,8 @@ HWTEST_F(WindowImplTest2, BindDialogTarget, Function | SmallTest | Level3)
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
 
-    EXPECT_CALL(m->Mock(), BindDialogTarget(_, _)).Times(2)
+    EXPECT_CALL(m->Mock(), BindDialogTarget(_, _))
+        .Times(2)
         .WillOnce(Return(WMError::WM_OK))
         .WillOnce(Return(WMError::WM_DO_NOTHING));
     sptr<IRemoteObject> targetToken;
@@ -1221,7 +1245,7 @@ HWTEST_F(WindowImplTest2, BindDialogTarget, Function | SmallTest | Level3)
  * @tc.desc: Destroy test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest2, Destroy, Function | SmallTest | Level3)
+HWTEST_F(WindowImplTest2, Destroy, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Destroy");
@@ -1247,7 +1271,7 @@ HWTEST_F(WindowImplTest2, Destroy, Function | SmallTest | Level3)
  * @tc.desc: UpdateSurfaceNodeAfterCustomAnimation test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest2, UpdateSurfaceNodeAfterCustomAnimation, Function | SmallTest | Level3)
+HWTEST_F(WindowImplTest2, UpdateSurfaceNodeAfterCustomAnimation, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("UpdateSurfaceNodeAfterCustomAnimation");
@@ -1283,7 +1307,7 @@ HWTEST_F(WindowImplTest2, UpdateSurfaceNodeAfterCustomAnimation, Function | Smal
  * @tc.desc: Show and Hide test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest2, ShowHide, Function | SmallTest | Level3)
+HWTEST_F(WindowImplTest2, ShowHide, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("ShowHide");
@@ -1344,7 +1368,7 @@ HWTEST_F(WindowImplTest2, ShowHide, Function | SmallTest | Level3)
  * @tc.desc: CloseWindow test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest2, CloseWindow, Function | SmallTest | Level3)
+HWTEST_F(WindowImplTest2, CloseWindow, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("CloseWindow");
@@ -1367,7 +1391,7 @@ HWTEST_F(WindowImplTest2, CloseWindow, Function | SmallTest | Level3)
  * @tc.desc: PendingCloseWindow test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest2, PendingCloseWindow, Function | SmallTest | Level3)
+HWTEST_F(WindowImplTest2, PendingCloseWindow, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
@@ -1381,7 +1405,7 @@ HWTEST_F(WindowImplTest2, PendingCloseWindow, Function | SmallTest | Level3)
  * @tc.desc: InvalidWindow test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest2, InvalidWindow, Function | SmallTest | Level3)
+HWTEST_F(WindowImplTest2, InvalidWindow, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
@@ -1397,7 +1421,7 @@ HWTEST_F(WindowImplTest2, InvalidWindow, Function | SmallTest | Level3)
  * @tc.desc: GetBackgroundColor | SetBackGroundColor test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest2, BackgroundColor, Function | SmallTest | Level3)
+HWTEST_F(WindowImplTest2, BackgroundColor, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
@@ -1424,7 +1448,7 @@ HWTEST_F(WindowImplTest2, BackgroundColor, Function | SmallTest | Level3)
  * @tc.desc: SetTransparent test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest2, SetTransparent, Function | SmallTest | Level3)
+HWTEST_F(WindowImplTest2, SetTransparent, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetTransparent");
@@ -1449,13 +1473,13 @@ HWTEST_F(WindowImplTest2, SetTransparent, Function | SmallTest | Level3)
  * @tc.desc: TransferLifeCycleEventToString test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest2, TransferLifeCycleEventToString, Function | SmallTest | Level3)
+HWTEST_F(WindowImplTest2, TransferLifeCycleEventToString, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
     ASSERT_EQ(std::string("DESTROY"), window->TransferLifeCycleEventToString(LifeCycleEvent::DESTROY_EVENT));
-    ASSERT_EQ(std::string("UNDEFINE"), window->TransferLifeCycleEventToString(
-        static_cast<LifeCycleEvent>(uint32_t(-1))));
+    ASSERT_EQ(std::string("UNDEFINE"),
+              window->TransferLifeCycleEventToString(static_cast<LifeCycleEvent>(uint32_t(-1))));
 }
 
 /**
@@ -1463,7 +1487,7 @@ HWTEST_F(WindowImplTest2, TransferLifeCycleEventToString, Function | SmallTest |
  * @tc.desc: NotifyWindowTransition test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest2, NotifyWindowTransition, Function | SmallTest | Level3)
+HWTEST_F(WindowImplTest2, NotifyWindowTransition, TestSize.Level1)
 {
     NotifyNativeWinDestroyFunc func = [](std::string) {};
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
@@ -1489,7 +1513,7 @@ HWTEST_F(WindowImplTest2, NotifyWindowTransition, Function | SmallTest | Level3)
  * @tc.desc: UpdateConfigurationSyncForAll Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest2, UpdateConfigurationSyncForAll, Function | SmallTest | Level3)
+HWTEST_F(WindowImplTest2, UpdateConfigurationSyncForAll, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
@@ -1501,6 +1525,6 @@ HWTEST_F(WindowImplTest2, UpdateConfigurationSyncForAll, Function | SmallTest | 
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

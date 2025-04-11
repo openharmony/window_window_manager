@@ -225,6 +225,13 @@ public:
     void SetSubWindowTitle(const std::string& subWindowTitle);
 
     /**
+     * @brief Set is subwindow support maximize.
+     *
+     * @param maximizeSupported true means support default not support.
+     */
+    void SetSubWindowMaximizeSupported(bool maximizeSupported);
+
+    /**
      * @brief Set subwindow topmost.
      *
      * @param isTopmost true means enable, default disabled.
@@ -237,6 +244,20 @@ public:
      * @param onlySupportSceneBoard only sceneboard supported.
      */
     void SetOnlySupportSceneBoard(bool onlySupportSceneBoard);
+
+    /**
+     * @brief Set sub window zLevel
+     *
+     * @param zLevel zLevel of sub window
+     */
+    void SetSubWindowZLevel(int32_t zLevel);
+
+    /**
+     * @brief Get sub window zLevel
+     *
+     * @return The zLevel of sub window
+     */
+    int32_t GetSubWindowZLevel() const;
 
     /**
      * @brief Get window mode.
@@ -393,6 +414,13 @@ public:
     bool GetWindowTopmost() const;
 
     /**
+     * @brief Get subwindow maximizeSupported
+     *
+     * @return true means subwindow support maximize, otherwise not.
+     */
+    bool GetSubWindowMaximizeSupported() const;
+
+    /**
      * @brief Set whether this window is a sub window of any level of UIExtension.
      *
      * @param isUIExtAnySubWindow true - is any sub window of UIExtension,
@@ -413,6 +441,7 @@ private:
     std::string windowName_ { "" };
     std::string bundleName_ { "" };
     std::string subWindowTitle_ = { "" };
+    bool subWindowMaximizeSupported_ = false;
     WindowType type_ { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW };
     WindowMode mode_ { WindowMode::WINDOW_MODE_UNDEFINED };
     bool focusable_ { true };
@@ -431,6 +460,7 @@ private:
     WindowTag windowTag_;
     WindowSessionType sessionType_ { WindowSessionType::SCENE_SESSION };
     float brightness_ = UNDEFINED_BRIGHTNESS;
+    int32_t zLevel_ = 0;
 
     Orientation requestedOrientation_ { Orientation::UNSPECIFIED };
     std::unordered_map<WindowType, SystemBarProperty> sysBarPropMap_ {

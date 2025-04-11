@@ -33,6 +33,12 @@ public:
     WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     void RectCheck(uint32_t curWidth, uint32_t curHeight) override;
     bool IsVisibleForeground() const override;
+    bool IsNeedCrossDisplayRendering() const override;
+    void HandleCrossMoveToSurfaceNode(WSRect& globalRect) override;
+    std::set<uint64_t> GetNewDisplayIdsDuringMoveTo(WSRect& newRect);
+
+    void SetParentSessionCallback(NotifySetParentSessionFunc&& func) override;
+    WMError NotifySetParentSession(int32_t oldParentWindowId, int32_t newParentWindowId) override;
 
 protected:
     void UpdatePointerArea(const WSRect& rect) override;
@@ -53,6 +59,27 @@ protected:
     bool IsTopmost() const override;
     bool IsModal() const override;
     bool IsApplicationModal() const override;
+    WSError SetSubWindowZLevel(int32_t zLevel) override;
+    int32_t GetSubWindowZLevel() const override;
+
+    /*
+     * PC Window
+     */
+    WSError NotifyFollowParentMultiScreenPolicy(bool enabled) override;
+    bool IsFollowParentMultiScreenPolicy() const override;
+    bool isFollowParentMultiScreenPolicy_ = false;
+
+    /*
+     * Sub Window
+     */
+    NotifySetParentSessionFunc setParentSessionFunc_;
+
+private:
+    /*
+     * Window Layout
+     */
+    void AddSurfaceNodeToScreen(DisplayId draggingOrMovingParentDisplayId) override;
+    void RemoveSurfaceNodeFromScreen() override;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SUB_SESSION_H

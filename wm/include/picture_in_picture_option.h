@@ -17,9 +17,9 @@
 #define OHOS_PIP_OPTION_H
 #include <refbase.h>
 #include <string>
-#include "xcomponent_controller.h"
 #include "napi/native_api.h"
 #include "wm_common.h"
+#include "xcomponent_controller.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -28,9 +28,11 @@ class PipOption : virtual public RefBase {
 public:
     explicit PipOption();
     virtual ~PipOption() = default;
+    void ClearNapiRefs(napi_env env);
     void SetContext(void* contextPtr);
     void SetNavigationId(const std::string& navigationId);
     void SetPipTemplate(uint32_t templateType);
+    void SetDefaultWindowSizeType(uint32_t defaultWindowSizeType);
     void SetContentSize(uint32_t width, uint32_t height);
     void SetPiPControlStatus(PiPControlType controlType, PiPControlStatus status);
     void SetPiPControlEnabled(PiPControlType controlType, PiPControlStatus enabled);
@@ -39,6 +41,7 @@ public:
     void* GetContext() const;
     std::string GetNavigationId() const;
     uint32_t GetPipTemplate();
+    uint32_t GetDefaultWindowSizeType() const;
     std::vector<std::uint32_t> GetControlGroup();
     std::vector<PiPControlStatusInfo> GetControlStatus();
     std::vector<PiPControlEnableInfo> GetControlEnable();
@@ -48,14 +51,19 @@ public:
     napi_ref GetNodeControllerRef() const;
     void SetTypeNodeRef(napi_ref ref);
     napi_ref GetTypeNodeRef() const;
+    void SetStorageRef(napi_ref ref);
+    napi_ref GetStorageRef() const;
     void SetTypeNodeEnabled(bool enable);
     bool IsTypeNodeEnabled() const;
+    uint32_t GetPipPriority(uint32_t pipTemplateType) const;
+    void GetPiPTemplateInfo(PiPTemplateInfo& pipTemplateInfo);
 private:
     void* contextPtr_ = nullptr;
     uint32_t templateType_  = 0;
     std::string navigationId_ = "";
     uint32_t contentWidth_ = 0;
     uint32_t contentHeight_ = 0;
+    uint32_t defaultWindowSizeType_ = 0;
     std::vector<PiPControlStatusInfo> pipControlStatusInfoList_;
     std::vector<PiPControlEnableInfo> pipControlEnableInfoList_;
     std::vector<std::uint32_t> controlGroup_;
@@ -63,6 +71,7 @@ private:
     napi_ref customNodeController_ = nullptr;
     napi_ref typeNode_ = nullptr;
     bool useTypeNode_ = false;
+    napi_ref storage_ = nullptr;
 };
 }
 }

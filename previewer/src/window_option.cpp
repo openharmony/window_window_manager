@@ -156,6 +156,11 @@ void WindowOption::SetSubWindowTitle(const std::string& subWindowTitle)
     subWindowTitle_ = subWindowTitle;
 }
 
+void WindowOption::SetSubWindowMaximizeSupported(bool maximizeSupported)
+{
+    subWindowMaximizeSupported_ = maximizeSupported;
+}
+
 void WindowOption::SetOnlySupportSceneBoard(bool onlySupportSceneBoard)
 {
     onlySupportSceneBoard_ = onlySupportSceneBoard;
@@ -164,6 +169,16 @@ void WindowOption::SetOnlySupportSceneBoard(bool onlySupportSceneBoard)
 void WindowOption::SetWindowTopmost(bool isTopmost)
 {
     isTopmost_ = isTopmost;
+}
+
+void WindowOption::SetSubWindowZLevel(int32_t zLevel)
+{
+    zLevel_ = zLevel;
+}
+
+int32_t WindowOption::GetSubWindowZLevel() const
+{
+    return zLevel_;
 }
 
 WindowMode WindowOption::GetWindowMode() const
@@ -269,6 +284,11 @@ std::string WindowOption::GetSubWindowTitle() const
 bool WindowOption::GetWindowTopmost() const
 {
     return isTopmost_;
+}
+
+bool WindowOption::GetSubWindowMaximizeSupported() const
+{
+    return subWindowMaximizeSupported_;
 }
 } // namespace Rosen
 } // namespace OHOS

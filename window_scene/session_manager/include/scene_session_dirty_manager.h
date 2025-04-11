@@ -32,6 +32,17 @@ struct SecRectInfo;
 MMI::Direction ConvertDegreeToMMIRotation(float degree);
 std::string DumpWindowInfo(const MMI::WindowInfo& info);
 std::string DumpRect(const std::vector<MMI::Rect>& rects);
+
+struct SingleHandData {
+    float scaleX = 1.0f;
+    float scaleY = 1.0f;
+    float singleHandX = 0.f;
+    float singleHandY = 0.f;
+    float pivotX = 0.f;
+    float pivotY = 0.f;
+    SingleHandMode mode = SingleHandMode::MIDDLE;
+};
+
 class SceneSessionDirtyManager {
 private:
     enum WindowAction : uint32_t {
@@ -55,15 +66,21 @@ public:
     void RegisterFlushWindowInfoCallback(FlushWindowInfoCallback&& callback);
     void ResetSessionDirty();
     void UpdateSecSurfaceInfo(const std::map<uint64_t, std::vector<SecSurfaceInfo>>& secSurfaceInfoMap);
+    void UpdateConstrainedModalUIExtInfo(const std::map<uint64_t,
+        std::vector<SecSurfaceInfo>>& constrainedModalUIExtInfoMap);
+    bool GetLastConstrainedModalUIExtInfo(const sptr<SceneSession>& sceneSession,
+        SecSurfaceInfo& constrainedModalUIExtInfo);
 
 private:
     std::vector<MMI::WindowInfo> FullSceneSessionInfoUpdate() const;
     bool IsFilterSession(const sptr<SceneSession>& sceneSession) const;
     std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>>
         GetWindowInfo(const sptr<SceneSession>& sceneSession, const WindowAction& action) const;
+    SingleHandData GetSingleHandData(const sptr<SceneSession>& sceneSession) const;
     void CalNotRotateTransform(const sptr<SceneSession>& sceneSession, Matrix3f& transform,
         bool useUIExtension = false) const;
-    void CalTransform(const sptr<SceneSession>& sceneSession, Matrix3f& transform, bool useUIExtension = false) const;
+    void CalTransform(const sptr<SceneSession>& sceneSession, Matrix3f& transform,
+        const SingleHandData& singleHandData, bool useUIExtension = false) const;
     void UpdatePrivacyMode(const sptr<SceneSession>& sceneSession,
         MMI::WindowInfo& windowInfo) const;
     std::map<int32_t, sptr<SceneSession>> GetDialogSessionMap(
@@ -76,7 +93,9 @@ private:
     void UpdateWindowFlags(DisplayId displayId, const sptr<SceneSession>& sceneSession,
         MMI::WindowInfo& windowInfo) const;
     void AddModalExtensionWindowInfo(std::vector<MMI::WindowInfo>& windowInfoList, MMI::WindowInfo windowInfo,
-        const sptr<SceneSession>& sceneSession);
+        const sptr<SceneSession>& sceneSession, const ExtensionWindowEventInfo& extensionInfo);
+    void GetModalUIExtensionInfo(std::vector<MMI::WindowInfo>& windowInfoList,
+        const sptr<SceneSession>& sceneSession, const MMI::WindowInfo& hostWindowInfo);
     std::vector<MMI::WindowInfo> GetSecSurfaceWindowinfoList(const sptr<SceneSession>& sceneSession,
         const MMI::WindowInfo& hostWindowinfo, const Matrix3f& hostTransform) const;
     MMI::WindowInfo GetSecComponentWindowInfo(const SecSurfaceInfo& secSurfaceInfo,
@@ -90,10 +109,12 @@ private:
         const sptr<WindowSessionProperty>& windowSessionProperty, std::vector<int32_t>& pointerChangeAreas) const;
     std::mutex mutexlock_;
     mutable std::shared_mutex secSurfaceInfoMutex_;
+    mutable std::shared_mutex constrainedModalUIExtInfoMutex_;
     FlushWindowInfoCallback flushWindowInfoCallback_;
     std::atomic_bool sessionDirty_ { false };
     std::atomic_bool hasPostTask_ { false };
     std::map<uint64_t, std::vector<SecSurfaceInfo>> secSurfaceInfoMap_;
+    std::map<uint64_t, std::vector<SecSurfaceInfo>> constrainedModalUIExtInfoMap_;
 };
 } //namespace OHOS::Rosen
 

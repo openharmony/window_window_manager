@@ -19,6 +19,7 @@
 #include "js_extension_window.h"
 #include "js_extension_window_utils.h"
 #include "window_manager_hilog.h"
+#include "js_window_utils.h"
 #include "permission.h"
 
 namespace OHOS {
@@ -99,18 +100,20 @@ napi_value JsEmbeddableWindowStage::GetSubWindow(napi_env env, napi_callback_inf
 
 napi_value JsEmbeddableWindowStage::OnGetSubWindow(napi_env env, napi_callback_info info)
 {
-    NapiAsyncTask::CompleteCallback complete =
-        [](napi_env env, NapiAsyncTask& task, int32_t status) {
-            task.Reject(env, CreateJsError(env,
-                static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT)));
-        };
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    napi_value callback = (argv[0] != nullptr && GetType(env, argv[0]) == napi_function) ? argv[0] : nullptr;
+    napi_value callback = (argc > 0 && argv[0] != nullptr && GetType(env, argv[0]) == napi_function) ?
+        argv[0] : nullptr;
     napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JsEmbeddableWindowStage::OnGetSubWindow",
-        env, CreateAsyncTaskWithLastParam(env, callback, nullptr, std::move(complete), &result));
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, callback, &result);
+    auto asyncTask = [env, task = napiAsyncTask] {
+        task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT)));
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+        napiAsyncTask->Reject(env, CreateJsError(env,
+            static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
+    }
     return result;
 }
 
@@ -120,43 +123,46 @@ napi_value JsEmbeddableWindowStage::OnCreateSubWindow(napi_env env, napi_callbac
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    NapiAsyncTask::CompleteCallback complete =
-        [](napi_env env, NapiAsyncTask& task, int32_t status) {
-            task.Reject(env, CreateJsError(env,
-                static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT)));
-        };
     napi_value callback = (argv[1] != nullptr && GetType(env, argv[1]) == napi_function) ? argv[1] : nullptr;
     napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JsEmbeddableWindowStage::OnCreateSubWindow",
-        env, CreateAsyncTaskWithLastParam(env, callback, nullptr, std::move(complete), &result));
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, callback, &result);
+    auto asyncTask = [env, task = napiAsyncTask] {
+        task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT)));
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+        napiAsyncTask->Reject(env, CreateJsError(env,
+            static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
+    }
     return result;
 }
 
 napi_value JsEmbeddableWindowStage::OnGetMainWindow(napi_env env, napi_callback_info info)
 {
     const char* const where = __func__;
-    NapiAsyncTask::CompleteCallback complete =
-        [windowImpl = windowExtensionSessionImpl_, sessionInfo = sessionInfo_, where]
-        (napi_env env, NapiAsyncTask& task, int32_t status) {
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    napi_value callback = (argc > 0 && argv[0] != nullptr && GetType(env, argv[0]) == napi_function) ?
+        argv[0] : nullptr;
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, callback, &result);
+    auto asyncTask = [windowImpl = windowExtensionSessionImpl_, sessionInfo = sessionInfo_,
+        where, env, task = napiAsyncTask] {
             if (windowImpl != nullptr) {
-                task.Resolve(env, Rosen::JsExtensionWindow::CreateJsExtensionWindowObject(env,
+                task->Resolve(env, Rosen::JsExtensionWindow::CreateJsExtensionWindowObject(env,
                 windowImpl, sessionInfo));
                 TLOGNI(WmsLogTag::WMS_UIEXT, "%{public}s [%{public}u, %{public}s]",
                     where, windowImpl->GetWindowId(), windowImpl->GetWindowName().c_str());
             } else {
-                task.Reject(env, CreateJsError(env,
+                task->Reject(env, CreateJsError(env,
                     static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
                     "Get main window failed."));
             }
         };
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    napi_value callback = (argv[0] != nullptr && GetType(env, argv[0]) == napi_function) ?
-        argv[0] : nullptr;
-    napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JsEmbeddableWindowStage::OnGetMainWindow",
-        env, CreateAsyncTaskWithLastParam(env, callback, nullptr, std::move(complete), &result));
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+        napiAsyncTask->Reject(env, CreateJsError(env,
+            static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
+    }
     return result;
 }
 
@@ -317,19 +323,21 @@ napi_value JsEmbeddableWindowStage::OnLoadContent(napi_env env, napi_callback_in
     }
 
     sptr<IRemoteObject> parentToken = sessionInfo_->parentToken;
-    NapiAsyncTask::CompleteCallback complete =
-        [window = windowExtensionSessionImpl_, contentStorage, contextUrl, parentToken, isLoadedByName](
-            napi_env env, NapiAsyncTask& task, int32_t status) {
-            if (window == nullptr) {
-                task.Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
-                TLOGE(WmsLogTag::WMS_UIEXT, "Get windowExtensionSessionImpl failed");
-                return;
-            }
-            LoadContentTask(contentStorage, contextUrl, window, env, task, parentToken, isLoadedByName);
-        };
     napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JsEmbeddableWindowStage::OnLoadContent",
-        env, CreateAsyncTaskWithLastParam(env, callBack, nullptr, std::move(complete), &result));
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, callBack, &result);
+    auto asyncTask = [window = windowExtensionSessionImpl_, contentStorage, contextUrl, parentToken, isLoadedByName,
+        env, task = napiAsyncTask] {
+        if (window == nullptr) {
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
+            TLOGNE(WmsLogTag::WMS_UIEXT, "Get windowExtensionSessionImpl failed");
+            return;
+        }
+        LoadContentTask(contentStorage, contextUrl, window, env, *task, parentToken, isLoadedByName);
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+        napiAsyncTask->Reject(env, CreateJsError(env,
+            static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
+    }
     return result;
 }
 

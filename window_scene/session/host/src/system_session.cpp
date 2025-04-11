@@ -33,6 +33,7 @@ SystemSession::SystemSession(const SessionInfo& info, const sptr<SpecificSession
     : SceneSession(info, specificCallback)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "Create");
+    pcFoldScreenController_ = sptr<PcFoldScreenController>::MakeSptr(wptr(this), GetPersistentId());
     moveDragController_ = sptr<MoveDragController>::MakeSptr(GetPersistentId(), GetWindowType());
     if (specificCallback != nullptr &&
         specificCallback->onWindowInputPidChangeCallback_ != nullptr) {
@@ -85,7 +86,7 @@ WSError SystemSession::Show(sptr<WindowSessionProperty> property)
             WLOGFW("parent session is null");
             return WSError::WS_ERROR_INVALID_PARENT;
         }
-        if (!parentSession->IsSessionForeground()) {
+        if ((type == WindowType::WINDOW_TYPE_TOAST) && !parentSession->IsSessionForeground()) {
             WLOGFW("parent session is not in foreground");
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
@@ -187,7 +188,7 @@ WSError SystemSession::ProcessPointDownSession(int32_t posX, int32_t posY)
             RaiseToAppTopForPointDown();
         }
     }
-    TLOGI(WmsLogTag::WMS_LIFE, "id: %{public}d, type: %{public}d", id, type);
+    TLOGD(WmsLogTag::WMS_EVENT, "id:%{public}d, type:%{public}d", id, type);
     PresentFocusIfPointDown();
     return SceneSession::ProcessPointDownSession(posX, posY);
 }
@@ -369,5 +370,13 @@ void SystemSession::UpdatePiPWindowStateChanged(bool isForeground)
     } else {
         TLOGD(WmsLogTag::WMS_PIP, "skip type");
     }
+}
+
+int32_t SystemSession::GetSubWindowZLevel() const
+{
+    int32_t zLevel = 0;
+    auto sessionProperty = GetSessionProperty();
+    zLevel = sessionProperty->GetSubWindowZLevel();
+    return zLevel;
 }
 } // namespace OHOS::Rosen

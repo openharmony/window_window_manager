@@ -50,7 +50,7 @@ public:
     MOCK_METHOD1(OnSessionEvent, WSError(SessionEvent event));
     MOCK_METHOD1(RequestSessionBack, WSError(bool needMoveToBackground));
     MOCK_METHOD0(RaiseToAppTop, WSError(void));
-    MOCK_METHOD2(GetAvoidAreaByType, AvoidArea(AvoidAreaType type, const WSRect& rect));
+    MOCK_METHOD3(GetAvoidAreaByType, AvoidArea(AvoidAreaType type, const WSRect& rect, int32_t apiVersion));
     MOCK_METHOD1(SetAspectRatio, WSError(float ratio));
     MOCK_METHOD1(ResetAspectRatio, WSError(float ratio));
     MOCK_METHOD1(OnNeedAvoid, WSError(bool status));
@@ -59,6 +59,11 @@ public:
     MOCK_METHOD1(GetAppForceLandscapeConfig, WMError(AppForceLandscapeConfig& config));
     MOCK_METHOD1(SetDialogSessionBackGestureEnabled, WSError(bool isEnabled));
     MOCK_METHOD1(SetActive, WSError(bool active));
+    MOCK_METHOD1(SyncSessionEvent, WSError(SessionEvent event));
+    MOCK_METHOD0(RemoveStartingWindow, WSError(void));
+    MOCK_METHOD1(GetGlobalMaximizeMode, WSError(MaximizeMode& mode));
+    MOCK_METHOD2(UpdateSessionPropertyByAction, WMError(const sptr<WindowSessionProperty>& property,
+        WSPropertyChangeAction action));
 };
 } // namespace Rosen
 } // namespace OHOS

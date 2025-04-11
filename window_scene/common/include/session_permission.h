@@ -26,6 +26,8 @@ constexpr const char* PERMISSION_KILL_APP_PROCESS = "ohos.permission.KILL_APP_PR
 constexpr const char* PERMISSION_MAIN_WINDOW_TOPMOST = "ohos.permission.WINDOW_TOPMOST";
 constexpr const char* PERMISSION_CALLED_EXTENSION_ON_LOCK_SCREEN = "ohos.permission.CALLED_UIEXTENSION_ON_LOCK_SCREEN";
 constexpr const char* PERMISSION_WRITE_APP_LOCK = "ohos.permission.WRITE_APP_LOCK";
+constexpr const char* PERMISSION_SET_ABILITY_INSTANCE_INFO = "ohos.permission.SET_ABILITY_INSTANCE_INFO";
+constexpr const char* PERMISSION_VISIBLE_WINDOW_INFO = "ohos.permission.VISIBLE_WINDOW_INFO";
 }
 class SessionPermission {
 public:
@@ -36,7 +38,6 @@ public:
     static bool IsShellCall();
     static bool IsStartByHdcd();
     static bool IsStartedByInputMethod();
-    static bool IsStartedBySystemKeyboard();
     static bool IsSACalling();
     static bool VerifyCallingPermission(const std::string& permissionName);
     static bool VerifyPermissionByCallerToken(const uint32_t callerToken, const std::string& permissionName);

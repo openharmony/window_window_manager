@@ -189,6 +189,16 @@ bool WindowOption::IsKeepScreenOn() const
     return keepScreenOn_;
 }
 
+void WindowOption::SetViewKeepScreenOn(bool keepScreenOn)
+{
+    viewKeepScreenOn_ = keepScreenOn;
+}
+
+bool WindowOption::IsViewKeepScreenOn() const
+{
+    return viewKeepScreenOn_;
+}
+
 void WindowOption::SetTurnScreenOn(bool turnScreenOn)
 {
     turnScreenOn_ = turnScreenOn;
@@ -237,6 +247,16 @@ void WindowOption::SetBundleName(const std::string bundleName)
 const std::string WindowOption::GetBundleName() const
 {
     return bundleName_;
+}
+
+void WindowOption::SetSubWindowMaximizeSupported(bool maximizeSupported)
+{
+    subWindowMaximizeSupported_ = maximizeSupported;
+}
+
+bool WindowOption::GetSubWindowMaximizeSupported() const
+{
+    return subWindowMaximizeSupported_;
 }
 
 void WindowOption::SetSubWindowTitle(const std::string& subWindowTitle)
@@ -353,6 +373,16 @@ bool WindowOption::GetWindowTopmost() const
     return isTopmost_;
 }
 
+void WindowOption::SetSubWindowZLevel(int32_t zLevel)
+{
+    zLevel_ = zLevel;
+}
+
+int32_t WindowOption::GetSubWindowZLevel() const
+{
+    return zLevel_;
+}
+
 void WindowOption::SetIsSystemKeyboard(bool isSystemKeyboard)
 {
     isSystemKeyboard_ = isSystemKeyboard;
@@ -381,6 +411,16 @@ void WindowOption::SetIsDensityFollowHost(bool isDensityFollowHost)
 bool WindowOption::GetIsDensityFollowHost() const
 {
     return isDensityFollowHost_;
+}
+
+void WindowOption::SetConstrainedModal(bool isConstrainedModal)
+{
+    isConstrainedModal_ = (uiExtensionUsage_ == static_cast<uint32_t>(UIExtensionUsage::MODAL)) && isConstrainedModal;
+}
+
+bool WindowOption::IsConstrainedModal() const
+{
+    return isConstrainedModal_;
 }
 
 } // namespace Rosen

@@ -138,12 +138,13 @@ namespace {
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(SessionLayoutTest, UpdateRect01, Function | SmallTest | Level2)
+HWTEST_F(SessionLayoutTest, UpdateRect01, TestSize.Level1)
 {
-    sptr<ISession> sessionToken = nullptr;
+    bool preBackgroundUpdateRectNotifyEnabled = Session::IsBackgroundUpdateRectNotifyEnabled();
+    Session::SetBackgroundUpdateRectNotifyEnabled(true);
     sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
     session_->sessionStage_ = mockSessionStage;
-    EXPECT_CALL(*(mockSessionStage), UpdateRect(_, _, _)).Times(AtLeast(1)).WillOnce(Return(WSError::WS_OK));
+    EXPECT_CALL(*(mockSessionStage), UpdateRect(_, _, _, _)).Times(AtLeast(1)).WillOnce(Return(WSError::WS_OK));
 
     WSRect rect = {0, 0, 0, 0};
     ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, session_->UpdateRect(rect,
@@ -168,6 +169,28 @@ HWTEST_F(SessionLayoutTest, UpdateRect01, Function | SmallTest | Level2)
     session_->sessionStage_ = nullptr;
     ASSERT_EQ(WSError::WS_OK, session_->UpdateRect(rect, SizeChangeReason::UNDEFINED, "SessionLayoutTest"));
     ASSERT_EQ(rect, session_->winRect_);
+    Session::SetBackgroundUpdateRectNotifyEnabled(preBackgroundUpdateRectNotifyEnabled);
+}
+
+/**
+ * @tc.name: UpdateRect_TestForeground
+ * @tc.desc: update rect
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionLayoutTest, UpdateRect_TestForeground, TestSize.Level1)
+{
+    bool preBackgroundUpdateRectNotifyEnabled = Session::IsBackgroundUpdateRectNotifyEnabled();
+    Session::SetBackgroundUpdateRectNotifyEnabled(false);
+    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
+    session_->sessionStage_ = mockSessionStage;
+
+    WSRect rect = { 0, 0, 100, 100 };
+    session_->UpdateSessionState(SessionState::STATE_ACTIVE);
+    ASSERT_EQ(WSError::WS_OK, session_->UpdateRect(rect, SizeChangeReason::UNDEFINED, "SessionLayoutTest"));
+    session_->UpdateSessionState(SessionState::STATE_BACKGROUND);
+    ASSERT_EQ(WSError::WS_DO_NOTHING, session_->UpdateRect(rect, SizeChangeReason::UNDEFINED, "SessionLayoutTest"));
+    Session::SetBackgroundUpdateRectNotifyEnabled(preBackgroundUpdateRectNotifyEnabled);
 }
 
 /**
@@ -175,7 +198,7 @@ HWTEST_F(SessionLayoutTest, UpdateRect01, Function | SmallTest | Level2)
  * @tc.desc: UpdateSessionRect
  * @tc.type: FUNC
  */
-HWTEST_F(SessionLayoutTest, UpdateSessionRect01, Function | SmallTest | Level2)
+HWTEST_F(SessionLayoutTest, UpdateSessionRect01, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "testSession1";
@@ -187,6 +210,71 @@ HWTEST_F(SessionLayoutTest, UpdateSessionRect01, Function | SmallTest | Level2)
 
     result = sceneSession->UpdateSessionRect(rect, SizeChangeReason::RESIZE);
     ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: SetSingleHandTransform
+ * @tc.desc: SetSingleHandTransform
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionLayoutTest, SetSingleHandTransform, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetSingleHandTransform";
+    info.bundleName_ = "SetSingleHandTransform";
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
+    SingleHandTransform transform;
+    session->SetSingleHandTransform(transform);
+    ASSERT_EQ(transform, session->GetSingleHandTransform());
+}
+
+/**
+ * @tc.name: IsDraggingReason
+ * @tc.desc: IsDraggingReason
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionLayoutTest, IsDraggingReason, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsDraggingReason";
+    info.bundleName_ = "IsDraggingReason";
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
+    ASSERT_EQ(false, session->IsDraggingReason(SizeChangeReason::UNDEFINED));
+    ASSERT_EQ(true, session->IsDraggingReason(SizeChangeReason::DRAG));
+    ASSERT_EQ(true, session->IsDraggingReason(SizeChangeReason::DRAG_START));
+    ASSERT_EQ(true, session->IsDraggingReason(SizeChangeReason::DRAG_MOVE));
+}
+
+/**
+ * @tc.name: SetDragStart
+ * @tc.desc: SetDragStart
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionLayoutTest, SetDragStart, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetDragStart";
+    info.bundleName_ = "SetDragStart";
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
+    session->SetDragStart(true);
+    ASSERT_EQ(true, session->IsDragStart());
+    session->SetDragStart(false);
+    ASSERT_EQ(false, session->IsDragStart());
+}
+
+/**
+ * @tc.name: SetOriginDisplayId
+ * @tc.desc: SetOriginDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionLayoutTest, SetOriginDisplayId, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetOriginDisplayId";
+    info.bundleName_ = "SetOriginDisplayId";
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
+    session->SetOriginDisplayId(999);
+    ASSERT_EQ(999, session->GetOriginDisplayId());
 }
 }
 } // namespace Rosen

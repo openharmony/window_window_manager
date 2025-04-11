@@ -135,7 +135,7 @@ namespace {
  * @tc.desc: create window and SetRequestedOrientation.
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRotationTest, WindowRotationTest1, Function | MediumTest | Level3)
+HWTEST_F(WindowRotationTest, WindowRotationTest1, TestSize.Level1)
 {
     fullInfo_.name  = "fullscreen.1";
     fullInfo_.orientation_ = Orientation::UNSPECIFIED;
@@ -145,7 +145,7 @@ HWTEST_F(WindowRotationTest, WindowRotationTest1, Function | MediumTest | Level3
     }
     activeWindows_.push_back(fullWindow);
     ASSERT_EQ(WMError::WM_OK, fullWindow->Show());
-    ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, fullWindow->GetMode());
+    ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, fullWindow->GetWindowMode());
     sleep(SPLIT_TEST_SLEEP_S);
 
     fullWindow->SetRequestedOrientation(Orientation::REVERSE_HORIZONTAL);
@@ -171,7 +171,7 @@ HWTEST_F(WindowRotationTest, WindowRotationTest1, Function | MediumTest | Level3
  * @tc.desc: create window with orientation property.
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRotationTest, WindowRotationTest2, Function | MediumTest | Level3)
+HWTEST_F(WindowRotationTest, WindowRotationTest2, TestSize.Level1)
 {
     fullInfo_.name  = "fullscreen.2";
     fullInfo_.orientation_ = Orientation::REVERSE_HORIZONTAL;
@@ -182,7 +182,7 @@ HWTEST_F(WindowRotationTest, WindowRotationTest2, Function | MediumTest | Level3
     activeWindows_.push_back(fullWindow);
 
     ASSERT_EQ(WMError::WM_OK, fullWindow->Show());
-    ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, fullWindow->GetMode());
+    ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, fullWindow->GetWindowMode());
     sleep(SPLIT_TEST_SLEEP_S);
 
     ASSERT_EQ(Orientation::REVERSE_HORIZONTAL, fullWindow->GetRequestedOrientation());
@@ -208,7 +208,7 @@ HWTEST_F(WindowRotationTest, WindowRotationTest2, Function | MediumTest | Level3
  * @tc.desc: create floating window with orientation property
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRotationTest, WindowRotationTest3, Function | MediumTest | Level3)
+HWTEST_F(WindowRotationTest, WindowRotationTest3, TestSize.Level1)
 {
     auto display = DisplayManager::GetInstance().GetDefaultDisplay();
     ASSERT_NE(display, nullptr);
@@ -223,7 +223,7 @@ HWTEST_F(WindowRotationTest, WindowRotationTest3, Function | MediumTest | Level3
     }
     activeWindows_.push_back(fullWindow);
     ASSERT_EQ(WMError::WM_OK, fullWindow->Show());
-    ASSERT_EQ(WindowMode::WINDOW_MODE_FLOATING, fullWindow->GetMode());
+    ASSERT_EQ(WindowMode::WINDOW_MODE_FLOATING, fullWindow->GetWindowMode());
     sleep(SPLIT_TEST_SLEEP_S);
 
     ASSERT_EQ(Orientation::REVERSE_HORIZONTAL, fullWindow->GetRequestedOrientation());
@@ -243,7 +243,7 @@ HWTEST_F(WindowRotationTest, WindowRotationTest3, Function | MediumTest | Level3
  * @tc.desc: create window with orientation after setting screen default orientation.
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRotationTest, WindowRotationTest4, Function | MediumTest | Level3)
+HWTEST_F(WindowRotationTest, WindowRotationTest4, TestSize.Level1)
 {
     auto displayDefault = DisplayManager::GetInstance().GetDefaultDisplay();
     ASSERT_NE(displayDefault, nullptr);
@@ -260,7 +260,7 @@ HWTEST_F(WindowRotationTest, WindowRotationTest4, Function | MediumTest | Level3
     }
     activeWindows_.push_back(fullWindow);
     ASSERT_EQ(WMError::WM_OK, fullWindow->Show());
-    ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, fullWindow->GetMode());
+    ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, fullWindow->GetWindowMode());
     sleep(SPLIT_TEST_SLEEP_S);
 
     ASSERT_EQ(Orientation::HORIZONTAL, fullWindow->GetRequestedOrientation());
@@ -286,7 +286,7 @@ HWTEST_F(WindowRotationTest, WindowRotationTest4, Function | MediumTest | Level3
  *           windows.
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRotationTest, WindowRotationTest5, Function | MediumTest | Level3)
+HWTEST_F(WindowRotationTest, WindowRotationTest5, TestSize.Level1)
 {
     auto displayDefault = DisplayManager::GetInstance().GetDefaultDisplay();
     ASSERT_NE(displayDefault, nullptr);
@@ -303,7 +303,7 @@ HWTEST_F(WindowRotationTest, WindowRotationTest5, Function | MediumTest | Level3
     }
     activeWindows_.push_back(fullWindow);
     ASSERT_EQ(WMError::WM_OK, fullWindow->Show());
-    ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, fullWindow->GetMode());
+    ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, fullWindow->GetWindowMode());
     sleep(SPLIT_TEST_SLEEP_S);
 
     ASSERT_EQ(Orientation::HORIZONTAL, fullWindow->GetRequestedOrientation());

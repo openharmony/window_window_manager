@@ -97,7 +97,7 @@ static inline Rect GetRectWithVpr(int32_t x, int32_t y, uint32_t w, uint32_t h)
  * @tc.desc: SystemToastWindow life cycle
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSystemToastWindowTest, SystemToastWindow01, Function | MediumTest | Level2)
+HWTEST_F(WindowSystemToastWindowTest, SystemToastWindow01, TestSize.Level1)
 {
     sptr<WindowScene> scene = CreateWindowScene();
     ASSERT_NE(nullptr, scene);
@@ -130,7 +130,7 @@ HWTEST_F(WindowSystemToastWindowTest, SystemToastWindow01, Function | MediumTest
  * @tc.desc: SystemToastWindow life cycle, main window hide first
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSystemToastWindowTest, SystemToastWindow02, Function | MediumTest | Level3)
+HWTEST_F(WindowSystemToastWindowTest, SystemToastWindow02, TestSize.Level1)
 {
     sptr<WindowScene> scene = CreateWindowScene();
     ASSERT_NE(nullptr, scene);
@@ -164,7 +164,7 @@ HWTEST_F(WindowSystemToastWindowTest, SystemToastWindow02, Function | MediumTest
  * @tc.desc: SystemToastWindow life cycle, app floating window hide first
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSystemToastWindowTest, SystemToastWindow03, Function | MediumTest | Level3)
+HWTEST_F(WindowSystemToastWindowTest, SystemToastWindow03, TestSize.Level1)
 {
     sptr<WindowScene> scene = CreateWindowScene();
     ASSERT_NE(nullptr, scene);
@@ -200,7 +200,7 @@ HWTEST_F(WindowSystemToastWindowTest, SystemToastWindow03, Function | MediumTest
  * @tc.desc: SystemToastWindow life cycle, main window destroy first
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSystemToastWindowTest, SystemToastWindow04, Function | MediumTest | Level3)
+HWTEST_F(WindowSystemToastWindowTest, SystemToastWindow04, TestSize.Level1)
 {
     sptr<WindowScene> scene = CreateWindowScene();
     ASSERT_NE(nullptr, scene);

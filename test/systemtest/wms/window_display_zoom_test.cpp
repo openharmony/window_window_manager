@@ -67,7 +67,7 @@ namespace {
  * @tc.type: FUNC
  * @tc.require: issueI5NGWL
  */
-HWTEST_F(WindowDisplayZoomTest, DisplayZoom01, Function | MediumTest | Level3)
+HWTEST_F(WindowDisplayZoomTest, DisplayZoom01, TestSize.Level1)
 {
     WindowAccessibilityController::GetInstance().OffWindowZoom();
     sleep(1);
@@ -118,7 +118,7 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom01, Function | MediumTest | Level3)
  * @tc.type: FUNC
  * @tc.require: issueI5NGWL
  */
-HWTEST_F(WindowDisplayZoomTest, DisplayZoom02, Function | MediumTest | Level3)
+HWTEST_F(WindowDisplayZoomTest, DisplayZoom02, TestSize.Level1)
 {
     windowInfo_.name = "DisplayZoom02";
     sptr<Window> window = Utils::CreateTestWindow(windowInfo_);
@@ -151,7 +151,7 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom02, Function | MediumTest | Level3)
  * @tc.type: FUNC
  * @tc.require: issueI5NGWL
  */
-HWTEST_F(WindowDisplayZoomTest, DisplayZoom03, Function | MediumTest | Level3)
+HWTEST_F(WindowDisplayZoomTest, DisplayZoom03, TestSize.Level1)
 {
     windowInfo_.name = "DisplayZoom03";
     sptr<Window> window = Utils::CreateTestWindow(windowInfo_);
@@ -178,7 +178,7 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom03, Function | MediumTest | Level3)
  * @tc.type: FUNC
  * @tc.require: issueI5NGWL
  */
-HWTEST_F(WindowDisplayZoomTest, DisplayZoom04, Function | MediumTest | Level3)
+HWTEST_F(WindowDisplayZoomTest, DisplayZoom04, TestSize.Level1)
 {
     WindowAccessibilityController::GetInstance().SetAnchorAndScale(0, 0, 2);
     sleep(1);
@@ -198,7 +198,7 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom04, Function | MediumTest | Level3)
     expect.scaleX_ = expect.scaleY_ = 2; // scale value
     ASSERT_TRUE(expect == implPtr->GetWindowProperty()->GetZoomTransform());
 
-    ASSERT_EQ(WMError::WM_OK, window->Hide());;
+    ASSERT_EQ(WMError::WM_OK, window->Hide());
     WindowAccessibilityController::GetInstance().OffWindowZoom();
     sleep(1);
 
@@ -216,7 +216,7 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom04, Function | MediumTest | Level3)
  * @tc.type: FUNC
  * @tc.require: issueI5NGWL
  */
-HWTEST_F(WindowDisplayZoomTest, DisplayZoom05, Function | MediumTest | Level3)
+HWTEST_F(WindowDisplayZoomTest, DisplayZoom05, TestSize.Level1)
 {
     WindowAccessibilityController::GetInstance().SetAnchorAndScale(0, 0, 2);
     sleep(1);

@@ -68,7 +68,7 @@ namespace {
  * @tc.desc: Dump
  * @tc.type: FUNC
  */
-HWTEST_F(WindowDumperTest, Dump01, Function | SmallTest | Level1)
+HWTEST_F(WindowDumperTest, Dump01, TestSize.Level1)
 {
     sptr<WindowDumper> windowDumper;
     windowDumper = new WindowDumper(WindowManagerService::GetInstance().windowRoot_);
@@ -87,7 +87,7 @@ HWTEST_F(WindowDumperTest, Dump01, Function | SmallTest | Level1)
  * @tc.desc: Dump fd less 0
  * @tc.type: FUNC
  */
-HWTEST_F(WindowDumperTest, Dump02, Function | SmallTest | Level1)
+HWTEST_F(WindowDumperTest, Dump02, TestSize.Level1)
 {
     sptr<WindowDumper> windowDumper;
     windowDumper = new WindowDumper(WindowManagerService::GetInstance().windowRoot_);
@@ -102,7 +102,7 @@ HWTEST_F(WindowDumperTest, Dump02, Function | SmallTest | Level1)
  * @tc.desc: Dump one param with '-x'
  * @tc.type: FUNC
  */
-HWTEST_F(WindowDumperTest, Dump04, Function | SmallTest | Level1)
+HWTEST_F(WindowDumperTest, Dump04, TestSize.Level1)
 {
     sptr<WindowDumper> windowDumper;
     windowDumper = new WindowDumper(WindowManagerService::GetInstance().windowRoot_);
@@ -119,7 +119,7 @@ HWTEST_F(WindowDumperTest, Dump04, Function | SmallTest | Level1)
  * @tc.desc: Dump two param with '-a'
  * @tc.type: FUNC
  */
-HWTEST_F(WindowDumperTest, Dump05, Function | SmallTest | Level1)
+HWTEST_F(WindowDumperTest, Dump05, TestSize.Level1)
 {
     sptr<WindowDumper> windowDumper;
     windowDumper = new WindowDumper(WindowManagerService::GetInstance().windowRoot_);
@@ -136,7 +136,7 @@ HWTEST_F(WindowDumperTest, Dump05, Function | SmallTest | Level1)
  * @tc.desc: Dump two param with '-w 1'
  * @tc.type: FUNC
  */
-HWTEST_F(WindowDumperTest, Dump06, Function | SmallTest | Level1)
+HWTEST_F(WindowDumperTest, Dump06, TestSize.Level1)
 {
     sptr<WindowDumper> windowDumper;
     windowDumper = new WindowDumper(WindowManagerService::GetInstance().windowRoot_);
@@ -155,7 +155,7 @@ HWTEST_F(WindowDumperTest, Dump06, Function | SmallTest | Level1)
  * @tc.desc: Dump two param with '-w n'
  * @tc.type: FUNC
  */
-HWTEST_F(WindowDumperTest, Dump07, Function | SmallTest | Level1)
+HWTEST_F(WindowDumperTest, Dump07, TestSize.Level1)
 {
     sptr<WindowDumper> windowDumper;
     windowDumper = new WindowDumper(WindowManagerService::GetInstance().windowRoot_);
@@ -174,7 +174,7 @@ HWTEST_F(WindowDumperTest, Dump07, Function | SmallTest | Level1)
  * @tc.desc: ShowAceDumpHelp
  * @tc.type: FUNC
  */
-HWTEST_F(WindowDumperTest, ShowAceDumpHelp01, Function | SmallTest | Level1)
+HWTEST_F(WindowDumperTest, ShowAceDumpHelp01, TestSize.Level1)
 {
     sptr<WindowDumper> windowDumper;
     windowDumper = new WindowDumper(WindowManagerService::GetInstance().windowRoot_);
@@ -189,7 +189,7 @@ HWTEST_F(WindowDumperTest, ShowAceDumpHelp01, Function | SmallTest | Level1)
  * @tc.desc: ShowAceDumpHelp
  * @tc.type: FUNC
  */
-HWTEST_F(WindowDumperTest, ShowAceDumpHelp02, Function | SmallTest | Level1)
+HWTEST_F(WindowDumperTest, ShowAceDumpHelp02, TestSize.Level1)
 {
     sptr<WindowDumper> windowDumper;
     windowDumper = new WindowDumper(WindowManagerService::GetInstance().windowRoot_);

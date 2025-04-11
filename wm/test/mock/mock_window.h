@@ -41,6 +41,8 @@ public:
     MOCK_METHOD0(AfterResumed, void(void));
     MOCK_METHOD0(AfterPaused, void(void));
     MOCK_METHOD0(AfterDestroyed, void(void));
+    MOCK_METHOD0(AfterDidForeground, void(void));
+    MOCK_METHOD0(AfterDidBackground, void(void));
 };
 
 class MockAvoidAreaChangedListener : public IAvoidAreaChangedListener {
@@ -62,6 +64,16 @@ class MockIOccupiedAreaChangeListener : public IOccupiedAreaChangeListener {
 public:
     MOCK_METHOD2(OnSizeChange, void(const sptr<OccupiedAreaChangeInfo>& info,
         const std::shared_ptr<RSTransaction>& rsTransaction));
+};
+
+class MockIKeyboardDidShowListener : public IKeyboardDidShowListener {
+public:
+    MOCK_METHOD0(OnKeyboardShow, void());
+};
+
+class MockIKeyboardDidHideListener : public IKeyboardDidHideListener {
+public:
+    MOCK_METHOD0(OnKeyboardHide, void());
 };
 
 class MockInputEventConsumer : public IInputEventConsumer {
@@ -129,9 +141,24 @@ public:
     MOCK_METHOD1(OnMainWindowClose, void(bool&));
 };
 
+class MockIWindowWillCloseListener : public IWindowWillCloseListener {
+public:
+    MOCK_METHOD1(OnWindowWillClose, void(sptr<Window> window));
+};
+
 class MockISwitchFreeMultiWindowListener : public ISwitchFreeMultiWindowListener {
 public:
     MOCK_METHOD1(OnSwitchFreeMultiWindow, void(bool));
+};
+
+class MockIWindowCrossAxisListener : public IWindowCrossAxisListener {
+public:
+    MOCK_METHOD1(OnCrossAxisChange, void(CrossAxisState));
+};
+
+class MockIWaterfallModeChangeListener : public IWaterfallModeChangeListener {
+public:
+    MOCK_METHOD1(OnWaterfallModeChange, void(bool isWaterfallMode));
 };
 } // Rosen
 } // OHOS

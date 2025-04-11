@@ -37,6 +37,8 @@ napi_value JsWindowSceneConfig::CreateWindowSceneConfig(napi_env env, const AppW
     napi_set_named_property(env, objValue, "floatCornerRadius", CreateJsValue(env, config.floatCornerRadius_));
     napi_set_named_property(env, objValue, "focusedShadow", CreateShadowValue(env, config, true));
     napi_set_named_property(env, objValue, "unfocusedShadow", CreateShadowValue(env, config, false));
+    napi_set_named_property(env, objValue, "focusedShadowDark", CreateShadowDarkValue(env, config, true));
+    napi_set_named_property(env, objValue, "unfocusedShadowDark", CreateShadowDarkValue(env, config, false));
     napi_set_named_property(env, objValue, "keyboardAnimationIn",
         CreateKeyboardAnimationValue(env, config.keyboardAnimationIn_));
     napi_set_named_property(env, objValue, "keyboardAnimationOut",
@@ -74,6 +76,28 @@ napi_value JsWindowSceneConfig::CreateShadowValue(napi_env env, const AppWindowS
         focused ? config.focusedShadow_.radius_ : config.unfocusedShadow_.radius_));
     napi_set_named_property(env, objValue, "color", CreateJsValue(env,
         focused ? config.focusedShadow_.color_ : config.unfocusedShadow_.color_));
+
+    return objValue;
+}
+
+napi_value JsWindowSceneConfig::CreateShadowDarkValue(napi_env env, const AppWindowSceneConfig& config,
+    bool focused)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Object is null!");
+        return NapiGetUndefined(env);
+    }
+
+    napi_set_named_property(env, objValue, "offsetX", CreateJsValue(env,
+        focused ? config.focusedShadowDark_.offsetX_ : config.unfocusedShadowDark_.offsetX_));
+    napi_set_named_property(env, objValue, "offsetY", CreateJsValue(env,
+        focused ? config.focusedShadowDark_.offsetY_ : config.unfocusedShadowDark_.offsetY_));
+    napi_set_named_property(env, objValue, "radius", CreateJsValue(env,
+        focused ? config.focusedShadowDark_.radius_ : config.unfocusedShadowDark_.radius_));
+    napi_set_named_property(env, objValue, "color", CreateJsValue(env,
+        focused ? config.focusedShadowDark_.color_ : config.unfocusedShadowDark_.color_));
 
     return objValue;
 }
@@ -186,6 +210,24 @@ napi_value JsWindowSceneConfig::CreateFreeMultiWindowConfig(napi_env env, const 
         config.freeMultiWindowConfig_.maxMainFloatingWindowNumber_));
     napi_set_named_property(env, objValue, "defaultWindowMode", CreateJsValue(env,
         config.freeMultiWindowConfig_.defaultWindowMode_));
+    return objValue;
+}
+
+napi_value JsWindowSceneConfig::CreateSingleHandCompatibleConfig(napi_env env,
+                                                                 const SingleHandCompatibleModeConfig& config)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Object is null!");
+        return NapiGetUndefined(env);
+    }
+
+    napi_set_named_property(env, objValue, "enabled", CreateJsValue(env, config.enabled));
+    napi_set_named_property(env, objValue, "singleHandScale", CreateJsValue(env, config.singleHandScale));
+    napi_set_named_property(env, objValue, "heightChangeRatio", CreateJsValue(env, config.heightChangeRatio));
+    napi_set_named_property(env, objValue, "widthChangeRatio", CreateJsValue(env, config.widthChangeRatio));
     return objValue;
 }
 } // namespace OHOS::Rosen

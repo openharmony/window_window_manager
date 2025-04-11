@@ -46,6 +46,7 @@ public:
 private:
     void ShowHelpInfo();
     void ShowAllScreenInfo();
+    void ShowVisibleAreaDisplayInfo();
     void DumpFoldStatus();
     void DumpTentMode();
     void DumpFoldCreaseRegion();
@@ -57,6 +58,7 @@ private:
         const OHOS::Rosen::DMRect& areaRect, const std::string& label);
     void DumpCutoutInfoById(ScreenId id);
     void DumpScreenInfoById(ScreenId id);
+    void DumpVisibleAreaDisplayInfoById(DisplayId id);
     void DumpScreenPropertyById(ScreenId id);
     void ExecuteInjectCmd();
     void ExecuteInjectCmd2();
@@ -75,6 +77,7 @@ private:
     void SetHallAndPostureValue(std::string input);
     void SetHallAndPostureStatus(std::string input);
     void SetSecondaryStatusChange(const std::string &input);
+    void SetLandscapeLock(std::string input);
     bool IsAllCharDigit(const std::string &firstPostureStr);
     bool GetPostureAndHall(std::vector<std::string> strVec,
         std::vector<float> &postures, std::vector<uint16_t> &halls);

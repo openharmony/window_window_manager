@@ -32,13 +32,9 @@ public:
     sptr<WindowProxy> windowProxy_;
 };
 
-void WindowProxyTest::SetUpTestCase()
-{
-}
+void WindowProxyTest::SetUpTestCase() {}
 
-void WindowProxyTest::TearDownTestCase()
-{
-}
+void WindowProxyTest::TearDownTestCase() {}
 
 void WindowProxyTest::SetUp()
 {
@@ -48,9 +44,7 @@ void WindowProxyTest::SetUp()
     windowProxy_ = new WindowProxy(mockWindowAgent_);
 }
 
-void WindowProxyTest::TearDown()
-{
-}
+void WindowProxyTest::TearDown() {}
 
 namespace {
 /**
@@ -58,9 +52,9 @@ namespace {
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(WindowProxyTest, UpdateWindowRect01, Function | SmallTest | Level2)
+HWTEST_F(WindowProxyTest, UpdateWindowRect01, TestSize.Level1)
 {
-    WMError err = windowProxy_->UpdateWindowRect(Rect {0, 0, 0, 0}, false, WindowSizeChangeReason::HIDE);
+    WMError err = windowProxy_->UpdateWindowRect(Rect{ 0, 0, 0, 0 }, false, WindowSizeChangeReason::HIDE);
     ASSERT_EQ(err, WMError::WM_OK);
 }
 
@@ -69,7 +63,7 @@ HWTEST_F(WindowProxyTest, UpdateWindowRect01, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(WindowProxyTest, UpdateWindowMode01, Function | SmallTest | Level2)
+HWTEST_F(WindowProxyTest, UpdateWindowMode01, TestSize.Level1)
 {
     WMError err = windowProxy_->UpdateWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     ASSERT_EQ(err, WMError::WM_OK);
@@ -80,7 +74,7 @@ HWTEST_F(WindowProxyTest, UpdateWindowMode01, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(WindowProxyTest, UpdateWindowModeSupportType01, Function | SmallTest | Level2)
+HWTEST_F(WindowProxyTest, UpdateWindowModeSupportType01, TestSize.Level1)
 {
     WMError err = windowProxy_->UpdateWindowModeSupportType(WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY);
     ASSERT_EQ(err, WMError::WM_OK);
@@ -91,7 +85,7 @@ HWTEST_F(WindowProxyTest, UpdateWindowModeSupportType01, Function | SmallTest | 
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(WindowProxyTest, UpdateFocusStatus01, Function | SmallTest | Level2)
+HWTEST_F(WindowProxyTest, UpdateFocusStatus01, TestSize.Level1)
 {
     WMError err = windowProxy_->UpdateFocusStatus(false);
     ASSERT_EQ(err, WMError::WM_OK);
@@ -102,7 +96,7 @@ HWTEST_F(WindowProxyTest, UpdateFocusStatus01, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(WindowProxyTest, UpdateAvoidArea01, Function | SmallTest | Level2)
+HWTEST_F(WindowProxyTest, UpdateAvoidArea01, TestSize.Level1)
 {
     const sptr<AvoidArea>& avoidArea = new AvoidArea();
     WMError err = windowProxy_->UpdateAvoidArea(avoidArea, AvoidAreaType::TYPE_SYSTEM);
@@ -114,7 +108,7 @@ HWTEST_F(WindowProxyTest, UpdateAvoidArea01, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(WindowProxyTest, UpdateWindowState01, Function | SmallTest | Level2)
+HWTEST_F(WindowProxyTest, UpdateWindowState01, TestSize.Level1)
 {
     WMError err = windowProxy_->UpdateWindowState(WindowState::STATE_BOTTOM);
     ASSERT_EQ(err, WMError::WM_OK);
@@ -125,7 +119,7 @@ HWTEST_F(WindowProxyTest, UpdateWindowState01, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(WindowProxyTest, UpdateWindowDragInfo01, Function | SmallTest | Level2)
+HWTEST_F(WindowProxyTest, UpdateWindowDragInfo01, TestSize.Level1)
 {
     PointInfo point;
     point.x = 1;
@@ -139,7 +133,7 @@ HWTEST_F(WindowProxyTest, UpdateWindowDragInfo01, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(WindowProxyTest, UpdateDisplayId01, Function | SmallTest | Level2)
+HWTEST_F(WindowProxyTest, UpdateDisplayId01, TestSize.Level1)
 {
     WMError err = windowProxy_->UpdateDisplayId(0, 1);
     ASSERT_EQ(err, WMError::WM_OK);
@@ -150,9 +144,9 @@ HWTEST_F(WindowProxyTest, UpdateDisplayId01, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(WindowProxyTest, UpdateOccupiedAreaChangeInfo01, Function | SmallTest | Level2)
+HWTEST_F(WindowProxyTest, UpdateOccupiedAreaChangeInfo01, TestSize.Level1)
 {
-    Rect overlapRect = {0, 0, 0, 0};
+    Rect overlapRect = { 0, 0, 0, 0 };
     sptr<OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo(OccupiedAreaType::TYPE_INPUT, overlapRect);
     WMError err = windowProxy_->UpdateOccupiedAreaChangeInfo(info);
     ASSERT_EQ(err, WMError::WM_OK);
@@ -163,7 +157,7 @@ HWTEST_F(WindowProxyTest, UpdateOccupiedAreaChangeInfo01, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(WindowProxyTest, UpdateActiveStatus01, Function | SmallTest | Level2)
+HWTEST_F(WindowProxyTest, UpdateActiveStatus01, TestSize.Level1)
 {
     WMError err = windowProxy_->UpdateActiveStatus(false);
     ASSERT_EQ(err, WMError::WM_OK);
@@ -174,7 +168,7 @@ HWTEST_F(WindowProxyTest, UpdateActiveStatus01, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(WindowProxyTest, NotifyTouchOutside01, Function | SmallTest | Level2)
+HWTEST_F(WindowProxyTest, NotifyTouchOutside01, TestSize.Level1)
 {
     WMError err = windowProxy_->NotifyTouchOutside();
     ASSERT_EQ(err, WMError::WM_OK);
@@ -185,7 +179,7 @@ HWTEST_F(WindowProxyTest, NotifyTouchOutside01, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(WindowProxyTest, DumpInfo01, Function | SmallTest | Level2)
+HWTEST_F(WindowProxyTest, DumpInfo01, TestSize.Level1)
 {
     std::vector<std::string> params;
     WMError err = windowProxy_->DumpInfo(params);
@@ -197,7 +191,7 @@ HWTEST_F(WindowProxyTest, DumpInfo01, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(WindowProxyTest, NotifyDestroy01, Function | SmallTest | Level2)
+HWTEST_F(WindowProxyTest, NotifyDestroy01, TestSize.Level1)
 {
     WMError err = windowProxy_->NotifyDestroy();
     ASSERT_EQ(err, WMError::WM_OK);
@@ -208,7 +202,7 @@ HWTEST_F(WindowProxyTest, NotifyDestroy01, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(WindowProxyTest, NotifyForeground01, Function | SmallTest | Level2)
+HWTEST_F(WindowProxyTest, NotifyForeground01, TestSize.Level1)
 {
     WMError err = windowProxy_->NotifyForeground();
     ASSERT_EQ(err, WMError::WM_OK);
@@ -219,7 +213,7 @@ HWTEST_F(WindowProxyTest, NotifyForeground01, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(WindowProxyTest, NotifyBackground01, Function | SmallTest | Level2)
+HWTEST_F(WindowProxyTest, NotifyBackground01, TestSize.Level1)
 {
     WMError err = windowProxy_->NotifyBackground();
     ASSERT_EQ(err, WMError::WM_OK);
@@ -230,7 +224,7 @@ HWTEST_F(WindowProxyTest, NotifyBackground01, Function | SmallTest | Level2)
  * @tc.desc: param is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(WindowProxyTest, NotifyWindowClientPointUp01, Function | SmallTest | Level2)
+HWTEST_F(WindowProxyTest, NotifyWindowClientPointUp01, TestSize.Level1)
 {
     WMError err = windowProxy_->NotifyWindowClientPointUp(nullptr);
     ASSERT_EQ(err, WMError::WM_ERROR_NULLPTR);
@@ -241,7 +235,7 @@ HWTEST_F(WindowProxyTest, NotifyWindowClientPointUp01, Function | SmallTest | Le
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(WindowProxyTest, NotifyWindowClientPointUp02, Function | SmallTest | Level2)
+HWTEST_F(WindowProxyTest, NotifyWindowClientPointUp02, TestSize.Level1)
 {
     auto pointerEvent = MMI::PointerEvent::Create();
     WMError err = windowProxy_->NotifyWindowClientPointUp(pointerEvent);
@@ -253,7 +247,7 @@ HWTEST_F(WindowProxyTest, NotifyWindowClientPointUp02, Function | SmallTest | Le
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(WindowProxyTest, UpdateZoomTransform01, Function | SmallTest | Level2)
+HWTEST_F(WindowProxyTest, UpdateZoomTransform01, TestSize.Level1)
 {
     Transform transform;
     WMError err = windowProxy_->UpdateZoomTransform(transform, false);
@@ -265,7 +259,7 @@ HWTEST_F(WindowProxyTest, UpdateZoomTransform01, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(WindowProxyTest, RestoreSplitWindowMode01, Function | SmallTest | Level2)
+HWTEST_F(WindowProxyTest, RestoreSplitWindowMode01, TestSize.Level1)
 {
     WMError err = windowProxy_->RestoreSplitWindowMode(200);
     ASSERT_EQ(err, WMError::WM_OK);
@@ -276,7 +270,7 @@ HWTEST_F(WindowProxyTest, RestoreSplitWindowMode01, Function | SmallTest | Level
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(WindowProxyTest, NotifyScreenshot, Function | SmallTest | Level2)
+HWTEST_F(WindowProxyTest, NotifyScreenshot, TestSize.Level1)
 {
     WMError err = windowProxy_->NotifyScreenshot();
     ASSERT_EQ(err, WMError::WM_OK);
@@ -287,7 +281,7 @@ HWTEST_F(WindowProxyTest, NotifyScreenshot, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(WindowProxyTest, NotifyForegroundInteractiveStatus, Function | SmallTest | Level2)
+HWTEST_F(WindowProxyTest, NotifyForegroundInteractiveStatus, TestSize.Level1)
 {
     ASSERT_NE(windowProxy_, nullptr);
     WMError err = WMError::WM_OK;
@@ -296,6 +290,6 @@ HWTEST_F(WindowProxyTest, NotifyForegroundInteractiveStatus, Function | SmallTes
     ASSERT_EQ(err, WMError::WM_OK);
 }
 
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

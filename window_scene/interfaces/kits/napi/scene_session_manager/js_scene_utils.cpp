@@ -23,6 +23,7 @@
 
 #include "property/rs_properties_def.h"
 #include "root_scene.h"
+#include "session/host/include/pc_fold_screen_manager.h"
 #include "window_manager_hilog.h"
 #include "window_visibility_info.h"
 #include "process_options.h"
@@ -33,6 +34,12 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsSceneUtils" };
 constexpr int32_t US_PER_NS = 1000;
 constexpr int32_t INVALID_VAL = -9999;
+
+const std::unordered_map<int32_t, ThrowSlipMode> FINGERS_TO_THROWSLIPMODE_MAP = {
+    { 3, ThrowSlipMode::THREE_FINGERS_SWIPE },
+    { 4, ThrowSlipMode::FOUR_FINGERS_SWIPE },
+    { 5, ThrowSlipMode::FIVE_FINGERS_SWIPE }
+};
 
 // Refer to OHOS::Ace::TouchType
 enum class AceTouchType : int32_t {
@@ -326,6 +333,19 @@ bool IsJsInstanceKeyUndefined(napi_env env, napi_value jsInstanceKey, SessionInf
     return true;
 }
 
+static bool IsJsIsUseControlSessionUndefined(napi_env env, napi_value jsIsUseControlSession, SessionInfo& sessionInfo)
+{
+    if (GetType(env, jsIsUseControlSession) != napi_undefined) {
+        bool isUseControlSession = false;
+        if (!ConvertFromJsValue(env, jsIsUseControlSession, isUseControlSession)) {
+            TLOGI(WmsLogTag::WMS_LIFE, "Failed to convert parameter to isUseControlSession");
+            return false;
+        }
+        sessionInfo.isUseControlSession = isUseControlSession;
+    }
+    return true;
+}
+
 bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sessionInfo)
 {
     napi_value jsBundleName = nullptr;
@@ -420,6 +440,8 @@ bool ConvertSessionInfoState(napi_env env, napi_value jsObject, SessionInfo& ses
     napi_get_named_property(env, jsObject, "isSetPointerAreas", &jsIsSetPointerAreas);
     napi_value jsProcessOption = nullptr;
     napi_get_named_property(env, jsObject, "processOptions", &jsProcessOption);
+    napi_value jsIsUseControlSession = nullptr;
+    napi_get_named_property(env, jsObject, "isAppUseControl", &jsIsUseControlSession);
 
     if (!IsJsPersistentIdUndefind(env, jsPersistentId, sessionInfo)) {
         return false;
@@ -443,6 +465,9 @@ bool ConvertSessionInfoState(napi_env env, napi_value jsObject, SessionInfo& ses
         return false;
     }
     if (!IsJsProcessOptionUndefined(env, jsProcessOption, sessionInfo)) {
+        return false;
+    }
+    if (!IsJsIsUseControlSessionUndefined(env, jsIsUseControlSession, sessionInfo)) {
         return false;
     }
     return true;
@@ -487,6 +512,67 @@ bool IsJsObjNameUndefind(napi_env env, napi_value jsObjName, int32_t& objName)
     }
     return true;
 }
+
+bool ConvertSessionRectInfoFromJs(napi_env env, napi_value jsObject, WSRect& rect)
+{
+    napi_value jsPosX = nullptr;
+    napi_get_named_property(env, jsObject, "posX_", &jsPosX);
+    napi_value jsPosY = nullptr;
+    napi_get_named_property(env, jsObject, "posY_", &jsPosY);
+    napi_value jsWidth = nullptr;
+    napi_get_named_property(env, jsObject, "width_", &jsWidth);
+    napi_value jsHeight = nullptr;
+    napi_get_named_property(env, jsObject, "height_", &jsHeight);
+
+    if (!IsJsObjNameUndefind(env, jsPosX, rect.posX_)) {
+        return false;
+    }
+
+    if (!IsJsObjNameUndefind(env, jsPosY, rect.posY_)) {
+        return false;
+    }
+
+    if (!IsJsObjNameUndefind(env, jsWidth, rect.width_)) {
+        return false;
+    }
+
+    if (!IsJsObjNameUndefind(env, jsHeight, rect.height_)) {
+        return false;
+    }
+    return true;
+}
+
+bool ConvertSingleHandScreenInfoFromJs(napi_env env, napi_value jsObject, SingleHandScreenInfo& singleHandScreenInfo)
+{
+    napi_value jsScaleRatio = nullptr;
+    napi_get_named_property(env, jsObject, "scaleRatio", &jsScaleRatio);
+    napi_value jsPivotX = nullptr;
+    napi_get_named_property(env, jsObject, "scalePivotX", &jsPivotX);
+    napi_value jsPivotY = nullptr;
+    napi_get_named_property(env, jsObject, "scalePivotY", &jsPivotY);
+    napi_value jsSingleHandMode = nullptr;
+    napi_get_named_property(env, jsObject, "singleHandMode", &jsSingleHandMode);
+
+    if (!IsJsObjNameUndefind(env, jsScaleRatio, singleHandScreenInfo.scaleRatio)) {
+        return false;
+    }
+
+    if (!IsJsObjNameUndefind(env, jsPivotX, singleHandScreenInfo.scalePivotX)) {
+        return false;
+    }
+
+    if (!IsJsObjNameUndefind(env, jsPivotY, singleHandScreenInfo.scalePivotY)) {
+        return false;
+    }
+
+    int32_t singleHandmode = 0;
+    if (!IsJsObjNameUndefind(env, jsSingleHandMode, singleHandmode)) {
+        return false;
+    }
+    singleHandScreenInfo.mode = static_cast<SingleHandMode>(singleHandmode);
+    return true;
+}
+
 
 bool ConvertRectInfoFromJs(napi_env env, napi_value jsObject, WSRect& rect)
 {
@@ -852,6 +938,95 @@ bool ConvertRotateAnimationConfigFromJs(napi_env env, napi_value value, RotateAn
     }
     return true;
 }
+bool ConvertRectFromJsValue(napi_env env, napi_value jsObject, Rect& displayRect)
+{
+    napi_value jsPosX_ = nullptr;
+    napi_value jsPosY_ = nullptr;
+    napi_value jsWidth_ = nullptr;
+    napi_value jsHeight_ = nullptr;
+    napi_get_named_property(env, jsObject, "posX_", &jsPosX_);
+    napi_get_named_property(env, jsObject, "posY_", &jsPosY_);
+    napi_get_named_property(env, jsObject, "width_", &jsWidth_);
+    napi_get_named_property(env, jsObject, "height_", &jsHeight_);
+    if (GetType(env, jsPosX_) != napi_undefined) {
+        int32_t posX;
+        if (!ConvertFromJsValue(env, jsPosX_, posX)) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to posX_");
+            return false;
+        }
+        displayRect.posX_ = posX;
+    }
+    if (GetType(env, jsPosY_) != napi_undefined) {
+        int32_t posY;
+        if (!ConvertFromJsValue(env, jsPosY_, posY)) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to posY_");
+            return false;
+        }
+        displayRect.posY_ = posY;
+    }
+    if (GetType(env, jsWidth_) != napi_undefined) {
+        int32_t width;
+        if (!ConvertFromJsValue(env, jsWidth_, width)) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to width_");
+            return false;
+        }
+        displayRect.width_ = width;
+    }
+    if (GetType(env, jsHeight_) != napi_undefined) {
+        int32_t height;
+        if (!ConvertFromJsValue(env, jsHeight_, height)) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to height_");
+            return false;
+        }
+        displayRect.height_ = height;
+    }
+    return true;
+}
+
+bool ConvertInfoFromJsValue(napi_env env, napi_value jsObject, RotationChangeInfo& rotationChangeInfo)
+{
+    napi_value jsType = nullptr;
+    napi_value jsOrientation = nullptr;
+    napi_value jsDisplayId = nullptr;
+    napi_value jsDisplayRect = nullptr;
+    napi_get_named_property(env, jsObject, "type", &jsType);
+    napi_get_named_property(env, jsObject, "orientation", &jsOrientation);
+    napi_get_named_property(env, jsObject, "displayId", &jsDisplayId);
+    napi_get_named_property(env, jsObject, "displayRect", &jsDisplayRect);
+    if (GetType(env, jsType) != napi_undefined) {
+        uint32_t type;
+        if (!ConvertFromJsValue(env, jsType, type)) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to type");
+            return false;
+        }
+        rotationChangeInfo.type_ = static_cast<RotationChangeType>(type);
+    }
+    if (GetType(env, jsOrientation) != napi_undefined) {
+        uint32_t orientation;
+        if (!ConvertFromJsValue(env, jsOrientation, orientation)) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to orientation");
+            return false;
+        }
+        rotationChangeInfo.orientation_ = orientation;
+    }
+    if (GetType(env, jsDisplayId) != napi_undefined) {
+        int32_t displayId;
+        if (!ConvertFromJsValue(env, jsDisplayId, displayId)) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to displayId");
+            return false;
+        }
+        rotationChangeInfo.displayId_ = static_cast<uint64_t>(displayId);
+    }
+    if (GetType(env, jsDisplayRect) != napi_undefined) {
+        Rect displayRect;
+        if (!ConvertRectFromJsValue(env, jsDisplayRect, displayRect)) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to displayRect");
+            return false;
+        }
+        rotationChangeInfo.displayRect_ = displayRect;
+    }
+    return true;
+}
 
 bool ConvertDragResizeTypeFromJs(napi_env env, napi_value value, DragResizeType& dragResizeType)
 {
@@ -859,11 +1034,25 @@ bool ConvertDragResizeTypeFromJs(napi_env env, napi_value value, DragResizeType&
     if (!ConvertFromJsValue(env, value, dragResizeTypeValue)) {
         return false;
     }
-    if (dragResizeTypeValue > static_cast<uint32_t>(DragResizeType::RESIZE_WHEN_DRAG_END)) {
+    if (dragResizeTypeValue >= static_cast<uint32_t>(DragResizeType::RESIZE_MAX_VALUE)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to dragResizeType");
         return false;
     }
     dragResizeType = static_cast<DragResizeType>(dragResizeTypeValue);
+    return true;
+}
+
+bool ConvertThrowSlipModeFromJs(napi_env env, napi_value value, ThrowSlipMode& throwSlipMode)
+{
+    int32_t fingers = 0;
+    if (!ConvertFromJsValue(env, value, fingers)) {
+        return false;
+    }
+    auto it = FINGERS_TO_THROWSLIPMODE_MAP.find(fingers);
+    if (it == FINGERS_TO_THROWSLIPMODE_MAP.end()) {
+        return false;
+    }
+    throwSlipMode = it->second;
     return true;
 }
 
@@ -910,16 +1099,16 @@ JsSessionType GetApiType(WindowType type)
 }
 
 napi_value CreateSupportWindowModes(napi_env env,
-    const std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes)
+    const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes)
 {
     napi_value arrayValue = nullptr;
-    napi_create_array_with_length(env, supportWindowModes.size(), &arrayValue);
+    napi_create_array_with_length(env, supportedWindowModes.size(), &arrayValue);
     if (arrayValue == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "Failed to create napi array");
         return NapiGetUndefined(env);
     }
     int32_t index = 0;
-    for (const auto supportWindowMode : supportWindowModes) {
+    for (const auto supportWindowMode : supportedWindowModes) {
         napi_set_element(env, arrayValue, index++, CreateJsValue(env, static_cast<int32_t>(supportWindowMode)));
     }
     return arrayValue;
@@ -974,10 +1163,26 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
     napi_set_named_property(env, objValue, "isFromIcon", CreateJsValue(env, sessionInfo.isFromIcon_));
     SetJsSessionInfoByWant(env, sessionInfo, objValue);
     napi_set_named_property(env, objValue, "supportWindowModes",
-        CreateSupportWindowModes(env, sessionInfo.supportWindowModes));
+        CreateSupportWindowModes(env, sessionInfo.supportedWindowModes));
+    napi_set_named_property(env, objValue, "specifiedFlag", CreateJsValue(env, sessionInfo.specifiedFlag_));
     if (sessionInfo.want != nullptr) {
         napi_set_named_property(env, objValue, "want", AppExecFwk::WrapWant(env, *sessionInfo.want));
     }
+    return objValue;
+}
+
+napi_value CreateJsExceptionInfo(napi_env env, const ExceptionInfo& exceptionInfo)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Failed to get jsObject");
+        return nullptr;
+    }
+    napi_set_named_property(env, objValue, "needRemoveSession",
+        CreateJsValue(env, exceptionInfo.needRemoveSession));
+    napi_set_named_property(env, objValue, "needClearCallerLink",
+        CreateJsValue(env, exceptionInfo.needClearCallerLink));
     return objValue;
 }
 
@@ -1008,12 +1213,37 @@ napi_value CreateJsSessionRecoverInfo(
     WSRect wsRect = { rect.posX_, rect.posY_, rect.width_, rect.height_ };
     napi_set_named_property(env, objValue, "recoverRect", CreateJsSessionRect(env, wsRect));
     napi_set_named_property(env, objValue, "layoutFullScreen", CreateJsValue(env, property->IsLayoutFullScreen()));
+    napi_set_named_property(env, objValue, "mainWindowTopmost", CreateJsValue(env, property->IsMainWindowTopmost()));
+    napi_set_named_property(env, objValue, "isFullScreenWaterfallMode",
+        CreateJsValue(env, property->GetIsFullScreenWaterfallMode()));
+    napi_set_named_property(env, objValue, "currentRotation", CreateJsValue(env, sessionInfo.currentRotation_));
     return objValue;
+}
+
+static void SetWindowSizeLimits(napi_env env, const SessionInfo& sessionInfo, napi_value objValue)
+{
+    if (sessionInfo.windowSizeLimits.maxWindowWidth > 0) {
+        napi_set_named_property(env, objValue, "maxWindowWidth",
+            CreateJsValue(env, sessionInfo.windowSizeLimits.maxWindowWidth));
+    }
+    if (sessionInfo.windowSizeLimits.minWindowWidth > 0) {
+        napi_set_named_property(env, objValue, "minWindowWidth",
+            CreateJsValue(env, sessionInfo.windowSizeLimits.minWindowWidth));
+    }
+    if (sessionInfo.windowSizeLimits.maxWindowHeight > 0) {
+        napi_set_named_property(env, objValue, "maxWindowHeight",
+            CreateJsValue(env, sessionInfo.windowSizeLimits.maxWindowHeight));
+    }
+    if (sessionInfo.windowSizeLimits.minWindowHeight > 0) {
+        napi_set_named_property(env, objValue, "minWindowHeight",
+            CreateJsValue(env, sessionInfo.windowSizeLimits.minWindowHeight));
+    }
 }
 
 void SetJsSessionInfoByWant(napi_env env, const SessionInfo& sessionInfo, napi_value objValue)
 {
     if (sessionInfo.want != nullptr) {
+        SetWindowSizeLimits(env, sessionInfo, objValue);
         napi_set_named_property(env, objValue, "windowTop",
             GetWindowRectIntValue(env,
             sessionInfo.want->GetIntParam(AAFwk::Want::PARAM_RESV_WINDOW_TOP, INVALID_VAL)));
@@ -1144,9 +1374,44 @@ napi_value CreateJsSessionSizeChangeReason(napi_env env)
     napi_set_named_property(env, objValue, "FLOATING_TO_FULL", CreateJsValue(env,
         static_cast<int32_t>(SizeChangeReason::FLOATING_TO_FULL)));
     CreatePiPSizeChangeReason(env, objValue);
+    napi_set_named_property(env, objValue, "MAXIMIZE_TO_SPLIT", CreateJsValue(env,
+        static_cast<int32_t>(SizeChangeReason::MAXIMIZE_TO_SPLIT)));
+    napi_set_named_property(env, objValue, "SPLIT_TO_MAXIMIZE", CreateJsValue(env,
+        static_cast<int32_t>(SizeChangeReason::SPLIT_TO_MAXIMIZE)));
+    napi_set_named_property(env, objValue, "PAGE_ROTATION", CreateJsValue(env,
+        static_cast<int32_t>(SizeChangeReason::PAGE_ROTATION)));
+    napi_set_named_property(env, objValue, "SPLIT_DRAG_START", CreateJsValue(env,
+        static_cast<int32_t>(SizeChangeReason::SPLIT_DRAG_START)));
+    napi_set_named_property(env, objValue, "SPLIT_DRAG", CreateJsValue(env,
+        static_cast<int32_t>(SizeChangeReason::SPLIT_DRAG)));
+    napi_set_named_property(env, objValue, "SPLIT_DRAG_END", CreateJsValue(env,
+        static_cast<int32_t>(SizeChangeReason::SPLIT_DRAG_END)));
     napi_set_named_property(env, objValue, "END", CreateJsValue(env,
         static_cast<int32_t>(SizeChangeReason::END)));
 
+    return objValue;
+}
+
+napi_value CreateJsRSUIFirstSwitch(napi_env env)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to get object");
+        return nullptr;
+    }
+    napi_set_named_property(env, objValue, "NONE", CreateJsValue(env,
+        static_cast<int32_t>(RSUIFirstSwitch::NONE)));
+    napi_set_named_property(env, objValue, "MODAL_WINDOW_CLOSE", CreateJsValue(env,
+        static_cast<int32_t>(RSUIFirstSwitch::MODAL_WINDOW_CLOSE)));
+    napi_set_named_property(env, objValue, "FORCE_DISABLE", CreateJsValue(env,
+        static_cast<int32_t>(RSUIFirstSwitch::FORCE_DISABLE)));
+    napi_set_named_property(env, objValue, "FORCE_ENABLE", CreateJsValue(env,
+        static_cast<int32_t>(RSUIFirstSwitch::FORCE_ENABLE)));
+    napi_set_named_property(env, objValue, "FORCE_ENABLE_LIMIT", CreateJsValue(env,
+        static_cast<int32_t>(RSUIFirstSwitch::FORCE_ENABLE_LIMIT)));
+    napi_set_named_property(env, objValue, "FORCE_DISABLE_NONFOCUS", CreateJsValue(env,
+        static_cast<int32_t>(RSUIFirstSwitch::FORCE_DISABLE_NONFOCUS)));
     return objValue;
 }
 
@@ -1428,6 +1693,8 @@ napi_value SubWindowModalTypeInit(napi_env env)
         static_cast<int32_t>(SubWindowModalType::TYPE_WINDOW_MODALITY)));
     napi_set_named_property(env, objValue, "TYPE_TOAST", CreateJsValue(env,
         static_cast<int32_t>(SubWindowModalType::TYPE_TOAST)));
+    napi_set_named_property(env, objValue, "TYPE_TEXT_MENU", CreateJsValue(env,
+        static_cast<int32_t>(SubWindowModalType::TYPE_TEXT_MENU)));
     napi_set_named_property(env, objValue, "TYPE_APPLICATION_MODALITY", CreateJsValue(env,
         static_cast<int32_t>(SubWindowModalType::TYPE_APPLICATION_MODALITY)));
     return objValue;
@@ -1522,6 +1789,59 @@ napi_value CreateJsSystemBarPropertyArrayObject(
     return arrayValue;
 }
 
+napi_value ConvertResultToJsValue(napi_env env, RotationChangeResult& rotationChangeResult)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Failed to get object");
+        return NapiGetUndefined(env);
+    }
+    napi_set_named_property(env, objValue, "rectType",
+        CreateJsValue(env, static_cast<uint32_t>(rotationChangeResult.rectType_)));
+    napi_set_named_property(env, objValue, "windowRect",
+        CreateJsSessionRect(env, rotationChangeResult.windowRect_));
+    return objValue;
+}
+
+napi_value CreateJsRotationChangeResultMapObject(napi_env env, const int32_t persistentId,
+    const RotationChangeResult& rotationChangeResult)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Failed to get object");
+        return NapiGetUndefined(env);
+    }
+    napi_set_named_property(env, objValue, "persistentId", CreateJsValue(env, persistentId));
+    napi_set_named_property(env, objValue, "rectType",
+        CreateJsValue(env, static_cast<uint32_t>(rotationChangeResult.rectType_)));
+    napi_set_named_property(env, objValue, "windowRect",
+        CreateJsSessionRect(env, rotationChangeResult.windowRect_));
+    return objValue;
+}
+
+napi_value CreateResultMapToJsValue(napi_env env,
+    const std::unordered_map<int32_t, RotationChangeResult>& rotationChangeResultMap)
+{
+    if (rotationChangeResultMap.empty()) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "rotationChangeResultMap is empty");
+        return nullptr;
+    }
+    napi_value arrayValue = nullptr;
+    napi_create_array_with_length(env, rotationChangeResultMap.size(), &arrayValue);
+    if (arrayValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Failed to create napi array");
+        return NapiGetUndefined(env);
+    }
+    uint32_t index = 0;
+    for (auto iter : rotationChangeResultMap) {
+        TLOGD(WmsLogTag::WMS_ROTATION, "CreateResultMapToJsValue index %{public}d", index);
+        napi_set_element(env, arrayValue, index++, CreateJsRotationChangeResultMapObject(env, iter.first, iter.second));
+    }
+    return arrayValue;
+}
+
 static void SetTypeProperty(napi_value object, napi_env env, const std::string& name, JsSessionType type)
 {
     napi_set_named_property(env, object, name.c_str(), CreateJsValue(env, static_cast<int32_t>(type)));
@@ -1548,6 +1868,33 @@ napi_value KeyboardGravityInit(napi_env env)
         static_cast<int32_t>(SessionGravity::SESSION_GRAVITY_BOTTOM)));
     napi_set_named_property(env, objValue, "GRAVITY_DEFAULT", CreateJsValue(env,
         static_cast<int32_t>(SessionGravity::SESSION_GRAVITY_DEFAULT)));
+    return objValue;
+}
+
+napi_value KeyboardViewModeInit(napi_env env)
+{
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "In");
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Env is nullptr");
+        return nullptr;
+    }
+
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to get object");
+        return nullptr;
+    }
+    napi_set_named_property(env, objValue, "NON_IMMERSIVE_MODE", CreateJsValue(env,
+        static_cast<int32_t>(KeyboardViewMode::NON_IMMERSIVE_MODE)));
+    napi_set_named_property(env, objValue, "IMMERSIVE_MODE", CreateJsValue(env,
+        static_cast<int32_t>(KeyboardViewMode::IMMERSIVE_MODE)));
+    napi_set_named_property(env, objValue, "LIGHT_IMMERSIVE_MODE", CreateJsValue(env,
+        static_cast<int32_t>(KeyboardViewMode::LIGHT_IMMERSIVE_MODE)));
+    napi_set_named_property(env, objValue, "DARK_IMMERSIVE_MODE", CreateJsValue(env,
+        static_cast<int32_t>(KeyboardViewMode::DARK_IMMERSIVE_MODE)));
+    napi_set_named_property(env, objValue, "VIEW_MODE_END", CreateJsValue(env,
+        static_cast<int32_t>(KeyboardViewMode::VIEW_MODE_END)));
     return objValue;
 }
 
@@ -1602,7 +1949,9 @@ napi_value SessionTypeInit(napi_env env)
     SetTypeProperty(objValue, env, "TYPE_KEYBOARD_PANEL", JsSessionType::TYPE_KEYBOARD_PANEL);
     SetTypeProperty(objValue, env, "TYPE_DIVIDER", JsSessionType::TYPE_DIVIDER);
     SetTypeProperty(objValue, env, "TYPE_TRANSPARENT_VIEW", JsSessionType::TYPE_TRANSPARENT_VIEW);
+    SetTypeProperty(objValue, env, "TYPE_WALLET_SWIPE_CARD", JsSessionType::TYPE_WALLET_SWIPE_CARD);
     SetTypeProperty(objValue, env, "TYPE_SCREEN_CONTROL", JsSessionType::TYPE_SCREEN_CONTROL);
+    SetTypeProperty(objValue, env, "TYPE_FLOAT_NAVIGATION", JsSessionType::TYPE_FLOAT_NAVIGATION);
     return objValue;
 }
 
@@ -1636,28 +1985,34 @@ napi_value SceneTypeInit(napi_env env)
     return objValue;
 }
 
-struct AsyncInfo {
-    napi_env env;
-    napi_async_work work;
-    std::function<void()> func;
-};
-
-static void NapiAsyncWork(napi_env env, std::function<void()> task)
+napi_value CreateRotationChangeType(napi_env env)
 {
-    napi_value resource = nullptr;
-    AsyncInfo* info = new AsyncInfo();
-    info->env = env;
-    info->func = task;
-    napi_create_string_utf8(env, "AsyncWork", NAPI_AUTO_LENGTH, &resource);
-    napi_create_async_work(env, nullptr, resource, [](napi_env env, void* data) {
-    },
-    [](napi_env env, napi_status status, void* data) {
-        AsyncInfo* info = (AsyncInfo*)data;
-        info->func();
-        napi_delete_async_work(env, info->work);
-        delete info;
-    }, (void*)info, &info->work);
-    napi_queue_async_work(env, info->work);
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Failed to get object");
+        return NapiGetUndefined(env);
+    }
+    napi_set_named_property(env, objValue, "WINDOW_WILL_ROTATE",
+        CreateJsValue(env, static_cast<uint32_t>(RotationChangeType::WINDOW_WILL_ROTATE)));
+    napi_set_named_property(env, objValue, "WINDOW_DID_ROTATE",
+        CreateJsValue(env, static_cast<uint32_t>(RotationChangeType::WINDOW_DID_ROTATE)));
+    return objValue;
+}
+
+napi_value CreateRectType(napi_env env)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Failed to get object");
+        return NapiGetUndefined(env);
+    }
+    napi_set_named_property(env, objValue, "RELATIVE_TO_SCREEN",
+        CreateJsValue(env, static_cast<uint32_t>(RectType::RELATIVE_TO_SCREEN)));
+    napi_set_named_property(env, objValue, "RELATIVE_TO_PARENT_WINDOW",
+        CreateJsValue(env, static_cast<uint32_t>(RectType::RELATIVE_TO_PARENT_WINDOW)));
+    return objValue;
 }
 
 MainThreadScheduler::MainThreadScheduler(napi_env env)
@@ -1693,7 +2048,14 @@ void MainThreadScheduler::PostMainThreadTask(Task&& localTask, std::string trace
         handler_->PostTask(std::move(task), "wms:" + traceInfo, delayTime,
             OHOS::AppExecFwk::EventQueue::Priority::IMMEDIATE);
     } else {
-        NapiAsyncWork(env_, task);
+        napi_send_event(env_, task, napi_eprio_immediate);
+    }
+}
+
+void MainThreadScheduler::RemoveMainThreadTaskByName(const std::string taskName)
+{
+    if (handler_ && !handler_->GetEventRunner()->IsCurrentRunnerThread()) {
+        handler_->RemoveTask("wms:" + taskName);
     }
 }
 } // namespace OHOS::Rosen

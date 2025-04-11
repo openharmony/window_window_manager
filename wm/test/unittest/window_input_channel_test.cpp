@@ -14,10 +14,10 @@
  */
 
 #include <gtest/gtest.h>
-#include "window_impl.h"
-#include "window_input_channel.h"
 #include "mock_window_adapter.h"
 #include "singleton_mocker.h"
+#include "window_impl.h"
+#include "window_input_channel.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -32,16 +32,13 @@ public:
     virtual void SetUp() override;
     virtual void TearDown() override;
     sptr<WindowImpl> window_;
+
 private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 300000;
 };
-void WindowInputChannelTest::SetUpTestCase()
-{
-}
+void WindowInputChannelTest::SetUpTestCase() {}
 
-void WindowInputChannelTest::TearDownTestCase()
-{
-}
+void WindowInputChannelTest::TearDownTestCase() {}
 
 void WindowInputChannelTest::SetUp()
 {
@@ -64,7 +61,7 @@ namespace {
  * @tc.desc: consume pointer event when receive callback from input
  * @tc.type: FUNC
  */
-HWTEST_F(WindowInputChannelTest, HandlePointerEvent, Function | SmallTest | Level2)
+HWTEST_F(WindowInputChannelTest, HandlePointerEvent, TestSize.Level1)
 {
     auto pointerEvent = MMI::PointerEvent::Create();
     sptr<WindowInputChannel> inputChannel = new WindowInputChannel(window_);
@@ -107,7 +104,7 @@ HWTEST_F(WindowInputChannelTest, HandlePointerEvent, Function | SmallTest | Leve
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_PULL_MOVE);
     inputChannel->HandlePointerEvent(pointerEvent);
 
-    window_->GetWindowProperty()->SetWindowRect({0, 0, 8, 8});
+    window_->GetWindowProperty()->SetWindowRect({ 0, 0, 8, 8 });
     inputChannel->HandlePointerEvent(pointerEvent);
     inputChannel->Destroy();
 }
@@ -117,7 +114,7 @@ HWTEST_F(WindowInputChannelTest, HandlePointerEvent, Function | SmallTest | Leve
  * @tc.desc: consume key event when receive callback from input
  * @tc.type: FUNC
  */
-HWTEST_F(WindowInputChannelTest, HandleKeyEvent, Function | SmallTest | Level2)
+HWTEST_F(WindowInputChannelTest, HandleKeyEvent, TestSize.Level1)
 {
     auto keyEvent = MMI::KeyEvent::Create();
     sptr<WindowInputChannel> inputChannel = new WindowInputChannel(window_);
@@ -148,7 +145,7 @@ HWTEST_F(WindowInputChannelTest, HandleKeyEvent, Function | SmallTest | Level2)
  * @tc.desc: DispatchKeyEventCallback
  * @tc.type: FUNC
  */
-HWTEST_F(WindowInputChannelTest, DispatchKeyEventCallback, Function | SmallTest | Level2)
+HWTEST_F(WindowInputChannelTest, DispatchKeyEventCallback, TestSize.Level1)
 {
     sptr<WindowInputChannel> inputChannel = new WindowInputChannel(window_);
     auto keyEvent = MMI::KeyEvent::Create();
@@ -171,7 +168,7 @@ HWTEST_F(WindowInputChannelTest, DispatchKeyEventCallback, Function | SmallTest 
  * @tc.desc: GetWindowRect
  * @tc.type: FUNC
  */
-HWTEST_F(WindowInputChannelTest, GetWindowRect, Function | SmallTest | Level2)
+HWTEST_F(WindowInputChannelTest, GetWindowRect, TestSize.Level1)
 {
     sptr<WindowInputChannel> inputChannel = new WindowInputChannel(window_);
     ASSERT_NE(inputChannel, nullptr);
@@ -183,6 +180,6 @@ HWTEST_F(WindowInputChannelTest, GetWindowRect, Function | SmallTest | Level2)
     auto rect2 = inputChannel->GetWindowRect();
     ASSERT_EQ(tempTect, rect2);
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

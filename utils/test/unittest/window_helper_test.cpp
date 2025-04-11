@@ -52,7 +52,7 @@ namespace {
  * @tc.desc: window type/mode test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowHelperTest, WindowTypeWindowMode, Function | SmallTest | Level1)
+HWTEST_F(WindowHelperTest, WindowTypeWindowMode, TestSize.Level1)
 {
     ASSERT_EQ(true, WindowHelper::IsMainFullScreenWindow(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
                                                          WindowMode::WINDOW_MODE_FULLSCREEN));
@@ -76,7 +76,7 @@ HWTEST_F(WindowHelperTest, WindowTypeWindowMode, Function | SmallTest | Level1)
  * @tc.desc: window mode supported test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowHelperTest, WindowModeSupport, Function | SmallTest | Level1)
+HWTEST_F(WindowHelperTest, WindowModeSupport, TestSize.Level1)
 {
     ASSERT_EQ(true, WindowHelper::IsWindowModeSupported(WindowModeSupport::WINDOW_MODE_SUPPORT_ALL,
                                                         WindowMode::WINDOW_MODE_FULLSCREEN));
@@ -97,7 +97,7 @@ HWTEST_F(WindowHelperTest, WindowModeSupport, Function | SmallTest | Level1)
  * @tc.desc: rect test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowHelperTest, WindowRect, Function | SmallTest | Level1)
+HWTEST_F(WindowHelperTest, WindowRect, TestSize.Level1)
 {
     Rect rect0 = {0, 0, 0, 0};
     ASSERT_EQ(true, WindowHelper::IsEmptyRect(rect0));
@@ -111,7 +111,7 @@ HWTEST_F(WindowHelperTest, WindowRect, Function | SmallTest | Level1)
  * @tc.desc: string test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowHelperTest, WindowStringUtil, Function | SmallTest | Level1)
+HWTEST_F(WindowHelperTest, WindowStringUtil, TestSize.Level1)
 {
     ASSERT_EQ(true, WindowHelper::IsNumber("123"));
     ASSERT_EQ(false, WindowHelper::IsNumber("1a3"));
@@ -136,7 +136,7 @@ HWTEST_F(WindowHelperTest, WindowStringUtil, Function | SmallTest | Level1)
  * @tc.desc: CalculateOriginPosition test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowHelperTest, CalculateOriginPosition, Function | SmallTest | Level1)
+HWTEST_F(WindowHelperTest, CalculateOriginPosition, TestSize.Level1)
 {
     Rect rect1 { 0, 0, 10, 10 }, rect2 { 100, 100, 200, 200 };
     PointInfo point = WindowHelper::CalculateOriginPosition(rect1, rect2, PointInfo { 200, 200 });
@@ -172,7 +172,7 @@ HWTEST_F(WindowHelperTest, CalculateOriginPosition, Function | SmallTest | Level
  * @tc.desc: TransformRect test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowHelperTest, TransformRect, Function | SmallTest | Level1)
+HWTEST_F(WindowHelperTest, TransformRect, TestSize.Level1)
 {
     Transform transform;
     Rect rect { 0, 0, 10, 20 };
@@ -192,7 +192,7 @@ HWTEST_F(WindowHelperTest, TransformRect, Function | SmallTest | Level1)
  * @tc.desc: CalculateHotZoneScale test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowHelperTest, CalculateHotZoneScale, Function | SmallTest | Level1)
+HWTEST_F(WindowHelperTest, CalculateHotZoneScale, TestSize.Level1)
 {
     Transform transform;
     transform.scaleX_ = 0.66f;
@@ -216,12 +216,16 @@ HWTEST_F(WindowHelperTest, CalculateHotZoneScale, Function | SmallTest | Level1)
  * @tc.desc: Window Type test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowHelperTest, WindowType, Function | SmallTest | Level1)
+HWTEST_F(WindowHelperTest, WindowType, TestSize.Level1)
 {
     ASSERT_EQ(true, WindowHelper::IsSystemWindow(WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW));
     ASSERT_EQ(true, WindowHelper::IsSystemSubWindow(WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW));
     ASSERT_EQ(false, WindowHelper::IsSystemSubWindow(WindowType::WINDOW_TYPE_APP_SUB_WINDOW));
     ASSERT_EQ(false, WindowHelper::IsSystemSubWindow(WindowType::WINDOW_TYPE_FLOAT));
+    ASSERT_EQ(false, WindowHelper::IsSystemSubWindow(WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD));
+    ASSERT_EQ(true, WindowHelper::IsSystemWindow(WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD));
+    ASSERT_EQ(false, WindowHelper::IsSystemSubWindow(WindowType::WINDOW_TYPE_FLOAT_NAVIGATION));
+    ASSERT_EQ(true, WindowHelper::IsSystemWindow(WindowType::WINDOW_TYPE_FLOAT_NAVIGATION));
 }
 
 /**
@@ -229,7 +233,7 @@ HWTEST_F(WindowHelperTest, WindowType, Function | SmallTest | Level1)
  * @tc.desc: GetTransformFromWorldMat4 test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowHelperTest, GetTransformFromWorldMat4, Function | SmallTest | Level1)
+HWTEST_F(WindowHelperTest, GetTransformFromWorldMat4, TestSize.Level1)
 {
     Transform transform1;
     transform1.scaleX_ = 0.66f;
@@ -263,7 +267,7 @@ HWTEST_F(WindowHelperTest, GetTransformFromWorldMat4, Function | SmallTest | Lev
  * @tc.desc: CheckButtonStyleValid test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowHelperTest, CheckButtonStyleValid, Function | SmallTest | Level1)
+HWTEST_F(WindowHelperTest, CheckButtonStyleValid, TestSize.Level1)
 {
     DecorButtonStyle style;
     // checkout the side of buttonBackgroundSize

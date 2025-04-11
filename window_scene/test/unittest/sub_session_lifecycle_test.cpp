@@ -86,7 +86,7 @@ namespace {
  * @tc.desc: check func Reconnect
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStubLifecycleTest, Reconnect01, Function | SmallTest | Level1)
+HWTEST_F(SessionStubLifecycleTest, Reconnect01, TestSize.Level1)
 {
     auto surfaceNode = CreateRSSurfaceNode();
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
@@ -137,7 +137,7 @@ HWTEST_F(SessionStubLifecycleTest, Reconnect01, Function | SmallTest | Level1)
  * @tc.desc: check func Hide
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStubLifecycleTest, Hide01, Function | SmallTest | Level1)
+HWTEST_F(SessionStubLifecycleTest, Hide01, TestSize.Level1)
 {
     subSession_->Hide();
     subSession_->GetMissionId();
@@ -166,7 +166,7 @@ HWTEST_F(SessionStubLifecycleTest, Hide01, Function | SmallTest | Level1)
  * @tc.desc: check func Hide
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStubLifecycleTest, Hide02, Function | SmallTest | Level1)
+HWTEST_F(SessionStubLifecycleTest, Hide02, TestSize.Level1)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
@@ -182,7 +182,7 @@ HWTEST_F(SessionStubLifecycleTest, Hide02, Function | SmallTest | Level1)
  * @tc.desc: check func Hide
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStubLifecycleTest, Hide04, Function | SmallTest | Level1)
+HWTEST_F(SessionStubLifecycleTest, Hide04, TestSize.Level1)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
@@ -206,25 +206,11 @@ HWTEST_F(SessionStubLifecycleTest, Hide04, Function | SmallTest | Level1)
 }
 
 /**
- * @tc.name: Show01
- * @tc.desc: check func Show
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStubLifecycleTest, Show01, Function | SmallTest | Level1)
-{
-    sptr<WindowSessionProperty> property = nullptr;
-    ASSERT_EQ(nullptr, property);
-
-    ASSERT_TRUE(subSession_ != nullptr);
-    ASSERT_EQ(WSError::WS_OK, subSession_->Show(property));
-}
-
-/**
  * @tc.name: Show02
  * @tc.desc: check func Show
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStubLifecycleTest, Show02, Function | SmallTest | Level1)
+HWTEST_F(SessionStubLifecycleTest, Show02, TestSize.Level1)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
@@ -246,7 +232,7 @@ HWTEST_F(SessionStubLifecycleTest, Show02, Function | SmallTest | Level1)
  * @tc.desc: check func Show
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStubLifecycleTest, Show03, Function | SmallTest | Level1)
+HWTEST_F(SessionStubLifecycleTest, Show03, TestSize.Level1)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
@@ -268,7 +254,7 @@ HWTEST_F(SessionStubLifecycleTest, Show03, Function | SmallTest | Level1)
  * @tc.desc: check func Show
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStubLifecycleTest, Show04, Function | SmallTest | Level1)
+HWTEST_F(SessionStubLifecycleTest, Show04, TestSize.Level1)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(property, nullptr);
@@ -287,7 +273,7 @@ HWTEST_F(SessionStubLifecycleTest, Show04, Function | SmallTest | Level1)
  * @tc.desc: check func ProcessPointDownSession
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStubLifecycleTest, ProcessPointDownSession01, Function | SmallTest | Level1)
+HWTEST_F(SessionStubLifecycleTest, ProcessPointDownSession01, TestSize.Level1)
 {
     subSession_->Hide();
     subSession_->SetParentSession(subSession_);
@@ -304,7 +290,7 @@ HWTEST_F(SessionStubLifecycleTest, ProcessPointDownSession01, Function | SmallTe
  * @tc.desc: check func ProcessPointDownSession
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStubLifecycleTest, ProcessPointDownSession02, Function | SmallTest | Level1)
+HWTEST_F(SessionStubLifecycleTest, ProcessPointDownSession02, TestSize.Level1)
 {
     subSession_->Hide();
     WSRect rect;

@@ -224,12 +224,14 @@ void RssSession::OnReceiveEvent(napi_env env, napi_value callbackObj, uint32_t e
     NAPI_CALL_RETURN_VOID(env,
         napi_create_reference(env, iter->first->GetNapiValue(), 1, &cbInfo->callback_));
 
-    NAPI_CALL_RETURN_VOID(env, napi_create_async_work(env, nullptr, resourceName,
-        [](napi_env env, void* data) {},
-        CompleteCb,
-        static_cast<void*>(cbInfo.get()),
-        &cbInfo->asyncWork_));
-    NAPI_CALL_RETURN_VOID(env, napi_queue_async_work(env, cbInfo->asyncWork_));
+    RssSessionCbInfo* ctx = cbInfo.get();
+    auto napiTask = [env, ctx]() {
+        RssSession::CompleteCb(env, ctx);
+    };
+    if (napi_status::napi_ok != napi_send_event(env, napiTask, napi_eprio_high)) {
+        WLOGFE("failed to napi_send_event");
+        return;
+    }
     cbInfo.release();
     WLOGFI("asyncCallback end");
 }
@@ -296,10 +298,9 @@ napi_value RssSession::UnRegisterRssDataCallback(napi_env env, napi_callback_inf
     return NapiGetUndefined(env);
 }
 
-void RssSession::CompleteCb(napi_env env, napi_status status, void* data)
+void RssSession::CompleteCb(napi_env env, RssSessionCbInfo* info)
 {
     WLOGFI("start");
-    auto* info = static_cast<RssSessionCbInfo*>(data);
     if (info == nullptr) {
         WLOGFW("Complete cb info is nullptr.");
         return;
@@ -320,8 +321,6 @@ void RssSession::CompleteCb(napi_env env, napi_status status, void* data)
     napi_value callResult = nullptr;
     NAPI_CALL_RETURN_VOID(env, napi_call_function(env, undefined, callback, 1, &result, &callResult));
     // delete resources
-    NAPI_CALL_RETURN_VOID(env, napi_delete_async_work(env, cbInfo->asyncWork_));
-    cbInfo->asyncWork_ = nullptr;
     if (cbInfo->callback_ != nullptr) {
         NAPI_CALL_RETURN_VOID(env, napi_delete_reference(env, cbInfo->callback_));
         cbInfo->callback_ = nullptr;

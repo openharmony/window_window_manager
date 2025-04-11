@@ -162,7 +162,7 @@ bool WindowAdapterLite::InitSSMProxy()
 
 void WindowAdapterLite::OnUserSwitch()
 {
-    TLOGI(WmsLogTag::WMS_MULTI_USER, "User switched lite");
+    TLOGD(WmsLogTag::WMS_MULTI_USER, "User switched lite");
     ClearWindowAdapter();
     InitSSMProxy();
     ReregisterWindowManagerLiteAgent();
@@ -195,14 +195,18 @@ void WMSDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
     SingletonContainer::Get<SessionManagerLite>().ClearSessionManagerProxy();
 }
 
-void WindowAdapterLite::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
+void WindowAdapterLite::GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId)
 {
     INIT_PROXY_CHECK_RETURN();
     WLOGFD("use Foucus window info proxy");
 
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_IF_NULL(wmsProxy);
-    wmsProxy->GetFocusWindowInfo(focusInfo);
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        wmsProxy->GetFocusWindowInfo(focusInfo, displayId);
+    } else {
+        wmsProxy->GetFocusWindowInfo(focusInfo);
+    }
 }
 
 WMError WindowAdapterLite::GetWindowModeType(WindowModeType& windowModeType)
@@ -223,6 +227,16 @@ WMError WindowAdapterLite::GetMainWindowInfos(int32_t topNum, std::vector<MainWi
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
     return wmsProxy->GetMainWindowInfos(topNum, topNInfo);
+}
+
+WMError WindowAdapterLite::GetCallingWindowInfo(CallingWindowInfo& callingWindowInfo)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "get calling window info");
+
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->GetCallingWindowInfo(callingWindowInfo);
 }
 
 WMError WindowAdapterLite::GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos)
@@ -326,6 +340,15 @@ WMError WindowAdapterLite::GetAccessibilityWindowInfo(std::vector<sptr<Accessibi
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
     return wmsProxy->GetAccessibilityWindowInfo(infos);
+}
+
+WMError WindowAdapterLite::ListWindowInfo(const WindowInfoOption& windowInfoOption,
+    std::vector<sptr<WindowInfo>>& infos)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->ListWindowInfo(windowInfoOption, infos);
 }
 } // namespace Rosen
 } // namespace OHOS

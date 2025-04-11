@@ -34,8 +34,8 @@ void RootSceneSession::LoadContent(
 void RootSceneSession::GetSystemAvoidAreaForRoot(const WSRect& rect, AvoidArea& avoidArea)
 {
     std::vector<sptr<SceneSession>> statusBarVector;
-    if (specificCallback_ != nullptr && specificCallback_->onGetSceneSessionVectorByType_) {
-        statusBarVector = specificCallback_->onGetSceneSessionVectorByType_(
+    if (specificCallback_ != nullptr && specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_) {
+        statusBarVector = specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_(
             WindowType::WINDOW_TYPE_STATUS_BAR, GetSessionProperty()->GetDisplayId());
     }
     for (auto& statusBar : statusBarVector) {
@@ -43,6 +43,10 @@ void RootSceneSession::GetSystemAvoidAreaForRoot(const WSRect& rect, AvoidArea& 
             continue;
         }
         WSRect statusBarRect = statusBar->GetSessionRect();
+        if (onGetStatusBarAvoidHeightFunc_) {
+            onGetStatusBarAvoidHeightFunc_(statusBarRect);
+            TLOGD(WmsLogTag::WMS_IMMS, "status bar height %{public}d", statusBarRect.height_);
+        }
         CalculateAvoidAreaRect(rect, statusBarRect, avoidArea);
         TLOGI(WmsLogTag::WMS_IMMS, "root scene %{public}s status bar %{public}s area %{public}s",
               rect.ToString().c_str(), statusBarRect.ToString().c_str(), avoidArea.ToString().c_str());
@@ -54,14 +58,14 @@ void RootSceneSession::GetKeyboardAvoidAreaForRoot(const WSRect& rect, AvoidArea
     std::vector<sptr<SceneSession>> inputMethodVector;
     if (specificCallback_ != nullptr && specificCallback_->onGetSceneSessionVectorByType_) {
         inputMethodVector = specificCallback_->onGetSceneSessionVectorByType_(
-            WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, GetSessionProperty()->GetDisplayId());
+            WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     }
     for (auto& inputMethod : inputMethodVector) {
         if (!inputMethod->IsVisible()) {
             continue;
         }
         SessionGravity gravity = inputMethod->GetKeyboardGravity();
-        if (gravity == SessionGravity::SESSION_GRAVITY_FLOAT) {
+        if (gravity == SessionGravity::SESSION_GRAVITY_FLOAT || !inputMethod->IsKeyboardAvoidAreaActive()) {
             continue;
         }
         if (isKeyboardPanelEnabled_) {
@@ -121,7 +125,7 @@ void RootSceneSession::GetAINavigationBarAreaForRoot(const WSRect& rect, AvoidAr
           rect.ToString().c_str(), barArea.ToString().c_str(), avoidArea.ToString().c_str());
 }
 
-AvoidArea RootSceneSession::GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect)
+AvoidArea RootSceneSession::GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect, int32_t apiVersion)
 {
     auto task = [weakThis = wptr(this), type]() -> AvoidArea {
         auto session = weakThis.promote();

@@ -40,6 +40,9 @@ class RSTransaction;
 constexpr int32_t ROTATE_ANIMATION_DURATION = 400;
 constexpr int32_t INVALID_SESSION_ID = 0;
 constexpr int32_t WINDOW_SUPPORT_MODE_MAX_SIZE = 4;
+constexpr int32_t DEFAULT_SCALE_RATIO = 100;
+const std::string WINDOW_SCREEN_LOCK_PREFIX = "windowLock_";
+const std::string VIEW_SCREEN_LOCK_PREFIX = "viewLock_";
 
 enum class WSError : int32_t {
     WS_OK = 0,
@@ -80,6 +83,7 @@ enum class WSError : int32_t {
     WS_ERROR_MIN_UI_EXTENSION_ABILITY_FAILED,
     WS_ERROR_TERMINATE_UI_EXTENSION_ABILITY_FAILED,
     WS_ERROR_PRE_HANDLE_COLLABORATOR_FAILED,
+    WS_ERROR_START_UI_ABILITY_TIMEOUT,
 
     WS_ERROR_EDM_CONTROLLED = 2097215, // enterprise limit
 };
@@ -133,6 +137,12 @@ enum ContinueState {
 enum class StartMethod : int32_t {
     START_NORMAL,
     START_CALL
+};
+
+enum class SingleHandMode : int32_t {
+    LEFT = 0,
+    RIGHT,
+    MIDDLE
 };
 
 /**
@@ -290,6 +300,16 @@ enum class FocusChangeReason {
     VOICE_INTERACTION,
 
     /**
+     * focus change for SA requerst.19
+     */
+    SA_REQUEST,
+
+    /**
+     * focus on previous window for system keyboard
+     */
+    SYSTEM_KEYBOARD,
+
+    /**
      * focus change max.
      */
     MAX,
@@ -310,6 +330,19 @@ struct SessionViewportConfig {
     uint64_t displayId_ = 0;
     int32_t orientation_ = 0;
     uint32_t transform_ = 0;
+};
+
+struct WindowSizeLimits {
+    uint32_t maxWindowWidth = 0;
+    uint32_t minWindowWidth = 0;
+    uint32_t maxWindowHeight = 0;
+    uint32_t minWindowHeight = 0;
+
+    bool operator==(const WindowSizeLimits& sizeLimits) const
+    {
+        return (maxWindowWidth == sizeLimits.maxWindowWidth && minWindowWidth == sizeLimits.minWindowWidth &&
+            maxWindowHeight == sizeLimits.maxWindowHeight && minWindowHeight == sizeLimits.minWindowHeight);
+    }
 };
 
 struct SessionInfo {
@@ -368,7 +401,15 @@ struct SessionInfo {
     bool isPcOrPadEnableActivation_ = false;
     bool canStartAbilityFromBackground_ = false;
     bool isFoundationCall_ = false;
-    int32_t specifiedId = 0;
+    int32_t requestId = 0;
+    std::string specifiedFlag_ = "";
+    bool disableDelegator = false;
+    bool reuseDelegatorWindow = false;
+
+    /*
+     * App Use Control
+     */
+    bool isUseControlSession = false; // Indicates whether the session is used for controlling a main session.
 
     /*
      * UIExtension
@@ -388,7 +429,14 @@ struct SessionInfo {
     /*
      * PC Window
      */
-    std::vector<AppExecFwk::SupportWindowMode> supportWindowModes;
+    std::vector<AppExecFwk::SupportWindowMode> supportedWindowModes;
+    WindowSizeLimits windowSizeLimits;
+    bool isFollowParentMultiScreenPolicy = false;
+
+    /*
+     * Window Rotation
+     */
+    int32_t currentRotation_ = 0;
 };
 
 enum class SessionFlag : uint32_t {
@@ -426,6 +474,13 @@ enum class SizeChangeReason : uint32_t {
     PIP_RESTORE,
     UPDATE_DPI_SYNC,
     DRAG_MOVE,
+    AVOID_AREA_CHANGE,
+    MAXIMIZE_TO_SPLIT,
+    SPLIT_TO_MAXIMIZE,
+    PAGE_ROTATION,
+    SPLIT_DRAG_START,
+    SPLIT_DRAG,
+    SPLIT_DRAG_END,
     END,
 };
 
@@ -451,6 +506,7 @@ enum class SessionEvent : uint32_t {
     EVENT_DRAG,
     EVENT_MAXIMIZE_WITHOUT_ANIMATION,
     EVENT_MAXIMIZE_WATERFALL,
+    EVENT_WATERFALL_TO_MAXIMIZE,
     EVENT_END
 };
 
@@ -550,7 +606,11 @@ struct WSRectT {
             width_ << " " << height_ << "]";
         return ss.str();
     }
+    static const WSRectT<T> EMPTY_RECT;
 };
+
+template<typename T>
+inline constexpr WSRectT<T> WSRectT<T>::EMPTY_RECT { 0, 0, 0, 0 };
 
 using WSRect = WSRectT<int32_t>;
 using WSRectF = WSRectT<float>;
@@ -591,10 +651,15 @@ struct WindowAnimationConfig {
 };
 
 struct StartingWindowInfo {
-    int32_t startingWindowBackgroundId_;
-    int32_t startingWindowIconId_;
-    uint32_t startingWindowBackgroundColor_;
-    std::string startingWindowIconPath_;
+    uint32_t backgroundColorEarlyVersion_;
+    std::string iconPathEarlyVersion_;
+    bool configFileEnabled_;
+    uint32_t backgroundColor_;
+    std::string iconPath_;
+    std::string illustrationPath_;
+    std::string brandingPath_;
+    std::string backgroundImagePath_;
+    std::string backgroundImageFit_;
 };
 
 struct StartingWindowAnimationConfig {
@@ -630,12 +695,28 @@ struct AppWindowSceneConfig {
     std::string rotationMode_ = "windowRotation";
     WindowShadowConfig focusedShadow_;
     WindowShadowConfig unfocusedShadow_;
+    WindowShadowConfig focusedShadowDark_;
+    WindowShadowConfig unfocusedShadowDark_;
     KeyboardSceneAnimationConfig keyboardAnimationIn_;
     KeyboardSceneAnimationConfig keyboardAnimationOut_;
     WindowAnimationConfig windowAnimation_;
     StartingWindowAnimationConfig startingWindowAnimationConfig_;
     SystemUIStatusBarConfig systemUIStatusBarConfig_;
     WindowImmersive windowImmersive_;
+};
+
+struct SingleHandCompatibleModeConfig {
+    bool enabled = false;
+    float singleHandScale = 1.0f;
+    float heightChangeRatio = 1.0f;
+    float widthChangeRatio = 1.0f;
+};
+
+struct SingleHandScreenInfo {
+    int32_t scaleRatio = DEFAULT_SCALE_RATIO;
+    int32_t scalePivotX = 0;
+    int32_t scalePivotY = 0;
+    SingleHandMode mode = SingleHandMode::MIDDLE;
 };
 
 struct DeviceScreenConfig {
@@ -701,6 +782,9 @@ enum class SystemAnimatedSceneType : uint32_t {
     SCENE_ENTER_WIND_RECOVER, // Enter win+D in recover mode
     SCENE_ENTER_RECENTS, // Enter recents
     SCENE_EXIT_RECENTS, // Exit recent.
+    SCENE_LOCKSCREEN_TO_LAUNCHER, // Unlock screen.
+    SCENE_ENTER_MIN_WINDOW, // Enter the window minimization state
+    SCENE_RECOVER_MIN_WINDOW, // Recover minimized window
     SCENE_OTHERS, // 1.Default state 2.The state in which the animation ends
 };
 
@@ -750,6 +834,19 @@ struct PostProcessFocusState {
         byForeground_ = true;
         reason_ = FocusChangeReason::DEFAULT;
     }
+};
+
+/**
+ * @brief WindowNode for snapshot
+ */
+enum class SnapshotNodeType : uint32_t {
+    DEFAULT_NODE = 0,
+    LEASH_NODE,
+    APP_NODE,
+};
+
+enum class AsyncTraceTaskId: int32_t {
+    THROW_SLIP_ANIMATION = 0,
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H
