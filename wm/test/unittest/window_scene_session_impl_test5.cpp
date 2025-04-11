@@ -1490,10 +1490,26 @@ HWTEST_F(WindowSceneSessionImplTest5, HandleWindowLimitsInCompatibleMode05, Func
 }
 
 /**
- * @tc.name: HandleWindowLimitsInCompatibleMode05
- * @tc.desc: HandleWindowLimitsInCompatibleMode
+ * @tc.name: IsDecorEnable1
+ * @tc.desc: IsDecorEnable1
  * @tc.type: FUNC
  */
+HWTEST_F(WindowSceneSessionImplTest5, IsDecorEnable1, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> subWindowOption = sptr<WindowOption>::MakeSptr();
+    subWindowOption->SetWindowName("IsDecorEnable1");
+    subWindowOption->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(subWindowOption);
+    window->property_->SetDecorEnable(true);
+    window->windowSystemConfig_.isSystemDecorEnable_ = true;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    auto ret = window->IsDecorEnable();
+    EXPECT_EQ(false, ret);
+    subWindowOption->SetSubWindowMaximizeSupported(true);
+    ret = window->IsDecorEnable();
+    EXPECT_EQ(false, ret);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
