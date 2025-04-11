@@ -60,7 +60,7 @@ ani_object AniSceneSessionManager::OnGetRootSceneUIContext(ani_env* env)
         TLOGE(WmsLogTag::DEFAULT, "[ANI] uiContent is nullptr");
         return AniSceneSessionUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    ani_object uiContext = nullptr; // use GetUIAniContext;
+    ani_object uiContext = uiContent->GetUIAniContext();
     if (uiContext == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] uiContext obtained from jsEngine is nullptr");
         return AniSceneSessionUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
@@ -84,7 +84,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         return ANI_NOT_FOUND;
     }
     std::array funcs = {
-        ani_native_function {"getRootSceneUIContextSync", "J:L@ohos/sceneSessionManager/UIContext;",
+        ani_native_function {"getRootSceneUIContextSync", "J:L@ohos/arkui/UIContext/UIContext;",
             reinterpret_cast<void *>(AniSceneSessionManager::GetRootSceneUIContext)}
     };
     if ((ret = env->Namespace_BindNativeFunctions(nsp, funcs.data(), funcs.size()))) {
