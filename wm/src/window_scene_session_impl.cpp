@@ -2577,7 +2577,7 @@ WMError WindowSceneSessionImpl::GetSystemBarProperties(std::map<WindowType, Syst
     return WMError::WM_OK;
 }
 
-WMError WindowSceneSessionImpl::SetSystemBarPropertyForPage(WindowType type, const sptr<SystemBarProperty>& property)
+WMError WindowSceneSessionImpl::SetSystemBarPropertyForPage(WindowType type, std::optional<SystemBarProperty> property)
 {
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_IMMS, "win %{public}u invalid state", GetWindowId());
@@ -2587,7 +2587,7 @@ WMError WindowSceneSessionImpl::SetSystemBarPropertyForPage(WindowType type, con
         TLOGI(WmsLogTag::WMS_IMMS, "only main window support, win %{public}u", GetWindowId());
         return WMError::WM_DO_NOTHING;
     }
-    if (property == nullptr) {
+    if (property == std::nullopt) {
         TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u property is nullptr use main window prop", GetWindowId());
         return NotifySpecificWindowSessionProperty(type, GetSystemBarPropertyByType(type));
     }
@@ -2597,8 +2597,8 @@ WMError WindowSceneSessionImpl::SetSystemBarPropertyForPage(WindowType type, con
         property->enable_, property->backgroundColor_,
         property->contentColor_, property->enableAnimation_, property->settingFlag_);
     auto lastProperty = GetSystemBarPropertyByType(type)
-    property_->SetSystemBarProperty(type, *property);
-    auto ret = NotifySpecificWindowSessionProperty(type, *property);
+    property_->SetSystemBarProperty(type, property.value());
+    auto ret = NotifySpecificWindowSessionProperty(type, property.value());
     property_->SetSystemBarProperty(type, lastProperty);
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_IMMS, "set prop fail, ret %{public}u", ret);

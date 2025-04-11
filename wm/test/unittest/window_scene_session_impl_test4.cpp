@@ -727,7 +727,7 @@ HWTEST_F(WindowSceneSessionImplTest4, SetSystemBarPropertyForPage, Function | Sm
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetPersistentId(1);
     windowSceneSessionImpl->property_ = property;
-    sptr<SystemBarProperty> prop = sptr<SystemBarProperty>::MakeSptr();
+    std::optional<SystemBarProperty> prop;
     windowSceneSessionImpl->state_ = WindowState::STATE_DESTROYED;
     auto ret = windowSceneSessionImpl->SetSystemBarPropertyForPage(WindowType::WINDOW_TYPE_STATUS_BAR, prop);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
