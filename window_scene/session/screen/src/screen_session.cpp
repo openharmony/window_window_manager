@@ -2209,16 +2209,6 @@ int32_t ScreenSession::GetApiVersion()
     return apiVersion;
 }
 
-void ScreenSession::SetShareProtect(bool needShareProtect)
-{
-    needShareProtect_ = needShareProtect;
-}
-
-bool ScreenSession::GetShareProtect()
-{
-    return needShareProtect_;
-}
-
 float ScreenSession::GetSensorRotation() const
 {
     return currentSensorRotation_;
