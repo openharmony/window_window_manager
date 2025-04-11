@@ -9049,7 +9049,8 @@ uint32_t ScreenSessionManager::GetDeviceStatus()
             if (displayMode == FoldDisplayMode::MAIN) {
                 status = DMDeviceStatus::STATUS_FOLDED;
             }
-            TLOGI(WmsLogTag::DMS, "Get device status for pocket, display mode: %{public}u", static_cast<uint32_t>(displayMode));
+            TLOGI(WmsLogTag::DMS, "Get device status for pocket, display mode: %{public}u",
+                static_cast<uint32_t>(displayMode));
         }
         TLOGI(WmsLogTag::DMS, "Get device status for pocket, tent mode: %{public}d status: %{public}u",
             tentMode, static_cast<uint32_t>(status));
