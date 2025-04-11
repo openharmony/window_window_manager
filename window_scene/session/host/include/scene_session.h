@@ -353,6 +353,7 @@ public:
     bool CalcNewWindowRectIfNeed(DMRect& availableArea, float newVpr);
     bool IsPrimaryDisplay() const;
     void SaveLastDensity();
+    virtual bool IsFollowParentMultiScreenPolicy() const { return false; }
     void NotifyUpdateFlagCallback(NotifyUpdateFlagFunc&& func);
 
     /*
