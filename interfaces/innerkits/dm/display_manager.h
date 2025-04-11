@@ -850,7 +850,7 @@ public:
      *
      * @return Device status.
      */
-    uint32_t GetDeviceStatus();
+    uint32_t GetDeviceStatus() const;
 private:
     DisplayManager();
     ~DisplayManager();
