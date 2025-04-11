@@ -747,13 +747,22 @@ HWTEST_F(WindowSceneSessionImplTest4, SetSystemBarPropertyForPage, Function | Sm
  */
 HWTEST_F(WindowSceneSessionImplTest4, GetSystemBarPropertyForPage, Function | SmallTest | Level2)
 {
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetSystemBarPropertyForPage");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    windowSceneSessionImpl->hostSession_ = session;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetPersistentId(1);
+    windowSceneSessionImpl->property_ = property;
     std::map<WindowType, SystemBarProperty> properties;
     std::map<WindowType, SystemBarProperty> pageProperties;
-    GetSystemBarPropertyForPage(properties, pageProperties);
+    windowSceneSessionImpl->GetSystemBarPropertyForPage(properties, pageProperties);
     EXPECT_EQ(pageProperties[WindowType::WINDOW_TYPE_STATUS_BAR],
-        GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR));
+        windowSceneSessionImpl->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR));
     EXPECT_EQ(pageProperties[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR],
-        GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR));
+        windowSceneSessionImpl->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR));
 }
 
 /**
