@@ -917,20 +917,23 @@ HWTEST_F(WindowSceneSessionImplTest, Recover01, TestSize.Level1)
  * @tc.desc: Recover
  * @tc.type: FUNC
  */
- HWTEST_F(WindowSceneSessionImplTest, Recover02, TestSize.Level1)
- {
-     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-     option->SetWindowName("Recover02");
-     sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
- 
-     windowSceneSession->property_->SetPersistentId(1);
-     windowSceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
- 
-     windowSceneSession->hostSession_ = session;
-     ASSERT_EQ(WMError::WM_OK, windowSceneSession->Recover());
- }
+HWTEST_F(WindowSceneSessionImplTest, Recover02, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> subWindowOption = sptr<WindowOption>::MakeSptr();
+    subWindowOption->SetWindowName("Recover02");
+    subWindowOption->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    subWindowOption->SetSubWindowMaximizeSupported(true);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(subWindowOption);
+    window->property_->SetPersistentId(1);
+    window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+
+    window->hostSession_ = session;
+    ASSERT_EQ(WMError::WM_OK, window->Recover());
+}
 
 /**
  * @tc.name: Maximize01
