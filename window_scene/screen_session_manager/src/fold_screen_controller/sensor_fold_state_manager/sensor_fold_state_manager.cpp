@@ -189,4 +189,9 @@ void SensorFoldStateManager::SetTentMode(int tentType)
     TLOGI(WmsLogTag::DMS, "tent mode changing: %{public}d -> %{public}d", tentModeType_, tentType);
     tentModeType_ = tentType;
 }
+
+int SensorFoldStateManager::GetTentMode()
+{
+    return tentModeType_;
+}
 } // namespace OHOS::Rosen

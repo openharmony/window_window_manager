@@ -198,6 +198,15 @@ bool FoldScreenController::GetCameraMode()
     return sensorFoldStateManager_->IsCameraMode();
 }
 
+int FoldScreenController::GetCurrentTentMode()
+{
+    if (sensorFoldStateManager_ == nullptr) {
+        TLOGW(WmsLogTag::DMS, "GetCurrentTentMode: sensorFoldStateManager_ is null");
+        return 0;
+    }
+    return sensorFoldStateManager_->GetTentMode();
+}
+
 void FoldScreenController::OnTentModeChanged(int tentType, int32_t hall)
 {
     if (sensorFoldStateManager_ == nullptr) {
