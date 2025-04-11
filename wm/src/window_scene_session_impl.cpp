@@ -906,7 +906,7 @@ void WindowSceneSessionImpl::ResetSuperFoldDisplayY(const std::shared_ptr<MMI::P
         pointerEvent->AddPointerItem(pointerItem);
         pointerEvent->SetTargetDisplayId(DISPLAY_ID_C);
         TLOGD(WmsLogTag::WMS_EVENT, "Calculated superFoldOffsetY: %{public}d, displayId: %{public}d",
-            superFoldOffsetY_, pointerEvent->GetTargetDisplayId(DISPLAY_ID_C));
+            superFoldOffsetY_, pointerEvent->GetTargetDisplayId());
     }
 }
 
