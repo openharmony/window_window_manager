@@ -305,7 +305,7 @@ public:
         return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
     }
 
-    virtual uint32_t GetDeviceStatus()
+    virtual uint32_t GetDeviceStatus() const
     {
         return 0;
     }

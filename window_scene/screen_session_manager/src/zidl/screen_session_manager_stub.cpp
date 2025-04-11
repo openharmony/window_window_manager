@@ -1136,7 +1136,10 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             break;
         }
         case DisplayManagerMessage::TRANS_ID_GET_DEVICE_STATUS: {
-            reply.WriteInt32(GetDeviceStatus());
+            if (!reply.WriteInt32(GetDeviceStatus())) {
+                TLOGE(WmsLogTag::DMS, "Write device status failed");
+                return ERR_INVALID_DATA;
+            }
             break;
         }
         default:

@@ -38,7 +38,7 @@ public:
     virtual bool IsCameraMode();
     void ClearState(sptr<FoldScreenPolicy> foldScreenPolicy);
     bool IsTentMode();
-    int GetTentMode();
+    int GetTentMode() const;
 
 protected:
     void HandleSensorChange(FoldStatus nextState, float angle, sptr<FoldScreenPolicy> foldScreenPolicy);
