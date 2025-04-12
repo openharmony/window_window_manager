@@ -4108,7 +4108,7 @@ bool ScreenSessionManagerProxy::GetIsRealScreen(ScreenId screenId)
     return reply.ReadBool();
 }
 
-uint32_t ScreenSessionManagerProxy::GetDeviceStatus()
+uint32_t ScreenSessionManagerProxy::GetDeviceStatus() const
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
