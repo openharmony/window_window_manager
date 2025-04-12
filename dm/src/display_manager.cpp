@@ -2119,7 +2119,7 @@ std::string DisplayManager::Impl::GetDisplayInfoSrting(sptr<DisplayInfo> display
     return oss.str();
 }
 
-uint32_t DisplayManager::Impl::GetDeviceStatus()
+uint32_t DisplayManager::Impl::GetDeviceStatus() const
 {
     return SingletonContainer::Get<DisplayManagerAdapter>().GetDeviceStatus();
 }
@@ -2492,7 +2492,7 @@ sptr<CutoutInfo> DisplayManager::Impl::GetCutoutInfoWithRotation(Rotation rotati
     return SingletonContainer::Get<DisplayManagerAdapter>().GetCutoutInfoWithRotation(displayId, rotationNum);
 }
 
-uint32_t DisplayManager::GetDeviceStatus()
+uint32_t DisplayManager::GetDeviceStatus() const
 {
     return pImpl_->GetDeviceStatus();
 }
