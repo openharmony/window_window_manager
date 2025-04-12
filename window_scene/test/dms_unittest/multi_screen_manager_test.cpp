@@ -66,7 +66,7 @@ public:
         ScreenId extendRSId) override { return true; };
     void SetScreenCombination(ScreenId mainScreenId, ScreenId extendScreenId,
         ScreenCombination extendCombination) override {};
-    std::string OnDumperClientScreenSessions() override { return "" };
+    std::string OnDumperClientScreenSessions() override { return ""; };
     sptr<IRemoteObject> AsObject() override {return testPtr;};
     sptr<IRemoteObject> testPtr;
 };
