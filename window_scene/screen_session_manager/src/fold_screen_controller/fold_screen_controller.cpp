@@ -180,7 +180,7 @@ FoldDisplayMode FoldScreenController::GetModeMatchStatus()
     return foldScreenPolicy_->GetModeMatchStatus();
 }
 
-bool FoldScreenController::GetTentMode()
+bool FoldScreenController::GetTentMode() const
 {
     if (sensorFoldStateManager_ == nullptr) {
         TLOGW(WmsLogTag::DMS, "GetTentMode: sensorFoldStateManager_ is null");
