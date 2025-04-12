@@ -970,7 +970,7 @@ sptr<DisplayInfo> DisplayManagerAdapter::GetPrimaryDisplayInfo()
     }
 }
 
-uint32_t DisplayManagerAdapter::GetDeviceStatus()
+uint32_t DisplayManagerAdapter::GetDeviceStatus() const
 {
     INIT_PROXY_CHECK_RETURN(0);
     return displayManagerServiceProxy_->GetDeviceStatus();
