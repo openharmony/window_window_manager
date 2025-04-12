@@ -744,7 +744,7 @@ WSError SceneSessionManager::SwitchFreeMultiWindow(bool enable)
         if (sceneSession == nullptr) {
             continue;
         }
-        sceneSession->SwitchFreeMultiWindow(enable);
+        sceneSession->SwitchFreeMultiWindow(systemConfig_);
     }
     WindowStyleType type = enable ?
             WindowStyleType::WINDOW_STYLE_FREE_MULTI_WINDOW : WindowStyleType::WINDOW_STYLE_DEFAULT;
