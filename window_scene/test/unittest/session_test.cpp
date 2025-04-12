@@ -1520,11 +1520,14 @@ HWTEST_F(WindowSessionTest, SwitchFreeMultiWindow, TestSize.Level1)
 
     session_->sessionInfo_.isSystem_ = false;
     session_->state_ = SessionState::STATE_FOREGROUND;
-    auto ret = session_->SwitchFreeMultiWindow(true);
+    SystemSessionConfig sessionConfig;
+    sessionConfig.freeMultiWindowEnable_ = true;
+    sessionConfig.defaultWindowMode_ = WindowMode::WINDOW_MODE_FLOATING;
+    auto ret = session_->SwitchFreeMultiWindow(sessionConfig);
     ASSERT_NE(ret, WSError::WS_ERROR_INVALID_SESSION);
 
     session_->sessionInfo_.isSystem_ = true;
-    ret = session_->SwitchFreeMultiWindow(true);
+    ret = session_->SwitchFreeMultiWindow(sessionConfig);
     ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_SESSION);
 }
 
