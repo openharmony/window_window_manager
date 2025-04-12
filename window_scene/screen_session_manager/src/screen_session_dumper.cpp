@@ -155,6 +155,7 @@ void ScreenSessionDumper::ExecuteDumpCmd()
     } else if (params_[0] == ARG_DUMP_ALL) {
         ShowAllScreenInfo();
         ShowVisibleAreaDisplayInfo();
+        ShowClientScreenInfo();
     } else if (params_[0] == ARG_DUMP_FOLD_STATUS) {
         DumpFoldStatus();
     }
@@ -306,6 +307,12 @@ void ScreenSessionDumper::ShowAllScreenInfo()
     }
 }
 
+void ScreenSessionDumper::ShowClientScreenInfo()
+{
+    std::string clientInfos = ScreenSessionManager::GetInstance().DumperClientScreenSessions();
+    dumpInfo_.append(clientInfos);
+}
+
 void ScreenSessionDumper::ShowVisibleAreaDisplayInfo()
 {
     std::vector<DisplayId> displayIds = ScreenSessionManager::GetInstance().GetAllDisplayIds();
@@ -373,14 +380,8 @@ void ScreenSessionDumper::DumpTentMode()
 {
     std::ostringstream oss;
     bool isTentMode = ScreenSessionManager::GetInstance().GetTentMode();
-    std::string status = "";
-    if (isTentMode) {
-        status = "TRUE";
-    } else {
-        status = "FALSE";
-    }
     oss << std::left << std::setw(LINE_WIDTH) << "TentMode: "
-        << status << std::endl;
+        << (isTentMode ? "true" : "false") << std::endl;
     dumpInfo_.append(oss.str());
 }
 
@@ -414,8 +415,20 @@ void ScreenSessionDumper::DumpScreenSessionById(ScreenId id)
     }
     oss << std::left << std::setw(LINE_WIDTH) << "Name: "
         << screenSession->GetName() << std::endl;
+    oss << std::left << std::setw(LINE_WIDTH) << "DisplayId: "
+        << screenSession->GetDisplayId() << std::endl;
     oss << std::left << std::setw(LINE_WIDTH) << "RSScreenId: "
         << screenSession->GetRSScreenId() << std::endl;
+    oss << std::left << std::setw(LINE_WIDTH) << "isInternal: "
+        <<(screenSession->GetIsInternal() ? "true" : "false") << std::endl;
+    oss << std::left << std::setw(LINE_WIDTH) << "isExtend: "
+        << (screenSession->GetIsExtend() ? "true" : "false") << std::endl;
+    if (screenSession->GetDisplayNode()) {
+        oss << std::left << std::setw(LINE_WIDTH) << "NodeId: "
+            << screenSession->GetDisplayNode()->GetId() << std::endl;
+    } else {
+        oss << std::left << std::setw(LINE_WIDTH) << "NodeId: " << "nullptr" << std::endl;
+    }
     sptr<SupportedScreenModes> activeModes = screenSession->GetActiveScreenMode();
     if (activeModes != nullptr) {
         oss << std::left << std::setw(LINE_WIDTH) << "activeModes<id, W, H, RS>: "
@@ -1000,7 +1013,6 @@ void ScreenSessionDumper::SetLandscapeLock(std::string input)
 #endif
 }
 
-
 #ifdef FOLD_ABILITY_ENABLE
 bool ScreenSessionDumper::IsAllCharDigit(const std::string &firstPostureStr)
 {
@@ -1097,7 +1109,7 @@ void ScreenSessionDumper::TriggerSecondarySensor(const std::string &valueStr)
     SecondaryFoldSensorManager::GetInstance().HandleHallDataExt(&hallEvent);
     SecondaryFoldSensorManager::GetInstance().HandlePostureData(&postureEvent);
 }
- 
+
 void ScreenSessionDumper::TriggerSecondaryFoldStatus(const std::string &valueStr)
 {
     std::vector<std::string> strVec = WindowHelper::Split(valueStr, "=");

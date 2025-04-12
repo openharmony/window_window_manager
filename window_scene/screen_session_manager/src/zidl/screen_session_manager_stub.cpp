@@ -1135,6 +1135,10 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             SetVirtualDisplayMuteFlag(screenId, muteFlag);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_NOTIFY_EXTEND_SCREEN_CREATE_FINISH: {
+            NotifyExtendScreenCreateFinish();
+            break;
+        }
         default:
             WLOGFW("unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
