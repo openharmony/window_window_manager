@@ -190,7 +190,7 @@ void SensorFoldStateManager::SetTentMode(int tentType)
     tentModeType_ = tentType;
 }
 
-int SensorFoldStateManager::GetTentMode()
+int SensorFoldStateManager::GetTentMode() const
 {
     return tentModeType_;
 }
