@@ -349,7 +349,7 @@ public:
     DeviceScreenConfig GetDeviceScreenConfig() override;
     DMError SetVirtualScreenRefreshRate(ScreenId screenId, uint32_t refreshInterval) override;
     void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList,
-        std::vector<uint64_t> surfaceIdList = {}) override;
+        std::vector<uint64_t> surfaceIdList = {}, std::vector<uint8_t> typeBlackList = {}) override;
     void SetVirtualDisplayMuteFlag(ScreenId screenId, bool muteFlag) override;
     // notify scb virtual screen change
     void OnVirtualScreenChange(ScreenId screenId, ScreenEvent screenEvent);

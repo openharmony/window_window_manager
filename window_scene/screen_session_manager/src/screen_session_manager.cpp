@@ -7917,7 +7917,7 @@ void ScreenSessionManager::RegisterApplicationStateObserver()
 }
 
 void ScreenSessionManager::SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList,
-    std::vector<uint64_t> surfaceIdList)
+    std::vector<uint64_t> surfaceIdList, std::vector<uint8_t> typeBlackList)
 {
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::DMS, "permission denied!");
@@ -7932,6 +7932,7 @@ void ScreenSessionManager::SetVirtualScreenBlackList(ScreenId screenId, std::vec
     if (windowIdList.empty()) {
         TLOGI(WmsLogTag::DMS, "WindowIdList is empty");
         rsInterface_.SetVirtualScreenBlackList(rsScreenId, surfaceIdList);
+        rsInterface_.SetVirtualScreenTypeBlackList(rsScreenId, typeBlackList);
         return;
     }
     if (!clientProxy_) {
@@ -7956,6 +7957,7 @@ void ScreenSessionManager::SetVirtualScreenBlackList(ScreenId screenId, std::vec
     }
     TLOGW(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
     rsInterface_.SetVirtualScreenBlackList(rsScreenId, surfaceNodeIdsToRS);
+    rsInterface_.SetVirtualScreenTypeBlackList(rsScreenId, typeBlackList);
 }
 
 void ScreenSessionManager::SetVirtualDisplayMuteFlag(ScreenId screenId, bool muteFlag)
