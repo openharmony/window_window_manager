@@ -2339,9 +2339,10 @@ DMError DisplayManager::Impl::ResetAllFreezeStatus()
 }
 
 void DisplayManager::SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList,
-    std::vector<uint64_t> surfaceIdList)
+    std::vector<uint64_t> surfaceIdList, std::vector<uint8_t> typeBlackList)
 {
-    SingletonContainer::Get<DisplayManagerAdapter>().SetVirtualScreenBlackList(screenId, windowIdList, surfaceIdList);
+    SingletonContainer::Get<DisplayManagerAdapter>().SetVirtualScreenBlackList(screenId, windowIdList, surfaceIdList,
+        typeBlackList);
 }
 
 void DisplayManager::DisablePowerOffRenderControl(ScreenId screenId)
