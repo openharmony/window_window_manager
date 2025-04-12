@@ -9030,7 +9030,7 @@ void ScreenSessionManager::SetExtendScreenDpi()
     TLOGI(WmsLogTag::DMS, "get setting extend screen dpi is : %{public}f", g_extendScreenDpiCoef_);
 }
 
-uint32_t ScreenSessionManager::GetDeviceStatus() const
+uint32_t ScreenSessionManager::GetDeviceStatus()
 {
     if (foldScreenController_ == nullptr) {
         return 0;
