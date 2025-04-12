@@ -914,7 +914,7 @@ HWTEST_F(WindowSceneSessionImplTest, Recover01, TestSize.Level1)
 
 /**
  * @tc.name: Recover02
- * @tc.desc: Recover
+ * @tc.desc: Recover02
  * @tc.type: FUNC
  */
 HWTEST_F(WindowSceneSessionImplTest, Recover02, Function | SmallTest | Level2)
@@ -932,6 +932,8 @@ HWTEST_F(WindowSceneSessionImplTest, Recover02, Function | SmallTest | Level2)
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
 
     window->hostSession_ = session;
+    ASSERT_EQ(WMError::WM_ERROR_REPEAT_OPERATION, window->Recover());
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     ASSERT_EQ(WMError::WM_OK, window->Recover());
 }
 

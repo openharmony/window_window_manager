@@ -1508,7 +1508,7 @@ HWTEST_F(WindowSceneSessionImplTest5, IsDecorEnable1, Function | SmallTest | Lev
     EXPECT_EQ(false, ret);
     subWindowOption->SetSubWindowMaximizeSupported(true);
     ret = window->IsDecorEnable();
-    EXPECT_EQ(false, ret);
+    EXPECT_EQ(true, ret);
 }
 }
 } // namespace Rosen
