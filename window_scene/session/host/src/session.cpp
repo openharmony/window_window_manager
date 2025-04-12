@@ -3793,7 +3793,7 @@ WSError Session::SwitchFreeMultiWindow(const SystemSessionConfig config)
     bool enable = config.freeMultiWindowEnable_;
     systemConfig_.defaultWindowMode_ = config.defaultWindowMode_;
     systemConfig_.freeMultiWindowEnable_ = enable;
-    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "windowId:%{public}d enable: %{public}d defaultWindowMode:%{public}d",
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "windowId: %{public}d enable: %{public}d defaultWindowMode: %{public}d",
         GetPersistentId(), enable, systemConfig_.defaultWindowMode_);
     if (!IsSessionValid()) {
         TLOGW(WmsLogTag::WMS_LAYOUT_PC, "Session is invalid, id: %{public}d state: %{public}u",
