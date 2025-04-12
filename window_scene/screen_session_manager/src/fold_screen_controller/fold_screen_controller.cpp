@@ -180,7 +180,7 @@ FoldDisplayMode FoldScreenController::GetModeMatchStatus()
     return foldScreenPolicy_->GetModeMatchStatus();
 }
 
-bool FoldScreenController::GetTentMode() const
+bool FoldScreenController::GetTentMode()
 {
     if (sensorFoldStateManager_ == nullptr) {
         TLOGW(WmsLogTag::DMS, "GetTentMode: sensorFoldStateManager_ is null");
@@ -198,7 +198,7 @@ bool FoldScreenController::GetCameraMode()
     return sensorFoldStateManager_->IsCameraMode();
 }
 
-int FoldScreenController::GetCurrentTentMode()
+int FoldScreenController::GetCurrentTentMode() const
 {
     if (sensorFoldStateManager_ == nullptr) {
         TLOGW(WmsLogTag::DMS, "GetCurrentTentMode: sensorFoldStateManager_ is null");
