@@ -40,7 +40,14 @@ namespace {
 const std::string UNDEFINED = "undefined";
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowSessionTest4"};
 }
-
+namespace {
+std::string logMsg;
+void SessionTest4LogCallBack(
+    const LogType type, const LogLevel level, const unsigned int domain, const char *tag, const char *msg)
+{
+    logMsg = msg;
+}
+}
 class WindowSessionTest4 : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -1120,75 +1127,164 @@ HWTEST_F(WindowSessionTest4, SafelySetWant01, TestSize.Level1)
 }
 
 /**
- * @tc.name: ReportWindowTimeout
- * @tc.desc: ReportWindowTimeout Test
+ * @tc.name: IsNeedReportTimeout
+ * @tc.desc: Case of non-specific window
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest4, ReportWindowTimeout, TestSize.Level1)
+HWTEST_F(WindowSessionTest4, IsNeedReportTimeout_NonSpecific_Window, TestSize.Level1)
 {
     SessionInfo sessionInfo;
-    sessionInfo.abilityName_ = "ReportWindowTimeout";
-    sessionInfo.bundleName_ = "ReportWindowTimeout";
+    sessionInfo.abilityName_ = "IsNeedReportTimeout_NonSpecific_Window";
+    sessionInfo.bundleName_ = "IsNeedReportTimeout_NonSpecific_Window";
 
     sptr<Session> session = sptr<Session>::MakeSptr(sessionInfo);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->isSystemCalling_ = true;
-    session->SetSessionProperty(property);
-
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     EXPECT_EQ(WindowType::APP_MAIN_WINDOW_BASE, property->GetWindowType());
-    session->ReportWindowTimeout(ATTACH_EVENT_NAME);
 
-    property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
-    EXPECT_EQ(WindowType::WINDOW_TYPE_FLOAT, property->GetWindowType());
-    session->windowAnimationDuration_ = 0;
-    session->ReportWindowTimeout(ATTACH_EVENT_NAME);
+    session->SetSessionProperty(property);
+    EXPECT_EQ(WindowType::APP_MAIN_WINDOW_BASE, session->GetWindowType());
+    EXPECT_EQ(false, session->IsNeedReportTimeout());
 
-    session->windowAnimationDuration_ = 1;
-    session->handler_ = nullptr;
-    session->ReportWindowTimeout(ATTACH_EVENT_NAME);
+    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    EXPECT_EQ(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, property->GetWindowType());
+
+    session->SetSessionProperty(property);
+    EXPECT_EQ(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, session->GetWindowType());
+    EXPECT_EQ(false, session->IsNeedReportTimeout());
 }
 
 /**
- * @tc.name: ReportWindowTimeout01
- * @tc.desc: ReportWindowTimeout01 Test
+ * @tc.name: IsNeedReportTimeout
+ * @tc.desc: Case of specific window
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest4, ReportWindowTimeout01, TestSize.Level1)
+HWTEST_F(WindowSessionTest4, IsNeedReportTimeout_specific_window, TestSize.Level1)
 {
     SessionInfo sessionInfo;
-    sessionInfo.abilityName_ = "ReportWindowTimeout01";
-    sessionInfo.bundleName_ = "ReportWindowTimeout01";
+    sessionInfo.abilityName_ = "IsNeedReportTimeout_specific_window";
+    sessionInfo.bundleName_ = "IsNeedReportTimeout_specific_window";
 
     sptr<Session> session = sptr<Session>::MakeSptr(sessionInfo);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->isSystemCalling_ = true;
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    EXPECT_EQ(WindowType::WINDOW_TYPE_APP_SUB_WINDOW, property->GetWindowType());
+
     session->SetSessionProperty(property);
+    EXPECT_EQ(WindowType::WINDOW_TYPE_APP_SUB_WINDOW, session->GetWindowType());
+    EXPECT_EQ(true, session->IsNeedReportTimeout());
+}
 
-    property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
-    EXPECT_EQ(WindowType::WINDOW_TYPE_FLOAT, property->GetWindowType());
-    session->windowAnimationDuration_ = 1;
+/**
+ * @tc.name: ReportWindowTimeout
+ * @tc.desc: Test Case about non specific window
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, ReportWindowTimeout_NonSpecificWindow, TestSize.Level1)
+{
+    LOG_SetCallback(SessionTest4LogCallBack);
+    logMsg.clear();
+    SessionInfo sessionInfo;
+    sessionInfo.abilityName_ = "ReportWindowTimeout_NonSpecificWindow";
+    sessionInfo.bundleName_ = "ReportWindowTimeout_NonSpecificWindow";
+
+    sptr<Session> session = sptr<Session>::MakeSptr(sessionInfo);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->isSystemCalling_ = true;
+    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    session->SetSessionProperty(property);
+    EXPECT_EQ(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, property->GetWindowType());
+    EXPECT_EQ(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, session->GetWindowType());
+    session->ReportWindowTimeout(ATTACH_EVENT_NAME);
+    EXPECT_EQ(false, session->IsNeedReportTimeout());
+}
+
+/**
+ * @tc.name: ReportWindowTimeout
+ * @tc.desc: Test Case about non specific window
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, ReportWindowTimeout_SpecificWindow, TestSize.Level1)
+{
+    LOG_SetCallback(SessionTest4LogCallBack);
+    logMsg.clear();
+    SessionInfo sessionInfo;
+    sessionInfo.abilityName_ = "ReportWindowTimeout_SpecificWindow";
+    sessionInfo.bundleName_ = "ReportWindowTimeout_SpecificWindow";
+
+    sptr<Session> session = sptr<Session>::MakeSptr(sessionInfo);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->isSystemCalling_ = true;
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    session->SetSessionProperty(property);
+    EXPECT_EQ(WindowType::WINDOW_TYPE_APP_SUB_WINDOW, property->GetWindowType());
+    EXPECT_EQ(WindowType::WINDOW_TYPE_APP_SUB_WINDOW, session->GetWindowType());
+    session->ReportWindowTimeout(ATTACH_EVENT_NAME);
+    EXPECT_TRUE(logMsg.find("not specific window") == std::string::npos);
+}
+
+/**
+ * @tc.name: ReportWindowTimeout
+ * @tc.desc: Test Case about handler is not nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, ReportWindowTimeout_Handler_NOT_NULL, TestSize.Level1)
+{
+    LOG_SetCallback(SessionTest4LogCallBack);
+    logMsg.clear();
+    SessionInfo sessionInfo;
+    sessionInfo.abilityName_ = "ReportWindowTimeout_Handler_NOT_NULL";
+    sessionInfo.bundleName_ = "ReportWindowTimeout_Handler_NOT_NULL";
+
+    sptr<Session> session = sptr<Session>::MakeSptr(sessionInfo);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->isSystemCalling_ = true;
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    session->SetSessionProperty(property);
+    EXPECT_EQ(WindowType::WINDOW_TYPE_APP_SUB_WINDOW, property->GetWindowType());
+    EXPECT_EQ(WindowType::WINDOW_TYPE_APP_SUB_WINDOW, session->GetWindowType());
     session->ReportWindowTimeout(ATTACH_EVENT_NAME);
 
-    session->SetAttachState(false);
+    sptr<SceneSessionManager> sceneSessionManager = sptr<SceneSessionManager>::MakeSptr();
+    session_->SetEventHandler(sceneSessionManager->taskScheduler_->GetEventHandler(),
+        sceneSessionManager->eventHandler_);
+    EXPECT_TRUE(logMsg.find("not specific window") == std::string::npos);
+    EXPECT_TRUE(logMsg.find("handler is null") == std::string::npos);
+}
+
+/**
+ * @tc.name: ReportWindowTimeout
+ * @tc.desc: Test Case about window animation duration
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, ReportWindowTimeout_WindowAnimationDuration, TestSize.Level1)
+{
+    LOG_SetCallback(SessionTest4LogCallBack);
+    logMsg.clear();
+    SessionInfo sessionInfo;
+    sessionInfo.abilityName_ = "ReportWindowTimeout_WindowAnimationDuration";
+    sessionInfo.bundleName_ = "ReportWindowTimeout_WindowAnimationDuration";
+
+    sptr<Session> session = sptr<Session>::MakeSptr(sessionInfo);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->isSystemCalling_ = true;
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    session->SetSessionProperty(property);
+    EXPECT_EQ(WindowType::WINDOW_TYPE_APP_SUB_WINDOW, property->GetWindowType());
+    EXPECT_EQ(WindowType::WINDOW_TYPE_APP_SUB_WINDOW, session->GetWindowType());
     session->ReportWindowTimeout(ATTACH_EVENT_NAME);
-    bool isAttach = session->GetAttachState();
-    EXPECT_EQ(false, isAttach);
+    sptr<SceneSessionManager> sceneSessionManager = sptr<SceneSessionManager>::MakeSptr();
+    session_->SetEventHandler(sceneSessionManager->taskScheduler_->GetEventHandler(),
+        sceneSessionManager->eventHandler_);
+    EXPECT_TRUE(logMsg.find("handler is null") == std::string::npos);
 
-    session->SetAttachState(false);
-    session->ReportWindowTimeout(DETACH_EVENT_NAME);
-    isAttach = session->GetAttachState();
-    EXPECT_EQ(false, isAttach);
+    session->SetWindowAnimationDuration(true);
+    EXPECT_EQ(true, session->IsNeedReportTimeout());
 
-    session->SetAttachState(true);
-    session->ReportWindowTimeout(ATTACH_EVENT_NAME);
-    isAttach = session->GetAttachState();
-    EXPECT_EQ(true, isAttach);
-
-    session->SetAttachState(true);
-    session->ReportWindowTimeout(DETACH_EVENT_NAME);
-    isAttach = session->GetAttachState();
-    EXPECT_EQ(true, isAttach);
+    session->SetWindowAnimationDuration(false);
+    EXPECT_TRUE(logMsg.find("window configured animation") == std::string::npos);
 }
 }
 } // namespace Rosen
