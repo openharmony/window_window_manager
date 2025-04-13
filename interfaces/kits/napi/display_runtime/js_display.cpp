@@ -26,7 +26,6 @@
 #include "window_manager_hilog.h"
 #include "display_manager.h"
 #include "singleton_container.h"
-#include "js_display_listener.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -145,8 +144,6 @@ const std::map<ScreenHDRFormat, HDRFormat> NATIVE_TO_JS_HDR_FORMAT_TYPE_MAP {
 }
 
 static thread_local std::map<DisplayId, std::shared_ptr<NativeReference>> g_JsDisplayMap;
-std::map<std::string, std::map<std::unique_ptr<NativeReference>, sptr<JsDisplayListener>>> jsCbMap_;
-std::mutex mtx_;
 std::recursive_mutex g_mutex;
 
 JsDisplay::JsDisplay(const sptr<Display>& display) : display_(display)
@@ -220,10 +217,10 @@ bool NapiIsCallable(napi_env env, napi_value value)
     return result;
 }
 
-bool IfCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
+bool JsDisplay::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
 {
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
-        WLOGI("IfCallbackRegistered methodName %{public}s not registered!", type.c_str());
+        WLOGI("IsCallbackRegistered methodName %{public}s not registered!", type.c_str());
         return false;
     }
 
@@ -231,7 +228,7 @@ bool IfCallbackRegistered(napi_env env, const std::string& type, napi_value jsLi
         bool isEquals = false;
         napi_strict_equals(env, jsListenerObject, iter.first->GetNapiValue(), &isEquals);
         if (isEquals) {
-            WLOGFE("IfCallbackRegistered callback already registered!");
+            WLOGFE("IsCallbackRegistered callback already registered!");
             return true;
         }
     }
@@ -283,7 +280,7 @@ napi_value JsDisplay::OnRegisterDisplayManagerCallback(napi_env env, napi_callba
 
 DMError JsDisplay::RegisterDisplayListenerWithType(napi_env env, const std::string& type, napi_value value)
 {
-    if (IfCallbackRegistered(env, type, value)) {
+    if (IsCallbackRegistered(env, type, value)) {
         WLOGFI("RegisterDisplayListenerWithType callback already registered!");
         return DMError::DM_OK;
     }
