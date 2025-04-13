@@ -322,16 +322,15 @@ HWTEST_F(WindowSessionImplLayoutTest, NotifyTransformChange_TestUIContent, TestS
     window->property_->SetPersistentId(2025);
 
     Transform testTransform;
-    window->SetIsNeedNotifyTransform(true);
+    window->uiContent_ = nullptr;
+    window->SetNeedRenotifyTransform(true);
     window->NotifyTransformChange(testTransform);
-    ASSERT_EQ(false, window->GetIsNeedNotifyTransform());
+    ASSERT_EQ(true, window->IsNeedRenotifyTransform());
 
-    std::string url = "";
-    window->SetUIContentInner(
-        url, nullptr, nullptr, WindowSetUIContentType::DEFAULT, BackupAndRestoreType::NONE, nullptr);
-    window->SetIsNeedNotifyTransform(true);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    window->SetNeedRenotifyTransform(true);
     window->NotifyTransformChange(testTransform);
-    ASSERT_EQ(false, window->GetIsNeedNotifyTransform());
+    ASSERT_EQ(false, window->IsNeedRenotifyTransform());
     GTEST_LOG_(INFO) << "WindowSessionImplLayoutTest: NotifyTransformChange_TestUIContent end";
 }
 
@@ -348,16 +347,13 @@ HWTEST_F(WindowSessionImplLayoutTest, NotifyAfterUIContentReady, TestSize.Level1
     option->SetIsUIExtFirstSubWindow(true);
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     window->property_->SetPersistentId(2025);
-    std::string url = "";
-    window->SetUIContentInner(
-        url, nullptr, nullptr, WindowSetUIContentType::DEFAULT, BackupAndRestoreType::NONE, nullptr);
-    window->SetIsNeedNotifyTransform(false);
-    Transform testTransform;
-    window->NotifyTransformChange(testTransform);
-    ASSERT_EQ(false, window->GetIsNeedNotifyTransform());
-    window->SetIsNeedNotifyTransform(false);
-    window->NotifyTransformChange(testTransform);
-    ASSERT_EQ(false, window->GetIsNeedNotifyTransform());
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    window->SetNeedRenotifyTransform(false);
+    window->NotifyAfterUIContentReady();
+    ASSERT_EQ(false, window->IsNeedRenotifyTransform());
+    window->SetNeedRenotifyTransform(false);
+    window->NotifyAfterUIContentReady();
+    ASSERT_EQ(false, window->IsNeedRenotifyTransform());
     GTEST_LOG_(INFO) << "WindowSessionImplLayoutTest: NotifyAfterUIContentReady end";
 }
 }

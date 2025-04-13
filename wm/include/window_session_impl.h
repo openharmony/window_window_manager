@@ -587,8 +587,8 @@ protected:
     void SetCurrentTransform(const Transform& transform) { currentTransform_ = transform; }
     const Transform& GetCurrentTransform() const { return currentTransform_; }
     void NotifyAfterUIContentReady();
-    void SetIsNeedNotifyTransform(bool isNeedRenotify) { isNeedRenotifyTransform_.store(isNeedRenotify); }
-    bool GetIsNeedNotifyTransform() const { return isNeedRenotifyTransform_.load(); }
+    void SetNeedRenotifyTransform(bool isNeedRenotify) { needRenotifyTransform_.store(isNeedRenotify); }
+    bool IsNeedRenotifyTransform() const { return needRenotifyTransform_.load(); }
     mutable std::recursive_mutex transformMutex_;
     std::atomic<CrossAxisState> crossAxisState_ = CrossAxisState::STATE_INVALID;
     bool IsValidCrossState(int32_t state) const;
@@ -821,7 +821,7 @@ private:
     Transform layoutTransform_;
     SingleHandTransform singleHandTransform_;
     Transform currentTransform_;
-    std::atomic_bool isNeedRenotifyTransform_ = false;
+    std::atomic_bool needRenotifyTransform_ = false;
     KeyFramePolicy keyFramePolicy_;
 
     /*
