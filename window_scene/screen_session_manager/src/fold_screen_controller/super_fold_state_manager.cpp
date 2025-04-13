@@ -239,8 +239,22 @@ void SuperFoldStateManager::ReportNotifySuperFoldStatusChange(int32_t currentSta
     }
 }
 
+void SuperFoldStateManager::HandleScreenConnectChange()
+{
+    std::unique_lock<std::mutex> lock(superStatusMutex_);
+    SuperFoldStatus curFoldState = curState_.load();
+    lock.unlock();
+    if (curFoldState == SuperFoldStatus::KEYBOARD) {
+        HandleSuperFoldStatusChange(SuperFoldStatusChangeEvents::KEYBOARD_OFF);
+        HandleSuperFoldStatusChange(SuperFoldStatusChangeEvents::ANGLE_CHANGE_EXPANDED);
+    } else {
+        HandleSuperFoldStatusChange(SuperFoldStatusChangeEvents::ANGLE_CHANGE_EXPANDED);
+    }
+}
+
 void SuperFoldStateManager::HandleSuperFoldStatusChange(SuperFoldStatusChangeEvents event)
 {
+    std::unique_lock<std::mutex> lock(superStatusMutex_);
     SuperFoldStatus curState = curState_.load();
     SuperFoldStatus nextState = SuperFoldStatus::UNKNOWN;
     bool isTransfer = false;
@@ -257,9 +271,10 @@ void SuperFoldStateManager::HandleSuperFoldStatusChange(SuperFoldStatusChangeEve
     TLOGD(WmsLogTag::DMS, "curAngle: %{public}f", curAngle);
     if (isTransfer && action) {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:HandleSuperFoldStatusChange");
-        ReportNotifySuperFoldStatusChange(static_cast<int32_t>(curState), static_cast<int32_t>(nextState), curAngle);
         action(event);
         TransferState(nextState);
+        lock.unlock();
+        ReportNotifySuperFoldStatusChange(static_cast<int32_t>(curState), static_cast<int32_t>(nextState), curAngle);
         HandleDisplayNotify(event);
         // notify
         auto screenSession = ScreenSessionManager::GetInstance().GetDefaultScreenSession();
