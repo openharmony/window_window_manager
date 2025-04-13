@@ -664,6 +664,8 @@ public:
     /*
      * Window Pattern
      */
+    void SetDelayRemoveSnapshot(bool delayRemoveSnapshot);
+    bool GetDelayRemoveSnapshot() const;
     void InitSnapshotCache();
     void VisitSnapshotFromCache(int32_t persistentId);
     void PutSnapshotToCache(int32_t persistentId);
@@ -1394,6 +1396,7 @@ private:
     /*
      * Window Pattern
      */
+    std::atomic<bool> delayRemoveSnapshot_ = false;
     void InitStartingWindowRdb(const std::string& rdbPath);
     bool GetStartingWindowInfoFromCache(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo);
     bool GetStartingWindowInfoFromRdb(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo);

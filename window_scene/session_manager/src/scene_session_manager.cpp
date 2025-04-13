@@ -13238,7 +13238,19 @@ WMError SceneSessionManager::UpdateAppHookDisplayInfo(int32_t uid, const HookInf
 
 void DisplayChangeListener::OnScreenFoldStatusChanged(const std::vector<std::string>& screenFoldInfo)
 {
+    SceneSessionManager::GetInstance().SetDelayRemoveSnapshot(true);
     SceneSessionManager::GetInstance().ReportScreenFoldStatusChange(screenFoldInfo);
+}
+
+void SceneSessionManager::SetDelayRemoveSnapshot(bool delayRemoveSnapshot)
+{
+    TLOGD(WmsLogTag::WMS_PATTERN, "delayRemoveSnapshot %{public}d", delayRemoveSnapshot);
+    delayRemoveSnapshot_ = delayRemoveSnapshot;
+}
+
+bool SceneSessionManager::GetDelayRemoveSnapshot() const
+{
+    return delayRemoveSnapshot_;
 }
 
 WMError SceneSessionManager::ReportScreenFoldStatusChange(const std::vector<std::string>& screenFoldInfo)
