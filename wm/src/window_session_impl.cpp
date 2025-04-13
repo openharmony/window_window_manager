@@ -1058,12 +1058,12 @@ void WindowSessionImpl::NotifyAfterUIContentReady()
 {
     auto uiContent = GetUIContentSharedPtr();
     CHECK_UI_CONTENT_RETURN_IF_NULL(uiContent);
-    if (GetIsNeedNotifyTransform()) {
+    if (IsNeedRenotifyTransform()) {
         auto transform = GetCurrentTransform();
         TLOGI(WmsLogTag::WMS_LAYOUT, "Renotify transform, id:%{public}d, scaleX:%{public}f, scaleY:%{public}f",
             GetPersistentId(), transform.scaleX_, transform.scaleY_);
         uiContent->UpdateTransform(transform);
-        SetIsNeedNotifyTransform(false);
+        SetNeedRenotifyTransform(false);
     }
 }
 
@@ -5515,9 +5515,9 @@ void WindowSessionImpl::NotifyTransformChange(const Transform& transform)
     if (auto uiContent = GetUIContentSharedPtr()) {
         uiContent->UpdateTransform(transform);
         SetLayoutTransform(transform);
-        SetIsNeedNotifyTransform(false);
+        SetNeedRenotifyTransform(false);
     } else {
-        SetIsNeedNotifyTransform(true);
+        SetNeedRenotifyTransform(true);
     }
 }
 
