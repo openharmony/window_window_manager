@@ -213,6 +213,26 @@ napi_value JsWindowSceneConfig::CreateFreeMultiWindowConfig(napi_env env, const 
     return objValue;
 }
 
+napi_value JsWindowSceneConfig::CreateWindowLimits(napi_env env, const WindowLimits& windowLimits)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "in");
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "Object is null!");
+        return NapiGetUndefined(env);
+    }
+    napi_set_named_property(env, objValue, "maxWidth", CreateJsValue(env,
+        windowLimits.maxWidth_));
+    napi_set_named_property(env, objValue, "maxHeight", CreateJsValue(env,
+        windowLimits.maxHeight_));
+    napi_set_named_property(env, objValue, "minWidth", CreateJsValue(env,
+        windowLimits.minWidth_));
+    napi_set_named_property(env, objValue, "minHeight", CreateJsValue(env,
+        windowLimits.minHeight_));
+    return objValue;
+}
+
 napi_value JsWindowSceneConfig::CreateSingleHandCompatibleConfig(napi_env env,
                                                                  const SingleHandCompatibleModeConfig& config)
 {
