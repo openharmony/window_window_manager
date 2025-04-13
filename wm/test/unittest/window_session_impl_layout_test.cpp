@@ -306,6 +306,60 @@ HWTEST_F(WindowSessionImplLayoutTest, NotifySingleHandTransformChange_TestUICont
     ASSERT_EQ(testTransform.posX, window->singleHandTransform_.posX);
     GTEST_LOG_(INFO) << "WindowSessionImplLayoutTest: NotifySingleHandTransformChange_TestUIContent end";
 }
+
+/**
+ * @tc.name: NotifyTransformChange_TestUIContent
+ * @tc.desc: NotifyTransformChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplLayoutTest, NotifyTransformChange_TestUIContent, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplLayoutTest: NotifyTransformChange_TestUIContent start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifyTransformChange_TestUIContent");
+    option->SetIsUIExtFirstSubWindow(true);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(2025);
+
+    Transform testTransform;
+    window->SetIsNeedNotifyTransform(true);
+    window->NotifyTransformChange(testTransform);
+    ASSERT_EQ(false, window->GetIsNeedNotifyTransform());
+
+    std::string url = "";
+    window->SetUIContentInner(
+        url, nullptr, nullptr, WindowSetUIContentType::DEFAULT, BackupAndRestoreType::NONE, nullptr);
+    window->SetIsNeedNotifyTransform(true);
+    window->NotifyTransformChange(testTransform);
+    ASSERT_EQ(false, window->GetIsNeedNotifyTransform());
+    GTEST_LOG_(INFO) << "WindowSessionImplLayoutTest: NotifyTransformChange_TestUIContent end";
+}
+
+/**
+ * @tc.name: NotifyAfterUIContentReady
+ * @tc.desc: NotifyAfterUIContentReady
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplLayoutTest, NotifyAfterUIContentReady, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplLayoutTest: NotifyAfterUIContentReady start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifyAfterUIContentReady");
+    option->SetIsUIExtFirstSubWindow(true);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(2025);
+    std::string url = "";
+    window->SetUIContentInner(
+        url, nullptr, nullptr, WindowSetUIContentType::DEFAULT, BackupAndRestoreType::NONE, nullptr);
+    window->SetIsNeedNotifyTransform(false);
+    Transform testTransform;
+    window->NotifyTransformChange(testTransform);
+    ASSERT_EQ(false, window->GetIsNeedNotifyTransform());
+    window->SetIsNeedNotifyTransform(false);
+    window->NotifyTransformChange(testTransform);
+    ASSERT_EQ(false, window->GetIsNeedNotifyTransform());
+    GTEST_LOG_(INFO) << "WindowSessionImplLayoutTest: NotifyAfterUIContentReady end";
+}
 }
 } // namespace Rosen
 } // namespace OHOS

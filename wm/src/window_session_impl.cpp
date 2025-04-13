@@ -217,6 +217,14 @@ bool WindowSessionImpl::isUIExtensionAbilityProcess_ = false;
         }                                                                      \
     } while (false)
 
+#define CHECK_UI_CONTENT_RETURN_IF_NULL(uiContent)                             \
+    do {                                                                       \
+        if ((uiContent) == nullptr) {                                          \
+            TLOGE(WmsLogTag::WMS_LIFE, "uiContent is null");                   \
+            return;                                                            \
+        }                                                                      \
+    } while (false)
+
 WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
 {
     WLOGFD("[WMSCom] Constructor");
@@ -1046,6 +1054,19 @@ void WindowSessionImpl::UpdateRectForResizeWithAnimation(const Rect& wmRect, con
     handler_->PostTask(task, "WMS_WindowSessionImpl_UpdateRectForResizeWithAnimation");
 }
 
+void WindowSessionImpl::NotifyAfterUIContentReady()
+{
+    auto uiContent = GetUIContentSharedPtr();
+    CHECK_UI_CONTENT_RETURN_IF_NULL(uiContent);
+    if (GetIsNeedNotifyTransform()) {
+        auto transform = GetCurrentTransform();
+        TLOGI(WmsLogTag::WMS_LAYOUT, "Renotify transform, id:%{public}d, scaleX:%{public}f, scaleY:%{public}f",
+            GetPersistentId(), transform.scaleX_, transform.scaleY_);
+        uiContent->UpdateTransform(transform);
+        SetIsNeedNotifyTransform(false);
+    }
+}
+
 void WindowSessionImpl::NotifyRotationAnimationEnd()
 {
     auto task = [weak = wptr(this)] {
@@ -1756,7 +1777,7 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
             contentInfo.c_str(), static_cast<uint16_t>(aceRet));
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-
+    NotifyAfterUIContentReady();
     TLOGD(WmsLogTag::WMS_LIFE, "end");
     return WMError::WM_OK;
 }
@@ -5490,9 +5511,13 @@ WMError WindowSessionImpl::UnregisterOrientationChangeListener(
 void WindowSessionImpl::NotifyTransformChange(const Transform& transform)
 {
     WLOGFI("in");
+    SetCurrentTransform(transform);
     if (auto uiContent = GetUIContentSharedPtr()) {
         uiContent->UpdateTransform(transform);
         SetLayoutTransform(transform);
+        SetIsNeedNotifyTransform(false);
+    } else {
+        SetIsNeedNotifyTransform(true);
     }
 }
 
