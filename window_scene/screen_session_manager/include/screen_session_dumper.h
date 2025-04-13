@@ -46,6 +46,7 @@ public:
 private:
     void ShowHelpInfo();
     void ShowAllScreenInfo();
+    void ShowClientScreenInfo();
     void ShowVisibleAreaDisplayInfo();
     void DumpFoldStatus();
     void DumpTentMode();
