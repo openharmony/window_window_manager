@@ -1842,6 +1842,32 @@ WMError SceneSessionManager::CheckWindowId(int32_t windowId, int32_t& pid)
     return taskScheduler_->PostSyncTask(task, "CheckWindowId:" + std::to_string(windowId));
 }
 
+const WindowLimits& SceneSessionManager::GetWindowLimits(int32_t windowId)
+{
+    WindowLimits windowLimits;
+    if (!systemConfig_.IsPcWindow()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "not pc device, return.");
+        return windowLimits;
+    }
+    if (!SessionPermission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "permission denied!");
+        return windowLimits;
+    }
+    auto sceneSession = GetSceneSession(windowId);
+    if (!sceneSession) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "sceneSession(%{public}d) is nullptr", windowId);
+        return windowLimits;
+    }
+    auto sessionProperty = sceneSession->GetSessionProperty();
+    if (sessionProperty != nullptr) {
+        windowLimits = sessionProperty->GetWindowLimits();
+        TLOGI(WmsLogTag::WMS_LAYOUT_PC, "GetWindowLimits minWidth:%{public}u, minHeight:%{public}u, "
+            "maxWidth:%{public}u, maxHeight:%{public}u, vpRatio:%{public}f", windowLimits.minWidth_,
+            windowLimits.minHeight_, windowLimits.maxWidth_, windowLimits.maxHeight_, windowLimits.vpRatio_);
+    }
+    return windowLimits;
+}
+
 uint32_t SceneSessionManager::GetLockScreenZOrder()
 {
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
@@ -10563,6 +10589,12 @@ void SceneSessionManager::ProcessVirtualPixelRatioChange(DisplayId defaultDispla
                 sceneSession->GetSessionState() == SessionState::STATE_ACTIVE) {
                 sceneSession->UpdateDensity();
                 TLOGND(WmsLogTag::WMS_ATTRIBUTE, "UpdateDensity name=%{public}s, persistentId=%{public}d, "
+                    "winType=%{public}d, state=%{public}d, visible-%{public}d", sceneSession->GetWindowName().c_str(),
+                    sceneSession->GetPersistentId(), sceneSession->GetWindowType(),
+                    sceneSession->GetSessionState(), sceneSession->IsVisible());
+            } else if (sceneSession->GetSessionState() == SessionState::STATE_BACKGROUND && systemConfig_.IsPcWindow()) {
+                sceneSession->SaveLastDensity();
+                TLOGND(WmsLogTag::WMS_ATTRIBUTE, "SaveLastDensity name=%{public}s, persistentId=%{public}d, "
                     "winType=%{public}d, state=%{public}d, visible-%{public}d", sceneSession->GetWindowName().c_str(),
                     sceneSession->GetPersistentId(), sceneSession->GetWindowType(),
                     sceneSession->GetSessionState(), sceneSession->IsVisible());

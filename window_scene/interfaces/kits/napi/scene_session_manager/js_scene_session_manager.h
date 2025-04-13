@@ -128,6 +128,11 @@ public:
     static napi_value NotifyRotationChange(napi_env env, napi_callback_info info);
 
     /*
+     * PC Window
+     */
+    static napi_value GetWindowLimits(napi_env env, napi_callback_info info);
+
+    /*
      * Multi Instance
      */
     static napi_value GetMaxInstanceCount(napi_env env, napi_callback_info info);
@@ -220,7 +225,12 @@ private:
     napi_value OnCloneWindow(napi_env env, napi_callback_info info);
     napi_value OnRegisterSingleHandContainerNode(napi_env env, napi_callback_info info);
     napi_value OnNotifyRotationChange(napi_env env, napi_callback_info info);
-
+    
+    /*
+     * PC Window
+     */
+    napi_value OnGetWindowLimits(napi_env env, napi_callback_info info);
+    
     /*
      * Multi Instance
      */
