@@ -73,7 +73,7 @@ private:
     void SetSuperFoldStatusChange(std::string input);
     void MockSendCastPublishEvent(std::string input);
     bool IsValidDisplayModeCommand(std::string command);
-    int SetFoldDisplayMode();
+    int32_t SetFoldDisplayMode();
     int SetFoldStatusLocked();
     void SetHallAndPostureValue(std::string input);
     void SetHallAndPostureStatus(std::string input);
@@ -84,6 +84,7 @@ private:
         std::vector<float> &postures, std::vector<uint16_t> &halls);
     void TriggerSecondarySensor(const std::string &valueStr);
     void TriggerSecondaryFoldStatus(const std::string &valueStr);
+    bool IsDeveloperModeCommand();
 private:
     int fd_;
     std::vector<std::string> params_;
