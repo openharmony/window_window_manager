@@ -2200,6 +2200,28 @@ HWTEST_F(ScreenSessionTest, ScreenCaptureNotify, Function | SmallTest | Level2)
     std::string clientName = "test";
     session->ScreenCaptureNotify(screenId, uid, clientName);
 }
+
+/**
+ * @tc.name: UpdateDisplayNodeRotation
+ * @tc.desc: UpdateDisplayNodeRotation test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, UpdateDisplayNodeRotation, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: UpdateDisplayNodeRotation start";
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(screenSession, nullptr);
+    screenSession->UpdateDisplayNodeRotation(1);
+    ASSERT_EQ(screenSession->isExtended_, false);
+
+    Rosen::RSDisplayNodeConfig rsConfig;
+    rsConfig.isMirrored = true;
+    rsConfig.screenId = 101;
+    screenSession->CreateDisplayNode(rsConfig);
+    screenSession->UpdateDisplayNodeRotation(1);
+    ASSERT_EQ(screenSession->isExtended_, false);
+    GTEST_LOG_(INFO) << "ScreenSessionTest: UpdateDisplayNodeRotation end";
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
