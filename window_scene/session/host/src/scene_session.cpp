@@ -5356,7 +5356,7 @@ WMError SceneSession::HandleActionUpdateTurnScreenOn(const sptr<WindowSessionPro
 {
     SetTurnScreenOn(property->IsTurnScreenOn());
 #ifdef POWER_MANAGER_ENABLE
-    PostTask([weakThis = wptr(this), where = __func__] {
+    PostExportTask([weakThis = wptr(this), where = __func__] {
         auto sceneSession = weakThis.promote();
         if (!sceneSession) {
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s session is invalid", where);
