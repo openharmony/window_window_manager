@@ -26,7 +26,6 @@ namespace Rosen {
 sptr<SettingObserver> ScreenSettingHelper::dpiObserver_;
 sptr<SettingObserver> ScreenSettingHelper::castObserver_;
 sptr<SettingObserver> ScreenSettingHelper::rotationObserver_;
-sptr<SettingObserver> ScreenSettingHelper::screenSkipProtectedWindowObserver_;
 sptr<SettingObserver> ScreenSettingHelper::wireCastObserver_;
 sptr<SettingObserver> ScreenSettingHelper::extendScreenDpiObserver_;
 constexpr int32_t PARAM_NUM_TEN = 10;
@@ -44,7 +43,6 @@ constexpr uint32_t SCREEN_MAIN_IN_DATA = 0;
 constexpr uint32_t SCREEN_MIRROR_IN_DATA = 1;
 constexpr uint32_t SCREEN_EXTEND_IN_DATA = 2;
 const std::string SCREEN_SHAPE = system::GetParameter("const.window.screen_shape", "0:0");
-const std::string SCREEN_SHARE_PROTECT_TABLE = "USER_SETTINGSDATA_SECURE_";
 constexpr int32_t INDEX_EXTEND_SCREEN_DPI_POSITION = -1;
 
 void ScreenSettingHelper::RegisterSettingDpiObserver(SettingObserver::UpdateFunc func)
@@ -476,53 +474,6 @@ ScreenShape ScreenSettingHelper::GetScreenShape(ScreenId screenId)
     }
     TLOGI(WmsLogTag::DMS, "Can not find screen shape info. ccm:%{public}s", SCREEN_SHAPE.c_str());
     return ScreenShape::RECTANGLE;
-}
-
-void ScreenSettingHelper::RegisterSettingscreenSkipProtectedWindowObserver(SettingObserver::UpdateFunc func)
-{
-    if (screenSkipProtectedWindowObserver_ != nullptr) {
-        TLOGI(WmsLogTag::DMS, "setting rotation observer is registered");
-        return;
-    }
-    SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
-    screenSkipProtectedWindowObserver_ = settingProvider.CreateObserver(SETTING_SCREEN_SHARE_PROTECT_KEY, func);
-    if (screenSkipProtectedWindowObserver_ == nullptr) {
-        TLOGE(WmsLogTag::DMS, "create observer failed");
-    }
-    ErrCode ret = settingProvider.RegisterObserverByTable(screenSkipProtectedWindowObserver_,
-        SCREEN_SHARE_PROTECT_TABLE);
-    if (ret != ERR_OK) {
-        TLOGE(WmsLogTag::DMS, "failed, ret:%{public}d", ret);
-        screenSkipProtectedWindowObserver_ = nullptr;
-    }
-}
-
-void ScreenSettingHelper::UnregisterSettingscreenSkipProtectedWindowObserver()
-{
-    if (screenSkipProtectedWindowObserver_ == nullptr) {
-        TLOGI(WmsLogTag::DMS, "rotationObserver_ is nullptr");
-        return;
-    }
-    SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
-    ErrCode ret = settingProvider.UnregisterObserverByTable(screenSkipProtectedWindowObserver_,
-        SCREEN_SHARE_PROTECT_TABLE);
-    if (ret != ERR_OK) {
-        TLOGE(WmsLogTag::DMS, "failed, ret:%{public}d", ret);
-    }
-    screenSkipProtectedWindowObserver_ = nullptr;
-}
-
-bool ScreenSettingHelper::GetSettingscreenSkipProtectedWindow(bool& enable, const std::string& key)
-{
-    int32_t value = 0;
-    SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
-    ErrCode ret = settingProvider.GetIntValueMultiUserByTable(key, value, SCREEN_SHARE_PROTECT_TABLE);
-    if (ret != ERR_OK) {
-        TLOGE(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
-        return false;
-    }
-    enable = (value == 1);
-    return true;
 }
 
 void ScreenSettingHelper::RegisterSettingWireCastObserver(SettingObserver::UpdateFunc func)

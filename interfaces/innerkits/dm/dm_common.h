@@ -471,6 +471,12 @@ enum class ScreenCombination : uint32_t {
     SCREEN_MAIN,
 };
 
+enum class MultiScreenPowerSwitchType : uint32_t {
+    SCREEN_SWITCH_ON,
+    SCREEN_SWITCH_OFF,
+    SCREEN_SWITCH_EXTERNAL,
+};
+
 enum class MultiScreenMode : uint32_t {
     SCREEN_MIRROR = 0,
     SCREEN_EXTEND = 1,

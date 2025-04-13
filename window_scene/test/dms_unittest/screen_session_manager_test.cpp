@@ -5393,37 +5393,11 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenSkipProtectedWindow, TestSize.Level1
     if (screenId != VIRTUAL_SCREEN_ID) {
         ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
     }
-    const std::vector<ScreenId> screenIds = {screenId, 1002};
+    const std::vector<ScreenId> screenIds = {screenId, 1234};
     bool isEnable = true;
     ASSERT_EQ(ssm_->SetScreenSkipProtectedWindow(screenIds, isEnable), DMError::DM_OK);
     isEnable = false;
     ASSERT_EQ(ssm_->SetScreenSkipProtectedWindow(screenIds, isEnable), DMError::DM_OK);
-}
-
-/**
- * @tc.name: SetScreenSkipProtectedWindowInner
- * @tc.desc: SetScreenSkipProtectedWindowInner test
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerTest, SetScreenSkipProtectedWindowInner, TestSize.Level1)
-{
-    ASSERT_NE(ssm_, nullptr);
-    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
-    ASSERT_NE(displayManagerAgent, nullptr);
-    VirtualScreenOption virtualOption;
-    virtualOption.name_ = "createVirtualOption1";
-    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
-    if (screenId != VIRTUAL_SCREEN_ID) {
-        ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
-    }
-    virtualOption.name_ = "createVirtualOption2";
-    auto screenId2 = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
-    if (screenId2 != VIRTUAL_SCREEN_ID) {
-        ASSERT_TRUE(screenId2 != VIRTUAL_SCREEN_ID);
-    }
-    auto screenSession = ssm_->GetScreenSession(screenId);
-    screenSession->SetShareProtect(true);
-    ssm_->SetScreenSkipProtectedWindowInner();
 }
 
 /**

@@ -221,6 +221,7 @@ public:
     DMError SetScreenSkipProtectedWindow(const std::vector<ScreenId>& screenIds, bool isEnable) override;
     bool GetIsRealScreen(ScreenId screenId) override;
     uint32_t GetDeviceStatus() override;
+    void NotifyExtendScreenCreateFinish() override;
 
 private:
     static inline BrokerDelegator<ScreenSessionManagerProxy> delegator_;
