@@ -253,6 +253,7 @@ public:
     bool GetIsExtend() const;
     void EnableMirrorScreenRegion();
     void SecondaryReflexionChange(ScreenId screenId, bool isSecondaryReflexion);
+    void UpdateDisplayNodeRotation(int rotation);
 
 private:
     ScreenProperty property_;

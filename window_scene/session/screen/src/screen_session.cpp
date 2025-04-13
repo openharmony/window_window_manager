@@ -769,6 +769,22 @@ void ScreenSession::UpdatePropertyAfterRotation(RRect bounds, int rotation, Fold
     ReportNotifyModeChange(displayOrientation);
 }
 
+void ScreenSession::UpdateDisplayNodeRotation(int rotation)
+{
+    Rotation targetRotation = ConvertIntToRotation(rotation);
+    auto transactionProxy = RSTransactionProxy::GetInstance();
+    if (transactionProxy != nullptr) {
+        transactionProxy->Begin();
+        {
+            std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
+            if (displayNode_ != nullptr) {
+                displayNode_->SetScreenRotation(static_cast<uint32_t>(targetRotation));
+            }
+        }
+        transactionProxy->Commit();
+    }
+}
+
 void ScreenSession::UpdatePropertyOnly(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode)
 {
     OptimizeSecondaryDisplayMode(bounds, foldDisplayMode);
