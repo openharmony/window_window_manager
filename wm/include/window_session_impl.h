@@ -584,6 +584,11 @@ protected:
     sptr<FutureCallback> getRotationResultFuture_ = nullptr;
     void UpdateVirtualPixelRatio(const sptr<Display>& display);
     WMError GetVirtualPixelRatio(float& vpr);
+    void SetCurrentTransform(const Transform& transform) { currentTransform_ = transform; }
+    const Transform& GetCurrentTransform() const { return currentTransform_; }
+    void NotifyAfterUIContentReady();
+    void SetIsNeedNotifyTransform(bool isNeedRenotify) { isNeedRenotifyTransform_.store(isNeedRenotify); }
+    bool GetIsNeedNotifyTransform() const { return isNeedRenotifyTransform_.load(); }
     mutable std::recursive_mutex transformMutex_;
     std::atomic<CrossAxisState> crossAxisState_ = CrossAxisState::STATE_INVALID;
     bool IsValidCrossState(int32_t state) const;
@@ -815,6 +820,8 @@ private:
     int16_t rotationAnimationCount_ { 0 };
     Transform layoutTransform_;
     SingleHandTransform singleHandTransform_;
+    Transform currentTransform_;
+    std::atomic_bool isNeedRenotifyTransform_ = false;
     KeyFramePolicy keyFramePolicy_;
 
     /*
