@@ -1492,8 +1492,10 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
         hideSplitButton, hideMaximizeButton, hideMinimizeButton, hideCloseButton);
     bool isSuperFoldDisplayDevice = FoldScreenStateInternel::IsSuperFoldDisplayDevice();
     if (property_->GetCompatibleModeInPc() && !property_->GetIsAtomicService()) {
-        uiContent->HideWindowTitleButton(true, true, hideMinimizeButton, hideCloseButton);
-        uiContent->OnContainerModalEvent("scb_back_visibility", "true");
+        bool isLayoutFullScreen = property_->IsLayoutFullScreen();
+        TLOGI(WmsLogTag::WMS_COMPAT, "compatible isLayoutFullScreen %{public}d", isLayoutFullScreen);
+        uiContent->HideWindowTitleButton(true, !isLayoutFullScreen, hideMinimizeButton, hideCloseButton);
+        uiContent->OnContainerModalEvent("scb_back_visibility", isLayoutFullScreen ? "false" : "true");
     } else {
         uiContent->HideWindowTitleButton(hideSplitButton, hideMaximizeButton, hideMinimizeButton, hideCloseButton);
         uiContent->OnContainerModalEvent("scb_back_visibility", "false");
@@ -2265,6 +2267,10 @@ void WindowSessionImpl::SetRequestedOrientation(Orientation orientation, bool ne
     bool isUserOrientation = IsUserOrientation(orientation);
     if (property_->GetRequestedOrientation() == orientation && !isUserOrientation) {
         return;
+    }
+    if (property_->GetCompatibleModeInPc() && IsHorizontalOrientation(orientation)) {
+        TLOGI(WmsLogTag::WMS_COMPAT, "compatible request horizontal orientation %{public}u", orientation);
+        property_->SetIsLayoutFullScreen(true);
     }
     property_->SetRequestedOrientation(orientation, needAnimation);
     UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_ORIENTATION);
@@ -5593,6 +5599,19 @@ bool WindowSessionImpl::IsVerticalOrientation(Orientation orientation) const
         orientation == Orientation::AUTO_ROTATION_PORTRAIT_RESTRICTED ||
         orientation == Orientation::USER_ROTATION_PORTRAIT ||
         orientation == Orientation::USER_ROTATION_PORTRAIT_INVERTED) {
+        return true;
+    }
+    return false;
+}
+
+bool WindowSessionImpl::IsHorizontalOrientation(Orientation orientation) const
+{
+    if (orientation == Orientation::HORIZONTAL ||
+        orientation == Orientation::REVERSE_HORIZONTAL ||
+        orientation == Orientation::SENSOR_HORIZONTAL ||
+        orientation == Orientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED ||
+        orientation == Orientation::USER_ROTATION_LANDSCAPE ||
+        orientation == Orientation::USER_ROTATION_LANDSCAPE_INVERTED) {
         return true;
     }
     return false;

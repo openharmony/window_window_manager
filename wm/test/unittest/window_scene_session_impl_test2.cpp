@@ -946,6 +946,26 @@ HWTEST_F(WindowSceneSessionImplTest2, GetConfigurationFromAbilityInfo02, TestSiz
 }
 
 /**
+ * @tc.name: GetConfigurationFromAbilityInfo03
+ * @tc.desc: GetConfigurationFromAbilityInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest2, GetConfigurationFromAbilityInfo03, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetConfigurationFromAbilityInfo03");
+    option->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    windowSceneSession->property_->SetCompatibleModeInPc(true);
+    windowSceneSession->GetConfigurationFromAbilityInfo();
+    auto supportType = windowSceneSession->property_->GetWindowModeSupportType();
+    bool isSupportFullScreen = WindowHelper::IsWindowModeSupported(supportType, WindowMode::WINDOW_MODE_FULLSCREEN);
+    bool isSupportFloating = WindowHelper::IsWindowModeSupported(supportType, WindowMode::WINDOW_MODE_FLOATING);
+    ASSERT_EQ(isSupportFullScreen, true);
+    ASSERT_EQ(isSupportFloating, true);
+}
+
+/**
  * @tc.name: NotifyWindowSessionProperty01
  * @tc.desc: NotifyWindowSessionProperty
  * @tc.type: FUNC
