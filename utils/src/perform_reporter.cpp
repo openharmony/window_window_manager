@@ -362,7 +362,7 @@ int32_t WindowInfoReporter::ReportEventDispatchException(int32_t exceptionType, 
 }
 
 int32_t WindowInfoReporter::ReportKeyboardLifeCycleException(int32_t windowId, KeyboardLifeCycleException subType,
-    std::string& msg)
+    const std::string& msg)
 {
     std::string eventName = "KEYBOARD_LIFE_CYCLE_EXCEPTION";
     int32_t ret = HiSysEventWrite(

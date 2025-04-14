@@ -909,7 +909,7 @@ private:
     bool ShouldCreateDetectTask(bool isAttach, WindowMode windowMode) const;
     bool ShouldCreateDetectTaskInRecent(bool newShowRecent, bool oldShowRecent, bool isAttach) const;
     void CreateDetectStateTask(bool isAttach, WindowMode windowMode);
-    void ReportWindowTimeout(std::string eventName);   // only report for specific window
+    void PostSpecificSessionLifeCycleTimeoutTask(const std::string& eventName);   // only report for specific window
     bool IsNeedReportTimeout() const;
 
     /*

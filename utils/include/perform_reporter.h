@@ -22,6 +22,7 @@
 #include <vector>
 #include <map>
 #include <mutex>
+#include <sstream>
 #include "wm_single_instance.h"
 
 namespace OHOS {
@@ -64,6 +65,14 @@ struct WindowLifeCycleReportInfo {
     int32_t windowMode;
     int32_t windowFlag;
     std::string timeoutStage;
+
+    inline std::string ToString() const
+    {
+        std::stringstream ss;
+        ss << "[bundleName:" << bundleName << ", id:" << windowId << ", type:" << windowType << ", windowMode:" <<
+            windowMode << ", flag:" << windowFlag << "]";
+        return ss.str();
+    }
 };
 
 class PerformReporter {
@@ -113,7 +122,8 @@ public:
     int32_t ReportUIExtensionException(int32_t exceptionType, int32_t pid, int32_t persistentId,
         const std::string& uiextInfo);
     int32_t ReportEventDispatchException(int32_t exceptionType, int32_t pid, const std::string& flushInfo);
-    int32_t ReportKeyboardLifeCycleException(int32_t windowId, KeyboardLifeCycleException subType, std::string& msg);
+    int32_t ReportKeyboardLifeCycleException(int32_t windowId, KeyboardLifeCycleException subType,
+        const std::string& msg);
     int32_t ReportSpecWindowLifeCycleChange(WindowLifeCycleReportInfo reportInfo);
 
 private:

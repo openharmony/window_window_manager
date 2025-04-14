@@ -635,7 +635,7 @@ void KeyboardSession::OpenKeyboardSyncTransaction()
         if (transactionController) {
             transactionController->OpenSyncTransaction(session->GetEventHandler());
         }
-        session->ReportLifeCycleException();
+        session->PostKeyboardAnimationSyncTimeoutTask();
         return WSError::WS_OK;
     };
     PostSyncTask(task);
@@ -893,7 +893,7 @@ void KeyboardSession::SetSkipSelfWhenShowOnVirtualScreen(bool isSkip)
     }, __func__);
 }
 
-void KeyboardSession::ReportLifeCycleException()
+void KeyboardSession::PostKeyboardAnimationSyncTimeoutTask()
 {
     // anim_sync_exception
     int32_t const THRESHOLD = 1000;
@@ -915,7 +915,7 @@ void KeyboardSession::ReportLifeCycleException()
     };
     auto handler = GetEventHandler();
     if (!handler) {
-        TLOGNE(WmsLogTag::WMS_KEYBOARD, "handler is null");
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "handler is null");
         return;
     }
     handler->PostTask(task, KEYBOARD_ANIM_SYNC_EVENT_NAME, THRESHOLD);

@@ -1346,12 +1346,10 @@ WSError Session::Foreground(sptr<WindowSessionProperty> property, bool isFromCli
         SetActive(true);
     }
     isStarting_ = false;
-
     NotifyForeground();
 
     isTerminating_ = false;
-    isNeedSyncSessionRect_ = true;
-    ReportWindowTimeout(ATTACH_EVENT_NAME);
+    PostSpecificSessionLifeCycleTimeoutTask(ATTACH_EVENT_NAME);
     return WSError::WS_OK;
 }
 
@@ -1424,7 +1422,7 @@ WSError Session::Background(bool isFromClient, const std::string& identityToken)
     UpdateSessionState(SessionState::STATE_BACKGROUND);
     SetIsPendingToBackgroundState(false);
     NotifyBackground();
-    ReportWindowTimeout(DETACH_EVENT_NAME);
+    PostSpecificSessionLifeCycleTimeoutTask(DETACH_EVENT_NAME);
     return WSError::WS_OK;
 }
 
@@ -4174,7 +4172,7 @@ bool Session::IsNeedReportTimeout() const
         type != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT && type != WindowType::WINDOW_TYPE_PANEL);
 }
 
-void Session::ReportWindowTimeout(std::string eventName)
+void Session::PostSpecificSessionLifeCycleTimeoutTask(const std::string& eventName)
 {
     const int32_t THRESHOLD = 20;
     if (!IsNeedReportTimeout()) {
@@ -4192,17 +4190,16 @@ void Session::ReportWindowTimeout(std::string eventName)
     }
     handler_->RemoveTask(eventName == ATTACH_EVENT_NAME ?
         DETACH_EVENT_NAME : ATTACH_EVENT_NAME);
-    auto task = [weakThis = wptr(this), eventName]() {
+    auto task = [weakThis = wptr(this), eventName, where = __func__]() {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNI(WmsLogTag::DEFAULT, "session is null.");
+            TLOGNI(WmsLogTag::DEFAULT, "%{public}s, session is null.", where);
             return;
         }
         bool isAttach = session->GetAttachState();
         if ((isAttach && eventName == ATTACH_EVENT_NAME) ||
-            (!isAttach && eventName == DETACH_EVENT_NAME)
-        ) {
-            TLOGND(WmsLogTag::DEFAULT, "detached or attached in time");
+            (!isAttach && eventName == DETACH_EVENT_NAME)) {
+            TLOGND(WmsLogTag::DEFAULT, "%{public}s, detached or attached in time", where);
             return;
         }
         WindowLifeCycleReportInfo reportInfo {
@@ -4213,6 +4210,7 @@ void Session::ReportWindowTimeout(std::string eventName)
             static_cast<int32_t>(session->GetSessionProperty()->GetWindowFlags()),
             eventName
         };
+        TLOGNI(WmsLogTag::DEFAULT, "%{public}s report msg: %{public}s", where, reportInfo.ToString().c_str());
         WindowInfoReporter::GetInstance().ReportSpecWindowLifeCycleChange(reportInfo);
     };
     PostTask(task, eventName, THRESHOLD);
