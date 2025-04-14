@@ -373,6 +373,21 @@ HWTEST_F(SceneSessionTest6, GetSystemAvoidArea, Function | SmallTest | Level1)
     int32_t height = session->GetStatusBarHeight();
     EXPECT_EQ(height, avoidArea.topRect_.height_);
 }
+
+/**
+ * @tc.name: NotifyWindowAttachStateListenerRegistered
+ * @tc.desc: NotifyWindowAttachStateListenerRegistered about session
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, NotifyWindowAttachStateListenerRegistered_session, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->NotifyWindowAttachStateListenerRegistered(true);
+    EXPECT_EQ(sceneSession->needNotifyAttachState_, true);
+    sceneSession->NotifyWindowAttachStateListenerRegistered(false);
+    EXPECT_EQ(sceneSession->needNotifyAttachState_, false);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
