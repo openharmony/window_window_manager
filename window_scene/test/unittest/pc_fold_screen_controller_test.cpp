@@ -447,11 +447,19 @@ HWTEST_F(PcFoldScreenManagerTest, CalculateThrowEnd, TestSize.Level1)
  */
 HWTEST_F(PcFoldScreenManagerTest, ThrowSlipToOppositeSide, TestSize.Level1)
 {
+    SetHalfFolded();
     WSRect rect = B_RECT;
     EXPECT_FALSE(manager_.ThrowSlipToOppositeSide(ScreenSide::EXPAND, rect, TOP_AVOID_HEIGHT, BOT_AVOID_HEIGHT, 0));
     EXPECT_TRUE(manager_.ThrowSlipToOppositeSide(ScreenSide::FOLD_B, rect, TOP_AVOID_HEIGHT, BOT_AVOID_HEIGHT, 0));
     rect = C_RECT;
     EXPECT_TRUE(manager_.ThrowSlipToOppositeSide(ScreenSide::FOLD_C, rect, TOP_AVOID_HEIGHT, BOT_AVOID_HEIGHT, 0));
+
+    rect = B_RECT;
+    for (int32_t i = 0; i < 100; ++i) {
+        manager_.ThrowSlipToOppositeSide(ScreenSide::FOLD_B, rect, TOP_AVOID_HEIGHT, BOT_AVOID_HEIGHT, 0);
+        manager_.ThrowSlipToOppositeSide(ScreenSide::FOLD_C, rect, TOP_AVOID_HEIGHT, BOT_AVOID_HEIGHT, 0);
+    }
+    EXPECT_LE(std::abs(rect.posY_ - B_RECT.posY_), 5);
 }
 
 /**
