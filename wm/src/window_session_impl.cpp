@@ -4790,6 +4790,7 @@ bool WindowSessionImpl::FilterPointerEvent(const std::shared_ptr<MMI::PointerEve
     if (sourceType == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
         std::lock_guard<std::mutex> lock(touchEventFilterMutex_);
         if (touchEventFilter_ == nullptr) {
+            TLOGD(WmsLogTag::WMS_INPUT_KEY_FLOW, "touch event filter null");
             return false;
         }
         isFiltered = touchEventFilter_(*pointerEvent.get());
@@ -4799,6 +4800,7 @@ bool WindowSessionImpl::FilterPointerEvent(const std::shared_ptr<MMI::PointerEve
                 action != OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_END)) {
         std::lock_guard<std::mutex> lock(mouseEventFilterMutex_);
         if (mouseEventFilter_ == nullptr) {
+            TLOGD(WmsLogTag::WMS_INPUT_KEY_FLOW, "mouse event filter null");
             return false;
         }
         isFiltered = mouseEventFilter_(*pointerEvent.get());
@@ -4806,6 +4808,7 @@ bool WindowSessionImpl::FilterPointerEvent(const std::shared_ptr<MMI::PointerEve
     if (isFiltered) {
         pointerEvent->MarkProcessed();
     }
+    TLOGD(WmsLogTag::WMS_INPUT_KEY_FLOW, "event consumed:%{public}d", isFiltered);
     return isFiltered;
 }
 
