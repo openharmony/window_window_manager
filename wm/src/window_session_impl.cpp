@@ -1493,7 +1493,6 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
     bool isSuperFoldDisplayDevice = FoldScreenStateInternel::IsSuperFoldDisplayDevice();
     if (property_->GetCompatibleModeInPc() && !property_->GetIsAtomicService()) {
         bool isLayoutFullScreen = property_->IsLayoutFullScreen();
-        TLOGI(WmsLogTag::WMS_COMPAT, "compatible isLayoutFullScreen %{public}d", isLayoutFullScreen);
         uiContent->HideWindowTitleButton(true, !isLayoutFullScreen, hideMinimizeButton, hideCloseButton);
         uiContent->OnContainerModalEvent("scb_back_visibility", isLayoutFullScreen ? "false" : "true");
     } else {
