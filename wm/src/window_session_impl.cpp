@@ -217,6 +217,14 @@ bool WindowSessionImpl::isUIExtensionAbilityProcess_ = false;
         }                                                                      \
     } while (false)
 
+#define CHECK_UI_CONTENT_RETURN_IF_NULL(uiContent)                             \
+    do {                                                                       \
+        if ((uiContent) == nullptr) {                                          \
+            TLOGE(WmsLogTag::WMS_LIFE, "uiContent is null");                   \
+            return;                                                            \
+        }                                                                      \
+    } while (false)
+
 WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
 {
     WLOGFD("[WMSCom] Constructor");
@@ -1046,6 +1054,19 @@ void WindowSessionImpl::UpdateRectForResizeWithAnimation(const Rect& wmRect, con
     handler_->PostTask(task, "WMS_WindowSessionImpl_UpdateRectForResizeWithAnimation");
 }
 
+void WindowSessionImpl::NotifyAfterUIContentReady()
+{
+    auto uiContent = GetUIContentSharedPtr();
+    CHECK_UI_CONTENT_RETURN_IF_NULL(uiContent);
+    if (IsNeedRenotifyTransform()) {
+        auto transform = GetCurrentTransform();
+        TLOGI(WmsLogTag::WMS_LAYOUT, "Renotify transform, id:%{public}d, scaleX:%{public}f, scaleY:%{public}f",
+            GetPersistentId(), transform.scaleX_, transform.scaleY_);
+        uiContent->UpdateTransform(transform);
+        SetNeedRenotifyTransform(false);
+    }
+}
+
 void WindowSessionImpl::NotifyRotationAnimationEnd()
 {
     auto task = [weak = wptr(this)] {
@@ -1756,7 +1777,7 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
             contentInfo.c_str(), static_cast<uint16_t>(aceRet));
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-
+    NotifyAfterUIContentReady();
     TLOGD(WmsLogTag::WMS_LIFE, "end");
     return WMError::WM_OK;
 }
@@ -4790,6 +4811,7 @@ bool WindowSessionImpl::FilterPointerEvent(const std::shared_ptr<MMI::PointerEve
     if (sourceType == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
         std::lock_guard<std::mutex> lock(touchEventFilterMutex_);
         if (touchEventFilter_ == nullptr) {
+            TLOGD(WmsLogTag::WMS_INPUT_KEY_FLOW, "touch event filter null");
             return false;
         }
         isFiltered = touchEventFilter_(*pointerEvent.get());
@@ -4799,6 +4821,7 @@ bool WindowSessionImpl::FilterPointerEvent(const std::shared_ptr<MMI::PointerEve
                 action != OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_END)) {
         std::lock_guard<std::mutex> lock(mouseEventFilterMutex_);
         if (mouseEventFilter_ == nullptr) {
+            TLOGD(WmsLogTag::WMS_INPUT_KEY_FLOW, "mouse event filter null");
             return false;
         }
         isFiltered = mouseEventFilter_(*pointerEvent.get());
@@ -4806,6 +4829,7 @@ bool WindowSessionImpl::FilterPointerEvent(const std::shared_ptr<MMI::PointerEve
     if (isFiltered) {
         pointerEvent->MarkProcessed();
     }
+    TLOGD(WmsLogTag::WMS_INPUT_KEY_FLOW, "event consumed:%{public}d", isFiltered);
     return isFiltered;
 }
 
@@ -5490,9 +5514,13 @@ WMError WindowSessionImpl::UnregisterOrientationChangeListener(
 void WindowSessionImpl::NotifyTransformChange(const Transform& transform)
 {
     WLOGFI("in");
+    SetCurrentTransform(transform);
     if (auto uiContent = GetUIContentSharedPtr()) {
         uiContent->UpdateTransform(transform);
         SetLayoutTransform(transform);
+        SetNeedRenotifyTransform(false);
+    } else {
+        SetNeedRenotifyTransform(true);
     }
 }
 

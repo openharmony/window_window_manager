@@ -125,7 +125,7 @@ using TraverseFunc = std::function<bool(const sptr<SceneSession>& session)>;
 using CmpFunc = std::function<bool(std::pair<int32_t, sptr<SceneSession>>& lhs,
     std::pair<int32_t, sptr<SceneSession>>& rhs)>;
 using ProcessStartUIAbilityErrorFunc = std::function<void(int32_t startUIAbilityError)>;
-using NotifySCBAfterUpdateFocusFunc = std::function<void()>;
+using NotifySCBAfterUpdateFocusFunc = std::function<void(DisplayId displayId)>;
 using ProcessCallingSessionIdChangeFunc = std::function<void(uint32_t callingSessionId)>;
 using FlushWindowInfoTask = std::function<void()>;
 using ProcessVirtualPixelRatioChangeFunc = std::function<void(float density, const Rect& rect)>;
@@ -664,6 +664,8 @@ public:
     /*
      * Window Pattern
      */
+    void SetDelayRemoveSnapshot(bool delayRemoveSnapshot);
+    bool GetDelayRemoveSnapshot() const;
     void InitSnapshotCache();
     void VisitSnapshotFromCache(int32_t persistentId);
     void PutSnapshotToCache(int32_t persistentId);
@@ -1394,6 +1396,7 @@ private:
     /*
      * Window Pattern
      */
+    std::atomic<bool> delayRemoveSnapshot_ = false;
     void InitStartingWindowRdb(const std::string& rdbPath);
     bool GetStartingWindowInfoFromCache(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo);
     bool GetStartingWindowInfoFromRdb(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo);

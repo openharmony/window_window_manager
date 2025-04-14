@@ -464,15 +464,6 @@ HWTEST_F(PerformReporterTest, ReportEventDispatchException, TestSize.Level1)
     oss << "displayInfos flush to MMI is empty!";
     res = windowInfoReporter.ReportEventDispatchException(static_cast<int32_t>(exceptionType), pid, oss.str());
     ASSERT_EQ(res, 0);
-
-    std::vector<MMI::WindowInfo> windowInfoList;
-    ASSERT_EQ(windowInfoList.empty(), true);
-    exceptionType = WindowDFXHelperType::WINDOW_FLUSH_EMPTY_WINDOW_INFO_TO_MMI_EXCEPTION;
-    pid = 2222;
-    oss.str("");
-    oss << "windowInfoList flush to MMI is empty!";
-    res = windowInfoReporter.ReportEventDispatchException(static_cast<int32_t>(exceptionType), pid, oss.str());
-    ASSERT_EQ(res, 0);
 }
 
 /**

@@ -2834,20 +2834,6 @@ HWTEST_F(ScreenSessionTest, GetPointerActiveHeight, Function | SmallTest | Level
 }
 
 /**
- * @tc.name: SetShareProtect
- * @tc.desc: SetShareProtect test
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionTest, SetShareProtect, Function | SmallTest | Level2)
-{
-    GTEST_LOG_(INFO) << "ScreenSessionTest: SetShareProtect start";
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
-    session->SetShareProtect(false);
-    ASSERT_EQ(session->GetShareProtect(), false);
-    GTEST_LOG_(INFO) << "ScreenSessionTest: SetShareProtect end";
-}
-
-/**
  * @tc.name: UpdateExpandAvailableArea
  * @tc.desc: UpdateExpandAvailableArea test
  * @tc.type: FUNC

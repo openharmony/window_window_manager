@@ -625,7 +625,7 @@ HWTEST_F(ScreenSceneConfigUtTest, GetCurvedCompressionAreaInLandscape03, TestSiz
 HWTEST_F(ScreenSceneConfigUtTest, ReadStringListConfigInfo01, Function | SmallTest | Level3)
 {
     xmlNodePtr rootNode = nullptr;
-    ScreenSceneConfig::ReadStringListConfigInfo(nullptr, "");
+    ScreenSceneConfig::ReadStringListConfigInfo(rootNode, "");
     EXPECT_EQ(rootNode, nullptr);
 }
 
