@@ -252,6 +252,13 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             uint64_t size = 0;
             if (!data.ReadUint64(size)) {
                 TLOGE(WmsLogTag::DMS, "Read size failed.");
+                reply.WriteInt32(static_cast<int32_t>(DMError::DM_ERROR_INVALID_PARAM));
+                break;
+            }
+            static constexpr uint64_t MAX_SIZE = 100;
+            if (size > MAX_SIZE) {
+                TLOGE(WmsLogTag::DMS, "Size too large.");
+                reply.WriteInt32(static_cast<int32_t>(DMError::DM_ERROR_INVALID_PARAM));
                 break;
             }
             std::vector<int32_t> persistentIds;
@@ -271,6 +278,13 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             uint64_t size = 0;
             if (!data.ReadUint64(size)) {
                 TLOGE(WmsLogTag::DMS, "Read size failed.");
+                reply.WriteInt32(static_cast<int32_t>(DMError::DM_ERROR_INVALID_PARAM));
+                break;
+            }
+            static constexpr uint64_t MAX_SIZE = 100;
+            if (size > MAX_SIZE) {
+                TLOGE(WmsLogTag::DMS, "Size too large.");
+                reply.WriteInt32(static_cast<int32_t>(DMError::DM_ERROR_INVALID_PARAM));
                 break;
             }
             std::vector<int32_t> persistentIds;
@@ -1119,6 +1133,17 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             bool muteFlag = data.ReadBool();
             SetVirtualDisplayMuteFlag(screenId, muteFlag);
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_GET_DEVICE_STATUS: {
+            if (!reply.WriteInt32(GetDeviceStatus())) {
+                TLOGE(WmsLogTag::DMS, "Write device status failed");
+                return ERR_INVALID_DATA;
+            }
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_NOTIFY_EXTEND_SCREEN_CREATE_FINISH: {
+            NotifyExtendScreenCreateFinish();
             break;
         }
         default:

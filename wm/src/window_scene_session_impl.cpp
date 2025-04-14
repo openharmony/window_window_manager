@@ -956,8 +956,11 @@ void WindowSceneSessionImpl::ResetSuperFoldDisplayY(const std::shared_ptr<MMI::P
     }
     if (auto displayY = pointerItem.GetDisplayY(); displayY >= superFoldOffsetY_) {
         pointerItem.SetDisplayY(displayY - superFoldOffsetY_);
+        pointerItem.SetDisplayYPos(pointerItem.GetDisplayYPos() - superFoldOffsetY_);
         pointerEvent->AddPointerItem(pointerItem);
-        TLOGD(WmsLogTag::WMS_EVENT, "Calculated superFoldOffsetY: %{public}d", superFoldOffsetY_);
+        pointerEvent->SetTargetDisplayId(DISPLAY_ID_C);
+        TLOGD(WmsLogTag::WMS_EVENT, "Calculated superFoldOffsetY: %{public}d, displayId: %{public}d",
+            superFoldOffsetY_, pointerEvent->GetTargetDisplayId());
     }
 }
 
@@ -1099,6 +1102,31 @@ static void GetWindowSizeLimits(std::shared_ptr<AppExecFwk::AbilityInfo> ability
         windowSizeLimits.minWindowHeight : abilityInfo->minWindowHeight;
 }
 
+void WindowSceneSessionImpl::HandleWindowLimitsInCompatibleMode(WindowSizeLimits& windowSizeLimits)
+{
+    if (!property_->GetCompatibleModeInPc()) {
+        return;
+    }
+    windowSizeLimits.maxWindowWidth = windowSystemConfig_.maxFloatingWindowSize_;
+    windowSizeLimits.maxWindowHeight = windowSystemConfig_.maxFloatingWindowSize_;
+    if (WindowHelper::IsMainWindow(GetType())) {
+        windowSizeLimits.minWindowWidth = windowSystemConfig_.miniWidthOfMainWindow_;
+        windowSizeLimits.minWindowHeight = windowSystemConfig_.miniHeightOfMainWindow_;
+    } else if (WindowHelper::IsSubWindow(GetType())) {
+        windowSizeLimits.minWindowWidth = windowSystemConfig_.miniWidthOfSubWindow_;
+        windowSizeLimits.minWindowHeight = windowSystemConfig_.miniHeightOfSubWindow_;
+    } else if (WindowHelper::IsDialogWindow(GetType())) {
+        windowSizeLimits.minWindowWidth = windowSystemConfig_.miniWidthOfDialogWindow_;
+        windowSizeLimits.minWindowHeight = windowSystemConfig_.miniHeightOfDialogWindow_;
+    } else {
+        windowSizeLimits.minWindowWidth = MIN_FLOATING_WIDTH;
+        windowSizeLimits.minWindowHeight = MIN_FLOATING_HEIGHT;
+    }
+    TLOGI(WmsLogTag::WMS_COMPAT, "maxWidth: %{public}u, minWidth: %{public}u, maxHeight: %{public}u, "
+        "minHeight: %{public}u", windowSizeLimits.maxWindowWidth, windowSizeLimits.minWindowWidth,
+        windowSizeLimits.maxWindowHeight, windowSizeLimits.minWindowHeight);
+}
+
 std::vector<AppExecFwk::SupportWindowMode> WindowSceneSessionImpl::ExtractSupportWindowModeFromMetaData(
     const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo)
 {
@@ -1146,6 +1174,9 @@ void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()
     if (abilityInfo != nullptr) {
         WindowSizeLimits windowSizeLimits = property_->GetWindowSizeLimits();
         GetWindowSizeLimits(abilityInfo, windowSizeLimits);
+        if (property_->GetCompatibleModeInPc()) {
+            HandleWindowLimitsInCompatibleMode(windowSizeLimits);
+        }
         property_->SetConfigWindowLimitsVP({
             windowSizeLimits.maxWindowWidth, windowSizeLimits.maxWindowHeight,
             windowSizeLimits.minWindowWidth, windowSizeLimits.minWindowHeight,

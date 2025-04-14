@@ -2906,19 +2906,6 @@ WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::Point
     if (raiseEnabled) {
         RaiseToAppTopForPointDown();
     }
-    // modify the window coordinates when move end
-    MMI::PointerEvent::PointerItem pointerItem;
-    if ((action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP || action == MMI::PointerEvent::POINTER_ACTION_MOVE) &&
-        needNotifyClient && pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem) &&
-        IsStartMoving()) {
-        int32_t windowX = pointerItem.GetDisplayX() - winRect_.posX_;
-        int32_t windowY = pointerItem.GetDisplayY() - winRect_.posY_;
-        TLOGD(WmsLogTag::WMS_EVENT, "move end position: windowX:%{private}d windowY:%{private}d action:%{public}d",
-            windowX, windowY, action);
-        pointerItem.SetWindowX(windowX);
-        pointerItem.SetWindowY(windowY);
-        pointerEvent->AddPointerItem(pointerItem);
-    }
     return Session::TransferPointerEvent(pointerEvent, needNotifyClient, isExecuteDelayRaise);
 }
 
@@ -5356,7 +5343,7 @@ WMError SceneSession::HandleActionUpdateTurnScreenOn(const sptr<WindowSessionPro
 {
     SetTurnScreenOn(property->IsTurnScreenOn());
 #ifdef POWER_MANAGER_ENABLE
-    PostTask([weakThis = wptr(this), where = __func__] {
+    PostExportTask([weakThis = wptr(this), where = __func__] {
         auto sceneSession = weakThis.promote();
         if (!sceneSession) {
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s session is invalid", where);

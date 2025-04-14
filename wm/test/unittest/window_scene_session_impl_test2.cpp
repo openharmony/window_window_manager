@@ -939,6 +939,7 @@ HWTEST_F(WindowSceneSessionImplTest2, GetConfigurationFromAbilityInfo02, TestSiz
     option->SetWindowName("GetConfigurationFromAbilityInfo02");
     option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
     sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    windowSceneSession->property_->SetCompatibleModeInPc(true);
     int ret = 0;
     windowSceneSession->GetConfigurationFromAbilityInfo();
     ASSERT_EQ(ret, 0);

@@ -744,7 +744,7 @@ WSError SceneSessionManager::SwitchFreeMultiWindow(bool enable)
         if (sceneSession == nullptr) {
             continue;
         }
-        sceneSession->SwitchFreeMultiWindow(enable);
+        sceneSession->SwitchFreeMultiWindow(systemConfig_);
     }
     WindowStyleType type = enable ?
             WindowStyleType::WINDOW_STYLE_FREE_MULTI_WINDOW : WindowStyleType::WINDOW_STYLE_DEFAULT;
@@ -3974,8 +3974,8 @@ void SceneSessionManager::UpdateRecoverPropertyForSuperFold(const sptr<WindowSes
         static_cast<uint32_t>(property->GetDisplayId()));
 
     auto foldCrease = foldCreaseRegion->GetCreaseRects().front();
-    recoverWindowRect.posY_ += foldCrease.posY_ + foldCrease.height_;
-    recoverRequestRect.posY_ += foldCrease.posY_ + foldCrease.height_;
+    recoverWindowRect.posY_ += foldCrease.posY_ + static_cast<int32_t>(foldCrease.height_);
+    recoverRequestRect.posY_ += foldCrease.posY_ + static_cast<int32_t>(foldCrease.height_);
     property->SetWindowRect(recoverWindowRect);
     property->SetRequestRect(recoverRequestRect);
     property->SetDisplayId(0);
@@ -5043,7 +5043,9 @@ void SceneSessionManager::FillSessionInfo(sptr<SceneSession>& sceneSession)
         TLOGE(WmsLogTag::DEFAULT, "abilityInfo is nullptr!");
         return;
     }
-    sceneSession->SetSessionInfoSupportedWindowModes(ExtractSupportWindowModeFromMetaData(abilityInfo));
+    if (sessionInfo.supportedWindowModes.empty()) {
+        sceneSession->SetSessionInfoSupportedWindowModes(ExtractSupportWindowModeFromMetaData(abilityInfo));
+    }
     sceneSession->SetEnableRemoveStartingWindow(GetEnableRemoveStartingWindowFromBMS(abilityInfo));
     sceneSession->SetSessionInfoAbilityInfo(abilityInfo);
     sceneSession->SetSessionInfoTime(GetCurrentTime());
@@ -6906,11 +6908,11 @@ WSError SceneSessionManager::ShiftFocus(DisplayId displayId, const sptr<SceneSes
     bool scbCurrFocus = nextSession && nextSession->GetSessionInfo().isSystem_;
     if (!scbPrevFocus && scbCurrFocus) {
         if (notifySCBAfterFocusedFunc_ != nullptr) {
-            notifySCBAfterFocusedFunc_();
+            notifySCBAfterFocusedFunc_(nextSession->GetSessionProperty()->GetDisplayId());
         }
     } else if (scbPrevFocus && !scbCurrFocus) {
         if (notifySCBAfterUnfocusedFunc_ != nullptr) {
-            notifySCBAfterUnfocusedFunc_();
+            notifySCBAfterUnfocusedFunc_(focusedSession->GetSessionProperty()->GetDisplayId());
         }
     }
     TLOGI(WmsLogTag::WMS_FOCUS, "displayId: %{public}" PRIu64
@@ -12044,17 +12046,6 @@ void SceneSessionManager::FlushWindowInfoToMMI(const bool forceFlush)
         SceneInputManager::GetInstance().ResetSessionDirty();
         auto [windowInfoList, pixelMapList] = SceneInputManager::GetInstance().GetFullWindowInfoList();
         TLOGND(WmsLogTag::WMS_EVENT, "windowInfoList size: %{public}d", static_cast<int32_t>(windowInfoList.size()));
-        if (windowInfoList.empty()) {
-            std::ostringstream oss;
-            oss << "windowInfoList flush to MMI is empty!";
-            int32_t ret = WindowInfoReporter::GetInstance().ReportEventDispatchException(
-                static_cast<int32_t>(WindowDFXHelperType::WINDOW_FLUSH_EMPTY_WINDOW_INFO_TO_MMI_EXCEPTION),
-                getpid(), oss.str()
-            );
-            if (ret != 0) {
-                TLOGNI(WmsLogTag::WMS_EVENT, "ReportEventDispatchException message failed, ret: %{public}d", ret);
-            }
-        }
         SceneInputManager::GetInstance().
             FlushDisplayInfoToMMI(std::move(windowInfoList), std::move(pixelMapList), forceFlush);
     };
@@ -13238,7 +13229,19 @@ WMError SceneSessionManager::UpdateAppHookDisplayInfo(int32_t uid, const HookInf
 
 void DisplayChangeListener::OnScreenFoldStatusChanged(const std::vector<std::string>& screenFoldInfo)
 {
+    SceneSessionManager::GetInstance().SetDelayRemoveSnapshot(true);
     SceneSessionManager::GetInstance().ReportScreenFoldStatusChange(screenFoldInfo);
+}
+
+void SceneSessionManager::SetDelayRemoveSnapshot(bool delayRemoveSnapshot)
+{
+    TLOGD(WmsLogTag::WMS_PATTERN, "delayRemoveSnapshot %{public}d", delayRemoveSnapshot);
+    delayRemoveSnapshot_ = delayRemoveSnapshot;
+}
+
+bool SceneSessionManager::GetDelayRemoveSnapshot() const
+{
+    return delayRemoveSnapshot_;
 }
 
 WMError SceneSessionManager::ReportScreenFoldStatusChange(const std::vector<std::string>& screenFoldInfo)
@@ -13904,6 +13907,9 @@ WMError SceneSessionManager::GetDisplayIdByWindowId(const std::vector<uint64_t>&
                 continue;
             }
             DisplayId displayId = session->GetSessionProperty()->GetDisplayId();
+            if (PcFoldScreenManager::GetInstance().IsHalfFoldedOnMainDisplay(displayId)) {
+                displayId = session->GetClientDisplayId();
+            }
             TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "windowId:%{public}" PRIu64 ", displayId:%{public}" PRIu64,
                 windowId, displayId);
             windowDisplayIdMap.insert({windowId, displayId});
@@ -14072,8 +14078,8 @@ WMError SceneSessionManager::ShiftAppWindowPointerEventInner(
     	param.x = -outside;
     	param.y = -outside;
         int ret = MMI::InputManager::GetInstance()->ShiftAppPointerEvent(param, true);
-        TLOGNI(WmsLogTag::WMS_PC, "sourceWindowId %{public}d targetWindowId %{public}d ret %{public}d",
-            param.sourceWindowId, param.targetWindowId, ret);
+        TLOGNI(WmsLogTag::WMS_PC, "sourceWindowId %{public}d targetWindowId %{public}d vpr %{public}f ret %{public}d",
+            param.sourceWindowId, param.targetWindowId, vpr, ret);
         return ret == 0 ? WMError::WM_OK : WMError::WM_ERROR_INVALID_CALLING;
     }, __func__);
 }

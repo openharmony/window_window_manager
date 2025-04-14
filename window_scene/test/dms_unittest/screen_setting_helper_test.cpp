@@ -625,7 +625,11 @@ namespace {
         MultiScreenInfo info;
         string inputString = "1 2 3";
         auto ret = ScreenSettingHelper::GetScreenRelativePosition(info, inputString);
-        ASSERT_TRUE(ret);
+        if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+            ASSERT_FALSE(ret);
+        } else {
+            ASSERT_TRUE(ret);
+        }
     }
 
     /**
@@ -702,8 +706,13 @@ namespace {
         screenSession->isInternal_ = true;
         string inputString = "1 2 3";
         auto ret = ScreenSettingHelper::GetScreenRelativePosition(info, inputString);
-        ASSERT_TRUE(ret);
-        ASSERT_EQ(info.mainScreenOption.screenId_, 1);
+        if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+            ASSERT_FALSE(ret);
+            ASSERT_EQ(info.mainScreenOption.screenId_, 0);
+        } else {
+            ASSERT_TRUE(ret);
+            ASSERT_EQ(info.mainScreenOption.screenId_, 1);
+        }
         ScreenSessionManager::GetInstance().screenSessionMap_.erase(screenId);
     }
 
@@ -728,8 +737,13 @@ namespace {
         info.isExtendMain = false;
         string inputString = "1001 2 3";
         auto ret = ScreenSettingHelper::GetScreenRelativePosition(info, inputString);
-        ASSERT_TRUE(ret);
-        ASSERT_EQ(info.mainScreenOption.screenId_, 1001);
+        if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+            ASSERT_FALSE(ret);
+            ASSERT_EQ(info.mainScreenOption.screenId_, 0);
+        } else {
+            ASSERT_TRUE(ret);
+            ASSERT_EQ(info.mainScreenOption.screenId_, 1001);
+        }
         ScreenSessionManager::GetInstance().screenSessionMap_.erase(screenId);
     }
 
@@ -754,8 +768,13 @@ namespace {
         info.isExtendMain = true;
         string inputString = "1001 2 3";
         auto ret = ScreenSettingHelper::GetScreenRelativePosition(info, inputString);
-        ASSERT_TRUE(ret);
-        ASSERT_EQ(info.secondaryScreenOption.screenId_, 1001);
+        if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+            ASSERT_FALSE(ret);
+            ASSERT_EQ(info.secondaryScreenOption.screenId_, 0);
+        } else {
+            ASSERT_TRUE(ret);
+            ASSERT_EQ(info.secondaryScreenOption.screenId_, 1001);
+        }
         ScreenSessionManager::GetInstance().screenSessionMap_.erase(screenId);
     }
 
@@ -780,8 +799,13 @@ namespace {
         info.isExtendMain = false;
         string inputString = "1 2 3";
         auto ret = ScreenSettingHelper::GetScreenRelativePosition(info, inputString);
-        ASSERT_TRUE(ret);
-        ASSERT_EQ(info.secondaryScreenOption.screenId_, 1);
+        if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+            ASSERT_FALSE(ret);
+            ASSERT_EQ(info.secondaryScreenOption.screenId_, 0);
+        } else {
+            ASSERT_TRUE(ret);
+            ASSERT_EQ(info.secondaryScreenOption.screenId_, 1);
+        }
         ScreenSessionManager::GetInstance().screenSessionMap_.erase(screenId);
     }
 

@@ -471,6 +471,12 @@ enum class ScreenCombination : uint32_t {
     SCREEN_MAIN,
 };
 
+enum class MultiScreenPowerSwitchType : uint32_t {
+    SCREEN_SWITCH_ON,
+    SCREEN_SWITCH_OFF,
+    SCREEN_SWITCH_EXTERNAL,
+};
+
 enum class MultiScreenMode : uint32_t {
     SCREEN_MIRROR = 0,
     SCREEN_EXTEND = 1,
@@ -605,6 +611,17 @@ struct SessionOption {
     bool isExtend_;
     std::string innerName_;
     ScreenId screenId_;
+};
+
+/**
+ * @brief Device state
+ */
+enum class DMDeviceStatus: uint32_t {
+    UNKNOWN = 0,
+    STATUS_FOLDED,
+    STATUS_TENT_HOVER,
+    STATUS_TENT,
+    STATUS_GLOBAL_FULL
 };
 }
 }

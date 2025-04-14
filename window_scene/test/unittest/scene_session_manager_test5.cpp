@@ -1657,6 +1657,31 @@ HWTEST_F(SceneSessionManagerTest5, RegisterRemoveSnapshotFunc, TestSize.Level1)
     sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     ASSERT_EQ(WSError::WS_OK, ssm_->RegisterSaveSnapshotFunc(sceneSession));
 }
+
+/**
+ * @tc.name: GetDelayRemoveSnapshot
+ * @tc.desc: GetDelayRemoveSnapshot Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, GetDelayRemoveSnapshot, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    auto res = ssm_->GetDelayRemoveSnapshot();
+    ASSERT_EQ(false, res);
+}
+
+/**
+ * @tc.name: SetDelayRemoveSnapshot
+ * @tc.desc: SetDelayRemoveSnapshot Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, SetDelayRemoveSnapshot, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->SetDelayRemoveSnapshot(true);
+    auto res = ssm_->GetDelayRemoveSnapshot();
+    ASSERT_EQ(true, res);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
