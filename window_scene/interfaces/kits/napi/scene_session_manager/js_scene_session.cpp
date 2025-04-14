@@ -5689,7 +5689,7 @@ napi_value JsSceneSession::OnAddSnapshot(napi_env env, napi_callback_info info)
         }
     }
 
-    TLOGI(WmsLogTag::WMS_PATTERN, "argc: %{public}u, useFfrt: %{public}u, needPersist: %{public}u",
+    TLOGI(WmsLogTag::WMS_PATTERN, "argc: %{public}zu, useFfrt: %{public}d, needPersist: %{public}d",
         argc, useFfrt, needPersist);
     auto session = weakSession_.promote();
     if (session == nullptr) {
