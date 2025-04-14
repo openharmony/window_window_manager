@@ -2471,6 +2471,7 @@ WSError SceneSession::GetAvoidAreasByRotation(int32_t rotation, const WSRect& re
     if (WindowHelper::IsMainFullScreenWindow(GetWindowType(), GetWindowMode())) {
         TLOGI(WmsLogTag::WMS_IMMS, "window is no support, type %{public}d, mode %{public}d",
             GetWindowType(), GetWindowMode());
+        return WSError::WS_DO_NOTHING;
     }
     return PostSyncTask([weakThis = wptr(this), rotation, &rect, &properties, &avoidAreas, where = __func__] {
         auto session = weakThis.promote();
