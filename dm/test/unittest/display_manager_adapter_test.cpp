@@ -143,11 +143,7 @@ HWTEST_F(DisplayManagerAdapterTest, GetScreenGamutMap, TestSize.Level1)
 {
     ScreenGamutMap gamutMap;
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().GetScreenGamutMap(0, gamutMap);
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(err, DMError::DM_ERROR_RENDER_SERVICE_FAILED);
-    } else {
-        ASSERT_EQ(err, DMError::DM_ERROR_RENDER_SERVICE_FAILED);
-    }
+    ASSERT_EQ(err, DMError::DM_ERROR_RENDER_SERVICE_FAILED);
 }
 
 /**
