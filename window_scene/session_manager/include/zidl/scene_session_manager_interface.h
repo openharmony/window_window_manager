@@ -119,6 +119,8 @@ public:
         TRANS_ID_SET_PROCESS_WATERMARK,
         TRANS_ID_GET_WINDOW_IDS_BY_COORDINATE,
         TRANS_ID_UPDATE_SESSION_SCREEN_LOCK,
+        TRANS_ID_ADD_SKIP_SELF_ON_VIRTUAL_SCREEN,
+        TRANS_ID_REMOVE_SKIP_SELF_ON_VIRTUAL_SCREEN,
         TRANS_ID_IS_PC_WINDOW,
         TRANS_ID_IS_PC_OR_PAD_FREE_MULTI_WINDOW_MODE,
         TRANS_ID_GET_DISPLAYID_BY_WINDOWID,
@@ -134,6 +136,7 @@ public:
         TRANS_ID_REQUEST_FOCUS_STATUS_BY_SA,
         TRANS_ID_MINIMIZE_BY_WINDOW_ID,
         TRANS_ID_SET_PARENT_WINDOW,
+        TRANS_ID_SET_FOREGROUND_WINDOW_NUM,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
@@ -292,6 +295,7 @@ public:
     MaximizeMode GetMaximizeMode() override { return MaximizeMode::MODE_AVOID_SYSTEM_BAR; }
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId = DEFAULT_DISPLAY_ID) override {}
     WMError MinimizeByWindowId(const std::vector<int32_t>& windowIds) override { return WMError::WM_OK; }
+    WMError SetForegroundWindowNum(int32_t windowNum) override { return WMError::WM_OK; }
 
     /**
      * @brief Raise a window to screen top by id of window.
@@ -357,6 +361,12 @@ public:
 
     WMError UpdateScreenLockStatusForApp(const std::string& bundleName,
         bool isRelease) override { return WMError::WM_OK; }
+
+    virtual WMError AddSkipSelfWhenShowOnVirtualScreenList(
+        const std::vector<int32_t>& persistentIds) { return WMError::WM_OK; }
+
+    virtual WMError RemoveSkipSelfWhenShowOnVirtualScreenList(
+        const std::vector<int32_t>& persistentIds) { return WMError::WM_OK; }
 
     WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode) override { return WMError::WM_OK; }
 

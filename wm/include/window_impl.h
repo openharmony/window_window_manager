@@ -291,6 +291,7 @@ public:
     void NotifyTouchDialogTarget(int32_t posX = 0, int32_t posY = 0) override;
     void NotifyDestroy();
     void NotifyForeground();
+    void NotifyMainWindowDidForeground(uint32_t reason);
     void NotifyBackground();
     void UpdateZoomTransform(const Transform& trans, bool isDisplayZoomOn);
     void PerformBack() override;
@@ -353,7 +354,7 @@ public:
     static void UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
     void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
     void RegisterWindowInspectorCallback();
-    uint32_t GetApiCompatibleVersion() const override;
+    uint32_t GetApiTargetVersion() const;
 
     /*
      * Keyboard
@@ -390,6 +391,8 @@ private:
 
     void NotifyAfterForeground(bool needNotifyListeners = true, bool needNotifyUiContent = true);
     void NotifyAfterBackground(bool needNotifyListeners = true, bool needNotifyUiContent = true);
+    void NotifyAfterDidForeground(uint32_t reason);
+    void NotifyAfterDidBackground(uint32_t reason);
     void NotifyAfterFocused();
     void NotifyAfterUnfocused(bool needNotifyUiContent = true);
     void NotifyAfterResumed();

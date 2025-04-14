@@ -63,7 +63,7 @@ namespace {
  * @tc.desc: test function : HandleSensorEventInput
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenRotationPropertyTest, HandleSensorEventInput, Function | SmallTest | Level1)
+HWTEST_F(ScreenRotationPropertyTest, HandleSensorEventInput, TestSize.Level1)
 {
     ScreenRotationProperty::HandleSensorEventInput(DeviceRotation::INVALID);
     ScreenRotationProperty::HandleSensorEventInput(DeviceRotation::ROTATION_PORTRAIT);
@@ -77,7 +77,7 @@ HWTEST_F(ScreenRotationPropertyTest, HandleSensorEventInput, Function | SmallTes
  * @tc.desc: test function : HandleHoverStatusEventInput
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenRotationPropertyTest, HandleHoverStatusEventInput, Function | SmallTest | Level1)
+HWTEST_F(ScreenRotationPropertyTest, HandleHoverStatusEventInput, TestSize.Level1)
 {
     ScreenRotationProperty::HandleHoverStatusEventInput(DeviceHoverStatus::INVALID);
     ScreenRotationProperty::HandleHoverStatusEventInput(DeviceHoverStatus::TENT_STATUS);
@@ -93,7 +93,7 @@ HWTEST_F(ScreenRotationPropertyTest, HandleHoverStatusEventInput, Function | Sma
  * @tc.desc: test function : ConvertDeviceToFloat
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenRotationPropertyTest, ConvertDeviceToFloat, Function | SmallTest | Level1)
+HWTEST_F(ScreenRotationPropertyTest, ConvertDeviceToFloat, TestSize.Level1)
 {
     float ret;
     ret = ScreenRotationProperty::ConvertDeviceToFloat(DeviceRotation::INVALID);

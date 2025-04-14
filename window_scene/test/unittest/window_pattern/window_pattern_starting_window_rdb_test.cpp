@@ -70,7 +70,7 @@ namespace {
  * @tc.desc: GetRdbStore
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPatternStartingWindowRdbTest, GetRdbStore, Function | SmallTest | Level1)
+HWTEST_F(WindowPatternStartingWindowRdbTest, GetRdbStore, TestSize.Level1)
 {
     ASSERT_NE(startingWindowRdbMgr_, nullptr);
     startingWindowRdbMgr_->wmsRdbConfig_.dbPath = TEST_INVALID_PATH;
@@ -89,7 +89,7 @@ HWTEST_F(WindowPatternStartingWindowRdbTest, GetRdbStore, Function | SmallTest |
  * @tc.desc: Init
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPatternStartingWindowRdbTest, Init, Function | SmallTest | Level1)
+HWTEST_F(WindowPatternStartingWindowRdbTest, Init, TestSize.Level1)
 {
     ASSERT_NE(startingWindowRdbMgr_, nullptr);
     startingWindowRdbMgr_->wmsRdbConfig_.dbPath = TEST_INVALID_PATH;
@@ -105,7 +105,7 @@ HWTEST_F(WindowPatternStartingWindowRdbTest, Init, Function | SmallTest | Level1
  * @tc.desc: InsertData
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPatternStartingWindowRdbTest, InsertData, Function | SmallTest | Level1)
+HWTEST_F(WindowPatternStartingWindowRdbTest, InsertData, TestSize.Level1)
 {
     ASSERT_NE(startingWindowRdbMgr_, nullptr);
     StartingWindowRdbItemKey itemKey = {
@@ -124,7 +124,7 @@ HWTEST_F(WindowPatternStartingWindowRdbTest, InsertData, Function | SmallTest | 
  * @tc.desc: BatchInsert
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPatternStartingWindowRdbTest, BatchInsert, Function | SmallTest | Level1)
+HWTEST_F(WindowPatternStartingWindowRdbTest, BatchInsert, TestSize.Level1)
 {
     ASSERT_NE(startingWindowRdbMgr_, nullptr);
     StartingWindowRdbItemKey firstItemKey, secondItemKey;
@@ -146,7 +146,7 @@ HWTEST_F(WindowPatternStartingWindowRdbTest, BatchInsert, Function | SmallTest |
  * @tc.desc: DeleteDataByBundleName
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPatternStartingWindowRdbTest, DeleteDataByBundleName, Function | SmallTest | Level1)
+HWTEST_F(WindowPatternStartingWindowRdbTest, DeleteDataByBundleName, TestSize.Level1)
 {
     ASSERT_NE(startingWindowRdbMgr_, nullptr);
     StartingWindowRdbItemKey itemKey;
@@ -163,7 +163,7 @@ HWTEST_F(WindowPatternStartingWindowRdbTest, DeleteDataByBundleName, Function | 
  * @tc.desc: QueryData
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPatternStartingWindowRdbTest, QueryData, Function | SmallTest | Level1)
+HWTEST_F(WindowPatternStartingWindowRdbTest, QueryData, TestSize.Level1)
 {
     ASSERT_NE(startingWindowRdbMgr_, nullptr);
     StartingWindowRdbItemKey itemKey;

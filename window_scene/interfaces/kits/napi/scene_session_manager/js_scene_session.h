@@ -96,6 +96,7 @@ enum class ListenerFuncType : uint32_t {
     UPDATE_FLAG_CB,
     Z_LEVEL_CHANGE_CB,
     SESSION_GET_TARGET_ORIENTATION_CONFIG_INFO_CB,
+    UPDATE_PIP_TEMPLATE_INFO_CB,
 };
 
 class SceneSession;
@@ -188,6 +189,7 @@ private:
     static void BindNativeMethodForFocus(napi_env env, napi_value objValue, const char* moduleName);
     static void BindNativeMethodForWaterfall(napi_env env, napi_value objValue, const char* moduleName);
     static napi_value SetSkipSelfWhenShowOnVirtualScreen(napi_env env, napi_callback_info info);
+    static napi_value SetSkipEventOnCastPlus(napi_env env, napi_callback_info info);
     static napi_value SetCompatibleModeInPc(napi_env env, napi_callback_info info);
     static napi_value SetAppSupportPhoneInPc(napi_env env, napi_callback_info info);
     static napi_value SetCompatibleWindowSizeInPc(napi_env env, napi_callback_info info);
@@ -211,6 +213,7 @@ private:
     static napi_value SetFrameGravity(napi_env env, napi_callback_info info);
     static napi_value SetUseStartingWindowAboveLocked(napi_env env, napi_callback_info info);
     static napi_value SaveSnapshotSync(napi_env env, napi_callback_info info);
+    static napi_value SaveSnapshotAsync(napi_env env, napi_callback_info info);
     static napi_value SetBorderUnoccupied(napi_env env, napi_callback_info info);
     static napi_value SetFreezeImmediately(napi_env env, napi_callback_info info);
     static napi_value SendContainerModalEvent(napi_env env, napi_callback_info info);
@@ -222,6 +225,7 @@ private:
     static napi_value SetSidebarBlur(napi_env env, napi_callback_info info);
     static napi_value NotifyRotationProperty(napi_env env, napi_callback_info info);
     static napi_value SetCurrentRotation(napi_env env, napi_callback_info info);
+    static napi_value SetSidebarBlurMaximize(napi_env env, napi_callback_info info);
 
     napi_value OnActivateDragBySystem(napi_env env, napi_callback_info info);
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
@@ -263,6 +267,7 @@ private:
     napi_value OnSetTemporarilyShowWhenLocked(napi_env env, napi_callback_info info);
     napi_value OnSetSkipDraw(napi_env env, napi_callback_info info);
     napi_value OnSetSkipSelfWhenShowOnVirtualScreen(napi_env env, napi_callback_info info);
+    napi_value OnSetSkipEventOnCastPlus(napi_env env, napi_callback_info info);
     napi_value OnSetCompatibleModeInPc(napi_env env, napi_callback_info info);
     napi_value OnSetAppSupportPhoneInPc(napi_env env, napi_callback_info info);
     napi_value OnSetCompatibleWindowSizeInPc(napi_env env, napi_callback_info info);
@@ -289,6 +294,7 @@ private:
     napi_value OnSetFrameGravity(napi_env env, napi_callback_info info);
     napi_value OnSetUseStartingWindowAboveLocked(napi_env env, napi_callback_info info);
     napi_value OnSaveSnapshotSync(napi_env env, napi_callback_info info);
+    napi_value OnSaveSnapshotAsync(napi_env env, napi_callback_info info);
     napi_value OnSetBorderUnoccupied(napi_env env, napi_callback_info info);
     napi_value OnSetFreezeImmediately(napi_env env, napi_callback_info info);
     napi_value OnMaskSupportEnterWaterfallMode(napi_env env, napi_callback_info info);
@@ -303,6 +309,7 @@ private:
     napi_value OnNotifyRotationProperty(napi_env env, napi_callback_info info);
     napi_value OnNotifyRotationChange(napi_env env, napi_callback_info info);
     napi_value OnSetCurrentRotation(napi_env env, napi_callback_info info);
+    napi_value OnSetSidebarBlurMaximize(napi_env env, napi_callback_info info);
 
     bool IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);
     void ProcessChangeSessionVisibilityWithStatusBarRegister();
@@ -359,6 +366,7 @@ private:
     void ProcessSetHighlightChangeRegister();
     void ProcessFollowParentRectRegister();
     void ProcessGetTargetOrientationConfigInfoRegister();
+    void ProcessUpdatePiPTemplateInfoRegister();
 
     /*
      * Window Property
@@ -436,6 +444,7 @@ private:
     void NotifyFollowParentRect(bool isFollow);
     void OnGetTargetOrientationConfigInfo(uint32_t targetOrientation);
     void OnRotationChange(int32_t persistentId, bool isRegister);
+    void OnUpdatePiPTemplateInfo(PiPTemplateInfo& pipTemplateInfo);
 
     /*
      * Window Property

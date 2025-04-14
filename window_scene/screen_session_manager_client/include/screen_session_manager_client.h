@@ -104,6 +104,15 @@ public:
 
     void UpdateDisplayScale(ScreenId id, float scaleX, float scaleY, float pivotX, float pivotY, float translateX,
                             float translateY);
+    bool OnExtendDisplayNodeChange(ScreenId firstId, ScreenId secondId) override;
+    bool OnCreateScreenSessionOnly(ScreenId screenId, ScreenId rsId,
+        const std::string& name, bool isExtend) override;
+    bool OnMainDisplayNodeChange(ScreenId mainScreenId, ScreenId extendScreenId, ScreenId extendRSId) override;
+    void SetScreenCombination(ScreenId mainScreenId, ScreenId extendScreenId,
+        ScreenCombination extendCombination) override;
+    std::string OnDumperClientScreenSessions() override;
+    void NotifyExtendScreenCreateFinish();
+
 protected:
     ScreenSessionManagerClient() = default;
     virtual ~ScreenSessionManagerClient() = default;
@@ -112,6 +121,9 @@ private:
     void ConnectToServer();
     bool CheckIfNeedConnectScreen(SessionOption option);
     void OnScreenConnectionChanged(SessionOption option, ScreenEvent screenEvent) override;
+    void HandleScreenConnection(SessionOption option);
+    void HandleScreenDisconnection(SessionOption option);
+    void NotifyClientScreenConnect(sptr<ScreenSession>& screenSession);
     void OnPropertyChanged(ScreenId screenId,
         const ScreenProperty& property, ScreenPropertyChangeReason reason) override;
     void OnPowerStatusChanged(DisplayPowerEvent event, EventStatus status,

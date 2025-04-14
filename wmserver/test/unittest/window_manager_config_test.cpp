@@ -170,7 +170,7 @@ namespace {
  * @tc.type: FUNC
  * @tc.require issueI5N26H
  */
-HWTEST_F(WindowManagerConfigTest, AnimationConfig, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerConfigTest, AnimationConfig, TestSize.Level1)
 {
     WindowManagerConfig::config_ = ReadConfig(XML_STR);
     WindowManagerService::GetInstance().ConfigureWindowManagerService();
@@ -203,7 +203,7 @@ HWTEST_F(WindowManagerConfigTest, AnimationConfig, Function | SmallTest | Level2
  * @tc.desc: maxAppWindowNumber test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerConfigTest, MaxAppWindowNumber, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerConfigTest, MaxAppWindowNumber, TestSize.Level1)
 {
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
@@ -244,7 +244,7 @@ HWTEST_F(WindowManagerConfigTest, MaxAppWindowNumber, Function | SmallTest | Lev
  * @tc.type: FUNC
  * @tc.require: issueI68QCO
  */
-HWTEST_F(WindowManagerConfigTest, DecorConfig01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerConfigTest, DecorConfig01, TestSize.Level1)
 {
     auto& sysConfig = WindowManagerService::GetInstance().systemConfig_;
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
@@ -272,7 +272,7 @@ HWTEST_F(WindowManagerConfigTest, DecorConfig01, Function | SmallTest | Level2)
  * @tc.type: FUNC
  * @tc.require: issueI68QCO
  */
-HWTEST_F(WindowManagerConfigTest, DecorConfig02, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerConfigTest, DecorConfig02, TestSize.Level1)
 {
     auto& sysConfig = WindowManagerService::GetInstance().systemConfig_;
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
@@ -293,7 +293,7 @@ HWTEST_F(WindowManagerConfigTest, DecorConfig02, Function | SmallTest | Level2)
  * @tc.type: FUNC
  * @tc.require: issueI68QCO
  */
-HWTEST_F(WindowManagerConfigTest, DecorConfig03, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerConfigTest, DecorConfig03, TestSize.Level1)
 {
     auto& sysConfig = WindowManagerService::GetInstance().systemConfig_;
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
@@ -314,7 +314,7 @@ HWTEST_F(WindowManagerConfigTest, DecorConfig03, Function | SmallTest | Level2)
  * @tc.type: FUNC
  * @tc.require: issueI68QCO
  */
-HWTEST_F(WindowManagerConfigTest, DecorConfig04, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerConfigTest, DecorConfig04, TestSize.Level1)
 {
     auto& sysConfig = WindowManagerService::GetInstance().systemConfig_;
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
@@ -336,7 +336,7 @@ HWTEST_F(WindowManagerConfigTest, DecorConfig04, Function | SmallTest | Level2)
  * @tc.type: FUNC
  * @tc.require: issueI68QCO
  */
-HWTEST_F(WindowManagerConfigTest, DecorConfig05, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerConfigTest, DecorConfig05, TestSize.Level1)
 {
     auto& sysConfig = WindowManagerService::GetInstance().systemConfig_;
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
@@ -358,7 +358,7 @@ HWTEST_F(WindowManagerConfigTest, DecorConfig05, Function | SmallTest | Level2)
  * @tc.type: FUNC
  * @tc.require: issueI68QCO
  */
-HWTEST_F(WindowManagerConfigTest, DecorConfig06, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerConfigTest, DecorConfig06, TestSize.Level1)
 {
     auto& sysConfig = WindowManagerService::GetInstance().systemConfig_;
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"

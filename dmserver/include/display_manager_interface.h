@@ -49,6 +49,10 @@ public:
         const sptr<IRemoteObject>& displayManagerAgent) = 0;
     virtual DMError DestroyVirtualScreen(ScreenId screenId) = 0;
     virtual DMError SetVirtualScreenSurface(ScreenId screenId, sptr<IBufferProducer> surface) = 0;
+    virtual DMError AddVirtualScreenBlockList(
+        const std::vector<int32_t>& persistentIds) { return DMError::DM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual DMError RemoveVirtualScreenBlockList(
+        const std::vector<int32_t>& persistentIds) { return DMError::DM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual DMError SetScreenPrivacyMaskImage(ScreenId screenId, const std::shared_ptr<Media::PixelMap>& privacyMaskImg)
     {
         return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
@@ -223,7 +227,10 @@ public:
 
     // unique screen
     virtual DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds,
-        std::vector<DisplayId>& displayIds) { return DMError::DM_OK; }
+        std::vector<DisplayId>& displayIds)
+    {
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 
     virtual VirtualScreenFlag GetVirtualScreenFlag(ScreenId screenId)
     {
@@ -293,9 +300,14 @@ public:
         return DMError::DM_OK;
     }
 
-    virtual DMError SetSystemKeyboardStatus(bool isOn = false)
+    virtual DMError SetSystemKeyboardStatus(bool isTpKeyboardOn = false)
     {
         return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    virtual uint32_t GetDeviceStatus()
+    {
+        return 0;
     }
 };
 } // namespace OHOS::Rosen

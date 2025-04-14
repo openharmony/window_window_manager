@@ -237,7 +237,7 @@ namespace {
  * @tc.desc: Read and write avoidArea test
  * @tc.type: FUNC
  */
-HWTEST_F(AvoidAreaControllerTest, AvoidArea01, Function | SmallTest | Level2)
+HWTEST_F(AvoidAreaControllerTest, AvoidArea01, TestSize.Level1)
 {
     AvoidArea avoidarea;
     Parcel parcel;
@@ -251,7 +251,7 @@ HWTEST_F(AvoidAreaControllerTest, AvoidArea01, Function | SmallTest | Level2)
  * @tc.desc: Get avoid areas with TYPE_SYSTEM
  * @tc.type: FUNC
  */
-HWTEST_F(AvoidAreaControllerTest, GetSystemBarAvoidArea01, Function | SmallTest | Level2)
+HWTEST_F(AvoidAreaControllerTest, GetSystemBarAvoidArea01, TestSize.Level1)
 {
     sptr<WindowProperty> property = createWindowProperty(110u, "test",
         WindowType::APP_WINDOW_BASE, WindowMode::WINDOW_MODE_FULLSCREEN, screenRect);
@@ -293,7 +293,7 @@ HWTEST_F(AvoidAreaControllerTest, GetSystemBarAvoidArea01, Function | SmallTest 
  * @tc.desc: Get avoid areas with listener, TYPE_SYSTEM.
  * @tc.type: FUNC
  */
-HWTEST_F(AvoidAreaControllerTest, SystemBarAvoidArea02, Function | SmallTest | Level2)
+HWTEST_F(AvoidAreaControllerTest, SystemBarAvoidArea02, TestSize.Level1)
 {
     sptr<WindowProperty> property = createWindowProperty(110u, "test",
         WindowType::APP_WINDOW_BASE, WindowMode::WINDOW_MODE_FULLSCREEN, screenRect);
@@ -347,7 +347,7 @@ HWTEST_F(AvoidAreaControllerTest, SystemBarAvoidArea02, Function | SmallTest | L
  * @tc.desc: Get avoid areas with listener, TYPE_SYSTEM.
  * @tc.type: FUNC
  */
-HWTEST_F(AvoidAreaControllerTest, SystemBarAvoidArea03, Function | SmallTest | Level2)
+HWTEST_F(AvoidAreaControllerTest, SystemBarAvoidArea03, TestSize.Level1)
 {
     sptr<WindowProperty> property = createWindowProperty(110u, "test",
         WindowType::APP_WINDOW_BASE, WindowMode::WINDOW_MODE_FULLSCREEN, screenRect);
@@ -392,7 +392,7 @@ HWTEST_F(AvoidAreaControllerTest, SystemBarAvoidArea03, Function | SmallTest | L
  * @tc.desc: Get avoid areas with listener, TYPE_SYSTEM.
  * @tc.type: FUNC
  */
-HWTEST_F(AvoidAreaControllerTest, SystemBarAvoidArea01, Function | SmallTest | Level2)
+HWTEST_F(AvoidAreaControllerTest, SystemBarAvoidArea01, TestSize.Level1)
 {
     sptr<WindowProperty> property = createWindowProperty(110u, "test",
         WindowType::APP_WINDOW_BASE, WindowMode::WINDOW_MODE_FULLSCREEN, screenRect);
@@ -459,7 +459,7 @@ HWTEST_F(AvoidAreaControllerTest, SystemBarAvoidArea01, Function | SmallTest | L
  * @tc.desc: Get avoid areas with TYPE_KEYBOARD.
  * @tc.type: FUNC
  */
-HWTEST_F(AvoidAreaControllerTest, KeyboardAvoidArea01, Function | SmallTest | Level2)
+HWTEST_F(AvoidAreaControllerTest, KeyboardAvoidArea01, TestSize.Level1)
 {
     sptr<WindowProperty> property = createWindowProperty(110u, "test",
         WindowType::APP_WINDOW_BASE, WindowMode::WINDOW_MODE_FULLSCREEN, screenRect);
@@ -500,7 +500,7 @@ HWTEST_F(AvoidAreaControllerTest, KeyboardAvoidArea01, Function | SmallTest | Le
  * @tc.desc: Get avoid areas with listener, TYPE_KEYBOARD.
  * @tc.type: FUNC
  */
-HWTEST_F(AvoidAreaControllerTest, KeyboardAvoidArea02, Function | SmallTest | Level2)
+HWTEST_F(AvoidAreaControllerTest, KeyboardAvoidArea02, TestSize.Level1)
 {
     sptr<WindowProperty> property = createWindowProperty(110u, "test",
         WindowType::APP_WINDOW_BASE, WindowMode::WINDOW_MODE_FULLSCREEN, screenRect);
@@ -531,7 +531,7 @@ HWTEST_F(AvoidAreaControllerTest, KeyboardAvoidArea02, Function | SmallTest | Le
  * @tc.desc: Get avoid areas with listener, TYPE_KEYBOARD.
  * @tc.type: FUNC
  */
-HWTEST_F(AvoidAreaControllerTest, UpdateAvoidAreaListener01, Function | SmallTest | Level2)
+HWTEST_F(AvoidAreaControllerTest, UpdateAvoidAreaListener01, TestSize.Level1)
 {
     sptr<WindowProperty> property = createWindowProperty(110u, "test",
         WindowType::APP_WINDOW_BASE, WindowMode::WINDOW_MODE_FULLSCREEN, screenRect);

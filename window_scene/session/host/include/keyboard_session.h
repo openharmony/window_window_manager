@@ -71,6 +71,7 @@ public:
     WSError ChangeKeyboardViewMode(KeyboardViewMode mode) override;
     void SetKeyboardViewModeChangeListener(const NotifyKeyboarViewModeChangeFunc& func) override;
     void SetSkipSelfWhenShowOnVirtualScreen(bool isSkip) override;
+    void SetSkipEventOnCastPlus(bool isSkip) override;
 
 protected:
     void EnableCallingSessionAvoidArea() override;

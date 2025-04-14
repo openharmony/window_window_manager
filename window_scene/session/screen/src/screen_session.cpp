@@ -65,6 +65,7 @@ ScreenSession::ScreenSession(const ScreenSessionConfig& config, ScreenSessionRea
         name_.c_str(), defaultScreenId_, config.mirrorNodeId);
     Rosen::RSDisplayNodeConfig rsConfig;
     bool isNeedCreateDisplayNode = true;
+    property_.SetRsId(rsId_);
     switch (reason) {
         case ScreenSessionReason::CREATE_SESSION_FOR_CLIENT: {
             TLOGI(WmsLogTag::DMS, "create screen session for client. noting to do.");
@@ -145,6 +146,7 @@ ScreenSession::ScreenSession(ScreenId screenId, ScreenId rsId, const std::string
 {
     TLOGI(WmsLogTag::DMS, "Success to create screenSession in constructor_0, screenid is %{public}" PRIu64"",
         screenId_);
+    property_.SetRsId(rsId_);
 }
 
 ScreenSession::ScreenSession(ScreenId screenId, const ScreenProperty& property, ScreenId defaultScreenId)
@@ -152,6 +154,7 @@ ScreenSession::ScreenSession(ScreenId screenId, const ScreenProperty& property, 
 {
     Rosen::RSDisplayNodeConfig config = { .screenId = screenId_ };
     displayNode_ = Rosen::RSDisplayNode::Create(config);
+    property_.SetRsId(rsId_);
     if (displayNode_) {
         TLOGI(WmsLogTag::DMS, "Success to create displayNode in constructor_1, screenid is %{public}" PRIu64"",
             screenId_);
@@ -170,6 +173,7 @@ ScreenSession::ScreenSession(ScreenId screenId, const ScreenProperty& property,
     : screenId_(screenId), defaultScreenId_(defaultScreenId), property_(property)
 {
     rsId_ = screenId;
+    property_.SetRsId(rsId_);
     Rosen::RSDisplayNodeConfig config = { .screenId = screenId_, .isMirrored = true, .mirrorNodeId = nodeId,
         .isSync = true};
     displayNode_ = Rosen::RSDisplayNode::Create(config);
@@ -190,6 +194,7 @@ ScreenSession::ScreenSession(const std::string& name, ScreenId smsId, ScreenId r
     : name_(name), screenId_(smsId), rsId_(rsId), defaultScreenId_(defaultScreenId)
 {
     (void)rsId_;
+    property_.SetRsId(rsId_);
     // 虚拟屏的screen id和rs id不一致，displayNode的创建应使用rs id
     Rosen::RSDisplayNodeConfig config = { .screenId = rsId_ };
     displayNode_ = Rosen::RSDisplayNode::Create(config);
@@ -265,21 +270,22 @@ void ScreenSession::EnableMirrorScreenRegion()
     const auto& mirrorScreenRegionPair = GetMirrorScreenRegion();
     const auto& rect = mirrorScreenRegionPair.second;
     ScreenId screenId = INVALID_SCREEN_ID;
+    bool isEnableRegionRotation = GetIsEnableRegionRotation();
     if (isPhysicalMirrorSwitch_) {
         screenId = screenId_;
     } else {
         screenId = rsId_;
     }
     auto ret = RSInterfaces::GetInstance().SetMirrorScreenVisibleRect(screenId,
-        { rect.posX_, rect.posY_, rect.width_, rect.height_ });
+        { rect.posX_, rect.posY_, rect.width_, rect.height_ }, isEnableRegionRotation);
     if (ret != StatusCode::SUCCESS) {
         TLOGE(WmsLogTag::DMS, "Fail! rsId %{public}" PRIu64", ret:%{public}d," PRIu64
-        ", x:%{public}d y:%{public}d w:%{public}u h:%{public}u", screenId, ret,
-        rect.posX_, rect.posY_, rect.width_, rect.height_);
+        ", x:%{public}d y:%{public}d w:%{public}u h:%{public}u, isEnableRegionRotation:%{public}d", screenId, ret,
+        rect.posX_, rect.posY_, rect.width_, rect.height_, isEnableRegionRotation);
     } else {
         TLOGE(WmsLogTag::DMS, "Success! rsId %{public}" PRIu64", ret:%{public}d," PRIu64
-        ", x:%{public}d y:%{public}d w:%{public}u h:%{public}u", screenId, ret,
-        rect.posX_, rect.posY_, rect.width_, rect.height_);
+        ", x:%{public}d y:%{public}d w:%{public}u h:%{public}u, isEnableRegionRotation:%{public}d", screenId, ret,
+        rect.posX_, rect.posY_, rect.width_, rect.height_, isEnableRegionRotation);
     }
 }
 
@@ -1013,6 +1019,22 @@ void ScreenSession::UpdatePropertyAfterRotation(RRect bounds, int rotation,
     ReportNotifyModeChange(displayOrientation);
 }
 
+void ScreenSession::UpdateDisplayNodeRotation(int rotation)
+{
+    Rotation targetRotation = ConvertIntToRotation(rotation);
+    auto transactionProxy = RSTransactionProxy::GetInstance();
+    if (transactionProxy != nullptr) {
+        transactionProxy->Begin();
+        {
+            std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
+            if (displayNode_ != nullptr) {
+                displayNode_->SetScreenRotation(static_cast<uint32_t>(targetRotation));
+            }
+        }
+        transactionProxy->Commit();
+    }
+}
+
 void ScreenSession::UpdatePropertyOnly(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode, bool isChanged)
 {
     OptimizeSecondaryDisplayMode(bounds, foldDisplayMode);
@@ -1201,6 +1223,11 @@ void ScreenSession::DestroyScreenScene()
 void ScreenSession::SetDensityInCurResolution(float densityInCurResolution)
 {
     property_.SetDensityInCurResolution(densityInCurResolution);
+}
+
+float ScreenSession::GetDensityInCurResolution()
+{
+    return property_.GetDensityInCurResolution();
 }
 
 void ScreenSession::SetDefaultDensity(float defaultDensity)
@@ -1413,6 +1440,7 @@ void ScreenSession::FillScreenInfo(sptr<ScreenInfo> info) const
         TLOGE(WmsLogTag::DMS, "FillScreenInfo failed! info is nullptr");
         return;
     }
+    info->SetRsId(rsId_);
     info->SetScreenId(screenId_);
     info->SetName(name_);
     info->SetIsExtend(GetIsExtend());
@@ -1429,7 +1457,7 @@ void ScreenSession::FillScreenInfo(sptr<ScreenInfo> info) const
             width = screenSessionModes->width_;
         }
     }
-    
+
     float virtualPixelRatio = property_.GetVirtualPixelRatio();
     // "< 1e-set6" means virtualPixelRatio is 0.
     if (fabsf(virtualPixelRatio) < 1e-6) {
@@ -1945,6 +1973,19 @@ void ScreenSession::Resize(uint32_t width, uint32_t height, bool isFreshBoundsSy
     RSTransaction::FlushImplicitTransaction();
 }
 
+void ScreenSession::SetFrameGravity(Gravity gravity)
+{
+    {
+        std::unique_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
+        if (displayNode_ == nullptr) {
+            TLOGE(WmsLogTag::DMS, "displayNode_ is null, setFrameGravity failed");
+            return;
+        }
+        displayNode_->SetFrameGravity(gravity);
+    }
+    RSTransaction::FlushImplicitTransaction();
+}
+
 bool ScreenSession::UpdateAvailableArea(DMRect area)
 {
     if (property_.GetAvailableArea() == area) {
@@ -2168,18 +2209,107 @@ int32_t ScreenSession::GetApiVersion()
     return apiVersion;
 }
 
-void ScreenSession::SetShareProtect(bool needShareProtect)
-{
-    needShareProtect_ = needShareProtect;
-}
-
-bool ScreenSession::GetShareProtect()
-{
-    return needShareProtect_;
-}
-
 float ScreenSession::GetSensorRotation() const
 {
     return currentSensorRotation_;
 }
+
+void ScreenSession::SetIsEnableRegionRotation(bool isEnableRegionRotation)
+{
+    std::lock_guard<std::mutex> lock(isEnableRegionRotationMutex_);
+    isEnableRegionRotation_ = isEnableRegionRotation;
+}
+ 
+bool ScreenSession::GetIsEnableRegionRotation()
+{
+    std::lock_guard<std::mutex> lock(isEnableRegionRotationMutex_);
+    return isEnableRegionRotation_;
+}
+
+DisplayId ScreenSession::GetDisplayId()
+{
+    return screenId_;
+}
+
+void ScreenSession::SetScreenId(ScreenId screenId)
+{
+    screenId_ = screenId;
+}
+
+void ScreenSession::SetDisplayNode(std::shared_ptr<RSDisplayNode> displayNode)
+{
+    std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
+    displayNode_ = displayNode;
+}
+
+void ScreenSession::SetScreenAvailableStatus(bool isScreenAvailable)
+{
+    isScreenAvailable_ = isScreenAvailable;
+}
+
+bool ScreenSession::IsScreenAvailable() const
+{
+    return isScreenAvailable_;
+}
+
+void ScreenSession::SetRSScreenId(ScreenId rsId)
+{
+    rsId_ = rsId;
+}
+
+void ScreenSession::SetScreenProperty(ScreenProperty property)
+{
+    property_ = property;
+}
+
+std::vector<sptr<SupportedScreenModes>> ScreenSession::GetScreenModes()
+{
+    return modes_;
+}
+
+void ScreenSession::SetScreenModes(std::vector<sptr<SupportedScreenModes>> modes)
+{
+    modes_ = modes;
+}
+
+int32_t ScreenSession::GetActiveId()
+{
+    return activeIdx_;
+}
+
+void ScreenSession::SetActiveId(int32_t activeIdx)
+{
+    activeIdx_ = activeIdx;
+}
+
+void ScreenSession::SetScreenOffScreenRendering()
+{
+    TLOGW(WmsLogTag::DMS, "screen off rendering come in.");
+    if (GetIsInternal()) {
+        TLOGW(WmsLogTag::DMS, "screen is internal");
+        return;
+    }
+    if (!GetScreenProperty().GetCurrentOffScreenRendering()) {
+        TLOGI(WmsLogTag::DMS, "rsId: %{public}" PRIu64" not support offScreen rendering", rsId_);
+        return;
+    }
+    uint32_t offWidth = GetScreenProperty().GetBounds().rect_.GetWidth();
+    uint32_t offHeight = GetScreenProperty().GetBounds().rect_.GetHeight();
+    if (GetScreenCombination() == ScreenCombination::SCREEN_MIRROR) {
+        TLOGD(WmsLogTag::DMS, "screen mirror change.");
+        offWidth = GetScreenProperty().GetScreenRealWidth();
+        offHeight = GetScreenProperty().GetScreenRealHeight();
+    }
+    int32_t res = RSInterfaces::GetInstance().SetPhysicalScreenResolution(rsId_, offWidth, offHeight);
+    if (GetScreenCombination() == ScreenCombination::SCREEN_MIRROR) {
+        SetFrameGravity(Rosen::Gravity::TOP_LEFT);
+    } else {
+        SetFrameGravity(Rosen::Gravity::RESIZE);
+        PropertyChange(GetScreenProperty(), ScreenPropertyChangeReason::UNDEFINED);
+    }
+    std::string offScreenResult = (res == StatusCode::SUCCESS) ? "success" : "failed";
+    TLOGW(WmsLogTag::DMS, "rsId=%{public}" PRIu64" offScreen width=%{public}u height=%{public}u %{public}s",
+        rsId_, offWidth, offHeight, offScreenResult.c_str());
+}
+
 } // namespace OHOS::Rosen

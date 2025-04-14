@@ -66,7 +66,7 @@ namespace {
  * @tc.desc: test HandleRecoverAndReconnectSceneSession
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleRecoverAndReconnectSceneSession, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleRecoverAndReconnectSceneSession, TestSize.Level1)
 {
     if (stub_ == nullptr) {
         return;
@@ -112,7 +112,7 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleRecoverAndReconnectSceneSes
  * @tc.desc: test HandlePendingSessionToForeground
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubLifecycleTest, HandlePendingSessionToForeground, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubLifecycleTest, HandlePendingSessionToForeground, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -132,7 +132,7 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandlePendingSessionToForeground,
 HWTEST_F(
     SceneSessionManagerStubLifecycleTest,
     HandlePendingSessionToBackgroundForDelegator,
-    Function | SmallTest | Level2
+    TestSize.Level1
 )
 {
     MessageParcel data;
@@ -150,7 +150,7 @@ HWTEST_F(
  * @tc.desc: test HandleTerminateSessionNew
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleTerminateSessionNew, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleTerminateSessionNew, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -166,7 +166,7 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleTerminateSessionNew, Functi
  * @tc.desc: test HandleSetSessionContinueState
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleSetSessionContinueState, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleSetSessionContinueState, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -185,7 +185,7 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleSetSessionContinueState, Fu
  * @tc.desc: test HandleClearSession
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleClearSession, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleClearSession, TestSize.Level1)
 {
     if (stub_ == nullptr) {
         return;
@@ -209,7 +209,7 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleClearSession, Function | Sm
  * @tc.desc: test HandleClearAllSessions
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleClearAllSessions, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleClearAllSessions, TestSize.Level1)
 {
     if (stub_ == nullptr) {
         return;
@@ -227,7 +227,7 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleClearAllSessions, Function 
  * @tc.desc: test HandleLockSession
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleLockSession, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleLockSession, TestSize.Level1)
 {
     if (stub_ == nullptr) {
         return;
@@ -249,7 +249,7 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleLockSession, Function | Sma
  * @tc.desc: test HandleUnlockSession
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleUnlockSession, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleUnlockSession, TestSize.Level1)
 {
     if (stub_ == nullptr) {
         return;
@@ -271,7 +271,7 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleUnlockSession, Function | S
  * @tc.desc: test HandleMoveSessionsToForeground
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleMoveSessionsToForeground, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleMoveSessionsToForeground, TestSize.Level1)
 {
     if (stub_ == nullptr) {
         return;
@@ -296,7 +296,7 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleMoveSessionsToForeground, F
  * @tc.desc: test HandleMoveSessionsToBackground
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleMoveSessionsToBackground, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleMoveSessionsToBackground, TestSize.Level1)
 {
     if (stub_ == nullptr) {
         return;
@@ -322,7 +322,7 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleMoveSessionsToBackground, F
 HWTEST_F(
     SceneSessionManagerStubLifecycleTest,
     HandleUpdateSessionWindowVisibilityListener,
-    Function | SmallTest | Level2
+    TestSize.Level1
 )
 {
     MessageParcel data;
@@ -340,7 +340,7 @@ HWTEST_F(
  * @tc.desc: test HandleGetVisibilityWindowInfo
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleGetVisibilityWindowInfo, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleGetVisibilityWindowInfo, TestSize.Level1)
 {
     if (stub_ == nullptr) {
         return;

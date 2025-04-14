@@ -75,7 +75,7 @@ namespace {
  * @tc.desc: return OK when show window
  * @tc.type: FUNC
  */
-HWTEST_F(OHWindowTest, ShowWindow01, Function | SmallTest | Level2)
+HWTEST_F(OHWindowTest, ShowWindow01, TestSize.Level1)
 {
     ASSERT_NE(nullptr, scene_);
     ASSERT_NE(nullptr, scene_->GetMainWindow());
@@ -88,7 +88,7 @@ HWTEST_F(OHWindowTest, ShowWindow01, Function | SmallTest | Level2)
  * @tc.desc: return OK when window is shown
  * @tc.type: FUNC
  */
-HWTEST_F(OHWindowTest, IsWindowShowing01, Function | SmallTest | Level2)
+HWTEST_F(OHWindowTest, IsWindowShowing01, TestSize.Level1)
 {
     ASSERT_NE(nullptr, scene_);
     ASSERT_NE(nullptr, scene_->GetMainWindow());
@@ -102,7 +102,7 @@ HWTEST_F(OHWindowTest, IsWindowShowing01, Function | SmallTest | Level2)
  * @tc.desc: OH_WindowManager_GetAllWindowLayoutInfoList test
  * @tc.type: FUNC
  */
-HWTEST_F(OHWindowTest, OH_WindowManager_GetAllWindowLayoutInfoList, Function | SmallTest | Level2)
+HWTEST_F(OHWindowTest, OH_WindowManager_GetAllWindowLayoutInfoList, TestSize.Level0)
 {
     int64_t displayId = -1;
     WindowManager_Rect** windowLayoutInfo = nullptr;

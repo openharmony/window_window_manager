@@ -69,7 +69,7 @@ namespace {
  * @tc.desc: Check if default jpeg is valid file names
  * @tc.type: FUNC
  */
-HWTEST_F(SnapshotUtilsTest, Check01, Function | SmallTest | Level3)
+HWTEST_F(SnapshotUtilsTest, Check01, TestSize.Level1)
 {
     ASSERT_EQ(true, SnapShotUtils::CheckFileNameValid(defaultFile_));
 }
@@ -79,7 +79,7 @@ HWTEST_F(SnapshotUtilsTest, Check01, Function | SmallTest | Level3)
  * @tc.desc: Check custom jpeg is valid file names
  * @tc.type: FUNC
  */
-HWTEST_F(SnapshotUtilsTest, Check02, Function | SmallTest | Level3)
+HWTEST_F(SnapshotUtilsTest, Check02, TestSize.Level1)
 {
     std::string fileName = "/data/local/tmp/test.jpeg";
     ASSERT_EQ(true, SnapShotUtils::CheckFileNameValid(fileName));
@@ -90,7 +90,7 @@ HWTEST_F(SnapshotUtilsTest, Check02, Function | SmallTest | Level3)
  * @tc.desc: Check random path is invalid file names
  * @tc.type: FUNC
  */
-HWTEST_F(SnapshotUtilsTest, Check03, Function | SmallTest | Level3)
+HWTEST_F(SnapshotUtilsTest, Check03, TestSize.Level1)
 {
     std::string fileName1 = "/path/to/test/1.jpeg";
     ASSERT_EQ(false, SnapShotUtils::CheckFileNameValid(fileName1));
@@ -111,7 +111,7 @@ HWTEST_F(SnapshotUtilsTest, Check03, Function | SmallTest | Level3)
  * @tc.desc: RGBA8888 to RGB888 using invalid params
  * @tc.type: FUNC
  */
-HWTEST_F(SnapshotUtilsTest, RGBA8888ToRGB88801, Function | SmallTest | Level3)
+HWTEST_F(SnapshotUtilsTest, RGBA8888ToRGB88801, TestSize.Level1)
 {
     uint8_t rgba8888Buf[RGBA8888BUF_SIZE];
     uint8_t rgb888Buf[RGB888BUF_SIZE];
@@ -126,7 +126,7 @@ HWTEST_F(SnapshotUtilsTest, RGBA8888ToRGB88801, Function | SmallTest | Level3)
  * @tc.desc: RGB565 to RGB888 using invalid params
  * @tc.type: FUNC
  */
-HWTEST_F(SnapshotUtilsTest, RGB565ToRGB888, Function | SmallTest | Level3)
+HWTEST_F(SnapshotUtilsTest, RGB565ToRGB888, TestSize.Level1)
 {
     uint8_t rgb565Buf[RGB565BUF_SIZE];
     uint8_t rgb888Buf[RGB888BUF_SIZE];
@@ -141,7 +141,7 @@ HWTEST_F(SnapshotUtilsTest, RGB565ToRGB888, Function | SmallTest | Level3)
  * @tc.desc: write rgb888 to jpeg using invalid data
  * @tc.type: FUNC
  */
-HWTEST_F(SnapshotUtilsTest, WriteRgb888ToJpeg01, Function | SmallTest | Level3)
+HWTEST_F(SnapshotUtilsTest, WriteRgb888ToJpeg01, TestSize.Level1)
 {
     uint8_t *data = nullptr;
     FILE *file = fopen(defaultFile_.c_str(), "wb");
@@ -157,7 +157,7 @@ HWTEST_F(SnapshotUtilsTest, WriteRgb888ToJpeg01, Function | SmallTest | Level3)
  * @tc.desc: write rgb888 to jpeg using invalid file
  * @tc.type: FUNC
  */
-HWTEST_F(SnapshotUtilsTest, WriteRgb888ToJpeg02, Function | SmallTest | Level3)
+HWTEST_F(SnapshotUtilsTest, WriteRgb888ToJpeg02, TestSize.Level1)
 {
     uint8_t *data = new uint8_t;
     FILE *file = nullptr;
@@ -169,7 +169,7 @@ HWTEST_F(SnapshotUtilsTest, WriteRgb888ToJpeg02, Function | SmallTest | Level3)
  * @tc.desc: Write default jpeg using valid file names and valid PixelMap
  * @tc.type: FUNC
  */
-HWTEST_F(SnapshotUtilsTest, Write01, Function | MediumTest | Level3)
+HWTEST_F(SnapshotUtilsTest, Write01, TestSize.Level1)
 {
     DisplayId id = DisplayManager::GetInstance().GetDefaultDisplayId();
     std::shared_ptr<Media::PixelMap> pixelMap = DisplayManager::GetInstance().GetScreenshot(id);
@@ -182,7 +182,7 @@ HWTEST_F(SnapshotUtilsTest, Write01, Function | MediumTest | Level3)
  * @tc.desc: Write default jpeg using valid file names and valid WriteToJpegParam
  * @tc.type: FUNC
  */
-HWTEST_F(SnapshotUtilsTest, Write02, Function | MediumTest | Level3)
+HWTEST_F(SnapshotUtilsTest, Write02, TestSize.Level1)
 {
     DisplayId id = DisplayManager::GetInstance().GetDefaultDisplayId();
     std::shared_ptr<Media::PixelMap> pixelMap = DisplayManager::GetInstance().GetScreenshot(id);
@@ -202,7 +202,7 @@ HWTEST_F(SnapshotUtilsTest, Write02, Function | MediumTest | Level3)
  * @tc.desc: Write custom jpeg using valid file names and valid WriteToJpegParam
  * @tc.type: FUNC
  */
-HWTEST_F(SnapshotUtilsTest, Write03, Function | MediumTest | Level3)
+HWTEST_F(SnapshotUtilsTest, Write03, TestSize.Level1)
 {
     DisplayId id = DisplayManager::GetInstance().GetDefaultDisplayId();
     std::shared_ptr<Media::PixelMap> pixelMap = DisplayManager::GetInstance().GetScreenshot(id);
@@ -222,7 +222,7 @@ HWTEST_F(SnapshotUtilsTest, Write03, Function | MediumTest | Level3)
  * @tc.desc: Write pixel map with jpeg, using fd
  * @tc.type: FUNC
  */
-HWTEST_F(SnapshotUtilsTest, Write04, Function | MediumTest | Level3)
+HWTEST_F(SnapshotUtilsTest, Write04, TestSize.Level1)
 {
     DisplayId id = DisplayManager::GetInstance().GetDefaultDisplayId();
     std::shared_ptr<Media::PixelMap> pixelMap = DisplayManager::GetInstance().GetScreenshot(id);
@@ -240,7 +240,7 @@ HWTEST_F(SnapshotUtilsTest, Write04, Function | MediumTest | Level3)
  * @tc.desc: Write custom jpeg using invalid file names and valid WriteToJpegParam
  * @tc.type: FUNC
  */
-HWTEST_F(SnapshotUtilsTest, Write05, Function | MediumTest | Level3)
+HWTEST_F(SnapshotUtilsTest, Write05, TestSize.Level1)
 {
     WriteToJpegParam param = {
         .width = 256,
@@ -257,7 +257,7 @@ HWTEST_F(SnapshotUtilsTest, Write05, Function | MediumTest | Level3)
  * @tc.desc: Write custom jpeg using valid file names and invalid WriteToJpegParam
  * @tc.type: FUNC
  */
-HWTEST_F(SnapshotUtilsTest, Write06, Function | MediumTest | Level3)
+HWTEST_F(SnapshotUtilsTest, Write06, TestSize.Level1)
 {
     WriteToJpegParam param = {
         .width = 256,
@@ -274,7 +274,7 @@ HWTEST_F(SnapshotUtilsTest, Write06, Function | MediumTest | Level3)
  * @tc.desc: Write custom jpeg using valid fd and invalid WriteToJpegParam
  * @tc.type: FUNC
  */
-HWTEST_F(SnapshotUtilsTest, Write07, Function | MediumTest | Level3)
+HWTEST_F(SnapshotUtilsTest, Write07, TestSize.Level1)
 {
     WriteToJpegParam param = {
         .width = 256,
@@ -291,7 +291,7 @@ HWTEST_F(SnapshotUtilsTest, Write07, Function | MediumTest | Level3)
  * @tc.desc: Write custom jpeg using invalid file names and valid WriteToJpegParam
  * @tc.type: FUNC
  */
-HWTEST_F(SnapshotUtilsTest, Write08, Function | MediumTest | Level3)
+HWTEST_F(SnapshotUtilsTest, Write08, TestSize.Level1)
 {
     WriteToJpegParam param = {
         .width = 256,
@@ -308,7 +308,7 @@ HWTEST_F(SnapshotUtilsTest, Write08, Function | MediumTest | Level3)
  * @tc.desc: Write custom jpeg using valid file names and invalid WriteToJpegParam
  * @tc.type: FUNC
  */
-HWTEST_F(SnapshotUtilsTest, Write09, Function | MediumTest | Level3)
+HWTEST_F(SnapshotUtilsTest, Write09, TestSize.Level1)
 {
     WriteToJpegParam param = {
         .width = 256,
@@ -325,7 +325,7 @@ HWTEST_F(SnapshotUtilsTest, Write09, Function | MediumTest | Level3)
  * @tc.desc: Write custom jpeg using valid fd and invalid WriteToJpegParam
  * @tc.type: FUNC
  */
-HWTEST_F(SnapshotUtilsTest, Write10, Function | MediumTest | Level3)
+HWTEST_F(SnapshotUtilsTest, Write10, TestSize.Level1)
 {
     WriteToJpegParam param = {
         .width = 256,
@@ -342,7 +342,7 @@ HWTEST_F(SnapshotUtilsTest, Write10, Function | MediumTest | Level3)
  * @tc.desc: Check width and height whether valid
  * @tc.type: FUNC
  */
-HWTEST_F(SnapshotUtilsTest, CheckWHValid, Function | SmallTest | Level3)
+HWTEST_F(SnapshotUtilsTest, CheckWHValid, TestSize.Level1)
 {
     ASSERT_EQ(false, SnapShotUtils::CheckWHValid(0));
     ASSERT_EQ(true, SnapShotUtils::CheckWHValid(DisplayManager::MAX_RESOLUTION_SIZE_SCREENSHOT));
@@ -354,7 +354,7 @@ HWTEST_F(SnapshotUtilsTest, CheckWHValid, Function | SmallTest | Level3)
  * @tc.desc: Check jpeg param whether valid width
  * @tc.type: FUNC
  */
-HWTEST_F(SnapshotUtilsTest, CheckParamValid01, Function | SmallTest | Level3)
+HWTEST_F(SnapshotUtilsTest, CheckParamValid01, TestSize.Level1)
 {
     WriteToJpegParam paramInvalidWidth = {
         .width = DisplayManager::MAX_RESOLUTION_SIZE_SCREENSHOT + 1,
@@ -371,7 +371,7 @@ HWTEST_F(SnapshotUtilsTest, CheckParamValid01, Function | SmallTest | Level3)
  * @tc.desc: Check jpeg param whether valid height
  * @tc.type: FUNC
  */
-HWTEST_F(SnapshotUtilsTest, CheckParamValid02, Function | SmallTest | Level3)
+HWTEST_F(SnapshotUtilsTest, CheckParamValid02, TestSize.Level1)
 {
     WriteToJpegParam paramInvalidHeight = {
         .width = DisplayManager::MAX_RESOLUTION_SIZE_SCREENSHOT,
@@ -388,7 +388,7 @@ HWTEST_F(SnapshotUtilsTest, CheckParamValid02, Function | SmallTest | Level3)
  * @tc.desc: Check jpeg param whether valid stride
  * @tc.type: FUNC
  */
-HWTEST_F(SnapshotUtilsTest, CheckParamValid03, Function | SmallTest | Level3)
+HWTEST_F(SnapshotUtilsTest, CheckParamValid03, TestSize.Level1)
 {
     WriteToJpegParam paramInvalidStride = {
         .width = 256,
@@ -405,7 +405,7 @@ HWTEST_F(SnapshotUtilsTest, CheckParamValid03, Function | SmallTest | Level3)
  * @tc.desc: Check jpeg param whether valid data
  * @tc.type: FUNC
  */
-HWTEST_F(SnapshotUtilsTest, CheckParamValid04, Function | SmallTest | Level3)
+HWTEST_F(SnapshotUtilsTest, CheckParamValid04, TestSize.Level1)
 {
     WriteToJpegParam paramInvalidData = {
         .width = 256,
@@ -422,7 +422,7 @@ HWTEST_F(SnapshotUtilsTest, CheckParamValid04, Function | SmallTest | Level3)
  * @tc.desc: Check jpeg param whether valid data
  * @tc.type: FUNC
  */
-HWTEST_F(SnapshotUtilsTest, CheckParamValid05, Function | SmallTest | Level3)
+HWTEST_F(SnapshotUtilsTest, CheckParamValid05, TestSize.Level1)
 {
     WriteToJpegParam paramInvalidData = {
         .width = 256,
@@ -439,7 +439,7 @@ HWTEST_F(SnapshotUtilsTest, CheckParamValid05, Function | SmallTest | Level3)
  * @tc.desc: Check jpeg param whether valid data
  * @tc.type: FUNC
  */
-HWTEST_F(SnapshotUtilsTest, CheckParamValid06, Function | SmallTest | Level3)
+HWTEST_F(SnapshotUtilsTest, CheckParamValid06, TestSize.Level1)
 {
     WriteToJpegParam paramInvalidData = {
         .width = 256,
@@ -456,7 +456,7 @@ HWTEST_F(SnapshotUtilsTest, CheckParamValid06, Function | SmallTest | Level3)
  * @tc.desc: Check jpeg param whether valid data
  * @tc.type: FUNC
  */
-HWTEST_F(SnapshotUtilsTest, CheckParamValid07, Function | SmallTest | Level3)
+HWTEST_F(SnapshotUtilsTest, CheckParamValid07, TestSize.Level1)
 {
     WriteToJpegParam paramInvalidData = {
         .width = 256,
@@ -473,7 +473,7 @@ HWTEST_F(SnapshotUtilsTest, CheckParamValid07, Function | SmallTest | Level3)
  * @tc.desc: Check jpeg param whether valid data
  * @tc.type: FUNC
  */
-HWTEST_F(SnapshotUtilsTest, CheckParamValid08, Function | SmallTest | Level3)
+HWTEST_F(SnapshotUtilsTest, CheckParamValid08, TestSize.Level1)
 {
     WriteToJpegParam paramInvalidData = {
         .width = 256,
@@ -490,7 +490,7 @@ HWTEST_F(SnapshotUtilsTest, CheckParamValid08, Function | SmallTest | Level3)
  * @tc.desc: Check jpeg param whether valid width and height
  * @tc.type: FUNC
  */
-HWTEST_F(SnapshotUtilsTest, CheckParamValid09, Function | SmallTest | Level3)
+HWTEST_F(SnapshotUtilsTest, CheckParamValid09, TestSize.Level1)
 {
     WriteToJpegParam paramInvalidWidthAndHeight = {
         .width = 0,
@@ -507,7 +507,7 @@ HWTEST_F(SnapshotUtilsTest, CheckParamValid09, Function | SmallTest | Level3)
  * @tc.desc: Check RGBA8888ToRGB888
  * @tc.type: FUNC
  */
-HWTEST_F(SnapshotUtilsTest, ProcessDisplayId01, Function | SmallTest | Level3)
+HWTEST_F(SnapshotUtilsTest, ProcessDisplayId01, TestSize.Level1)
 {
     Rosen::DisplayId displayId = 1;
     bool isDisplayIdSet = false;

@@ -65,7 +65,7 @@ namespace {
  * @tc.desc: context is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(RootSceneTest, LoadContent01, Function | SmallTest | Level3)
+HWTEST_F(RootSceneTest, LoadContent01, TestSize.Level1)
 {
     RootScene rootScene;
     rootScene.LoadContent("a", nullptr, nullptr, nullptr);
@@ -77,12 +77,15 @@ HWTEST_F(RootSceneTest, LoadContent01, Function | SmallTest | Level3)
  * @tc.desc: UpdateViewportConfig Test
  * @tc.type: FUNC
  */
-HWTEST_F(RootSceneTest, UpdateViewportConfig01, Function | SmallTest | Level3)
+HWTEST_F(RootSceneTest, UpdateViewportConfig01, TestSize.Level1)
 {
     RootScene rootScene;
     Rect rect;
 
     rootScene.uiContent_ = nullptr;
+    rootScene.UpdateViewportConfig(rect, WindowSizeChangeReason::UNDEFINED);
+
+    rootScene.uiContent_ = std::make_unique<Ace::UIContentMocker>();
     rootScene.UpdateViewportConfig(rect, WindowSizeChangeReason::UNDEFINED);
 
     rect.width_ = MOCK_LEM_SUB_WIDTH;
@@ -96,12 +99,14 @@ HWTEST_F(RootSceneTest, UpdateViewportConfig01, Function | SmallTest | Level3)
  * @tc.desc: UpdateConfiguration Test
  * @tc.type: FUNC
  */
-HWTEST_F(RootSceneTest, UpdateConfiguration, Function | SmallTest | Level3)
+HWTEST_F(RootSceneTest, UpdateConfiguration, TestSize.Level1)
 {
     RootScene rootScene;
     std::shared_ptr<AppExecFwk::Configuration> configuration = std::make_shared<AppExecFwk::Configuration>();
-
     rootScene.uiContent_ = nullptr;
+    rootScene.UpdateConfiguration(configuration);
+
+    rootScene.uiContent_ = std::make_unique<Ace::UIContentMocker>();
     rootScene.UpdateConfiguration(configuration);
     ASSERT_EQ(1, rootScene.GetWindowId());
 }
@@ -111,7 +116,7 @@ HWTEST_F(RootSceneTest, UpdateConfiguration, Function | SmallTest | Level3)
  * @tc.desc: UpdateConfigurationForSpecified Test
  * @tc.type: FUNC
  */
-HWTEST_F(RootSceneTest, UpdateConfigurationForSpecified, Function | SmallTest | Level3)
+HWTEST_F(RootSceneTest, UpdateConfigurationForSpecified, TestSize.Level1)
 {
     RootScene rootScene;
     std::shared_ptr<AppExecFwk::Configuration> configuration;
@@ -127,7 +132,7 @@ HWTEST_F(RootSceneTest, UpdateConfigurationForSpecified, Function | SmallTest | 
  * @tc.desc: UpdateConfigurationForAll Test
  * @tc.type: FUNC
  */
-HWTEST_F(RootSceneTest, UpdateConfigurationForAll, Function | SmallTest | Level3)
+HWTEST_F(RootSceneTest, UpdateConfigurationForAll, TestSize.Level1)
 {
     RootScene rootScene;
     std::shared_ptr<AppExecFwk::Configuration> configuration = std::make_shared<AppExecFwk::Configuration>();
@@ -148,7 +153,7 @@ HWTEST_F(RootSceneTest, UpdateConfigurationForAll, Function | SmallTest | Level3
  * @tc.desc: RegisterInputEventListener Test
  * @tc.type: FUNC
  */
-HWTEST_F(RootSceneTest, RegisterInputEventListener01, Function | SmallTest | Level3)
+HWTEST_F(RootSceneTest, RegisterInputEventListener01, TestSize.Level1)
 {
     RootScene rootScene;
     rootScene.RegisterInputEventListener();
@@ -160,7 +165,7 @@ HWTEST_F(RootSceneTest, RegisterInputEventListener01, Function | SmallTest | Lev
  * @tc.desc: RequestVsync Test Err
  * @tc.type: FUNC
  */
-HWTEST_F(RootSceneTest, RequestVsyncErr, Function | SmallTest | Level3)
+HWTEST_F(RootSceneTest, RequestVsyncErr, TestSize.Level1)
 {
     RootScene rootScene;
     std::shared_ptr<VsyncCallback> vsyncCallback = std::make_shared<VsyncCallback>();
@@ -173,7 +178,7 @@ HWTEST_F(RootSceneTest, RequestVsyncErr, Function | SmallTest | Level3)
  * @tc.desc: GetVSyncPeriod Test
  * @tc.type: FUNC
  */
-HWTEST_F(RootSceneTest, GetVSyncPeriod, Function | SmallTest | Level3)
+HWTEST_F(RootSceneTest, GetVSyncPeriod, TestSize.Level1)
 {
     RootScene rootScene;
     rootScene.GetVSyncPeriod();
@@ -185,7 +190,7 @@ HWTEST_F(RootSceneTest, GetVSyncPeriod, Function | SmallTest | Level3)
  * @tc.desc: FlushFrameRate Test
  * @tc.type: FUNC
  */
-HWTEST_F(RootSceneTest, FlushFrameRate, Function | SmallTest | Level3)
+HWTEST_F(RootSceneTest, FlushFrameRate, TestSize.Level1)
 {
     RootScene rootScene;
     uint32_t rate = 120;
@@ -199,11 +204,15 @@ HWTEST_F(RootSceneTest, FlushFrameRate, Function | SmallTest | Level3)
  * @tc.desc: SetFrameLayoutFinishCallback Test
  * @tc.type: FUNC
  */
-HWTEST_F(RootSceneTest, SetFrameLayoutFinishCallback, Function | SmallTest | Level3)
+HWTEST_F(RootSceneTest, SetFrameLayoutFinishCallback, TestSize.Level1)
 {
     RootScene rootScene;
-
     rootScene.SetFrameLayoutFinishCallback(nullptr);
+    ASSERT_EQ(rootScene.frameLayoutFinishCb_, nullptr);
+
+    rootScene.uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    rootScene.SetFrameLayoutFinishCallback(nullptr);
+    ASSERT_EQ(rootScene.frameLayoutFinishCb_, nullptr);
     ASSERT_EQ(1, rootScene.GetWindowId());
 }
 
@@ -212,7 +221,7 @@ HWTEST_F(RootSceneTest, SetFrameLayoutFinishCallback, Function | SmallTest | Lev
  * @tc.desc: SetUiDvsyncSwitch Test
  * @tc.type: FUNC
  */
-HWTEST_F(RootSceneTest, SetUiDvsyncSwitchSucc, Function | SmallTest | Level3)
+HWTEST_F(RootSceneTest, SetUiDvsyncSwitchSucc, TestSize.Level1)
 {
     RootScene rootScene;
     rootScene.SetUiDvsyncSwitch(true);
@@ -225,7 +234,7 @@ HWTEST_F(RootSceneTest, SetUiDvsyncSwitchSucc, Function | SmallTest | Level3)
  * @tc.desc: SetUiDvsyncSwitch Test
  * @tc.type: FUNC
  */
-HWTEST_F(RootSceneTest, SetUiDvsyncSwitchErr, Function | SmallTest | Level3)
+HWTEST_F(RootSceneTest, SetUiDvsyncSwitchErr, TestSize.Level1)
 {
     RootScene rootScene;
     rootScene.SetUiDvsyncSwitch(true);
@@ -238,7 +247,7 @@ HWTEST_F(RootSceneTest, SetUiDvsyncSwitchErr, Function | SmallTest | Level3)
  * @tc.desc: IsLastFrameLayoutFinished Test
  * @tc.type: FUNC
  */
-HWTEST_F(RootSceneTest, IsLastFrameLayoutFinished, Function | SmallTest | Level3)
+HWTEST_F(RootSceneTest, IsLastFrameLayoutFinished, TestSize.Level1)
 {
     RootScene rootScene;
     auto ret = rootScene.IsLastFrameLayoutFinished();
@@ -251,7 +260,7 @@ HWTEST_F(RootSceneTest, IsLastFrameLayoutFinished, Function | SmallTest | Level3
  * @tc.desc: OnFlushUIParams Test
  * @tc.type: FUNC
  */
-HWTEST_F(RootSceneTest, OnFlushUIParams, Function | SmallTest | Level3)
+HWTEST_F(RootSceneTest, OnFlushUIParams, TestSize.Level1)
 {
     RootScene rootScene;
     rootScene.OnFlushUIParams();
@@ -263,7 +272,7 @@ HWTEST_F(RootSceneTest, OnFlushUIParams, Function | SmallTest | Level3)
  * @tc.desc: OnBundleUpdated Test
  * @tc.type: FUNC
  */
-HWTEST_F(RootSceneTest, OnBundleUpdated, Function | SmallTest | Level3)
+HWTEST_F(RootSceneTest, OnBundleUpdated, TestSize.Level1)
 {
     RootScene rootScene;
     std::string bundleName = "test";
@@ -276,7 +285,7 @@ HWTEST_F(RootSceneTest, OnBundleUpdated, Function | SmallTest | Level3)
  * @tc.desc: SetDisplayOrientation Test01
  * @tc.type: FUNC
  */
-HWTEST_F(RootSceneTest, SetDisplayOrientationTest01, Function | SmallTest | Level3)
+HWTEST_F(RootSceneTest, SetDisplayOrientationTest01, TestSize.Level1)
 {
     RootScene rootScene;
     int32_t orientation = 0;
@@ -289,7 +298,7 @@ HWTEST_F(RootSceneTest, SetDisplayOrientationTest01, Function | SmallTest | Leve
  * @tc.desc: SetDisplayOrientation Test02
  * @tc.type: FUNC
  */
-HWTEST_F(RootSceneTest, SetDisplayOrientationTest02, Function | SmallTest | Level3)
+HWTEST_F(RootSceneTest, SetDisplayOrientationTest02, TestSize.Level1)
 {
     RootScene rootScene;
     int32_t orientation = 100;
@@ -302,7 +311,7 @@ HWTEST_F(RootSceneTest, SetDisplayOrientationTest02, Function | SmallTest | Leve
  * @tc.desc: RegisterAvoidAreaChangeListener Test
  * @tc.type: FUNC
  */
-HWTEST_F(RootSceneTest, RegisterAvoidAreaChangeListener, Function | SmallTest | Level3)
+HWTEST_F(RootSceneTest, RegisterAvoidAreaChangeListener, TestSize.Level1)
 {
     RootScene rootScene;
     rootScene.updateRootSceneAvoidAreaCallback_ = [] {};
@@ -319,7 +328,7 @@ HWTEST_F(RootSceneTest, RegisterAvoidAreaChangeListener, Function | SmallTest | 
  * @tc.desc: UnregisterAvoidAreaChangeListener Test
  * @tc.type: FUNC
  */
-HWTEST_F(RootSceneTest, UnregisterAvoidAreaChangeListener, Function | SmallTest | Level3)
+HWTEST_F(RootSceneTest, UnregisterAvoidAreaChangeListener, TestSize.Level1)
 {
     RootScene rootScene;
     sptr<IAvoidAreaChangedListener> listener = sptr<IAvoidAreaChangedListener>::MakeSptr();
@@ -335,7 +344,7 @@ HWTEST_F(RootSceneTest, UnregisterAvoidAreaChangeListener, Function | SmallTest 
  * @tc.desc: NotifyAvoidAreaChangeForRoot Test
  * @tc.type: FUNC
  */
-HWTEST_F(RootSceneTest, NotifyAvoidAreaChangeForRoot, Function | SmallTest | Level3)
+HWTEST_F(RootSceneTest, NotifyAvoidAreaChangeForRoot, TestSize.Level1)
 {
     RootScene rootScene;
     sptr<IAvoidAreaChangedListener> listener = sptr<IAvoidAreaChangedListener>::MakeSptr();
@@ -351,7 +360,7 @@ HWTEST_F(RootSceneTest, NotifyAvoidAreaChangeForRoot, Function | SmallTest | Lev
  * @tc.desc: GetAvoidAreaByType Test err
  * @tc.type: FUNC
  */
-HWTEST_F(RootSceneTest, GetAvoidAreaByType, Function | SmallTest | Level3)
+HWTEST_F(RootSceneTest, GetAvoidAreaByType, TestSize.Level1)
 {
     RootScene rootScene;
     AvoidAreaType type = AvoidAreaType::TYPE_SYSTEM_GESTURE;
@@ -367,7 +376,7 @@ HWTEST_F(RootSceneTest, GetAvoidAreaByType, Function | SmallTest | Level3)
  * @tc.desc: GetAvoidAreaByType Test err
  * @tc.type: FUNC
  */
-HWTEST_F(RootSceneTest, GetAvoidAreaByTypeTest, Function | SmallTest | Level3)
+HWTEST_F(RootSceneTest, GetAvoidAreaByTypeTest, TestSize.Level1)
 {
     RootScene rootScene;
     AvoidAreaType type = AvoidAreaType::TYPE_SYSTEM_GESTURE;
@@ -388,7 +397,7 @@ HWTEST_F(RootSceneTest, GetAvoidAreaByTypeTest, Function | SmallTest | Level3)
  * @tc.desc: GetAvoidAreaByType Test err
  * @tc.type: FUNC
  */
-HWTEST_F(RootSceneTest, GetAvoidAreaByTypeTest001, Function | SmallTest | Level3)
+HWTEST_F(RootSceneTest, GetAvoidAreaByTypeTest001, TestSize.Level1)
 {
     RootScene rootScene;
     AvoidAreaType type = AvoidAreaType::TYPE_SYSTEM_GESTURE;
@@ -411,7 +420,7 @@ HWTEST_F(RootSceneTest, GetAvoidAreaByTypeTest001, Function | SmallTest | Level3
  * @tc.desc: UpdateConfigurationSync Test
  * @tc.type: FUNC
  */
-HWTEST_F(RootSceneTest, UpdateConfigurationSync, Function | SmallTest | Level3)
+HWTEST_F(RootSceneTest, UpdateConfigurationSync, TestSize.Level1)
 {
     RootScene rootScene;
     std::shared_ptr<AppExecFwk::Configuration> configuration = std::make_shared<AppExecFwk::Configuration>();
@@ -426,7 +435,7 @@ HWTEST_F(RootSceneTest, UpdateConfigurationSync, Function | SmallTest | Level3)
  * @tc.desc: UpdateConfigurationSyncForAll Test
  * @tc.type: FUNC
  */
-HWTEST_F(RootSceneTest, UpdateConfigurationSyncForAll, Function | SmallTest | Level3)
+HWTEST_F(RootSceneTest, UpdateConfigurationSyncForAll, TestSize.Level1)
 {
     RootScene rootScene;
     std::shared_ptr<AppExecFwk::Configuration> configuration = std::make_shared<AppExecFwk::Configuration>();
@@ -447,7 +456,7 @@ HWTEST_F(RootSceneTest, UpdateConfigurationSyncForAll, Function | SmallTest | Le
  * @tc.desc: IsSystemWindow Test
  * @tc.type: FUNC
  */
-HWTEST_F(RootSceneTest, IsSystemWindow, Function | SmallTest | Level3)
+HWTEST_F(RootSceneTest, IsSystemWindow, TestSize.Level1)
 {
     RootScene rootScene;
     bool res = rootScene.IsSystemWindow();
@@ -459,7 +468,7 @@ HWTEST_F(RootSceneTest, IsSystemWindow, Function | SmallTest | Level3)
  * @tc.desc: IsAppWindow Test
  * @tc.type: FUNC
  */
-HWTEST_F(RootSceneTest, IsAppWindow, Function | SmallTest | Level3)
+HWTEST_F(RootSceneTest, IsAppWindow, TestSize.Level1)
 {
     RootScene rootScene;
     bool res = rootScene.IsAppWindow();
@@ -471,7 +480,7 @@ HWTEST_F(RootSceneTest, IsAppWindow, Function | SmallTest | Level3)
  * @tc.desc: RegisterOccupiedAreaChangeListener Test
  * @tc.type: FUNC
  */
-HWTEST_F(RootSceneTest, RegisterOccupiedAreaChangeListener, Function | SmallTest | Level3)
+HWTEST_F(RootSceneTest, RegisterOccupiedAreaChangeListener, TestSize.Level1)
 {
     RootScene rootScene;
     sptr<IOccupiedAreaChangeListener> listener = sptr<IOccupiedAreaChangeListener>::MakeSptr();
@@ -487,7 +496,7 @@ HWTEST_F(RootSceneTest, RegisterOccupiedAreaChangeListener, Function | SmallTest
  * @tc.desc: UnregisterOccupiedAreaChangeListener Test
  * @tc.type: FUNC
  */
-HWTEST_F(RootSceneTest, UnregisterOccupiedAreaChangeListener, Function | SmallTest | Level3)
+HWTEST_F(RootSceneTest, UnregisterOccupiedAreaChangeListener, TestSize.Level1)
 {
     RootScene rootScene;
     sptr<IOccupiedAreaChangeListener> listener = sptr<IOccupiedAreaChangeListener>::MakeSptr();
@@ -503,7 +512,7 @@ HWTEST_F(RootSceneTest, UnregisterOccupiedAreaChangeListener, Function | SmallTe
  * @tc.desc: NotifyOccupiedAreaChangeForRoot Test
  * @tc.type: FUNC
  */
-HWTEST_F(RootSceneTest, NotifyOccupiedAreaChangeForRoot, Function | SmallTest | Level3)
+HWTEST_F(RootSceneTest, NotifyOccupiedAreaChangeForRoot, TestSize.Level1)
 {
     auto rootScene = sptr<RootScene>::MakeSptr();
     sptr<IOccupiedAreaChangeListener> listener = sptr<IOccupiedAreaChangeListener>::MakeSptr();
@@ -522,7 +531,7 @@ HWTEST_F(RootSceneTest, NotifyOccupiedAreaChangeForRoot, Function | SmallTest | 
  * @tc.desc: For GetRSNodeByStringID Test
  * @tc.type: FUNC
  */
-HWTEST_F(RootSceneTest, GetRSNodeByStringIDTest, Function | SmallTest | Level3)
+HWTEST_F(RootSceneTest, GetRSNodeByStringIDTest, TestSize.Level1)
 {
     string stringId = "GetRSNodeByStringIDTest";
     sptr<RootScene> rootScene = sptr<RootScene>::MakeSptr();
@@ -539,7 +548,7 @@ HWTEST_F(RootSceneTest, GetRSNodeByStringIDTest, Function | SmallTest | Level3)
  * @tc.desc: For GetRSNodeByStringID Test
  * @tc.type: FUNC
  */
-HWTEST_F(RootSceneTest, GetRSNodeByStringIDTest001, Function | SmallTest | Level3)
+HWTEST_F(RootSceneTest, GetRSNodeByStringIDTest001, TestSize.Level1)
 {
     string stringId = "GetRSNodeByStringIDTest";
     sptr<RootScene> rootScene = sptr<RootScene>::MakeSptr();

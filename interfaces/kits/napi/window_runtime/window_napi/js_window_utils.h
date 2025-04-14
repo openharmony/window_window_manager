@@ -282,6 +282,10 @@ const std::map<WindowSizeChangeReason, RectChangeReason> JS_SIZE_CHANGE_REASON {
     { WindowSizeChangeReason::FLOATING_TO_FULL,      RectChangeReason::UNDEFINED  },
     { WindowSizeChangeReason::MAXIMIZE_TO_SPLIT,     RectChangeReason::UNDEFINED  },
     { WindowSizeChangeReason::SPLIT_TO_MAXIMIZE,     RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::SPLIT_DRAG_START,      RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::SPLIT_DRAG,            RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::SPLIT_DRAG_END,        RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::PAGE_ROTATION,         RectChangeReason::UNDEFINED  },
     { WindowSizeChangeReason::END,                   RectChangeReason::UNDEFINED  },
 };
 

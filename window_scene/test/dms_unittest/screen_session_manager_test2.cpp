@@ -65,7 +65,7 @@ namespace {
  * @tc.desc: SwitchScrollParam test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerTest, SwitchScrollParam01, Function | SmallTest | Level3)
+HWTEST_F(ScreenSessionManagerTest, SwitchScrollParam01, TestSize.Level1)
 {
     ScreenSceneConfig::scrollableParams_.clear();
     vector<FoldDisplayMode> displayModeALL = {
@@ -114,7 +114,7 @@ HWTEST_F(ScreenSessionManagerTest, SwitchScrollParam01, Function | SmallTest | L
  * @tc.desc: SwitchScrollParam test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerTest, SwitchScrollParam02, Function | SmallTest | Level3)
+HWTEST_F(ScreenSessionManagerTest, SwitchScrollParam02, TestSize.Level1)
 {
     ScreenSceneConfig::scrollableParams_.clear();
     vector<FoldDisplayMode> displayModeALL = {
@@ -160,12 +160,37 @@ HWTEST_F(ScreenSessionManagerTest, WakeUpPictureFrameBlock, Function | SmallTest
     ASSERT_NE(ssm_, nullptr);
     ssm_->pictureFrameReady_ = false;
     ssm_->pictureFrameBreak_ = false;
+    ssm_->WakeUpPictureFrameBlock(DisplayEvent::SCREEN_LOCK_OFF);
+    ASSERT_EQ(ssm_->pictureFrameReady_, false);
+    ASSERT_EQ(ssm_->pictureFrameBreak_, false);
     ssm_->WakeUpPictureFrameBlock(DisplayEvent::SCREEN_LOCK_START_DREAM);
     ASSERT_EQ(ssm_->pictureFrameReady_, true);
     ssm_->WakeUpPictureFrameBlock(DisplayEvent::SCREEN_LOCK_END_DREAM);
     ASSERT_EQ(ssm_->pictureFrameBreak_, true);
-    ssm_->WakeUpPictureFrameBlock(DisplayEvent::SCREEN_LOCK_OFF);
-    ASSERT_EQ(ssm_->pictureFrameBreak_, false);
+}
+
+/**
+ * @tc.name: AddVirtualScreenBlockList
+ * @tc.desc: AddVirtualScreenBlockList test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, AddVirtualScreenBlockList, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    std::vector<int32_t> persistentIds {0, 1, 2};
+    ASSERT_EQ(DMError::DM_OK, ssm_->AddVirtualScreenBlockList(persistentIds));
+}
+
+/**
+ * @tc.name: RemoveVirtualScreenBlockList
+ * @tc.desc: RemoveVirtualScreenBlockList test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, RemoveVirtualScreenBlockList, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    std::vector<int32_t> persistentIds {0, 1, 2};
+    ASSERT_EQ(DMError::DM_OK, ssm_->RemoveVirtualScreenBlockList(persistentIds));
 }
 
 /**
@@ -185,6 +210,33 @@ HWTEST_F(ScreenSessionManagerTest, WakeUpPictureFrameBlock, Function | SmallTest
 
      ASSERT_EQ(ssm_->pictureFrameReady_, false);
      ASSERT_EQ(ssm_->pictureFrameBreak_, false);
+}
+
+/**
+ * @tc.name: GetCutoutInfoWithRotation01
+ * @tc.desc: GetCutoutInfoWithRotation test with controller nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetCutoutInfoWithRotation01, Function | SmallTest | Level3)
+{
+    DisplayId id = 0;
+    int32_t rotation = 0;
+    ScreenSessionManager::GetInstance().screenCutoutController_ = nullptr;
+    auto cutoutInfo = ScreenSessionManager::GetInstance().GetCutoutInfoWithRotation(id, rotation);
+    ASSERT_EQ(cutoutInfo, nullptr);
+}
+
+/**
+ * @tc.name: GetCutoutInfoWithRotation02
+ * @tc.desc: GetCutoutInfoWithRotation test with controller not nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetCutoutInfoWithRotation02, Function | SmallTest | Level3)
+{
+    DisplayId id = 0;
+    int32_t rotation = 0;
+    auto cutoutInfo = ssm_->GetCutoutInfoWithRotation(id, rotation);
+    ASSERT_NE(cutoutInfo, nullptr);
 }
 }
 }

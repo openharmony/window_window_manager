@@ -201,7 +201,7 @@ public:
     void NotifyDisconnect();
     void NotifyLayoutFinished();
     void NotifyRemoveBlank();
-    void NotifyAddSnapshot();
+    void NotifyAddSnapshot(bool useFfrt = false, bool needPersist = false);
     void NotifyRemoveSnapshot();
     void NotifyExtensionDied() override;
     void NotifyExtensionTimeout(int32_t errorCode) override;
@@ -245,18 +245,29 @@ public:
     void SetSaveSnapshotCallback(Task&& task)
     {
         if (task) {
+            std::lock_guard lock(saveSnapshotCallbackMutex_);
             saveSnapshotCallback_ = std::move(task);
         }
     }
     void SetRemoveSnapshotCallback(Task&& task)
     {
         if (task) {
+            std::lock_guard lock(removeSnapshotCallbackMutex_);
             removeSnapshotCallback_ = std::move(task);
+        }
+    }
+    void SetAddSnapshotCallback(Task&& task)
+    {
+        if (task) {
+            std::lock_guard lock(addSnapshotCallbackMutex_);
+            addSnapshotCallback_ = std::move(task);
         }
     }
 
     SessionState GetSessionState() const;
     virtual void SetSessionState(SessionState state);
+    void SetSessionInfoSupportedWindowModes(
+        const std::vector<AppExecFwk::SupportWindowMode>& updatedWindowModes);
     void SetSessionInfoAncoSceneState(int32_t ancoSceneState);
     void SetSessionInfoTime(const std::string& time);
     void SetSessionInfoAbilityInfo(const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo);
@@ -292,10 +303,15 @@ public:
     std::string GetWindowName() const;
     WSRect GetLastLayoutRect() const;
     WSRect GetLayoutRect() const;
+    bool GetSkipSelfWhenShowOnVirtualScreen() const;
+    DisplayId GetDisplayId() const { return GetSessionProperty()->GetDisplayId(); }
+    DisplayId GetOriginDisplayId() const { return originDisplayId_; }
+    void SetOriginDisplayId(DisplayId displayId);
 
     virtual WSError SetActive(bool active);
     virtual WSError UpdateSizeChangeReason(SizeChangeReason reason);
     SizeChangeReason GetSizeChangeReason() const { return reason_; }
+    bool IsDraggingReason(SizeChangeReason reason) const;
     virtual WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
         const std::string& updateReason, const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     virtual WSError UpdateRectWithLayoutInfo(const WSRect& rect, SizeChangeReason reason,
@@ -303,6 +319,8 @@ public:
         const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {});
     WSError UpdateDensity();
     WSError UpdateOrientation();
+    virtual bool IsDragMoving() const { return false; }
+    virtual bool IsDragZooming() const { return false; }
 
     void SetShowRecent(bool showRecent);
     void SetSystemActive(bool systemActive);
@@ -393,7 +411,7 @@ public:
     void SetContextTransparentFunc(const NotifyContextTransparentFunc& func);
     void NotifyContextTransparent();
     bool NeedCheckContextTransparent() const;
-    
+
     /*
      * Window Rotate Animation
      */
@@ -425,9 +443,10 @@ public:
     void NotifyUIRequestFocus();
     virtual void NotifyUILostFocus();
     WSError NotifyFocusStatus(bool isFocused);
+    void SetExclusivelyHighlighted(bool isExclusivelyHighlighted);
     virtual WSError UpdateHighlightStatus(bool isHighlight, bool needBlockHighlightNotify);
     WSError NotifyHighlightChange(bool isHighlight);
-    void SetExclusivelyHighlighted(bool isExclusivelyHighlighted);
+    WSError GetIsHighlighted(bool& isHighlighted) override;
 
     /*
      * Multi Window
@@ -557,10 +576,9 @@ public:
     void RegisterIsScreenLockedCallback(const std::function<bool()>& callback);
     std::string GetWindowDetectTaskName() const;
     void RemoveWindowDetectTask();
-    WSError SwitchFreeMultiWindow(bool enable);
+    WSError SwitchFreeMultiWindow(const SystemSessionConfig& config);
 
-    virtual bool CheckGetAvoidAreaAvailable(AvoidAreaType type,
-        int32_t apiVersion = API_VERSION_INVALID) { return true; }
+    virtual bool CheckGetAvoidAreaAvailable(AvoidAreaType type) { return true; }
 
     virtual bool IsVisibleForeground() const;
     void SetIsStarting(bool isStarting);
@@ -616,6 +634,8 @@ public:
     DisplayId GetClientDisplayId() const;
     virtual void RegisterNotifySurfaceBoundsChangeFunc(int32_t sessionId, NotifySurfaceBoundsChangeFunc&& func) {};
     virtual void UnregisterNotifySurfaceBoundsChangeFunc(int32_t sessionId) {};
+    virtual bool IsAnyParentSessionDragMoving() const { return false; }
+    virtual bool IsAnyParentSessionDragZooming() const { return false; }
 
     /*
      * Screen Lock
@@ -633,7 +653,7 @@ public:
     sptr<Session> GetMainSession() const;
     sptr<Session> GetMainOrFloatSession() const;
     bool IsPcWindow() const;
-    bool IsAncestorsSession(int ancestorsId) const;
+    bool IsAncestorsSession(int32_t ancestorsId) const;
 
     /**
      * Window Property
@@ -799,6 +819,14 @@ protected:
     DisplayId clientDisplayId_ = 0; // Window displayId on the client
     DisplayId configDisplayId_ = DISPLAY_ID_INVALID;
     SuperFoldStatus lastScreenFoldStatus_ = SuperFoldStatus::UNKNOWN;
+    virtual bool IsNeedConvertToRelativeRect(
+        SizeChangeReason reason = SizeChangeReason::UNDEFINED) const { return false; }
+    virtual WSRect ConvertRelativeRectToGlobal(const WSRect& relativeRect,
+        DisplayId currentDisplayId) const { return { 0, 0, 0, 0 }; }
+    virtual WSRect ConvertGlobalRectToRelative(const WSRect& globalRect,
+        DisplayId targetDisplayId) const { return { 0, 0, 0, 0 }; }
+    bool IsDragStart() const { return isDragStart_; }
+    void SetDragStart(bool isDragStart);
 
     /*
      * Window ZOrder
@@ -811,7 +839,7 @@ protected:
      */
     bool isFocused_ = false;
     bool blockingFocus_ { false };
-    bool isHighlight_ { false };
+    bool isHighlighted_ { false };
 
     uint32_t uiNodeId_ = 0;
     float aspectRatio_ = 0.0f;
@@ -939,6 +967,8 @@ private:
     /*
      * Window Lifecycle
      */
+    void RecordWindowStateAttachExceptionEvent(bool isAttached);
+
     std::atomic<bool> isAttach_ { false };
     std::atomic<bool> isPendingToBackgroundState_ { false };
     std::atomic<bool> isActivatedAfterScreenLocked_ { true };
@@ -964,6 +994,8 @@ private:
     SingleHandTransform singleHandTransform_;
     bool singleHandModeFlag_ = false;
     SingleHandScreenInfo singleHandScreenInfo_;
+    DisplayId originDisplayId_ = DISPLAY_ID_INVALID;
+    bool isDragStart_ = { false };
 
     /*
      * Screen Lock
@@ -975,8 +1007,10 @@ private:
      */
     Task saveSnapshotCallback_ = []() {};
     Task removeSnapshotCallback_ = []() {};
+    Task addSnapshotCallback_ = []() {};
     std::mutex saveSnapshotCallbackMutex_;
     std::mutex removeSnapshotCallbackMutex_;
+    std::mutex addSnapshotCallbackMutex_;
     std::atomic<bool> needNotifyAttachState_ = { false };
 
     /*

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,9 +28,6 @@ const RSAnimationTimingCurve MOVING_CURVE =
     RSAnimationTimingCurve::CreateSpring(static_cast<float>(MOVING_RESPONSE / 1000.0f), MOVING_DAMPING_RATIO, 0.0f);
 
 // throw-slip
-constexpr float TAN_25_DEG = 0.4663; // throw slip angle = 25 deg
-constexpr float VEL_B_THRESHOLD = 1.732; // 1732 dp/s
-constexpr float VEL_C_THRESHOLD = 1.345; // 1345 dp/s
 constexpr float THROW_BACKTRACING_DURATION = 100.0f;
 constexpr int32_t THROW_BACKTRACING_THRESHOLD = 200;
 constexpr float THROW_SLIP_TIME = 416.0f;
@@ -55,8 +52,19 @@ WM_IMPLEMENT_SINGLE_INSTANCE(PcFoldScreenManager);
 void PcFoldScreenManager::UpdateFoldScreenStatus(DisplayId displayId, SuperFoldStatus status,
     const WSRect& defaultDisplayRect, const WSRect& virtualDisplayRect, const WSRect& foldCreaseRect)
 {
+    DisplayId preDisplayId = DEFAULT_DISPLAY_ID;
+    SuperFoldStatus preStatus = SuperFoldStatus::UNKNOWN;
+    {
+        std::unique_lock<std::shared_mutex> lock(displayInfoMutex_);
+        preDisplayId = displayId_;
+        preStatus = screenFoldStatus_;
+    }
     SetDisplayInfo(displayId, status);
     SetDisplayRects(defaultDisplayRect, virtualDisplayRect, foldCreaseRect);
+    if (preDisplayId == displayId && preStatus == status) {
+        return;
+    }
+    ExecuteFoldScreenStatusChangeCallbacks(displayId, status, preStatus);
 }
 
 void PcFoldScreenManager::SetDisplayInfo(DisplayId displayId, SuperFoldStatus status)
@@ -71,7 +79,6 @@ void PcFoldScreenManager::SetDisplayInfo(DisplayId displayId, SuperFoldStatus st
     screenFoldStatus_ = status;
     ResetArrangeRule();
     displayId_ = displayId;
-    ExecuteFoldScreenStatusChangeCallbacks(displayId_, screenFoldStatus_, prevScreenFoldStatus_);
     auto display = DisplayManager::GetInstance().GetDisplayById(displayId);
     if (display == nullptr) {
         TLOGE(WmsLogTag::WMS_MAIN, "Failed to get display");
@@ -84,9 +91,8 @@ void PcFoldScreenManager::SetDisplayInfo(DisplayId displayId, SuperFoldStatus st
 void PcFoldScreenManager::SetDisplayRects(
     const WSRect& defaultDisplayRect, const WSRect& virtualDisplayRect, const WSRect& foldCreaseRect)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "%{public}s, %{public}s, %{public}s",
-        defaultDisplayRect.ToString().c_str(), virtualDisplayRect.ToString().c_str(),
-        foldCreaseRect.ToString().c_str());
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "%{public}s, %{public}s, %{public}s", defaultDisplayRect.ToString().c_str(),
+        virtualDisplayRect.ToString().c_str(), foldCreaseRect.ToString().c_str());
     std::unique_lock<std::shared_mutex> lock(rectsMutex_);
     defaultDisplayRect_ = defaultDisplayRect;
     virtualDisplayRect_ = virtualDisplayRect;
@@ -204,7 +210,7 @@ void PcFoldScreenManager::ResetArrangeRule(const WSRect& rect)
 void PcFoldScreenManager::ResetArrangeRule(ScreenSide side)
 {
     if (side != ScreenSide::FOLD_B && side != ScreenSide::FOLD_C) {
-        TLOGD(WmsLogTag::WMS_LAYOUT, "invalid side: %{public}d", static_cast<int32_t>(side));
+        TLOGD(WmsLogTag::WMS_LAYOUT_PC, "invalid side: %{public}d", static_cast<int32_t>(side));
         return;
     }
     std::unique_lock<std::mutex> lock(arrangedRectsMutex_);
@@ -218,10 +224,10 @@ void PcFoldScreenManager::ResetArrangeRule(ScreenSide side)
 void PcFoldScreenManager::ResizeToFullScreen(WSRect& rect, int32_t topAvoidHeight, int32_t botAvoidHeight)
 {
     ScreenSide side = CalculateScreenSide(rect);
-    TLOGD(WmsLogTag::WMS_LAYOUT, "side: %{public}d, rect: %{public}s",
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "side: %{public}d, rect: %{public}s",
         static_cast<int32_t>(side), rect.ToString().c_str());
     if (side != ScreenSide::FOLD_B && side != ScreenSide::FOLD_C) {
-        TLOGW(WmsLogTag::WMS_LAYOUT, "rule not avaliable, side %{public}d", static_cast<int32_t>(side));
+        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "rule not avaliable, side %{public}d", static_cast<int32_t>(side));
         return;
     }
 
@@ -395,8 +401,14 @@ bool PcFoldScreenManager::ThrowSlipToOppositeSide(ScreenSide startSide, WSRect& 
         rect.posY_ > startLimitRect.posY_) {
         float ratio = static_cast<float>(endLimitRect.height_ - rect.height_) /
             static_cast<float>(startLimitRect.height_ - rect.height_);
-        rect.posY_ = MathHelper::Floor(ratio * static_cast<float>(rect.posY_ - startLimitRect.posY_)) +
-            endLimitRect.posY_;
+        // after mutiple throw-slip, posY converges
+        if (MathHelper::GreatNotEqual(ratio, 1.0f)) {
+            rect.posY_ = MathHelper::Floor(ratio * static_cast<float>(rect.posY_ - startLimitRect.posY_)) +
+                endLimitRect.posY_;
+        } else {
+            rect.posY_ = MathHelper::Ceil(ratio * static_cast<float>(rect.posY_ - startLimitRect.posY_)) +
+                endLimitRect.posY_;
+        }
     } else {
         rect.posY_ = rect.posY_ + endLimitRect.posY_ - startLimitRect.posY_;
     }
@@ -410,7 +422,7 @@ bool PcFoldScreenManager::ThrowSlipToOppositeSide(ScreenSide startSide, WSRect& 
 void PcFoldScreenManager::MappingRectInScreenSide(ScreenSide side, WSRect& rect,
     int32_t topAvoidHeight, int32_t botAvoidHeight)
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT, "side: %{public}d, rect: %{public}s, avoid heights: [%{public}d,%{public}d]",
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "side: %{public}d, rect: %{public}s, avoid heights: [%{public}d,%{public}d]",
         static_cast<int32_t>(side), rect.ToString().c_str(), topAvoidHeight, botAvoidHeight);
     WSRect topLeftLimit = RECT_ZERO;
     WSRect botRightLimit = RECT_ZERO;
@@ -439,7 +451,7 @@ void PcFoldScreenManager::MappingRectInScreenSide(ScreenSide side, WSRect& rect,
                 virtualDisplayRect.posY_ + virtualDisplayRect.height_ - topLeftLimit.posY_ - botAvoidHeight);
             break;
         default:
-            TLOGW(WmsLogTag::WMS_LAYOUT, "invalid side: %{public}d", static_cast<int32_t>(side));
+            TLOGW(WmsLogTag::WMS_LAYOUT_PC, "invalid side: %{public}d", static_cast<int32_t>(side));
             return;
     }
     rect.posX_ = std::max(rect.posX_, topLeftLimit.posX_);
@@ -448,17 +460,17 @@ void PcFoldScreenManager::MappingRectInScreenSide(ScreenSide side, WSRect& rect,
     rect.posY_ = std::min(rect.posY_, botRightLimit.posY_);
     rect.width_ = std::min(rect.width_, botRightLimit.width_);
     rect.height_ = std::min(rect.height_, botRightLimit.height_);
-    TLOGD(WmsLogTag::WMS_LAYOUT, "limit rects: [%{public}s,%{public}s], mapped rect: %{public}s",
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "limit rects: [%{public}s,%{public}s], mapped rect: %{public}s",
         topLeftLimit.ToString().c_str(), botRightLimit.ToString().c_str(), rect.ToString().c_str());
 }
 
 void PcFoldScreenManager::MappingRectInScreenSideWithArrangeRule(ScreenSide side, WSRect& rect,
     int32_t topAvoidHeight, int32_t botAvoidHeight, int32_t titleHeight)
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT, "side: %{public}d, rect: %{public}s",
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "side: %{public}d, rect: %{public}s",
         static_cast<int32_t>(side), rect.ToString().c_str());
     if (side != ScreenSide::FOLD_B && side != ScreenSide::FOLD_C) {
-        TLOGW(WmsLogTag::WMS_LAYOUT, "rule not avaliable, side %{public}d", static_cast<int32_t>(side));
+        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "rule not avaliable, side %{public}d", static_cast<int32_t>(side));
         return;
     }
 
@@ -482,13 +494,13 @@ void PcFoldScreenManager::MappingRectInScreenSideWithArrangeRule(ScreenSide side
         WSRect& lastArrangedRect = (side == ScreenSide::FOLD_B) ? defaultArrangedRect_ : virtualArrangedRect_;
         if (lastArrangedRect.IsEmpty()) {
             ApplyInitArrangeRule(rect, lastArrangedRect, limitRect, titleHeight);
-            TLOGD(WmsLogTag::WMS_LAYOUT, "init rule, limit: %{public}s, arranged: %{public}s, rect: %{public}s",
+            TLOGD(WmsLogTag::WMS_LAYOUT_PC, "init rule, limit: %{public}s, arranged: %{public}s, rect: %{public}s",
                 limitRect.ToString().c_str(), lastArrangedRect.ToString().c_str(), rect.ToString().c_str());
             return;
         }
 
         ApplyArrangeRule(rect, lastArrangedRect, limitRect, titleHeight);
-        TLOGD(WmsLogTag::WMS_LAYOUT, "apply rule, limit: %{public}s, arranged: %{public}s, rect: %{public}s",
+        TLOGD(WmsLogTag::WMS_LAYOUT_PC, "apply rule, limit: %{public}s, arranged: %{public}s, rect: %{public}s",
             limitRect.ToString().c_str(), lastArrangedRect.ToString().c_str(), rect.ToString().c_str());
     }
 }
@@ -500,8 +512,8 @@ void PcFoldScreenManager::MappingRectInScreenSideWithArrangeRule(ScreenSide side
 void PcFoldScreenManager::ApplyInitArrangeRule(WSRect& rect, WSRect& lastArrangedRect,
     const WSRect& limitRect, int32_t titleHeight)
 {
-    rect.posX_ = std::max(limitRect.posX_, limitRect.posX_ + (limitRect.width_ - rect.width_) / 2); // 2: center align
-    rect.posY_ = std::max(limitRect.posY_, limitRect.posY_ + (limitRect.height_ - rect.height_) / 2); // 2: center align
+    rect.posX_ = std::max(limitRect.posX_, limitRect.posX_ + (limitRect.width_ - rect.width_) / 2); // 2:center align
+    rect.posY_ = std::max(limitRect.posY_, limitRect.posY_ + (limitRect.height_ - rect.height_) / 2); // 2:center align
     float vpr = GetVpr();
     lastArrangedRect = { rect.posX_, rect.posY_, RULE_TRANS_X * vpr, titleHeight * vpr };
 }
@@ -531,21 +543,21 @@ void PcFoldScreenManager::ApplyArrangeRule(WSRect& rect, WSRect& lastArrangedRec
 void PcFoldScreenManager::RegisterFoldScreenStatusChangeCallback(int32_t persistentId,
     const std::weak_ptr<FoldScreenStatusChangeCallback>& func)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "id: %{public}d", persistentId);
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "id: %{public}d", persistentId);
     std::unique_lock<std::mutex> lock(callbackMutex_);
     auto [_, result] = foldScreenStatusChangeCallbacks_.insert_or_assign(persistentId, func);
-    if (result) {
-        TLOGW(WmsLogTag::WMS_LAYOUT, "callback has registered");
+    if (!result) {
+        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "callback has registered");
     }
 }
 
 void PcFoldScreenManager::UnregisterFoldScreenStatusChangeCallback(int32_t persistentId)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "id: %{public}d", persistentId);
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "id: %{public}d", persistentId);
     std::unique_lock<std::mutex> lock(callbackMutex_);
     auto iter = foldScreenStatusChangeCallbacks_.find(persistentId);
     if (iter == foldScreenStatusChangeCallbacks_.end()) {
-        TLOGW(WmsLogTag::WMS_LAYOUT, "callback not registered");
+        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "callback not registered");
         return;
     }
     foldScreenStatusChangeCallbacks_.erase(iter);
@@ -558,7 +570,7 @@ void PcFoldScreenManager::ExecuteFoldScreenStatusChangeCallbacks(DisplayId displ
     for (auto iter = foldScreenStatusChangeCallbacks_.begin(); iter != foldScreenStatusChangeCallbacks_.end();) {
         auto callback = iter->second.lock();
         if (callback == nullptr) {
-            TLOGW(WmsLogTag::WMS_LAYOUT, "callback invalid, id: %{public}d", iter->first);
+            TLOGW(WmsLogTag::WMS_LAYOUT_PC, "callback invalid, id: %{public}d", iter->first);
             iter = foldScreenStatusChangeCallbacks_.erase(iter);
             continue;
         }
@@ -573,7 +585,7 @@ void PcFoldScreenManager::RegisterSystemKeyboardStatusChangeCallback(int32_t per
     TLOGI(WmsLogTag::WMS_LAYOUT_PC, "id: %{public}d", persistentId);
     std::unique_lock<std::mutex> lock(callbackMutex_);
     auto [_, result] = systemKeyboardStatusChangeCallbacks_.insert_or_assign(persistentId, func);
-    if (result) {
+    if (!result) {
         TLOGW(WmsLogTag::WMS_LAYOUT_PC, "callback has registered");
     }
 }

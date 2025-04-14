@@ -187,6 +187,10 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleGetWindowIdsByCoordinate(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UPDATE_SESSION_SCREEN_LOCK):
             return HandleUpdateSessionScreenLock(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_ADD_SKIP_SELF_ON_VIRTUAL_SCREEN):
+            return HandleAddSkipSelfWhenShowOnVirtualScreenList(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_REMOVE_SKIP_SELF_ON_VIRTUAL_SCREEN):
+            return HandleRemoveSkipSelfWhenShowOnVirtualScreenList(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_IS_PC_WINDOW):
             return HandleIsPcWindow(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_IS_PC_OR_PAD_FREE_MULTI_WINDOW_MODE):
@@ -215,6 +219,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleMinimizeByWindowId(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_PARENT_WINDOW):
             return HandleSetParentWindow(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_FOREGROUND_WINDOW_NUM):
+            return HandleSetForegroundWindowNum(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1643,6 +1649,58 @@ int SceneSessionManagerStub::HandleUpdateSessionScreenLock(MessageParcel& data, 
     return ERR_NONE;
 }
 
+int SceneSessionManagerStub::HandleAddSkipSelfWhenShowOnVirtualScreenList(MessageParcel& data, MessageParcel& reply)
+{
+    uint64_t size = 0;
+    if (!data.ReadUint64(size)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read size failed.");
+        return ERR_INVALID_DATA;
+    }
+    static constexpr uint64_t MAX_SIZE = 100;
+    if (size > MAX_SIZE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Size too large.");
+        return ERR_INVALID_DATA;
+    }
+    std::vector<int32_t> persistentIds;
+    for (uint64_t i = 0; i < size; i++) {
+        int32_t persistentId = 0;
+        if (!data.ReadInt32(persistentId)) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read persistentId failed.");
+            return ERR_INVALID_DATA;
+        }
+        persistentIds.push_back(persistentId);
+    }
+    WMError errCode = AddSkipSelfWhenShowOnVirtualScreenList(persistentIds);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleRemoveSkipSelfWhenShowOnVirtualScreenList(MessageParcel& data, MessageParcel& reply)
+{
+    uint64_t size = 0;
+    if (!data.ReadUint64(size)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read size failed.");
+        return ERR_INVALID_DATA;
+    }
+    static constexpr uint64_t MAX_SIZE = 100;
+    if (size > MAX_SIZE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Size too large.");
+        return ERR_INVALID_DATA;
+    }
+    std::vector<int32_t> persistentIds;
+    for (uint64_t i = 0; i < size; i++) {
+        int32_t persistentId = 0;
+        if (!data.ReadInt32(persistentId)) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read persistentId failed.");
+            return ERR_INVALID_DATA;
+        }
+        persistentIds.push_back(persistentId);
+    }
+    WMError errCode = RemoveSkipSelfWhenShowOnVirtualScreenList(persistentIds);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
 int SceneSessionManagerStub::HandleIsPcWindow(MessageParcel& data, MessageParcel& reply)
 {
     bool isPcWindow = false;
@@ -1853,6 +1911,21 @@ int SceneSessionManagerStub::HandleMinimizeByWindowId(MessageParcel& data, Messa
     WMError errCode = MinimizeByWindowId(windowIds);
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_LIFE, "Write errCode failed.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleSetForegroundWindowNum(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t windowNum = 0;
+    if (!data.ReadInt32(windowNum)) {
+        TLOGE(WmsLogTag::WMS_PC, "read windowNum failed");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = SetForegroundWindowNum(windowNum);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_PC, "Write errCode failed.");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;

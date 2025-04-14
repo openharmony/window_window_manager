@@ -98,6 +98,7 @@ public:
     WSError UpdatePiPRect(const Rect& rect, SizeChangeReason reason) override;
     WSError UpdatePiPControlStatus(WsPiPControlType controlType, WsPiPControlStatus status) override;
     WSError SetAutoStartPiP(bool isAutoStart, uint32_t priority, uint32_t width, uint32_t height) override;
+    WSError UpdatePiPTemplateInfo(PiPTemplateInfo& pipTemplateInfo) override;
 
     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
     WSError SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
@@ -118,7 +119,6 @@ public:
     int32_t GetStatusBarHeight() override;
     WMError SetSystemWindowEnableDrag(bool enableDrag) override;
     void NotifyExtensionDetachToDisplay() override;
-    WSError RequestFocus(bool isFocused) override;
 
     /*
      * Gesture Back
@@ -153,6 +153,7 @@ public:
     WSError StartMovingWithCoordinate(int32_t offsetX, int32_t offsetY,
         int32_t pointerPosX, int32_t pointerPosY) override;
     WSError OnContainerModalEvent(const std::string& eventName, const std::string& eventValue) override;
+    WSError NotifyFollowParentMultiScreenPolicy(bool enabled) override;
     WSError UpdateFlag(const std::string& flag) override;
 
     /*
@@ -172,6 +173,13 @@ public:
      * window rotation
      */
     WSError UpdateRotationChangeRegistered(int32_t persistentId, bool isRegister) override;
+
+    /*
+     * window focus
+     */
+    WSError RequestFocus(bool isFocused) override;
+    WSError GetIsHighlighted(bool& isHighlighted) override;
+    WMError NotifyDisableDelegatorChange() override;
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;
 };

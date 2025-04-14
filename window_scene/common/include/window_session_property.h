@@ -50,11 +50,14 @@ public:
     void SetTouchable(bool isTouchable);
     void SetDragEnabled(bool dragEnabled);
     void SetHideNonSystemFloatingWindows(bool hide);
+    void SetSkipSelfWhenShowOnVirtualScreen(bool isSkip);
+    void SetSkipEventOnCastPlus(bool isSkip);
     void SetForceHide(bool hide);
     void SetRaiseEnabled(bool raiseEnabled);
     void SetSystemCalling(bool isSystemCalling);
     void SetTurnScreenOn(bool turnScreenOn);
     void SetKeepScreenOn(bool keepScreenOn);
+    void SetViewKeepScreenOn(bool keepScreenOn);
     void SetRequestedOrientation(Orientation orientation, bool needAnimation = true);
     void SetDefaultRequestedOrientation(Orientation orientation);
     void SetPrivacyMode(bool isPrivate);
@@ -121,11 +124,14 @@ public:
     bool GetDragEnabled() const;
     bool GetTouchable() const;
     bool GetHideNonSystemFloatingWindows() const;
+    bool GetSkipSelfWhenShowOnVirtualScreen() const;
+    bool GetSkipEventOnCastPlus() const;
     bool GetForceHide() const;
     bool GetRaiseEnabled() const;
     bool GetSystemCalling() const;
     bool IsTurnScreenOn() const;
     bool IsKeepScreenOn() const;
+    bool IsViewKeepScreenOn() const;
     Orientation GetRequestedOrientation() const;
     bool GetRequestedAnimation() const;
     Orientation GetDefaultRequestedOrientation() const;
@@ -263,8 +269,6 @@ public:
     WindowSizeLimits GetWindowSizeLimits() const;
     void SetIsFullScreenWaterfallMode(bool isFullScreenWaterfallMode);
     bool GetIsFullScreenWaterfallMode() const;
-    void SetIsSaveBySpecifiedFlag(bool isSaveBySpecifiedFlag);
-    bool GetIsSaveBySpecifiedFlag() const;
 
     /*
      * Keyboard
@@ -292,6 +296,7 @@ private:
     static void UnmarshallingKeyboardTouchHotAreas(Parcel& parcel, WindowSessionProperty* property);
     bool WriteActionUpdateTurnScreenOn(Parcel& parcel);
     bool WriteActionUpdateKeepScreenOn(Parcel& parcel);
+    bool WriteActionUpdateViewKeepScreenOn(Parcel& parcel);
     bool WriteActionUpdateFocusable(Parcel& parcel);
     bool WriteActionUpdateTouchable(Parcel& parcel);
     bool WriteActionUpdateSetBrightness(Parcel& parcel);
@@ -321,6 +326,7 @@ private:
     bool WriteActionUpdateExclusivelyHighlighted(Parcel& parcel);
     void ReadActionUpdateTurnScreenOn(Parcel& parcel);
     void ReadActionUpdateKeepScreenOn(Parcel& parcel);
+    void ReadActionUpdateViewKeepScreenOn(Parcel& parcel);
     void ReadActionUpdateFocusable(Parcel& parcel);
     void ReadActionUpdateTouchable(Parcel& parcel);
     void ReadActionUpdateSetBrightness(Parcel& parcel);
@@ -364,6 +370,7 @@ private:
     bool tokenState_ { false };
     bool turnScreenOn_ = false;
     bool keepScreenOn_ = false;
+    bool viewKeepScreenOn_ = false;
     bool topmost_ = false;
     bool mainWindowTopmost_ = false;
     Orientation requestedOrientation_ = Orientation::UNSPECIFIED;
@@ -386,7 +393,7 @@ private:
     WindowLimits userLimits_;
     WindowLimits configLimitsVP_;
     float lastVpr_ = 0.0f;
-    PiPTemplateInfo pipTemplateInfo_ = {0, 0, {}};
+    PiPTemplateInfo pipTemplateInfo_ = {};
     KeyboardLayoutParams keyboardLayoutParams_;
     uint32_t windowModeSupportType_ {WindowModeSupport::WINDOW_MODE_SUPPORT_ALL};
     std::unordered_map<WindowType, SystemBarProperty> sysBarPropMap_ {
@@ -403,6 +410,8 @@ private:
     std::vector<Rect> touchHotAreas_;  // coordinates relative to window.
     KeyboardTouchHotAreas keyboardTouchHotAreas_;  // coordinates relative to window.
     bool hideNonSystemFloatingWindows_ = false;
+    bool isSkipSelfWhenShowOnVirtualScreen_ = false;
+    bool isSkipEventOnCastPlus_ = false;
     bool forceHide_ = false;
     bool keepKeyboardFlag_ = false;
     uint32_t callingSessionId_ = INVALID_SESSION_ID;
@@ -468,7 +477,6 @@ private:
     bool isWindowDelayRaiseEnabled_ = false;
     WindowSizeLimits windowSizeLimits_;
     bool isFullScreenWaterfallMode_ = false;
-    bool isSaveBySpecifiedFlag_ = false;
 
     /*
      * Keyboard

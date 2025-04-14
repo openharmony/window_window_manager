@@ -67,7 +67,7 @@ namespace {
  * @tc.desc: UpdateRect
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplLayoutTest, UpdateRect01, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplLayoutTest, UpdateRect01, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplLayoutTest: UpdateRect01 start";
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
@@ -114,7 +114,7 @@ HWTEST_F(WindowSessionImplLayoutTest, UpdateRect01, Function | SmallTest | Level
  * @tc.desc: UpdateRect
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplLayoutTest, UpdateRect02, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplLayoutTest, UpdateRect02, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplLayoutTest: UpdateRect02 start";
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
@@ -158,7 +158,7 @@ HWTEST_F(WindowSessionImplLayoutTest, UpdateRect02, Function | SmallTest | Level
  * @tc.desc: SetResizeByDragEnabled and check the retCode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplLayoutTest, SetResizeByDragEnabled01, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplLayoutTest, SetResizeByDragEnabled01, TestSize.Level0)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetResizeByDragEnabled01");
@@ -172,7 +172,7 @@ HWTEST_F(WindowSessionImplLayoutTest, SetResizeByDragEnabled01, Function | Small
  * @tc.desc: SetResizeByDragEnabled and check the retCode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplLayoutTest, SetResizeByDragEnabled02, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplLayoutTest, SetResizeByDragEnabled02, TestSize.Level0)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetResizeByDragEnabled02");
@@ -193,7 +193,7 @@ HWTEST_F(WindowSessionImplLayoutTest, SetResizeByDragEnabled02, Function | Small
  * @tc.desc: SetResizeByDragEnabled and check the retCode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplLayoutTest, SetResizeByDragEnabled03, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplLayoutTest, SetResizeByDragEnabled03, TestSize.Level0)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetResizeByDragEnabled03");
@@ -223,7 +223,7 @@ HWTEST_F(WindowSessionImplLayoutTest, SetResizeByDragEnabled03, Function | Small
  * @tc.desc: UpdateViewportConfig
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplLayoutTest, UpdateViewportConfig, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplLayoutTest, UpdateViewportConfig, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplLayoutTest: UpdateViewportConfig start";
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
@@ -262,7 +262,7 @@ HWTEST_F(WindowSessionImplLayoutTest, UpdateViewportConfig, Function | SmallTest
  * @tc.desc: UpdateViewportConfig
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplLayoutTest, UpdateViewportConfig01, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplLayoutTest, UpdateViewportConfig01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("UpdateViewportConfig01");
@@ -289,7 +289,7 @@ HWTEST_F(WindowSessionImplLayoutTest, UpdateViewportConfig01, Function | SmallTe
  * @tc.desc: NotifySingleHandTransformChange
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplLayoutTest, NotifySingleHandTransformChange_TestUIContent, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplLayoutTest, NotifySingleHandTransformChange_TestUIContent, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplLayoutTest: NotifySingleHandTransformChange_TestUIContent start";
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
@@ -305,6 +305,56 @@ HWTEST_F(WindowSessionImplLayoutTest, NotifySingleHandTransformChange_TestUICont
     window->NotifySingleHandTransformChange(testTransform);
     ASSERT_EQ(testTransform.posX, window->singleHandTransform_.posX);
     GTEST_LOG_(INFO) << "WindowSessionImplLayoutTest: NotifySingleHandTransformChange_TestUIContent end";
+}
+
+/**
+ * @tc.name: NotifyTransformChange_TestUIContent
+ * @tc.desc: NotifyTransformChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplLayoutTest, NotifyTransformChange_TestUIContent, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplLayoutTest: NotifyTransformChange_TestUIContent start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifyTransformChange_TestUIContent");
+    option->SetIsUIExtFirstSubWindow(true);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(2025);
+
+    Transform testTransform;
+    window->uiContent_ = nullptr;
+    window->SetNeedRenotifyTransform(true);
+    window->NotifyTransformChange(testTransform);
+    ASSERT_EQ(true, window->IsNeedRenotifyTransform());
+
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    window->SetNeedRenotifyTransform(true);
+    window->NotifyTransformChange(testTransform);
+    ASSERT_EQ(false, window->IsNeedRenotifyTransform());
+    GTEST_LOG_(INFO) << "WindowSessionImplLayoutTest: NotifyTransformChange_TestUIContent end";
+}
+
+/**
+ * @tc.name: NotifyAfterUIContentReady
+ * @tc.desc: NotifyAfterUIContentReady
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplLayoutTest, NotifyAfterUIContentReady, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplLayoutTest: NotifyAfterUIContentReady start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifyAfterUIContentReady");
+    option->SetIsUIExtFirstSubWindow(true);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(2025);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    window->SetNeedRenotifyTransform(false);
+    window->NotifyAfterUIContentReady();
+    ASSERT_EQ(false, window->IsNeedRenotifyTransform());
+    window->SetNeedRenotifyTransform(false);
+    window->NotifyAfterUIContentReady();
+    ASSERT_EQ(false, window->IsNeedRenotifyTransform());
+    GTEST_LOG_(INFO) << "WindowSessionImplLayoutTest: NotifyAfterUIContentReady end";
 }
 }
 } // namespace Rosen

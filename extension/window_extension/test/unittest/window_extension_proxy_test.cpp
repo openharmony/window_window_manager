@@ -69,7 +69,7 @@ namespace {
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionProxyTest, OnWindowReady, Function | SmallTest | Level2)
+HWTEST_F(WindowExtensionProxyTest, OnWindowReady, TestSize.Level1)
 {
     ASSERT_NE(nullptr, windowExtensionClientProxy_);
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
@@ -88,7 +88,7 @@ HWTEST_F(WindowExtensionProxyTest, OnWindowReady, Function | SmallTest | Level2)
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionProxyTest, OnBackPress, Function | SmallTest | Level2)
+HWTEST_F(WindowExtensionProxyTest, OnBackPress, TestSize.Level1)
 {
     ASSERT_NE(nullptr, windowExtensionClientProxy_);
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
@@ -102,7 +102,7 @@ HWTEST_F(WindowExtensionProxyTest, OnBackPress, Function | SmallTest | Level2)
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionProxyTest, OnKeyEvent, Function | SmallTest | Level2)
+HWTEST_F(WindowExtensionProxyTest, OnKeyEvent, TestSize.Level1)
 {
     ASSERT_NE(nullptr, windowExtensionClientProxy_);
     std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
@@ -119,7 +119,7 @@ HWTEST_F(WindowExtensionProxyTest, OnKeyEvent, Function | SmallTest | Level2)
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionProxyTest, OnPointerEvent, Function | SmallTest | Level2)
+HWTEST_F(WindowExtensionProxyTest, OnPointerEvent, TestSize.Level1)
 {
     ASSERT_NE(nullptr, windowExtensionClientProxy_);
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
@@ -136,7 +136,7 @@ HWTEST_F(WindowExtensionProxyTest, OnPointerEvent, Function | SmallTest | Level2
  * @tc.desc: test success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionProxyTest, OnRemoteRequest, Function | SmallTest | Level2)
+HWTEST_F(WindowExtensionProxyTest, OnRemoteRequest, TestSize.Level1)
 {
     uint32_t code = 1000;
     MessageParcel data = {};

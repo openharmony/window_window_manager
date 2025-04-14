@@ -1,0 +1,93 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/test.gni")
+import("//foundation/window/window_manager/windowmanager_aafwk.gni")
+
+module_out_path = "window_manager/window_manager/window_scene/rotation"
+ws_unittest_common = "../:ws_unittest_common"
+
+ohos_unittest("ws_scene_session_rotation_test") {
+  module_out_path = module_out_path
+
+  sources = [ "scene_session_rotation_test.cpp" ]
+
+  deps = [ ws_unittest_common ]
+
+  external_deps = [
+    "ability_base:session_info",
+    "ability_runtime:app_context",
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("ws_session_stage_proxy_rotation_test") {
+  module_out_path = module_out_path
+
+  sources = [ "session_stage_proxy_rotation_test.cpp" ]
+
+  include_dirs = [ "${window_base_path}/window_scene/test/mock" ]
+
+  deps = [ ws_unittest_common ]
+
+  external_deps = [
+    "ability_base:base",
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("ws_session_stage_stub_rotation_test") {
+  module_out_path = module_out_path
+
+  sources = [ "session_stage_stub_rotation_test.cpp" ]
+
+  deps = [ ws_unittest_common ]
+
+  external_deps = [
+    "ability_runtime:app_manager",
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("ws_window_session_property_rotation_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_session_property_rotation_test.cpp" ]
+
+  deps = [ ws_unittest_common ]
+
+  external_deps = [ "c_utils:utils" ]
+}
+
+ohos_unittest("ws_scene_session_manager_rotation_test") {
+  module_out_path = module_out_path
+
+  sources = [ "scene_session_manager_rotation_test.cpp" ]
+
+  deps = [ ws_unittest_common ]
+
+  external_deps = [
+    "ability_base:configuration",
+    "ability_base:session_info",
+    "ability_runtime:ability_context_native",
+    "ability_runtime:mission_info",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "hilog:libhilog",
+  ]
+}

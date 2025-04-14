@@ -69,7 +69,7 @@ namespace {
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(SessionStubMockTest, HandleTransferAccessibilityEvent, Function | SmallTest | Level2)
+HWTEST_F(SessionStubMockTest, HandleTransferAccessibilityEvent, TestSize.Level1)
 {
     WLOGI("HandleTransferAccessibilityEvent begin");
     MessageParcel data;
@@ -92,7 +92,7 @@ HWTEST_F(SessionStubMockTest, HandleTransferAccessibilityEvent, Function | Small
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(SessionStubMockTest, HandleTransferAccessibilityEvent01, Function | SmallTest | Level2)
+HWTEST_F(SessionStubMockTest, HandleTransferAccessibilityEvent01, TestSize.Level1)
 {
     WLOGI("HandleTransferAccessibilityEvent01 begin");
     MessageParcel data;

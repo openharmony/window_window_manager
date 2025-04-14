@@ -19,6 +19,7 @@
 #include "interfaces/include/ws_common.h"
 #include "mock/mock_session_stage.h"
 #include "mock/mock_keyboard_session.h"
+#include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session/host/include/session.h"
 #include "session/host/include/scene_session.h"
 #include "window_helper.h"
@@ -43,7 +44,6 @@ public:
 private:
     sptr<SceneSession> GetSceneSession(const std::string& abilityName, const std::string& bundleName);
     static constexpr uint32_t SPLIT_TEST_SLEEP_S = 1;
-    static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
 
 void KeyboardSessionTest::SetUpTestCase()
@@ -79,10 +79,10 @@ sptr<SceneSession> KeyboardSessionTest::GetSceneSession(const std::string& abili
 namespace {
 /**
  * @tc.name: Show
- * @tc.desc: test function : Show
+ * @tc.desc: test function: Show
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest, GetKeyboardGravity, Function | SmallTest | Level1)
+HWTEST_F(KeyboardSessionTest, GetKeyboardGravity, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "GetKeyboardGravity";
@@ -97,10 +97,10 @@ HWTEST_F(KeyboardSessionTest, GetKeyboardGravity, Function | SmallTest | Level1)
 
 /**
  * @tc.name: Show01
- * @tc.desc: test function : Show
+ * @tc.desc: test function: Show
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest, Show01, Function | SmallTest | Level1)
+HWTEST_F(KeyboardSessionTest, Show01, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "Show01";
@@ -126,10 +126,10 @@ HWTEST_F(KeyboardSessionTest, Show01, Function | SmallTest | Level1)
 
 /**
  * @tc.name: Show02
- * @tc.desc: test function : Show
+ * @tc.desc: test function: Show
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest, Show02, Function | SmallTest | Level1)
+HWTEST_F(KeyboardSessionTest, Show02, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "Show02";
@@ -147,10 +147,10 @@ HWTEST_F(KeyboardSessionTest, Show02, Function | SmallTest | Level1)
 
 /**
  * @tc.name: Show03
- * @tc.desc: test function : Show
+ * @tc.desc: test function: Show
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest, Show03, Function | SmallTest | Level1)
+HWTEST_F(KeyboardSessionTest, Show03, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "Show03";
@@ -171,10 +171,10 @@ HWTEST_F(KeyboardSessionTest, Show03, Function | SmallTest | Level1)
 
 /**
  * @tc.name: Hide
- * @tc.desc: test function : Hide
+ * @tc.desc: test function: Hide
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest, Hide, Function | SmallTest | Level1)
+HWTEST_F(KeyboardSessionTest, Hide, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "Hide";
@@ -196,7 +196,7 @@ HWTEST_F(KeyboardSessionTest, Hide, Function | SmallTest | Level1)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest, Disconnect, Function | SmallTest | Level2)
+HWTEST_F(KeyboardSessionTest, Disconnect, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "Disconnect";
@@ -216,7 +216,7 @@ HWTEST_F(KeyboardSessionTest, Disconnect, Function | SmallTest | Level2)
  * @tc.desc: test system keyboard disconnect
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest, DisConnect01, Function | SmallTest | Level2)
+HWTEST_F(KeyboardSessionTest, DisConnect01, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "DisConnect01";
@@ -245,7 +245,7 @@ HWTEST_F(KeyboardSessionTest, DisConnect01, Function | SmallTest | Level2)
  * @tc.desc: GetSceneSession
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest, GetSceneSession01, Function | SmallTest | Level1)
+HWTEST_F(KeyboardSessionTest, GetSceneSession01, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "GetSceneSession01";
@@ -277,7 +277,7 @@ HWTEST_F(KeyboardSessionTest, GetSceneSession01, Function | SmallTest | Level1)
  * @tc.desc: NotifyOccupiedAreaChangeInfo
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest, NotifyOccupiedAreaChangeInfo, Function | SmallTest | Level1)
+HWTEST_F(KeyboardSessionTest, NotifyOccupiedAreaChangeInfo, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "NotifyOccupiedAreaChangeInfo";
@@ -307,7 +307,7 @@ HWTEST_F(KeyboardSessionTest, NotifyOccupiedAreaChangeInfo, Function | SmallTest
  * @tc.desc: NotifyOccupiedAreaChangeInfo
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest, NotifyOccupiedAreaChangeInfo02, Function | SmallTest | Level1)
+HWTEST_F(KeyboardSessionTest, NotifyOccupiedAreaChangeInfo02, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "NotifyOccupiedAreaChangeInfo02";
@@ -323,11 +323,26 @@ HWTEST_F(KeyboardSessionTest, NotifyOccupiedAreaChangeInfo02, Function | SmallTe
     sptr<SceneSession> callingSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     WSRect rect = { 0, 0, 1260, 2720 };
     WSRect occupiedArea = { 0, 1700, 1260, 1020 };
+
     // test CalculateSafeRectForMidScene
+    WSRect zeroRect =  { 0, 0, 0, 0 };
     callingSession->SetIsMidScene(true);
     keyboardSession->NotifyOccupiedAreaChangeInfo(callingSession, rect, occupiedArea);
-    WSRect lastRect =  { 0, 0, 0, 0 };
-    EXPECT_NE(callingSession->GetLastSafeRect(), lastRect);
+    EXPECT_NE(callingSession->GetLastSafeRect(), zeroRect);
+    callingSession->SetScale(0, 0, 0, 0);
+    keyboardSession->NotifyOccupiedAreaChangeInfo(callingSession, rect, occupiedArea);
+    EXPECT_EQ(callingSession->GetLastSafeRect(), zeroRect);
+    callingSession->SetScale(0, 1, 0, 0);
+    keyboardSession->NotifyOccupiedAreaChangeInfo(callingSession, rect, occupiedArea);
+    EXPECT_EQ(callingSession->GetLastSafeRect(), zeroRect);
+    callingSession->SetScale(1, 0, 0, 0);
+    keyboardSession->NotifyOccupiedAreaChangeInfo(callingSession, rect, occupiedArea);
+    EXPECT_EQ(callingSession->GetLastSafeRect(), zeroRect);
+
+    callingSession->SetScale(1, 1, 0, 0);
+    rect = { 0, 0, 1260, 0 };
+    keyboardSession->NotifyOccupiedAreaChangeInfo(callingSession, rect, occupiedArea);
+    EXPECT_EQ(callingSession->GetLastSafeRect(), zeroRect);
 }
 
 /**
@@ -335,7 +350,7 @@ HWTEST_F(KeyboardSessionTest, NotifyOccupiedAreaChangeInfo02, Function | SmallTe
  * @tc.desc: NotifyRootSceneOccupiedAreaChange
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest, NotifyRootSceneOccupiedAreaChange, Function | SmallTest | Level1)
+HWTEST_F(KeyboardSessionTest, NotifyRootSceneOccupiedAreaChange, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "NotifyRootSceneOccupiedAreaChange";
@@ -361,11 +376,41 @@ HWTEST_F(KeyboardSessionTest, NotifyRootSceneOccupiedAreaChange, Function | Smal
 }
 
 /**
+ * @tc.name: NotifyRootSceneOccupiedAreaChange02
+ * @tc.desc: NotifyRootSceneOccupiedAreaChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest, NotifyRootSceneOccupiedAreaChange02, TestSize.Level0)
+{
+    SessionInfo info;
+    info.abilityName_ = "NotifyRootSceneOccupiedAreaChange02";
+    info.bundleName_ = "NotifyRootSceneOccupiedAreaChange02";
+    sptr<SceneSession::SpecificSessionCallback> specificCb =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    ASSERT_NE(specificCb, nullptr);
+    sptr<KeyboardSession::KeyboardSessionCallback> keyboardCb =
+        sptr<KeyboardSession::KeyboardSessionCallback>::MakeSptr();
+    ASSERT_NE(keyboardCb, nullptr);
+    sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, specificCb, keyboardCb);
+    ASSERT_NE(keyboardSession, nullptr);
+    auto occupiedInfo = sptr<OccupiedAreaChangeInfo>::MakeSptr();
+    ASSERT_NE(occupiedInfo, nullptr);
+    auto ret = 1;
+    keyboardSession->keyboardCallback_->onNotifyOccupiedAreaChange =
+        [&ret](const sptr<OccupiedAreaChangeInfo>& info)->void {
+        ret = 2;
+    };
+    keyboardSession->GetSessionProperty()->SetDisplayId(ScreenSessionManagerClient::GetInstance().GetDefaultScreenId());
+    keyboardSession->NotifyRootSceneOccupiedAreaChange(occupiedInfo);
+    EXPECT_EQ(ret, 2);
+}
+
+/**
  * @tc.name: RestoreCallingSession
  * @tc.desc: RestoreCallingSession
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest, RestoreCallingSession, Function | SmallTest | Level1)
+HWTEST_F(KeyboardSessionTest, RestoreCallingSession, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "RestoreCallingSession";
@@ -406,7 +451,7 @@ HWTEST_F(KeyboardSessionTest, RestoreCallingSession, Function | SmallTest | Leve
  * @tc.desc: RestoreCallingSession
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest, RestoreCallingSession02, Function | SmallTest | Level1)
+HWTEST_F(KeyboardSessionTest, RestoreCallingSession02, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "RestoreCallingSession02";
@@ -432,7 +477,7 @@ HWTEST_F(KeyboardSessionTest, RestoreCallingSession02, Function | SmallTest | Le
  * @tc.desc: UseFocusIdIfCallingSessionIdInvalid
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest, UseFocusIdIfCallingSessionIdInvalid, Function | SmallTest | Level1)
+HWTEST_F(KeyboardSessionTest, UseFocusIdIfCallingSessionIdInvalid, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "UseFocusIdIfCallingSessionIdInvalid";
@@ -461,7 +506,7 @@ HWTEST_F(KeyboardSessionTest, UseFocusIdIfCallingSessionIdInvalid, Function | Sm
  * @tc.desc: UpdateCallingSessionIdAndPosition
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest, UpdateCallingSessionIdAndPosition, Function | SmallTest | Level1)
+HWTEST_F(KeyboardSessionTest, UpdateCallingSessionIdAndPosition, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "UpdateCallingSessionIdAndPosition";
@@ -489,7 +534,7 @@ HWTEST_F(KeyboardSessionTest, UpdateCallingSessionIdAndPosition, Function | Smal
  * @tc.desc: GetFocusedSessionId
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest, GetFocusedSessionId, Function | SmallTest | Level1)
+HWTEST_F(KeyboardSessionTest, GetFocusedSessionId, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "GetFocusedSessionId";
@@ -513,7 +558,7 @@ HWTEST_F(KeyboardSessionTest, GetFocusedSessionId, Function | SmallTest | Level1
  * @tc.desc: OnKeyboardPanelUpdated
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest, OnKeyboardPanelUpdated, Function | SmallTest | Level1)
+HWTEST_F(KeyboardSessionTest, OnKeyboardPanelUpdated, TestSize.Level1)
 {
     WLOGFI("OnKeyboardPanelUpdated begin!");
     int ret = 0;
@@ -556,7 +601,7 @@ HWTEST_F(KeyboardSessionTest, OnKeyboardPanelUpdated, Function | SmallTest | Lev
  * @tc.desc: SetCallingSessionId
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest, SetCallingSessionId, Function | SmallTest | Level1)
+HWTEST_F(KeyboardSessionTest, SetCallingSessionId, TestSize.Level0)
 {
     WLOGFI("SetCallingSessionId begin!");
     SessionInfo info;
@@ -601,11 +646,51 @@ HWTEST_F(KeyboardSessionTest, SetCallingSessionId, Function | SmallTest | Level1
 }
 
 /**
+ * @tc.name: SetCallingSessionId02
+ * @tc.desc: SetCallingSessionId
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest, SetCallingSessionId02, TestSize.Level0)
+{
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "SetCallingSessionId02 begin!");
+    SessionInfo info;
+    info.abilityName_ = "SetCallingSessionId02";
+    info.bundleName_ = "SetCallingSessionId02";
+    sptr<SceneSession::SpecificSessionCallback> specificCb =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    EXPECT_NE(specificCb, nullptr);
+    sptr<KeyboardSession::KeyboardSessionCallback> keyboardCb =
+        sptr<KeyboardSession::KeyboardSessionCallback>::MakeSptr();
+    EXPECT_NE(keyboardCb, nullptr);
+    sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, specificCb, keyboardCb);
+    EXPECT_NE(keyboardSession, nullptr);
+
+    // getCallingSession is not nullptr
+    info.windowType_ = 1; // 1 is main_window_type
+    sptr<SceneSession> callingSession = sptr<SceneSession>::MakeSptr(info, specificCb);
+    EXPECT_NE(callingSession, nullptr);
+    ASSERT_NE(keyboardSession->keyboardCallback_, nullptr);
+    keyboardSession->keyboardCallback_->onGetSceneSession =
+        [callingSession](int32_t persistenId)->sptr<SceneSession> {
+        if (persistenId != 100) { // callingSession's persistentId is 100
+            return nullptr;
+        }
+        return callingSession;
+    };
+    keyboardSession->keyboardCallback_->onGetFocusedSessionId = []()->int32_t {
+        return 100; // focusSession's persistentId is 100
+    };
+    keyboardSession->state_ = SessionState::STATE_FOREGROUND;
+    keyboardSession->SetCallingSessionId(0);
+    ASSERT_EQ(keyboardSession->GetCallingSessionId(), 100); // 100 is callingSessionId
+}
+
+/**
  * @tc.name: GetCallingSessionId
  * @tc.desc: GetCallingSessionId
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest, GetCallingSessionId, Function | SmallTest | Level1)
+HWTEST_F(KeyboardSessionTest, GetCallingSessionId, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "GetCallingSessionId";
@@ -621,7 +706,7 @@ HWTEST_F(KeyboardSessionTest, GetCallingSessionId, Function | SmallTest | Level1
  * @tc.desc: GetCallingSessionId01
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest, GetCallingSessionId01, Function | SmallTest | Level1)
+HWTEST_F(KeyboardSessionTest, GetCallingSessionId01, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "GetCallingSessionId";
@@ -641,7 +726,7 @@ HWTEST_F(KeyboardSessionTest, GetCallingSessionId01, Function | SmallTest | Leve
  * @tc.desc: test NotifySystemKeyboardAvoidChange
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest, NotifySystemKeyboardAvoidChange, Function | SmallTest | Level1)
+HWTEST_F(KeyboardSessionTest, NotifySystemKeyboardAvoidChange, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "NotifySystemKeyboardAvoidChange";
@@ -677,7 +762,7 @@ HWTEST_F(KeyboardSessionTest, NotifySystemKeyboardAvoidChange, Function | SmallT
  * @tc.desc: test ChangeKeyboardViewMode
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest, ChangeKeyboardViewMode, Function | SmallTest | Level1)
+HWTEST_F(KeyboardSessionTest, ChangeKeyboardViewMode, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "ChangeKeyboardViewMode";

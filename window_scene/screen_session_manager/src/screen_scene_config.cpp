@@ -197,7 +197,7 @@ void ScreenSceneConfig::ParseNodeConfig(const xmlNodePtr& currNode)
         (xmlNodeMap_[CURVED_SCREEN_BOUNDARY] == nodeName) ||
         (xmlNodeMap_[CURVED_AREA_IN_LANDSCAPE] == nodeName) ||
         (xmlNodeMap_[BUILD_IN_DEFAULT_ORIENTATION] == nodeName) ||
-        (xmlNodeMap_[DEFAULT_DEVICE_ROTATION_OFFSET] == nodeName)||
+        (xmlNodeMap_[DEFAULT_DEVICE_ROTATION_OFFSET] == nodeName) ||
         (xmlNodeMap_[OFF_SCREEN_PPI_THRESHOLD] == nodeName);
     bool stringConfigCheck = (xmlNodeMap_[DEFAULT_DISPLAY_CUTOUT_PATH] == nodeName) ||
         (xmlNodeMap_[SUB_DISPLAY_CUTOUT_PATH] == nodeName) ||

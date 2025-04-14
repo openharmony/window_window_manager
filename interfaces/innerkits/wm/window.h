@@ -1297,6 +1297,21 @@ public:
     virtual bool IsKeepScreenOn() const { return false; }
 
     /**
+     * @brief Set the view screen always on or not.
+     *
+     * @param keepScreenOn
+     * @return WMError
+     */
+    virtual WMError SetViewKeepScreenOn(bool keepScreenOn) { return WMError::WM_OK; }
+
+    /**
+     * @brief Get the view screen is always on or not.
+     *
+     * @return True means view screen is always on, false means the opposite.
+     */
+    virtual bool IsViewKeepScreenOn() const { return false; }
+
+    /**
      * @brief Set the screen on
      *
      * @param turnScreenOn True means turn screen on, false means the opposite.
@@ -2004,9 +2019,16 @@ public:
     /**
      * @brief Notify caller window orientation set by developer
      *
-     * @param ori Orientation set by developer
+     * @param orientation Orientation set by developer
      */
     virtual void NotifyPreferredOrientationChange(Orientation orientation) {}
+
+    /**
+     * @brief Set developer requested orientation.
+     *
+     * @param orientation Orientation set by developer
+     */
+    virtual void SetPreferredRequestedOrientation(Orientation orientation) {}
 
     /**
      * @brief Register SystemBarProperty listener.
@@ -2176,6 +2198,11 @@ public:
      * @return WMError
      */
     virtual WMError CloseDirectly() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief notify rotation change result.
+     */
+    virtual void NotifyRotationChangeResult(RotationChangeResult rotationChangeResult) {}
 
     /**
      * @brief start move main window. It is called by ACE when title is moved.
@@ -2954,6 +2981,16 @@ public:
     }
 
     /**
+     * @brief Set whether the sub window supports simultaneous display on multiple screens
+     *        when the parent window is dragged to move or dragged to zoom.
+     *
+     * @param enabled The value true means sub window supports simultaneous display on multiple screens
+     *                when the parent window is dragged to move or dragged to zoom, and false means the opposite.
+     * @return WM_OK means set success, others means failed.
+     */
+    virtual WMError SetFollowParentMultiScreenPolicy(bool enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;}
+
+    /**
      * @brief Get the rect of host window.
      *
      * @param hostWindowId window Id of the host window.
@@ -3279,6 +3316,20 @@ public:
     virtual WindowType GetParentWindowType() const { return WindowType::WINDOW_TYPE_APP_MAIN_WINDOW; }
 
     /**
+     * @brief Get the root host window type of UIExtension.
+     *
+     * @return WindowType of the root host window.
+     */
+    virtual WindowType GetRootHostWindowType() const { return WindowType::WINDOW_TYPE_APP_MAIN_WINDOW; }
+
+    /**
+     * @brief Set the root host window type of UIExtension.
+     *
+     * @param WindowType of the root host window.
+     */
+    virtual void SetRootHostWindowType(WindowType& rootHostWindowType) {}
+
+    /**
      * @brief Notify modal UIExtension it may be covered
      *
      * @param byLoadContent True when called by loading content, false when called by creating non topmost subwindow
@@ -3584,6 +3635,13 @@ public:
      * @return true means subwindow support maximize, others means do not support.
      */
     virtual bool IsSubWindowMaximizeSupported() const { return false; }
+
+    /**
+     * @brief Update the pipTemplateInfo.
+     *
+     * @param pipTemplateInfo the pipTemplateInfo of pip window
+     */
+    virtual void UpdatePiPTemplateInfo(PiPTemplateInfo& pipTemplateInfo) {}
 
     /**
      * @brief Register keyboard show animation completion listener.

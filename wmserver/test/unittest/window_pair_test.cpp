@@ -60,7 +60,7 @@ namespace {
  * @tc.desc: Send split screen event to notify create recent view.
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPairTest, NotifyShowRecent01, Function | SmallTest | Level2)
+HWTEST_F(WindowPairTest, NotifyShowRecent01, TestSize.Level1)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
     windowPair->primary_ = nullptr;
@@ -84,7 +84,7 @@ HWTEST_F(WindowPairTest, NotifyShowRecent01, Function | SmallTest | Level2)
  * @tc.desc: Send split screen event to notify create or destroy divider window.
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPairTest, NotifyCreateOrDestroyDivider01, Function | SmallTest | Level2)
+HWTEST_F(WindowPairTest, NotifyCreateOrDestroyDivider01, TestSize.Level1)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
     windowPair->primary_ = nullptr;
@@ -104,7 +104,7 @@ HWTEST_F(WindowPairTest, NotifyCreateOrDestroyDivider01, Function | SmallTest | 
  * @tc.desc: Get whether the window pair is paired
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPairTest, IsPaired01, Function | SmallTest | Level2)
+HWTEST_F(WindowPairTest, IsPaired01, TestSize.Level1)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
     windowPair->primary_ = nullptr;
@@ -119,7 +119,7 @@ HWTEST_F(WindowPairTest, IsPaired01, Function | SmallTest | Level2)
  * @tc.desc: Get whether the window pair is paired
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPairTest, IsPaired02, Function | SmallTest | Level2)
+HWTEST_F(WindowPairTest, IsPaired02, TestSize.Level1)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
     sptr<WindowProperty> property1 = new WindowProperty();
@@ -140,7 +140,7 @@ HWTEST_F(WindowPairTest, IsPaired02, Function | SmallTest | Level2)
  * @tc.desc: Get whether the window pair is paired
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPairTest, IsPaired03, Function | SmallTest | Level2)
+HWTEST_F(WindowPairTest, IsPaired03, TestSize.Level1)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
     sptr<WindowProperty> property1 = new WindowProperty();
@@ -161,7 +161,7 @@ HWTEST_F(WindowPairTest, IsPaired03, Function | SmallTest | Level2)
  * @tc.desc: Find window node from window pair
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPairTest, Find01, Function | SmallTest | Level2)
+HWTEST_F(WindowPairTest, Find01, TestSize.Level1)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
     sptr<WindowNode> node1 = nullptr;
@@ -173,7 +173,7 @@ HWTEST_F(WindowPairTest, Find01, Function | SmallTest | Level2)
  * @tc.desc: Find window node from window pair
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPairTest, Find02, Function | SmallTest | Level2)
+HWTEST_F(WindowPairTest, Find02, TestSize.Level1)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
     sptr<WindowProperty> property1 = new WindowProperty();
@@ -188,7 +188,7 @@ HWTEST_F(WindowPairTest, Find02, Function | SmallTest | Level2)
  * @tc.desc: Find window node from window pair
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPairTest, Find03, Function | SmallTest | Level2)
+HWTEST_F(WindowPairTest, Find03, TestSize.Level1)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
     sptr<WindowProperty> property1 = new WindowProperty();
@@ -204,7 +204,7 @@ HWTEST_F(WindowPairTest, Find03, Function | SmallTest | Level2)
  * @tc.desc: Find window node from window pair
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPairTest, Find04, Function | SmallTest | Level2)
+HWTEST_F(WindowPairTest, Find04, TestSize.Level1)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
     sptr<WindowProperty> property1 = new WindowProperty();
@@ -221,7 +221,7 @@ HWTEST_F(WindowPairTest, Find04, Function | SmallTest | Level2)
  * @tc.desc: Get split ratio
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPairTest, GetSplitRatio01, Function | SmallTest | Level2)
+HWTEST_F(WindowPairTest, GetSplitRatio01, TestSize.Level1)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
     windowPair->ratio_ = 0;
@@ -235,7 +235,7 @@ HWTEST_F(WindowPairTest, GetSplitRatio01, Function | SmallTest | Level2)
  * @tc.desc: Get whether dock slice is forbidden to move
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPairTest, IsForbidDockSliceMove01, Function | SmallTest | Level2)
+HWTEST_F(WindowPairTest, IsForbidDockSliceMove01, TestSize.Level1)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
     windowPair->status_ = WindowPairStatus::PAIRED_DONE;
@@ -249,7 +249,7 @@ HWTEST_F(WindowPairTest, IsForbidDockSliceMove01, Function | SmallTest | Level2)
  * @tc.desc: Get whether dock slice is forbidden to move
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPairTest, IsForbidDockSliceMove02, Function | SmallTest | Level2)
+HWTEST_F(WindowPairTest, IsForbidDockSliceMove02, TestSize.Level1)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
     windowPair->status_ = WindowPairStatus::PAIRED_DONE;
@@ -265,7 +265,7 @@ HWTEST_F(WindowPairTest, IsForbidDockSliceMove02, Function | SmallTest | Level2)
  * @tc.desc: Get whether dock slice is forbidden to move
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPairTest, IsForbidDockSliceMove03, Function | SmallTest | Level2)
+HWTEST_F(WindowPairTest, IsForbidDockSliceMove03, TestSize.Level1)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
     windowPair->status_ = WindowPairStatus::PAIRED_DONE;
@@ -281,7 +281,7 @@ HWTEST_F(WindowPairTest, IsForbidDockSliceMove03, Function | SmallTest | Level2)
  * @tc.desc: Get whether dock slice is forbidden to move
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPairTest, IsForbidDockSliceMove04, Function | SmallTest | Level2)
+HWTEST_F(WindowPairTest, IsForbidDockSliceMove04, TestSize.Level1)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
     windowPair->status_ = WindowPairStatus::PAIRED_DONE;
@@ -297,7 +297,7 @@ HWTEST_F(WindowPairTest, IsForbidDockSliceMove04, Function | SmallTest | Level2)
  * @tc.desc: Get whether dock slice is forbidden to move
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPairTest, IsForbidDockSliceMove05, Function | SmallTest | Level2)
+HWTEST_F(WindowPairTest, IsForbidDockSliceMove05, TestSize.Level1)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
     windowPair->status_ = WindowPairStatus::PAIRED_DONE;
@@ -313,7 +313,7 @@ HWTEST_F(WindowPairTest, IsForbidDockSliceMove05, Function | SmallTest | Level2)
  * @tc.desc: Get whether dock slice is forbidden to move
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPairTest, IsForbidDockSliceMove06, Function | SmallTest | Level2)
+HWTEST_F(WindowPairTest, IsForbidDockSliceMove06, TestSize.Level1)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
     windowPair->status_ = WindowPairStatus::PAIRED_DONE;
@@ -331,7 +331,7 @@ HWTEST_F(WindowPairTest, IsForbidDockSliceMove06, Function | SmallTest | Level2)
  * @tc.desc: whether dock slice in exit split screen mode area
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPairTest, IsDockSliceInExitSplitModeArea01, Function | SmallTest | Level2)
+HWTEST_F(WindowPairTest, IsDockSliceInExitSplitModeArea01, TestSize.Level1)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
     std::vector<int32_t> points {0, 0};
@@ -344,7 +344,7 @@ HWTEST_F(WindowPairTest, IsDockSliceInExitSplitModeArea01, Function | SmallTest 
  * @tc.desc: whether dock slice in exit split screen mode area
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPairTest, IsDockSliceInExitSplitModeArea02, Function | SmallTest | Level2)
+HWTEST_F(WindowPairTest, IsDockSliceInExitSplitModeArea02, TestSize.Level1)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
     std::vector<int32_t> points {2, 0};
@@ -375,7 +375,7 @@ HWTEST_F(WindowPairTest, IsDockSliceInExitSplitModeArea02, Function | SmallTest 
  * @tc.desc: whether dock slice in exit split screen mode area
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPairTest, IsDockSliceInExitSplitModeArea03, Function | SmallTest | Level2)
+HWTEST_F(WindowPairTest, IsDockSliceInExitSplitModeArea03, TestSize.Level1)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
     std::vector<int32_t> points {0, 50};
@@ -401,7 +401,7 @@ HWTEST_F(WindowPairTest, IsDockSliceInExitSplitModeArea03, Function | SmallTest 
  * @tc.desc: Gets whether the window is related to split window.
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPairTest, IsSplitRelated01, Function | SmallTest | Level2)
+HWTEST_F(WindowPairTest, IsSplitRelated01, TestSize.Level1)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
     sptr<WindowNode> node = nullptr;
@@ -413,7 +413,7 @@ HWTEST_F(WindowPairTest, IsSplitRelated01, Function | SmallTest | Level2)
  * @tc.desc: Gets whether the window is related to split window.
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPairTest, IsSplitRelated02, Function | SmallTest | Level2)
+HWTEST_F(WindowPairTest, IsSplitRelated02, TestSize.Level1)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
     sptr<WindowProperty> property1 = new WindowProperty();
@@ -435,7 +435,7 @@ HWTEST_F(WindowPairTest, IsSplitRelated02, Function | SmallTest | Level2)
  * @tc.desc: Get all window node form pair in Z order.
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPairTest, GetOrderedPair01, Function | SmallTest | Level2)
+HWTEST_F(WindowPairTest, GetOrderedPair01, TestSize.Level1)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
     sptr<WindowNode> node1 = nullptr;
@@ -449,7 +449,7 @@ HWTEST_F(WindowPairTest, GetOrderedPair01, Function | SmallTest | Level2)
  * @tc.desc: Get all window node form pair in Z order.
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPairTest, GetOrderedPair02, Function | SmallTest | Level2)
+HWTEST_F(WindowPairTest, GetOrderedPair02, TestSize.Level1)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
 
@@ -481,7 +481,7 @@ HWTEST_F(WindowPairTest, GetOrderedPair02, Function | SmallTest | Level2)
  * @tc.desc: Get all window node form pair in Z order.
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPairTest, GetOrderedPair03, Function | SmallTest | Level2)
+HWTEST_F(WindowPairTest, GetOrderedPair03, TestSize.Level1)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
 
@@ -513,7 +513,7 @@ HWTEST_F(WindowPairTest, GetOrderedPair03, Function | SmallTest | Level2)
  * @tc.desc: Get all window node form pair in Z order.
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPairTest, GetOrderedPair04, Function | SmallTest | Level2)
+HWTEST_F(WindowPairTest, GetOrderedPair04, TestSize.Level1)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
     // create window property
@@ -542,7 +542,7 @@ HWTEST_F(WindowPairTest, GetOrderedPair04, Function | SmallTest | Level2)
  * @tc.desc: Get all window node form pair in Z order.
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPairTest, GetOrderedPair05, Function | SmallTest | Level2)
+HWTEST_F(WindowPairTest, GetOrderedPair05, TestSize.Level1)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
     // create window property
@@ -571,7 +571,7 @@ HWTEST_F(WindowPairTest, GetOrderedPair05, Function | SmallTest | Level2)
  * @tc.desc: Get all window node form pair in Z order.
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPairTest, GetOrderedPair06, Function | SmallTest | Level2)
+HWTEST_F(WindowPairTest, GetOrderedPair06, TestSize.Level1)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
     // create window property
@@ -600,7 +600,7 @@ HWTEST_F(WindowPairTest, GetOrderedPair06, Function | SmallTest | Level2)
  * @tc.desc: Get all window node form pair in Z order.
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPairTest, GetOrderedPair07, Function | SmallTest | Level2)
+HWTEST_F(WindowPairTest, GetOrderedPair07, TestSize.Level1)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
     // create window property
@@ -629,7 +629,7 @@ HWTEST_F(WindowPairTest, GetOrderedPair07, Function | SmallTest | Level2)
  * @tc.desc: Get all window node form pair.
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPairTest, GetPairedWindows01, Function | SmallTest | Level2)
+HWTEST_F(WindowPairTest, GetPairedWindows01, TestSize.Level1)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
     sptr<WindowProperty> property0 = new WindowProperty();
@@ -656,7 +656,7 @@ HWTEST_F(WindowPairTest, GetPairedWindows01, Function | SmallTest | Level2)
  * @tc.desc: Clear window pair.
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPairTest, Clear01, Function | SmallTest | Level2)
+HWTEST_F(WindowPairTest, Clear01, TestSize.Level1)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
     sptr<WindowProperty> property0 = new WindowProperty();
@@ -674,7 +674,7 @@ HWTEST_F(WindowPairTest, Clear01, Function | SmallTest | Level2)
  * @tc.desc: Update pair status
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPairTest, UpdateWindowPairStatus01, Function | SmallTest | Level2)
+HWTEST_F(WindowPairTest, UpdateWindowPairStatus01, TestSize.Level1)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
     sptr<WindowProperty> property0 = new WindowProperty();
@@ -696,7 +696,7 @@ HWTEST_F(WindowPairTest, UpdateWindowPairStatus01, Function | SmallTest | Level2
  * @tc.desc: Update pair status
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPairTest, UpdateWindowPairStatus02, Function | SmallTest | Level2)
+HWTEST_F(WindowPairTest, UpdateWindowPairStatus02, TestSize.Level1)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
     sptr<WindowProperty> property0 = new WindowProperty();
@@ -718,7 +718,7 @@ HWTEST_F(WindowPairTest, UpdateWindowPairStatus02, Function | SmallTest | Level2
  * @tc.desc: Update pair status
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPairTest, UpdateWindowPairStatus03, Function | SmallTest | Level2)
+HWTEST_F(WindowPairTest, UpdateWindowPairStatus03, TestSize.Level1)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
     sptr<WindowProperty> property0 = new WindowProperty();
@@ -743,7 +743,7 @@ HWTEST_F(WindowPairTest, UpdateWindowPairStatus03, Function | SmallTest | Level2
  * @tc.desc: Update pair status
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPairTest, UpdateWindowPairStatus04, Function | SmallTest | Level2)
+HWTEST_F(WindowPairTest, UpdateWindowPairStatus04, TestSize.Level1)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
     sptr<WindowProperty> property0 = new WindowProperty();
@@ -770,7 +770,7 @@ HWTEST_F(WindowPairTest, UpdateWindowPairStatus04, Function | SmallTest | Level2
  * @tc.desc: Update pair status
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPairTest, UpdateWindowPairStatus05, Function | SmallTest | Level2)
+HWTEST_F(WindowPairTest, UpdateWindowPairStatus05, TestSize.Level1)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
     sptr<WindowProperty> property0 = new WindowProperty();
@@ -796,7 +796,7 @@ HWTEST_F(WindowPairTest, UpdateWindowPairStatus05, Function | SmallTest | Level2
  * @tc.desc: Switch the position of two paired window.
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPairTest, SwitchPosition01, Function | SmallTest | Level2)
+HWTEST_F(WindowPairTest, SwitchPosition01, TestSize.Level1)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
     sptr<WindowProperty> property0 = new WindowProperty();
@@ -817,7 +817,7 @@ HWTEST_F(WindowPairTest, SwitchPosition01, Function | SmallTest | Level2)
  * @tc.desc: Switch the position of two paired window.
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPairTest, SwitchPosition02, Function | SmallTest | Level2)
+HWTEST_F(WindowPairTest, SwitchPosition02, TestSize.Level1)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
     sptr<WindowProperty> property0 = new WindowProperty();
@@ -839,7 +839,7 @@ HWTEST_F(WindowPairTest, SwitchPosition02, Function | SmallTest | Level2)
  * @tc.desc: Switch the position of two paired window.
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPairTest, SwitchPosition03, Function | SmallTest | Level2)
+HWTEST_F(WindowPairTest, SwitchPosition03, TestSize.Level1)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
     sptr<WindowProperty> property0 = new WindowProperty();
@@ -861,7 +861,7 @@ HWTEST_F(WindowPairTest, SwitchPosition03, Function | SmallTest | Level2)
  * @tc.desc: Update paired window node
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPairTest, HandlePairedNodesChange01, Function | SmallTest | Level2)
+HWTEST_F(WindowPairTest, HandlePairedNodesChange01, TestSize.Level1)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
     sptr<WindowProperty> property0 = new WindowProperty();
@@ -884,7 +884,7 @@ HWTEST_F(WindowPairTest, HandlePairedNodesChange01, Function | SmallTest | Level
  * @tc.desc: Update paired window node
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPairTest, HandlePairedNodesChange02, Function | SmallTest | Level2)
+HWTEST_F(WindowPairTest, HandlePairedNodesChange02, TestSize.Level1)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
     sptr<WindowProperty> property0 = new WindowProperty();
@@ -908,7 +908,7 @@ HWTEST_F(WindowPairTest, HandlePairedNodesChange02, Function | SmallTest | Level
  * @tc.desc: Update paired window node
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPairTest, HandlePairedNodesChange03, Function | SmallTest | Level2)
+HWTEST_F(WindowPairTest, HandlePairedNodesChange03, TestSize.Level1)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
     sptr<WindowProperty> property0 = new WindowProperty();
@@ -929,7 +929,7 @@ HWTEST_F(WindowPairTest, HandlePairedNodesChange03, Function | SmallTest | Level
  * @tc.desc: Update paired window node
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPairTest, HandlePairedNodesChange04, Function | SmallTest | Level2)
+HWTEST_F(WindowPairTest, HandlePairedNodesChange04, TestSize.Level1)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
     sptr<WindowProperty> property0 = new WindowProperty();
@@ -955,7 +955,7 @@ HWTEST_F(WindowPairTest, HandlePairedNodesChange04, Function | SmallTest | Level
  * @tc.desc: Update paired window node
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPairTest, HandlePairedNodesChange05, Function | SmallTest | Level2)
+HWTEST_F(WindowPairTest, HandlePairedNodesChange05, TestSize.Level1)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
     sptr<WindowProperty> property1 = new WindowProperty();
@@ -977,7 +977,7 @@ HWTEST_F(WindowPairTest, HandlePairedNodesChange05, Function | SmallTest | Level
  * @tc.desc: Handle removed window
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPairTest, HandleRemoveWindow01, Function | SmallTest | Level2)
+HWTEST_F(WindowPairTest, HandleRemoveWindow01, TestSize.Level1)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
     sptr<WindowProperty> property1 = new WindowProperty();
@@ -994,7 +994,7 @@ HWTEST_F(WindowPairTest, HandleRemoveWindow01, Function | SmallTest | Level2)
  * @tc.desc: Handle removed window
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPairTest, HandleRemoveWindow02, Function | SmallTest | Level2)
+HWTEST_F(WindowPairTest, HandleRemoveWindow02, TestSize.Level1)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
 
@@ -1027,7 +1027,7 @@ HWTEST_F(WindowPairTest, HandleRemoveWindow02, Function | SmallTest | Level2)
  * @tc.desc: take pair snapsht
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPairTest, TakePairSnapshot01, Function | SmallTest | Level2)
+HWTEST_F(WindowPairTest, TakePairSnapshot01, TestSize.Level1)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
 
@@ -1059,7 +1059,7 @@ HWTEST_F(WindowPairTest, TakePairSnapshot01, Function | SmallTest | Level2)
  * @tc.desc: Clear Pair Snapshot
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPairTest, ClearPairSnapshot01, Function | SmallTest | Level2)
+HWTEST_F(WindowPairTest, ClearPairSnapshot01, TestSize.Level1)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
 
@@ -1093,7 +1093,7 @@ HWTEST_F(WindowPairTest, ClearPairSnapshot01, Function | SmallTest | Level2)
  * @tc.desc: Exit Split Mode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPairTest, ExitSplitMode01, Function | SmallTest | Level2)
+HWTEST_F(WindowPairTest, ExitSplitMode01, TestSize.Level1)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
     sptr<WindowProperty> property1 = new WindowProperty();
@@ -1115,7 +1115,7 @@ HWTEST_F(WindowPairTest, ExitSplitMode01, Function | SmallTest | Level2)
  * @tc.desc: Exit Split Mode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPairTest, ExitSplitMode02, Function | SmallTest | Level2)
+HWTEST_F(WindowPairTest, ExitSplitMode02, TestSize.Level1)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
     sptr<WindowProperty> property1 = new WindowProperty();
@@ -1156,7 +1156,7 @@ HWTEST_F(WindowPairTest, ExitSplitMode02, Function | SmallTest | Level2)
  * @tc.desc: Exit Split Mode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPairTest, ExitSplitMode03, Function | SmallTest | Level2)
+HWTEST_F(WindowPairTest, ExitSplitMode03, TestSize.Level1)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
     sptr<WindowProperty> property1 = new WindowProperty();
@@ -1196,7 +1196,7 @@ HWTEST_F(WindowPairTest, ExitSplitMode03, Function | SmallTest | Level2)
  * @tc.desc: check function IsDuringSplit
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPairTest, IsDuringSplit, Function | SmallTest | Level2)
+HWTEST_F(WindowPairTest, IsDuringSplit, TestSize.Level1)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
     auto result = windowPair->IsDuringSplit();

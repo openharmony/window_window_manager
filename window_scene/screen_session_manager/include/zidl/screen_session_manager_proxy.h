@@ -78,6 +78,10 @@ public:
     virtual DMError DestroyVirtualScreen(ScreenId screenId) override;
 
     virtual DMError SetVirtualScreenSurface(ScreenId screenId, sptr<IBufferProducer> surface) override;
+
+    DMError AddVirtualScreenBlockList(const std::vector<int32_t>& persistentIds) override;
+
+    DMError RemoveVirtualScreenBlockList(const std::vector<int32_t>& persistentIds) override;
     
     virtual DMError SetScreenPrivacyMaskImage(ScreenId screenId,
         const std::shared_ptr<Media::PixelMap>& privacyMaskImg) override;
@@ -216,6 +220,8 @@ public:
     ScreenCombination GetScreenCombination(ScreenId screenId) override;
     DMError SetScreenSkipProtectedWindow(const std::vector<ScreenId>& screenIds, bool isEnable) override;
     bool GetIsRealScreen(ScreenId screenId) override;
+    uint32_t GetDeviceStatus() override;
+    void NotifyExtendScreenCreateFinish() override;
 
 private:
     static inline BrokerDelegator<ScreenSessionManagerProxy> delegator_;

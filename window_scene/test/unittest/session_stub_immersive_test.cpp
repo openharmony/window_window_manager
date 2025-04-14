@@ -62,7 +62,7 @@ namespace {
  * @tc.desc: GetAvoidAreaByType with invalid type
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStubImmersiveTest, HandleGetAvoidAreaByTypeWithInvalidType, Function | SmallTest | Level2)
+HWTEST_F(SessionStubImmersiveTest, HandleGetAvoidAreaByTypeWithInvalidType, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SessionStubImmersiveTest::HandleGetAvoidAreaByTypeWithInvalidType start";
     MessageParcel data;
@@ -81,7 +81,7 @@ HWTEST_F(SessionStubImmersiveTest, HandleGetAvoidAreaByTypeWithInvalidType, Func
  * @tc.desc: GetAvoidAreaByType with system type
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStubImmersiveTest, HandleGetAvoidAreaByTypeWithSystemType, Function | SmallTest | Level2)
+HWTEST_F(SessionStubImmersiveTest, HandleGetAvoidAreaByTypeWithSystemType, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SessionStubImmersiveTest::HandleGetAvoidAreaByTypeWithSystemType start";
     AvoidArea mockArea;
@@ -115,7 +115,7 @@ HWTEST_F(SessionStubImmersiveTest, HandleGetAvoidAreaByTypeWithSystemType, Funct
  * @tc.desc: GetAllAvoidAreas return two Areas
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStubImmersiveTest, HandleGetAllAvoidAreasNormal, Function | SmallTest | Level2)
+HWTEST_F(SessionStubImmersiveTest, HandleGetAllAvoidAreasNormal, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SessionStubImmersiveTest::HandleGetAllAvoidAreasNormal start";
     EXPECT_CALL(*session_, GetAllAvoidAreas(_)).WillOnce(Invoke(
@@ -163,7 +163,7 @@ HWTEST_F(SessionStubImmersiveTest, HandleGetAllAvoidAreasNormal, Function | Smal
  * @tc.desc: GetAllAvoidAreas return empty
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStubImmersiveTest, HandleGetAllAvoidAreasEmpty, Function | SmallTest | Level2)
+HWTEST_F(SessionStubImmersiveTest, HandleGetAllAvoidAreasEmpty, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SessionStubImmersiveTest::HandleGetAllAvoidAreasEmpty start";
     EXPECT_CALL(*session_, GetAllAvoidAreas(_)).WillOnce(Return(WSError::WS_OK));

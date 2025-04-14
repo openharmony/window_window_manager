@@ -59,7 +59,7 @@ namespace {
  * @tc.desc: add and excute
  * @tc.type: FUNC
  */
-HWTEST_F(MinimizeAppTest, MinimizeAppTest01, Function | SmallTest | Level2)
+HWTEST_F(MinimizeAppTest, MinimizeAppTest01, TestSize.Level1)
 {
     sptr<WindowNode> node1 = new WindowNode(CreateWindowProperty(1));
     sptr<WindowNode> node2 = new WindowNode(CreateWindowProperty(2));
@@ -109,7 +109,7 @@ HWTEST_F(MinimizeAppTest, MinimizeAppTest01, Function | SmallTest | Level2)
  * @tc.desc: add, find and clear
  * @tc.type: FUNC
  */
-HWTEST_F(MinimizeAppTest, MinimizeAppTest02, Function | SmallTest | Level2)
+HWTEST_F(MinimizeAppTest, MinimizeAppTest02, TestSize.Level1)
 {
     sptr<WindowNode> node1 = new WindowNode();
 
@@ -126,7 +126,7 @@ HWTEST_F(MinimizeAppTest, MinimizeAppTest02, Function | SmallTest | Level2)
  * @tc.desc: add and find
  * @tc.type: FUNC
  */
-HWTEST_F(MinimizeAppTest, MinimizeAppTest03, Function | SmallTest | Level2)
+HWTEST_F(MinimizeAppTest, MinimizeAppTest03, TestSize.Level1)
 {
     MinimizeApp::SetMinimizedByOtherConfig(false);
     sptr<WindowNode> node1 = new WindowNode();
@@ -143,7 +143,7 @@ HWTEST_F(MinimizeAppTest, MinimizeAppTest03, Function | SmallTest | Level2)
  * @tc.desc: add and recover
  * @tc.type: FUNC
  */
-HWTEST_F(MinimizeAppTest, MinimizeAppTest04, Function | SmallTest | Level2)
+HWTEST_F(MinimizeAppTest, MinimizeAppTest04, TestSize.Level1)
 {
     sptr<WindowNode> node1 = new WindowNode();
     MinimizeApp::AddNeedMinimizeApp(node1, MinimizeReason::LAYOUT_TILE);
@@ -159,7 +159,7 @@ HWTEST_F(MinimizeAppTest, MinimizeAppTest04, Function | SmallTest | Level2)
  * @tc.desc: insert nullptr to needMinimizeAppNodes_
  * @tc.type: FUNC
  */
-HWTEST_F(MinimizeAppTest, MinimizeAppTest05, Function | SmallTest | Level2)
+HWTEST_F(MinimizeAppTest, MinimizeAppTest05, TestSize.Level1)
 {
     MinimizeApp::needMinimizeAppNodes_[MinimizeReason::MINIMIZE_ALL].emplace_back(nullptr);
     auto getNodes = MinimizeApp::GetNeedMinimizeAppNodesWithReason(MinimizeReason::MINIMIZE_ALL);
@@ -178,7 +178,7 @@ HWTEST_F(MinimizeAppTest, MinimizeAppTest05, Function | SmallTest | Level2)
  * @tc.desc: check node need minimize or not
  * @tc.type: FUNC
  */
-HWTEST_F(MinimizeAppTest, IsNodeNeedMinimizeWithReason01, Function | SmallTest | Level2)
+HWTEST_F(MinimizeAppTest, IsNodeNeedMinimizeWithReason01, TestSize.Level1)
 {
     ASSERT_EQ(false, MinimizeApp::IsNodeNeedMinimizeWithReason(nullptr, MinimizeReason::MINIMIZE_ALL));
 
@@ -200,7 +200,7 @@ HWTEST_F(MinimizeAppTest, IsNodeNeedMinimizeWithReason01, Function | SmallTest |
  * @tc.desc: clear node with reason
  * @tc.type: FUNC
  */
-HWTEST_F(MinimizeAppTest, ClearNodesWithReason01, Function | SmallTest | Level2)
+HWTEST_F(MinimizeAppTest, ClearNodesWithReason01, TestSize.Level1)
 {
     sptr<WindowNode> node1 = new WindowNode();
     sptr<WindowNode> node2 = new WindowNode();
@@ -218,7 +218,7 @@ HWTEST_F(MinimizeAppTest, ClearNodesWithReason01, Function | SmallTest | Level2)
  * @tc.desc: Get recoverd node from list
  * @tc.type: FUNC
  */
-HWTEST_F(MinimizeAppTest, GetRecoverdNodeFromMinimizeList01, Function | SmallTest | Level2)
+HWTEST_F(MinimizeAppTest, GetRecoverdNodeFromMinimizeList01, TestSize.Level1)
 {
     sptr<WindowNode> node1 = new WindowNode();
     MinimizeApp::AddNeedMinimizeApp(node1, MinimizeReason::MINIMIZE_BUTTON);
@@ -232,7 +232,7 @@ HWTEST_F(MinimizeAppTest, GetRecoverdNodeFromMinimizeList01, Function | SmallTes
  * @tc.desc: check node need minize or not
  * @tc.type: FUNC
  */
-HWTEST_F(MinimizeAppTest, IsNodeNeedMinimize01, Function | SmallTest | Level2)
+HWTEST_F(MinimizeAppTest, IsNodeNeedMinimize01, TestSize.Level1)
 {
     ASSERT_EQ(false, MinimizeApp::IsNodeNeedMinimize(nullptr));
 }
@@ -242,7 +242,7 @@ HWTEST_F(MinimizeAppTest, IsNodeNeedMinimize01, Function | SmallTest | Level2)
  * @tc.desc: Execute Minimize With TargetReason
  * @tc.type: FUNC
  */
-HWTEST_F(MinimizeAppTest, ExecuteMinimizeTargetReasons01, Function | SmallTest | Level2)
+HWTEST_F(MinimizeAppTest, ExecuteMinimizeTargetReasons01, TestSize.Level1)
 {
     sptr<WindowNode> node1 = new WindowNode();
     MinimizeApp::AddNeedMinimizeApp(node1, MinimizeReason::MINIMIZE_BUTTON);

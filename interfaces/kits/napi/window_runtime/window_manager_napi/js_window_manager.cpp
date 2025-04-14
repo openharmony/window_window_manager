@@ -21,6 +21,7 @@
 #include <new>
 #include <transaction/rs_interfaces.h>
 #include "ability_context.h"
+#include "common/include/session_permission.h"
 #include "display_manager.h"
 #include "dm_common.h"
 #include "wm_common.h"
@@ -32,6 +33,7 @@
 #include "pixel_map_napi.h"
 #include "permission.h"
 #include "singleton_container.h"
+#include "sys_cap_util.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -46,6 +48,7 @@ constexpr size_t ARGC_TWO = 2;
 constexpr size_t ARGC_THREE = 3;
 constexpr size_t ARGC_FOUR = 4;
 constexpr int32_t INVALID_COORDINATE = -1;
+constexpr uint32_t API_VERSION_18 = 18;
 }
 
 JsWindowManager::JsWindowManager() : registerManager_(std::make_unique<JsWindowRegisterManager>())
@@ -1070,23 +1073,26 @@ napi_value JsWindowManager::OnSetGestureNavigationEnabled(napi_env env, napi_cal
     napi_get_value_bool(env, nativeBool, &gestureNavigationEnable);
 
     WLOGI("Set gesture navigation enable as %{public}d", gestureNavigationEnable);
-    NapiAsyncTask::CompleteCallback complete =
-        [gestureNavigationEnable](napi_env env, NapiAsyncTask& task, int32_t status) {
-            WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
-                SingletonContainer::Get<WindowManager>().SetGestureNavigationEnabled(gestureNavigationEnable));
-            if (ret == WmErrorCode::WM_OK) {
-                task.Resolve(env, NapiGetUndefined(env));
-                WLOGD("SetGestureNavigationEnabled success");
-            } else {
-                task.Reject(env, JsErrUtils::CreateJsError(env, ret, "SetGestureNavigationEnabled failed"));
-            }
-        };
     // 1: maximum params num; 1: index of callback
     napi_value lastParam = (argc <= 1) ? nullptr :
         ((argv[1] != nullptr && GetType(env, argv[1]) == napi_function) ? argv[1] : nullptr);
     napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JsWindowManager::OnSetGestureNavigationEnabled",
-        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
+    auto asyncTask = [gestureNavigationEnable, env, task = napiAsyncTask] {
+        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
+            SingletonContainer::Get<WindowManager>().SetGestureNavigationEnabled(gestureNavigationEnable));
+        if (ret == WmErrorCode::WM_OK) {
+            task->Resolve(env, NapiGetUndefined(env));
+            WLOGD("SetGestureNavigationEnabled success");
+        } else {
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "SetGestureNavigationEnabled failed"));
+        }
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "napi_send_event failed");
+        napiAsyncTask->Reject(env,
+            JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
+    }
     return result;
 }
 
@@ -1130,18 +1136,21 @@ napi_value JsWindowManager::OnSetWaterMarkImage(napi_env env, napi_callback_info
         return NapiGetUndefined(env);
     }
 
-    NapiAsyncTask::CompleteCallback complete =
-        [=](napi_env env, NapiAsyncTask& task, int32_t status) {
-            RSInterfaces::GetInstance().ShowWatermark(pixelMap, isShow);
-            task.Resolve(env, NapiGetUndefined(env));
-            WLOGD("OnSetWaterMarkImage success");
-        };
     // 2: maximum params num; 2: index of callback
     napi_value lastParam = (argc <= 2) ? nullptr :
         (GetType(env, argv[2]) == napi_function ? argv[2] : nullptr);
     napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JsWindowManager::OnSetWaterMarkImage",
-        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
+    auto asyncTask = [env, pixelMap, isShow, task = napiAsyncTask] {
+        RSInterfaces::GetInstance().ShowWatermark(pixelMap, isShow);
+        task->Resolve(env, NapiGetUndefined(env));
+        WLOGD("OnSetWaterMarkImage success");
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "napi_send_event failed");
+        napiAsyncTask->Reject(env,
+            JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
+    }
     return result;
 }
 
@@ -1232,6 +1241,15 @@ napi_value JsWindowManager::OnGetAllWindowLayoutInfo(napi_env env, napi_callback
 
 napi_value JsWindowManager::OnGetVisibleWindowInfo(napi_env env, napi_callback_info info)
 {
+    uint32_t apiVersion = SysCapUtil::GetApiCompatibleVersion();
+    if (apiVersion < API_VERSION_18 && !Permission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied!, api%{public}u", apiVersion);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
+    } else if (apiVersion >= API_VERSION_18 &&
+               !CheckCallingPermission(PermissionConstants::PERMISSION_VISIBLE_WINDOW_INFO)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied!, api%{public}u", apiVersion);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_NO_PERMISSION);
+    }
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);

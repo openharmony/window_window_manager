@@ -53,7 +53,7 @@ namespace {
  * @tc.desc: MathHalper test
  * @tc.type: FUNC
  */
-HWTEST_F(WmMathTest, MathHalper, Function | SmallTest | Level2)
+HWTEST_F(WmMathTest, MathHalper, TestSize.Level1)
 {
     {
         const float t = 0.5f;
@@ -95,7 +95,7 @@ HWTEST_F(WmMathTest, MathHalper, Function | SmallTest | Level2)
  *           Get translation component from transform matrix
  * @tc.type: FUNC
  */
-HWTEST_F(WmMathTest, TransformMatrix, Function | SmallTest | Level2)
+HWTEST_F(WmMathTest, TransformMatrix, TestSize.Level1)
 {
     Vector3 scale(1.5f, 0.7f, 2.2f), translation(100.f, 132.f, 20.f);
     Matrix4 transformMat = CreateScale(scale.x_, scale.y_, scale.z_);
@@ -115,7 +115,7 @@ HWTEST_F(WmMathTest, TransformMatrix, Function | SmallTest | Level2)
  *           Get translation component from transform matrix
  * @tc.type: FUNC
  */
-HWTEST_F(WmMathTest, TransformWithPerspDiv, Function | SmallTest | Level2)
+HWTEST_F(WmMathTest, TransformWithPerspDiv, TestSize.Level1)
 {
     Vector3 vec(1.0, 1.0, 1.0);
     Matrix4 mat = Matrix4::Identity;
@@ -136,7 +136,7 @@ HWTEST_F(WmMathTest, TransformWithPerspDiv, Function | SmallTest | Level2)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(WmMathTest, Invert, Function | SmallTest | Level2)
+HWTEST_F(WmMathTest, Invert, TestSize.Level1)
 {
     Matrix4 mat;
     mat.mat_[0][0] = 0.f;
@@ -150,7 +150,7 @@ HWTEST_F(WmMathTest, Invert, Function | SmallTest | Level2)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(WmMathTest, Invert02, Function | SmallTest | Level2)
+HWTEST_F(WmMathTest, Invert02, TestSize.Level1)
 {
     Matrix4 mat;
     mat.mat_[0][0] = 10.0f;
@@ -164,7 +164,7 @@ HWTEST_F(WmMathTest, Invert02, Function | SmallTest | Level2)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(WmMathTest, Invert03, Function | SmallTest | Level2)
+HWTEST_F(WmMathTest, Invert03, TestSize.Level1)
 {
     Matrix4 mat;
     mat.mat_[0][0] = 0.f;
@@ -178,7 +178,7 @@ HWTEST_F(WmMathTest, Invert03, Function | SmallTest | Level2)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(WmMathTest, Invert04, Function | SmallTest | Level2)
+HWTEST_F(WmMathTest, Invert04, TestSize.Level1)
 {
     Matrix4 mat;
     mat.mat_[0][0] = 10.0f;

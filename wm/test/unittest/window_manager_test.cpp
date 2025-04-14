@@ -61,6 +61,15 @@ public:
     };
 };
 
+class TestWindowVisibilityStateListener : public IWindowInfoChangedListener {
+public:
+    void OnWindowInfoChanged(
+        const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList) override
+    {
+        WLOGI("TestWindowUpdateListener");
+    };
+};
+
 class TestWindowModeChangedListener : public IWindowModeChangedListener {
 public:
     void OnWindowModeUpdate(WindowModeType mode) override
@@ -164,7 +173,7 @@ namespace {
  * @tc.desc: Create window with no WindowName and no abilityToken
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, GetVisibilityWindowInfo01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, GetVisibilityWindowInfo01, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     std::vector<sptr<WindowVisibilityInfo>> infos;
@@ -180,7 +189,7 @@ HWTEST_F(WindowManagerTest, GetVisibilityWindowInfo01, Function | SmallTest | Le
  * @tc.desc: ToggleShownStateForAllAppWindows ok
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, ToggleShownStateForAllAppWindows, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, ToggleShownStateForAllAppWindows, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), ToggleShownStateForAllAppWindows()).Times(1).WillOnce(Return(WMError::WM_OK));
@@ -192,7 +201,7 @@ HWTEST_F(WindowManagerTest, ToggleShownStateForAllAppWindows, Function | SmallTe
  * @tc.desc: Create window with no WindowName and no abilityToken
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, GetAccessibilityWindowInfo01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, GetAccessibilityWindowInfo01, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     std::vector<sptr<AccessibilityWindowInfo>> infos;
@@ -208,7 +217,7 @@ HWTEST_F(WindowManagerTest, GetAccessibilityWindowInfo01, Function | SmallTest |
  * @tc.desc: GetUnreliableWindowInfo ok
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, GetUnreliableWindowInfo, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, GetUnreliableWindowInfo, TestSize.Level1)
 {
     std::unique_ptr<Mocker> mocker = std::make_unique<Mocker>();
     int32_t windowId = 0;
@@ -222,7 +231,7 @@ HWTEST_F(WindowManagerTest, GetUnreliableWindowInfo, Function | SmallTest | Leve
  * @tc.desc: Check GetSnapshotByWindowId01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, GetSnapshotByWindowId01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, GetSnapshotByWindowId01, TestSize.Level1)
 {
     auto& windowManager = WindowManager::GetInstance();
     int32_t windowId = -1;
@@ -240,7 +249,7 @@ HWTEST_F(WindowManagerTest, GetSnapshotByWindowId01, Function | SmallTest | Leve
  * @tc.desc: check RegisterCameraFloatWindowChangedListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, RegisterCameraFloatWindowChangedListener01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, RegisterCameraFloatWindowChangedListener01, TestSize.Level1)
 {
     auto& windowManager = WindowManager::GetInstance();
     auto oldWindowManagerAgent = windowManager.pImpl_->cameraFloatWindowChangedListenerAgent_;
@@ -272,7 +281,7 @@ HWTEST_F(WindowManagerTest, RegisterCameraFloatWindowChangedListener01, Function
  * @tc.desc: check UnregisterCameraFloatWindowChangedListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, UnregisterCameraFloatWindowChangedListener01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, UnregisterCameraFloatWindowChangedListener01, TestSize.Level1)
 {
     auto& windowManager = WindowManager::GetInstance();
     auto oldWindowManagerAgent = windowManager.pImpl_->cameraFloatWindowChangedListenerAgent_;
@@ -314,7 +323,7 @@ HWTEST_F(WindowManagerTest, UnregisterCameraFloatWindowChangedListener01, Functi
  * @tc.desc: check RegisterVisibilityChangedListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, RegisterVisibilityChangedListener01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, RegisterVisibilityChangedListener01, TestSize.Level1)
 {
     auto& windowManager = WindowManager::GetInstance();
     auto oldWindowManagerAgent = windowManager.pImpl_->windowVisibilityListenerAgent_;
@@ -347,7 +356,7 @@ HWTEST_F(WindowManagerTest, RegisterVisibilityChangedListener01, Function | Smal
  * @tc.desc: check UnregisterVisibilityChangedListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, UnregisterVisibilityChangedListener01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, UnregisterVisibilityChangedListener01, TestSize.Level1)
 {
     auto& windowManager = WindowManager::GetInstance();
     auto oldWindowManagerAgent = windowManager.pImpl_->windowVisibilityListenerAgent_;
@@ -387,7 +396,7 @@ HWTEST_F(WindowManagerTest, UnregisterVisibilityChangedListener01, Function | Sm
  * @tc.desc: check RegisterWindowUpdateListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, RegisterWindowUpdateListener01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, RegisterWindowUpdateListener01, TestSize.Level1)
 {
     auto& windowManager = WindowManager::GetInstance();
     auto oldWindowManagerAgent = windowManager.pImpl_->windowUpdateListenerAgent_;
@@ -420,7 +429,7 @@ HWTEST_F(WindowManagerTest, RegisterWindowUpdateListener01, Function | SmallTest
  * @tc.desc: check UnregisterWindowUpdateListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, UnregisterWindowUpdateListener01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, UnregisterWindowUpdateListener01, TestSize.Level1)
 {
     auto& windowManager = WindowManager::GetInstance();
     auto oldWindowManagerAgent = windowManager.pImpl_->windowUpdateListenerAgent_;
@@ -461,7 +470,7 @@ HWTEST_F(WindowManagerTest, UnregisterWindowUpdateListener01, Function | SmallTe
  * @tc.desc: check RegisterWindowModeChangedListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, RegisterWindowModeChangedListener01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, RegisterWindowModeChangedListener01, TestSize.Level1)
 {
     auto& windowManager = WindowManager::GetInstance();
     auto oldWindowManagerAgent = windowManager.pImpl_->windowModeListenerAgent_;
@@ -494,7 +503,7 @@ HWTEST_F(WindowManagerTest, RegisterWindowModeChangedListener01, Function | Smal
  * @tc.desc: check UnregisterWindowModeChangedListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, UnregisterWindowModeChangedListener01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, UnregisterWindowModeChangedListener01, TestSize.Level1)
 {
     auto& windowManager = WindowManager::GetInstance();
     auto oldWindowManagerAgent = windowManager.pImpl_->windowModeListenerAgent_;
@@ -535,7 +544,7 @@ HWTEST_F(WindowManagerTest, UnregisterWindowModeChangedListener01, Function | Sm
  * @tc.desc: check RegisterSystemBarChangedListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, RegisterSystemBarChangedListener01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, RegisterSystemBarChangedListener01, TestSize.Level1)
 {
     auto& windowManager = WindowManager::GetInstance();
     auto oldWindowManagerAgent = windowManager.pImpl_->systemBarChangedListenerAgent_;
@@ -568,7 +577,7 @@ HWTEST_F(WindowManagerTest, RegisterSystemBarChangedListener01, Function | Small
  * @tc.desc: check UnregisterSystemBarChangedListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, UnregisterSystemBarChangedListener01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, UnregisterSystemBarChangedListener01, TestSize.Level1)
 {
     auto& windowManager = WindowManager::GetInstance();
     auto oldWindowManagerAgent = windowManager.pImpl_->systemBarChangedListenerAgent_;
@@ -608,7 +617,7 @@ HWTEST_F(WindowManagerTest, UnregisterSystemBarChangedListener01, Function | Sma
  * @tc.desc: check RegisterWaterMarkListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, RegisterWaterMarkFlagChangedListener01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, RegisterWaterMarkFlagChangedListener01, TestSize.Level1)
 {
     auto& windowManager = WindowManager::GetInstance();
 
@@ -641,7 +650,7 @@ HWTEST_F(WindowManagerTest, RegisterWaterMarkFlagChangedListener01, Function | S
  * @tc.desc: check UnregisterWaterMarkFlagChangedListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, UnregisterWaterMarkFlagChangedListener01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, UnregisterWaterMarkFlagChangedListener01, TestSize.Level1)
 {
     auto& windowManager = WindowManager::GetInstance();
     windowManager.pImpl_->waterMarkFlagChangeAgent_ = nullptr;
@@ -678,7 +687,7 @@ HWTEST_F(WindowManagerTest, UnregisterWaterMarkFlagChangedListener01, Function |
  * @tc.desc: check RegisterGestureNavigationEnabledChangedListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, RegisterGestureNavigationEnabledChangedListener, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, RegisterGestureNavigationEnabledChangedListener, TestSize.Level1)
 {
     auto& windowManager = WindowManager::GetInstance();
 
@@ -712,7 +721,7 @@ HWTEST_F(WindowManagerTest, RegisterGestureNavigationEnabledChangedListener, Fun
  * @tc.desc: check UnregisterGestureNavigationEnabledChangedListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, UnregisterGestureNavigationEnabledChangedListener, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, UnregisterGestureNavigationEnabledChangedListener, TestSize.Level1)
 {
     auto& windowManager = WindowManager::GetInstance();
     windowManager.pImpl_->gestureNavigationEnabledAgent_ = nullptr;
@@ -752,7 +761,7 @@ HWTEST_F(WindowManagerTest, UnregisterGestureNavigationEnabledChangedListener, F
  * @tc.desc: GetUIContentRemoteObj
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, GetUIContentRemoteObj, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, GetUIContentRemoteObj, TestSize.Level1)
 {
     sptr<IRemoteObject> remoteObj;
     WMError res = WindowManager::GetInstance().GetUIContentRemoteObj(1, remoteObj);
@@ -768,7 +777,7 @@ HWTEST_F(WindowManagerTest, GetUIContentRemoteObj, Function | SmallTest | Level2
  * @tc.desc: window GetFocusWindowInfo
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, GetFocusWindowInfo, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, GetFocusWindowInfo, TestSize.Level1)
 {
     FocusChangeInfo focusInfo;
     auto ret = 0;
@@ -781,7 +790,7 @@ HWTEST_F(WindowManagerTest, GetFocusWindowInfo, Function | SmallTest | Level2)
  * @tc.desc: window MinimizeAllAppWindows
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, MinimizeAllAppWindows, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, MinimizeAllAppWindows, TestSize.Level1)
 {
     DisplayId displayId = 0;
     WMError ret = WindowManager::GetInstance().MinimizeAllAppWindows(displayId);
@@ -793,7 +802,7 @@ HWTEST_F(WindowManagerTest, MinimizeAllAppWindows, Function | SmallTest | Level2
  * @tc.desc: window SetWindowLayoutMode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, SetWindowLayoutMode, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, SetWindowLayoutMode, TestSize.Level1)
 {
     WMError ret = WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::BASE);
     ASSERT_EQ(ret, WMError::WM_OK);
@@ -810,7 +819,7 @@ HWTEST_F(WindowManagerTest, SetWindowLayoutMode, Function | SmallTest | Level2)
  * @tc.desc: check SkipSnapshotForAppProcess
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, SkipSnapshotForAppProcess, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, SkipSnapshotForAppProcess, TestSize.Level1)
 {
     int32_t pid = 1000;
     bool skip = true;
@@ -823,7 +832,7 @@ HWTEST_F(WindowManagerTest, SkipSnapshotForAppProcess, Function | SmallTest | Le
  * @tc.desc: UpdateCameraFloatWindowStatus
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, UpdateCameraFloatWindowStatus, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, UpdateCameraFloatWindowStatus, TestSize.Level1)
 {
     uint32_t accessTokenId = 0;
     bool isShowing = true;
@@ -837,7 +846,7 @@ HWTEST_F(WindowManagerTest, UpdateCameraFloatWindowStatus, Function | SmallTest 
  * @tc.desc: NotifyWaterMarkFlagChangedResult
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, NotifyWaterMarkFlagChangedResult, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, NotifyWaterMarkFlagChangedResult, TestSize.Level1)
 {
     bool showwatermark = true;
     auto ret = 0;
@@ -850,7 +859,7 @@ HWTEST_F(WindowManagerTest, NotifyWaterMarkFlagChangedResult, Function | SmallTe
  * @tc.desc: NotifyGestureNavigationEnabledResult
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, NotifyGestureNavigationEnabledResult, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, NotifyGestureNavigationEnabledResult, TestSize.Level1)
 {
     bool enable = true;
     auto ret = 0;
@@ -863,7 +872,7 @@ HWTEST_F(WindowManagerTest, NotifyGestureNavigationEnabledResult, Function | Sma
  * @tc.desc: DumpSessionAll
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, DumpSessionAll, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, DumpSessionAll, TestSize.Level1)
 {
     std::vector<std::string> infos;
     infos.push_back("DumpSessionWithId");
@@ -876,7 +885,7 @@ HWTEST_F(WindowManagerTest, DumpSessionAll, Function | SmallTest | Level2)
  * @tc.desc: DumpSessionWithId
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, DumpSessionWithId, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, DumpSessionWithId, TestSize.Level1)
 {
     std::vector<std::string> infos;
     infos.push_back("DumpSessionWithId");
@@ -890,7 +899,7 @@ HWTEST_F(WindowManagerTest, DumpSessionWithId, Function | SmallTest | Level2)
  * @tc.desc: GetWindowModeType01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, GetWindowModeType01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, GetWindowModeType01, TestSize.Level1)
 {
     std::vector<sptr<AccessibilityWindowInfo>> infos;
     infos.clear();
@@ -905,7 +914,7 @@ HWTEST_F(WindowManagerTest, GetWindowModeType01, Function | SmallTest | Level2)
  * @tc.desc: check RegisterVisibleWindowNumChangedListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, RegisterVisibleWindowNumChangedListener, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, RegisterVisibleWindowNumChangedListener, TestSize.Level1)
 {
     auto& windowManager = WindowManager::GetInstance();
 
@@ -938,7 +947,7 @@ HWTEST_F(WindowManagerTest, RegisterVisibleWindowNumChangedListener, Function | 
  * @tc.desc: check UnregisterVisibleWindowNumChangedListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, UnregisterVisibleWindowNumChangedListener, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, UnregisterVisibleWindowNumChangedListener, TestSize.Level1)
 {
     auto& windowManager = WindowManager::GetInstance();
     windowManager.pImpl_->visibleWindowNumChangedListenerAgent_ = nullptr;
@@ -972,7 +981,7 @@ HWTEST_F(WindowManagerTest, UnregisterVisibleWindowNumChangedListener, Function 
  * @tc.desc: check RegisterAndOnVisibleWindowNumChanged
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, RegisterAndOnVisibleWindowNumChanged, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, RegisterAndOnVisibleWindowNumChanged, TestSize.Level1)
 {
     auto& windowManager = WindowManager::GetInstance();
     windowManager.pImpl_->visibleWindowNumChangedListenerAgent_ = nullptr;
@@ -999,7 +1008,7 @@ HWTEST_F(WindowManagerTest, RegisterAndOnVisibleWindowNumChanged, Function | Sma
  * @tc.desc: Test01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, Test01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, Test01, TestSize.Level1)
 {
     sptr<IWMSConnectionChangedListener> listener = nullptr;
     WMError res = WindowManager::GetInstance().RegisterWMSConnectionChangedListener(listener);
@@ -1017,7 +1026,7 @@ HWTEST_F(WindowManagerTest, Test01, Function | SmallTest | Level2)
  * @tc.desc: check RegisterDisplayInfoChangedListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, RegisterDisplayInfoChangedListener, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, RegisterDisplayInfoChangedListener, TestSize.Level1)
 {
     auto& windowManager = WindowManager::GetInstance();
     windowManager.pImpl_->displayInfoChangedListeners_.clear();
@@ -1052,7 +1061,7 @@ HWTEST_F(WindowManagerTest, RegisterDisplayInfoChangedListener, Function | Small
  * @tc.desc: check UnregisterDisplayInfoChangedListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, UnregisterDisplayInfoChangedListener, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, UnregisterDisplayInfoChangedListener, TestSize.Level1)
 {
     auto& windowManager = WindowManager::GetInstance();
     windowManager.pImpl_->displayInfoChangedListeners_.clear();
@@ -1097,7 +1106,7 @@ HWTEST_F(WindowManagerTest, UnregisterDisplayInfoChangedListener, Function | Sma
  * @tc.desc: check NotifyDisplayInfoChanged
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, NotifyDisplayInfoChanged, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, NotifyDisplayInfoChanged, TestSize.Level1)
 {
     sptr<IRemoteObject> targetToken = sptr<IRemoteObjectMocker>::MakeSptr();
     DisplayId displayId = 0;
@@ -1128,7 +1137,7 @@ HWTEST_F(WindowManagerTest, NotifyDisplayInfoChanged, Function | SmallTest | Lev
  * @tc.desc: check RegisterWindowStyleChangedListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, RegisterWindowStyleChangedListener, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, RegisterWindowStyleChangedListener, TestSize.Level1)
 {
     auto& windowManager = WindowManager::GetInstance();
     auto oldWindowManagerAgent = windowManager.pImpl_->windowStyleListenerAgent_;
@@ -1146,7 +1155,7 @@ HWTEST_F(WindowManagerTest, RegisterWindowStyleChangedListener, Function | Small
  * @tc.desc: check UnregisterWindowStyleChangedListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, UnregisterWindowStyleChangedListener, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, UnregisterWindowStyleChangedListener, TestSize.Level1)
 {
     auto& windowManager = WindowManager::GetInstance();
     auto oldWindowManagerAgent = windowManager.pImpl_->windowStyleListenerAgent_;
@@ -1166,7 +1175,7 @@ HWTEST_F(WindowManagerTest, UnregisterWindowStyleChangedListener, Function | Sma
  * @tc.desc: check NotifyWindowStyleChange
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, NotifyWindowStyleChange, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, NotifyWindowStyleChange, TestSize.Level1)
 {
     WindowStyleType type = Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT;
     auto ret = WindowManager::GetInstance().NotifyWindowStyleChange(type);
@@ -1178,7 +1187,7 @@ HWTEST_F(WindowManagerTest, NotifyWindowStyleChange, Function | SmallTest | Leve
  * @tc.desc: check GetWindowStyleType
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, GetWindowStyleType, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, GetWindowStyleType, TestSize.Level1)
 {
     WindowStyleType type;
     type = WindowManager::GetInstance().GetWindowStyleType();
@@ -1190,7 +1199,7 @@ HWTEST_F(WindowManagerTest, GetWindowStyleType, Function | SmallTest | Level2)
  * @tc.desc: check ShiftAppWindowFocus
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, ShiftAppWindowFocus01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, ShiftAppWindowFocus01, TestSize.Level1)
 {
     WMError ret = WindowManager::GetInstance().ShiftAppWindowFocus(0, 1);
     ASSERT_NE(WMError::WM_OK, ret);
@@ -1201,7 +1210,7 @@ HWTEST_F(WindowManagerTest, ShiftAppWindowFocus01, Function | SmallTest | Level2
  * @tc.desc: check RegisterVisibleWindowNumChangedListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, RegisterVisibleWindowNumChangedListener01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, RegisterVisibleWindowNumChangedListener01, TestSize.Level1)
 {
     WMError ret;
     sptr<IVisibleWindowNumChangedListener> listener = sptr<TestVisibleWindowNumChangedListener>::MakeSptr();
@@ -1217,7 +1226,7 @@ HWTEST_F(WindowManagerTest, RegisterVisibleWindowNumChangedListener01, Function 
  * @tc.desc: check UnregisterVisibleWindowNumChangedListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, UnregisterVisibleWindowNumChangedListener01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, UnregisterVisibleWindowNumChangedListener01, TestSize.Level1)
 {
     WMError ret;
     sptr<IVisibleWindowNumChangedListener> listener = sptr<TestVisibleWindowNumChangedListener>::MakeSptr();
@@ -1233,7 +1242,7 @@ HWTEST_F(WindowManagerTest, UnregisterVisibleWindowNumChangedListener01, Functio
  * @tc.desc: check RegisterDrawingContentChangedListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, RegisterDrawingContentChangedListener01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, RegisterDrawingContentChangedListener01, TestSize.Level1)
 {
     WMError ret;
     sptr<IDrawingContentChangedListener> listener = sptr<TestDrawingContentChangedListener>::MakeSptr();
@@ -1249,7 +1258,7 @@ HWTEST_F(WindowManagerTest, RegisterDrawingContentChangedListener01, Function | 
  * @tc.desc: check UnregisterDrawingContentChangedListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, UnregisterDrawingContentChangedListener01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, UnregisterDrawingContentChangedListener01, TestSize.Level1)
 {
     WMError ret;
     sptr<IDrawingContentChangedListener> listener = sptr<TestDrawingContentChangedListener>::MakeSptr();
@@ -1265,7 +1274,7 @@ HWTEST_F(WindowManagerTest, UnregisterDrawingContentChangedListener01, Function 
  * @tc.desc: check RegisterFocusChangedListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, RegisterFocusChangedListener01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, RegisterFocusChangedListener01, TestSize.Level1)
 {
     WMError ret;
     sptr<IFocusChangedListener> listener = sptr<TestFocusChangedListener>::MakeSptr();
@@ -1281,7 +1290,7 @@ HWTEST_F(WindowManagerTest, RegisterFocusChangedListener01, Function | SmallTest
  * @tc.desc: check UnregisterFocusChangedListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, UnregisterFocusChangedListener01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, UnregisterFocusChangedListener01, TestSize.Level1)
 {
     WMError ret;
     sptr<IFocusChangedListener> listener = sptr<TestFocusChangedListener>::MakeSptr();
@@ -1297,7 +1306,7 @@ HWTEST_F(WindowManagerTest, UnregisterFocusChangedListener01, Function | SmallTe
  * @tc.desc: check SetProcessWatermark
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, SetProcessWatermark, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, SetProcessWatermark, TestSize.Level1)
 {
     int32_t pid = 1000;
     const std::string watermarkName = "SetProcessWatermarkName";
@@ -1311,7 +1320,7 @@ HWTEST_F(WindowManagerTest, SetProcessWatermark, Function | SmallTest | Level2)
  * @tc.desc: check NotifyDisplayInfoChange, Token is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, NotifyDisplayInfoChange01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, NotifyDisplayInfoChange01, TestSize.Level1)
 {
     WMError ret = WindowManager::GetInstance().NotifyDisplayInfoChange(nullptr, 1, 2, DisplayOrientation::PORTRAIT);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
@@ -1322,7 +1331,7 @@ HWTEST_F(WindowManagerTest, NotifyDisplayInfoChange01, Function | SmallTest | Le
  * @tc.desc: check NotifyDisplayInfoChange, Token is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, NotifyDisplayInfoChange02, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, NotifyDisplayInfoChange02, TestSize.Level1)
 {
     sptr<IRemoteObject> Token = sptr<IRemoteObjectMocker>::MakeSptr();
     WMError ret = WindowManager::GetInstance().NotifyDisplayInfoChange(Token, 1, 2, DisplayOrientation::PORTRAIT);
@@ -1334,7 +1343,7 @@ HWTEST_F(WindowManagerTest, NotifyDisplayInfoChange02, Function | SmallTest | Le
  * @tc.desc: check NotifyWMSDisconnected
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, NotifyWMSDisconnected01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, NotifyWMSDisconnected01, TestSize.Level1)
 {
     WMError ret = WindowManager::GetInstance().ShiftAppWindowFocus(0, 1);
     ASSERT_NE(WMError::WM_OK, ret);
@@ -1346,7 +1355,7 @@ HWTEST_F(WindowManagerTest, NotifyWMSDisconnected01, Function | SmallTest | Leve
  * @tc.desc: check NotifyFocused
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, NotifyFocused01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, NotifyFocused01, TestSize.Level1)
 {
     sptr<FocusChangeInfo> focusChangeInfo = sptr<FocusChangeInfo>::MakeSptr();
     ASSERT_NE(focusChangeInfo, nullptr);
@@ -1359,7 +1368,7 @@ HWTEST_F(WindowManagerTest, NotifyFocused01, Function | SmallTest | Level2)
  * @tc.desc: check NotifyUnfocused
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, NotifyUnfocused01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, NotifyUnfocused01, TestSize.Level1)
 {
     sptr<FocusChangeInfo> focusChangeInfo = sptr<FocusChangeInfo>::MakeSptr();
     ASSERT_NE(focusChangeInfo, nullptr);
@@ -1372,7 +1381,7 @@ HWTEST_F(WindowManagerTest, NotifyUnfocused01, Function | SmallTest | Level2)
  * @tc.desc: check NotifyAccessibilityWindowInfo
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, NotifyAccessibilityWindowInfo01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, NotifyAccessibilityWindowInfo01, TestSize.Level1)
 {
     WMError ret = WindowManager::GetInstance().ShiftAppWindowFocus(0, 1);
     ASSERT_NE(WMError::WM_OK, ret);
@@ -1393,7 +1402,7 @@ HWTEST_F(WindowManagerTest, NotifyAccessibilityWindowInfo01, Function | SmallTes
  * @tc.desc: check NotifyVisibleWindowNumChanged
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, NotifyVisibleWindowNumChanged01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, NotifyVisibleWindowNumChanged01, TestSize.Level1)
 {
     std::vector<VisibleWindowNumInfo> visibleWindowNumInfo;
     WindowManager::GetInstance().pImpl_->visibleWindowNumChangedListeners_.clear();
@@ -1412,7 +1421,7 @@ HWTEST_F(WindowManagerTest, NotifyVisibleWindowNumChanged01, Function | SmallTes
  * @tc.desc: check RegisterWindowPidVisibilityChangedListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, RegisterWindowPidVisibilityChangedListener, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, RegisterWindowPidVisibilityChangedListener, TestSize.Level1)
 {
     WMError ret;
     sptr<IWindowPidVisibilityChangedListener> listener = sptr<TestWindowPidVisibilityChangedListener>::MakeSptr();
@@ -1429,7 +1438,7 @@ HWTEST_F(WindowManagerTest, RegisterWindowPidVisibilityChangedListener, Function
  * @tc.desc: check UnregisterWindowPidVisibilityChangedListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, UnregisterWindowPidVisibilityChangedListener, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, UnregisterWindowPidVisibilityChangedListener, TestSize.Level1)
 {
     WMError ret;
     sptr<IWindowPidVisibilityChangedListener> listener = sptr<TestWindowPidVisibilityChangedListener>::MakeSptr();
@@ -1445,7 +1454,7 @@ HWTEST_F(WindowManagerTest, UnregisterWindowPidVisibilityChangedListener, Functi
  * @tc.desc: NotifyWindowPidVisibilityChanged
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, NotifyWindowPidVisibilityChanged, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, NotifyWindowPidVisibilityChanged, TestSize.Level1)
 {
     sptr<WindowPidVisibilityInfo> info = sptr<WindowPidVisibilityInfo>::MakeSptr();
     WindowManager::GetInstance().NotifyWindowPidVisibilityChanged(info);
@@ -1457,7 +1466,7 @@ HWTEST_F(WindowManagerTest, NotifyWindowPidVisibilityChanged, Function | SmallTe
  * @tc.desc: check UpdateScreenLockStatusForApp
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, UpdateScreenLockStatusForApp, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, UpdateScreenLockStatusForApp, TestSize.Level1)
 {
     auto ret = WindowManager::GetInstance().UpdateScreenLockStatusForApp("", true);
     ASSERT_EQ(ret, WMError::WM_OK);
@@ -1468,7 +1477,7 @@ HWTEST_F(WindowManagerTest, UpdateScreenLockStatusForApp, Function | SmallTest |
  * @tc.desc: check GetDisplayIdByWindowId
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, GetDisplayIdByWindowId, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, GetDisplayIdByWindowId, TestSize.Level1)
 {
     const std::vector<uint64_t> windowIds = { 1, 2 };
     std::unordered_map<uint64_t, DisplayId> windowDisplayIdMap;
@@ -1481,7 +1490,7 @@ HWTEST_F(WindowManagerTest, GetDisplayIdByWindowId, Function | SmallTest | Level
  * @tc.desc: check SetGlobalDragResizeType
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, SetGlobalDragResizeType, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, SetGlobalDragResizeType, TestSize.Level1)
 {
     DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
     auto ret = WindowManager::GetInstance().SetGlobalDragResizeType(dragResizeType);
@@ -1493,7 +1502,7 @@ HWTEST_F(WindowManagerTest, SetGlobalDragResizeType, Function | SmallTest | Leve
  * @tc.desc: check GetGlobalDragResizeType
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, GetGlobalDragResizeType, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, GetGlobalDragResizeType, TestSize.Level1)
 {
     DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
     auto ret = WindowManager::GetInstance().GetGlobalDragResizeType(dragResizeType);
@@ -1505,7 +1514,7 @@ HWTEST_F(WindowManagerTest, GetGlobalDragResizeType, Function | SmallTest | Leve
  * @tc.desc: check SetAppDragResizeType
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, SetAppDragResizeType, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, SetAppDragResizeType, TestSize.Level1)
 {
     DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
     const std::string bundleName = "test";
@@ -1518,7 +1527,7 @@ HWTEST_F(WindowManagerTest, SetAppDragResizeType, Function | SmallTest | Level2)
  * @tc.desc: check GetAppDragResizeType
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, GetAppDragResizeType, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, GetAppDragResizeType, TestSize.Level1)
 {
     DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
     const std::string bundleName = "test";
@@ -1531,7 +1540,7 @@ HWTEST_F(WindowManagerTest, GetAppDragResizeType, Function | SmallTest | Level2)
  * @tc.desc: test EffectiveDragResizeType
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, EffectiveDragResizeType, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, EffectiveDragResizeType, TestSize.Level1)
 {
     DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
     const std::string bundleName = "test";
@@ -1552,7 +1561,7 @@ HWTEST_F(WindowManagerTest, EffectiveDragResizeType, Function | SmallTest | Leve
  * @tc.desc: check SetAppKeyFramePolicy enable
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, SetAppKeyFramePolicy01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, SetAppKeyFramePolicy01, TestSize.Level1)
 {
     const std::string bundleName = "test";
     KeyFramePolicy keyFramePolicy;
@@ -1567,7 +1576,7 @@ HWTEST_F(WindowManagerTest, SetAppKeyFramePolicy01, Function | SmallTest | Level
  * @tc.desc: check SetAppKeyFramePolicy disable
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, SetAppKeyFramePolicy02, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, SetAppKeyFramePolicy02, TestSize.Level1)
 {
     const std::string bundleName = "test";
     KeyFramePolicy keyFramePolicy;
@@ -1581,7 +1590,7 @@ HWTEST_F(WindowManagerTest, SetAppKeyFramePolicy02, Function | SmallTest | Level
  * @tc.desc: check NotifyWMSConnected
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, NotifyWMSConnected, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, NotifyWMSConnected, TestSize.Level1)
 {
     WMError ret = WindowManager::GetInstance().ShiftAppWindowFocus(0, 1);
     ASSERT_NE(WMError::WM_OK, ret);
@@ -1593,7 +1602,7 @@ HWTEST_F(WindowManagerTest, NotifyWMSConnected, Function | SmallTest | Level2)
  * @tc.desc: check GetAllWindowLayoutInfo
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, GetAllWindowLayoutInfo, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, GetAllWindowLayoutInfo, TestSize.Level1)
 {
     DisplayId displayId = 1;
     std::vector<sptr<WindowLayoutInfo>> infos;
@@ -1606,7 +1615,7 @@ HWTEST_F(WindowManagerTest, GetAllWindowLayoutInfo, Function | SmallTest | Level
  * @tc.desc: check ShiftAppWindowPointerEvent
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, ShiftAppWindowPointerEvent, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, ShiftAppWindowPointerEvent, TestSize.Level1)
 {
     int32_t sourceWindowId = 1;
     int32_t targetWindowId = 1;
@@ -1619,7 +1628,7 @@ HWTEST_F(WindowManagerTest, ShiftAppWindowPointerEvent, Function | SmallTest | L
  * @tc.desc: check OnWMSConnectionChanged
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, OnWMSConnectionChanged, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, OnWMSConnectionChanged, TestSize.Level1)
 {
     int32_t userId = 1;
     int32_t screenId = 1;
@@ -1640,7 +1649,7 @@ HWTEST_F(WindowManagerTest, OnWMSConnectionChanged, Function | SmallTest | Level
  * @tc.desc: check RequestFocus
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, RequestFocus, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, RequestFocus, TestSize.Level1)
 {
     WindowManager windowManager;
     int32_t persistentId = 1;
@@ -1657,7 +1666,7 @@ HWTEST_F(WindowManagerTest, RequestFocus, Function | SmallTest | Level2)
  * @tc.desc: Check MinimizeByWindowId
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, MinimizeByWindowId, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, MinimizeByWindowId, TestSize.Level1)
 {
     auto& windowManager = WindowManager::GetInstance();
     std::vector<int32_t> windowIds;
@@ -1666,6 +1675,156 @@ HWTEST_F(WindowManagerTest, MinimizeByWindowId, Function | SmallTest | Level2)
     windowIds = {-1, 0};
     WMError ret_2 = windowManager.MinimizeByWindowId(windowIds);
     ASSERT_EQ(WMError::WM_OK, ret_2);
+}
+
+/**
+ * @tc.name: ProcessRegisterWindowInfoChangeCallback01
+ * @tc.desc: Check ProcessRegisterWindowInfoChangeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, ProcessRegisterWindowInfoChangeCallback01, Function | SmallTest | Level2)
+{
+    sptr<TestWindowVisibilityStateListener> listener = sptr<TestWindowVisibilityStateListener>::MakeSptr();
+    WindowInfoKey observedInfo = WindowInfoKey::VISIBILITY_STATE;
+    auto ret = WindowManager::GetInstance().ProcessRegisterWindowInfoChangeCallback(observedInfo, listener);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
+    ret = WindowManager::GetInstance().ProcessRegisterWindowInfoChangeCallback(observedInfo, nullptr);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+    observedInfo = WindowInfoKey::BUNDLE_NAME;
+    ret = WindowManager::GetInstance().ProcessRegisterWindowInfoChangeCallback(observedInfo, listener);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+}
+
+/**
+ * @tc.name: ProcessUnregisterWindowInfoChangeCallback01
+ * @tc.desc: Check ProcessUnregisterWindowInfoChangeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, ProcessUnregisterWindowInfoChangeCallback01, Function | SmallTest | Level2)
+{
+    sptr<TestWindowVisibilityStateListener> listener = sptr<TestWindowVisibilityStateListener>::MakeSptr();
+    WindowInfoKey observedInfo = WindowInfoKey::VISIBILITY_STATE;
+    auto ret = WindowManager::GetInstance().ProcessUnregisterWindowInfoChangeCallback(observedInfo, listener);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ret = WindowManager::GetInstance().ProcessUnregisterWindowInfoChangeCallback(observedInfo, nullptr);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+    observedInfo = WindowInfoKey::BUNDLE_NAME;
+    ret = WindowManager::GetInstance().ProcessUnregisterWindowInfoChangeCallback(observedInfo, listener);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+}
+
+/**
+ * @tc.name: RegisterWindowInfoChangeCallback01
+ * @tc.desc: Check RegisterWindowInfoChangeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, RegisterWindowInfoChangeCallback01, Function | SmallTest | Level2)
+{
+    sptr<TestWindowVisibilityStateListener> listener = sptr<TestWindowVisibilityStateListener>::MakeSptr();
+    auto interestInfoSizeOld = listener->GetInterestInfo().size();
+    std::unordered_set<WindowInfoKey> observedInfo;
+    observedInfo.insert(WindowInfoKey::VISIBILITY_STATE);
+    auto ret = WindowManager::GetInstance().RegisterWindowInfoChangeCallback(observedInfo, listener);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
+    ASSERT_EQ(interestInfoSizeOld + 1, listener->GetInterestInfo().size());
+    std::unordered_set<WindowInfoKey> observedInfo1;
+    observedInfo1.insert(WindowInfoKey::BUNDLE_NAME);
+    ret = WindowManager::GetInstance().RegisterWindowInfoChangeCallback(observedInfo1, listener);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+}
+
+/**
+ * @tc.name: UnregisterWindowInfoChangeCallback01
+ * @tc.desc: Check UnregisterWindowInfoChangeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, UnregisterWindowInfoChangeCallback01, Function | SmallTest | Level2)
+{
+    sptr<TestWindowVisibilityStateListener> listener = sptr<TestWindowVisibilityStateListener>::MakeSptr();
+    auto interestInfoSizeOld = listener->GetInterestInfo().size();
+    std::unordered_set<WindowInfoKey> observedInfo;
+    observedInfo.insert(WindowInfoKey::VISIBILITY_STATE);
+    auto ret = WindowManager::GetInstance().UnregisterWindowInfoChangeCallback(observedInfo, listener);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(interestInfoSizeOld + 1, listener->GetInterestInfo().size());
+    std::unordered_set<WindowInfoKey> observedInfo1;
+    observedInfo1.insert(WindowInfoKey::BUNDLE_NAME);
+    ret = WindowManager::GetInstance().UnregisterWindowInfoChangeCallback(observedInfo1, listener);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+}
+
+/**
+ * @tc.name: RegisterVisibilityStateChangedListener01
+ * @tc.desc: check RegisterVisibilityStateChangedListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, RegisterVisibilityStateChangedListener01, Function | SmallTest | Level2)
+{
+    auto& windowManager = WindowManager::GetInstance();
+    auto oldWindowManagerAgent = windowManager.pImpl_->windowVisibilityStateListenerAgent_;
+    auto oldListeners = windowManager.pImpl_->windowVisibilityStateListeners_;
+    windowManager.pImpl_->windowVisibilityStateListenerAgent_ = nullptr;
+    windowManager.pImpl_->windowVisibilityStateListeners_.clear();
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterVisibilityStateChangedListener(nullptr));
+ 
+    sptr<TestWindowVisibilityStateListener> listener = sptr<TestWindowVisibilityStateListener>::MakeSptr();
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_ERROR_NULLPTR));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterVisibilityStateChangedListener(listener));
+    ASSERT_EQ(nullptr, windowManager.pImpl_->windowVisibilityStateListenerAgent_);
+ 
+    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, windowManager.RegisterVisibilityStateChangedListener(listener));
+    ASSERT_EQ(1, windowManager.pImpl_->windowVisibilityStateListeners_.size());
+ 
+    // to check that the same listner can not be registered twice
+    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, windowManager.RegisterVisibilityStateChangedListener(listener));
+    ASSERT_EQ(1, windowManager.pImpl_->windowVisibilityStateListeners_.size());
+ 
+    windowManager.pImpl_->windowVisibilityStateListenerAgent_ = oldWindowManagerAgent;
+    windowManager.pImpl_->windowVisibilityStateListeners_ = oldListeners;
+}
+
+/**
+ * @tc.name: UnregisterVisibilityStateChangedListener01
+ * @tc.desc: check UnregisterVisibilityStateChangedListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, UnregisterVisibilityStateChangedListener01, Function | SmallTest | Level2)
+{
+    auto& windowManager = WindowManager::GetInstance();
+    auto oldWindowManagerAgent = windowManager.pImpl_->windowVisibilityStateListenerAgent_;
+    auto oldListeners = windowManager.pImpl_->windowVisibilityStateListeners_;
+    windowManager.pImpl_->windowVisibilityStateListenerAgent_ = sptr<WindowManagerAgent>::MakeSptr();
+    windowManager.pImpl_->windowVisibilityStateListeners_.clear();
+
+    // check nullpter
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.UnregisterVisibilityStateChangedListener(nullptr));
+
+    sptr<TestWindowVisibilityStateListener> listener1 = sptr<TestWindowVisibilityStateListener>::MakeSptr();
+    sptr<TestWindowVisibilityStateListener> listener2 = sptr<TestWindowVisibilityStateListener>::MakeSptr();
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, windowManager.UnregisterVisibilityStateChangedListener(listener1));
+
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    windowManager.RegisterVisibilityStateChangedListener(listener1);
+    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    windowManager.RegisterVisibilityStateChangedListener(listener2);
+    ASSERT_EQ(2, windowManager.pImpl_->windowVisibilityStateListeners_.size());
+
+    ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterVisibilityStateChangedListener(listener1));
+    EXPECT_CALL(m->Mock(), UnregisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterVisibilityStateChangedListener(listener2));
+    ASSERT_EQ(0, windowManager.pImpl_->windowVisibilityStateListeners_.size());
+    ASSERT_EQ(nullptr, windowManager.pImpl_->windowVisibilityStateListenerAgent_);
+
+    windowManager.pImpl_->windowVisibilityStateListeners_.emplace_back(listener1);
+    ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterVisibilityStateChangedListener(listener1));
+    ASSERT_EQ(0, windowManager.pImpl_->windowVisibilityStateListeners_.size());
+
+    windowManager.pImpl_->windowVisibilityStateListenerAgent_ = oldWindowManagerAgent;
+    windowManager.pImpl_->windowVisibilityStateListeners_ = oldListeners;
 }
 } // namespace
 } // namespace Rosen

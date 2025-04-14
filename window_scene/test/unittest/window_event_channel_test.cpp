@@ -112,7 +112,7 @@ namespace {
  * @tc.desc: normal function TransferKeyEvent
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelTest, TransferKeyEvent, Function | SmallTest | Level2)
+HWTEST_F(WindowEventChannelTest, TransferKeyEvent, TestSize.Level1)
 {
     std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
     keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_BACK);
@@ -126,7 +126,7 @@ HWTEST_F(WindowEventChannelTest, TransferKeyEvent, Function | SmallTest | Level2
  * @tc.desc: normal function TransferPointerEvent
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelTest, TransferPointerEvent, Function | SmallTest | Level2)
+HWTEST_F(WindowEventChannelTest, TransferPointerEvent, TestSize.Level1)
 {
     auto pointerEvent = MMI::PointerEvent::Create();
     sptr<WindowEventChannel> windowEventChannel = sptr<WindowEventChannel>::MakeSptr(sessionStage);
@@ -167,7 +167,7 @@ HWTEST_F(WindowEventChannelTest, TransferPointerEvent, Function | SmallTest | Le
  * @tc.desc: normal function TransferBackpressedEventForConsumed
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelTest, TransferBackpressedEventForConsumed, Function | SmallTest | Level2)
+HWTEST_F(WindowEventChannelTest, TransferBackpressedEventForConsumed, TestSize.Level1)
 {
     bool isConsumed = false;
     auto res = windowEventChannel_->TransferBackpressedEventForConsumed(isConsumed);
@@ -188,7 +188,7 @@ HWTEST_F(WindowEventChannelTest, TransferBackpressedEventForConsumed, Function |
  * @tc.desc: normal function TransferKeyEventForConsumed
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelTest, TransferKeyEventForConsumed, Function | SmallTest | Level2)
+HWTEST_F(WindowEventChannelTest, TransferKeyEventForConsumed, TestSize.Level1)
 {
     auto keyEvent = MMI::KeyEvent::Create();
     ASSERT_NE(keyEvent, nullptr);
@@ -250,7 +250,7 @@ HWTEST_F(WindowEventChannelTest, TransferKeyEventForConsumed, Function | SmallTe
  * @tc.desc: normal function TransferKeyEventForConsumed02
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelTest, TransferKeyEventForConsumed02, Function | SmallTest | Level2)
+HWTEST_F(WindowEventChannelTest, TransferKeyEventForConsumed02, TestSize.Level1)
 {
     auto keyEvent = MMI::KeyEvent::Create();
     ASSERT_NE(keyEvent, nullptr);
@@ -290,7 +290,7 @@ HWTEST_F(WindowEventChannelTest, TransferKeyEventForConsumed02, Function | Small
  * @tc.desc: normal function TransferKeyEventForConsumedAsync01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelTest, TransferKeyEventForConsumedAsync01, Function | SmallTest | Level2)
+HWTEST_F(WindowEventChannelTest, TransferKeyEventForConsumedAsync01, TestSize.Level1)
 {
     auto keyEvent = MMI::KeyEvent::Create();
     ASSERT_NE(keyEvent, nullptr);
@@ -308,7 +308,7 @@ HWTEST_F(WindowEventChannelTest, TransferKeyEventForConsumedAsync01, Function | 
  * @tc.desc: normal function TransferKeyEventForConsumedAsync02
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelTest, TransferKeyEventForConsumedAsync02, Function | SmallTest | Level2)
+HWTEST_F(WindowEventChannelTest, TransferKeyEventForConsumedAsync02, TestSize.Level1)
 {
     auto keyEvent = MMI::KeyEvent::Create();
     ASSERT_NE(keyEvent, nullptr);
@@ -328,7 +328,7 @@ HWTEST_F(WindowEventChannelTest, TransferKeyEventForConsumedAsync02, Function | 
  * @tc.type: FUNC
  */
 HWTEST_F(WindowEventChannelTest, WindowEventChannelListenerProxyOnTransferKeyEventForConsumed,
-    Function | SmallTest | Level2)
+    TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     WindowEventChannelListenerProxy listenerProxy(iRemoteObjectMocker);
@@ -340,7 +340,7 @@ HWTEST_F(WindowEventChannelTest, WindowEventChannelListenerProxyOnTransferKeyEve
  * @tc.desc: normal function TransferFocusActiveEvent
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelTest, TransferFocusActiveEvent, Function | SmallTest | Level2)
+HWTEST_F(WindowEventChannelTest, TransferFocusActiveEvent, TestSize.Level1)
 {
     bool isFocusActive = false;
     windowEventChannel_->sessionStage_ = nullptr;
@@ -353,7 +353,7 @@ HWTEST_F(WindowEventChannelTest, TransferFocusActiveEvent, Function | SmallTest 
  * @tc.desc: normal function PrintKeyEvent
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelTest, PrintKeyEvent, Function | SmallTest | Level2)
+HWTEST_F(WindowEventChannelTest, PrintKeyEvent, TestSize.Level1)
 {
     std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
     ASSERT_NE(keyEvent, nullptr);
@@ -380,7 +380,7 @@ HWTEST_F(WindowEventChannelTest, PrintKeyEvent, Function | SmallTest | Level2)
  * @tc.desc: normal function PrintPointerEvent
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelTest, PrintPointerEvent, Function | SmallTest | Level2)
+HWTEST_F(WindowEventChannelTest, PrintPointerEvent, TestSize.Level1)
 {
     auto pointerEvent = MMI::PointerEvent::Create();
     ASSERT_TRUE((windowEventChannel_ != nullptr));
@@ -405,7 +405,7 @@ HWTEST_F(WindowEventChannelTest, PrintPointerEvent, Function | SmallTest | Level
  * @tc.desc: normal function TransferFocusState
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelTest, TransferFocusState, Function | SmallTest | Level2)
+HWTEST_F(WindowEventChannelTest, TransferFocusState, TestSize.Level1)
 {
     bool focusState = false;
     windowEventChannel_->sessionStage_ = nullptr;
@@ -419,7 +419,7 @@ HWTEST_F(WindowEventChannelTest, TransferFocusState, Function | SmallTest | Leve
  * @tc.desc: normal function TransferAccessibilityHoverEvent01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelTest, TransferAccessibilityHoverEvent01, Function | SmallTest | Level2)
+HWTEST_F(WindowEventChannelTest, TransferAccessibilityHoverEvent01, TestSize.Level1)
 {
     WLOGFI("TransferAccessibilityHoverEvent01 begin");
     auto res = TransferAccessibilityHoverEvent(true);
@@ -432,7 +432,7 @@ HWTEST_F(WindowEventChannelTest, TransferAccessibilityHoverEvent01, Function | S
  * @tc.desc: normal function TransferAccessibilityHoverEvent02
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelTest, TransferAccessibilityHoverEvent02, Function | SmallTest | Level2)
+HWTEST_F(WindowEventChannelTest, TransferAccessibilityHoverEvent02, TestSize.Level1)
 {
     WLOGFI("TransferAccessibilityHoverEvent02 begin");
     auto res = TransferAccessibilityHoverEvent(false);
@@ -445,7 +445,7 @@ HWTEST_F(WindowEventChannelTest, TransferAccessibilityHoverEvent02, Function | S
  * @tc.desc: normal function TransferAccessibilityChildTreeRegister01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelTest, TransferAccessibilityChildTreeRegister01, Function | SmallTest | Level2)
+HWTEST_F(WindowEventChannelTest, TransferAccessibilityChildTreeRegister01, TestSize.Level1)
 {
     WLOGFI("TransferAccessibilityChildTreeRegister01 begin");
     auto res = TransferAccessibilityChildTreeRegister(true);
@@ -458,7 +458,7 @@ HWTEST_F(WindowEventChannelTest, TransferAccessibilityChildTreeRegister01, Funct
  * @tc.desc: normal function TransferAccessibilityChildTreeRegister02
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelTest, TransferAccessibilityChildTreeRegister02, Function | SmallTest | Level2)
+HWTEST_F(WindowEventChannelTest, TransferAccessibilityChildTreeRegister02, TestSize.Level1)
 {
     WLOGFI("TransferAccessibilityChildTreeRegister02 begin");
     auto res = TransferAccessibilityChildTreeRegister(false);
@@ -471,7 +471,7 @@ HWTEST_F(WindowEventChannelTest, TransferAccessibilityChildTreeRegister02, Funct
  * @tc.desc: normal function TransferAccessibilityChildTreeUnregister01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelTest, TransferAccessibilityChildTreeUnregister01, Function | SmallTest | Level2)
+HWTEST_F(WindowEventChannelTest, TransferAccessibilityChildTreeUnregister01, TestSize.Level1)
 {
     WLOGFI("TransferAccessibilityChildTreeUnregister01 begin");
     auto res = TransferAccessibilityChildTreeUnregister(true);
@@ -484,7 +484,7 @@ HWTEST_F(WindowEventChannelTest, TransferAccessibilityChildTreeUnregister01, Fun
  * @tc.desc: normal function TransferAccessibilityChildTreeUnregister02
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelTest, TransferAccessibilityChildTreeUnregister02, Function | SmallTest | Level2)
+HWTEST_F(WindowEventChannelTest, TransferAccessibilityChildTreeUnregister02, TestSize.Level1)
 {
     WLOGFI("TransferAccessibilityChildTreeUnregister02 begin");
     auto res = TransferAccessibilityChildTreeUnregister(false);
@@ -497,7 +497,7 @@ HWTEST_F(WindowEventChannelTest, TransferAccessibilityChildTreeUnregister02, Fun
  * @tc.desc: normal function TransferAccessibilityDumpChildInfo01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelTest, TransferAccessibilityDumpChildInfo01, Function | SmallTest | Level2)
+HWTEST_F(WindowEventChannelTest, TransferAccessibilityDumpChildInfo01, TestSize.Level1)
 {
     WLOGFI("TransferAccessibilityDumpChildInfo01 begin");
     auto res = TransferAccessibilityDumpChildInfo(true);
@@ -510,7 +510,7 @@ HWTEST_F(WindowEventChannelTest, TransferAccessibilityDumpChildInfo01, Function 
  * @tc.desc: normal function TransferAccessibilityDumpChildInfo02
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelTest, TransferAccessibilityDumpChildInfo02, Function | SmallTest | Level2)
+HWTEST_F(WindowEventChannelTest, TransferAccessibilityDumpChildInfo02, TestSize.Level1)
 {
     WLOGFI("TransferAccessibilityDumpChildInfo02 begin");
     auto res = TransferAccessibilityDumpChildInfo(false);
@@ -523,7 +523,7 @@ HWTEST_F(WindowEventChannelTest, TransferAccessibilityDumpChildInfo02, Function 
  * @tc.desc: normal function PrintInfoPointerEvent
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelTest, PrintInfoPointerEvent, Function | SmallTest | Level2)
+HWTEST_F(WindowEventChannelTest, PrintInfoPointerEvent, TestSize.Level1)
 {
     auto pointerEvent = MMI::PointerEvent::Create();
     ASSERT_NE(pointerEvent, nullptr);

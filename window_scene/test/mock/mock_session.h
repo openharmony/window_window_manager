@@ -59,6 +59,11 @@ public:
     MOCK_METHOD1(GetAppForceLandscapeConfig, WMError(AppForceLandscapeConfig& config));
     MOCK_METHOD1(SetDialogSessionBackGestureEnabled, WSError(bool isEnabled));
     MOCK_METHOD1(SetActive, WSError(bool active));
+    MOCK_METHOD1(SyncSessionEvent, WSError(SessionEvent event));
+    MOCK_METHOD0(RemoveStartingWindow, WSError(void));
+    MOCK_METHOD1(GetGlobalMaximizeMode, WSError(MaximizeMode& mode));
+    MOCK_METHOD2(UpdateSessionPropertyByAction, WMError(const sptr<WindowSessionProperty>& property,
+        WSPropertyChangeAction action));
 };
 } // namespace Rosen
 } // namespace OHOS

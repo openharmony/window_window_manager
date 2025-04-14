@@ -55,7 +55,7 @@ namespace {
  * @tc.desc: one FLOATING MainWindow, maximize ImmersiveMode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowStatusChangeTest, ChangeWindowStatus01, Function | MediumTest | Level0)
+HWTEST_F(WindowStatusChangeTest, ChangeWindowStatus01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window1_1");
@@ -95,7 +95,7 @@ HWTEST_F(WindowStatusChangeTest, ChangeWindowStatus01, Function | MediumTest | L
  * @tc.desc: one FLOATING MainWindow, maximize and recover
  * @tc.type: FUNC
  */
-HWTEST_F(WindowStatusChangeTest, ChangeWindowStatus02, Function | MediumTest | Level0)
+HWTEST_F(WindowStatusChangeTest, ChangeWindowStatus02, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window1_2");
@@ -147,7 +147,7 @@ HWTEST_F(WindowStatusChangeTest, ChangeWindowStatus02, Function | MediumTest | L
  * @tc.desc: one FLOATING SubWindow, maximize and recover
  * @tc.type: FUNC
  */
-HWTEST_F(WindowStatusChangeTest, ChangeWindowStatus03, Function | MediumTest | Level0)
+HWTEST_F(WindowStatusChangeTest, ChangeWindowStatus03, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window1_3");
@@ -195,7 +195,7 @@ HWTEST_F(WindowStatusChangeTest, ChangeWindowStatus03, Function | MediumTest | L
  * @tc.desc: one FULLSCREEN SubWindow, recover
  * @tc.type: FUNC
  */
-HWTEST_F(WindowStatusChangeTest, ChangeWindowStatus04, Function | MediumTest | Level0)
+HWTEST_F(WindowStatusChangeTest, ChangeWindowStatus04, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window1_4");
@@ -237,7 +237,7 @@ HWTEST_F(WindowStatusChangeTest, ChangeWindowStatus04, Function | MediumTest | L
  * @tc.desc: one FLOATING MainWindow, minimize and restore
  * @tc.type: FUNC
  */
-HWTEST_F(WindowStatusChangeTest, ChangeWindowStatus05, Function | MediumTest | Level0)
+HWTEST_F(WindowStatusChangeTest, ChangeWindowStatus05, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window2_1");
@@ -282,7 +282,7 @@ HWTEST_F(WindowStatusChangeTest, ChangeWindowStatus05, Function | MediumTest | L
  * @tc.desc: one FLOATING SubWindow, minimize and restore
  * @tc.type: FUNC
  */
-HWTEST_F(WindowStatusChangeTest, ChangeWindowStatus06, Function | MediumTest | Level0)
+HWTEST_F(WindowStatusChangeTest, ChangeWindowStatus06, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window2_2");

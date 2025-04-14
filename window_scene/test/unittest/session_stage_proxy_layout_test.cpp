@@ -50,7 +50,7 @@ namespace {
  * @tc.desc: test function : NotifySingleHandTransformChange
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyLayoutTest, NotifySingleHandTransformChange, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyLayoutTest, NotifySingleHandTransformChange, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SessionStageProxyLayoutTest: NotifySingleHandTransformChange start";
     SingleHandTransform singleHandTransform;

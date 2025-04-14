@@ -29,12 +29,10 @@ ohos_fuzztest("DisplayManagerFuzzTest") {
   ]
 
   sources = [ "displaymanager_fuzzer.cpp" ]
-  deps = [
-    "${window_base_path}/dm:libdm",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-  ]
+  deps = [ "${window_base_path}/dm:libdm" ]
   external_deps = [
     "c_utils:utils",
+    "graphic_2d:librender_service_client",
     "hilog:libhilog",
   ]
 }
