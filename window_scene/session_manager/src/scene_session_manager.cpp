@@ -3470,7 +3470,7 @@ WSError SceneSessionManager::CheckSubSessionStartedByExtensionAndSetDisplayId(co
         if (parentBundleName != hostBundleName && (SHELL_ASSISTANT_BUNDLENAME != hostBundleName ||
             !sessionInfo.want || sessionInfo.want->GetElement().GetBundleName() != hostBundleName)) {
             TLOGE(WmsLogTag::WMS_UIEXT, "The hostWindow is not this parentwindow ! parentwindow bundleName: %{public}s,"
-                " hostwindow bundleName: %{public}s", parentBundleName, hostBundleName);
+                " hostwindow bundleName: %{public}s", parentBundleName.c_str(), hostBundleName.c_str());
             ReportSubWindowCreationFailure(pid, info.elementName.GetAbilityName(), parentBundleName, hostBundleName);
             return WSError::WS_ERROR_INVALID_WINDOW;
         }
