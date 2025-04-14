@@ -134,7 +134,7 @@ constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PC = 50;
 constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PAD = 8;
 constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PHONE = 3;
 constexpr uint32_t LIFECYCLE_ISOLATE_VERSION = 18;
-constexpr uint64_t NOTIFY_START_ABILITY_TIMEOUT = 3000;
+constexpr uint64_t NOTIFY_START_ABILITY_TIMEOUT = 4000;
 constexpr uint64_t START_UI_ABILITY_TIMEOUT = 3000;
 
 const std::map<std::string, OHOS::AppExecFwk::DisplayOrientation> STRING_TO_DISPLAY_ORIENTATION_MAP = {
@@ -10502,17 +10502,19 @@ BrokerStates SceneSessionManager::NotifyStartAbility(
         }
         sessionInfo.want->SetParam("oh_persistentId", persistentId);
         std::shared_ptr<int32_t> ret = std::make_shared<int32_t>(0);
-        bool isTimeout = ffrtQueueHelper_->SubmitTaskAndWait([this, collaborator, &sessionInfo, accessTokenIDEx,
-            ret] {
-            auto result = collaborator->NotifyStartAbility(*(sessionInfo.abilityInfo), currentUserId_,
-                *(sessionInfo.want), static_cast<uint64_t>(accessTokenIDEx));
+        std::shared_ptr<AAFwk::Want> notifyWant = std::make_shared<AAFwk::Want>(*(sessionInfo.want));
+        bool isTimeout = ffrtQueueHelper_->SubmitTaskAndWait([this, collaborator, accessTokenIDEx,
+            notifyWant, abilityInfo = sessionInfo.abilityInfo, ret] {
+            auto result = collaborator->NotifyStartAbility(*abilityInfo, currentUserId_, *notifyWant,
+                static_cast<uint64_t>(accessTokenIDEx));
             *ret = static_cast<int32_t>(result);
         }, NOTIFY_START_ABILITY_TIMEOUT);
 
         if (isTimeout) {
-            TLOGE(WmsLogTag::WMS_LIFE, "notify start ability timeout, current userId: %{public}d", currentUserId_.load());
+            TLOGE(WmsLogTag::WMS_LIFE, "notify start ability timeout, id: %{public}d", persistentId);
             return BrokerStates::BROKER_NOT_START;
         }
+        *(sessionInfo.want) = *notifyWant;
         TLOGI(WmsLogTag::WMS_LIFE, "collaborator ret: %{public}d", *ret);
         if (*ret == 0) {
             return BrokerStates::BROKER_STARTED;
@@ -10582,10 +10584,14 @@ void SceneSessionManager::NotifyMoveSessionToForeground(int32_t collaboratorType
 
 void SceneSessionManager::NotifyClearSession(int32_t collaboratorType, int32_t persistentId)
 {
-    TLOGD(WmsLogTag::DEFAULT, "id: %{public}d, type: %{public}d", persistentId, collaboratorType);
+    TLOGD(WmsLogTag::WMS_LIFE, "id: %{public}d, type: %{public}d", persistentId, collaboratorType);
     if (auto collaborator = GetCollaboratorByType(collaboratorType)) {
-        TLOGI(WmsLogTag::DEFAULT, "called NotifyClearMission %{public}d", persistentId);
-        collaborator->NotifyClearMission(persistentId);
+        const char* const where = __func__;
+        ffrtQueueHelper_->SubmitTask([collaborator, persistentId, where] {
+            int32_t ret = collaborator->NotifyClearMission(persistentId);
+            TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s called clear mission ret: %{public}d, persistent id: %{public}d",
+                where, ret, persistentId);
+        });
     }
 }
 
