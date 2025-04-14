@@ -1158,6 +1158,9 @@ public:
      */
     WMError UnregisterWindowInfoChangeCallback(const std::unordered_set<WindowInfoKey>& observedInfo,
         const sptr<IWindowInfoChangedListener>& listener);
+    
+    void SetIsModuleHookEndToSet(const std::string& moduleName);
+    bool GetIsModuleHookEndFromSet(const std::string& moduleName);
 
 private:
     WindowManager();
@@ -1166,6 +1169,7 @@ private:
     class Impl;
     std::unique_ptr<Impl> pImpl_;
     bool destroyed_ = false;
+    std::unordered_set<std::string> isModuleHookEndSet_;
 
     void OnWMSConnectionChanged(int32_t userId, int32_t screenId, bool isConnected) const;
     void UpdateFocusStatus(uint32_t windowId, const sptr<IRemoteObject>& abilityToken, WindowType windowType,

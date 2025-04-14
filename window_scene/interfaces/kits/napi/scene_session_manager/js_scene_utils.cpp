@@ -346,6 +346,19 @@ static bool IsJsIsUseControlSessionUndefined(napi_env env, napi_value jsIsUseCon
     return true;
 }
 
+static bool IsJsIsModuleAbilityHookUndefind(napi_env env, napi_value jsIsModuleAbilityHook, SessionInfo& sessionInfo)
+{
+    if (GetType(env, jsIsModuleAbilityHook) != napi_undefined) {
+        bool isModuleAbilityHook = false;
+        if (!ConvertFromJsValue(env, jsIsModuleAbilityHook, isModuleAbilityHook)) {
+            TLOGI(WmsLogTag::WMS_LIFE, "Failed to convert parameter to isModuleAbilityHook");
+            return false;
+        }
+        sessionInfo.isModuleAbilityHook = isModuleAbilityHook;
+    }
+    return true;
+}
+
 bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sessionInfo)
 {
     napi_value jsBundleName = nullptr;
@@ -368,6 +381,9 @@ bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sess
     napi_get_named_property(env, jsObject, "isNewAppInstance", &jsIsNewAppInstance);
     napi_value jsInstanceKey = nullptr;
     napi_get_named_property(env, jsObject, "instanceKey", &jsInstanceKey);
+    napi_value jsIsModuleAbilityHook = nullptr;
+    napi_get_named_property(env, jsObject, "isModuleAbilityHook", &jsIsModuleAbilityHook);
+    
     if (!IsJsBundleNameUndefind(env, jsBundleName, sessionInfo)) {
         return false;
     }
@@ -383,15 +399,12 @@ bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sess
     if (!IsJsIsSystemUndefind(env, jsIsSystem, sessionInfo)) {
         return false;
     }
-    if (!IsJsSceneTypeUndefined(env, jsSceneType, sessionInfo)) {
-        return false;
-    }
-    if (!IsJsWindowInputTypeUndefind(env, jsWindowInputType, sessionInfo)) {
-        return false;
-    }
-    if (!IsJsFullScreenStartUndefined(env, jsFullScreenStart, sessionInfo) ||
+    if (!IsJsSceneTypeUndefined(env, jsSceneType, sessionInfo) ||
+        !IsJsFullScreenStartUndefined(env, jsFullScreenStart, sessionInfo) ||
         !IsJsIsNewAppInstanceUndefined(env, jsIsNewAppInstance, sessionInfo) ||
-        !IsJsInstanceKeyUndefined(env, jsInstanceKey, sessionInfo)) {
+        !IsJsInstanceKeyUndefined(env, jsInstanceKey, sessionInfo) ||
+        !IsJsWindowInputTypeUndefind(env, jsWindowInputType, sessionInfo) ||
+        !IsJsIsModuleAbilityHookUndefind(env, jsIsModuleAbilityHook, sessionInfo)) {
         return false;
     }
     return true;
