@@ -3788,13 +3788,11 @@ void Session::NotifySessionInfoLockedStateChange(bool lockedState)
     }
 }
 
-WSError Session::SwitchFreeMultiWindow(const SystemSessionConfig config)
+WSError Session::SwitchFreeMultiWindow(const SystemSessionConfig& config)
 {
     bool enable = config.freeMultiWindowEnable_;
     systemConfig_.defaultWindowMode_ = config.defaultWindowMode_;
     systemConfig_.freeMultiWindowEnable_ = enable;
-    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "windowId: %{public}d enable: %{public}d defaultWindowMode: %{public}d",
-        GetPersistentId(), enable, systemConfig_.defaultWindowMode_);
     if (!IsSessionValid()) {
         TLOGW(WmsLogTag::WMS_LAYOUT_PC, "Session is invalid, id: %{public}d state: %{public}u",
             GetPersistentId(), GetSessionState());
@@ -3804,6 +3802,8 @@ WSError Session::SwitchFreeMultiWindow(const SystemSessionConfig config)
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "sessionStage_ is null");
         return WSError::WS_ERROR_NULLPTR;
     }
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "windowId: %{public}d enable: %{public}d defaultWindowMode: %{public}d",
+        GetPersistentId(), enable, systemConfig_.defaultWindowMode_);
     bool isUiExtSubWindow = WindowHelper::IsSubWindow(GetSessionProperty()->GetWindowType()) &&
         GetSessionProperty()->GetIsUIExtFirstSubWindow();
     if (WindowHelper::IsMainWindow(GetWindowType()) || isUiExtSubWindow) {
