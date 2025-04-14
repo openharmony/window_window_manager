@@ -28,6 +28,7 @@ public:
     FfrtQueueHelper();
     ~FfrtQueueHelper();
     bool SubmitTaskAndWait(std::function<void()>&& task, uint64_t timeout);
+    void SubmitTask(std::function<void()>&& task);
 
 private:
     std::unique_ptr<ffrt::queue> ffrtQueue_;
