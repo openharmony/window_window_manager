@@ -612,6 +612,17 @@ struct SessionOption {
     std::string innerName_;
     ScreenId screenId_;
 };
+
+/**
+ * @brief Device state
+ */
+enum class DMDeviceStatus: uint32_t {
+    UNKNOWN = 0,
+    STATUS_FOLDED,
+    STATUS_TENT_HOVER,
+    STATUS_TENT,
+    STATUS_GLOBAL_FULL
+};
 }
 }
 #endif // OHOS_ROSEN_DM_COMMON_H

@@ -118,6 +118,15 @@ void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode disp
         std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);
         lastDisplayMode_ = displayMode;
     }
+    if (!ScreenSessionManager::GetInstance().GetTentMode()) {
+        if (displayMode == FoldDisplayMode::MAIN) {
+            TLOGI(WmsLogTag::DMS, "Set device status to STATUS_FOLDED");
+            SetDeviceStatus(static_cast<uint32_t>(DMDeviceStatus::STATUS_FOLDED));
+        } else {
+            TLOGI(WmsLogTag::DMS, "Set device status to UNKNOWN");
+            SetDeviceStatus(static_cast<uint32_t>(DMDeviceStatus::UNKNOWN));
+        }
+    }
     ChangeScreenDisplayModeProc(screenSession, displayMode, reason);
     {
         std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);
