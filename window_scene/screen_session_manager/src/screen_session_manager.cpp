@@ -1786,11 +1786,9 @@ DMError ScreenSessionManager::SetVirtualPixelRatio(ScreenId screenId, float virt
     screenSession->SetVirtualPixelRatio(virtualPixelRatio);
     if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
         sptr<ScreenSession> fakeScreenSession = screenSession->GetFakeScreenSession();
-        if (fakeScreenSession == nullptr) {
-            TLOGE(WmsLogTag::DMS, "error,fakeScreenSession is nullptr.");
-            return DMError::DM_OK;
+        if (fakeScreenSession != nullptr) {
+            fakeScreenSession->SetVirtualPixelRatio(virtualPixelRatio);
         }
-        fakeScreenSession->SetVirtualPixelRatio(virtualPixelRatio);
     }
     std::map<DisplayId, sptr<DisplayInfo>> emptyMap;
     OnPropertyChange(screenSession->GetScreenProperty(), ScreenPropertyChangeReason::VIRTUAL_PIXEL_RATIO_CHANGE,
