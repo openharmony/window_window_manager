@@ -567,7 +567,7 @@ public:
     void RegisterIsScreenLockedCallback(const std::function<bool()>& callback);
     std::string GetWindowDetectTaskName() const;
     void RemoveWindowDetectTask();
-    WSError SwitchFreeMultiWindow(const SystemSessionConfig config);
+    WSError SwitchFreeMultiWindow(const SystemSessionConfig& config);
 
     virtual bool CheckGetAvoidAreaAvailable(AvoidAreaType type) { return true; }
 
