@@ -14623,7 +14623,8 @@ void SceneSessionManager::ReportKeyboardCreateException(sptr<SceneSession>& keyb
             TLOGW(WmsLogTag::DEFAULT, "session nullptr");
             continue;
         }
-        msg += std::to_string(session->GetPersistentId()) + ",";
+        msg +=  "PanelId:" + std::to_string(session->GetPersistentId()) + ",";
+        msg +=  "screenId:" + std::to_string(session->GetScreenId()) + ",";
     }
     msg += "],";
     for (const auto& session : GetSceneSessionVectorByType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT)) {
@@ -14631,7 +14632,7 @@ void SceneSessionManager::ReportKeyboardCreateException(sptr<SceneSession>& keyb
             TLOGW(WmsLogTag::DEFAULT, "session nullptr");
             continue;
         }
-        msg += "id:" + std::to_string(session->GetPersistentId()) + ",";
+        msg += "keyboardId:" + std::to_string(session->GetPersistentId()) + ",";
         msg += "screenId:" + std::to_string(session->GetScreenId()) + ",";
     }
     WindowInfoReporter::GetInstance().ReportKeyboardLifeCycleException(
