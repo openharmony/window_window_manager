@@ -315,7 +315,7 @@ HWTEST_F(WindowSessionTest, ConnectInner, TestSize.Level1)
     auto res3 = session_->ConnectInner(mockSessionStage_, mockEventChannel_,
         nullptr, sessionConfig, property, nullptr, 1, 1, "");
     ASSERT_EQ(res3, WSError::WS_OK);
-    ASSERT_EQ(false, session_->GetIsNeedUpdateWindowMode());
+    ASSERT_EQ(false, session_->GetSessionProperty()->GetIsNeedUpdateWindowMode());
 }
 
 /**
