@@ -1208,7 +1208,8 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint8(backgroundAlpha_) && parcel.WriteUint32(static_cast<uint32_t>(keyboardViewMode_)) &&
         parcel.WriteFloat(cornerRadius_) && parcel.WriteBool(isExclusivelyHighlighted_) &&
         parcel.WriteBool(isAtomicService_) && parcel.WriteUint32(apiVersion_) &&
-        parcel.WriteBool(isFullScreenWaterfallMode_);
+        parcel.WriteBool(isFullScreenWaterfallMode_) && parcel.WriteBool(isAbilityHookEnd_) &&
+        parcel.WriteBool(isModuleAbilityHook_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -1301,6 +1302,8 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetIsAtomicService(parcel.ReadBool());
     property->SetApiVersion(parcel.ReadUint32());
     property->SetIsFullScreenWaterfallMode(parcel.ReadBool());
+    property->SetIsAbilityHookEnd(parcel.ReadBool());
+    property->SetIsModuleAbilityHook(parcel.ReadBool());
     return property;
 }
 
@@ -1400,6 +1403,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     isAtomicService_ = property->isAtomicService_;
     apiVersion_ = property->apiVersion_;
     isFullScreenWaterfallMode_ = property->isFullScreenWaterfallMode_;
+    isAbilityHookEnd_ = property->isAbilityHookEnd_;
 }
 
 bool WindowSessionProperty::Write(Parcel& parcel, WSPropertyChangeAction action)
@@ -1986,6 +1990,26 @@ void WindowSessionProperty::SetIsFullScreenWaterfallMode(bool isFullScreenWaterf
 bool WindowSessionProperty::GetIsFullScreenWaterfallMode() const
 {
     return isFullScreenWaterfallMode_;
+}
+
+void WindowSessionProperty::SetIsAbilityHookEnd(bool isAbilityHookEnd)
+{
+    isAbilityHookEnd_ = isAbilityHookEnd;
+}
+
+bool WindowSessionProperty::GetIsAbilityHookEnd() const
+{
+    return isAbilityHookEnd_;
+}
+
+void WindowSessionProperty::SetIsModuleAbilityHook(bool isModuleAbilityHook)
+{
+    isModuleAbilityHook_ = isModuleAbilityHook;
+}
+
+bool WindowSessionProperty::GetIsModuleAbilityHook() const
+{
+    return isModuleAbilityHook_;
 }
 } // namespace Rosen
 } // namespace OHOS

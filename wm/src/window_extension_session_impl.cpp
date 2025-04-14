@@ -87,7 +87,7 @@ std::shared_ptr<IDataHandler> WindowExtensionSessionImpl::GetExtensionDataHandle
 }
 
 WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Context>& context,
-    const sptr<Rosen::ISession>& iSession, const std::string& identityToken)
+    const sptr<Rosen::ISession>& iSession, const std::string& identityToken, bool isAbilityHookEnd)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "Called.");
     if (!context || !iSession) {
@@ -228,7 +228,7 @@ void WindowExtensionSessionImpl::UpdateConfigurationSyncForAll(
     }
 }
 
-WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClearListener)
+WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClearListener, uint32_t reason)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d Destroy, state:%{public}u, needNotifyServer:%{public}d, "
         "needClearListener:%{public}d", GetPersistentId(), state_, needNotifyServer, needClearListener);

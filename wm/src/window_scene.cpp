@@ -21,7 +21,9 @@
 #include "perform_reporter.h"
 #include "singleton_container.h"
 #include "static_call.h"
+#include "window_manager.h"
 #include "window_manager_hilog.h"
+#include "wm_common_inner.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -66,7 +68,7 @@ WMError WindowScene::Init(DisplayId displayId, const std::shared_ptr<AbilityRunt
         option->SetBundleName(context->GetBundleName());
     }
     auto mainWindow = SingletonContainer::Get<StaticCall>().CreateWindow(
-        GenerateMainWindowName(context), option, context);
+        GenerateMainWindowName(context), option, context, isAbilityHookEnd);
     if (mainWindow == nullptr) {
         TLOGE(WmsLogTag::WMS_MAIN, "mainWindow is null after create Window!");
         return WMError::WM_ERROR_NULLPTR;
@@ -86,7 +88,7 @@ WMError WindowScene::Init(DisplayId displayId, const std::shared_ptr<AbilityRunt
 
 WMError WindowScene::Init(DisplayId displayId, const std::shared_ptr<AbilityRuntime::Context>& context,
     sptr<IWindowLifeCycle>& listener, sptr<WindowOption> option, const sptr<IRemoteObject>& iSession,
-    const std::string& identityToken)
+    const std::string& identityToken, bool isAbilityHookEnd)
 {
     TLOGI(WmsLogTag::WMS_MAIN, "WindowScene with window session!");
     if (option == nullptr || iSession == nullptr) {
@@ -98,8 +100,15 @@ WMError WindowScene::Init(DisplayId displayId, const std::shared_ptr<AbilityRunt
     if (context != nullptr) {
         option->SetBundleName(context->GetBundleName());
     }
+    if (isAbilityHookEnd) {
+        SingletonContainer::Get<WindowManager>().SetIsModuleHookEndToSet(context->GetHapModuleInfo()->moduleName);
+    }
+    if (SingletonContainer::Get<WindowManager>().GetIsModuleHookEndFromSet(context->GetHapModuleInfo()->moduleName)) {
+        TLOGI(WmsLogTag::WMS_MAIN, "set isAbilityHookEnd true");
+        isAbilityHookEnd = true;
+    }
     auto mainWindow = SingletonContainer::Get<StaticCall>()
-        .CreateWindow(option, context, iSession, identityToken);
+        .CreateWindow(option, context, iSession, identityToken, isAbilityHookEnd);
     if (mainWindow == nullptr) {
         TLOGE(WmsLogTag::WMS_MAIN, "mainWindow is null after create Window!");
         return WMError::WM_ERROR_NULLPTR;
@@ -182,14 +191,14 @@ WMError WindowScene::GoBackground(uint32_t reason)
     return mainWindow->Hide(reason);
 }
 
-WMError WindowScene::GoDestroy()
+WMError WindowScene::GoDestroy(uint32_t reason)
 {
     auto mainWindow = GetMainWindow();
     if (mainWindow == nullptr) {
         TLOGE(WmsLogTag::WMS_MAIN, "main window is null");
         return WMError::WM_ERROR_NULLPTR;
     }
-    WMError ret = mainWindow->Destroy();
+    WMError ret = mainWindow->Destroy(reason);
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_MAIN, "failed, name: %{public}s", mainWindow->GetWindowName().c_str());
         return ret;
@@ -198,6 +207,11 @@ WMError WindowScene::GoDestroy()
     std::lock_guard<std::mutex> lock(mainWindowMutex_);
     mainWindow_ = nullptr;
     return WMError::WM_OK;
+}
+
+WMError WindowScene::GoDestroyHookWindow()
+{
+    return GoDestroy(static_cast<uint32_t>(WindowStateChangeReason::ABILITY_HOOK));
 }
 
 WMError WindowScene::OnNewWant(const AAFwk::Want& want)
@@ -273,5 +287,15 @@ WMError WindowScene::NotifyMemoryLevel(int32_t level)
     return mainWindow->NotifyMemoryLevel(level);
 }
 
+WMError WindowScene::SetHookedWindowElementInfo(const AppExecFwk::ElementName& elementName)
+{
+    auto mainWindow  = GetMainWindow();
+    if (mainWindow == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "failed, because main window is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    TLOGI(WmsLogTag::WMS_MAIN, "set hooked window element info");
+    return mainWindow->SetHookedWindowElementInfo(elementName);
+}
 } // namespace Rosen
 } // namespace OHOS

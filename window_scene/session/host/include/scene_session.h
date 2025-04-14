@@ -557,8 +557,6 @@ public:
     virtual void NotifySessionLockStateChange(bool isLockedState) {}
     virtual void SetUpdateSessionLabelAndIconListener(NofitySessionLabelAndIconUpdatedFunc&& func) {}
     bool UpdateInteractiveInner(bool interactive);
-    void SetIsAbilityHook(bool isAbilityHook);
-    bool GetIsAbilityHook() const;
     void HookSceneSessionActivation(NotifyHookSceneSessionActivationFunc&& func);
     void SetSceneSessionDestructNotificationFunc(NotifySceneSessionDestructFunc&& func);
     void SetIsUserRequestedExit(bool isUserRequestedExit);
@@ -1246,7 +1244,6 @@ private:
    /*
     * Window Lifecycle
     */
-    bool isAbilityHook_ = false;
     NotifyHookSceneSessionActivationFunc hookSceneSessionActivationFunc_;
     bool isUserRequestedExit_ = false;
 };

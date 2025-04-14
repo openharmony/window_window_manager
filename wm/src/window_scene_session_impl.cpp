@@ -450,8 +450,10 @@ WMError WindowSceneSessionImpl::RecoverAndReconnectSceneSession()
     auto context = GetContext();
     auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context);
     if (context && context->GetHapModuleInfo() && abilityContext && abilityContext->GetAbilityInfo()) {
-        property_->EditSessionInfo().abilityName_ = abilityContext->GetAbilityInfo()->name;
-        property_->EditSessionInfo().moduleName_ = context->GetHapModuleInfo()->moduleName;
+        if (!abilityContext->IsHook() || (abilityContext->IsHook() && abilityContext->GetHookOff())) {
+            property_->EditSessionInfo().abilityName_ = abilityContext->GetAbilityInfo()->name;
+            property_->EditSessionInfo().moduleName_ = context->GetHapModuleInfo()->moduleName;
+        }
     } else {
         TLOGE(WmsLogTag::WMS_RECOVER, "context or abilityContext is null, recovered session failed");
         return WMError::WM_ERROR_NULLPTR;
@@ -564,7 +566,7 @@ void WindowSceneSessionImpl::UpdateWindowState()
 }
 
 WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Context>& context,
-    const sptr<Rosen::ISession>& iSession, const std::string& identityToken)
+    const sptr<Rosen::ISession>& iSession, const std::string& identityToken, bool isAbilityHookEnd)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "Window Create name:%{public}s, state:%{public}u, mode:%{public}u",
         property_->GetWindowName().c_str(), state_, GetWindowMode());
@@ -580,6 +582,8 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
     hostSession_ = iSession;
     SetContext(context);
     identityToken_ = identityToken;
+    property_->SetIsAbilityHookEnd(isAbilityHookEnd);
+    TLOGI(WmsLogTag::WMS_LIFE, "SetIsAbilityHookEnd %{public}d", isAbilityHookEnd);
     AdjustWindowAnimationFlag();
     if (context && context->GetApplicationInfo() &&
         context->GetApplicationInfo()->apiCompatibleVersion >= 9 && // 9: api version
@@ -1788,10 +1792,44 @@ WMError WindowSceneSessionImpl::SyncDestroyAndDisconnectSpecificSession(int32_t 
     return ret;
 }
 
-WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearListener)
+WMError WindowSceneSessionImpl::DestroyHookWindow()
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "in");
+    InputTransferStation::GetInstance().RemoveInputWindow(GetPersistentId());
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "session invalid, id: %{public}d", GetPersistentId());
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        state_ = WindowState::STATE_DESTROYED;
+        requestState_ = WindowState::STATE_DESTROYED;
+    }
+
+    DestroySubWindow();
+    {
+        std::unique_lock<std::shared_mutex> lock(windowSessionMutex_);
+        windowSessionMap_.erase(property_->GetWindowName());
+    }
+    {
+        std::lock_guard<std::mutex> lock(hostSessionMutex_);
+        hostSession_ = nullptr;
+    }
+    NotifyAfterDestroy();
+    ClearListenersById(GetPersistentId());
+    ClearVsyncStation();
+    SetUIContentComplete();
+    TLOGI(WmsLogTag::WMS_LIFE, "Destroy hook window success, id: %{public}d", property_->GetPersistentId());
+    return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearListener, uint32_t reason)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "Destroy start, id:%{public}d, state:%{public}u, needNotifyServer:%{public}d, "
         "needClearListener:%{public}d", GetPersistentId(), state_, needNotifyServer, needClearListener);
+    if (reason == static_cast<uint32_t>(WindowStateChangeReason::ABILITY_HOOK)) {
+        return DestroyHookWindow();
+    }
     InputTransferStation::GetInstance().RemoveInputWindow(GetPersistentId());
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_LIFE, "session invalid, id: %{public}d", GetPersistentId());
@@ -5991,6 +6029,22 @@ WMError WindowSceneSessionImpl::GetWindowPropertyInfo(WindowPropertyInfo& window
     windowPropertyInfo.isTransparent = IsTransparent();
     windowPropertyInfo.id = GetWindowId();
     windowPropertyInfo.displayId = GetDisplayId();
+    return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::SetHookedWindowElementInfo(const AppExecFwk::ElementName& elementName)
+{
+    auto context = GetContext();
+    auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context);
+    if (!abilityContext) {
+        TLOGE(WmsLogTag::WMS_LIFE, "abilityContext is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    if (abilityContext->IsHook() && !abilityContext->GetHookOff()) {
+        property_->EditSessionInfo().bundleName_ = elementName.GetBundleName();
+        property_->EditSessionInfo().moduleName_ = elementName.GetModuleName();
+        property_->EditSessionInfo().abilityName_ = elementName.GetAbilityName();
+    }
     return WMError::WM_OK;
 }
 } // namespace Rosen

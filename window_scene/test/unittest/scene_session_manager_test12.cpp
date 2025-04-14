@@ -2177,11 +2177,11 @@ HWTEST_F(SceneSessionManagerTest12, GetActiveSceneSessionCopy, Function | SmallT
 }
 
 /**
- * @tc.name: GetMainSessionByModuleName
- * @tc.desc: test function : GetMainSessionByModuleName
+ * @tc.name: GetHookedSessionByModuleName
+ * @tc.desc: test function : GetHookedSessionByModuleName
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest12, GetMainSessionByModuleName, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerTest12, GetHookedSessionByModuleName, Function | SmallTest | Level2)
 {
     SessionInfo info;
     info.bundleName_ = "testBundleName1";
@@ -2191,27 +2191,27 @@ HWTEST_F(SceneSessionManagerTest12, GetMainSessionByModuleName, Function | Small
     sptr<SceneSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    auto res = ssm_->GetMainSessionByModuleName(info);
+    auto res = ssm_->GetHookedSessionByModuleName(info);
     ASSERT_EQ(res, nullptr);
 
     ssm_->sceneSessionMap_.insert({101, sceneSession});
-    res = ssm_->GetMainSessionByModuleName(info);
+    res = ssm_->GetHookedSessionByModuleName(info);
     ASSERT_EQ(res, sceneSession);
 
     info.appInstanceKey_ = "testAppInstanceKey1";
-    res = ssm_->GetMainSessionByModuleName(info);
+    res = ssm_->GetHookedSessionByModuleName(info);
     ASSERT_EQ(res, nullptr);
 
     info.appIndex_ = 2;
-    res = ssm_->GetMainSessionByModuleName(info);
+    res = ssm_->GetHookedSessionByModuleName(info);
     ASSERT_EQ(res, nullptr);
 
     info.moduleName_ = "testModuleName2";
-    res = ssm_->GetMainSessionByModuleName(info);
+    res = ssm_->GetHookedSessionByModuleName(info);
     ASSERT_EQ(res, nullptr);
 
     info.bundleName_ = "testBundleName2";
-    res = ssm_->GetMainSessionByModuleName(info);
+    res = ssm_->GetHookedSessionByModuleName(info);
     ASSERT_EQ(res, nullptr);
 }
 
@@ -2231,7 +2231,7 @@ HWTEST_F(SceneSessionManagerTest12, RequestSceneSession, Function | SmallTest | 
     sptr<SceneSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    sceneSession->SetIsAbilityHook(true);
+    sceneSession->sessionInfo_.isModuleAbilityHook = true;
     sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
     ssm_->sceneSessionMap_[101] = sceneSession;
 

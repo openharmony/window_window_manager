@@ -15,87 +15,87 @@
 
 class WindowStage {
   constructor(obj) {
-    this.__window_stage__ = obj;
+    this.windowStage = obj;
   }
 
   setUIContent(context, url, storage) {
-    return this.__window_stage__.setUIContent(context, url, storage);
+    return this.windowStage.setUIContent(context, url, storage);
   }
 
   loadContent(url, storage, asyncCallback) {
-    return this.__window_stage__.loadContent(url, storage, asyncCallback);
+    return this.windowStage.loadContent(url, storage, asyncCallback);
   }
 
   loadContentByName(name, storage, asyncCallback) {
-    return this.__window_stage__.loadContentByName(name, storage, asyncCallback);
+    return this.windowStage.loadContentByName(name, storage, asyncCallback);
   }
 
   getWindowMode(asyncCallback) {
-    return this.__window_stage__.getWindowMode(asyncCallback);
+    return this.windowStage.getWindowMode(asyncCallback);
   }
 
   getMainWindow(asyncCallback) {
-    return this.__window_stage__.getMainWindow(asyncCallback);
+    return this.windowStage.getMainWindow(asyncCallback);
   }
 
   getMainWindowSync() {
-    return this.__window_stage__.getMainWindowSync();
+    return this.windowStage.getMainWindowSync();
   }
 
   createSubWindow(windowName, asyncCallback) {
-    return this.__window_stage__.createSubWindow(windowName, asyncCallback);
+    return this.windowStage.createSubWindow(windowName, asyncCallback);
   }
 
   createSubWindowWithOptions(windowName, options, asyncCallback) {
-    return this.__window_stage__.createSubWindowWithOptions(windowName, options, asyncCallback);
+    return this.windowStage.createSubWindowWithOptions(windowName, options, asyncCallback);
   }
 
   getSubWindow(asyncCallback) {
-    return this.__window_stage__.getSubWindow(asyncCallback);
+    return this.windowStage.getSubWindow(asyncCallback);
   }
 
   setWindowModal(isModal) {
-    return this.__window_stage__.setWindowModal(isModal);
+    return this.windowStage.setWindowModal(isModal);
   }
 
   on(type, callback) {
-    return this.__window_stage__.on(type, callback);
+    return this.windowStage.on(type, callback);
   }
 
   off(type, callback) {
-    return this.__window_stage__.off(type, callback);
+    return this.windowStage.off(type, callback);
   }
 
   setShowOnLockScreen(showOnLockScreen) {
-    return this.__window_stage__.setShowOnLockScreen(showOnLockScreen);
+    return this.windowStage.setShowOnLockScreen(showOnLockScreen);
   }
 
   disableWindowDecor() {
-    return this.__window_stage__.disableWindowDecor();
+    return this.windowStage.disableWindowDecor();
   }
 
   setDefaultDensityEnabled(enabled) {
-    return this.__window_stage__.setDefaultDensityEnabled(enabled);
+    return this.windowStage.setDefaultDensityEnabled(enabled);
   }
 
   setCustomDensity(density) {
-    return this.__window_stage__.setCustomDensity(density);
+    return this.windowStage.setCustomDensity(density);
   }
 
   removeStartingWindow() {
-    return this.__window_stage__.removeStartingWindow();
+    return this.windowStage.removeStartingWindow();
   }
 
   setWindowRectAutoSave(enabled, isSaveBySpecifiedFlag) {
-    return this.__window_stage__.setWindowRectAutoSave(enabled, isSaveBySpecifiedFlag);
+    return this.windowStage.setWindowRectAutoSave(enabled, isSaveBySpecifiedFlag);
   }
 
   isWindowRectAutoSave() {
-    return this.__window_stage__.isWindowRectAutoSave();
+    return this.windowStage.isWindowRectAutoSave();
   }
 
   setSupportedWindowModes(supportedWindowModes) {
-    return this.__window_stage__.setSupportedWindowModes(supportedWindowModes);
+    return this.windowStage.setSupportedWindowModes(supportedWindowModes);
   }
 }
 
