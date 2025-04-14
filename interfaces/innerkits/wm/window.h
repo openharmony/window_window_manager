@@ -2613,7 +2613,7 @@ public:
     virtual void UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool systemBarEnableAnimation,
         SystemBarProperty& property) {}
 
-    /**
+    /*
      * @brief Set System Bar Property for page
      *
      * @param type WINDOW_TYPE_STATUS_BAR or WINDOW_TYPE_NAVIGATION_INDICATOR

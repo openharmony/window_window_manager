@@ -2468,6 +2468,10 @@ WSError SceneSession::GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoid
 WSError SceneSession::GetAvoidAreasByRotation(int32_t rotation, const WSRect& rect,
     const std::map<WindowType, SystemBarProperty>& properties, std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
+    if (WindowHelper::IsMainFullScreenWindow(GetWindowType(), GetWindowMode())) {
+        TLOGI(WmsLogTag::WMS_IMMS, "window is no support, type %{public}d, mode %{public}d",
+            GetWindowType(), GetWindowMode());
+    }
     return PostSyncTask([weakThis = wptr(this), rotation, &rect, &properties, &avoidAreas, where = __func__] {
         auto session = weakThis.promote();
         if (!session) {
