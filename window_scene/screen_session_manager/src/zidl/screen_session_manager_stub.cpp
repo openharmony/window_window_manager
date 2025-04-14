@@ -1135,6 +1135,13 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             SetVirtualDisplayMuteFlag(screenId, muteFlag);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_GET_DEVICE_STATUS: {
+            if (!reply.WriteInt32(GetDeviceStatus())) {
+                TLOGE(WmsLogTag::DMS, "Write device status failed");
+                return ERR_INVALID_DATA;
+            }
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_NOTIFY_EXTEND_SCREEN_CREATE_FINISH: {
             NotifyExtendScreenCreateFinish();
             break;
