@@ -70,6 +70,7 @@ void SingleDisplayPocketFoldPolicy::SetdisplayModeChangeStatus(bool status, bool
     if (status) {
         pengdingTask_ = isOnBootAnimation ? FOLD_TO_EXPAND_ONBOOTANIMATION_TASK_NUM : FOLD_TO_EXPAND_TASK_NUM;
         startTimePoint_ = std::chrono::steady_clock::now();
+        SetIsFirstFrameCommitReported(false);
         displayModeChangeRunning_ = status;
         TLOGI(WmsLogTag::DMS, "displaymodechange start, taskCount: %{public}d", pengdingTask_.load());
     } else {
@@ -116,6 +117,15 @@ void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode disp
     {
         std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);
         lastDisplayMode_ = displayMode;
+    }
+    if (!ScreenSessionManager::GetInstance().GetTentMode()) {
+        if (displayMode == FoldDisplayMode::MAIN) {
+            TLOGI(WmsLogTag::DMS, "Set device status to STATUS_FOLDED");
+            SetDeviceStatus(static_cast<uint32_t>(DMDeviceStatus::STATUS_FOLDED));
+        } else {
+            TLOGI(WmsLogTag::DMS, "Set device status to UNKNOWN");
+            SetDeviceStatus(static_cast<uint32_t>(DMDeviceStatus::UNKNOWN));
+        }
     }
     ChangeScreenDisplayModeProc(screenSession, displayMode, reason);
     {
@@ -309,6 +319,8 @@ void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeToMainWhenFoldScreenO
         if (ifTentMode) {
             PowerMgr::PowerMgrClient::GetInstance().WakeupDeviceAsync(
                 PowerMgr::WakeupDeviceType::WAKEUP_DEVICE_TENT_MODE_CHANGE);
+        } else {
+            SetIsFirstFrameCommitReported(true);
         }
         SetdisplayModeChangeStatus(false);
     };

@@ -67,7 +67,7 @@ namespace {
  * @tc.desc: Register private window listener test
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayUpdateTest, RegisterDisplayUpdateListener, Function | MediumTest | Level2)
+HWTEST_F(DisplayUpdateTest, RegisterDisplayUpdateListener, TestSize.Level1)
 {
     auto& dm = DisplayManager::GetInstance();
     sptr<DisplayUpdateListener> listener_ = new DisplayUpdateListener();

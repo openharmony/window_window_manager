@@ -66,7 +66,7 @@ namespace {
  * @tc.desc: check func UpdateWindowMode
  * @tc.type: FUNC
  */
-HWTEST_F(SCBSystemSessionLayoutTest, UpdateWindowMode, Function | SmallTest | Level1)
+HWTEST_F(SCBSystemSessionLayoutTest, UpdateWindowMode, TestSize.Level1)
 {
     scbSystemSession_->PresentFocusIfPointDown();
     scbSystemSession_->PresentFoucusIfNeed(2);
@@ -82,7 +82,7 @@ HWTEST_F(SCBSystemSessionLayoutTest, UpdateWindowMode, Function | SmallTest | Le
  * @tc.desc: check func NotifyClientToUpdateRect
  * @tc.type: FUNC
  */
-HWTEST_F(SCBSystemSessionLayoutTest, NotifyClientToUpdateRect02, Function | SmallTest | Level3)
+HWTEST_F(SCBSystemSessionLayoutTest, NotifyClientToUpdateRect02, TestSize.Level1)
 {
     auto specificCallback1 = sptr<SCBSystemSession::SpecificSessionCallback>::MakeSptr();
     SessionInfo info;
@@ -119,7 +119,7 @@ HWTEST_F(SCBSystemSessionLayoutTest, NotifyClientToUpdateRect02, Function | Smal
  * @tc.desc: check func NotifyClientToUpdateRect
  * @tc.type: FUNC
  */
-HWTEST_F(SCBSystemSessionLayoutTest, NotifyClientToUpdateRect03, Function | SmallTest | Level1)
+HWTEST_F(SCBSystemSessionLayoutTest, NotifyClientToUpdateRect03, TestSize.Level1)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
@@ -176,7 +176,7 @@ HWTEST_F(SCBSystemSessionLayoutTest, NotifyClientToUpdateRect03, Function | Smal
  * @tc.desc: check func NotifyClientToUpdateRect
  * @tc.type: FUNC
  */
-HWTEST_F(SCBSystemSessionLayoutTest, NotifyClientToUpdateRect04, Function | SmallTest | Level1)
+HWTEST_F(SCBSystemSessionLayoutTest, NotifyClientToUpdateRect04, TestSize.Level1)
 {
     scbSystemSession_->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
     auto ret = scbSystemSession_->NotifyClientToUpdateRect("SCBSystemSessionLayoutTest", nullptr);

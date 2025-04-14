@@ -104,7 +104,7 @@ namespace {
  * @tc.desc: test get keyboard height when WINDOW_TYPE_INPUT_METHOD_FLOAT show
  * @tc.type: FUNC
  */
-HWTEST_F(WindowOccupiedAreaChangeTest, KeyboardHeightChangeTest01, Function | MediumTest | Level3)
+HWTEST_F(WindowOccupiedAreaChangeTest, KeyboardHeightChangeTest01, TestSize.Level1)
 {
     fullScreenAppInfo_.name = "KeyboardHeightChangeTest01";
     const sptr<Window>& window1 = Utils::CreateTestWindow(fullScreenAppInfo_);
@@ -136,7 +136,7 @@ HWTEST_F(WindowOccupiedAreaChangeTest, KeyboardHeightChangeTest01, Function | Me
  * @tc.desc: test get keyboard height when WINDOW_TYPE_INPUT_METHOD_FLOAT hide
  * @tc.type: FUNC
  */
-HWTEST_F(WindowOccupiedAreaChangeTest, KeyboardHeightChangeTest02, Function | MediumTest | Level3)
+HWTEST_F(WindowOccupiedAreaChangeTest, KeyboardHeightChangeTest02, TestSize.Level1)
 {
     fullScreenAppInfo_.name = "KeyboardHeightChangeTest02";
     const sptr<Window>& window1 = Utils::CreateTestWindow(fullScreenAppInfo_);
@@ -168,7 +168,7 @@ HWTEST_F(WindowOccupiedAreaChangeTest, KeyboardHeightChangeTest02, Function | Me
  * @tc.desc: test get keyboard height when WINDOW_TYPE_INPUT_METHOD_FLOAT destroy
  * @tc.type: FUNC
  */
-HWTEST_F(WindowOccupiedAreaChangeTest, KeyboardHeightChangeTest03, Function | MediumTest | Level3)
+HWTEST_F(WindowOccupiedAreaChangeTest, KeyboardHeightChangeTest03, TestSize.Level1)
 {
     fullScreenAppInfo_.name = "KeyboardHeightChangeTest03";
     const sptr<Window>& window1 = Utils::CreateTestWindow(fullScreenAppInfo_);

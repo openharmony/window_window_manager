@@ -90,7 +90,9 @@ private:
     int HandleNotifySubModalTypeChange(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyMainModalTypeChange(MessageParcel& data, MessageParcel& reply);
     int HandleSetSessionLabelAndIcon(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyFollowParentMultiScreenPolicy(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateRotationChangeListenerRegistered(MessageParcel& data, MessageParcel& reply);
+    int HandleGetIsHighlighted(MessageParcel& data, MessageParcel& reply);
 
     // extension extension
     int HandleTransferAbilityResult(MessageParcel& data, MessageParcel& reply);
@@ -104,12 +106,14 @@ private:
     int HandleNotifyExtensionEventAsync(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyExtensionDetachToDisplay(MessageParcel& data, MessageParcel& reply);
     int HandleExtensionProviderData(MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    int HandleNotifyDisableDelegatorChange(MessageParcel& data, MessageParcel& reply);
 
     // PictureInPicture
     int HandleNotifyPiPWindowPrepareClose(MessageParcel& data, MessageParcel& reply);
     int HandleUpdatePiPRect(MessageParcel& data, MessageParcel& reply);
     int HandleUpdatePiPControlStatus(MessageParcel& data, MessageParcel& reply);
     int HandleSetAutoStartPiP(MessageParcel& data, MessageParcel& reply);
+    int HandleUpdatePiPTemplateInfo(MessageParcel& data, MessageParcel& reply);
 
     // Window Pattern
     int HandleNotifyWindowAttachStateListenerRegistered(MessageParcel& data, MessageParcel& reply);

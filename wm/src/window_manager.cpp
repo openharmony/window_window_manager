@@ -477,23 +477,31 @@ WMError WindowManager::RegisterFocusChangedListener(const sptr<IFocusChangedList
         return WMError::WM_ERROR_NULLPTR;
     }
 
-    std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
+    sptr<WindowManagerAgent> focusChangedListenerAgentBack = nullptr;
     WMError ret = WMError::WM_OK;
-    if (pImpl_->focusChangedListenerAgent_ == nullptr) {
-        pImpl_->focusChangedListenerAgent_ = new WindowManagerAgent();
+    {
+        std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
+        if (pImpl_->focusChangedListenerAgent_ == nullptr) {
+            pImpl_->focusChangedListenerAgent_ = new WindowManagerAgent();
+        }
+        focusChangedListenerAgentBack = pImpl_->focusChangedListenerAgent_;
     }
     ret = WindowAdapter::GetInstance().RegisterWindowManagerAgent(
-        WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS, pImpl_->focusChangedListenerAgent_);
-    if (ret != WMError::WM_OK) {
-        WLOGFW("RegisterWindowManagerAgent failed!");
-        pImpl_->focusChangedListenerAgent_ = nullptr;
-    } else {
-        auto iter = std::find(pImpl_->focusChangedListeners_.begin(), pImpl_->focusChangedListeners_.end(), listener);
-        if (iter != pImpl_->focusChangedListeners_.end()) {
-            WLOGFW("Listener is already registered.");
-            return WMError::WM_OK;
+        WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS, focusChangedListenerAgentBack);
+    {
+        std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
+        if (ret != WMError::WM_OK) {
+            TLOGE(WmsLogTag::WMS_FOCUS, "RegisterWindowManagerAgent failed!");
+            pImpl_->focusChangedListenerAgent_ = nullptr;
+        } else {
+            auto iter = std::find(
+                pImpl_->focusChangedListeners_.begin(), pImpl_->focusChangedListeners_.end(), listener);
+            if (iter != pImpl_->focusChangedListeners_.end()) {
+                TLOGW(WmsLogTag::WMS_FOCUS, "Listener is already registered.");
+                return WMError::WM_OK;
+            }
+            pImpl_->focusChangedListeners_.push_back(listener);
         }
-        pImpl_->focusChangedListeners_.push_back(listener);
     }
     return ret;
 }
@@ -1665,6 +1673,15 @@ WMError WindowManager::MinimizeByWindowId(const std::vector<int32_t>& windowIds)
     WMError ret = SingletonContainer::Get<WindowAdapter>().MinimizeByWindowId(windowIds);
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_LIFE, "failed");
+    }
+    return ret;
+}
+
+WMError WindowManager::SetForegroundWindowNum(int32_t windowNum)
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().SetForegroundWindowNum(windowNum);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_PC, "failed");
     }
     return ret;
 }

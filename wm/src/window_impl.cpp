@@ -52,6 +52,7 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowImpl"};
 const std::string PARAM_DUMP_HELP = "-h";
 const uint32_t API_VERSION_MOD = 1000;
+constexpr int32_t API_VERSION_18 = 18;
 
 Ace::ContentInfoType GetAceContentInfoType(BackupAndRestoreType type)
 {
@@ -964,7 +965,10 @@ void WindowImpl::UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool syste
 {
     property.enable_ = systemBarEnable;
     property.enableAnimation_ = systemBarEnableAnimation;
-    property.settingFlag_ |= SystemBarSettingFlag::ENABLE_SETTING;
+    // isolate on api 18
+    if (GetApiTargetVersion() >= API_VERSION_18) {
+        property.settingFlag_ |= SystemBarSettingFlag::ENABLE_SETTING;
+    }
 }
 
 WMError WindowImpl::SetSpecificBarProperty(WindowType type, const SystemBarProperty& property)
@@ -1731,6 +1735,13 @@ WMError WindowImpl::PreProcessShow(uint32_t reason, bool withAnimation)
     return WMError::WM_OK;
 }
 
+void WindowImpl::NotifyMainWindowDidForeground(uint32_t reason)
+{
+    if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
+        NotifyAfterDidForeground(reason);
+    }
+}
+
 WMError WindowImpl::Show(uint32_t reason, bool withAnimation, bool withFocus)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, __PRETTY_FUNCTION__);
@@ -1761,6 +1772,7 @@ WMError WindowImpl::Show(uint32_t reason, bool withAnimation, bool withFocus)
         } else {
             NotifyAfterForeground(true, false);
         }
+        NotifyMainWindowDidForeground(reason);
         return WMError::WM_OK;
     }
     WMError ret = PreProcessShow(reason, withAnimation);
@@ -1774,6 +1786,7 @@ WMError WindowImpl::Show(uint32_t reason, bool withAnimation, bool withFocus)
     RecordLifeCycleExceptionEvent(LifeCycleEvent::SHOW_EVENT, ret);
     if (ret == WMError::WM_OK) {
         UpdateWindowStateWhenShow();
+        NotifyMainWindowDidForeground(reason);
     } else {
         NotifyForegroundFailed(ret);
         WLOGFE("show window id:%{public}u errCode:%{public}d", property_->GetWindowId(), static_cast<int32_t>(ret));
@@ -1829,6 +1842,9 @@ WMError WindowImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerki
         return ret;
     }
     UpdateWindowStateWhenHide();
+    if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
+        NotifyAfterDidBackground(reason);
+    }
     uint32_t animationFlag = property_->GetAnimationFlag();
     if (animationFlag == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
         animationTransitionController_->AnimationForHidden();
@@ -3918,6 +3934,30 @@ void WindowImpl::NotifyAfterForeground(bool needNotifyListeners, bool needNotify
     }
 }
 
+void WindowImpl::NotifyAfterDidForeground(uint32_t reason)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "reason: %{public}d", reason);
+    if (reason != static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL)) {
+        TLOGI(WmsLogTag::WMS_LIFE, "reason: %{public}d no need notify did foreground", reason);
+        return;
+    }
+    if (handler_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "handler is nullptr");
+        return;
+    }
+    const char* const where = __func__;
+    handler_->PostTask([weak = wptr(this), where] {
+        auto window = weak.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s window is nullptr", where);
+            return;
+        }
+        TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s execute", where);
+        auto lifecycleListeners = window->GetListeners<IWindowLifeCycle>();
+        CALL_LIFECYCLE_LISTENER(AfterDidForeground, lifecycleListeners);
+    }, where, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+}
+
 void WindowImpl::NotifyAfterBackground(bool needNotifyListeners, bool needNotifyUiContent)
 {
     if (needNotifyListeners) {
@@ -3927,6 +3967,30 @@ void WindowImpl::NotifyAfterBackground(bool needNotifyListeners, bool needNotify
     if (needNotifyUiContent) {
         CALL_UI_CONTENT(Background);
     }
+}
+
+void WindowImpl::NotifyAfterDidBackground(uint32_t reason)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "reason: %{public}d", reason);
+    if (reason != static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL)) {
+        TLOGI(WmsLogTag::WMS_LIFE, "reason: %{public}d no need notify did background", reason);
+        return;
+    }
+    if (handler_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "handler is nullptr");
+        return;
+    }
+    const char* const where = __func__;
+    handler_->PostTask([weak = wptr(this), where] {
+        auto window = weak.promote();
+        if (window == nullptr) {
+            TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s window is nullptr", where);
+            return;
+        }
+        TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s execute", where);
+        auto lifecycleListeners = window->GetListeners<IWindowLifeCycle>();
+        CALL_LIFECYCLE_LISTENER(AfterDidBackground, lifecycleListeners);
+    }, where, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
 void WindowImpl::NotifyAfterFocused()
@@ -4456,11 +4520,11 @@ void WindowImpl::RegisterWindowInspectorCallback()
     WindowInspector::GetInstance().RegisterGetWMSWindowListCallback(GetWindowId(), std::move(getWMSWindowListCallback));
 }
 
-uint32_t WindowImpl::GetApiCompatibleVersion() const
+uint32_t WindowImpl::GetApiTargetVersion() const
 {
     uint32_t version = 0;
     if ((context_ != nullptr) && (context_->GetApplicationInfo() != nullptr)) {
-        version = context_->GetApplicationInfo()->apiCompatibleVersion % API_VERSION_MOD;
+        version = context_->GetApplicationInfo()->apiTargetVersion % API_VERSION_MOD;
     }
     return version;
 }

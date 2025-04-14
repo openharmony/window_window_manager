@@ -44,7 +44,9 @@ enum class ListenerFunctionType : uint32_t {
     START_PIP_FAILED_CB,
     NOTIFY_APP_USE_CONTROL_LIST_CB,
     WATCH_GESTURE_CONSUME_RESULT_CB,
-    WATCH_FOCUS_ACTIVE_CHANGE_CB
+    WATCH_FOCUS_ACTIVE_CHANGE_CB,
+    SET_FOREGROUND_WINDOW_NUM_CB,
+    SCENE_SESSION_DESTRUCT_CB
 };
 
 class JsSceneSessionManager final {
@@ -56,16 +58,6 @@ public:
     static void Finalizer(napi_env env, void* data, void* hint);
 
     static napi_value GetRootSceneSession(napi_env env, napi_callback_info info);
-    static napi_value RequestSceneSession(napi_env env, napi_callback_info info);
-    static napi_value UpdateSceneSessionWant(napi_env env, napi_callback_info info);
-    static napi_value RequestSceneSessionActivation(napi_env env, napi_callback_info info);
-    static napi_value RequestSceneSessionBackground(napi_env env, napi_callback_info info);
-    static napi_value RequestSceneSessionDestruction(napi_env env, napi_callback_info info);
-    static napi_value NotifyForegroundInteractiveStatus(napi_env env, napi_callback_info info);
-    static napi_value IsSceneSessionValid(napi_env env, napi_callback_info info);
-    static napi_value RequestSceneSessionByCall(napi_env env, napi_callback_info info);
-    static napi_value StartAbilityBySpecified(napi_env env, napi_callback_info info);
-    static napi_value StartUIAbilityBySCB(napi_env env, napi_callback_info info);
     static napi_value ChangeUIAbilityVisibilityBySCB(napi_env env, napi_callback_info info);
     static napi_value RegisterCallback(napi_env env, napi_callback_info info);
     static napi_value GetWindowSceneConfig(napi_env env, napi_callback_info info);
@@ -276,6 +268,8 @@ private:
     void OnNotifyAppUseControlList(
         ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList);
     void RegisterNotifyAppUseControlListCallback();
+    void RegisterSetForegroundWindowNumCallback();
+    void OnSetForegroundWindowNum(int32_t windowNum);
 
     /*
      * Window Recover
@@ -298,6 +292,22 @@ private:
     void OnWatchGestureConsumeResult(int32_t keyCode, bool isConsumed);
     void RegisterWatchFocusActiveChangeCallback();
     void OnWatchFocusActiveChange(bool isActive);
+
+    /*
+     * Window Lifecycle
+     */
+    static napi_value RequestSceneSession(napi_env env, napi_callback_info info);
+    static napi_value UpdateSceneSessionWant(napi_env env, napi_callback_info info);
+    static napi_value RequestSceneSessionActivation(napi_env env, napi_callback_info info);
+    static napi_value RequestSceneSessionBackground(napi_env env, napi_callback_info info);
+    static napi_value RequestSceneSessionDestruction(napi_env env, napi_callback_info info);
+    static napi_value NotifyForegroundInteractiveStatus(napi_env env, napi_callback_info info);
+    static napi_value IsSceneSessionValid(napi_env env, napi_callback_info info);
+    static napi_value RequestSceneSessionByCall(napi_env env, napi_callback_info info);
+    static napi_value StartAbilityBySpecified(napi_env env, napi_callback_info info);
+    static napi_value StartUIAbilityBySCB(napi_env env, napi_callback_info info);
+    void RegisterSceneSessionDestructCallback();
+    void OnSceneSessionDestruct(int32_t persistentId);
 
     napi_env env_;
     std::shared_mutex jsCbMapMutex_;

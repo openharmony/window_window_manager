@@ -57,7 +57,7 @@ namespace {
  * @tc.desc: test function : HandleAngleOrHallChange
  * @tc.type: FUNC
  */
-HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, HandleAngleOrHallChange01, Function | SmallTest | Level1)
+HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, HandleAngleOrHallChange01, TestSize.Level1)
 {
     if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
         return;
@@ -75,7 +75,7 @@ HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, HandleAngleOrHallChange01, 
  * @tc.desc: test angles.size() != 3
  * @tc.type: FUNC
  */
-HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, HandleAngleOrHallChange02, Function | SmallTest | Level1)
+HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, HandleAngleOrHallChange02, TestSize.Level1)
 {
     if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
         return;
@@ -94,7 +94,7 @@ HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, HandleAngleOrHallChange02, 
  * @tc.desc: test isSecondaryReflexion
  * @tc.type: FUNC
  */
-HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, HandleAngleOrHallChange03, Function | SmallTest | Level1)
+HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, HandleAngleOrHallChange03, TestSize.Level1)
 {
     if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
         return;
@@ -116,7 +116,7 @@ HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, HandleAngleOrHallChange03, 
  * @tc.desc: test isHasReflexioned && !isSecondaryReflexion
  * @tc.type: FUNC
  */
-HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, HandleAngleOrHallChange04, Function | SmallTest | Level1)
+HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, HandleAngleOrHallChange04, TestSize.Level1)
 {
     if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
         return;
@@ -139,7 +139,7 @@ HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, HandleAngleOrHallChange04, 
  * @tc.type: FUNC
  */
 HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, UpdateSwitchScreenBoundaryForLargeFoldDeviceAB,
-        Function | SmallTest | Level1)
+        TestSize.Level1)
 {
     if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
         return;
@@ -163,7 +163,7 @@ HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, UpdateSwitchScreenBoundaryF
  * @tc.type: FUNC
  */
 HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, UpdateSwitchScreenBoundaryForLargeFoldDeviceBC,
-        Function | SmallTest | Level1)
+        TestSize.Level1)
 {
     if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
         return;
@@ -186,7 +186,7 @@ HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, UpdateSwitchScreenBoundaryF
  * @tc.desc: test function : GetNextFoldStateHalf
  * @tc.type: FUNC
  */
-HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, GetNextFoldStateHalf01, Function | SmallTest | Level1)
+HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, GetNextFoldStateHalf01, TestSize.Level1)
 {
     if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
         return;
@@ -235,7 +235,7 @@ HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, GetNextFoldStateHalf01, Fun
  * @tc.desc: test function : GetNextFoldStateHalf
  * @tc.type: FUNC
  */
-HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, GetNextFoldStateHalf02, Function | SmallTest | Level1)
+HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, GetNextFoldStateHalf02, TestSize.Level1)
 {
     if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
         return;
@@ -283,7 +283,7 @@ HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, GetNextFoldStateHalf02, Fun
  * @tc.desc: test function : GetGlobalFoldState
  * @tc.type: FUNC
  */
-HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, GetGlobalFoldState, Function | SmallTest | Level1)
+HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, GetGlobalFoldState, TestSize.Level1)
 {
     if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
         return;

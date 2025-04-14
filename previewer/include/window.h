@@ -291,6 +291,7 @@ public:
     virtual void OnNewWant(const AAFwk::Want& want) = 0;
     virtual void SetRequestedOrientation(Orientation) = 0;
     virtual void NotifyPreferredOrientationChange(Orientation orientation) = 0;
+    virtual void SetPreferredRequestedOrientation(Orientation orientation) = 0;
     virtual Orientation GetRequestedOrientation() = 0;
     virtual void SetRequestWindowModeSupportType(uint32_t windowModeSupportType) = 0;
     virtual uint32_t GetRequestWindowModeSupportType() const = 0;
@@ -310,6 +311,7 @@ public:
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
+    virtual WMError SetFollowParentMultiScreenPolicy(bool enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual void StartMove() = 0;
     virtual WmErrorCode StartMoveWindow() { return WmErrorCode::WM_OK; }
     virtual WmErrorCode StartMoveWindowWithCoordinate(int32_t offsetX,
@@ -546,6 +548,20 @@ public:
      * @return Api compatible version
      */
     virtual uint32_t GetApiCompatibleVersion() const { return 0; }
+
+    /**
+     * @brief Get the root host window type of UIExtension.
+     *
+     * @return WindowType of the root host window.
+     */
+    virtual WindowType GetRootHostWindowType() const { return WindowType::WINDOW_TYPE_APP_MAIN_WINDOW; }
+
+    /**
+     * @brief Set the root host window type of UIExtension.
+     *
+     * @param WindowType of the root host window.
+     */
+    virtual void SetRootHostWindowType(WindowType& rootHostWindowType) {}
 
     /**
      * @brief Register SystemBarProperty listener.

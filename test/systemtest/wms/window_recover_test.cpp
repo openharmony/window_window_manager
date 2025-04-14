@@ -58,7 +58,7 @@ namespace {
  * @tc.desc: RecoverAndReconnectSceneSession
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRecoverTest, RecoverAndReconnectSceneSession, Function | SmallTest | Level2)
+HWTEST_F(WindowRecoverTest, RecoverAndReconnectSceneSession, TestSize.Level1)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(nullptr, option);
@@ -113,7 +113,7 @@ HWTEST_F(WindowRecoverTest, RecoverAndReconnectSceneSession, Function | SmallTes
  * @tc.desc: RecoverAndConnectSpecificSession
  * @tc.type: FUNC
  */
-HWTEST_F(WindowRecoverTest, RecoverAndConnectSpecificSession, Function | SmallTest | Level3)
+HWTEST_F(WindowRecoverTest, RecoverAndConnectSpecificSession, TestSize.Level1)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(nullptr, option);

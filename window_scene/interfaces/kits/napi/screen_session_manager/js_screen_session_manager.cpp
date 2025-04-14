@@ -118,6 +118,8 @@ napi_value JsScreenSessionManager::Init(napi_env env, napi_value exportObj)
         JsScreenSessionManager::SetScreenOnDelayTime);
     BindNativeFunction(env, exportObj, "getExtendScreenConnectStatus", moduleName,
         JsScreenSessionManager::GetExtendScreenConnectStatus);
+    BindNativeFunction(env, exportObj, "notifyExtendScreenCreateFinish", moduleName,
+        JsScreenSessionManager::NotifyExtendScreenCreateFinish);
     return NapiGetUndefined(env);
 }
 
@@ -282,6 +284,13 @@ napi_value JsScreenSessionManager::GetExtendScreenConnectStatus(napi_env env, na
     TLOGD(WmsLogTag::DMS, "[NAPI]GetExtendScreenConnectStatus");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnGetExtendScreenConnectStatus(env, info) : nullptr;
+}
+
+napi_value JsScreenSessionManager::NotifyExtendScreenCreateFinish(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DMS, "[NAPI]NotifyExtendScreenCreateFinish");
+    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
+    return (me != nullptr) ? me->OnNotifyExtendScreenCreateFinish(env, info) : nullptr;
 }
 
 void JsScreenSessionManager::OnScreenConnected(const sptr<ScreenSession>& screenSession)
@@ -991,17 +1000,15 @@ napi_value JsScreenSessionManager::OnSetScreenOnDelayTime(napi_env env, const na
 
 napi_value JsScreenSessionManager::OnGetExtendScreenConnectStatus(napi_env env, napi_callback_info info)
 {
-    WLOGFD("[NAPI]OnGetExtendScreenConnectStatus");
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc >= 1) {
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM)));
-        return NapiGetUndefined(env);
-    }
     ExtendScreenConnectStatus status = ScreenSessionManagerClient::GetInstance().GetExtendScreenConnectStatus();
-    WLOGI("[NAPI]" PRIu64", OnGetExtendScreenConnectStatus = %{public}u", status);
+    WLOGI("[NAPI] OnGetExtendScreenConnectStatus = %{public}u", status);
     return CreateJsValue(env, status);
 }
 
+napi_value JsScreenSessionManager::OnNotifyExtendScreenCreateFinish(napi_env env, const napi_callback_info info)
+{
+    ScreenSessionManagerClient::GetInstance().NotifyExtendScreenCreateFinish();
+    WLOGI("[NAPI] OnNotifyExtendScreenCreateFinish");
+    return NapiGetUndefined(env);
+}
 } // namespace OHOS::Rosen

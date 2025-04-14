@@ -44,7 +44,7 @@ namespace {
  * @tc.desc: InitConnectServer
  * @tc.type: FUNC
  */
-HWTEST_F(WindowInspetorTest, InitConnectServer, Function | SmallTest | Level2)
+HWTEST_F(WindowInspetorTest, InitConnectServer, TestSize.Level1)
 {
     WindowInspector::GetInstance().ConnectServer();
     EXPECT_EQ(true, WindowInspector::GetInstance().IsConnectServerSuccess());
@@ -55,7 +55,7 @@ HWTEST_F(WindowInspetorTest, InitConnectServer, Function | SmallTest | Level2)
  * @tc.desc: ProcessArkUIInspectorMessage
  * @tc.type: FUNC
  */
-HWTEST_F(WindowInspetorTest, ProcessArkUIInspectorMessage, Function | SmallTest | Level2)
+HWTEST_F(WindowInspetorTest, ProcessArkUIInspectorMessage, TestSize.Level1)
 {
     std::string jsonStr;
     std::string message1 = "{method:WMS,params:{interface:getCurrentProcessWindowList}}";

@@ -45,6 +45,12 @@ WSError FutureCallback::OnUpdateTargetOrientationInfo(OrientationInfo& info)
     return WSError::WS_DO_NOTHING;
 }
 
+void FutureCallback::OnUpdateRotationResult(RotationChangeResult rotationChangeResult)
+{
+    TLOGI(WmsLogTag::WMS_ROTATION, "update the rotation change result");
+    getRotationResultFuture_.SetValue(rotationChangeResult);
+}
+
 Rect FutureCallback::GetResizeAsyncResult(long timeOut)
 {
     return resizeFuture_.GetResult(timeOut);
@@ -60,6 +66,11 @@ OrientationInfo FutureCallback::GetTargetOrientationResult(long timeOut)
     return getTargetRotationFuture_.GetResult(timeOut);
 }
 
+RotationChangeResult FutureCallback::GetRotationResult(long timeOut)
+{
+    return getRotationResultFuture_.GetResult(timeOut);
+}
+
 void FutureCallback::ResetResizeLock()
 {
     resizeFuture_.ResetLock({});
@@ -73,6 +84,11 @@ void FutureCallback::ResetMoveToLock()
 void FutureCallback::ResetGetTargetRotationLock()
 {
     getTargetRotationFuture_.ResetLock({});
+}
+
+void FutureCallback::ResetRotationResultLock()
+{
+    getRotationResultFuture_.ResetLock({});
 }
 } // namespace Rosen
 } // namespace OHOS

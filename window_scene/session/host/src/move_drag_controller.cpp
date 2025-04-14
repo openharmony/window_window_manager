@@ -398,14 +398,36 @@ bool MoveDragController::ConsumeMoveEvent(const std::shared_ptr<MMI::PointerEven
     }
 
     if (WindowHelper::IsInputWindow(winType_) && CalcMoveInputBarRect(pointerEvent, originalRect)) {
+        ModifyWindowCoordinatesWhenMoveEnd(pointerEvent);
         ProcessSessionRectChange(reason);
         return ret;
     }
 
     if (CalcMoveTargetRect(pointerEvent, originalRect)) {
+        ModifyWindowCoordinatesWhenMoveEnd(pointerEvent);
         ProcessSessionRectChange(reason);
     }
     return ret;
+}
+
+/** @note @window.drag */
+void MoveDragController::ModifyWindowCoordinatesWhenMoveEnd(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    // modify the window coordinates when move end
+    MMI::PointerEvent::PointerItem pointerItem;
+    int32_t action = pointerEvent->GetPointerAction();
+    if ((action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP || action == MMI::PointerEvent::POINTER_ACTION_MOVE)
+        && pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem)) {
+        int32_t windowX =
+            pointerItem.GetDisplayX() - GetTargetRectByDisplayId(pointerEvent->GetTargetDisplayId()).posX_;
+        int32_t windowY =
+            pointerItem.GetDisplayY() - GetTargetRectByDisplayId(pointerEvent->GetTargetDisplayId()).posY_;
+        TLOGD(WmsLogTag::WMS_EVENT, "move end position: windowX:%{private}d windowY:%{private}d action:%{public}d",
+            windowX, windowY, action);
+        pointerItem.SetWindowX(windowX);
+        pointerItem.SetWindowY(windowY);
+        pointerEvent->AddPointerItem(pointerItem);
+    }
 }
 
 /** @note @window.drag */
@@ -1379,7 +1401,7 @@ void MoveDragController::HandleStartMovingWithCoordinate(int32_t offsetX, int32_
 }
 
 /** @note @window.drag */
-void MoveDragController::CalcFirstMoveTargetRect(const WSRect& windowRect, bool isFullToFloating)
+void MoveDragController::CalcFirstMoveTargetRect(const WSRect& windowRect, bool useWindowRect)
 {
     if (!GetStartMoveFlag() || moveTempProperty_.isEmpty()) {
         return;
@@ -1391,7 +1413,7 @@ void MoveDragController::CalcFirstMoveTargetRect(const WSRect& windowRect, bool 
         windowRect.width_,
         windowRect.height_
     };
-    if (isFullToFloating) {
+    if (useWindowRect) {
         originalRect.posX_ = windowRect.posX_;
         originalRect.posY_ = windowRect.posY_;
     }

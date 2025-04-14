@@ -41,6 +41,8 @@ constexpr int32_t ROTATE_ANIMATION_DURATION = 400;
 constexpr int32_t INVALID_SESSION_ID = 0;
 constexpr int32_t WINDOW_SUPPORT_MODE_MAX_SIZE = 4;
 constexpr int32_t DEFAULT_SCALE_RATIO = 100;
+const std::string WINDOW_SCREEN_LOCK_PREFIX = "windowLock_";
+const std::string VIEW_SCREEN_LOCK_PREFIX = "viewLock_";
 
 enum class WSError : int32_t {
     WS_OK = 0,
@@ -401,6 +403,8 @@ struct SessionInfo {
     bool isFoundationCall_ = false;
     int32_t requestId = 0;
     std::string specifiedFlag_ = "";
+    bool disableDelegator = false;
+    bool reuseDelegatorWindow = false;
 
     /*
      * App Use Control
@@ -427,6 +431,7 @@ struct SessionInfo {
      */
     std::vector<AppExecFwk::SupportWindowMode> supportedWindowModes;
     WindowSizeLimits windowSizeLimits;
+    bool isFollowParentMultiScreenPolicy = false;
 
     /*
      * Window Rotation
@@ -473,6 +478,9 @@ enum class SizeChangeReason : uint32_t {
     MAXIMIZE_TO_SPLIT,
     SPLIT_TO_MAXIMIZE,
     PAGE_ROTATION,
+    SPLIT_DRAG_START,
+    SPLIT_DRAG,
+    SPLIT_DRAG_END,
     END,
 };
 
@@ -826,6 +834,19 @@ struct PostProcessFocusState {
         byForeground_ = true;
         reason_ = FocusChangeReason::DEFAULT;
     }
+};
+
+/**
+ * @brief WindowNode for snapshot
+ */
+enum class SnapshotNodeType : uint32_t {
+    DEFAULT_NODE = 0,
+    LEASH_NODE,
+    APP_NODE,
+};
+
+enum class AsyncTraceTaskId: int32_t {
+    THROW_SLIP_ANIMATION = 0,
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H

@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include <cstdint>
 #include "window_input_intercept.h"
+#include "window_input_intercept_client.h"
 #include "window_input_intercept_consumer.h"
 
 using namespace testing;
@@ -64,7 +65,7 @@ void WindowInputInterceptTest::TearDown() {}
  * @tc.desc: when call IsInputIntercept(KeyEvent) and the callback of the deviceId is exist, return true
  * @tc.type: FUNC
  */
-HWTEST_F(WindowInputInterceptTest, IsInputIntercept01, Function | SmallTest | Level2)
+HWTEST_F(WindowInputInterceptTest, IsInputIntercept01, TestSize.Level1)
 {
     std::shared_ptr<WindowInputInterceptConsumer> consumer = std::make_shared<WindowInputInterceptConsumer>();
     WindowInputIntercept::GetInstance().RegisterInputEventIntercept(DEVICE_ID, consumer);
@@ -75,6 +76,15 @@ HWTEST_F(WindowInputInterceptTest, IsInputIntercept01, Function | SmallTest | Le
 
     WindowInputIntercept::GetInstance().UnRegisterInputEventIntercept(DEVICE_ID);
     EXPECT_FALSE(WindowInputIntercept::GetInstance().IsInputIntercept(keyEvent));
+
+    WindowInputInterceptClient::RegisterInputEventIntercept(DEVICE_ID, consumer);
+    EXPECT_TRUE(WindowInputIntercept::GetInstance().IsInputIntercept(keyEvent));
+    WindowInputInterceptClient::SendInputEvent(keyEvent);
+    consumer->OnInputEvent(keyEvent);
+    EXPECT_NE(nullptr, consumer->keyEventResult_);
+
+    WindowInputInterceptClient::UnRegisterInputEventIntercept(DEVICE_ID);
+    EXPECT_FALSE(WindowInputIntercept::GetInstance().IsInputIntercept(keyEvent));
 }
 
 /**
@@ -82,7 +92,7 @@ HWTEST_F(WindowInputInterceptTest, IsInputIntercept01, Function | SmallTest | Le
  * @tc.desc: when call IsInputIntercept(KeyEvent) and the callback of the deviceId is not exist, return false
  * @tc.type: FUNC
  */
-HWTEST_F(WindowInputInterceptTest, IsInputIntercept02, Function | SmallTest | Level2)
+HWTEST_F(WindowInputInterceptTest, IsInputIntercept02, TestSize.Level1)
 {
     std::shared_ptr<WindowInputInterceptConsumer> consumer = std::make_shared<WindowInputInterceptConsumer>();
     WindowInputIntercept::GetInstance().RegisterInputEventIntercept(DEVICE_ID, consumer);
@@ -97,7 +107,7 @@ HWTEST_F(WindowInputInterceptTest, IsInputIntercept02, Function | SmallTest | Le
  * @tc.desc: when call IsInputIntercept(PointerEvent) and the callback of the deviceId is exist, return true
  * @tc.type: FUNC
  */
-HWTEST_F(WindowInputInterceptTest, IsInputIntercept03, Function | SmallTest | Level2)
+HWTEST_F(WindowInputInterceptTest, IsInputIntercept03, TestSize.Level1)
 {
     std::shared_ptr<WindowInputInterceptConsumer> consumer = std::make_shared<WindowInputInterceptConsumer>();
     WindowInputIntercept::GetInstance().RegisterInputEventIntercept(DEVICE_ID, consumer);
@@ -105,6 +115,15 @@ HWTEST_F(WindowInputInterceptTest, IsInputIntercept03, Function | SmallTest | Le
     pointerEvent->SetDeviceId(DEVICE_ID);
     EXPECT_TRUE(WindowInputIntercept::GetInstance().IsInputIntercept(pointerEvent));
     EXPECT_EQ(DEVICE_ID, consumer->pointerEvent_->GetDeviceId());
+
+    WindowInputInterceptClient::RegisterInputEventIntercept(DEVICE_ID, consumer);
+    EXPECT_TRUE(WindowInputIntercept::GetInstance().IsInputIntercept(pointerEvent));
+    WindowInputInterceptClient::SendInputEvent(pointerEvent);
+    consumer->OnInputEvent(pointerEvent);
+    EXPECT_NE(nullptr, consumer->pointerEvent_);
+
+    WindowInputInterceptClient::UnRegisterInputEventIntercept(DEVICE_ID);
+    EXPECT_FALSE(WindowInputIntercept::GetInstance().IsInputIntercept(pointerEvent));
 }
 
 /**
@@ -112,7 +131,7 @@ HWTEST_F(WindowInputInterceptTest, IsInputIntercept03, Function | SmallTest | Le
  * @tc.desc: when call IsInputIntercept(PointerEvent) and the callback of the deviceId is not exist, return false
  * @tc.type: FUNC
  */
-HWTEST_F(WindowInputInterceptTest, IsInputIntercept04, Function | SmallTest | Level2)
+HWTEST_F(WindowInputInterceptTest, IsInputIntercept04, TestSize.Level1)
 {
     std::shared_ptr<WindowInputInterceptConsumer> consumer = std::make_shared<WindowInputInterceptConsumer>();
     WindowInputIntercept::GetInstance().RegisterInputEventIntercept(DEVICE_ID, consumer);

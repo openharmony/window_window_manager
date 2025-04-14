@@ -365,6 +365,10 @@ enum class WindowSizeChangeReason : uint32_t {
     AVOID_AREA_CHANGE,
     MAXIMIZE_TO_SPLIT,
     SPLIT_TO_MAXIMIZE,
+    SPLIT_DRAG_START,
+    SPLIT_DRAG,
+    SPLIT_DRAG_END,
+    PAGE_ROTATION,
     END
 };
 
@@ -1251,18 +1255,18 @@ enum class RectType : uint32_t {
  * @brief rotation change info to notify listener.
  */
 struct RotationChangeInfo {
-    RotationChangeType type;
-    uint32_t orientation;
-    DisplayId displayId;
-    Rect displayRect;
+    RotationChangeType type_;
+    uint32_t orientation_;
+    DisplayId displayId_;
+    Rect displayRect_;
 };
 
 /**
  * @brief rotation change result return from listener.
  */
 struct RotationChangeResult {
-    RectType rectType;
-    Rect windowRect;
+    RectType rectType_;
+    Rect windowRect_;
 };
 }
 }

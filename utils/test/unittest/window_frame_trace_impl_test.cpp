@@ -33,7 +33,7 @@ namespace {
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(WindowFrameTraceImplTest, AccessFrameTrace01, Function | SmallTest | Level2)
+HWTEST_F(WindowFrameTraceImplTest, AccessFrameTrace01, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowFrameTraceImplTest: AccessFrameTrace01 start";
     WindowFrameTraceImpl trace;
@@ -52,7 +52,7 @@ HWTEST_F(WindowFrameTraceImplTest, AccessFrameTrace01, Function | SmallTest | Le
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(WindowFrameTraceImplTest, VsyncStartFrameTrace01, Function | SmallTest | Level2)
+HWTEST_F(WindowFrameTraceImplTest, VsyncStartFrameTrace01, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowFrameTraceImplTest: VsyncStartFrameTrace01 start";
     WindowFrameTraceImpl trace;
@@ -71,7 +71,7 @@ HWTEST_F(WindowFrameTraceImplTest, VsyncStartFrameTrace01, Function | SmallTest 
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(WindowFrameTraceImplTest, VsyncStopFrameTrace01, Function | SmallTest | Level2)
+HWTEST_F(WindowFrameTraceImplTest, VsyncStopFrameTrace01, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowFrameTraceImplTest: VsyncStopFrameTrace01 start";
     WindowFrameTraceImpl trace;

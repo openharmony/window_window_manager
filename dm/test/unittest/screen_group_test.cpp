@@ -58,7 +58,7 @@ namespace {
  * @tc.desc: test InterfaceToken check failed
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenGroupTest, UpdateScreenGroupInfo02, Function | SmallTest | Level2)
+HWTEST_F(ScreenGroupTest, UpdateScreenGroupInfo02, TestSize.Level1)
 {
     sptr<ScreenGroupInfo> screenGroupInfo = new(std::nothrow) ScreenGroupInfo();
     sptr<ScreenGroup> screenGroup = new ScreenGroup(screenGroupInfo);
@@ -73,7 +73,7 @@ HWTEST_F(ScreenGroupTest, UpdateScreenGroupInfo02, Function | SmallTest | Level2
  * @tc.desc: test InterfaceToken check success
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenGroupTest, UpdateScreenGroupInfo01, Function | SmallTest | Level2)
+HWTEST_F(ScreenGroupTest, UpdateScreenGroupInfo01, TestSize.Level1)
 {
     sptr<ScreenGroupInfo> screenGroupInfo = new(std::nothrow) ScreenGroupInfo();
     sptr<ScreenGroup> screenGroup = new ScreenGroup(screenGroupInfo);
@@ -89,7 +89,7 @@ HWTEST_F(ScreenGroupTest, UpdateScreenGroupInfo01, Function | SmallTest | Level2
  * @tc.desc: test InterfaceToken check success
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenGroupTest, UpdateScreenGroupInfo03, Function | SmallTest | Level2)
+HWTEST_F(ScreenGroupTest, UpdateScreenGroupInfo03, TestSize.Level1)
 {
     sptr<ScreenGroupInfo> screenGroupInfo = new(std::nothrow) ScreenGroupInfo();
     sptr<ScreenGroup> screenGroup = new ScreenGroup(screenGroupInfo);
@@ -107,7 +107,7 @@ HWTEST_F(ScreenGroupTest, UpdateScreenGroupInfo03, Function | SmallTest | Level2
  * @tc.desc: for interface coverage & check GetChildIds
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenGroupTest, GetChildIds, Function | SmallTest | Level2)
+HWTEST_F(ScreenGroupTest, GetChildIds, TestSize.Level1)
 {
     sptr<ScreenGroupInfo> screenGroupInfo = new(std::nothrow) ScreenGroupInfo();
     sptr<ScreenGroup> screenGroup = new ScreenGroup(screenGroupInfo);

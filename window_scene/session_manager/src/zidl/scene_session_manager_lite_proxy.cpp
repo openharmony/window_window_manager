@@ -850,6 +850,11 @@ WMError SceneSessionManagerLiteProxy::UnregisterWindowManagerAgent(WindowManager
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
+    if ((windowManagerAgent == nullptr)) {
+        TLOGE(WmsLogTag::DEFAULT, "windowManagerAgent is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
     if (!data.WriteRemoteObject(windowManagerAgent->AsObject())) {
         WLOGFE("Write IWindowManagerAgent failed");
         return WMError::WM_ERROR_IPC_FAILED;
@@ -1612,7 +1617,7 @@ WMError SceneSessionManagerLiteProxy::RegisterSessionLifecycleListenerByIds(
     TLOGD(WmsLogTag::WMS_LIFE, "in");
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::WMS_LIFE, "Write interfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
@@ -1654,7 +1659,7 @@ WMError SceneSessionManagerLiteProxy::RegisterSessionLifecycleListenerByBundles(
     TLOGD(WmsLogTag::WMS_LIFE, "in");
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::WMS_LIFE, "Write interfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
@@ -1696,7 +1701,7 @@ WMError SceneSessionManagerLiteProxy::UnregisterSessionLifecycleListener(
     TLOGD(WmsLogTag::WMS_LIFE, "in");
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::WMS_LIFE, "Write interfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;

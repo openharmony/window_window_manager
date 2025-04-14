@@ -82,7 +82,7 @@ namespace {
  * @tc.desc: OnInputEven01, keyEvent
  * @tc.type: FUNC
  */
-HWTEST_F(DragControllerTest, OnInputEvent01, Function | SmallTest | Level2)
+HWTEST_F(DragControllerTest, OnInputEvent01, TestSize.Level1)
 {
     ASSERT_TRUE(inputListener_);
     std::shared_ptr<MMI::KeyEvent> keyEvent;
@@ -96,7 +96,7 @@ HWTEST_F(DragControllerTest, OnInputEvent01, Function | SmallTest | Level2)
  * @tc.desc: OnInputEvent02, axisEvent
  * @tc.type: FUNC
  */
-HWTEST_F(DragControllerTest, OnInputEvent02, Function | SmallTest | Level2)
+HWTEST_F(DragControllerTest, OnInputEvent02, TestSize.Level1)
 {
     ASSERT_TRUE(inputListener_);
     std::shared_ptr<MMI::AxisEvent> axisEvent;
@@ -110,7 +110,7 @@ HWTEST_F(DragControllerTest, OnInputEvent02, Function | SmallTest | Level2)
  * @tc.desc: OnInputEvent03, pointerEvent
  * @tc.type: FUNC
  */
-HWTEST_F(DragControllerTest, OnInputEvent03, Function | SmallTest | Level2)
+HWTEST_F(DragControllerTest, OnInputEvent03, TestSize.Level1)
 {
     ASSERT_TRUE(inputListener_);
     std::shared_ptr<MMI::PointerEvent> pointerEvent;
@@ -128,7 +128,7 @@ HWTEST_F(DragControllerTest, OnInputEvent03, Function | SmallTest | Level2)
  * @tc.desc: Stop02
  * @tc.type: FUNC
  */
-HWTEST_F(DragControllerTest, Stop02, Function | SmallTest | Level2)
+HWTEST_F(DragControllerTest, Stop02, TestSize.Level1)
 {
     ASSERT_TRUE(moveDragController_);
     moveDragController_->Init();
@@ -141,7 +141,7 @@ HWTEST_F(DragControllerTest, Stop02, Function | SmallTest | Level2)
  * @tc.desc: HandleEndUpMovingOrDragging
  * @tc.type: FUNC
  */
-HWTEST_F(DragControllerTest, HandleEndUpMovingOrDragging, Function | SmallTest | Level2)
+HWTEST_F(DragControllerTest, HandleEndUpMovingOrDragging, TestSize.Level1)
 {
     ASSERT_TRUE(moveDragController_);
     uint32_t windowId = 1; // windowId: 1
@@ -155,7 +155,7 @@ HWTEST_F(DragControllerTest, HandleEndUpMovingOrDragging, Function | SmallTest |
  * @tc.desc: HandleWindowRemovedOrDestroyed
  * @tc.type: FUNC
  */
-HWTEST_F(DragControllerTest, HandleWindowRemovedOrDestroyed, Function | SmallTest | Level2)
+HWTEST_F(DragControllerTest, HandleWindowRemovedOrDestroyed, TestSize.Level1)
 {
     ASSERT_TRUE(moveDragController_);
     uint32_t windowId = 5; // windowId: 5
@@ -177,7 +177,7 @@ HWTEST_F(DragControllerTest, HandleWindowRemovedOrDestroyed, Function | SmallTes
  * @tc.desc: ConvertPointerPosToDisplayGroupPos
  * @tc.type: FUNC
  */
-HWTEST_F(DragControllerTest, ConvertPointerPosToDisplayGroupPos, Function | SmallTest | Level2)
+HWTEST_F(DragControllerTest, ConvertPointerPosToDisplayGroupPos, TestSize.Level1)
 {
     ASSERT_TRUE(moveDragController_);
 
@@ -203,7 +203,7 @@ HWTEST_F(DragControllerTest, ConvertPointerPosToDisplayGroupPos, Function | Smal
  * @tc.desc: ConsumePointerEvent
  * @tc.type: FUNC
  */
-HWTEST_F(DragControllerTest, ConsumePointerEvent, Function | SmallTest | Level2)
+HWTEST_F(DragControllerTest, ConsumePointerEvent, TestSize.Level1)
 {
     ASSERT_TRUE(moveDragController_);
     std::shared_ptr<MMI::PointerEvent> pointerEvent;
@@ -220,7 +220,7 @@ HWTEST_F(DragControllerTest, ConsumePointerEvent, Function | SmallTest | Level2)
  * @tc.desc: RequestVsync Test
  * @tc.type: FUNC
  */
-HWTEST_F(DragControllerTest, RequestVsync, Function | SmallTest | Level2)
+HWTEST_F(DragControllerTest, RequestVsync, TestSize.Level1)
 {
     ASSERT_TRUE(moveDragController_);
     NodeId nodeId = 0;
@@ -239,7 +239,7 @@ HWTEST_F(DragControllerTest, RequestVsync, Function | SmallTest | Level2)
  * @tc.desc: OnReceiveVsync
  * @tc.type: FUNC
  */
-HWTEST_F(DragControllerTest, OnReceiveVsync, Function | SmallTest | Level2)
+HWTEST_F(DragControllerTest, OnReceiveVsync, TestSize.Level1)
 {
     ASSERT_TRUE(moveDragController_);
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
@@ -254,7 +254,7 @@ HWTEST_F(DragControllerTest, OnReceiveVsync, Function | SmallTest | Level2)
  * @tc.desc: GetVsyncStationByWindowId Test Succ
  * @tc.type: FUNC
  */
-HWTEST_F(DragControllerTest, GetVsyncStationByWindowId1, Function | SmallTest | Level2)
+HWTEST_F(DragControllerTest, GetVsyncStationByWindowId1, TestSize.Level1)
 {
     ASSERT_TRUE(moveDragController_);
     NodeId nodeId = 0;
@@ -270,7 +270,7 @@ HWTEST_F(DragControllerTest, GetVsyncStationByWindowId1, Function | SmallTest | 
  * @tc.desc: GetVsyncStationByWindowId Test Fail
  * @tc.type: FUNC
  */
-HWTEST_F(DragControllerTest, GetVsyncStationByWindowId2, Function | SmallTest | Level2)
+HWTEST_F(DragControllerTest, GetVsyncStationByWindowId2, TestSize.Level1)
 {
     ASSERT_TRUE(moveDragController_);
     uint32_t windowId = 100;
@@ -285,7 +285,7 @@ HWTEST_F(DragControllerTest, GetVsyncStationByWindowId2, Function | SmallTest | 
  * @tc.desc: GetHotZoneRect
  * @tc.type: FUNC
  */
-HWTEST_F(DragControllerTest, GetHotZoneRect, Function | SmallTest | Level2)
+HWTEST_F(DragControllerTest, GetHotZoneRect, TestSize.Level1)
 {
     ASSERT_TRUE(moveDragController_);
 
@@ -335,7 +335,7 @@ HWTEST_F(DragControllerTest, GetHotZoneRect, Function | SmallTest | Level2)
  * @tc.desc: HandleDragEvent01
  * @tc.type: FUNC
  */
-HWTEST_F(DragControllerTest, HandleDragEvent01, Function | SmallTest | Level2)
+HWTEST_F(DragControllerTest, HandleDragEvent01, TestSize.Level1)
 {
     ASSERT_TRUE(moveDragController_);
     int32_t posX = 0;
@@ -370,7 +370,7 @@ HWTEST_F(DragControllerTest, HandleDragEvent01, Function | SmallTest | Level2)
  * @tc.desc: HandleDragEvent02
  * @tc.type: FUNC
  */
-HWTEST_F(DragControllerTest, HandleDragEvent02, Function | SmallTest | Level2)
+HWTEST_F(DragControllerTest, HandleDragEvent02, TestSize.Level1)
 {
     ASSERT_TRUE(moveDragController_);
     int32_t posX = 0;
@@ -410,7 +410,7 @@ HWTEST_F(DragControllerTest, HandleDragEvent02, Function | SmallTest | Level2)
  * @tc.desc: HandleMoveEvent
  * @tc.type: FUNC
  */
-HWTEST_F(DragControllerTest, HandleMoveEvent, Function | SmallTest | Level2)
+HWTEST_F(DragControllerTest, HandleMoveEvent, TestSize.Level1)
 {
     ASSERT_TRUE(moveDragController_);
     int32_t posX = 0;
@@ -445,7 +445,7 @@ HWTEST_F(DragControllerTest, HandleMoveEvent, Function | SmallTest | Level2)
  * @tc.desc: HandlePointerEvent
  * @tc.type: FUNC
  */
-HWTEST_F(DragControllerTest, HandlePointerEvent, Function | SmallTest | Level2)
+HWTEST_F(DragControllerTest, HandlePointerEvent, TestSize.Level1)
 {
     ASSERT_TRUE(moveDragController_);
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
@@ -510,7 +510,7 @@ HWTEST_F(DragControllerTest, HandlePointerEvent, Function | SmallTest | Level2)
  * @tc.desc: UpdateDragInfo01
  * @tc.type: FUNC
  */
-HWTEST_F(DragControllerTest, UpdateDragInfo01, Function | SmallTest | Level2)
+HWTEST_F(DragControllerTest, UpdateDragInfo01, TestSize.Level1)
 {
     ASSERT_TRUE(moveDragController_);
     uint32_t windowId = 0;
@@ -523,7 +523,7 @@ HWTEST_F(DragControllerTest, UpdateDragInfo01, Function | SmallTest | Level2)
  * @tc.desc: UpdateDragInfo02
  * @tc.type: FUNC
  */
-HWTEST_F(DragControllerTest, UpdateDragInfo02, Function | SmallTest | Level2)
+HWTEST_F(DragControllerTest, UpdateDragInfo02, TestSize.Level1)
 {
     uint32_t windowId = 1;
     sptr<DragController> dragController = sptr<DragController>::MakeSptr(windowRoot_);
@@ -537,7 +537,7 @@ HWTEST_F(DragControllerTest, UpdateDragInfo02, Function | SmallTest | Level2)
  * @tc.desc: StartDrag01
  * @tc.type: FUNC
  */
-HWTEST_F(DragControllerTest, StartDrag01, Function | SmallTest | Level2)
+HWTEST_F(DragControllerTest, StartDrag01, TestSize.Level1)
 {
     uint32_t windowId = 1;
     sptr<DragController> dragController = sptr<DragController>::MakeSptr(windowRoot_);
@@ -551,7 +551,7 @@ HWTEST_F(DragControllerTest, StartDrag01, Function | SmallTest | Level2)
  * @tc.desc: FinishDrag01
  * @tc.type: FUNC
  */
-HWTEST_F(DragControllerTest, FinishDrag01, Function | SmallTest | Level2)
+HWTEST_F(DragControllerTest, FinishDrag01, TestSize.Level1)
 {
     uint32_t windowId = 1;
     sptr<DragController> dragController = sptr<DragController>::MakeSptr(windowRoot_);
@@ -565,7 +565,7 @@ HWTEST_F(DragControllerTest, FinishDrag01, Function | SmallTest | Level2)
  * @tc.desc: GetHitWindow01
  * @tc.type: FUNC
  */
-HWTEST_F(DragControllerTest, GetHitWindow01, Function | SmallTest | Level2)
+HWTEST_F(DragControllerTest, GetHitWindow01, TestSize.Level1)
 {
     DisplayId id = 0;
     PointInfo point;
@@ -580,7 +580,7 @@ HWTEST_F(DragControllerTest, GetHitWindow01, Function | SmallTest | Level2)
  * @tc.desc: GetHitWindow02
  * @tc.type: FUNC
  */
-HWTEST_F(DragControllerTest, GetHitWindow02, Function | SmallTest | Level2)
+HWTEST_F(DragControllerTest, GetHitWindow02, TestSize.Level1)
 {
     DisplayId id = DISPLAY_ID_INVALID;
     PointInfo point;
@@ -595,7 +595,7 @@ HWTEST_F(DragControllerTest, GetHitWindow02, Function | SmallTest | Level2)
  * @tc.desc: GetHitWindow03
  * @tc.type: FUNC
  */
-HWTEST_F(DragControllerTest, GetHitWindow03, Function | SmallTest | Level2)
+HWTEST_F(DragControllerTest, GetHitWindow03, TestSize.Level1)
 {
     DisplayId id = 1;
     PointInfo point;
@@ -612,7 +612,7 @@ HWTEST_F(DragControllerTest, GetHitWindow03, Function | SmallTest | Level2)
  * @tc.desc: Init01
  * @tc.type: FUNC
  */
-HWTEST_F(DragControllerTest, Init02, Function | SmallTest | Level2)
+HWTEST_F(DragControllerTest, Init02, TestSize.Level1)
 {
     ASSERT_TRUE(moveDragController_);
     auto ret = moveDragController_->Init();
@@ -624,7 +624,7 @@ HWTEST_F(DragControllerTest, Init02, Function | SmallTest | Level2)
  * @tc.desc: StartDrag
  * @tc.type: FUNC
  */
-HWTEST_F(DragControllerTest, StartDrag02, Function | SmallTest | Level2)
+HWTEST_F(DragControllerTest, StartDrag02, TestSize.Level1)
 {
     uint32_t windowId = 0;
     sptr<DragController> dragController = sptr<DragController>::MakeSptr(windowRoot_);
@@ -638,7 +638,7 @@ HWTEST_F(DragControllerTest, StartDrag02, Function | SmallTest | Level2)
  * @tc.desc: FinishDrag
  * @tc.type: FUNC
  */
-HWTEST_F(DragControllerTest, FinishDrag02, Function | SmallTest | Level2)
+HWTEST_F(DragControllerTest, FinishDrag02, TestSize.Level1)
 {
     uint32_t windowId = 0;
     sptr<DragController> dragController = sptr<DragController>::MakeSptr(windowRoot_);
@@ -653,7 +653,7 @@ HWTEST_F(DragControllerTest, FinishDrag02, Function | SmallTest | Level2)
  * @tc.desc: GetHitWindow04
  * @tc.type: FUNC
  */
-HWTEST_F(DragControllerTest, GetHitWindow04, Function | SmallTest | Level2)
+HWTEST_F(DragControllerTest, GetHitWindow04, TestSize.Level1)
 {
     DisplayId id = 0;
     PointInfo point;
@@ -666,7 +666,7 @@ HWTEST_F(DragControllerTest, GetHitWindow04, Function | SmallTest | Level2)
  * @tc.desc: GetHitPoint
  * @tc.type: FUNC
  */
-HWTEST_F(DragControllerTest, GetHitPoint, Function | SmallTest | Level2)
+HWTEST_F(DragControllerTest, GetHitPoint, TestSize.Level1)
 {
     uint32_t windowId = 0;
     PointInfo point;
@@ -681,7 +681,7 @@ HWTEST_F(DragControllerTest, GetHitPoint, Function | SmallTest | Level2)
  * @tc.desc: HandleEndUpMovingOrDragging01
  * @tc.type: FUNC
  */
-HWTEST_F(DragControllerTest, HandleEndUpMovingOrDragging01, Function | SmallTest | Level2)
+HWTEST_F(DragControllerTest, HandleEndUpMovingOrDragging01, TestSize.Level1)
 {
     ASSERT_TRUE(moveDragController_);
     uint32_t windowId = 1; // windowId: 1
@@ -695,7 +695,7 @@ HWTEST_F(DragControllerTest, HandleEndUpMovingOrDragging01, Function | SmallTest
  * @tc.desc: HandleDisplayLimitRectChange
  * @tc.type: FUNC
  */
-HWTEST_F(DragControllerTest, HandleDisplayLimitRectChange, Function | SmallTest | Level2)
+HWTEST_F(DragControllerTest, HandleDisplayLimitRectChange, TestSize.Level1)
 {
     std::map<DisplayId, Rect> limitRectMap;
     moveDragController_->HandleDisplayLimitRectChange(limitRectMap);

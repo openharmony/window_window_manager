@@ -50,7 +50,7 @@ namespace {
  * @tc.desc: normal test
  * @tc.type: FUNC
  */
-HWTEST_F(WmsUtilsTest, IsFixedOrientation01, Function | SmallTest | Level2)
+HWTEST_F(WmsUtilsTest, IsFixedOrientation01, TestSize.Level1)
 {
     bool ret = WmsUtils::IsFixedOrientation(Orientation::HORIZONTAL, WindowMode::WINDOW_MODE_FULLSCREEN, 0);
     ASSERT_TRUE(ret);
@@ -61,7 +61,7 @@ HWTEST_F(WmsUtilsTest, IsFixedOrientation01, Function | SmallTest | Level2)
  * @tc.desc: more then Orientation::REVERSE_HORIZONTAL
  * @tc.type: FUNC
  */
-HWTEST_F(WmsUtilsTest, IsFixedOrientation02, Function | SmallTest | Level2)
+HWTEST_F(WmsUtilsTest, IsFixedOrientation02, TestSize.Level1)
 {
     bool ret = WmsUtils::IsFixedOrientation(Orientation::SENSOR, WindowMode::WINDOW_MODE_FULLSCREEN, 0);
     ASSERT_FALSE(ret);
@@ -72,7 +72,7 @@ HWTEST_F(WmsUtilsTest, IsFixedOrientation02, Function | SmallTest | Level2)
  * @tc.desc: less then Orientation::VERTICAL
  * @tc.type: FUNC
  */
-HWTEST_F(WmsUtilsTest, IsFixedOrientation03, Function | SmallTest | Level2)
+HWTEST_F(WmsUtilsTest, IsFixedOrientation03, TestSize.Level1)
 {
     bool ret = WmsUtils::IsFixedOrientation(Orientation::UNSPECIFIED, WindowMode::WINDOW_MODE_FULLSCREEN, 0);
     ASSERT_FALSE(ret);
@@ -83,7 +83,7 @@ HWTEST_F(WmsUtilsTest, IsFixedOrientation03, Function | SmallTest | Level2)
  * @tc.desc: flags is WindowFlag::WINDOW_FLAG_NEED_AVOID
  * @tc.type: FUNC
  */
-HWTEST_F(WmsUtilsTest, IsFixedOrientation04, Function | SmallTest | Level2)
+HWTEST_F(WmsUtilsTest, IsFixedOrientation04, TestSize.Level1)
 {
     bool ret = WmsUtils::IsFixedOrientation(Orientation::HORIZONTAL, WindowMode::WINDOW_MODE_FULLSCREEN,
         static_cast<int32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID));
@@ -95,7 +95,7 @@ HWTEST_F(WmsUtilsTest, IsFixedOrientation04, Function | SmallTest | Level2)
  * @tc.desc: mode is not WindowMode::WINDOW_MODE_FULLSCREEN
  * @tc.type: FUNC
  */
-HWTEST_F(WmsUtilsTest, IsFixedOrientation05, Function | SmallTest | Level2)
+HWTEST_F(WmsUtilsTest, IsFixedOrientation05, TestSize.Level1)
 {
     bool ret = WmsUtils::IsFixedOrientation(Orientation::HORIZONTAL, WindowMode::WINDOW_MODE_FLOATING, 0);
     ASSERT_FALSE(ret);
@@ -106,7 +106,7 @@ HWTEST_F(WmsUtilsTest, IsFixedOrientation05, Function | SmallTest | Level2)
  * @tc.desc: requestOrientation is not HORIZONTAL
  * @tc.type: FUNC
  */
-HWTEST_F(WmsUtilsTest, IsExpectedRotateLandscapeWindow01, Function | SmallTest | Level2)
+HWTEST_F(WmsUtilsTest, IsExpectedRotateLandscapeWindow01, TestSize.Level1)
 {
     bool ret = WmsUtils::IsExpectedRotateLandscapeWindow(Orientation::VERTICAL, DisplayOrientation::PORTRAIT, 0);
     ASSERT_FALSE(ret);
@@ -117,7 +117,7 @@ HWTEST_F(WmsUtilsTest, IsExpectedRotateLandscapeWindow01, Function | SmallTest |
  * @tc.desc: flags is WindowFlag::WINDOW_FLAG_NEED_AVOID
  * @tc.type: FUNC
  */
-HWTEST_F(WmsUtilsTest, IsExpectedRotatableWindow01, Function | SmallTest | Level2)
+HWTEST_F(WmsUtilsTest, IsExpectedRotatableWindow01, TestSize.Level1)
 {
     bool ret = WmsUtils::IsExpectedRotatableWindow(Orientation::VERTICAL, DisplayOrientation::PORTRAIT,
         static_cast<int32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID));
@@ -129,7 +129,7 @@ HWTEST_F(WmsUtilsTest, IsExpectedRotatableWindow01, Function | SmallTest | Level
  * @tc.desc: disOrientation == currentOrientation
  * @tc.type: FUNC
  */
-HWTEST_F(WmsUtilsTest, IsExpectedRotatableWindow02, Function | SmallTest | Level2)
+HWTEST_F(WmsUtilsTest, IsExpectedRotatableWindow02, TestSize.Level1)
 {
     bool ret = WmsUtils::IsExpectedRotatableWindow(Orientation::VERTICAL, DisplayOrientation::PORTRAIT, 0);
     ASSERT_FALSE(ret);
@@ -140,7 +140,7 @@ HWTEST_F(WmsUtilsTest, IsExpectedRotatableWindow02, Function | SmallTest | Level
  * @tc.desc: disOrientation == currentOrientation
  * @tc.type: FUNC
  */
-HWTEST_F(WmsUtilsTest, IsExpectedRotatableWindow03, Function | SmallTest | Level2)
+HWTEST_F(WmsUtilsTest, IsExpectedRotatableWindow03, TestSize.Level1)
 {
     bool ret = WmsUtils::IsExpectedRotatableWindow(Orientation::VERTICAL, DisplayOrientation::PORTRAIT, 0);
     ASSERT_FALSE(ret);
@@ -151,7 +151,7 @@ HWTEST_F(WmsUtilsTest, IsExpectedRotatableWindow03, Function | SmallTest | Level
  * @tc.desc: disOrientation - currentOrientation == 2
  * @tc.type: FUNC
  */
-HWTEST_F(WmsUtilsTest, IsExpectedRotatableWindow04, Function | SmallTest | Level2)
+HWTEST_F(WmsUtilsTest, IsExpectedRotatableWindow04, TestSize.Level1)
 {
     bool ret = WmsUtils::IsExpectedRotatableWindow(Orientation::REVERSE_VERTICAL, DisplayOrientation::PORTRAIT, 0);
     ASSERT_FALSE(ret);
@@ -162,7 +162,7 @@ HWTEST_F(WmsUtilsTest, IsExpectedRotatableWindow04, Function | SmallTest | Level
  * @tc.desc: disOrientation - currentOrientation == 2
  * @tc.type: FUNC
  */
-HWTEST_F(WmsUtilsTest, IsExpectedRotatableWindow05, Function | SmallTest | Level2)
+HWTEST_F(WmsUtilsTest, IsExpectedRotatableWindow05, TestSize.Level1)
 {
     bool ret = WmsUtils::IsExpectedRotatableWindow(Orientation::REVERSE_VERTICAL,
         DisplayOrientation::PORTRAIT, 0, false);
@@ -174,7 +174,7 @@ HWTEST_F(WmsUtilsTest, IsExpectedRotatableWindow05, Function | SmallTest | Level
  * @tc.desc: mode is not WindowMode::WINDOW_MODE_FULLSCREEN
  * @tc.type: FUNC
  */
-HWTEST_F(WmsUtilsTest, IsExpectedRotatableWindow06, Function | SmallTest | Level2)
+HWTEST_F(WmsUtilsTest, IsExpectedRotatableWindow06, TestSize.Level1)
 {
     bool ret = WmsUtils::IsExpectedRotatableWindow(Orientation::REVERSE_VERTICAL,
         DisplayOrientation::PORTRAIT,  WindowMode::WINDOW_MODE_FLOATING, 0);

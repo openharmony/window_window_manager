@@ -77,10 +77,6 @@ void ProcessStatusBarEnabledChangeFuncTest(bool enable)
 {
 }
 
-void DumpRootSceneElementInfoFuncTest(const std::vector<std::string>& params, std::vector<std::string>& infos)
-{
-}
-
 void SceneSessionManagerTest5::SetUpTestCase()
 {
     ssm_ = &SceneSessionManager::GetInstance();
@@ -109,7 +105,7 @@ namespace {
  * @tc.desc: SceneSesionManager notify session touch outside
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, NotifySessionTouchOutside01, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, NotifySessionTouchOutside01, TestSize.Level1)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(ssm_, nullptr);
@@ -129,7 +125,7 @@ HWTEST_F(SceneSessionManagerTest5, NotifySessionTouchOutside01, Function | Small
  * @tc.desc: Erase cached info when bundle update
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, OnBundleUpdated, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, OnBundleUpdated, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     ssm_->startingWindowMap_.clear();
@@ -159,7 +155,7 @@ HWTEST_F(SceneSessionManagerTest5, OnBundleUpdated, Function | SmallTest | Level
  * @tc.desc: Clear startingWindowMap when configuration update
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, OnConfigurationUpdated, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, OnConfigurationUpdated, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     ssm_->startingWindowMap_.clear();
@@ -190,7 +186,7 @@ HWTEST_F(SceneSessionManagerTest5, OnConfigurationUpdated, Function | SmallTest 
  * @tc.desc: SceneSesionManager prepare terminate
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, PrepareTerminate, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, PrepareTerminate, TestSize.Level1)
 {
     int32_t persistentId = 1;
     bool isPrepareTerminate = true;
@@ -204,7 +200,7 @@ HWTEST_F(SceneSessionManagerTest5, PrepareTerminate, Function | SmallTest | Leve
  * @tc.desc: RequestInputMethodCloseKeyboard
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, RequestInputMethodCloseKeyboard02, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, RequestInputMethodCloseKeyboard02, TestSize.Level1)
 {
     int32_t persistentId = -1;
     bool isPrepareTerminate = true;
@@ -218,7 +214,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestInputMethodCloseKeyboard02, Function |
  * @tc.desc: HandleSpecificSystemBarProperty
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, HandleSpecificSystemBarProperty, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, HandleSpecificSystemBarProperty, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     SessionInfo info;
@@ -236,7 +232,7 @@ HWTEST_F(SceneSessionManagerTest5, HandleSpecificSystemBarProperty, Function | S
  * @tc.desc: UpdateBrightness
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, UpdateBrightness, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, UpdateBrightness, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     SessionInfo info;
@@ -258,7 +254,7 @@ HWTEST_F(SceneSessionManagerTest5, UpdateBrightness, Function | SmallTest | Leve
  * @tc.desc: IsNeedUpdateBrightness
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, IsNeedUpdateBrightness, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, IsNeedUpdateBrightness, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     ssm_->displayBrightness_ = -1;
@@ -286,7 +282,7 @@ HWTEST_F(SceneSessionManagerTest5, IsNeedUpdateBrightness, Function | SmallTest 
  * @tc.desc: RegisterSessionSnapshotFunc
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, RegisterSessionSnapshotFunc, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, RegisterSessionSnapshotFunc, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "test1";
@@ -309,7 +305,7 @@ HWTEST_F(SceneSessionManagerTest5, RegisterSessionSnapshotFunc, Function | Small
  * @tc.desc: RequestAllAppSessionUnfocus
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, RequestAllAppSessionUnfocus, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, RequestAllAppSessionUnfocus, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "test1";
@@ -328,7 +324,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestAllAppSessionUnfocus, Function | Small
  * @tc.desc: RequestFocusStatus
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, RequestFocusStatus, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, RequestFocusStatus, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "RequestFocusStatus";
@@ -348,7 +344,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestFocusStatus, Function | SmallTest | Le
  * @tc.desc: RequestFocusStatus01
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, RequestFocusStatus01, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, RequestFocusStatus01, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "RequestFocusStatus01";
@@ -370,7 +366,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestFocusStatus01, Function | SmallTest | 
  * @tc.desc: RequestSessionFocus
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, RequestSessionFocus, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, RequestSessionFocus, TestSize.Level0)
 {
     FocusChangeReason reason = FocusChangeReason::DEFAULT;
     WSError ret = ssm_->RequestSessionFocus(0, true, reason);
@@ -410,7 +406,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestSessionFocus, Function | SmallTest | L
  * @tc.desc: RequestFocusClient
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, RequestFocusClient, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, RequestFocusClient, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "RequestFocusTest1";
@@ -464,7 +460,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestFocusClient, Function | SmallTest | Le
  * @tc.desc: RequestFocusClient
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, RequestFocusClient01, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, RequestFocusClient01, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "RequestFocusTest1";
@@ -538,7 +534,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestFocusClient01, Function | SmallTest | 
  * @tc.desc: SetShiftFocusListener
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, SetShiftFocusListener, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, SetShiftFocusListener, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     SessionInfo info;
@@ -569,7 +565,7 @@ HWTEST_F(SceneSessionManagerTest5, SetShiftFocusListener, Function | SmallTest |
  * @tc.desc: UpdateFocusStatus
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, UpdateFocusStatus, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, UpdateFocusStatus, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     SessionInfo info;
@@ -590,7 +586,7 @@ HWTEST_F(SceneSessionManagerTest5, UpdateFocusStatus, Function | SmallTest | Lev
  * @tc.desc: UpdateFocusStatus
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, UpdateFocusStatus01, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, UpdateFocusStatus01, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     sptr<SceneSession> sceneSession = nullptr;
@@ -599,13 +595,25 @@ HWTEST_F(SceneSessionManagerTest5, UpdateFocusStatus01, Function | SmallTest | L
 
     ssm_->UpdateFocusStatus(DEFAULT_DISPLAY_ID, sceneSession, false);
     ASSERT_EQ(focusGroup->GetFocusedSessionId(), 1);
-    ssm_->needBlockNotifyFocusStatusUntilForeground_ = false;
     ssm_->UpdateFocusStatus(DEFAULT_DISPLAY_ID, sceneSession, true);
     ASSERT_NE(focusGroup->GetFocusedSessionId(), 1);
-    focusGroup->SetFocusedSessionId(1);
-    ssm_->needBlockNotifyFocusStatusUntilForeground_ = true;
+}
+
+/**
+ * @tc.name: UpdateFocusStatus02
+ * @tc.desc: Verify that the NotifyFocusStatusByMission function is called.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, UpdateFocusStatus02, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "UpdateFocusStatus02";
+    info.bundleName_ = "UpdateFocusStatus02";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
+    focusGroup->SetNeedBlockNotifyFocusStatusUntilForeground(true);
     ssm_->UpdateFocusStatus(DEFAULT_DISPLAY_ID, sceneSession, true);
-    ASSERT_NE(focusGroup->GetFocusedSessionId(), 1);
 }
 
 /**
@@ -613,7 +621,7 @@ HWTEST_F(SceneSessionManagerTest5, UpdateFocusStatus01, Function | SmallTest | L
  * @tc.desc: RequestSessionUnfocus
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, RequestSessionUnfocus, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, RequestSessionUnfocus, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "test1";
@@ -649,7 +657,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestSessionUnfocus, Function | SmallTest |
  * @tc.desc: RequestFocusSpecificCheck
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, RequestFocusSpecificCheck, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, RequestFocusSpecificCheck, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "test1";
@@ -674,14 +682,12 @@ HWTEST_F(SceneSessionManagerTest5, RequestFocusSpecificCheck, Function | SmallTe
  * @tc.desc: NotifyFocusStatus
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, NotifyFocusStatus, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, NotifyFocusStatus, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "test1";
     info.bundleName_ = "test2";
-    sptr<SceneSession> sceneSession = nullptr;
     auto focusGroup = sptr<FocusGroup>::MakeSptr(DEFAULT_DISPLAY_ID);
-    ssm_->NotifyFocusStatus(sceneSession, true, focusGroup);
     sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession1, nullptr);
     ssm_->NotifyFocusStatus(sceneSession1, false, focusGroup);
@@ -694,7 +700,7 @@ HWTEST_F(SceneSessionManagerTest5, NotifyFocusStatus, Function | SmallTest | Lev
  * @tc.desc: NotifyFocusStatusByMission
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, NotifyFocusStatusByMission, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, NotifyFocusStatusByMission, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "test1";
@@ -721,7 +727,7 @@ HWTEST_F(SceneSessionManagerTest5, NotifyFocusStatusByMission, Function | SmallT
  * @tc.desc: UpdateFocus
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, UpdateFocus, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, UpdateFocus, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "test1";
@@ -740,7 +746,7 @@ HWTEST_F(SceneSessionManagerTest5, UpdateFocus, Function | SmallTest | Level3)
  * @tc.desc: RequestSessionFocusImmediately
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, RequestSessionFocusImmediately, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, RequestSessionFocusImmediately, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "test1";
@@ -763,7 +769,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestSessionFocusImmediately, Function | Sm
  * @tc.desc: RequestFocusBasicCheck
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, RequestFocusBasicCheck, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, RequestFocusBasicCheck, TestSize.Level1)
 {
     sptr<FocusGroup> focusGroup = nullptr;
     WSError ret = ssm_->RequestFocusBasicCheck(0, focusGroup);
@@ -783,7 +789,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestFocusBasicCheck, Function | SmallTest 
  * @tc.desc: CheckFocusIsDownThroughBlockingType
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, CheckFocusIsDownThroughBlockingType, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, CheckFocusIsDownThroughBlockingType, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "test1";
@@ -805,7 +811,7 @@ HWTEST_F(SceneSessionManagerTest5, CheckFocusIsDownThroughBlockingType, Function
  * @tc.desc: CheckFocusIsDownThroughBlockingType
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, CheckFocusIsDownThroughBlockingType01, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, CheckFocusIsDownThroughBlockingType01, TestSize.Level0)
 {
     ASSERT_NE(ssm_, nullptr);
     SessionInfo info;
@@ -835,7 +841,7 @@ HWTEST_F(SceneSessionManagerTest5, CheckFocusIsDownThroughBlockingType01, Functi
  * @tc.desc: CheckTopmostWindowFocus
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, CheckTopmostWindowFocus, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, CheckTopmostWindowFocus, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     SessionInfo info;
@@ -861,7 +867,7 @@ HWTEST_F(SceneSessionManagerTest5, CheckTopmostWindowFocus, Function | SmallTest
  * @tc.desc: CheckRequestFocusImmdediately
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, CheckRequestFocusImmdediately, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, CheckRequestFocusImmdediately, TestSize.Level0)
 {
     ASSERT_NE(ssm_, nullptr);
     SessionInfo info;
@@ -886,7 +892,7 @@ HWTEST_F(SceneSessionManagerTest5, CheckRequestFocusImmdediately, Function | Sma
  * @tc.desc: GetNextFocusableSession
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, GetNextFocusableSession, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, GetNextFocusableSession, TestSize.Level1)
 {
     int32_t persistentId = 0;
     ASSERT_NE(ssm_, nullptr);
@@ -911,7 +917,7 @@ HWTEST_F(SceneSessionManagerTest5, GetNextFocusableSession, Function | SmallTest
  * @tc.desc: GetTopNearestBlockingFocusSession
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, GetTopNearestBlockingFocusSession, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, GetTopNearestBlockingFocusSession, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     SessionInfo info;
@@ -938,7 +944,7 @@ HWTEST_F(SceneSessionManagerTest5, GetTopNearestBlockingFocusSession, Function |
  * @tc.desc: PreloadInLakeApp、UpdateSessionAvoidAreaListener
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, PreloadInLakeApp, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, PreloadInLakeApp, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     SessionInfo info;
@@ -961,7 +967,7 @@ HWTEST_F(SceneSessionManagerTest5, PreloadInLakeApp, Function | SmallTest | Leve
  * @tc.desc: NotifyMMIWindowPidChange
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, NotifyMMIWindowPidChange, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, NotifyMMIWindowPidChange, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     SessionInfo info;
@@ -975,35 +981,11 @@ HWTEST_F(SceneSessionManagerTest5, NotifyMMIWindowPidChange, Function | SmallTes
 }
 
 /**
- * @tc.name: CheckSessionPropertyOnRecovery
- * @tc.desc: CheckSessionPropertyOnRecovery
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest5, CheckSessionPropertyOnRecovery, Function | SmallTest | Level3)
-{
-    ASSERT_NE(ssm_, nullptr);
-    SessionInfo info;
-    info.abilityName_ = "test1";
-    info.bundleName_ = "test2";
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(property, nullptr);
-    property->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
-    property->SetWindowFlags(123);
-    WSError result = ssm_->CheckSessionPropertyOnRecovery(property, false);
-    ASSERT_EQ(result, WSError::WS_ERROR_NOT_SYSTEM_APP);
-
-    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    property->SetParentPersistentId(111);
-    result = ssm_->CheckSessionPropertyOnRecovery(property, true);
-    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
-}
-
-/**
  * @tc.name: InitSnapshotCache
  * @tc.desc: InitSnapshotCache
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, InitSnapshotCache, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, InitSnapshotCache, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     ssm_->InitSnapshotCache();
@@ -1021,7 +1003,7 @@ HWTEST_F(SceneSessionManagerTest5, InitSnapshotCache, Function | SmallTest | Lev
  * @tc.desc: PutSnapshotToCache
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, PutSnapshotToCache, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, PutSnapshotToCache, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     ssm_->sceneSessionMap_.clear();
@@ -1046,7 +1028,7 @@ HWTEST_F(SceneSessionManagerTest5, PutSnapshotToCache, Function | SmallTest | Le
  * @tc.desc: VisitSnapshotFromCache
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, VisitSnapshotFromCache, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, VisitSnapshotFromCache, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     ssm_->sceneSessionMap_.clear();
@@ -1073,7 +1055,7 @@ HWTEST_F(SceneSessionManagerTest5, VisitSnapshotFromCache, Function | SmallTest 
  * @tc.desc: RemoveSnapshotFromCache
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, RemoveSnapshotFromCache, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, RemoveSnapshotFromCache, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     ssm_->sceneSessionMap_.clear();
@@ -1100,7 +1082,7 @@ HWTEST_F(SceneSessionManagerTest5, RemoveSnapshotFromCache, Function | SmallTest
  * @tc.desc: RequestSceneSessionBackground
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, RequestSceneSessionBackground, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, RequestSceneSessionBackground, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     SessionInfo info;
@@ -1124,7 +1106,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestSceneSessionBackground, Function | Sma
  * @tc.desc: RequestSceneSessionBackground
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, RequestSceneSessionBackground02, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, RequestSceneSessionBackground02, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     SessionInfo info;
@@ -1150,7 +1132,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestSceneSessionBackground02, Function | S
  * @tc.desc: SceneSesionManager config app window shadow
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, ConfigAppWindowShadow03, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, ConfigAppWindowShadow03, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     WindowSceneConfig::ConfigItem item;
@@ -1177,7 +1159,7 @@ HWTEST_F(SceneSessionManagerTest5, ConfigAppWindowShadow03, Function | SmallTest
  * @tc.desc: CreateAndConnectSpecificSession
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, CreateAndConnectSpecificSession02, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, CreateAndConnectSpecificSession02, TestSize.Level0)
 {
     ASSERT_NE(ssm_, nullptr);
     sptr<ISessionStage> sessionStage = sptr<SessionStageMocker>::MakeSptr();
@@ -1229,7 +1211,7 @@ HWTEST_F(SceneSessionManagerTest5, CreateAndConnectSpecificSession02, Function |
  * @tc.desc: CheckSubSessionStartedByExtensionAndSetDisplayId
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, CheckUIExtensionAndSetDisplayId01, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, CheckUIExtensionAndSetDisplayId01, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     SessionInfo info;
@@ -1255,7 +1237,7 @@ HWTEST_F(SceneSessionManagerTest5, CheckUIExtensionAndSetDisplayId01, Function |
  * @tc.desc: ProcessDialogRequestFocusImmdediately
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, ProcessDialogRequestFocusImmdediately02, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, ProcessDialogRequestFocusImmdediately02, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     SessionInfo info;
@@ -1277,7 +1259,7 @@ HWTEST_F(SceneSessionManagerTest5, ProcessDialogRequestFocusImmdediately02, Func
  * @tc.desc: SceneSesionManager request scene session by call
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, RequestSceneSessionByCall02, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, RequestSceneSessionByCall02, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     sptr<SceneSession> sceneSession = nullptr;
@@ -1294,7 +1276,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestSceneSessionByCall02, Function | Small
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, GetAllAbilityInfos02, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, GetAllAbilityInfos02, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     AAFwk::Want want;
@@ -1314,79 +1296,11 @@ HWTEST_F(SceneSessionManagerTest5, GetAllAbilityInfos02, Function | SmallTest | 
 }
 
 /**
- * @tc.name: GetBatchAbilityInfos01
- * @tc.desc: GetBatchAbilityInfos01
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest5, GetBatchAbilityInfos01, Function | SmallTest | Level3)
-{
-    ASSERT_NE(ssm_, nullptr);
-    auto bundleMgr = ssm_->bundleMgr_;
-    ssm_->bundleMgr_ = nullptr;
-    int32_t userId = 100;
-    std::vector<std::string> bundleNames = { "test1", "test2" };
-    auto scbAbilityInfos = std::make_shared<std::vector<SCBAbilityInfo>>();
-    WSError ret = ssm_->GetBatchAbilityInfos(bundleNames, userId, *scbAbilityInfos);
-    ASSERT_EQ(ret, WSError::WS_ERROR_NULLPTR);
-}
-
-/**
- * @tc.name: GetBatchAbilityInfos02
- * @tc.desc: GetBatchAbilityInfos02
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest5, GetBatchAbilityInfos02, Function | SmallTest | Level3)
-{
-    ASSERT_NE(ssm_, nullptr);
-    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    ssm_->bundleMgr_ = sptr<AppExecFwk::BundleMgrProxy>::MakeSptr(iRemoteObjectMocker);
-    int32_t userId = 100;
-    std::vector<std::string> bundleNames = {};
-    auto scbAbilityInfos = std::make_shared<std::vector<SCBAbilityInfo>>();
-    WSError ret = ssm_->GetBatchAbilityInfos(bundleNames, userId, *scbAbilityInfos);
-    ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_PARAM);
-}
-
-/**
- * @tc.name: GetBatchAbilityInfos03
- * @tc.desc: GetBatchAbilityInfos03
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest5, GetBatchAbilityInfos03, Function | SmallTest | Level3)
-{
-    ASSERT_NE(ssm_, nullptr);
-    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    ssm_->bundleMgr_ = sptr<AppExecFwk::BundleMgrProxy>::MakeSptr(iRemoteObjectMocker);
-    int32_t userId = 100;
-    std::vector<std::string> bundleNames = { "" };
-    auto scbAbilityInfos = std::make_shared<std::vector<SCBAbilityInfo>>();
-    WSError ret = ssm_->GetBatchAbilityInfos(bundleNames, userId, *scbAbilityInfos);
-    ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_PARAM);
-}
-
-/**
- * @tc.name: GetBatchAbilityInfos04
- * @tc.desc: GetBatchAbilityInfos04
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest5, GetBatchAbilityInfos04, Function | SmallTest | Level3)
-{
-    ASSERT_NE(ssm_, nullptr);
-    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    ssm_->bundleMgr_ = sptr<AppExecFwk::BundleMgrProxy>::MakeSptr(iRemoteObjectMocker);
-    int32_t userId = 100;
-    std::vector<std::string> bundleNames = { "test1", "test2" };
-    auto scbAbilityInfos = std::make_shared<std::vector<SCBAbilityInfo>>();
-    WSError ret = ssm_->GetBatchAbilityInfos(bundleNames, userId, *scbAbilityInfos);
-    ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_PARAM);
-}
-
-/**
  * @tc.name: FindMainWindowWithToken
  * @tc.desc: SceneSesionManager find main window with token
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, FindMainWindowWithToken02, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, FindMainWindowWithToken02, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     SessionInfo info;
@@ -1407,7 +1321,7 @@ HWTEST_F(SceneSessionManagerTest5, FindMainWindowWithToken02, Function | SmallTe
  * @tc.desc: SceneSesionManager FindSessionByToken
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, FindSessionByToken, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, FindSessionByToken, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     SessionInfo info;
@@ -1435,7 +1349,7 @@ HWTEST_F(SceneSessionManagerTest5, FindSessionByToken, Function | SmallTest | Le
  * @tc.desc: RequestSceneSessionBackground
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, RequestSceneSessionBackground03, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, RequestSceneSessionBackground03, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     SessionInfo info;
@@ -1463,7 +1377,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestSceneSessionBackground03, Function | S
  * @tc.desc: SceneSesionManager config decor
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, ConfigDecor02, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, ConfigDecor02, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     WindowSceneConfig::ConfigItem* item = new WindowSceneConfig::ConfigItem;
@@ -1476,7 +1390,7 @@ HWTEST_F(SceneSessionManagerTest5, ConfigDecor02, Function | SmallTest | Level3)
  * @tc.desc: SetSkipSelfWhenShowOnVirtualScreen
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, SetSkipSelfWhenShowOnVirtualScreen, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, SetSkipSelfWhenShowOnVirtualScreen, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     SessionInfo info;
@@ -1495,7 +1409,7 @@ HWTEST_F(SceneSessionManagerTest5, SetSkipSelfWhenShowOnVirtualScreen, Function 
  * @tc.desc: InitSceneSession02
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, InitSceneSession02, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, InitSceneSession02, TestSize.Level1)
 {
     ASSERT_NE(nullptr, ssm_);
     SessionInfo sessionInfo;
@@ -1521,7 +1435,7 @@ HWTEST_F(SceneSessionManagerTest5, InitSceneSession02, Function | SmallTest | Le
  * @tc.desc: SceneSesionManager prepare terminate
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, PrepareTerminate03, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, PrepareTerminate03, TestSize.Level1)
 {
     ASSERT_NE(nullptr, ssm_);
     SessionInfo sessionInfo;
@@ -1538,7 +1452,7 @@ HWTEST_F(SceneSessionManagerTest5, PrepareTerminate03, Function | SmallTest | Le
  * @tc.desc: SceneSesionManager add client death recipient
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, AddClientDeathRecipient02, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, AddClientDeathRecipient02, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     SessionInfo info;
@@ -1556,7 +1470,7 @@ HWTEST_F(SceneSessionManagerTest5, AddClientDeathRecipient02, Function | SmallTe
  * @tc.desc: SceneSessionManager request focus status from SCB
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, RequestFocusStatusBySCB, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, RequestFocusStatusBySCB, TestSize.Level1)
 {
     ssm_->sceneSessionMap_.clear();
     SessionInfo info;
@@ -1589,7 +1503,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestFocusStatusBySCB, Function | SmallTest
  * @tc.desc: SceneSessionManager request focus status from SCB
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, RequestFocusStatusBySCB01, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, RequestFocusStatusBySCB01, TestSize.Level1)
 {
     ssm_->sceneSessionMap_.clear();
     SessionInfo info;
@@ -1639,7 +1553,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestFocusStatusBySCB01, Function | SmallTe
  * @tc.desc: RequestSessionUnfocus01
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, RequestSessionUnfocus01, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, RequestSessionUnfocus01, TestSize.Level1)
 {
     ssm_->sceneSessionMap_.clear();
     SessionInfo info;
@@ -1673,7 +1587,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestSessionUnfocus01, Function | SmallTest
  * @tc.desc: RequestSessionUnfocus02
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, RequestSessionUnfocus02, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest5, RequestSessionUnfocus02, TestSize.Level1)
 {
     ssm_->sceneSessionMap_.clear();
     SessionInfo info;
@@ -1700,6 +1614,73 @@ HWTEST_F(SceneSessionManagerTest5, RequestSessionUnfocus02, Function | SmallTest
     auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
     ASSERT_EQ(focusGroup->GetFocusedSessionId(), 1);
     ASSERT_EQ(focusGroup->GetNeedBlockNotifyFocusStatusUntilForeground(), false);
+}
+
+/**
+ * @tc.name: RegisterSaveSnapshotFunc
+ * @tc.desc: RegisterSaveSnapshotFunc Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, RegisterSaveSnapshotFunc, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr<SceneSession> sceneSession = nullptr;
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, ssm_->RegisterSaveSnapshotFunc(sceneSession));
+
+    SessionInfo info;
+    info.windowType_ = 1000;
+    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->property_->SetPersistentId(1);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_WINDOW, ssm_->RegisterSaveSnapshotFunc(sceneSession));
+
+    sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    ASSERT_EQ(WSError::WS_OK, ssm_->RegisterSaveSnapshotFunc(sceneSession));
+}
+
+/**
+ * @tc.name: RegisterRemoveSnapshotFunc
+ * @tc.desc: RegisterRemoveSnapshotFunc Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, RegisterRemoveSnapshotFunc, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr<SceneSession> sceneSession = nullptr;
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, ssm_->RegisterSaveSnapshotFunc(sceneSession));
+
+    SessionInfo info;
+    info.windowType_ = 1000;
+    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->property_->SetPersistentId(1);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_WINDOW, ssm_->RegisterSaveSnapshotFunc(sceneSession));
+
+    sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    ASSERT_EQ(WSError::WS_OK, ssm_->RegisterSaveSnapshotFunc(sceneSession));
+}
+
+/**
+ * @tc.name: GetDelayRemoveSnapshot
+ * @tc.desc: GetDelayRemoveSnapshot Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, GetDelayRemoveSnapshot, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    auto res = ssm_->GetDelayRemoveSnapshot();
+    ASSERT_EQ(false, res);
+}
+
+/**
+ * @tc.name: SetDelayRemoveSnapshot
+ * @tc.desc: SetDelayRemoveSnapshot Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, SetDelayRemoveSnapshot, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->SetDelayRemoveSnapshot(true);
+    auto res = ssm_->GetDelayRemoveSnapshot();
+    ASSERT_EQ(true, res);
 }
 }
 } // namespace Rosen

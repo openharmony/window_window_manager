@@ -110,6 +110,7 @@ public:
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshotWithOption(const CaptureOption& captureOption,
         DmErrorCode* errorCode = nullptr);
     virtual sptr<DisplayInfo> GetPrimaryDisplayInfo();
+    virtual uint32_t GetDeviceStatus();
 
 private:
     static inline SingletonDelegator<DisplayManagerAdapter> delegator;
@@ -122,6 +123,8 @@ public:
         const sptr<IDisplayManagerAgent>& displayManagerAgent);
     virtual DMError DestroyVirtualScreen(ScreenId screenId);
     virtual DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface);
+    virtual DMError AddVirtualScreenBlockList(const std::vector<int32_t>& persistentIds);
+    virtual DMError RemoveVirtualScreenBlockList(const std::vector<int32_t>& persistentIds);
     virtual DMError SetScreenPrivacyMaskImage(ScreenId screenId,
         const std::shared_ptr<Media::PixelMap>& privacyMaskImg);
     virtual DMError SetVirtualMirrorScreenCanvasRotation(ScreenId screenId, bool canvasRotation);

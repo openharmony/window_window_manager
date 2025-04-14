@@ -35,6 +35,12 @@ private:
     napi_value NapiSendTask(napi_env env, PipOption& pipOption);
     std::unique_ptr<AbilityRuntime::NapiAsyncTask> CreateEmptyAsyncTask(napi_env env, napi_value* result);
 };
+
+enum DefaultWindowSizeType : uint32_t {
+    NOT_SET,
+    SMALL,
+    LARGE,
+};
 }
 }
 #endif //OHOS_JS_PIP_WINDOW_MANAGER_H

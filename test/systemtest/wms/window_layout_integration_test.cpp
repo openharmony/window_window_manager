@@ -66,7 +66,7 @@ namespace {
  * @tc.desc: test moveWindowTo for ALN/PC with windowMode: 102, windowType: 2107
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, moveWindowTo01, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, moveWindowTo01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("moveWindowTo01");
@@ -119,7 +119,7 @@ HWTEST_F(WindowLayoutTest, moveWindowTo01, Function | MediumTest | Level3)
  * @tc.desc: test moveWindowTo for ALN with windowMode: 102, windowType: 1001
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, moveWindowTo02, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, moveWindowTo02, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("moveWindowTo02");
@@ -171,7 +171,7 @@ HWTEST_F(WindowLayoutTest, moveWindowTo02, Function | MediumTest | Level3)
  * @tc.desc: test moveWindowTo for ALN with windowMode: 1, windowType: 1
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, moveWindowTo03, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, moveWindowTo03, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("moveWindowTo03");
@@ -232,7 +232,7 @@ HWTEST_F(WindowLayoutTest, moveWindowTo03, Function | MediumTest | Level3)
  * @tc.desc: test moveWindowTo for ALN with windowMode: 100, windowType: 1
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, moveWindowTo04, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, moveWindowTo04, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("moveWindowTo04");
@@ -293,7 +293,7 @@ HWTEST_F(WindowLayoutTest, moveWindowTo04, Function | MediumTest | Level3)
  * @tc.desc: test resize for ALN/PC with windowMode: 102, windowType: 2107
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, resize01, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, resize01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("resize01");
@@ -336,7 +336,7 @@ HWTEST_F(WindowLayoutTest, resize01, Function | MediumTest | Level3)
     EXPECT_EQ(windowLimits.maxHeight_, rect.height_);
 
     ret = window->Resize(0, 0);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret); // check parameter first
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret); // check parameter first
 }
 
 /**
@@ -344,7 +344,7 @@ HWTEST_F(WindowLayoutTest, resize01, Function | MediumTest | Level3)
  * @tc.desc: test resize for ALN with windowMode: 1, windowType: 1
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, resize02, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, resize02, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("resize02");
@@ -370,7 +370,7 @@ HWTEST_F(WindowLayoutTest, resize02, Function | MediumTest | Level3)
     EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
 
     ret = window->Resize(0, 0);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret); // check parameter first
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret); // check parameter first
 }
 
 /**
@@ -378,7 +378,7 @@ HWTEST_F(WindowLayoutTest, resize02, Function | MediumTest | Level3)
  * @tc.desc: test resize for PC with windowMode: 1, windowType: 1
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, resize03, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, resize03, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("resize03");
@@ -404,7 +404,7 @@ HWTEST_F(WindowLayoutTest, resize03, Function | MediumTest | Level3)
     EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
 
     ret = window->Resize(0, 0);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret); // check parameter first
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret); // check parameter first
 }
 
 /**
@@ -412,7 +412,7 @@ HWTEST_F(WindowLayoutTest, resize03, Function | MediumTest | Level3)
  * @tc.desc: test resize for ALN/PC with windowMode: 100, windowType: 1
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, resize04, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, resize04, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("resize04");
@@ -438,7 +438,7 @@ HWTEST_F(WindowLayoutTest, resize04, Function | MediumTest | Level3)
     EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
 
     ret = window->Resize(0, 0);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret); // check parameter first
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret); // check parameter first
 }
 
 /**
@@ -446,7 +446,7 @@ HWTEST_F(WindowLayoutTest, resize04, Function | MediumTest | Level3)
  * @tc.desc: test resize for ALN/PC with windowMode: 102, windowType: 2107
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, resize05, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, resize05, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("resize05");
@@ -486,7 +486,7 @@ HWTEST_F(WindowLayoutTest, resize05, Function | MediumTest | Level3)
  * @tc.desc: test resize for ALN with windowMode: 1, windowType: 1
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, resize06, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, resize06, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("resize06");
@@ -520,7 +520,7 @@ HWTEST_F(WindowLayoutTest, resize06, Function | MediumTest | Level3)
  * @tc.desc: test resize for PC with windowMode: 1, windowType: 1
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, resize07, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, resize07, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("resize07");
@@ -554,7 +554,7 @@ HWTEST_F(WindowLayoutTest, resize07, Function | MediumTest | Level3)
  * @tc.desc: test resize for ALN/PC with windowMode: 100, windowType: 1
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, resize08, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, resize08, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("resize08");
@@ -587,7 +587,7 @@ HWTEST_F(WindowLayoutTest, resize08, Function | MediumTest | Level3)
  * @tc.desc: test data route for SetWindowLimits
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, SetWindowLimitsDataRoute, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, SetWindowLimitsDataRoute, TestSize.Level1)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "### WindowLayoutTest::SetWindowLimitsDataRoute begin ###");
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
@@ -624,7 +624,7 @@ HWTEST_F(WindowLayoutTest, SetWindowLimitsDataRoute, Function | MediumTest | Lev
  * @tc.desc: test data route for SetAspectRatioDataRoute
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, SetAspectRatioDataRoute, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, SetAspectRatioDataRoute, TestSize.Level1)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "### WindowLayoutTest::SetAspectRatioDataRoute begin ###");
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
@@ -657,7 +657,7 @@ HWTEST_F(WindowLayoutTest, SetAspectRatioDataRoute, Function | MediumTest | Leve
  * @tc.desc: test data route for moveTo
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, moveToDataRoute, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, moveToDataRoute, TestSize.Level1)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "### WindowLayoutTest::moveToDataRoute begin ###");
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
@@ -689,7 +689,7 @@ HWTEST_F(WindowLayoutTest, moveToDataRoute, Function | MediumTest | Level3)
  * @tc.desc: test data route for Resize
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, ResizeDataRoute, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, ResizeDataRoute, TestSize.Level1)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "### WindowLayoutTest::ResizeDataRoute begin ###");
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
@@ -731,7 +731,7 @@ HWTEST_F(WindowLayoutTest, ResizeDataRoute, Function | MediumTest | Level3)
  * @tc.desc: test AdjustRectByAspectRatio
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, AdjustRectByAspectRatio, Function | MediumTest | Level0)
+HWTEST_F(WindowLayoutTest, AdjustRectByAspectRatio, TestSize.Level1)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "### WindowLayoutTest::AdjustRectByAspectRatio begin ###");
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();

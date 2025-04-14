@@ -74,7 +74,7 @@ namespace {
  * @tc.desc: check func Reconnect
  * @tc.type: FUNC
  */
-HWTEST_F(MainSessionLifecycleTest, Reconnect01, Function | SmallTest | Level1)
+HWTEST_F(MainSessionLifecycleTest, Reconnect01, TestSize.Level1)
 {
     auto surfaceNode = CreateRSSurfaceNode();
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
@@ -103,6 +103,10 @@ HWTEST_F(MainSessionLifecycleTest, Reconnect01, Function | SmallTest | Level1)
     property->SetWindowState(WindowState::STATE_SHOWN);
     result = mainSession_->Reconnect(mockSessionStage, testWindowEventChannel, surfaceNode, property);
     ASSERT_EQ(result, WSError::WS_OK);
+
+    mainSession_->pcFoldScreenController_ = nullptr;
+    result = mainSession_->Reconnect(mockSessionStage, testWindowEventChannel, surfaceNode, property);
+    ASSERT_EQ(result, WSError::WS_OK);
 }
 
 /**
@@ -110,7 +114,7 @@ HWTEST_F(MainSessionLifecycleTest, Reconnect01, Function | SmallTest | Level1)
  * @tc.desc: check func NotifyForegroundInteractiveStatus
  * @tc.type: FUNC
  */
-HWTEST_F(MainSessionLifecycleTest, NotifyForegroundInteractiveStatus01, Function | SmallTest | Level2)
+HWTEST_F(MainSessionLifecycleTest, NotifyForegroundInteractiveStatus01, TestSize.Level1)
 {
     mainSession_->isVisible_ = true;
     mainSession_->SetSessionState(SessionState::STATE_DISCONNECT);
@@ -136,7 +140,7 @@ HWTEST_F(MainSessionLifecycleTest, NotifyForegroundInteractiveStatus01, Function
  * @tc.desc: check func NotifyForegroundInteractiveStatus
  * @tc.type: FUNC
  */
-HWTEST_F(MainSessionLifecycleTest, NotifyForegroundInteractiveStatus02, Function | SmallTest | Level2)
+HWTEST_F(MainSessionLifecycleTest, NotifyForegroundInteractiveStatus02, TestSize.Level1)
 {
     auto surfaceNode = CreateRSSurfaceNode();
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();

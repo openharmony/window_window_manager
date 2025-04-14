@@ -54,7 +54,7 @@ void LruCacheTest::TearDown()
  * @tc.desc: test function Visit
  * @tc.type: FUNC
  */
-HWTEST_F(LruCacheTest, Visit, Function | SmallTest | Level2)
+HWTEST_F(LruCacheTest, Visit, TestSize.Level1)
 {
     testLruCache_ = std::make_unique<LruCache>(TEST_CACHE_CAPACITY);
     bool res = testLruCache_->Visit(30);
@@ -70,7 +70,7 @@ HWTEST_F(LruCacheTest, Visit, Function | SmallTest | Level2)
  * @tc.desc: test function Put
  * @tc.type: FUNC
  */
-HWTEST_F(LruCacheTest, Put, Function | SmallTest | Level2)
+HWTEST_F(LruCacheTest, Put, TestSize.Level1)
 {
     testLruCache_ = std::make_unique<LruCache>(TEST_CACHE_CAPACITY);
     int32_t res = testLruCache_->Put(30);
@@ -87,7 +87,7 @@ HWTEST_F(LruCacheTest, Put, Function | SmallTest | Level2)
  * @tc.desc: test function Remove
  * @tc.type: FUNC
  */
-HWTEST_F(LruCacheTest, Remove, Function | SmallTest | Level2)
+HWTEST_F(LruCacheTest, Remove, TestSize.Level1)
 {
     testLruCache_ = std::make_unique<LruCache>(TEST_CACHE_CAPACITY);
     int32_t res = testLruCache_->Put(30);

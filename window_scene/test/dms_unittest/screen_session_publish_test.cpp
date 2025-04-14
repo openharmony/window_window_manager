@@ -69,7 +69,7 @@ namespace {
  * @tc.desc: InitPublishEvents
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionPublishTest, InitPublishEvents, Function | SmallTest | Level3)
+HWTEST_F(ScreenSessionPublishTest, InitPublishEvents, TestSize.Level1)
 {
     auto screenSessionPublish = ScreenSessionPublish::GetInstance();
     screenSessionPublish.InitPublishEvents();
@@ -90,7 +90,7 @@ HWTEST_F(ScreenSessionPublishTest, InitPublishEvents, Function | SmallTest | Lev
  * @tc.desc: PublishEvents
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionPublishTest, PublishEvents, Function | SmallTest | Level3)
+HWTEST_F(ScreenSessionPublishTest, PublishEvents, TestSize.Level1)
 {
     auto screenSessionPublish = ScreenSessionPublish::GetInstance();
     EventFwk::CommonEventData eventData;
@@ -112,7 +112,7 @@ HWTEST_F(ScreenSessionPublishTest, PublishEvents, Function | SmallTest | Level3)
  * @tc.desc: PublishCastPluggedEvent
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionPublishTest, PublishCastPluggedEvent, Function | SmallTest | Level3)
+HWTEST_F(ScreenSessionPublishTest, PublishCastPluggedEvent, TestSize.Level1)
 {
     auto screenSessionPublish = ScreenSessionPublish::GetInstance();
     bool isEnable = false;
@@ -131,7 +131,7 @@ HWTEST_F(ScreenSessionPublishTest, PublishCastPluggedEvent, Function | SmallTest
  * @tc.desc: PublishDisplayRotationEvent
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionPublishTest, PublishDisplayRotationEvent, Function | SmallTest | Level3)
+HWTEST_F(ScreenSessionPublishTest, PublishDisplayRotationEvent, TestSize.Level1)
 {
     auto screenSessionPublish = ScreenSessionPublish::GetInstance();
     screenSessionPublish.cesWantMap_.clear();
@@ -152,7 +152,7 @@ HWTEST_F(ScreenSessionPublishTest, PublishDisplayRotationEvent, Function | Small
  * @tc.desc: PublishSmartNotificationEvent
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionPublishTest, PublishSmartNotificationEvent, Function | SmallTest | Level3)
+HWTEST_F(ScreenSessionPublishTest, PublishSmartNotificationEvent, TestSize.Level1)
 {
     auto screenSessionPublish = ScreenSessionPublish::GetInstance();
     screenSessionPublish.cesWantMap_.clear();
@@ -171,7 +171,7 @@ HWTEST_F(ScreenSessionPublishTest, PublishSmartNotificationEvent, Function | Sma
  * @tc.desc: RegisterLowTempSubscriber
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionPublishTest, RegisterLowTempSubscriber, Function | SmallTest | Level3)
+HWTEST_F(ScreenSessionPublishTest, RegisterLowTempSubscriber, TestSize.Level1)
 {
     auto screenSessionPublish = ScreenSessionPublish::GetInstance();
     screenSessionPublish.subscriber_ = nullptr;
@@ -184,7 +184,7 @@ HWTEST_F(ScreenSessionPublishTest, RegisterLowTempSubscriber, Function | SmallTe
  * @tc.desc: UnRegisterLowTempSubscriber
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionPublishTest, UnRegisterLowTempSubscriber, Function | SmallTest | Level3)
+HWTEST_F(ScreenSessionPublishTest, UnRegisterLowTempSubscriber, TestSize.Level1)
 {
     auto screenSessionPublish = ScreenSessionPublish::GetInstance();
     screenSessionPublish.RegisterLowTempSubscriber();
