@@ -1277,6 +1277,7 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
     property->SetSkipSelfWhenShowOnVirtualScreen(GetSessionProperty()->GetSkipSelfWhenShowOnVirtualScreen());
     property->SetSkipEventOnCastPlus(GetSessionProperty()->GetSkipEventOnCastPlus());
     SetSessionProperty(property);
+    GetSessionProperty()->SetIsNeedUpdateWindowMode(false);
 }
 
 void Session::InitSystemSessionDragEnable(const sptr<WindowSessionProperty>& property)
