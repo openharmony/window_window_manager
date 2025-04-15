@@ -3216,6 +3216,20 @@ public:
     virtual WindowType GetParentWindowType() const { return WindowType::WINDOW_TYPE_APP_MAIN_WINDOW; }
 
     /**
+     * @brief Get the root host window type of UIExtension.
+     *
+     * @return WindowType of the root host window.
+     */
+    virtual WindowType GetRootHostWindowType() const { return WindowType::WINDOW_TYPE_APP_MAIN_WINDOW; }
+
+    /**
+     * @brief Set the root host window type of UIExtension.
+     *
+     * @param WindowType of the root host window.
+     */
+    virtual void SetRootHostWindowType(WindowType& rootHostWindowType) {}
+
+    /**
      * @brief Notify modal UIExtension it may be covered
      *
      * @param byLoadContent True when called by loading content, false when called by creating non topmost subwindow

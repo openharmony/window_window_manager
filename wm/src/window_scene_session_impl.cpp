@@ -129,6 +129,7 @@ constexpr float INVALID_DEFAULT_DENSITY = 1.0f;
 constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_WIDTH = 40;
 constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_HEIGHT = 40;
 constexpr int32_t API_VERSION_18 = 18;
+constexpr uint32_t API_VERSION_MOD = 1000;
 constexpr uint32_t LIFECYCLE_ISOLATE_VERSION = 18;
 constexpr uint32_t SNAPSHOT_TIMEOUT = 2000; // MS
 }
@@ -2201,11 +2202,14 @@ WMError WindowSceneSessionImpl::GetSubWindowZLevel(int32_t& zLevel)
 WMError WindowSceneSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea,
     const Rect& rect, int32_t apiVersion)
 {
-    apiVersion = apiVersion == API_VERSION_INVALID ?
-        static_cast<int32_t>(SysCapUtil::GetApiCompatibleVersion()) : apiVersion;
+    uint32_t currentApiVersion = 0;
+    if (context_ != nullptr && context_->GetApplicationInfo() != nullptr) {
+        currentApiVersion = context_->GetApplicationInfo()->apiTargetVersion % API_VERSION_MOD;
+    }
+    apiVersion = apiVersion == API_VERSION_INVALID ? currentApiVersion : apiVersion;
     if (apiVersion < API_VERSION_18 && WindowHelper::IsSystemWindow(property_->GetWindowType())) {
-        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u type %{public}d api version not supported",
-            GetWindowId(), type);
+        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u type %{public}d api %{public}u not supported",
+            GetWindowId(), type, currentApiVersion);
         return WMError::WM_OK;
     }
     if (IsWindowSessionInvalid()) {
