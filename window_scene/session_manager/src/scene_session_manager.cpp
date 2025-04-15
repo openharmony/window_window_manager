@@ -138,7 +138,6 @@ constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PHONE = 3;
 constexpr uint32_t LIFECYCLE_ISOLATE_VERSION = 20;
 constexpr uint64_t NOTIFY_START_ABILITY_TIMEOUT = 4000;
 constexpr uint64_t START_UI_ABILITY_TIMEOUT = 3000;
-constexpr const char* SHELL_ASSISTANT_BUNDLENAME = "com.huawei.shell_assistant";
 
 const std::map<std::string, OHOS::AppExecFwk::DisplayOrientation> STRING_TO_DISPLAY_ORIENTATION_MAP = {
     {"unspecified",                         OHOS::AppExecFwk::DisplayOrientation::UNSPECIFIED},
@@ -3465,13 +3464,13 @@ WSError SceneSessionManager::CheckSubSessionStartedByExtensionAndSetDisplayId(co
         AAFwk::UIExtensionHostInfo hostInfo;
         AAFwk::AbilityManagerClient::GetInstance()->GetUIExtensionRootHostInfo(token, hostInfo);
         const auto& sessionInfo = extensionParentSession->GetSessionInfo();
-        const auto& parentBundleName = sessionInfo.bundleName_;
-        const auto& hostBundleName = hostInfo.elementName_.GetBundleName();
-        if (parentBundleName != hostBundleName && (SHELL_ASSISTANT_BUNDLENAME != hostBundleName ||
-            !sessionInfo.want || sessionInfo.want->GetElement().GetBundleName() != hostBundleName)) {
+        auto hostBundleName = extensionParentSession->IsAnco()?
+            SessionUtils::GetBundleNameBySessionName(hostInfo.sessionName) : hostInfo.elementName_.GetBundleName();
+        if (sessionInfo.bundleName_ != hostBundleName) {
             TLOGE(WmsLogTag::WMS_UIEXT, "The hostWindow is not this parentwindow ! parentwindow bundleName: %{public}s,"
-                " hostwindow bundleName: %{public}s", parentBundleName.c_str(), hostBundleName.c_str());
-            ReportSubWindowCreationFailure(pid, info.elementName.GetAbilityName(), parentBundleName, hostBundleName);
+                " hostwindow bundleName: %{public}s", sessionInfo.bundleName_.c_str(), hostBundleName.c_str());
+            ReportSubWindowCreationFailure(pid, info.elementName.GetAbilityName(), sessionInfo.bundleName_,
+                hostBundleName);
             return WSError::WS_ERROR_INVALID_WINDOW;
         }
         result = WSError::WS_OK;
