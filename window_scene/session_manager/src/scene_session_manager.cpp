@@ -1703,7 +1703,7 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
     specificCb->onUpdateGestureBackEnabled_ = [this](int32_t persistentId) {
         this->UpdateGestureBackEnabled(persistentId);
     };
-    specificCb->onKeyboardRotationChange_ = [this](int32_t persistentId, uint32_t rotation,
+    specificCb->onKeyboardRotationChange_ = [this](int32_t persistentId, Rotation rotation,
         std::vector<std::pair<bool, WSRect>>& avoidAreas) {
         this->GetKeyboardOccupiedAreaWithRotation(persistentId, rotation, avoidAreas);
     };
@@ -10266,7 +10266,7 @@ void SceneSessionManager::UpdateAvoidArea(int32_t persistentId)
 }
 
 void SceneSessionManager::GetKeyboardOccupiedAreaWithRotation(
-    int32_t persistentId, uint32_t rotation, std::vector<std::pair<bool, WSRect>>& avoidAreas)
+    int32_t persistentId, Rotation rotation, std::vector<std::pair<bool, WSRect>>& avoidAreas)
 {
     if (systemConfig_.IsPcWindow()) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "The PC device is not compatible, id: %{public}d", persistentId);
@@ -10287,9 +10287,9 @@ void SceneSessionManager::GetKeyboardOccupiedAreaWithRotation(
     std::pair<bool, WSRect> keyboardOccupiedArea = {true, {0, 0, 0, 0}};
     const KeyboardLayoutParams& keyboardLayoutParams = keyboardSession->GetSessionProperty()->GetKeyboardLayoutParams();
     Rect nextRect;
-    if (rotation == 0 || rotation == 180 || rotation == 360) {
+    if (rotation == Rotation::ROTATION_0 || rotation == Rotation::ROTATION_180) {
         nextRect = keyboardLayoutParams.PortraitPanelRect_;
-    } else if (rotation == 90 || rotation == 270) {
+    } else if (rotation == Rotation::ROTATION_90 || rotation == Rotation::ROTATION_270) {
         nextRect = keyboardLayoutParams.LandscapePanelRect_;
     } else {
         TLOGE(WmsLogTag::WMS_KEYBOARD,
