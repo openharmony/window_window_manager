@@ -281,9 +281,9 @@ void SceneInputManager::ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& dis
     }
 }
 
-std::unordered_map<DisplayId, int32_t> SceneInputManager::GetFocusedSessionMap()
+std::unordered_map<DisplayId, int32_t> SceneInputManager::GetFocusedSessionMap() const
 {
-    std::map<DisplayId, int32_t> focusInfoMap;
+    std::unordered_map<DisplayId, int32_t> focusInfoMap;
     auto focusInfoMapArray = SceneSessionManager::GetInstance().GetAllFocusedSessionList();
     for (const auto& item : focusInfoMapArray) {
         int32_t focusedSessionId = item.second;
