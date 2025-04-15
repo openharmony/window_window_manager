@@ -468,7 +468,15 @@ ScreenShape ScreenSettingHelper::GetScreenShape(ScreenId screenId)
     std::string shape;
     while (std::getline(iss, id, ':')) {
         std::getline(iss, shape, ';');
+        if (!IsNumber(id)) {
+            TLOGI(WmsLogTag::DMS, "id is invalid");
+            continue;
+        }
         if (screenId == static_cast<ScreenId>(std::stoi(id))) {
+            if (!IsNumber(shape)) {
+                TLOGE(WmsLogTag::DMS, "shape is invalid");
+                return ScreenShape::RECTANGLE;
+            }
             return static_cast<ScreenShape>(std::stoi(shape));
         }
     }
