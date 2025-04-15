@@ -78,6 +78,7 @@ constexpr int32_t HOOK_AI_BAR_HEIGHT = 28;
 constexpr int32_t POW_DOUBLE = 2;
 constexpr int32_t MULTI_WINDOW_FLOATING_TITLE_BAR_HEIGHT_VP = 46;
 constexpr int32_t MULTI_WINDOW_TITLE_BAR_DEFAULT_HEIGHT_VP = 32;
+constexpr int32_t ROTATION_DEGREE = 90;
 
 bool CheckIfRectElementIsTooLarge(const WSRect& rect)
 {
@@ -7592,7 +7593,8 @@ WSError SceneSession::NotifyRotationProperty(int32_t rotation, uint32_t width, u
             WSRect wsrect = { 0, 0, width, height };
             auto properties = session->GetSystemBarPropertyForRotation();
             std::map<AvoidAreaType, AvoidArea> avoidAreas;
-            session->GetAvoidAreasByRotation(static_cast<Rotation>(rotation / 90), wsrect, properties, avoidAreas);
+            session->GetAvoidAreasByRotation(
+                static_cast<Rotation>(rotation / ROTATION_DEGREE), wsrect, properties, avoidAreas);
             if (!session->sessionStage_) {
                 return WSError::WS_ERROR_NULLPTR;
             }
