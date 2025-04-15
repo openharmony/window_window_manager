@@ -601,6 +601,7 @@ std::pair<std::vector<MMI::WindowInfo>, std::vector<std::shared_ptr<Media::Pixel
         } else {
             GetModalUIExtensionInfo(windowInfoList, sceneSessionValue, windowInfo);
         }
+        windowInfo.groupId = SceneSessionManager::GetInstance().GetDisplayGroupId(windowInfo.displayId);
         TLOGD(WmsLogTag::WMS_EVENT, "windowId=%{public}d, agentWindowId=%{public}d, zOrder=%{public}f",
             windowInfo.id, windowInfo.agentWindowId, windowInfo.zOrder);
         windowInfoList.emplace_back(windowInfo);

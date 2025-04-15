@@ -276,6 +276,8 @@ public:
      */
     WSError SetFocusedSessionId(const int32_t persistentId, const DisplayId displayId);
     int32_t GetFocusedSessionId(DisplayId displayId = DEFAULT_DISPLAY_ID) const;
+    DisplayId GetDisplayGroupId(DisplayId displayId = DEFAULT_DISPLAY_ID) const;
+    std::vector<std::pair<DisplayId, int32_t>> GetAllFocusedSessionList() const;
     FocusChangeReason GetFocusChangeReason() const { return focusChangeReason_; }
     WMError RequestFocusStatus(int32_t persistentId, bool isFocused, bool byForeground = true,
         FocusChangeReason reason = FocusChangeReason::DEFAULT) override;
