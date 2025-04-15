@@ -3488,7 +3488,9 @@ WSError SceneSessionManager::CheckSubSessionStartedByExtensionAndSetDisplayId(co
     if (result == WSError::WS_OK) {
         sptr<WindowSessionProperty> parentProperty = extensionParentSession->GetSessionProperty();
         if (sessionStage && property->GetIsUIExtFirstSubWindow()) {
-            sessionStage->UpdateDisplayId(parentProperty->GetDisplayId());
+            sessionStage->UpdateDisplayId(extensionParentSession->GetClientDisplayId() == VIRTUAL_DISPLAY_ID
+                                              ? VIRTUAL_DISPLAY_ID
+                                              : parentProperty->GetDisplayId());
             property->SetDisplayId(parentProperty->GetDisplayId());
         }
     } else {
