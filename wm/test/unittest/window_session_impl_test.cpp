@@ -24,6 +24,7 @@
 #include "color_parser.h"
 #include "extension/extension_business_info.h"
 #include "mock_session.h"
+#include "mock_session_stub.h"
 #include "mock_uicontent.h"
 #include "mock_window.h"
 #include "parameters.h"
@@ -2005,6 +2006,26 @@ HWTEST_F(WindowSessionImplTest, UnregisterWaterfallModeChangeListener, TestSize.
     listener = nullptr;
     ret = window->UnregisterWaterfallModeChangeListener(listener);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+}
+
+/**
+ * @tc.name: IsWaterfallModeEnabled
+ * @tc.desc: IsWaterfallModeEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, IsWaterfallModeEnabled, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("IsWaterfallModeEnabled");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->hostSession_ = nullptr;
+    EXPECT_EQ(window->IsWaterfallModeEnabled(), false);
+
+    auto mockHostSession = sptr<SessionStubMocker>::MakeSptr();
+    window->hostSession_ = mockHostSession;
+    window->property_->persistentId_ = 1234;
+    EXPECT_CALL(*mockHostSession, GetWaterfallMode(_)).WillOnce(DoAll(SetArgReferee<0>(true), Return(WSError::WS_OK)));
+    EXPECT_EQ(window->IsWaterfallModeEnabled(), true);
 }
 
 /**
