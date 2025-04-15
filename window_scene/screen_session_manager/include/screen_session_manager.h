@@ -518,6 +518,9 @@ private:
     void IsEnableRegionRotation(sptr<ScreenSession> screenSession);
     void CalculateXYPosition(sptr<ScreenSession> screenSession);
     bool IsSpecialApp();
+    void SetMultiScreenRelativePositionInner(sptr<ScreenSession>& firstScreenSession,
+        sptr<ScreenSession>& secondScreenSession, MultiScreenPositionOptions mainScreenOptions,
+        MultiScreenPositionOptions secondScreenOption);
 #ifdef DEVICE_STATUS_ENABLE
     void SetDragWindowScreenId(ScreenId screenId, ScreenId displayNodeScreenId);
 #endif // DEVICE_STATUS_ENABLE
