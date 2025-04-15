@@ -5288,7 +5288,8 @@ void ScreenSessionManager::ChangeScreenGroup(sptr<ScreenSessionGroup> group, con
         if (filterScreen && screen->groupSmsId_ == group->screenId_ && group->HasChild(screen->screenId_)) {
             // screen already in group
             if (combination != ScreenCombination::SCREEN_MIRROR ||
-                screen->GetMirrorScreenRegion().second == mainScreenRegion) {
+                (screen->GetMirrorScreenRegion().second == mainScreenRegion &&
+                 screen->GetScreenCombination() == ScreenCombination::SCREEN_MIRROR)) {
                 continue;
             }
             // mirror mode and mirror area change
