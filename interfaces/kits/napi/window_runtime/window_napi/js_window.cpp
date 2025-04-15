@@ -81,6 +81,7 @@ JsWindow::JsWindow(const sptr<Window>& window)
         WLOGI("Destroy window %{public}s in js window", windowName.c_str());
     };
     windowToken_->RegisterWindowDestroyedListener(func);
+    jsWindowName_ = windowToken_->GetWindowName();
     WLOGI(" constructorCnt: %{public}d", ++g_ctorCnt);
 }
 
@@ -96,9 +97,15 @@ JsWindow::~JsWindow()
 std::string JsWindow::GetWindowName()
 {
     if (windowToken_ == nullptr) {
+        TLOGW(WmsLogTag::WMS_LIFE, "windowToken_ is null");
         return "";
     }
     return windowToken_->GetWindowName();
+}
+
+const std::string& JsWindow::GetJSWindowName() const
+{
+    return jsWindowName_;
 }
 
 void JsWindow::Finalizer(napi_env env, void* data, void* hint)
@@ -109,10 +116,10 @@ void JsWindow::Finalizer(napi_env env, void* data, void* hint)
         WLOGFE("jsWin is nullptr");
         return;
     }
-    std::string windowName = jsWin->GetWindowName();
     std::lock_guard<std::mutex> lock(g_mutex);
-    g_jsWindowMap.erase(windowName);
-    WLOGI("Remove window %{public}s from g_jsWindowMap", windowName.c_str());
+    const std::string& jsWindowName = jsWin->GetJSWindowName();
+    g_jsWindowMap.erase(jsWindowName);
+    WLOGI("Remove window %{public}s from g_jsWindowMap", jsWindowName.c_str());
 }
 
 napi_value JsWindow::Show(napi_env env, napi_callback_info info)
