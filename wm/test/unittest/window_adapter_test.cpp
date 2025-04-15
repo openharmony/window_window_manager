@@ -876,19 +876,6 @@ HWTEST_F(WindowAdapterTest, MinimizeByWindowId, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetForegroundWindowNum
- * @tc.desc: WindowAdapter/SetForegroundWindowNum
- * @tc.type: FUNC
- */
-HWTEST_F(WindowAdapterTest, SetForegroundWindowNum, Function | SmallTest | Level2)
-{
-    WindowAdapter windowAdapter;
-    int32_t windowNum = 1;
-    auto err = windowAdapter.SetForegroundWindowNum(windowNum);
-    ASSERT_EQ(err, WMError::WM_OK);
-}
-
-/**
  * @tc.name: ListWindowInfo01
  * @tc.desc: WindowAdapter/ListWindowInfo
  * @tc.type: FUNC

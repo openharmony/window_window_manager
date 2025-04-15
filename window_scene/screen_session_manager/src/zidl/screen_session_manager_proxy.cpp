@@ -4107,4 +4107,57 @@ bool ScreenSessionManagerProxy::GetIsRealScreen(ScreenId screenId)
     }
     return reply.ReadBool();
 }
+
+uint32_t ScreenSessionManagerProxy::GetDeviceStatus()
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("ScreenSessionManagerProxy::GetDeviceStatus: remote is nullptr");
+        return 0;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("ScreenSessionManagerProxy::GetDeviceStatus: WriteInterfaceToken failed");
+        return 0;
+    }
+
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DEVICE_STATUS),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("ScreenSessionManagerProxy::GetDeviceStatus: SendRequest failed");
+        return 0;
+    }
+
+    uint32_t status = 0;
+    if (!reply.ReadUint32(status)) {
+        WLOGFE("ScreenSessionManagerProxy::GetDeviceStatus: ReadUint32 failed");
+        return 0;
+    }
+
+    return status;
+}
+
+void ScreenSessionManagerProxy::NotifyExtendScreenCreateFinish()
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return;
+    }
+
+    MessageParcel reply;
+    MessageParcel data;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_NOTIFY_EXTEND_SCREEN_CREATE_FINISH),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return;
+    }
+}
 } // namespace OHOS::Rosen

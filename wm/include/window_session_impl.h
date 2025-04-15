@@ -90,6 +90,7 @@ public:
         AppExecFwk::Ability* ability) override;
     std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const override;
     const std::shared_ptr<AbilityRuntime::Context> GetContext() const override;
+    void SetContext(const std::shared_ptr<AbilityRuntime::Context>& context);
     Rect GetRequestRect() const override;
     WindowType GetType() const override;
     const std::string& GetWindowName() const override;
@@ -428,6 +429,9 @@ public:
     RotationChangeResult NotifyRotationChange(const RotationChangeInfo& rotationChangeInfo) override;
     WMError CheckMultiWindowRect(uint32_t& width, uint32_t& height);
     WSError SetCurrentRotation(int32_t currentRotation) override;
+    void SetDisplayOrientationForRotation(DisplayOrientation displayOrientaion);
+    DisplayOrientation GetDisplayOrientationForRotation() const;
+    void SetPreferredRequestedOrientation(Orientation orientation) override;
 
 protected:
     WMError Connect();
@@ -496,8 +500,8 @@ protected:
     void UpdateSubWindowStateAndNotify(int32_t parentPersistentId, const WindowState newState);
     void DestroySubWindow();
     bool IsSubWindowMaximizeSupported() const override;
-    void UpdateSubWindowLevel(uint32_t subWindowLevel);
-    void GetSubWidnows(int32_t parentPersistentId, std::vector<sptr<WindowSessionImpl>>& subWindows);
+    void UpdateSubWindowInfo(uint32_t subWindowLevel, const std::shared_ptr<AbilityRuntime::Context>& context);
+    void GetSubWindows(int32_t parentPersistentId, std::vector<sptr<WindowSessionImpl>>& subWindows);
     void RemoveSubWindow(int32_t parentPersistentId);
 
     sptr<WindowOption> windowOption_;
@@ -506,6 +510,7 @@ protected:
     std::shared_ptr<Ace::UIContent> uiContent_;
     mutable std::shared_mutex uiContentMutex_;
     std::shared_ptr<AbilityRuntime::Context> context_;
+    mutable std::shared_mutex contextMutex_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
 
     sptr<WindowSessionProperty> property_;
@@ -582,6 +587,11 @@ protected:
     sptr<FutureCallback> getRotationResultFuture_ = nullptr;
     void UpdateVirtualPixelRatio(const sptr<Display>& display);
     WMError GetVirtualPixelRatio(float& vpr);
+    void SetCurrentTransform(const Transform& transform) { currentTransform_ = transform; }
+    const Transform& GetCurrentTransform() const { return currentTransform_; }
+    void NotifyAfterUIContentReady();
+    void SetNeedRenotifyTransform(bool isNeedRenotify) { needRenotifyTransform_.store(isNeedRenotify); }
+    bool IsNeedRenotifyTransform() const { return needRenotifyTransform_.load(); }
     mutable std::recursive_mutex transformMutex_;
     std::atomic<CrossAxisState> crossAxisState_ = CrossAxisState::STATE_INVALID;
     bool IsValidCrossState(int32_t state) const;
@@ -813,6 +823,8 @@ private:
     int16_t rotationAnimationCount_ { 0 };
     Transform layoutTransform_;
     SingleHandTransform singleHandTransform_;
+    Transform currentTransform_;
+    std::atomic_bool needRenotifyTransform_ = false;
     KeyFramePolicy keyFramePolicy_;
 
     /*
@@ -872,6 +884,8 @@ private:
     void NotifyRotationChangeResultInner(
             const std::vector<sptr<IWindowRotationChangeListener>>& windowRotationChangeListener,
             const RotationChangeInfo& rotationChangeInfo);
+    DisplayOrientation windowOrientation_ = DisplayOrientation::UNKNOWN;
+    Orientation preferredRequestedOrientation_ = Orientation::UNSPECIFIED;
 
     /*
      * keyboard

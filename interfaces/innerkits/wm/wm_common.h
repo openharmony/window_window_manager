@@ -455,6 +455,9 @@ enum class WindowSizeChangeReason : uint32_t {
     MAXIMIZE_TO_SPLIT,
     SPLIT_TO_MAXIMIZE,
     PAGE_ROTATION,
+    SPLIT_DRAG_START,
+    SPLIT_DRAG,
+    SPLIT_DRAG_END,
     END,
 };
 
@@ -491,7 +494,7 @@ enum class DragResizeType : uint32_t {
     RESIZE_EACH_FRAME = 1,
     RESIZE_WHEN_DRAG_END = 2,
     RESIZE_KEY_FRAME = 3,
-    RESIZE_MAX_VALUE = 99,
+    RESIZE_MAX_VALUE,  // invalid value begin, add new value above
 };
 
 /**

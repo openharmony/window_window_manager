@@ -5626,12 +5626,38 @@ napi_value JsSceneSession::OnRemoveBlank(napi_env env, napi_callback_info info)
 
 napi_value JsSceneSession::OnAddSnapshot(napi_env env, napi_callback_info info)
 {
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+
+    bool useFfrt = false;
+    if (argc >= ARGC_ONE && GetType(env, argv[0]) == napi_boolean) {
+        if (!ConvertFromJsValue(env, argv[0], useFfrt)) {
+            TLOGE(WmsLogTag::WMS_PATTERN, "Failed to convert parameter to useFfrt");
+            napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                "Input parameter is missing or invalid"));
+            return NapiGetUndefined(env);
+        }
+    }
+
+    bool needPersist = false;
+    if (argc >= ARGC_TWO && GetType(env, argv[1]) == napi_boolean) {
+        if (!ConvertFromJsValue(env, argv[1], needPersist)) {
+            TLOGE(WmsLogTag::WMS_PATTERN, "Failed to convert parameter to needPersist");
+            napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                "Input parameter is missing or invalid"));
+            return NapiGetUndefined(env);
+        }
+    }
+
+    TLOGI(WmsLogTag::WMS_PATTERN, "argc: %{public}u, useFfrt: %{public}u, needPersist: %{public}u",
+        argc, useFfrt, needPersist);
     auto session = weakSession_.promote();
     if (session == nullptr) {
-        TLOGE(WmsLogTag::WMS_PATTERN, "session is nullptr, id:%{public}d", persistentId_);
+        TLOGE(WmsLogTag::WMS_PATTERN, "session is null, id:%{public}d", persistentId_);
         return NapiGetUndefined(env);
     }
-    session->NotifyAddSnapshot();
+    session->NotifyAddSnapshot(useFfrt, needPersist);
     return NapiGetUndefined(env);
 }
 

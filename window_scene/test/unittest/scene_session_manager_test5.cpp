@@ -687,9 +687,7 @@ HWTEST_F(SceneSessionManagerTest5, NotifyFocusStatus, TestSize.Level1)
     SessionInfo info;
     info.abilityName_ = "test1";
     info.bundleName_ = "test2";
-    sptr<SceneSession> sceneSession = nullptr;
     auto focusGroup = sptr<FocusGroup>::MakeSptr(DEFAULT_DISPLAY_ID);
-    ssm_->NotifyFocusStatus(sceneSession, true, focusGroup);
     sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession1, nullptr);
     ssm_->NotifyFocusStatus(sceneSession1, false, focusGroup);
@@ -1658,6 +1656,31 @@ HWTEST_F(SceneSessionManagerTest5, RegisterRemoveSnapshotFunc, TestSize.Level1)
 
     sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     ASSERT_EQ(WSError::WS_OK, ssm_->RegisterSaveSnapshotFunc(sceneSession));
+}
+
+/**
+ * @tc.name: GetDelayRemoveSnapshot
+ * @tc.desc: GetDelayRemoveSnapshot Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, GetDelayRemoveSnapshot, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    auto res = ssm_->GetDelayRemoveSnapshot();
+    ASSERT_EQ(false, res);
+}
+
+/**
+ * @tc.name: SetDelayRemoveSnapshot
+ * @tc.desc: SetDelayRemoveSnapshot Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, SetDelayRemoveSnapshot, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->SetDelayRemoveSnapshot(true);
+    auto res = ssm_->GetDelayRemoveSnapshot();
+    ASSERT_EQ(true, res);
 }
 }
 } // namespace Rosen

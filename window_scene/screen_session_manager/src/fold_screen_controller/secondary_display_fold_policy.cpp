@@ -19,6 +19,8 @@
 #include "session/screen/include/screen_session.h"
 #include "screen_session_manager.h"
 #include "screen_scene_config.h"
+#include "sensor_agent.h"
+#include "sensor_agent_type.h"
 
 #include "window_manager_hilog.h"
 
@@ -107,6 +109,13 @@ void SecondaryDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode display
         std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);
         currentDisplayMode_ = displayMode;
         lastDisplayMode_ = displayMode;
+    }
+    if (displayMode == FoldDisplayMode::GLOBAL_FULL) {
+        TLOGW(WmsLogTag::DMS, "Set device status to STATUS_GLOBAL_FULL");
+        SetDeviceStatus(static_cast<uint32_t>(DMDeviceStatus::STATUS_GLOBAL_FULL));
+    } else {
+        TLOGW(WmsLogTag::DMS, "Set device status to UNKNOWN");
+        SetDeviceStatus(static_cast<uint32_t>(DMDeviceStatus::UNKNOWN));
     }
     ScreenSessionManager::GetInstance().NotifyDisplayModeChanged(displayMode);
 }
