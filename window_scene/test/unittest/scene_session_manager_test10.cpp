@@ -1470,7 +1470,7 @@ HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_keyboard, TestSize.L
     info.bundleName_ = "NotifyNextAvoidRectInfo_keyboard";
     info.screenId_ = 0;
     auto specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    specificCb->onKeyboardRotationChange_ = [](int32_t persistentId, uint32_t rotation,
+    specificCb->onKeyboardRotationChange_ = [](int32_t persistentId, Rotation rotation,
         std::vector<std::pair<bool, WSRect>>& avoidAreas) {
         ssm_->GetKeyboardOccupiedAreaWithRotation(persistentId, rotation, avoidAreas);
     };
@@ -1496,7 +1496,7 @@ HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_keyboard_01, TestSiz
     info.bundleName_ = "NotifyNextAvoidRectInfo_keyboard_01";
     info.screenId_ = 0;
     auto specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    specificCb->onKeyboardRotationChange_ = [](int32_t persistentId, uint32_t rotation,
+    specificCb->onKeyboardRotationChange_ = [](int32_t persistentId, Rotation rotation,
         std::vector<std::pair<bool, WSRect>>& avoidAreas) {
         ssm_->GetKeyboardOccupiedAreaWithRotation(persistentId, rotation, avoidAreas);
     };
