@@ -6408,7 +6408,6 @@ napi_value JsWindow::OnMinimize(napi_env env, napi_callback_info info)
 
     if (windowToken_ != nullptr && WindowHelper::IsFloatOrSubWindow(windowToken_->GetType())) {
         if (!windowToken_->IsSceneBoardEnabled()) {
-            TLOGI(WmsLogTag::WMS_LAYOUT, "device not support");
             return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
         }
         TLOGI(WmsLogTag::WMS_LAYOUT, "subWindow or float window use hide");
