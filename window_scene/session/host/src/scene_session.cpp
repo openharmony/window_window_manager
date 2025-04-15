@@ -2606,7 +2606,7 @@ WSError SceneSession::GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoid
 WSError SceneSession::GetAvoidAreasByRotation(Rotation rotation, const WSRect& rect,
     const std::map<WindowType, SystemBarProperty>& properties, std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
-    if (WindowHelper::IsMainFullScreenWindow(GetWindowType(), GetWindowMode())) {
+    if (!WindowHelper::IsMainFullScreenWindow(GetWindowType(), GetWindowMode())) {
         TLOGI(WmsLogTag::WMS_IMMS, "window is no support, type %{public}d, mode %{public}d",
             GetWindowType(), GetWindowMode());
         return WSError::WS_DO_NOTHING;
@@ -2670,11 +2670,11 @@ void SceneSession::GetSystemBarAvoidAreaByRotation(Rotation rotation, AvoidAreaT
         TLOGE(WmsLogTag::WMS_IMMS, "win [%{public}d] properties is empty, type %{public}d", GetPersistentId(), type);
         return;
     }
-    bool needCalcu = winType == WindowType::WINDOW_TYPE_STATUS_BAR &&
+    bool isStatusBarAvoidAreaEmpty = winType == WindowType::WINDOW_TYPE_STATUS_BAR &&
         (rotation == Rotation::ROTATION_90 || rotation == Rotation::ROTATION_270) &&
-        static_cast<bool>(static_cast<int32_t>(properties.at(winType).settingFlag_) &
-        static_cast<int32_t>(SystemBarSettingFlag::ENABLE_SETTING));
-    if (!properties.at(winType).enable_ || !needCalcu) {
+        !(static_cast<bool>(static_cast<int32_t>(properties.at(winType).settingFlag_) &
+        static_cast<int32_t>(SystemBarSettingFlag::ENABLE_SETTING)));
+    if (!properties.at(winType).enable_ || isStatusBarAvoidAreaEmpty) {
         TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}d] avoid area is empty, type %{public}d", GetPersistentId(), type);
         return;
     }
