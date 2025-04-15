@@ -239,15 +239,7 @@ void SuperFoldSensorManager::HandleSuperSensorChange(SuperFoldStatusChangeEvents
 void SuperFoldSensorManager::HandleScreenConnectChange()
 {
     TLOGI(WmsLogTag::DMS, "Screen connect to stop statemachine.");
-    if (SuperFoldStateManager::GetInstance().GetCurrentStatus() == SuperFoldStatus::KEYBOARD) {
-        SuperFoldStateManager::GetInstance().HandleSuperFoldStatusChange(
-            SuperFoldStatusChangeEvents::KEYBOARD_OFF);
-        SuperFoldStateManager::GetInstance().HandleSuperFoldStatusChange(
-            SuperFoldStatusChangeEvents::ANGLE_CHANGE_EXPANDED);
-    } else {
-        SuperFoldStateManager::GetInstance().HandleSuperFoldStatusChange(
-            SuperFoldStatusChangeEvents::ANGLE_CHANGE_EXPANDED);
-    }
+    SuperFoldStateManager::GetInstance().HandleScreenConnectChange();
 }
 
 void SuperFoldSensorManager::HandleScreenDisconnectChange()

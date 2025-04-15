@@ -50,6 +50,8 @@ public:
 
     void HandleSuperFoldStatusChange(SuperFoldStatusChangeEvents events);
 
+    void HandleScreenConnectChange();
+
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
 
     SuperFoldStatus GetCurrentStatus();
@@ -61,6 +63,7 @@ public:
 private:
     std::atomic<SuperFoldStatus> curState_ = SuperFoldStatus::UNKNOWN;
     sptr<FoldCreaseRegion> currentSuperFoldCreaseRegion_ = nullptr;
+    std::mutex superStatusMutex_;
     struct Transition {
         SuperFoldStatus nextState;
         std::function<void (SuperFoldStatusChangeEvents)> action;

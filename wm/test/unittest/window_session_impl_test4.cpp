@@ -1265,6 +1265,7 @@ HWTEST_F(WindowSessionImplTest4, GetTitleButtonVisible01, TestSize.Level1)
 HWTEST_F(WindowSessionImplTest4, UpdateRect03, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetDisplayId(0);
     option->SetWindowName("WindowSessionCreateCheck");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
 

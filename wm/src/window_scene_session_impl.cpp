@@ -98,6 +98,7 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowSceneSessionImpl"};
 constexpr int32_t WINDOW_DETACH_TIMEOUT = 300;
 constexpr int32_t WINDOW_LAYOUT_TIMEOUT = 30;
+constexpr int32_t WINDOW_PAGE_ROTATION_TIMEOUT = 2000;
 const std::string PARAM_DUMP_HELP = "-h";
 constexpr float MIN_GRAY_SCALE = 0.0f;
 constexpr float MAX_GRAY_SCALE = 1.0f;
@@ -2206,10 +2207,23 @@ WMError WindowSceneSessionImpl::GetTargetOrientationConfigInfo(Orientation targe
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
 
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
+    if (display == nullptr) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "display is null, winId=%{public}u", GetWindowId());
+        return WMError::WM_ERROR_NULLPTR;
+    }
     sptr<DisplayInfo> displayInfo = display ? display->GetDisplayInfo() : nullptr;
-    auto ret = hostSession->GetTargetOrientationConfigInfo(targetOrientation, properties);
+    if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "displayInfo is null!");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    WSError ret;
+    if (targetOrientation == Orientation::INVALID) {
+        ret = hostSession->GetTargetOrientationConfigInfo(GetRequestedOrientation(), properties);
+    } else {
+        ret = hostSession->GetTargetOrientationConfigInfo(targetOrientation, properties);
+    }
     getTargetInfoCallback_->ResetGetTargetRotationLock();
-    OrientationInfo info = getTargetInfoCallback_->GetTargetOrientationResult(WINDOW_LAYOUT_TIMEOUT);
+    OrientationInfo info = getTargetInfoCallback_->GetTargetOrientationResult(WINDOW_PAGE_ROTATION_TIMEOUT);
     avoidAreas = info.avoidAreas;
     config = FillTargetOrientationConfig(info, displayInfo, GetDisplayId());
     TLOGI(WmsLogTag::WMS_ROTATION,
@@ -3285,15 +3299,38 @@ bool WindowSceneSessionImpl::CalcWindowShouldMove()
     return false;
 }
 
+bool WindowSceneSessionImpl::CheckCanMoveWindowType()
+{
+    WindowType windowType = GetType();
+    if (!WindowHelper::IsSystemWindow(windowType) &&
+        !WindowHelper::IsMainWindow(windowType) &&
+        !WindowHelper::IsSubWindow(windowType)) {
+        return false;
+    }
+    return true;
+}
+
+bool WindowSceneSessionImpl::CheckIsPcAppInPadFullScreenOnMobileWindowMode()
+{
+    if (property_->GetIsPcAppInPad() &&
+        property_->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
+        !IsFreeMultiWindowMode()) {
+        return true;
+    }
+    return false;
+}
+
 WmErrorCode WindowSceneSessionImpl::StartMoveWindow()
 {
+    if (!CheckCanMoveWindowType()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "invalid window type:%{public}u", GetType());
+        return WmErrorCode::WM_ERROR_INVALID_CALLING;
+    }
     if (!CalcWindowShouldMove()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "The device is not supported");
         return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
-    if (property_->GetIsPcAppInPad() &&
-        property_->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
-        !IsFreeMultiWindowMode()) {
+    if (CheckIsPcAppInPadFullScreenOnMobileWindowMode()) {
         return WmErrorCode::WM_OK;
     }
     if (auto hostSession = GetHostSession()) {
@@ -3319,13 +3356,15 @@ WmErrorCode WindowSceneSessionImpl::StartMoveWindow()
 
 WmErrorCode WindowSceneSessionImpl::StartMoveWindowWithCoordinate(int32_t offsetX, int32_t offsetY)
 {
+    if (!CheckCanMoveWindowType()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "invalid window type:%{public}u", GetType());
+        return WmErrorCode::WM_ERROR_INVALID_CALLING;
+    }
     if (!IsPcOrPadCapabilityEnabled()) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "The device is not supported");
         return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
-    if (property_->GetIsPcAppInPad() &&
-        property_->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
-        !IsFreeMultiWindowMode()) {
+    if (CheckIsPcAppInPadFullScreenOnMobileWindowMode()) {
         return WmErrorCode::WM_OK;
     }
     if (IsWindowSessionInvalid()) {
@@ -3369,6 +3408,10 @@ WmErrorCode WindowSceneSessionImpl::StartMoveWindowWithCoordinate(int32_t offset
 
 WmErrorCode WindowSceneSessionImpl::StopMoveWindow()
 {
+    if (!CheckCanMoveWindowType()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "invalid window type:%{public}u", GetType());
+        return WmErrorCode::WM_ERROR_INVALID_CALLING;
+    }
     if (!IsPcOrPadFreeMultiWindowMode()) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "The device is not supported");
         return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;

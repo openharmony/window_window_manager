@@ -332,7 +332,8 @@ enum class Orientation : uint32_t {
     USER_ROTATION_PORTRAIT_INVERTED = 16,
     USER_ROTATION_LANDSCAPE_INVERTED = 17,
     FOLLOW_DESKTOP = 18,
-    END = FOLLOW_DESKTOP,
+    INVALID = 19,
+    END = INVALID,
 };
 
 /**
