@@ -367,6 +367,7 @@ HWTEST_F(WindowSessionImplTest5, UpdateRectForPageRotation, Function | SmallTest
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: UpdateRectForPageRotation start";
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetDisplayId(0);
     option->SetWindowName("UpdateRectForPageRotation");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     Rect wmRect = { 0, 0, 0, 0 };
@@ -560,6 +561,63 @@ HWTEST_F(WindowSessionImplTest5, NotifyClientOrientationChange, Function | Small
     windowSessionImpl->windowOrientationChangeListener_[windowSessionImpl->property_->GetPersistentId()] = holder;
     WMError res = windowSessionImpl->RegisterOrientationChangeListener(listener);
     EXPECT_EQ(WMError::WM_OK, res);
+}
+
+/**
+ * @tc.name: GetDisplayOrientationForRotation
+ * @tc.desc: GetDisplayOrientationForRotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, GetDisplayOrientationForRotation, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest5: GetDisplayOrientationForRotation start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetDisplayId(0);
+    option->SetWindowName("GetDisplayOrientationForRotation");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+
+    window->SetDisplayOrientationForRotation(DisplayOrientation::PORTRAIT);
+    EXPECT_EQ(window->GetDisplayOrientationForRotation(), DisplayOrientation::PORTRAIT);
+    window->SetDisplayOrientationForRotation(DisplayOrientation::UNKNOWN);
+    EXPECT_EQ(window->GetDisplayOrientationForRotation(), DisplayOrientation::UNKNOWN);
+    window->SetDisplayOrientationForRotation(DisplayOrientation::LANDSCAPE);
+    EXPECT_EQ(window->GetDisplayOrientationForRotation(), DisplayOrientation::LANDSCAPE);
+    window->SetDisplayOrientationForRotation(DisplayOrientation::PORTRAIT_INVERTED);
+    EXPECT_EQ(window->GetDisplayOrientationForRotation(), DisplayOrientation::PORTRAIT_INVERTED);
+    window->SetDisplayOrientationForRotation(DisplayOrientation::LANDSCAPE_INVERTED);
+    EXPECT_EQ(window->GetDisplayOrientationForRotation(), DisplayOrientation::LANDSCAPE_INVERTED);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest5: GetDisplayOrientationForRotation end";
+}
+
+/**
+ * @tc.name: GetRequestedOrientation
+ * @tc.desc: GetRequestedOrientation
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, GetRequestedOrientation, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest5: GetRequestedOrientation start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetDisplayId(0);
+    option->SetWindowName("GetRequestedOrientation");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+    window->state_ = WindowState::STATE_CREATED;
+
+    window->SetPreferredRequestedOrientation(Orientation::USER_ROTATION_PORTRAIT);
+    EXPECT_EQ(window->GetRequestedOrientation(), Orientation::USER_ROTATION_PORTRAIT);
+    window->SetPreferredRequestedOrientation(Orientation::VERTICAL);
+    EXPECT_EQ(window->GetRequestedOrientation(), Orientation::VERTICAL);
+    window->SetPreferredRequestedOrientation(Orientation::HORIZONTAL);
+    EXPECT_EQ(window->GetRequestedOrientation(), Orientation::HORIZONTAL);
+    window->SetPreferredRequestedOrientation(Orientation::SENSOR);
+    EXPECT_EQ(window->GetRequestedOrientation(), Orientation::SENSOR);
+    window->SetPreferredRequestedOrientation(Orientation::FOLLOW_DESKTOP);
+    EXPECT_EQ(window->GetRequestedOrientation(), Orientation::FOLLOW_DESKTOP);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest5: GetRequestedOrientation end";
 }
 } // namespace
 } // namespace Rosen

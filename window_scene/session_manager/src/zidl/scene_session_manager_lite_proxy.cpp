@@ -850,6 +850,11 @@ WMError SceneSessionManagerLiteProxy::UnregisterWindowManagerAgent(WindowManager
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
+    if ((windowManagerAgent == nullptr)) {
+        TLOGE(WmsLogTag::DEFAULT, "windowManagerAgent is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
     if (!data.WriteRemoteObject(windowManagerAgent->AsObject())) {
         WLOGFE("Write IWindowManagerAgent failed");
         return WMError::WM_ERROR_IPC_FAILED;

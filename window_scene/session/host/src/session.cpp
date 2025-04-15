@@ -466,18 +466,31 @@ void Session::NotifyRemoveBlank()
     }
 }
 
-void Session::NotifyAddSnapshot()
+void Session::NotifyAddSnapshot(bool useFfrt, bool needPersist)
 {
     /*
      * for blankness prolems, persist snapshot could conflict with background process,
      * thus no need to persist snapshot here
      */
-    SaveSnapshot(false, false);
-    auto lifecycleListeners = GetListeners<ILifecycleListener>();
-    for (auto& listener : lifecycleListeners) {
-        if (auto listenerPtr = listener.lock()) {
-            listenerPtr->OnAddSnapshot();
+    SaveSnapshot(useFfrt, needPersist);
+    auto task = [weakThis = wptr(this), where = __func__]() {
+        auto session = weakThis.promote();
+        if (session == nullptr) {
+            TLOGNE(WmsLogTag::WMS_PATTERN, "%{public}s session is null", where);
+            return;
         }
+        auto lifecycleListeners = session->GetListeners<ILifecycleListener>();
+        for (auto& listener : lifecycleListeners) {
+            if (auto listenerPtr = listener.lock()) {
+                listenerPtr->OnAddSnapshot();
+            }
+        }
+    };
+
+    if (useFfrt) {
+        SetAddSnapshotCallback(task);
+    } else {
+        task();
     }
 }
 
@@ -1264,6 +1277,7 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
     property->SetSkipSelfWhenShowOnVirtualScreen(GetSessionProperty()->GetSkipSelfWhenShowOnVirtualScreen());
     property->SetSkipEventOnCastPlus(GetSessionProperty()->GetSkipEventOnCastPlus());
     SetSessionProperty(property);
+    GetSessionProperty()->SetIsNeedUpdateWindowMode(false);
 }
 
 void Session::InitSystemSessionDragEnable(const sptr<WindowSessionProperty>& property)
@@ -2476,7 +2490,12 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist)
             session->snapshot_ = pixelMap;
         }
         {
-            std::lock_guard lock(session->saveSnapshotCallbackMutex_);
+            std::lock_guard<std::mutex> lock(session->addSnapshotCallbackMutex_);
+            session->addSnapshotCallback_();
+        }
+        session->SetAddSnapshotCallback([]() {});
+        {
+            std::lock_guard<std::mutex> lock(session->saveSnapshotCallbackMutex_);
             session->saveSnapshotCallback_();
         }
         if (!requirePersist) {

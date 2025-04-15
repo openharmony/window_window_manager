@@ -429,6 +429,9 @@ public:
     RotationChangeResult NotifyRotationChange(const RotationChangeInfo& rotationChangeInfo) override;
     WMError CheckMultiWindowRect(uint32_t& width, uint32_t& height);
     WSError SetCurrentRotation(int32_t currentRotation) override;
+    void SetDisplayOrientationForRotation(DisplayOrientation displayOrientaion);
+    DisplayOrientation GetDisplayOrientationForRotation() const;
+    void SetPreferredRequestedOrientation(Orientation orientation) override;
 
 protected:
     WMError Connect();
@@ -881,6 +884,8 @@ private:
     void NotifyRotationChangeResultInner(
             const std::vector<sptr<IWindowRotationChangeListener>>& windowRotationChangeListener,
             const RotationChangeInfo& rotationChangeInfo);
+    DisplayOrientation windowOrientation_ = DisplayOrientation::UNKNOWN;
+    Orientation preferredRequestedOrientation_ = Orientation::UNSPECIFIED;
 
     /*
      * keyboard

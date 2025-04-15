@@ -1007,6 +1007,10 @@ void WindowImpl::NotifyPreferredOrientationChange(Orientation orientation)
 {
 }
 
+void WindowImpl::SetPreferredRequestedOrientation(Orientation orientation)
+{
+}
+
 void WindowImpl::SetRequestedOrientation(Orientation orientation)
 {
 }
