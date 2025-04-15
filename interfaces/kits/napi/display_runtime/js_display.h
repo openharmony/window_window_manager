@@ -23,6 +23,7 @@
 #include "cutout_info.h"
 #include "display.h"
 #include "dm_common.h"
+#include "js_display_listener.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -79,6 +80,8 @@ public:
 
 private:
     sptr<Display> display_ = nullptr;
+    std::map<std::string, std::map<std::unique_ptr<NativeReference>, sptr<JsDisplayListener>>> jsCbMap_;
+    std::mutex mtx_;
     napi_value OnGetCutoutInfo(napi_env env, napi_callback_info info);
     napi_value OnHasImmersiveWindow(napi_env env, napi_callback_info info);
     napi_value OnGetAvailableArea(napi_env env, napi_callback_info info);
@@ -91,6 +94,7 @@ private:
     DMError RegisterDisplayListenerWithType(napi_env env, const std::string& type, napi_value value);
     DMError UnregisterAllDisplayListenerWithType(const std::string& type);
     DMError UnRegisterDisplayListenerWithType(napi_env env, const std::string& type, napi_value value);
+    bool IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);
 };
 enum class DisplayStateMode : uint32_t {
     STATE_UNKNOWN = 0,
