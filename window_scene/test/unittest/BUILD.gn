@@ -1676,6 +1676,28 @@ ohos_unittest("ws_session_manager_service_recover_proxy_test") {
   ]
 }
 
+<<<<<<< HEAD
+=======
+ohos_unittest("ws_mock_session_manager_service_test") {
+  module_out_path = module_out_path
+
+  include_dirs = [ "../mock" ]
+
+  sources = [ "mock_session_manager_service_test.cpp" ]
+
+  deps = [
+    ":ws_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+    "${window_base_path}/wmserver:sms",
+  ]
+
+  external_deps = [
+    "hilog:libhilog",
+    "safwk:system_ability_fwk",
+  ]
+}
+
+>>>>>>> a171952f23 (ng格式修改)
 ohos_unittest("ws_dfx_hisysevent_test") {
   module_out_path = module_out_path
 
