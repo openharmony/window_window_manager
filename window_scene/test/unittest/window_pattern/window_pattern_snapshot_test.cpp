@@ -13,25 +13,26 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
-#include <regex>
 #include <bundle_mgr_interface.h>
 #include <bundlemgr/launcher_service.h>
+#include <gtest/gtest.h>
+#include <regex>
+
+#include "application_info.h"
+#include "context.h"
 #include "interfaces/include/ws_common.h"
 #include "iremote_object_mocker.h"
 #include "screen_fold_data.h"
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
-#include "session_manager/include/scene_session_manager.h"
 #include "session_info.h"
 #include "session/host/include/scene_session.h"
 #include "session/host/include/main_session.h"
-#include "window_manager_agent.h"
 #include "session_manager.h"
-#include "zidl/window_manager_agent_interface.h"
+#include "session_manager/include/scene_session_manager.h"
 #include "mock/mock_session_stage.h"
 #include "mock/mock_window_event_channel.h"
-#include "application_info.h"
-#include "context.h"
+#include "window_manager_agent.h"
+#include "zidl/window_manager_agent_interface.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -78,8 +79,8 @@ void WindowPatternSnapshotTest::SetUp()
     info.moduleName_ = "testSession2";
     info.bundleName_ = "testSession3";
     session_ = sptr<Session>::MakeSptr(info);
+    ASSERT_NE(nullptr, session_);
     session_->surfaceNode_ = CreateRSSurfaceNode();
-    EXPECT_NE(nullptr, session_);
     ssm_->sceneSessionMap_.clear();
 }
 
@@ -215,10 +216,10 @@ HWTEST_F(WindowPatternSnapshotTest, GetLocalSnapshotPixelMap, TestSize.Level1)
         sptr<ScenePersistence>::MakeSptr(abilityInfo.bundleName_, persistentId);
     ASSERT_NE(nullptr, scenePersistence);
     auto result = scenePersistence->GetLocalSnapshotPixelMap(0.5, 0.5);
-    EXPECT_EQ(result, nullptr);
+    ASSERT_EQ(result, nullptr);
 
     bool result2 = scenePersistence->IsSnapshotExisted();
-    EXPECT_EQ(result2, false);
+    ASSERT_EQ(result2, false);
 
     // create pixelMap
     const uint32_t colors[1] = { 0x6f0000ff };
@@ -239,11 +240,11 @@ HWTEST_F(WindowPatternSnapshotTest, GetLocalSnapshotPixelMap, TestSize.Level1)
         result = scenePersistence->GetLocalSnapshotPixelMap(0.8, 0.2);
         result2 = scenePersistence->IsSnapshotExisted();
     }
-    EXPECT_NE(result, nullptr);
+    ASSERT_NE(result, nullptr);
     ASSERT_EQ(result2, true);
 
     result = scenePersistence->GetLocalSnapshotPixelMap(0.0, 0.2);
-    EXPECT_NE(result, nullptr);
+    ASSERT_NE(result, nullptr);
 }
 
 /**
@@ -392,7 +393,7 @@ HWTEST_F(WindowPatternSnapshotTest, GetSessionSnapshotPixelMap01, TestSize.Level
     int32_t persistentId = 65535;
     float scaleValue = 0.5f;
     auto pixelMap = ssm_->GetSessionSnapshotPixelMap(persistentId, scaleValue);
-    EXPECT_EQ(pixelMap, nullptr);
+    ASSERT_EQ(pixelMap, nullptr);
 }
 
 /**
@@ -413,7 +414,7 @@ HWTEST_F(WindowPatternSnapshotTest, GetSessionSnapshotPixelMap02, TestSize.Level
     int32_t persistentId = 1;
     float scaleParam = 0.5f;
     auto result = ssm_->GetSessionSnapshotPixelMap(persistentId, scaleParam);
-    EXPECT_EQ(result, nullptr);
+    ASSERT_EQ(result, nullptr);
 
     sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
     std::string bundleName = "testBundleName";
@@ -425,7 +426,7 @@ HWTEST_F(WindowPatternSnapshotTest, GetSessionSnapshotPixelMap02, TestSize.Level
     ASSERT_NE(sceneSession->surfaceNode_, nullptr);
     sceneSession->bufferAvailable_ = true;
     result = ssm_->GetSessionSnapshotPixelMap(persistentId, scaleParam);
-    EXPECT_EQ(result, nullptr);
+    ASSERT_EQ(result, nullptr);
 }
 
 /**
@@ -498,16 +499,16 @@ HWTEST_F(WindowPatternSnapshotTest, Snapshot02, TestSize.Level1)
     struct RSSurfaceNodeConfig config;
     session_->surfaceNode_ = RSSurfaceNode::Create(config);
     ASSERT_NE(session_->surfaceNode_, nullptr);
-    EXPECT_EQ(nullptr, session_->Snapshot(false, 0.0f));
+    ASSERT_EQ(nullptr, session_->Snapshot(false, 0.0f));
 
     session_->bufferAvailable_ = true;
-    EXPECT_EQ(nullptr, session_->Snapshot(false, 0.0f));
+    ASSERT_EQ(nullptr, session_->Snapshot(false, 0.0f));
 
     session_->surfaceNode_->bufferAvailable_ = true;
-    EXPECT_EQ(nullptr, session_->Snapshot(false, 0.0f));
+    ASSERT_EQ(nullptr, session_->Snapshot(false, 0.0f));
 
     session_->surfaceNode_ = nullptr;
-    EXPECT_EQ(nullptr, session_->Snapshot(false, 0.0f));
+    ASSERT_EQ(nullptr, session_->Snapshot(false, 0.0f));
 }
 
 /**
@@ -539,7 +540,7 @@ HWTEST_F(WindowPatternSnapshotTest, SaveSnapshot02, TestSize.Level1)
     session_->scenePersistence_ = nullptr;
     session_->snapshot_ = nullptr;
     session_->SaveSnapshot(true);
-    EXPECT_EQ(session_->snapshot_, nullptr);
+    ASSERT_EQ(session_->snapshot_, nullptr);
 
     session_->scenePersistence_ =
         sptr<ScenePersistence>::MakeSptr(session_->sessionInfo_.bundleName_, session_->persistentId_);
@@ -559,12 +560,12 @@ HWTEST_F(WindowPatternSnapshotTest, SaveSnapshot02, TestSize.Level1)
 HWTEST_F(WindowPatternSnapshotTest, GetSnapshotPixelMap, TestSize.Level1)
 {
     session_->scenePersistence_ = nullptr;
-    EXPECT_EQ(nullptr, session_->GetSnapshotPixelMap(6.6f, 8.8f));
+    ASSERT_EQ(nullptr, session_->GetSnapshotPixelMap(6.6f, 8.8f));
     session_->scenePersistence_ = sptr<ScenePersistence>::MakeSptr("GetSnapshotPixelMap", 2024);
-    EXPECT_NE(nullptr, session_->scenePersistence_);
+    ASSERT_NE(nullptr, session_->scenePersistence_);
     session_->scenePersistence_->isSavingSnapshot_.store(true);
     session_->snapshot_ = nullptr;
-    EXPECT_EQ(nullptr, session_->GetSnapshotPixelMap(6.6f, 8.8f));
+    ASSERT_EQ(nullptr, session_->GetSnapshotPixelMap(6.6f, 8.8f));
 }
 }
 }
