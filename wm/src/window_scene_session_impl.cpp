@@ -343,8 +343,9 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         hostSession_ = session;
     }
     TLOGI(WmsLogTag::WMS_LIFE, "name:%{public}s,id:%{public}d,parentId:%{public}d,type:%{public}u,"
-        "touchable:%{public}d", property_->GetWindowName().c_str(), property_->GetPersistentId(),
-        property_->GetParentPersistentId(), GetType(), property_->GetTouchable());
+        "touchable:%{public}d,displayId:%{public}" PRIu64, property_->GetWindowName().c_str(),
+        property_->GetPersistentId(), property_->GetParentPersistentId(), GetType(),
+        property_->GetTouchable(), property_->GetDisplayId());
     return WMError::WM_OK;
 }
 
