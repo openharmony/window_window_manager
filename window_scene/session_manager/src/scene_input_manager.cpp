@@ -315,7 +315,7 @@ void SceneInputManager::FlushFullInfoToMMI(const std::vector<MMI::DisplayInfo>& 
         auto displayGroupId = SceneSessionManager::GetInstance().GetDisplayGroupId(windowInfo.displayId);
         windowInfoMap[displayGroupId].emplace_back(windowInfo);
     }
-    std::vector<MMI::DisplayGrouupInfo> DisplayGrouupInfoArray;
+    std::vector<MMI::DisplayGroupInfo> DisplayGroupInfoArray;
     for (const auto& pair : displayInfoMap) {
         auto displayGroupId = pair.first;
         auto displayInfoList = pair.second;
@@ -330,7 +330,7 @@ void SceneInputManager::FlushFullInfoToMMI(const std::vector<MMI::DisplayInfo>& 
         }
         MMI::DisplayGroupInfo displayGroupInfo = {
             .groupId = displayGroupId,
-            .isMainGroup = displayGroupId == DEFAULT_DISPLAY_ID;
+            .isMainGroup = displayGroupId == DEFAULT_DISPLAY_ID,
             .width = mainScreenWidth,
             .height = mainScreenHeight,
             .focusWindowId = focusInfoMap[displayGroupId],
@@ -338,12 +338,12 @@ void SceneInputManager::FlushFullInfoToMMI(const std::vector<MMI::DisplayInfo>& 
             .windowsInfo = windowInfoMap[displayGroupId],
             .displaysInfo = displayInfoList
         };
-        DisplayGrouupInfoArray.push_back(displayGroupInfo);
+        DisplayGroupInfoArray.push_back(displayGroupInfo);
     }
 
-    MMI::InputManager::GetInstance()->UpdateDisplayInfo(DisplayGrouupInfoArray);
+    MMI::InputManager::GetInstance()->UpdateDisplayInfo(DisplayGroupInfoArray);
 
-    for (auto groupInfo : DisplayGrouupInfoArray) {
+    for (auto groupInfo : DisplayGroupInfoArray) {
         TLOGD(WmsLogTag::WMS_EVENT, "[EventDispatch] - displayGroupId: %{public}d", groupInfo.groupId);
         for (const auto& displayInfo : groupInfo.displaysInfo) {
             TLOGD(WmsLogTag::WMS_EVENT, "[EventDispatch] - %{public}s", DumpDisplayInfo(displayInfo).c_str());
