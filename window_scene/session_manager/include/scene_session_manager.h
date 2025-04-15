@@ -125,7 +125,7 @@ using TraverseFunc = std::function<bool(const sptr<SceneSession>& session)>;
 using CmpFunc = std::function<bool(std::pair<int32_t, sptr<SceneSession>>& lhs,
     std::pair<int32_t, sptr<SceneSession>>& rhs)>;
 using ProcessStartUIAbilityErrorFunc = std::function<void(int32_t startUIAbilityError)>;
-using NotifySCBAfterUpdateFocusFunc = std::function<void()>;
+using NotifySCBAfterUpdateFocusFunc = std::function<void(DisplayId displayId)>;
 using ProcessCallingSessionIdChangeFunc = std::function<void(uint32_t callingSessionId)>;
 using FlushWindowInfoTask = std::function<void()>;
 using ProcessVirtualPixelRatioChangeFunc = std::function<void(float density, const Rect& rect)>;
@@ -145,6 +145,7 @@ using NotifyRootSceneOccupiedAreaChangeFunc = std::function<void(const sptr<Occu
 using GetRSNodeByStringIDFunc = std::function<std::shared_ptr<Rosen::RSNode>(const std::string& id)>;
 using SetTopWindowBoundaryByIDFunc = std::function<void(const std::string& id)>;
 using SetForegroundWindowNumFunc = std::function<void(int32_t windowNum)>;
+using NotifySceneSessionDestructFunc = std::function<void(int32_t persistentId)>;
 
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
@@ -442,7 +443,7 @@ public:
     WMError SetSystemAnimatedScenes(SystemAnimatedSceneType sceneType, bool isRegularAnimation = false);
 
     std::shared_ptr<Media::PixelMap> GetSessionSnapshotPixelMap(const int32_t persistentId, const float scaleParam,
-        const SnapshotNodeType snapNode = SnapshotNodeType::DEFAULT_NODE);
+        const SnapshotNodeType snapshotNode = SnapshotNodeType::DEFAULT_NODE, bool needSnapshot = true);
     WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) override;
     const std::map<int32_t, sptr<SceneSession>> GetSceneSessionMap();
     void GetAllSceneSession(std::vector<sptr<SceneSession>>& sceneSessions);
@@ -660,10 +661,13 @@ public:
     WMError UnregisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener);
     bool IsMainWindowByPersistentId(int32_t persistentId);
     WMError MinimizeByWindowId(const std::vector<int32_t>& windowIds) override;
+    void RegisterSceneSessionDestructCallback(NotifySceneSessionDestructFunc&& func);
 
     /*
      * Window Pattern
      */
+    void SetDelayRemoveSnapshot(bool delayRemoveSnapshot);
+    bool GetDelayRemoveSnapshot() const;
     void InitSnapshotCache();
     void VisitSnapshotFromCache(int32_t persistentId);
     void PutSnapshotToCache(int32_t persistentId);
@@ -742,6 +746,7 @@ private:
      * Window Lifecycle
      */
     bool isUserAuthPassed_ {false};
+    NotifySceneSessionDestructFunc onSceneSessionDestruct_;
     sptr<SceneSession> GetSceneSessionBySessionInfo(const SessionInfo& sessionInfo);
     void CreateRootSceneSession();
     void InitSceneSession(sptr<SceneSession>& sceneSession, const SessionInfo& sessionInfo,
@@ -750,6 +755,10 @@ private:
     void NotifySessionForeground(const sptr<SceneSession>& session, uint32_t reason, bool withAnimation);
     void NotifySessionBackground(const sptr<SceneSession>& session, uint32_t reason, bool withAnimation,
         bool isFromInnerkits);
+    std::vector<AppExecFwk::SupportWindowMode> ExtractSupportWindowModeFromMetaData(
+        const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo);
+    std::vector<AppExecFwk::SupportWindowMode> ParseWindowModeFromMetaData(
+        const std::string& supportModesInFreeMultiWindow);
     WSError ClearSession(sptr<SceneSession> sceneSession);
     bool IsSessionClearable(sptr<SceneSession> sceneSession);
     void GetAllClearableSessions(std::vector<sptr<SceneSession>>& sessionVector);
@@ -761,6 +770,7 @@ private:
     sptr<SceneSession> GetMainSessionByModuleName(const SessionInfo& sessionInfo);
     void SetSceneSessionIsAbilityHook(sptr<SceneSession> sceneSession);
     void RegisterHookSceneSessionActivationFunc(const sptr<SceneSession>& sceneSession);
+    void RegisterSceneSessionDestructNotifyManagerFunc(const sptr<SceneSession>& sceneSession);
 
     /*
      * Window Focus
@@ -1391,6 +1401,7 @@ private:
     /*
      * Window Pattern
      */
+    std::atomic<bool> delayRemoveSnapshot_ = false;
     void InitStartingWindowRdb(const std::string& rdbPath);
     bool GetStartingWindowInfoFromCache(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo);
     bool GetStartingWindowInfoFromRdb(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo);

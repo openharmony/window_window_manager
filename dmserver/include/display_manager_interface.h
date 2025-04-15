@@ -304,6 +304,11 @@ public:
     {
         return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
     }
+
+    virtual uint32_t GetDeviceStatus()
+    {
+        return 0;
+    }
 };
 } // namespace OHOS::Rosen
 

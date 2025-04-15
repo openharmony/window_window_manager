@@ -1297,7 +1297,7 @@ public:
     virtual bool IsKeepScreenOn() const { return false; }
 
     /**
-     * @brief Set the view screen always on
+     * @brief Set the view screen always on or not.
      *
      * @param keepScreenOn
      * @return WMError
@@ -2019,9 +2019,16 @@ public:
     /**
      * @brief Notify caller window orientation set by developer
      *
-     * @param ori Orientation set by developer
+     * @param orientation Orientation set by developer
      */
     virtual void NotifyPreferredOrientationChange(Orientation orientation) {}
+
+    /**
+     * @brief Set developer requested orientation.
+     *
+     * @param orientation Orientation set by developer
+     */
+    virtual void SetPreferredRequestedOrientation(Orientation orientation) {}
 
     /**
      * @brief Register SystemBarProperty listener.

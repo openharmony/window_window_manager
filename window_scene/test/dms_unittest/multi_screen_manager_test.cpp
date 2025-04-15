@@ -59,6 +59,14 @@ public:
     void OnSecondaryReflexionChanged(ScreenId screenId, bool isSecondaryReflexion) override {};
     void OnExtendScreenConnectStatusChanged(ScreenId screenId,
         ExtendScreenConnectStatus extendScreenConnectStatus) override {}
+    bool OnExtendDisplayNodeChange(ScreenId mainScreenId, ScreenId extendScreenId) override { return true; };
+    bool OnCreateScreenSessionOnly(ScreenId screenId, ScreenId rsId,
+        const std::string& name, bool isExtend) override { return true; };
+    bool OnMainDisplayNodeChange(ScreenId mainScreenId, ScreenId extendScreenId,
+        ScreenId extendRSId) override { return true; };
+    void SetScreenCombination(ScreenId mainScreenId, ScreenId extendScreenId,
+        ScreenCombination extendCombination) override {};
+    std::string OnDumperClientScreenSessions() override { return ""; };
     sptr<IRemoteObject> AsObject() override {return testPtr;};
     sptr<IRemoteObject> testPtr;
 };

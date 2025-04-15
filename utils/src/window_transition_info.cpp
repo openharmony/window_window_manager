@@ -264,6 +264,7 @@ WindowTransitionInfo* WindowTransitionInfo::Unmarshalling(Parcel& parcel)
     if (parcel.ReadBool()) {
         auto readObject = parcel.ReadObject<IRemoteObject>();
         if (readObject == nullptr) {
+            delete windowTransitionInfo;
             return nullptr;
         }
         windowTransitionInfo->abilityToken_ = readObject;

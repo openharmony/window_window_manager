@@ -934,54 +934,35 @@ HWTEST_F(PictureInPictureControllerTest, SetXComponentController, TestSize.Level
 }
 
 /**
- * @tc.name: RegisterPipContentListenerWithType
- * @tc.desc: RegisterPipContentListenerWithType
+ * @tc.name: RegisterPiPTypeNodeChange
+ * @tc.desc: RegisterPiPTypeNodeChange
  * @tc.type: FUNC
  */
-HWTEST_F(PictureInPictureControllerTest, RegisterPipContentListenerWithType, TestSize.Level1)
+HWTEST_F(PictureInPictureControllerTest, RegisterPiPTypeNodeChange, Function | SmallTest | Level2)
 {
     sptr<MockWindow> mw = new MockWindow();
     sptr<PipOption> option = new PipOption();
     sptr<PictureInPictureController> pipControl = new PictureInPictureController(option, mw, 100, nullptr);
-    pipControl->pipOption_ = nullptr;
-    ASSERT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY,
-        pipControl->RegisterPipContentListenerWithType("nodeUpdate", nullptr));
-    pipControl->pipOption_ = option;
-    ASSERT_EQ(WMError::WM_OK, pipControl->RegisterPipContentListenerWithType("nodeUpdate", nullptr));
+    auto listener = sptr<IPiPTypeNodeObserver>::MakeSptr();
+    ASSERT_NE(nullptr, listener);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, pipControl->RegisterPiPTypeNodeChange(nullptr));
+    ASSERT_EQ(WMError::WM_OK, pipControl->RegisterPiPTypeNodeChange(listener));
 }
 
 /**
- * @tc.name: UnRegisterPipContentListenerWithType
- * @tc.desc: UnRegisterPipContentListenerWithType
+ * @tc.name: UnRegisterPiPTypeNodeChange
+ * @tc.desc: UnRegisterPiPTypeNodeChange
  * @tc.type: FUNC
  */
-HWTEST_F(PictureInPictureControllerTest, UnRegisterPipContentListenerWithType, TestSize.Level1)
+HWTEST_F(PictureInPictureControllerTest, UnRegisterPiPTypeNodeChange, Function | SmallTest | Level2)
 {
     sptr<MockWindow> mw = new MockWindow();
     sptr<PipOption> option = new PipOption();
     sptr<PictureInPictureController> pipControl = new PictureInPictureController(option, mw, 100, nullptr);
-    pipControl->pipOption_ = nullptr;
-    ASSERT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, pipControl->UnRegisterPipContentListenerWithType("nodeUpdate"));
-    pipControl->pipOption_ = option;
-    ASSERT_EQ(WMError::WM_OK, pipControl->UnRegisterPipContentListenerWithType("nodeUpdate"));
-}
-
-/**
- * @tc.name: GetPipContentCallbackRef
- * @tc.desc: GetPipContentCallbackRef
- * @tc.type: FUNC
- */
-HWTEST_F(PictureInPictureControllerTest, GetPipContentCallbackRef, TestSize.Level1)
-{
-    sptr<MockWindow> mw = new MockWindow();
-    sptr<PipOption> option = new PipOption();
-    sptr<PictureInPictureController> pipControl = new PictureInPictureController(option, mw, 100, nullptr);
-    pipControl->pipOption_ = nullptr;
-    pipControl->RegisterPipContentListenerWithType("nodeUpdate", nullptr);
-    ASSERT_EQ(nullptr, pipControl->GetPipContentCallbackRef("nodeUpdate"));
-    pipControl->pipOption_ = option;
-    pipControl->RegisterPipContentListenerWithType("nodeUpdate", nullptr);
-    ASSERT_EQ(nullptr, pipControl->GetPipContentCallbackRef("nodeUpdate"));
+    auto listener = sptr<IPiPTypeNodeObserver>::MakeSptr();
+    ASSERT_NE(nullptr, listener);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, pipControl->UnRegisterPiPTypeNodeChange(nullptr));
+    ASSERT_EQ(WMError::WM_OK, pipControl->UnRegisterPiPTypeNodeChange(listener));
 }
 
 /**

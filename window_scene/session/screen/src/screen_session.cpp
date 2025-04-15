@@ -1019,6 +1019,22 @@ void ScreenSession::UpdatePropertyAfterRotation(RRect bounds, int rotation,
     ReportNotifyModeChange(displayOrientation);
 }
 
+void ScreenSession::UpdateDisplayNodeRotation(int rotation)
+{
+    Rotation targetRotation = ConvertIntToRotation(rotation);
+    auto transactionProxy = RSTransactionProxy::GetInstance();
+    if (transactionProxy != nullptr) {
+        transactionProxy->Begin();
+        {
+            std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
+            if (displayNode_ != nullptr) {
+                displayNode_->SetScreenRotation(static_cast<uint32_t>(targetRotation));
+            }
+        }
+        transactionProxy->Commit();
+    }
+}
+
 void ScreenSession::UpdatePropertyOnly(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode, bool isChanged)
 {
     OptimizeSecondaryDisplayMode(bounds, foldDisplayMode);
@@ -1207,6 +1223,11 @@ void ScreenSession::DestroyScreenScene()
 void ScreenSession::SetDensityInCurResolution(float densityInCurResolution)
 {
     property_.SetDensityInCurResolution(densityInCurResolution);
+}
+
+float ScreenSession::GetDensityInCurResolution()
+{
+    return property_.GetDensityInCurResolution();
 }
 
 void ScreenSession::SetDefaultDensity(float defaultDensity)
@@ -1436,7 +1457,7 @@ void ScreenSession::FillScreenInfo(sptr<ScreenInfo> info) const
             width = screenSessionModes->width_;
         }
     }
-    
+
     float virtualPixelRatio = property_.GetVirtualPixelRatio();
     // "< 1e-set6" means virtualPixelRatio is 0.
     if (fabsf(virtualPixelRatio) < 1e-6) {
@@ -2188,16 +2209,6 @@ int32_t ScreenSession::GetApiVersion()
     return apiVersion;
 }
 
-void ScreenSession::SetShareProtect(bool needShareProtect)
-{
-    needShareProtect_ = needShareProtect;
-}
-
-bool ScreenSession::GetShareProtect()
-{
-    return needShareProtect_;
-}
-
 float ScreenSession::GetSensorRotation() const
 {
     return currentSensorRotation_;
@@ -2214,4 +2225,91 @@ bool ScreenSession::GetIsEnableRegionRotation()
     std::lock_guard<std::mutex> lock(isEnableRegionRotationMutex_);
     return isEnableRegionRotation_;
 }
+
+DisplayId ScreenSession::GetDisplayId()
+{
+    return screenId_;
+}
+
+void ScreenSession::SetScreenId(ScreenId screenId)
+{
+    screenId_ = screenId;
+}
+
+void ScreenSession::SetDisplayNode(std::shared_ptr<RSDisplayNode> displayNode)
+{
+    std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
+    displayNode_ = displayNode;
+}
+
+void ScreenSession::SetScreenAvailableStatus(bool isScreenAvailable)
+{
+    isScreenAvailable_ = isScreenAvailable;
+}
+
+bool ScreenSession::IsScreenAvailable() const
+{
+    return isScreenAvailable_;
+}
+
+void ScreenSession::SetRSScreenId(ScreenId rsId)
+{
+    rsId_ = rsId;
+}
+
+void ScreenSession::SetScreenProperty(ScreenProperty property)
+{
+    property_ = property;
+}
+
+std::vector<sptr<SupportedScreenModes>> ScreenSession::GetScreenModes()
+{
+    return modes_;
+}
+
+void ScreenSession::SetScreenModes(std::vector<sptr<SupportedScreenModes>> modes)
+{
+    modes_ = modes;
+}
+
+int32_t ScreenSession::GetActiveId()
+{
+    return activeIdx_;
+}
+
+void ScreenSession::SetActiveId(int32_t activeIdx)
+{
+    activeIdx_ = activeIdx;
+}
+
+void ScreenSession::SetScreenOffScreenRendering()
+{
+    TLOGW(WmsLogTag::DMS, "screen off rendering come in.");
+    if (GetIsInternal()) {
+        TLOGW(WmsLogTag::DMS, "screen is internal");
+        return;
+    }
+    if (!GetScreenProperty().GetCurrentOffScreenRendering()) {
+        TLOGI(WmsLogTag::DMS, "rsId: %{public}" PRIu64" not support offScreen rendering", rsId_);
+        return;
+    }
+    uint32_t offWidth = GetScreenProperty().GetBounds().rect_.GetWidth();
+    uint32_t offHeight = GetScreenProperty().GetBounds().rect_.GetHeight();
+    if (GetScreenCombination() == ScreenCombination::SCREEN_MIRROR) {
+        TLOGD(WmsLogTag::DMS, "screen mirror change.");
+        offWidth = GetScreenProperty().GetScreenRealWidth();
+        offHeight = GetScreenProperty().GetScreenRealHeight();
+    }
+    int32_t res = RSInterfaces::GetInstance().SetPhysicalScreenResolution(rsId_, offWidth, offHeight);
+    if (GetScreenCombination() == ScreenCombination::SCREEN_MIRROR) {
+        SetFrameGravity(Rosen::Gravity::TOP_LEFT);
+    } else {
+        SetFrameGravity(Rosen::Gravity::RESIZE);
+        PropertyChange(GetScreenProperty(), ScreenPropertyChangeReason::UNDEFINED);
+    }
+    std::string offScreenResult = (res == StatusCode::SUCCESS) ? "success" : "failed";
+    TLOGW(WmsLogTag::DMS, "rsId=%{public}" PRIu64" offScreen width=%{public}u height=%{public}u %{public}s",
+        rsId_, offWidth, offHeight, offScreenResult.c_str());
+}
+
 } // namespace OHOS::Rosen
