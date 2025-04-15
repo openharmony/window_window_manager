@@ -5523,6 +5523,16 @@ int32_t SceneSessionManager::GetFocusedSessionId(DisplayId displayId) const
     return windowFocusController_->GetFocusedSessionId(displayId);
 }
 
+DisplayId SceneSessionManager::GetDisplayGroupId(DisplayId displayId) const
+{
+    return windowFocusController_->GetDisplayGroupId(displayId);
+}
+
+std::vector<std::pair<DisplayId, int32_t>> SceneSessionManager::GetAllFocusedSessionList() const
+{
+    return windowFocusController_->GetAllFocusedSessionList();
+}
+
 void SceneSessionManager::GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId)
 {
     if (!SessionPermission::IsSACalling()) {
