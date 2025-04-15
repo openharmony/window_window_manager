@@ -32,6 +32,7 @@
 #include "scb_session_handler.h"
 #include "session/host/include/root_scene_session.h"
 #include "session/host/include/keyboard_session.h"
+#include "session_manager/include/ffrt_queue_helper.h"
 #include "session_manager/include/window_manager_lru.h"
 #include "session_manager/include/zidl/scene_session_manager_stub.h"
 #include "wm_single_instance.h"
@@ -587,6 +588,8 @@ private:
      */
     bool isUserAuthPassed_ {false};
     sptr<SceneSession> GetSceneSessionBySessionInfo(const SessionInfo& sessionInfo);
+    int32_t StartUIAbilityBySCBTimeoutCheck(const sptr<AAFwk::SessionInfo>& abilitySessionInfo,
+        const uint32_t& windowStateChangeReason, bool& isColdStart);
 
     /*
      * Window Focus
@@ -1041,6 +1044,7 @@ private:
      */
     NotifyAppUseControlListFunc notifyAppUseControlListFunc_;
     std::unordered_set<std::string> sessionLockedStateCacheSet_;
+    std::shared_ptr<FfrtQueueHelper> ffrtQueueHelper_ = nullptr;
 
     /*
      * Window Pattern
