@@ -2239,7 +2239,7 @@ void SceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
 }
 
 void SceneSession::GetKeyboardOccupiedAreaWithRotation(
-    int32_t persistentId, uint32_t rotation, std::vector<std::pair<bool, WSRect>>& avoidAreas)
+    int32_t persistentId, Rotation rotation, std::vector<std::pair<bool, WSRect>>& avoidAreas)
 {
     TLOGI(WmsLogTag::WMS_KEYBOARD, "In");
     if (!specificCallback_ || !specificCallback_->onKeyboardRotationChange_) {
@@ -2602,7 +2602,7 @@ WSError SceneSession::GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoid
     }, __func__);
 }
 
-WSError SceneSession::GetAvoidAreasByRotation(int32_t rotation, const WSRect& rect,
+WSError SceneSession::GetAvoidAreasByRotation(Rotation rotation, const WSRect& rect,
     const std::map<WindowType, SystemBarProperty>& properties, std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
     if (WindowHelper::IsMainFullScreenWindow(GetWindowType(), GetWindowMode())) {
@@ -2626,7 +2626,7 @@ WSError SceneSession::GetAvoidAreasByRotation(int32_t rotation, const WSRect& re
     }, __func__);
 }
 
-AvoidArea SceneSession::GetAvoidAreaByRotation(int32_t rotation, const WSRect& rect,
+AvoidArea SceneSession::GetAvoidAreaByRotation(Rotation rotation, const WSRect& rect,
     const std::map<WindowType, SystemBarProperty>& properties, AvoidAreaType type)
 {
     AvoidArea avoidArea;
@@ -2652,7 +2652,7 @@ AvoidArea SceneSession::GetAvoidAreaByRotation(int32_t rotation, const WSRect& r
     return avoidArea;
 }
 
-void SceneSession::GetSystemBarAvoidAreaByRotation(int32_t rotation, AvoidAreaType type, const WSRect& rect,
+void SceneSession::GetSystemBarAvoidAreaByRotation(Rotation rotation, AvoidAreaType type, const WSRect& rect,
     const std::map<WindowType, SystemBarProperty>& properties, AvoidArea& avoidArea)
 {
     DisplayId displayId = GetSessionProperty()->GetDisplayId();
@@ -2665,23 +2665,28 @@ void SceneSession::GetSystemBarAvoidAreaByRotation(int32_t rotation, AvoidAreaTy
     }
     WindowType winType = (type == AvoidAreaType::TYPE_SYSTEM) ? WindowType::WINDOW_TYPE_STATUS_BAR :
                                                                 WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR;
-    bool needCalcu = (winType == WindowType::WINDOW_TYPE_STATUS_BAR) && (rotation == 90 || rotation == 270) &&
+    if (auto iter = properties.find(winType); iter == properties.end()) {
+        TLOGE(WmsLogTag::WMS_IMMS, "win [%{public}d] properties is empty, type %{public}d", GetPersistentId(), type);
+        return;
+    }
+    bool needCalcu = winType == WindowType::WINDOW_TYPE_STATUS_BAR &&
+        (rotation == Rotation::ROTATION_90 || rotation == Rotation::ROTATION_270) &&
         static_cast<bool>(static_cast<int32_t>(properties.at(winType).settingFlag_) &
         static_cast<int32_t>(SystemBarSettingFlag::ENABLE_SETTING));
-    if (properties.count(winType) == 0 || !properties.at(winType).enable_ || !needCalcu) {
+    if (!properties.at(winType).enable_ || !needCalcu) {
         TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}d] avoid area is empty, type %{public}d", GetPersistentId(), type);
         return;
     }
-    WSRect avoidRect = (rotation == 0 || rotation == 180) ? nextSystemBarAvoidAreaRectInfo.first :
-                                                            nextSystemBarAvoidAreaRectInfo.second;
+    WSRect avoidRect = (rotation == Rotation::ROTATION_0 || rotation == Rotation::ROTATION_180) ?
+        nextSystemBarAvoidAreaRectInfo.first : nextSystemBarAvoidAreaRectInfo.second;
     TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d tyep %{public}d rect %{public}s bar %{public}s",
         GetPersistentId(), type, rect.ToString().c_str(), avoidRect.ToString().c_str());
     CalculateAvoidAreaRect(rect, avoidRect, avoidArea);
 }
 
-void SceneSession::GetCutoutAvoidAreaByRotation(int32_t rotation, const WSRect& rect, AvoidArea& avoidArea)
+void SceneSession::GetCutoutAvoidAreaByRotation(Rotation rotation, const WSRect& rect, AvoidArea& avoidArea)
 {
-    auto cutoutInfo = DisplayManager::GetInstance().GetCutoutInfoWithRotation(static_cast<Rotation>(rotation / 90));
+    auto cutoutInfo = DisplayManager::GetInstance().GetCutoutInfoWithRotation(rotation);
     if (cutoutInfo == nullptr) {
         TLOGI(WmsLogTag::WMS_IMMS, "There is no cutout info");
         return;
@@ -2704,7 +2709,7 @@ void SceneSession::GetCutoutAvoidAreaByRotation(int32_t rotation, const WSRect& 
     }
 }
 
-void SceneSession::GetKeyboardAvoidAreaByRotation(int32_t rotation, const WSRect& rect, AvoidArea& avoidArea)
+void SceneSession::GetKeyboardAvoidAreaByRotation(Rotation rotation, const WSRect& rect, AvoidArea& avoidArea)
 {
     std::vector<std::pair<bool, WSRect>> avoidInfoVector;
     GetKeyboardOccupiedAreaWithRotation(GetPersistentId(), rotation, avoidInfoVector);
@@ -7587,7 +7592,7 @@ WSError SceneSession::NotifyRotationProperty(int32_t rotation, uint32_t width, u
             WSRect wsrect = { 0, 0, width, height };
             auto properties = session->GetSystemBarPropertyForRotation();
             std::map<AvoidAreaType, AvoidArea> avoidAreas;
-            session->GetAvoidAreasByRotation(rotation, wsrect, properties, avoidAreas);
+            session->GetAvoidAreasByRotation(static_cast<Rotation>(rotation / 90), wsrect, properties, avoidAreas);
             if (!session->sessionStage_) {
                 return WSError::WS_ERROR_NULLPTR;
             }
