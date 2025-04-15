@@ -81,6 +81,7 @@ ohos_shared_library("window_native_kit") {
     "../../../../utils:libwmutil_base",
     "../../../../wm:libwm",
     "../common:wm_napi_util",
+    "../../../../window_scene/interfaces/innerkits:libwsutils",
   ]
 
   external_deps = [
