@@ -1397,6 +1397,9 @@ void SceneSessionManager::CreateRootSceneSession()
     rootSceneSession_->isKeyboardPanelEnabled_ = isKeyboardPanelEnabled_;
     rootSceneSession_->SetEventHandler(taskScheduler_->GetEventHandler());
     AAFwk::AbilityManagerClient::GetInstance()->SetRootSceneSession(rootSceneSession_->AsObject());
+    rootSceneSession_->RegisterGetStatusBarAvoidHeightFunc([this](WSRect& barArea) {
+        return this->GetStatusBarAvoidHeight(barArea);
+    });
 }
 
 sptr<RootSceneSession> SceneSessionManager::GetRootSceneSession()
