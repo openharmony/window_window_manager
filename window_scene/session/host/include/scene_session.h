@@ -385,7 +385,7 @@ public:
     WSError SetIsStatusBarVisibleInner(bool isVisible);
     WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
     void UpdateRotationAvoidArea();
-    bool CheckGetAvoidAreaAvailable(AvoidAreaType type, int32_t apiVersion = API_VERSION_INVALID) override;
+    bool CheckGetAvoidAreaAvailable(AvoidAreaType type) override;
     bool GetIsDisplayStatusBarTemporarily() const;
     void SetIsDisplayStatusBarTemporarily(bool isTemporary);
     void SetIsLastFrameLayoutFinishedFunc(IsLastFrameLayoutFinishedFunc&& func);
@@ -852,8 +852,7 @@ private:
     void GetCutoutAvoidArea(WSRect& rect, AvoidArea& avoidArea);
     void GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea);
     void GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea) const;
-    AvoidArea GetAvoidAreaByTypeInner(AvoidAreaType type, const WSRect& rect = WSRect::EMPTY_RECT,
-        int32_t apiVersion = API_VERSION_INVALID);
+    AvoidArea GetAvoidAreaByTypeInner(AvoidAreaType type, const WSRect& rect = WSRect::EMPTY_RECT);
 
     /*
      * Window Lifecycle
