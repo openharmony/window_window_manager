@@ -838,7 +838,7 @@ void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& pr
     WindowSizeChangeReason wmReason, const SceneAnimationConfig& config,
     const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
-    handler_->PostImmediateTask([weak = wptr(this), wmReason, wmRect, preRect, config, avoidAreas]() mutable {
+    handler_->PostTask([weak = wptr(this), wmReason, wmRect, preRect, config, avoidAreas]() mutable {
         HITRACE_METER_NAME(HITRACE_TAG_WINDOW_MANAGER, "WindowSessionImpl::UpdateRectForRotation");
         auto window = weak.promote();
         if (!window) {
@@ -938,10 +938,10 @@ void WindowSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, const Rect&
     if (wmReason == WindowSizeChangeReason::DRAG) {
         bool isDragTaskPostDone = true;
         if (isDragTaskPostDone_.compare_exchange_strong(isDragTaskPostDone, false)) {
-            handler_->PostImmediateTask(task, "WMS_WindowSessionImpl_UpdateRectForOtherReason");
+            handler_->PostTask(task, "WMS_WindowSessionImpl_UpdateRectForOtherReason");
         }
     } else {
-        handler_->PostImmediateTask(task, "WMS_WindowSessionImpl_UpdateRectForOtherReason");
+        handler_->PostTask(task, "WMS_WindowSessionImpl_UpdateRectForOtherReason");
     }
 }
 
@@ -3978,7 +3978,7 @@ WSError WindowSessionImpl::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, Avo
             window->UpdateViewportConfig(window->GetRect(), WindowSizeChangeReason::AVOID_AREA_CHANGE);
         }
     };
-    handler_->PostImmediateTask(std::move(task), __func__);
+    handler_->PostTask(std::move(task), __func__);
     return WSError::WS_OK;
 }
 
