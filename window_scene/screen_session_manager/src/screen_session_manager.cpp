@@ -8443,6 +8443,10 @@ void ScreenSessionManager::MultiScreenModeChange(const std::string& firstScreenI
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
         return;
     }
+    if (!ScreenSettingHelper::IsNumber(firstScreenIdStr) || !ScreenSettingHelper::IsNumber(secondaryScreenIdStr)) {
+        TLOGE(WmsLogTag::DMS, "param denied!");
+        return;
+    }
     ScreenId firstScreenId = static_cast<ScreenId>(std::stoi(firstScreenIdStr));
     ScreenId secondaryScreenId = static_cast<ScreenId>(std::stoi(secondaryScreenIdStr));
     if (secondaryChandeMode == "mirror" || secondaryChandeMode == "extend") {
