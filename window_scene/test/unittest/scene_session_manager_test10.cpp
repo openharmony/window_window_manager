@@ -1409,12 +1409,12 @@ HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_statusBar, TestSize.
     properties[WindowType::WINDOW_TYPE_STATUS_BAR] = SystemBarProperty();
     properties[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR] = SystemBarProperty();
     std::map<AvoidAreaType, AvoidArea> avoidAreas;
-    sceneSession->GetAvoidAreasByRotation(0, { 0, 0, 1260, 2720 }, properties, avoidAreas);
+    sceneSession->GetAvoidAreasByRotation(Rotation::ROTATION_0, { 0, 0, 1260, 2720 }, properties, avoidAreas);
     Rect rect = { 0, 0, 1260, 123 };
     ASSERT_EQ(avoidAreas[AvoidAreaType::TYPE_SYSTEM].topRect_, rect);
     properties[WindowType::WINDOW_TYPE_STATUS_BAR].enable_ = false;
     rect = { 0, 0, 0, 0 };
-    sceneSession->GetAvoidAreasByRotation(0, { 0, 0, 1260, 123 }, properties, avoidAreas);
+    sceneSession->GetAvoidAreasByRotation(Rotation::ROTATION_0, { 0, 0, 1260, 123 }, properties, avoidAreas);
     ASSERT_EQ(avoidAreas[AvoidAreaType::TYPE_SYSTEM].topRect_, rect);
     ssm_->sceneSessionMap_.clear();
 }
@@ -1448,12 +1448,12 @@ HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_statusBar_01, TestSi
     properties[WindowType::WINDOW_TYPE_STATUS_BAR] = SystemBarProperty();
     properties[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR] = SystemBarProperty();
     std::map<AvoidAreaType, AvoidArea> avoidAreas;
-    sceneSession->GetAvoidAreasByRotation(90, { 0, 0, 2720, 1260 }, properties, avoidAreas);
+    sceneSession->GetAvoidAreasByRotation(Rotation::ROTATION_90, { 0, 0, 2720, 1260 }, properties, avoidAreas);
     Rect rect = { 0, 0, 2720, 123 };
     ASSERT_EQ(avoidAreas[AvoidAreaType::TYPE_SYSTEM].topRect_, rect);
     properties[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR].enable_ = false;
     rect = { 0, 0, 0, 0 };
-    sceneSession->GetAvoidAreasByRotation(90, { 0, 0, 2720, 1260 }, properties, avoidAreas);
+    sceneSession->GetAvoidAreasByRotation(Rotation::ROTATION_90, { 0, 0, 2720, 1260 }, properties, avoidAreas);
     ASSERT_EQ(avoidAreas[AvoidAreaType::TYPE_NAVIGATION_INDICATOR].bottomRect_, rect);
     ssm_->sceneSessionMap_.clear();
 }
@@ -1478,7 +1478,7 @@ HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_keyboard, TestSize.L
     sceneSession->property_->SetPersistentId(1);
     ssm_->sceneSessionMap_.insert({ 1, sceneSession });
     AvoidArea avoidArea;
-    sceneSession->GetKeyboardAvoidAreaByRotation(0, { 0, 0, 1260, 2720 }, avoidArea);
+    sceneSession->GetKeyboardAvoidAreaByRotation(Rotation::ROTATION_0, { 0, 0, 1260, 2720 }, avoidArea);
     Rect rect = { 0, 0, 0, 0 };
     ASSERT_EQ(avoidArea.bottomRect_, rect);
     ssm_->sceneSessionMap_.clear();
@@ -1517,16 +1517,16 @@ HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_keyboard_01, TestSiz
     auto uiType = ssm_->systemConfig_.windowUIType_;
     ssm_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     AvoidArea avoidArea;
-    sceneSession->GetKeyboardAvoidAreaByRotation(0, { 0, 0, 1260, 2720 }, avoidArea);
+    sceneSession->GetKeyboardAvoidAreaByRotation(Rotation::ROTATION_0, { 0, 0, 1260, 2720 }, avoidArea);
     Rect rect = { 0, 1700, 1260, 1020 };
     ASSERT_EQ(avoidArea.bottomRect_, rect);
-    sceneSession->GetKeyboardAvoidAreaByRotation(90, { 0, 0, 2720, 1260 }, avoidArea);
+    sceneSession->GetKeyboardAvoidAreaByRotation(Rotation::ROTATION_90, { 0, 0, 2720, 1260 }, avoidArea);
     rect = { 0, 538, 2720, 722 };
     ASSERT_EQ(avoidArea.bottomRect_, rect);
     keyboardSession->state_ = SessionState::STATE_BACKGROUND;
     rect = { 0, 0, 0, 0 };
     avoidArea.bottomRect_ = rect;
-    sceneSession->GetKeyboardAvoidAreaByRotation(180, { 0, 0, 1260, 2720 }, avoidArea);
+    sceneSession->GetKeyboardAvoidAreaByRotation(Rotation::ROTATION_180, { 0, 0, 1260, 2720 }, avoidArea);
     ASSERT_EQ(avoidArea.bottomRect_, rect);
     ssm_->systemConfig_.windowUIType_ = uiType;
     ssm_->sceneSessionMap_.clear();
@@ -1550,21 +1550,21 @@ HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_cutOut, TestSize.Lev
     Rect rect = { 0, 0, 0, 0 };
     bool haveCutout = GetCutoutInfoByRotation(Rotation::ROTATION_0, rect);
     if (haveCutout) {
-        sceneSession->GetCutoutAvoidAreaByRotation(0, { 0, 0, 1260, 2720 }, avoidArea);
+        sceneSession->GetCutoutAvoidAreaByRotation(Rotation::ROTATION_0, { 0, 0, 1260, 2720 }, avoidArea);
         ASSERT_EQ(avoidArea.topRect_, rect);
     } else {
         EXPECT_TRUE(avoidArea.isEmptyAvoidArea());
     }
     haveCutout = GetCutoutInfoByRotation(Rotation::ROTATION_90, rect);
     if (haveCutout) {
-        sceneSession->GetCutoutAvoidAreaByRotation(90, { 0, 0, 2720, 1260 }, avoidArea);
+        sceneSession->GetCutoutAvoidAreaByRotation(Rotation::ROTATION_90, { 0, 0, 2720, 1260 }, avoidArea);
         ASSERT_EQ(avoidArea.rightRect_, rect);
     } else {
         EXPECT_TRUE(avoidArea.isEmptyAvoidArea());
     }
     haveCutout = GetCutoutInfoByRotation(Rotation::ROTATION_270, rect);
     if (haveCutout) {
-        sceneSession->GetCutoutAvoidAreaByRotation(270, { 0, 0, 2720, 1260 }, avoidArea);
+        sceneSession->GetCutoutAvoidAreaByRotation(Rotation::ROTATION_270, { 0, 0, 2720, 1260 }, avoidArea);
         ASSERT_EQ(avoidArea.leftRect_, rect);
     } else {
         EXPECT_TRUE(avoidArea.isEmptyAvoidArea());
@@ -1600,21 +1600,21 @@ HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_AIBar, TestSize.Leve
     properties[WindowType::WINDOW_TYPE_STATUS_BAR] = SystemBarProperty();
     properties[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR] = SystemBarProperty();
     std::map<AvoidAreaType, AvoidArea> avoidAreas;
-    sceneSession->GetAvoidAreasByRotation(0, { 0, 0, 1260, 2720 }, properties, avoidAreas);
+    sceneSession->GetAvoidAreasByRotation(Rotation::ROTATION_0, { 0, 0, 1260, 2720 }, properties, avoidAreas);
     Rect rect = { 409, 2629, 442, 91 };
     ASSERT_EQ(avoidAreas[AvoidAreaType::TYPE_NAVIGATION_INDICATOR].bottomRect_, rect);
-    sceneSession->GetAvoidAreasByRotation(90, { 0, 0, 2720, 1260 }, properties, avoidAreas);
+    sceneSession->GetAvoidAreasByRotation(Rotation::ROTATION_90, { 0, 0, 2720, 1260 }, properties, avoidAreas);
     rect = { 884, 1169, 952, 91 };
     ASSERT_EQ(avoidAreas[AvoidAreaType::TYPE_NAVIGATION_INDICATOR].bottomRect_, rect);
-    sceneSession->GetAvoidAreasByRotation(180, { 0, 0, 1260, 2720 }, properties, avoidAreas);
+    sceneSession->GetAvoidAreasByRotation(Rotation::ROTATION_180, { 0, 0, 1260, 2720 }, properties, avoidAreas);
     rect = { 409, 2629, 442, 91 };
     ASSERT_EQ(avoidAreas[AvoidAreaType::TYPE_NAVIGATION_INDICATOR].bottomRect_, rect);
-    sceneSession->GetAvoidAreasByRotation(270, { 0, 0, 2720, 1260 }, properties, avoidAreas);
+    sceneSession->GetAvoidAreasByRotation(Rotation::ROTATION_270, { 0, 0, 2720, 1260 }, properties, avoidAreas);
     rect = { 884, 1169, 952, 91 };
     ASSERT_EQ(avoidAreas[AvoidAreaType::TYPE_NAVIGATION_INDICATOR].bottomRect_, rect);
     properties[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR].enable_ = false;
     rect = { 0, 0, 0, 0 };
-    sceneSession->GetAvoidAreasByRotation(0, { 0, 0, 2720, 1260 }, properties, avoidAreas);
+    sceneSession->GetAvoidAreasByRotation(Rotation::ROTATION_0, { 0, 0, 2720, 1260 }, properties, avoidAreas);
     ASSERT_EQ(avoidAreas[AvoidAreaType::TYPE_NAVIGATION_INDICATOR].topRect_, rect);
     ssm_->sceneSessionMap_.clear();
 }
