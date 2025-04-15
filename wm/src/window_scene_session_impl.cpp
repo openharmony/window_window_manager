@@ -3299,15 +3299,38 @@ bool WindowSceneSessionImpl::CalcWindowShouldMove()
     return false;
 }
 
+bool WindowSceneSessionImpl::CheckCanMoveWindowType()
+{
+    WindowType windowType = GetType();
+    if (!WindowHelper::IsSystemWindow(windowType) &&
+        !WindowHelper::IsMainWindow(windowType) &&
+        !WindowHelper::IsSubWindow(windowType)) {
+        return false;
+    }
+    return true;
+}
+
+bool WindowSceneSessionImpl::CheckIsPcAppInPadFullScreenOnMobileWindowMode()
+{
+    if (property_->GetIsPcAppInPad() &&
+        property_->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
+        !IsFreeMultiWindowMode()) {
+        return true;
+    }
+    return false;
+}
+
 WmErrorCode WindowSceneSessionImpl::StartMoveWindow()
 {
+    if (!CheckCanMoveWindowType()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "invalid window type:%{public}u", GetType());
+        return WmErrorCode::WM_ERROR_INVALID_CALLING;
+    }
     if (!CalcWindowShouldMove()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "The device is not supported");
         return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
-    if (property_->GetIsPcAppInPad() &&
-        property_->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
-        !IsFreeMultiWindowMode()) {
+    if (CheckIsPcAppInPadFullScreenOnMobileWindowMode()) {
         return WmErrorCode::WM_OK;
     }
     if (auto hostSession = GetHostSession()) {
@@ -3333,13 +3356,15 @@ WmErrorCode WindowSceneSessionImpl::StartMoveWindow()
 
 WmErrorCode WindowSceneSessionImpl::StartMoveWindowWithCoordinate(int32_t offsetX, int32_t offsetY)
 {
+    if (!CheckCanMoveWindowType()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "invalid window type:%{public}u", GetType());
+        return WmErrorCode::WM_ERROR_INVALID_CALLING;
+    }
     if (!IsPcOrPadCapabilityEnabled()) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "The device is not supported");
         return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
-    if (property_->GetIsPcAppInPad() &&
-        property_->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
-        !IsFreeMultiWindowMode()) {
+    if (CheckIsPcAppInPadFullScreenOnMobileWindowMode()) {
         return WmErrorCode::WM_OK;
     }
     if (IsWindowSessionInvalid()) {
@@ -3383,6 +3408,10 @@ WmErrorCode WindowSceneSessionImpl::StartMoveWindowWithCoordinate(int32_t offset
 
 WmErrorCode WindowSceneSessionImpl::StopMoveWindow()
 {
+    if (!CheckCanMoveWindowType()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "invalid window type:%{public}u", GetType());
+        return WmErrorCode::WM_ERROR_INVALID_CALLING;
+    }
     if (!IsPcOrPadFreeMultiWindowMode()) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "The device is not supported");
         return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
