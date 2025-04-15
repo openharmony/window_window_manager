@@ -479,6 +479,37 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession11, TestSize
 }
 
 /**
+ * @tc.name: CreateAndConnectSpecificSession12
+ * @tc.desc: CreateAndConnectSpecificSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession12, TestSize.Level1)
+{
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
+    }
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowTag(WindowTag::SYSTEM_WINDOW);
+    option->SetWindowName("CreateAndConnectSpecificSession12");
+    option->SetDisplayId(999);
+    sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+
+    SessionInfo sessionInfo = { "CreateTestBundle6", "CreateTestModule612", "CreateTestAbility12" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_EQ(WMError::WM_OK, windowSceneSession->Create(abilityContext_, session));
+
+    windowSceneSession->property_->SetPersistentId(105);
+    windowSceneSession->property_->SetParentPersistentId(102);
+    windowSceneSession->property_->SetParentId(102);
+    windowSceneSession->hostSession_ = session;
+
+    windowSceneSession->property_->type_ = WindowType::SYSTEM_WINDOW_BASE;
+    ASSERT_EQ(WMError::WM_OK, windowSceneSession->CreateAndConnectSpecificSession());
+    ASSERT_EQ(999, windowSceneSession->property_->GetDisplayId());
+    ASSERT_EQ(WMError::WM_OK, windowSceneSession->Destroy(true));
+}
+
+/**
  * @tc.name: IsValidSystemWindowType01
  * @tc.desc: IsValidSystemWindowType
  * @tc.type: FUNC
