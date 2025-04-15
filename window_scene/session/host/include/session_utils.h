@@ -70,6 +70,21 @@ inline std::string ConvertSessionName(const std::string& bundleName, const std::
 
     return strName;
 }
+
+inline std::string GetBundleNameBySessionName(const std::string& sessionName)
+{
+    size_t headLength = std::char_traits<char>::length(SESSION_NAME_MARK_HEAD);
+    if (sessionName.empty() || sessionName.size() < headLength ||
+        sessionName.compare(0, headLength, SESSION_NAME_MARK_HEAD, headLength) != 0) {
+        return "";
+    }
+    size_t position = sessionName.find(SESSION_NAME_SEPARATOR);
+    if (position != std::string::npos) {
+        return sessionName.substr(headLength, position - 1);
+    } else {
+        return sessionName.substr(headLength);
+    }
+}
 } // namespace SessionUtils
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_UTILS_H
