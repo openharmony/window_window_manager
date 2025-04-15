@@ -281,7 +281,7 @@ void SceneInputManager::ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& dis
     }
 }
 
-std::map<DisplayId, int32_t> SceneInputManager::GetAllFocusedSessionList()
+std::map<DisplayId, int32_t> SceneInputManager::GetAllFocusedSessionMap()
 {
     std::map<DisplayId, int32_t> focusInfoMap;
     auto focusInfoMapArray = SceneSessionManager::GetInstance().GetAllFocusedSessionList();
@@ -289,7 +289,7 @@ std::map<DisplayId, int32_t> SceneInputManager::GetAllFocusedSessionList()
         int32_t focusedSessionId = item.second;
         auto focusedSession = SceneSessionManager::GetInstance().GetSceneSession(focusedSessionId);
         if (focusedSession == nullptr) {
-            TLOGE(WmsLogTag::WMS_EVENT, "focusedSession is null");
+            TLOGE(WmsLogTag::WMS_EVENT, "focusedSession is null, id: %{public}d", focusedSessionId);
             focusInfoMap[item.first] = INVALID_PERSISTENT_ID;
             continue;
         }
@@ -304,7 +304,7 @@ std::map<DisplayId, int32_t> SceneInputManager::GetAllFocusedSessionList()
 void SceneInputManager::FlushFullInfoToMMI(const std::vector<MMI::DisplayInfo>& displayInfos,
     const std::vector<MMI::WindowInfo>& windowInfoList, bool isOverBatchSize)
 {
-    auto focusInfoMap = GetAllFocusedSessionList();
+    auto focusInfoMap = GetAllFocusedSessionMap();
     std::map<DisplayId, std::vector<MMI::DisplayInfo>> displayInfoMap;
     for (const auto& displayInfo : displayInfos) {
         auto displayGroupId = SceneSessionManager::GetInstance().GetDisplayGroupId(displayInfo.id);
