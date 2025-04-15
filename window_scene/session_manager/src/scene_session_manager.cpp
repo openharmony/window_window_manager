@@ -119,7 +119,7 @@ const std::string ARG_DUMP_SCB = "-b";
 constexpr uint64_t NANO_SECOND_PER_SEC = 1000000000; // ns
 const int32_t LOGICAL_DISPLACEMENT_32 = 32;
 constexpr int32_t GET_TOP_WINDOW_DELAY = 100;
-constexpr uint64_t NOTIFY_START_ABILITY_TIMEOUT = 3000;
+constexpr uint64_t NOTIFY_START_ABILITY_TIMEOUT = 4000;
 constexpr uint64_t START_UI_ABILITY_TIMEOUT = 3000;
 
 static const std::chrono::milliseconds WAIT_TIME(10 * 1000); // 10 * 1000 wait for 10s
@@ -8817,17 +8817,19 @@ BrokerStates SceneSessionManager::NotifyStartAbility(
         }
         sessionInfo.want->SetParam("oh_persistentId", persistentId);
         std::shared_ptr<int32_t> ret = std::make_shared<int32_t>(0);
-        bool isTimeout = ffrtQueueHelper_->SubmitTaskAndWait([this, collaborator, &sessionInfo, accessTokenIDEx,
-            ret] {
-            auto result = collaborator->NotifyStartAbility(*(sessionInfo.abilityInfo), currentUserId_,
-                *(sessionInfo.want), static_cast<uint64_t>(accessTokenIDEx));
+        std::shared_ptr<AAFwk::Want> notifyWant = std::make_shared<AAFwk::Want>(*(sessionInfo.want));
+        bool isTimeout = ffrtQueueHelper_->SubmitTaskAndWait([this, collaborator, accessTokenIDEx,
+            notifyWant, abilityInfo = sessionInfo.abilityInfo, ret] {
+            auto result = collaborator->NotifyStartAbility(*abilityInfo, currentUserId_, *notifyWant,
+                static_cast<uint64_t>(accessTokenIDEx));
             *ret = static_cast<int32_t>(result);
         }, NOTIFY_START_ABILITY_TIMEOUT);
 
         if (isTimeout) {
-            TLOGE(WmsLogTag::WMS_LIFE, "notify start ability timeout, current userId: %{public}d", currentUserId_);
+            TLOGE(WmsLogTag::WMS_LIFE, "notify start ability timeout, id: %{public}d", persistentId);
             return BrokerStates::BROKER_NOT_START;
         }
+        *(sessionInfo.want) = *notifyWant;
         TLOGI(WmsLogTag::WMS_LIFE, "collaborator ret: %{public}d", *ret);
         if (*ret == 0) {
             return BrokerStates::BROKER_STARTED;
@@ -8907,11 +8909,14 @@ void SceneSessionManager::NotifyMoveSessionToForeground(int32_t collaboratorType
 
 void SceneSessionManager::NotifyClearSession(int32_t collaboratorType, int32_t persistentId)
 {
-    WLOGFD("id: %{public}d, type: %{public}d", persistentId, collaboratorType);
-    sptr<AAFwk::IAbilityManagerCollaborator> collaborator = GetCollaboratorByType(collaboratorType);
-    if (collaborator != nullptr) {
-        WLOGFI("called NotifyClearMission %{public}d", persistentId);
-        collaborator->NotifyClearMission(persistentId);
+    TLOGD(WmsLogTag::WMS_LIFE, "id: %{public}d, type: %{public}d", persistentId, collaboratorType);
+    if (auto collaborator = GetCollaboratorByType(collaboratorType)) {
+        const char* const where = __func__;
+        ffrtQueueHelper_->SubmitTask([collaborator, persistentId, where] {
+            int32_t ret = collaborator->NotifyClearMission(persistentId);
+            TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s called clear mission ret: %{public}d, persistent id: %{public}d",
+                where, ret, persistentId);
+        });
     }
 }
 
