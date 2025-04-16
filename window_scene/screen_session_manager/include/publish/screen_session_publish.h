@@ -37,6 +37,8 @@ public:
     void PublishSmartNotificationEvent(const std::string& faultDesc, const std::string& faultSuggest);
     bool RegisterLowTempSubscriber();
     bool UnRegisterLowTempSubscriber();
+    bool RegisterUserSwitchedSubscriber();
+    bool UnRegisterUserSwitchedSubscriber();
 
 private:
     explicit ScreenSessionPublish() = default;
@@ -57,6 +59,7 @@ private:
     sptr<EventFwk::CommonEventPublishInfo> publishInfo_;
     static std::map<std::string, sptr<EventFwk::Want>> cesWantMap_;
     std::shared_ptr<EventSubscriber> subscriber_ = nullptr;
+    std::shared_ptr<EventSubscriber> userSwitchedSubscriber_ = nullptr;
 };
 } // namespace OHOS::Rosen
 

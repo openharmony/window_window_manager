@@ -409,8 +409,11 @@ void ScreenSessionManager::OnAddSystemAbility(int32_t systemAbilityId, const std
         screenEventTracker_.RecordEvent("Dms recover Posture and Hall sensor finished.");
 #endif
     } else if (systemAbilityId == COMMON_EVENT_SERVICE_ID) {
-        auto task = [this]() { ScreenSessionPublish::GetInstance().RegisterLowTempSubscriber(); };
-        taskScheduler_->PostAsyncTask(task, "RegisterLowTempSubscriber");
+        auto task = []() {
+            ScreenSessionPublish::GetInstance().RegisterLowTempSubscriber();
+            ScreenSessionPublish::GetInstance().RegisterUserSwitchedSubscriber();
+        };
+        taskScheduler_->PostAsyncTask(task, "RegisterCommonEventSubscriber");
     }
 }
 
