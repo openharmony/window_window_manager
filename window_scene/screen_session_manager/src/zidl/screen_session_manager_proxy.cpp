@@ -3532,7 +3532,7 @@ DMError ScreenSessionManagerProxy::SetVirtualScreenRefreshRate(ScreenId screenId
 }
 
 void ScreenSessionManagerProxy::SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList,
-    std::vector<uint64_t> surfaceIdList)
+    std::vector<uint64_t> surfaceIdList, std::vector<uint8_t> typeBlackList)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -3556,6 +3556,10 @@ void ScreenSessionManagerProxy::SetVirtualScreenBlackList(ScreenId screenId, std
     }
     if (!data.WriteUInt64Vector(surfaceIdList)) {
         WLOGFE("Write surfaceIdList failed");
+        return;
+    }
+    if (!data.WriteUInt8Vector(typeBlackList)) {
+        WLOGFE("Write typeBlackList failed");
         return;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_BLACK_LIST),
