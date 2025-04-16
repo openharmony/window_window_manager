@@ -449,7 +449,7 @@ struct SessionInfo {
         }
     }
 
-    void SafelySetWant(const AAFwk::Want &newWant) const
+    void SafelySetWant(const AAFwk::Want& newWant) const
     {
         std::lock_guard<std::mutex> lock(*wantMutex_);
         if (want == nullptr) {
