@@ -15,21 +15,14 @@ import("//build/config/components/ets_frontend/ets2abc_config.gni")
 
 # abc generate
 generate_static_abc("screen_abc") {
-  arktsconfig = "./arktsconfig.json"
-  in_puts = [
-    "./arktsconfig.json",
-    "./ets/screen.ets",
-  ]
-  dst_file = "$target_out_dir/screen.abc"
-  out_puts = [ "$target_out_dir/screen.abc" ]
-  timeout_limit = "120"
-  extra_visibility = [ ":*" ]
+  base_url = "./ets"
+  files = [ "./ets/@ohos.screen.ets" ]
   is_boot_abc = "True"
-  device_dst_file = "/system/framework/screen.abc"
+  device_dst_file = "/system/framework/screen_abc.abc"
 }
 
 ohos_prebuilt_etc("screen_etc") {
-  source = "$target_out_dir/screen.abc"
+  source = "$target_out_dir/screen_abc.abc"
   deps = [ ":screen_abc" ]
   part_name = "window_manager"
   subsystem_name = "window"
