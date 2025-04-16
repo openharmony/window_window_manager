@@ -2208,6 +2208,8 @@ WMError WindowSceneSessionImpl::GetTargetOrientationConfigInfo(Orientation targe
         TLOGE(WmsLogTag::WMS_ROTATION, "Session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+    std::map<WindowType, SystemBarProperty> pageProperties;
+    GetSystemBarPropertyForPage(properties, pageProperties);
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
 
@@ -2223,9 +2225,9 @@ WMError WindowSceneSessionImpl::GetTargetOrientationConfigInfo(Orientation targe
     }
     WSError ret;
     if (targetOrientation == Orientation::INVALID) {
-        ret = hostSession->GetTargetOrientationConfigInfo(GetRequestedOrientation(), properties);
+        ret = hostSession->GetTargetOrientationConfigInfo(GetRequestedOrientation(), pageProperties);
     } else {
-        ret = hostSession->GetTargetOrientationConfigInfo(targetOrientation, properties);
+        ret = hostSession->GetTargetOrientationConfigInfo(targetOrientation, pageProperties);
     }
     getTargetInfoCallback_->ResetGetTargetRotationLock();
     OrientationInfo info = getTargetInfoCallback_->GetTargetOrientationResult(WINDOW_PAGE_ROTATION_TIMEOUT);
@@ -2775,6 +2777,54 @@ WMError WindowSceneSessionImpl::GetSystemBarProperties(std::map<WindowType, Syst
     auto currProperties = property_->GetSystemBarProperty();
     properties[WindowType::WINDOW_TYPE_STATUS_BAR] = currProperties[WindowType::WINDOW_TYPE_STATUS_BAR];
     return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::SetSystemBarPropertyForPage(WindowType type, std::optional<SystemBarProperty> property)
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_IMMS, "win %{public}u invalid state", GetWindowId());
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (!WindowHelper::IsMainWindow(GetType())) {
+        TLOGI(WmsLogTag::WMS_IMMS, "only main window support, win %{public}u", GetWindowId());
+        return WMError::WM_DO_NOTHING;
+    }
+    if (property == std::nullopt) {
+        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u property is nullptr use main window prop", GetWindowId());
+        return NotifySpecificWindowSessionProperty(type, GetSystemBarPropertyByType(type));
+    }
+    TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}u %{public}s] type %{public}u "
+        "%{public}u %{public}x %{public}x %{public}u %{public}u",
+        GetWindowId(), GetWindowName().c_str(), static_cast<uint32_t>(type),
+        property->enable_, property->backgroundColor_,
+        property->contentColor_, property->enableAnimation_, property->settingFlag_);
+    auto lastProperty = GetSystemBarPropertyByType(type);
+    property_->SetSystemBarProperty(type, property.value());
+    auto ret = NotifySpecificWindowSessionProperty(type, property.value());
+    property_->SetSystemBarProperty(type, lastProperty);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_IMMS, "set prop fail, ret %{public}u", ret);
+        return ret;
+    }
+    return WMError::WM_OK;
+}
+
+void WindowSceneSessionImpl::GetSystemBarPropertyForPage(const std::map<WindowType, SystemBarProperty>& properties,
+    std::map<WindowType, SystemBarProperty>& pageProperties)
+{
+    for (auto type : { WindowType::WINDOW_TYPE_STATUS_BAR, WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR }) {
+        if (properties.find(type) != properties.end()) {
+            pageProperties[type] = properties.at(type);
+        } else {
+            pageProperties[type] = GetSystemBarPropertyByType(type);
+        }
+        TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}u %{public}s] type %{public}u "
+            "%{public}u %{public}x %{public}x %{public}u %{public}u",
+            GetWindowId(), GetWindowName().c_str(), static_cast<uint32_t>(type),
+            pageProperties[type].enable_, pageProperties[type].backgroundColor_,
+            pageProperties[type].contentColor_, pageProperties[type].enableAnimation_,
+            pageProperties[type].settingFlag_);
+    }
 }
 
 WMError WindowSceneSessionImpl::SetFullScreen(bool status)

@@ -2647,6 +2647,18 @@ public:
     virtual void UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool systemBarEnableAnimation,
         SystemBarProperty& property) {}
 
+    /*
+     * @brief Set System Bar Property for page
+     *
+     * @param type WINDOW_TYPE_STATUS_BAR or WINDOW_TYPE_NAVIGATION_INDICATOR
+     * @param property System Bar Property
+     * @return WMError
+     */
+    virtual WMError SetSystemBarPropertyForPage(WindowType type, std::optional<SystemBarProperty> property)
+    {
+        return WMError::WM_OK;
+    }
+
     /**
      * @brief Set Specific System Bar(include status bar and nav bar) Property
      *
