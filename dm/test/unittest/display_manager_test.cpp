@@ -1884,8 +1884,6 @@ HWTEST_F(DisplayManagerTest, InvalidimageRect, TestSize.Level1)
     DmErrorCode errorCode;
     bool isUseDma = false;
 
-    auto mockPixelMap = std::make_shared<Media::PixelMap>();
-
     auto result = displayManager.GetScreenshotwithConfig(config, &errorCode, isUseDma);
     EXPECT_EQ(result, nullptr);
 }
@@ -1903,8 +1901,6 @@ HWTEST_F(DisplayManagerTest, InvalidimageSize, TestSize.Level1)
     DmErrorCode errorCode;
     bool isUseDma = false;
 
-    auto mockPixelMap = std::make_shared<Media::PixelMap>();
-
     auto result = displayManager.GetScreenshotwithConfig(config, &errorCode, isUseDma);
     EXPECT_EQ(result, nullptr);
 }
@@ -1920,8 +1916,6 @@ HWTEST_F(DisplayManagerTest, PixelMapCreateReturnsNullptr, TestSize.Level1)
     SnapShotConfig config;
     DmErrorCode errorCode;
     bool isUseDma = false;
-
-    auto mockPixelMap = std::make_shared<Media::PixelMap>();
 
     auto result = displayManager.GetScreenshotwithConfig(config, &errorCode, isUseDma);
     EXPECT_EQ(result, nullptr);
