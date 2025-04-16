@@ -97,7 +97,7 @@ JsWindow::~JsWindow()
 std::string JsWindow::GetWindowName()
 {
     if (windowToken_ == nullptr) {
-        TLOGW(WmsLogTag::WMS_LIFE, "windowToken_ is null");
+        TLOGW(WmsLogTag::WMS_LIFE, "windowToken is null");
         return "";
     }
     return windowToken_->GetWindowName();
