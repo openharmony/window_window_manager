@@ -450,6 +450,7 @@ void SuperFoldStateManager::HandleSystemKeyboardStatusDisplayNotify(
     TLOGD(WmsLogTag::DMS, "curFoldState: %{public}u", curFoldState);
     if (!isKeyboardOn_ && curFoldState == SuperFoldStatus::HALF_FOLDED) {
         screenSession->UpdatePropertyByFakeInUse(!isTpKeyboardOn);
+        screenSession->SetIsFakeInUse(!isTpKeyboardOn);
         screenSession->SetIsBScreenHalf(true);
     }
     sptr<ScreenSession> fakeScreenSession = screenSession->GetFakeScreenSession();
