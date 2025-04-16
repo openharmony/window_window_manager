@@ -980,12 +980,6 @@ void WindowSceneSessionImpl::ConsumePointerEventInner(const std::shared_ptr<MMI:
     }
     lastPointerEvent_ = pointerEvent;
     if (isPointDown) {
-        auto displayInfo = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayInfo(property_->GetDisplayId());
-        if (displayInfo == nullptr) {
-            WLOGFE("display info is nullptr");
-            pointerEvent->MarkProcessed();
-            return;
-        }
         float vpr = WindowSessionImpl::GetVirtualPixelRatio();
         if (MathHelper::NearZero(vpr)) {
             WLOGFW("vpr is zero");
