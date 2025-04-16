@@ -1447,6 +1447,9 @@ void SceneSessionManager::CreateRootSceneSession()
     rootSceneSession_->RegisterGetStatusBarAvoidHeightFunc([this](WSRect& barArea) {
         return this->GetStatusBarAvoidHeight(barArea);
     });
+    rootSceneSession_->RegisterGetstatusBarConstantlyShowFunc([this](uint64_t screenId, bool& isVisible) {
+        return this->GetStatusBarConstantlyShow(screenId, isVisible);
+    });
 }
 
 sptr<RootSceneSession> SceneSessionManager::GetRootSceneSession()
@@ -2135,6 +2138,9 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         });
         sceneSession->RegisterGetStatusBarAvoidHeightFunc([this](WSRect& barArea) {
             return this->GetStatusBarAvoidHeight(barArea);
+        });
+        sceneSession->RegisterGetStatusBarConstantlyShowFunc([this](uint64_t screenId, bool& isVisible) {
+            return this->GetStatusBarConstantlyShow(screenId, isVisible);
         });
         DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
         GetAppDragResizeType(sessionInfo.bundleName_, dragResizeType);
@@ -10382,6 +10388,22 @@ WSError SceneSessionManager::NotifyStatusBarShowStatus(int32_t persistentId, boo
         sceneSession->SetIsStatusBarVisible(isVisible);
     }, __func__);
     return WSError::WS_OK;
+}
+
+WSError SceneSessionManager::NotifyStatusBarConstantlyShowStatus(uint32_t screenId, bool isVisible)
+{
+    TLOGD(WmsLogTag::WMS_IMMS, "screenId %{public}" PRIu64 " isVisible %{public}u", screenId, isVisible);
+    const char* const where = __func__;
+    auto task = [this, screenId, isVisible] {
+        statusBarConstantlyShowMap_[screenId] = isVisible;
+        return WMError::WM_OK;
+    };
+    taskScheduler_->PostSyncTask(task, where);
+}
+
+void SceneSessionManager::GetStatusBarConstantlyShow(uint64_t screenId, bool& isVisible)
+{
+    isVisible = statusBarConstantlyShowMap_[screenId];
 }
 
 WSError SceneSessionManager::NotifyAINavigationBarShowStatus(bool isVisible, WSRect barArea, uint64_t displayId)
