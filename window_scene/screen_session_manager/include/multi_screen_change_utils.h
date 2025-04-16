@@ -44,7 +44,8 @@ public:
     static void ScreenCombinationChange(sptr<ScreenSession>& innerScreen, sptr<ScreenSession>& externalScreen,
         ScreenCombination externalCombination);
 
-    static void ScreenMainPositionChange(sptr<ScreenSession>& screenSession);
+    static void ScreenMainPositionChange(sptr<ScreenSession>& innerScreen,
+        sptr<ScreenSession>& externalScreen);
 
     static void ScreenPhysicalInfoChange(sptr<ScreenSession>& innerScreen,
         sptr<ScreenSession>& externalScreen);

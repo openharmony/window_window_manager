@@ -68,18 +68,18 @@ void MultiScreenChangeUtils::ScreenExtendPositionChange(sptr<ScreenSession>& inn
         TLOGE(WmsLogTag::DMS, "screenSession null.");
         return;
     }
-    innerScreen->SetStartPosition(0, 0);
     innerScreen->PropertyChange(innerScreen->GetScreenProperty(),
         ScreenPropertyChangeReason::RELATIVE_POSITION_CHANGE);
-    externalScreen->SetStartPosition(innerScreen->GetScreenProperty().GetBounds().rect_.GetWidth(), 0);
     externalScreen->PropertyChange(externalScreen->GetScreenProperty(),
         ScreenPropertyChangeReason::RELATIVE_POSITION_CHANGE);
-    std::shared_ptr<RSDisplayNode> innerNode = innerScreen->GetDisplayNode();
-    std::shared_ptr<RSDisplayNode> externalNode = externalScreen->GetDisplayNode();
     {
+        std::shared_ptr<RSDisplayNode> innerNode = innerScreen->GetDisplayNode();
+        std::shared_ptr<RSDisplayNode> externalNode = externalScreen->GetDisplayNode();
         if (innerNode && externalNode) {
-            innerNode->SetDisplayOffset(0, 0);
-            externalNode->SetDisplayOffset(innerScreen->GetScreenProperty().GetBounds().rect_.GetWidth(), 0);
+            innerNode->SetDisplayOffset(innerScreen->GetScreenProperty().GetStartX(),
+                innerScreen->GetScreenProperty().GetStartY());
+            externalNode->SetDisplayOffset(externalScreen->GetScreenProperty().GetStartX(),
+                externalScreen->GetScreenProperty().GetStartY());
         } else {
             TLOGW(WmsLogTag::DMS, "DisplayNode is null");
         }
@@ -99,21 +99,27 @@ void MultiScreenChangeUtils::SetScreenAvailableStatus(sptr<ScreenSession>& scree
     screenSession->SetScreenAvailableStatus(isScreenAvailable);
 }
 
-void MultiScreenChangeUtils::ScreenMainPositionChange(sptr<ScreenSession>& screenSession)
+void MultiScreenChangeUtils::ScreenMainPositionChange(sptr<ScreenSession>& innerScreen,
+    sptr<ScreenSession>& externalScreen)
 {
-    if (!screenSession) {
+    if (!innerScreen || !externalScreen) {
         TLOGE(WmsLogTag::DMS, "screenSession is null");
         return;
     }
-    screenSession->SetStartPosition(0, 0);
-    screenSession->PropertyChange(screenSession->GetScreenProperty(),
+    innerScreen->SetStartPosition(0, 0);
+    innerScreen->PropertyChange(innerScreen->GetScreenProperty(),
+        ScreenPropertyChangeReason::RELATIVE_POSITION_CHANGE);
+    externalScreen->SetStartPosition(0, 0);
+    externalScreen->PropertyChange(externalScreen->GetScreenProperty(),
         ScreenPropertyChangeReason::RELATIVE_POSITION_CHANGE);
     {
-        std::shared_ptr<RSDisplayNode> displayNode = screenSession->GetDisplayNode();
-        if (displayNode != nullptr) {
-            displayNode->SetDisplayOffset(0, 0);
+        std::shared_ptr<RSDisplayNode> innerNode = innerScreen->GetDisplayNode();
+        std::shared_ptr<RSDisplayNode> externalNode = externalScreen->GetDisplayNode();
+        if (innerNode && externalNode) {
+            innerNode->SetDisplayOffset(0, 0);
+            externalNode->SetDisplayOffset(0, 0);
         } else {
-            TLOGW(WmsLogTag::DMS, "displayNode is null");
+            TLOGW(WmsLogTag::DMS, "DisplayNode is null");
         }
     }
     RSTransaction::FlushImplicitTransaction();
