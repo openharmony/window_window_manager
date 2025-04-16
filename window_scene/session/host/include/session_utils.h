@@ -71,7 +71,7 @@ inline std::string ConvertSessionName(const std::string& bundleName, const std::
     return strName;
 }
 
-inline std::string GetBundleNameBySessionName(const std::string& sessionName)
+std::string GetBundleNameBySessionName(const std::string& sessionName)
 {
     size_t headLength = std::char_traits<char>::length(SESSION_NAME_MARK_HEAD);
     if (sessionName.empty() || sessionName.size() < headLength ||
