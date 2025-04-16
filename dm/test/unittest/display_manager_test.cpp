@@ -1986,7 +1986,7 @@ HWTEST_F(DisplayManagerTest, ShouldReturnUNKNOWN, TestSize.Level1)
     DisplayManager displayManager;
     DisplayManagerAdapter displayManagerAdapter;
     SingletonContainer::Get<DisplayManagerAdapter>().InitDMSProxy();
-    displayManagerAdapter.SetFoldDisplayMode(FoldDisplayMode:: GLOBAL_FULL);
+    displayManagerAdapter.SetFoldDisplayMode(FoldDisplayMode::GLOBAL_FULL);
 
     auto result = displayManager.GetFoldDisplayModeForExternal();
 
