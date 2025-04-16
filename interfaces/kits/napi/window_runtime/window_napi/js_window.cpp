@@ -76,7 +76,7 @@ JsWindow::JsWindow(const sptr<Window>& window)
                 return;
             }
             g_jsWindowMap.erase(windowName);
-            TLOGI(WmsLogTag::WMS_LIFE, "Remove window %{public}s from g_jsWindowMap", windowName.c_str());
+            TLOGI(WmsLogTag::WMS_LIFE, "Remove window %{public}s", windowName.c_str());
         }
         windowToken_ = nullptr;
         TLOGI(WmsLogTag::WMS_LIFE, "Destroy window %{public}s in js window", windowName.c_str());
@@ -111,7 +111,7 @@ void JsWindow::Finalizer(napi_env env, void* data, void* hint)
     std::string windowName = jsWin->GetWindowName();
     std::lock_guard<std::mutex> lock(g_mutex);
     g_jsWindowMap.erase(windowName);
-    TLOGI(WmsLogTag::WMS_LIFE, "Remove window %{public}s from g_jsWindowMap", windowName.c_str());
+    TLOGI(WmsLogTag::WMS_LIFE, "Remove window %{public}s", windowName.c_str());
 }
 
 napi_value JsWindow::Show(napi_env env, napi_callback_info info)
@@ -6532,7 +6532,7 @@ __attribute__((no_sanitize("cfi")))
     jsWindowRef.reset(reinterpret_cast<NativeReference*>(result));
     std::lock_guard<std::mutex> lock(g_mutex);
     g_jsWindowMap[windowName] = jsWindowRef;
-    TLOGI(WmsLogTag::WMS_LIFE, "Add window %{public}s to g_jsWindowMap", windowName.c_str());
+    TLOGI(WmsLogTag::WMS_LIFE, "Add window %{public}s", windowName.c_str());
     return objValue;
 }
 
