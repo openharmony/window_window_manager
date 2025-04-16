@@ -1257,6 +1257,7 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
         static_cast<uint32_t>(GetSessionProperty()->GetRequestedOrientation()),
         static_cast<uint32_t>(GetSessionProperty()->GetDefaultRequestedOrientation()));
     property->SetCompatibleModeInPc(GetSessionProperty()->GetCompatibleModeInPc());
+    property->SetCompatibleModeInPcWithTopBar(GetSessionProperty()->GetCompatibleModeInPcWithTopBar());
     property->SetIsSupportDragInPcCompatibleMode(GetSessionProperty()->GetIsSupportDragInPcCompatibleMode());
     if (GetSessionProperty()->GetCompatibleModeInPc()) {
         property->SetDragEnabled(GetSessionProperty()->GetIsSupportDragInPcCompatibleMode());
@@ -2873,6 +2874,13 @@ WSError Session::SetCompatibleModeInPc(bool enable, bool isSupportDragInPcCompat
     if (enable) {
         GetSessionProperty()->SetDragEnabled(isSupportDragInPcCompatibleMode);
     }
+    return WSError::WS_OK;
+}
+
+WSError Session::SetCompatibleModeInPcWithTopBar(bool enableTopBar)
+{
+    TLOGI(WmsLogTag::WMS_SCB, "SetCompatibleModeInPcWithTopBar enableTopBar: %{public}d", enableTopBar);
+    GetSessionProperty()->SetCompatibleModeInPcWithTopBar(enableTopBar);
     return WSError::WS_OK;
 }
 
