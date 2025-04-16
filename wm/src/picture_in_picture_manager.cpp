@@ -203,7 +203,7 @@ void PictureInPictureManager::DoClose(bool destroyWindow, bool byPriority)
         } else {
             currentStopType = StopPipType::OTHER_PACKAGE_STOP;
         }
-        controller->StopPictureInPicture(destroyWindow, currentStopType, !byPriority);;
+        controller->StopPictureInPicture(destroyWindow, currentStopType, !byPriority);
     }
 }
 
