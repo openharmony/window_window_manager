@@ -192,6 +192,33 @@ HWTEST_F(ScreenSessionPublishTest, UnRegisterLowTempSubscriber, TestSize.Level1)
     screenSessionPublish.subscriber_ = nullptr;
     ASSERT_EQ(screenSessionPublish.UnRegisterLowTempSubscriber(), false);
 }
+
+/**
+ * @tc.name: RegisterUserSwitchedSubscriber
+ * @tc.desc: RegisterUserSwitchedSubscriber
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionPublishTest, RegisterUserSwitchedSubscriber, TestSize.Level1)
+{
+    auto screenSessionPublish = ScreenSessionPublish::GetInstance();
+    screenSessionPublish.userSwitchedSubscriber_ = nullptr;
+    ASSERT_EQ(screenSessionPublish.RegisterUserSwitchedSubscriber(), true);
+    ASSERT_EQ(screenSessionPublish.RegisterUserSwitchedSubscriber(), false);
+}
+
+/**
+ * @tc.name: UnRegisterUserSwitchedSubscriber
+ * @tc.desc: UnRegisterUserSwitchedSubscriber
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionPublishTest, UnRegisterUserSwitchedSubscriber, TestSize.Level1)
+{
+    auto screenSessionPublish = ScreenSessionPublish::GetInstance();
+    screenSessionPublish.RegisterUserSwitchedSubscriber();
+    ASSERT_EQ(screenSessionPublish.UnRegisterUserSwitchedSubscriber(), true);
+    screenSessionPublish.userSwitchedSubscriber_ = nullptr;
+    ASSERT_EQ(screenSessionPublish.UnRegisterUserSwitchedSubscriber(), false);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
