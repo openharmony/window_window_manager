@@ -1079,6 +1079,33 @@ HWTEST_F(WindowSessionTest4, GetWindowMetaInfoForWindowInfo01, TestSize.Level1)
     WindowMetaInfo windowMetaInfo1 = sceneSession1->GetWindowMetaInfoForWindowInfo();
     ASSERT_EQ(windowMetaInfo1 .windowName, sceneSession1->GetSessionInfo().abilityName_);
 }
+
+/**
+ * @tc.name: SafelyGetWant01
+ * @tc.desc: SafelyGetWant Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, SafelyGetWant01, TestSize.Level1)
+{
+    SessionInfo sessionInfo;
+    ASSERT_EQ(nullptr, sessionInfo.want);
+    EXPECT_EQ(sessionInfo.SafelyGetWant().GetBundle(), "");
+}
+
+/**
+ * @tc.name: SafelySetWant01
+ * @tc.desc: SafelySetWant Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, SafelySetWant01, TestSize.Level1)
+{
+    SessionInfo sessionInfo;
+    AAFwk::Want wantObj;
+    wantObj.SetBundle("SafelySetWantTest");
+    sessionInfo.SafelySetWant(wantObj);
+    ASSERT_NE(nullptr, sessionInfo.want);
+    EXPECT_EQ(sessionInfo.SafelyGetWant().GetBundle(), "SafelySetWantTest");
+}
 }
 } // namespace Rosen
 } // namespace OHOS
