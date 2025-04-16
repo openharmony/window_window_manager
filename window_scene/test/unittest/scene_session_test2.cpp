@@ -902,6 +902,7 @@ HWTEST_F(SceneSessionTest2, ProcessPointDownSession, TestSize.Level1)
     SessionInfo info;
     info.abilityName_ = "ProcessPointDownSession";
     info.bundleName_ = "ProcessPointDownSession";
+    info.windowInputType_ = 0;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->specificCallback_ = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(nullptr, sceneSession->specificCallback_);
@@ -922,6 +923,10 @@ HWTEST_F(SceneSessionTest2, ProcessPointDownSession, TestSize.Level1)
     sceneSession->sessionInfo_.bundleName_ = "SCBGestureBack";
     sceneSession->specificCallback_->onOutsideDownEvent_ = nullptr;
     EXPECT_EQ(WSError::WS_OK, sceneSession->ProcessPointDownSession(3, 4));
+
+    info.windowInputType_ = 1;
+    sceneSession->specificCallback_->onOutsideDownEvent_ = nullptr;
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_TYPE, sceneSession->ProcessPointDownSession(3, 4));
 }
 
 /**
