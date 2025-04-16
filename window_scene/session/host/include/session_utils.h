@@ -71,19 +71,12 @@ inline std::string ConvertSessionName(const std::string& bundleName, const std::
     return strName;
 }
 
-std::string GetBundleNameBySessionName(const std::string& sessionName)
+inline std::string GetBundleNameBySessionName(const std::string& name)
 {
-    size_t headLength = std::char_traits<char>::length(SESSION_NAME_MARK_HEAD);
-    if (sessionName.empty() || sessionName.size() < headLength ||
-        sessionName.compare(0, headLength, SESSION_NAME_MARK_HEAD, headLength) != 0) {
-        return "";
-    }
-    size_t position = sessionName.find(SESSION_NAME_SEPARATOR);
-    if (position != std::string::npos) {
-        return sessionName.substr(headLength, position - 1);
-    } else {
-        return sessionName.substr(headLength);
-    }
+    const size_t len = std::char_traits<char>::length(SESSION_NAME_MARK_HEAD);
+    if (name.empty() || name.size() < len || name.compare(0, len, SESSION_NAME_MARK_HEAD) != 0) return "";
+    size_t pos = name.find(SESSION_NAME_SEPARATOR);
+    return pos != std::string::npos? name.substr(len, pos - 1) : name.substr(len);
 }
 } // namespace SessionUtils
 } // namespace OHOS::Rosen
