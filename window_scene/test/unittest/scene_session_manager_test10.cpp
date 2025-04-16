@@ -1077,11 +1077,11 @@ HWTEST_F(SceneSessionManagerTest10, NotifyStatusBarShowStatus, TestSize.Level0)
 }
 
 /**
- * @tc.name: GetStatusBarConstantlyShowStatus
- * @tc.desc: test GetStatusBarConstantlyShowStatus
+ * @tc.name: GetStatusBarConstantlyShow
+ * @tc.desc: test GetStatusBarConstantlyShow
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest10, GetStatusBarConstantlyShowStatus, TestSize.Level0)
+HWTEST_F(SceneSessionManagerTest10, GetStatusBarConstantlyShow, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "test";
@@ -1091,8 +1091,8 @@ HWTEST_F(SceneSessionManagerTest10, GetStatusBarConstantlyShowStatus, TestSize.L
 
     ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
     bool isVisible;
-    ssm_->NotifyStatusBarConstantlyShowStatus(sceneSession->GetScreenId(), false);
-    ssm_->GetStatusBarConstantlyShowStatus(sceneSession->GetScreenId(), isVisible);
+    ssm_->NotifyStatusBarConstantlyShow(sceneSession->GetScreenId(), false);
+    ssm_->GetStatusBarConstantlyShow(sceneSession->GetScreenId(), isVisible);
     EXPECT_EQ(isVisible, false);
     ssm_->sceneSessionMap_.erase(sceneSession->GetPersistentId());
 }
