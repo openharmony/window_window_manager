@@ -3227,8 +3227,7 @@ void ScreenSessionManager::CallRsSetScreenPowerStatusSync(ScreenId screenId, Scr
                 powerStateChangeReason_ == PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION) {
                 return;
             }
-            if (sourceMode == ScreenSourceMode::SCREEN_UNIQUE &&
-                status != ScreenPowerStatus::POWER_STATUS_ON &&
+            if (status != ScreenPowerStatus::POWER_STATUS_ON &&
                 powerStateChangeReason_ == PowerStateChangeReason::STATE_CHANGE_REASON_HARD_KEY) {
                 return;
             }
