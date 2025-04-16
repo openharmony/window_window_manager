@@ -5911,6 +5911,18 @@ Transform WindowSessionImpl::GetLayoutTransform() const
     return layoutTransform_;
 }
 
+void WindowSessionImpl::SetCurrentTransform(const Transform& transform)
+{
+    std::lock_guard<std::mutex> lock(currentTransformMutex_);
+    currentTransform_ = transform;
+}
+
+Transform WindowSessionImpl::GetCurrentTransform() const
+{
+    std::lock_guard<std::mutex> lock(currentTransformMutex_);
+    return currentTransform_;
+}
+
 void WindowSessionImpl::RegisterWindowInspectorCallback()
 {
     auto getWMSWindowListCallback = [weakThis = wptr(this)]() -> std::optional<WindowListInfo> {
