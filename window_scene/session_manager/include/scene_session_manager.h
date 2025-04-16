@@ -420,7 +420,7 @@ public:
     bool GetImmersiveState(ScreenId screenId);
     WSError NotifyStatusBarShowStatus(int32_t persistentId, bool isVisible);
     void NotifyStatusBarConstantlyShow(uint64_t screenId, bool isVisible);
-    void GetStatusBarConstantlyShow(uint64_t screenId, bool isVisible);
+    void GetStatusBarConstantlyShow(uint64_t screenId, bool& isVisible);
     WSError NotifyAINavigationBarShowStatus(bool isVisible, WSRect barArea, uint64_t displayId);
     WSError NotifyNextAvoidRectInfo(AvoidAreaType type,
         const WSRect& portraitRect, const WSRect& landspaceRect, DisplayId displayId);

@@ -6733,7 +6733,7 @@ void SceneSession::RegisterGetStatusBarAvoidHeightFunc(GetStatusBarAvoidHeightFu
     onGetStatusBarAvoidHeightFunc_ = std::move(callback);
 }
 
-void SceneSession::RegisterGetstatusBarConstantlyShowFunc(GetStatusBarConstantlyShowFunc&& callback)
+void SceneSession::RegisterGetStatusBarConstantlyShowFunc(GetStatusBarConstantlyShowFunc&& callback)
 {
     onGetStatusBarConstantlyShowFunc_ = std::move(callback);
 }
