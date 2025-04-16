@@ -14,15 +14,17 @@
  */
 
 #include "js_window_utils.h"
+
 #include <iomanip>
 #include <regex>
 #include <sstream>
+
 #include "accesstoken_kit.h"
 #include "bundle_constants.h"
 #include "ipc_skeleton.h"
-#include "window_manager_hilog.h"
-#include "scene_board_judgement.h"
 #include "js_window.h"
+#include "scene_board_judgement.h"
+#include "window_manager_hilog.h"
 #include "wm_common.h"
 
 namespace OHOS {

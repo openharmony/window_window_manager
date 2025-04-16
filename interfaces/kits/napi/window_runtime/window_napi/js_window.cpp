@@ -1252,6 +1252,7 @@ napi_value JsWindow::OnShowWindow(napi_env env, napi_callback_info info)
         WmErrorCode parseRet = ParseShowWindowOptions(env, showWindowOptions, focusOnShow);
         if (parseRet != WmErrorCode::WM_OK) {
             NapiThrowError(env, parseRet);
+            return;
         }
     }
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
