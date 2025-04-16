@@ -7285,7 +7285,7 @@ void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& cl
         if (displayMode == FoldDisplayMode::FULL) {
             TLOGI(WmsLogTag::DMS, "switch screen to full");
             SetDisplayNodeScreenId(SCREEN_ID_FULL, SCREEN_ID_FULL);
-        } else if () {
+        } else if (displayMode == FoldDisplayMode::MAIN) {
             TLOGI(WmsLogTag::DMS, "switch screen to main");
             SetDisplayNodeScreenId(SCREEN_ID_FULL, SCREEN_ID_MAIN);
         }
