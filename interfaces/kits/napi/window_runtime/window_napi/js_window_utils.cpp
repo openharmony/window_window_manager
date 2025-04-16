@@ -14,14 +14,17 @@
  */
 
 #include "js_window_utils.h"
+
 #include <iomanip>
 #include <regex>
 #include <sstream>
+
 #include "accesstoken_kit.h"
 #include "bundle_constants.h"
 #include "ipc_skeleton.h"
-#include "window_manager_hilog.h"
 #include "js_window.h"
+#include "scene_board_judgement.h"
+#include "window_manager_hilog.h"
 #include "wm_common.h"
 
 namespace OHOS {
@@ -1488,6 +1491,22 @@ bool ParseSubWindowOptions(napi_env env, napi_value jsObject, const sptr<WindowO
         return false;
     }
     return ParseZLevelParam(env, jsObject, windowOption);
+}
+
+WmErrorCode ParseShowWindowOptions(napi_env env, napi_value showWindowOptions, bool& focusOnShow)
+{
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    napi_value focusOnShowValue = nullptr;
+    napi_get_named_property(env, showWindowOptions, "focusOnShow", &focusOnShowValue);
+    if (focusOnShowValue != nullptr) {
+        if (GetType(env, focusOnShowValue) != napi_boolean || !ConvertFromJsValue(env, focusOnShowValue, focusOnShow)) {
+            TLOGE(WmsLogTag::WMS_FOCUS, "failed to convert focusOnShow to boolean");
+            return WmErrorCode::WM_ERROR_INVALID_PARAM;
+        }
+    }
+    return WmErrorCode::WM_OK;
 }
 
 bool CheckPromise(napi_env env, napi_value promiseObj)

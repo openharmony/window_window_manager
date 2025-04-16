@@ -17,6 +17,7 @@
 #define OHOS_ROSEN_WINDOW_SCENE_SCENE_BOARD_JUDGEMENT_H
 
 #include <fstream>
+#include <mutex>
 
 namespace OHOS {
 namespace Rosen {
