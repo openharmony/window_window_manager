@@ -305,7 +305,7 @@ void SceneInputManager::FlushFullInfoToMMI(const std::vector<MMI::DisplayInfo>& 
     const std::vector<MMI::WindowInfo>& windowInfoList, bool isOverBatchSize)
 {
     auto focusInfoMap = GetFocusedSessionMap();
-    std::unordered_map<DisplayId, std::vector<MMI::DisplayInfo>> displayInfoMap;
+    std::map<DisplayId, std::vector<MMI::DisplayInfo>> displayInfoMap;
     for (const auto& displayInfo : displayInfos) {
         auto displayGroupId = SceneSessionManager::GetInstance().GetDisplayGroupId(displayInfo.id);
         displayInfoMap[displayGroupId].emplace_back(displayInfo);
