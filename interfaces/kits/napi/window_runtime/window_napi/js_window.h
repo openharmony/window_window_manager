@@ -226,8 +226,7 @@ public:
     static napi_value SetFollowParentWindowLayoutEnabled(napi_env env, napi_callback_info info);
 
 private:
-    std::string GetWindowName();
-    const std::string& GetJSWindowName() const;
+    const std::string& GetWindowName() const;
     static bool ParseScaleOption(napi_env env, napi_value jsObject, Transform& trans);
     static bool ParseRotateOption(napi_env env, napi_value jsObject, Transform& trans);
     static bool ParseTranslateOption(napi_env env, napi_value jsObject, Transform& trans);
@@ -397,7 +396,7 @@ private:
     napi_value OnRestore(napi_env env, napi_callback_info info);
     napi_value OnStartMoveWindowWithCoordinate(napi_env env, size_t argc, napi_value* argv);
 
-    std::string jsWindowName_; // this property as key of g_jsWindowMap
+    std::string windowName_;
     sptr<Window> windowToken_ = nullptr;
     std::unique_ptr<JsWindowRegisterManager> registerManager_ = nullptr;
     std::shared_ptr<NativeReference> jsTransControllerObj_ = nullptr;
