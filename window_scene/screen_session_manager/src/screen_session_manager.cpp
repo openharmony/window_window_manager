@@ -947,8 +947,13 @@ void ScreenSessionManager::SetMultiScreenDefaultRelativePosition()
             mainHeight > mainWidth) {
             mainWidth = mainHeight;
         }
-        mainOptions = { mainSession->GetScreenId(), 0, 0 };
-        extendOptions = { extendSession->GetScreenId(), mainWidth, 0 };
+        if (g_isPcDevice) {
+            mainOptions = { mainSession->GetRSScreenId(), 0, 0 };
+            extendOptions = { extendSession->GetRSScreenId(), mainWidth, 0 };
+        } else {
+            mainOptions = { mainSession->GetScreenId(), 0, 0 };
+            extendOptions = { extendSession->GetScreenId(), mainWidth, 0 };
+        }
         auto ret = SetMultiScreenRelativePosition(mainOptions, extendOptions);
         if (ret != DMError::DM_OK) {
             TLOGE(WmsLogTag::DMS, "set Relative Position failed, DMError:%{public}d", static_cast<int32_t>(ret));
@@ -2325,7 +2330,8 @@ void ScreenSessionManager::SetExtendedScreenFallbackPlan(ScreenId screenId)
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:SetPhysicalScreenResolution(%" PRIu64")", screenId);
     int32_t res = rsInterface_.SetPhysicalScreenResolution(rsScreenId, screenAdjustWidth, screenAdjustHeight);
-    if (screenSession->GetScreenCombination() == ScreenCombination::SCREEN_EXTEND) {
+    if ((screenSession->GetScreenCombination() == ScreenCombination::SCREEN_EXTEND ||
+        screenSession->GetScreenCombination() == ScreenCombination::SCREEN_MAIN) && !screenSession->GetIsInternal()) {
         screenSession->PropertyChange(screenSession->GetScreenProperty(), ScreenPropertyChangeReason::UNDEFINED);
         screenSession->SetFrameGravity(Rosen::Gravity::RESIZE);
     } else {
@@ -8305,8 +8311,15 @@ DMError ScreenSessionManager::SetMultiScreenRelativePosition(MultiScreenPosition
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
-    sptr<ScreenSession> firstScreenSession = GetScreenSession(mainScreenOptions.screenId_);
-    sptr<ScreenSession> secondScreenSession = GetScreenSession(secondScreenOption.screenId_);
+    sptr<ScreenSession> firstScreenSession = nullptr;
+    sptr<ScreenSession> secondScreenSession = nullptr;
+    if (g_isPcDevice) {
+        firstScreenSession = GetScreenSessionByRsId(mainScreenOptions.screenId_);
+        secondScreenSession = GetScreenSessionByRsId(secondScreenOption.screenId_);
+    } else {
+        firstScreenSession = GetScreenSession(mainScreenOptions.screenId_);
+        secondScreenSession = GetScreenSession(secondScreenOption.screenId_);
+    }
     if (!firstScreenSession || !secondScreenSession) {
         TLOGE(WmsLogTag::DMS, "ScreenSession is null");
         return DMError::DM_ERROR_NULLPTR;
@@ -8317,6 +8330,17 @@ DMError ScreenSessionManager::SetMultiScreenRelativePosition(MultiScreenPosition
         TLOGE(WmsLogTag::DMS, "Options incorrect!");
         return DMError::DM_ERROR_INVALID_PARAM;
     }
+    SetMultiScreenRelativePositionInner(firstScreenSession, secondScreenSession, mainScreenOptions,
+        secondScreenOption);
+#endif
+    return DMError::DM_OK;
+}
+
+void ScreenSessionManager::SetMultiScreenRelativePositionInner(sptr<ScreenSession>& firstScreenSession,
+    sptr<ScreenSession>& secondScreenSession, MultiScreenPositionOptions mainScreenOptions,
+    MultiScreenPositionOptions secondScreenOption)
+{
+#ifdef WM_MULTI_SCREEN_ENABLE
     firstScreenSession->SetStartPosition(mainScreenOptions.startX_, mainScreenOptions.startY_);
     CalculateXYPosition(firstScreenSession);
     firstScreenSession->PropertyChange(firstScreenSession->GetScreenProperty(),
@@ -8325,6 +8349,14 @@ DMError ScreenSessionManager::SetMultiScreenRelativePosition(MultiScreenPosition
     CalculateXYPosition(secondScreenSession);
     secondScreenSession->PropertyChange(secondScreenSession->GetScreenProperty(),
         ScreenPropertyChangeReason::RELATIVE_POSITION_CHANGE);
+    if (g_isPcDevice) {
+        sptr<ScreenSession> firstPhysicalScreen = GetPhysicalScreenSession(firstScreenSession->GetRSScreenId());
+        sptr<ScreenSession> secondPhysicalScreen = GetPhysicalScreenSession(secondScreenSession->GetRSScreenId());
+        if (firstPhysicalScreen && secondPhysicalScreen) {
+            firstPhysicalScreen->SetStartPosition(mainScreenOptions.startX_, mainScreenOptions.startY_);
+            secondPhysicalScreen->SetStartPosition(secondScreenOption.startX_, secondScreenOption.startY_);
+        }
+    }
     std::shared_ptr<RSDisplayNode> firstDisplayNode = firstScreenSession->GetDisplayNode();
     std::shared_ptr<RSDisplayNode> secondDisplayNode = secondScreenSession->GetDisplayNode();
     if (firstDisplayNode && secondDisplayNode) {
@@ -8339,7 +8371,6 @@ DMError ScreenSessionManager::SetMultiScreenRelativePosition(MultiScreenPosition
         transactionProxy->FlushImplicitTransaction();
     }
 #endif
-    return DMError::DM_OK;
 }
 
 void ScreenSessionManager::SetRelativePositionForDisconnect(MultiScreenPositionOptions defaultScreenOptions)
