@@ -209,6 +209,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::SetStatusBarDefaultVisibilityPerDisplay);
     BindNativeFunction(env, exportObj, "notifyStatusBarShowStatus", moduleName,
         JsSceneSessionManager::NotifyStatusBarShowStatus);
+    BindNativeFunction(env, exportObj, "notifyStatusBarConstantlyShowStatus", moduleName,
+        JsSceneSessionManager::NotifyStatusBarConstantlyShowStatus);
     BindNativeFunction(env, exportObj, "notifyAINavigationBarShowStatus", moduleName,
         JsSceneSessionManager::NotifyAINavigationBarShowStatus);
     BindNativeFunction(env, exportObj, "notifyNextAvoidRectInfo", moduleName,
@@ -1096,6 +1098,13 @@ napi_value JsSceneSessionManager::NotifyStatusBarShowStatus(napi_env env, napi_c
     TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnNotifyStatusBarShowStatus(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::NotifyStatusBarConstantlyShowStatus(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnNotifyStatusBarConstantlyShowStatus(env, info) : nullptr;
 }
 
 napi_value JsSceneSessionManager::NotifyAINavigationBarShowStatus(napi_env env, napi_callback_info info)
@@ -3110,6 +3119,39 @@ napi_value JsSceneSessionManager::OnNotifyStatusBarShowStatus(napi_env env, napi
         return NapiGetUndefined(env);
     }
     SceneSessionManager::GetInstance().NotifyStatusBarShowStatus(persistentId, isVisible);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSessionManager::OnNotifyStatusBarConstantlyShowStatus(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_TWO) {
+        TLOGE(WmsLogTag::WMS_IMMS, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int64_t screenId = -1;
+    if (!ConvertFromJsValue(env, argv[0], screenId)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to screenId");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    if (screenId <= 0) {
+        TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to screenId");
+        return NapiGetUndefined(env);
+    }
+    bool isVisible = false;
+    if (!ConvertFromJsValue(env, argv[1], isVisible)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to isVisible");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    SceneSessionManager::GetInstance().NotifyStatusBarConstantlyShowStatus(static_cast<uint64_t>(screenId), isVisible);
     return NapiGetUndefined(env);
 }
 

@@ -38,8 +38,16 @@ void RootSceneSession::GetSystemAvoidAreaForRoot(const WSRect& rect, AvoidArea& 
         statusBarVector = specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_(
             WindowType::WINDOW_TYPE_STATUS_BAR, GetSessionProperty()->GetDisplayId());
     }
+    uint64_t screenId = GetScreenId();
     for (auto& statusBar : statusBarVector) {
-        if (!statusBar->IsVisible()) {
+        bool isVisible = statusBar->IsVisible();
+        TLOGD(WmsLogTag::WMS_IMMS, "isVisible %{public}d", isVisible);
+        if (onGetStatusBarConstantlyShowFunc_) {
+            onGetStatusBarConstantlyShowFunc_(screenId, isVisible);
+            TLOGD(WmsLogTag::WMS_IMMS, "screenId %{public}" PRIu64 " constantly isVisible %{public}d",
+                screenId, isVisible);
+        }
+        if (!isVisible) {
             continue;
         }
         WSRect statusBarRect = statusBar->GetSessionRect();
