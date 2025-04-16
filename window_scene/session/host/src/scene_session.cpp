@@ -6735,7 +6735,7 @@ void SceneSession::RegisterGetStatusBarAvoidHeightFunc(GetStatusBarAvoidHeightFu
 
 void SceneSession::RegisterGetstatusBarConstantlyShowFunc(GetStatusBarConstantlyShowFunc&& callback)
 {
-    onGetStatusBarConstantlyShowFunc = std::move(callback);
+    onGetStatusBarConstantlyShowFunc_ = std::move(callback);
 }
 
 WMError SceneSession::GetAppForceLandscapeConfig(AppForceLandscapeConfig& config)

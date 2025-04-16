@@ -10390,7 +10390,7 @@ WSError SceneSessionManager::NotifyStatusBarShowStatus(int32_t persistentId, boo
     return WSError::WS_OK;
 }
 
-WSError SceneSessionManager::NotifyStatusBarConstantlyShowStatus(uint32_t screenId, bool isVisible)
+WSError SceneSessionManager::NotifyStatusBarConstantlyShow(uint32_t screenId, bool isVisible)
 {
     TLOGD(WmsLogTag::WMS_IMMS, "screenId %{public}" PRIu64 " isVisible %{public}u", screenId, isVisible);
     const char* const where = __func__;

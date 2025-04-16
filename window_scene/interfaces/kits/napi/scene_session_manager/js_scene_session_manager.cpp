@@ -3151,7 +3151,7 @@ napi_value JsSceneSessionManager::OnNotifyStatusBarConstantlyShowStatus(napi_env
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    SceneSessionManager::GetInstance().NotifyStatusBarConstantlyShowStatus(static_cast<uint64_t>(screenId), isVisible);
+    SceneSessionManager::GetInstance().NotifyStatusBarConstantlyShow(static_cast<uint64_t>(screenId), isVisible);
     return NapiGetUndefined(env);
 }
 
