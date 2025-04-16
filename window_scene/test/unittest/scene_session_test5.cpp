@@ -275,7 +275,8 @@ HWTEST_F(SceneSessionTest5, NotifyOutsideDownEvent, TestSize.Level1)
     pointerEvent->RemoveAllPointerItems();
 
     info.windowInputType_ = 1;
-    session->NotifyOutsideDownEvent(pointerEvent);
+    sptr<SceneSession> session1 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    session1->NotifyOutsideDownEvent(pointerEvent);
 }
 
 /**

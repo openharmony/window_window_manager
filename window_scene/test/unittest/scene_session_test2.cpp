@@ -925,8 +925,11 @@ HWTEST_F(SceneSessionTest2, ProcessPointDownSession, TestSize.Level1)
     EXPECT_EQ(WSError::WS_OK, sceneSession->ProcessPointDownSession(3, 4));
 
     info.windowInputType_ = 1;
-    sceneSession->specificCallback_->onOutsideDownEvent_ = nullptr;
-    EXPECT_EQ(WSError::WS_ERROR_INVALID_TYPE, sceneSession->ProcessPointDownSession(3, 4));
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession1->specificCallback_ = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    EXPECT_NE(nullptr, sceneSession1->specificCallback_);
+    sceneSession1->specificCallback_->onOutsideDownEvent_ = nullptr;
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_TYPE, sceneSession1->ProcessPointDownSession(3, 4));
 }
 
 /**
