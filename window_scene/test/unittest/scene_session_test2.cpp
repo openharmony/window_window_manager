@@ -16,6 +16,7 @@
 #include "window_helper.h"
 #include "display_manager.h"
 #include "pointer_event.h"
+#include "proxy/include/window_info.h"
 
 #include <gtest/gtest.h>
 #include "key_event.h"
@@ -902,7 +903,7 @@ HWTEST_F(SceneSessionTest2, ProcessPointDownSession, TestSize.Level1)
     SessionInfo info;
     info.abilityName_ = "ProcessPointDownSession";
     info.bundleName_ = "ProcessPointDownSession";
-    info.windowInputType_ = 0;
+    info.windowInputType_ = static_cast<uint32_t>(MMI::WindowInputType::NORMAL);
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->specificCallback_ = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(nullptr, sceneSession->specificCallback_);
@@ -924,7 +925,7 @@ HWTEST_F(SceneSessionTest2, ProcessPointDownSession, TestSize.Level1)
     sceneSession->specificCallback_->onOutsideDownEvent_ = nullptr;
     EXPECT_EQ(WSError::WS_OK, sceneSession->ProcessPointDownSession(3, 4));
 
-    info.windowInputType_ = 1;
+    info.windowInputType_ = static_cast<uint32_t>(MMI::WindowInputType::TRANSMIT_ALL);
     sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession1->specificCallback_ = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(nullptr, sceneSession1->specificCallback_);
