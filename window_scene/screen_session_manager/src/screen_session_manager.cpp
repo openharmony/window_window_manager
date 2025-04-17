@@ -7279,8 +7279,9 @@ void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& cl
     SwitchScbNodeHandle(userId, newScbPid, true);
     AddScbClientDeathRecipient(client, newScbPid);
 
-    if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() ||
-        FoldScreenStateInternel::IsSingleDisplayFoldDevice()) {
+    static bool isNeedSwitchScreen = FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() ||
+        FoldScreenStateInternel::IsSingleDisplayFoldDevice()；
+    if (isNeedSwitchScreen) {
         FoldDisplayMode displayMode = GetFoldDisplayMode();
         if (displayMode == FoldDisplayMode::FULL) {
             TLOGI(WmsLogTag::DMS, "switch screen to full");
