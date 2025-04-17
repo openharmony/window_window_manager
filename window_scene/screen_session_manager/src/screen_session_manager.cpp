@@ -7280,7 +7280,7 @@ void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& cl
     AddScbClientDeathRecipient(client, newScbPid);
 
     static bool isNeedSwitchScreen = FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() ||
-        FoldScreenStateInternel::IsSingleDisplayFoldDevice()；
+        FoldScreenStateInternel::IsSingleDisplayFoldDevice();
     if (isNeedSwitchScreen) {
         FoldDisplayMode displayMode = GetFoldDisplayMode();
         if (displayMode == FoldDisplayMode::FULL) {
