@@ -174,6 +174,7 @@ public:
     virtual SuperFoldStatus GetSuperFoldStatus() { return SuperFoldStatus::UNKNOWN; };
     virtual void SetLandscapeLockStatus(bool isLocked) {};
     virtual ExtendScreenConnectStatus GetExtendScreenConnectStatus() { return ExtendScreenConnectStatus::UNKNOWN; }
+    virtual void SetForceCloseHdr(ScreenId screenid, bool isForceCloseHdr) {};
 
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() override { return nullptr; };
 

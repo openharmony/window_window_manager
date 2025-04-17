@@ -107,6 +107,8 @@ napi_value JsScreenSessionManager::Init(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "getSuperFoldStatus", moduleName, JsScreenSessionManager::GetSuperFoldStatus);
     BindNativeFunction(env, exportObj, "setLandscapeLockStatus", moduleName,
         JsScreenSessionManager::SetLandscapeLockStatus);
+    BindNativeFunction(env, exportObj, "setForceCloseHdr", moduleName,
+        JsScreenSessionManager::SetForceCloseHdr);
     BindNativeFunction(env, exportObj, "getScreenSnapshot", moduleName,
         JsScreenSessionManager::GetScreenSnapshot);
     BindNativeFunction(env, exportObj, "getScreenSnapshotSync", moduleName,
@@ -263,6 +265,13 @@ napi_value JsScreenSessionManager::SetLandscapeLockStatus(napi_env env, napi_cal
     WLOGD("[NAPI]SetLandscapeLockStatus");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnSetLandscapeLockStatus(env, info) : nullptr;
+}
+
+napi_value JsScreenSessionManager::SetForceCloseHdr(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DMS, "[NAPI] begin");
+    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
+    return (me != nullptr) ? me->OnSetForceCloseHdr(env, info) : nullptr;
 }
 
 napi_value JsScreenSessionManager::GetScreenSnapshot(napi_env env, napi_callback_info info)
@@ -874,6 +883,35 @@ napi_value JsScreenSessionManager::OnSetLandscapeLockStatus(napi_env env, napi_c
         return NapiGetUndefined(env);
     }
     ScreenSessionManagerClient::GetInstance().SetLandscapeLockStatus(isLocked);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsScreenSessionManager::OnSetForceCloseHdr(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_TWO;
+    napi_value argv[ARGC_TWO] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_TWO) {
+        TLOGE(WmsLogTag::DMS, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int32_t screenId;
+    if (!ConvertFromJsValue(env, argv[0], screenId)) {
+        TLOGE(WmsLogTag::DMS, "Failed to convert parameter to screenId");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    bool isForceCloseHdr;
+    if (!ConvertFromJsValue(env, argv[1], isForceCloseHdr)) {
+        TLOGE(WmsLogTag::DMS, "Failed to convert parameter to isForceCloseHdr");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    ScreenSessionManagerClient::GetInstance().SetForceCloseHdr(screenId, isForceCloseHdr);
     return NapiGetUndefined(env);
 }
 
