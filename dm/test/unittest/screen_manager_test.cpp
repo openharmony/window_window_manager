@@ -778,7 +778,8 @@ HWTEST_F(ScreenManagerTest, MakeMirrorForRecord01, TestSize.Level1)
 
 /**
  * @tc.name: MakeMirrorForRecord02
- * @tc.desc: Test MakeMirrorForRecord function when mirrorScreenId size does not exceed MAX_SCREEN_SIZE and screenGroupId is valid.
+ * @tc.desc: Test MakeMirrorForRecord function when mirrorScreenId size
+     does not exceed MAX_SCREEN_SIZE and screenGroupId is valid.
  * @tc.type: FUNC
  */
 HWTEST_F(ScreenManagerTest, MakeMirrorForRecord02, TestSize.Level1)
@@ -794,7 +795,8 @@ HWTEST_F(ScreenManagerTest, MakeMirrorForRecord02, TestSize.Level1)
 
 /**
  * @tc.name: MakeMirrorForRecord03
- * @tc.desc: Test MakeMirrorForRecord function when mirrorScreenId size does not exceed MAX_SCREEN_SIZE but screenGroupId is invalid.
+ * @tc.desc: Test MakeMirrorForRecord function when mirrorScreenId size
+     does not exceed MAX_SCREEN_SIZE but screenGroupId is invalid.
  * @tc.type: FUNC
  */
 HWTEST_F(ScreenManagerTest, MakeMirrorForRecord03, TestSize.Level1)
