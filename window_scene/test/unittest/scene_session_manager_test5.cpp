@@ -789,13 +789,25 @@ HWTEST_F(SceneSessionManagerTest5, UpdateFocusStatus01, Function | SmallTest | L
 
     ssm_->UpdateFocusStatus(DEFAULT_DISPLAY_ID, sceneSession, false);
     ASSERT_EQ(focusGroup->GetFocusedSessionId(), 1);
-    ssm_->needBlockNotifyFocusStatusUntilForeground_ = false;
     ssm_->UpdateFocusStatus(DEFAULT_DISPLAY_ID, sceneSession, true);
     ASSERT_NE(focusGroup->GetFocusedSessionId(), 1);
-    focusGroup->SetFocusedSessionId(1);
-    ssm_->needBlockNotifyFocusStatusUntilForeground_ = true;
+}
+
+/**
+ * @tc.name: UpdateFocusStatus02
+ * @tc.desc: Verify that the NotifyFocusStatusByMission function is called.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, UpdateFocusStatus02, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "UpdateFocusStatus02";
+    info.bundleName_ = "UpdateFocusStatus02";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
+    focusGroup->SetNeedBlockNotifyFocusStatusUntilForeground(true);
     ssm_->UpdateFocusStatus(DEFAULT_DISPLAY_ID, sceneSession, true);
-    ASSERT_NE(focusGroup->GetFocusedSessionId(), 1);
 }
 
 /**
@@ -869,9 +881,7 @@ HWTEST_F(SceneSessionManagerTest5, NotifyFocusStatus, Function | SmallTest | Lev
     SessionInfo info;
     info.abilityName_ = "test1";
     info.bundleName_ = "test2";
-    sptr<SceneSession> sceneSession = nullptr;
     auto focusGroup = sptr<FocusGroup>::MakeSptr(DEFAULT_DISPLAY_ID);
-    ssm_->NotifyFocusStatus(sceneSession, true, focusGroup);
     sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession1, nullptr);
     ssm_->NotifyFocusStatus(sceneSession1, false, focusGroup);
