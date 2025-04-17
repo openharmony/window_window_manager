@@ -526,6 +526,35 @@ __attribute__((no_sanitize("cfi")))
     return obj;
 }
 
+ani_object AniWindow::Resize(ani_env* env, ani_double width, ani_double height)
+{
+    if (windowToken_ == nullptr) {
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+
+    WMError ret = windowToken_->Resize(static_cast<int>(width), static_cast<int>(height));
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] Resize set error, ret:%{public}d", ret);
+        return AniWindowUtils::AniThrowError(env, ret);
+    }
+    return AniWindowUtils::CreateAniUndefined(env);
+}
+
+ani_object AniWindow::MoveWindowTo(ani_env* env, ani_double x, ani_double y)
+{
+    if (windowToken_ == nullptr) {
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+
+    WMError ret = windowToken_->MoveTo(static_cast<int>(x), static_cast<int>(y));
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] MoveWindowTo set error, ret:%{public}d", ret);
+        return AniWindowUtils::AniThrowError(env, ret);
+    }
+    return AniWindowUtils::CreateAniUndefined(env);
+}
+
+
 ani_double AniWindow::GetWindowDecorHeight(ani_env* env)
 {
     int32_t height { 0 };
@@ -796,6 +825,30 @@ ani_object AniWindow::SetSpecificSystemBarEnabled(ani_env* env, ani_string name,
 }  // namespace Rosen
 }  // namespace OHOS
 
+static ani_object WindowResize(ani_env* env, ani_object obj, ani_long nativeObj, ani_double width, ani_double height)
+{
+    using namespace OHOS::Rosen;
+    TLOGI(WmsLogTag::WMS_LAYOUT, "[ANI]");
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    if (aniWindow == nullptr || aniWindow->GetWindow() == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] windowToken is nullptr");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    return aniWindow->Resize(env, width, height);
+}
+
+static ani_object WindowMoveWindowTo(ani_env* env, ani_object obj, ani_long nativeObj, ani_double x, ani_double y)
+{
+    using namespace OHOS::Rosen;
+    TLOGI(WmsLogTag::WMS_LAYOUT, "[ANI]");
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    if (aniWindow == nullptr || aniWindow->GetWindow() == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] windowToken is nullptr");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    return aniWindow->MoveWindowTo(env, x, y);
+}
+
 static ani_double WindowGetWindowDecorHeight(ani_env* env, ani_object obj, ani_long nativeObj)
 {
     using namespace OHOS::Rosen;
@@ -1017,6 +1070,10 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
         return ANI_NOT_FOUND;
     }
     std::array methods = {
+        ani_native_function {"resize", "JDD:I",
+            reinterpret_cast<void *>(WindowResize)},
+        ani_native_function {"moveWindowTo", "JDD:I",
+            reinterpret_cast<void *>(WindowMoveWindowTo)},
         ani_native_function {"getWindowDecorHeight", "J:D",
             reinterpret_cast<void *>(WindowGetWindowDecorHeight)},
         ani_native_function {"setWindowBackgroundColor", "JLstd/core/String;:I",
