@@ -1960,5 +1960,15 @@ uint32_t WindowSessionProperty::GetApiVersion() const
 {
     return apiVersion_;
 }
+
+void WindowSessionProperty::SetIsFullScreenWaterfallMode(bool isFullScreenWaterfallMode)
+{
+    isFullScreenWaterfallMode_ = isFullScreenWaterfallMode;
+}
+
+bool WindowSessionProperty::GetIsFullScreenWaterfallMode() const
+{
+    return isFullScreenWaterfallMode_;
+}
 } // namespace Rosen
 } // namespace OHOS
