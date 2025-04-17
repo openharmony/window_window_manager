@@ -8131,4 +8131,14 @@ void SceneSession::SetIsUserRequestedExit(bool isUserRequestedExit)
 {
     isUserRequestedExit_ = isUserRequestedExit;
 }
+
+void SceneSession::SetIsAncoForFloatingWindow(bool isAncoForFloatingWindow)
+{
+    isAncoForFloatingWindow_ = isAncoForFloatingWindow;
+}
+
+bool SceneSession::GetIsAncoForFloatingWindow() const
+{
+    return isAncoForFloatingWindow_;
+}
 } // namespace OHOS::Rosen
