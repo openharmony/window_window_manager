@@ -3527,7 +3527,7 @@ void SceneSessionManager::CheckFloatWindowIsAnco(pid_t pid, const sptr<SceneSess
     for (const auto& [_, session] : sceneSessionMapCopy) {
         if (session && session->GetCallingPid() == pid &&
             session->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
-            auto sessionInfo = session->GetSessioinInfo();
+            auto sessionInfo = session->GetSessionInfo();
             if (AbilityInfoManager::GetInstance().IsAnco(sessionInfo.bundleName_,
                 sessionInfo.abilityName_, sessionInfo.moduleName_)) {
                 newSession->GetSessionProperty()->SetIsAncoForFloatingWindow(true);
