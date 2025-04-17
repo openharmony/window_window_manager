@@ -618,11 +618,13 @@ void JsSceneSessionManager::ProcessShiftFocus()
     };
     NotifyDiffSCBAfterUpdateFocusFunc scbFocusChangeCallback = [this](
         DisplayId prevDisplayId, DisplayId currDisplayId) {
-        TLOGND(WmsLogTag::WMS_FOCUS, "scb focus change, prevId: %{public} currId: %{public}" PRIu64, prevDisplayId, currDisplayId);
+        TLOGND(WmsLogTag::WMS_FOCUS, "scb focus change, prevId: %{public}" PRIu64 "currId: %{public}" PRIu64,
+            prevDisplayId, currDisplayId);
         const auto& prevUIContent = rootScene_->GetUIContentByDisplayId(prevDisplayId);
         const auto& currUIContent = rootScene_->GetUIContentByDisplayId(currDisplayId);
         if (!prevUIContent && !currUIContent) {
-            TLOGNE(WmsLogTag::WMS_FOCUS, "uiContent is nullptr");
+            TLOGNE(WmsLogTag::WMS_FOCUS, "uiContent is nullptr, prevId: %{public}" PRIu64 "currId: %{public}" PRIu64,
+                prevDisplayId, currDisplayId);
             return;
         }
         if (prevUIContent == nullptr) {
@@ -642,7 +644,7 @@ void JsSceneSessionManager::ProcessShiftFocus()
         }
         prevUIContent->UnFocus();
         currUIContent->Focus();
-    }
+    };
     SceneSessionManager::GetInstance().SetShiftFocusListener(func);
     SceneSessionManager::GetInstance().SetSCBFocusedListener(focusedCallback);
     SceneSessionManager::GetInstance().SetSCBUnfocusedListener(unfocusedCallback);

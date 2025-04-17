@@ -461,7 +461,7 @@ Ace::UIContent* RootScene::GetUIContentByDisplayId(DisplayId displayId)
     auto iter = rootSceneMap_.find(displayId);
     if (iter == rootSceneMap_.end()) {
         TLOGE(WmsLogTag::WMS_FOCUS, "Can not find rootScene, displayId: %{public}" PRIu64, displayId);
-        return this.GetUIContent();
+        return GetUIContent();
     }
     if (iter->second != nullptr) {
         auto window = iter->second.promote();
