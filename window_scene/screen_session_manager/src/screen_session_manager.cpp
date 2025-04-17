@@ -7024,7 +7024,7 @@ void ScreenSessionManager::OnPropertyChange(const ScreenProperty& newProperty, S
     TLOGI(WmsLogTag::DMS, "screenId: %{public}" PRIu64 " reason: %{public}d", screenId, static_cast<int>(reason));
     if (!clientProxy_) {
         TLOGI(WmsLogTag::DMS, "clientProxy_ is null");
-        if (foldScreenController_ != nullptr) {
+        if (foldScreenController_ != nullptr && !FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
             foldScreenController_->SetdisplayModeChangeStatus(false);
         }
         return;
