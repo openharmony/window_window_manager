@@ -66,7 +66,6 @@ test_external_deps = [
   "ability_base:base",
   "ability_base:want",
   "ability_base:zuri",
-  # need delete it for abilitycontext
   "ability_runtime:ability_context_native",
   "ability_runtime:ability_manager",
   "ability_runtime:app_context",
