@@ -3529,7 +3529,7 @@ void SceneSessionManager::CheckFloatWindowIsAnco(pid_t pid, const sptr<SceneSess
             session->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
             auto sessionInfo = session->GetSessionInfo();
             if (AbilityInfoManager::GetInstance().IsAnco(sessionInfo.bundleName_,
-                sessionInfo.abilityName_, sessionInfo.moduleName_)) {
+                    sessionInfo.abilityName_, sessionInfo.moduleName_)) {
                 newSession->SetIsAncoForFloatingWindow(true);
                 TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Set float window is anco, wid: %{public}d", newSession->GetWindowId());
                 break;
