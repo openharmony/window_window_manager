@@ -42,6 +42,7 @@ constexpr uint32_t DATA_INDEX_TWO = 2;
 constexpr uint32_t SCREEN_MAIN_IN_DATA = 0;
 constexpr uint32_t SCREEN_MIRROR_IN_DATA = 1;
 constexpr uint32_t SCREEN_EXTEND_IN_DATA = 2;
+constexpr ScreenId RS_ID_INTERNAL = 0;
 const std::string SCREEN_SHAPE = system::GetParameter("const.window.screen_shape", "0:0");
 constexpr int32_t INDEX_EXTEND_SCREEN_DPI_POSITION = -1;
 
@@ -448,12 +449,13 @@ bool ScreenSettingHelper::GetScreenRelativePosition(MultiScreenInfo& info, const
     TLOGW(WmsLogTag::DMS, "screenId: %{public}" PRIu64 ", startX: %{public}d, startY: %{public}d",
         screenId, startX, startY);
 
-    ScreenId internalScreenId = ScreenSessionManager::GetInstance().GetInternalScreenId();
-    if ((info.isExtendMain && screenId != internalScreenId) || (!info.isExtendMain && screenId == internalScreenId)) {
+    if ((RS_ID_INTERNAL == screenId && !info.isExtendMain) || (RS_ID_INTERNAL != screenId && info.isExtendMain)) {
+        TLOGI(WmsLogTag::DMS, "find main screen option");
         info.mainScreenOption.screenId_ = screenId;
         info.mainScreenOption.startX_ = startX;
         info.mainScreenOption.startY_ = startY;
     } else {
+        TLOGI(WmsLogTag::DMS, "find secondary screen option");
         info.secondaryScreenOption.screenId_ = screenId;
         info.secondaryScreenOption.startX_ = startX;
         info.secondaryScreenOption.startY_ = startY;
