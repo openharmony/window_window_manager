@@ -47,7 +47,7 @@ ohos_unittest("extension_window_extension_stub_impl_test") {
 
   deps = [ ":window_extension_unittest_common" ]
 
-    external_deps = [
+  external_deps = [
     "ability_runtime:ability_manager",
     "ace_engine:ace_uicontent",
     "napi:ace_napi",
