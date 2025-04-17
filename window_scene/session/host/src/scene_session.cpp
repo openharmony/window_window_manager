@@ -6810,14 +6810,17 @@ void SceneSession::SetBehindWindowFilterEnabled(bool enabled)
 
 void SceneSession::UpdateAllModalUIExtensions(const WSRect& globalRect)
 {
+    if (modalUIExtensionInfoList_.empty()) {
+        return;
+    }
     PostTask([weakThis = wptr(this), where = __func__, globalRect] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_UIEXT, "%{public}s session is null", where);
             return;
         }
-        auto parentTransX = globalRect.posX_ - session->GetSessionRect().posX_;
-        auto parentTransY = globalRect.posY_ - session->GetSessionRect().posY_;
+        auto parentTransX = globalRect.posX_ - session->GetClientRect().posX_;
+        auto parentTransY = globalRect.posY_ - session->GetClientRect().posY_;
         {
             std::unique_lock<std::shared_mutex> lock(session->modalUIExtensionInfoListMutex_);
             for (auto& extensionInfo : session->modalUIExtensionInfoList_) {
@@ -6826,7 +6829,7 @@ void SceneSession::UpdateAllModalUIExtensions(const WSRect& globalRect)
                 }
                 extensionInfo.windowRect = extensionInfo.uiExtRect;
                 extensionInfo.windowRect.posX_ += parentTransX;
-                extensionInfo.windowRect.posX_ += parentTransY;
+                extensionInfo.windowRect.posY_ += parentTransY;
             }
         }
         session->NotifySessionInfoChange();
