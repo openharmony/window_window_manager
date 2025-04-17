@@ -881,9 +881,7 @@ HWTEST_F(SceneSessionManagerTest5, NotifyFocusStatus, Function | SmallTest | Lev
     SessionInfo info;
     info.abilityName_ = "test1";
     info.bundleName_ = "test2";
-    sptr<SceneSession> sceneSession = nullptr;
     auto focusGroup = sptr<FocusGroup>::MakeSptr(DEFAULT_DISPLAY_ID);
-    ssm_->NotifyFocusStatus(sceneSession, true, focusGroup);
     sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession1, nullptr);
     ssm_->NotifyFocusStatus(sceneSession1, false, focusGroup);
