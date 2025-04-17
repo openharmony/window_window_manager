@@ -1303,7 +1303,7 @@ HWTEST_F(SceneSessionManagerTest5, CheckFloatWindowIsAnco01, TestSize.Level1)
     sceneSession->SetCallingPid(123);
     ssm_->sceneSessionMap_.insert({ 123, sceneSession });
     ssm_->CheckFloatWindowIsAnco(123, sceneSession1);
-    ASSERT_EQ(sceneSession1->GetSessionProperty()->GetIsAncoForFloatingWindow(), false);
+    ASSERT_EQ(sceneSession1->GetIsAncoForFloatingWindow(), false);
     ssm_->sceneSessionMap_.erase(123);
     usleep(WAIT_SYNC_IN_NS);
 }

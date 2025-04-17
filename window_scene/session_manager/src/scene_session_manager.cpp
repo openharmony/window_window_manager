@@ -3530,7 +3530,7 @@ void SceneSessionManager::CheckFloatWindowIsAnco(pid_t pid, const sptr<SceneSess
             auto sessionInfo = session->GetSessionInfo();
             if (AbilityInfoManager::GetInstance().IsAnco(sessionInfo.bundleName_,
                 sessionInfo.abilityName_, sessionInfo.moduleName_)) {
-                newSession->GetSessionProperty()->SetIsAncoForFloatingWindow(true);
+                newSession->SetIsAncoForFloatingWindow(true);
                 TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Set float window is anco, wid: %{public}d", newSession->GetWindowId());
                 break;
             }
@@ -5303,7 +5303,7 @@ void SceneSessionManager::UpdateForceHideState(const sptr<SceneSession>& sceneSe
             systemTopSceneSessionMap_.insert({ persistentId, sceneSession });
             notifyAll = !forceHideFloatOld;
         } else if ((property->IsFloatingWindowAppType() && !property->GetSystemCalling()) ||
-            sceneSession->GetSessionProperty()->GetIsAncoForFloatingWindow()) {
+            sceneSession->GetIsAncoForFloatingWindow()) {
             nonSystemFloatSceneSessionMap_.insert({ persistentId, sceneSession });
             if (forceHideFloatOld) {
                 sceneSession->NotifyForceHideChange(true);
@@ -5314,7 +5314,7 @@ void SceneSessionManager::UpdateForceHideState(const sptr<SceneSession>& sceneSe
             systemTopSceneSessionMap_.erase(persistentId);
             notifyAll = forceHideFloatOld && systemTopSceneSessionMap_.empty();
         } else if ((property->IsFloatingWindowAppType() && !property->GetSystemCalling()) ||
-            sceneSession->GetSessionProperty()->GetIsAncoForFloatingWindow()) {
+            sceneSession->GetIsAncoForFloatingWindow()) {
             nonSystemFloatSceneSessionMap_.erase(persistentId);
             if (property->GetForceHide()) {
                 sceneSession->NotifyForceHideChange(false);
