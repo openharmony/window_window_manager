@@ -342,6 +342,7 @@ public:
     void SetScreenCorrection();
     void ReportFoldDisplayTime(uint64_t screenId, int64_t rsFirstFrameTime);
     void RegisterFirstFrameCommitCallback();
+    void SetForceCloseHdr(ScreenId screenId, bool isForceCloseHdr) override;
 
     VirtualScreenFlag GetVirtualScreenFlag(ScreenId screenId) override;
     DMError SetVirtualScreenFlag(ScreenId screenId, VirtualScreenFlag screenFlag) override;
