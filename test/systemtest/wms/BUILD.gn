@@ -66,6 +66,7 @@ test_external_deps = [
   "ability_base:base",
   "ability_base:want",
   "ability_base:zuri",
+  # need delete it for abilitycontext
   "ability_runtime:ability_context_native",
   "ability_runtime:ability_manager",
   "ability_runtime:app_context",
@@ -577,23 +578,12 @@ ohos_static_library("wms_systemtest_common") {
   ]
 
   public_deps = [
-    "//foundation/arkui/ace_engine/interfaces/inner_api/ace:ace_uicontent",
-
-    # need delete it for abilitycontext
-    "${ability_runtime_inner_api_path}/ability_manager:ability_manager",
     "${window_base_path}/dm:libdm",
     "${window_base_path}/dmserver:libdms",
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/utils:libwmutil_base",
     "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
     "${window_base_path}/wm:libwm",
-    "//commonlibrary/c_utils/base:utils",
-    "//foundation/arkui/napi:ace_napi",
-    "//foundation/graphic/graphic_2d/rosen/modules/animation/window_animation:window_animation",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-    "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
-    "//third_party/googletest:gmock",
-    "//third_party/googletest:gtest_main",
   ]
   external_deps = test_external_deps
 
