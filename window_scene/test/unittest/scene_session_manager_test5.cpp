@@ -561,6 +561,32 @@ HWTEST_F(SceneSessionManagerTest5, SetShiftFocusListener, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ShiftFocus
+ * @tc.desc: ShiftFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, ShiftFocus, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    NotifyDiffSCBAfterUpdateFocusFunc func;
+    ssm_->SetSCBFocusChangeListener(func);
+    ASSERT_NE(ssm_->notifyDiffSCBAfterUnfocusedFunc_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "ShiftFocus";
+    info.bundleName_ = "ShiftFocus";
+    info.isSystem_ = true;
+    sptr<SceneSession> focusedSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    focusedSession->persistentId_ = 1;
+    sceneSession->persistentId_ = 2;
+    focusedSession->GetSessionProperty()->SetDisplayId(0);
+    sceneSession->GetSessionProperty()->SetDisplayId(12);
+    ssm_->sceneSessionMap_.insert({focusedSession->GetPersistentId(), focusedSession});
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    ssm_->ShiftFocus(DEFAULT_DISPLAY_ID, sceneSession, false, FocusChangeReason::DEFAULT);
+}
+
+/**
  * @tc.name: UpdateFocusStatus
  * @tc.desc: UpdateFocusStatus
  * @tc.type: FUNC
