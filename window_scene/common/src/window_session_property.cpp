@@ -1384,6 +1384,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     isAtomicService_ = property->isAtomicService_;
     apiVersion_ = property->apiVersion_;
     isFullScreenWaterfallMode_ = property->isFullScreenWaterfallMode_;
+    isAncoForFloatingWindow_ = property->isAncoForFloatingWindow_;
 }
 
 bool WindowSessionProperty::Write(Parcel& parcel, WSPropertyChangeAction action)
@@ -1969,6 +1970,16 @@ void WindowSessionProperty::SetIsFullScreenWaterfallMode(bool isFullScreenWaterf
 bool WindowSessionProperty::GetIsFullScreenWaterfallMode() const
 {
     return isFullScreenWaterfallMode_;
+}
+
+void WindowSessionProperty::SetIsAncoForFloatingWindow(bool isAncoForFloatingWindow)
+{
+    isAncoForFloatingWindow_ = isAncoForFloatingWindow;
+}
+
+bool WindowSessionProperty::GetIsAncoForFloatingWindow() const
+{
+    return isAncoForFloatingWindow_;
 }
 } // namespace Rosen
 } // namespace OHOS

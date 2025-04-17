@@ -928,6 +928,7 @@ private:
     DisplayId UpdateSpecificSessionClientDisplayId(const sptr<WindowSessionProperty>& property);
     void SetSkipEventOnCastPlusInner(int32_t windowId, bool isSkip);
     void UpdateSessionDisplayIdBySessionInfo(sptr<SceneSession> sceneSession, const SessionInfo& sessionInfo);
+    void CheckFloatWindowIsAnco(pid_t pid, const sptr<SceneSession>& newSession);
     bool IsNeedUpdateBrightness(float brightness);
 
     /*

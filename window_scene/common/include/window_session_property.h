@@ -233,6 +233,8 @@ public:
      */
     void SetWindowCornerRadius(float cornerRadius);
     float GetWindowCornerRadius() const;
+    void SetIsAncoForFloatingWindow(bool isAncoForFloatingWindow);
+    bool GetIsAncoForFloatingWindow() const;
 
     /*
      * UIExtension
@@ -501,6 +503,7 @@ private:
      */
     float cornerRadius_ = 0.0f;
     mutable std::mutex cornerRadiusMutex_;
+    bool isAncoForFloatingWindow_ = false;
 };
 
 struct FreeMultiWindowConfig : public Parcelable {
