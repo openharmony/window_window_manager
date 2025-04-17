@@ -4325,9 +4325,7 @@ void WindowSessionImpl::NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, 
         WindowHelper::IsUIExtensionWindow(GetType()) && WindowHelper::IsSystemWindow(GetRootHostWindowType());
     bool isSystemWindow = WindowHelper::IsSystemWindow(GetType());
     uint32_t currentApiVersion = 0;
-    if (context_ != nullptr && context_->GetApplicationInfo() != nullptr) {
-        currentApiVersion = context_->GetApplicationInfo()->apiTargetVersion % API_VERSION_MOD;
-    }
+    GetTargetAPIVersionByApplicationInfo(currentApiVersion);
     AvoidArea newAvoidArea;
     // api 18 isolation for UEC with system host window
     if ((isUIExtensionWithSystemHost || isSystemWindow) && currentApiVersion < API_VERSION_18) {
@@ -5897,6 +5895,13 @@ void WindowSessionImpl::SetTargetAPIVersion(uint32_t targetAPIVersion)
 uint32_t WindowSessionImpl::GetTargetAPIVersion() const
 {
     return targetAPIVersion_;
+}
+
+void WindowSessionImpl::GetTargetAPIVersionByApplicationInfo(uint32_t& currentApiVersion)
+{
+    if (context_ != nullptr && context_->GetApplicationInfo() != nullptr) {
+        currentApiVersion = context_->GetApplicationInfo()->apiTargetVersion % API_VERSION_MOD;
+    }
 }
 
 void WindowSessionImpl::SetLayoutTransform(const Transform& transform)

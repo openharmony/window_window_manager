@@ -131,6 +131,7 @@ public:
     WMError SetWindowModal(bool isModal) override;
     void SetTargetAPIVersion(uint32_t targetAPIVersion);
     uint32_t GetTargetAPIVersion() const;
+    void GetTargetAPIVersionByApplicationInfo(uint32_t& currentApiVersion);
     void NotifyClientWindowSize();
     bool IsFullScreenPcAppInPadMode() const;
 
