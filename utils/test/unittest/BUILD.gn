@@ -41,11 +41,11 @@ group("unittest") {
 
 test_external_deps = [
   "c_utils:utils",
-  "graphic_2d:librender_service_base",
-  "graphic_2d:librender_service_client",
   "googletest:gmock",
   "googletest:gtest",
   "googletest:gtest_main",
+  "graphic_2d:librender_service_base",
+  "graphic_2d:librender_service_client",
   "hilog:libhilog",
 ]
 
