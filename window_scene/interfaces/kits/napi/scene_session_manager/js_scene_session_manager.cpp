@@ -618,32 +618,22 @@ void JsSceneSessionManager::ProcessShiftFocus()
     };
     NotifyDiffSCBAfterUpdateFocusFunc scbFocusChangeCallback = [this](
         DisplayId prevDisplayId, DisplayId currDisplayId) {
-        TLOGND(WmsLogTag::WMS_FOCUS, "scb focus change, prevId: %{public}" PRIu64 "currId: %{public}" PRIu64,
+        TLOGND(WmsLogTag::WMS_FOCUS, "scb focus change, prevId: %{public}" PRIu64 " currId: %{public}" PRIu64,
             prevDisplayId, currDisplayId);
         const auto& prevUIContent = rootScene_->GetUIContentByDisplayId(prevDisplayId);
         const auto& currUIContent = rootScene_->GetUIContentByDisplayId(currDisplayId);
-        if (!prevUIContent && !currUIContent) {
-            TLOGNE(WmsLogTag::WMS_FOCUS, "uiContent is nullptr, prevId: %{public}" PRIu64 "currId: %{public}" PRIu64,
-                prevDisplayId, currDisplayId);
-            return;
-        }
-        if (prevUIContent == nullptr) {
-            TLOGNE(WmsLogTag::WMS_FOCUS, "uiContent is nullptr, id: %{public}" PRIu64, prevDisplayId);
-            currUIContent->Focus();
-            return;
-        }
-
-        if (currUIContent == nullptr) {
-            TLOGNE(WmsLogTag::WMS_FOCUS, "uiContent is nullptr, id: %{public}" PRIu64, currDisplayId);
-            prevUIContent->UnFocus();
-            return;
-        }
         if (prevUIContent == currUIContent) {
-            TLOGNE(WmsLogTag::WMS_FOCUS, "not need to update focus");
+            TLOGND(WmsLogTag::WMS_FOCUS, "not need to update focus");
             return;
         }
-        prevUIContent->UnFocus();
-        currUIContent->Focus();
+        if (prevUIContent != nullptr) {
+            TLOGND(WmsLogTag::WMS_FOCUS, "scb uicontent unfocus, id: %{public}" PRIu64, prevDisplayId);
+            prevUIContent->UnFocus();
+        }
+        if (currUIContent != nullptr) {
+            TLOGND(WmsLogTag::WMS_FOCUS, "scb uicontent focus, id: %{public}" PRIu64, currDisplayId);
+            currUIContent->Focus();
+        }
     };
     SceneSessionManager::GetInstance().SetShiftFocusListener(func);
     SceneSessionManager::GetInstance().SetSCBFocusedListener(focusedCallback);
