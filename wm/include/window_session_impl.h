@@ -463,6 +463,11 @@ protected:
     sptr<FutureCallback> layoutCallback_ = nullptr;
     void FlushLayoutSize(int32_t width, int32_t height) override;
     void UpdateVirtualPixelRatio(const sptr<Display>& display);
+    void SetCurrentTransform(const Transform& transform);
+    Transform GetCurrentTransform() const;
+    void NotifyAfterUIContentReady();
+    void SetNeedRenotifyTransform(bool isNeedRenotify) { needRenotifyTransform_.store(isNeedRenotify); }
+    bool IsNeedRenotifyTransform() const { return needRenotifyTransform_.load(); }
     mutable std::recursive_mutex transformMutex_;
 
     /*
@@ -630,6 +635,9 @@ private:
     int16_t rotationAnimationCount_ { 0 };
     Transform layoutTransform_;
     SingleHandTransform singleHandTransform_;
+    mutable std::mutex currentTransformMutex_;
+    Transform currentTransform_;
+    std::atomic_bool needRenotifyTransform_ = false;
 
     /*
      * Window Decor listener
