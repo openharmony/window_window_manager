@@ -64,7 +64,8 @@ public:
     void OnKeyboardPanelUpdated() override;
     void OnCallingSessionUpdated() override;
     void OpenKeyboardSyncTransaction() override;
-    void CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRect, bool isKeyboardShow, bool isRotating) override;
+    void CloseKeyboardSyncTransaction(uint32_t callingId, const WSRect& keyboardPanelRect,
+        bool isKeyboardShow) override;
     bool IsVisibleForeground() const override;
     uint32_t GetCallingSessionId() override;
     void RecalculatePanelRectForAvoidArea(WSRect& panelRect) override;
@@ -75,7 +76,7 @@ public:
 
 protected:
     void EnableCallingSessionAvoidArea() override;
-    void RestoreCallingSession(const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
+    void RestoreCallingSession(uint32_t callingId, const std::shared_ptr<RSTransaction>& rsTransaction) override;
 
 private:
     sptr<SceneSession> GetSceneSession(uint32_t persistentId);
@@ -86,11 +87,10 @@ private:
 
     void NotifyOccupiedAreaChangeInfo(const sptr<SceneSession>& callingSession, const WSRect& rect,
         const WSRect& occupiedArea, const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
-    void RaiseCallingSession(const WSRect& keyboardPanelRect, bool needCheckVisible,
-        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
+    void RaiseCallingSession(uint32_t callingId, const WSRect& keyboardPanelRect, bool needCheckVisible,
+        const std::shared_ptr<RSTransaction>& rsTransaction);
     void UpdateKeyboardAvoidArea();
     void UseFocusIdIfCallingSessionIdInvalid();
-    void UpdateCallingSessionIdAndPosition(uint32_t newCallingSessionId);
     void NotifyKeyboardPanelInfoChange(WSRect rect, bool isKeyboardPanelShow);
     bool CheckIfNeedRaiseCallingSession(sptr<SceneSession> callingSession, bool isCallingSessionFloating);
     WSError AdjustKeyboardLayout(const KeyboardLayoutParams& params) override;
