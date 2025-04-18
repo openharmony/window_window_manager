@@ -497,14 +497,14 @@ HWTEST_F(WindowSceneSessionImplTest5, SwitchFreeMultiWindow01, TestSize.Level1)
     window->windowSystemConfig_.freeMultiWindowEnable_ = true;
     ref = window->SwitchFreeMultiWindow(true);
     ASSERT_EQ(WSError::WS_ERROR_REPEAT_OPERATION, ref);
-    
+
     window->windowSystemConfig_.freeMultiWindowEnable_ = false;
     WindowSceneSessionImpl::windowSessionMap_.insert(std::make_pair(window->GetWindowName(),
         std::pair<uint64_t, sptr<WindowSessionImpl>>(window->GetWindowId(), window)));
-    ASSERT_EQ(WSError::WS_OK, window->SwitchFreeMultiWindow(true));
-    ASSERT_EQ(true, window->windowSystemConfig_.freeMultiWindowEnable_);
-    ASSERT_EQ(WSError::WS_OK, window->SwitchFreeMultiWindow(false));
-    ASSERT_EQ(false, window->windowSystemConfig_.freeMultiWindowEnable_);
+    EXPECT_EQ(WSError::WS_ERROR_NULLPTR, window->SwitchFreeMultiWindow(true));
+    EXPECT_EQ(true, window->windowSystemConfig_.freeMultiWindowEnable_);
+    EXPECT_EQ(WSError::WS_ERROR_NULLPTR, window->SwitchFreeMultiWindow(false));
+    EXPECT_EQ(false, window->windowSystemConfig_.freeMultiWindowEnable_);
     WindowSceneSessionImpl::windowSessionMap_.erase(window->GetWindowName());
 }
 
@@ -554,7 +554,7 @@ HWTEST_F(WindowSceneSessionImplTest5, SwitchFreeMultiWindow02, TestSize.Level1)
     EXPECT_EQ(false, mainWindow->IsPcOrPadFreeMultiWindowMode());
     EXPECT_EQ(false, floatWindow->IsPcOrPadFreeMultiWindowMode());
     EXPECT_EQ(false, subWindow->IsPcOrPadFreeMultiWindowMode());
-    EXPECT_EQ(WSError::WS_OK, mainWindow->SwitchFreeMultiWindow(true));
+    EXPECT_EQ(WSError::WS_ERROR_NULLPTR, mainWindow->SwitchFreeMultiWindow(true));
     EXPECT_EQ(true, mainWindow->IsPcOrPadFreeMultiWindowMode());
     EXPECT_EQ(true, floatWindow->IsPcOrPadFreeMultiWindowMode());
     EXPECT_EQ(true, subWindow->IsPcOrPadFreeMultiWindowMode());
@@ -1264,7 +1264,7 @@ HWTEST_F(WindowSceneSessionImplTest5, SetFollowParentWindowLayoutEnabled01, Func
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     ret = window->SetFollowParentWindowLayoutEnabled(true);
     ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_OPERATION);
-    
+
     property->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
     ret = window->SetFollowParentWindowLayoutEnabled(true);
     ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_OPERATION);
