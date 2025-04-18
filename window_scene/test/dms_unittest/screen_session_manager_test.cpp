@@ -949,7 +949,7 @@ HWTEST_F(ScreenSessionManagerTest, GetDisplaySnapshot, TestSize.Level1)
 {
     DisplayId displayId(0);
     DmErrorCode* errorCode = nullptr;
-    ssm_->GetDisplaySnapshot(displayId, errorCode, false);
+    ssm_->GetDisplaySnapshot(displayId, errorCode, false, false);
     EXPECT_TRUE(1);
 }
 
