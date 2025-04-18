@@ -618,9 +618,29 @@ void JsSceneSessionManager::ProcessShiftFocus()
         }
         uiContent->UnFocus();
     };
+    NotifyDiffSCBAfterUpdateFocusFunc scbFocusChangeCallback = [this](
+        DisplayId prevDisplayId, DisplayId currDisplayId) {
+        TLOGND(WmsLogTag::WMS_FOCUS, "scb focus change, prevId: %{public}" PRIu64 " currId: %{public}" PRIu64,
+            prevDisplayId, currDisplayId);
+        const auto& prevUIContent = rootScene_->GetUIContentByDisplayId(prevDisplayId);
+        const auto& currUIContent = rootScene_->GetUIContentByDisplayId(currDisplayId);
+        if (prevUIContent == currUIContent) {
+            TLOGND(WmsLogTag::WMS_FOCUS, "not need to update focus");
+            return;
+        }
+        if (prevUIContent != nullptr) {
+            TLOGND(WmsLogTag::WMS_FOCUS, "scb uicontent unfocus, id: %{public}" PRIu64, prevDisplayId);
+            prevUIContent->UnFocus();
+        }
+        if (currUIContent != nullptr) {
+            TLOGND(WmsLogTag::WMS_FOCUS, "scb uicontent focus, id: %{public}" PRIu64, currDisplayId);
+            currUIContent->Focus();
+        }
+    };
     SceneSessionManager::GetInstance().SetShiftFocusListener(func);
     SceneSessionManager::GetInstance().SetSCBFocusedListener(focusedCallback);
     SceneSessionManager::GetInstance().SetSCBUnfocusedListener(unfocusedCallback);
+    SceneSessionManager::GetInstance().SetSCBFocusChangeListener(std::move(scbFocusChangeCallback));
 }
 
 void JsSceneSessionManager::ProcessCallingSessionIdChangeRegister()
