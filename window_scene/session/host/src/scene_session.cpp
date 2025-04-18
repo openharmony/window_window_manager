@@ -4038,6 +4038,7 @@ void SceneSession::HandleSubSessionSurfaceNode(bool isAdd, DisplayId draggingOrM
             NotifySessionRectChange(lastRect, SizeChangeReason::UNDEFINED, moveConfiguration.displayId);
             SetRequestRectWhenFollowParent({0, 0, 0, 0});
             SetRequestMoveConfiguration({DISPLAY_ID_INVALID});
+            cloneNodeCount_ = 0;
         }
     }
 }
