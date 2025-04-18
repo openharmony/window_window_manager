@@ -970,11 +970,12 @@ WMError WindowExtensionSessionImpl::GetAvoidAreaByType(AvoidAreaType type, Avoid
     uint32_t currentApiVersion = 0;
     GetTargetAPIVersionByApplicationInfo(currentApiVersion);
     apiVersion = apiVersion == API_VERSION_INVALID ? currentApiVersion : apiVersion;
-    TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d type %{public}d api %{public}d", GetPersistentId(), type, apiVersion);
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
     WSRect sessionRect = { rect.posX_, rect.posY_, rect.width_, rect.height_ };
     avoidArea = hostSession->GetAvoidAreaByType(type, sessionRect, apiVersion);
+    TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d type %{public}d api %{public}d area %{public}s",
+        GetPersistentId(), type, apiVersion, avoidArea.ToString().c_str());
     return WMError::WM_OK;
 }
 
