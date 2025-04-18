@@ -846,12 +846,6 @@ public:
      */
     sptr<CutoutInfo> GetCutoutInfoWithRotation(Rotation rotation);
 
-    /**
-     * @brief Get device status.
-     *
-     * @return Device status.
-     */
-    uint32_t GetDeviceStatus() const;
 private:
     DisplayManager();
     ~DisplayManager();
