@@ -64,7 +64,7 @@ public:
     bool SetRotationFromWindow(ScreenId screenId, Rotation targetRotation, bool withAnimation);
     void SetGravitySensorSubscriptionEnabled();
     std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId,
-        DmErrorCode* errorCode, bool isUseDma) override;
+        DmErrorCode* errorCode, bool isUseDma, bool isCaptureFullOfScreen = false) override;
     DMError HasPrivateWindow(DisplayId id, bool& hasPrivateWindow) override;
     // colorspace, gamut
     DMError GetScreenSupportedColorGamuts(ScreenId screenId, std::vector<ScreenColorGamut>& colorGamuts) override;

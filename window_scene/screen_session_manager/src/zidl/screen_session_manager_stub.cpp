@@ -470,7 +470,9 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             DisplayId displayId = data.ReadUint64();
             DmErrorCode errCode = DmErrorCode::DM_OK;
             bool isUseDma = data.ReadBool();
-            std::shared_ptr<Media::PixelMap> displaySnapshot = GetDisplaySnapshot(displayId, &errCode, isUseDma);
+            bool isCaptureFullOfScreen = data.ReadBool();
+            std::shared_ptr<Media::PixelMap> displaySnapshot = GetDisplaySnapshot(displayId, &errCode, isUseDma,
+                isCaptureFullOfScreen);
             reply.WriteParcelable(displaySnapshot == nullptr ? nullptr : displaySnapshot.get());
             static_cast<void>(reply.WriteInt32(static_cast<int32_t>(errCode)));
             break;
@@ -1270,6 +1272,7 @@ void ScreenSessionManagerStub::ProcGetDisplaySnapshotWithOption(MessageParcel& d
     option.displayId_ = static_cast<DisplayId>(data.ReadUint64());
     option.isNeedNotify_ = static_cast<bool>(data.ReadBool());
     option.isNeedPointer_ = static_cast<bool>(data.ReadBool());
+    option.isCaptureFullOfScreen = static_cast<bool>(data.ReadBool());
     DmErrorCode errCode = DmErrorCode::DM_OK;
     std::shared_ptr<Media::PixelMap> capture = GetDisplaySnapshotWithOption(option, &errCode);
     reply.WriteParcelable(capture == nullptr ? nullptr : capture.get());
