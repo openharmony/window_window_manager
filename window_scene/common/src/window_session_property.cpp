@@ -1367,7 +1367,10 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     isLayoutFullScreen_ = property->isLayoutFullScreen_;
     isShaped_ = property->isShaped_;
     fullScreenStart_ = property->fullScreenStart_;
-    windowMask_ = property->windowMask_;
+    {
+        std::lock_guard<std::mutex> lock(windowMaskMutex_);
+        windowMask_ = property->windowMask_;
+    }
     collaboratorType_ = property->collaboratorType_;
     compatibleModeInPc_ = property->compatibleModeInPc_;
     compatibleModeInPcTitleVisible_ = property->compatibleModeInPcTitleVisible_;
@@ -1836,6 +1839,7 @@ WindowType WindowSessionProperty::GetParentWindowType() const
 
 void WindowSessionProperty::SetWindowMask(const std::shared_ptr<Media::PixelMap>& windowMask)
 {
+    std::lock_guard<std::mutex> lock(windowMaskMutex_);
     windowMask_ = windowMask;
 }
 
