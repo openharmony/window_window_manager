@@ -3140,10 +3140,6 @@ napi_value JsSceneSessionManager::OnNotifyStatusBarConstantlyShowStatus(napi_env
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    if (screenId <= 0) {
-        TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to screenId");
-        return NapiGetUndefined(env);
-    }
     bool isVisible = false;
     if (!ConvertFromJsValue(env, argv[1], isVisible)) {
         TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to isVisible");
