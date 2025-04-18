@@ -2129,7 +2129,7 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
             GetPersistentId(), static_cast<uint32_t>(GetWindowType()), sessionProperty->GetWindowFlags());
         return;
     }
-    if (sessionProperty->GetCompatibleModeInPc()) {
+    if (sessionProperty->GetCompatibleModeInPc() && !sessionProperty->GetCompatibleModeInPcTitleVisible()) {
         HookAvoidAreaInCompatibleMode(rect, AvoidAreaType::TYPE_SYSTEM, avoidArea);
         return;
     }
@@ -2292,7 +2292,7 @@ void SceneSession::GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea) con
         return;
     }
     // compatibleMode app need to hook avoidArea in pc
-    if (GetSessionProperty()->GetCompatibleModeInPc()) {
+    if (GetSessionProperty()->GetCompatibleModeInPc() && !GetSessionProperty()->GetCompatibleModeInPcTitleVisible()) {
         HookAvoidAreaInCompatibleMode(rect, AvoidAreaType::TYPE_NAVIGATION_INDICATOR, avoidArea);
         return;
     }

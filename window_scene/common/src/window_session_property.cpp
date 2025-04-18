@@ -1041,6 +1041,16 @@ bool WindowSessionProperty::GetCompatibleModeInPc() const
     return compatibleModeInPc_;
 }
 
+void WindowSessionProperty::SetCompatibleModeInPcTitleVisible(bool compatibleModeInPcTitleVisible)
+{
+    compatibleModeInPcTitleVisible_ = compatibleModeInPcTitleVisible;
+}
+
+bool WindowSessionProperty::GetCompatibleModeInPcTitleVisible() const
+{
+    return compatibleModeInPcTitleVisible_;
+}
+
 void WindowSessionProperty::SetCompatibleWindowSizeInPc(int32_t portraitWidth,
     int32_t portraitHeight, int32_t landscapeWidth, int32_t landscapeHeight)
 {
@@ -1188,6 +1198,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint32(static_cast<uint32_t>(parentWindowType_)) &&
         MarshallingWindowMask(parcel) &&
         parcel.WriteParcelable(&keyboardLayoutParams_) && parcel.WriteBool(compatibleModeInPc_) &&
+        parcel.WriteBool(compatibleModeInPcTitleVisible_) &&
         parcel.WriteInt32(compatibleInPcPortraitWidth_) && parcel.WriteInt32(compatibleInPcPortraitHeight_) &&
         parcel.WriteInt32(compatibleInPcLandscapeWidth_) && parcel.WriteInt32(compatibleInPcLandscapeHeight_) &&
         parcel.WriteBool(isAppSupportPhoneInPc_) && parcel.WriteBool(isSupportDragInPcCompatibleMode_) &&
@@ -1272,6 +1283,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     }
     property->SetKeyboardLayoutParams(*keyboardLayoutParams);
     property->SetCompatibleModeInPc(parcel.ReadBool());
+    property->SetCompatibleModeInPcTitleVisible(parcel.ReadBool());
     property->SetCompatibleWindowSizeInPc(parcel.ReadInt32(), parcel.ReadInt32(),
                                           parcel.ReadInt32(), parcel.ReadInt32());
     property->SetIsAppSupportPhoneInPc(parcel.ReadBool());
@@ -1358,6 +1370,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     windowMask_ = property->windowMask_;
     collaboratorType_ = property->collaboratorType_;
     compatibleModeInPc_ = property->compatibleModeInPc_;
+    compatibleModeInPcTitleVisible_ = property->compatibleModeInPcTitleVisible_;
     compatibleInPcPortraitWidth_ = property->compatibleInPcPortraitWidth_;
     compatibleInPcPortraitHeight_ = property->compatibleInPcPortraitHeight_;
     compatibleInPcLandscapeWidth_ = property->compatibleInPcLandscapeWidth_;

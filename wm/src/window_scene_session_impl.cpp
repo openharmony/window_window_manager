@@ -2524,7 +2524,8 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
         SetLayoutFullScreenByApiVersion(status);
         // compatibleMode app may set statusBarColor before ignoreSafeArea
         auto systemBarProperties = property_->GetSystemBarProperty();
-        if (status && systemBarProperties.find(WindowType::WINDOW_TYPE_STATUS_BAR) != systemBarProperties.end()) {
+        if (status && systemBarProperties.find(WindowType::WINDOW_TYPE_STATUS_BAR) != systemBarProperties.end() &&
+            !property_->GetCompatibleModeInPcTitleVisible()) {
             auto statusBarProperty = systemBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR];
             HookDecorButtonStyleInCompatibleMode(statusBarProperty.contentColor_);
         }
@@ -2635,7 +2636,8 @@ WMError WindowSceneSessionImpl::NotifySpecificWindowSessionProperty(WindowType t
         if (auto uiContent = GetUIContentSharedPtr()) {
             uiContent->SetStatusBarItemColor(property.contentColor_);
         }
-        if (property_->GetCompatibleModeInPc() && isIgnoreSafeArea_) {
+        if (property_->GetCompatibleModeInPc() && isIgnoreSafeArea_ &&
+            !property_->GetCompatibleModeInPcTitleVisible()) {
             HookDecorButtonStyleInCompatibleMode(property.contentColor_);
         }
     } else if (type == WindowType::WINDOW_TYPE_NAVIGATION_BAR) {

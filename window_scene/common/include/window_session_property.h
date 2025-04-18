@@ -99,6 +99,7 @@ public:
     void SetWindowMask(const std::shared_ptr<Media::PixelMap>& windowMask);
     void SetIsShaped(bool isShaped);
     void SetCompatibleModeInPc(bool compatibleModeInPc);
+    void SetCompatibleModeInPcTitleVisible(bool compatibleModeInPcTitleVisible);
     void SetCompatibleWindowSizeInPc(int32_t portraitWidth, int32_t portraitHeight,
         int32_t landscapeWidth, int32_t landscapeHeight);
     void SetIsAppSupportPhoneInPc(bool isSupportPhone);
@@ -167,6 +168,7 @@ public:
     bool GetIsShaped() const;
     KeyboardLayoutParams GetKeyboardLayoutParams() const;
     bool GetCompatibleModeInPc() const;
+    bool GetCompatibleModeInPcTitleVisible() const;
     int32_t GetCompatibleInPcPortraitWidth() const;
     int32_t GetCompatibleInPcPortraitHeight() const;
     int32_t GetCompatibleInPcLandscapeWidth() const;
@@ -429,6 +431,7 @@ private:
     static const std::map<uint64_t, HandlWritePropertyFunc> writeFuncMap_;
     static const std::map<uint64_t, HandlReadPropertyFunc> readFuncMap_;
     bool compatibleModeInPc_ = false;
+    bool compatibleModeInPcTitleVisible_ = false;
     int32_t compatibleInPcPortraitWidth_ = 0;
     int32_t compatibleInPcPortraitHeight_ = 0;
     int32_t compatibleInPcLandscapeWidth_ = 0;
