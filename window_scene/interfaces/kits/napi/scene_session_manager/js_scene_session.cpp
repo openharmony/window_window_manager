@@ -406,8 +406,8 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
     BindNativeFunction(env, objValue, "setSkipEventOnCastPlus", moduleName, JsSceneSession::SetSkipEventOnCastPlus);
     BindNativeFunction(env, objValue, "setCompatibleModeInPc", moduleName,
         JsSceneSession::SetCompatibleModeInPc);
-    BindNativeFunction(env, objValue, "setCompatibleModeInPcWithTopBar", moduleName,
-        JsSceneSession::SetCompatibleModeInPcWithTopBar);
+    BindNativeFunction(env, objValue, "setCompatibleModeInPcTitleVisible", moduleName,
+        JsSceneSession::SetCompatibleModeInPcTitleVisible);
     BindNativeFunction(env, objValue, "setUniqueDensityDpiFromSCB", moduleName,
         JsSceneSession::SetUniqueDensityDpiFromSCB);
     BindNativeFunction(env, objValue, "setBlank", moduleName, JsSceneSession::SetBlank);
@@ -2239,11 +2239,11 @@ napi_value JsSceneSession::SetCompatibleModeInPc(napi_env env, napi_callback_inf
     return (me != nullptr) ? me->OnSetCompatibleModeInPc(env, info) : nullptr;
 }
 
-napi_value JsSceneSession::SetCompatibleModeInPcWithTopBar(napi_env env, napi_callback_info info)
+napi_value JsSceneSession::SetCompatibleModeInPcTitleVisible(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_COMPAT, "[NAPI]");
     JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
-    return (me != nullptr) ? me->OnSetCompatibleModeInPcWithTopBar(env, info) : nullptr;
+    return (me != nullptr) ? me->OnSetCompatibleModeInPcTitleVisible(env, info) : nullptr;
 }
 
 napi_value JsSceneSession::SetCompatibleWindowSizeInPc(napi_env env, napi_callback_info info)
@@ -5448,7 +5448,7 @@ napi_value JsSceneSession::OnSetCompatibleModeInPc(napi_env env, napi_callback_i
     return NapiGetUndefined(env);
 }
 
-napi_value JsSceneSession::OnSetCompatibleModeInPcWithTopBar(napi_env env, napi_callback_info info)
+napi_value JsSceneSession::OnSetCompatibleModeInPcTitleVisible(napi_env env, napi_callback_info info)
 {
     size_t argc = ARGC_ONE;
     napi_value argv[ARGC_ONE] = {nullptr};
@@ -5461,9 +5461,9 @@ napi_value JsSceneSession::OnSetCompatibleModeInPcWithTopBar(napi_env env, napi_
         return NapiGetUndefined(env);
     }
 
-    bool enableTopBar = false;
-    if (!ConvertFromJsValue(env, argv[ARG_INDEX_0], enableTopBar)) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "Failed to convert parameter to enableTopBar");
+    bool enableTitleVisible = false;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_0], enableTitleVisible)) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "Failed to convert parameter to enableTitleVisible");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
@@ -5474,7 +5474,7 @@ napi_value JsSceneSession::OnSetCompatibleModeInPcWithTopBar(napi_env env, napi_
         TLOGE(WmsLogTag::WMS_COMPAT, "session is nullptr, id:%{public}d", persistentId_);
         return NapiGetUndefined(env);
     }
-    session->SetCompatibleModeInPcWithTopBar(enableTopBar);
+    session->SetCompatibleModeInPcTitleVisible(enableTitleVisible);
     return NapiGetUndefined(env);
 }
 

@@ -1257,7 +1257,7 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
         static_cast<uint32_t>(GetSessionProperty()->GetRequestedOrientation()),
         static_cast<uint32_t>(GetSessionProperty()->GetDefaultRequestedOrientation()));
     property->SetCompatibleModeInPc(GetSessionProperty()->GetCompatibleModeInPc());
-    property->SetCompatibleModeInPcWithTopBar(GetSessionProperty()->GetCompatibleModeInPcWithTopBar());
+    property->SetCompatibleModeInPcTitleVisible(GetSessionProperty()->GetCompatibleModeInPcTitleVisible());
     property->SetIsSupportDragInPcCompatibleMode(GetSessionProperty()->GetIsSupportDragInPcCompatibleMode());
     if (GetSessionProperty()->GetCompatibleModeInPc()) {
         property->SetDragEnabled(GetSessionProperty()->GetIsSupportDragInPcCompatibleMode());
@@ -2877,10 +2877,10 @@ WSError Session::SetCompatibleModeInPc(bool enable, bool isSupportDragInPcCompat
     return WSError::WS_OK;
 }
 
-WSError Session::SetCompatibleModeInPcWithTopBar(bool enableTopBar)
+WSError Session::SetCompatibleModeInPcTitleVisible(bool enableTitleVisible)
 {
-    TLOGI(WmsLogTag::WMS_SCB, "SetCompatibleModeInPcWithTopBar enableTopBar: %{public}d", enableTopBar);
-    GetSessionProperty()->SetCompatibleModeInPcWithTopBar(enableTopBar);
+    TLOGI(WmsLogTag::WMS_SCB, "SetCompatibleModeInPcTitleVisible enableTitleVisible: %{public}d", enableTitleVisible);
+    GetSessionProperty()->SetCompatibleModeInPcTitleVisible(enableTitleVisible);
     return WSError::WS_OK;
 }
 

@@ -324,7 +324,7 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
                                               reply.ReadUint32(), reply.ReadUint32() };
         property->SetWindowSizeLimits(windowSizeLimits);
         property->SetCompatibleModeInPc(reply.ReadBool());
-        property->SetCompatibleModeInPcWithTopBar(reply.ReadBool());
+        property->SetCompatibleModeInPcTitleVisible(reply.ReadBool());
         property->SetCompatibleWindowSizeInPc(reply.ReadInt32(), reply.ReadInt32(),
                                               reply.ReadInt32(), reply.ReadInt32());
         property->SetIsAppSupportPhoneInPc(reply.ReadBool());
