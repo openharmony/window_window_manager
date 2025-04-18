@@ -150,7 +150,6 @@ ohos_static_library("window_extension_unittest_common") {
 
   external_deps = [
     "ability_runtime:ability_manager",
-    "ace_engine:ace_uicontent",
     "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:ability_context_native",
@@ -158,6 +157,7 @@ ohos_static_library("window_extension_unittest_common") {
     "ability_runtime:app_context",
     "ability_runtime:runtime",
     "accessibility:accessibility_common",
+    "ace_engine:ace_uicontent",
     "hilog:libhilog",
     "ipc:ipc_single",
     "napi:ace_napi",
