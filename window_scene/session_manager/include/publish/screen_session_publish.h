@@ -22,7 +22,9 @@
 #include <common_event_data.h>
 #include <common_event_publish_info.h>
 
+#include "common_event_subscriber.h"
 #include "dm_common.h"
+#include "screen_session_manager.h"
 
 namespace OHOS::Rosen {
 class ScreenSessionPublish {
@@ -31,18 +33,30 @@ public:
     void InitPublishEvents();
     void PublishCastPlugInEvent();
     void PublishCastPlugOutEvent();
-    void PublishDisplayRotationEvent(const ScreenId &screenId, const Rotation &displayRotation);
+    void PublishDisplayRotationEvent(const ScreenId& screenId, const Rotation& displayRotation);
+    void PublishSmartNotificationEvent(const std::string& faultDesc, const std::string& faultSuggest);
+    bool RegisterLowTempSubscriber();
+    bool UnRegisterLowTempSubscriber();
 
 private:
     explicit ScreenSessionPublish() = default;
-    ~ScreenSessionPublish() = default;
+    ~ScreenSessionPublish();
 
-    int32_t PublishEvents(const EventFwk::CommonEventData &eventData, std::string bundleName = "");
-    void PublishCastPluggedEvent(const bool &isEnable);
+    class EventSubscriber : public EventFwk::CommonEventSubscriber {
+        public:
+            EventSubscriber(const EventFwk::CommonEventSubscribeInfo& info)
+                : EventFwk::CommonEventSubscriber(info) {}
+            ~EventSubscriber() = default;
+            void OnReceiveEvent(const EventFwk::CommonEventData& data) override;
+        };
+    
+        int32_t PublishEvents(const EventFwk::CommonEventData& eventData, std::string bundleName = "");
+        void PublishCastPluggedEvent(const bool& isEnable);
 
 private:
     sptr<EventFwk::CommonEventPublishInfo> publishInfo_;
     static std::map<std::string, sptr<EventFwk::Want>> cesWantMap_;
+    std::shared_ptr<EventSubscriber> subscriber_ = nullptr;
 };
 } // namespace OHOS::Rosen
 
