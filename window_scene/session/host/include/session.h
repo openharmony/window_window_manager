@@ -316,8 +316,6 @@ public:
     WSRect GetLayoutRect() const;
     bool GetSkipSelfWhenShowOnVirtualScreen() const;
     DisplayId GetDisplayId() const { return GetSessionProperty()->GetDisplayId(); }
-    DisplayId GetOriginDisplayId() const { return originDisplayId_; }
-    void SetOriginDisplayId(DisplayId displayId);
 
     virtual WSError SetActive(bool active);
     virtual WSError UpdateSizeChangeReason(SizeChangeReason reason);
@@ -1035,7 +1033,6 @@ private:
     SingleHandTransform singleHandTransform_;
     bool singleHandModeFlag_ = false;
     SingleHandScreenInfo singleHandScreenInfo_;
-    DisplayId originDisplayId_ = DISPLAY_ID_INVALID;
     bool isDragStart_ = { false };
     NotifyDisplayIdChangeFunc DisplayIdChangeFunc_;
     std::atomic_bool isWindowModeDirty_ = false;
