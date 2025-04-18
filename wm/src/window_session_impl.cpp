@@ -72,6 +72,8 @@ constexpr int32_t  WINDOW_ROTATION_CHANGE = 20;
 const std::string SET_UIEXTENSION_DESTROY_TIMEOUT_LISTENER_TASK_NAME = "SetUIExtDestroyTimeoutListener";
 constexpr int64_t SET_UIEXTENSION_DESTROY_TIMEOUT_TIME_MS = 4000;
 
+const std::string SCB_BACK_VISIBILITY = "scb_back_visibility";
+
 Ace::ContentInfoType GetAceContentInfoType(BackupAndRestoreType type)
 {
     auto contentInfoType = Ace::ContentInfoType::NONE;
@@ -1513,8 +1515,9 @@ Rect WindowSessionImpl::GetRect() const
 void WindowSessionImpl::UpdateTitleButtonVisibility()
 {
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
-    if (uiContent == nullptr || !IsDecorEnable())
+    if (uiContent == nullptr || !IsDecorEnable()) {
         return;
+    }
     WindowType windowType = GetType();
     bool isSubWindow = WindowHelper::IsSubWindow(windowType);
     bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
@@ -1539,11 +1542,12 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
     if (property_->GetCompatibleModeInPc() && !property_->GetIsAtomicService()) {
         bool isLayoutFullScreen = property_->IsLayoutFullScreen();
         uiContent->HideWindowTitleButton(true, !isLayoutFullScreen, hideMinimizeButton, hideCloseButton);
-        if (!property_->GetCompatibleModeInPcWithTopBar())
-            uiContent->OnContainerModalEvent("scb_back_visibility", isLayoutFullScreen ? "false" : "true");
+        if (!property_->GetCompatibleModeInPcTitleVisible()) {
+            uiContent->OnContainerModalEvent(SCB_BACK_VISIBILITY, isLayoutFullScreen ? "false" : "true");
+        }
     } else {
         uiContent->HideWindowTitleButton(hideSplitButton, hideMaximizeButton, hideMinimizeButton, hideCloseButton);
-        uiContent->OnContainerModalEvent("scb_back_visibility", "false");
+        uiContent->OnContainerModalEvent(SCB_BACK_VISIBILITY, "false");
     }
     if (isSuperFoldDisplayDevice) {
         handler_->PostTask([weakThis = wptr(this), where = __func__] {
@@ -1643,7 +1647,7 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
         std::unique_lock<std::shared_mutex> lock(uiContentMutex_);
         uiContent_ = std::move(uiContent);
         // compatibleMode app in pc, need change decor title to float title bar
-        if (property_->GetCompatibleModeInPc() && !property_->GetCompatibleModeInPcWithTopBar()) {
+        if (property_->GetCompatibleModeInPc() && !property_->GetCompatibleModeInPcTitleVisible()) {
             uiContent_->SetContainerModalTitleVisible(false, true);
             uiContent_->EnableContainerModalCustomGesture(true);
         }

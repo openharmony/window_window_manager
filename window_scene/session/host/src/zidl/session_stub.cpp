@@ -446,7 +446,7 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         reply.WriteUint32(windowSizeLimits.maxWindowHeight);
         reply.WriteUint32(windowSizeLimits.minWindowHeight);
         reply.WriteBool(property->GetCompatibleModeInPc());
-        reply.WriteBool(property->GetCompatibleModeInPcWithTopBar());
+        reply.WriteBool(property->GetCompatibleModeInPcTitleVisible());
         reply.WriteInt32(property->GetCompatibleInPcPortraitWidth());
         reply.WriteInt32(property->GetCompatibleInPcPortraitHeight());
         reply.WriteInt32(property->GetCompatibleInPcLandscapeWidth());
