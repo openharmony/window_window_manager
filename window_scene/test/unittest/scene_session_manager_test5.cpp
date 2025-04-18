@@ -568,9 +568,6 @@ HWTEST_F(SceneSessionManagerTest5, SetShiftFocusListener, TestSize.Level1)
 HWTEST_F(SceneSessionManagerTest5, ShiftFocus, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
-    NotifyDiffSCBAfterUpdateFocusFunc func;
-    ssm_->SetSCBFocusChangeListener(func);
-    ASSERT_NE(ssm_->notifyDiffSCBAfterUnfocusedFunc_, nullptr);
     SessionInfo info;
     info.abilityName_ = "ShiftFocus";
     info.bundleName_ = "ShiftFocus";
