@@ -15,6 +15,7 @@
 
 #include <hisysevent.h>
 #include <hitrace_meter.h>
+#include <parameters.h>
 #include <transaction/rs_interfaces.h>
 #include "fold_screen_controller/single_display_pocket_fold_policy.h"
 #include "session/screen/include/screen_session.h"
@@ -122,9 +123,13 @@ void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode disp
         if (displayMode == FoldDisplayMode::MAIN) {
             TLOGI(WmsLogTag::DMS, "Set device status to STATUS_FOLDED");
             SetDeviceStatus(static_cast<uint32_t>(DMDeviceStatus::STATUS_FOLDED));
+            system::SetParameter("persist.dms.device.status",
+                std::to_string(static_cast<uint32_t>(DMDeviceStatus::STATUS_FOLDED)));
         } else {
             TLOGI(WmsLogTag::DMS, "Set device status to UNKNOWN");
             SetDeviceStatus(static_cast<uint32_t>(DMDeviceStatus::UNKNOWN));
+            system::SetParameter("persist.dms.device.status",
+                std::to_string(static_cast<uint32_t>(DMDeviceStatus::UNKNOWN)));
         }
     }
     ChangeScreenDisplayModeProc(screenSession, displayMode, reason);

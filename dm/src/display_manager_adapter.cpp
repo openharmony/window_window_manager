@@ -970,12 +970,6 @@ sptr<DisplayInfo> DisplayManagerAdapter::GetPrimaryDisplayInfo()
     }
 }
 
-uint32_t DisplayManagerAdapter::GetDeviceStatus()
-{
-    INIT_PROXY_CHECK_RETURN(0);
-    return displayManagerServiceProxy_->GetDeviceStatus();
-}
-
 std::shared_ptr<Media::PixelMap> DisplayManagerAdapter::GetDisplaySnapshotWithOption(const CaptureOption& captureOption,
     DmErrorCode* errorCode)
 {
