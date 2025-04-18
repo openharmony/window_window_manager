@@ -149,7 +149,6 @@ ohos_static_library("window_extension_unittest_common") {
   ]
 
   external_deps = [
-    "ability_runtime:ability_manager",
     "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:ability_context_native",
