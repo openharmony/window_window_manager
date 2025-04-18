@@ -6869,10 +6869,10 @@ void SceneSessionManager::SetSCBUnfocusedListener(const NotifySCBAfterUpdateFocu
     notifySCBAfterUnfocusedFunc_ = func;
 }
 
-void SceneSessionManager::SetSCBFocusChangeListener(const NotifyDiffSCBAfterUpdateFocusFunc& func)
+void SceneSessionManager::SetSCBFocusChangeListener(const NotifyDiffSCBAfterUpdateFocusFunc&& func)
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "in");
-    notifyDiffSCBAfterUnfocusedFunc_ = func;
+    notifyDiffSCBAfterUnfocusedFunc_ = std::move(func);
 }
 
 void SceneSessionManager::SetCallingSessionIdSessionListenser(const ProcessCallingSessionIdChangeFunc& func)

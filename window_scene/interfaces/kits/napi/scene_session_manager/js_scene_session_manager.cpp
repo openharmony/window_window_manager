@@ -638,7 +638,7 @@ void JsSceneSessionManager::ProcessShiftFocus()
     SceneSessionManager::GetInstance().SetShiftFocusListener(func);
     SceneSessionManager::GetInstance().SetSCBFocusedListener(focusedCallback);
     SceneSessionManager::GetInstance().SetSCBUnfocusedListener(unfocusedCallback);
-    SceneSessionManager::GetInstance().SetSCBFocusChangeListener(scbFocusChangeCallback);
+    SceneSessionManager::GetInstance().SetSCBFocusChangeListener(std::move(scbFocusChangeCallback));
 }
 
 void JsSceneSessionManager::ProcessCallingSessionIdChangeRegister()
