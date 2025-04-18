@@ -250,8 +250,8 @@ public:
     virtual bool IsNeedCrossDisplayRendering() const { return false; }
 
     virtual void OpenKeyboardSyncTransaction() {}
-    virtual void CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRect,
-        bool isKeyboardShow, bool isRotating) {}
+    virtual void CloseKeyboardSyncTransaction(uint32_t callingId, const WSRect& keyboardPanelRect,
+        bool isKeyboardShow) {}
     WSError ChangeSessionVisibilityWithStatusBar(const sptr<AAFwk::SessionInfo> info, bool visible) override;
     WSError PendingSessionActivation(const sptr<AAFwk::SessionInfo> info) override;
     bool DisallowActivationFromPendingBackground(bool isPcOrPadEnableActivation, bool isFoundationCall,
@@ -900,7 +900,7 @@ protected:
      * Keyboard
      */
     virtual void EnableCallingSessionAvoidArea() {}
-    virtual void RestoreCallingSession(const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) {}
+    virtual void RestoreCallingSession(uint32_t callingId, const std::shared_ptr<RSTransaction>& rsTransaction) {}
     bool keyboardAvoidAreaActive_ = true;
     std::atomic<bool> isKeyboardDidShowRegistered_ = false;
     std::atomic<bool> isKeyboardDidHideRegistered_ = false;

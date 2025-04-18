@@ -7350,7 +7350,7 @@ void SceneSession::RegisterSupportWindowModesCallback(NotifySetSupportedWindowMo
 void SceneSession::ActivateKeyboardAvoidArea(bool active, bool recalculateAvoid)
 {
     if (recalculateAvoid && !active) {
-        RestoreCallingSession();
+        RestoreCallingSession(GetCallingSessionId(), nullptr);
     }
     keyboardAvoidAreaActive_ = active;
     if (recalculateAvoid && active) {
