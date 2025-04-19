@@ -1565,7 +1565,8 @@ void WindowSceneSessionImpl::SetDefaultProperty()
         case WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW:
         case WindowType::WINDOW_TYPE_PANEL:
         case WindowType::WINDOW_TYPE_LAUNCHER_DOCK:
-        case WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD: {
+        case WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD:
+        case WindowType::WINDOW_TYPE_MUTISCREEN_COLLABORATION: {
             property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
             break;
         }
