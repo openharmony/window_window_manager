@@ -2122,6 +2122,11 @@ WMError WindowSceneSessionImpl::CheckAndModifyWindowRect(uint32_t& width, uint32
 /** @note @window.layout */
 WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height, const RectAnimationConfig& rectAnimationConfig)
 {
+    auto reason = SizeChangeReason::RESIZE;
+    if (isResizedByLimit_) {
+        reason = SizeChangeReason::RESIZE_BY_LIMIT;
+        isResizedByLimit_ = false;
+    }
     TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d resize %{public}u %{public}u",
         property_->GetPersistentId(), width, height);
 
@@ -2156,8 +2161,10 @@ WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height, const Re
 
     WSRect wsRect = { newRect.posX_, newRect.posY_, newRect.width_, newRect.height_ };
     auto hostSession = GetHostSession();
-    SizeChangeReason reason = rectAnimationConfig.duration > 0 ? SizeChangeReason::RESIZE_WITH_ANIMATION :
-        SizeChangeReason::RESIZE;
+    if (rectAnimationConfig.duration > 0 && reason == SizeChangeReason::RESIZE) {
+        reason = SizeChangeReason::RESIZE_WITH_ANIMATION;
+    }
+        
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
     auto ret = hostSession->UpdateSessionRect(wsRect, reason, false, false, {}, rectAnimationConfig);
     return static_cast<WMError>(ret);
@@ -5004,6 +5011,7 @@ void WindowSceneSessionImpl::UpdateNewSize()
         needResize = true;
     }
     if (needResize) {
+        isResizedByLimit_ = true;
         Resize(width, height);
         TLOGI(WmsLogTag::WMS_LAYOUT, "Resize window by limits. Id: %{public}u, width: %{public}u,"
             " height: %{public}u", GetWindowId(), width, height);
