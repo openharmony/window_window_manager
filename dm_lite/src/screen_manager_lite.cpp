@@ -445,6 +445,11 @@ DMError ScreenManagerLite::Impl::GetPhysicalScreenInfos(std::vector<sptr<ScreenI
     return DMError::DM_OK;
 }
 
+sptr<ScreenInfo> ScreenManagerLite::GetScreenInfoById(ScreenId screenId)
+{
+    return SingletonContainer::Get<ScreenManagerAdapterLite>().GetScreenInfo(screenId);
+}
+
 void ScreenManagerLite::Impl::OnRemoteDied()
 {
     WLOGFD("dms is died");
