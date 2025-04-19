@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <cerrno>
+
 #include "screen_setting_helper.h"
 
 #include "window_manager_hilog.h"
@@ -321,6 +323,19 @@ bool ScreenSettingHelper::IsNumber(const std::string& str)
         }
     }
     return hasDigit;
+}
+
+bool ScreenSettingHelper::ConvertStrToULongLong(const std::string& str, uint64_t& num)
+{
+    char *endFlag;
+    errno = 0;
+    num = std::strtoull(str.c_str(), &endFlag, BASE_TEN);
+    if (errno == ERANGE) {
+        return false;
+    } else if (*endFlag != '\0') {
+        return false;
+    }
+    return true;
 }
 
 std::map<std::string, MultiScreenInfo> ScreenSettingHelper::GetMultiScreenInfo(const std::string& key)

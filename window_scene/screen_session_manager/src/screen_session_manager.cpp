@@ -24,6 +24,7 @@
 #include "input_manager.h"
 
 #include <hitrace_meter.h>
+#include "screen_setting_helper.h"
 #ifdef DEVICE_STATUS_ENABLE
 #include <interaction_manager.h>
 #endif // DEVICE_STATUS_ENABLE
@@ -8492,8 +8493,13 @@ void ScreenSessionManager::MultiScreenModeChange(const std::string& firstScreenI
         TLOGE(WmsLogTag::DMS, "param denied!");
         return;
     }
-    ScreenId firstScreenId = static_cast<ScreenId>(std::stoi(firstScreenIdStr));
-    ScreenId secondaryScreenId = static_cast<ScreenId>(std::stoi(secondaryScreenIdStr));
+    ScreenId firstScreenId;
+    ScreenId secondaryScreenId;
+    if (!ScreenSettingHelper::ConvertStrToULongLong(firstScreenIdStr, firstScreenId) ||
+        !ScreenSettingHelper::ConvertStrToULongLong(secondaryScreenIdStr, secondaryScreenId)) {
+        TLOGE(WmsLogTag::DMS, "dumper screenId params error!");
+        return;
+    }
     if (secondaryChandeMode == "mirror" || secondaryChandeMode == "extend") {
         MultiScreenModeChange(firstScreenId, secondaryScreenId, secondaryChandeMode);
     } else {
