@@ -421,7 +421,6 @@ public:
     SessionOption GetSessionOption(sptr<ScreenSession> screenSession);
     SessionOption GetSessionOption(sptr<ScreenSession> screenSession, ScreenId screenId);
     virtual DMError SetSystemKeyboardStatus(bool isTpKeyboardOn = false) override;
-    uint32_t GetDeviceStatus() override;
 
     sptr<ScreenSession> GetPhysicalScreenSession(ScreenId screenId) const;
     sptr<ScreenSession> GetScreenSessionByRsId(ScreenId rsScreenId);

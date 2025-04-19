@@ -1762,17 +1762,6 @@ HWTEST_F(DisplayManagerTest, GetCutoutInfoWithRotation, Function | SmallTest | L
 }
 
 /**
- * @tc.name: GetDeviceStatus
- * @tc.desc: GetDeviceStatus test
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerTest, GetDeviceStatus, Function | SmallTest | Level1)
-{
-    uint32_t status = DisplayManager::GetInstance().GetDeviceStatus();
-    ASSERT_EQ(status, 0);
-}
-
-/**
  * @tc.name: GetVisibleAreaDisplayInfoById_ShouldReturnNull_WhenDisplayInfoIsNull
  * @tc.desc: Test GetVisibleAreaDisplayInfoById function when the returned DisplayInfo is
  * @tc.type: FUNC

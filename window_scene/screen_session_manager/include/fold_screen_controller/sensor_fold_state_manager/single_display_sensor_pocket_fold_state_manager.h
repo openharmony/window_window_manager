@@ -75,6 +75,7 @@ private:
     bool TriggerTentExit(float angle, int hall);
     void TentModeHandleSensorChange(float angle, int hall, sptr<FoldScreenPolicy> foldScreenPolicy);
     void ReportTentStatusChange(ReportTentModeStatus tentStatus);
+    void SetDeviceStatusAndParam(uint32_t deviceStatus);
     float currentAngle = -1.0F;
     int currentHall = -1;
 };
