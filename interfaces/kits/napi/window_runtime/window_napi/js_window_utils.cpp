@@ -101,6 +101,8 @@ napi_value WindowTypeInit(napi_env env)
         static_cast<int32_t>(ApiWindowType::TYPE_SCREEN_CONTROL)));
     napi_set_named_property(env, objValue, "TYPE_FLOAT_NAVIGATION", CreateJsValue(env,
         static_cast<int32_t>(ApiWindowType::TYPE_FLOAT_NAVIGATION)));
+    napi_set_named_property(env, objValue, "TYPE_MUTISCREEN_COLLABORATION", CreateJsValue(env,
+        static_cast<int32_t>(ApiWindowType::TYPE_MUTISCREEN_COLLABORATION)));
     napi_set_named_property(env, objValue, "TYPE_MAIN", CreateJsValue(env,
         static_cast<int32_t>(ApiWindowType::TYPE_MAIN)));
 

@@ -226,6 +226,8 @@ HWTEST_F(WindowHelperTest, WindowType, TestSize.Level1)
     ASSERT_EQ(true, WindowHelper::IsSystemWindow(WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD));
     ASSERT_EQ(false, WindowHelper::IsSystemSubWindow(WindowType::WINDOW_TYPE_FLOAT_NAVIGATION));
     ASSERT_EQ(true, WindowHelper::IsSystemWindow(WindowType::WINDOW_TYPE_FLOAT_NAVIGATION));
+    ASSERT_EQ(false, WindowHelper::IsSystemSubWindow(WindowType::WINDOW_TYPE_MUTISCREEN_COLLABORATION));
+    ASSERT_EQ(true, WindowHelper::IsSystemWindow(WindowType::WINDOW_TYPE_MUTISCREEN_COLLABORATION));
 }
 
 /**
