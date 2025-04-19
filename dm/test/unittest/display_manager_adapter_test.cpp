@@ -878,6 +878,34 @@ HWTEST_F(DisplayManagerAdapterTest, GetDisplayCapability, TestSize.Level1)
         ASSERT_EQ(result, DMError::DM_OK);
     }
 }
+
+/**
+ * @tc.name: GetVisibleAreaDisplayInfoById
+ * @tc.desc: Test GetVisibleAreaDisplayInfoById function with invalid displayId.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, GetVisibleAreaDisplayInfoById, TestSize.Level1)
+{
+    sptr<DisplayInfo> info =
+        SingletonContainer::Get<DisplayManagerAdapter>().GetVisibleAreaDisplayInfoById(DISPLAY_ID_INVALID);
+    EXPECT_EQ(info, nullptr);
+}
+
+/**
+ * @tc.name: GetExpandAvailableArea
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, GetExpandAvailableArea, TestSize.Level1)
+{
+    DMRect area;
+    DMError err = SingletonContainer::Get<DisplayManagerAdapter>().GetExpandAvailableArea(0, area);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(err, DMError::DM_ERROR_DEVICE_NOT_SUPPORT);
+    } else {
+        EXPECT_EQ(err, DMError::DM_OK);
+    }
+}
 }
 }
 }
