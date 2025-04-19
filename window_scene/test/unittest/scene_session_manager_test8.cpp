@@ -416,22 +416,6 @@ HWTEST_F(SceneSessionManagerTest8, FilterSceneSessionCovered, Function | SmallTe
 }
 
 /**
-<<<<<<< HEAD
- * @tc.name: WindowDestroyNotifyVisibility
- * @tc.desc: test function : WindowDestroyNotifyVisibility
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest8, WindowDestroyNotifyVisibility, Function | SmallTest | Level3)
-{
-    sptr<SceneSession> sceneSession = nullptr;
-    ssm_->WindowDestroyNotifyVisibility(sceneSession);
-
-    SessionInfo sessionInfo;
-    sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    EXPECT_NE(nullptr, sceneSession);
-    EXPECT_EQ(WSError::WS_OK, sceneSession->SetRSVisible(true));
-    ssm_->WindowDestroyNotifyVisibility(sceneSession);
-=======
  * @tc.name: SubtractIntersectArea
  * @tc.desc: test function : SubtractIntersectArea
  * @tc.type: FUNC
@@ -451,7 +435,23 @@ HWTEST_F(SceneSessionManagerTest8, SubtractIntersectArea, TestSize.Level1)
     WSRect wsRect {.posX_ = 0, .posY_ = 0, .width_ = 100, .height_ = 100};
     sceneSession->winRect_ = wsRect;
     EXPECT_EQ(ssm_->SubtractIntersectArea(unaccountedSpace, sceneSession), true);
->>>>>>> f53b8f119f (add tdds)
+}
+
+/**
+ * @tc.name: WindowDestroyNotifyVisibility
+ * @tc.desc: test function : WindowDestroyNotifyVisibility
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, WindowDestroyNotifyVisibility, Function | SmallTest | Level3)
+{
+    sptr<SceneSession> sceneSession = nullptr;
+    ssm_->WindowDestroyNotifyVisibility(sceneSession);
+
+    SessionInfo sessionInfo;
+    sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    EXPECT_NE(nullptr, sceneSession);
+    EXPECT_EQ(WSError::WS_OK, sceneSession->SetRSVisible(true));
+    ssm_->WindowDestroyNotifyVisibility(sceneSession);
 }
 
 /**
