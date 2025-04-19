@@ -93,22 +93,36 @@ constexpr const char* WM_ERROR_CODE_MSG_INVALID_PARAM = "Parameter error. Possib
     "3. Parameter verification failed.";
 constexpr const char* WM_ERROR_CODE_MSG_DEVICE_NOT_SUPPORT = "Capability not supported. "
     "Failed to call the API due to limited device capabilities.";
-constexpr const char* WM_ERROR_CODE_MSG_REPEAT_OPERATION = "Repeated operation.";
-constexpr const char* WM_ERROR_CODE_MSG_STATE_ABNORMALLY = "This window state is abnormal.";
+constexpr const char* WM_ERROR_CODE_MSG_REPEAT_OPERATION = "Repeated operation. Possible causes: "
+    "1. The window is already;"
+    "2. The window is alerady in this state.";
+constexpr const char* WM_ERROR_CODE_MSG_STATE_ABNORMALLY = "This window state is abnormal. Possible causes: "
+    "1.The window is not created or destroyed.";
 constexpr const char* WM_ERROR_CODE_MSG_SYSTEM_ABNORMALLY = "This window manager service works abnormally.";
-constexpr const char* WM_ERROR_CODE_MSG_INVALID_CALLING = "Unauthorized operation.";
-constexpr const char* WM_ERROR_CODE_MSG_STAGE_ABNORMALLY = "This window stage is abnormal.";
-constexpr const char* WM_ERROR_CODE_MSG_CONTEXT_ABNORMALLY = "This window context is abnormal.";
+constexpr const char* WM_ERROR_CODE_MSG_INVALID_CALLING = "Forbidden operation. Possible causes: "
+    "1.Incorrect window type;"
+    "2.The subwindow is distroyed or being destroyed.";
+constexpr const char* WM_ERROR_CODE_MSG_STAGE_ABNORMALLY = "This window stage is abnormal. Possible causes: "
+    "1.The window stage is not created or destroyed;"
+    "2.The window is not created or destroyed.";
+constexpr const char* WM_ERROR_CODE_MSG_CONTEXT_ABNORMALLY = "This window context is abnormal. Possible causes: "
+    "1.The context is null.";
 constexpr const char* WM_ERROR_CODE_MSG_START_ABILITY_FAILED = "Failed to start the ability.";
-constexpr const char* WM_ERROR_CODE_MSG_INVALID_DISPLAY = "The display device is abnormal.";
+constexpr const char* WM_ERROR_CODE_MSG_INVALID_DISPLAY = "The display device is abnormal. Possible causes: "
+    "1.The window container could not be found.";
 constexpr const char* WM_ERROR_CODE_MSG_INVALID_PARENT = "The parent window is invalid.";
 constexpr const char* WM_ERROR_CODE_MSG_INVALID_OP_IN_CUR_STATUS =
     "The operation in the current window status is invalid.";
 constexpr const char* WM_ERROR_CODE_MSG_PIP_DESTROY_FAILED = "Failed to destroy the PiP window.";
 constexpr const char* WM_ERROR_CODE_MSG_PIP_STATE_ABNORMALLY = "The PiP window state is abnormal.";
 constexpr const char* WM_ERROR_CODE_MSG_PIP_CREATE_FAILED = "Failed to create the PiP window.";
-constexpr const char* WM_ERROR_CODE_MSG_PIP_INTERNAL_ERROR = "PiP internal error.";
-constexpr const char* WM_ERROR_CODE_MSG_PIP_REPEAT_OPERATION = "Repeated PiP operation.";
+constexpr const char* WM_ERROR_CODE_MSG_PIP_INTERNAL_ERROR = "PiP internal error. Possible causes: "
+    "1.The napi throws a task error;"
+    "2.The pip window is abnormal;"
+    "3.The pip controller is abnormal.";
+constexpr const char* WM_ERROR_CODE_MSG_PIP_REPEAT_OPERATION = "Repeated PiP operation. Possible causes: "
+    "1.The pip window is already created;"
+    "2.The pip window is already stopped.";
 
 static std::map<WmErrorCode, const char*> WM_ERROR_CODE_TO_ERROR_MSG_MAP {
     {WmErrorCode::WM_OK,                              WM_ERROR_CODE_MSG_OK                       },
