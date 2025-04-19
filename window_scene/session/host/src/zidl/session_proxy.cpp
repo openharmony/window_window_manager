@@ -324,6 +324,7 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
                                               reply.ReadUint32(), reply.ReadUint32() };
         property->SetWindowSizeLimits(windowSizeLimits);
         property->SetCompatibleModeInPc(reply.ReadBool());
+        property->SetCompatibleModeInPcTitleVisible(reply.ReadBool());
         property->SetCompatibleWindowSizeInPc(reply.ReadInt32(), reply.ReadInt32(),
                                               reply.ReadInt32(), reply.ReadInt32());
         property->SetIsAppSupportPhoneInPc(reply.ReadBool());
@@ -1484,6 +1485,9 @@ int32_t SessionProxy::TransferExtensionData(const AAFwk::WantParams& wantParams)
         TLOGE(WmsLogTag::WMS_UIEXT, "SendRequest failed, code: %{public}d", sendCode);
     }
     int32_t ret = reply.ReadInt32();
+    if (ret != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Ret value read by ReadInt32 is abnormal, ret: %{public}d", ret);
+    }
     return sendCode;
 }
 

@@ -883,6 +883,56 @@ HWTEST_F(SceneSessionManagerTest12, ShiftAppWindowPointerEvent_04, TestSize.Leve
 }
 
 /**
+ * @tc.name: ShiftAppWindowPointerEventInner01
+ * @tc.desc: ShiftAppWindowPointerEventInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, ShiftAppWindowPointerEventInner01, TestSize.Level1)
+{
+    SessionInfo sourceInfo;
+    sourceInfo.windowType_ = 1;
+    sptr<SceneSession> sourceSceneSession = sptr<SceneSession>::MakeSptr(sourceInfo, nullptr);
+    ssm_->sceneSessionMap_.insert({sourceSceneSession->GetPersistentId(), sourceSceneSession});
+
+    SessionInfo targetInfo;
+    targetInfo.windowType_ = 1;
+    sptr<SceneSession> targetSceneSession = sptr<SceneSession>::MakeSptr(targetInfo, nullptr);
+    ssm_->sceneSessionMap_.insert({targetSceneSession->GetPersistentId(), targetSceneSession});
+
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    WMError result = ssm_->ShiftAppWindowPointerEventInner(
+        sourceSceneSession->GetPersistentId(), targetSceneSession->GetPersistentId(), DISPLAY_ID_INVALID);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_CALLING);
+    ssm_->sceneSessionMap_.erase(sourceSceneSession->GetPersistentId());
+    ssm_->sceneSessionMap_.erase(targetSceneSession->GetPersistentId());
+}
+
+/**
+ * @tc.name: ShiftAppWindowPointerEventInner02
+ * @tc.desc: ShiftAppWindowPointerEventInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, ShiftAppWindowPointerEventInner02, TestSize.Level1)
+{
+    SessionInfo sourceInfo;
+    sourceInfo.windowType_ = 1;
+    sptr<SceneSession> sourceSceneSession = sptr<SceneSession>::MakeSptr(sourceInfo, nullptr);
+    ssm_->sceneSessionMap_.insert({sourceSceneSession->GetPersistentId(), sourceSceneSession});
+
+    SessionInfo targetInfo;
+    targetInfo.windowType_ = 1;
+    sptr<SceneSession> targetSceneSession = sptr<SceneSession>::MakeSptr(targetInfo, nullptr);
+    ssm_->sceneSessionMap_.insert({targetSceneSession->GetPersistentId(), targetSceneSession});
+
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    WMError result = ssm_->ShiftAppWindowPointerEventInner(
+        sourceSceneSession->GetPersistentId(), targetSceneSession->GetPersistentId(), 0);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_CALLING);
+    ssm_->sceneSessionMap_.erase(sourceSceneSession->GetPersistentId());
+    ssm_->sceneSessionMap_.erase(targetSceneSession->GetPersistentId());
+}
+
+/**
  * @tc.name: GetKeyboardSession
  * @tc.desc: test GetKeyboardSession
  * @tc.type: FUNC
@@ -1670,21 +1720,21 @@ HWTEST_F(SceneSessionManagerTest12, GetKeyboardOccupiedAreaWithRotation1, TestSi
 {
     GetKeyboardOccupiedAreaWithRotationTestData(WindowUIType::PHONE_WINDOW, 0, 0,
         SessionState::STATE_FOREGROUND, WindowGravity::WINDOW_GRAVITY_BOTTOM);
-    ssm_->GetKeyboardOccupiedAreaWithRotation(1, 0, avoidAreas_);
+    ssm_->GetKeyboardOccupiedAreaWithRotation(1, Rotation::ROTATION_0, avoidAreas_);
     ASSERT_EQ(1, static_cast<uint32_t>(avoidAreas_.size()));
     ASSERT_EQ(true, avoidAreas_[0].first);
     ASSERT_EQ(true, CheckKeyboardOccupiedAreaInfo(portraitPanelRect_, avoidAreas_[0].second));
 
     GetKeyboardOccupiedAreaWithRotationTestData(WindowUIType::PAD_WINDOW, 0, 0,
         SessionState::STATE_FOREGROUND, WindowGravity::WINDOW_GRAVITY_BOTTOM);
-    ssm_->GetKeyboardOccupiedAreaWithRotation(1, 90, avoidAreas_);
+    ssm_->GetKeyboardOccupiedAreaWithRotation(1, Rotation::ROTATION_90, avoidAreas_);
     ASSERT_EQ(1, static_cast<uint32_t>(avoidAreas_.size()));
     ASSERT_EQ(true, avoidAreas_[0].first);
     ASSERT_EQ(true, CheckKeyboardOccupiedAreaInfo(landscapePanelRect_, avoidAreas_[0].second));
 
     GetKeyboardOccupiedAreaWithRotationTestData(WindowUIType::PC_WINDOW, 0, 0,
         SessionState::STATE_FOREGROUND, WindowGravity::WINDOW_GRAVITY_BOTTOM);
-    ssm_->GetKeyboardOccupiedAreaWithRotation(1, 0, avoidAreas_);
+    ssm_->GetKeyboardOccupiedAreaWithRotation(1, Rotation::ROTATION_0, avoidAreas_);
     ASSERT_EQ(0, static_cast<uint32_t>(avoidAreas_.size()));
 }
 
@@ -1698,35 +1748,15 @@ HWTEST_F(SceneSessionManagerTest12, GetKeyboardOccupiedAreaWithRotation2, TestSi
     GetKeyboardOccupiedAreaWithRotationTestData(WindowUIType::PHONE_WINDOW, 0, 0,
         SessionState::STATE_FOREGROUND, WindowGravity::WINDOW_GRAVITY_BOTTOM);
 
-    ssm_->GetKeyboardOccupiedAreaWithRotation(-1, 0, avoidAreas_);
+    ssm_->GetKeyboardOccupiedAreaWithRotation(-1, Rotation::ROTATION_0, avoidAreas_);
     ASSERT_EQ(0, static_cast<uint32_t>(avoidAreas_.size()));
 
-    ssm_->GetKeyboardOccupiedAreaWithRotation(0, 0, avoidAreas_);
+    ssm_->GetKeyboardOccupiedAreaWithRotation(0, Rotation::ROTATION_0, avoidAreas_);
     ASSERT_EQ(0, static_cast<uint32_t>(avoidAreas_.size()));
 
     GetKeyboardOccupiedAreaWithRotationTestData(WindowUIType::PHONE_WINDOW, 12, 0,
         SessionState::STATE_FOREGROUND, WindowGravity::WINDOW_GRAVITY_BOTTOM);
-    ssm_->GetKeyboardOccupiedAreaWithRotation(1, 0, avoidAreas_);
-    ASSERT_EQ(0, static_cast<uint32_t>(avoidAreas_.size()));
-}
-
-/**
- * @tc.name: GetKeyboardOccupiedAreaWithRotation3
- * @tc.desc: test function : GetKeyboardOccupiedAreaWithRotation
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest12, GetKeyboardOccupiedAreaWithRotation3, TestSize.Level1)
-{
-    GetKeyboardOccupiedAreaWithRotationTestData(WindowUIType::PHONE_WINDOW, 0, 0,
-        SessionState::STATE_FOREGROUND, WindowGravity::WINDOW_GRAVITY_BOTTOM);
-    
-    ssm_->GetKeyboardOccupiedAreaWithRotation(1, 450, avoidAreas_);
-    ASSERT_EQ(0, static_cast<uint32_t>(avoidAreas_.size()));
-
-    ssm_->GetKeyboardOccupiedAreaWithRotation(1, -90, avoidAreas_);
-    ASSERT_EQ(0, static_cast<uint32_t>(avoidAreas_.size()));
-
-    ssm_->GetKeyboardOccupiedAreaWithRotation(1, 45, avoidAreas_);
+    ssm_->GetKeyboardOccupiedAreaWithRotation(1, Rotation::ROTATION_0, avoidAreas_);
     ASSERT_EQ(0, static_cast<uint32_t>(avoidAreas_.size()));
 }
 
@@ -1740,7 +1770,7 @@ HWTEST_F(SceneSessionManagerTest12, GetKeyboardOccupiedAreaWithRotation4, TestSi
     GetKeyboardOccupiedAreaWithRotationTestData(WindowUIType::PHONE_WINDOW, 0, 0,
         SessionState::STATE_FOREGROUND, WindowGravity::WINDOW_GRAVITY_FLOAT);
     
-    ssm_->GetKeyboardOccupiedAreaWithRotation(1, 0, avoidAreas_);
+    ssm_->GetKeyboardOccupiedAreaWithRotation(1, Rotation::ROTATION_0, avoidAreas_);
     ASSERT_EQ(1, static_cast<uint32_t>(avoidAreas_.size()));
     ASSERT_EQ(false, avoidAreas_[0].first);
     ASSERT_EQ(true, CheckKeyboardOccupiedAreaInfo(portraitPanelRect_, avoidAreas_[0].second));
@@ -1756,7 +1786,7 @@ HWTEST_F(SceneSessionManagerTest12, GetKeyboardOccupiedAreaWithRotation5, TestSi
     GetKeyboardOccupiedAreaWithRotationTestData(WindowUIType::PHONE_WINDOW, 0, 0,
         SessionState::STATE_BACKGROUND, WindowGravity::WINDOW_GRAVITY_BOTTOM);
     
-    ssm_->GetKeyboardOccupiedAreaWithRotation(1, 90, avoidAreas_);
+    ssm_->GetKeyboardOccupiedAreaWithRotation(1, Rotation::ROTATION_90, avoidAreas_);
     ASSERT_EQ(1, static_cast<uint32_t>(avoidAreas_.size()));
     ASSERT_EQ(false, avoidAreas_[0].first);
     ASSERT_EQ(true, CheckKeyboardOccupiedAreaInfo(landscapePanelRect_, avoidAreas_[0].second));
@@ -1772,12 +1802,12 @@ HWTEST_F(SceneSessionManagerTest12, GetKeyboardOccupiedAreaWithRotation6, TestSi
     GetKeyboardOccupiedAreaWithRotationTestData(WindowUIType::PHONE_WINDOW, 0, 0,
         SessionState::STATE_FOREGROUND, WindowGravity::WINDOW_GRAVITY_BOTTOM);
 
-    ssm_->GetKeyboardOccupiedAreaWithRotation(1, 180, avoidAreas_);
+    ssm_->GetKeyboardOccupiedAreaWithRotation(1, Rotation::ROTATION_180, avoidAreas_);
     ASSERT_EQ(1, static_cast<uint32_t>(avoidAreas_.size()));
     ASSERT_EQ(true, avoidAreas_[0].first);
     ASSERT_EQ(true, CheckKeyboardOccupiedAreaInfo(portraitPanelRect_, avoidAreas_[0].second));
 
-    ssm_->GetKeyboardOccupiedAreaWithRotation(1, 360, avoidAreas_);
+    ssm_->GetKeyboardOccupiedAreaWithRotation(1, Rotation::ROTATION_0, avoidAreas_);
     ASSERT_EQ(2, static_cast<uint32_t>(avoidAreas_.size()));
     ASSERT_EQ(true, avoidAreas_[1].first);
     ASSERT_EQ(true, CheckKeyboardOccupiedAreaInfo(portraitPanelRect_, avoidAreas_[1].second));
@@ -1792,7 +1822,7 @@ HWTEST_F(SceneSessionManagerTest12, GetKeyboardOccupiedAreaWithRotation7, TestSi
 {
     GetKeyboardOccupiedAreaWithRotationTestData(WindowUIType::PHONE_WINDOW, 0, 0,
         SessionState::STATE_ACTIVE, WindowGravity::WINDOW_GRAVITY_BOTTOM);
-    ssm_->GetKeyboardOccupiedAreaWithRotation(1, 270, avoidAreas_);
+    ssm_->GetKeyboardOccupiedAreaWithRotation(1, Rotation::ROTATION_270, avoidAreas_);
 
     ASSERT_EQ(1, static_cast<uint32_t>(avoidAreas_.size()));
     ASSERT_EQ(true, avoidAreas_[0].first);

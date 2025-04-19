@@ -37,6 +37,7 @@
 #include "display_manager.h"
 #include "extension/extension_business_info.h"
 #include "hitrace_meter.h"
+#include "scene_board_judgement.h"
 #include "session_permission.h"
 #include "key_event.h"
 #include "session/container/include/window_event_channel.h"
@@ -70,6 +71,8 @@ constexpr int32_t  WINDOW_ROTATION_CHANGE = 20;
  */
 const std::string SET_UIEXTENSION_DESTROY_TIMEOUT_LISTENER_TASK_NAME = "SetUIExtDestroyTimeoutListener";
 constexpr int64_t SET_UIEXTENSION_DESTROY_TIMEOUT_TIME_MS = 4000;
+
+const std::string SCB_BACK_VISIBILITY = "scb_back_visibility";
 
 Ace::ContentInfoType GetAceContentInfoType(BackupAndRestoreType type)
 {
@@ -217,6 +220,14 @@ bool WindowSessionImpl::isUIExtensionAbilityProcess_ = false;
         }                                                                      \
     } while (false)
 
+#define CHECK_UI_CONTENT_RETURN_IF_NULL(uiContent)                             \
+    do {                                                                       \
+        if ((uiContent) == nullptr) {                                          \
+            TLOGE(WmsLogTag::WMS_LIFE, "uiContent is null");                   \
+            return;                                                            \
+        }                                                                      \
+    } while (false)
+
 WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
 {
     WLOGFD("[WMSCom] Constructor");
@@ -276,6 +287,11 @@ bool WindowSessionImpl::IsPcOrPadCapabilityEnabled() const
 bool WindowSessionImpl::IsPcOrPadFreeMultiWindowMode() const
 {
     return windowSystemConfig_.IsPcWindow() || IsFreeMultiWindowMode();
+}
+
+bool WindowSessionImpl::IsSceneBoardEnabled() const
+{
+    return SceneBoardJudgement::IsSceneBoardEnabled();
 }
 
 bool WindowSessionImpl::GetCompatibleModeInPc() const
@@ -838,6 +854,19 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
         layoutCallback_->OnUpdateSessionRect(wmRect, wmReason, GetPersistentId());
     }
 
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
+    if (display == nullptr) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "get display failed displayId: %{public}" PRIu64, property_->GetDisplayId());
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    auto displayInfo = display->GetDisplayInfo();
+    if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "get display info failed displayId: %{public}" PRIu64,
+            property_->GetDisplayId());
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    DisplayOrientation displayOrientaion = displayInfo->GetDisplayOrientation();
+    SetDisplayOrientationForRotation(displayOrientaion);
     return WSError::WS_OK;
 }
 
@@ -910,15 +939,25 @@ void WindowSessionImpl::UpdateRectForPageRotation(const Rect& wmRect, const Rect
     WindowSizeChangeReason wmReason, const SceneAnimationConfig& config,
     const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
+    DisplayOrientation windowOrientation = GetDisplayOrientationForRotation();
+    TLOGE(WmsLogTag::WMS_ROTATION, "windowOrientation: %{public}d", static_cast<int32_t>(windowOrientation));
     handler_->PostImmediateTask(
-        [weak = wptr(this), wmReason, wmRect, preRect, config, avoidAreas]() mutable {
+        [weak = wptr(this), wmReason, wmRect, preRect, config, avoidAreas, windowOrientation]() mutable {
             HITRACE_METER_NAME(HITRACE_TAG_WINDOW_MANAGER, "WindowSessionImpl::UpdateRectForPageRotation");
             auto window = weak.promote();
             if (!window) {
                 return;
             }
             auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(window->property_->GetDisplayId());
+            if (display == nullptr) {
+                TLOGE(WmsLogTag::WMS_ROTATION, "display is null!");
+                return;
+            }
             sptr<DisplayInfo> displayInfo = display ? display->GetDisplayInfo() : nullptr;
+            if (displayInfo == nullptr) {
+                TLOGE(WmsLogTag::WMS_ROTATION, "displayInfo is null!");
+                return;
+            }
             window->UpdateVirtualPixelRatio(display);
             const std::shared_ptr<RSTransaction>& rsTransaction = config.rsTransaction_;
             if (rsTransaction) {
@@ -930,7 +969,14 @@ void WindowSessionImpl::UpdateRectForPageRotation(const Rect& wmRect, const Rect
                 window->lastSizeChangeReason_ = wmReason;
             }
             window->NotifyClientOrientationChange();
-            window->UpdateViewportConfig(wmRect, wmReason, rsTransaction, displayInfo, avoidAreas);
+            DisplayOrientation displayOrientaion = displayInfo->GetDisplayOrientation();
+            TLOGE(WmsLogTag::WMS_ROTATION, "targetdisplayOrientation: %{public}d",
+                static_cast<int32_t>(displayOrientaion));
+            TLOGE(WmsLogTag::WMS_ROTATION, "windowRect: %{public}s, preRect: %{public}s",
+                wmRect.ToString().c_str(), preRect.ToString().c_str());
+            if (wmRect != preRect || windowOrientation != displayOrientaion) {
+                window->UpdateViewportConfig(wmRect, wmReason, rsTransaction, displayInfo, avoidAreas);
+            }
             if (rsTransaction) {
                 rsTransaction->Commit();
             } else {
@@ -939,6 +985,16 @@ void WindowSessionImpl::UpdateRectForPageRotation(const Rect& wmRect, const Rect
             window->postTaskDone_ = true;
         },
         "WMS_WindowSessionImpl_UpdateRectForPageRotation");
+}
+
+void WindowSessionImpl::SetDisplayOrientationForRotation(DisplayOrientation displayOrientaion)
+{
+    windowOrientation_ = displayOrientaion;
+}
+
+DisplayOrientation WindowSessionImpl::GetDisplayOrientationForRotation() const
+{
+    return windowOrientation_;
 }
 
 void WindowSessionImpl::UpdateRectForOtherReasonTask(const Rect& wmRect, const Rect& preRect,
@@ -1044,6 +1100,19 @@ void WindowSessionImpl::UpdateRectForResizeWithAnimation(const Rect& wmRect, con
         window->postTaskDone_ = true;
     };
     handler_->PostTask(task, "WMS_WindowSessionImpl_UpdateRectForResizeWithAnimation");
+}
+
+void WindowSessionImpl::NotifyAfterUIContentReady()
+{
+    auto uiContent = GetUIContentSharedPtr();
+    CHECK_UI_CONTENT_RETURN_IF_NULL(uiContent);
+    if (IsNeedRenotifyTransform()) {
+        auto transform = GetCurrentTransform();
+        TLOGI(WmsLogTag::WMS_LAYOUT, "Renotify transform, id:%{public}d, scaleX:%{public}f, scaleY:%{public}f",
+            GetPersistentId(), transform.scaleX_, transform.scaleY_);
+        uiContent->UpdateTransform(transform);
+        SetNeedRenotifyTransform(false);
+    }
 }
 
 void WindowSessionImpl::NotifyRotationAnimationEnd()
@@ -1471,11 +1540,14 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
         hideSplitButton, hideMaximizeButton, hideMinimizeButton, hideCloseButton);
     bool isSuperFoldDisplayDevice = FoldScreenStateInternel::IsSuperFoldDisplayDevice();
     if (property_->GetCompatibleModeInPc() && !property_->GetIsAtomicService()) {
-        uiContent->HideWindowTitleButton(true, true, hideMinimizeButton, hideCloseButton);
-        uiContent->OnContainerModalEvent("scb_back_visibility", "true");
+        bool isLayoutFullScreen = property_->IsLayoutFullScreen();
+        uiContent->HideWindowTitleButton(true, !isLayoutFullScreen, hideMinimizeButton, hideCloseButton);
+        if (!property_->GetCompatibleModeInPcTitleVisible()) {
+            uiContent->OnContainerModalEvent(SCB_BACK_VISIBILITY, isLayoutFullScreen ? "false" : "true");
+        }
     } else {
         uiContent->HideWindowTitleButton(hideSplitButton, hideMaximizeButton, hideMinimizeButton, hideCloseButton);
-        uiContent->OnContainerModalEvent("scb_back_visibility", "false");
+        uiContent->OnContainerModalEvent(SCB_BACK_VISIBILITY, "false");
     }
     if (isSuperFoldDisplayDevice) {
         handler_->PostTask([weakThis = wptr(this), where = __func__] {
@@ -1575,7 +1647,7 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
         std::unique_lock<std::shared_mutex> lock(uiContentMutex_);
         uiContent_ = std::move(uiContent);
         // compatibleMode app in pc, need change decor title to float title bar
-        if (property_->GetCompatibleModeInPc()) {
+        if (property_->GetCompatibleModeInPc() && !property_->GetCompatibleModeInPcTitleVisible()) {
             uiContent_->SetContainerModalTitleVisible(false, true);
             uiContent_->EnableContainerModalCustomGesture(true);
         }
@@ -1756,7 +1828,7 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
             contentInfo.c_str(), static_cast<uint16_t>(aceRet));
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-
+    NotifyAfterUIContentReady();
     TLOGD(WmsLogTag::WMS_LIFE, "end");
     return WMError::WM_OK;
 }
@@ -2245,6 +2317,13 @@ void WindowSessionImpl::SetRequestedOrientation(Orientation orientation, bool ne
     if (property_->GetRequestedOrientation() == orientation && !isUserOrientation) {
         return;
     }
+    if (orientation == Orientation::INVALID) {
+        orientation = GetRequestedOrientation();
+    }
+    if (property_->GetCompatibleModeInPc() && IsHorizontalOrientation(orientation)) {
+        TLOGI(WmsLogTag::WMS_COMPAT, "compatible request horizontal orientation %{public}u", orientation);
+        property_->SetIsLayoutFullScreen(true);
+    }
     property_->SetRequestedOrientation(orientation, needAnimation);
     UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_ORIENTATION);
 }
@@ -2255,7 +2334,19 @@ Orientation WindowSessionImpl::GetRequestedOrientation()
         TLOGE(WmsLogTag::DEFAULT, "windowSession is invalid");
         return Orientation::UNSPECIFIED;
     }
-    return property_->GetRequestedOrientation();
+    return preferredRequestedOrientation_;
+}
+
+void WindowSessionImpl::SetPreferredRequestedOrientation(Orientation orientation)
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::DEFAULT, "windowSession is invalid");
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_ROTATION,
+        "id:%{public}u preferredRequestedOrientation:%{public}u state:%{public}u",
+        GetPersistentId(), orientation, state_);
+    preferredRequestedOrientation_ = orientation;
 }
 
 std::string WindowSessionImpl::GetContentInfo(BackupAndRestoreType type)
@@ -2672,15 +2763,6 @@ WMError WindowSessionImpl::GetDecorHeight(int32_t& height)
         return err;
     }
     height = static_cast<int32_t>(height / vpr);
-    if (GetTargetAPIVersion() >= API_VERSION_18) { // 18: isolated version
-        // SetDecorHeight and GetDecorHeight round down twice, resulting in a 1vp precision loss.
-        if (decorHeight_ - height == 1) {
-            height = decorHeight_;
-        } else if (decorHeight_ == 0) {
-            // There is also a loss of precision when the display size changes.
-            decorHeight_ = height;
-        }
-    }
     TLOGD(WmsLogTag::WMS_DECOR, "end, height: %{public}d", height);
     return WMError::WM_OK;
 }
@@ -2741,9 +2823,6 @@ WMError WindowSessionImpl::GetTitleButtonArea(TitleButtonRect& titleButtonRect)
     res = uiContent->GetContainerModalButtonsRect(decorRect, titleButtonLeftRect);
     if (!res) {
         TLOGE(WmsLogTag::WMS_DECOR, "GetContainerModalButtonsRect failed");
-        if (GetTargetAPIVersion() >= API_VERSION_18) { // 18: isolated version
-            titleButtonRect.ResetRect();
-        }
         return WMError::WM_OK;
     }
     float vpr = 0.f;
@@ -2801,17 +2880,12 @@ WMError WindowSessionImpl::RegisterWindowTitleButtonRectChangeListener(
                 TLOGNE(WmsLogTag::WMS_DECOR, "%{public}s window is null", where);
                 return;
             }
-            TitleButtonRect titleButtonRect;
-            if (window->GetTargetAPIVersion() >= API_VERSION_18 && // 18: isolated version
-                titleButtonLeftRect.IsUninitializedRect()) {
-                window->NotifyWindowTitleButtonRectChange(titleButtonRect);
-                return;
-            }
             float vpr = 0.f;
             auto err = window->GetVirtualPixelRatio(vpr);
             if (err != WMError::WM_OK) {
                 return;
             }
+            TitleButtonRect titleButtonRect;
             titleButtonRect.posX_ = static_cast<int32_t>(decorRect.width_) -
                 static_cast<int32_t>(titleButtonLeftRect.width_) - titleButtonLeftRect.posX_;
             titleButtonRect.posX_ = static_cast<int32_t>(titleButtonRect.posX_ / vpr);
@@ -4790,6 +4864,7 @@ bool WindowSessionImpl::FilterPointerEvent(const std::shared_ptr<MMI::PointerEve
     if (sourceType == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
         std::lock_guard<std::mutex> lock(touchEventFilterMutex_);
         if (touchEventFilter_ == nullptr) {
+            TLOGD(WmsLogTag::WMS_INPUT_KEY_FLOW, "touch event filter null");
             return false;
         }
         isFiltered = touchEventFilter_(*pointerEvent.get());
@@ -4799,6 +4874,7 @@ bool WindowSessionImpl::FilterPointerEvent(const std::shared_ptr<MMI::PointerEve
                 action != OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_END)) {
         std::lock_guard<std::mutex> lock(mouseEventFilterMutex_);
         if (mouseEventFilter_ == nullptr) {
+            TLOGD(WmsLogTag::WMS_INPUT_KEY_FLOW, "mouse event filter null");
             return false;
         }
         isFiltered = mouseEventFilter_(*pointerEvent.get());
@@ -4806,6 +4882,7 @@ bool WindowSessionImpl::FilterPointerEvent(const std::shared_ptr<MMI::PointerEve
     if (isFiltered) {
         pointerEvent->MarkProcessed();
     }
+    TLOGD(WmsLogTag::WMS_INPUT_KEY_FLOW, "event consumed:%{public}d", isFiltered);
     return isFiltered;
 }
 
@@ -5490,9 +5567,13 @@ WMError WindowSessionImpl::UnregisterOrientationChangeListener(
 void WindowSessionImpl::NotifyTransformChange(const Transform& transform)
 {
     WLOGFI("in");
+    SetCurrentTransform(transform);
     if (auto uiContent = GetUIContentSharedPtr()) {
         uiContent->UpdateTransform(transform);
         SetLayoutTransform(transform);
+        SetNeedRenotifyTransform(false);
+    } else {
+        SetNeedRenotifyTransform(true);
     }
 }
 
@@ -5568,6 +5649,16 @@ bool WindowSessionImpl::IsVerticalOrientation(Orientation orientation) const
         return true;
     }
     return false;
+}
+
+bool WindowSessionImpl::IsHorizontalOrientation(Orientation orientation) const
+{
+    return orientation == Orientation::HORIZONTAL ||
+           orientation == Orientation::REVERSE_HORIZONTAL ||
+           orientation == Orientation::SENSOR_HORIZONTAL ||
+           orientation == Orientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED ||
+           orientation == Orientation::USER_ROTATION_LANDSCAPE ||
+           orientation == Orientation::USER_ROTATION_LANDSCAPE_INVERTED;
 }
 
 WMError WindowSessionImpl::GetCallingWindowWindowStatus(WindowStatus& windowStatus) const
@@ -5822,6 +5913,18 @@ Transform WindowSessionImpl::GetLayoutTransform() const
 {
     std::lock_guard<std::recursive_mutex> lock(transformMutex_);
     return layoutTransform_;
+}
+
+void WindowSessionImpl::SetCurrentTransform(const Transform& transform)
+{
+    std::lock_guard<std::mutex> lock(currentTransformMutex_);
+    currentTransform_ = transform;
+}
+
+Transform WindowSessionImpl::GetCurrentTransform() const
+{
+    std::lock_guard<std::mutex> lock(currentTransformMutex_);
+    return currentTransform_;
 }
 
 void WindowSessionImpl::RegisterWindowInspectorCallback()

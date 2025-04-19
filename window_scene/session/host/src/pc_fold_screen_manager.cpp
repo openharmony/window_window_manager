@@ -401,8 +401,14 @@ bool PcFoldScreenManager::ThrowSlipToOppositeSide(ScreenSide startSide, WSRect& 
         rect.posY_ > startLimitRect.posY_) {
         float ratio = static_cast<float>(endLimitRect.height_ - rect.height_) /
             static_cast<float>(startLimitRect.height_ - rect.height_);
-        rect.posY_ = MathHelper::Floor(ratio * static_cast<float>(rect.posY_ - startLimitRect.posY_)) +
-            endLimitRect.posY_;
+        // after mutiple throw-slip, posY converges
+        if (MathHelper::GreatNotEqual(ratio, 1.0f)) {
+            rect.posY_ = MathHelper::Floor(ratio * static_cast<float>(rect.posY_ - startLimitRect.posY_)) +
+                endLimitRect.posY_;
+        } else {
+            rect.posY_ = MathHelper::Ceil(ratio * static_cast<float>(rect.posY_ - startLimitRect.posY_)) +
+                endLimitRect.posY_;
+        }
     } else {
         rect.posY_ = rect.posY_ + endLimitRect.posY_ - startLimitRect.posY_;
     }

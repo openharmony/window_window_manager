@@ -466,18 +466,31 @@ void Session::NotifyRemoveBlank()
     }
 }
 
-void Session::NotifyAddSnapshot()
+void Session::NotifyAddSnapshot(bool useFfrt, bool needPersist)
 {
     /*
      * for blankness prolems, persist snapshot could conflict with background process,
      * thus no need to persist snapshot here
      */
-    SaveSnapshot(false, false);
-    auto lifecycleListeners = GetListeners<ILifecycleListener>();
-    for (auto& listener : lifecycleListeners) {
-        if (auto listenerPtr = listener.lock()) {
-            listenerPtr->OnAddSnapshot();
+    SaveSnapshot(useFfrt, needPersist);
+    auto task = [weakThis = wptr(this), where = __func__]() {
+        auto session = weakThis.promote();
+        if (session == nullptr) {
+            TLOGNE(WmsLogTag::WMS_PATTERN, "%{public}s session is null", where);
+            return;
         }
+        auto lifecycleListeners = session->GetListeners<ILifecycleListener>();
+        for (auto& listener : lifecycleListeners) {
+            if (auto listenerPtr = listener.lock()) {
+                listenerPtr->OnAddSnapshot();
+            }
+        }
+    };
+
+    if (useFfrt) {
+        SetAddSnapshotCallback(task);
+    } else {
+        task();
     }
 }
 
@@ -1244,6 +1257,7 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
         static_cast<uint32_t>(GetSessionProperty()->GetRequestedOrientation()),
         static_cast<uint32_t>(GetSessionProperty()->GetDefaultRequestedOrientation()));
     property->SetCompatibleModeInPc(GetSessionProperty()->GetCompatibleModeInPc());
+    property->SetCompatibleModeInPcTitleVisible(GetSessionProperty()->GetCompatibleModeInPcTitleVisible());
     property->SetIsSupportDragInPcCompatibleMode(GetSessionProperty()->GetIsSupportDragInPcCompatibleMode());
     if (GetSessionProperty()->GetCompatibleModeInPc()) {
         property->SetDragEnabled(GetSessionProperty()->GetIsSupportDragInPcCompatibleMode());
@@ -1264,6 +1278,7 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
     property->SetSkipSelfWhenShowOnVirtualScreen(GetSessionProperty()->GetSkipSelfWhenShowOnVirtualScreen());
     property->SetSkipEventOnCastPlus(GetSessionProperty()->GetSkipEventOnCastPlus());
     SetSessionProperty(property);
+    GetSessionProperty()->SetIsNeedUpdateWindowMode(false);
 }
 
 void Session::InitSystemSessionDragEnable(const sptr<WindowSessionProperty>& property)
@@ -2476,7 +2491,12 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist)
             session->snapshot_ = pixelMap;
         }
         {
-            std::lock_guard lock(session->saveSnapshotCallbackMutex_);
+            std::lock_guard<std::mutex> lock(session->addSnapshotCallbackMutex_);
+            session->addSnapshotCallback_();
+        }
+        session->SetAddSnapshotCallback([]() {});
+        {
+            std::lock_guard<std::mutex> lock(session->saveSnapshotCallbackMutex_);
             session->saveSnapshotCallback_();
         }
         if (!requirePersist) {
@@ -2854,6 +2874,13 @@ WSError Session::SetCompatibleModeInPc(bool enable, bool isSupportDragInPcCompat
     if (enable) {
         GetSessionProperty()->SetDragEnabled(isSupportDragInPcCompatibleMode);
     }
+    return WSError::WS_OK;
+}
+
+WSError Session::SetCompatibleModeInPcTitleVisible(bool enableTitleVisible)
+{
+    TLOGI(WmsLogTag::WMS_SCB, "SetCompatibleModeInPcTitleVisible enableTitleVisible: %{public}d", enableTitleVisible);
+    GetSessionProperty()->SetCompatibleModeInPcTitleVisible(enableTitleVisible);
     return WSError::WS_OK;
 }
 
@@ -3788,9 +3815,10 @@ void Session::NotifySessionInfoLockedStateChange(bool lockedState)
     }
 }
 
-WSError Session::SwitchFreeMultiWindow(bool enable)
+WSError Session::SwitchFreeMultiWindow(const SystemSessionConfig& config)
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "windowId:%{public}d enable: %{public}d", GetPersistentId(), enable);
+    bool enable = config.freeMultiWindowEnable_;
+    systemConfig_.defaultWindowMode_ = config.defaultWindowMode_;
     systemConfig_.freeMultiWindowEnable_ = enable;
     if (!IsSessionValid()) {
         TLOGW(WmsLogTag::WMS_LAYOUT_PC, "Session is invalid, id: %{public}d state: %{public}u",
@@ -3801,6 +3829,8 @@ WSError Session::SwitchFreeMultiWindow(bool enable)
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "sessionStage_ is null");
         return WSError::WS_ERROR_NULLPTR;
     }
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "windowId: %{public}d enable: %{public}d defaultWindowMode: %{public}d",
+        GetPersistentId(), enable, systemConfig_.defaultWindowMode_);
     bool isUiExtSubWindow = WindowHelper::IsSubWindow(GetSessionProperty()->GetWindowType()) &&
         GetSessionProperty()->GetIsUIExtFirstSubWindow();
     if (WindowHelper::IsMainWindow(GetWindowType()) || isUiExtSubWindow) {

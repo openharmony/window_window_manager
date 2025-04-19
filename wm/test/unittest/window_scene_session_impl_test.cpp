@@ -479,6 +479,37 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession11, TestSize
 }
 
 /**
+ * @tc.name: CreateAndConnectSpecificSession12
+ * @tc.desc: CreateAndConnectSpecificSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession12, TestSize.Level1)
+{
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
+    }
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowTag(WindowTag::SYSTEM_WINDOW);
+    option->SetWindowName("CreateAndConnectSpecificSession12");
+    option->SetDisplayId(999);
+    sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+
+    SessionInfo sessionInfo = { "CreateTestBundle6", "CreateTestModule612", "CreateTestAbility12" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_EQ(WMError::WM_OK, windowSceneSession->Create(abilityContext_, session));
+
+    windowSceneSession->property_->SetPersistentId(105);
+    windowSceneSession->property_->SetParentPersistentId(102);
+    windowSceneSession->property_->SetParentId(102);
+    windowSceneSession->hostSession_ = session;
+
+    windowSceneSession->property_->type_ = WindowType::SYSTEM_WINDOW_BASE;
+    ASSERT_EQ(WMError::WM_OK, windowSceneSession->CreateAndConnectSpecificSession());
+    ASSERT_EQ(999, windowSceneSession->property_->GetDisplayId());
+    ASSERT_EQ(WMError::WM_OK, windowSceneSession->Destroy(true));
+}
+
+/**
  * @tc.name: IsValidSystemWindowType01
  * @tc.desc: IsValidSystemWindowType
  * @tc.type: FUNC
@@ -820,6 +851,102 @@ HWTEST_F(WindowSceneSessionImplTest, StartMoveWindow_IsDeviceSupportOrNot, TestS
 }
 
 /**
+ * @tc.name: StartMoveWindow_02
+ * @tc.desc: StartMoveWindow Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, StartMoveWindow_02, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("StartMoveWindow_02");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
+    ASSERT_EQ(window->StartMoveWindow(), WmErrorCode::WM_ERROR_INVALID_CALLING);
+
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    ASSERT_EQ(window->StartMoveWindow(), WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ASSERT_EQ(window->StartMoveWindow(), WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
+
+    SessionInfo info = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    window->hostSession_ = sceneSession;
+    ASSERT_EQ(window->StartMoveWindow(), WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(1, WindowType::WINDOW_TYPE_FLOAT);
+    ASSERT_EQ(window->StartMoveWindow(), WmErrorCode::WM_OK);
+    sceneSession->moveDragController_->hasPointDown_ = true;
+    sceneSession->moveDragController_->SetStartMoveFlag(true);
+    ASSERT_EQ(window->StartMoveWindow(), WmErrorCode::WM_ERROR_REPEAT_OPERATION);
+}
+
+/**
+ * @tc.name: StartMoveWindowWithCoordinate_03
+ * @tc.desc: StartMoveWindowWithCoordinate Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, StartMoveWindowWithCoordinate_03, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    Rect windowRect = { 200, 200, 1000, 1000};
+    window->property_->SetWindowRect(windowRect);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
+    ASSERT_EQ(window->StartMoveWindowWithCoordinate(-1, 50), WmErrorCode::WM_ERROR_INVALID_CALLING);
+
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    ASSERT_EQ(window->StartMoveWindowWithCoordinate(-1, 50), WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ASSERT_EQ(window->StartMoveWindowWithCoordinate(-1, 50), WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+
+    SessionInfo info = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    window->hostSession_ = sceneSession;
+    ASSERT_EQ(window->StartMoveWindowWithCoordinate(-1, 50), WmErrorCode::WM_ERROR_INVALID_PARAM);
+
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(1, WindowType::WINDOW_TYPE_FLOAT);
+    ASSERT_EQ(window->StartMoveWindowWithCoordinate(500, 500), WmErrorCode::WM_OK);
+    sceneSession->moveDragController_->hasPointDown_ = true;
+    sceneSession->moveDragController_->SetStartMoveFlag(true);
+    ASSERT_EQ(window->StartMoveWindowWithCoordinate(500, 500), WmErrorCode::WM_ERROR_REPEAT_OPERATION);
+}
+
+/**
+ * @tc.name: StopMoveWindow
+ * @tc.desc: StopMoveWindow Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, StopMoveWindow, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("StopMoveWindow");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
+    ASSERT_EQ(window->StopMoveWindow(), WmErrorCode::WM_ERROR_INVALID_CALLING);
+
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    ASSERT_EQ(window->StopMoveWindow(), WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ASSERT_EQ(window->StopMoveWindow(), WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+
+    SessionInfo info = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    window->hostSession_ = sceneSession;
+    ASSERT_EQ(window->StopMoveWindow(), WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(1, WindowType::WINDOW_TYPE_FLOAT);
+    ASSERT_EQ(window->StopMoveWindow(), WmErrorCode::WM_OK);
+}
+/**
  * @tc.name: Close01
  * @tc.desc: Close
  * @tc.type: FUNC
@@ -910,6 +1037,31 @@ HWTEST_F(WindowSceneSessionImplTest, Recover01, TestSize.Level1)
 
     windowSceneSession->hostSession_ = session;
     ASSERT_EQ(WMError::WM_OK, windowSceneSession->Recover());
+}
+
+/**
+ * @tc.name: Recover02
+ * @tc.desc: Recover02
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, Recover02, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> subWindowOption = sptr<WindowOption>::MakeSptr();
+    subWindowOption->SetWindowName("Recover02");
+    subWindowOption->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    subWindowOption->SetSubWindowMaximizeSupported(true);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(subWindowOption);
+    window->property_->SetPersistentId(1);
+    window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+
+    window->hostSession_ = session;
+    ASSERT_EQ(WMError::WM_ERROR_REPEAT_OPERATION, window->Recover());
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    ASSERT_EQ(WMError::WM_OK, window->Recover());
 }
 
 /**
