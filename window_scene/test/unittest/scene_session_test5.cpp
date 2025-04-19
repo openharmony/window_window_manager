@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 #include <pointer_event.h>
+#include "proxy/include/window_info.h"
 
 #include "common/include/session_permission.h"
 #include "display_manager.h"
@@ -243,6 +244,7 @@ HWTEST_F(SceneSessionTest5, NotifyOutsideDownEvent, TestSize.Level1)
     SessionInfo info;
     info.abilityName_ = "NotifyOutsideDownEvent";
     info.bundleName_ = "NotifyOutsideDownEvent";
+    info.windowInputType_ = static_cast<uint32_t>(MMI::WindowInputType::NORMAL);
 
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
@@ -272,6 +274,10 @@ HWTEST_F(SceneSessionTest5, NotifyOutsideDownEvent, TestSize.Level1)
     pointerEvent->SetPointerAction(5);
     session->NotifyOutsideDownEvent(pointerEvent);
     pointerEvent->RemoveAllPointerItems();
+
+    info.windowInputType_ = static_cast<uint32_t>(MMI::WindowInputType::TRANSMIT_ALL);
+    sptr<SceneSession> session1 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    session1->NotifyOutsideDownEvent(pointerEvent);
 }
 
 /**

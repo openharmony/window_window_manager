@@ -1097,6 +1097,7 @@ ohos_unittest("ws_scene_session_test") {
     "ability_runtime:app_context",
     "c_utils:utils",
     "hilog:libhilog",
+    "input:libmmi-client",
   ]
 }
 
@@ -1629,9 +1630,7 @@ ohos_unittest("ws_mock_session_manager_service_test") {
 
   include_dirs = [ "../mock" ]
 
-  sources = [
-    "mock_session_manager_service_test.cpp",
-  ]
+  sources = [ "mock_session_manager_service_test.cpp" ]
 
   deps = [
     ":ws_unittest_common",

@@ -76,8 +76,8 @@ constexpr int32_t API_VERSION_18 = 18;
 constexpr int32_t HOOK_SYSTEM_BAR_HEIGHT = 40;
 constexpr int32_t HOOK_AI_BAR_HEIGHT = 28;
 constexpr int32_t POW_DOUBLE = 2;
-constexpr int32_t MULTI_WINDOW_FLOATING_TITLE_BAR_HEIGHT_VP = 46;
 constexpr int32_t MULTI_WINDOW_TITLE_BAR_DEFAULT_HEIGHT_VP = 32;
+constexpr int32_t ROTATION_DEGREE = 90;
 
 bool CheckIfRectElementIsTooLarge(const WSRect& rect)
 {
@@ -108,6 +108,10 @@ SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCa
 SceneSession::~SceneSession()
 {
     TLOGI(WmsLogTag::WMS_LIFE, "id: %{public}d", GetPersistentId());
+    // exclude when user deletes session in recent.
+    if (SessionHelper::IsMainWindow(GetWindowType()) && notifySceneSessionDestructFunc_ && !isUserRequestedExit_) {
+        notifySceneSessionDestructFunc_(GetPersistentId());
+    }
 }
 
 WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
@@ -2125,7 +2129,7 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
             GetPersistentId(), static_cast<uint32_t>(GetWindowType()), sessionProperty->GetWindowFlags());
         return;
     }
-    if (sessionProperty->GetCompatibleModeInPc()) {
+    if (sessionProperty->GetCompatibleModeInPc() && !sessionProperty->GetCompatibleModeInPcTitleVisible()) {
         HookAvoidAreaInCompatibleMode(rect, AvoidAreaType::TYPE_SYSTEM, avoidArea);
         return;
     }
@@ -2158,8 +2162,8 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
         }
         vpr = display->GetVirtualPixelRatio();
         bool isFloat = windowMode == WindowMode::WINDOW_MODE_FLOATING && !GetIsMidScene();
-        int32_t height = isFloat ? MULTI_WINDOW_FLOATING_TITLE_BAR_HEIGHT_VP : MULTI_WINDOW_TITLE_BAR_DEFAULT_HEIGHT_VP;
-        avoidArea.topRect_.height_ = vpr * height;
+        int32_t height = isFloat ? GetStatusBarHeight() : vpr * MULTI_WINDOW_TITLE_BAR_DEFAULT_HEIGHT_VP;
+        avoidArea.topRect_.height_ = height;
         avoidArea.topRect_.width_ = static_cast<uint32_t>(display->GetWidth());
         return;
     }
@@ -2235,7 +2239,7 @@ void SceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
 }
 
 void SceneSession::GetKeyboardOccupiedAreaWithRotation(
-    int32_t persistentId, uint32_t rotation, std::vector<std::pair<bool, WSRect>>& avoidAreas)
+    int32_t persistentId, Rotation rotation, std::vector<std::pair<bool, WSRect>>& avoidAreas)
 {
     TLOGI(WmsLogTag::WMS_KEYBOARD, "In");
     if (!specificCallback_ || !specificCallback_->onKeyboardRotationChange_) {
@@ -2288,7 +2292,7 @@ void SceneSession::GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea) con
         return;
     }
     // compatibleMode app need to hook avoidArea in pc
-    if (GetSessionProperty()->GetCompatibleModeInPc()) {
+    if (GetSessionProperty()->GetCompatibleModeInPc() && !GetSessionProperty()->GetCompatibleModeInPcTitleVisible()) {
         HookAvoidAreaInCompatibleMode(rect, AvoidAreaType::TYPE_NAVIGATION_INDICATOR, avoidArea);
         return;
     }
@@ -2598,9 +2602,14 @@ WSError SceneSession::GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoid
     }, __func__);
 }
 
-WSError SceneSession::GetAvoidAreasByRotation(int32_t rotation, const WSRect& rect,
+WSError SceneSession::GetAvoidAreasByRotation(Rotation rotation, const WSRect& rect,
     const std::map<WindowType, SystemBarProperty>& properties, std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
+    if (!WindowHelper::IsMainFullScreenWindow(GetWindowType(), GetWindowMode())) {
+        TLOGI(WmsLogTag::WMS_IMMS, "window is no support, type %{public}d, mode %{public}d",
+            GetWindowType(), GetWindowMode());
+        return WSError::WS_DO_NOTHING;
+    }
     return PostSyncTask([weakThis = wptr(this), rotation, &rect, &properties, &avoidAreas, where = __func__] {
         auto session = weakThis.promote();
         if (!session) {
@@ -2617,7 +2626,7 @@ WSError SceneSession::GetAvoidAreasByRotation(int32_t rotation, const WSRect& re
     }, __func__);
 }
 
-AvoidArea SceneSession::GetAvoidAreaByRotation(int32_t rotation, const WSRect& rect,
+AvoidArea SceneSession::GetAvoidAreaByRotation(Rotation rotation, const WSRect& rect,
     const std::map<WindowType, SystemBarProperty>& properties, AvoidAreaType type)
 {
     AvoidArea avoidArea;
@@ -2643,7 +2652,7 @@ AvoidArea SceneSession::GetAvoidAreaByRotation(int32_t rotation, const WSRect& r
     return avoidArea;
 }
 
-void SceneSession::GetSystemBarAvoidAreaByRotation(int32_t rotation, AvoidAreaType type, const WSRect& rect,
+void SceneSession::GetSystemBarAvoidAreaByRotation(Rotation rotation, AvoidAreaType type, const WSRect& rect,
     const std::map<WindowType, SystemBarProperty>& properties, AvoidArea& avoidArea)
 {
     DisplayId displayId = GetSessionProperty()->GetDisplayId();
@@ -2656,20 +2665,28 @@ void SceneSession::GetSystemBarAvoidAreaByRotation(int32_t rotation, AvoidAreaTy
     }
     WindowType winType = (type == AvoidAreaType::TYPE_SYSTEM) ? WindowType::WINDOW_TYPE_STATUS_BAR :
                                                                 WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR;
-    if (auto iter = properties.find(winType); iter != properties.end() && !iter->second.enable_) {
+    if (auto iter = properties.find(winType); iter == properties.end()) {
+        TLOGE(WmsLogTag::WMS_IMMS, "win [%{public}d] properties is empty, type %{public}d", GetPersistentId(), type);
+        return;
+    }
+    bool isStatusBarAvoidAreaEmpty = winType == WindowType::WINDOW_TYPE_STATUS_BAR &&
+        (rotation == Rotation::ROTATION_90 || rotation == Rotation::ROTATION_270) &&
+        !(static_cast<bool>(static_cast<int32_t>(properties.at(winType).settingFlag_) &
+        static_cast<int32_t>(SystemBarSettingFlag::ENABLE_SETTING)));
+    if (!properties.at(winType).enable_ || isStatusBarAvoidAreaEmpty) {
         TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}d] avoid area is empty, type %{public}d", GetPersistentId(), type);
         return;
     }
-    WSRect avoidRect = (rotation == 0 || rotation == 180) ? nextSystemBarAvoidAreaRectInfo.first :
-                                                            nextSystemBarAvoidAreaRectInfo.second;
+    WSRect avoidRect = (rotation == Rotation::ROTATION_0 || rotation == Rotation::ROTATION_180) ?
+        nextSystemBarAvoidAreaRectInfo.first : nextSystemBarAvoidAreaRectInfo.second;
     TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d tyep %{public}d rect %{public}s bar %{public}s",
         GetPersistentId(), type, rect.ToString().c_str(), avoidRect.ToString().c_str());
     CalculateAvoidAreaRect(rect, avoidRect, avoidArea);
 }
 
-void SceneSession::GetCutoutAvoidAreaByRotation(int32_t rotation, const WSRect& rect, AvoidArea& avoidArea)
+void SceneSession::GetCutoutAvoidAreaByRotation(Rotation rotation, const WSRect& rect, AvoidArea& avoidArea)
 {
-    auto cutoutInfo = DisplayManager::GetInstance().GetCutoutInfoWithRotation(static_cast<Rotation>(rotation / 90));
+    auto cutoutInfo = DisplayManager::GetInstance().GetCutoutInfoWithRotation(rotation);
     if (cutoutInfo == nullptr) {
         TLOGI(WmsLogTag::WMS_IMMS, "There is no cutout info");
         return;
@@ -2692,7 +2709,7 @@ void SceneSession::GetCutoutAvoidAreaByRotation(int32_t rotation, const WSRect& 
     }
 }
 
-void SceneSession::GetKeyboardAvoidAreaByRotation(int32_t rotation, const WSRect& rect, AvoidArea& avoidArea)
+void SceneSession::GetKeyboardAvoidAreaByRotation(Rotation rotation, const WSRect& rect, AvoidArea& avoidArea)
 {
     std::vector<std::pair<bool, WSRect>> avoidInfoVector;
     GetKeyboardOccupiedAreaWithRotation(GetPersistentId(), rotation, avoidInfoVector);
@@ -2766,6 +2783,11 @@ WSError SceneSession::ProcessPointDownSession(int32_t posX, int32_t posY)
     const auto& id = GetPersistentId();
     TLOGD(WmsLogTag::WMS_INPUT_KEY_FLOW, "id:%{public}d, type:%{public}d", id, GetWindowType());
 
+    if (static_cast<MMI::WindowInputType>(GetSessionInfo().windowInputType_) == MMI::WindowInputType::TRANSMIT_ALL) {
+        TLOGD(WmsLogTag::WMS_INPUT_KEY_FLOW, "Cancel the double_send mechanism window response touchoutside.");
+        return WSError::WS_ERROR_INVALID_TYPE;
+    }
+
     // notify touch outside
     if (specificCallback_ != nullptr && specificCallback_->onSessionTouchOutside_ &&
         sessionInfo_.bundleName_.find("SCBGestureBack") == std::string::npos) {
@@ -2790,6 +2812,11 @@ WSError SceneSession::SendPointEventForMoveDrag(const std::shared_ptr<MMI::Point
 void SceneSession::NotifyOutsideDownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     // notify touchOutside and touchDown event
+    if (static_cast<MMI::WindowInputType>(GetSessionInfo().windowInputType_) == MMI::WindowInputType::TRANSMIT_ALL) {
+        TLOGD(WmsLogTag::WMS_INPUT_KEY_FLOW, "Cancel the double_send mechanism window response touchoutside.");
+        return;
+    }
+
     int32_t action = pointerEvent->GetPointerAction();
     if (action != MMI::PointerEvent::POINTER_ACTION_DOWN &&
         action != MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
@@ -2905,19 +2932,6 @@ WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::Point
         (action == MMI::PointerEvent::POINTER_ACTION_DOWN || action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
     if (raiseEnabled) {
         RaiseToAppTopForPointDown();
-    }
-    // modify the window coordinates when move end
-    MMI::PointerEvent::PointerItem pointerItem;
-    if ((action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP || action == MMI::PointerEvent::POINTER_ACTION_MOVE) &&
-        needNotifyClient && pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem) &&
-        IsStartMoving()) {
-        int32_t windowX = pointerItem.GetDisplayX() - winRect_.posX_;
-        int32_t windowY = pointerItem.GetDisplayY() - winRect_.posY_;
-        TLOGD(WmsLogTag::WMS_EVENT, "move end position: windowX:%{private}d windowY:%{private}d action:%{public}d",
-            windowX, windowY, action);
-        pointerItem.SetWindowX(windowX);
-        pointerItem.SetWindowY(windowY);
-        pointerEvent->AddPointerItem(pointerItem);
     }
     return Session::TransferPointerEvent(pointerEvent, needNotifyClient, isExecuteDelayRaise);
 }
@@ -6969,7 +6983,7 @@ bool SceneSession::UpdateVisibilityInner(bool visibility)
     if (isVisible_ == visibility) {
         return false;
     }
-    TLOGI(WmsLogTag::WMS_PIPELINE, "id: %{public}d, visibility: %{public}u -> %{public}u",
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "id: %{public}d, visibility: %{public}u -> %{public}u",
         GetPersistentId(), isVisible_, visibility);
     if (visibilityChangedDetectFunc_) {
         visibilityChangedDetectFunc_(GetCallingPid(), isVisible_, visibility);
@@ -7588,7 +7602,8 @@ WSError SceneSession::NotifyRotationProperty(int32_t rotation, uint32_t width, u
             WSRect wsrect = { 0, 0, width, height };
             auto properties = session->GetSystemBarPropertyForRotation();
             std::map<AvoidAreaType, AvoidArea> avoidAreas;
-            session->GetAvoidAreasByRotation(rotation, wsrect, properties, avoidAreas);
+            session->GetAvoidAreasByRotation(
+                static_cast<Rotation>(rotation / ROTATION_DEGREE), wsrect, properties, avoidAreas);
             if (!session->sessionStage_) {
                 return WSError::WS_ERROR_NULLPTR;
             }
@@ -8115,5 +8130,25 @@ void SceneSession::ModifyRSAnimatablePropertyMaximize(bool isMaximize, bool isDa
         }
     }
     Rosen::RSNode::CloseImplicitAnimation();
+}
+
+void SceneSession::SetSceneSessionDestructNotificationFunc(NotifySceneSessionDestructFunc&& func)
+{
+    notifySceneSessionDestructFunc_ = std::move(func);
+}
+
+void SceneSession::SetIsUserRequestedExit(bool isUserRequestedExit)
+{
+    isUserRequestedExit_ = isUserRequestedExit;
+}
+
+void SceneSession::SetIsAncoForFloatingWindow(bool isAncoForFloatingWindow)
+{
+    isAncoForFloatingWindow_ = isAncoForFloatingWindow;
+}
+
+bool SceneSession::GetIsAncoForFloatingWindow() const
+{
+    return isAncoForFloatingWindow_;
 }
 } // namespace OHOS::Rosen

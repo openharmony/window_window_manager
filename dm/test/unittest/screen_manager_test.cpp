@@ -759,6 +759,56 @@ HWTEST_F(ScreenManagerTest, SetScreenSkipProtectedWindow, TestSize.Level1)
     auto result = ScreenManager::GetInstance().SetScreenSkipProtectedWindow(screenIds, isEnable);
     EXPECT_EQ(result, DMError::DM_ERROR_INVALID_PARAM);
 }
+
+/**
+ * @tc.name: MakeMirrorForRecord01
+ * @tc.desc: Test MakeMirrorForRecord function when mirrorScreenId size exceeds MAX_SCREEN_SIZE.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenManagerTest, MakeMirrorForRecord01, TestSize.Level1)
+{
+    ScreenId mainScreenId = 1;
+    std::vector<ScreenId> miirrorScreenId(MAX_SCREEN_SIZE + 1);
+    ScreenId screenGroupId;
+
+    DMError result = ScreenManager::GetInstance().MakeMirrorForRecord(mainScreenId, miirrorScreenId, screenGroupId);
+
+    EXPECT_EQ(result, DMError::DM_ERROR_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: MakeMirrorForRecord02
+ * @tc.desc: Test MakeMirrorForRecord function when mirrorScreenId size
+     does not exceed MAX_SCREEN_SIZE and screenGroupId is valid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenManagerTest, MakeMirrorForRecord02, TestSize.Level1)
+{
+    ScreenId mainScreenId = 1;
+    std::vector<ScreenId> miirrorScreenId(MAX_SCREEN_SIZE - 1);
+    ScreenId screenGroupId = 2;
+
+    DMError result = ScreenManager::GetInstance().MakeMirrorForRecord(mainScreenId, miirrorScreenId, screenGroupId);
+
+    EXPECT_EQ(result, DMError::DM_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: MakeMirrorForRecord03
+ * @tc.desc: Test MakeMirrorForRecord function when mirrorScreenId size
+     does not exceed MAX_SCREEN_SIZE but screenGroupId is invalid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenManagerTest, MakeMirrorForRecord03, TestSize.Level1)
+{
+    ScreenId mainScreenId = 1;
+    std::vector<ScreenId> miirrorScreenId(MAX_SCREEN_SIZE - 1);
+    ScreenId screenGroupId = SCREEN_ID_INVALID;
+
+    DMError result = ScreenManager::GetInstance().MakeMirrorForRecord(mainScreenId, miirrorScreenId, screenGroupId);
+
+    EXPECT_EQ(result, DMError::DM_OK);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

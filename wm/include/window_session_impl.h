@@ -121,6 +121,7 @@ public:
     bool IsPcWindow() const override;
     bool IsPcOrPadCapabilityEnabled() const override;
     bool IsPcOrPadFreeMultiWindowMode() const override;
+    bool IsSceneBoardEnabled() const override;
     bool GetCompatibleModeInPc() const override;
     WMError SetWindowDelayRaiseEnabled(bool isEnabled) override;
     bool IsWindowDelayRaiseEnabled() const override;
@@ -429,6 +430,9 @@ public:
     RotationChangeResult NotifyRotationChange(const RotationChangeInfo& rotationChangeInfo) override;
     WMError CheckMultiWindowRect(uint32_t& width, uint32_t& height);
     WSError SetCurrentRotation(int32_t currentRotation) override;
+    void SetDisplayOrientationForRotation(DisplayOrientation displayOrientaion);
+    DisplayOrientation GetDisplayOrientationForRotation() const;
+    void SetPreferredRequestedOrientation(Orientation orientation) override;
 
 protected:
     WMError Connect();
@@ -469,6 +473,7 @@ protected:
     bool IsKeyboardEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const;
     void DispatchKeyEventCallback(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed);
     bool IsVerticalOrientation(Orientation orientation) const;
+    bool IsHorizontalOrientation(Orientation orientation) const;
     void CopyUniqueDensityParameter(sptr<WindowSessionImpl> parentWindow);
     sptr<WindowSessionImpl> FindMainWindowWithContext();
     sptr<WindowSessionImpl> FindExtensionWindowWithContext();
@@ -584,6 +589,11 @@ protected:
     sptr<FutureCallback> getRotationResultFuture_ = nullptr;
     void UpdateVirtualPixelRatio(const sptr<Display>& display);
     WMError GetVirtualPixelRatio(float& vpr);
+    void SetCurrentTransform(const Transform& transform);
+    Transform GetCurrentTransform() const;
+    void NotifyAfterUIContentReady();
+    void SetNeedRenotifyTransform(bool isNeedRenotify) { needRenotifyTransform_.store(isNeedRenotify); }
+    bool IsNeedRenotifyTransform() const { return needRenotifyTransform_.load(); }
     mutable std::recursive_mutex transformMutex_;
     std::atomic<CrossAxisState> crossAxisState_ = CrossAxisState::STATE_INVALID;
     bool IsValidCrossState(int32_t state) const;
@@ -815,6 +825,9 @@ private:
     int16_t rotationAnimationCount_ { 0 };
     Transform layoutTransform_;
     SingleHandTransform singleHandTransform_;
+    mutable std::mutex currentTransformMutex_;
+    Transform currentTransform_;
+    std::atomic_bool needRenotifyTransform_ = false;
     KeyFramePolicy keyFramePolicy_;
 
     /*
@@ -874,6 +887,8 @@ private:
     void NotifyRotationChangeResultInner(
             const std::vector<sptr<IWindowRotationChangeListener>>& windowRotationChangeListener,
             const RotationChangeInfo& rotationChangeInfo);
+    DisplayOrientation windowOrientation_ = DisplayOrientation::UNKNOWN;
+    Orientation preferredRequestedOrientation_ = Orientation::UNSPECIFIED;
 
     /*
      * keyboard

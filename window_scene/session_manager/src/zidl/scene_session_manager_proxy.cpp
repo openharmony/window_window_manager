@@ -32,6 +32,7 @@ namespace OHOS::Rosen {
 namespace {
 constexpr int32_t CYCLE_LIMIT = 1000;
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSessionManagerProxy"};
+constexpr DisplayId VIRTUAL_DISPLAY_ID = 999;
 }
 WSError SceneSessionManagerProxy::CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
     const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
@@ -105,7 +106,9 @@ WSError SceneSessionManagerProxy::CreateAndConnectSpecificSession(const sptr<ISe
         TLOGE(WmsLogTag::WMS_LIFE, "Read displayId failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    property->SetDisplayId(displayId);
+    if (property->GetDisplayId() != VIRTUAL_DISPLAY_ID) {
+        property->SetDisplayId(displayId);
+    }
     int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
 }

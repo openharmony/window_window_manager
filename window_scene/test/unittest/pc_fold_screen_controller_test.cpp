@@ -30,6 +30,12 @@ namespace OHOS {
 namespace Rosen {
 
 namespace {
+    std::string g_errLog;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
+        const char *msg)
+    {
+        g_errLog = msg;
+    }
 // screen const
 constexpr int32_t SCREEN_WIDTH = 2472;
 constexpr int32_t SCREEN_HEIGHT = 3296;
@@ -441,11 +447,19 @@ HWTEST_F(PcFoldScreenManagerTest, CalculateThrowEnd, TestSize.Level1)
  */
 HWTEST_F(PcFoldScreenManagerTest, ThrowSlipToOppositeSide, TestSize.Level1)
 {
+    SetHalfFolded();
     WSRect rect = B_RECT;
     EXPECT_FALSE(manager_.ThrowSlipToOppositeSide(ScreenSide::EXPAND, rect, TOP_AVOID_HEIGHT, BOT_AVOID_HEIGHT, 0));
     EXPECT_TRUE(manager_.ThrowSlipToOppositeSide(ScreenSide::FOLD_B, rect, TOP_AVOID_HEIGHT, BOT_AVOID_HEIGHT, 0));
     rect = C_RECT;
     EXPECT_TRUE(manager_.ThrowSlipToOppositeSide(ScreenSide::FOLD_C, rect, TOP_AVOID_HEIGHT, BOT_AVOID_HEIGHT, 0));
+
+    rect = B_RECT;
+    for (int32_t i = 0; i < 100; ++i) {
+        manager_.ThrowSlipToOppositeSide(ScreenSide::FOLD_B, rect, TOP_AVOID_HEIGHT, BOT_AVOID_HEIGHT, 0);
+        manager_.ThrowSlipToOppositeSide(ScreenSide::FOLD_C, rect, TOP_AVOID_HEIGHT, BOT_AVOID_HEIGHT, 0);
+    }
+    EXPECT_LE(std::abs(rect.posY_ - B_RECT.posY_), 5);
 }
 
 /**
@@ -456,6 +470,7 @@ HWTEST_F(PcFoldScreenManagerTest, ThrowSlipToOppositeSide, TestSize.Level1)
 HWTEST_F(PcFoldScreenManagerTest, MappingRectInScreenSide, TestSize.Level1)
 {
     // half folded
+    LOG_SetCallback(MyLogCallback);
     SetHalfFolded();
     WSRect rect = B_ACROSS_RECT;
     WSRect rectMapped = rect;
@@ -484,9 +499,8 @@ HWTEST_F(PcFoldScreenManagerTest, MappingRectInScreenSide, TestSize.Level1)
     // flattened
     SetExpanded();
     rect = B_ACROSS_RECT;
-    rectMapped = rect;
     manager_.MappingRectInScreenSide(ScreenSide::EXPAND, rect, TOP_AVOID_HEIGHT, BOT_AVOID_HEIGHT);
-    EXPECT_EQ(rect, rectMapped);
+    EXPECT_TRUE(g_errLog.find("invalid side") != std::string::npos);
 }
 
 /**

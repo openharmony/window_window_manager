@@ -497,14 +497,14 @@ HWTEST_F(WindowSceneSessionImplTest5, SwitchFreeMultiWindow01, TestSize.Level1)
     window->windowSystemConfig_.freeMultiWindowEnable_ = true;
     ref = window->SwitchFreeMultiWindow(true);
     ASSERT_EQ(WSError::WS_ERROR_REPEAT_OPERATION, ref);
-    
+
     window->windowSystemConfig_.freeMultiWindowEnable_ = false;
     WindowSceneSessionImpl::windowSessionMap_.insert(std::make_pair(window->GetWindowName(),
         std::pair<uint64_t, sptr<WindowSessionImpl>>(window->GetWindowId(), window)));
-    ASSERT_EQ(WSError::WS_OK, window->SwitchFreeMultiWindow(true));
-    ASSERT_EQ(true, window->windowSystemConfig_.freeMultiWindowEnable_);
-    ASSERT_EQ(WSError::WS_OK, window->SwitchFreeMultiWindow(false));
-    ASSERT_EQ(false, window->windowSystemConfig_.freeMultiWindowEnable_);
+    EXPECT_EQ(WSError::WS_ERROR_NULLPTR, window->SwitchFreeMultiWindow(true));
+    EXPECT_EQ(true, window->windowSystemConfig_.freeMultiWindowEnable_);
+    EXPECT_EQ(WSError::WS_ERROR_NULLPTR, window->SwitchFreeMultiWindow(false));
+    EXPECT_EQ(false, window->windowSystemConfig_.freeMultiWindowEnable_);
     WindowSceneSessionImpl::windowSessionMap_.erase(window->GetWindowName());
 }
 
@@ -554,7 +554,7 @@ HWTEST_F(WindowSceneSessionImplTest5, SwitchFreeMultiWindow02, TestSize.Level1)
     EXPECT_EQ(false, mainWindow->IsPcOrPadFreeMultiWindowMode());
     EXPECT_EQ(false, floatWindow->IsPcOrPadFreeMultiWindowMode());
     EXPECT_EQ(false, subWindow->IsPcOrPadFreeMultiWindowMode());
-    EXPECT_EQ(WSError::WS_OK, mainWindow->SwitchFreeMultiWindow(true));
+    EXPECT_EQ(WSError::WS_ERROR_NULLPTR, mainWindow->SwitchFreeMultiWindow(true));
     EXPECT_EQ(true, mainWindow->IsPcOrPadFreeMultiWindowMode());
     EXPECT_EQ(true, floatWindow->IsPcOrPadFreeMultiWindowMode());
     EXPECT_EQ(true, subWindow->IsPcOrPadFreeMultiWindowMode());
@@ -1264,7 +1264,7 @@ HWTEST_F(WindowSceneSessionImplTest5, SetFollowParentWindowLayoutEnabled01, Func
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     ret = window->SetFollowParentWindowLayoutEnabled(true);
     ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_OPERATION);
-    
+
     property->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
     ret = window->SetFollowParentWindowLayoutEnabled(true);
     ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_OPERATION);
@@ -1272,6 +1272,35 @@ HWTEST_F(WindowSceneSessionImplTest5, SetFollowParentWindowLayoutEnabled01, Func
     property->subWindowLevel_ = 1;
     ret = window->SetFollowParentWindowLayoutEnabled(true);
     ASSERT_EQ(ret, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: GetTargetOrientationConfigInfo
+ * @tc.desc: GetTargetOrientationConfigInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, GetTargetOrientationConfigInfo, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetDisplayId(0);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    Orientation targetOrientation = Orientation::USER_ROTATION_PORTRAIT;
+    std::map<Rosen::WindowType, Rosen::SystemBarProperty> properties;
+    Rosen::SystemBarProperty statusBarProperty;
+    properties[Rosen::WindowType::WINDOW_TYPE_STATUS_BAR] = statusBarProperty;
+    Ace::ViewportConfig config;
+    std::map<AvoidAreaType, AvoidArea> avoidAreas;
+    window->getTargetInfoCallback_ = sptr<FutureCallback>::MakeSptr();
+
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->property_->SetWindowName("GetTargetOrientationConfigInfo");
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    window->state_ = WindowState::STATE_CREATED;
+    EXPECT_EQ(WMError::WM_OK,
+    window->GetTargetOrientationConfigInfo(targetOrientation, properties, config, avoidAreas));
 }
 
 /**
@@ -1487,6 +1516,28 @@ HWTEST_F(WindowSceneSessionImplTest5, HandleWindowLimitsInCompatibleMode05, Func
     EXPECT_EQ(windowSizeLimits.maxWindowHeight, 0);
     EXPECT_EQ(windowSizeLimits.minWindowWidth, 0);
     EXPECT_EQ(windowSizeLimits.minWindowHeight, 0);
+}
+
+/**
+ * @tc.name: IsDecorEnable1
+ * @tc.desc: IsDecorEnable1
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, IsDecorEnable1, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> subWindowOption = sptr<WindowOption>::MakeSptr();
+    subWindowOption->SetWindowName("IsDecorEnable1");
+    subWindowOption->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(subWindowOption);
+    window->property_->SetDecorEnable(true);
+    window->windowSystemConfig_.isSystemDecorEnable_ = true;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    auto ret = window->IsDecorEnable();
+    EXPECT_EQ(false, ret);
+    subWindowOption->SetSubWindowMaximizeSupported(true);
+    ret = window->IsDecorEnable();
+    EXPECT_EQ(true, ret);
 }
 }
 } // namespace Rosen

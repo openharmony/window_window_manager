@@ -131,6 +131,9 @@ public:
         const std::map<WindowType, SystemBarPropertyFlag>& propertyFlags) override;
     WMError GetSystemBarProperties(std::map<WindowType, SystemBarProperty>& properties) override;
     WMError SetSpecificBarProperty(WindowType type, const SystemBarProperty& property) override;
+    WMError SetSystemBarPropertyForPage(WindowType type, std::optional<SystemBarProperty> property) override;
+    void GetSystemBarPropertyForPage(const std::map<WindowType, SystemBarProperty>& properties,
+        std::map<WindowType, SystemBarProperty>& pageProperties);
     void ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     bool PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     WSError NotifyDialogStateChange(bool isForeground) override;
@@ -421,6 +424,8 @@ private:
      * Move Drag
      */
     bool CalcWindowShouldMove();
+    bool CheckCanMoveWindowType();
+    bool CheckIsPcAppInPadFullScreenOnMobileWindowMode();
 
     /*
      * PC Window

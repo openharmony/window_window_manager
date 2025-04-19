@@ -571,6 +571,8 @@ HWTEST_F(WindowSessionImplTest4, GetDecorButtonStyle, TestSize.Level1)
     ASSERT_EQ(style.closeButtonRightMargin, DEFAULT_CLOSE_BUTTON_RIGHT_MARGIN);
     ASSERT_EQ(style.spacingBetweenButtons, DEFAULT_SPACING_BETWEEN_BUTTONS);
     ASSERT_EQ(style.colorMode, DEFAULT_COLOR_MODE);
+    ASSERT_EQ(style.buttonIconSize, DEFAULT_BUTTON_ICON_SIZE);
+    ASSERT_EQ(style.buttonBackgroundCornerRadius, DEFAULT_BUTTON_BACKGROUND_CORNER_RADIUS);
     ASSERT_EQ(res, WMError::WM_OK);
 }
 
@@ -606,7 +608,7 @@ HWTEST_F(WindowSessionImplTest4, SetDecorButtonStyle, TestSize.Level1)
     ASSERT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
 
     // check uiContent is null
-    style.buttonBackgroundSize = 24;
+    style.buttonBackgroundSize = 40;
     res = window->SetDecorButtonStyle(style);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
 
@@ -1265,6 +1267,7 @@ HWTEST_F(WindowSessionImplTest4, GetTitleButtonVisible01, TestSize.Level1)
 HWTEST_F(WindowSessionImplTest4, UpdateRect03, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetDisplayId(0);
     option->SetWindowName("WindowSessionCreateCheck");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
 

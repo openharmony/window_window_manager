@@ -406,6 +406,8 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
     BindNativeFunction(env, objValue, "setSkipEventOnCastPlus", moduleName, JsSceneSession::SetSkipEventOnCastPlus);
     BindNativeFunction(env, objValue, "setCompatibleModeInPc", moduleName,
         JsSceneSession::SetCompatibleModeInPc);
+    BindNativeFunction(env, objValue, "setCompatibleModeInPcTitleVisible", moduleName,
+        JsSceneSession::SetCompatibleModeInPcTitleVisible);
     BindNativeFunction(env, objValue, "setUniqueDensityDpiFromSCB", moduleName,
         JsSceneSession::SetUniqueDensityDpiFromSCB);
     BindNativeFunction(env, objValue, "setBlank", moduleName, JsSceneSession::SetBlank);
@@ -2235,6 +2237,13 @@ napi_value JsSceneSession::SetCompatibleModeInPc(napi_env env, napi_callback_inf
     TLOGD(WmsLogTag::WMS_COMPAT, "[NAPI]");
     JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetCompatibleModeInPc(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::SetCompatibleModeInPcTitleVisible(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_COMPAT, "[NAPI]");
+    JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnSetCompatibleModeInPcTitleVisible(env, info) : nullptr;
 }
 
 napi_value JsSceneSession::SetCompatibleWindowSizeInPc(napi_env env, napi_callback_info info)
@@ -5439,6 +5448,36 @@ napi_value JsSceneSession::OnSetCompatibleModeInPc(napi_env env, napi_callback_i
     return NapiGetUndefined(env);
 }
 
+napi_value JsSceneSession::OnSetCompatibleModeInPcTitleVisible(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_ONE;
+    napi_value argv[ARGC_ONE] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+
+    if (argc < ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    bool enableTitleVisible = false;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_0], enableTitleVisible)) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "Failed to convert parameter to enableTitleVisible");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "session is nullptr, id:%{public}d", persistentId_);
+        return NapiGetUndefined(env);
+    }
+    session->SetCompatibleModeInPcTitleVisible(enableTitleVisible);
+    return NapiGetUndefined(env);
+}
+
 napi_value JsSceneSession::OnSetAppSupportPhoneInPc(napi_env env, napi_callback_info info)
 {
     size_t argc = ARGC_FOUR;
@@ -5626,12 +5665,38 @@ napi_value JsSceneSession::OnRemoveBlank(napi_env env, napi_callback_info info)
 
 napi_value JsSceneSession::OnAddSnapshot(napi_env env, napi_callback_info info)
 {
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+
+    bool useFfrt = false;
+    if (argc >= ARGC_ONE && GetType(env, argv[0]) == napi_boolean) {
+        if (!ConvertFromJsValue(env, argv[0], useFfrt)) {
+            TLOGE(WmsLogTag::WMS_PATTERN, "Failed to convert parameter to useFfrt");
+            napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                "Input parameter is missing or invalid"));
+            return NapiGetUndefined(env);
+        }
+    }
+
+    bool needPersist = false;
+    if (argc >= ARGC_TWO && GetType(env, argv[1]) == napi_boolean) {
+        if (!ConvertFromJsValue(env, argv[1], needPersist)) {
+            TLOGE(WmsLogTag::WMS_PATTERN, "Failed to convert parameter to needPersist");
+            napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                "Input parameter is missing or invalid"));
+            return NapiGetUndefined(env);
+        }
+    }
+
+    TLOGI(WmsLogTag::WMS_PATTERN, "argc: %{public}u, useFfrt: %{public}u, needPersist: %{public}u",
+        argc, useFfrt, needPersist);
     auto session = weakSession_.promote();
     if (session == nullptr) {
-        TLOGE(WmsLogTag::WMS_PATTERN, "session is nullptr, id:%{public}d", persistentId_);
+        TLOGE(WmsLogTag::WMS_PATTERN, "session is null, id:%{public}d", persistentId_);
         return NapiGetUndefined(env);
     }
-    session->NotifyAddSnapshot();
+    session->NotifyAddSnapshot(useFfrt, needPersist);
     return NapiGetUndefined(env);
 }
 
