@@ -524,6 +524,35 @@ HWTEST_F(SceneSessionManagerTest3, GetSceneSessionVectorByTypeAndDisplayId, Test
 }
 
 /**
+ * @tc.name: GetWindowLimits
+ * @tc.desc: GetWindowLimits
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest3, GetWindowLimits, TestSize.Level1)
+{
+    int ret = 0;
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test2";
+    info.moduleName_ = "test3";
+    info.appIndex_ = 10;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    WindowLimits limits;
+    limits.maxHeight_ = 1000;
+    limits.minHeight_ = 500;
+    limits.maxWidth_ = 1000;
+    limits.minWidth_ = 500;
+    sceneSession->property_->SetWindowLimits(limits);
+    
+    int32_t windowId = 1;
+    ssm_->sceneSessionMap_.insert({windowId, sceneSession});
+    ssm_->GetWindowLimits(windowId);
+    ssm_->sceneSessionMap_.erase(windowId);
+    ASSERT_EQ(ret, 0);
+}
+
+/**
  * @tc.name: CheckWindowId
  * @tc.desc: CheckWindowId
  * @tc.type: FUNC

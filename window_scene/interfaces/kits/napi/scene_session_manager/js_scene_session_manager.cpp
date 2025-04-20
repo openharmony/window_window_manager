@@ -229,6 +229,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::GetFreeMultiWindowConfig);
     BindNativeFunction(env, exportObj, "getIsLayoutFullScreen", moduleName,
         JsSceneSessionManager::GetIsLayoutFullScreen);
+    BindNativeFunction(env, exportObj, "getWindowLimits", moduleName,
+        JsSceneSessionManager::GetWindowLimits);
     BindNativeFunction(env, exportObj, "notifyEnterRecentTask", moduleName,
         JsSceneSessionManager::NotifyEnterRecentTask);
     BindNativeFunction(env, exportObj, "updateDisplayHookInfo", moduleName,
@@ -618,9 +620,29 @@ void JsSceneSessionManager::ProcessShiftFocus()
         }
         uiContent->UnFocus();
     };
+    NotifyDiffSCBAfterUpdateFocusFunc scbFocusChangeCallback = [this](
+        DisplayId prevDisplayId, DisplayId currDisplayId) {
+        TLOGND(WmsLogTag::WMS_FOCUS, "scb focus change, prevId: %{public}" PRIu64 " currId: %{public}" PRIu64,
+            prevDisplayId, currDisplayId);
+        const auto& prevUIContent = rootScene_->GetUIContentByDisplayId(prevDisplayId);
+        const auto& currUIContent = rootScene_->GetUIContentByDisplayId(currDisplayId);
+        if (prevUIContent == currUIContent) {
+            TLOGND(WmsLogTag::WMS_FOCUS, "not need to update focus");
+            return;
+        }
+        if (prevUIContent != nullptr) {
+            TLOGND(WmsLogTag::WMS_FOCUS, "scb uicontent unfocus, id: %{public}" PRIu64, prevDisplayId);
+            prevUIContent->UnFocus();
+        }
+        if (currUIContent != nullptr) {
+            TLOGND(WmsLogTag::WMS_FOCUS, "scb uicontent focus, id: %{public}" PRIu64, currDisplayId);
+            currUIContent->Focus();
+        }
+    };
     SceneSessionManager::GetInstance().SetShiftFocusListener(func);
     SceneSessionManager::GetInstance().SetSCBFocusedListener(focusedCallback);
     SceneSessionManager::GetInstance().SetSCBUnfocusedListener(unfocusedCallback);
+    SceneSessionManager::GetInstance().SetSCBFocusChangeListener(std::move(scbFocusChangeCallback));
 }
 
 void JsSceneSessionManager::ProcessCallingSessionIdChangeRegister()
@@ -1159,6 +1181,13 @@ napi_value JsSceneSessionManager::GetIsLayoutFullScreen(napi_env env, napi_callb
     WLOGFI("[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnGetIsLayoutFullScreen(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::GetWindowLimits(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "[NAPI]");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnGetWindowLimits(env, info) : nullptr;
 }
 
 napi_value JsSceneSessionManager::GetFreeMultiWindowConfig(napi_env env, napi_callback_info info)
@@ -3630,6 +3659,35 @@ napi_value JsSceneSessionManager::OnGetIsLayoutFullScreen(napi_env env, napi_cal
     napi_value result = nullptr;
     napi_get_boolean(env, isLayoutFullScreen, &result);
     return result;
+}
+
+napi_value JsSceneSessionManager::OnGetWindowLimits(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int32_t windowId;
+    if (!ConvertFromJsValue(env, argv[0], windowId)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Failed to convert parameter to windowId");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    auto windowLimits = SceneSessionManager::GetInstance().GetWindowLimits(windowId);
+    napi_value jsWindowLimitsObj = JsWindowSceneConfig::CreateWindowLimits(env, windowLimits);
+    if (jsWindowLimitsObj == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "jsWindowLimitsObj is nullptr");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY),
+            "Get window limits failed."));
+        return NapiGetUndefined(env);
+    }
+    return jsWindowLimitsObj;
 }
 
 napi_value JsSceneSessionManager::OnNotifyEnterRecentTask(napi_env env, napi_callback_info info)

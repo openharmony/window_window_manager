@@ -144,8 +144,6 @@ const uint32_t MAX_INTERVAL_US = 1800000000; // 30分钟
 const int32_t MAP_SIZE = 300;
 const std::string NO_EXIST_BUNDLE_MANE = "null";
 ScreenCache<int32_t, std::string> g_uidVersionMap(MAP_SIZE, NO_EXIST_BUNDLE_MANE);
-constexpr int32_t MOTION_ACTION_TENT_MODE_ON = 1;
-constexpr int32_t MOTION_ACTION_TENT_MODE_HOVER = 2;
 
 const std::string SCREEN_UNKNOWN = "unknown";
 #ifdef WM_MULTI_SCREEN_ENABLE
@@ -419,8 +417,11 @@ void ScreenSessionManager::OnAddSystemAbility(int32_t systemAbilityId, const std
         screenEventTracker_.RecordEvent("Dms recover Posture and Hall sensor finished.");
 #endif
     } else if (systemAbilityId == COMMON_EVENT_SERVICE_ID) {
-        auto task = [this]() { ScreenSessionPublish::GetInstance().RegisterLowTempSubscriber(); };
-        taskScheduler_->PostAsyncTask(task, "RegisterLowTempSubscriber");
+        auto task = []() {
+            ScreenSessionPublish::GetInstance().RegisterLowTempSubscriber();
+            ScreenSessionPublish::GetInstance().RegisterUserSwitchedSubscriber();
+        };
+        taskScheduler_->PostAsyncTask(task, "RegisterCommonEventSubscriber");
     }
 }
 
@@ -7024,7 +7025,7 @@ void ScreenSessionManager::OnPropertyChange(const ScreenProperty& newProperty, S
     TLOGI(WmsLogTag::DMS, "screenId: %{public}" PRIu64 " reason: %{public}d", screenId, static_cast<int>(reason));
     if (!clientProxy_) {
         TLOGI(WmsLogTag::DMS, "clientProxy_ is null");
-        if (foldScreenController_ != nullptr) {
+        if (foldScreenController_ != nullptr && !FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
             foldScreenController_->SetdisplayModeChangeStatus(false);
         }
         return;
@@ -7283,6 +7284,19 @@ void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& cl
     SetClientInner();
     SwitchScbNodeHandle(userId, newScbPid, true);
     AddScbClientDeathRecipient(client, newScbPid);
+
+    static bool isNeedSwitchScreen = FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() ||
+        FoldScreenStateInternel::IsSingleDisplayFoldDevice();
+    if (isNeedSwitchScreen) {
+        FoldDisplayMode displayMode = GetFoldDisplayMode();
+        if (displayMode == FoldDisplayMode::FULL) {
+            TLOGI(WmsLogTag::DMS, "switch screen to full");
+            SetDisplayNodeScreenId(SCREEN_ID_FULL, SCREEN_ID_FULL);
+        } else if (displayMode == FoldDisplayMode::MAIN) {
+            TLOGI(WmsLogTag::DMS, "switch screen to main");
+            SetDisplayNodeScreenId(SCREEN_ID_FULL, SCREEN_ID_MAIN);
+        }
+    }
 }
 
 void ScreenSessionManager::SwitchScbNodeHandle(int32_t newUserId, int32_t newScbPid, bool coldBoot)
@@ -7324,7 +7338,6 @@ void ScreenSessionManager::SwitchScbNodeHandle(int32_t newUserId, int32_t newScb
     currentScbPId_ = newScbPid;
     scbSwitchCV_.notify_all();
     oldScbDisplayMode_ = GetFoldDisplayMode();
-    NotifyCastWhenSwitchScbNode();
 #endif
 }
 
@@ -9043,42 +9056,6 @@ void ScreenSessionManager::SetExtendScreenDpi()
     float dpi = static_cast<float>(cachedSettingDpi_) / BASELINE_DENSITY;
     SetExtendPixelRatio(dpi * g_extendScreenDpiCoef_);
     TLOGI(WmsLogTag::DMS, "get setting extend screen dpi is : %{public}f", g_extendScreenDpiCoef_);
-}
-
-uint32_t ScreenSessionManager::GetDeviceStatus()
-{
-    if (foldScreenController_ == nullptr) {
-        return 0;
-    }
-
-    DMDeviceStatus status = DMDeviceStatus::UNKNOWN;
-
-    if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
-        int tentMode = foldScreenController_->GetCurrentTentMode();
-        if (tentMode == MOTION_ACTION_TENT_MODE_HOVER) {
-            status = DMDeviceStatus::STATUS_TENT_HOVER;
-        } else if (tentMode == MOTION_ACTION_TENT_MODE_ON) {
-            status = DMDeviceStatus::STATUS_TENT;
-        } else {
-            FoldDisplayMode displayMode = foldScreenController_->GetModeMatchStatus();
-            if (displayMode == FoldDisplayMode::MAIN) {
-                status = DMDeviceStatus::STATUS_FOLDED;
-            }
-            TLOGI(WmsLogTag::DMS, "Get device status for pocket, display mode: %{public}u",
-                static_cast<uint32_t>(displayMode));
-        }
-        TLOGI(WmsLogTag::DMS, "Get device status for pocket, tent mode: %{public}d status: %{public}u",
-            tentMode, static_cast<uint32_t>(status));
-    } else if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
-        FoldDisplayMode displayMode = foldScreenController_->GetModeMatchStatus();
-        if (displayMode == FoldDisplayMode::GLOBAL_FULL) {
-            status = DMDeviceStatus::STATUS_GLOBAL_FULL;
-        }
-        TLOGI(WmsLogTag::DMS, "Get device status, display mode: %{public}u status: %{public}u",
-            static_cast<uint32_t>(displayMode), static_cast<uint32_t>(status));
-    }
-
-    return static_cast<uint32_t>(status);
 }
 
 sptr<ScreenSession> ScreenSessionManager::GetFakePhysicalScreenSession(ScreenId screenId, ScreenId defScreenId,
