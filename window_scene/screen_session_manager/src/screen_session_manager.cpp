@@ -9024,6 +9024,18 @@ bool ScreenSessionManager::BlockScreenWaitPictureFrameByCV(bool isStartDream)
     return pictureFrameIsOk;
 }
 
+void ScreenSessionManager::SetForceCloseHdr(ScreenId screenId, bool isForceCloseHdr)
+{
+    auto screenSession = GetScreenSession(screenId);
+    if (!screenSession) {
+        TLOGE(WmsLogTag::DMS, "screenSession is nullptr");
+        return;
+    }
+    TLOGI(WmsLogTag::DMS, "[UL_POWER]screenId:%{public}" PRIu64 "isForceCloseHdr:%{public}d",
+        screenId, isForceCloseHdr);
+    screenSession->SetForceCloseHdr(isForceCloseHdr);
+}
+
 void ScreenSessionManager::RegisterSettingExtendScreenDpiObserver()
 {
     TLOGI(WmsLogTag::DMS, "Register Setting Extend Dpi Observer");
