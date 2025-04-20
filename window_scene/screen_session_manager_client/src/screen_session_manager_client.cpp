@@ -621,6 +621,15 @@ void ScreenSessionManagerClient::SetLandscapeLockStatus(bool isLocked)
     return screenSessionManager_->SetLandscapeLockStatus(isLocked);
 }
 
+void ScreenSessionManagerClient::SetForceCloseHdr(ScreenId screenId, bool isForceCloseHdr)
+{
+    if (!screenSessionManager_) {
+        TLOGE(WmsLogTag::DMS, "screenSessionManager_ is null");
+        return;
+    }
+    return screenSessionManager_->SetForceCloseHdr(screenId, isForceCloseHdr);
+}
+
 ExtendScreenConnectStatus ScreenSessionManagerClient::GetExtendScreenConnectStatus()
 {
     if (!screenSessionManager_) {

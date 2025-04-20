@@ -2661,6 +2661,36 @@ void ScreenSessionManagerProxy::SetLandscapeLockStatus(bool isLocked)
     }
 }
 
+void ScreenSessionManagerProxy::SetForceCloseHdr(ScreenId screenId, bool isForceCloseHdr)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGW(WmsLogTag::DMS, "remote is null");
+        return;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return;
+    }
+    if (!(data.WriteUint64(static_cast<uint64_t>(screenId)))) {
+        TLOGE(WmsLogTag::DMS, "Write screenId failed");
+        return;
+    }
+    if (!data.WriteBool(isForceCloseHdr)) {
+        TLOGE(WmsLogTag::DMS, "Write isForceCloseHdr failed");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCENE_BOARD_FORCE_CLOSE_HDR),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
+        return;
+    }
+}
+
 ExtendScreenConnectStatus ScreenSessionManagerProxy::GetExtendScreenConnectStatus()
 {
     sptr<IRemoteObject> remote = Remote();

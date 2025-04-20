@@ -2035,6 +2035,18 @@ void ScreenSession::SetColorSpaces(std::vector<uint32_t>&& colorSpaces)
     colorSpaces_ = std::move(colorSpaces);
 }
 
+void ScreenSession::SetForceCloseHdr(bool isForceCloseHdr)
+{
+    {
+        std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
+        if (displayNode_ != nullptr) {
+            TLOGI(WmsLogTag::DMS, "SetForceCloseHdr %{public}d", isForceCloseHdr);
+            displayNode_->SetForceCloseHdr(isForceCloseHdr);
+        }
+    }
+    RSTransaction::FlushImplicitTransaction();
+}
+
 bool ScreenSession::IsWidthHeightMatch(float width, float height, float targetWidth, float targetHeight)
 {
     return (width == targetWidth && height == targetHeight) || (width == targetHeight && height == targetWidth);
