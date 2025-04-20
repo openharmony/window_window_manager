@@ -5893,6 +5893,77 @@ HWTEST_F(ScreenSessionManagerTest, NotifyCastWhenSwitchScbNode, Function | Small
 
     ssm_->NotifyCastWhenSwitchScbNode();
 }
+
+/**
+ * @tc.name: RecoverRestoredMultiScreenMode01
+ * @tc.desc: RecoverRestoredMultiScreenMode01
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, RecoverRestoredMultiScreenMode01, TestSize.Level1)
+{
+    ScreenId id = 1;
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(id, ScreenProperty(), 0);
+    screenSession->GetScreenProperty().SetScreenType(ScreenType::REAL);
+    EXPECT_FALSE(ScreenSessionManager::GetInstance().RecoverRestoredMultiScreenMode(screenSession));
+}
+
+/**
+ * @tc.name: RecoverRestoredMultiScreenMode02
+ * @tc.desc: RecoverRestoredMultiScreenMode02
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, RecoverRestoredMultiScreenMode02, TestSize.Level1)
+{
+    ScreenId id = 2;
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(id, ScreenProperty(), 0);
+    screenSession->GetScreenProperty().SetScreenType(ScreenType::UNDEFINED);
+    EXPECT_FALSE(ScreenSessionManager::GetInstance().RecoverRestoredMultiScreenMode(screenSession));
+}
+
+/**
+ * @tc.name: TestIsFreezed_WhenPidNotExist
+ * @tc.desc: Test IsFreezed function when agentPid does not exist in freezedPidList_
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, TestIsFreezed_WhenPidNotExist, TestSize.Level1)
+{
+    int32_t agentPid = 1234;
+    DisplayManagerAgentType agentType = DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER;
+
+    EXPECT_FALSE(ScreenSessionManager::GetInstance().IsFreezed(agentPid, agentType));
+}
+
+/**
+ * @tc.name: TestIsFreezed_WhenPidExistButAgentTypeNotExist
+ * @tc.desc: Test IsFreezed function when agentPid exists in freezedPidList_ but not in pidAgentTypeMap_
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, TestIsFreezed_WhenPidExistButAgentTypeNotExist, TestSize.Level1)
+{
+    int32_t agentPid = 1234;
+    DisplayManagerAgentType agentType = DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER;
+
+    ScreenSessionManager::GetInstance().freezedPidList_.insert(agentPid);
+    EXPECT_TRUE(ScreenSessionManager::GetInstance().IsFreezed(agentPid, agentType));
+    EXPECT_EQ(ScreenSessionManager::GetInstance().pidAgentTypeMap_[agentPid].count(agentType), 1);
+}
+
+/**
+ * @tc.name: TestIsFreezed_WhenPidAndAgentTypeExist
+ * @tc.desc: Test IsFreezed function when agentPid and agentType both exists
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, TestIsFreezed_WhenPidAndAgentTypeExist, TestSize.Level1)
+{
+    int32_t agentPid = 1234;
+    DisplayManagerAgentType agentType = DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER;
+
+    ScreenSessionManager::GetInstance().freezedPidList_.insert(agentPid);
+    ScreenSessionManager::GetInstance().pidAgentTypeMap_[agentPid] =
+        std::set<DisplayManagerAgentType>({DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER});
+    EXPECT_TRUE(ScreenSessionManager::GetInstance().IsFreezed(agentPid, agentType));
+    EXPECT_EQ(ScreenSessionManager::GetInstance().pidAgentTypeMap_[agentPid].count(agentType), 1);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

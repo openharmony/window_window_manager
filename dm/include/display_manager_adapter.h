@@ -110,7 +110,6 @@ public:
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshotWithOption(const CaptureOption& captureOption,
         DmErrorCode* errorCode = nullptr);
     virtual sptr<DisplayInfo> GetPrimaryDisplayInfo();
-    virtual uint32_t GetDeviceStatus();
 
 private:
     static inline SingletonDelegator<DisplayManagerAdapter> delegator;

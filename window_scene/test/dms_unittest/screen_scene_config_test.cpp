@@ -1077,6 +1077,53 @@ HWTEST_F(ScreenSceneConfigTest, ParseNodeConfig07, TestSize.Level1)
     ScreenSceneConfig::ParseNodeConfig(currNode);
     xmlFreeNode(currNode);
 }
+
+/**
+ * @tc.name: GetOffScreenPPIThreshold01
+ * @tc.desc: Test GetOffScreenPPIThreshold when the array is not empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, GetOffScreenPPIThreshold01, TestSize.Level1)
+{
+    uint32_t result = ScreenSceneConfig::GetOffScreenPPIThreshold();
+    EXPECT_EQ(result, 0);
+}
+
+/**
+ * @tc.name: GetOffScreenPPIThreshold02
+ * @tc.desc: Test GetOffScreenPPIThreshold when the array is empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, GetOffScreenPPIThreshold02, TestSize.Level1)
+{
+    ScreenSceneConfig::xmlNodeMap_.clear();
+    uint32_t result = ScreenSceneConfig::GetOffScreenPPIThreshold();
+    EXPECT_EQ(result, ScreenSceneConfig::offScreenPPIThreshold_);
+}
+
+/**
+ * @tc.name: IsSupportOffScreenRendering01
+ * @tc.desc: IsSupportOffScreenRendering01
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, IsSupportOffScreenRendering01, TestSize.Level1)
+{
+    ScreenSceneConfig::enableConfig_["isSupportOffScreenRendering"] = true;
+    bool res = ScreenSceneConfig::IsSupportOffScreenRendering();
+    EXPECT_EQ(true, res);
+}
+
+/**
+ * @tc.name: IsSupportOffScreenRendering02
+ * @tc.desc: IsSupportOffScreenRendering02
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, IsSupportOffScreenRendering02, TestSize.Level1)
+{
+    ScreenSceneConfig::enableConfig_.erase("isSupportOffScreenRendering");
+    bool res = ScreenSceneConfig::IsSupportOffScreenRendering();
+    EXPECT_EQ(false, res);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
