@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-#include <cerrno>
-
 #include "screen_setting_helper.h"
 
-#include "window_manager_hilog.h"
+#include <cerrno>
+#include <parameters.h>
+
+#include "screen_session_manager/include/screen_session_manager.h"
 #include "setting_provider.h"
 #include "system_ability_definition.h"
-#include "screen_session_manager/include/screen_session_manager.h"
-#include <parameters.h>
+#include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -325,16 +325,17 @@ bool ScreenSettingHelper::IsNumber(const std::string& str)
     return hasDigit;
 }
 
-bool ScreenSettingHelper::ConvertStrToULongLong(const std::string& str, uint64_t& num)
+bool ScreenSettingHelper::ConvertStrToUint64(const std::string& str, uint64_t& num)
 {
     char *endFlag;
     errno = 0;
-    num = std::strtoull(str.c_str(), &endFlag, BASE_TEN);
+    uint64_t tmp = static_cast<uint64_t>(std::strtoull(str.c_str(), &endFlag, BASE_TEN));
     if (errno == ERANGE) {
         return false;
-    } else if (*endFlag != '\0') {
+    } else if (endFlag == nullptr || *endFlag != '\0') {
         return false;
     }
+    num = tmp;
     return true;
 }
 
