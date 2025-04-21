@@ -39,6 +39,7 @@ public:
         const std::shared_ptr<AppExecFwk::EventHandler>& vsyncHandler = nullptr);
     ~VsyncStation();
 
+    bool HasRequestedVsync() const { return hasRequestedVsync_; }
     bool IsVsyncReceiverCreated();
     void RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback);
     int64_t GetVSyncPeriod();

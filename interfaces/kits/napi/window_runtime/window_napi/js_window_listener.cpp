@@ -488,6 +488,25 @@ void JsWindowListener::OnWindowStatusChange(WindowStatus windowstatus)
     }
 }
 
+void JsWindowListener::OnWindowStatusDidChange(WindowStatus windowstatus)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]");
+    // js callback should run in js thread
+    auto jsCallback = [self = weakRef_, windowstatus, env = env_, funcName = __func__] {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: this listener or env is nullptr", funcName);
+            return;
+        }
+        HandleScope handleScope(env);
+        napi_value argv[] = {CreateJsValue(env, static_cast<uint32_t>(windowstatus))};
+        thisListener->CallJsMethod(WINDOW_STATUS_DID_CHANGE_CB.c_str(), argv, ArraySize(argv));
+    };
+    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "failed to send event");
+    }
+}
+
 void JsWindowListener::OnDisplayIdChanged(DisplayId displayId)
 {
     TLOGD(WmsLogTag::WMS_ATTRIBUTE, "in");

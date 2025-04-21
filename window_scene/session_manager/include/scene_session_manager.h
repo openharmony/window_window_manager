@@ -148,6 +148,9 @@ using GetRSNodeByStringIDFunc = std::function<std::shared_ptr<Rosen::RSNode>(con
 using SetTopWindowBoundaryByIDFunc = std::function<void(const std::string& id)>;
 using SetForegroundWindowNumFunc = std::function<void(int32_t windowNum)>;
 using NotifySceneSessionDestructFunc = std::function<void(int32_t persistentId)>;
+using HasRootSceneRequestedVsyncFunc = std::function<bool()>;
+using RequestVsyncByRootSceneWhenModeChangeFunc =
+    std::function<void(const std::shared_ptr<VsyncCallback>& vsyncCallback)>;
 
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
@@ -541,6 +544,8 @@ public:
     void RegisterSingleHandContainerNode(const std::string& stringId);
     const SingleHandCompatibleModeConfig& GetSingleHandCompatibleModeConfig() const;
     void ConfigSupportFollowParentWindowLayout();
+    void SetHasRootSceneRequestedVsyncFunc(HasRootSceneRequestedVsyncFunc&& func);
+    void SetRequestVsyncByRootSceneWhenModeChangeFunc(RequestVsyncByRootSceneWhenModeChangeFunc&& func);
 
     /*
      * Window Property
@@ -1290,6 +1295,10 @@ private:
     bool GetDisplaySizeById(DisplayId displayId, int32_t& displayWidth, int32_t& displayHeight);
     void UpdateSessionWithFoldStateChange(DisplayId displayId, SuperFoldStatus status, SuperFoldStatus prevStatus);
     void ConfigSingleHandCompatibleMode(const WindowSceneConfig::ConfigItem& configItem);
+    HasRootSceneRequestedVsyncFunc hasRootSceneRequestedVsyncFunc_;
+    RequestVsyncByRootSceneWhenModeChangeFunc requestVsyncByRootSceneWhenModeChangeFunc_;
+    WSError HasRootSceneRequestedVsync(bool& hasRootSceneRequestedVsync);
+    WSError RequestVsyncByRootSceneWhenModeChange(const std::shared_ptr<VsyncCallback>& vsyncCallback);
 
     /*
      * Window Snapshot

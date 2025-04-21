@@ -57,6 +57,7 @@ public:
     WMError ResizeAsync(uint32_t width, uint32_t height,
         const RectAnimationConfig& rectAnimationConfig = {}) override;
     WMError SetFollowParentWindowLayoutEnabled(bool isFollow) override;
+    WSError NotifyLayoutFinishAfterWindowModeChange(WindowMode mode) override;
 
     /*
      * Window Hierarchy

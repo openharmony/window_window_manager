@@ -42,6 +42,7 @@ enum class RegisterListenerType : uint32_t {
     DIALOG_TARGET_TOUCH_CB,
     DIALOG_DEATH_RECIPIENT_CB,
     WINDOW_STATUS_CHANGE_CB,
+    WINDOW_STATUS_DID_CHANGE_CB,
     WINDOW_TITLE_BUTTON_RECT_CHANGE_CB,
     WINDOW_VISIBILITY_CHANGE_CB,
     WINDOW_DISPLAYID_CHANGE_CB,
@@ -114,6 +115,8 @@ private:
     WmErrorCode ProcessWindowNoInteractionRegister(sptr<JsWindowListener> listener, sptr<Window> window,
         bool isRegister, napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessWindowStatusChangeRegister(sptr<JsWindowListener> listener, sptr<Window> window,
+        bool isRegister, napi_env env, napi_value parameter = nullptr);
+    WmErrorCode ProcessWindowStatusDidChangeRegister(sptr<JsWindowListener> listener, sptr<Window> window,
         bool isRegister, napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessWindowTitleButtonRectChangeRegister(sptr<JsWindowListener> listener, sptr<Window> window,
         bool isRegister, napi_env env, napi_value parameter = nullptr);
