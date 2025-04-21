@@ -194,7 +194,7 @@ void SceneSessionDirtyManager::UpdateDefaultHotAreas(sptr<SceneSession> sceneSes
         TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is nullptr");
         return;
     }
-    WSRect windowRect = sceneSession->GetSessionGlobalRect();
+    WSRect windowRect = sceneSession->GetSessionGlobalRectInMultiScreen();
     uint32_t touchOffset = 0;
     uint32_t pointerOffset = 0;
     bool isMidScene = sceneSession->GetIsMidScene();
@@ -716,7 +716,7 @@ std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyMa
         return {};
     }
     Matrix3f transform;
-    WSRect windowRect = sceneSession->GetSessionGlobalRect();
+    WSRect windowRect = sceneSession->GetSessionGlobalRectInMultiScreen();
     auto pid = sceneSession->GetCallingPid();
     auto uid = sceneSession->GetCallingUid();
     auto windowId = sceneSession->GetWindowId();
