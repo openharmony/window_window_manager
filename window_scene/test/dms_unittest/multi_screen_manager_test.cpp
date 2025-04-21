@@ -35,7 +35,7 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
-    sptr<TestClient> testClient_;
+    sptr<ScreenSessionManagerClientTest> testClient_;
     void SetAceessTokenPermission(const std::string processName);
 };
 
@@ -772,7 +772,7 @@ HWTEST_F(MultiScreenManagerTest, MultiScreenModeChange02, TestSize.Level1)
         virtualOption1, displayManagerAgent1->AsObject());
     auto secondarySession = ScreenSessionManager::GetInstance().GetScreenSession(screenId1);
 
-    testClient_ = new TestClient();
+    testClient_ = new ScreenSessionManagerClientTest();
     ScreenSessionManager::GetInstance().SetClient(testClient_);
     ASSERT_NE(ScreenSessionManager::GetInstance().GetClientProxy(), nullptr);
 
@@ -845,7 +845,7 @@ HWTEST_F(MultiScreenManagerTest, DoFirstMainChange02, TestSize.Level1)
     auto secondarySession = ScreenSessionManager::GetInstance().GetScreenSession(screenId1);
     ScreenCombination secondaryCombination = secondarySession->GetScreenCombination();
 
-    testClient_ = new TestClient();
+    testClient_ = new ScreenSessionManagerClientTest();
     ScreenSessionManager::GetInstance().SetClient(testClient_);
     ASSERT_NE(ScreenSessionManager::GetInstance().GetClientProxy(), nullptr);
     MultiScreenManager::GetInstance().DoFirstMainChange(firstSession, secondarySession, "unknown");
@@ -1027,7 +1027,7 @@ HWTEST_F(MultiScreenManagerTest, DoFirstMirrorChange02, TestSize.Level1)
     auto secondarySession = ScreenSessionManager::GetInstance().GetScreenSession(screenId1);
     ScreenCombination secondaryCombination = secondarySession->GetScreenCombination();
 
-    testClient_ = new TestClient();
+    testClient_ = new ScreenSessionManagerClientTest();
     ScreenSessionManager::GetInstance().SetClient(testClient_);
     ASSERT_NE(ScreenSessionManager::GetInstance().GetClientProxy(), nullptr);
     MultiScreenManager::GetInstance().DoFirstMirrorChange(firstSession, secondarySession, "unknown");
