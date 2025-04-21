@@ -14,49 +14,31 @@
 import("//build/config/components/ets_frontend/ets2abc_config.gni")
 
 # abc generate
-generate_static_abc("extension_window_abc_ani") {
-  arktsconfig = "./uiExtension.json"
-  dst_file = "$target_out_dir/extension_window_ani.abc"
-  out_puts = [ "$target_out_dir/extension_window_ani.abc" ]
-  in_puts = [
-    "./uiExtension.json",
-    "./uiExtension.ets",
-    "./uiExtension_entry.ets",
-  ]
-  cache_path = "./cache/uiExtension"
-  timeout_limit = "120"
-  extra_visibility = [ ":*" ]
+generate_static_abc("extension_window_ani") {
+  base_url = "."
+  files = [ "./@ohos.arkui.uiExtension.ets" ]
   is_boot_abc = "True"
   device_dst_file = "/system/framework/extension_window_ani.abc"
 }
 
 ohos_prebuilt_etc("extension_window_abc_ani_etc") {
   source = "$target_out_dir/extension_window_ani.abc"
-  deps = [ ":extension_window_abc_ani" ]
+  deps = [ ":extension_window_ani" ]
   part_name = "window_manager"
   subsystem_name = "window"
   module_install_dir = "framework"
 }
 
-generate_static_abc("extension_window_host_abc_ani") {
-  arktsconfig = "./uiExtensionHost.json"
-  dst_file = "$target_out_dir/extension_window_host_ani.abc"
-  out_puts = [ "$target_out_dir/extension_window_host_ani.abc" ]
-  in_puts = [
-    "./uiExtensionHost.json",
-    "./uiExtensionHost.ets",
-    "./uiExtensionHost_entry.ets",
-  ]
-  cache_path = "./cache/uiExtensionHost"
-  timeout_limit = "120"
+generate_static_abc("extension_window_host_ani") {
+  base_url = "."
+  files = [ "./@ohos.uiExtensionHost.ets" ]
   is_boot_abc = "True"
   device_dst_file = "/system/framework/extension_window_host_ani.abc"
-  extra_visibility = [ ":*" ]
 }
 
 ohos_prebuilt_etc("extension_window_host_abc_ani_etc") {
   source = "$target_out_dir/extension_window_host_ani.abc"
-  deps = [ ":extension_window_host_abc_ani" ]
+  deps = [ ":extension_window_host_ani" ]
   part_name = "window_manager"
   subsystem_name = "window"
   module_install_dir = "framework"
