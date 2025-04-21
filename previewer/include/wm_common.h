@@ -661,14 +661,14 @@ struct WindowDensityInfo {
 };
 
 /**
- * @struct WindowProperties
+ * @struct WindowPropertyInfo
  *
- * @brief Currently available window properties
+ * @brief Currently available window property
  */
-struct WindowProperties {
+struct WindowPropertyInfo {
     Rect windowRect { 0, 0, 0, 0 };
     Rect drawableRect { 0, 0, 0, 0 };
-    uint32_t apiVersion = 0;
+    uint32_t apiCompatibleVersion = 0;
     WindowType type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
     bool isLayoutFullScreen = false;
     bool isFullScreen = false;

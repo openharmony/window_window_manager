@@ -626,12 +626,12 @@ public:
     virtual bool IsSubWindowMaximizeSupported() const { return false; }
 
     /**
-     * @brief Get the window density of current window.
+     * @brief Get the window property of current window.
      *
-     * @param windowPropweties the window properties struct.
+     * @param windowPropertyInfo the window property struct.
      * @return WMError.
      */
-    virtual WMError GetWindowProperties(WindowProperties& windowProperties) { return WMError::WM_OK; }
+    virtual WMError GetWindowPropertyInfo(WindowPropertyInfo& windowPropertyInfo) { return WMError::WM_OK; }
 };
 }
 }
