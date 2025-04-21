@@ -73,6 +73,8 @@ constexpr uint32_t INVALID_TARGET_API_VERSION = 0;
 const std::string SET_UIEXTENSION_DESTROY_TIMEOUT_LISTENER_TASK_NAME = "SetUIExtDestroyTimeoutListener";
 constexpr int64_t SET_UIEXTENSION_DESTROY_TIMEOUT_TIME_MS = 4000;
 
+const std::string SCB_BACK_VISIBILITY = "scb_back_visibility";
+
 Ace::ContentInfoType GetAceContentInfoType(BackupAndRestoreType type)
 {
     auto contentInfoType = Ace::ContentInfoType::NONE;
@@ -1541,10 +1543,12 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
     if (property_->GetCompatibleModeInPc() && !property_->GetIsAtomicService()) {
         bool isLayoutFullScreen = property_->IsLayoutFullScreen();
         uiContent->HideWindowTitleButton(true, !isLayoutFullScreen, hideMinimizeButton, hideCloseButton);
-        uiContent->OnContainerModalEvent("scb_back_visibility", isLayoutFullScreen ? "false" : "true");
+        if (!property_->GetCompatibleModeInPcTitleVisible()) {
+            uiContent->OnContainerModalEvent(SCB_BACK_VISIBILITY, isLayoutFullScreen ? "false" : "true");
+        }
     } else {
         uiContent->HideWindowTitleButton(hideSplitButton, hideMaximizeButton, hideMinimizeButton, hideCloseButton);
-        uiContent->OnContainerModalEvent("scb_back_visibility", "false");
+        uiContent->OnContainerModalEvent(SCB_BACK_VISIBILITY, "false");
     }
     if (isSuperFoldDisplayDevice) {
         handler_->PostTask([weakThis = wptr(this), where = __func__] {
@@ -1644,7 +1648,7 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
         std::unique_lock<std::shared_mutex> lock(uiContentMutex_);
         uiContent_ = std::move(uiContent);
         // compatibleMode app in pc, need change decor title to float title bar
-        if (property_->GetCompatibleModeInPc()) {
+        if (property_->GetCompatibleModeInPc() && !property_->GetCompatibleModeInPcTitleVisible()) {
             uiContent_->SetContainerModalTitleVisible(false, true);
             uiContent_->EnableContainerModalCustomGesture(true);
         }
@@ -5914,6 +5918,18 @@ Transform WindowSessionImpl::GetLayoutTransform() const
 {
     std::lock_guard<std::recursive_mutex> lock(transformMutex_);
     return layoutTransform_;
+}
+
+void WindowSessionImpl::SetCurrentTransform(const Transform& transform)
+{
+    std::lock_guard<std::mutex> lock(currentTransformMutex_);
+    currentTransform_ = transform;
+}
+
+Transform WindowSessionImpl::GetCurrentTransform() const
+{
+    std::lock_guard<std::mutex> lock(currentTransformMutex_);
+    return currentTransform_;
 }
 
 void WindowSessionImpl::RegisterWindowInspectorCallback()

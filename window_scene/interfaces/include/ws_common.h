@@ -360,6 +360,7 @@ struct SessionInfo {
     bool isFromIcon_ = false;
 
     mutable std::shared_ptr<AAFwk::Want> want = nullptr; // want for ability start
+    std::shared_ptr<std::mutex> wantMutex_ = std::make_shared<std::mutex>();
     std::shared_ptr<AAFwk::Want> closeAbilityWant = nullptr;
     std::shared_ptr<AAFwk::AbilityStartSetting> startSetting = nullptr;
     std::shared_ptr<AAFwk::ProcessOptions> processOptions = nullptr;
@@ -437,6 +438,25 @@ struct SessionInfo {
      * Window Rotation
      */
     int32_t currentRotation_ = 0;
+
+    AAFwk::Want SafelyGetWant() const
+    {
+        std::lock_guard<std::mutex> lock(*wantMutex_);
+        if (want != nullptr) {
+            return *(want);
+        } else {
+            return AAFwk::Want();
+        }
+    }
+
+    void SafelySetWant(const AAFwk::Want& newWant) const
+    {
+        std::lock_guard<std::mutex> lock(*wantMutex_);
+        if (want == nullptr) {
+            want = std::make_shared<AAFwk::Want>();
+        }
+        *want = newWant;
+    }
 };
 
 enum class SessionFlag : uint32_t {
@@ -481,6 +501,7 @@ enum class SizeChangeReason : uint32_t {
     SPLIT_DRAG_START,
     SPLIT_DRAG,
     SPLIT_DRAG_END,
+    RESIZE_BY_LIMIT,
     END,
 };
 

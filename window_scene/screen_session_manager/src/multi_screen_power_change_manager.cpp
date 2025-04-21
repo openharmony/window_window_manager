@@ -263,7 +263,7 @@ DMError MultiScreenPowerChangeManager::HandleInnerMainExternalExtendChange(sptr<
     MultiScreenChangeUtils::ScreenPhysicalInfoChange(innerScreen, externalScreen);
 
     /* step4: change position */
-    MultiScreenChangeUtils::ScreenMainPositionChange(externalScreen);
+    MultiScreenChangeUtils::ScreenMainPositionChange(externalScreen, innerScreen);
 
     /* step5: notify external screen property change */
     MultiScreenChangeUtils::ScreenPropertyChangeNotify(innerScreen, externalScreen);
@@ -324,7 +324,7 @@ DMError MultiScreenPowerChangeManager::HandleInnerMainExternalMirrorChange(sptr<
     MultiScreenChangeUtils::ScreenPhysicalInfoChange(innerScreen, externalScreen);
 
     /* step4: change position */
-    MultiScreenChangeUtils::ScreenMainPositionChange(externalScreen);
+    MultiScreenChangeUtils::ScreenMainPositionChange(externalScreen, innerScreen);
 
     /* step5: notify external screen property change */
     MultiScreenChangeUtils::ScreenPropertyChangeNotify(innerScreen, externalScreen);
@@ -543,7 +543,7 @@ DMError MultiScreenPowerChangeManager::HandleRecoveryInnerMainExternalMirrorChan
     MultiScreenChangeUtils::ScreenPhysicalInfoChange(innerScreen, externalScreen);
 
     /* step5: change position */
-    MultiScreenChangeUtils::ScreenMainPositionChange(externalScreen);
+    MultiScreenChangeUtils::ScreenMainPositionChange(externalScreen, innerScreen);
 
     /* step6: notify external screen property change */
     MultiScreenChangeUtils::ScreenPropertyChangeNotify(innerScreen, externalScreen);

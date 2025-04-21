@@ -165,6 +165,7 @@ public:
     void SetLandscapeLockStatus(bool isLocked) override;
     ExtendScreenConnectStatus GetExtendScreenConnectStatus() override;
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() override;
+    void SetForceCloseHdr(ScreenId screenId, bool isForceCloseHdr) override;
 
     void SetCameraStatus(int32_t cameraStatus, int32_t cameraPosition) override;
 
@@ -200,7 +201,7 @@ public:
     DeviceScreenConfig GetDeviceScreenConfig() override;
     DMError SetVirtualScreenRefreshRate(ScreenId screenId, uint32_t refreshInterval) override;
     void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList,
-        std::vector<uint64_t> surfaceIdList = {}) override;
+        std::vector<uint64_t> surfaceIdList = {}, std::vector<uint8_t> typeBlackList = {}) override;
     void SetVirtualDisplayMuteFlag(ScreenId screenId, bool muteFlag) override;
     void DisablePowerOffRenderControl(ScreenId screenId) override;
     DMError ProxyForFreeze(const std::set<int32_t>& pidList, bool isProxy) override;
@@ -220,7 +221,6 @@ public:
     ScreenCombination GetScreenCombination(ScreenId screenId) override;
     DMError SetScreenSkipProtectedWindow(const std::vector<ScreenId>& screenIds, bool isEnable) override;
     bool GetIsRealScreen(ScreenId screenId) override;
-    uint32_t GetDeviceStatus() override;
     void NotifyExtendScreenCreateFinish() override;
 
 private:

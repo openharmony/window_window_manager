@@ -253,7 +253,7 @@ public:
         return DMError::DM_OK;
     }
     virtual void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList,
-        std::vector<uint64_t> surfaceIdList = {}) {}
+        std::vector<uint64_t> surfaceIdList = {}, std::vector<uint8_t> typeBlackList = {}) {}
     virtual void SetVirtualDisplayMuteFlag(ScreenId screenId, bool muteFlag) {}
     virtual void DisablePowerOffRenderControl(ScreenId screenId) {}
 
@@ -303,11 +303,6 @@ public:
     virtual DMError SetSystemKeyboardStatus(bool isTpKeyboardOn = false)
     {
         return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
-    }
-
-    virtual uint32_t GetDeviceStatus()
-    {
-        return 0;
     }
 };
 } // namespace OHOS::Rosen

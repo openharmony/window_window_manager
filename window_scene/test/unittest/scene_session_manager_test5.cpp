@@ -561,6 +561,29 @@ HWTEST_F(SceneSessionManagerTest5, SetShiftFocusListener, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ShiftFocus
+ * @tc.desc: ShiftFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, ShiftFocus, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "ShiftFocus";
+    info.bundleName_ = "ShiftFocus";
+    info.isSystem_ = true;
+    sptr<SceneSession> focusedSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    focusedSession->persistentId_ = 1;
+    sceneSession->persistentId_ = 2;
+    focusedSession->GetSessionProperty()->SetDisplayId(0);
+    sceneSession->GetSessionProperty()->SetDisplayId(12);
+    ssm_->sceneSessionMap_.insert({focusedSession->GetPersistentId(), focusedSession});
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    ssm_->ShiftFocus(DEFAULT_DISPLAY_ID, sceneSession, false, FocusChangeReason::DEFAULT);
+}
+
+/**
  * @tc.name: UpdateFocusStatus
  * @tc.desc: UpdateFocusStatus
  * @tc.type: FUNC
@@ -1278,6 +1301,31 @@ HWTEST_F(SceneSessionManagerTest5, ProcessDialogRequestFocusImmdediately02, Test
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     auto ret = ssm_->ProcessDialogRequestFocusImmdediately(sceneSession);
     EXPECT_EQ(WSError::WS_DO_NOTHING, ret);
+    usleep(WAIT_SYNC_IN_NS);
+}
+
+/**
+ * @tc.name: CheckFloatWindowIsAnco01
+ * @tc.desc: CheckFloatWindowIsAnco
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, CheckFloatWindowIsAnco01, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test2";
+    info.moduleName_ = "test2";
+    info.persistentId_ = 123;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->SetCallingPid(123);
+    ssm_->sceneSessionMap_.insert({ 123, sceneSession });
+    ssm_->CheckFloatWindowIsAnco(123, sceneSession1);
+    ASSERT_EQ(sceneSession1->GetIsAncoForFloatingWindow(), false);
+    ssm_->sceneSessionMap_.erase(123);
     usleep(WAIT_SYNC_IN_NS);
 }
 

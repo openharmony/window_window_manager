@@ -1232,11 +1232,10 @@ HWTEST_F(SceneSessionTest3, GetKeyboardOccupiedAreaWithRotation1, TestSize.Level
     sceneSession->specificCallback_ = nullptr;
 
     int32_t persistentId = 1;
-    uint32_t rotation = 90;
     std::vector<std::pair<bool, WSRect>> avoidAreas;
     std::pair<bool, WSRect> keyboardOccupiedArea = {false, {0, 0, 0, 0}};
     avoidAreas.emplace_back(keyboardOccupiedArea);
-    sceneSession->GetKeyboardOccupiedAreaWithRotation(persistentId, rotation, avoidAreas);
+    sceneSession->GetKeyboardOccupiedAreaWithRotation(persistentId, Rotation::ROTATION_90, avoidAreas);
     uint32_t areaSize = static_cast<uint32_t>(avoidAreas.size());
     ASSERT_EQ(1, areaSize);
     ASSERT_EQ(false, avoidAreas[0].first);
@@ -1259,11 +1258,10 @@ HWTEST_F(SceneSessionTest3, GetKeyboardOccupiedAreaWithRotation2, TestSize.Level
     sceneSession->specificCallback_->onKeyboardRotationChange_ = nullptr;
 
     int32_t persistentId = 1;
-    uint32_t rotation = 90;
     std::vector<std::pair<bool, WSRect>> avoidAreas;
     std::pair<bool, WSRect> keyboardOccupiedArea = {true, {0, 0, 0, 0}};
     avoidAreas.emplace_back(keyboardOccupiedArea);
-    sceneSession->GetKeyboardOccupiedAreaWithRotation(persistentId, rotation, avoidAreas);
+    sceneSession->GetKeyboardOccupiedAreaWithRotation(persistentId, Rotation::ROTATION_90, avoidAreas);
     uint32_t areaSize = static_cast<uint32_t>(avoidAreas.size());
     ASSERT_EQ(1, areaSize);
     ASSERT_EQ(true, avoidAreas[0].first);
