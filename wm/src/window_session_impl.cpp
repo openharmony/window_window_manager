@@ -470,7 +470,7 @@ WMError WindowSessionImpl::WindowSessionCreateCheck()
 
     bool isPhoneOrPad = windowSystemConfig_.IsPhoneWindow() || windowSystemConfig_.IsPadWindow();
     if (!isPhoneOrPad && property_->GetWindowType() == WindowType::WINDOW_TYPE_MUTISCREEN_COLLABORATION) {
-        TLOGE(WmsLogTag::DEFAULT, "only phone or pad can create mutiScreen collaboration window");
+        TLOGE(WmsLogTag::WMS_LIFE, "only phone or pad can create mutiScreen collaboration window");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
 
