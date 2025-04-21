@@ -34,7 +34,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "Window"
 
 static sptr<Window> CreateWindowWithSession(sptr<WindowOption>& option,
     const std::shared_ptr<OHOS::AbilityRuntime::Context>& context, WMError& errCode,
-    sptr<ISession> iSession = nullptr, const std::string& identityToken = "", bool isAbilityHookEnd = false)
+    sptr<ISession> iSession = nullptr, const std::string& identityToken = "", bool isModuleAbilityHookEnd = false)
 {
     WLOGFD("in");
     sptr<WindowSessionImpl> windowSessionImpl = nullptr;
@@ -51,7 +51,7 @@ static sptr<Window> CreateWindowWithSession(sptr<WindowOption>& option,
     }
 
     windowSessionImpl->SetWindowType(option->GetWindowType());
-    WMError error = windowSessionImpl->Create(context, iSession, identityToken, isAbilityHookEnd);
+    WMError error = windowSessionImpl->Create(context, iSession, identityToken, isModuleAbilityHookEnd);
     if (error != WMError::WM_OK) {
         errCode = error;
         WLOGFE("error: %{public}u", static_cast<uint32_t>(errCode));
@@ -105,7 +105,7 @@ sptr<Window> Window::Create(const std::string& windowName, sptr<WindowOption>& o
 }
 
 sptr<Window> Window::Create(sptr<WindowOption>& option, const std::shared_ptr<OHOS::AbilityRuntime::Context>& context,
-    const sptr<IRemoteObject>& iSession, WMError& errCode, const std::string& identityToken, bool isAbilityHookEnd)
+    const sptr<IRemoteObject>& iSession, WMError& errCode, const std::string& identityToken, bool isModuleAbilityHookEnd)
 {
     // create from ability mgr service
     if (!iSession || !option) {
@@ -132,7 +132,7 @@ sptr<Window> Window::Create(sptr<WindowOption>& option, const std::shared_ptr<OH
         return nullptr;
     }
     return CreateWindowWithSession(option, context, errCode,
-        iface_cast<Rosen::ISession>(iSession), identityToken, isAbilityHookEnd);
+        iface_cast<Rosen::ISession>(iSession), identityToken, isModuleAbilityHookEnd);
 }
 
 sptr<Window> Window::CreatePiP(sptr<WindowOption>& option, const PiPTemplateInfo& pipTemplateInfo,

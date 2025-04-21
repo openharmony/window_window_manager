@@ -2231,7 +2231,7 @@ HWTEST_F(SceneSessionManagerTest12, RequestSceneSession, Function | SmallTest | 
     sptr<SceneSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    sceneSession->sessionInfo_.isModuleAbilityHook = true;
+    sceneSession->sessionInfo_.isModuleAbilityHook_ = true;
     sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
     ssm_->sceneSessionMap_[101] = sceneSession;
 

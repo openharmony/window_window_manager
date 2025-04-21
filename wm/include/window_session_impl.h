@@ -73,7 +73,7 @@ public:
 
     virtual WMError Create(const std::shared_ptr<AbilityRuntime::Context>& context,
         const sptr<Rosen::ISession>& iSession,
-        const std::string& identityToken = "", bool isAbilityHookEnd = false) { return WMError::WM_OK; }
+        const std::string& identityToken = "", bool isModuleAbilityHookEnd = false) { return WMError::WM_OK; }
 
     /*
      * inherits from window

@@ -406,7 +406,7 @@ struct SessionInfo {
     std::string specifiedFlag_ = "";
     bool disableDelegator = false;
     bool reuseDelegatorWindow = false;
-    bool isModuleAbilityHook = false;
+    bool isModuleAbilityHook_ = false;
 
     /*
      * App Use Control

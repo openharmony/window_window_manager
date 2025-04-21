@@ -87,7 +87,7 @@ std::shared_ptr<IDataHandler> WindowExtensionSessionImpl::GetExtensionDataHandle
 }
 
 WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Context>& context,
-    const sptr<Rosen::ISession>& iSession, const std::string& identityToken, bool isAbilityHookEnd)
+    const sptr<Rosen::ISession>& iSession, const std::string& identityToken, bool isModuleAbilityHookEnd)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "Called.");
     if (!context || !iSession) {

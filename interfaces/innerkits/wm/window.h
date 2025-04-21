@@ -750,7 +750,7 @@ public:
      */
     static sptr<Window> Create(sptr<WindowOption>& option, const std::shared_ptr<AbilityRuntime::Context>& context,
         const sptr<IRemoteObject>& iSession, WMError& errCode = DefaultCreateErrCode,
-        const std::string& identityToken = "", bool isAbilityHookEnd = false);
+        const std::string& identityToken = "", bool isModuleAbilityHookEnd = false);
 
     /**
      * @brief create pip window with session

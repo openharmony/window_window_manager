@@ -566,7 +566,7 @@ void WindowSceneSessionImpl::UpdateWindowState()
 }
 
 WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Context>& context,
-    const sptr<Rosen::ISession>& iSession, const std::string& identityToken, bool isAbilityHookEnd)
+    const sptr<Rosen::ISession>& iSession, const std::string& identityToken, bool isModuleAbilityHookEnd)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "Window Create name:%{public}s, state:%{public}u, mode:%{public}u",
         property_->GetWindowName().c_str(), state_, GetWindowMode());
@@ -582,8 +582,8 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
     hostSession_ = iSession;
     SetContext(context);
     identityToken_ = identityToken;
-    property_->SetIsAbilityHookEnd(isAbilityHookEnd);
-    TLOGI(WmsLogTag::WMS_LIFE, "SetIsAbilityHookEnd %{public}d", isAbilityHookEnd);
+    property_->SetIsModuleAbilityHookEnd(isModuleAbilityHookEnd);
+    TLOGI(WmsLogTag::WMS_LIFE, "SetIsModuleAbilityHookEnd %{public}d", isModuleAbilityHookEnd);
     AdjustWindowAnimationFlag();
     if (context && context->GetApplicationInfo() &&
         context->GetApplicationInfo()->apiCompatibleVersion >= 9 && // 9: api version
