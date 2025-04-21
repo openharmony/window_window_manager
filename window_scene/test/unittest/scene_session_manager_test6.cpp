@@ -1121,6 +1121,38 @@ HWTEST_F(SceneSessionManagerTest6, FillWindowInfo04, TestSize.Level1)
 }
 
 /**
+ * @tc.name: FillWindowInfo05
+ * @tc.desc: FillWindowInfo05
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, FillWindowInfo05, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    std::vector<sptr<AccessibilityWindowInfo>> infos;
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest2";
+    sessionInfo.abilityName_ = "FillWindowInfo05";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sceneSession->GetSessionProperty()->SetIsSystemKeyboard(true);
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::HALF_FOLDED,
+        { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1649, 2472, 40 });
+    WSRect area = { 0, 1690, 2472, 1648 };
+    sceneSession->SetSessionGlobalRect(area);
+    auto ret = ssm_->FillWindowInfo(infos, sceneSession);
+    EXPECT_EQ(true, ret);
+    EXPECT_EQ(1, infos.size());
+    EXPECT_EQ(0, infos[0]->displayId_);
+
+    infos.clear();
+    sceneSession->GetSessionProperty()->SetIsSystemKeyboard(false);
+    auto ret = ssm_->FillWindowInfo(infos, sceneSession);
+    EXPECT_EQ(true, ret);
+    EXPECT_EQ(1, infos.size());
+    EXPECT_EQ(999, infos[0]->displayId_);
+}
+
+/**
  * @tc.name: SetSessionVisibilityInfo
  * @tc.desc: SetSessionVisibilityInfo
  * @tc.type: FUNC
