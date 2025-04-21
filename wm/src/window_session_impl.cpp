@@ -5898,7 +5898,7 @@ void WindowSessionImpl::SetTargetAPIVersion(uint32_t targetAPIVersion)
 
 uint32_t WindowSessionImpl::GetTargetAPIVersion() const
 {
-    return targetAPIVersion_;GetTargetAPIVersionByApplicationInfo
+    return targetAPIVersion_;
 }
 
 uint32_t WindowSessionImpl::GetTargetAPIVersionByApplicationInfo() const
