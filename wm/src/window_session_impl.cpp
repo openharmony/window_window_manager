@@ -5898,12 +5898,12 @@ void WindowSessionImpl::SetTargetAPIVersion(uint32_t targetAPIVersion)
 
 uint32_t WindowSessionImpl::GetTargetAPIVersion() const
 {
-    return targetAPIVersion_;
+    return targetAPIVersion_;GetTargetAPIVersionByApplicationInfo
 }
 
 uint32_t WindowSessionImpl::GetTargetAPIVersionByApplicationInfo() const
 {
-    return (context_ != nullptr && context_->GetApplicationInfo() != nullptr) ? 
+    return (context_ != nullptr && context_->GetApplicationInfo() != nullptr) ?
         static_cast<uint32_t>(context_->GetApplicationInfo()->apiTargetVersion) % API_VERSION_MOD :
         INVALID_TARGET_API_VERSION;
 }
