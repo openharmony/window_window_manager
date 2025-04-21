@@ -1448,7 +1448,7 @@ void SceneSessionManager::CreateRootSceneSession()
         return this->GetStatusBarAvoidHeight(barArea);
     });
     rootSceneSession_->RegisterGetStatusBarConstantlyShowFunc([this](DisplayId displayId, bool& isVisible) {
-        return this->GetStatusBarConstantlyShow(DisplayId, isVisible);
+        return this->GetStatusBarConstantlyShow(displayId, isVisible);
     });
 }
 
@@ -10401,7 +10401,7 @@ void SceneSessionManager::NotifyStatusBarConstantlyShow(DisplayId displayId, boo
     taskScheduler_->PostSyncTask(task, where);
 }
 
-void SceneSessionManager::GetStatusBarConstantlyShow(uint64_t screenId, bool& isVisible)
+void SceneSessionManager::GetStatusBarConstantlyShow(DisplayId DisplayId, bool& isVisible)
 {
     isVisible = statusBarConstantlyShowMap_[screenId];
 }
