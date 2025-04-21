@@ -34,20 +34,20 @@ void RootSceneSession::LoadContent(
 void RootSceneSession::GetSystemAvoidAreaForRoot(const WSRect& rect, AvoidArea& avoidArea)
 {
     std::vector<sptr<SceneSession>> statusBarVector;
+    DisplayId displayId = GetSessionProperty()->GetDisplayId();
     if (specificCallback_ != nullptr && specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_) {
         statusBarVector = specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_(
-            WindowType::WINDOW_TYPE_STATUS_BAR, GetSessionProperty()->GetDisplayId());
+            WindowType::WINDOW_TYPE_STATUS_BAR, displayId);
     }
-    uint64_t screenId = GetScreenId();
     for (auto& statusBar : statusBarVector) {
         bool isVisible = statusBar->IsVisible();
-        TLOGD(WmsLogTag::WMS_IMMS, "isVisible %{public}d", isVisible);
         if (onGetStatusBarConstantlyShowFunc_) {
-            onGetStatusBarConstantlyShowFunc_(screenId, isVisible);
-            TLOGD(WmsLogTag::WMS_IMMS, "screenId %{public}" PRIu64 " constantly isVisible %{public}d",
-                screenId, isVisible);
+            onGetStatusBarConstantlyShowFunc_(displayId, isVisible);
+            TLOGD(WmsLogTag::WMS_IMMS, "displayId %{public}" PRIu64 " constantly isVisible %{public}d",
+                displayId, isVisible);
         }
         if (!isVisible) {
+            TLOGI(WmsLogTag::WMS_IMMS, "root scene status bar not visible");
             continue;
         }
         WSRect statusBarRect = statusBar->GetSessionRect();

@@ -2172,17 +2172,15 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
         statusBarVector = specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_(
             WindowType::WINDOW_TYPE_STATUS_BAR, sessionProperty->GetDisplayId());
     }
-    uint64_t screenId = GetScreenId();
     for (auto& statusBar : statusBarVector) {
         if (statusBar == nullptr) {
             continue;
         }
         bool isVisible = statusBar->isVisible_;
-        TLOGD(WmsLogTag::WMS_IMMS, "win %{public}d isVisible %{public}d", GetPersistentId(), isVisible);
         if (onGetStatusBarConstantlyShowFunc_) {
-            onGetStatusBarConstantlyShowFunc_(screenId, isVisible);
-            TLOGD(WmsLogTag::WMS_IMMS, "win %{public}d screenId %{public}" PRIu64 " constantly isVisible %{public}d",
-                GetPersistentId(), screenId, isVisible);
+            onGetStatusBarConstantlyShowFunc_(displayId, isVisible);
+            TLOGD(WmsLogTag::WMS_IMMS, "win %{public}d displayId %{public}" PRIu64 " constantly isVisible %{public}d",
+                GetPersistentId(), displayId, isVisible);
         }
         bool isStatusBarVisible = WindowHelper::IsMainWindow(Session::GetWindowType()) ?
             isStatusBarVisible_ : isVisible;
