@@ -624,6 +624,14 @@ public:
      * @return true means subwindow support maximize, others means do not support.
      */
     virtual bool IsSubWindowMaximizeSupported() const { return false; }
+
+    /**
+     * @brief Get the window density of current window.
+     *
+     * @param windowPropweties the window properties struct.
+     * @return WMError.
+     */
+    virtual WMError GetWindowProperties(WindowProperties& windowProperties) { return WMError::WM_OK; }
 };
 }
 }
