@@ -2678,6 +2678,19 @@ HWTEST_F(WindowTest, IsPcOrPadCapabilityEnabled, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: IsSceneBoardEnabled
+ * @tc.desc: IsSceneBoardEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, IsSceneBoardEnabled, TestSize.Level1)
+{
+    sptr<Window> window = sptr<Window>::MakeSptr();
+    auto ret = window->IsSceneBoardEnabled();
+    EXPECT_EQ(false, ret);
+    EXPECT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
  * @tc.name: RegisterMainWindowCloseListeners
  * @tc.desc: RegisterMainWindowCloseListeners
  * @tc.type: FUNC

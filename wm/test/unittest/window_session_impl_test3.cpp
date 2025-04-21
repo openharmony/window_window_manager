@@ -221,6 +221,27 @@ HWTEST_F(WindowSessionImplTest3, GetAppForceLandscapeConfig02, Function | SmallT
 }
 
 /**
+ * @tc.name: IsSceneBoardEnabled
+ * @tc.desc: IsSceneBoardEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, IsSceneBoardEnabled, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: IsSceneBoardEnabled start";
+    window_ = GetTestWindowImpl("IsSceneBoardEnabled");
+    ASSERT_NE(window_, nullptr);
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window_->hostSession_ = session;
+    window_->property_->SetPersistentId(1);
+    window_->state_ = WindowState::STATE_CREATED;
+    bool result = SceneBoardJudgement::IsSceneBoardEnabled();
+    ASSERT_EQ(result, window_->IsSceneBoardEnabled());
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: IsSceneBoardEnabled end";
+}
+
+/**
  * @tc.name: IsFocused
  * @tc.desc: IsFocused
  * @tc.type: FUNC
