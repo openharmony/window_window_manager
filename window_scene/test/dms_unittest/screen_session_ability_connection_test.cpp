@@ -31,8 +31,7 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
-namespace 
-{
+namespace {
 std::string g_errlog;
 void ScreenSessionLogCallback(
     const LogType type, const LogLevel level, const unsigned int domain, const char *tag, const char *msg)
@@ -754,4 +753,4 @@ HWTEST_F(ScreenSessionAbilityConnectionTest, OnRemoteDied01, TestSize.Level1)
 }
 } // namespace
 } // namespace Rosen
- } // namespace OHOS
+} // namespace OHOS
