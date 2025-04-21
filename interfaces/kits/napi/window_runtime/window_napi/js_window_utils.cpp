@@ -447,30 +447,26 @@ napi_value GetRectAndConvertToJsValue(napi_env env, const Rect& rect)
     return objValue;
 }
 
-napi_value CreateJsWindowPropertiesObject(napi_env env, sptr<Window>& window, const Rect& drawableRect)
+napi_value CreateJsWindowPropertiesObject(napi_env env, const WindowPropertyInfo& windowPropertyInfo)
 {
     WLOGD("CreateJsWindowPropertiesObject");
     napi_value objValue = nullptr;
-    if (window == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window is nullptr.");
-        return objValue;
-    }
     CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
-    Rect windowRect = window->GetRect();
-    napi_value windowRectObj = GetRectAndConvertToJsValue(env, windowRect);
+
+    napi_value windowRectObj = GetRectAndConvertToJsValue(env, windowPropertyInfo.windowRect);
     if (windowRectObj == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "GetWindowRect failed!");
     }
     napi_set_named_property(env, objValue, "windowRect", windowRectObj);
 
-    napi_value drawableRectObj = GetRectAndConvertToJsValue(env, drawableRect);
+    napi_value drawableRectObj = GetRectAndConvertToJsValue(env, windowPropertyInfo.drawableRect);
     if (drawableRectObj == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "GetDrawableRect failed!");
     }
     napi_set_named_property(env, objValue, "drawableRect", drawableRectObj);
 
-    WindowType type = window->GetType();
-    uint32_t apiVersion = window->GetApiCompatibleVersion();
+    WindowType type = windowPropertyInfo.type;
+    uint32_t apiVersion = windowPropertyInfo.apiCompatibleVersion;
     if (apiVersion < API_VERSION_18 && type == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "api version %{public}d.", apiVersion);
         napi_set_named_property(env, objValue, "type", CreateJsValue(env, type));
@@ -479,20 +475,21 @@ napi_value CreateJsWindowPropertiesObject(napi_env env, sptr<Window>& window, co
     } else {
         napi_set_named_property(env, objValue, "type", CreateJsValue(env, type));
     }
-    napi_set_named_property(env, objValue, "isLayoutFullScreen", CreateJsValue(env, window->IsLayoutFullScreen()));
-    napi_set_named_property(env, objValue, "isFullScreen", CreateJsValue(env, window->IsFullScreen()));
-    napi_set_named_property(env, objValue, "touchable", CreateJsValue(env, window->GetTouchable()));
-    napi_set_named_property(env, objValue, "focusable", CreateJsValue(env, window->GetFocusable()));
-    napi_set_named_property(env, objValue, "name", CreateJsValue(env, window->GetWindowName()));
-    napi_set_named_property(env, objValue, "isPrivacyMode", CreateJsValue(env, window->IsPrivacyMode()));
-    napi_set_named_property(env, objValue, "isKeepScreenOn", CreateJsValue(env, window->IsKeepScreenOn()));
-    napi_set_named_property(env, objValue, "brightness", CreateJsValue(env, window->GetBrightness()));
-    napi_set_named_property(env, objValue, "isTransparent", CreateJsValue(env, window->IsTransparent()));
+    napi_set_named_property(env, objValue, "isLayoutFullScreen",
+                            CreateJsValue(env, windowPropertyInfo.isLayoutFullScreen));
+    napi_set_named_property(env, objValue, "isFullScreen", CreateJsValue(env, windowPropertyInfo.isFullScreen));
+    napi_set_named_property(env, objValue, "touchable", CreateJsValue(env, windowPropertyInfo.isTouchable));
+    napi_set_named_property(env, objValue, "focusable", CreateJsValue(env, windowPropertyInfo.isFocusable));
+    napi_set_named_property(env, objValue, "name", CreateJsValue(env, windowPropertyInfo.name));
+    napi_set_named_property(env, objValue, "isPrivacyMode", CreateJsValue(env, windowPropertyInfo.isPrivacyMode));
+    napi_set_named_property(env, objValue, "isKeepScreenOn", CreateJsValue(env, windowPropertyInfo.isKeepScreenOn));
+    napi_set_named_property(env, objValue, "brightness", CreateJsValue(env, windowPropertyInfo.brightness));
+    napi_set_named_property(env, objValue, "isTransparent", CreateJsValue(env, windowPropertyInfo.isTransparent));
     napi_set_named_property(env, objValue, "isRoundCorner", CreateJsValue(env, false)); // empty method
     napi_set_named_property(env, objValue, "dimBehindValue", CreateJsValue(env, 0));
-    napi_set_named_property(env, objValue, "id", CreateJsValue(env, window->GetWindowId()));
+    napi_set_named_property(env, objValue, "id", CreateJsValue(env, windowPropertyInfo.id));
     napi_set_named_property(env, objValue, "displayId", CreateJsValue(env,
-        static_cast<int64_t>(window->GetDisplayId())));
+        static_cast<int64_t>(windowPropertyInfo.displayId)));
     return objValue;
 }
 
