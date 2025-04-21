@@ -1587,7 +1587,7 @@ static napi_value CreateSCBAbilityInfo(napi_env env, const SCBAbilityInfo& scbAb
     napi_set_named_property(env, objValue, "sdkVersion", CreateJsValue(env, scbAbilityInfo.sdkVersion_));
     napi_set_named_property(env, objValue, "codePath", CreateJsValue(env, scbAbilityInfo.codePath_));
     napi_set_named_property(
-        env, objValue, "isModuleAbilityHook", CreateJsValue(env, scbAbilityInfo.isModuleAbilityHook_));
+        env, objValue, "isAbilityHook", CreateJsValue(env, scbAbilityInfo.isAbilityHook_));
     return objValue;
 }
 

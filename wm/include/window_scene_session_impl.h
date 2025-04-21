@@ -42,7 +42,7 @@ public:
     bool IsStartMoving() override;
     WindowMode GetWindowMode() const override;
     void Resume() override;
-    WMError SetHookedWindowElementInfo(const AppExecFwk::ElementName& elementName) override;
+    WMError SetHookTargetElementInfo(const AppExecFwk::ElementName& elementName) override;
 
     /*
      * Window Layout

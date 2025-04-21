@@ -3709,7 +3709,7 @@ public:
      * @param elementName includes bundleName, moduleName and abilityName of the hooked window.
      * @return WM_OK means set success.
      */
-    virtual WMError SetHookedWindowElementInfo(const AppExecFwk::ElementName& elementName)
+    virtual WMError SetHookTargetElementInfo(const AppExecFwk::ElementName& elementName)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }

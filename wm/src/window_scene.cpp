@@ -68,7 +68,7 @@ WMError WindowScene::Init(DisplayId displayId, const std::shared_ptr<AbilityRunt
         option->SetBundleName(context->GetBundleName());
     }
     auto mainWindow = SingletonContainer::Get<StaticCall>().CreateWindow(
-        GenerateMainWindowName(context), option, context, isModuleAbilityHookEnd);
+        GenerateMainWindowName(context), option, context);
     if (mainWindow == nullptr) {
         TLOGE(WmsLogTag::WMS_MAIN, "mainWindow is null after create Window!");
         return WMError::WM_ERROR_NULLPTR;
@@ -99,13 +99,11 @@ WMError WindowScene::Init(DisplayId displayId, const std::shared_ptr<AbilityRunt
     option->SetWindowName(GenerateMainWindowName(context));
     if (context != nullptr) {
         option->SetBundleName(context->GetBundleName());
-    }
-    if (isModuleAbilityHookEnd) {
-        SingletonContainer::Get<WindowManager>().SetIsModuleHookEndToSet(context->GetHapModuleInfo()->moduleName);
-    }
-    if (SingletonContainer::Get<WindowManager>().GetIsModuleHookEndFromSet(context->GetHapModuleInfo()->moduleName)) {
-        TLOGI(WmsLogTag::WMS_MAIN, "set isModuleAbilityHookEnd true");
-        isModuleAbilityHookEnd = true;
+        std::string moduleName = context->GetHapModuleInfo() ? context->GetHapModuleInfo()->moduleName : "";
+        if (!moduleName.empty()) {
+            isModuleAbilityHookEnd =
+                SingletonContainer::Get<WindowManager>().IsModuleHookOff(isModuleAbilityHookEnd, moduleName);
+        }
     }
     auto mainWindow = SingletonContainer::Get<StaticCall>()
         .CreateWindow(option, context, iSession, identityToken, isModuleAbilityHookEnd);
@@ -193,6 +191,7 @@ WMError WindowScene::GoBackground(uint32_t reason)
 
 WMError WindowScene::GoDestroy(uint32_t reason)
 {
+    TLOGI(WmsLogTag::WMS_MAIN, "reason: %{public}u", reason);
     auto mainWindow = GetMainWindow();
     if (mainWindow == nullptr) {
         TLOGE(WmsLogTag::WMS_MAIN, "main window is null");
@@ -295,7 +294,7 @@ WMError WindowScene::SetHookedWindowElementInfo(const AppExecFwk::ElementName& e
         return WMError::WM_ERROR_NULLPTR;
     }
     TLOGI(WmsLogTag::WMS_MAIN, "set hooked window element info");
-    return mainWindow->SetHookedWindowElementInfo(elementName);
+    return mainWindow->SetHookTargetElementInfo(elementName);
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -1208,8 +1208,8 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint8(backgroundAlpha_) && parcel.WriteUint32(static_cast<uint32_t>(keyboardViewMode_)) &&
         parcel.WriteFloat(cornerRadius_) && parcel.WriteBool(isExclusivelyHighlighted_) &&
         parcel.WriteBool(isAtomicService_) && parcel.WriteUint32(apiVersion_) &&
-        parcel.WriteBool(isFullScreenWaterfallMode_) && parcel.WriteBool(isModuleAbilityHookEnd_) &&
-        parcel.WriteBool(isModuleAbilityHook_);
+        parcel.WriteBool(isFullScreenWaterfallMode_) && parcel.WriteBool(isAbilityHookOff_) &&
+        parcel.WriteBool(isAbilityHook_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -1302,8 +1302,8 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetIsAtomicService(parcel.ReadBool());
     property->SetApiVersion(parcel.ReadUint32());
     property->SetIsFullScreenWaterfallMode(parcel.ReadBool());
-    property->SetIsModuleAbilityHookEnd(parcel.ReadBool());
-    property->SetIsModuleAbilityHook(parcel.ReadBool());
+    property->SetIsAbilityHookOff(parcel.ReadBool());
+    property->SetIsAbilityHook(parcel.ReadBool());
     return property;
 }
 
@@ -1403,8 +1403,8 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     isAtomicService_ = property->isAtomicService_;
     apiVersion_ = property->apiVersion_;
     isFullScreenWaterfallMode_ = property->isFullScreenWaterfallMode_;
-    isModuleAbilityHookEnd_ = property->isModuleAbilityHookEnd_;
-    isModuleAbilityHook_ = property->isModuleAbilityHook_;
+    isAbilityHookOff_ = property->isAbilityHookOff_;
+    isAbilityHook_ = property->isAbilityHook_;
 }
 
 bool WindowSessionProperty::Write(Parcel& parcel, WSPropertyChangeAction action)
@@ -1993,24 +1993,24 @@ bool WindowSessionProperty::GetIsFullScreenWaterfallMode() const
     return isFullScreenWaterfallMode_;
 }
 
-void WindowSessionProperty::SetIsModuleAbilityHookEnd(bool isModuleAbilityHookEnd)
+void WindowSessionProperty::SetIsAbilityHookOff(bool isAbilityHookOff)
 {
-    isModuleAbilityHookEnd_ = isModuleAbilityHookEnd;
+    isAbilityHookOff_ = isAbilityHookOff;
 }
 
-bool WindowSessionProperty::GetIsModuleAbilityHookEnd() const
+bool WindowSessionProperty::GetIsAbilityHookOff() const
 {
-    return isModuleAbilityHookEnd_;
+    return isAbilityHookOff_;
 }
 
-void WindowSessionProperty::SetIsModuleAbilityHook(bool isModuleAbilityHook)
+void WindowSessionProperty::SetIsAbilityHook(bool isAbilityHook)
 {
-    isModuleAbilityHook_ = isModuleAbilityHook;
+    isAbilityHook_ = isAbilityHook;
 }
 
-bool WindowSessionProperty::GetIsModuleAbilityHook() const
+bool WindowSessionProperty::GetIsAbilityHook() const
 {
-    return isModuleAbilityHook_;
+    return isAbilityHook_;
 }
 } // namespace Rosen
 } // namespace OHOS

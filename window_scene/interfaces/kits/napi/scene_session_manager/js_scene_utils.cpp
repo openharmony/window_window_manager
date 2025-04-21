@@ -346,15 +346,15 @@ static bool IsJsIsUseControlSessionUndefined(napi_env env, napi_value jsIsUseCon
     return true;
 }
 
-static bool IsJsIsModuleAbilityHookUndefind(napi_env env, napi_value jsIsModuleAbilityHook, SessionInfo& sessionInfo)
+static bool IsJsIsAbilityHookUndefind(napi_env env, napi_value jsIsAbilityHook, SessionInfo& sessionInfo)
 {
-    if (GetType(env, jsIsModuleAbilityHook) != napi_undefined) {
-        bool isModuleAbilityHook = false;
-        if (!ConvertFromJsValue(env, jsIsModuleAbilityHook, isModuleAbilityHook)) {
-            TLOGI(WmsLogTag::WMS_LIFE, "Failed to convert parameter to isModuleAbilityHook");
+    if (GetType(env, jsIsAbilityHook) != napi_undefined) {
+        bool isAbilityHook = false;
+        if (!ConvertFromJsValue(env, jsIsAbilityHook, isAbilityHook)) {
+            TLOGI(WmsLogTag::WMS_LIFE, "Failed to convert parameter to isAbilityHook");
             return false;
         }
-        sessionInfo.isModuleAbilityHook_ = isModuleAbilityHook;
+        sessionInfo.isAbilityHook_ = isAbilityHook;
     }
     return true;
 }
@@ -381,8 +381,8 @@ bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sess
     napi_get_named_property(env, jsObject, "isNewAppInstance", &jsIsNewAppInstance);
     napi_value jsInstanceKey = nullptr;
     napi_get_named_property(env, jsObject, "instanceKey", &jsInstanceKey);
-    napi_value jsIsModuleAbilityHook = nullptr;
-    napi_get_named_property(env, jsObject, "isModuleAbilityHook", &jsIsModuleAbilityHook);
+    napi_value jsIsAbilityHook = nullptr;
+    napi_get_named_property(env, jsObject, "isAbilityHook", &jsIsAbilityHook);
     
     if (!IsJsBundleNameUndefind(env, jsBundleName, sessionInfo)) {
         return false;
@@ -404,7 +404,7 @@ bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sess
         !IsJsIsNewAppInstanceUndefined(env, jsIsNewAppInstance, sessionInfo) ||
         !IsJsInstanceKeyUndefined(env, jsInstanceKey, sessionInfo) ||
         !IsJsWindowInputTypeUndefind(env, jsWindowInputType, sessionInfo) ||
-        !IsJsIsModuleAbilityHookUndefind(env, jsIsModuleAbilityHook, sessionInfo)) {
+        !IsJsIsAbilityHookUndefind(env, jsIsAbilityHook, sessionInfo)) {
         return false;
     }
     return true;

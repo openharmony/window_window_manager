@@ -1192,8 +1192,8 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
     sptr<IRemoteObject> token, int32_t pid, int32_t uid, const std::string& identityToken)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "ConnectInner session, id: %{public}d, state: %{public}u,"
-        "isTerminating:%{public}d, callingPid:%{public}d", GetPersistentId(),
-        static_cast<uint32_t>(GetSessionState()), isTerminating_, pid);
+        "isTerminating:%{public}d, callingPid:%{public}d, disableDelegator:%{public}d", GetPersistentId(),
+        static_cast<uint32_t>(GetSessionState()), isTerminating_, pid, property->GetIsAbilityHookOff());
     if (GetSessionState() != SessionState::STATE_DISCONNECT && !isTerminating_ &&
         !GetSessionInfo().reuseDelegatorWindow) {
         TLOGE(WmsLogTag::WMS_LIFE, "state is not disconnect state:%{public}u id:%{public}u!, reuse %{public}d",
@@ -1215,9 +1215,7 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
     UpdateSessionState(SessionState::STATE_CONNECT);
     WindowHelper::IsUIExtensionWindow(GetWindowType()) ? UpdateRect(winRect_, SizeChangeReason::UNDEFINED, "Connect") :
         NotifyClientToUpdateRect("Connect", nullptr);
-    EditSessionInfo().disableDelegator = property->GetIsModuleAbilityHookEnd();
-    TLOGI(WmsLogTag::WMS_LIFE, "set session id %{public}d disableDelegator %{public}d",
-        persistentId_, property->GetIsModuleAbilityHookEnd());
+    EditSessionInfo().disableDelegator = property->GetIsAbilityHookOff();
     NotifyConnect();
     return WSError::WS_OK;
 }
@@ -1280,7 +1278,7 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
     }
     property->SetSkipSelfWhenShowOnVirtualScreen(GetSessionProperty()->GetSkipSelfWhenShowOnVirtualScreen());
     property->SetSkipEventOnCastPlus(GetSessionProperty()->GetSkipEventOnCastPlus());
-    property->SetIsModuleAbilityHook(GetSessionInfo().isModuleAbilityHook_);
+    property->SetIsAbilityHook(GetSessionInfo().isAbilityHook_);
     SetSessionProperty(property);
     GetSessionProperty()->SetIsNeedUpdateWindowMode(false);
 }
@@ -1307,8 +1305,9 @@ WSError Session::Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<I
         TLOGE(WmsLogTag::WMS_RECOVER, "property is nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
-    TLOGI(WmsLogTag::WMS_RECOVER, "id:%{public}d, state:%{public}u, pid:%{public}d",
-        property->GetPersistentId(), static_cast<uint32_t>(property->GetWindowState()), pid);
+    TLOGI(WmsLogTag::WMS_RECOVER, "id:%{public}d, state:%{public}u, pid:%{public}d, disableDelegator:%{public}d",
+        property->GetPersistentId(), static_cast<uint32_t>(property->GetWindowState()), pid,
+        property->GetIsAbilityHookOff());
     if (sessionStage == nullptr || eventChannel == nullptr) {
         TLOGE(WmsLogTag::WMS_RECOVER, "session stage or eventChannel is nullptr");
         return WSError::WS_ERROR_NULLPTR;
@@ -1326,9 +1325,7 @@ WSError Session::Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<I
     layoutRect_ = { windowRect.posX_, windowRect.posY_,
         static_cast<int32_t>(windowRect.width_), static_cast<int32_t>(windowRect.height_) };
     UpdateSessionState(SessionState::STATE_CONNECT);
-    EditSessionInfo().disableDelegator = property->GetIsModuleAbilityHookEnd();
-    TLOGI(WmsLogTag::WMS_LIFE, "set session id %{public}d disableDelegator %{public}d",
-        persistentId_, property->GetIsModuleAbilityHookEnd());
+    EditSessionInfo().disableDelegator = property->GetIsAbilityHookOff();
     return WSError::WS_OK;
 }
 
