@@ -131,7 +131,6 @@ public:
     WMError SetWindowModal(bool isModal) override;
     void SetTargetAPIVersion(uint32_t targetAPIVersion);
     uint32_t GetTargetAPIVersion() const;
-    void GetTargetAPIVersionByApplicationInfo(uint32_t& currentApiVersion);
     void NotifyClientWindowSize();
     bool IsFullScreenPcAppInPadMode() const;
 
@@ -623,6 +622,7 @@ protected:
     float lastSystemDensity_ = UNDEFINED_DENSITY;
     WSError NotifySystemDensityChange(float density);
     void RegisterWindowInspectorCallback();
+    uint32_t GetTargetAPIVersionByApplicationInfo() const;
 
     /*
      * Window Input Event

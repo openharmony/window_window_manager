@@ -967,9 +967,8 @@ WMError WindowExtensionSessionImpl::UnregisterOccupiedAreaChangeListener(
 WMError WindowExtensionSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea,
     const Rect& rect, int32_t apiVersion)
 {
-    uint32_t currentApiVersion = 0;
-    GetTargetAPIVersionByApplicationInfo(currentApiVersion);
-    apiVersion = apiVersion == API_VERSION_INVALID ? currentApiVersion : apiVersion;
+    uint32_t currentApiVersion = GetTargetAPIVersionByApplicationInfo();
+    apiVersion = (apiVersion == API_VERSION_INVALID) ? static_cast<int32_t>(currentApiVersion) : apiVersion;
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
     WSRect sessionRect = { rect.posX_, rect.posY_, rect.width_, rect.height_ };
