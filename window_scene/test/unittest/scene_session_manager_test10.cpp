@@ -1091,8 +1091,8 @@ HWTEST_F(SceneSessionManagerTest10, GetStatusBarConstantlyShow, TestSize.Level0)
 
     ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
     bool isVisible;
-    ssm_->NotifyStatusBarConstantlyShow(sceneSession->GetScreenId(), false);
-    ssm_->GetStatusBarConstantlyShow(sceneSession->GetScreenId(), isVisible);
+    ssm_->NotifyStatusBarConstantlyShow(sceneSession->GetSessionProperty()->GetDisplayId(), false);
+    ssm_->GetStatusBarConstantlyShow(sceneSession->GetSessionProperty()->GetDisplayId(), isVisible);
     EXPECT_EQ(isVisible, false);
     ssm_->sceneSessionMap_.erase(sceneSession->GetPersistentId());
 }

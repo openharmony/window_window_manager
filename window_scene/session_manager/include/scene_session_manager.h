@@ -419,8 +419,8 @@ public:
     void UpdateRootSceneAvoidArea();
     bool GetImmersiveState(ScreenId screenId);
     WSError NotifyStatusBarShowStatus(int32_t persistentId, bool isVisible);
-    void NotifyStatusBarConstantlyShow(uint64_t screenId, bool isVisible);
-    void GetStatusBarConstantlyShow(uint64_t screenId, bool& isVisible);
+    void NotifyStatusBarConstantlyShow(DisplayId displayId, bool isVisible);
+    void GetStatusBarConstantlyShow(DisplayId displayId, bool& isVisible);
     WSError NotifyAINavigationBarShowStatus(bool isVisible, WSRect barArea, uint64_t displayId);
     WSError NotifyNextAvoidRectInfo(AvoidAreaType type,
         const WSRect& portraitRect, const WSRect& landspaceRect, DisplayId displayId);
@@ -1332,7 +1332,7 @@ private:
     std::set<int32_t> avoidAreaListenerSessionSet_;
     static constexpr int32_t INVALID_STATUS_BAR_AVOID_HEIGHT = -1;
     int32_t statusBarAvoidHeight_ = INVALID_STATUS_BAR_AVOID_HEIGHT;
-    std::unordered_map<uint64_t, bool> statusBarConstantlyShowMap_;
+    std::unordered_map<DisplayId, bool> statusBarConstantlyShowMap_;
 
     struct SessionInfoList {
         int32_t uid_;

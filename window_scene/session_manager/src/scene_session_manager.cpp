@@ -1447,8 +1447,8 @@ void SceneSessionManager::CreateRootSceneSession()
     rootSceneSession_->RegisterGetStatusBarAvoidHeightFunc([this](WSRect& barArea) {
         return this->GetStatusBarAvoidHeight(barArea);
     });
-    rootSceneSession_->RegisterGetStatusBarConstantlyShowFunc([this](uint64_t screenId, bool& isVisible) {
-        return this->GetStatusBarConstantlyShow(screenId, isVisible);
+    rootSceneSession_->RegisterGetStatusBarConstantlyShowFunc([this](DisplayId displayId, bool& isVisible) {
+        return this->GetStatusBarConstantlyShow(DisplayId, isVisible);
     });
 }
 
@@ -2139,8 +2139,8 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         sceneSession->RegisterGetStatusBarAvoidHeightFunc([this](WSRect& barArea) {
             return this->GetStatusBarAvoidHeight(barArea);
         });
-        sceneSession->RegisterGetStatusBarConstantlyShowFunc([this](uint64_t screenId, bool& isVisible) {
-            return this->GetStatusBarConstantlyShow(screenId, isVisible);
+        sceneSession->RegisterGetStatusBarConstantlyShowFunc([this](DisplayId displayId, bool& isVisible) {
+            return this->GetStatusBarConstantlyShow(displayId, isVisible);
         });
         DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
         GetAppDragResizeType(sessionInfo.bundleName_, dragResizeType);
@@ -10390,12 +10390,12 @@ WSError SceneSessionManager::NotifyStatusBarShowStatus(int32_t persistentId, boo
     return WSError::WS_OK;
 }
 
-void SceneSessionManager::NotifyStatusBarConstantlyShow(uint64_t screenId, bool isVisible)
+void SceneSessionManager::NotifyStatusBarConstantlyShow(DisplayId displayId, bool isVisible)
 {
-    TLOGD(WmsLogTag::WMS_IMMS, "screenId %{public}" PRIu64 " isVisible %{public}u", screenId, isVisible);
+    TLOGD(WmsLogTag::WMS_IMMS, "displayId %{public}" PRIu64 " isVisible %{public}u", displayId, isVisible);
     const char* const where = __func__;
-    auto task = [this, screenId, isVisible] {
-        statusBarConstantlyShowMap_[screenId] = isVisible;
+    auto task = [this, displayId, isVisible] {
+        statusBarConstantlyShowMap_[displayId] = isVisible;
         return WMError::WM_OK;
     };
     taskScheduler_->PostSyncTask(task, where);
