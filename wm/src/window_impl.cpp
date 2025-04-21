@@ -96,6 +96,7 @@ std::map<uint32_t, std::vector<sptr<IAvoidAreaChangedListener>>> WindowImpl::avo
 std::map<uint32_t, std::vector<sptr<IOccupiedAreaChangeListener>>> WindowImpl::occupiedAreaChangeListeners_;
 std::map<uint32_t, sptr<IDialogDeathRecipientListener>> WindowImpl::dialogDeathRecipientListener_;
 std::recursive_mutex WindowImpl::globalMutex_;
+static std::mutex windowMapMutex_;
 int g_constructorCnt = 0;
 int g_deConstructorCnt = 0;
 WindowImpl::WindowImpl(const sptr<WindowOption>& option)
@@ -190,6 +191,7 @@ WindowImpl::~WindowImpl()
 
 sptr<Window> WindowImpl::Find(const std::string& name)
 {
+    std::lock_guard<std::mutex> lock(windowMapMutex_);
     auto iter = windowMap_.find(name);
     if (iter == windowMap_.end()) {
         return nullptr;
@@ -204,6 +206,7 @@ const std::shared_ptr<AbilityRuntime::Context> WindowImpl::GetContext() const
 
 sptr<Window> WindowImpl::FindWindowById(uint32_t WinId)
 {
+    std::lock_guard<std::mutex> lock(windowMapMutex_);
     if (windowMap_.empty()) {
         WLOGFE("Please create mainWindow First!");
         return nullptr;
@@ -236,17 +239,20 @@ sptr<Window> WindowImpl::GetWindowWithId(uint32_t WinId)
 
 sptr<Window> WindowImpl::GetTopWindowWithContext(const std::shared_ptr<AbilityRuntime::Context>& context)
 {
-    if (windowMap_.empty()) {
-        WLOGFE("Please create mainWindow First!");
-        return nullptr;
-    }
     uint32_t mainWinId = INVALID_WINDOW_ID;
-    for (auto iter = windowMap_.begin(); iter != windowMap_.end(); iter++) {
-        auto win = iter->second.second;
-        if (context.get() == win->GetContext().get() && WindowHelper::IsMainWindow(win->GetType())) {
-            mainWinId = win->GetWindowId();
-            WLOGI("GetTopWindow Find MainWinId:%{public}u.", mainWinId);
-            break;
+    {
+        std::lock_guard<std::mutex> lock(windowMapMutex_);
+        if (windowMap_.empty()) {
+            WLOGFE("Please create mainWindow First!");
+            return nullptr;
+        }
+        for (auto iter = windowMap_.begin(); iter != windowMap_.end(); iter++) {
+            auto win = iter->second.second;
+            if (context.get() == win->GetContext().get() && WindowHelper::IsMainWindow(win->GetType())) {
+                mainWinId = win->GetWindowId();
+                WLOGI("GetTopWindow Find MainWinId:%{public}u.", mainWinId);
+                break;
+            }
         }
     }
     WLOGI("GetTopWindowfinal winId:%{public}u!", mainWinId);
@@ -277,6 +283,7 @@ void WindowImpl::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Con
 {
     std::unordered_set<std::shared_ptr<AbilityRuntime::Context>> ignoreWindowCtxSet(
         ignoreWindowContexts.begin(), ignoreWindowContexts.end());
+    std::lock_guard<std::mutex> lock(windowMapMutex_);
     for (const auto& winPair : windowMap_) {
         auto window = winPair.second.second;
         if (window == nullptr) {
@@ -1162,6 +1169,7 @@ void WindowImpl::MapFloatingWindowToAppIfNeeded()
     }
 
     WLOGFI("In");
+    std::lock_guard<std::mutex> lock(windowMapMutex_);
     for (const auto& winPair : windowMap_) {
         auto win = winPair.second.second;
         if (win->GetType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
@@ -1181,6 +1189,7 @@ void WindowImpl::MapDialogWindowToAppIfNeeded()
         return;
     }
 
+    std::lock_guard<std::mutex> lock(windowMapMutex_);
     for (const auto& winPair : windowMap_) {
         auto win = winPair.second.second;
         if (win->GetType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
@@ -1272,6 +1281,7 @@ bool WindowImpl::IsAppMainOrSubOrFloatingWindow()
     }
 
     if (WindowHelper::IsAppFloatingWindow(GetType())) {
+        std::lock_guard<std::mutex> lock(windowMapMutex_);
         for (const auto& winPair : windowMap_) {
             auto win = winPair.second.second;
             if (win != nullptr && win->GetType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
@@ -1318,9 +1328,12 @@ WMError WindowImpl::WindowCreateCheck(uint32_t parentId)
         return WMError::WM_ERROR_NULLPTR;
     }
     // check window name, same window names are forbidden
-    if (windowMap_.find(name_) != windowMap_.end()) {
-        WLOGFE("WindowName(%{public}s) already exists.", name_.c_str());
-        return WMError::WM_ERROR_REPEAT_OPERATION;
+    {
+        std::lock_guard<std::mutex> lock(windowMapMutex_);
+        if (windowMap_.find(name_) != windowMap_.end()) {
+            WLOGFE("WindowName(%{public}s) already exists.", name_.c_str());
+            return WMError::WM_ERROR_REPEAT_OPERATION;
+        }
     }
     if (CheckCameraFloatingWindowMultiCreated(property_->GetWindowType())) {
         WLOGFE("Camera Floating Window already exists.");
@@ -1338,11 +1351,14 @@ WMError WindowImpl::WindowCreateCheck(uint32_t parentId)
         property_->SetParentId(parentId);
     } else {
         sptr<Window> parentWindow = nullptr;
-        for (const auto& winPair : windowMap_) {
-            if (winPair.second.first == parentId) {
-                property_->SetParentId(parentId);
-                parentWindow = winPair.second.second;
-                break;
+        {
+            std::lock_guard<std::mutex> lock(windowMapMutex_);
+            for (const auto& winPair : windowMap_) {
+                if (winPair.second.first == parentId) {
+                    property_->SetParentId(parentId);
+                    parentWindow = winPair.second.second;
+                    break;
+                }
             }
         }
         if (WindowHelper::IsSystemSubWindow(property_->GetWindowType())) {
@@ -1434,7 +1450,10 @@ WMError WindowImpl::Create(uint32_t parentId, const std::shared_ptr<AbilityRunti
         surfaceNode_->SetWindowId(windowId);
     }
     sptr<Window> self(this);
-    windowMap_.insert(std::make_pair(name_, std::pair<uint32_t, sptr<Window>>(windowId, self)));
+    {
+        std::lock_guard<std::mutex> lock(windowMapMutex_);
+        windowMap_.insert(std::make_pair(name_, std::pair<uint32_t, sptr<Window>>(windowId, self)));
+    }
     if (parentId != INVALID_WINDOW_ID) {
         subWindowMap_[property_->GetParentId()].push_back(window);
     }
@@ -1638,7 +1657,10 @@ WMError WindowImpl::Destroy(bool needNotifyServer, bool needClearListener)
     if (needRemoveWindowInputChannel_) {
         InputTransferStation::GetInstance().RemoveInputWindow(property_->GetWindowId());
     }
-    windowMap_.erase(GetWindowName());
+    {
+        std::lock_guard<std::mutex> lock(windowMapMutex_);
+        windowMap_.erase(GetWindowName());
+    }
     if (needClearListener) {
         ClearListenersById(GetWindowId());
     }
@@ -3538,6 +3560,7 @@ void WindowImpl::UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Confi
 
 void WindowImpl::UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
+    std::lock_guard<std::mutex> lock(windowMapMutex_);
     for (const auto& winPair : windowMap_) {
         if (auto window = winPair.second.second) {
             window->UpdateConfigurationSync(configuration);
@@ -4331,9 +4354,12 @@ bool WindowImpl::CheckCameraFloatingWindowMultiCreated(WindowType type)
         return false;
     }
 
-    for (auto& winPair : windowMap_) {
-        if (winPair.second.second->GetType() == WindowType::WINDOW_TYPE_FLOAT_CAMERA) {
-            return true;
+    {
+        std::lock_guard<std::mutex> lock(windowMapMutex_);
+        for (auto& winPair : windowMap_) {
+            if (winPair.second.second->GetType() == WindowType::WINDOW_TYPE_FLOAT_CAMERA) {
+                return true;
+            }
         }
     }
     uint32_t accessTokenId = static_cast<uint32_t>(IPCSkeleton::GetCallingTokenID());
