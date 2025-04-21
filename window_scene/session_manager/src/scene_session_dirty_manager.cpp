@@ -751,6 +751,7 @@ std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyMa
         .windowInputType = static_cast<MMI::WindowInputType>(sceneSession->GetSessionInfo().windowInputType_),
         .windowType = static_cast<int32_t>(windowType),
         .isSkipSelfWhenShowOnVirtualScreen = sceneSession->GetSessionProperty()->GetSkipEventOnCastPlus(),
+        .windowName = sceneSession->GetWindowNameAllType(),
     };
 
     std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
