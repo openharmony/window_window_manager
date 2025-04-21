@@ -191,7 +191,8 @@ constexpr const char* DM_ERROR_CODE_MSG_NOT_SYSTEM_APP = "not system app";
 constexpr const char* DM_ERROR_CODE_MSG_INVALID_PARAM = "invalid param";
 constexpr const char* DM_ERROR_CODE_MSG_DEVICE_NOT_SUPPORT = "device not support";
 constexpr const char* DM_ERROR_CODE_MSG_INVALID_SCREEN = "invalid screen";
-constexpr const char* DM_ERROR_CODE_MSG_INVALID_CALLING = "invalid calling";
+constexpr const char* DM_ERROR_CODE_MSG_INVALID_CALLING = "Unauthorized operation. Possible cause: "
+    "The creator and destroyer of the virtual screen are inconsistent.";
 constexpr const char* DM_ERROR_CODE_MSG_SYSTEM_INNORMAL = "system innormal";
 
 static std::map<DmErrorCode, const char*> DM_ERROR_CODE_TO_ERROR_MSG_MAP {
