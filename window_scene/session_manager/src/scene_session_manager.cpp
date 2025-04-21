@@ -10401,9 +10401,9 @@ void SceneSessionManager::NotifyStatusBarConstantlyShow(DisplayId displayId, boo
     taskScheduler_->PostSyncTask(task, where);
 }
 
-void SceneSessionManager::GetStatusBarConstantlyShow(DisplayId DisplayId, bool& isVisible)
+void SceneSessionManager::GetStatusBarConstantlyShow(DisplayId displayId, bool& isVisible)
 {
-    isVisible = statusBarConstantlyShowMap_[screenId];
+    isVisible = statusBarConstantlyShowMap_[displayId];
 }
 
 WSError SceneSessionManager::NotifyAINavigationBarShowStatus(bool isVisible, WSRect barArea, uint64_t displayId)
