@@ -222,25 +222,6 @@ ohos_unittest("ws_multi_screen_power_change_manager_test") {
   external_deps = test_external_deps
 }
 
-ohos_unittest("ws_multi_screen_power_change_manager_test") {
-  module_out_path = module_out_path
-
-  sanitize = {
-    cfi = true
-    cfi_cross_dso = true
-    debug = false
-  }
-
-  sources = [ "multi_screen_power_change_manager_test.cpp" ]
-
-  deps = [ ":ws_unittest_common" ]
-
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-  ]
-}
-
 ohos_unittest("ws_screen_session_test") {
   module_out_path = module_out_path
 
