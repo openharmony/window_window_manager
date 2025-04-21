@@ -2298,13 +2298,13 @@ napi_value JsWindow::OnGetProperties(napi_env env, napi_callback_info info)
             WLOGFE("window is nullptr or get invalid param");
             return;
         }
-        WindowProperties windowProperties;
-        WMError ret = weakToken->GetWindowProperties(windowProperties);
+        WindowPropertyInfo windowPropertyInfo;
+        WMError ret = weakToken->GetWindowPropertyInfo(windowPropertyInfo);
         if (ret != WMError::WM_OK) {
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
             return;
         }
-        auto objValue = CreateJsWindowPropertiesObject(env, windowProperties);
+        auto objValue = CreateJsWindowPropertiesObject(env, windowPropertyInfo);
         if (objValue != nullptr) {
             task->Resolve(env, objValue);
         } else {
