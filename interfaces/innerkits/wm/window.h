@@ -3693,6 +3693,14 @@ public:
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
+
+    /**
+     * @brief Get the window density of current window.
+     *
+     * @param windowPropweties the window properties struct.
+     * @return WMError.
+     */
+    virtual WMError GetWindowProperties(WindowProperties& windowProperties) { return WMError::WM_OK; }
 };
 }
 }

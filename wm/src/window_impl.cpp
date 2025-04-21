@@ -4528,5 +4528,33 @@ uint32_t WindowImpl::GetApiTargetVersion() const
     }
     return version;
 }
+
+WMError WindowImpl::GetWindowProperties(WindowProperties& windowProperties)
+{
+    if (!IsWindowValid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    windowProperties.windowRect = GetRect();
+    auto uicontent = GetUIContent();
+    if (uicontent == nullptr) {
+        TLOGW(WmsLogTag::WMS_ATTRIBUTE, "uicontent is nullptr");
+    } else {
+        uicontent->GetWindowPaintSize(windowProperties.drawableRect);
+    }
+    windowProperties.type = GetType();
+    windowProperties.apiVersion = GetApiCompatibleVersion();
+    windowProperties.isLayoutFullScreen = IsLayoutFullScreen();
+    windowProperties.isFullScreen = IsFullScreen();
+    windowProperties.isTouchable = GetTouchable();
+    windowProperties.isFocusable = GetFocusable();
+    windowProperties.name = GetWindowName();
+    windowProperties.isPrivacyMode = IsPrivacyMode();
+    windowProperties.isKeepScreenOn = IsKeepScreenOn();
+    windowProperties.brightness = GetBrightness();
+    windowProperties.isTransparent = IsTransparent();
+    windowProperties.id = GetWindowId();
+    windowProperties.displayId = GetDisplayId();
+    return WMError::WM_OK;
+}
 } // namespace Rosen
 } // namespace OHOS

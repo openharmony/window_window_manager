@@ -5969,5 +5969,33 @@ bool WindowSceneSessionImpl::IsFullScreenEnable() const
     }
     return true;
 }
+
+WMError WindowSceneSessionImpl::GetWindowProperties(WindowProperties& windowProperties)
+{
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    windowProperties.windowRect = GetRect();
+    auto uicontent = GetUIContentSharedPtr();
+    if (uicontent == nullptr) {
+        TLOGW(WmsLogTag::WMS_ATTRIBUTE, "uicontent is nullptr");
+    } else {
+        uicontent->GetWindowPaintSize(windowProperties.drawableRect);
+    }
+    windowProperties.type = GetType();
+    windowProperties.apiVersion = GetApiCompatibleVersion();
+    windowProperties.isLayoutFullScreen = IsLayoutFullScreen();
+    windowProperties.isFullScreen = IsFullScreen();
+    windowProperties.isTouchable = GetTouchable();
+    windowProperties.isFocusable = GetFocusable();
+    windowProperties.name = GetWindowName();
+    windowProperties.isPrivacyMode = IsPrivacyMode();
+    windowProperties.isKeepScreenOn = IsKeepScreenOn();
+    windowProperties.brightness = GetBrightness();
+    windowProperties.isTransparent = IsTransparent();
+    windowProperties.id = GetWindowId();
+    windowProperties.displayId = GetDisplayId();
+    return WMError::WM_OK;
+}
 } // namespace Rosen
 } // namespace OHOS

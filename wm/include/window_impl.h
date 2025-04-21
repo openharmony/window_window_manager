@@ -355,6 +355,7 @@ public:
     void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
     void RegisterWindowInspectorCallback();
     uint32_t GetApiTargetVersion() const;
+    WMError GetWindowProperties(WindowProperties& windowProperties) override;
 
     /*
      * Keyboard
