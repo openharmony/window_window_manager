@@ -1931,6 +1931,13 @@ public:
     virtual bool IsPcOrPadFreeMultiWindowMode() const { return false; }
 
     /**
+     * @brief Judge whether SceneBoard is enabled.
+     *
+     * @return True means SceneBoard is enabled, false means the opposite.
+     */
+    virtual bool IsSceneBoardEnabled() const { return false; }
+
+    /**
      * @brief Register transfer component data callback.
      *
      * @param func Function to notify transfer component data.
