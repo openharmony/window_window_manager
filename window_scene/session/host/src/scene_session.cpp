@@ -7259,4 +7259,14 @@ void SceneSession::NotifyUpdateFlagCallback(NotifyUpdateFlagFunc&& func)
             session->GetPersistentId(), session->sessionInfo_.specifiedFlag_.c_str());
     }, __func__);
 }
+
+void SceneSession::SetIsAncoForFloatingWindow(bool isAncoForFloatingWindow)
+{
+    isAncoForFloatingWindow_ = isAncoForFloatingWindow;
+}
+
+bool SceneSession::GetIsAncoForFloatingWindow() const
+{
+    return isAncoForFloatingWindow_;
+}
 } // namespace OHOS::Rosen
