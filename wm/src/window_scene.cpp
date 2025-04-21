@@ -68,7 +68,7 @@ WMError WindowScene::Init(DisplayId displayId, const std::shared_ptr<AbilityRunt
         option->SetBundleName(context->GetBundleName());
     }
     auto mainWindow = SingletonContainer::Get<StaticCall>().CreateWindow(
-        GenerateMainWindowName(context), option, context, isAbilityHookEnd);
+        GenerateMainWindowName(context), option, context, isModuleAbilityHookEnd);
     if (mainWindow == nullptr) {
         TLOGE(WmsLogTag::WMS_MAIN, "mainWindow is null after create Window!");
         return WMError::WM_ERROR_NULLPTR;
@@ -88,7 +88,7 @@ WMError WindowScene::Init(DisplayId displayId, const std::shared_ptr<AbilityRunt
 
 WMError WindowScene::Init(DisplayId displayId, const std::shared_ptr<AbilityRuntime::Context>& context,
     sptr<IWindowLifeCycle>& listener, sptr<WindowOption> option, const sptr<IRemoteObject>& iSession,
-    const std::string& identityToken, bool isAbilityHookEnd)
+    const std::string& identityToken, bool isModuleAbilityHookEnd)
 {
     TLOGI(WmsLogTag::WMS_MAIN, "WindowScene with window session!");
     if (option == nullptr || iSession == nullptr) {
@@ -100,15 +100,15 @@ WMError WindowScene::Init(DisplayId displayId, const std::shared_ptr<AbilityRunt
     if (context != nullptr) {
         option->SetBundleName(context->GetBundleName());
     }
-    if (isAbilityHookEnd) {
+    if (isModuleAbilityHookEnd) {
         SingletonContainer::Get<WindowManager>().SetIsModuleHookEndToSet(context->GetHapModuleInfo()->moduleName);
     }
     if (SingletonContainer::Get<WindowManager>().GetIsModuleHookEndFromSet(context->GetHapModuleInfo()->moduleName)) {
-        TLOGI(WmsLogTag::WMS_MAIN, "set isAbilityHookEnd true");
-        isAbilityHookEnd = true;
+        TLOGI(WmsLogTag::WMS_MAIN, "set isModuleAbilityHookEnd true");
+        isModuleAbilityHookEnd = true;
     }
     auto mainWindow = SingletonContainer::Get<StaticCall>()
-        .CreateWindow(option, context, iSession, identityToken, isAbilityHookEnd);
+        .CreateWindow(option, context, iSession, identityToken, isModuleAbilityHookEnd);
     if (mainWindow == nullptr) {
         TLOGE(WmsLogTag::WMS_MAIN, "mainWindow is null after create Window!");
         return WMError::WM_ERROR_NULLPTR;

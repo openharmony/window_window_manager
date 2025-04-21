@@ -2394,8 +2394,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
             TLOGNE(WmsLogTag::WMS_LIFE, "sceneSession is nullptr!");
             return sceneSession;
         }
-        SetSceneSessionIsAbilityHook(sceneSession);
-        if (sessionInfo.isModuleAbilityHook) {
+        if (sessionInfo.isModuleAbilityHook_) {
             auto session = GetHookedSessionByModuleName(sessionInfo);
             if (session) {
                 TLOGNW(WmsLogTag::WMS_LIFE, "session disableDelegator %{public}d is still hook, return hook session",
@@ -3748,7 +3747,7 @@ SessionInfo SceneSessionManager::RecoverSessionInfo(const sptr<WindowSessionProp
     sessionInfo.isPersistentRecover_ = true;
     sessionInfo.appInstanceKey_ = property->GetAppInstanceKey();
     sessionInfo.screenId_ = property->GetDisplayId();
-    sessionInfo.isModuleAbilityHook = property->GetIsModuleAbilityHook();
+    sessionInfo.isModuleAbilityHook_ = property->GetIsModuleAbilityHook();
     TLOGI(WmsLogTag::WMS_RECOVER,
         "Recover and reconnect session with: bundleName=%{public}s, moduleName=%{public}s, "
         "abilityName=%{public}s, windowMode=%{public}d, windowType=%{public}u, persistentId=%{public}d, "
@@ -3757,7 +3756,7 @@ SessionInfo SceneSessionManager::RecoverSessionInfo(const sptr<WindowSessionProp
         sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(), sessionInfo.abilityName_.c_str(),
         sessionInfo.windowMode, sessionInfo.windowType_, sessionInfo.persistentId_, sessionInfo.sessionState_,
         sessionInfo.appInstanceKey_.c_str(), sessionInfo.isFollowParentMultiScreenPolicy,
-        static_cast<int32_t>(sessionInfo.screenId_), sessionInfo.isModuleAbilityHook);
+        static_cast<int32_t>(sessionInfo.screenId_), sessionInfo.isModuleAbilityHook_);
     return sessionInfo;
 }
 

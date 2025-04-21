@@ -354,7 +354,7 @@ static bool IsJsIsModuleAbilityHookUndefind(napi_env env, napi_value jsIsModuleA
             TLOGI(WmsLogTag::WMS_LIFE, "Failed to convert parameter to isModuleAbilityHook");
             return false;
         }
-        sessionInfo.isModuleAbilityHook = isModuleAbilityHook;
+        sessionInfo.isModuleAbilityHook_ = isModuleAbilityHook;
     }
     return true;
 }

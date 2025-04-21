@@ -1215,9 +1215,9 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
     UpdateSessionState(SessionState::STATE_CONNECT);
     WindowHelper::IsUIExtensionWindow(GetWindowType()) ? UpdateRect(winRect_, SizeChangeReason::UNDEFINED, "Connect") :
         NotifyClientToUpdateRect("Connect", nullptr);
-    EditSessionInfo().disableDelegator = property->GetIsAbilityHookEnd();
+    EditSessionInfo().disableDelegator = property->GetIsModuleAbilityHookEnd();
     TLOGI(WmsLogTag::WMS_LIFE, "set session id %{public}d disableDelegator %{public}d",
-        persistentId_, property->GetIsAbilityHookEnd());
+        persistentId_, property->GetIsModuleAbilityHookEnd());
     NotifyConnect();
     return WSError::WS_OK;
 }
@@ -1280,7 +1280,7 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
     }
     property->SetSkipSelfWhenShowOnVirtualScreen(GetSessionProperty()->GetSkipSelfWhenShowOnVirtualScreen());
     property->SetSkipEventOnCastPlus(GetSessionProperty()->GetSkipEventOnCastPlus());
-    property->SetIsModuleAbilityHook(GetSessionInfo().isModuleAbilityHook);
+    property->SetIsModuleAbilityHook(GetSessionInfo().isModuleAbilityHook_);
     SetSessionProperty(property);
     GetSessionProperty()->SetIsNeedUpdateWindowMode(false);
 }
@@ -1326,9 +1326,9 @@ WSError Session::Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<I
     layoutRect_ = { windowRect.posX_, windowRect.posY_,
         static_cast<int32_t>(windowRect.width_), static_cast<int32_t>(windowRect.height_) };
     UpdateSessionState(SessionState::STATE_CONNECT);
-    EditSessionInfo().disableDelegator = property->GetIsAbilityHookEnd();
+    EditSessionInfo().disableDelegator = property->GetIsModuleAbilityHookEnd();
     TLOGI(WmsLogTag::WMS_LIFE, "set session id %{public}d disableDelegator %{public}d",
-        persistentId_, property->GetIsAbilityHookEnd());
+        persistentId_, property->GetIsModuleAbilityHookEnd());
     return WSError::WS_OK;
 }
 
