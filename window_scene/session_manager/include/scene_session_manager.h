@@ -84,7 +84,7 @@ struct SCBAbilityInfo {
     AppExecFwk::AbilityInfo abilityInfo_;
     uint32_t sdkVersion_;
     std::string codePath_;
-    bool isModuleAbilityHook_;
+    bool isAbilityHook_;
 };
 
 struct SessionIdentityInfo {

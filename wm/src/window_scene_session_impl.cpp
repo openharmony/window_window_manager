@@ -582,8 +582,8 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
     hostSession_ = iSession;
     SetContext(context);
     identityToken_ = identityToken;
-    property_->SetIsModuleAbilityHookEnd(isModuleAbilityHookEnd);
-    TLOGI(WmsLogTag::WMS_LIFE, "SetIsModuleAbilityHookEnd %{public}d", isModuleAbilityHookEnd);
+    property_->SetIsAbilityHookOff(isModuleAbilityHookEnd);
+    TLOGI(WmsLogTag::WMS_LIFE, "SetIsAbilityHookOff %{public}d", isModuleAbilityHookEnd);
     AdjustWindowAnimationFlag();
     if (context && context->GetApplicationInfo() &&
         context->GetApplicationInfo()->apiCompatibleVersion >= 9 && // 9: api version
@@ -1826,7 +1826,8 @@ WMError WindowSceneSessionImpl::DestroyHookWindow()
 WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearListener, uint32_t reason)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "Destroy start, id:%{public}d, state:%{public}u, needNotifyServer:%{public}d, "
-        "needClearListener:%{public}d", GetPersistentId(), state_, needNotifyServer, needClearListener);
+        "needClearListener:%{public}d, reason:%{public}u", GetPersistentId(), state_, needNotifyServer,
+        needClearListener, reason);
     if (reason == static_cast<uint32_t>(WindowStateChangeReason::ABILITY_HOOK)) {
         return DestroyHookWindow();
     }
@@ -6032,7 +6033,7 @@ WMError WindowSceneSessionImpl::GetWindowPropertyInfo(WindowPropertyInfo& window
     return WMError::WM_OK;
 }
 
-WMError WindowSceneSessionImpl::SetHookedWindowElementInfo(const AppExecFwk::ElementName& elementName)
+WMError WindowSceneSessionImpl::SetHookTargetElementInfo(const AppExecFwk::ElementName& elementName)
 {
     auto context = GetContext();
     auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context);

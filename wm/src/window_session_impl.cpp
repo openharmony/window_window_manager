@@ -762,7 +762,8 @@ void WindowSessionImpl::DestroySubWindow()
 WMError WindowSessionImpl::Destroy(bool needNotifyServer, bool needClearListener, uint32_t reason)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d Destroy, state:%{public}u, needNotifyServer:%{public}d, "
-        "needClearListener:%{public}d", GetPersistentId(), state_, needNotifyServer, needClearListener);
+        "needClearListener:%{public}d, reason:%{public}u", GetPersistentId(), state_, needNotifyServer,
+        needClearListener, reason);
     if (IsWindowSessionInvalid()) {
         WLOGFW("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;

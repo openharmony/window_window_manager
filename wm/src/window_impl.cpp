@@ -1613,7 +1613,7 @@ WMError WindowImpl::Destroy(bool needNotifyServer, bool needClearListener, uint3
         return WMError::WM_OK;
     }
 
-    WLOGI("Window %{public}u Destroy", property_->GetWindowId());
+    WLOGI("Window %{public}u Destroy, reason: %{public}u", property_->GetWindowId(), reason);
     WindowInspector::GetInstance().UnregisterGetWMSWindowListCallback(GetWindowId());
     WMError ret = WMError::WM_OK;
     if (needNotifyServer) {

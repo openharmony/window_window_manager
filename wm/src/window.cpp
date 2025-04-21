@@ -105,7 +105,8 @@ sptr<Window> Window::Create(const std::string& windowName, sptr<WindowOption>& o
 }
 
 sptr<Window> Window::Create(sptr<WindowOption>& option, const std::shared_ptr<OHOS::AbilityRuntime::Context>& context,
-    const sptr<IRemoteObject>& iSession, WMError& errCode, const std::string& identityToken, bool isModuleAbilityHookEnd)
+    const sptr<IRemoteObject>& iSession, WMError& errCode, const std::string& identityToken,
+    bool isModuleAbilityHookEnd)
 {
     // create from ability mgr service
     if (!iSession || !option) {

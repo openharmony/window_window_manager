@@ -217,10 +217,10 @@ public:
     bool GetFullScreenStart() const;
     void SetApiVersion(uint32_t version);
     uint32_t GetApiVersion() const;
-    void SetIsModuleAbilityHookEnd(bool isModuleAbilityHookEnd);
-    bool GetIsModuleAbilityHookEnd() const;
-    void SetIsModuleAbilityHook(bool isModuleAbilityHook);
-    bool GetIsModuleAbilityHook() const;
+    void SetIsAbilityHookOff(bool isAbilityHookOff);
+    bool GetIsAbilityHookOff() const;
+    void SetIsAbilityHook(bool isAbilityHook);
+    bool GetIsAbilityHook() const;
 
     /*
      * Sub Window
@@ -450,8 +450,8 @@ private:
     mutable std::mutex atomicServiceMutex_;
     bool isAtomicService_ = false;
     uint32_t apiVersion_ = 0;
-    bool isModuleAbilityHookEnd_ = false;
-    bool isModuleAbilityHook_ = false;
+    bool isAbilityHookOff_ = false;
+    bool isAbilityHook_ = false;
 
     /*
      * Sub Window
