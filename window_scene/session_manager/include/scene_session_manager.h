@@ -535,6 +535,7 @@ public:
     void RegisterSetTopWindowBoundaryByIDFunc(SetTopWindowBoundaryByIDFunc&& func);
     void RegisterSingleHandContainerNode(const std::string& stringId);
     const SingleHandCompatibleModeConfig& GetSingleHandCompatibleModeConfig() const;
+    void ConfigSupportFollowParentWindowLayout();
 
     /*
      * Window Property
