@@ -3179,6 +3179,15 @@ WSRect Session::GetSessionGlobalRect() const
 }
 
 /** @note @window.layout */
+WSRect Session::GetSessionGlobalRectInMultiScreen() const
+{
+    if (IsDragMoving()) {
+        return ConvertGlobalRectToRelative(GetSessionRect(), GetDisplayId());
+    }
+    return GetSessionGlobalRect();
+}
+
+/** @note @window.layout */
 void Session::SetSessionGlobalRect(const WSRect& rect)
 {
     std::lock_guard<std::mutex> lock(globalRectMutex_);
