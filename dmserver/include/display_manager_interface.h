@@ -200,7 +200,6 @@ public:
     {
         return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
     }
-    virtual bool IsOrientationNeedChanged() {return false;}
     virtual bool IsFoldable() { return false; }
     virtual bool IsCaptured() { return false; }
 
