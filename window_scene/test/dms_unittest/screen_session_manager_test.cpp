@@ -6053,6 +6053,25 @@ HWTEST_F(ScreenSessionManagerTest, ShouldHandleNonExistingGroupSmsId, TestSize.L
     ssm.screenSessionMap_.erase(1100);
 #endif
 }
+
+/**
+ * @tc.name: SetRSScreenPowerStatus
+ * @tc.desc: call RS power func, and notify brightness while screen on
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetRSScreenPowerStatus, TestSize.Leval1)
+{
+    ScreenPowerState state;
+    EXPECT_NE(ssm_, nullptr);
+
+    ssm_->SetRSScreenPowerStatus(0, ScreenPowerStatus::POWER_STATUS_ON);
+    state = ssm_->GetScreenPower(0);
+    EXPECT_EQ(state, ScreenPowerState::POWER_ON);
+
+    ssm_->SetRSScreenPowerStatus(0, ScreenPowerStatus::POWER_STATUS_OFF);
+    state = ssm_->GetScreenPower(0);
+    EXPECT_EQ(state, ScreenPowerState::POWER_OFF);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
