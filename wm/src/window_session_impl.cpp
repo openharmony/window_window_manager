@@ -2788,7 +2788,14 @@ WMError WindowSessionImpl::SetDecorButtonStyle(const DecorButtonStyle& decorButt
         TLOGE(WmsLogTag::WMS_DECOR, "uiContent is null, windowId: %{public}u", GetWindowId());
         return WMError::WM_ERROR_NULLPTR;
     }
-    uiContent->SetContainerButtonStyle(decorButtonStyle);
+    nlohmann::json decorStr;
+    decorStr.emplace("buttonBackgroundCornerRadius", decorButtonStyle.buttonBackgroundCornerRadius);
+    decorStr.emplace("buttonBackgroundSize", decorButtonStyle.buttonBackgroundSize);
+    decorStr.emplace("buttonIconSize", decorButtonStyle.buttonIconSize);
+    decorStr.emplace("closeButtonRightMargin", decorButtonStyle.closeButtonRightMargin);
+    decorStr.emplace("colorMode", decorButtonStyle.colorMode);
+    decorStr.emplace("spacingBetweenButtons", decorButtonStyle.spacingBetweenButtons);
+    uiContent->SetContainerModalEvent("decor_button_style_change", decorStr.dump());
     decorButtonStyle_ = decorButtonStyle;
     return WMError::WM_OK;
 }
