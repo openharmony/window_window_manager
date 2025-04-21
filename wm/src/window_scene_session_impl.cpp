@@ -2164,7 +2164,7 @@ WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height, const Re
     if (rectAnimationConfig.duration > 0 && reason == SizeChangeReason::RESIZE) {
         reason = SizeChangeReason::RESIZE_WITH_ANIMATION;
     }
-        
+
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
     auto ret = hostSession->UpdateSessionRect(wsRect, reason, false, false, {}, rectAnimationConfig);
     return static_cast<WMError>(ret);
@@ -4798,12 +4798,35 @@ WSError WindowSceneSessionImpl::UpdateTitleInTargetPos(bool isShow, int32_t heig
     return WSError::WS_OK;
 }
 
+void WindowSceneSessionImpl::UpdateSupportWindowModesWhenSwitchFreeMultiWindow()
+{
+    if (haveSetSupportedWindowModes_) {
+        TLOGI(WmsLogTag::WMS_LAYOUT, "SupportedWindowMode is already set, id: %{public}d", GetPersistentId());
+        return;
+    }
+    auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
+    if (abilityContext == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "abilityContext is nullptr");
+        return;
+    }
+    auto abilityInfo = abilityContext->GetAbilityInfo();
+    std::vector<AppExecFwk::SupportWindowMode> updateWindowModes =
+        ExtractSupportWindowModeFromMetaData(abilityInfo);
+    if (auto hostSession = GetHostSession()) {
+        hostSession->NotifySupportWindowModesChange(updateWindowModes);
+    };
+    auto windowModeSupportType = WindowHelper::ConvertSupportModesToSupportType(updateWindowModes);
+    property_->SetWindowModeSupportType(windowModeSupportType);
+    UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO);
+}
+
 WSError WindowSceneSessionImpl::SwitchFreeMultiWindow(bool enable)
 {
     if (IsWindowSessionInvalid()) {
         return WSError::WS_ERROR_INVALID_WINDOW;
     }
     if (windowSystemConfig_.freeMultiWindowEnable_ == enable) {
+        UpdateSupportWindowModesWhenSwitchFreeMultiWindow();
         return WSError::WS_ERROR_REPEAT_OPERATION;
     }
     NotifySwitchFreeMultiWindow(enable);
@@ -4815,24 +4838,7 @@ WSError WindowSceneSessionImpl::SwitchFreeMultiWindow(bool enable)
             window->SetFreeMultiWindowMode(enable);
         }
     }
-    if (haveSetSupportedWindowModes_) {
-        TLOGI(WmsLogTag::WMS_LAYOUT, "SupportedWindowMode is already set, id: %{public}d", GetPersistentId());
-        return WSError::WS_OK;
-    }
-    auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
-    if (abilityContext == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "abilityContext is nullptr");
-        return WSError::WS_ERROR_NULLPTR;
-    }
-    auto abilityInfo = abilityContext->GetAbilityInfo();
-    std::vector<AppExecFwk::SupportWindowMode> updateWindowModes =
-        ExtractSupportWindowModeFromMetaData(abilityInfo);
-    if (auto hostSession = GetHostSession()) {
-        hostSession->NotifySupportWindowModesChange(updateWindowModes);
-    };
-    auto windowModeSupportType = WindowHelper::ConvertSupportModesToSupportType(updateWindowModes);
-    property_->SetWindowModeSupportType(windowModeSupportType);
-    UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO);
+    UpdateSupportWindowModesWhenSwitchFreeMultiWindow();
 
     return WSError::WS_OK;
 }
