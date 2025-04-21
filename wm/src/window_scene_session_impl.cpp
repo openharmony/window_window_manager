@@ -2423,9 +2423,8 @@ WMError WindowSceneSessionImpl::GetSubWindowZLevel(int32_t& zLevel)
 WMError WindowSceneSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea,
     const Rect& rect, int32_t apiVersion)
 {
-    uint32_t currentApiVersion = 0;
-    GetTargetAPIVersionByApplicationInfo(currentApiVersion);
-    apiVersion = apiVersion == API_VERSION_INVALID ? currentApiVersion : apiVersion;
+    uint32_t currentApiVersion = GetTargetAPIVersionByApplicationInfo();
+    apiVersion = (apiVersion == API_VERSION_INVALID) ? static_cast<int32_t>(currentApiVersion) : apiVersion;
     if (apiVersion < API_VERSION_18 && WindowHelper::IsSystemWindow(property_->GetWindowType())) {
         TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u type %{public}d api %{public}u not supported",
             GetWindowId(), type, currentApiVersion);
