@@ -1812,48 +1812,48 @@ HWTEST_F(WindowSceneSessionImplTest4, IsSystemDensityChanged01, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetWindowProperties
- * @tc.desc: GetWindowProperties01
+ * @tc.name: GetWindowPropertyInfo
+ * @tc.desc: GetWindowPropertyInfo01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest4, GetWindowProperties01, TestSize.Level1)
+HWTEST_F(WindowSceneSessionImplTest4, GetWindowPropertyInfo01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetFocusable(false);
     option->SetTouchable(true);
     option->SetDisplayId(999);
-    option->SetWindowName("GetWindowProperties01");
+    option->SetWindowName("GetWindowPropertyInfo01");
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     window->hostSession_ = nullptr;
-    WindowProperties windowProperties;
-    auto ret = window->GetWindowProperties(windowProperties);
+    WindowPropertyInfo windowPropertyInfo;
+    auto ret = window->GetWindowPropertyInfo(windowPropertyInfo);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
 }
 
 /**
- * @tc.name: GetWindowProperties
- * @tc.desc: GetWindowProperties02
+ * @tc.name: GetWindowPropertyInfo
+ * @tc.desc: GetWindowPropertyInfo02
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest4, GetWindowProperties02, TestSize.Level1)
+HWTEST_F(WindowSceneSessionImplTest4, GetWindowPropertyInfo02, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetFocusable(false);
     option->SetTouchable(true);
     option->SetDisplayId(999);
-    option->SetWindowName("GetWindowProperties02");
+    option->SetWindowName("GetWindowPropertyInfo02");
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->property_->SetPersistentId(1);
     window->hostSession_ = session;
     window->state_ = WindowState::STATE_SHOWN;
-    WindowProperties windowProperties;
-    auto ret = window->GetWindowProperties(windowProperties);
+    WindowPropertyInfo windowPropertyInfo;
+    auto ret = window->GetWindowPropertyInfo(windowPropertyInfo);
     EXPECT_EQ(WMError::WM_OK, ret);
-    EXPECT_EQ(false, windowProperties.isFocusable);
-    EXPECT_EQ(true, windowProperties.isTouchable);
-    EXPECT_EQ(999, windowProperties.displayId);
+    EXPECT_EQ(false, windowPropertyInfo.isFocusable);
+    EXPECT_EQ(true, windowPropertyInfo.isTouchable);
+    EXPECT_EQ(999, windowPropertyInfo.displayId);
 }
 } // namespace
 } // namespace Rosen

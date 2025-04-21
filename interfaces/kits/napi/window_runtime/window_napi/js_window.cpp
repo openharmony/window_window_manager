@@ -2328,13 +2328,13 @@ napi_value JsWindow::OnGetWindowPropertiesSync(napi_env env, napi_callback_info 
         WLOGFW("window is nullptr or get invalid param");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    WindowProperties windowProperties;
-    WMError ret = windowToken_->GetWindowProperties(windowProperties);
+    WindowPropertyInfo windowPropertyInfo;
+    WMError ret = windowToken_->GetWindowPropertyInfo(windowPropertyInfo);
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "get window properties failed");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    auto objValue = CreateJsWindowPropertiesObject(env, windowProperties);
+    auto objValue = CreateJsWindowPropertiesObject(env, windowPropertyInfo);
     WLOGI("Window [%{public}u, %{public}s] get properties end",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
     if (objValue != nullptr) {
