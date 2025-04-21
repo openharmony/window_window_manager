@@ -2795,7 +2795,7 @@ WMError WindowSessionImpl::SetDecorButtonStyle(const DecorButtonStyle& decorButt
     decorStr.emplace("closeButtonRightMargin", decorButtonStyle.closeButtonRightMargin);
     decorStr.emplace("colorMode", decorButtonStyle.colorMode);
     decorStr.emplace("spacingBetweenButtons", decorButtonStyle.spacingBetweenButtons);
-    uiContent->SetContainerModalEvent("decor_button_style_change", decorStr.dump());
+    uiContent->onContainerModalEvent("decor_button_style_change", decorStr.dump());
     decorButtonStyle_ = decorButtonStyle;
     return WMError::WM_OK;
 }
