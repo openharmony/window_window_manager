@@ -219,6 +219,21 @@ public:
 };
 
 /**
+ * @class IWindowStatusDidChangeListener
+ *
+ * @brief IWindowStatusDidChangeListener is used to observe the window status when window status changed.
+ */
+class IWindowStatusDidChangeListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when window status changed.
+     *
+     * @param status Mode of the current window.
+     */
+    virtual void OnWindowStatusDidChange(WindowStatus status) {}
+};
+
+/**
  * @class IAvoidAreaChangedListener
  *
  * @brief IAvoidAreaChangedListener is used to observe the avoid area when avoid area size changed.
@@ -2634,6 +2649,28 @@ public:
      * @return WM_OK means unregister success, others means unregister failed.
      */
     virtual WMError UnregisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Register window status change listener.
+     *
+     * @param listener IWindowStatusDidChangeListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterWindowStatusDidChangeListener(const sptr<IWindowStatusDidChangeListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Unregister window status change listener.
+     *
+     * @param listener IWindowStatusDidChangeListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterWindowStatusDidChangeListener(const sptr<IWindowStatusDidChangeListener>& listener)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }

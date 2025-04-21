@@ -4742,6 +4742,12 @@ void WindowSceneSessionImpl::DumpSessionElementInfo(const std::vector<std::strin
     SingletonContainer::Get<WindowAdapter>().NotifyDumpInfoResult(info);
 }
 
+WSError WindowSceneSessionImpl::NotifyLayoutFinishAfterWindowModeChange(WindowMode mode)
+{
+    NotifyWindowStatusDidChange(mode);
+    return WSError::WS_OK;
+}
+
 WSError WindowSceneSessionImpl::UpdateWindowMode(WindowMode mode)
 {
     WLOGFI("%{public}u mode %{public}u", GetWindowId(), static_cast<uint32_t>(mode));
