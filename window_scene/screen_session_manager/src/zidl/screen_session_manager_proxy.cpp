@@ -2661,6 +2661,36 @@ void ScreenSessionManagerProxy::SetLandscapeLockStatus(bool isLocked)
     }
 }
 
+void ScreenSessionManagerProxy::SetForceCloseHdr(ScreenId screenId, bool isForceCloseHdr)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGW(WmsLogTag::DMS, "remote is null");
+        return;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return;
+    }
+    if (!(data.WriteUint64(static_cast<uint64_t>(screenId)))) {
+        TLOGE(WmsLogTag::DMS, "Write screenId failed");
+        return;
+    }
+    if (!data.WriteBool(isForceCloseHdr)) {
+        TLOGE(WmsLogTag::DMS, "Write isForceCloseHdr failed");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCENE_BOARD_FORCE_CLOSE_HDR),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
+        return;
+    }
+}
+
 ExtendScreenConnectStatus ScreenSessionManagerProxy::GetExtendScreenConnectStatus()
 {
     sptr<IRemoteObject> remote = Remote();
@@ -3532,7 +3562,7 @@ DMError ScreenSessionManagerProxy::SetVirtualScreenRefreshRate(ScreenId screenId
 }
 
 void ScreenSessionManagerProxy::SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList,
-    std::vector<uint64_t> surfaceIdList)
+    std::vector<uint64_t> surfaceIdList, std::vector<uint8_t> typeBlackList)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -3556,6 +3586,10 @@ void ScreenSessionManagerProxy::SetVirtualScreenBlackList(ScreenId screenId, std
     }
     if (!data.WriteUInt64Vector(surfaceIdList)) {
         WLOGFE("Write surfaceIdList failed");
+        return;
+    }
+    if (!data.WriteUInt8Vector(typeBlackList)) {
+        WLOGFE("Write typeBlackList failed");
         return;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_BLACK_LIST),
@@ -4106,37 +4140,6 @@ bool ScreenSessionManagerProxy::GetIsRealScreen(ScreenId screenId)
         return false;
     }
     return reply.ReadBool();
-}
-
-uint32_t ScreenSessionManagerProxy::GetDeviceStatus()
-{
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        WLOGFW("ScreenSessionManagerProxy::GetDeviceStatus: remote is nullptr");
-        return 0;
-    }
-
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("ScreenSessionManagerProxy::GetDeviceStatus: WriteInterfaceToken failed");
-        return 0;
-    }
-
-    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DEVICE_STATUS),
-        data, reply, option) != ERR_NONE) {
-        WLOGFE("ScreenSessionManagerProxy::GetDeviceStatus: SendRequest failed");
-        return 0;
-    }
-
-    uint32_t status = 0;
-    if (!reply.ReadUint32(status)) {
-        WLOGFE("ScreenSessionManagerProxy::GetDeviceStatus: ReadUint32 failed");
-        return 0;
-    }
-
-    return status;
 }
 
 void ScreenSessionManagerProxy::NotifyExtendScreenCreateFinish()

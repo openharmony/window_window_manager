@@ -96,7 +96,7 @@ public:
     virtual DMError SetFoldStatusLockedFromJs(bool locked);
     virtual sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
     virtual void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList,
-        std::vector<uint64_t> surfaceIdList = {});
+        std::vector<uint64_t> surfaceIdList = {}, std::vector<uint8_t> typeBlackList = {});
     virtual void SetVirtualDisplayMuteFlag(ScreenId screenId, bool muteFlag);
     virtual void DisablePowerOffRenderControl(ScreenId screenId);
     virtual DMError ProxyForFreeze(const std::set<int32_t>& pidList, bool isProxy);
@@ -110,7 +110,6 @@ public:
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshotWithOption(const CaptureOption& captureOption,
         DmErrorCode* errorCode = nullptr);
     virtual sptr<DisplayInfo> GetPrimaryDisplayInfo();
-    virtual uint32_t GetDeviceStatus();
 
 private:
     static inline SingletonDelegator<DisplayManagerAdapter> delegator;

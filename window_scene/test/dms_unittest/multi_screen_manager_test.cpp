@@ -18,8 +18,8 @@
 #include "multi_screen_manager.h"
 #include "screen_session_manager/include/screen_session_manager.h"
 #include "display_manager_agent_default.h"
-#include "zidl/screen_session_manager_client_interface.h"
 #include "common_test_utils.h"
+#include "test_client.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -29,47 +29,6 @@ namespace Rosen {
 namespace {
 constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
 }
-class TestClient : public IScreenSessionManagerClient {
-public:
-    void SwitchUserCallback(std::vector<int32_t> oldScbPids, int32_t currentScbPid) override {};
-    void OnScreenConnectionChanged(SessionOption option, ScreenEvent screenEvent) override {};
-    void OnPropertyChanged(ScreenId screenId,
-        const ScreenProperty& property, ScreenPropertyChangeReason reason) override {};
-    void OnPowerStatusChanged(DisplayPowerEvent event, EventStatus status,
-        PowerStateChangeReason reason) override {};
-    void OnSensorRotationChanged(ScreenId screenId, float sensorRotation) override {};
-    void OnHoverStatusChanged(ScreenId screenId, int32_t hoverStatus, bool needRotate = true) override {};
-    void OnScreenOrientationChanged(ScreenId screenId, float screenOrientation) override {};
-    void OnScreenRotationLockedChanged(ScreenId screenId, bool isLocked) override {};
-    void OnScreenExtendChanged(ScreenId mainScreenId, ScreenId extendScreenId) override {};
-
-    void OnDisplayStateChanged(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
-        const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type) override {};
-    void OnScreenshot(DisplayId displayId) override {};
-    void OnImmersiveStateChanged(ScreenId screenId, bool& immersive) override {};
-    void SetDisplayNodeScreenId(ScreenId screenId, ScreenId displayNodeScreenId) override {};
-    void OnGetSurfaceNodeIdsFromMissionIdsChanged(std::vector<uint64_t>& missionIds,
-        std::vector<uint64_t>& surfaceNodeIds, bool isBlackList = false) override {};
-    void OnUpdateFoldDisplayMode(FoldDisplayMode displayMode) override {};
-    void SetVirtualPixelRatioSystem(ScreenId screenId, float virtualPixelRatio) override {};
-    void OnFoldStatusChangedReportUE(const std::vector<std::string>& screenFoldInfo) override {};
-    void ScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) override {};
-    void OnCameraBackSelfieChanged(ScreenId screenId, bool isCameraBackSelfie) override {}
-    void OnSuperFoldStatusChanged(ScreenId screenId, SuperFoldStatus superFoldStatus) override {};
-    void OnSecondaryReflexionChanged(ScreenId screenId, bool isSecondaryReflexion) override {};
-    void OnExtendScreenConnectStatusChanged(ScreenId screenId,
-        ExtendScreenConnectStatus extendScreenConnectStatus) override {}
-    bool OnExtendDisplayNodeChange(ScreenId mainScreenId, ScreenId extendScreenId) override { return true; };
-    bool OnCreateScreenSessionOnly(ScreenId screenId, ScreenId rsId,
-        const std::string& name, bool isExtend) override { return true; };
-    bool OnMainDisplayNodeChange(ScreenId mainScreenId, ScreenId extendScreenId,
-        ScreenId extendRSId) override { return true; };
-    void SetScreenCombination(ScreenId mainScreenId, ScreenId extendScreenId,
-        ScreenCombination extendCombination) override {};
-    std::string OnDumperClientScreenSessions() override { return ""; };
-    sptr<IRemoteObject> AsObject() override {return testPtr;};
-    sptr<IRemoteObject> testPtr;
-};
 class MultiScreenManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();

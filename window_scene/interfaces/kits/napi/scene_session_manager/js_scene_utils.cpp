@@ -1166,7 +1166,7 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
         CreateSupportWindowModes(env, sessionInfo.supportedWindowModes));
     napi_set_named_property(env, objValue, "specifiedFlag", CreateJsValue(env, sessionInfo.specifiedFlag_));
     if (sessionInfo.want != nullptr) {
-        napi_set_named_property(env, objValue, "want", AppExecFwk::WrapWant(env, *sessionInfo.want));
+        napi_set_named_property(env, objValue, "want", AppExecFwk::WrapWant(env, sessionInfo.SafelyGetWant()));
     }
     return objValue;
 }
@@ -1386,6 +1386,8 @@ napi_value CreateJsSessionSizeChangeReason(napi_env env)
         static_cast<int32_t>(SizeChangeReason::SPLIT_DRAG)));
     napi_set_named_property(env, objValue, "SPLIT_DRAG_END", CreateJsValue(env,
         static_cast<int32_t>(SizeChangeReason::SPLIT_DRAG_END)));
+    napi_set_named_property(env, objValue, "RESIZE_BY_LIMIT", CreateJsValue(env,
+        static_cast<int32_t>(SizeChangeReason::RESIZE_BY_LIMIT)));
     napi_set_named_property(env, objValue, "END", CreateJsValue(env,
         static_cast<int32_t>(SizeChangeReason::END)));
 

@@ -342,6 +342,7 @@ public:
     void SetScreenCorrection();
     void ReportFoldDisplayTime(uint64_t screenId, int64_t rsFirstFrameTime);
     void RegisterFirstFrameCommitCallback();
+    void SetForceCloseHdr(ScreenId screenId, bool isForceCloseHdr) override;
 
     VirtualScreenFlag GetVirtualScreenFlag(ScreenId screenId) override;
     DMError SetVirtualScreenFlag(ScreenId screenId, VirtualScreenFlag screenFlag) override;
@@ -349,7 +350,7 @@ public:
     DeviceScreenConfig GetDeviceScreenConfig() override;
     DMError SetVirtualScreenRefreshRate(ScreenId screenId, uint32_t refreshInterval) override;
     void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList,
-        std::vector<uint64_t> surfaceIdList = {}) override;
+        std::vector<uint64_t> surfaceIdList = {}, std::vector<uint8_t> typeBlackList = {}) override;
     void SetVirtualDisplayMuteFlag(ScreenId screenId, bool muteFlag) override;
     // notify scb virtual screen change
     void OnVirtualScreenChange(ScreenId screenId, ScreenEvent screenEvent);
@@ -421,7 +422,6 @@ public:
     SessionOption GetSessionOption(sptr<ScreenSession> screenSession);
     SessionOption GetSessionOption(sptr<ScreenSession> screenSession, ScreenId screenId);
     virtual DMError SetSystemKeyboardStatus(bool isTpKeyboardOn = false) override;
-    uint32_t GetDeviceStatus() override;
 
     sptr<ScreenSession> GetPhysicalScreenSession(ScreenId screenId) const;
     sptr<ScreenSession> GetScreenSessionByRsId(ScreenId rsScreenId);
@@ -518,6 +518,9 @@ private:
     void IsEnableRegionRotation(sptr<ScreenSession> screenSession);
     void CalculateXYPosition(sptr<ScreenSession> screenSession);
     bool IsSpecialApp();
+    void SetMultiScreenRelativePositionInner(sptr<ScreenSession>& firstScreenSession,
+        sptr<ScreenSession>& secondScreenSession, MultiScreenPositionOptions mainScreenOptions,
+        MultiScreenPositionOptions secondScreenOption);
 #ifdef DEVICE_STATUS_ENABLE
     void SetDragWindowScreenId(ScreenId screenId, ScreenId displayNodeScreenId);
 #endif // DEVICE_STATUS_ENABLE

@@ -979,12 +979,6 @@ void WindowSceneSessionImpl::ConsumePointerEventInner(const std::shared_ptr<MMI:
     }
     lastPointerEvent_ = pointerEvent;
     if (isPointDown) {
-        auto displayInfo = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayInfo(property_->GetDisplayId());
-        if (displayInfo == nullptr) {
-            WLOGFE("display info is nullptr");
-            pointerEvent->MarkProcessed();
-            return;
-        }
         float vpr = WindowSessionImpl::GetVirtualPixelRatio();
         if (MathHelper::NearZero(vpr)) {
             WLOGFW("vpr is zero");
@@ -2127,6 +2121,11 @@ WMError WindowSceneSessionImpl::CheckAndModifyWindowRect(uint32_t& width, uint32
 /** @note @window.layout */
 WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height, const RectAnimationConfig& rectAnimationConfig)
 {
+    auto reason = SizeChangeReason::RESIZE;
+    if (isResizedByLimit_) {
+        reason = SizeChangeReason::RESIZE_BY_LIMIT;
+        isResizedByLimit_ = false;
+    }
     TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d resize %{public}u %{public}u",
         property_->GetPersistentId(), width, height);
 
@@ -2161,8 +2160,10 @@ WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height, const Re
 
     WSRect wsRect = { newRect.posX_, newRect.posY_, newRect.width_, newRect.height_ };
     auto hostSession = GetHostSession();
-    SizeChangeReason reason = rectAnimationConfig.duration > 0 ? SizeChangeReason::RESIZE_WITH_ANIMATION :
-        SizeChangeReason::RESIZE;
+    if (rectAnimationConfig.duration > 0 && reason == SizeChangeReason::RESIZE) {
+        reason = SizeChangeReason::RESIZE_WITH_ANIMATION;
+    }
+        
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
     auto ret = hostSession->UpdateSessionRect(wsRect, reason, false, false, {}, rectAnimationConfig);
     return static_cast<WMError>(ret);
@@ -2207,6 +2208,8 @@ WMError WindowSceneSessionImpl::GetTargetOrientationConfigInfo(Orientation targe
         TLOGE(WmsLogTag::WMS_ROTATION, "Session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+    std::map<WindowType, SystemBarProperty> pageProperties;
+    GetSystemBarPropertyForPage(properties, pageProperties);
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
 
@@ -2222,9 +2225,9 @@ WMError WindowSceneSessionImpl::GetTargetOrientationConfigInfo(Orientation targe
     }
     WSError ret;
     if (targetOrientation == Orientation::INVALID) {
-        ret = hostSession->GetTargetOrientationConfigInfo(GetRequestedOrientation(), properties);
+        ret = hostSession->GetTargetOrientationConfigInfo(GetRequestedOrientation(), pageProperties);
     } else {
-        ret = hostSession->GetTargetOrientationConfigInfo(targetOrientation, properties);
+        ret = hostSession->GetTargetOrientationConfigInfo(targetOrientation, pageProperties);
     }
     getTargetInfoCallback_->ResetGetTargetRotationLock();
     OrientationInfo info = getTargetInfoCallback_->GetTargetOrientationResult(WINDOW_PAGE_ROTATION_TIMEOUT);
@@ -2524,7 +2527,8 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
         SetLayoutFullScreenByApiVersion(status);
         // compatibleMode app may set statusBarColor before ignoreSafeArea
         auto systemBarProperties = property_->GetSystemBarProperty();
-        if (status && systemBarProperties.find(WindowType::WINDOW_TYPE_STATUS_BAR) != systemBarProperties.end()) {
+        if (status && systemBarProperties.find(WindowType::WINDOW_TYPE_STATUS_BAR) != systemBarProperties.end() &&
+            !property_->GetCompatibleModeInPcTitleVisible()) {
             auto statusBarProperty = systemBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR];
             HookDecorButtonStyleInCompatibleMode(statusBarProperty.contentColor_);
         }
@@ -2635,7 +2639,8 @@ WMError WindowSceneSessionImpl::NotifySpecificWindowSessionProperty(WindowType t
         if (auto uiContent = GetUIContentSharedPtr()) {
             uiContent->SetStatusBarItemColor(property.contentColor_);
         }
-        if (property_->GetCompatibleModeInPc() && isIgnoreSafeArea_) {
+        if (property_->GetCompatibleModeInPc() && isIgnoreSafeArea_ &&
+            !property_->GetCompatibleModeInPcTitleVisible()) {
             HookDecorButtonStyleInCompatibleMode(property.contentColor_);
         }
     } else if (type == WindowType::WINDOW_TYPE_NAVIGATION_BAR) {
@@ -2771,6 +2776,54 @@ WMError WindowSceneSessionImpl::GetSystemBarProperties(std::map<WindowType, Syst
     auto currProperties = property_->GetSystemBarProperty();
     properties[WindowType::WINDOW_TYPE_STATUS_BAR] = currProperties[WindowType::WINDOW_TYPE_STATUS_BAR];
     return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::SetSystemBarPropertyForPage(WindowType type, std::optional<SystemBarProperty> property)
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_IMMS, "win %{public}u invalid state", GetWindowId());
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (!WindowHelper::IsMainWindow(GetType())) {
+        TLOGI(WmsLogTag::WMS_IMMS, "only main window support, win %{public}u", GetWindowId());
+        return WMError::WM_DO_NOTHING;
+    }
+    if (property == std::nullopt) {
+        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u property is nullptr use main window prop", GetWindowId());
+        return NotifySpecificWindowSessionProperty(type, GetSystemBarPropertyByType(type));
+    }
+    TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}u %{public}s] type %{public}u "
+        "%{public}u %{public}x %{public}x %{public}u %{public}u",
+        GetWindowId(), GetWindowName().c_str(), static_cast<uint32_t>(type),
+        property->enable_, property->backgroundColor_,
+        property->contentColor_, property->enableAnimation_, property->settingFlag_);
+    auto lastProperty = GetSystemBarPropertyByType(type);
+    property_->SetSystemBarProperty(type, property.value());
+    auto ret = NotifySpecificWindowSessionProperty(type, property.value());
+    property_->SetSystemBarProperty(type, lastProperty);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_IMMS, "set prop fail, ret %{public}u", ret);
+        return ret;
+    }
+    return WMError::WM_OK;
+}
+
+void WindowSceneSessionImpl::GetSystemBarPropertyForPage(const std::map<WindowType, SystemBarProperty>& properties,
+    std::map<WindowType, SystemBarProperty>& pageProperties)
+{
+    for (auto type : { WindowType::WINDOW_TYPE_STATUS_BAR, WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR }) {
+        if (properties.find(type) != properties.end()) {
+            pageProperties[type] = properties.at(type);
+        } else {
+            pageProperties[type] = GetSystemBarPropertyByType(type);
+        }
+        TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}u %{public}s] type %{public}u "
+            "%{public}u %{public}x %{public}x %{public}u %{public}u",
+            GetWindowId(), GetWindowName().c_str(), static_cast<uint32_t>(type),
+            pageProperties[type].enable_, pageProperties[type].backgroundColor_,
+            pageProperties[type].contentColor_, pageProperties[type].enableAnimation_,
+            pageProperties[type].settingFlag_);
+    }
 }
 
 WMError WindowSceneSessionImpl::SetFullScreen(bool status)
@@ -4954,6 +5007,7 @@ void WindowSceneSessionImpl::UpdateNewSize()
         needResize = true;
     }
     if (needResize) {
+        isResizedByLimit_ = true;
         Resize(width, height);
         TLOGI(WmsLogTag::WMS_LAYOUT, "Resize window by limits. Id: %{public}u, width: %{public}u,"
             " height: %{public}u", GetWindowId(), width, height);
