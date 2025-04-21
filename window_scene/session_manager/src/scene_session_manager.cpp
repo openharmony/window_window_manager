@@ -9521,7 +9521,8 @@ bool SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInf
     WSRect wsRect = sceneSession->GetSessionGlobalRectWithSingleHandScale(); // only accessability and mmi need global
     DisplayId displayId = sceneSession->GetSessionProperty()->GetDisplayId();
     if (!sceneSession->GetSessionInfo().isSystem_ &&
-        PcFoldScreenManager::GetInstance().IsHalfFoldedOnMainDisplay(displayId)) {
+        PcFoldScreenManager::GetInstance().IsHalfFoldedOnMainDisplay(displayId) &&
+        !sceneSession->GetSessionProperty()->IsSystemKeyboard()) {
         displayId = sceneSession->TransformGlobalRectToRelativeRect(wsRect);
     }
     info->displayId_ = displayId;
