@@ -263,6 +263,7 @@ HWTEST_F(IntentionEventManagerTest, OnInputEvent0, TestSize.Level1)
     pointerEvent->AddPointerItem(item);
 
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UP);
+    pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
     EXPECT_EQ(MMI::PointerEvent::POINTER_ACTION_UP, pointerEvent->GetPointerAction());
     inputEventListener_->OnInputEvent(pointerEvent);
 
@@ -424,6 +425,43 @@ HWTEST_F(IntentionEventManagerTest, IsKeyboardEvent, TestSize.Level1)
     keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_BACK);
     EXPECT_EQ(true, inputEventListener_->IsKeyboardEvent(keyEvent));
     usleep(WAIT_SYNC_IN_NS);
+}
+
+/**
+ * @tc.name: ProcessInjectionEvent
+ * @tc.desc: ProcessInjectionEvent Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(IntentionEventManagerTest, ProcessInjectionEvent, TestSize.Level1)
+{
+    int32_t TRANSPARENT_FINGER_ID = 10000;
+    int32_t TRANSPARENT_BUTTON_FINGER_ID = 77777777;
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    MMI::PointerEvent::PointerItem item;
+    pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
+    pointerEvent->SetPointerId(0);
+    item.SetPointerId(1);
+    pointerEvent->AddPointerItem(item);
+
+    int32_t oriPointerId = pointerEvent->GetPointerId();
+    inputEventListener_->ProcessInjectionEvent(pointerEvent, 1);
+    EXPECT_EQ(oriPointerId, pointerEvent->GetPointerId());
+    pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_MOUSE);
+    inputEventListener_->ProcessInjectionEvent(pointerEvent, 1);
+    EXPECT_EQ(oriPointerId, pointerEvent->GetPointerId());
+
+    item.SetPointerId(0);
+    pointerEvent->AddPointerItem(item);
+    pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
+    inputEventListener_->ProcessInjectionEvent(pointerEvent, 1);
+    EXPECT_EQ(oriPointerId + TRANSPARENT_FINGER_ID, pointerEvent->GetPointerId());
+
+    pointerEvent->SetPointerId(0);
+    item.SetPointerId(0);
+    pointerEvent->UpdatePointerItem(0, item);
+    pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_MOUSE);
+    inputEventListener_->ProcessInjectionEvent(pointerEvent, 1);
+    EXPECT_EQ(TRANSPARENT_BUTTON_FINGER_ID, pointerEvent->GetPointerId());
 }
 }
 }
