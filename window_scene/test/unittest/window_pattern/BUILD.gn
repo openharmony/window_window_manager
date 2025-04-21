@@ -50,6 +50,8 @@ ohos_unittest("window_pattern_starting_window_test") {
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "eventhandler:libeventhandler",
+    "graphic_2d:librender_service_base",
+    "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "relational_store:native_rdb",
   ]
@@ -61,6 +63,8 @@ ohos_unittest("window_pattern_starting_window_rdb_test") {
   deps = [ ws_unittest_common ]
   external_deps = [
     "c_utils:utils",
+    "graphic_2d:librender_service_base",
+    "graphic_2d:librender_service_client",
     "relational_store:native_rdb",
   ]
 }

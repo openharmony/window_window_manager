@@ -220,15 +220,13 @@ ohos_unittest("dmserver_display_manager_config_test") {
 
   sources = [ "display_manager_config_test.cpp" ]
 
-  deps = [
-    ":dmserver_unittest_common",
-    "//third_party/libxml2:libxml2",
-  ]
+  deps = [ ":dmserver_unittest_common" ]
 
   external_deps = [
     "c_utils:utils",
     "config_policy:configpolicy_util",
     "hilog:libhilog",
+    "libxml2:libxml2",
   ]
 }
 
