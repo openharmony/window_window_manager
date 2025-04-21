@@ -6497,13 +6497,13 @@ void SceneSessionManager::UpdateFocusStatus(DisplayId displayId, const sptr<Scen
         }
     }
     sceneSession->UpdateFocus(isFocused);
-    if ((isFocused && !needBlockNotifyFocusStatusUntilForeground) || (!isFocused && !needBlockNotifyUnfocusStatus)) {
-        NotifyFocusStatus(sceneSession, isFocused, focusGroup);
-    }
     // notify listenerController
     auto prevSession = GetSceneSession(focusGroup->GetLastFocusedSessionId());
     if (isFocused && MissionChanged(prevSession, sceneSession)) {
-        NotifyFocusStatusByMission(prevSession, sceneSession);
+        NotifyUnFocusedByMission(prevSession, sceneSession);
+    }
+    if ((isFocused && !needBlockNotifyFocusStatusUntilForeground) || (!isFocused && !needBlockNotifyUnfocusStatus)) {
+        NotifyFocusedByMission(sceneSession, isFocused, focusGroup);
     }
 }
 
@@ -6688,6 +6688,14 @@ void SceneSessionManager::NotifyUnFocusedByMission(const sptr<SceneSession>& sce
     if (sceneSession && !sceneSession->GetSessionInfo().isSystem_) {
         TLOGD(WmsLogTag::WMS_FOCUS, "id: %{public}d", sceneSession->GetMissionId());
         listenerController_->NotifySessionUnfocused(sceneSession->GetMissionId());
+    }
+}
+
+void SceneSessionManager::NotifyFocusedByMission(const sptr<SceneSession>& sceneSession)
+{
+    if (sceneSession && !sceneSession->GetSessionInfo().isSystem_) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "Focused, id: %{public}d", sceneSession->GetMissionId());
+        listenerController_->NotifySessionFocused(sceneSession->GetMissionId());
     }
 }
 
