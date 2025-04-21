@@ -95,7 +95,7 @@ HWTEST_F(MultiScreenModeChangeManagerTest, OnMultiScreenModeChangeRequest, TestS
     auto ret = multiSMCM_.OnMultiScreenModeChangeRequest(innerScreen, externalScreen, operateType);
     ASSERT_EQ(ret, DMError::DM_ERROR_NULLPTR);
 
-    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption;
     virtualOption.name_ = "createVirtualOption";
     ScreenId screenId = ssm_.CreateVirtualScreen(
@@ -190,7 +190,7 @@ HWTEST_F(MultiScreenModeChangeManagerTest, HandleInnerMainExternalExtendChange, 
         externalTargetCombination);
     ASSERT_EQ(ret, DMError::DM_ERROR_NULLPTR);
 
-    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption;
     virtualOption.name_ = "createVirtualOption";
     ScreenId screenId = ssm_.CreateVirtualScreen(
@@ -236,7 +236,7 @@ HWTEST_F(MultiScreenModeChangeManagerTest, HandleInnerMainExternalMirrorChange, 
         externalTargetCombination);
     ASSERT_EQ(ret, DMError::DM_ERROR_NULLPTR);
 
-    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption;
     virtualOption.name_ = "createVirtualOption";
     ScreenId screenId = ssm_.CreateVirtualScreen(
@@ -282,7 +282,7 @@ HWTEST_F(MultiScreenModeChangeManagerTest, HandleInnerExtendExternalMainChange, 
         externalTargetCombination);
     ASSERT_EQ(ret, DMError::DM_ERROR_NULLPTR);
 
-    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption;
     virtualOption.name_ = "createVirtualOption";
     ScreenId screenId = ssm_.CreateVirtualScreen(
@@ -328,7 +328,7 @@ HWTEST_F(MultiScreenModeChangeManagerTest, HandleInnerMirrorExternalMainChange, 
         externalTargetCombination);
     ASSERT_EQ(ret, DMError::DM_ERROR_NULLPTR);
 
-    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption;
     virtualOption.name_ = "createVirtualOption";
     ScreenId screenId = ssm_.CreateVirtualScreen(
@@ -370,7 +370,7 @@ HWTEST_F(MultiScreenModeChangeManagerTest, NotifyClientCreateExtendSessionOnly, 
     sptr<ScreenSession> screenSession = nullptr;
     multiSMCM_.NotifyClientCreateExtendSessionOnly(ssmClient, screenSession);
 
-    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption;
     virtualOption.name_ = "createVirtualOption";
     ScreenId screenId = ssm_.CreateVirtualScreen(
@@ -380,7 +380,7 @@ HWTEST_F(MultiScreenModeChangeManagerTest, NotifyClientCreateExtendSessionOnly, 
     ASSERT_FALSE(screenSession->GetIsExtend());
 
     screenSession = nullptr;
-    ssmClient = new TestClient();
+    ssmClient = new ScreenSessionManagerClientTest();
     multiSMCM_.NotifyClientCreateExtendSessionOnly(ssmClient, screenSession);
 
     screenSession = ssm_.GetScreenSession(screenId);
@@ -401,7 +401,7 @@ HWTEST_F(MultiScreenModeChangeManagerTest, NotifyClientCreateMirrorSessionOnly, 
     sptr<ScreenSession> mainSession = nullptr;
     multiSMCM_.NotifyClientCreateMirrorSessionOnly(ssmClient, screenSession, mainSession);
 
-    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption;
     virtualOption.name_ = "createVirtualOption";
     ScreenId screenId = ssm_.CreateVirtualScreen(
@@ -413,13 +413,12 @@ HWTEST_F(MultiScreenModeChangeManagerTest, NotifyClientCreateMirrorSessionOnly, 
     mainSession = ssm_.GetDefaultScreenSession();
     multiSMCM_.NotifyClientCreateMirrorSessionOnly(ssmClient, screenSession, mainSession);
     ASSERT_FALSE(screenSession->GetIsExtend());
-
    
     screenSession = nullptr;
     multiSMCM_.NotifyClientCreateMirrorSessionOnly(ssmClient, screenSession, mainSession);
 
     screenSession = nullptr;
-    ssmClient = new TestClient();
+    ssmClient = new ScreenSessionManagerClientTest();
     multiSMCM_.NotifyClientCreateMirrorSessionOnly(ssmClient, screenSession, mainSession);
 
     screenSession = ssm_.GetScreenSession(screenId);
@@ -440,7 +439,7 @@ HWTEST_F(MultiScreenModeChangeManagerTest, ScreenChangeToMirrorMode, TestSize.Le
     sptr<ScreenSession> mainSession = nullptr;
     multiSMCM_.ScreenChangeToMirrorMode(ssmClient, screenSession, mainSession);
 
-    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption;
     virtualOption.name_ = "createVirtualOption";
     ScreenId screenId = ssm_.CreateVirtualScreen(
@@ -450,7 +449,7 @@ HWTEST_F(MultiScreenModeChangeManagerTest, ScreenChangeToMirrorMode, TestSize.Le
 
     mainSession = ssm_.GetDefaultScreenSession();
     multiSMCM_.ScreenChangeToMirrorMode(ssmClient, screenSession, mainSession);
-    ssmClient = new TestClient();
+    ssmClient = new ScreenSessionManagerClientTest();
     multiSMCM_.ScreenChangeToMirrorMode(ssmClient, screenSession, mainSession);
     ASSERT_EQ(ScreenCombination::SCREEN_MIRROR, screenSession->GetScreenCombination());
     ssm_.DestroyVirtualScreen(screenId);
@@ -466,13 +465,13 @@ HWTEST_F(MultiScreenModeChangeManagerTest, ScreenDisplayNodeChangeNotify, TestSi
     sptr<IScreenSessionManagerClient> ssmClient = nullptr;
     sptr<ScreenSession> innerSession = ssm_.GetDefaultScreenSession();
 
-    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption;
     virtualOption.name_ = "createVirtualOption";
     ScreenId screenId = ssm_.CreateVirtualScreen(
         virtualOption, displayManagerAgent->AsObject());
     sptr<ScreenSession> externalSession = ssm_.GetScreenSession(screenId);
-    ssmClient = new TestClient();
+    ssmClient = new ScreenSessionManagerClientTest();
     auto ret = multiSMCM_.ScreenDisplayNodeChangeNotify(ssmClient, innerSession, externalSession);
     ASSERT_EQ(DMError::DM_OK, ret);
     ssm_.DestroyVirtualScreen(screenId);
@@ -486,14 +485,14 @@ HWTEST_F(MultiScreenModeChangeManagerTest, ScreenDisplayNodeChangeNotify, TestSi
 HWTEST_F(MultiScreenModeChangeManagerTest, HandleInnerMainExternalExtendToInnerMainExternalMirrorChange,
     TestSize.Level1)
 {
-    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption;
     virtualOption.name_ = "createVirtualOption";
     ScreenId screenId = ssm_.CreateVirtualScreen(
         virtualOption, displayManagerAgent->AsObject());
     sptr<ScreenSession> innerSession = ssm_.GetScreenSession(screenId);
 
-    sptr<IDisplayManagerAgent> displayManagerAgent1 = new(std::nothrow) DisplayManagerAgentDefault();
+    sptr<IDisplayManagerAgent> displayManagerAgent1 = new DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption1;
     virtualOption1.name_ = "createVirtualOption";
     ScreenId screenId1 = ssm_.CreateVirtualScreen(
@@ -506,17 +505,18 @@ HWTEST_F(MultiScreenModeChangeManagerTest, HandleInnerMainExternalExtendToInnerM
         externalSession);
     ASSERT_EQ(DMError::DM_OK, ret);
 
-    externalSession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
+    innerSession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
     ret = multiSMCM_.HandleInnerMainExternalExtendToInnerMainExternalMirrorChange(innerSession, externalSession);
     ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ret);
     
-    innerSession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
-    externalSession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
-    ret = multiSMCM_.HandleInnerMainExternalExtendToInnerMainExternalMirrorChange(innerSession, externalSession);
-
-    innerSession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
+    
     externalSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
-    sptr<IScreenSessionManagerClient> ssmClient = new TestClient();
+    ret = multiSMCM_.HandleInnerMainExternalExtendToInnerMainExternalMirrorChange(innerSession, externalSession);
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ret);
+
+    innerSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
+    externalSession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
+    sptr<IScreenSessionManagerClient> ssmClient = new ScreenSessionManagerClientTest();
     ssm_.SetClient(ssmClient);
     ret = multiSMCM_.HandleInnerMainExternalExtendToInnerMainExternalMirrorChange(innerSession, externalSession);
     ASSERT_EQ(DMError::DM_OK, ret);
@@ -532,14 +532,14 @@ HWTEST_F(MultiScreenModeChangeManagerTest, HandleInnerMainExternalExtendToInnerM
 HWTEST_F(MultiScreenModeChangeManagerTest, HandleInnerMainExternalExtendToInnerExtendExternalMainChange,
     TestSize.Level1)
 {
-    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption;
     virtualOption.name_ = "createVirtualOption";
     ScreenId screenId = ssm_.CreateVirtualScreen(
         virtualOption, displayManagerAgent->AsObject());
     sptr<ScreenSession> innerSession = ssm_.GetScreenSession(screenId);
 
-    sptr<IDisplayManagerAgent> displayManagerAgent1 = new(std::nothrow) DisplayManagerAgentDefault();
+    sptr<IDisplayManagerAgent> displayManagerAgent1 = new DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption1;
     virtualOption1.name_ = "createVirtualOption";
     ScreenId screenId1 = ssm_.CreateVirtualScreen(
@@ -560,12 +560,490 @@ HWTEST_F(MultiScreenModeChangeManagerTest, HandleInnerMainExternalExtendToInnerE
     innerSession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
     externalSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
     ret = multiSMCM_.HandleInnerMainExternalExtendToInnerExtendExternalMainChange(innerSession, externalSession);
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ret);
 
     innerSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
     externalSession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
-    sptr<IScreenSessionManagerClient> ssmClient = new TestClient();
+    sptr<IScreenSessionManagerClient> ssmClient = new ScreenSessionManagerClientTest();
     ssm_.SetClient(ssmClient);
     ret = multiSMCM_.HandleInnerMainExternalExtendToInnerExtendExternalMainChange(innerSession, externalSession);
+    ASSERT_EQ(DMError::DM_OK, ret);
+    ssm_.DestroyVirtualScreen(screenId);
+    ssm_.DestroyVirtualScreen(screenId1);
+}
+
+/**
+ * @tc.name: HandleInnerMainExternalExtendToInnerMirrorExternalMainChange
+ * @tc.desc: HandleInnerMainExternalExtendToInnerMirrorExternalMainChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenModeChangeManagerTest, HandleInnerMainExternalExtendToInnerMirrorExternalMainChange,
+    TestSize.Level1)
+{
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    ScreenId screenId = ssm_.CreateVirtualScreen(
+        virtualOption, displayManagerAgent->AsObject());
+    sptr<ScreenSession> innerSession = ssm_.GetScreenSession(screenId);
+
+    sptr<IDisplayManagerAgent> displayManagerAgent1 = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption1;
+    virtualOption1.name_ = "createVirtualOption";
+    ScreenId screenId1 = ssm_.CreateVirtualScreen(
+        virtualOption1, displayManagerAgent1->AsObject());
+    sptr<ScreenSession> externalSession = ssm_.GetScreenSession(screenId1);
+
+    ssm_.clientProxy_ = nullptr;
+    innerSession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
+    externalSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
+    DMError ret = multiSMCM_.HandleInnerMainExternalExtendToInnerMirrorExternalMainChange(innerSession,
+        externalSession);
+    ASSERT_EQ(DMError::DM_OK, ret);
+
+    externalSession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
+    ret = multiSMCM_.HandleInnerMainExternalExtendToInnerMirrorExternalMainChange(innerSession, externalSession);
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ret);
+    
+    innerSession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
+    externalSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
+    ret = multiSMCM_.HandleInnerMainExternalExtendToInnerMirrorExternalMainChange(innerSession, externalSession);
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ret);
+
+    innerSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
+    externalSession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
+    sptr<IScreenSessionManagerClient> ssmClient = new ScreenSessionManagerClientTest();
+    ssm_.SetClient(ssmClient);
+    ret = multiSMCM_.HandleInnerMainExternalExtendToInnerMirrorExternalMainChange(innerSession, externalSession);
+    ASSERT_EQ(DMError::DM_OK, ret);
+    ssm_.DestroyVirtualScreen(screenId);
+    ssm_.DestroyVirtualScreen(screenId1);
+}
+
+/**
+ * @tc.name: HandleInnerMainExternalMirrorToInnerMainExternalExtendChange
+ * @tc.desc: HandleInnerMainExternalMirrorToInnerMainExternalExtendChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenModeChangeManagerTest, HandleInnerMainExternalMirrorToInnerMainExternalExtendChange,
+    TestSize.Level1)
+{
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    ScreenId screenId = ssm_.CreateVirtualScreen(
+        virtualOption, displayManagerAgent->AsObject());
+    sptr<ScreenSession> innerSession = ssm_.GetScreenSession(screenId);
+
+    sptr<IDisplayManagerAgent> displayManagerAgent1 = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption1;
+    virtualOption1.name_ = "createVirtualOption";
+    ScreenId screenId1 = ssm_.CreateVirtualScreen(
+        virtualOption1, displayManagerAgent1->AsObject());
+    sptr<ScreenSession> externalSession = ssm_.GetScreenSession(screenId1);
+
+    ssm_.clientProxy_ = nullptr;
+    innerSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
+    externalSession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
+    DMError ret = multiSMCM_.HandleInnerMainExternalMirrorToInnerMainExternalExtendChange(innerSession,
+        externalSession);
+    ASSERT_EQ(DMError::DM_OK, ret);
+
+    innerSession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
+    ret = multiSMCM_.HandleInnerMainExternalMirrorToInnerMainExternalExtendChange(innerSession, externalSession);
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ret);
+    
+    innerSession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
+    externalSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
+    ret = multiSMCM_.HandleInnerMainExternalMirrorToInnerMainExternalExtendChange(innerSession, externalSession);
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ret);
+
+    innerSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
+    externalSession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
+    sptr<IScreenSessionManagerClient> ssmClient = new ScreenSessionManagerClientTest();
+    ssm_.SetClient(ssmClient);
+    ret = multiSMCM_.HandleInnerMainExternalMirrorToInnerMainExternalExtendChange(innerSession, externalSession);
+    ASSERT_EQ(DMError::DM_OK, ret);
+    ssm_.DestroyVirtualScreen(screenId);
+    ssm_.DestroyVirtualScreen(screenId1);
+}
+
+/**
+ * @tc.name: HandleInnerMainExternalMirrorToInnerMirrorExternalMainChange
+ * @tc.desc: HandleInnerMainExternalMirrorToInnerMirrorExternalMainChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenModeChangeManagerTest, HandleInnerMainExternalMirrorToInnerMirrorExternalMainChange,
+    TestSize.Level1)
+{
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    ScreenId screenId = ssm_.CreateVirtualScreen(
+        virtualOption, displayManagerAgent->AsObject());
+    sptr<ScreenSession> innerSession = ssm_.GetScreenSession(screenId);
+
+    sptr<IDisplayManagerAgent> displayManagerAgent1 = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption1;
+    virtualOption1.name_ = "createVirtualOption";
+    ScreenId screenId1 = ssm_.CreateVirtualScreen(
+        virtualOption1, displayManagerAgent1->AsObject());
+    sptr<ScreenSession> externalSession = ssm_.GetScreenSession(screenId1);
+
+    ssm_.clientProxy_ = nullptr;
+    innerSession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
+    externalSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
+    DMError ret = multiSMCM_.HandleInnerMainExternalMirrorToInnerMirrorExternalMainChange(innerSession,
+        externalSession);
+    ASSERT_EQ(DMError::DM_OK, ret);
+
+    externalSession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
+    ret = multiSMCM_.HandleInnerMainExternalMirrorToInnerMirrorExternalMainChange(innerSession, externalSession);
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ret);
+    
+    innerSession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
+    externalSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
+    ret = multiSMCM_.HandleInnerMainExternalMirrorToInnerMirrorExternalMainChange(innerSession, externalSession);
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ret);
+
+    innerSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
+    externalSession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
+    sptr<IScreenSessionManagerClient> ssmClient = new ScreenSessionManagerClientTest();
+    ssm_.SetClient(ssmClient);
+    ret = multiSMCM_.HandleInnerMainExternalMirrorToInnerMirrorExternalMainChange(innerSession, externalSession);
+    ASSERT_EQ(DMError::DM_OK, ret);
+    ssm_.DestroyVirtualScreen(screenId);
+    ssm_.DestroyVirtualScreen(screenId1);
+}
+
+/**
+ * @tc.name: HandleInnerMainExternalMirrorToInnerExtendExternalMainChange
+ * @tc.desc: HandleInnerMainExternalMirrorToInnerExtendExternalMainChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenModeChangeManagerTest, HandleInnerMainExternalMirrorToInnerExtendExternalMainChange,
+    TestSize.Level1)
+{
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    ScreenId screenId = ssm_.CreateVirtualScreen(
+        virtualOption, displayManagerAgent->AsObject());
+    sptr<ScreenSession> innerSession = ssm_.GetScreenSession(screenId);
+
+    sptr<IDisplayManagerAgent> displayManagerAgent1 = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption1;
+    virtualOption1.name_ = "createVirtualOption";
+    ScreenId screenId1 = ssm_.CreateVirtualScreen(
+        virtualOption1, displayManagerAgent1->AsObject());
+    sptr<ScreenSession> externalSession = ssm_.GetScreenSession(screenId1);
+
+    ssm_.clientProxy_ = nullptr;
+    innerSession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
+    externalSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
+    DMError ret = multiSMCM_.HandleInnerMainExternalMirrorToInnerExtendExternalMainChange(innerSession,
+        externalSession);
+    ASSERT_EQ(DMError::DM_OK, ret);
+
+    externalSession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
+    ret = multiSMCM_.HandleInnerMainExternalMirrorToInnerExtendExternalMainChange(innerSession, externalSession);
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ret);
+    
+    innerSession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
+    ret = multiSMCM_.HandleInnerMainExternalMirrorToInnerExtendExternalMainChange(innerSession, externalSession);
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ret);
+
+    innerSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
+    externalSession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
+    sptr<IScreenSessionManagerClient> ssmClient = new ScreenSessionManagerClientTest();
+    ssm_.SetClient(ssmClient);
+    ret = multiSMCM_.HandleInnerMainExternalMirrorToInnerExtendExternalMainChange(innerSession, externalSession);
+    ASSERT_EQ(DMError::DM_OK, ret);
+    ssm_.DestroyVirtualScreen(screenId);
+    ssm_.DestroyVirtualScreen(screenId1);
+}
+
+/**
+ * @tc.name: HandleInnerExtendExternalMainToInnerMirrorExternalMainChange
+ * @tc.desc: HandleInnerExtendExternalMainToInnerMirrorExternalMainChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenModeChangeManagerTest, HandleInnerExtendExternalMainToInnerMirrorExternalMainChange,
+    TestSize.Level1)
+{
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    ScreenId screenId = ssm_.CreateVirtualScreen(
+        virtualOption, displayManagerAgent->AsObject());
+    sptr<ScreenSession> innerSession = ssm_.GetScreenSession(screenId);
+
+    sptr<IDisplayManagerAgent> displayManagerAgent1 = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption1;
+    virtualOption1.name_ = "createVirtualOption";
+    ScreenId screenId1 = ssm_.CreateVirtualScreen(
+        virtualOption1, displayManagerAgent1->AsObject());
+    sptr<ScreenSession> externalSession = ssm_.GetScreenSession(screenId1);
+
+    ssm_.clientProxy_ = nullptr;
+    innerSession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
+    externalSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
+    DMError ret = multiSMCM_.HandleInnerExtendExternalMainToInnerMirrorExternalMainChange(innerSession,
+        externalSession);
+    ASSERT_EQ(DMError::DM_OK, ret);
+
+    externalSession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
+    ret = multiSMCM_.HandleInnerExtendExternalMainToInnerMirrorExternalMainChange(innerSession, externalSession);
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ret);
+    
+    innerSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
+    ret = multiSMCM_.HandleInnerExtendExternalMainToInnerMirrorExternalMainChange(innerSession, externalSession);
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ret);
+
+    innerSession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
+    externalSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
+    sptr<IScreenSessionManagerClient> ssmClient = new ScreenSessionManagerClientTest();
+    ssm_.SetClient(ssmClient);
+    ret = multiSMCM_.HandleInnerExtendExternalMainToInnerMirrorExternalMainChange(innerSession, externalSession);
+    ASSERT_EQ(DMError::DM_OK, ret);
+    ssm_.DestroyVirtualScreen(screenId);
+    ssm_.DestroyVirtualScreen(screenId1);
+}
+
+/**
+ * @tc.name: HandleInnerExtendExternalMainToInnerMainExternalExtendChange
+ * @tc.desc: HandleInnerExtendExternalMainToInnerMainExternalExtendChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenModeChangeManagerTest, HandleInnerExtendExternalMainToInnerMainExternalExtendChange,
+    TestSize.Level1)
+{
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    ScreenId screenId = ssm_.CreateVirtualScreen(
+        virtualOption, displayManagerAgent->AsObject());
+    sptr<ScreenSession> innerSession = ssm_.GetScreenSession(screenId);
+
+    sptr<IDisplayManagerAgent> displayManagerAgent1 = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption1;
+    virtualOption1.name_ = "createVirtualOption";
+    ScreenId screenId1 = ssm_.CreateVirtualScreen(
+        virtualOption1, displayManagerAgent1->AsObject());
+    sptr<ScreenSession> externalSession = ssm_.GetScreenSession(screenId1);
+
+    ssm_.clientProxy_ = nullptr;
+    innerSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
+    externalSession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
+    DMError ret = multiSMCM_.HandleInnerExtendExternalMainToInnerMainExternalExtendChange(innerSession,
+        externalSession);
+    ASSERT_EQ(DMError::DM_OK, ret);
+
+    externalSession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
+    ret = multiSMCM_.HandleInnerExtendExternalMainToInnerMainExternalExtendChange(innerSession, externalSession);
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ret);
+    
+    innerSession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
+    externalSession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
+    ret = multiSMCM_.HandleInnerExtendExternalMainToInnerMainExternalExtendChange(innerSession, externalSession);
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ret);
+
+    innerSession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
+    externalSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
+    sptr<IScreenSessionManagerClient> ssmClient = new ScreenSessionManagerClientTest();
+    ssm_.SetClient(ssmClient);
+    ret = multiSMCM_.HandleInnerExtendExternalMainToInnerMainExternalExtendChange(innerSession, externalSession);
+    ASSERT_EQ(DMError::DM_OK, ret);
+    ssm_.DestroyVirtualScreen(screenId);
+    ssm_.DestroyVirtualScreen(screenId1);
+}
+
+/**
+ * @tc.name: HandleInnerExtendExternalMainToInnerMainExternalMirrorChange
+ * @tc.desc: HandleInnerExtendExternalMainToInnerMainExternalMirrorChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenModeChangeManagerTest, HandleInnerExtendExternalMainToInnerMainExternalMirrorChange,
+    TestSize.Level1)
+{
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    ScreenId screenId = ssm_.CreateVirtualScreen(
+        virtualOption, displayManagerAgent->AsObject());
+    sptr<ScreenSession> innerSession = ssm_.GetScreenSession(screenId);
+
+    sptr<IDisplayManagerAgent> displayManagerAgent1 = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption1;
+    virtualOption1.name_ = "createVirtualOption";
+    ScreenId screenId1 = ssm_.CreateVirtualScreen(
+        virtualOption1, displayManagerAgent1->AsObject());
+    sptr<ScreenSession> externalSession = ssm_.GetScreenSession(screenId1);
+
+    ssm_.clientProxy_ = nullptr;
+    innerSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
+    externalSession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
+    DMError ret = multiSMCM_.HandleInnerExtendExternalMainToInnerMainExternalMirrorChange(innerSession,
+        externalSession);
+    ASSERT_EQ(DMError::DM_OK, ret);
+
+    externalSession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
+    ret = multiSMCM_.HandleInnerExtendExternalMainToInnerMainExternalMirrorChange(innerSession, externalSession);
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ret);
+    
+    innerSession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
+    externalSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
+    ret = multiSMCM_.HandleInnerExtendExternalMainToInnerMainExternalMirrorChange(innerSession, externalSession);
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ret);
+
+    innerSession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
+    externalSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
+    sptr<IScreenSessionManagerClient> ssmClient = new ScreenSessionManagerClientTest();
+    ssm_.SetClient(ssmClient);
+    ret = multiSMCM_.HandleInnerExtendExternalMainToInnerMainExternalMirrorChange(innerSession, externalSession);
+    ASSERT_EQ(DMError::DM_OK, ret);
+    ssm_.DestroyVirtualScreen(screenId);
+    ssm_.DestroyVirtualScreen(screenId1);
+}
+
+/**
+ * @tc.name: HandleInnerMirrorExternalMainToInnerExtendExternalMainChange
+ * @tc.desc: HandleInnerMirrorExternalMainToInnerExtendExternalMainChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenModeChangeManagerTest, HandleInnerMirrorExternalMainToInnerExtendExternalMainChange,
+    TestSize.Level1)
+{
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    ScreenId screenId = ssm_.CreateVirtualScreen(
+        virtualOption, displayManagerAgent->AsObject());
+    sptr<ScreenSession> innerSession = ssm_.GetScreenSession(screenId);
+
+    sptr<IDisplayManagerAgent> displayManagerAgent1 = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption1;
+    virtualOption1.name_ = "createVirtualOption";
+    ScreenId screenId1 = ssm_.CreateVirtualScreen(
+        virtualOption1, displayManagerAgent1->AsObject());
+    sptr<ScreenSession> externalSession = ssm_.GetScreenSession(screenId1);
+
+    ssm_.clientProxy_ = nullptr;
+    innerSession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
+    externalSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
+    DMError ret = multiSMCM_.HandleInnerMirrorExternalMainToInnerExtendExternalMainChange(innerSession,
+        externalSession);
+    ASSERT_EQ(DMError::DM_OK, ret);
+
+    externalSession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
+    ret = multiSMCM_.HandleInnerMirrorExternalMainToInnerExtendExternalMainChange(innerSession, externalSession);
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ret);
+    
+    innerSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
+    ret = multiSMCM_.HandleInnerMirrorExternalMainToInnerExtendExternalMainChange(innerSession, externalSession);
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ret);
+
+    innerSession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
+    externalSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
+    sptr<IScreenSessionManagerClient> ssmClient = new ScreenSessionManagerClientTest();
+    ssm_.SetClient(ssmClient);
+    ret = multiSMCM_.HandleInnerMirrorExternalMainToInnerExtendExternalMainChange(innerSession, externalSession);
+    ASSERT_EQ(DMError::DM_OK, ret);
+    ssm_.DestroyVirtualScreen(screenId);
+    ssm_.DestroyVirtualScreen(screenId1);
+}
+
+/**
+ * @tc.name: HandleInnerMirrorExternalMainToInnerMainExternalMirrorChange
+ * @tc.desc: HandleInnerMirrorExternalMainToInnerMainExternalMirrorChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenModeChangeManagerTest, HandleInnerMirrorExternalMainToInnerMainExternalMirrorChange,
+    TestSize.Level1)
+{
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    ScreenId screenId = ssm_.CreateVirtualScreen(
+        virtualOption, displayManagerAgent->AsObject());
+    sptr<ScreenSession> innerSession = ssm_.GetScreenSession(screenId);
+
+    sptr<IDisplayManagerAgent> displayManagerAgent1 = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption1;
+    virtualOption1.name_ = "createVirtualOption";
+    ScreenId screenId1 = ssm_.CreateVirtualScreen(
+        virtualOption1, displayManagerAgent1->AsObject());
+    sptr<ScreenSession> externalSession = ssm_.GetScreenSession(screenId1);
+
+    ssm_.clientProxy_ = nullptr;
+    innerSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
+    externalSession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
+    DMError ret = multiSMCM_.HandleInnerMirrorExternalMainToInnerMainExternalMirrorChange(innerSession,
+        externalSession);
+    ASSERT_EQ(DMError::DM_OK, ret);
+
+    externalSession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
+    ret = multiSMCM_.HandleInnerMirrorExternalMainToInnerMainExternalMirrorChange(innerSession, externalSession);
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ret);
+    
+    innerSession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
+    externalSession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
+    ret = multiSMCM_.HandleInnerMirrorExternalMainToInnerMainExternalMirrorChange(innerSession, externalSession);
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ret);
+
+    innerSession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
+    externalSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
+    sptr<IScreenSessionManagerClient> ssmClient = new ScreenSessionManagerClientTest();
+    ssm_.SetClient(ssmClient);
+    ret = multiSMCM_.HandleInnerMirrorExternalMainToInnerMainExternalMirrorChange(innerSession, externalSession);
+    ASSERT_EQ(DMError::DM_OK, ret);
+    ssm_.DestroyVirtualScreen(screenId);
+    ssm_.DestroyVirtualScreen(screenId1);
+}
+
+/**
+ * @tc.name: HandleInnerMirrorExternalMainToInnerMainExternalExtendChange
+ * @tc.desc: HandleInnerMirrorExternalMainToInnerMainExternalExtendChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenModeChangeManagerTest, HandleInnerMirrorExternalMainToInnerMainExternalExtendChange,
+    TestSize.Level1)
+{
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    ScreenId screenId = ssm_.CreateVirtualScreen(
+        virtualOption, displayManagerAgent->AsObject());
+    sptr<ScreenSession> innerSession = ssm_.GetScreenSession(screenId);
+
+    sptr<IDisplayManagerAgent> displayManagerAgent1 = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption1;
+    virtualOption1.name_ = "createVirtualOption";
+    ScreenId screenId1 = ssm_.CreateVirtualScreen(
+        virtualOption1, displayManagerAgent1->AsObject());
+    sptr<ScreenSession> externalSession = ssm_.GetScreenSession(screenId1);
+
+    ssm_.clientProxy_ = nullptr;
+    innerSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
+    externalSession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
+    DMError ret = multiSMCM_.HandleInnerMirrorExternalMainToInnerMainExternalExtendChange(innerSession,
+        externalSession);
+    ASSERT_EQ(DMError::DM_OK, ret);
+
+    externalSession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
+    ret = multiSMCM_.HandleInnerMirrorExternalMainToInnerMainExternalExtendChange(innerSession, externalSession);
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ret);
+    
+    innerSession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
+    externalSession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
+    ret = multiSMCM_.HandleInnerMirrorExternalMainToInnerMainExternalExtendChange(innerSession, externalSession);
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ret);
+
+    innerSession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
+    externalSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
+    sptr<IScreenSessionManagerClient> ssmClient = new ScreenSessionManagerClientTest();
+    ssm_.SetClient(ssmClient);
+    ret = multiSMCM_.HandleInnerMirrorExternalMainToInnerMainExternalExtendChange(innerSession, externalSession);
     ASSERT_EQ(DMError::DM_OK, ret);
     ssm_.DestroyVirtualScreen(screenId);
     ssm_.DestroyVirtualScreen(screenId1);

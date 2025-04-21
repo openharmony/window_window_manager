@@ -20,7 +20,7 @@
 
 namespace OHOS {
 namespace Rosen {
-class TestClient : public IScreenSessionManagerClient {
+class ScreenSessionManagerClientTest : public IScreenSessionManagerClient {
 public:
     void SwitchUserCallback(std::vector<int32_t> oldScbPids, int32_t currentScbPid) override {};
     void OnScreenConnectionChanged(SessionOption option, ScreenEvent screenEvent) override {};
