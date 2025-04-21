@@ -32,6 +32,7 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 const int32_t CV_WAIT_SCREENOFF_MS = 1500;
+const int32_t CV_WAIT_SCREENON_MS = 300;
 const int32_t CV_WAIT_SCREENOFF_MS_MAX = 3000;
 constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
 constexpr int32_t CAST_WIRED_PROJECTION_START = 1005;
@@ -5963,6 +5964,94 @@ HWTEST_F(ScreenSessionManagerTest, TestIsFreezed_WhenPidAndAgentTypeExist, TestS
         std::set<DisplayManagerAgentType>({DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER});
     EXPECT_TRUE(ScreenSessionManager::GetInstance().IsFreezed(agentPid, agentType));
     EXPECT_EQ(ScreenSessionManager::GetInstance().pidAgentTypeMap_[agentPid].count(agentType), 1);
+}
+
+/**
+ * @tc.name: SetScreenOnDelayTime
+ * @tc.desc: SetScreenOnDelayTime test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetScreenOnDelayTime, TestSize.Level1)
+{
+    int32_t delay = CV_WAIT_SCREENON_MS - 1;
+    int32_t ret = ssm_->SetScreenOnDelayTime(delay);
+    EXPECT_EQ(ret, delay);
+
+    delay = CV_WAIT_SCREENON_MS + 1;
+    ret = ssm_->SetScreenOnDelayTime(delay);
+    EXPECT_EQ(ret, CV_WAIT_SCREENON_MS);
+}
+
+/**
+ * @tc.name: ShouldReturnOkWhenMultiScreenNotEnabled
+ * @tc.desc: ShouldReturnOkWhenMultiScreenNotEnabled test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, ShouldReturnOkWhenMultiScreenNotEnabled, TestSize.Level1)
+{
+    EXPECT_EQ(ScreenSessionManager::GetInstance().VirtualScreenUniqueSwitch({}), DMError::DM_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: ShouldReturnOkWhenMultiScreenNotEnabled
+ * @tc.desc: ShouldReturnOkWhenMultiScreenNotEnabled test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, ShouldReturnNullPtrWhenDefaultScreenIsNull, TestSize.Level1)
+{
+#ifndef WM_MULTI_SCREEN_ENABLE
+#define WM_MULTI_SCREEN_ENABLE
+    ScreenSessionManager ssm;
+    ssm = ScreenSessionManager::GetInstance();
+
+    ssm.screenSessionMap_.erase(1100);
+    ssm.defaultScreenId_ = 1100;
+    EXPECT_EQ(ssm.VirtualScreenYniqueSwitch({}), DMError::DM_ERROR_NULLPTR);
+#endif
+}
+
+/**
+ * @tc.name: ShouldHandleExistingGroupSmsId
+ * @tc.desc: ShouldHandleExistingGroupSmsId test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, ShouldHandleExistingGroupSmsId, TestSize.Level1)
+{
+#ifndef WM_MULTI_SCREEN_ENABLE
+#define WM_MULTI_SCREEN_ENABLE
+    ScreenSessionManager ssm;
+    ssm = ScreenSessionManager::GetInstance();
+
+    Sptr<ScreenSession> screenSession = Sptr<ScreenSession>::MakeSptr();
+    screenSession->groupSmsId_ = 1001;
+    ssm.screenSessionMap_[1100] = screenSession;
+    ssm.defaultScreenId_ = 1100;
+    ssm.smsSessionGroupMap_[1001] = {};
+    EXPECT_EQ(ssm.VirtualScreenYniqueSwitch({}), DMError::DM_OK);
+    EXPECT_EQ(ssm.smsSessionGroupMap_.count(1), 0);
+    ssm.screenSessionMap_.erase(1100);
+#endif
+}
+
+/**
+ * @tc.name: ShouldHandleNonExistingGroupSmsId
+ * @tc.desc: ShouldHandleNonExistingGroupSmsId test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, ShouldHandleNonExistingGroupSmsId, TestSize.Level1)
+{
+#ifndef WM_MULTI_SCREEN_ENABLE
+#define WM_MULTI_SCREEN_ENABLE
+    ScreenSessionManager ssm;
+    ssm = ScreenSessionManager::GetInstance();
+
+    Sptr<ScreenSession> screenSession = Sptr<ScreenSession>::MakeSptr();
+    screenSession->groupSmsId_ = 1001;
+    ssm.screenSessionMap_[1100] = screenSession;
+    ssm.defaultScreenId_ = 1100;
+    EXPECT_EQ(ssm.VirtualScreenYniqueSwitch({}), DMError::DM_OK);
+    ssm.screenSessionMap_.erase(1100);
+#endif
 }
 }
 } // namespace Rosen
