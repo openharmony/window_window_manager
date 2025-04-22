@@ -1653,11 +1653,6 @@ void Session::SetAttachState(bool isAttach, WindowMode windowMode)
     CreateDetectStateTask(isAttach, windowMode);
 }
 
-void Session::SetNeedNotifyAttachState(bool needNotify)
-{
-    needNotifyAttachState_.store(needNotify);
-}
-
 void Session::CreateDetectStateTask(bool isAttach, WindowMode windowMode)
 {
     if (!IsSupportDetectWindow(isAttach)) {
