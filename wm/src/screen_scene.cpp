@@ -54,7 +54,7 @@ ScreenScene::~ScreenScene()
     Destroy();
 }
 
-WMError ScreenScene::Destroy()
+WMError ScreenScene::Destroy(uint32_t reason)
 {
     std::function<void()> task; //延长task的生命周期
     {

@@ -38,6 +38,7 @@ enum class WindowStateChangeReason : uint32_t {
     TOGGLING,
     USER_SWITCH,
     ABILITY_CALL,
+    ABILITY_HOOK,
 };
 
 enum class WindowUpdateReason : uint32_t {
