@@ -2802,7 +2802,7 @@ WMError WindowSessionImpl::SetDecorButtonStyle(const DecorButtonStyle& decorButt
     decorJson.emplace(CLOSE_BUTTON_RIGHT_MARGIN, decorButtonStyle.closeButtonRightMargin);
     decorJson.emplace(BUTTON_COLOR_MODE, decorButtonStyle.colorMode);
     decorJson.emplace(BUTTON_SPACING_BETWEEN, decorButtonStyle.spacingBetweenButtons);
-    uiContent->OnContainerModalEvent(DECOR_BUTTON_STYLE_CHANGE, decorStr.dump());
+    uiContent->OnContainerModalEvent(DECOR_BUTTON_STYLE_CHANGE, decorJson.dump());
     decorButtonStyle_ = decorButtonStyle;
     return WMError::WM_OK;
 }
