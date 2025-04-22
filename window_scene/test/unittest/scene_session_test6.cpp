@@ -34,6 +34,14 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
+namespace {
+    std::string g_errlog;
+    void ScreenSessionLogCallback(
+        const LogType type, const LogLevel level, const unsigned int domain, const char *tag, const char *msg)
+    {
+    g_errlog = msg;
+    }
+} // namespace name
 
 class SceneSessionTest6 : public testing::Test {
 public:
@@ -307,15 +315,14 @@ HWTEST_F(SceneSessionTest6, NotifyKeyboardAnimationCompleted, Function | SmallTe
  */
 HWTEST_F(SceneSessionTest6, UpdateNewSizeForPCWindow, Function | SmallTest | Level1)
 {
+    LOG_SetCallback(ScreenSessionLogCallback);
     SessionInfo info;
     info.abilityName_ = "UpdateNewSizeForPCWindow";
     info.bundleName_ = "UpdateNewSizeForPCWindow";
     info.windowType_ = 1;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(12, WindowType::WINDOW_TYPE_FLOAT);
-    sceneSession->moveDragController_->SetMoveDragHotAreaCrossDisplay(true);
-    sceneSession->UpdateNewSizeForPCWindow();
-    ASSERT_EQ(false, sceneSession->moveDragController_->IsMoveDragHotAreaCrossDisplay());
+    sceneSession->UpdateNewSizeForPCWindow(true);
+    EXPECT_TRUE(g_errlog.find("dip change do nothing.") != std::string::npos);
 }
 
 /**
