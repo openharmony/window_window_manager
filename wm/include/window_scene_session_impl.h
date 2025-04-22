@@ -320,6 +320,7 @@ private:
     void UpdateWindowState();
     void UpdateNewSize();
     void fillWindowLimits(WindowLimits& windowLimits);
+    void UpdateSupportWindowModesWhenSwitchFreeMultiWindow();
     void ConsumePointerEventInner(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         MMI::PointerEvent::PointerItem& pointerItem, bool isHitTargetDraggable = false);
     void HandleEventForCompatibleMode(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
