@@ -96,7 +96,7 @@ std::map<uint32_t, std::vector<sptr<IAvoidAreaChangedListener>>> WindowImpl::avo
 std::map<uint32_t, std::vector<sptr<IOccupiedAreaChangeListener>>> WindowImpl::occupiedAreaChangeListeners_;
 std::map<uint32_t, sptr<IDialogDeathRecipientListener>> WindowImpl::dialogDeathRecipientListener_;
 std::recursive_mutex WindowImpl::globalMutex_;
-static std::mutex windowMapMutex_;
+static std::shared_mutex windowMapMutex_;
 int g_constructorCnt = 0;
 int g_deConstructorCnt = 0;
 WindowImpl::WindowImpl(const sptr<WindowOption>& option)
@@ -191,7 +191,7 @@ WindowImpl::~WindowImpl()
 
 sptr<Window> WindowImpl::Find(const std::string& name)
 {
-    std::lock_guard<std::mutex> lock(windowMapMutex_);
+    std::shared_lock<std::shared_mutex> lock(windowMapMutex_);
     auto iter = windowMap_.find(name);
     if (iter == windowMap_.end()) {
         return nullptr;
@@ -206,7 +206,7 @@ const std::shared_ptr<AbilityRuntime::Context> WindowImpl::GetContext() const
 
 sptr<Window> WindowImpl::FindWindowById(uint32_t WinId)
 {
-    std::lock_guard<std::mutex> lock(windowMapMutex_);
+    sstd::shared_lock<std::shared_mutex> lock(windowMapMutex_);
     if (windowMap_.empty()) {
         WLOGFE("Please create mainWindow First!");
         return nullptr;
@@ -241,7 +241,7 @@ sptr<Window> WindowImpl::GetTopWindowWithContext(const std::shared_ptr<AbilityRu
 {
     uint32_t mainWinId = INVALID_WINDOW_ID;
     {
-        std::lock_guard<std::mutex> lock(windowMapMutex_);
+        std::shared_lock<std::shared_mutex> lock(windowMapMutex_);
         if (windowMap_.empty()) {
             WLOGFE("Please create mainWindow First!");
             return nullptr;
@@ -283,7 +283,7 @@ void WindowImpl::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Con
 {
     std::unordered_set<std::shared_ptr<AbilityRuntime::Context>> ignoreWindowCtxSet(
         ignoreWindowContexts.begin(), ignoreWindowContexts.end());
-    std::lock_guard<std::mutex> lock(windowMapMutex_);
+    std::shared_lock<std::shared_mutex> lock(windowMapMutex_);
     for (const auto& winPair : windowMap_) {
         auto window = winPair.second.second;
         if (window == nullptr) {
@@ -1169,7 +1169,7 @@ void WindowImpl::MapFloatingWindowToAppIfNeeded()
     }
 
     WLOGFI("In");
-    std::lock_guard<std::mutex> lock(windowMapMutex_);
+    std::shared_lock<std::shared_mutex> lock(windowMapMutex_);
     for (const auto& winPair : windowMap_) {
         auto win = winPair.second.second;
         if (win->GetType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
@@ -1189,7 +1189,7 @@ void WindowImpl::MapDialogWindowToAppIfNeeded()
         return;
     }
 
-    std::lock_guard<std::mutex> lock(windowMapMutex_);
+    std::shared_lock<std::shared_mutex> lock(windowMapMutex_);
     for (const auto& winPair : windowMap_) {
         auto win = winPair.second.second;
         if (win->GetType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
@@ -1281,7 +1281,7 @@ bool WindowImpl::IsAppMainOrSubOrFloatingWindow()
     }
 
     if (WindowHelper::IsAppFloatingWindow(GetType())) {
-        std::lock_guard<std::mutex> lock(windowMapMutex_);
+        std::shared_lock<std::shared_mutex> lock(windowMapMutex_);
         for (const auto& winPair : windowMap_) {
             auto win = winPair.second.second;
             if (win != nullptr && win->GetType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
@@ -1329,7 +1329,7 @@ WMError WindowImpl::WindowCreateCheck(uint32_t parentId)
     }
     // check window name, same window names are forbidden
     {
-        std::lock_guard<std::mutex> lock(windowMapMutex_);
+        std::shared_lock<std::shared_mutex> lock(windowMapMutex_);
         if (windowMap_.find(name_) != windowMap_.end()) {
             WLOGFE("WindowName(%{public}s) already exists.", name_.c_str());
             return WMError::WM_ERROR_REPEAT_OPERATION;
@@ -1451,7 +1451,7 @@ WMError WindowImpl::Create(uint32_t parentId, const std::shared_ptr<AbilityRunti
     }
     sptr<Window> self(this);
     {
-        std::lock_guard<std::mutex> lock(windowMapMutex_);
+        std::unique_lock<std::shared_mutex> lock(windowMapMutex_);
         windowMap_.insert(std::make_pair(name_, std::pair<uint32_t, sptr<Window>>(windowId, self)));
     }
     if (parentId != INVALID_WINDOW_ID) {
@@ -1658,7 +1658,7 @@ WMError WindowImpl::Destroy(bool needNotifyServer, bool needClearListener)
         InputTransferStation::GetInstance().RemoveInputWindow(property_->GetWindowId());
     }
     {
-        std::lock_guard<std::mutex> lock(windowMapMutex_);
+        std::unique_lock<std::shared_mutex> lock(windowMapMutex_);
         windowMap_.erase(GetWindowName());
     }
     if (needClearListener) {
@@ -3560,7 +3560,7 @@ void WindowImpl::UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Confi
 
 void WindowImpl::UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
-    std::lock_guard<std::mutex> lock(windowMapMutex_);
+    std::shared_lock<std::shared_mutex> lock(windowMapMutex_);
     for (const auto& winPair : windowMap_) {
         if (auto window = winPair.second.second) {
             window->UpdateConfigurationSync(configuration);
@@ -4355,7 +4355,7 @@ bool WindowImpl::CheckCameraFloatingWindowMultiCreated(WindowType type)
     }
 
     {
-        std::lock_guard<std::mutex> lock(windowMapMutex_);
+        std::unique_lock<std::shared_mutex> lock(windowMapMutex_);
         for (auto& winPair : windowMap_) {
             if (winPair.second.second->GetType() == WindowType::WINDOW_TYPE_FLOAT_CAMERA) {
                 return true;
