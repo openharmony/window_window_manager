@@ -1602,18 +1602,18 @@ void WindowImpl::ClearVsyncStation()
     }
 }
 
-WMError WindowImpl::Destroy()
+WMError WindowImpl::Destroy(uint32_t reason)
 {
-    return Destroy(true);
+    return Destroy(true, true, reason);
 }
 
-WMError WindowImpl::Destroy(bool needNotifyServer, bool needClearListener)
+WMError WindowImpl::Destroy(bool needNotifyServer, bool needClearListener, uint32_t reason)
 {
     if (!IsWindowValid()) {
         return WMError::WM_OK;
     }
 
-    WLOGI("Window %{public}u Destroy", property_->GetWindowId());
+    WLOGI("Window %{public}u Destroy, reason: %{public}u", property_->GetWindowId(), reason);
     WindowInspector::GetInstance().UnregisterGetWMSWindowListCallback(GetWindowId());
     WMError ret = WMError::WM_OK;
     if (needNotifyServer) {

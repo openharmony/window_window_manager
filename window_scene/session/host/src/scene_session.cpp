@@ -8030,17 +8030,6 @@ WSError SceneSession::SetCurrentRotation(int32_t currentRotation)
     return WSError::WS_OK;
 }
 
-void SceneSession::SetIsAbilityHook(bool isAbilityHook)
-{
-    TLOGI(WmsLogTag::WMS_MAIN, "set session id %{public}d isAbilityHook %{public}d", persistentId_, isAbilityHook);
-    isAbilityHook_ = isAbilityHook;
-}
-
-bool SceneSession::GetIsAbilityHook() const
-{
-    return isAbilityHook_;
-}
-
 WMError SceneSession::NotifyDisableDelegatorChange()
 {
     PostTask([weakThis = wptr(this), where = __func__] {

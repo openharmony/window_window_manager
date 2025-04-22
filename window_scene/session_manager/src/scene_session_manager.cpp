@@ -2358,9 +2358,10 @@ sptr<SceneSession> SceneSessionManager::GetSceneSessionBySessionInfo(const Sessi
     return nullptr;
 }
 
-sptr<SceneSession> SceneSessionManager::GetMainSessionByModuleName(const SessionInfo& sessionInfo)
+sptr<SceneSession> SceneSessionManager::GetHookedSessionByModuleName(const SessionInfo& sessionInfo)
 {
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    sptr<SceneSession> session = nullptr;
     for (const auto &[_, sceneSession] : sceneSessionMap_) {
         if (!sceneSession || !SessionHelper::IsMainWindow(sceneSession->GetWindowType())) {
             continue;
@@ -2371,43 +2372,13 @@ sptr<SceneSession> SceneSessionManager::GetMainSessionByModuleName(const Session
             sceneSession->GetSessionInfo().appInstanceKey_ != sessionInfo.appInstanceKey_) {
             continue;
         }
-        return sceneSession;
-    }
-    return nullptr;
-}
-
-void SceneSessionManager::SetSceneSessionIsAbilityHook(sptr<SceneSession> sceneSession)
-{
-    if (bundleMgr_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "bundleMgr_ is nullptr");
-        return;
-    }
-    int32_t userId = GetUserIdByUid(getuid());
-    auto flags = (AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION |
-        AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_PERMISSION |
-        AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_METADATA |
-        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_ABILITY) |
-        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION) |
-        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE));
-    AppExecFwk::BundleInfo bundleInfo;
-    if (bundleMgr_->GetBundleInfoV9(sceneSession->GetSessionInfo().bundleName_, flags, bundleInfo, userId)) {
-        TLOGW(WmsLogTag::WMS_LIFE, "Query ability info from BMS failed.");
-        return;
-    }
-    auto& hapModulesList = bundleInfo.hapModuleInfos;
-    if (hapModulesList.empty()) {
-        TLOGW(WmsLogTag::WMS_LIFE, "hapModulesList is empty");
-        return;
-    }
-    for (auto& hapModule : hapModulesList) {
-        if (hapModule.moduleName != sceneSession->GetSessionInfo().moduleName_) {
-            continue;
-        }
-        if (!hapModule.abilitySrcEntryDelegator.empty() && !hapModule.abilityStageSrcEntryDelegator.empty()) {
-            sceneSession->SetIsAbilityHook(true);
-            break;
+        if (sceneSession->GetSessionInfo().disableDelegator) {
+            return nullptr;
+        } else {
+            session = sceneSession;
         }
     }
+    return session;
 }
 
 sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& sessionInfo,
@@ -2429,17 +2400,12 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
             TLOGNE(WmsLogTag::WMS_LIFE, "sceneSession is nullptr!");
             return sceneSession;
         }
-        SetSceneSessionIsAbilityHook(sceneSession);
-        if (sceneSession->GetIsAbilityHook()) {
-            auto session = GetMainSessionByModuleName(sessionInfo);
-            if (session && !session->GetSessionInfo().disableDelegator) {
+        if (sessionInfo.isAbilityHook_) {
+            auto session = GetHookedSessionByModuleName(sessionInfo);
+            if (session) {
                 TLOGNW(WmsLogTag::WMS_LIFE, "session disableDelegator %{public}d is still hook, return hook session",
                     session->GetSessionInfo().disableDelegator);
                 return session;
-            } else if (session && session->GetSessionInfo().disableDelegator) {
-                sceneSession->EditSessionInfo().disableDelegator = true;
-                TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s: set session id %{public}d disableDelegator true",
-                    where, sceneSession->GetPersistentId());
             }
             RegisterHookSceneSessionActivationFunc(sceneSession);
         }
@@ -3787,15 +3753,16 @@ SessionInfo SceneSessionManager::RecoverSessionInfo(const sptr<WindowSessionProp
     sessionInfo.isPersistentRecover_ = true;
     sessionInfo.appInstanceKey_ = property->GetAppInstanceKey();
     sessionInfo.screenId_ = property->GetDisplayId();
+    sessionInfo.isAbilityHook_ = property->GetIsAbilityHook();
     TLOGI(WmsLogTag::WMS_RECOVER,
         "Recover and reconnect session with: bundleName=%{public}s, moduleName=%{public}s, "
         "abilityName=%{public}s, windowMode=%{public}d, windowType=%{public}u, persistentId=%{public}d, "
         "windowState=%{public}u, appInstanceKey=%{public}s, isFollowParentMultiScreenPolicy=%{public}d, "
-        "screenId=%{public}d",
+        "screenId=%{public}d, isAbilityHook=%{public}d",
         sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(), sessionInfo.abilityName_.c_str(),
         sessionInfo.windowMode, sessionInfo.windowType_, sessionInfo.persistentId_, sessionInfo.sessionState_,
         sessionInfo.appInstanceKey_.c_str(), sessionInfo.isFollowParentMultiScreenPolicy,
-        static_cast<int32_t>(sessionInfo.screenId_));
+        static_cast<int32_t>(sessionInfo.screenId_), sessionInfo.isAbilityHook_);
     return sessionInfo;
 }
 
@@ -8784,6 +8751,10 @@ WSError SceneSessionManager::GetAbilityInfo(const std::string& bundleName, const
     }
     auto sdkVersion = bundleInfo.targetVersion % 100; // % 100 to get the real version
     for (auto& hapModule : hapModulesList) {
+        bool isModuleAbilityHook = false;
+        if (!hapModule.abilitySrcEntryDelegator.empty() && !hapModule.abilityStageSrcEntryDelegator.empty()) {
+            isModuleAbilityHook = true;
+        }
         auto& abilityInfoList = hapModule.abilityInfos;
         for (auto& abilityInfo : abilityInfoList) {
             abilityInfo.windowModes = ExtractSupportWindowModeFromMetaData(
@@ -8792,6 +8763,7 @@ WSError SceneSessionManager::GetAbilityInfo(const std::string& bundleName, const
                 scbAbilityInfo.abilityInfo_ = abilityInfo;
                 scbAbilityInfo.sdkVersion_ = sdkVersion;
                 scbAbilityInfo.codePath_ = bundleInfo.applicationInfo.codePath;
+                scbAbilityInfo.isAbilityHook_ = isModuleAbilityHook;
                 GetOrientationFromResourceManager(scbAbilityInfo.abilityInfo_);
                 return WSError::WS_OK;
             }
@@ -8831,12 +8803,17 @@ WSError SceneSessionManager::GetAbilityInfosFromBundleInfo(const std::vector<App
         }
         for (auto& hapModule : hapModulesList) {
             auto& abilityInfoList = hapModule.abilityInfos;
+            bool isModuleAbilityHook = false;
+            if (!hapModule.abilitySrcEntryDelegator.empty() && !hapModule.abilityStageSrcEntryDelegator.empty()) {
+                isModuleAbilityHook = true;
+            }
             for (auto& abilityInfo : abilityInfoList) {
                 SCBAbilityInfo scbAbilityInfo;
                 scbAbilityInfo.abilityInfo_ = abilityInfo;
                 scbAbilityInfo.abilityInfo_.windowModes = ExtractSupportWindowModeFromMetaData(
                     std::make_shared<OHOS::AppExecFwk::AbilityInfo>(abilityInfo));
                 scbAbilityInfo.sdkVersion_ = sdkVersion;
+                scbAbilityInfo.isAbilityHook_ = isModuleAbilityHook;
                 GetOrientationFromResourceManager(scbAbilityInfo.abilityInfo_);
                 scbAbilityInfos.push_back(scbAbilityInfo);
             }
