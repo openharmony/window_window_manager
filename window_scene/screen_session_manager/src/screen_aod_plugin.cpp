@@ -55,7 +55,7 @@ __attribute__((no_sanitize("cfi"))) bool IsInAod()
         TLOGE(WmsLogTag::DMS, "g_handle is nullptr");
         return false;
     }
-    IsInAodFunc func = (IsInAodFunc)(dlsym(g_handle, "IsInAod"));
+    IsInAodFunc func = reinterpret_cast<IsInAodFunc>(dlsym(g_handle, "IsInAod"));
     const char* dlsymError = dlerror();
     if  (dlsymError) {
         TLOGE(WmsLogTag::DMS, "dlsym error: %{public}s", dlsymError);
