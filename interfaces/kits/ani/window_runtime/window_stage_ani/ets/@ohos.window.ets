@@ -20,6 +20,8 @@ export type AsyncCallbackVoid = (err: BusinessError) => void;
 export type WindowEventCallback = (data: window.WindowEventType) => void;
 export type WindowSizeCallback = (data: window.Size) => void;
 export type WindowStatusCallback = (data: window.WindowStatusType) => void;
+export type KeyboardHeightChangeCallback = (data: number) => void;
+export type KeyboardDidShowOrHideCallback = (data: window.KeyboardInfo) => void;
 
 namespace window {
   export interface Size {
@@ -1125,6 +1127,30 @@ export interface WindowLimits {
     minHeight: number;
 }
 
+/**
+ * The information of keyboard
+ *
+ * @interface KeyboardInfo
+ * @syscap SystemCapability.Window.SessionManager
+ * @atomicservice
+ * @since 18
+ */
+export interface KeyboardInfo {
+  /**
+   * The position and size of the keyboard
+   *
+   * @type { Rect }
+   * @syscap SystemCapability.Window.SessionManager
+   * @atomicservice
+   * @since 18
+   */
+  rect: Rect;
+}
+
+export class KeyboardInfoInternal implements KeyboardInfo {
+  rect: Rect;
+}
+
 export class WindowStageInternal implements WindowStage {
     static { loadLibrary('windowstageani_kit.z') }
 
@@ -1239,10 +1265,15 @@ export class WindowInternal implements Window {
     private native getUIContextSync(nativeObj: long): UIContext;
     private native getWindowAvoidAreaSync(nativeObj: long, type: int): AvoidArea;
     private native setWaterMarkFlagSync(nativeObj: long, enable: boolean): void;
-    private native onSync(nativeObj: long, type: 'windowEvent' | 'windowSizeChange' | 'windowStatusChange',
-        callback: WindowEventCallback | WindowSizeCallback | WindowStatusCallback): void;
-    private native offSync(nativeObj: long, type: 'windowEvent' | 'windowSizeChange' | 'windowStatusChange',
-        callback: WindowEventCallback | WindowSizeCallback | WindowStatusCallback): void;
+    private native keepKeyboardOnFocusSync(nativeObj: long, enable: boolean): void;
+    private native onSync(nativeObj: long, type: 'windowEvent' | 'windowSizeChange' | 'windowStatusChange' |
+        'keyboardHeightChange' | 'keyboardDidShow' | 'keyboardDidHide',
+        callback: WindowEventCallback | WindowSizeCallback | WindowStatusCallback | KeyboardHeightChangeCallback |
+        KeyboardDidShowOrHideCallback): void;
+    private native offSync(nativeObj: long, type: 'windowEvent' | 'windowSizeChange' | 'windowStatusChange' |
+        'keyboardHeightChange' | 'keyboardDidShow' | 'keyboardDidHide',
+        callback: WindowEventCallback | WindowSizeCallback | WindowStatusCallback | KeyboardHeightChangeCallback |
+        KeyboardDidShowOrHideCallback): void;
 
     public resize(width: double, height: double): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) :void => {
@@ -1659,14 +1690,22 @@ export class WindowInternal implements Window {
       });
     }
 
-    public on(type: 'windowEvent' | 'windowSizeChange' | 'windowStatusChange',
-        callback: WindowEventCallback | WindowSizeCallback | WindowStatusCallback,
+    public keepKeyboardOnFocus(keepKeyboardFlag: boolean): void {
+      this.keepKeyboardOnFocusSync(this.nativeObj, keepKeyboardFlag);
+    }
+
+    public on(type: 'windowEvent' | 'windowSizeChange' | 'windowStatusChange' |
+        'keyboardHeightChange' | 'keyboardDidShow' | 'keyboardDidHide',
+        callback: WindowEventCallback | WindowSizeCallback | WindowStatusCallback |
+        KeyboardHeightChangeCallback | KeyboardDidShowOrHideCallback,
         callbackForTimeout?:Callback<void>): void {
         this.onSync(this.nativeObj, type, callback);
     }
 
-    public off(type: 'windowEvent' | 'windowSizeChange' | 'windowStatusChange',
-        callback: WindowEventCallback | WindowSizeCallback | WindowStatusCallback): void {
+    public off(type: 'windowEvent' | 'windowSizeChange' | 'windowStatusChange' |
+        'keyboardHeightChange' | 'keyboardDidShow' | 'keyboardDidHide',
+        callback: WindowEventCallback | WindowSizeCallback | WindowStatusCallback |
+        KeyboardHeightChangeCallback | KeyboardDidShowOrHideCallback): void {
         this.offSync(this.nativeObj, type, callback);
     }
 }
@@ -1714,11 +1753,16 @@ export interface Window {
     getWindowAvoidArea(type: AvoidAreaType): AvoidArea;
     setWaterMarkFlag(enable: boolean): Promise<void>;
     setWaterMarkFlag(enable: boolean, callback: AsyncCallback<void>): void;
-    on(type: 'windowEvent' | 'windowSizeChange' | 'windowStatusChange',
-        callback: WindowEventCallback | WindowSizeCallback | WindowStatusCallback,
+    keepKeyboardOnFocus(enable: boolean): void;
+    on(type: 'windowEvent' | 'windowSizeChange' | 'windowStatusChange' |
+        'keyboardHeightChange' | 'keyboardDidShow' | 'keyboardDidHide',
+        callback: WindowEventCallback | WindowSizeCallback | WindowStatusCallback |
+        KeyboardHeightChangeCallback | KeyboardDidShowOrHideCallback,
         callbackForTimeout?:Callback<void>): void;
-    off(type: 'windowEvent' | 'windowSizeChange' | 'windowStatusChange',
-        callback: WindowEventCallback | WindowSizeCallback | WindowStatusCallback): void;
+    off(type: 'windowEvent' | 'windowSizeChange' | 'windowStatusChange' |
+        'keyboardHeightChange' | 'keyboardDidShow' | 'keyboardDidHide',
+        callback: WindowEventCallback | WindowSizeCallback | WindowStatusCallback |
+        KeyboardHeightChangeCallback | KeyboardDidShowOrHideCallback): void;
 }
 
 export native function CreateWindowStage(scene: long): WindowStageInternal;
@@ -1762,6 +1806,21 @@ function runWindowEventCallBack(cb: object, cbArg: int): void {
 function runWindowSizeCallBack(cb: object, cbArg: object): void {
     const func = cb as (cbArg: Size) => void;
     func(cbArg as Size);
+}
+
+function runKeyboardHeightChangeCallBack(cb: object, cbArg: number): void {
+    const func = cb as (cbArg: number) => void;
+    func(cbArg as number);
+}
+
+function runKeyboardDidShowCallBack(cb: object, cbArg: object): void {
+    const func = cb as (cbArg: KeyboardInfo) => void;
+    func(cbArg as KeyboardInfo);
+}
+
+function runKeyboardDidHideCallBack(cb: object, cbArg: object): void {
+    const func = cb as (cbArg: KeyboardInfo) => void;
+    func(cbArg as KeyboardInfo);
 }
 
 function runWindowStatusCallBack(cb: object, cbArg: int): void {
