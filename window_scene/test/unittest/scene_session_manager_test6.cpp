@@ -1146,7 +1146,7 @@ HWTEST_F(SceneSessionManagerTest6, FillWindowInfo05, TestSize.Level1)
 
     infos.clear();
     sceneSession->GetSessionProperty()->SetIsSystemKeyboard(false);
-    auto ret = ssm_->FillWindowInfo(infos, sceneSession);
+    ret = ssm_->FillWindowInfo(infos, sceneSession);
     EXPECT_EQ(true, ret);
     EXPECT_EQ(1, infos.size());
     EXPECT_EQ(999, infos[0]->displayId_);
