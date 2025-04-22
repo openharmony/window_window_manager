@@ -7203,7 +7203,7 @@ void SceneSessionManager::NotifyFocusStatus(const sptr<SceneSession>& sceneSessi
     SessionManagerAgentController::GetInstance().UpdateFocusChangeInfo(focusChangeInfo, isFocused);
     sceneSession->NotifyFocusStatus(isFocused);
     // notify listenerController focused
-    auto prevSession = GetSceneSession(lastFocusedSessionId);
+    auto prevSession = GetSceneSession(focusGroup->GetLastFocusedSessionId());
     if (isFocused && MissionChanged(prevSession, sceneSession)) {
         NotifyFocusedByMission(sceneSession);
     }
