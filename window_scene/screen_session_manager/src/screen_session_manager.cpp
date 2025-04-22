@@ -3319,7 +3319,7 @@ void ScreenSessionManager::SetScreenPowerForFold(ScreenId screenId, ScreenPowerS
         (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() ||
         FoldScreenStateInternel::IsDualDisplayFoldDevice())) {
         if (!IsInAod()) {
-            TLOGW(WmsLogTag::DMS, "preStatus:%{public}d, screenId:{}" PRIu64"",
+            TLOGW(WmsLogTag::DMS, "preStatus:%{public}d, screenId:%{public}" PRIu64"",
                 lastPowerForAllStatus_.load(), screenId);
             rsInterface_.SetScreenPowerStatus(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_ON);
             lastScreenId_ = SCREEN_ID_INVALID;
