@@ -68,8 +68,8 @@
 #include "fold_screen_controller/super_fold_state_manager.h"
 #include "fold_screen_controller/secondary_fold_sensor_manager.h"
 #include "fold_screen_controller/super_fold_policy.h"
-#include "screen_aod_plugin.h"
 #endif
+#include "screen_aod_plugin.h"
 
 namespace OHOS::Rosen {
 namespace {
