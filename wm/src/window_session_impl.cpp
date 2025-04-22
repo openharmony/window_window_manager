@@ -70,6 +70,13 @@ constexpr int32_t  WINDOW_ROTATION_CHANGE = 20;
  * DFX
  */
 const std::string SET_UIEXTENSION_DESTROY_TIMEOUT_LISTENER_TASK_NAME = "SetUIExtDestroyTimeoutListener";
+const std::string BUTTON_BACKGROUND_CORNER_RADIUS = "button_background_corner_radius";
+const std::string BUTTON_BACKGROUND_SIZE = "button_background_size";
+const std::string BUTTON_ICON_SIZE = "button_icon_size";
+const std::string CLOSE_BUTTON_RIGHT_MARGIN = "close_button_right_margin";
+const std::string BUTTON_COLOR_MODE = "color_mode";
+const std::string BUTTON_SPACING_BETWEEN = "spacing_between_buttons";
+const std::string DECOR_BUTTON_STYLE_CHANGE = "decor_button_style_change";
 constexpr int64_t SET_UIEXTENSION_DESTROY_TIMEOUT_TIME_MS = 4000;
 
 const std::string SCB_BACK_VISIBILITY = "scb_back_visibility";
@@ -2789,13 +2796,13 @@ WMError WindowSessionImpl::SetDecorButtonStyle(const DecorButtonStyle& decorButt
         return WMError::WM_ERROR_NULLPTR;
     }
     nlohmann::json decorJson;
-    decorStr.emplace("BUTTON_BACKGROUND_CORNER_RADIUS", decorButtonStyle.buttonBackgroundCornerRadius);
-    decorStr.emplace("BUTTON_BACKGROUND_SIZE", decorButtonStyle.buttonBackgroundSize);
-    decorStr.emplace("BUTTON_ICON_SIZE", decorButtonStyle.buttonIconSize);
-    decorStr.emplace("CLOSE_BUTTON_RIGHT_MARGIN", decorButtonStyle.closeButtonRightMargin);
-    decorStr.emplace("BUTTON_COLOR_MODE", decorButtonStyle.colorMode);
-    decorStr.emplace("BUTTON_SPACING_BETWEEN", decorButtonStyle.spacingBetweenButtons);
-    uiContent->OnContainerModalEvent("decor_button_style_change", decorStr.dump());
+    decorStr.emplace(BUTTON_BACKGROUND_CORNER_RADIUS, decorButtonStyle.buttonBackgroundCornerRadius);
+    decorStr.emplace(BUTTON_BACKGROUND_SIZE, decorButtonStyle.buttonBackgroundSize);
+    decorStr.emplace(BUTTON_ICON_SIZE, decorButtonStyle.buttonIconSize);
+    decorStr.emplace(CLOSE_BUTTON_RIGHT_MARGIN, decorButtonStyle.closeButtonRightMargin);
+    decorStr.emplace(BUTTON_COLOR_MODE, decorButtonStyle.colorMode);
+    decorStr.emplace(BUTTON_SPACING_BETWEEN, decorButtonStyle.spacingBetweenButtons);
+    uiContent->OnContainerModalEvent(DECOR_BUTTON_STYLE_CHANGE, decorStr.dump());
     decorButtonStyle_ = decorButtonStyle;
     return WMError::WM_OK;
 }
