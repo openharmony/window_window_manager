@@ -137,7 +137,7 @@ HWTEST_F(ScreenSessionTest, ScreenSession05, TestSize.Level1)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, CreateDisplayNode, TestSize.Level1)
+HWTEST_F(ScreenSessionTest, CreateDisplayNode, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: CreateDisplayNode start";
     Rosen::RSDisplayNodeConfig rsConfig;
@@ -351,7 +351,7 @@ HWTEST_F(ScreenSessionTest, ConvertIntToRotation, TestSize.Level1)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, SetVirtualScreenFlag, TestSize.Level1)
+HWTEST_F(ScreenSessionTest, SetVirtualScreenFlag, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "SetVirtualScreenFlag start";
     ScreenSessionConfig config = {
@@ -371,7 +371,7 @@ HWTEST_F(ScreenSessionTest, SetVirtualScreenFlag, TestSize.Level1)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, GetVirtualScreenFlag, TestSize.Level1)
+HWTEST_F(ScreenSessionTest, GetVirtualScreenFlag, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "GetVirtualScreenFlag start";
     ScreenSessionConfig config = {
@@ -746,7 +746,7 @@ HWTEST_F(ScreenSessionTest, SetDensityInCurResolution, TestSize.Level1)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, GetSourceMode, TestSize.Level1)
+HWTEST_F(ScreenSessionTest, GetSourceMode, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetSourceMode start";
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
@@ -778,7 +778,7 @@ HWTEST_F(ScreenSessionTest, GetSourceMode, TestSize.Level1)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, GetSourceMode02, TestSize.Level1)
+HWTEST_F(ScreenSessionTest, GetSourceMode02, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetSourceMode02 start";
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
@@ -1023,7 +1023,7 @@ HWTEST_F(ScreenSessionTest, SetPrivateSessionForeground, TestSize.Level1)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, GetScreenCombination, TestSize.Level1)
+HWTEST_F(ScreenSessionTest, GetScreenCombination, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "GetScreenCombination start";
     ScreenSessionConfig config = {
@@ -1087,7 +1087,7 @@ HWTEST_F(ScreenSessionTest, Resize002, TestSize.Level1)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, UpdateAvailableArea, TestSize.Level1)
+HWTEST_F(ScreenSessionTest, UpdateAvailableArea, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "UpdateAvailableArea start";
     ScreenSessionConfig config = {

@@ -1754,7 +1754,7 @@ HWTEST_F(ScreenSessionManagerTest, GetRSDisplayNodeByScreenId, TestSize.Level1)
  * @tc.desc: GetAllDisplayIds virtual screen
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerTest, GetAllDisplayIds, TestSize.Level1)
+HWTEST_F(ScreenSessionManagerTest, GetAllDisplayIds, TestSize.Level0)
 {
     sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption;
@@ -2937,7 +2937,7 @@ HWTEST_F(ScreenSessionManagerTest, GetDisplayNode02, TestSize.Level1)
  * @tc.desc: GetScreenProperty
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerTest, GetScreenProperty01, TestSize.Level1)
+HWTEST_F(ScreenSessionManagerTest, GetScreenProperty01, TestSize.Level0)
 {
     ScreenId screenId = 2000;
     ASSERT_EQ(ssm_->GetScreenSession(screenId), nullptr);
@@ -2950,7 +2950,7 @@ HWTEST_F(ScreenSessionManagerTest, GetScreenProperty01, TestSize.Level1)
  * @tc.desc: !screenSession = false
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerTest, GetScreenProperty02, TestSize.Level1)
+HWTEST_F(ScreenSessionManagerTest, GetScreenProperty02, TestSize.Level0)
 {
     ScreenId screenId = 1050;
     sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession(screenId, ScreenProperty(), 0);
