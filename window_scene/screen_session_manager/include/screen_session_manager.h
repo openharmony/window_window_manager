@@ -360,12 +360,12 @@ public:
     void ReportFoldStatusToScb(std::vector<std::string>& screenFoldInfo);
     std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution() override;
 
-    std::string GetDisplayCapability() override;
+    DMError GetDisplayCapability(std::string& capabilitInfo) override;
     nlohmann::ordered_json GetCapabilityJson(FoldStatus foldStatus, FoldDisplayMode displayMode,
         std::vector<std::string> rotation, std::vector<std::string> orientation);
-    std::string GetSecondaryDisplayCapability();
-    std::string GetFoldableDeviceCapability();
-    std::string GetSuperFoldCapability();
+    DMError GetSecondaryDisplayCapability(std::string& capabilitInfo);
+    DMError GetFoldableDeviceCapability(std::string& capabilitInfo);
+    DMError GetSuperFoldCapability(std::string& capabilitInfo);
 
     void OnScreenExtendChange(ScreenId mainScreenId, ScreenId extendScreenId) override;
     void OnSuperFoldStatusChange(ScreenId screenId, SuperFoldStatus superFoldStatus) override;

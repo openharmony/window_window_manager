@@ -653,13 +653,6 @@ public:
     FoldStatus GetFoldStatus();
 
     /**
-     * @brief Get current display information, including foldstatus, displaymode, rotation, and orientation information.
-     *
-     * @return information of device.
-     */
-    std::string GetDisplayCapability();
-
-    /**
      * @brief Get the display mode of the foldable device.
      *
      * @return display mode of the foldable device.
