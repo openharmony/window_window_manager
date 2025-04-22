@@ -2168,16 +2168,23 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
         if (statusBar == nullptr) {
             continue;
         }
-        WSRect statusBarRect = statusBar->GetSessionRect();
+        bool isVisible = statusBar->isVisible_;
+        if (onGetStatusBarConstantlyShowFunc_) {
+            onGetStatusBarConstantlyShowFunc_(displayId, isVisible);
+            TLOGD(WmsLogTag::WMS_IMMS, "win %{public}d displayId %{public}" PRIu64 " constantly isVisible %{public}d",
+                GetPersistentId(), displayId, isVisible);
+        }
         bool isStatusBarVisible = WindowHelper::IsMainWindow(Session::GetWindowType()) ?
-            isStatusBarVisible_ : statusBar->isVisible_;
+            isStatusBarVisible_ : isVisible;
         if (!isStatusBarVisible) {
             TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d status bar not visible", GetPersistentId());
             continue;
         }
+        WSRect statusBarRect = statusBar->GetSessionRect();
         if (onGetStatusBarAvoidHeightFunc_) {
             onGetStatusBarAvoidHeightFunc_(statusBarRect);
-            TLOGD(WmsLogTag::WMS_IMMS, "status bar height %{public}d", statusBarRect.height_);
+            TLOGD(WmsLogTag::WMS_IMMS, "win %{public}d status bar height %{public}d",
+                GetPersistentId(), statusBarRect.height_);
         }
         TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d rect %{public}s status bar %{public}s",
             GetPersistentId(), rect.ToString().c_str(), statusBarRect.ToString().c_str());
@@ -6737,6 +6744,11 @@ void SceneSession::RegisterGetStatusBarAvoidHeightFunc(GetStatusBarAvoidHeightFu
     onGetStatusBarAvoidHeightFunc_ = std::move(callback);
 }
 
+void SceneSession::RegisterGetStatusBarConstantlyShowFunc(GetStatusBarConstantlyShowFunc&& callback)
+{
+    onGetStatusBarConstantlyShowFunc_ = std::move(callback);
+}
+
 WMError SceneSession::GetAppForceLandscapeConfig(AppForceLandscapeConfig& config)
 {
     if (forceSplitFunc_ == nullptr) {
@@ -6885,6 +6897,8 @@ int32_t SceneSession::GetStatusBarHeight()
         WSRect statusBarRect = statusBar->GetSessionRect();
         if (onGetStatusBarAvoidHeightFunc_) {
             onGetStatusBarAvoidHeightFunc_(statusBarRect);
+            TLOGD(WmsLogTag::WMS_IMMS, "win %{public}d status bar height %{public}d",
+                GetPersistentId(), statusBarRect.height_);
         }
         height = statusBarRect.height_;
     }
