@@ -564,7 +564,6 @@ public:
     void SetAttachState(bool isAttach, WindowMode windowMode = WindowMode::WINDOW_MODE_UNDEFINED);
     bool GetAttachState() const;
     void RegisterDetachCallback(const sptr<IPatternDetachCallback>& callback);
-    void SetNeedNotifyAttachState(bool needNotify);
 
     SystemSessionConfig GetSystemConfig() const;
     void RectCheckProcess();
@@ -867,6 +866,12 @@ protected:
      * Window Hierarchy
      */
     NotifyClickModalWindowOutsideFunc clickModalWindowOutsideFunc_;
+    
+    /*
+     * Window Pattern
+     */
+    std::atomic<bool> isAttach_ { false };
+    std::atomic<bool> needNotifyAttachState_ = { false };
 
     /*
      * Window Pipeline
@@ -971,7 +976,6 @@ private:
      */
     void RecordWindowStateAttachExceptionEvent(bool isAttached);
 
-    std::atomic<bool> isAttach_ { false };
     std::atomic<bool> isPendingToBackgroundState_ { false };
     std::atomic<bool> isActivatedAfterScreenLocked_ { true };
     sptr<IPatternDetachCallback> detachCallback_ = nullptr;
@@ -1013,7 +1017,6 @@ private:
     std::mutex saveSnapshotCallbackMutex_;
     std::mutex removeSnapshotCallbackMutex_;
     std::mutex addSnapshotCallbackMutex_;
-    std::atomic<bool> needNotifyAttachState_ = { false };
 
     /*
      * Window Pattern

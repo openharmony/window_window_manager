@@ -7744,7 +7744,7 @@ void SceneSession::ModifyRSAnimatableProperty(bool isDefaultSidebarBlur, bool is
 
 void SceneSession::NotifyWindowAttachStateListenerRegistered(bool registered)
 {
-    SetNeedNotifyAttachState(registered);
+    needNotifyAttachState_.store(registered);
 }
 
 void SceneSession::NotifyKeyboardAnimationCompleted(bool isShowAnimation,
