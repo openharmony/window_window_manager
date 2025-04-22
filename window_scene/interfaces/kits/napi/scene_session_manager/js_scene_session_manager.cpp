@@ -2380,8 +2380,11 @@ napi_value JsSceneSessionManager::OnChangeUIAbilityVisibilityBySCB(napi_env env,
     ConvertFromJsValue(env, argv[ARG_INDEX_ONE], visibility);
     bool isFromClient = true;
     ConvertFromJsValue(env, argv[ARG_INDEX_TWO], isFromClient);
+    bool isNewWant = false;
+    ConvertFromJsValue(env, argv[ARG_INDEX_THREE], isNewWant);
 
-    SceneSessionManager::GetInstance().ChangeUIAbilityVisibilityBySCB(sceneSession, visibility, isFromClient);
+    SceneSessionManager::GetInstance().ChangeUIAbilityVisibilityBySCB(
+        sceneSession, visibility, isNewWant, isFromClient);
     return NapiGetUndefined(env);
 }
 
