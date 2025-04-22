@@ -201,7 +201,7 @@ public:
     void NotifyDisconnect();
     void NotifyLayoutFinished();
     void NotifyRemoveBlank();
-    void NotifyAddSnapshot();
+    void NotifyAddSnapshot(bool useFfrt = false, bool needPersist = false);
     void NotifyRemoveSnapshot();
     void NotifyExtensionDied() override;
     void NotifyExtensionTimeout(int32_t errorCode) override;
@@ -245,18 +245,29 @@ public:
     void SetSaveSnapshotCallback(Task&& task)
     {
         if (task) {
+            std::lock_guard lock(saveSnapshotCallbackMutex_);
             saveSnapshotCallback_ = std::move(task);
         }
     }
     void SetRemoveSnapshotCallback(Task&& task)
     {
         if (task) {
+            std::lock_guard lock(removeSnapshotCallbackMutex_);
             removeSnapshotCallback_ = std::move(task);
+        }
+    }
+    void SetAddSnapshotCallback(Task&& task)
+    {
+        if (task) {
+            std::lock_guard lock(addSnapshotCallbackMutex_);
+            addSnapshotCallback_ = std::move(task);
         }
     }
 
     SessionState GetSessionState() const;
     virtual void SetSessionState(SessionState state);
+    void SetSessionInfoSupportedWindowModes(
+        const std::vector<AppExecFwk::SupportWindowMode>& updatedWindowModes);
     void SetSessionInfoAncoSceneState(int32_t ancoSceneState);
     void SetSessionInfoTime(const std::string& time);
     void SetSessionInfoAbilityInfo(const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo);
@@ -400,7 +411,7 @@ public:
     void SetContextTransparentFunc(const NotifyContextTransparentFunc& func);
     void NotifyContextTransparent();
     bool NeedCheckContextTransparent() const;
-    
+
     /*
      * Window Rotate Animation
      */
@@ -565,7 +576,7 @@ public:
     void RegisterIsScreenLockedCallback(const std::function<bool()>& callback);
     std::string GetWindowDetectTaskName() const;
     void RemoveWindowDetectTask();
-    WSError SwitchFreeMultiWindow(bool enable);
+    WSError SwitchFreeMultiWindow(const SystemSessionConfig& config);
 
     virtual bool CheckGetAvoidAreaAvailable(AvoidAreaType type) { return true; }
 
@@ -996,8 +1007,10 @@ private:
      */
     Task saveSnapshotCallback_ = []() {};
     Task removeSnapshotCallback_ = []() {};
+    Task addSnapshotCallback_ = []() {};
     std::mutex saveSnapshotCallbackMutex_;
     std::mutex removeSnapshotCallbackMutex_;
+    std::mutex addSnapshotCallbackMutex_;
     std::atomic<bool> needNotifyAttachState_ = { false };
 
     /*

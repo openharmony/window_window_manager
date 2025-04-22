@@ -73,6 +73,119 @@ RSSurfaceNode::SharedPtr WindowSceneSessionImplTest2::CreateRSSurfaceNode()
 
 namespace {
 /**
+ * @tc.name: SetBackdropBlur
+ * @tc.desc: SetBackdropBlur test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest2, SetBackdropBlur, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetWindowName("SetBackdropBlur");
+    window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
+
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetBackdropBlur(-1.0));
+    ASSERT_EQ(WMError::WM_OK, window->SetBackdropBlur(1.0));
+    ASSERT_EQ(WMError::WM_OK, window->SetBackdropBlur(0.0));
+    window->surfaceNode_ = nullptr;
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetBackdropBlur(1.0));
+}
+
+/**
+ * @tc.name: SetShadowColor
+ * @tc.desc: SetShadowColor test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest2, SetShadowColor, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetWindowName("SetShadowColor");
+    window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
+
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetShadowColor("111ff22ee44"));
+    ASSERT_EQ(WMError::WM_OK, window->SetShadowColor("#ff22ee44"));
+    ASSERT_EQ(WMError::WM_OK, window->SetShadowColor("#000999"));
+    window->surfaceNode_ = nullptr;
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetShadowColor("#ff22ee44"));
+}
+
+/**
+ * @tc.name: SetCornerRadius
+ * @tc.desc: SetCornerRadius test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest2, SetCornerRadius, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetWindowName("SetCornerRadius");
+    window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
+
+    ASSERT_EQ(WMError::WM_OK, window->SetCornerRadius(1.0));
+    window->surfaceNode_ = nullptr;
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetCornerRadius(1.0));
+}
+
+/**
+ * @tc.name: SetShadowRadius
+ * @tc.desc: SetShadowRadius test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest2, SetShadowRadius, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetWindowName("SetShadowRadius");
+    window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
+
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetShadowRadius(-1.0));
+    ASSERT_EQ(WMError::WM_OK, window->SetShadowRadius(0.0));
+    ASSERT_EQ(WMError::WM_OK, window->SetShadowRadius(1.0));
+    window->surfaceNode_ = nullptr;
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetShadowRadius(1.0));
+}
+
+/**
+ * @tc.name: SetTransform01
+ * @tc.desc: set transform
+ * @tc.type: FUNC
+ * @tc.require:issueI7IJVV
+ */
+HWTEST_F(WindowSceneSessionImplTest2, SetTransform01, Function | SmallTest | Level3)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetTransform01");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    Transform trans_;
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetTransform(trans_));
+}
+
+/**
+ * @tc.name: SetTransform01
+ * @tc.desc: set transform
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest2, SetTransform02, Function | SmallTest | Level3)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetTransform01");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+    window->state_ = WindowState::STATE_CREATED;
+    Transform trans_;
+    ASSERT_EQ(WMError::WM_OK, window->SetTransform(trans_));
+    ASSERT_EQ(trans_, window->GetTransform());
+}
+
+/**
  * @tc.name: RegisterAnimationTransitionController01
  * @tc.desc: RegisterAnimationTransitionController
  * @tc.type: FUNC
@@ -134,6 +247,42 @@ HWTEST_F(WindowSceneSessionImplTest2, UpdateSurfaceNodeAfterCustomAnimation, Tes
 }
 
 /**
+ * @tc.name: SetAlpha01
+ * @tc.desc: SetAlpha
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest2, SetAlpha01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetAlpha01");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    windowSceneSession->property_->SetPersistentId(11);
+    windowSceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, windowSceneSession->SetAlpha(1.0));
+}
+
+/**
+ * @tc.name: SetAlpha02
+ * @tc.desc: SetAlpha
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest2, SetAlpha02, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetAlpha02");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestMode", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    windowSceneSession->hostSession_ = session;
+    windowSceneSession->property_->SetPersistentId(1);
+    windowSceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ASSERT_EQ(WMError::WM_OK, windowSceneSession->SetAlpha(1.0));
+}
+
+/**
  * @tc.name: DestroySubWindow01
  * @tc.desc: DestroySubWindow
  * @tc.type: FUNC
@@ -188,7 +337,7 @@ HWTEST_F(WindowSceneSessionImplTest2, UpdateAnimationFlagProperty02, TestSize.Le
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("UpdateAnimationFlagProperty01");
     option->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    
+
     sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     ASSERT_EQ(WMError::WM_OK, windowSceneSession->UpdateAnimationFlagProperty(false));
 }
@@ -304,6 +453,52 @@ HWTEST_F(WindowSceneSessionImplTest2, GetConfigurationFromAbilityInfo01, TestSiz
     int ret = 0;
     windowSceneSession->GetConfigurationFromAbilityInfo();
     ASSERT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: ExtractSupportWindowModeFromMetaData
+ * @tc.desc: ExtractSupportWindowModeFromMetaData
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest2, ExtractSupportWindowModeFromMetaData, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("ExtractSupportWindowModeFromMetaData");
+    option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+    sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+
+    windowSceneSession->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    AppExecFwk::AbilityInfo abilityInfo;
+    int ret = 0;
+    std::vector<AppExecFwk::SupportWindowMode> updateWindowModes =
+        windowSceneSession->ExtractSupportWindowModeFromMetaData(
+        std::make_shared<OHOS::AppExecFwk::AbilityInfo>(abilityInfo));
+    ASSERT_EQ(ret, 0);
+
+    windowSceneSession->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    windowSceneSession->windowSystemConfig_.freeMultiWindowEnable_ = false;
+    updateWindowModes =
+        windowSceneSession->ExtractSupportWindowModeFromMetaData(
+        std::make_shared<OHOS::AppExecFwk::AbilityInfo>(abilityInfo));
+    ASSERT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: ParseWindowModeFromMetaData
+ * @tc.desc: ParseWindowModeFromMetaData
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest2, ParseWindowModeFromMetaData, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("ParseWindowModeFromMetaData");
+    option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+    sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+
+    std::vector<AppExecFwk::SupportWindowMode> updateWindowModes =
+        {AppExecFwk::SupportWindowMode::FULLSCREEN, AppExecFwk::SupportWindowMode::SPLIT,
+        AppExecFwk::SupportWindowMode::FLOATING};
+    ASSERT_EQ(updateWindowModes, windowSceneSession->ParseWindowModeFromMetaData("fullscreen,split,floating"));
 }
 
 /**
@@ -744,9 +939,30 @@ HWTEST_F(WindowSceneSessionImplTest2, GetConfigurationFromAbilityInfo02, TestSiz
     option->SetWindowName("GetConfigurationFromAbilityInfo02");
     option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
     sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    windowSceneSession->property_->SetCompatibleModeInPc(true);
     int ret = 0;
     windowSceneSession->GetConfigurationFromAbilityInfo();
     ASSERT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: GetConfigurationFromAbilityInfo03
+ * @tc.desc: GetConfigurationFromAbilityInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest2, GetConfigurationFromAbilityInfo03, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetConfigurationFromAbilityInfo03");
+    option->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    windowSceneSession->property_->SetCompatibleModeInPc(true);
+    windowSceneSession->GetConfigurationFromAbilityInfo();
+    auto supportType = windowSceneSession->property_->GetWindowModeSupportType();
+    bool isSupportFullScreen = WindowHelper::IsWindowModeSupported(supportType, WindowMode::WINDOW_MODE_FULLSCREEN);
+    bool isSupportFloating = WindowHelper::IsWindowModeSupported(supportType, WindowMode::WINDOW_MODE_FLOATING);
+    ASSERT_EQ(isSupportFullScreen, true);
+    ASSERT_EQ(isSupportFloating, true);
 }
 
 /**

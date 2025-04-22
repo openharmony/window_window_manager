@@ -340,12 +340,12 @@ WMError WindowExtensionSessionImpl::TransferExtensionData(const AAFwk::WantParam
         oss << " provider bundleName: " << context_->GetBundleName() << ",";
         oss << " provider windowName: " << property_->GetWindowName() << ",";
         oss << " errorCode: " << static_cast<int32_t>(ret) << ";";
-        int32_t ret = WindowInfoReporter::GetInstance().ReportUIExtensionException(
+        int32_t res = WindowInfoReporter::GetInstance().ReportUIExtensionException(
             static_cast<int32_t>(WindowDFXHelperType::WINDOW_UIEXTENSION_TRANSFER_DATA_FAIL),
             getpid(), GetPersistentId(), oss.str()
         );
-        if (ret != 0) {
-            TLOGI(WmsLogTag::WMS_UIEXT, "ReportUIExtensionException message failed, ret: %{public}d", ret);
+        if (res != 0) {
+            TLOGI(WmsLogTag::WMS_UIEXT, "ReportUIExtensionException message failed, res: %{public}d", res);
         }
     }
     return WMError::WM_ERROR_IPC_FAILED;

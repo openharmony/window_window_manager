@@ -291,6 +291,7 @@ public:
     virtual void OnNewWant(const AAFwk::Want& want) = 0;
     virtual void SetRequestedOrientation(Orientation) = 0;
     virtual void NotifyPreferredOrientationChange(Orientation orientation) = 0;
+    virtual void SetPreferredRequestedOrientation(Orientation orientation) = 0;
     virtual Orientation GetRequestedOrientation() = 0;
     virtual void SetRequestWindowModeSupportType(uint32_t windowModeSupportType) = 0;
     virtual uint32_t GetRequestWindowModeSupportType() const = 0;
@@ -358,6 +359,7 @@ public:
     virtual bool IsPcWindow() const { return false; }
     virtual bool IsPcOrPadCapabilityEnabled() const { return false; }
     virtual bool IsPcOrPadFreeMultiWindowMode() const { return false; }
+    virtual bool IsSceneBoardEnabled() const { return false; }
     virtual bool GetCompatibleModeInPc() const { return false; }
     virtual WmErrorCode KeepKeyboardOnFocus(bool keepKeyboardFlag) = 0;
     virtual WMError RegisterWindowVisibilityChangeListener(const WindowVisibilityListenerSptr& listener) = 0;

@@ -731,9 +731,10 @@ public:
      * @param screenId ScreenId used in virtual screen.
      * @param windowIdList The windowId list to shield on cast screen.
      * @param surfaceIdList The surfaceId list to shield on cast screen.
+     * @param typeBlackList The surface type list to shield on cast screen.
     */
     void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList,
-        std::vector<uint64_t> surfaceIdList = {});
+        std::vector<uint64_t> surfaceIdList = {}, std::vector<uint8_t> typeBlackList = {});
 
     /**
      * @brief Set virtual display mute flag to RS.
@@ -844,7 +845,13 @@ public:
      * @return CutoutInfo object of default screen.
      */
     sptr<CutoutInfo> GetCutoutInfoWithRotation(Rotation rotation);
-    
+
+    /**
+     * @brief Get device status.
+     *
+     * @return Device status.
+     */
+    uint32_t GetDeviceStatus() const;
 private:
     DisplayManager();
     ~DisplayManager();
