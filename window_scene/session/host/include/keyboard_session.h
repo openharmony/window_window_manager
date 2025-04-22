@@ -100,6 +100,7 @@ private:
         bool isShow);
     void NotifySystemKeyboardAvoidChange(SystemKeyboardAvoidChangeReason reason);
     void NotifyRootSceneOccupiedAreaChange(const sptr<OccupiedAreaChangeInfo>& info);
+    bool IsNeedRaiseSubWindow(const sptr<SceneSession>& callingSession, const WSRect& callingSessionRect);
 
     sptr<KeyboardSessionCallback> keyboardCallback_ = nullptr;
     bool isKeyboardSyncTransactionOpen_ = false;

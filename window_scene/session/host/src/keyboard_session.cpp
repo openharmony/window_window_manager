@@ -482,7 +482,8 @@ void KeyboardSession::RaiseCallingSession(const WSRect& keyboardPanelRect, bool 
 
     WSRect newRect = callingSessionRect;
     int32_t statusHeight = callingSession->GetStatusBarHeight();
-    if (isCallingSessionFloating && callingSessionRect.posY_ > statusHeight) {
+    if (IsNeedRaiseSubWindow(callingSession, newRect) &&
+        isCallingSessionFloating && callingSessionRect.posY_ > statusHeight) {
         if (oriPosYBeforeRaisedByKeyboard == 0) {
             oriPosYBeforeRaisedByKeyboard = callingSessionRect.posY_;
             callingSession->SetOriPosYBeforeRaisedByKeyboard(callingSessionRect.posY_);
@@ -769,6 +770,24 @@ void KeyboardSession::NotifyRootSceneOccupiedAreaChange(const sptr<OccupiedAreaC
         return;
     }
     keyboardCallback_->onNotifyOccupiedAreaChange(info);
+}
+
+bool KeyboardSession::IsNeedRaiseSubWindow(const sptr<SceneSession>& callingSession, const WSRect& callingSessionRect)
+{
+    if (!SessionHelper::IsSubWindow(callingSession->GetWindowType())) {
+        TLOGD(WmsLogTag::WMS_KEYBOARD, "Not sub window");
+        return true;
+    }
+
+    auto mainSession = callingSession->GetMainSession();
+    if (mainSession != nullptr && WindowHelper::IsSplitWindowMode(mainSession->GetWindowMode()) &&
+        callingSessionRect == mainSession->GetSessionRect()) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "No need to raise, parentId: %{public}d, rect: %{public}s",
+            mainSession->GetPersistentId(), callingSessionRect.ToString().c_str());
+        return false;
+    }
+
+    return true;
 }
 
 void KeyboardSession::SetKeyboardViewModeChangeListener(const NotifyKeyboarViewModeChangeFunc& func)
