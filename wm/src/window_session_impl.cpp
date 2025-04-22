@@ -76,7 +76,7 @@ const std::string BUTTON_ICON_SIZE = "buttonIconSize";
 const std::string CLOSE_BUTTON_RIGHT_MARGIN = "closeButtonRightMargin";
 const std::string BUTTON_COLOR_MODE = "colorMode";
 const std::string BUTTON_SPACING_BETWEEN = "spacingBetweenButtons";
-const std::string DECOR_BUTTON_STYLE_CHANGE = "decorButtonStyleChange";
+const std::string DECOR_BUTTON_STYLE_CHANGE = "decor_button_style_change";
 constexpr int64_t SET_UIEXTENSION_DESTROY_TIMEOUT_TIME_MS = 4000;
 
 const std::string SCB_BACK_VISIBILITY = "scb_back_visibility";
