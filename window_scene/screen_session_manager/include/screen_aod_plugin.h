@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef SCREEN_SENSOR_PLUGIN_H
-#define SCREEN_SENSOR_PLUGIN_H
+#ifndef SCREEN_AOD_PLUGIN_H
+#define SCREEN_AOD_PLUGIN_H
 
 #include <string>
 
