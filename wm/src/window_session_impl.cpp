@@ -2796,12 +2796,12 @@ WMError WindowSessionImpl::SetDecorButtonStyle(const DecorButtonStyle& decorButt
         return WMError::WM_ERROR_NULLPTR;
     }
     nlohmann::json decorJson;
-    decorStr.emplace(BUTTON_BACKGROUND_CORNER_RADIUS, decorButtonStyle.buttonBackgroundCornerRadius);
-    decorStr.emplace(BUTTON_BACKGROUND_SIZE, decorButtonStyle.buttonBackgroundSize);
-    decorStr.emplace(BUTTON_ICON_SIZE, decorButtonStyle.buttonIconSize);
-    decorStr.emplace(CLOSE_BUTTON_RIGHT_MARGIN, decorButtonStyle.closeButtonRightMargin);
-    decorStr.emplace(BUTTON_COLOR_MODE, decorButtonStyle.colorMode);
-    decorStr.emplace(BUTTON_SPACING_BETWEEN, decorButtonStyle.spacingBetweenButtons);
+    decorJson.emplace(BUTTON_BACKGROUND_CORNER_RADIUS, decorButtonStyle.buttonBackgroundCornerRadius);
+    decorJson.emplace(BUTTON_BACKGROUND_SIZE, decorButtonStyle.buttonBackgroundSize);
+    decorJson.emplace(BUTTON_ICON_SIZE, decorButtonStyle.buttonIconSize);
+    decorJson.emplace(CLOSE_BUTTON_RIGHT_MARGIN, decorButtonStyle.closeButtonRightMargin);
+    decorJson.emplace(BUTTON_COLOR_MODE, decorButtonStyle.colorMode);
+    decorJson.emplace(BUTTON_SPACING_BETWEEN, decorButtonStyle.spacingBetweenButtons);
     uiContent->OnContainerModalEvent(DECOR_BUTTON_STYLE_CHANGE, decorStr.dump());
     decorButtonStyle_ = decorButtonStyle;
     return WMError::WM_OK;
