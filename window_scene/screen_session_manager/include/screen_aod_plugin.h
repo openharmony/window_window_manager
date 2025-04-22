@@ -36,4 +36,4 @@ void UnloadAodLib(void);
 bool IsInAod();
 }
 }
-#endif /* SCREEN_SENSOR_PLUGIN_H */
+#endif /* SCREEN_AOD_PLUGIN_H */
