@@ -7650,6 +7650,10 @@ void ScreenSessionManager::RecoverMultiScreenMode(sptr<ScreenSession> screenSess
         TLOGE(WmsLogTag::DMS, "screenSession is null!");
         return;
     }
+    if (!g_isPcDevice || screenSession->GetScreenProperty().GetScreenType() != ScreenType::REAL) {
+        TLOGI(WmsLogTag::DMS, "not PC or not real screen, no need recover!");
+        return;
+    }
     if (!RecoverRestoredMultiScreenMode(screenSession)) {
         ScreenCombination screenCombination = screenSession->GetScreenCombination();
         if (screenCombination == ScreenCombination::SCREEN_MIRROR) {
