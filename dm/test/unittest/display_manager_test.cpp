@@ -1760,6 +1760,238 @@ HWTEST_F(DisplayManagerTest, GetCutoutInfoWithRotation, Function | SmallTest | L
     sptr<CutoutInfo> info = DisplayManager::GetInstance().GetCutoutInfoWithRotation(rotation);
     ASSERT_NE(nullptr, info);
 }
+
+/**
+ * @tc.name: GetDeviceStatus
+ * @tc.desc: GetDeviceStatus test
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetDeviceStatus, Function | SmallTest | Level1)
+{
+    uint32_t status = DisplayManager::GetInstance().GetDeviceStatus();
+    ASSERT_EQ(status, 0);
+}
+
+/**
+ * @tc.name: GetVisibleAreaDisplayInfoById_ShouldReturnNull_WhenDisplayInfoIsNull
+ * @tc.desc: Test GetVisibleAreaDisplayInfoById function when the returned DisplayInfo is
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetVisibleAreaDisplayInfoById_ShouldReturnNull_WhenDisplayInfoIsNull, TestSize.Level1)
+{
+    DisplayId displayId = 123;
+    g_dmIsDestroyed = true;
+
+    auto result = DisplayManagerAdapter::GetInstance().GetVisibleAreaDisplayInfoById(displayId);
+
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: GetSnapshotByPicker_LockFailed_Test
+ * @tc.desc: Test GetSnapshotByPicker when try_lock fails
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetSnapshotByPicker_LockFailed_Test, TestSize.Level1)
+{
+    DisplayManager displayManager;
+    Media::Rect rect;
+    DmErrorCode errorCode;
+
+    std::unique_lock<std::mutex> lock(snapBypickerMutex, std::defer_lock);
+
+    auto result = displayManager.GetSnapshotByPicker(rect, &errorCode);
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: GetSnapshotByPicker_GetSnapshotFailed_Test
+ * @tc.desc: Test GetSnapshotByPicker when GetSnapshotByPicker returns nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetSnapshotByPicker_GetSnapshotFailed_Test, TestSize.Level1)
+{
+    DisplayManager displayManager;
+    Media::Rect rect;
+    DmErrorCode errorCode;
+
+    std::shared_ptr<Media::PixelMap> screenShot =
+        SingletonContainer::Get<DisplayManagerAdapter>().GetSnapshotByPicker(rect, &errorCode);
+
+    auto result = displayManager.GetSnapshotByPicker(rect, &errorCode);
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: GetSnapshotByPicker_InvalidSize_Test
+ * @tc.desc: Test GetSnapshotByPicker when rect has invalid size
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetSnapshotByPicker_InvalidSize_Test, TestSize.Level1)
+{
+    DisplayManager displayManager;
+    Media::Rect rect;
+    rect.width = 0;
+    rect.height = 0;
+    DmErrorCode errorCode;
+
+    auto result = displayManager.GetSnapshotByPicker(rect, &errorCode);
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: GetSnapshotByPicker_CreatePixelMapFailed_Test
+ * @tc.desc: Test GetSnapshotByPicker when Media::PixelMap::Create returns nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetSnapshotByPicker_CreatePixelMapFailed_Test, TestSize.Level1)
+{
+    DisplayManager displayManager;
+    Media::Rect rect;
+    DmErrorCode errorCode;
+    auto pixelMap = nullptr;
+
+    auto result = displayManager.GetSnapshotByPicker(rect, &errorCode);
+    EXPECT_EQ(result, pixelMap);
+}
+
+/**
+ * @tc.name: GetScreenshotreturnsnullptr
+ * @tc.desc: GetScreenshot returns nullptr fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetScreenshotreturnsnullptr, TestSize.Level1)
+{
+    DisplayManager displayManager;
+    SnapShotConfig config;
+    DmErrorCode errorCode;
+    bool isUseDma = false;
+
+    auto result = displayManager.GetScreenshotwithConfig(config, &errorCode, isUseDma);
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: InvalidimageRect
+ * @tc.desc: Invalid imageRect fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, InvalidimageRect, TestSize.Level1)
+{
+    DisplayManager displayManager;
+    SnapShotConfig config;
+    config.imageRect_.left = -1;
+    DmErrorCode errorCode;
+    bool isUseDma = false;
+
+    auto result = displayManager.GetScreenshotwithConfig(config, &errorCode, isUseDma);
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: InvalidimageSize
+ * @tc.desc: Invalid imageSize fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, InvalidimageSize, TestSize.Level1)
+{
+    DisplayManager displayManager;
+    SnapShotConfig config;
+    config.imageSize_.width = 0;
+    DmErrorCode errorCode;
+    bool isUseDma = false;
+
+    auto result = displayManager.GetScreenshotwithConfig(config, &errorCode, isUseDma);
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: Media::PixelMap::Create returns nullptr
+ * @tc.desc: Media::PixelMap::Create returns nullptr fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, PixelMapCreateReturnsNullptr, TestSize.Level1)
+{
+    DisplayManager displayManager;
+    SnapShotConfig config;
+    DmErrorCode errorCode;
+    bool isUseDma = false;
+
+    auto result = displayManager.GetScreenshotwithConfig(config, &errorCode, isUseDma);
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: GetCallingAbilityDisplayId_shouldReturnInvalid_WhenListIsEmpty
+ * @tc.desc: GetCallingAbilityDisplayId function when displayIdList_ is empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetCallingAbilityDisplayId_shouldReturnInvalid_WhenListIsEmpty, TestSize.Level1)
+{
+    DisplayManager displayManager;
+    displayManager.displayIdList_.clear();
+    EXPECT_EQ(displayManager.GetCallingAbilityDisplayId(), DISPLAY_ID_INVALID);
+}
+
+/**
+ * @tc.name: GetCallingAbilityDisplayId_shouldReturnInvalid_WhenListContainsOneId
+ * @tc.desc: Test GetCallingAbilityDisplayId function when displayIdList_ contains one id.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetCallingAbilityDisplayId_shouldReturnInvalid_WhenListContainsOneId, TestSize.Level1)
+{
+    DisplayManager displayManager;
+    displayManager.displayIdList_.clear();
+    SingletonContainer::Get<DisplayManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> obj =
+        SingletonContainer::Get<DisplayManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<IRemoteObject> weakPtr = obj;
+    DisplayId displayId = DISPLAY_ID_INVALID;
+    displayManager.displayIdList_.push_back(std::make_pair(weakPtr, displayId));
+    EXPECT_EQ(displayManager.GetCallingAbilityDisplayId(), DISPLAY_ID_INVALID);
+}
+
+/**
+ * @tc.name: GetCallingAbilityDisplayId_shouldReturnInvalid_WhenListContainsMultipleDifferentIds
+ * @tc.desc: Test GetCallingAbilityDisplayId function when displayIdList_ multiple different ids.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetCallingAbilityDisplayId_shouldReturnInvalid_WhenListContainsMultipleDifferentIds,
+    TestSize.Level1)
+{
+    DisplayManager displayManager;
+    displayManager.displayIdList_.clear();
+    SingletonContainer::Get<DisplayManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> obj =
+        SingletonContainer::Get<DisplayManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<IRemoteObject> weakPtr = obj;
+    DisplayId displayId = DISPLAY_ID_INVALID;
+    displayManager.displayIdList_.push_back(std::make_pair(weakPtr, displayId));
+    SingletonContainer::Get<DisplayManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> obj_01 =
+        SingletonContainer::Get<DisplayManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<IRemoteObject> weakPtr_01 = obj_01;
+    DisplayId displayId_01 = 2;
+    displayManager.displayIdList_.push_back(std::make_pair(weakPtr_01, displayId_01));
+    EXPECT_EQ(displayManager.GetCallingAbilityDisplayId(), DISPLAY_ID_INVALID);
+}
+
+/**
+ * @tc.name: ShouldReturnUNKNOWN
+ * @tc.desc: GetFoldDisplayMode returns UNKNOWN
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, ShouldReturnUNKNOWN, TestSize.Level1)
+{
+    DisplayManager displayManager;
+    DisplayManagerAdapter displayManagerAdapter;
+    SingletonContainer::Get<DisplayManagerAdapter>().InitDMSProxy();
+    displayManagerAdapter.SetFoldDisplayMode(FoldDisplayMode::GLOBAL_FULL);
+
+    auto result = displayManager.GetFoldDisplayModeForExternal();
+
+    EXPECT_EQ(result, OHOS::Rosen::FoldDisplayMode::UNKNOWN);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

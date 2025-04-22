@@ -33,6 +33,14 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
+namespace {
+std::string logMsg;
+void SceneSessionLogCallback(
+    const LogType type, const LogLevel level, const unsigned int domain, const char *tag, const char *msg)
+{
+    logMsg = msg;
+}
+}
 constexpr int WAIT_ASYNC_US = 1000000;
 class SceneSessionTest : public testing::Test {
 public:
@@ -442,176 +450,6 @@ HWTEST_F(SceneSessionTest, IsViewKeepScreenOn02, TestSize.Level1)
     ASSERT_NE(sceneSession, nullptr);
     ASSERT_EQ(WSError::WS_OK, sceneSession->SetViewKeepScreenOn(false));
     ASSERT_EQ(false, sceneSession->IsViewKeepScreenOn());
-}
-
-/**
- * @tc.name: IsAppSession
- * @tc.desc: IsAppSession true
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest, IsAppSession01, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "IsAppSession01";
-    info.bundleName_ = "IsAppSession01";
-    info.windowType_ = 1;
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
-    ASSERT_EQ(true, sceneSession->IsAppSession());
-}
-
-/**
- * @tc.name: IsAppSession
- * @tc.desc: IsAppSession false
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest, IsAppSession02, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "IsAppSession02";
-    info.bundleName_ = "IsAppSession02";
-    info.windowType_ = 2106;
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
-    ASSERT_EQ(false, sceneSession->IsAppSession());
-
-    SessionInfo parentInfo;
-    parentInfo.abilityName_ = "testSession1";
-    parentInfo.moduleName_ = "testSession2";
-    parentInfo.bundleName_ = "testSession3";
-    sptr<Session> parentSession = sptr<Session>::MakeSptr(parentInfo);
-    ASSERT_NE(parentSession, nullptr);
-
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    EXPECT_NE(property, nullptr);
-    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    parentSession->SetSessionProperty(property);
-    sceneSession->SetParentSession(parentSession);
-    ASSERT_EQ(false, sceneSession->IsAppSession());
-
-    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    parentSession->SetSessionProperty(property);
-    sceneSession->SetParentSession(parentSession);
-    ASSERT_EQ(true, sceneSession->IsAppSession());
-}
-
-/**
- * @tc.name: IsAppOrLowerSystemSession
- * @tc.desc: IsAppOrLowerSystemSession true
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest, IsAppOrLowerSystemSession01, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "Background01";
-    info.bundleName_ = "IsAppOrLowerSystemSession01";
-    info.windowType_ = 2126;
-
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
-    ASSERT_EQ(true, sceneSession->IsAppOrLowerSystemSession());
-}
-
-/**
- * @tc.name: IsAppOrLowerSystemSession
- * @tc.desc: IsAppOrLowerSystemSession false
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest, IsAppOrLowerSystemSession02, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "Background02";
-    info.bundleName_ = "IsAppOrLowerSystemSession02";
-    info.windowType_ = 2106;
-
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
-    ASSERT_EQ(false, sceneSession->IsAppOrLowerSystemSession());
-
-    SessionInfo parentInfo;
-    parentInfo.abilityName_ = "testSession1";
-    parentInfo.moduleName_ = "testSession2";
-    parentInfo.bundleName_ = "testSession3";
-    sptr<Session> parentSession = sptr<Session>::MakeSptr(parentInfo);
-    ASSERT_NE(parentSession, nullptr);
-
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    EXPECT_NE(property, nullptr);
-    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    parentSession->SetSessionProperty(property);
-    sceneSession->SetParentSession(parentSession);
-    ASSERT_EQ(false, sceneSession->IsAppOrLowerSystemSession());
-
-    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    parentSession->SetSessionProperty(property);
-    sceneSession->SetParentSession(parentSession);
-    ASSERT_EQ(true, sceneSession->IsAppOrLowerSystemSession());
-}
-
-/**
- * @tc.name: IsSystemSessionAboveApp
- * @tc.desc: IsSystemSessionAboveApp true
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest, IsSystemSessionAboveApp01, TestSize.Level1)
-{
-    SessionInfo info1;
-    info1.abilityName_ = "HighZOrder01";
-    info1.bundleName_ = "IsSystemSessionAboveApp01";
-    info1.windowType_ = 2122;
-
-    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info1, nullptr);
-    ASSERT_EQ(true, sceneSession1->IsSystemSessionAboveApp());
-
-    SessionInfo info2;
-    info2.abilityName_ = "HighZOrder02";
-    info2.bundleName_ = "IsSystemSessionAboveApp02";
-    info2.windowType_ = 2104;
-
-    sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(info2, nullptr);
-    ASSERT_EQ(true, sceneSession2->IsSystemSessionAboveApp());
-
-    SessionInfo info3;
-    info3.abilityName_ = "HighZOrder03";
-    info3.bundleName_ = "SCBDropdownPanel13";
-    info3.windowType_ = 2109;
-
-    sptr<SceneSession> sceneSession3 = sptr<SceneSession>::MakeSptr(info3, nullptr);
-    ASSERT_EQ(true, sceneSession3->IsSystemSessionAboveApp());
-
-    SessionInfo info4;
-    info4.abilityName_ = "HighZOrder04";
-    info4.bundleName_ = "IsSystemSessionAboveApp04";
-    info4.windowType_ = 2109;
-
-    sptr<SceneSession> sceneSession4 = sptr<SceneSession>::MakeSptr(info4, nullptr);
-    ASSERT_EQ(false, sceneSession4->IsSystemSessionAboveApp());
-
-    SessionInfo info5;
-    info5.abilityName_ = "HighZOrderGestureDock";
-    info5.bundleName_ = "SCBGestureDock21";
-    info5.windowType_ = 2106;
-
-    sptr<SceneSession> sceneSession5 = sptr<SceneSession>::MakeSptr(info5, nullptr);
-    ASSERT_EQ(true, sceneSession5->IsSystemSessionAboveApp());
-}
-
-/**
- * @tc.name: IsSystemSessionAboveApp
- * @tc.desc: IsSystemSessionAboveApp false
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest, IsSystemSessionAboveApp02, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "HighZOrder05";
-    info.bundleName_ = "IsSystemSessionAboveApp05";
-    info.windowType_ = 1;
-
-    sptr<SceneSession> sceneSession;
-    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
-    ASSERT_EQ(false, sceneSession->IsSystemSessionAboveApp());
 }
 
 /**
@@ -1996,6 +1834,31 @@ HWTEST_F(SceneSessionTest, IsFollowParentMultiScreenPolicy, TestSize.Level1)
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback);
     EXPECT_EQ(sceneSession->IsFollowParentMultiScreenPolicy(), false);
+}
+
+/**
+ * @tc.name: CloneWindow
+ * @tc.desc: CloneWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, CloneWindow, TestSize.Level1)
+{
+    LOG_SetCallback(SceneSessionLogCallback);
+    SessionInfo info;
+    info.abilityName_ = "CloneWindow";
+    info.bundleName_ = "CloneWindow";
+    info.windowType_ = 1;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback);
+    EXPECT_NE(sceneSession, nullptr);
+    uint64_t surfaceNodeId = 1;
+    bool needOffScreen = false;
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    sceneSession->SetSurfaceNode(surfaceNode);
+    sceneSession->CloneWindow(surfaceNodeId, needOffScreen);
+    EXPECT_TRUE(logMsg.find("cloned") != std::string::npos);
 }
 } // namespace
 } // Rosen

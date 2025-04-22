@@ -101,6 +101,7 @@ public:
     DMError SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid, std::vector<uint64_t>& windowIdList);
     sptr<Display> GetPrimaryDisplaySync();
     void OnRemoteDied();
+    uint32_t GetDeviceStatus() const;
     sptr<CutoutInfo> GetCutoutInfoWithRotation(Rotation rotation);
     
 private:
@@ -2118,6 +2119,11 @@ std::string DisplayManager::Impl::GetDisplayInfoSrting(sptr<DisplayInfo> display
     return oss.str();
 }
 
+uint32_t DisplayManager::Impl::GetDeviceStatus() const
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().GetDeviceStatus();
+}
+
 bool DisplayManager::WakeUpBegin(PowerStateChangeReason reason)
 {
     WLOGFD("[UL_POWER]WakeUpBegin start, reason:%{public}u", reason);
@@ -2303,12 +2309,6 @@ bool DisplayManager::Impl::ConvertScreenIdToRsScreenId(ScreenId screenId, Screen
     return res;
 }
 
-void DisplayManager::SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList,
-    std::vector<uint64_t> surfaceIdList)
-{
-    SingletonContainer::Get<DisplayManagerAdapter>().SetVirtualScreenBlackList(screenId, windowIdList, surfaceIdList);
-}
-
 void DisplayManager::SetVirtualDisplayMuteFlag(ScreenId screenId, bool muteFlag)
 {
     return pImpl_->SetVirtualDisplayMuteFlag(screenId, muteFlag);
@@ -2317,11 +2317,6 @@ void DisplayManager::SetVirtualDisplayMuteFlag(ScreenId screenId, bool muteFlag)
 void DisplayManager::Impl::SetVirtualDisplayMuteFlag(ScreenId screenId, bool muteFlag)
 {
     return SingletonContainer::Get<DisplayManagerAdapter>().SetVirtualDisplayMuteFlag(screenId, muteFlag);
-}
-
-void DisplayManager::DisablePowerOffRenderControl(ScreenId screenId)
-{
-    SingletonContainer::Get<DisplayManagerAdapter>().DisablePowerOffRenderControl(screenId);
 }
 
 DMError DisplayManager::ProxyForFreeze(std::set<int32_t> pidList, bool isProxy)
@@ -2347,6 +2342,18 @@ DMError DisplayManager::ResetAllFreezeStatus()
 DMError DisplayManager::Impl::ResetAllFreezeStatus()
 {
     return SingletonContainer::Get<DisplayManagerAdapter>().ResetAllFreezeStatus();
+}
+
+void DisplayManager::SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList,
+    std::vector<uint64_t> surfaceIdList, std::vector<uint8_t> typeBlackList)
+{
+    SingletonContainer::Get<DisplayManagerAdapter>().SetVirtualScreenBlackList(screenId, windowIdList, surfaceIdList,
+        typeBlackList);
+}
+
+void DisplayManager::DisablePowerOffRenderControl(ScreenId screenId)
+{
+    SingletonContainer::Get<DisplayManagerAdapter>().DisablePowerOffRenderControl(screenId);
 }
 
 DMError DisplayManager::SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid,
@@ -2485,5 +2492,11 @@ sptr<CutoutInfo> DisplayManager::Impl::GetCutoutInfoWithRotation(Rotation rotati
     auto displayId = displayInfo->GetDisplayId();
     return SingletonContainer::Get<DisplayManagerAdapter>().GetCutoutInfoWithRotation(displayId, rotationNum);
 }
+
+uint32_t DisplayManager::GetDeviceStatus() const
+{
+    return pImpl_->GetDeviceStatus();
+}
+
 } // namespace OHOS::Rosen
 

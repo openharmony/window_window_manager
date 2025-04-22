@@ -221,6 +221,27 @@ HWTEST_F(WindowSessionImplTest3, GetAppForceLandscapeConfig02, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsSceneBoardEnabled
+ * @tc.desc: IsSceneBoardEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, IsSceneBoardEnabled, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: IsSceneBoardEnabled start";
+    window_ = GetTestWindowImpl("IsSceneBoardEnabled");
+    ASSERT_NE(window_, nullptr);
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window_->hostSession_ = session;
+    window_->property_->SetPersistentId(1);
+    window_->state_ = WindowState::STATE_CREATED;
+    bool result = SceneBoardJudgement::IsSceneBoardEnabled();
+    ASSERT_EQ(result, window_->IsSceneBoardEnabled());
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: IsSceneBoardEnabled end";
+}
+
+/**
  * @tc.name: IsFocused
  * @tc.desc: IsFocused
  * @tc.type: FUNC
@@ -603,6 +624,40 @@ HWTEST_F(WindowSessionImplTest3, IsVerticalOrientation, TestSize.Level1)
     ret = window_->IsVerticalOrientation(orientation);
     ASSERT_EQ(ret, false);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: IsVerticalOrientation end";
+}
+
+/**
+ * @tc.name: IsHorizontalOrientation
+ * @tc.desc: IsHorizontalOrientation
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, IsHorizontalOrientation, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: IsHorizontalOrientation start";
+    window_ = GetTestWindowImpl("IsHorizontalOrientation");
+    ASSERT_NE(window_, nullptr);
+    Orientation orientation = Orientation::HORIZONTAL;
+    auto ret = window_->IsHorizontalOrientation(orientation);
+    ASSERT_EQ(ret, true);
+    orientation = Orientation::REVERSE_HORIZONTAL;
+    ret = window_->IsHorizontalOrientation(orientation);
+    ASSERT_EQ(ret, true);
+    orientation = Orientation::SENSOR_HORIZONTAL;
+    ret = window_->IsHorizontalOrientation(orientation);
+    ASSERT_EQ(ret, true);
+    orientation = Orientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED;
+    ret = window_->IsHorizontalOrientation(orientation);
+    ASSERT_EQ(ret, true);
+    orientation = Orientation::USER_ROTATION_LANDSCAPE;
+    ret = window_->IsHorizontalOrientation(orientation);
+    ASSERT_EQ(ret, true);
+    orientation = Orientation::USER_ROTATION_LANDSCAPE_INVERTED;
+    ret = window_->IsHorizontalOrientation(orientation);
+    ASSERT_EQ(ret, true);
+    orientation = Orientation::UNSPECIFIED;
+    ret = window_->IsHorizontalOrientation(orientation);
+    ASSERT_EQ(ret, false);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: IsHorizontalOrientation end";
 }
 
 /**

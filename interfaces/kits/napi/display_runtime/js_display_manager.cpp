@@ -1181,7 +1181,6 @@ napi_value OnAddVirtualScreenBlockList(napi_env env, napi_callback_info info)
         }
         auto res = DM_JS_TO_ERROR_CODE_MAP.at(
             SingletonContainer::Get<ScreenManager>().AddVirtualScreenBlockList(persistentIds));
-        res = (res == DmErrorCode::DM_ERROR_NOT_SYSTEM_APP) ? DmErrorCode::DM_ERROR_NO_PERMISSION : res;
         if (res != DmErrorCode::DM_OK) {
             TLOGE(WmsLogTag::DMS, "failed");
             task->Reject(env, CreateJsError(env, static_cast<int32_t>(res), "add black list failed"));
@@ -1233,7 +1232,6 @@ napi_value OnRemoveVirtualScreenBlockList(napi_env env, napi_callback_info info)
         }
         auto res = DM_JS_TO_ERROR_CODE_MAP.at(
             SingletonContainer::Get<ScreenManager>().RemoveVirtualScreenBlockList(persistentIds));
-        res = (res == DmErrorCode::DM_ERROR_NOT_SYSTEM_APP) ? DmErrorCode::DM_ERROR_NO_PERMISSION : res;
         if (res != DmErrorCode::DM_OK) {
             TLOGE(WmsLogTag::DMS, "failed");
             task->Reject(env, CreateJsError(env, static_cast<int32_t>(res), "remove black list failed"));

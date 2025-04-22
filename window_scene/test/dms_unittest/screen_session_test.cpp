@@ -2834,20 +2834,6 @@ HWTEST_F(ScreenSessionTest, GetPointerActiveHeight, Function | SmallTest | Level
 }
 
 /**
- * @tc.name: SetShareProtect
- * @tc.desc: SetShareProtect test
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionTest, SetShareProtect, Function | SmallTest | Level2)
-{
-    GTEST_LOG_(INFO) << "ScreenSessionTest: SetShareProtect start";
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
-    session->SetShareProtect(false);
-    ASSERT_EQ(session->GetShareProtect(), false);
-    GTEST_LOG_(INFO) << "ScreenSessionTest: SetShareProtect end";
-}
-
-/**
  * @tc.name: UpdateExpandAvailableArea
  * @tc.desc: UpdateExpandAvailableArea test
  * @tc.type: FUNC
@@ -2869,6 +2855,28 @@ HWTEST_F(ScreenSessionTest, UpdateExpandAvailableArea, Function | SmallTest | Le
     res = screenSession->UpdateExpandAvailableArea(area);
     ASSERT_EQ(res, true);
     GTEST_LOG_(INFO) << "ScreenSessionTest: UpdateExpandAvailableArea end";
+}
+
+/**
+ * @tc.name: UpdateDisplayNodeRotation
+ * @tc.desc: UpdateDisplayNodeRotation test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, UpdateDisplayNodeRotation, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: UpdateDisplayNodeRotation start";
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(screenSession, nullptr);
+    screenSession->UpdateDisplayNodeRotation(1);
+    ASSERT_EQ(screenSession->isExtended_, false);
+
+    Rosen::RSDisplayNodeConfig rsConfig;
+    rsConfig.isMirrored = true;
+    rsConfig.screenId = 101;
+    screenSession->CreateDisplayNode(rsConfig);
+    screenSession->UpdateDisplayNodeRotation(1);
+    ASSERT_EQ(screenSession->isExtended_, false);
+    GTEST_LOG_(INFO) << "ScreenSessionTest: UpdateDisplayNodeRotation end";
 }
 } // namespace
 } // namespace Rosen

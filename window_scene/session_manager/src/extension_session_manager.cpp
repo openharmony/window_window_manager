@@ -59,7 +59,7 @@ sptr<AAFwk::SessionInfo> ExtensionSessionManager::SetAbilitySessionInfo(const sp
     abilitySessionInfo->orientation = sessionInfo.config_.orientation_;
     abilitySessionInfo->isDensityFollowHost = sessionInfo.config_.isDensityFollowHost_;
     if (sessionInfo.want != nullptr) {
-        abilitySessionInfo->want = *sessionInfo.want;
+        abilitySessionInfo->want = sessionInfo.SafelyGetWant();
     }
     return abilitySessionInfo;
 }
@@ -132,7 +132,8 @@ WSError ExtensionSessionManager::RequestExtensionSessionActivation(const sptr<Ex
         if (errorCode != ERR_OK) {
             std::ostringstream oss;
             oss << "Start UIExtensionAbility failed" << ",";
-            oss << " provider windowName: " << extSession->GetWindowName() << ",";
+            oss << " provider bundleName: " << extSession->GetSessionInfo().bundleName_ << ",";
+            oss << " provider abilityName: " << extSession->GetSessionInfo().abilityName_ << ",";
             oss << " errorCode: " << errorCode << ";";
             int32_t ret = WindowInfoReporter::GetInstance().ReportUIExtensionException(
                 static_cast<int32_t>(WindowDFXHelperType::WINDOW_UIEXTENSION_START_ABILITY_FAIL),

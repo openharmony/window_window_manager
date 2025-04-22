@@ -114,6 +114,7 @@ group("unittest") {
     "rotation:ws_session_stage_stub_rotation_test",
     "rotation:ws_window_session_property_rotation_test",
     "ui_extension:unittest",
+    "window_focus:unittest",
     "window_pattern:window_pattern_snapshot_test",
     "window_pattern:window_pattern_starting_window_rdb_test",
     "window_pattern:window_pattern_starting_window_test",
@@ -122,6 +123,7 @@ group("unittest") {
 
   if (window_manager_use_sceneboard) {
     deps += [
+      ":ws_mock_session_manager_service_test",
       ":ws_session_manager_lite_test",
       ":ws_session_manager_test",
     ]
@@ -363,6 +365,7 @@ ohos_unittest("ws_root_scene_session_test") {
   deps = [ ":ws_unittest_common" ]
 
   external_deps = [
+    "ability_runtime:mission_info",
     "c_utils:utils",
     "hilog:libhilog",
   ]
@@ -1621,6 +1624,27 @@ ohos_unittest("ws_session_manager_service_recover_proxy_test") {
   ]
 }
 
+ohos_unittest("ws_mock_session_manager_service_test") {
+  module_out_path = module_out_path
+
+  include_dirs = [ "../mock" ]
+
+  sources = [
+    "mock_session_manager_service_test.cpp",
+  ]
+
+  deps = [
+    ":ws_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+    "${window_base_path}/wmserver:sms",
+  ]
+
+  external_deps = [
+    "hilog:libhilog",
+    "safwk:system_ability_fwk",
+  ]
+}
+
 ohos_unittest("ws_dfx_hisysevent_test") {
   module_out_path = module_out_path
 
@@ -1707,6 +1731,7 @@ ohos_static_library("ws_unittest_common") {
     "multi_user:*",
     "rotation:*",
     "ui_extension:*",
+    "window_focus:*",
     "window_pattern:*",
     "window_recover:*",
   ]
