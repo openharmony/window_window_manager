@@ -268,12 +268,15 @@ public:
     SuperFoldStatus GetSuperFoldStatus() override;
     void SetLandscapeLockStatus(bool isLocked) override;
     bool GetTentMode();
-    bool GetCameraMode();
     ExtendScreenConnectStatus GetExtendScreenConnectStatus() override;
     bool GetIsExtendScreenConnected();
     void SetIsExtendScreenConnected(bool isExtendScreenConnected);
     void HandleExtendScreenConnect(ScreenId screenId);
     void HandleExtendScreenDisconnect(ScreenId screenId);
+    bool GetIsOuterOnlyMode();
+    void SetIsOuterOnlyMode(bool isOuterOnlyMode);
+    bool GetIsOuterOnlyModeBeforePowerOff();
+    void SetIsOuterOnlyModeBeforePowerOff(bool isOuterOnlyModeBeforePowerOff);
 
     bool SetScreenPower(ScreenPowerStatus status, PowerStateChangeReason reason);
     void SetScreenPowerForFold(ScreenPowerStatus status);
@@ -317,6 +320,8 @@ public:
     std::shared_ptr<RSDisplayNode> GetDisplayNode(ScreenId screenId) override;
     void UpdateScreenRotationProperty(ScreenId screenId, const RRect& bounds, float rotation,
         ScreenPropertyChangeType screenPropertyChangeType) override;
+    void UpdateScreenRotationPropertyForRs(sptr<ScreenSession>& screenSession,
+        ScreenPropertyChangeType screenPropertyChangeType, const RRect& bounds, float rotation);
     void UpdateScreenDirectionInfo(ScreenId screenId, float screenComponentRotation, float rotation,
         float phyRotation, ScreenPropertyChangeType screenPropertyChangeType) override;
     uint32_t GetCurvedCompressionArea() override;
@@ -385,18 +390,18 @@ public:
     void SwitchScrollParam(FoldDisplayMode displayMode);
     void OnScreenChange(ScreenId screenId, ScreenEvent screenEvent,
         ScreenChangeReason reason = ScreenChangeReason::DEFAULT);
+    void OnFoldScreenChange(sptr<ScreenSession>& screenSession);
     void SetCoordinationFlag(bool isCoordinationFlag);
     bool GetCoordinationFlag(void);
     DMError SetVirtualScreenMaxRefreshRate(ScreenId id, uint32_t refreshRate,
         uint32_t& actualRefreshRate) override;
 
     void SetLastScreenMode(sptr<ScreenSession> firstSession, sptr<ScreenSession> secondarySession);
-
-    bool IsOrientationNeedChanged() override;
     /*
      * multi user
      */
     void SwitchUser() override;
+    void SetDefaultMultiScreenModeWhenSwitchUser() override;
     void SwitchScbNodeHandle(int32_t userId, int32_t newScbPid, bool coldBoot);
     void HotSwitch(int32_t newUserId, int32_t newScbPid);
     void AddScbClientDeathRecipient(const sptr<IScreenSessionManagerClient>& scbClient, int32_t scbPid);
@@ -427,6 +432,8 @@ public:
     sptr<ScreenSession> GetPhysicalScreenSession(ScreenId screenId) const;
     sptr<ScreenSession> GetScreenSessionByRsId(ScreenId rsScreenId);
     void NotifyExtendScreenCreateFinish() override;
+    void NotifyExtendScreenDestroyFinish() override;
+    void NotifyCreatedScreen(sptr<ScreenSession> screenSession);
     void UpdateScreenIdManager(sptr<ScreenSession>& innerScreen, sptr<ScreenSession>& externalScreen);
     std::string DumperClientScreenSessions();
     void SetMultiScreenModeChangeTracker(std::string changeProc);
@@ -476,7 +483,11 @@ private:
     void GetAndMergeEdidInfo(sptr<ScreenSession> screenSession);
     std::string ConvertEdidToString(const struct BaseEdid edidData);
     bool RecoverRestoredMultiScreenMode(sptr<ScreenSession> screenSession);
+    bool CheckMultiScreenInfoMap(std::map<std::string, MultiScreenInfo> multiScreenInfoMap,
+        const std::string& serialNumber);
     void SetExtendedScreenFallbackPlan(ScreenId screenId);
+    void SetExtendedScreenFallbackPlanEvent(int32_t res);
+    void SetInnerScreenFallbackPlan(sptr<ScreenSession> screenSession);
     int32_t GetCurrentInUseScreenNumber();
     void ReportHandleScreenEvent(ScreenEvent screenEvent, ScreenCombination screenCombination);
     void HandleScreenConnectEvent(sptr<ScreenSession> screenSession, ScreenId screenId, ScreenEvent screenEvent);
@@ -484,10 +495,14 @@ private:
     void HandlePCScreenDisconnect(sptr<ScreenSession> screenSession);
     ScreenRotation ConvertOffsetToCorrectRotation(int32_t phyOffset);
     void MultiScreenModeChange(ScreenId mainScreenId, ScreenId secondaryScreenId, const std::string& operateType);
+    void OperateModeChange(ScreenId mainScreenId, ScreenId secondaryScreenId, sptr<ScreenSession>& firstSession,
+        sptr<ScreenSession>& secondarySession, const std::string& operateMode);
     void SetClientInner();
     void RecoverMultiScreenMode(sptr<ScreenSession> screenSession);
     void GetCurrentScreenPhyBounds(float& phyWidth, float& phyHeight, bool& isReset, const ScreenId& screenid);
     void SetPhysicalRotationClientInner(ScreenId screenId, int rotation);
+    sptr<ScreenSession> GetInternalScreenSession();
+    void ExitOuterOnlyMode(ScreenId mainScreenId, ScreenId secondaryScreenId, MultiScreenMode screenMode);
 
     void NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);
@@ -609,6 +624,7 @@ private:
     std::map<ScreenId, sptr<ScreenSessionGroup>> smsScreenGroupMap_;
     std::map<uint32_t, DMHookInfo> displayHookMap_;
 
+    bool userSwitching_ = false;
     bool isAutoRotationOpen_ = false;
     bool isExpandCombination_ = false;
     bool isScreenShot_ = false;
@@ -635,6 +651,8 @@ private:
     uint32_t defaultDeviceRotationOffset_ { 0 };
     std::atomic<ExtendScreenConnectStatus> extendScreenConnectStatus_ = ExtendScreenConnectStatus::UNKNOWN;
     bool isExtendScreenConnected_ = false;
+    bool isOuterOnlyMode_ = false;
+    bool isOuterOnlyModeBeforePowerOff_ = false;
 
     /**
      * On/Off screen
@@ -660,6 +678,8 @@ private:
 
     std::vector<ScreenId> mirrorScreenIds_;
     std::mutex snapBypickerMutex_;
+    std::mutex switchUserMutex_;
+    std::condition_variable switchUserCV_;
 
     std::mutex freezedPidListMutex_;
     std::set<int32_t> freezedPidList_;
@@ -710,7 +730,7 @@ private:
     void UpdateDisplayState(std::vector<ScreenId> screenIds, DisplayState state);
     void SetExtendPixelRatio(const float& dpi);
     void CallRsSetScreenPowerStatusSyncForExtend(const std::vector<ScreenId>& screenIds, ScreenPowerStatus status);
-    void SetRsSetScreenPowerStatusSync(const std::vector<ScreenId>& screenIds, ScreenPowerStatus status);
+    void SetRsSetScreenPowerStatusSync(std::vector<ScreenId>& screenIds, ScreenPowerStatus status);
     DisplayState lastDisplayState_ { DisplayState::UNKNOWN };
     void SetMultiScreenOuterMode(sptr<ScreenSession>& innerSession, sptr<ScreenSession>& outerSession);
     void RecoveryMultiScreenNormalMode(sptr<ScreenSession>& innerSession, sptr<ScreenSession>& outerSession);

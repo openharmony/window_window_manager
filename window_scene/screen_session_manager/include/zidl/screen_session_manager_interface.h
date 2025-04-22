@@ -166,7 +166,6 @@ public:
 
     FoldDisplayMode GetFoldDisplayMode() override { return FoldDisplayMode::UNKNOWN; }
 
-    bool IsOrientationNeedChanged() override {return false;};
     bool IsFoldable() override { return false; };
     bool IsCaptured() override { return false; };
 
@@ -250,7 +249,9 @@ public:
     {
         return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
     }
+    virtual void SetDefaultMultiScreenModeWhenSwitchUser() {};
     virtual void NotifyExtendScreenCreateFinish() {};
+    virtual void NotifyExtendScreenDestroyFinish() {};
 };
 } // namespace Rosen
 } // namespace OHOS
