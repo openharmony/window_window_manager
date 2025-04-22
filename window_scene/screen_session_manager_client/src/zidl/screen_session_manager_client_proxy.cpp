@@ -827,6 +827,10 @@ void ScreenSessionManagerClientProxy::SetScreenCombination(ScreenId mainScreenId
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
     if (!data.WriteUint64(static_cast<uint64_t>(mainScreenId))) {
         WLOGFE("Write main screenId failed");
         return;

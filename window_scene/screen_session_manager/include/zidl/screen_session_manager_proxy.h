@@ -158,7 +158,6 @@ public:
 
     bool IsFoldable() override;
     bool IsCaptured() override;
-    bool IsOrientationNeedChanged() override;
 
     FoldStatus GetFoldStatus() override;
     SuperFoldStatus GetSuperFoldStatus() override;
@@ -221,7 +220,9 @@ public:
     ScreenCombination GetScreenCombination(ScreenId screenId) override;
     DMError SetScreenSkipProtectedWindow(const std::vector<ScreenId>& screenIds, bool isEnable) override;
     bool GetIsRealScreen(ScreenId screenId) override;
+    void SetDefaultMultiScreenModeWhenSwitchUser() override;
     void NotifyExtendScreenCreateFinish() override;
+    void NotifyExtendScreenDestroyFinish() override;
 
 private:
     static inline BrokerDelegator<ScreenSessionManagerProxy> delegator_;

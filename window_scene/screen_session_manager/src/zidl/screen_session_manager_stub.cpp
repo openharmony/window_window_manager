@@ -1114,10 +1114,6 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             RecordEventFromScb(description, needRecordEvent);
             break;
         }
-        case DisplayManagerMessage::TRANS_ID_IS_ORIENTATION_NEED_CHANGE: {
-            reply.WriteBool(IsOrientationNeedChanged());
-            break;
-        }
         case DisplayManagerMessage::TRANS_ID_GET_IS_REAL_SCREEN: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             reply.WriteBool(GetIsRealScreen(screenId));
@@ -1156,8 +1152,16 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             SetForceCloseHdr(screenId, isForceCloseHdr);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SET_DEFAULT_MODE_WHEN_SWITCH_USER: {
+            SetDefaultMultiScreenModeWhenSwitchUser();
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_NOTIFY_EXTEND_SCREEN_CREATE_FINISH: {
             NotifyExtendScreenCreateFinish();
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_NOTIFY_EXTEND_SCREEN_DESTROY_FINISH: {
+            NotifyExtendScreenDestroyFinish();
             break;
         }
         default:
