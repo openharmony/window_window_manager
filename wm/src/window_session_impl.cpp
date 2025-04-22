@@ -70,13 +70,13 @@ constexpr int32_t  WINDOW_ROTATION_CHANGE = 20;
  * DFX
  */
 const std::string SET_UIEXTENSION_DESTROY_TIMEOUT_LISTENER_TASK_NAME = "SetUIExtDestroyTimeoutListener";
-const std::string BUTTON_BACKGROUND_CORNER_RADIUS = "button_background_corner_radius";
-const std::string BUTTON_BACKGROUND_SIZE = "button_background_size";
-const std::string BUTTON_ICON_SIZE = "button_icon_size";
-const std::string CLOSE_BUTTON_RIGHT_MARGIN = "close_button_right_margin";
-const std::string BUTTON_COLOR_MODE = "color_mode";
-const std::string BUTTON_SPACING_BETWEEN = "spacing_between_buttons";
-const std::string DECOR_BUTTON_STYLE_CHANGE = "decor_button_style_change";
+const std::string BUTTON_BACKGROUND_CORNER_RADIUS = "buttonBackgroundCornerRadius";
+const std::string BUTTON_BACKGROUND_SIZE = "buttonBackgroundSize";
+const std::string BUTTON_ICON_SIZE = "buttonIconSize";
+const std::string CLOSE_BUTTON_RIGHT_MARGIN = "closeButtonRightMargin";
+const std::string BUTTON_COLOR_MODE = "colorMode";
+const std::string BUTTON_SPACING_BETWEEN = "spacingBetweenButtons";
+const std::string DECOR_BUTTON_STYLE_CHANGE = "decorButtonStyleChange";
 constexpr int64_t SET_UIEXTENSION_DESTROY_TIMEOUT_TIME_MS = 4000;
 
 const std::string SCB_BACK_VISIBILITY = "scb_back_visibility";
