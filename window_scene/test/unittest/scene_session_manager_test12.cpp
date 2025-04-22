@@ -574,7 +574,7 @@ HWTEST_F(SceneSessionManagerTest12, DestroyToastSession, TestSize.Level1)
     sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ssm_->DestroyToastSession(sceneSession);
     ssm_->StartUIAbilityBySCB(sceneSession);
-    int32_t ret = ssm_->ChangeUIAbilityVisibilityBySCB(sceneSession, true);
+    int32_t ret = ssm_->ChangeUIAbilityVisibilityBySCB(sceneSession, true, false);
     EXPECT_NE(ret, ERR_OK);
 }
 
