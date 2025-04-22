@@ -34,6 +34,8 @@ enum class RegisterListenerType : uint32_t {
     LIFECYCLE_EVENT_CB,
     WINDOW_EVENT_CB,
     KEYBOARD_HEIGHT_CHANGE_CB,
+    KEYBOARD_DID_SHOW_CB,
+    KEYBOARD_DID_HIDE_CB,
     TOUCH_OUTSIDE_CB,
     SCREENSHOT_EVENT_CB,
     DIALOG_TARGET_TOUCH_CB,
@@ -67,6 +69,10 @@ private:
     WmErrorCode ProcessLifeCycleEventRegister(sptr<AniWindowListener> listener, sptr<Window> window, bool isRegister,
         ani_env* env);
     WmErrorCode ProcessOccupiedAreaChangeRegister(sptr<AniWindowListener> listener, sptr<Window> window,
+        bool isRegister, ani_env* env);
+    WmErrorCode ProcessKeyboardDidShowRegister(sptr<AniWindowListener> listener, sptr<Window> window,
+        bool isRegister, ani_env* env);
+    WmErrorCode ProcessKeyboardDidHideRegister(sptr<AniWindowListener> listener, sptr<Window> window,
         bool isRegister, ani_env* env);
     WmErrorCode ProcessSystemBarChangeRegister(sptr<AniWindowListener> listener, sptr<Window> window, bool isRegister,
     ani_env* env);
