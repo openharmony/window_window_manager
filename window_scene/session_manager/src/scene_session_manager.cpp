@@ -10398,7 +10398,7 @@ void SceneSessionManager::NotifyStatusBarConstantlyShow(DisplayId displayId, boo
         statusBarConstantlyShowMap_[displayId] = isVisible;
         return WMError::WM_OK;
     };
-    taskScheduler_->PostSyncTask(task, where);
+    taskScheduler_->PostAsyncTask(task, where);
 }
 
 void SceneSessionManager::GetStatusBarConstantlyShow(DisplayId displayId, bool& isVisible)
