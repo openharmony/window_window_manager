@@ -3861,7 +3861,7 @@ HWTEST_F(ScreenSessionManagerTest, GetDisplayCapability, Function | SmallTest | 
 {
     std::string info {""};
     if (ssm_ != nullptr) {
-        info = ssm_->GetDisplayCapability();
+        EXPECT_EQ(DMError::DM_OK, ssm_->GetDisplayCapability(info));
         ASSERT_NE(info, "");
     } else {
         ASSERT_EQ(info, "");
@@ -3877,7 +3877,7 @@ HWTEST_F(ScreenSessionManagerTest, GetSecondaryDisplayCapability, Function | Sma
 {
     std::string info {""};
     if (ssm_ != nullptr) {
-        info = ssm_->GetSecondaryDisplayCapability();
+        EXPECT_EQ(DMError::DM_OK, ssm_->GetSecondaryDisplayCapability(info));
         ASSERT_NE(info, "");
     } else {
         ASSERT_EQ(info, "");
@@ -3896,7 +3896,7 @@ HWTEST_F(ScreenSessionManagerTest, GetSuperFoldCapability, Function | SmallTest 
     }
     std::string info {""};
     if (ssm_ != nullptr) {
-        info = ssm_->GetSuperFoldCapability();
+        EXPECT_EQ(DMError::DM_OK, ssm_->GetSuperFoldCapability(info));
         ASSERT_NE(info, "");
     } else {
         ASSERT_EQ(info, "");
@@ -3915,7 +3915,7 @@ HWTEST_F(ScreenSessionManagerTest, GetFoldableDeviceCapability, Function | Small
     }
     std::string info {""};
     if (ssm_ != nullptr) {
-        info = ssm_->GetFoldableDeviceCapability();
+        EXPECT_EQ(DMError::DM_OK, ssm_->GetFoldableDeviceCapability(info));
         ASSERT_NE(info, "");
     } else {
         ASSERT_EQ(info, "");
