@@ -945,18 +945,20 @@ struct WindowDisplayInfo : public Parcelable {
  */
 struct WindowLayoutInfo : public Parcelable {
     Rect rect = Rect::EMPTY_RECT;
+    uint32_t zOrder = 0;
 
     bool Marshalling(Parcel& parcel) const override
     {
         return parcel.WriteInt32(rect.posX_) && parcel.WriteInt32(rect.posY_) && parcel.WriteUint32(rect.width_) &&
-               parcel.WriteUint32(rect.height_);
+               parcel.WriteUint32(rect.height_) && parcel.WriteUint32(zOrder);
     }
 
     static WindowLayoutInfo* Unmarshalling(Parcel& parcel)
     {
         WindowLayoutInfo* windowLayoutInfo = new WindowLayoutInfo();
         if (!parcel.ReadInt32(windowLayoutInfo->rect.posX_) || !parcel.ReadInt32(windowLayoutInfo->rect.posY_) ||
-            !parcel.ReadUint32(windowLayoutInfo->rect.width_) || !parcel.ReadUint32(windowLayoutInfo->rect.height_)) {
+            !parcel.ReadUint32(windowLayoutInfo->rect.width_) || !parcel.ReadUint32(windowLayoutInfo->rect.height_) ||
+            !parcel.ReadUint32(windowLayoutInfo->zOrder)) {
             delete windowLayoutInfo;
             return nullptr;
         }
@@ -975,21 +977,31 @@ struct WindowMetaInfo : public Parcelable {
     std::string bundleName;
     std::string abilityName;
     int32_t appIndex = 0;
+    WindowType windowType = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
+    int32_t parentWindowId = -1;
+    uint64_t surfaceNodeId = -1;
+    bool isPrivacyMode = false;
 
     bool Marshalling(Parcel& parcel) const override
     {
         return parcel.WriteInt32(windowId) && parcel.WriteString(windowName) && parcel.WriteString(bundleName) &&
-               parcel.WriteString(abilityName) && parcel.WriteInt32(appIndex);
+               parcel.WriteString(abilityName) && parcel.WriteInt32(appIndex) &&
+               parcel.WriteUint32(static_cast<uint32_t>(windowType)) && parcel.WriteInt32(parentWindowId) &&
+               parcel.WriteUint64(surfaceNodeId) && parcel.WriteBool(isPrivacyMode);
     }
     static WindowMetaInfo* Unmarshalling(Parcel& parcel)
     {
+        uint32_t windowTypeValue = 1;
         WindowMetaInfo* windowMetaInfo = new WindowMetaInfo();
         if (!parcel.ReadInt32(windowMetaInfo->windowId) || !parcel.ReadString(windowMetaInfo->windowName) ||
             !parcel.ReadString(windowMetaInfo->bundleName) || !parcel.ReadString(windowMetaInfo->abilityName) ||
-            !parcel.ReadInt32(windowMetaInfo->appIndex)) {
+            !parcel.ReadInt32(windowMetaInfo->appIndex) || !parcel.ReadUint32(windowTypeValue) || 
+            !parcel.ReadInt32(windowMetaInfo->parentWindowId) || !parcel.ReadUint64(windowMetaInfo->surfaceNodeId) ||
+            !parcel.ReadBool(windowMetaInfo->isPrivacyMode)) {
             delete windowMetaInfo;
             return nullptr;
         }
+        windowMetaInfo->windowType = static_cast<WindowType>(windowTypeValue);
         return windowMetaInfo;
     }
 };
