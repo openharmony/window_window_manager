@@ -196,6 +196,7 @@ ohos_shared_library("screen_session_manager") {
       "src/fold_screen_controller/super_fold_policy.cpp",
       "src/fold_screen_controller/super_fold_sensor_manager.cpp",
       "src/fold_screen_controller/super_fold_state_manager.cpp",
+      "src/screen_aod_plugin.cpp",
     ]
     print("window manager fold ability is enabled.")
   } else {
