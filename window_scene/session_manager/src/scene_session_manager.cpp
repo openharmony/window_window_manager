@@ -8161,13 +8161,17 @@ bool SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInf
     const sptr<SceneSession>& sceneSession)
 {
     if (sceneSession == nullptr) {
-        WLOGFW("null scene session.");
+        TLOGW(WmsLogTag::DEFAULT, "null scene session.");
         return false;
     }
     if (sceneSession->GetSessionInfo().bundleName_.find("SCBGestureBack") != std::string::npos ||
         sceneSession->GetSessionInfo().bundleName_.find("SCBGestureNavBar") != std::string::npos ||
         sceneSession->GetSessionInfo().bundleName_.find("SCBGestureTopBar") != std::string::npos) {
-        WLOGFD("filter gesture window.");
+        TLOGD(WmsLogTag::DEFAULT, "filter gesture window.");
+        return false;
+    }
+    if (sceneSession->GetSessionInfo().bundleName_.find("SCBDragScale") != std::string::npos) {
+        TLOGD(WmsLogTag::DEFAULT, "filter DragScale window.");
         return false;
     }
     sptr<AccessibilityWindowInfo> info = new (std::nothrow) AccessibilityWindowInfo();
@@ -11164,6 +11168,12 @@ void SceneSessionManager::GetAllSceneSessionForAccessibility(std::vector<sptr<Sc
             sceneSession->GetSessionInfo().bundleName_.find("SCBGestureTopBar") != std::string::npos) {
             continue;
         }
+        if (sceneSession->GetSessionInfo().bundleName_.find("SCBDragScale") != std::string::npos) {
+            continue;
+        }
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "isSys=%{public}d, inWid=%{public}d, bundle=%{public}s, zOrder=%{public}u",
+            sceneSession->GetSessionInfo().isSystem_, static_cast<int32_t>(sceneSession->GetPersistentId()),
+            sceneSession->GetSessionInfo().bundleName_.c_str(), sceneSession->GetZOrder());
         sceneSessionList.push_back(sceneSession);
     }
 }
@@ -11207,27 +11217,61 @@ void SceneSessionManager::FilterSceneSessionCovered(std::vector<sptr<SceneSessio
             }
             unaccountedSpaceMap[displayId] = unaccountedSpace;
         }
-        WSRect wsRect = sceneSession->GetSessionRect();
-        SkIRect windowBounds {.fLeft = wsRect.posX_, .fTop = wsRect.posY_,
-                              .fRight = wsRect.posX_ + wsRect.width_, .fBottom = wsRect.posY_ + wsRect.height_};
-        SkRegion windowRegion(windowBounds);
-        if (unaccountedSpace->quickReject(windowRegion)) {
-            TLOGD(WmsLogTag::WMS_MAIN, "quick reject: [l=%{public}d,t=%{public}d,r=%{public}d,b=%{public}d]",
-                windowBounds.fLeft, windowBounds.fTop, windowBounds.fRight, windowBounds.fBottom);
-            continue;
+        if (SubtractIntersectArea(unaccountedSpace, sceneSession)) {
+            result.push_back(sceneSession);
         }
-        if (!unaccountedSpace->intersects(windowRegion)) {
-            TLOGD(WmsLogTag::WMS_MAIN, "no intersects: [l=%{public}d,t=%{public}d,r=%{public}d,b=%{public}d]",
-                windowBounds.fLeft, windowBounds.fTop, windowBounds.fRight, windowBounds.fBottom);
-            continue;
-        }
-        result.push_back(sceneSession);
-        unaccountedSpace->op(windowRegion, SkRegion::Op::kDifference_Op);
         if (unaccountedSpace->isEmpty()) {
+            TLOGD(WmsLogTag::WMS_ATTRIBUTE, "break after: inWid=%{public}d, zOrder=%{public}u",
+                static_cast<int32_t>(sceneSession->GetPersistentId()), sceneSession->GetZOrder());
             break;
         }
     }
     sceneSessionList = result;
+}
+
+bool SceneSessionManager::SubtractIntersectArea(std::shared_ptr<SkRegion>& unaccountedSpace,
+    const sptr<SceneSession>& sceneSession)
+{
+    if (unaccountedSpace == nullptr || sceneSession == nullptr) {
+        TLOGW(WmsLogTag::WMS_ATTRIBUTE, "space or session is null");
+        return false;
+    }
+    auto hotAreas = sceneSession->GetTouchHotAreas();
+    if (hotAreas.empty()) {
+        WSRect wsRect = sceneSession->GetSessionRect();
+        hotAreas.push_back({.posX_ = wsRect.posX_, .posY_ = wsRect.posY_,
+                            .width_ = wsRect.width_, .height_ = wsRect.height_});
+    }
+    bool hasIntersectArea = false;
+    for (const auto& rect : hotAreas) {
+        SkIRect windowBounds {.fLeft = rect.posX_, .fTop = rect.posY_,
+                              .fRight = rect.posX_ + rect.width_, .fBottom = rect.posY_ + rect.height_};
+        SkRegion windowRegion(windowBounds);
+        if (unaccountedSpace->quickReject(windowRegion)) {
+            TLOGD(WmsLogTag::WMS_ATTRIBUTE, "quick reject: inWid=%{public}d, "
+                "bounds=[l=%{public}d, t=%{public}d, r=%{public}d, b=%{public}d]",
+                static_cast<int32_t>(sceneSession->GetPersistentId()),
+                windowBounds.fLeft, windowBounds.fTop, windowBounds.fRight, windowBounds.fBottom);
+            continue;
+        }
+        if (!unaccountedSpace->intersects(windowRegion)) {
+            TLOGD(WmsLogTag::WMS_ATTRIBUTE, "no intersects: inWid=%{public}d, "
+                "bounds=[l=%{public}d, t=%{public}d, r=%{public}d, b=%{public}d]",
+                static_cast<int32_t>(sceneSession->GetPersistentId()),
+                windowBounds.fLeft, windowBounds.fTop, windowBounds.fRight, windowBounds.fBottom);
+            continue;
+        }
+        hasIntersectArea = true;
+        unaccountedSpace->op(windowRegion, SkRegion::Op::kDifference_Op);
+        if (unaccountedSpace->isEmpty()) {
+            TLOGD(WmsLogTag::WMS_ATTRIBUTE, "break hot area: inWid=%{public}d, "
+                "bounds=[l=%{public}d, t=%{public}d, r=%{public}d, b=%{public}d]",
+                static_cast<int32_t>(sceneSession->GetPersistentId()),
+                windowBounds.fLeft, windowBounds.fTop, windowBounds.fRight, windowBounds.fBottom);
+            break;
+        }
+    }
+    return hasIntersectArea;
 }
 
 void SceneSessionManager::NotifyAllAccessibilityInfo()
