@@ -221,6 +221,8 @@ public:
     bool GetIsAbilityHookOff() const;
     void SetIsAbilityHook(bool isAbilityHook);
     bool GetIsAbilityHook() const;
+    bool GetFollowScreenChange() const;
+    void SetFollowScreenChange(bool isFollowScreenChange);
 
     /*
      * Sub Window
@@ -331,6 +333,7 @@ private:
     bool WriteActionUpdateAvoidAreaOption(Parcel& parcel);
     bool WriteActionUpdateBackgroundAlpha(Parcel& parcel);
     bool WriteActionUpdateExclusivelyHighlighted(Parcel& parcel);
+    bool WriteActionUpdateFollowScreenChange(Parcel& parcel);
     void ReadActionUpdateTurnScreenOn(Parcel& parcel);
     void ReadActionUpdateKeepScreenOn(Parcel& parcel);
     void ReadActionUpdateViewKeepScreenOn(Parcel& parcel);
@@ -361,6 +364,7 @@ private:
     void ReadActionUpdateAvoidAreaOption(Parcel& parcel);
     void ReadActionUpdateBackgroundAlpha(Parcel& parcel);
     void ReadActionUpdateExclusivelyHighlighted(Parcel& parcel);
+    void ReadActionUpdateFollowScreenChange(Parcel& parcel);
     std::string windowName_;
     SessionInfo sessionInfo_;
     mutable std::mutex windowRectMutex_;
@@ -386,6 +390,7 @@ private:
     bool isPrivacyMode_ { false };
     bool isSystemPrivacyMode_ { false };
     bool isSnapshotSkip_ { false };
+    bool isFollowScreenChange_ { false };
     float brightness_ = UNDEFINED_BRIGHTNESS;
     uint64_t displayId_ = 0;
     int32_t parentId_ = INVALID_SESSION_ID; // parentId of sceneSession, which is low 32 bite of parentPersistentId_
