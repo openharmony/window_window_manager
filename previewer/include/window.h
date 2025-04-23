@@ -61,6 +61,7 @@ namespace OHOS {
 namespace Rosen {
 class RSSurfaceNode;
 class RSTransaction;
+class RSUIDirector;
 using NotifyNativeWinDestroyFunc = std::function<void(std::string windowName)>;
 using SendRenderDataCallback = bool (*)(const void*, const size_t, const int32_t, const int32_t, const uint64_t);
 using ContentInfoCallback = std::function<void(std::string contentInfo)>;
@@ -140,6 +141,12 @@ public:
        const std::vector<std::shared_ptr<AbilityRuntime::Context>>& ignoreWindowContexts = {});
     static void UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
     virtual std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const = 0;
+
+    /*
+     * RS Multi Instance
+     */
+    virtual std::shared_ptr<RSUIDirector> GetRSUIDirector() const = 0;
+
     virtual const std::shared_ptr<AbilityRuntime::Context> GetContext() const = 0;
     virtual Rect GetRect() const = 0;
     virtual Rect GetRequestRect() const = 0;

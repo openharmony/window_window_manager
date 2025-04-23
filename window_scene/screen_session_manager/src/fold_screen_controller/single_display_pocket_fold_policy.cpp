@@ -18,6 +18,7 @@
 #include <parameters.h>
 #include <transaction/rs_interfaces.h>
 #include "fold_screen_controller/single_display_pocket_fold_policy.h"
+#include "rs_adapter.h"
 #include "session/screen/include/screen_session.h"
 #include "screen_session_manager.h"
 
@@ -541,11 +542,8 @@ void SingleDisplayPocketFoldPolicy::AddOrRemoveDisplayNodeToTree(ScreenId screen
         displayNode->RemoveDisplayNodeFromTree();
     }
     displayNode = nullptr;
-    auto transactionProxy = RSTransactionProxy::GetInstance();
-    if (transactionProxy != nullptr) {
-        TLOGI(WmsLogTag::DMS, "add or remove displayNode");
-        transactionProxy->FlushImplicitTransaction();
-    }
+    TLOGI(WmsLogTag::DMS, "add or remove displayNode");
+    RSTransactionAdapter::FlushImplicitTransaction(screenSession->GetRSUIDirector());
 }
 
 void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeToCoordination()

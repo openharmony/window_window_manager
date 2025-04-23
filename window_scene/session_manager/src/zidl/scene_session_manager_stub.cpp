@@ -17,6 +17,7 @@
 
 #include <ui/rs_surface_node.h>
 #include "marshalling_helper.h"
+#include "rs_adapter.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -239,6 +240,8 @@ int SceneSessionManagerStub::HandleCreateAndConnectSpecificSession(MessageParcel
     sptr<IRemoteObject> eventChannelObject = data.ReadRemoteObject();
     sptr<IWindowEventChannel> eventChannel = iface_cast<IWindowEventChannel>(eventChannelObject);
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Unmarshalling(data);
+    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "Unmarshalling RSSurfaceNode: %{public}s",
+        RSAdapterUtil::RSNodeToStr(surfaceNode).c_str());
     if (sessionStage == nullptr || eventChannel == nullptr || surfaceNode == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "Failed to read scene session stage object or event channel object!");
         return ERR_INVALID_DATA;

@@ -39,6 +39,7 @@
 #include "permission.h"
 #include "persistent_storage.h"
 #include "remote_animation.h"
+#include "rs_adapter.h"
 #include "singleton_container.h"
 #include "starting_window.h"
 #include "ui/rs_ui_director.h"
@@ -91,8 +92,11 @@ WindowManagerService::WindowManagerService() : SystemAbility(WINDOW_MANAGER_SERV
     rsUiDirector_ = RSUIDirector::Create();
     rsUiDirector_->SetUITaskRunner([this](const std::function<void()>& task, uint32_t delay) {
         PostAsyncTask(task, "WindowManagerService:cacheGuard", delay);
-    });
-    rsUiDirector_->Init(false);
+    }, 0, true);
+    rsUiDirector_->Init(false, true);
+    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "Create RSUIDirector: %{public}s",
+          RSAdapterUtil::RSUIDirectorToStr(rsUiDirector_).c_str());
+    WindowInnerManager::GetInstance().SetRSUIDirector(rsUiDirector_);
 }
 
 void WindowManagerService::OnStart()
@@ -973,6 +977,11 @@ WMError WindowManagerService::CreateWindow(sptr<IWindow>& window, sptr<WindowPro
     property->isSystemCalling_ = Permission::IsSystemCalling();
     auto task = [this, pid, uid, &window, &property, &surfaceNode, &windowId, &token]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:CreateWindow(%u)", windowId);
+        if (rsUiDirector_) {
+            surfaceNode->SetRSUIContext(rsUiDirector_->GetRSUIContext());
+            TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "Set RSUIContext: %{public}s",
+                  RSAdapterUtil::RSNodeToStr(surfaceNode).c_str());
+        }
         return windowController_->CreateWindow(window, property, surfaceNode, windowId, token, pid, uid);
     };
     WMError ret = PostSyncTask(task, "CreateWindow");

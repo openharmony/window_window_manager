@@ -29,6 +29,7 @@
 #include "display_manager_agent_controller.h"
 #include "display_manager_service.h"
 #include "event_runner.h"
+#include "rs_adapter.h"
 #include "screen_rotation_controller.h"
 #include "window_manager_hilog.h"
 
@@ -138,7 +139,7 @@ void AbstractScreenController::UpdateRSTree(ScreenId dmsScreenId, ScreenId paren
             WLOGE("rsDisplayNode of parentAbstractScreen is nullptr");
             return;
         }
-        abstractScreen->UpdateDisplayGroupRSTree(surfaceNode, parentAbstractScreen->rsDisplayNode_->GetId(), isAdd);
+        abstractScreen->UpdateDisplayGroupRSTree(surfaceNode, parentAbstractScreen->rsDisplayNode_, isAdd);
     } else {
         abstractScreen->UpdateRSTree(surfaceNode, isAdd);
     }
@@ -337,10 +338,7 @@ void AbstractScreenController::ProcessScreenConnected(ScreenId rsScreenId)
             absScreen->rsDisplayNode_->SetRotation(-90.0f * static_cast<uint32_t>(rotationAfter));
             absScreen->rsDisplayNode_->SetFrame(x, y, w, h);
             absScreen->rsDisplayNode_->SetBounds(x, y, w, h);
-            auto transactionProxy = RSTransactionProxy::GetInstance();
-            if (transactionProxy != nullptr) {
-                transactionProxy->FlushImplicitTransaction();
-            }
+            RSTransactionAdapter::FlushImplicitTransaction(absScreen->rsDisplayNode_);
             absScreen->rotation_ = rotationAfter;
             absScreen->SetOrientation(absScreen->screenRequestedOrientation_);
         }
@@ -874,7 +872,7 @@ void AbstractScreenController::SetScreenRotateAnimation(
         // 10027 means "gesture" level that setting duration: 800, lit_cpu_min_freq: 1421000, mid_cpu_min_feq: 1882000
         OHOS::SOCPERF::SocPerfClient::GetInstance().PerfRequest(10027, "");
 #endif
-        RSNode::Animate(timingProtocol, curve, [weakNode, srect, rotationAfter, this]() {
+        RSNode::Animate(displayNode->GetRSUIContext(), timingProtocol, curve, [weakNode, srect, rotationAfter, this] {
             auto displayNode = weakNode.lock();
             if (displayNode == nullptr) {
                 WLOGFE("error, cannot get DisplayNode");
@@ -901,28 +899,6 @@ void AbstractScreenController::SetDisplayNode(Rotation rotationAfter,
     displayNode->SetBounds(srect.x, srect.y, srect.w, srect.h);
 }
 
-void AbstractScreenController::OpenRotationSyncTransaction()
-{
-     // Before open transaction, it must flush first.
-    auto transactionProxy = RSTransactionProxy::GetInstance();
-    if (!transactionProxy) {
-        return;
-    }
-    transactionProxy->FlushImplicitTransaction();
-    auto syncTransactionController = RSSyncTransactionController::GetInstance();
-    if (syncTransactionController) {
-        syncTransactionController->OpenSyncTransaction();
-    }
-}
-
-void AbstractScreenController::CloseRotationSyncTransaction()
-{
-    auto syncTransactionController = RSSyncTransactionController::GetInstance();
-    if (syncTransactionController) {
-        syncTransactionController->CloseSyncTransaction();
-    }
-}
-
 bool AbstractScreenController::SetRotation(ScreenId screenId, Rotation rotationAfter,
     bool isFromWindow, bool withAnimation)
 {
@@ -938,10 +914,12 @@ bool AbstractScreenController::SetRotation(ScreenId screenId, Rotation rotationA
         return false;
     }
     WLOGFD("set orientation. rotation %{public}u", rotationAfter);
-    OpenRotationSyncTransaction();
-    SetScreenRotateAnimation(screen, screenId, rotationAfter, withAnimation);
-    screen->rotation_ = rotationAfter;
-    CloseRotationSyncTransaction();
+
+    {
+        AutoRSSyncTransaction syncTrans(screen->rsDisplayNode_);
+        SetScreenRotateAnimation(screen, screenId, rotationAfter, withAnimation);
+        screen->rotation_ = rotationAfter;
+    }
 
     NotifyScreenChanged(screen->ConvertToScreenInfo(), ScreenChangeEvent::UPDATE_ROTATION);
     // Notify rotation event to AbstractDisplayController

@@ -66,6 +66,12 @@ public:
     void StartWindowInfoReportLoop();
     void SetWindowRoot(const sptr<WindowRoot>& windowRoot);
 
+    /*
+     * RS Multi Instance
+     */
+    void SetRSUIDirector(std::shared_ptr<RSUIDirector>& rsUIDirector);
+    std::shared_ptr<RSUIDirector> GetRSUIDirector() const;
+
 protected:
     WindowInnerManager();
     ~WindowInnerManager();
@@ -82,6 +88,11 @@ private:
     InnerWMRunningState state_;
     const std::string INNER_WM_THREAD_NAME = "InnerWindowManager";
     bool isReportTaskStart_ = false;
+
+    /*
+     * RS Multi Instance
+     */
+    std::shared_ptr<RSUIDirector> rsUIDirector_;
 };
 } // namespace Rosen
 } // namespace OHOS

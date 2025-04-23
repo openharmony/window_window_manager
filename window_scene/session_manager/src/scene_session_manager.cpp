@@ -55,6 +55,7 @@
 #include "perform_reporter.h"
 #include "rdb/starting_window_rdb_manager.h"
 #include "res_sched_client.h"
+#include "rs_adapter.h"
 #include "scene_input_manager.h"
 #include "scene_system_ability_listener.h"
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
@@ -12068,8 +12069,8 @@ const std::map<int32_t, sptr<SceneSession>> SceneSessionManager::GetSceneSession
 void SceneSessionManager::NotifyUpdateRectAfterLayout()
 {
     std::shared_ptr<RSTransaction> rsTransaction = nullptr;
-    if (auto transactionController = RSSyncTransactionController::GetInstance()) {
-        rsTransaction = transactionController->GetRSTransaction();
+    if (auto rootSceneSession = GetRootSceneSession()) {
+        rsTransaction = RSSyncTransactionAdapter(rootSceneSession->GetSurfaceNode()).GetRSTransaction();
     }
     auto task = [this, rsTransaction] {
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);

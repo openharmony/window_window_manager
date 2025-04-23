@@ -118,8 +118,6 @@ private:
     void NotifyScreenChanged(sptr<ScreenInfo> screenInfo, ScreenChangeEvent event) const;
     void NotifyScreenGroupChanged(const sptr<ScreenInfo>& screenInfo, ScreenGroupChangeEvent event) const;
     void NotifyScreenGroupChanged(const std::vector<sptr<ScreenInfo>>& screenInfo, ScreenGroupChangeEvent event) const;
-    void OpenRotationSyncTransaction();
-    void CloseRotationSyncTransaction();
     void UpdateScreenGroupLayout(sptr<AbstractScreenGroup> screenGroup);
     void SetDisplayNode(Rotation rotationAfter, const std::shared_ptr<RSDisplayNode>& displayNode,
         struct ScreenRect srect);

@@ -35,6 +35,7 @@
 #include "persistent_storage.h"
 #include "surface_capture_future.h"
 #include "remote_animation.h"
+#include "rs_adapter.h"
 #include "starting_window.h"
 #include "window_inner_manager.h"
 #include "window_manager_hilog.h"
@@ -484,7 +485,11 @@ void WindowController::NotifyInputCallingWindowRectAndOccupiedAreaChange(const s
         const AnimationConfig::KeyboardAnimation& animation = WindowHelper::IsEmptyRect(occupiedArea) ?
             WindowNodeContainer::GetAnimationConfigRef().keyboardAnimationOut_ :
             WindowNodeContainer::GetAnimationConfigRef().keyboardAnimationIn_;
-        RSNode::Animate(animation.duration_, animation.curve_, setBoundsFun);
+        std::shared_ptr<RSUIContext> rsUIContext;
+        if (callingWindow->leashWinSurfaceNode_) {
+            rsUIContext = callingWindow->leashWinSurfaceNode_->GetRSUIContext();
+        }
+        RSNode::Animate(rsUIContext, animation.duration_, animation.curve_, setBoundsFun);
     }
 
     // if keyboard will occupy calling, notify calling window the occupied area and safe height
@@ -492,12 +497,9 @@ void WindowController::NotifyInputCallingWindowRectAndOccupiedAreaChange(const s
     sptr<OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo(OccupiedAreaType::TYPE_INPUT,
         safeRect, safeRect.height_);
 
-    if (WindowNodeContainer::GetAnimateTransactionEnabled()) {
-        auto syncTransactionController = RSSyncTransactionController::GetInstance();
-        if (syncTransactionController) {
-            callingWindow->GetWindowToken()->UpdateOccupiedAreaAndRect(info, rect,
-                syncTransactionController->GetRSTransaction());
-        }
+    auto rsTransaction = RSSyncTransactionAdapter(callingWindow->surfaceNode_).GetRSTransaction();
+    if (WindowNodeContainer::GetAnimateTransactionEnabled() && rsTransaction) {
+        callingWindow->GetWindowToken()->UpdateOccupiedAreaAndRect(info, rect,rsTransaction);
     } else {
         callingWindow->GetWindowToken()->UpdateOccupiedAreaAndRect(info, rect);
     }
@@ -900,11 +902,17 @@ void WindowController::ProcessDisplayCompression(DisplayId defaultDisplayId, con
     WLOGFD("Add maskingSurfaceNode");
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
     rsSurfaceNodeConfig.SurfaceNodeName = "maskingSurface";
-    maskingSurfaceNode_ = RSSurfaceNode::Create(rsSurfaceNodeConfig);
+    std::shared_ptr<RSUIContext> rsUIContext;
+    if (auto rsUIDirector = WindowInnerManager::GetInstance().GetRSUIDirector()) {
+        rsUIContext = rsUIDirector->GetRSUIContext();
+    }
+    maskingSurfaceNode_ = RSSurfaceNode::Create(rsSurfaceNodeConfig, true, rsUIContext);
     if (maskingSurfaceNode_ == nullptr) {
         WLOGFE("Create maskingSurfaceNode failed");
         return;
     }
+    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
+          "Create RSSurfaceNode: %{public}s", RSAdapterUtil::RSNodeToStr(maskingSurfaceNode_).c_str());
     auto displayWidth = displayInfo->GetWidth();
     auto displayHeight = displayInfo->GetHeight();
     auto maskingSizeX = displayInfo->GetOffsetX();
@@ -1369,14 +1377,20 @@ void WindowController::FlushWindowInfo(uint32_t windowId)
 {
     WLOGD("FlushWindowInfo");
     displayZoomController_->UpdateWindowZoomInfo(windowId);
-    RSTransaction::FlushImplicitTransaction();
+    auto node = windowRoot_->GetWindowNode(windowId);
+    if (node) {
+        RSTransactionAdapter::FlushImplicitTransaction(node->surfaceNode_);
+    } else {
+        RSTransaction::FlushImplicitTransaction();
+    }
     inputWindowMonitor_->UpdateInputWindow(windowId);
 }
 
 void WindowController::FlushWindowInfoWithDisplayId(DisplayId displayId)
 {
     WLOGFD("DisplayId: %{public}" PRIu64"", displayId);
-    RSTransaction::FlushImplicitTransaction();
+    auto rsUIDirector = WindowInnerManager::GetInstance().GetRSUIDirector();
+    RSTransactionAdapter::FlushImplicitTransaction(rsUIDirector);
     inputWindowMonitor_->UpdateInputWindowByDisplayId(displayId);
 }
 
@@ -1550,7 +1564,7 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
             if (node->leashWinSurfaceNode_ != nullptr) {
                 node->leashWinSurfaceNode_->SetSecurityLayer(isPrivacyMode);
             }
-            RSTransaction::FlushImplicitTransaction();
+            RSTransactionAdapter::FlushImplicitTransaction(node->surfaceNode_);
             UpdatePrivateStateAndNotify(node);
             break;
         }
@@ -1562,7 +1576,7 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
             if (node->leashWinSurfaceNode_ != nullptr) {
                 node->leashWinSurfaceNode_->SetSecurityLayer(isPrivacyMode);
             }
-            RSTransaction::FlushImplicitTransaction();
+            RSTransactionAdapter::FlushImplicitTransaction(node->surfaceNode_);
             UpdatePrivateStateAndNotify(node);
             break;
         }
@@ -1574,7 +1588,7 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
             if (node->leashWinSurfaceNode_ != nullptr) {
                 node->leashWinSurfaceNode_->SetSkipLayer(isSnapshotSkip);
             }
-            RSTransaction::FlushImplicitTransaction();
+            RSTransactionAdapter::FlushImplicitTransaction(node->surfaceNode_);
             break;
         }
         case PropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO: {

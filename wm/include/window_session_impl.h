@@ -25,6 +25,7 @@
 #include <ui_content.h>
 #include <ui/rs_canvas_node.h>
 #include <ui/rs_surface_node.h>
+#include <ui/rs_ui_director.h>
 #include "display_manager.h"
 #include "singleton_container.h"
 
@@ -89,6 +90,12 @@ public:
     WMError SetUIContentByAbc(const std::string& abcPath, napi_env env, napi_value storage,
         AppExecFwk::Ability* ability) override;
     std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const override;
+
+    /*
+     * RS Multi Instance
+     */
+    std::shared_ptr<RSUIDirector> GetRSUIDirector() const override;
+
     const std::shared_ptr<AbilityRuntime::Context> GetContext() const override;
     void SetContext(const std::shared_ptr<AbilityRuntime::Context>& context);
     Rect GetRequestRect() const override;
@@ -527,6 +534,11 @@ protected:
     std::shared_ptr<AbilityRuntime::Context> context_;
     mutable std::shared_mutex contextMutex_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
+
+    /*
+     * RS Multi Instance
+     */
+    std::shared_ptr<RSUIDirector> rsUIDirector_;
 
     sptr<WindowSessionProperty> property_;
     SystemSessionConfig windowSystemConfig_;

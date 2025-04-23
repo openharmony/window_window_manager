@@ -17,6 +17,7 @@
 
 #include <transaction/rs_transaction.h>
 
+#include "rs_adapter.h"
 #include "screen_session_manager.h"
 #include "window_manager_hilog.h"
 
@@ -83,8 +84,9 @@ void MultiScreenChangeUtils::ScreenExtendPositionChange(sptr<ScreenSession>& inn
         } else {
             TLOGW(WmsLogTag::DMS, "DisplayNode is null");
         }
+        RSTransactionAdapter::FlushImplicitTransaction(innerNode);
+        RSTransactionAdapter::FlushImplicitTransaction(externalNode);
     }
-    RSTransaction::FlushImplicitTransaction();
 }
 
 void MultiScreenChangeUtils::SetScreenAvailableStatus(sptr<ScreenSession>& screenSession,
@@ -123,8 +125,9 @@ void MultiScreenChangeUtils::ScreenMainPositionChange(sptr<ScreenSession>& inner
         } else {
             TLOGW(WmsLogTag::DMS, "DisplayNode is null");
         }
+        RSTransactionAdapter::FlushImplicitTransaction(innerNode);
+        RSTransactionAdapter::FlushImplicitTransaction(externalNode);
     }
-    RSTransaction::FlushImplicitTransaction();
 }
 
 void MultiScreenChangeUtils::SetExternalScreenOffScreenRendering(sptr<ScreenSession>& innerScreen,

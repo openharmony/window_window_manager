@@ -48,6 +48,7 @@ class PixelMap;
 
 namespace OHOS::Rosen {
 class RSSurfaceNode;
+class RSUIContext;
 class RSTransaction;
 class RSSyncTransactionController;
 class Session;
@@ -236,6 +237,11 @@ public:
     std::optional<NodeId> GetSurfaceNodeId() const;
     void SetLeashWinSurfaceNode(std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode);
     std::shared_ptr<RSSurfaceNode> GetLeashWinSurfaceNode() const;
+
+    /*
+     * RS Multi Instance
+     */
+    std::shared_ptr<RSUIContext> GetRSUIContext(const char* caller) const;
 
     /*
      * Window Scene Snapshot
@@ -739,6 +745,12 @@ protected:
     std::recursive_mutex sessionInfoMutex_;
     mutable std::mutex surfaceNodeMutex_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
+
+    /*
+     * RS Multi Instance
+     */
+    std::shared_ptr<RSUIContext> rsUIContext_;
+
     mutable std::mutex snapshotMutex_;
     std::shared_ptr<Media::PixelMap> snapshot_;
     sptr<ISessionStage> sessionStage_;
