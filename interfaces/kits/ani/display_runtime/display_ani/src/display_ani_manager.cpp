@@ -260,7 +260,7 @@ DmErrorCode DisplayManagerAni::processRegisterCallback(ani_env* env, std::string
 }
 
 void DisplayManagerAni::unRegisterCallback(ani_env* env, ani_string type,
-    ani_ref callback, ani_long nativeObj)
+    ani_long nativeObj, ani_ref callback)
 {
     TLOGI(WmsLogTag::DMS, "[ANI] unRegisterCallback begin");
     DisplayManagerAni* displayManagerAni = reinterpret_cast<DisplayManagerAni*>(nativeObj);

@@ -12,30 +12,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 import { AsyncCallback, Callback } from '@ohos.base';
- 
+
 export default namespace screen {
- 
+
 loadLibrary('screenani_kit.z');
- 
+
 export function on(eventType: 'connect' | 'disconnect' | 'change', callback: Callback<number>): void{
     syncOn(eventType, callback, screenMgrRef);
 }
 native function syncOn(eventType: 'connect' | 'disconnect' | 'change',
     callback: Callback<number>, nativeObj: long): void;
- 
+
 export function off(eventType: 'connect' | 'disconnect' | 'change', callback?: Callback<number>): void{
-    syncOff(eventType, callback, screenMgrRef);
+    syncOff(eventType, screenMgrRef, callback);
 }
 native function syncOff(eventType: 'connect' | 'disconnect' | 'change',
-    callback?: Callback<number>, nativeObj: long): void;
- 
+    nativeObj: long, callback?: Callback<number>): void;
+
 export let screenMgrRef: long;
 export function setScreenMgrRef(nativeObj: long): void{
     screenMgrRef = nativeObj;
 }
- 
+
 export function screenEventCallBack(cb: object, cbArg: double): void {
     const func = cb as (cbArg: double) => void;
     func(cbArg as double);

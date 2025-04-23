@@ -39,7 +39,7 @@ public:
     static void registerCallback(ani_env* env, ani_string type,
         ani_ref callback, ani_long nativeObj);
     static void unRegisterCallback(ani_env* env, ani_string type,
-        ani_ref callback, ani_long nativeObj);
+        ani_long nativeObj, ani_ref callback);
     DMError UnRegisterDisplayListenerWithType(std::string type, ani_env* env, ani_ref callback);
     DMError UnregisterAllDisplayListenerWithType(std::string type);
     DmErrorCode processRegisterCallback(ani_env* env, std::string& typeStr,
