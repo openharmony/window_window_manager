@@ -39,7 +39,6 @@ group("unittest") {
     ":ws_scene_persistent_storage_test",
     ":ws_scene_session_converter_test",
     ":ws_scene_session_lifecycle_test",
-    ":ws_scene_session_manager_layout_test",
     ":ws_scene_session_manager_lifecycle_test",
     ":ws_scene_session_manager_lifecycle_test2",
     ":ws_scene_session_manager_lite_stub_test",
@@ -74,7 +73,6 @@ group("unittest") {
     ":ws_session_proxy_property_test",
     ":ws_session_proxy_test",
     ":ws_session_specific_window_test",
-    ":ws_session_stage_proxy_layout_test",
     ":ws_session_stage_proxy_lifecycle_test",
     ":ws_session_stage_proxy_test",
     ":ws_session_stage_stub_lifecycle_test",
@@ -107,6 +105,7 @@ group("unittest") {
     "event_distribution:ws_scene_input_manager_test",
     "event_distribution:ws_scene_session_dirty_manager_test",
     "event_distribution:ws_scene_session_dirty_manager_test2",
+    "layout:ws_layout_test",
     "multi_user:unittest",
     "rotation:ws_scene_session_manager_rotation_test",
     "rotation:ws_scene_session_rotation_test",
@@ -181,7 +180,6 @@ ohos_unittest("ws_keyboard_session_test") {
   module_out_path = module_out_path
 
   sources = [
-    "keyboard_session_layout_test.cpp",
     "keyboard_session_test.cpp",
     "keyboard_session_test2.cpp",
     "keyboard_session_test3.cpp",
@@ -224,10 +222,7 @@ ohos_unittest("ws_main_session_lifecycle_test") {
 ohos_unittest("ws_scb_system_session_test") {
   module_out_path = module_out_path
 
-  sources = [
-    "scb_system_session_layout_test.cpp",
-    "scb_system_session_test.cpp",
-  ]
+  sources = [ "scb_system_session_test.cpp" ]
 
   deps = [ ":ws_unittest_common" ]
 
@@ -390,7 +385,6 @@ ohos_unittest("ws_session_test") {
   module_out_path = module_out_path
 
   sources = [
-    "session_layout_test.cpp",
     "session_test.cpp",
     "session_test2.cpp",
     "session_test3.cpp",
@@ -572,28 +566,6 @@ ohos_unittest("ws_session_stage_stub_lifecycle_test") {
   external_deps = [
     "ability_runtime:app_manager",
     "c_utils:utils",
-    "hilog:libhilog",
-  ]
-}
-
-ohos_unittest("ws_scene_session_manager_layout_test") {
-  module_out_path = module_out_path
-
-  sources = [ "scene_session_manager_layout_test.cpp" ]
-
-  cflags_cc = [ "-Wno-thread-safety" ]
-
-  deps = [ ":ws_unittest_common" ]
-
-  external_deps = [
-    "ability_base:configuration",
-    "ability_base:session_info",
-    "ability_runtime:ability_context_native",
-    "ability_runtime:mission_info",
-    "bundle_framework:appexecfwk_base",
-    "bundle_framework:appexecfwk_core",
-    "c_utils:utils",
-    "eventhandler:libeventhandler",
     "hilog:libhilog",
   ]
 }
@@ -1079,7 +1051,6 @@ ohos_unittest("ws_scene_session_test") {
   module_out_path = module_out_path
 
   sources = [
-    "scene_session_layout_test.cpp",
     "scene_session_test.cpp",
     "scene_session_test2.cpp",
     "scene_session_test3.cpp",
@@ -1340,25 +1311,6 @@ ohos_unittest("ws_scene_session_converter_test") {
   ]
 }
 
-ohos_unittest("ws_session_stage_proxy_layout_test") {
-  module_out_path = module_out_path
-
-  sources = [
-    "../mock/mock_message_parcel.cpp",
-    "session_stage_proxy_layout_test.cpp",
-  ]
-
-  include_dirs = [ "${window_base_path}/window_scene/test/mock" ]
-
-  deps = [ ":ws_unittest_common" ]
-
-  external_deps = [
-    "ability_base:base",
-    "c_utils:utils",
-    "hilog:libhilog",
-  ]
-}
-
 ohos_unittest("ws_session_stage_proxy_test") {
   module_out_path = module_out_path
 
@@ -1492,10 +1444,7 @@ ohos_unittest("ws_hidumper_controller_test") {
 ohos_unittest("ws_session_stub_test") {
   module_out_path = module_out_path
 
-  sources = [
-    "session_stub_layout_test.cpp",
-    "session_stub_test.cpp",
-  ]
+  sources = [ "session_stub_test.cpp" ]
 
   deps = [ ":ws_unittest_common" ]
 
@@ -1727,6 +1676,7 @@ ohos_static_library("ws_unittest_common") {
     ":*",
     "animation:*",
     "event_distribution:*",
+    "layout:*",
     "multi_user:*",
     "rotation:*",
     "ui_extension:*",
