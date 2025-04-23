@@ -68,6 +68,7 @@ ohos_shared_library("screen_session_manager") {
     "src/multi_screen_mode_change_manager.cpp",
     "src/multi_screen_power_change_manager.cpp",
     "src/publish/screen_session_publish.cpp",
+    "src/screen_aod_plugin.cpp",
     "src/screen_cutout_controller.cpp",
     "src/screen_edid_parse.cpp",
     "src/screen_power_utils.cpp",

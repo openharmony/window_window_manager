@@ -69,6 +69,7 @@
 #include "fold_screen_controller/secondary_fold_sensor_manager.h"
 #include "fold_screen_controller/super_fold_policy.h"
 #endif
+#include "screen_aod_plugin.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -357,6 +358,13 @@ void ScreenSessionManager::Init()
     if (!LoadMotionSensor()) {
         screenEventTracker_.RecordEvent("Dms load motion plugin failed.");
         TLOGW(WmsLogTag::DMS, "load motion plugin failed.");
+    }
+
+    if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() ||
+        FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
+        if (!LoadAodLib()) {
+            TLOGE(WmsLogTag::DMS, "load aod lib failed");
+        }
     }
 
     RegisterScreenChangeListener();
@@ -3310,11 +3318,14 @@ void ScreenSessionManager::SetScreenPowerForFold(ScreenId screenId, ScreenPowerS
         screenId == SCREEN_ID_MAIN && lastScreenId_.load() == SCREEN_ID_MAIN &&
         (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() ||
         FoldScreenStateInternel::IsDualDisplayFoldDevice())) {
-            TLOGW(WmsLogTag::DMS, "status:%{public}d", lastPowerForAllStatus_.load());
+        if (!IsInAod()) {
+            TLOGW(WmsLogTag::DMS, "preStatus:%{public}d, screenId:%{public}" PRIu64"",
+                lastPowerForAllStatus_.load(), screenId);
             rsInterface_.SetScreenPowerStatus(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_ON);
             lastScreenId_ = SCREEN_ID_INVALID;
             lastPowerForAllStatus_ = ScreenPowerStatus::INVALID_POWER_STATUS;
         }
+    }
     rsInterface_.SetScreenPowerStatus(screenId, status);
 }
 
