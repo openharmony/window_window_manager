@@ -1077,8 +1077,8 @@ napi_value JsExtensionWindow::OnOccupyEvents(napi_env env, napi_callback_info in
         if (ret == WmErrorCode::WM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
         } else {
-            TLOGNE(WmsLogTag::WMS_UIEXT, "OnOccupyEvents failed, errorCode: %{public}d", ret);
-            task->Reject(env, ret, "JsExtensionWindow::OnOccupyEvents failed"));
+            TLOGNE(WmsLogTag::WMS_UIEXT, "OnOccupyEvents failed, code: %{public}d", ret);
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "JsExtensionWindow::OnOccupyEvents failed"));
         }
     };
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
