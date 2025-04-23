@@ -1352,7 +1352,7 @@ WMError WindowImpl::WindowCreateCheck(uint32_t parentId)
     } else {
         sptr<Window> parentWindow = nullptr;
         {
-            std::unique_lock<std::shared_mutex> lock(windowMapMutex_);
+            std::shared_lock<std::shared_mutex> lock(windowMapMutex_);
             for (const auto& winPair : windowMap_) {
                 if (winPair.second.first == parentId) {
                     property_->SetParentId(parentId);
@@ -4355,7 +4355,7 @@ bool WindowImpl::CheckCameraFloatingWindowMultiCreated(WindowType type)
     }
 
     {
-        std::unique_lock<std::shared_mutex> lock(windowMapMutex_);
+        std::shared_lock<std::shared_mutex> lock(windowMapMutex_);
         for (auto& winPair : windowMap_) {
             if (winPair.second.second->GetType() == WindowType::WINDOW_TYPE_FLOAT_CAMERA) {
                 return true;
