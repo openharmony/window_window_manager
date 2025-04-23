@@ -2060,7 +2060,7 @@ HWTEST_F(SceneSessionManagerTest, TestReportIncompleteScreenFoldStatusChangeEven
 HWTEST_F(SceneSessionManagerTest, SetAppForceLandscapeConfig, TestSize.Level1)
 {
     std::string bundleName = "SetAppForceLandscapeConfig";
-    AppForceLandscapeConfig config = { 0, "MainPage" };
+    AppForceLandscapeConfig config = { 0, "MainPage", false };
     WSError result = ssm_->SetAppForceLandscapeConfig(bundleName, config);
     ASSERT_EQ(result, WSError::WS_OK);
 }
@@ -2076,6 +2076,7 @@ HWTEST_F(SceneSessionManagerTest, GetAppForceLandscapeConfig, TestSize.Level1)
     AppForceLandscapeConfig config = ssm_->GetAppForceLandscapeConfig(bundleName);
     ASSERT_EQ(config.mode_, 0);
     ASSERT_EQ(config.homePage_, "");
+    ASSERT_EQ(config.isSupportSplitMode_, false);
 }
 
 /**

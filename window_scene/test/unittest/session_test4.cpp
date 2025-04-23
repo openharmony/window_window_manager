@@ -1106,6 +1106,23 @@ HWTEST_F(WindowSessionTest4, SafelySetWant01, TestSize.Level1)
     ASSERT_NE(nullptr, sessionInfo.want);
     EXPECT_EQ(sessionInfo.SafelyGetWant().GetBundle(), "SafelySetWantTest");
 }
+
+/**
+ * @tc.name: NotifyAppForceLandscapeConfigUpdated
+ * @tc.desc: check func NotifyAppForceLandscapeConfigUpdated
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, NotifyAppForceLandscapeConfigUpdated, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->state_ = SessionState::STATE_CONNECT;
+    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
+    EXPECT_NE(nullptr, mockSessionStage);
+    session_->sessionStage_ = mockSessionStage;
+    EXPECT_EQ(WSError::WS_OK, session_->NotifyAppForceLandscapeConfigUpdated());
+    session_->sessionStage_ = nullptr;
+    EXPECT_EQ(WSError::WS_ERROR_NULLPTR, session_->NotifyAppForceLandscapeConfigUpdated());
+}
 }
 } // namespace Rosen
 } // namespace OHOS

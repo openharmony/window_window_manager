@@ -369,6 +369,7 @@ public:
     std::vector<sptr<Session>> GetDialogVector() const;
     void ClearDialogVector();
     WSError NotifyDestroy();
+    WSError NotifyAppForceLandscapeConfigUpdated();
     WSError NotifyCloseExistPipWindow();
 
     void SetSessionFocusableChangeListener(const NotifySessionFocusableChangeFunc& func);

@@ -1778,8 +1778,9 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
 
     AppForceLandscapeConfig config = {};
     if (WindowHelper::IsMainWindow(winType) && GetAppForceLandscapeConfig(config) == WMError::WM_OK &&
-        config.mode_ == FORCE_SPLIT_MODE) {
-        SetForceSplitEnable(true, config.homePage_);
+        config.isSupportSplitMode_ == true) {
+        bool isForceSplit = (config.mode_ == FORCE_SPLIT_MODE);
+        SetForceSplitEnable(isForceSplit, config.homePage_);
     }
 
     uint32_t version = 0;
@@ -5709,6 +5710,23 @@ void WindowSessionImpl::SetForceSplitEnable(bool isForceSplit, const std::string
     TLOGI(WmsLogTag::DEFAULT, "isForceSplit: %{public}u, homePage: %{public}s",
         isForceSplit, homePage.c_str());
     uiContent->SetForceSplitEnable(isForceSplit, homePage);
+}
+
+WSError WindowSessionImpl::NotifyAppForceLandscapeConfigUpdated()
+{
+    TLOGI(WmsLogTag::DEFAULT, "Notify App Force Landscape Config Updated");
+    WindowType winType = GetType();
+    AppForceLandscapeConfig config = {};
+    if (WindowHelper::IsMainWindow(winType) && GetAppForceLandscapeConfig(config) == WMError::WM_OK &&
+        config.isSupportSplitMode_ == true) {
+        bool isForceSplit = (config.mode_ == FORCE_SPLIT_MODE);
+        TLOGI(WmsLogTag::DEFAULT, "SetForceSplitEnable, isForceSplit: %{public}u, homePage: %{public}s",
+            isForceSplit, config.homePage_.c_str());
+        SetForceSplitEnable(isForceSplit, config.homePage_);
+        return WSError::WS_OK;
+    }
+    TLOGI(WmsLogTag::DEFAULT, "SetForceSplitEnable, WS_DO_NOTHING");
+    return WSError::WS_DO_NOTHING;
 }
 
 void WindowSessionImpl::SetFrameLayoutCallbackEnable(bool enable)

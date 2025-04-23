@@ -1012,6 +1012,19 @@ HWTEST_F(SessionStageStubTest, HandleNotifyRotationProperty, Function | SmallTes
     EXPECT_TRUE(sessionStageStub_ != nullptr);
     EXPECT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
 }
+
+/**
+ * @tc.name: HandleNotifyAppForceLandscapeConfigUpdated
+ * @tc.desc: test function : HandleNotifyAppForceLandscapeConfigUpdated
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifyAppForceLandscapeConfigUpdated, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_TRUE(sessionStageStub_ != nullptr);
+    ASSERT_EQ(0, sessionStageStub_->HandleNotifyAppForceLandscapeConfigUpdated(data, reply));
+}
 }
 }
 }
