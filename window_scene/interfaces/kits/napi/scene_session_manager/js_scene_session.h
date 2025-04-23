@@ -96,6 +96,7 @@ enum class ListenerFuncType : uint32_t {
     UPDATE_FLAG_CB,
     Z_LEVEL_CHANGE_CB,
     SESSION_GET_TARGET_ORIENTATION_CONFIG_INFO_CB,
+    SESSION_UPDATE_FOLLOW_SCREEN_CHANGE_CB,
 };
 
 class SceneSession;
@@ -123,6 +124,7 @@ private:
     void ProcessPendingSessionToForegroundRegister();
     void ProcessPendingSessionToBackgroundForDelegatorRegister();
     void ProcessSessionLockStateChangeRegister();
+    void ProcessSessionUpdateFollowScreenChange();
     void OnSessionLockStateChange(bool isLockedState);
     sptr<SceneSession> GenSceneSession(SessionInfo& info);
     void PendingSessionActivation(SessionInfo& info);
@@ -438,6 +440,7 @@ private:
     void NotifyFollowParentRect(bool isFollow);
     void OnGetTargetOrientationConfigInfo(uint32_t targetOrientation);
     void OnRotationChange(int32_t persistentId, bool isRegister);
+    void OnUpdateFollowScreenChange(bool isFollowScreenChange);
 
     /*
      * Window Property
