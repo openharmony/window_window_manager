@@ -30,7 +30,6 @@ namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "IntentionEventManager" };
 constexpr int32_t TRANSPARENT_FINGER_ID = 10000;
-constexpr int32_t TRANSPARENT_BUTTON_FINGER_ID = 77777777;
 constexpr int32_t DELAY_TIME = 15;
 constexpr unsigned int FREQUENT_CLICK_TIME_LIMIT = 3;
 constexpr int FREQUENT_CLICK_COUNT_LIMIT = 8;
@@ -153,22 +152,19 @@ bool IntentionEventManager::InputEventListener::CheckPointerEvent(
 }
 
 void IntentionEventManager::InputEventListener::ProcessInjectionEvent(
-    std::shared_ptr<MMI::PointerEvent> pointerEvent, int32_t dispatchTimes) const
+    std::shared_ptr<MMI::PointerEvent> pointerEvent) const
 {
+    auto dispatchTimes = pointerEvent->GetDispatchTimes();
     MMI::PointerEvent::PointerItem pointerItem;
     auto pointerId = pointerEvent->GetPointerId();
-    if (pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN &&
-        pointerEvent->GetPointerItem(pointerId, pointerItem)) {
+    if (pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE &&
+        pointerEvent->HasFlag(MMI::InputEvent::EVENT_FLAG_SIMULATE)) {
+        MMI::InputManager::GetInstance()->TransformMouseEventToTouchEvent(pointerEvent);
+    }
+    if (dispatchTimes > 0 && pointerEvent->GetPointerItem(pointerId, pointerItem)) {
         pointerItem.SetPointerId(pointerId + dispatchTimes * TRANSPARENT_FINGER_ID);
         pointerEvent->UpdatePointerItem(pointerId, pointerItem);
         pointerEvent->SetPointerId(pointerId + dispatchTimes * TRANSPARENT_FINGER_ID);
-    } else if (pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
-        MMI::InputManager::GetInstance()->TransformMouseEventToTouchEvent(pointerEvent);
-        if (pointerEvent->GetPointerItem(pointerId, pointerItem)) {
-            pointerItem.SetPointerId(TRANSPARENT_BUTTON_FINGER_ID);
-            pointerEvent->UpdatePointerItem(pointerId, pointerItem);
-            pointerEvent->SetPointerId(TRANSPARENT_BUTTON_FINGER_ID);
-        }
     }
 }
 
@@ -188,9 +184,7 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
         return;
     }
     auto dispatchTimes = pointerEvent->GetDispatchTimes();
-    if (dispatchTimes > 0) {
-        ProcessInjectionEvent(pointerEvent, dispatchTimes);
-    }
+    ProcessInjectionEvent(pointerEvent);
     auto sourceType = pointerEvent->GetSourceType();
     if (action != MMI::PointerEvent::POINTER_ACTION_MOVE) {
         if (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE ||
