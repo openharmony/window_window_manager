@@ -253,11 +253,6 @@ void SingleDisplaySensorPocketFoldStateManager::ReportTentStatusChange(ReportTen
     }
 }
 
-bool SingleDisplaySensorPocketFoldStateManager::IsCameraMode()
-{
-    return false;
-}
-
 ApplicationStatePocketObserver::ApplicationStatePocketObserver() {}
 
 void ApplicationStatePocketObserver::RegisterCameraForegroundChanged(std::function<void()> callback)

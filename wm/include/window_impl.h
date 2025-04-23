@@ -181,7 +181,7 @@ public:
 
     WMError Create(uint32_t parentId,
         const std::shared_ptr<AbilityRuntime::Context>& context = nullptr);
-    virtual WMError Destroy() override;
+    virtual WMError Destroy(uint32_t reason = 0) override;
     virtual WMError Show(uint32_t reason = 0, bool withAnimation = false, bool withFocus = true) override;
     virtual WMError Hide(uint32_t reason = 0, bool withAnimation = false, bool isFromInnerkits = true) override;
     virtual WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false,
@@ -355,6 +355,7 @@ public:
     void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
     void RegisterWindowInspectorCallback();
     uint32_t GetApiTargetVersion() const;
+    WMError GetWindowPropertyInfo(WindowPropertyInfo& windowPropertyInfo) override;
 
     /*
      * Keyboard
@@ -435,7 +436,7 @@ private:
     void MapFloatingWindowToAppIfNeeded();
     void MapDialogWindowToAppIfNeeded();
     WMError UpdateProperty(PropertyChangeAction action);
-    WMError Destroy(bool needNotifyServer, bool needClearListener = true);
+    WMError Destroy(bool needNotifyServer, bool needClearListener = true, uint32_t reason = 0);
     WMError SetBackgroundColor(uint32_t color);
     uint32_t GetBackgroundColor() const;
     void InitAbilityInfo();

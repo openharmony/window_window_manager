@@ -483,11 +483,11 @@ void SingleDisplayPocketFoldPolicy::BootAnimationFinishPowerInit()
 {
     int64_t timeStamp = 50;
     if (RSInterfaces::GetInstance().GetActiveScreenId() == SCREEN_ID_FULL) {
-        // 同显切内屏：外屏下电
+        // coordination to full: power off main screen
         TLOGI(WmsLogTag::DMS, "Fold Screen Power main screen off.");
         ScreenSessionManager::GetInstance().SetRSScreenPowerStatus(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_OFF);
     } else if (RSInterfaces::GetInstance().GetActiveScreenId() == SCREEN_ID_MAIN) {
-        // 同显切外屏：双屏都灭再外屏上电
+        // coordination to main: power off both and power on main screen
         TLOGI(WmsLogTag::DMS, "Fold Screen Power all screen off.");
         ScreenSessionManager::GetInstance().SetRSScreenPowerStatus(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_OFF);
         ScreenSessionManager::GetInstance().SetRSScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_OFF);

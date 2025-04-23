@@ -478,6 +478,63 @@ HWTEST_F(KeyboardSessionTest3, SetSkipEventOnCastPlus01, Function | SmallTest | 
     sceneSession->SetSkipEventOnCastPlus(false);
     ASSERT_EQ(false, sceneSession->GetSessionProperty()->GetSkipEventOnCastPlus());
 }
+
+/**
+ * @tc.name: IsNeedRaiseSubWindow01
+ * @tc.desc: check func IsNeedRaiseSubWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest3, IsNeedRaiseSubWindow01, Function | SmallTest | Level0)
+{
+    auto keyboardSession = GetKeyboardSession("IsNeedRaiseSubWindow",
+        "IsNeedRaiseSubWindow");
+    SessionInfo info;
+    info.abilityName_ = "CallingSession";
+    info.bundleName_ = "CallingSession";
+    auto callingSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto sessionRect = callingSession->GetSessionRect();
+    auto ret = keyboardSession->IsNeedRaiseSubWindow(callingSession, sessionRect);
+    ASSERT_EQ(true, ret);
+
+    callingSession->GetSessionProperty()->type_ = WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
+    ret = keyboardSession->IsNeedRaiseSubWindow(callingSession, sessionRect);
+    ASSERT_EQ(true, ret);
+}
+
+/**
+ * @tc.name: IsNeedRaiseSubWindow02
+ * @tc.desc: check func IsNeedRaiseSubWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest3, IsNeedRaiseSubWindow02, Function | SmallTest | Level0)
+{
+    auto keyboardSession = GetKeyboardSession("IsNeedRaiseSubWindow",
+        "IsNeedRaiseSubWindow");
+    SessionInfo info;
+    info.abilityName_ = "CallingSession";
+    info.bundleName_ = "CallingSession";
+    auto callingSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto sessionRect = callingSession->GetSessionRect();
+    callingSession->GetSessionProperty()->type_ = WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
+
+    SessionInfo mainInfo;
+    mainInfo.abilityName_ = "mainSession";
+    mainInfo.bundleName_ = "mainSession";
+    auto mainSession = sptr<SceneSession>::MakeSptr(mainInfo, nullptr);
+    callingSession->parentSession_ = mainSession;
+
+    auto ret = keyboardSession->IsNeedRaiseSubWindow(callingSession, sessionRect);
+    ASSERT_EQ(true, ret);
+    
+    mainSession->GetSessionProperty()->windowMode_ = WindowMode::WINDOW_MODE_SPLIT_PRIMARY;
+    ret = keyboardSession->IsNeedRaiseSubWindow(callingSession, sessionRect);
+    ASSERT_EQ(false, ret);
+
+    WSRect newRect{ 0, 0, 0, 10 };
+    mainSession->SetSessionRect(newRect);
+    ret = keyboardSession->IsNeedRaiseSubWindow(callingSession, sessionRect);
+    ASSERT_EQ(true, ret);
+}
 }  // namespace
 }  // namespace Rosen
 }  // namespace OHOS

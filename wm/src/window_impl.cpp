@@ -1602,18 +1602,18 @@ void WindowImpl::ClearVsyncStation()
     }
 }
 
-WMError WindowImpl::Destroy()
+WMError WindowImpl::Destroy(uint32_t reason)
 {
-    return Destroy(true);
+    return Destroy(true, true, reason);
 }
 
-WMError WindowImpl::Destroy(bool needNotifyServer, bool needClearListener)
+WMError WindowImpl::Destroy(bool needNotifyServer, bool needClearListener, uint32_t reason)
 {
     if (!IsWindowValid()) {
         return WMError::WM_OK;
     }
 
-    WLOGI("Window %{public}u Destroy", property_->GetWindowId());
+    WLOGI("Window %{public}u Destroy, reason: %{public}u", property_->GetWindowId(), reason);
     WindowInspector::GetInstance().UnregisterGetWMSWindowListCallback(GetWindowId());
     WMError ret = WMError::WM_OK;
     if (needNotifyServer) {
@@ -4524,9 +4524,37 @@ uint32_t WindowImpl::GetApiTargetVersion() const
 {
     uint32_t version = 0;
     if ((context_ != nullptr) && (context_->GetApplicationInfo() != nullptr)) {
-        version = static_cast<uint32_t>(context_->GetApplicationInfo()->apiTargetVersion % API_VERSION_MOD);
+        version = static_cast<uint32_t>(context_->GetApplicationInfo()->apiTargetVersion) % API_VERSION_MOD;
     }
     return version;
+}
+
+WMError WindowImpl::GetWindowPropertyInfo(WindowPropertyInfo& windowPropertyInfo)
+{
+    if (!IsWindowValid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    windowPropertyInfo.windowRect = GetRect();
+    auto uicontent = GetUIContent();
+    if (uicontent == nullptr) {
+        TLOGW(WmsLogTag::WMS_ATTRIBUTE, "uicontent is nullptr");
+    } else {
+        uicontent->GetWindowPaintSize(windowPropertyInfo.drawableRect);
+    }
+    windowPropertyInfo.type = GetType();
+    windowPropertyInfo.apiCompatibleVersion = GetApiCompatibleVersion();
+    windowPropertyInfo.isLayoutFullScreen = IsLayoutFullScreen();
+    windowPropertyInfo.isFullScreen = IsFullScreen();
+    windowPropertyInfo.isTouchable = GetTouchable();
+    windowPropertyInfo.isFocusable = GetFocusable();
+    windowPropertyInfo.name = GetWindowName();
+    windowPropertyInfo.isPrivacyMode = IsPrivacyMode();
+    windowPropertyInfo.isKeepScreenOn = IsKeepScreenOn();
+    windowPropertyInfo.brightness = GetBrightness();
+    windowPropertyInfo.isTransparent = IsTransparent();
+    windowPropertyInfo.id = GetWindowId();
+    windowPropertyInfo.displayId = GetDisplayId();
+    return WMError::WM_OK;
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -65,6 +65,7 @@ constexpr int32_t API_VERSION_18 = 18;
 constexpr uint32_t API_VERSION_MOD = 1000;
 constexpr uint32_t LIFECYCLE_ISOLATE_VERSION = 20;
 constexpr int32_t  WINDOW_ROTATION_CHANGE = 20;
+constexpr uint32_t INVALID_TARGET_API_VERSION = 0;
 
 /*
  * DFX
@@ -758,10 +759,11 @@ void WindowSessionImpl::DestroySubWindow()
     }
 }
 
-WMError WindowSessionImpl::Destroy(bool needNotifyServer, bool needClearListener)
+WMError WindowSessionImpl::Destroy(bool needNotifyServer, bool needClearListener, uint32_t reason)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d Destroy, state:%{public}u, needNotifyServer:%{public}d, "
-        "needClearListener:%{public}d", GetPersistentId(), state_, needNotifyServer, needClearListener);
+        "needClearListener:%{public}d, reason:%{public}u", GetPersistentId(), state_, needNotifyServer,
+        needClearListener, reason);
     if (IsWindowSessionInvalid()) {
         WLOGFW("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -796,9 +798,9 @@ WMError WindowSessionImpl::Destroy(bool needNotifyServer, bool needClearListener
     return WMError::WM_OK;
 }
 
-WMError WindowSessionImpl::Destroy()
+WMError WindowSessionImpl::Destroy(uint32_t reason)
 {
-    return Destroy(true);
+    return Destroy(true, true, reason);
 }
 
 WSError WindowSessionImpl::SetActive(bool active)
@@ -4328,13 +4330,10 @@ void WindowSessionImpl::NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, 
     bool isUIExtensionWithSystemHost =
         WindowHelper::IsUIExtensionWindow(GetType()) && WindowHelper::IsSystemWindow(GetRootHostWindowType());
     bool isSystemWindow = WindowHelper::IsSystemWindow(GetType());
-    uint32_t currentApiVersion = 0;
-    if (context_ != nullptr && context_->GetApplicationInfo() != nullptr) {
-        currentApiVersion = context_->GetApplicationInfo()->apiTargetVersion % API_VERSION_MOD;
-    }
+    uint32_t currentApiVersion = GetTargetAPIVersionByApplicationInfo();
     AvoidArea newAvoidArea;
     // api 18 isolation for UEC with system host window
-    if ((isUIExtensionWithSystemHost || isSystemWindow) && currentApiVersion < API_VERSION_18) {
+    if ((isUIExtensionWithSystemHost || isSystemWindow) && currentApiVersion < static_cast<uint32_t>(API_VERSION_18)) {
         TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d api %{public}u type %{public}d not supported",
             GetPersistentId(), currentApiVersion, type);
     } else {
@@ -5901,6 +5900,13 @@ void WindowSessionImpl::SetTargetAPIVersion(uint32_t targetAPIVersion)
 uint32_t WindowSessionImpl::GetTargetAPIVersion() const
 {
     return targetAPIVersion_;
+}
+
+uint32_t WindowSessionImpl::GetTargetAPIVersionByApplicationInfo() const
+{
+    return (context_ != nullptr && context_->GetApplicationInfo() != nullptr) ?
+        static_cast<uint32_t>(context_->GetApplicationInfo()->apiTargetVersion) % API_VERSION_MOD :
+        INVALID_TARGET_API_VERSION;
 }
 
 void WindowSessionImpl::SetLayoutTransform(const Transform& transform)

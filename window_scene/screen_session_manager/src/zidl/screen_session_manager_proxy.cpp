@@ -2570,29 +2570,6 @@ bool ScreenSessionManagerProxy::IsCaptured()
     return reply.ReadBool();
 }
 
-bool ScreenSessionManagerProxy::IsOrientationNeedChanged()
-{
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        WLOGFW("remote is null");
-        return false;
-    }
- 
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
-        return false;
-    }
-    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_IS_ORIENTATION_NEED_CHANGE),
-        data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
-        return false;
-    }
-    return reply.ReadBool();
-}
-
 FoldStatus ScreenSessionManagerProxy::GetFoldStatus()
 {
     sptr<IRemoteObject> remote = Remote();
@@ -4148,6 +4125,29 @@ bool ScreenSessionManagerProxy::GetIsRealScreen(ScreenId screenId)
     return reply.ReadBool();
 }
 
+void ScreenSessionManagerProxy::SetDefaultMultiScreenModeWhenSwitchUser()
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return;
+    }
+
+    MessageParcel reply;
+    MessageParcel data;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_DEFAULT_MODE_WHEN_SWITCH_USER),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return;
+    }
+    return;
+}
+
 void ScreenSessionManagerProxy::NotifyExtendScreenCreateFinish()
 {
     sptr<IRemoteObject> remote = Remote();
@@ -4158,7 +4158,7 @@ void ScreenSessionManagerProxy::NotifyExtendScreenCreateFinish()
 
     MessageParcel reply;
     MessageParcel data;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
         return;
@@ -4169,4 +4169,27 @@ void ScreenSessionManagerProxy::NotifyExtendScreenCreateFinish()
         return;
     }
 }
+
+void ScreenSessionManagerProxy::NotifyExtendScreenDestroyFinish()
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return;
+    }
+
+    MessageParcel reply;
+    MessageParcel data;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_NOTIFY_EXTEND_SCREEN_DESTROY_FINISH),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return;
+    }
+}
+
 } // namespace OHOS::Rosen
