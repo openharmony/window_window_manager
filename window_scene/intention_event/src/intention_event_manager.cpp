@@ -96,6 +96,10 @@ bool IntentionEventManager::EnableInputEventListener(Ace::UIContent* uiContent,
 
     const char* const where = __func__;
     auto callback = [where](std::shared_ptr<MMI::PointerEvent> pointerEvent) {
+        if (pointerEvent == nullptr) {
+            TLOGNE(WmsLogTag::WMS_EVENT, "%{public}s pointerEvent is null", where);
+            return;
+        }
         int32_t action = pointerEvent->GetPointerAction();
         if (action != MMI::PointerEvent::POINTER_ACTION_DOWN &&
             action != MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
