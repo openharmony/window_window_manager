@@ -437,6 +437,7 @@ public:
     void UpdateScreenIdManager(sptr<ScreenSession>& innerScreen, sptr<ScreenSession>& externalScreen);
     std::string DumperClientScreenSessions();
     void SetMultiScreenModeChangeTracker(std::string changeProc);
+    void SetRSScreenPowerStatus(ScreenId screenId, ScreenPowerStatus status);
 
 protected:
     ScreenSessionManager();
