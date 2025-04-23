@@ -2348,6 +2348,13 @@ public:
     virtual bool IsPcOrPadFreeMultiWindowMode() const { return false; }
 
     /**
+     * @brief Judge whether SceneBoard is enabled.
+     *
+     * @return True means SceneBoard is enabled, false means the opposite.
+     */
+    virtual bool IsSceneBoardEnabled() const { return false; }
+
+    /**
      * @brief get compatible mode in pc.
      *
      * @return True means window is compatible mode in pc, false means the opposite.
