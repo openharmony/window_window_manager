@@ -15,6 +15,7 @@
 
 #include "js_extension_window.h"
 
+#include "js_err_utils.h"
 #include "js_extension_window_utils.h"
 #include "js_runtime_utils.h"
 #include "js_window_utils.h"
@@ -1043,30 +1044,50 @@ napi_value JsExtensionWindow::OnCreateSubWindowWithOptions(napi_env env, napi_ca
 
 napi_value JsExtensionWindow::OnOccupyEvents(napi_env env, napi_callback_info info)
 {
-    if (extensionWindow_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "extensionWindow_ is nullptr");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
-    }
-    
     size_t argc = FOUR_PARAMS_SIZE;
     napi_value argv[FOUR_PARAMS_SIZE] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc != 1) {
+    napi_value lastParam = (argc <= 1) ? nullptr :
+        (GetType(env, argv[1]) == napi_function ? argv[1] : nullptr);
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
+    if (argc < 1) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Argc is invalid: %{public}zu", argc);
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "invalid param"));
+        return result;
     }
     int32_t eventFlags = 0;
     if (!ConvertFromJsValue(env, argv[0], eventFlags)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Failed to convert parameter to int32_t");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "invalid param"));
+        return result;
     }
-
-    auto ret = WM_JS_TO_ERROR_CODE_MAP.at(extensionWindow_->OccupyEvents(eventFlags));
-    if (ret != WmErrorCode::WM_OK) {
-        return NapiThrowError(env, ret);
+    auto asyncTask = [weakToken = std::weak_ptr<ExtensionWindow>(extensionWindow_), eventFlags, env,
+        task = napiAsyncTask] {
+        auto weakWindow = weakToken.lock();
+        if (weakWindow == nullptr) {
+            TLOGNE(WmsLogTag::WMS_UIEXT, "window is nullptr");
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                "OnOccupyEvents failed"));
+            return;
+        }
+        auto ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->OccupyEvents(eventFlags));
+        if (ret == WmErrorCode::WM_OK) {
+            task->Resolve(env, NapiGetUndefined(env));
+        } else {
+            TLOGNE(WmsLogTag::WMS_UIEXT, "OnOccupyEvents failed, errorCode: %{public}d", ret);
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                "OnOccupyEvents failed"));
+        }
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "napi_send_event failed");
+        napiAsyncTask->Reject(env,
+            JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
     }
-    
-    return NapiGetUndefined(env);
+    return result;
 }
 
 }  // namespace Rosen
