@@ -17,6 +17,7 @@
 
 #include "ability_manager_client.h"
 #include "memory_guard.h"
+#include "rs_adapter.h"
 #include "window.h"
 #include "window_manager_hilog.h"
 #include "xcollie/watchdog.h"
@@ -340,6 +341,17 @@ void WindowInnerManager::SetWindowRoot(const sptr<WindowRoot>& windowRoot)
     if (moveDragController_ != nullptr) {
         moveDragController_->SetWindowRoot(windowRoot);
     }
+}
+
+void WindowInnerManager::SetRSUIDirector(std::shared_ptr<RSUIDirector>& rsUIDirector)
+{
+    rsUIDirector_ = rsUIDirector;
+}
+
+std::shared_ptr<RSUIDirector> WindowInnerManager::GetRSUIDirector() const
+{
+    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "%{public}s", RSAdapterUtil::RSUIDirectorToStr(rsUIDirector_).c_str());
+    return rsUIDirector_;
 }
 } // Rosen
 } // OHOS

@@ -28,6 +28,7 @@
 #include <parameters.h>
 #include "sys_cap_util.h"
 #include <ipc_skeleton.h>
+#include "rs_adapter.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -63,6 +64,12 @@ ScreenSession::ScreenSession(const ScreenSessionConfig& config, ScreenSessionRea
     TLOGI(WmsLogTag::DMS,
         "[DPNODE]Config name: %{public}s, defaultId: %{public}" PRIu64", mirrorNodeId: %{public}" PRIu64"",
         name_.c_str(), defaultScreenId_, config.mirrorNodeId);
+    InitRSUIDirector();
+    if (displayNode_) {
+        displayNode_->SetRSUIContext(rsUIDirector_->GetRSUIContext());
+        TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
+              "Set RSUIContext: %{public}s", RSAdapterUtil::RSNodeToStr(displayNode_).c_str());
+    }
     Rosen::RSDisplayNodeConfig rsConfig;
     bool isNeedCreateDisplayNode = true;
     property_.SetRsId(rsId_);
@@ -109,7 +116,9 @@ void ScreenSession::CreateDisplayNode(const Rosen::RSDisplayNodeConfig& config)
         config.screenId, config.mirrorNodeId, static_cast<int32_t>(config.isMirrored));
     {
         std::unique_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
-        displayNode_ = Rosen::RSDisplayNode::Create(config);
+        displayNode_ = Rosen::RSDisplayNode::Create(config, rsUIDirector_->GetRSUIContext());
+        TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
+              "Create RSDisplayNode: %{public}s", RSAdapterUtil::RSNodeToStr(displayNode_).c_str());
         if (displayNode_) {
             displayNode_->SetFrame(property_.GetBounds().rect_.left_, property_.GetBounds().rect_.top_,
                 property_.GetBounds().rect_.width_, property_.GetBounds().rect_.height_);
@@ -118,18 +127,18 @@ void ScreenSession::CreateDisplayNode(const Rosen::RSDisplayNodeConfig& config)
             if (config.isMirrored) {
                 EnableMirrorScreenRegion();
             }
+            RSTransactionAdapter::FlushImplicitTransaction(displayNode_);
         } else {
             TLOGE(WmsLogTag::DMS, "Failed to create displayNode, displayNode is null!");
         }
     }
-    RSTransaction::FlushImplicitTransaction();
 }
 
 void ScreenSession::ReuseDisplayNode(const RSDisplayNodeConfig& config)
 {
     if (displayNode_) {
         displayNode_->SetDisplayNodeMirrorConfig(config);
-        RSTransaction::FlushImplicitTransaction();
+        RSTransactionAdapter::FlushImplicitTransaction(displayNode_);
     } else {
         CreateDisplayNode(config);
     }
@@ -147,13 +156,22 @@ ScreenSession::ScreenSession(ScreenId screenId, ScreenId rsId, const std::string
     TLOGI(WmsLogTag::DMS, "Success to create screenSession in constructor_0, screenid is %{public}" PRIu64"",
         screenId_);
     property_.SetRsId(rsId_);
+    InitRSUIDirector();
+    if (displayNode_) {
+        displayNode_->SetRSUIContext(rsUIDirector_->GetRSUIContext());
+        TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
+              "Set RSUIContext: %{public}s", RSAdapterUtil::RSNodeToStr(displayNode_).c_str());
+    }
 }
 
 ScreenSession::ScreenSession(ScreenId screenId, const ScreenProperty& property, ScreenId defaultScreenId)
     : screenId_(screenId), defaultScreenId_(defaultScreenId), property_(property)
 {
+    InitRSUIDirector();
     Rosen::RSDisplayNodeConfig config = { .screenId = screenId_ };
-    displayNode_ = Rosen::RSDisplayNode::Create(config);
+    displayNode_ = Rosen::RSDisplayNode::Create(config, rsUIDirector_->GetRSUIContext());
+    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
+          "Create RSDisplayNode: %{public}s", RSAdapterUtil::RSNodeToStr(displayNode_).c_str());
     property_.SetRsId(rsId_);
     if (displayNode_) {
         TLOGI(WmsLogTag::DMS, "Success to create displayNode in constructor_1, screenid is %{public}" PRIu64"",
@@ -162,10 +180,10 @@ ScreenSession::ScreenSession(ScreenId screenId, const ScreenProperty& property, 
             property_.GetBounds().rect_.width_, property_.GetBounds().rect_.height_);
         displayNode_->SetBounds(property_.GetBounds().rect_.left_, property_.GetBounds().rect_.top_,
             property_.GetBounds().rect_.width_, property_.GetBounds().rect_.height_);
+        RSTransactionAdapter::FlushImplicitTransaction(displayNode_);
     } else {
         TLOGE(WmsLogTag::DMS, "Failed to create displayNode, displayNode is null!");
     }
-    RSTransaction::FlushImplicitTransaction();
 }
 
 ScreenSession::ScreenSession(ScreenId screenId, const ScreenProperty& property,
@@ -174,9 +192,12 @@ ScreenSession::ScreenSession(ScreenId screenId, const ScreenProperty& property,
 {
     rsId_ = screenId;
     property_.SetRsId(rsId_);
+    InitRSUIDirector();
     Rosen::RSDisplayNodeConfig config = { .screenId = screenId_, .isMirrored = true, .mirrorNodeId = nodeId,
         .isSync = true};
-    displayNode_ = Rosen::RSDisplayNode::Create(config);
+    displayNode_ = Rosen::RSDisplayNode::Create(config, rsUIDirector_->GetRSUIContext());
+    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
+          "Create RSDisplayNode: %{public}s", RSAdapterUtil::RSNodeToStr(displayNode_).c_str());
     if (displayNode_) {
         TLOGI(WmsLogTag::DMS, "Success to create displayNode in constructor_2, screenid is %{public}" PRIu64"",
             screenId_);
@@ -184,10 +205,10 @@ ScreenSession::ScreenSession(ScreenId screenId, const ScreenProperty& property,
             property_.GetBounds().rect_.width_, property_.GetBounds().rect_.height_);
         displayNode_->SetBounds(property_.GetBounds().rect_.left_, property_.GetBounds().rect_.top_,
             property_.GetBounds().rect_.width_, property_.GetBounds().rect_.height_);
+        RSTransactionAdapter::FlushImplicitTransaction(displayNode_);
     } else {
         TLOGE(WmsLogTag::DMS, "Failed to create displayNode, displayNode is null!");
     }
-    RSTransaction::FlushImplicitTransaction();
 }
 
 ScreenSession::ScreenSession(const std::string& name, ScreenId smsId, ScreenId rsId, ScreenId defaultScreenId)
@@ -195,19 +216,22 @@ ScreenSession::ScreenSession(const std::string& name, ScreenId smsId, ScreenId r
 {
     (void)rsId_;
     property_.SetRsId(rsId_);
+    InitRSUIDirector();
     // 虚拟屏的screen id和rs id不一致，displayNode的创建应使用rs id
     Rosen::RSDisplayNodeConfig config = { .screenId = rsId_ };
-    displayNode_ = Rosen::RSDisplayNode::Create(config);
+    displayNode_ = Rosen::RSDisplayNode::Create(config, rsUIDirector_->GetRSUIContext());
+    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
+          "Create RSDisplayNode: %{public}s", RSAdapterUtil::RSNodeToStr(displayNode_).c_str());
     if (displayNode_) {
         TLOGI(WmsLogTag::DMS, "Success to create displayNode in constructor_3, rs id is %{public}" PRIu64"", rsId_);
         displayNode_->SetFrame(property_.GetBounds().rect_.left_, property_.GetBounds().rect_.top_,
             property_.GetBounds().rect_.width_, property_.GetBounds().rect_.height_);
         displayNode_->SetBounds(property_.GetBounds().rect_.left_, property_.GetBounds().rect_.top_,
             property_.GetBounds().rect_.width_, property_.GetBounds().rect_.height_);
+        RSTransactionAdapter::FlushImplicitTransaction(displayNode_);
     } else {
         TLOGE(WmsLogTag::DMS, "Failed to create displayNode, displayNode is null!");
     }
-    RSTransaction::FlushImplicitTransaction();
 }
 
 void ScreenSession::SetDisplayNodeScreenId(ScreenId screenId)
@@ -985,19 +1009,10 @@ void ScreenSession::UpdatePropertyAfterRotation(RRect bounds, int rotation, Fold
             return;
         }
     }
-    auto transactionProxy = RSTransactionProxy::GetInstance();
-    if (transactionProxy != nullptr) {
-        transactionProxy->Begin();
-        {
-            std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
-            displayNode_->SetScreenRotation(static_cast<uint32_t>(property_.GetDeviceRotation()));
-        }
-        transactionProxy->Commit();
-    } else {
-        {
-            std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
-            displayNode_->SetScreenRotation(static_cast<uint32_t>(property_.GetDeviceRotation()));
-        }
+    {
+        std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
+        AutoRSTransaction trans(displayNode_);
+        displayNode_->SetScreenRotation(static_cast<uint32_t>(property_.GetDeviceRotation()));
     }
     TLOGI(WmsLogTag::DMS, "bounds:[%{public}f %{public}f %{public}f %{public}f],rotation:%{public}d,\
         displayOrientation:%{public}u, foldDisplayMode:%{public}u",
@@ -1010,16 +1025,10 @@ void ScreenSession::UpdatePropertyAfterRotation(RRect bounds, int rotation, Fold
 void ScreenSession::UpdateDisplayNodeRotation(int rotation)
 {
     Rotation targetRotation = ConvertIntToRotation(rotation);
-    auto transactionProxy = RSTransactionProxy::GetInstance();
-    if (transactionProxy != nullptr) {
-        transactionProxy->Begin();
-        {
-            std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
-            if (displayNode_ != nullptr) {
-                displayNode_->SetScreenRotation(static_cast<uint32_t>(targetRotation));
-            }
-        }
-        transactionProxy->Commit();
+    std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
+    if (displayNode_ != nullptr) {
+        AutoRSTransaction trans(displayNode_);
+        displayNode_->SetScreenRotation(static_cast<uint32_t>(targetRotation));
     }
 }
 
@@ -1700,12 +1709,14 @@ void ScreenSession::InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startP
             return;
         }
     } else {
-        std::shared_ptr<RSDisplayNode> rsDisplayNode = RSDisplayNode::Create(config);
+        std::shared_ptr<RSDisplayNode> rsDisplayNode = RSDisplayNode::Create(config, rsUIDirector_->GetRSUIContext());
         if (rsDisplayNode == nullptr) {
             TLOGE(WmsLogTag::DMS, "fail to add child. create rsDisplayNode fail!");
             return;
         }
         displayNode_ = rsDisplayNode;
+        TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
+              "Create RSDisplayNode: %{public}s", RSAdapterUtil::RSNodeToStr(displayNode_).c_str());
     }
     TLOGI(WmsLogTag::DMS, "SetDisplayOffset: posX:%{public}d, posY:%{public}d", startPoint.posX_, startPoint.posY_);
     displayNode_->SetDisplayOffset(startPoint.posX_, startPoint.posY_);
@@ -1736,10 +1747,7 @@ void ScreenSession::InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startP
     if (config.isMirrored) {
         EnableMirrorScreenRegion();
     }
-    auto transactionProxy = RSTransactionProxy::GetInstance();
-    if (transactionProxy != nullptr) {
-        transactionProxy->FlushImplicitTransaction();
-    }
+    RSTransactionAdapter::FlushImplicitTransaction(displayNode_);
 }
 
 ScreenSessionGroup::ScreenSessionGroup(ScreenId screenId, ScreenId rsId,
@@ -1855,7 +1863,7 @@ bool ScreenSessionGroup::RemoveChild(sptr<ScreenSession>& smsScreen)
     }
     displayNode = nullptr;
     // attention: make sure reference count 0
-    RSTransaction::FlushImplicitTransaction();
+    RSTransactionAdapter::FlushImplicitTransaction(smsScreen->GetRSUIDirector());
     return screenSessionMap_.erase(screenId);
 }
 
@@ -1948,21 +1956,19 @@ void ScreenSession::Resize(uint32_t width, uint32_t height, bool isFreshBoundsSy
         }
         displayNode_->SetFrame(0, 0, static_cast<float>(width), static_cast<float>(height));
         displayNode_->SetBounds(0, 0, static_cast<float>(width), static_cast<float>(height));
+        RSTransactionAdapter::FlushImplicitTransaction(displayNode_);
     }
-    RSTransaction::FlushImplicitTransaction();
 }
 
 void ScreenSession::SetFrameGravity(Gravity gravity)
 {
-    {
-        std::unique_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
-        if (displayNode_ == nullptr) {
-            TLOGE(WmsLogTag::DMS, "displayNode_ is null, setFrameGravity failed");
-            return;
-        }
-        displayNode_->SetFrameGravity(gravity);
+    std::unique_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
+    if (displayNode_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "displayNode_ is null, setFrameGravity failed");
+        return;
     }
-    RSTransaction::FlushImplicitTransaction();
+    displayNode_->SetFrameGravity(gravity);
+    RSTransactionAdapter::FlushImplicitTransaction(displayNode_);
 }
 
 bool ScreenSession::UpdateAvailableArea(DMRect area)
@@ -2017,14 +2023,12 @@ void ScreenSession::SetColorSpaces(std::vector<uint32_t>&& colorSpaces)
 
 void ScreenSession::SetForceCloseHdr(bool isForceCloseHdr)
 {
-    {
-        std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
-        if (displayNode_ != nullptr) {
-            TLOGI(WmsLogTag::DMS, "SetForceCloseHdr %{public}d", isForceCloseHdr);
-            displayNode_->SetForceCloseHdr(isForceCloseHdr);
-        }
+    std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
+    if (displayNode_ != nullptr) {
+        TLOGI(WmsLogTag::DMS, "SetForceCloseHdr %{public}d", isForceCloseHdr);
+        displayNode_->SetForceCloseHdr(isForceCloseHdr);
+        RSTransactionAdapter::FlushImplicitTransaction(displayNode_);
     }
-    RSTransaction::FlushImplicitTransaction();
 }
 
 bool ScreenSession::IsWidthHeightMatch(float width, float height, float targetWidth, float targetHeight)
@@ -2348,5 +2352,25 @@ void ScreenSession::SetIsAvailableAreaNeedNotify(bool isAvailableAreaNeedNotify)
 bool ScreenSession::GetIsAvailableAreaNeedNotify() const
 {
     return isAvailableAreaNeedNotify_;
+}
+
+std::shared_ptr<RSUIDirector> ScreenSession::GetRSUIDirector() const
+{
+    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "%{public}s, screenId: %{public}" PRIu64,
+          RSAdapterUtil::RSUIDirectorToStr(rsUIDirector_).c_str(), screenId_);
+    return rsUIDirector_;
+}
+
+void ScreenSession::InitRSUIDirector()
+{
+    if (rsUIDirector_) {
+        TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
+              "RSUIDirector already exists: %{public}s", RSAdapterUtil::RSUIDirectorToStr(rsUIDirector_).c_str());
+        return;
+    }
+    rsUIDirector_ = RSUIDirector::Create();
+    rsUIDirector_->Init(true, true);
+    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
+          "Create RSUIDirector: %{public}s", RSAdapterUtil::RSUIDirectorToStr(rsUIDirector_).c_str());
 }
 } // namespace OHOS::Rosen

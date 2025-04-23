@@ -18,6 +18,7 @@
 #include <hitrace_meter.h>
 #include <transaction/rs_transaction.h>
 
+#include "rs_adapter.h"
 #include "window_manager_hilog.h"
 #include <power_mgr_client.h>
 
@@ -190,17 +191,14 @@ DMError MultiScreenPowerChangeManager::HandleScreenOnlyExternalModeChange(sptr<S
 
 void MultiScreenPowerChangeManager::ScreenDisplayNodeRemove(sptr<ScreenSession>& screenScreen)
 {
-    {
-        TLOGW(WmsLogTag::DMS, "removeNode screenId=%{public}" PRIu64, screenScreen->GetScreenId());
-        std::shared_ptr<RSDisplayNode> displayNode = screenScreen->GetDisplayNode();
-        if (displayNode != nullptr) {
-            displayNode->SetDisplayOffset(0, 0);
-            displayNode->RemoveFromTree();
-            screenScreen->ReleaseDisplayNode();
-        }
-        displayNode = nullptr;
+    TLOGW(WmsLogTag::DMS, "removeNode screenId=%{public}" PRIu64, screenScreen->GetScreenId());
+    std::shared_ptr<RSDisplayNode> displayNode = screenScreen->GetDisplayNode();
+    if (displayNode != nullptr) {
+        displayNode->SetDisplayOffset(0, 0);
+        displayNode->RemoveFromTree();
+        screenScreen->ReleaseDisplayNode();
     }
-    RSTransaction::FlushImplicitTransaction();
+    RSTransactionAdapter::FlushImplicitTransaction(displayNode);
 }
 
 void MultiScreenPowerChangeManager::ScreenToExtendChange(sptr<IScreenSessionManagerClient> ssmClient,

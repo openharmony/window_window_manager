@@ -17,6 +17,7 @@
 #include "session/host/include/keyboard_session.h"
 
 #include <hitrace_meter.h>
+#include "rs_adapter.h"
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session_helper.h"
 #include <ui/rs_surface_node.h>
@@ -631,10 +632,7 @@ void KeyboardSession::OpenKeyboardSyncTransaction()
         }
         TLOGNI(WmsLogTag::WMS_KEYBOARD, "Open keyboard sync");
         session->isKeyboardSyncTransactionOpen_ = true;
-        auto transactionController = RSSyncTransactionController::GetInstance();
-        if (transactionController) {
-            transactionController->OpenSyncTransaction(session->GetEventHandler());
-        }
+        RSSyncTransactionAdapter::OpenSyncTransaction(session->GetSurfaceNode(), session->GetEventHandler());
         session->PostKeyboardAnimationSyncTimeoutTask();
         return WSError::WS_OK;
     };
@@ -675,22 +673,14 @@ void KeyboardSession::CloseKeyboardSyncTransaction(uint32_t callingId, const WSR
             TLOGI(WmsLogTag::WMS_KEYBOARD, "Keyboard anim_sync event cancelled");
             handler->RemoveTask(KEYBOARD_ANIM_SYNC_EVENT_NAME);
         }
-        auto transactionController = RSSyncTransactionController::GetInstance();
-        if (transactionController) {
-            transactionController->CloseSyncTransaction(session->GetEventHandler());
-        }
+        RSSyncTransactionAdapter::CloseSyncTransaction(session->GetSurfaceNode(), session->GetEventHandler());
         return WSError::WS_OK;
     }, "CloseKeyboardSyncTransaction");
 }
 
 std::shared_ptr<RSTransaction> KeyboardSession::GetRSTransaction()
 {
-    auto transactionController = RSSyncTransactionController::GetInstance();
-    std::shared_ptr<RSTransaction> rsTransaction = nullptr;
-    if (transactionController) {
-        rsTransaction = transactionController->GetRSTransaction();
-    }
-    return rsTransaction;
+    return RSSyncTransactionAdapter(GetSurfaceNode()).GetRSTransaction();
 }
 
 std::string KeyboardSession::GetSessionScreenName()

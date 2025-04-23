@@ -18,6 +18,7 @@
 #include <event_handler.h>
 #include <transaction/rs_interfaces.h>
 #include <ui_content.h>
+#include <ui/rs_ui_director.h>
 #include <viewport_config.h>
 
 #include "app_mgr_client.h"
@@ -25,6 +26,9 @@
 #include "singleton_container.h"
 
 #include "dm_common.h"
+#include "display_manager.h"
+#include "rs_adapter.h"
+#include "screen_session_manager_client.h"
 #include "intention_event_manager.h"
 #include "input_transfer_station.h"
 #include "window_manager_hilog.h"
@@ -267,6 +271,26 @@ Ace::UIContent* ScreenScene::GetUIContent() const
         TLOGE(WmsLogTag::DMS, "uiContent_ is nullptr!");
         return nullptr;
     }
+}
+
+std::shared_ptr<RSUIDirector> ScreenScene::GetRSUIDirector() const
+{
+    sptr<Display> display;
+    if (displayId_ == DISPLAY_ID_INVALID) {
+        display = DisplayManager::GetInstance().GetDefaultDisplay();
+        TLOGE(WmsLogTag::WMS_RS_MULTI_INSTANCE, "displayId is invalid, use default display");
+    } else {
+        display = DisplayManager::GetInstance().GetDisplayById(displayId_);
+    }
+    if (!display) {
+        TLOGE(WmsLogTag::WMS_RS_MULTI_INSTANCE, "display is null, displayId: %{public}" PRIu64, displayId_);
+        return nullptr;
+    }
+    auto screenId = display->GetScreenId();
+    auto rsUIDirector = ScreenSessionManagerClient::GetInstance().GetRSUIDirector(screenId, __func__);
+    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "%{public}s, screenId: %{public}" PRIu64 ", windowId: %{public}d",
+          RSAdapterUtil::RSUIDirectorToStr(rsUIDirector).c_str(), screenId, GetWindowId());
+    return rsUIDirector;
 }
 } // namespace Rosen
 } // namespace OHOS

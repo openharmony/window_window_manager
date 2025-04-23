@@ -34,6 +34,8 @@ class UIContent;
 
 namespace OHOS {
 namespace Rosen {
+class RSUIDirector;
+
 class ScreenScene : public Window {
 public:
     ScreenScene(std::string name);
@@ -89,6 +91,12 @@ public:
     void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
     void SetOnConfigurationUpdatedCallback(
         const std::function<void(const std::shared_ptr<AppExecFwk::Configuration>&)>& callback);
+
+    /*
+     * RS Multi Instance
+     */
+    std::shared_ptr<RSUIDirector> GetRSUIDirector() const override;
+
 private:
     mutable std::mutex mutex_;
     std::unique_ptr<Ace::UIContent> uiContent_;

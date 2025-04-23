@@ -18,9 +18,13 @@
 #include <ui/rs_surface_node.h>
 #include "display_test_utils.h"
 #include "display.h"
+#include "display_manager_agent_controller.h"
 #include "display_manager_proxy.h"
+#include "rs_adapter.h"
 #include "screen.h"
 #include "surface_draw.h"
+#include "ui/rs_ui_context.h"
+#include "ui/rs_ui_director.h"
 #include "wm_common.h"
 #include "wm_common_inner.h"
 #include "window.h"
@@ -109,7 +113,7 @@ sptr<Window> DisplayManagerTest::CreateWindow(std::string name,
     width = window->GetRect().width_;
     height = window->GetRect().height_;
     DrawWindowColor(window, color, width, height); // 0x66000000 color_black
-    RSTransaction::FlushImplicitTransaction();
+    RSTransactionAdapter::FlushImplicitTransaction(window->GetSurfaceNode());
     return window;
 }
 

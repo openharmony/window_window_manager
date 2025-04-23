@@ -17,7 +17,10 @@
 
 #include <hisysevent.h>
 #include "pointer_event.h"
+#include "rs_adapter.h"
+#include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include <ui/rs_surface_node.h>
+#include <ui/rs_ui_context.h>
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
@@ -36,6 +39,14 @@ SCBSystemSession::SCBSystemSession(const SessionInfo& info, const sptr<SpecificS
         config.SurfaceNodeName = name;
         config.surfaceWindowType = SurfaceWindowType::SYSTEM_SCB_WINDOW;
         surfaceNode_ = Rosen::RSSurfaceNode::Create(config, Rosen::RSSurfaceNodeType::APP_WINDOW_NODE);
+        if (surfaceNode_) {
+            // RSUIContext and RSSurfaceNode may be created in different threads,
+            // so multi-threads check need to be skipped.
+            surfaceNode_->SetSkipCheckInMultiInstance(true);
+            surfaceNode_->SetRSUIContext(GetRSUIContext(__func__));
+            TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
+                  "Create RSSurfaceNode: %{public}s", RSAdapterUtil::RSNodeToStr(surfaceNode_).c_str());
+        }
         SetIsUseControlSession(info.isUseControlSession);
     }
     WLOGFD("Create SCBSystemSession");

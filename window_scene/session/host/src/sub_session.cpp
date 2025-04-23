@@ -15,6 +15,7 @@
 
 #include "session/host/include/sub_session.h"
 
+#include "rs_adapter.h"
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session/screen/include/screen_session.h"
 #include <transaction/rs_sync_transaction_controller.h>
@@ -398,7 +399,7 @@ void SubSession::HandleCrossMoveToSurfaceNode(WSRect& globalRect)
         TLOGI(WmsLogTag::WMS_LAYOUT, "Add sub window to display:%{public}" PRIu64 " persistentId:%{public}d",
             displayId, GetPersistentId());
     }
-    RSTransaction::FlushImplicitTransaction();
+    RSTransactionAdapter::FlushImplicitTransaction(movedSurfaceNode);
 }
 
 std::set<uint64_t> SubSession::GetNewDisplayIdsDuringMoveTo(WSRect& newRect)
@@ -471,7 +472,7 @@ void SubSession::AddSurfaceNodeToScreen(DisplayId draggingOrMovingParentDisplayI
         TLOGI(WmsLogTag::WMS_LAYOUT, "Add sub window to display:%{public}" PRIu64 " persistentId:%{public}d, "
             "cloneNodeCount:%{public}d", displayId, GetPersistentId(), cloneNodeCount_);
     }
-    RSTransaction::FlushImplicitTransaction();
+    RSTransactionAdapter::FlushImplicitTransaction(currSurfacedNode);
 }
 
 void SubSession::RemoveSurfaceNodeFromScreen()

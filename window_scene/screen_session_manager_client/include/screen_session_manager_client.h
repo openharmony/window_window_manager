@@ -117,6 +117,12 @@ public:
     void NotifyExtendScreenDestroyFinish();
     void NotifyScreenMaskAppear();
 
+    /*
+     * RS Multi Instance
+     */
+    std::shared_ptr<RSUIDirector> GetRSUIDirector(ScreenId screenId, const char* caller = "");
+    std::shared_ptr<RSUIContext> GetRSUIContext(ScreenId screenId, const char* caller = "");
+
 protected:
     ScreenSessionManagerClient() = default;
     virtual ~ScreenSessionManagerClient() = default;

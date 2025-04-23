@@ -18,6 +18,7 @@
 #include <transaction/rs_interfaces.h>
 #include "dm_common.h"
 #include "fold_screen_controller/dual_display_fold_policy.h"
+#include "rs_adapter.h"
 #include "session/screen/include/screen_session.h"
 #include "screen_session_manager.h"
 
@@ -430,11 +431,8 @@ void DualDisplayFoldPolicy::AddOrRemoveDisplayNodeToTree(ScreenId screenId, int3
     } else if (command == REMOVE_DISPLAY_NODE) {
         displayNode->RemoveDisplayNodeFromTree();
     }
-    auto transactionProxy = RSTransactionProxy::GetInstance();
-    if (transactionProxy != nullptr) {
-        TLOGI(WmsLogTag::DMS, "add or remove displayNode");
-        transactionProxy->FlushImplicitTransaction();
-    }
+    TLOGI(WmsLogTag::DMS, "add or remove displayNode");
+    RSTransactionAdapter::FlushImplicitTransaction(screenSession->GetRSUIDirector());
 }
 
 void DualDisplayFoldPolicy::ExitCoordination()

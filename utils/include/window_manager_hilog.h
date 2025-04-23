@@ -71,6 +71,7 @@ enum class WmsLogTag : uint8_t {
     WMS_COMPAT,                // C0421C
     WMS_ROTATION,              // C0421D
     WMS_ANIMATION,             // C0421E
+    WMS_RS_MULTI_INSTANCE,     // C0421F
     END,                       // Last one, do not use
 };
 
