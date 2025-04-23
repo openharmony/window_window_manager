@@ -9198,7 +9198,8 @@ DMError ScreenSessionManager::SetScreenSkipProtectedWindow(const std::vector<Scr
 
 bool ScreenSessionManager::IsSpecialApp()
 {
-    if (!FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
+    if (!FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() &&
+        !FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
         return false;
     }
     static std::chrono::steady_clock::time_point lastRequestTime = std::chrono::steady_clock::now();
