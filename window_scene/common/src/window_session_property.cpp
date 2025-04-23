@@ -1224,7 +1224,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteFloat(cornerRadius_) && parcel.WriteBool(isExclusivelyHighlighted_) &&
         parcel.WriteBool(isAtomicService_) && parcel.WriteUint32(apiVersion_) &&
         parcel.WriteBool(isFullScreenWaterfallMode_) && parcel.WriteBool(isAbilityHookOff_) &&
-        parcel.WriteBool(isAbilityHook_)&& parcel.WirteBool(isFollowScreenChange_);
+        parcel.WriteBool(isAbilityHook_) && parcel.WirteBool(isFollowScreenChange_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
