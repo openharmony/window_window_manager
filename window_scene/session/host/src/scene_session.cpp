@@ -4264,6 +4264,7 @@ WMError SceneSession::SetSnapshotSkip(bool isSkip)
             "id: %{public}d", isSkip, GetPersistentId());
         return WMError::WM_OK;
     }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, isSkip: %{public}d", GetWindowId(), isSkip);
     property->SetSnapshotSkip(isSkip);
     auto rsTransaction = RSTransactionProxy::GetInstance();
     if (rsTransaction != nullptr) {
