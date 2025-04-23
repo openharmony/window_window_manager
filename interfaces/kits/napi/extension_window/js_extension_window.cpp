@@ -15,7 +15,6 @@
 
 #include "js_extension_window.h"
 
-#include "js_err_utils.h"
 #include "js_extension_window_utils.h"
 #include "js_runtime_utils.h"
 #include "js_window_utils.h"
