@@ -2298,14 +2298,13 @@ napi_value JsWindow::OnGetProperties(napi_env env, napi_callback_info info)
             WLOGFE("window is nullptr or get invalid param");
             return;
         }
-        Rect drawableRect = g_emptyRect;
-        auto uicontent = weakWindow->GetUIContent();
-        if (uicontent == nullptr) {
-            WLOGFW("uicontent is nullptr");
-        } else {
-            uicontent->GetAppPaintSize(drawableRect);
+        WindowPropertyInfo windowPropertyInfo;
+        WMError ret = weakToken->GetWindowPropertyInfo(windowPropertyInfo);
+        if (ret != WMError::WM_OK) {
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+            return;
         }
-        auto objValue = CreateJsWindowPropertiesObject(env, weakWindow, drawableRect);
+        auto objValue = CreateJsWindowPropertiesObject(env, windowPropertyInfo);
         if (objValue != nullptr) {
             task->Resolve(env, objValue);
         } else {
@@ -2329,14 +2328,13 @@ napi_value JsWindow::OnGetWindowPropertiesSync(napi_env env, napi_callback_info 
         WLOGFW("window is nullptr or get invalid param");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    Rect drawableRect = g_emptyRect;
-    auto uicontent = windowToken_->GetUIContent();
-    if (uicontent == nullptr) {
-        WLOGFW("uicontent is nullptr");
-    } else {
-        uicontent->GetWindowPaintSize(drawableRect);
+    WindowPropertyInfo windowPropertyInfo;
+    WMError ret = windowToken_->GetWindowPropertyInfo(windowPropertyInfo);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "get window properties failed");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    auto objValue = CreateJsWindowPropertiesObject(env, windowToken_, drawableRect);
+    auto objValue = CreateJsWindowPropertiesObject(env, windowPropertyInfo);
     WLOGI("Window [%{public}u, %{public}s] get properties end",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
     if (objValue != nullptr) {

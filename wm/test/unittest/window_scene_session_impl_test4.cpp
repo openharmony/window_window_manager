@@ -670,6 +670,72 @@ HWTEST_F(WindowSceneSessionImplTest4, RegisterKeyboardPanelInfoChangeListener, T
 }
 
 /**
+ * @tc.name: RegisterWindowAttachStateChangeListener
+ * @tc.desc: RegisterWindowAttachStateChangeListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, RegisterWindowAttachStateChangeListener, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("RegisterKeyboardPanelInfoChangeListener");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    windowSceneSessionImpl->windowAttachStateChangeListener_ = sptr<IWindowAttachStateChangeListner>::MakeSptr();
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
+    windowSceneSessionImpl->hostSession_ = session;
+
+    // case1: listener is nullptr
+    sptr<IWindowAttachStateChangeListner> listener = nullptr;
+    auto ret = windowSceneSessionImpl->RegisterWindowAttachStateChangeListener(listener);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+
+    // case2: listener is not nullptr
+    listener = sptr<IWindowAttachStateChangeListner>::MakeSptr();
+    ret = windowSceneSessionImpl->RegisterWindowAttachStateChangeListener(listener);
+    EXPECT_EQ(WMError::WM_OK, ret);
+
+    // case3: host session is nullptr
+    windowSceneSessionImpl->hostSession_ = nullptr;
+    ret = windowSceneSessionImpl->RegisterWindowAttachStateChangeListener(listener);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+}
+
+/**
+ * @tc.name: UnregisterWindowAttachStateChangeListener
+ * @tc.desc: UnregisterWindowAttachStateChangeListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, UnregisterWindowAttachStateChangeListener, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UnregisterWindowAttachStateChangeListener");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    windowSceneSessionImpl->windowAttachStateChangeListener_ = sptr<IWindowAttachStateChangeListner>::MakeSptr();
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
+    windowSceneSessionImpl->hostSession_ = session;
+
+    // case1: register listener
+    sptr<IWindowAttachStateChangeListner> listener = sptr<IWindowAttachStateChangeListner>::MakeSptr();
+    auto ret = windowSceneSessionImpl->RegisterWindowAttachStateChangeListener(listener);
+    EXPECT_EQ(WMError::WM_OK, ret);
+
+    // case2: unregister success
+    ret = windowSceneSessionImpl->UnregisterWindowAttachStateChangeListener();
+    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(windowSceneSessionImpl->windowAttachStateChangeListener_, nullptr);
+
+    // case3: host session is nullptr
+    windowSceneSessionImpl->hostSession_ = nullptr;
+    ret = windowSceneSessionImpl->UnregisterWindowAttachStateChangeListener();
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+}
+
+/**
  * @tc.name: GetSystemBarPropertyByType
  * @tc.desc: GetSystemBarPropertyByType
  * @tc.type: FUNC
@@ -1809,6 +1875,51 @@ HWTEST_F(WindowSceneSessionImplTest4, IsSystemDensityChanged01, TestSize.Level1)
     window->lastSystemDensity_ = 1.5f;
     ret = window->IsSystemDensityChanged(displayInfo);
     ASSERT_EQ(false, ret);
+}
+
+/**
+ * @tc.name: GetWindowPropertyInfo
+ * @tc.desc: GetWindowPropertyInfo01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, GetWindowPropertyInfo01, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetFocusable(false);
+    option->SetTouchable(true);
+    option->SetDisplayId(999);
+    option->SetWindowName("GetWindowPropertyInfo01");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->hostSession_ = nullptr;
+    WindowPropertyInfo windowPropertyInfo;
+    auto ret = window->GetWindowPropertyInfo(windowPropertyInfo);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+}
+
+/**
+ * @tc.name: GetWindowPropertyInfo
+ * @tc.desc: GetWindowPropertyInfo02
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, GetWindowPropertyInfo02, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetFocusable(false);
+    option->SetTouchable(true);
+    option->SetDisplayId(999);
+    option->SetWindowName("GetWindowPropertyInfo02");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->property_->SetPersistentId(1);
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_SHOWN;
+    WindowPropertyInfo windowPropertyInfo;
+    auto ret = window->GetWindowPropertyInfo(windowPropertyInfo);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(false, windowPropertyInfo.isFocusable);
+    EXPECT_EQ(true, windowPropertyInfo.isTouchable);
+    EXPECT_EQ(999, windowPropertyInfo.displayId);
 }
 } // namespace
 } // namespace Rosen

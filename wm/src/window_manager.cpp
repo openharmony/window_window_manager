@@ -1751,5 +1751,32 @@ WMError WindowManager::UnregisterWindowInfoChangeCallback(const std::unordered_s
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s", observedInfoForLog.str().c_str());
     return ret;
 }
+
+void WindowManager::SetIsModuleHookOffToSet(const std::string& moduleName)
+{
+    isModuleHookOffSet_.insert(moduleName);
+    TLOGI(WmsLogTag::WMS_LIFE, "%{public}s", moduleName.c_str());
+}
+
+bool WindowManager::GetIsModuleHookOffFromSet(const std::string& moduleName)
+{
+    auto iter = isModuleHookOffSet_.find(moduleName);
+    if (iter != isModuleHookOffSet_.end()) {
+        return true;
+    }
+    return false;
+}
+
+bool WindowManager::IsModuleHookOff(bool isModuleAbilityHookEnd, const std::string& moduleName)
+{
+    if (isModuleAbilityHookEnd) {
+        SetIsModuleHookOffToSet(moduleName);
+    }
+    if (GetIsModuleHookOffFromSet(moduleName)) {
+        TLOGI(WmsLogTag::WMS_MAIN, "set IsModuleHookOff true");
+        return true;
+    }
+    return false;
+}
 } // namespace Rosen
 } // namespace OHOS

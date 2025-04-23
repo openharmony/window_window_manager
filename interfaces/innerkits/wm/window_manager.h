@@ -1158,6 +1158,15 @@ public:
      */
     WMError UnregisterWindowInfoChangeCallback(const std::unordered_set<WindowInfoKey>& observedInfo,
         const sptr<IWindowInfoChangedListener>& listener);
+    
+    /**
+     * @brief Whether new requested window needs hook.
+     *
+     * @param isModuleAbilityHookEnd Whether this module finished ability hook.
+     * @param moduleName Indicates the hooked moduleName.
+     * @return bool means the module finished ability hook or not.
+     */
+    bool IsModuleHookOff(bool isModuleAbilityHookEnd, const std::string& moduleName);
 
 private:
     WindowManager();
@@ -1166,6 +1175,7 @@ private:
     class Impl;
     std::unique_ptr<Impl> pImpl_;
     bool destroyed_ = false;
+    std::unordered_set<std::string> isModuleHookOffSet_;
 
     void OnWMSConnectionChanged(int32_t userId, int32_t screenId, bool isConnected) const;
     void UpdateFocusStatus(uint32_t windowId, const sptr<IRemoteObject>& abilityToken, WindowType windowType,
@@ -1191,6 +1201,8 @@ private:
         const sptr<IWindowInfoChangedListener>& listener);
     WMError RegisterVisibilityStateChangedListener(const sptr<IWindowInfoChangedListener>& listener);
     WMError UnregisterVisibilityStateChangedListener(const sptr<IWindowInfoChangedListener>& listener);
+    void SetIsModuleHookOffToSet(const std::string& moduleName);
+    bool GetIsModuleHookOffFromSet(const std::string& moduleName);
 };
 } // namespace Rosen
 } // namespace OHOS
