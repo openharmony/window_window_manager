@@ -315,6 +315,23 @@ void RootScene::RegisterGetSessionAvoidAreaByTypeCallback(GetSessionAvoidAreaByT
     getSessionAvoidAreaByTypeCallback_ = std::move(callback);
 }
 
+uint32_t RootScene::GetStatusBarHeight()
+{
+    uint32_t height = 0;
+    if (getStatusBarHeightCallback_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "getStatusBarHeightCallback_ is nullptr");
+        return height;
+    }
+    height = getStatusBarHeightCallback_();
+    TLOGI(WmsLogTag::WMS_IMMS, "root scene height %{public}u", height);
+    return height;
+}
+
+void RootScene::RegisterGetStatusBarHeightCallback(GetStatusBarHeightCallback&& callback)
+{
+    getStatusBarHeightCallback_ = std::move(callback);
+}
+
 void RootScene::RegisterUpdateRootSceneRectCallback(UpdateRootSceneRectCallback&& callback)
 {
     updateRootSceneRectCallback_ = std::move(callback);

@@ -174,6 +174,31 @@ AvoidArea RootSceneSession::GetAvoidAreaByType(AvoidAreaType type, const WSRect&
     return PostSyncTask(task, __func__);
 }
 
+int32_t RootSceneSession::GetStatusBarHeight()
+{
+    int32_t height = 0;
+    if (specificCallback_ == nullptr || specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ == nullptr ||
+        GetSessionProperty() == nullptr) {
+            TLOGE(WmsLogTag::WMS_IMMS, "specificCallback_ or session property is null");
+            return height;
+    }
+    const auto& statusBarVector = specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_(
+        WindowType::WINDOW_TYPE_STATUS_BAR, GetSessionProperty()->GetDisplayId());
+    for (auto& statusBar : statusBarVector) {
+        if (statusBar == nullptr) {
+            continue;
+        }
+        WSRect statusBarRect = statusBar->GetSessionRect();
+        if (onGetStatusBarAvoidHeightFunc_) {
+            onGetStatusBarAvoidHeightFunc_(statusBarRect);
+            TLOGD(WmsLogTag::WMS_IMMS, "root scene status bar height %{public}d", statusBarRect.height_);
+        }
+        height = statusBarRect.height_;
+    }
+    TLOGI(WmsLogTag::WMS_IMMS, "root scene height %{public}d", height);
+    return height;
+}
+
 void RootSceneSession::SetRootSessionRect(const WSRect& rect)
 {
     if (!rect.IsInvalid() && winRect_ != rect) {
