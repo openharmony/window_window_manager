@@ -48,6 +48,7 @@ public:
     void OnCameraBackSelfieChanged(ScreenId screenId, bool isCameraBackSelfie) override {}
     void OnSuperFoldStatusChanged(ScreenId screenId, SuperFoldStatus superFoldStatus) override {};
     void OnSecondaryReflexionChanged(ScreenId screenId, bool isSecondaryReflexion) override {};
+    void OnBeforeScreenPropertyChanged(FoldStatus foldStatus) override {};
     void OnExtendScreenConnectStatusChanged(ScreenId screenId,
         ExtendScreenConnectStatus extendScreenConnectStatus) override {}
     bool OnExtendDisplayNodeChange(ScreenId mainScreenId, ScreenId extendScreenId) override { return true; };

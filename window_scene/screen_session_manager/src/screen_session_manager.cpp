@@ -9006,6 +9006,16 @@ void ScreenSessionManager::OnSecondaryReflexionChange(ScreenId screenId, bool is
     clientProxy_->OnSecondaryReflexionChanged(screenId, isSecondaryReflexion);
 }
 
+void ScreenSessionManager::OnBeforeScreenPropertyChange(FoldStatus foldStatus)
+{
+    TLOGI(WmsLogTag::DMS, "foldstatus: %{public}d", foldStatus);
+    if (!clientProxy_) {
+        TLOGE(WmsLogTag::DMS, "clientProxy_ is null");
+        return;
+    }
+    clientProxy_->OnBeforeScreenPropertyChanged(foldStatus);
+}
+
 int32_t ScreenSessionManager::GetCameraStatus()
 {
     return cameraStatus_;
