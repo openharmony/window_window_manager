@@ -1078,12 +1078,11 @@ napi_value JsExtensionWindow::OnOccupyEvents(napi_env env, napi_callback_info in
             task->Resolve(env, NapiGetUndefined(env));
         } else {
             TLOGNE(WmsLogTag::WMS_UIEXT, "OnOccupyEvents failed, errorCode: %{public}d", ret);
-            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-                "OnOccupyEvents failed"));
+            task->Reject(env, ret, "JsExtensionWindow::OnOccupyEvents failed"));
         }
     };
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
-        TLOGE(WmsLogTag::WMS_IMMS, "napi_send_event failed");
+        TLOGE(WmsLogTag::WMS_UIEXT, "napi_send_event failed");
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
     }
