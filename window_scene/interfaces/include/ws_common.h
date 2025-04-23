@@ -503,6 +503,7 @@ enum class SizeChangeReason : uint32_t {
     SPLIT_DRAG,
     SPLIT_DRAG_END,
     RESIZE_BY_LIMIT,
+    MAXIMIZE_IN_IMPLICT,
     END,
 };
 
