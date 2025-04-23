@@ -513,6 +513,7 @@ private:
     std::recursive_mutex mutex_;
     std::recursive_mutex windowStateMutex_;
     static std::recursive_mutex globalMutex_;
+    static std::shared_mutex windowMapMutex_;
     const float SYSTEM_ALARM_WINDOW_WIDTH_RATIO = 0.8;
     const float SYSTEM_ALARM_WINDOW_HEIGHT_RATIO = 0.3;
     WindowSizeChangeReason lastSizeChangeReason_ = WindowSizeChangeReason::END;
