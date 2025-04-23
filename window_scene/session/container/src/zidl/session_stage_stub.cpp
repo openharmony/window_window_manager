@@ -214,6 +214,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyRotationChange(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_CURRENT_ROTATION):
             return HandleSetCurrentRotation(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_APP_FORCE_LANDSCAPE_CONFIG_UPDATED):
+            return HandleNotifyAppForceLandscapeConfigUpdated(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -998,6 +1000,14 @@ int SessionStageStub::HandleSetCurrentRotation(MessageParcel& data, MessageParce
         return ERR_INVALID_VALUE;
     }
     SetCurrentRotation(currentRotation);
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleNotifyAppForceLandscapeConfigUpdated(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFI("Handle Notify App Force Landscape Config Updated");
+    WSError errCode = NotifyAppForceLandscapeConfigUpdated();
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

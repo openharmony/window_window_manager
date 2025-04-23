@@ -2046,6 +2046,14 @@ WSError Session::NotifyDestroy()
     return sessionStage_->NotifyDestroy();
 }
 
+WSError Session::NotifyAppForceLandscapeConfigUpdated()
+{
+    if (!sessionStage_) {
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return sessionStage_->NotifyAppForceLandscapeConfigUpdated();
+}
+
 void Session::SetParentSession(const sptr<Session>& session)
 {
     if (session == nullptr) {

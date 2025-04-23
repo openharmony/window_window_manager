@@ -743,6 +743,18 @@ HWTEST_F(SessionStageProxyTest, NotifyTargetRotationInfo, Function | SmallTest |
     WSError res = sessionStage_->NotifyTargetRotationInfo(info);
     ASSERT_EQ(WSError::WS_OK, res);
 }
+
+/**
+ * @tc.name: NotifyAppForceLandscapeConfigUpdated
+ * @tc.desc: test function : NotifyAppForceLandscapeConfigUpdated
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, NotifyAppForceLandscapeConfigUpdated, TestSize.Level1)
+{
+    ASSERT_TRUE((sessionStage_ != nullptr));
+    WSError res = sessionStage_->NotifyAppForceLandscapeConfigUpdated();
+    ASSERT_EQ(WSError::WS_OK, res);
+}
 }
 }
 }

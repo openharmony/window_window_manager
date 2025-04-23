@@ -194,6 +194,7 @@ HWTEST_F(WindowSessionImplTest3, GetAppForceLandscapeConfig01, TestSize.Level1)
         ASSERT_EQ(res, WMError::WM_OK);
         ASSERT_EQ(config.mode_, 0);
         ASSERT_EQ(config.homePage_, "");
+        ASSERT_EQ(config.isSupportSplitMode_, false);
     }
     GTEST_LOG_(INFO) << "WindowSessionImplTest: GetAppForceLandscapeConfig end";
 }
@@ -216,6 +217,7 @@ HWTEST_F(WindowSessionImplTest3, GetAppForceLandscapeConfig02, TestSize.Level1)
         ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
         ASSERT_EQ(config.mode_, 0);
         ASSERT_EQ(config.homePage_, "");
+        ASSERT_EQ(config.isSupportSplitMode_, false);
     }
     GTEST_LOG_(INFO) << "WindowSessionImplTest: GetAppForceLandscapeConfig end";
 }
