@@ -368,18 +368,13 @@ ani_object AniWindowUtils::CreateAniSystemBarTintState(ani_env* env, DisplayId d
         return AniWindowUtils::CreateAniUndefined(env);
     }
     CallAniMethodVoid(env, state, aniClass, "<set>displayId", nullptr, static_cast<ani_long>(displayId));
-    ani_array_ref regionTintArray = nullptr;
-    ani_class regionTintCls;
-    if (env->FindClass("L@ohos/window/window/SystemBarRegionTintInternal;", &regionTintCls) != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] class not found");
-        return AniWindowUtils::CreateAniUndefined(env);
-    }
-    if (env->Array_New_Ref(regionTintCls, tints.size(), CreateAniUndefined(env), &regionTintArray) != ANI_OK) {
+    ani_array regionTintArray = nullptr;
+    if (env->Array_New(tints.size(), CreateAniUndefined(env), &regionTintArray) != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] create array failed");
         return AniWindowUtils::CreateAniUndefined(env);
     }
     for (size_t i = 0; i < tints.size(); i++) {
-        if (env->Array_Set_Ref(regionTintArray, i, CreateAniSystemBarRegionTint(env, tints[i])) != ANI_OK) {
+        if (env->Array_Set(regionTintArray, i, CreateAniSystemBarRegionTint(env, tints[i])) != ANI_OK) {
             TLOGE(WmsLogTag::DEFAULT, "[ANI] create region tint failed");
             return AniWindowUtils::CreateAniUndefined(env);
         }

@@ -44,7 +44,7 @@ static ani_status NewAniObjectNoParams(ani_env* env, ani_class cls, ani_object* 
 
 static ani_object CreateAniUndefined(ani_env* env);
 
-static void CreateAniArrayInt(ani_env* env, ani_size size, ani_array_int *aniArray, std::vector<uint32_t> vec);
+static void CreateAniArrayInt(ani_env* env, ani_size size, ani_array* aniArray, std::vector<uint32_t> vec);
 
 static ani_status GetAniString(ani_env* env, const std::string& str, ani_string* result);
 
