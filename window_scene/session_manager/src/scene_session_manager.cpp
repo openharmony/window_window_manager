@@ -1482,7 +1482,7 @@ AvoidArea SceneSessionManager::GetRootSessionAvoidAreaByType(AvoidAreaType type)
 
 uint32_t SceneSessionManager::GetRootSceneStatusBarHeight()
 {
-    return static<uint32_t>(rootSceneSession_->GetStatusBarHeight());
+    return static_cast<uint32_t>(rootSceneSession_->GetStatusBarHeight());
 }
 
 sptr<SceneSession> SceneSessionManager::GetSceneSession(int32_t persistentId)
