@@ -658,11 +658,11 @@ HWTEST_F(SceneSessionManagerTest3, ChangeUIAbilityVisibilityBySCB, TestSize.Leve
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
     sceneSession->SetSessionState(SessionState::STATE_ACTIVE);
-    int32_t ret = ssm_->ChangeUIAbilityVisibilityBySCB(sceneSession, true);
+    int32_t ret = ssm_->ChangeUIAbilityVisibilityBySCB(sceneSession, true, false);
     EXPECT_EQ(ret, 2097202);
-    ret = ssm_->ChangeUIAbilityVisibilityBySCB(sceneSession, true, false);
+    ret = ssm_->ChangeUIAbilityVisibilityBySCB(sceneSession, true, false, false);
     EXPECT_EQ(ret, 2097202);
-    ret = ssm_->ChangeUIAbilityVisibilityBySCB(sceneSession, true, true);
+    ret = ssm_->ChangeUIAbilityVisibilityBySCB(sceneSession, true, false, true);
     EXPECT_EQ(ret, 2097202);
 }
 

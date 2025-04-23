@@ -358,7 +358,7 @@ public:
     void SetIsWindowRectAutoSave(const std::string& key, bool enabled,
         const std::string& abilityKey, bool isSaveBySpecifiedFlag);
     int32_t ChangeUIAbilityVisibilityBySCB(const sptr<SceneSession>& sceneSession, bool visibility,
-        bool isFromClient = true);
+        bool isNewWant, bool isFromClient = true);
     WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId) override;
     void SetFocusedSessionDisplayIdIfNeeded(sptr<SceneSession>& newSession);
     const WindowLimits& GetWindowLimits(int32_t windowId);
