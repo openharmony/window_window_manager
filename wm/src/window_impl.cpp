@@ -206,7 +206,7 @@ const std::shared_ptr<AbilityRuntime::Context> WindowImpl::GetContext() const
 
 sptr<Window> WindowImpl::FindWindowById(uint32_t WinId)
 {
-    sstd::shared_lock<std::shared_mutex> lock(windowMapMutex_);
+    std::shared_lock<std::shared_mutex> lock(windowMapMutex_);
     if (windowMap_.empty()) {
         WLOGFE("Please create mainWindow First!");
         return nullptr;
@@ -1352,7 +1352,7 @@ WMError WindowImpl::WindowCreateCheck(uint32_t parentId)
     } else {
         sptr<Window> parentWindow = nullptr;
         {
-            std::lock_guard<std::mutex> lock(windowMapMutex_);
+            std::unique_lock<std::shared_mutex> lock(windowMapMutex_);
             for (const auto& winPair : windowMap_) {
                 if (winPair.second.first == parentId) {
                     property_->SetParentId(parentId);
