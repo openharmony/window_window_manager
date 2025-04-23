@@ -99,7 +99,7 @@ constexpr const char* WM_ERROR_CODE_MSG_REPEAT_OPERATION = "Repeated operation. 
 constexpr const char* WM_ERROR_CODE_MSG_STATE_ABNORMALLY = "This window state is abnormal. Possible causes: "
     "1.The window is not created or destroyed.";
 constexpr const char* WM_ERROR_CODE_MSG_SYSTEM_ABNORMALLY = "This window manager service works abnormally.";
-constexpr const char* WM_ERROR_CODE_MSG_INVALID_CALLING = "Forbidden operation. Possible causes: "
+constexpr const char* WM_ERROR_CODE_MSG_INVALID_CALLING = "Unauthorized operation. Possible causes: "
     "1.Incorrect window type;"
     "2.The subwindow is distroyed or being destroyed.";
 constexpr const char* WM_ERROR_CODE_MSG_STAGE_ABNORMALLY = "This window stage is abnormal. Possible causes: "
