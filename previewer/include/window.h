@@ -160,6 +160,7 @@ public:
     virtual bool IsFullScreen() const = 0;
     virtual WMError SetWindowMode(WindowMode mode) = 0;
     virtual WMError SetWindowType(WindowType type) = 0;
+    virtual WMError SetFollowScreenChange(bool isFollowScreenChange) = 0;
     virtual WMError SetAlpha(float alpha) = 0;
     virtual WMError SetTransform(const Transform& trans) = 0;
     virtual const Transform& GetTransform() const = 0;
