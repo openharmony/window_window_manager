@@ -6831,20 +6831,18 @@ void SceneSession::SetFollowParentRectFunc(NotifyFollowParentRectFunc&& func)
 WSError SceneSession::SetFollowParentWindowLayoutEnabled(bool isFollow)
 {
     auto property = GetSessionProperty();
-    if (!property) {
-        TLOGE(WmsLogTag::WMS_SUB, "property is null");
+    if (!property || property->GetSubWindowLevel() > 1) {
+        TLOGE(WmsLogTag::WMS_SUB, "property is null or not surppot more than 1 level window");
         return WSError::WS_ERROR_INVALID_OPERATION;
     }
-    // only support sub window and dialog
     if (!WindowHelper::IsSubWindow(property->GetWindowType()) &&
         !WindowHelper::IsDialogWindow(property->GetWindowType())) {
         TLOGE(WmsLogTag::WMS_SUB, "only sub window and dialog is valid");
         return WSError::WS_ERROR_INVALID_OPERATION;
     }
-    // only support first level window
-    if (property->GetSubWindowLevel() > 1) {
-        TLOGW(WmsLogTag::WMS_SUB, "not surppot more than 1 level window");
-        return WSError::WS_ERROR_INVALID_OPERATION;
+    if (!systemConfig_.supportFollowParentWindowLayout_) {
+        TLOGI(WmsLogTag::WMS_SUB, "not support device");
+        return WSError::WS_ERROR_DEVICE_NOT_SUPPORT;
     }
     PostTask([weakThis = wptr(this), isFollow = isFollow,  where = __func__] {
         auto session = weakThis.promote();

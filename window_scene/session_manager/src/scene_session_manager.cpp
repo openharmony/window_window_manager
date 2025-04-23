@@ -1406,6 +1406,15 @@ void SceneSessionManager::ConfigSystemUIStatusBar(const WindowSceneConfig::Confi
     }
 }
 
+void SceneSessionManager::ConfigSupportFollowParentWindowLayout()
+{
+    TLOGI(WmsLogTag::WMS_SUB, "support");
+    auto task = [this] {
+        systemConfig_.supportFollowParentWindowLayout_ = true;
+    };
+    taskScheduler_->PostAsyncTask(task, "ConfigSupportFollowParentWindowLayout");
+}
+
 void SceneSessionManager::SetRootSceneContext(const std::weak_ptr<AbilityRuntime::Context>& contextWeak)
 {
     rootSceneContextWeak_ = contextWeak;
