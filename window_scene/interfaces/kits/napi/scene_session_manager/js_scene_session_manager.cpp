@@ -708,6 +708,9 @@ void JsSceneSessionManager::RegisterSSManagerCallbacksOnRootScene()
     rootScene_->RegisterGetSessionAvoidAreaByTypeCallback([](AvoidAreaType type) {
         return SceneSessionManager::GetInstance().GetRootSessionAvoidAreaByType(type);
     });
+    rootScene_->RegisterGetStatusBarHeightCallback([]() {
+        return SceneSessionManager::GetInstance().GetRootSceneStatusBarHeight();
+    });
     rootScene_->RegisterUpdateRootSceneAvoidAreaCallback([] {
         SceneSessionManager::GetInstance().UpdateRootSceneAvoidArea();
     });

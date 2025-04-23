@@ -361,6 +361,19 @@ HWTEST_F(RootSceneSessionTest, UpdateAvoidArea_01, TestSize.Level1)
     auto ret = ssm_->rootSceneSession_->UpdateAvoidArea(new AvoidArea(avoidArea), AvoidAreaType::TYPE_SYSTEM);
     ASSERT_EQ(ret, WSError::WS_OK);
 }
+
+/**
+ * @tc.name: GetStatusBarHeight
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneSessionTest, GetStatusBarHeight, TestSize.Leval1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->rootSceneSession_ = sptr<RootSceneSession>::MakeSptr();
+    auto ret = ssm_->rootSceneSession_->GetStatusBarHeight();
+    ASSERT_EQ(0, ret);
+}
 }
 }
 }

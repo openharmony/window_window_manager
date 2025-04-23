@@ -1480,6 +1480,11 @@ AvoidArea SceneSessionManager::GetRootSessionAvoidAreaByType(AvoidAreaType type)
     return {};
 }
 
+uint32_t SceneSessionManager::GetRootSceneStatusBarHeight()
+{
+    return static<uint32_t>(rootSceneSession_->GetStatusBarHeight());
+}
+
 sptr<SceneSession> SceneSessionManager::GetSceneSession(int32_t persistentId)
 {
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
