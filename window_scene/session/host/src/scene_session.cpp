@@ -7818,6 +7818,7 @@ void SceneSession::UpdateNewSizeForPCWindow(bool isNotSessionRectWithDpiChange)
             TLOGE(WmsLogTag::WMS_LAYOUT_PC, "get available area failed!");
             return;
         }
+
         TLOGI(WmsLogTag::WMS_LAYOUT_PC, "availableArea: %{public}d, %{public}d, %{public}u, %{public}u, "
             "Id: %{public}u", availableArea.posX_, availableArea.posY_,
             availableArea.width_, availableArea.height_, GetPersistentId());
