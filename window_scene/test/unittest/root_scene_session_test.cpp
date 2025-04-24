@@ -367,7 +367,7 @@ HWTEST_F(RootSceneSessionTest, UpdateAvoidArea_01, TestSize.Level1)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(RootSceneSessionTest, GetStatusBarHeight, TestSize.Leval1)
+HWTEST_F(RootSceneSessionTest, GetStatusBarHeight, TestSize.Level1)
 {
     ASSERT_NE(nullptr, ssm_);
     ssm_->rootSceneSession_ = sptr<RootSceneSession>::MakeSptr();
