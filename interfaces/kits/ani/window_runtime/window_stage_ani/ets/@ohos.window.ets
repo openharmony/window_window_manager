@@ -16,13 +16,15 @@ import { AsyncCallback, BusinessError, Callback } from '@ohos.base';
 import { LocalStorage } from '@ohos.arkui.stateManagement';
 import { UIContext } from '@ohos.arkui.UIContext';
 import BaseContext from 'application.BaseContext';
+import hilog from '@ohos.hilog';
 export type AsyncCallbackVoid = (err: BusinessError) => void;
 export type WindowEventCallback = (data: window.WindowEventType) => void;
 export type WindowSizeCallback = (data: window.Size) => void;
 export type WindowStatusCallback = (data: window.WindowStatusType) => void;
 export type KeyboardHeightChangeCallback = (data: number) => void;
 export type KeyboardDidShowOrHideCallback = (data: window.KeyboardInfo) => void;
-
+const DOMAIN = 0x4200;
+const TAG = '[ANI]';
 namespace window {
   export interface Size {
     /**
@@ -1770,8 +1772,9 @@ export function CreateWindowStageApi(scene: long): WindowStage { return CreateWi
 export native function CreateWindow(window: long): WindowInternal;
 
 let nativeObj: long;
-function setNativeObj(nativeObj: long):void {
-    nativeObj = nativeObj;
+function setNativeObj(nativeObject: long):void {
+    hilog.info(DOMAIN, TAG, 'setNativeObj, nativeObject:' + nativeObject);
+    nativeObj = nativeObject;
 }
 
 native function getLastWindowSync(nativeObj: long, ctx: BaseContext): Window;
@@ -1779,6 +1782,7 @@ native function getLastWindowSync(nativeObj: long, ctx: BaseContext): Window;
 export function getLastWindow(ctx: BaseContext): Promise<Window> {
   return new Promise<Window>((resolve: (value: Window) => void, reject: (error: BusinessError) => void ) => {
       taskpool.execute((): Window => {
+          hilog.info(DOMAIN, TAG, 'getLastWindow, ctx:' + ctx);
           return getLastWindowSync(nativeObj, ctx);
       }).then((ret: NullishType) => {
           resolve(ret as Window);
@@ -1790,6 +1794,7 @@ export function getLastWindow(ctx: BaseContext): Promise<Window> {
 
 export function getLastWindow(ctx: BaseContext, callback: AsyncCallback<Window>): void {
     taskpool.execute((): Window => {
+        hilog.info(DOMAIN, TAG, 'getLastWindow, ctx:' + ctx);
         return getLastWindowSync(nativeObj, ctx);
     }).then((ret: NullishType) => {
         callback(new BusinessError(), ret as Window);
