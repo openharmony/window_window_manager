@@ -264,7 +264,12 @@ sptr<IRemoteObject> JsWindowExtension::OnConnect(const AAFwk::Want& want)
         WLOGFE("context is nullptr.");
         return nullptr;
     }
-    AAFwk::AbilityManagerClient::GetInstance()->ScheduleCommandAbilityWindowDone(
+    auto client = AAFwk::AbilityManagerClient::GetInstance();
+    if (client == nullptr) {
+        WLOGFE("client is nullptr.");
+        return nullptr;
+    }
+    client->ScheduleCommandAbilityWindowDone(
         context->GetToken(), sessionInfo_, AAFwk::WIN_CMD_FOREGROUND, AAFwk::ABILITY_CMD_FOREGROUND);
     return stub_->AsObject();
 }
@@ -293,7 +298,12 @@ void JsWindowExtension::OnDisconnect(const AAFwk::Want& want)
         WLOGFE("context is nullptr.");
         return;
     }
-    AAFwk::AbilityManagerClient::GetInstance()->ScheduleCommandAbilityWindowDone(
+    auto client = AAFwk::AbilityManagerClient::GetInstance();
+    if (client == nullptr) {
+        WLOGFE("client is nullptr.");
+        return;
+    }
+    client->ScheduleCommandAbilityWindowDone(
         context->GetToken(), sessionInfo_, AAFwk::WIN_CMD_DESTROY, AAFwk::ABILITY_CMD_DESTROY);
 }
 
