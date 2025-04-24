@@ -545,6 +545,11 @@ protected:
     sptr<FutureCallback> layoutCallback_ = nullptr;
     void UpdateVirtualPixelRatio(const sptr<Display>& display);
     WMError GetVirtualPixelRatio(float& vpr);
+    void SetCurrentTransform(const Transform& transform);
+    Transform GetCurrentTransform() const;
+    void NotifyAfterUIContentReady();
+    void SetNeedRenotifyTransform(bool isNeedRenotify) { needRenotifyTransform_.store(isNeedRenotify); }
+    bool IsNeedRenotifyTransform() const { return needRenotifyTransform_.load(); }
     mutable std::recursive_mutex transformMutex_;
     std::atomic<CrossAxisState> crossAxisState_ = CrossAxisState::STATE_INVALID;
     bool IsValidCrossState(int32_t state) const;
@@ -745,6 +750,9 @@ private:
     int16_t rotationAnimationCount_ { 0 };
     Transform layoutTransform_;
     SingleHandTransform singleHandTransform_;
+    mutable std::mutex currentTransformMutex_;
+    Transform currentTransform_;
+    std::atomic_bool needRenotifyTransform_ = false;
     
     /*
      * Window Decor

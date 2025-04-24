@@ -206,6 +206,14 @@ bool WindowSessionImpl::isUIExtensionAbilityProcess_ = false;
         }                                                                      \
     } while (false)
 
+#define CHECK_UI_CONTENT_RETURN_IF_NULL(uiContent)                             \
+    do {                                                                       \
+        if ((uiContent) == nullptr) {                                          \
+            TLOGE(WmsLogTag::WMS_LIFE, "uiContent is null");                   \
+            return;                                                            \
+        }                                                                      \
+    } while (false)
+
 WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
 {
     WLOGFD("[WMSCom] Constructor");
@@ -994,6 +1002,19 @@ void WindowSessionImpl::UpdateRectForResizeWithAnimation(const Rect& wmRect, con
     handler_->PostTask(task, "WMS_WindowSessionImpl_UpdateRectForResizeWithAnimation");
 }
 
+void WindowSessionImpl::NotifyAfterUIContentReady()
+{
+    auto uiContent = GetUIContentSharedPtr();
+    CHECK_UI_CONTENT_RETURN_IF_NULL(uiContent);
+    if (IsNeedRenotifyTransform()) {
+        auto transform = GetCurrentTransform();
+        TLOGI(WmsLogTag::WMS_LAYOUT, "Renotify transform, id:%{public}d, scaleX:%{public}f, scaleY:%{public}f",
+            GetPersistentId(), transform.scaleX_, transform.scaleY_);
+        uiContent->UpdateTransform(transform);
+        SetNeedRenotifyTransform(false);
+    }
+}
+
 void WindowSessionImpl::NotifyRotationAnimationEnd()
 {
     auto task = [weak = wptr(this)] {
@@ -1623,7 +1644,7 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
             contentInfo.c_str(), static_cast<uint16_t>(aceRet));
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-
+    NotifyAfterUIContentReady();
     TLOGD(WmsLogTag::WMS_LIFE, "end");
     return WMError::WM_OK;
 }
@@ -5039,9 +5060,13 @@ void WindowSessionImpl::NotifyWindowStatusChange(WindowMode mode)
 void WindowSessionImpl::NotifyTransformChange(const Transform& transform)
 {
     WLOGFI("in");
+    SetCurrentTransform(transform);
     if (auto uiContent = GetUIContentSharedPtr()) {
         uiContent->UpdateTransform(transform);
         SetLayoutTransform(transform);
+        SetNeedRenotifyTransform(false);
+    } else {
+        SetNeedRenotifyTransform(true);
     }
 }
 
@@ -5369,6 +5394,18 @@ Transform WindowSessionImpl::GetLayoutTransform() const
 {
     std::lock_guard<std::recursive_mutex> lock(transformMutex_);
     return layoutTransform_;
+}
+
+void WindowSessionImpl::SetCurrentTransform(const Transform& transform)
+{
+    std::lock_guard<std::mutex> lock(currentTransformMutex_);
+    currentTransform_ = transform;
+}
+
+Transform WindowSessionImpl::GetCurrentTransform() const
+{
+    std::lock_guard<std::mutex> lock(currentTransformMutex_);
+    return currentTransform_;
 }
 
 void WindowSessionImpl::RegisterWindowInspectorCallback()
