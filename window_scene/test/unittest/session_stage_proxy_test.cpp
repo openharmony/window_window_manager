@@ -743,6 +743,45 @@ HWTEST_F(SessionStageProxyTest, NotifyTargetRotationInfo, Function | SmallTest |
     WSError res = sessionStage_->NotifyTargetRotationInfo(info);
     ASSERT_EQ(WSError::WS_OK, res);
 }
+
+/**
+ * @tc.name: SetCurrentRotation
+ * @tc.desc: test function : SetCurrentRotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, SetCurrentRotation, Function | SmallTest | Level1)
+{
+    int currentRotation = 1;
+    ASSERT_TRUE(sessionStage_ != nullptr);
+    WSError res = sessionStage_->SetCurrentRotation(currentRotation);
+    ASSERT_EQ(WSError::WS_OK, res);
+}
+
+/**
+ * @tc.name: ReadLittleStringVectorFromParcel
+ * @tc.desc: test function : ReadLittleStringVectorFromParcel
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, ReadLittleStringVectorFromParcel, Function | SmallTest | Level1)
+{
+    bool isAttach = false;
+    ASSERT_TRUE(sessionStage_ != nullptr);
+    WSError res = sessionStage_->NotifyWindowAttachStateChange(isAttach);
+    ASSERT_EQ(WSError::WS_OK, res);
+}
+
+/**
+ * @tc.name: NotifyWindowCrossAxisChange
+ * @tc.desc: test function : NotifyWindowCrossAxisChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, NotifyWindowCrossAxisChange, Function | SmallTest | Level1)
+{
+    CrossAxisState state = CrossAxisState::STATE_CROSS;
+    ASSERT_TRUE(sessionStage_ != nullptr);
+    sessionStage_->NotifyWindowCrossAxisChange(state);
+    ASSERT_NE(nullptr, sessionStage_);
+}
 }
 }
 }
