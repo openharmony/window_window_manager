@@ -6497,13 +6497,13 @@ void SceneSessionManager::UpdateFocusStatus(DisplayId displayId, const sptr<Scen
         }
     }
     sceneSession->UpdateFocus(isFocused);
-    if ((isFocused && !needBlockNotifyFocusStatusUntilForeground) || (!isFocused && !needBlockNotifyUnfocusStatus)) {
-        NotifyFocusStatus(sceneSession, isFocused, focusGroup);
-    }
-    // notify listenerController
+    // notify listenerController unfocused
     auto prevSession = GetSceneSession(focusGroup->GetLastFocusedSessionId());
     if (isFocused && MissionChanged(prevSession, sceneSession)) {
-        NotifyFocusStatusByMission(prevSession, sceneSession);
+        NotifyUnFocusedByMission(prevSession);
+    }
+    if ((isFocused && !needBlockNotifyFocusStatusUntilForeground) || (!isFocused && !needBlockNotifyUnfocusStatus)) {
+        NotifyFocusStatus(sceneSession, isFocused, focusGroup);
     }
 }
 
@@ -6656,6 +6656,11 @@ void SceneSessionManager::NotifyFocusStatus(const sptr<SceneSession>& sceneSessi
     SceneSessionManager::NotifyRssThawApp(focusChangeInfo->uid_, "", "THAW_BY_FOCUS_CHANGED");
     SessionManagerAgentController::GetInstance().UpdateFocusChangeInfo(focusChangeInfo, isFocused);
     sceneSession->NotifyFocusStatus(isFocused);
+    // notify listenerController focused
+    auto prevSession = GetSceneSession(focusGroup->GetLastFocusedSessionId());
+    if (isFocused && MissionChanged(prevSession, sceneSession)) {
+        NotifyFocusedByMission(sceneSession);
+    }
 }
 
 int32_t SceneSessionManager::NotifyRssThawApp(const int32_t uid, const std::string& bundleName,
@@ -6688,6 +6693,14 @@ void SceneSessionManager::NotifyUnFocusedByMission(const sptr<SceneSession>& sce
     if (sceneSession && !sceneSession->GetSessionInfo().isSystem_) {
         TLOGD(WmsLogTag::WMS_FOCUS, "id: %{public}d", sceneSession->GetMissionId());
         listenerController_->NotifySessionUnfocused(sceneSession->GetMissionId());
+    }
+}
+
+void SceneSessionManager::NotifyFocusedByMission(const sptr<SceneSession>& sceneSession)
+{
+    if (sceneSession && !sceneSession->GetSessionInfo().isSystem_) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "Focused, id: %{public}d", sceneSession->GetMissionId());
+        listenerController_->NotifySessionFocused(sceneSession->GetMissionId());
     }
 }
 
