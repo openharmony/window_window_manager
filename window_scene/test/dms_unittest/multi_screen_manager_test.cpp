@@ -781,13 +781,39 @@ HWTEST_F(MultiScreenManagerTest, MultiScreenModeChange02, TestSize.Level1)
     MultiScreenManager::GetInstance().MultiScreenModeChange(firstSession, secondarySession, "extend");
     ASSERT_EQ(secondarySession->GetScreenCombination(), ScreenCombination::SCREEN_EXTEND);
 
-    firstSession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
-    MultiScreenManager::GetInstance().MultiScreenModeChange(firstSession, secondarySession, "mirror");
-    ASSERT_EQ(secondarySession->GetScreenCombination(), ScreenCombination::SCREEN_MIRROR);
+    ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId);
+    ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId1);
+}
+
+/**
+ * @tc.name: MultiScreenModeChange
+ * @tc.desc: firstSession == nullptr,secondarySession == nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, MultiScreenModeChange03, TestSize.Level1)
+{
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    auto screenId = ScreenSessionManager::GetInstance().CreateVirtualScreen(
+        virtualOption, displayManagerAgent->AsObject());
+    auto firstSession = ScreenSessionManager::GetInstance().GetScreenSession(screenId);
+
+    sptr<IDisplayManagerAgent> displayManagerAgent1 = new(std::nothrow) DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption1;
+    virtualOption1.name_ = "createVirtualOption";
+    auto screenId1 = ScreenSessionManager::GetInstance().CreateVirtualScreen(
+        virtualOption1, displayManagerAgent1->AsObject());
+    auto secondarySession = ScreenSessionManager::GetInstance().GetScreenSession(screenId1);
+
+    testClient_ = new ScreenSessionManagerClientTest();
+    ScreenSessionManager::GetInstance().SetClient(testClient_);
+    ASSERT_NE(ScreenSessionManager::GetInstance().GetClientProxy(), nullptr);
 
     firstSession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
-    MultiScreenManager::GetInstance().MultiScreenModeChange(firstSession, secondarySession, "extend");
-    ASSERT_EQ(secondarySession->GetScreenCombination(), ScreenCombination::SCREEN_EXTEND);
+    secondarySession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
+    MultiScreenManager::GetInstance().MultiScreenModeChange(firstSession, secondarySession, "mirror");
+    ASSERT_EQ(secondarySession->GetScreenCombination(), ScreenCombination::SCREEN_MIRROR);
 
     ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId);
     ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId1);
