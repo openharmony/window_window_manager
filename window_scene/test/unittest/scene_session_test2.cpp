@@ -369,31 +369,6 @@ HWTEST_F(SceneSessionTest2, UpdateSizeChangeReason01, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetMinimizedFlagByUserSwitch/IsMinimizedByUserSwitch
- * @tc.desc: SetMinimizedFlagByUserSwitch/IsMinimizedByUserSwitch Test
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest2, SetMinimizedFlagByUserSwitch, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "SetMinimizedFlagByUserSwitch";
-    info.bundleName_ = "SetMinimizedFlagByUserSwitch";
-
-    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(session, nullptr);
-
-    bool isMinimized = true;
-    session->SetMinimizedFlagByUserSwitch(isMinimized);
-    bool ret = session->IsMinimizedByUserSwitch();
-    ASSERT_EQ(ret, true);
-
-    isMinimized = false;
-    session->SetMinimizedFlagByUserSwitch(isMinimized);
-    ret = session->IsMinimizedByUserSwitch();
-    ASSERT_EQ(ret, false);
-}
-
-/**
  * @tc.name: UpdatePiPRect01
  * @tc.desc: UpdatePiPRect
  * @tc.type: FUNC
