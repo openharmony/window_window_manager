@@ -4335,9 +4335,7 @@ DMError ScreenSessionManager::DestroyVirtualScreen(ScreenId screenId)
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:DestroyVirtualScreen(%" PRIu64")", screenId);
     auto screen = GetScreenSession(screenId);
     if (rsScreenId != SCREEN_ID_INVALID && screen != nullptr) {
-        if (CheckScreenInScreenGroup(screen)) {
-            NotifyDisplayDestroy(screenId);
-        }
+        NotifyDisplayDestroy(screenId);
         {
             std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
             auto screenGroup = RemoveFromGroupLocked(screen);
