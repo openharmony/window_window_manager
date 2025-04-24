@@ -377,6 +377,7 @@ enum class WindowSizeChangeReason : uint32_t {
     SPLIT_DRAG_END,
     RESIZE_BY_LIMIT,
     PAGE_ROTATION,
+    MAXIMIZE_IN_IMPLICT = 32,
     END
 };
 

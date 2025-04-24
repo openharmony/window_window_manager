@@ -1401,6 +1401,8 @@ napi_value CreateJsSessionSizeChangeReason(napi_env env)
         static_cast<int32_t>(SizeChangeReason::SPLIT_DRAG_END)));
     napi_set_named_property(env, objValue, "RESIZE_BY_LIMIT", CreateJsValue(env,
         static_cast<int32_t>(SizeChangeReason::RESIZE_BY_LIMIT)));
+    napi_set_named_property(env, objValue, "MAXIMIZE_IN_IMPLICT", CreateJsValue(env,
+        static_cast<int32_t>(SizeChangeReason::MAXIMIZE_IN_IMPLICT)));
     napi_set_named_property(env, objValue, "END", CreateJsValue(env,
         static_cast<int32_t>(SizeChangeReason::END)));
 
