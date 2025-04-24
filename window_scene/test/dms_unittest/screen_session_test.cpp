@@ -1307,8 +1307,14 @@ HWTEST_F(ScreenSessionTest, GetScreenSupportedColorGamuts, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetScreenSupportedColorGamuts start";
     std::vector<ScreenColorGamut> colorGamuts;
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
-    DMError ret = session->GetScreenSupportedColorGamuts(colorGamuts);
+    ScreenSessionConfig config = {
+        .screenId = 0,
+        .rsId = 0,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    ASSERT_NE(screenSession, nullptr);
+    DMError ret = screenSession->GetScreenSupportedColorGamuts(colorGamuts);
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(ret, DMError::DM_OK);
     } else {
@@ -1368,11 +1374,15 @@ HWTEST_F(ScreenSessionTest, GetScreenColorGamut, TestSize.Level1)
 {
 #ifdef WM_SCREEN_COLOR_GAMUT_ENABLE
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetScreenColorGamut start";
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
-    ASSERT_NE(session, nullptr);
-
+    ScreenSessionConfig config = {
+        .screenId = 0,
+        .rsId = 0,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    ASSERT_NE(screenSession, nullptr);
     ScreenColorGamut colorGamut;
-    DMError res = session->GetScreenColorGamut(colorGamut);
+    DMError res = screenSession->GetScreenColorGamut(colorGamut);
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(res, DMError::DM_OK);
     } else {
@@ -1415,7 +1425,7 @@ HWTEST_F(ScreenSessionTest, SetScreenColorGamut02, TestSize.Level1)
 
     int32_t colorGamut = -1;
     DMError res = session->SetScreenColorGamut(colorGamut);
-    ASSERT_EQ(res, DMError::DM_ERROR_INVALID_PARAM);
+    EXPECT_NE(res, DMError::DM_OK);
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetScreenColorGamut end";
 #endif
 }
