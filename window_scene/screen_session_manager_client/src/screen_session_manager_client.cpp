@@ -363,7 +363,7 @@ void ScreenSessionManagerClient::UpdateScreenRotationProperty(ScreenId screenId,
     screenSession->SetPhysicalRotation(directionInfo.phyRotation_);
     screenSession->SetScreenComponentRotation(directionInfo.screenRotation_);
     screenSession->UpdateToInputManager(bounds, directionInfo.notifyRotation_, directionInfo.rotation_,
-        foldDisplayMode, screenSessionManager_->IsOrientationNeedChanged());
+        foldDisplayMode);
     screenSession->UpdateTouchBoundsAndOffset();
     if (currentstate_ != SuperFoldStatus::KEYBOARD) {
         screenSession->SetValidHeight(bounds.rect_.GetHeight());
@@ -621,6 +621,15 @@ void ScreenSessionManagerClient::SetLandscapeLockStatus(bool isLocked)
     return screenSessionManager_->SetLandscapeLockStatus(isLocked);
 }
 
+void ScreenSessionManagerClient::SetForceCloseHdr(ScreenId screenId, bool isForceCloseHdr)
+{
+    if (!screenSessionManager_) {
+        TLOGE(WmsLogTag::DMS, "screenSessionManager_ is null");
+        return;
+    }
+    return screenSessionManager_->SetForceCloseHdr(screenId, isForceCloseHdr);
+}
+
 ExtendScreenConnectStatus ScreenSessionManagerClient::GetExtendScreenConnectStatus()
 {
     if (!screenSessionManager_) {
@@ -793,7 +802,7 @@ void ScreenSessionManagerClient::UpdatePropertyWhenSwitchUser(const sptr <Screen
     float rotation, RRect bounds, ScreenId screenId)
 {
     screenSession->UpdateToInputManager(bounds, static_cast<int>(rotation), static_cast<int>(rotation),
-        FoldDisplayMode::UNKNOWN, screenSessionManager_->IsOrientationNeedChanged());
+        FoldDisplayMode::UNKNOWN);
     screenSession->SetPhysicalRotation(rotation);
     screenSession->SetScreenComponentRotation(rotation);
     ScreenProperty property = screenSessionManager_->GetScreenProperty(screenId);
@@ -1071,6 +1080,16 @@ std::string ScreenSessionManagerClient::OnDumperClientScreenSessions()
     return screenInfos;
 }
 
+void ScreenSessionManagerClient::SetDefaultMultiScreenModeWhenSwitchUser()
+{
+    if (!screenSessionManager_) {
+        TLOGE(WmsLogTag::DMS, "screenSessionManager_ is null");
+        return;
+    }
+    screenSessionManager_->SetDefaultMultiScreenModeWhenSwitchUser();
+    return;
+}
+
 void ScreenSessionManagerClient::NotifyExtendScreenCreateFinish()
 {
     if (!screenSessionManager_) {
@@ -1078,5 +1097,14 @@ void ScreenSessionManagerClient::NotifyExtendScreenCreateFinish()
         return;
     }
     return screenSessionManager_->NotifyExtendScreenCreateFinish();
+}
+
+void ScreenSessionManagerClient::NotifyExtendScreenDestroyFinish()
+{
+    if (!screenSessionManager_) {
+        TLOGE(WmsLogTag::DMS, "screenSessionManager_ is null");
+        return;
+    }
+    return screenSessionManager_->NotifyExtendScreenDestroyFinish();
 }
 } // namespace OHOS::Rosen

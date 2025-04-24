@@ -116,6 +116,7 @@ using NotifyAvoidAreaChangeCallback = std::function<void(const sptr<AvoidArea>& 
 using NotifySetSupportedWindowModesFunc = std::function<void(
     std::vector<AppExecFwk::SupportWindowMode>&& supportedWindowModes)>;
 using GetStatusBarAvoidHeightFunc = std::function<void(WSRect& barArea)>;
+using GetStatusBarConstantlyShowFunc = std::function<void(DisplayId dispalyId, bool& isVisible)>;
 using NotifySetWindowCornerRadiusFunc = std::function<void(float cornerRadius)>;
 using GetKeyboardOccupiedAreaWithRotationCallback =
     std::function<void(int32_t persistentId, Rotation rotation, std::vector<std::pair<bool, WSRect>>& avoidAreas)>;
@@ -366,8 +367,8 @@ public:
     void AddRSNodeModifier(bool isDark, const std::shared_ptr<RSBaseNode>& rsNode);
     void SetSidebarBlur(bool isDefaultSidebarBlur, bool isNeedAnimation);
     void ModifyRSAnimatableProperty(bool isDefaultSidebarBlur, bool isDark, bool isNeedAnimation);
-    WSError UpdateDensity();
-    void UpdateNewSizeForPCWindow();
+    WSError UpdateDensity(bool isNotSessionRectWithDpiChange = false);
+    void UpdateNewSizeForPCWindow(bool isNotSessionRectWithDpiChange = false);
     bool CalcNewWindowRectIfNeed(DMRect& availableArea, float newVpr, WSRect& winRect);
     void CalcNewClientRectForSuperFold(WSRect& rect);
     void SaveLastDensity();
@@ -422,6 +423,7 @@ public:
     void MarkAvoidAreaAsDirty();
     virtual void RecalculatePanelRectForAvoidArea(WSRect& panelRect) {}
     void RegisterGetStatusBarAvoidHeightFunc(GetStatusBarAvoidHeightFunc&& func);
+    void RegisterGetStatusBarConstantlyShowFunc(GetStatusBarConstantlyShowFunc&& func);
     void HookAvoidAreaInCompatibleMode(const WSRect& rect, AvoidAreaType avoidAreaType, AvoidArea& avoidArea) const;
 
     void SetAbilitySessionInfo(std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo);
@@ -557,8 +559,6 @@ public:
     virtual void NotifySessionLockStateChange(bool isLockedState) {}
     virtual void SetUpdateSessionLabelAndIconListener(NofitySessionLabelAndIconUpdatedFunc&& func) {}
     bool UpdateInteractiveInner(bool interactive);
-    void SetIsAbilityHook(bool isAbilityHook);
-    bool GetIsAbilityHook() const;
     void HookSceneSessionActivation(NotifyHookSceneSessionActivationFunc&& func);
     void SetSceneSessionDestructNotificationFunc(NotifySceneSessionDestructFunc&& func);
     void SetIsUserRequestedExit(bool isUserRequestedExit);
@@ -754,6 +754,8 @@ public:
     void SetWindowCornerRadiusCallback(NotifySetWindowCornerRadiusFunc&& func);
     WSError SetWindowCornerRadius(float cornerRadius) override;
     void SetPrivacyModeChangeNotifyFunc(NotifyPrivacyModeChangeFunc&& func);
+    void SetIsAncoForFloatingWindow(bool isAncoForFloatingWindow);
+    bool GetIsAncoForFloatingWindow() const;
 
     /*
      * Window Pattern
@@ -795,6 +797,7 @@ protected:
     NotifyNeedAvoidFunc onNeedAvoid_;
     NotifySystemBarPropertyChangeFunc onSystemBarPropertyChange_;
     GetStatusBarAvoidHeightFunc onGetStatusBarAvoidHeightFunc_;
+    GetStatusBarConstantlyShowFunc onGetStatusBarConstantlyShowFunc_;
 
     /*
      * Gesture Back
@@ -1231,6 +1234,7 @@ private:
     NotifyPrivacyModeChangeFunc privacyModeChangeNotifyFunc_;
     // Set true if either sessionProperty privacyMode or combinedExtWindowFlags_ privacyModeFlag is true.
     bool isPrivacyMode_ { false };
+    bool isAncoForFloatingWindow_ = false;
 
     /*
      * PC Window Sidebar Blur
@@ -1243,7 +1247,6 @@ private:
    /*
     * Window Lifecycle
     */
-    bool isAbilityHook_ = false;
     NotifyHookSceneSessionActivationFunc hookSceneSessionActivationFunc_;
     bool isUserRequestedExit_ = false;
 };

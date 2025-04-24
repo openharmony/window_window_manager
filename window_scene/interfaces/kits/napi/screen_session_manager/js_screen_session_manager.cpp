@@ -107,6 +107,8 @@ napi_value JsScreenSessionManager::Init(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "getSuperFoldStatus", moduleName, JsScreenSessionManager::GetSuperFoldStatus);
     BindNativeFunction(env, exportObj, "setLandscapeLockStatus", moduleName,
         JsScreenSessionManager::SetLandscapeLockStatus);
+    BindNativeFunction(env, exportObj, "setForceCloseHdr", moduleName,
+        JsScreenSessionManager::SetForceCloseHdr);
     BindNativeFunction(env, exportObj, "getScreenSnapshot", moduleName,
         JsScreenSessionManager::GetScreenSnapshot);
     BindNativeFunction(env, exportObj, "getScreenSnapshotSync", moduleName,
@@ -118,8 +120,12 @@ napi_value JsScreenSessionManager::Init(napi_env env, napi_value exportObj)
         JsScreenSessionManager::SetScreenOnDelayTime);
     BindNativeFunction(env, exportObj, "getExtendScreenConnectStatus", moduleName,
         JsScreenSessionManager::GetExtendScreenConnectStatus);
+    BindNativeFunction(env, exportObj, "setDefaultMultiScreenModeWhenSwitchUser", moduleName,
+        JsScreenSessionManager::SetDefaultMultiScreenModeWhenSwitchUser);
     BindNativeFunction(env, exportObj, "notifyExtendScreenCreateFinish", moduleName,
         JsScreenSessionManager::NotifyExtendScreenCreateFinish);
+    BindNativeFunction(env, exportObj, "notifyExtendScreenDestroyFinish", moduleName,
+        JsScreenSessionManager::NotifyExtendScreenDestroyFinish);
     return NapiGetUndefined(env);
 }
 
@@ -265,6 +271,13 @@ napi_value JsScreenSessionManager::SetLandscapeLockStatus(napi_env env, napi_cal
     return (me != nullptr) ? me->OnSetLandscapeLockStatus(env, info) : nullptr;
 }
 
+napi_value JsScreenSessionManager::SetForceCloseHdr(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DMS, "[NAPI] begin");
+    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
+    return (me != nullptr) ? me->OnSetForceCloseHdr(env, info) : nullptr;
+}
+
 napi_value JsScreenSessionManager::GetScreenSnapshot(napi_env env, napi_callback_info info)
 {
     WLOGD("[NAPI]GetScreenSnapshot");
@@ -286,11 +299,25 @@ napi_value JsScreenSessionManager::GetExtendScreenConnectStatus(napi_env env, na
     return (me != nullptr) ? me->OnGetExtendScreenConnectStatus(env, info) : nullptr;
 }
 
+napi_value JsScreenSessionManager::SetDefaultMultiScreenModeWhenSwitchUser(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DMS, "[NAPI]SetDefaultMultiScreenModeWhenSwitchUser");
+    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
+    return (me != nullptr) ? me->OnSetDefaultMultiScreenModeWhenSwitchUser(env, info) : nullptr;
+}
+
 napi_value JsScreenSessionManager::NotifyExtendScreenCreateFinish(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::DMS, "[NAPI]NotifyExtendScreenCreateFinish");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnNotifyExtendScreenCreateFinish(env, info) : nullptr;
+}
+
+napi_value JsScreenSessionManager::NotifyExtendScreenDestroyFinish(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DMS, "[NAPI]NotifyExtendScreenDestroyFinish");
+    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
+    return (me != nullptr) ? me->OnNotifyExtendScreenDestroyFinish(env, info) : nullptr;
 }
 
 void JsScreenSessionManager::OnScreenConnected(const sptr<ScreenSession>& screenSession)
@@ -877,6 +904,35 @@ napi_value JsScreenSessionManager::OnSetLandscapeLockStatus(napi_env env, napi_c
     return NapiGetUndefined(env);
 }
 
+napi_value JsScreenSessionManager::OnSetForceCloseHdr(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_TWO;
+    napi_value argv[ARGC_TWO] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_TWO) {
+        TLOGE(WmsLogTag::DMS, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int32_t screenId;
+    if (!ConvertFromJsValue(env, argv[0], screenId)) {
+        TLOGE(WmsLogTag::DMS, "Failed to convert parameter to screenId");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    bool isForceCloseHdr;
+    if (!ConvertFromJsValue(env, argv[1], isForceCloseHdr)) {
+        TLOGE(WmsLogTag::DMS, "Failed to convert parameter to isForceCloseHdr");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    ScreenSessionManagerClient::GetInstance().SetForceCloseHdr(screenId, isForceCloseHdr);
+    return NapiGetUndefined(env);
+}
+
 napi_value JsScreenSessionManager::OnGetScreenSnapshot(napi_env env, const napi_callback_info info)
 {
     WLOGFD("[NAPI]OnGetScreenSnapshot");
@@ -1005,10 +1061,24 @@ napi_value JsScreenSessionManager::OnGetExtendScreenConnectStatus(napi_env env, 
     return CreateJsValue(env, status);
 }
 
+napi_value JsScreenSessionManager::OnSetDefaultMultiScreenModeWhenSwitchUser(napi_env env,
+    const napi_callback_info info)
+{
+    ScreenSessionManagerClient::GetInstance().SetDefaultMultiScreenModeWhenSwitchUser();
+    WLOGI("[NAPI] OnSetDefaultMultiScreenModeWhenSwitchUser");
+    return NapiGetUndefined(env);
+}
+
 napi_value JsScreenSessionManager::OnNotifyExtendScreenCreateFinish(napi_env env, const napi_callback_info info)
 {
     ScreenSessionManagerClient::GetInstance().NotifyExtendScreenCreateFinish();
     WLOGI("[NAPI] OnNotifyExtendScreenCreateFinish");
+    return NapiGetUndefined(env);
+}
+
+napi_value JsScreenSessionManager::OnNotifyExtendScreenDestroyFinish(napi_env env, const napi_callback_info info)
+{
+    ScreenSessionManagerClient::GetInstance().NotifyExtendScreenDestroyFinish();
     return NapiGetUndefined(env);
 }
 } // namespace OHOS::Rosen

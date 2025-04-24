@@ -182,12 +182,10 @@ void SingleDisplaySensorPocketFoldStateManager::HandleTentChange(int tentType,
         HandleSensorChange(FoldStatus::FOLDED, currentAngle, foldScreenPolicy);
         foldScreenPolicy->ChangeOnTentMode(FoldStatus::FOLDED);
         if (tentType == TENT_MODE_ON) {
-            TLOGI(WmsLogTag::DMS, "Set device status to STATUS_TENT");
-            SetDeviceStatus(static_cast<uint32_t>(DMDeviceStatus::STATUS_TENT));
+            SetDeviceStatusAndParam(static_cast<uint32_t>(DMDeviceStatus::STATUS_TENT));
             ScreenRotationProperty::HandleHoverStatusEventInput(DeviceHoverStatus::TENT_STATUS);
         } else if (tentType == TENT_MODE_HOVER_ON) {
-            TLOGI(WmsLogTag::DMS, "Set device status to STATUS_TENT_HOVER");
-            SetDeviceStatus(static_cast<uint32_t>(DMDeviceStatus::STATUS_TENT_HOVER));
+            SetDeviceStatusAndParam(static_cast<uint32_t>(DMDeviceStatus::STATUS_TENT_HOVER));
             ScreenRotationProperty::HandleHoverStatusEventInput(DeviceHoverStatus::TENT_STATUS_HOVER);
         }
     } else {
@@ -201,11 +199,9 @@ void SingleDisplaySensorPocketFoldStateManager::HandleTentChange(int tentType,
             nextState = GetNextFoldState(currentAngle, hall);
         }
         if (nextState == FoldStatus::FOLDED) {
-            TLOGI(WmsLogTag::DMS, "Set device status to STATUS_FOLDED");
-            SetDeviceStatus(static_cast<uint32_t>(DMDeviceStatus::STATUS_FOLDED));
+            SetDeviceStatusAndParam(static_cast<uint32_t>(DMDeviceStatus::STATUS_FOLDED));
         } else {
-            TLOGI(WmsLogTag::DMS, "Set device status to UNKNOWN");
-            SetDeviceStatus(static_cast<uint32_t>(DMDeviceStatus::UNKNOWN));
+            SetDeviceStatusAndParam(static_cast<uint32_t>(DMDeviceStatus::UNKNOWN));
         }
         HandleSensorChange(nextState, currentAngle, foldScreenPolicy);
         ReportTentStatusChange(ReportTentModeStatus::NORMAL_EXIT_TENT_MODE);
@@ -257,11 +253,6 @@ void SingleDisplaySensorPocketFoldStateManager::ReportTentStatusChange(ReportTen
     }
 }
 
-bool SingleDisplaySensorPocketFoldStateManager::IsCameraMode()
-{
-    return false;
-}
-
 ApplicationStatePocketObserver::ApplicationStatePocketObserver() {}
 
 void ApplicationStatePocketObserver::RegisterCameraForegroundChanged(std::function<void()> callback)
@@ -301,5 +292,12 @@ bool ApplicationStatePocketObserver::IsCameraForeground()
 std::string ApplicationStatePocketObserver::GetForegroundApp()
 {
     return foregroundBundleName_;
+}
+
+void SingleDisplaySensorPocketFoldStateManager::SetDeviceStatusAndParam(uint32_t deviceStatus)
+{
+    TLOGI(WmsLogTag::DMS, "Set device status to: %{public}u", deviceStatus);
+    SetDeviceStatus(deviceStatus);
+    system::SetParameter("persist.dms.device.status", std::to_string(deviceStatus));
 }
 } // namespace OHOS::Rosen

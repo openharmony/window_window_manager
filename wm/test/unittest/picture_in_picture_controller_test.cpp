@@ -34,7 +34,7 @@ public:
     MockWindow() {};
     ~MockWindow() {};
     MOCK_METHOD3(Show, WMError(uint32_t reason, bool withAnimation, bool withFocus));
-    MOCK_METHOD0(Destroy, WMError());
+    MOCK_METHOD1(Destroy, WMError(uint32_t reason));
     MOCK_METHOD0(NotifyPrepareClosePiPWindow, WMError());
     MOCK_METHOD4(SetAutoStartPiP, void(bool isAutoStart, uint32_t priority, uint32_t width, uint32_t height));
     MOCK_CONST_METHOD0(GetWindowState, WindowState());
@@ -1046,29 +1046,29 @@ HWTEST_F(PictureInPictureControllerTest, DestroyPictureInPictureWindow, TestSize
 
     sptr<MockWindow> window = sptr<MockWindow>::MakeSptr();
     pipControl->window_ = window;
-    EXPECT_CALL(*(window), Destroy()).Times(1).WillOnce(Return(WMError::WM_DO_NOTHING));
+    EXPECT_CALL(*(window), Destroy(0)).Times(1).WillOnce(Return(WMError::WM_DO_NOTHING));
     ASSERT_EQ(WMError::WM_ERROR_PIP_DESTROY_FAILED, pipControl->DestroyPictureInPictureWindow());
 
-    EXPECT_CALL(*(window), Destroy()).Times(1).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(*(window), Destroy(0)).Times(1).WillOnce(Return(WMError::WM_OK));
     pipControl->pipOption_ = nullptr;
     pipControl->mainWindow_ = nullptr;
     pipControl->window_ = window;
     ASSERT_EQ(WMError::WM_OK, pipControl->DestroyPictureInPictureWindow());
     pipControl->mainWindow_ = mw;
     pipControl->window_ = window;
-    EXPECT_CALL(*(window), Destroy()).Times(1).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(*(window), Destroy(0)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, pipControl->DestroyPictureInPictureWindow());
     pipControl->pipOption_ = option;
     pipControl->pipOption_->SetNavigationId("navId");
     pipControl->pipOption_->SetTypeNodeEnabled(false);
     pipControl->mainWindow_ = nullptr;
     pipControl->window_ = window;
-    EXPECT_CALL(*(window), Destroy()).Times(1).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(*(window), Destroy(0)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, pipControl->DestroyPictureInPictureWindow());
     pipControl->pipOption_->SetNavigationId("");
     pipControl->mainWindow_ = mw;
     pipControl->window_ = window;
-    EXPECT_CALL(*(window), Destroy()).Times(1).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(*(window), Destroy(0)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, pipControl->DestroyPictureInPictureWindow());
 }
 

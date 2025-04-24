@@ -294,6 +294,7 @@ public:
     void SetSessionRect(const WSRect& rect);
     WSRect GetSessionRect() const;
     WSRect GetSessionGlobalRect() const;
+    WSRect GetSessionGlobalRectInMultiScreen() const;
     WMError GetGlobalScaledRect(Rect& globalScaledRect) override;
     void SetSessionGlobalRect(const WSRect& rect);
     void SetSessionRequestRect(const WSRect& rect);
@@ -380,6 +381,7 @@ public:
     virtual void PresentFoucusIfNeed(int32_t pointerAcrion);
     virtual WSError UpdateWindowMode(WindowMode mode);
     WSError SetCompatibleModeInPc(bool enable, bool isSupportDragInPcCompatibleMode);
+    WSError SetCompatibleModeInPcTitleVisible(bool enableTitleVisible);
     WSError SetAppSupportPhoneInPc(bool isSupportPhone);
     WSError SetCompatibleWindowSizeInPc(int32_t portraitWidth, int32_t portraitHeight,
         int32_t landscapeWidth, int32_t landscapeHeight);
@@ -562,7 +564,6 @@ public:
     void SetAttachState(bool isAttach, WindowMode windowMode = WindowMode::WINDOW_MODE_UNDEFINED);
     bool GetAttachState() const;
     void RegisterDetachCallback(const sptr<IPatternDetachCallback>& callback);
-    void SetNeedNotifyAttachState(bool needNotify);
 
     SystemSessionConfig GetSystemConfig() const;
     void RectCheckProcess();
@@ -865,6 +866,12 @@ protected:
      * Window Hierarchy
      */
     NotifyClickModalWindowOutsideFunc clickModalWindowOutsideFunc_;
+    
+    /*
+     * Window Pattern
+     */
+    std::atomic<bool> isAttach_ { false };
+    std::atomic<bool> needNotifyAttachState_ = { false };
 
     /*
      * Window Pipeline
@@ -969,7 +976,6 @@ private:
      */
     void RecordWindowStateAttachExceptionEvent(bool isAttached);
 
-    std::atomic<bool> isAttach_ { false };
     std::atomic<bool> isPendingToBackgroundState_ { false };
     std::atomic<bool> isActivatedAfterScreenLocked_ { true };
     sptr<IPatternDetachCallback> detachCallback_ = nullptr;
@@ -1011,7 +1017,6 @@ private:
     std::mutex saveSnapshotCallbackMutex_;
     std::mutex removeSnapshotCallbackMutex_;
     std::mutex addSnapshotCallbackMutex_;
-    std::atomic<bool> needNotifyAttachState_ = { false };
 
     /*
      * Window Pattern

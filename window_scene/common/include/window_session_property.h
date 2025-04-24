@@ -99,6 +99,7 @@ public:
     void SetWindowMask(const std::shared_ptr<Media::PixelMap>& windowMask);
     void SetIsShaped(bool isShaped);
     void SetCompatibleModeInPc(bool compatibleModeInPc);
+    void SetCompatibleModeInPcTitleVisible(bool compatibleModeInPcTitleVisible);
     void SetCompatibleWindowSizeInPc(int32_t portraitWidth, int32_t portraitHeight,
         int32_t landscapeWidth, int32_t landscapeHeight);
     void SetIsAppSupportPhoneInPc(bool isSupportPhone);
@@ -167,6 +168,7 @@ public:
     bool GetIsShaped() const;
     KeyboardLayoutParams GetKeyboardLayoutParams() const;
     bool GetCompatibleModeInPc() const;
+    bool GetCompatibleModeInPcTitleVisible() const;
     int32_t GetCompatibleInPcPortraitWidth() const;
     int32_t GetCompatibleInPcPortraitHeight() const;
     int32_t GetCompatibleInPcLandscapeWidth() const;
@@ -215,6 +217,10 @@ public:
     bool GetFullScreenStart() const;
     void SetApiVersion(uint32_t version);
     uint32_t GetApiVersion() const;
+    void SetIsAbilityHookOff(bool isAbilityHookOff);
+    bool GetIsAbilityHookOff() const;
+    void SetIsAbilityHook(bool isAbilityHook);
+    bool GetIsAbilityHook() const;
 
     /*
      * Sub Window
@@ -430,6 +436,7 @@ private:
     static const std::map<uint64_t, HandlWritePropertyFunc> writeFuncMap_;
     static const std::map<uint64_t, HandlReadPropertyFunc> readFuncMap_;
     bool compatibleModeInPc_ = false;
+    bool compatibleModeInPcTitleVisible_ = false;
     int32_t compatibleInPcPortraitWidth_ = 0;
     int32_t compatibleInPcPortraitHeight_ = 0;
     int32_t compatibleInPcLandscapeWidth_ = 0;
@@ -443,6 +450,8 @@ private:
     mutable std::mutex atomicServiceMutex_;
     bool isAtomicService_ = false;
     uint32_t apiVersion_ = 0;
+    bool isAbilityHookOff_ = false;
+    bool isAbilityHook_ = false;
 
     /*
      * Sub Window
@@ -593,6 +602,8 @@ struct SystemSessionConfig : public Parcelable {
     FreeMultiWindowConfig freeMultiWindowConfig_;
     WindowUIType windowUIType_ = WindowUIType::INVALID_WINDOW;
     bool supportTypeFloatWindow_ = false;
+    // Product configuration
+    bool supportFollowParentWindowLayout_ = false;
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
@@ -631,6 +642,9 @@ struct SystemSessionConfig : public Parcelable {
             return false;
         }
         if (!parcel.WriteBool(supportTypeFloatWindow_)) {
+            return false;
+        }
+        if (!parcel.WriteBool(supportFollowParentWindowLayout_)) {
             return false;
         }
         return true;
@@ -676,6 +690,7 @@ struct SystemSessionConfig : public Parcelable {
         config->freeMultiWindowConfig_ = *freeMultiWindowConfig;
         config->windowUIType_ = static_cast<WindowUIType>(parcel.ReadUint8());
         config->supportTypeFloatWindow_ = parcel.ReadBool();
+        config->supportFollowParentWindowLayout_ = parcel.ReadBool();
         return config;
     }
 

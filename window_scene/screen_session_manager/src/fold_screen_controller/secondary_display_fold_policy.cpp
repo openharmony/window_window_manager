@@ -16,6 +16,7 @@
 #include <hisysevent.h>
 #include <hitrace_meter.h>
 #include <transaction/rs_interfaces.h>
+#include <parameters.h>
 #include "session/screen/include/screen_session.h"
 #include "screen_session_manager.h"
 #include "screen_scene_config.h"
@@ -113,9 +114,13 @@ void SecondaryDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode display
     if (displayMode == FoldDisplayMode::GLOBAL_FULL) {
         TLOGW(WmsLogTag::DMS, "Set device status to STATUS_GLOBAL_FULL");
         SetDeviceStatus(static_cast<uint32_t>(DMDeviceStatus::STATUS_GLOBAL_FULL));
+        system::SetParameter("persist.dms.device.status",
+            std::to_string(static_cast<uint32_t>(DMDeviceStatus::STATUS_GLOBAL_FULL)));
     } else {
         TLOGW(WmsLogTag::DMS, "Set device status to UNKNOWN");
         SetDeviceStatus(static_cast<uint32_t>(DMDeviceStatus::UNKNOWN));
+        system::SetParameter("persist.dms.device.status",
+            std::to_string(static_cast<uint32_t>(DMDeviceStatus::UNKNOWN)));
     }
     ScreenSessionManager::GetInstance().NotifyDisplayModeChanged(displayMode);
 }

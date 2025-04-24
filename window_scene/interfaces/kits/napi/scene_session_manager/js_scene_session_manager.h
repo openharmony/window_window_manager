@@ -117,6 +117,12 @@ public:
     static napi_value CloneWindow(napi_env env, napi_callback_info info);
     static napi_value RegisterSingleHandContainerNode(napi_env env, napi_callback_info info);
     static napi_value NotifyRotationChange(napi_env env, napi_callback_info info);
+    static napi_value SupportFollowParentWindowLayout(napi_env env, napi_callback_info info);
+
+    /*
+     * PC Window
+     */
+    static napi_value GetWindowLimits(napi_env env, napi_callback_info info);
 
     /*
      * Multi Instance
@@ -134,6 +140,7 @@ public:
     static napi_value GetIsLayoutFullScreen(napi_env env, napi_callback_info info);
     static napi_value SetStatusBarDefaultVisibilityPerDisplay(napi_env env, napi_callback_info info);
     static napi_value NotifyStatusBarShowStatus(napi_env env, napi_callback_info info);
+    static napi_value NotifyStatusBarConstantlyShowStatus(napi_env env, napi_callback_info info);
     static napi_value SetStatusBarAvoidHeight(napi_env env, napi_callback_info info);
 
     /*
@@ -211,7 +218,13 @@ private:
     napi_value OnCloneWindow(napi_env env, napi_callback_info info);
     napi_value OnRegisterSingleHandContainerNode(napi_env env, napi_callback_info info);
     napi_value OnNotifyRotationChange(napi_env env, napi_callback_info info);
-
+    napi_value OnSupportFollowParentWindowLayout(napi_env env, napi_callback_info info);
+    
+    /*
+     * PC Window
+     */
+    napi_value OnGetWindowLimits(napi_env env, napi_callback_info info);
+    
     /*
      * Multi Instance
      */
@@ -228,6 +241,7 @@ private:
     napi_value OnGetIsLayoutFullScreen(napi_env env, napi_callback_info info);
     napi_value OnSetStatusBarDefaultVisibilityPerDisplay(napi_env env, napi_callback_info info);
     napi_value OnNotifyStatusBarShowStatus(napi_env env, napi_callback_info info);
+    napi_value OnNotifyStatusBarConstantlyShowStatus(napi_env env, napi_callback_info info);
     napi_value OnSetStatusBarAvoidHeight(napi_env env, napi_callback_info info);
 
     /*

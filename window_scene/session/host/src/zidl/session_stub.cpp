@@ -446,6 +446,7 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         reply.WriteUint32(windowSizeLimits.maxWindowHeight);
         reply.WriteUint32(windowSizeLimits.minWindowHeight);
         reply.WriteBool(property->GetCompatibleModeInPc());
+        reply.WriteBool(property->GetCompatibleModeInPcTitleVisible());
         reply.WriteInt32(property->GetCompatibleInPcPortraitWidth());
         reply.WriteInt32(property->GetCompatibleInPcPortraitHeight());
         reply.WriteInt32(property->GetCompatibleInPcLandscapeWidth());
@@ -458,6 +459,7 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         reply.WriteString(property->GetAppInstanceKey());
         reply.WriteBool(property->GetDragEnabled());
         reply.WriteBool(property->GetIsAtomicService());
+        reply.WriteBool(property->GetIsAbilityHook());
     }
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;

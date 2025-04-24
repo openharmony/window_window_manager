@@ -35,17 +35,24 @@ namespace {
 constexpr uint32_t DEFAULT_SPACING_BETWEEN_BUTTONS = 12;
 constexpr uint32_t DEFAULT_BUTTON_BACKGROUND_SIZE = 28;
 constexpr uint32_t DEFAULT_CLOSE_BUTTON_RIGHT_MARGIN = 20;
+constexpr uint32_t DEFAULT_BUTTON_ICON_SIZE = 20;
+constexpr uint32_t DEFAULT_BUTTON_BACKGROUND_CORNER_RADIUS = 4;
 constexpr int32_t DEFAULT_COLOR_MODE = -1;
 constexpr int32_t MIN_COLOR_MODE = -1;
 constexpr int32_t MAX_COLOR_MODE = 1;
 constexpr int32_t LIGHT_COLOR_MODE = 0;
 constexpr int32_t DARK_COLOR_MODE = 1;
-constexpr uint32_t MIN_SPACING_BETWEEN_BUTTONS = 12;
+constexpr uint32_t MIN_SPACING_BETWEEN_BUTTONS = 8;
 constexpr uint32_t MAX_SPACING_BETWEEN_BUTTONS = 24;
 constexpr uint32_t MIN_BUTTON_BACKGROUND_SIZE = 20;
 constexpr uint32_t MAX_BUTTON_BACKGROUND_SIZE = 40;
-constexpr uint32_t MIN_CLOSE_BUTTON_RIGHT_MARGIN = 8;
+constexpr uint32_t MIN_CLOSE_BUTTON_RIGHT_MARGIN = 6;
 constexpr uint32_t MAX_CLOSE_BUTTON_RIGHT_MARGIN = 22;
+constexpr uint32_t MIN_BUTTON_ICON_SIZE = 16;
+constexpr uint32_t MAX_BUTTON_ICON_SIZE = 24;
+constexpr uint32_t MIN_BUTTON_BACKGROUND_CORNER_RADIUS = 4;
+constexpr uint32_t MAX_BUTTON_BACKGROUND_CORNER_RADIUS = 8;
+constexpr uint32_t MIN_BUTTON_BETWEEN = 40;
 constexpr int32_t MINIMUM_Z_LEVEL = -10000;
 constexpr int32_t MAXIMUM_Z_LEVEL = 10000;
 }
@@ -368,6 +375,7 @@ enum class WindowSizeChangeReason : uint32_t {
     SPLIT_DRAG_START,
     SPLIT_DRAG,
     SPLIT_DRAG_END,
+    RESIZE_BY_LIMIT,
     PAGE_ROTATION,
     END
 };
@@ -653,6 +661,31 @@ struct WindowDensityInfo {
 };
 
 /**
+ * @struct WindowPropertyInfo
+ *
+ * @brief Currently available window property
+ */
+struct WindowPropertyInfo {
+    Rect windowRect { 0, 0, 0, 0 };
+    Rect drawableRect { 0, 0, 0, 0 };
+    uint32_t apiCompatibleVersion = 0;
+    WindowType type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
+    bool isLayoutFullScreen = false;
+    bool isFullScreen = false;
+    bool isTouchable = false;
+    bool isFocusable = false;
+    std::string name;
+    bool isPrivacyMode = false;
+    bool isKeepScreenOn = false;
+    float brightness = 0.0f;
+    bool isTransparent = false;
+    bool isRoundCorner = false;
+    float dimBehindValue = 0.0f;
+    uint32_t id = INVALID_WINDOW_ID;
+    DisplayId displayId = DISPLAY_ID_INVALID;
+};
+
+/**
  * @brief Enumerates avoid area type.
  */
 enum class AvoidAreaType : uint32_t {
@@ -704,6 +737,8 @@ struct DecorButtonStyle {
     uint32_t spacingBetweenButtons = DEFAULT_SPACING_BETWEEN_BUTTONS;
     uint32_t closeButtonRightMargin = DEFAULT_CLOSE_BUTTON_RIGHT_MARGIN;
     uint32_t buttonBackgroundSize = DEFAULT_BUTTON_BACKGROUND_SIZE;
+    uint32_t buttonIconSize = DEFAULT_BUTTON_ICON_SIZE;
+    uint32_t buttonBackgroundCornerRadius = DEFAULT_BUTTON_BACKGROUND_CORNER_RADIUS;
 };
 
 /**

@@ -60,7 +60,7 @@ public:
     virtual sptr<DisplayInfo> GetDisplayInfoByScreenId(ScreenId screenId);
     virtual std::vector<DisplayId> GetAllDisplayIds();
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId,
-        DmErrorCode* errorCode = nullptr, bool isUseDma = false);
+        DmErrorCode* errorCode = nullptr, bool isUseDma = false, bool isCaptureFullOfScreen = false);
     virtual std::shared_ptr<Media::PixelMap> GetSnapshotByPicker(Media::Rect &rect, DmErrorCode* errorCode = nullptr);
     virtual DMError HasImmersiveWindow(ScreenId screenId, bool& immersive);
     virtual DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow);
@@ -110,7 +110,6 @@ public:
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshotWithOption(const CaptureOption& captureOption,
         DmErrorCode* errorCode = nullptr);
     virtual sptr<DisplayInfo> GetPrimaryDisplayInfo();
-    virtual uint32_t GetDeviceStatus();
 
 private:
     static inline SingletonDelegator<DisplayManagerAdapter> delegator;

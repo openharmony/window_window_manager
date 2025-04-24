@@ -64,7 +64,7 @@ public:
     }
     virtual DMError SetOrientation(ScreenId screenId, Orientation orientation) = 0;
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId,
-        DmErrorCode* errorCode = nullptr, bool isUseDma = false) = 0;
+        DmErrorCode* errorCode = nullptr, bool isUseDma = false, bool isCaptureFullOfScreen = false) = 0;
     virtual std::shared_ptr<Media::PixelMap> GetSnapshotByPicker(Media::Rect &rect, DmErrorCode* errorCode = nullptr)
     {
         *errorCode = DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT;
@@ -200,7 +200,6 @@ public:
     {
         return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
     }
-    virtual bool IsOrientationNeedChanged() {return false;}
     virtual bool IsFoldable() { return false; }
     virtual bool IsCaptured() { return false; }
 
@@ -303,11 +302,6 @@ public:
     virtual DMError SetSystemKeyboardStatus(bool isTpKeyboardOn = false)
     {
         return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
-    }
-
-    virtual uint32_t GetDeviceStatus()
-    {
-        return 0;
     }
 };
 } // namespace OHOS::Rosen

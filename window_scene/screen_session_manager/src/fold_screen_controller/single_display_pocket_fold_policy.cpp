@@ -15,6 +15,7 @@
 
 #include <hisysevent.h>
 #include <hitrace_meter.h>
+#include <parameters.h>
 #include <transaction/rs_interfaces.h>
 #include "fold_screen_controller/single_display_pocket_fold_policy.h"
 #include "session/screen/include/screen_session.h"
@@ -24,6 +25,9 @@
 
 #ifdef POWER_MANAGER_ENABLE
 #include <power_mgr_client.h>
+#endif
+#ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
+#include <display_power_mgr_client.h>
 #endif
 
 namespace OHOS::Rosen {
@@ -122,9 +126,13 @@ void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode disp
         if (displayMode == FoldDisplayMode::MAIN) {
             TLOGI(WmsLogTag::DMS, "Set device status to STATUS_FOLDED");
             SetDeviceStatus(static_cast<uint32_t>(DMDeviceStatus::STATUS_FOLDED));
+            system::SetParameter("persist.dms.device.status",
+                std::to_string(static_cast<uint32_t>(DMDeviceStatus::STATUS_FOLDED)));
         } else {
             TLOGI(WmsLogTag::DMS, "Set device status to UNKNOWN");
             SetDeviceStatus(static_cast<uint32_t>(DMDeviceStatus::UNKNOWN));
+            system::SetParameter("persist.dms.device.status",
+                std::to_string(static_cast<uint32_t>(DMDeviceStatus::UNKNOWN)));
         }
     }
     ChangeScreenDisplayModeProc(screenSession, displayMode, reason);
@@ -475,17 +483,18 @@ void SingleDisplayPocketFoldPolicy::BootAnimationFinishPowerInit()
 {
     int64_t timeStamp = 50;
     if (RSInterfaces::GetInstance().GetActiveScreenId() == SCREEN_ID_FULL) {
-        // 同显切内屏：外屏下电
+        // coordination to full: power off main screen
         TLOGI(WmsLogTag::DMS, "Fold Screen Power main screen off.");
-        RSInterfaces::GetInstance().SetScreenPowerStatus(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_OFF);
+        ScreenSessionManager::GetInstance().SetRSScreenPowerStatus(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_OFF);
     } else if (RSInterfaces::GetInstance().GetActiveScreenId() == SCREEN_ID_MAIN) {
-        // 同显切外屏：双屏都灭再外屏上电
+        // coordination to main: power off both and power on main screen
         TLOGI(WmsLogTag::DMS, "Fold Screen Power all screen off.");
-        RSInterfaces::GetInstance().SetScreenPowerStatus(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_OFF);
-        RSInterfaces::GetInstance().SetScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_OFF);
+        ScreenSessionManager::GetInstance().SetRSScreenPowerStatus(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_OFF);
+        ScreenSessionManager::GetInstance().SetRSScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_OFF);
+
         std::this_thread::sleep_for(std::chrono::milliseconds(timeStamp));
         TLOGI(WmsLogTag::DMS, "Fold Screen Power main screen on.");
-        RSInterfaces::GetInstance().SetScreenPowerStatus(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_ON);
+        ScreenSessionManager::GetInstance().SetRSScreenPowerStatus(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_ON);
     } else {
         TLOGI(WmsLogTag::DMS, "Fold Screen Power Init, invalid active screen id");
     }

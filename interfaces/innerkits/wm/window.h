@@ -36,6 +36,7 @@ class AxisEvent;
 namespace OHOS::AppExecFwk {
 class Configuration;
 class Ability;
+class ElementName;
 enum class SupportWindowMode;
 }
 
@@ -749,7 +750,7 @@ public:
      */
     static sptr<Window> Create(sptr<WindowOption>& option, const std::shared_ptr<AbilityRuntime::Context>& context,
         const sptr<IRemoteObject>& iSession, WMError& errCode = DefaultCreateErrCode,
-        const std::string& identityToken = "");
+        const std::string& identityToken = "", bool isModuleAbilityHookEnd = false);
 
     /**
      * @brief create pip window with session
@@ -1165,7 +1166,7 @@ public:
      *
      * @return WMError
      */
-    virtual WMError Destroy() { return WMError::WM_OK; }
+    virtual WMError Destroy(uint32_t reason = 0) { return WMError::WM_OK; }
 
     /**
      * @brief Show window
@@ -3690,6 +3691,25 @@ public:
      * @return WM_OK means unregister success, others means unregister failed.
      */
     virtual WMError UnregisterKeyboardDidHideListener(const sptr<IKeyboardDidHideListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Get the window property of current window.
+     *
+     * @param windowPropertyInfo the window property struct.
+     * @return WMError.
+     */
+    virtual WMError GetWindowPropertyInfo(WindowPropertyInfo& windowPropertyInfo) { return WMError::WM_OK; }
+
+    /**
+     * @brief Set the bundleName, moduleName and abilityName of the hooked window.
+     *
+     * @param elementName includes bundleName, moduleName and abilityName of the hooked window.
+     * @return WM_OK means set success.
+     */
+    virtual WMError SetHookTargetElementInfo(const AppExecFwk::ElementName& elementName)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
