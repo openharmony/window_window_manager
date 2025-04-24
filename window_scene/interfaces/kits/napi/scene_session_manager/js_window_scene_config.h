@@ -32,6 +32,7 @@ public:
     static napi_value CreateFreeMultiWindowConfig(napi_env env, const SystemSessionConfig& config);
     static napi_value CreateWindowLimits(napi_env env, const WindowLimits& windowLimits);
     static napi_value CreateSingleHandCompatibleConfig(napi_env env, const SingleHandCompatibleModeConfig& config);
+    static napi_value CreateSystemConfig(napi_env env, const SystemSessionConfig& config);
 
 private:
     static napi_value CreateShadowValue(napi_env env, const AppWindowSceneConfig& config, bool focused);
