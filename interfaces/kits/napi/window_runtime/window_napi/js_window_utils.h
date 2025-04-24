@@ -89,7 +89,6 @@ enum class ApiWindowType : uint32_t {
     TYPE_WALLET_SWIPE_CARD,
     TYPE_SCREEN_CONTROL,
     TYPE_FLOAT_NAVIGATION,
-    TYPE_MAIN = 32,
     TYPE_END
 };
 
@@ -129,7 +128,6 @@ const std::map<WindowType, ApiWindowType> NATIVE_JS_TO_WINDOW_TYPE_MAP {
     { WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD,   ApiWindowType::TYPE_WALLET_SWIPE_CARD },
     { WindowType::WINDOW_TYPE_SCREEN_CONTROL,      ApiWindowType::TYPE_SCREEN_CONTROL    },
     { WindowType::WINDOW_TYPE_FLOAT_NAVIGATION,    ApiWindowType::TYPE_FLOAT_NAVIGATION  },
-    { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,     ApiWindowType::TYPE_MAIN              },
 };
 
 const std::map<ApiWindowType, WindowType> JS_TO_NATIVE_WINDOW_TYPE_MAP {
@@ -158,7 +156,6 @@ const std::map<ApiWindowType, WindowType> JS_TO_NATIVE_WINDOW_TYPE_MAP {
     { ApiWindowType::TYPE_WALLET_SWIPE_CARD,   WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD   },
     { ApiWindowType::TYPE_SCREEN_CONTROL,      WindowType::WINDOW_TYPE_SCREEN_CONTROL      },
     { ApiWindowType::TYPE_FLOAT_NAVIGATION,    WindowType::WINDOW_TYPE_FLOAT_NAVIGATION    },
-    { ApiWindowType::TYPE_MAIN,                WindowType::WINDOW_TYPE_APP_MAIN_WINDOW     },
 };
 
 enum class ApiWindowMode : uint32_t {
