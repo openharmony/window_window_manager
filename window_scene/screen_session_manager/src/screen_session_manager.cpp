@@ -3373,12 +3373,12 @@ void ScreenSessionManager::CallRsSetScreenPowerStatusSync(ScreenId screenId, Scr
                 return;
             }
             auto sourceMode = screenSession->GetSourceMode();
-            if (sourceMode == ScreenSourceMode::SCREEN_MIRROR &&
-                status != ScreenPowerStatus::POWER_STATUS_ON &&
+            if (status != ScreenPowerStatus::POWER_STATUS_ON &&
                 powerStateChangeReason_ == PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION) {
                 return;
             }
-            if (status != ScreenPowerStatus::POWER_STATUS_ON &&
+            if (sourceMode == ScreenSourceMode::SCREEN_UNIQUE &&
+                status != ScreenPowerStatus::POWER_STATUS_ON &&
                 powerStateChangeReason_ == PowerStateChangeReason::STATE_CHANGE_REASON_HARD_KEY) {
                 return;
             }
