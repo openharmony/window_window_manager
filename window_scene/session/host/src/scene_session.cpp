@@ -7931,6 +7931,7 @@ void SceneSession::UpdateSuperFoldThreshold(DMRect& availableArea, int32_t& topT
                 ScreenSessionManagerClient::GetInstance().GetScreenSessionById(GetSessionProperty()->GetDisplayId());
             if (currentScreenSession == nullptr) {
                 TLOGW(WmsLogTag::WMS_LAYOUT_PC, "Screen session is null");
+                return;
             }
             uint32_t currentScreenHeight = currentScreenSession->GetScreenProperty().GetBounds().rect_.height_;
             int32_t dockHeight = GetDockHeight();
