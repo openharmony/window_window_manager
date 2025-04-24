@@ -7063,7 +7063,7 @@ void SceneSessionManager::UpdateHighlightStatus(DisplayId displayId, const sptr<
         SetHighlightSessionIds(currSceneSession, needBlockHighlightNotify);
         return;
     }
-    if(currSceneSession->GetSessionInfo().isSystem_) {
+    if(SessionHelper::IsSystemWindow(currSceneSession->GetWindowType())) {
         TLOGD(WmsLogTag::WMS_FOCUS, "system highlighted");
         AddHighlightSessionIds(currSceneSession, needBlockHighlightNotify);
         return;

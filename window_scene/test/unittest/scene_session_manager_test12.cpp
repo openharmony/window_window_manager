@@ -1108,7 +1108,7 @@ HWTEST_F(SceneSessionManagerTest12, FilterForGetAllWindowLayoutInfo01, TestSize.
     zOrder = 101;
     sceneSession2->SetZOrder(zOrder);
     ssm_->sceneSessionMap_.insert({ sceneSession2->GetPersistentId(), sceneSession2 });
-    
+
     constexpr DisplayId DEFAULT_DISPLAY_ID = 0;
     std::vector<sptr<SceneSession>> filteredSessions;
     ssm_->FilterForGetAllWindowLayoutInfo(DEFAULT_DISPLAY_ID, false, filteredSessions);
@@ -1155,7 +1155,7 @@ HWTEST_F(SceneSessionManagerTest12, FilterForGetAllWindowLayoutInfo02, TestSize.
     zOrder = 102;
     sceneSession3->SetZOrder(zOrder);
     ssm_->sceneSessionMap_.insert({ sceneSession3->GetPersistentId(), sceneSession3 });
-    
+
     constexpr DisplayId DEFAULT_DISPLAY_ID = 0;
     std::vector<sptr<SceneSession>> filteredSessions;
     ssm_->FilterForGetAllWindowLayoutInfo(DEFAULT_DISPLAY_ID, false, filteredSessions);
@@ -1198,7 +1198,7 @@ HWTEST_F(SceneSessionManagerTest12, FilterForGetAllWindowLayoutInfo03, TestSize.
     zOrder = 99;
     sceneSession3->SetZOrder(zOrder);
     ssm_->sceneSessionMap_.insert({ sceneSession3->GetPersistentId(), sceneSession3 });
-    
+
     constexpr DisplayId DEFAULT_DISPLAY_ID = 0;
     std::vector<sptr<SceneSession>> filteredSessions;
     ssm_->FilterForGetAllWindowLayoutInfo(DEFAULT_DISPLAY_ID, false, filteredSessions);
@@ -1520,41 +1520,51 @@ HWTEST_F(SceneSessionManagerTest12, HasFloatingWindowForeground06, TestSize.Leve
 HWTEST_F(SceneSessionManagerTest12, UpdateHighlightStatus, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
-    sptr<WindowSessionProperty> property1 = sptr<WindowSessionProperty>::MakeSptr();
-    sptr<WindowSessionProperty> property2 = sptr<WindowSessionProperty>::MakeSptr();
- 
-    SessionInfo info1;
-    info1.abilityName_ = "abilityName_test1";
-    info1.bundleName_ = "bundleName_test1";
- 
-    SessionInfo info2;
-    info2.abilityName_ = "abilityName_test2";
-    info2.bundleName_ = "bundleName_test2";
- 
-    sptr<SceneSession> preSceneSession = sptr<SceneSession>::MakeSptr(info1, nullptr);
-    sptr<SceneSession> currSceneSession = sptr<SceneSession>::MakeSptr(info2, nullptr);
- 
-    preSceneSession->property_ = property1;
-    currSceneSession->property_ = property2;
+    SessionInfo info;
+    info.abilityName_ = "UpdateHighlightStatus";
+    info.bundleName_ = "UpdateHighlightStatus";
+    sptr<SceneSession> preSceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> currSceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     preSceneSession->property_->SetPersistentId(1);
     currSceneSession->property_->SetPersistentId(2);
- 
+
     sptr<SceneSession> nullSceneSession1;
     sptr<SceneSession> nullSceneSession2;
- 
+
     ssm_->UpdateHighlightStatus(DEFAULT_DISPLAY_ID, nullSceneSession1, nullSceneSession2, false);
     ssm_->UpdateHighlightStatus(DEFAULT_DISPLAY_ID, preSceneSession, nullSceneSession2, false);
     ssm_->UpdateHighlightStatus(DEFAULT_DISPLAY_ID, preSceneSession, currSceneSession, true);
     ssm_->UpdateHighlightStatus(DEFAULT_DISPLAY_ID, preSceneSession, currSceneSession, false);
     currSceneSession->property_->isExclusivelyHighlighted_ = false;
-    info1.isSystem_ = true;
-    ssm_->UpdateHighlightStatus(DEFAULT_DISPLAY_ID, preSceneSession, currSceneSession, false);
-    info1.isSystem_ = false;
-    ssm_->UpdateHighlightStatus(DEFAULT_DISPLAY_ID, preSceneSession, currSceneSession, false);
     preSceneSession->property_->SetPersistentId(2);
     ssm_->UpdateHighlightStatus(DEFAULT_DISPLAY_ID, preSceneSession, currSceneSession, false);
 }
- 
+
+/**
+ * @tc.name: UpdateHighlightStatus01
+ * @tc.desc: UpdateHighlightStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, UpdateHighlightStatus01, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->highlightIds_.clear();
+    SessionInfo info;
+    info.abilityName_ = "UpdateHighlightStatus01";
+    info.bundleName_ = "UpdateHighlightStatus01";
+    sptr<SceneSession> preSceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> currSceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    preSceneSession->property_->SetPersistentId(1);
+    currSceneSession->property_->SetPersistentId(2);
+    currSceneSession->property_->isExclusivelyHighlighted_ = false;
+    currSceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ssm_->UpdateHighlightStatus(DEFAULT_DISPLAY_ID, preSceneSession, currSceneSession, false);
+    ASSERT_NE(ssm_->highlightIds_.size(), 0);
+    currSceneSession->property_->SetWindowType(WindowType::BELOW_APP_SYSTEM_WINDOW_BASE);
+    ssm_->UpdateHighlightStatus(DEFAULT_DISPLAY_ID, preSceneSession, currSceneSession, false);
+    ASSERT_NE(ssm_->highlightIds_.size(), 1);
+}
+
 /**
  * @tc.name: SetHighlightSessionIds
  * @tc.desc: SetHighlightSessionIds
@@ -1567,7 +1577,7 @@ HWTEST_F(SceneSessionManagerTest12, SetHighlightSessionIds, TestSize.Level1)
     SessionInfo info1;
     info1.abilityName_ = "abilityName_test1";
     info1.bundleName_ = "bundleName_test1";
- 
+
     sptr<SceneSession> currSceneSession = sptr<SceneSession>::MakeSptr(info1, nullptr);
     currSceneSession->property_ = property;
     currSceneSession->property_->SetPersistentId(1);
@@ -1576,7 +1586,7 @@ HWTEST_F(SceneSessionManagerTest12, SetHighlightSessionIds, TestSize.Level1)
     ssm_->SetHighlightSessionIds(currSceneSession, false);
     ASSERT_EQ(ssm_->highlightIds_.count(1) == 1, true);
 }
- 
+
 /**
  * @tc.name: AddHighlightSessionIds
  * @tc.desc: AddHighlightSessionIds
@@ -1587,18 +1597,18 @@ HWTEST_F(SceneSessionManagerTest12, AddHighlightSessionIds, TestSize.Level1)
     ASSERT_NE(ssm_, nullptr);
     sptr<WindowSessionProperty> property1 = sptr<WindowSessionProperty>::MakeSptr();
     sptr<WindowSessionProperty> property2 = sptr<WindowSessionProperty>::MakeSptr();
- 
+
     SessionInfo info1;
     info1.abilityName_ = "abilityName_test1";
     info1.bundleName_ = "bundleName_test1";
- 
+
     SessionInfo info2;
     info2.abilityName_ = "abilityName_test2";
     info2.bundleName_ = "bundleName_test2";
- 
+
     sptr<SceneSession> preSceneSession = sptr<SceneSession>::MakeSptr(info1, nullptr);
     sptr<SceneSession> currSceneSession = sptr<SceneSession>::MakeSptr(info2, nullptr);
- 
+
     preSceneSession->property_->SetPersistentId(1);
     currSceneSession->property_->SetPersistentId(2);
     preSceneSession->persistentId_ = 1;
@@ -1610,7 +1620,7 @@ HWTEST_F(SceneSessionManagerTest12, AddHighlightSessionIds, TestSize.Level1)
     ASSERT_EQ(ssm_->highlightIds_.count(1) == 1, true);
     ASSERT_EQ(ssm_->highlightIds_.count(2) == 1, true);
 }
- 
+
 /**
  * @tc.name: RemoveHighlightSessionIds
  * @tc.desc: RemoveHighlightSessionIds
@@ -1621,24 +1631,24 @@ HWTEST_F(SceneSessionManagerTest12, RemoveHighlightSessionIds, TestSize.Level1)
     ASSERT_NE(ssm_, nullptr);
     sptr<WindowSessionProperty> property1 = sptr<WindowSessionProperty>::MakeSptr();
     sptr<WindowSessionProperty> property2 = sptr<WindowSessionProperty>::MakeSptr();
- 
+
     SessionInfo info1;
     info1.abilityName_ = "abilityName_test1";
     info1.bundleName_ = "bundleName_test1";
- 
+
     SessionInfo info2;
     info2.abilityName_ = "abilityName_test2";
     info2.bundleName_ = "bundleName_test2";
- 
+
     sptr<SceneSession> preSceneSession = sptr<SceneSession>::MakeSptr(info1, nullptr);
     sptr<SceneSession> currSceneSession = sptr<SceneSession>::MakeSptr(info2, nullptr);
- 
+
     preSceneSession->property_->SetPersistentId(1);
     currSceneSession->property_->SetPersistentId(2);
- 
+
     preSceneSession->persistentId_ = 1;
     currSceneSession->persistentId_ = 2;
- 
+
     preSceneSession->property_ = property1;
     currSceneSession->property_ = property2;
     ssm_->AddHighlightSessionIds(currSceneSession, false);
@@ -1769,7 +1779,7 @@ HWTEST_F(SceneSessionManagerTest12, GetKeyboardOccupiedAreaWithRotation4, TestSi
 {
     GetKeyboardOccupiedAreaWithRotationTestData(WindowUIType::PHONE_WINDOW, 0, 0,
         SessionState::STATE_FOREGROUND, WindowGravity::WINDOW_GRAVITY_FLOAT);
-    
+
     ssm_->GetKeyboardOccupiedAreaWithRotation(1, Rotation::ROTATION_0, avoidAreas_);
     ASSERT_EQ(1, static_cast<uint32_t>(avoidAreas_.size()));
     ASSERT_EQ(false, avoidAreas_[0].first);
@@ -1785,7 +1795,7 @@ HWTEST_F(SceneSessionManagerTest12, GetKeyboardOccupiedAreaWithRotation5, TestSi
 {
     GetKeyboardOccupiedAreaWithRotationTestData(WindowUIType::PHONE_WINDOW, 0, 0,
         SessionState::STATE_BACKGROUND, WindowGravity::WINDOW_GRAVITY_BOTTOM);
-    
+
     ssm_->GetKeyboardOccupiedAreaWithRotation(1, Rotation::ROTATION_90, avoidAreas_);
     ASSERT_EQ(1, static_cast<uint32_t>(avoidAreas_.size()));
     ASSERT_EQ(false, avoidAreas_[0].first);
