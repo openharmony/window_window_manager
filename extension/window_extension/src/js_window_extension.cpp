@@ -68,8 +68,13 @@ napi_value AttachWindowExtensionContext(napi_env env, void* value, void *)
         WLOGFE("Failed to get js window extension context");
         return nullptr;
     }
-    auto contextObj = AbilityRuntime::JsRuntime::LoadSystemModuleByEngine(env,
-        "application.WindowExtensionContext", &object, 1)->GetNapiValue();
+    auto contextObjRef = AbilityRuntime::JsRuntime::LoadSystemModuleByEngine(env,
+        "application.WindowExtensionContext", &object, 1);
+    if (contextObjRef == nullptr) {
+        WLOGFE("Failed to get contextObjRef");
+        return nullptr;
+    }
+    auto contextObj = contextObjRef->GetNapiValue();
     if (contextObj == nullptr) {
         WLOGFE("Failed to get context native object");
         return nullptr;
