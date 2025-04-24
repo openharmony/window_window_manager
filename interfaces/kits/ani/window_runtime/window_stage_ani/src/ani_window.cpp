@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <ui_content.h>
 
 #include "ani.h"
 #include "ani_err_utils.h"
@@ -446,8 +447,7 @@ ani_object AniWindow::OnGetUIContext(ani_env* env)
         TLOGE(WmsLogTag::DEFAULT, "[ANI] uicontent is nullptr");
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    // 依赖arkui uicontent->GetUINapiContext();
-    return AniWindowUtils::CreateAniUndefined(env);
+    return uicontent->GetUIAniContext();
 }
 
 ani_object AniWindow::GetWindowAvoidArea(ani_env* env, ani_object obj, ani_long nativeObj, ani_int type)
@@ -1142,7 +1142,7 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(AniWindow::SetUIContent)},
         ani_native_function {"loadContentSync", "JLstd/core/String;:V",
             reinterpret_cast<void *>(AniWindow::LoadContent)},
-        ani_native_function {"loadContentSync", "JLstd/core/String;L@koalaui/runtime/states/StateMgmt/LocalStorage;:V",
+        ani_native_function {"loadContentSync", "JLstd/core/String;Larkui/stateManagement/storages/localStorage/LocalStorage;:V",
             reinterpret_cast<void *>(AniWindow::LoadContentNew)},
         ani_native_function {"setWindowKeepScreenOnSync", "JZ:V",
             reinterpret_cast<void *>(AniWindow::SetWindowKeepScreenOn)},
