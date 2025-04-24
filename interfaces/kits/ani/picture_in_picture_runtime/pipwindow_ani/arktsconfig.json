@@ -37,6 +37,6 @@
     "package": "@ohos"
   },
   "files": [
-    "./ets/pipwindow.ets"
+    "./ets/@ohos.PiPWindow.ets"
   ]
-}
+}

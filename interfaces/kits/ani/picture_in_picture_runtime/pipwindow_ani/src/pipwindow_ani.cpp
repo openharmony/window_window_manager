@@ -50,7 +50,7 @@ void PiPWindowAni::OnstartPiPAni(ani_env* env)
         return;
     }
     pipController->StartPictureInPicture(StartPipType::USER_START);
-    TLOGI(WmsLogTag::DEFAULT, "[ANI] startPiPAni end");
+    TLOGI(WmsLogTag::WMS_PIP, "[ANI] startPiPAni end");
 }
 
 void PiPWindowAni::stopPiPAni(ani_env* env, ani_object obj, ani_long nativeObj)
@@ -72,7 +72,7 @@ void PiPWindowAni::OnstopPiPAni(ani_env* env)
         return;
     }
     pipController->StopPictureInPictureFromClient();
-    TLOGI(WmsLogTag::DEFAULT, "[ANI] stopPiPAni end");
+    TLOGI(WmsLogTag::WMS_PIP, "[ANI] stopPiPAni end");
 }
 
 extern "C" {
@@ -97,13 +97,12 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         ani_native_function {"stopPiP", ":V", reinterpret_cast<void *>(PiPWindowAni::stopPiPAni)},
     };
     if ((ret = env->Namespace_BindNativeFunctions(nsp, funcs.data(), funcs.size()))) {
-        TLOGE(WmsLogTag::DMS, "[ANI] bind namespace fail %{public}u", ret);
+        TLOGE(WmsLogTag::WMS_PIP, "[ANI] bind namespace fail %{public}u", ret);
         return ANI_NOT_FOUND;
     }
-
-    ani_class displayCls = nullptr;
-    if ((ret = env->FindClass("L@ohos/display/display/DisplayImpl;", &displayCls)) != ANI_OK) {
-        TLOGE(WmsLogTag::DMS, "[ANI] null env %{public}u", ret);
+    ani_class cls = nullptr;
+    if ((ret = env->FindClass("L@ohos/PiPWindow/PiPWindow/PiPControllerInternal;", &cls)) != ANI_OK) {
+        TLOGD(WmsLogTag::WMS_PIP, "[ANI] null env %{public}u", ret);
         return ANI_NOT_FOUND;
     }
     *result = ANI_VERSION_1;
