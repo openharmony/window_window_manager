@@ -8809,8 +8809,13 @@ void ScreenSessionManager::MultiScreenModeChange(const std::string& firstScreenI
         TLOGE(WmsLogTag::DMS, "param denied!");
         return;
     }
-    ScreenId firstScreenId = static_cast<ScreenId>(std::stoi(firstScreenIdStr));
-    ScreenId secondaryScreenId = static_cast<ScreenId>(std::stoi(secondaryScreenIdStr));
+    ScreenId firstScreenId = DISPLAY_ID_INVALID;
+    ScreenId secondaryScreenId = DISPLAY_ID_INVALID;
+    if (!ScreenSettingHelper::ConvertStrToUint64(firstScreenIdStr, firstScreenId) ||
+        !ScreenSettingHelper::ConvertStrToUint64(secondaryScreenIdStr, secondaryScreenId)) {
+        TLOGE(WmsLogTag::DMS, "dumper screenId params error!");
+        return;
+    }
     if (secondaryChandeMode == "mirror" || secondaryChandeMode == "extend") {
         MultiScreenModeChange(firstScreenId, secondaryScreenId, secondaryChandeMode);
     } else {
