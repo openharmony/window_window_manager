@@ -174,8 +174,6 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
     if (!CheckPointerEvent(pointerEvent)) {
         return;
     }
-    LogPointInfo(pointerEvent);
-    int32_t action = pointerEvent->GetPointerAction();
     uint32_t windowId = static_cast<uint32_t>(pointerEvent->GetTargetWindowId());
     auto sceneSession = SceneSessionManager::GetInstance().GetSceneSession(windowId);
     if (sceneSession == nullptr) {
@@ -185,6 +183,8 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
     }
     auto dispatchTimes = pointerEvent->GetDispatchTimes();
     ProcessInjectionEvent(pointerEvent);
+    int32_t action = pointerEvent->GetPointerAction();
+    LogPointInfo(pointerEvent);
     auto sourceType = pointerEvent->GetSourceType();
     if (action != MMI::PointerEvent::POINTER_ACTION_MOVE) {
         if (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE ||
