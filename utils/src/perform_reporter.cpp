@@ -307,7 +307,9 @@ int32_t WindowInfoReporter::ReportWindowProfileInfo(const WindowProfileInfo& win
         "BUNDLE_NAME", windowProfileInfo.bundleName,
         "WINDOW_VISIBLE_STATE", windowProfileInfo.windowVisibleState,
         "WINDOW_LOCATED_SCREEN", windowProfileInfo.windowLocatedScreen,
-        "WINDOW_SCENE_MODE", windowProfileInfo.windowSceneMode);
+        "WINDOW_SCENE_MODE", windowProfileInfo.windowSceneMode,
+        "WINDOW_ZORDER", windowProfileInfo.zorder,
+        "WINDOW_RECT", windowProfileInfo.rect);
     if (ret != 0) {
         WLOGFE("Write HiSysEvent error, ret:%{public}d", ret);
     }
