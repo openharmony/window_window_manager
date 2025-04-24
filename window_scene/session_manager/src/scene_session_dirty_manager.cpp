@@ -742,6 +742,7 @@ std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyMa
     if (windowName.size() >= prefix.size() && windowName.substr(0, prefix.size()) == prefix) {
         windowNameType = WINDOW_NAME_TYPE_SCREENSHOT;
     }
+    auto pixelMap = windowSessionProperty->GetWindowMask();
     MMI::WindowInfo windowInfo = {
         .id = windowId,
         .pid = sceneSession->IsStartMoving() ? static_cast<int32_t>(getpid()) : pid,
@@ -757,18 +758,12 @@ std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyMa
         .zOrder = zOrder,
         .pointerChangeAreas = std::move(pointerChangeAreas),
         .transform = transformData,
+        .pixelMap = pixelMap.get(),
         .windowInputType = static_cast<MMI::WindowInputType>(sceneSession->GetSessionInfo().windowInputType_),
         .windowType = static_cast<int32_t>(windowType),
         .isSkipSelfWhenShowOnVirtualScreen = sceneSession->GetSessionProperty()->GetSkipEventOnCastPlus(),
         .windowNameType = windowNameType,
     };
-
-    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
-    {
-        std::lock_guard<std::mutex> lock(windowSessionProperty->windowMaskMutex_);
-        pixelMap = windowSessionProperty->GetWindowMask();
-        windowInfo.pixelMap = pixelMap.get();
-    }
     UpdateWindowFlags(displayId, sceneSession, windowInfo);
     if (windowSessionProperty->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_HANDWRITING)) {
         windowInfo.flags |= MMI::WindowInfo::FLAG_BIT_HANDWRITING;
