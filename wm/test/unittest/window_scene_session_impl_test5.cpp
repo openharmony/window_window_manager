@@ -497,14 +497,14 @@ HWTEST_F(WindowSceneSessionImplTest5, SwitchFreeMultiWindow01, TestSize.Level1)
     window->windowSystemConfig_.freeMultiWindowEnable_ = true;
     ref = window->SwitchFreeMultiWindow(true);
     ASSERT_EQ(WSError::WS_ERROR_REPEAT_OPERATION, ref);
-    
+
     window->windowSystemConfig_.freeMultiWindowEnable_ = false;
     WindowSceneSessionImpl::windowSessionMap_.insert(std::make_pair(window->GetWindowName(),
         std::pair<uint64_t, sptr<WindowSessionImpl>>(window->GetWindowId(), window)));
-    ASSERT_EQ(WSError::WS_OK, window->SwitchFreeMultiWindow(true));
-    ASSERT_EQ(true, window->windowSystemConfig_.freeMultiWindowEnable_);
-    ASSERT_EQ(WSError::WS_OK, window->SwitchFreeMultiWindow(false));
-    ASSERT_EQ(false, window->windowSystemConfig_.freeMultiWindowEnable_);
+    EXPECT_EQ(WSError::WS_ERROR_NULLPTR, window->SwitchFreeMultiWindow(true));
+    EXPECT_EQ(true, window->windowSystemConfig_.freeMultiWindowEnable_);
+    EXPECT_EQ(WSError::WS_ERROR_NULLPTR, window->SwitchFreeMultiWindow(false));
+    EXPECT_EQ(false, window->windowSystemConfig_.freeMultiWindowEnable_);
     WindowSceneSessionImpl::windowSessionMap_.erase(window->GetWindowName());
 }
 
@@ -554,7 +554,7 @@ HWTEST_F(WindowSceneSessionImplTest5, SwitchFreeMultiWindow02, TestSize.Level1)
     EXPECT_EQ(false, mainWindow->IsPcOrPadFreeMultiWindowMode());
     EXPECT_EQ(false, floatWindow->IsPcOrPadFreeMultiWindowMode());
     EXPECT_EQ(false, subWindow->IsPcOrPadFreeMultiWindowMode());
-    EXPECT_EQ(WSError::WS_OK, mainWindow->SwitchFreeMultiWindow(true));
+    EXPECT_EQ(WSError::WS_ERROR_NULLPTR, mainWindow->SwitchFreeMultiWindow(true));
     EXPECT_EQ(true, mainWindow->IsPcOrPadFreeMultiWindowMode());
     EXPECT_EQ(true, floatWindow->IsPcOrPadFreeMultiWindowMode());
     EXPECT_EQ(true, subWindow->IsPcOrPadFreeMultiWindowMode());
@@ -740,6 +740,47 @@ HWTEST_F(WindowSceneSessionImplTest5, UpdateSystemBarProperties, TestSize.Level0
     std::unordered_map<WindowType, SystemBarProperty> systemBarProperties;
     std::unordered_map<WindowType, SystemBarPropertyFlag> systemBarPropertyFlags;
     ASSERT_EQ(WMError::WM_OK, window->UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags));
+}
+
+/**
+ * @tc.name: UpdateSystemBarProperties02
+ * @tc.desc: UpdateSystemBarProperties02 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, UpdateSystemBarProperties02, TestSize.Level0)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateSystemBarProperties02");
+    option->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
+    option->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+    window->state_ = WindowState::STATE_CREATED;
+
+    WindowType windowType1 = WindowType::WINDOW_TYPE_STATUS_BAR;
+    WindowType windowType2 = WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR;
+    SystemBarProperty systemBarProperty1 = SystemBarProperty();
+    SystemBarProperty systemBarProperty2 = SystemBarProperty(true, 100, 200);
+    SystemBarPropertyFlag systemBarPropertyFlag1 = {true, true, true, true};
+    SystemBarPropertyFlag systemBarPropertyFlag2 = {false, false, false, false};
+
+    std::unordered_map<WindowType, SystemBarProperty> systemBarProperties;
+    std::unordered_map<WindowType, SystemBarPropertyFlag> systemBarPropertyFlags;
+    systemBarProperties.insert({windowType1, systemBarProperty1});
+    systemBarPropertyFlags.insert({windowType2, systemBarPropertyFlag2});
+    ASSERT_EQ(WMError::WM_DO_NOTHING, window->UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags));
+
+    systemBarProperties.insert({windowType2, systemBarProperty2});
+    systemBarPropertyFlags.insert({windowType1, systemBarPropertyFlag1});
+    ASSERT_EQ(WMError::WM_OK, window->UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags));
+
+    window->state_ = WindowState::STATE_BOTTOM;
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW,
+            window->UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags));
 }
 
 /**
@@ -1264,7 +1305,7 @@ HWTEST_F(WindowSceneSessionImplTest5, SetFollowParentWindowLayoutEnabled01, Func
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     ret = window->SetFollowParentWindowLayoutEnabled(true);
     ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_OPERATION);
-    
+
     property->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
     ret = window->SetFollowParentWindowLayoutEnabled(true);
     ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_OPERATION);

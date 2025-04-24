@@ -285,6 +285,7 @@ const std::map<WindowSizeChangeReason, RectChangeReason> JS_SIZE_CHANGE_REASON {
     { WindowSizeChangeReason::SPLIT_DRAG_START,      RectChangeReason::UNDEFINED  },
     { WindowSizeChangeReason::SPLIT_DRAG,            RectChangeReason::UNDEFINED  },
     { WindowSizeChangeReason::SPLIT_DRAG_END,        RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::RESIZE_BY_LIMIT,       RectChangeReason::UNDEFINED  },
     { WindowSizeChangeReason::PAGE_ROTATION,         RectChangeReason::UNDEFINED  },
     { WindowSizeChangeReason::END,                   RectChangeReason::UNDEFINED  },
 };
@@ -324,7 +325,7 @@ public:
     napi_value CreateJsWindowInfoArrayObject(napi_env env, const std::vector<sptr<WindowVisibilityInfo>>& infos);
     napi_value CreateJsWindowInfoObject(napi_env env, const sptr<WindowVisibilityInfo>& window);
     napi_value GetRectAndConvertToJsValue(napi_env env, const Rect& rect);
-    napi_value CreateJsWindowPropertiesObject(napi_env env, sptr<Window>& window, const Rect& drawableRect);
+    napi_value CreateJsWindowPropertiesObject(napi_env env, const WindowPropertyInfo& windowPropertyInfo);
     napi_value CreateJsSystemBarPropertiesObject(napi_env env, sptr<Window>& window);
     napi_value CreateRotationChangeInfoObject(napi_env env, const RotationChangeInfo& rotationChangeInfo);
     bool GetSystemBarPropertiesFromJs(napi_env env, napi_value jsObject,

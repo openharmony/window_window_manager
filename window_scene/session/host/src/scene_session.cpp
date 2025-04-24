@@ -66,6 +66,7 @@ namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSession" };
 const std::string DLP_INDEX = "ohos.dlp.params.index";
+const std::string ERROR_REASON_LOW_MEMORY_KILL = "LowMemoryKill";
 constexpr const char* APP_CLONE_INDEX = "ohos.extra.param.key.appCloneIndex";
 constexpr float MINI_FLOAT_SCALE = 0.3f;
 constexpr float MOVE_DRAG_POSITION_Z = 100.5f;
@@ -76,7 +77,6 @@ constexpr int32_t API_VERSION_18 = 18;
 constexpr int32_t HOOK_SYSTEM_BAR_HEIGHT = 40;
 constexpr int32_t HOOK_AI_BAR_HEIGHT = 28;
 constexpr int32_t POW_DOUBLE = 2;
-constexpr int32_t MULTI_WINDOW_FLOATING_TITLE_BAR_HEIGHT_VP = 46;
 constexpr int32_t MULTI_WINDOW_TITLE_BAR_DEFAULT_HEIGHT_VP = 32;
 constexpr int32_t ROTATION_DEGREE = 90;
 
@@ -713,15 +713,6 @@ WSError SceneSession::SetMoveAvailableArea(DisplayId displayId)
     if (systemConfig_.IsPhoneWindow() && isFoldable && statusBarRect.width_) {
         availableArea.width_ = statusBarRect.width_;
     }
-    if (PcFoldScreenManager::GetInstance().IsHalfFolded(GetScreenId())) {
-        ret = DisplayManager::GetInstance().GetExpandAvailableArea(GetSessionProperty()->GetDisplayId(),
-            availableArea);
-        if (ret != DMError::DM_OK) {
-            TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to get available area, ret: %{public}d", ret);
-            return WSError::WS_ERROR_INVALID_DISPLAY;
-        }
-    }
-
     TLOGD(WmsLogTag::WMS_KEYBOARD,
           "the available area x is: %{public}d, y is: %{public}d, width is: %{public}d, height is: %{public}d",
           availableArea.posX_, availableArea.posY_, availableArea.width_, availableArea.height_);
@@ -2130,7 +2121,7 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
             GetPersistentId(), static_cast<uint32_t>(GetWindowType()), sessionProperty->GetWindowFlags());
         return;
     }
-    if (sessionProperty->GetCompatibleModeInPc()) {
+    if (sessionProperty->GetCompatibleModeInPc() && !sessionProperty->GetCompatibleModeInPcTitleVisible()) {
         HookAvoidAreaInCompatibleMode(rect, AvoidAreaType::TYPE_SYSTEM, avoidArea);
         return;
     }
@@ -2163,8 +2154,8 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
         }
         vpr = display->GetVirtualPixelRatio();
         bool isFloat = windowMode == WindowMode::WINDOW_MODE_FLOATING && !GetIsMidScene();
-        int32_t height = isFloat ? MULTI_WINDOW_FLOATING_TITLE_BAR_HEIGHT_VP : MULTI_WINDOW_TITLE_BAR_DEFAULT_HEIGHT_VP;
-        avoidArea.topRect_.height_ = vpr * height;
+        int32_t height = isFloat ? GetStatusBarHeight() : vpr * MULTI_WINDOW_TITLE_BAR_DEFAULT_HEIGHT_VP;
+        avoidArea.topRect_.height_ = static_cast<uint32_t>(height);
         avoidArea.topRect_.width_ = static_cast<uint32_t>(display->GetWidth());
         return;
     }
@@ -2177,16 +2168,23 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
         if (statusBar == nullptr) {
             continue;
         }
-        WSRect statusBarRect = statusBar->GetSessionRect();
+        bool isVisible = statusBar->isVisible_;
+        if (onGetStatusBarConstantlyShowFunc_) {
+            onGetStatusBarConstantlyShowFunc_(displayId, isVisible);
+            TLOGD(WmsLogTag::WMS_IMMS, "win %{public}d displayId %{public}" PRIu64 " constantly isVisible %{public}d",
+                GetPersistentId(), displayId, isVisible);
+        }
         bool isStatusBarVisible = WindowHelper::IsMainWindow(Session::GetWindowType()) ?
-            isStatusBarVisible_ : statusBar->isVisible_;
+            isStatusBarVisible_ : isVisible;
         if (!isStatusBarVisible) {
             TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d status bar not visible", GetPersistentId());
             continue;
         }
+        WSRect statusBarRect = statusBar->GetSessionRect();
         if (onGetStatusBarAvoidHeightFunc_) {
             onGetStatusBarAvoidHeightFunc_(statusBarRect);
-            TLOGD(WmsLogTag::WMS_IMMS, "status bar height %{public}d", statusBarRect.height_);
+            TLOGD(WmsLogTag::WMS_IMMS, "win %{public}d status bar height %{public}d",
+                GetPersistentId(), statusBarRect.height_);
         }
         TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d rect %{public}s status bar %{public}s",
             GetPersistentId(), rect.ToString().c_str(), statusBarRect.ToString().c_str());
@@ -2293,7 +2291,7 @@ void SceneSession::GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea) con
         return;
     }
     // compatibleMode app need to hook avoidArea in pc
-    if (GetSessionProperty()->GetCompatibleModeInPc()) {
+    if (GetSessionProperty()->GetCompatibleModeInPc() && !GetSessionProperty()->GetCompatibleModeInPcTitleVisible()) {
         HookAvoidAreaInCompatibleMode(rect, AvoidAreaType::TYPE_NAVIGATION_INDICATOR, avoidArea);
         return;
     }
@@ -2784,6 +2782,11 @@ WSError SceneSession::ProcessPointDownSession(int32_t posX, int32_t posY)
     const auto& id = GetPersistentId();
     TLOGD(WmsLogTag::WMS_INPUT_KEY_FLOW, "id:%{public}d, type:%{public}d", id, GetWindowType());
 
+    if (static_cast<MMI::WindowInputType>(GetSessionInfo().windowInputType_) == MMI::WindowInputType::TRANSMIT_ALL) {
+        TLOGD(WmsLogTag::WMS_INPUT_KEY_FLOW, "Cancel the double_send mechanism window response touchoutside.");
+        return WSError::WS_ERROR_INVALID_TYPE;
+    }
+
     // notify touch outside
     if (specificCallback_ != nullptr && specificCallback_->onSessionTouchOutside_ &&
         sessionInfo_.bundleName_.find("SCBGestureBack") == std::string::npos) {
@@ -2808,6 +2811,11 @@ WSError SceneSession::SendPointEventForMoveDrag(const std::shared_ptr<MMI::Point
 void SceneSession::NotifyOutsideDownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     // notify touchOutside and touchDown event
+    if (static_cast<MMI::WindowInputType>(GetSessionInfo().windowInputType_) == MMI::WindowInputType::TRANSMIT_ALL) {
+        TLOGD(WmsLogTag::WMS_INPUT_KEY_FLOW, "Cancel the double_send mechanism window response touchoutside.");
+        return;
+    }
+
     int32_t action = pointerEvent->GetPointerAction();
     if (action != MMI::PointerEvent::POINTER_ACTION_DOWN &&
         action != MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
@@ -2892,9 +2900,6 @@ WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::Point
             TLOGD(WmsLogTag::WMS_LAYOUT, "moveDragController_ is null");
             return Session::TransferPointerEvent(pointerEvent, needNotifyClient, isExecuteDelayRaise);
         }
-        if (isFollowParentLayout_) {
-            return WSError::WS_OK;
-        }
         if ((property->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING && IsDragAccessible()) ||
             isDragAccessibleSystemWindow) {
             if ((systemConfig_.IsPcWindow() || IsFreeMultiWindowMode() ||
@@ -2909,7 +2914,7 @@ WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::Point
         }
         if ((WindowHelper::IsMainWindow(windowType) ||
              WindowHelper::IsSubWindow(windowType) ||
-             WindowHelper::IsSystemWindow(windowType)) &&
+             WindowHelper::IsSystemWindow(windowType)) && !isFollowParentLayout_ &&
             moveDragController_->ConsumeMoveEvent(pointerEvent, winRect_)) {
             PresentFoucusIfNeed(pointerEvent->GetPointerAction());
             pointerEvent->MarkProcessed();
@@ -3382,8 +3387,8 @@ void SceneSession::HandleMoveDragEnd(WSRect& rect, SizeChangeReason reason)
         TLOGI(WmsLogTag::WMS_LAYOUT_PC, "set full screen after throw slip");
     }
 
-    if (moveDragController_->GetMoveDragEndDisplayId() == moveDragController_->GetMoveDragStartDisplayId() ||
-        (!moveDragController_->isSupportWindowDragCrossDisplay() && !WindowHelper::IsInputWindow(GetWindowType()))) {
+    if ((moveDragController_->GetMoveDragEndDisplayId() == moveDragController_->GetMoveDragStartDisplayId() ||
+        !moveDragController_->IsSupportWindowDragCrossDisplay()) && !WindowHelper::IsInputWindow(GetWindowType())) {
         NotifySessionRectChange(rect, reason);
     } else {
         displayChangedByMoveDrag_ = true;
@@ -5801,7 +5806,8 @@ WSError SceneSession::NotifySessionExceptionInner(const sptr<AAFwk::SessionInfo>
             return WSError::WS_ERROR_NULLPTR;
         }
         if (SessionHelper::IsMainWindow(session->GetWindowType()) && !session->clientIdentityToken_.empty() &&
-            isFromClient && session->clientIdentityToken_ != abilitySessionInfo->identityToken) {
+            isFromClient && (abilitySessionInfo->errorReason != ERROR_REASON_LOW_MEMORY_KILL ||
+            session->clientIdentityToken_ != abilitySessionInfo->identityToken)) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s client exception not matched: %{public}s, %{public}s",
                 where, session->clientIdentityToken_.c_str(), abilitySessionInfo->identityToken.c_str());
             session->RemoveLifeCycleTask(LifeCycleTaskType::STOP);
@@ -6738,6 +6744,11 @@ void SceneSession::RegisterGetStatusBarAvoidHeightFunc(GetStatusBarAvoidHeightFu
     onGetStatusBarAvoidHeightFunc_ = std::move(callback);
 }
 
+void SceneSession::RegisterGetStatusBarConstantlyShowFunc(GetStatusBarConstantlyShowFunc&& callback)
+{
+    onGetStatusBarConstantlyShowFunc_ = std::move(callback);
+}
+
 WMError SceneSession::GetAppForceLandscapeConfig(AppForceLandscapeConfig& config)
 {
     if (forceSplitFunc_ == nullptr) {
@@ -6820,20 +6831,18 @@ void SceneSession::SetFollowParentRectFunc(NotifyFollowParentRectFunc&& func)
 WSError SceneSession::SetFollowParentWindowLayoutEnabled(bool isFollow)
 {
     auto property = GetSessionProperty();
-    if (!property) {
-        TLOGE(WmsLogTag::WMS_SUB, "property is null");
+    if (!property || property->GetSubWindowLevel() > 1) {
+        TLOGE(WmsLogTag::WMS_SUB, "property is null or not surppot more than 1 level window");
         return WSError::WS_ERROR_INVALID_OPERATION;
     }
-    // only support sub window and dialog
     if (!WindowHelper::IsSubWindow(property->GetWindowType()) &&
         !WindowHelper::IsDialogWindow(property->GetWindowType())) {
         TLOGE(WmsLogTag::WMS_SUB, "only sub window and dialog is valid");
         return WSError::WS_ERROR_INVALID_OPERATION;
     }
-    // only support first level window
-    if (property->GetSubWindowLevel() > 1) {
-        TLOGW(WmsLogTag::WMS_SUB, "not surppot more than 1 level window");
-        return WSError::WS_ERROR_INVALID_OPERATION;
+    if (!systemConfig_.supportFollowParentWindowLayout_) {
+        TLOGI(WmsLogTag::WMS_SUB, "not support device");
+        return WSError::WS_ERROR_DEVICE_NOT_SUPPORT;
     }
     PostTask([weakThis = wptr(this), isFollow = isFollow,  where = __func__] {
         auto session = weakThis.promote();
@@ -6886,6 +6895,8 @@ int32_t SceneSession::GetStatusBarHeight()
         WSRect statusBarRect = statusBar->GetSessionRect();
         if (onGetStatusBarAvoidHeightFunc_) {
             onGetStatusBarAvoidHeightFunc_(statusBarRect);
+            TLOGD(WmsLogTag::WMS_IMMS, "win %{public}d status bar height %{public}d",
+                GetPersistentId(), statusBarRect.height_);
         }
         height = statusBarRect.height_;
     }
@@ -6974,7 +6985,7 @@ bool SceneSession::UpdateVisibilityInner(bool visibility)
     if (isVisible_ == visibility) {
         return false;
     }
-    TLOGI(WmsLogTag::WMS_PIPELINE, "id: %{public}d, visibility: %{public}u -> %{public}u",
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "id: %{public}d, visibility: %{public}u -> %{public}u",
         GetPersistentId(), isVisible_, visibility);
     if (visibilityChangedDetectFunc_) {
         visibilityChangedDetectFunc_(GetCallingPid(), isVisible_, visibility);
@@ -7731,7 +7742,7 @@ void SceneSession::ModifyRSAnimatableProperty(bool isDefaultSidebarBlur, bool is
 
 void SceneSession::NotifyWindowAttachStateListenerRegistered(bool registered)
 {
-    SetNeedNotifyAttachState(registered);
+    needNotifyAttachState_.store(registered);
 }
 
 void SceneSession::NotifyKeyboardAnimationCompleted(bool isShowAnimation,
@@ -7775,22 +7786,21 @@ void SceneSession::NotifyKeyboardDidHideRegistered(bool registered)
     isKeyboardDidHideRegistered_.store(registered);
 }
 
-WSError SceneSession::UpdateDensity()
+WSError SceneSession::UpdateDensity(bool isNotSessionRectWithDpiChange)
 {
     if (systemConfig_.IsPcWindow() && WindowHelper::IsAppWindow(GetWindowType()) &&
         Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING && !isDefaultDensityEnabled_) {
-        UpdateNewSizeForPCWindow();
+        UpdateNewSizeForPCWindow(isNotSessionRectWithDpiChange);
     }
     SetTempRect({ 0, 0, 0, 0 });
     SaveLastDensity();
     return Session::UpdateDensity();
 }
 
-void SceneSession::UpdateNewSizeForPCWindow()
+void SceneSession::UpdateNewSizeForPCWindow(bool isNotSessionRectWithDpiChange)
 {
-    if (moveDragController_ && moveDragController_->IsMoveDragHotAreaCrossDisplay()) {
-        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "is move drag to hot area, do nothing.");
-        moveDragController_->SetMoveDragHotAreaCrossDisplay(false);
+    if (isNotSessionRectWithDpiChange) {
+        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "dip change do nothing.");
         return;
     }
 
@@ -8017,17 +8027,6 @@ WSError SceneSession::SetCurrentRotation(int32_t currentRotation)
     return WSError::WS_OK;
 }
 
-void SceneSession::SetIsAbilityHook(bool isAbilityHook)
-{
-    TLOGI(WmsLogTag::WMS_MAIN, "set session id %{public}d isAbilityHook %{public}d", persistentId_, isAbilityHook);
-    isAbilityHook_ = isAbilityHook;
-}
-
-bool SceneSession::GetIsAbilityHook() const
-{
-    return isAbilityHook_;
-}
-
 WMError SceneSession::NotifyDisableDelegatorChange()
 {
     PostTask([weakThis = wptr(this), where = __func__] {
@@ -8131,5 +8130,15 @@ void SceneSession::SetSceneSessionDestructNotificationFunc(NotifySceneSessionDes
 void SceneSession::SetIsUserRequestedExit(bool isUserRequestedExit)
 {
     isUserRequestedExit_ = isUserRequestedExit;
+}
+
+void SceneSession::SetIsAncoForFloatingWindow(bool isAncoForFloatingWindow)
+{
+    isAncoForFloatingWindow_ = isAncoForFloatingWindow;
+}
+
+bool SceneSession::GetIsAncoForFloatingWindow() const
+{
+    return isAncoForFloatingWindow_;
 }
 } // namespace OHOS::Rosen

@@ -295,7 +295,7 @@ DMError DisplayManagerProxy::SetOrientation(ScreenId screenId, Orientation orien
 }
 
 std::shared_ptr<Media::PixelMap> DisplayManagerProxy::GetDisplaySnapshot(DisplayId displayId,
-    DmErrorCode* errorCode, bool isUseDma)
+    DmErrorCode* errorCode, bool isUseDma, bool isCaptureFullOfScreen)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {

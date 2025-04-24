@@ -137,7 +137,7 @@ HWTEST_F(ScreenSessionTest, ScreenSession05, TestSize.Level1)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, CreateDisplayNode, TestSize.Level1)
+HWTEST_F(ScreenSessionTest, CreateDisplayNode, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: CreateDisplayNode start";
     Rosen::RSDisplayNodeConfig rsConfig;
@@ -351,7 +351,7 @@ HWTEST_F(ScreenSessionTest, ConvertIntToRotation, TestSize.Level1)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, SetVirtualScreenFlag, TestSize.Level1)
+HWTEST_F(ScreenSessionTest, SetVirtualScreenFlag, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "SetVirtualScreenFlag start";
     ScreenSessionConfig config = {
@@ -371,7 +371,7 @@ HWTEST_F(ScreenSessionTest, SetVirtualScreenFlag, TestSize.Level1)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, GetVirtualScreenFlag, TestSize.Level1)
+HWTEST_F(ScreenSessionTest, GetVirtualScreenFlag, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "GetVirtualScreenFlag start";
     ScreenSessionConfig config = {
@@ -447,12 +447,12 @@ HWTEST_F(ScreenSessionTest, UpdateToInputManager, TestSize.Level1)
     int rotation = 90;
     int deviceRotation = 90;
     FoldDisplayMode foldDisplayMode = FoldDisplayMode::FULL;
-    screenSession->UpdateToInputManager(bounds, rotation, deviceRotation, foldDisplayMode, false);
+    screenSession->UpdateToInputManager(bounds, rotation, deviceRotation, foldDisplayMode);
     bounds.rect_.width_ = 1344;
     bounds.rect_.height_ = 2772;
     rotation = 0;
     foldDisplayMode = FoldDisplayMode::MAIN;
-    screenSession->UpdateToInputManager(bounds, rotation, deviceRotation, foldDisplayMode, false);
+    screenSession->UpdateToInputManager(bounds, rotation, deviceRotation, foldDisplayMode);
     GTEST_LOG_(INFO) << "UpdateToInputManager end";
 }
 
@@ -512,7 +512,7 @@ HWTEST_F(ScreenSessionTest, UpdatePropertyAfterRotation, TestSize.Level1)
     bounds.rect_.height_ = 2772;
     int rotation = 90;
     FoldDisplayMode foldDisplayMode = FoldDisplayMode::MAIN;
-    screenSession->UpdatePropertyAfterRotation(bounds, rotation, foldDisplayMode, false);
+    screenSession->UpdatePropertyAfterRotation(bounds, rotation, foldDisplayMode);
     GTEST_LOG_(INFO) << "UpdatePropertyAfterRotation end";
 }
 
@@ -746,7 +746,7 @@ HWTEST_F(ScreenSessionTest, SetDensityInCurResolution, TestSize.Level1)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, GetSourceMode, TestSize.Level1)
+HWTEST_F(ScreenSessionTest, GetSourceMode, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetSourceMode start";
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
@@ -778,7 +778,7 @@ HWTEST_F(ScreenSessionTest, GetSourceMode, TestSize.Level1)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, GetSourceMode02, TestSize.Level1)
+HWTEST_F(ScreenSessionTest, GetSourceMode02, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetSourceMode02 start";
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
@@ -1023,7 +1023,7 @@ HWTEST_F(ScreenSessionTest, SetPrivateSessionForeground, TestSize.Level1)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, GetScreenCombination, TestSize.Level1)
+HWTEST_F(ScreenSessionTest, GetScreenCombination, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "GetScreenCombination start";
     ScreenSessionConfig config = {
@@ -1087,7 +1087,7 @@ HWTEST_F(ScreenSessionTest, Resize002, TestSize.Level1)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, UpdateAvailableArea, TestSize.Level1)
+HWTEST_F(ScreenSessionTest, UpdateAvailableArea, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "UpdateAvailableArea start";
     ScreenSessionConfig config = {
@@ -2277,7 +2277,7 @@ HWTEST_F(ScreenSessionTest, CalcDisplayOrientation01, TestSize.Level1)
     FoldDisplayMode foldDisplayMode { FoldDisplayMode::COORDINATION };
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
     session->activeIdx_ = -1;
-    auto res = session->CalcDisplayOrientation(rotation, foldDisplayMode, false);
+    auto res = session->CalcDisplayOrientation(rotation, foldDisplayMode);
     EXPECT_EQ(DisplayOrientation::LANDSCAPE, res);
 
     sptr<SupportedScreenModes> supportedScreenModes = new SupportedScreenModes;
@@ -2287,19 +2287,19 @@ HWTEST_F(ScreenSessionTest, CalcDisplayOrientation01, TestSize.Level1)
     session->activeIdx_ = 0;
 
     rotation = Rotation::ROTATION_0;
-    res = session->CalcDisplayOrientation(rotation, foldDisplayMode, false);
+    res = session->CalcDisplayOrientation(rotation, foldDisplayMode);
     EXPECT_EQ(DisplayOrientation::LANDSCAPE, res);
 
     rotation = Rotation::ROTATION_90;
-    res = session->CalcDisplayOrientation(rotation, foldDisplayMode, false);
+    res = session->CalcDisplayOrientation(rotation, foldDisplayMode);
     EXPECT_EQ(DisplayOrientation::PORTRAIT, res);
 
     rotation = Rotation::ROTATION_180;
-    res = session->CalcDisplayOrientation(rotation, foldDisplayMode, false);
+    res = session->CalcDisplayOrientation(rotation, foldDisplayMode);
     EXPECT_EQ(DisplayOrientation::LANDSCAPE_INVERTED, res);
 
     rotation = Rotation::ROTATION_270;
-    res = session->CalcDisplayOrientation(rotation, foldDisplayMode, false);
+    res = session->CalcDisplayOrientation(rotation, foldDisplayMode);
     EXPECT_EQ(DisplayOrientation::PORTRAIT_INVERTED, res);
 
     GTEST_LOG_(INFO) << "ScreenSessionTest: CalcDisplayOrientation end";
@@ -2317,7 +2317,7 @@ HWTEST_F(ScreenSessionTest, CalcDisplayOrientation02, TestSize.Level1)
     FoldDisplayMode foldDisplayMode { FoldDisplayMode::UNKNOWN };
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
     session->activeIdx_ = -1;
-    auto res = session->CalcDisplayOrientation(rotation, foldDisplayMode, false);
+    auto res = session->CalcDisplayOrientation(rotation, foldDisplayMode);
     EXPECT_EQ(DisplayOrientation::LANDSCAPE, res);
 
     sptr<SupportedScreenModes> supportedScreenModes = new SupportedScreenModes;
@@ -2327,19 +2327,19 @@ HWTEST_F(ScreenSessionTest, CalcDisplayOrientation02, TestSize.Level1)
     session->activeIdx_ = 0;
 
     rotation = Rotation::ROTATION_0;
-    res = session->CalcDisplayOrientation(rotation, foldDisplayMode, false);
+    res = session->CalcDisplayOrientation(rotation, foldDisplayMode);
     EXPECT_EQ(DisplayOrientation::LANDSCAPE, res);
 
     rotation = Rotation::ROTATION_90;
-    res = session->CalcDisplayOrientation(rotation, foldDisplayMode, false);
+    res = session->CalcDisplayOrientation(rotation, foldDisplayMode);
     EXPECT_EQ(DisplayOrientation::PORTRAIT, res);
 
     rotation = Rotation::ROTATION_180;
-    res = session->CalcDisplayOrientation(rotation, foldDisplayMode, false);
+    res = session->CalcDisplayOrientation(rotation, foldDisplayMode);
     EXPECT_EQ(DisplayOrientation::LANDSCAPE_INVERTED, res);
 
     rotation = Rotation::ROTATION_270;
-    res = session->CalcDisplayOrientation(rotation, foldDisplayMode, false);
+    res = session->CalcDisplayOrientation(rotation, foldDisplayMode);
     EXPECT_EQ(DisplayOrientation::PORTRAIT_INVERTED, res);
 
     GTEST_LOG_(INFO) << "ScreenSessionTest: CalcDisplayOrientation end";
@@ -2631,7 +2631,7 @@ HWTEST_F(ScreenSessionTest, CalcDeviceOrientation01, TestSize.Level1)
 {
     sptr<ScreenSession> session = new ScreenSession();
     ASSERT_NE(session, nullptr);
-    DisplayOrientation result = session->CalcDeviceOrientation(Rotation::ROTATION_0, FoldDisplayMode::FULL, false);
+    DisplayOrientation result = session->CalcDeviceOrientation(Rotation::ROTATION_0, FoldDisplayMode::FULL);
     ASSERT_EQ(result, DisplayOrientation::PORTRAIT);
 }
 
@@ -2644,7 +2644,7 @@ HWTEST_F(ScreenSessionTest, CalcDeviceOrientation02, TestSize.Level1)
 {
     sptr<ScreenSession> session = new ScreenSession();
     ASSERT_NE(session, nullptr);
-    DisplayOrientation result = session->CalcDeviceOrientation(Rotation::ROTATION_90, FoldDisplayMode::FULL, false);
+    DisplayOrientation result = session->CalcDeviceOrientation(Rotation::ROTATION_90, FoldDisplayMode::FULL);
     ASSERT_EQ(result, DisplayOrientation::LANDSCAPE);
 }
 
@@ -2657,7 +2657,7 @@ HWTEST_F(ScreenSessionTest, CalcDeviceOrientation03, TestSize.Level1)
 {
     sptr<ScreenSession> session = new ScreenSession();
     ASSERT_NE(session, nullptr);
-    DisplayOrientation result = session->CalcDeviceOrientation(Rotation::ROTATION_180, FoldDisplayMode::FULL, false);
+    DisplayOrientation result = session->CalcDeviceOrientation(Rotation::ROTATION_180, FoldDisplayMode::FULL);
     ASSERT_EQ(result, DisplayOrientation::PORTRAIT_INVERTED);
 }
 
@@ -2670,7 +2670,7 @@ HWTEST_F(ScreenSessionTest, CalcDeviceOrientation04, TestSize.Level1)
 {
     sptr<ScreenSession> session = new ScreenSession();
     ASSERT_NE(session, nullptr);
-    DisplayOrientation result = session->CalcDeviceOrientation(Rotation::ROTATION_270, FoldDisplayMode::FULL, false);
+    DisplayOrientation result = session->CalcDeviceOrientation(Rotation::ROTATION_270, FoldDisplayMode::FULL);
     ASSERT_EQ(result, DisplayOrientation::LANDSCAPE_INVERTED);
 }
 
@@ -2684,7 +2684,7 @@ HWTEST_F(ScreenSessionTest, CalcDeviceOrientation05, TestSize.Level1)
     sptr<ScreenSession> session = new ScreenSession();
     ASSERT_NE(session, nullptr);
     DisplayOrientation result = session->CalcDeviceOrientation(static_cast<Rotation>(100),
-        FoldDisplayMode::FULL, false);
+        FoldDisplayMode::FULL);
     ASSERT_EQ(result, DisplayOrientation::UNKNOWN);
 }
 

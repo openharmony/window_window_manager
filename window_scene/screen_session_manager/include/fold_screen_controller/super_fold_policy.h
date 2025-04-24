@@ -28,7 +28,7 @@ public:
     ~SuperFoldPolicy() = default;
     bool IsFakeDisplayExist();
     bool IsNeedSetSnapshotRect(DisplayId displayId);
-    Drawing::Rect GetSnapshotRect(DisplayId displayId);
+    Drawing::Rect GetSnapshotRect(DisplayId displayId, bool isCaptureFullOfScreen = false);
     DMRect GetRecordRect(DisplayId displayId);
 };
 }

@@ -22,6 +22,7 @@
 #include "mock/mock_session_stage.h"
 
 #include "screen_manager.h"
+#include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session/host/include/sub_session.h"
 #include "session/host/include/main_session.h"
 #include "session/host/include/scene_session.h"
@@ -33,6 +34,14 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
+namespace {
+    std::string g_errlog;
+    void ScreenSessionLogCallback(
+        const LogType type, const LogLevel level, const unsigned int domain, const char *tag, const char *msg)
+    {
+    g_errlog = msg;
+    }
+} // namespace name
 
 class SceneSessionTest6 : public testing::Test {
 public:
@@ -306,15 +315,14 @@ HWTEST_F(SceneSessionTest6, NotifyKeyboardAnimationCompleted, Function | SmallTe
  */
 HWTEST_F(SceneSessionTest6, UpdateNewSizeForPCWindow, Function | SmallTest | Level1)
 {
+    LOG_SetCallback(ScreenSessionLogCallback);
     SessionInfo info;
     info.abilityName_ = "UpdateNewSizeForPCWindow";
     info.bundleName_ = "UpdateNewSizeForPCWindow";
     info.windowType_ = 1;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(12, WindowType::WINDOW_TYPE_FLOAT);
-    sceneSession->moveDragController_->SetMoveDragHotAreaCrossDisplay(true);
-    sceneSession->UpdateNewSizeForPCWindow();
-    ASSERT_EQ(false, sceneSession->moveDragController_->IsMoveDragHotAreaCrossDisplay());
+    sceneSession->UpdateNewSizeForPCWindow(true);
+    EXPECT_TRUE(g_errlog.find("dip change do nothing.") != std::string::npos);
 }
 
 /**
@@ -338,6 +346,54 @@ HWTEST_F(SceneSessionTest6, CalcNewWindowRectIfNeed, Function | SmallTest | Leve
     sceneSession->CalcNewWindowRectIfNeed(availableArea, newVpr, winRect);
     WSRect result = { 0, 0, 1200, 900 };
     ASSERT_EQ(result, winRect);
+}
+
+/**
+ * @tc.name: GetSystemAvoidArea
+ * @tc.desc: GetSystemAvoidArea function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, GetSystemAvoidArea, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "GetSystemAvoidArea";
+    info.bundleName_ = "GetSystemAvoidArea";
+
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(session, nullptr);
+    ASSERT_NE(session->GetSessionProperty(), nullptr);
+    session->GetSessionProperty()->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    EXPECT_EQ(WindowMode::WINDOW_MODE_FLOATING, session->GetSessionProperty()->GetWindowMode());
+    info.windowType_ = static_cast<uint32_t>(WindowType::APP_MAIN_WINDOW_BASE);
+
+    SystemSessionConfig systemConfig;
+    systemConfig.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    session->SetSystemConfig(systemConfig);
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
+    session->GetSessionProperty()->SetDisplayId(2025);
+    session->SetIsMidScene(false);
+    EXPECT_EQ(session->GetIsMidScene(), false);
+
+    WSRect rect;
+    AvoidArea avoidArea;
+    session->GetSystemAvoidArea(rect, avoidArea);
+    int32_t height = session->GetStatusBarHeight();
+    EXPECT_EQ(height, avoidArea.topRect_.height_);
+}
+
+/**
+ * @tc.name: NotifyWindowAttachStateListenerRegistered
+ * @tc.desc: NotifyWindowAttachStateListenerRegistered about session
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, NotifyWindowAttachStateListenerRegistered_session, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->NotifyWindowAttachStateListenerRegistered(true);
+    EXPECT_EQ(sceneSession->needNotifyAttachState_, true);
+    sceneSession->NotifyWindowAttachStateListenerRegistered(false);
+    EXPECT_EQ(sceneSession->needNotifyAttachState_, false);
 }
 } // namespace
 } // namespace Rosen

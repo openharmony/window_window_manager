@@ -324,6 +324,7 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
                                               reply.ReadUint32(), reply.ReadUint32() };
         property->SetWindowSizeLimits(windowSizeLimits);
         property->SetCompatibleModeInPc(reply.ReadBool());
+        property->SetCompatibleModeInPcTitleVisible(reply.ReadBool());
         property->SetCompatibleWindowSizeInPc(reply.ReadInt32(), reply.ReadInt32(),
                                               reply.ReadInt32(), reply.ReadInt32());
         property->SetIsAppSupportPhoneInPc(reply.ReadBool());
@@ -334,6 +335,7 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
         property->SetAppInstanceKey(reply.ReadString());
         property->SetDragEnabled(reply.ReadBool());
         property->SetIsAtomicService(reply.ReadBool());
+        property->SetIsAbilityHook(reply.ReadBool());
     }
     int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);

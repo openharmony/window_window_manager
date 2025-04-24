@@ -151,10 +151,8 @@ public:
     void ReleaseDisplayNode();
 
     Rotation CalcRotation(Orientation orientation, FoldDisplayMode foldDisplayMode) const;
-    DisplayOrientation CalcDisplayOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode,
-        bool IsOrientationNeedChanged) const;
-    DisplayOrientation CalcDeviceOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode,
-        bool IsOrientationNeedChanged) const;
+    DisplayOrientation CalcDisplayOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode) const;
+    DisplayOrientation CalcDeviceOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode) const;
     void FillScreenInfo(sptr<ScreenInfo> info) const;
     void InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startPoint, bool isExtend = false);
 
@@ -191,11 +189,10 @@ public:
     void SetIsPhysicalMirrorSwitch(bool isPhysicalMirrorSwitch);
     bool GetIsPhysicalMirrorSwitch();
     void UpdateTouchBoundsAndOffset();
-    void UpdateToInputManager(RRect bounds, int rotation, int deviceRotation,
-        FoldDisplayMode foldDisplayMode, bool isChanged);
-    void UpdatePropertyAfterRotation(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode, bool isChanged);
-    void UpdatePropertyOnly(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode, bool isChanged);
-    void UpdateRotationOrientation(int rotation, FoldDisplayMode foldDisplayMode, bool isChanged);
+    void UpdateToInputManager(RRect bounds, int rotation, int deviceRotation, FoldDisplayMode foldDisplayMode);
+    void UpdatePropertyAfterRotation(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
+    void UpdatePropertyOnly(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
+    void UpdateRotationOrientation(int rotation, FoldDisplayMode foldDisplayMode);
     void UpdatePropertyByFakeInUse(bool isFakeInUse);
     ScreenProperty UpdatePropertyByFoldControl(const ScreenProperty& updatedProperty,
         FoldDisplayMode foldDisplayMode = FoldDisplayMode::UNKNOWN);
@@ -211,6 +208,7 @@ public:
 
     void SetHdrFormats(std::vector<uint32_t>&& hdrFormats);
     void SetColorSpaces(std::vector<uint32_t>&& colorSpaces);
+    void SetForceCloseHdr(bool isForceCloseHdr);
 
     VirtualScreenFlag GetVirtualScreenFlag();
     void SetVirtualScreenFlag(VirtualScreenFlag screenFlag);

@@ -101,7 +101,6 @@ public:
     DMError SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid, std::vector<uint64_t>& windowIdList);
     sptr<Display> GetPrimaryDisplaySync();
     void OnRemoteDied();
-    uint32_t GetDeviceStatus() const;
     sptr<CutoutInfo> GetCutoutInfoWithRotation(Rotation rotation);
     
 private:
@@ -760,14 +759,15 @@ sptr<Display> DisplayManager::Impl::GetDisplayByScreenId(ScreenId screenId)
 }
 
 std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId displayId,
-    DmErrorCode* errorCode, bool isUseDma)
+    DmErrorCode* errorCode, bool isUseDma, bool isCaptureFullOfScreen)
 {
     if (displayId == DISPLAY_ID_INVALID) {
         WLOGFE("displayId invalid!");
         return nullptr;
     }
     std::shared_ptr<Media::PixelMap> screenShot =
-        SingletonContainer::Get<DisplayManagerAdapter>().GetDisplaySnapshot(displayId, errorCode, isUseDma);
+        SingletonContainer::Get<DisplayManagerAdapter>().GetDisplaySnapshot(displayId, errorCode,
+            isUseDma, isCaptureFullOfScreen);
     if (screenShot == nullptr) {
         WLOGFE("DisplayManager::GetScreenshot failed!");
         return nullptr;
@@ -813,7 +813,8 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetSnapshotByPicker(Media::Rect
 std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshotwithConfig(const SnapShotConfig &snapShotConfig,
     DmErrorCode* errorCode, bool isUseDma)
 {
-    std::shared_ptr<Media::PixelMap> screenShot = GetScreenshot(snapShotConfig.displayId_, errorCode, isUseDma);
+    std::shared_ptr<Media::PixelMap> screenShot = GetScreenshot(snapShotConfig.displayId_, errorCode, isUseDma,
+        snapShotConfig.isCaptureFullOfScreen);
     if (screenShot == nullptr) {
         WLOGFE("DisplayManager::GetScreenshot failed!");
         return nullptr;
@@ -2119,11 +2120,6 @@ std::string DisplayManager::Impl::GetDisplayInfoSrting(sptr<DisplayInfo> display
     return oss.str();
 }
 
-uint32_t DisplayManager::Impl::GetDeviceStatus() const
-{
-    return SingletonContainer::Get<DisplayManagerAdapter>().GetDeviceStatus();
-}
-
 bool DisplayManager::WakeUpBegin(PowerStateChangeReason reason)
 {
     WLOGFD("[UL_POWER]WakeUpBegin start, reason:%{public}u", reason);
@@ -2491,11 +2487,6 @@ sptr<CutoutInfo> DisplayManager::Impl::GetCutoutInfoWithRotation(Rotation rotati
     }
     auto displayId = displayInfo->GetDisplayId();
     return SingletonContainer::Get<DisplayManagerAdapter>().GetCutoutInfoWithRotation(displayId, rotationNum);
-}
-
-uint32_t DisplayManager::GetDeviceStatus() const
-{
-    return pImpl_->GetDeviceStatus();
 }
 
 } // namespace OHOS::Rosen

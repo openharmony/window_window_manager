@@ -114,7 +114,7 @@ public:
     virtual void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens) override;
 
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId,
-        DmErrorCode* errorCode, bool isUseDma) override;
+        DmErrorCode* errorCode, bool isUseDma, bool isCaptureFullOfScreen) override;
     virtual std::shared_ptr<Media::PixelMap> GetSnapshotByPicker(Media::Rect &rect, DmErrorCode* errorCode) override;
 
     virtual sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) override;
@@ -158,13 +158,13 @@ public:
 
     bool IsFoldable() override;
     bool IsCaptured() override;
-    bool IsOrientationNeedChanged() override;
 
     FoldStatus GetFoldStatus() override;
     SuperFoldStatus GetSuperFoldStatus() override;
     void SetLandscapeLockStatus(bool isLocked) override;
     ExtendScreenConnectStatus GetExtendScreenConnectStatus() override;
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() override;
+    void SetForceCloseHdr(ScreenId screenId, bool isForceCloseHdr) override;
 
     void SetCameraStatus(int32_t cameraStatus, int32_t cameraPosition) override;
 
@@ -220,8 +220,9 @@ public:
     ScreenCombination GetScreenCombination(ScreenId screenId) override;
     DMError SetScreenSkipProtectedWindow(const std::vector<ScreenId>& screenIds, bool isEnable) override;
     bool GetIsRealScreen(ScreenId screenId) override;
-    uint32_t GetDeviceStatus() override;
+    void SetDefaultMultiScreenModeWhenSwitchUser() override;
     void NotifyExtendScreenCreateFinish() override;
+    void NotifyExtendScreenDestroyFinish() override;
 
 private:
     static inline BrokerDelegator<ScreenSessionManagerProxy> delegator_;

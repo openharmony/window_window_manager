@@ -1751,7 +1751,7 @@ void ScreenSessionManagerProxy::RemoveVirtualScreenFromGroup(std::vector<ScreenI
 }
 
 std::shared_ptr<Media::PixelMap> ScreenSessionManagerProxy::GetDisplaySnapshot(DisplayId displayId,
-    DmErrorCode* errorCode, bool isUseDma)
+    DmErrorCode* errorCode, bool isUseDma, bool isCaptureFullOfScreen)
 {
     WLOGFD("SCB: ScreenSessionManagerProxy::GetDisplaySnapshot enter");
     sptr<IRemoteObject> remote = Remote();
@@ -1775,6 +1775,11 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManagerProxy::GetDisplaySnapshot(D
 
     if (!data.WriteBool(isUseDma)) {
         WLOGFE("isUseDma fail: data write failed");
+        return nullptr;
+    }
+
+    if (!data.WriteBool(isCaptureFullOfScreen)) {
+        WLOGFE("isCaptureFullOfScreen fail: data write failed");
         return nullptr;
     }
 
@@ -2565,29 +2570,6 @@ bool ScreenSessionManagerProxy::IsCaptured()
     return reply.ReadBool();
 }
 
-bool ScreenSessionManagerProxy::IsOrientationNeedChanged()
-{
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        WLOGFW("remote is null");
-        return false;
-    }
- 
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
-        return false;
-    }
-    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_IS_ORIENTATION_NEED_CHANGE),
-        data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
-        return false;
-    }
-    return reply.ReadBool();
-}
-
 FoldStatus ScreenSessionManagerProxy::GetFoldStatus()
 {
     sptr<IRemoteObject> remote = Remote();
@@ -2657,6 +2639,36 @@ void ScreenSessionManagerProxy::SetLandscapeLockStatus(bool isLocked)
         static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCENE_BOARD_LANDSCAPE_LOCK_STATUS),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
+        return;
+    }
+}
+
+void ScreenSessionManagerProxy::SetForceCloseHdr(ScreenId screenId, bool isForceCloseHdr)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGW(WmsLogTag::DMS, "remote is null");
+        return;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return;
+    }
+    if (!(data.WriteUint64(static_cast<uint64_t>(screenId)))) {
+        TLOGE(WmsLogTag::DMS, "Write screenId failed");
+        return;
+    }
+    if (!data.WriteBool(isForceCloseHdr)) {
+        TLOGE(WmsLogTag::DMS, "Write isForceCloseHdr failed");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCENE_BOARD_FORCE_CLOSE_HDR),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return;
     }
 }
@@ -4007,7 +4019,8 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManagerProxy::GetDisplaySnapshotWi
         return nullptr;
     }
     if (!data.WriteUint64(captureOption.displayId_) ||
-        !data.WriteBool(captureOption.isNeedNotify_) || !data.WriteBool(captureOption.isNeedPointer_)) {
+        !data.WriteBool(captureOption.isNeedNotify_) || !data.WriteBool(captureOption.isNeedPointer_) ||
+        !data.WriteBool(captureOption.isCaptureFullOfScreen)) {
         WLOGFE("Write displayId or isNeedNotify or isNeedPointer failed");
         return nullptr;
     }
@@ -4112,35 +4125,27 @@ bool ScreenSessionManagerProxy::GetIsRealScreen(ScreenId screenId)
     return reply.ReadBool();
 }
 
-uint32_t ScreenSessionManagerProxy::GetDeviceStatus()
+void ScreenSessionManagerProxy::SetDefaultMultiScreenModeWhenSwitchUser()
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("ScreenSessionManagerProxy::GetDeviceStatus: remote is nullptr");
-        return 0;
+        WLOGFE("remote is null");
+        return;
     }
 
-    MessageParcel data;
     MessageParcel reply;
-    MessageOption option;
+    MessageParcel data;
+    MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("ScreenSessionManagerProxy::GetDeviceStatus: WriteInterfaceToken failed");
-        return 0;
+        WLOGFE("WriteInterfaceToken failed");
+        return;
     }
-
-    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DEVICE_STATUS),
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_DEFAULT_MODE_WHEN_SWITCH_USER),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("ScreenSessionManagerProxy::GetDeviceStatus: SendRequest failed");
-        return 0;
+        WLOGFE("SendRequest failed");
+        return;
     }
-
-    uint32_t status = 0;
-    if (!reply.ReadUint32(status)) {
-        WLOGFE("ScreenSessionManagerProxy::GetDeviceStatus: ReadUint32 failed");
-        return 0;
-    }
-
-    return status;
+    return;
 }
 
 void ScreenSessionManagerProxy::NotifyExtendScreenCreateFinish()
@@ -4153,7 +4158,7 @@ void ScreenSessionManagerProxy::NotifyExtendScreenCreateFinish()
 
     MessageParcel reply;
     MessageParcel data;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
         return;
@@ -4164,4 +4169,27 @@ void ScreenSessionManagerProxy::NotifyExtendScreenCreateFinish()
         return;
     }
 }
+
+void ScreenSessionManagerProxy::NotifyExtendScreenDestroyFinish()
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return;
+    }
+
+    MessageParcel reply;
+    MessageParcel data;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_NOTIFY_EXTEND_SCREEN_DESTROY_FINISH),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return;
+    }
+}
+
 } // namespace OHOS::Rosen

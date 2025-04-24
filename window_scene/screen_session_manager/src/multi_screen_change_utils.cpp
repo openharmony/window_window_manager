@@ -199,12 +199,13 @@ void MultiScreenChangeUtils::ScreenRSIdChange(sptr<ScreenSession>& innerScreen,
         TLOGE(WmsLogTag::DMS, "screen sessions null.");
         return;
     }
+    
+    ScreenSessionManager::GetInstance().UpdateScreenIdManager(innerScreen, externalScreen);
+
     ScreenId innerScreenId = innerScreen->GetRSScreenId();
     ScreenId externalScreenId = externalScreen->GetRSScreenId();
     innerScreen->SetRSScreenId(externalScreenId);
     externalScreen->SetRSScreenId(innerScreenId);
-
-    ScreenSessionManager::GetInstance().UpdateScreenIdManager(innerScreen, externalScreen);
 
     bool isInnerScreenInternal = innerScreen->GetIsInternal();
     bool isexternalScreenInternal = externalScreen->GetIsInternal();

@@ -346,6 +346,19 @@ static bool IsJsIsUseControlSessionUndefined(napi_env env, napi_value jsIsUseCon
     return true;
 }
 
+static bool IsJsIsAbilityHookUndefind(napi_env env, napi_value jsIsAbilityHook, SessionInfo& sessionInfo)
+{
+    if (GetType(env, jsIsAbilityHook) != napi_undefined) {
+        bool isAbilityHook = false;
+        if (!ConvertFromJsValue(env, jsIsAbilityHook, isAbilityHook)) {
+            TLOGI(WmsLogTag::WMS_LIFE, "Failed to convert parameter to isAbilityHook");
+            return false;
+        }
+        sessionInfo.isAbilityHook_ = isAbilityHook;
+    }
+    return true;
+}
+
 bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sessionInfo)
 {
     napi_value jsBundleName = nullptr;
@@ -368,6 +381,9 @@ bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sess
     napi_get_named_property(env, jsObject, "isNewAppInstance", &jsIsNewAppInstance);
     napi_value jsInstanceKey = nullptr;
     napi_get_named_property(env, jsObject, "instanceKey", &jsInstanceKey);
+    napi_value jsIsAbilityHook = nullptr;
+    napi_get_named_property(env, jsObject, "isAbilityHook", &jsIsAbilityHook);
+    
     if (!IsJsBundleNameUndefind(env, jsBundleName, sessionInfo)) {
         return false;
     }
@@ -383,15 +399,12 @@ bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sess
     if (!IsJsIsSystemUndefind(env, jsIsSystem, sessionInfo)) {
         return false;
     }
-    if (!IsJsSceneTypeUndefined(env, jsSceneType, sessionInfo)) {
-        return false;
-    }
-    if (!IsJsWindowInputTypeUndefind(env, jsWindowInputType, sessionInfo)) {
-        return false;
-    }
-    if (!IsJsFullScreenStartUndefined(env, jsFullScreenStart, sessionInfo) ||
+    if (!IsJsSceneTypeUndefined(env, jsSceneType, sessionInfo) ||
+        !IsJsFullScreenStartUndefined(env, jsFullScreenStart, sessionInfo) ||
         !IsJsIsNewAppInstanceUndefined(env, jsIsNewAppInstance, sessionInfo) ||
-        !IsJsInstanceKeyUndefined(env, jsInstanceKey, sessionInfo)) {
+        !IsJsInstanceKeyUndefined(env, jsInstanceKey, sessionInfo) ||
+        !IsJsWindowInputTypeUndefind(env, jsWindowInputType, sessionInfo) ||
+        !IsJsIsAbilityHookUndefind(env, jsIsAbilityHook, sessionInfo)) {
         return false;
     }
     return true;
@@ -1166,7 +1179,7 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
         CreateSupportWindowModes(env, sessionInfo.supportedWindowModes));
     napi_set_named_property(env, objValue, "specifiedFlag", CreateJsValue(env, sessionInfo.specifiedFlag_));
     if (sessionInfo.want != nullptr) {
-        napi_set_named_property(env, objValue, "want", AppExecFwk::WrapWant(env, *sessionInfo.want));
+        napi_set_named_property(env, objValue, "want", AppExecFwk::WrapWant(env, sessionInfo.SafelyGetWant()));
     }
     return objValue;
 }
@@ -1386,6 +1399,8 @@ napi_value CreateJsSessionSizeChangeReason(napi_env env)
         static_cast<int32_t>(SizeChangeReason::SPLIT_DRAG)));
     napi_set_named_property(env, objValue, "SPLIT_DRAG_END", CreateJsValue(env,
         static_cast<int32_t>(SizeChangeReason::SPLIT_DRAG_END)));
+    napi_set_named_property(env, objValue, "RESIZE_BY_LIMIT", CreateJsValue(env,
+        static_cast<int32_t>(SizeChangeReason::RESIZE_BY_LIMIT)));
     napi_set_named_property(env, objValue, "END", CreateJsValue(env,
         static_cast<int32_t>(SizeChangeReason::END)));
 
