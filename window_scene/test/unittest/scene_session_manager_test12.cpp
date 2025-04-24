@@ -1559,10 +1559,10 @@ HWTEST_F(SceneSessionManagerTest12, UpdateHighlightStatus01, TestSize.Level1)
     currSceneSession->property_->isExclusivelyHighlighted_ = false;
     currSceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     ssm_->UpdateHighlightStatus(DEFAULT_DISPLAY_ID, preSceneSession, currSceneSession, false);
-    ASSERT_NE(ssm_->highlightIds_.size(), 1);
+    ASSERT_EQ(ssm_->highlightIds_.size(), 1);
     currSceneSession->property_->SetWindowType(WindowType::BELOW_APP_SYSTEM_WINDOW_BASE);
     ssm_->UpdateHighlightStatus(DEFAULT_DISPLAY_ID, preSceneSession, currSceneSession, false);
-    ASSERT_NE(ssm_->highlightIds_.size(), 2);
+    ASSERT_EQ(ssm_->highlightIds_.size(), 2);
 }
 
 /**
