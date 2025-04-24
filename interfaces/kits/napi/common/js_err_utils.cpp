@@ -103,8 +103,7 @@ constexpr const char* WM_ERROR_CODE_MSG_INVALID_CALLING = "Unauthorized operatio
     "1.Incorrect window type;"
     "2.The subwindow is distroyed or being destroyed.";
 constexpr const char* WM_ERROR_CODE_MSG_STAGE_ABNORMALLY = "This window stage is abnormal. Possible causes: "
-    "1.The window stage is not created or destroyed;"
-    "2.The window is not created or destroyed.";
+    "1.The window stage is not created or destroyed;";
 constexpr const char* WM_ERROR_CODE_MSG_CONTEXT_ABNORMALLY = "This window context is abnormal. Possible causes: "
     "1.The context is null.";
 constexpr const char* WM_ERROR_CODE_MSG_START_ABILITY_FAILED = "Failed to start the ability.";
@@ -117,12 +116,11 @@ constexpr const char* WM_ERROR_CODE_MSG_PIP_DESTROY_FAILED = "Failed to destroy 
 constexpr const char* WM_ERROR_CODE_MSG_PIP_STATE_ABNORMALLY = "The PiP window state is abnormal.";
 constexpr const char* WM_ERROR_CODE_MSG_PIP_CREATE_FAILED = "Failed to create the PiP window.";
 constexpr const char* WM_ERROR_CODE_MSG_PIP_INTERNAL_ERROR = "PiP internal error. Possible causes: "
-    "1.The napi throws a task error;"
-    "2.The pip window is abnormal;"
-    "3.The pip controller is abnormal.";
+    "1.Internal error in napi, abnormality in the pip task framework;"
+    "2.Abnormality in the window relied on by pip, possibly an empty window;"
+    "3.Abnormality in the pip controller.";
 constexpr const char* WM_ERROR_CODE_MSG_PIP_REPEAT_OPERATION = "Repeated PiP operation. Possible causes: "
-    "1.The pip window is already created;"
-    "2.The pip window is already stopped.";
+    "1.This pip has either been pulled up or has already been closed.;";
 
 static std::map<WmErrorCode, const char*> WM_ERROR_CODE_TO_ERROR_MSG_MAP {
     {WmErrorCode::WM_OK,                              WM_ERROR_CODE_MSG_OK                       },
