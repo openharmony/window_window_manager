@@ -2796,12 +2796,7 @@ WMError WindowSessionImpl::SetDecorButtonStyle(const DecorButtonStyle& decorButt
         return WMError::WM_ERROR_NULLPTR;
     }
     nlohmann::json decorJson;
-    decorJson.emplace(BUTTON_BACKGROUND_CORNER_RADIUS, decorButtonStyle.buttonBackgroundCornerRadius);
-    decorJson.emplace(BUTTON_BACKGROUND_SIZE, decorButtonStyle.buttonBackgroundSize);
-    decorJson.emplace(BUTTON_ICON_SIZE, decorButtonStyle.buttonIconSize);
-    decorJson.emplace(CLOSE_BUTTON_RIGHT_MARGIN, decorButtonStyle.closeButtonRightMargin);
-    decorJson.emplace(BUTTON_COLOR_MODE, decorButtonStyle.colorMode);
-    decorJson.emplace(BUTTON_SPACING_BETWEEN, decorButtonStyle.spacingBetweenButtons);
+    decorJson = WindowSessionImpl::setContainerButtonStyle(decorButtonStyle);
     uiContent->OnContainerModalEvent(DECOR_BUTTON_STYLE_CHANGE, decorJson.dump());
     decorButtonStyle_ = decorButtonStyle;
     return WMError::WM_OK;
@@ -6105,6 +6100,19 @@ WSError WindowSessionImpl::SetCurrentRotation(int32_t currentRotation)
     }
     property_->EditSessionInfo().currentRotation_ = currentRotation;
     return WSError::WS_OK;
+}
+
+//xzw
+nlohmann::json WindowSessionImpl::setContainerButtonStyle(const DecorButtonStyle& decorButtonStyle)
+{
+    nlohmann::json decorJson;
+    decorJson.emplace(BUTTON_BACKGROUND_CORNER_RADIUS, decorButtonStyle.buttonBackgroundCornerRadius);
+    decorJson.emplace(BUTTON_BACKGROUND_SIZE, decorButtonStyle.buttonBackgroundSize);
+    decorJson.emplace(BUTTON_ICON_SIZE, decorButtonStyle.buttonIconSize);
+    decorJson.emplace(CLOSE_BUTTON_RIGHT_MARGIN, decorButtonStyle.closeButtonRightMargin);
+    decorJson.emplace(BUTTON_COLOR_MODE, decorButtonStyle.colorMode);
+    decorJson.emplace(BUTTON_SPACING_BETWEEN, decorButtonStyle.spacingBetweenButtons);
+    return decorJson;
 }
 } // namespace Rosen
 } // namespace OHOS
