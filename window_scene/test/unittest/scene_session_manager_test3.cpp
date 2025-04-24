@@ -530,7 +530,6 @@ HWTEST_F(SceneSessionManagerTest3, GetSceneSessionVectorByTypeAndDisplayId, Test
  */
 HWTEST_F(SceneSessionManagerTest3, GetWindowLimits, TestSize.Level1)
 {
-    int ret = 0;
     SessionInfo info;
     info.abilityName_ = "test1";
     info.bundleName_ = "test2";
@@ -547,9 +546,15 @@ HWTEST_F(SceneSessionManagerTest3, GetWindowLimits, TestSize.Level1)
     
     int32_t windowId = 1;
     ssm_->sceneSessionMap_.insert({windowId, sceneSession});
-    ssm_->GetWindowLimits(windowId);
+    auto defaultUIType = ssm_->systemConfig_.windowUIType_;
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    auto ret = ssm_->GetWindowLimits(windowId);
     ssm_->sceneSessionMap_.erase(windowId);
-    ASSERT_EQ(ret, 0);
+    ssm_->systemConfig_.windowUIType_ = defaultUIType;
+    ASSERT_EQ(ret.maxHeight_, 1000);
+    ASSERT_EQ(ret.minHeight_, 500);
+    ASSERT_EQ(ret.maxWidth_, 1000);
+    ASSERT_EQ(ret.minWidth_, 500);
 }
 
 /**
