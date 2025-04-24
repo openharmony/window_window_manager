@@ -291,7 +291,7 @@ public:
     bool GetFocusableOnShow() const;
     bool GetExclusivelyHighlighted() const;
     void SetExclusivelyHighlighted(bool isExclusivelyHighlighted);
-    std::mutex windowMaskMutex_;
+    mutable std::mutex windowMaskMutex_;
 
 private:
     void setTouchHotAreasInner(const std::vector<Rect>& rects, std::vector<Rect>& touchHotAreas);

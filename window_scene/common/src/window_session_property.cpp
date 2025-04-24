@@ -932,6 +932,7 @@ bool WindowSessionProperty::MarshallingWindowMask(Parcel& parcel) const
         return false;
     }
     if (isShaped_) {
+        std::lock_guard<std::mutex> lock(windowMaskMutex_);
         if (!windowMask_->Marshalling(parcel)) {
             return false;
         }
@@ -1850,6 +1851,7 @@ void WindowSessionProperty::SetWindowMask(const std::shared_ptr<Media::PixelMap>
 
 std::shared_ptr<Media::PixelMap> WindowSessionProperty::GetWindowMask() const
 {
+    std::lock_guard<std::mutex> lock(windowMaskMutex_);
     return windowMask_;
 }
 
