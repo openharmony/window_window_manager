@@ -129,7 +129,14 @@ void JsWindowExtension::Init(const std::shared_ptr<AbilityRuntime::AbilityLocalR
         WLOGFE("Failed to get srcPath");
         return;
     }
-
+    if (Extension::abilityInfo_ == nullptr) {
+        WLOGFE("Failed to get abilityInfo");
+        return;
+    }
+    if (abilityInfo_ == nullptr) {
+        WLOGFE("Failed to get abilityInfo_");
+        return;
+    }
     std::string moduleName(Extension::abilityInfo_->moduleName);
     moduleName.append("::").append(abilityInfo_->name);
     WLOGI("JsWindowExtension::Init module:%{public}s,srcPath:%{public}s.", moduleName.c_str(), srcPath.c_str());
@@ -253,6 +260,10 @@ sptr<IRemoteObject> JsWindowExtension::OnConnect(const AAFwk::Want& want)
     WLOGFD("Create stub successfully!");
     WindowManager::GetInstance().NotifyWindowExtensionVisibilityChange(getprocpid(), getuid(), true);
     auto context = GetContext();
+    if (context == nullptr) {
+        WLOGFE("context is nullptr.");
+        return nullptr;
+    }
     AAFwk::AbilityManagerClient::GetInstance()->ScheduleCommandAbilityWindowDone(
         context->GetToken(), sessionInfo_, AAFwk::WIN_CMD_FOREGROUND, AAFwk::ABILITY_CMD_FOREGROUND);
     return stub_->AsObject();
@@ -278,6 +289,10 @@ void JsWindowExtension::OnDisconnect(const AAFwk::Want& want)
     WLOGI("called.");
     WindowManager::GetInstance().NotifyWindowExtensionVisibilityChange(getprocpid(), getuid(), false);
     auto context = GetContext();
+    if (context == nullptr) {
+        WLOGFE("context is nullptr.");
+        return;
+    }
     AAFwk::AbilityManagerClient::GetInstance()->ScheduleCommandAbilityWindowDone(
         context->GetToken(), sessionInfo_, AAFwk::WIN_CMD_DESTROY, AAFwk::ABILITY_CMD_DESTROY);
 }
