@@ -156,6 +156,12 @@ ohos_shared_library("screen_session_manager") {
     defines += [ "POWER_MANAGER_ENABLE" ]
   }
 
+  if (defined(global_parts_info) &&
+      defined(global_parts_info.powermgr_display_manager)) {
+    external_deps += [ "display_manager:displaymgr" ]
+    defines += [ "POWERMGR_DISPLAY_MANAGER_ENABLE" ]
+  }
+
   if (window_manager_feature_tp_enable) {
     defines += [ "TP_FEATURE_ENABLE" ]
   }

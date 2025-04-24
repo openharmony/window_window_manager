@@ -291,7 +291,7 @@ public:
     bool GetFocusableOnShow() const;
     bool GetExclusivelyHighlighted() const;
     void SetExclusivelyHighlighted(bool isExclusivelyHighlighted);
-    std::mutex windowMaskMutex_;
+    mutable std::mutex windowMaskMutex_;
 
 private:
     void setTouchHotAreasInner(const std::vector<Rect>& rects, std::vector<Rect>& touchHotAreas);
@@ -608,6 +608,10 @@ struct SystemSessionConfig : public Parcelable {
     FreeMultiWindowConfig freeMultiWindowConfig_;
     WindowUIType windowUIType_ = WindowUIType::INVALID_WINDOW;
     bool supportTypeFloatWindow_ = false;
+    // 4: default max mid scene num
+    uint32_t maxMidSceneNum_ = 4;
+    // Product configuration
+    bool supportFollowParentWindowLayout_ = false;
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
@@ -646,6 +650,12 @@ struct SystemSessionConfig : public Parcelable {
             return false;
         }
         if (!parcel.WriteBool(supportTypeFloatWindow_)) {
+            return false;
+        }
+        if (!parcel.WriteBool(maxMidSceneNum_)) {
+            return false;
+        }
+        if (!parcel.WriteBool(supportFollowParentWindowLayout_)) {
             return false;
         }
         return true;
@@ -691,6 +701,8 @@ struct SystemSessionConfig : public Parcelable {
         config->freeMultiWindowConfig_ = *freeMultiWindowConfig;
         config->windowUIType_ = static_cast<WindowUIType>(parcel.ReadUint8());
         config->supportTypeFloatWindow_ = parcel.ReadBool();
+        config->maxMidSceneNum_ = parcel.ReadUint32();
+        config->supportFollowParentWindowLayout_ = parcel.ReadBool();
         return config;
     }
 

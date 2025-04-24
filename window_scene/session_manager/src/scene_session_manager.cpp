@@ -597,6 +597,10 @@ void SceneSessionManager::ConfigWindowSceneXml()
     if (item.IsMap()) {
         ConfigStartingWindowAnimation(item);
     }
+    item = config["maxMidSceneNum"];
+    if (GetSingleIntItem(item, param)) {
+        systemConfig_.maxMidSceneNum_ = static_cast<uint32_t>(param);
+    }
     ConfigFreeMultiWindow();
     ConfigWindowSizeLimits();
     ConfigSnapshotScale();
@@ -1405,6 +1409,15 @@ void SceneSessionManager::ConfigSystemUIStatusBar(const WindowSceneConfig::Confi
         TLOGI(WmsLogTag::WMS_IMMS, "immersiveStatusBarContentColor %{public}s",
             appWindowSceneConfig_.systemUIStatusBarConfig_.immersiveStatusBarContentColor_.c_str());
     }
+}
+
+void SceneSessionManager::ConfigSupportFollowParentWindowLayout()
+{
+    TLOGI(WmsLogTag::WMS_SUB, "support");
+    auto task = [this] {
+        systemConfig_.supportFollowParentWindowLayout_ = true;
+    };
+    taskScheduler_->PostAsyncTask(task, "ConfigSupportFollowParentWindowLayout");
 }
 
 void SceneSessionManager::SetRootSceneContext(const std::weak_ptr<AbilityRuntime::Context>& contextWeak)
@@ -2734,11 +2747,16 @@ int32_t SceneSessionManager::StartUIAbilityBySCB(sptr<AAFwk::SessionInfo>& abili
 }
 
 int32_t SceneSessionManager::ChangeUIAbilityVisibilityBySCB(const sptr<SceneSession>& sceneSession,
-    bool visibility, bool isFromClient)
+    bool visibility, bool isNewWant, bool isFromClient)
 {
     auto abilitySessionInfo = SetAbilitySessionInfo(sceneSession);
     if (!isFromClient) {
         sceneSession->RemoveLifeCycleTask(LifeCycleTaskType::START);
+    }
+    if(visibility) {
+        abilitySessionInfo->isNewWant = isNewWant;
+        TLOGI(WmsLogTag::WMS_MAIN, "ChangUIAbilityVisibility isNewActive:%{public}d, isVisibility: %{public}d",
+            abilitySessionInfo->isNewWant, visibility);
     }
     return AAFwk::AbilityManagerClient::GetInstance()->ChangeUIAbilityVisibilityBySCB(abilitySessionInfo, visibility);
 }
@@ -11343,7 +11361,7 @@ WSError SceneSessionManager::GetIsLayoutFullScreen(bool& isLayoutFullScreen)
     return WSError::WS_OK;
 }
 
-WSError SceneSessionManager::UpdateSessionDisplayId(int32_t persistentId, uint64_t screenId, WSRect winRect)
+WSError SceneSessionManager::UpdateSessionDisplayId(int32_t persistentId, uint64_t screenId, WSRect winRect, bool isNotSessionRectWithDpiChange)
 {
     auto sceneSession = GetSceneSession(persistentId);
     if (!sceneSession) {
@@ -11360,7 +11378,7 @@ WSError SceneSessionManager::UpdateSessionDisplayId(int32_t persistentId, uint64
         sceneSession->SetTempRect(winRect);
     }
     sceneSession->NotifyDisplayMove(fromScreenId, screenId);
-    sceneSession->UpdateDensity();
+    sceneSession->UpdateDensity(isNotSessionRectWithDpiChange);
 
     // Find keyboard session.
     const auto& keyboardSessionVec = GetSceneSessionVectorByType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
