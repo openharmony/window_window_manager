@@ -97,17 +97,17 @@ constexpr const char* WM_ERROR_CODE_MSG_REPEAT_OPERATION = "Repeated operation. 
     "1. The window is already;"
     "2. The window is alerady in this state.";
 constexpr const char* WM_ERROR_CODE_MSG_STATE_ABNORMALLY = "This window state is abnormal. Possible causes: "
-    "1.The window is not created or destroyed.";
+    "The window is not created or destroyed.";
 constexpr const char* WM_ERROR_CODE_MSG_SYSTEM_ABNORMALLY = "This window manager service works abnormally.";
 constexpr const char* WM_ERROR_CODE_MSG_INVALID_CALLING = "Unauthorized operation. Possible causes: "
-    "1.Incorrect window type;";
+    "Incorrect window type;";
 constexpr const char* WM_ERROR_CODE_MSG_STAGE_ABNORMALLY = "This window stage is abnormal. Possible causes: "
-    "1.The window stage is not created or destroyed;";
+    "The window stage is not created or destroyed;";
 constexpr const char* WM_ERROR_CODE_MSG_CONTEXT_ABNORMALLY = "This window context is abnormal. Possible causes: "
-    "1.The context is null.";
+    "The context is null.";
 constexpr const char* WM_ERROR_CODE_MSG_START_ABILITY_FAILED = "Failed to start the ability.";
 constexpr const char* WM_ERROR_CODE_MSG_INVALID_DISPLAY = "The display device is abnormal. Possible causes: "
-    "1.The window container could not be found.";
+    "The window container could not be found.";
 constexpr const char* WM_ERROR_CODE_MSG_INVALID_PARENT = "The parent window is invalid.";
 constexpr const char* WM_ERROR_CODE_MSG_INVALID_OP_IN_CUR_STATUS =
     "The operation in the current window status is invalid.";
@@ -118,7 +118,7 @@ constexpr const char* WM_ERROR_CODE_MSG_PIP_INTERNAL_ERROR = "PiP internal error
     "1.Abnormality in the window relied on by pip, possibly an empty window;"
     "2.Abnormality in the pip controller.";
 constexpr const char* WM_ERROR_CODE_MSG_PIP_REPEAT_OPERATION = "Repeated PiP operation. Possible causes: "
-    "1.This pip has either been pulled up or has already been closed.;";
+    "This pip has either been pulled up or has already been closed.;";
 
 static std::map<WmErrorCode, const char*> WM_ERROR_CODE_TO_ERROR_MSG_MAP {
     {WmErrorCode::WM_OK,                              WM_ERROR_CODE_MSG_OK                       },
