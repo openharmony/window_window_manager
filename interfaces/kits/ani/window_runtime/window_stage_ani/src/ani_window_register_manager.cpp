@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "ani.h"
 #include "ani_window_register_manager.h"
 #include "singleton_container.h"
 #include "window_manager.h"
@@ -273,9 +274,25 @@ WmErrorCode AniWindowRegisterManager::ProcessWindowVisibilityChangeRegister(sptr
 }
 
 WmErrorCode AniWindowRegisterManager::ProcessWindowNoInteractionRegister(sptr<AniWindowListener> listener,
-    sptr<Window> window, bool isRegister, ani_env* env)
+    sptr<Window> window, bool isRegister, ani_env* env, ani_double timeout)
 {
-    return WmErrorCode::WM_OK;
+    if (window == nullptr) {
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    sptr<IWindowNoInteractionListener> thisListener(listener);
+    if (!isRegister) {
+        return WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterWindowNoInteractionListener(thisListener));
+    }
+    ani_long tmptimeout = static_cast<ani_long>(timeout);
+    constexpr ani_long secToMicrosecRatio = 1000;
+    constexpr ani_long noInteractionMax = LLONG_MAX / secToMicrosecRatio;
+    if (tmptimeout <= 0 || (tmptimeout > noInteractionMax)) {
+        TLOGE(WmsLogTag::DEFAULT, "invalid parameter: no-interaction-timeout %{public}lld is not in(0s~%{public}lld",
+            tmptimeout, noInteractionMax);
+        return WmErrorCode::WM_ERROR_INVALID_PARAM;
+    }
+    thisListener->SetTimeout(tmptimeout * secToMicrosecRatio);
+    return WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterWindowNoInteractionListener(thisListener));
 }
 
 WmErrorCode AniWindowRegisterManager::ProcessScreenshotRegister(sptr<AniWindowListener> listener,
@@ -365,7 +382,7 @@ bool AniWindowRegisterManager::IsCallbackRegistered(ani_env* env, std::string ty
 }
 
 WmErrorCode AniWindowRegisterManager::RegisterListener(sptr<Window> window, std::string type,
-    CaseType caseType, ani_env* env, ani_ref callback)
+    CaseType caseType, ani_env* env, ani_ref callback, ani_double timeout)
 {
     std::lock_guard<std::mutex> lock(mtx_);
     if (IsCallbackRegistered(env, type, callback)) {
@@ -393,7 +410,7 @@ WmErrorCode AniWindowRegisterManager::RegisterListener(sptr<Window> window, std:
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     windowManagerListener->SetMainEventHandler();
-    WmErrorCode ret = ProcessListener(listenerType, caseType, windowManagerListener, window, true, env);
+    WmErrorCode ret = ProcessListener(listenerType, caseType, windowManagerListener, window, true, env, timeout);
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI]Register type %{public}s failed", type.c_str());
         return ret;
@@ -405,7 +422,8 @@ WmErrorCode AniWindowRegisterManager::RegisterListener(sptr<Window> window, std:
 }
 
 WmErrorCode AniWindowRegisterManager::ProcessListener(RegisterListenerType registerListenerType, CaseType caseType,
-    const sptr<AniWindowListener>& windowManagerListener, const sptr<Window>& window, bool isRegister, ani_env* env)
+    const sptr<AniWindowListener>& windowManagerListener, const sptr<Window>& window, bool isRegister,
+    ani_env* env, ani_double timeout)
 {
     if (caseType == CaseType::CASE_WINDOW_MANAGER) {
         switch (static_cast<uint32_t>(registerListenerType)) {
@@ -454,7 +472,7 @@ WmErrorCode AniWindowRegisterManager::ProcessListener(RegisterListenerType regis
             case static_cast<uint32_t>(RegisterListenerType::WINDOW_VISIBILITY_CHANGE_CB):
                 return ProcessWindowVisibilityChangeRegister(windowManagerListener, window, isRegister, env);
             case static_cast<uint32_t>(RegisterListenerType::WINDOW_NO_INTERACTION_DETECT_CB):
-                return ProcessWindowNoInteractionRegister(windowManagerListener, window, isRegister, env);
+                return ProcessWindowNoInteractionRegister(windowManagerListener, window, isRegister, env, timeout);
             case static_cast<uint32_t>(RegisterListenerType::WINDOW_RECT_CHANGE_CB):
                 return ProcessWindowRectChangeRegister(windowManagerListener, window, isRegister, env);
             case static_cast<uint32_t>(RegisterListenerType::SUB_WINDOW_CLOSE_CB):
@@ -500,7 +518,7 @@ WmErrorCode AniWindowRegisterManager::UnregisterListener(sptr<Window> window, st
     RegisterListenerType listenerType = iterCallbackType->second;
     if (callback == nullptr) {
         for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
-            WmErrorCode ret = ProcessListener(listenerType, caseType, it->second, window, false, env);
+            WmErrorCode ret = ProcessListener(listenerType, caseType, it->second, window, false, env, 0);
             if (ret != WmErrorCode::WM_OK) {
                 TLOGE(WmsLogTag::DEFAULT, "[ANI]Unregister type %{public}s failed, no value", type.c_str());
                 return ret;
@@ -516,7 +534,7 @@ WmErrorCode AniWindowRegisterManager::UnregisterListener(sptr<Window> window, st
                 continue;
             }
             findFlag = true;
-            WmErrorCode ret = ProcessListener(listenerType, caseType, it->second, window, false, env);
+            WmErrorCode ret = ProcessListener(listenerType, caseType, it->second, window, false, env, 0);
             if (ret != WmErrorCode::WM_OK) {
                 TLOGE(WmsLogTag::DEFAULT, "[ANI]Unregister type %{public}s failed", type.c_str());
                 return ret;
