@@ -4111,8 +4111,11 @@ WindowMetaInfo Session::GetWindowMetaInfoForWindowInfo() const
     if (auto parentSession = GetParentSession()) {
         windowMetaInfo.parentWindowId = parentSession->GetWindowId();
     }
-    if (auto surfaceNodeId = GetSurfaceNodeId()) {
-        windowMetaInfo.surfaceNodeId = static_cast<uint64_t>(*surfaceNodeId);
+    if (auto surfaceNode = GetSurfaceNode()) {
+        windowMetaInfo.surfaceNodeId = static_cast<uint64_t>(surfaceNode->GetId());
+    }
+    if (auto leashWinSurfaceNode = GetLeashWinSurfaceNode()) {
+        windowMetaInfo.leashWinSurfaceNodeId = static_cast<uint64_t>(leashWinSurfaceNode->GetId());
     }
     auto property = GetSessionProperty();
     windowMetaInfo.isPrivacyMode = property->GetPrivacyMode() || property->GetSystemPrivacyMode();

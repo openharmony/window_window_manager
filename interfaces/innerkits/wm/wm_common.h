@@ -1694,6 +1694,7 @@ struct WindowMetaInfo : public Parcelable {
     WindowType windowType = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
     int32_t parentWindowId = -1;
     uint64_t surfaceNodeId = -1;
+    uint64_t leashWinSurfaceNodeId = -1;
     bool isPrivacyMode = false;
 
     bool Marshalling(Parcel& parcel) const override
@@ -1701,8 +1702,10 @@ struct WindowMetaInfo : public Parcelable {
         return parcel.WriteInt32(windowId) && parcel.WriteString(windowName) && parcel.WriteString(bundleName) &&
                parcel.WriteString(abilityName) && parcel.WriteInt32(appIndex) && parcel.WriteInt32(pid) &&
                parcel.WriteUint32(static_cast<uint32_t>(windowType)) && parcel.WriteInt32(parentWindowId) &&
-               parcel.WriteUint64(surfaceNodeId) && parcel.WriteBool(isPrivacyMode);
+               parcel.WriteUint64(surfaceNodeId) && parcel.WriteUint64(leashWinSurfaceNodeId) &&
+               parcel.WriteBool(isPrivacyMode);
     }
+
     static WindowMetaInfo* Unmarshalling(Parcel& parcel)
     {
         uint32_t windowTypeValue = 1;
@@ -1711,7 +1714,8 @@ struct WindowMetaInfo : public Parcelable {
             !parcel.ReadString(windowMetaInfo->bundleName) || !parcel.ReadString(windowMetaInfo->abilityName) ||
             !parcel.ReadInt32(windowMetaInfo->appIndex) || !parcel.ReadInt32(windowMetaInfo->pid) ||
             !parcel.ReadUint32(windowTypeValue) || !parcel.ReadInt32(windowMetaInfo->parentWindowId) ||
-            !parcel.ReadUint64(windowMetaInfo->surfaceNodeId) || !parcel.ReadBool(windowMetaInfo->isPrivacyMode)) {
+            !parcel.ReadUint64(windowMetaInfo->surfaceNodeId) || !parcel.ReadBool(windowMetaInfo->isPrivacyMode) ||
+            !parcel.ReadUint64(windowMetaInfo->leashWinSurfaceNodeId)) {
             delete windowMetaInfo;
             return nullptr;
         }
