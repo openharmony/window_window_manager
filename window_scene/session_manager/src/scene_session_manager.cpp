@@ -11623,7 +11623,7 @@ WMError SceneSessionManager::ListWindowInfo(const WindowInfoOption& windowInfoOp
                 continue;
             }
             if (!FilterForListWindowInfo(windowInfoOption, sceneSession)) {
-                TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: filter win: %{public}d",
+                TLOGND(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: filter win: %{public}d",
                     where, sceneSession->GetWindowId());
                 continue;
             }
