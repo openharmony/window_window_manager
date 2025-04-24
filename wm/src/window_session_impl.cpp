@@ -6102,7 +6102,6 @@ WSError WindowSessionImpl::SetCurrentRotation(int32_t currentRotation)
     return WSError::WS_OK;
 }
 
-//xzw
 nlohmann::json WindowSessionImpl::setContainerButtonStyle(const DecorButtonStyle& decorButtonStyle)
 {
     nlohmann::json decorJson;
