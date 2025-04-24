@@ -5806,7 +5806,7 @@ WSError SceneSession::NotifySessionExceptionInner(const sptr<AAFwk::SessionInfo>
             return WSError::WS_ERROR_NULLPTR;
         }
         if (SessionHelper::IsMainWindow(session->GetWindowType()) && !session->clientIdentityToken_.empty() &&
-            isFromClient && (abilitySessionInfo->errorReason != ERROR_REASON_LOW_MEMORY_KILL ||
+            isFromClient && (abilitySessionInfo->errorReason != ERROR_REASON_LOW_MEMORY_KILL &&
             session->clientIdentityToken_ != abilitySessionInfo->identityToken)) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s client exception not matched: %{public}s, %{public}s",
                 where, session->clientIdentityToken_.c_str(), abilitySessionInfo->identityToken.c_str());
@@ -6831,20 +6831,18 @@ void SceneSession::SetFollowParentRectFunc(NotifyFollowParentRectFunc&& func)
 WSError SceneSession::SetFollowParentWindowLayoutEnabled(bool isFollow)
 {
     auto property = GetSessionProperty();
-    if (!property) {
-        TLOGE(WmsLogTag::WMS_SUB, "property is null");
+    if (!property || property->GetSubWindowLevel() > 1) {
+        TLOGE(WmsLogTag::WMS_SUB, "property is null or not surppot more than 1 level window");
         return WSError::WS_ERROR_INVALID_OPERATION;
     }
-    // only support sub window and dialog
     if (!WindowHelper::IsSubWindow(property->GetWindowType()) &&
         !WindowHelper::IsDialogWindow(property->GetWindowType())) {
         TLOGE(WmsLogTag::WMS_SUB, "only sub window and dialog is valid");
         return WSError::WS_ERROR_INVALID_OPERATION;
     }
-    // only support first level window
-    if (property->GetSubWindowLevel() > 1) {
-        TLOGW(WmsLogTag::WMS_SUB, "not surppot more than 1 level window");
-        return WSError::WS_ERROR_INVALID_OPERATION;
+    if (!systemConfig_.supportFollowParentWindowLayout_) {
+        TLOGI(WmsLogTag::WMS_SUB, "not support device");
+        return WSError::WS_ERROR_DEVICE_NOT_SUPPORT;
     }
     PostTask([weakThis = wptr(this), isFollow = isFollow,  where = __func__] {
         auto session = weakThis.promote();
@@ -7788,22 +7786,21 @@ void SceneSession::NotifyKeyboardDidHideRegistered(bool registered)
     isKeyboardDidHideRegistered_.store(registered);
 }
 
-WSError SceneSession::UpdateDensity()
+WSError SceneSession::UpdateDensity(bool isNotSessionRectWithDpiChange)
 {
     if (systemConfig_.IsPcWindow() && WindowHelper::IsAppWindow(GetWindowType()) &&
         Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING && !isDefaultDensityEnabled_) {
-        UpdateNewSizeForPCWindow();
+        UpdateNewSizeForPCWindow(isNotSessionRectWithDpiChange);
     }
     SetTempRect({ 0, 0, 0, 0 });
     SaveLastDensity();
     return Session::UpdateDensity();
 }
 
-void SceneSession::UpdateNewSizeForPCWindow()
+void SceneSession::UpdateNewSizeForPCWindow(bool isNotSessionRectWithDpiChange)
 {
-    if (moveDragController_ && moveDragController_->IsMoveDragHotAreaCrossDisplay()) {
-        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "is move drag to hot area, do nothing.");
-        moveDragController_->SetMoveDragHotAreaCrossDisplay(false);
+    if (isNotSessionRectWithDpiChange) {
+        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "dip change do nothing.");
         return;
     }
 
