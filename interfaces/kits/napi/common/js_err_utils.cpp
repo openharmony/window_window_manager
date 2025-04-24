@@ -100,8 +100,7 @@ constexpr const char* WM_ERROR_CODE_MSG_STATE_ABNORMALLY = "This window state is
     "1.The window is not created or destroyed.";
 constexpr const char* WM_ERROR_CODE_MSG_SYSTEM_ABNORMALLY = "This window manager service works abnormally.";
 constexpr const char* WM_ERROR_CODE_MSG_INVALID_CALLING = "Unauthorized operation. Possible causes: "
-    "1.Incorrect window type;"
-    "2.The subwindow is distroyed or being destroyed.";
+    "1.Incorrect window type;";
 constexpr const char* WM_ERROR_CODE_MSG_STAGE_ABNORMALLY = "This window stage is abnormal. Possible causes: "
     "1.The window stage is not created or destroyed;";
 constexpr const char* WM_ERROR_CODE_MSG_CONTEXT_ABNORMALLY = "This window context is abnormal. Possible causes: "
@@ -116,9 +115,8 @@ constexpr const char* WM_ERROR_CODE_MSG_PIP_DESTROY_FAILED = "Failed to destroy 
 constexpr const char* WM_ERROR_CODE_MSG_PIP_STATE_ABNORMALLY = "The PiP window state is abnormal.";
 constexpr const char* WM_ERROR_CODE_MSG_PIP_CREATE_FAILED = "Failed to create the PiP window.";
 constexpr const char* WM_ERROR_CODE_MSG_PIP_INTERNAL_ERROR = "PiP internal error. Possible causes: "
-    "1.Internal error in napi, abnormality in the pip task framework;"
-    "2.Abnormality in the window relied on by pip, possibly an empty window;"
-    "3.Abnormality in the pip controller.";
+    "1.Abnormality in the window relied on by pip, possibly an empty window;"
+    "2.Abnormality in the pip controller.";
 constexpr const char* WM_ERROR_CODE_MSG_PIP_REPEAT_OPERATION = "Repeated PiP operation. Possible causes: "
     "1.This pip has either been pulled up or has already been closed.;";
 
