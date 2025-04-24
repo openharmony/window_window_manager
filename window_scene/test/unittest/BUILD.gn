@@ -22,8 +22,6 @@ group("unittest") {
     ":ws_anomaly_detection_test",
     ":ws_dfx_hisysevent_test",
     ":ws_distributed_client_test",
-    ":ws_extension_session_manager_test",
-    ":ws_extension_session_test",
     ":ws_ffrt_helper_test",
     ":ws_hidumper_controller_test",
     ":ws_keyboard_session_test",
@@ -321,23 +319,6 @@ ohos_unittest("ws_scene_persistent_storage_test") {
     "c_utils:utils",
     "hilog:libhilog",
     "preferences:native_preferences",
-  ]
-}
-
-ohos_unittest("ws_extension_session_test") {
-  module_out_path = module_out_path
-
-  sources = [ "extension_session_test.cpp" ]
-  include_dirs = [ "${window_base_path}/window_scene/session/host/include" ]
-
-  deps = [ ":ws_unittest_common" ]
-  defines = [ "ACCESSIBILITY_MOCK" ]
-
-  external_deps = [
-    "ability_base:session_info",
-    "ability_base:want",
-    "c_utils:utils",
-    "hilog:libhilog",
   ]
 }
 
@@ -1420,19 +1401,6 @@ ohos_unittest("ws_window_event_channel_proxy_mock_test") {
     "ENABLE_MOCK_WRITE_STRING_VECTOR",
     "ENABLE_MOCK_READ_INT64",
   ]
-
-  deps = [ ":ws_unittest_common" ]
-
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-  ]
-}
-
-ohos_unittest("ws_extension_session_manager_test") {
-  module_out_path = module_out_path
-
-  sources = [ "extension_session_manager_test.cpp" ]
 
   deps = [ ":ws_unittest_common" ]
 
