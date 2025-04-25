@@ -14,10 +14,11 @@
  */
 
 #include "session/host/include/keyboard_session.h"
+
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session_helper.h"
-#include <ui/rs_surface_node.h>
 #include <hitrace_meter.h>
+#include <ui/rs_surface_node.h>
 #include "window_helper.h"
 #include "window_manager_hilog.h"
 
@@ -545,39 +546,38 @@ void KeyboardSession::NotifySessionRectChange(const WSRect& rect,
     SizeChangeReason reason, DisplayId displayId, const RectAnimationConfig& rectAnimationConfig)
 {
     PostTask([weakThis = wptr(this), rect, reason, displayId, rectAnimationConfig, where = __func__] {
-                auto session = weakThis.promote();
-                if (session == nullptr) {
-                    TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s session is null", where);
-                    return;
-                }
-                uint32_t screenWidth = 0;
-                uint32_t screenHeight = 0;
-                auto sessionProperty = session->GetSessionProperty();
-                bool ret = session->GetScreenWidthAndHeightFromClient(sessionProperty, screenWidth, screenHeight);
-                if (!ret) {
-                    TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s get screen size failed", where);
-                    return;
-                }
-                bool isLandscape = screenWidth > screenHeight;
-                KeyboardLayoutParams params = sessionProperty->GetKeyboardLayoutParams();
-                if (isLandscape) {
-                    params.LandscapeKeyboardRect_.posX_ = rect.posX_;
-                    params.LandscapeKeyboardRect_.posY_ = rect.posY_;
-                    params.LandscapePanelRect_.posX_ = rect.posX_;
-                    params.LandscapePanelRect_.posY_ = rect.posY_;
-                } else {
-                    params.PortraitKeyboardRect_.posX_ = rect.posX_;
-                    params.PortraitKeyboardRect_.posY_ = rect.posY_;
-                    params.PortraitPanelRect_.posX_ = rect.posX_;
-                    params.PortraitPanelRect_.posY_ = rect.posY_;
-                }
-                TLOGD(WmsLogTag::WMS_KEYBOARD,
-                    "isLandscape:%{public}d, landRect:%{public}s, portraitRect:%{public}s",
-                    isLandscape,
-                    params.LandscapeKeyboardRect_.ToString().c_str(),
-                    params.PortraitKeyboardRect_.ToString().c_str());
-                session->AdjustKeyboardLayout(params);
-             }, __func__ + GetRectInfo(rect));
+        auto session = weakThis.promote();
+        if (session == nullptr) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s session is null", where);
+            return;
+        }
+        uint32_t screenWidth = 0;
+        uint32_t screenHeight = 0;
+        auto sessionProperty = session->GetSessionProperty();
+        bool ret = session->GetScreenWidthAndHeightFromClient(sessionProperty, screenWidth, screenHeight);
+        if (!ret) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s get screen size failed", where);
+            return;
+        }
+        bool isLandscape = screenWidth > screenHeight;
+        KeyboardLayoutParams params = sessionProperty->GetKeyboardLayoutParams();
+        if (isLandscape) {
+            params.LandscapeKeyboardRect_.posX_ = rect.posX_;
+            params.LandscapeKeyboardRect_.posY_ = rect.posY_;
+            params.LandscapePanelRect_.posX_ = rect.posX_;
+            params.LandscapePanelRect_.posY_ = rect.posY_;
+        } else {
+            params.PortraitKeyboardRect_.posX_ = rect.posX_;
+            params.PortraitKeyboardRect_.posY_ = rect.posY_;
+            params.PortraitPanelRect_.posX_ = rect.posX_;
+            params.PortraitPanelRect_.posY_ = rect.posY_;
+        }
+        TLOGD(WmsLogTag::WMS_KEYBOARD,"isLandscape:%{public}d, landRect:%{public}s, portraitRect:%{public}s",
+            isLandscape,
+            params.LandscapeKeyboardRect_.ToString().c_str(),
+            params.PortraitKeyboardRect_.ToString().c_str());
+        session->AdjustKeyboardLayout(params);
+    }, __func__ + GetRectInfo(rect));
 }
 
 // Use focused session id when calling session id is invalid.
@@ -908,23 +908,23 @@ void KeyboardSession::SetSkipEventOnCastPlus(bool isSkip)
 WSError KeyboardSession::UpdateSizeChangeReason(SizeChangeReason reason)
 {
     PostTask([weakThis = wptr(this), reason, where = __func__]() {
-                auto keyboardSession = weakThis.promote();
-                if (keyboardSession == nullptr) {
-                    TLOGE(WmsLogTag::WMS_KEYBOARD, "%{public}s session is null", where);
-                    return WSError::WS_ERROR_DESTROYED_OBJECT;
-                }
-                if (reason == SizeChangeReason::DRAG_START || reason == SizeChangeReason::DRAG_MOVE ||
-                    reason == SizeChangeReason::DRAG_END || reason == SizeChangeReason::UNDEFINED) {
-                    auto panelSession = keyboardSession->GetKeyboardPanelSession();
-                    if (panelSession != nullptr) {
-                        panelSession->UpdateSizeChangeReason(reason);
-                    }
-                }
-                TLOGD(WmsLogTag::WMS_KEYBOARD, "%{public}s Id: %{public}d, reason: %{public}d",
-                    where, keyboardSession->GetPersistentId(), static_cast<int32_t>(reason));
-                keyboardSession->SceneSession::UpdateSizeChangeReason(reason);
-                return WSError::WS_OK;
-             }, __func__);
+        auto keyboardSession = weakThis.promote();
+        if (keyboardSession == nullptr) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "%{public}s session is null", where);
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        if (reason == SizeChangeReason::DRAG_START || reason == SizeChangeReason::DRAG_MOVE ||
+            reason == SizeChangeReason::DRAG_END || reason == SizeChangeReason::UNDEFINED) {
+            auto panelSession = keyboardSession->GetKeyboardPanelSession();
+            if (panelSession != nullptr) {
+                panelSession->UpdateSizeChangeReason(reason);
+            }
+        }
+        TLOGD(WmsLogTag::WMS_KEYBOARD, "%{public}s Id: %{public}d, reason: %{public}d",
+            where, keyboardSession->GetPersistentId(), static_cast<int32_t>(reason));
+        keyboardSession->SceneSession::UpdateSizeChangeReason(reason);
+        return WSError::WS_OK;
+    }, __func__);
     return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen
