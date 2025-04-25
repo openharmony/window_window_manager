@@ -13592,7 +13592,6 @@ WSError SceneSessionManager::SetAppForceLandscapeConfig(const std::string& bundl
             auto& session = iter.second;
             if (session && session->GetSessionInfo().bundleName_ == bundleName) {
                 session->NotifyAppForceLandscapeConfigUpdated();
-                break;
             }
         }
     }
