@@ -140,9 +140,6 @@ config("dms_systemtest_common_public_config") {
     "../../../interfaces/innerkits/wm",
     "../../common/utils/include",
     "../../../utils/include",
-
-    # RSSurface
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client",
   ]
 }
 
@@ -173,6 +170,7 @@ ohos_static_library("dms_systemtest_common") {
     "access_token:libaccesstoken_sdk",
     "access_token:libnativetoken",
     "access_token:libtoken_setproc",
+    "graphic_2d:librender_service_client",
     "graphic_surface:surface",
     "input:libmmi-client",
     "ipc:ipc_single",

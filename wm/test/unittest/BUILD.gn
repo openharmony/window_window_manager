@@ -682,7 +682,10 @@ ohos_unittest("wm_window_adapter_test") {
     "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
   ]
 
-  external_deps = [ "c_utils:utils" ]
+  external_deps = [
+    "c_utils:utils",
+    "safwk:system_ability_fwk",
+  ]
 }
 
 ohos_unittest("wm_pattern_detach_callback_test") {
