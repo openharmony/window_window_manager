@@ -16,8 +16,8 @@
 #include "session/host/include/keyboard_session.h"
 
 #include <hitrace_meter.h>
-#include "session_helper.h"
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
+#include "session_helper.h"
 #include <ui/rs_surface_node.h>
 #include "window_helper.h"
 #include "window_manager_hilog.h"
