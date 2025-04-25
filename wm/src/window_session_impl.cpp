@@ -65,7 +65,6 @@ constexpr int32_t API_VERSION_18 = 18;
 constexpr uint32_t API_VERSION_MOD = 1000;
 constexpr uint32_t LIFECYCLE_ISOLATE_VERSION = 18;
 constexpr uint32_t INVALID_TARGET_API_VERSION = 0;
-
 /*
  * DFX
  */
