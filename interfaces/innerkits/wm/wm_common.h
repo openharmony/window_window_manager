@@ -1692,7 +1692,7 @@ struct WindowMetaInfo : public Parcelable {
     int32_t appIndex = 0;
     int32_t pid = -1;
     WindowType windowType = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
-    int32_t parentWindowId = -1;
+    uint32_t parentWindowId = INVALID_WINDOW_ID;
     uint64_t surfaceNodeId = 0;
     uint64_t leashWinSurfaceNodeId = 0;
     bool isPrivacyMode = false;
@@ -1701,7 +1701,7 @@ struct WindowMetaInfo : public Parcelable {
     {
         return parcel.WriteInt32(windowId) && parcel.WriteString(windowName) && parcel.WriteString(bundleName) &&
                parcel.WriteString(abilityName) && parcel.WriteInt32(appIndex) && parcel.WriteInt32(pid) &&
-               parcel.WriteUint32(static_cast<uint32_t>(windowType)) && parcel.WriteInt32(parentWindowId) &&
+               parcel.WriteUint32(static_cast<uint32_t>(windowType)) && parcel.WriteUint32(parentWindowId) &&
                parcel.WriteUint64(surfaceNodeId) && parcel.WriteUint64(leashWinSurfaceNodeId) &&
                parcel.WriteBool(isPrivacyMode);
     }
@@ -1713,9 +1713,10 @@ struct WindowMetaInfo : public Parcelable {
         if (!parcel.ReadInt32(windowMetaInfo->windowId) || !parcel.ReadString(windowMetaInfo->windowName) ||
             !parcel.ReadString(windowMetaInfo->bundleName) || !parcel.ReadString(windowMetaInfo->abilityName) ||
             !parcel.ReadInt32(windowMetaInfo->appIndex) || !parcel.ReadInt32(windowMetaInfo->pid) ||
-            !parcel.ReadUint32(windowTypeValue) || !parcel.ReadInt32(windowMetaInfo->parentWindowId) ||
-            !parcel.ReadUint64(windowMetaInfo->surfaceNodeId) || !parcel.ReadBool(windowMetaInfo->isPrivacyMode) ||
-            !parcel.ReadUint64(windowMetaInfo->leashWinSurfaceNodeId)) {
+            !parcel.ReadUint32(windowTypeValue) || !parcel.ReadUint32(windowMetaInfo->parentWindowId) ||
+            !parcel.ReadUint64(windowMetaInfo->surfaceNodeId) ||
+            !parcel.ReadUint64(windowMetaInfo->leashWinSurfaceNodeId) ||
+            !parcel.ReadBool(windowMetaInfo->isPrivacyMode)) {
             delete windowMetaInfo;
             return nullptr;
         }
