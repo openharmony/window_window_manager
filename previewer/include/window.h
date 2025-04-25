@@ -442,7 +442,7 @@ public:
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
-    
+
     /**
      * @brief Get sub window zLevel
      *
@@ -542,13 +542,6 @@ public:
      * @return WM_OK means get success, others means get failed.
      */
     virtual WMError IsWindowHighlighted(bool& highlighted) const { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
-
-    /**
-     * @brief Get the api compatible version.
-     *
-     * @return Api compatible version
-     */
-    virtual uint32_t GetApiCompatibleVersion() const { return 0; }
 
     /**
      * @brief Get the root host window type of UIExtension.
