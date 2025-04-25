@@ -521,7 +521,7 @@ __attribute__((no_sanitize("cfi")))
         TLOGE(WmsLogTag::DEFAULT, "[ANI] get ctor fail %{public}u", ret);
         return nullptr;
     }
-    env->Object_CallMethod_Void(obj, setObjFunc, aniWindow.get());
+    env->Object_CallMethod_Void(obj, setObjFunc, reinterpret_cast<ani_long>(aniWindow.get()));
     localObjs.insert(std::pair(obj, aniWindow.release()));
     return obj;
 }
@@ -957,8 +957,8 @@ static ani_int WindowSetWindowDecorHeight(ani_env* env, ani_object obj, ani_long
 static ani_object WindowGetWindowProperties(ani_env* env, ani_object obj, ani_long nativeObj)
 {
     using namespace OHOS::Rosen;
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    TLOGD(WmsLogTag::DEFAULT, "[ANI], %{public}p", aniWindow);
     if (aniWindow == nullptr || aniWindow->GetWindow() == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] windowToken_ is nullptr");
         return AniWindowUtils::CreateAniUndefined(env);
