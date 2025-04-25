@@ -567,6 +567,7 @@ protected:
     float lastSystemDensity_ = UNDEFINED_DENSITY;
     WSError NotifySystemDensityChange(float density);
     void RegisterWindowInspectorCallback();
+    uint32_t GetTargetAPIVersionByApplicationInfo();
 
     /*
      * Window Input Event
