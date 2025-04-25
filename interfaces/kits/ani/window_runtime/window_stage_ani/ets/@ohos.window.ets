@@ -17,6 +17,7 @@ import { LocalStorage } from '@ohos.arkui.stateManagement';
 import { UIContext } from '@ohos.arkui.UIContext';
 import BaseContext from 'application.BaseContext';
 import hilog from '@ohos.hilog';
+import { ColorMetrics } from '@ohos.arkui.node';
 export type AsyncCallbackVoid = (err: BusinessError) => void;
 export type WindowEventCallback = (data: window.WindowEventType) => void;
 export type WindowSizeCallback = (data: window.Size) => void;
@@ -1268,13 +1269,11 @@ export class WindowInternal implements Window {
     private native getWindowAvoidAreaSync(nativeObj: long, type: int): AvoidArea;
     private native setWaterMarkFlagSync(nativeObj: long, enable: boolean): void;
     private native keepKeyboardOnFocusSync(nativeObj: long, enable: boolean): void;
-    private native onSync(nativeObj: long, type: 'windowEvent' | 'windowSizeChange' | 'windowStatusChange' |
-        'keyboardHeightChange' | 'keyboardDidShow' | 'keyboardDidHide',
+    private native onSync(nativeObj: long, type: string,
         callback: WindowEventCallback | WindowSizeCallback | WindowStatusCallback | KeyboardHeightChangeCallback |
         KeyboardDidShowOrHideCallback): void;
-    private native offSync(nativeObj: long, type: 'windowEvent' | 'windowSizeChange' | 'windowStatusChange' |
-        'keyboardHeightChange' | 'keyboardDidShow' | 'keyboardDidHide',
-        callback: WindowEventCallback | WindowSizeCallback | WindowStatusCallback | KeyboardHeightChangeCallback |
+    private native offSync(nativeObj: long, type: string,
+        callback?: WindowEventCallback | WindowSizeCallback | WindowStatusCallback | KeyboardHeightChangeCallback |
         KeyboardDidShowOrHideCallback): void;
 
     public resize(width: double, height: double): Promise<void> {
@@ -1326,8 +1325,10 @@ export class WindowInternal implements Window {
        return ret;
     }
 
-    public setWindowBackgroundColor(color: string): void {
-       this.setWindowBackgroundColor(this.nativeObj, color);
+    public setWindowBackgroundColor(color: string | ColorMetrics): void {
+       if (color instanceof string) {
+         this.setWindowBackgroundColor(this.nativeObj, color as string);
+       }
     }
 
     public setBackgroundColor(color: string): Promise<void> {
@@ -1696,20 +1697,38 @@ export class WindowInternal implements Window {
       this.keepKeyboardOnFocusSync(this.nativeObj, keepKeyboardFlag);
     }
 
-    public on(type: 'windowEvent' | 'windowSizeChange' | 'windowStatusChange' |
-        'keyboardHeightChange' | 'keyboardDidShow' | 'keyboardDidHide',
-        callback: WindowEventCallback | WindowSizeCallback | WindowStatusCallback |
-        KeyboardHeightChangeCallback | KeyboardDidShowOrHideCallback,
-        callbackForTimeout?:Callback<void>): void {
-        this.onSync(this.nativeObj, type, callback);
+    public on<T>(type: string, callback: Callback<T>): void {
+      this.onSync(this.nativeObj, type, callback as WindowSizeCallback);
     }
+    //public on(type: 'windowEvent', callback: Callback<WindowEventType>): void {
+    //  this.onSync(this.nativeObj, type, callback);
+    //}
+    //public on(type: 'windowStatusChange', callback: Callback<WindowStatusType>): void {
+    //  this.onSync(this.nativeObj, type, callback);
+    //}
+    //public on(type: 'windowEvent' | 'windowStatusChange' |
+    //    'keyboardHeightChange' | 'keyboardDidShow' | 'keyboardDidHide',
+    //    callback: WindowEventCallback | WindowSizeCallback | WindowStatusCallback |
+    //    KeyboardHeightChangeCallback | KeyboardDidShowOrHideCallback,
+    //    callbackForTimeout?:Callback<void>): void {
+    //    this.onSync(this.nativeObj, type, callback);
+    //}
 
-    public off(type: 'windowEvent' | 'windowSizeChange' | 'windowStatusChange' |
-        'keyboardHeightChange' | 'keyboardDidShow' | 'keyboardDidHide',
-        callback: WindowEventCallback | WindowSizeCallback | WindowStatusCallback |
-        KeyboardHeightChangeCallback | KeyboardDidShowOrHideCallback): void {
-        this.offSync(this.nativeObj, type, callback);
+    public off<T>(type: string, callback?: Callback<T>): void {
+        this.offSync(this.nativeObj, type, callback as WindowEventCallback);
     }
+    //public off(type: 'windowEvent', callback?: Callback<WindowEventType>): void {
+    //    this.offSync(this.nativeObj, type, callback);
+    //}
+    //public off(type: 'windowStatusChange', callback?: Callback<WindowStatusType>): void {
+    //    this.offSync(this.nativeObj, type, callback);
+    //}
+    //public off(type: 'windowEvent' | 'windowStatusChange' |
+    //    'keyboardHeightChange' | 'keyboardDidShow' | 'keyboardDidHide',
+    //    callback?: WindowEventCallback | WindowSizeCallback | WindowStatusCallback |
+    //    KeyboardHeightChangeCallback | KeyboardDidShowOrHideCallback): void {
+    //    this.offSync(this.nativeObj, type, callback);
+    //}
 }
 
 export interface Window {
@@ -1718,7 +1737,7 @@ export interface Window {
     resize(width: double, height: double, callback: AsyncCallback<void>): void;
     moveWindowTo(x: double, y: double, callback: AsyncCallback<void>): void;
     getWindowDecorHeight(): double;
-    setWindowBackgroundColor(color: string): void;
+    setWindowBackgroundColor(color: string | ColorMetrics): void;
     setBackgroundColor(color: string): Promise<void>;
     setBackgroundColor(color: string, callback: AsyncCallback<void>): void;
     setImmersiveModeEnabledState(enable: boolean): void;
@@ -1756,15 +1775,21 @@ export interface Window {
     setWaterMarkFlag(enable: boolean): Promise<void>;
     setWaterMarkFlag(enable: boolean, callback: AsyncCallback<void>): void;
     keepKeyboardOnFocus(enable: boolean): void;
-    on(type: 'windowEvent' | 'windowSizeChange' | 'windowStatusChange' |
-        'keyboardHeightChange' | 'keyboardDidShow' | 'keyboardDidHide',
-        callback: WindowEventCallback | WindowSizeCallback | WindowStatusCallback |
-        KeyboardHeightChangeCallback | KeyboardDidShowOrHideCallback,
-        callbackForTimeout?:Callback<void>): void;
-    off(type: 'windowEvent' | 'windowSizeChange' | 'windowStatusChange' |
-        'keyboardHeightChange' | 'keyboardDidShow' | 'keyboardDidHide',
-        callback: WindowEventCallback | WindowSizeCallback | WindowStatusCallback |
-        KeyboardHeightChangeCallback | KeyboardDidShowOrHideCallback): void;
+    on<T>(type: string, callback: Callback<T>): void;
+    off<T>(type: string, callback?: Callback<T>): void;
+    //on(type: 'windowEvent', callback: Callback<WindowEventType>): void;
+    //off(type: 'windowEvent', callback?: Callback<WindowEventType>): void;
+    //on(type: 'windowStatusChange', callback: Callback<WindowStatusType>): void;
+    //off(type: 'windowStatusChange', callback?: Callback<WindowStatusType>): void;
+    //on(type: 'windowEvent' | 'windowStatusChange' |
+    //    'keyboardHeightChange' | 'keyboardDidShow' | 'keyboardDidHide',
+    //    callback: WindowEventCallback | WindowSizeCallback | WindowStatusCallback |
+    //    KeyboardHeightChangeCallback | KeyboardDidShowOrHideCallback,
+    //    callbackForTimeout?:Callback<void>): void;
+    //off(type: 'windowEvent' | 'windowStatusChange' |
+    //    'keyboardHeightChange' | 'keyboardDidShow' | 'keyboardDidHide',
+    //    callback?: WindowEventCallback | WindowSizeCallback | WindowStatusCallback |
+    //    KeyboardHeightChangeCallback | KeyboardDidShowOrHideCallback): void;
 }
 
 export native function CreateWindowStage(scene: long): WindowStageInternal;
