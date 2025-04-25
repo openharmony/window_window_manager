@@ -4098,6 +4098,7 @@ WindowLayoutInfo Session::GetWindowLayoutInfoForWindowInfo() const
     }
     windowLayoutInfo.rect = { sessionGlobalRect.posX_, sessionGlobalRect.posY_,
                               sessionGlobalRect.width_, sessionGlobalRect.height_};
+    windowLayoutInfo.zOrder = GetZOrder();
     return windowLayoutInfo;
 }
 
@@ -4114,6 +4115,18 @@ WindowMetaInfo Session::GetWindowMetaInfoForWindowInfo() const
     windowMetaInfo.abilityName = GetSessionInfo().abilityName_;
     windowMetaInfo.appIndex = GetSessionInfo().appIndex_;
     windowMetaInfo.pid = GetCallingPid();
+    windowMetaInfo.windowType = GetWindowType();
+    if (auto parentSession = GetParentSession()) {
+        windowMetaInfo.parentWindowId = parentSession->GetWindowId();
+    }
+    if (auto surfaceNode = GetSurfaceNode()) {
+        windowMetaInfo.surfaceNodeId = static_cast<uint64_t>(surfaceNode->GetId());
+    }
+    if (auto leashWinSurfaceNode = GetLeashWinSurfaceNode()) {
+        windowMetaInfo.leashWinSurfaceNodeId = static_cast<uint64_t>(leashWinSurfaceNode->GetId());
+    }
+    auto property = GetSessionProperty();
+    windowMetaInfo.isPrivacyMode = property->GetPrivacyMode() || property->GetSystemPrivacyMode();
     return windowMetaInfo;
 }
 

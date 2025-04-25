@@ -11982,13 +11982,17 @@ WMError SceneSessionManager::ListWindowInfo(const WindowInfoOption& windowInfoOp
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
-    return taskScheduler_->PostSyncTask([this, windowInfoOption, &infos] {
+    const char* const where = __func__;
+    return taskScheduler_->PostSyncTask([this, windowInfoOption, &infos, where] {
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (const auto& [_, sceneSession] : sceneSessionMap_) {
             if (sceneSession == nullptr) {
+                TLOGNW(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: session is null", where);
                 continue;
             }
             if (!FilterForListWindowInfo(windowInfoOption, sceneSession)) {
+                TLOGND(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: filter win: %{public}d",
+                    where, sceneSession->GetWindowId());
                 continue;
             }
             auto windowInfo = sptr<WindowInfo>::MakeSptr();
@@ -12016,33 +12020,42 @@ bool SceneSessionManager::FilterForListWindowInfo(const WindowInfoOption& window
     DisplayId displayId = windowInfoOption.displayId;
     if (PcFoldScreenManager::GetInstance().IsHalfFoldedOnMainDisplay(sceneSession->GetSessionProperty()->GetDisplayId())) {
         if (displayId == DEFAULT_DISPLAY_ID && sceneSession->GetSessionGlobalRect().posY_ >= GetFoldLowerScreenPosY()) {
+            TLOGD(WmsLogTag::WMS_ATTRIBUTE, "fold lower screen win: %{public}d", sceneSession->GetWindowId());
             return false;
         }
         if (displayId == VIRTUAL_DISPLAY_ID) {
             if (sceneSession->GetSessionGlobalRect().posY_ +
                 sceneSession->GetSessionGlobalRect().height_ < GetFoldLowerScreenPosY()) {
+                TLOGD(WmsLogTag::WMS_ATTRIBUTE, "fold virtual screen win: %{public}d", sceneSession->GetWindowId());
                 return false;
             }
             displayId = DEFAULT_DISPLAY_ID;
         }
     }
     if (displayId != DISPLAY_ID_INVALID && sceneSession->GetSessionProperty()->GetDisplayId() != displayId) {
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "win: %{public}d, target displayId: %{public}" PRIu64,
+            sceneSession->GetWindowId(), displayId);
         return false;
     }
-    if (windowInfoOption.windowId != 0 && sceneSession->GetWindowId() !=windowInfoOption.windowId) {
+    if (windowInfoOption.windowId != 0 && sceneSession->GetWindowId() != windowInfoOption.windowId) {
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "win: %{public}d, target winId: %{public}d",
+            sceneSession->GetWindowId(), windowInfoOption.windowId);
         return false;
     }
     if (IsChosenWindowOption(windowInfoOption.windowInfoFilterOption, WindowInfoFilterOption::EXCLUDE_SYSTEM) &&
         sceneSession->GetSessionInfo().isSystem_) {
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "exclude system win: %{public}d", sceneSession->GetWindowId());
         return false;
     }
     if (IsChosenWindowOption(windowInfoOption.windowInfoFilterOption, WindowInfoFilterOption::VISIBLE) &&
         (sceneSession->GetVisibilityState() == WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION ||
         sceneSession->GetVisibilityState() == WINDOW_LAYER_STATE_MAX)) {
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "exclude unvisible win: %{public}d", sceneSession->GetWindowId());
         return false;
     }
     if (IsChosenWindowOption(windowInfoOption.windowInfoFilterOption, WindowInfoFilterOption::FOREGROUND) &&
         !IsSessionVisibleForeground(sceneSession)) {
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "exclude background win: %{public}d", sceneSession->GetWindowId());
         return false;
     }
     return true;
