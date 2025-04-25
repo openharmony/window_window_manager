@@ -1561,6 +1561,7 @@ HWTEST_F(SceneSessionManagerTest12, UpdateHighlightStatus01, TestSize.Level1)
     ssm_->UpdateHighlightStatus(DEFAULT_DISPLAY_ID, preSceneSession, currSceneSession, false);
     ASSERT_EQ(ssm_->highlightIds_.size(), 1);
     currSceneSession->property_->SetWindowType(WindowType::BELOW_APP_SYSTEM_WINDOW_BASE);
+    currSceneSession->property_->SetPersistentId(3);
     ssm_->UpdateHighlightStatus(DEFAULT_DISPLAY_ID, preSceneSession, currSceneSession, false);
     ASSERT_EQ(ssm_->highlightIds_.size(), 2);
 }
