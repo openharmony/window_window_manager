@@ -72,10 +72,15 @@ public:
     WSError ChangeKeyboardViewMode(KeyboardViewMode mode) override;
     void SetKeyboardViewModeChangeListener(const NotifyKeyboarViewModeChangeFunc& func) override;
     void SetSkipSelfWhenShowOnVirtualScreen(bool isSkip) override;
+    WSError UpdateSizeChangeReason(SizeChangeReason reason) override;
     void SetSkipEventOnCastPlus(bool isSkip) override;
 
 protected:
     void EnableCallingSessionAvoidArea() override;
+    void NotifySessionRectChange(const WSRect& rect,
+        SizeChangeReason reason = SizeChangeReason::UNDEFINED,
+        DisplayId displayId = DISPLAY_ID_INVALID,
+        const RectAnimationConfig& rectAnimationConfig = {}) override;        
     void RestoreCallingSession(uint32_t callingId, const std::shared_ptr<RSTransaction>& rsTransaction) override;
 
 private:
@@ -100,6 +105,7 @@ private:
         bool isShow);
     void NotifySystemKeyboardAvoidChange(SystemKeyboardAvoidChangeReason reason);
     void NotifyRootSceneOccupiedAreaChange(const sptr<OccupiedAreaChangeInfo>& info);
+    void SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool needFlush = true) override;
     bool IsNeedRaiseSubWindow(const sptr<SceneSession>& callingSession, const WSRect& callingSessionRect);
 
     sptr<KeyboardSessionCallback> keyboardCallback_ = nullptr;
