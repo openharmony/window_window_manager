@@ -10649,6 +10649,7 @@ void SceneSessionManager::UpdateDarkColorModeToRS()
     std::string colorMode = config->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
     bool isDark = (colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_DARK);
     bool ret = RSInterfaces::GetInstance().SetGlobalDarkColorMode(isDark);
+    darkMode_.store(isDark);
     TLOGI(WmsLogTag::DEFAULT, "colorMode: %{public}s, ret: %{public}d", colorMode.c_str(), ret);
 }
 
