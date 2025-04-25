@@ -122,7 +122,8 @@ void FoldScreenController::RecoverDisplayMode()
         return;
     }
     if (!FoldScreenStateInternel::IsSingleDisplayFoldDevice() &&
-        !FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
+        !FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() &&
+        !FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
         TLOGI(WmsLogTag::DMS, "not single display fold (pocket) device, skip");
         return;
     }
