@@ -1916,7 +1916,6 @@ WSError SessionStageProxy::SetCurrentRotation(int32_t currentRotation)
 
 WSError SessionStageProxy::NotifyAppForceLandscapeConfigUpdated()
 {
-    TLOGI(WmsLogTag::DEFAULT, "Notify App Force Landscape Config Updated");
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);

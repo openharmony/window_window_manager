@@ -5716,7 +5716,7 @@ void WindowSessionImpl::SetForceSplitEnable(bool isForceSplit, const std::string
 
 WSError WindowSessionImpl::NotifyAppForceLandscapeConfigUpdated()
 {
-    TLOGI(WmsLogTag::DEFAULT, "Notify App Force Landscape Config Updated");
+    TLOGI(WmsLogTag::DEFAULT, "in");
     WindowType winType = GetType();
     AppForceLandscapeConfig config = {};
     if (WindowHelper::IsMainWindow(winType) && GetAppForceLandscapeConfig(config) == WMError::WM_OK &&
@@ -5727,7 +5727,6 @@ WSError WindowSessionImpl::NotifyAppForceLandscapeConfigUpdated()
         SetForceSplitEnable(isForceSplit, config.homePage_);
         return WSError::WS_OK;
     }
-    TLOGI(WmsLogTag::DEFAULT, "SetForceSplitEnable, WS_DO_NOTHING");
     return WSError::WS_DO_NOTHING;
 }
 

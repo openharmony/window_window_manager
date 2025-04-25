@@ -1005,7 +1005,7 @@ int SessionStageStub::HandleSetCurrentRotation(MessageParcel& data, MessageParce
 
 int SessionStageStub::HandleNotifyAppForceLandscapeConfigUpdated(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFI("Handle Notify App Force Landscape Config Updated");
+    TLOGD(WmsLogTag::DEFAULT, "in");
     WSError errCode = NotifyAppForceLandscapeConfigUpdated();
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
