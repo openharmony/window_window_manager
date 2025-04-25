@@ -15,9 +15,9 @@
 
 #include "session/host/include/keyboard_session.h"
 
-#include "screen_session_manager_client/include/screen_session_manager_client.h"
-#include "session_helper.h"
 #include <hitrace_meter.h>
+#include "session_helper.h"
+#include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include <ui/rs_surface_node.h>
 #include "window_helper.h"
 #include "window_manager_hilog.h"
@@ -559,9 +559,9 @@ void KeyboardSession::NotifySessionRectChange(const WSRect& rect,
             TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s get screen size failed", where);
             return;
         }
-        bool isLandscape = screenWidth > screenHeight;
+        bool isLand = screenWidth > screenHeight;
         KeyboardLayoutParams params = sessionProperty->GetKeyboardLayoutParams();
-        if (isLandscape) {
+        if (isLand) {
             params.LandscapeKeyboardRect_.posX_ = rect.posX_;
             params.LandscapeKeyboardRect_.posY_ = rect.posY_;
             params.LandscapePanelRect_.posX_ = rect.posX_;
@@ -572,10 +572,8 @@ void KeyboardSession::NotifySessionRectChange(const WSRect& rect,
             params.PortraitPanelRect_.posX_ = rect.posX_;
             params.PortraitPanelRect_.posY_ = rect.posY_;
         }
-        TLOGD(WmsLogTag::WMS_KEYBOARD,"isLandscape:%{public}d, landRect:%{public}s, portraitRect:%{public}s",
-            isLandscape,
-            params.LandscapeKeyboardRect_.ToString().c_str(),
-            params.PortraitKeyboardRect_.ToString().c_str());
+        TLOGD(WmsLogTag::WMS_KEYBOARD, "isLand:%{public}d, landRect:%{public}s, portraitRect:%{public}s", isLand,
+            params.LandscapeKeyboardRect_.ToString().c_str(), params.PortraitKeyboardRect_.ToString().c_str());
         session->AdjustKeyboardLayout(params);
     }, __func__ + GetRectInfo(rect));
 }
