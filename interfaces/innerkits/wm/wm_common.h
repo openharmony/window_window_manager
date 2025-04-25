@@ -1693,8 +1693,8 @@ struct WindowMetaInfo : public Parcelable {
     int32_t pid = -1;
     WindowType windowType = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
     int32_t parentWindowId = -1;
-    uint64_t surfaceNodeId = -1;
-    uint64_t leashWinSurfaceNodeId = -1;
+    uint64_t surfaceNodeId = 0;
+    uint64_t leashWinSurfaceNodeId = 0;
     bool isPrivacyMode = false;
 
     bool Marshalling(Parcel& parcel) const override
