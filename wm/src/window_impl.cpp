@@ -4464,7 +4464,7 @@ uint32_t WindowImpl::GetApiTargetVersion() const
 {
     uint32_t version = 0;
     if ((context_ != nullptr) && (context_->GetApplicationInfo() != nullptr)) {
-        version = context_->GetApplicationInfo()->apiTargetVersion % API_VERSION_MOD;
+        version = static_cast<uint32_t>(context_->GetApplicationInfo()->apiTargetVersion) % API_VERSION_MOD;
     }
     return version;
 }
