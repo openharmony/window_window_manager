@@ -1073,6 +1073,8 @@ HWTEST_F(WindowSessionTest4, GetWindowMetaInfoForWindowInfo01, Function | SmallT
     sceneSession1->GetSessionProperty()->SetDisplayId(0);
     sceneSession1->SetParentSession(sceneSession);
     sceneSession1->property_->SetPrivacyMode(true);
+    sceneSession1->surfaceNode_ = nullptr;
+    sceneSession1->leashWinSurfaceNode_ = nullptr;
 
     WindowMetaInfo windowMetaInfo = sceneSession->GetWindowMetaInfoForWindowInfo();
     ASSERT_EQ(windowMetaInfo.windowId, sceneSession->GetWindowId());
@@ -1083,6 +1085,8 @@ HWTEST_F(WindowSessionTest4, GetWindowMetaInfoForWindowInfo01, Function | SmallT
     WindowMetaInfo windowMetaInfo1 = sceneSession1->GetWindowMetaInfoForWindowInfo();
     ASSERT_EQ(windowMetaInfo1.windowName, sceneSession1->GetSessionInfo().abilityName_);
     ASSERT_EQ(windowMetaInfo1.parentWindowId, sceneSession->GetWindowId());
+    ASSERT_EQ(windowMetaInfo1.surfaceNodeId, -1);
+    ASSERT_EQ(windowMetaInfo1.leashWinSurfaceNodeId, -1);
     ASSERT_EQ(windowMetaInfo1.isPrivacyMode, true);
 }
 }
