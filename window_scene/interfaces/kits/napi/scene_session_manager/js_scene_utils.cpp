@@ -49,19 +49,55 @@ enum class AceTouchType : int32_t {
     CANCEL,
 };
 
-int32_t GetMMITouchType(int32_t aceType)
+// Refer to OHOS::Ace::SourceType
+enum class AceSourceType : int32_t {
+    NONE = 0,
+    MOUSE = 1,
+    TOUCH = 2,
+    TOUCH_PAD = 3,
+    KEYBOARD = 4
+};
+
+void TransferToMMIFormat(int32_t aceType, MMI::PointerEvent& pointerEvent)
 {
-    switch (aceType) {
-        case static_cast<int32_t>(AceTouchType::DOWN):
-            return MMI::PointerEvent::POINTER_ACTION_DOWN;
-        case static_cast<int32_t>(AceTouchType::UP):
-            return MMI::PointerEvent::POINTER_ACTION_UP;
-        case static_cast<int32_t>(AceTouchType::MOVE):
-            return MMI::PointerEvent::POINTER_ACTION_MOVE;
-        case static_cast<int32_t>(AceTouchType::CANCEL):
-            return MMI::PointerEvent::POINTER_ACTION_CANCEL;
-        default:
-            return MMI::PointerEvent::POINTER_ACTION_UNKNOWN;
+    auto sourceType = pointerEvent.GetSourceType();
+    if (sourceType == MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
+        switch (aceType) {
+            case static_cast<int32_t>(AceTouchType::DOWN):
+                pointerEvent.SetPointerAction(MMI::PointerEvent::POINTER_ACTION_DOWN);
+                break;
+            case static_cast<int32_t>(AceTouchType::UP):
+                pointerEvent.SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UP);
+                break;
+            case static_cast<int32_t>(AceTouchType::MOVE):
+                pointerEvent.SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
+                break;
+            case static_cast<int32_t>(AceTouchType::CANCEL):
+                pointerEvent.SetPointerAction(MMI::PointerEvent::POINTER_ACTION_CANCEL);
+                break;
+            default:
+                pointerEvent.SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UNKNOWN);
+        }
+    } else if (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
+        pointerEvent.SetButtonId(MMI::PointerEvent::MOUSE_BUTTON_LEFT);
+        switch (aceType) {
+            case static_cast<int32_t>(AceTouchType::DOWN):
+                pointerEvent.SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
+                break;
+            case static_cast<int32_t>(AceTouchType::UP):
+                pointerEvent.SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);
+                break;
+            case static_cast<int32_t>(AceTouchType::MOVE):
+                pointerEvent.SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
+                break;
+            case static_cast<int32_t>(AceTouchType::CANCEL):
+                pointerEvent.SetPointerAction(MMI::PointerEvent::POINTER_ACTION_CANCEL);
+                break;
+            default:
+                pointerEvent.SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UNKNOWN);
+        }
+    } else {
+        pointerEvent.SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UNKNOWN);
     }
 }
 } // namespace
@@ -702,7 +738,7 @@ bool ConvertPointerItemFromJs(napi_env env, napi_value touchObject, MMI::Pointer
         WLOGFE("Failed to convert parameter to touchType");
         return false;
     }
-    pointerEvent.SetPointerAction(GetMMITouchType(touchType));
+    TransferToMMIFormat(touchType, pointerEvent);
     double windowX;
     if (!ConvertFromJsValue(env, jsWindowX, windowX)) {
         WLOGFE("Failed to convert parameter to windowX");
@@ -769,6 +805,16 @@ bool ConvertTouchesObjectFromJs(napi_env env, napi_value jsTouches, int32_t poin
     return true;
 }
 
+int32_t ConvertMMISourceType(int32_t sourceType)
+{
+    if (sourceType == static_cast<int32_t>(AceSourceType::TOUCH)) {
+        return MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN;
+    } else if (sourceType == static_cast<int32_t>(AceSourceType::MOUSE)) {
+        return MMI::PointerEvent::SOURCE_TYPE_MOUSE;
+    }
+    return MMI::PointerEvent::SOURCE_TYPE_UNKNOWN;
+}
+
 bool ConvertPointerEventFromJs(napi_env env, napi_value jsObject, MMI::PointerEvent& pointerEvent)
 {
     napi_value jsSourceType = nullptr;
@@ -784,7 +830,7 @@ bool ConvertPointerEventFromJs(napi_env env, napi_value jsObject, MMI::PointerEv
         WLOGFE("Failed to convert parameter to sourceType");
         return false;
     }
-    pointerEvent.SetSourceType(MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
+    pointerEvent.SetSourceType(ConvertMMISourceType(sourceType));
     double timestamp;
     if (!ConvertFromJsValue(env, jsTimestamp, timestamp)) {
         WLOGFE("Failed to convert parameter to timestamp");
