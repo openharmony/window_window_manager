@@ -1031,12 +1031,14 @@ HWTEST_F(WindowSessionTest4, GetWindowLayoutInfoForWindowInfo01, Function | Smal
     sceneSession->SetSessionGlobalRect(rect);
     sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
     sceneSession->GetSessionProperty()->SetDisplayId(0);
+    sceneSession->SetZOrder(100);
 
     WindowLayoutInfo windowLayoutInfo = sceneSession->GetWindowLayoutInfoForWindowInfo();
     ASSERT_EQ(windowLayoutInfo.rect.posX_, 5);
     ASSERT_EQ(windowLayoutInfo.rect.posY_, 0);
     ASSERT_EQ(windowLayoutInfo.rect.width_, 100);
     ASSERT_EQ(windowLayoutInfo.rect.height_, 100);
+    ASSERT_EQ(windowLayoutInfo.zOrder, 100);
 }
 
 /**
@@ -1050,6 +1052,7 @@ HWTEST_F(WindowSessionTest4, GetWindowMetaInfoForWindowInfo01, Function | SmallT
     sessionInfo.isSystem_ = false;
     sessionInfo.bundleName_ = "bundleName";
     sessionInfo.abilityName_ = "abilityName";
+    sessionInfo.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     sceneSession->GetSessionProperty()->SetWindowName("sceneSession");
     sceneSession->SetVisibilityState(WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
@@ -1068,14 +1071,23 @@ HWTEST_F(WindowSessionTest4, GetWindowMetaInfoForWindowInfo01, Function | SmallT
     sceneSession1->SetSessionGlobalRect(rect);
     sceneSession1->SetSessionState(SessionState::STATE_FOREGROUND);
     sceneSession1->GetSessionProperty()->SetDisplayId(0);
+    sceneSession1->SetParentSession(sceneSession);
+    sceneSession1->property_->SetPrivacyMode(true);
+    sceneSession1->surfaceNode_ = nullptr;
+    sceneSession1->leashWinSurfaceNode_ = nullptr;
 
     WindowMetaInfo windowMetaInfo = sceneSession->GetWindowMetaInfoForWindowInfo();
     ASSERT_EQ(windowMetaInfo.windowId, sceneSession->GetWindowId());
     ASSERT_EQ(windowMetaInfo.windowName, sceneSession->GetSessionProperty()->GetWindowName());
     ASSERT_EQ(windowMetaInfo.bundleName, sceneSession->GetSessionInfo().bundleName_);
     ASSERT_EQ(windowMetaInfo.abilityName, sceneSession->GetSessionInfo().abilityName_);
+    ASSERT_EQ(windowMetaInfo.windowType, WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     WindowMetaInfo windowMetaInfo1 = sceneSession1->GetWindowMetaInfoForWindowInfo();
-    ASSERT_EQ(windowMetaInfo1 .windowName, sceneSession1->GetSessionInfo().abilityName_);
+    ASSERT_EQ(windowMetaInfo1.windowName, sceneSession1->GetSessionInfo().abilityName_);
+    ASSERT_EQ(windowMetaInfo1.parentWindowId, sceneSession->GetWindowId());
+    ASSERT_EQ(windowMetaInfo1.surfaceNodeId, 0);
+    ASSERT_EQ(windowMetaInfo1.leashWinSurfaceNodeId, 0);
+    ASSERT_EQ(windowMetaInfo1.isPrivacyMode, true);
 }
 }
 } // namespace Rosen
