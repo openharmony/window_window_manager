@@ -1085,8 +1085,8 @@ HWTEST_F(WindowSessionTest4, GetWindowMetaInfoForWindowInfo01, Function | SmallT
     WindowMetaInfo windowMetaInfo1 = sceneSession1->GetWindowMetaInfoForWindowInfo();
     ASSERT_EQ(windowMetaInfo1.windowName, sceneSession1->GetSessionInfo().abilityName_);
     ASSERT_EQ(windowMetaInfo1.parentWindowId, sceneSession->GetWindowId());
-    ASSERT_EQ(windowMetaInfo1.surfaceNodeId, -1);
-    ASSERT_EQ(windowMetaInfo1.leashWinSurfaceNodeId, -1);
+    ASSERT_EQ(windowMetaInfo1.surfaceNodeId, 0);
+    ASSERT_EQ(windowMetaInfo1.leashWinSurfaceNodeId, 0);
     ASSERT_EQ(windowMetaInfo1.isPrivacyMode, true);
 }
 }
