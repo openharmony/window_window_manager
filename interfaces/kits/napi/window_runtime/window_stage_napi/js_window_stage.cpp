@@ -423,6 +423,7 @@ napi_value JsWindowStage::OnLoadContent(napi_env env, napi_callback_info info, b
         napi_create_reference(env, storage, 1, &result);
         contentStorage = std::shared_ptr<NativeReference>(reinterpret_cast<NativeReference*>(result));
     }
+
     NapiAsyncTask::CompleteCallback complete =
         [weak = windowScene_, contentStorage, contextUrl, isLoadedByName](
             napi_env env, NapiAsyncTask& task, int32_t status) {
