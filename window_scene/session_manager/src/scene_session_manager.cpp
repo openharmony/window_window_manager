@@ -13586,7 +13586,7 @@ WSError SceneSessionManager::SetAppForceLandscapeConfig(const std::string& bundl
         bundleName.c_str(), config.mode_, config.homePage_.c_str(), config.isSupportSplitMode_);
     
     if(preConfig.mode_ == FORCE_SPLIT_MODE || config.mode_ == FORCE_SPLIT_MODE) {
-        //通知客户端状态变化
+        //Notify the client of the mode change
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (const auto& iter : sceneSessionMap_) {
             auto& session = iter.second;
