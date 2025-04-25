@@ -94,9 +94,9 @@ ani_status DisplayAniUtils::cvtDisplay(sptr<Display> display, ani_env* env, ani_
     env->Object_SetFieldByName_Ref(obj, "<property>name", str);
     env->Object_SetFieldByName_Boolean(obj, "<property>alive", info->GetAliveStatus());
     if (NATIVE_TO_JS_DISPLAY_STATE_MAP.count(info->GetDisplayState()) != 0) {
-        env->Object_SetFieldByName_Int(obj, "<property>state", static_cast<uint32_t>(info->GetDisplayState()));
+        env->Object_SetFieldByName_Int(obj, "<property>state_", static_cast<uint32_t>(info->GetDisplayState()));
     } else {
-        env->Object_SetFieldByName_Int(obj, "<property>state", 0);
+        env->Object_SetFieldByName_Int(obj, "<property>state_", 0);
     }
     env->Object_SetFieldByName_Double(obj, "<property>refreshRate", info->GetRefreshRate());
     env->Object_SetFieldByName_Double(obj, "<property>rotation", static_cast<uint32_t>(info->GetRotation()));
@@ -109,15 +109,19 @@ ani_status DisplayAniUtils::cvtDisplay(sptr<Display> display, ani_env* env, ani_
     env->Object_SetFieldByName_Double(obj, "<property>availableWidth", info->GetAvailableWidth());
     env->Object_SetFieldByName_Double(obj, "<property>availableHeight", info->GetAvailableHeight());
     env->Object_SetFieldByName_Double(obj, "<property>densityDPI", info->GetVirtualPixelRatio() * DOT_PER_INCH);
-    env->Object_SetFieldByName_Double(obj, "<property>orientation",
+    env->Object_SetFieldByName_Int(obj, "<property>orientation_",
         static_cast<uint32_t>(info->GetDisplayOrientation()));
+    TLOGI(WmsLogTag::DMS, "[ANI] display = %{public}u, name = %{public}s",
+        static_cast<uint32_t>(info->GetDisplayId()), info->GetName().c_str());
     env->Object_SetFieldByName_Double(obj, "<property>densityPixels", info->GetVirtualPixelRatio());
     env->Object_SetFieldByName_Double(obj, "<property>scaledDensity", info->GetVirtualPixelRatio());
     env->Object_SetFieldByName_Double(obj, "<property>xDPI", info->GetXDpi());
     env->Object_SetFieldByName_Double(obj, "<property>yDPI", info->GetYDpi());
+    TLOGI(WmsLogTag::DMS, "[ANI] display = %{public}u, name = %{public}s",
+        static_cast<uint32_t>(info->GetDisplayId()), info->GetName().c_str());
     auto colorSpaces = info->GetColorSpaces();
     auto hdrFormats = info->GetHdrFormats();
-    TLOGI(WmsLogTag::DMS, "[ANI] colorSpaces(0) %{public}u, %{public}u", colorSpaces.size(), colorSpaces[1]);
+    TLOGI(WmsLogTag::DMS, "[ANI] colorSpaces(0) %{public}u, %{public}u", colorSpaces.size(), 0);
     if (colorSpaces.size() != 0) {
         ani_array_int colorSpacesAni;
         CreateAniArrayInt(env, colorSpaces.size(), &colorSpacesAni, colorSpaces);
