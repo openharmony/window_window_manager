@@ -264,6 +264,10 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleKeyFrameAnimateEnd(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_KEY_FRAME_CLONE_NODE):
             return HandleUpdateKeyFrameCloneNode(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_KEYBOARD_WILL_SHOW_REGISTERED):
+            return HandleNotifyKeyboardWillShowRegistered(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_KEYBOARD_WILL_HIDE_REGISTERED):
+            return HandleNotifyKeyboardWillHideRegistered(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_KEYBOARD_DID_SHOW_REGISTERED):
             return HandleNotifyKeyboardDidShowRegistered(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_KEYBOARD_DID_HIDE_REGISTERED):
@@ -1724,6 +1728,30 @@ int SessionStub::HandleNotifyKeyboardDidHideRegistered(MessageParcel& data, Mess
     }
     TLOGD(WmsLogTag::WMS_KEYBOARD, "registered: %{public}d", registered);
     NotifyKeyboardDidHideRegistered(registered);
+    return ERR_NONE;
+}
+
+int SessionStub::HandleNotifyKeyboardWillShowRegistered(MessageParcel& data, MessageParcel& reply)
+{
+    bool registered = false;
+    if (!data.ReadBool(registered)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "read registered failed");
+        return ERR_INVALID_DATA;
+    }
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "registered: %{public}d", registered);
+    NotifyKeyboardWillShowRegistered(registered);
+    return ERR_NONE;
+}
+
+int SessionStub::HandleNotifyKeyboardWillHideRegistered(MessageParcel& data, MessageParcel& reply)
+{
+    bool registered = false;
+    if (!data.ReadBool(registered)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "read registered failed");
+        return ERR_INVALID_DATA;
+    }
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "registered: %{public}d", registered);
+    NotifyKeyboardWillHideRegistered(registered);
     return ERR_NONE;
 }
 

@@ -102,10 +102,14 @@ constexpr int ARG_COUNT_1 = 1;
 constexpr int ARG_COUNT_2 = 2;
 constexpr int ARG_COUNT_3 = 3;
 constexpr int ARG_COUNT_4 = 4;
+constexpr int ARG_COUNT_7 = 7;
 constexpr int ARG_INDEX_0 = 0;
 constexpr int ARG_INDEX_1 = 1;
 constexpr int ARG_INDEX_2 = 2;
 constexpr int ARG_INDEX_3 = 3;
+constexpr int ARG_INDEX_4 = 4;
+constexpr int ARG_INDEX_5 = 5;
+constexpr int ARG_INDEX_6 = 6;
 constexpr uint32_t DISALLOW_ACTIVATION_ISOLATE_VERSION = 20;
 
 const std::map<std::string, ListenerFuncType> ListenerFuncMap {
@@ -3176,12 +3180,44 @@ napi_value JsSceneSession::OnOpenKeyboardSyncTransaction(napi_env env, napi_call
     return NapiGetUndefined(env);
 }
 
+bool JsSceneSession::HandleCloseKeyboardSyncTransactionWSRectParams(napi_env env,
+    napi_value argv[], int index, WSRect& rect)
+{
+    napi_value nativeObj = argv[index];
+    if (nativeObj == nullptr || !ConvertSessionRectInfoFromJs(env, nativeObj, rect)) {
+        if (index == ARG_INDEX_0) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to convert parameter to keyboardPanelRect");
+        } else if (index == ARG_INDEX_3) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to convert parameter to beginRect");
+        } else if (index == ARG_INDEX_4) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to convert parameter to endRect");
+        }
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return false;
+    }
+    return true;
+}
+
+bool JsSceneSession::HandleCloseKeyboardSyncTransactionBoolParams(napi_env env,
+    napi_value argv[], int index, bool& result)
+{
+    napi_value nativeObj = argv[index];
+    if (!ConvertFromJsValue(env, nativeObj, result)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to convert parameter to bool");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return false;
+    }
+    return true;
+}
+
 napi_value JsSceneSession::OnCloseKeyboardSyncTransaction(napi_env env, napi_callback_info info)
 {
-    size_t argc = ARG_COUNT_4;
-    napi_value argv[ARG_COUNT_4] = {nullptr};
+    size_t argc = ARG_COUNT_7;
+    napi_value argv[ARG_COUNT_7] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < 3) { // 3: params num
+    if (argc < ARG_COUNT_7) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
@@ -3189,25 +3225,24 @@ napi_value JsSceneSession::OnCloseKeyboardSyncTransaction(napi_env env, napi_cal
     }
 
     WSRect keyboardPanelRect = { 0, 0, 0, 0 };
-    napi_value nativeObj = argv[ARG_INDEX_0];
-    if (nativeObj == nullptr || !ConvertRectInfoFromJs(env, nativeObj, keyboardPanelRect)) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to convert parameter to keyboardPanelRect");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
-        return NapiGetUndefined(env);
-    }
-
     bool isKeyboardShow = false;
-    if (!ConvertFromJsValue(env, argv[ARG_INDEX_1], isKeyboardShow)) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to convert parameter to bool");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
+    bool isRotating = false;
+    WSRect beginRect = { 0, 0, 0, 0 };
+    WSRect endRect = { 0, 0, 0, 0 };
+    bool animated = false;
+
+    if (!HandleCloseKeyboardSyncTransactionWSRectParams(env, argv, ARG_INDEX_0, keyboardPanelRect) ||
+        !HandleCloseKeyboardSyncTransactionBoolParams(env, argv, ARG_INDEX_1, isKeyboardShow) ||
+        !HandleCloseKeyboardSyncTransactionBoolParams(env, argv, ARG_INDEX_2, isRotating) ||
+        !HandleCloseKeyboardSyncTransactionWSRectParams(env, argv, ARG_INDEX_3, beginRect) ||
+        !HandleCloseKeyboardSyncTransactionWSRectParams(env, argv, ARG_INDEX_4, endRect) ||
+        !HandleCloseKeyboardSyncTransactionBoolParams(env, argv, ARG_INDEX_5, animated)) {
         return NapiGetUndefined(env);
     }
 
-    bool isRotating = false;
-    if (!ConvertFromJsValue(env, argv[ARG_INDEX_2], isRotating)) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to convert parameter to bool");
+    uint32_t callingId = 0;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_6], callingId)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to convert parameter to uint32_t");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
@@ -3218,7 +3253,14 @@ napi_value JsSceneSession::OnCloseKeyboardSyncTransaction(napi_env env, napi_cal
         TLOGE(WmsLogTag::WMS_KEYBOARD, "session is nullptr, id:%{public}d", persistentId_);
         return NapiGetUndefined(env);
     }
-    session->CloseKeyboardSyncTransaction(keyboardPanelRect, isKeyboardShow, isRotating);
+
+    WindowAnimationInfo animationInfo;
+    animationInfo.beginRect = beginRect;
+    animationInfo.endRect = endRect;
+    animationInfo.animated =  animated;
+    animationInfo.callingId = callingId;
+
+    session->CloseKeyboardSyncTransaction(keyboardPanelRect, isKeyboardShow, isRotating, animationInfo);
     return NapiGetUndefined(env);
 }
 

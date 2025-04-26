@@ -294,9 +294,6 @@ WSError KeyboardSession::AdjustKeyboardLayout(const KeyboardLayoutParams& params
         if (params.gravity_ == WindowGravity::WINDOW_GRAVITY_FLOAT) {
             session->NotifySystemKeyboardAvoidChange(SystemKeyboardAvoidChangeReason::KEYBOARD_GRAVITY_FLOAT);
             session->SetWindowAnimationFlag(false);
-            if (session->IsSessionForeground()) {
-                session->RestoreCallingSession();
-            }
         } else {
             if (session->IsSessionForeground()) {
                 session->NotifySystemKeyboardAvoidChange(SystemKeyboardAvoidChangeReason::KEYBOARD_GRAVITY_BOTTOM);
@@ -648,9 +645,9 @@ void KeyboardSession::OpenKeyboardSyncTransaction()
 }
 
 void KeyboardSession::CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRect,
-    bool isKeyboardShow, bool isRotating)
+    bool isKeyboardShow, bool isRotating, const WindowAnimationInfo& animationInfo)
 {
-    PostTask([weakThis = wptr(this), keyboardPanelRect, isKeyboardShow, isRotating]() {
+    PostTask([weakThis = wptr(this), keyboardPanelRect, isKeyboardShow, isRotating, animationInfo]() {
         auto session = weakThis.promote();
         if (!session) {
             TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboard session is null");
@@ -662,6 +659,13 @@ void KeyboardSession::CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRe
         if (!isRotating && session->isKeyboardSyncTransactionOpen_) {
             rsTransaction = session->GetRSTransaction();
         }
+
+        sptr<SceneSession> callingSession = session->GetSceneSession(animationInfo.callingId);
+        if (callingSession != nullptr) {
+            callingSession->NotifyKeyboardAnimationWillBegin(isKeyboardShow, animationInfo.beginRect,
+                animationInfo.endRect, animationInfo.animated, rsTransaction);
+        }
+
         if (isKeyboardShow) {
             /* notify calling session when keyboard is not visible */
             if (session->GetCallingSessionId() == INVALID_WINDOW_ID) {

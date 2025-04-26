@@ -250,7 +250,7 @@ public:
 
     virtual void OpenKeyboardSyncTransaction() {}
     virtual void CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRect,
-        bool isKeyboardShow, bool isRotating) {}
+        bool isKeyboardShow, bool isRotating, const WindowAnimationInfo& animationInfo) {}
     WSError ChangeSessionVisibilityWithStatusBar(const sptr<AAFwk::SessionInfo> info, bool visible) override;
     WSError PendingSessionActivation(const sptr<AAFwk::SessionInfo> info) override;
     bool DisallowActivationFromPendingBackground(bool isPcOrPadEnableActivation, bool isFoundationCall,
@@ -729,6 +729,10 @@ public:
     void GetKeyboardOccupiedAreaWithRotation(
         int32_t persistentId, uint32_t rotation, std::vector<std::pair<bool, WSRect>>& avoidAreas);
     void NotifyKeyboardAnimationCompleted(bool isShowAnimation, const WSRect& panelRect);
+    void NotifyKeyboardAnimationWillBegin(bool isKeyboardShow, const WSRect& beginRect, const WSRect& endRect,
+        bool withAnimation, const std::shared_ptr<RSTransaction>& rsTransaction);
+    void NotifyKeyboardWillShowRegistered(bool registered) override;
+    void NotifyKeyboardWillHideRegistered(bool registered) override;
     void NotifyKeyboardDidShowRegistered(bool registered) override;
     void NotifyKeyboardDidHideRegistered(bool registered) override;
 
@@ -896,6 +900,8 @@ protected:
     virtual void EnableCallingSessionAvoidArea() {}
     virtual void RestoreCallingSession(const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) {}
     bool keyboardAvoidAreaActive_ = true;
+    std::atomic<bool> isKeyboardWillShowRegistered_ { false };
+    std::atomic<bool> isKeyboardWillHideRegistered_ { false };
     std::atomic<bool> isKeyboardDidShowRegistered_ = false;
     std::atomic<bool> isKeyboardDidHideRegistered_ = false;
 

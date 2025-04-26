@@ -2774,6 +2774,54 @@ void SessionProxy::NotifyWindowAttachStateListenerRegistered(bool registered)
     }
 }
 
+void SessionProxy::NotifyKeyboardWillShowRegistered(bool registered)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "writeInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteBool(registered)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Write registered failed.");
+        return;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Remote is null");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_KEYBOARD_WILL_SHOW_REGISTERED),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "SendRequest failed");
+    }
+}
+
+void SessionProxy::NotifyKeyboardWillHideRegistered(bool registered)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "writeInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteBool(registered)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Write registered failed.");
+        return;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Remote is null");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_KEYBOARD_WILL_HIDE_REGISTERED),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "SendRequest failed");
+    }
+}
+
 void SessionProxy::NotifyKeyboardDidShowRegistered(bool registered)
 {
     MessageParcel data;
