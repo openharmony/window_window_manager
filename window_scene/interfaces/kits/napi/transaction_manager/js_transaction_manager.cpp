@@ -94,25 +94,35 @@ napi_value JsTransactionManager::CloseSyncTransactionWithVsync(napi_env env, nap
     return (me != nullptr) ? me->OnCloseSyncTransactionWithVsync(env, info) : nullptr;
 }
 
-napi_value JsTransactionManager::OnOpenSyncTransaction(napi_env env, napi_callback_info info)
+ScreenId ParseScreenIdFromArgs(napi_env env, napi_callback_info info)
 {
     size_t argc = 1;
     napi_value argv[1] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+
     if (argc != 1) {
         TLOGE(WmsLogTag::DEFAULT, "Argc is invalid: %{public}zu", argc);
-        return NapiThrowError(env, WSErrorCode::WS_ERROR_INVALID_PARAM, "Input parameter is missing or invalid");
+        return SCREEN_ID_INVALID;
     }
 
     int64_t screenIdValue = SCREEN_ID_INVALID;
     if (!ConvertFromJsValue(env, argv[0], screenIdValue)) {
-        TLOGE(WmsLogTag::DEFAULT, "Failed to convert paramter to screenIdValue");
-        return NapiThrowError(env, WSErrorCode::WS_ERROR_INVALID_PARAM, "Input parameter is missing or invalid");
+        TLOGE(WmsLogTag::DEFAULT, "Failed to convert parameter to screenId");
+        return SCREEN_ID_INVALID;
     }
 
-    ScreenId screenId = static_cast<ScreenId>(screenIdValue);
-    if (screenId == SCREEN_ID_INVALID) {
+    if (screenIdValue == SCREEN_ID_INVALID) {
         TLOGE(WmsLogTag::DEFAULT, "Invalid screenId");
+        return SCREEN_ID_INVALID;
+    }
+
+    return static_cast<ScreenId>(screenIdValue);
+}
+
+napi_value JsTransactionManager::OnOpenSyncTransaction(napi_env env, napi_callback_info info)
+{
+    ScreenId screenId = ParseScreenIdFromArgs(env, info);
+    if (screenId == SCREEN_ID_INVALID) {
         return NapiThrowError(env, WSErrorCode::WS_ERROR_INVALID_PARAM, "Input parameter is missing or invalid");
     }
 
@@ -133,23 +143,8 @@ napi_value JsTransactionManager::OnOpenSyncTransaction(napi_env env, napi_callba
 
 napi_value JsTransactionManager::OnCloseSyncTransaction(napi_env env, napi_callback_info info)
 {
-    size_t argc = 1;
-    napi_value argv[1] = { nullptr };
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc != 1) {
-        TLOGE(WmsLogTag::DEFAULT, "Argc is invalid: %{public}zu", argc);
-        return NapiThrowError(env, WSErrorCode::WS_ERROR_INVALID_PARAM, "Input parameter is missing or invalid");
-    }
-
-    int64_t screenIdValue = SCREEN_ID_INVALID;
-    if (!ConvertFromJsValue(env, argv[0], screenIdValue)) {
-        TLOGE(WmsLogTag::DEFAULT, "Failed to convert paramter to screenIdValue");
-        return NapiThrowError(env, WSErrorCode::WS_ERROR_INVALID_PARAM, "Input parameter is missing or invalid");
-    }
-
-    ScreenId screenId = static_cast<ScreenId>(screenIdValue);
+    ScreenId screenId = ParseScreenIdFromArgs(env, info);
     if (screenId == SCREEN_ID_INVALID) {
-        TLOGE(WmsLogTag::DEFAULT, "Invalid screenId");
         return NapiThrowError(env, WSErrorCode::WS_ERROR_INVALID_PARAM, "Input parameter is missing or invalid");
     }
 
@@ -167,23 +162,8 @@ napi_value JsTransactionManager::OnCloseSyncTransaction(napi_env env, napi_callb
 
 napi_value JsTransactionManager::OnCloseSyncTransactionWithVsync(napi_env env, napi_callback_info info)
 {
-    size_t argc = 1;
-    napi_value argv[1] = { nullptr };
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc != 1) {
-        TLOGE(WmsLogTag::DEFAULT, "Argc is invalid: %{public}zu", argc);
-        return NapiThrowError(env, WSErrorCode::WS_ERROR_INVALID_PARAM, "Input parameter is missing or invalid");
-    }
-
-    int64_t screenIdValue = SCREEN_ID_INVALID;
-    if (!ConvertFromJsValue(env, argv[0], screenIdValue)) {
-        TLOGE(WmsLogTag::DEFAULT, "Failed to convert paramter to screenIdValue");
-        return NapiThrowError(env, WSErrorCode::WS_ERROR_INVALID_PARAM, "Input parameter is missing or invalid");
-    }
-
-    ScreenId screenId = static_cast<ScreenId>(screenIdValue);
+    ScreenId screenId = ParseScreenIdFromArgs(env, info);
     if (screenId == SCREEN_ID_INVALID) {
-        TLOGE(WmsLogTag::DEFAULT, "Invalid screenId");
         return NapiThrowError(env, WSErrorCode::WS_ERROR_INVALID_PARAM, "Input parameter is missing or invalid");
     }
 
