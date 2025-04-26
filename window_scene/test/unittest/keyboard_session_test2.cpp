@@ -219,14 +219,16 @@ HWTEST_F(KeyboardSessionTest2, OpenKeyboardSyncTransaction, TestSize.Level1)
     std::string bundleName = "OpenKeyboardSyncTransaction";
     sptr<KeyboardSession> keyboardSession = GetKeyboardSession(abilityName, bundleName);
 
-    uint32_t callingId = 0;
     WSRect keyboardPanelRect = { 0, 0, 0, 0 };
     bool isKeyboardShow = true;
+    WindowAnimationInfo animationInfo;
 
     // isKeyBoardSyncTransactionOpen_ is false
-    keyboardSession->CloseKeyboardSyncTransaction(callingId, keyboardPanelRect, isKeyboardShow);
+    keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, isKeyboardShow, animationInfo);
+    keyboardSession->OpenKeyboardSyncTransaction();
 
     // isKeyBoardSyncTransactionOpen_ is true
+    keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, isKeyboardShow, animationInfo);
     keyboardSession->OpenKeyboardSyncTransaction();
     ASSERT_EQ(keyboardSession->isKeyboardSyncTransactionOpen_, true);
     keyboardSession->CloseKeyboardSyncTransaction(callingId, keyboardPanelRect, isKeyboardShow);
@@ -357,10 +359,10 @@ HWTEST_F(KeyboardSessionTest2, OpenKeyboardSyncTransaction01, TestSize.Level1)
     keyboardSession->OpenKeyboardSyncTransaction();
     keyboardSession->isKeyboardSyncTransactionOpen_ = false;
     keyboardSession->OpenKeyboardSyncTransaction();
-    uint32_t callingId = 0;
-    WSRect keyboardPanelRect;
-    keyboardSession->CloseKeyboardSyncTransaction(callingId, keyboardPanelRect, true);
-    keyboardSession->CloseKeyboardSyncTransaction(callingId, keyboardPanelRect, false);
+    WSRect keyboardPanelRect = {0, 0, 0, 0};
+    WindowAnimationInfo animationInfo;
+    keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, true, animationInfo);
+    keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, false, animationInfo);
 }
 
 /**
@@ -606,15 +608,15 @@ HWTEST_F(KeyboardSessionTest2, CloseKeyBoardSyncTransaction3, TestSize.Level1)
     sptr<KeyboardSession> keyboardSession = GetKeyboardSession(abilityName, bundleName);
     ASSERT_NE(keyboardSession, nullptr);
 
-    uint32_t callingId = 0;
     WSRect keyboardPanelRect;
     bool isKeyboardShow = true;
+    WindowAnimationInfo animationInfo;
 
     keyboardSession->dirtyFlags_ = 0;
     keyboardSession->specificCallback_->onUpdateAvoidArea_ = [](uint32_t callingSessionId) {};
     keyboardSession->isKeyboardSyncTransactionOpen_ = true;
     // isKeyBoardSyncTransactionOpen_ is true
-    keyboardSession->CloseKeyboardSyncTransaction(callingId, keyboardPanelRect, isKeyboardShow);
+    keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, isKeyboardShow, animationInfo);
     usleep(WAIT_ASYNC_US);
     ASSERT_EQ(keyboardSession->isKeyboardSyncTransactionOpen_, false);
 }
@@ -630,18 +632,18 @@ HWTEST_F(KeyboardSessionTest2, CloseKeyboardSyncTransaction4, TestSize.Level1)
     std::string bundleName = "CloseKeyboardSyncTransaction4";
     sptr<KeyboardSession> keyboardSession = GetKeyboardSession(abilityName, bundleName);
     ASSERT_NE(keyboardSession, nullptr);
-    uint32_t callingId = 0;
-    WSRect keyboardPanelRect;
+    WSRect keyboardPanelRect = { 0, 0, 0, 0 };
+    WindowAnimationInfo animationInfo;
     keyboardSession->dirtyFlags_ = 0;
 
     keyboardSession->isKeyboardSyncTransactionOpen_ = false;
     ASSERT_NE(keyboardSession->property_, nullptr);
-    keyboardSession->CloseKeyboardSyncTransaction(callingId, keyboardPanelRect, false);
+    keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, false, animationInfo);
     usleep(WAIT_ASYNC_US);
     ASSERT_EQ(0, keyboardSession->dirtyFlags_);
     keyboardSession->isKeyboardSyncTransactionOpen_ = true;
     keyboardSession->property_->SetCallingSessionId(1);
-    keyboardSession->CloseKeyboardSyncTransaction(callingId, keyboardPanelRect, false);
+    keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, false, animationInfo);
     usleep(WAIT_ASYNC_US);
     auto callingSessionId = keyboardSession->property_->GetCallingSessionId();
     ASSERT_EQ(callingSessionId, INVALID_WINDOW_ID);

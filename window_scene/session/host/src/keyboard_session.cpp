@@ -301,9 +301,6 @@ WSError KeyboardSession::AdjustKeyboardLayout(const KeyboardLayoutParams& params
         if (params.gravity_ == WindowGravity::WINDOW_GRAVITY_FLOAT) {
             session->NotifySystemKeyboardAvoidChange(SystemKeyboardAvoidChangeReason::KEYBOARD_GRAVITY_FLOAT);
             session->SetWindowAnimationFlag(false);
-            if (session->IsSessionForeground()) {
-                session->RestoreCallingSession(session->GetCallingSessionId(), nullptr);
-            }
         } else {
             if (session->IsSessionForeground()) {
                 session->NotifySystemKeyboardAvoidChange(SystemKeyboardAvoidChangeReason::KEYBOARD_GRAVITY_BOTTOM);
@@ -639,22 +636,30 @@ void KeyboardSession::OpenKeyboardSyncTransaction()
     PostSyncTask(task);
 }
 
-void KeyboardSession::CloseKeyboardSyncTransaction(uint32_t callingId, const WSRect& keyboardPanelRect,
-    bool isKeyboardShow)
+void KeyboardSession::CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRect,
+    bool isKeyboardShow, const WindowAnimationInfo& animationInfo)
 {
-    PostTask([weakThis = wptr(this), callingId, keyboardPanelRect, isKeyboardShow]() {
+    PostTask([weakThis = wptr(this), keyboardPanelRect, isKeyboardShow, animationInfo]() {
         auto session = weakThis.promote();
         if (!session) {
             TLOGE(WmsLogTag::WMS_KEYBOARD, "Keyboard session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
+        auto callingId = animationInfo.callingId;
         TLOGNI(WmsLogTag::WMS_KEYBOARD, "Close keyboard sync, callingId: %{public}d, isKeyboardShow: %{public}d",
             callingId, isKeyboardShow);
         std::shared_ptr<RSTransaction> rsTransaction = nullptr;
         if (session->isKeyboardSyncTransactionOpen_) {
             rsTransaction = session->GetRSTransaction();
         }
+
         // The callingId may change in WindowManager. Use scb's callingId to properly handle callingWindow raise/restore.
+        sptr<SceneSession> callingSession = session->GetSceneSession(callingId);
+        if (callingSession != nullptr) {
+            callingSession->NotifyKeyboardAnimationWillBegin(isKeyboardShow, animationInfo.beginRect,
+                animationInfo.endRect, animationInfo.animated, rsTransaction);
+        }
+
         if (isKeyboardShow) {
             session->RaiseCallingSession(callingId, keyboardPanelRect, false, rsTransaction);
             session->UpdateKeyboardAvoidArea();

@@ -14,8 +14,12 @@
  */
 
 #include "session/container/include/zidl/session_stage_proxy.h"
-#include "iremote_object_mocker.h"
+
 #include <gtest/gtest.h>
+#include <transaction/rs_transaction.h>
+
+#include "iremote_object_mocker.h"
+#include "mock_message_parcel.h"
 #include "proto.h"
 #include "string_wrapper.h"
 #include "util.h"
@@ -283,6 +287,19 @@ HWTEST_F(SessionStageProxyTest, NotifyKeyboardAnimationCompleted, TestSize.Level
     ASSERT_TRUE((sessionStage_ != nullptr));
     KeyboardPanelInfo keyboardPanelInfo;
     sessionStage_->NotifyKeyboardAnimationCompleted(keyboardPanelInfo);
+}
+
+/**
+ * @tc.name: NotifyKeyboardAnimationWillBegin
+ * @tc.desc: test function : NotifyKeyboardAnimationWillBegin
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, NotifyKeyboardAnimationWillBegin, Function | SmallTest | Level1)
+{
+    ASSERT_TRUE((sessionStage_ != nullptr));
+    KeyboardAnimationInfo keyboardAnimationInfo;
+    const std::shared_ptr<RSTransaction>& rsTransaction = std::make_shared<RSTransaction>();
+    sessionStage_->NotifyKeyboardAnimationWillBegin(keyboardAnimationInfo, rsTransaction);
 }
 
 /**

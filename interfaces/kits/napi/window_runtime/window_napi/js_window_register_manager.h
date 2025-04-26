@@ -35,6 +35,8 @@ enum class RegisterListenerType : uint32_t {
     LIFECYCLE_EVENT_CB,
     WINDOW_EVENT_CB,
     KEYBOARD_HEIGHT_CHANGE_CB,
+    KEYBOARD_WILL_SHOW_CB,
+    KEYBOARD_WILL_HIDE_CB,
     KEYBOARD_DID_SHOW_CB,
     KEYBOARD_DID_HIDE_CB,
     TOUCH_OUTSIDE_CB,
@@ -77,6 +79,10 @@ private:
         napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessOccupiedAreaChangeRegister(sptr<JsWindowListener> listener, sptr<Window> window,
         bool isRegister, napi_env env, napi_value parameter = nullptr);
+    WmErrorCode ProcessKeyboardWillShowRegister(sptr<JsWindowListener> listener, const sptr<Window>& window,
+        bool isRegister, napi_env env, napi_value parameter);
+    WmErrorCode ProcessKeyboardWillHideRegister(sptr<JsWindowListener> listener, const sptr<Window>& window,
+        bool isRegister, napi_env env, napi_value parameter);
     WmErrorCode ProcessKeyboardDidShowRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister,
         napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessKeyboardDidHideRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister,

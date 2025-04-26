@@ -685,6 +685,7 @@ struct SystemSessionConfig : public Parcelable {
     bool supportFollowParentWindowLayout_ = false;
     bool supportZLevel_ = false;
     bool skipRedundantWindowStatusNotifications_ = false;
+    uint32_t supportFunctionType_ = 0;
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
@@ -731,10 +732,8 @@ struct SystemSessionConfig : public Parcelable {
         if (!parcel.WriteBool(supportFollowParentWindowLayout_)) {
             return false;
         }
-        if (!parcel.WriteBool(supportZLevel_)) {
-            return false;
-        }
-        if (!parcel.WriteBool(skipRedundantWindowStatusNotifications_)) {
+        if (!parcel.WriteBool(supportZLevel_) ||
+            !parcel.WriteBool(skipRedundantWindowStatusNotifications_) || !parcel.WriteUint32(supportFunctionType_)) {
             return false;
         }
         return true;
@@ -784,6 +783,7 @@ struct SystemSessionConfig : public Parcelable {
         config->supportFollowParentWindowLayout_ = parcel.ReadBool();
         config->supportZLevel_ = parcel.ReadBool();
         config->skipRedundantWindowStatusNotifications_ = parcel.ReadBool();
+        config->supportFunctionType_ = parcel.ReadUint32();
         return config;
     }
 
