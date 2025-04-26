@@ -746,26 +746,15 @@ bool WindowNodeContainer::AddAppSurfaceNodeOnRSTree(sptr<WindowNode>& node)
     return true;
 }
 
-void WindowNodeContainer::OpenInputMethodSyncTransaction(sptr<WindowNode>& node)
+void WindowNodeContainer::RunInInputMethodSyncTransaction(sptr<WindowNode>& node, std::function<void()> task)
 {
-    if (!isAnimateTransactionEnabled_) {
-        WLOGD("InputMethodSyncTransaction is not enabled");
-        return;
+    if (isAnimateTransactionEnabled_) {
+        AutoRSSyncTransaction autoSync(node->surfaceNode_, true);
+        task();
+    } else {
+        TLOGD(WmsLogTag::DEFAULT, "InputMethodSyncTransaction is disabled");
+        task();
     }
-    // Before open transaction, it must flush first.
-    RSTransactionAdapter::FlushImplicitTransaction(node->surfaceNode_);
-    RSSyncTransactionAdapter::OpenSyncTransaction(node->surfaceNode_);
-    WLOGD("OpenInputMethodSyncTransaction");
-}
-
-void WindowNodeContainer::CloseInputMethodSyncTransaction(sptr<WindowNode>& node)
-{
-    if (!isAnimateTransactionEnabled_) {
-        WLOGD("InputMethodSyncTransaction is not enabled while close");
-        return;
-    }
-    RSSyncTransactionAdapter::CloseSyncTransaction(node->surfaceNode_);
-    WLOGD("CloseInputMethodSyncTransaction");
 }
 
 bool WindowNodeContainer::IsWindowFollowParent(WindowType type)
@@ -841,9 +830,10 @@ bool WindowNodeContainer::AddNodeOnRSTree(sptr<WindowNode>& node, DisplayId disp
         windowGravity != WindowGravity::WINDOW_GRAVITY_FLOAT &&
         !animationPlayed) { // add keyboard with animation
         auto timingProtocol = animationConfig_.keyboardAnimationIn_.duration_;
-        OpenInputMethodSyncTransaction(node);
-        RSNode::Animate(rsUIContext, timingProtocol, animationConfig_.keyboardAnimationIn_.curve_, updateRSTreeFunc);
-        CloseInputMethodSyncTransaction(node);
+        RunInInputMethodSyncTransaction(node, [&]() {
+            RSNode::Animate(
+                rsUIContext, timingProtocol, animationConfig_.keyboardAnimationIn_.curve_, updateRSTreeFunc);
+        });
     } else {
         WLOGFD("add node without animation");
         updateRSTreeFunc();
@@ -917,10 +907,11 @@ bool WindowNodeContainer::RemoveNodeFromRSTree(sptr<WindowNode>& node, DisplayId
     } else if (node->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&
         windowGravity != WindowGravity::WINDOW_GRAVITY_FLOAT && !animationPlayed) {
         // remove keyboard with animation
-        OpenInputMethodSyncTransaction(node);
-        auto timingProtocol = animationConfig_.keyboardAnimationOut_.duration_;
-        RSNode::Animate(rsUIContext, timingProtocol, animationConfig_.keyboardAnimationOut_.curve_, updateRSTreeFunc);
-        CloseInputMethodSyncTransaction(node);
+        RunInInputMethodSyncTransaction(node, [&]() {
+            auto timingProtocol = animationConfig_.keyboardAnimationOut_.duration_;
+            RSNode::Animate(
+                rsUIContext, timingProtocol, animationConfig_.keyboardAnimationOut_.curve_, updateRSTreeFunc);
+        });
     } else {
         updateRSTreeFunc();
     }
@@ -1445,7 +1436,7 @@ void WindowNodeContainer::NotifyIfKeyboardRegionChanged(const sptr<WindowNode>& 
         sptr<OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo(OccupiedAreaType::TYPE_INPUT,
             overlapRect, textFieldPositionY, textFieldHeight);
         if (isAnimateTransactionEnabled_) {
-            auto rsTransaction = RSSyncTransactionAdapter(node->surfaceNode_).GetRSTransaction();
+            auto rsTransaction = RSSyncTransactionAdapter::GetRSTransaction(node->surfaceNode_);
             callingWindow->GetWindowToken()->UpdateOccupiedAreaChangeInfo(info, rsTransaction);
         } else {
             callingWindow->GetWindowToken()->UpdateOccupiedAreaChangeInfo(info);

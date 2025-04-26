@@ -205,7 +205,7 @@ HWTEST_F(WindowAgentTest, UpdateOccupiedAreaAndRect, TestSize.Level1)
     sptr<OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo(OccupiedAreaType::TYPE_INPUT, overlapRect);
     std::shared_ptr<RSTransaction> rsTransaction;
     if (windowAgent_->window_) {
-        rsTransaction = RSSyncTransactionAdapter(windowAgent_->window_->GetSurfaceNode()).GetRSTransaction();
+        rsTransaction = RSSyncTransactionAdapter::GetRSTransaction(windowAgent_->window_->GetSurfaceNode());
     }
 
     WMError err =

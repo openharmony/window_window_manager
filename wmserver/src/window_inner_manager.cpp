@@ -345,6 +345,7 @@ void WindowInnerManager::SetWindowRoot(const sptr<WindowRoot>& windowRoot)
 
 void WindowInnerManager::SetRSUIDirector(std::shared_ptr<RSUIDirector>& rsUIDirector)
 {
+    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "%{public}s", RSAdapterUtil::RSUIDirectorToStr(rsUIDirector).c_str());
     rsUIDirector_ = rsUIDirector;
 }
 

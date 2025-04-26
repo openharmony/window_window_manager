@@ -91,8 +91,8 @@ WindowManagerService::WindowManagerService() : SystemAbility(WINDOW_MANAGER_SERV
     // init RSUIDirector, it will handle animation callback
     rsUiDirector_ = RSUIDirector::Create();
     rsUiDirector_->SetUITaskRunner([this](const std::function<void()>& task, uint32_t delay) {
-        PostAsyncTask(task, "WindowManagerService:cacheGuard", delay);
-    }, 0, true);
+            PostAsyncTask(task, "WindowManagerService:cacheGuard", delay);
+        }, 0, true);
     rsUiDirector_->Init(false, true);
     TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "Create RSUIDirector: %{public}s",
           RSAdapterUtil::RSUIDirectorToStr(rsUiDirector_).c_str());

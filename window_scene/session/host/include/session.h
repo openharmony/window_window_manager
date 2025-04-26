@@ -241,7 +241,7 @@ public:
     /*
      * RS Multi Instance
      */
-    std::shared_ptr<RSUIContext> GetRSUIContext(const char* caller) const;
+    std::shared_ptr<RSUIContext> GetRSUIContext(const char* caller = "") const;
 
     /*
      * Window Scene Snapshot

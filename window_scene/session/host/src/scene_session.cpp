@@ -4327,7 +4327,6 @@ WMError SceneSession::SetSnapshotSkip(bool isSkip)
     }
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, isSkip: %{public}d", GetWindowId(), isSkip);
     property->SetSnapshotSkip(isSkip);
-
     {
         AutoRSTransaction trans(surfaceNode);
         surfaceNode->SetSkipLayer(isSkip);
@@ -4348,7 +4347,6 @@ void SceneSession::SetWatermarkEnabled(const std::string& watermarkName, bool is
     }
     TLOGI(WmsLogTag::DEFAULT, "watermarkName:%{public}s, isEnabled:%{public}d, wid:%{public}d",
         watermarkName.c_str(), isEnabled, GetPersistentId());
-    
     {
         AutoRSTransaction trans(surfaceNode);
         surfaceNode->SetWatermarkEnabled(watermarkName, isEnabled);
@@ -4377,7 +4375,6 @@ void SceneSession::SetSystemSceneOcclusionAlpha(double alpha)
     }
     uint8_t alpha8bit = static_cast<uint8_t>(alpha * 255);
     WLOGFI("SetAbilityBGAlpha alpha8bit=%{public}u.", alpha8bit);
-    
     {
         AutoRSTransaction trans(surfaceNode);
         surfaceNode->SetAbilityBGAlpha(alpha8bit);
@@ -4403,23 +4400,18 @@ void SceneSession::ResetOcclusionAlpha()
 void SceneSession::SetSystemSceneForceUIFirst(bool forceUIFirst)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::SetForceUIFirst");
-    auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
-    auto surfaceNode = GetSurfaceNode();
-    if (leashWinSurfaceNode == nullptr && surfaceNode == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "leashWindow and surfaceNode are nullptr");
-        return;
-    }
-    {
+    if (auto leashWinSurfaceNode = GetLeashWinSurfaceNode()) {
+        AutoRSTransaction trans(leashWinSurfaceNode);
+        TLOGI(WmsLogTag::DEFAULT, "%{public}s %{public}" PRIu64 " forceUIFirst=%{public}d.",
+            leashWinSurfaceNode->GetName().c_str(), leashWinSurfaceNode->GetId(), forceUIFirst);
+        leashWinSurfaceNode->SetForceUIFirst(forceUIFirst);
+    } else if (auto surfaceNode = GetSurfaceNode()) {
         AutoRSTransaction trans(surfaceNode);
-        if (leashWinSurfaceNode != nullptr) {
-            TLOGI(WmsLogTag::DEFAULT, "%{public}s %{public}" PRIu64 " forceUIFirst=%{public}d.",
-                leashWinSurfaceNode->GetName().c_str(), leashWinSurfaceNode->GetId(), forceUIFirst);
-            leashWinSurfaceNode->SetForceUIFirst(forceUIFirst);
-        } else if (surfaceNode != nullptr) {
-            TLOGI(WmsLogTag::DEFAULT, "%{public}s %{public}" PRIu64 " forceUIFirst=%{public}d.",
-                surfaceNode->GetName().c_str(), surfaceNode->GetId(), forceUIFirst);
-            surfaceNode->SetForceUIFirst(forceUIFirst);
-        }
+        TLOGI(WmsLogTag::DEFAULT, "%{public}s %{public}" PRIu64 " forceUIFirst=%{public}d.",
+            surfaceNode->GetName().c_str(), surfaceNode->GetId(), forceUIFirst);
+        surfaceNode->SetForceUIFirst(forceUIFirst);
+    } else {
+        TLOGE(WmsLogTag::DEFAULT, "leashWindow and surfaceNode are nullptr");
     }
 }
 
@@ -7084,8 +7076,7 @@ bool SceneSession::UpdateRectInner(const SessionUIParam& uiParam, SizeChangeReas
     if (!((NotifyServerToUpdateRect(uiParam, reason) || IsDirtyWindow()) && PipelineNeedNotifyClientToUpdateRect())) {
         return false;
     }
-    RSSyncTransactionAdapter rsSyncTransAdapter(GetSurfaceNode());
-    NotifyClientToUpdateRect("WMSPipeline", rsSyncTransAdapter.GetRSTransaction());
+    NotifyClientToUpdateRect("WMSPipeline", RSSyncTransactionAdapter::GetRSTransaction(GetSurfaceNode()));
     return true;
 }
 
@@ -7762,8 +7753,7 @@ void SceneSession::ModifyRSAnimatableProperty(bool isDefaultSidebarBlur, bool is
     // sidebar animation duration
     constexpr int32_t duration = 150;
     if (isDefaultSidebarBlur) {
-        auto surfaceNode = GetSurfaceNode();
-        auto rsUIContext = surfaceNode ? surfaceNode->GetRSUIContext() : nullptr;
+        auto rsUIContext = GetRSUIContext(__func__);
         if (isNeedAnimation) {
             Rosen::RSAnimationTimingProtocol timingProtocol;
             timingProtocol.SetDuration(duration);
@@ -8162,10 +8152,6 @@ void SceneSession::SetSidebarBlurMaximize(bool isMaximize)
 void SceneSession::ModifyRSAnimatablePropertyMaximize(bool isMaximize, bool isDark)
 {
     TLOGI(WmsLogTag::WMS_PC, "isMaximize: %{public}d, isDark: %{public}d", isMaximize, isDark);
-
-    auto surfaceNode = GetSurfaceNode();
-    auto rsUIContext = surfaceNode ? surfaceNode->GetRSUIContext() : nullptr;
-    
     // sidebar maximize animation duration
     constexpr int32_t duration = 150;
     Rosen::RSAnimationTimingProtocol timingProtocol;
@@ -8173,6 +8159,7 @@ void SceneSession::ModifyRSAnimatablePropertyMaximize(bool isMaximize, bool isDa
     timingProtocol.SetDirection(true);
     timingProtocol.SetFillMode(Rosen::FillMode::FORWARDS);
     timingProtocol.SetFinishCallbackType(Rosen::FinishCallbackType::LOGICALLY);
+    auto rsUIContext = GetRSUIContext(__func__);
     RSNode::OpenImplicitAnimation(rsUIContext, timingProtocol, Rosen::RSAnimationTimingCurve::LINEAR, nullptr);
     if (isMaximize) {
         if (isDark) {

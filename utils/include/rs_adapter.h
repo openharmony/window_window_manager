@@ -76,6 +76,8 @@ public:
     void OpenSyncTransaction(std::shared_ptr<AppExecFwk::EventHandler> handler = nullptr);
     void CloseSyncTransaction(std::shared_ptr<AppExecFwk::EventHandler> handler = nullptr);
 
+    static std::shared_ptr<RSTransaction> GetRSTransaction(const std::shared_ptr<RSUIContext>& rsUIContext);
+    static std::shared_ptr<RSTransaction> GetRSTransaction(const std::shared_ptr<RSNode>& rsNode);
     static void OpenSyncTransaction(
         const std::shared_ptr<RSUIContext>& rsUIContext, std::shared_ptr<AppExecFwk::EventHandler> handler = nullptr);
     static void OpenSyncTransaction(
@@ -91,8 +93,8 @@ private:
     template<typename ReturnType, typename Func>
     ReturnType InvokeSyncTransaction(Func&& func);
 
-    template<typename Func>
-    static void InvokeSyncTransaction(const std::shared_ptr<RSUIContext>& rsUIContext, Func&& func);
+    template<typename ReturnType, typename Func>
+    static ReturnType InvokeSyncTransaction(const std::shared_ptr<RSUIContext>& rsUIContext, Func&& func);
 
     std::shared_ptr<RSUIContext> rsUIContext_;
     RSSyncTransactionController* rsSyncTransController_;

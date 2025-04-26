@@ -174,7 +174,8 @@ void Session::SetSurfaceNode(const std::shared_ptr<RSSurfaceNode>& surfaceNode)
         auto originRSUIContext = surfaceNode->GetRSUIContext();
         surfaceNode->SetRSUIContext(rsUIContext_);
         TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
-              "Set RSUIContext: %{public}s, Origin %{public}s, Session [id: %{public}d]",
+              "Skip check in RS multi-instance and set RSUIContext: %{public}s, "
+              "origin %{public}s, Session [id: %{public}d]",
               RSAdapterUtil::RSNodeToStr(surfaceNode).c_str(),
               RSAdapterUtil::RSUIContextToStr(originRSUIContext).c_str(), GetPersistentId());
     }
@@ -204,7 +205,8 @@ void Session::SetLeashWinSurfaceNode(std::shared_ptr<RSSurfaceNode> leashWinSurf
         auto originRSUIContext = leashWinSurfaceNode->GetRSUIContext();
         leashWinSurfaceNode->SetRSUIContext(rsUIContext_);
         TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
-              "Set RSUIContext: %{public}s, Origin %{public}s, Session [id: %{public}d]",
+              "Skip check in RS multi-instance and set RSUIContext: %{public}s, "
+              "origin %{public}s, Session [id: %{public}d]",
               RSAdapterUtil::RSNodeToStr(leashWinSurfaceNode).c_str(),
               RSAdapterUtil::RSUIContextToStr(originRSUIContext).c_str(), GetPersistentId());
     }

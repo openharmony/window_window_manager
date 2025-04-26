@@ -669,20 +669,19 @@ std::shared_ptr<RSUIDirector> ScreenSessionManagerClient::GetRSUIDirector(Screen
 {
     if (screenId == SCREEN_ID_INVALID) {
         screenId = GetDefaultScreenId();
-        if (screenId == SCREEN_ID_INVALID) {
-            TLOGW(WmsLogTag::WMS_RS_MULTI_INSTANCE,
-                 "screenId and default screenId are invalid, caller: %{public}s", caller);
-            return nullptr;
-        } else {
-            TLOGW(WmsLogTag::WMS_RS_MULTI_INSTANCE,
-                 "screenId is invalid, use default screenId: %{public}" PRIu64 ", caller: %{public}s",
-                 screenId, caller);
-        }
+        TLOGW(WmsLogTag::WMS_RS_MULTI_INSTANCE,
+              "screenId is invalid, use default screenId: %{public}" PRIu64 ", caller: %{public}s",
+              screenId, caller);
+    }
+    if (screenId == SCREEN_ID_INVALID) {
+        TLOGW(WmsLogTag::WMS_RS_MULTI_INSTANCE,
+              "Default screenId is also invalid, caller: %{public}s", caller);
+        return nullptr;
     }
     auto screenSession = GetScreenSession(screenId);
     if (!screenSession) {
         TLOGE(WmsLogTag::WMS_RS_MULTI_INSTANCE,
-              "screen session is null, screenId: %{public}" PRIu64 ", caller: %{public}s", screenId, caller);
+              "Screen session is null, screenId: %{public}" PRIu64 ", caller: %{public}s", screenId, caller);
         return nullptr;
     }
     auto rsUIDirector = screenSession->GetRSUIDirector();

@@ -12070,7 +12070,7 @@ void SceneSessionManager::NotifyUpdateRectAfterLayout()
 {
     std::shared_ptr<RSTransaction> rsTransaction = nullptr;
     if (auto rootSceneSession = GetRootSceneSession()) {
-        rsTransaction = RSSyncTransactionAdapter(rootSceneSession->GetSurfaceNode()).GetRSTransaction();
+        rsTransaction = RSSyncTransactionAdapter::GetRSTransaction(rootSceneSession->GetRSUIContext());
     }
     auto task = [this, rsTransaction] {
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
