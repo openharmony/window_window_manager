@@ -98,6 +98,8 @@ public:
     void NotifyWindowCrossAxisChange(CrossAxisState state) override;
     WSError NotifyWindowAttachStateChange(bool isAttach) override;
     void NotifyKeyboardAnimationCompleted(const KeyboardPanelInfo& keyboardPanelInfo) override;
+    void NotifyKeyboardAnimationWillBegin(const KeyboardAnimationInfo& keyboardAnimationInfo,
+        const std::shared_ptr<RSTransaction>& rsTransaction) override;
     WSError SetCurrentRotation(int32_t currentRotation) override;
 
 private:

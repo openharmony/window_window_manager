@@ -253,6 +253,8 @@ public:
     virtual void NotifyWindowCrossAxisChange(CrossAxisState state) = 0;
     virtual WSError NotifyWindowAttachStateChange(bool isAttach) { return WSError::WS_DO_NOTHING; }
     virtual void NotifyKeyboardAnimationCompleted(const KeyboardPanelInfo& keyboardPanelInfo) {}
+    virtual void NotifyKeyboardAnimationWillBegin(const KeyboardAnimationInfo& keyboardAnimationInfo,
+        const std::shared_ptr<RSTransaction>& rsTransaction) {};
     virtual WSError NotifyTargetRotationInfo(OrientationInfo& info) { return WSError::WS_DO_NOTHING; }
     virtual RotationChangeResult NotifyRotationChange(const RotationChangeInfo& rotationChangeInfo)
     {
