@@ -1280,7 +1280,7 @@ uint32_t WindowImpl::GetApiTargetVersion() const
 void WindowImpl::InitRSUIDirector()
 {
     if (rsUIDirector_) {
-        TLOGW(WmsLogTag::WMS_RS_MULTI_INSTANCE,
+        TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
               "The RSUIDirector already exists: %{public}s, windowId: %{public}d",
               RSAdapterUtil::RSUIDirectorToStr(rsUIDirector_).c_str(), GetWindowId());
         return;
