@@ -385,6 +385,54 @@ HWTEST_F(SceneSessionTest6, NotifyWindowAttachStateListenerRegistered_session, F
     sceneSession->NotifyWindowAttachStateListenerRegistered(false);
     EXPECT_EQ(sceneSession->needNotifyAttachState_, false);
 }
+
+/**
+ * @tc.name: UpdateFollowScreenChange
+ * @tc.desc: UpdateFollowScreenChange 
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, UpdateFollowScreenChange, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    bool isFollowScreenChange = true;
+    sceneSession->specificCallback_ = nullptr;
+    WSError ret = sceneSession->UpdateFollowScreenChange(isFollowScreenChange);
+    EXPECT_EQ(WSError::WS_OK, true);
+
+    sptr<SceneSession::SpecificSessionCallback> callback = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    EXPECT_NE(nullptr, callback);
+    sceneSession->specificCallback_ = callback;
+    ret = sceneSession->UpdateFollowScreenChange(isFollowScreenChange);
+    EXPECT_EQ(WSError::WS_OK, true);
+
+    auto task = [] (bool isFollowScreenChange) {};
+    callback->onUpdateFollowScreenChange_ = task;
+    ret = sceneSession->UpdateFollowScreenChange(isFollowScreenChange);
+    EXPECT_EQ(WSError::WS_OK, true);
+}
+
+/**
+ * @tc.name: RegisterFollowScreenChangeCallback
+ * @tc.desc: RegisterFollowScreenChangeCallback 
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, RegisterFollowScreenChangeCallback, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    sceneSession->specificCallback_ = nullptr;
+    sptr<SceneSession::SpecificSessionCallback> callback = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    EXPECT_NE(nullptr, callback);
+    sceneSession->specificCallback_ = callback;
+    EXPECT_EQ(nullptr, callback->onUpdateFollowScreenChange_);
+
+    auto task = [] (bool isFollowScreenChange) {};
+    callback->onUpdateFollowScreenChange_ = task;
+    EXPECT_NE(nullptr, callback->onUpdateFollowScreenChange_);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
