@@ -1547,10 +1547,12 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
         uiContent->HideWindowTitleButton(true, !isLayoutFullScreen, hideMinimizeButton, hideCloseButton);
         if (!property_->GetCompatibleModeInPcTitleVisible()) {
             uiContent->OnContainerModalEvent(SCB_BACK_VISIBILITY, isLayoutFullScreen ? "false" : "true");
+            uiContent->OnContainerModalEvent("scb_compatible_maximize_visibility", isLayoutFullScreen ? "false" : "true");
         }
     } else {
         uiContent->HideWindowTitleButton(hideSplitButton, hideMaximizeButton, hideMinimizeButton, hideCloseButton);
         uiContent->OnContainerModalEvent(SCB_BACK_VISIBILITY, "false");
+        uiContent->OnContainerModalEvent("scb_compatible_maximize_visibility", "false");
     }
     if (isSuperFoldDisplayDevice) {
         handler_->PostTask([weakThis = wptr(this), where = __func__] {
