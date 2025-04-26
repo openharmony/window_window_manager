@@ -680,7 +680,7 @@ void KeyboardSession::CloseKeyboardSyncTransaction(uint32_t callingId, const WSR
 
 std::shared_ptr<RSTransaction> KeyboardSession::GetRSTransaction()
 {
-    return RSSyncTransactionAdapter(GetSurfaceNode()).GetRSTransaction();
+    return RSSyncTransactionAdapter::GetRSTransaction(GetSurfaceNode());
 }
 
 std::string KeyboardSession::GetSessionScreenName()

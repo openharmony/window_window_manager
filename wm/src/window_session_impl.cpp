@@ -938,11 +938,7 @@ void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& pr
         auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(window->property_->GetDisplayId());
         sptr<DisplayInfo> displayInfo = display ? display->GetDisplayInfo() : nullptr;
         window->UpdateVirtualPixelRatio(display);
-        std::shared_ptr<RSUIContext> rsUIContext;
-        if (auto surfaceNode = window->GetSurfaceNode()) {
-            rsUIContext = surfaceNode->GetRSUIContext();
-        }
-        RSTransactionAdapter rsTransAdapter(rsUIContext);
+        RSTransactionAdapter rsTransAdapter(window->GetSurfaceNode());
         const std::shared_ptr<RSTransaction>& rsTransaction = config.rsTransaction_;
         if (rsTransaction) {
             rsTransAdapter.FlushImplicitTransaction();
@@ -953,6 +949,7 @@ void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& pr
         protocol.SetDuration(config.animationDuration_);
         // animation curve: cubic [0.2, 0.0, 0.2, 1.0]
         auto curve = RSAnimationTimingCurve::CreateCubicCurve(0.2, 0.0, 0.2, 1.0);
+        auto rsUIContext = rsTransAdapter.GetRSUIContext();
         RSNode::OpenImplicitAnimation(rsUIContext, protocol, curve, [weak]() {
             auto window = weak.promote();
             if (!window) {
@@ -1003,14 +1000,9 @@ void WindowSessionImpl::UpdateRectForPageRotation(const Rect& wmRect, const Rect
                 return;
             }
             window->UpdateVirtualPixelRatio(display);
-            std::shared_ptr<RSUIContext> rsUIContext;
-            if (auto surfaceNode = window->GetSurfaceNode()) {
-                rsUIContext = surfaceNode->GetRSUIContext();
-            }
-            RSTransactionAdapter rsTransAdapter(rsUIContext);
             const std::shared_ptr<RSTransaction>& rsTransaction = config.rsTransaction_;
             if (rsTransaction) {
-                rsTransAdapter.FlushImplicitTransaction();
+                RSTransactionAdapter::FlushImplicitTransaction(window->GetSurfaceNode());
                 rsTransaction->Begin();
             }
             if ((wmRect != preRect) || (wmReason != window->lastSizeChangeReason_)) {
@@ -1029,7 +1021,7 @@ void WindowSessionImpl::UpdateRectForPageRotation(const Rect& wmRect, const Rect
             if (rsTransaction) {
                 rsTransaction->Commit();
             } else {
-                rsTransAdapter.FlushImplicitTransaction();
+                RSTransactionAdapter::FlushImplicitTransaction(window->GetSurfaceNode());
             }
             window->postTaskDone_ = true;
         },
@@ -1126,12 +1118,7 @@ void WindowSessionImpl::UpdateRectForResizeWithAnimation(const Rect& wmRect, con
             TLOGNE(WmsLogTag::WMS_LAYOUT, "window is null, updateRectForResizeWithAnimation failed");
             return;
         }
-
-        std::shared_ptr<RSUIContext> rsUIContext;
-        if (auto surfaceNode = window->GetSurfaceNode()) {
-            rsUIContext = surfaceNode->GetRSUIContext();
-        }
-        RSTransactionAdapter rsTransAdapter(rsUIContext);
+        RSTransactionAdapter rsTransAdapter(window->GetSurfaceNode());
         if (rsTransaction) {
             rsTransAdapter.FlushImplicitTransaction();
             rsTransaction->Begin();
@@ -1140,6 +1127,7 @@ void WindowSessionImpl::UpdateRectForResizeWithAnimation(const Rect& wmRect, con
         protocol.SetDuration(rectAnimationConfig.duration);
         auto curve = RSAnimationTimingCurve::CreateCubicCurve(rectAnimationConfig.x1,
             rectAnimationConfig.y1, rectAnimationConfig.x2, rectAnimationConfig.y2);
+        auto rsUIContext = rsTransAdapter.GetRSUIContext();
         RSNode::OpenImplicitAnimation(rsUIContext, protocol, curve, nullptr);
         if (wmRect != preRect || wmReason != window->lastSizeChangeReason_) {
             window->NotifySizeChange(wmRect, wmReason);

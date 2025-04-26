@@ -837,7 +837,7 @@ public:
 
     /**
      * @brief Get the RSUIDirector associated with the window
-     * 
+     *
      * @return std::shared_ptr<RSUIDirector> The RSUIDirector instance
      */
     virtual std::shared_ptr<RSUIDirector> GetRSUIDirector() const { return nullptr; }

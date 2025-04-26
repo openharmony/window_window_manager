@@ -375,7 +375,7 @@ void WindowLayoutPolicy::NotifyClientAndAnimation(const sptr<WindowNode>& node,
 {
     if (node->GetWindowToken()) {
         auto type = node->GetWindowType();
-        auto rsTransaction = RSSyncTransactionAdapter(node->surfaceNode_).GetRSTransaction();
+        auto rsTransaction = RSSyncTransactionAdapter::GetRSTransaction(node->surfaceNode_);
         if (reason == WindowSizeChangeReason::ROTATION && rsTransaction && IsNeedAnimationSync(type)) {
             node->GetWindowToken()->UpdateWindowRect(winRect, node->GetDecoStatus(), reason, rsTransaction);
         } else {
@@ -690,7 +690,7 @@ void WindowLayoutPolicy::UpdateSurfaceBounds(const sptr<WindowNode>& node, const
     };
 
     std::shared_ptr<RSUIContext> rsUIContext;
-    if(node->surfaceNode_) {
+    if (node->surfaceNode_) {
         rsUIContext = node->surfaceNode_->GetRSUIContext();
     }
 

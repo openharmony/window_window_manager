@@ -365,7 +365,7 @@ void StartingWindow::AddNodeOnRSTree(sptr<WindowNode>& node, bool isMultiDisplay
     if (!RemoteAnimation::CheckAnimationController()) {
         std::shared_ptr<RSUIContext> rsUIContext;
         if (node->leashWinSurfaceNode_) {
-            rsUIContext = node->leashWinSurfaceNode_->GetRSUIContext(); 
+            rsUIContext = node->leashWinSurfaceNode_->GetRSUIContext();
         }
         RSNode::Animate(rsUIContext, animationConfig_.windowAnimationConfig_.animationTiming_.timingProtocol_,
                         animationConfig_.windowAnimationConfig_.animationTiming_.timingCurve_,

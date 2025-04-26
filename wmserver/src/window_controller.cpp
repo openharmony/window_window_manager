@@ -497,9 +497,9 @@ void WindowController::NotifyInputCallingWindowRectAndOccupiedAreaChange(const s
     sptr<OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo(OccupiedAreaType::TYPE_INPUT,
         safeRect, safeRect.height_);
 
-    auto rsTransaction = RSSyncTransactionAdapter(callingWindow->surfaceNode_).GetRSTransaction();
+    auto rsTransaction = RSSyncTransactionAdapter::GetRSTransaction(callingWindow->surfaceNode_);
     if (WindowNodeContainer::GetAnimateTransactionEnabled() && rsTransaction) {
-        callingWindow->GetWindowToken()->UpdateOccupiedAreaAndRect(info, rect,rsTransaction);
+        callingWindow->GetWindowToken()->UpdateOccupiedAreaAndRect(info, rect, rsTransaction);
     } else {
         callingWindow->GetWindowToken()->UpdateOccupiedAreaAndRect(info, rect);
     }
@@ -1378,11 +1378,7 @@ void WindowController::FlushWindowInfo(uint32_t windowId)
     WLOGD("FlushWindowInfo");
     displayZoomController_->UpdateWindowZoomInfo(windowId);
     auto node = windowRoot_->GetWindowNode(windowId);
-    if (node) {
-        RSTransactionAdapter::FlushImplicitTransaction(node->surfaceNode_);
-    } else {
-        RSTransaction::FlushImplicitTransaction();
-    }
+    RSTransactionAdapter::FlushImplicitTransaction(node ? node->surfaceNode_ : nullptr);
     inputWindowMonitor_->UpdateInputWindow(windowId);
 }
 

@@ -197,9 +197,8 @@ static void GetAndDrawSnapShot(const sptr<WindowNode>& srcNode)
         struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
         rsSurfaceNodeConfig.SurfaceNodeName = "closeWin" + std::to_string(srcNode->GetWindowId());
         RSTransactionAdapter rsTransAdapter(srcNode->leashWinSurfaceNode_);
-        auto rsUIContext = rsTransAdapter.GetRSUIContext();
         srcNode->closeWinSurfaceNode_ = RSSurfaceNode::Create(rsSurfaceNodeConfig,
-            RSSurfaceNodeType::STARTING_WINDOW_NODE, true, false, rsUIContext);
+            RSSurfaceNodeType::STARTING_WINDOW_NODE, true, false, rsTransAdapter.GetRSUIContext());
         TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
               "Create RSSurfaceNode: %{public}s", RSAdapterUtil::RSNodeToStr(srcNode->closeWinSurfaceNode_).c_str());
         auto rect = srcNode->GetWindowRect();
@@ -276,7 +275,7 @@ sptr<RSWindowAnimationFinishedCallback> RemoteAnimation::GetTransitionFinishedCa
         MinimizeApp::ExecuteMinimizeAll(); // minimize execute in show animation
         RSAnimationTimingProtocol timingProtocol(200); // animation time
         auto rsTransAdapter = std::make_shared<RSTransactionAdapter>(weakNode->leashWinSurfaceNode_);
-        RSNode::Animate(rsTransAdapter->GetRSUIContext(), timingProtocol, RSAnimationTimingCurve::EASE_OUT, 
+        RSNode::Animate(rsTransAdapter->GetRSUIContext(), timingProtocol, RSAnimationTimingCurve::EASE_OUT,
             [weakNode, rsTransAdapter]() {
                 auto winRect = weakNode->GetWindowRect();
                 WLOGFD("name:%{public}s id:%{public}u winRect:[x:%{public}d, y:%{public}d, w:%{public}d, h:%{public}d]",
