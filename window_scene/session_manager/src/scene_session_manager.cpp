@@ -1949,12 +1949,7 @@ sptr<SceneSession> SceneSessionManager::RequestKeyboardPanelSession(const std::s
         .screenId_ = displayId,
         .isRotable_ = true,
     };
-    if (systemConfig_.IsPcWindow()) {
-        panelInfo.sceneType_ = SceneType::INPUT_SCENE;
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "Set panel canvasNode");
-    } else {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "Set panel surfaceNode");
-    }
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Set panel surfaceNode");
     return RequestSceneSession(panelInfo, nullptr);
 }
 
