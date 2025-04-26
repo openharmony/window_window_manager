@@ -1086,23 +1086,45 @@ HWTEST_F(WindowSceneSessionImplTest, Maximize01, TestSize.Level1)
 }
 
 /**
- * @tc.name: Maximize01
- * @tc.desc: Maximize
+ * @tc.name: CompatibleModeMaximize
+ * @tc.desc: CompatibleModeMaximize
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest, Maximize01, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplTest, CompatibleModeMaximize, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("Maximize01");
-    option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    option->SetWindowName("CompatibleModeMaximize");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, windowSceneSession->CompatibleModeMaximize());
 
     windowSceneSession->property_->SetPersistentId(1);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
 
     windowSceneSession->hostSession_ = session;
-    ASSERT_EQ(WMError::WM_OK, windowSceneSession->Maximize());
+    ASSERT_EQ(WMError::WM_OK, windowSceneSession->CompatibleModeMaximize());
+}
+
+/**
+ * @tc.name: CompatibleModeRecover
+ * @tc.desc: CompatibleModeRecover
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, CompatibleModeRecover, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("CompatibleModeRecover");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, windowSceneSession->CompatibleModeRecover());
+
+    windowSceneSession->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+
+    windowSceneSession->hostSession_ = session;
+    ASSERT_EQ(WMError::WM_OK, windowSceneSession->CompatibleModeRecover());
 }
 
 /**

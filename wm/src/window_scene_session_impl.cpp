@@ -2986,6 +2986,40 @@ WMError WindowSceneSessionImpl::Minimize()
     return WMError::WM_OK;
 }
 
+WMError WindowSceneSessionImpl::CompatibleModeMaximize()
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "id: %{public}d", GetPersistentId());
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (!WindowHelper::IsMainWindow(GetType())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "maximize fail, not main");
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+    hostSession->OnSessionEvent(SessionEvent::EVENT_COMPATIBLE_TO_MAXIMIZE);
+    return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::CompatibleModeRecover()
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "id: %{public}d", GetPersistentId());
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (!WindowHelper::IsMainWindow(GetType())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "recover fail, not main");
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+    hostSession->OnSessionEvent(SessionEvent::EVENT_COMPATIBLE_TO_RECOVER);
+    return WMError::WM_OK;
+}
+
 WMError WindowSceneSessionImpl::Maximize()
 {
     TLOGI(WmsLogTag::WMS_LAYOUT_PC, "id: %{public}d", GetPersistentId());
@@ -5871,6 +5905,12 @@ WMError WindowSceneSessionImpl::OnContainerModalEvent(const std::string& eventNa
         return ret;
     } else if (eventName == BACK_WINDOW_EVENT) {
         HandleBackEvent();
+        return WMError::WM_OK;
+    } else if (eventName == COMPATIBLE_MAX_WINDOW_EVENT) {
+        CompatibleModeMaximize();
+        return WMError::WM_OK;
+    } else if (eventName == COMPATIBLE_RECOVER_WINDOW_EVENT) {
+        CompatibleModeRecover();
         return WMError::WM_OK;
     }
     return WMError::WM_DO_NOTHING;
