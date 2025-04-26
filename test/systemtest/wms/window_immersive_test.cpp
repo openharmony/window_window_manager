@@ -25,7 +25,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowImmersiveTest"};
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowImmersiveTest" };
 
 const Rect SYS_BAR_REGION_NULL = { 0, 0, 0, 0 };
 const SystemBarProperty SYS_BAR_PROP_DEFAULT;
@@ -46,12 +46,12 @@ const SystemBarRegionTints TEST_PROPS_2 = {
     { WindowType::WINDOW_TYPE_NAVIGATION_BAR, SYS_BAR_PROP_3, SYS_BAR_REGION_NULL },
 };
 
-const Rect EMPTY_RECT = {0, 0, 0, 0};
+const Rect EMPTY_RECT = { 0, 0, 0, 0 };
 const float RATIO = 0.3;
-}
+} // namespace
 
 using Utils = WindowTestUtils;
-const int WAIT_ASYNC_US = 100000;  // 100000us
+const int WAIT_ASYNC_US = 100000; // 100000us
 
 class TestSystemBarChangedListener : public ISystemBarChangedListener {
 public:
@@ -109,14 +109,18 @@ void WindowImmersiveTest::DumpFailedInfo(const SystemBarRegionTints& expect)
     WLOGI("WindowImmersiveTest Expected:");
     for (auto tint : expect) {
         WLOGI("WindowType: %{public}4d, Enable: %{public}4d, Color: %{public}x | %{public}x",
-            static_cast<uint32_t>(tint.type_), tint.prop_.enable_,
-            tint.prop_.backgroundColor_, tint.prop_.contentColor_);
+              static_cast<uint32_t>(tint.type_),
+              tint.prop_.enable_,
+              tint.prop_.backgroundColor_,
+              tint.prop_.contentColor_);
     }
     WLOGI("WindowImmersiveTest Act: ");
     for (auto tint : act) {
         WLOGI("WindowType: %{public}4d, Enable: %{public}4d, Color: %{public}x | %{public}x",
-            static_cast<uint32_t>(tint.type_), tint.prop_.enable_,
-            tint.prop_.backgroundColor_, tint.prop_.contentColor_);
+              static_cast<uint32_t>(tint.type_),
+              tint.prop_.enable_,
+              tint.prop_.backgroundColor_,
+              tint.prop_.contentColor_);
     }
 }
 
@@ -128,8 +132,10 @@ void WindowImmersiveTest::DumpFailedInfo(bool expectStatus, bool expectNav)
     WLOGI("WindowImmersiveTest Act: ");
     for (auto tint : act) {
         WLOGI("WindowType: %{public}4d, Enable: %{public}4d, Color: %{public}x | %{public}x",
-            static_cast<uint32_t>(tint.type_), tint.prop_.enable_,
-            tint.prop_.backgroundColor_, tint.prop_.contentColor_);
+              static_cast<uint32_t>(tint.type_),
+              tint.prop_.enable_,
+              tint.prop_.backgroundColor_,
+              tint.prop_.contentColor_);
     }
 }
 
@@ -164,8 +170,8 @@ bool WindowImmersiveTest::SystemBarEnableState(bool expectStatus, bool expectNav
     auto act = testSystemBarChangedListener_->tints_;
     bool check = false;
     for (auto tint : act) {
-        if ((tint.type_ == WindowType::WINDOW_TYPE_STATUS_BAR && tint.prop_.enable_ == expectStatus)
-            || (tint.type_ == WindowType::WINDOW_TYPE_NAVIGATION_BAR && tint.prop_.enable_ == expectNav)) {
+        if ((tint.type_ == WindowType::WINDOW_TYPE_STATUS_BAR && tint.prop_.enable_ == expectStatus) ||
+            (tint.type_ == WindowType::WINDOW_TYPE_NAVIGATION_BAR && tint.prop_.enable_ == expectNav)) {
             check = true;
         } else {
             check = false;
@@ -179,7 +185,7 @@ bool WindowImmersiveTest::SystemBarEnableState(bool expectStatus, bool expectNav
 
 void TestSystemBarChangedListener::OnSystemBarPropertyChange(DisplayId displayId, const SystemBarRegionTints& tints)
 {
-    WLOGI("TestSystemBarChangedListener Display ID: %{public}" PRIu64"", displayId);
+    WLOGI("TestSystemBarChangedListener Display ID: %{public}" PRIu64 "", displayId);
     WLOGI("TestSystemBarChangedListener tints size: %{public}zu", tints.size());
     for (auto tint : tints) {
         auto type = tint.type_;
@@ -200,15 +206,16 @@ void WindowImmersiveTest::SetUpTestCase()
 {
     auto display = DisplayManager::GetInstance().GetDisplayById(0);
     ASSERT_TRUE((display != nullptr));
-    WLOGI("GetDefaultDisplay: id %{public}" PRIu64", w %{public}d, h %{public}d, fps %{public}u",
-        display->GetId(), display->GetWidth(), display->GetHeight(), display->GetRefreshRate());
-    Rect displayRect = {0, 0, display->GetWidth(), display->GetHeight()};
+    WLOGI("GetDefaultDisplay: id %{public}" PRIu64 ", w %{public}d, h %{public}d, fps %{public}u",
+          display->GetId(),
+          display->GetWidth(),
+          display->GetHeight(),
+          display->GetRefreshRate());
+    Rect displayRect = { 0, 0, display->GetWidth(), display->GetHeight() };
     Utils::InitByDisplayRect(displayRect);
 }
 
-void WindowImmersiveTest::TearDownTestCase()
-{
-}
+void WindowImmersiveTest::TearDownTestCase() {}
 
 void WindowImmersiveTest::SetUp()
 {
@@ -217,7 +224,7 @@ void WindowImmersiveTest::SetUp()
         .rect = Utils::customAppRect_,
         .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
         .mode = WindowMode::WINDOW_MODE_FULLSCREEN, // immersive setting
-        .needAvoid = false, // immersive setting
+        .needAvoid = false,                         // immersive setting
         .parentLimit = false,
         .parentId = INVALID_WINDOW_ID,
     };
@@ -458,6 +465,6 @@ HWTEST_F(WindowImmersiveTest, DockWindowTest01, TestSize.Level1)
     }
     ASSERT_EQ(WMError::WM_OK, dockWindow->Destroy());
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS
