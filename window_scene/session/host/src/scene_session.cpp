@@ -1186,8 +1186,7 @@ void SceneSession::RegisterFollowScreenChangeCallback(NotifyFollowScreenChangeFu
             return;
         }
         session->specificCallback_->onUpdateFollowScreenChange_ = std::move(callback);
-        auto property = session->GetSessionProperty();
-        session->specificCallback_->onUpdateFollowScreenChange_(property->GetFollowScreenChange());
+        session->specificCallback_->onUpdateFollowScreenChange_(session->GetFollowScreenChange());
     }, __func__);
 }
 
@@ -4490,6 +4489,16 @@ bool SceneSession::IsNeedDefaultAnimation() const
     return needDefaultAnimationFlag_;
 }
 
+bool SceneSession::GetFollowScreenChange() const
+{
+    return isFollowScreenChange_;
+}
+
+void SceneSession::SetFollowScreenChange(bool isFollowScreenChange)
+{
+    isFollowScreenChange_ = isFollowScreenChange;
+}
+
 bool SceneSession::IsAppSession() const
 {
     if (GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
@@ -5737,6 +5746,7 @@ WMError SceneSession::HandleActionUpdateFollowScreenChange(const sptr<WindowSess
 
 WSError SceneSession::UpdateFollowScreenChange(bool isFollowScreenChange)
 {
+    SetFollowScreenChange(isFollowScreenChange);
     auto task = [weakThis = wptr(this), isFollowScreenChange] {
         auto session = weakThis.promote();
         if (!session || !session->specificCallback_) {

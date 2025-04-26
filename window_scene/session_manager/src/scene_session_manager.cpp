@@ -7709,6 +7709,7 @@ void SceneSessionManager::RegisterSessionChangeByActionNotifyManagerFunc(sptr<Sc
             case WSPropertyChangeAction::ACTION_UPDATE_STATUS_PROPS:
             case WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_PROPS:
             case WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_INDICATOR_PROPS:
+            case WSPropertyChangeAction::ACTION_UPDATE_FOLLOW_SCREEN_CHANGE:
                 NotifyWindowInfoChange(property->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
                 break;
             case WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS:
