@@ -1606,6 +1606,10 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
             node->GetWindowProperty()->SetTextFieldHeight(property->GetTextFieldHeight());
             break;
         }
+        case PropertyChangeAction::ACTION_UPDATE_FOLLOW_SCREEN_CHANGE: {
+            node->GetWindowProperty()->SetFollowScreenChange(property->GetFollowScreenChange());
+            break;
+        }
         default:
             break;
     }
