@@ -106,6 +106,8 @@ constexpr int32_t DISPLAY_ID_C = 999;
 constexpr int32_t MAX_POINTERS = 16;
 constexpr int32_t TOUCH_SLOP_RATIO = 25;
 const std::string BACK_WINDOW_EVENT = "scb_back_window_event";
+const std::string COMPATIBLE_MAX_WINDOW_EVENT = "win_compatible_max_event";
+const std::string COMPATIBLE_RECOVER_WINDOW_EVENT = "win_compatible_recover_event";
 const std::unordered_set<WindowType> INVALID_SYSTEM_WINDOW_TYPE = {
     WindowType::WINDOW_TYPE_NEGATIVE_SCREEN,
     WindowType::WINDOW_TYPE_THEME_EDITOR,

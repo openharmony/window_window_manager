@@ -174,6 +174,8 @@ public:
     WMError SetWindowRectAutoSave(bool enabled, bool isSaveBySpecifiedFlag = false) override;
     WMError IsWindowRectAutoSave(bool& enabled) override;
     WMError MaximizeFloating() override;
+    WMError CompatibleModeMaximize();
+    WMError CompatibleModeRecover();
     WMError Maximize() override;
     WMError Maximize(MaximizePresentation presentation) override;
     WMError Recover() override;
