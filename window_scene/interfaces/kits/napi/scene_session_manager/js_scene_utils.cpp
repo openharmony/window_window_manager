@@ -2176,6 +2176,21 @@ napi_value CreateRectType(napi_env env)
     return objValue;
 }
 
+napi_value CreateSupportType(napi_env env)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to get object");
+        return NapiGetUndefined(env);
+    }
+    napi_set_named_property(env, objValue, "ALLOW_KEYBOARD_WILL_ANIMATION_NOTIFICATION",
+        CreateJsValue(env, static_cast<uint32_t>(SupportFunctionType::ALLOW_KEYBOARD_WILL_ANIMATION_NOTIFICATION)));
+    napi_set_named_property(env, objValue, "ALLOW_KEYBOARD_DID_ANIMATION_NOTIFICATION",
+        CreateJsValue(env, static_cast<uint32_t>(SupportFunctionType::ALLOW_KEYBOARD_DID_ANIMATION_NOTIFICATION)));
+    return objValue;
+}
+
 MainThreadScheduler::MainThreadScheduler(napi_env env)
     : env_(env)
 {

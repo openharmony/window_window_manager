@@ -1900,6 +1900,50 @@ public:
     uint32_t duration_ = 0;
 };
 
+/**
+ * @struct KeyboardAnimationInfo
+ *
+ * @brief Info of keyboard animation
+ */
+struct KeyboardAnimationInfo: public Parcelable {
+    Rect beginRect { 0, 0, 0, 0 };
+    Rect endRect { 0, 0, 0, 0 };
+    bool isShow { false };
+    bool withAnimation { false };
+
+    bool Marshalling(Parcel& parcel) const
+    {
+        bool result = parcel.WriteInt32(beginRect.posX_) &&
+            parcel.WriteInt32(beginRect.posY_) &&
+            parcel.WriteUint32(beginRect.width_) &&
+            parcel.WriteUint32(beginRect.height_) &&
+            parcel.WriteInt32(endRect.posX_) && parcel.WriteInt32(endRect.posY_) &&
+            parcel.WriteUint32(endRect.width_) && parcel.WriteUint32(endRect.height_) &&
+            parcel.WriteBool(isShow) && parcel.WriteBool(withAnimation);
+        return result;
+    }
+
+    static KeyboardAnimationInfo* Unmarshalling(Parcel& parcel)
+    {
+        KeyboardAnimationInfo* animationInfo = new KeyboardAnimationInfo();
+        bool res = parcel.ReadInt32(animationInfo->beginRect.posX_) &&
+            parcel.ReadInt32(animationInfo->beginRect.posY_) &&
+            parcel.ReadUint32(animationInfo->beginRect.width_) &&
+            parcel.ReadUint32(animationInfo->beginRect.height_) &&
+            parcel.ReadInt32(animationInfo->endRect.posX_) &&
+            parcel.ReadInt32(animationInfo->endRect.posY_) &&
+            parcel.ReadUint32(animationInfo->endRect.width_) &&
+            parcel.ReadUint32(animationInfo->endRect.height_) &&
+            parcel.ReadBool(animationInfo->isShow) &&
+            parcel.ReadBool(animationInfo->withAnimation);
+        if (!res) {
+            delete animationInfo;
+            return nullptr;
+        }
+        return animationInfo;
+    }
+};
+
 struct KeyboardAnimationConfig {
     KeyboardAnimationCurve curveIn;
     KeyboardAnimationCurve curveOut;
@@ -2463,6 +2507,21 @@ struct RotationChangeResult {
  */
 enum DefaultSpecificZIndex {
     MUTISCREEN_COLLABORATION = 930,
+};
+
+/**
+ * @brief Enumerates support function type
+ */
+enum SupportFunctionType : uint32_t {
+    /**
+     * Supports callbacks triggered begore the keyboard show/hide animations begin.
+     */
+    ALLOW_KEYBOARD_WILL_ANIMATION_NOTIFICATION = 1 << 0,
+
+    /**
+     * Supports callbacks triggered after the keyboard show/hide animations complete.
+     */
+    ALLOW_KEYBOARD_DID_ANIMATION_NOTIFICATION = 1 << 1,
 };
 }
 }

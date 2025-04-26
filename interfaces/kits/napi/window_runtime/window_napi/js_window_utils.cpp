@@ -37,8 +37,15 @@ constexpr size_t ARG_COUNT_ZERO = 0;
 constexpr size_t ARG_COUNT_TWO = 2;
 constexpr size_t ARG_COUNT_THREE = 3;
 constexpr int32_t MAX_TOUCHABLE_AREAS = 10;
+<<<<<<< HEAD
+=======
+constexpr uint32_t API_VERSION_18 = 18;
+constexpr uint32_t CURVE_TYPE_SPRING = 1;
+constexpr uint32_t ANIMATION_FOUR_PARAMS_SIZE = 4;
+>>>>>>> 33d9e0422d (动画开始前回调实现)
 const std::string RESOLVED_CALLBACK = "resolvedCallback";
 const std::string REJECTED_CALLBACK = "rejectedCallback";
+const std::string INTERPOLATINGSPRING  = "interpolatingSpring";
 constexpr std::array<DefaultSpecificZIndex, 1> DefaultSpecificZIndexList = {
     DefaultSpecificZIndex::MUTISCREEN_COLLABORATION
 };
@@ -446,6 +453,53 @@ napi_value GetRectAndConvertToJsValue(napi_env env, const Rect& rect)
     napi_set_named_property(env, objValue, "top", CreateJsValue(env, rect.posY_));
     napi_set_named_property(env, objValue, "width", CreateJsValue(env, rect.width_));
     napi_set_named_property(env, objValue, "height", CreateJsValue(env, rect.height_));
+    return objValue;
+}
+
+napi_value CreateJsWindowAnimationConfigObject(napi_env env, const KeyboardAnimationCurve& curve)
+{
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+    napi_status status = napi_invalid_arg;
+    if (curve.curveType_ == INTERPOLATINGSPRING) {
+        status = napi_set_named_property(env, objValue, "curve", CreateJsValue(env, CURVE_TYPE_SPRING));
+        if (status != napi_ok) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "Fail to set curve to napi property");
+            return NapiGetUndefined(env);
+        }
+    }
+    status = napi_set_named_property(env, objValue, "duration", CreateJsValue(env, curve.duration_));
+    if (status != napi_ok) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Fail to set duration to napi property");
+        return NapiGetUndefined(env);
+    }
+    auto paramSize = curve.curveParams_.size();
+    if (paramSize == ANIMATION_FOUR_PARAMS_SIZE) {
+        napi_value jsArray = nullptr;
+        status = napi_create_array_with_length(env, paramSize, &jsArray);
+        if (status != napi_ok) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "Fail to create jsArray");
+            return NapiGetUndefined(env);
+        }
+        for (size_t i = 0; i < paramSize; i++) {
+            napi_value param = nullptr;
+            status = napi_create_double(env, static_cast<double>(curve.curveParams_[i]), &param);
+            if (status != napi_ok) {
+                TLOGE(WmsLogTag::WMS_KEYBOARD, "Fail to create jsDoubleValue");
+                return NapiGetUndefined(env);
+            }
+            status = napi_set_element(env, jsArray, i, param);
+            if (status != napi_ok) {
+                TLOGE(WmsLogTag::WMS_KEYBOARD, "Fail to set element to jsArray");
+                return NapiGetUndefined(env);
+            }
+        }
+        status = napi_set_named_property(env, objValue, "param", jsArray);
+        if (status != napi_ok) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "Fail to set param to napi property");
+            return NapiGetUndefined(env);
+        }
+    }
     return objValue;
 }
 
