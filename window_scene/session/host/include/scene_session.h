@@ -1081,6 +1081,7 @@ private:
     std::vector<sptr<SceneSession>> toastSession_;
     std::atomic_bool needStartingWindowExitAnimation_ { true };
     bool needDefaultAnimationFlag_ = true;
+    bool isFollowScreenChange_ = false;
     SessionEventParam sessionEventParam_ = { 0, 0, 0, 0, 0 };
     std::atomic_bool isStartMoving_ { false };
     std::atomic_bool isVisibleForAccessibility_ { true };
@@ -1192,6 +1193,8 @@ private:
      */
     NotifyReqOrientationChangeFunc onRequestedOrientationChange_;
     NotifyRotationChangeFunc onUpdateRotationChangeFunc_;
+    bool GetFollowScreenChange() const;
+    void SetFollowScreenChange(bool isFollowScreenChange);
 
     /*
      * Window Animation
