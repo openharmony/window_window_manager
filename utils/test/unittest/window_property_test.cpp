@@ -660,6 +660,20 @@ HWTEST_F(WindowPropertyTest, GetTextFieldHeight36, TestSize.Level1)
     double res = winPropSrc.GetTextFieldHeight();
     ASSERT_EQ(res, textFieldHeight);
 }
+
+/**
+ * @tc.name: GetFollowScreenChange37
+ * @tc.desc: GetFollowScreenChange test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, GetFollowScreenChange37, TestSize.Level1)
+{
+    WindowProperty winPropSrc;
+    bool isFollowScreenChange = true;
+    winPropSrc.SetFollowScreenChange(isFollowScreenChange);
+    bool res = winPropSrc.GetFollowScreenChange();
+    ASSERT_EQ(res, isFollowScreenChange);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
