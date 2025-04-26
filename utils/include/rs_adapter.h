@@ -20,16 +20,16 @@
 #include <transaction/rs_sync_transaction_handler.h>
 #include <transaction/rs_transaction.h>
 #include <ui/rs_node.h>
-#include <ui/rs_ui_director.h>
 #include <ui/rs_ui_context.h>
+#include <ui/rs_ui_director.h>
 
 namespace OHOS {
 namespace Rosen {
 class RSTransactionAdapter {
 public:
+    explicit RSTransactionAdapter(std::shared_ptr<RSUIContext> rsUIContext);
     explicit RSTransactionAdapter(std::shared_ptr<RSNode> rsNode);
     explicit RSTransactionAdapter(std::shared_ptr<RSUIDirector> rsUIDirector);
-    explicit RSTransactionAdapter(std::shared_ptr<RSUIContext> rsUIContext);
 
     std::shared_ptr<RSUIContext> GetRSUIContext() const;
     void Begin();
@@ -37,13 +37,18 @@ public:
     void FlushImplicitTransaction(uint64_t timestamp = 0, const std::string& abilityName = "");
 
     static void FlushImplicitTransaction(
+        const std::shared_ptr<RSUIContext>& rsUIContext, uint64_t timestamp = 0, const std::string& abilityName = "");
+    static void FlushImplicitTransaction(
         const std::shared_ptr<RSNode>& rsNode, uint64_t timestamp = 0, const std::string& abilityName = "");
     static void FlushImplicitTransaction(
         const std::shared_ptr<RSUIDirector>& rsUIDirector, uint64_t timestamp = 0, const std::string& abilityName = "");
-    static void FlushImplicitTransaction(
-        const std::shared_ptr<RSUIContext>& rsUIContext, uint64_t timestamp = 0, const std::string& abilityName = "");
 
 private:
+    void InitByRSUIContext(const std::shared_ptr<RSUIContext>& rsUIContext);
+
+    template<typename Func>
+    void InvokeTransaction(Func&& func);
+
     std::shared_ptr<RSUIContext> rsUIContext_;
     RSTransactionProxy* rsTransProxy_;
     std::shared_ptr<RSTransactionHandler> rsTransHandler_;
@@ -64,23 +69,31 @@ private:
 
 class RSSyncTransactionAdapter {
 public:
-    explicit RSSyncTransactionAdapter(std::shared_ptr<RSNode> rsNode);
     explicit RSSyncTransactionAdapter(std::shared_ptr<RSUIContext> rsUIContext);
+    explicit RSSyncTransactionAdapter(std::shared_ptr<RSNode> rsNode);
 
-    std::shared_ptr<RSTransaction> GetRSTransaction() const;
+    std::shared_ptr<RSTransaction> GetRSTransaction();
     void OpenSyncTransaction(std::shared_ptr<AppExecFwk::EventHandler> handler = nullptr);
     void CloseSyncTransaction(std::shared_ptr<AppExecFwk::EventHandler> handler = nullptr);
 
     static void OpenSyncTransaction(
-        const std::shared_ptr<RSNode>& rsNode, std::shared_ptr<AppExecFwk::EventHandler> handler = nullptr);
+        const std::shared_ptr<RSUIContext>& rsUIContext, std::shared_ptr<AppExecFwk::EventHandler> handler = nullptr);
     static void OpenSyncTransaction(
-        const std::shared_ptr<RSUIContext>& rsUIContext, std::shared_ptr<AppExecFwk::EventHandler> handler = nullptr);
-    static void CloseSyncTransaction(
         const std::shared_ptr<RSNode>& rsNode, std::shared_ptr<AppExecFwk::EventHandler> handler = nullptr);
     static void CloseSyncTransaction(
         const std::shared_ptr<RSUIContext>& rsUIContext, std::shared_ptr<AppExecFwk::EventHandler> handler = nullptr);
+    static void CloseSyncTransaction(
+        const std::shared_ptr<RSNode>& rsNode, std::shared_ptr<AppExecFwk::EventHandler> handler = nullptr);
 
 private:
+    void InitByRSUIContext(const std::shared_ptr<RSUIContext>& rsUIContext);
+
+    template<typename ReturnType, typename Func>
+    ReturnType InvokeSyncTransaction(Func&& func);
+
+    template<typename Func>
+    static void InvokeSyncTransaction(const std::shared_ptr<RSUIContext>& rsUIContext, Func&& func);
+
     std::shared_ptr<RSUIContext> rsUIContext_;
     RSSyncTransactionController* rsSyncTransController_;
     std::shared_ptr<RSSyncTransactionHandler> rsSyncTransHandler_;
@@ -117,8 +130,8 @@ private:
 
 class RSAdapterUtil {
 public:
-    static std::string RSNodeToStr(const std::shared_ptr<RSNode>& rsNode);
     static std::string RSUIContextToStr(const std::shared_ptr<RSUIContext>& rsUIContext);
+    static std::string RSNodeToStr(const std::shared_ptr<RSNode>& rsNode);
     static std::string RSUIDirectorToStr(const std::shared_ptr<RSUIDirector>& rsUIDirector);
 };
 } // namespace Rosen
