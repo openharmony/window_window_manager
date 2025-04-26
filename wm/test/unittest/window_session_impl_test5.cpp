@@ -619,6 +619,35 @@ HWTEST_F(WindowSessionImplTest5, GetRequestedOrientation, Function | SmallTest |
     EXPECT_EQ(window->GetRequestedOrientation(), Orientation::FOLLOW_DESKTOP);
     GTEST_LOG_(INFO) << "WindowSessionImplTest5: GetRequestedOrientation end";
 }
+
+/**
+ * @tc.name: SetFollowScreenChange
+ * @tc.desc: SetFollowScreenChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, SetFollowScreenChange, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetFollowScreenChange");
+
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(0);
+    WMError ret = window->SetFollowScreenChange(true);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+
+    window->property_->SetPersistentId(1);
+    window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_END);
+    WMError ret = window->SetFollowScreenChange(true);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW_MODE_OR_SIZE, ret);
+
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
+    WMError ret = window->SetFollowScreenChange(true);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW_MODE_OR_SIZE, ret);
+
+    window->property_->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+    WMError ret = window->SetFollowScreenChange(true);
+    EXPECT_EQ(WMError::WM_OK, ret);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
