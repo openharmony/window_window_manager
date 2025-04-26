@@ -64,7 +64,7 @@ constexpr int32_t FORCE_SPLIT_MODE = 5;
 constexpr int32_t API_VERSION_18 = 18;
 constexpr uint32_t API_VERSION_MOD = 1000;
 constexpr uint32_t LIFECYCLE_ISOLATE_VERSION = 18;
-
+constexpr uint32_t INVALID_TARGET_API_VERSION = 0;
 /*
  * DFX
  */
@@ -3975,13 +3975,10 @@ void WindowSessionImpl::NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, 
     bool isUIExtensionWithSystemHost =
         WindowHelper::IsUIExtensionWindow(GetType()) && WindowHelper::IsSystemWindow(GetRootHostWindowType());
     bool isSystemWindow = WindowHelper::IsSystemWindow(GetType());
-    uint32_t currentApiVersion = 0;
-    if (context_ != nullptr && context_->GetApplicationInfo() != nullptr) {
-        currentApiVersion = context_->GetApplicationInfo()->apiTargetVersion % API_VERSION_MOD;
-    }
+    uint32_t currentApiVersion = GetTargetAPIVersionByApplicationInfo();
     AvoidArea newAvoidArea;
     // api 18 isolation for UEC with system host window
-    if ((isUIExtensionWithSystemHost || isSystemWindow) && currentApiVersion < API_VERSION_18) {
+    if ((isUIExtensionWithSystemHost || isSystemWindow) && currentApiVersion < static_cast<uint32_t>(API_VERSION_18)) {
         TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d api %{public}u type %{public}d not supported",
             GetPersistentId(), currentApiVersion, type);
     } else {
@@ -5382,6 +5379,13 @@ void WindowSessionImpl::SetTargetAPIVersion(uint32_t targetAPIVersion)
 uint32_t WindowSessionImpl::GetTargetAPIVersion() const
 {
     return targetAPIVersion_;
+}
+
+uint32_t WindowSessionImpl::GetTargetAPIVersionByApplicationInfo() const
+{
+    return (context_ != nullptr && context_->GetApplicationInfo() != nullptr) ?
+        static_cast<uint32_t>(context_->GetApplicationInfo()->apiTargetVersion) % API_VERSION_MOD :
+        INVALID_TARGET_API_VERSION;
 }
 
 void WindowSessionImpl::SetLayoutTransform(const Transform& transform)
