@@ -67,7 +67,9 @@ private:
         void OnExtensionDied() override {}
         void OnExtensionTimeout(int32_t errorCode) override {}
         void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
-            int64_t uiExtensionIdLevel) override {}
+                                  int64_t uiExtensionIdLevel) override
+        {
+        }
         void OnDrawingCompleted() override {}
         void OnAppRemoveStartingWindow() override {}
     };
@@ -77,13 +79,9 @@ private:
     sptr<WindowEventChannelMocker> mockEventChannel_ = nullptr;
 };
 
-void WindowSessionTest2::SetUpTestCase()
-{
-}
+void WindowSessionTest2::SetUpTestCase() {}
 
-void WindowSessionTest2::TearDownTestCase()
-{
-}
+void WindowSessionTest2::TearDownTestCase() {}
 
 void WindowSessionTest2::SetUp()
 {
@@ -96,9 +94,7 @@ void WindowSessionTest2::SetUp()
     EXPECT_NE(nullptr, session_);
     ssm_ = sptr<SceneSessionManager>::MakeSptr();
     session_->SetEventHandler(ssm_->taskScheduler_->GetEventHandler(), ssm_->eventHandler_);
-    auto isScreenLockedCallback = [this]() {
-        return ssm_->IsScreenLocked();
-    };
+    auto isScreenLockedCallback = [this]() { return ssm_->IsScreenLocked(); };
     session_->RegisterIsScreenLockedCallback(isScreenLockedCallback);
 
     mockSessionStage_ = sptr<SessionStageMocker>::MakeSptr();
@@ -561,9 +557,7 @@ HWTEST_F(WindowSessionTest2, SetSessionFocusableChangeListener, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
 
-    NotifySessionFocusableChangeFunc func = [](const bool isFocusable)
-    {
-    };
+    NotifySessionFocusableChangeFunc func = [](const bool isFocusable) {};
     session_->SetSessionFocusableChangeListener(func);
 
     session_->state_ = SessionState::STATE_DISCONNECT;
@@ -579,9 +573,7 @@ HWTEST_F(WindowSessionTest2, SetSessionTouchableChangeListener, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
 
-    NotifySessionTouchableChangeFunc func = [](const bool touchable)
-    {
-    };
+    NotifySessionTouchableChangeFunc func = [](const bool touchable) {};
     session_->SetSessionTouchableChangeListener(func);
 
     session_->state_ = SessionState::STATE_DISCONNECT;
@@ -597,9 +589,7 @@ HWTEST_F(WindowSessionTest2, SetSessionInfoLockedStateChangeListener, TestSize.L
 {
     ASSERT_NE(session_, nullptr);
 
-    NotifySessionTouchableChangeFunc func = [](const bool lockedState)
-    {
-    };
+    NotifySessionTouchableChangeFunc func = [](const bool lockedState) {};
     session_->SetSessionInfoLockedStateChangeListener(func);
 
     session_->SetSessionInfoLockedState(true);
@@ -1163,10 +1153,8 @@ HWTEST_F(WindowSessionTest2, SetSessionState02, TestSize.Level1)
 HWTEST_F(WindowSessionTest2, SetChangeSessionVisibilityWithStatusBarEventListener, TestSize.Level1)
 {
     int resultValue = 0;
-    session_->SetChangeSessionVisibilityWithStatusBarEventListener([&resultValue](
-        const SessionInfo& info, const bool visible) {
-        resultValue = 1;
-    });
+    session_->SetChangeSessionVisibilityWithStatusBarEventListener(
+        [&resultValue](const SessionInfo& info, const bool visible) { resultValue = 1; });
     usleep(WAIT_SYNC_IN_NS);
     ASSERT_NE(session_->changeSessionVisibilityWithStatusBarFunc_, nullptr);
 
@@ -1174,10 +1162,8 @@ HWTEST_F(WindowSessionTest2, SetChangeSessionVisibilityWithStatusBarEventListene
     session_->changeSessionVisibilityWithStatusBarFunc_(info, true);
     ASSERT_EQ(resultValue, 1);
 
-    session_->SetChangeSessionVisibilityWithStatusBarEventListener([&resultValue](
-        const SessionInfo& info, const bool visible) {
-        resultValue = 2;
-    });
+    session_->SetChangeSessionVisibilityWithStatusBarEventListener(
+        [&resultValue](const SessionInfo& info, const bool visible) { resultValue = 2; });
     usleep(WAIT_SYNC_IN_NS);
     ASSERT_NE(session_->changeSessionVisibilityWithStatusBarFunc_, nullptr);
     session_->changeSessionVisibilityWithStatusBarFunc_(info, true);
@@ -1267,7 +1253,7 @@ HWTEST_F(WindowSessionTest2, GetRSVisible02, TestSize.Level1)
 HWTEST_F(WindowSessionTest2, SetVisibilityState, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
-    WindowVisibilityState state { WINDOW_VISIBILITY_STATE_NO_OCCLUSION};
+    WindowVisibilityState state{ WINDOW_VISIBILITY_STATE_NO_OCCLUSION };
     ASSERT_EQ(WSError::WS_OK, session_->SetVisibilityState(state));
     ASSERT_EQ(state, session_->visibilityState_);
 }
@@ -1280,7 +1266,7 @@ HWTEST_F(WindowSessionTest2, SetVisibilityState, TestSize.Level1)
 HWTEST_F(WindowSessionTest2, GetVisibilityState, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
-    WindowVisibilityState state { WINDOW_LAYER_STATE_MAX};
+    WindowVisibilityState state{ WINDOW_LAYER_STATE_MAX };
     ASSERT_EQ(state, session_->GetVisibilityState());
 }
 
@@ -1528,7 +1514,7 @@ HWTEST_F(WindowSessionTest2, SetContextTransparentFunc, TestSize.Level1)
     ASSERT_NE(session_, nullptr);
     session_->SetContextTransparentFunc(nullptr);
     ASSERT_EQ(session_->contextTransparentFunc_, nullptr);
-    NotifyContextTransparentFunc func = [](){};
+    NotifyContextTransparentFunc func = []() {};
     session_->SetContextTransparentFunc(func);
     ASSERT_NE(session_->contextTransparentFunc_, nullptr);
 }
@@ -1543,7 +1529,7 @@ HWTEST_F(WindowSessionTest2, NeedCheckContextTransparent, TestSize.Level1)
     ASSERT_NE(session_, nullptr);
     session_->SetContextTransparentFunc(nullptr);
     ASSERT_EQ(session_->NeedCheckContextTransparent(), false);
-    NotifyContextTransparentFunc func = [](){};
+    NotifyContextTransparentFunc func = []() {};
     session_->SetContextTransparentFunc(func);
     ASSERT_EQ(session_->NeedCheckContextTransparent(), true);
 }
@@ -1572,6 +1558,6 @@ HWTEST_F(WindowSessionTest2, SetBorderUnoccupied, TestSize.Level1)
     bool res = session_->GetBorderUnoccupied();
     ASSERT_EQ(res, true);
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS
