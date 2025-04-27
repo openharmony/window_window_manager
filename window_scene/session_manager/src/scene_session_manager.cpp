@@ -9492,6 +9492,8 @@ void SceneSessionManager::WindowDestroyNotifyVisibility(const sptr<SceneSession>
         TLOGE(WmsLogTag::DEFAULT, "sceneSession is nullptr!");
         return;
     }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "in, wid: %{public}d, RSVisible: %{public}d, WindowMode: %{public}u",
+        sceneSession->GetWindowId(), sceneSession->GetRSVisible(), sceneSession->GetWindowMode());
     if (sceneSession->GetRSVisible() || sceneSession->GetWindowMode() == WindowMode::WINDOW_MODE_PIP) {
         std::vector<sptr<WindowVisibilityInfo>> windowVisibilityInfos;
 #ifdef MEMMGR_WINDOW_ENABLE
