@@ -19,6 +19,7 @@
 #include "input_manager.h"
 #include "perform_reporter.h"
 #include "window_manager_hilog.h"
+#include "wm_common.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -472,6 +473,55 @@ HWTEST_F(PerformReporterTest, ReportWindowProfileInfo017, TestSize.Level1)
     windowProfileInfo.windowVisibleState = 2;
     WindowInfoReporter windowInfoReporter;
     res = windowInfoReporter.ReportWindowProfileInfo(windowProfileInfo);
+    ASSERT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: ReportWindowProfileInfo018
+ * @tc.desc: ReportKeyboardLifeCycleException test
+ * @tc.type: FUNC
+ */
+HWTEST_F(PerformReporterTest, ReportKeyboardLifeCycleException18, Function | SmallTest | Level2)
+{
+    KeyboardLifeCycleException subEventType = KeyboardLifeCycleException::ANIM_SYNC_EXCEPTION;
+    int32_t windowId = 198;
+    std::string msg = "ReportKeyboardLifeCycleExceptionTestMSG";
+    WindowInfoReporter windowInfoReporter;
+    int32_t res = windowInfoReporter.ReportKeyboardLifeCycleException(windowId, subEventType, msg);
+    ASSERT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: ReportWindowProfileInfo019
+ * @tc.desc: ReportKeyboardLifeCycleException test
+ * @tc.type: FUNC
+ */
+HWTEST_F(PerformReporterTest, ReportKeyboardLifeCycleException19, Function | SmallTest | Level2)
+{
+    KeyboardLifeCycleException subEventType = KeyboardLifeCycleException::CREATE_EXCEPTION;
+    int32_t windowId = 198;
+    std::string msg = "ReportKeyboardLifeCycleExceptionTestMSG";
+    WindowInfoReporter windowInfoReporter;
+    int32_t res = windowInfoReporter.ReportKeyboardLifeCycleException(windowId, subEventType, msg);
+    ASSERT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: ReportWindowProfileInfo018
+ * @tc.desc: ReportSpecWindowLifeCycleChange test
+ * @tc.type: FUNC
+ */
+HWTEST_F(PerformReporterTest, ReportSpecWindowLifeCycleChange, Function | SmallTest | Level2)
+{
+    int32_t windowId = 198;
+    std::string stage = "attach";
+    WindowLifeCycleReportInfo reportInfo = { "bundleName", windowId,
+        static_cast<int32_t>(WindowType::WINDOW_TYPE_APP_SUB_WINDOW),
+        static_cast<int32_t>(WindowMode::WINDOW_MODE_FULLSCREEN),
+        static_cast<int32_t>(WindowFlag::WINDOW_FLAG_IS_TEXT_MENU),
+        stage};
+    WindowInfoReporter windowInfoReporter;
+    int32_t res = windowInfoReporter.ReportSpecWindowLifeCycleChange(reportInfo);
     ASSERT_EQ(res, 0);
 }
 } // namespace

@@ -40,6 +40,7 @@ ohos_unittest("ws_scene_input_manager_test") {
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
     "input:libmmi-client",
+    "safwk:system_ability_fwk",
   ]
 }
 
@@ -64,6 +65,7 @@ ohos_unittest("ws_scene_session_dirty_manager_test") {
     "hilog:libhilog",
     "init:libbegetutil",
     "input:libmmi-client",
+    "safwk:system_ability_fwk",
   ]
 }
 
@@ -89,6 +91,7 @@ ohos_unittest("ws_scene_session_dirty_manager_test2") {
     "hilog:libhilog",
     "init:libbegetutil",
     "input:libmmi-client",
+    "safwk:system_ability_fwk",
   ]
 }
 

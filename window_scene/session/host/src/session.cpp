@@ -1346,10 +1346,10 @@ WSError Session::Foreground(sptr<WindowSessionProperty> property, bool isFromCli
         SetActive(true);
     }
     isStarting_ = false;
-
     NotifyForeground();
 
     isTerminating_ = false;
+    PostSpecificSessionLifeCycleTimeoutTask(ATTACH_EVENT_NAME);
     return WSError::WS_OK;
 }
 
@@ -1422,6 +1422,7 @@ WSError Session::Background(bool isFromClient, const std::string& identityToken)
     UpdateSessionState(SessionState::STATE_BACKGROUND);
     SetIsPendingToBackgroundState(false);
     NotifyBackground();
+    PostSpecificSessionLifeCycleTimeoutTask(DETACH_EVENT_NAME);
     return WSError::WS_OK;
 }
 
@@ -1637,6 +1638,9 @@ void Session::SetIsActivatedAfterScreenLocked(bool isActivatedAfterScreenLocked)
 void Session::SetAttachState(bool isAttach, WindowMode windowMode)
 {
     isAttach_ = isAttach;
+    if (handler_ && IsNeedReportTimeout()) {
+        handler_->RemoveTask(isAttach_ ? ATTACH_EVENT_NAME : DETACH_EVENT_NAME);
+    }
     PostTask([weakThis = wptr(this), isAttach]() {
         auto session = weakThis.promote();
         if (session == nullptr) {
@@ -4098,6 +4102,7 @@ WindowLayoutInfo Session::GetWindowLayoutInfoForWindowInfo() const
     }
     windowLayoutInfo.rect = { sessionGlobalRect.posX_, sessionGlobalRect.posY_,
                               sessionGlobalRect.width_, sessionGlobalRect.height_};
+    windowLayoutInfo.zOrder = GetZOrder();
     return windowLayoutInfo;
 }
 
@@ -4114,6 +4119,18 @@ WindowMetaInfo Session::GetWindowMetaInfoForWindowInfo() const
     windowMetaInfo.abilityName = GetSessionInfo().abilityName_;
     windowMetaInfo.appIndex = GetSessionInfo().appIndex_;
     windowMetaInfo.pid = GetCallingPid();
+    windowMetaInfo.windowType = GetWindowType();
+    if (auto parentSession = GetParentSession()) {
+        windowMetaInfo.parentWindowId = parentSession->GetWindowId();
+    }
+    if (auto surfaceNode = GetSurfaceNode()) {
+        windowMetaInfo.surfaceNodeId = static_cast<uint64_t>(surfaceNode->GetId());
+    }
+    if (auto leashWinSurfaceNode = GetLeashWinSurfaceNode()) {
+        windowMetaInfo.leashWinSurfaceNodeId = static_cast<uint64_t>(leashWinSurfaceNode->GetId());
+    }
+    auto property = GetSessionProperty();
+    windowMetaInfo.isPrivacyMode = property->GetPrivacyMode() || property->GetSystemPrivacyMode();
     return windowMetaInfo;
 }
 
@@ -4141,5 +4158,61 @@ void Session::SetBorderUnoccupied(bool borderUnoccupied)
 bool Session::GetBorderUnoccupied() const
 {
     return borderUnoccupied_;
+}
+
+void Session::SetWindowAnimationDuration(int32_t duration)
+{
+    windowAnimationDuration_ = duration;
+}
+
+bool Session::IsNeedReportTimeout() const
+{
+    WindowType type = GetWindowType();
+    return WindowHelper::IsSubWindow(type) || (WindowHelper::IsAboveSystemWindow(type) &&
+        type != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT && type != WindowType::WINDOW_TYPE_PANEL);
+}
+
+void Session::PostSpecificSessionLifeCycleTimeoutTask(const std::string& eventName)
+{
+    const int32_t THRESHOLD = 20;
+    if (!IsNeedReportTimeout()) {
+        TLOGD(WmsLogTag::DEFAULT, "not specific window");
+        return;
+    }
+    // if configured animation, don't report
+    if (windowAnimationDuration_) {
+        TLOGD(WmsLogTag::DEFAULT, "window configured animation, don't report");
+        return;
+    }
+    if (!handler_) {
+        TLOGE(WmsLogTag::DEFAULT, "handler is null");
+        return;
+    }
+    handler_->RemoveTask(eventName == ATTACH_EVENT_NAME ?
+        DETACH_EVENT_NAME : ATTACH_EVENT_NAME);
+    auto task = [weakThis = wptr(this), eventName, where = __func__]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNI(WmsLogTag::DEFAULT, "%{public}s, session is null.", where);
+            return;
+        }
+        bool isAttach = session->GetAttachState();
+        if ((isAttach && eventName == ATTACH_EVENT_NAME) ||
+            (!isAttach && eventName == DETACH_EVENT_NAME)) {
+            TLOGND(WmsLogTag::DEFAULT, "%{public}s, detached or attached in time", where);
+            return;
+        }
+        WindowLifeCycleReportInfo reportInfo {
+            session->GetSessionInfo().bundleName_,
+            static_cast<int32_t>(session->GetPersistentId()),
+            static_cast<int32_t>(session->GetWindowType()),
+            static_cast<int32_t>(session->GetWindowMode()),
+            static_cast<int32_t>(session->GetSessionProperty()->GetWindowFlags()),
+            eventName
+        };
+        TLOGNI(WmsLogTag::DEFAULT, "%{public}s report msg: %{public}s", where, reportInfo.ToString().c_str());
+        WindowInfoReporter::GetInstance().ReportSpecWindowLifeCycleChange(reportInfo);
+    };
+    PostTask(task, eventName, THRESHOLD);
 }
 } // namespace OHOS::Rosen
