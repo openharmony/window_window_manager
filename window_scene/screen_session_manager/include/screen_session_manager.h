@@ -382,8 +382,10 @@ public:
     void OnSecondaryReflexionChange(ScreenId screenId, bool isSecondaryReflexion) override;
     void OnExtendScreenConnectStatusChange(ScreenId screenId,
         ExtendScreenConnectStatus extendScreenConnectStatus) override;
+    void OnBeforeScreenPropertyChange(FoldStatus foldStatus) override;
     void SetDefaultScreenId(ScreenId defaultId);
     sptr<IScreenSessionManagerClient> GetClientProxy();
+    void SetClientProxy(const sptr<IScreenSessionManagerClient>& client);
     void NotifyCastWhenScreenConnectChange(bool isConnected);
     void NotifyCastWhenSwitchScbNode();
     void MultiScreenModeChange(const std::string& mainScreenId, const std::string& secondaryScreenId,
@@ -600,6 +602,7 @@ private:
     FoldDisplayMode oldScbDisplayMode_ = FoldDisplayMode::UNKNOWN;
 
     sptr<IScreenSessionManagerClient> clientProxy_;
+    std::mutex clientProxyMutex_; // above guarded by clientProxyMutex_
     ClientAgentContainer<IDisplayManagerAgent, DisplayManagerAgentType> dmAgentContainer_;
     DeviceScreenConfig deviceScreenConfig_;
     std::vector<DisplayPhysicalResolution> allDisplayPhysicalResolution_ {};

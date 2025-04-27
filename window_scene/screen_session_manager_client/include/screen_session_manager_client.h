@@ -141,6 +141,7 @@ private:
     void OnSecondaryReflexionChanged(ScreenId screenId, bool isSecondaryReflexion) override;
     void OnExtendScreenConnectStatusChanged(ScreenId screenId,
         ExtendScreenConnectStatus extendScreenConnectStatus) override;
+    void OnBeforeScreenPropertyChanged(FoldStatus foldStatus) override;
 
     void SetDisplayNodeScreenId(ScreenId screenId, ScreenId displayNodeScreenId) override;
     void ScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) override;

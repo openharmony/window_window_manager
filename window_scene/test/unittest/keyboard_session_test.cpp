@@ -425,7 +425,7 @@ HWTEST_F(KeyboardSessionTest, RestoreCallingSession, TestSize.Level0)
     EXPECT_NE(keyboardSession, nullptr);
 
     // callingSession is nullptr
-    keyboardSession->RestoreCallingSession();
+    keyboardSession->RestoreCallingSession(0, nullptr);
 
     // callingsession is not nullptr
     info.windowType_ = 1; // 1 is main_window_type
@@ -436,13 +436,14 @@ HWTEST_F(KeyboardSessionTest, RestoreCallingSession, TestSize.Level0)
         [callingSession](int32_t persistentId) -> sptr<SceneSession> {
         return callingSession;
     };
-    keyboardSession->RestoreCallingSession();
+    ASSERT_NE(callingSession->property_, nullptr);
+    uint32_t callingId = callingSession->property_->GetPersistentId();
+    keyboardSession->RestoreCallingSession(callingId, nullptr);
     ASSERT_EQ(callingSession->GetOriPosYBeforeRaisedByKeyboard(), 0); // 0: default value
 
     callingSession->SetOriPosYBeforeRaisedByKeyboard(100); // 100 is not default
-    ASSERT_NE(callingSession->property_, nullptr);
     callingSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    keyboardSession->RestoreCallingSession();
+    keyboardSession->RestoreCallingSession(callingId, nullptr);
     ASSERT_EQ(callingSession->GetOriPosYBeforeRaisedByKeyboard(), 0); // 0: default value
 }
 
@@ -466,9 +467,10 @@ HWTEST_F(KeyboardSessionTest, RestoreCallingSession02, TestSize.Level0)
         [callingSession](int32_t persistentId) -> sptr<SceneSession> {
         return callingSession;
     };
-
+    ASSERT_NE(callingSession->property_, nullptr);
+    uint32_t callingId = callingSession->property_->GetPersistentId();
     keyboardSession->keyboardAvoidAreaActive_ = false;
-    keyboardSession->RestoreCallingSession();
+    keyboardSession->RestoreCallingSession(callingId, nullptr);
     ASSERT_EQ(callingSession->GetOriPosYBeforeRaisedByKeyboard(), 0); // 0: default value
 }
 
@@ -499,34 +501,6 @@ HWTEST_F(KeyboardSessionTest, UseFocusIdIfCallingSessionIdInvalid, TestSize.Leve
 
     keyboardSession->GetSessionProperty()->SetCallingSessionId(id);
     keyboardSession->UseFocusIdIfCallingSessionIdInvalid();
-}
-
-/**
- * @tc.name: UpdateCallingSessionIdAndPosition
- * @tc.desc: UpdateCallingSessionIdAndPosition
- * @tc.type: FUNC
- */
-HWTEST_F(KeyboardSessionTest, UpdateCallingSessionIdAndPosition, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "UpdateCallingSessionIdAndPosition";
-    info.bundleName_ = "UpdateCallingSessionIdAndPosition";
-    sptr<SceneSession::SpecificSessionCallback> specificCb =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    EXPECT_NE(specificCb, nullptr);
-    sptr<KeyboardSession::KeyboardSessionCallback> keyboardCb =
-        sptr<KeyboardSession::KeyboardSessionCallback>::MakeSptr();
-    EXPECT_NE(keyboardCb, nullptr);
-    sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, specificCb, keyboardCb);
-    EXPECT_NE(keyboardSession, nullptr);
-
-    info.windowType_ = 1;
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCb);
-    EXPECT_NE(sceneSession, nullptr);
-    auto id = sceneSession->GetPersistentId();
-    EXPECT_NE(id, 0);
-
-    keyboardSession->UpdateCallingSessionIdAndPosition(id);
 }
 
 /**

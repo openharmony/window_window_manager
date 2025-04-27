@@ -448,4 +448,26 @@ void DualDisplayFoldPolicy::ExitCoordination()
     TLOGI(WmsLogTag::DMS, "CurrentDisplayMode:%{public}d", displayMode);
     ScreenSessionManager::GetInstance().NotifyDisplayModeChanged(displayMode);
 }
+
+void DualDisplayFoldPolicy::ChangeOnTentMode(FoldStatus currentState)
+{
+    TLOGI(WmsLogTag::DMS, "Enter tent mode, current state:%{public}d, change display mode to MAIN", currentState);
+    if (currentState == FoldStatus::EXPAND || currentState == FoldStatus::HALF_FOLD) {
+        ChangeScreenDisplayMode(FoldDisplayMode::SUB);
+    } else if (currentState == FoldStatus::FOLDED) {
+        ChangeScreenDisplayMode(FoldDisplayMode::SUB);
+        PowerMgr::PowerMgrClient::GetInstance().WakeupDeviceAsync();
+    } else {
+        TLOGE(WmsLogTag::DMS, "current state:%{public}d invalid", currentState);
+    }
+}
+ 
+void DualDisplayFoldPolicy::ChangeOffTentMode()
+{
+    PowerMgr::PowerMgrClient::GetInstance().WakeupDeviceAsync();
+    FoldDisplayMode displayMode = GetModeMatchStatus();
+    TLOGW(WmsLogTag::DMS, "CurrentDisplayMode:%{public}d, CurrentFoldStatus:%{public}d",
+        currentDisplayMode_, currentFoldStatus_);
+    ChangeScreenDisplayMode(displayMode);
+}
 } // namespace OHOS::Rosen
