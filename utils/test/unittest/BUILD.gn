@@ -25,6 +25,7 @@ group("unittest") {
     ":utils_dms_reporter_test",
     ":utils_perform_reporter_test",
     ":utils_persistent_storage_test",
+    ":utils_rs_adapter_test",
     ":utils_screen_group_info_test",
     ":utils_screen_info_test",
     ":utils_string_test",
@@ -261,6 +262,16 @@ ohos_unittest("utils_window_transition_info_test") {
     "ability_runtime:ability_manager",
     "ipc:ipc_single",
   ]
+}
+
+ohos_unittest("utils_rs_adapter_test") {
+  module_out_path = module_out_path
+
+  sources = [ "rs_adapter_test.cpp" ]
+
+  deps = [ ":utils_unittest_common" ]
+
+  external_deps = test_external_deps
 }
 
 ## Build dm_unittest_common.a {{{
