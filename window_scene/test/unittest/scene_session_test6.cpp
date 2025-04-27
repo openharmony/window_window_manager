@@ -277,14 +277,14 @@ HWTEST_F(SceneSessionTest6, UpdateFollowScreenChange, Function | SmallTest | Lev
 {
     SessionInfo info;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-
+    ASSERT_NE(nullptr, sceneSession);
     bool isFollowScreenChange = true;
     sceneSession->specificCallback_ = nullptr;
     WSError ret = sceneSession->UpdateFollowScreenChange(isFollowScreenChange);
     EXPECT_EQ(WSError::WS_OK, ret);
 
     sptr<SceneSession::SpecificSessionCallback> callback = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    EXPECT_NE(nullptr, callback);
+    ASSERT_NE(nullptr, callback);
     sceneSession->specificCallback_ = callback;
     ret = sceneSession->UpdateFollowScreenChange(isFollowScreenChange);
     EXPECT_EQ(WSError::WS_OK, ret);
@@ -304,10 +304,10 @@ HWTEST_F(SceneSessionTest6, RegisterFollowScreenChangeCallback, Function | Small
 {
     SessionInfo info;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-
+    ASSERT_NE(nullptr, sceneSession);
     sceneSession->specificCallback_ = nullptr;
     sptr<SceneSession::SpecificSessionCallback> callback = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    EXPECT_NE(nullptr, callback);
+    ASSERT_NE(nullptr, callback);
     sceneSession->specificCallback_ = callback;
     EXPECT_EQ(nullptr, callback->onUpdateFollowScreenChange_);
 
