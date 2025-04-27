@@ -7476,8 +7476,7 @@ napi_value JsWindow::OnGetWindowStatus(napi_env env, napi_callback_info info)
     }
     auto objValue = CreateJsValue(env, windowStatus);
     if (objValue != nullptr) {
-        TLOGI(WmsLogTag::WMS_PC, "window [%{public}u, %{public}s] end",
-            window->GetWindowId(), window->GetWindowName().c_str());
+        TLOGI(WmsLogTag::WMS_PC, "id:[%{public}u] end", window->GetWindowId());
         return objValue;
     } else {
         TLOGE(WmsLogTag::WMS_PC, "create js value windowStatus failed");
