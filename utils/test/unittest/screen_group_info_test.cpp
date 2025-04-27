@@ -30,21 +30,13 @@ public:
     virtual void TearDown() override;
 };
 
-void ScreenGroupInfoTest::SetUpTestCase()
-{
-}
+void ScreenGroupInfoTest::SetUpTestCase() {}
 
-void ScreenGroupInfoTest::TearDownTestCase()
-{
-}
+void ScreenGroupInfoTest::TearDownTestCase() {}
 
-void ScreenGroupInfoTest::SetUp()
-{
-}
+void ScreenGroupInfoTest::SetUp() {}
 
-void ScreenGroupInfoTest::TearDown()
-{
-}
+void ScreenGroupInfoTest::TearDown() {}
 
 namespace {
 /**
@@ -82,7 +74,7 @@ HWTEST_F(ScreenGroupInfoTest, InnerUnmarshalling, TestSize.Level1)
 {
     ScreenGroupInfo screenGroupInfoSrc;
     Parcel parcel;
-    parcel.WriteUint32(21);    // MAX_SCREEN_GROUP_INFO_SIZE + 1
+    parcel.WriteUint32(21); // MAX_SCREEN_GROUP_INFO_SIZE + 1
     bool result = screenGroupInfoSrc.InnerUnmarshalling(parcel);
     ASSERT_FALSE(result);
 }
@@ -99,6 +91,6 @@ HWTEST_F(ScreenGroupInfoTest, Marshalling, TestSize.Level1)
     bool result = screenGroupInfoSrc.InnerUnmarshalling(parcel);
     ASSERT_FALSE(result);
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

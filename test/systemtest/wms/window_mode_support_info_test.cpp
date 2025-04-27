@@ -15,10 +15,10 @@
 
 // gtest
 #include <gtest/gtest.h>
+#include "scene_board_judgement.h"
 #include "window_manager.h"
 #include "window_test_utils.h"
 #include "wm_common.h"
-#include "scene_board_judgement.h"
 using namespace testing;
 using namespace testing::ext;
 
@@ -33,6 +33,7 @@ public:
     virtual void TearDown() override;
     Utils::TestWindowInfo fullAppInfo_1_;
     Utils::TestWindowInfo fullAppInfo_2_;
+
 private:
     static constexpr uint32_t WAIT_SYANC_US = 100000;
 };
@@ -41,39 +42,35 @@ void WindowModeSupportTypeTest::SetUpTestCase()
 {
     auto display = DisplayManager::GetInstance().GetDisplayById(0);
     ASSERT_TRUE((display != nullptr));
-    Rect displayRect = {0, 0, display->GetWidth(), display->GetHeight()};
+    Rect displayRect = { 0, 0, display->GetWidth(), display->GetHeight() };
     Utils::InitByDisplayRect(displayRect);
 }
 
-void WindowModeSupportTypeTest::TearDownTestCase()
-{
-}
+void WindowModeSupportTypeTest::TearDownTestCase() {}
 
 void WindowModeSupportTypeTest::SetUp()
 {
     fullAppInfo_1_ = {
-            .name = "FullWindow",
-            .rect = Utils::customAppRect_,
-            .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
-            .mode = WindowMode::WINDOW_MODE_FULLSCREEN,
-            .needAvoid = false,
-            .parentLimit = false,
-            .parentId = INVALID_WINDOW_ID,
+        .name = "FullWindow",
+        .rect = Utils::customAppRect_,
+        .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
+        .mode = WindowMode::WINDOW_MODE_FULLSCREEN,
+        .needAvoid = false,
+        .parentLimit = false,
+        .parentId = INVALID_WINDOW_ID,
     };
     fullAppInfo_2_ = {
-            .name = "FullWindow2",
-            .rect = Utils::customAppRect_,
-            .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
-            .mode = WindowMode::WINDOW_MODE_FULLSCREEN,
-            .needAvoid = false,
-            .parentLimit = false,
-            .parentId = INVALID_WINDOW_ID,
+        .name = "FullWindow2",
+        .rect = Utils::customAppRect_,
+        .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
+        .mode = WindowMode::WINDOW_MODE_FULLSCREEN,
+        .needAvoid = false,
+        .parentLimit = false,
+        .parentId = INVALID_WINDOW_ID,
     };
 }
 
-void WindowModeSupportTypeTest::TearDown()
-{
-}
+void WindowModeSupportTypeTest::TearDown() {}
 
 namespace {
 /**
@@ -132,7 +129,7 @@ HWTEST_F(WindowModeSupportTypeTest, WindowModeSupportType03, TestSize.Level1)
         return;
     }
     window->SetRequestWindowModeSupportType(WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN |
-        WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING);
+                                            WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING);
     ASSERT_EQ(WMError::WM_OK, window->Show());
     ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, window->GetWindowMode());
 
@@ -164,8 +161,8 @@ HWTEST_F(WindowModeSupportTypeTest, WindowModeSupportType04, TestSize.Level1)
         return;
     }
     window->SetRequestWindowModeSupportType(WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING |
-    WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
-    WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY);
+                                            WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
+                                            WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY);
     ASSERT_NE(WMError::WM_OK, window->Show());
     ASSERT_EQ(WMError::WM_OK, window->Hide());
     window->Destroy();
@@ -194,8 +191,7 @@ HWTEST_F(WindowModeSupportTypeTest, WindowModeSupportType05, TestSize.Level1)
     ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, window1->GetWindowMode());
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(WindowMode::WINDOW_MODE_FLOATING, window2->GetWindowMode());
-    }
-    else {
+    } else {
         ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, window2->GetWindowMode());
     }
     window1->Destroy();

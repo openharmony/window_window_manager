@@ -20,8 +20,8 @@
 
 #include "agent_death_recipient.h"
 #include "iremote_object_mocker.h"
-#include "singleton_container.h"
 #include "perform_reporter.h"
+#include "singleton_container.h"
 #include "surface_reader_handler_impl.h"
 #include "sys_cap_util.h"
 
@@ -47,21 +47,13 @@ public:
     std::map<int32_t, std::set<int32_t>> oldDependencySetMap_;
 };
 
-void UtilsAllTest::SetUpTestCase()
-{
-}
+void UtilsAllTest::SetUpTestCase() {}
 
-void UtilsAllTest::TearDownTestCase()
-{
-}
+void UtilsAllTest::TearDownTestCase() {}
 
-void UtilsAllTest::SetUp()
-{
-}
+void UtilsAllTest::SetUp() {}
 
-void UtilsAllTest::TearDown()
-{
-}
+void UtilsAllTest::TearDown() {}
 
 namespace {
 /**
@@ -79,9 +71,7 @@ HWTEST_F(UtilsAllTest, ADROnRemoteDied01, TestSize.Level1)
     deathRecipient->OnRemoteDied(remoteObj);
     ASSERT_EQ(0, remoteObj->count_);
 
-    deathRecipient->callback_ = [&remoteObj](sptr<IRemoteObject>& remote) {
-        remoteObj->count_ = 1;
-    };
+    deathRecipient->callback_ = [&remoteObj](sptr<IRemoteObject>& remote) { remoteObj->count_ = 1; };
     deathRecipient->OnRemoteDied(remoteObj);
     ASSERT_EQ(1, remoteObj->count_);
 }
@@ -93,7 +83,7 @@ HWTEST_F(UtilsAllTest, ADROnRemoteDied01, TestSize.Level1)
  */
 HWTEST_F(UtilsAllTest, PRCount01, TestSize.Level1)
 {
-    std::vector<int64_t> timeSpiltsMs = {0, 1, 2};
+    std::vector<int64_t> timeSpiltsMs = { 0, 1, 2 };
     PerformReporter reporter = PerformReporter("test", timeSpiltsMs);
 
     reporter.count(0);
@@ -188,7 +178,7 @@ HWTEST_F(UtilsAllTest, SCDependOn01, TestSize.Level1)
  */
 HWTEST_F(UtilsAllTest, SRHOnImageAvailable, TestSize.Level1)
 {
-    sptr<SurfaceReaderHandlerImpl> surfaceReaderHandlerImpl = new (std::nothrow)SurfaceReaderHandlerImpl();
+    sptr<SurfaceReaderHandlerImpl> surfaceReaderHandlerImpl = new (std::nothrow) SurfaceReaderHandlerImpl();
     surfaceReaderHandlerImpl->flag_ = false;
     surfaceReaderHandlerImpl->OnImageAvailable(nullptr);
     ASSERT_EQ(true, surfaceReaderHandlerImpl->flag_);
@@ -204,7 +194,7 @@ HWTEST_F(UtilsAllTest, SRHOnImageAvailable, TestSize.Level1)
  */
 HWTEST_F(UtilsAllTest, SRHGetPixelMap, TestSize.Level1)
 {
-    sptr<SurfaceReaderHandlerImpl> surfaceReaderHandlerImpl = new (std::nothrow)SurfaceReaderHandlerImpl();
+    sptr<SurfaceReaderHandlerImpl> surfaceReaderHandlerImpl = new (std::nothrow) SurfaceReaderHandlerImpl();
     surfaceReaderHandlerImpl->flag_ = false;
     surfaceReaderHandlerImpl->GetPixelMap();
     ASSERT_EQ(false, surfaceReaderHandlerImpl->flag_);
@@ -221,6 +211,6 @@ HWTEST_F(UtilsAllTest, SysCapUtilGetClientName, TestSize.Level1)
 {
     ASSERT_NE("", SysCapUtil::GetClientName());
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS
