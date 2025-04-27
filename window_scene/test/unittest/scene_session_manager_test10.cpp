@@ -1086,6 +1086,27 @@ HWTEST_F(SceneSessionManagerTest10, NotifyStatusBarShowStatus, Function | SmallT
 }
 
 /**
+ * @tc.name: GetStatusBarConstantlyShow
+ * @tc.desc: test GetStatusBarConstantlyShow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, GetStatusBarConstantlyShow, TestSize.Level0)
+{
+    SessionInfo info;
+    info.abilityName_ = "test";
+    info.bundleName_ = "test";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    bool isVisible;
+    ssm_->NotifyStatusBarConstantlyShow(sceneSession->GetSessionProperty()->GetDisplayId(), false);
+    ssm_->GetStatusBarConstantlyShow(sceneSession->GetSessionProperty()->GetDisplayId(), isVisible);
+    EXPECT_EQ(isVisible, false);
+    ssm_->sceneSessionMap_.erase(sceneSession->GetPersistentId());
+}
+
+/**
  * @tc.name: NotifyAppUseControlList
  * @tc.desc: NotifyAppUseControlList
  * @tc.type: FUNC
