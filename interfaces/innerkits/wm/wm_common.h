@@ -1371,12 +1371,12 @@ struct PiPControlEnableInfo {
 };
 
 struct PiPTemplateInfo : public Parcelable {
-    uint32_t pipTemplateType;
-    uint32_t priority;
+    uint32_t pipTemplateType{0};
+    uint32_t priority{0};
     std::vector<uint32_t> controlGroup;
     std::vector<PiPControlStatusInfo> pipControlStatusInfoList;
     std::vector<PiPControlEnableInfo> pipControlEnableInfoList;
-    uint32_t defaultWindowSizeType;
+    uint32_t defaultWindowSizeType{0};
 
     PiPTemplateInfo() {}
 
