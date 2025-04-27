@@ -2986,7 +2986,7 @@ WMError WindowSceneSessionImpl::Minimize()
     return WMError::WM_OK;
 }
 
-WMError WindowSceneSessionImpl::CompatibleModeMaximize()
+WMError WindowSceneSessionImpl::MaximizeForCompatibleMode()
 {
     TLOGI(WmsLogTag::WMS_LAYOUT_PC, "id: %{public}d", GetPersistentId());
     if (IsWindowSessionInvalid()) {
@@ -3003,7 +3003,7 @@ WMError WindowSceneSessionImpl::CompatibleModeMaximize()
     return WMError::WM_OK;
 }
 
-WMError WindowSceneSessionImpl::CompatibleModeRecover()
+WMError WindowSceneSessionImpl::RecoverForCompatibleMode()
 {
     TLOGI(WmsLogTag::WMS_LAYOUT_PC, "id: %{public}d", GetPersistentId());
     if (IsWindowSessionInvalid()) {
@@ -5907,10 +5907,10 @@ WMError WindowSceneSessionImpl::OnContainerModalEvent(const std::string& eventNa
         HandleBackEvent();
         return WMError::WM_OK;
     } else if (eventName == COMPATIBLE_MAX_WINDOW_EVENT) {
-        CompatibleModeMaximize();
+        MaximizeForCompatibleMode();
         return WMError::WM_OK;
     } else if (eventName == COMPATIBLE_RECOVER_WINDOW_EVENT) {
-        CompatibleModeRecover();
+        RecoverForCompatibleMode();
         return WMError::WM_OK;
     }
     return WMError::WM_DO_NOTHING;
