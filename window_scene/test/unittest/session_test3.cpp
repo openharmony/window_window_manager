@@ -58,13 +58,9 @@ private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 500000;
 };
 
-void WindowSessionTest3::SetUpTestCase()
-{
-}
+void WindowSessionTest3::SetUpTestCase() {}
 
-void WindowSessionTest3::TearDownTestCase()
-{
-}
+void WindowSessionTest3::TearDownTestCase() {}
 
 void WindowSessionTest3::SetUp()
 {
@@ -77,9 +73,7 @@ void WindowSessionTest3::SetUp()
     session_->surfaceNode_ = CreateRSSurfaceNode();
     ssm_ = sptr<SceneSessionManager>::MakeSptr();
     session_->SetEventHandler(ssm_->taskScheduler_->GetEventHandler(), ssm_->eventHandler_);
-    auto isScreenLockedCallback = [this]() {
-        return ssm_->IsScreenLocked();
-    };
+    auto isScreenLockedCallback = [this]() { return ssm_->IsScreenLocked(); };
     session_->RegisterIsScreenLockedCallback(isScreenLockedCallback);
 }
 
@@ -536,9 +530,7 @@ HWTEST_F(WindowSessionTest3, SetBufferAvailableChangeListener, TestSize.Level1)
     session_->SetBufferAvailableChangeListener(nullptr);
 
     int resultValue = 0;
-    NotifyBufferAvailableChangeFunc func = [&resultValue](const bool isAvailable) {
-        resultValue += 1;
-    };
+    NotifyBufferAvailableChangeFunc func = [&resultValue](const bool isAvailable) { resultValue += 1; };
     session_->SetBufferAvailableChangeListener(func);
     ASSERT_EQ(resultValue, 1);
 }
@@ -551,9 +543,7 @@ HWTEST_F(WindowSessionTest3, SetBufferAvailableChangeListener, TestSize.Level1)
 HWTEST_F(WindowSessionTest3, NotifySessionFocusableChange, TestSize.Level1)
 {
     int resultValue = 0;
-    NotifySessionFocusableChangeFunc func = [&resultValue](const bool isFocusable) {
-        resultValue += 1;
-    };
+    NotifySessionFocusableChangeFunc func = [&resultValue](const bool isFocusable) { resultValue += 1; };
     session_->SetSessionFocusableChangeListener(func);
     session_->NotifySessionFocusableChange(true);
     ASSERT_EQ(resultValue, 2);
@@ -566,10 +556,8 @@ HWTEST_F(WindowSessionTest3, NotifySessionFocusableChange, TestSize.Level1)
  */
 HWTEST_F(WindowSessionTest3, GetStateFromManager, TestSize.Level1)
 {
-    ManagerState key = ManagerState{0};
-    GetStateFromManagerFunc func = [](const ManagerState key) {
-        return true;
-    };
+    ManagerState key = ManagerState{ 0 };
+    GetStateFromManagerFunc func = [](const ManagerState key) { return true; };
     session_->getStateFromManagerFunc_ = func;
     session_->GetStateFromManager(key);
 
@@ -577,7 +565,7 @@ HWTEST_F(WindowSessionTest3, GetStateFromManager, TestSize.Level1)
     ASSERT_EQ(false, session_->GetStateFromManager(key));
 
     // 覆盖default分支
-    key = ManagerState{-1};
+    key = ManagerState{ -1 };
     ASSERT_EQ(false, session_->GetStateFromManager(key));
 }
 
@@ -619,9 +607,7 @@ HWTEST_F(WindowSessionTest3, SetCompatibleModeInPc, TestSize.Level1)
 HWTEST_F(WindowSessionTest3, NotifySessionTouchableChange, TestSize.Level1)
 {
     int resultValue = 0;
-    NotifySessionTouchableChangeFunc func = [&resultValue](const bool touchable) {
-        resultValue += 1;
-    };
+    NotifySessionTouchableChangeFunc func = [&resultValue](const bool touchable) { resultValue += 1; };
     session_->SetSessionTouchableChangeListener(func);
     session_->NotifySessionTouchableChange(true);
     ASSERT_EQ(resultValue, 2);
@@ -658,10 +644,10 @@ HWTEST_F(WindowSessionTest3, NotifyClick, TestSize.Level1)
 HWTEST_F(WindowSessionTest3, NotifyRequestFocusStatusNotifyManager, TestSize.Level1)
 {
     int resultValue = 0;
-    NotifyRequestFocusStatusNotifyManagerFunc func = [&resultValue](int32_t persistentId,
-        const bool isFocused, const bool byForeground, FocusChangeReason reason) {
-        resultValue += 1;
-    };
+    NotifyRequestFocusStatusNotifyManagerFunc func =
+        [&resultValue](int32_t persistentId, const bool isFocused, const bool byForeground, FocusChangeReason reason) {
+            resultValue += 1;
+        };
     session_->SetRequestFocusStatusNotifyManagerListener(func);
     FocusChangeReason reason = FocusChangeReason::SCB_SESSION_REQUEST;
     session_->NotifyRequestFocusStatusNotifyManager(true, false, reason);
@@ -833,7 +819,7 @@ HWTEST_F(WindowSessionTest3, RectCheckProcess01, TestSize.Level1)
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert(std::make_pair(0, screenSession));
     session_->RectCheckProcess();
 
-    WSRect rect = {0, 0, 0, 0};
+    WSRect rect = { 0, 0, 0, 0 };
     session_->winRect_ = rect;
     session_->RectCheckProcess();
 
@@ -868,9 +854,7 @@ HWTEST_F(WindowSessionTest3, SetAcquireRotateAnimationConfigFunc, TestSize.Level
     int32_t duration = session_->GetRotateAnimationDuration();
     ASSERT_EQ(duration, ROTATE_ANIMATION_DURATION);
 
-    AcquireRotateAnimationConfigFunc func = [](RotateAnimationConfig& config) {
-        config.duration_ = 800;
-    };
+    AcquireRotateAnimationConfigFunc func = [](RotateAnimationConfig& config) { config.duration_ = 800; };
     session_->SetAcquireRotateAnimationConfigFunc(func);
     ASSERT_NE(session_->acquireRotateAnimationConfigFunc_, nullptr);
     duration = session_->GetRotateAnimationDuration();
@@ -898,9 +882,7 @@ HWTEST_F(WindowSessionTest3, SetIsPcAppInPad, TestSize.Level1)
 HWTEST_F(WindowSessionTest3, SetBufferAvailable, TestSize.Level1)
 {
     int resultValue = 0;
-    NotifyBufferAvailableChangeFunc func = [&resultValue](const bool isAvailable) {
-        resultValue = 1;
-    };
+    NotifyBufferAvailableChangeFunc func = [&resultValue](const bool isAvailable) { resultValue = 1; };
     session_->SetBufferAvailableChangeListener(func);
     session_->SetBufferAvailable(true);
     ASSERT_EQ(session_->bufferAvailable_, true);
@@ -914,9 +896,7 @@ HWTEST_F(WindowSessionTest3, SetBufferAvailable, TestSize.Level1)
 HWTEST_F(WindowSessionTest3, NotifySessionInfoChange, TestSize.Level1)
 {
     int resultValue = 0;
-    NotifyBufferAvailableChangeFunc func = [&resultValue](const bool isAvailable) {
-        resultValue = 1;
-    };
+    NotifyBufferAvailableChangeFunc func = [&resultValue](const bool isAvailable) { resultValue = 1; };
     session_->SetSessionInfoChangeNotifyManagerListener(func);
     session_->NotifySessionInfoChange();
     ASSERT_EQ(resultValue, 1);
@@ -1174,6 +1154,6 @@ HWTEST_F(WindowSessionTest3, GetIsHighlighted, Function | SmallTest | Level2)
     ASSERT_EQ(session_->GetIsHighlighted(isHighlighted), WSError::WS_OK);
     ASSERT_EQ(isHighlighted, false);
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

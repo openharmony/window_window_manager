@@ -65,7 +65,9 @@ private:
         void OnExtensionDied() override {}
         void OnExtensionTimeout(int32_t errorCode) override {}
         void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
-            int64_t uiExtensionIdLevel) override {}
+                                  int64_t uiExtensionIdLevel) override
+        {
+        }
         void OnDrawingCompleted() override {}
         void OnAppRemoveStartingWindow() override {}
     };
@@ -75,13 +77,9 @@ private:
     sptr<WindowEventChannelMocker> mockEventChannel_ = nullptr;
 };
 
-void SessionLayoutTest::SetUpTestCase()
-{
-}
+void SessionLayoutTest::SetUpTestCase() {}
 
-void SessionLayoutTest::TearDownTestCase()
-{
-}
+void SessionLayoutTest::TearDownTestCase() {}
 
 void SessionLayoutTest::SetUp()
 {
@@ -93,9 +91,7 @@ void SessionLayoutTest::SetUp()
     session_->surfaceNode_ = CreateRSSurfaceNode();
     ssm_ = sptr<SceneSessionManager>::MakeSptr();
     session_->SetEventHandler(ssm_->taskScheduler_->GetEventHandler(), ssm_->eventHandler_);
-    auto isScreenLockedCallback = [this]() {
-        return ssm_->IsScreenLocked();
-    };
+    auto isScreenLockedCallback = [this]() { return ssm_->IsScreenLocked(); };
     session_->RegisterIsScreenLockedCallback(isScreenLockedCallback);
     mockSessionStage_ = sptr<SessionStageMocker>::MakeSptr();
     mockEventChannel_ = sptr<WindowEventChannelMocker>::MakeSptr(mockSessionStage_);
@@ -146,26 +142,25 @@ HWTEST_F(SessionLayoutTest, UpdateRect01, TestSize.Level1)
     session_->sessionStage_ = mockSessionStage;
     EXPECT_CALL(*(mockSessionStage), UpdateRect(_, _, _, _)).Times(AtLeast(1)).WillOnce(Return(WSError::WS_OK));
 
-    WSRect rect = {0, 0, 0, 0};
-    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, session_->UpdateRect(rect,
-        SizeChangeReason::UNDEFINED, "SessionLayoutTest"));
+    WSRect rect = { 0, 0, 0, 0 };
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION,
+              session_->UpdateRect(rect, SizeChangeReason::UNDEFINED, "SessionLayoutTest"));
     sptr<WindowEventChannelMocker> mockEventChannel = sptr<WindowEventChannelMocker>::MakeSptr(mockSessionStage);
     SystemSessionConfig sessionConfig;
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_EQ(WSError::WS_OK, session_->Connect(mockSessionStage,
-            mockEventChannel, nullptr, sessionConfig, property));
+    ASSERT_EQ(WSError::WS_OK, session_->Connect(mockSessionStage, mockEventChannel, nullptr, sessionConfig, property));
 
-    rect = {0, 0, 100, 100};
-    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, session_->UpdateRect(rect,
-        SizeChangeReason::UNDEFINED, "SessionLayoutTest"));
+    rect = { 0, 0, 100, 100 };
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION,
+              session_->UpdateRect(rect, SizeChangeReason::UNDEFINED, "SessionLayoutTest"));
     ASSERT_EQ(rect, session_->winRect_);
 
-    rect = {0, 0, 200, 200};
+    rect = { 0, 0, 200, 200 };
     session_->UpdateSessionState(SessionState::STATE_ACTIVE);
     ASSERT_EQ(WSError::WS_OK, session_->UpdateRect(rect, SizeChangeReason::UNDEFINED, "SessionLayoutTest"));
     ASSERT_EQ(rect, session_->winRect_);
 
-    rect = {0, 0, 300, 300};
+    rect = { 0, 0, 300, 300 };
     session_->sessionStage_ = nullptr;
     ASSERT_EQ(WSError::WS_OK, session_->UpdateRect(rect, SizeChangeReason::UNDEFINED, "SessionLayoutTest"));
     ASSERT_EQ(rect, session_->winRect_);
@@ -204,7 +199,7 @@ HWTEST_F(SessionLayoutTest, UpdateSessionRect01, TestSize.Level1)
     info.abilityName_ = "testSession1";
     info.bundleName_ = "testSession3";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    WSRect rect = {0, 0, 320, 240}; // width: 320, height: 240
+    WSRect rect = { 0, 0, 320, 240 }; // width: 320, height: 240
     auto result = sceneSession->UpdateSessionRect(rect, SizeChangeReason::RESIZE);
     ASSERT_EQ(result, WSError::WS_OK);
 
@@ -276,6 +271,6 @@ HWTEST_F(SessionLayoutTest, SetOriginDisplayId, TestSize.Level1)
     session->SetOriginDisplayId(999);
     ASSERT_EQ(999, session->GetOriginDisplayId());
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

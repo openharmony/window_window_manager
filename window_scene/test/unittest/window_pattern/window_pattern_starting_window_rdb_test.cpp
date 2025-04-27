@@ -41,13 +41,9 @@ public:
 
 std::shared_ptr<StartingWindowRdbManager> WindowPatternStartingWindowRdbTest::startingWindowRdbMgr_ = nullptr;
 
-void WindowPatternStartingWindowRdbTest::SetUpTestCase()
-{
-}
+void WindowPatternStartingWindowRdbTest::SetUpTestCase() {}
 
-void WindowPatternStartingWindowRdbTest::TearDownTestCase()
-{
-}
+void WindowPatternStartingWindowRdbTest::TearDownTestCase() {}
 
 void WindowPatternStartingWindowRdbTest::SetUp()
 {
@@ -131,7 +127,7 @@ HWTEST_F(WindowPatternStartingWindowRdbTest, BatchInsert, TestSize.Level1)
     StartingWindowInfo firstStartingWindowInfo, secondStartingWindowInfo;
     firstItemKey.bundleName = "first";
     secondItemKey.bundleName = "second";
-    std::vector<std::pair<StartingWindowRdbItemKey, StartingWindowInfo>> inputValues {
+    std::vector<std::pair<StartingWindowRdbItemKey, StartingWindowInfo>> inputValues{
         std::make_pair(firstItemKey, firstStartingWindowInfo),
         std::make_pair(secondItemKey, secondStartingWindowInfo),
     };
@@ -180,6 +176,6 @@ HWTEST_F(WindowPatternStartingWindowRdbTest, QueryData, TestSize.Level1)
     ASSERT_EQ(res, true);
     ASSERT_EQ(inputInfo.backgroundColor_, resInfo.backgroundColor_);
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

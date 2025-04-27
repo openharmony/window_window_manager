@@ -61,13 +61,9 @@ void WindowPatternStartingWindowTest::TearDownTestCase()
     NativeRdb::RdbHelper::DeleteRdbStore(TEST_RDB_PATH + TEST_RDB_NAME);
 }
 
-void WindowPatternStartingWindowTest::SetUp()
-{
-}
+void WindowPatternStartingWindowTest::SetUp() {}
 
-void WindowPatternStartingWindowTest::TearDown()
-{
-}
+void WindowPatternStartingWindowTest::TearDown() {}
 
 void WindowPatternStartingWindowTest::InitTestStartingWindowRdb()
 {
@@ -122,7 +118,7 @@ HWTEST_F(WindowPatternStartingWindowTest, GetStartupPage02, TestSize.Level1)
     cachedInfo.iconPathEarlyVersion_ = "pathFromCache";
     ssm_->startingWindowMap_.clear();
     auto key = sessionInfo.moduleName_ + sessionInfo.abilityName_;
-    std::map<std::string, StartingWindowInfo> startingWindowInfoMap { { key, cachedInfo } };
+    std::map<std::string, StartingWindowInfo> startingWindowInfoMap{ { key, cachedInfo } };
     ssm_->startingWindowMap_.insert({ sessionInfo.bundleName_, startingWindowInfoMap });
     StartingWindowInfo outInfo;
     outInfo.iconPathEarlyVersion_ = "default";
@@ -174,7 +170,7 @@ HWTEST_F(WindowPatternStartingWindowTest, GetStartingWindowInfoFromCache, TestSi
     auto res = ssm_->GetStartingWindowInfoFromCache(sessionInfo, startingWindowInfo);
     ASSERT_EQ(res, false);
     auto key = sessionInfo.moduleName_ + sessionInfo.abilityName_;
-    std::map<std::string, StartingWindowInfo> startingWindowInfoMap { {key, startingWindowInfo } };
+    std::map<std::string, StartingWindowInfo> startingWindowInfoMap{ { key, startingWindowInfo } };
     ssm_->startingWindowMap_.insert({ sessionInfo.bundleName_, startingWindowInfoMap });
     res = ssm_->GetStartingWindowInfoFromCache(sessionInfo, startingWindowInfo);
     ASSERT_EQ(res, true);
@@ -275,8 +271,7 @@ HWTEST_F(WindowPatternStartingWindowTest, CacheStartingWindowInfo01, TestSize.Le
     /**
      * @tc.steps: step2. Cache info and check result.
      */
-    ssm_->CacheStartingWindowInfo(
-        abilityInfo.bundleName, abilityInfo.moduleName, abilityInfo.name, startingWindowInfo);
+    ssm_->CacheStartingWindowInfo(abilityInfo.bundleName, abilityInfo.moduleName, abilityInfo.name, startingWindowInfo);
     auto iter = ssm_->startingWindowMap_.find(abilityInfo.bundleName);
     ASSERT_NE(iter, ssm_->startingWindowMap_.end());
     auto& infoMap = iter->second;
@@ -314,14 +309,13 @@ HWTEST_F(WindowPatternStartingWindowTest, CacheStartingWindowInfo02, TestSize.Le
         .backgroundColorEarlyVersion_ = 0x00000000,
         .iconPathEarlyVersion_ = "path",
     };
-    std::map<std::string, StartingWindowInfo> startingWindowInfoMap{{ key, anotherStartingWindowInfo }};
-    ssm_->startingWindowMap_.insert({abilityInfo.bundleName, startingWindowInfoMap});
+    std::map<std::string, StartingWindowInfo> startingWindowInfoMap{ { key, anotherStartingWindowInfo } };
+    ssm_->startingWindowMap_.insert({ abilityInfo.bundleName, startingWindowInfoMap });
 
     /**
      * @tc.steps: step3. Execute and check result.
      */
-    ssm_->CacheStartingWindowInfo(
-        abilityInfo.bundleName, abilityInfo.moduleName, abilityInfo.name, startingWindowInfo);
+    ssm_->CacheStartingWindowInfo(abilityInfo.bundleName, abilityInfo.moduleName, abilityInfo.name, startingWindowInfo);
     auto iter = ssm_->startingWindowMap_.find(abilityInfo.bundleName);
     ASSERT_NE(iter, ssm_->startingWindowMap_.end());
     auto& infoMap = iter->second;
@@ -358,6 +352,6 @@ HWTEST_F(WindowPatternStartingWindowTest, GetBundleStartingWindowInfos, TestSize
     ssm_->GetBundleStartingWindowInfos(bundleInfo, outValues);
     ASSERT_EQ(outValues.size(), 0);
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

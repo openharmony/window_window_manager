@@ -41,24 +41,16 @@ private:
     sptr<SceneSession> GetSceneSession(const std::string& abilityName, const std::string& bundleName);
 };
 
-void KeyboardSessionLayoutTest::SetUpTestCase()
-{
-}
+void KeyboardSessionLayoutTest::SetUpTestCase() {}
 
-void KeyboardSessionLayoutTest::TearDownTestCase()
-{
-}
+void KeyboardSessionLayoutTest::TearDownTestCase() {}
 
-void KeyboardSessionLayoutTest::SetUp()
-{
-}
+void KeyboardSessionLayoutTest::SetUp() {}
 
-void KeyboardSessionLayoutTest::TearDown()
-{
-}
+void KeyboardSessionLayoutTest::TearDown() {}
 
 sptr<SceneSession> KeyboardSessionLayoutTest::GetSceneSession(const std::string& abilityName,
-    const std::string& bundleName)
+                                                              const std::string& bundleName)
 {
     SessionInfo info;
     info.abilityName_ = abilityName;
@@ -141,6 +133,6 @@ HWTEST_F(KeyboardSessionLayoutTest, NotifyClientToUpdateRect03, TestSize.Level1)
     ret = keyboardSession->NotifyClientToUpdateRect("KeyboardSessionLayoutTest", nullptr);
     ASSERT_EQ(ret, WSError::WS_OK);
 }
-}  // namespace
-}  // namespace Rosen
-}  // namespace OHOS
+} // namespace
+} // namespace Rosen
+} // namespace OHOS
