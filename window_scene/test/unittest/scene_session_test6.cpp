@@ -388,7 +388,7 @@ HWTEST_F(SceneSessionTest6, NotifyWindowAttachStateListenerRegistered_session, F
 
 /**
  * @tc.name: UpdateFollowScreenChange
- * @tc.desc: UpdateFollowScreenChange 
+ * @tc.desc: UpdateFollowScreenChange
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest6, UpdateFollowScreenChange, Function | SmallTest | Level1)
@@ -415,7 +415,7 @@ HWTEST_F(SceneSessionTest6, UpdateFollowScreenChange, Function | SmallTest | Lev
 
 /**
  * @tc.name: RegisterFollowScreenChangeCallback
- * @tc.desc: RegisterFollowScreenChangeCallback 
+ * @tc.desc: RegisterFollowScreenChangeCallback
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest6, RegisterFollowScreenChangeCallback, Function | SmallTest | Level1)

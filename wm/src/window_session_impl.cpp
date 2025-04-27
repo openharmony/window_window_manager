@@ -3675,7 +3675,7 @@ WMError WindowSessionImpl::SetFollowScreenChange(bool isFollowScreenChange)
 
     if (!WindowHelper::IsSystemWindow(property_->GetWindowType())) {
         TLOGE(WmsLogTag::DEFAULT, "window %{public}u type not support", GetWindowId());
-        return WMError::WM_ERROR_INVALID_WINDOW_MODE_OR_SIZE;    
+        return WMError::WM_ERROR_INVALID_WINDOW_MODE_OR_SIZE;
     }
     property_->SetFollowScreenChange(isFollowScreenChange);
     return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_FOLLOW_SCREEN_CHANGE);
