@@ -38,7 +38,7 @@ public:
     void TearDown() override;
 
     static inline float virtualPixelRatio_ = 1.0;
-    static inline Rect displayRect_ {0, 0, 0, 0};
+    static inline Rect displayRect_{ 0, 0, 0, 0 };
     static inline std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext_ = nullptr;
 };
 
@@ -52,17 +52,11 @@ void WindowSystemToastWindowTest::SetUpTestCase()
     virtualPixelRatio_ = WindowTestUtils::GetVirtualPixelRatio(0);
 }
 
-void WindowSystemToastWindowTest::TearDownTestCase()
-{
-}
+void WindowSystemToastWindowTest::TearDownTestCase() {}
 
-void WindowSystemToastWindowTest::SetUp()
-{
-}
+void WindowSystemToastWindowTest::SetUp() {}
 
-void WindowSystemToastWindowTest::TearDown()
-{
-}
+void WindowSystemToastWindowTest::TearDown() {}
 
 static sptr<WindowScene> CreateWindowScene()
 {
@@ -89,7 +83,7 @@ static sptr<Window> CreateSystemToastWindow(WindowType type, Rect rect, std::str
 static inline Rect GetRectWithVpr(int32_t x, int32_t y, uint32_t w, uint32_t h)
 {
     auto vpr = WindowSystemToastWindowTest::virtualPixelRatio_;
-    return {x, y, static_cast<uint32_t>(w * vpr), static_cast<uint32_t>(h * vpr)};
+    return { x, y, static_cast<uint32_t>(w * vpr), static_cast<uint32_t>(h * vpr) };
 }
 
 /**
@@ -123,7 +117,7 @@ HWTEST_F(WindowSystemToastWindowTest, SystemToastWindow01, TestSize.Level1)
     }
     ASSERT_EQ(WMError::WM_OK, fltWin->Destroy());
     ASSERT_EQ(WMError::WM_OK, scene->GoDestroy());
-    }
+}
 
 /**
  * @tc.name: SystemToastWindow02
@@ -227,5 +221,5 @@ HWTEST_F(WindowSystemToastWindowTest, SystemToastWindow04, TestSize.Level1)
     ASSERT_EQ(false, fltWin->GetWindowState() == WindowState::STATE_SHOWN);
     ASSERT_EQ(WMError::WM_OK, fltWin->Destroy());
 }
-}
-}
+} // namespace Rosen
+} // namespace OHOS
