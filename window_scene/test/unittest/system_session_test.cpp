@@ -42,19 +42,16 @@ public:
     SessionInfo info;
     sptr<SystemSession::SpecificSessionCallback> specificCallback = nullptr;
     sptr<SystemSession> systemSession_;
+
 private:
     RSSurfaceNode::SharedPtr CreateRSSurfaceNode();
     sptr<SystemSession> GetSystemSession(const std::string& name);
     sptr<SceneSession> GetSceneSession(const std::string& name);
 };
 
-void SystemSessionTest::SetUpTestCase()
-{
-}
+void SystemSessionTest::SetUpTestCase() {}
 
-void SystemSessionTest::TearDownTestCase()
-{
-}
+void SystemSessionTest::TearDownTestCase() {}
 
 void SystemSessionTest::SetUp()
 {
@@ -166,8 +163,7 @@ HWTEST_F(SystemSessionTest, CheckPointerEventDispatch, TestSize.Level1)
     info.windowType_ = 2122;
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    sptr<SystemSession> sysSession =
-        sptr<SystemSession>::MakeSptr(info, specificCallback_);
+    sptr<SystemSession> sysSession = sptr<SystemSession>::MakeSptr(info, specificCallback_);
     sysSession->SetSessionState(SessionState::STATE_FOREGROUND);
     bool ret1 = sysSession->CheckPointerEventDispatch(pointerEvent_);
     ASSERT_EQ(true, ret1);
@@ -187,8 +183,7 @@ HWTEST_F(SystemSessionTest, UpdatePointerArea, TestSize.Level1)
     info.windowType_ = 2122;
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    sptr<SystemSession> sysSession =
-        sptr<SystemSession>::MakeSptr(info, specificCallback_);
+    sptr<SystemSession> sysSession = sptr<SystemSession>::MakeSptr(info, specificCallback_);
     sysSession->UpdatePointerArea(rect);
     ASSERT_NE(sysSession->preRect_, rect);
 
@@ -332,10 +327,9 @@ HWTEST_F(SystemSessionTest, UpdateCameraWindowStatus01, TestSize.Level1)
     systemSession_->UpdateCameraWindowStatus(true);
     ASSERT_EQ(result, false);
 
-    systemSession_->specificCallback_->onCameraFloatSessionChange_ =
-        [&result] (uint32_t accessTokenId, bool isShowing) {
-            result = isShowing;
-        };
+    systemSession_->specificCallback_->onCameraFloatSessionChange_ = [&result](uint32_t accessTokenId, bool isShowing) {
+        result = isShowing;
+    };
     systemSession_->UpdateCameraWindowStatus(true);
     ASSERT_EQ(result, true);
 }
@@ -354,32 +348,28 @@ HWTEST_F(SystemSessionTest, UpdateCameraWindowStatus02, TestSize.Level1)
     ASSERT_NE(specificCallback, nullptr);
     bool result = false;
     sysSession->specificCallback_ = specificCallback;
-    
+
     sysSession->property_->SetWindowType(WindowType::WINDOW_TYPE_PIP);
     sysSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
     sysSession->UpdateCameraWindowStatus(true);
     ASSERT_EQ(result, false);
 
-    sysSession->specificCallback_->onCameraSessionChange_ =
-        [&result](uint32_t accessTokenId, bool isShowing) {
-            result = isShowing;
-        };
+    sysSession->specificCallback_->onCameraSessionChange_ = [&result](uint32_t accessTokenId, bool isShowing) {
+        result = isShowing;
+    };
 
     result = false;
-    sysSession->pipTemplateInfo_.pipTemplateType =
-        static_cast<uint32_t>(PiPTemplateType::VIDEO_CALL);
+    sysSession->pipTemplateInfo_.pipTemplateType = static_cast<uint32_t>(PiPTemplateType::VIDEO_CALL);
     sysSession->UpdateCameraWindowStatus(true);
     ASSERT_EQ(result, true);
 
     result = false;
-    sysSession->pipTemplateInfo_.pipTemplateType =
-        static_cast<uint32_t>(PiPTemplateType::VIDEO_MEETING);
+    sysSession->pipTemplateInfo_.pipTemplateType = static_cast<uint32_t>(PiPTemplateType::VIDEO_MEETING);
     sysSession->UpdateCameraWindowStatus(true);
     ASSERT_EQ(result, true);
 
     result = false;
-    sysSession->pipTemplateInfo_.pipTemplateType =
-        static_cast<uint32_t>(PiPTemplateType::VIDEO_LIVE);
+    sysSession->pipTemplateInfo_.pipTemplateType = static_cast<uint32_t>(PiPTemplateType::VIDEO_LIVE);
     sysSession->UpdateCameraWindowStatus(true);
     ASSERT_EQ(result, false);
 }
@@ -684,7 +674,7 @@ HWTEST_F(SystemSessionTest, NotifyClientToUpdateRect02, TestSize.Level1)
     sysSession->property_->SetWindowType(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
     sysSession->state_ = SessionState::STATE_ACTIVE;
 
-    //for NotifyClientToUpdateRectTask
+    // for NotifyClientToUpdateRectTask
     sysSession->isKeyboardPanelEnabled_ = true;
 
     sysSession->dirtyFlags_ = 0;
@@ -779,22 +769,17 @@ HWTEST_F(SystemSessionTest, UpdatePiPWindowStateChanged, TestSize.Level1)
     sessionInfo.moduleName_ = "UpdatePiPWindowStateChanged";
     sessionInfo.bundleName_ = "UpdatePiPWindowStateChanged";
     sessionInfo.windowType_ = static_cast<uint32_t>(WindowType::APP_MAIN_WINDOW_BASE);
-    sptr<SceneSession::SpecificSessionCallback> callback =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession::SpecificSessionCallback> callback = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(nullptr, callback);
-    sptr<SystemSession> systemSession =
-        sptr<SystemSession>::MakeSptr(sessionInfo, callback);
+    sptr<SystemSession> systemSession = sptr<SystemSession>::MakeSptr(sessionInfo, callback);
     EXPECT_NE(nullptr, systemSession);
-    PiPStateChangeCallback callbackFun = [](const std::string& bundleName, bool isForeground) {
-        return;
-    };
+    PiPStateChangeCallback callbackFun = [](const std::string& bundleName, bool isForeground) { return; };
     callback->onPiPStateChange_ = callbackFun;
     EXPECT_EQ(WindowType::APP_MAIN_WINDOW_BASE, systemSession->GetWindowType());
     systemSession->UpdatePiPWindowStateChanged(true);
 
     sessionInfo.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_PIP);
-    sptr<SystemSession> system =
-        sptr<SystemSession>::MakeSptr(sessionInfo, callback);
+    sptr<SystemSession> system = sptr<SystemSession>::MakeSptr(sessionInfo, callback);
     EXPECT_NE(nullptr, system);
     EXPECT_EQ(WindowType::WINDOW_TYPE_PIP, system->GetWindowType());
     system->UpdatePiPWindowStateChanged(true);

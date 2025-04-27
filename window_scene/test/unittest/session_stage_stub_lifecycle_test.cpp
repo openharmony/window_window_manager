@@ -32,7 +32,6 @@
 #include "zidl/window_manager_agent_interface.h"
 #include "window_manager_hilog.h"
 
-
 using namespace testing;
 using namespace testing::ext;
 
@@ -47,21 +46,13 @@ public:
     sptr<SessionStageStub> sessionStageStub_ = sptr<SessionStageMocker>::MakeSptr();
 };
 
-void SessionStageStubLifecycleTest::SetUpTestCase()
-{
-}
+void SessionStageStubLifecycleTest::SetUpTestCase() {}
 
-void SessionStageStubLifecycleTest::TearDownTestCase()
-{
-}
+void SessionStageStubLifecycleTest::TearDownTestCase() {}
 
-void SessionStageStubLifecycleTest::SetUp()
-{
-}
+void SessionStageStubLifecycleTest::SetUp() {}
 
-void SessionStageStubLifecycleTest::TearDown()
-{
-}
+void SessionStageStubLifecycleTest::TearDown() {}
 
 namespace {
 /**
@@ -125,6 +116,6 @@ HWTEST_F(SessionStageStubLifecycleTest, HandleNotifySessionBackground, TestSize.
     ASSERT_TRUE((sessionStageStub_ != nullptr));
     ASSERT_EQ(0, sessionStageStub_->HandleNotifySessionBackground(data, reply));
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

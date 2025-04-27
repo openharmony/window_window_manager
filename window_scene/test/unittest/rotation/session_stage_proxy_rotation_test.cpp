@@ -40,21 +40,13 @@ public:
     sptr<SessionStageProxy> sessionStage_ = sptr<SessionStageProxy>::MakeSptr(iRemoteObjectMocker);
 };
 
-void SessionStageProxyRotationTest::SetUpTestCase()
-{
-}
+void SessionStageProxyRotationTest::SetUpTestCase() {}
 
-void SessionStageProxyRotationTest::TearDownTestCase()
-{
-}
+void SessionStageProxyRotationTest::TearDownTestCase() {}
 
-void SessionStageProxyRotationTest::SetUp()
-{
-}
+void SessionStageProxyRotationTest::SetUp() {}
 
-void SessionStageProxyRotationTest::TearDown()
-{
-}
+void SessionStageProxyRotationTest::TearDown() {}
 
 namespace {
 /**
@@ -62,13 +54,13 @@ namespace {
  * @tc.desc: test function : SetCurrentRotation
  * @tc.type: FUNC
  */
- HWTEST_F(SessionStageProxyRotationTest, SetCurrentRotation, TestSize.Level1)
+HWTEST_F(SessionStageProxyRotationTest, SetCurrentRotation, TestSize.Level1)
 {
     int32_t currentRotation = 90;
     ASSERT_TRUE(sessionStage_ != nullptr);
     WSError res = sessionStage_->SetCurrentRotation(currentRotation);
     ASSERT_EQ(WSError::WS_OK, res);
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS
