@@ -5750,7 +5750,7 @@ WSError SceneSession::UpdateFollowScreenChange(bool isFollowScreenChange)
     auto task = [weakThis = wptr(this), isFollowScreenChange] {
         auto session = weakThis.promote();
         if (!session || !session->specificCallback_) {
-            TLOGNE(WmsLogTag::DEFAULT, "%{public}s session or specific callback is null", where);
+            TLOGNE(WmsLogTag::DEFAULT, "session or specific callback is null");
             return;
         }
         if (session->specificCallback_->onUpdateFollowScreenChange_) {
