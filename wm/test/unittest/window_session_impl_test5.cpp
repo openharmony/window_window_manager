@@ -637,15 +637,15 @@ HWTEST_F(WindowSessionImplTest5, SetFollowScreenChange, Function | SmallTest | L
 
     window->property_->SetPersistentId(1);
     window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_END);
-    WMError ret = window->SetFollowScreenChange(true);
+    ret = window->SetFollowScreenChange(true);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW_MODE_OR_SIZE, ret);
 
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
-    WMError ret = window->SetFollowScreenChange(true);
+    ret = window->SetFollowScreenChange(true);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW_MODE_OR_SIZE, ret);
 
     window->property_->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
-    WMError ret = window->SetFollowScreenChange(true);
+    ret = window->SetFollowScreenChange(true);
     EXPECT_EQ(WMError::WM_OK, ret);
 }
 } // namespace
