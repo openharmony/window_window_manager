@@ -354,5 +354,12 @@ std::shared_ptr<RSUIDirector> WindowInnerManager::GetRSUIDirector() const
     TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "%{public}s", RSAdapterUtil::RSUIDirectorToStr(rsUIDirector_).c_str());
     return rsUIDirector_;
 }
+
+std::shared_ptr<RSUIContext> GetRSUIContext() const
+{
+    auto rsUIContext = rsUIDirector_ ? rsUIDirector_->GetRSUIContext() : nullptr;
+    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "%{public}s", RSAdapterUtil::RSUIContextToStr(rsUIContext).c_str());
+    return rsUIContext;
+}
 } // Rosen
 } // OHOS

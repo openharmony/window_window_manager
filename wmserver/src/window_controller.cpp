@@ -902,11 +902,8 @@ void WindowController::ProcessDisplayCompression(DisplayId defaultDisplayId, con
     WLOGFD("Add maskingSurfaceNode");
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
     rsSurfaceNodeConfig.SurfaceNodeName = "maskingSurface";
-    std::shared_ptr<RSUIContext> rsUIContext;
-    if (auto rsUIDirector = WindowInnerManager::GetInstance().GetRSUIDirector()) {
-        rsUIContext = rsUIDirector->GetRSUIContext();
-    }
-    maskingSurfaceNode_ = RSSurfaceNode::Create(rsSurfaceNodeConfig, true, rsUIContext);
+    maskingSurfaceNode_ = RSSurfaceNode::Create(
+        rsSurfaceNodeConfig, true, WindowInnerManager::GetInstance().GetRSUIContext());
     if (maskingSurfaceNode_ == nullptr) {
         WLOGFE("Create maskingSurfaceNode failed");
         return;

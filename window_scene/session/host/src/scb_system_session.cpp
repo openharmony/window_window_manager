@@ -45,7 +45,7 @@ SCBSystemSession::SCBSystemSession(const SessionInfo& info, const sptr<SpecificS
             surfaceNode_->SetSkipCheckInMultiInstance(true);
             surfaceNode_->SetRSUIContext(GetRSUIContext(__func__));
             TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
-                  "Skip check in multi-instance and set RSUIContext: %{public}s",
+                  "Skip check in RS multi-instance and set RSUIContext: %{public}s",
                   RSAdapterUtil::RSNodeToStr(surfaceNode_).c_str());
         }
         SetIsUseControlSession(info.isUseControlSession);
