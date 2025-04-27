@@ -15,6 +15,7 @@
 import { AsyncCallback, BusinessError, Callback } from '@ohos.base';
 import { LocalStorage } from '@ohos.arkui.stateManagement';
 import { UIContext } from '@ohos.arkui.UIContext';
+import image from '@ohos.multimedia.image';
 import BaseContext from 'application.BaseContext';
 import hilog from '@ohos.hilog';
 import { ColorMetrics } from '@ohos.arkui.node';
@@ -318,6 +319,19 @@ namespace window {
     topRect: Rect;
     rightRect: Rect;
     bottomRect: Rect;
+  }
+
+  export class SystemBarRegionTintInternal {
+    type: WindowType;
+    isEnable?: boolean;
+    region?: Rect;
+    backgroundColor?: string;
+    contentColor?: string;
+  }
+
+  export class SystemBarTintStateInternal {
+    displayId: number;
+    regionTint: Array<SystemBarRegionTintInternal>;
   }
 
   export interface Rect {
@@ -1255,6 +1269,8 @@ export class WindowInternal implements Window {
     private native setWindowLayoutFullScreen(nativeObj: long, isLayoutFullScreen: boolean): int;
     private native setWindowSystemBarProperties(nativeObj: long, systemBarProperties: SystemBarProperties): int;
     private native setSpecificSystemBarEnabled(nativeObj: long, name: String, enable: boolean, enableAnimation: boolean): int;
+    private native snapshot(nativeObj: long): image.PixelMap;
+    private native hideNonSystemFloatingWindows(nativeObj: long, shouldHide: boolean): void;
 
     private native setWindowColorSpaceSync(nativeObj: long, colorSpace: int): void;
     private native setPreferredOrientationSync(nativeObj: long, orientation: int): void;
@@ -1479,6 +1495,50 @@ export class WindowInternal implements Window {
                 reject(err as BusinessError);
             });
         });
+    }
+
+    public snapshot(): Promise<image.PixelMap> {
+      return new Promise<image.PixelMap>((resolve: (value: image.PixelMap) => void, reject: (error: BusinessError) => void) => {
+        taskpool.execute(() => {
+          return this.snapshot(this.nativeObj);
+        }).then((ret: NullishType) => {
+          resolve(ret as image.PixelMap);
+        }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
+    public snapshot(callback: AsyncCallback<image.PixelMap | undefined>): void {
+      taskpool.execute(() => {
+        return this.snapshot(this.nativeObj);
+      }).then((ret: NullishType) => {
+        callback(new BusinessError(), ret as image.PixelMap);
+      }).catch((err: NullishType) => {
+        callback(err as BusinessError, undefined);
+      });
+    }
+
+    public hideNonSystemFloatingWindows(shouldHide: boolean): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute(() => {
+          this.hideNonSystemFloatingWindows(this.nativeObj, shouldHide);
+        }).then(() => {
+          resolve(undefined);
+        }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
+    public hideNonSystemFloatingWindows(shouldHide: boolean, callback: AsyncCallback<void>): void {
+      taskpool.execute((): void => {
+        this.hideNonSystemFloatingWindows(this.nativeObj, shouldHide);
+      }).then(() => {
+        callback(new BusinessError(), undefined);
+      }).catch((err: NullishType) => {
+        callback(err as BusinessError, undefined);
+      });
     }
 
     public setWindowColorSpace(colorSpace: ColorSpace): Promise<void> {
@@ -1753,6 +1813,10 @@ export interface Window {
     setWindowSystemBarProperties(systemBarProperties: SystemBarProperties): Promise<void>;
     setWindowSystemBarProperties(systemBarProperties: SystemBarProperties, callback: AsyncCallback<void>): void;
     setSpecificSystemBarEnabled(name: String, enable: boolean, enableAnimation?: boolean): Promise<void>;
+    snapshot(): Promise<image.PixelMap>;
+    snapshot(callback: AsyncCallback<image.PixelMap | undefined>): void;
+    hideNonSystemFloatingWindows(shouldHide: boolean): Promise<void>;
+    hideNonSystemFloatingWindows(shouldHide: boolean, callback: AsyncCallback<void>): void;
     setWindowColorSpace(colorSpace: ColorSpace): Promise<void>;
     setWindowColorSpace(colorSpace: ColorSpace, callback: AsyncCallback<void>): void;
     setPreferredOrientation(orientation: Orientation): Promise<void>;
@@ -1797,12 +1861,14 @@ export function CreateWindowStageApi(scene: long): WindowStage { return CreateWi
 export native function CreateWindow(window: long): WindowInternal;
 
 let nativeObj: long;
-function setNativeObj(nativeObject: long):void {
+export function setNativeObj(nativeObject: long):void {
     hilog.info(DOMAIN, TAG, 'setNativeObj, nativeObject:' + nativeObject);
     nativeObj = nativeObject;
 }
 
 native function getLastWindowSync(nativeObj: long, ctx: BaseContext): Window;
+native function onSync(nativeObj: long, type: string, callback: object): void;
+native function offSync(nativeObj: long, type: string, callback: object): void;
 
 export function getLastWindow(ctx: BaseContext): Promise<Window> {
   return new Promise<Window>((resolve: (value: Window) => void, reject: (error: BusinessError) => void ) => {
@@ -1826,6 +1892,34 @@ export function getLastWindow(ctx: BaseContext, callback: AsyncCallback<Window>)
     }).catch((err: NullishType) => {
         callback(err as BusinessError, new WindowInternal());
     });
+}
+
+export function on(type: string, callback: object): void {
+  onSync(nativeObj, type, callback);
+}
+
+export function off(type: string, callback: object): void {
+  offSync(nativeObj, type, callback);
+}
+
+function runWindowListenerVoidArgCallBack(cb: object): void {
+  const func = cb as () => void;
+  func();
+}
+
+function runWindowListenerBooleanArgCallBack(cb: object, cbArg: boolean): void {
+  const func = cb as (cbArg: boolean) => void;
+  func(cbArg);
+}
+
+function runSystemBarTintChangeCallBack(cb: object, tint: object): void {
+  const func = cb as (tint: SystemBarTintStateInternal) => void;
+  func(tint as SystemBarTintStateInternal);
+}
+
+function runAvoidAreaChangeCallBack(cb: object, area: object, type: int): void {
+  const func = cb as (data: AvoidAreaOptions) => void;
+  func({type: type as AvoidAreaType, area: area as AvoidArea});
 }
 
 function runWindowEventCallBack(cb: object, cbArg: int): void {
