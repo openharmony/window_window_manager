@@ -332,9 +332,13 @@ napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& sessio
     if (sessionProperty != nullptr) {
         napi_set_named_property(env, objValue, "screenId",
             CreateJsValue(env, static_cast<int32_t>(sessionProperty->GetDisplayId())));
+        napi_set_named_property(env, objValue, "zIndex",
+            CreateJsValue(env, static_cast<int32_t>(sessionProperty->GetZIndex())));
     } else {
         napi_set_named_property(env, objValue, "screenId",
             CreateJsValue(env, static_cast<int32_t>(SCREEN_ID_INVALID)));
+        napi_set_named_property(env, objValue, "zIndex",
+            CreateJsValue(env, static_cast<int32_t>(SPECIFIC_ZINDEX_INVALID)));
         TLOGE(WmsLogTag::WMS_LIFE, "sessionProperty is nullptr!");
     }
     const char* moduleName = "JsSceneSession";

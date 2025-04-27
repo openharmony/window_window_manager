@@ -1947,6 +1947,7 @@ napi_value SessionTypeInit(napi_env env)
     SetTypeProperty(objValue, env, "TYPE_SCREEN_CONTROL", JsSessionType::TYPE_SCREEN_CONTROL);
     SetTypeProperty(objValue, env, "TYPE_FLOAT_NAVIGATION", JsSessionType::TYPE_FLOAT_NAVIGATION);
     SetTypeProperty(objValue, env, "TYPE_MUTISCREEN_COLLABORATION", JsSessionType::TYPE_MUTISCREEN_COLLABORATION);
+    SetTypeProperty(objValue, env, "TYPE_DYNAMIC", JsSessionType::TYPE_DYNAMIC);
     return objValue;
 }
 
