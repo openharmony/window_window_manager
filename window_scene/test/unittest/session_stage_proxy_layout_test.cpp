@@ -58,6 +58,6 @@ HWTEST_F(SessionStageProxyLayoutTest, NotifySingleHandTransformChange, TestSize.
     ASSERT_TRUE((sessionStage_ != nullptr));
     GTEST_LOG_(INFO) << "SessionStageProxyLayoutTest: NotifySingleHandTransformChange end";
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

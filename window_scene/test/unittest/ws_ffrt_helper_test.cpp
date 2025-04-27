@@ -40,13 +40,9 @@ private:
     WSFFRTHelper* wsFfrtHelper_;
 };
 
-void WSFFRTHelperTest::SetUpTestCase()
-{
-}
+void WSFFRTHelperTest::SetUpTestCase() {}
 
-void WSFFRTHelperTest::TearDownTestCase()
-{
-}
+void WSFFRTHelperTest::TearDownTestCase() {}
 
 void WSFFRTHelperTest::SetUp()
 {
@@ -68,7 +64,7 @@ HWTEST_F(WSFFRTHelperTest, SubmitTask001, TestSize.Level1)
 {
     ASSERT_NE(wsFfrtHelper_, nullptr);
 
-    auto mockTask = []{};
+    auto mockTask = [] {};
     std::string taskName = "testTask";
     uint64_t delayTime = 0;
     TaskQos qos = TaskQos::USER_INTERACTIVE;
@@ -93,7 +89,7 @@ HWTEST_F(WSFFRTHelperTest, SubmitTask002, TestSize.Level1)
     SET_THREAD_NUM(threadNum);
     auto submitTask = [] {
         for (size_t i = 0; i < TASK_NUM; ++i) {
-            auto mockTask = []{};
+            auto mockTask = [] {};
             int id = g_taskId.fetch_add(1);
             std::string taskName = "testTask" + std::to_string(id);
             uint64_t delayTime = 0;
@@ -117,7 +113,7 @@ HWTEST_F(WSFFRTHelperTest, CancelTask001, TestSize.Level1)
 {
     ASSERT_NE(wsFfrtHelper_, nullptr);
 
-    auto mockTask = []{};
+    auto mockTask = [] {};
     std::string taskName = "testTask";
     uint64_t delayTime = 0;
     TaskQos qos = TaskQos::USER_INTERACTIVE;
@@ -139,7 +135,7 @@ HWTEST_F(WSFFRTHelperTest, CancelTask002, TestSize.Level1)
     ASSERT_NE(g_wsFfrtHelper, nullptr);
 
     constexpr int totalTaskNum = 50000;
-    auto mockTask = []{};
+    auto mockTask = [] {};
     for (size_t i = 0; i < totalTaskNum; ++i) {
         wsFfrtHelper_->SubmitTask(mockTask, "testTask" + std::to_string(i), 0, TaskQos::USER_INTERACTIVE);
     }
@@ -161,4 +157,4 @@ HWTEST_F(WSFFRTHelperTest, CancelTask002, TestSize.Level1)
     g_wsFfrtHelper = nullptr;
 }
 
-}
+} // namespace OHOS::Rosen
