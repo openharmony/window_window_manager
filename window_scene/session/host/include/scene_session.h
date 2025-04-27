@@ -115,6 +115,7 @@ using NotifyAvoidAreaChangeCallback = std::function<void(const sptr<AvoidArea>& 
 using NotifySetSupportedWindowModesFunc = std::function<void(
     std::vector<AppExecFwk::SupportWindowMode>&& supportedWindowModes)>;
 using GetStatusBarAvoidHeightFunc = std::function<void(WSRect& barArea)>;
+using GetStatusBarConstantlyShowFunc = std::function<void(DisplayId displayId, bool& isVisible)>;
 using NotifySetWindowCornerRadiusFunc = std::function<void(float cornerRadius)>;
 using NotifyFollowParentRectFunc = std::function<void(bool isFollow)>;
 using GetSceneSessionByIdCallback = std::function<sptr<SceneSession>(int32_t sessionId)>;
@@ -396,6 +397,7 @@ public:
     void MarkAvoidAreaAsDirty();
     virtual void RecalculatePanelRectForAvoidArea(WSRect& panelRect) {}
     void RegisterGetStatusBarAvoidHeightFunc(GetStatusBarAvoidHeightFunc&& func);
+    void RegisterGetStatusBarConstantlyShowFunc(GetStatusBarConstantlyShowFunc&& func);
     void HookAvoidAreaInCompatibleMode(WSRect& rect, AvoidArea& avoidArea, AvoidAreaType avoidAreaType) const;
 
     void SetAbilitySessionInfo(std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo);
@@ -741,6 +743,7 @@ protected:
     NotifyNeedAvoidFunc onNeedAvoid_;
     NotifySystemBarPropertyChangeFunc onSystemBarPropertyChange_;
     GetStatusBarAvoidHeightFunc onGetStatusBarAvoidHeightFunc_;
+    GetStatusBarConstantlyShowFunc onGetStatusBarConstantlyShowFunc_;
 
     /*
      * Gesture Back
