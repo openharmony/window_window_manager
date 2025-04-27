@@ -260,6 +260,20 @@ public:
     int32_t GetSubWindowZLevel() const;
 
     /**
+     * @brief Set zIndex of specific window.
+     *
+     * @param zIndex zIndex of specific window
+     */
+    void SetZIndex(int32_t zIndex);
+
+    /**
+     * @brief Get zIndex of specific window.
+     *
+     * @return Return zIndex of specific window
+     */
+    int32_t GetZIndex() const;
+
+    /**
      * @brief Get window mode.
      *
      * @return The mode of window.
@@ -461,6 +475,7 @@ private:
     WindowSessionType sessionType_ { WindowSessionType::SCENE_SESSION };
     float brightness_ = UNDEFINED_BRIGHTNESS;
     int32_t zLevel_ = 0;
+    int32_t zIndex_ = 0;
 
     Orientation requestedOrientation_ { Orientation::UNSPECIFIED };
     std::unordered_map<WindowType, SystemBarProperty> sysBarPropMap_ {

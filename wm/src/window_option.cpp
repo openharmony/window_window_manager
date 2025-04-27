@@ -373,6 +373,16 @@ int32_t WindowOption::GetSubWindowZLevel() const
     return zLevel_;
 }
 
+void WindowOption::SetZIndex(int32_t zIndex)
+{
+    zIndex_ = zIndex;
+}
+
+int32_t WindowOption::GetZIndex() const
+{
+    return zIndex_;
+}
+
 void WindowOption::SetIsSystemKeyboard(bool isSystemKeyboard)
 {
     isSystemKeyboard_ = isSystemKeyboard;

@@ -535,6 +535,10 @@ bool JsWindowManager::ParseConfigOption(napi_env env, napi_value jsObject,
         option.SetParentId(parentId);
     }
 
+    if (!ParseZIndex(env, jsObject, option)) {
+        return false;
+    }
+
     return true;
 }
 
