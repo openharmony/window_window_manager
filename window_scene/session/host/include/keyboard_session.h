@@ -71,9 +71,14 @@ public:
     WSError ChangeKeyboardViewMode(KeyboardViewMode mode) override;
     void SetKeyboardViewModeChangeListener(const NotifyKeyboarViewModeChangeFunc& func) override;
     void SetSkipSelfWhenShowOnVirtualScreen(bool isSkip) override;
+    WSError UpdateSizeChangeReason(SizeChangeReason reason) override;
 
 protected:
     void EnableCallingSessionAvoidArea() override;
+    void NotifySessionRectChange(const WSRect& rect,
+        SizeChangeReason reason = SizeChangeReason::UNDEFINED,
+        DisplayId displayId = DISPLAY_ID_INVALID,
+        const RectAnimationConfig& rectAnimationConfig = {}) override;
     void RestoreCallingSession(const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
 
 private:
@@ -99,6 +104,7 @@ private:
         bool isShow);
     void NotifySystemKeyboardAvoidChange(SystemKeyboardAvoidChangeReason reason);
     void NotifyRootSceneOccupiedAreaChange(const sptr<OccupiedAreaChangeInfo>& info);
+    void SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool needFlush = true) override;
 
     sptr<KeyboardSessionCallback> keyboardCallback_ = nullptr;
     bool isKeyboardSyncTransactionOpen_ = false;
