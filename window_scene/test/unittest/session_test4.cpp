@@ -38,8 +38,8 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 const std::string UNDEFINED = "undefined";
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowSessionTest4"};
-}
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowSessionTest4" };
+} // namespace
 
 class WindowSessionTest4 : public testing::Test {
 public:
@@ -56,13 +56,9 @@ private:
     static constexpr uint32_t waitSyncInNs_ = 500000;
 };
 
-void WindowSessionTest4::SetUpTestCase()
-{
-}
+void WindowSessionTest4::SetUpTestCase() {}
 
-void WindowSessionTest4::TearDownTestCase()
-{
-}
+void WindowSessionTest4::TearDownTestCase() {}
 
 void WindowSessionTest4::SetUp()
 {
@@ -75,9 +71,7 @@ void WindowSessionTest4::SetUp()
     EXPECT_NE(nullptr, session_);
     ssm_ = sptr<SceneSessionManager>::MakeSptr();
     session_->SetEventHandler(ssm_->taskScheduler_->GetEventHandler(), ssm_->eventHandler_);
-    auto isScreenLockedCallback = [this]() {
-        return ssm_->IsScreenLocked();
-    };
+    auto isScreenLockedCallback = [this]() { return ssm_->IsScreenLocked(); };
     session_->RegisterIsScreenLockedCallback(isScreenLockedCallback);
 }
 
@@ -120,7 +114,7 @@ namespace {
 HWTEST_F(WindowSessionTest4, SetShowRecent001, TestSize.Level1)
 {
     std::string taskName = "wms:WindowStateDetect" + std::to_string(session_->persistentId_);
-    auto task = [](){};
+    auto task = []() {};
     int64_t delayTime = 3000;
     session_->handler_->PostTask(task, taskName, delayTime);
     int32_t beforeTaskNum = GetTaskCount();
@@ -138,7 +132,7 @@ HWTEST_F(WindowSessionTest4, SetShowRecent001, TestSize.Level1)
 HWTEST_F(WindowSessionTest4, SetShowRecent002, TestSize.Level1)
 {
     std::string taskName = "wms:WindowStateDetect" + std::to_string(session_->persistentId_);
-    auto task = [](){};
+    auto task = []() {};
     int64_t delayTime = 3000;
     session_->handler_->PostTask(task, taskName, delayTime);
     session_->showRecent_ = false;
@@ -157,7 +151,7 @@ HWTEST_F(WindowSessionTest4, SetShowRecent002, TestSize.Level1)
 HWTEST_F(WindowSessionTest4, SetShowRecent003, TestSize.Level1)
 {
     std::string taskName = "wms:WindowStateDetect" + std::to_string(session_->persistentId_);
-    auto task = [](){};
+    auto task = []() {};
     int64_t delayTime = 3000;
     session_->handler_->PostTask(task, taskName, delayTime);
     session_->showRecent_ = true;
@@ -221,7 +215,7 @@ HWTEST_F(WindowSessionTest4, CreateDetectStateTask002, TestSize.Level1)
 {
     session_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     std::string taskName = "wms:WindowStateDetect" + std::to_string(session_->persistentId_);
-    auto task = [](){};
+    auto task = []() {};
     int64_t delayTime = 3000;
     session_->handler_->PostTask(task, taskName, delayTime);
     int32_t beforeTaskNum = GetTaskCount();
@@ -334,7 +328,7 @@ HWTEST_F(WindowSessionTest4, PostExportTask02, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     std::string name = "sessionExportTask";
-    auto task = [](){};
+    auto task = []() {};
     int64_t delayTime = 0;
 
     session_->PostExportTask(task, name, delayTime);
@@ -343,7 +337,7 @@ HWTEST_F(WindowSessionTest4, PostExportTask02, TestSize.Level1)
 
     sptr<SceneSessionManager> sceneSessionManager = sptr<SceneSessionManager>::MakeSptr();
     session_->SetEventHandler(sceneSessionManager->taskScheduler_->GetEventHandler(),
-        sceneSessionManager->eventHandler_);
+                              sceneSessionManager->eventHandler_);
     session_->PostExportTask(task, name, delayTime);
     auto result2 = session_->GetBufferAvailable();
     ASSERT_EQ(result2, false);
@@ -500,7 +494,7 @@ HWTEST_F(WindowSessionTest4, UpdateDensity, TestSize.Level1)
  */
 HWTEST_F(WindowSessionTest4, UpdateSizeChangeReason, TestSize.Level1)
 {
-    SizeChangeReason reason = SizeChangeReason{1};
+    SizeChangeReason reason = SizeChangeReason{ 1 };
     ASSERT_EQ(session_->UpdateSizeChangeReason(reason), WSError::WS_OK);
 }
 
@@ -512,15 +506,11 @@ HWTEST_F(WindowSessionTest4, UpdateSizeChangeReason, TestSize.Level1)
 HWTEST_F(WindowSessionTest4, SetPendingSessionActivationEventListener, TestSize.Level1)
 {
     int resultValue = 0;
-    session_->SetPendingSessionActivationEventListener([&resultValue](const SessionInfo& info) {
-        resultValue = 1;
-    });
+    session_->SetPendingSessionActivationEventListener([&resultValue](const SessionInfo& info) { resultValue = 1; });
     usleep(waitSyncInNs_);
-    session_->SetTerminateSessionListener([&resultValue](const SessionInfo& info) {
-        resultValue = 2;
-    });
+    session_->SetTerminateSessionListener([&resultValue](const SessionInfo& info) { resultValue = 2; });
     usleep(waitSyncInNs_);
-    LifeCycleTaskType taskType = LifeCycleTaskType{0};
+    LifeCycleTaskType taskType = LifeCycleTaskType{ 0 };
     session_->RemoveLifeCycleTask(taskType);
     ASSERT_EQ(resultValue, 0);
 }
@@ -561,8 +551,8 @@ HWTEST_F(WindowSessionTest4, SetSessionIcon, TestSize.Level1)
 HWTEST_F(WindowSessionTest4, SetSessionExceptionListener, TestSize.Level1)
 {
     session_->SetSessionExceptionListener(nullptr, true);
-    session_->SetSessionExceptionListener([](const SessionInfo& info,
-        const ExceptionInfo& exceptionInfo, bool startFail) {}, true);
+    session_->SetSessionExceptionListener(
+        [](const SessionInfo& info, const ExceptionInfo& exceptionInfo, bool startFail) {}, true);
     usleep(waitSyncInNs_);
     ASSERT_NE(nullptr, session_->jsSceneSessionExceptionFunc_);
 }
@@ -608,7 +598,7 @@ HWTEST_F(WindowSessionTest4, NotifyCloseExistPipWindow, TestSize.Level1)
 {
     sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
     ASSERT_NE(mockSessionStage, nullptr);
-    ManagerState key = ManagerState{0};
+    ManagerState key = ManagerState{ 0 };
     session_->GetStateFromManager(key);
     session_->NotifyUILostFocus();
 
@@ -629,7 +619,7 @@ HWTEST_F(WindowSessionTest4, NotifyCloseExistPipWindow, TestSize.Level1)
  * @tc.desc: SetUseStartingWindowAboveLocked Test
  * @tc.type: FUNC
  */
- HWTEST_F(WindowSessionTest4, SetUseStartingWindowAboveLocked, TestSize.Level1)
+HWTEST_F(WindowSessionTest4, SetUseStartingWindowAboveLocked, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     session_->useStartingWindowAboveLocked_ = false;
@@ -703,9 +693,7 @@ HWTEST_F(WindowSessionTest4, SetBackPressedListenser, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     int32_t result = 0;
-    session_->SetBackPressedListenser([&result](const bool needMoveToBackground) {
-        result = 1;
-    });
+    session_->SetBackPressedListenser([&result](const bool needMoveToBackground) { result = 1; });
     usleep(waitSyncInNs_);
     session_->backPressedFunc_(true);
     ASSERT_EQ(result, 1);
@@ -738,7 +726,7 @@ HWTEST_F(WindowSessionTest4, NotifyContextTransparent, TestSize.Level1)
 
     NotifyContextTransparentFunc contextTransparentFunc = session_->contextTransparentFunc_;
     if (contextTransparentFunc == nullptr) {
-        contextTransparentFunc = [](){};
+        contextTransparentFunc = []() {};
     }
     session_->contextTransparentFunc_ = nullptr;
     session_->NotifyContextTransparent();
@@ -1118,6 +1106,6 @@ HWTEST_F(WindowSessionTest4, SafelySetWant01, TestSize.Level1)
     ASSERT_NE(nullptr, sessionInfo.want);
     EXPECT_EQ(sessionInfo.SafelyGetWant().GetBundle(), "SafelySetWantTest");
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS
