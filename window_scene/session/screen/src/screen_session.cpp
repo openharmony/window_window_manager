@@ -2183,6 +2183,26 @@ void ScreenSession::SecondaryReflexionChange(ScreenId screenId, bool isSecondary
     }
 }
 
+void ScreenSession::BeforeScreenPropertyChange(FoldStatus foldStatus)
+{
+    std::vector<IScreenChangeListener*> curScreenChangeListenerList;
+    {
+        std::lock_guard<std::mutex> lock(screenChangeListenerListMutex_);
+        curScreenChangeListenerList = screenChangeListenerList_;
+    }
+    if (curScreenChangeListenerList.empty()) {
+        TLOGE(WmsLogTag::DMS, "screenChangeListenerList is empty.");
+        return;
+    }
+    for (auto& listener : curScreenChangeListenerList) {
+        if (!listener) {
+            TLOGE(WmsLogTag::DMS, "screenChangeListener is null.");
+            continue;
+        }
+        listener->OnBeforeScreenPropertyChange(foldStatus);
+    }
+}
+
 void ScreenSession::SetIsPhysicalMirrorSwitch(bool isPhysicalMirrorSwitch)
 {
     isPhysicalMirrorSwitch_ = isPhysicalMirrorSwitch;

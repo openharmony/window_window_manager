@@ -444,6 +444,7 @@ void SingleDisplayPocketFoldPolicy::SendPropertyChangeResult(sptr<ScreenSession>
     std::lock_guard<std::recursive_mutex> lock_info(displayInfoMutex_);
     screenProperty_ = ScreenSessionManager::GetInstance().GetPhyScreenProperty(screenId);
     ScreenProperty property = screenSession->UpdatePropertyByFoldControl(screenProperty_);
+    ScreenSessionManager::GetInstance().OnBeforeScreenPropertyChange(currentFoldStatus_);
     screenSession->PropertyChange(property, reason);
     screenSession->SetRotationAndScreenRotationOnly(Rotation::ROTATION_0);
     TLOGI(WmsLogTag::DMS, "screenBounds : width_= %{public}f, height_= %{public}f",
