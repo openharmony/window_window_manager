@@ -1563,7 +1563,7 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
 }
 
 void WindowSessionImpl::HideTitleButton(bool& hideSplitButton, bool& hideMaximizeButton,
-    bool& hideMinimizeButton,bool& hideCloseButton)
+    bool& hideMinimizeButton, bool& hideCloseButton)
 {
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
     if (uiContent == nullptr || !IsDecorEnable()) {
