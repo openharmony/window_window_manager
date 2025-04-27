@@ -107,9 +107,11 @@ void MultiScreenChangeUtils::ScreenMainPositionChange(sptr<ScreenSession>& inner
         return;
     }
     innerScreen->SetStartPosition(0, 0);
+    innerScreen->SetXYPosition(0, 0);
     innerScreen->PropertyChange(innerScreen->GetScreenProperty(),
         ScreenPropertyChangeReason::RELATIVE_POSITION_CHANGE);
     externalScreen->SetStartPosition(0, 0);
+    externalScreen->SetXYPosition(0, 0);
     externalScreen->PropertyChange(externalScreen->GetScreenProperty(),
         ScreenPropertyChangeReason::RELATIVE_POSITION_CHANGE);
     {

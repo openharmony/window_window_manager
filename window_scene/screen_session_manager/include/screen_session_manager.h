@@ -536,7 +536,11 @@ private:
     std::shared_ptr<RSDisplayNode> GetDisplayNodeByDisplayId(DisplayId displayId);
     void RefreshMirrorScreenRegion(ScreenId screenId);
     void IsEnableRegionRotation(sptr<ScreenSession> screenSession);
-    void CalculateXYPosition(sptr<ScreenSession> screenSession);
+    void CalculateXYPosition(sptr<ScreenSession> firstScreenSession,
+        sptr<ScreenSession> secondaryScreenSession = nullptr);
+    void CalculateSecondryXYPosition(sptr<ScreenSession> firstScreenSession,
+        
+        sptr<ScreenSession> secondaryScreenSession);
     bool IsSpecialApp();
     void SetMultiScreenRelativePositionInner(sptr<ScreenSession>& firstScreenSession,
         sptr<ScreenSession>& secondScreenSession, MultiScreenPositionOptions mainScreenOptions,
