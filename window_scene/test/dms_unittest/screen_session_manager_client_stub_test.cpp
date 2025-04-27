@@ -891,6 +891,22 @@ HWTEST_F(ScreenSessionManagerClientStubTest, HandleOnDumperClientScreenSessions,
 }
 
 /**
+ * @tc.name: HandleOnBeforeScreenPropertyChange
+ * @tc.desc: HandleOnBeforeScreenPropertyChange test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientStubTest, HandleOnBeforeScreenPropertyChange, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteInterfaceToken(ScreenSessionManagerClientStub::GetDescriptor());
+    ASSERT_TRUE(screenSessionManagerClientStub_ != nullptr);
+    auto ret = screenSessionManagerClientStub_->HandleOnBeforeScreenPropertyChange(data, reply);
+    EXPECT_EQ(ret, 0);
+}
+
+/**
  * @tc.name: HandleSyncScreenCombination
  * @tc.desc: HandleSyncScreenCombination test
  * @tc.type: FUNC

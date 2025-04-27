@@ -3607,13 +3607,6 @@ public:
     }
 
     /**
-     * @brief Get the api compatible version.
-     *
-     * @return Api compatible version
-     */
-    virtual uint32_t GetApiCompatibleVersion() const { return 0; }
-
-    /**
      * @brief Set the parent window of a sub window.
      *
      * @param newParentWindowId new parent window id.
