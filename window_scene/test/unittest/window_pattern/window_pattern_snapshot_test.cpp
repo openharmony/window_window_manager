@@ -567,6 +567,31 @@ HWTEST_F(WindowPatternSnapshotTest, GetSnapshotPixelMap, TestSize.Level1)
     session_->snapshot_ = nullptr;
     ASSERT_EQ(nullptr, session_->GetSnapshotPixelMap(6.6f, 8.8f));
 }
+
+/**
+ * @tc.name: GetEnableAddSnapshot
+ * @tc.desc: GetEnableAddSnapshot Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternSnapshotTest, GetEnableAddSnapshot, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    bool res = session_->GetEnableAddSnapshot();
+    ASSERT_EQ(res, true);
+}
+
+/**
+ * @tc.name: SetEnableAddSnapshot
+ * @tc.desc: SetEnableAddSnapshot Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternSnapshotTest, SetEnableAddSnapshot, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->SetEnableAddSnapshot(false);
+    bool res = session_->GetEnableAddSnapshot();
+    ASSERT_EQ(res, false);
+}
 }
 }
 }
