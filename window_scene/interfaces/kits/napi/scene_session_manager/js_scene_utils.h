@@ -69,7 +69,7 @@ enum class JsSessionType : uint32_t {
     TYPE_WALLET_SWIPE_CARD,
     TYPE_SCREEN_CONTROL,
     TYPE_FLOAT_NAVIGATION,
-    TYPE_DYNAMIC
+    TYPE_DYNAMIC = 41
 };
 
 const std::map<WindowType, JsSessionType> WINDOW_TO_JS_SESSION_TYPE_MAP {
