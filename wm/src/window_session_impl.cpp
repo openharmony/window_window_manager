@@ -2795,8 +2795,7 @@ WMError WindowSessionImpl::SetDecorButtonStyle(const DecorButtonStyle& decorButt
         TLOGE(WmsLogTag::WMS_DECOR, "uiContent is null, windowId: %{public}u", GetWindowId());
         return WMError::WM_ERROR_NULLPTR;
     }
-    nlohmann::json decorJson;
-    decorJson = WindowSessionImpl::setContainerButtonStyle(decorButtonStyle);
+    nlohmann::json decorJson = WindowSessionImpl::setContainerButtonStyle(decorButtonStyle);
     uiContent->OnContainerModalEvent(DECOR_BUTTON_STYLE_CHANGE, decorJson.dump());
     decorButtonStyle_ = decorButtonStyle;
     return WMError::WM_OK;
