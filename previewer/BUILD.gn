@@ -137,8 +137,7 @@ if (!ispreview) {
     deps = [
       ":previewer_window",
       "${graphic_base_path}/graphic_2d/rosen/modules/platform:eventhandler",
-      "${graphic_base_path}/graphic_2d/rosen/modules/platform:utils",
-      "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+      "${graphic_base_path}/graphic_2d/rosen/modules/platform:utils"
     ]
 
     external_deps = [
