@@ -355,7 +355,7 @@ std::shared_ptr<RSUIDirector> WindowInnerManager::GetRSUIDirector() const
     return rsUIDirector_;
 }
 
-std::shared_ptr<RSUIContext> GetRSUIContext() const
+std::shared_ptr<RSUIContext> WindowInnerManager::GetRSUIContext() const
 {
     auto rsUIContext = rsUIDirector_ ? rsUIDirector_->GetRSUIContext() : nullptr;
     TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "%{public}s", RSAdapterUtil::RSUIContextToStr(rsUIContext).c_str());
