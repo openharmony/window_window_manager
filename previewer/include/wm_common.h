@@ -116,6 +116,7 @@ enum class WindowType : uint32_t {
     WINDOW_TYPE_WALLET_SWIPE_CARD,
     WINDOW_TYPE_SCREEN_CONTROL,
     WINDOW_TYPE_FLOAT_NAVIGATION,
+    WINDOW_TYPE_DYNAMIC,
     ABOVE_APP_SYSTEM_WINDOW_END,
 
     SYSTEM_SUB_WINDOW_BASE = 2500,
@@ -1325,6 +1326,13 @@ struct RotationChangeInfo {
 struct RotationChangeResult {
     RectType rectType_;
     Rect windowRect_;
+};
+
+/**
+ * @brief default zIndex for specific window.
+ */
+enum DefaultSpecificZIndex {
+    MUTISCREEN_COLLABORATION = 930,
 };
 }
 }

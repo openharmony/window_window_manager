@@ -224,6 +224,8 @@ public:
      */
     void SetSubWindowZLevel(int32_t zLevel);
     int32_t GetSubWindowZLevel() const;
+    void SetZIndex(int32_t zIndex);
+    int32_t GetZIndex() const;
 
     /*
      * Window Property
@@ -464,6 +466,7 @@ private:
      * Window Hierarchy
      */
     int32_t zLevel_ = 0;
+    int32_t zIndex_ = SPECIFIC_ZINDEX_INVALID;
 
     /*
      * UIExtension

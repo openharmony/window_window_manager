@@ -183,6 +183,11 @@ public:
                 type == WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR);
     }
 
+    static inline bool IsDynamicWindow(WindowType type)
+    {
+        return type == WindowType::WINDOW_TYPE_DYNAMIC;
+    }
+
     static inline bool IsFullScreenWindow(WindowMode mode)
     {
         return mode == WindowMode::WINDOW_MODE_FULLSCREEN;

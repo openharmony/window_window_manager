@@ -1086,6 +1086,16 @@ int32_t WindowSessionProperty::GetSubWindowZLevel() const
     return zLevel_;
 }
 
+void WindowSessionProperty::SetZIndex(int32_t zIndex)
+{
+    zIndex_ = zIndex;
+}
+
+int32_t WindowSessionProperty::GetZIndex() const
+{
+    return zIndex_;
+}
+
 void WindowSessionProperty::SetIsAtomicService(bool isAtomicService)
 {
     std::lock_guard lock(atomicServiceMutex_);
@@ -1133,7 +1143,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint32(static_cast<uint32_t>(windowMode_)) &&
         parcel.WriteUint32(flags_) && parcel.WriteBool(raiseEnabled_) &&
         parcel.WriteBool(topmost_) && parcel.WriteBool(mainWindowTopmost_) &&
-        parcel.WriteInt32(zLevel_) &&
+        parcel.WriteInt32(zLevel_) && parcel.WriteInt32(zIndex_) &&
         parcel.WriteBool(isDecorEnable_) && parcel.WriteBool(dragEnabled_) &&
         parcel.WriteBool(hideNonSystemFloatingWindows_) && parcel.WriteBool(forceHide_) &&
         MarshallingWindowLimits(parcel) && parcel.WriteFloat(brightness_) &&
@@ -1205,6 +1215,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetTopmost(parcel.ReadBool());
     property->SetMainWindowTopmost(parcel.ReadBool());
     property->SetSubWindowZLevel(parcel.ReadInt32());
+    property->SetZIndex(parcel.ReadInt32());
     property->SetDecorEnable(parcel.ReadBool());
     property->SetDragEnabled(parcel.ReadBool());
     property->SetHideNonSystemFloatingWindows(parcel.ReadBool());
@@ -1277,6 +1288,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     topmost_ = property->topmost_;
     mainWindowTopmost_ = property->mainWindowTopmost_;
     zLevel_ = property->zLevel_;
+    zIndex_ = property->zIndex_;
     requestedOrientation_ = property->requestedOrientation_;
     defaultRequestedOrientation_ = property->defaultRequestedOrientation_;
     isPrivacyMode_ = property->isPrivacyMode_;

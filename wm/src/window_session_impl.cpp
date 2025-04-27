@@ -262,6 +262,7 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     property_->SetIsUIExtFirstSubWindow(option->GetIsUIExtFirstSubWindow());
     property_->SetTopmost(option->GetWindowTopmost());
     property_->SetSubWindowZLevel(option->GetSubWindowZLevel());
+    property_->SetZIndex(option->GetZIndex());
     property_->SetRealParentId(option->GetRealParentId());
     property_->SetParentWindowType(option->GetParentWindowType());
     property_->SetUIExtensionUsage(static_cast<UIExtensionUsage>(option->GetUIExtensionUsage()));
