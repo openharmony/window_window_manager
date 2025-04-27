@@ -399,18 +399,18 @@ HWTEST_F(SceneSessionTest6, UpdateFollowScreenChange, Function | SmallTest | Lev
     bool isFollowScreenChange = true;
     sceneSession->specificCallback_ = nullptr;
     WSError ret = sceneSession->UpdateFollowScreenChange(isFollowScreenChange);
-    EXPECT_EQ(WSError::WS_OK, true);
+    EXPECT_EQ(WSError::WS_OK, ret);
 
     sptr<SceneSession::SpecificSessionCallback> callback = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(nullptr, callback);
     sceneSession->specificCallback_ = callback;
     ret = sceneSession->UpdateFollowScreenChange(isFollowScreenChange);
-    EXPECT_EQ(WSError::WS_OK, true);
+    EXPECT_EQ(WSError::WS_OK, ret);
 
     auto task = [] (bool isFollowScreenChange) {};
     callback->onUpdateFollowScreenChange_ = task;
     ret = sceneSession->UpdateFollowScreenChange(isFollowScreenChange);
-    EXPECT_EQ(WSError::WS_OK, true);
+    EXPECT_EQ(WSError::WS_OK, ret);
 }
 
 /**
