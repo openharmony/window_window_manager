@@ -26,12 +26,14 @@ public:
     MockDataHandler() = default;
     ~MockDataHandler() override = default;
 
-    MOCK_METHOD(DataHandlerErr, SendData,
-                (const AAFwk::Want& data, AAFwk::Want& reply, const DataTransferConfig& config), (override));
-    MOCK_METHOD(bool, WriteInterfaceToken, (MessageParcel& data), (override));
+    MOCK_METHOD(DataHandlerErr,
+                SendData,
+                (const AAFwk::Want& data, AAFwk::Want& reply, const DataTransferConfig& config),
+                (override));
+    MOCK_METHOD(bool, WriteInterfaceToken, (MessageParcel & data), (override));
 
     // Helper methods to expose protected methods for testing
     using DataHandler::NotifyDataConsumer;
 };
-}  // namespace OHOS::Rosen::Extension
-#endif  // OHOS_ROSEN_EXTENSION_DATA_HANDLE_MOCK_H
+} // namespace OHOS::Rosen::Extension
+#endif // OHOS_ROSEN_EXTENSION_DATA_HANDLE_MOCK_H

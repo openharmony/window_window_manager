@@ -43,19 +43,16 @@ public:
     void TearDown() override;
     SessionInfo info;
     sptr<SubSession::SpecificSessionCallback> specificCallback = nullptr;
+
 private:
     RSSurfaceNode::SharedPtr CreateRSSurfaceNode();
     sptr<SubSession> subSession_;
     SystemSessionConfig systemConfig_;
 };
 
-void SubSessionTest::SetUpTestCase()
-{
-}
+void SubSessionTest::SetUpTestCase() {}
 
-void SubSessionTest::TearDownTestCase()
-{
-}
+void SubSessionTest::TearDownTestCase() {}
 
 void SubSessionTest::SetUp()
 {
@@ -433,9 +430,7 @@ HWTEST_F(SubSessionTest, SetParentSessionCallback, TestSize.Level1)
     subSession->SetParentSessionCallback(nullptr);
     EXPECT_EQ(subSession->setParentSessionFunc_, nullptr);
 
-    NotifySetParentSessionFunc func = [](int32_t oldParentWindowId, int32_t newParentWindowId) {
-        return;
-    };
+    NotifySetParentSessionFunc func = [](int32_t oldParentWindowId, int32_t newParentWindowId) { return; };
     subSession->SetParentSessionCallback(std::move(func));
     EXPECT_NE(subSession->setParentSessionFunc_, nullptr);
 }
@@ -456,9 +451,7 @@ HWTEST_F(SubSessionTest, NotifySetParentSession, TestSize.Level1)
     auto res = subSession->NotifySetParentSession(oldParentWindowId, newParentWindowId);
     EXPECT_EQ(res, WMError::WM_OK);
 
-    NotifySetParentSessionFunc func = [](int32_t oldParentWindowId, int32_t newParentWindowId) {
-        return;
-    };
+    NotifySetParentSessionFunc func = [](int32_t oldParentWindowId, int32_t newParentWindowId) { return; };
     subSession->SetParentSessionCallback(std::move(func));
     res = subSession->NotifySetParentSession(oldParentWindowId, newParentWindowId);
     EXPECT_EQ(res, WMError::WM_OK);
@@ -640,9 +633,7 @@ HWTEST_F(SubSessionTest, SetSubWindowZLevel, TestSize.Level1)
     info.bundleName_ = "SetSubWindowZLevel";
     sptr<SubSession> subSession = sptr<SubSession>::MakeSptr(info, nullptr);
     int32_t testZLevel = 0;
-    subSession->onSubSessionZLevelChange_ = [&testZLevel](int32_t zLevel) {
-        testZLevel = zLevel;
-    };
+    subSession->onSubSessionZLevelChange_ = [&testZLevel](int32_t zLevel) { testZLevel = zLevel; };
     subSession->property_->zLevel_ = 0;
     WSError ret = subSession->SetSubWindowZLevel(1);
     EXPECT_EQ(1, subSession->property_->zLevel_);
@@ -664,6 +655,6 @@ HWTEST_F(SubSessionTest, GetSubWindowZLevel, TestSize.Level1)
     subSession->property_->zLevel_ = 1;
     EXPECT_EQ(1, subSession->GetSubWindowZLevel());
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

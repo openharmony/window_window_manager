@@ -39,28 +39,23 @@ public:
     void InitTestSceneSessionForListWindowInfo();
 
     static sptr<SceneSessionManager> ssm_;
+
 private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
 
 sptr<SceneSessionManager> SceneSessionManagerTest10::ssm_ = nullptr;
 
-void NotifyRecoverSceneSessionFuncTest(const sptr<SceneSession>& session, const SessionInfo& sessionInfo)
-{
-}
+void NotifyRecoverSceneSessionFuncTest(const sptr<SceneSession>& session, const SessionInfo& sessionInfo) {}
 
 bool TraverseFuncTest(const sptr<SceneSession>& session)
 {
     return true;
 }
 
-void WindowChangedFuncTest(int32_t persistentId, WindowUpdateType type)
-{
-}
+void WindowChangedFuncTest(int32_t persistentId, WindowUpdateType type) {}
 
-void ProcessStatusBarEnabledChangeFuncTest(bool enable)
-{
-}
+void ProcessStatusBarEnabledChangeFuncTest(bool enable) {}
 
 bool GetCutoutInfoByRotation(Rotation rotation, Rect& rect)
 {
@@ -75,12 +70,7 @@ bool GetCutoutInfoByRotation(Rotation rotation, Rect& rect)
         return false;
     }
     for (auto& cutoutArea : cutoutAreas) {
-        rect = {
-            cutoutArea.posX_,
-            cutoutArea.posY_,
-            cutoutArea.width_,
-            cutoutArea.height_
-        };
+        rect = { cutoutArea.posX_, cutoutArea.posY_, cutoutArea.width_, cutoutArea.height_ };
     }
     return true;
 }
@@ -95,9 +85,7 @@ void SceneSessionManagerTest10::TearDownTestCase()
     ssm_ = nullptr;
 }
 
-void SceneSessionManagerTest10::SetUp()
-{
-}
+void SceneSessionManagerTest10::SetUp() {}
 
 void SceneSessionManagerTest10::TearDown()
 {
@@ -105,7 +93,10 @@ void SceneSessionManagerTest10::TearDown()
 }
 
 void SceneSessionManagerTest10::InitTestSceneSession(DisplayId displayId,
-    int32_t windowId, int32_t zOrder, bool visible, WSRect rect)
+                                                     int32_t windowId,
+                                                     int32_t zOrder,
+                                                     bool visible,
+                                                     WSRect rect)
 {
     SessionInfo info;
     info.bundleName_ = "root";
@@ -116,7 +107,7 @@ void SceneSessionManagerTest10::InitTestSceneSession(DisplayId displayId,
     sceneSession->SetRSVisible(visible);
     sceneSession->SetSessionRect(rect);
     sceneSession->property_->SetDisplayId(displayId);
-    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
     EXPECT_EQ(windowId, sceneSession->GetPersistentId());
 }
 
@@ -209,8 +200,8 @@ HWTEST_F(SceneSessionManagerTest10, RequestSceneSessionDestructionInner, TestSiz
 
     SessionInfo sessionInfo;
     sessionInfo.collaboratorType_ = CollaboratorType::RESERVE_TYPE;
-    auto res = ssm_->RequestSceneSessionDestructionInner(sceneSession, sceneSessionInfo,
-        needRemoveSession, isForceClean);
+    auto res =
+        ssm_->RequestSceneSessionDestructionInner(sceneSession, sceneSessionInfo, needRemoveSession, isForceClean);
     ASSERT_EQ(res, WSError::WS_OK);
 }
 
@@ -234,8 +225,8 @@ HWTEST_F(SceneSessionManagerTest10, TestRequestSceneSessionDestructionInner_01, 
     sessionInfo.collaboratorType_ = CollaboratorType::DEFAULT_TYPE;
     sessionInfo.want = std::make_shared<AAFwk::Want>();
     ssm_->listenerController_ = std::make_shared<SessionListenerController>();
-    auto res = ssm_->RequestSceneSessionDestructionInner(sceneSession, sceneSessionInfo,
-        needRemoveSession, isForceClean);
+    auto res =
+        ssm_->RequestSceneSessionDestructionInner(sceneSession, sceneSessionInfo, needRemoveSession, isForceClean);
     ASSERT_EQ(res, WSError::WS_OK);
 }
 
@@ -389,7 +380,7 @@ HWTEST_F(SceneSessionManagerTest10, RegisterAcquireRotateAnimationConfigFunc, Te
     ASSERT_NE(sceneSession->scenePersistence_, nullptr);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
     ssm_->RegisterAcquireRotateAnimationConfigFunc(sceneSession);
-    WSRect rect({1, 1, 1, 1});
+    WSRect rect({ 1, 1, 1, 1 });
     SizeChangeReason reason = SizeChangeReason::ROTATION;
     WSError result = sceneSession->UpdateRect(rect, reason, "SceneSessionManagerTest10");
     ASSERT_EQ(result, WSError::WS_OK);
@@ -474,19 +465,19 @@ HWTEST_F(SceneSessionManagerTest10, GetWindowIdsByCoordinate01, TestSize.Level1)
 HWTEST_F(SceneSessionManagerTest10, GetWindowIdsByCoordinate02, TestSize.Level1)
 {
     ssm_->sceneSessionMap_.clear();
-    InitTestSceneSession(1, 101, 11, true, {100, 100, 200, 200});
-    ssm_->sceneSessionMap_.insert({102, nullptr});
-    InitTestSceneSession(1, 103, 14, true, {120, 120, 220, 220});
-    InitTestSceneSession(1, 105, 12, true, {100, 100, 200, 200});
+    InitTestSceneSession(1, 101, 11, true, { 100, 100, 200, 200 });
+    ssm_->sceneSessionMap_.insert({ 102, nullptr });
+    InitTestSceneSession(1, 103, 14, true, { 120, 120, 220, 220 });
+    InitTestSceneSession(1, 105, 12, true, { 100, 100, 200, 200 });
     auto it1 = ssm_->sceneSessionMap_.find(105);
     if (it1 != ssm_->sceneSessionMap_.end()) {
         it1->second->sessionInfo_.bundleName_ = "other";
     }
-    InitTestSceneSession(1, 106, 15, true, {140, 140, 240, 240});
-    InitTestSceneSession(2, 107, 15, true, {150, 150, 250, 250});
-    InitTestSceneSession(1, 108, 13, false, {150, 150, 250, 250});
-    InitTestSceneSession(1, 109, 13, true, {160, 160, 260, 260});
-    InitTestSceneSession(1, 110, 12, true, {500, 500, 600, 600});
+    InitTestSceneSession(1, 106, 15, true, { 140, 140, 240, 240 });
+    InitTestSceneSession(2, 107, 15, true, { 150, 150, 250, 250 });
+    InitTestSceneSession(1, 108, 13, false, { 150, 150, 250, 250 });
+    InitTestSceneSession(1, 109, 13, true, { 160, 160, 260, 260 });
+    InitTestSceneSession(1, 110, 12, true, { 500, 500, 600, 600 });
 
     std::vector<int32_t> windowIds;
     WMError result = ssm_->GetWindowIdsByCoordinate(1, 0, -1, -1, windowIds);
@@ -508,21 +499,21 @@ HWTEST_F(SceneSessionManagerTest10, GetWindowIdsByCoordinate02, TestSize.Level1)
 HWTEST_F(SceneSessionManagerTest10, GetWindowIdsByCoordinate03, TestSize.Level1)
 {
     ssm_->sceneSessionMap_.clear();
-    InitTestSceneSession(1, 111, 11, true, {100, 100, 200, 200});
-    ssm_->sceneSessionMap_.insert({102, nullptr});
-    InitTestSceneSession(1, 113, 14, true, {120, 120, 220, 220});
-    InitTestSceneSession(1, 114, 12, true, {100, 100, 200, 200});
+    InitTestSceneSession(1, 111, 11, true, { 100, 100, 200, 200 });
+    ssm_->sceneSessionMap_.insert({ 102, nullptr });
+    InitTestSceneSession(1, 113, 14, true, { 120, 120, 220, 220 });
+    InitTestSceneSession(1, 114, 12, true, { 100, 100, 200, 200 });
     ASSERT_TRUE(ssm_->sceneSessionMap_.find(114) != ssm_->sceneSessionMap_.end());
-    InitTestSceneSession(1, 115, 12, true, {100, 100, 200, 200});
+    InitTestSceneSession(1, 115, 12, true, { 100, 100, 200, 200 });
     auto it1 = ssm_->sceneSessionMap_.find(115);
     if (it1 != ssm_->sceneSessionMap_.end()) {
         it1->second->sessionInfo_.bundleName_ = "other";
     }
-    InitTestSceneSession(1, 116, 15, true, {140, 140, 240, 240});
-    InitTestSceneSession(2, 117, 15, true, {150, 150, 250, 250});
-    InitTestSceneSession(1, 118, 13, false, {150, 150, 250, 250});
-    InitTestSceneSession(1, 119, 13, true, {160, 160, 260, 260});
-    InitTestSceneSession(1, 120, 12, true, {500, 500, 600, 600});
+    InitTestSceneSession(1, 116, 15, true, { 140, 140, 240, 240 });
+    InitTestSceneSession(2, 117, 15, true, { 150, 150, 250, 250 });
+    InitTestSceneSession(1, 118, 13, false, { 150, 150, 250, 250 });
+    InitTestSceneSession(1, 119, 13, true, { 160, 160, 260, 260 });
+    InitTestSceneSession(1, 120, 12, true, { 500, 500, 600, 600 });
 
     std::vector<int32_t> windowIds;
     WMError result = ssm_->GetWindowIdsByCoordinate(1, 3, -1, -1, windowIds);
@@ -542,19 +533,19 @@ HWTEST_F(SceneSessionManagerTest10, GetWindowIdsByCoordinate03, TestSize.Level1)
 HWTEST_F(SceneSessionManagerTest10, GetWindowIdsByCoordinate04, TestSize.Level1)
 {
     ssm_->sceneSessionMap_.clear();
-    InitTestSceneSession(1, 121, 11, true, {100, 100, 200, 200});
-    ssm_->sceneSessionMap_.insert({102, nullptr});
-    InitTestSceneSession(1, 123, 14, true, {120, 120, 220, 220});
-    InitTestSceneSession(1, 125, 12, true, {100, 100, 200, 200});
+    InitTestSceneSession(1, 121, 11, true, { 100, 100, 200, 200 });
+    ssm_->sceneSessionMap_.insert({ 102, nullptr });
+    InitTestSceneSession(1, 123, 14, true, { 120, 120, 220, 220 });
+    InitTestSceneSession(1, 125, 12, true, { 100, 100, 200, 200 });
     auto it1 = ssm_->sceneSessionMap_.find(125);
     if (it1 != ssm_->sceneSessionMap_.end()) {
         it1->second->sessionInfo_.bundleName_ = "other";
     }
-    InitTestSceneSession(1, 126, 15, true, {140, 140, 240, 240});
-    InitTestSceneSession(2, 127, 15, true, {150, 150, 250, 250});
-    InitTestSceneSession(1, 128, 13, false, {150, 150, 250, 250});
-    InitTestSceneSession(1, 129, 13, true, {160, 160, 260, 260});
-    InitTestSceneSession(1, 130, 12, true, {500, 500, 600, 600});
+    InitTestSceneSession(1, 126, 15, true, { 140, 140, 240, 240 });
+    InitTestSceneSession(2, 127, 15, true, { 150, 150, 250, 250 });
+    InitTestSceneSession(1, 128, 13, false, { 150, 150, 250, 250 });
+    InitTestSceneSession(1, 129, 13, true, { 160, 160, 260, 260 });
+    InitTestSceneSession(1, 130, 12, true, { 500, 500, 600, 600 });
 
     std::vector<int32_t> windowIds;
     WMError result = ssm_->GetWindowIdsByCoordinate(1, 0, 180, 180, windowIds);
@@ -575,21 +566,21 @@ HWTEST_F(SceneSessionManagerTest10, GetWindowIdsByCoordinate04, TestSize.Level1)
 HWTEST_F(SceneSessionManagerTest10, GetWindowIdsByCoordinate05, TestSize.Level1)
 {
     ssm_->sceneSessionMap_.clear();
-    InitTestSceneSession(1, 131, 11, true, {100, 100, 200, 200});
-    ssm_->sceneSessionMap_.insert({102, nullptr});
-    InitTestSceneSession(1, 133, 14, true, {120, 120, 220, 220});
-    InitTestSceneSession(1, 134, 12, true, {100, 100, 200, 200});
+    InitTestSceneSession(1, 131, 11, true, { 100, 100, 200, 200 });
+    ssm_->sceneSessionMap_.insert({ 102, nullptr });
+    InitTestSceneSession(1, 133, 14, true, { 120, 120, 220, 220 });
+    InitTestSceneSession(1, 134, 12, true, { 100, 100, 200, 200 });
     ASSERT_TRUE(ssm_->sceneSessionMap_.find(134) != ssm_->sceneSessionMap_.end());
-    InitTestSceneSession(1, 135, 12, true, {100, 100, 200, 200});
+    InitTestSceneSession(1, 135, 12, true, { 100, 100, 200, 200 });
     auto it1 = ssm_->sceneSessionMap_.find(135);
     if (it1 != ssm_->sceneSessionMap_.end()) {
         it1->second->sessionInfo_.bundleName_ = "other";
     }
-    InitTestSceneSession(1, 136, 15, true, {140, 140, 240, 240});
-    InitTestSceneSession(2, 137, 15, true, {150, 150, 250, 250});
-    InitTestSceneSession(1, 138, 13, false, {150, 150, 250, 250});
-    InitTestSceneSession(1, 139, 13, true, {160, 160, 260, 260});
-    InitTestSceneSession(1, 140, 12, true, {500, 500, 600, 600});
+    InitTestSceneSession(1, 136, 15, true, { 140, 140, 240, 240 });
+    InitTestSceneSession(2, 137, 15, true, { 150, 150, 250, 250 });
+    InitTestSceneSession(1, 138, 13, false, { 150, 150, 250, 250 });
+    InitTestSceneSession(1, 139, 13, true, { 160, 160, 260, 260 });
+    InitTestSceneSession(1, 140, 12, true, { 500, 500, 600, 600 });
 
     std::vector<int32_t> windowIds;
     WMError result = ssm_->GetWindowIdsByCoordinate(1, 3, 180, 180, windowIds);
@@ -730,7 +721,7 @@ HWTEST_F(SceneSessionManagerTest10, TestGetMainParentSceneSession_03, TestSize.L
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sptr<SceneSession> sceneSessionParent = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSessionParent->property_->SetPersistentId(100);
-    ssm_->sceneSessionMap_.insert({100, sceneSessionParent});
+    ssm_->sceneSessionMap_.insert({ 100, sceneSessionParent });
     sceneSession->SetParentSession(sceneSessionParent);
 
     ssm_->sceneSessionMap_[999] = sceneSession;
@@ -823,7 +814,7 @@ HWTEST_F(SceneSessionManagerTest10, NotifyVisibleChange, TestSize.Level1)
     ASSERT_NE(nullptr, sceneSession);
 
     ASSERT_FALSE(ssm_->NotifyVisibleChange(sceneSession->GetPersistentId()));
-    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
     ASSERT_TRUE(ssm_->NotifyVisibleChange(sceneSession->GetPersistentId()));
 
     ssm_->sceneSessionMap_.erase(sceneSession->GetPersistentId());
@@ -896,7 +887,7 @@ HWTEST_F(SceneSessionManagerTest10, TestEraseSceneSessionAndMarkDirtyLocked_01, 
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     const int32_t validId = 100;
     const int32_t invalidId = 101;
-    ssm_->sceneSessionMap_.insert({validId, sceneSession});
+    ssm_->sceneSessionMap_.insert({ validId, sceneSession });
     // erase id not exist
     ssm_->EraseSceneSessionAndMarkDirtyLocked(invalidId);
     ASSERT_EQ(ssm_->sessionMapDirty_, 0);
@@ -919,7 +910,7 @@ HWTEST_F(SceneSessionManagerTest10, TestEraseSceneSessionAndMarkDirtyLocked_02, 
     info.bundleName_ = "TestEraseSceneSessionAndMarkDirtyLocked_02";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     const int32_t validId = 100;
-    ssm_->sceneSessionMap_.insert({validId, sceneSession});
+    ssm_->sceneSessionMap_.insert({ validId, sceneSession });
 
     // erase invisible session
     sceneSession->isVisible_ = false;
@@ -946,7 +937,7 @@ HWTEST_F(SceneSessionManagerTest10, TestEraseSceneSessionAndMarkDirtyLocked_03, 
     const int32_t validId = 100;
 
     // erase visible session
-    ssm_->sceneSessionMap_.insert({validId, sceneSession});
+    ssm_->sceneSessionMap_.insert({ validId, sceneSession });
     sceneSession->isVisible_ = true;
     ssm_->EraseSceneSessionAndMarkDirtyLocked(validId);
     ASSERT_EQ(ssm_->sessionMapDirty_, static_cast<uint32_t>(SessionUIDirtyFlag::VISIBLE));
@@ -1070,7 +1061,7 @@ HWTEST_F(SceneSessionManagerTest10, NotifyStatusBarShowStatus, TestSize.Level0)
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
 
-    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
     sceneSession->isStatusBarVisible_ = true;
     EXPECT_EQ(WSError::WS_OK, ssm_->NotifyStatusBarShowStatus(sceneSession->GetPersistentId(), false));
     ssm_->sceneSessionMap_.erase(sceneSession->GetPersistentId());
@@ -1089,7 +1080,7 @@ HWTEST_F(SceneSessionManagerTest10, GetStatusBarConstantlyShow, TestSize.Level0)
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
 
-    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
     bool isVisible;
     ssm_->NotifyStatusBarConstantlyShow(sceneSession->GetSessionProperty()->GetDisplayId(), false);
     ssm_->GetStatusBarConstantlyShow(sceneSession->GetSessionProperty()->GetDisplayId(), isVisible);
@@ -1108,14 +1099,14 @@ HWTEST_F(SceneSessionManagerTest10, NotifyAppUseControlList, TestSize.Level1)
     std::vector<AppUseControlInfo> controlList;
     controlList.emplace_back();
     EXPECT_EQ(WSError::WS_ERROR_INVALID_PERMISSION,
-        ssm_->NotifyAppUseControlList(ControlAppType::APP_LOCK, -1, controlList));
+              ssm_->NotifyAppUseControlList(ControlAppType::APP_LOCK, -1, controlList));
 
     AppUseControlInfo appUseControlInfo;
     appUseControlInfo.bundleName_ = "bundleName";
     appUseControlInfo.appIndex_ = 1;
     appUseControlInfo.isNeedControl_ = true;
     EXPECT_EQ(WSError::WS_ERROR_INVALID_PERMISSION,
-        ssm_->NotifyAppUseControlList(ControlAppType::APP_LOCK, -1, controlList));
+              ssm_->NotifyAppUseControlList(ControlAppType::APP_LOCK, -1, controlList));
 }
 
 /**
@@ -1285,8 +1276,8 @@ HWTEST_F(SceneSessionManagerTest10, FilterForListWindowInfo06, TestSize.Level1)
     ssm_->sceneSessionMap_.clear();
     InitTestSceneSessionForListWindowInfo();
     WindowInfoOption windowInfoOption;
-    windowInfoOption.windowInfoFilterOption = WindowInfoFilterOption::EXCLUDE_SYSTEM |
-        WindowInfoFilterOption::FOREGROUND;
+    windowInfoOption.windowInfoFilterOption =
+        WindowInfoFilterOption::EXCLUDE_SYSTEM | WindowInfoFilterOption::FOREGROUND;
     windowInfoOption.windowInfoTypeOption = WindowInfoTypeOption::ALL;
     windowInfoOption.displayId = DISPLAY_ID_INVALID;
     windowInfoOption.windowId = 0;
@@ -1384,10 +1375,10 @@ HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_01, TestSize.Level0)
     info.bundleName_ = "NotifyNextAvoidRectInfo";
     info.screenId_ = 0;
     auto specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    specificCb->onGetNextAvoidAreaRectInfo_ = [](
-        DisplayId displayId, AvoidAreaType type, std::pair<WSRect, WSRect>& nextSystemBarAvoidAreaRectInfo) {
-        return ssm_->GetNextAvoidRectInfo(displayId, type, nextSystemBarAvoidAreaRectInfo);
-    };
+    specificCb->onGetNextAvoidAreaRectInfo_ =
+        [](DisplayId displayId, AvoidAreaType type, std::pair<WSRect, WSRect>& nextSystemBarAvoidAreaRectInfo) {
+            return ssm_->GetNextAvoidRectInfo(displayId, type, nextSystemBarAvoidAreaRectInfo);
+        };
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCb);
     sceneSession->property_->SetPersistentId(1);
     sceneSession->winRect_ = { 0, 0, 1260, 2720 };
@@ -1418,10 +1409,10 @@ HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_statusBar, TestSize.
     info.bundleName_ = "NotifyNextAvoidRectInfo_statusBar";
     info.screenId_ = 0;
     auto specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    specificCb->onGetNextAvoidAreaRectInfo_ = [](
-        DisplayId displayId, AvoidAreaType type, std::pair<WSRect, WSRect>& nextSystemBarAvoidAreaRectInfo) {
-        return ssm_->GetNextAvoidRectInfo(displayId, type, nextSystemBarAvoidAreaRectInfo);
-    };
+    specificCb->onGetNextAvoidAreaRectInfo_ =
+        [](DisplayId displayId, AvoidAreaType type, std::pair<WSRect, WSRect>& nextSystemBarAvoidAreaRectInfo) {
+            return ssm_->GetNextAvoidRectInfo(displayId, type, nextSystemBarAvoidAreaRectInfo);
+        };
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCb);
     sceneSession->property_->SetPersistentId(1);
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
@@ -1460,10 +1451,10 @@ HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_statusBar_01, TestSi
     info.bundleName_ = "NotifyNextAvoidRectInfo_statusBar_01";
     info.screenId_ = 0;
     auto specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    specificCb->onGetNextAvoidAreaRectInfo_ = [](
-        DisplayId displayId, AvoidAreaType type, std::pair<WSRect, WSRect>& nextSystemBarAvoidAreaRectInfo) {
-        return ssm_->GetNextAvoidRectInfo(displayId, type, nextSystemBarAvoidAreaRectInfo);
-    };
+    specificCb->onGetNextAvoidAreaRectInfo_ =
+        [](DisplayId displayId, AvoidAreaType type, std::pair<WSRect, WSRect>& nextSystemBarAvoidAreaRectInfo) {
+            return ssm_->GetNextAvoidRectInfo(displayId, type, nextSystemBarAvoidAreaRectInfo);
+        };
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCb);
     sceneSession->property_->SetPersistentId(1);
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
@@ -1497,10 +1488,10 @@ HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_keyboard, TestSize.L
     info.bundleName_ = "NotifyNextAvoidRectInfo_keyboard";
     info.screenId_ = 0;
     auto specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    specificCb->onKeyboardRotationChange_ = [](int32_t persistentId, Rotation rotation,
-        std::vector<std::pair<bool, WSRect>>& avoidAreas) {
-        ssm_->GetKeyboardOccupiedAreaWithRotation(persistentId, rotation, avoidAreas);
-    };
+    specificCb->onKeyboardRotationChange_ =
+        [](int32_t persistentId, Rotation rotation, std::vector<std::pair<bool, WSRect>>& avoidAreas) {
+            ssm_->GetKeyboardOccupiedAreaWithRotation(persistentId, rotation, avoidAreas);
+        };
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCb);
     sceneSession->property_->SetPersistentId(1);
     ssm_->sceneSessionMap_.insert({ 1, sceneSession });
@@ -1523,10 +1514,10 @@ HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_keyboard_01, TestSiz
     info.bundleName_ = "NotifyNextAvoidRectInfo_keyboard_01";
     info.screenId_ = 0;
     auto specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    specificCb->onKeyboardRotationChange_ = [](int32_t persistentId, Rotation rotation,
-        std::vector<std::pair<bool, WSRect>>& avoidAreas) {
-        ssm_->GetKeyboardOccupiedAreaWithRotation(persistentId, rotation, avoidAreas);
-    };
+    specificCb->onKeyboardRotationChange_ =
+        [](int32_t persistentId, Rotation rotation, std::vector<std::pair<bool, WSRect>>& avoidAreas) {
+            ssm_->GetKeyboardOccupiedAreaWithRotation(persistentId, rotation, avoidAreas);
+        };
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCb);
     sceneSession->property_->SetPersistentId(1);
     SessionInfo keyboardSessionInfo;
@@ -1615,10 +1606,10 @@ HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_AIBar, TestSize.Leve
     info.bundleName_ = "NotifyNextAvoidRectInfo_AIBar";
     info.screenId_ = 0;
     auto specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    specificCb->onGetNextAvoidAreaRectInfo_ = [](
-        DisplayId displayId, AvoidAreaType type, std::pair<WSRect, WSRect>& nextSystemBarAvoidAreaRectInfo) {
-        return ssm_->GetNextAvoidRectInfo(displayId, type, nextSystemBarAvoidAreaRectInfo);
-    };
+    specificCb->onGetNextAvoidAreaRectInfo_ =
+        [](DisplayId displayId, AvoidAreaType type, std::pair<WSRect, WSRect>& nextSystemBarAvoidAreaRectInfo) {
+            return ssm_->GetNextAvoidRectInfo(displayId, type, nextSystemBarAvoidAreaRectInfo);
+        };
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCb);
     sceneSession->property_->SetPersistentId(1);
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
@@ -1648,6 +1639,6 @@ HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_AIBar, TestSize.Leve
     ASSERT_EQ(avoidAreas[AvoidAreaType::TYPE_NAVIGATION_INDICATOR].topRect_, rect);
     ssm_->sceneSessionMap_.clear();
 }
-}  // namespace
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

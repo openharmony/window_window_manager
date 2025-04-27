@@ -394,7 +394,7 @@ public:
     virtual WMError NotifySetParentSession(int32_t oldParentWindowId,
         int32_t newParentWindowId) { return WMError::WM_ERROR_INVALID_WINDOW; }
     void UpdateSubWindowLevel(uint32_t subWindowLevel);
-    int GetMaxSubWindowLevel() const;
+    uint32_t GetMaxSubWindowLevel() const;
 
     /*
      * Window Immersive
