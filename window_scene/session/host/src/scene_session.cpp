@@ -1181,8 +1181,8 @@ void SceneSession::RegisterFollowScreenChangeCallback(NotifyFollowScreenChangeFu
 {
     PostTask([weakThis = wptr(this), callback = std::move(callback), where = __func__] {
         auto session = weakThis.promote();
-        if (!session || !session->specificCallback_) {
-            TLOGNE(WmsLogTag::DEFAULT, "%{public}s session or specific callback is null", where);
+        if (!session || !session->specificCallback_ || !callback) {
+            TLOGNE(WmsLogTag::DEFAULT, "%{public}s session or specific callback or callback is null", where);
             return;
         }
         session->specificCallback_->onUpdateFollowScreenChange_ = std::move(callback);

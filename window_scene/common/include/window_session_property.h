@@ -221,8 +221,8 @@ public:
     bool GetIsAbilityHookOff() const;
     void SetIsAbilityHook(bool isAbilityHook);
     bool GetIsAbilityHook() const;
-    bool GetFollowScreenChange() const;
     void SetFollowScreenChange(bool isFollowScreenChange);
+    bool GetFollowScreenChange() const;
 
     /*
      * Sub Window
