@@ -52,8 +52,8 @@ static sptr<WindowScene> CreateWindowScene()
     return scene;
 }
 
-static sptr<Window>
-    CreateSubWindow(sptr<WindowScene> scene, WindowType type, struct Rect rect, uint32_t flags, std::string name = "")
+static sptr<Window> CreateSubWindow(sptr<WindowScene> scene, WindowType type,
+    struct Rect rect, uint32_t flags, std::string name = "")
 {
     sptr<WindowOption> subOp = new WindowOption();
     subOp->SetWindowType(type);

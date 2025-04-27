@@ -98,8 +98,8 @@ void WindowMoveDragTest::TearDown()
     usleep(WAIT_SYANC_MS);
 }
 
-std::shared_ptr<MMI::PointerEvent>
-    WindowMoveDragTest::CreatePointerEvent(int32_t posX, int32_t posY, uint32_t pointerId, int32_t pointerAction)
+std::shared_ptr<MMI::PointerEvent> WindowMoveDragTest::CreatePointerEvent(int32_t posX, int32_t posY,
+    uint32_t pointerId, int32_t pointerAction)
 {
     MMI::PointerEvent::PointerItem pointerItem;
     pointerItem.SetPointerId(pointerId);

@@ -103,8 +103,8 @@ static sptr<Window> CreateAppSubWindow(sptr<Window> parentWindow,
     return window;
 }
 
-static sptr<Window>
-    CreateSystemSubWindow(sptr<Window> parentWindow, struct Rect rect, uint32_t flags, std::string name = "")
+static sptr<Window> CreateSystemSubWindow(sptr<Window> parentWindow, struct Rect rect,
+    uint32_t flags, std::string name = "")
 {
     sptr<WindowOption> subOp = new WindowOption();
     subOp->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW);
