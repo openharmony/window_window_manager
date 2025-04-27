@@ -298,25 +298,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     }
     *result = ANI_VERSION_1;
 
-    // just for test
-    ani_namespace ns;
-    if ((ret = env->FindNamespace("L@ohos/window/window;", &ns)) != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] find ns %{public}u", ret);
-        return ANI_NOT_FOUND;
-    }
-    std::array functions = {
-        ani_native_function {"CreateWindowStage", "J:L@ohos/window/window/WindowStageInternal;",
-            reinterpret_cast<void *>(WindowStageCreate)},
-        ani_native_function {"getLastWindowSync",
-            "JLapplication/BaseContext/BaseContext;:L@ohos/window/window/Window;",
-            reinterpret_cast<void *>(AniWindowManager::GetLastWindow)},
-    };
-    if ((ret = env->Namespace_BindNativeFunctions(ns, functions.data(), functions.size())) != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] bind ns func %{public}u", ret);
-        return ANI_NOT_FOUND;
-    }
-    AniWindowManager::AniWindowManagerInit(env, ns);
-
+    AniWindowManager::AniWindowManagerInit(env);
     OHOS::Rosen::ANI_Window_Constructor(vm, result);
     return ANI_OK;
 }

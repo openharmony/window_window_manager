@@ -46,6 +46,7 @@ enum class RegisterListenerType : uint32_t {
     WINDOW_NO_INTERACTION_DETECT_CB,
     WINDOW_RECT_CHANGE_CB,
     SUB_WINDOW_CLOSE_CB,
+    WINDOW_HIGHLIGHT_CHANGE_CB,
     WINDOW_STAGE_EVENT_CB,
     WINDOW_STAGE_CLOSE_CB,
 };
@@ -99,6 +100,8 @@ private:
     WmErrorCode ProcessWindowRectChangeRegister(sptr<AniWindowListener> listener, sptr<Window> window,
         bool isRegister, ani_env* env);
     WmErrorCode ProcessSubWindowCloseRegister(sptr<AniWindowListener> listener, sptr<Window> window,
+        bool isRegister, ani_env* env);
+    WmErrorCode ProcessWindowHighlightChangeRegister(sptr<AniWindowListener> listener, sptr<Window> window,
         bool isRegister, ani_env* env);
     WmErrorCode ProcessMainWindowCloseRegister(const sptr<AniWindowListener>& listener, const sptr<Window>& window,
         bool isRegister, ani_env* env);
