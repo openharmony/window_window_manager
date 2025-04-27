@@ -42,6 +42,9 @@ constexpr int32_t MAX_TOUCHABLE_AREAS = 10;
 constexpr uint32_t API_VERSION_18 = 18;
 const std::string RESOLVED_CALLBACK = "resolvedCallback";
 const std::string REJECTED_CALLBACK = "rejectedCallback";
+constexpr std::array<DefaultSpecificZIndex, 1> DefaultSpecificZIndexList = {
+    DefaultSpecificZIndex::MUTISCREEN_COLLABORATION
+};
 }
 
 napi_value WindowTypeInit(napi_env env)
@@ -105,6 +108,8 @@ napi_value WindowTypeInit(napi_env env)
         static_cast<int32_t>(ApiWindowType::TYPE_FLOAT_NAVIGATION)));
     napi_set_named_property(env, objValue, "TYPE_MUTISCREEN_COLLABORATION", CreateJsValue(env,
         static_cast<int32_t>(ApiWindowType::TYPE_MUTISCREEN_COLLABORATION)));
+    napi_set_named_property(env, objValue, "TYPE_DYNAMIC", CreateJsValue(env,
+        static_cast<int32_t>(ApiWindowType::TYPE_DYNAMIC)));
     napi_set_named_property(env, objValue, "TYPE_MAIN", CreateJsValue(env,
         static_cast<int32_t>(ApiWindowType::TYPE_MAIN)));
 
@@ -1603,6 +1608,31 @@ bool CallPromise(napi_env env, napi_value promiseObj, AsyncCallback* asyncCallba
     napi_value catchArgv[] = { rejectedCallback };
     napi_call_function(env, promiseObj, promiseCatch, ArraySize(catchArgv), catchArgv, nullptr);
 
+    return true;
+}
+
+bool CheckZIndex(int32_t zIndex)
+{
+    DefaultSpecificZIndex zIndexEnum = static_cast<DefaultSpecificZIndex>(zIndex);
+    return std::find(DefaultSpecificZIndexList.begin(), DefaultSpecificZIndexList.end(), zIndexEnum) !=
+        DefaultSpecificZIndexList.end();
+}
+
+bool ParseZIndex(napi_env env, napi_value jsObject, WindowOption& option)
+{
+    if (!WindowHelper::IsDynamicWindow(option.GetWindowType())) {
+        return true;
+    }
+    int32_t zIndex = 0;
+    if (!ParseJsValue(jsObject, env, "zIndex", zIndex)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "parse zIndex failed");
+        return true;
+    }
+    if (!CheckZIndex(zIndex)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "check zIndex failed, %{public}d", zIndex);
+        return true;
+    }
+    option.SetZIndex(zIndex);
     return true;
 }
 } // namespace Rosen

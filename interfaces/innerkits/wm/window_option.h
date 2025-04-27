@@ -281,6 +281,13 @@ public:
     void SetSubWindowZLevel(int32_t zLevel);
 
     /**
+     * @brief Set zIndex of specific window.
+     *
+     * @param zIndex zIndex of specific window
+     */
+    void SetZIndex(int32_t zIndex);
+
+    /**
      * @brief Set real parent id of UIExtension
      *
      * @param realParentId real parent id of UIExtension
@@ -484,6 +491,13 @@ public:
     int32_t GetSubWindowZLevel() const;
 
     /**
+     * @brief Get zIndex of specific window.
+     *
+     * @return Return zIndex of specific window
+     */
+    int32_t GetZIndex() const;
+
+    /**
      * @brief Get subwindow maximizeSupported
      *
      * @return true means subwindow support maximize, otherwise not.
@@ -610,6 +624,7 @@ private:
     std::string dialogTitle_ = { "" };
     bool isTopmost_ = false;
     int32_t zLevel_ = 0;
+    int32_t zIndex_ = 0;
     bool isSystemKeyboard_ = false;
 
     /*

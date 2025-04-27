@@ -15,6 +15,7 @@
 
 #ifndef OHOS_JS_WINDOW_UTILS_H
 #define OHOS_JS_WINDOW_UTILS_H
+#include <array>
 #include <map>
 #include "js_runtime_utils.h"
 #include "native_engine/native_engine.h"
@@ -90,6 +91,7 @@ enum class ApiWindowType : uint32_t {
     TYPE_SCREEN_CONTROL,
     TYPE_FLOAT_NAVIGATION,
     TYPE_MUTISCREEN_COLLABORATION,
+    TYPE_DYNAMIC = 26,
     TYPE_MAIN = 32,
     TYPE_END
 };
@@ -131,6 +133,7 @@ const std::map<WindowType, ApiWindowType> NATIVE_JS_TO_WINDOW_TYPE_MAP {
     { WindowType::WINDOW_TYPE_SCREEN_CONTROL,           ApiWindowType::TYPE_SCREEN_CONTROL           },
     { WindowType::WINDOW_TYPE_FLOAT_NAVIGATION,         ApiWindowType::TYPE_FLOAT_NAVIGATION         },
     { WindowType::WINDOW_TYPE_MUTISCREEN_COLLABORATION, ApiWindowType::TYPE_MUTISCREEN_COLLABORATION },
+    { WindowType::WINDOW_TYPE_DYNAMIC,                  ApiWindowType::TYPE_DYNAMIC                  },
     { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,          ApiWindowType::TYPE_MAIN                     },
 };
 
@@ -161,6 +164,7 @@ const std::map<ApiWindowType, WindowType> JS_TO_NATIVE_WINDOW_TYPE_MAP {
     { ApiWindowType::TYPE_SCREEN_CONTROL,           WindowType::WINDOW_TYPE_SCREEN_CONTROL           },
     { ApiWindowType::TYPE_FLOAT_NAVIGATION,         WindowType::WINDOW_TYPE_FLOAT_NAVIGATION         },
     { ApiWindowType::TYPE_MUTISCREEN_COLLABORATION, WindowType::WINDOW_TYPE_MUTISCREEN_COLLABORATION },
+    { ApiWindowType::TYPE_DYNAMIC,                  WindowType::WINDOW_TYPE_DYNAMIC                  },
     { ApiWindowType::TYPE_MAIN,                     WindowType::WINDOW_TYPE_APP_MAIN_WINDOW          },
 };
 
@@ -390,6 +394,8 @@ public:
     WmErrorCode ParseShowWindowOptions(napi_env env, napi_value showWindowOptions, bool& focusOnShow);
     bool GetRotationResultFromJs(napi_env env, napi_value jsObject, RotationChangeResult& rotationChangeResult);
     bool ConvertRectFromJsValue(napi_env env, napi_value jsObject, Rect& displayRect);
+    bool CheckZIndex(int32_t zIndex);
+    bool ParseZIndex(napi_env env, napi_value jsObject, WindowOption& option);
     template<class T>
     bool ParseJsValue(napi_value jsObject, napi_env env, const std::string& name, T& data)
     {
