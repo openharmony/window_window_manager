@@ -7115,7 +7115,7 @@ void JsSceneSession::OnUpdateFollowScreenChange(bool isFollowScreenChange)
         napi_value followScreenChangeObj = CreateJsValue(env, isFollowScreenChange);
         napi_value argv[] = { followScreenChangeObj };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
-    }, info);
+        }, info);
 }
 
 napi_value JsSceneSession::OnSetCurrentRotation(napi_env env, napi_callback_info info)
