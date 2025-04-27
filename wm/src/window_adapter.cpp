@@ -391,7 +391,6 @@ void WindowAdapter::WindowManagerAndSessionRecover()
         if (ret != WMError::WM_OK) {
             TLOGE(WmsLogTag::WMS_RECOVER, "Session recover callback, persistentId=%{public}" PRId32 " is error",
                 it.first);
-            return;
         }
     }
 }
