@@ -1107,4 +1107,23 @@ void ScreenSessionManagerClient::NotifyExtendScreenDestroyFinish()
     }
     return screenSessionManager_->NotifyExtendScreenDestroyFinish();
 }
+
+void ScreenSessionManagerClient::OnBeforeScreenPropertyChanged(FoldStatus foldStatus)
+{
+    sptr<ScreenSession> screenSession = nullptr;
+    {
+        std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
+        if (screenSessionMap_.empty()) {
+            TLOGE(WmsLogTag::DMS, "screenSessionMap_ is nullptr");
+            return;
+        }
+        screenSession = screenSessionMap_.begin()->second;
+    }
+    if (!screenSession) {
+        TLOGE(WmsLogTag::DMS, "screenSession is null");
+        return;
+    }
+    TLOGI(WmsLogTag::DMS, "fold status %{public}d", foldStatus);
+    screenSession->BeforeScreenPropertyChange(foldStatus);
+}
 } // namespace OHOS::Rosen

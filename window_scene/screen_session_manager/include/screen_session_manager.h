@@ -382,6 +382,7 @@ public:
     void OnSecondaryReflexionChange(ScreenId screenId, bool isSecondaryReflexion) override;
     void OnExtendScreenConnectStatusChange(ScreenId screenId,
         ExtendScreenConnectStatus extendScreenConnectStatus) override;
+    void OnBeforeScreenPropertyChange(FoldStatus foldStatus) override;
     void SetDefaultScreenId(ScreenId defaultId);
     sptr<IScreenSessionManagerClient> GetClientProxy();
     void SetClientProxy(const sptr<IScreenSessionManagerClient>& client);
