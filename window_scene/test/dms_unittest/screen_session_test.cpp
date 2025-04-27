@@ -43,6 +43,7 @@ public:
     void OnSecondaryReflexionChange(ScreenId screenId, bool isSecondaryReflexion) override {}
     void OnExtendScreenConnectStatusChange(ScreenId screenId,
         ExtendScreenConnectStatus extendScreenConnectStatus) override {}
+    void OnBeforeScreenPropertyChange(FoldStatus foldStatus) override {}
 };
 class ScreenSessionTest : public testing::Test {
   public:

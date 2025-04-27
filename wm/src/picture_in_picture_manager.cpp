@@ -15,6 +15,7 @@
 
 #include "picture_in_picture_manager.h"
 
+#include "parameters.h"
 #include "picture_in_picture_controller.h"
 #include "window_manager_hilog.h"
 #include "window_scene_session_impl.h"
@@ -299,6 +300,12 @@ void PictureInPictureManager::PipSizeChange(double width, double height, double 
     if (auto controller = GetActiveController()) {
         controller->PipSizeChange(width, height, scale);
     }
+}
+
+bool PictureInPictureManager::IsPcType()
+{
+    const std::string multiWindowUIType = system::GetParameter("const.window.multiWindowUIType", "");
+    return multiWindowUIType == "FreeFormMultiWindow";
 }
 
 }

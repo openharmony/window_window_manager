@@ -1626,5 +1626,34 @@ HWTEST_F(ScreenSessionManagerClientTest, OnDumperClientScreenSessions, TestSize.
     auto ret = client->OnDumperClientScreenSessions();
     EXPECT_EQ(ret.empty(), false);
 }
+
+/**
+ * @tc.name: OnBeforeScreenPropertyChanged
+ * @tc.desc: OnBeforeScreenPropertyChanged test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, OnBeforeScreenPropertyChanged, TestSize.Level2)
+{
+    sptr<ScreenSessionManagerClient> client = new ScreenSessionManagerClient();
+    client->ConnectToServer();
+    ASSERT_TRUE(client != nullptr);
+
+    RSDisplayNodeConfig config;
+    std::shared_ptr<RSDisplayNode> node = std::make_shared<RSDisplayNode>(config);
+    sptr<ScreenSession> screenSession1 = new ScreenSession(50, 50, "test1", ScreenProperty(), node);
+    ASSERT_NE(nullptr, screenSession1);
+    client->screenSessionMap_[50] = screenSession1;
+
+    sptr<ScreenSession> screenSession3 = new ScreenSession(52, 52, "test1", ScreenProperty(), nullptr);
+    ASSERT_NE(nullptr, screenSession3);
+    client->screenSessionMap_[52] = screenSession3;
+
+    sptr<ScreenSession> screenSession4 = nullptr;
+    client->screenSessionMap_[53] = screenSession4;
+
+    FoldStatus foldStatus = FoldStatus::UNKNOWN;
+    client->OnBeforeScreenPropertyChanged(foldStatus);
+    EXPECT_NE(client, nullptr);
+}
 } // namespace Rosen
 } // namespace OHOS

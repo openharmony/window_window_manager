@@ -234,18 +234,18 @@ HWTEST_F(KeyboardSessionTest2, OpenKeyboardSyncTransaction, TestSize.Level1)
     std::string bundleName = "OpenKeyboardSyncTransaction";
     sptr<KeyboardSession> keyboardSession = GetKeyboardSession(abilityName, bundleName);
 
+    uint32_t callingId = 0;
     WSRect keyboardPanelRect = { 0, 0, 0, 0 };
     bool isKeyboardShow = true;
-    bool isRotating = false;
 
     // isKeyBoardSyncTransactionOpen_ is false
-    keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, isKeyboardShow, isRotating);
-    keyboardSession->OpenKeyboardSyncTransaction();
+    keyboardSession->CloseKeyboardSyncTransaction(callingId, keyboardPanelRect, isKeyboardShow);
 
     // isKeyBoardSyncTransactionOpen_ is true
-    keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, isKeyboardShow, isRotating);
     keyboardSession->OpenKeyboardSyncTransaction();
     ASSERT_EQ(keyboardSession->isKeyboardSyncTransactionOpen_, true);
+    keyboardSession->CloseKeyboardSyncTransaction(callingId, keyboardPanelRect, isKeyboardShow);
+    ASSERT_EQ(keyboardSession->isKeyboardSyncTransactionOpen_, false);
 }
 
 /**
@@ -357,27 +357,6 @@ HWTEST_F(KeyboardSessionTest2, CheckIfNeedRaiseCallingSession01, TestSize.Level1
 }
 
 /**
- * @tc.name: UpdateCallingSessionIdAndPosition01
- * @tc.desc: UpdateCallingSessionIdAndPosition01
- * @tc.type: FUNC
- */
-HWTEST_F(KeyboardSessionTest2, UpdateCallingSessionIdAndPosition01, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "UpdateCallingSessionIdAndPosition";
-    info.bundleName_ = "UpdateCallingSessionIdAndPosition";
-    sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, nullptr, nullptr);
-    ASSERT_NE(keyboardSession, nullptr);
-    ASSERT_NE(keyboardSession->property_, nullptr);
-    keyboardSession->UpdateCallingSessionIdAndPosition(0);
-    keyboardSession->property_->SetCallingSessionId(-1);
-    keyboardSession->UpdateCallingSessionIdAndPosition(0);
-    keyboardSession->UpdateCallingSessionIdAndPosition(-1);
-    keyboardSession->property_->SetCallingSessionId(0);
-    keyboardSession->UpdateCallingSessionIdAndPosition(0);
-}
-
-/**
  * @tc.name: OpenKeyboardSyncTransaction01
  * @tc.desc: OpenKeyboardSyncTransaction
  * @tc.type: FUNC
@@ -385,17 +364,18 @@ HWTEST_F(KeyboardSessionTest2, UpdateCallingSessionIdAndPosition01, TestSize.Lev
 HWTEST_F(KeyboardSessionTest2, OpenKeyboardSyncTransaction01, TestSize.Level1)
 {
     SessionInfo info;
-    info.abilityName_ = "UpdateCallingSessionIdAndPosition";
-    info.bundleName_ = "UpdateCallingSessionIdAndPosition";
+    info.abilityName_ = "OpenKeyboardSyncTransaction01";
+    info.bundleName_ = "OpenKeyboardSyncTransaction01";
     sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, nullptr, nullptr);
     ASSERT_NE(keyboardSession, nullptr);
     keyboardSession->isKeyboardSyncTransactionOpen_ = true;
     keyboardSession->OpenKeyboardSyncTransaction();
     keyboardSession->isKeyboardSyncTransactionOpen_ = false;
     keyboardSession->OpenKeyboardSyncTransaction();
-    WSRect keyboardPanelRect = {0, 0, 0, 0};
-    keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, true, true);
-    keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, false, false);
+    uint32_t callingId = 0;
+    WSRect keyboardPanelRect;
+    keyboardSession->CloseKeyboardSyncTransaction(callingId, keyboardPanelRect, true);
+    keyboardSession->CloseKeyboardSyncTransaction(callingId, keyboardPanelRect, false);
 }
 
 /**
@@ -469,7 +449,8 @@ HWTEST_F(KeyboardSessionTest2, RaiseCallingSession01, TestSize.Level0)
     Rosen::WSRect emptyRect{ 0, 0, 0, 0 };
     std::shared_ptr<RSTransaction> rsTransaction = nullptr;
     keyboardSession->state_ = SessionState::STATE_FOREGROUND;
-    keyboardSession->RaiseCallingSession(keyboardPanelRect, true, rsTransaction);
+    uint32_t callingId = callingSession->property_->GetPersistentId();
+    keyboardSession->RaiseCallingSession(callingId, keyboardPanelRect, true, rsTransaction);
     ASSERT_EQ(resultRect, emptyRect);
 
     // for cover GetSceneSession
@@ -477,7 +458,7 @@ HWTEST_F(KeyboardSessionTest2, RaiseCallingSession01, TestSize.Level0)
         [callingSession](int32_t persistentId)->sptr<SceneSession> {
         return callingSession;
     };
-    keyboardSession->RaiseCallingSession(keyboardPanelRect, true, rsTransaction);
+    keyboardSession->RaiseCallingSession(callingId, keyboardPanelRect, true, rsTransaction);
     // for cover CheckIfNeedRaiseCallingSession
     keyboardSession->property_->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
 
@@ -514,18 +495,19 @@ HWTEST_F(KeyboardSessionTest2, RaiseCallingSession02, TestSize.Level0)
     keyboardSession->state_ = SessionState::STATE_FOREGROUND;
     keyboardSession->isVisible_ = true;
     callingSession->oriPosYBeforeRaisedByKeyboard_ = 0;
-    keyboardSession->RaiseCallingSession(keyboardPanelRect, true, nullptr);
+    uint32_t callingId = callingSession->property_->GetPersistentId();
+    keyboardSession->RaiseCallingSession(callingId, keyboardPanelRect, true, nullptr);
     ASSERT_EQ(callingSession->winRect_.posY_, 1);
 
     callingSession->oriPosYBeforeRaisedByKeyboard_ = 10;
     callingSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    keyboardSession->RaiseCallingSession(keyboardPanelRect, true, nullptr);
+    keyboardSession->RaiseCallingSession(callingId, keyboardPanelRect, true, nullptr);
     ASSERT_EQ(callingSession->winRect_.posY_, 1);
 
     keyboardPanelRect = { 0, 0, 0, 0 };
     callingSession->oriPosYBeforeRaisedByKeyboard_ = 10;
     callingSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    keyboardSession->RaiseCallingSession(keyboardPanelRect, true, nullptr);
+    keyboardSession->RaiseCallingSession(callingId, keyboardPanelRect, true, nullptr);
     ASSERT_EQ(callingSession->winRect_.posY_, 1);
 }
 
@@ -553,27 +535,28 @@ HWTEST_F(KeyboardSessionTest2, RaiseCallingSession03, TestSize.Level0)
     ASSERT_NE(callingSession->property_, nullptr);
     callingSession->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     callingSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    keyboardSession->RaiseCallingSession(keyboardPanelRect, true, nullptr);
+    uint32_t callingId = callingSession->property_->GetPersistentId();
+    keyboardSession->RaiseCallingSession(callingId, keyboardPanelRect, true, nullptr);
     callingOriPosY = callingSession->oriPosYBeforeRaisedByKeyboard_;
     ASSERT_EQ(callingOriPosY, 0);
 
     callingSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     callingSession->winRect_.posY_ = 200;
     keyboardPanelRect.posY_ = 200;
-    keyboardSession->RaiseCallingSession(keyboardPanelRect, true, nullptr);
+    keyboardSession->RaiseCallingSession(callingId, keyboardPanelRect, true, nullptr);
     callingOriPosY = callingSession->oriPosYBeforeRaisedByKeyboard_;
     ASSERT_EQ(callingOriPosY, 200);
 
     callingSession->oriPosYBeforeRaisedByKeyboard_ = 10;
     callingSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    keyboardSession->RaiseCallingSession(keyboardPanelRect, true, nullptr);
+    keyboardSession->RaiseCallingSession(callingId, keyboardPanelRect, true, nullptr);
     callingOriPosY = callingSession->oriPosYBeforeRaisedByKeyboard_;
     ASSERT_EQ(callingOriPosY, 10);
 
     keyboardSession->ActivateKeyboardAvoidArea(false, false);
     ASSERT_EQ(false, keyboardSession->keyboardAvoidAreaActive_);
     keyboardSession->EnableCallingSessionAvoidArea();
-    keyboardSession->RaiseCallingSession(keyboardPanelRect, true, nullptr);
+    keyboardSession->RaiseCallingSession(callingId, keyboardPanelRect, true, nullptr);
     ASSERT_EQ(callingSession->oriPosYBeforeRaisedByKeyboard_, 10); // 10 is calling session position
 }
 
@@ -601,29 +584,30 @@ HWTEST_F(KeyboardSessionTest2, IsCallingSessionSplitMode01, TestSize.Level1)
     ASSERT_NE(callingSession, nullptr);
     callingSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     callingSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
-    keyboardSession->RaiseCallingSession(keyboardPanelRect, true, nullptr);
+    uint32_t callingId = callingSession->property_->GetPersistentId();
+    keyboardSession->RaiseCallingSession(callingId, keyboardPanelRect, true, nullptr);
     ASSERT_EQ(callingSession->oriPosYBeforeRaisedByKeyboard_, 0);
 
     callingSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    keyboardSession->RaiseCallingSession(keyboardPanelRect, true, nullptr);
+    keyboardSession->RaiseCallingSession(callingId, keyboardPanelRect, true, nullptr);
     ASSERT_EQ(callingSession->oriPosYBeforeRaisedByKeyboard_, 0);
 
     callingSession->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
-    keyboardSession->RaiseCallingSession(keyboardPanelRect, true, nullptr);
+    keyboardSession->RaiseCallingSession(callingId, keyboardPanelRect, true, nullptr);
     ASSERT_EQ(callingSession->oriPosYBeforeRaisedByKeyboard_, 0);
 
     callingSession->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
-    keyboardSession->RaiseCallingSession(keyboardPanelRect, true, nullptr);
+    keyboardSession->RaiseCallingSession(callingId, keyboardPanelRect, true, nullptr);
     ASSERT_EQ(callingSession->oriPosYBeforeRaisedByKeyboard_, 0);
 
     callingSession->parentSession_ = callingParentSession;
     callingSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     callingParentSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
-    keyboardSession->RaiseCallingSession(keyboardPanelRect, true, nullptr);
+    keyboardSession->RaiseCallingSession(callingId, keyboardPanelRect, true, nullptr);
     ASSERT_EQ(callingSession->oriPosYBeforeRaisedByKeyboard_, 0);
 
     callingParentSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    keyboardSession->RaiseCallingSession(keyboardPanelRect, true, nullptr);
+    keyboardSession->RaiseCallingSession(callingId, keyboardPanelRect, true, nullptr);
     ASSERT_EQ(callingSession->oriPosYBeforeRaisedByKeyboard_, 0);
 }
 
@@ -639,15 +623,15 @@ HWTEST_F(KeyboardSessionTest2, CloseKeyBoardSyncTransaction3, TestSize.Level1)
     sptr<KeyboardSession> keyboardSession = GetKeyboardSession(abilityName, bundleName);
     ASSERT_NE(keyboardSession, nullptr);
 
-    WSRect keyboardPanelRect = { 0, 0, 0, 0 };
+    uint32_t callingId = 0;
+    WSRect keyboardPanelRect;
     bool isKeyboardShow = true;
-    bool isRotating = false;
 
     keyboardSession->dirtyFlags_ = 0;
     keyboardSession->specificCallback_->onUpdateAvoidArea_ = [](uint32_t callingSessionId) {};
     keyboardSession->isKeyboardSyncTransactionOpen_ = true;
     // isKeyBoardSyncTransactionOpen_ is true
-    keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, isKeyboardShow, isRotating);
+    keyboardSession->CloseKeyboardSyncTransaction(callingId, keyboardPanelRect, isKeyboardShow);
     usleep(WAIT_ASYNC_US);
     ASSERT_EQ(keyboardSession->isKeyboardSyncTransactionOpen_, false);
 }
@@ -663,17 +647,18 @@ HWTEST_F(KeyboardSessionTest2, CloseKeyboardSyncTransaction4, TestSize.Level1)
     std::string bundleName = "CloseKeyboardSyncTransaction4";
     sptr<KeyboardSession> keyboardSession = GetKeyboardSession(abilityName, bundleName);
     ASSERT_NE(keyboardSession, nullptr);
-    WSRect keyboardPanelRect = { 0, 0, 0, 0 };
+    uint32_t callingId = 0;
+    WSRect keyboardPanelRect;
     keyboardSession->dirtyFlags_ = 0;
 
     keyboardSession->isKeyboardSyncTransactionOpen_ = false;
     ASSERT_NE(keyboardSession->property_, nullptr);
-    keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, false, false);
+    keyboardSession->CloseKeyboardSyncTransaction(callingId, keyboardPanelRect, false);
     usleep(WAIT_ASYNC_US);
     ASSERT_EQ(0, keyboardSession->dirtyFlags_);
     keyboardSession->isKeyboardSyncTransactionOpen_ = true;
     keyboardSession->property_->SetCallingSessionId(1);
-    keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, false, false);
+    keyboardSession->CloseKeyboardSyncTransaction(callingId, keyboardPanelRect, false);
     usleep(WAIT_ASYNC_US);
     auto callingSessionId = keyboardSession->property_->GetCallingSessionId();
     ASSERT_EQ(callingSessionId, INVALID_WINDOW_ID);

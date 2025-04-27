@@ -295,6 +295,65 @@ HWTEST_F(KeyboardSessionTest3, MoveAndResizeKeyboard01, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetSurfaceBounds01
+ * @tc.desc: test function: SetSurfaceBounds
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest3, SetSurfaceBounds01, TestSize.Level1)
+{
+    auto keyboardSession = GetKeyboardSession("SetSurfaceBounds01", "SetSurfaceBounds01");
+    ASSERT_NE(keyboardSession, nullptr);
+
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    keyboardSession->surfaceNode_ = nullptr;
+    WSRect preRect = { 20, 20, 800, 800 };
+    WSRect rect = { 30, 30, 900, 900 };
+    keyboardSession->SetSessionRect(preRect);
+    keyboardSession->SetSurfaceBounds(rect, false);
+
+    keyboardSession->surfaceNode_ = surfaceNode;
+    keyboardSession->SetSurfaceBounds(rect, false);
+    EXPECT_EQ(preRect, keyboardSession->GetSessionRect());
+}
+
+/**
+ * @tc.name: NotifySessionRectChange01
+ * @tc.desc: test function: NotifySessionRectChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest3, NotifySessionRectChange01, TestSize.Level1)
+{
+    auto keyboardSession = GetKeyboardSession("NotifySessionRectChange01", "NotifySessionRectChange01");
+    ASSERT_NE(keyboardSession, nullptr);
+
+    WSRect rect = { 50, 50, 900, 900 };
+    keyboardSession->NotifySessionRectChange(rect, SizeChangeReason::DRAG_END, -1);
+    keyboardSession->NotifySessionRectChange(rect, SizeChangeReason::DRAG_END, 11);
+    keyboardSession->sessionRectChangeFunc_ = [](const WSRect& rect,
+        SizeChangeReason reason, DisplayId displayId, const RectAnimationConfig& rectAnimationConfig) {
+        return;
+    };
+    keyboardSession->NotifySessionRectChange(rect, SizeChangeReason::DRAG_END, -1);
+    keyboardSession->NotifySessionRectChange(rect, SizeChangeReason::DRAG_END, 11);
+}
+
+/**
+ * @tc.name: UpdateSizeChangeReason01
+ * @tc.desc: test function: UpdateSizeChangeReason
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest3, UpdateSizeChangeReason01, TestSize.Level1)
+{
+    auto keyboardSession = GetKeyboardSession("UpdateSizeChangeReason01", "UpdateSizeChangeReason01");
+    ASSERT_NE(keyboardSession, nullptr);
+
+    keyboardSession->UpdateSizeChangeReason(SizeChangeReason::DRAG_END);
+    ASSERT_EQ(keyboardSession->reason_, SizeChangeReason::DRAG_END);
+    ASSERT_EQ(WSError::WS_OK, keyboardSession->UpdateSizeChangeReason(SizeChangeReason::UNDEFINED));
+}
+
+/**
  * @tc.name: OnCallingSessionUpdated01
  * @tc.desc: test function: OnCallingSessionUpdated
  * @tc.type: FUNC
