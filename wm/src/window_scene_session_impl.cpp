@@ -5545,11 +5545,18 @@ WMError WindowSceneSessionImpl::SetFollowParentWindowLayoutEnabled(bool isFollow
         TLOGI(WmsLogTag::WMS_SUB, "not support more than 1 level window");
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
+    if (!windowSystemConfig_.supportFollowParentWindowLayout_) {
+        TLOGI(WmsLogTag::WMS_SUB, "not support device");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     if (!GetHostSession()) {
         TLOGI(WmsLogTag::WMS_SUB, "session is nullptr");
         return WMError::WM_ERROR_INVALID_SESSION;
     }
     WSError ret = GetHostSession()->SetFollowParentWindowLayoutEnabled(isFollow);
+    if (ret == WSError::WS_ERROR_DEVICE_NOT_SUPPORT) {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     return ret != WSError::WS_OK ? WMError::WM_ERROR_SYSTEM_ABNORMALLY : WMError::WM_OK;
 }
 

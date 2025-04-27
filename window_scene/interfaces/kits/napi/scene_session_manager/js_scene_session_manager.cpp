@@ -261,6 +261,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::CloneWindow);
     BindNativeFunction(env, exportObj, "registerSingleHandContainerNode", moduleName,
         JsSceneSessionManager::RegisterSingleHandContainerNode);
+    BindNativeFunction(env, exportObj, "supportFollowParentWindowLayout", moduleName,
+        JsSceneSessionManager::SupportFollowParentWindowLayout);
     return NapiGetUndefined(env);
 }
 
@@ -1308,6 +1310,13 @@ bool JsSceneSessionManager::IsCallbackRegistered(napi_env env, const std::string
         }
     }
     return false;
+}
+
+napi_value JsSceneSessionManager::SupportFollowParentWindowLayout(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_ROTATION, "[NAPI]");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnSupportFollowParentWindowLayout(env, info) : nullptr;
 }
 
 napi_value JsSceneSessionManager::OnRegisterCallback(napi_env env, napi_callback_info info)
@@ -4220,6 +4229,12 @@ napi_value JsSceneSessionManager::OnRegisterSingleHandContainerNode(napi_env env
         return NapiGetUndefined(env);
     }
     SceneSessionManager::GetInstance().RegisterSingleHandContainerNode(stringId);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSessionManager::OnSupportFollowParentWindowLayout(napi_env env, napi_callback_info info)
+{
+    SceneSessionManager::GetInstance().ConfigSupportFollowParentWindowLayout();
     return NapiGetUndefined(env);
 }
 } // namespace OHOS::Rosen
