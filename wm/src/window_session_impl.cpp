@@ -1543,18 +1543,7 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
         "[%{public}d, %{public}d, %{public}d, %{public}d]",
         hideSplitButton, hideMaximizeButton, hideMinimizeButton, hideCloseButton);
     bool isSuperFoldDisplayDevice = FoldScreenStateInternel::IsSuperFoldDisplayDevice();
-    if (property_->GetCompatibleModeInPc() && !property_->GetIsAtomicService()) {
-        bool isLayoutFullScreen = property_->IsLayoutFullScreen();
-        uiContent->HideWindowTitleButton(true, !isLayoutFullScreen, hideMinimizeButton, hideCloseButton);
-        if (!property_->GetCompatibleModeInPcTitleVisible()) {
-            uiContent->OnContainerModalEvent(SCB_BACK_VISIBILITY, isLayoutFullScreen ? "false" : "true");
-            uiContent->OnContainerModalEvent(SCB_COMPATIBLE_MAXIMIZE_VISIBILITY, isLayoutFullScreen ? "false" : "true");
-        }
-    } else {
-        uiContent->HideWindowTitleButton(hideSplitButton, hideMaximizeButton, hideMinimizeButton, hideCloseButton);
-        uiContent->OnContainerModalEvent(SCB_BACK_VISIBILITY, "false");
-        uiContent->OnContainerModalEvent(SCB_COMPATIBLE_MAXIMIZE_VISIBILITY, "false");
-    }
+    HideTitleButton(hideSplitButton, hideMaximizeButton, hideMinimizeButton, hideCloseButton);
     if (isSuperFoldDisplayDevice) {
         handler_->PostTask([weakThis = wptr(this), where = __func__] {
             auto window = weakThis.promote();
@@ -1570,6 +1559,27 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
             uiContent->OnContainerModalEvent(WINDOW_WATERFALL_VISIBILITY_EVENT,
                 window->supportEnterWaterfallMode_ ? "true" : "false");
         }, "UIContentOnContainerModalEvent");
+    }
+}
+
+void WindowSessionImpl::HideTitleButton(bool& hideSplitButton, bool& hideMaximizeButton,
+    bool& hideMinimizeButton,bool& hideCloseButton)
+{
+    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
+    if (uiContent == nullptr || !IsDecorEnable()) {
+        return;
+    }
+    if (property_->GetCompatibleModeInPc() && !property_->GetIsAtomicService()) {
+        bool isLayoutFullScreen = property_->IsLayoutFullScreen();
+        uiContent->HideWindowTitleButton(true, !isLayoutFullScreen, hideMinimizeButton, hideCloseButton);
+        if (!property_->GetCompatibleModeInPcTitleVisible()) {
+            uiContent->OnContainerModalEvent(SCB_BACK_VISIBILITY, isLayoutFullScreen ? "false" : "true");
+            uiContent->OnContainerModalEvent(SCB_COMPATIBLE_MAXIMIZE_VISIBILITY, isLayoutFullScreen ? "false" : "true");
+        }
+    } else {
+        uiContent->HideWindowTitleButton(hideSplitButton, hideMaximizeButton, hideMinimizeButton, hideCloseButton);
+        uiContent->OnContainerModalEvent(SCB_BACK_VISIBILITY, "false");
+        uiContent->OnContainerModalEvent(SCB_COMPATIBLE_MAXIMIZE_VISIBILITY, "false");
     }
 }
 
