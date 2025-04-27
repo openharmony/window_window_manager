@@ -2249,7 +2249,7 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateExtensionConfig, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("UpdateExtensionConfig");
-    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
     window->crossAxisState_ = CrossAxisState::STATE_INVALID;
     auto want = std::make_shared<AAFwk::Want>();
     window->UpdateExtensionConfig(want);
