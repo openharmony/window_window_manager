@@ -32,7 +32,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowEventChannelProxyMockTest"};
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowEventChannelProxyMockTest" };
 }
 class WindowEventChannelMockStubTest : public testing::Test {
 public:
@@ -45,21 +45,13 @@ public:
     sptr<WindowEventChannelStub> windowEventChannelStub_ = sptr<WindowEventChannelMocker>::MakeSptr(sessionStage);
 };
 
-void WindowEventChannelMockStubTest::SetUpTestCase()
-{
-}
+void WindowEventChannelMockStubTest::SetUpTestCase() {}
 
-void WindowEventChannelMockStubTest::TearDownTestCase()
-{
-}
+void WindowEventChannelMockStubTest::TearDownTestCase() {}
 
-void WindowEventChannelMockStubTest::SetUp()
-{
-}
+void WindowEventChannelMockStubTest::SetUp() {}
 
-void WindowEventChannelMockStubTest::TearDown()
-{
-}
+void WindowEventChannelMockStubTest::TearDown() {}
 
 /**
  * @tc.name: HandleTransferAccessibilityChildTreeRegister01
@@ -72,11 +64,11 @@ HWTEST_F(WindowEventChannelMockStubTest, HandleTransferAccessibilityChildTreeReg
     MockMessageParcel::ClearAllErrorFlag();
     MessageParcel data;
     MessageParcel reply;
-    
+
     data.WriteUint32(0);
     data.WriteInt32(0);
     data.WriteInt64(0);
-    
+
     MockMessageParcel::SetWriteInt32ErrorFlag(true);
     ASSERT_TRUE((windowEventChannelStub_ != nullptr));
     ASSERT_EQ(ERR_INVALID_DATA, windowEventChannelStub_->HandleTransferAccessibilityChildTreeRegister(data, reply));
@@ -140,5 +132,5 @@ HWTEST_F(WindowEventChannelMockStubTest, HandleTransferAccessibilityDumpChildInf
     ASSERT_EQ(ERR_NONE, windowEventChannelStub_->HandleTransferAccessibilityDumpChildInfo(data, reply));
     WLOGI("HandleTransferAccessibilityDumpChildInfo end");
 }
-}
-}
+} // namespace Rosen
+} // namespace OHOS

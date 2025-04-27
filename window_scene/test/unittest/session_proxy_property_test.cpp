@@ -45,8 +45,7 @@ HWTEST_F(SessionProxyPropertyTest, UpdateSessionPropertyByAction01, TestSize.Lev
     ASSERT_NE(iRemoteObjectMocker, nullptr);
     auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     ASSERT_NE(sProxy, nullptr);
-    WMError res = sProxy->UpdateSessionPropertyByAction(nullptr,
-        WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
+    WMError res = sProxy->UpdateSessionPropertyByAction(nullptr, WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
     ASSERT_EQ(res, WMError::WM_OK);
     GTEST_LOG_(INFO) << "SessionProxyPropertyTest: UpdateSessionPropertyByAction01 end";
 }
@@ -63,8 +62,7 @@ HWTEST_F(SessionProxyPropertyTest, UpdateSessionPropertyByAction02, TestSize.Lev
     ASSERT_NE(iRemoteObjectMocker, nullptr);
     auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     ASSERT_NE(sProxy, nullptr);
-    WMError res = sProxy->UpdateSessionPropertyByAction(nullptr,
-        WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON);
+    WMError res = sProxy->UpdateSessionPropertyByAction(nullptr, WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON);
     ASSERT_EQ(res, WMError::WM_OK);
     GTEST_LOG_(INFO) << "SessionProxyPropertyTest: UpdateSessionPropertyByAction02 end";
 }
@@ -81,37 +79,43 @@ HWTEST_F(SessionProxyPropertyTest, UpdateSessionPropertyByAction, TestSize.Level
     auto sessionProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     ASSERT_NE(sessionProxy, nullptr);
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
-    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, sessionProxy->UpdateSessionPropertyByAction(nullptr,
-        WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
+    ASSERT_EQ(
+        WMError::WM_ERROR_IPC_FAILED,
+        sessionProxy->UpdateSessionPropertyByAction(nullptr, WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
     MockMessageParcel::ClearAllErrorFlag();
 
     MockMessageParcel::SetWriteUint32ErrorFlag(true);
-    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, sessionProxy->UpdateSessionPropertyByAction(nullptr,
-        WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
+    ASSERT_EQ(
+        WMError::WM_ERROR_IPC_FAILED,
+        sessionProxy->UpdateSessionPropertyByAction(nullptr, WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
     MockMessageParcel::ClearAllErrorFlag();
 
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(property, nullptr);
     MockMessageParcel::SetWriteBoolErrorFlag(true);
-    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, sessionProxy->UpdateSessionPropertyByAction(property,
-        WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
+    ASSERT_EQ(
+        WMError::WM_ERROR_IPC_FAILED,
+        sessionProxy->UpdateSessionPropertyByAction(property, WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
     MockMessageParcel::ClearAllErrorFlag();
 
     MockMessageParcel::SetWriteBoolErrorFlag(false);
-    ASSERT_EQ(WMError::WM_OK, sessionProxy->UpdateSessionPropertyByAction(property,
-        WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
+    ASSERT_EQ(
+        WMError::WM_OK,
+        sessionProxy->UpdateSessionPropertyByAction(property, WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
     MockMessageParcel::ClearAllErrorFlag();
 
     MockMessageParcel::SetWriteBoolErrorFlag(true);
-    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, sessionProxy->UpdateSessionPropertyByAction(nullptr,
-        WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
+    ASSERT_EQ(
+        WMError::WM_ERROR_IPC_FAILED,
+        sessionProxy->UpdateSessionPropertyByAction(nullptr, WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
     MockMessageParcel::ClearAllErrorFlag();
 
     MockMessageParcel::SetWriteBoolErrorFlag(false);
-    ASSERT_EQ(WMError::WM_OK, sessionProxy->UpdateSessionPropertyByAction(nullptr,
-        WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
+    ASSERT_EQ(
+        WMError::WM_OK,
+        sessionProxy->UpdateSessionPropertyByAction(nullptr, WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
     MockMessageParcel::ClearAllErrorFlag();
 }
-}
+} // namespace
 } // namespace Rosen
-} // OHOS
+} // namespace OHOS

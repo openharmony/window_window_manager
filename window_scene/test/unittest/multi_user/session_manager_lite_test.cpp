@@ -26,6 +26,7 @@ class SessionManagerLiteTest : public Test {
 public:
     void SetUp() override;
     void TearDown() override;
+
 private:
     std::shared_ptr<SessionManagerLite> sml_;
 };

@@ -38,19 +38,16 @@ public:
     void SetUp() override;
     void TearDown() override;
     SessionInfo info;
-    sptr <SystemSession::SpecificSessionCallback> specificCallback = nullptr;
-    sptr <SystemSession> systemSession_;
+    sptr<SystemSession::SpecificSessionCallback> specificCallback = nullptr;
+    sptr<SystemSession> systemSession_;
+
 private:
     RSSurfaceNode::SharedPtr CreateRSSurfaceNode();
 };
 
-void SystemSessionLifecycleTest::SetUpTestCase()
-{
-}
+void SystemSessionLifecycleTest::SetUpTestCase() {}
 
-void SystemSessionLifecycleTest::TearDownTestCase()
-{
-}
+void SystemSessionLifecycleTest::TearDownTestCase() {}
 
 void SystemSessionLifecycleTest::SetUp()
 {
@@ -209,8 +206,7 @@ HWTEST_F(SystemSessionLifecycleTest, Disconnect02, TestSize.Level1)
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     ASSERT_NE(specificCallback, nullptr);
-    sptr<SystemSession> sysSession =
-        sptr<SystemSession>::MakeSptr(info, specificCallback);
+    sptr<SystemSession> sysSession = sptr<SystemSession>::MakeSptr(info, specificCallback);
     ASSERT_NE(sysSession, nullptr);
 
     bool isFromClient = true;
@@ -232,8 +228,7 @@ HWTEST_F(SystemSessionLifecycleTest, Disconnect03, TestSize.Level1)
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     ASSERT_NE(specificCallback, nullptr);
-    sptr<SystemSession> sysSession =
-        sptr<SystemSession>::MakeSptr(info, specificCallback);
+    sptr<SystemSession> sysSession = sptr<SystemSession>::MakeSptr(info, specificCallback);
     ASSERT_NE(sysSession, nullptr);
 
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
@@ -245,6 +240,6 @@ HWTEST_F(SystemSessionLifecycleTest, Disconnect03, TestSize.Level1)
     auto ret = sysSession->Disconnect(isFromClient);
     ASSERT_EQ(WSError::WS_OK, ret);
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS
