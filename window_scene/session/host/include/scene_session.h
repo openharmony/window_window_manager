@@ -582,6 +582,12 @@ public:
      */
     void SetTitleAndDockHoverShowChangeCallback(NotifyTitleAndDockHoverShowChangeFunc&& func);
 
+    /*
+     * Window Property
+     */
+    void SetIsAncoForFloatingWindow(bool isAncoForFloatingWindow);
+    bool GetIsAncoForFloatingWindow() const;
+
 protected:
     void NotifySessionRectChange(const WSRect& rect, const SizeChangeReason& reason = SizeChangeReason::UNDEFINED);
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
@@ -920,6 +926,11 @@ private:
      * Window LayoutFullScreen
      */
     NotifyLayoutFullScreenChangeFunc onLayoutFullScreenChangeFunc_;
+
+    /*
+     * Window Property
+     */
+    bool isAncoForFloatingWindow_ = false;
     
     /*
      * PC Window Layout

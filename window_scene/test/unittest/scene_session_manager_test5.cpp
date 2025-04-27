@@ -1138,6 +1138,31 @@ HWTEST_F(SceneSessionManagerTest5, ProcessDialogRequestFocusImmdediately02, Func
 }
 
 /**
+ * @tc.name: CheckFloatWindowIsAnco01
+ * @tc.desc: CheckFloatWindowIsAnco
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, CheckFloatWindowIsAnco01, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test2";
+    info.moduleName_ = "test2";
+    info.persistentId_ = 123;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->SetCallingPid(123);
+    ssm_->sceneSessionMap_.insert({ 123, sceneSession });
+    ssm_->CheckFloatWindowIsAnco(123, sceneSession1);
+    ASSERT_EQ(sceneSession1->GetIsAncoForFloatingWindow(), false);
+    ssm_->sceneSessionMap_.erase(123);
+    usleep(WAIT_SYNC_IN_NS);
+}
+
+/**
  * @tc.name: RequestSceneSessionByCall
  * @tc.desc: SceneSesionManager request scene session by call
  * @tc.type: FUNC
