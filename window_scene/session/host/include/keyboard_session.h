@@ -38,6 +38,8 @@ using OnSystemKeyboardAvoidChangeCallback = std::function<void(DisplayId display
     SystemKeyboardAvoidChangeReason reason)>;
 using NotifyOccupiedAreaChangeCallback = std::function<void(const sptr<OccupiedAreaChangeInfo>& info)>;
 
+const std::string KEYBOARD_ANIM_SYNC_EVENT_NAME { "KeyboardAnimationSyncException" };
+
 class KeyboardSession : public SystemSession {
 public:
     // callback for notify SceneSessionManager
@@ -73,6 +75,7 @@ public:
     void SetKeyboardViewModeChangeListener(const NotifyKeyboarViewModeChangeFunc& func) override;
     void SetSkipSelfWhenShowOnVirtualScreen(bool isSkip) override;
     WSError UpdateSizeChangeReason(SizeChangeReason reason) override;
+    bool GetIsKeyboardSyncTransactionOpen() const { return isKeyboardSyncTransactionOpen_; }
     void SetSkipEventOnCastPlus(bool isSkip) override;
 
 protected:
@@ -107,6 +110,7 @@ private:
     void NotifyRootSceneOccupiedAreaChange(const sptr<OccupiedAreaChangeInfo>& info);
     void SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool needFlush = true) override;
     bool IsNeedRaiseSubWindow(const sptr<SceneSession>& callingSession, const WSRect& callingSessionRect);
+    void PostKeyboardAnimationSyncTimeoutTask();
 
     sptr<KeyboardSessionCallback> keyboardCallback_ = nullptr;
     bool isKeyboardSyncTransactionOpen_ = false;

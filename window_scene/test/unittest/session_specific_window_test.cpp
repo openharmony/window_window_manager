@@ -49,13 +49,9 @@ private:
     sptr<WindowEventChannelMocker> mockEventChannel_ = nullptr;
 };
 
-void SessionSpecificWindowTest::SetUpTestCase()
-{
-}
+void SessionSpecificWindowTest::SetUpTestCase() {}
 
-void SessionSpecificWindowTest::TearDownTestCase()
-{
-}
+void SessionSpecificWindowTest::TearDownTestCase() {}
 
 void SessionSpecificWindowTest::SetUp()
 {
@@ -109,7 +105,6 @@ HWTEST_F(SessionSpecificWindowTest, BindDialogSessionTarget, TestSize.Level1)
     result = sceneSession->BindDialogSessionTarget(sceneSession2);
     ASSERT_EQ(result, WSError::WS_OK);
 }
-
 
 /**
  * @tc.name: AddSubSession
@@ -170,9 +165,7 @@ HWTEST_F(SessionSpecificWindowTest, ClearSpecificSessionCbMap, TestSize.Level1)
     info.bundleName_ = "ClearSpecificSessionCbMap";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     auto result = false;
-    sceneSession->clearCallbackMapFunc_ = [&result](bool needRemove) {
-        result = needRemove;
-    };
+    sceneSession->clearCallbackMapFunc_ = [&result](bool needRemove) { result = needRemove; };
     sceneSession->ClearSpecificSessionCbMap();
     usleep(WAIT_SYNC_IN_NS);
     ASSERT_EQ(result, true);
@@ -675,6 +668,6 @@ HWTEST_F(SessionSpecificWindowTest, HandleSubWindowClick05, Function | SmallTest
     result = session->HandleSubWindowClick(MMI::PointerEvent::POINTER_ACTION_DOWN, true);
     EXPECT_EQ(result, WSError::WS_OK);
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

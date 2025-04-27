@@ -24,7 +24,6 @@
 #include "wm_common.h"
 #include "mock_message_parcel.h"
 
-
 using namespace testing;
 using namespace testing::ext;
 
@@ -40,21 +39,13 @@ public:
     sptr<SessionStageProxy> sessionStage_ = sptr<SessionStageProxy>::MakeSptr(iRemoteObjectMocker);
 };
 
-void SessionStageProxyTest::SetUpTestCase()
-{
-}
+void SessionStageProxyTest::SetUpTestCase() {}
 
-void SessionStageProxyTest::TearDownTestCase()
-{
-}
+void SessionStageProxyTest::TearDownTestCase() {}
 
-void SessionStageProxyTest::SetUp()
-{
-}
+void SessionStageProxyTest::SetUp() {}
 
-void SessionStageProxyTest::TearDown()
-{
-}
+void SessionStageProxyTest::TearDown() {}
 
 namespace {
 /**
@@ -103,7 +94,7 @@ HWTEST_F(SessionStageProxyTest, UpdateRect, TestSize.Level1)
     WSError res = sessionStage_->UpdateRect(rect, reason);
     ASSERT_EQ(WSError::WS_OK, res);
     std::shared_ptr<RSTransaction> rsTransaction = std::make_shared<RSTransaction>();
-    SceneAnimationConfig config { .rsTransaction_ = rsTransaction };
+    SceneAnimationConfig config{ .rsTransaction_ = rsTransaction };
     res = sessionStage_->UpdateRect(rect, reason, config);
     ASSERT_EQ(WSError::WS_OK, res);
 }
@@ -782,6 +773,6 @@ HWTEST_F(SessionStageProxyTest, NotifyWindowCrossAxisChange, Function | SmallTes
     sessionStage_->NotifyWindowCrossAxisChange(state);
     ASSERT_NE(nullptr, sessionStage_);
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

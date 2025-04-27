@@ -33,21 +33,13 @@ public:
     void TearDown() override;
 };
 
-void SessionPermissionTest::SetUpTestCase()
-{
-}
+void SessionPermissionTest::SetUpTestCase() {}
 
-void SessionPermissionTest::TearDownTestCase()
-{
-}
+void SessionPermissionTest::TearDownTestCase() {}
 
-void SessionPermissionTest::SetUp()
-{
-}
+void SessionPermissionTest::SetUp() {}
 
-void SessionPermissionTest::TearDown()
-{
-}
+void SessionPermissionTest::TearDown() {}
 namespace {
 
 /**
@@ -80,7 +72,7 @@ HWTEST_F(SessionPermissionTest, IsSACalling, TestSize.Level1)
  */
 HWTEST_F(SessionPermissionTest, VerifyCallingPermission, TestSize.Level1)
 {
-    const std::string *permissionNode = new string;
+    const std::string* permissionNode = new string;
     bool result = SessionPermission::VerifyCallingPermission(*permissionNode);
     ASSERT_EQ(false, result);
 }
@@ -93,7 +85,7 @@ HWTEST_F(SessionPermissionTest, VerifyCallingPermission, TestSize.Level1)
 HWTEST_F(SessionPermissionTest, VerifyPermissionByCallerToken, TestSize.Level1)
 {
     const uint32_t callerToken = 1000;
-    const std::string *permissionNode = new string;
+    const std::string* permissionNode = new string;
     bool result = SessionPermission::VerifyPermissionByCallerToken(callerToken, *permissionNode);
     ASSERT_EQ(false, result);
 }
@@ -105,11 +97,11 @@ HWTEST_F(SessionPermissionTest, VerifyPermissionByCallerToken, TestSize.Level1)
  */
 HWTEST_F(SessionPermissionTest, IsSameBundleNameAsCalling, TestSize.Level1)
 {
-    const std::string *bundleName = new string;
+    const std::string* bundleName = new string;
     bool result = SessionPermission::IsSameBundleNameAsCalling(*bundleName);
     ASSERT_EQ(false, result);
 
-    const std::string *bundleName2 = new string("test");
+    const std::string* bundleName2 = new string("test");
     bool result2 = SessionPermission::IsSameBundleNameAsCalling(*bundleName2);
     ASSERT_EQ(false, result2);
 }
@@ -208,6 +200,6 @@ HWTEST_F(SessionPermissionTest, IsFoundationCall, TestSize.Level1)
     ASSERT_EQ(false, result);
 }
 
-} // namespacecd
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

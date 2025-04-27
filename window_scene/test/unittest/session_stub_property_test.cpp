@@ -42,11 +42,10 @@ void SessionStubPropertyTest::SetUp()
     session_ = sptr<SessionStubMocker>::MakeSptr();
     EXPECT_NE(nullptr, session_);
 
-    EXPECT_CALL(*session_, OnRemoteRequest(_, _, _, _)).WillOnce(Invoke(
-        [&](uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) -> int {
+    EXPECT_CALL(*session_, OnRemoteRequest(_, _, _, _))
+        .WillOnce(Invoke([&](uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) -> int {
             return session_->SessionStub::OnRemoteRequest(code, data, reply, option);
-        }
-    ));
+        }));
 }
 
 void SessionStubPropertyTest::TearDown()
@@ -68,7 +67,7 @@ HWTEST_F(SessionStubPropertyTest, HandleUpdatePropertyByAction01, TestSize.Level
 
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option{MessageOption::TF_SYNC};
+    MessageOption option{ MessageOption::TF_SYNC };
     data.WriteInterfaceToken(u"OHOS.ISession");
     data.WriteUint64(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST));
     uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_SESSION_PROPERTY);
@@ -89,7 +88,7 @@ HWTEST_F(SessionStubPropertyTest, HandleUpdatePropertyByAction02, TestSize.Level
 
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option{MessageOption::TF_SYNC};
+    MessageOption option{ MessageOption::TF_SYNC };
     data.WriteInterfaceToken(u"OHOS.ISession");
     const uint32_t invalidData = 0;
     data.WriteUint32(invalidData);
@@ -111,13 +110,13 @@ HWTEST_F(SessionStubPropertyTest, HandleUpdatePropertyByAction03, TestSize.Level
 
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option{MessageOption::TF_SYNC};
+    MessageOption option{ MessageOption::TF_SYNC };
     data.WriteInterfaceToken(u"OHOS.ISession");
     uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_SESSION_PROPERTY);
 
     int ret = session_->OnRemoteRequest(code, data, reply, option);
     ASSERT_EQ(ERR_INVALID_DATA, ret);
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

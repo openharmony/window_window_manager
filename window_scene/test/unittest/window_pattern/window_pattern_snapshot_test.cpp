@@ -49,12 +49,12 @@ public:
     void SetUp() override;
     void TearDown() override;
     static sptr<SceneSessionManager> ssm_;
+
 private:
     RSSurfaceNode::SharedPtr CreateRSSurfaceNode();
     sptr<Session> session_ = nullptr;
     std::shared_ptr<Media::PixelMap> mPixelMap = std::make_shared<Media::PixelMap>();
 };
-
 
 constexpr const char* UNDERLINE_SEPARATOR = "_";
 constexpr const char* IMAGE_SUFFIX = ".jpg";
@@ -155,8 +155,8 @@ HWTEST_F(WindowPatternSnapshotTest, SaveSnapshot01, TestSize.Level1)
 
     scenePersistence->SaveSnapshot(mPixelMap);
     uint32_t fileID = static_cast<uint32_t>(persistentId) & 0x3fffffff;
-    std::string test = ScenePersistence::snapshotDirectory_ +
-        bundleName + UNDERLINE_SEPARATOR + std::to_string(fileID) + IMAGE_SUFFIX;
+    std::string test =
+        ScenePersistence::snapshotDirectory_ + bundleName + UNDERLINE_SEPARATOR + std::to_string(fileID) + IMAGE_SUFFIX;
     std::pair<uint32_t, uint32_t> sizeResult = scenePersistence->GetSnapshotSize();
     EXPECT_EQ(sizeResult.first, 0);
     EXPECT_EQ(sizeResult.second, 0);
@@ -212,8 +212,7 @@ HWTEST_F(WindowPatternSnapshotTest, GetLocalSnapshotPixelMap, TestSize.Level1)
     auto abilityInfo = session->GetSessionInfo();
     auto persistentId = abilityInfo.persistentId_;
     ScenePersistence::CreateSnapshotDir("storage");
-    sptr<ScenePersistence> scenePersistence =
-        sptr<ScenePersistence>::MakeSptr(abilityInfo.bundleName_, persistentId);
+    sptr<ScenePersistence> scenePersistence = sptr<ScenePersistence>::MakeSptr(abilityInfo.bundleName_, persistentId);
     ASSERT_NE(nullptr, scenePersistence);
     auto result = scenePersistence->GetLocalSnapshotPixelMap(0.5, 0.5);
     ASSERT_EQ(result, nullptr);
@@ -469,7 +468,6 @@ HWTEST_F(WindowPatternSnapshotTest, NotifyRemoveSnapshot, TestSize.Level1)
     ASSERT_EQ(session_->GetScenePersistence()->HasSnapshot(), false);
 }
 
-
 /**
  * @tc.name: Snapshot01
  * @tc.desc: ret is false
@@ -577,7 +575,7 @@ HWTEST_F(WindowPatternSnapshotTest, GetEnableAddSnapshot, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     bool res = session_->GetEnableAddSnapshot();
-    ASSERT_EQ(res, true);
+    EXPECT_EQ(res, true);
 }
 
 /**
@@ -590,8 +588,8 @@ HWTEST_F(WindowPatternSnapshotTest, SetEnableAddSnapshot, TestSize.Level1)
     ASSERT_NE(session_, nullptr);
     session_->SetEnableAddSnapshot(false);
     bool res = session_->GetEnableAddSnapshot();
-    ASSERT_EQ(res, false);
+    EXPECT_EQ(res, false);
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

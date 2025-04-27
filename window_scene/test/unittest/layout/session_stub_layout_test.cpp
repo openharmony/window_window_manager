@@ -49,13 +49,9 @@ private:
     sptr<SessionStub> session_ = nullptr;
 };
 
-void SessionStubLayoutTest::SetUpTestCase()
-{
-}
+void SessionStubLayoutTest::SetUpTestCase() {}
 
-void SessionStubLayoutTest::TearDownTestCase()
-{
-}
+void SessionStubLayoutTest::TearDownTestCase() {}
 
 void SessionStubLayoutTest::SetUp()
 {
@@ -140,6 +136,6 @@ HWTEST_F(SessionStubLayoutTest, HandleSetSystemEnableDrag_TestReadBool, TestSize
     res = session_->HandleSetSystemEnableDrag(data, reply);
     ASSERT_EQ(ERR_NONE, res);
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

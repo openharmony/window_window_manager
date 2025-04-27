@@ -31,19 +31,23 @@ public:
     WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     WSError TransferFocusActiveEvent(bool isFocusActive) override;
-    WSError TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed,
-        bool isPreImeEvent = false) override;
-    WSError TransferKeyEventForConsumedAsync(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool isPreImeEvent,
-        const sptr<IRemoteObject>& listener) override;
+    WSError TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent,
+                                        bool& isConsumed,
+                                        bool isPreImeEvent = false) override;
+    WSError TransferKeyEventForConsumedAsync(const std::shared_ptr<MMI::KeyEvent>& keyEvent,
+                                             bool isPreImeEvent,
+                                             const sptr<IRemoteObject>& listener) override;
     WSError TransferFocusState(bool focusState) override;
     WSError TransferBackpressedEventForConsumed(bool& isConsumed) override;
-    WSError TransferAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType, int32_t eventType,
-        int64_t timeMs) override;
-    WSError TransferAccessibilityChildTreeRegister(
-        uint32_t windowId, int32_t treeId, int64_t accessibilityId) override;
+    WSError TransferAccessibilityHoverEvent(float pointX,
+                                            float pointY,
+                                            int32_t sourceType,
+                                            int32_t eventType,
+                                            int64_t timeMs) override;
+    WSError TransferAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId) override;
     WSError TransferAccessibilityChildTreeUnregister() override;
-    WSError TransferAccessibilityDumpChildInfo(
-        const std::vector<std::string>& params, std::vector<std::string>& info) override;
+    WSError TransferAccessibilityDumpChildInfo(const std::vector<std::string>& params,
+                                               std::vector<std::string>& info) override;
 
     sptr<IRemoteObject> AsObject() override
     {
@@ -66,14 +70,16 @@ WSError TestWindowEventChannel::TransferFocusActiveEvent(bool isFocusActive)
     return WSError::WS_OK;
 }
 
-WSError TestWindowEventChannel::TransferKeyEventForConsumed(
-    const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed, bool isPreImeEvent)
+WSError TestWindowEventChannel::TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent,
+                                                            bool& isConsumed,
+                                                            bool isPreImeEvent)
 {
     return WSError::WS_OK;
 }
 
 WSError TestWindowEventChannel::TransferKeyEventForConsumedAsync(const std::shared_ptr<MMI::KeyEvent>& keyEvent,
-    bool isPreImeEvent, const sptr<IRemoteObject>& listener)
+                                                                 bool isPreImeEvent,
+                                                                 const sptr<IRemoteObject>& listener)
 {
     return WSError::WS_OK;
 }
@@ -88,8 +94,9 @@ WSError TestWindowEventChannel::TransferBackpressedEventForConsumed(bool& isCons
     return WSError::WS_OK;
 }
 
-WSError TestWindowEventChannel::TransferAccessibilityChildTreeRegister(
-    uint32_t windowId, int32_t treeId, int64_t accessibilityId)
+WSError TestWindowEventChannel::TransferAccessibilityChildTreeRegister(uint32_t windowId,
+                                                                       int32_t treeId,
+                                                                       int64_t accessibilityId)
 {
     return WSError::WS_OK;
 }
@@ -99,14 +106,17 @@ WSError TestWindowEventChannel::TransferAccessibilityChildTreeUnregister()
     return WSError::WS_OK;
 }
 
-WSError TestWindowEventChannel::TransferAccessibilityDumpChildInfo(
-    const std::vector<std::string>& params, std::vector<std::string>& info)
+WSError TestWindowEventChannel::TransferAccessibilityDumpChildInfo(const std::vector<std::string>& params,
+                                                                   std::vector<std::string>& info)
 {
     return WSError::WS_OK;
 }
 
-WSError TestWindowEventChannel::TransferAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType,
-    int32_t eventType, int64_t timeMs)
+WSError TestWindowEventChannel::TransferAccessibilityHoverEvent(float pointX,
+                                                                float pointY,
+                                                                int32_t sourceType,
+                                                                int32_t eventType,
+                                                                int64_t timeMs)
 {
     return WSError::WS_OK;
 }
