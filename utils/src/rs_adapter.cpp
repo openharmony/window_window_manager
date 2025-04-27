@@ -19,6 +19,9 @@
 
 namespace OHOS {
 namespace Rosen {
+
+InvokerType RSTransactionAdapter::invokerType_ = InvokerType::NONE;
+
 void RSTransactionAdapter::InitByRSUIContext(const std::shared_ptr<RSUIContext>& rsUIContext)
 {
     rsUIContext_ = rsUIContext;
@@ -58,12 +61,15 @@ template<typename Func>
 void RSTransactionAdapter::InvokeTransaction(Func&& func)
 {
     if (rsTransHandler_) {
+        invokerType_ = InvokerType::RS_TRANSACTION_HANDLER;
         TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "Use rsTransHandler");
         func(rsTransHandler_);
     } else if (rsTransProxy_) {
+        invokerType_ = InvokerType::RS_TRANSACTION_PROXY;
         TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "Fallback to rsTransProxy");
         func(rsTransProxy_);
     } else {
+        invokerType_ = InvokerType::NONE;
         TLOGE(WmsLogTag::WMS_RS_MULTI_INSTANCE, "Both rsTransHandler and rsTransProxy are null");
     }
 }
@@ -90,12 +96,15 @@ void RSTransactionAdapter::FlushImplicitTransaction(
 {
     auto rsTransHandler = rsUIContext ? rsUIContext->GetRSTransaction() : nullptr;
     if (rsTransHandler) {
+        invokerType_ = InvokerType::RS_TRANSACTION_HANDLER;
         TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "Use rsTransHandler");
         rsTransHandler->FlushImplicitTransaction(timestamp, abilityName);
     } else if (auto rsTransProxy = RSTransactionProxy::GetInstance()) {
+        invokerType_ = InvokerType::RS_TRANSACTION_PROXY;
         TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "Fallback to rsTransProxy");
         rsTransProxy->FlushImplicitTransaction(timestamp, abilityName);
     } else {
+        invokerType_ = InvokerType::NONE;
         TLOGE(WmsLogTag::WMS_RS_MULTI_INSTANCE, "Both rsTransHandler and rsTransProxy are null");
     }
 }
@@ -132,6 +141,8 @@ AutoRSTransaction::~AutoRSTransaction()
     }
 }
 
+InvokerType RSSyncTransactionAdapter::invokerType_ = InvokerType::NONE;
+
 void RSSyncTransactionAdapter::InitByRSUIContext(const std::shared_ptr<RSUIContext>& rsUIContext)
 {
     rsUIContext_ = rsUIContext;
@@ -160,12 +171,15 @@ template<typename ReturnType, typename Func>
 ReturnType RSSyncTransactionAdapter::InvokeSyncTransaction(Func&& func)
 {
     if (rsSyncTransHandler_) {
+        invokerType_ = InvokerType::RS_SYNC_TRANSACTION_HANDLER;
         TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "Use rsSyncTransHandler");
         return func(rsSyncTransHandler_);
     } else if (rsSyncTransController_) {
+        invokerType_ = InvokerType::RS_SYNC_TRANSACTION_CONTROLLER;
         TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "Fallback to rsSyncTransController");
         return func(rsSyncTransController_);
     } else {
+        invokerType_ = InvokerType::NONE;
         TLOGE(WmsLogTag::WMS_RS_MULTI_INSTANCE, "Both rsSyncTransHandler and rsSyncTransController are null");
         if constexpr (!std::is_void_v<ReturnType>) {
             return nullptr;
@@ -199,12 +213,15 @@ ReturnType RSSyncTransactionAdapter::InvokeSyncTransaction(const std::shared_ptr
 {
     auto rsSyncTransHandler = rsUIContext ? rsUIContext->GetSyncTransactionHandler() : nullptr;
     if (rsSyncTransHandler) {
+        invokerType_ = InvokerType::RS_SYNC_TRANSACTION_HANDLER;
         TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "Use rsSyncTransHandler");
         return func(rsSyncTransHandler);
     } else if (auto rsSyncTransController = RSSyncTransactionController::GetInstance()) {
+        invokerType_ = InvokerType::RS_SYNC_TRANSACTION_CONTROLLER;
         TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "Fallback to rsSyncTransController");
         return func(rsSyncTransController);
     } else {
+        invokerType_ = InvokerType::NONE;
         TLOGE(WmsLogTag::WMS_RS_MULTI_INSTANCE, "Both rsSyncTransHandler and rsSyncTransController are null");
         if constexpr (!std::is_void_v<ReturnType>) {
             return nullptr;

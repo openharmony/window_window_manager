@@ -25,6 +25,14 @@
 
 namespace OHOS {
 namespace Rosen {
+enum class InvokerType {
+    RS_TRANSACTION_PROXY = 0,
+    RS_TRANSACTION_HANDLER,
+    RS_SYNC_TRANSACTION_CONTROLLER,
+    RS_SYNC_TRANSACTION_HANDLER,
+    NONE,
+};
+
 class RSTransactionAdapter {
 public:
     explicit RSTransactionAdapter(std::shared_ptr<RSUIContext> rsUIContext);
@@ -48,6 +56,8 @@ private:
 
     template<typename Func>
     void InvokeTransaction(Func&& func);
+
+    static InvokerType invokerType_;
 
     std::shared_ptr<RSUIContext> rsUIContext_;
     RSTransactionProxy* rsTransProxy_;
@@ -95,6 +105,8 @@ private:
 
     template<typename ReturnType, typename Func>
     static ReturnType InvokeSyncTransaction(const std::shared_ptr<RSUIContext>& rsUIContext, Func&& func);
+
+    static InvokerType invokerType_;
 
     std::shared_ptr<RSUIContext> rsUIContext_;
     RSSyncTransactionController* rsSyncTransController_;
