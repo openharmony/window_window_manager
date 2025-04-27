@@ -222,8 +222,8 @@ void WindowTestUtils::InitByDisplayRect(const Rect& displayRect)
                        displayRect_.height_ * DEFAULT_ASPECT_RATIO };
 }
 
-std::shared_ptr<MMI::PointerEvent>
-    WindowTestUtils::CreatePointerEvent(int32_t posX, int32_t posY, uint32_t pointerId, int32_t pointerAction)
+std::shared_ptr<MMI::PointerEvent> WindowTestUtils::CreatePointerEvent(int32_t posX, int32_t posY, uint32_t pointerId,
+    int32_t pointerAction)
 {
     MMI::PointerEvent::PointerItem pointerItem;
     pointerItem.SetPointerId(pointerId);
