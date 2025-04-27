@@ -41,6 +41,7 @@ constexpr int32_t MAX_COLOR_MODE = 1;
 constexpr int32_t LIGHT_COLOR_MODE = 0;
 constexpr int32_t DARK_COLOR_MODE = 1;
 constexpr uint32_t MIN_SPACING_BETWEEN_BUTTONS = 12;
+
 constexpr uint32_t MAX_SPACING_BETWEEN_BUTTONS = 24;
 constexpr uint32_t MIN_BUTTON_BACKGROUND_SIZE = 20;
 constexpr uint32_t MAX_BUTTON_BACKGROUND_SIZE = 40;
@@ -111,6 +112,7 @@ enum class WindowType : uint32_t {
     WINDOW_TYPE_SCREEN_CONTROL,
     WINDOW_TYPE_FLOAT_NAVIGATION,
     WINDOW_TYPE_MUTISCREEN_COLLABORATION,
+    WINDOW_TYPE_DYNAMIC,
     ABOVE_APP_SYSTEM_WINDOW_END,
 
     SYSTEM_SUB_WINDOW_BASE = 2500,
@@ -1280,6 +1282,13 @@ struct RotationChangeInfo {
 struct RotationChangeResult {
     RectType rectType_;
     Rect windowRect_;
+};
+
+/**
+ * @brief default zIndex for specific window.
+ */
+enum DefaultSpecificZIndex {
+    MUTISCREEN_COLLABORATION = 930,
 };
 }
 }

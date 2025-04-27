@@ -181,6 +181,16 @@ int32_t WindowOption::GetSubWindowZLevel() const
     return zLevel_;
 }
 
+void WindowOption::SetZIndex(int32_t zIndex)
+{
+    zIndex_ = zIndex;
+}
+
+int32_t WindowOption::GetZIndex() const
+{
+    return zIndex_;
+}
+
 WindowMode WindowOption::GetWindowMode() const
 {
     return mode_;
