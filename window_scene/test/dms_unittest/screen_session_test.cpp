@@ -2941,9 +2941,10 @@ HWTEST_F(ScreenSessionTest, ScreenExtendChange01, TestSize.Level1)
 HWTEST_F(ScreenSessionTest, ScreenExtendChange02, TestSize.Level1)
 {
     LOG_SetCallback(MyLogCallback);
-    //IScreenChangeListener* screenChangeListener = new MockScreenChangeListener();
+    IScreenChangeListener* screenChangeListener = new MockScreenChangeListener();
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
     EXPECT_NE(nullptr, session);
+    session->RegisterScreenChangeListener(screenChangeListener);
     ScreenId mainScreenId = 0;
     ScreenId extendScreenId = 1;
     session->ScreenExtendChange(mainScreenId, extendScreenId);
