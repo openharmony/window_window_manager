@@ -702,6 +702,8 @@ public:
     void SetWindowCornerRadiusCallback(NotifySetWindowCornerRadiusFunc&& func);
     WSError SetWindowCornerRadius(float cornerRadius) override;
     void SetPrivacyModeChangeNotifyFunc(NotifyPrivacyModeChangeFunc&& func);
+    void SetIsAncoForFloatingWindow(bool isAncoForFloatingWindow);
+    bool GetIsAncoForFloatingWindow() const;
 
     /*
      * Window Pattern
@@ -1137,6 +1139,7 @@ private:
     NotifyPrivacyModeChangeFunc privacyModeChangeNotifyFunc_;
     // Set true if either sessionProperty privacyMode or combinedExtWindowFlags_ privacyModeFlag is true.
     bool isPrivacyMode_ { false };
+    bool isAncoForFloatingWindow_ = false;
 
     /*
      * PC Window Sidebar Blur
