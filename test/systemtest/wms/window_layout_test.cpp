@@ -460,13 +460,8 @@ HWTEST_F(WindowLayoutTest, LayoutWindow10, TestSize.Level1)
 HWTEST_F(WindowLayoutTest, LayoutTile01, TestSize.Level1)
 {
     Utils::TestWindowInfo info = {
-        .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
-        .mode = WindowMode::WINDOW_MODE_FLOATING,
-        .needAvoid = true,
-        .parentId = INVALID_WINDOW_ID,
-        .parentLimit = false,
-        .name = "mainTile1",
-        .rect = { 0, 0, 0, 0 },
+        .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, .mode = WindowMode::WINDOW_MODE_FLOATING, .needAvoid = true,
+        .parentId = INVALID_WINDOW_ID, .parentLimit = false, .name = "mainTile1", .rect = {0, 0, 0, 0},
     };
     const sptr<Window>& window = Utils::CreateTestWindow(info);
     ASSERT_NE(window, nullptr);
@@ -526,13 +521,9 @@ HWTEST_F(WindowLayoutTest, LayoutTileNegative01, TestSize.Level1)
 {
     WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE);
     Utils::TestWindowInfo info = {
-        .name = "mainTileNegative1",
-        .rect = { -1, -100, -1, -100 }, // -1, -100, -1, -100 is typical negative case nums
-        .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
-        .mode = WindowMode::WINDOW_MODE_FLOATING,
-        .needAvoid = true,
-        .parentLimit = false,
-        .parentId = INVALID_WINDOW_ID,
+        .name = "mainTileNegative1", .rect = {-1, -100, -1, -100}, // -1, -100, -1, -100 is typical negative case nums
+        .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, .mode = WindowMode::WINDOW_MODE_FLOATING,
+        .needAvoid = true, .parentLimit = false, .parentId = INVALID_WINDOW_ID,
     };
     const sptr<Window>& window = Utils::CreateTestWindow(info);
     ASSERT_NE(window, nullptr);
