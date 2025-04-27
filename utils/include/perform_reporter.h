@@ -22,6 +22,7 @@
 #include <vector>
 #include <map>
 #include <mutex>
+#include <sstream>
 #include "wm_single_instance.h"
 
 namespace OHOS {
@@ -45,6 +46,33 @@ struct WindowProfileInfo {
     int32_t windowVisibleState = -1;
     int32_t windowLocatedScreen = -1;
     int32_t windowSceneMode = -1;
+};
+
+enum class KeyboardLifeCycleException {
+    ANIM_SYNC_EXCEPTION,
+    CREATE_EXCEPTION,
+};
+
+const std::map<KeyboardLifeCycleException, std::string> KEYBOARD_LIFE_CYCLE_EXCEPTION_MAP = {
+    {KeyboardLifeCycleException::ANIM_SYNC_EXCEPTION, "ANIM_SYNC_EXCEPTION"},
+    {KeyboardLifeCycleException::CREATE_EXCEPTION, "CREATE_EXCEPTION"}
+};
+
+struct WindowLifeCycleReportInfo {
+    std::string bundleName;
+    int32_t windowId;
+    int32_t windowType;
+    int32_t windowMode;
+    int32_t windowFlag;
+    std::string timeoutStage;
+
+    inline std::string ToString() const
+    {
+        std::stringstream ss;
+        ss << "[bundleName:" << bundleName << ", id:" << windowId << ", type:" << windowType << ", windowMode:" <<
+            windowMode << ", flag:" << windowFlag << "]";
+        return ss.str();
+    }
 };
 
 class PerformReporter {
@@ -94,6 +122,9 @@ public:
     int32_t ReportUIExtensionException(int32_t exceptionType, int32_t pid, int32_t persistentId,
         const std::string& uiextInfo);
     int32_t ReportEventDispatchException(int32_t exceptionType, int32_t pid, const std::string& flushInfo);
+    int32_t ReportKeyboardLifeCycleException(int32_t windowId, KeyboardLifeCycleException subType,
+        const std::string& msg);
+    int32_t ReportSpecWindowLifeCycleChange(WindowLifeCycleReportInfo reportInfo);
 
 private:
     void UpdateReportInfo(FullInfoMap& infoMap, const std::string& bundleName,
