@@ -2672,8 +2672,8 @@ void SceneSession::GetSystemBarAvoidAreaByRotation(Rotation rotation, AvoidAreaT
     }
     bool isStatusBarAvoidAreaEmpty = winType == WindowType::WINDOW_TYPE_STATUS_BAR &&
         (rotation == Rotation::ROTATION_90 || rotation == Rotation::ROTATION_270) &&
-        !(static_cast<bool>(static_cast<int32_t>(properties.at(winType).settingFlag_) &
-        static_cast<int32_t>(SystemBarSettingFlag::ENABLE_SETTING)));
+        !(static_cast<bool>(static_cast<uint32_t>(properties.at(winType).settingFlag_) &
+        static_cast<uint32_t>(SystemBarSettingFlag::ENABLE_SETTING)));
     if (!properties.at(winType).enable_ || isStatusBarAvoidAreaEmpty) {
         TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}d] avoid area is empty, type %{public}d", GetPersistentId(), type);
         return;
