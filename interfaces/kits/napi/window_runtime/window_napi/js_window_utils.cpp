@@ -1619,6 +1619,7 @@ bool ParseZIndex(napi_env env, napi_value jsObject, WindowOption& option)
     int32_t zIndex = 0;
     if (!ParseJsValue(jsObject, env, "zIndex", zIndex)) {
         TLOGE(WmsLogTag::WMS_FOCUS, "parse zIndex failed");
+        return true;
     }
     if (!CheckZIndex(zIndex)) {
         TLOGE(WmsLogTag::WMS_FOCUS, "check zIndex failed, %{public}d", zIndex);
