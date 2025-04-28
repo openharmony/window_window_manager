@@ -20,6 +20,8 @@
 #include "ws_common.h"
 #include "mock_message_parcel.h"
 #include "pointer_event.h"
+#include "ui/rs_canvas_node.h"
+#include "transaction/rs_transaction.h"
 
 // using namespace FRAME_TRACE;
 using namespace testing;
@@ -1397,6 +1399,38 @@ HWTEST_F(SessionProxyTest, GetTargetOrientationConfigInfo, Function | SmallTest 
     properties[Rosen::WindowType::WINDOW_TYPE_STATUS_BAR] = statusBarProperty;
     WSError res = sProxy->GetTargetOrientationConfigInfo(Orientation::USER_ROTATION_PORTRAIT, properties);
     ASSERT_EQ(res, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: KeyFrameAnimateEnd
+ * @tc.desc: KeyFrameAnimateEnd test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, KeyFrameAnimateEnd, Function | SmallTest | Level2)
+{
+    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
+    ASSERT_EQ(sProxy->KeyFrameAnimateEnd(), WSError::WS_OK);
+}
+
+/**
+ * @tc.name: UpdateKeyFrameCloneNode
+ * @tc.desc: UpdateKeyFrameCloneNode test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, UpdateKeyFrameCloneNode, Function | SmallTest | Level2)
+{
+    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
+    auto rsCanvasNode = RSCanvasNode::Create();
+    ASSERT_NE(rsCanvasNode, nullptr);
+    auto rsTransaction = std::make_shared<RSTransaction>();
+    ASSERT_NE(rsTransaction, nullptr);
+    ASSERT_EQ(sProxy->UpdateKeyFrameCloneNode(rsCanvasNode, rsTransaction), WSError::WS_OK);
 }
 
 /**

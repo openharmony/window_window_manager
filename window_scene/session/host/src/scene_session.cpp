@@ -3688,15 +3688,13 @@ void SceneSession::UpdateKeyFrameState(SizeChangeReason reason, const WSRect& re
         TLOGE(WmsLogTag::WMS_LAYOUT, "no moveDragController or sessionStage");
         return;
     }
-    uint64_t timeStamp = std::chrono::duration_cast<std::chrono::milliseconds>(
-        std::chrono::system_clock::now().time_since_epoch()).count();
     if (reason == SizeChangeReason::DRAG_START && moveDragController_->GetStartDragFlag()) {
         TLOGD(WmsLogTag::WMS_LAYOUT, "key frame start check");
         if (!keyFramePolicy_.enabled() || GetAppDragResizeType() == DragResizeType::RESIZE_WHEN_DRAG_END) {
             keyFramePolicy_.running_ = false;
             return;
         }
-        return InitKeyFrameState(timeStamp, rect);
+        return InitKeyFrameState(rect);
     }
     if (!keyFramePolicy_.running_ || !keyFrameCloneNode_) {
         TLOGD(WmsLogTag::WMS_LAYOUT, "key frame not start");
@@ -3704,6 +3702,11 @@ void SceneSession::UpdateKeyFrameState(SizeChangeReason reason, const WSRect& re
     }
     if (reason == SizeChangeReason::DRAG) {
         TLOGD(WmsLogTag::WMS_LAYOUT, "reset gravity and resize clone node");
+        uint64_t timeStamp = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()).count());
+        if (keyFrameDragPauseNoticed_) {
+            lastKeyFrameStamp_ = timeStamp;
+        }
         lastKeyFrameDragStamp_ = timeStamp;
         lastKeyFrameDragRect_ = rect;
         keyFrameDragPauseNoticed_ = false;
@@ -3726,9 +3729,11 @@ void SceneSession::UpdateKeyFrameState(SizeChangeReason reason, const WSRect& re
     }
 }
 
-void SceneSession::InitKeyFrameState(uint64_t timeStamp, const WSRect& rect)
+void SceneSession::InitKeyFrameState(const WSRect& rect)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "key frame start init");
+    uint64_t timeStamp = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now().time_since_epoch()).count());
     keyFramePolicy_.running_ = true;
     keyFramePolicy_.stopping_ = false;
     keyFrameAnimating_ = false;
@@ -3765,18 +3770,24 @@ void SceneSession::RequestKeyFrameNextVsync(uint64_t requestStamp, uint64_t coun
 void SceneSession::OnKeyFrameNextVsync(uint64_t count)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "get vsync %{public}" PRIu64, count);
-    uint64_t nowTimeStamp = std::chrono::duration_cast<std::chrono::milliseconds>(
-        std::chrono::system_clock::now().time_since_epoch()).count();
+    uint64_t nowTimeStamp = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now().time_since_epoch()).count());
     uint64_t duration = nowTimeStamp - lastKeyFrameDragStamp_;
     const uint64_t minDelay = 100;
     if (!keyFrameDragPauseNoticed_ && !keyFrameAnimating_ && duration >= minDelay) {
-        TLOGNI(WmsLogTag::WMS_LAYOUT, "to notice for key frame drag paused");
+        bool isToNotice = true;
+        if (KeyFrameRectAlmostSame(lastKeyFrameRect_, lastKeyFrameDragRect_)) {
+            isToNotice = false;
+        }
         keyFrameDragPauseNoticed_ = true;
         lastKeyFrameDragStamp_ = nowTimeStamp;
         lastKeyFrameStamp_ = nowTimeStamp;
         winRect_ = lastKeyFrameDragRect_;
         lastKeyFrameRect_ = lastKeyFrameDragRect_;
-        NotifyClientToUpdateRect("OnMoveDragCallback", nullptr);
+        if (isToNotice) {
+            NotifyClientToUpdateRect("OnMoveDragCallback", nullptr);
+        }
+        TLOGNI(WmsLogTag::WMS_LAYOUT, "to notice for key frame drag paused: %{public}d", isToNotice);
     }
 }
 
@@ -3800,8 +3811,9 @@ bool SceneSession::KeyFrameNotifyFilter(const WSRect& rect, SizeChangeReason rea
         TLOGD(WmsLogTag::WMS_LAYOUT, "filter for animating");
         return true;
     }
-    uint64_t nowTimeStamp = std::chrono::duration_cast<std::chrono::milliseconds>(
-        std::chrono::system_clock::now().time_since_epoch()).count();
+    bool isToFilter = true;
+    uint64_t nowTimeStamp = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now().time_since_epoch()).count());
     uint64_t interval = nowTimeStamp - lastKeyFrameStamp_;
     bool intervalCheckPass = interval >= keyFramePolicy_.interval_;
     bool distanceCheckPass = false;
@@ -3814,12 +3826,33 @@ bool SceneSession::KeyFrameNotifyFilter(const WSRect& rect, SizeChangeReason rea
     TLOGI(WmsLogTag::WMS_LAYOUT, "key frame checking: %{public}" PRIu64 "[%{public}d], %{public}f[%{public}d]",
         interval, intervalCheckPass, distance, distanceCheckPass);
     if (intervalCheckPass || distanceCheckPass) {
+        isToFilter = false;
+    }
+    if (!isToFilter && KeyFrameRectAlmostSame(lastKeyFrameRect_, rect)) {
+        isToFilter = true;
+        lastKeyFrameStamp_ = nowTimeStamp;
+        lastKeyFrameRect_ = rect;
+    }
+    if (!isToFilter) {
         lastKeyFrameStamp_ = nowTimeStamp;
         lastKeyFrameRect_ = rect;
         keyFrameAnimating_ = true;
-        return false;
     }
-    return true;
+    return isToFilter;
+}
+
+bool SceneSession::KeyFrameRectAlmostSame(const WSRect& rect1, const WSRect& rect2)
+{
+    const int MAX_DIFF_THREDHOLD_FOR_TOUCH_EVENT = 3;
+    if (std::abs(rect1.posX_ - rect2.posX_) <= MAX_DIFF_THREDHOLD_FOR_TOUCH_EVENT &&
+        std::abs(rect1.posY_ - rect2.posY_) <= MAX_DIFF_THREDHOLD_FOR_TOUCH_EVENT &&
+        std::abs(rect1.width_ - rect2.width_) <= MAX_DIFF_THREDHOLD_FOR_TOUCH_EVENT &&
+        std::abs(rect1.height_ - rect2.height_) <= MAX_DIFF_THREDHOLD_FOR_TOUCH_EVENT) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "rect almost same: %{public}s -> %{public}s",
+            rect1.ToString().c_str(), rect2.ToString().c_str());
+        return true;
+    }
+    return false;
 }
 
 WSError SceneSession::KeyFrameAnimateEnd()
