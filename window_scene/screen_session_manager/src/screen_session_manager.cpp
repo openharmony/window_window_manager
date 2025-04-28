@@ -2780,6 +2780,7 @@ void ScreenSessionManager::GetInternalAndExternalSession(sptr<ScreenSession>& in
 bool ScreenSessionManager::SetScreenPowerById(ScreenId screenId, ScreenPowerState state,
     PowerStateChangeReason reason)
 {
+    std::lock_guard<std::mutex> lock(screenPowerMutex_);
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::DMS, "permission denied! calling: %{public}s, pid: %{public}d",
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
@@ -3160,6 +3161,11 @@ bool ScreenSessionManager::SetScreenPowerForAll(ScreenPowerState state, PowerSta
 
     if (!GetPowerStatus(state, reason, status)) {
         return false;
+    }
+    if (g_isPcDevice && reason == PowerStateChangeReason::POWER_BUTTON && state == ScreenPowerState::POWER_OFF) {
+        isDeviceShutDown_ = true;
+    } else {
+        isDeviceShutDown_ = false;
     }
     gotScreenOffNotify_  = false;
     keyguardDrawnDone_ = false;
@@ -7742,6 +7748,10 @@ void ScreenSessionManager::RecoverMultiScreenMode(sptr<ScreenSession> screenSess
     }
     if (!g_isPcDevice || screenSession->GetScreenProperty().GetScreenType() != ScreenType::REAL) {
         TLOGI(WmsLogTag::DMS, "not PC or not real screen, no need recover!");
+        return;
+    }
+    if (isDeviceShutDown_) {
+        TLOGI(WmsLogTag::DMS, "device shut down, no need recover!");
         return;
     }
     sptr<ScreenSession> internalSession = GetInternalScreenSession();
