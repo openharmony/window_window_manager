@@ -33,6 +33,7 @@ public:
     explicit AniWindowManager();
 
     static ani_status AniWindowManagerInit(ani_env* env);
+    static ani_object WindowStageCreate(ani_env* env, ani_long scene);
     static ani_object GetLastWindow(ani_env* env, ani_long nativeObj, ani_object context);
     static void RegisterWindowManagerCallback(ani_env* env, ani_long nativeObj, ani_string type, ani_ref callback);
     static void UnregisterWindowManagerCallback(ani_env* env, ani_long nativeObj, ani_string type, ani_ref callback);
@@ -41,6 +42,8 @@ private:
     ani_object GetTopWindowTask(ani_env* env, void* contextPtr, bool newApi);
     void OnRegisterWindowManagerCallback(ani_env* env, ani_string type, ani_ref callback);
     void OnUnregisterWindowManagerCallback(ani_env* env, ani_string type, ani_ref callback);
+
+    std::unique_ptr<AniWindowRegisterManager> registerManager_ = nullptr;
 };
 } // namespace Rosen
 } // namespace OHOS
