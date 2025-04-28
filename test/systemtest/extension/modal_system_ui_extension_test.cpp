@@ -16,8 +16,8 @@
 #include <gtest/gtest.h>
 
 #include "iremote_object_mocker.h"
-#include "modal_system_ui_extension.h"
 #include "mock_message_parcel.h"
+#include "modal_system_ui_extension.h"
 #include "wm_common.h"
 
 using namespace testing;
@@ -33,21 +33,13 @@ public:
     void TearDown() override;
 };
 
-void ModalSystemUiExtensionTest::SetUpTestCase()
-{
-}
+void ModalSystemUiExtensionTest::SetUpTestCase() {}
 
-void ModalSystemUiExtensionTest::TearDownTestCase()
-{
-}
+void ModalSystemUiExtensionTest::TearDownTestCase() {}
 
-void ModalSystemUiExtensionTest::SetUp()
-{
-}
+void ModalSystemUiExtensionTest::SetUp() {}
 
-void ModalSystemUiExtensionTest::TearDown()
-{
-}
+void ModalSystemUiExtensionTest::TearDown() {}
 
 namespace {
 /**
@@ -57,7 +49,7 @@ namespace {
  */
 HWTEST_F(ModalSystemUiExtensionTest, ModalSystemUiExtensionConnection01, TestSize.Level1)
 {
-    auto connection = new(std::nothrow)ModalSystemUiExtension();
+    auto connection = new (std::nothrow) ModalSystemUiExtension();
     if (connection == nullptr) {
         return;
     }
@@ -143,6 +135,6 @@ HWTEST_F(ModalSystemUiExtensionTest, DialogAbilityConnectionSendWant, TestSize.L
     remoteObject->sendRequestResult_ = 1;
     EXPECT_FALSE(connection->SendWant(remoteObject));
 }
-}
-} // Rosen
-} // OHOS
+} // namespace
+} // namespace Rosen
+} // namespace OHOS
