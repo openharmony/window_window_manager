@@ -35,17 +35,14 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+
 private:
     std::shared_ptr<SessionManagerLite> sml_;
 };
 
-void SessionManagerLiteTest::SetUpTestCase()
-{
-}
+void SessionManagerLiteTest::SetUpTestCase() {}
 
-void SessionManagerLiteTest::TearDownTestCase()
-{
-}
+void SessionManagerLiteTest::TearDownTestCase() {}
 
 void SessionManagerLiteTest::SetUp()
 {
@@ -183,6 +180,6 @@ HWTEST_F(SessionManagerLiteTest, InitMockSMSProxy, TestSize.Level1)
     sml_->InitMockSMSProxy();
     ASSERT_NE(sml_->foundationDeath_, nullptr);
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS
