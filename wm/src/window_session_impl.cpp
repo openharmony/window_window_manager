@@ -35,6 +35,7 @@
 #include "display_info.h"
 #include "display_manager.h"
 #include "hitrace_meter.h"
+#include "scene_board_judgement.h"
 #include "session_permission.h"
 #include "key_event.h"
 #include "session/container/include/window_event_channel.h"
@@ -267,6 +268,11 @@ bool WindowSessionImpl::IsPcOrPadCapabilityEnabled() const
 bool WindowSessionImpl::IsPcOrPadFreeMultiWindowMode() const
 {
     return windowSystemConfig_.uiType_ == UI_TYPE_PC || IsFreeMultiWindowMode();
+}
+
+bool WindowSessionImpl::IsSceneBoardEnabled() const
+{
+    return SceneBoardJudgement::IsSceneBoardEnabled();
 }
 
 void WindowSessionImpl::MakeSubOrDialogWindowDragableAndMoveble()
