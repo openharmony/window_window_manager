@@ -1844,7 +1844,7 @@ HWTEST_F(SceneSessionTest5, WindowScaleTransfer01, TestSize.Level1)
     info.abilityName_ = "WindowScaleTransfer01";
     info.bundleName_ = "WindowScaleTransfer01";
     info.screenId_ = 0;
-    sptr mainSession = sptr::MakeSptr(info, nullptr);
+    sptr<MainSession> mainSession = sptr::MakeSptr(info, nullptr);
     WSRect rect = { 100, 100, 400, 400 };
     WSRect resultRect = { 200, 200, 200, 200 };
     float scaleX = 0.5f;
@@ -1866,7 +1866,7 @@ HWTEST_F(SceneSessionTest5, WindowScaleTransfer02, TestSize.Level1)
     info.abilityName_ = "WindowScaleTransfer02";
     info.bundleName_ = "WindowScaleTransfer02";
     info.screenId_ = 0;
-    sptr mainSession = sptr::MakeSptr(info, nullptr);
+    sptr<MainSession> mainSession = sptr::MakeSptr(info, nullptr);
     WSRect rect = { 200, 200, 200, 200 };
     WSRect resultRect = { 100, 100, 400, 400 };
     float scaleX = 2.0f;
@@ -1888,7 +1888,7 @@ HWTEST_F(SceneSessionTest5, IsCompatibilityModeScale01, TestSize.Level1)
     info.abilityName_ = "IsCompatibilityModeScale01";
     info.bundleName_ = "IsCompatibilityModeScale01";
     info.screenId_ = 0;
-    sptr mainSession = sptr::MakeSptr(info, nullptr);
+    sptr<MainSession> mainSession = sptr::MakeSptr(info, nullptr);
     auto property = mainSession->GetSessionProperty();
     float scaleX = 2.0f;
     float scaleY = 2.0f;
@@ -1913,7 +1913,7 @@ HWTEST_F(SceneSessionTest5, IsCompatibilityModeScale02, TestSize.Level1)
     info.abilityName_ = "IsCompatibilityModeScale02";
     info.bundleName_ = "IsCompatibilityModeScale02";
     info.screenId_ = 0;
-    sptr mainSession = sptr::MakeSptr(info, nullptr);
+    sptr<MainSession> mainSession = sptr::MakeSptr(info, nullptr);
     auto property = mainSession->GetSessionProperty();
     float scaleX = 1.0f;
     float scaleY = 1.0f;
@@ -1938,7 +1938,7 @@ HWTEST_F(SceneSessionTest5, HookStartMoveRect, TestSize.Level1)
     info.abilityName_ = "HookStartMoveRect";
     info.bundleName_ = "HookStartMoveRect";
     info.screenId_ = 0;
-    sptr mainSession = sptr::MakeSptr(info, nullptr);
+    sptr<MainSession> mainSession = sptr::MakeSptr(info, nullptr);
     WSRect preRect = { 100, 100, 400, 400 };
     WSRect resultRect = { 200, 200, 200, 200 };
     float scaleX = 0.5f;
