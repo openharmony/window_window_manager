@@ -26,6 +26,8 @@
 #include "want.h"
 #include "ws_common.h"
 #include "wm_common.h"
+#include "ui/rs_canvas_node.h"
+#include "transaction/rs_transaction.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1177,6 +1179,28 @@ HWTEST_F(SessionStubTest, HandleKeyFrameAnimateEnd, Function | SmallTest | Level
     MessageParcel reply;
     auto result = session_->HandleKeyFrameAnimateEnd(data, reply);
     ASSERT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleUpdateKeyFrameCloneNode
+ * @tc.desc: sessionStub HandleUpdateKeyFrameCloneNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleUpdateKeyFrameCloneNode, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto rsCanvasNode = RSCanvasNode::Create();
+    ASSERT_NE(rsCanvasNode, nullptr);
+    ASSERT_EQ(rsCanvasNode->Marshalling(data), true);
+    auto rsTransaction = std::make_shared<RSTransaction>();
+    ASSERT_NE(rsTransaction, nullptr);
+    ASSERT_EQ(data.WriteParcelable(rsTransaction.get()), true);
+    auto result = session_->HandleUpdateKeyFrameCloneNode(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+    int32_t ret = 0;
+    ASSERT_EQ(reply.ReadInt32(ret), true);
+    ASSERT_EQ(ret, 0);
 }
 
 /**
