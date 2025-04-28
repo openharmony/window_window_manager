@@ -125,6 +125,7 @@ using GetSceneSessionByIdCallback = std::function<sptr<SceneSession>(int32_t ses
 using NotifySetParentSessionFunc = std::function<void(int32_t oldParentWindowId, int32_t newParentWindowId)>;
 using NotifyUpdateFlagFunc = std::function<void(const std::string& flag)>;
 using NotifyRotationChangeFunc = std::function<void(int32_t persistentId, bool isRegister)>;
+using NotifyFollowScreenChangeFunc = std::function<void(bool isFollowScreenChange)>;
 
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
@@ -162,6 +163,7 @@ public:
         NotifyAvoidAreaChangeCallback onNotifyAvoidAreaChange_;
         GetKeyboardOccupiedAreaWithRotationCallback onKeyboardRotationChange_;
         GetSceneSessionByIdCallback onGetSceneSessionByIdCallback_;
+        NotifyFollowScreenChangeFunc onUpdateFollowScreenChange_;
     };
 
     // func for change window scene pattern property
@@ -512,6 +514,8 @@ public:
     RotationChangeResult NotifyRotationChange(const RotationChangeInfo& rotationChangeInfo);
     bool isRotationChangeCallbackRegistered = false;
     WSError SetCurrentRotation(int32_t currentRotation);
+    void RegisterFollowScreenChangeCallback(NotifyFollowScreenChangeFunc&& callback);
+    WSError UpdateFollowScreenChange(bool isFollowScreenChange);
 
     /*
      * Window Animation
@@ -1034,6 +1038,8 @@ private:
     WMError HandleBackgroundAlpha(const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action);
     WMError HandleActionUpdateExclusivelyHighlighted(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);
+    WMError HandleActionUpdateFollowScreenChange(const sptr<WindowSessionProperty>& property,
+            WSPropertyChangeAction action);
     void HandleSpecificSystemBarProperty(WindowType type, const sptr<WindowSessionProperty>& property);
     void SetWindowFlags(const sptr<WindowSessionProperty>& property);
     void NotifySessionChangeByActionNotifyManager(const sptr<WindowSessionProperty>& property,
@@ -1054,6 +1060,7 @@ private:
     std::vector<sptr<SceneSession>> toastSession_;
     std::atomic_bool needStartingWindowExitAnimation_ { true };
     bool needDefaultAnimationFlag_ = true;
+    bool isFollowScreenChange_ = false;
     SessionEventParam sessionEventParam_ = { 0, 0, 0, 0, 0 };
     std::atomic_bool isStartMoving_ { false };
     std::atomic_bool isVisibleForAccessibility_ { true };
@@ -1160,6 +1167,8 @@ private:
      */
     NotifyReqOrientationChangeFunc onRequestedOrientationChange_;
     NotifyRotationChangeFunc onUpdateRotationChangeFunc_;
+    bool GetFollowScreenChange() const;
+    void SetFollowScreenChange(bool isFollowScreenChange);
 
     /*
      * Window Animation

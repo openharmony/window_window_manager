@@ -243,6 +243,35 @@ HWTEST_F(WindowSessionImplTest5, SetUniqueVirtualPixelRatioForSub, TestSize.Leve
     EXPECT_NEAR(subWindow01->virtualPixelRatio_, virtualPixelRatio, 0.00001f);
     EXPECT_NEAR(subWindow02->virtualPixelRatio_, virtualPixelRatio, 0.00001f);
 }
+
+/**
+ * @tc.name: SetFollowScreenChange
+ * @tc.desc: SetFollowScreenChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, SetFollowScreenChange, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetFollowScreenChange");
+
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(0);
+    WMError ret = window->SetFollowScreenChange(true);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+
+    window->property_->SetPersistentId(1);
+    window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_END);
+    ret = window->SetFollowScreenChange(true);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW_MODE_OR_SIZE, ret);
+
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
+    ret = window->SetFollowScreenChange(true);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW_MODE_OR_SIZE, ret);
+
+    window->property_->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+    ret = window->SetFollowScreenChange(true);
+    EXPECT_EQ(WMError::WM_OK, ret);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

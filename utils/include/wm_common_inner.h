@@ -89,6 +89,7 @@ enum class PropertyChangeAction : uint32_t {
     ACTION_UPDATE_SYSTEM_PRIVACY_MODE = 1 << 18,
     ACTION_UPDATE_SNAPSHOT_SKIP = 1 << 19,
     ACTION_UPDATE_TEXTFIELD_AVOID_INFO = 1 << 20,
+    ACTION_UPDATE_FOLLOW_SCREEN_CHANGE = 1 << 21,
 };
 
 struct ModeChangeHotZonesConfig {
