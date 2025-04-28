@@ -180,7 +180,7 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {SET_PARENT_SESSION_CB,                 ListenerFuncType::SET_PARENT_SESSION_CB},
     {UPDATE_FLAG_CB,                        ListenerFuncType::UPDATE_FLAG_CB},
     {Z_LEVEL_CHANGE_CB,                     ListenerFuncType::Z_LEVEL_CHANGE_CB},
-    {SESSION_UPDATE_FOLLOW_SCREEN_CHANGE_CB, ListenerFuncType::SESSION_UPDATE_FOLLOW_SCREEN_CHANGE_CB},
+    {UPDATE_FOLLOW_SCREEN_CHANGE_CB, ListenerFuncType::UPDATE_FOLLOW_SCREEN_CHANGE_CB},
 };
 
 const std::vector<std::string> g_syncGlobalPositionPermission {
