@@ -654,6 +654,85 @@ HWTEST_F(DisplayManagerServiceTest, StopExpand, TestSize.Level1)
     auto ret = dms_->StopExpand(expandScreenIds);
     ASSERT_EQ(ret, DMError::DM_OK);
 }
+
+/**
+ * @tc.name: GetVisibleAreaDisplayInfoById01
+ * @tc.desc: GetVisibleAreaDisplayInfoById
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerServiceTest, GetVisibleAreaDisplayInfoById01, TestSize.Level1)
+{
+    DisplayId displayId = DISPLAY_ID_INVALID;
+    auto ret = dms_->GetVisibleAreaDisplayInfoById(displayId);
+    EXPECT_EQ(ret, nullptr);
+}
+
+/**
+ * @tc.name: GetVisibleAreaDisplayInfoById02
+ * @tc.desc: GetVisibleAreaDisplayInfoById
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerServiceTest, GetVisibleAreaDisplayInfoById02, TestSize.Level1)
+{
+    DisplayId displayId = 2;
+    std::string name = "testDisplay";
+    sptr<SupportedScreenModes> info = new SupportedScreenModes();
+    sptr<AbstractScreen> absScreen = new AbstractScreen(dms_->abstractScreenController_, name, 0, 0);
+    sptr<AbstractDisplay> absDisplay = new AbstractDisplay(0, info, absScreen);
+    dms_->abstractDisplayController_->abstractDisplayMap_.insert({displayId, absDisplay});
+    auto ret = dms_->GetVisibleAreaDisplayInfoById(displayId);
+    EXPECT_NE(ret, nullptr);
+}
+
+/**
+ * @tc.name: SetScreenBrightness
+ * @tc.desc: SetScreenBrightness
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerServiceTest, SetScreenBrightness, TestSize.Level1)
+{
+    uint64_t screenId = 1;
+    uint32_t level = 2;
+    dms_->SetScreenBrightness(screenId, level);
+    EXPECT_TRUE(dms_->SetScreenBrightness(screenId, level));
+}
+
+/**
+ * @tc.name: GetAllDisplayPhysicalResolution01
+ * @tc.desc: Test GetAllDisplayPhysicalResolution function when allDisplayPhysicalResolution_ is empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerServiceTest, GetAllDisplayPhysicalResolution01, TestSize.Level1)
+{
+    dms_->allDisplayPhysicalResolution_.clear();
+    auto result = dms_->GetAllDisplayPhysicalResolution();
+    EXPECT_FALSE(result.empty());
+}
+
+/**
+ * @tc.name: GetAllDisplayPhysicalResolution02
+ * @tc.desc: Test GetAllDisplayPhysicalResolution function when allDisplayPhysicalResolution_ is not empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerServiceTest, GetAllDisplayPhysicalResolution02, TestSize.Level1)
+{
+    dms_->allDisplayPhysicalResolution_.emplace_back(DisplayPhysicalResolution());
+    auto result = dms_->GetAllDisplayPhysicalResolution();
+    EXPECT_FALSE(result.empty());
+}
+
+/**
+ * @tc.name: GetAllDisplayPhysicalResolution03
+ * @tc.desc: Test GetAllDisplayPhysicalResolution function when default display info is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerServiceTest, GetAllDisplayPhysicalResolution03, TestSize.Level1)
+{
+    dms_->allDisplayPhysicalResolution_.clear();
+    dms_->GetDefaultDisplayInfo();
+    auto result = dms_->GetAllDisplayPhysicalResolution();
+    EXPECT_FALSE(result.empty());
+}
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -34,9 +34,7 @@ public:
 
 sptr<SceneSessionManager> RootSceneSessionTest::ssm_ = nullptr;
 
-void LoadContentFuncTest(const std::string&, napi_env, napi_value, AbilityRuntime::Context*)
-{
-}
+void LoadContentFuncTest(const std::string&, napi_env, napi_value, AbilityRuntime::Context*) {}
 
 void RootSceneSessionTest::SetUpTestCase()
 {
@@ -48,13 +46,9 @@ void RootSceneSessionTest::TearDownTestCase()
     ssm_ = nullptr;
 }
 
-void RootSceneSessionTest::SetUp()
-{
-}
+void RootSceneSessionTest::SetUp() {}
 
-void RootSceneSessionTest::TearDown()
-{
-}
+void RootSceneSessionTest::TearDown() {}
 
 namespace {
 /**
@@ -204,8 +198,8 @@ HWTEST_F(RootSceneSessionTest, GetAvoidAreaByType, TestSize.Level1)
     EXPECT_TRUE(avoidArea.isEmptyAvoidArea());
     avoidArea = ssm_->rootSceneSession_->GetAvoidAreaByType(AvoidAreaType::TYPE_KEYBOARD, { 0, 0, 0, 0 }, 1);
     EXPECT_TRUE(avoidArea.isEmptyAvoidArea());
-    avoidArea = ssm_->rootSceneSession_->GetAvoidAreaByType(
-        AvoidAreaType::TYPE_NAVIGATION_INDICATOR, { 0, 0, 0, 0 }, 1);
+    avoidArea =
+        ssm_->rootSceneSession_->GetAvoidAreaByType(AvoidAreaType::TYPE_NAVIGATION_INDICATOR, { 0, 0, 0, 0 }, 1);
     EXPECT_TRUE(avoidArea.isEmptyAvoidArea());
     avoidArea = ssm_->rootSceneSession_->GetAvoidAreaByType(AvoidAreaType::TYPE_END, { 0, 0, 0, 0 }, 1);
     EXPECT_TRUE(avoidArea.isEmptyAvoidArea());
@@ -273,7 +267,7 @@ HWTEST_F(RootSceneSessionTest, GetKeyboardAvoidAreaForRoot_01, TestSize.Level1)
     keyboardSession->winRect_ = { 0, 1700, 1260, 1020 };
     keyboardSession->property_->SetPersistentId(2);
     keyboardSession->isVisible_ = true;
-    ssm_->sceneSessionMap_.insert({keyboardSession->GetPersistentId(), keyboardSession});
+    ssm_->sceneSessionMap_.insert({ keyboardSession->GetPersistentId(), keyboardSession });
     AvoidArea avoidArea;
     ssm_->rootSceneSession_->GetKeyboardAvoidAreaForRoot(ssm_->rootSceneSession_->winRect_, avoidArea);
     Rect rect = { 0, 1700, 1260, 1020 };
@@ -313,9 +307,7 @@ HWTEST_F(RootSceneSessionTest, GetAINavigationBarAreaForRoot_01, TestSize.Level1
 {
     ASSERT_NE(nullptr, ssm_);
     auto specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    specificCb->onGetAINavigationBarArea_ = [](uint64_t displayId) {
-        return ssm_->GetAINavigationBarArea(displayId);
-    };
+    specificCb->onGetAINavigationBarArea_ = [](uint64_t displayId) { return ssm_->GetAINavigationBarArea(displayId); };
     ssm_->rootSceneSession_ = sptr<RootSceneSession>::MakeSptr(specificCb);
     ssm_->rootSceneSession_->winRect_ = { 0, 0, 1260, 2720 };
     AvoidArea avoidArea;
@@ -361,6 +353,6 @@ HWTEST_F(RootSceneSessionTest, UpdateAvoidArea_01, TestSize.Level1)
     auto ret = ssm_->rootSceneSession_->UpdateAvoidArea(new AvoidArea(avoidArea), AvoidAreaType::TYPE_SYSTEM);
     ASSERT_EQ(ret, WSError::WS_OK);
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS
