@@ -154,6 +154,12 @@ float PcFoldScreenManager::GetVpr() const
     return vpr_;
 }
 
+int32_t PcFoldScreenManager::GetVirtualDisplayPosY() const
+{
+    std::shared_lock<std::shared_mutex> lock(rectsMutex_);
+    return defaultDisplayRect_.height_ + foldCreaseRect_.height_;
+}
+
 std::tuple<WSRect, WSRect, WSRect> PcFoldScreenManager::GetDisplayRects() const
 {
     std::shared_lock<std::shared_mutex> lock(rectsMutex_);
