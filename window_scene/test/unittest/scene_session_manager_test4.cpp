@@ -1661,12 +1661,12 @@ HWTEST_F(SceneSessionManagerTest4, GetTopNearestBlockingFocusSession01, TestSize
     sceneSession02->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession01));
     ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession02));
-    sptr<SceneSession> ret = ssm_->GetTopNearestBlockingFocusSession(DEFAULT_DISPLAY_ID, 0, true);
+    sptr<SceneSession> ret = ssm_->GetTopNearestBlockingFocusSession(0, true);
     EXPECT_EQ(ret, sceneSession01);
 
     ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     sceneSession02->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
-    ret = ssm_->GetTopNearestBlockingFocusSession(DEFAULT_DISPLAY_ID, 2, true);
+    ret = ssm_->GetTopNearestBlockingFocusSession(2, true);
     EXPECT_EQ(ret, nullptr);
 }
 
@@ -1698,7 +1698,7 @@ HWTEST_F(SceneSessionManagerTest4, CheckBlockingFocus, TestSize.Level1)
     EXPECT_EQ(ret, true);
     ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     sceneSession->blockingFocus_ = false;
-    sceneSession01->property_->SetWindowType(WindowType::WINDOW_TYPE_VOICE_INTERACTION);
+    sceneSession01->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     sceneSession->SetParentSession(sceneSession01);
     ret = ssm_->CheckBlockingFocus(sceneSession, false);
