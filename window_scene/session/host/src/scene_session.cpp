@@ -848,8 +848,7 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
             session->moveDragController_->InitMoveDragProperty();
             if (session->pcFoldScreenController_) {
                 WSRect currRect;
-                auto sessionRect = session->GetSessionRect();
-                session->HookStartMoveRect(currRect, sessionRect);
+                session->HookStartMoveRect(currRect, session->GetSessionRect());
                 session->pcFoldScreenController_->RecordStartMoveRect(currRect, session->IsFullScreenMovable());
             }
             WSRect rect = session->winRect_;
@@ -3473,6 +3472,10 @@ bool SceneSession::MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeR
     auto property = GetSessionProperty();
     auto scaleX = mainSession->GetScaleX();
     auto scaleY = mainSession->GetScaleY();
+    if (scaleX == 0 || scaleY == 0) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "scale ratio is 0");
+        return false;
+    }
     if (IsCompatibilityModeScale(scaleX, scaleY)) {
         WindowScaleTransfer(rect, scaleX, scaleY);
     }
@@ -3512,6 +3515,7 @@ bool SceneSession::MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeR
         finishCallback = [weakThis = wptr(this), rect, where = __func__] {
             auto session = weakThis.promote();
             if (session == nullptr) {
+
                 TLOGNW(WmsLogTag::WMS_LAYOUT_PC, "%{public}s session is nullptr", where);
                 return;
             }
