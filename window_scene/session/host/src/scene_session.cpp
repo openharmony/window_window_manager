@@ -1482,7 +1482,7 @@ void SceneSession::SetSessionRectChangeCallback(const NotifySessionRectChangeFun
             TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s, winName:%{public}s, reason:%{public}d, rect:%{public}s",
                 where, session->GetWindowName().c_str(), reason, rect.ToString().c_str());
             if (session->GetClientDisplayId() == VIRTUAL_DISPLAY_ID && rect.posY_ == 0) {
-                rect += PcFoldScreenManager::GetInstance().GetVirtualDisplayPosY();
+                rect.posY_ += PcFoldScreenManager::GetInstance().GetVirtualDisplayPosY();
             }
             auto rectAnimationConfig = session->GetRequestRectAnimationConfig();
             session->sessionRectChangeFunc_(rect, reason, DISPLAY_ID_INVALID, rectAnimationConfig);
