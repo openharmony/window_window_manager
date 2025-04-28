@@ -168,6 +168,7 @@ public:
     WSError KeyFrameAnimateEnd() override;
     WSError UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode,
         std::shared_ptr<RSTransaction>& rsTransaction) override;
+    WSError SetDragKeyFramePolicy(const KeyFramePolicy& keyFramePolicy) override;
 
     /**
      * window rotation

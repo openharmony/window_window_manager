@@ -141,6 +141,7 @@ private:
     // KeyFrame
     int HandleKeyFrameAnimateEnd(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateKeyFrameCloneNode(MessageParcel& data, MessageParcel& reply);
+    int HandleSetDragKeyFramePolicy(MessageParcel& data, MessageParcel& reply);
 
     int ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
 

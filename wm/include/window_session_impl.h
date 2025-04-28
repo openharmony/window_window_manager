@@ -365,6 +365,7 @@ public:
     void RegisterKeyFrameCallback();
     WSError LinkKeyFrameCanvasNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode) override;
     WSError SetKeyFramePolicy(KeyFramePolicy& keyFramePolicy) override;
+    WMError SetDragKeyFramePolicy(const KeyFramePolicy& keyFramePolicy) override;
 
     /*
      * Free Multi Window

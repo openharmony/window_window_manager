@@ -1748,6 +1748,20 @@ WSError WindowSessionImpl::SetKeyFramePolicy(KeyFramePolicy& keyFramePolicy)
     return WSError::WS_OK;
 }
 
+WMError WindowSessionImpl::SetDragKeyFramePolicy(const KeyFramePolicy& keyFramePolicy)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    auto session = GetHostSession();
+    if (!session) {
+        TLOGE(WmsLogTag::WMS_EVENT, "session is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    WSError errorCode = session->SetDragKeyFramePolicy(keyFramePolicy);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "Id: %{public}d, keyFramePolicy: %{public}s, errorCode: %{public}d",
+        GetPersistentId(), keyFramePolicy.ToString().c_str(), static_cast<int32_t>(errorCode));
+    return static_cast<WMError>(errorCode);
+}
+
 WMError WindowSessionImpl::NotifyWatchFocusActiveChange(bool isActive)
 {
     TLOGD(WmsLogTag::WMS_EVENT, "isActive:%{public}d", isActive);
