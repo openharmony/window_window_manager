@@ -5573,11 +5573,7 @@ sptr<SceneSession> SceneSessionManager::GetTopNearestBlockingFocusSession(uint32
             TLOGD(WmsLogTag::WMS_FOCUS, "sub window of topmost do not block");
             return false;
         }
-        bool isPhoneOrPad = systemConfig_.uiType_ == UI_TYPE_PHONE || systemConfig_.uiType_ == UI_TYPE_PAD;
-        bool isBlockingType = (includingAppSession && session->IsAppSession()) ||
-                              (session->GetSessionInfo().isSystem_ && session->GetBlockingFocus()) ||
-                              (isPhoneOrPad && session->GetWindowType() == WindowType::WINDOW_TYPE_VOICE_INTERACTION);
-        if (IsSessionVisibleForeground(session) && isBlockingType)  {
+        if (IsSessionVisibleForeground(session) && CheckBlockingFocus(session, includingAppSession))  {
             ret = session;
             return true;
         }
@@ -5585,6 +5581,23 @@ sptr<SceneSession> SceneSessionManager::GetTopNearestBlockingFocusSession(uint32
     };
     TraverseSessionTree(func, false);
     return ret;
+}
+
+bool SceneSessionManager::CheckBlockingFocus(const sptr<SceneSession>& session, bool includingAppSession)
+{
+    if (session->GetSessionInfo().isSystem_ && session->GetBlockingFocus()) {
+        return true;
+    }
+    bool isPhoneOrPad = systemConfig_.IsPhoneWindow() || systemConfig_.IsPadWindow();
+    if (isPhoneOrPad && session->GetWindowType() == WindowType::WINDOW_TYPE_VOICE_INTERACTION) {
+        return true;
+    }
+    bool isPcOrPcMode = systemConfig_.IsPcWindow() ||
+        (systemConfig_.IsPadWindow() && systemConfig_.IsFreeMultiWindowMode());
+    if (includingAppSession && session->IsAppSession()) {
+        return !(isPcOrPcMode && session->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT);
+    }
+    return false;
 }
 
 sptr<SceneSession> SceneSessionManager::GetTopFocusableNonAppSession()
