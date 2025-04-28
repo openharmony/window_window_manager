@@ -5758,7 +5758,7 @@ WSError SceneSession::UpdateFollowScreenChange(bool isFollowScreenChange)
             session->specificCallback_->onUpdateFollowScreenChange_(isFollowScreenChange);
         }
     };
-    PostTask(task, "UpdateFollowScreenChange");
+    PostTask(std::move(task), "UpdateFollowScreenChange");
     return WSError::WS_OK;
 }
 
