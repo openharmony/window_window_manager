@@ -24,6 +24,7 @@
 #include "scene_board_judgement.h"
 #include "fold_screen_state_internel.h"
 #include "common_test_utils.h"
+#include "iremote_object_mocker.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -6349,6 +6350,180 @@ HWTEST_F(ScreenSessionManagerTest, SetRSScreenPowerStatus, TestSize.Level1)
     ssm_->SetRSScreenPowerStatus(0, ScreenPowerStatus::POWER_STATUS_OFF);
     state = ssm_->GetScreenPower(0);
     EXPECT_EQ(state, ScreenPowerState::POWER_OFF);
+}
+
+/**
+ * @tc.name: GetScreenCombination01
+ * @tc.desc: GetScreenCombination01
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetScreenCombination01, TestSize.Level1)
+{
+    ScreenId screenId = 1051;
+    auto ret = ssm_->GetScreenCombination(screenId);
+    EXPECT_EQ(ret, ScreenCombination::SCREEN_ALONE);
+}
+
+/**
+ * @tc.name: GetScreenCombination02
+ * @tc.desc: !screenSession = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetScreenCombination02, TestSize.Level1)
+{
+    ScreenId screenId = 1050;
+    sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession(screenId, ScreenProperty(), 0);
+    EXPECT_NE(screenSession, nullptr);
+    ssm_->screenSessionMap_[screenId] = screenSession;
+    auto ret = ssm_->GetScreenCombination(screenId);
+    EXPECT_EQ(ret, ScreenCombination::SCREEN_ALONE);
+}
+
+/**
+ * @tc.name: OnRemoteDied01
+ * @tc.desc: OnRemoteDied_ShouldReturnFalse_WhenAgentIsNUllptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, OnRemoteDied01, TestSize.Level1)
+{
+    EXPECT_FALSE(ssm_->OnRemoteDied(nullptr));
+}
+
+/**
+ * @tc.name: OnRemoteDied02
+ * @tc.desc: OnRemoteDied_ShouldReturnTrue_WhenAgentNotFound
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, OnRemoteDied02, TestSize.Level1)
+{
+    sptr<IRemoteObject> agent = sptr<MockIRemoteObject>::MakeSptr();
+    EXPECT_TRUE(ssm_->OnRemoteDied(agent));
+}
+
+/**
+ * @tc.name: OnRemoteDied03
+ * @tc.desc: OnRemoteDied_ShouldRemoveAgent_WhenAgentFoundAndNoScreens
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, OnRemoteDied03, TestSize.Level1)
+{
+    sptr<IRemoteObject> agent = sptr<MockIRemoteObject>::MakeSptr();
+    ssm_->screenAgentMap_[agent] = {};
+
+    EXPECT_TRUE(ssm_->OnRemoteDied(agent));
+    EXPECT_TRUE(ssm_->screenAgentMap_.find(agent) == ssm_->screenAgentMap_.end());
+}
+
+/**
+ * @tc.name: GetExpandAvailableArea
+ * @tc.desc: GetExpandAvailableArea test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetExpandAvailableArea, TestSize.Level1)
+{
+    DMRect area;
+    EXPECT_EQ(DMError::DM_ERROR_NULLPTR, ssm_->GetExpandAvailableArea(SCREEN_ID_INVALID, area));
+    DisplayId id = 0;
+    sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession(id, ScreenProperty(), 0);
+    ssm_->screenSessionMap_[id] = screenSession;
+    ASSERT_NE(nullptr, screenSession);
+    EXPECT_EQ(DMError::DM_OK, ssm_->GetExpandAvailableArea(id, area));
+}
+
+/**
+ * @tc.name: GetFakePhysicalScreenSession001
+ * @tc.desc: Test that the function returns nullptr when g_isPcDevice is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetFakePhysicalScreenSession001, TestSize.Level1)
+{
+    ScreenId screenId = 1;
+    ScreenId defScreenId = 2;
+    ScreenProperty property;
+
+    auto screenSession = ScreenSessionManager::GetInstance().GetFakePhysicalScreenSession(screenId, defScreenId,
+        property);
+    EXPECT_EQ(screenSession, nullptr);
+}
+
+/**
+ * @tc.name: CreateFakePhysicalMirrorSessionInner
+ * @tc.desc: CreateFakePhysicalMirrorSessionInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, CreateFakePhysicalMirrorSessionInner, TestSize.Level1)
+{
+    ScreenId screenId = 1;
+    ScreenId defScreenId = 2;
+    ScreenProperty property;
+
+    auto screenSession = ScreenSessionManager::GetInstance().CreateFakePhysicalMirrorSessionInner(screenId, defScreenId,
+        property);
+    EXPECT_EQ(screenSession, nullptr);
+}
+
+/**
+ * @tc.name: GetPhysicalScreenSessionInner
+ * @tc.desc: GetPhysicalScreenSessionInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetPhysicalScreenSessionInner, TestSize.Level1)
+{
+    ScreenId screenId = 1;
+    ScreenProperty property;
+
+    auto screenSession = ScreenSessionManager::GetInstance().GetPhysicalScreenSessionInner(screenId, property);
+    EXPECT_EQ(screenSession, nullptr);
+}
+
+/**
+ * @tc.name: GetOrCreatePhysicalScreenSession
+ * @tc.desc: Test scenario where no existing physical screen session exists and new session creation fails
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetOrCreatePhysicalScreenSession, TestSize.Level1)
+{
+    ScreenId screenId = 1;
+    sptr<ScreenSession> result = ScreenSessionManager::GetInstance().GetOrCreatePhysicalScreenSession(screenId);
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: GetScreenSessionByRsId
+ * @tc.desc: GetScreenSessionByRsId
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetScreenSessionByRsId, TestSize.Level1)
+{
+    ScreenId rsScreenId = 123;
+    ssm_->screenSessionMap_[rsScreenId] = nullptr;
+    sptr<ScreenSession> newSession = new ScreenSession();
+
+    sptr<ScreenSession> result = ScreenSessionManager::GetInstance().GetScreenSessionByRsId(rsScreenId);
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: GetPhysicalScreenSession001
+ * @tc.desc: Test GetPhysicalScreenSession function when screenId is not found in the map
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetPhysicalScreenSession001, TestSize.Level1)
+{
+    ScreenId screenId = 123;
+    EXPECT_EQ(ssm_->GetPhysicalScreenSession(screenId), nullptr);
+}
+
+/**
+ * @tc.name: GetPhysicalScreenSession002
+ * @tc.desc: Test GetPhysicalScreenSession function when screenSessionMap is empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetPhysicalScreenSession002, TestSize.Level1)
+{
+    ssm_->screenAgentMap_.clear();
+    ScreenId screenId = 123;
+    EXPECT_EQ(ssm_->GetPhysicalScreenSession(screenId), nullptr);
 }
 }
 } // namespace Rosen
