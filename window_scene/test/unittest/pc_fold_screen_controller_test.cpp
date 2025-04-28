@@ -721,6 +721,18 @@ HWTEST_F(PcFoldScreenManagerTest, GetVpr, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetVirtualDisplayPosY
+ * @tc.desc: test function : GetVirtualDisplayPosY
+ * @tc.type: FUNC
+ */
+HWTEST_F(PcFoldScreenManagerTest, GetVirtualDisplayPosY, Function | SmallTest | Level2)
+{
+    manager_.SetDisplayRects(DISPLAY_RECT, ZERO_RECT, ZERO_RECT);
+    const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] = manager_.GetDisplayRects();
+    EXPECT_EQ(defaultDisplayRect.posY_ + foldCreaseRect.posY_, manager_.GetVirtualDisplayPosY());
+}
+
+/**
  * @tc.name: IsAllowThrowSlip
  * @tc.desc: test function : IsAllowThrowSlip, IsStartFullScreen
  * @tc.type: FUNC

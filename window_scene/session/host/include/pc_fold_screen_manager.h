@@ -67,6 +67,7 @@ public:
     void UpdateSystemKeyboardStatus(bool hasSystemKeyboard);
     bool HasSystemKeyboard() const;
 
+    int32_t GetVirtualDisplayPosY() const;
     std::tuple<WSRect, WSRect, WSRect> GetDisplayRects() const;
 
     // animation parameters
