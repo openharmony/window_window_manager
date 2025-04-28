@@ -35,13 +35,14 @@ enum class InvokerType {
 
 class RSTransactionAdapter {
 public:
-    explicit RSTransactionAdapter(std::shared_ptr<RSUIContext> rsUIContext);
-    explicit RSTransactionAdapter(std::shared_ptr<RSNode> rsNode);
-    explicit RSTransactionAdapter(std::shared_ptr<RSUIDirector> rsUIDirector);
+    explicit RSTransactionAdapter(const std::shared_ptr<RSUIContext>& rsUIContext);
+    explicit RSTransactionAdapter(const std::shared_ptr<RSNode>& rsNode);
+    explicit RSTransactionAdapter(const std::shared_ptr<RSUIDirector>& rsUIDirector);
+    virtual ~RSTransactionAdapter() = default;
 
     std::shared_ptr<RSUIContext> GetRSUIContext() const;
-    void Begin();
-    void Commit(uint64_t timestamp = 0);
+    virtual void Begin();
+    virtual void Commit(uint64_t timestamp = 0);
     void FlushImplicitTransaction(uint64_t timestamp = 0, const std::string& abilityName = "");
 
     static void FlushImplicitTransaction(
@@ -66,7 +67,8 @@ private:
 
 class AutoRSTransaction {
 public:
-    explicit AutoRSTransaction(std::shared_ptr<RSNode> rsNode, bool enable = true);
+    explicit AutoRSTransaction(const std::shared_ptr<RSNode>& rsNode, bool enable = true);
+    explicit AutoRSTransaction(const std::shared_ptr<RSTransactionAdapter>& rsTransAdapter, bool enable = true);
     ~AutoRSTransaction();
     AutoRSTransaction(const AutoRSTransaction&) = delete;
     AutoRSTransaction& operator=(const AutoRSTransaction&) = delete;
@@ -74,28 +76,30 @@ public:
     AutoRSTransaction& operator=(AutoRSTransaction&&) = delete;
 
 private:
-    std::unique_ptr<RSTransactionAdapter> rsTransAdapter_;
+    std::shared_ptr<RSTransactionAdapter> rsTransAdapter_;
 };
 
 class RSSyncTransactionAdapter {
 public:
-    explicit RSSyncTransactionAdapter(std::shared_ptr<RSUIContext> rsUIContext);
-    explicit RSSyncTransactionAdapter(std::shared_ptr<RSNode> rsNode);
+    explicit RSSyncTransactionAdapter(const std::shared_ptr<RSUIContext>& rsUIContext);
+    explicit RSSyncTransactionAdapter(const std::shared_ptr<RSNode>& rsNode);
+    virtual ~RSSyncTransactionAdapter() = default;
 
+    std::shared_ptr<RSUIContext> GetRSUIContext() const;
     std::shared_ptr<RSTransaction> GetRSTransaction();
-    void OpenSyncTransaction(std::shared_ptr<AppExecFwk::EventHandler> handler = nullptr);
-    void CloseSyncTransaction(std::shared_ptr<AppExecFwk::EventHandler> handler = nullptr);
+    virtual void OpenSyncTransaction(const std::shared_ptr<AppExecFwk::EventHandler>& handler = nullptr);
+    virtual void CloseSyncTransaction(const std::shared_ptr<AppExecFwk::EventHandler>& handler = nullptr);
 
     static std::shared_ptr<RSTransaction> GetRSTransaction(const std::shared_ptr<RSUIContext>& rsUIContext);
     static std::shared_ptr<RSTransaction> GetRSTransaction(const std::shared_ptr<RSNode>& rsNode);
-    static void OpenSyncTransaction(
-        const std::shared_ptr<RSUIContext>& rsUIContext, std::shared_ptr<AppExecFwk::EventHandler> handler = nullptr);
-    static void OpenSyncTransaction(
-        const std::shared_ptr<RSNode>& rsNode, std::shared_ptr<AppExecFwk::EventHandler> handler = nullptr);
-    static void CloseSyncTransaction(
-        const std::shared_ptr<RSUIContext>& rsUIContext, std::shared_ptr<AppExecFwk::EventHandler> handler = nullptr);
-    static void CloseSyncTransaction(
-        const std::shared_ptr<RSNode>& rsNode, std::shared_ptr<AppExecFwk::EventHandler> handler = nullptr);
+    static void OpenSyncTransaction(const std::shared_ptr<RSUIContext>& rsUIContext,
+                                    const std::shared_ptr<AppExecFwk::EventHandler>& handler = nullptr);
+    static void OpenSyncTransaction(const std::shared_ptr<RSNode>& rsNode,
+                                    const std::shared_ptr<AppExecFwk::EventHandler>& handler = nullptr);
+    static void CloseSyncTransaction(const std::shared_ptr<RSUIContext>& rsUIContext,
+                                     const std::shared_ptr<AppExecFwk::EventHandler>& handler = nullptr);
+    static void CloseSyncTransaction(const std::shared_ptr<RSNode>& rsNode,
+                                     const std::shared_ptr<AppExecFwk::EventHandler>& handler = nullptr);
 
 private:
     void InitByRSUIContext(const std::shared_ptr<RSUIContext>& rsUIContext);
@@ -115,9 +119,12 @@ private:
 
 class AutoRSSyncTransaction {
 public:
-    explicit AutoRSSyncTransaction(std::shared_ptr<RSNode> rsNode,
+    explicit AutoRSSyncTransaction(const std::shared_ptr<RSNode>& rsNode,
                                    bool needFlushImplicitTransaction = true,
-                                   std::shared_ptr<AppExecFwk::EventHandler> handler = nullptr);
+                                   const std::shared_ptr<AppExecFwk::EventHandler>& handler = nullptr);
+    explicit AutoRSSyncTransaction(const std::shared_ptr<RSSyncTransactionAdapter>& rsSyncTransAdapter,
+                                   bool needFlushImplicitTransaction = true,
+                                   const std::shared_ptr<AppExecFwk::EventHandler>& handler = nullptr);
     ~AutoRSSyncTransaction();
     AutoRSSyncTransaction(const AutoRSSyncTransaction&) = delete;
     AutoRSSyncTransaction& operator=(const AutoRSSyncTransaction&) = delete;
@@ -125,13 +132,13 @@ public:
     AutoRSSyncTransaction& operator=(AutoRSSyncTransaction&&) = delete;
 
 private:
-    std::unique_ptr<RSSyncTransactionAdapter> rsSyncTransAdapter_;
+    std::shared_ptr<RSSyncTransactionAdapter> rsSyncTransAdapter_;
     std::shared_ptr<AppExecFwk::EventHandler> handler_;
 };
 
 class AllowRSMultiInstance {
 public:
-    explicit AllowRSMultiInstance(std::shared_ptr<RSNode> rsNode);
+    explicit AllowRSMultiInstance(const std::shared_ptr<RSNode>& rsNode);
     ~AllowRSMultiInstance();
     AllowRSMultiInstance(const AllowRSMultiInstance&) = delete;
     AllowRSMultiInstance& operator=(const AllowRSMultiInstance&) = delete;

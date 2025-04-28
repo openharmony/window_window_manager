@@ -18,7 +18,6 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-#include "hilog/log.h"
 #include "ui/rs_surface_node.h"
 
 using namespace testing;
@@ -26,22 +25,10 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
-namespace {
-std::string logMsg;
-
-void TestLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
-                     const char* msg)
-{
-    logMsg += msg;
-}
-}
-
 class RSAdapterTest : public Test {
 public:
     static void SetUpTestCase()
     {
-        LOG_SetCallback(TestLogCallback);
-
         rsUIDirector_ = RSUIDirector::Create();
         rsUIDirector_->Init(true, true);
         rsUIContext_ = rsUIDirector_->GetRSUIContext();
@@ -49,20 +36,9 @@ public:
         rsNode_ = RSSurfaceNode::Create(config, true, rsUIContext_);
     }
 
-    static void TearDownTestCase()
-    {
-        LOG_SetCallback(nullptr);
-    }
-
-    void SetUp() override
-    {
-        logMsg.clear();
-    }
-
-    void TearDown() override
-    {
-        logMsg.clear();
-    }
+    static void TearDownTestCase() {}
+    void SetUp() override {}
+    void TearDown() override {}
 
 private:
     static std::shared_ptr<RSNode> rsNode_;
@@ -73,6 +49,23 @@ private:
 std::shared_ptr<RSNode> RSAdapterTest::rsNode_ = nullptr;
 std::shared_ptr<RSUIContext> RSAdapterTest::rsUIContext_ = nullptr;
 std::shared_ptr<RSUIDirector> RSAdapterTest::rsUIDirector_ = nullptr;
+
+class MockRSTransactionAdapter : public RSTransactionAdapter {
+public:
+    explicit MockRSTransactionAdapter(const std::shared_ptr<RSUIContext>& rsUIContext)
+        : RSTransactionAdapter(rsUIContext) {}
+    MOCK_METHOD(void, Begin, (), (override));
+    MOCK_METHOD(void, Commit, (uint64_t timestamp), (override));
+};
+
+class MockRSSyncTransactionAdapter : public RSSyncTransactionAdapter {
+public:
+    explicit MockRSSyncTransactionAdapter(const std::shared_ptr<RSUIContext>& rsUIContext)
+        : RSSyncTransactionAdapter(rsUIContext) {}
+    MOCK_METHOD(void, OpenSyncTransaction, (const std::shared_ptr<AppExecFwk::EventHandler>& handler), (override));
+    MOCK_METHOD(void, CloseSyncTransaction, (const std::shared_ptr<AppExecFwk::EventHandler>& handler), (override));
+};
+    
 
 /**
  * @tc.name: RSTransactionAdapterConstructor
@@ -124,11 +117,11 @@ HWTEST_F(RSAdapterTest, RSTransactionAdapterCommit, Function | SmallTest | Level
 }
 
 /**
- * @tc.name: RSTransactionAdapterFlushImplicitTransactionMember
+ * @tc.name: RSTransactionAdapterFlushImplicitTransaction
  * @tc.desc: Verify RSTransactionAdapter::FlushImplicitTransaction (member function).
  * @tc.type: FUNC
  */
-HWTEST_F(RSAdapterTest, RSTransactionAdapterFlushImplicitTransactionMember, Function | SmallTest | Level1)
+HWTEST_F(RSAdapterTest, RSTransactionAdapterFlushImplicitTransaction, Function | SmallTest | Level1)
 {
     RSTransactionAdapter adapter(rsUIContext_);
     adapter.FlushImplicitTransaction();
@@ -140,11 +133,11 @@ HWTEST_F(RSAdapterTest, RSTransactionAdapterFlushImplicitTransactionMember, Func
 }
 
 /**
- * @tc.name: RSTransactionAdapterFlushImplicitTransactionStatic
+ * @tc.name: RSTransactionAdapterStaticFlushImplicitTransaction
  * @tc.desc: Verify static FlushImplicitTransaction with RSUIContext.
  * @tc.type: FUNC
  */
-HWTEST_F(RSAdapterTest, RSTransactionAdapterFlushImplicitTransactionStatic, Function | SmallTest | Level1)
+HWTEST_F(RSAdapterTest, RSTransactionAdapterStaticFlushImplicitTransaction, Function | SmallTest | Level1)
 {
     RSTransactionAdapter::FlushImplicitTransaction(rsUIContext_);
     if (rsUIContext_) {
@@ -161,11 +154,15 @@ HWTEST_F(RSAdapterTest, RSTransactionAdapterFlushImplicitTransactionStatic, Func
  */
 HWTEST_F(RSAdapterTest, AutoRSTransactionLifecycle, Function | SmallTest | Level1)
 {
+    auto mockAdapter = std::make_shared<MockRSTransactionAdapter>(rsUIContext_);
+    EXPECT_CALL(*mockAdapter, Begin())
+        .Times(1);
+    EXPECT_CALL(*mockAdapter, Commit(_))
+        .Times(1);
+
     {
-        AutoRSTransaction autoTransaction(rsNode_, true);
-        EXPECT_NE(logMsg.find("Begin transaction"), std::string::npos);
+        AutoRSTransaction autoTransaction(mockAdapter, true);
     }
-    EXPECT_NE(logMsg.find("Commit transaction"), std::string::npos);
 }
 
 /**
@@ -280,16 +277,20 @@ HWTEST_F(RSAdapterTest, RSSyncTransactionAdapterStaticCloseSyncTransaction, Func
 
 /**
  * @tc.name: AutoRSSyncTransactionLifecycle
- * @tc.desc: Verify AutoRSSyncTransaction lifecycle (Flush + Open + Close).
+ * @tc.desc: Verify AutoRSSyncTransaction lifecycle (Open + Close).
  * @tc.type: FUNC
  */
 HWTEST_F(RSAdapterTest, AutoRSSyncTransactionLifecycle, Function | SmallTest | Level1)
 {
+    auto mockAdapter = std::make_shared<MockRSSyncTransactionAdapter>(rsUIContext_);
+    EXPECT_CALL(*mockAdapter, OpenSyncTransaction(_))
+        .Times(1);
+    EXPECT_CALL(*mockAdapter, CloseSyncTransaction(_))
+        .Times(1);
+
     {
-        AutoRSSyncTransaction autoSyncTransaction(rsNode_);
-        EXPECT_NE(logMsg.find("Open sync transaction"), std::string::npos);
+        AutoRSSyncTransaction autoSyncTransaction(mockAdapter);
     }
-    EXPECT_NE(logMsg.find("Close sync transaction"), std::string::npos);
 }
 
 /**
@@ -301,9 +302,9 @@ HWTEST_F(RSAdapterTest, AllowRSMultiInstanceLifecycle, Function | SmallTest | Le
 {
     {
         AllowRSMultiInstance allowMulti(rsNode_);
-        EXPECT_NE(logMsg.find("Skip check in RS multi-instance"), std::string::npos);
+        EXPECT_TRUE(rsNode_->isSkipCheckInMultiInstance_);
     }
-    EXPECT_NE(logMsg.find("Reopen check in RS multi-instance"), std::string::npos);
+    EXPECT_FALSE(rsNode_->isSkipCheckInMultiInstance_);
 }
 
 /**
