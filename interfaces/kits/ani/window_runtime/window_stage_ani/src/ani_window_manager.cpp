@@ -20,14 +20,20 @@
 #include "ani.h"
 #include "ani_window.h"
 #include "ani_window_stage.h"
+#include "ani_window.h"
+#include "ani_window_stage.h"
 #include "ani_window_utils.h"
 #include "singleton_container.h"
 #include "window_manager.h"
 #include "window_manager_hilog.h"
 #include "window_scene.h"
+#include "ani_window_utils.h"
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+const std::string PIP_WINDOW = "pip_window";
+}
 AniWindowManager::AniWindowManager() : registerManager_(std::make_unique<AniWindowRegisterManager>())
 {
 }
@@ -47,6 +53,10 @@ ani_status AniWindowManager::AniWindowManagerInit(ani_env* env)
         ani_native_function {"getLastWindowSync",
             "JLapplication/BaseContext/BaseContext;:L@ohos/window/window/Window;",
             reinterpret_cast<void *>(AniWindowManager::GetLastWindow)},
+        ani_native_function {"findWindowSync",
+            "JLstd/core/String;:L@ohos/window/window/Window;",
+            reinterpret_cast<void *>(AniWindowManager::FindWindow)},
+        ani_native_function {"minimizeAllSync", "JD:V", reinterpret_cast<void *>(AniWindowManager::MinimizeAll)},
         ani_native_function {"shiftAppWindowFocusSync", "JDD:V",
             reinterpret_cast<void *>(AniWindowManager::ShiftAppWindowFocus)},
         ani_native_function {"onSync", nullptr,
@@ -76,11 +86,10 @@ ani_status AniWindowManager::AniWindowManagerInit(ani_env* env)
 
 ani_object AniWindowManager::WindowStageCreate(ani_env* env, ani_long scene)
 {
-    using namespace OHOS::Rosen;
     TLOGD(WmsLogTag::DEFAULT, "[ANI] create windowstage with scene 0x%{public}p %{public}d",
         reinterpret_cast<void*>(env), (int32_t)scene);
     std::shared_ptr<WindowScene> scenePtr;
-    return CreateAniWindowStage(env, scenePtr); // just for test
+    return CreateAniWindowStage(env, scenePtr);
 }
 
 ani_object AniWindowManager::GetLastWindow(ani_env* env, ani_long nativeObj, ani_object context)
@@ -106,6 +115,62 @@ ani_object AniWindowManager::OnGetLastWindow(ani_env* env, ani_object aniContext
         return AniWindowUtils::AniThrowError(env, WMError::WM_ERROR_NULLPTR, "Get top window failed");
     }
     return CreateAniWindowObject(env, window);
+}
+
+ani_object AniWindowManager::FindWindow(ani_env* env, ani_long nativeObj, ani_string windowName)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    AniWindowManager* aniWindowManager = reinterpret_cast<AniWindowManager*>(nativeObj);
+    return aniWindowManager != nullptr ? aniWindowManager->OnFindWindow(env, windowName) : nullptr;
+}
+
+ani_object AniWindowManager::OnFindWindow(ani_env* env, ani_string windowName)
+{
+    std::string name;
+    AniWindowUtils::GetStdString(env, windowName, name);
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]Window name=%{public}s", name.c_str());
+    if (name.compare(PIP_WINDOW) == 0) {
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    ani_object aniWindowObj = FindAniWindowObject(name);
+    if (aniWindowObj != nullptr) {
+        TLOGD(WmsLogTag::DEFAULT, "[ANI]Find window: %{public}s, use exist js window", name.c_str());
+        return aniWindowObj;
+    } else {
+        sptr<Window> window = Window::Find(name);
+        if (window == nullptr) {
+            return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        } else {
+            return CreateAniWindowObject(env, window);
+        }
+    }
+}
+
+void AniWindowManager::MinimizeAll(ani_env* env, ani_long nativeObj, ani_double displayId)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    AniWindowManager* aniWindowManager = reinterpret_cast<AniWindowManager*>(nativeObj);
+    if (aniWindowManager != nullptr) {
+        aniWindowManager->OnMinimizeAll(env, displayId);
+    } else {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] aniWindowManager is nullptr");
+    }
+}
+
+void AniWindowManager::OnMinimizeAll(ani_env* env, ani_double displayId)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    if (static_cast<uint64_t>(displayId) < 0 ||
+        SingletonContainer::Get<DisplayManager>().GetDisplayById(static_cast<uint64_t>(displayId)) == nullptr) {
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return;
+    }
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
+        SingletonContainer::Get<WindowManager>().MinimizeAllAppWindows(static_cast<uint64_t>(displayId)));
+    if (ret != WmErrorCode::WM_OK) {
+        AniWindowUtils::AniThrowError(env, ret, "OnMinimizeAll failed");
+        return;
+    }
 }
 
 void AniWindowManager::RegisterWindowManagerCallback(ani_env* env, ani_long nativeObj,
