@@ -30,12 +30,15 @@ namespace OHOS {
 namespace Rosen {
 
 namespace {
-    std::string g_errLog;
-    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
-        const char *msg)
-    {
-        g_errLog = msg;
-    }
+std::string g_errLog;
+void MyLogCallback(const LogType type,
+                   const LogLevel level,
+                   const unsigned int domain,
+                   const char* tag,
+                   const char* msg)
+{
+    g_errLog = msg;
+}
 // screen const
 constexpr int32_t SCREEN_WIDTH = 2472;
 constexpr int32_t SCREEN_HEIGHT = 3296;
@@ -50,9 +53,13 @@ const WSRect DEFAULT_DISPLAY_RECT = { 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT_HALF };
 const WSRect VIRTUAL_DISPLAY_RECT = { 0, SCREEN_HEIGHT_HALF, SCREEN_WIDTH, SCREEN_HEIGHT_HALF };
 const WSRect FOLD_CREASE_RECT = { 0, SCREEN_HEIGHT_HALF - CREASE_HEIGHT / 2, SCREEN_WIDTH, CREASE_HEIGHT };
 const WSRect ZERO_RECT = { 0, 0, 0, 0 };
-const WSRect DEFAULT_FULLSCREEN_RECT = { 0, TOP_AVOID_HEIGHT, SCREEN_WIDTH,
-                                         SCREEN_HEIGHT_HALF - CREASE_HEIGHT / 2 - TOP_AVOID_HEIGHT};
-const WSRect VIRTUAL_FULLSCREEN_RECT = { 0, SCREEN_HEIGHT_HALF + CREASE_HEIGHT / 2, SCREEN_WIDTH,
+const WSRect DEFAULT_FULLSCREEN_RECT = { 0,
+                                         TOP_AVOID_HEIGHT,
+                                         SCREEN_WIDTH,
+                                         SCREEN_HEIGHT_HALF - CREASE_HEIGHT / 2 - TOP_AVOID_HEIGHT };
+const WSRect VIRTUAL_FULLSCREEN_RECT = { 0,
+                                         SCREEN_HEIGHT_HALF + CREASE_HEIGHT / 2,
+                                         SCREEN_WIDTH,
                                          SCREEN_HEIGHT_HALF - CREASE_HEIGHT / 2 - BOT_AVOID_HEIGHT };
 
 // test rects
@@ -64,8 +71,8 @@ const WSRect C_ACROSS_RECT = { 400, SCREEN_HEIGHT_HALF - 100, 400, 400 };
 const WSRect C_BOT_RECT = { 400, SCREEN_HEIGHT - 100, 400, 400 };
 
 // arrange rule
-constexpr int32_t RULE_TRANS_X = 48; // dp
-constexpr int32_t MIN_DECOR_HEIGHT = 37; // dp
+constexpr int32_t RULE_TRANS_X = 48;      // dp
+constexpr int32_t MIN_DECOR_HEIGHT = 37;  // dp
 constexpr int32_t MAX_DECOR_HEIGHT = 112; // dp
 
 // velocity test
@@ -94,33 +101,26 @@ public:
 
 PcFoldScreenManager& PcFoldScreenManagerTest::manager_ = PcFoldScreenManager::GetInstance();
 
-void PcFoldScreenManagerTest::SetUpTestCase()
-{
-}
+void PcFoldScreenManagerTest::SetUpTestCase() {}
 
-void PcFoldScreenManagerTest::TearDownTestCase()
-{
-}
+void PcFoldScreenManagerTest::TearDownTestCase() {}
 
 void PcFoldScreenManagerTest::SetUp()
 {
     SetExpanded();
 }
 
-void PcFoldScreenManagerTest::TearDown()
-{
-}
+void PcFoldScreenManagerTest::TearDown() {}
 
 void PcFoldScreenManagerTest::SetHalfFolded()
 {
-    manager_.UpdateFoldScreenStatus(DEFAULT_SCREEN_ID, SuperFoldStatus::HALF_FOLDED,
-        DEFAULT_DISPLAY_RECT, VIRTUAL_DISPLAY_RECT, FOLD_CREASE_RECT);
+    manager_.UpdateFoldScreenStatus(
+        DEFAULT_SCREEN_ID, SuperFoldStatus::HALF_FOLDED, DEFAULT_DISPLAY_RECT, VIRTUAL_DISPLAY_RECT, FOLD_CREASE_RECT);
 }
 
 void PcFoldScreenManagerTest::SetExpanded()
 {
-    manager_.UpdateFoldScreenStatus(DEFAULT_SCREEN_ID, SuperFoldStatus::EXPANDED,
-        DISPLAY_RECT, ZERO_RECT, ZERO_RECT);
+    manager_.UpdateFoldScreenStatus(DEFAULT_SCREEN_ID, SuperFoldStatus::EXPANDED, DISPLAY_RECT, ZERO_RECT, ZERO_RECT);
 }
 
 class PcFoldScreenControllerTest : public testing::Test {
@@ -140,13 +140,9 @@ public:
 
 PcFoldScreenManager& PcFoldScreenControllerTest::manager_ = PcFoldScreenManager::GetInstance();
 
-void PcFoldScreenControllerTest::SetUpTestCase()
-{
-}
+void PcFoldScreenControllerTest::SetUpTestCase() {}
 
-void PcFoldScreenControllerTest::TearDownTestCase()
-{
-}
+void PcFoldScreenControllerTest::TearDownTestCase() {}
 
 void PcFoldScreenControllerTest::SetUp()
 {
@@ -172,14 +168,13 @@ void PcFoldScreenControllerTest::TearDown()
 
 void PcFoldScreenControllerTest::SetHalfFolded()
 {
-    manager_.UpdateFoldScreenStatus(DEFAULT_SCREEN_ID, SuperFoldStatus::HALF_FOLDED,
-        DEFAULT_DISPLAY_RECT, VIRTUAL_DISPLAY_RECT, FOLD_CREASE_RECT);
+    manager_.UpdateFoldScreenStatus(
+        DEFAULT_SCREEN_ID, SuperFoldStatus::HALF_FOLDED, DEFAULT_DISPLAY_RECT, VIRTUAL_DISPLAY_RECT, FOLD_CREASE_RECT);
 }
 
 void PcFoldScreenControllerTest::SetExpanded()
 {
-    manager_.UpdateFoldScreenStatus(DEFAULT_SCREEN_ID, SuperFoldStatus::EXPANDED,
-        DISPLAY_RECT, ZERO_RECT, ZERO_RECT);
+    manager_.UpdateFoldScreenStatus(DEFAULT_SCREEN_ID, SuperFoldStatus::EXPANDED, DISPLAY_RECT, ZERO_RECT, ZERO_RECT);
 }
 
 /**
@@ -362,21 +357,21 @@ HWTEST_F(PcFoldScreenManagerTest, NeedDoEasyThrowSlip, TestSize.Level1)
     SetHalfFolded();
     // side B cross axis
     WSRect startRectB = { 100, 100, 100, 20 };
-    WSRect rectB = { 100, SCREEN_HEIGHT_HALF + 90, 100, 20};
+    WSRect rectB = { 100, SCREEN_HEIGHT_HALF + 90, 100, 20 };
     ScreenSide throwSide = ScreenSide::FOLD_C;
     EXPECT_TRUE(manager_.NeedDoEasyThrowSlip(rectB, startRectB, B_VELOCITY, throwSide));
     EXPECT_EQ(ScreenSide::FOLD_B, throwSide);
-    rectB = { 100, SCREEN_HEIGHT - 110, 100, 20};
+    rectB = { 100, SCREEN_HEIGHT - 110, 100, 20 };
     throwSide = ScreenSide::FOLD_C;
     EXPECT_FALSE(manager_.NeedDoEasyThrowSlip(rectB, startRectB, B_VELOCITY, throwSide));
     EXPECT_EQ(ScreenSide::FOLD_C, throwSide);
     // side C cross axis
     WSRect startRectC = { 100, SCREEN_HEIGHT - 100, 100, 20 };
-    WSRect rectC = { 100, SCREEN_HEIGHT_HALF - 110, 100, 20};
+    WSRect rectC = { 100, SCREEN_HEIGHT_HALF - 110, 100, 20 };
     throwSide = ScreenSide::FOLD_B;
     EXPECT_TRUE(manager_.NeedDoEasyThrowSlip(rectC, startRectC, C_VELOCITY, throwSide));
     EXPECT_EQ(ScreenSide::FOLD_C, throwSide);
-    rectC = { 100, 90, 100, 20};
+    rectC = { 100, 90, 100, 20 };
     throwSide = ScreenSide::FOLD_B;
     EXPECT_FALSE(manager_.NeedDoEasyThrowSlip(rectC, startRectC, C_VELOCITY, throwSide));
     EXPECT_EQ(ScreenSide::FOLD_B, throwSide);
@@ -411,16 +406,16 @@ HWTEST_F(PcFoldScreenManagerTest, CalculateThrowBacktracingRect, TestSize.Level1
 {
     SetHalfFolded();
     // side B
-    WSRect rectB = { 100, SCREEN_HEIGHT_HALF + 90, 100, 20};
+    WSRect rectB = { 100, SCREEN_HEIGHT_HALF + 90, 100, 20 };
     EXPECT_EQ(ScreenSide::FOLD_B,
-        manager_.CalculateScreenSide(manager_.CalculateThrowBacktracingRect(rectB, B_VELOCITY)));
-    rectB = { 100, SCREEN_HEIGHT - 110, 100, 20};
+              manager_.CalculateScreenSide(manager_.CalculateThrowBacktracingRect(rectB, B_VELOCITY)));
+    rectB = { 100, SCREEN_HEIGHT - 110, 100, 20 };
     EXPECT_EQ(rectB, manager_.CalculateThrowBacktracingRect(rectB, B_VELOCITY));
     // side C
-    WSRect rectC = { 100, SCREEN_HEIGHT_HALF - 110, 100, 20};
+    WSRect rectC = { 100, SCREEN_HEIGHT_HALF - 110, 100, 20 };
     EXPECT_EQ(ScreenSide::FOLD_C,
-        manager_.CalculateScreenSide(manager_.CalculateThrowBacktracingRect(rectC, C_VELOCITY)));
-    rectC = { 100, 90, 100, 20};
+              manager_.CalculateScreenSide(manager_.CalculateThrowBacktracingRect(rectC, C_VELOCITY)));
+    rectC = { 100, 90, 100, 20 };
     EXPECT_EQ(rectC, manager_.CalculateThrowBacktracingRect(rectC, C_VELOCITY));
 }
 
@@ -519,24 +514,23 @@ HWTEST_F(PcFoldScreenManagerTest, MappingRectInScreenSideWithArrangeRule1, TestS
     // init arrange rule
     manager_.defaultArrangedRect_ = ZERO_RECT;
     rect = B_RECT;
-    manager_.MappingRectInScreenSideWithArrangeRule(ScreenSide::FOLD_B, rect, TOP_AVOID_HEIGHT, BOT_AVOID_HEIGHT,
-        decorHeight);
+    manager_.MappingRectInScreenSideWithArrangeRule(
+        ScreenSide::FOLD_B, rect, TOP_AVOID_HEIGHT, BOT_AVOID_HEIGHT, decorHeight);
     const int32_t centerBX = (DEFAULT_DISPLAY_RECT.width_ - B_RECT.width_) / 2;
     const int32_t centerBY = TOP_AVOID_HEIGHT + (FOLD_CREASE_RECT.posY_ - TOP_AVOID_HEIGHT - B_RECT.height_) / 2;
-    EXPECT_EQ(rect, (WSRect { centerBX, centerBY, B_RECT.width_, B_RECT.height_ }));
-    EXPECT_EQ(manager_.defaultArrangedRect_,
-        (WSRect { centerBX, centerBY, RULE_TRANS_X * vpr, decorHeight * vpr }));
+    EXPECT_EQ(rect, (WSRect{ centerBX, centerBY, B_RECT.width_, B_RECT.height_ }));
+    EXPECT_EQ(manager_.defaultArrangedRect_, (WSRect{ centerBX, centerBY, RULE_TRANS_X * vpr, decorHeight * vpr }));
 
     manager_.virtualArrangedRect_ = ZERO_RECT;
     rect = C_RECT;
-    manager_.MappingRectInScreenSideWithArrangeRule(ScreenSide::FOLD_C, rect, TOP_AVOID_HEIGHT, BOT_AVOID_HEIGHT,
-        decorHeight);
+    manager_.MappingRectInScreenSideWithArrangeRule(
+        ScreenSide::FOLD_C, rect, TOP_AVOID_HEIGHT, BOT_AVOID_HEIGHT, decorHeight);
     const int32_t centerCX = (VIRTUAL_DISPLAY_RECT.width_ - C_RECT.width_) / 2;
-    const int32_t centerCY = FOLD_CREASE_RECT.posY_ + FOLD_CREASE_RECT.height_ +
+    const int32_t centerCY =
+        FOLD_CREASE_RECT.posY_ + FOLD_CREASE_RECT.height_ +
         (SCREEN_HEIGHT - FOLD_CREASE_RECT.posY_ - FOLD_CREASE_RECT.height_ - BOT_AVOID_HEIGHT - C_RECT.height_) / 2;
-    EXPECT_EQ(rect, (WSRect { centerCX, centerCY, C_RECT.width_, C_RECT.height_ }));
-    EXPECT_EQ(manager_.virtualArrangedRect_,
-        (WSRect { centerCX, centerCY, RULE_TRANS_X * vpr, decorHeight * vpr }));
+    EXPECT_EQ(rect, (WSRect{ centerCX, centerCY, C_RECT.width_, C_RECT.height_ }));
+    EXPECT_EQ(manager_.virtualArrangedRect_, (WSRect{ centerCX, centerCY, RULE_TRANS_X * vpr, decorHeight * vpr }));
 }
 
 /**
@@ -553,23 +547,25 @@ HWTEST_F(PcFoldScreenManagerTest, MappingRectInScreenSideWithArrangeRule2, TestS
     WSRect rect = B_RECT;
 
     // normal arrange rule
-    manager_.defaultArrangedRect_ = WSRect { 100, 100, RULE_TRANS_X * vpr, 100 * vpr };
+    manager_.defaultArrangedRect_ = WSRect{ 100, 100, RULE_TRANS_X * vpr, 100 * vpr };
     rect = B_RECT;
-    manager_.MappingRectInScreenSideWithArrangeRule(ScreenSide::FOLD_B, rect, TOP_AVOID_HEIGHT, BOT_AVOID_HEIGHT,
-        decorHeight);
-    EXPECT_EQ(rect, (WSRect { 100 + RULE_TRANS_X * vpr, 100 + 100 * vpr, B_RECT.width_, B_RECT.height_ }));
+    manager_.MappingRectInScreenSideWithArrangeRule(
+        ScreenSide::FOLD_B, rect, TOP_AVOID_HEIGHT, BOT_AVOID_HEIGHT, decorHeight);
+    EXPECT_EQ(rect, (WSRect{ 100 + RULE_TRANS_X * vpr, 100 + 100 * vpr, B_RECT.width_, B_RECT.height_ }));
     EXPECT_EQ(manager_.defaultArrangedRect_,
-        (WSRect { 100 + RULE_TRANS_X * vpr, 100 + 100 * vpr, RULE_TRANS_X * vpr, decorHeight * vpr }));
+              (WSRect{ 100 + RULE_TRANS_X * vpr, 100 + 100 * vpr, RULE_TRANS_X * vpr, decorHeight * vpr }));
 
-    manager_.virtualArrangedRect_ = WSRect { 100, SCREEN_HEIGHT_HALF + 100, RULE_TRANS_X * vpr, 100 * vpr };
+    manager_.virtualArrangedRect_ = WSRect{ 100, SCREEN_HEIGHT_HALF + 100, RULE_TRANS_X * vpr, 100 * vpr };
     rect = C_RECT;
-    manager_.MappingRectInScreenSideWithArrangeRule(ScreenSide::FOLD_C, rect, TOP_AVOID_HEIGHT, BOT_AVOID_HEIGHT,
-        decorHeight);
-    EXPECT_EQ(rect,
-        (WSRect { 100 + RULE_TRANS_X * vpr, SCREEN_HEIGHT_HALF + 100 + 100 * vpr, C_RECT.width_, C_RECT.height_ }));
-    EXPECT_EQ(manager_.virtualArrangedRect_,
-        (WSRect { 100 + RULE_TRANS_X * vpr, SCREEN_HEIGHT_HALF + 100 + 100 * vpr,
-                RULE_TRANS_X * vpr, decorHeight * vpr }));
+    manager_.MappingRectInScreenSideWithArrangeRule(
+        ScreenSide::FOLD_C, rect, TOP_AVOID_HEIGHT, BOT_AVOID_HEIGHT, decorHeight);
+    EXPECT_EQ(
+        rect,
+        (WSRect{ 100 + RULE_TRANS_X * vpr, SCREEN_HEIGHT_HALF + 100 + 100 * vpr, C_RECT.width_, C_RECT.height_ }));
+    EXPECT_EQ(
+        manager_.virtualArrangedRect_,
+        (WSRect{
+            100 + RULE_TRANS_X * vpr, SCREEN_HEIGHT_HALF + 100 + 100 * vpr, RULE_TRANS_X * vpr, decorHeight * vpr }));
 }
 
 /**
@@ -587,39 +583,36 @@ HWTEST_F(PcFoldScreenManagerTest, MappingRectInScreenSideWithArrangeRule3, TestS
     int32_t virtualPosY = FOLD_CREASE_RECT.posY_ + FOLD_CREASE_RECT.height_;
 
     // new column rule
-    manager_.defaultArrangedRect_ = WSRect { 100, SCREEN_HEIGHT_HALF - 200, RULE_TRANS_X * vpr, 100 * vpr };
+    manager_.defaultArrangedRect_ = WSRect{ 100, SCREEN_HEIGHT_HALF - 200, RULE_TRANS_X * vpr, 100 * vpr };
     rect = B_RECT;
-    manager_.MappingRectInScreenSideWithArrangeRule(ScreenSide::FOLD_B, rect, TOP_AVOID_HEIGHT, BOT_AVOID_HEIGHT,
-        decorHeight);
-    EXPECT_EQ(rect, (WSRect { 100 + RULE_TRANS_X * vpr, TOP_AVOID_HEIGHT, B_RECT.width_, B_RECT.height_ }));
+    manager_.MappingRectInScreenSideWithArrangeRule(
+        ScreenSide::FOLD_B, rect, TOP_AVOID_HEIGHT, BOT_AVOID_HEIGHT, decorHeight);
+    EXPECT_EQ(rect, (WSRect{ 100 + RULE_TRANS_X * vpr, TOP_AVOID_HEIGHT, B_RECT.width_, B_RECT.height_ }));
     EXPECT_EQ(manager_.defaultArrangedRect_,
-        (WSRect { 100 + RULE_TRANS_X * vpr, TOP_AVOID_HEIGHT, RULE_TRANS_X * vpr, decorHeight * vpr }));
+              (WSRect{ 100 + RULE_TRANS_X * vpr, TOP_AVOID_HEIGHT, RULE_TRANS_X * vpr, decorHeight * vpr }));
 
-    manager_.virtualArrangedRect_ = WSRect { 100, SCREEN_HEIGHT - 200, RULE_TRANS_X * vpr, 100 * vpr };
+    manager_.virtualArrangedRect_ = WSRect{ 100, SCREEN_HEIGHT - 200, RULE_TRANS_X * vpr, 100 * vpr };
     rect = C_RECT;
-    manager_.MappingRectInScreenSideWithArrangeRule(ScreenSide::FOLD_C, rect, TOP_AVOID_HEIGHT, BOT_AVOID_HEIGHT,
-        decorHeight);
-    EXPECT_EQ(rect,
-        (WSRect { 100 + RULE_TRANS_X * vpr, virtualPosY, C_RECT.width_, C_RECT.height_ }));
+    manager_.MappingRectInScreenSideWithArrangeRule(
+        ScreenSide::FOLD_C, rect, TOP_AVOID_HEIGHT, BOT_AVOID_HEIGHT, decorHeight);
+    EXPECT_EQ(rect, (WSRect{ 100 + RULE_TRANS_X * vpr, virtualPosY, C_RECT.width_, C_RECT.height_ }));
     EXPECT_EQ(manager_.virtualArrangedRect_,
-        (WSRect { 100 + RULE_TRANS_X * vpr, virtualPosY, RULE_TRANS_X * vpr, decorHeight * vpr }));
+              (WSRect{ 100 + RULE_TRANS_X * vpr, virtualPosY, RULE_TRANS_X * vpr, decorHeight * vpr }));
 
     // reset rule
-    manager_.defaultArrangedRect_ = WSRect { SCREEN_WIDTH - 200, 100, RULE_TRANS_X * vpr, 100 * vpr };
+    manager_.defaultArrangedRect_ = WSRect{ SCREEN_WIDTH - 200, 100, RULE_TRANS_X * vpr, 100 * vpr };
     rect = B_RECT;
-    manager_.MappingRectInScreenSideWithArrangeRule(ScreenSide::FOLD_B, rect, TOP_AVOID_HEIGHT, BOT_AVOID_HEIGHT,
-        decorHeight);
-    EXPECT_EQ(rect, (WSRect { 0, TOP_AVOID_HEIGHT, B_RECT.width_, B_RECT.height_ }));
-    EXPECT_EQ(manager_.defaultArrangedRect_,
-        (WSRect { 0, TOP_AVOID_HEIGHT, RULE_TRANS_X * vpr, decorHeight * vpr }));
+    manager_.MappingRectInScreenSideWithArrangeRule(
+        ScreenSide::FOLD_B, rect, TOP_AVOID_HEIGHT, BOT_AVOID_HEIGHT, decorHeight);
+    EXPECT_EQ(rect, (WSRect{ 0, TOP_AVOID_HEIGHT, B_RECT.width_, B_RECT.height_ }));
+    EXPECT_EQ(manager_.defaultArrangedRect_, (WSRect{ 0, TOP_AVOID_HEIGHT, RULE_TRANS_X * vpr, decorHeight * vpr }));
 
-    manager_.virtualArrangedRect_ = WSRect { SCREEN_WIDTH - 200, 100, RULE_TRANS_X * vpr, 100 * vpr };
+    manager_.virtualArrangedRect_ = WSRect{ SCREEN_WIDTH - 200, 100, RULE_TRANS_X * vpr, 100 * vpr };
     rect = C_RECT;
-    manager_.MappingRectInScreenSideWithArrangeRule(ScreenSide::FOLD_C, rect, TOP_AVOID_HEIGHT, BOT_AVOID_HEIGHT,
-        decorHeight);
-    EXPECT_EQ(rect, (WSRect { 0, virtualPosY, C_RECT.width_, C_RECT.height_ }));
-    EXPECT_EQ(manager_.virtualArrangedRect_,
-        (WSRect { 0, virtualPosY, RULE_TRANS_X * vpr, decorHeight * vpr }));
+    manager_.MappingRectInScreenSideWithArrangeRule(
+        ScreenSide::FOLD_C, rect, TOP_AVOID_HEIGHT, BOT_AVOID_HEIGHT, decorHeight);
+    EXPECT_EQ(rect, (WSRect{ 0, virtualPosY, C_RECT.width_, C_RECT.height_ }));
+    EXPECT_EQ(manager_.virtualArrangedRect_, (WSRect{ 0, virtualPosY, RULE_TRANS_X * vpr, decorHeight * vpr }));
 }
 
 /**
@@ -634,8 +627,7 @@ HWTEST_F(PcFoldScreenManagerTest, RegisterFoldScreenStatusChangeCallback, TestSi
     EXPECT_EQ(callbacks.size(), 0);
     int32_t persistentId = 100;
     auto func = std::make_shared<FoldScreenStatusChangeCallback>(
-        [](DisplayId displayId, SuperFoldStatus status, SuperFoldStatus prevStatus) {}
-    );
+        [](DisplayId displayId, SuperFoldStatus status, SuperFoldStatus prevStatus) {});
     manager_.RegisterFoldScreenStatusChangeCallback(persistentId, std::weak_ptr<FoldScreenStatusChangeCallback>(func));
     EXPECT_NE(callbacks.find(persistentId), callbacks.end());
     manager_.UnregisterFoldScreenStatusChangeCallback(persistentId);
@@ -657,13 +649,12 @@ HWTEST_F(PcFoldScreenManagerTest, ExecuteFoldScreenStatusChangeCallbacks, TestSi
     SuperFoldStatus testStatus = SuperFoldStatus::UNKNOWN;
     SuperFoldStatus testPrevStatus = SuperFoldStatus::UNKNOWN;
     auto func = std::make_shared<FoldScreenStatusChangeCallback>(
-        [&testDisplayId, &testStatus, &testPrevStatus](DisplayId displayId,
-            SuperFoldStatus status, SuperFoldStatus prevStatus) {
+        [&testDisplayId, &testStatus, &testPrevStatus](
+            DisplayId displayId, SuperFoldStatus status, SuperFoldStatus prevStatus) {
             testDisplayId = displayId;
             testStatus = status;
             testPrevStatus = prevStatus;
-        }
-    );
+        });
     manager_.RegisterFoldScreenStatusChangeCallback(persistentId, std::weak_ptr<FoldScreenStatusChangeCallback>(func));
     EXPECT_NE(callbacks.find(persistentId), callbacks.end());
     manager_.ExecuteFoldScreenStatusChangeCallbacks(100, SuperFoldStatus::EXPANDED, SuperFoldStatus::HALF_FOLDED);
@@ -683,11 +674,10 @@ HWTEST_F(PcFoldScreenManagerTest, RegisterSystemKeyboardStatusChangeCallback, Te
     callbacks.clear();
     EXPECT_EQ(callbacks.size(), 0);
     int32_t persistentId = 100;
-    auto func = std::make_shared<SystemKeyboardStatusChangeCallback>(
-        [](DisplayId displayId, bool hasSystemKeyboard) {}
-    );
+    auto func =
+        std::make_shared<SystemKeyboardStatusChangeCallback>([](DisplayId displayId, bool hasSystemKeyboard) {});
     manager_.RegisterSystemKeyboardStatusChangeCallback(persistentId,
-        std::weak_ptr<SystemKeyboardStatusChangeCallback>(func));
+                                                        std::weak_ptr<SystemKeyboardStatusChangeCallback>(func));
     EXPECT_NE(callbacks.find(persistentId), callbacks.end());
     manager_.UnregisterSystemKeyboardStatusChangeCallback(persistentId);
     EXPECT_EQ(callbacks.find(persistentId), callbacks.end());
@@ -710,10 +700,9 @@ HWTEST_F(PcFoldScreenManagerTest, ExecuteSystemKeyboardStatusChangeCallbacks, Te
         [&testDisplayId, &testStatus](DisplayId displayId, bool hasSystemKeyboard) {
             testDisplayId = displayId;
             testStatus = hasSystemKeyboard;
-        }
-    );
+        });
     manager_.RegisterSystemKeyboardStatusChangeCallback(persistentId,
-        std::weak_ptr<SystemKeyboardStatusChangeCallback>(func));
+                                                        std::weak_ptr<SystemKeyboardStatusChangeCallback>(func));
     EXPECT_NE(callbacks.find(persistentId), callbacks.end());
     manager_.ExecuteSystemKeyboardStatusChangeCallbacks(100, true);
     EXPECT_EQ(testDisplayId, 100);
@@ -995,9 +984,7 @@ HWTEST_F(PcFoldScreenControllerTest, RegisterFullScreenWaterfallModeChangeCallba
     // register and execute
     controller_->isFullScreenWaterfallMode_ = true;
     bool testWaterfallMode = false;
-    auto func2 = [&testWaterfallMode](bool isWaterfallMode) {
-        testWaterfallMode = isWaterfallMode;
-    };
+    auto func2 = [&testWaterfallMode](bool isWaterfallMode) { testWaterfallMode = isWaterfallMode; };
     controller_->RegisterFullScreenWaterfallModeChangeCallback(std::move(func2));
     ASSERT_NE(controller_->fullScreenWaterfallModeChangeCallback_, nullptr);
     EXPECT_TRUE(testWaterfallMode);
@@ -1133,6 +1120,6 @@ HWTEST_F(PcFoldScreenControllerTest, IsSupportEnterWaterfallMode, TestSize.Level
     EXPECT_FALSE(controller_->IsSupportEnterWaterfallMode(SuperFoldStatus::HALF_FOLDED, true));
     EXPECT_FALSE(controller_->IsSupportEnterWaterfallMode(SuperFoldStatus::EXPANDED, false));
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

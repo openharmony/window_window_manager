@@ -38,16 +38,19 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 const std::string UNDEFINED = "undefined";
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowSessionTest4"};
-}
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowSessionTest4" };
+} // namespace
 namespace {
 std::string g_logMsg;
-void SessionTest4LogCallBack(
-    const LogType type, const LogLevel level, const unsigned int domain, const char *tag, const char *msg)
+void SessionTest4LogCallBack(const LogType type,
+                             const LogLevel level,
+                             const unsigned int domain,
+                             const char* tag,
+                             const char* msg)
 {
     g_logMsg = msg;
 }
-}
+} // namespace
 class WindowSessionTest4 : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -1237,7 +1240,7 @@ HWTEST_F(WindowSessionTest4, ReportWindowTimeout_Handler_NOT_NULL, TestSize.Leve
 
     sptr<SceneSessionManager> sceneSessionManager = sptr<SceneSessionManager>::MakeSptr();
     session_->SetEventHandler(sceneSessionManager->taskScheduler_->GetEventHandler(),
-        sceneSessionManager->eventHandler_);
+                              sceneSessionManager->eventHandler_);
     EXPECT_TRUE(g_logMsg.find("not specific window") == std::string::npos);
     EXPECT_TRUE(g_logMsg.find("handler is null") == std::string::npos);
 }
@@ -1265,7 +1268,7 @@ HWTEST_F(WindowSessionTest4, ReportWindowTimeout_WindowAnimationDuration, TestSi
     session->PostSpecificSessionLifeCycleTimeoutTask(ATTACH_EVENT_NAME);
     sptr<SceneSessionManager> sceneSessionManager = sptr<SceneSessionManager>::MakeSptr();
     session_->SetEventHandler(sceneSessionManager->taskScheduler_->GetEventHandler(),
-        sceneSessionManager->eventHandler_);
+                              sceneSessionManager->eventHandler_);
     EXPECT_TRUE(g_logMsg.find("handler is null") == std::string::npos);
 
     session->SetWindowAnimationDuration(true);
@@ -1274,6 +1277,6 @@ HWTEST_F(WindowSessionTest4, ReportWindowTimeout_WindowAnimationDuration, TestSi
     session->SetWindowAnimationDuration(false);
     EXPECT_TRUE(g_logMsg.find("window configured animation") == std::string::npos);
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS
