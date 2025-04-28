@@ -2473,6 +2473,17 @@ void Session::ResetSnapshot()
     scenePersistence_->ResetSnapshotCache();
 }
 
+void Session::SetEnableAddSnapshot(bool enableAddSnapshot)
+{
+    TLOGI(WmsLogTag::WMS_PATTERN, "enableAddSnapshot: %{public}d", enableAddSnapshot);
+    enableAddSnapshot_ = enableAddSnapshot;
+}
+
+bool Session::GetEnableAddSnapshot() const
+{
+    return enableAddSnapshot_;
+}
+
 void Session::SaveSnapshot(bool useFfrt, bool needPersist)
 {
     if (scenePersistence_ == nullptr) {
