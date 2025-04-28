@@ -844,6 +844,48 @@ HWTEST_F(SceneSessionManagerTest6, GetAbilityInfosFromBundleInfo, TestSize.Level
 }
 
 /**
+ * @tc.name: GetCollaboratorAbilityInfos
+ * @tc.desc: GetCollaboratorAbilityInfos
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, GetCollaboratorAbilityInfos, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    std::vector<AppExecFwk::BundleInfo> bundleInfos;
+    std::vector<SCBAbilityInfo> scbAbilityInfos;
+    int32_t userId = 0;
+    ssm_->GetCollaboratorAbilityInfos(bundleInfos, scbAbilityInfos, userId);
+    EXPECT_EQ(scbAbilityInfos.size(), 0);
+}
+
+/**
+ * @tc.name: FindAbilityInfo
+ * @tc.desc: FindAbilityInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, FindAbilityInfo, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    std::string moduleName = "testModuleName";
+    std::string abilityName = "testAbilityName";
+    AppExecFwk::BundleInfo bundleInfo;
+    AppExecFwk::AbilityInfo targetAbilityInfo;
+    auto ret = ssm_->FindAbilityInfo(bundleInfo, moduleName, abilityName, targetAbilityInfo);
+    EXPECT_FALSE(ret);
+
+    AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.moduleName = moduleName;
+    abilityInfo.name = abilityName;
+    AppExecFwk::HapModuleInfo hapModuleInfo;
+    hapModuleInfo.abilityInfos.emplace_back(abilityInfo);
+    bundleInfo.hapModuleInfos.emplace_back(hapModuleInfo);
+    ret = ssm_->FindAbilityInfo(bundleInfo, moduleName, abilityName, targetAbilityInfo);
+    EXPECT_TRUE(ret);
+    EXPECT_EQ(targetAbilityInfo.moduleName, moduleName);
+    EXPECT_EQ(targetAbilityInfo.name, abilityName);
+}
+
+/**
  * @tc.name: GetOrientationFromResourceManager
  * @tc.desc: GetOrientationFromResourceManager
  * @tc.type: FUNC
