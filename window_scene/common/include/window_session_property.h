@@ -214,7 +214,6 @@ public:
     void SetFollowScreenChange(bool isFollowScreenChange);
     bool GetFollowScreenChange() const;
 
-
     /*
      * Sub Window
      */
