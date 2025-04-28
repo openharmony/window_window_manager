@@ -246,15 +246,6 @@ static ani_int WindowStageLoadContent(ani_env* env, ani_object obj,
     return (ani_int)0u;
 }
 
-static ani_object WindowStageCreate(ani_env* env, ani_long scene)
-{
-    using namespace OHOS::Rosen;
-    TLOGD(WmsLogTag::DEFAULT, "[ANI] create windowstage with scene 0x%{public}p %{public}d",
-        reinterpret_cast<void*>(env), (int32_t)scene);
-    std::shared_ptr<WindowScene> scenePtr;
-    return CreateAniWindowStage(env, scenePtr); // just for test
-}
-
 static ani_object WindowGetMainWindow(ani_env* env, ani_object obj, ani_long nativeObj)
 {
     using namespace OHOS::Rosen;

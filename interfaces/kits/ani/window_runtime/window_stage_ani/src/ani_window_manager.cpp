@@ -18,10 +18,12 @@
 #include <ability.h>
 
 #include "ani.h"
-#include "window_scene.h"
-#include "window_manager_hilog.h"
-#include "ani_window_utils.h"
 #include "ani_window.h"
+#include "ani_window_stage.h"
+#include "ani_window_utils.h"
+#include "window_scene.h"
+#include "window_manager.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -40,7 +42,7 @@ ani_status AniWindowManager::AniWindowManagerInit(ani_env* env)
     }
     std::array functions = {
         ani_native_function {"CreateWindowStage", "J:L@ohos/window/window/WindowStageInternal;",
-            reinterpret_cast<void *>(WindowStageCreate)},
+            reinterpret_cast<void *>(AniWindowManager::WindowStageCreate)},
         ani_native_function {"getLastWindowSync",
             "JLapplication/BaseContext/BaseContext;:L@ohos/window/window/Window;",
             reinterpret_cast<void *>(AniWindowManager::GetLastWindow)},
@@ -67,6 +69,15 @@ ani_status AniWindowManager::AniWindowManagerInit(ani_env* env)
         return ret;
     }
     return ret;
+}
+
+static ani_object WindowStageCreate(ani_env* env, ani_long scene)
+{
+    using namespace OHOS::Rosen;
+    TLOGD(WmsLogTag::DEFAULT, "[ANI] create windowstage with scene 0x%{public}p %{public}d",
+        reinterpret_cast<void*>(env), (int32_t)scene);
+    std::shared_ptr<WindowScene> scenePtr;
+    return CreateAniWindowStage(env, scenePtr); // just for test
 }
 
 ani_object AniWindowManager::GetLastWindow(ani_env* env, ani_long nativeObj, ani_object context)
