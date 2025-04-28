@@ -71,7 +71,7 @@ ani_status AniWindowManager::AniWindowManagerInit(ani_env* env)
     return ret;
 }
 
-static ani_object WindowStageCreate(ani_env* env, ani_long scene)
+ani_object AniWindowManager::WindowStageCreate(ani_env* env, ani_long scene)
 {
     using namespace OHOS::Rosen;
     TLOGD(WmsLogTag::DEFAULT, "[ANI] create windowstage with scene 0x%{public}p %{public}d",
