@@ -636,6 +636,7 @@ private:
     bool isCoordinationFlag_ = false;
     bool isFoldScreenOuterScreenReady_ = false;
     bool isCameraBackSelfie_ = false;
+    bool isDeviceShutDown_ = false;
     uint32_t hdmiScreenCount_ = 0;
     uint32_t virtualScreenCount_ = 0;
     uint32_t currentExpandScreenCount_ = 0;
@@ -685,6 +686,7 @@ private:
     std::mutex snapBypickerMutex_;
     std::mutex switchUserMutex_;
     std::condition_variable switchUserCV_;
+    std::mutex screenPowerMutex_;
 
     std::mutex freezedPidListMutex_;
     std::set<int32_t> freezedPidList_;
