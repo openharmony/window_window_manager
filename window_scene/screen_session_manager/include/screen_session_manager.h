@@ -274,6 +274,8 @@ public:
     void SetIsExtendScreenConnected(bool isExtendScreenConnected);
     void HandleExtendScreenConnect(ScreenId screenId);
     void HandleExtendScreenDisconnect(ScreenId screenId);
+    bool GetIsFoldStatusLocked();
+    void SetIsFoldStatusLocked(bool isFoldStatusLocked);
     bool GetIsOuterOnlyMode();
     void SetIsOuterOnlyMode(bool isOuterOnlyMode);
     bool GetIsOuterOnlyModeBeforePowerOff();
@@ -541,6 +543,7 @@ private:
     void SetMultiScreenRelativePositionInner(sptr<ScreenSession>& firstScreenSession,
         sptr<ScreenSession>& secondScreenSession, MultiScreenPositionOptions mainScreenOptions,
         MultiScreenPositionOptions secondScreenOption);
+    void HandleSuperFoldStatusLocked(bool isLocked);
 #ifdef DEVICE_STATUS_ENABLE
     void SetDragWindowScreenId(ScreenId screenId, ScreenId displayNodeScreenId);
 #endif // DEVICE_STATUS_ENABLE
@@ -658,6 +661,7 @@ private:
     bool isExtendScreenConnected_ = false;
     bool isOuterOnlyMode_ = false;
     bool isOuterOnlyModeBeforePowerOff_ = false;
+    std::atomic<bool> isFoldStatusLocked_ = false;
 
     /**
      * On/Off screen
