@@ -847,8 +847,10 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
             session->InitializeCrossMoveDrag();
             session->moveDragController_->InitMoveDragProperty();
             if (session->pcFoldScreenController_) {
-                session->pcFoldScreenController_->RecordStartMoveRect(session->GetSessionRect(),
-                    session->IsFullScreenMovable());
+                WSRect currRect;
+                auto sessionRect = session->GetSessionRect();
+                session->HookStartMoveRect(currRect, sessionRect);
+                session->pcFoldScreenController_->RecordStartMoveRect(currRect, session->IsFullScreenMovable());
             }
             WSRect rect = session->winRect_;
             if (session->IsFullScreenMovable()) {
@@ -3400,6 +3402,61 @@ void SceneSession::HandleMoveDragEnd(WSRect& rect, SizeChangeReason reason)
 }
 
 /**
+ * the window is transformed according to the scale ratio
+ */
+void SceneSession::WindowScaleTransfer(WSRect& rect, float scaleX, float scaleY)
+{
+    auto curWidth = rect.width_;
+    auto curHeight = rect.height_;
+    rect.width_ = curWidth * scaleX;
+    rect.height_ = curHeight * scaleY;
+    auto widthDifference = (curWidth - rect.width_) / 2;
+    auto heightDifference = (curHeight - rect.height_) / 2;
+    rect.posX_ = rect.posX_ + widthDifference;
+    rect.posY_ = rect.posY_ + heightDifference;
+    TLOGNI(WmsLogTag::WMS_LAYOUT, "scaleX: %{public}f, scaleY: %{public}f, sizeDifference: [%{public}d, "
+        "%{public}d], rect: %{public}s", scaleX, scaleY, widthDifference, heightDifference, rect.ToString().c_str());
+}
+
+/**
+ * hook startMoveRect with showRect
+ */
+void SceneSession::HookStartMoveRect(WSRect& newRect, const WSRect& sessionRect)
+{
+    auto mainSession = GetMainSession();
+    if (!mainSession) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "mainSession is nullptr");
+        newRect = sessionRect;
+        return;
+    }
+    auto scaleX = mainSession->GetScaleX();
+    auto scaleY = mainSession->GetScaleY();
+    if (IsCompatibilityModeScale(scaleX, scaleY)) {
+        newRect.posX_ = sessionRect.posX_;
+        newRect.posY_ = sessionRect.posY_;
+        newRect.width_ = sessionRect.width_;
+        newRect.height_ = sessionRect.height_;
+        WindowScaleTransfer(newRect, scaleX, scaleY);
+    } else {
+        newRect = sessionRect;
+    }
+    return;
+}
+
+/**
+ * check compatible mode application that includes scale ratio
+ * @return true: compatible mode application with scale ratio
+ */
+bool SceneSession::IsCompatibilityModeScale(float scaleX, float scaleY)
+{
+    auto property = GetSessionProperty();
+    if (property->GetCompatibleModeInPc() && ((scaleX > 0.0f && scaleX != 1.0f) || (scaleY > 0.0f && scaleY != 1.0f))) {
+        return true;
+    }
+    return false;
+}
+
+/**
  * move with init velocity
  * @return true: successfully throw slip
  */
@@ -3408,13 +3465,29 @@ bool SceneSession::MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeR
     if (pcFoldScreenController_ == nullptr) {
         return false;
     }
+    auto mainSession = GetMainSession();
+    if (!mainSession) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "mainSession is nullptr");
+        return false;
+    }
+    auto property = GetSessionProperty();
+    auto scaleX = mainSession->GetScaleX();
+    auto scaleY = mainSession->GetScaleY();
+    if (IsCompatibilityModeScale(scaleX, scaleY)) {
+        WindowScaleTransfer(rect, scaleX, scaleY);
+    }
     bool ret = pcFoldScreenController_->ThrowSlip(GetScreenId(), rect, GetStatusBarHeight(), GetDockHeight());
     if (!ret) {
         TLOGD(WmsLogTag::WMS_LAYOUT_PC, "no throw slip");
         pcFoldScreenController_->ResetRecords();
+        if (IsCompatibilityModeScale(scaleX, scaleY)) {
+            WindowScaleTransfer(rect, 1 / scaleX, 1 / scaleY);
+        }
         return false;
     }
-
+    if (IsCompatibilityModeScale(scaleX, scaleY)) {
+        WindowScaleTransfer(rect, 1 / scaleX, 1 / scaleY);
+    }
     WSRect endRect = rect;
     std::function<void()> finishCallback = nullptr;
     bool needSetFullScreen = pcFoldScreenController_->IsStartFullScreen();
@@ -3528,7 +3601,9 @@ void SceneSession::ThrowSlipDirectly(ThrowSlipMode throwSlipMode, const WSRectF&
             return;
         }
         bool isFullScreen = session->IsFullScreenMovable();
-        controller->RecordStartMoveRectDirectly(session->GetSessionRect(), throwSlipMode, velocity, isFullScreen);
+        WSRect currRect;
+        session->HookStartMoveRect(currRect, session->GetSessionRect());
+        controller->RecordStartMoveRectDirectly(currRect, throwSlipMode, velocity, isFullScreen);
         const WSRect& oriGlobalRect = session->GetSessionGlobalRect();
         WSRect globalRect = oriGlobalRect;
         if (!session->MoveUnderInteriaAndNotifyRectChange(globalRect, SizeChangeReason::UNDEFINED)) {

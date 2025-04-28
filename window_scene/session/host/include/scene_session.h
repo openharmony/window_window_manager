@@ -949,6 +949,9 @@ private:
     WSError InitializeMoveInputBar();
     void HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect, SizeChangeReason reason);
     void HandleMoveDragEnd(WSRect& rect, SizeChangeReason reason);
+    void WindowScaleTransfer(WSRect& rect, float scaleX, float scaleY);
+    void HookStartMoveRect(WSRect& newRect, const WSRect& sessionRect);
+    bool IsCompatibilityModeScale(float scaleX, float scaleY);
     bool MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeReason reason);
     void NotifyFullScreenAfterThrowSlip(const WSRect& rect);
     void SetDragResizeTypeDuringDrag(DragResizeType dragResizeType) { dragResizeTypeDuringDrag_ = dragResizeType; }
