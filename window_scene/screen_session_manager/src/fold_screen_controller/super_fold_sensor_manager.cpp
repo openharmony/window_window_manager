@@ -230,7 +230,8 @@ void SuperFoldSensorManager::NotifyHallChanged(uint16_t Hall)
 void SuperFoldSensorManager::HandleSuperSensorChange(SuperFoldStatusChangeEvents events)
 {
     // trigger events
-    if (ScreenSessionManager::GetInstance().GetIsExtendScreenConnected()) {
+    if (ScreenSessionManager::GetInstance().GetIsExtendScreenConnected() ||
+        ScreenSessionManager::GetInstance().GetIsFoldStatusLocked()) {
         return;
     }
     SuperFoldStateManager::GetInstance().HandleSuperFoldStatusChange(events);
@@ -245,6 +246,19 @@ void SuperFoldSensorManager::HandleScreenConnectChange()
 void SuperFoldSensorManager::HandleScreenDisconnectChange()
 {
     TLOGI(WmsLogTag::DMS, "Screen disconnect to stop statemachine.");
+    NotifyHallChanged(curHall_);
+    NotifyFoldAngleChanged(curAngle_);
+}
+
+void SuperFoldSensorManager::HandleFoldStatusLocked()
+{
+    TLOGI(WmsLogTag::DMS, "Fold status locked to stop statemachine.");
+    SuperFoldStateManager::GetInstance().HandleScreenConnectChange();
+}
+
+void SuperFoldSensorManager::HandleFoldStatusUnlocked()
+{
+    TLOGI(WmsLogTag::DMS, "Fold status unlocked to start statemachine.");
     NotifyHallChanged(curHall_);
     NotifyFoldAngleChanged(curAngle_);
 }

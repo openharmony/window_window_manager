@@ -67,5 +67,5 @@ HWTEST_F(SceneBoardJudgementTest, SafeGetLine_WhenLineIsEmpty, TestSize.Level1)
     EXPECT_EQ(line, "");
 }
 
-} // Rosen
-} // OHOS
+} // namespace Rosen
+} // namespace OHOS

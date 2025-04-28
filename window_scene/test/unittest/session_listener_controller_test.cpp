@@ -141,17 +141,14 @@ public:
     {
         event_ = event;
     }
+
 private:
     ISessionLifecycleListener::SessionLifecycleEvent event_;
 };
 
-void SessionListenerControllerTest::SetUpTestCase()
-{
-}
+void SessionListenerControllerTest::SetUpTestCase() {}
 
-void SessionListenerControllerTest::TearDownTestCase()
-{
-}
+void SessionListenerControllerTest::TearDownTestCase() {}
 
 void SessionListenerControllerTest::SetUp()
 {
@@ -451,7 +448,7 @@ HWTEST_F(SessionListenerControllerTest, ListenerDeathRecipient, TestSize.Level1)
  */
 HWTEST_F(SessionListenerControllerTest, RegisterSessionLifecycleListenerByBundles, TestSize.Level1)
 {
-    std::vector<std::string> bundleNameList1 = {"bundle1", "bundle2"};
+    std::vector<std::string> bundleNameList1 = { "bundle1", "bundle2" };
     WMError res = slController->RegisterSessionLifecycleListener(nullptr, bundleNameList1);
     ASSERT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
 
@@ -472,7 +469,7 @@ HWTEST_F(SessionListenerControllerTest, RegisterSessionLifecycleListenerByBundle
  */
 HWTEST_F(SessionListenerControllerTest, RegisterSessionLifecycleListenerByIds, TestSize.Level1)
 {
-    std::vector<int32_t> persistentIdList1 = {1, 2};
+    std::vector<int32_t> persistentIdList1 = { 1, 2 };
     WMError res = slController->RegisterSessionLifecycleListener(nullptr, persistentIdList1);
     ASSERT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
 
@@ -544,8 +541,8 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionLifecycleEvent02, Function 
     sptr<MySessionLifecycleListener> myListener = new MySessionLifecycleListener();
     sptr<ISessionLifecycleListener> listener = iface_cast<ISessionLifecycleListener>(myListener->AsObject());
     ASSERT_NE(listener, nullptr);
-    std::vector<int32_t> persistentIdList = {102};
-    
+    std::vector<int32_t> persistentIdList = { 102 };
+
     SessionInfo info;
     info.bundleName_ = "com.example.myapp";
     info.abilityName_ = "MainAbility";
@@ -555,8 +552,8 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionLifecycleEvent02, Function 
     sptr<SceneSessionManager> ssm = sptr<SceneSessionManager>::MakeSptr();
     sptr<SceneSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    ssm->sceneSessionMap_.insert({102, sceneSession});
-    
+    ssm->sceneSessionMap_.insert({ 102, sceneSession });
+
     slController->RegisterSessionLifecycleListener(listener, persistentIdList);
     slController->NotifySessionLifecycleEvent(ISessionLifecycleListener::SessionLifecycleEvent::CREATED, info);
     ASSERT_EQ(myListener->event_, ISessionLifecycleListener::SessionLifecycleEvent::CREATED);

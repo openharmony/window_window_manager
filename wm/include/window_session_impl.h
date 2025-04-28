@@ -251,6 +251,8 @@ public:
     void NotifyBackgroundFailed(WMError ret);
     WSError MarkProcessed(int32_t eventId) override;
     void UpdateTitleButtonVisibility();
+    void HideTitleButton(bool& hideSplitButton, bool& hideMaximizeButton, bool& hideMinimizeButton,
+        bool& hideCloseButton);
     WSError NotifyDestroy() override;
     WSError NotifyTransferComponentData(const AAFwk::WantParams& wantParams) override;
     WSErrorCode NotifyTransferComponentDataSync(const AAFwk::WantParams& wantParams,

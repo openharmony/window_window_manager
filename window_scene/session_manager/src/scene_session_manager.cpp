@@ -10567,9 +10567,14 @@ void SceneSessionManager::NotifySessionAINavigationBarChange(int32_t persistentI
     TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d layout finished %{public}d",
         persistentId, isLastFrameLayoutFinished);
     if (isLastFrameLayoutFinished) {
-        sceneSession->UpdateAvoidArea(
-            new AvoidArea(sceneSession->GetAvoidAreaByType(AvoidAreaType::TYPE_NAVIGATION_INDICATOR)),
-            AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
+        auto area = sceneSession->GetAvoidAreaByType(AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
+        if (!CheckAvoidAreaForAINavigationBar(isAINavigationBarVisible_, area,
+            sceneSession->GetSessionRect().height_)) {
+            TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}d] avoid area update rejected by wrong direction",
+                persistentId);
+            return;
+        }
+        sceneSession->UpdateAvoidArea(new AvoidArea(area), AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
     } else {
         sceneSession->MarkAvoidAreaAsDirty();
     }
@@ -12744,9 +12749,10 @@ void SceneSessionManager::ReportWindowProfileInfos()
 {
     enum class WindowVisibleState : int32_t {
         FOCUSBLE = 0,
-        VISIBLE,
+        FULLY_VISIBLE,
         MINIMIZED,
-        OCCLUSION
+        TOTALLY_OCCLUSION,
+        PARTLY_OCCLUSION
     };
     std::map<int32_t, sptr<SceneSession>> sceneSessionMapCopy;
     {
@@ -12760,6 +12766,11 @@ void SceneSessionManager::ReportWindowProfileInfos()
             continue;
         }
         WindowProfileInfo windowProfileInfo;
+        WSRect rect = currSession->GetSessionRect();
+        std::stringstream rectStr;
+        rectStr << "[" << rect.posX_ << " " << rect.posY_ << " " << rect.width_ << " " << rect.height_ << "]";
+        windowProfileInfo.rect = rectStr.str();
+        windowProfileInfo.zorder = static_cast<int32_t>(currSession->GetZOrder());
         windowProfileInfo.bundleName = currSession->GetSessionInfo().bundleName_;
         windowProfileInfo.windowLocatedScreen = static_cast<int32_t>(
             currSession->GetSessionProperty()->GetDisplayId());
@@ -12768,16 +12779,20 @@ void SceneSessionManager::ReportWindowProfileInfos()
             windowProfileInfo.windowVisibleState = static_cast<int32_t>(WindowVisibleState::FOCUSBLE);
         } else if (currSession->GetSessionState() == SessionState::STATE_BACKGROUND) {
             windowProfileInfo.windowVisibleState = static_cast<int32_t>(WindowVisibleState::MINIMIZED);
-        } else if (!currSession->GetRSVisible()) {
-            windowProfileInfo.windowVisibleState = static_cast<int32_t>(WindowVisibleState::OCCLUSION);
+        } else if (currSession->GetVisibilityState() == WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
+            windowProfileInfo.windowVisibleState = static_cast<int32_t>(WindowVisibleState::TOTALLY_OCCLUSION);
+        } else if (currSession->GetVisibilityState() == WINDOW_VISIBILITY_STATE_NO_OCCLUSION) {
+            windowProfileInfo.windowVisibleState = static_cast<int32_t>(WindowVisibleState::FULLY_VISIBLE);
         } else {
-            windowProfileInfo.windowVisibleState = static_cast<int32_t>(WindowVisibleState::VISIBLE);
+            windowProfileInfo.windowVisibleState = static_cast<int32_t>(WindowVisibleState::PARTLY_OCCLUSION);
         }
         WindowInfoReporter::GetInstance().ReportWindowProfileInfo(windowProfileInfo);
-        TLOGD(WmsLogTag::DEFAULT, "bundleName:%{public}s, windowVisibleState:%{public}d, "
-            "windowLocatedScreen:%{public}d, windowSceneMode:%{public}d",
-            windowProfileInfo.bundleName.c_str(), windowProfileInfo.windowVisibleState,
-            windowProfileInfo.windowLocatedScreen, windowProfileInfo.windowSceneMode);
+        TLOGD(WmsLogTag::DEFAULT,
+              "bundleName:%{public}s, windowVisibleState:%{public}d, windowLocatedScreen:%{public}d, "
+              "windowSceneMode:%{public}d, windowZorder:%{public}d, windowRect:%{public}s",
+              windowProfileInfo.bundleName.c_str(), windowProfileInfo.windowVisibleState,
+              windowProfileInfo.windowLocatedScreen, windowProfileInfo.windowSceneMode,
+              windowProfileInfo.zorder, windowProfileInfo.rect.c_str());
     }
 }
 

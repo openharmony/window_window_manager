@@ -106,6 +106,8 @@ constexpr int32_t DISPLAY_ID_C = 999;
 constexpr int32_t MAX_POINTERS = 16;
 constexpr int32_t TOUCH_SLOP_RATIO = 25;
 const std::string BACK_WINDOW_EVENT = "scb_back_window_event";
+const std::string COMPATIBLE_MAX_WINDOW_EVENT = "win_compatible_max_event";
+const std::string COMPATIBLE_RECOVER_WINDOW_EVENT = "win_compatible_recover_event";
 const std::unordered_set<WindowType> INVALID_SYSTEM_WINDOW_TYPE = {
     WindowType::WINDOW_TYPE_NEGATIVE_SCREEN,
     WindowType::WINDOW_TYPE_THEME_EDITOR,
@@ -2981,6 +2983,40 @@ WMError WindowSceneSessionImpl::Minimize()
         WLOGFE("This window state is abnormal.");
         return WMError::WM_DO_NOTHING;
     }
+    return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::MaximizeForCompatibleMode()
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "id: %{public}d", GetPersistentId());
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (!WindowHelper::IsMainWindow(GetType())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "maximize fail, not main");
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+    hostSession->OnSessionEvent(SessionEvent::EVENT_COMPATIBLE_TO_MAXIMIZE);
+    return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::RecoverForCompatibleMode()
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "id: %{public}d", GetPersistentId());
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (!WindowHelper::IsMainWindow(GetType())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "recover fail, not main");
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+    hostSession->OnSessionEvent(SessionEvent::EVENT_COMPATIBLE_TO_RECOVER);
     return WMError::WM_OK;
 }
 
@@ -5869,6 +5905,12 @@ WMError WindowSceneSessionImpl::OnContainerModalEvent(const std::string& eventNa
         return ret;
     } else if (eventName == BACK_WINDOW_EVENT) {
         HandleBackEvent();
+        return WMError::WM_OK;
+    } else if (eventName == COMPATIBLE_MAX_WINDOW_EVENT) {
+        MaximizeForCompatibleMode();
+        return WMError::WM_OK;
+    } else if (eventName == COMPATIBLE_RECOVER_WINDOW_EVENT) {
+        RecoverForCompatibleMode();
         return WMError::WM_OK;
     }
     return WMError::WM_DO_NOTHING;
