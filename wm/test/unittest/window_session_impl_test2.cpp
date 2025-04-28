@@ -1236,6 +1236,25 @@ HWTEST_F(WindowSessionImplTest2, GetVirtualPixelRatio, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetDragKeyFramePolicy
+ * @tc.desc: SetDragKeyFramePolicy
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest2, SetDragKeyFramePolicy, TestSize.Level1)
+{
+    auto window = GetTestWindowImpl("SetDragKeyFramePolicy");
+    ASSERT_NE(nullptr, window);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> hostSession = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, hostSession);
+    window->hostSession_ = hostSession;
+    KeyFramePolicy keyFramePolicy;
+    ASSERT_EQ(window->SetDragKeyFramePolicy(keyFramePolicy), WMError::WM_OK);
+    window->hostSession_ = nullptr;
+    ASSERT_EQ(window->SetDragKeyFramePolicy(keyFramePolicy), WMError::WM_ERROR_NULLPTR);
+}
+
+/**
  * @tc.name: NotifyScreenshot
  * @tc.desc: NotifyScreenshot01 listener==nullptr
  * @tc.type: FUNC

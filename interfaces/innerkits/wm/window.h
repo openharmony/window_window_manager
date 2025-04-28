@@ -3697,6 +3697,21 @@ public:
     virtual WMError GetWindowPropertyInfo(WindowPropertyInfo& windowPropertyInfo) { return WMError::WM_OK; }
 
     /**
+     * @brief Set drag key frame policy.
+     * effective order:
+     *  1. resize when drag
+     *  2. key frame
+     *  3. default value
+     *
+     * @param keyFramePolicy param of key frame
+     * @return WM_OK means get success, others means failed.
+     */
+    virtual WMError SetDragKeyFramePolicy(const KeyFramePolicy& keyFramePolicy)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
      * @brief Set the bundleName, moduleName and abilityName of the hooked window.
      *
      * @param elementName includes bundleName, moduleName and abilityName of the hooked window.

@@ -109,6 +109,7 @@ enum class SessionInterfaceCode {
     // KeyFrame
     TRANS_ID_KEY_FRAME_ANIMATE_END,
     TRANS_ID_UPDATE_KEY_FRAME_CLONE_NODE,
+    TRANS_ID_SET_DRAG_KEY_FRAME_POLICY,
 
     // PC Fold Screen
     TRANS_ID_GET_WATERFALL_MODE,

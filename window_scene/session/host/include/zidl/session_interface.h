@@ -220,6 +220,7 @@ public:
     virtual WSError KeyFrameAnimateEnd() { return WSError::WS_OK; }
     virtual WSError UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode,
         std::shared_ptr<RSTransaction>& rsTransaction) { return WSError::WS_OK; }
+    virtual WSError SetDragKeyFramePolicy(const KeyFramePolicy& keyFramePolicy) { return WSError::WS_OK; }
 
     virtual WSError NotifyFrameLayoutFinishFromApp(bool notifyListener, const WSRect& rect)
     {
