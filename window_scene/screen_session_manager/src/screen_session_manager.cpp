@@ -1672,31 +1672,38 @@ std::vector<DisplayId> ScreenSessionManager::GetAllDisplayIds()
     return res;
 }
 
-void ScreenSessionManager::CalculateXYPosition(sptr<ScreenSession> screenSession)
+void ScreenSessionManager::CalculateXYPosition(sptr<ScreenSession> firstScreenSession,
+    sptr<ScreenSession> secondaryScreenSession)
 {
-    if (screenSession == nullptr) {
-        TLOGI(WmsLogTag::DMS, "screenSession is nullptr");
+    if (firstScreenSession != nullptr &&
+        firstScreenSession->GetScreenCombination() == ScreenCombination::SCREEN_MAIN) {
+        firstScreenSession->SetXYPosition(0, 0);
+        CalculateSecondryXYPosition(firstScreenSession, secondaryScreenSession);
+    } else if (secondaryScreenSession != nullptr &&
+        secondaryScreenSession->GetScreenCombination() == ScreenCombination::SCREEN_MAIN) {
+        secondaryScreenSession->SetXYPosition(0, 0);
+        CalculateSecondryXYPosition(secondaryScreenSession, firstScreenSession);
+    } else {
+        TLOGE(WmsLogTag::DMS, "CalculateXYPosition error!");
+    }
+}
+
+void ScreenSessionManager::CalculateSecondryXYPosition(sptr<ScreenSession> firstScreenSession,
+    sptr<ScreenSession> secondaryScreenSession)
+{
+    if (firstScreenSession == nullptr || secondaryScreenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "screenSession is nullptr");
         return;
     }
-    if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::REAL && screenSession->isInternal_) {
-        screenSession->SetXYPosition(0, 0);
-    } else {
-        ScreenId internalScreenId = GetInternalScreenId();
-        sptr<ScreenSession> internalSession = GetScreenSession(internalScreenId);
-        if (internalSession == nullptr) {
-            TLOGI(WmsLogTag::DMS, "internalSession is nullptr");
-            return;
-        }
-        ScreenProperty internalScreenProperty = internalSession->GetScreenProperty();
-        ScreenProperty secondaryScreenProperty = screenSession->GetScreenProperty();
-        int32_t internalX = internalScreenProperty.GetStartX();
-        int32_t internalY = internalScreenProperty.GetStartY();
-        int32_t secondaryX = secondaryScreenProperty.GetStartX();
-        int32_t secondaryY = secondaryScreenProperty.GetStartY();
-        secondaryX = secondaryX + ~internalX + 1;
-        secondaryY = secondaryY + ~internalY + 1;
-        screenSession->SetXYPosition(secondaryX, secondaryY);
-    }
+    ScreenProperty firstScreenProperty = firstScreenSession->GetScreenProperty();
+    ScreenProperty secondaryScreenProperty = secondaryScreenSession->GetScreenProperty();
+    uint32_t firstStartX = firstScreenProperty.GetStartX();
+    uint32_t firstStartY = firstScreenProperty.GetStartY();
+    uint32_t secondaryStartX = secondaryScreenProperty.GetStartX();
+    uint32_t secondaryStartY = secondaryScreenProperty.GetStartY();
+    int32_t secondaryX = -firstStartX + secondaryStartX;
+    int32_t secondaryY = -firstStartY + secondaryStartY;
+    secondaryScreenSession->SetXYPosition(secondaryX, secondaryY);
 }
 
 sptr<ScreenInfo> ScreenSessionManager::GetScreenInfoById(ScreenId screenId)
@@ -8705,11 +8712,10 @@ void ScreenSessionManager::SetMultiScreenRelativePositionInner(sptr<ScreenSessio
 {
 #ifdef WM_MULTI_SCREEN_ENABLE
     firstScreenSession->SetStartPosition(mainScreenOptions.startX_, mainScreenOptions.startY_);
-    CalculateXYPosition(firstScreenSession);
     firstScreenSession->PropertyChange(firstScreenSession->GetScreenProperty(),
         ScreenPropertyChangeReason::RELATIVE_POSITION_CHANGE);
     secondScreenSession->SetStartPosition(secondScreenOption.startX_, secondScreenOption.startY_);
-    CalculateXYPosition(secondScreenSession);
+    CalculateXYPosition(firstScreenSession, secondScreenSession);
     secondScreenSession->PropertyChange(secondScreenSession->GetScreenProperty(),
         ScreenPropertyChangeReason::RELATIVE_POSITION_CHANGE);
     if (g_isPcDevice) {
@@ -8718,6 +8724,7 @@ void ScreenSessionManager::SetMultiScreenRelativePositionInner(sptr<ScreenSessio
         if (firstPhysicalScreen && secondPhysicalScreen) {
             firstPhysicalScreen->SetStartPosition(mainScreenOptions.startX_, mainScreenOptions.startY_);
             secondPhysicalScreen->SetStartPosition(secondScreenOption.startX_, secondScreenOption.startY_);
+            CalculateXYPosition(firstPhysicalScreen, secondPhysicalScreen);
         }
     }
     std::shared_ptr<RSDisplayNode> firstDisplayNode = firstScreenSession->GetDisplayNode();
