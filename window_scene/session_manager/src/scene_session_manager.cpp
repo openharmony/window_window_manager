@@ -3777,7 +3777,7 @@ SessionInfo SceneSessionManager::RecoverSessionInfo(const sptr<WindowSessionProp
         sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(), sessionInfo.abilityName_.c_str(),
         sessionInfo.windowMode, sessionInfo.windowType_, sessionInfo.persistentId_, sessionInfo.sessionState_,
         sessionInfo.appInstanceKey_.c_str(), sessionInfo.isFollowParentMultiScreenPolicy,
-        static_cast<int32_t>(sessionInfo.screenId_), sessionInfo.isAbilityHook_);
+        sessionInfo.screenId_, sessionInfo.isAbilityHook_);
     return sessionInfo;
 }
 
