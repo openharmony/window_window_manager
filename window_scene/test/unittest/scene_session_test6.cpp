@@ -22,6 +22,7 @@
 
 
 #include "screen_manager.h"
+#include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session/host/include/sub_session.h"
 #include "session/host/include/main_session.h"
 #include "session/host/include/scene_session.h"
@@ -266,6 +267,39 @@ HWTEST_F(SceneSessionTest6, SetFollowParentWindowLayoutEnabled03, Function | Sma
 
     sceneSession->SetFollowParentWindowLayoutEnabled(false);
     ASSERT_EQ(nullptr, parentSession->notifySurfaceBoundsChangeFuncMap_[sceneSession->GetPersistentId()]);
+}
+
+/**
+ * @tc.name: GetSystemAvoidArea
+ * @tc.desc: GetSystemAvoidArea function
+ * @tc.type: FUNC
+ */
+ HWTEST_F(SceneSessionTest6, GetSystemAvoidArea, Function | SmallTest | Level1)
+ {
+    SessionInfo info;
+    info.abilityName_ = "GetSystemAvoidArea";
+    info.bundleName_ = "GetSystemAvoidArea";
+
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(session, nullptr);
+    ASSERT_NE(session->GetSessionProperty(), nullptr);
+    session->GetSessionProperty()->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    EXPECT_EQ(WindowMode::WINDOW_MODE_FLOATING, session->GetSessionProperty()->GetWindowMode());
+    info.windowType_ = static_cast<uint32_t>(WindowType::APP_MAIN_WINDOW_BASE);
+
+    SystemSessionConfig systemConfig;
+    systemConfig.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    session->SetSystemConfig(systemConfig);
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
+    session->GetSessionProperty()->SetDisplayId(2025);
+    session->SetIsMidScene(false);
+    EXPECT_EQ(session->GetIsMidScene(), false);
+
+    WSRect rect;
+    AvoidArea avoidArea;
+    session->GetSystemAvoidArea(rect, avoidArea);
+    int32_t height = session->GetStatusBarHeight();
+    EXPECT_EQ(height, avoidArea.topRect_.height_);
 }
 } // namespace
 } // namespace Rosen
