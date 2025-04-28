@@ -480,6 +480,8 @@ HWTEST_F(PerformReporterTest, ReportWindowProfileInfo017, TestSize.Level1)
     windowProfileInfo.windowLocatedScreen = 0;
     windowProfileInfo.windowSceneMode = 102;
     windowProfileInfo.windowVisibleState = 2;
+    windowProfileInfo.rect = "[0 0 60 90]";
+    windowProfileInfo.zorder = 110;
     WindowInfoReporter windowInfoReporter;
     res = windowInfoReporter.ReportWindowProfileInfo(windowProfileInfo);
     ASSERT_EQ(res, 0);
