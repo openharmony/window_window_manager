@@ -2554,14 +2554,14 @@ WMError WindowSessionImpl::UnregisterWindowChangeListener(const sptr<IWindowChan
 WMError WindowSessionImpl::RegisterWindowCrossAxisListener(const sptr<IWindowCrossAxisListener>& listener)
 {
     WLOGFD("in");
-    std::lock_guard<std::recursive_mutex> lockListener(windowChangeListenerMutex_);
+    std::lock_guard<std::recursive_mutex> lockListener(windowCrossAxisListenerMutex_);
     return RegisterListener(windowCrossAxisListeners_[GetPersistentId()], listener);
 }
 
 WMError WindowSessionImpl::UnregisterWindowCrossAxisListener(const sptr<IWindowCrossAxisListener>& listener)
 {
     WLOGFD("in");
-    std::lock_guard<std::recursive_mutex> lockListener(windowChangeListenerMutex_);
+    std::lock_guard<std::recursive_mutex> lockListener(windowCrossAxisListenerMutex_);
     return UnregisterListener(windowCrossAxisListeners_[GetPersistentId()], listener);
 }
 
