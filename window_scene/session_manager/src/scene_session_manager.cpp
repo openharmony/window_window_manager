@@ -10773,6 +10773,7 @@ void DisplayChangeListener::OnDisplayStateChange(DisplayId defaultDisplayId, spt
         case DisplayStateChangeType::VIRTUAL_PIXEL_RATIO_CHANGE: {
             SceneSessionManager::GetInstance().ProcessVirtualPixelRatioChange(defaultDisplayId,
                 displayInfo, displayInfoMap, type);
+            SceneSessionManager::GetInstance().FlushWindowInfoToMMI();
             break;
         }
         case DisplayStateChangeType::UPDATE_ROTATION: {
