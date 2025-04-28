@@ -65,7 +65,7 @@ void WindowImpl::CreateSurfaceNode(const std::string name, const SendRenderDataC
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
     rsSurfaceNodeConfig.SurfaceNodeName = name;
     rsSurfaceNodeConfig.additionalData = reinterpret_cast<void*>(callback);
-    surfaceNode_ = RSSurfaceNode::Create(rsSurfaceNodeConfig, true, rsUIDirector->GetRSUIContext());
+    surfaceNode_ = RSSurfaceNode::Create(rsSurfaceNodeConfig, true, rsUIDirector_->GetRSUIContext());
     TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
           "Create RSSurfaceNode: %{public}s", RSAdapterUtil::RSNodeToStr(surfaceNode_).c_str());
     if (surfaceNode_ != nullptr) {

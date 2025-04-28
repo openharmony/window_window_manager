@@ -305,13 +305,13 @@ AutoRSSyncTransaction::AutoRSSyncTransaction(
 AutoRSSyncTransaction::AutoRSSyncTransaction(
     const std::shared_ptr<RSSyncTransactionAdapter>& rsSyncTransAdapter,
     bool needFlushImplicitTransaction,
-    const std::shared_ptr<AppExecFwk::EventHandler>& handler) : handler_(handler)
+    const std::shared_ptr<AppExecFwk::EventHandler>& handler)
+    : rsSyncTransAdapter_(rsSyncTransAdapter), handler_(handler)
 {
-    if (!rsSyncTransAdapter_) {
+    if (rsSyncTransAdapter_) {
         if (needFlushImplicitTransaction) {
             RSTransactionAdapter::FlushImplicitTransaction(rsSyncTransAdapter_->GetRSUIContext());
         }
-        rsSyncTransAdapter_ = rsSyncTransAdapter;
         TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "Open sync transaction");
         rsSyncTransAdapter_->OpenSyncTransaction(handler);
     }
@@ -325,7 +325,7 @@ AutoRSSyncTransaction::~AutoRSSyncTransaction()
     }
 }
 
-AllowRSMultiInstance::AllowRSMultiInstance(const std::shared_ptr<RSNode>& rsNode) : rsNode_(rsNode)
+AllowInMultiThreadGuard::AllowInMultiThreadGuard(const std::shared_ptr<RSNode>& rsNode) : rsNode_(rsNode)
 {
     if (rsNode_) {
         TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
@@ -334,7 +334,7 @@ AllowRSMultiInstance::AllowRSMultiInstance(const std::shared_ptr<RSNode>& rsNode
     }
 }
 
-AllowRSMultiInstance::~AllowRSMultiInstance()
+AllowInMultiThreadGuard::~AllowInMultiThreadGuard()
 {
     if (rsNode_) {
         TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
