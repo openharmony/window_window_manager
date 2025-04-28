@@ -294,14 +294,14 @@ HWTEST_F(RSAdapterTest, AutoRSSyncTransactionLifecycle, Function | SmallTest | L
 }
 
 /**
- * @tc.name: AllowRSMultiInstanceLifecycle
- * @tc.desc: Verify AllowRSMultiInstance lifecycle (skip check toggle).
+ * @tc.name: AllowInMultiThreadGuardLifecycle
+ * @tc.desc: Verify AllowInMultiThreadGuard lifecycle (skip check toggle).
  * @tc.type: FUNC
  */
-HWTEST_F(RSAdapterTest, AllowRSMultiInstanceLifecycle, Function | SmallTest | Level1)
+HWTEST_F(RSAdapterTest, AllowInMultiThreadGuardLifecycle, Function | SmallTest | Level1)
 {
     {
-        AllowRSMultiInstance allowMulti(rsNode_);
+        AllowInMultiThreadGuard allowMulti(rsNode_);
         EXPECT_TRUE(rsNode_->isSkipCheckInMultiInstance_);
     }
     EXPECT_FALSE(rsNode_->isSkipCheckInMultiInstance_);

@@ -136,14 +136,14 @@ private:
     std::shared_ptr<AppExecFwk::EventHandler> handler_;
 };
 
-class AllowRSMultiInstance {
+class AllowInMultiThreadGuard {
 public:
-    explicit AllowRSMultiInstance(const std::shared_ptr<RSNode>& rsNode);
-    ~AllowRSMultiInstance();
-    AllowRSMultiInstance(const AllowRSMultiInstance&) = delete;
-    AllowRSMultiInstance& operator=(const AllowRSMultiInstance&) = delete;
-    AllowRSMultiInstance(AllowRSMultiInstance&&) = delete;
-    AllowRSMultiInstance& operator=(AllowRSMultiInstance&&) = delete;
+    explicit AllowInMultiThreadGuard(const std::shared_ptr<RSNode>& rsNode);
+    ~AllowInMultiThreadGuard();
+    AllowInMultiThreadGuard(const AllowInMultiThreadGuard&) = delete;
+    AllowInMultiThreadGuard& operator=(const AllowInMultiThreadGuard&) = delete;
+    AllowInMultiThreadGuard(AllowInMultiThreadGuard&&) = delete;
+    AllowInMultiThreadGuard& operator=(AllowInMultiThreadGuard&&) = delete;
 
 private:
     std::shared_ptr<RSNode> rsNode_;
