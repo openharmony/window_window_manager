@@ -3666,10 +3666,9 @@ WSError WindowSessionImpl::SetSplitButtonVisible(bool isVisible)
 
 WMError WindowSessionImpl::SetFollowScreenChange(bool isFollowScreenChange)
 {
-    TLOGI(WmsLogTag::DEFAULT, "window %{public}u set follow screen change: %{public}d", GetWindowId(),
-        isFollowScreenChange);
+    TLOGI(WmsLogTag::DEFAULT, "window %{public}u set follow screen change: %{public}d",
+        GetWindowId(), isFollowScreenChange);
     if (IsWindowSessionInvalid()) {
-        TLOGE(WmsLogTag::DEFAULT, "window is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
