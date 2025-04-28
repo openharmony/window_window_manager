@@ -1833,8 +1833,6 @@ HWTEST_F(SceneSessionTest5, MoveUnderInteriaAndNotifyRectChange, TestSize.Level1
     EXPECT_TRUE(mainSession->MoveUnderInteriaAndNotifyRectChange(rect, SizeChangeReason::DRAG_END));
 }
 
-
-
 /**
  * @tc.name: WindowScaleTransfer01
  * @tc.desc: WindowScaleTransfer01
