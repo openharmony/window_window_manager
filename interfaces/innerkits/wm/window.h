@@ -945,6 +945,14 @@ public:
     virtual bool GetTouchable() const { return false; }
 
     /**
+     * @brief Set follow screen change property of window.
+     *
+     * @param isFollowScreenChange Window follow screen change.
+     * @return WMError.
+     */
+    virtual WMError SetFollowScreenChange(bool isFollowScreenChange) { return WMError::WM_OK; }
+
+    /**
      * @brief Get SystemBarProperty By WindowType.
      *
      * @param type Type of window.
