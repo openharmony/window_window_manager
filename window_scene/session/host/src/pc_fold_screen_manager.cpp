@@ -188,6 +188,12 @@ ScreenSide PcFoldScreenManager::CalculateScreenSide(const WSRect& rect)
         ScreenSide::FOLD_B : ScreenSide::FOLD_C;
 }
 
+ScreenSide PcFoldScreenManager::CalculateScreenSide(int32_t posY)
+{
+    const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] = GetDisplayRects();
+    return posY < foldCreaseRect.posY_ ? ScreenSide::FOLD_B : ScreenSide::FOLD_C;
+}
+
 bool PcFoldScreenManager::IsCrossFoldCrease(const WSRect& rect)
 {
     const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] = GetDisplayRects();
