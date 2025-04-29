@@ -143,6 +143,14 @@ enum class WindowState : uint32_t {
 };
 
 /**
+ * @brief scale type of compatible mode window.
+ */
+enum class ScaleType : uint32_t {
+    WINDOW_SCALE,
+    WINDOW_RECOVERY
+};
+
+/**
  * @brief Enumerates blur style of window.
  */
 enum class WindowBlurStyle : uint32_t {
