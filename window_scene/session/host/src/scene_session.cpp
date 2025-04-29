@@ -3405,15 +3405,16 @@ void SceneSession::HandleMoveDragEnd(WSRect& rect, SizeChangeReason reason)
  */
 void SceneSession::WindowScaleTransfer(WSRect& rect, float scaleX, float scaleY)
 {
-    auto curWidth = rect.width_;
-    auto curHeight = rect.height_;
+    const float HALF = 0.5;
+    auto curWidth = static_cast<float>(rect.width_);
+    auto curHeight = static_cast<float>(rect.height_);
     rect.width_ = curWidth * scaleX;
     rect.height_ = curHeight * scaleY;
-    auto widthDifference = (curWidth - rect.width_) / 2;
-    auto heightDifference = (curHeight - rect.height_) / 2;
+    auto widthDifference = (curWidth - rect.width_) * HALF;
+    auto heightDifference = (curHeight - rect.height_) * HALF;
     rect.posX_ = rect.posX_ + widthDifference;
     rect.posY_ = rect.posY_ + heightDifference;
-    TLOGNI(WmsLogTag::WMS_LAYOUT, "scaleX: %{public}f, scaleY: %{public}f, sizeDifference: [%{public}d, "
+    TLOGI(WmsLogTag::WMS_LAYOUT, "scaleX: %{public}f, scaleY: %{public}f, sizeDifference: [%{public}d, "
         "%{public}d], rect: %{public}s", scaleX, scaleY, widthDifference, heightDifference, rect.ToString().c_str());
 }
 
@@ -3422,22 +3423,16 @@ void SceneSession::WindowScaleTransfer(WSRect& rect, float scaleX, float scaleY)
  */
 void SceneSession::HookStartMoveRect(WSRect& newRect, const WSRect& sessionRect)
 {
+    newRect = sessionRect;
     auto mainSession = GetMainSession();
     if (!mainSession) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "mainSession is nullptr");
-        newRect = sessionRect;
         return;
     }
     auto scaleX = mainSession->GetScaleX();
     auto scaleY = mainSession->GetScaleY();
     if (IsCompatibilityModeScale(scaleX, scaleY)) {
-        newRect.posX_ = sessionRect.posX_;
-        newRect.posY_ = sessionRect.posY_;
-        newRect.width_ = sessionRect.width_;
-        newRect.height_ = sessionRect.height_;
         WindowScaleTransfer(newRect, scaleX, scaleY);
-    } else {
-        newRect = sessionRect;
     }
     return;
 }
@@ -3449,7 +3444,8 @@ void SceneSession::HookStartMoveRect(WSRect& newRect, const WSRect& sessionRect)
 bool SceneSession::IsCompatibilityModeScale(float scaleX, float scaleY)
 {
     auto property = GetSessionProperty();
-    if (property->GetCompatibleModeInPc() && ((scaleX > 0.0f && scaleX != 1.0f) || (scaleY > 0.0f && scaleY != 1.0f))) {
+    if (property->GetCompatibleModeInPc() && scaleX > 0.0f && scaleY > 0.0f &&
+        (!NearEqual(scaleX, 1.0f) || !NearEqual(scaleY, 1.0f))) {
         return true;
     }
     return false;
@@ -3485,7 +3481,7 @@ void SceneSession::CompatibilityModeWindowScaleTransfer(WSRect& rect, ScaleType 
     auto property = GetSessionProperty();
     auto scaleX = mainSession->GetScaleX();
     auto scaleY = mainSession->GetScaleY();
-    if (scaleX == 0 || scaleY == 0) {
+    if (MathHelper::NearZero(scaleX) || MathHelper::NearZero(scaleY)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "scale ratio is 0");
         return;
     }
