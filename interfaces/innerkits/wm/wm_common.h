@@ -171,14 +171,6 @@ struct HookInfo {
 };
 
 /**
- * @brief scale type of compatible mode window.
- */
-enum class ScaleType : uint32_t {
-    WINDOW_SCALE,
-    WINDOW_RECOVERY
-};
-
-/**
  * @brief Enumerates mode of window.
  */
 enum class WindowMode : uint32_t {
