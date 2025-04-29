@@ -695,8 +695,7 @@ std::shared_ptr<RSUIContext> ScreenSessionManagerClient::GetRSUIContext(ScreenId
 {
     auto rsUIDirector = GetRSUIDirector(screenId, caller);
     auto rsUIContext = rsUIDirector ? rsUIDirector->GetRSUIContext() : nullptr;
-    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
-          "%{public}s, screenId: %{public}" PRIu64 ", caller: %{public}s",
+    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "%{public}s, screenId: %{public}" PRIu64 ", caller: %{public}s",
           RSAdapterUtil::RSUIContextToStr(rsUIContext).c_str(), screenId, caller);
     return rsUIContext;
 }

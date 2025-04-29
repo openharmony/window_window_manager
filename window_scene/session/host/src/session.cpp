@@ -233,8 +233,7 @@ std::shared_ptr<RSSurfaceNode> Session::GetLeashWinSurfaceNode() const
 
 std::shared_ptr<RSUIContext> Session::GetRSUIContext(const char* caller) const
 {
-    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
-          "Get RSUIContext: %{public}s, Session [id: %{public}d], caller: %{public}s",
+    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "%{public}s, Session [id: %{public}d], caller: %{public}s",
           RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str(), GetPersistentId(), caller);
     return rsUIContext_;
 }
