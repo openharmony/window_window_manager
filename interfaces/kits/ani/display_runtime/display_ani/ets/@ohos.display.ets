@@ -409,12 +409,12 @@ export function off(type: 'add' | 'remove' | 'change' | 'privateModeChange' | 'f
       callback?: Callback<number> | Callback<boolean> | Callback<FoldStatus> | Callback<Array<number>> |
       Callback<boolean> | Callback<FoldDisplayMode>): void
 {
-    syncOff(type, callback, displayMgrRef);
+    syncOff(type, displayMgrRef, callback);
 }
 
 export native function syncOff(type: 'add' | 'remove' | 'change' | 'privateModeChange' | 'foldStatusChange' |
       'foldAngleChange' | 'captureStatusChange' | 'foldDisplayModeChange',
-    callback?: object, nativeObj: long) : void;
+    nativeObj: long, callback?: object) : void;
 
 export function displayEventCallBack(cb: object, cbArg: double): void {
     const func = cb as (cbArg: double) => void;
