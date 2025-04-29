@@ -2018,6 +2018,7 @@ HWTEST_F(SceneSessionTest5, MarkSystemSceneUIFirst, TestSize.Level1)
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
     session->MarkSystemSceneUIFirst(true, true);
+
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
     session->surfaceNode_ = surfaceNode;
