@@ -3664,6 +3664,22 @@ WSError WindowSessionImpl::SetSplitButtonVisible(bool isVisible)
     return WSError::WS_OK;
 }
 
+WMError WindowSessionImpl::SetFollowScreenChange(bool isFollowScreenChange)
+{
+    TLOGI(WmsLogTag::DEFAULT, "window %{public}u set follow screen change: %{public}d",
+        GetWindowId(), isFollowScreenChange);
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
+    if (!WindowHelper::IsSystemWindow(property_->GetWindowType())) {
+        TLOGE(WmsLogTag::DEFAULT, "window %{public}u type not support", GetWindowId());
+        return WMError::WM_ERROR_INVALID_WINDOW_MODE_OR_SIZE;
+    }
+    property_->SetFollowScreenChange(isFollowScreenChange);
+    return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_FOLLOW_SCREEN_CHANGE);
+}
+
 WMError WindowSessionImpl::GetIsMidScene(bool& isMidScene)
 {
     if (IsWindowSessionInvalid()) {
