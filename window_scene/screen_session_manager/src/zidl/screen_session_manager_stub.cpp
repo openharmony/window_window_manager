@@ -756,6 +756,11 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             static_cast<void>(reply.WriteInt32(static_cast<int32_t>(ret)));
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SET_FOLD_STATUS_EXPAND_AND_LOCKED: {
+            bool lockDisplayStatus = static_cast<bool>(data.ReadUint32());
+            SetFoldStatusExpandAndLocked(lockDisplayStatus);
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_SCENE_BOARD_SET_DISPLAY_SCALE: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             auto scaleX = data.ReadFloat();

@@ -299,6 +299,8 @@ public:
         return DMError::DM_OK;
     }
 
+    virtual void SetFoldStatusExpandAndLocked(bool locked) {}
+
     virtual DMError SetSystemKeyboardStatus(bool isTpKeyboardOn = false)
     {
         return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
