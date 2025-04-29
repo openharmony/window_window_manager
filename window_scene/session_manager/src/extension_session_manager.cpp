@@ -59,7 +59,7 @@ sptr<AAFwk::SessionInfo> ExtensionSessionManager::SetAbilitySessionInfo(const sp
     abilitySessionInfo->orientation = sessionInfo.config_.orientation_;
     abilitySessionInfo->isDensityFollowHost = sessionInfo.config_.isDensityFollowHost_;
     if (sessionInfo.want != nullptr) {
-        abilitySessionInfo->want = sessionInfo.SafelyGetWant();
+        abilitySessionInfo->want = sessionInfo.GetWantSafely();
     }
     return abilitySessionInfo;
 }
