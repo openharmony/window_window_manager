@@ -1186,8 +1186,6 @@ private:
     sptr<AAFwk::IAbilityManagerCollaborator> GetCollaboratorByType(int32_t collaboratorType);
     void GetCollaboratorAbilityInfos(const std::vector<AppExecFwk::BundleInfo>& bundleInfos,
         std::vector<SCBAbilityInfo>& scbAbilityInfos, int32_t userId);
-    bool FindAbilityInfo(const AppExecFwk::BundleInfo& bundleInfo,
-        const std::string& moduleName, const std::string& abilityName, AppExecFwk::AbilityInfo& abilityInfo);
 
     std::vector<uint64_t> skipSurfaceNodeIds_;
     std::atomic_bool processingFlushUIParams_ { false };
