@@ -58,37 +58,37 @@ std::shared_ptr<RSUIContext> RSTransactionAdapter::GetRSUIContext() const
 }
 
 template<typename Func>
-void RSTransactionAdapter::InvokeTransaction(Func&& func)
+void RSTransactionAdapter::InvokeTransaction(Func&& func, const char* caller)
 {
     if (rsTransHandler_) {
         invokerType_ = InvokerType::RS_TRANSACTION_HANDLER;
-        TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "Use rsTransHandler");
+        TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "%{public}s: Use rsTransHandler", caller);
         func(rsTransHandler_);
     } else if (rsTransProxy_) {
         invokerType_ = InvokerType::RS_TRANSACTION_PROXY;
-        TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "Fallback to rsTransProxy");
+        TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "%{public}s: Fallback to rsTransProxy", caller);
         func(rsTransProxy_);
     } else {
         invokerType_ = InvokerType::NONE;
-        TLOGE(WmsLogTag::WMS_RS_MULTI_INSTANCE, "Both rsTransHandler and rsTransProxy are null");
+        TLOGE(WmsLogTag::WMS_RS_MULTI_INSTANCE, "%{public}s: Both rsTransHandler and rsTransProxy are null", caller);
     }
 }
 
 void RSTransactionAdapter::Begin()
 {
-    InvokeTransaction([](auto& invoker) { invoker->Begin(); });
+    InvokeTransaction([](auto& invoker) { invoker->Begin(); }, __func__);
 }
 
 void RSTransactionAdapter::Commit(uint64_t timestamp)
 {
-    InvokeTransaction([timestamp](auto& invoker) { invoker->Commit(timestamp); });
+    InvokeTransaction([timestamp](auto& invoker) { invoker->Commit(timestamp); }, __func__);
 }
 
 void RSTransactionAdapter::FlushImplicitTransaction(uint64_t timestamp, const std::string& abilityName)
 {
     InvokeTransaction([timestamp, &abilityName](auto& invoker) {
-        invoker->FlushImplicitTransaction(timestamp, abilityName);
-    });
+                          invoker->FlushImplicitTransaction(timestamp, abilityName);
+                      }, __func__);
 }
 
 void RSTransactionAdapter::FlushImplicitTransaction(
@@ -178,19 +178,20 @@ RSSyncTransactionAdapter::RSSyncTransactionAdapter(const std::shared_ptr<RSNode>
 }
 
 template<typename ReturnType, typename Func>
-ReturnType RSSyncTransactionAdapter::InvokeSyncTransaction(Func&& func)
+ReturnType RSSyncTransactionAdapter::InvokeSyncTransaction(Func&& func, const char* caller)
 {
     if (rsSyncTransHandler_) {
         invokerType_ = InvokerType::RS_SYNC_TRANSACTION_HANDLER;
-        TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "Use rsSyncTransHandler");
+        TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "%{public}s: Use rsSyncTransHandler", caller);
         return func(rsSyncTransHandler_);
     } else if (rsSyncTransController_) {
         invokerType_ = InvokerType::RS_SYNC_TRANSACTION_CONTROLLER;
-        TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "Fallback to rsSyncTransController");
+        TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "%{public}s: Fallback to rsSyncTransController", caller);
         return func(rsSyncTransController_);
     } else {
         invokerType_ = InvokerType::NONE;
-        TLOGE(WmsLogTag::WMS_RS_MULTI_INSTANCE, "Both rsSyncTransHandler and rsSyncTransController are null");
+        TLOGE(WmsLogTag::WMS_RS_MULTI_INSTANCE,
+              "%{public}s: Both rsSyncTransHandler and rsSyncTransController are null", caller);
         if constexpr (!std::is_void_v<ReturnType>) {
             return nullptr;
         }
@@ -205,40 +206,48 @@ std::shared_ptr<RSUIContext> RSSyncTransactionAdapter::GetRSUIContext() const
 
 std::shared_ptr<RSTransaction> RSSyncTransactionAdapter::GetRSTransaction()
 {
-    return InvokeSyncTransaction<std::shared_ptr<RSTransaction>>([](auto& invoker) {
-        return invoker->GetRSTransaction();
-    });
+    return InvokeSyncTransaction<std::shared_ptr<RSTransaction>>(
+        [](auto& invoker) {
+            return invoker->GetRSTransaction();
+        },
+        __func__);
 }
 
 void RSSyncTransactionAdapter::OpenSyncTransaction(const std::shared_ptr<AppExecFwk::EventHandler>& handler)
 {
-    InvokeSyncTransaction<void>([handler](auto& invoker) {
-        invoker->OpenSyncTransaction(handler);
-    });
+    InvokeSyncTransaction<void>(
+        [handler](auto& invoker) {
+            invoker->OpenSyncTransaction(handler);
+        },
+        __func__);
 }
 
 void RSSyncTransactionAdapter::CloseSyncTransaction(const std::shared_ptr<AppExecFwk::EventHandler>& handler)
 {
-    InvokeSyncTransaction<void>([handler](auto& invoker) {
-        invoker->CloseSyncTransaction(handler);
-    });
+    InvokeSyncTransaction<void>(
+        [handler](auto& invoker) {
+            invoker->CloseSyncTransaction(handler);
+        },
+        __func__);
 }
 
 template<typename ReturnType, typename Func>
-ReturnType RSSyncTransactionAdapter::InvokeSyncTransaction(const std::shared_ptr<RSUIContext>& rsUIContext, Func&& func)
+ReturnType RSSyncTransactionAdapter::InvokeSyncTransaction(
+    const std::shared_ptr<RSUIContext>& rsUIContext, Func&& func, const char* caller)
 {
     auto rsSyncTransHandler = rsUIContext ? rsUIContext->GetSyncTransactionHandler() : nullptr;
     if (rsSyncTransHandler) {
         invokerType_ = InvokerType::RS_SYNC_TRANSACTION_HANDLER;
-        TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "Use rsSyncTransHandler");
+        TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "%{public}s: Use rsSyncTransHandler", caller);
         return func(rsSyncTransHandler);
     } else if (auto rsSyncTransController = RSSyncTransactionController::GetInstance()) {
         invokerType_ = InvokerType::RS_SYNC_TRANSACTION_CONTROLLER;
-        TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "Fallback to rsSyncTransController");
+        TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "%{public}s: Fallback to rsSyncTransController", caller);
         return func(rsSyncTransController);
     } else {
         invokerType_ = InvokerType::NONE;
-        TLOGE(WmsLogTag::WMS_RS_MULTI_INSTANCE, "Both rsSyncTransHandler and rsSyncTransController are null");
+        TLOGE(WmsLogTag::WMS_RS_MULTI_INSTANCE,
+              "%{public}s: Both rsSyncTransHandler and rsSyncTransController are null", caller);
         if constexpr (!std::is_void_v<ReturnType>) {
             return nullptr;
         }
@@ -249,7 +258,11 @@ std::shared_ptr<RSTransaction> RSSyncTransactionAdapter::GetRSTransaction(
     const std::shared_ptr<RSUIContext>& rsUIContext)
 {
     return InvokeSyncTransaction<std::shared_ptr<RSTransaction>>(
-        rsUIContext, [](auto& invoker) { return invoker->GetRSTransaction(); });
+        rsUIContext,
+        [](auto& invoker) {
+            return invoker->GetRSTransaction();
+        },
+        __func__);
 }
 
 std::shared_ptr<RSTransaction> RSSyncTransactionAdapter::GetRSTransaction(const std::shared_ptr<RSNode>& rsNode)
@@ -261,9 +274,12 @@ std::shared_ptr<RSTransaction> RSSyncTransactionAdapter::GetRSTransaction(const 
 void RSSyncTransactionAdapter::OpenSyncTransaction(
     const std::shared_ptr<RSUIContext>& rsUIContext, const std::shared_ptr<AppExecFwk::EventHandler>& handler)
 {
-    InvokeSyncTransaction<void>(rsUIContext, [handler](auto& invoker) {
-        invoker->OpenSyncTransaction(handler);
-    });
+    InvokeSyncTransaction<void>(
+        rsUIContext,
+        [handler](auto& invoker) {
+            invoker->OpenSyncTransaction(handler);
+        },
+        __func__);
 }
 
 void RSSyncTransactionAdapter::OpenSyncTransaction(
@@ -276,9 +292,12 @@ void RSSyncTransactionAdapter::OpenSyncTransaction(
 void RSSyncTransactionAdapter::CloseSyncTransaction(
     const std::shared_ptr<RSUIContext>& rsUIContext, const std::shared_ptr<AppExecFwk::EventHandler>& handler)
 {
-    InvokeSyncTransaction<void>(rsUIContext, [handler](auto& invoker) {
-        invoker->CloseSyncTransaction(handler);
-    });
+    InvokeSyncTransaction<void>(
+        rsUIContext,
+        [handler](auto& invoker) {
+            invoker->CloseSyncTransaction(handler);
+        },
+        __func__);
 }
 
 void RSSyncTransactionAdapter::CloseSyncTransaction(

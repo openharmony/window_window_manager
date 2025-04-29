@@ -56,7 +56,7 @@ private:
     void InitByRSUIContext(const std::shared_ptr<RSUIContext>& rsUIContext);
 
     template<typename Func>
-    void InvokeTransaction(Func&& func);
+    void InvokeTransaction(Func&& func, const char* caller);
 
     static InvokerType invokerType_;
 
@@ -105,10 +105,11 @@ private:
     void InitByRSUIContext(const std::shared_ptr<RSUIContext>& rsUIContext);
 
     template<typename ReturnType, typename Func>
-    ReturnType InvokeSyncTransaction(Func&& func);
+    ReturnType InvokeSyncTransaction(Func&& func, const char* caller);
 
     template<typename ReturnType, typename Func>
-    static ReturnType InvokeSyncTransaction(const std::shared_ptr<RSUIContext>& rsUIContext, Func&& func);
+    static ReturnType InvokeSyncTransaction(
+        const std::shared_ptr<RSUIContext>& rsUIContext, Func&& func, const char* caller);
 
     static InvokerType invokerType_;
 

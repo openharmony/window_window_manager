@@ -494,12 +494,8 @@ uint32_t AbstractScreen::GetPhyHeight() const
 
 std::shared_ptr<RSUIContext> AbstractScreen::GetRSUIContext() const
 {
-    std::shared_ptr<RSUIContext> rsUIContext;
-    if (rsUIDirector_) {
-        rsUIContext = rsUIDirector_->GetRSUIContext();
-    }
-    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
-          "Get RSUIContext: %{public}s", RSAdapterUtil::RSUIDirectorToStr(rsUIDirector_).c_str());
+    auto rsUIContext = rsUIDirector_ ? rsUIDirector_->GetRSUIContext() : nullptr;
+    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "%{public}s", RSAdapterUtil::RSUIContextToStr(rsUIContext).c_str());
     return rsUIContext;
 }
 
