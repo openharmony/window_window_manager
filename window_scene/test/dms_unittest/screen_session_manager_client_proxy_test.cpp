@@ -398,5 +398,16 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, OnDumperClientScreenSessions, Test
     screenSessionManagerClientProxy_->OnDumperClientScreenSessions();
     ASSERT_TRUE(screenSessionManagerClientProxy_ != nullptr);
 }
+
+/**
+ * @tc.name: OnBeforeScreenPropertyChanged
+ * @tc.desc: OnBeforeScreenPropertyChanged test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientProxyTest, OnBeforeScreenPropertyChanged, TestSize.Level1)
+{
+    screenSessionManagerClientProxy_->OnBeforeScreenPropertyChanged(FoldStatus::UNKNOWN);
+    ASSERT_TRUE(screenSessionManagerClientProxy_ != nullptr);
+}
 } // namespace Rosen
 } // namespace OHOS

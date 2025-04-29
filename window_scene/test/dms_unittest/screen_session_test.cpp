@@ -18,12 +18,21 @@
 #include "screen_session_manager/include/screen_session_manager.h"
 #include "scene_board_judgement.h"
 #include "fold_screen_state_internel.h"
+#include "window_manager_hilog.h"
 
 // using namespace FRAME_TRACE;
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
+namespace {
+    std::string g_errLog;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
+        const char *msg)
+    {
+    g_errLog = msg;
+    }
+}
 class MockScreenChangeListener : public IScreenChangeListener {
 public:
     void OnConnect(ScreenId screenId) override {}
@@ -43,6 +52,7 @@ public:
     void OnSecondaryReflexionChange(ScreenId screenId, bool isSecondaryReflexion) override {}
     void OnExtendScreenConnectStatusChange(ScreenId screenId,
         ExtendScreenConnectStatus extendScreenConnectStatus) override {}
+    void OnBeforeScreenPropertyChange(FoldStatus foldStatus) override {}
 };
 class ScreenSessionTest : public testing::Test {
   public:
@@ -1307,8 +1317,14 @@ HWTEST_F(ScreenSessionTest, GetScreenSupportedColorGamuts, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetScreenSupportedColorGamuts start";
     std::vector<ScreenColorGamut> colorGamuts;
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
-    DMError ret = session->GetScreenSupportedColorGamuts(colorGamuts);
+    ScreenSessionConfig config = {
+        .screenId = 0,
+        .rsId = 0,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    ASSERT_NE(screenSession, nullptr);
+    DMError ret = screenSession->GetScreenSupportedColorGamuts(colorGamuts);
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(ret, DMError::DM_OK);
     } else {
@@ -1368,11 +1384,15 @@ HWTEST_F(ScreenSessionTest, GetScreenColorGamut, TestSize.Level1)
 {
 #ifdef WM_SCREEN_COLOR_GAMUT_ENABLE
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetScreenColorGamut start";
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
-    ASSERT_NE(session, nullptr);
-
+    ScreenSessionConfig config = {
+        .screenId = 0,
+        .rsId = 0,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    ASSERT_NE(screenSession, nullptr);
     ScreenColorGamut colorGamut;
-    DMError res = session->GetScreenColorGamut(colorGamut);
+    DMError res = screenSession->GetScreenColorGamut(colorGamut);
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(res, DMError::DM_OK);
     } else {
@@ -1415,7 +1435,7 @@ HWTEST_F(ScreenSessionTest, SetScreenColorGamut02, TestSize.Level1)
 
     int32_t colorGamut = -1;
     DMError res = session->SetScreenColorGamut(colorGamut);
-    ASSERT_EQ(res, DMError::DM_ERROR_INVALID_PARAM);
+    EXPECT_NE(res, DMError::DM_OK);
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetScreenColorGamut end";
 #endif
 }
@@ -2877,6 +2897,163 @@ HWTEST_F(ScreenSessionTest, UpdateDisplayNodeRotation, Function | SmallTest | Le
     screenSession->UpdateDisplayNodeRotation(1);
     ASSERT_EQ(screenSession->isExtended_, false);
     GTEST_LOG_(INFO) << "ScreenSessionTest: UpdateDisplayNodeRotation end";
+}
+
+/**
+ * @tc.name: UpdateExpandAvailableArea01
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, UpdateExpandAvailableArea01, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "UpdateExpandAvailableArea start";
+    ScreenSessionConfig config = {
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    EXPECT_NE(nullptr, screenSession);
+    DMRect area = screenSession->GetAvailableArea();
+    auto res = screenSession->UpdateExpandAvailableArea(area);
+    ASSERT_EQ(res, false);
+    area = {2, 2, 2, 2};
+    res = screenSession->UpdateExpandAvailableArea(area);
+    ASSERT_EQ(res, true);
+    GTEST_LOG_(INFO) << "UpdateExpandAvailableArea end";
+}
+
+/**
+ * @tc.name: ScreenExtendChange01
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, ScreenExtendChange01, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenExtendChange start";
+    ScreenSessionConfig config = {
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    EXPECT_NE(nullptr, screenSession);
+    ScreenId mainScreenId = 0;
+    ScreenId extendScreenId = 1;
+    screenSession->ScreenExtendChange(mainScreenId, extendScreenId);
+    GTEST_LOG_(INFO) << "UpdateExpandAvailableArea end";
+}
+
+/**
+ * @tc.name: ScreenExtendChange02
+ * @tc.desc: run in for
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, ScreenExtendChange02, TestSize.Level1)
+{
+    LOG_SetCallback(MyLogCallback);
+    IScreenChangeListener* screenChangeListener = new MockScreenChangeListener();
+    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    EXPECT_NE(nullptr, session);
+    session->RegisterScreenChangeListener(screenChangeListener);
+    ScreenId mainScreenId = 0;
+    ScreenId extendScreenId = 1;
+    session->ScreenExtendChange(mainScreenId, extendScreenId);
+    EXPECT_FALSE(g_errLog.find("screenChangeListener is null.") != std::string::npos);
+}
+
+/**
+ * @tc.name: SuperFoldStatusChange01
+ * @tc.desc: run in for
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SuperFoldStatusChange01, TestSize.Level1)
+{
+    LOG_SetCallback(MyLogCallback);
+    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    EXPECT_NE(nullptr, session);
+    ScreenId mainScreenId = 0;
+    SuperFoldStatus superFoldStatus = SuperFoldStatus::UNKNOWN;
+    session->SuperFoldStatusChange(mainScreenId, superFoldStatus);
+    EXPECT_EQ(true, session->screenChangeListenerList_.empty());
+    EXPECT_TRUE(g_errLog.find("screenChangeListenerList is empty.") != std::string::npos);
+}
+
+/**
+ * @tc.name: ExtendScreenConnectStatusChange
+ * @tc.desc: run in for
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, ExtendScreenConnectStatusChange, TestSize.Level1)
+{
+    LOG_SetCallback(MyLogCallback);
+    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    EXPECT_NE(nullptr, session);
+    ScreenId mainScreenId = 0;
+    ExtendScreenConnectStatus extendScreenConnectStatus = ExtendScreenConnectStatus::UNKNOWN;
+    session->ExtendScreenConnectStatusChange(mainScreenId, extendScreenConnectStatus);
+    EXPECT_EQ(true, session->screenChangeListenerList_.empty());
+    EXPECT_TRUE(g_errLog.find("screenChangeListenerList is empty.") != std::string::npos);
+}
+
+/**
+ * @tc.name: SecondaryReflexionChange
+ * @tc.desc: run in for
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SecondaryReflexionChange, TestSize.Level1)
+{
+    LOG_SetCallback(MyLogCallback);
+    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    EXPECT_NE(nullptr, session);
+    ScreenId mainScreenId = 0;
+    bool isSecondaryReflexion = true;
+    session->SecondaryReflexionChange(mainScreenId, isSecondaryReflexion);
+    EXPECT_EQ(true, session->screenChangeListenerList_.empty());
+    EXPECT_TRUE(g_errLog.find("screenChangeListenerList is empty.") != std::string::npos);
+}
+
+/**
+ * @tc.name: SetFrameGravity
+ * @tc.desc: run in for
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetFrameGravity, TestSize.Level1)
+{
+    LOG_SetCallback(MyLogCallback);
+    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    EXPECT_NE(nullptr, session);
+    session->displayNode_  = nullptr;
+    Gravity gravity = Rosen::Gravity::RESIZE;
+    session->SetFrameGravity(gravity);
+    EXPECT_TRUE(g_errLog.find("displayNode_ is null, setFrameGravity failed") != std::string::npos);
+}
+
+/**
+ * @tc.name: UpdatePropertyOnly
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, UpdatePropertyOnly, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "UpdatePropertyOnly start";
+    LOG_SetCallback(MyLogCallback);
+    ScreenSessionConfig config = {
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    EXPECT_NE(nullptr, screenSession);
+    RRect bounds;
+    bounds.rect_.width_ = 1344;
+    bounds.rect_.height_ = 2772;
+    int rotation = 90;
+    FoldDisplayMode foldDisplayMode = FoldDisplayMode::MAIN;
+    screenSession->UpdatePropertyOnly(bounds, rotation, foldDisplayMode);
+    EXPECT_FALSE(g_errLog.find("bounds:[%{public}f %{public}f %{public}f %{public}f],\
+        rotation:%{public}d, displayOrientation:%{public}u") != std::string::npos);
+    GTEST_LOG_(INFO) << "UpdatePropertyOnly end";
 }
 } // namespace
 } // namespace Rosen

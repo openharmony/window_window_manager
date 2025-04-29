@@ -24,7 +24,6 @@
 #include "wm_common.h"
 #include "mock_message_parcel.h"
 
-
 using namespace testing;
 using namespace testing::ext;
 
@@ -40,21 +39,13 @@ public:
     sptr<SessionStageProxy> sessionStage_ = sptr<SessionStageProxy>::MakeSptr(iRemoteObjectMocker);
 };
 
-void SessionStageProxyTest::SetUpTestCase()
-{
-}
+void SessionStageProxyTest::SetUpTestCase() {}
 
-void SessionStageProxyTest::TearDownTestCase()
-{
-}
+void SessionStageProxyTest::TearDownTestCase() {}
 
-void SessionStageProxyTest::SetUp()
-{
-}
+void SessionStageProxyTest::SetUp() {}
 
-void SessionStageProxyTest::TearDown()
-{
-}
+void SessionStageProxyTest::TearDown() {}
 
 namespace {
 /**
@@ -103,7 +94,7 @@ HWTEST_F(SessionStageProxyTest, UpdateRect, TestSize.Level1)
     WSError res = sessionStage_->UpdateRect(rect, reason);
     ASSERT_EQ(WSError::WS_OK, res);
     std::shared_ptr<RSTransaction> rsTransaction = std::make_shared<RSTransaction>();
-    SceneAnimationConfig config { .rsTransaction_ = rsTransaction };
+    SceneAnimationConfig config{ .rsTransaction_ = rsTransaction };
     res = sessionStage_->UpdateRect(rect, reason, config);
     ASSERT_EQ(WSError::WS_OK, res);
 }
@@ -743,6 +734,45 @@ HWTEST_F(SessionStageProxyTest, NotifyTargetRotationInfo, Function | SmallTest |
     WSError res = sessionStage_->NotifyTargetRotationInfo(info);
     ASSERT_EQ(WSError::WS_OK, res);
 }
+
+/**
+ * @tc.name: SetCurrentRotation
+ * @tc.desc: test function : SetCurrentRotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, SetCurrentRotation, Function | SmallTest | Level1)
+{
+    int currentRotation = 1;
+    ASSERT_TRUE(sessionStage_ != nullptr);
+    WSError res = sessionStage_->SetCurrentRotation(currentRotation);
+    ASSERT_EQ(WSError::WS_OK, res);
 }
+
+/**
+ * @tc.name: ReadLittleStringVectorFromParcel
+ * @tc.desc: test function : ReadLittleStringVectorFromParcel
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, ReadLittleStringVectorFromParcel, Function | SmallTest | Level1)
+{
+    bool isAttach = false;
+    ASSERT_TRUE(sessionStage_ != nullptr);
+    WSError res = sessionStage_->NotifyWindowAttachStateChange(isAttach);
+    ASSERT_EQ(WSError::WS_OK, res);
 }
+
+/**
+ * @tc.name: NotifyWindowCrossAxisChange
+ * @tc.desc: test function : NotifyWindowCrossAxisChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, NotifyWindowCrossAxisChange, Function | SmallTest | Level1)
+{
+    CrossAxisState state = CrossAxisState::STATE_CROSS;
+    ASSERT_TRUE(sessionStage_ != nullptr);
+    sessionStage_->NotifyWindowCrossAxisChange(state);
+    ASSERT_NE(nullptr, sessionStage_);
 }
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

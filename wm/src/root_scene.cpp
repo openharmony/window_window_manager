@@ -315,7 +315,7 @@ void RootScene::RegisterGetSessionAvoidAreaByTypeCallback(GetSessionAvoidAreaByT
     getSessionAvoidAreaByTypeCallback_ = std::move(callback);
 }
 
-uint32_t RootScene::GetStatusBarHeight()
+uint32_t RootScene::GetStatusBarHeight() const
 {
     uint32_t height = 0;
     if (getStatusBarHeightCallback_ == nullptr) {

@@ -238,6 +238,18 @@ HWTEST_F(ScreenSessionManagerTest, GetCutoutInfoWithRotation02, Function | Small
     auto cutoutInfo = ssm_->GetCutoutInfoWithRotation(id, rotation);
     ASSERT_NE(cutoutInfo, nullptr);
 }
+
+/**
+ * @tc.name: OnBeforeScreenPropertyChange
+ * @tc.desc: OnBeforeScreenPropertyChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, OnBeforeScreenPropertyChange, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->OnBeforeScreenPropertyChange(FoldStatus::UNKNOWN);
+    ASSERT_EQ(ssm_->clientProxy_, nullptr);
+}
 }
 }
 }

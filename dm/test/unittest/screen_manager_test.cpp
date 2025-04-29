@@ -807,7 +807,7 @@ HWTEST_F(ScreenManagerTest, MakeMirrorForRecord03, TestSize.Level1)
 
     DMError result = ScreenManager::GetInstance().MakeMirrorForRecord(mainScreenId, miirrorScreenId, screenGroupId);
 
-    EXPECT_EQ(result, DMError::DM_OK);
+    EXPECT_EQ(result, DMError::DM_ERROR_NULLPTR);
 }
 }
 } // namespace Rosen

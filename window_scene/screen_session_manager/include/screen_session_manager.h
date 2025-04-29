@@ -95,6 +95,7 @@ public:
 
     ScreenId GetInternalScreenId() override;
     bool SetScreenPowerById(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason) override;
+    bool SetScreenPowerForSuperFoldDevice(ScreenId screenId, ScreenPowerState state);
     DisplayState GetDisplayState(DisplayId displayId) override;
     bool SetScreenBrightness(uint64_t screenId, uint32_t level) override;
     uint32_t GetScreenBrightness(uint64_t screenId) override;
@@ -273,6 +274,8 @@ public:
     void SetIsExtendScreenConnected(bool isExtendScreenConnected);
     void HandleExtendScreenConnect(ScreenId screenId);
     void HandleExtendScreenDisconnect(ScreenId screenId);
+    bool GetIsFoldStatusLocked();
+    void SetIsFoldStatusLocked(bool isFoldStatusLocked);
     bool GetIsOuterOnlyMode();
     void SetIsOuterOnlyMode(bool isOuterOnlyMode);
     bool GetIsOuterOnlyModeBeforePowerOff();
@@ -381,8 +384,10 @@ public:
     void OnSecondaryReflexionChange(ScreenId screenId, bool isSecondaryReflexion) override;
     void OnExtendScreenConnectStatusChange(ScreenId screenId,
         ExtendScreenConnectStatus extendScreenConnectStatus) override;
+    void OnBeforeScreenPropertyChange(FoldStatus foldStatus) override;
     void SetDefaultScreenId(ScreenId defaultId);
     sptr<IScreenSessionManagerClient> GetClientProxy();
+    void SetClientProxy(const sptr<IScreenSessionManagerClient>& client);
     void NotifyCastWhenScreenConnectChange(bool isConnected);
     void NotifyCastWhenSwitchScbNode();
     void MultiScreenModeChange(const std::string& mainScreenId, const std::string& secondaryScreenId,
@@ -437,6 +442,7 @@ public:
     void UpdateScreenIdManager(sptr<ScreenSession>& innerScreen, sptr<ScreenSession>& externalScreen);
     std::string DumperClientScreenSessions();
     void SetMultiScreenModeChangeTracker(std::string changeProc);
+    void SetRSScreenPowerStatus(ScreenId screenId, ScreenPowerStatus status);
 
 protected:
     ScreenSessionManager();
@@ -532,11 +538,16 @@ private:
     std::shared_ptr<RSDisplayNode> GetDisplayNodeByDisplayId(DisplayId displayId);
     void RefreshMirrorScreenRegion(ScreenId screenId);
     void IsEnableRegionRotation(sptr<ScreenSession> screenSession);
-    void CalculateXYPosition(sptr<ScreenSession> screenSession);
+    void CalculateXYPosition(sptr<ScreenSession> firstScreenSession,
+        sptr<ScreenSession> secondaryScreenSession = nullptr);
+    void CalculateSecondryXYPosition(sptr<ScreenSession> firstScreenSession,
+        
+        sptr<ScreenSession> secondaryScreenSession);
     bool IsSpecialApp();
     void SetMultiScreenRelativePositionInner(sptr<ScreenSession>& firstScreenSession,
         sptr<ScreenSession>& secondScreenSession, MultiScreenPositionOptions mainScreenOptions,
         MultiScreenPositionOptions secondScreenOption);
+    void HandleSuperFoldStatusLocked(bool isLocked);
 #ifdef DEVICE_STATUS_ENABLE
     void SetDragWindowScreenId(ScreenId screenId, ScreenId displayNodeScreenId);
 #endif // DEVICE_STATUS_ENABLE
@@ -598,6 +609,7 @@ private:
     FoldDisplayMode oldScbDisplayMode_ = FoldDisplayMode::UNKNOWN;
 
     sptr<IScreenSessionManagerClient> clientProxy_;
+    std::mutex clientProxyMutex_; // above guarded by clientProxyMutex_
     ClientAgentContainer<IDisplayManagerAgent, DisplayManagerAgentType> dmAgentContainer_;
     DeviceScreenConfig deviceScreenConfig_;
     std::vector<DisplayPhysicalResolution> allDisplayPhysicalResolution_ {};
@@ -631,6 +643,7 @@ private:
     bool isCoordinationFlag_ = false;
     bool isFoldScreenOuterScreenReady_ = false;
     bool isCameraBackSelfie_ = false;
+    bool isDeviceShutDown_ = false;
     uint32_t hdmiScreenCount_ = 0;
     uint32_t virtualScreenCount_ = 0;
     uint32_t currentExpandScreenCount_ = 0;
@@ -653,6 +666,7 @@ private:
     bool isExtendScreenConnected_ = false;
     bool isOuterOnlyMode_ = false;
     bool isOuterOnlyModeBeforePowerOff_ = false;
+    std::atomic<bool> isFoldStatusLocked_ = false;
 
     /**
      * On/Off screen
@@ -680,6 +694,7 @@ private:
     std::mutex snapBypickerMutex_;
     std::mutex switchUserMutex_;
     std::condition_variable switchUserCV_;
+    std::mutex screenPowerMutex_;
 
     std::mutex freezedPidListMutex_;
     std::set<int32_t> freezedPidList_;

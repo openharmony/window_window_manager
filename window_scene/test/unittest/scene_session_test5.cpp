@@ -64,21 +64,13 @@ public:
     void TearDown() override;
 };
 
-void SceneSessionTest5::SetUpTestCase()
-{
-}
+void SceneSessionTest5::SetUpTestCase() {}
 
-void SceneSessionTest5::TearDownTestCase()
-{
-}
+void SceneSessionTest5::TearDownTestCase() {}
 
-void SceneSessionTest5::SetUp()
-{
-}
+void SceneSessionTest5::SetUp() {}
 
-void SceneSessionTest5::TearDown()
-{
-}
+void SceneSessionTest5::TearDown() {}
 
 namespace {
 
@@ -147,11 +139,11 @@ HWTEST_F(SceneSessionTest5, HookAvoidAreaInCompatibleMode, TestSize.Level1)
 
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
-    WSRect rect = {800, 100, 1000, 1000};
+    WSRect rect = { 800, 100, 1000, 1000 };
     AvoidArea avoidArea;
-    avoidArea.topRect_ = {-1, -1, -1, -1};
-    avoidArea.bottomRect_ = {-1, -1, -1, -1};
-    Rect invalidRect = {-1, -1, -1, -1};
+    avoidArea.topRect_ = { -1, -1, -1, -1 };
+    avoidArea.bottomRect_ = { -1, -1, -1, -1 };
+    Rect invalidRect = { -1, -1, -1, -1 };
     // hook Func only support compatibleMode
     session->SetCompatibleModeInPc(false, true);
     session->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
@@ -167,12 +159,12 @@ HWTEST_F(SceneSessionTest5, HookAvoidAreaInCompatibleMode, TestSize.Level1)
     session->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     session->HookAvoidAreaInCompatibleMode(rect, AvoidAreaType::TYPE_SYSTEM, avoidArea);
     auto vpr = 3.5f;
-    Rect targetRect = {0, 0, rect.width_, 40 * vpr};
+    Rect targetRect = { 0, 0, rect.width_, 40 * vpr };
     EXPECT_TRUE(avoidArea.topRect_ == targetRect);
 
     // test buttom aiBar avoidArea
     session->HookAvoidAreaInCompatibleMode(rect, AvoidAreaType::TYPE_NAVIGATION_INDICATOR, avoidArea);
-    targetRect = {0, rect.height_ - 28 * vpr, rect.width_, 28 * vpr};
+    targetRect = { 0, rect.height_ - 28 * vpr, rect.width_, 28 * vpr };
     EXPECT_TRUE(avoidArea.bottomRect_ == targetRect);
 }
 
@@ -226,7 +218,7 @@ HWTEST_F(SceneSessionTest5, GetSystemAvoidArea01, TestSize.Level1)
     session->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     session->GetSystemAvoidArea(rect, avoidArea);
     rect.height_ = 3;
-    rect.width_ =4;
+    rect.width_ = 4;
     session->GetSystemAvoidArea(rect, avoidArea);
 
     session->isVisible_ = true;
@@ -263,9 +255,7 @@ HWTEST_F(SceneSessionTest5, NotifyOutsideDownEvent, TestSize.Level1)
     session->specificCallback_ = specificCallback;
     session->specificCallback_->onOutsideDownEvent_ = nullptr;
     session->NotifyOutsideDownEvent(pointerEvent);
-    OnOutsideDownEvent func = [](int32_t x, int32_t y) {
-        return;
-    };
+    OnOutsideDownEvent func = [](int32_t x, int32_t y) { return; };
     session->specificCallback_->onOutsideDownEvent_ = func;
     session->NotifyOutsideDownEvent(pointerEvent);
     auto res = pointerEvent->GetPointerItem(2024, pointerItem);
@@ -304,9 +294,7 @@ HWTEST_F(SceneSessionTest5, TransferPointerEventInner, TestSize.Level1)
     session->specificCallback_->onSessionTouchOutside_ = nullptr;
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, session->TransferPointerEventInner(pointerEvent, false));
 
-    NotifySessionTouchOutsideCallback func = [](int32_t persistentId) {
-        return;
-    };
+    NotifySessionTouchOutsideCallback func = [](int32_t persistentId) { return; };
     session->specificCallback_->onSessionTouchOutside_ = func;
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, session->TransferPointerEventInner(pointerEvent, false));
     pointerEvent->SetPointerAction(2);
@@ -462,10 +450,10 @@ HWTEST_F(SceneSessionTest5, UpdateSessionPropertyByAction, TestSize.Level1)
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, session->UpdateSessionPropertyByAction
-        (nullptr, WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE));
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, session->UpdateSessionPropertyByAction
-        (property, WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE));
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR,
+              session->UpdateSessionPropertyByAction(nullptr, WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION,
+              session->UpdateSessionPropertyByAction(property, WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE));
 }
 
 /**
@@ -481,10 +469,10 @@ HWTEST_F(SceneSessionTest5, SetSessionRectChangeCallback, TestSize.Level1)
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
     WSRect rec = { 1, 1, 1, 1 };
-    NotifySessionRectChangeFunc func = [](const WSRect& rect, SizeChangeReason reason,
-        DisplayId displayId, const RectAnimationConfig& rectAnimationConfig) {
-        return;
-    };
+    NotifySessionRectChangeFunc func = [](const WSRect& rect,
+                                          SizeChangeReason reason,
+                                          DisplayId displayId,
+                                          const RectAnimationConfig& rectAnimationConfig) { return; };
     session->SetSessionRectChangeCallback(nullptr);
     info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     session->SetSessionRectChangeCallback(func);
@@ -510,10 +498,10 @@ HWTEST_F(SceneSessionTest5, SetSessionRectChangeCallback02, TestSize.Level1)
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
     WSRect rec = { 1, 1, 1, 1 };
-    NotifySessionRectChangeFunc func = [](const WSRect& rect, SizeChangeReason reason,
-        DisplayId displayId, const RectAnimationConfig& rectAnimationConfig) {
-        return;
-    };
+    NotifySessionRectChangeFunc func = [](const WSRect& rect,
+                                          SizeChangeReason reason,
+                                          DisplayId displayId,
+                                          const RectAnimationConfig& rectAnimationConfig) { return; };
     session->SetSessionRectChangeCallback(nullptr);
 
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
@@ -552,10 +540,10 @@ HWTEST_F(SceneSessionTest5, SetSessionRectChangeCallback03, TestSize.Level1)
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     session->SetSessionProperty(property);
     WSRect rec = { 1, 1, 1, 1 };
-    NotifySessionRectChangeFunc func = [](const WSRect& rect, const SizeChangeReason reason,
-        DisplayId displayId, const RectAnimationConfig& rectAnimationConfig) {
-        return;
-    };
+    NotifySessionRectChangeFunc func = [](const WSRect& rect,
+                                          const SizeChangeReason reason,
+                                          DisplayId displayId,
+                                          const RectAnimationConfig& rectAnimationConfig) { return; };
     session->SetSessionRequestRect(rec);
     session->SetSessionRectChangeCallback(nullptr);
 
@@ -608,7 +596,7 @@ HWTEST_F(SceneSessionTest5, GetSystemAvoidArea02, TestSize.Level1)
     session->GetSystemAvoidArea(rect, avoidArea);
     session->GetSessionProperty()->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     rect.height_ = 2;
-    rect.width_ =1 ;
+    rect.width_ = 1;
     session->GetSystemAvoidArea(rect, avoidArea);
     rect.height_ = 1;
     session->GetSystemAvoidArea(rect, avoidArea);
@@ -828,7 +816,7 @@ HWTEST_F(SceneSessionTest5, UpdateKeyFrameState, Function | SmallTest | Level2)
     EXPECT_NE(nullptr, rsTransaction);
 
     session->moveDragController_ = nullptr;
-    session->sessionStage_= nullptr;
+    session->sessionStage_ = nullptr;
     SizeChangeReason reason = { SizeChangeReason::DRAG_START };
     WSRect rect;
     KeyFramePolicy keyFramePolicy;
@@ -838,7 +826,7 @@ HWTEST_F(SceneSessionTest5, UpdateKeyFrameState, Function | SmallTest | Level2)
     session->moveDragController_ = moveDragController;
     session->UpdateKeyFrameState(reason, rect);
     EXPECT_EQ(session->keyFramePolicy_.running_, false);
-    session->sessionStage_= sessionStage;
+    session->sessionStage_ = sessionStage;
     session->UpdateKeyFrameState(reason, rect);
     EXPECT_EQ(session->keyFramePolicy_.running_, false);
     session->moveDragController_->isStartDrag_ = true;
@@ -875,7 +863,7 @@ HWTEST_F(SceneSessionTest5, RequestKeyFrameNextVsync, Function | SmallTest | Lev
     EXPECT_NE(session, nullptr);
     uint64_t requestStamp = 0;
     uint64_t count = 0;
-    
+
     session->RequestKeyFrameNextVsync(requestStamp, count);
     session->keyFramePolicy_.running_ = true;
     session->RequestKeyFrameNextVsync(requestStamp, count);
@@ -917,8 +905,9 @@ HWTEST_F(SceneSessionTest5, OnKeyFrameNextVsync, Function | SmallTest | Level2)
     EXPECT_EQ(session->keyFrameDragPauseNoticed_, true);
     session->keyFrameDragPauseNoticed_ = false;
     session->keyFrameAnimating_ = false;
-    uint64_t nowTimeStamp = std::chrono::duration_cast<std::chrono::milliseconds>(
-        std::chrono::system_clock::now().time_since_epoch()).count();
+    uint64_t nowTimeStamp =
+        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())
+            .count();
     session->lastKeyFrameDragStamp_ = nowTimeStamp;
     session->OnKeyFrameNextVsync(count);
     EXPECT_EQ(session->keyFrameDragPauseNoticed_, false);
@@ -951,8 +940,9 @@ HWTEST_F(SceneSessionTest5, KeyFrameNotifyFilter, Function | SmallTest | Level2)
     EXPECT_EQ(session->KeyFrameNotifyFilter(rect, reason), false);
     EXPECT_EQ(session->KeyFrameNotifyFilter(rect, reason), true);
     session->lastKeyFrameRect_ = rect;
-    WSRect moveToRect = { 0, 0, static_cast<int>(session->keyFramePolicy_.distance_),
-        static_cast<int>(session->keyFramePolicy_.distance_) };
+    WSRect moveToRect = {
+        0, 0, static_cast<int>(session->keyFramePolicy_.distance_), static_cast<int>(session->keyFramePolicy_.distance_)
+    };
     session->keyFrameAnimating_ = false;
     EXPECT_EQ(session->KeyFrameNotifyFilter(moveToRect, reason), false);
     session->keyFramePolicy_.distance_ = 0;
@@ -995,9 +985,8 @@ HWTEST_F(SceneSessionTest5, UpdateWinRectForSystemBar, TestSize.Level1)
     session->specificCallback_ = specificCallback;
     WSRect rect = { 1, 10, 3, 4 };
     session->UpdateWinRectForSystemBar(rect);
-    GetSceneSessionVectorByTypeAndDisplayIdCallback func = [session](WindowType type, uint64_t displayId)->
-        std::vector<sptr<SceneSession>>
-    {
+    GetSceneSessionVectorByTypeAndDisplayIdCallback func =
+        [session](WindowType type, uint64_t displayId) -> std::vector<sptr<SceneSession>> {
         std::vector<sptr<SceneSession>> vSession;
         vSession.push_back(session);
         return vSession;
@@ -1033,12 +1022,8 @@ HWTEST_F(SceneSessionTest5, UpdateNativeVisibility, TestSize.Level1)
     EXPECT_NE(session, nullptr);
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    NotifyWindowInfoUpdateCallback dateFunc = [](int32_t persistentId, WindowUpdateType type) {
-        return;
-    };
-    UpdateAvoidAreaCallback areaFunc = [](const int32_t persistentId) {
-        return;
-    };
+    NotifyWindowInfoUpdateCallback dateFunc = [](int32_t persistentId, WindowUpdateType type) { return; };
+    UpdateAvoidAreaCallback areaFunc = [](const int32_t persistentId) { return; };
     specificCallback->onWindowInfoUpdate_ = dateFunc;
     specificCallback->onUpdateAvoidArea_ = areaFunc;
     session->specificCallback_ = specificCallback;
@@ -1237,9 +1222,7 @@ HWTEST_F(SceneSessionTest5, UpdateWindowAnimationFlag, TestSize.Level1)
     session->onWindowAnimationFlagChange_ = nullptr;
     EXPECT_EQ(WSError::WS_OK, session->UpdateWindowAnimationFlag(true));
 
-    NotifyWindowAnimationFlagChangeFunc func = [](const bool flag) {
-        return;
-    };
+    NotifyWindowAnimationFlagChangeFunc func = [](const bool flag) { return; };
     session->onWindowAnimationFlagChange_ = func;
     EXPECT_EQ(WSError::WS_OK, session->UpdateWindowAnimationFlag(true));
 }
@@ -1453,8 +1436,8 @@ HWTEST_F(SceneSessionTest5, HandleActionUpdateWindowModeSupportType, TestSize.Le
 
     property->isSystemCalling_ = false;
     session->SetSessionProperty(property);
-    ASSERT_EQ(WMError::WM_ERROR_NOT_SYSTEM_APP, session->HandleActionUpdateWindowModeSupportType(property,
-        WSPropertyChangeAction::ACTION_UPDATE_RECT));
+    ASSERT_EQ(WMError::WM_ERROR_NOT_SYSTEM_APP,
+              session->HandleActionUpdateWindowModeSupportType(property, WSPropertyChangeAction::ACTION_UPDATE_RECT));
 }
 
 /**
@@ -1557,14 +1540,12 @@ HWTEST_F(SceneSessionTest5, ProcessUpdatePropertyByAction, TestSize.Level1)
     session->ProcessUpdatePropertyByAction(property, WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS);
     session->ProcessUpdatePropertyByAction(property, WSPropertyChangeAction::ACTION_UPDATE_ORIENTATION);
     session->ProcessUpdatePropertyByAction(property, WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE);
-    session->ProcessUpdatePropertyByAction(
-        property, WSPropertyChangeAction::ACTION_UPDATE_SYSTEM_PRIVACY_MODE);
+    session->ProcessUpdatePropertyByAction(property, WSPropertyChangeAction::ACTION_UPDATE_SYSTEM_PRIVACY_MODE);
     session->ProcessUpdatePropertyByAction(property, WSPropertyChangeAction::ACTION_UPDATE_SNAPSHOT_SKIP);
     session->ProcessUpdatePropertyByAction(property, WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE);
     session->ProcessUpdatePropertyByAction(property, WSPropertyChangeAction::ACTION_UPDATE_OTHER_PROPS);
     session->ProcessUpdatePropertyByAction(property, WSPropertyChangeAction::ACTION_UPDATE_STATUS_PROPS);
-    session->ProcessUpdatePropertyByAction(
-        property, WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_INDICATOR_PROPS);
+    session->ProcessUpdatePropertyByAction(property, WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_INDICATOR_PROPS);
     session->ProcessUpdatePropertyByAction(property, WSPropertyChangeAction::ACTION_UPDATE_FLAGS);
     session->ProcessUpdatePropertyByAction(property, WSPropertyChangeAction::ACTION_UPDATE_MODE);
     session->ProcessUpdatePropertyByAction(property, WSPropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG);
@@ -1573,10 +1554,9 @@ HWTEST_F(SceneSessionTest5, ProcessUpdatePropertyByAction, TestSize.Level1)
     session->ProcessUpdatePropertyByAction(property, WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS);
     session->ProcessUpdatePropertyByAction(property, WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED);
     session->ProcessUpdatePropertyByAction(property, WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED);
-    session->ProcessUpdatePropertyByAction(
-        property, WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_FLOATING_WINDOWS);
-    session->ProcessUpdatePropertyByAction(
-        property, WSPropertyChangeAction::ACTION_UPDATE_TEXTFIELD_AVOID_INFO);
+    session->ProcessUpdatePropertyByAction(property,
+                                           WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_FLOATING_WINDOWS);
+    session->ProcessUpdatePropertyByAction(property, WSPropertyChangeAction::ACTION_UPDATE_TEXTFIELD_AVOID_INFO);
     session->ProcessUpdatePropertyByAction(property, WSPropertyChangeAction::ACTION_UPDATE_WINDOW_MASK);
     session->ProcessUpdatePropertyByAction(property, WSPropertyChangeAction::ACTION_UPDATE_TOPMOST);
     session->ProcessUpdatePropertyByAction(property, WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO);
@@ -1598,13 +1578,11 @@ HWTEST_F(SceneSessionTest5, HandleActionUpdateTurnScreenOn, TestSize.Level0)
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     EXPECT_NE(property, nullptr);
 
-    auto res = session->HandleActionUpdateTurnScreenOn(
-        property, WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON);
+    auto res = session->HandleActionUpdateTurnScreenOn(property, WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON);
     EXPECT_EQ(res, WMError::WM_OK);
 
     property->SetTurnScreenOn(true);
-    res = session->HandleActionUpdateTurnScreenOn(
-        property, WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON);
+    res = session->HandleActionUpdateTurnScreenOn(property, WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON);
     EXPECT_EQ(res, WMError::WM_OK);
 }
 
@@ -1628,8 +1606,7 @@ HWTEST_F(SceneSessionTest5, HandleActionUpdatePrivacyMode1, TestSize.Level0)
     session->property_->SetPrivacyMode(false);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetPrivacyMode(true);
-    auto res =
-        session->HandleActionUpdatePrivacyMode(property, WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE);
+    auto res = session->HandleActionUpdatePrivacyMode(property, WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE);
     EXPECT_EQ(WMError::WM_OK, res);
     EXPECT_EQ(true, session->property_->GetPrivacyMode());
 }
@@ -1654,8 +1631,7 @@ HWTEST_F(SceneSessionTest5, HandleActionUpdatePrivacyMode2, TestSize.Level1)
     session->property_->SetPrivacyMode(true);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetPrivacyMode(false);
-    auto res =
-        session->HandleActionUpdatePrivacyMode(property, WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE);
+    auto res = session->HandleActionUpdatePrivacyMode(property, WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE);
     EXPECT_EQ(WMError::WM_OK, res);
     EXPECT_EQ(false, session->property_->GetPrivacyMode());
 }
@@ -1832,8 +1808,8 @@ HWTEST_F(SceneSessionTest5, MoveUnderInteriaAndNotifyRectChange, TestSize.Level1
     auto controller = mainSession->pcFoldScreenController_;
     WSRect rect = { 0, 0, 100, 100 };
     EXPECT_FALSE(mainSession->MoveUnderInteriaAndNotifyRectChange(rect, SizeChangeReason::DRAG_END));
-    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::HALF_FOLDED,
-        { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(
+        0, SuperFoldStatus::HALF_FOLDED, { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
     PcFoldScreenManager::GetInstance().vpr_ = 1.7f;
 
     WSRect rect0 = { 100, 100, 400, 400 };
@@ -1871,7 +1847,7 @@ HWTEST_F(SceneSessionTest5, ThrowSlipDirectly, TestSize.Level1)
     sptr<MainSession> mainSession = sptr<MainSession>::MakeSptr(info, nullptr);
     WSRect rect = { 100, 100, 400, 400 };
     mainSession->winRect_ = rect;
-    mainSession->ThrowSlipDirectly(ThrowSlipMode::THREE_FINGERS_SWIPE, WSRectF { 0.0f, 0.0f, 0.0f, 0.0f });
+    mainSession->ThrowSlipDirectly(ThrowSlipMode::THREE_FINGERS_SWIPE, WSRectF{ 0.0f, 0.0f, 0.0f, 0.0f });
     EXPECT_EQ(mainSession->winRect_, rect);
 }
 
@@ -1934,9 +1910,7 @@ HWTEST_F(SceneSessionTest5, SetSessionDisplayIdChangeCallback, TestSize.Level1)
 {
     const SessionInfo info;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sceneSession->SetSessionDisplayIdChangeCallback([] (uint64_t displayId) {
-        return;
-    });
+    sceneSession->SetSessionDisplayIdChangeCallback([](uint64_t displayId) { return; });
     ASSERT_NE(sceneSession->sessionDisplayIdChangeFunc_, nullptr);
 }
 
@@ -1951,9 +1925,7 @@ HWTEST_F(SceneSessionTest5, NotifySessionDisplayIdChange, TestSize.Level1)
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     uint64_t checkDisplayId = 345;
     uint64_t moveDisplayId = 456;
-    sceneSession->sessionDisplayIdChangeFunc_ = [&checkDisplayId] (uint64_t displayId) {
-        checkDisplayId = displayId;
-    };
+    sceneSession->sessionDisplayIdChangeFunc_ = [&checkDisplayId](uint64_t displayId) { checkDisplayId = displayId; };
     sceneSession->NotifySessionDisplayIdChange(moveDisplayId);
     ASSERT_EQ(moveDisplayId, checkDisplayId);
 }
@@ -1979,7 +1951,7 @@ HWTEST_F(SceneSessionTest5, CheckAndMoveDisplayIdRecursively, TestSize.Level1)
                 GTEST_LOG_(INFO) << "SceneSessionMocker:NULL";
                 return;
             }
-    });
+        });
     sceneSession->property_->SetDisplayId(displayId);
     sceneSession->shouldFollowParentWhenShow_ = true;
     EXPECT_CALL(*sceneSession, SetScreenId(displayId)).Times(0);
@@ -2304,7 +2276,7 @@ HWTEST_F(SceneSessionTest5, UpdateDensity, TestSize.Level1)
     };
     sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
     ASSERT_NE(nullptr, screenSession);
-    
+
     session->UpdateDensity();
     WSRect resultRect = { 10, 10, 800, 600 };
     EXPECT_EQ(session->winRect_, resultRect);
@@ -2328,7 +2300,7 @@ HWTEST_F(SceneSessionTest5, NotifyRotationChange, Function | SmallTest | Level2)
     session->isRotationChangeCallbackRegistered = true;
     res = session->NotifyRotationChange(rotationInfo);
     EXPECT_EQ(res.windowRect_.width_, 0);
-    
+
     sptr<SessionStageMocker> sessionStageMocker = sptr<SessionStageMocker>::MakeSptr();
     ASSERT_NE(sessionStageMocker, nullptr);
     session->sessionStage_ = sessionStageMocker;
@@ -2350,9 +2322,7 @@ HWTEST_F(SceneSessionTest5, SetSessionGetTargetOrientationConfigInfoCallback, Fu
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
 
-    sceneSession->SetSessionGetTargetOrientationConfigInfoCallback([](uint32_t targetOrientation) {
-        return;
-    });
+    sceneSession->SetSessionGetTargetOrientationConfigInfoCallback([](uint32_t targetOrientation) { return; });
     EXPECT_NE(sceneSession->sessionGetTargetOrientationConfigInfoFunc_, nullptr);
 }
 
@@ -2420,6 +2390,6 @@ HWTEST_F(SceneSessionTest5, GetSystemBarPropertyForRotation, Function | SmallTes
     sceneSession->SetSystemBarPropertyForRotation(properties);
     EXPECT_EQ(sceneSession->GetSystemBarPropertyForRotation(), properties);
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

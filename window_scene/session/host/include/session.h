@@ -136,6 +136,9 @@ struct DetectTaskInfo {
     DetectTaskState taskState = DetectTaskState::NO_TASK;
 };
 
+const std::string ATTACH_EVENT_NAME { "wms::ReportWindowTimeout_Attach" };
+const std::string DETACH_EVENT_NAME { "wms::ReportWindowTimeout_Detach" };
+
 class Session : public SessionStub {
 public:
     friend class HidumpController;
@@ -263,6 +266,8 @@ public:
             addSnapshotCallback_ = std::move(task);
         }
     }
+    void SetEnableAddSnapshot(bool enableAddSnapshot = true);
+    bool GetEnableAddSnapshot() const;
 
     SessionState GetSessionState() const;
     virtual void SetSessionState(SessionState state);
@@ -669,6 +674,11 @@ public:
      */
     void SetBorderUnoccupied(bool borderUnoccupied = false);
     bool GetBorderUnoccupied() const;
+
+    /*
+     * Specific Window
+     */
+    void SetWindowAnimationDuration(int32_t duration);
     
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
@@ -901,6 +911,8 @@ private:
     bool ShouldCreateDetectTask(bool isAttach, WindowMode windowMode) const;
     bool ShouldCreateDetectTaskInRecent(bool newShowRecent, bool oldShowRecent, bool isAttach) const;
     void CreateDetectStateTask(bool isAttach, WindowMode windowMode);
+    void PostSpecificSessionLifeCycleTimeoutTask(const std::string& eventName);   // only report for specific window
+    bool IsNeedReportTimeout() const;
 
     /*
      * Window Rotate Animation
@@ -1011,6 +1023,7 @@ private:
     /*
      * Window Scene Snapshot
      */
+    std::atomic<bool> enableAddSnapshot_ = true;
     Task saveSnapshotCallback_ = []() {};
     Task removeSnapshotCallback_ = []() {};
     Task addSnapshotCallback_ = []() {};
@@ -1022,6 +1035,11 @@ private:
      * Window Pattern
      */
     bool borderUnoccupied_ = false;
+
+    /*
+     * Specific Window
+     */
+    int32_t windowAnimationDuration_;
 };
 } // namespace OHOS::Rosen
 

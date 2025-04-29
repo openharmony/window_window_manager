@@ -38,17 +38,14 @@ public:
     void SetUp() override;
     void TearDown() override;
     sptr<SceneSessionManagerStub> stub_;
+
 private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
 
-void SceneSessionManagerStubTest::SetUpTestCase()
-{
-}
+void SceneSessionManagerStubTest::SetUpTestCase() {}
 
-void SceneSessionManagerStubTest::TearDownTestCase()
-{
-}
+void SceneSessionManagerStubTest::TearDownTestCase() {}
 
 void SceneSessionManagerStubTest::SetUp()
 {
@@ -223,8 +220,7 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdDestroyAndDisconnectSpecificSession
  * @tc.desc: test TransIdDestroyAndDisconnectSpecificSessionWithDetachCallback
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, TransIdDestroyAndDisconnectSpecificSessionWithDetachCallback,
-         TestSize.Level1)
+HWTEST_F(SceneSessionManagerStubTest, TransIdDestroyAndDisconnectSpecificSessionWithDetachCallback, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -363,7 +359,7 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdIsValidSessionIds, TestSize.Level1)
     MessageOption option;
 
     data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
-    std::vector<int32_t> points{0, 0};
+    std::vector<int32_t> points{ 0, 0 };
     data.WriteInt32Vector(points);
 
     uint32_t code =
@@ -802,7 +798,7 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdGetSessionDump, TestSize.Level1)
     MessageOption option;
 
     data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
-    std::vector<std::string> params = {"-a"};
+    std::vector<std::string> params = { "-a" };
     data.WriteStringVector(params);
     stub_->HandleGetSessionDump(data, reply);
 
@@ -1062,8 +1058,8 @@ HWTEST_F(SceneSessionManagerStubTest, OnRemoteRequest01, TestSize.Level1)
     sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgent>::MakeSptr();
     data.WriteRemoteObject(windowManagerAgent->AsObject());
 
-    uint32_t code = static_cast<uint32_t>(
-        ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_REGISTER_WINDOW_MANAGER_AGENT);
+    uint32_t code =
+        static_cast<uint32_t>(ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_REGISTER_WINDOW_MANAGER_AGENT);
 
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
@@ -1202,8 +1198,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleDestroyAndDisconnectSpcificSession, 
  * @tc.desc: test HandleDestroyAndDisconnectSpcificSessionWithDetachCallback
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleDestroyAndDisconnectSpcificSessionWithDetachCallback,
-    TestSize.Level1)
+HWTEST_F(SceneSessionManagerStubTest, HandleDestroyAndDisconnectSpcificSessionWithDetachCallback, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1421,7 +1416,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleIsValidSessionIds, TestSize.Level1)
     MessageParcel data;
     MessageParcel reply;
 
-    std::vector<int32_t> points {0, 0};
+    std::vector<int32_t> points{ 0, 0 };
     data.WriteInt32Vector(points);
     int res = stub_->HandleIsValidSessionIds(data, reply);
     EXPECT_EQ(res, ERR_NONE);
@@ -1655,7 +1650,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionDump, TestSize.Level1)
     MessageParcel data;
     MessageParcel reply;
 
-    std::vector<std::string> params = {"-a"};
+    std::vector<std::string> params = { "-a" };
     data.WriteStringVector(params);
     stub_->HandleGetSessionDump(data, reply);
 
@@ -1778,7 +1773,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleNotifyDumpInfoResult, TestSize.Level
     data.WriteUint32(vectorSize);
     stub_->HandleNotifyDumpInfoResult(data, reply);
 
-    std::vector<std::string> info = {"-a", "-b123", "-c3456789", ""};
+    std::vector<std::string> info = { "-a", "-b123", "-c3456789", "" };
     vectorSize = static_cast<uint32_t>(info.size());
     data.WriteUint32(vectorSize);
     uint32_t curSize;
@@ -2034,7 +2029,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleUpdateModalExtensionRect, TestSize.L
 
     sptr<IRemoteObject> token = nullptr;
     data.WriteRemoteObject(token);
-    Rect rect { 1, 2, 3, 4 };
+    Rect rect{ 1, 2, 3, 4 };
     data.WriteInt32(rect.posX_);
     data.WriteInt32(rect.posY_);
     data.WriteInt32(rect.width_);
@@ -2248,7 +2243,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetProcessSurfaceNodeIdByPersistentI
     MessageParcel data;
     MessageParcel reply;
     int32_t pid = 123;
-    std::vector<int32_t> persistentIds = {1, 2, 3};
+    std::vector<int32_t> persistentIds = { 1, 2, 3 };
     std::vector<uint64_t> surfaceNodeIds;
     data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
     data.WriteInt32(pid);
@@ -2268,7 +2263,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSkipSnapshotByUserIdAndBundleNames, 
     MessageParcel data;
     MessageParcel reply;
     int32_t userId = 100;
-    std::vector<std::string> bundleNameList = {"a", "b", "c"};
+    std::vector<std::string> bundleNameList = { "a", "b", "c" };
     data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
     data.WriteInt32(userId);
     data.WriteStringVector(bundleNameList);
@@ -2373,7 +2368,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetDisplayIdByWindowId, TestSize.Lev
 {
     MessageParcel data;
     MessageParcel reply;
-    const std::vector<uint64_t> windowIds = {1, 2};
+    const std::vector<uint64_t> windowIds = { 1, 2 };
     data.WriteUInt64Vector(windowIds);
 
     int res = stub_->HandleGetDisplayIdByWindowId(data, reply);
@@ -2522,6 +2517,6 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetForegroundWindowNum, TestSize.Lev
     int res = stub_->HandleSetForegroundWindowNum(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

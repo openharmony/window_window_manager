@@ -37,6 +37,9 @@ constexpr int UPDATE_TASK_DURATION = 10;
 const std::string UPDATE_WINDOW_INFO_TASK = "UpdateWindowInfoTask";
 static int32_t g_screenRotationOffset = system::GetIntParameter<int32_t>("const.fold.screen_rotation.offset", 0);
 constexpr float ZORDER_UIEXTENSION_INDEX = 0.1;
+constexpr int WINDOW_NAME_TYPE_UNKNOWN = 0;
+constexpr int WINDOW_NAME_TYPE_SCREENSHOT = 1;
+const std::string SCREENSHOT_WINDOW_NAME_PREFIX = "ScreenShotWindow";
 } // namespace
 
 static bool operator==(const MMI::Rect left, const MMI::Rect right)
@@ -733,6 +736,13 @@ std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyMa
     std::vector<MMI::Rect> touchHotAreas;
     std::vector<MMI::Rect> pointerHotAreas;
     UpdateHotAreas(sceneSession, touchHotAreas, pointerHotAreas);
+    int windowNameType = WINDOW_NAME_TYPE_UNKNOWN;
+    std::string windowName = sceneSession->GetWindowNameAllType();
+    std::string prefix = SCREENSHOT_WINDOW_NAME_PREFIX;
+    if (windowName.size() >= prefix.size() && windowName.substr(0, prefix.size()) == prefix) {
+        windowNameType = WINDOW_NAME_TYPE_SCREENSHOT;
+    }
+    auto pixelMap = windowSessionProperty->GetWindowMask();
     MMI::WindowInfo windowInfo = {
         .id = windowId,
         .pid = sceneSession->IsStartMoving() ? static_cast<int32_t>(getpid()) : pid,
@@ -748,17 +758,12 @@ std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyMa
         .zOrder = zOrder,
         .pointerChangeAreas = std::move(pointerChangeAreas),
         .transform = transformData,
+        .pixelMap = pixelMap.get(),
         .windowInputType = static_cast<MMI::WindowInputType>(sceneSession->GetSessionInfo().windowInputType_),
         .windowType = static_cast<int32_t>(windowType),
         .isSkipSelfWhenShowOnVirtualScreen = sceneSession->GetSessionProperty()->GetSkipEventOnCastPlus(),
+        .windowNameType = windowNameType,
     };
-
-    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
-    {
-        std::lock_guard<std::mutex> lock(windowSessionProperty->windowMaskMutex_);
-        pixelMap = windowSessionProperty->GetWindowMask();
-        windowInfo.pixelMap = pixelMap.get();
-    }
     UpdateWindowFlags(displayId, sceneSession, windowInfo);
     if (windowSessionProperty->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_HANDWRITING)) {
         windowInfo.flags |= MMI::WindowInfo::FLAG_BIT_HANDWRITING;

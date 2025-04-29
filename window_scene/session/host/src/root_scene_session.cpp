@@ -177,10 +177,9 @@ AvoidArea RootSceneSession::GetAvoidAreaByType(AvoidAreaType type, const WSRect&
 int32_t RootSceneSession::GetStatusBarHeight()
 {
     int32_t height = 0;
-    if (specificCallback_ == nullptr || specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ == nullptr ||
-        GetSessionProperty() == nullptr) {
-            TLOGE(WmsLogTag::WMS_IMMS, "specificCallback_ or session property is null");
-            return height;
+    if (specificCallback_ == nullptr || specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "specificCallback_ or session property is null");
+        return height;
     }
     const auto& statusBarVector = specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_(
         WindowType::WINDOW_TYPE_STATUS_BAR, GetSessionProperty()->GetDisplayId());

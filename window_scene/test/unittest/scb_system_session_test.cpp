@@ -38,13 +38,9 @@ public:
     sptr<SCBSystemSession> scbSystemSession_;
 };
 
-void SCBSystemSessionTest::SetUpTestCase()
-{
-}
+void SCBSystemSessionTest::SetUpTestCase() {}
 
-void SCBSystemSessionTest::TearDownTestCase()
-{
-}
+void SCBSystemSessionTest::TearDownTestCase() {}
 
 void SCBSystemSessionTest::SetUp()
 {
@@ -140,8 +136,7 @@ HWTEST_F(SCBSystemSessionTest, BindKeyboardSession02, TestSize.Level1)
     info.bundleName_ = "IntentionEventManager";
     info.moduleName_ = "InputEventListener";
     info.isSystem_ = true;
-    sptr<SceneSession::SpecificSessionCallback> callback =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession::SpecificSessionCallback> callback = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, callback);
     scbSystemSession_->BindKeyboardSession(session);
 }
@@ -248,6 +243,6 @@ HWTEST_F(SCBSystemSessionTest, SetSkipEventOnCastPlus01, TestSize.Level1)
     scbSystemSession_->SetSkipEventOnCastPlus(false);
     ASSERT_EQ(false, scbSystemSession_->GetSessionProperty()->GetSkipEventOnCastPlus());
 }
-} //namespace
-} //namespace Rosen
-} //namespace OHOS
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

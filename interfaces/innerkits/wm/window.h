@@ -946,6 +946,14 @@ public:
     virtual bool GetTouchable() const { return false; }
 
     /**
+     * @brief Set follow screen change property of window.
+     *
+     * @param isFollowScreenChange Window follow screen change.
+     * @return WMError.
+     */
+    virtual WMError SetFollowScreenChange(bool isFollowScreenChange) { return WMError::WM_OK; }
+
+    /**
      * @brief Get SystemBarProperty By WindowType.
      *
      * @param type Type of window.
@@ -3272,7 +3280,7 @@ public:
      *
      * @return the height of status bar.
      */
-    virtual uint32_t GetStatusBarHeight() { return 0; }
+    virtual uint32_t GetStatusBarHeight() const { return 0; }
 
     /**
      * @brief Get whether the free multi-window mode is enabled or not.
@@ -3605,13 +3613,6 @@ public:
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
-
-    /**
-     * @brief Get the api compatible version.
-     *
-     * @return Api compatible version
-     */
-    virtual uint32_t GetApiCompatibleVersion() const { return 0; }
 
     /**
      * @brief Set the parent window of a sub window.
