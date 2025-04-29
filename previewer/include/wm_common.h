@@ -649,6 +649,31 @@ struct WindowDensityInfo {
 };
 
 /**
+ * @struct WindowPropertyInfo
+ *
+ * @brief Currently available window property
+ */
+struct WindowPropertyInfo {
+    Rect windowRect { 0, 0, 0, 0 };
+    Rect drawableRect { 0, 0, 0, 0 };
+    uint32_t apiCompatibleVersion = 0;
+    WindowType type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
+    bool isLayoutFullScreen = false;
+    bool isFullScreen = false;
+    bool isTouchable = false;
+    bool isFocusable = false;
+    std::string name;
+    bool isPrivacyMode = false;
+    bool isKeepScreenOn = false;
+    float brightness = 0.0f;
+    bool isTransparent = false;
+    bool isRoundCorner = false;
+    float dimBehindValue = 0.0f;
+    uint32_t id = INVALID_WINDOW_ID;
+    DisplayId displayId = DISPLAY_ID_INVALID;
+};
+
+/**
  * @brief Enumerates avoid area type.
  */
 enum class AvoidAreaType : uint32_t {

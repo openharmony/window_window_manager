@@ -436,7 +436,7 @@ public:
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
-    
+
     /**
      * @brief Get sub window zLevel
      *
@@ -538,13 +538,6 @@ public:
     virtual WMError IsWindowHighlighted(bool& highlighted) const { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
-     * @brief Get the api compatible version.
-     *
-     * @return Api compatible version
-     */
-    virtual uint32_t GetApiCompatibleVersion() const { return 0; }
-
-    /**
      * @brief Get the root host window type of UIExtension.
      *
      * @return WindowType of the root host window.
@@ -588,6 +581,14 @@ public:
      * @return true means subwindow support maximize, others means do not support.
      */
     virtual bool IsSubWindowMaximizeSupported() const { return false; }
+
+    /**
+     * @brief Get the window property of current window.
+     *
+     * @param windowPropertyInfo the window property struct.
+     * @return WMError.
+     */
+    virtual WMError GetWindowPropertyInfo(WindowPropertyInfo& windowPropertyInfo) { return WMError::WM_OK; }
 };
 }
 }
