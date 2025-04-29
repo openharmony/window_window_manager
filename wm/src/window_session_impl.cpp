@@ -1323,7 +1323,8 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
     for (const auto& [type, avoidArea] : avoidAreas) {
         TLOGD(WmsLogTag::WMS_IMMS, "avoid type %{public}u area %{public}s",
             type, avoidArea.ToString().c_str());
-        if (lastAvoidAreaMap_[type] != avoidArea) {
+        if (lastAvoidAreaMap_.find(type) == lastAvoidAreaMap_.end() ||
+            lastAvoidAreaMap_[type] != avoidArea) {
             lastAvoidAreaMap_[type] = avoidArea;
             NotifyAvoidAreaChange(new AvoidArea(avoidArea), type);
         }
@@ -4012,7 +4013,8 @@ WSError WindowSessionImpl::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, Avo
         if (!window) {
             return;
         }
-        if (window->lastAvoidAreaMap_[type] != *avoidArea) {
+        if (window->lastAvoidAreaMap_.find(type) == window->lastAvoidAreaMap_.end() ||
+            window->lastAvoidAreaMap_[type] != *avoidArea) {
             window->lastAvoidAreaMap_[type] = *avoidArea;
             window->NotifyAvoidAreaChange(avoidArea, type);
             window->UpdateViewportConfig(window->GetRect(), WindowSizeChangeReason::AVOID_AREA_CHANGE);
