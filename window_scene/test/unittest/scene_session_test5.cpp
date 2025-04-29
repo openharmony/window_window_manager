@@ -1973,17 +1973,17 @@ HWTEST_F(SceneSessionTest5, CompatibilityModeWindowScaleTransfer, TestSize.Level
     WSRect resultRect = { 200, 200, 200, 200 };
     float scaleX = 0.5f;
     float scaleY = 0.5f;
-    ScaleType scaleType = ScaleType::WINDOW_SCALE;
+    bool isScale = true;
     mainSession->SetScale(scaleX, scaleY, 0.5f, 0.5f);
     auto property = mainSession->GetSessionProperty();
     property->SetCompatibleModeInPc(false);
-    mainSession->CompatibilityModeWindowScaleTransfer(preRect, scaleType);
+    mainSession->CompatibilityModeWindowScaleTransfer(preRect, isScale);
     EXPECT_EQ(noChangeRect, preRect);
     property->SetCompatibleModeInPc(true);
-    mainSession->CompatibilityModeWindowScaleTransfer(preRect, scaleType);
+    mainSession->CompatibilityModeWindowScaleTransfer(preRect, isScale);
     EXPECT_EQ(resultRect, preRect);
-    scaleType = ScaleType::WINDOW_RECOVERY;
-    mainSession->CompatibilityModeWindowScaleTransfer(preRect, scaleType);
+    isScale = false;
+    mainSession->CompatibilityModeWindowScaleTransfer(preRect, isScale);
     EXPECT_EQ(noChangeRect, preRect);
 }
 
