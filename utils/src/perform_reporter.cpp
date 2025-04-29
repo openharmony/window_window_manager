@@ -307,7 +307,9 @@ int32_t WindowInfoReporter::ReportWindowProfileInfo(const WindowProfileInfo& win
         "BUNDLE_NAME", windowProfileInfo.bundleName,
         "WINDOW_VISIBLE_STATE", windowProfileInfo.windowVisibleState,
         "WINDOW_LOCATED_SCREEN", windowProfileInfo.windowLocatedScreen,
-        "WINDOW_SCENE_MODE", windowProfileInfo.windowSceneMode);
+        "WINDOW_SCENE_MODE", windowProfileInfo.windowSceneMode,
+        "WINDOW_ZORDER", windowProfileInfo.zorder,
+        "WINDOW_RECT", windowProfileInfo.rect);
     if (ret != 0) {
         WLOGFE("Write HiSysEvent error, ret:%{public}d", ret);
     }
@@ -357,6 +359,40 @@ int32_t WindowInfoReporter::ReportEventDispatchException(int32_t exceptionType, 
         "MSG", flushInfo);
     if (ret != 0) {
         TLOGE(WmsLogTag::WMS_EVENT, "Write HiSysEvent error, ret: %{public}d", ret);
+    }
+    return ret;
+}
+
+int32_t WindowInfoReporter::ReportKeyboardLifeCycleException(int32_t windowId, KeyboardLifeCycleException subType,
+    const std::string& msg)
+{
+    std::string eventName = "KEYBOARD_LIFE_CYCLE_EXCEPTION";
+    int32_t ret = HiSysEventWrite(
+        HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER, eventName,
+        HiviewDFX::HiSysEvent::EventType::FAULT,
+        "WINDOW_ID", windowId,
+        "SUB_TYPE", KEYBOARD_LIFE_CYCLE_EXCEPTION_MAP.at(subType),
+        "MSG", msg);
+    if (ret != 0) {
+        TLOGE(WmsLogTag::DEFAULT, "write HiSysEvent error, ret: %{public}d", ret);
+    }
+    return ret;
+}
+
+int32_t WindowInfoReporter::ReportSpecWindowLifeCycleChange(WindowLifeCycleReportInfo reportInfo)
+{
+    std::string eventName = "SPEC_WINDOW_LIFE_CYCLE_CHANGE";
+    int32_t ret = HiSysEventWrite(
+        HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER, eventName,
+        HiviewDFX::HiSysEvent::EventType::FAULT,
+        "BUNDLE_NAME", reportInfo.bundleName,
+        "WINDOW_ID", reportInfo.windowId,
+        "WINDOW_TYPE", reportInfo.windowType,
+        "WINDOW_MODE", reportInfo.windowMode,
+        "WINDOW_FLAG", reportInfo.windowFlag,
+        "STAGE", reportInfo.timeoutStage);
+    if (ret != 0) {
+        TLOGE(WmsLogTag::DEFAULT, "write HiSysEvent error, ret: %{public}d", ret);
     }
     return ret;
 }

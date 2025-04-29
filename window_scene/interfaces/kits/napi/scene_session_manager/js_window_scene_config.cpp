@@ -250,4 +250,21 @@ napi_value JsWindowSceneConfig::CreateSingleHandCompatibleConfig(napi_env env,
     napi_set_named_property(env, objValue, "widthChangeRatio", CreateJsValue(env, config.widthChangeRatio));
     return objValue;
 }
+
+napi_value JsWindowSceneConfig::CreateSystemConfig(napi_env env, const SystemSessionConfig& config)
+{
+    TLOGI(WmsLogTag::DEFAULT, "in");
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "Object is null!");
+        return NapiGetUndefined(env);
+    }
+
+    napi_set_named_property(env, objValue, "maxMidSceneNum", CreateJsValue(env,
+        config.maxMidSceneNum_));
+    napi_set_named_property(env, objValue, "maxFloatingWindowSize", CreateJsValue(env,
+        config.maxFloatingWindowSize_));
+    return objValue;
+}
 } // namespace OHOS::Rosen

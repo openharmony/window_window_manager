@@ -28,7 +28,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 class SessionProxyAnimationTest : public testing::Test {
-  public:
+public:
     SessionProxyAnimationTest() {}
     ~SessionProxyAnimationTest() {}
 };

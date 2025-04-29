@@ -57,6 +57,7 @@ public:
     virtual void OnSecondaryReflexionChange(ScreenId screenId, bool isSecondaryReflexion) = 0;
     virtual void OnExtendScreenConnectStatusChange(ScreenId screenId,
         ExtendScreenConnectStatus extendScreenConnectStatus) = 0;
+    virtual void OnBeforeScreenPropertyChange(FoldStatus foldStatus) = 0;
 };
 
 enum class MirrorScreenType : int32_t {
@@ -305,6 +306,7 @@ public:
     void SetIsEnableRegionRotation(bool isEnableRegionRotation);
     bool GetIsEnableRegionRotation();
     void UpdateDisplayNodeRotation(int rotation);
+    void BeforeScreenPropertyChange(FoldStatus foldStatus);
 
     DisplayId GetDisplayId();
 

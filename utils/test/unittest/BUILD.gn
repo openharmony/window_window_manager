@@ -39,6 +39,16 @@ group("unittest") {
   ]
 }
 
+test_external_deps = [
+  "c_utils:utils",
+  "googletest:gmock",
+  "googletest:gtest",
+  "googletest:gtest_main",
+  "graphic_2d:librender_service_base",
+  "graphic_2d:librender_service_client",
+  "hilog:libhilog",
+]
+
 ohos_unittest("wm_window_frame_trace_impl_test") {
   module_out_path = module_out_path
   defines = [ "FRAME_TRACE_ENABLE" ]
@@ -46,10 +56,7 @@ ohos_unittest("wm_window_frame_trace_impl_test") {
 
   deps = [ ":utils_unittest_common" ]
 
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-  ]
+  external_deps = test_external_deps
 }
 
 ohos_unittest("utils_surface_reader_test") {
@@ -59,10 +66,7 @@ ohos_unittest("utils_surface_reader_test") {
 
   deps = [ ":utils_unittest_common" ]
 
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-  ]
+  external_deps = test_external_deps
 }
 
 ohos_unittest("utils_display_info_test") {
@@ -72,10 +76,7 @@ ohos_unittest("utils_display_info_test") {
 
   deps = [ ":utils_unittest_common" ]
 
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-  ]
+  external_deps = test_external_deps
 }
 
 ohos_unittest("utils_dms_reporter_test") {
@@ -85,10 +86,7 @@ ohos_unittest("utils_dms_reporter_test") {
 
   deps = [ ":utils_unittest_common" ]
 
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-  ]
+  external_deps = test_external_deps
 }
 
 ohos_unittest("utils_screen_info_test") {
@@ -98,11 +96,8 @@ ohos_unittest("utils_screen_info_test") {
 
   deps = [ ":utils_unittest_common" ]
 
-  external_deps = [
-    "c_utils:utils",
-    "graphic_surface:surface",
-    "hilog:libhilog",
-  ]
+  external_deps = test_external_deps
+  external_deps += [ "graphic_surface:surface" ]
 }
 
 ohos_unittest("utils_screen_group_info_test") {
@@ -112,11 +107,8 @@ ohos_unittest("utils_screen_group_info_test") {
 
   deps = [ ":utils_unittest_common" ]
 
-  external_deps = [
-    "c_utils:utils",
-    "graphic_surface:surface",
-    "hilog:libhilog",
-  ]
+  external_deps = test_external_deps
+  external_deps += [ "graphic_surface:surface" ]
 }
 
 ohos_unittest("utils_string_test") {
@@ -126,10 +118,7 @@ ohos_unittest("utils_string_test") {
 
   deps = [ ":utils_unittest_common" ]
 
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-  ]
+  external_deps = test_external_deps
 }
 
 ohos_unittest("utils_window_property_test") {
@@ -139,11 +128,8 @@ ohos_unittest("utils_window_property_test") {
 
   deps = [ ":utils_unittest_common" ]
 
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-    "input:libmmi-client",
-  ]
+  external_deps = test_external_deps
+  external_deps += [ "input:libmmi-client" ]
 }
 
 ohos_unittest("utils_wm_math_test") {
@@ -153,10 +139,7 @@ ohos_unittest("utils_wm_math_test") {
 
   deps = [ ":utils_unittest_common" ]
 
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-  ]
+  external_deps = test_external_deps
 }
 
 ohos_unittest("utils_surface_draw_test") {
@@ -166,15 +149,14 @@ ohos_unittest("utils_surface_draw_test") {
 
   deps = [ ":utils_unittest_common" ]
 
-  external_deps = [
+  external_deps = test_external_deps
+  external_deps += [
     "ability_base:base",
     "ability_base:want",
     "ability_runtime:ability_context_native",
     "ability_runtime:ability_manager",
     "ability_runtime:abilitykit_native",
     "ace_engine:ace_uicontent",
-    "c_utils:utils",
-    "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_single",
     "napi:ace_napi",
@@ -188,11 +170,10 @@ ohos_unittest("utils_window_helper_test") {
 
   deps = [ ":utils_unittest_common" ]
 
-  external_deps = [
+  external_deps = test_external_deps
+  external_deps += [
     "ability_runtime:ability_manager",
     "bundle_framework:appexecfwk_base",
-    "c_utils:utils",
-    "hilog:libhilog",
   ]
 }
 
@@ -203,11 +184,8 @@ ohos_unittest("utils_perform_reporter_test") {
 
   deps = [ ":utils_unittest_common" ]
 
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-    "input:libmmi-client",
-  ]
+  external_deps = test_external_deps
+  external_deps += [ "input:libmmi-client" ]
 }
 
 ohos_unittest("utils_persistent_storage_test") {
@@ -217,11 +195,7 @@ ohos_unittest("utils_persistent_storage_test") {
 
   deps = [ ":utils_unittest_common" ]
 
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-    "preferences:native_preferences",
-  ]
+  external_deps = test_external_deps
 }
 
 ohos_unittest("utils_cutout_info_test") {
@@ -231,10 +205,7 @@ ohos_unittest("utils_cutout_info_test") {
 
   deps = [ ":utils_unittest_common" ]
 
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-  ]
+  external_deps = test_external_deps
 }
 
 ohos_unittest("utils_all_test") {
@@ -244,11 +215,10 @@ ohos_unittest("utils_all_test") {
 
   deps = [ ":utils_unittest_common" ]
 
-  external_deps = [
+  external_deps = test_external_deps
+  external_deps += [
     "ability_runtime:ability_manager",
     "access_token:libaccesstoken_sdk",
-    "c_utils:utils",
-    "hilog:libhilog",
     "ipc:ipc_single",
   ]
 }
@@ -260,11 +230,10 @@ ohos_unittest("wm_permission_test") {
 
   deps = [ ":utils_unittest_common" ]
 
-  external_deps = [
+  external_deps = test_external_deps
+  external_deps += [
     "ability_runtime:ability_manager",
     "access_token:libaccesstoken_sdk",
-    "c_utils:utils",
-    "hilog:libhilog",
     "ipc:ipc_single",
   ]
 }
@@ -276,10 +245,7 @@ ohos_unittest("utils_wm_occlusion_region_test") {
 
   deps = [ ":utils_unittest_common" ]
 
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-  ]
+  external_deps = test_external_deps
 }
 
 ohos_unittest("utils_window_transition_info_test") {
@@ -289,10 +255,9 @@ ohos_unittest("utils_window_transition_info_test") {
 
   deps = [ ":utils_unittest_common" ]
 
-  external_deps = [
+  external_deps = test_external_deps
+  external_deps += [
     "ability_runtime:ability_manager",
-    "c_utils:utils",
-    "hilog:libhilog",
     "ipc:ipc_single",
   ]
 }
@@ -307,7 +272,6 @@ config("utils_unittest_common_public_config") {
     "../../include",
     "../../../wm/include",
     "../../../dm/include",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_base/include",
   ]
 }
 
@@ -326,13 +290,10 @@ ohos_static_library("utils_unittest_common") {
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/utils:libwmutil_base",
     "${window_base_path}/wm:libwm",
-    "//commonlibrary/c_utils/base:utils",
-    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_base:librender_service_base",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-    "//third_party/googletest:gmock",
-    "//third_party/googletest:gtest_main",
   ]
+
+  external_deps = test_external_deps
+  external_deps += [ "graphic_2d:2d_graphics" ]
 
   subsystem_name = "window"
   part_name = "window_manager"

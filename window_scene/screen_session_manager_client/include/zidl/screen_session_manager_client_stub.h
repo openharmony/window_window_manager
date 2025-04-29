@@ -61,6 +61,7 @@ private:
     int HandleOnMainDisplayNodeChange(MessageParcel& data, MessageParcel& reply);
     int HandleSyncScreenCombination(MessageParcel& data, MessageParcel& reply);
     int HandleOnDumperClientScreenSessions(MessageParcel& data, MessageParcel& reply);
+    int HandleOnBeforeScreenPropertyChange(MessageParcel& data, MessageParcel& reply);
 
     HandleScreenChangeMap HandleScreenChangeMap_ {};
 };

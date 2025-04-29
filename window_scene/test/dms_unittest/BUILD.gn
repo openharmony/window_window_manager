@@ -103,6 +103,7 @@ test_external_deps = [
   "ipc:ipc_single",
   "libxml2:libxml2",
   "napi:ace_napi",
+  "safwk:system_ability_fwk",
 ]
 
 ohos_unittest("ws_setting_observer_test") {

@@ -37,17 +37,14 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+
 private:
     std::shared_ptr<SessionManager> sm_;
 };
 
-void SessionManagerUTTest::SetUpTestCase()
-{
-}
+void SessionManagerUTTest::SetUpTestCase() {}
 
-void SessionManagerUTTest::TearDownTestCase()
-{
-}
+void SessionManagerUTTest::TearDownTestCase() {}
 
 void SessionManagerUTTest::SetUp()
 {
@@ -73,13 +70,14 @@ HWTEST_F(SessionManagerUTTest, OnRemoteRequest, TestSize.Level1)
     OHOS::MessageOption option;
     IPCObjectStub iPCObjectStub;
 
-    uint32_t code = static_cast<uint32_t>(OHOS::Rosen::ISessionManagerServiceRecoverListener::
-        SessionManagerServiceRecoverMessage::TRANS_ID_ON_SESSION_MANAGER_SERVICE_RECOVER);
+    uint32_t code =
+        static_cast<uint32_t>(OHOS::Rosen::ISessionManagerServiceRecoverListener::SessionManagerServiceRecoverMessage::
+                                  TRANS_ID_ON_SESSION_MANAGER_SERVICE_RECOVER);
     auto ret = iPCObjectStub.OnRemoteRequest(code, data, reply, option);
     ASSERT_NE(ret, 0);
 
     code = static_cast<uint32_t>(OHOS::Rosen::ISessionManagerServiceRecoverListener::
-        SessionManagerServiceRecoverMessage::TRANS_ID_ON_WMS_CONNECTION_CHANGED);
+                                     SessionManagerServiceRecoverMessage::TRANS_ID_ON_WMS_CONNECTION_CHANGED);
     ret = iPCObjectStub.OnRemoteRequest(code, data, reply, option);
     ASSERT_NE(ret, 0);
 
@@ -365,6 +363,6 @@ HWTEST_F(SessionManagerUTTest, RegisterWindowManagerRecoverCallbackFunc, TestSiz
     sm_->RegisterWindowManagerRecoverCallbackFunc(testFunc);
     ASSERT_NE(sm_->windowManagerRecoverFunc_, nullptr);
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

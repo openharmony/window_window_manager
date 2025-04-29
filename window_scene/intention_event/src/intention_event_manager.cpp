@@ -93,6 +93,36 @@ bool IntentionEventManager::EnableInputEventListener(Ace::UIContent* uiContent,
         std::make_shared<IntentionEventManager::InputEventListener>(uiContent, eventHandler);
     MMI::InputManager::GetInstance()->SetWindowInputEventConsumer(listener, eventHandler);
     TLOGI(WmsLogTag::WMS_EVENT, "SetWindowInputEventConsumer success");
+
+    const char* const where = __func__;
+    auto callback = [where](std::shared_ptr<MMI::PointerEvent> pointerEvent) {
+        if (pointerEvent == nullptr) {
+            TLOGNE(WmsLogTag::WMS_EVENT, "%{public}s pointerEvent is null", where);
+            return;
+        }
+        int32_t action = pointerEvent->GetPointerAction();
+        if (action != MMI::PointerEvent::POINTER_ACTION_DOWN &&
+            action != MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
+            return;
+        }
+        int32_t windowId = static_cast<uint32_t>(pointerEvent->GetTargetWindowId());
+        auto sceneSession = SceneSessionManager::GetInstance().GetSceneSession(windowId);
+        if (sceneSession == nullptr) {
+            TLOGNE(WmsLogTag::WMS_EVENT, "%{public}s session is nullptr", where);
+            return;
+        }
+        if (!sceneSession->IsAnco()) {
+            TLOGNE(WmsLogTag::WMS_EVENT, "%{public}s session is not anco", where);
+            return;
+        }
+        MMI::PointerEvent::PointerItem pointerItem;
+        if (pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem)) {
+            sceneSession->ProcessPointDownSession(pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
+        }
+    };
+    auto ret = MMI::InputManager::GetInstance()->AddMonitor(callback);
+    TLOGI(WmsLogTag::WMS_EVENT, "set monitor ret : %{public}d", ret);
+
     if (IS_BETA) {
         // Xcollie's SetTimerCounter task is set with the params to record count and time of the input down event
         int id = HiviewDFX::XCollie::GetInstance().SetTimerCount("FREQUENT_CLICK_WARNING", FREQUENT_CLICK_TIME_LIMIT,
@@ -151,14 +181,29 @@ bool IntentionEventManager::InputEventListener::CheckPointerEvent(
     return true;
 }
 
+void IntentionEventManager::InputEventListener::ProcessInjectionEvent(
+    std::shared_ptr<MMI::PointerEvent> pointerEvent) const
+{
+    auto dispatchTimes = pointerEvent->GetDispatchTimes();
+    MMI::PointerEvent::PointerItem pointerItem;
+    auto pointerId = pointerEvent->GetPointerId();
+    if (pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE &&
+        pointerEvent->HasFlag(MMI::InputEvent::EVENT_FLAG_SIMULATE)) {
+        MMI::InputManager::GetInstance()->TransformMouseEventToTouchEvent(pointerEvent);
+    }
+    if (dispatchTimes > 0 && pointerEvent->GetPointerItem(pointerId, pointerItem)) {
+        pointerItem.SetPointerId(pointerId + dispatchTimes * TRANSPARENT_FINGER_ID);
+        pointerEvent->UpdatePointerItem(pointerId, pointerItem);
+        pointerEvent->SetPointerId(pointerId + dispatchTimes * TRANSPARENT_FINGER_ID);
+    }
+}
+
 void IntentionEventManager::InputEventListener::OnInputEvent(
     std::shared_ptr<MMI::PointerEvent> pointerEvent) const
 {
     if (!CheckPointerEvent(pointerEvent)) {
         return;
     }
-    LogPointInfo(pointerEvent);
-    int32_t action = pointerEvent->GetPointerAction();
     uint32_t windowId = static_cast<uint32_t>(pointerEvent->GetTargetWindowId());
     auto sceneSession = SceneSessionManager::GetInstance().GetSceneSession(windowId);
     if (sceneSession == nullptr) {
@@ -167,15 +212,9 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
         return;
     }
     auto dispatchTimes = pointerEvent->GetDispatchTimes();
-    if (dispatchTimes > 0) {
-        MMI::PointerEvent::PointerItem pointerItem;
-        auto pointerId = pointerEvent->GetPointerId();
-        if (pointerEvent->GetPointerItem(pointerId, pointerItem)) {
-            pointerItem.SetPointerId(pointerId + dispatchTimes * TRANSPARENT_FINGER_ID);
-            pointerEvent->UpdatePointerItem(pointerId, pointerItem);
-            pointerEvent->SetPointerId(pointerId + dispatchTimes * TRANSPARENT_FINGER_ID);
-        }
-    }
+    ProcessInjectionEvent(pointerEvent);
+    int32_t action = pointerEvent->GetPointerAction();
+    LogPointInfo(pointerEvent);
     auto sourceType = pointerEvent->GetSourceType();
     if (action != MMI::PointerEvent::POINTER_ACTION_MOVE) {
         if (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE ||

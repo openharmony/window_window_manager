@@ -251,6 +251,8 @@ public:
     void NotifyBackgroundFailed(WMError ret);
     WSError MarkProcessed(int32_t eventId) override;
     void UpdateTitleButtonVisibility();
+    void HideTitleButton(bool& hideSplitButton, bool& hideMaximizeButton, bool& hideMinimizeButton,
+        bool& hideCloseButton);
     WSError NotifyDestroy() override;
     WSError NotifyTransferComponentData(const AAFwk::WantParams& wantParams) override;
     WSErrorCode NotifyTransferComponentDataSync(const AAFwk::WantParams& wantParams,
@@ -310,6 +312,7 @@ public:
     WMError SetAPPWindowLabel(const std::string& label) override;
     WMError SetAPPWindowIcon(const std::shared_ptr<Media::PixelMap>& icon) override;
     WMError SetWindowContainerColor(const std::string& activeColor, const std::string& inactiveColor) override;
+    nlohmann::json setContainerButtonStyle(const DecorButtonStyle& decorButtonStyle);
 
     /*
      * Window Decor listener
@@ -433,6 +436,7 @@ public:
     void SetDisplayOrientationForRotation(DisplayOrientation displayOrientaion);
     DisplayOrientation GetDisplayOrientationForRotation() const;
     void SetPreferredRequestedOrientation(Orientation orientation) override;
+    WMError SetFollowScreenChange(bool isFollowScreenChange) override;
 
 protected:
     WMError Connect();
@@ -604,7 +608,7 @@ protected:
      * Window Immersive
      */
     std::map<AvoidAreaType, AvoidArea> lastAvoidAreaMap_;
-    uint32_t GetStatusBarHeight() override;
+    uint32_t GetStatusBarHeight() const override;
     WindowType rootHostWindowType_ = WindowType::APP_MAIN_WINDOW_BASE;
 
     /*
@@ -629,6 +633,12 @@ protected:
      */
     bool GetWatchGestureConsumed() const;
     void SetWatchGestureConsumed(bool isWatchGestureConsumed);
+
+    /*
+     * Window Rotation
+     */
+    int16_t rotationAnimationCount_ { 0 };
+    void NotifyRotationAnimationEnd();
 
 private:
     //Trans between colorGamut and colorSpace
@@ -728,7 +738,6 @@ private:
     void UpdateRectForResizeWithAnimation(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
         const RectAnimationConfig& rectAnimationConfig, const std::shared_ptr<RSTransaction>& rsTransaction = nullptr,
         const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {});
-    void NotifyRotationAnimationEnd();
     void SubmitNoInteractionMonitorTask(int32_t eventId, const IWindowNoInteractionListenerSptr& listener);
     bool IsUserOrientation(Orientation orientation) const;
     WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config);
@@ -823,7 +832,6 @@ private:
     std::atomic_bool dragActivated_ = true;
     WindowSizeChangeReason lastSizeChangeReason_ = WindowSizeChangeReason::END;
     bool postTaskDone_ = false;
-    int16_t rotationAnimationCount_ { 0 };
     Transform layoutTransform_;
     SingleHandTransform singleHandTransform_;
     mutable std::mutex currentTransformMutex_;

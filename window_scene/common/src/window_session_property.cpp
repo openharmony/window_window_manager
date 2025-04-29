@@ -93,6 +93,8 @@ const std::map<uint64_t, HandlWritePropertyFunc> WindowSessionProperty::writeFun
         &WindowSessionProperty::WriteActionUpdateBackgroundAlpha),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_EXCLUSIVE_HIGHLIGHTED),
         &WindowSessionProperty::WriteActionUpdateExclusivelyHighlighted),
+    std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_FOLLOW_SCREEN_CHANGE),
+        &WindowSessionProperty::WriteActionUpdateFollowScreenChange),
 };
 
 const std::map<uint64_t, HandlReadPropertyFunc> WindowSessionProperty::readFuncMap_ {
@@ -164,6 +166,8 @@ const std::map<uint64_t, HandlReadPropertyFunc> WindowSessionProperty::readFuncM
         &WindowSessionProperty::ReadActionUpdateBackgroundAlpha),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_EXCLUSIVE_HIGHLIGHTED),
         &WindowSessionProperty::ReadActionUpdateExclusivelyHighlighted),
+    std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_FOLLOW_SCREEN_CHANGE),
+        &WindowSessionProperty::ReadActionUpdateFollowScreenChange),
 };
 
 WindowSessionProperty::WindowSessionProperty(const sptr<WindowSessionProperty>& property)
@@ -568,6 +572,16 @@ void WindowSessionProperty::SetMaximizeMode(MaximizeMode mode)
     maximizeMode_ = mode;
 }
 
+void WindowSessionProperty::SetFollowScreenChange(bool isFollowScreenChange)
+{
+    isFollowScreenChange_ = isFollowScreenChange;
+}
+
+bool WindowSessionProperty::GetFollowScreenChange() const
+{
+    return isFollowScreenChange_;
+}
+
 void WindowSessionProperty::SetSystemBarProperty(WindowType type, const SystemBarProperty& property)
 {
     if (type == WindowType::WINDOW_TYPE_STATUS_BAR ||
@@ -932,6 +946,7 @@ bool WindowSessionProperty::MarshallingWindowMask(Parcel& parcel) const
         return false;
     }
     if (isShaped_) {
+        std::lock_guard<std::mutex> lock(windowMaskMutex_);
         if (!windowMask_->Marshalling(parcel)) {
             return false;
         }
@@ -1209,7 +1224,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteFloat(cornerRadius_) && parcel.WriteBool(isExclusivelyHighlighted_) &&
         parcel.WriteBool(isAtomicService_) && parcel.WriteUint32(apiVersion_) &&
         parcel.WriteBool(isFullScreenWaterfallMode_) && parcel.WriteBool(isAbilityHookOff_) &&
-        parcel.WriteBool(isAbilityHook_);
+        parcel.WriteBool(isAbilityHook_) && parcel.WriteBool(isFollowScreenChange_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -1304,6 +1319,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetIsFullScreenWaterfallMode(parcel.ReadBool());
     property->SetIsAbilityHookOff(parcel.ReadBool());
     property->SetIsAbilityHook(parcel.ReadBool());
+    property->SetFollowScreenChange(parcel.ReadBool());
     return property;
 }
 
@@ -1405,6 +1421,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     isFullScreenWaterfallMode_ = property->isFullScreenWaterfallMode_;
     isAbilityHookOff_ = property->isAbilityHookOff_;
     isAbilityHook_ = property->isAbilityHook_;
+    isFollowScreenChange_ = property->isFollowScreenChange_;
 }
 
 bool WindowSessionProperty::Write(Parcel& parcel, WSPropertyChangeAction action)
@@ -1569,6 +1586,11 @@ bool WindowSessionProperty::WriteActionUpdateBackgroundAlpha(Parcel& parcel)
 bool WindowSessionProperty::WriteActionUpdateExclusivelyHighlighted(Parcel& parcel)
 {
     return parcel.WriteBool(isExclusivelyHighlighted_);
+}
+
+bool WindowSessionProperty::WriteActionUpdateFollowScreenChange(Parcel& parcel)
+{
+    return parcel.WriteBool(isFollowScreenChange_);
 }
 
 void WindowSessionProperty::Read(Parcel& parcel, WSPropertyChangeAction action)
@@ -1737,6 +1759,11 @@ void WindowSessionProperty::ReadActionUpdateExclusivelyHighlighted(Parcel& parce
     SetExclusivelyHighlighted(parcel.ReadBool());
 }
 
+void WindowSessionProperty::ReadActionUpdateFollowScreenChange(Parcel& parcel)
+{
+    SetFollowScreenChange(parcel.ReadBool());
+}
+
 void WindowSessionProperty::SetTransform(const Transform& trans)
 {
     trans_ = trans;
@@ -1850,6 +1877,7 @@ void WindowSessionProperty::SetWindowMask(const std::shared_ptr<Media::PixelMap>
 
 std::shared_ptr<Media::PixelMap> WindowSessionProperty::GetWindowMask() const
 {
+    std::lock_guard<std::mutex> lock(windowMaskMutex_);
     return windowMask_;
 }
 
