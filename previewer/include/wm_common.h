@@ -1,4 +1,4 @@
-/*
+ /*
  * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -140,14 +140,6 @@ enum class WindowState : uint32_t {
     STATE_UNFROZEN,
     STATE_DESTROYED,
     STATE_BOTTOM = STATE_DESTROYED // Add state type after STATE_DESTROYED is not allowed.
-};
-
-/**
- * @brief scale type of compatible mode window.
- */
-enum class ScaleType : uint32_t {
-    WINDOW_SCALE,
-    WINDOW_RECOVERY
 };
 
 /**
