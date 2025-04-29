@@ -4508,7 +4508,6 @@ WMError WindowImpl::GetWindowPropertyInfo(WindowPropertyInfo& windowPropertyInfo
         uicontent->GetWindowPaintSize(windowPropertyInfo.drawableRect);
     }
     windowPropertyInfo.type = GetType();
-    windowPropertyInfo.apiCompatibleVersion = GetApiCompatibleVersion();
     windowPropertyInfo.isLayoutFullScreen = IsLayoutFullScreen();
     windowPropertyInfo.isFullScreen = IsFullScreen();
     windowPropertyInfo.isTouchable = GetTouchable();
