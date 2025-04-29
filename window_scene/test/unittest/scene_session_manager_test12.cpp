@@ -1372,7 +1372,7 @@ HWTEST_F(SceneSessionManagerTest12, HasFloatingWindowForeground06, Function | Sm
  * @tc.desc: UpdateHighlightStatus
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest12, UpdateHighlightStatus, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest12, UpdateHighlightStatus, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
     SessionInfo info;
@@ -1400,7 +1400,7 @@ HWTEST_F(SceneSessionManagerTest12, UpdateHighlightStatus, TestSize.Level1)
  * @tc.desc: UpdateHighlightStatus
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest12, UpdateHighlightStatus01, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest12, UpdateHighlightStatus01, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
     ssm_->highlightIds_.clear();
