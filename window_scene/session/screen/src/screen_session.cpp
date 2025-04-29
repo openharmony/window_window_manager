@@ -623,7 +623,6 @@ ScreenProperty ScreenSession::UpdatePropertyByFoldControl(const ScreenProperty& 
     property_.SetDpiPhyBounds(updatedProperty.GetPhyWidth(), updatedProperty.GetPhyHeight());
     property_.SetPhyBounds(updatedProperty.GetPhyBounds());
     property_.SetBounds(updatedProperty.GetBounds());
-    OptimizeSecondaryDisplayMode(updatedProperty.GetBounds(), foldDisplayMode);
     if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
         DisplayOrientation deviceOrientation =
             CalcDeviceOrientation(property_.GetScreenRotation(), foldDisplayMode);
@@ -918,7 +917,6 @@ void ScreenSession::UpdateTouchBoundsAndOffset()
 void ScreenSession::UpdateToInputManager(RRect bounds, int rotation, int deviceRotation,
     FoldDisplayMode foldDisplayMode)
 {
-    OptimizeSecondaryDisplayMode(bounds, foldDisplayMode);
     bool needUpdateToInputManager = false;
     if (foldDisplayMode == FoldDisplayMode::FULL &&
         property_.GetBounds() == bounds && property_.GetRotation() != static_cast<float>(rotation)) {
@@ -956,26 +954,8 @@ void ScreenSession::SetScreenComponentRotation(int rotation)
     TLOGI(WmsLogTag::DMS, "screenComponentRotation :%{public}f ", property_.GetScreenComponentRotation());
 }
 
-void ScreenSession::OptimizeSecondaryDisplayMode(const RRect &bounds, FoldDisplayMode &foldDisplayMode)
-{
-    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
-        return;
-    }
-    if (IsWidthHeightMatch(bounds.rect_.GetWidth(), bounds.rect_.GetHeight(),
-        MAIN_STATUS_WIDTH, SCREEN_HEIGHT)) {
-        foldDisplayMode = FoldDisplayMode::MAIN;
-    } else if (IsWidthHeightMatch(bounds.rect_.GetWidth(), bounds.rect_.GetHeight(),
-        FULL_STATUS_WIDTH, SCREEN_HEIGHT)) {
-        foldDisplayMode = FoldDisplayMode::FULL;
-    } else if (IsWidthHeightMatch(bounds.rect_.GetWidth(), bounds.rect_.GetHeight(),
-        GLOBAL_FULL_STATUS_WIDTH, SCREEN_HEIGHT)) {
-        foldDisplayMode = FoldDisplayMode::GLOBAL_FULL;
-    }
-}
-
 void ScreenSession::UpdatePropertyAfterRotation(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode)
 {
-    OptimizeSecondaryDisplayMode(bounds, foldDisplayMode);
     Rotation targetRotation = ConvertIntToRotation(rotation);
     DisplayOrientation displayOrientation = CalcDisplayOrientation(targetRotation, foldDisplayMode);
     property_.SetBounds(bounds);
@@ -1035,7 +1015,6 @@ void ScreenSession::UpdateDisplayNodeRotation(int rotation)
 
 void ScreenSession::UpdatePropertyOnly(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode)
 {
-    OptimizeSecondaryDisplayMode(bounds, foldDisplayMode);
     Rotation targetRotation = ConvertIntToRotation(rotation);
     DisplayOrientation displayOrientation = CalcDisplayOrientation(targetRotation, foldDisplayMode);
     property_.SetBounds(bounds);
@@ -1056,7 +1035,6 @@ void ScreenSession::UpdatePropertyOnly(RRect bounds, int rotation, FoldDisplayMo
 
 void ScreenSession::UpdateRotationOrientation(int rotation, FoldDisplayMode foldDisplayMode)
 {
-    OptimizeSecondaryDisplayMode(property_.GetBounds(), foldDisplayMode);
     Rotation targetRotation = ConvertIntToRotation(rotation);
     DisplayOrientation deviceOrientation = CalcDeviceOrientation(targetRotation, foldDisplayMode);
     property_.UpdateDeviceRotation(targetRotation);
