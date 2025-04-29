@@ -5588,12 +5588,12 @@ bool SceneSessionManager::CheckBlockingFocus(const sptr<SceneSession>& session, 
     if (session->GetSessionInfo().isSystem_ && session->GetBlockingFocus()) {
         return true;
     }
-    bool isPhoneOrPad = systemConfig_.IsPhoneWindow() || systemConfig_.IsPadWindow();
+    bool isPhoneOrPad = systemConfig_.uiType_ == UI_TYPE_PHONE || systemConfig_.uiType_ == UI_TYPE_PAD;
     if (isPhoneOrPad && session->GetWindowType() == WindowType::WINDOW_TYPE_VOICE_INTERACTION) {
         return true;
     }
-    bool isPcOrPcMode = systemConfig_.IsPcWindow() ||
-        (systemConfig_.IsPadWindow() && systemConfig_.IsFreeMultiWindowMode());
+    bool isPcOrPcMode = systemConfig_.uiType_ == UI_TYPE_PC ||
+        (systemConfig_.uiType_ == UI_TYPE_PAD && systemConfig_.IsFreeMultiWindowMode());
     if (includingAppSession && session->IsAppSession()) {
         return !(isPcOrPcMode && session->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT);
     }

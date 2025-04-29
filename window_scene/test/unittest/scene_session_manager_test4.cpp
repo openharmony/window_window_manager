@@ -1647,7 +1647,7 @@ HWTEST_F(SceneSessionManagerTest4, GetTopNearestBlockingFocusSession01, TestSize
     ASSERT_NE(ssm_, nullptr);
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "bundleName";
-    ssm_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    ssm_->systemConfig_.uiType_ = UI_TYPE_PHONE;
     sptr<SceneSession> sceneSession01 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     sptr<SceneSession> sceneSession02 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     sceneSession01->SetZOrder(1);
@@ -1664,7 +1664,7 @@ HWTEST_F(SceneSessionManagerTest4, GetTopNearestBlockingFocusSession01, TestSize
     sptr<SceneSession> ret = ssm_->GetTopNearestBlockingFocusSession(0, true);
     EXPECT_EQ(ret, sceneSession01);
 
-    ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ssm_->systemConfig_.uiType_ = UI_TYPE_PC;
     sceneSession02->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     ret = ssm_->GetTopNearestBlockingFocusSession(2, true);
     EXPECT_EQ(ret, nullptr);
@@ -1680,7 +1680,7 @@ HWTEST_F(SceneSessionManagerTest4, CheckBlockingFocus, TestSize.Level1)
     ASSERT_NE(ssm_, nullptr);
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "bundleName";
-    ssm_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    ssm_->systemConfig_.uiType_ = UI_TYPE_PHONE;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     sptr<SceneSession> sceneSession01 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     bool ret = ssm_->CheckBlockingFocus(sceneSession, false);
@@ -1696,7 +1696,7 @@ HWTEST_F(SceneSessionManagerTest4, CheckBlockingFocus, TestSize.Level1)
     sceneSession->blockingFocus_ = true;
     ret = ssm_->CheckBlockingFocus(sceneSession, false);
     EXPECT_EQ(ret, true);
-    ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ssm_->systemConfig_.uiType_ = UI_TYPE_PC;
     sceneSession->blockingFocus_ = false;
     sceneSession01->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
