@@ -3414,8 +3414,8 @@ void SceneSession::WindowScaleTransfer(WSRect& rect, float scaleX, float scaleY)
     auto heightDifference = (curHeight - rect.height_) * HALF;
     rect.posX_ = rect.posX_ + widthDifference;
     rect.posY_ = rect.posY_ + heightDifference;
-    TLOGI(WmsLogTag::WMS_LAYOUT, "scaleX: %{public}f, scaleY: %{public}f, sizeDifference: [%{public}d, "
-        "%{public}d], rect: %{public}s", scaleX, scaleY, widthDifference, heightDifference, rect.ToString().c_str());
+    TLOGI(WmsLogTag::WMS_LAYOUT, "scaleX: %{public}f, scaleY: %{public}f, sizeDifference: [%{public}f, "
+        "%{public}f], rect: %{public}s", scaleX, scaleY, widthDifference, heightDifference, rect.ToString().c_str());
 }
 
 /**
@@ -3434,7 +3434,6 @@ void SceneSession::HookStartMoveRect(WSRect& newRect, const WSRect& sessionRect)
     if (IsCompatibilityModeScale(scaleX, scaleY)) {
         WindowScaleTransfer(newRect, scaleX, scaleY);
     }
-    return;
 }
 
 /**
