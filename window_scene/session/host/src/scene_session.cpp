@@ -3405,17 +3405,17 @@ void SceneSession::HandleMoveDragEnd(WSRect& rect, SizeChangeReason reason)
  */
 void SceneSession::WindowScaleTransfer(WSRect& rect, float scaleX, float scaleY)
 {
-    const float HALF = 0.5;
-    auto curWidth = static_cast<float>(rect.width_);
-    auto curHeight = static_cast<float>(rect.height_);
-    rect.width_ = curWidth * scaleX;
-    rect.height_ = curHeight * scaleY;
-    auto widthDifference = (curWidth - rect.width_) * HALF;
-    auto heightDifference = (curHeight - rect.height_) * HALF;
+    const float HALF = 0.5f;
+    auto curWidth = rect.width_;
+    auto curHeight = rect.height_;
+    rect.width_ = static_cast<uint32_t>(curWidth * scaleX);
+    rect.height_ = static_cast<uint32_t>(curHeight * scaleY);
+    auto widthDifference = static_cast<int32_t>((curWidth - rect.width_) * HALF);
+    auto heightDifference = static_cast<int32_t>((curHeight - rect.height_) * HALF);
     rect.posX_ = rect.posX_ + widthDifference;
     rect.posY_ = rect.posY_ + heightDifference;
-    TLOGI(WmsLogTag::WMS_LAYOUT, "scaleX: %{public}f, scaleY: %{public}f, sizeDifference: [%{public}f, "
-        "%{public}f], rect: %{public}s", scaleX, scaleY, widthDifference, heightDifference, rect.ToString().c_str());
+    TLOGI(WmsLogTag::WMS_LAYOUT, "scaleX: %{public}f, scaleY: %{public}f, sizeDifference: [%{public}d, "
+        "%{public}d], rect: %{public}s", scaleX, scaleY, widthDifference, heightDifference, rect.ToString().c_str());
 }
 
 /**
