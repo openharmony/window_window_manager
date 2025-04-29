@@ -805,6 +805,10 @@ void ScreenSessionManagerClient::UpdatePropertyWhenSwitchUser(const sptr <Screen
         FoldDisplayMode::UNKNOWN);
     screenSession->SetPhysicalRotation(rotation);
     screenSession->SetScreenComponentRotation(rotation);
+    screenSessionManager_->UpdateScreenDirectionInfo(screenId, rotation, rotation, rotation,
+        ScreenPropertyChangeType::UNSPECIFIED);
+    screenSessionManager_->UpdateScreenRotationProperty(screenId, bounds, rotation,
+        ScreenPropertyChangeType::UNSPECIFIED);
     ScreenProperty property = screenSessionManager_->GetScreenProperty(screenId);
     if (property.GetValidHeight() == INT32_MAX || property.GetValidHeight() == 0) {
         WLOGFW("invalid property, validheight is bounds");
@@ -818,10 +822,6 @@ void ScreenSessionManagerClient::UpdatePropertyWhenSwitchUser(const sptr <Screen
     } else {
         screenSession->SetValidWidth(property.GetValidWidth());
     }
-    screenSessionManager_->UpdateScreenDirectionInfo(screenId, rotation, rotation, rotation,
-        ScreenPropertyChangeType::UNSPECIFIED);
-    screenSessionManager_->UpdateScreenRotationProperty(screenId, bounds, rotation,
-        ScreenPropertyChangeType::UNSPECIFIED);
 }
 
 void ScreenSessionManagerClient::NotifyClientScreenConnect(sptr<ScreenSession>& screenSession)
