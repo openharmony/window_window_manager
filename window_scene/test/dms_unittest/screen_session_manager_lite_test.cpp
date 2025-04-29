@@ -205,7 +205,7 @@ HWTEST_F(ScreenSessionManagerLiteTest, GetInstance_ShouldReturnExistingInstance_
 
     ScreenSessionManagerLite& instance2 = ScreenSessionManagerLite::GetInstance();
 
-    EXPECT_NE(&instance1, &instance2);
+    EXPECT_EQ(&instance1, &instance2);
 }
 }
 } // namespace Rosen
