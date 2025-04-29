@@ -3487,13 +3487,13 @@ public:
     virtual void UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>& want) {}
 
     /**
-     * @brief Receive async IPC event from UIExtensionComponent.
+     * @brief Receive async IPC message from UIExtensionComponent.
      *
-     * @param code the event code.
-     * @param data the data transfered from UIExtensionComponent.
+     * @param code the message code.
      * @param persistentId the persistent id of UIExtension.
+     * @param data the data transfered from UIExtensionComponent.
      */
-    virtual WMError OnAsyncExtensionEvent(uint32_t code, const AAFwk::Want& data, int32_t persistentId)
+    virtual WMError OnExtensionMessage(uint32_t code, int32_t persistentId, const AAFwk::Want& data)
     {
         return WMError::WM_OK;
     }
