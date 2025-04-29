@@ -55,7 +55,6 @@ constexpr uint32_t MIN_BUTTON_ICON_SIZE = 16;
 constexpr uint32_t MAX_BUTTON_ICON_SIZE = 24;
 constexpr uint32_t MIN_BUTTON_BACKGROUND_CORNER_RADIUS = 4;
 constexpr uint32_t MAX_BUTTON_BACKGROUND_CORNER_RADIUS = 8;
-constexpr uint32_t MIN_BUTTON_BETWEEN = 40;
 constexpr int32_t API_VERSION_INVALID = -1;
 constexpr uint32_t MAX_SIZE_PIP_CONTROL_GROUP = 8;
 constexpr uint32_t MAX_SIZE_PIP_CONTROL = 9;
