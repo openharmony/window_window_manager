@@ -952,6 +952,8 @@ private:
     void WindowScaleTransfer(WSRect& rect, float scaleX, float scaleY);
     void HookStartMoveRect(WSRect& newRect, const WSRect& sessionRect);
     bool IsCompatibilityModeScale(float scaleX, float scaleY);
+    void CompatibilityModeWindowScaleTransfer(WSRect& rect, ScaleType scaleType);
+    void ThrowSlipToFullScreen(WSRect& endRect, WSRect& rect);
     bool MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeReason reason);
     void NotifyFullScreenAfterThrowSlip(const WSRect& rect);
     void SetDragResizeTypeDuringDrag(DragResizeType dragResizeType) { dragResizeTypeDuringDrag_ = dragResizeType; }

@@ -3456,6 +3456,49 @@ bool SceneSession::IsCompatibilityModeScale(float scaleX, float scaleY)
 }
 
 /**
+ * throw slip to full screen
+ */
+void SceneSession::ThrowSlipToFullScreen(WSRect& endRect, WSRect& rect)
+{
+    if (pcFoldScreenController_ == nullptr) {
+        return;
+    }
+    // maximize end rect and notify last rect
+    throwSlipToFullScreenAnimCount_.fetch_add(1);
+    pcFoldScreenController_->ResizeToFullScreen(endRect, GetStatusBarHeight(), GetDockHeight());
+    if (pcFoldScreenController_->IsThrowSlipDirectly()) {
+        pcFoldScreenController_->ThrowSlipFloatingRectDirectly(
+            rect, GetSessionRequestRect(), GetStatusBarHeight(), GetDockHeight());
+    }
+}
+
+/**
+ * the compatible mode window is being scaled and transformed
+ */
+void SceneSession::CompatibilityModeWindowScaleTransfer(WSRect& rect, ScaleType scaleType)
+{
+    auto mainSession = GetMainSession();
+    if (!mainSession) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "mainSession is nullptr");
+        return;
+    }
+    auto property = GetSessionProperty();
+    auto scaleX = mainSession->GetScaleX();
+    auto scaleY = mainSession->GetScaleY();
+    if (scaleX == 0 || scaleY == 0) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "scale ratio is 0");
+        return;
+    }
+    if (scaleType == ScaleType::WINDOW_RECOVERY) {
+        scaleX = 1 / scaleX;
+        scaleY = 1 / scaleY;
+    }
+    if (IsCompatibilityModeScale(scaleX, scaleY)) {
+        WindowScaleTransfer(rect, scaleX, scaleY);
+    }
+}
+
+/**
  * move with init velocity
  * @return true: successfully throw slip
  */
@@ -3464,33 +3507,15 @@ bool SceneSession::MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeR
     if (pcFoldScreenController_ == nullptr) {
         return false;
     }
-    auto mainSession = GetMainSession();
-    if (!mainSession) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "mainSession is nullptr");
-        return false;
-    }
-    auto property = GetSessionProperty();
-    auto scaleX = mainSession->GetScaleX();
-    auto scaleY = mainSession->GetScaleY();
-    if (scaleX == 0 || scaleY == 0) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "scale ratio is 0");
-        return false;
-    }
-    if (IsCompatibilityModeScale(scaleX, scaleY)) {
-        WindowScaleTransfer(rect, scaleX, scaleY);
-    }
+    CompatibilityModeWindowScaleTransfer(rect, ScaleType::WINDOW_SCALE);
     bool ret = pcFoldScreenController_->ThrowSlip(GetScreenId(), rect, GetStatusBarHeight(), GetDockHeight());
     if (!ret) {
         TLOGD(WmsLogTag::WMS_LAYOUT_PC, "no throw slip");
         pcFoldScreenController_->ResetRecords();
-        if (IsCompatibilityModeScale(scaleX, scaleY)) {
-            WindowScaleTransfer(rect, 1 / scaleX, 1 / scaleY);
-        }
+        CompatibilityModeWindowScaleTransfer(rect, ScaleType::WINDOW_RECOVERY);
         return false;
     }
-    if (IsCompatibilityModeScale(scaleX, scaleY)) {
-        WindowScaleTransfer(rect, 1 / scaleX, 1 / scaleY);
-    }
+    CompatibilityModeWindowScaleTransfer(rect, ScaleType::WINDOW_RECOVERY);
     WSRect endRect = rect;
     std::function<void()> finishCallback = nullptr;
     bool needSetFullScreen = pcFoldScreenController_->IsStartFullScreen();

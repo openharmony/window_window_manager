@@ -1957,6 +1957,37 @@ HWTEST_F(SceneSessionTest5, HookStartMoveRect, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CompatibilityModeWindowScaleTransfer
+ * @tc.desc: CompatibilityModeWindowScaleTransfer
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, CompatibilityModeWindowScaleTransfer, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "CompatibilityModeWindowScaleTransfer";
+    info.bundleName_ = "CompatibilityModeWindowScaleTransfer";
+    info.screenId_ = 0;
+    sptr<MainSession> mainSession = sptr::MakeSptr(info, nullptr);
+    WSRect preRect = { 100, 100, 400, 400 };
+    WSRect noChangeRect = { 100, 100, 400, 400 };
+    WSRect resultRect = { 200, 200, 200, 200 };
+    float scaleX = 0.5f;
+    float scaleY = 0.5f;
+    ScaleType scaleType = ScaleType::WINDOW_SCALE;
+    mainSession->SetScale(scaleX, scaleY, 0.5f, 0.5f);
+    auto property = mainSession->GetSessionProperty();
+    property->SetCompatibleModeInPc(false);
+    mainSession->CompatibilityModeWindowScaleTransfer(preRect, scaleType);
+    EXPECT_EQ(noChangeRect, preRect);
+    property->SetCompatibleModeInPc(true);
+    mainSession->CompatibilityModeWindowScaleTransfer(preRect, scaleType);
+    EXPECT_EQ(resultRect, preRect);
+    scaleType = ScaleType::WINDOW_RECOVERY;
+    mainSession->CompatibilityModeWindowScaleTransfer(preRect, scaleType);
+    EXPECT_EQ(noChangeRect, preRect);
+}
+
+/**
  * @tc.name: ThrowSlipDirectly
  * @tc.desc: ThrowSlipDirectly
  * @tc.type: FUNC
