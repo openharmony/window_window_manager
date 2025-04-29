@@ -3515,13 +3515,7 @@ bool SceneSession::MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeR
     std::function<void()> finishCallback = nullptr;
     bool needSetFullScreen = pcFoldScreenController_->IsStartFullScreen();
     if (needSetFullScreen) {
-        // maximize end rect and notify last rect
-        throwSlipToFullScreenAnimCount_.fetch_add(1);
-        pcFoldScreenController_->ResizeToFullScreen(endRect, GetStatusBarHeight(), GetDockHeight());
-        if (pcFoldScreenController_->IsThrowSlipDirectly()) {
-            pcFoldScreenController_->ThrowSlipFloatingRectDirectly(
-                rect, GetSessionRequestRect(), GetStatusBarHeight(), GetDockHeight());
-        }
+        ThrowSlipToFullScreen(endRect, rect);
         finishCallback = [weakThis = wptr(this), rect, where = __func__] {
             auto session = weakThis.promote();
             if (session == nullptr) {
