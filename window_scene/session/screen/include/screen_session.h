@@ -326,6 +326,9 @@ public:
     void SetScreenAvailableStatus(bool isScreenAvailable);
     bool IsScreenAvailable() const;
 
+    void SetIsAvailableAreaNeedNotify(bool isAvailableAreaNeedNotify);
+    bool GetIsAvailableAreaNeedNotify() const;
+
 private:
     ScreenProperty property_;
     std::shared_ptr<RSDisplayNode> displayNode_;
@@ -363,6 +366,7 @@ private:
     std::string innerName_ {"UNKOWN"};
     bool isEnableRegionRotation_ = false;
     std::mutex isEnableRegionRotationMutex_;
+    bool isAvailableAreaNeedNotify_ = false;
 };
 
 class ScreenSessionGroup : public ScreenSession {
