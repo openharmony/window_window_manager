@@ -3455,13 +3455,6 @@ public:
     }
 
     /**
-     * @brief Get the api compatible version.
-     *
-     * @return Api compatible version
-     */
-    virtual uint32_t GetApiCompatibleVersion() const { return 0; }
-
-    /**
      * @brief Set the parent window of a sub window.
      *
      * @param newParentWindowId new parent window id.
@@ -3535,6 +3528,14 @@ public:
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
+
+    /**
+     * @brief Get the window property of current window.
+     *
+     * @param windowPropertyInfo the window property struct.
+     * @return WMError.
+     */
+    virtual WMError GetWindowPropertyInfo(WindowPropertyInfo& windowPropertyInfo) { return WMError::WM_OK; }
 };
 }
 }

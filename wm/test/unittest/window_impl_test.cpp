@@ -1402,6 +1402,47 @@ HWTEST_F(WindowImplTest, SetRestoredRouterStack_0100, Function | SmallTest | Lev
     EXPECT_EQ(gettedStack, routerStack);
     EXPECT_TRUE(window->GetRestoredRouterStack().empty());
 }
+
+/**
+ * @tc.name: GetWindowPropertyInfo
+ * @tc.desc: GetWindowPropertyInfo01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest, GetWindowPropertyInfo01, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetFocusable(false);
+    option->SetTouchable(true);
+    option->SetDisplayId(999);
+    option->SetWindowName("GetWindowPropertyInfo01");
+    sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
+    window->state_ = WindowState::STATE_DESTROYED;
+    WindowPropertyInfo windowPropertyInfo;
+    auto ret = window->GetWindowPropertyInfo(windowPropertyInfo);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+}
+
+/**
+ * @tc.name: GetWindowPropertyInfo
+ * @tc.desc: GetWindowPropertyInfo02
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest, GetWindowPropertyInfo02, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetFocusable(false);
+    option->SetTouchable(true);
+    option->SetDisplayId(999);
+    option->SetWindowName("GetWindowPropertyInfo02");
+    sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
+    window->state_ = WindowState::STATE_SHOWN;
+    WindowPropertyInfo windowPropertyInfo;
+    auto ret = window->GetWindowPropertyInfo(windowPropertyInfo);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(false, windowPropertyInfo.isFocusable);
+    EXPECT_EQ(true, windowPropertyInfo.isTouchable);
+    EXPECT_EQ(999, windowPropertyInfo.displayId);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

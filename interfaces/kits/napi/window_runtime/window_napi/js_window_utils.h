@@ -89,7 +89,6 @@ enum class ApiWindowType : uint32_t {
     TYPE_WALLET_SWIPE_CARD,
     TYPE_SCREEN_CONTROL,
     TYPE_FLOAT_NAVIGATION,
-    TYPE_MAIN = 32,
     TYPE_END
 };
 
@@ -129,7 +128,6 @@ const std::map<WindowType, ApiWindowType> NATIVE_JS_TO_WINDOW_TYPE_MAP {
     { WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD,   ApiWindowType::TYPE_WALLET_SWIPE_CARD },
     { WindowType::WINDOW_TYPE_SCREEN_CONTROL,      ApiWindowType::TYPE_SCREEN_CONTROL    },
     { WindowType::WINDOW_TYPE_FLOAT_NAVIGATION,    ApiWindowType::TYPE_FLOAT_NAVIGATION  },
-    { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,     ApiWindowType::TYPE_MAIN              },
 };
 
 const std::map<ApiWindowType, WindowType> JS_TO_NATIVE_WINDOW_TYPE_MAP {
@@ -158,7 +156,6 @@ const std::map<ApiWindowType, WindowType> JS_TO_NATIVE_WINDOW_TYPE_MAP {
     { ApiWindowType::TYPE_WALLET_SWIPE_CARD,   WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD   },
     { ApiWindowType::TYPE_SCREEN_CONTROL,      WindowType::WINDOW_TYPE_SCREEN_CONTROL      },
     { ApiWindowType::TYPE_FLOAT_NAVIGATION,    WindowType::WINDOW_TYPE_FLOAT_NAVIGATION    },
-    { ApiWindowType::TYPE_MAIN,                WindowType::WINDOW_TYPE_APP_MAIN_WINDOW     },
 };
 
 enum class ApiWindowMode : uint32_t {
@@ -320,7 +317,7 @@ public:
     napi_value CreateJsWindowInfoArrayObject(napi_env env, const std::vector<sptr<WindowVisibilityInfo>>& infos);
     napi_value CreateJsWindowInfoObject(napi_env env, const sptr<WindowVisibilityInfo>& window);
     napi_value GetRectAndConvertToJsValue(napi_env env, const Rect& rect);
-    napi_value CreateJsWindowPropertiesObject(napi_env env, sptr<Window>& window, const Rect& drawableRect);
+    napi_value CreateJsWindowPropertiesObject(napi_env env, const WindowPropertyInfo& windowPropertyInfo);
     napi_value CreateJsSystemBarPropertiesObject(napi_env env, sptr<Window>& window);
     bool GetSystemBarPropertiesFromJs(napi_env env, napi_value jsObject,
         std::unordered_map<WindowType, SystemBarProperty>& properties,
