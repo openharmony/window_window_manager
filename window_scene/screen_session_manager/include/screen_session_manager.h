@@ -403,6 +403,7 @@ public:
     bool GetCoordinationFlag(void);
     DMError SetVirtualScreenMaxRefreshRate(ScreenId id, uint32_t refreshRate,
         uint32_t& actualRefreshRate) override;
+    void OnScreenModeChange(ScreenModeChangeEvent screenModeChangeEvent) override;
 
     void SetLastScreenMode(sptr<ScreenSession> firstSession, sptr<ScreenSession> secondarySession);
     /*
@@ -446,6 +447,7 @@ public:
     std::string DumperClientScreenSessions();
     void SetMultiScreenModeChangeTracker(std::string changeProc);
     void SetRSScreenPowerStatus(ScreenId screenId, ScreenPowerStatus status);
+    void NotifyScreenMaskAppear() override;
 
 protected:
     ScreenSessionManager();
@@ -699,6 +701,8 @@ private:
     std::condition_variable switchUserCV_;
     std::mutex screenPowerMutex_;
     std::mutex screenChangeMutex_;
+    std::mutex screenMaskMutex_;
+    std::condition_variable screenMaskCV_;
 
     std::mutex freezedPidListMutex_;
     std::set<int32_t> freezedPidList_;
