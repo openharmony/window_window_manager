@@ -145,7 +145,7 @@ public:
     /*
      * RS Multi Instance
      */
-    virtual std::shared_ptr<RSUIDirector> GetRSUIDirector() const = 0;
+    virtual std::shared_ptr<RSUIDirector> GetRSUIDirector() const { return nullptr; }
 
     virtual const std::shared_ptr<AbilityRuntime::Context> GetContext() const = 0;
     virtual Rect GetRect() const = 0;

@@ -48,7 +48,6 @@ WindowImpl::WindowImpl(const sptr<WindowOption>& option)
     }
     WLOGFI("WindowImpl constructorCnt: %{public}d",
         ++constructorCnt);
-    InitRSUIDirector();
 }
 
 WindowImpl::~WindowImpl()
@@ -64,7 +63,7 @@ void WindowImpl::CreateSurfaceNode(const std::string name, const SendRenderDataC
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
     rsSurfaceNodeConfig.SurfaceNodeName = name;
     rsSurfaceNodeConfig.additionalData = reinterpret_cast<void*>(callback);
-    surfaceNode_ = RSSurfaceNode::Create(rsSurfaceNodeConfig, true, rsUIDirector_->GetRSUIContext());
+    surfaceNode_ = RSSurfaceNode::Create(rsSurfaceNodeConfig);
     if (surfaceNode_ != nullptr) {
         vsyncStation_ = std::make_shared<VsyncStation>(surfaceNode_->GetId());
     }
@@ -163,11 +162,6 @@ void WindowImpl::UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk:
 std::shared_ptr<RSSurfaceNode> WindowImpl::GetSurfaceNode() const
 {
     return surfaceNode_;
-}
-
-std::shared_ptr<RSUIDirector> WindowImpl::GetRSUIDirector() const
-{
-    return rsUIDirector_;
 }
 
 Rect WindowImpl::GetRect() const
@@ -1269,15 +1263,6 @@ uint32_t WindowImpl::GetApiTargetVersion() const
         version = context_->GetApplicationInfo()->apiTargetVersion % API_VERSION_MOD;
     }
     return version;
-}
-
-void WindowImpl::InitRSUIDirector()
-{
-    if (rsUIDirector_) {
-        return;
-    }
-    rsUIDirector_ = RSUIDirector::Create();
-    rsUIDirector_->Init(true, true);
 }
 } // namespace Rosen
 } // namespace OHOS

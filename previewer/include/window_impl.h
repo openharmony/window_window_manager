@@ -21,7 +21,6 @@
 #include <ui_content.h>
 #include "context.h"
 #include "ui/rs_surface_node.h"
-#include "ui/rs_ui_director.h"
 #include "vsync_station.h"
 #include "window.h"
 #include "window_property.h"
@@ -62,12 +61,6 @@ public:
     static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration,
         const std::vector<std::shared_ptr<AbilityRuntime::Context>>& ignoreWindowContexts = {});
     virtual std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const override;
-
-    /*
-     * RS Multi Instance
-     */
-    std::shared_ptr<RSUIDirector> GetRSUIDirector() const override;
-
     virtual Rect GetRect() const override;
     virtual Rect GetRequestRect() const override;
     virtual WindowType GetType() const override;
@@ -304,12 +297,6 @@ private:
     void NotifySystemBarChange(WindowType type, const SystemBarProperty& property);
     void NotifySetIgnoreSafeArea(bool value);
     void NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
-
-    /*
-     * RS Multi Instance
-     */
-    void InitRSUIDirector();
-
     static std::mutex globalMutex_;
     static std::map<std::string, std::pair<uint32_t, sptr<Window>>> windowMap_;
     static std::map<uint32_t, std::vector<sptr<WindowImpl>>> subWindowMap_;
@@ -318,12 +305,6 @@ private:
     static std::map<uint32_t, std::vector<sptr<IAvoidAreaChangedListener>>> avoidAreaChangeListeners_;
     WindowState state_ { WindowState::STATE_INITIAL };
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
-
-    /*
-     * RS Multi Instance
-     */
-    std::shared_ptr<RSUIDirector> rsUIDirector_;
-
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
     std::shared_ptr<AbilityRuntime::Context> context_;
     std::string name_;
