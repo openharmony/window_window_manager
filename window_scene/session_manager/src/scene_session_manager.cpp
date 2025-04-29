@@ -6564,21 +6564,21 @@ void SceneSessionManager::UpdateHighlightStatus(DisplayId displayId, const sptr<
         return;
     }
     bool needBlockHighlightNotify = focusGroup->GetNeedBlockNotifyFocusStatusUntilForeground();
-    if(isProactiveUnfocus){
+    if (isProactiveUnfocus) {
         TLOGD(WmsLogTag::WMS_FOCUS, "proactiveUnfocus");
         RemoveHighlightSessionIds(preSceneSession);
     }
-    if(currSceneSession->GetSessionProperty()->GetExclusivelyHighlighted()) {
+    if (currSceneSession->GetSessionProperty()->GetExclusivelyHighlighted()) {
         TLOGD(WmsLogTag::WMS_FOCUS, "exclusively highlighted");
         SetHighlightSessionIds(currSceneSession, needBlockHighlightNotify);
         return;
     }
-    if(currSceneSession->GetSessionInfo().isSystem_) {
+    if (SessionHelper::IsSystemWindow(currSceneSession->GetWindowType())) {
         TLOGD(WmsLogTag::WMS_FOCUS, "system highlighted");
         AddHighlightSessionIds(currSceneSession, needBlockHighlightNotify);
         return;
     }
-    if(currSceneSession->IsSameMainSession(preSceneSession)) {
+    if (currSceneSession->IsSameMainSession(preSceneSession)) {
         TLOGD(WmsLogTag::WMS_FOCUS, "related highlighted");
         AddHighlightSessionIds(currSceneSession, needBlockHighlightNotify);
         return;
