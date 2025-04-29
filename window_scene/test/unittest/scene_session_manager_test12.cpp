@@ -1400,7 +1400,7 @@ HWTEST_F(SceneSessionManagerTest12, UpdateHighlightStatus, Function | SmallTest 
  * @tc.desc: UpdateHighlightStatus
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest12, UpdateHighlightStatus01, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest12, UpdateHighlightStatus01, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     ssm_->highlightIds_.clear();
