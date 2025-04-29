@@ -3487,6 +3487,18 @@ public:
     virtual void UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>& want) {}
 
     /**
+     * @brief Receive async IPC event from UIExtensionComponent.
+     *
+     * @param code the event code.
+     * @param data the data transfered from UIExtensionComponent.
+     * @param persistentId the persistent id of UIExtension.
+     */
+    virtual WMError OnAsyncExtensionEvent(uint32_t code, const AAFwk::Want& data, int32_t persistentId)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
      * @brief Query whether the waterfall mode is enabled or not.
      *
      * @return true means the waterfall mode is enabled, and false means the opposite.
