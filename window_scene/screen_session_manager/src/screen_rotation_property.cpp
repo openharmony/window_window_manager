@@ -28,7 +28,7 @@ bool ScreenRotationProperty::isDeviceHorizontal()
 void ScreenRotationProperty::HandleSensorEventInput(DeviceRotation deviceRotation)
 {
     static DeviceRotation lastSensorRotationConverted_ = DeviceRotation::INVALID;
-    TLOGI(WmsLogTag::DMS, "DeviceRotation: %{public}d, "
+    TLOGI(WmsLogTag::DMS_SSM, "DeviceRotation: %{public}d, "
         "lastSensorRotationConverted: %{public}d", deviceRotation, lastSensorRotationConverted_);
 
     if (deviceRotation != DeviceRotation::INVALID && lastSensorRotationConverted_ != deviceRotation) {
@@ -36,7 +36,7 @@ void ScreenRotationProperty::HandleSensorEventInput(DeviceRotation deviceRotatio
     }
     auto screenSession = ScreenSessionManager::GetInstance().GetDefaultScreenSession();
     if (!screenSession) {
-        TLOGW(WmsLogTag::DMS, "screenSession is null, sensor rotation status handle failed");
+        TLOGW(WmsLogTag::DMS_SSM, "screenSession is null, sensor rotation status handle failed");
         return;
     }
     screenSession->HandleSensorRotation(ConvertDeviceToFloat(deviceRotation));
@@ -66,7 +66,7 @@ float ScreenRotationProperty::ConvertDeviceToFloat(DeviceRotation deviceRotation
             sensorRotation = -1.0f; // keep before degree
             break;
         default:
-            TLOGW(WmsLogTag::DMS, "invalid device rotation: %{public}d", deviceRotation);
+            TLOGW(WmsLogTag::DMS_SSM, "invalid device rotation: %{public}d", deviceRotation);
     }
     return sensorRotation;
 }
@@ -74,7 +74,7 @@ float ScreenRotationProperty::ConvertDeviceToFloat(DeviceRotation deviceRotation
 void ScreenRotationProperty::HandleHoverStatusEventInput(DeviceHoverStatus hoverStatus, bool needRotate)
 {
     static DeviceHoverStatus lastHoverStatusConverted_ = DeviceHoverStatus::INVALID;
-    TLOGI(WmsLogTag::DMS, "DeviceHoverStatus: %{public}d, "
+    TLOGI(WmsLogTag::DMS_SSM, "DeviceHoverStatus: %{public}d, "
         "lastHoverStatusConverted: %{public}d", hoverStatus, lastHoverStatusConverted_);
 
     if (hoverStatus != DeviceHoverStatus::INVALID) {
@@ -82,7 +82,7 @@ void ScreenRotationProperty::HandleHoverStatusEventInput(DeviceHoverStatus hover
     }
     auto screenSession = ScreenSessionManager::GetInstance().GetDefaultScreenSession();
     if (!screenSession) {
-        TLOGW(WmsLogTag::DMS, "screenSession is null, sensor rotation status handle failed");
+        TLOGW(WmsLogTag::DMS_SSM, "screenSession is null, sensor rotation status handle failed");
         return;
     }
     screenSession->HandleHoverStatusChange(static_cast<int32_t>(hoverStatus), needRotate);

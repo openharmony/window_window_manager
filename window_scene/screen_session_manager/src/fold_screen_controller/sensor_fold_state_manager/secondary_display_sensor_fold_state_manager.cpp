@@ -56,19 +56,19 @@ void SecondaryDisplaySensorFoldStateManager::HandleAngleOrHallChange(const std::
     FoldStatus nextState = GetNextFoldState(angles, halls);
     HandleSensorChange(nextState, angles, foldScreenPolicy);
     if (angles.size() != ANGLES_AXIS_SIZE) {
-        TLOGE(WmsLogTag::DMS, "angles size is not right, angles size %{public}zu", angles.size());
+        TLOGE(WmsLogTag::DMS_SSM, "angles size is not right, angles size %{public}zu", angles.size());
         return;
     }
     bool isSecondaryReflexion = static_cast<bool>(angles[REFLEXION_VALUE]);
     if (isSecondaryReflexion) {
-        TLOGW(WmsLogTag::DMS, "Secondary is reflexion");
+        TLOGW(WmsLogTag::DMS_SSM, "Secondary is reflexion");
         isHasReflexioned = true;
         ReportSecondaryReflexion(static_cast<int32_t>(nextState), static_cast<int32_t>(nextState),
             isSecondaryReflexion);
         SendReflexionResult(isSecondaryReflexion);
     }
     if (isHasReflexioned && !isSecondaryReflexion) {
-        TLOGW(WmsLogTag::DMS, "Secondary recover from reflexion");
+        TLOGW(WmsLogTag::DMS_SSM, "Secondary recover from reflexion");
         isHasReflexioned = false;
         SendReflexionResult(isSecondaryReflexion);
     }
@@ -77,14 +77,14 @@ void SecondaryDisplaySensorFoldStateManager::HandleAngleOrHallChange(const std::
 FoldStatus SecondaryDisplaySensorFoldStateManager::GetNextFoldState(const std::vector<float> &angles,
     const std::vector<uint16_t> &halls)
 {
-    TLOGD(WmsLogTag::DMS, "%{public}s, %{public}s",
+    TLOGD(WmsLogTag::DMS_SSM, "%{public}s, %{public}s",
         FoldScreenStateInternel::TransVec2Str(angles, "angle").c_str(),
         FoldScreenStateInternel::TransVec2Str(halls, "hall").c_str());
 
     FoldStatus state = FoldStatus::UNKNOWN;
     bool isPowerOn = PowerMgr::PowerMgrClient::GetInstance().IsScreenOn();
     if (angles.size() != ANGLES_AXIS_SIZE || halls.size() != HALLS_AXIS_SIZE) {
-        TLOGE(WmsLogTag::DMS, "angles or halls size is not right, angles size %{public}zu, halls size %{public}zu",
+        TLOGE(WmsLogTag::DMS_SSM, "angles or halls size is not right, angles size %{public}zu, halls size %{public}zu",
             angles.size(), halls.size());
         return state;
     }
@@ -196,7 +196,7 @@ FoldStatus SecondaryDisplaySensorFoldStateManager::GetGlobalFoldState(FoldStatus
 
 FoldStatus SecondaryDisplaySensorFoldStateManager::GetFoldStateUnpower(const std::vector<uint16_t> &halls)
 {
-    TLOGW(WmsLogTag::DMS, "The screen is not currently lit");
+    TLOGW(WmsLogTag::DMS_SSM, "The screen is not currently lit");
     FoldStatus state = FoldStatus::UNKNOWN;
     int hall1 = halls[0];
     int hall2 = halls[1];
@@ -215,7 +215,7 @@ FoldStatus SecondaryDisplaySensorFoldStateManager::GetFoldStateUnpower(const std
 void SecondaryDisplaySensorFoldStateManager::ReportSecondaryReflexion(int32_t currentStatus, int32_t nextStatus,
     bool isSecondaryReflexion)
 {
-    TLOGW(WmsLogTag::DMS, "ReportSecondaryReflexion currentStatus: %{public}d, isSecondaryReflexion: %{public}d",
+    TLOGW(WmsLogTag::DMS_SSM, "ReportSecondaryReflexion currentStatus: %{public}d, isSecondaryReflexion: %{public}d",
         currentStatus, isSecondaryReflexion);
     int32_t ret = HiSysEventWrite(
         OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
@@ -225,7 +225,7 @@ void SecondaryDisplaySensorFoldStateManager::ReportSecondaryReflexion(int32_t cu
         "NEXT_FOLD_STATUS", nextStatus,
         "SENSOR_POSTURE", isSecondaryReflexion);
     if (ret != 0) {
-        TLOGE(WmsLogTag::DMS, "Write HiSysEvent error, ret: %{public}d", ret);
+        TLOGE(WmsLogTag::DMS_SSM, "Write HiSysEvent error, ret: %{public}d", ret);
     }
 }
 
@@ -233,7 +233,7 @@ void SecondaryDisplaySensorFoldStateManager::SendReflexionResult(bool isSecondar
 {
     auto screenSession = ScreenSessionManager::GetInstance().GetDefaultScreenSession();
     if (screenSession == nullptr) {
-        TLOGE(WmsLogTag::DMS, "screen session is null!");
+        TLOGE(WmsLogTag::DMS_SSM, "screen session is null!");
         return;
     }
     ScreenId screenId = screenSession->GetScreenId();

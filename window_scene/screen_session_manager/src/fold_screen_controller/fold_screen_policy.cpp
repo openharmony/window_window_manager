@@ -58,7 +58,7 @@ FoldStatus FoldScreenPolicy::GetFoldStatus()
 
 void FoldScreenPolicy::SetFoldStatus(FoldStatus foldStatus)
 {
-    TLOGI(WmsLogTag::DMS, "SetFoldStatus FoldStatus: %{public}d", foldStatus);
+    TLOGI(WmsLogTag::DMS_SSM, "SetFoldStatus FoldStatus: %{public}d", foldStatus);
     currentFoldStatus_ = foldStatus;
     lastFoldStatus_ = foldStatus;
 }
@@ -92,11 +92,11 @@ void FoldScreenPolicy::ChangeOffTentMode() {}
 
 bool FoldScreenPolicy::GetModeChangeRunningStatus()
 {
-    TLOGE(WmsLogTag::DMS, "GetdisplayModeRunningStatus: %{public}d", GetdisplayModeRunningStatus());
+    TLOGE(WmsLogTag::DMS_SSM, "GetdisplayModeRunningStatus: %{public}d", GetdisplayModeRunningStatus());
     auto currentTime = std::chrono::steady_clock::now();
     auto intervalMs = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - startTimePoint_).count();
     if (intervalMs > MODE_CHANGE_TIMEOUT_MS) {
-        TLOGE(WmsLogTag::DMS, "mode change timeout.");
+        TLOGE(WmsLogTag::DMS_SSM, "mode change timeout.");
         return false;
     }
     return GetdisplayModeRunningStatus();
@@ -120,7 +120,7 @@ void FoldScreenPolicy::SetLastCacheDisplayMode(FoldDisplayMode mode)
 int64_t FoldScreenPolicy::getFoldingElapsedMs()
 {
     if (endTimePoint_ < startTimePoint_) {
-        TLOGE(WmsLogTag::DMS, "invalid timepoint. endTimePoint less startTimePoint");
+        TLOGE(WmsLogTag::DMS_SSM, "invalid timepoint. endTimePoint less startTimePoint");
         return 0;
     }
     auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(endTimePoint_ - startTimePoint_).count();

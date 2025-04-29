@@ -22,9 +22,6 @@
 
 namespace OHOS::Rosen {
 using namespace AbilityRuntime;
-namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsScreenUtils" };
-}
 
 napi_value NapiGetUndefined(napi_env env)
 {
@@ -52,7 +49,7 @@ napi_value JsScreenUtils::CreateJsScreenProperty(napi_env env, const ScreenPrope
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
-        WLOGFE("Failed to create object!");
+        TLOGE(WmsLogTag::DMS_KITS, "Failed to create object!");
         return NapiGetUndefined(env);
     }
 
@@ -74,7 +71,7 @@ napi_value JsScreenUtils::CreateJsRRect(napi_env env, const RRect& rrect)
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
-        WLOGFE("Failed to create object!");
+        TLOGE(WmsLogTag::DMS_KITS, "Failed to create object!");
         return NapiGetUndefined(env);
     }
 
@@ -91,7 +88,7 @@ napi_value JsScreenUtils::CreateJsScreenConnectChangeType(napi_env env)
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
-        WLOGFE("Failed to create object!");
+        TLOGE(WmsLogTag::DMS_KITS, "Failed to create object!");
         return NapiGetUndefined(env);
     }
 
@@ -105,7 +102,7 @@ napi_value JsScreenUtils::CreateJsScreenPropertyChangeReason(napi_env env)
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
-        WLOGFE("Failed to create object!");
+        TLOGE(WmsLogTag::DMS_KITS, "Failed to create object!");
         return NapiGetUndefined(env);
     }
 
@@ -141,7 +138,7 @@ napi_value JsScreenUtils::CreateJsFoldStatus(napi_env env)
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
-        WLOGFE("Failed to create object!");
+        TLOGE(WmsLogTag::DMS_KITS, "Failed to create object!");
         return NapiGetUndefined(env);
     }
 
@@ -161,7 +158,7 @@ napi_value JsScreenUtils::CreateJsScreenPropertyChangeType(napi_env env)
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
-        WLOGFE("Failed to create object!");
+        TLOGE(WmsLogTag::DMS_KITS, "Failed to create object!");
         return NapiGetUndefined(env);
     }
 
@@ -187,7 +184,7 @@ napi_value JsScreenUtils::CreateJsSuperFoldStatus(napi_env env)
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
-        WLOGFE("Failed to create object!");
+        TLOGE(WmsLogTag::DMS_KITS, "Failed to create object!");
         return NapiGetUndefined(env);
     }
 
@@ -209,7 +206,7 @@ napi_value JsScreenUtils::CreateJsExtendScreenConnectStatus(napi_env env)
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
-        WLOGFE("Failed to create object!");
+        TLOGE(WmsLogTag::DMS_KITS, "Failed to create object!");
         return NapiGetUndefined(env);
     }
 
@@ -234,7 +231,7 @@ bool ConvertRRectFromJs(napi_env env, napi_value jsObject, RRect& bound)
     if (GetType(env, jsLeft) != napi_undefined) {
         int32_t left;
         if (!ConvertFromJsValue(env, jsLeft, left)) {
-            WLOGFE("[NAPI]Failed to convert parameter to left");
+            TLOGE(WmsLogTag::DMS_KITS, "[NAPI]Failed to convert parameter to left");
             return false;
         }
         bound.rect_.left_ = left;
@@ -242,7 +239,7 @@ bool ConvertRRectFromJs(napi_env env, napi_value jsObject, RRect& bound)
     if (GetType(env, jsTop) != napi_undefined) {
         int32_t top;
         if (!ConvertFromJsValue(env, jsTop, top)) {
-            WLOGFE("[NAPI]Failed to convert parameter to top");
+            TLOGE(WmsLogTag::DMS_KITS, "[NAPI]Failed to convert parameter to top");
             return false;
         }
         bound.rect_.top_ = top;
@@ -250,7 +247,7 @@ bool ConvertRRectFromJs(napi_env env, napi_value jsObject, RRect& bound)
     if (GetType(env, jsWidth) != napi_undefined) {
         int32_t width;
         if (!ConvertFromJsValue(env, jsWidth, width)) {
-            WLOGFE("[NAPI]Failed to convert parameter to width");
+            TLOGE(WmsLogTag::DMS_KITS, "[NAPI]Failed to convert parameter to width");
             return false;
         }
         bound.rect_.width_ = width;
@@ -258,7 +255,7 @@ bool ConvertRRectFromJs(napi_env env, napi_value jsObject, RRect& bound)
     if (GetType(env, jsHeight) != napi_undefined) {
         int32_t height;
         if (!ConvertFromJsValue(env, jsHeight, height)) {
-            WLOGFE("[NAPI]Failed to convert parameter to height");
+            TLOGE(WmsLogTag::DMS_KITS, "[NAPI]Failed to convert parameter to height");
             return false;
         }
         bound.rect_.height_ = height;
@@ -266,7 +263,7 @@ bool ConvertRRectFromJs(napi_env env, napi_value jsObject, RRect& bound)
     if (GetType(env, jsRadius) != napi_undefined) {
         int radius;
         if (!ConvertFromJsValue(env, jsRadius, radius)) {
-            WLOGFE("[NAPI]Failed to convert parameter to radius");
+            TLOGE(WmsLogTag::DMS_KITS, "[NAPI]Failed to convert parameter to radius");
             return false;
         }
         bound.radius_[0].x_ = static_cast<float>(radius);
@@ -288,7 +285,7 @@ bool ConvertScreenDirectionInfoFromJs(napi_env env, napi_value jsObject, ScreenD
     if (GetType(env, jsNotifyRotation) != napi_undefined) {
         int32_t notifyRotation;
         if (!ConvertFromJsValue(env, jsNotifyRotation, notifyRotation)) {
-            WLOGFE("[NAPI]Failed to convert parameter to notifyRotation");
+            TLOGE(WmsLogTag::DMS_KITS, "[NAPI]Failed to convert parameter to notifyRotation");
             return false;
         }
         directionInfo.notifyRotation_ = notifyRotation;
@@ -296,7 +293,7 @@ bool ConvertScreenDirectionInfoFromJs(napi_env env, napi_value jsObject, ScreenD
     if (GetType(env, jsScreenRotation) != napi_undefined) {
         int32_t screenRotation;
         if (!ConvertFromJsValue(env, jsScreenRotation, screenRotation)) {
-            WLOGFE("[NAPI]Failed to convert parameter to screenRotation");
+            TLOGE(WmsLogTag::DMS_KITS, "[NAPI]Failed to convert parameter to screenRotation");
             return false;
         }
         directionInfo.screenRotation_ = screenRotation;
@@ -304,7 +301,7 @@ bool ConvertScreenDirectionInfoFromJs(napi_env env, napi_value jsObject, ScreenD
     if (GetType(env, jsRotation) != napi_undefined) {
         int32_t rotation;
         if (!ConvertFromJsValue(env, jsRotation, rotation)) {
-            WLOGFE("[NAPI]Failed to convert parameter to rotation");
+            TLOGE(WmsLogTag::DMS_KITS, "[NAPI]Failed to convert parameter to rotation");
             return false;
         }
         directionInfo.rotation_ = rotation;
@@ -312,7 +309,7 @@ bool ConvertScreenDirectionInfoFromJs(napi_env env, napi_value jsObject, ScreenD
     if (GetType(env, jsPhyRotation) != napi_undefined) {
         int32_t phyRotation;
         if (!ConvertFromJsValue(env, jsPhyRotation, phyRotation)) {
-            WLOGFE("[NAPI]Failed to convert parameter to phyRotation");
+            TLOGE(WmsLogTag::DMS_KITS, "[NAPI]Failed to convert parameter to phyRotation");
             return false;
         }
         directionInfo.phyRotation_ = phyRotation;
@@ -331,7 +328,7 @@ bool ConvertDMRectFromJs(napi_env env, napi_value jsObject, DMRect& rect)
     if (GetType(env, jsPosX) != napi_undefined) {
         int32_t posX;
         if (!ConvertFromJsValue(env, jsPosX, posX)) {
-            WLOGFE("[NAPI]Failed to convert parameter to posX");
+            TLOGE(WmsLogTag::DMS_KITS, "[NAPI]Failed to convert parameter to posX");
             return false;
         }
         rect.posX_ = posX;
@@ -339,7 +336,7 @@ bool ConvertDMRectFromJs(napi_env env, napi_value jsObject, DMRect& rect)
     if (GetType(env, jsPosY) != napi_undefined) {
         int32_t top;
         if (!ConvertFromJsValue(env, jsPosY, top)) {
-            WLOGFE("[NAPI]Failed to convert parameter to posY");
+            TLOGE(WmsLogTag::DMS_KITS, "[NAPI]Failed to convert parameter to posY");
             return false;
         }
         rect.posY_ = top;
@@ -347,7 +344,7 @@ bool ConvertDMRectFromJs(napi_env env, napi_value jsObject, DMRect& rect)
     if (GetType(env, jsWidth) != napi_undefined) {
         int32_t width;
         if (!ConvertFromJsValue(env, jsWidth, width)) {
-            WLOGFE("[NAPI]Failed to convert parameter to width");
+            TLOGE(WmsLogTag::DMS_KITS, "[NAPI]Failed to convert parameter to width");
             return false;
         }
         rect.width_ = static_cast<uint32_t>(width);
@@ -355,7 +352,7 @@ bool ConvertDMRectFromJs(napi_env env, napi_value jsObject, DMRect& rect)
     if (GetType(env, jsHeight) != napi_undefined) {
         int32_t height;
         if (!ConvertFromJsValue(env, jsHeight, height)) {
-            WLOGFE("[NAPI]Failed to convert parameter to height");
+            TLOGE(WmsLogTag::DMS_KITS, "[NAPI]Failed to convert parameter to height");
             return false;
         }
         rect.height_ = static_cast<uint32_t>(height);
