@@ -436,6 +436,7 @@ public:
     void SetDisplayOrientationForRotation(DisplayOrientation displayOrientaion);
     DisplayOrientation GetDisplayOrientationForRotation() const;
     void SetPreferredRequestedOrientation(Orientation orientation) override;
+    WMError SetFollowScreenChange(bool isFollowScreenChange) override;
 
 protected:
     WMError Connect();
