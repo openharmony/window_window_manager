@@ -1191,7 +1191,7 @@ void SceneSession::RegisterFollowScreenChangeCallback(NotifyFollowScreenChangeFu
         }
         session->specificCallback_->onUpdateFollowScreenChange_ = std::move(callback);
         session->specificCallback_->onUpdateFollowScreenChange_(session->GetFollowScreenChange());
-        }, __func__);
+    }, __func__);
 }
 
 WSError SceneSession::SetGlobalMaximizeMode(MaximizeMode mode)
