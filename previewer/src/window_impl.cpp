@@ -23,7 +23,6 @@
 #include "window_option.h"
 #include "viewport_config.h"
 #include "singleton_container.h"
-#include "rs_adapter.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -66,8 +65,6 @@ void WindowImpl::CreateSurfaceNode(const std::string name, const SendRenderDataC
     rsSurfaceNodeConfig.SurfaceNodeName = name;
     rsSurfaceNodeConfig.additionalData = reinterpret_cast<void*>(callback);
     surfaceNode_ = RSSurfaceNode::Create(rsSurfaceNodeConfig, true, rsUIDirector_->GetRSUIContext());
-    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
-          "Create RSSurfaceNode: %{public}s", RSAdapterUtil::RSNodeToStr(surfaceNode_).c_str());
     if (surfaceNode_ != nullptr) {
         vsyncStation_ = std::make_shared<VsyncStation>(surfaceNode_->GetId());
     }
@@ -170,9 +167,6 @@ std::shared_ptr<RSSurfaceNode> WindowImpl::GetSurfaceNode() const
 
 std::shared_ptr<RSUIDirector> WindowImpl::GetRSUIDirector() const
 {
-    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
-          "Get RSUIDirector: %{public}s, windowId: %{public}d",
-          RSAdapterUtil::RSUIDirectorToStr(rsUIDirector_).c_str(), GetWindowId());
     return rsUIDirector_;
 }
 
@@ -1280,16 +1274,10 @@ uint32_t WindowImpl::GetApiTargetVersion() const
 void WindowImpl::InitRSUIDirector()
 {
     if (rsUIDirector_) {
-        TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
-              "The RSUIDirector already exists: %{public}s, windowId: %{public}d",
-              RSAdapterUtil::RSUIDirectorToStr(rsUIDirector_).c_str(), GetWindowId());
         return;
     }
     rsUIDirector_ = RSUIDirector::Create();
     rsUIDirector_->Init(true, true);
-    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
-          "Create RSUIDirector: %{public}s, windowId: %{public}d",
-          RSAdapterUtil::RSUIDirectorToStr(rsUIDirector_).c_str(), GetWindowId());
 }
 } // namespace Rosen
 } // namespace OHOS
