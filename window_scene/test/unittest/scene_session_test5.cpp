@@ -1834,6 +1834,160 @@ HWTEST_F(SceneSessionTest5, MoveUnderInteriaAndNotifyRectChange, TestSize.Level1
 }
 
 /**
+ * @tc.name: WindowScaleTransfer01
+ * @tc.desc: WindowScaleTransfer01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, WindowScaleTransfer01, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "WindowScaleTransfer01";
+    info.bundleName_ = "WindowScaleTransfer01";
+    info.screenId_ = 0;
+    sptr<MainSession> mainSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    WSRect rect = { 100, 100, 400, 400 };
+    WSRect resultRect = { 200, 200, 200, 200 };
+    float scaleX = 0.5f;
+    float scaleY = 0.5f;
+    mainSession->winRect_ = rect;
+    mainSession->SetScale(scaleX, scaleY, 0.5f, 0.5f);
+    mainSession->WindowScaleTransfer(mainSession->winRect_, scaleX, scaleY);
+    EXPECT_EQ(mainSession->winRect_, resultRect);
+}
+
+/**
+ * @tc.name: WindowScaleTransfer02
+ * @tc.desc: WindowScaleTransfer02
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, WindowScaleTransfer02, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "WindowScaleTransfer02";
+    info.bundleName_ = "WindowScaleTransfer02";
+    info.screenId_ = 0;
+    sptr<MainSession> mainSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    WSRect rect = { 200, 200, 200, 200 };
+    WSRect resultRect = { 100, 100, 400, 400 };
+    float scaleX = 2.0f;
+    float scaleY = 2.0f;
+    mainSession->winRect_ = rect;
+    mainSession->SetScale(scaleX, scaleY, 0.5f, 0.5f);
+    mainSession->WindowScaleTransfer(mainSession->winRect_, scaleX, scaleY);
+    EXPECT_EQ(mainSession->winRect_, resultRect);
+}
+
+/**
+ * @tc.name: IsCompatibilityModeScale01
+ * @tc.desc: IsCompatibilityModeScale01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, IsCompatibilityModeScale01, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsCompatibilityModeScale01";
+    info.bundleName_ = "IsCompatibilityModeScale01";
+    info.screenId_ = 0;
+    sptr<MainSession> mainSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    auto property = mainSession->GetSessionProperty();
+    float scaleX = 2.0f;
+    float scaleY = 2.0f;
+    property->SetCompatibleModeInPc(true);
+    ASSERT_EQ(property->GetCompatibleModeInPc(), true);
+    bool res = mainSession->IsCompatibilityModeScale(scaleX, scaleY);
+    EXPECT_EQ(res, true);
+    property->SetCompatibleModeInPc(false);
+    ASSERT_EQ(property->GetCompatibleModeInPc(), false);
+    res = mainSession->IsCompatibilityModeScale(scaleX, scaleY);
+    EXPECT_EQ(res, false);
+}
+
+/**
+ * @tc.name: IsCompatibilityModeScale02
+ * @tc.desc: IsCompatibilityModeScale02
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, IsCompatibilityModeScale02, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsCompatibilityModeScale02";
+    info.bundleName_ = "IsCompatibilityModeScale02";
+    info.screenId_ = 0;
+    sptr<MainSession> mainSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    auto property = mainSession->GetSessionProperty();
+    float scaleX = 1.0f;
+    float scaleY = 1.0f;
+    property->SetCompatibleModeInPc(true);
+    ASSERT_EQ(property->GetCompatibleModeInPc(), true);
+    bool res = mainSession->IsCompatibilityModeScale(scaleX, scaleY);
+    EXPECT_EQ(res, false);
+    property->SetCompatibleModeInPc(false);
+    ASSERT_EQ(property->GetCompatibleModeInPc(), false);
+    res = mainSession->IsCompatibilityModeScale(scaleX, scaleY);
+    EXPECT_EQ(res, false);
+}
+
+/**
+ * @tc.name: HookStartMoveRect
+ * @tc.desc: HookStartMoveRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, HookStartMoveRect, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "HookStartMoveRect";
+    info.bundleName_ = "HookStartMoveRect";
+    info.screenId_ = 0;
+    sptr<MainSession> mainSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    WSRect preRect = { 100, 100, 400, 400 };
+    WSRect resultRect = { 200, 200, 200, 200 };
+    float scaleX = 0.5f;
+    float scaleY = 0.5f;
+    mainSession->SetScale(scaleX, scaleY, 0.5f, 0.5f);
+    mainSession->SetSessionRect(preRect);
+    EXPECT_EQ(preRect, mainSession->GetSessionRect());
+    auto property = mainSession->GetSessionProperty();
+    property->SetCompatibleModeInPc(false);
+    WSRect currRect;
+    mainSession->HookStartMoveRect(currRect, mainSession->GetSessionRect());
+    EXPECT_EQ(preRect, currRect);
+    property->SetCompatibleModeInPc(true);
+    mainSession->HookStartMoveRect(currRect, mainSession->GetSessionRect());
+    EXPECT_EQ(resultRect, currRect);
+}
+
+/**
+ * @tc.name: CompatibilityModeWindowScaleTransfer
+ * @tc.desc: CompatibilityModeWindowScaleTransfer
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, CompatibilityModeWindowScaleTransfer, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "CompatibilityModeWindowScaleTransfer";
+    info.bundleName_ = "CompatibilityModeWindowScaleTransfer";
+    info.screenId_ = 0;
+    sptr<MainSession> mainSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    WSRect preRect = { 100, 100, 400, 400 };
+    WSRect noChangeRect = { 100, 100, 400, 400 };
+    WSRect resultRect = { 200, 200, 200, 200 };
+    float scaleX = 0.5f;
+    float scaleY = 0.5f;
+    bool isScale = true;
+    mainSession->SetScale(scaleX, scaleY, 0.5f, 0.5f);
+    auto property = mainSession->GetSessionProperty();
+    property->SetCompatibleModeInPc(false);
+    mainSession->CompatibilityModeWindowScaleTransfer(preRect, isScale);
+    EXPECT_EQ(noChangeRect, preRect);
+    property->SetCompatibleModeInPc(true);
+    mainSession->CompatibilityModeWindowScaleTransfer(preRect, isScale);
+    EXPECT_EQ(resultRect, preRect);
+    isScale = false;
+    mainSession->CompatibilityModeWindowScaleTransfer(preRect, isScale);
+    EXPECT_EQ(noChangeRect, preRect);
+}
+
+/**
  * @tc.name: ThrowSlipDirectly
  * @tc.desc: ThrowSlipDirectly
  * @tc.type: FUNC
