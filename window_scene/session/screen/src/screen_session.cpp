@@ -1979,9 +1979,10 @@ void ScreenSession::SetFrameGravity(Gravity gravity)
 
 bool ScreenSession::UpdateAvailableArea(DMRect area)
 {
-    if (property_.GetAvailableArea() == area) {
+    if (property_.GetAvailableArea() == area && !GetIsAvailableAreaNeedNotify()) {
         return false;
     }
+    SetIsAvailableAreaNeedNotify(false);
     property_.SetAvailableArea(area);
     return true;
 }
@@ -2335,4 +2336,13 @@ void ScreenSession::SetScreenOffScreenRendering()
         rsId_, offWidth, offHeight, offScreenResult.c_str());
 }
 
+void ScreenSession::SetIsAvailableAreaNeedNotify(bool isAvailableAreaNeedNotify)
+{
+    isAvailableAreaNeedNotify_ = isAvailableAreaNeedNotify;
+}
+
+bool ScreenSession::GetIsAvailableAreaNeedNotify() const
+{
+    return isAvailableAreaNeedNotify_;
+}
 } // namespace OHOS::Rosen
