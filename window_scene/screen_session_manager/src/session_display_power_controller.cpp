@@ -21,7 +21,7 @@ namespace OHOS {
 namespace Rosen {
 bool SessionDisplayPowerController::SuspendBegin(PowerStateChangeReason reason)
 {
-    TLOGI(WmsLogTag::DMS, "reason:%{public}u", reason);
+    TLOGI(WmsLogTag::DMS_SSM, "reason:%{public}u", reason);
     std::map<DisplayId, sptr<DisplayInfo>> emptyMap;
     displayStateChangeListener_(DISPLAY_ID_INVALID, nullptr, emptyMap, DisplayStateChangeType::BEFORE_SUSPEND);
     return true;
@@ -46,7 +46,7 @@ bool SessionDisplayPowerController::HandleSetDisplayStateOff(DisplayState& state
             std::lock_guard<std::mutex> notifyLock(notifyMutex_);
             canCancelSuspendNotify_ = false;
             if (needCancelNotify_) {
-                TLOGI(WmsLogTag::DMS, "[UL_POWER]SetDisplayState to OFF is canceled successfully before notify");
+                TLOGI(WmsLogTag::DMS_SSM, "[UL_POWER]SetDisplayState to OFF is canceled successfully before notify");
                 needCancelNotify_ = false;
                 displayState_ = lastState;
                 ScreenSessionManager::GetInstance().NotifyDisplayStateChanged(DISPLAY_ID_INVALID,
@@ -63,7 +63,7 @@ bool SessionDisplayPowerController::HandleSetDisplayStateOff(DisplayState& state
         }
         isSuspendBegin_ = false;
         if (canceledSuspend_) {
-            TLOGI(WmsLogTag::DMS, "[UL_POWER]SetDisplayState to OFF is canceled successfully after notify");
+            TLOGI(WmsLogTag::DMS_SSM, "[UL_POWER]SetDisplayState to OFF is canceled successfully after notify");
             canceledSuspend_ = false;
             displayState_ = lastState;
             ScreenSessionManager::GetInstance().NotifyDisplayStateChanged(DISPLAY_ID_INVALID,
@@ -76,7 +76,7 @@ bool SessionDisplayPowerController::HandleSetDisplayStateOff(DisplayState& state
 
 bool SessionDisplayPowerController::SetDisplayState(DisplayState state)
 {
-    TLOGI(WmsLogTag::DMS, "[UL_POWER]state:%{public}u", state);
+    TLOGI(WmsLogTag::DMS_SSM, "[UL_POWER]state:%{public}u", state);
     switch (state) {
         case DisplayState::ON: {
             SetDisplayStateToOn(state);
@@ -95,7 +95,7 @@ bool SessionDisplayPowerController::SetDisplayState(DisplayState state)
             break;
         }
         default: {
-            TLOGW(WmsLogTag::DMS, "[UL_POWER]unknown DisplayState!");
+            TLOGW(WmsLogTag::DMS_SSM, "[UL_POWER]unknown DisplayState!");
             return false;
         }
     }
@@ -124,7 +124,7 @@ DisplayState SessionDisplayPowerController::GetDisplayState(DisplayId displayId)
 
 void SessionDisplayPowerController::NotifyDisplayEvent(DisplayEvent event)
 {
-    TLOGI(WmsLogTag::DMS, "[UL_POWER]DisplayEvent:%{public}u", event);
+    TLOGI(WmsLogTag::DMS_SSM, "[UL_POWER]DisplayEvent:%{public}u", event);
     if (event == DisplayEvent::UNLOCK) {
         std::map<DisplayId, sptr<DisplayInfo>> emptyMap;
         displayStateChangeListener_(DISPLAY_ID_INVALID, nullptr, emptyMap, DisplayStateChangeType::BEFORE_UNLOCK);

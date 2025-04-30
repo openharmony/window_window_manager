@@ -33,26 +33,26 @@ ScreenSnapshotPickerConnection &ScreenSnapshotPickerConnection::GetInstance()
 bool ScreenSnapshotPickerConnection::SnapshotPickerConnectExtension()
 {
     if (bundleName_.empty() || abilityName_.empty()) {
-        TLOGE(WmsLogTag::DMS, "screen snapshot bundleName or abilityName is empty");
+        TLOGE(WmsLogTag::DMS_SSM, "screen snapshot bundleName or abilityName is empty");
         return false;
     }
-    TLOGI(WmsLogTag::DMS, "bundleName:%{public}s, abilityName:%{public}s",
+    TLOGI(WmsLogTag::DMS_SSM, "bundleName:%{public}s, abilityName:%{public}s",
         bundleName_.c_str(), abilityName_.c_str());
     if (abilityConnection_ != nullptr) {
-        TLOGI(WmsLogTag::DMS, "screen snapshot already connected");
+        TLOGI(WmsLogTag::DMS_SSM, "screen snapshot already connected");
         return true;
     }
     abilityConnection_ = std::make_unique<ScreenSessionAbilityConnection>();
     if (abilityConnection_ == nullptr) {
-        TLOGE(WmsLogTag::DMS, "connection is nullptr");
+        TLOGE(WmsLogTag::DMS_SSM, "connection is nullptr");
         return false;
     }
     bool ret = abilityConnection_->ScreenSessionConnectExtension(bundleName_, abilityName_);
     if (!ret) {
-        TLOGE(WmsLogTag::DMS, "ScreenSessionConnectExtension failed");
+        TLOGE(WmsLogTag::DMS_SSM, "ScreenSessionConnectExtension failed");
         return false;
     }
-    TLOGI(WmsLogTag::DMS, "SnapshotPickerConnectExtension succeed");
+    TLOGI(WmsLogTag::DMS_SSM, "SnapshotPickerConnectExtension succeed");
     return true;
 }
 
@@ -62,27 +62,27 @@ int32_t ScreenSnapshotPickerConnection::GetScreenSnapshotInfo(Media::Rect &rect,
     MessageParcel reply;
 
     if (abilityConnection_ == nullptr) {
-        TLOGE(WmsLogTag::DMS, "ability connection is nullptr");
+        TLOGE(WmsLogTag::DMS_SSM, "ability connection is nullptr");
         return RES_FAILURE;
     }
 
     if (abilityConnection_->GetScreenSessionAbilityConnectionStub() == nullptr) {
-        TLOGE(WmsLogTag::DMS, "ScreenSessionAbilityConnectionStud is nullptr");
+        TLOGE(WmsLogTag::DMS_SSM, "ScreenSessionAbilityConnectionStud is nullptr");
         return RES_FAILURE;
     }
 
     if (!data.WriteInterfaceToken(GetScreenSessionAbilityConnectionStub()->GetDescriptor())) {
-        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS_SSM, "WriteInterfaceToken failed");
         return RES_FAILURE;
     }
 
     if (!data.WriteRemoteObject(abilityConnection_->GetScreenSessionAbilityConnectionStub()->AsObject())) {
-        TLOGE(WmsLogTag::DMS, "WriteRemoteObject failed");
+        TLOGE(WmsLogTag::DMS_SSM, "WriteRemoteObject failed");
         return RES_FAILURE;
     }
     int32_t ret = abilityConnection_->SendMessageBlock(TRANS_CMD_SEND_SNAPSHOT_RECT, data, reply);
     if (ret != ERR_OK) {
-        TLOGE(WmsLogTag::DMS, "send message failed");
+        TLOGE(WmsLogTag::DMS_SSM, "send message failed");
         return RES_FAILURE;
     }
 
@@ -98,7 +98,7 @@ int32_t ScreenSnapshotPickerConnection::GetScreenSnapshotInfo(Media::Rect &rect,
     rect.width = GetScreenSessionAbilityConnectionStub()->GetWidth();
     rect.height = GetScreenSessionAbilityConnectionStub()->GetHeight();
 
-    TLOGI(WmsLogTag::DMS, "snapshot area info screenId:%{public}" PRIu64", \
+    TLOGI(WmsLogTag::DMS_SSM, "snapshot area info screenId:%{public}" PRIu64", \
         left:%{public}d, top:%{public}d, width:%{public}d, height:%{public}d",
         screenId, rect.left, rect.top, rect.width, rect.height);
 
@@ -108,13 +108,13 @@ int32_t ScreenSnapshotPickerConnection::GetScreenSnapshotInfo(Media::Rect &rect,
 void ScreenSnapshotPickerConnection::SnapshotPickerDisconnectExtension()
 {
     if (abilityConnection_ == nullptr) {
-        TLOGE(WmsLogTag::DMS, "ability connect failed");
+        TLOGE(WmsLogTag::DMS_SSM, "ability connect failed");
         return;
     }
 
     abilityConnection_->ScreenSessionDisconnectExtension();
     abilityConnection_ = nullptr;
-    TLOGI(WmsLogTag::DMS, "SnapshotPickerDisconnectExtension exit");
+    TLOGI(WmsLogTag::DMS_SSM, "SnapshotPickerDisconnectExtension exit");
 }
 
 sptr<ScreenSessionAbilityConnectionStub> ScreenSnapshotPickerConnection::GetScreenSessionAbilityConnectionStub()

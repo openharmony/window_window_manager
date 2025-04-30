@@ -35,7 +35,6 @@ namespace OHOS::Rosen {
 using OHOS::AppExecFwk::AppStateData;
 using OHOS::AppExecFwk::ApplicationState;
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "SingleDisplaySensorPocketFoldStateManager"};
 const std::string CAMERA_NAME = "camera";
 constexpr float ANGLE_MIN_VAL = 0.0F;
 constexpr float ALTA_HALF_FOLDED_MAX_THRESHOLD = 140.0F;
@@ -146,18 +145,18 @@ void SingleDisplaySensorPocketFoldStateManager::RegisterApplicationStateObserver
     applicationStateObserver_ = new (std::nothrow) ApplicationStatePocketObserver();
     auto appMgrClient_ = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance();
     if (applicationStateObserver_ == nullptr) {
-        TLOGI(WmsLogTag::DMS, "applicationStateObserver_ is nullptr.");
+        TLOGI(WmsLogTag::DMS_SSM, "applicationStateObserver_ is nullptr.");
         return;
     }
     if (appMgrClient_ == nullptr) {
-        TLOGE(WmsLogTag::DMS, "appMgrClient_ is nullptr.");
+        TLOGE(WmsLogTag::DMS_SSM, "appMgrClient_ is nullptr.");
     } else {
         auto flag = static_cast<int32_t>(
             appMgrClient_->RegisterApplicationStateObserver(applicationStateObserver_, hallSwitchPackageNameList_));
         if (flag != ERR_OK) {
-            TLOGE(WmsLogTag::DMS, "Register app debug listener failed.");
+            TLOGE(WmsLogTag::DMS_SSM, "Register app debug listener failed.");
         } else {
-            TLOGI(WmsLogTag::DMS, "Register app debug listener success.");
+            TLOGI(WmsLogTag::DMS_SSM, "Register app debug listener success.");
         }
     }
 }
@@ -166,13 +165,13 @@ void SingleDisplaySensorPocketFoldStateManager::HandleTentChange(int tentType,
     sptr<FoldScreenPolicy> foldScreenPolicy, int32_t hall)
 {
     if (tentType == tentModeType_) {
-        WLOGI("Repeat reporting tent mode:%{public}d, no processing", tentModeType_);
+        TLOGI(WmsLogTag::DMS_SSM, "Repeat reporting tent mode:%{public}d, no processing", tentModeType_);
         return;
     }
 
     SetTentMode(tentType);
     if (foldScreenPolicy == nullptr) {
-        WLOGE("foldScreenPolicy is nullptr");
+        TLOGE(WmsLogTag::DMS_SSM, "foldScreenPolicy is nullptr");
         return;
     }
     if (tentType != TENT_MODE_OFF) {
@@ -205,13 +204,13 @@ bool SingleDisplaySensorPocketFoldStateManager::TriggerTentExit(float angle, int
 {
     if (hall == HALL_FOLDED_THRESHOLD) {
         ReportTentStatusChange(ReportTentModeStatus::ABNORMAL_EXIT_TENT_MODE_DUE_TO_HALL);
-        WLOGI("Exit tent mode due to hall sensor report folded");
+        TLOGI(WmsLogTag::DMS_SSM, "Exit tent mode due to hall sensor report folded");
         return true;
     }
 
     if (std::isless(angle, TENT_MODE_EXIT_MIN_THRESHOLD) || std::isgreater(angle, TENT_MODE_EXIT_MAX_THRESHOLD)) {
         ReportTentStatusChange(ReportTentModeStatus::ABNORMAL_EXIT_TENT_MODE_DUE_TO_ANGLE);
-        WLOGI("Exit tent mode due to angle sensor report angle:%{public}f", angle);
+        TLOGI(WmsLogTag::DMS_SSM, "Exit tent mode due to angle sensor report angle:%{public}f", angle);
         return true;
     }
 
@@ -224,7 +223,7 @@ void SingleDisplaySensorPocketFoldStateManager::TentModeHandleSensorChange(float
     if (TriggerTentExit(angle, hall)) {
         FoldStatus nextState = GetNextFoldState(angle, hall);
         HandleSensorChange(nextState, angle, foldScreenPolicy);
-        TLOGI(WmsLogTag::DMS, "exit tent mode. angle: %{public}f, hall: %{public}d", angle, hall);
+        TLOGI(WmsLogTag::DMS_SSM, "exit tent mode. angle: %{public}f, hall: %{public}d", angle, hall);
         SetTentMode(TENT_MODE_OFF);
         ScreenRotationProperty::HandleHoverStatusEventInput(DeviceHoverStatus::TENT_STATUS_CANCEL);
     }
@@ -233,14 +232,14 @@ void SingleDisplaySensorPocketFoldStateManager::TentModeHandleSensorChange(float
 void SingleDisplaySensorPocketFoldStateManager::ReportTentStatusChange(ReportTentModeStatus tentStatus)
 {
     int32_t status = static_cast<int32_t>(tentStatus);
-    TLOGI(WmsLogTag::DMS, "report tentStatus: %{public}d", status);
+    TLOGI(WmsLogTag::DMS_SSM, "report tentStatus: %{public}d", status);
     int32_t ret = HiSysEventWrite(
         OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
         "FOLD_TENT_MODE",
         OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
         "FOLD_TENT_STATUS", status);
     if (ret != 0) {
-        TLOGE(WmsLogTag::DMS, "Write HiSysEvent error, ret: %{public}d", ret);
+        TLOGE(WmsLogTag::DMS_SSM, "Write HiSysEvent error, ret: %{public}d", ret);
     }
 }
 
@@ -274,7 +273,7 @@ void ApplicationStatePocketObserver::OnForegroundApplicationChanged(const AppSta
     }
     if (appStateData.bundleName.find(CAMERA_NAME) != std::string::npos) {
         if (onCameraForegroundChanged_ == nullptr) {
-            TLOGE(WmsLogTag::DMS, "onCameraForegroundChanged_ not register");
+            TLOGE(WmsLogTag::DMS_SSM, "onCameraForegroundChanged_ not register");
             return;
         }
     }

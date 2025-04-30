@@ -29,88 +29,88 @@ const int32_t DM_ERROR_SYSTEM_INNORMAL = 1400003;
 
 RetStruct FfiOHOSGetDefaultDisplaySync()
 {
-    TLOGI(WmsLogTag::DMS, "FfiOHOSGetDefaultDisplaySync start");
+    TLOGI(WmsLogTag::DMS_KITS, "start");
     return CJDisplayManager::GetDefaultDisplaySync();
 }
 
 RetStruct FfiOHOSGetAllDisplays()
 {
-    TLOGI(WmsLogTag::DMS, "FfiOHOSGetAllDisplays start");
+    TLOGI(WmsLogTag::DMS_KITS, "start");
     return CJDisplayManager::GetAllDisplays();
 }
 
 RetStruct FfiOHOSHasPrivateWindow(uint32_t displayId)
 {
-    TLOGI(WmsLogTag::DMS, "FfiOHOSHasPrivateWindow start");
+    TLOGI(WmsLogTag::DMS_KITS, "start");
     return CJDisplayManager::HasPrivateWindow(displayId);
 }
 
 bool FfiOHOSIsFoldable()
 {
-    TLOGI(WmsLogTag::DMS, "FfiOHOSIsFoldable start");
+    TLOGI(WmsLogTag::DMS_KITS, "start");
     return CJDisplayManager::IsFoldable();
 }
 
 void FfiOHOSSetFoldDisplayMode(uint32_t mode)
 {
-    TLOGI(WmsLogTag::DMS, "FfiOHOSSetFoldDisplayMode start");
+    TLOGI(WmsLogTag::DMS_KITS, "start");
     CJDisplayManager::SetFoldDisplayMode(mode);
 }
 
 uint32_t FfiOHOSGetFoldStatus()
 {
-    TLOGI(WmsLogTag::DMS, "FfiOHOSGetFoldStatus start");
+    TLOGI(WmsLogTag::DMS_KITS, "start");
     return CJDisplayManager::GetFoldStatus();
 }
 
 uint32_t FfiOHOSGetFoldDisplayMode()
 {
-    TLOGI(WmsLogTag::DMS, "FfiOHOSGetFoldDisplayMode start");
+    TLOGI(WmsLogTag::DMS_KITS, "start");
     return CJDisplayManager::GetFoldDisplayMode();
 }
 
 RetStruct FfiOHOSGetCurrentFoldCreaseRegion()
 {
-    TLOGI(WmsLogTag::DMS, "FfiOHOSGetCurrentFoldCreaseRegion start");
+    TLOGI(WmsLogTag::DMS_KITS, "start");
     return CJDisplayManager::GetCurrentFoldCreaseRegion();
 }
 
 bool FfiOHOSIsCaptured()
 {
-    TLOGD(WmsLogTag::DMS, "FfiOHOSIsCaptured start");
+    TLOGD(WmsLogTag::DMS_KITS, "start");
     return CJDisplayManager::IsCaptured();
 }
 
 RetStruct FfiOHOSGetAllDisplayPhysicalResolution()
 {
-    TLOGD(WmsLogTag::DMS, "FfiOHOSGetAllDisplayPhysicalResolution start");
+    TLOGD(WmsLogTag::DMS_KITS, "start");
     return CJDisplayManager::GetAllDisplayPhysicalResolution();
 }
 
 int32_t FfiOHOSUnRegisterAllDisplayManagerCallback(const char* type)
 {
-    TLOGD(WmsLogTag::DMS, "FfiOHOSUnRegisterAllDisplayManagerCallback start");
+    TLOGD(WmsLogTag::DMS_KITS, "start");
     return CJDisplayManager::OnUnregisterAllDisplayListenerWithType(type);
 }
 
 int32_t FfiOHOSRegisterDisplayManagerCallback(const char* type, int64_t callbackId)
 {
-    TLOGD(WmsLogTag::DMS, "FfiOHOSRegisterDisplayManagerCallback start");
+    TLOGD(WmsLogTag::DMS_KITS, "start");
     return CJDisplayManager::OnRegisterDisplayListenerWithType(type, callbackId);
 }
 
 int32_t FfiOHOSUnRegisterDisplayManagerCallback(const char* type, int64_t callbackId)
 {
-    TLOGD(WmsLogTag::DMS, "FFiOHOSUnRegisterDisplayManagerCallback start");
+    TLOGD(WmsLogTag::DMS_KITS, "start");
     return CJDisplayManager::OnUnRegisterDisplayListenerWithType(type, callbackId);
 }
 
 uint32_t FfiOHOSDisplayGetId(int64_t id)
 {
-    TLOGI(WmsLogTag::DMS, "FfiOHOSDisplayGetId start");
+    TLOGI(WmsLogTag::DMS_KITS, "start");
     auto instance = FFIData::GetData<DisplayImpl>(id);
     if (!instance) {
-        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}" PRId64, id);
+        TLOGE(WmsLogTag::DMS_KITS, "[Display] instance not exist %{public}" PRId64, id);
         return 0;
     }
     auto ret = instance->GetInfoId();
@@ -119,10 +119,10 @@ uint32_t FfiOHOSDisplayGetId(int64_t id)
 
 char* FfiOHOSGetDisplayName(int64_t id)
 {
-    TLOGI(WmsLogTag::DMS, "FfiOHOSGetDisplayName");
+    TLOGI(WmsLogTag::DMS_KITS, "start");
     auto instance = FFIData::GetData<DisplayImpl>(id);
     if (!instance) {
-        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}" PRId64, id);
+        TLOGE(WmsLogTag::DMS_KITS, "[Display] instance not exist %{public}" PRId64, id);
         return nullptr;
     }
     auto ret = instance->GetName();
@@ -131,10 +131,10 @@ char* FfiOHOSGetDisplayName(int64_t id)
 
 bool FfiOHOSDisplayGetAlive(int64_t id)
 {
-    TLOGI(WmsLogTag::DMS, "FfiOHOSDisplayGetAlive start");
+    TLOGI(WmsLogTag::DMS_KITS, "start");
     auto instance = FFIData::GetData<DisplayImpl>(id);
     if (!instance) {
-        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}" PRId64, id);
+        TLOGE(WmsLogTag::DMS_KITS, "[Display] instance not exist %{public}" PRId64, id);
         return false;
     }
     auto ret = instance->GetAlive();
@@ -143,10 +143,10 @@ bool FfiOHOSDisplayGetAlive(int64_t id)
 
 uint32_t FfiOHOSDisplayGetState(int64_t id)
 {
-    TLOGI(WmsLogTag::DMS, "FfiOHOSDisplayGetState start");
+    TLOGI(WmsLogTag::DMS_KITS, "start");
     auto instance = FFIData::GetData<DisplayImpl>(id);
     if (!instance) {
-        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}" PRId64, id);
+        TLOGE(WmsLogTag::DMS_KITS, "[Display] instance not exist %{public}" PRId64, id);
         return 0;
     }
     auto ret = instance->GetState();
@@ -155,10 +155,10 @@ uint32_t FfiOHOSDisplayGetState(int64_t id)
 
 uint32_t FfiOHOSDisplayGetRefreshRate(int64_t id)
 {
-    TLOGI(WmsLogTag::DMS, "FfiOHOSDisplayGetRefreshRate start");
+    TLOGI(WmsLogTag::DMS_KITS, "start");
     auto instance = FFIData::GetData<DisplayImpl>(id);
     if (!instance) {
-        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}" PRId64, id);
+        TLOGE(WmsLogTag::DMS_KITS, "[Display] instance not exist %{public}" PRId64, id);
         return 0;
     }
     auto ret = instance->GetRefreshRate();
@@ -167,10 +167,10 @@ uint32_t FfiOHOSDisplayGetRefreshRate(int64_t id)
 
 uint32_t FfiOHOSDisplayGetRotation(int64_t id)
 {
-    TLOGI(WmsLogTag::DMS, "FfiOHOSDisplayGetRotation start");
+    TLOGI(WmsLogTag::DMS_KITS, "start");
     auto instance = FFIData::GetData<DisplayImpl>(id);
     if (!instance) {
-        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}" PRId64, id);
+        TLOGE(WmsLogTag::DMS_KITS, "[Display] instance not exist %{public}" PRId64, id);
         return 0;
     }
     auto ret = instance->GetRotation();
@@ -179,10 +179,10 @@ uint32_t FfiOHOSDisplayGetRotation(int64_t id)
 
 uint32_t FfiOHOSDisplayGetOrientation(int64_t id)
 {
-    TLOGI(WmsLogTag::DMS, "FfiOHOSDisplayGetOrientation start");
+    TLOGI(WmsLogTag::DMS_KITS, "start");
     auto instance = FFIData::GetData<DisplayImpl>(id);
     if (!instance) {
-        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}" PRId64, id);
+        TLOGE(WmsLogTag::DMS_KITS, "[Display] instance not exist %{public}" PRId64, id);
         return 0;
     }
     auto ret = instance->GetOrientation();
@@ -191,10 +191,10 @@ uint32_t FfiOHOSDisplayGetOrientation(int64_t id)
 
 int32_t FfiOHOSDisplayGetWidth(int64_t id)
 {
-    TLOGI(WmsLogTag::DMS, "FfiOHOSDisplayGetWidth start");
+    TLOGI(WmsLogTag::DMS_KITS, "start");
     auto instance = FFIData::GetData<DisplayImpl>(id);
     if (!instance) {
-        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}" PRId64, id);
+        TLOGE(WmsLogTag::DMS_KITS, "[Display] instance not exist %{public}" PRId64, id);
         return 0;
     }
     auto ret = instance->GetWidth();
@@ -203,10 +203,10 @@ int32_t FfiOHOSDisplayGetWidth(int64_t id)
 
 int32_t FfiOHOSDisplayGetHeight(int64_t id)
 {
-    TLOGI(WmsLogTag::DMS, "FfiOHOSDisplayGetHeight start");
+    TLOGI(WmsLogTag::DMS_KITS, "start");
     auto instance = FFIData::GetData<DisplayImpl>(id);
     if (!instance) {
-        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}" PRId64, id);
+        TLOGE(WmsLogTag::DMS_KITS, "[Display] instance not exist %{public}" PRId64, id);
         return 0;
     }
     auto ret = instance->GetHeight();
@@ -215,10 +215,10 @@ int32_t FfiOHOSDisplayGetHeight(int64_t id)
 
 float FfiOHOSDisplayGetDensityDPI(int64_t id)
 {
-    TLOGI(WmsLogTag::DMS, "FfiOHOSDisplayGetVirtualPixelRatio start");
+    TLOGI(WmsLogTag::DMS_KITS, "start");
     auto instance = FFIData::GetData<DisplayImpl>(id);
     if (!instance) {
-        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}" PRId64, id);
+        TLOGE(WmsLogTag::DMS_KITS, "[Display] instance not exist %{public}" PRId64, id);
         return 0.0;
     }
     auto ret = instance->GetDensityDPI();
@@ -227,10 +227,10 @@ float FfiOHOSDisplayGetDensityDPI(int64_t id)
 
 float FfiOHOSDisplayGetVirtualPixelRatio(int64_t id)
 {
-    TLOGI(WmsLogTag::DMS, "FfiOHOSDisplayGetVirtualPixelRatio start");
+    TLOGI(WmsLogTag::DMS_KITS, "start");
     auto instance = FFIData::GetData<DisplayImpl>(id);
     if (!instance) {
-        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}" PRId64, id);
+        TLOGE(WmsLogTag::DMS_KITS, "[Display] instance not exist %{public}" PRId64, id);
         return 0.0;
     }
     auto ret = instance->GetVirtualPixelRatio();
@@ -239,10 +239,10 @@ float FfiOHOSDisplayGetVirtualPixelRatio(int64_t id)
 
 float FfiOHOSDisplayGetXDPI(int64_t id)
 {
-    TLOGI(WmsLogTag::DMS, "FfiOHOSDisplayGetXDPI start");
+    TLOGI(WmsLogTag::DMS_KITS, "start");
     auto instance = FFIData::GetData<DisplayImpl>(id);
     if (!instance) {
-        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}" PRId64, id);
+        TLOGE(WmsLogTag::DMS_KITS, "[Display] instance not exist %{public}" PRId64, id);
         return 0.0;
     }
     auto ret = instance->GetXDPI();
@@ -251,10 +251,10 @@ float FfiOHOSDisplayGetXDPI(int64_t id)
 
 float FfiOHOSDisplayGetYDPI(int64_t id)
 {
-    TLOGI(WmsLogTag::DMS, "FfiOHOSDisplayGetYDPI start");
+    TLOGI(WmsLogTag::DMS_KITS, "start");
     auto instance = FFIData::GetData<DisplayImpl>(id);
     if (!instance) {
-        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}" PRId64, id);
+        TLOGE(WmsLogTag::DMS_KITS, "[Display] instance not exist %{public}" PRId64, id);
         return 0.0;
     }
     auto ret = instance->GetYDPI();
@@ -263,10 +263,10 @@ float FfiOHOSDisplayGetYDPI(int64_t id)
 
 RetStruct FfiOHOSDisplayGetColorSpaces(int64_t id)
 {
-    TLOGD(WmsLogTag::DMS, "FfiOHOSDisplayGetColorSpaces start");
+    TLOGD(WmsLogTag::DMS_KITS, "start");
     auto instance = FFIData::GetData<DisplayImpl>(id);
     if (!instance) {
-        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}" PRId64, id);
+        TLOGE(WmsLogTag::DMS_KITS, "[Display] instance not exist %{public}" PRId64, id);
         return { DM_ERROR_SYSTEM_INNORMAL, 0, nullptr };
     }
     auto ret = instance->GetColorSpaces();
@@ -275,10 +275,10 @@ RetStruct FfiOHOSDisplayGetColorSpaces(int64_t id)
 
 RetStruct FfiOHOSDisplayGetHdrFormats(int64_t id)
 {
-    TLOGD(WmsLogTag::DMS, "FfiOHOSDisplayGetHdrFormats start");
+    TLOGD(WmsLogTag::DMS_KITS, "start");
     auto instance = FFIData::GetData<DisplayImpl>(id);
     if (!instance) {
-        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}" PRId64, id);
+        TLOGE(WmsLogTag::DMS_KITS, "[Display] instance not exist %{public}" PRId64, id);
         return { DM_ERROR_SYSTEM_INNORMAL, 0, nullptr };
     }
     auto ret = instance->GetHdrFormats();
@@ -287,10 +287,10 @@ RetStruct FfiOHOSDisplayGetHdrFormats(int64_t id)
 
 uint32_t FfiOHOSDisplayGetAvailableWidth(int64_t id)
 {
-    TLOGD(WmsLogTag::DMS, "FfiOHOSDisplayGetAvailableWidth start");
+    TLOGD(WmsLogTag::DMS_KITS, "start");
     auto instance = FFIData::GetData<DisplayImpl>(id);
     if (!instance) {
-        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}" PRId64, id);
+        TLOGE(WmsLogTag::DMS_KITS, "[Display] instance not exist %{public}" PRId64, id);
         return 0.0;
     }
     auto ret = instance->GetAvailableWidth();
@@ -299,10 +299,10 @@ uint32_t FfiOHOSDisplayGetAvailableWidth(int64_t id)
 
 uint32_t FfiOHOSDisplayGetAvailableHeight(int64_t id)
 {
-    TLOGD(WmsLogTag::DMS, "FfiOHOSDisplayGetAvailableHeight start");
+    TLOGD(WmsLogTag::DMS_KITS, "start");
     auto instance = FFIData::GetData<DisplayImpl>(id);
     if (!instance) {
-        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}" PRId64, id);
+        TLOGE(WmsLogTag::DMS_KITS, "[Display] instance not exist %{public}" PRId64, id);
         return 0.0;
     }
     auto ret = instance->GetAvailableHeight();
@@ -311,10 +311,10 @@ uint32_t FfiOHOSDisplayGetAvailableHeight(int64_t id)
 
 RetStruct FfiOHOSDisplayGetCutoutInfo(int64_t id)
 {
-    TLOGD(WmsLogTag::DMS, "FfiOHOSDisplayGetCutoutInfo start");
+    TLOGD(WmsLogTag::DMS_KITS, "start");
     auto instance = FFIData::GetData<DisplayImpl>(id);
     if (!instance) {
-        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}" PRId64, id);
+        TLOGE(WmsLogTag::DMS_KITS, "[Display] instance not exist %{public}" PRId64, id);
         return { DM_ERROR_SYSTEM_INNORMAL, 0, nullptr };
     }
     auto ret = instance->GetCutoutInfo();
@@ -323,10 +323,10 @@ RetStruct FfiOHOSDisplayGetCutoutInfo(int64_t id)
 
 RetStruct FfiOHOSDisplayGetAvailableArea(int64_t id)
 {
-    TLOGD(WmsLogTag::DMS, "FfiOHOSDisplayGetAvailableArea start");
+    TLOGD(WmsLogTag::DMS_KITS, "start");
     auto instance = FFIData::GetData<DisplayImpl>(id);
     if (!instance) {
-        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}" PRId64, id);
+        TLOGE(WmsLogTag::DMS_KITS, "[Display] instance not exist %{public}" PRId64, id);
         return { DM_ERROR_SYSTEM_INNORMAL, 0, nullptr };
     }
     auto ret = instance->GetAvailableArea();
@@ -335,10 +335,10 @@ RetStruct FfiOHOSDisplayGetAvailableArea(int64_t id)
 
 int32_t FfiOHOSDisplayUnRegisterAllDisplayManagerCallback(const char* type, int64_t id)
 {
-    TLOGD(WmsLogTag::DMS, "FfiOHOSDisplayUnRegisterDisplayManagerCallbackWithType start");
+    TLOGD(WmsLogTag::DMS_KITS, "start");
     auto instance = FFIData::GetData<DisplayImpl>(id);
     if (!instance) {
-        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}" PRId64, id);
+        TLOGE(WmsLogTag::DMS_KITS, "[Display] instance not exist %{public}" PRId64, id);
         return DM_ERROR_SYSTEM_INNORMAL;
     }
     auto ret = instance->OnUnRegisterAllDisplayManagerCallback(type);
@@ -347,10 +347,10 @@ int32_t FfiOHOSDisplayUnRegisterAllDisplayManagerCallback(const char* type, int6
 
 int32_t FfiOHOSDisplayRegisterDisplayManagerCallback(const char* type, int64_t id, int64_t callbackId)
 {
-    TLOGD(WmsLogTag::DMS, "FfiOHOSDisplayRegisterDisplayManagerCallback start");
+    TLOGD(WmsLogTag::DMS_KITS, "start");
     auto instance = FFIData::GetData<DisplayImpl>(id);
     if (!instance) {
-        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}" PRId64, id);
+        TLOGE(WmsLogTag::DMS_KITS, "[Display] instance not exist %{public}" PRId64, id);
         return DM_ERROR_SYSTEM_INNORMAL;
     }
     auto ret = instance->OnRegisterDisplayManagerCallback(type, callbackId);
@@ -359,10 +359,10 @@ int32_t FfiOHOSDisplayRegisterDisplayManagerCallback(const char* type, int64_t i
 
 int32_t FfiOHOSDisplayUnRegisterDisplayManagerCallback(const char* type, int64_t id, int64_t callbackId)
 {
-    TLOGD(WmsLogTag::DMS, "FfiOHOSDisplayUnRegisterDisplayManagerCallback start");
+    TLOGD(WmsLogTag::DMS_KITS, "start");
     auto instance = FFIData::GetData<DisplayImpl>(id);
     if (!instance) {
-        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}" PRId64, id);
+        TLOGE(WmsLogTag::DMS_KITS, "[Display] instance not exist %{public}" PRId64, id);
         return DM_ERROR_SYSTEM_INNORMAL;
     }
     auto ret = instance->OnUnRegisterDisplayManagerCallback(type, callbackId);

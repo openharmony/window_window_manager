@@ -34,13 +34,13 @@ static void SetDisplayObject(sptr<Display>& obj, RetStruct& ret)
 {
     auto result = DisplayImpl::CreateDisplayImpl(obj);
     if (result == nullptr || ret.data == nullptr) {
-        TLOGE(WmsLogTag::DMS, "[GetDefaultDisplaySync] ERROR Failed to create DisplayImpl.");
+        TLOGE(WmsLogTag::DMS_KITS, "[GetDefaultDisplaySync] ERROR Failed to create DisplayImpl.");
         ret.code = static_cast<int32_t>(DmErrorCode::DM_ERROR_SYSTEM_INNORMAL);
         return;
     }
     int64_t* dataPtr = static_cast<int64_t*>(ret.data);
     if (dataPtr == nullptr) {
-        TLOGE(WmsLogTag::DMS, "[SetDisplayObject] ERROR Failed to create dataPtr.");
+        TLOGE(WmsLogTag::DMS_KITS, "[SetDisplayObject] ERROR Failed to create dataPtr.");
         ret.code = static_cast<int32_t>(DmErrorCode::DM_ERROR_SYSTEM_INNORMAL);
         return;
     }
@@ -53,7 +53,7 @@ static void SetDisplaysArrayObject(std::vector<sptr<Display>>& list, RetStruct& 
 {
     int64_t* displayImplIdList = static_cast<int64_t*>(malloc(sizeof(int64_t) * list.size()));
     if (displayImplIdList == nullptr) {
-        TLOGE(WmsLogTag::DMS, "[SetDisplaysArrayObject] ERROR Failed to create displayImplIdList.");
+        TLOGE(WmsLogTag::DMS_KITS, "[SetDisplaysArrayObject] ERROR Failed to create displayImplIdList.");
         ret.code = static_cast<int32_t>(DmErrorCode::DM_ERROR_SYSTEM_INNORMAL);
         return;
     }
@@ -65,8 +65,8 @@ static void SetDisplaysArrayObject(std::vector<sptr<Display>>& list, RetStruct& 
         }
         SetDisplayObject(display, ret);
         if (ret.code != 0) {
-            TLOGE(WmsLogTag::DMS, "[SetDisplaysArrayObject] ERROR Create display failed in %{public}" PRId64 " obj",
-                ret.len);
+            TLOGE(WmsLogTag::DMS_KITS, "[SetDisplaysArrayObject] ERROR Create display failed in"
+                " %{public}" PRId64 " obj", ret.len);
             free(displayImplIdList);
             ret.data = nullptr;
             return;
@@ -112,7 +112,7 @@ static CFoldCreaseRegion* CreateCFoldCreaseRegionObject(sptr<FoldCreaseRegion>& 
     region->number = static_cast<int64_t>(creaseRects.size());
     region->creaseRects = CreateCreaseRects(creaseRects);
     if (region->creaseRects == nullptr) {
-        TLOGE(WmsLogTag::DMS, "[CreateCreaseRects] ERROR Failed to create creaseRects.");
+        TLOGE(WmsLogTag::DMS_KITS, "[CreateCreaseRects] ERROR Failed to create creaseRects.");
         free(region);
         return nullptr;
     }
@@ -124,13 +124,13 @@ RetStruct CJDisplayManager::GetDefaultDisplaySync()
     RetStruct ret = { .code = static_cast<int32_t>(DmErrorCode::DM_ERROR_SYSTEM_INNORMAL), .len = 0, .data = nullptr };
     sptr<Display> display = SingletonContainer::Get<DisplayManager>().GetDefaultDisplaySync();
     if (display == nullptr) {
-        TLOGE(WmsLogTag::DMS, "[DisplayManager] Get default display is nullptr");
+        TLOGE(WmsLogTag::DMS_KITS, "[DisplayManager] Get default display is nullptr");
         ret.code = static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN);
         return ret;
     }
     int64_t* displayImplId = static_cast<int64_t*>(malloc(sizeof(int64_t)));
     if (displayImplId == nullptr) {
-        TLOGE(WmsLogTag::DMS, "[GetDefaultDisplaySync] ERROR Failed to create displayImplId.");
+        TLOGE(WmsLogTag::DMS_KITS, "[GetDefaultDisplaySync] ERROR Failed to create displayImplId.");
         ret.code = static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN);
         return ret;
     }
@@ -146,7 +146,7 @@ RetStruct CJDisplayManager::GetAllDisplays()
     std::vector<sptr<Display>> displays = SingletonContainer::Get<DisplayManager>().GetAllDisplays();
     if (displays.empty()) {
         ret.code = static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN);
-        TLOGE(WmsLogTag::DMS, "[GetAllDisplays] ERROR Failed to get all displays.");
+        TLOGE(WmsLogTag::DMS_KITS, "[GetAllDisplays] ERROR Failed to get all displays.");
         return ret;
     }
     SetDisplaysArrayObject(displays, ret);
@@ -268,13 +268,13 @@ bool CJDisplayManager::IfCallbackRegistered(const std::string& type, int64_t cal
 {
     if (CJDisplayManager::cjCbMap_.empty() ||
         CJDisplayManager::cjCbMap_.find(type) == CJDisplayManager::cjCbMap_.end()) {
-        TLOGI(WmsLogTag::DMS, "IfCallbackRegistered methodName %{public}s not registered", type.c_str());
+        TLOGI(WmsLogTag::DMS_KITS, "IfCallbackRegistered methodName %{public}s not registered", type.c_str());
         return false;
     }
 
     for (auto& iter : CJDisplayManager::cjCbMap_[type]) {
         if (iter.first == callbackId) {
-            TLOGE(WmsLogTag::DMS, "IfCallbackRegistered callback already registered!");
+            TLOGE(WmsLogTag::DMS_KITS, "IfCallbackRegistered callback already registered!");
             return true;
         }
     }
@@ -283,20 +283,20 @@ bool CJDisplayManager::IfCallbackRegistered(const std::string& type, int64_t cal
 
 int32_t CJDisplayManager::OnUnregisterAllDisplayListenerWithType(const std::string& type)
 {
-    TLOGD(WmsLogTag::DMS, "CJDisplayManager::OnUnregisterAllDisplayListenerWithType is called");
+    TLOGD(WmsLogTag::DMS_KITS, "CJDisplayManager::OnUnregisterAllDisplayListenerWithType is called");
     DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(CJDisplayManager::UnregisterAllDisplayListenerWithType(type));
     if (ret != DmErrorCode::DM_OK) {
         if (ret != DmErrorCode::DM_ERROR_NOT_SYSTEM_APP) {
             ret = DmErrorCode::DM_ERROR_INVALID_PARAM;
         }
-        TLOGE(WmsLogTag::DMS, "Failed to unregister display listener with type %{public}s", type.c_str());
+        TLOGE(WmsLogTag::DMS_KITS, "Failed to unregister display listener with type %{public}s", type.c_str());
     }
     return static_cast<int32_t>(ret);
 }
 
 DMError CJDisplayManager::UnregisterAllDisplayListenerWithType(const std::string& type)
 {
-    TLOGD(WmsLogTag::DMS, "CJDisplayManager::UnregisterAllDisplayListenerWithType is called");
+    TLOGD(WmsLogTag::DMS_KITS, "CJDisplayManager::UnregisterAllDisplayListenerWithType is called");
     if (CJDisplayManager::cjCbMap_.empty() ||
         CJDisplayManager::cjCbMap_.find(type) == CJDisplayManager::cjCbMap_.end()) {
         TLOGI(
@@ -333,7 +333,8 @@ DMError CJDisplayManager::UnregisterAllDisplayListenerWithType(const std::string
             ret = DMError::DM_ERROR_INVALID_PARAM;
         }
         CJDisplayManager::cjCbMap_[type].erase(it++);
-        TLOGI(WmsLogTag::DMS, "Unregister display listener with type %{public}s  ret: %{public}u", type.c_str(), ret);
+        TLOGI(WmsLogTag::DMS_KITS, "Unregister display listener with type %{public}s  ret: %{public}u",
+            type.c_str(), ret);
     }
     cjCbMap_[type].clear();
     return ret;
@@ -341,22 +342,22 @@ DMError CJDisplayManager::UnregisterAllDisplayListenerWithType(const std::string
 
 int32_t CJDisplayManager::OnRegisterDisplayListenerWithType(const std::string& type, int64_t callbackId)
 {
-    TLOGD(WmsLogTag::DMS, "CJDisplayManager::OnRegisterDisplayListenerWithType is called");
+    TLOGD(WmsLogTag::DMS_KITS, "CJDisplayManager::OnRegisterDisplayListenerWithType is called");
     DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(CJDisplayManager::RegisterDisplayListenerWithType(type, callbackId));
     if (ret != DmErrorCode::DM_OK) {
         if (ret != DmErrorCode::DM_ERROR_NOT_SYSTEM_APP) {
             ret = DmErrorCode::DM_ERROR_INVALID_PARAM;
         }
-        TLOGE(WmsLogTag::DMS, "Failed to register display listener with type %{public}s", type.c_str());
+        TLOGE(WmsLogTag::DMS_KITS, "Failed to register display listener with type %{public}s", type.c_str());
     }
     return static_cast<int32_t>(ret);
 }
 
 DMError CJDisplayManager::RegisterDisplayListenerWithType(const std::string& type, int64_t callbackId)
 {
-    TLOGD(WmsLogTag::DMS, "CJDisplayManager::RegisterDisplayListenerWithType is called");
+    TLOGD(WmsLogTag::DMS_KITS, "CJDisplayManager::RegisterDisplayListenerWithType is called");
     if (IfCallbackRegistered(type, callbackId)) {
-        TLOGI(WmsLogTag::DMS, "RegisterDisplayListenerWithType callback with type %{public}s already registered",
+        TLOGI(WmsLogTag::DMS_KITS, "RegisterDisplayListenerWithType callback with type %{public}s already registered",
             type.c_str());
         return DMError::DM_OK;
     }
@@ -364,7 +365,7 @@ DMError CJDisplayManager::RegisterDisplayListenerWithType(const std::string& typ
     sptr<CJDisplayListener> displayListener = new (std::nothrow) CJDisplayListener();
     DMError ret = DMError::DM_OK;
     if (displayListener == nullptr) {
-        TLOGE(WmsLogTag::DMS, "displayListener is nullptr");
+        TLOGE(WmsLogTag::DMS_KITS, "displayListener is nullptr");
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     if (type == EVENT_ADD || type == EVENT_REMOVE || type == EVENT_CHANGE) {
@@ -382,11 +383,11 @@ DMError CJDisplayManager::RegisterDisplayListenerWithType(const std::string& typ
     } else if (type == EVENT_CAPTURE_STATUS_CHANGED) {
         ret = SingletonContainer::Get<DisplayManager>().RegisterCaptureStatusListener(displayListener);
     } else {
-        TLOGE(WmsLogTag::DMS, "RegisterDisplayListenerWithType failed, %{public}s not support", type.c_str());
+        TLOGE(WmsLogTag::DMS_KITS, "RegisterDisplayListenerWithType failed, %{public}s not support", type.c_str());
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     if (ret != DMError::DM_OK) {
-        TLOGE(WmsLogTag::DMS, "RegisterDisplayListenerWithType failed, ret %{public}u", ret);
+        TLOGE(WmsLogTag::DMS_KITS, "RegisterDisplayListenerWithType failed, ret %{public}u", ret);
         return ret;
     }
     displayListener->AddCallback(type, callbackId);
@@ -396,23 +397,24 @@ DMError CJDisplayManager::RegisterDisplayListenerWithType(const std::string& typ
 
 int32_t CJDisplayManager::OnUnRegisterDisplayListenerWithType(const std::string& type, int64_t callbackId)
 {
-    TLOGD(WmsLogTag::DMS, "CJDisplayManager::OnUnRegisterDisplayListenerWithType is called");
+    TLOGD(WmsLogTag::DMS_KITS, "CJDisplayManager::OnUnRegisterDisplayListenerWithType is called");
     DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(CJDisplayManager::UnRegisterDisplayListenerWithType(type, callbackId));
     if (ret != DmErrorCode::DM_OK) {
         if (ret != DmErrorCode::DM_ERROR_NOT_SYSTEM_APP) {
             ret = DmErrorCode::DM_ERROR_INVALID_PARAM;
         }
-        TLOGE(WmsLogTag::DMS, "Failed to unregister display listener with type %{public}s", type.c_str());
+        TLOGE(WmsLogTag::DMS_KITS, "Failed to unregister display listener with type %{public}s", type.c_str());
     }
     return static_cast<int32_t>(ret);
 }
 
 DMError CJDisplayManager::UnRegisterDisplayListenerWithType(const std::string& type, int64_t callbackId)
 {
-    TLOGD(WmsLogTag::DMS, "CJDisplayManager::UnRegisterDisplayListenerWithType is called");
+    TLOGD(WmsLogTag::DMS_KITS, "CJDisplayManager::UnRegisterDisplayListenerWithType is called");
     if (CJDisplayManager::cjCbMap_.empty() ||
         CJDisplayManager::cjCbMap_.find(type) == CJDisplayManager::cjCbMap_.end()) {
-        TLOGI(WmsLogTag::DMS, "UnRegisterDisplayListenerWithType methodName %{public}s not registered!", type.c_str());
+        TLOGI(WmsLogTag::DMS_KITS, "UnRegisterDisplayListenerWithType methodName %{public}s not registered!",
+            type.c_str());
         return DMError::DM_OK;
     }
     std::lock_guard<std::mutex> lock(CJDisplayManager::mtx_);

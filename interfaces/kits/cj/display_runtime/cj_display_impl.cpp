@@ -77,7 +77,7 @@ CRect* CreateCBoundingRects(std::vector<DMRect>& bound)
     int32_t number = static_cast<int32_t>(bound.size());
     CRect* result = static_cast<CRect*>(malloc(sizeof(CRect) * number));
     if (result == nullptr) {
-        TLOGE(WmsLogTag::DMS, "[CreateCBoundingRects] memory failed.");
+        TLOGE(WmsLogTag::DMS_KITS, "[CreateCBoundingRects] memory failed.");
         return nullptr;
     }
     for (int i = 0; i < number; i++) {
@@ -108,7 +108,7 @@ CCutoutInfo* CreateCCutoutInfoObject(sptr<CutoutInfo>& cutoutInfo)
     info->number = static_cast<int64_t>(boundingRects.size());
     info->boundingRects = CreateCBoundingRects(boundingRects);
     if (info->boundingRects == nullptr) {
-        TLOGE(WmsLogTag::DMS, "[CreateCCutoutInfoObject] memory failed.");
+        TLOGE(WmsLogTag::DMS_KITS, "[CreateCCutoutInfoObject] memory failed.");
         free(info);
         return nullptr;
     }
@@ -120,7 +120,8 @@ sptr<DisplayImpl> DisplayImpl::FindDisplayObject(uint64_t displayId)
 {
     std::lock_guard<std::recursive_mutex> lock(g_mutex);
     if (g_cjDisplayMap.find(displayId) == g_cjDisplayMap.end()) {
-        TLOGI(WmsLogTag::DMS, "[FindDisplayObject] Can not find display %{public}" PRIu64 " in display map", displayId);
+        TLOGI(WmsLogTag::DMS_KITS, "[FindDisplayObject] Can not find display %{public}" PRIu64 " in display map",
+            displayId);
         return nullptr;
     }
     return g_cjDisplayMap[displayId];
@@ -146,13 +147,13 @@ sptr<DisplayImpl> DisplayImpl::CreateDisplayImpl(sptr<Display>& display)
     sptr<DisplayImpl> cjDisplayPtr = DisplayImpl::FindDisplayObject(displayId);
     auto info = display->GetDisplayInfo();
     if (info == nullptr) {
-        TLOGE(WmsLogTag::DMS, "[CreateDisplayImpl] Failed to get display info");
+        TLOGE(WmsLogTag::DMS_KITS, "[CreateDisplayImpl] Failed to get display info");
         return nullptr;
     }
     if (cjDisplayPtr == nullptr) {
         cjDisplayPtr = FFIData::Create<DisplayImpl>(display);
         if (cjDisplayPtr == nullptr) {
-            TLOGE(WmsLogTag::DMS, "[CreateDisplayImpl] Failed to create display");
+            TLOGE(WmsLogTag::DMS_KITS, "[CreateDisplayImpl] Failed to create display");
             return nullptr;
         }
         std::lock_guard<std::recursive_mutex> lock(g_mutex);
@@ -165,7 +166,7 @@ uint32_t DisplayImpl::GetInfoId()
 {
     auto info = display_->GetDisplayInfo();
     if (info == nullptr) {
-        TLOGE(WmsLogTag::DMS, "[GetInfoId] Failed to get display info");
+        TLOGE(WmsLogTag::DMS_KITS, "[GetInfoId] Failed to get display info");
         return static_cast<uint32_t>(DISPLAY_ID_INVALID);
     }
     return static_cast<uint32_t>(info->GetDisplayId());
@@ -175,7 +176,7 @@ char* DisplayImpl::GetName()
 {
     auto info = display_->GetDisplayInfo();
     if (info == nullptr) {
-        TLOGE(WmsLogTag::DMS, "[GetName] Failed to get display info");
+        TLOGE(WmsLogTag::DMS_KITS, "[GetName] Failed to get display info");
         return nullptr;
     }
     auto name = info->GetName();
@@ -186,7 +187,7 @@ char* DisplayImpl::GetName()
     }
     int ret = memcpy_s(retData, len + 1, name.c_str(), len + 1);
     if (ret != 0) {
-        TLOGE(WmsLogTag::DMS, "[DisplayImpl] Failed to get name");
+        TLOGE(WmsLogTag::DMS_KITS, "[DisplayImpl] Failed to get name");
         free(retData);
         retData = nullptr;
     }
@@ -197,7 +198,7 @@ bool DisplayImpl::GetAlive()
 {
     auto info = display_->GetDisplayInfo();
     if (info == nullptr) {
-        TLOGE(WmsLogTag::DMS, "[GetAlive] Failed to get display info");
+        TLOGE(WmsLogTag::DMS_KITS, "[GetAlive] Failed to get display info");
         return false;
     }
     return info->GetAliveStatus();
@@ -207,7 +208,7 @@ uint32_t DisplayImpl::GetState()
 {
     auto info = display_->GetDisplayInfo();
     if (info == nullptr) {
-        TLOGE(WmsLogTag::DMS, "[GetState] Failed to get display info");
+        TLOGE(WmsLogTag::DMS_KITS, "[GetState] Failed to get display info");
         return static_cast<uint32_t>(DisplayStateMode::STATE_UNKNOWN);
     }
     auto state = info->GetDisplayState();
@@ -222,7 +223,7 @@ uint32_t DisplayImpl::GetRefreshRate()
 {
     auto info = display_->GetDisplayInfo();
     if (info == nullptr) {
-        TLOGE(WmsLogTag::DMS, "[GetRefreshRate] Failed to get display info");
+        TLOGE(WmsLogTag::DMS_KITS, "[GetRefreshRate] Failed to get display info");
         return 0;
     }
     return info->GetRefreshRate();
@@ -232,7 +233,7 @@ uint32_t DisplayImpl::GetRotation()
 {
     auto info = display_->GetDisplayInfo();
     if (info == nullptr) {
-        TLOGE(WmsLogTag::DMS, "[GetRotation] Failed to get display info");
+        TLOGE(WmsLogTag::DMS_KITS, "[GetRotation] Failed to get display info");
         return 0;
     }
     return static_cast<uint32_t>(info->GetRotation());
@@ -242,7 +243,7 @@ uint32_t DisplayImpl::GetOrientation()
 {
     auto info = display_->GetDisplayInfo();
     if (info == nullptr) {
-        TLOGE(WmsLogTag::DMS, "[GetOrientation] Failed to get display info");
+        TLOGE(WmsLogTag::DMS_KITS, "[GetOrientation] Failed to get display info");
         return 0;
     }
     return static_cast<uint32_t>(info->GetDisplayOrientation());
@@ -252,7 +253,7 @@ int32_t DisplayImpl::GetWidth()
 {
     auto info = display_->GetDisplayInfo();
     if (info == nullptr) {
-        TLOGE(WmsLogTag::DMS, "[GetWidth] Failed to get display info");
+        TLOGE(WmsLogTag::DMS_KITS, "[GetWidth] Failed to get display info");
         return 0;
     }
     return info->GetWidth();
@@ -262,7 +263,7 @@ int32_t DisplayImpl::GetHeight()
 {
     auto info = display_->GetDisplayInfo();
     if (info == nullptr) {
-        TLOGE(WmsLogTag::DMS, "[GetHeight] Failed to get display info");
+        TLOGE(WmsLogTag::DMS_KITS, "[GetHeight] Failed to get display info");
         return 0;
     }
     return info->GetHeight();
@@ -272,7 +273,7 @@ float DisplayImpl::GetDensityDPI()
 {
     auto info = display_->GetDisplayInfo();
     if (info == nullptr) {
-        TLOGE(WmsLogTag::DMS, "[GetDensityDPI] Failed to get display info");
+        TLOGE(WmsLogTag::DMS_KITS, "[GetDensityDPI] Failed to get display info");
         return 1.0 * DOT_PER_INCH;
     }
     return info->GetVirtualPixelRatio() * DOT_PER_INCH;
@@ -282,7 +283,7 @@ float DisplayImpl::GetVirtualPixelRatio()
 {
     auto info = display_->GetDisplayInfo();
     if (info == nullptr) {
-        TLOGE(WmsLogTag::DMS, "[GetVirtualPixelRatio] Failed to get display info");
+        TLOGE(WmsLogTag::DMS_KITS, "[GetVirtualPixelRatio] Failed to get display info");
         return 1.0;
     }
     return info->GetVirtualPixelRatio();
@@ -292,7 +293,7 @@ float DisplayImpl::GetXDPI()
 {
     auto info = display_->GetDisplayInfo();
     if (info == nullptr) {
-        TLOGE(WmsLogTag::DMS, "[GetXDPI] Failed to get display info");
+        TLOGE(WmsLogTag::DMS_KITS, "[GetXDPI] Failed to get display info");
         return 0.0;
     }
     return info->GetXDpi();
@@ -302,7 +303,7 @@ float DisplayImpl::GetYDPI()
 {
     auto info = display_->GetDisplayInfo();
     if (info == nullptr) {
-        TLOGE(WmsLogTag::DMS, "[GetYDPI] Failed to get display info");
+        TLOGE(WmsLogTag::DMS_KITS, "[GetYDPI] Failed to get display info");
         return 0.0;
     }
     return info->GetYDpi();
@@ -312,7 +313,7 @@ RetStruct DisplayImpl::GetColorSpaces()
 {
     auto info = display_->GetDisplayInfo();
     if (info == nullptr) {
-        TLOGE(WmsLogTag::DMS, "[GetColorSpaces] Failed to get display info");
+        TLOGE(WmsLogTag::DMS_KITS, "[GetColorSpaces] Failed to get display info");
         return {};
     }
     auto colorSpaces = info->GetColorSpaces();
@@ -332,7 +333,7 @@ RetStruct DisplayImpl::GetHdrFormats()
 {
     auto info = display_->GetDisplayInfo();
     if (info == nullptr) {
-        TLOGE(WmsLogTag::DMS, "[GetHdrFormats] Failed to get display info");
+        TLOGE(WmsLogTag::DMS_KITS, "[GetHdrFormats] Failed to get display info");
         return {};
     }
     auto hdrFormats = info->GetHdrFormats();
@@ -352,7 +353,7 @@ uint32_t DisplayImpl::GetAvailableWidth()
 {
     auto info = display_->GetDisplayInfo();
     if (info == nullptr) {
-        TLOGE(WmsLogTag::DMS, "[GetAvailableWidth] Failed to get display info");
+        TLOGE(WmsLogTag::DMS_KITS, "[GetAvailableWidth] Failed to get display info");
         return 0;
     }
     return info->GetAvailableWidth();
@@ -362,7 +363,7 @@ uint32_t DisplayImpl::GetAvailableHeight()
 {
     auto info = display_->GetDisplayInfo();
     if (info == nullptr) {
-        TLOGE(WmsLogTag::DMS, "[GetAvailableHeight] Failed to get display info");
+        TLOGE(WmsLogTag::DMS_KITS, "[GetAvailableHeight] Failed to get display info");
         return 0;
     }
     return info->GetAvailableHeight();
@@ -395,13 +396,13 @@ RetStruct DisplayImpl::GetAvailableArea()
     DmErrorCode errorCode = DM_JS_TO_ERROR_CODE_MAP.at(display_->GetAvailableArea(area));
     if (errorCode != DmErrorCode::DM_OK) {
         result.code = static_cast<int32_t>(errorCode);
-        TLOGE(WmsLogTag::DMS, "GetAvailableArea failed!");
+        TLOGE(WmsLogTag::DMS_KITS, "GetAvailableArea failed!");
         return result;
     }
     result.data = static_cast<CRect*>(malloc(sizeof(CRect)));
     if (result.data == nullptr) {
         result.code = static_cast<int32_t>(DmErrorCode::DM_ERROR_SYSTEM_INNORMAL);
-        TLOGE(WmsLogTag::DMS, "GetAvailableArea failed!");
+        TLOGE(WmsLogTag::DMS_KITS, "GetAvailableArea failed!");
         return result;
     }
     SetCRect(area, static_cast<CRect*>(result.data));
@@ -412,13 +413,13 @@ RetStruct DisplayImpl::GetAvailableArea()
 bool IfCallbackRegistered(const std::string& type, int64_t funcId)
 {
     if (g_cjCbMap.empty() || g_cjCbMap.find(type) == g_cjCbMap.end()) {
-        TLOGI(WmsLogTag::DMS, "IfCallbackRegistered methodName %{public}s not registered!", type.c_str());
+        TLOGI(WmsLogTag::DMS_KITS, "IfCallbackRegistered methodName %{public}s not registered!", type.c_str());
         return false;
     }
 
     for (auto& iter : g_cjCbMap[type]) {
         if (iter.first == funcId) {
-            TLOGE(WmsLogTag::DMS, "IfCallbackRegistered callback already registered!");
+            TLOGE(WmsLogTag::DMS_KITS, "IfCallbackRegistered callback already registered!");
             return true;
         }
     }
@@ -428,10 +429,10 @@ bool IfCallbackRegistered(const std::string& type, int64_t funcId)
 int32_t DisplayImpl::OnUnRegisterAllDisplayManagerCallback(const std::string& type)
 {
     std::lock_guard<std::mutex> lock(g_mtx);
-    TLOGD(WmsLogTag::DMS, "DisplayImpl::OnUnRegisterDisplayManagerCallbackWithType is called");
+    TLOGD(WmsLogTag::DMS_KITS, "DisplayImpl::OnUnRegisterDisplayManagerCallbackWithType is called");
     DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(UnRegisterAllDisplayListenerWithType(type));
     if (ret != DmErrorCode::DM_OK) {
-        TLOGE(WmsLogTag::DMS, "Failed to unregister display listener with type %{public}s.", type.c_str());
+        TLOGE(WmsLogTag::DMS_KITS, "Failed to unregister display listener with type %{public}s.", type.c_str());
         ret = DmErrorCode::DM_ERROR_INVALID_PARAM;
     }
     return static_cast<int32_t>(ret);
@@ -439,9 +440,9 @@ int32_t DisplayImpl::OnUnRegisterAllDisplayManagerCallback(const std::string& ty
 
 DMError DisplayImpl::UnRegisterAllDisplayListenerWithType(const std::string& type)
 {
-    TLOGD(WmsLogTag::DMS, "DisplayImpl::UnRegisterDisplayManagerListenerWithType is called");
+    TLOGD(WmsLogTag::DMS_KITS, "DisplayImpl::UnRegisterDisplayManagerListenerWithType is called");
     if (g_cjCbMap.empty() || g_cjCbMap.find(type) == g_cjCbMap.end()) {
-        TLOGI(WmsLogTag::DMS, "UnRegisterDisplayManagerListenerWithType methodName %{public}s not registered",
+        TLOGI(WmsLogTag::DMS_KITS, "UnRegisterDisplayManagerListenerWithType methodName %{public}s not registered",
             type.c_str());
         return DMError::DM_OK;
     }
@@ -463,10 +464,10 @@ DMError DisplayImpl::UnRegisterAllDisplayListenerWithType(const std::string& typ
 int32_t DisplayImpl::OnRegisterDisplayManagerCallback(const std::string& type, int64_t funcId)
 {
     std::lock_guard<std::mutex> lock(g_mtx);
-    TLOGD(WmsLogTag::DMS, "DisplayImpl::OnRegisterDisplayManagerCallback is called");
+    TLOGD(WmsLogTag::DMS_KITS, "DisplayImpl::OnRegisterDisplayManagerCallback is called");
     DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(RegisterDisplayListenerWithType(type, funcId));
     if (ret != DmErrorCode::DM_OK) {
-        TLOGE(WmsLogTag::DMS, "Failed to register display listener with type %{public}s", type.c_str());
+        TLOGE(WmsLogTag::DMS_KITS, "Failed to register display listener with type %{public}s", type.c_str());
         ret = DmErrorCode::DM_ERROR_INVALID_PARAM;
     }
     return static_cast<int32_t>(ret);
@@ -474,25 +475,25 @@ int32_t DisplayImpl::OnRegisterDisplayManagerCallback(const std::string& type, i
 
 DMError DisplayImpl::RegisterDisplayListenerWithType(const std::string& type, int64_t funcId)
 {
-    TLOGD(WmsLogTag::DMS, "DisplayImpl::RegisterDisplayListenerWithType is called");
+    TLOGD(WmsLogTag::DMS_KITS, "DisplayImpl::RegisterDisplayListenerWithType is called");
     if (IfCallbackRegistered(type, funcId)) {
-        TLOGI(WmsLogTag::DMS, "RegisterDisplayListenerWithType callback already registered!");
+        TLOGI(WmsLogTag::DMS_KITS, "RegisterDisplayListenerWithType callback already registered!");
         return DMError::DM_OK;
     }
     sptr<CJDisplayListener> displayListener = new (std::nothrow) CJDisplayListener();
     DMError ret = DMError::DM_OK;
     if (displayListener == nullptr) {
-        TLOGE(WmsLogTag::DMS, "displayListener is nullptr");
+        TLOGE(WmsLogTag::DMS_KITS, "displayListener is nullptr");
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     if (type == EVENT_AVAILABLE_AREA_CHANGED) {
         ret = SingletonContainer::Get<DisplayManager>().RegisterAvailableAreaListener(displayListener);
     } else {
-        TLOGI(WmsLogTag::DMS, "RegisterDisplayListenerWithType failed, %{public}s not support", type.c_str());
+        TLOGI(WmsLogTag::DMS_KITS, "RegisterDisplayListenerWithType failed, %{public}s not support", type.c_str());
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     if (ret != DMError::DM_OK) {
-        TLOGE(WmsLogTag::DMS, "RegisterDisplayListenerWithType failed, ret: %{public}u", ret);
+        TLOGE(WmsLogTag::DMS_KITS, "RegisterDisplayListenerWithType failed, ret: %{public}u", ret);
         return ret;
     }
     displayListener->AddCallback(type, funcId);
@@ -503,10 +504,10 @@ DMError DisplayImpl::RegisterDisplayListenerWithType(const std::string& type, in
 int32_t DisplayImpl::OnUnRegisterDisplayManagerCallback(const std::string& type, int64_t funcId)
 {
     std::lock_guard<std::mutex> lock(g_mtx);
-    TLOGD(WmsLogTag::DMS, "DisplayImpl::OnUnRegisterDisplayManagerCallback is called");
+    TLOGD(WmsLogTag::DMS_KITS, "DisplayImpl::OnUnRegisterDisplayManagerCallback is called");
     DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(UnRegisterDisplayListenerWithType(type, funcId));
     if (ret != DmErrorCode::DM_OK) {
-        TLOGE(WmsLogTag::DMS, "Failed to unregister display listener with type %{public}s", type.c_str());
+        TLOGE(WmsLogTag::DMS_KITS, "Failed to unregister display listener with type %{public}s", type.c_str());
         ret = DmErrorCode::DM_ERROR_INVALID_PARAM;
     }
     return static_cast<int32_t>(ret);
@@ -514,9 +515,10 @@ int32_t DisplayImpl::OnUnRegisterDisplayManagerCallback(const std::string& type,
 
 DMError DisplayImpl::UnRegisterDisplayListenerWithType(const std::string& type, int64_t funcId)
 {
-    TLOGD(WmsLogTag::DMS, "DisplayImpl::UnRegisterDisplayListenerWithType is called");
+    TLOGD(WmsLogTag::DMS_KITS, "DisplayImpl::UnRegisterDisplayListenerWithType is called");
     if (g_cjCbMap.empty() || g_cjCbMap.find(type) == g_cjCbMap.end()) {
-        TLOGI(WmsLogTag::DMS, "UnRegisterDisplayListenerWithType methodName %{public}s not registered", type.c_str());
+        TLOGI(WmsLogTag::DMS_KITS, "UnRegisterDisplayListenerWithType methodName %{public}s not registered",
+            type.c_str());
         return DMError::DM_OK;
     }
     DMError ret = DMError::DM_OK;
