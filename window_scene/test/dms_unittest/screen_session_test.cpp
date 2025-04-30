@@ -53,6 +53,7 @@ public:
     void OnExtendScreenConnectStatusChange(ScreenId screenId,
         ExtendScreenConnectStatus extendScreenConnectStatus) override {}
     void OnBeforeScreenPropertyChange(FoldStatus foldStatus) override {}
+    void OnScreenModeChange(ScreenModeChangeEvent screenModeChangeEvent) override {}
 };
 class ScreenSessionTest : public testing::Test {
   public:

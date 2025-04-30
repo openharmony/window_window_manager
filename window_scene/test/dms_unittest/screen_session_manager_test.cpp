@@ -6525,6 +6525,20 @@ HWTEST_F(ScreenSessionManagerTest, GetPhysicalScreenSession002, TestSize.Level1)
     ScreenId screenId = 123;
     EXPECT_EQ(ssm_->GetPhysicalScreenSession(screenId), nullptr);
 }
+
+/**
+ * @tc.name: OnScreenModeChange
+ * @tc.desc: OnScreenModeChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, OnScreenModeChange, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ASSERT_EQ(ssm_->clientProxy_, nullptr);
+
+    ScreenModeChangeEvent screenModeChangeEvent = ScreenModeChangeEvent::UNKNOWN;
+    ssm_->OnScreenModeChange(screenModeChangeEvent);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

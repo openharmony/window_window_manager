@@ -252,6 +252,7 @@ public:
     virtual void SetDefaultMultiScreenModeWhenSwitchUser() {};
     virtual void NotifyExtendScreenCreateFinish() {};
     virtual void NotifyExtendScreenDestroyFinish() {};
+    virtual void NotifyScreenMaskAppear() {};
 };
 } // namespace Rosen
 } // namespace OHOS
