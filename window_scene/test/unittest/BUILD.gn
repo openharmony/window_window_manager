@@ -1556,10 +1556,9 @@ ohos_unittest("ws_scene_system_ability_listener_test") {
 
   deps = [ ":ws_unittest_common" ]
 
-  external_deps = [
-    "c_utils:utils",
+  external_deps = test_external_deps
+  external_deps += [
     "eventhandler:libeventhandler",
-    "ipc:ipc_single",
     "samgr:samgr_proxy",
   ]
 
