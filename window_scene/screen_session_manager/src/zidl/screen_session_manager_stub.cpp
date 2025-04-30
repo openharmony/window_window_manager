@@ -1164,6 +1164,10 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             NotifyExtendScreenDestroyFinish();
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_NOTIFY_SCREEN_MASK_APPEAR: {
+            NotifyScreenMaskAppear();
+            break;
+        }
         default:
             TLOGW(WmsLogTag::DMS, "unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);

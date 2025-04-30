@@ -95,7 +95,8 @@ public:
 
     ScreenId GetInternalScreenId() override;
     bool SetScreenPowerById(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason) override;
-    bool SetScreenPowerForSuperFoldDevice(ScreenId screenId, ScreenPowerState state);
+    bool SetScreenPowerByIdForPC(ScreenId screenId, ScreenPowerState state);
+    bool SetScreenPowerByIdDefault(ScreenId screenId, ScreenPowerState state);
     DisplayState GetDisplayState(DisplayId displayId) override;
     bool SetScreenBrightness(uint64_t screenId, uint32_t level) override;
     uint32_t GetScreenBrightness(uint64_t screenId) override;
@@ -395,11 +396,14 @@ public:
     void SwitchScrollParam(FoldDisplayMode displayMode);
     void OnScreenChange(ScreenId screenId, ScreenEvent screenEvent,
         ScreenChangeReason reason = ScreenChangeReason::DEFAULT);
+    void OnScreenChangeForPC(ScreenId screenId, ScreenEvent screenEvent, ScreenChangeReason reason);
+    void OnScreenChangeDefault(ScreenId screenId, ScreenEvent screenEvent, ScreenChangeReason reason);
     void OnFoldScreenChange(sptr<ScreenSession>& screenSession);
     void SetCoordinationFlag(bool isCoordinationFlag);
     bool GetCoordinationFlag(void);
     DMError SetVirtualScreenMaxRefreshRate(ScreenId id, uint32_t refreshRate,
         uint32_t& actualRefreshRate) override;
+    void OnScreenModeChange(ScreenModeChangeEvent screenModeChangeEvent) override;
 
     void SetLastScreenMode(sptr<ScreenSession> firstSession, sptr<ScreenSession> secondarySession);
     /*
@@ -443,6 +447,7 @@ public:
     std::string DumperClientScreenSessions();
     void SetMultiScreenModeChangeTracker(std::string changeProc);
     void SetRSScreenPowerStatus(ScreenId screenId, ScreenPowerStatus status);
+    void NotifyScreenMaskAppear() override;
 
 protected:
     ScreenSessionManager();
@@ -695,6 +700,9 @@ private:
     std::mutex switchUserMutex_;
     std::condition_variable switchUserCV_;
     std::mutex screenPowerMutex_;
+    std::mutex screenChangeMutex_;
+    std::mutex screenMaskMutex_;
+    std::condition_variable screenMaskCV_;
 
     std::mutex freezedPidListMutex_;
     std::set<int32_t> freezedPidList_;
