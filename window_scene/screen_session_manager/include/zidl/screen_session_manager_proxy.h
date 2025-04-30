@@ -223,6 +223,7 @@ public:
     void SetDefaultMultiScreenModeWhenSwitchUser() override;
     void NotifyExtendScreenCreateFinish() override;
     void NotifyExtendScreenDestroyFinish() override;
+    void NotifyScreenMaskAppear() override;
 
 private:
     static inline BrokerDelegator<ScreenSessionManagerProxy> delegator_;

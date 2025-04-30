@@ -58,6 +58,7 @@ public:
     virtual void OnExtendScreenConnectStatusChange(ScreenId screenId,
         ExtendScreenConnectStatus extendScreenConnectStatus) = 0;
     virtual void OnBeforeScreenPropertyChange(FoldStatus foldStatus) = 0;
+    virtual void OnScreenModeChange(ScreenModeChangeEvent screenModeChangeEvent) = 0;
 };
 
 enum class MirrorScreenType : int32_t {
@@ -307,6 +308,7 @@ public:
     bool GetIsEnableRegionRotation();
     void UpdateDisplayNodeRotation(int rotation);
     void BeforeScreenPropertyChange(FoldStatus foldStatus);
+    void ScreenModeChange(ScreenModeChangeEvent screenModeChangeEvent);
 
     DisplayId GetDisplayId();
 

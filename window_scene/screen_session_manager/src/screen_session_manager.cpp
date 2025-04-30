@@ -158,6 +158,7 @@ const std::string SCREEN_EXTEND = "extend";
 const std::string SCREEN_MIRROR = "mirror";
 const std::string MULTI_SCREEN_EXIT_STR = "exit";
 const std::string MULTI_SCREEN_ENTER_STR = "enter";
+const int32_t CV_WAIT_SCREEN_MASK_MS = 1500;
 #endif
 const bool IS_COORDINATION_SUPPORT =
     OHOS::system::GetBoolParameter("const.window.foldabledevice.is_coordination_support", false);
@@ -7432,7 +7433,7 @@ void ScreenSessionManager::SwitchUser()
     if (g_isPcDevice && userSwitching_) {
         std::unique_lock<std::mutex> lock(switchUserMutex_);
         if (switchUserCV_.wait_for(lock, std::chrono::milliseconds(CV_WAIT_USERSWITCH_MS)) == std::cv_status::timeout) {
-            TLOGI(WmsLogTag::DMS, "wait switchUserCV_timeout");
+            TLOGI(WmsLogTag::DMS, "wait switchUserCV_ timeout");
             userSwitching_ = false;
         }
     }
@@ -8842,6 +8843,14 @@ void ScreenSessionManager::MultiScreenModeChange(ScreenId mainScreenId, ScreenId
 #ifdef WM_MULTI_SCREEN_ENABLE
     TLOGW(WmsLogTag::DMS, "mainId=%{public}" PRIu64" secondId=%{public}" PRIu64" operateType: %{public}s",
         mainScreenId, secondaryScreenId, operateMode.c_str());
+    OnScreenModeChange(ScreenModeChangeEvent::BEGIN);
+    if (g_isPcDevice) {
+        std::unique_lock<std::mutex> lock(screenMaskMutex_);
+        if (screenMaskCV_.wait_for(lock,
+            std::chrono::milliseconds(CV_WAIT_SCREEN_MASK_MS)) == std::cv_status::timeout) {
+            TLOGI(WmsLogTag::DMS, "wait screenMaskMutex_ timeout");
+        }
+    }
     sptr<ScreenSession> firstSession = nullptr;
     sptr<ScreenSession> secondarySession = nullptr;
     OperateModeChange(mainScreenId, secondaryScreenId, firstSession, secondarySession, operateMode);
@@ -8863,6 +8872,8 @@ void ScreenSessionManager::MultiScreenModeChange(ScreenId mainScreenId, ScreenId
     } else {
         TLOGE(WmsLogTag::DMS, "params error");
     }
+    NotifyScreenModeChange();
+    OnScreenModeChange(ScreenModeChangeEvent::END);
 #endif
 }
 
@@ -9793,5 +9804,26 @@ void ScreenSessionManager::SetRSScreenPowerStatus(ScreenId screenId, ScreenPower
             screenId, static_cast<uint32_t>(status), ret);
 #endif
     }
+}
+
+void ScreenSessionManager::OnScreenModeChange(ScreenModeChangeEvent screenModeChangeEvent)
+{
+    TLOGI(WmsLogTag::DMS, "screenModeChangeEvent: %{public}d", static_cast<uint32_t>(screenModeChangeEvent));
+    auto clientProxy = GetClientProxy();
+    if (!clientProxy) {
+        TLOGE(WmsLogTag::DMS, "clientProxy_ is null");
+        return;
+    }
+    clientProxy->OnScreenModeChanged(screenModeChangeEvent);
+}
+
+void ScreenSessionManager::NotifyScreenMaskAppear()
+{
+    if (!g_isPcDevice) {
+        TLOGW(WmsLogTag::DMS, "not pc device.");
+        return;
+    }
+    TLOGI(WmsLogTag::DMS, "screen mask appeared, notify block");
+    screenMaskCV_.notify_all();
 }
 } // namespace OHOS::Rosen
