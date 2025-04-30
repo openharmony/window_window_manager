@@ -299,15 +299,43 @@ static void ParseMetadataConfiguration(napi_env env, napi_value objValue, const 
     }
 }
 
+napi_value JsSceneSession::GetJsPanelSessionObj(napi_env env, const sptr<SceneSession>& session)
+{
+    if (session->GetWindowType() != WindowType::WINDOW_TYPE_KEYBOARD_PANEL) {
+        TLOGD(WmsLogTag::WMS_KEYBOARD, "This is not panel session");
+        return nullptr;
+    }
+    int32_t persistentId = session->GetPersistentId();
+    auto iter = jsSceneSessionMap_.find(persistentId);
+    if (iter != jsSceneSessionMap_.end()) {
+        const auto& ref = iter->second;
+        if (ref != nullptr) {
+            TLOGI(WmsLogTag::WMS_KEYBOARD, "Js panel session exists already and reuse it, id: %{public}d",
+                  persistentId);
+            napi_value panelSessionObj = nullptr;
+            napi_get_reference_value(env, ref, &panelSessionObj);
+            return panelSessionObj;
+        }
+    }
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Not find js panel session");
+    return nullptr;
+}
+
 napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& session)
 {
-    napi_value objValue = nullptr;
-    napi_create_object(env, &objValue);
-    if (objValue == nullptr || session == nullptr) {
-        WLOGFE("Object or session is null!");
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "session is null");
         return NapiGetUndefined(env);
     }
-
+    napi_value objValue = JsSceneSession::GetJsPanelSessionObj(env, session);
+    if (objValue != nullptr) {
+        return objValue;
+    }
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "objValue is null");
+        return NapiGetUndefined(env);
+    }
     sptr<JsSceneSession> jsSceneSession = sptr<JsSceneSession>::MakeSptr(env, session);
     jsSceneSession->IncStrongRef(nullptr);
     napi_wrap(env, objValue, jsSceneSession.GetRefPtr(), JsSceneSession::Finalizer, nullptr, nullptr);
