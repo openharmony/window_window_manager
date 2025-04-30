@@ -27,16 +27,13 @@
 #include "zidl/screen_session_manager_interface.h"
 
 namespace OHOS::Rosen {
-namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayManagerAdapter"};
-}
 WM_IMPLEMENT_SINGLE_INSTANCE(DisplayManagerAdapter)
 WM_IMPLEMENT_SINGLE_INSTANCE(ScreenManagerAdapter)
 
 #define INIT_PROXY_CHECK_RETURN(ret) \
     do { \
         if (!InitDMSProxy()) { \
-            WLOGFE("InitDMSProxy failed!"); \
+            TLOGE(WmsLogTag::DMS_DM, "InitDMSProxy failed!"); \
             return ret; \
         } \
     } while (false)
@@ -117,7 +114,7 @@ DMError ScreenManagerAdapter::GetPixelFormat(ScreenId screenId, GraphicPixelForm
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
-    WLOGFI("ScreenManagerAdapter::GetPixelFormat");
+    TLOGI(WmsLogTag::DMS_DM, "enter");
     return displayManagerServiceProxy_->GetPixelFormat(screenId, pixelFormat);
 }
 
@@ -125,7 +122,7 @@ DMError ScreenManagerAdapter::SetPixelFormat(ScreenId screenId, GraphicPixelForm
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
-    WLOGFI("ScreenManagerAdapter::SetPixelFormat");
+    TLOGI(WmsLogTag::DMS_DM, "enter");
     return displayManagerServiceProxy_->SetPixelFormat(screenId, pixelFormat);
 }
 
@@ -134,7 +131,7 @@ DMError ScreenManagerAdapter::GetSupportedHDRFormats(ScreenId screenId,
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
-    WLOGFI("ScreenManagerAdapter::GetSupportedHDRFormats");
+    TLOGI(WmsLogTag::DMS_DM, "enter");
     return displayManagerServiceProxy_->GetSupportedHDRFormats(screenId, hdrFormats);
 }
 
@@ -142,7 +139,7 @@ DMError ScreenManagerAdapter::GetScreenHDRFormat(ScreenId screenId, ScreenHDRFor
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
-    WLOGFI("ScreenManagerAdapter::GetScreenHDRFormat");
+    TLOGI(WmsLogTag::DMS_DM, "enter");
     return displayManagerServiceProxy_->GetScreenHDRFormat(screenId, hdrFormat);
 }
 
@@ -150,7 +147,7 @@ DMError ScreenManagerAdapter::SetScreenHDRFormat(ScreenId screenId, int32_t mode
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
-    WLOGFI("ScreenManagerAdapter::SetScreenHDRFormat");
+    TLOGI(WmsLogTag::DMS_DM, "enter");
     return displayManagerServiceProxy_->SetScreenHDRFormat(screenId, modeIdx);
 }
 
@@ -159,7 +156,7 @@ DMError ScreenManagerAdapter::GetSupportedColorSpaces(ScreenId screenId,
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
-    WLOGFI("ScreenManagerAdapter::GetSupportedColorSpaces");
+    TLOGI(WmsLogTag::DMS_DM, "enter");
     return displayManagerServiceProxy_->GetSupportedColorSpaces(screenId, colorSpaces);
 }
 
@@ -168,7 +165,7 @@ DMError ScreenManagerAdapter::GetScreenColorSpace(ScreenId screenId,
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
-    WLOGFI("ScreenManagerAdapter::GetScreenColorSpace");
+    TLOGI(WmsLogTag::DMS_DM, "enter");
     return displayManagerServiceProxy_->GetScreenColorSpace(screenId, colorSpace);
 }
 
@@ -177,7 +174,7 @@ DMError ScreenManagerAdapter::SetScreenColorSpace(ScreenId screenId,
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
-    WLOGFI("ScreenManagerAdapter::SetScreenColorSpace");
+    TLOGI(WmsLogTag::DMS_DM, "enter");
     return displayManagerServiceProxy_->SetScreenColorSpace(screenId, colorSpace);
 }
 
@@ -190,7 +187,7 @@ DMError ScreenManagerAdapter::GetSupportedHDRFormats(ScreenId screenId, std::vec
     for (auto value : hdrFormatsVec) {
         hdrFormats.push_back(static_cast<uint32_t>(value));
     }
-    WLOGFI("ScreenManagerAdapter::GetSupportedHDRFormats ret %{public}d", static_cast<int32_t>(ret));
+    TLOGI(WmsLogTag::DMS_DM, "ret %{public}d", static_cast<int32_t>(ret));
     return ret;
 }
 
@@ -203,7 +200,7 @@ DMError ScreenManagerAdapter::GetSupportedColorSpaces(ScreenId screenId, std::ve
     for (auto value : colorSpacesVec) {
         colorSpaces.push_back(static_cast<uint32_t>(value));
     }
-    WLOGFI("ScreenManagerAdapter::GetSupportedColorSpaces ret %{public}d", static_cast<int32_t>(ret));
+    TLOGI(WmsLogTag::DMS_DM, "ret %{public}d", static_cast<int32_t>(ret));
     return ret;
 }
 
@@ -212,7 +209,7 @@ ScreenId ScreenManagerAdapter::CreateVirtualScreen(VirtualScreenOption option,
 {
     INIT_PROXY_CHECK_RETURN(SCREEN_ID_INVALID);
 
-    WLOGFI("DisplayManagerAdapter::CreateVirtualScreen");
+    TLOGI(WmsLogTag::DMS_DM, "enter");
     return displayManagerServiceProxy_->CreateVirtualScreen(option, displayManagerAgent->AsObject());
 }
 
@@ -220,7 +217,7 @@ DMError ScreenManagerAdapter::DestroyVirtualScreen(ScreenId screenId)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
-    WLOGFI("DisplayManagerAdapter::DestroyVirtualScreen");
+    TLOGI(WmsLogTag::DMS_DM, "enter");
     return displayManagerServiceProxy_->DestroyVirtualScreen(screenId);
 }
 
@@ -229,10 +226,10 @@ DMError ScreenManagerAdapter::SetVirtualScreenSurface(ScreenId screenId, sptr<Su
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
     if (surface == nullptr) {
-        WLOGFE("Surface is nullptr");
+        TLOGE(WmsLogTag::DMS_DM, "Surface is nullptr");
         return DMError::DM_ERROR_NULLPTR;
     }
-    WLOGFI("DisplayManagerAdapter::SetVirtualScreenSurface");
+    TLOGI(WmsLogTag::DMS_DM, "enter");
     return displayManagerServiceProxy_->SetVirtualScreenSurface(screenId, surface->GetProducer());
 }
 
@@ -240,46 +237,47 @@ DMError ScreenManagerAdapter::SetScreenPrivacyMaskImage(ScreenId screenId,
     const std::shared_ptr<Media::PixelMap>& privacyMaskImg)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
-    WLOGFI("DisplayManagerAdapter::SetScreenPrivacyMaskImage");
+    TLOGI(WmsLogTag::DMS_DM, "enter");
     return displayManagerServiceProxy_->SetScreenPrivacyMaskImage(screenId, privacyMaskImg);
 }
 
 DMError ScreenManagerAdapter::SetVirtualMirrorScreenCanvasRotation(ScreenId screenId, bool canvasRotation)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
-    WLOGFI("DisplayManagerAdapter::SetVirtualMirrorScreenCanvasRotation");
+    TLOGI(WmsLogTag::DMS_DM, "enter");
     return displayManagerServiceProxy_->SetVirtualMirrorScreenCanvasRotation(screenId, canvasRotation);
 }
 
 DMError ScreenManagerAdapter::SetVirtualMirrorScreenScaleMode(ScreenId screenId, ScreenScaleMode scaleMode)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
-    WLOGFI("DisplayManagerAdapter::SetVirtualMirrorScreenScaleMode");
+    TLOGI(WmsLogTag::DMS_DM, "enter");
     return displayManagerServiceProxy_->SetVirtualMirrorScreenScaleMode(screenId, scaleMode);
 }
 
 DMError ScreenManagerAdapter::SetScreenRotationLocked(bool isLocked)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
-    WLOGFI("DisplayManagerAdapter::SetScreenRotationLocked");
+    TLOGI(WmsLogTag::DMS_DM, "enter");
     return displayManagerServiceProxy_->SetScreenRotationLocked(isLocked);
 }
 
 DMError ScreenManagerAdapter::SetScreenRotationLockedFromJs(bool isLocked)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
-    WLOGFI("DisplayManagerAdapter::SetScreenRotationLockedFromJs");
+    TLOGI(WmsLogTag::DMS_DM, "enter");
     return displayManagerServiceProxy_->SetScreenRotationLockedFromJs(isLocked);
 }
 
 DMError ScreenManagerAdapter::IsScreenRotationLocked(bool& isLocked)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
-    WLOGFI("DisplayManagerAdapter::IsScreenRotationLocked");
+    TLOGI(WmsLogTag::DMS_DM, "enter");
     return displayManagerServiceProxy_->IsScreenRotationLocked(isLocked);
 }
 
-bool ScreenManagerAdapter::SetSpecifiedScreenPower(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason)
+bool ScreenManagerAdapter::SetSpecifiedScreenPower(ScreenId screenId, ScreenPowerState state,
+    PowerStateChangeReason reason)
 {
     INIT_PROXY_CHECK_RETURN(false);
     return displayManagerServiceProxy_->SetSpecifiedScreenPower(screenId, state, reason);
@@ -411,14 +409,14 @@ bool BaseAdapter::InitDMSProxy()
         sptr<ISystemAbilityManager> systemAbilityManager =
                 SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
         if (!systemAbilityManager) {
-            WLOGFE("Failed to get system ability mgr.");
+            TLOGE(WmsLogTag::DMS_DM, "Failed to get system ability mgr.");
             return false;
         }
 
         sptr<IRemoteObject> remoteObject
             = systemAbilityManager->GetSystemAbility(DISPLAY_MANAGER_SERVICE_SA_ID);
         if (!remoteObject) {
-            WLOGFE("Failed to get display manager service.");
+            TLOGE(WmsLogTag::DMS_DM, "Failed to get display manager service.");
             return false;
         }
 
@@ -428,17 +426,17 @@ bool BaseAdapter::InitDMSProxy()
             displayManagerServiceProxy_ = iface_cast<IDisplayManager>(remoteObject);
         }
         if ((!displayManagerServiceProxy_) || (!displayManagerServiceProxy_->AsObject())) {
-            WLOGFW("Failed to get system display manager services");
+            TLOGW(WmsLogTag::DMS_DM, "Failed to get system display manager services");
             return false;
         }
 
         dmsDeath_ = new(std::nothrow) DMSDeathRecipient(*this);
         if (dmsDeath_ == nullptr) {
-            WLOGFE("Failed to create death Recipient ptr DMSDeathRecipient");
+            TLOGE(WmsLogTag::DMS_DM, "Failed to create death Recipient ptr DMSDeathRecipient");
             return false;
         }
         if (remoteObject->IsProxyObject() && !remoteObject->AddDeathRecipient(dmsDeath_)) {
-            WLOGFE("Failed to add death recipient");
+            TLOGE(WmsLogTag::DMS_DM, "Failed to add death recipient");
             return false;
         }
         isProxyValid_ = true;
@@ -453,19 +451,19 @@ DMSDeathRecipient::DMSDeathRecipient(BaseAdapter& adapter) : adapter_(adapter)
 void DMSDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
 {
     if (wptrDeath == nullptr) {
-        WLOGFE("wptrDeath is null");
+        TLOGE(WmsLogTag::DMS_DM, "wptrDeath is null");
         return;
     }
 
     sptr<IRemoteObject> object = wptrDeath.promote();
     if (!object) {
-        WLOGFE("object is null");
+        TLOGE(WmsLogTag::DMS_DM, "object is null");
         return;
     }
-    WLOGFI("dms OnRemoteDied");
+    TLOGI(WmsLogTag::DMS_DM, "dms OnRemoteDied");
     adapter_.Clear();
     if (SingletonContainer::IsDestroyed()) {
-        WLOGFE("SingletonContainer is destroyed");
+        TLOGE(WmsLogTag::DMS_DM, "SingletonContainer is destroyed");
         return;
     }
     SingletonContainer::Get<DisplayManager>().OnRemoteDied();
@@ -476,7 +474,7 @@ void DMSDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
 
 BaseAdapter::~BaseAdapter()
 {
-    WLOGFI("destory!");
+    TLOGI(WmsLogTag::DMS_DM, "destory!");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     Clear();
     displayManagerServiceProxy_ = nullptr;
@@ -484,7 +482,7 @@ BaseAdapter::~BaseAdapter()
 
 void BaseAdapter::Clear()
 {
-    WLOGFD("Clear!");
+    TLOGD(WmsLogTag::DMS_DM, "Clear!");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if ((displayManagerServiceProxy_ != nullptr) && (displayManagerServiceProxy_->AsObject() != nullptr)) {
         displayManagerServiceProxy_->AsObject()->RemoveDeathRecipient(dmsDeath_);
@@ -549,7 +547,7 @@ DMError ScreenManagerAdapter::DisableMirror(bool disableOrNot)
 sptr<ScreenInfo> ScreenManagerAdapter::GetScreenInfo(ScreenId screenId)
 {
     if (screenId == SCREEN_ID_INVALID) {
-        WLOGFE("screen id is invalid");
+        TLOGE(WmsLogTag::DMS_DM, "screen id is invalid");
         return nullptr;
     }
     INIT_PROXY_CHECK_RETURN(nullptr);
@@ -560,7 +558,7 @@ sptr<ScreenInfo> ScreenManagerAdapter::GetScreenInfo(ScreenId screenId)
 
 std::vector<DisplayId> DisplayManagerAdapter::GetAllDisplayIds()
 {
-    WLOGFD("DisplayManagerAdapter::GetAllDisplayIds enter");
+    TLOGD(WmsLogTag::DMS_DM, "enter");
     INIT_PROXY_CHECK_RETURN(std::vector<DisplayId>());
 
     return displayManagerServiceProxy_->GetAllDisplayIds();
@@ -589,9 +587,9 @@ DMError DisplayManagerAdapter::HasImmersiveWindow(ScreenId screenId, bool& immer
 
 sptr<DisplayInfo> DisplayManagerAdapter::GetDisplayInfo(DisplayId displayId)
 {
-    WLOGFD("DisplayManagerAdapter::GetDisplayInfo enter, displayId: %{public}" PRIu64" ", displayId);
+    TLOGD(WmsLogTag::DMS_DM, "enter, displayId: %{public}" PRIu64" ", displayId);
     if (displayId == DISPLAY_ID_INVALID) {
-        WLOGFE("screen id is invalid");
+        TLOGE(WmsLogTag::DMS_DM, "screen id is invalid");
         return nullptr;
     }
     INIT_PROXY_CHECK_RETURN(nullptr);
@@ -601,9 +599,9 @@ sptr<DisplayInfo> DisplayManagerAdapter::GetDisplayInfo(DisplayId displayId)
 
 sptr<DisplayInfo> DisplayManagerAdapter::GetVisibleAreaDisplayInfoById(DisplayId displayId)
 {
-    WLOGFD("enter, displayId: %{public}" PRIu64" ", displayId);
+    TLOGD(WmsLogTag::DMS_DM, "enter, displayId: %{public}" PRIu64" ", displayId);
     if (displayId == DISPLAY_ID_INVALID) {
-        WLOGFE("display id is invalid");
+        TLOGE(WmsLogTag::DMS_DM, "display id is invalid");
         return nullptr;
     }
     INIT_PROXY_CHECK_RETURN(nullptr);
@@ -613,9 +611,9 @@ sptr<DisplayInfo> DisplayManagerAdapter::GetVisibleAreaDisplayInfoById(DisplayId
 
 sptr<CutoutInfo> DisplayManagerAdapter::GetCutoutInfo(DisplayId displayId)
 {
-    WLOGFD("DisplayManagerAdapter::GetCutoutInfo");
+    TLOGD(WmsLogTag::DMS_DM, "enter");
     if (displayId == DISPLAY_ID_INVALID) {
-        WLOGFE("screen id is invalid");
+        TLOGE(WmsLogTag::DMS_DM, "screen id is invalid");
         return nullptr;
     }
     INIT_PROXY_CHECK_RETURN(nullptr);
@@ -624,10 +622,10 @@ sptr<CutoutInfo> DisplayManagerAdapter::GetCutoutInfo(DisplayId displayId)
 
 sptr<CutoutInfo> DisplayManagerAdapter::GetCutoutInfoWithRotation(DisplayId displayId, int32_t rotation)
 {
-    TLOGD(WmsLogTag::DMS, "GetCutoutInfoWithRotation enter, rotation: %{public}d, displayId: %{public}" PRIu64" ",
+    TLOGD(WmsLogTag::DMS_DM, "enter, rotation: %{public}d, displayId: %{public}" PRIu64" ",
         rotation, displayId);
     if (displayId == DISPLAY_ID_INVALID) {
-        WLOGFE("screen id is invalid");
+        TLOGE(WmsLogTag::DMS_DM, "screen id is invalid");
         return nullptr;
     }
     INIT_PROXY_CHECK_RETURN(nullptr);
@@ -638,7 +636,7 @@ DMError DisplayManagerAdapter::AddSurfaceNodeToDisplay(DisplayId displayId,
     std::shared_ptr<class RSSurfaceNode>& surfaceNode)
 {
     if (displayId == DISPLAY_ID_INVALID) {
-        WLOGFE("screen id is invalid");
+        TLOGE(WmsLogTag::DMS_DM, "screen id is invalid");
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
@@ -649,7 +647,7 @@ DMError DisplayManagerAdapter::RemoveSurfaceNodeFromDisplay(DisplayId displayId,
     std::shared_ptr<class RSSurfaceNode>& surfaceNode)
 {
     if (displayId == DISPLAY_ID_INVALID) {
-        WLOGFE("screen id is invalid");
+        TLOGE(WmsLogTag::DMS_DM, "screen id is invalid");
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
@@ -730,7 +728,7 @@ sptr<FoldCreaseRegion> DisplayManagerAdapter::GetCurrentFoldCreaseRegion()
 sptr<ScreenGroupInfo> ScreenManagerAdapter::GetScreenGroupInfoById(ScreenId screenId)
 {
     if (screenId == SCREEN_ID_INVALID) {
-        WLOGFE("screenGroup id is invalid");
+        TLOGE(WmsLogTag::DMS_DM, "screenGroup id is invalid");
         return nullptr;
     }
     INIT_PROXY_CHECK_RETURN(nullptr);
@@ -828,7 +826,7 @@ DMError ScreenManagerAdapter::MakeUniqueScreen(const std::vector<ScreenId>& scre
 DMError DisplayManagerAdapter::GetAvailableArea(DisplayId displayId, DMRect& area)
 {
     if (displayId == DISPLAY_ID_INVALID) {
-        WLOGFE("displayId id is invalid");
+        TLOGE(WmsLogTag::DMS_DM, "displayId id is invalid");
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
@@ -839,7 +837,7 @@ DMError DisplayManagerAdapter::GetAvailableArea(DisplayId displayId, DMRect& are
 DMError DisplayManagerAdapter::GetExpandAvailableArea(DisplayId displayId, DMRect& area)
 {
     if (displayId == DISPLAY_ID_INVALID) {
-        WLOGFE("displayId id is invalid");
+        TLOGE(WmsLogTag::DMS_DM, "displayId id is invalid");
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
@@ -851,7 +849,7 @@ VirtualScreenFlag ScreenManagerAdapter::GetVirtualScreenFlag(ScreenId screenId)
 {
     INIT_PROXY_CHECK_RETURN(VirtualScreenFlag::DEFAULT);
     if (screenId == SCREEN_ID_INVALID) {
-        WLOGFE("screenId id is invalid");
+        TLOGE(WmsLogTag::DMS_DM, "screenId id is invalid");
         return VirtualScreenFlag::DEFAULT;
     }
 
@@ -862,7 +860,7 @@ DMError ScreenManagerAdapter::SetVirtualScreenFlag(ScreenId screenId, VirtualScr
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
     if (screenId == SCREEN_ID_INVALID) {
-        WLOGFE("displayId id is invalid");
+        TLOGE(WmsLogTag::DMS_DM, "displayId id is invalid");
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     if (screenFlag < VirtualScreenFlag::DEFAULT || screenFlag >= VirtualScreenFlag::MAX) {

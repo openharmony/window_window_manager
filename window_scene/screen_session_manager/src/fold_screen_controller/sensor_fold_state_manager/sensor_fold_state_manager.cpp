@@ -27,9 +27,6 @@
 #endif
 
 namespace OHOS::Rosen {
-namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "SensorFoldStateManager"};
-} // namespace
 
 SensorFoldStateManager::SensorFoldStateManager() = default;
 SensorFoldStateManager::~SensorFoldStateManager() = default;
@@ -50,14 +47,14 @@ void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, float angl
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (nextState == FoldStatus::UNKNOWN) {
-        WLOGFW("fold state is UNKNOWN");
+        TLOGW(WmsLogTag::DMS_SSM, "fold state is UNKNOWN");
         return;
     }
     if (mState_ == nextState) {
-        WLOGFD("fold state doesn't change, foldState = %{public}d.", mState_);
+        TLOGD(WmsLogTag::DMS_SSM, "fold state doesn't change, foldState = %{public}d.", mState_);
         return;
     }
-    WLOGFI("current state: %{public}d, next state: %{public}d.", mState_, nextState);
+    TLOGI(WmsLogTag::DMS_SSM, "current state: %{public}d, next state: %{public}d.", mState_, nextState);
     ReportNotifyFoldStatusChange(static_cast<int32_t>(mState_), static_cast<int32_t>(nextState), angle);
     PowerMgr::PowerMgrClient::GetInstance().RefreshActivity();
 
@@ -78,14 +75,14 @@ void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, const std:
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (nextState == FoldStatus::UNKNOWN) {
-        WLOGFW("fold state is UNKNOWN");
+        TLOGW(WmsLogTag::DMS_SSM, "fold state is UNKNOWN");
         return;
     }
     if (mState_ == nextState) {
-        WLOGFD("fold state doesn't change, foldState = %{public}d.", mState_);
+        TLOGD(WmsLogTag::DMS_SSM, "fold state doesn't change, foldState = %{public}d.", mState_);
         return;
     }
-    WLOGFI("current state: %{public}d, next state: %{public}d.", mState_, nextState);
+    TLOGI(WmsLogTag::DMS_SSM, "current state: %{public}d, next state: %{public}d.", mState_, nextState);
     ReportNotifyFoldStatusChange(static_cast<int32_t>(mState_), static_cast<int32_t>(nextState), angles);
     PowerMgr::PowerMgrClient::GetInstance().RefreshActivity();
 
@@ -109,8 +106,8 @@ FoldStatus SensorFoldStateManager::GetCurrentState()
 void SensorFoldStateManager::ReportNotifyFoldStatusChange(int32_t currentStatus, int32_t nextStatus,
     float postureAngle)
 {
-    WLOGI("ReportNotifyFoldStatusChange currentStatus: %{public}d, nextStatus: %{public}d, postureAngle: %{public}f",
-        currentStatus, nextStatus, postureAngle);
+    TLOGI(WmsLogTag::DMS_SSM, "ReportNotifyFoldStatusChange currentStatus: %{public}d, nextStatus: %{public}d, "
+        "postureAngle: %{public}f", currentStatus, nextStatus, postureAngle);
     int32_t ret = HiSysEventWrite(
         OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
         "NOTIFY_FOLD_STATE_CHANGE",
@@ -119,14 +116,14 @@ void SensorFoldStateManager::ReportNotifyFoldStatusChange(int32_t currentStatus,
         "NEXT_FOLD_STATUS", nextStatus,
         "SENSOR_POSTURE", postureAngle);
     if (ret != 0) {
-        WLOGE("ReportNotifyFoldStatusChange Write HiSysEvent error, ret: %{public}d", ret);
+        TLOGE(WmsLogTag::DMS_SSM, "ReportNotifyFoldStatusChange Write HiSysEvent error, ret: %{public}d", ret);
     }
 }
 
 void SensorFoldStateManager::ReportNotifyFoldStatusChange(int32_t currentStatus, int32_t nextStatus,
     const std::vector<float> &postureAngles)
 {
-    TLOGI(WmsLogTag::DMS, "currentStatus: %{public}d, nextStatus: %{public}d, %{public}s",
+    TLOGI(WmsLogTag::DMS_SSM, "currentStatus: %{public}d, nextStatus: %{public}d, %{public}s",
         currentStatus, nextStatus, FoldScreenStateInternel::TransVec2Str(postureAngles, "postureAngles").c_str());
     int32_t ret = HiSysEventWrite(
         OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
@@ -136,7 +133,7 @@ void SensorFoldStateManager::ReportNotifyFoldStatusChange(int32_t currentStatus,
         "NEXT_FOLD_STATUS", nextStatus,
         "SENSOR_POSTURE", FoldScreenStateInternel::TransVec2Str(postureAngles, "postureAngles"));
     if (ret != 0) {
-        TLOGE(WmsLogTag::DMS, "Write HiSysEvent error, ret: %{public}d", ret);
+        TLOGE(WmsLogTag::DMS_SSM, "Write HiSysEvent error, ret: %{public}d", ret);
     }
 }
 
@@ -148,7 +145,7 @@ void SensorFoldStateManager::ClearState(sptr<FoldScreenPolicy> foldScreenPolicy)
 
 void SensorFoldStateManager::RegisterApplicationStateObserver()
 {
-    TLOGI(WmsLogTag::DMS, "current device is not supported");
+    TLOGI(WmsLogTag::DMS_SSM, "current device is not supported");
 }
 
 void SensorFoldStateManager::NotifyReportFoldStatusToScb(FoldStatus currentStatus, FoldStatus nextStatus,
@@ -186,7 +183,7 @@ bool SensorFoldStateManager::IsTentMode()
 
 void SensorFoldStateManager::SetTentMode(int tentType)
 {
-    TLOGI(WmsLogTag::DMS, "tent mode changing: %{public}d -> %{public}d", tentModeType_, tentType);
+    TLOGI(WmsLogTag::DMS_SSM, "tent mode changing: %{public}d -> %{public}d", tentModeType_, tentType);
     tentModeType_ = tentType;
 }
 } // namespace OHOS::Rosen

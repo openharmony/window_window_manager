@@ -26,7 +26,7 @@ std::recursive_mutex g_instanceMutex;
 
 ScreenSessionManagerLite::~ScreenSessionManagerLite()
 {
-    TLOGD(WmsLogTag::DMS, "destroy");
+    TLOGD(WmsLogTag::DMS_SSM, "destroy");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     destroyed_ = true;
 }
@@ -38,13 +38,13 @@ void ScreenSessionManagerLite::ConnectToServer()
     }
     auto systemAbilityMgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (!systemAbilityMgr) {
-        TLOGE(WmsLogTag::DMS, "Failed to get system ability mgr");
+        TLOGE(WmsLogTag::DMS_SSM, "Failed to get system ability mgr");
         return;
     }
 
     auto remoteObject = systemAbilityMgr->GetSystemAbility(DISPLAY_MANAGER_SERVICE_SA_ID);
     if (!remoteObject) {
-        TLOGE(WmsLogTag::DMS, "Failed to get display manager service");
+        TLOGE(WmsLogTag::DMS_SSM, "Failed to get display manager service");
         return;
     }
 
@@ -52,16 +52,16 @@ void ScreenSessionManagerLite::ConnectToServer()
     if (screenSessionManager_) {
         ssmDeath_ = new (std::nothrow) ScreenSMDeathRecipient();
         if (!ssmDeath_) {
-            TLOGE(WmsLogTag::DMS, "Failed to create death Recipient ptr WMSDeathRecipient");
+            TLOGE(WmsLogTag::DMS_SSM, "Failed to create death Recipient ptr WMSDeathRecipient");
             return;
         }
         if (remoteObject->IsProxyObject() && !remoteObject->AddDeathRecipient(ssmDeath_)) {
-            TLOGE(WmsLogTag::DMS, "Failed to add death recipient");
+            TLOGE(WmsLogTag::DMS_SSM, "Failed to add death recipient");
             return;
         }
     }
     if (!screenSessionManager_) {
-        TLOGE(WmsLogTag::DMS, "Failed to get screen session manager proxy");
+        TLOGE(WmsLogTag::DMS_SSM, "Failed to get screen session manager proxy");
         return;
     }
 }
@@ -165,7 +165,7 @@ void ScreenSessionManagerLite::Clear()
         screenSessionManager_->AsObject()->RemoveDeathRecipient(ssmDeath_);
     }
     if (destroyed_) {
-        TLOGD(WmsLogTag::DMS, "Already destroyed");
+        TLOGD(WmsLogTag::DMS_SSM, "Already destroyed");
         return;
     }
     screenSessionManager_ = nullptr;
@@ -174,16 +174,16 @@ void ScreenSessionManagerLite::Clear()
 void ScreenSMDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
 {
     if (wptrDeath == nullptr) {
-        TLOGE(WmsLogTag::DMS, "ScreenSMDeathRecipient wptrDeath is null");
+        TLOGE(WmsLogTag::DMS_SSM, "ScreenSMDeathRecipient wptrDeath is null");
         return;
     }
 
     sptr<IRemoteObject> object = wptrDeath.promote();
     if (!object) {
-        TLOGE(WmsLogTag::DMS, "ScreenSMDeathRecipient object is null");
+        TLOGE(WmsLogTag::DMS_SSM, "ScreenSMDeathRecipient object is null");
         return;
     }
-    TLOGI(WmsLogTag::DMS, "ScreenSessionManagerLite OnRemoteDied");
+    TLOGI(WmsLogTag::DMS_SSM, "ScreenSessionManagerLite OnRemoteDied");
     ScreenSessionManagerLite::GetInstance().Clear();
 }
 } // namespace OHOS::Rosen
