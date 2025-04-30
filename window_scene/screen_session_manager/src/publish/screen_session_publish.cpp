@@ -131,7 +131,7 @@ void ScreenSessionPublish::PublishCastPlugOutEvent()
 void ScreenSessionPublish::PublishDisplayRotationEvent(
     const ScreenId& screenId, const Rotation& displayRotation)
 {
-    TLOGI(WmsLogTag::DMS,
+    TLOGI(WmsLogTag::DMS_SSM,
         "start to publish display rotation event, screenId: %{public}d, displayRotation: %{public}d",
         static_cast<int32_t>(screenId), static_cast<int32_t>(displayRotation));
     EventFwk::CommonEventData eventData;

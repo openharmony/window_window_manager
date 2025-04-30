@@ -339,7 +339,7 @@ void SecondaryDisplayFoldPolicy::InitScreenParams()
         }
     }
     screenParams_.push_back(screenParams_[GLOBAL_FULL_STATUS_WIDTH] - screenParams_[FULL_STATUS_WIDTH]);
-    TLOGI(WmsLogTag::DMS,
+    TLOGI(WmsLogTag::DMS_SSM,
         "PhysicalResolution : mainStatusWidth_= %{public}d, fullStatusWidth_= %{public}d, gloablFullStatusWidth_="
         "%{public}d, screenHeight_= %{public}d, fullStatusOffsetX_= %{public}d",
           screenParams_[MAIN_STATUS_WIDTH], screenParams_[FULL_STATUS_WIDTH],
