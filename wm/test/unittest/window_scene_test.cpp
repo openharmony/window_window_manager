@@ -595,8 +595,8 @@ HWTEST_F(WindowSceneTest, GoDestroyHookWindow, TestSize.Level1)
     DisplayId displayId = 0;
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<IWindowLifeCycle> listener = nullptr;
-    sptr<WindowScene> scene = new WindowScene();
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowScene> scene = sptr<WindowScene>::MakeSptr();
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _)).Times(1).WillOnce(Return(new WindowSceneSessionImpl(option)));
     ASSERT_EQ(WMError::WM_OK, scene->Init(displayId, abilityContext_, listener));
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, scene->GoDestroyHookWindow());
@@ -611,12 +611,12 @@ HWTEST_F(WindowSceneTest, SetHookedWindowElementInfo, TestSize.Level1)
 {
     DisplayId displayId = 0;
     AppExecFwk::ElementName elementName;
+    sptr<WindowScene> scene = sptr<WindowScene>::MakeSptr();
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->SetHookedWindowElementInfo(elementName));
 
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<IWindowLifeCycle> listener = nullptr;
-    sptr<WindowScene> scene = new WindowScene();
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _)).Times(1).WillOnce(Return(new WindowSceneSessionImpl(option)));
     ASSERT_EQ(WMError::WM_OK, scene->Init(displayId, abilityContext_, listener));
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->SetHookedWindowElementInfo(elementName));
