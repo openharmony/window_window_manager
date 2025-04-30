@@ -362,7 +362,6 @@ private:
     void SetScreenSnapshotRect(RSSurfaceCaptureConfig& config);
     bool IsWidthHeightMatch(float width, float height, float targetWidth, float targetHeight);
     std::mutex mirrorScreenRegionMutex_;
-    void OptimizeSecondaryDisplayMode(const RRect &bounds, FoldDisplayMode &foldDisplayMode);
     std::string innerName_ {"UNKOWN"};
     bool isEnableRegionRotation_ = false;
     std::mutex isEnableRegionRotationMutex_;
