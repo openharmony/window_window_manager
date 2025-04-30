@@ -177,6 +177,50 @@ HWTEST_F(DisplayManagerServiceTest, HasPrivateWindow, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetScreenIdByDisplayId
+ * @tc.desc: DMS get screen id by display id
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerServiceTest, GetScreenIdByDisplayId, TestSize.Level1)
+{
+    std::string name = "testDisplay";
+    sptr<SupportedScreenModes> info = new SupportedScreenModes();
+    sptr<AbstractScreen> absScreen = new AbstractScreen(dms_->abstractScreenController_, name, 0, 0);
+    sptr<AbstractDisplay> absDisplay = new AbstractDisplay(0, info, absScreen);
+    dms_->abstractDisplayController_->abstractDisplayMap_.clear();
+    dms_->abstractDisplayController_->abstractDisplayMap_ = {
+        {0, absDisplay}
+    };
+ 
+    absDisplay->screenId_ = 0;
+    EXPECT_EQ(SCREEN_ID_INVALID, dms_->GetScreenIdByDisplayId(1));
+    EXPECT_EQ(0, dms_->GetScreenIdByDisplayId(0));
+}
+
+/**
+ * @tc.name: GetScreenInfoById01
+ * @tc.desc: DMS get screen info by id
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerServiceTest, GetScreenInfoById01, TestSize.Level1)
+{
+    ScreenId screenId = dms_->GetScreenIdByDisplayId(1000);
+    auto ret = dms_->GetScreenInfoById(screenId);
+    EXPECT_EQ(ret, nullptr);
+}
+
+/**
+ * @tc.name: GetScreenBrightness
+ * @tc.desc: DMS get screen brightness
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerServiceTest, GetScreenBrightness, TestSize.Level1)
+{
+    auto ret = dms_->GetScreenBrightness(0);
+    EXPECT_GT(static_cast<int32_t>(ret), -1);
+}
+
+/**
  * @tc.name: GetDisplayInfo
  * @tc.desc: DMS get display info
  * @tc.type: FUNC
