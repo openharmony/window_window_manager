@@ -3065,7 +3065,7 @@ HWTEST_F(ScreenSessionTest, UpdatePropertyOnly, TestSize.Level1)
 }
 
 /**
-* @tc.name: ReuseDisplayNode
+ * @tc.name: ReuseDisplayNode
  * @tc.desc: ReuseDisplayNode test
  * @tc.type: FUNC
  */
@@ -3156,7 +3156,11 @@ HWTEST_F(ScreenSessionTest, SetFakeScreenSession, TestSize.Level1)
     };
     sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
     ScreenSessionConfig fakeConfig = {
-        sptr<ScreenSession> fakeScreenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> fakeScreenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
     screenSession->SetFakeScreenSession(fakeScreenSession);
     ASSERT_EQ(screenSession->GetFakeScreenSession(), fakeScreenSession);
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetFakeScreenSession end";
