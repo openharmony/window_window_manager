@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "../include/ability_info_manager.h"
+#include "ability_info_manager.h"
 
 #include <bundlemgr/launcher_service.h>
 
@@ -22,6 +22,23 @@
 
 namespace OHOS::Rosen {
 WM_IMPLEMENT_SINGLE_INSTANCE(AbilityInfoManager);
+
+bool AbilityInfoManager::FindAbilityInfo(const AppExecFwk::BundleInfo& bundleInfo,
+    const std::string& moduleName, const std::string& abilityName, AppExecFwk::AbilityInfo& abilityInfo)
+{
+    auto& hapModulesList = bundleInfo.hapModuleInfos;
+    for (auto& hapModule : hapModulesList) {
+        auto& abilityInfoList = hapModule.abilityInfos;
+        for (auto& ability : abilityInfoList) {
+            if (ability.moduleName == moduleName && ability.name == abilityName) {
+                abilityInfo = ability;
+                return true;
+            }
+        }
+    }
+    TLOGW(WmsLogTag::DEFAULT, "ability info not found, bundle:%{public}s", bundleInfo.name.c_str());
+    return false;
+}
 
 void AbilityInfoManager::Init(const sptr<AppExecFwk::IBundleMgr>& bundleMgr)
 {

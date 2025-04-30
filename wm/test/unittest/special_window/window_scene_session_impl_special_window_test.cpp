@@ -95,7 +95,7 @@ namespace {
  * @tc.desc: CreateAndConnectSpecificSession
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplSpecialWindowTest, CreateAndConnectSpecificSession01, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplSpecialWindowTest, CreateAndConnectSpecificSession01, TestSize.Level1)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(nullptr, option);
@@ -121,7 +121,7 @@ HWTEST_F(WindowSceneSessionImplSpecialWindowTest, CreateAndConnectSpecificSessio
  * @tc.desc: CreateAndConnectSpecificSession
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplSpecialWindowTest, CreateAndConnectSpecificSession02, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplSpecialWindowTest, CreateAndConnectSpecificSession02, TestSize.Level1)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(nullptr, option);
@@ -149,7 +149,7 @@ HWTEST_F(WindowSceneSessionImplSpecialWindowTest, CreateAndConnectSpecificSessio
  * @tc.desc: CreateAndConnectSpecificSession
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplSpecialWindowTest, CreateAndConnectSpecificSession03, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplSpecialWindowTest, CreateAndConnectSpecificSession03, TestSize.Level1)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(nullptr, option);
@@ -178,7 +178,7 @@ HWTEST_F(WindowSceneSessionImplSpecialWindowTest, CreateAndConnectSpecificSessio
  * @tc.desc: CreateAndConnectSpecificSession
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplSpecialWindowTest, CreateAndConnectSpecificSession04, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplSpecialWindowTest, CreateAndConnectSpecificSession04, TestSize.Level1)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(nullptr, option);
@@ -208,7 +208,7 @@ HWTEST_F(WindowSceneSessionImplSpecialWindowTest, CreateAndConnectSpecificSessio
  * @tc.desc: CreateAndConnectSpecificSession
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplSpecialWindowTest, CreateAndConnectSpecificSession05, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplSpecialWindowTest, CreateAndConnectSpecificSession05, TestSize.Level1)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(nullptr, option);
@@ -236,7 +236,7 @@ HWTEST_F(WindowSceneSessionImplSpecialWindowTest, CreateAndConnectSpecificSessio
  * @tc.desc: CreateAndConnectSpecificSession
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplSpecialWindowTest, CreateAndConnectSpecificSession06, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplSpecialWindowTest, CreateAndConnectSpecificSession06, TestSize.Level1)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(nullptr, option);
@@ -265,7 +265,7 @@ HWTEST_F(WindowSceneSessionImplSpecialWindowTest, CreateAndConnectSpecificSessio
  * @tc.desc: CreateAndConnectSpecificSession
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplSpecialWindowTest, CreateAndConnectSpecificSession07, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplSpecialWindowTest, CreateAndConnectSpecificSession07, TestSize.Level1)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(nullptr, option);
@@ -294,7 +294,7 @@ HWTEST_F(WindowSceneSessionImplSpecialWindowTest, CreateAndConnectSpecificSessio
  * @tc.desc: CreateAndConnectSpecificSession
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplSpecialWindowTest, CreateAndConnectSpecificSession08, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplSpecialWindowTest, CreateAndConnectSpecificSession08, TestSize.Level1)
 {
     constexpr int parentId = 10000;
     constexpr int displayId = 100;
@@ -349,7 +349,7 @@ HWTEST_F(WindowSceneSessionImplSpecialWindowTest, CreateAndConnectSpecificSessio
  * @tc.desc: FindParentSessionByParentId
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplSpecialWindowTest, FindParentSessionByParentId01, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplSpecialWindowTest, FindParentSessionByParentId01, TestSize.Level1)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     option->SetWindowTag(WindowTag::MAIN_WINDOW);

@@ -169,7 +169,7 @@ namespace {
  * @tc.desc: new window node with WindowProperty
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeTest, NewWindowNode01, Function | SmallTest | Level3)
+HWTEST_F(WindowNodeTest, NewWindowNode01, TestSize.Level1)
 {
     std::string windowName = "WindowNode01";
     auto property = CreateWindowProperty(1, windowName);
@@ -186,7 +186,7 @@ HWTEST_F(WindowNodeTest, NewWindowNode01, Function | SmallTest | Level3)
  * @tc.desc: new window node with WindowProperty, RSSurfaceNode, IWindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeTest, NewWindowNode02, Function | SmallTest | Level1)
+HWTEST_F(WindowNodeTest, NewWindowNode02, TestSize.Level1)
 {
     std::string windowName = "WindowNode02";
     auto property = CreateWindowProperty(2, windowName);
@@ -209,7 +209,7 @@ HWTEST_F(WindowNodeTest, NewWindowNode02, Function | SmallTest | Level1)
  * @tc.desc: new window node with WindowProperty, RSSurfaceNode, IWindow, pid , uid
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeTest, NewWindowNode03, Function | SmallTest | Level1)
+HWTEST_F(WindowNodeTest, NewWindowNode03, TestSize.Level1)
 {
     std::string windowName = "WindowNode03";
     auto property = CreateWindowProperty(3, windowName);
@@ -235,7 +235,7 @@ HWTEST_F(WindowNodeTest, NewWindowNode03, Function | SmallTest | Level1)
  * @tc.desc: SetDisplayId & GetDisplayId
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeTest, SetDisplayId01, Function | SmallTest | Level1)
+HWTEST_F(WindowNodeTest, SetDisplayId01, TestSize.Level1)
 {
     std::string windowName = "WindowNode04";
     auto property = CreateWindowProperty(4, windowName);
@@ -255,7 +255,7 @@ HWTEST_F(WindowNodeTest, SetDisplayId01, Function | SmallTest | Level1)
  * @tc.desc: SetEntireWindowTouchHotArea & GetEntireWindowTouchHotArea
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeTest, SetEntireWindowTouchHotArea01, Function | SmallTest | Level1)
+HWTEST_F(WindowNodeTest, SetEntireWindowTouchHotArea01, TestSize.Level1)
 {
     std::string windowName = "WindowNode05";
     auto property = CreateWindowProperty(5, windowName);
@@ -283,7 +283,7 @@ HWTEST_F(WindowNodeTest, SetEntireWindowTouchHotArea01, Function | SmallTest | L
  * @tc.desc: SetEntireWindowPointerHotArea & GetEntireWindowPointerHotArea
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeTest, SetEntireWindowPointerHotArea01, Function | SmallTest | Level1)
+HWTEST_F(WindowNodeTest, SetEntireWindowPointerHotArea01, TestSize.Level1)
 {
     std::string windowName = "WindowNode06";
     auto property = CreateWindowProperty(6, windowName);
@@ -313,7 +313,7 @@ HWTEST_F(WindowNodeTest, SetEntireWindowPointerHotArea01, Function | SmallTest |
  * @tc.desc: SetWindowRect & GetWindowRect
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeTest, SetWindowRect01, Function | SmallTest | Level1)
+HWTEST_F(WindowNodeTest, SetWindowRect01, TestSize.Level1)
 {
     std::string windowName = "WindowNode07";
     auto property = CreateWindowProperty(7, windowName);
@@ -343,7 +343,7 @@ HWTEST_F(WindowNodeTest, SetWindowRect01, Function | SmallTest | Level1)
  * @tc.desc: SetDecoStatus & GetDecoStatus
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeTest, SetDecoStatus01, Function | SmallTest | Level1)
+HWTEST_F(WindowNodeTest, SetDecoStatus01, TestSize.Level1)
 {
     std::string windowName = "WindowNode08";
     auto property = CreateWindowProperty(8, windowName);
@@ -368,7 +368,7 @@ HWTEST_F(WindowNodeTest, SetDecoStatus01, Function | SmallTest | Level1)
  * @tc.desc: SetRequestRect & GetRequestRect
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeTest, SetRequestRect01, Function | SmallTest | Level1)
+HWTEST_F(WindowNodeTest, SetRequestRect01, TestSize.Level1)
 {
     std::string windowName = "WindowNode09";
     auto property = CreateWindowProperty(9, windowName);
@@ -397,7 +397,7 @@ HWTEST_F(WindowNodeTest, SetRequestRect01, Function | SmallTest | Level1)
  * @tc.desc: SetWindowProperty & GetWindowProperty
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeTest, SetWindowProperty01, Function | SmallTest | Level1)
+HWTEST_F(WindowNodeTest, SetWindowProperty01, TestSize.Level1)
 {
     std::string windowName = "WindowNode09";
     auto property = CreateWindowProperty(9, windowName);
@@ -418,7 +418,7 @@ HWTEST_F(WindowNodeTest, SetWindowProperty01, Function | SmallTest | Level1)
  * @tc.desc: SetSystemBarProperty & GetSystemBarProperty
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeTest, SetSystemBarProperty01, Function | SmallTest | Level1)
+HWTEST_F(WindowNodeTest, SetSystemBarProperty01, TestSize.Level1)
 {
     std::string windowName = "WindowNode10";
     auto property = CreateWindowProperty(10, windowName);
@@ -445,7 +445,7 @@ HWTEST_F(WindowNodeTest, SetSystemBarProperty01, Function | SmallTest | Level1)
  * @tc.desc: SetWindowMode & GetWindowMode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeTest, SetWindowMode01, Function | SmallTest | Level1)
+HWTEST_F(WindowNodeTest, SetWindowMode01, TestSize.Level1)
 {
     std::string windowName = "WindowNode11";
     auto property = CreateWindowProperty(11, windowName);
@@ -465,7 +465,7 @@ HWTEST_F(WindowNodeTest, SetWindowMode01, Function | SmallTest | Level1)
  * @tc.desc: SetBrightness & GetBrightness
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeTest, SetBrightness01, Function | SmallTest | Level1)
+HWTEST_F(WindowNodeTest, SetBrightness01, TestSize.Level1)
 {
     std::string windowName = "WindowNode12";
     auto property = CreateWindowProperty(12, windowName);
@@ -487,7 +487,7 @@ HWTEST_F(WindowNodeTest, SetBrightness01, Function | SmallTest | Level1)
  * @tc.desc: SetTurnScreenOn & IsTurnScreenOn
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeTest, SetTurnScreenOn01, Function | SmallTest | Level1)
+HWTEST_F(WindowNodeTest, SetTurnScreenOn01, TestSize.Level1)
 {
     std::string windowName = "WindowNode13";
     auto property = CreateWindowProperty(13, windowName);
@@ -505,7 +505,7 @@ HWTEST_F(WindowNodeTest, SetTurnScreenOn01, Function | SmallTest | Level1)
  * @tc.desc: SetKeepScreenOn & IsKeepScreenOn
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeTest, SetKeepScreenOn01, Function | SmallTest | Level1)
+HWTEST_F(WindowNodeTest, SetKeepScreenOn01, TestSize.Level1)
 {
     std::string windowName = "WindowNode14";
     auto property = CreateWindowProperty(14, windowName);
@@ -523,7 +523,7 @@ HWTEST_F(WindowNodeTest, SetKeepScreenOn01, Function | SmallTest | Level1)
  * @tc.desc: SetCallingWindow & GetCallingWindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeTest, SetCallingWindow01, Function | SmallTest | Level1)
+HWTEST_F(WindowNodeTest, SetCallingWindow01, TestSize.Level1)
 {
     std::string windowName = "WindowNode15";
     auto property = CreateWindowProperty(15, windowName);
@@ -541,7 +541,7 @@ HWTEST_F(WindowNodeTest, SetCallingWindow01, Function | SmallTest | Level1)
  * @tc.desc: SetCallingPid & GetCallingPid, SetInputEventCallingPid & GetInputEventCallingPid
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeTest, SetCallingPid01, Function | SmallTest | Level1)
+HWTEST_F(WindowNodeTest, SetCallingPid01, TestSize.Level1)
 {
     std::string windowName = "WindowNode16";
     auto property = CreateWindowProperty(16, windowName);
@@ -566,7 +566,7 @@ HWTEST_F(WindowNodeTest, SetCallingPid01, Function | SmallTest | Level1)
  * @tc.desc: SetCallingUid & GetCallingUid
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeTest, SetCallingUid01, Function | SmallTest | Level1)
+HWTEST_F(WindowNodeTest, SetCallingUid01, TestSize.Level1)
 {
     std::string windowName = "WindowNode17";
     auto property = CreateWindowProperty(17, windowName);
@@ -586,7 +586,7 @@ HWTEST_F(WindowNodeTest, SetCallingUid01, Function | SmallTest | Level1)
  * @tc.desc: SetWindowSizeChangeReason & GetWindowSizeChangeReason & ResetWindowSizeChangeReason
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeTest, SetWindowSizeChangeReason01, Function | SmallTest | Level1)
+HWTEST_F(WindowNodeTest, SetWindowSizeChangeReason01, TestSize.Level1)
 {
     std::string windowName = "WindowNode19";
     auto property = CreateWindowProperty(19, windowName);
@@ -607,7 +607,7 @@ HWTEST_F(WindowNodeTest, SetWindowSizeChangeReason01, Function | SmallTest | Lev
  * @tc.desc: SetRequestedOrientation & GetRequestedOrientation
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeTest, SetRequestedOrientation01, Function | SmallTest | Level1)
+HWTEST_F(WindowNodeTest, SetRequestedOrientation01, TestSize.Level1)
 {
     std::string windowName = "WindowNode20";
     auto property = CreateWindowProperty(20, windowName);
@@ -625,7 +625,7 @@ HWTEST_F(WindowNodeTest, SetRequestedOrientation01, Function | SmallTest | Level
  * @tc.desc: SetShowingDisplays & GetShowingDisplays
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeTest, SetShowingDisplays01, Function | SmallTest | Level1)
+HWTEST_F(WindowNodeTest, SetShowingDisplays01, TestSize.Level1)
 {
     std::string windowName = "WindowNode21";
     auto property = CreateWindowProperty(21, windowName);
@@ -651,7 +651,7 @@ HWTEST_F(WindowNodeTest, SetShowingDisplays01, Function | SmallTest | Level1)
  * @tc.desc: SetWindowModeSupportType & GetWindowModeSupportType
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeTest, SetWindowModeSupportType01, Function | SmallTest | Level1)
+HWTEST_F(WindowNodeTest, SetWindowModeSupportType01, TestSize.Level1)
 {
     std::string windowName = "WindowNode22";
     auto property = CreateWindowProperty(22, windowName);
@@ -669,7 +669,7 @@ HWTEST_F(WindowNodeTest, SetWindowModeSupportType01, Function | SmallTest | Leve
  * @tc.desc: SetDragType & GetDragType
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeTest, SetDragType01, Function | SmallTest | Level1)
+HWTEST_F(WindowNodeTest, SetDragType01, TestSize.Level1)
 {
     std::string windowName = "WindowNode23";
     auto property = CreateWindowProperty(23, windowName);
@@ -687,7 +687,7 @@ HWTEST_F(WindowNodeTest, SetDragType01, Function | SmallTest | Level1)
  * @tc.desc: SetOriginRect & GetOriginRect
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeTest, SetOriginRect01, Function | SmallTest | Level1)
+HWTEST_F(WindowNodeTest, SetOriginRect01, TestSize.Level1)
 {
     std::string windowName = "WindowNode24";
     auto property = CreateWindowProperty(24, windowName);
@@ -712,7 +712,7 @@ HWTEST_F(WindowNodeTest, SetOriginRect01, Function | SmallTest | Level1)
  * @tc.desc: SetTouchHotAreas & GetTouchHotAreas
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeTest, SetTouchHotAreas01, Function | SmallTest | Level1)
+HWTEST_F(WindowNodeTest, SetTouchHotAreas01, TestSize.Level1)
 {
     std::string windowName = "WindowNode25";
     auto property = CreateWindowProperty(25, windowName);
@@ -739,7 +739,7 @@ HWTEST_F(WindowNodeTest, SetTouchHotAreas01, Function | SmallTest | Level1)
  * @tc.desc: SetPointerHotAreas & GetPointerHotAreas
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeTest, SetPointerHotAreas01, Function | SmallTest | Level1)
+HWTEST_F(WindowNodeTest, SetPointerHotAreas01, TestSize.Level1)
 {
     std::string windowName = "WindowNode26";
     auto property = CreateWindowProperty(26, windowName);
@@ -766,7 +766,7 @@ HWTEST_F(WindowNodeTest, SetPointerHotAreas01, Function | SmallTest | Level1)
  * @tc.desc: SetWindowSizeLimits & GetWindowSizeLimits
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeTest, SetWindowSizeLimits01, Function | SmallTest | Level1)
+HWTEST_F(WindowNodeTest, SetWindowSizeLimits01, TestSize.Level1)
 {
     std::string windowName = "WindowNode27";
     auto property = CreateWindowProperty(27, windowName);
@@ -799,7 +799,7 @@ HWTEST_F(WindowNodeTest, SetWindowSizeLimits01, Function | SmallTest | Level1)
  * @tc.desc: SetWindowUpdatedSizeLimits & GetWindowUpdatedSizeLimits
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeTest, SetWindowUpdatedSizeLimits01, Function | SmallTest | Level1)
+HWTEST_F(WindowNodeTest, SetWindowUpdatedSizeLimits01, TestSize.Level1)
 {
     std::string windowName = "WindowNode28";
     auto property = CreateWindowProperty(28, windowName);
@@ -832,7 +832,7 @@ HWTEST_F(WindowNodeTest, SetWindowUpdatedSizeLimits01, Function | SmallTest | Le
  * @tc.desc: SetSnapshot & GetSnapshot
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeTest, SetSnapshot01, Function | SmallTest | Level1)
+HWTEST_F(WindowNodeTest, SetSnapshot01, TestSize.Level1)
 {
     std::string windowName = "WindowNode29";
     auto property = CreateWindowProperty(29, windowName);
@@ -862,7 +862,7 @@ HWTEST_F(WindowNodeTest, SetSnapshot01, Function | SmallTest | Level1)
  * @tc.desc: UpdateZoomTransform & GetZoomTransform
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeTest, UpdateZoomTransform01, Function | SmallTest | Level1)
+HWTEST_F(WindowNodeTest, UpdateZoomTransform01, TestSize.Level1)
 {
     std::string windowName = "WindowNode30";
     auto property = CreateWindowProperty(30, windowName);
@@ -888,7 +888,7 @@ HWTEST_F(WindowNodeTest, UpdateZoomTransform01, Function | SmallTest | Level1)
  * @tc.desc: SetTransform & ComputeTransform
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeTest, SetTransform01, Function | SmallTest | Level1)
+HWTEST_F(WindowNodeTest, SetTransform01, TestSize.Level1)
 {
     std::string windowName = "WindowNode31";
     auto property = CreateWindowProperty(31, windowName);
@@ -935,7 +935,7 @@ HWTEST_F(WindowNodeTest, SetTransform01, Function | SmallTest | Level1)
  * @tc.desc: SetVisibilityState & GetVisibilityState
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeTest, GetVisibilityState001, Function | SmallTest | Level1)
+HWTEST_F(WindowNodeTest, GetVisibilityState001, TestSize.Level1)
 {
     std::string windowName = "WindowNode32";
     auto property = CreateWindowProperty(7, windowName);
@@ -955,7 +955,7 @@ HWTEST_F(WindowNodeTest, GetVisibilityState001, Function | SmallTest | Level1)
  * @tc.desc: SetTouchable & GetTouchable
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeTest, GetTouchable01, Function | SmallTest | Level1)
+HWTEST_F(WindowNodeTest, GetTouchable01, TestSize.Level1)
 {
     std::string windowName = "WindowNode33";
     auto property = CreateWindowProperty(33, windowName);

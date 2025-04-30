@@ -30,21 +30,13 @@ public:
     virtual void TearDown() override;
 };
 
-void DisplayInfoTest::SetUpTestCase()
-{
-}
+void DisplayInfoTest::SetUpTestCase() {}
 
-void DisplayInfoTest::TearDownTestCase()
-{
-}
+void DisplayInfoTest::TearDownTestCase() {}
 
-void DisplayInfoTest::SetUp()
-{
-}
+void DisplayInfoTest::SetUp() {}
 
-void DisplayInfoTest::TearDown()
-{
-}
+void DisplayInfoTest::TearDown() {}
 
 namespace {
 /**
@@ -64,6 +56,6 @@ HWTEST_F(DisplayInfoTest, MarshallingUnmarshalling, TestSize.Level1)
     ASSERT_EQ(displayInfoDst->GetDisplayId(), 1);
     delete displayInfoDst;
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

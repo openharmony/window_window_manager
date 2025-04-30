@@ -15,9 +15,9 @@
 
 // gtest
 #include <gtest/gtest.h>
+#include "scene_board_judgement.h"
 #include "window_test_utils.h"
 #include "wm_common.h"
-#include "scene_board_judgement.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -41,17 +41,13 @@ void WindowInputMethodTest::SetUpTestCase()
 {
     auto display = DisplayManager::GetInstance().GetDisplayById(0);
     ASSERT_TRUE((display != nullptr));
-    Rect displayRect = {0, 0, display->GetWidth(), display->GetHeight()};
+    Rect displayRect = { 0, 0, display->GetWidth(), display->GetHeight() };
     Utils::InitByDisplayRect(displayRect);
 }
 
-void WindowInputMethodTest::TearDownTestCase()
-{
-}
+void WindowInputMethodTest::TearDownTestCase() {}
 
-void WindowInputMethodTest::SetUp()
-{
-}
+void WindowInputMethodTest::SetUp() {}
 
 void WindowInputMethodTest::TearDown()
 {
@@ -64,7 +60,7 @@ namespace {
  * @tc.desc: create window and show keyboard.
  * @tc.type: FUNC
  */
-HWTEST_F(WindowInputMethodTest, ShowKeyboard01, Function | MediumTest | Level3)
+HWTEST_F(WindowInputMethodTest, ShowKeyboard01, TestSize.Level1)
 {
     WindowTestUtils::TestWindowInfo windowInfo = {
         .name = "ShowKeyboard",
@@ -95,15 +91,14 @@ HWTEST_F(WindowInputMethodTest, ShowKeyboard01, Function | MediumTest | Level3)
     ASSERT_EQ(WMError::WM_OK, fullWindow->ChangeKeyboardViewMode(KeyboardViewMode::LIGHT_IMMERSIVE_MODE));
     sleep(TEST_SLEEP_SECOND);
 
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM,
-        fullWindow->ChangeKeyboardViewMode(static_cast<KeyboardViewMode>(-1)));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, fullWindow->ChangeKeyboardViewMode(static_cast<KeyboardViewMode>(-1)));
     sleep(TEST_SLEEP_SECOND);
 
     ASSERT_EQ(WMError::WM_OK, fullWindow->Hide());
     sleep(TEST_SLEEP_SECOND);
 
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW,
-        fullWindow->ChangeKeyboardViewMode(KeyboardViewMode::DARK_IMMERSIVE_MODE));
+              fullWindow->ChangeKeyboardViewMode(KeyboardViewMode::DARK_IMMERSIVE_MODE));
     sleep(TEST_SLEEP_SECOND);
     fullWindow->Destroy();
 }

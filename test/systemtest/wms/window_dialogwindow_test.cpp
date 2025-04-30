@@ -36,21 +36,13 @@ public:
     static inline std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext_ = nullptr;
 };
 
-void WindowDialogWindowTest::SetUpTestCase()
-{
-}
+void WindowDialogWindowTest::SetUpTestCase() {}
 
-void WindowDialogWindowTest::TearDownTestCase()
-{
-}
+void WindowDialogWindowTest::TearDownTestCase() {}
 
-void WindowDialogWindowTest::SetUp()
-{
-}
+void WindowDialogWindowTest::SetUp() {}
 
-void WindowDialogWindowTest::TearDown()
-{
-}
+void WindowDialogWindowTest::TearDown() {}
 
 static sptr<WindowScene> CreateWindowScene()
 {
@@ -83,12 +75,12 @@ static sptr<Window> CreateDialogWindow(sptr<WindowScene> scene, WindowType type,
  * @tc.type: FUNC
  * @tc.require: issueI5GKWZ
  */
-HWTEST_F(WindowDialogWindowTest, DialogWindow01, Function | MediumTest | Level2)
+HWTEST_F(WindowDialogWindowTest, DialogWindow01, TestSize.Level1)
 {
     sptr<WindowScene> scene = CreateWindowScene();
     ASSERT_NE(scene, nullptr);
 
-    struct Rect rect = {0, 0, 100, 200};
+    struct Rect rect = { 0, 0, 100, 200 };
     sptr<Window> dialogWindow = CreateDialogWindow(scene, WindowType::WINDOW_TYPE_DIALOG, rect);
     ASSERT_NE(nullptr, dialogWindow);
 
@@ -108,12 +100,12 @@ HWTEST_F(WindowDialogWindowTest, DialogWindow01, Function | MediumTest | Level2)
  * @tc.type: FUNC
  * @tc.require: issueI5GKWZ
  */
-HWTEST_F(WindowDialogWindowTest, DialogWindow02, Function | MediumTest | Level2)
+HWTEST_F(WindowDialogWindowTest, DialogWindow02, TestSize.Level1)
 {
     sptr<WindowScene> scene = CreateWindowScene();
     ASSERT_NE(scene, nullptr);
 
-    struct Rect rect = {0, 0, 100, 200};
+    struct Rect rect = { 0, 0, 100, 200 };
     sptr<Window> dialogWindow0 = CreateDialogWindow(scene, WindowType::WINDOW_TYPE_DIALOG, rect);
     ASSERT_NE(nullptr, dialogWindow0);
 
@@ -136,12 +128,12 @@ HWTEST_F(WindowDialogWindowTest, DialogWindow02, Function | MediumTest | Level2)
  * @tc.type: FUNC
  * @tc.require: issueI5GKWZ
  */
-HWTEST_F(WindowDialogWindowTest, DialogWindow03, Function | MediumTest | Level2)
+HWTEST_F(WindowDialogWindowTest, DialogWindow03, TestSize.Level1)
 {
     sptr<WindowScene> scene = CreateWindowScene();
     ASSERT_NE(scene, nullptr);
 
-    struct Rect rect = {0, 0, 100, 200};
+    struct Rect rect = { 0, 0, 100, 200 };
     sptr<Window> dialogWindow0 = CreateDialogWindow(scene, WindowType::WINDOW_TYPE_DIALOG, rect, "dialog0");
     sptr<Window> dialogWindow1 = CreateDialogWindow(scene, WindowType::WINDOW_TYPE_DIALOG, rect, "dialog0");
     ASSERT_NE(nullptr, dialogWindow0);
@@ -163,7 +155,7 @@ HWTEST_F(WindowDialogWindowTest, DialogWindow03, Function | MediumTest | Level2)
  * @tc.type: FUNC
  * @tc.require: issueI5GKWZ
  */
-HWTEST_F(WindowDialogWindowTest, DialogWindow04, Function | MediumTest | Level2)
+HWTEST_F(WindowDialogWindowTest, DialogWindow04, TestSize.Level1)
 {
     sptr<WindowScene> scene = CreateWindowScene();
     ASSERT_NE(scene, nullptr);
@@ -171,12 +163,11 @@ HWTEST_F(WindowDialogWindowTest, DialogWindow04, Function | MediumTest | Level2)
         ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
     }
 
-    struct Rect rect = {0, 0, 100, 200};
+    struct Rect rect = { 0, 0, 100, 200 };
     sptr<Window> dialogWindow0 = CreateDialogWindow(scene, WindowType::WINDOW_TYPE_DIALOG, rect, "dialog0");
     ASSERT_NE(nullptr, dialogWindow0);
     ASSERT_EQ(WMError::WM_OK, dialogWindow0->Show());
     ASSERT_EQ(WMError::WM_OK, dialogWindow0->Destroy());
-
 
     sptr<Window> dialogWindow1 = CreateDialogWindow(scene, WindowType::WINDOW_TYPE_DIALOG, rect, "dialog0");
     ASSERT_NE(nullptr, dialogWindow1);
@@ -193,12 +184,12 @@ HWTEST_F(WindowDialogWindowTest, DialogWindow04, Function | MediumTest | Level2)
  * @tc.type: FUNC
  * @tc.require: issueI5GKWZ
  */
-HWTEST_F(WindowDialogWindowTest, DialogWindow05, Function | MediumTest | Level2)
+HWTEST_F(WindowDialogWindowTest, DialogWindow05, TestSize.Level1)
 {
     sptr<WindowScene> scene = CreateWindowScene();
     ASSERT_NE(scene, nullptr);
 
-    struct Rect rect = {0, 0, 100, 200};
+    struct Rect rect = { 0, 0, 100, 200 };
     sptr<Window> dialogWindow = CreateDialogWindow(scene, WindowType::WINDOW_TYPE_DIALOG, rect);
     ASSERT_NE(nullptr, dialogWindow);
 
@@ -218,12 +209,12 @@ HWTEST_F(WindowDialogWindowTest, DialogWindow05, Function | MediumTest | Level2)
  * @tc.type: FUNC
  * @tc.require: issueI5GKWZ
  */
-HWTEST_F(WindowDialogWindowTest, DialogWindow06, Function | MediumTest | Level2)
+HWTEST_F(WindowDialogWindowTest, DialogWindow06, TestSize.Level1)
 {
     sptr<WindowScene> scene = CreateWindowScene();
     ASSERT_NE(scene, nullptr);
 
-    struct Rect rect = {0, 0, 100, 200};
+    struct Rect rect = { 0, 0, 100, 200 };
     sptr<Window> dialogWindow = CreateDialogWindow(scene, WindowType::WINDOW_TYPE_DIALOG, rect);
 
     ASSERT_NE(nullptr, dialogWindow);
@@ -246,12 +237,12 @@ HWTEST_F(WindowDialogWindowTest, DialogWindow06, Function | MediumTest | Level2)
  * @tc.type: FUNC
  * @tc.require: issueI5GKWZ
  */
-HWTEST_F(WindowDialogWindowTest, DialogWindow07, Function | MediumTest | Level2)
+HWTEST_F(WindowDialogWindowTest, DialogWindow07, TestSize.Level1)
 {
     sptr<WindowScene> scene = CreateWindowScene();
     ASSERT_NE(scene, nullptr);
 
-    struct Rect rect = {0, 0, 100, 200};
+    struct Rect rect = { 0, 0, 100, 200 };
     sptr<Window> dialogWindow = CreateDialogWindow(scene, WindowType::WINDOW_TYPE_DIALOG, rect);
     ASSERT_NE(nullptr, dialogWindow);
 

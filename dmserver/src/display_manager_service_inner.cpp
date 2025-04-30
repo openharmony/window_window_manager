@@ -119,9 +119,10 @@ sptr<SupportedScreenModes> DisplayManagerServiceInner::GetScreenModesByDisplayId
 }
 
 std::shared_ptr<Media::PixelMap> DisplayManagerServiceInner::GetDisplaySnapshot(DisplayId displayId,
-    DmErrorCode* errorCode, bool isUseDma) const
+    DmErrorCode* errorCode, bool isUseDma, bool isCaptureFullOfScreen) const
 {
-    return DisplayManagerService::GetInstance().GetDisplaySnapshot(displayId, errorCode, isUseDma);
+    return DisplayManagerService::GetInstance().GetDisplaySnapshot(displayId, errorCode, isUseDma,
+        isCaptureFullOfScreen);
 }
 
 void DisplayManagerServiceInner::RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener)

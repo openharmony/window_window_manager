@@ -136,6 +136,9 @@ struct DetectTaskInfo {
     DetectTaskState taskState = DetectTaskState::NO_TASK;
 };
 
+const std::string ATTACH_EVENT_NAME { "wms::ReportWindowTimeout_Attach" };
+const std::string DETACH_EVENT_NAME { "wms::ReportWindowTimeout_Detach" };
+
 class Session : public SessionStub {
 public:
     friend class HidumpController;
@@ -201,7 +204,7 @@ public:
     void NotifyDisconnect();
     void NotifyLayoutFinished();
     void NotifyRemoveBlank();
-    void NotifyAddSnapshot();
+    void NotifyAddSnapshot(bool useFfrt = false, bool needPersist = false);
     void NotifyRemoveSnapshot();
     void NotifyExtensionDied() override;
     void NotifyExtensionTimeout(int32_t errorCode) override;
@@ -245,18 +248,31 @@ public:
     void SetSaveSnapshotCallback(Task&& task)
     {
         if (task) {
+            std::lock_guard lock(saveSnapshotCallbackMutex_);
             saveSnapshotCallback_ = std::move(task);
         }
     }
     void SetRemoveSnapshotCallback(Task&& task)
     {
         if (task) {
+            std::lock_guard lock(removeSnapshotCallbackMutex_);
             removeSnapshotCallback_ = std::move(task);
         }
     }
+    void SetAddSnapshotCallback(Task&& task)
+    {
+        if (task) {
+            std::lock_guard lock(addSnapshotCallbackMutex_);
+            addSnapshotCallback_ = std::move(task);
+        }
+    }
+    void SetEnableAddSnapshot(bool enableAddSnapshot = true);
+    bool GetEnableAddSnapshot() const;
 
     SessionState GetSessionState() const;
     virtual void SetSessionState(SessionState state);
+    void SetSessionInfoSupportedWindowModes(
+        const std::vector<AppExecFwk::SupportWindowMode>& updatedWindowModes);
     void SetSessionInfoAncoSceneState(int32_t ancoSceneState);
     void SetSessionInfoTime(const std::string& time);
     void SetSessionInfoAbilityInfo(const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo);
@@ -283,6 +299,7 @@ public:
     void SetSessionRect(const WSRect& rect);
     WSRect GetSessionRect() const;
     WSRect GetSessionGlobalRect() const;
+    WSRect GetSessionGlobalRectInMultiScreen() const;
     WMError GetGlobalScaledRect(Rect& globalScaledRect) override;
     void SetSessionGlobalRect(const WSRect& rect);
     void SetSessionRequestRect(const WSRect& rect);
@@ -292,6 +309,7 @@ public:
     std::string GetWindowName() const;
     WSRect GetLastLayoutRect() const;
     WSRect GetLayoutRect() const;
+    bool GetSkipSelfWhenShowOnVirtualScreen() const;
     DisplayId GetDisplayId() const { return GetSessionProperty()->GetDisplayId(); }
     DisplayId GetOriginDisplayId() const { return originDisplayId_; }
     void SetOriginDisplayId(DisplayId displayId);
@@ -368,6 +386,7 @@ public:
     virtual void PresentFoucusIfNeed(int32_t pointerAcrion);
     virtual WSError UpdateWindowMode(WindowMode mode);
     WSError SetCompatibleModeInPc(bool enable, bool isSupportDragInPcCompatibleMode);
+    WSError SetCompatibleModeInPcTitleVisible(bool enableTitleVisible);
     WSError SetAppSupportPhoneInPc(bool isSupportPhone);
     WSError SetCompatibleWindowSizeInPc(int32_t portraitWidth, int32_t portraitHeight,
         int32_t landscapeWidth, int32_t landscapeHeight);
@@ -399,7 +418,7 @@ public:
     void SetContextTransparentFunc(const NotifyContextTransparentFunc& func);
     void NotifyContextTransparent();
     bool NeedCheckContextTransparent() const;
-    
+
     /*
      * Window Rotate Animation
      */
@@ -431,9 +450,10 @@ public:
     void NotifyUIRequestFocus();
     virtual void NotifyUILostFocus();
     WSError NotifyFocusStatus(bool isFocused);
+    void SetExclusivelyHighlighted(bool isExclusivelyHighlighted);
     virtual WSError UpdateHighlightStatus(bool isHighlight, bool needBlockHighlightNotify);
     WSError NotifyHighlightChange(bool isHighlight);
-    void SetExclusivelyHighlighted(bool isExclusivelyHighlighted);
+    WSError GetIsHighlighted(bool& isHighlighted) override;
 
     /*
      * Multi Window
@@ -549,7 +569,6 @@ public:
     void SetAttachState(bool isAttach, WindowMode windowMode = WindowMode::WINDOW_MODE_UNDEFINED);
     bool GetAttachState() const;
     void RegisterDetachCallback(const sptr<IPatternDetachCallback>& callback);
-    void SetNeedNotifyAttachState(bool needNotify);
 
     SystemSessionConfig GetSystemConfig() const;
     void RectCheckProcess();
@@ -563,10 +582,9 @@ public:
     void RegisterIsScreenLockedCallback(const std::function<bool()>& callback);
     std::string GetWindowDetectTaskName() const;
     void RemoveWindowDetectTask();
-    WSError SwitchFreeMultiWindow(bool enable);
+    WSError SwitchFreeMultiWindow(const SystemSessionConfig& config);
 
-    virtual bool CheckGetAvoidAreaAvailable(AvoidAreaType type,
-        int32_t apiVersion = API_VERSION_INVALID) { return true; }
+    virtual bool CheckGetAvoidAreaAvailable(AvoidAreaType type) { return true; }
 
     virtual bool IsVisibleForeground() const;
     void SetIsStarting(bool isStarting);
@@ -641,7 +659,7 @@ public:
     sptr<Session> GetMainSession() const;
     sptr<Session> GetMainOrFloatSession() const;
     bool IsPcWindow() const;
-    bool IsAncestorsSession(int ancestorsId) const;
+    bool IsAncestorsSession(int32_t ancestorsId) const;
 
     /**
      * Window Property
@@ -656,6 +674,11 @@ public:
      */
     void SetBorderUnoccupied(bool borderUnoccupied = false);
     bool GetBorderUnoccupied() const;
+
+    /*
+     * Specific Window
+     */
+    void SetWindowAnimationDuration(int32_t duration);
     
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
@@ -827,7 +850,7 @@ protected:
      */
     bool isFocused_ = false;
     bool blockingFocus_ { false };
-    bool isHighlight_ { false };
+    bool isHighlighted_ { false };
 
     uint32_t uiNodeId_ = 0;
     float aspectRatio_ = 0.0f;
@@ -853,6 +876,12 @@ protected:
      * Window Hierarchy
      */
     NotifyClickModalWindowOutsideFunc clickModalWindowOutsideFunc_;
+    
+    /*
+     * Window Pattern
+     */
+    std::atomic<bool> isAttach_ { false };
+    std::atomic<bool> needNotifyAttachState_ = { false };
 
     /*
      * Window Pipeline
@@ -882,6 +911,8 @@ private:
     bool ShouldCreateDetectTask(bool isAttach, WindowMode windowMode) const;
     bool ShouldCreateDetectTaskInRecent(bool newShowRecent, bool oldShowRecent, bool isAttach) const;
     void CreateDetectStateTask(bool isAttach, WindowMode windowMode);
+    void PostSpecificSessionLifeCycleTimeoutTask(const std::string& eventName);   // only report for specific window
+    bool IsNeedReportTimeout() const;
 
     /*
      * Window Rotate Animation
@@ -957,7 +988,6 @@ private:
      */
     void RecordWindowStateAttachExceptionEvent(bool isAttached);
 
-    std::atomic<bool> isAttach_ { false };
     std::atomic<bool> isPendingToBackgroundState_ { false };
     std::atomic<bool> isActivatedAfterScreenLocked_ { true };
     sptr<IPatternDetachCallback> detachCallback_ = nullptr;
@@ -993,16 +1023,23 @@ private:
     /*
      * Window Scene Snapshot
      */
+    std::atomic<bool> enableAddSnapshot_ = true;
     Task saveSnapshotCallback_ = []() {};
     Task removeSnapshotCallback_ = []() {};
+    Task addSnapshotCallback_ = []() {};
     std::mutex saveSnapshotCallbackMutex_;
     std::mutex removeSnapshotCallbackMutex_;
-    std::atomic<bool> needNotifyAttachState_ = { false };
+    std::mutex addSnapshotCallbackMutex_;
 
     /*
      * Window Pattern
      */
     bool borderUnoccupied_ = false;
+
+    /*
+     * Specific Window
+     */
+    int32_t windowAnimationDuration_;
 };
 } // namespace OHOS::Rosen
 

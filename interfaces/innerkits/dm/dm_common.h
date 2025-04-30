@@ -332,7 +332,8 @@ enum class Orientation : uint32_t {
     USER_ROTATION_PORTRAIT_INVERTED = 16,
     USER_ROTATION_LANDSCAPE_INVERTED = 17,
     FOLLOW_DESKTOP = 18,
-    END = FOLLOW_DESKTOP,
+    INVALID = 19,
+    END = INVALID,
 };
 
 /**
@@ -471,6 +472,12 @@ enum class ScreenCombination : uint32_t {
     SCREEN_MAIN,
 };
 
+enum class MultiScreenPowerSwitchType : uint32_t {
+    SCREEN_SWITCH_ON,
+    SCREEN_SWITCH_OFF,
+    SCREEN_SWITCH_EXTERNAL,
+};
+
 enum class MultiScreenMode : uint32_t {
     SCREEN_MIRROR = 0,
     SCREEN_EXTEND = 1,
@@ -514,6 +521,7 @@ struct CaptureOption {
     DisplayId displayId_ = DISPLAY_ID_INVALID;
     bool isNeedNotify_ = true;
     bool isNeedPointer_ = true;
+    bool isCaptureFullOfScreen = false;
 };
 
 struct ExpandOption {
@@ -605,6 +613,17 @@ struct SessionOption {
     bool isExtend_;
     std::string innerName_;
     ScreenId screenId_;
+};
+
+/**
+ * @brief Device state
+ */
+enum class DMDeviceStatus: uint32_t {
+    UNKNOWN = 0,
+    STATUS_FOLDED,
+    STATUS_TENT_HOVER,
+    STATUS_TENT,
+    STATUS_GLOBAL_FULL
 };
 }
 }

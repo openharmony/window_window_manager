@@ -38,7 +38,7 @@ public:
     void TearDown() override;
 
     static inline float virtualPixelRatio_ = 1.0;
-    static inline Rect displayRect_ {0, 0, 0, 0};
+    static inline Rect displayRect_{ 0, 0, 0, 0 };
     static inline std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext_ = nullptr;
 };
 
@@ -52,17 +52,11 @@ void WindowSystemToastWindowTest::SetUpTestCase()
     virtualPixelRatio_ = WindowTestUtils::GetVirtualPixelRatio(0);
 }
 
-void WindowSystemToastWindowTest::TearDownTestCase()
-{
-}
+void WindowSystemToastWindowTest::TearDownTestCase() {}
 
-void WindowSystemToastWindowTest::SetUp()
-{
-}
+void WindowSystemToastWindowTest::SetUp() {}
 
-void WindowSystemToastWindowTest::TearDown()
-{
-}
+void WindowSystemToastWindowTest::TearDown() {}
 
 static sptr<WindowScene> CreateWindowScene()
 {
@@ -89,7 +83,7 @@ static sptr<Window> CreateSystemToastWindow(WindowType type, Rect rect, std::str
 static inline Rect GetRectWithVpr(int32_t x, int32_t y, uint32_t w, uint32_t h)
 {
     auto vpr = WindowSystemToastWindowTest::virtualPixelRatio_;
-    return {x, y, static_cast<uint32_t>(w * vpr), static_cast<uint32_t>(h * vpr)};
+    return { x, y, static_cast<uint32_t>(w * vpr), static_cast<uint32_t>(h * vpr) };
 }
 
 /**
@@ -97,7 +91,7 @@ static inline Rect GetRectWithVpr(int32_t x, int32_t y, uint32_t w, uint32_t h)
  * @tc.desc: SystemToastWindow life cycle
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSystemToastWindowTest, SystemToastWindow01, Function | MediumTest | Level2)
+HWTEST_F(WindowSystemToastWindowTest, SystemToastWindow01, TestSize.Level1)
 {
     sptr<WindowScene> scene = CreateWindowScene();
     ASSERT_NE(nullptr, scene);
@@ -123,14 +117,14 @@ HWTEST_F(WindowSystemToastWindowTest, SystemToastWindow01, Function | MediumTest
     }
     ASSERT_EQ(WMError::WM_OK, fltWin->Destroy());
     ASSERT_EQ(WMError::WM_OK, scene->GoDestroy());
-    }
+}
 
 /**
  * @tc.name: SystemToastWindow02
  * @tc.desc: SystemToastWindow life cycle, main window hide first
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSystemToastWindowTest, SystemToastWindow02, Function | MediumTest | Level3)
+HWTEST_F(WindowSystemToastWindowTest, SystemToastWindow02, TestSize.Level1)
 {
     sptr<WindowScene> scene = CreateWindowScene();
     ASSERT_NE(nullptr, scene);
@@ -164,7 +158,7 @@ HWTEST_F(WindowSystemToastWindowTest, SystemToastWindow02, Function | MediumTest
  * @tc.desc: SystemToastWindow life cycle, app floating window hide first
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSystemToastWindowTest, SystemToastWindow03, Function | MediumTest | Level3)
+HWTEST_F(WindowSystemToastWindowTest, SystemToastWindow03, TestSize.Level1)
 {
     sptr<WindowScene> scene = CreateWindowScene();
     ASSERT_NE(nullptr, scene);
@@ -200,7 +194,7 @@ HWTEST_F(WindowSystemToastWindowTest, SystemToastWindow03, Function | MediumTest
  * @tc.desc: SystemToastWindow life cycle, main window destroy first
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSystemToastWindowTest, SystemToastWindow04, Function | MediumTest | Level3)
+HWTEST_F(WindowSystemToastWindowTest, SystemToastWindow04, TestSize.Level1)
 {
     sptr<WindowScene> scene = CreateWindowScene();
     ASSERT_NE(nullptr, scene);
@@ -227,5 +221,5 @@ HWTEST_F(WindowSystemToastWindowTest, SystemToastWindow04, Function | MediumTest
     ASSERT_EQ(false, fltWin->GetWindowState() == WindowState::STATE_SHOWN);
     ASSERT_EQ(WMError::WM_OK, fltWin->Destroy());
 }
-}
-}
+} // namespace Rosen
+} // namespace OHOS

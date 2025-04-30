@@ -56,6 +56,12 @@ private:
     int HandleOnSuperFoldStatusChanged(MessageParcel& data, MessageParcel& reply);
     int HandleOnSecondaryReflexionChanged(MessageParcel& data, MessageParcel& reply);
     int HandleOnExtendScreenConnectStatusChanged(MessageParcel& data, MessageParcel& reply);
+    int HandleOnExtendDisplayNodeChange(MessageParcel& data, MessageParcel& reply);
+    int HandleOnCreateScreenSessionOnly(MessageParcel& data, MessageParcel& reply);
+    int HandleOnMainDisplayNodeChange(MessageParcel& data, MessageParcel& reply);
+    int HandleSyncScreenCombination(MessageParcel& data, MessageParcel& reply);
+    int HandleOnDumperClientScreenSessions(MessageParcel& data, MessageParcel& reply);
+    int HandleOnBeforeScreenPropertyChange(MessageParcel& data, MessageParcel& reply);
 
     HandleScreenChangeMap HandleScreenChangeMap_ {};
 };

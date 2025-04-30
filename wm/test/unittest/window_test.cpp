@@ -55,7 +55,7 @@ namespace {
  * @tc.desc: Create window with no WindowName，no option and no context
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, Create01, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, Create01, TestSize.Level1)
 {
     sptr<WindowOption> option = nullptr;
     ASSERT_EQ(nullptr, Window::Create("", option));
@@ -66,7 +66,7 @@ HWTEST_F(WindowTest, Create01, Function | SmallTest | Level2)
  * @tc.desc: Create window with WindowName，no option and no context
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, Create02, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, Create02, TestSize.Level1)
 {
     // no option: Window::Create with defult option
     // default option : default WindowType is WindowType::WINDOW_TYPE_APP_MAIN_WINDOW
@@ -82,7 +82,7 @@ HWTEST_F(WindowTest, Create02, Function | SmallTest | Level2)
  * @tc.desc: Create window with WindowName, option and no context
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, Create03, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, Create03, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
@@ -96,7 +96,7 @@ HWTEST_F(WindowTest, Create03, Function | SmallTest | Level2)
  * @tc.desc: Create window with WindowName and no abilityToken
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, Create04, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, Create04, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     // Create app TRANSPARENT_VIEW window but only support sceneBoard
@@ -117,7 +117,7 @@ HWTEST_F(WindowTest, Create04, Function | SmallTest | Level2)
  * @tc.desc: Create window with WindowName option and context
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, Create05, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, Create05, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
@@ -129,7 +129,7 @@ HWTEST_F(WindowTest, Create05, Function | SmallTest | Level2)
  * @tc.desc: Create PiP window with option
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, CreatePiP, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, CreatePiP, TestSize.Level1)
 {
     sptr<WindowOption> option = nullptr;
     PiPTemplateInfo pipTemplateInfo;
@@ -160,7 +160,7 @@ HWTEST_F(WindowTest, CreatePiP, Function | SmallTest | Level2)
  * @tc.desc: Find with no name
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, Find01, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, Find01, TestSize.Level1)
 {
     ASSERT_EQ(nullptr, Window::Find(""));
 }
@@ -170,7 +170,7 @@ HWTEST_F(WindowTest, Find01, Function | SmallTest | Level2)
  * @tc.desc: Find with name
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, Find02, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, Find02, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
@@ -193,7 +193,7 @@ HWTEST_F(WindowTest, Find02, Function | SmallTest | Level2)
  * @tc.desc: get node
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, GetSurfaceNode, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, GetSurfaceNode, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     ASSERT_EQ(nullptr, window->GetSurfaceNode());
@@ -205,7 +205,7 @@ HWTEST_F(WindowTest, GetSurfaceNode, Function | SmallTest | Level2)
  * @tc.desc: get context
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, GetContext, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, GetContext, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     ASSERT_EQ(nullptr, window->GetContext());
@@ -217,7 +217,7 @@ HWTEST_F(WindowTest, GetContext, Function | SmallTest | Level2)
  * @tc.desc: get top window with id
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, GetTopWindowWithId, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, GetTopWindowWithId, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
@@ -252,7 +252,7 @@ HWTEST_F(WindowTest, GetTopWindowWithId, Function | SmallTest | Level2)
  * @tc.desc: get rect
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, GetRect, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, GetRect, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     ASSERT_EQ(Rect(), window->GetRect());
@@ -264,7 +264,7 @@ HWTEST_F(WindowTest, GetRect, Function | SmallTest | Level2)
  * @tc.desc: get rect
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, GetRequestRect, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, GetRequestRect, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     ASSERT_EQ(Rect(), window->GetRequestRect());
@@ -276,7 +276,7 @@ HWTEST_F(WindowTest, GetRequestRect, Function | SmallTest | Level2)
  * @tc.desc: get type
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, GetType, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, GetType, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     ASSERT_EQ(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, window->GetType());
@@ -288,7 +288,7 @@ HWTEST_F(WindowTest, GetType, Function | SmallTest | Level2)
  * @tc.desc: get mode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, GetWindowMode, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, GetWindowMode, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     ASSERT_EQ(WindowMode::WINDOW_MODE_UNDEFINED, window->GetWindowMode());
@@ -304,7 +304,7 @@ HWTEST_F(WindowTest, GetWindowMode, Function | SmallTest | Level2)
  * @tc.desc: get alpha
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, GetAlpha, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, GetAlpha, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     ASSERT_EQ(0.0f, window->GetAlpha());
@@ -316,7 +316,7 @@ HWTEST_F(WindowTest, GetAlpha, Function | SmallTest | Level2)
  * @tc.desc: get focusable
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, GetFocusable, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, GetFocusable, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     ASSERT_EQ(false, window->GetFocusable());
@@ -328,7 +328,7 @@ HWTEST_F(WindowTest, GetFocusable, Function | SmallTest | Level2)
  * @tc.desc: set Focusable
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, SetFocusable, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, SetFocusable, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     ASSERT_EQ(WMError::WM_OK, window->SetFocusable(true));
@@ -340,7 +340,7 @@ HWTEST_F(WindowTest, SetFocusable, Function | SmallTest | Level2)
  * @tc.desc: get Touchable
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, GetTouchable, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, GetTouchable, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     ASSERT_EQ(false, window->GetTouchable());
@@ -352,7 +352,7 @@ HWTEST_F(WindowTest, GetTouchable, Function | SmallTest | Level2)
  * @tc.desc: set Touchable
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, SetTouchable, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, SetTouchable, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     ASSERT_EQ(WMError::WM_OK, window->SetTouchable(true));
@@ -364,7 +364,7 @@ HWTEST_F(WindowTest, SetTouchable, Function | SmallTest | Level2)
  * @tc.desc: get SystemBarPropertyByType
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, GetSystemBarPropertyByType, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, GetSystemBarPropertyByType, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     ASSERT_EQ(SystemBarProperty(), window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW));
@@ -376,7 +376,7 @@ HWTEST_F(WindowTest, GetSystemBarPropertyByType, Function | SmallTest | Level2)
  * @tc.desc: set SystemBarProperty
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, SetSystemBarProperty, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, SetSystemBarProperty, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     SystemBarProperty prop;
@@ -390,7 +390,7 @@ HWTEST_F(WindowTest, SetSystemBarProperty, Function | SmallTest | Level2)
  * @tc.desc: get FullScreen
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, IsFullScreen, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, IsFullScreen, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     ASSERT_EQ(false, window->IsFullScreen());
@@ -402,7 +402,7 @@ HWTEST_F(WindowTest, IsFullScreen, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, IsLayoutFullScreen, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, IsLayoutFullScreen, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     ASSERT_EQ(false, window->IsLayoutFullScreen());
@@ -414,7 +414,7 @@ HWTEST_F(WindowTest, IsLayoutFullScreen, Function | SmallTest | Level2)
  * @tc.desc: set
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, SetAlpha, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, SetAlpha, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     ASSERT_EQ(WMError::WM_OK, window->SetAlpha(0.0f));
@@ -426,7 +426,7 @@ HWTEST_F(WindowTest, SetAlpha, Function | SmallTest | Level2)
  * @tc.desc: set
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, SetTransform, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, SetTransform, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     Transform trans;
@@ -439,7 +439,7 @@ HWTEST_F(WindowTest, SetTransform, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, GetTransform, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, GetTransform, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     Transform trans;
@@ -452,7 +452,7 @@ HWTEST_F(WindowTest, GetTransform, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, GetAvoidAreaByType, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, GetAvoidAreaByType, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     AvoidArea avoidArea;
@@ -466,7 +466,7 @@ HWTEST_F(WindowTest, GetAvoidAreaByType, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, SetImmersiveModeEnabledState, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, SetImmersiveModeEnabledState, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->SetImmersiveModeEnabledState(true);
@@ -479,7 +479,7 @@ HWTEST_F(WindowTest, SetImmersiveModeEnabledState, Function | SmallTest | Level2
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, SetLayoutFullScreen, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, SetLayoutFullScreen, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->SetLayoutFullScreen(true);
@@ -492,7 +492,7 @@ HWTEST_F(WindowTest, SetLayoutFullScreen, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, SetTitleAndDockHoverShown, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, SetTitleAndDockHoverShown, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->SetTitleAndDockHoverShown(true, true);
@@ -505,7 +505,7 @@ HWTEST_F(WindowTest, SetTitleAndDockHoverShown, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, SetFullScreen, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, SetFullScreen, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->SetFullScreen(true);
@@ -518,7 +518,7 @@ HWTEST_F(WindowTest, SetFullScreen, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, Destroy, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, Destroy, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->Destroy();
@@ -531,7 +531,7 @@ HWTEST_F(WindowTest, Destroy, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, Show, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, Show, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->Show();
@@ -544,7 +544,7 @@ HWTEST_F(WindowTest, Show, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, Hide, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, Hide, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->Hide();
@@ -557,7 +557,7 @@ HWTEST_F(WindowTest, Hide, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, MoveTo, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, MoveTo, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->MoveTo(0, 0);
@@ -570,7 +570,7 @@ HWTEST_F(WindowTest, MoveTo, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, Resize, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, Resize, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->Resize(0, 0);
@@ -583,7 +583,7 @@ HWTEST_F(WindowTest, Resize, Function | SmallTest | Level2)
  * @tc.desc: SetKeepScreenOn true
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, SetKeepScreenOn01, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, SetKeepScreenOn01, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->SetKeepScreenOn(true);
@@ -596,7 +596,7 @@ HWTEST_F(WindowTest, SetKeepScreenOn01, Function | SmallTest | Level2)
  * @tc.desc: SetKeepScreenOn false
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, SetKeepScreenOn02, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, SetKeepScreenOn02, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->SetKeepScreenOn(false);
@@ -609,7 +609,7 @@ HWTEST_F(WindowTest, SetKeepScreenOn02, Function | SmallTest | Level2)
  * @tc.desc: IsKeepScreenOn
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, IsKeepScreenOn, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, IsKeepScreenOn, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->IsKeepScreenOn();
@@ -622,7 +622,7 @@ HWTEST_F(WindowTest, IsKeepScreenOn, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, SetTurnScreenOn, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, SetTurnScreenOn, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->SetTurnScreenOn(true);
@@ -635,7 +635,7 @@ HWTEST_F(WindowTest, SetTurnScreenOn, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, IsTurnScreenOn, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, IsTurnScreenOn, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->IsTurnScreenOn();
@@ -648,7 +648,7 @@ HWTEST_F(WindowTest, IsTurnScreenOn, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, SetBackgroundColor, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, SetBackgroundColor, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->SetBackgroundColor("0x00000000");
@@ -661,7 +661,7 @@ HWTEST_F(WindowTest, SetBackgroundColor, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, SetTransparent, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, SetTransparent, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->SetTransparent(true);
@@ -674,7 +674,7 @@ HWTEST_F(WindowTest, SetTransparent, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, IsTransparent, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, IsTransparent, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->IsTransparent();
@@ -687,7 +687,7 @@ HWTEST_F(WindowTest, IsTransparent, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, SetBrightness, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, SetBrightness, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->SetBrightness(0.0f);
@@ -700,7 +700,7 @@ HWTEST_F(WindowTest, SetBrightness, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, GetBrightness, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, GetBrightness, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->GetBrightness();
@@ -713,7 +713,7 @@ HWTEST_F(WindowTest, GetBrightness, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, SetPrivacyMode, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, SetPrivacyMode, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->SetPrivacyMode(0.0f);
@@ -726,7 +726,7 @@ HWTEST_F(WindowTest, SetPrivacyMode, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, IsPrivacyMode, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, IsPrivacyMode, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->IsPrivacyMode();
@@ -739,7 +739,7 @@ HWTEST_F(WindowTest, IsPrivacyMode, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, SetSystemPrivacyMode, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, SetSystemPrivacyMode, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = false;
@@ -753,7 +753,7 @@ HWTEST_F(WindowTest, SetSystemPrivacyMode, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, BindDialogTarget, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, BindDialogTarget, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     sptr<IRemoteObject> targetToken;
@@ -767,7 +767,7 @@ HWTEST_F(WindowTest, BindDialogTarget, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, RaiseToAppTop, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, RaiseToAppTop, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->RaiseToAppTop();
@@ -780,7 +780,7 @@ HWTEST_F(WindowTest, RaiseToAppTop, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, SetSnapshotSkip, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, SetSnapshotSkip, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->SetSnapshotSkip(true);
@@ -793,7 +793,7 @@ HWTEST_F(WindowTest, SetSnapshotSkip, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, SetCornerRadius, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, SetCornerRadius, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->SetCornerRadius(1.0f);
@@ -806,7 +806,7 @@ HWTEST_F(WindowTest, SetCornerRadius, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, SetShadowRadius, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, SetShadowRadius, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->SetShadowRadius(1.0f);
@@ -819,7 +819,7 @@ HWTEST_F(WindowTest, SetShadowRadius, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, SetShadowColor, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, SetShadowColor, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->SetShadowColor("0x00000000");
@@ -832,7 +832,7 @@ HWTEST_F(WindowTest, SetShadowColor, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, SetShadowOffsetX, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, SetShadowOffsetX, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->SetShadowOffsetX(0.0f);
@@ -845,7 +845,7 @@ HWTEST_F(WindowTest, SetShadowOffsetX, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, SetShadowOffsetY, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, SetShadowOffsetY, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->SetShadowOffsetY(0.0f);
@@ -858,7 +858,7 @@ HWTEST_F(WindowTest, SetShadowOffsetY, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, SetBlur, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, SetBlur, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->SetBlur(0.0f);
@@ -871,7 +871,7 @@ HWTEST_F(WindowTest, SetBlur, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, SetBackdropBlur, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, SetBackdropBlur, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->SetBackdropBlur(0.0f);
@@ -884,7 +884,7 @@ HWTEST_F(WindowTest, SetBackdropBlur, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, SetBackdropBlurStyle, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, SetBackdropBlurStyle, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->SetBackdropBlurStyle(WindowBlurStyle::WINDOW_BLUR_OFF);
@@ -897,7 +897,7 @@ HWTEST_F(WindowTest, SetBackdropBlurStyle, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, RequestFocus, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, RequestFocus, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->RequestFocus();
@@ -910,7 +910,7 @@ HWTEST_F(WindowTest, RequestFocus, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, IsFocused, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, IsFocused, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->IsFocused();
@@ -923,7 +923,7 @@ HWTEST_F(WindowTest, IsFocused, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, UpdateSurfaceNodeAfterCustomAnimation, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, UpdateSurfaceNodeAfterCustomAnimation, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->UpdateSurfaceNodeAfterCustomAnimation(false);
@@ -936,7 +936,7 @@ HWTEST_F(WindowTest, UpdateSurfaceNodeAfterCustomAnimation, Function | SmallTest
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, SetInputEventConsumer, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, SetInputEventConsumer, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = true;
@@ -951,7 +951,7 @@ HWTEST_F(WindowTest, SetInputEventConsumer, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, ConsumeKeyEvent, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, ConsumeKeyEvent, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = WMError::WM_OK;
@@ -966,7 +966,7 @@ HWTEST_F(WindowTest, ConsumeKeyEvent, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, PreNotifyKeyEvent, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, PreNotifyKeyEvent, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = WMError::WM_OK;
@@ -981,7 +981,7 @@ HWTEST_F(WindowTest, PreNotifyKeyEvent, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, ConsumePointerEvent, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, ConsumePointerEvent, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = WMError::WM_OK;
@@ -996,7 +996,7 @@ HWTEST_F(WindowTest, ConsumePointerEvent, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, RequestVsync, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, RequestVsync, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     std::shared_ptr<VsyncCallback> vsyncCallback = nullptr;
@@ -1012,7 +1012,7 @@ HWTEST_F(WindowTest, RequestVsync, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, UpdateConfiguration, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, UpdateConfiguration, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     std::shared_ptr<AppExecFwk::Configuration> conf = nullptr;
@@ -1028,7 +1028,7 @@ HWTEST_F(WindowTest, UpdateConfiguration, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, RegisterLifeCycleListener, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, RegisterLifeCycleListener, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     sptr<IWindowLifeCycle> listener = nullptr;
@@ -1042,7 +1042,7 @@ HWTEST_F(WindowTest, RegisterLifeCycleListener, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, UnregisterLifeCycleListener, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, UnregisterLifeCycleListener, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     sptr<IWindowLifeCycle> listener = nullptr;
@@ -1056,7 +1056,7 @@ HWTEST_F(WindowTest, UnregisterLifeCycleListener, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, RegisterWindowChangeListener, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, RegisterWindowChangeListener, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     sptr<IWindowChangeListener> listener = nullptr;
@@ -1070,7 +1070,7 @@ HWTEST_F(WindowTest, RegisterWindowChangeListener, Function | SmallTest | Level2
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, UnregisterWindowChangeListener, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, UnregisterWindowChangeListener, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     sptr<IWindowChangeListener> listener = nullptr;
@@ -1084,7 +1084,7 @@ HWTEST_F(WindowTest, UnregisterWindowChangeListener, Function | SmallTest | Leve
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, RegisterAvoidAreaChangeListener, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, RegisterAvoidAreaChangeListener, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     sptr<IAvoidAreaChangedListener> listener = nullptr;
@@ -1098,7 +1098,7 @@ HWTEST_F(WindowTest, RegisterAvoidAreaChangeListener, Function | SmallTest | Lev
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, UnregisterAvoidAreaChangeListener, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, UnregisterAvoidAreaChangeListener, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     sptr<IAvoidAreaChangedListener> listener = nullptr;
@@ -1112,7 +1112,7 @@ HWTEST_F(WindowTest, UnregisterAvoidAreaChangeListener, Function | SmallTest | L
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, RegisterDragListener, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, RegisterDragListener, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     sptr<IWindowDragListener> listener = nullptr;
@@ -1126,7 +1126,7 @@ HWTEST_F(WindowTest, RegisterDragListener, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, UnregisterDragListener, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, UnregisterDragListener, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     sptr<IWindowDragListener> listener = nullptr;
@@ -1140,7 +1140,7 @@ HWTEST_F(WindowTest, UnregisterDragListener, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, RegisterDisplayMoveListener, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, RegisterDisplayMoveListener, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     sptr<IDisplayMoveListener> listener = nullptr;
@@ -1154,7 +1154,7 @@ HWTEST_F(WindowTest, RegisterDisplayMoveListener, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, UnregisterDisplayMoveListener, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, UnregisterDisplayMoveListener, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     sptr<IDisplayMoveListener> listener = nullptr;
@@ -1168,7 +1168,7 @@ HWTEST_F(WindowTest, UnregisterDisplayMoveListener, Function | SmallTest | Level
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, RegisterWindowDestroyedListener, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, RegisterWindowDestroyedListener, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     NotifyNativeWinDestroyFunc func = nullptr;
@@ -1184,7 +1184,7 @@ HWTEST_F(WindowTest, RegisterWindowDestroyedListener, Function | SmallTest | Lev
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, RegisterOccupiedAreaChangeListener, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, RegisterOccupiedAreaChangeListener, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     sptr<IOccupiedAreaChangeListener> listener = nullptr;
@@ -1198,7 +1198,7 @@ HWTEST_F(WindowTest, RegisterOccupiedAreaChangeListener, Function | SmallTest | 
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, UnregisterOccupiedAreaChangeListener, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, UnregisterOccupiedAreaChangeListener, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     sptr<IOccupiedAreaChangeListener> listener = nullptr;
@@ -1212,7 +1212,7 @@ HWTEST_F(WindowTest, UnregisterOccupiedAreaChangeListener, Function | SmallTest 
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, RegisterTouchOutsideListener, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, RegisterTouchOutsideListener, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     sptr<ITouchOutsideListener> listener = nullptr;
@@ -1226,7 +1226,7 @@ HWTEST_F(WindowTest, RegisterTouchOutsideListener, Function | SmallTest | Level2
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, UnregisterTouchOutsideListener, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, UnregisterTouchOutsideListener, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     sptr<ITouchOutsideListener> listener = nullptr;
@@ -1240,7 +1240,7 @@ HWTEST_F(WindowTest, UnregisterTouchOutsideListener, Function | SmallTest | Leve
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, RegisterAnimationTransitionController, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, RegisterAnimationTransitionController, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     sptr<IAnimationTransitionController> listener = nullptr;
@@ -1254,7 +1254,7 @@ HWTEST_F(WindowTest, RegisterAnimationTransitionController, Function | SmallTest
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, RegisterScreenshotListener, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, RegisterScreenshotListener, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     sptr<IScreenshotListener> listener = nullptr;
@@ -1268,7 +1268,7 @@ HWTEST_F(WindowTest, RegisterScreenshotListener, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, UnregisterScreenshotListener, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, UnregisterScreenshotListener, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     sptr<IScreenshotListener> listener = nullptr;
@@ -1282,7 +1282,7 @@ HWTEST_F(WindowTest, UnregisterScreenshotListener, Function | SmallTest | Level2
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, RegisterDialogTargetTouchListener, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, RegisterDialogTargetTouchListener, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     sptr<IDialogTargetTouchListener> listener = nullptr;
@@ -1302,7 +1302,7 @@ HWTEST_F(WindowTest, RegisterDialogTargetTouchListener, Function | SmallTest | L
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, UnregisterDialogTargetTouchListener, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, UnregisterDialogTargetTouchListener, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     sptr<IDialogTargetTouchListener> listener = nullptr;
@@ -1320,7 +1320,7 @@ HWTEST_F(WindowTest, UnregisterDialogTargetTouchListener, Function | SmallTest |
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, RegisterDialogDeathRecipientListener, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, RegisterDialogDeathRecipientListener, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = WMError::WM_OK;
@@ -1335,7 +1335,7 @@ HWTEST_F(WindowTest, RegisterDialogDeathRecipientListener, Function | SmallTest 
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, UnregisterDialogDeathRecipientListener, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, UnregisterDialogDeathRecipientListener, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = WMError::WM_OK;
@@ -1350,7 +1350,7 @@ HWTEST_F(WindowTest, UnregisterDialogDeathRecipientListener, Function | SmallTes
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, NotifyTouchDialogTarget, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, NotifyTouchDialogTarget, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = WMError::WM_OK;
@@ -1365,7 +1365,7 @@ HWTEST_F(WindowTest, NotifyTouchDialogTarget, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, SetAceAbilityHandler, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, SetAceAbilityHandler, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = WMError::WM_OK;
@@ -1380,7 +1380,7 @@ HWTEST_F(WindowTest, SetAceAbilityHandler, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, NapiSetUIContent, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, NapiSetUIContent, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     napi_env env = nullptr;
@@ -1395,7 +1395,7 @@ HWTEST_F(WindowTest, NapiSetUIContent, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, NapiSetUIContentByName, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, NapiSetUIContentByName, TestSize.Level1)
 {
     auto window = sptr<Window>::MakeSptr();
     napi_env env = nullptr;
@@ -1410,7 +1410,7 @@ HWTEST_F(WindowTest, NapiSetUIContentByName, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, SetUIContentByAbc, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, SetUIContentByAbc, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     napi_env env = nullptr;
@@ -1425,7 +1425,7 @@ HWTEST_F(WindowTest, SetUIContentByAbc, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, GetContentInfo, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, GetContentInfo, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->GetContentInfo();
@@ -1438,7 +1438,7 @@ HWTEST_F(WindowTest, GetContentInfo, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, GetUIContent, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, GetUIContent, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->GetUIContent();
@@ -1451,7 +1451,7 @@ HWTEST_F(WindowTest, GetUIContent, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, OnNewWant, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, OnNewWant, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     AAFwk::Want want;
@@ -1466,7 +1466,7 @@ HWTEST_F(WindowTest, OnNewWant, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, SetRequestedOrientation, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, SetRequestedOrientation, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = true;
@@ -1481,7 +1481,7 @@ HWTEST_F(WindowTest, SetRequestedOrientation, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, GetRequestedOrientation, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, GetRequestedOrientation, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->GetRequestedOrientation();
@@ -1494,7 +1494,7 @@ HWTEST_F(WindowTest, GetRequestedOrientation, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, SetRequestWindowModeSupportType, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, SetRequestWindowModeSupportType, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     uint32_t windowModeSupportType = 0;
@@ -1508,7 +1508,7 @@ HWTEST_F(WindowTest, SetRequestWindowModeSupportType, Function | SmallTest | Lev
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, GetRequestWindowModeSupportType, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, GetRequestWindowModeSupportType, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     uint32_t ret = window->GetRequestWindowModeSupportType();
@@ -1521,7 +1521,7 @@ HWTEST_F(WindowTest, GetRequestWindowModeSupportType, Function | SmallTest | Lev
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, SetTouchHotAreas, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, SetTouchHotAreas, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     std::vector<Rect> rects;
@@ -1535,7 +1535,7 @@ HWTEST_F(WindowTest, SetTouchHotAreas, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, GetRequestedTouchHotAreas, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, GetRequestedTouchHotAreas, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     std::vector<Rect> rects;
@@ -1550,7 +1550,7 @@ HWTEST_F(WindowTest, GetRequestedTouchHotAreas, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, IsMainHandlerAvailable, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, IsMainHandlerAvailable, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
@@ -1565,7 +1565,7 @@ HWTEST_F(WindowTest, IsMainHandlerAvailable, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, SetAPPWindowLabel, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, SetAPPWindowLabel, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->SetAPPWindowLabel("");
@@ -1582,7 +1582,7 @@ HWTEST_F(WindowTest, SetAPPWindowLabel, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, IsDecorEnable, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, IsDecorEnable, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->IsDecorEnable();
@@ -1595,7 +1595,7 @@ HWTEST_F(WindowTest, IsDecorEnable, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, Maximize, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, Maximize, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->Maximize();
@@ -1608,7 +1608,7 @@ HWTEST_F(WindowTest, Maximize, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, MaximizeFloating, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, MaximizeFloating, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->MaximizeFloating();
@@ -1621,7 +1621,7 @@ HWTEST_F(WindowTest, MaximizeFloating, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, Minimize, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, Minimize, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->Minimize();
@@ -1634,7 +1634,7 @@ HWTEST_F(WindowTest, Minimize, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, Recover, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, Recover, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->Recover();
@@ -1652,7 +1652,7 @@ HWTEST_F(WindowTest, Recover, Function | SmallTest | Level2)
  * @tc.desc: Close
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, Close, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, Close, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->Close();
@@ -1665,7 +1665,7 @@ HWTEST_F(WindowTest, Close, Function | SmallTest | Level2)
  * @tc.desc: CloseDirectly
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, CloseDirectly, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, CloseDirectly, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->CloseDirectly();
@@ -1678,7 +1678,7 @@ HWTEST_F(WindowTest, CloseDirectly, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, StartMove, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, StartMove, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = WMError::WM_OK;
@@ -1692,7 +1692,7 @@ HWTEST_F(WindowTest, StartMove, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, SetGlobalMaximizeMode, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, SetGlobalMaximizeMode, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->SetGlobalMaximizeMode(MaximizeMode::MODE_AVOID_SYSTEM_BAR);
@@ -1705,7 +1705,7 @@ HWTEST_F(WindowTest, SetGlobalMaximizeMode, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, GetGlobalMaximizeMode, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, GetGlobalMaximizeMode, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
 
@@ -1719,7 +1719,7 @@ HWTEST_F(WindowTest, GetGlobalMaximizeMode, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, IsSupportWideGamut, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, IsSupportWideGamut, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->IsSupportWideGamut();
@@ -1732,7 +1732,7 @@ HWTEST_F(WindowTest, IsSupportWideGamut, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, SetColorSpace, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, SetColorSpace, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     bool ret = true;
@@ -1746,7 +1746,7 @@ HWTEST_F(WindowTest, SetColorSpace, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, GetColorSpace, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, GetColorSpace, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->GetColorSpace();
@@ -1759,7 +1759,7 @@ HWTEST_F(WindowTest, GetColorSpace, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, DumpInfo, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, DumpInfo, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     std::vector<std::string> params;
@@ -1775,7 +1775,7 @@ HWTEST_F(WindowTest, DumpInfo, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, Snapshot, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, Snapshot, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto pixmap = window->Snapshot();
@@ -1788,7 +1788,7 @@ HWTEST_F(WindowTest, Snapshot, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, NotifyMemoryLevel, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, NotifyMemoryLevel, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->NotifyMemoryLevel(0);
@@ -1805,7 +1805,7 @@ HWTEST_F(WindowTest, NotifyMemoryLevel, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, IsAllowHaveSystemSubWindow, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, IsAllowHaveSystemSubWindow, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     window->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
@@ -1819,7 +1819,7 @@ HWTEST_F(WindowTest, IsAllowHaveSystemSubWindow, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, SetAspectRatio, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, SetAspectRatio, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->SetAspectRatio(0.0f);
@@ -1836,7 +1836,7 @@ HWTEST_F(WindowTest, SetAspectRatio, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, ResetAspectRatio, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, ResetAspectRatio, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->ResetAspectRatio();
@@ -1849,7 +1849,7 @@ HWTEST_F(WindowTest, ResetAspectRatio, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, GetKeyboardAnimationConfig, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, GetKeyboardAnimationConfig, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     KeyboardAnimationCurve curve;
@@ -1863,7 +1863,7 @@ HWTEST_F(WindowTest, GetKeyboardAnimationConfig, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, SetNeedDefaultAnimation, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, SetNeedDefaultAnimation, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = true;
@@ -1877,7 +1877,7 @@ HWTEST_F(WindowTest, SetNeedDefaultAnimation, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, TransferAbilityResult, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, TransferAbilityResult, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     AAFwk::Want want;
@@ -1891,7 +1891,7 @@ HWTEST_F(WindowTest, TransferAbilityResult, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, TransferExtensionData, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, TransferExtensionData, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     AAFwk::WantParams wantParams;
@@ -1905,7 +1905,7 @@ HWTEST_F(WindowTest, TransferExtensionData, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, RegisterTransferComponentDataListener, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, RegisterTransferComponentDataListener, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     NotifyTransferComponentDataFunc func;
@@ -1920,7 +1920,7 @@ HWTEST_F(WindowTest, RegisterTransferComponentDataListener, Function | SmallTest
  * @tc.desc: WindowChangeListener01 fun
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, WindowChangeListener01, Function | SmallTest | Level3)
+HWTEST_F(WindowTest, WindowChangeListener01, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = true;
@@ -1937,7 +1937,7 @@ HWTEST_F(WindowTest, WindowChangeListener01, Function | SmallTest | Level3)
  * @tc.desc: IOccupiedAreaChangeListener fun
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, IOccupiedAreaChangeListener, Function | SmallTest | Level3)
+HWTEST_F(WindowTest, IOccupiedAreaChangeListener, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = true;
@@ -1956,7 +1956,7 @@ HWTEST_F(WindowTest, IOccupiedAreaChangeListener, Function | SmallTest | Level3)
  * @tc.desc: WindowChangeListener02 fun
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, WindowChangeListener02, Function | SmallTest | Level3)
+HWTEST_F(WindowTest, WindowChangeListener02, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = true;
@@ -1975,7 +1975,7 @@ HWTEST_F(WindowTest, WindowChangeListener02, Function | SmallTest | Level3)
  * @tc.desc: IAnimationTransitionController fun
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, IAnimationTransitionController, Function | SmallTest | Level3)
+HWTEST_F(WindowTest, IAnimationTransitionController, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = true;
@@ -1992,7 +1992,7 @@ HWTEST_F(WindowTest, IAnimationTransitionController, Function | SmallTest | Leve
  * @tc.desc: IInputEventConsumer fun
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, IInputEventConsumer, Function | SmallTest | Level3)
+HWTEST_F(WindowTest, IInputEventConsumer, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = true;
@@ -2012,7 +2012,7 @@ HWTEST_F(WindowTest, IInputEventConsumer, Function | SmallTest | Level3)
  * @tc.desc: IDialogDeathRecipientListener fun
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, IDialogDeathRecipientListener, Function | SmallTest | Level3)
+HWTEST_F(WindowTest, IDialogDeathRecipientListener, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = true;
@@ -2029,7 +2029,7 @@ HWTEST_F(WindowTest, IDialogDeathRecipientListener, Function | SmallTest | Level
  * @tc.desc: IAceAbilityHandler fun
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, IAceAbilityHandler, Function | SmallTest | Level3)
+HWTEST_F(WindowTest, IAceAbilityHandler, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = true;
@@ -2046,7 +2046,7 @@ HWTEST_F(WindowTest, IAceAbilityHandler, Function | SmallTest | Level3)
  * @tc.desc: IDispatchInputEventListener fun
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, IDispatchInputEventListener, Function | SmallTest | Level3)
+HWTEST_F(WindowTest, IDispatchInputEventListener, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = true;
@@ -2065,7 +2065,7 @@ HWTEST_F(WindowTest, IDispatchInputEventListener, Function | SmallTest | Level3)
  * @tc.desc: keyboardAnimationCurve marshalling
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, keyboardAnimationCurveMarshalling, Function | SmallTest | Level3)
+HWTEST_F(WindowTest, keyboardAnimationCurveMarshalling, TestSize.Level1)
 {
     MessageParcel data;
     KeyboardAnimationCurve curveConfig;
@@ -2080,7 +2080,7 @@ HWTEST_F(WindowTest, keyboardAnimationCurveMarshalling, Function | SmallTest | L
  * @tc.desc: window life cycle BackgroundFailed
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, WindowLifeCycleBackgroundFailed, Function | SmallTest | Level3)
+HWTEST_F(WindowTest, WindowLifeCycleBackgroundFailed, TestSize.Level1)
 {
     IWindowLifeCycle windowLifeCycle;
     int32_t ret = 0;
@@ -2093,7 +2093,7 @@ HWTEST_F(WindowTest, WindowLifeCycleBackgroundFailed, Function | SmallTest | Lev
  * @tc.desc: window GetVSyncPeriod
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, GetVSyncPeriod, Function | SmallTest | Level3)
+HWTEST_F(WindowTest, GetVSyncPeriod, TestSize.Level1)
 {
     sptr<WindowOption> winOption = sptr<WindowOption>::MakeSptr();
     winOption->SetWindowType(OHOS::Rosen::WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
@@ -2116,7 +2116,7 @@ HWTEST_F(WindowTest, GetVSyncPeriod, Function | SmallTest | Level3)
  * @tc.desc: window performBack
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, performBack, Function | SmallTest | Level3)
+HWTEST_F(WindowTest, performBack, TestSize.Level1)
 {
     sptr<WindowOption> winOption = sptr<WindowOption>::MakeSptr();
     winOption->SetWindowType(OHOS::Rosen::WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
@@ -2137,7 +2137,7 @@ HWTEST_F(WindowTest, performBack, Function | SmallTest | Level3)
  * @tc.desc: set dragEnabled flag
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, SetResizeByDragEnabled, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, SetResizeByDragEnabled, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetResizeByDragEnabled(true));
@@ -2149,7 +2149,7 @@ HWTEST_F(WindowTest, SetResizeByDragEnabled, Function | SmallTest | Level2)
  * @tc.desc: set raiseEnabled flag
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, SetRaiseByClickEnabled, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, SetRaiseByClickEnabled, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetRaiseByClickEnabled(true));
@@ -2161,7 +2161,7 @@ HWTEST_F(WindowTest, SetRaiseByClickEnabled, Function | SmallTest | Level2)
  * @tc.desc: RaiseAboveTarget flag
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, RaiseAboveTarget, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, RaiseAboveTarget, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->RaiseAboveTarget(2));
@@ -2173,7 +2173,7 @@ HWTEST_F(WindowTest, RaiseAboveTarget, Function | SmallTest | Level2)
  * @tc.desc: set shouldHide flag
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, HideNonSystemFloatingWindows, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, HideNonSystemFloatingWindows, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->HideNonSystemFloatingWindows(false));
@@ -2185,7 +2185,7 @@ HWTEST_F(WindowTest, HideNonSystemFloatingWindows, Function | SmallTest | Level2
  * @tc.desc: window GetWindowLimits
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, GetWindowLimits, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, GetWindowLimits, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     WindowLimits windowLimits;
@@ -2199,7 +2199,7 @@ HWTEST_F(WindowTest, GetWindowLimits, Function | SmallTest | Level2)
  * @tc.desc: window SetWindowLimits
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, SetWindowLimits, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, SetWindowLimits, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     WindowLimits windowLimits;
@@ -2215,7 +2215,7 @@ HWTEST_F(WindowTest, SetWindowLimits, Function | SmallTest | Level2)
  * @tc.desc: Register window visibility change listener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, RegisterWindowVisibilityChangeListener, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, RegisterWindowVisibilityChangeListener, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->RegisterWindowVisibilityChangeListener(nullptr));
@@ -2227,7 +2227,7 @@ HWTEST_F(WindowTest, RegisterWindowVisibilityChangeListener, Function | SmallTes
  * @tc.desc: Unregister window visibility change listener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, UnregisterWindowVisibilityChangeListener, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, UnregisterWindowVisibilityChangeListener, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->UnregisterWindowVisibilityChangeListener(nullptr));
@@ -2239,7 +2239,7 @@ HWTEST_F(WindowTest, UnregisterWindowVisibilityChangeListener, Function | SmallT
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, TransferAccessibilityEvent, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, TransferAccessibilityEvent, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     Accessibility::AccessibilityEventInfo info;
@@ -2252,7 +2252,7 @@ HWTEST_F(WindowTest, TransferAccessibilityEvent, Function | SmallTest | Level2)
  * @tc.desc: FlushFrameRate Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, FlushFrameRate, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, FlushFrameRate, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     uint32_t rate = 120;
@@ -2267,7 +2267,7 @@ HWTEST_F(WindowTest, FlushFrameRate, Function | SmallTest | Level2)
  * @tc.desc: set single frame composer enable flag
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, SetSingleFrameComposerEnabled, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, SetSingleFrameComposerEnabled, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetSingleFrameComposerEnabled(false));
@@ -2279,7 +2279,7 @@ HWTEST_F(WindowTest, SetSingleFrameComposerEnabled, Function | SmallTest | Level
  * @tc.desc: maximize interface Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, Maximize01, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, Maximize01, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     MaximizePresentation presentation = MaximizePresentation::ENTER_IMMERSIVE;
@@ -2291,7 +2291,7 @@ HWTEST_F(WindowTest, Maximize01, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, RegisterWindowRectChangeListener, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, RegisterWindowRectChangeListener, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     sptr<IWindowRectChangeListener> listener = nullptr;
@@ -2305,7 +2305,7 @@ HWTEST_F(WindowTest, RegisterWindowRectChangeListener, Function | SmallTest | Le
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, UnregisterWindowRectChangeListener, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, UnregisterWindowRectChangeListener, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     sptr<IWindowRectChangeListener> listener = nullptr;
@@ -2319,7 +2319,7 @@ HWTEST_F(WindowTest, UnregisterWindowRectChangeListener, Function | SmallTest | 
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, RegisterKeyboardPanelInfoChangeListener, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, RegisterKeyboardPanelInfoChangeListener, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     sptr<IKeyboardPanelInfoChangeListener> listener = nullptr;
@@ -2333,7 +2333,7 @@ HWTEST_F(WindowTest, RegisterKeyboardPanelInfoChangeListener, Function | SmallTe
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, UnregisterKeyboardPanelInfoChangeListener, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, UnregisterKeyboardPanelInfoChangeListener, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     sptr<IKeyboardPanelInfoChangeListener> listener = nullptr;
@@ -2347,7 +2347,7 @@ HWTEST_F(WindowTest, UnregisterKeyboardPanelInfoChangeListener, Function | Small
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, GetTopWindowWithContext, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, GetTopWindowWithContext, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     ASSERT_EQ(nullptr, window->GetTopWindowWithContext(nullptr));
@@ -2390,7 +2390,7 @@ HWTEST_F(WindowTest, GetTopWindowWithContext, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, GetMainWindowWithContext, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, GetMainWindowWithContext, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     uint32_t windId = 0;
@@ -2410,7 +2410,7 @@ HWTEST_F(WindowTest, GetMainWindowWithContext, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, SetTopmost, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, SetTopmost, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->SetTopmost(false);
@@ -2424,7 +2424,7 @@ HWTEST_F(WindowTest, SetTopmost, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, SetUIContentByName, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, SetUIContentByName, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     napi_env env = nullptr;
@@ -2439,7 +2439,7 @@ HWTEST_F(WindowTest, SetUIContentByName, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, TriggerBindModalUIExtension, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, TriggerBindModalUIExtension, TestSize.Level1)
 {
     sptr<WindowOption> winOption = sptr<WindowOption>::MakeSptr();
     winOption->SetWindowType(OHOS::Rosen::WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
@@ -2459,7 +2459,7 @@ HWTEST_F(WindowTest, TriggerBindModalUIExtension, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, RegisterTransferComponentDataForResultListener, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, RegisterTransferComponentDataForResultListener, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     NotifyTransferComponentDataForResultFunc func;
@@ -2474,7 +2474,7 @@ HWTEST_F(WindowTest, RegisterTransferComponentDataForResultListener, Function | 
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, SetTextFieldAvoidInfo, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, SetTextFieldAvoidInfo, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->SetTextFieldAvoidInfo(50.0, 100.0);
@@ -2489,7 +2489,7 @@ HWTEST_F(WindowTest, SetTextFieldAvoidInfo, Function | SmallTest | Level2)
  * @tc.desc: Test01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, Test01, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, Test01, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     SystemBarProperty prop;
@@ -2513,7 +2513,7 @@ HWTEST_F(WindowTest, Test01, Function | SmallTest | Level2)
  * @tc.desc: Test02
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, Test02, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, Test02, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     IWindowLifeCycle windowLifeCycle;
@@ -2536,7 +2536,7 @@ HWTEST_F(WindowTest, Test02, Function | SmallTest | Level2)
  * @tc.desc: Test03
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, Test03, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, Test03, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     KeyEventFilterFunc keyEventFilterFunc;
@@ -2557,7 +2557,7 @@ HWTEST_F(WindowTest, Test03, Function | SmallTest | Level2)
  * @tc.desc: Test04
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, Test04, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, Test04, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     ASSERT_EQ(nullptr, window->GetUIContentWithId(0));
@@ -2571,7 +2571,7 @@ HWTEST_F(WindowTest, Test04, Function | SmallTest | Level2)
  * @tc.desc: Test05
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, Test05, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, Test05, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto mainWinId = 0;
@@ -2585,7 +2585,7 @@ HWTEST_F(WindowTest, Test05, Function | SmallTest | Level2)
  * @tc.desc: SetTitleButtonVisible
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, SetTitleButtonVisible, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, SetTitleButtonVisible, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     WMError res = window->SetTitleButtonVisible(true, true, true, true);
@@ -2611,7 +2611,7 @@ HWTEST_F(WindowTest, SetTitleButtonVisible, Function | SmallTest | Level2)
  * @tc.desc: SetWindowTitle
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, SetWindowTitle, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, SetWindowTitle, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     std::string title = "SetWindowTitle";
@@ -2625,7 +2625,7 @@ HWTEST_F(WindowTest, SetWindowTitle, Function | SmallTest | Level2)
  * @tc.desc: SetSubWindowModal
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, SetSubWindowModal, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, SetSubWindowModal, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->SetSubWindowModal(true);
@@ -2638,7 +2638,7 @@ HWTEST_F(WindowTest, SetSubWindowModal, Function | SmallTest | Level2)
  * @tc.desc: GetWindowStatus
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, GetWindowStatus, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, GetWindowStatus, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     WindowStatus windowStatus;
@@ -2652,7 +2652,7 @@ HWTEST_F(WindowTest, GetWindowStatus, Function | SmallTest | Level2)
  * @tc.desc: GetCompatibleModeInPc
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, GetCompatibleModeInPc, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, GetCompatibleModeInPc, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     ASSERT_NE(window, nullptr);
@@ -2666,7 +2666,7 @@ HWTEST_F(WindowTest, GetCompatibleModeInPc, Function | SmallTest | Level2)
  * @tc.desc: IsPcOrPadCapabilityEnabled
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, IsPcOrPadCapabilityEnabled, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, IsPcOrPadCapabilityEnabled, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     ASSERT_NE(window, nullptr);
@@ -2676,11 +2676,24 @@ HWTEST_F(WindowTest, IsPcOrPadCapabilityEnabled, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: IsSceneBoardEnabled
+ * @tc.desc: IsSceneBoardEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, IsSceneBoardEnabled, TestSize.Level1)
+{
+    sptr<Window> window = sptr<Window>::MakeSptr();
+    auto ret = window->IsSceneBoardEnabled();
+    EXPECT_EQ(false, ret);
+    EXPECT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
  * @tc.name: RegisterMainWindowCloseListeners
  * @tc.desc: RegisterMainWindowCloseListeners
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, RegisterMainWindowCloseListeners, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, RegisterMainWindowCloseListeners, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     ASSERT_NE(window, nullptr);
@@ -2695,7 +2708,7 @@ HWTEST_F(WindowTest, RegisterMainWindowCloseListeners, Function | SmallTest | Le
  * @tc.desc: UnregisterMainWindowCloseListeners
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, UnregisterMainWindowCloseListeners, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, UnregisterMainWindowCloseListeners, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     ASSERT_NE(window, nullptr);
@@ -2710,7 +2723,7 @@ HWTEST_F(WindowTest, UnregisterMainWindowCloseListeners, Function | SmallTest | 
  * @tc.desc: RegisterWindowWillCloseListeners
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, RegisterWindowWillCloseListeners, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, RegisterWindowWillCloseListeners, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     sptr<IWindowWillCloseListener> listener = sptr<IWindowWillCloseListener>::MakeSptr();
@@ -2724,7 +2737,7 @@ HWTEST_F(WindowTest, RegisterWindowWillCloseListeners, Function | SmallTest | Le
  * @tc.desc: UnRegisterWindowWillCloseListeners
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, UnRegisterWindowWillCloseListeners, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, UnRegisterWindowWillCloseListeners, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     sptr<IWindowWillCloseListener> listener = sptr<IWindowWillCloseListener>::MakeSptr();
@@ -2738,7 +2751,7 @@ HWTEST_F(WindowTest, UnRegisterWindowWillCloseListeners, Function | SmallTest | 
  * @tc.desc: Marshalling
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, Marshalling, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, Marshalling, TestSize.Level1)
 {
     OccupiedAreaType type = OccupiedAreaType::TYPE_INPUT;
     Rect rect = { 0, 0, 0, 0 };
@@ -2758,7 +2771,7 @@ HWTEST_F(WindowTest, Marshalling, Function | SmallTest | Level2)
  * @tc.desc: SetDecorButtonStyle
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, SetDecorButtonStyle, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, SetDecorButtonStyle, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     DecorButtonStyle style;
@@ -2771,7 +2784,7 @@ HWTEST_F(WindowTest, SetDecorButtonStyle, Function | SmallTest | Level2)
  * @tc.desc: GetDecorButtonStyle
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, GetDecorButtonStyle, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, GetDecorButtonStyle, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     DecorButtonStyle style;
@@ -2784,7 +2797,7 @@ HWTEST_F(WindowTest, GetDecorButtonStyle, Function | SmallTest | Level2)
  * @tc.desc: GetIsMidScene
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, GetIsMidScene, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, GetIsMidScene, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     bool isMidScene = false;
@@ -2799,7 +2812,7 @@ HWTEST_F(WindowTest, GetIsMidScene, Function | SmallTest | Level2)
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, GetLayoutTransform, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, GetLayoutTransform, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     Transform trans;
@@ -2812,7 +2825,7 @@ HWTEST_F(WindowTest, GetLayoutTransform, Function | SmallTest | Level2)
  * @tc.desc: SetParentWindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, SetParentWindow, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, SetParentWindow, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     int32_t newParentWindowId = 1;
@@ -2825,7 +2838,7 @@ HWTEST_F(WindowTest, SetParentWindow, Function | SmallTest | Level2)
  * @tc.desc: GetParentWindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, GetParentWindow, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, GetParentWindow, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     sptr<Window> parentWindow = nullptr;

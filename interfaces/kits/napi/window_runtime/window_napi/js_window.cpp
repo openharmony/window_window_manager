@@ -72,33 +72,32 @@ JsWindow::JsWindow(const sptr<Window>& window)
         {
             std::lock_guard<std::mutex> lock(g_mutex);
             if (windowName.empty() || g_jsWindowMap.count(windowName) == 0) {
-                WLOGFE("Can not find window %{public}s ", windowName.c_str());
+                TLOGE(WmsLogTag::WMS_LIFE, "Can not find window %{public}s ", windowName.c_str());
                 return;
             }
             g_jsWindowMap.erase(windowName);
+            TLOGI(WmsLogTag::WMS_LIFE, "Remove window %{public}s", windowName.c_str());
         }
         windowToken_ = nullptr;
-        WLOGI("Destroy window %{public}s in js window", windowName.c_str());
+        TLOGI(WmsLogTag::WMS_LIFE, "Destroy window %{public}s in js window", windowName.c_str());
     };
     windowToken_->RegisterWindowDestroyedListener(func);
-    WLOGI(" constructorCnt: %{public}d", ++g_ctorCnt);
+    windowName_ = windowToken_->GetWindowName();
+    TLOGI(WmsLogTag::WMS_LIFE, "window: %{public}s, ctorCnt: %{public}d", windowName_.c_str(), ++g_ctorCnt);
 }
 
 JsWindow::~JsWindow()
 {
-    WLOGI(" deConstructorCnt:%{public}d", ++g_dtorCnt);
+    TLOGI(WmsLogTag::WMS_LIFE, "window: %{public}s, dtorCnt: %{public}d", windowName_.c_str(), ++g_dtorCnt);
     if (windowToken_ != nullptr) {
         windowToken_->UnregisterWindowDestroyedListener();
     }
     windowToken_ = nullptr;
 }
 
-std::string JsWindow::GetWindowName()
+const std::string& JsWindow::GetWindowName() const
 {
-    if (windowToken_ == nullptr) {
-        return "";
-    }
-    return windowToken_->GetWindowName();
+    return windowName_;
 }
 
 void JsWindow::Finalizer(napi_env env, void* data, void* hint)
@@ -112,7 +111,7 @@ void JsWindow::Finalizer(napi_env env, void* data, void* hint)
     std::string windowName = jsWin->GetWindowName();
     std::lock_guard<std::mutex> lock(g_mutex);
     g_jsWindowMap.erase(windowName);
-    WLOGI("Remove window %{public}s from g_jsWindowMap", windowName.c_str());
+    TLOGI(WmsLogTag::WMS_LIFE, "Remove window %{public}s", windowName.c_str());
 }
 
 napi_value JsWindow::Show(napi_env env, napi_callback_info info)
@@ -2299,14 +2298,13 @@ napi_value JsWindow::OnGetProperties(napi_env env, napi_callback_info info)
             WLOGFE("window is nullptr or get invalid param");
             return;
         }
-        Rect drawableRect = g_emptyRect;
-        auto uicontent = weakWindow->GetUIContent();
-        if (uicontent == nullptr) {
-            WLOGFW("uicontent is nullptr");
-        } else {
-            uicontent->GetAppPaintSize(drawableRect);
+        WindowPropertyInfo windowPropertyInfo;
+        WMError ret = weakToken->GetWindowPropertyInfo(windowPropertyInfo);
+        if (ret != WMError::WM_OK) {
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+            return;
         }
-        auto objValue = CreateJsWindowPropertiesObject(env, weakWindow, drawableRect);
+        auto objValue = CreateJsWindowPropertiesObject(env, windowPropertyInfo);
         if (objValue != nullptr) {
             task->Resolve(env, objValue);
         } else {
@@ -2330,14 +2328,13 @@ napi_value JsWindow::OnGetWindowPropertiesSync(napi_env env, napi_callback_info 
         WLOGFW("window is nullptr or get invalid param");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    Rect drawableRect = g_emptyRect;
-    auto uicontent = windowToken_->GetUIContent();
-    if (uicontent == nullptr) {
-        WLOGFW("uicontent is nullptr");
-    } else {
-        uicontent->GetWindowPaintSize(drawableRect);
+    WindowPropertyInfo windowPropertyInfo;
+    WMError ret = windowToken_->GetWindowPropertyInfo(windowPropertyInfo);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "get window properties failed");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    auto objValue = CreateJsWindowPropertiesObject(env, windowToken_, drawableRect);
+    auto objValue = CreateJsWindowPropertiesObject(env, windowPropertyInfo);
     WLOGI("Window [%{public}u, %{public}s] get properties end",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
     if (objValue != nullptr) {
@@ -3588,6 +3585,7 @@ napi_value JsWindow::OnSetPreferredOrientation(napi_env env, napi_callback_info 
         }
         weakWindow->SetRequestedOrientation(requestedOrientation);
         weakWindow->NotifyPreferredOrientationChange(requestedOrientation);
+        weakWindow->SetPreferredRequestedOrientation(requestedOrientation);
         task->Resolve(env, NapiGetUndefined(env));
         TLOGNI(WmsLogTag::WMS_ROTATION, "%{public}s end, window [%{public}u, %{public}s] orientation=%{public}u",
             where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(),
@@ -6407,6 +6405,9 @@ napi_value JsWindow::OnMinimize(napi_env env, napi_callback_info info)
     }
 
     if (windowToken_ != nullptr && WindowHelper::IsFloatOrSubWindow(windowToken_->GetType())) {
+        if (!windowToken_->IsSceneBoardEnabled()) {
+            return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
+        }
         TLOGI(WmsLogTag::WMS_LAYOUT, "subWindow or float window use hide");
         return HideWindowFunction(env, info, WmErrorCode::WM_OK);
     }
@@ -6529,6 +6530,7 @@ __attribute__((no_sanitize("cfi")))
     jsWindowRef.reset(reinterpret_cast<NativeReference*>(result));
     std::lock_guard<std::mutex> lock(g_mutex);
     g_jsWindowMap[windowName] = jsWindowRef;
+    TLOGI(WmsLogTag::WMS_LIFE, "Add window %{public}s", windowName.c_str());
     return objValue;
 }
 
@@ -6899,8 +6901,8 @@ napi_value JsWindow::OnSetSubWindowModal(napi_env env, napi_callback_info info)
     return result;
 }
 
-static std::function<void()> SetFollowParentMultiScreenPolicyTask(const wptr<Window>& weakToken, bool enabled,
-    napi_env env, std::shared_ptr<NapiAsyncTask> napiAsyncTask)
+static std::function<void()> GetFollowParentMultiScreenPolicyTask(const wptr<Window>& weakToken, bool enabled,
+    napi_env env, std::shared_ptr<NapiAsyncTask>& napiAsyncTask)
 {
     return [weakToken, enabled, env, task = napiAsyncTask] {
         auto window = weakToken.promote();
@@ -6933,14 +6935,6 @@ static std::function<void()> SetFollowParentMultiScreenPolicyTask(const wptr<Win
 
 napi_value JsWindow::OnSetFollowParentMultiScreenPolicy(napi_env env, napi_callback_info info)
 {
-    if (windowToken_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_SUB, "windowToken is null");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
-    }
-    if (!windowToken_->IsPcOrPadFreeMultiWindowMode()) {
-        TLOGE(WmsLogTag::WMS_SUB, "device not support");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
-    }
     size_t argc = ONE_PARAMS_SIZE;
     napi_value argv[ONE_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -6955,7 +6949,7 @@ napi_value JsWindow::OnSetFollowParentMultiScreenPolicy(napi_env env, napi_callb
     }
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
-    auto asyncTask = SetFollowParentMultiScreenPolicyTask(wptr<Window>(windowToken_), enabled, env, napiAsyncTask);
+    auto asyncTask = GetFollowParentMultiScreenPolicyTask(wptr<Window>(windowToken_), enabled, env, napiAsyncTask);
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
         napiAsyncTask->Reject(env,
             CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
@@ -7482,8 +7476,7 @@ napi_value JsWindow::OnGetWindowStatus(napi_env env, napi_callback_info info)
     }
     auto objValue = CreateJsValue(env, windowStatus);
     if (objValue != nullptr) {
-        TLOGI(WmsLogTag::WMS_PC, "window [%{public}u, %{public}s] end",
-            window->GetWindowId(), window->GetWindowName().c_str());
+        TLOGI(WmsLogTag::WMS_PC, "id:[%{public}u] end", window->GetWindowId());
         return objValue;
     } else {
         TLOGE(WmsLogTag::WMS_PC, "create js value windowStatus failed");
@@ -7599,13 +7592,6 @@ napi_value JsWindow::OnStartMoving(napi_env env, napi_callback_info info)
             *err = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
             return;
         }
-        if (!WindowHelper::IsSystemWindow(windowToken_->GetType()) &&
-            !WindowHelper::IsMainWindow(windowToken_->GetType()) &&
-            !WindowHelper::IsSubWindow(windowToken_->GetType())) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: This is not valid window.", funcName);
-            *err = WmErrorCode::WM_ERROR_INVALID_CALLING;
-            return;
-        }
         *err = window->StartMoveWindow();
     };
 
@@ -7657,12 +7643,6 @@ napi_value JsWindow::OnStartMoveWindowWithCoordinate(napi_env env, size_t argc, 
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
             return;
         }
-        WindowType windowType = window->GetType();
-        if (!WindowHelper::IsSystemWindow(windowType) && !WindowHelper::IsAppWindow(windowType)) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s invalid window type:%{public}u", where, windowType);
-            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_CALLING));
-            return;
-        }
         WmErrorCode ret = window->StartMoveWindowWithCoordinate(offsetX, offsetY);
         if (ret == WmErrorCode::WM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
@@ -7691,13 +7671,6 @@ napi_value JsWindow::OnStopMoving(napi_env env, napi_callback_info info)
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s window is nullptr.", where);
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
-            return;
-        }
-        if (!WindowHelper::IsSystemWindow(window->GetType()) &&
-            !WindowHelper::IsMainWindow(window->GetType()) &&
-            !WindowHelper::IsSubWindow(window->GetType())) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s This is not valid window.", where);
-            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_CALLING));
             return;
         }
         WmErrorCode ret = window->StopMoveWindow();

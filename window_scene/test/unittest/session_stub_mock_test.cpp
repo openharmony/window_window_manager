@@ -26,7 +26,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionStubMockTest"};
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionStubMockTest" };
 }
 
 namespace OHOS::Accessibility {
@@ -43,13 +43,9 @@ private:
     sptr<SessionStub> session_ = nullptr;
 };
 
-void SessionStubMockTest::SetUpTestCase()
-{
-}
+void SessionStubMockTest::SetUpTestCase() {}
 
-void SessionStubMockTest::TearDownTestCase()
-{
-}
+void SessionStubMockTest::TearDownTestCase() {}
 
 void SessionStubMockTest::SetUp()
 {
@@ -69,7 +65,7 @@ namespace {
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(SessionStubMockTest, HandleTransferAccessibilityEvent, Function | SmallTest | Level2)
+HWTEST_F(SessionStubMockTest, HandleTransferAccessibilityEvent, TestSize.Level1)
 {
     WLOGI("HandleTransferAccessibilityEvent begin");
     MessageParcel data;
@@ -92,7 +88,7 @@ HWTEST_F(SessionStubMockTest, HandleTransferAccessibilityEvent, Function | Small
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(SessionStubMockTest, HandleTransferAccessibilityEvent01, Function | SmallTest | Level2)
+HWTEST_F(SessionStubMockTest, HandleTransferAccessibilityEvent01, TestSize.Level1)
 {
     WLOGI("HandleTransferAccessibilityEvent01 begin");
     MessageParcel data;
@@ -108,6 +104,6 @@ HWTEST_F(SessionStubMockTest, HandleTransferAccessibilityEvent01, Function | Sma
     ASSERT_EQ(ERR_INVALID_DATA, session_->HandleTransferAccessibilityEvent(data, reply));
     WLOGI("HandleTransferAccessibilityEvent01 end");
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

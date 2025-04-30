@@ -85,6 +85,20 @@ static int32_t checkControlsRules(uint32_t pipTemplateType, std::vector<std::uin
     return 0;
 }
 
+static void checkLocalStorage(napi_env env, PipOption& option, napi_value storage)
+{
+    napi_valuetype valueType;
+    napi_typeof(env, storage, &valueType);
+    if (valueType != napi_object) {
+        option.SetStorageRef(nullptr);
+    } else {
+        napi_ref storageRef;
+        napi_create_reference(env, storage, 1, &storageRef);
+        option.SetStorageRef(storageRef);
+        TLOGI(WmsLogTag::WMS_PIP, "localStorage is set");
+    }
+}
+
 static int32_t checkOptionParams(PipOption& option)
 {
     if (option.GetContext() == nullptr) {
@@ -99,6 +113,14 @@ static int32_t checkOptionParams(PipOption& option)
     if (TEMPLATE_CONTROL_MAP.find(static_cast<PiPTemplateType>(pipTemplateType)) ==
         TEMPLATE_CONTROL_MAP.end()) {
         TLOGE(WmsLogTag::WMS_PIP, "pipOption param error, pipTemplateType not exists.");
+        return -1;
+    }
+    uint32_t defaultWindowSizeType = option.GetDefaultWindowSizeType();
+    if (!(defaultWindowSizeType == DefaultWindowSizeType::NOT_SET ||
+            defaultWindowSizeType == DefaultWindowSizeType::SMALL ||
+            defaultWindowSizeType == DefaultWindowSizeType::LARGE)) {
+        TLOGE(WmsLogTag::WMS_PIP, "pipOption param error, invalid defaultWindowSizeType:%{public}u",
+            defaultWindowSizeType);
         return -1;
     }
     return checkControlsRules(pipTemplateType, option.GetControlGroup());
@@ -143,15 +165,18 @@ static int32_t GetPictureInPictureOptionFromJs(napi_env env, napi_value optionOb
     napi_value templateTypeValue = nullptr;
     napi_value widthValue = nullptr;
     napi_value heightValue = nullptr;
+    napi_value defaultWindowSizeTypeValue = nullptr;
     napi_value xComponentControllerValue = nullptr;
     napi_value controlGroup = nullptr;
     napi_value nodeController = nullptr;
+    napi_value storage = nullptr;
     napi_ref nodeControllerRef = nullptr;
     void* contextPtr = nullptr;
     std::string navigationId = "";
     uint32_t templateType = static_cast<uint32_t>(PiPTemplateType::VIDEO_PLAY);
     uint32_t width = 0;
     uint32_t height = 0;
+    uint32_t defaultWindowSizeType = 0;
     std::vector<std::uint32_t> controls;
 
     napi_get_named_property(env, optionObject, "context", &contextPtrValue);
@@ -159,15 +184,19 @@ static int32_t GetPictureInPictureOptionFromJs(napi_env env, napi_value optionOb
     napi_get_named_property(env, optionObject, "templateType", &templateTypeValue);
     napi_get_named_property(env, optionObject, "contentWidth", &widthValue);
     napi_get_named_property(env, optionObject, "contentHeight", &heightValue);
+    napi_get_named_property(env, optionObject, "defaultWindowSizeType", &defaultWindowSizeTypeValue);
     napi_get_named_property(env, optionObject, "componentController", &xComponentControllerValue);
     napi_get_named_property(env, optionObject, "controlGroups", &controlGroup);
     napi_get_named_property(env, optionObject, "customUIController", &nodeController);
+    napi_get_named_property(env, optionObject, "localStorage", &storage);
     napi_create_reference(env, nodeController, 1, &nodeControllerRef);
+    checkLocalStorage(env, option, storage);
     napi_unwrap(env, contextPtrValue, &contextPtr);
     ConvertFromJsValue(env, navigationIdValue, navigationId);
     ConvertFromJsValue(env, templateTypeValue, templateType);
     ConvertFromJsValue(env, widthValue, width);
     ConvertFromJsValue(env, heightValue, height);
+    ConvertFromJsValue(env, defaultWindowSizeTypeValue, defaultWindowSizeType);
     GetControlGroupFromJs(env, controlGroup, controls, templateType);
     std::shared_ptr<XComponentController> xComponentControllerResult =
         XComponentController::GetXComponentControllerFromNapiValue(env, xComponentControllerValue);
@@ -175,6 +204,7 @@ static int32_t GetPictureInPictureOptionFromJs(napi_env env, napi_value optionOb
     option.SetNavigationId(navigationId);
     option.SetPipTemplate(templateType);
     option.SetContentSize(width, height);
+    option.SetDefaultWindowSizeType(defaultWindowSizeType);
     option.SetControlGroup(controls);
     option.SetXComponentController(xComponentControllerResult);
     option.SetNodeControllerRef(nodeControllerRef);
@@ -204,7 +234,8 @@ napi_value JsPipWindowManager::IsPipEnabled(napi_env env, napi_callback_info inf
 napi_value JsPipWindowManager::OnIsPipEnabled(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_PIP, "OnIsPipEnabled called");
-    return CreateJsValue(env, true);
+    bool isPc = PictureInPictureManager::IsPcType();
+    return CreateJsValue(env, !isPc);
 }
 
 napi_value JsPipWindowManager::CreatePipController(napi_env env, napi_callback_info info)
@@ -225,7 +256,7 @@ napi_value JsPipWindowManager::NapiSendTask(napi_env env, PipOption& pipOption)
 {
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, &result);
-    auto asyncTask = [this, env, task = napiAsyncTask, pipOption]() {
+    auto asyncTask = [this, env, task = napiAsyncTask, pipOption]() mutable {
         if (!PictureInPictureManager::IsSupportPiP()) {
             task->Reject(env, CreateJsError(env, static_cast<int32_t>(
                 WMError::WM_ERROR_DEVICE_NOT_SUPPORT), "device not support pip."));
@@ -247,6 +278,9 @@ napi_value JsPipWindowManager::NapiSendTask(napi_env env, PipOption& pipOption)
         sptr<PictureInPictureController> pipController =
             new PictureInPictureController(pipOptionPtr, mainWindow, mainWindow->GetWindowId(), env);
         task->Resolve(env, CreateJsPipControllerObject(env, pipController));
+        PiPTemplateInfo pipTemplateInfo;
+        pipOption.GetPiPTemplateInfo(pipTemplateInfo);
+        mainWindow->UpdatePiPTemplateInfo(pipTemplateInfo);
     };
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
         napiAsyncTask->Reject(env, CreateJsError(env,
@@ -272,7 +306,7 @@ napi_value JsPipWindowManager::OnCreatePipController(napi_env env, napi_callback
     PipOption pipOption;
     if (GetPictureInPictureOptionFromJs(env, config, pipOption) == -1) {
         std::string errMsg = "Invalid parameters in config, please check if context/xComponentController is null,"
-            " or controlGroup mismatch the corresponding pipTemplateType";
+            " or controlGroup mismatch the corresponding pipTemplateType, or defaultWindowSizeType is invalid";
         TLOGE(WmsLogTag::WMS_PIP, "%{public}s", errMsg.c_str());
         return NapiThrowInvalidParam(env, errMsg);
     }

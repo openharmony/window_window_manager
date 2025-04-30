@@ -282,6 +282,34 @@ HWTEST_F(SuperFoldSensorManagerTest, NotifyFoldAngleChanged03, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NotifyFoldAngleChanged04
+ * @tc.desc: test function : NotifyFoldAngleChanged
+ * @tc.type: FUNC
+ */
+ HWTEST_F(SuperFoldSensorManagerTest, NotifyFoldAngleChanged04, Function | SmallTest | Level3)
+ {
+     SuperFoldSensorManager mgr = SuperFoldSensorManager();
+     float foldAngle = 90.0F;
+     mgr.NotifyFoldAngleChanged(foldAngle);
+     EXPECT_TRUE(ScreenSessionManager::GetInstance().lastFoldAngles_.empty());
+     usleep(SLEEP_TIME_US);
+ }
+
+ /**
+ * @tc.name: NotifyFoldAngleChanged05
+ * @tc.desc: test function : NotifyFoldAngleChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(SuperFoldSensorManagerTest, NotifyFoldAngleChanged05, Function | SmallTest | Level3)
+{
+    SuperFoldSensorManager mgr = SuperFoldSensorManager();
+    float foldAngle = 135.0F;
+    mgr.NotifyFoldAngleChanged(foldAngle);
+    EXPECT_TRUE(ScreenSessionManager::GetInstance().lastFoldAngles_.empty());
+    usleep(SLEEP_TIME_US);
+}
+
+/**
  * @tc.name: HandleHallData01
  * @tc.desc: test function : HandleHallData
  * @tc.type: FUNC
@@ -415,6 +443,78 @@ HWTEST_F(SuperFoldSensorManagerTest, HandleHallData06, TestSize.Level1)
     hallData.status = 132;
     mgr.HandleHallData(&event);
     ASSERT_EQ(mgr.curHall_, HALL_HAVE_KEYBOARD_THRESHOLD);
+}
+
+/**
+ * @tc.name: NotifyHallChanged
+ * @tc.desc: test function : NotifyHallChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(SuperFoldSensorManagerTest, NotifyHallChanged, Function | SmallTest | Level3)
+{
+    SuperFoldSensorManager mgr = SuperFoldSensorManager();
+    mgr.NotifyHallChanged(0B0000);
+    ASSERT_EQ(mgr.curHall_, USHRT_MAX);
+    mgr.NotifyHallChanged(0B0100);
+    ASSERT_EQ(mgr.curHall_, USHRT_MAX);
+    mgr.NotifyHallChanged(0B0101);
+    ASSERT_EQ(mgr.curHall_, USHRT_MAX);
+    mgr.curAngle_ = 165.0F;
+    mgr.NotifyHallChanged(0B0000);
+    ASSERT_EQ(mgr.curHall_, USHRT_MAX);
+}
+
+/**
+ * @tc.name: HandleSuperSensorChange
+ * @tc.desc: test function : HandleSuperSensorChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SuperFoldSensorManagerTest, HandleSuperSensorChange, Function | SmallTest | Level3)
+{
+    SuperFoldSensorManager mgr = SuperFoldSensorManager();
+    ScreenSessionManager::GetInstance().isExtendScreenConnected_ = true;
+    mgr.HandleSuperSensorChange(SuperFoldStatusChangeEvents::ANGLE_CHANGE_EXPANDED);
+    ASSERT_EQ(mgr.curHall_, USHRT_MAX);
+    ScreenSessionManager::GetInstance().isExtendScreenConnected_ = false;
+    mgr.HandleSuperSensorChange(SuperFoldStatusChangeEvents::ANGLE_CHANGE_EXPANDED);
+    ASSERT_EQ(mgr.curHall_, USHRT_MAX);
+}
+
+/**
+ * @tc.name: HandleScreenConnectChange
+ * @tc.desc: test function : HandleScreenConnectChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SuperFoldSensorManagerTest, HandleScreenConnectChange, Function | SmallTest | Level3)
+{
+    SuperFoldSensorManager mgr = SuperFoldSensorManager();
+    mgr.HandleScreenConnectChange();
+    ASSERT_EQ(mgr.curHall_, USHRT_MAX);
+}
+
+/**
+ * @tc.name: HandleScreenDisconnectChange
+ * @tc.desc: test function : HandleScreenDisconnectChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SuperFoldSensorManagerTest, HandleScreenDisconnectChange, Function | SmallTest | Level3)
+{
+    SuperFoldSensorManager mgr = SuperFoldSensorManager();
+    mgr.HandleScreenDisconnectChange();
+    ASSERT_EQ(mgr.curHall_, USHRT_MAX);
+}
+
+/**
+ * @tc.name: GetCurAngle
+ * @tc.desc: test function : GetCurAngle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SuperFoldSensorManagerTest, GetCurAngle, Function | SmallTest | Level3)
+{
+    SuperFoldSensorManager mgr = SuperFoldSensorManager();
+    mgr.curAngle_ = 110.0F;
+    float angle = mgr.GetCurAngle();
+    ASSERT_EQ(angle, 110.0F);
 }
 }
 } // namespace Rosen

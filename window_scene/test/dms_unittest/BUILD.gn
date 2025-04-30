@@ -76,9 +76,35 @@ group("unittest") {
   }
 
   if (window_manager_feature_multi_screen) {
-    deps += [ ":ws_multi_screen_manager_test" ]
+    deps += [
+      ":ws_multi_screen_change_utils_test",
+      ":ws_multi_screen_manager_test",
+      ":ws_multi_screen_mode_change_manager_test",
+      ":ws_multi_screen_power_change_manager_test",
+    ]
   }
 }
+
+test_external_deps = [
+  "ability_base:configuration",
+  "ability_runtime:ability_manager",
+  "ability_runtime:app_manager",
+  "accessibility:accessibility_common",
+  "accessibility:accessibility_interface",
+  "c_utils:utils",
+  "googletest:gmock",
+  "googletest:gtest",
+  "googletest:gtest_main",
+  "graphic_2d:librender_service_base",
+  "graphic_2d:librender_service_client",
+  "hilog:libhilog",
+  "image_framework:image_native",
+  "input:libmmi-client",
+  "ipc:ipc_single",
+  "libxml2:libxml2",
+  "napi:ace_napi",
+  "safwk:system_ability_fwk",
+]
 
 ohos_unittest("ws_setting_observer_test") {
   module_out_path = module_out_path
@@ -87,12 +113,8 @@ ohos_unittest("ws_setting_observer_test") {
 
   deps = [ ":ws_unittest_common" ]
 
-  external_deps = [
-    "ability_runtime:ability_manager",
-    "ability_runtime:dataobs_manager",
-    "c_utils:utils",
-    "hilog:libhilog",
-  ]
+  external_deps = test_external_deps
+  external_deps += [ "ability_runtime:dataobs_manager" ]
 }
 
 ohos_unittest("ws_setting_provider_test") {
@@ -102,11 +124,8 @@ ohos_unittest("ws_setting_provider_test") {
 
   deps = [ ":ws_unittest_common" ]
 
-  external_deps = [
-    "c_utils:utils",
-    "data_share:datashare_consumer",
-    "hilog:libhilog",
-  ]
+  external_deps = test_external_deps
+  external_deps += [ "data_share:datashare_consumer" ]
 }
 
 ohos_unittest("ws_screen_session_publish_test") {
@@ -116,11 +135,9 @@ ohos_unittest("ws_screen_session_publish_test") {
 
   deps = [ ":ws_unittest_common" ]
 
-  external_deps = [
-    "ability_runtime:app_manager",
-    "c_utils:utils",
+  external_deps = test_external_deps
+  external_deps += [
     "common_event_service:cesfwk_innerkits",
-    "hilog:libhilog",
     "init:libbegetutil",
   ]
 }
@@ -134,11 +151,9 @@ ohos_unittest("ws_screen_setting_helper_test") {
     ":ws_unittest_common",
     "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
   ]
-  external_deps = [
-    "ability_runtime:app_manager",
+  external_deps = test_external_deps
+  external_deps += [
     "ability_runtime:dataobs_manager",
-    "c_utils:utils",
-    "hilog:libhilog",
     "init:libbegetutil",
   ]
 }
@@ -157,11 +172,24 @@ ohos_unittest("ws_screen_session_manager_lite_test") {
     "${window_base_path}/wmserver:sms",
   ]
 
-  external_deps = [
-    "ability_runtime:app_manager",
-    "c_utils:utils",
-    "hilog:libhilog",
-  ]
+  external_deps = test_external_deps
+}
+
+ohos_unittest("ws_multi_screen_change_utils_test") {
+  module_out_path = module_out_path
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
+  sources = [ "multi_screen_change_utils_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = test_external_deps
+  external_deps += [ "hitrace:hitrace_meter" ]
 }
 
 ohos_unittest("ws_multi_screen_manager_test") {
@@ -177,11 +205,40 @@ ohos_unittest("ws_multi_screen_manager_test") {
 
   deps = [ ":ws_unittest_common" ]
 
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-    "hitrace:hitrace_meter",
-  ]
+  external_deps = test_external_deps
+  external_deps += [ "hitrace:hitrace_meter" ]
+}
+
+ohos_unittest("ws_multi_screen_mode_change_manager_test") {
+  module_out_path = module_out_path
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
+  sources = [ "multi_screen_mode_change_manager_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = test_external_deps
+}
+
+ohos_unittest("ws_multi_screen_power_change_manager_test") {
+  module_out_path = module_out_path
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
+  sources = [ "multi_screen_power_change_manager_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = test_external_deps
 }
 
 ohos_unittest("ws_screen_session_test") {
@@ -196,11 +253,8 @@ ohos_unittest("ws_screen_session_test") {
     "${window_base_path}/window_scene/session:screen_session",
   ]
 
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-    "init:libbegetutil",
-  ]
+  external_deps = test_external_deps
+  external_deps += [ "init:libbegetutil" ]
 
   defines = []
 
@@ -252,12 +306,12 @@ ohos_unittest("ws_screen_session_ability_connection_test") {
     "${window_base_path}/window_scene/session:screen_session",
   ]
 
-  external_deps = [
+  external_deps = test_external_deps
+  external_deps += [
     "ability_base:base",
     "ability_base:want",
     "ability_runtime:abilitykit_native",
     "ability_runtime:extension_manager",
-    "c_utils:utils",
     "ipc:ipc_core",
   ]
 }
@@ -274,12 +328,12 @@ ohos_unittest("ws_screen_session_ability_connection_ut_test") {
     "${window_base_path}/window_scene/session:screen_session",
   ]
 
-  external_deps = [
+  external_deps = test_external_deps
+  external_deps += [
     "ability_base:base",
     "ability_base:want",
     "ability_runtime:abilitykit_native",
     "ability_runtime:extension_manager",
-    "c_utils:utils",
     "ipc:ipc_core",
   ]
 }
@@ -295,10 +349,8 @@ ohos_unittest("ws_screen_snapshot_picker_connection_test") {
     "${window_base_path}/window_scene/session:screen_session",
   ]
 
-  external_deps = [
-    "ability_runtime:abilitykit_native",
-    "c_utils:utils",
-  ]
+  external_deps = test_external_deps
+  external_deps += [ "ability_runtime:abilitykit_native" ]
 }
 
 ohos_unittest("ws_screen_property_test") {
@@ -312,10 +364,7 @@ ohos_unittest("ws_screen_property_test") {
     "${window_base_path}/window_scene/session:screen_session",
   ]
 
-  external_deps = [
-    "c_utils:utils",
-    "graphic_2d:librender_service_client",
-  ]
+  external_deps = test_external_deps
 }
 
 ohos_unittest("ws_screen_cutout_controller_test") {
@@ -330,11 +379,7 @@ ohos_unittest("ws_screen_cutout_controller_test") {
   sources = [ "screen_cutout_controller_test.cpp" ]
 
   deps = [ ":ws_unittest_common" ]
-  external_deps = [
-    "ability_runtime:app_manager",
-    "c_utils:utils",
-    "hilog:libhilog",
-  ]
+  external_deps = test_external_deps
 }
 
 ohos_unittest("ws_screen_scene_config_test") {
@@ -347,11 +392,8 @@ ohos_unittest("ws_screen_scene_config_test") {
     "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
   ]
 
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-    "init:libbegetutil",
-  ]
+  external_deps = test_external_deps
+  external_deps += [ "init:libbegetutil" ]
 }
 
 ohos_unittest("ws_screen_session_manager_client_proxy_test") {
@@ -360,6 +402,7 @@ ohos_unittest("ws_screen_session_manager_client_proxy_test") {
   sources = [ "screen_session_manager_client_proxy_test.cpp" ]
 
   deps = [ ":ws_unittest_common" ]
+  external_deps = test_external_deps
 }
 
 ohos_unittest("ws_screen_session_manager_client_stub_test") {
@@ -370,6 +413,7 @@ ohos_unittest("ws_screen_session_manager_client_stub_test") {
   sources = [ "screen_session_manager_client_stub_test.cpp" ]
 
   deps = [ ":ws_unittest_common" ]
+  external_deps = test_external_deps
 }
 
 ohos_unittest("ws_screen_session_manager_client_test") {
@@ -382,11 +426,8 @@ ohos_unittest("ws_screen_session_manager_client_test") {
     "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
   ]
 
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-    "init:libbegetutil",
-  ]
+  external_deps = test_external_deps
+  external_deps += [ "init:libbegetutil" ]
 }
 
 ohos_unittest("ws_screen_session_manager_lite_proxy_test") {
@@ -402,6 +443,7 @@ ohos_unittest("ws_screen_session_manager_lite_proxy_test") {
     "${window_base_path}/dm_lite:libdm_lite",
     "${window_base_path}/wmserver:sms",
   ]
+  external_deps = test_external_deps
 }
 
 ohos_unittest("ws_screen_session_manager_lite_stub_test") {
@@ -413,6 +455,7 @@ ohos_unittest("ws_screen_session_manager_lite_stub_test") {
     ":ws_unittest_common",
     "${window_base_path}/wmserver:sms",
   ]
+  external_deps = test_external_deps
 }
 
 ohos_unittest("ws_screen_session_manager_stub_test") {
@@ -425,11 +468,7 @@ ohos_unittest("ws_screen_session_manager_stub_test") {
     "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
   ]
 
-  external_deps = [
-    "ability_runtime:app_manager",
-    "c_utils:utils",
-    "hilog:libhilog",
-  ]
+  external_deps = test_external_deps
 }
 
 ohos_unittest("ws_screen_session_manager_proxy_test") {
@@ -442,12 +481,8 @@ ohos_unittest("ws_screen_session_manager_proxy_test") {
     "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
   ]
 
-  external_deps = [
-    "ability_runtime:app_manager",
-    "c_utils:utils",
-    "hilog:libhilog",
-    "init:libbegetutil",
-  ]
+  external_deps = test_external_deps
+  external_deps += [ "init:libbegetutil" ]
 }
 
 ohos_unittest("ws_screen_session_manager_proxy_ut_test") {
@@ -460,11 +495,7 @@ ohos_unittest("ws_screen_session_manager_proxy_ut_test") {
     "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
   ]
 
-  external_deps = [
-    "ability_runtime:app_manager",
-    "c_utils:utils",
-    "hilog:libhilog",
-  ]
+  external_deps = test_external_deps
 }
 
 ohos_unittest("ws_screen_session_manager_test") {
@@ -483,12 +514,10 @@ ohos_unittest("ws_screen_session_manager_test") {
     "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
   ]
 
-  external_deps = [
+  external_deps = test_external_deps
+  external_deps += [
     "ability_runtime:ability_context_native",
-    "ability_runtime:app_manager",
     "ability_runtime:runtime",
-    "c_utils:utils",
-    "hilog:libhilog",
     "init:libbegetutil",
   ]
 
@@ -537,11 +566,8 @@ ohos_unittest("ws_screen_session_manager_test2") {
 
   deps = [ ":ws_unittest_common" ]
 
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-    "init:libbegetutil",
-  ]
+  external_deps = test_external_deps
+  external_deps += [ "init:libbegetutil" ]
 }
 
 ohos_unittest("ws_screen_rotation_property_test") {
@@ -551,11 +577,8 @@ ohos_unittest("ws_screen_rotation_property_test") {
 
   deps = [ ":ws_unittest_common" ]
 
-  external_deps = [
-    "ability_runtime:app_manager",
-    "c_utils:utils",
-    "hilog:libhilog",
-  ]
+  external_deps = test_external_deps
+
   defines = []
   if (defined(global_parts_info) && defined(global_parts_info.sensors_sensor)) {
     external_deps += [ "sensor:sensor_interface_native" ]
@@ -570,11 +593,8 @@ ohos_unittest("ws_screen_session_dumper_test") {
 
   deps = [ ":ws_unittest_common" ]
 
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-    "init:libbegetutil",
-  ]
+  external_deps = test_external_deps
+  external_deps += [ "init:libbegetutil" ]
 }
 
 ohos_unittest("ws_screen_power_utils_test") {
@@ -584,11 +604,8 @@ ohos_unittest("ws_screen_power_utils_test") {
 
   deps = [ ":ws_unittest_common" ]
 
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-    "init:libbegetutil",
-  ]
+  external_deps = test_external_deps
+  external_deps += [ "init:libbegetutil" ]
 }
 
 ohos_unittest("ws_screen_edid_test") {
@@ -598,11 +615,8 @@ ohos_unittest("ws_screen_edid_test") {
 
   deps = [ ":ws_unittest_common" ]
 
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-    "init:libbegetutil",
-  ]
+  external_deps = test_external_deps
+  external_deps += [ "init:libbegetutil" ]
 }
 
 ohos_unittest("ws_session_display_power_controller_test") {
@@ -612,11 +626,7 @@ ohos_unittest("ws_session_display_power_controller_test") {
 
   deps = [ ":ws_unittest_common" ]
 
-  external_deps = [
-    "ability_runtime:app_manager",
-    "c_utils:utils",
-    "hilog:libhilog",
-  ]
+  external_deps = test_external_deps
 }
 
 if (window_manager_fold_ability) {
@@ -627,11 +637,7 @@ if (window_manager_fold_ability) {
 
     deps = [ ":ws_unittest_common" ]
 
-    external_deps = [
-      "ability_runtime:app_manager",
-      "c_utils:utils",
-      "hilog:libhilog",
-    ]
+    external_deps = test_external_deps
   }
 
   ohos_unittest("ws_single_display_pocket_fold_policy_test") {
@@ -641,10 +647,8 @@ if (window_manager_fold_ability) {
 
     deps = [ ":ws_unittest_common" ]
 
-    external_deps = [
-      "ability_runtime:app_manager",
-      "c_utils:utils",
-      "hilog:libhilog",
+    external_deps = test_external_deps
+    external_deps += [
       "hisysevent:libhisysevent",
       "init:libbegetutil",
     ]
@@ -657,12 +661,8 @@ if (window_manager_fold_ability) {
 
     deps = [ ":ws_unittest_common" ]
 
-    external_deps = [
-      "ability_runtime:app_manager",
-      "c_utils:utils",
-      "hilog:libhilog",
-      "init:libbegetutil",
-    ]
+    external_deps = test_external_deps
+    external_deps += [ "init:libbegetutil" ]
   }
 
   ohos_unittest("ws_dual_display_fold_policy_test") {
@@ -672,12 +672,8 @@ if (window_manager_fold_ability) {
 
     deps = [ ":ws_unittest_common" ]
 
-    external_deps = [
-      "ability_runtime:app_manager",
-      "c_utils:utils",
-      "hilog:libhilog",
-      "init:libbegetutil",
-    ]
+    external_deps = test_external_deps
+    external_deps += [ "init:libbegetutil" ]
   }
 
   ohos_unittest("ws_dual_display_sensor_fold_state_manager_test") {
@@ -687,12 +683,8 @@ if (window_manager_fold_ability) {
 
     deps = [ ":ws_unittest_common" ]
 
-    external_deps = [
-      "ability_runtime:app_manager",
-      "c_utils:utils",
-      "hilog:libhilog",
-      "init:libbegetutil",
-    ]
+    external_deps = test_external_deps
+    external_deps += [ "init:libbegetutil" ]
   }
 
   ohos_unittest("ws_fold_screen_sensor_manager_test") {
@@ -705,10 +697,8 @@ if (window_manager_fold_ability) {
       "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
     ]
 
-    external_deps = [
-      "ability_runtime:app_manager",
-      "c_utils:utils",
-      "hilog:libhilog",
+    external_deps = test_external_deps
+    external_deps += [
       "hisysevent:libhisysevent",
       "init:libbegetutil",
     ]
@@ -728,12 +718,8 @@ if (window_manager_fold_ability) {
 
     deps = [ ":ws_unittest_common" ]
 
-    external_deps = [
-      "ability_runtime:app_manager",
-      "c_utils:utils",
-      "hilog:libhilog",
-      "init:libbegetutil",
-    ]
+    external_deps = test_external_deps
+    external_deps += [ "init:libbegetutil" ]
   }
 
   ohos_unittest("ws_fold_screen_state_machine_test") {
@@ -743,11 +729,7 @@ if (window_manager_fold_ability) {
 
     deps = [ ":ws_unittest_common" ]
 
-    external_deps = [
-      "ability_runtime:app_manager",
-      "c_utils:utils",
-      "hilog:libhilog",
-    ]
+    external_deps = test_external_deps
   }
 
   ohos_unittest("ws_single_display_sensor_fold_state_manager_test") {
@@ -760,10 +742,7 @@ if (window_manager_fold_ability) {
       "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
     ]
 
-    external_deps = [
-      "c_utils:utils",
-      "hilog:libhilog",
-    ]
+    external_deps = test_external_deps
   }
 
   ohos_unittest("ws_single_display_sensor_pocket_fold_state_manager_test") {
@@ -773,12 +752,8 @@ if (window_manager_fold_ability) {
 
     deps = [ ":ws_unittest_common" ]
 
-    external_deps = [
-      "ability_runtime:app_manager",
-      "c_utils:utils",
-      "hilog:libhilog",
-      "init:libbegetutil",
-    ]
+    external_deps = test_external_deps
+    external_deps += [ "init:libbegetutil" ]
   }
 
   ohos_unittest("ws_super_fold_state_manager_test") {
@@ -788,12 +763,7 @@ if (window_manager_fold_ability) {
 
     deps = [ ":ws_unittest_common" ]
 
-    external_deps = [
-      "ability_runtime:app_manager",
-      "c_utils:utils",
-      "hilog:libhilog",
-      "init:libbegetutil",
-    ]
+    external_deps = test_external_deps
   }
 
   ohos_unittest("ws_super_fold_sensor_manager_test") {
@@ -806,10 +776,8 @@ if (window_manager_fold_ability) {
       "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
     ]
 
-    external_deps = [
-      "ability_runtime:app_manager",
-      "c_utils:utils",
-      "hilog:libhilog",
+    external_deps = test_external_deps
+    external_deps += [
       "hisysevent:libhisysevent",
       "init:libbegetutil",
       "sensor:sensor_interface_native",
@@ -823,12 +791,8 @@ if (window_manager_fold_ability) {
 
     deps = [ ":ws_unittest_common" ]
 
-    external_deps = [
-      "ability_runtime:app_manager",
-      "c_utils:utils",
-      "hilog:libhilog",
-      "init:libbegetutil",
-    ]
+    external_deps = test_external_deps
+    external_deps += [ "init:libbegetutil" ]
   }
 
   ohos_unittest("ws_secondary_fold_sensor_manager_test") {
@@ -841,10 +805,8 @@ if (window_manager_fold_ability) {
       "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
     ]
 
-    external_deps = [
-      "ability_runtime:app_manager",
-      "c_utils:utils",
-      "hilog:libhilog",
+    external_deps = test_external_deps
+    external_deps += [
       "init:libbegetutil",
       "sensor:sensor_interface_native",
     ]
@@ -864,12 +826,8 @@ if (window_manager_fold_ability) {
 
     deps = [ ":ws_unittest_common" ]
 
-    external_deps = [
-      "ability_runtime:app_manager",
-      "c_utils:utils",
-      "hilog:libhilog",
-      "init:libbegetutil",
-    ]
+    external_deps = test_external_deps
+    external_deps += [ "init:libbegetutil" ]
   }
 }
 
@@ -949,28 +907,16 @@ ohos_static_library("ws_unittest_common") {
     "${window_base_path}/window_scene/session_manager:session_manager",
     "${window_base_path}/window_scene/session_manager:session_manager_lite",
     "${window_base_path}/wm:libwm",
-    "//third_party/googletest:gmock",
-    "//third_party/googletest:gtest_main",
-    "//third_party/libxml2:libxml2",
   ]
 
   public_deps = [
-    "${arkui_path}/napi:ace_napi",
-    "${graphic_base_path}/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/utils:libwmutil_base",
+    "${window_base_path}/window_scene/session:screen_session",
     "../../../test/common/utils:libtestutil",
   ]
 
-  external_deps = [
-    "ability_base:configuration",
-    "accessibility:accessibility_common",
-    "accessibility:accessibility_interface",
-    "c_utils:utils",
-    "hilog:libhilog",
-    "input:libmmi-client",
-    "ipc:ipc_single",
-  ]
+  external_deps = test_external_deps
 
   public_external_deps = [
     "ability_base:session_info",

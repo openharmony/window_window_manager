@@ -29,28 +29,27 @@ public:
     SessionProxyImmersiveTest() {}
     ~SessionProxyImmersiveTest() {}
 };
-    
+
 namespace {
 /**
  * @tc.name: GetAllAvoidAreasOnlyOne
  * @tc.desc: get one system avoid area
  * @tc.type: FUNC
  */
-HWTEST_F(SessionProxyImmersiveTest, GetAllAvoidAreasOnlyOne, Function | SmallTest | Level2)
+HWTEST_F(SessionProxyImmersiveTest, GetAllAvoidAreasOnlyOne, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SessionProxyImmersiveTest::GetAllAvoidAreasOnlyOne start";
     auto remoteObj = sptr<RemoteObjectMocker>::MakeSptr();
-    EXPECT_CALL(*remoteObj, SendRequest(_, _, _, _)).WillOnce(Invoke(
-        [](uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) -> int {
+    EXPECT_CALL(*remoteObj, SendRequest(_, _, _, _))
+        .WillOnce(Invoke([](uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) -> int {
             reply.WriteUint32(static_cast<uint32_t>(1)); // avoidArea num
             reply.WriteUint32(static_cast<uint32_t>(AvoidAreaType::TYPE_SYSTEM));
             AvoidArea tmpArea;
-            tmpArea.topRect_ = {0, 0, 1200, 127};
+            tmpArea.topRect_ = { 0, 0, 1200, 127 };
             reply.WriteParcelable(&tmpArea);
             reply.WriteUint32(0); // error code
             return 0;
-        }
-    ));
+        }));
 
     auto sProxy = sptr<SessionProxy>::MakeSptr(remoteObj);
     std::map<AvoidAreaType, AvoidArea> avoidAreas;
@@ -72,7 +71,7 @@ HWTEST_F(SessionProxyImmersiveTest, GetAllAvoidAreasOnlyOne, Function | SmallTes
  * @tc.desc: remote func return error code 1003
  * @tc.type: FUNC
  */
-HWTEST_F(SessionProxyImmersiveTest, GetAllAvoidAreasRemoteErrorPara, Function | SmallTest | Level2)
+HWTEST_F(SessionProxyImmersiveTest, GetAllAvoidAreasRemoteErrorPara, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SessionProxyImmersiveTest::GetAllAvoidAreasRemoteErrorPara start";
     auto remoteObj = sptr<RemoteObjectMocker>::MakeSptr();
@@ -92,17 +91,16 @@ HWTEST_F(SessionProxyImmersiveTest, GetAllAvoidAreasRemoteErrorPara, Function | 
  * @tc.desc: remote func return no avoid area
  * @tc.type: FUNC
  */
-HWTEST_F(SessionProxyImmersiveTest, GetAllAvoidAreasEmpty, Function | SmallTest | Level2)
+HWTEST_F(SessionProxyImmersiveTest, GetAllAvoidAreasEmpty, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SessionProxyImmersiveTest::GetAllAvoidAreasEmpty start";
     auto remoteObj = sptr<RemoteObjectMocker>::MakeSptr();
-    EXPECT_CALL(*remoteObj, SendRequest(_, _, _, _)).WillOnce(Invoke(
-        [](uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) -> int {
+    EXPECT_CALL(*remoteObj, SendRequest(_, _, _, _))
+        .WillOnce(Invoke([](uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) -> int {
             reply.WriteUint32(0); // avoidArea num
             reply.WriteUint32(0); // error code
             return 0;
-        }
-    ));
+        }));
 
     auto sProxy = sptr<SessionProxy>::MakeSptr(remoteObj);
     std::map<AvoidAreaType, AvoidArea> avoidAreas;
@@ -118,21 +116,20 @@ HWTEST_F(SessionProxyImmersiveTest, GetAllAvoidAreasEmpty, Function | SmallTest 
  * @tc.desc: remote func return invalid area type
  * @tc.type: FUNC
  */
-HWTEST_F(SessionProxyImmersiveTest, GetAllAvoidAreasWithInvalidAreaType, Function | SmallTest | Level2)
+HWTEST_F(SessionProxyImmersiveTest, GetAllAvoidAreasWithInvalidAreaType, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SessionProxyImmersiveTest::GetAllAvoidAreasWithInvalidAreaType start";
     auto remoteObj = sptr<RemoteObjectMocker>::MakeSptr();
-    EXPECT_CALL(*remoteObj, SendRequest(_, _, _, _)).WillOnce(Invoke(
-        [](uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) -> int {
-            reply.WriteUint32(1); // avoidArea num
+    EXPECT_CALL(*remoteObj, SendRequest(_, _, _, _))
+        .WillOnce(Invoke([](uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) -> int {
+            reply.WriteUint32(1);    // avoidArea num
             reply.WriteUint32(1111); // invalid areaType
             AvoidArea tmpArea;
-            tmpArea.topRect_ = {0, 0, 1200, 127};
+            tmpArea.topRect_ = { 0, 0, 1200, 127 };
             reply.WriteParcelable(&tmpArea);
             reply.WriteUint32(0); // error code
             return 0;
-        }
-    ));
+        }));
 
     auto sProxy = sptr<SessionProxy>::MakeSptr(remoteObj);
     std::map<AvoidAreaType, AvoidArea> avoidAreas;
@@ -147,19 +144,18 @@ HWTEST_F(SessionProxyImmersiveTest, GetAllAvoidAreasWithInvalidAreaType, Functio
  * @tc.desc: remote func return invalid area type
  * @tc.type: FUNC
  */
-HWTEST_F(SessionProxyImmersiveTest, GetAllAvoidAreasWithInvalidArea, Function | SmallTest | Level2)
+HWTEST_F(SessionProxyImmersiveTest, GetAllAvoidAreasWithInvalidArea, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SessionProxyImmersiveTest::GetAllAvoidAreasWithInvalidArea start";
     auto remoteObj = sptr<RemoteObjectMocker>::MakeSptr();
-    EXPECT_CALL(*remoteObj, SendRequest(_, _, _, _)).WillOnce(Invoke(
-        [](uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) -> int {
+    EXPECT_CALL(*remoteObj, SendRequest(_, _, _, _))
+        .WillOnce(Invoke([](uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) -> int {
             reply.WriteUint32(1); // avoidArea num
             reply.WriteUint32(static_cast<uint32_t>(AvoidAreaType::TYPE_SYSTEM));
             reply.WriteUint32(2234); // invalid area
-            reply.WriteUint32(0); // error code
+            reply.WriteUint32(0);    // error code
             return 0;
-        }
-    ));
+        }));
 
     auto sProxy = sptr<SessionProxy>::MakeSptr(remoteObj);
     std::map<AvoidAreaType, AvoidArea> avoidAreas;
@@ -174,7 +170,7 @@ HWTEST_F(SessionProxyImmersiveTest, GetAllAvoidAreasWithInvalidArea, Function | 
  * @tc.desc: remote obj is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(SessionProxyImmersiveTest, GetAvoidAreaByTypeWithRemoteNull, Function | SmallTest | Level2)
+HWTEST_F(SessionProxyImmersiveTest, GetAvoidAreaByTypeWithRemoteNull, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SessionProxyImmersiveTest::GetAvoidAreaByTypeWithRemoteNull start";
     auto sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
@@ -188,7 +184,7 @@ HWTEST_F(SessionProxyImmersiveTest, GetAvoidAreaByTypeWithRemoteNull, Function |
  * @tc.desc: remote func return error code
  * @tc.type: FUNC
  */
-HWTEST_F(SessionProxyImmersiveTest, GetAvoidAreaByTypeWithRemoteErr, Function | SmallTest | Level2)
+HWTEST_F(SessionProxyImmersiveTest, GetAvoidAreaByTypeWithRemoteErr, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SessionProxyImmersiveTest::GetAvoidAreaByTypeWithRemoteErr start";
     auto remoteObj = sptr<RemoteObjectMocker>::MakeSptr();
@@ -205,16 +201,15 @@ HWTEST_F(SessionProxyImmersiveTest, GetAvoidAreaByTypeWithRemoteErr, Function | 
  * @tc.desc: remote func return invalid avoid area
  * @tc.type: FUNC
  */
-HWTEST_F(SessionProxyImmersiveTest, GetAvoidAreaByTypeWithAreaInvalid, Function | SmallTest | Level2)
+HWTEST_F(SessionProxyImmersiveTest, GetAvoidAreaByTypeWithAreaInvalid, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SessionProxyImmersiveTest::GetAvoidAreaByTypeWithAreaInvalid start";
     auto remoteObj = sptr<RemoteObjectMocker>::MakeSptr();
-    EXPECT_CALL(*remoteObj, SendRequest(_, _, _, _)).WillOnce(Invoke(
-        [](uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) -> int {
+    EXPECT_CALL(*remoteObj, SendRequest(_, _, _, _))
+        .WillOnce(Invoke([](uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) -> int {
             reply.WriteUint32(2234); // invalid area
             return 0;
-        }
-    ));
+        }));
 
     auto sProxy = sptr<SessionProxy>::MakeSptr(remoteObj);
     AvoidArea ret = sProxy->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM);
@@ -227,18 +222,17 @@ HWTEST_F(SessionProxyImmersiveTest, GetAvoidAreaByTypeWithAreaInvalid, Function 
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionProxyImmersiveTest, GetAvoidAreaByTypeWithAreaNormal, Function | SmallTest | Level2)
+HWTEST_F(SessionProxyImmersiveTest, GetAvoidAreaByTypeWithAreaNormal, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SessionProxyImmersiveTest::GetAvoidAreaByTypeWithAreaNormal start";
     auto remoteObj = sptr<RemoteObjectMocker>::MakeSptr();
-    EXPECT_CALL(*remoteObj, SendRequest(_, _, _, _)).WillOnce(Invoke(
-        [](uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) -> int {
+    EXPECT_CALL(*remoteObj, SendRequest(_, _, _, _))
+        .WillOnce(Invoke([](uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) -> int {
             AvoidArea tmpArea;
-            tmpArea.topRect_ = {0, 0, 1200, 127};
+            tmpArea.topRect_ = { 0, 0, 1200, 127 };
             reply.WriteParcelable(&tmpArea);
             return 0;
-        }
-    ));
+        }));
 
     auto sProxy = sptr<SessionProxy>::MakeSptr(remoteObj);
     AvoidArea ret = sProxy->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM);
@@ -254,7 +248,7 @@ HWTEST_F(SessionProxyImmersiveTest, GetAvoidAreaByTypeWithAreaNormal, Function |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionProxyImmersiveTest, GetAvoidAreaByTypeEmpty, Function | SmallTest | Level2)
+HWTEST_F(SessionProxyImmersiveTest, GetAvoidAreaByTypeEmpty, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SessionProxyImmersiveTest::GetAvoidAreaByTypeEmpty start";
     auto remoteObj = sptr<RemoteObjectMocker>::MakeSptr();

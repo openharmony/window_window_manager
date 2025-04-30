@@ -15,8 +15,8 @@
 
 // gtest
 #include <gtest/gtest.h>
-#include "window_test_utils.h"
 #include "scene_board_judgement.h"
+#include "window_test_utils.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -32,21 +32,13 @@ public:
     virtual void TearDown() override;
 };
 
-void WindowMultiAbilityTest::SetUpTestCase()
-{
-}
+void WindowMultiAbilityTest::SetUpTestCase() {}
 
-void WindowMultiAbilityTest::TearDownTestCase()
-{
-}
+void WindowMultiAbilityTest::TearDownTestCase() {}
 
-void WindowMultiAbilityTest::SetUp()
-{
-}
+void WindowMultiAbilityTest::SetUp() {}
 
-void WindowMultiAbilityTest::TearDown()
-{
-}
+void WindowMultiAbilityTest::TearDown() {}
 
 static void DoSceneResource(sptr<WindowScene> windowscene)
 {
@@ -64,7 +56,7 @@ static void DoSceneResource(sptr<WindowScene> windowscene)
  * @tc.desc: Five scene process in one thread
  * @tc.type: FUNC
  */
-HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow01, Function | MediumTest | Level2)
+HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow01, TestSize.Level1)
 {
     sptr<WindowScene> scene1 = Utils::CreateWindowScene();
     sptr<WindowScene> scene2 = Utils::CreateWindowScene();
@@ -91,7 +83,7 @@ HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow01, Function | MediumTest | L
         ASSERT_EQ(WMError::WM_OK, scene3->GoBackground());
         ASSERT_EQ(WMError::WM_OK, scene2->GoBackground());
         ASSERT_EQ(WMError::WM_OK, scene1->GoBackground());
-    }else {
+    } else {
         ASSERT_NE(WMError::WM_OK, scene5->GoBackground());
         ASSERT_NE(WMError::WM_OK, scene4->GoBackground());
         ASSERT_NE(WMError::WM_OK, scene3->GoBackground());
@@ -118,7 +110,7 @@ HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow01, Function | MediumTest | L
  * @tc.desc: Five scene process in one thread, create/show/hide/destroy in order
  * @tc.type: FUNC
  */
-HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow02, Function | MediumTest | Level3)
+HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow02, TestSize.Level1)
 {
     sptr<WindowScene> scene1 = Utils::CreateWindowScene();
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
@@ -173,7 +165,7 @@ HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow02, Function | MediumTest | L
  * @tc.desc: Five scene process in one thread, create/show/hide/destroy in order
  * @tc.type: FUNC
  */
-HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow2, Function | MediumTest | Level3)
+HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow2, TestSize.Level1)
 {
     sptr<WindowScene> scene4 = Utils::CreateWindowScene();
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
@@ -214,7 +206,7 @@ HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow2, Function | MediumTest | Le
  * @tc.desc: Five scene process in one thread, create/show/hide/destroy out of order
  * @tc.type: FUNC
  */
-HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow03, Function | MediumTest | Level3)
+HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow03, TestSize.Level1)
 {
     sptr<WindowScene> scene1 = Utils::CreateWindowScene();
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {

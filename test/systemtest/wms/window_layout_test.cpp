@@ -19,11 +19,10 @@
 #include "common_test_utils.h"
 #include "mock_session.h"
 #include "session/host/include/scene_session.h"
-#include "window_test_utils.h"
 #include "window_adapter.h"
 #include "window_scene_session_impl.h"
+#include "window_test_utils.h"
 #include "wm_common.h"
-
 
 using namespace testing;
 using namespace testing::ext;
@@ -41,6 +40,7 @@ public:
     std::vector<sptr<Window>> activeWindows_;
     static vector<Rect> fullScreenExpecteds_;
     static inline float virtualPixelRatio_ = 0.0;
+
 private:
     static constexpr uint32_t WAIT_SYANC_US = 100000;
     static constexpr uint32_t WAIT_SERVERAL_FRAMES = 36000;
@@ -58,27 +58,30 @@ void WindowLayoutTest::SetUpTestCase()
     auto display = DisplayManager::GetInstance().GetDisplayById(0);
     ASSERT_NE(display, nullptr);
     ASSERT_TRUE((display != nullptr));
-    Rect displayRect = {0, 0, display->GetWidth(), display->GetHeight()};
+    Rect displayRect = { 0, 0, display->GetWidth(), display->GetHeight() };
     Utils::InitByDisplayRect(displayRect);
 
     virtualPixelRatio_ = WindowTestUtils::GetVirtualPixelRatio(0);
 
     // calc expected rects
-    Rect expected = { // 0. only statusBar
+    Rect expected = {
+        // 0. only statusBar
         0,
         Utils::statusBarRect_.height_,
         Utils::displayRect_.width_,
         Utils::displayRect_.height_ - Utils::statusBarRect_.height_,
     };
     fullScreenExpecteds_.push_back(expected);
-    expected = { // 1. both statusBar and naviBar
+    expected = {
+        // 1. both statusBar and naviBar
         0,
         Utils::statusBarRect_.height_,
         Utils::displayRect_.width_,
         Utils::displayRect_.height_ - Utils::statusBarRect_.height_ - Utils::naviBarRect_.height_,
     };
     fullScreenExpecteds_.push_back(expected);
-    expected = { // 2. only naviBar
+    expected = {
+        // 2. only naviBar
         0,
         0,
         Utils::displayRect_.width_,
@@ -93,7 +96,7 @@ void WindowLayoutTest::InitAvoidArea()
 {
     Utils::TestWindowInfo info = {
         .name = "avoidArea",
-        .rect = {0, 0, 0, 0},
+        .rect = { 0, 0, 0, 0 },
         .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
         .mode = WindowMode::WINDOW_MODE_FLOATING,
         .needAvoid = true,
@@ -109,9 +112,7 @@ void WindowLayoutTest::InitAvoidArea()
     window->Destroy();
 }
 
-void WindowLayoutTest::TearDownTestCase()
-{
-}
+void WindowLayoutTest::TearDownTestCase() {}
 
 void WindowLayoutTest::SetUp()
 {
@@ -122,7 +123,7 @@ void WindowLayoutTest::SetUp()
 
 void WindowLayoutTest::TearDown()
 {
-    for (auto window: activeWindows_) {
+    for (auto window : activeWindows_) {
         window->Destroy();
     }
     sleep(WAIT_SYANC_S);
@@ -135,7 +136,7 @@ namespace {
  * @tc.desc: One FLOATING APP Window with on custom rect
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, LayoutWindow01, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, LayoutWindow01, TestSize.Level1)
 {
     WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::TILE);
     WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE);
@@ -144,7 +145,7 @@ HWTEST_F(WindowLayoutTest, LayoutWindow01, Function | MediumTest | Level3)
 
     Utils::TestWindowInfo info = {
         .name = "main1",
-        .rect = {0, 0, 0, 0},
+        .rect = { 0, 0, 0, 0 },
         .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
         .mode = WindowMode::WINDOW_MODE_FLOATING,
         .needAvoid = true,
@@ -167,7 +168,7 @@ HWTEST_F(WindowLayoutTest, LayoutWindow01, Function | MediumTest | Level3)
  * @tc.desc: One FLOATING APP Window
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, LayoutWindow02, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, LayoutWindow02, TestSize.Level1)
 {
     Rect res = Utils::GetFloatingLimitedRect(Utils::customAppRect_, virtualPixelRatio_);
     Utils::TestWindowInfo info = {
@@ -198,7 +199,7 @@ HWTEST_F(WindowLayoutTest, LayoutWindow02, Function | MediumTest | Level3)
  * @tc.desc: One FLOATING APP Window & One StatusBar Window
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, LayoutWindow04, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, LayoutWindow04, TestSize.Level1)
 {
     // app window
     Rect res = Utils::GetFloatingLimitedRect(Utils::customAppRect_, virtualPixelRatio_);
@@ -246,7 +247,7 @@ HWTEST_F(WindowLayoutTest, LayoutWindow04, Function | MediumTest | Level3)
  * @tc.desc: StatusBar Window and NaviBar & Sys Window FULLSCRENN,NOT NEEDVOID,PARENTLIMIT
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, LayoutWindow06, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, LayoutWindow06, TestSize.Level1)
 {
     sptr<Window> statBar = Utils::CreateStatusBarWindow();
     ASSERT_NE(statBar, nullptr);
@@ -300,7 +301,7 @@ HWTEST_F(WindowLayoutTest, LayoutWindow06, Function | MediumTest | Level3)
  * @tc.desc: StatusBar Window and NaviBar & One Floating Sys Window
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, LayoutWindow07, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, LayoutWindow07, TestSize.Level1)
 {
     // statusBar window
     sptr<Window> statBar = Utils::CreateStatusBarWindow();
@@ -333,7 +334,7 @@ HWTEST_F(WindowLayoutTest, LayoutWindow07, Function | MediumTest | Level3)
         ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, statBar->Show());
     }
     sysWin->Show();
-    
+
     ASSERT_TRUE(Utils::RectEqualTo(sysWin, Utils::customAppRect_));
 
     if (WMError::WM_OK == naviBar->Show()) {
@@ -356,11 +357,11 @@ HWTEST_F(WindowLayoutTest, LayoutWindow07, Function | MediumTest | Level3)
  * @tc.desc: One FLOATING APP Window with on custom rect
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, LayoutWindow08, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, LayoutWindow08, TestSize.Level1)
 {
     Utils::TestWindowInfo info = {
         .name = "main8",
-        .rect = {0, 0, 0, 0},
+        .rect = { 0, 0, 0, 0 },
         .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
         .mode = WindowMode::WINDOW_MODE_FLOATING,
         .needAvoid = true,
@@ -385,11 +386,11 @@ HWTEST_F(WindowLayoutTest, LayoutWindow08, Function | MediumTest | Level3)
  * @tc.desc: Add a floating and resize(2, 2)
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, LayoutWindow09, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, LayoutWindow09, TestSize.Level1)
 {
     Utils::TestWindowInfo info = {
         .name = "main9",
-        .rect = {0, 0, 0, 0},
+        .rect = { 0, 0, 0, 0 },
         .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
         .mode = WindowMode::WINDOW_MODE_FLOATING,
         .needAvoid = true,
@@ -408,8 +409,8 @@ HWTEST_F(WindowLayoutTest, LayoutWindow09, Function | MediumTest | Level3)
     usleep(WAIT_SYANC_US);
     ASSERT_TRUE(Utils::RectEqualTo(window, expect));
 
-    ASSERT_EQ(WMError::WM_OK, window->Resize(2u, 2u));        // 2: custom min size
-    Rect finalExcept = { expect.posX_, expect.posY_, 2u, 2u}; // 2: custom min size
+    ASSERT_EQ(WMError::WM_OK, window->Resize(2u, 2u));         // 2: custom min size
+    Rect finalExcept = { expect.posX_, expect.posY_, 2u, 2u }; // 2: custom min size
     finalExcept = Utils::GetFloatingLimitedRect(finalExcept, virtualPixelRatio_);
     ASSERT_TRUE(Utils::RectEqualTo(window, finalExcept));
     ASSERT_EQ(WMError::WM_OK, window->Hide());
@@ -420,11 +421,11 @@ HWTEST_F(WindowLayoutTest, LayoutWindow09, Function | MediumTest | Level3)
  * @tc.desc: One FLOATING APP Window do max and recovery
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, LayoutWindow10, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, LayoutWindow10, TestSize.Level1)
 {
     Utils::TestWindowInfo info = {
         .name = "main10",
-        .rect = {0, 0, 0, 0},
+        .rect = { 0, 0, 0, 0 },
         .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
         .mode = WindowMode::WINDOW_MODE_FLOATING,
         .needAvoid = true,
@@ -456,7 +457,7 @@ HWTEST_F(WindowLayoutTest, LayoutWindow10, Function | MediumTest | Level3)
  * @tc.desc: One FLOATING APP Window into tile mode, show 4 new window
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, LayoutTile01, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, LayoutTile01, TestSize.Level1)
 {
     Utils::TestWindowInfo info = {
         .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, .mode = WindowMode::WINDOW_MODE_FLOATING, .needAvoid = true,
@@ -516,7 +517,7 @@ HWTEST_F(WindowLayoutTest, LayoutTile01, Function | MediumTest | Level3)
  * @tc.desc: negative test for tile window
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, LayoutTileNegative01, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, LayoutTileNegative01, TestSize.Level1)
 {
     WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE);
     Utils::TestWindowInfo info = {
@@ -578,12 +579,12 @@ HWTEST_F(WindowLayoutTest, LayoutTileNegative01, Function | MediumTest | Level3)
  * @tc.desc: move window out of the display
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, LayoutNegative01, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, LayoutNegative01, TestSize.Level1)
 {
     WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE);
     Utils::TestWindowInfo info = {
         .name = "mainNegative1",
-        .rect = {0, 0, 0, 0},
+        .rect = { 0, 0, 0, 0 },
         .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
         .mode = WindowMode::WINDOW_MODE_FLOATING,
         .needAvoid = true,
@@ -605,14 +606,14 @@ HWTEST_F(WindowLayoutTest, LayoutNegative01, Function | MediumTest | Level3)
  * @tc.desc: resize window to negative size
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, LayoutNegative02, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, LayoutNegative02, TestSize.Level1)
 {
     WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE);
     const uint32_t negativeW = 0;
     const uint32_t negativeH = 0;
     Utils::TestWindowInfo info = {
         .name = "mainNegative2",
-        .rect = {0, 0, 0, 0},
+        .rect = { 0, 0, 0, 0 },
         .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
         .mode = WindowMode::WINDOW_MODE_FLOATING,
         .needAvoid = true,
@@ -629,11 +630,11 @@ HWTEST_F(WindowLayoutTest, LayoutNegative02, Function | MediumTest | Level3)
     ASSERT_TRUE(Utils::RectEqualTo(window, expect));
     window->Resize(negativeW, negativeH);
     usleep(WAIT_SYANC_US);
-    Rect expect2 = {expect.posX_, expect.posY_, negativeW, negativeH};
+    Rect expect2 = { expect.posX_, expect.posY_, negativeW, negativeH };
     expect2 = Utils::CalcLimitedRect(expect2, virtualPixelRatio_);
     ASSERT_TRUE(Utils::RectEqualTo(window, expect2));
 }
 
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

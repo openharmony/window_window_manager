@@ -43,11 +43,10 @@ void SessionStubImmersiveTest::SetUp()
     session_ = sptr<SessionStubMocker>::MakeSptr();
     EXPECT_NE(nullptr, session_);
 
-    EXPECT_CALL(*session_, OnRemoteRequest(_, _, _, _)).WillOnce(Invoke(
-        [&](uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) -> int {
+    EXPECT_CALL(*session_, OnRemoteRequest(_, _, _, _))
+        .WillOnce(Invoke([&](uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) -> int {
             return session_->SessionStub::OnRemoteRequest(code, data, reply, option);
-        }
-    ));
+        }));
 }
 
 void SessionStubImmersiveTest::TearDown()
@@ -62,12 +61,12 @@ namespace {
  * @tc.desc: GetAvoidAreaByType with invalid type
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStubImmersiveTest, HandleGetAvoidAreaByTypeWithInvalidType, Function | SmallTest | Level2)
+HWTEST_F(SessionStubImmersiveTest, HandleGetAvoidAreaByTypeWithInvalidType, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SessionStubImmersiveTest::HandleGetAvoidAreaByTypeWithInvalidType start";
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option = {MessageOption::TF_SYNC};
+    MessageOption option = { MessageOption::TF_SYNC };
     data.WriteInterfaceToken(u"OHOS.ISession");
     data.WriteUint32(1111); // invalid type
     uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_AVOID_AREA);
@@ -81,7 +80,7 @@ HWTEST_F(SessionStubImmersiveTest, HandleGetAvoidAreaByTypeWithInvalidType, Func
  * @tc.desc: GetAvoidAreaByType with system type
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStubImmersiveTest, HandleGetAvoidAreaByTypeWithSystemType, Function | SmallTest | Level2)
+HWTEST_F(SessionStubImmersiveTest, HandleGetAvoidAreaByTypeWithSystemType, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SessionStubImmersiveTest::HandleGetAvoidAreaByTypeWithSystemType start";
     AvoidArea mockArea;
@@ -91,10 +90,10 @@ HWTEST_F(SessionStubImmersiveTest, HandleGetAvoidAreaByTypeWithSystemType, Funct
 
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option = {MessageOption::TF_SYNC};
+    MessageOption option = { MessageOption::TF_SYNC };
     data.WriteInterfaceToken(u"OHOS.ISession");
     data.WriteUint32(static_cast<uint32_t>(AvoidAreaType::TYPE_SYSTEM));
-    WSRect rect = {0, 0, 1200, 127};
+    WSRect rect = { 0, 0, 1200, 127 };
     data.WriteInt32(rect.posX_);
     data.WriteInt32(rect.posY_);
     data.WriteInt32(rect.width_);
@@ -115,11 +114,11 @@ HWTEST_F(SessionStubImmersiveTest, HandleGetAvoidAreaByTypeWithSystemType, Funct
  * @tc.desc: GetAllAvoidAreas return two Areas
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStubImmersiveTest, HandleGetAllAvoidAreasNormal, Function | SmallTest | Level2)
+HWTEST_F(SessionStubImmersiveTest, HandleGetAllAvoidAreasNormal, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SessionStubImmersiveTest::HandleGetAllAvoidAreasNormal start";
-    EXPECT_CALL(*session_, GetAllAvoidAreas(_)).WillOnce(Invoke(
-        [](std::map<AvoidAreaType, AvoidArea>& avoidAreas) -> WSError {
+    EXPECT_CALL(*session_, GetAllAvoidAreas(_))
+        .WillOnce(Invoke([](std::map<AvoidAreaType, AvoidArea>& avoidAreas) -> WSError {
             AvoidArea mockArea;
             mockArea.topRect_.width_ = 1200;
             mockArea.topRect_.height_ = 127;
@@ -130,12 +129,11 @@ HWTEST_F(SessionStubImmersiveTest, HandleGetAllAvoidAreasNormal, Function | Smal
             indArea.bottomRect_.height_ = 10;
             avoidAreas[AvoidAreaType::TYPE_NAVIGATION_INDICATOR] = indArea;
             return WSError::WS_OK;
-        }
-    ));
+        }));
 
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option = {MessageOption::TF_SYNC};
+    MessageOption option = { MessageOption::TF_SYNC };
     data.WriteInterfaceToken(u"OHOS.ISession");
     data.WriteUint32(static_cast<uint32_t>(AvoidAreaType::TYPE_SYSTEM));
     uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_ALL_AVOID_AREAS);
@@ -148,8 +146,8 @@ HWTEST_F(SessionStubImmersiveTest, HandleGetAllAvoidAreasNormal, Function | Smal
     for (uint32_t i = 0; i < 2; i++) {
         uint32_t type = reply.ReadUint32();
         ASSERT_TRUE((static_cast<AvoidAreaType>(type) == AvoidAreaType::TYPE_SYSTEM) ||
-            (static_cast<AvoidAreaType>(type) == AvoidAreaType::TYPE_NAVIGATION_INDICATOR));
-        
+                    (static_cast<AvoidAreaType>(type) == AvoidAreaType::TYPE_NAVIGATION_INDICATOR));
+
         sptr<AvoidArea> area = reply.ReadParcelable<AvoidArea>();
         ASSERT_TRUE(area != nullptr);
     }
@@ -163,14 +161,14 @@ HWTEST_F(SessionStubImmersiveTest, HandleGetAllAvoidAreasNormal, Function | Smal
  * @tc.desc: GetAllAvoidAreas return empty
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStubImmersiveTest, HandleGetAllAvoidAreasEmpty, Function | SmallTest | Level2)
+HWTEST_F(SessionStubImmersiveTest, HandleGetAllAvoidAreasEmpty, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SessionStubImmersiveTest::HandleGetAllAvoidAreasEmpty start";
     EXPECT_CALL(*session_, GetAllAvoidAreas(_)).WillOnce(Return(WSError::WS_OK));
 
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option = {MessageOption::TF_SYNC};
+    MessageOption option = { MessageOption::TF_SYNC };
     data.WriteInterfaceToken(u"OHOS.ISession");
     data.WriteUint32(static_cast<uint32_t>(AvoidAreaType::TYPE_SYSTEM));
     uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_ALL_AVOID_AREAS);
@@ -184,6 +182,6 @@ HWTEST_F(SessionStubImmersiveTest, HandleGetAllAvoidAreasEmpty, Function | Small
     ASSERT_EQ(errCode, 0);
     GTEST_LOG_(INFO) << "SessionStubImmersiveTest::HandleGetAllAvoidAreasEmpty end";
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

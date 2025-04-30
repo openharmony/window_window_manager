@@ -35,30 +35,24 @@ public:
     Utils::TestWindowInfo fullScreenAppInfo_;
 };
 
-void WindowGamutTest::SetUpTestCase()
-{
-}
+void WindowGamutTest::SetUpTestCase() {}
 
-void WindowGamutTest::TearDownTestCase()
-{
-}
+void WindowGamutTest::TearDownTestCase() {}
 
 void WindowGamutTest::SetUp()
 {
     fullScreenAppInfo_ = {
-            .name = "FullWindow",
-            .rect = Utils::customAppRect_,
-            .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
-            .mode = WindowMode::WINDOW_MODE_FULLSCREEN,
-            .needAvoid = false,
-            .parentLimit = false,
-            .parentId = INVALID_WINDOW_ID,
+        .name = "FullWindow",
+        .rect = Utils::customAppRect_,
+        .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
+        .mode = WindowMode::WINDOW_MODE_FULLSCREEN,
+        .needAvoid = false,
+        .parentLimit = false,
+        .parentId = INVALID_WINDOW_ID,
     };
 }
 
-void WindowGamutTest::TearDown()
-{
-}
+void WindowGamutTest::TearDown() {}
 
 namespace {
 /**
@@ -66,7 +60,7 @@ namespace {
  * @tc.desc: IsSupportWideGamut
  * @tc.type: FUNC
  */
-HWTEST_F(WindowGamutTest, IsSupportWideGamut01, Function | MediumTest | Level3)
+HWTEST_F(WindowGamutTest, IsSupportWideGamut01, TestSize.Level1)
 {
     fullScreenAppInfo_.name = "window_isSupportWideGamut01";
     sptr<Window> window = Utils::CreateTestWindow(fullScreenAppInfo_);
@@ -82,7 +76,7 @@ HWTEST_F(WindowGamutTest, IsSupportWideGamut01, Function | MediumTest | Level3)
  * @tc.desc: Get ColorSpace
  * @tc.type: FUNC
  */
-HWTEST_F(WindowGamutTest, GetColorSpace01, Function | MediumTest | Level3)
+HWTEST_F(WindowGamutTest, GetColorSpace01, TestSize.Level1)
 {
     fullScreenAppInfo_.name = "window_getColorSpace01";
     sptr<Window> window = Utils::CreateTestWindow(fullScreenAppInfo_);
@@ -98,13 +92,10 @@ HWTEST_F(WindowGamutTest, GetColorSpace01, Function | MediumTest | Level3)
  * @tc.desc: Set ColorSpace, valid param
  * @tc.type: FUNC
  */
-HWTEST_F(WindowGamutTest, SetColorSpace01, Function | MediumTest | Level3)
+HWTEST_F(WindowGamutTest, SetColorSpace01, TestSize.Level1)
 {
     uint32_t i, j;
-    const ColorSpace colorSpacesToTest[] = {
-        ColorSpace::COLOR_SPACE_DEFAULT,
-        ColorSpace::COLOR_SPACE_WIDE_GAMUT
-    };
+    const ColorSpace colorSpacesToTest[] = { ColorSpace::COLOR_SPACE_DEFAULT, ColorSpace::COLOR_SPACE_WIDE_GAMUT };
     ColorSpace colorSpace;
     fullScreenAppInfo_.name = "window_setColorSpace01";
     sptr<Window> window = Utils::CreateTestWindow(fullScreenAppInfo_);
@@ -114,7 +105,7 @@ HWTEST_F(WindowGamutTest, SetColorSpace01, Function | MediumTest | Level3)
 
     for (j = 0; j < sizeof(colorSpacesToTest) / sizeof(ColorSpace); j++) {
         window->SetColorSpace(colorSpacesToTest[j]); // async func
-        for (i = 0; i < MAX_WAIT_COUNT; i++) { // wait some time for async set ok
+        for (i = 0; i < MAX_WAIT_COUNT; i++) {       // wait some time for async set ok
             colorSpace = window->GetColorSpace();
             if (colorSpace != colorSpacesToTest[j]) {
                 usleep(WAIT_DUR);
@@ -135,7 +126,7 @@ HWTEST_F(WindowGamutTest, SetColorSpace01, Function | MediumTest | Level3)
  * @tc.desc: Set ColorSpace, invalid param
  * @tc.type: FUNC
  */
-HWTEST_F(WindowGamutTest, SetColorSpace02, Function | MediumTest | Level3)
+HWTEST_F(WindowGamutTest, SetColorSpace02, TestSize.Level1)
 {
     fullScreenAppInfo_.name = "window_setColorSpace02";
     sptr<Window> window = Utils::CreateTestWindow(fullScreenAppInfo_);
@@ -144,7 +135,7 @@ HWTEST_F(WindowGamutTest, SetColorSpace02, Function | MediumTest | Level3)
 
     ColorSpace invalidColorSpace =
         static_cast<ColorSpace>(static_cast<uint32_t>(ColorSpace::COLOR_SPACE_WIDE_GAMUT) + 1);
-    window->SetColorSpace(invalidColorSpace);  // invalid param
+    window->SetColorSpace(invalidColorSpace); // invalid param
 
     ASSERT_EQ(colorSpaceBackup, window->GetColorSpace());
 

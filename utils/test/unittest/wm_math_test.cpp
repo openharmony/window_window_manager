@@ -31,21 +31,13 @@ public:
     virtual void TearDown() override;
 };
 
-void WmMathTest::SetUpTestCase()
-{
-}
+void WmMathTest::SetUpTestCase() {}
 
-void WmMathTest::TearDownTestCase()
-{
-}
+void WmMathTest::TearDownTestCase() {}
 
-void WmMathTest::SetUp()
-{
-}
+void WmMathTest::SetUp() {}
 
-void WmMathTest::TearDown()
-{
-}
+void WmMathTest::TearDown() {}
 
 namespace {
 /**
@@ -186,6 +178,6 @@ HWTEST_F(WmMathTest, Invert04, TestSize.Level1)
     mat.Invert();
     ASSERT_EQ(false, MathHelper::NearZero(0.f - mat.mat_[1][0]));
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

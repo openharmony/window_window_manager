@@ -61,7 +61,7 @@ namespace {
  * @tc.type: FUNC
  * @tc.require: issueI5I5L4
  */
-HWTEST_F(InputTransferStationTest, AddInputWindow, Function | SmallTest | Level2)
+HWTEST_F(InputTransferStationTest, AddInputWindow, TestSize.Level0)
 {
     if (!window_) {
         GTEST_LOG_(INFO) << "Null Pointer";
@@ -77,6 +77,11 @@ HWTEST_F(InputTransferStationTest, AddInputWindow, Function | SmallTest | Level2
     InputTransferStation::GetInstance().AddInputWindow(window_);
     InputTransferStation::GetInstance().inputListener_ = listener;
     InputTransferStation::GetInstance().AddInputWindow(window_);
+    InputTransferStation::GetInstance().isGameControllerLoaded_ = true;
+    InputTransferStation::GetInstance().AddInputWindow(window_);
+    InputTransferStation::GetInstance().isGameControllerLoaded_ = false;
+    InputTransferStation::GetInstance().AddInputWindow(window_);
+    ASSERT_EQ(true, InputTransferStation::GetInstance().isGameControllerLoaded_);
 }
 
 /**
@@ -85,7 +90,7 @@ HWTEST_F(InputTransferStationTest, AddInputWindow, Function | SmallTest | Level2
  * @tc.type: FUNC
  * @tc.require: issueI5I5L4
  */
-HWTEST_F(InputTransferStationTest, RemoveInputWindow, Function | SmallTest | Level2)
+HWTEST_F(InputTransferStationTest, RemoveInputWindow, TestSize.Level0)
 {
     InputTransferStation::GetInstance().destroyed_ = true;
     InputTransferStation::GetInstance().RemoveInputWindow(window_->GetWindowId());
@@ -103,7 +108,7 @@ HWTEST_F(InputTransferStationTest, RemoveInputWindow, Function | SmallTest | Lev
  * @tc.desc: OnInputEvent keyEvent
  * @tc.type: FUNC
  */
-HWTEST_F(InputTransferStationTest, OnInputEvent1, Function | SmallTest | Level2)
+HWTEST_F(InputTransferStationTest, OnInputEvent1, TestSize.Level1)
 {
     auto keyEvent = MMI::KeyEvent::Create();
     if (!keyEvent || !listener) {
@@ -125,7 +130,7 @@ HWTEST_F(InputTransferStationTest, OnInputEvent1, Function | SmallTest | Level2)
  * @tc.desc: OnInputEvent axisEvent
  * @tc.type: FUNC
  */
-HWTEST_F(InputTransferStationTest, OnInputEvent2, Function | SmallTest | Level2)
+HWTEST_F(InputTransferStationTest, OnInputEvent2, TestSize.Level1)
 {
     auto axisEvent = MMI::AxisEvent::Create();
     if (!axisEvent || !listener) {
@@ -144,7 +149,7 @@ HWTEST_F(InputTransferStationTest, OnInputEvent2, Function | SmallTest | Level2)
  * @tc.desc: OnInputEvent pointerEvent
  * @tc.type: FUNC
  */
-HWTEST_F(InputTransferStationTest, OnInputEvent3, Function | SmallTest | Level2)
+HWTEST_F(InputTransferStationTest, OnInputEvent3, TestSize.Level1)
 {
     auto pointerEvent = MMI::PointerEvent::Create();
     if (!pointerEvent || !listener) {
@@ -172,7 +177,7 @@ HWTEST_F(InputTransferStationTest, OnInputEvent3, Function | SmallTest | Level2)
  * @tc.desc: GetInputChannel
  * @tc.type: FUNC
  */
-HWTEST_F(InputTransferStationTest, GetInputChannel, Function | SmallTest | Level2)
+HWTEST_F(InputTransferStationTest, GetInputChannel, TestSize.Level0)
 {
     InputTransferStation::GetInstance().destroyed_ = true;
     auto channel = InputTransferStation::GetInstance().GetInputChannel(0);

@@ -32,6 +32,7 @@ namespace OHOS::Rosen {
 namespace {
 constexpr int32_t CYCLE_LIMIT = 1000;
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSessionManagerProxy"};
+constexpr DisplayId VIRTUAL_DISPLAY_ID = 999;
 }
 WSError SceneSessionManagerProxy::CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
     const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
@@ -105,7 +106,9 @@ WSError SceneSessionManagerProxy::CreateAndConnectSpecificSession(const sptr<ISe
         TLOGE(WmsLogTag::WMS_LIFE, "Read displayId failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    property->SetDisplayId(displayId);
+    if (property->GetDisplayId() != VIRTUAL_DISPLAY_ID) {
+        property->SetDisplayId(displayId);
+    }
     int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
 }
@@ -2681,6 +2684,62 @@ WMError SceneSessionManagerProxy::UpdateScreenLockStatusForApp(const std::string
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (Remote()->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UPDATE_SESSION_SCREEN_LOCK),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(reply.ReadInt32());
+}
+
+WMError SceneSessionManagerProxy::AddSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write token failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint64(persistentIds.size())) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write size failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    for (const auto persistentId: persistentIds) {
+        if (!data.WriteInt32(persistentId)) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write persistentId failed");
+            return WMError::WM_ERROR_IPC_FAILED;
+        }
+    }
+    if (Remote()->SendRequest(
+        static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_ADD_SKIP_SELF_ON_VIRTUAL_SCREEN),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(reply.ReadInt32());
+}
+
+WMError SceneSessionManagerProxy::RemoveSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write token failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint64(persistentIds.size())) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write size failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    for (const auto persistentId: persistentIds) {
+        if (!data.WriteInt32(persistentId)) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write persistentId failed");
+            return WMError::WM_ERROR_IPC_FAILED;
+        }
+    }
+    if (Remote()->SendRequest(
+        static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_REMOVE_SKIP_SELF_ON_VIRTUAL_SCREEN),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;

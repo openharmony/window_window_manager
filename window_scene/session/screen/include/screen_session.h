@@ -57,6 +57,7 @@ public:
     virtual void OnSecondaryReflexionChange(ScreenId screenId, bool isSecondaryReflexion) = 0;
     virtual void OnExtendScreenConnectStatusChange(ScreenId screenId,
         ExtendScreenConnectStatus extendScreenConnectStatus) = 0;
+    virtual void OnBeforeScreenPropertyChange(FoldStatus foldStatus) = 0;
 };
 
 enum class MirrorScreenType : int32_t {
@@ -129,6 +130,7 @@ public:
     void SetScreenSceneDpiChangeListener(const SetScreenSceneDpiFunc& func);
     void SetScreenSceneDpi(float density);
     void SetDensityInCurResolution(float densityInCurResolution);
+    float GetDensityInCurResolution();
     void SetDefaultDensity(float defaultDensity);
     void UpdateVirtualPixelRatio(const RRect& bounds);
     void SetScreenType(ScreenType type);
@@ -150,10 +152,8 @@ public:
     void ReleaseDisplayNode();
 
     Rotation CalcRotation(Orientation orientation, FoldDisplayMode foldDisplayMode) const;
-    DisplayOrientation CalcDisplayOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode,
-        bool IsOrientationNeedChanged) const;
-    DisplayOrientation CalcDeviceOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode,
-        bool IsOrientationNeedChanged) const;
+    DisplayOrientation CalcDisplayOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode) const;
+    DisplayOrientation CalcDeviceOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode) const;
     void FillScreenInfo(sptr<ScreenInfo> info) const;
     void InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startPoint, bool isExtend = false);
 
@@ -190,11 +190,10 @@ public:
     void SetIsPhysicalMirrorSwitch(bool isPhysicalMirrorSwitch);
     bool GetIsPhysicalMirrorSwitch();
     void UpdateTouchBoundsAndOffset();
-    void UpdateToInputManager(RRect bounds, int rotation, int deviceRotation,
-        FoldDisplayMode foldDisplayMode, bool isChanged);
-    void UpdatePropertyAfterRotation(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode, bool isChanged);
-    void UpdatePropertyOnly(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode, bool isChanged);
-    void UpdateRotationOrientation(int rotation, FoldDisplayMode foldDisplayMode, bool isChanged);
+    void UpdateToInputManager(RRect bounds, int rotation, int deviceRotation, FoldDisplayMode foldDisplayMode);
+    void UpdatePropertyAfterRotation(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
+    void UpdatePropertyOnly(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
+    void UpdateRotationOrientation(int rotation, FoldDisplayMode foldDisplayMode);
     void UpdatePropertyByFakeInUse(bool isFakeInUse);
     ScreenProperty UpdatePropertyByFoldControl(const ScreenProperty& updatedProperty,
         FoldDisplayMode foldDisplayMode = FoldDisplayMode::UNKNOWN);
@@ -210,12 +209,10 @@ public:
 
     void SetHdrFormats(std::vector<uint32_t>&& hdrFormats);
     void SetColorSpaces(std::vector<uint32_t>&& colorSpaces);
+    void SetForceCloseHdr(bool isForceCloseHdr);
 
     VirtualScreenFlag GetVirtualScreenFlag();
     void SetVirtualScreenFlag(VirtualScreenFlag screenFlag);
-
-    bool GetShareProtect();
-    void SetShareProtect(bool needShareProtect);
 
     std::string name_ { "UNKNOWN" };
     ScreenId screenId_ {};
@@ -248,7 +245,6 @@ public:
     uint32_t GetPointerActiveWidth();
     void SetPointerActiveHeight(uint32_t pointerActiveHeight);
     uint32_t GetPointerActiveHeight();
-
     float GetSensorRotation() const;
     DisplaySourceMode GetDisplaySourceMode() const;
     void SetXYPosition(int32_t x, int32_t y);
@@ -307,6 +303,31 @@ public:
     void SecondaryReflexionChange(ScreenId screenId, bool isSecondaryReflexion);
     void EnableMirrorScreenRegion();
     void ExtendScreenConnectStatusChange(ScreenId screenId, ExtendScreenConnectStatus extendScreenConnectStatus);
+    void SetIsEnableRegionRotation(bool isEnableRegionRotation);
+    bool GetIsEnableRegionRotation();
+    void UpdateDisplayNodeRotation(int rotation);
+    void BeforeScreenPropertyChange(FoldStatus foldStatus);
+
+    DisplayId GetDisplayId();
+
+    std::vector<sptr<SupportedScreenModes>> GetScreenModes();
+    void SetScreenModes(std::vector<sptr<SupportedScreenModes>> modes);
+
+    int32_t GetActiveId();
+    void SetActiveId(int32_t activeIdx);
+
+    void SetScreenId(ScreenId screenId);
+    void SetRSScreenId(ScreenId rsId);
+
+    void SetDisplayNode(std::shared_ptr<RSDisplayNode> displayNode);
+    void SetScreenOffScreenRendering();
+    void SetScreenProperty(ScreenProperty property);
+
+    void SetScreenAvailableStatus(bool isScreenAvailable);
+    bool IsScreenAvailable() const;
+
+    void SetIsAvailableAreaNeedNotify(bool isAvailableAreaNeedNotify);
+    bool GetIsAvailableAreaNeedNotify() const;
 
 private:
     ScreenProperty property_;
@@ -320,6 +341,7 @@ private:
     bool isFakeInUse_ = false;  // is fake session in use
     bool isBScreenHalf_ = false;
     bool isPhysicalMirrorSwitch_ = false;
+    bool isScreenAvailable_ = true;
     mutable std::shared_mutex displayNodeMutex_;
     std::atomic<bool> touchEnabled_ { true };
     std::function<void(float)> updateToInputManagerCallback_ = nullptr;
@@ -336,13 +358,15 @@ private:
     DestroyScreenSceneFunc destroyScreenSceneCallback_ = nullptr;
     void ReportNotifyModeChange(DisplayOrientation displayOrientation);
     sptr<ScreenSession> fakeScreenSession_ = nullptr;
-    bool needShareProtect_ = false;
     int32_t GetApiVersion();
     void SetScreenSnapshotRect(RSSurfaceCaptureConfig& config);
     bool IsWidthHeightMatch(float width, float height, float targetWidth, float targetHeight);
     std::mutex mirrorScreenRegionMutex_;
     void OptimizeSecondaryDisplayMode(const RRect &bounds, FoldDisplayMode &foldDisplayMode);
     std::string innerName_ {"UNKOWN"};
+    bool isEnableRegionRotation_ = false;
+    std::mutex isEnableRegionRotationMutex_;
+    bool isAvailableAreaNeedNotify_ = false;
 };
 
 class ScreenSessionGroup : public ScreenSession {

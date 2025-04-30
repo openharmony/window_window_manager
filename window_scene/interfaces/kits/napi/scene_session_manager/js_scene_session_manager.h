@@ -45,7 +45,8 @@ enum class ListenerFunctionType : uint32_t {
     NOTIFY_APP_USE_CONTROL_LIST_CB,
     WATCH_GESTURE_CONSUME_RESULT_CB,
     WATCH_FOCUS_ACTIVE_CHANGE_CB,
-    SET_FOREGROUND_WINDOW_NUM_CB
+    SET_FOREGROUND_WINDOW_NUM_CB,
+    SCENE_SESSION_DESTRUCT_CB
 };
 
 class JsSceneSessionManager final {
@@ -57,19 +58,10 @@ public:
     static void Finalizer(napi_env env, void* data, void* hint);
 
     static napi_value GetRootSceneSession(napi_env env, napi_callback_info info);
-    static napi_value RequestSceneSession(napi_env env, napi_callback_info info);
-    static napi_value UpdateSceneSessionWant(napi_env env, napi_callback_info info);
-    static napi_value RequestSceneSessionActivation(napi_env env, napi_callback_info info);
-    static napi_value RequestSceneSessionBackground(napi_env env, napi_callback_info info);
-    static napi_value RequestSceneSessionDestruction(napi_env env, napi_callback_info info);
-    static napi_value NotifyForegroundInteractiveStatus(napi_env env, napi_callback_info info);
-    static napi_value IsSceneSessionValid(napi_env env, napi_callback_info info);
-    static napi_value RequestSceneSessionByCall(napi_env env, napi_callback_info info);
-    static napi_value StartAbilityBySpecified(napi_env env, napi_callback_info info);
-    static napi_value StartUIAbilityBySCB(napi_env env, napi_callback_info info);
     static napi_value ChangeUIAbilityVisibilityBySCB(napi_env env, napi_callback_info info);
     static napi_value RegisterCallback(napi_env env, napi_callback_info info);
     static napi_value GetWindowSceneConfig(napi_env env, napi_callback_info info);
+    static napi_value GetSystemConfig(napi_env env, napi_callback_info info);
     static napi_value UpdateRotateAnimationConfig(napi_env env, napi_callback_info info);
     static napi_value ProcessBackEvent(napi_env env, napi_callback_info info);
     static napi_value CheckSceneZOrder(napi_env env, napi_callback_info info);
@@ -126,6 +118,12 @@ public:
     static napi_value CloneWindow(napi_env env, napi_callback_info info);
     static napi_value RegisterSingleHandContainerNode(napi_env env, napi_callback_info info);
     static napi_value NotifyRotationChange(napi_env env, napi_callback_info info);
+    static napi_value SupportFollowParentWindowLayout(napi_env env, napi_callback_info info);
+
+    /*
+     * PC Window
+     */
+    static napi_value GetWindowLimits(napi_env env, napi_callback_info info);
 
     /*
      * Multi Instance
@@ -143,6 +141,7 @@ public:
     static napi_value GetIsLayoutFullScreen(napi_env env, napi_callback_info info);
     static napi_value SetStatusBarDefaultVisibilityPerDisplay(napi_env env, napi_callback_info info);
     static napi_value NotifyStatusBarShowStatus(napi_env env, napi_callback_info info);
+    static napi_value NotifyStatusBarConstantlyShowStatus(napi_env env, napi_callback_info info);
     static napi_value SetStatusBarAvoidHeight(napi_env env, napi_callback_info info);
 
     /*
@@ -166,6 +165,7 @@ private:
     napi_value OnStartUIAbilityBySCB(napi_env env, napi_callback_info info);
     napi_value OnChangeUIAbilityVisibilityBySCB(napi_env env, napi_callback_info info);
     napi_value OnGetWindowSceneConfig(napi_env env, napi_callback_info info);
+    napi_value OnGetSystemConfig(napi_env env, napi_callback_info info);
     napi_value OnUpdateRotateAnimationConfig(napi_env env, napi_callback_info info);
     napi_value OnProcessBackEvent(napi_env env, napi_callback_info info);
     napi_value OnCheckSceneZOrder(napi_env env, napi_callback_info info);
@@ -220,7 +220,13 @@ private:
     napi_value OnCloneWindow(napi_env env, napi_callback_info info);
     napi_value OnRegisterSingleHandContainerNode(napi_env env, napi_callback_info info);
     napi_value OnNotifyRotationChange(napi_env env, napi_callback_info info);
-
+    napi_value OnSupportFollowParentWindowLayout(napi_env env, napi_callback_info info);
+    
+    /*
+     * PC Window
+     */
+    napi_value OnGetWindowLimits(napi_env env, napi_callback_info info);
+    
     /*
      * Multi Instance
      */
@@ -237,6 +243,7 @@ private:
     napi_value OnGetIsLayoutFullScreen(napi_env env, napi_callback_info info);
     napi_value OnSetStatusBarDefaultVisibilityPerDisplay(napi_env env, napi_callback_info info);
     napi_value OnNotifyStatusBarShowStatus(napi_env env, napi_callback_info info);
+    napi_value OnNotifyStatusBarConstantlyShowStatus(napi_env env, napi_callback_info info);
     napi_value OnSetStatusBarAvoidHeight(napi_env env, napi_callback_info info);
 
     /*
@@ -301,6 +308,22 @@ private:
     void OnWatchGestureConsumeResult(int32_t keyCode, bool isConsumed);
     void RegisterWatchFocusActiveChangeCallback();
     void OnWatchFocusActiveChange(bool isActive);
+
+    /*
+     * Window Lifecycle
+     */
+    static napi_value RequestSceneSession(napi_env env, napi_callback_info info);
+    static napi_value UpdateSceneSessionWant(napi_env env, napi_callback_info info);
+    static napi_value RequestSceneSessionActivation(napi_env env, napi_callback_info info);
+    static napi_value RequestSceneSessionBackground(napi_env env, napi_callback_info info);
+    static napi_value RequestSceneSessionDestruction(napi_env env, napi_callback_info info);
+    static napi_value NotifyForegroundInteractiveStatus(napi_env env, napi_callback_info info);
+    static napi_value IsSceneSessionValid(napi_env env, napi_callback_info info);
+    static napi_value RequestSceneSessionByCall(napi_env env, napi_callback_info info);
+    static napi_value StartAbilityBySpecified(napi_env env, napi_callback_info info);
+    static napi_value StartUIAbilityBySCB(napi_env env, napi_callback_info info);
+    void RegisterSceneSessionDestructCallback();
+    void OnSceneSessionDestruct(int32_t persistentId);
 
     napi_env env_;
     std::shared_mutex jsCbMapMutex_;
