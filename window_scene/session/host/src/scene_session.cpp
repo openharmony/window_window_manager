@@ -3444,7 +3444,7 @@ bool SceneSession::IsCompatibilityModeScale(float scaleX, float scaleY)
     auto property = GetSessionProperty();
     if (property->GetCompatibleModeInPc() && MathHelper::GreatNotEqual(scaleX, 0.0f) &&
         MathHelper::GreatNotEqual(scaleY, 0.0f) && (!NearEqual(scaleX, 1.0f) || !NearEqual(scaleY, 1.0f))) {
-        return true; 
+        return true;
     }
     return false;
 }
