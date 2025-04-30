@@ -585,6 +585,42 @@ HWTEST_F(WindowSceneTest, NotifyMemoryLevel03, TestSize.Level1)
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->NotifyMemoryLevel(0)); // ui content is null
 }
 
+/**
+ * @tc.name: GoDestroyHookWindow
+ * @tc.desc: Destroy hook window
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, GoDestroyHookWindow, TestSize.Level1)
+{
+    DisplayId displayId = 0;
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    sptr<IWindowLifeCycle> listener = nullptr;
+    sptr<WindowScene> scene = new WindowScene();
+    sptr<WindowOption> option = new WindowOption();
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _)).Times(1).WillOnce(Return(new WindowSceneSessionImpl(option)));
+    ASSERT_EQ(WMError::WM_OK, scene->Init(displayId, abilityContext_, listener));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, scene->GoDestroyHookWindow());
+}
+
+/**
+ * @tc.name: SetHookedWindowElementInfo
+ * @tc.desc: SetHookedWindowElementInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, SetHookedWindowElementInfo, TestSize.Level1)
+{
+    DisplayId displayId = 0;
+    AppExecFwk::ElementName elementName;
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->SetHookedWindowElementInfo(elementName));
+
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    sptr<IWindowLifeCycle> listener = nullptr;
+    sptr<WindowScene> scene = new WindowScene();
+    sptr<WindowOption> option = new WindowOption();
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _)).Times(1).WillOnce(Return(new WindowSceneSessionImpl(option)));
+    ASSERT_EQ(WMError::WM_OK, scene->Init(displayId, abilityContext_, listener));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->SetHookedWindowElementInfo(elementName));
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
