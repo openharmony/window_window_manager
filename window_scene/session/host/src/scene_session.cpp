@@ -695,8 +695,8 @@ WSError SceneSession::SetMoveAvailableArea(DisplayId displayId)
     DMRect statusBarRect = CalcRectForStatusBar();
     if (systemConfig_.IsPadWindow() || systemConfig_.IsPhoneWindow()) {
         uint32_t statusBarHeight = statusBarRect.height_;
-        if (statusBarHeight > availableArea.posY_) {
-            availableArea.posY_ = statusBarHeight;
+        if (static_cast<int32_t>(statusBarHeight) > availableArea.posY_) {
+            availableArea.posY_ = static_cast<int32_t>(statusBarHeight);
         }
 
         sptr<ScreenSession> currentScreenSession =
@@ -3442,9 +3442,9 @@ void SceneSession::HookStartMoveRect(WSRect& newRect, const WSRect& sessionRect)
 bool SceneSession::IsCompatibilityModeScale(float scaleX, float scaleY)
 {
     auto property = GetSessionProperty();
-    if (property->GetCompatibleModeInPc() && scaleX > 0.0f && scaleY > 0.0f &&
-        (!NearEqual(scaleX, 1.0f) || !NearEqual(scaleY, 1.0f))) {
-        return true;
+    if (property->GetCompatibleModeInPc() && MathHelper::GreatNotEqual(scaleX, 0.0f) &&
+        MathHelper::GreatNotEqual(scaleY, 0.0f) && (!NearEqual(scaleX, 1.0f) || !NearEqual(scaleY, 1.0f))) {
+        return true; 
     }
     return false;
 }
@@ -3482,7 +3482,7 @@ void SceneSession::CompatibilityModeWindowScaleTransfer(WSRect& rect, bool isSca
         return;
     }
     if (!isScale) {
-        if (!MathHelperNearZero(scaleX)) {
+        if (!MathHelper::NearZero(scaleX)) {
             scaleX = 1 / scaleX;
         }
         if (!MathHelper::NearZero(scaleY)) {
