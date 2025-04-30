@@ -53,23 +53,18 @@ public:
     static void SetVisibleForAccessibility(sptr<SceneSession>& sceneSession);
     int32_t GetTaskCount(sptr<SceneSession>& session);
     static sptr<SceneSessionManager> ssm_;
+
 private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
 
 sptr<SceneSessionManager> SceneSessionManagerLifecycleTest2::ssm_ = nullptr;
 
-void WindowChangedFuncTest(int32_t persistentId, WindowUpdateType type)
-{
-}
+void WindowChangedFuncTest(int32_t persistentId, WindowUpdateType type) {}
 
-void ProcessStatusBarEnabledChangeFuncTest(bool enable)
-{
-}
+void ProcessStatusBarEnabledChangeFuncTest(bool enable) {}
 
-void DumpRootSceneElementInfoFuncTest(const std::vector<std::string>& params, std::vector<std::string>& infos)
-{
-}
+void DumpRootSceneElementInfoFuncTest(const std::vector<std::string>& params, std::vector<std::string>& infos) {}
 
 void SceneSessionManagerLifecycleTest2::SetUpTestCase()
 {
@@ -120,7 +115,7 @@ namespace {
  * @tc.desc: OnSessionStateChange
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerLifecycleTest2, OnSessionStateChange, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerLifecycleTest2, OnSessionStateChange, TestSize.Level1)
 {
     SessionState state = SessionState::STATE_FOREGROUND;
     ASSERT_NE(nullptr, ssm_);
@@ -157,7 +152,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest2, OnSessionStateChange, Function | Sma
  * @tc.desc: OnSessionStateChange01
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerLifecycleTest2, OnSessionStateChange01, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerLifecycleTest2, OnSessionStateChange01, TestSize.Level1)
 {
     SessionState state = SessionState::STATE_BACKGROUND;
     ASSERT_NE(nullptr, ssm_);
@@ -186,7 +181,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest2, OnSessionStateChange01, Function | S
  * @tc.desc: OnSessionStateChange02
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerLifecycleTest2, OnSessionStateChange02, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerLifecycleTest2, OnSessionStateChange02, TestSize.Level1)
 {
     SessionState state = SessionState::STATE_FOREGROUND;
     ASSERT_NE(nullptr, ssm_);
@@ -213,7 +208,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest2, OnSessionStateChange02, Function | S
  * @tc.desc: NotifyWindowStateErrorFromMMI
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerLifecycleTest2, NotifyWindowStateErrorFromMMI, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerLifecycleTest2, NotifyWindowStateErrorFromMMI, TestSize.Level1)
 {
     int ret = 0;
     ssm_->sceneSessionMap_.clear();
@@ -249,14 +244,14 @@ HWTEST_F(SceneSessionManagerLifecycleTest2, NotifyWindowStateErrorFromMMI, Funct
     sceneSession2->property_ = property2;
     sceneSession2->SetCallingPid(100);
 
-    ssm_->sceneSessionMap_.insert({10086, sceneSession});
-    ssm_->sceneSessionMap_.insert({10087, sceneSession1});
-    ssm_->sceneSessionMap_.insert({10088, sceneSession2});
-    ssm_->sceneSessionMap_.insert({10089, nullptr});
+    ssm_->sceneSessionMap_.insert({ 10086, sceneSession });
+    ssm_->sceneSessionMap_.insert({ 10087, sceneSession1 });
+    ssm_->sceneSessionMap_.insert({ 10088, sceneSession2 });
+    ssm_->sceneSessionMap_.insert({ 10089, nullptr });
     ssm_->NotifyWindowStateErrorFromMMI(-1, 10086);
     ssm_->NotifyWindowStateErrorFromMMI(100, 10086);
     ASSERT_EQ(ret, 0);
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

@@ -15,17 +15,17 @@
 
 // gtest
 #include <gtest/gtest.h>
-#include "window.h"
-#include "wm_common.h"
 #include "common_test_utils.h"
+#include "window.h"
 #include "window_test_utils.h"
+#include "wm_common.h"
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowAnimationTest"};
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowAnimationTest" };
 }
 
 using Utils = WindowTestUtils;
@@ -35,6 +35,7 @@ public:
     explicit TestAnimationTransitionController(sptr<Window> window) : window_(window) {}
     void AnimationForShown() override;
     void AnimationForHidden() override;
+
 private:
     sptr<Window> window_ = nullptr;
 };
@@ -67,33 +68,27 @@ void TestAnimationTransitionController::AnimationForHidden()
     window_->SetTransform(trans);
 }
 
-void WindowAnimationTransitionTest::SetUpTestCase()
-{
-}
+void WindowAnimationTransitionTest::SetUpTestCase() {}
 
-void WindowAnimationTransitionTest::TearDownTestCase()
-{
-}
+void WindowAnimationTransitionTest::TearDownTestCase() {}
 
 void WindowAnimationTransitionTest::SetUp()
 {
     CommonTestUtils::GuaranteeFloatWindowPermission("wms_window_animation_transition_test");
     windowInfo_ = {
-            .name = "AnimationTestWindow",
-            .rect = {0, 0, 200, 200},
-            .type = WindowType::WINDOW_TYPE_FLOAT,
-            .mode = WindowMode::WINDOW_MODE_FLOATING,
-            .needAvoid = false,
-            .parentLimit = false,
-            .parentId = INVALID_WINDOW_ID,
+        .name = "AnimationTestWindow",
+        .rect = { 0, 0, 200, 200 },
+        .type = WindowType::WINDOW_TYPE_FLOAT,
+        .mode = WindowMode::WINDOW_MODE_FLOATING,
+        .needAvoid = false,
+        .parentLimit = false,
+        .parentId = INVALID_WINDOW_ID,
     };
     trans_.pivotX_ = 1.0f;
     trans_.pivotY_ = 0.6f;
 }
 
-void WindowAnimationTransitionTest::TearDown()
-{
-}
+void WindowAnimationTransitionTest::TearDown() {}
 
 namespace {
 /**
@@ -102,7 +97,7 @@ namespace {
  * @tc.type: FUNC
  * @tc.require: issueI5NDLK
  */
-HWTEST_F(WindowAnimationTransitionTest, AnimationTransitionTest01, Function | MediumTest | Level3)
+HWTEST_F(WindowAnimationTransitionTest, AnimationTransitionTest01, TestSize.Level1)
 {
     const sptr<Window>& window = Utils::CreateTestWindow(windowInfo_);
     ASSERT_NE(window, nullptr);
@@ -123,7 +118,7 @@ HWTEST_F(WindowAnimationTransitionTest, AnimationTransitionTest01, Function | Me
  * @tc.type: FUNC
  * @tc.require: issueI5NDLK
  */
-HWTEST_F(WindowAnimationTransitionTest, AnimationTransitionTest02, Function | MediumTest | Level3)
+HWTEST_F(WindowAnimationTransitionTest, AnimationTransitionTest02, TestSize.Level1)
 {
     const sptr<Window>& window = Utils::CreateTestWindow(windowInfo_);
     ASSERT_NE(window, nullptr);
@@ -142,7 +137,7 @@ HWTEST_F(WindowAnimationTransitionTest, AnimationTransitionTest02, Function | Me
  * @tc.type: FUNC
  * @tc.require: issueI5NDLK
  */
-HWTEST_F(WindowAnimationTransitionTest, AnimationTransitionTest03, Function | MediumTest | Level3)
+HWTEST_F(WindowAnimationTransitionTest, AnimationTransitionTest03, TestSize.Level1)
 {
     const sptr<Window>& window = Utils::CreateTestWindow(windowInfo_);
     ASSERT_NE(window, nullptr);
@@ -158,7 +153,7 @@ HWTEST_F(WindowAnimationTransitionTest, AnimationTransitionTest03, Function | Me
  * @tc.type: FUNC
  * @tc.require: issueI5NDLK
  */
-HWTEST_F(WindowAnimationTransitionTest, AnimationTransitionTest04, Function | MediumTest | Level3)
+HWTEST_F(WindowAnimationTransitionTest, AnimationTransitionTest04, TestSize.Level1)
 {
     const sptr<Window>& window = Utils::CreateTestWindow(windowInfo_);
     ASSERT_NE(window, nullptr);
@@ -171,6 +166,6 @@ HWTEST_F(WindowAnimationTransitionTest, AnimationTransitionTest04, Function | Me
     ASSERT_TRUE(defaultTrans_ == window->GetTransform());
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

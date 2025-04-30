@@ -33,23 +33,15 @@ public:
     void TearDown() override;
 };
 
-void SceneSystemAbilityListenerTest::SetUpTestCase()
-{
-}
+void SceneSystemAbilityListenerTest::SetUpTestCase() {}
 
-void SceneSystemAbilityListenerTest::TearDownTestCase()
-{
-}
+void SceneSystemAbilityListenerTest::TearDownTestCase() {}
 
-void SceneSystemAbilityListenerTest::SetUp()
-{
-}
+void SceneSystemAbilityListenerTest::SetUp() {}
 
-void SceneSystemAbilityListenerTest::TearDown()
-{
-}
+void SceneSystemAbilityListenerTest::TearDown() {}
 
-HWTEST_F(SceneSystemAbilityListenerTest, OnAddSystemAbilityTest, Function | SmallTest | Level2)
+HWTEST_F(SceneSystemAbilityListenerTest, OnAddSystemAbilityTest, TestSize.Level1)
 {
     std::string scbUid = std::to_string(12);
     std::string scbPid = std::to_string(34);
@@ -57,8 +49,12 @@ HWTEST_F(SceneSystemAbilityListenerTest, OnAddSystemAbilityTest, Function | Smal
     std::string ssmTid = std::to_string(78);
     std::string scbBundleName = "scb";
     std::string ssmThreadName = "ssm";
-    SCBThreadInfo threadInfo = {.scbUid_ = scbUid, .scbPid_ = scbPid, .scbTid_ = scbTid,
-        .ssmTid_ = ssmTid, .scbBundleName_ = scbBundleName, .ssmThreadName_ = ssmThreadName};
+    SCBThreadInfo threadInfo = { .scbUid_ = scbUid,
+                                 .scbPid_ = scbPid,
+                                 .scbTid_ = scbTid,
+                                 .ssmTid_ = ssmTid,
+                                 .scbBundleName_ = scbBundleName,
+                                 .ssmThreadName_ = ssmThreadName };
     SceneSystemAbilityListener listener(threadInfo);
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
     ResourceSchedule::ResSchedClient::GetInstance().rss_ = nullptr;
@@ -70,5 +66,5 @@ HWTEST_F(SceneSystemAbilityListenerTest, OnAddSystemAbilityTest, Function | Smal
     EXPECT_EQ(listener.info_, threadInfo);
 #endif
 }
-}
-}
+} // namespace Rosen
+} // namespace OHOS

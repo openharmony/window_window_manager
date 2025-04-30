@@ -36,21 +36,13 @@ public:
     void TearDown() override;
 };
 
-void SceneSessionConverterTest::SetUpTestCase()
-{
-}
+void SceneSessionConverterTest::SetUpTestCase() {}
 
-void SceneSessionConverterTest::TearDownTestCase()
-{
-}
+void SceneSessionConverterTest::TearDownTestCase() {}
 
-void SceneSessionConverterTest::SetUp()
-{
-}
+void SceneSessionConverterTest::SetUp() {}
 
-void SceneSessionConverterTest::TearDown()
-{
-}
+void SceneSessionConverterTest::TearDown() {}
 
 namespace {
 
@@ -59,7 +51,7 @@ namespace {
  * @tc.desc: ConvertToMissionInfos func
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionConverterTest, ConvertToMissionInfos, Function | SmallTest | Level1)
+HWTEST_F(SceneSessionConverterTest, ConvertToMissionInfos, TestSize.Level1)
 {
     std::vector<sptr<SceneSession>> sceneSessionInfos;
     std::vector<AAFwk::MissionInfo> missionInfos;
@@ -88,7 +80,7 @@ HWTEST_F(SceneSessionConverterTest, ConvertToMissionInfos, Function | SmallTest 
  * @tc.desc: ConvertToMissionInfo func
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionConverterTest, ConvertToMissionInfo, Function | SmallTest | Level1)
+HWTEST_F(SceneSessionConverterTest, ConvertToMissionInfo, TestSize.Level1)
 {
     sptr<SceneSession> sceneSession = nullptr;
     AAFwk::MissionInfo missionInfo;
@@ -111,6 +103,6 @@ HWTEST_F(SceneSessionConverterTest, ConvertToMissionInfo, Function | SmallTest |
     EXPECT_EQ(WSError::WS_OK, result3);
 }
 
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

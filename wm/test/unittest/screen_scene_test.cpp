@@ -52,7 +52,7 @@ namespace {
  * @tc.desc: context is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneTest, LoadContent01, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneTest, LoadContent01, TestSize.Level1)
 {
     ScreenScene screenScene("UNKNOWN");
     screenScene.LoadContent("a", nullptr, nullptr, nullptr);
@@ -64,7 +64,7 @@ HWTEST_F(ScreenSceneTest, LoadContent01, Function | SmallTest | Level3)
  * @tc.desc: context is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneTest, Destroy01, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneTest, Destroy01, TestSize.Level1)
 {
     ScreenScene screenScene("UNKNOWN");
     screenScene.LoadContent("a", nullptr, nullptr, nullptr);
@@ -77,7 +77,7 @@ HWTEST_F(ScreenSceneTest, Destroy01, Function | SmallTest | Level3)
  * @tc.desc: UpdateViewportConfig Test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneTest, UpdateViewportConfig01, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneTest, UpdateViewportConfig01, TestSize.Level1)
 {
     ScreenScene screenScene("UNKNOWN");
     Rect rect;
@@ -90,7 +90,7 @@ HWTEST_F(ScreenSceneTest, UpdateViewportConfig01, Function | SmallTest | Level3)
  * @tc.desc: UpdateConfiguration Test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneTest, UpdateConfiguration, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneTest, UpdateConfiguration, TestSize.Level1)
 {
     ScreenScene screenScene("UNKNOWN");
     std::shared_ptr<AppExecFwk::Configuration> configuration = std::make_shared<AppExecFwk::Configuration>();
@@ -103,7 +103,7 @@ HWTEST_F(ScreenSceneTest, UpdateConfiguration, Function | SmallTest | Level3)
  * @tc.desc: RequestVsync Test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneTest, RequestVsync, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneTest, RequestVsync, TestSize.Level1)
 {
     ScreenScene screenScene("UNKNOWN");
     std::shared_ptr<VsyncCallback> vsyncCallback = std::make_shared<VsyncCallback>();
@@ -116,7 +116,7 @@ HWTEST_F(ScreenSceneTest, RequestVsync, Function | SmallTest | Level3)
  * @tc.desc: GetVSyncPeriod Test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneTest, GetVSyncPeriod, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneTest, GetVSyncPeriod, TestSize.Level1)
 {
     ScreenScene screenScene("UNKNOWN");
     screenScene.GetVSyncPeriod();
@@ -128,7 +128,7 @@ HWTEST_F(ScreenSceneTest, GetVSyncPeriod, Function | SmallTest | Level3)
  * @tc.desc: FlushFrameRate Test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneTest, FlushFrameRate, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneTest, FlushFrameRate, TestSize.Level1)
 {
     ScreenScene screenScene("UNKNOWN");
     uint32_t rate = 120;
@@ -142,7 +142,7 @@ HWTEST_F(ScreenSceneTest, FlushFrameRate, Function | SmallTest | Level3)
  * @tc.desc: OnBundleUpdated Test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneTest, OnBundleUpdated, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneTest, OnBundleUpdated, TestSize.Level1)
 {
     ScreenScene screenScene("UNKNOWN");
     std::string bundleName = "test";
@@ -155,7 +155,7 @@ HWTEST_F(ScreenSceneTest, OnBundleUpdated, Function | SmallTest | Level3)
  * @tc.desc: GetDisplayId & SetDisplayId Test01
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneTest, DisplayIdTest01, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneTest, DisplayIdTest01, TestSize.Level1)
 {
     ScreenScene screenScene("UNKNOWN");
     DisplayId setDisplayId = 0;
@@ -169,7 +169,7 @@ HWTEST_F(ScreenSceneTest, DisplayIdTest01, Function | SmallTest | Level3)
  * @tc.desc: GetDisplayId & SetDisplayId Test02
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneTest, DisplayIdTest02, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneTest, DisplayIdTest02, TestSize.Level1)
 {
     ScreenScene screenScene("UNKNOWN");
     DisplayId setDisplayId = 100;
@@ -183,7 +183,7 @@ HWTEST_F(ScreenSceneTest, DisplayIdTest02, Function | SmallTest | Level3)
  * @tc.desc: SetDisplayOrientation Test01
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneTest, SetDisplayOrientation01, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneTest, SetDisplayOrientation01, TestSize.Level1)
 {
     ScreenScene screenScene("UNKNOWN");
     int32_t orientation = 0;
@@ -196,7 +196,7 @@ HWTEST_F(ScreenSceneTest, SetDisplayOrientation01, Function | SmallTest | Level3
  * @tc.desc: SetDisplayOrientation Test02
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneTest, SetDisplayOrientation02, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneTest, SetDisplayOrientation02, TestSize.Level1)
 {
     ScreenScene screenScene("UNKNOWN");
     int32_t orientation = 100;
@@ -209,7 +209,7 @@ HWTEST_F(ScreenSceneTest, SetDisplayOrientation02, Function | SmallTest | Level3
  * @tc.desc: SetFrameLayoutFinishCallback Test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneTest, SetFrameLayoutFinishCallback, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneTest, SetFrameLayoutFinishCallback, TestSize.Level1)
 {
     ScreenScene screenScene("UNKNOWN");
     screenScene.SetFrameLayoutFinishCallback([]() {});
@@ -221,7 +221,7 @@ HWTEST_F(ScreenSceneTest, SetFrameLayoutFinishCallback, Function | SmallTest | L
  * @tc.desc: SetDisplayDensity Test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneTest, SetDisplayDensity, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneTest, SetDisplayDensity, TestSize.Level1)
 {
     ScreenScene screenScene("UNKNOWN");
     float density = 2.0f;
@@ -234,7 +234,7 @@ HWTEST_F(ScreenSceneTest, SetDisplayDensity, Function | SmallTest | Level3)
  * @tc.desc: IsSystemWindow Test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneTest, IsSystemWindow, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneTest, IsSystemWindow, TestSize.Level1)
 {
     ScreenScene screenScene("UNKNOWN");
     bool res = screenScene.IsSystemWindow();
@@ -246,7 +246,7 @@ HWTEST_F(ScreenSceneTest, IsSystemWindow, Function | SmallTest | Level3)
  * @tc.desc: IsAppWindow Test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneTest, IsAppWindow, Function | SmallTest | Level3)
+HWTEST_F(ScreenSceneTest, IsAppWindow, TestSize.Level1)
 {
     ScreenScene screenScene("UNKNOWN");
     bool res = screenScene.IsAppWindow();

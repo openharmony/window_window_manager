@@ -181,7 +181,7 @@ public:
 
     WMError Create(uint32_t parentId,
         const std::shared_ptr<AbilityRuntime::Context>& context = nullptr);
-    virtual WMError Destroy() override;
+    virtual WMError Destroy(uint32_t reason = 0) override;
     virtual WMError Show(uint32_t reason = 0, bool withAnimation = false, bool withFocus = true) override;
     virtual WMError Hide(uint32_t reason = 0, bool withAnimation = false, bool isFromInnerkits = true) override;
     virtual WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false,
@@ -291,6 +291,7 @@ public:
     void NotifyTouchDialogTarget(int32_t posX = 0, int32_t posY = 0) override;
     void NotifyDestroy();
     void NotifyForeground();
+    void NotifyMainWindowDidForeground(uint32_t reason);
     void NotifyBackground();
     void UpdateZoomTransform(const Transform& trans, bool isDisplayZoomOn);
     void PerformBack() override;
@@ -354,6 +355,7 @@ public:
     void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
     void RegisterWindowInspectorCallback();
     uint32_t GetApiTargetVersion() const;
+    WMError GetWindowPropertyInfo(WindowPropertyInfo& windowPropertyInfo) override;
 
     /*
      * Keyboard
@@ -390,6 +392,8 @@ private:
 
     void NotifyAfterForeground(bool needNotifyListeners = true, bool needNotifyUiContent = true);
     void NotifyAfterBackground(bool needNotifyListeners = true, bool needNotifyUiContent = true);
+    void NotifyAfterDidForeground(uint32_t reason);
+    void NotifyAfterDidBackground(uint32_t reason);
     void NotifyAfterFocused();
     void NotifyAfterUnfocused(bool needNotifyUiContent = true);
     void NotifyAfterResumed();
@@ -432,7 +436,7 @@ private:
     void MapFloatingWindowToAppIfNeeded();
     void MapDialogWindowToAppIfNeeded();
     WMError UpdateProperty(PropertyChangeAction action);
-    WMError Destroy(bool needNotifyServer, bool needClearListener = true);
+    WMError Destroy(bool needNotifyServer, bool needClearListener = true, uint32_t reason = 0);
     WMError SetBackgroundColor(uint32_t color);
     uint32_t GetBackgroundColor() const;
     void InitAbilityInfo();
@@ -513,6 +517,7 @@ private:
     std::recursive_mutex mutex_;
     std::recursive_mutex windowStateMutex_;
     static std::recursive_mutex globalMutex_;
+    static std::shared_mutex windowMapMutex_;
     const float SYSTEM_ALARM_WINDOW_WIDTH_RATIO = 0.8;
     const float SYSTEM_ALARM_WINDOW_HEIGHT_RATIO = 0.3;
     WindowSizeChangeReason lastSizeChangeReason_ = WindowSizeChangeReason::END;

@@ -43,7 +43,7 @@ namespace {
  * @tc.desc: test function DoPrepareTerminate
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPrepareTerminateTest, DoPrepareTerminate, Function | SmallTest | Level2)
+HWTEST_F(WindowPrepareTerminateTest, DoPrepareTerminate, TestSize.Level1)
 {
     WindowPrepareTerminateHandler handler;
     handler.DoPrepareTerminate();

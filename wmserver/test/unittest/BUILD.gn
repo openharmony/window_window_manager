@@ -54,6 +54,7 @@ test_external_deps = [
   "eventhandler:libeventhandler",
   "googletest:gmock",
   "googletest:gtest_main",
+  "graphic_2d:2d_graphics",
   "graphic_2d:librender_service_client",
   "graphic_2d:window_animation",
   "hicollie:libhicollie",
@@ -64,6 +65,7 @@ test_external_deps = [
   "ipc:ipc_single",
   "napi:ace_napi",
   "power_manager:powermgr_client",
+  "preferences:native_preferences",
   "safwk:system_ability_fwk",
 ]
 
@@ -77,7 +79,6 @@ test_inner_deps = [
   "../..:libwms",
   "../../../dmserver:libdms",
   "../../../test/common/utils:libtestutil",
-  "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
 ]
 
 config("wmserver_unittest_common_public_config") {
@@ -90,8 +91,6 @@ config("wmserver_unittest_common_public_config") {
     "../../include/window_snapshot",
     "../../../interfaces/innerkits/wm",
     "../../../utils/include",
-    "//third_party/googletest/googlemock/include",
-    "foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include/",
   ]
 }
 
@@ -163,7 +162,7 @@ ohos_unittest("wmserver_window_manager_config_test") {
   deps = test_inner_deps
   external_deps = test_external_deps
 
-  deps += [ "//third_party/libxml2:libxml2" ]
+  external_deps += [ "libxml2:libxml2" ]
 }
 
 ohos_unittest("wmserver_window_snapshot_test") {

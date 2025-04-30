@@ -72,21 +72,9 @@ namespace {
 
 void InitSessionInfo(MMI::DisplayInfo& displayedInfo, MMI::WindowInfo& windowInfo)
 {
-    displayedInfo = {
-        .id = 42,
-        .x = 0,
-        .y = 0,
-        .width = 1270,
-        .height = 2240
-    };
+    displayedInfo = { .id = 42, .x = 0, .y = 0, .width = 1270, .height = 2240 };
 
-    windowInfo = {
-        .id = 43,
-        .pid = 433,
-        .displayId = 42,
-        .zOrder = 30.0,
-        .area = {0, 0, 1000, 1200}
-    };
+    windowInfo = { .id = 43, .pid = 433, .displayId = 42, .zOrder = 30.0, .area = { 0, 0, 1000, 1200 } };
 }
 
 /**
@@ -94,7 +82,7 @@ void InitSessionInfo(MMI::DisplayInfo& displayedInfo, MMI::WindowInfo& windowInf
  * @tc.desc: Init sceneSession
  * @tc.type: FUNC
  */
-void InitSceneSession(sptr<SceneSession> &sceneSession, int32_t pid, int windowId, WindowType propertyType)
+void InitSceneSession(sptr<SceneSession>& sceneSession, int32_t pid, int windowId, WindowType propertyType)
 {
     sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(windowSessionProperty, nullptr);
@@ -107,14 +95,381 @@ void InitSceneSession(sptr<SceneSession> &sceneSession, int32_t pid, int windowI
     windowSessionProperty->SetPersistentId(windowId);
     sceneSession->SetSessionProperty(windowSessionProperty);
 
-    WSRect windowRect = {0, 0, 1270, 2700};
+    WSRect windowRect = { 0, 0, 1270, 2700 };
     sceneSession->SetSessionRect(windowRect);
-    sceneSession->SetVisibilityChangedDetectFunc([](int32_t pid, bool isVisible, bool newIsVisible) {
-        return;
-    });
+    sceneSession->SetVisibilityChangedDetectFunc([](int32_t pid, bool isVisible, bool newIsVisible) { return; });
     sceneSession->SetCallingPid(pid);
     int32_t uid = 1315;
     sceneSession->SetCallingUid(uid);
+}
+
+/**
+ * @tc.name: GetWindowInfoWithoutParentWindowAndStateActive
+ * @tc.desc: windowInfo without parent window and state active
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithoutParentWindowAndStateActive, TestSize.Level1)
+{
+    SessionInfo subWindowInfo;
+    subWindowInfo.abilityName_ = "TestSubWithType";
+    subWindowInfo.bundleName_ = "TestSubWithType";
+    int32_t subWindowId = 36;
+    sptr<SceneSession> sceneSessionSubWindow = sptr<SceneSession>::MakeSptr(subWindowInfo, nullptr);
+    ASSERT_NE(sceneSessionSubWindow, nullptr);
+    sceneSessionSubWindow->persistentId_ = subWindowId;
+    sceneSessionSubWindow->isVisible_ = false;
+    uint32_t subFlags = static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK);
+    sceneSessionSubWindow->property_->SetWindowFlags(subFlags);
+    int32_t subWindowPid = 56;
+    InitSceneSession(sceneSessionSubWindow, subWindowPid, subWindowId, WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sceneSessionSubWindow->SetParentSession(nullptr);
+    sceneSessionSubWindow->SetSessionState(SessionState::STATE_ACTIVE);
+    std::map<int32_t, sptr<SceneSession>> retSceneSessionMap;
+    retSceneSessionMap.insert(std::make_pair(subWindowPid, sceneSessionSubWindow));
+    ssm_->sceneSessionMap_ = retSceneSessionMap;
+    std::map<int32_t, sptr<SceneSession>> sceneSessionMap =
+        Rosen::SceneSessionManager::GetInstance().GetSceneSessionMap();
+    int32_t windowInfoSize = sceneSessionMap.size();
+    ASSERT_EQ(windowInfoSize, 0);
+}
+
+/**
+ * @tc.name: GetWindowInfoWithNotSystemTouchable
+ * @tc.desc: windowInfo with systemtouchable is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithNotSystemTouchable, TestSize.Level1)
+{
+    SessionInfo mainWindowInfo;
+    mainWindowInfo.abilityName_ = "TestMainWithType";
+    mainWindowInfo.bundleName_ = "TestMainWithType";
+    int32_t mainWindowId = 37;
+    sptr<SceneSession> sceneSessionMainWindow = sptr<SceneSession>::MakeSptr(mainWindowInfo, nullptr);
+    ASSERT_NE(sceneSessionMainWindow, nullptr);
+    sceneSessionMainWindow->persistentId_ = mainWindowId;
+    sceneSessionMainWindow->isVisible_ = true;
+    uint32_t mainFlags = static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK);
+    sceneSessionMainWindow->property_->SetWindowFlags(mainFlags);
+    bool isTouchable = false;
+    // set systemTouchable false;
+    sceneSessionMainWindow->SetSystemTouchable(isTouchable);
+    int32_t mainWindowPid = 57;
+    InitSceneSession(sceneSessionMainWindow, mainWindowPid, mainWindowId, WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    std::map<int32_t, sptr<SceneSession>> retSceneSessionMap;
+    retSceneSessionMap.insert(std::make_pair(mainWindowPid, sceneSessionMainWindow));
+    ssm_->sceneSessionMap_ = retSceneSessionMap;
+    MMI::WindowInfo windowInfo;
+    ScreenId screenId = 37;
+    ScreenSessionConfig config;
+    sptr<ScreenSession> screenSession =
+        sptr<ScreenSession>::MakeSptr(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert(std::make_pair(screenId, screenSession));
+    manager_->UpdateWindowFlags(screenId, sceneSessionMainWindow, windowInfo);
+    bool windowFlagResult = false;
+    if (windowInfo.flags == 1) {
+        windowFlagResult = true;
+    }
+    ASSERT_EQ(windowFlagResult, true);
+}
+
+/**
+ * @tc.name: GetWindowInfoWithNotIsTouchEnable
+ * @tc.desc: windowInfo with isTouchenable is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithNotIsTouchEnable, TestSize.Level1)
+{
+    SessionInfo mainWindowInfo;
+    mainWindowInfo.abilityName_ = "TestMainWithType";
+    mainWindowInfo.bundleName_ = "TestMainWithType";
+    int32_t mainWindowId = 38;
+    sptr<SceneSession> sceneSessionMainWindow = sptr<SceneSession>::MakeSptr(mainWindowInfo, nullptr);
+    ASSERT_NE(sceneSessionMainWindow, nullptr);
+    sceneSessionMainWindow->persistentId_ = mainWindowId;
+    sceneSessionMainWindow->isVisible_ = true;
+    uint32_t mainFlags = static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK);
+    sceneSessionMainWindow->property_->SetWindowFlags(mainFlags);
+    bool isTouchable = true;
+    sceneSessionMainWindow->SetSystemTouchable(isTouchable);
+    int32_t mainWindowPid = 58;
+    InitSceneSession(sceneSessionMainWindow, mainWindowPid, mainWindowId, WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    std::map<int32_t, sptr<SceneSession>> retSceneSessionMap;
+    retSceneSessionMap.insert(std::make_pair(mainWindowPid, sceneSessionMainWindow));
+    ssm_->sceneSessionMap_ = retSceneSessionMap;
+    MMI::WindowInfo windowInfo;
+    ScreenId screenId = 38;
+    ScreenSessionConfig config;
+    sptr<ScreenSession> screenSession =
+        sptr<ScreenSession>::MakeSptr(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    // set screenSession touchenable_ true
+    screenSession->touchEnabled_.store(false);
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert(std::make_pair(screenId, screenSession));
+    manager_->UpdateWindowFlags(screenId, sceneSessionMainWindow, windowInfo);
+    bool windowFlagResult = false;
+    if (windowInfo.flags == MMI::WindowInfo::FLAG_BIT_UNTOUCHABLE) {
+        windowFlagResult = true;
+    }
+    ASSERT_EQ(windowFlagResult, true);
+}
+
+/**
+ * @tc.name: GetWindowInfoWithNotIsForceTouchEnable
+ * @tc.desc: windowInfo with isForeTouchenable is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithNotIsForceTouchEnable, TestSize.Level1)
+{
+    SessionInfo mainWindowInfo;
+    mainWindowInfo.abilityName_ = "TestMainWithType";
+    mainWindowInfo.bundleName_ = "TestMainWithType";
+    int32_t mainWindowId = 39;
+    sptr<SceneSession> sceneSessionMainWindow = sptr<SceneSession>::MakeSptr(mainWindowInfo, nullptr);
+    ASSERT_NE(sceneSessionMainWindow, nullptr);
+    sceneSessionMainWindow->persistentId_ = mainWindowId;
+    sceneSessionMainWindow->isVisible_ = true;
+    uint32_t mainFlags = static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK);
+    sceneSessionMainWindow->property_->SetWindowFlags(mainFlags);
+    // set isForceTouchable false
+    bool isForceTouchable = false;
+    sceneSessionMainWindow->SetForceTouchable(isForceTouchable);
+    int32_t mainWindowPid = 59;
+    InitSceneSession(sceneSessionMainWindow, mainWindowPid, mainWindowId, WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    std::map<int32_t, sptr<SceneSession>> retSceneSessionMap;
+    retSceneSessionMap.insert(std::make_pair(mainWindowPid, sceneSessionMainWindow));
+    ssm_->sceneSessionMap_ = retSceneSessionMap;
+    MMI::WindowInfo windowInfo;
+    ScreenId screenId = 39;
+    ScreenSessionConfig config;
+    sptr<ScreenSession> screenSession =
+        sptr<ScreenSession>::MakeSptr(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    screenSession->touchEnabled_.store(true);
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert(std::make_pair(screenId, screenSession));
+    manager_->UpdateWindowFlags(screenId, sceneSessionMainWindow, windowInfo);
+    bool windowFlagResult = false;
+    if (windowInfo.flags == 1) {
+        windowFlagResult = true;
+    }
+    ASSERT_EQ(windowFlagResult, true);
+}
+
+/**
+ * @tc.name: GetWindowInfoWithNotForegroundInteractiveStatus
+ * @tc.desc: windowInfo with foregroundInteractiveStatus_ is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithNotForegroundInteractiveStatus, TestSize.Level1)
+{
+    SessionInfo mainWindowInfo;
+    mainWindowInfo.abilityName_ = "TestMainWithType";
+    mainWindowInfo.bundleName_ = "TestMainWithType";
+    int32_t mainWindowId = 40;
+    sptr<SceneSession> sceneSessionMainWindow = sptr<SceneSession>::MakeSptr(mainWindowInfo, nullptr);
+    ASSERT_NE(sceneSessionMainWindow, nullptr);
+    sceneSessionMainWindow->persistentId_ = mainWindowId;
+    sceneSessionMainWindow->isVisible_ = true;
+    // set foregroundInterativeStatus_ false
+    sceneSessionMainWindow->foregroundInteractiveStatus_.store(false);
+    uint32_t mainFlags = static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK);
+    sceneSessionMainWindow->property_->SetWindowFlags(mainFlags);
+    int32_t mainWindowPid = 60;
+    InitSceneSession(sceneSessionMainWindow, mainWindowPid, mainWindowId, WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    std::map<int32_t, sptr<SceneSession>> retSceneSessionMap;
+    retSceneSessionMap.insert(std::make_pair(mainWindowPid, sceneSessionMainWindow));
+    ssm_->sceneSessionMap_ = retSceneSessionMap;
+    MMI::WindowInfo windowInfo;
+    ScreenId screenId = 40;
+    ScreenSessionConfig config;
+    sptr<ScreenSession> screenSession =
+        sptr<ScreenSession>::MakeSptr(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert(std::make_pair(screenId, screenSession));
+    manager_->UpdateWindowFlags(screenId, sceneSessionMainWindow, windowInfo);
+    bool windowFlagResult = false;
+    if (windowInfo.flags == 1) {
+        windowFlagResult = true;
+    }
+    ASSERT_EQ(windowFlagResult, true);
+}
+
+/**
+ * @tc.name: GetWindowInfoWithNotPropertyTouchable
+ * @tc.desc: windowInfo with property touchable false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithNotPropertyTouchable, TestSize.Level1)
+{
+    SessionInfo mainWindowInfo;
+    mainWindowInfo.abilityName_ = "TestMainWithType";
+    mainWindowInfo.bundleName_ = "TestMainWithType";
+    int32_t mainWindowId = 41;
+    sptr<SceneSession> sceneSessionMainWindow = sptr<SceneSession>::MakeSptr(mainWindowInfo, nullptr);
+    ASSERT_NE(sceneSessionMainWindow, nullptr);
+    sceneSessionMainWindow->persistentId_ = mainWindowId;
+    sceneSessionMainWindow->foregroundInteractiveStatus_.store(false);
+    uint32_t mainFlags = static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK);
+    sceneSessionMainWindow->property_->SetWindowFlags(mainFlags);
+    // set property_.touchEnable_ false
+    sceneSessionMainWindow->property_->touchable_ = false;
+    int32_t mainWindowPid = 61;
+    InitSceneSession(sceneSessionMainWindow, mainWindowPid, mainWindowId, WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    std::map<int32_t, sptr<SceneSession>> retSceneSessionMap;
+    retSceneSessionMap.insert(std::make_pair(mainWindowPid, sceneSessionMainWindow));
+    ssm_->sceneSessionMap_ = retSceneSessionMap;
+    MMI::WindowInfo windowInfo;
+    ScreenId screenId = 41;
+    ScreenSessionConfig config;
+    sptr<ScreenSession> screenSession =
+        sptr<ScreenSession>::MakeSptr(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert(std::make_pair(screenId, screenSession));
+    manager_->UpdateWindowFlags(screenId, sceneSessionMainWindow, windowInfo);
+    bool windowFlagResult = false;
+    if (windowInfo.flags == 1) {
+        windowFlagResult = true;
+    }
+    ASSERT_EQ(windowFlagResult, true);
+}
+
+/**
+ * @tc.name: GetWindowInfoWithSameInfo
+ * @tc.desc: windowInfo with same displayInfos and windowInfos
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithSameInfo, TestSize.Level1)
+{
+    MMI::DisplayInfo lastDisplayedInfo;
+    MMI::WindowInfo lastWindowInfo;
+    InitSessionInfo(lastDisplayedInfo, lastWindowInfo);
+    int32_t focusedSession = 42;
+    sim_->focusedSessionId_ = focusedSession;
+    int32_t lastFocusedSession = 42;
+    sim_->lastFocusId_ = lastFocusedSession;
+    std::vector<MMI::DisplayInfo> lastDisplayInfos;
+    std::vector<MMI::WindowInfo> lastWindowInfoList;
+    lastDisplayInfos.emplace_back(lastDisplayedInfo);
+    lastWindowInfoList.emplace_back(lastWindowInfo);
+    sim_->lastDisplayInfos_ = lastDisplayInfos;
+    sim_->lastWindowInfoList_ = lastWindowInfoList;
+    MMI::DisplayInfo currDisplayedInfo;
+    MMI::WindowInfo currWindowInfo;
+    InitSessionInfo(currDisplayedInfo, currWindowInfo);
+    std::vector<MMI::DisplayInfo> currDisplayInfos;
+    std::vector<MMI::WindowInfo> currWindowInfoList;
+    currDisplayInfos.emplace_back(currDisplayedInfo);
+    currWindowInfoList.emplace_back(currWindowInfo);
+    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
+    focusGroup->SetFocusedSessionId(focusedSession);
+    bool checkNeedUpdateFlag = true;
+    // check the same information
+    checkNeedUpdateFlag = sim_->CheckNeedUpdate(currDisplayInfos, currWindowInfoList);
+    ASSERT_EQ(checkNeedUpdateFlag, false);
+}
+
+/**
+ * @tc.name: GetWindowInfoWithPidDiff
+ * @tc.desc: windowInfo with different pid
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithPidDiff, TestSize.Level1)
+{
+    MMI::DisplayInfo lastDisplayedInfo;
+    MMI::WindowInfo lastWindowInfo;
+    InitSessionInfo(lastDisplayedInfo, lastWindowInfo);
+    int32_t focusedSession = 43;
+    sim_->focusedSessionId_ = focusedSession;
+    int32_t lastFocusedSession = 43;
+    sim_->lastFocusId_ = lastFocusedSession;
+    std::vector<MMI::DisplayInfo> lastDisplayInfos;
+    std::vector<MMI::WindowInfo> lastWindowInfoList;
+    lastDisplayInfos.emplace_back(lastDisplayedInfo);
+    lastWindowInfoList.emplace_back(lastWindowInfo);
+    sim_->lastDisplayInfos_ = lastDisplayInfos;
+    sim_->lastWindowInfoList_ = lastWindowInfoList;
+    MMI::DisplayInfo currDisplayedInfo;
+    MMI::WindowInfo currWindowInfo;
+    InitSessionInfo(currDisplayedInfo, currWindowInfo);
+    // set different pid number
+    currWindowInfo.pid = 434;
+    std::vector<MMI::DisplayInfo> currDisplayInfos;
+    std::vector<MMI::WindowInfo> currWindowInfoList;
+    currDisplayInfos.emplace_back(currDisplayedInfo);
+    currWindowInfoList.emplace_back(currWindowInfo);
+    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
+    focusGroup->SetFocusedSessionId(focusedSession);
+    bool checkNeedUpdateFlag = false;
+    checkNeedUpdateFlag = sim_->CheckNeedUpdate(currDisplayInfos, currWindowInfoList);
+    ASSERT_EQ(checkNeedUpdateFlag, true);
+}
+
+/**
+ * @tc.name: GetWindowInfoWithAreaDiff
+ * @tc.desc: windowInfo with different area
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithAreaDiff, TestSize.Level1)
+{
+    MMI::DisplayInfo lastDisplayedInfo;
+    MMI::WindowInfo lastWindowInfo;
+    InitSessionInfo(lastDisplayedInfo, lastWindowInfo);
+    int32_t focusedSession = 44;
+    sim_->focusedSessionId_ = focusedSession;
+    int32_t lastFocusedSession = 44;
+    sim_->lastFocusId_ = lastFocusedSession;
+    std::vector<MMI::DisplayInfo> lastDisplayInfos;
+    std::vector<MMI::WindowInfo> lastWindowInfoList;
+    lastDisplayInfos.emplace_back(lastDisplayedInfo);
+    lastWindowInfoList.emplace_back(lastWindowInfo);
+    sim_->lastDisplayInfos_ = lastDisplayInfos;
+    sim_->lastWindowInfoList_ = lastWindowInfoList;
+    MMI::DisplayInfo currDisplayedInfo;
+    MMI::WindowInfo currWindowInfo;
+    InitSessionInfo(currDisplayedInfo, currWindowInfo);
+    // set different area number
+    currWindowInfo.area = { 0, 0, 500, 600 };
+    std::vector<MMI::DisplayInfo> currDisplayInfos;
+    std::vector<MMI::WindowInfo> currWindowInfoList;
+    currDisplayInfos.emplace_back(currDisplayedInfo);
+    currWindowInfoList.emplace_back(currWindowInfo);
+    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
+    focusGroup->SetFocusedSessionId(focusedSession);
+    bool checkNeedUpdateFlag = false;
+    checkNeedUpdateFlag = sim_->CheckNeedUpdate(currDisplayInfos, currWindowInfoList);
+    ASSERT_EQ(checkNeedUpdateFlag, true);
+}
+
+/**
+ * @tc.name: GetWindowInfoWithzOrderDiff
+ * @tc.desc: windowInfo with different zOrder
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithzOrderDiff, TestSize.Level1)
+{
+    MMI::DisplayInfo lastDisplayedInfo;
+    MMI::WindowInfo lastWindowInfo;
+    InitSessionInfo(lastDisplayedInfo, lastWindowInfo);
+    int32_t focusedSession = 45;
+    sim_->focusedSessionId_ = focusedSession;
+    int32_t lastFocusedSession = 45;
+    sim_->lastFocusId_ = lastFocusedSession;
+    std::vector<MMI::DisplayInfo> lastDisplayInfos;
+    std::vector<MMI::WindowInfo> lastWindowInfoList;
+    lastDisplayInfos.emplace_back(lastDisplayedInfo);
+    lastWindowInfoList.emplace_back(lastWindowInfo);
+    sim_->lastDisplayInfos_ = lastDisplayInfos;
+    sim_->lastWindowInfoList_ = lastWindowInfoList;
+    MMI::DisplayInfo currDisplayedInfo;
+    MMI::WindowInfo currWindowInfo;
+    InitSessionInfo(currDisplayedInfo, currWindowInfo);
+    // set different zOrder number
+    currWindowInfo.zOrder = 40.0;
+    std::vector<MMI::DisplayInfo> currDisplayInfos;
+    std::vector<MMI::WindowInfo> currWindowInfoList;
+    currDisplayInfos.emplace_back(currDisplayedInfo);
+    currWindowInfoList.emplace_back(currWindowInfo);
+    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
+    focusGroup->SetFocusedSessionId(focusedSession);
+    bool checkNeedUpdateFlag = false;
+    checkNeedUpdateFlag = sim_->CheckNeedUpdate(currDisplayInfos, currWindowInfoList);
+    ASSERT_EQ(checkNeedUpdateFlag, true);
 }
 
 /**
@@ -122,7 +477,7 @@ void InitSceneSession(sptr<SceneSession> &sceneSession, int32_t pid, int windowI
  * @tc.desc: windowInfo without hotAreas information
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithoutHotArea, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithoutHotArea, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "TestWithoutHotArea";
@@ -133,15 +488,15 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithoutHotArea, Function | 
     ASSERT_NE(windowSessionProperty, nullptr);
     windowSessionProperty->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
     sceneSession->InitSessionPropertyWhenConnect(windowSessionProperty);
-    WSRect windowRect = {0, 0, 1270, 2700};
+    WSRect windowRect = { 0, 0, 1270, 2700 };
     sceneSession->SetSessionRect(windowRect);
     sceneSession->globalRect_ = windowRect;
     // set hotArea without info
     std::vector<MMI::Rect> touchHotAreas;
     std::vector<MMI::Rect> pointerHotAreas;
     manager_->UpdateHotAreas(sceneSession, touchHotAreas, pointerHotAreas);
-    bool touchHotResult = touchHotAreas[0].x == 0 && touchHotAreas[0].y == 0 &&
-                          touchHotAreas[0].width == 1270 && touchHotAreas[0].height == 2700;
+    bool touchHotResult = touchHotAreas[0].x == 0 && touchHotAreas[0].y == 0 && touchHotAreas[0].width == 1270 &&
+                          touchHotAreas[0].height == 2700;
     ASSERT_EQ(touchHotResult, true);
     bool pointerHotResult = pointerHotAreas[0].x == 0 && pointerHotAreas[0].y == 0 &&
                             pointerHotAreas[0].width == 1270 && pointerHotAreas[0].height == 2700;
@@ -153,7 +508,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithoutHotArea, Function | 
  * @tc.desc: windowInfo with hotAreas information
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithHotArea, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithHotArea, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "TestWithHotArea";
@@ -163,22 +518,22 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithHotArea, Function | Sma
     sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(windowSessionProperty, nullptr);
     windowSessionProperty->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
-    Rect rect = {0, 0, 300, 500};
+    Rect rect = { 0, 0, 300, 500 };
     std::vector<Rect> rects;
     rects.emplace_back(rect);
     // set touchHotArea and pointerHotArea info
     windowSessionProperty->SetTouchHotAreas(rects);
     sceneSession->InitSessionPropertyWhenConnect(windowSessionProperty);
-    WSRect windowRect = {0, 0, 1270, 2700};
+    WSRect windowRect = { 0, 0, 1270, 2700 };
     sceneSession->SetSessionRect(windowRect);
     std::vector<MMI::Rect> touchHotAreas;
     std::vector<MMI::Rect> pointerHotAreas;
     manager_->UpdateHotAreas(sceneSession, touchHotAreas, pointerHotAreas);
-    bool touchHotResult = touchHotAreas[0].x == 0 && touchHotAreas[0].y == 0 &&
-                          touchHotAreas[0].width == 300 && touchHotAreas[0].height == 500;
+    bool touchHotResult = touchHotAreas[0].x == 0 && touchHotAreas[0].y == 0 && touchHotAreas[0].width == 300 &&
+                          touchHotAreas[0].height == 500;
     ASSERT_EQ(touchHotResult, true);
-    bool pointerHotResult = pointerHotAreas[0].x == 0 && pointerHotAreas[0].y == 0 &&
-                            pointerHotAreas[0].width == 300 && pointerHotAreas[0].height == 500;
+    bool pointerHotResult = pointerHotAreas[0].x == 0 && pointerHotAreas[0].y == 0 && pointerHotAreas[0].width == 300 &&
+                            pointerHotAreas[0].height == 500;
     ASSERT_EQ(pointerHotResult, true);
 }
 
@@ -187,7 +542,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithHotArea, Function | Sma
  * @tc.desc: windowInfo with windowType dialog
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithWindowTypeDialog, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithWindowTypeDialog, TestSize.Level1)
 {
     // init main window info
     SessionInfo mainWindowInfo;
@@ -239,7 +594,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithWindowTypeDialog, Funct
  * @tc.desc: windowInfo with window_Type_app_sub
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithWindowTypeAppSub, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithWindowTypeAppSub, TestSize.Level1)
 {
     // init main window info
     SessionInfo mainWindowInfo;
@@ -289,7 +644,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithWindowTypeAppSub, Funct
  * @tc.desc: windowInfo with window_Type_keyboard panel
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithTypeKeyboardPanel, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithTypeKeyboardPanel, TestSize.Level1)
 {
     SessionInfo mainWindowInfo;
     mainWindowInfo.abilityName_ = "TestMainWithType";
@@ -318,7 +673,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithTypeKeyboardPanel, Func
  * @tc.desc: windowInfo without parent window
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithoutParentWindow, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithoutParentWindow, TestSize.Level1)
 {
     SessionInfo subWindowInfo;
     subWindowInfo.abilityName_ = "TestSubWithType";
@@ -341,376 +696,6 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithoutParentWindow, Functi
     int32_t windowInfoSize = sceneSessionMap.size();
     ASSERT_EQ(windowInfoSize, 0);
 }
-
-/**
- * @tc.name: GetWindowInfoWithoutParentWindowAndStateActive
- * @tc.desc: windowInfo without parent window and state active
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithoutParentWindowAndStateActive, Function | SmallTest | Level2)
-{
-    SessionInfo subWindowInfo;
-    subWindowInfo.abilityName_ = "TestSubWithType";
-    subWindowInfo.bundleName_ = "TestSubWithType";
-    int32_t subWindowId = 36;
-    sptr<SceneSession> sceneSessionSubWindow = sptr<SceneSession>::MakeSptr(subWindowInfo, nullptr);
-    ASSERT_NE(sceneSessionSubWindow, nullptr);
-    sceneSessionSubWindow->persistentId_ = subWindowId;
-    sceneSessionSubWindow->isVisible_ = false;
-    uint32_t subFlags = static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK);
-    sceneSessionSubWindow->property_->SetWindowFlags(subFlags);
-    int32_t subWindowPid = 56;
-    InitSceneSession(sceneSessionSubWindow, subWindowPid, subWindowId, WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    sceneSessionSubWindow->SetParentSession(nullptr);
-    sceneSessionSubWindow->SetSessionState(SessionState::STATE_ACTIVE);
-    std::map<int32_t, sptr<SceneSession>> retSceneSessionMap;
-    retSceneSessionMap.insert(std::make_pair(subWindowPid, sceneSessionSubWindow));
-    ssm_->sceneSessionMap_ = retSceneSessionMap;
-    std::map<int32_t, sptr<SceneSession>> sceneSessionMap =
-        Rosen::SceneSessionManager::GetInstance().GetSceneSessionMap();
-    int32_t windowInfoSize = sceneSessionMap.size();
-    ASSERT_EQ(windowInfoSize, 0);
-}
-
-/**
- * @tc.name: GetWindowInfoWithNotSystemTouchable
- * @tc.desc: windowInfo with systemtouchable is false
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithNotSystemTouchable, Function | SmallTest | Level2)
-{
-    SessionInfo mainWindowInfo;
-    mainWindowInfo.abilityName_ = "TestMainWithType";
-    mainWindowInfo.bundleName_ = "TestMainWithType";
-    int32_t mainWindowId = 37;
-    sptr<SceneSession> sceneSessionMainWindow = sptr<SceneSession>::MakeSptr(mainWindowInfo, nullptr);
-    ASSERT_NE(sceneSessionMainWindow, nullptr);
-    sceneSessionMainWindow->persistentId_ = mainWindowId;
-    sceneSessionMainWindow->isVisible_ = true;
-    uint32_t mainFlags = static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK);
-    sceneSessionMainWindow->property_->SetWindowFlags(mainFlags);
-    bool isTouchable = false;
-    // set systemTouchable false;
-    sceneSessionMainWindow->SetSystemTouchable(isTouchable);
-    int32_t mainWindowPid = 57;
-    InitSceneSession(sceneSessionMainWindow, mainWindowPid, mainWindowId, WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    std::map<int32_t, sptr<SceneSession>> retSceneSessionMap;
-    retSceneSessionMap.insert(std::make_pair(mainWindowPid, sceneSessionMainWindow));
-    ssm_->sceneSessionMap_ = retSceneSessionMap;
-    MMI::WindowInfo windowInfo;
-    ScreenId screenId = 37;
-    ScreenSessionConfig config;
-    sptr<ScreenSession> screenSession =
-        sptr<ScreenSession>::MakeSptr(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
-    ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert(std::make_pair(screenId, screenSession));
-    manager_->UpdateWindowFlags(screenId, sceneSessionMainWindow, windowInfo);
-    bool windowFlagResult = false;
-    if (windowInfo.flags == 1) {
-        windowFlagResult = true;
-    }
-    ASSERT_EQ(windowFlagResult, true);
-}
-
-/**
- * @tc.name: GetWindowInfoWithNotIsTouchEnable
- * @tc.desc: windowInfo with isTouchenable is false
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithNotIsTouchEnable, Function | SmallTest | Level2)
-{
-    SessionInfo mainWindowInfo;
-    mainWindowInfo.abilityName_ = "TestMainWithType";
-    mainWindowInfo.bundleName_ = "TestMainWithType";
-    int32_t mainWindowId = 38;
-    sptr<SceneSession> sceneSessionMainWindow = sptr<SceneSession>::MakeSptr(mainWindowInfo, nullptr);
-    ASSERT_NE(sceneSessionMainWindow, nullptr);
-    sceneSessionMainWindow->persistentId_ = mainWindowId;
-    sceneSessionMainWindow->isVisible_ = true;
-    uint32_t mainFlags = static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK);
-    sceneSessionMainWindow->property_->SetWindowFlags(mainFlags);
-    bool isTouchable = true;
-    sceneSessionMainWindow->SetSystemTouchable(isTouchable);
-    int32_t mainWindowPid = 58;
-    InitSceneSession(sceneSessionMainWindow, mainWindowPid, mainWindowId, WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    std::map<int32_t, sptr<SceneSession>> retSceneSessionMap;
-    retSceneSessionMap.insert(std::make_pair(mainWindowPid, sceneSessionMainWindow));
-    ssm_->sceneSessionMap_ = retSceneSessionMap;
-    MMI::WindowInfo windowInfo;
-    ScreenId screenId = 38;
-    ScreenSessionConfig config;
-    sptr<ScreenSession> screenSession =
-        sptr<ScreenSession>::MakeSptr(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
-    // set screenSession touchenable_ true
-    screenSession->touchEnabled_.store(false);
-    ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
-    ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert(std::make_pair(screenId, screenSession));
-    manager_->UpdateWindowFlags(screenId, sceneSessionMainWindow, windowInfo);
-    bool windowFlagResult = false;
-    if (windowInfo.flags == MMI::WindowInfo::FLAG_BIT_UNTOUCHABLE) {
-        windowFlagResult = true;
-    }
-    ASSERT_EQ(windowFlagResult, true);
-}
-
-/**
- * @tc.name: GetWindowInfoWithNotIsForceTouchEnable
- * @tc.desc: windowInfo with isForeTouchenable is false
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithNotIsForceTouchEnable, Function | SmallTest | Level2)
-{
-    SessionInfo mainWindowInfo;
-    mainWindowInfo.abilityName_ = "TestMainWithType";
-    mainWindowInfo.bundleName_ = "TestMainWithType";
-    int32_t mainWindowId = 39;
-    sptr<SceneSession> sceneSessionMainWindow = sptr<SceneSession>::MakeSptr(mainWindowInfo, nullptr);
-    ASSERT_NE(sceneSessionMainWindow, nullptr);
-    sceneSessionMainWindow->persistentId_ = mainWindowId;
-    sceneSessionMainWindow->isVisible_ = true;
-    uint32_t mainFlags = static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK);
-    sceneSessionMainWindow->property_->SetWindowFlags(mainFlags);
-    // set isForceTouchable false
-    bool isForceTouchable = false;
-    sceneSessionMainWindow->SetForceTouchable(isForceTouchable);
-    int32_t mainWindowPid = 59;
-    InitSceneSession(sceneSessionMainWindow, mainWindowPid, mainWindowId, WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    std::map<int32_t, sptr<SceneSession>> retSceneSessionMap;
-    retSceneSessionMap.insert(std::make_pair(mainWindowPid, sceneSessionMainWindow));
-    ssm_->sceneSessionMap_ = retSceneSessionMap;
-    MMI::WindowInfo windowInfo;
-    ScreenId screenId = 39;
-    ScreenSessionConfig config;
-    sptr<ScreenSession> screenSession =
-        sptr<ScreenSession>::MakeSptr(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
-    screenSession->touchEnabled_.store(true);
-    ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert(std::make_pair(screenId, screenSession));
-    manager_->UpdateWindowFlags(screenId, sceneSessionMainWindow, windowInfo);
-    bool windowFlagResult = false;
-    if (windowInfo.flags == 1) {
-        windowFlagResult = true;
-    }
-    ASSERT_EQ(windowFlagResult, true);
-}
-
-/**
- * @tc.name: GetWindowInfoWithNotForegroundInteractiveStatus
- * @tc.desc: windowInfo with foregroundInteractiveStatus_ is false
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithNotForegroundInteractiveStatus, Function | SmallTest | Level2)
-{
-    SessionInfo mainWindowInfo;
-    mainWindowInfo.abilityName_ = "TestMainWithType";
-    mainWindowInfo.bundleName_ = "TestMainWithType";
-    int32_t mainWindowId = 40;
-    sptr<SceneSession> sceneSessionMainWindow = sptr<SceneSession>::MakeSptr(mainWindowInfo, nullptr);
-    ASSERT_NE(sceneSessionMainWindow, nullptr);
-    sceneSessionMainWindow->persistentId_ = mainWindowId;
-    sceneSessionMainWindow->isVisible_ = true;
-    // set foregroundInterativeStatus_ false
-    sceneSessionMainWindow->foregroundInteractiveStatus_.store(false);
-    uint32_t mainFlags = static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK);
-    sceneSessionMainWindow->property_->SetWindowFlags(mainFlags);
-    int32_t mainWindowPid = 60;
-    InitSceneSession(sceneSessionMainWindow, mainWindowPid, mainWindowId, WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    std::map<int32_t, sptr<SceneSession>> retSceneSessionMap;
-    retSceneSessionMap.insert(std::make_pair(mainWindowPid, sceneSessionMainWindow));
-    ssm_->sceneSessionMap_ = retSceneSessionMap;
-    MMI::WindowInfo windowInfo;
-    ScreenId screenId = 40;
-    ScreenSessionConfig config;
-    sptr<ScreenSession> screenSession =
-        sptr<ScreenSession>::MakeSptr(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
-    ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert(std::make_pair(screenId, screenSession));
-    manager_->UpdateWindowFlags(screenId, sceneSessionMainWindow, windowInfo);
-    bool windowFlagResult = false;
-    if (windowInfo.flags == 1) {
-        windowFlagResult = true;
-    }
-    ASSERT_EQ(windowFlagResult, true);
-}
-
-/**
- * @tc.name: GetWindowInfoWithNotPropertyTouchable
- * @tc.desc: windowInfo with property touchable false
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithNotPropertyTouchable, Function | SmallTest | Level2)
-{
-    SessionInfo mainWindowInfo;
-    mainWindowInfo.abilityName_ = "TestMainWithType";
-    mainWindowInfo.bundleName_ = "TestMainWithType";
-    int32_t mainWindowId = 41;
-    sptr<SceneSession> sceneSessionMainWindow = sptr<SceneSession>::MakeSptr(mainWindowInfo, nullptr);
-    ASSERT_NE(sceneSessionMainWindow, nullptr);
-    sceneSessionMainWindow->persistentId_ = mainWindowId;
-    sceneSessionMainWindow->foregroundInteractiveStatus_.store(false);
-    uint32_t mainFlags = static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK);
-    sceneSessionMainWindow->property_->SetWindowFlags(mainFlags);
-    // set property_.touchEnable_ false
-    sceneSessionMainWindow->property_->touchable_ = false;
-    int32_t mainWindowPid = 61;
-    InitSceneSession(sceneSessionMainWindow, mainWindowPid, mainWindowId, WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    std::map<int32_t, sptr<SceneSession>> retSceneSessionMap;
-    retSceneSessionMap.insert(std::make_pair(mainWindowPid, sceneSessionMainWindow));
-    ssm_->sceneSessionMap_ = retSceneSessionMap;
-    MMI::WindowInfo windowInfo;
-    ScreenId screenId = 41;
-    ScreenSessionConfig config;
-    sptr<ScreenSession> screenSession =
-        sptr<ScreenSession>::MakeSptr(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
-    ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert(std::make_pair(screenId, screenSession));
-    manager_->UpdateWindowFlags(screenId, sceneSessionMainWindow, windowInfo);
-    bool windowFlagResult = false;
-    if (windowInfo.flags == 1) {
-        windowFlagResult = true;
-    }
-    ASSERT_EQ(windowFlagResult, true);
-}
-
-/**
- * @tc.name: GetWindowInfoWithSameInfo
- * @tc.desc: windowInfo with same displayInfos and windowInfos
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithSameInfo, Function | SmallTest | Level2)
-{
-    MMI::DisplayInfo lastDisplayedInfo;
-    MMI::WindowInfo lastWindowInfo;
-    InitSessionInfo(lastDisplayedInfo, lastWindowInfo);
-    int32_t focusedSession = 42;
-    sim_->focusedSessionId_ = focusedSession;
-    int32_t lastFocusedSession = 42;
-    sim_->lastFocusId_ = lastFocusedSession;
-    std::vector<MMI::DisplayInfo> lastDisplayInfos;
-    std::vector<MMI::WindowInfo> lastWindowInfoList;
-    lastDisplayInfos.emplace_back(lastDisplayedInfo);
-    lastWindowInfoList.emplace_back(lastWindowInfo);
-    sim_->lastDisplayInfos_ = lastDisplayInfos;
-    sim_->lastWindowInfoList_ = lastWindowInfoList;
-    MMI::DisplayInfo currDisplayedInfo;
-    MMI::WindowInfo currWindowInfo;
-    InitSessionInfo(currDisplayedInfo, currWindowInfo);
-    std::vector<MMI::DisplayInfo> currDisplayInfos;
-    std::vector<MMI::WindowInfo> currWindowInfoList;
-    currDisplayInfos.emplace_back(currDisplayedInfo);
-    currWindowInfoList.emplace_back(currWindowInfo);
-    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
-    focusGroup->SetFocusedSessionId(focusedSession);
-    bool checkNeedUpdateFlag = true;
-    // check the same information
-    checkNeedUpdateFlag = sim_->CheckNeedUpdate(currDisplayInfos, currWindowInfoList);
-    ASSERT_EQ(checkNeedUpdateFlag, false);
-}
-
-/**
- * @tc.name: GetWindowInfoWithPidDiff
- * @tc.desc: windowInfo with different pid
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithPidDiff, Function | SmallTest | Level2)
-{
-    MMI::DisplayInfo lastDisplayedInfo;
-    MMI::WindowInfo lastWindowInfo;
-    InitSessionInfo(lastDisplayedInfo, lastWindowInfo);
-    int32_t focusedSession = 43;
-    sim_->focusedSessionId_ = focusedSession;
-    int32_t lastFocusedSession = 43;
-    sim_->lastFocusId_ = lastFocusedSession;
-    std::vector<MMI::DisplayInfo> lastDisplayInfos;
-    std::vector<MMI::WindowInfo> lastWindowInfoList;
-    lastDisplayInfos.emplace_back(lastDisplayedInfo);
-    lastWindowInfoList.emplace_back(lastWindowInfo);
-    sim_->lastDisplayInfos_ = lastDisplayInfos;
-    sim_->lastWindowInfoList_ = lastWindowInfoList;
-    MMI::DisplayInfo currDisplayedInfo;
-    MMI::WindowInfo currWindowInfo;
-    InitSessionInfo(currDisplayedInfo, currWindowInfo);
-    // set different pid number
-    currWindowInfo.pid = 434;
-    std::vector<MMI::DisplayInfo> currDisplayInfos;
-    std::vector<MMI::WindowInfo> currWindowInfoList;
-    currDisplayInfos.emplace_back(currDisplayedInfo);
-    currWindowInfoList.emplace_back(currWindowInfo);
-    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
-    focusGroup->SetFocusedSessionId(focusedSession);
-    bool checkNeedUpdateFlag = false;
-    checkNeedUpdateFlag = sim_->CheckNeedUpdate(currDisplayInfos, currWindowInfoList);
-    ASSERT_EQ(checkNeedUpdateFlag, true);
-}
-
-/**
- * @tc.name: GetWindowInfoWithAreaDiff
- * @tc.desc: windowInfo with different area
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithAreaDiff, Function | SmallTest | Level2)
-{
-    MMI::DisplayInfo lastDisplayedInfo;
-    MMI::WindowInfo lastWindowInfo;
-    InitSessionInfo(lastDisplayedInfo, lastWindowInfo);
-    int32_t focusedSession = 44;
-    sim_->focusedSessionId_ = focusedSession;
-    int32_t lastFocusedSession = 44;
-    sim_->lastFocusId_ = lastFocusedSession;
-    std::vector<MMI::DisplayInfo> lastDisplayInfos;
-    std::vector<MMI::WindowInfo> lastWindowInfoList;
-    lastDisplayInfos.emplace_back(lastDisplayedInfo);
-    lastWindowInfoList.emplace_back(lastWindowInfo);
-    sim_->lastDisplayInfos_ = lastDisplayInfos;
-    sim_->lastWindowInfoList_ = lastWindowInfoList;
-    MMI::DisplayInfo currDisplayedInfo;
-    MMI::WindowInfo currWindowInfo;
-    InitSessionInfo(currDisplayedInfo, currWindowInfo);
-    // set different area number
-    currWindowInfo.area = {0, 0, 500, 600};
-    std::vector<MMI::DisplayInfo> currDisplayInfos;
-    std::vector<MMI::WindowInfo> currWindowInfoList;
-    currDisplayInfos.emplace_back(currDisplayedInfo);
-    currWindowInfoList.emplace_back(currWindowInfo);
-    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
-    focusGroup->SetFocusedSessionId(focusedSession);
-    bool checkNeedUpdateFlag = false;
-    checkNeedUpdateFlag = sim_->CheckNeedUpdate(currDisplayInfos, currWindowInfoList);
-    ASSERT_EQ(checkNeedUpdateFlag, true);
-}
-
-/**
- * @tc.name: GetWindowInfoWithzOrderDiff
- * @tc.desc: windowInfo with different zOrder
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithzOrderDiff, Function | SmallTest | Level2)
-{
-    MMI::DisplayInfo lastDisplayedInfo;
-    MMI::WindowInfo lastWindowInfo;
-    InitSessionInfo(lastDisplayedInfo, lastWindowInfo);
-    int32_t focusedSession = 45;
-    sim_->focusedSessionId_ = focusedSession;
-    int32_t lastFocusedSession = 45;
-    sim_->lastFocusId_ = lastFocusedSession;
-    std::vector<MMI::DisplayInfo> lastDisplayInfos;
-    std::vector<MMI::WindowInfo> lastWindowInfoList;
-    lastDisplayInfos.emplace_back(lastDisplayedInfo);
-    lastWindowInfoList.emplace_back(lastWindowInfo);
-    sim_->lastDisplayInfos_ = lastDisplayInfos;
-    sim_->lastWindowInfoList_ = lastWindowInfoList;
-    MMI::DisplayInfo currDisplayedInfo;
-    MMI::WindowInfo currWindowInfo;
-    InitSessionInfo(currDisplayedInfo, currWindowInfo);
-    // set different zOrder number
-    currWindowInfo.zOrder = 40.0;
-    std::vector<MMI::DisplayInfo> currDisplayInfos;
-    std::vector<MMI::WindowInfo> currWindowInfoList;
-    currDisplayInfos.emplace_back(currDisplayedInfo);
-    currWindowInfoList.emplace_back(currWindowInfo);
-    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
-    focusGroup->SetFocusedSessionId(focusedSession);
-    bool checkNeedUpdateFlag = false;
-    checkNeedUpdateFlag = sim_->CheckNeedUpdate(currDisplayInfos, currWindowInfoList);
-    ASSERT_EQ(checkNeedUpdateFlag, true);
-}
-
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

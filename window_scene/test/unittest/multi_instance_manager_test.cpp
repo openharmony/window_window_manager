@@ -26,33 +26,28 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    const std::string BUNDLE_NAME = "bundleName";
-    const int32_t USER_ID { 100 };
-    const int32_t SLEEP_TIME { 10000 };
-}
+const std::string BUNDLE_NAME = "bundleName";
+const int32_t USER_ID{ 100 };
+const int32_t SLEEP_TIME{ 10000 };
+} // namespace
 class MultiInstanceManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+
 private:
     sptr<SceneSession> GetSceneSession(const std::string& instanceKey = "");
     void Init(AppExecFwk::MultiAppModeType modeType, uint32_t maxCount);
     std::shared_ptr<TaskScheduler> GetTaskScheduler();
 };
 
-void MultiInstanceManagerTest::SetUpTestCase()
-{
-}
+void MultiInstanceManagerTest::SetUpTestCase() {}
 
-void MultiInstanceManagerTest::TearDownTestCase()
-{
-}
+void MultiInstanceManagerTest::TearDownTestCase() {}
 
-void MultiInstanceManagerTest::SetUp()
-{
-}
+void MultiInstanceManagerTest::SetUp() {}
 
 void MultiInstanceManagerTest::TearDown()
 {
@@ -76,16 +71,17 @@ sptr<SceneSession> MultiInstanceManagerTest::GetSceneSession(const std::string& 
 void MultiInstanceManagerTest::Init(AppExecFwk::MultiAppModeType modeType, uint32_t maxCount)
 {
     sptr<IBundleMgrMocker> bundleMgrMocker = sptr<IBundleMgrMocker>::MakeSptr();
-    EXPECT_CALL(*bundleMgrMocker, GetApplicationInfos(_, _, _)).WillOnce([modeType, maxCount](
-        const AppExecFwk::ApplicationFlag flag, const int32_t userId,
-        std::vector<AppExecFwk::ApplicationInfo>& appInfos) {
-        AppExecFwk::ApplicationInfo appInfo;
-        appInfo.bundleName = BUNDLE_NAME;
-        appInfo.multiAppMode.multiAppModeType = modeType;
-        appInfo.multiAppMode.maxCount = maxCount;
-        appInfos.push_back(appInfo);
-        return true;
-    });
+    EXPECT_CALL(*bundleMgrMocker, GetApplicationInfos(_, _, _))
+        .WillOnce([modeType, maxCount](const AppExecFwk::ApplicationFlag flag,
+                                       const int32_t userId,
+                                       std::vector<AppExecFwk::ApplicationInfo>& appInfos) {
+            AppExecFwk::ApplicationInfo appInfo;
+            appInfo.bundleName = BUNDLE_NAME;
+            appInfo.multiAppMode.multiAppModeType = modeType;
+            appInfo.multiAppMode.maxCount = maxCount;
+            appInfos.push_back(appInfo);
+            return true;
+        });
     MultiInstanceManager::GetInstance().Init(bundleMgrMocker, GetTaskScheduler());
     MultiInstanceManager::GetInstance().SetCurrentUserId(USER_ID);
     usleep(SLEEP_TIME);
@@ -104,7 +100,7 @@ namespace {
  * @tc.desc: test function : IsMultiInstance
  * @tc.type: FUNC
  */
-HWTEST_F(MultiInstanceManagerTest, IsMultiInstance, Function | SmallTest | Level1)
+HWTEST_F(MultiInstanceManagerTest, IsMultiInstance, TestSize.Level1)
 {
     AppExecFwk::MultiAppModeType modeType = AppExecFwk::MultiAppModeType::MULTI_INSTANCE;
     uint32_t maxCount = 5;
@@ -117,7 +113,7 @@ HWTEST_F(MultiInstanceManagerTest, IsMultiInstance, Function | SmallTest | Level
  * @tc.desc: test function : IsMultiInstance
  * @tc.type: FUNC
  */
-HWTEST_F(MultiInstanceManagerTest, IsMultiInstance02, Function | SmallTest | Level1)
+HWTEST_F(MultiInstanceManagerTest, IsMultiInstance02, TestSize.Level1)
 {
     AppExecFwk::MultiAppModeType modeType = AppExecFwk::MultiAppModeType::UNSPECIFIED;
     uint32_t maxCount = 5;
@@ -130,7 +126,7 @@ HWTEST_F(MultiInstanceManagerTest, IsMultiInstance02, Function | SmallTest | Lev
  * @tc.desc: test function : IsValidInstanceKey
  * @tc.type: FUNC
  */
-HWTEST_F(MultiInstanceManagerTest, IsValidInstanceKey, Function | SmallTest | Level1)
+HWTEST_F(MultiInstanceManagerTest, IsValidInstanceKey, TestSize.Level1)
 {
     AppExecFwk::MultiAppModeType modeType = AppExecFwk::MultiAppModeType::MULTI_INSTANCE;
     uint32_t maxCount = 5;
@@ -155,7 +151,7 @@ HWTEST_F(MultiInstanceManagerTest, IsValidInstanceKey, Function | SmallTest | Le
  * @tc.desc: test function : FillInstanceKeyIfNeed
  * @tc.type: FUNC
  */
-HWTEST_F(MultiInstanceManagerTest, FillInstanceKeyIfNeed, Function | SmallTest | Level1)
+HWTEST_F(MultiInstanceManagerTest, FillInstanceKeyIfNeed, TestSize.Level1)
 {
     AppExecFwk::MultiAppModeType modeType = AppExecFwk::MultiAppModeType::MULTI_INSTANCE;
     uint32_t maxCount = 5;
@@ -172,7 +168,7 @@ HWTEST_F(MultiInstanceManagerTest, FillInstanceKeyIfNeed, Function | SmallTest |
  * @tc.desc: test function : FillInstanceKeyIfNeed
  * @tc.type: FUNC
  */
-HWTEST_F(MultiInstanceManagerTest, FillInstanceKeyIfNeed02, Function | SmallTest | Level1)
+HWTEST_F(MultiInstanceManagerTest, FillInstanceKeyIfNeed02, TestSize.Level1)
 {
     AppExecFwk::MultiAppModeType modeType = AppExecFwk::MultiAppModeType::MULTI_INSTANCE;
     uint32_t maxCount = 5;
@@ -190,7 +186,7 @@ HWTEST_F(MultiInstanceManagerTest, FillInstanceKeyIfNeed02, Function | SmallTest
  * @tc.desc: test function : FillInstanceKeyIfNeed
  * @tc.type: FUNC
  */
-HWTEST_F(MultiInstanceManagerTest, FillInstanceKeyIfNeed03, Function | SmallTest | Level1)
+HWTEST_F(MultiInstanceManagerTest, FillInstanceKeyIfNeed03, TestSize.Level1)
 {
     AppExecFwk::MultiAppModeType modeType = AppExecFwk::MultiAppModeType::MULTI_INSTANCE;
     uint32_t maxCount = 2;
@@ -217,7 +213,7 @@ HWTEST_F(MultiInstanceManagerTest, FillInstanceKeyIfNeed03, Function | SmallTest
  * @tc.desc: test function : MultiInstancePendingSessionActivation
  * @tc.type: FUNC
  */
-HWTEST_F(MultiInstanceManagerTest, MultiInstancePendingSessionActivation, Function | SmallTest | Level1)
+HWTEST_F(MultiInstanceManagerTest, MultiInstancePendingSessionActivation, TestSize.Level1)
 {
     AppExecFwk::MultiAppModeType modeType = AppExecFwk::MultiAppModeType::UNSPECIFIED;
     uint32_t maxCount = 0;
@@ -232,7 +228,7 @@ HWTEST_F(MultiInstanceManagerTest, MultiInstancePendingSessionActivation, Functi
  * @tc.desc: test function : MultiInstancePendingSessionActivation
  * @tc.type: FUNC
  */
-HWTEST_F(MultiInstanceManagerTest, MultiInstancePendingSessionActivation02, Function | SmallTest | Level1)
+HWTEST_F(MultiInstanceManagerTest, MultiInstancePendingSessionActivation02, TestSize.Level1)
 {
     AppExecFwk::MultiAppModeType modeType = AppExecFwk::MultiAppModeType::MULTI_INSTANCE;
     uint32_t maxCount = 5;
@@ -248,7 +244,7 @@ HWTEST_F(MultiInstanceManagerTest, MultiInstancePendingSessionActivation02, Func
  * @tc.desc: test function : MultiInstancePendingSessionActivation
  * @tc.type: FUNC
  */
-HWTEST_F(MultiInstanceManagerTest, MultiInstancePendingSessionActivation03, Function | SmallTest | Level1)
+HWTEST_F(MultiInstanceManagerTest, MultiInstancePendingSessionActivation03, TestSize.Level1)
 {
     AppExecFwk::MultiAppModeType modeType = AppExecFwk::MultiAppModeType::MULTI_INSTANCE;
     uint32_t maxCount = 5;
@@ -264,7 +260,7 @@ HWTEST_F(MultiInstanceManagerTest, MultiInstancePendingSessionActivation03, Func
  * @tc.desc: test function : GetMaxInstanceCount
  * @tc.type: FUNC
  */
-HWTEST_F(MultiInstanceManagerTest, GetMaxInstanceCount, Function | SmallTest | Level1)
+HWTEST_F(MultiInstanceManagerTest, GetMaxInstanceCount, TestSize.Level1)
 {
     AppExecFwk::MultiAppModeType modeType = AppExecFwk::MultiAppModeType::MULTI_INSTANCE;
     uint32_t maxCount = 5;
@@ -277,7 +273,7 @@ HWTEST_F(MultiInstanceManagerTest, GetMaxInstanceCount, Function | SmallTest | L
  * @tc.desc: test function : GetInstanceCount
  * @tc.type: FUNC
  */
-HWTEST_F(MultiInstanceManagerTest, GetInstanceCount, Function | SmallTest | Level1)
+HWTEST_F(MultiInstanceManagerTest, GetInstanceCount, TestSize.Level1)
 {
     AppExecFwk::MultiAppModeType modeType = AppExecFwk::MultiAppModeType::MULTI_INSTANCE;
     uint32_t maxCount = 5;
@@ -297,7 +293,7 @@ HWTEST_F(MultiInstanceManagerTest, GetInstanceCount, Function | SmallTest | Leve
  * @tc.desc: test function : GetLastInstanceKey
  * @tc.type: FUNC
  */
-HWTEST_F(MultiInstanceManagerTest, GetLastInstanceKey, Function | SmallTest | Level1)
+HWTEST_F(MultiInstanceManagerTest, GetLastInstanceKey, TestSize.Level1)
 {
     AppExecFwk::MultiAppModeType modeType = AppExecFwk::MultiAppModeType::MULTI_INSTANCE;
     uint32_t maxCount = 5;
@@ -317,7 +313,7 @@ HWTEST_F(MultiInstanceManagerTest, GetLastInstanceKey, Function | SmallTest | Le
  * @tc.desc: test function : CreateNewInstanceKey
  * @tc.type: FUNC
  */
-HWTEST_F(MultiInstanceManagerTest, CreateNewInstanceKey, Function | SmallTest | Level1)
+HWTEST_F(MultiInstanceManagerTest, CreateNewInstanceKey, TestSize.Level1)
 {
     AppExecFwk::MultiAppModeType modeType = AppExecFwk::MultiAppModeType::MULTI_INSTANCE;
     uint32_t maxCount = 5;
@@ -354,7 +350,7 @@ HWTEST_F(MultiInstanceManagerTest, CreateNewInstanceKey, Function | SmallTest | 
  * @tc.desc: test function : IsInstanceKeyExist
  * @tc.type: FUNC
  */
-HWTEST_F(MultiInstanceManagerTest, IsInstanceKeyExist, Function | SmallTest | Level1)
+HWTEST_F(MultiInstanceManagerTest, IsInstanceKeyExist, TestSize.Level1)
 {
     AppExecFwk::MultiAppModeType modeType = AppExecFwk::MultiAppModeType::MULTI_INSTANCE;
     uint32_t maxCount = 5;
@@ -374,6 +370,6 @@ HWTEST_F(MultiInstanceManagerTest, IsInstanceKeyExist, Function | SmallTest | Le
     MultiInstanceManager::GetInstance().DecreaseInstanceKeyRefCount(sceneSession);
     MultiInstanceManager::GetInstance().DecreaseInstanceKeyRefCount(sceneSession3);
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

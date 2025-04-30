@@ -19,9 +19,9 @@
 #include "common_test_utils.h"
 #include "mock_session.h"
 #include "session/host/include/scene_session.h"
-#include "window_test_utils.h"
 #include "window_adapter.h"
 #include "window_scene_session_impl.h"
+#include "window_test_utils.h"
 #include "wm_common.h"
 
 using namespace testing;
@@ -36,28 +36,19 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+
 private:
     std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext_;
     static constexpr uint32_t WAIT_SERVERAL_FRAMES = 70000;
 };
 
+void WindowLayoutTest::SetUpTestCase() {}
 
-void WindowLayoutTest::SetUpTestCase()
-{
-}
+void WindowLayoutTest::TearDownTestCase() {}
 
-void WindowLayoutTest::TearDownTestCase()
-{
-}
+void WindowLayoutTest::SetUp() {}
 
-void WindowLayoutTest::SetUp()
-{
-}
-
-void WindowLayoutTest::TearDown()
-{
-}
-
+void WindowLayoutTest::TearDown() {}
 
 namespace {
 
@@ -66,13 +57,13 @@ namespace {
  * @tc.desc: test moveWindowTo for ALN/PC with windowMode: 102, windowType: 2107
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, moveWindowTo01, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, moveWindowTo01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("moveWindowTo01");
     option->SetWindowType(WindowType::WINDOW_TYPE_TOAST);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    
+
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
 
     window->property_->SetPersistentId(10001);
@@ -119,7 +110,7 @@ HWTEST_F(WindowLayoutTest, moveWindowTo01, Function | MediumTest | Level3)
  * @tc.desc: test moveWindowTo for ALN with windowMode: 102, windowType: 1001
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, moveWindowTo02, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, moveWindowTo02, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("moveWindowTo02");
@@ -129,7 +120,8 @@ HWTEST_F(WindowLayoutTest, moveWindowTo02, Function | MediumTest | Level3)
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
 
     SessionInfo sessionInfo = { "bundleName_moveWindowTo02",
-        "moduleName_moveWindowTo02", "abilityName_moveWindowTo02" };
+                                "moduleName_moveWindowTo02",
+                                "abilityName_moveWindowTo02" };
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
 
     Rect rectOld;
@@ -171,19 +163,20 @@ HWTEST_F(WindowLayoutTest, moveWindowTo02, Function | MediumTest | Level3)
  * @tc.desc: test moveWindowTo for ALN with windowMode: 1, windowType: 1
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, moveWindowTo03, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, moveWindowTo03, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("moveWindowTo03");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    
+
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
 
     window->property_->SetPersistentId(10003);
 
     SessionInfo sessionInfo = { "bundleName_moveWindowTo03",
-        "moduleName_moveWindowTo03", "abilityName_moveWindowTo03" };
+                                "moduleName_moveWindowTo03",
+                                "abilityName_moveWindowTo03" };
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
 
     Rect rectOld;
@@ -232,19 +225,20 @@ HWTEST_F(WindowLayoutTest, moveWindowTo03, Function | MediumTest | Level3)
  * @tc.desc: test moveWindowTo for ALN with windowMode: 100, windowType: 1
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, moveWindowTo04, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, moveWindowTo04, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("moveWindowTo04");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     option->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
-    
+
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
 
     window->property_->SetPersistentId(10004);
 
     SessionInfo sessionInfo = { "bundleName_moveWindowTo04",
-        "moduleName_moveWindowTo04", "abilityName_moveWindowTo04" };
+                                "moduleName_moveWindowTo04",
+                                "abilityName_moveWindowTo04" };
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
 
     Rect rectOld;
@@ -293,13 +287,13 @@ HWTEST_F(WindowLayoutTest, moveWindowTo04, Function | MediumTest | Level3)
  * @tc.desc: test resize for ALN/PC with windowMode: 102, windowType: 2107
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, resize01, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, resize01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("resize01");
     option->SetWindowType(WindowType::WINDOW_TYPE_TOAST);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    
+
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
 
     Rect rect;
@@ -336,7 +330,7 @@ HWTEST_F(WindowLayoutTest, resize01, Function | MediumTest | Level3)
     EXPECT_EQ(windowLimits.maxHeight_, rect.height_);
 
     ret = window->Resize(0, 0);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret); // check parameter first
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret); // check parameter first
 }
 
 /**
@@ -344,13 +338,13 @@ HWTEST_F(WindowLayoutTest, resize01, Function | MediumTest | Level3)
  * @tc.desc: test resize for ALN with windowMode: 1, windowType: 1
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, resize02, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, resize02, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("resize02");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    
+
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
 
     SessionInfo sessionInfo = { "bundleName_resize02", "moduleName_resize02", "abilityName_resize02" };
@@ -370,7 +364,7 @@ HWTEST_F(WindowLayoutTest, resize02, Function | MediumTest | Level3)
     EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
 
     ret = window->Resize(0, 0);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret); // check parameter first
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret); // check parameter first
 }
 
 /**
@@ -378,13 +372,13 @@ HWTEST_F(WindowLayoutTest, resize02, Function | MediumTest | Level3)
  * @tc.desc: test resize for PC with windowMode: 1, windowType: 1
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, resize03, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, resize03, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("resize03");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    
+
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
 
     SessionInfo sessionInfo = { "bundleName_resize03", "moduleName_resize03", "abilityName_resize03" };
@@ -404,7 +398,7 @@ HWTEST_F(WindowLayoutTest, resize03, Function | MediumTest | Level3)
     EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
 
     ret = window->Resize(0, 0);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret); // check parameter first
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret); // check parameter first
 }
 
 /**
@@ -412,13 +406,13 @@ HWTEST_F(WindowLayoutTest, resize03, Function | MediumTest | Level3)
  * @tc.desc: test resize for ALN/PC with windowMode: 100, windowType: 1
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, resize04, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, resize04, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("resize04");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     option->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
-    
+
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
 
     SessionInfo sessionInfo = { "bundleName_resize04", "moduleName_resize04", "abilityName_resize04" };
@@ -438,7 +432,7 @@ HWTEST_F(WindowLayoutTest, resize04, Function | MediumTest | Level3)
     EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
 
     ret = window->Resize(0, 0);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret); // check parameter first
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret); // check parameter first
 }
 
 /**
@@ -446,13 +440,13 @@ HWTEST_F(WindowLayoutTest, resize04, Function | MediumTest | Level3)
  * @tc.desc: test resize for ALN/PC with windowMode: 102, windowType: 2107
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, resize05, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, resize05, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("resize05");
     option->SetWindowType(WindowType::WINDOW_TYPE_TOAST);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    
+
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
 
     Rect rect;
@@ -486,13 +480,13 @@ HWTEST_F(WindowLayoutTest, resize05, Function | MediumTest | Level3)
  * @tc.desc: test resize for ALN with windowMode: 1, windowType: 1
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, resize06, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, resize06, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("resize06");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    
+
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
 
     SessionInfo sessionInfo = { "bundleName_resize06", "moduleName_resize06", "abilityName_resize06" };
@@ -520,13 +514,13 @@ HWTEST_F(WindowLayoutTest, resize06, Function | MediumTest | Level3)
  * @tc.desc: test resize for PC with windowMode: 1, windowType: 1
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, resize07, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, resize07, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("resize07");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    
+
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
 
     SessionInfo sessionInfo = { "bundleName_resize07", "moduleName_resize07", "abilityName_resize07" };
@@ -554,13 +548,13 @@ HWTEST_F(WindowLayoutTest, resize07, Function | MediumTest | Level3)
  * @tc.desc: test resize for ALN/PC with windowMode: 100, windowType: 1
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, resize08, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, resize08, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("resize08");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     option->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
-    
+
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
 
     SessionInfo sessionInfo = { "bundleName_resize08", "moduleName_resize08", "abilityName_resize08" };
@@ -587,14 +581,14 @@ HWTEST_F(WindowLayoutTest, resize08, Function | MediumTest | Level3)
  * @tc.desc: test data route for SetWindowLimits
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, SetWindowLimitsDataRoute, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, SetWindowLimitsDataRoute, TestSize.Level1)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "### WindowLayoutTest::SetWindowLimitsDataRoute begin ###");
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetWindowLimitsDataRoute");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    
+
     sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     windowSceneSessionImpl->property_->SetPersistentId(1);
     windowSceneSessionImpl->property_->SetDisplayId(0);
@@ -605,7 +599,7 @@ HWTEST_F(WindowLayoutTest, SetWindowLimitsDataRoute, Function | MediumTest | Lev
     windowSceneSessionImpl->hostSession_ = session;
     windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
 
-    WindowLimits windowLimits1 = {4000, 4000, 2000, 2000, 0.0f, 0.0f};
+    WindowLimits windowLimits1 = { 4000, 4000, 2000, 2000, 0.0f, 0.0f };
     WMError ret = windowSceneSessionImpl->SetWindowLimits(windowLimits1, false);
     EXPECT_EQ(WMError::WM_OK, ret);
     auto windowProperty = windowSceneSessionImpl->GetProperty();
@@ -624,14 +618,14 @@ HWTEST_F(WindowLayoutTest, SetWindowLimitsDataRoute, Function | MediumTest | Lev
  * @tc.desc: test data route for SetAspectRatioDataRoute
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, SetAspectRatioDataRoute, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, SetAspectRatioDataRoute, TestSize.Level1)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "### WindowLayoutTest::SetAspectRatioDataRoute begin ###");
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetAspectRatioDataRoute");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    
+
     sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     windowSceneSessionImpl->property_->SetPersistentId(1);
     windowSceneSessionImpl->property_->SetDisplayId(0);
@@ -642,7 +636,7 @@ HWTEST_F(WindowLayoutTest, SetAspectRatioDataRoute, Function | MediumTest | Leve
     windowSceneSessionImpl->hostSession_ = session;
     windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
 
-    WindowLimits windowLimits1 = {4000, 4000, 2000, 2000, 0.0f, 0.0f};
+    WindowLimits windowLimits1 = { 4000, 4000, 2000, 2000, 0.0f, 0.0f };
     WMError ret = windowSceneSessionImpl->SetWindowLimits(windowLimits1, false);
     EXPECT_EQ(WMError::WM_OK, ret);
     const float ratio = 1.5;
@@ -657,7 +651,7 @@ HWTEST_F(WindowLayoutTest, SetAspectRatioDataRoute, Function | MediumTest | Leve
  * @tc.desc: test data route for moveTo
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, moveToDataRoute, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, moveToDataRoute, TestSize.Level1)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "### WindowLayoutTest::moveToDataRoute begin ###");
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
@@ -677,7 +671,7 @@ HWTEST_F(WindowLayoutTest, moveToDataRoute, Function | MediumTest | Level3)
     WMError ret = windowSceneSessionImpl->MoveTo(500, 500);
     usleep(WAIT_SERVERAL_FRAMES);
     EXPECT_EQ(WMError::WM_OK, ret);
-    
+
     Rect rect = windowSceneSessionImpl->property_->GetRequestRect();
     EXPECT_EQ(500, rect.posX_);
     EXPECT_EQ(500, rect.posY_);
@@ -689,7 +683,7 @@ HWTEST_F(WindowLayoutTest, moveToDataRoute, Function | MediumTest | Level3)
  * @tc.desc: test data route for Resize
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, ResizeDataRoute, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, ResizeDataRoute, TestSize.Level1)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "### WindowLayoutTest::ResizeDataRoute begin ###");
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
@@ -731,7 +725,7 @@ HWTEST_F(WindowLayoutTest, ResizeDataRoute, Function | MediumTest | Level3)
  * @tc.desc: test AdjustRectByAspectRatio
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, AdjustRectByAspectRatio, Function | MediumTest | Level0)
+HWTEST_F(WindowLayoutTest, AdjustRectByAspectRatio, TestSize.Level1)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "### WindowLayoutTest::AdjustRectByAspectRatio begin ###");
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
@@ -752,7 +746,7 @@ HWTEST_F(WindowLayoutTest, AdjustRectByAspectRatio, Function | MediumTest | Leve
     windowSceneSessionImpl->hostSession_ = session;
     windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
 
-    WindowLimits windowLimits1 = {3000, 3000, 1200, 1200, 0.0f, 0.0f};
+    WindowLimits windowLimits1 = { 3000, 3000, 1200, 1200, 0.0f, 0.0f };
     WMError wmRet1 = windowSceneSessionImpl->SetWindowLimits(windowLimits1, false);
     EXPECT_EQ(WMError::WM_OK, wmRet1);
 
@@ -783,6 +777,6 @@ HWTEST_F(WindowLayoutTest, AdjustRectByAspectRatio, Function | MediumTest | Leve
     TLOGI(WmsLogTag::WMS_LAYOUT, "### WindowLayoutTest::AdjustRectByAspectRatio end ###");
 }
 
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

@@ -287,6 +287,17 @@ public:
         return WSError::WS_OK;
     }
 
+    /**
+     * @brief Update pipTemplateInfo.
+     *
+     * @param pipTemplateInfo Indicates the {@link PiPTemplateInfo} pipTemplateInfo of pip window
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError UpdatePiPTemplateInfo(PiPTemplateInfo& pipTemplateInfo)
+    {
+        return WSError::WS_OK;
+    }
+
     virtual WSError ProcessPointDownSession(int32_t posX, int32_t posY) { return WSError::WS_OK; }
     virtual WSError SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         bool isExecuteDelayRaise = false) { return WSError::WS_OK; }
@@ -421,6 +432,19 @@ public:
     virtual WSError SetFollowParentWindowLayoutEnabled(bool isFollow) { return WSError::WS_OK; };
     virtual WSError UpdateFlag(const std::string& flag) { return WSError::WS_OK; };
     virtual WSError UpdateRotationChangeRegistered(int32_t persistentId, bool isRegister) { return WSError::WS_OK; }
+    virtual WSError GetIsHighlighted(bool& isHighlighted) { return WSError::WS_OK; }
+
+    /**
+     * @brief Notify when disableDelegator change to true
+     *
+     * This function is used to notify disableDelegator change.
+     *
+     * @caller SA
+     * @permission SA permission
+     *
+     * @return Successful call returns WMError::WS_OK, otherwise it indicates failure
+     */
+    virtual WMError NotifyDisableDelegatorChange() { return WMError::WM_OK; }
 };
 } // namespace OHOS::Rosen
 

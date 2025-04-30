@@ -78,8 +78,8 @@ private:
     /*
      * Window Layout
      */
-    void AddSurfaceNodeToScreen() override;
-    void RemoveSufaceNodeFromScreen() override;
+    void AddSurfaceNodeToScreen(DisplayId draggingOrMovingParentDisplayId) override;
+    void RemoveSurfaceNodeFromScreen() override;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SUB_SESSION_H

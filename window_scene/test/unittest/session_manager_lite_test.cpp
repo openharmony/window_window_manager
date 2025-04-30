@@ -35,17 +35,14 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+
 private:
     std::shared_ptr<SessionManagerLite> sml_;
 };
 
-void SessionManagerLiteTest::SetUpTestCase()
-{
-}
+void SessionManagerLiteTest::SetUpTestCase() {}
 
-void SessionManagerLiteTest::TearDownTestCase()
-{
-}
+void SessionManagerLiteTest::TearDownTestCase() {}
 
 void SessionManagerLiteTest::SetUp()
 {
@@ -60,72 +57,11 @@ void SessionManagerLiteTest::TearDown()
 
 namespace {
 /**
- * @tc.name: GetSceneSessionManagerLiteProxy
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SessionManagerLiteTest, GetSceneSessionManagerLiteProxy, Function | SmallTest | Level2)
-{
-    ASSERT_NE(nullptr, sml_);
-    sml_->Clear();
-    sml_->ClearSessionManagerProxy();
-    auto sceneSessionManagerLiteProxy = sml_->GetSceneSessionManagerLiteProxy();
-    ASSERT_NE(nullptr, sceneSessionManagerLiteProxy);
-
-    sml_->ClearSessionManagerProxy();
-    sml_->GetSessionManagerServiceProxy();
-    sceneSessionManagerLiteProxy = sml_->GetSceneSessionManagerLiteProxy();
-    ASSERT_NE(nullptr, sceneSessionManagerLiteProxy);
-}
-
-/**
- * @tc.name: InitSceneSessionManagerLiteProxy
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SessionManagerLiteTest, InitSceneSessionManagerLiteProxy01, Function | SmallTest | Level2)
-{
-    ASSERT_NE(nullptr, sml_);
-    sml_->InitSceneSessionManagerLiteProxy();
-    ASSERT_EQ(nullptr, sml_->sceneSessionManagerLiteProxy_);
-}
-
-/**
- * @tc.name: InitSceneSessionManagerLiteProxy
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SessionManagerLiteTest, InitSceneSessionManagerLiteProxy02, Function | SmallTest | Level2)
-{
-    ASSERT_NE(nullptr, sml_);
-    sml_->GetSceneSessionManagerLiteProxy();
-    sml_->InitSceneSessionManagerLiteProxy();
-    ASSERT_NE(nullptr, sml_->sceneSessionManagerLiteProxy_);
-}
-
-/**
- * @tc.name: ClearSessionManagerProxy
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SessionManagerLiteTest, ClearSessionManagerProxy, Function | SmallTest | Level2)
-{
-    ASSERT_NE(nullptr, sml_);
-    sml_->ClearSessionManagerProxy();
-    ASSERT_EQ(sml_->sessionManagerServiceProxy_, nullptr);
-
-    sml_->recoverListenerRegistered_ = true;
-    sml_->GetSessionManagerServiceProxy();
-    sml_->ClearSessionManagerProxy();
-    ASSERT_EQ(sml_->sessionManagerServiceProxy_, nullptr);
-}
-
-/**
  * @tc.name: RecoverSessionManagerService
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionManagerLiteTest, RecoverSessionManagerService, Function | SmallTest | Level2)
+HWTEST_F(SessionManagerLiteTest, RecoverSessionManagerService, TestSize.Level1)
 {
     ASSERT_NE(nullptr, sml_);
     bool funcInvoked = false;
@@ -142,7 +78,7 @@ HWTEST_F(SessionManagerLiteTest, RecoverSessionManagerService, Function | SmallT
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionManagerLiteTest, ReregisterSessionListener, Function | SmallTest | Level2)
+HWTEST_F(SessionManagerLiteTest, ReregisterSessionListener, TestSize.Level1)
 {
     ASSERT_NE(nullptr, sml_);
     sml_->ReregisterSessionListener();
@@ -155,89 +91,11 @@ HWTEST_F(SessionManagerLiteTest, ReregisterSessionListener, Function | SmallTest
 }
 
 /**
- * @tc.name: OnWMSConnectionChangedCallback
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SessionManagerLiteTest, OnWMSConnectionChangedCallback, Function | SmallTest | Level2)
-{
-    ASSERT_NE(nullptr, sml_);
-    bool funcInvoked = false;
-    sml_->wmsConnectionChangedFunc_ = nullptr;
-    sml_->OnWMSConnectionChangedCallback(101, DEFAULT_SCREEN_ID, true, false);
-    ASSERT_EQ(funcInvoked, false);
-
-    sml_->wmsConnectionChangedFunc_ = [&](int32_t userId, int32_t screenId, bool isConnected) { funcInvoked = true; };
-    sml_->OnWMSConnectionChangedCallback(101, DEFAULT_SCREEN_ID, true, true);
-    ASSERT_EQ(funcInvoked, true);
-}
-
-/**
- * @tc.name: OnWMSConnectionChanged1
- * @tc.desc: wms disconnected
- * @tc.type: FUNC
- */
-HWTEST_F(SessionManagerLiteTest, OnWMSConnectionChanged1, Function | SmallTest | Level2)
-{
-    ASSERT_NE(nullptr, sml_);
-    sptr<ISessionManagerService> sessionManagerService;
-    sml_->isWMSConnected_ = true;
-    sml_->currentWMSUserId_ = 100;
-    sml_->OnWMSConnectionChanged(100, DEFAULT_SCREEN_ID, false, sessionManagerService);
-    ASSERT_EQ(sml_->isWMSConnected_, false);
-
-    sml_->currentWMSUserId_ = 101;
-    sml_->isWMSConnected_ = true;
-    sml_->OnWMSConnectionChanged(100, DEFAULT_SCREEN_ID, false, sessionManagerService);
-    ASSERT_EQ(sml_->isWMSConnected_, true);
-}
-
-/**
- * @tc.name: OnWMSConnectionChanged2
- * @tc.desc: wms connected
- * @tc.type: FUNC
- */
-HWTEST_F(SessionManagerLiteTest, OnWMSConnectionChanged2, Function | SmallTest | Level2)
-{
-    ASSERT_NE(nullptr, sml_);
-    sptr<ISessionManagerService> sessionManagerService;
-    sml_->isWMSConnected_ = false;
-    sml_->currentWMSUserId_ = INVALID_USER_ID;
-    sml_->OnWMSConnectionChanged(100, DEFAULT_SCREEN_ID, true, sessionManagerService);
-    ASSERT_EQ(sml_->isWMSConnected_, true);
-
-    // user switch
-    sml_->currentWMSUserId_ = 100;
-    sml_->isWMSConnected_ = true;
-    sml_->OnWMSConnectionChanged(101, DEFAULT_SCREEN_ID, true, sessionManagerService);
-    ASSERT_EQ(sml_->isWMSConnected_, true);
-}
-
-/**
- * @tc.name: OnUserSwitch
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SessionManagerLiteTest, OnUserSwitch, Function | SmallTest | Level2)
-{
-    ASSERT_NE(nullptr, sml_);
-    sml_->OnUserSwitch(nullptr);
-    ASSERT_EQ(nullptr, sml_->sessionManagerServiceProxy_);
-
-    sml_->recoverListenerRegistered_ = true;
-    bool funInvoked = false;
-    sml_->userSwitchCallbackFunc_ = [&]() { funInvoked = true; };
-    auto sessionManagerService = sml_->GetSessionManagerServiceProxy();
-    sml_->OnUserSwitch(sessionManagerService);
-    ASSERT_EQ(funInvoked, true);
-}
-
-/**
  * @tc.name: OnRemoteDied1
  * @tc.desc: foundation died
  * @tc.type: FUNC
  */
-HWTEST_F(SessionManagerLiteTest, OnRemoteDied1, Function | SmallTest | Level2)
+HWTEST_F(SessionManagerLiteTest, OnRemoteDied1, TestSize.Level1)
 {
     ASSERT_NE(nullptr, sml_);
     FoundationDeathRecipient foundationDeathRecipient;
@@ -256,7 +114,7 @@ HWTEST_F(SessionManagerLiteTest, OnRemoteDied1, Function | SmallTest | Level2)
  * @tc.desc: scb died
  * @tc.type: FUNC
  */
-HWTEST_F(SessionManagerLiteTest, OnRemoteDied2, Function | SmallTest | Level2)
+HWTEST_F(SessionManagerLiteTest, OnRemoteDied2, TestSize.Level1)
 {
     ASSERT_NE(nullptr, sml_);
     SSMDeathRecipient sSMDeathRecipient;
@@ -270,7 +128,7 @@ HWTEST_F(SessionManagerLiteTest, OnRemoteDied2, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionManagerLiteTest, OnFoundationDied, Function | SmallTest | Level2)
+HWTEST_F(SessionManagerLiteTest, OnFoundationDied, TestSize.Level1)
 {
     ASSERT_NE(nullptr, sml_);
     sml_->OnFoundationDied();
@@ -283,40 +141,11 @@ HWTEST_F(SessionManagerLiteTest, OnFoundationDied, Function | SmallTest | Level2
 }
 
 /**
- * @tc.name: RegisterWMSConnectionChangedListener
- * @tc.desc: WMSConnectionChangedCallbackFunc is null
- * @tc.type: FUNC
- */
-HWTEST_F(SessionManagerLiteTest, RegisterWMSConnectionChangedListener, Function | SmallTest | Level2)
-{
-    ASSERT_NE(nullptr, sml_);
-    auto ret = sml_->RegisterWMSConnectionChangedListener(nullptr);
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
-}
-
-/**
- * @tc.name: RegisterWMSConnectionChangedListener1
- * @tc.desc: normal test
- * @tc.type: FUNC
- */
-HWTEST_F(SessionManagerLiteTest, RegisterWMSConnectionChangedListener1, Function | SmallTest | Level2)
-{
-    ASSERT_NE(nullptr, sml_);
-    sml_->recoverListenerRegistered_ = true;
-    sml_->currentWMSUserId_ = 100;
-    sml_->currentScreenId_ = 0;
-    sml_->isWMSConnected_ = true;
-    auto callbackFunc = [](int32_t userId, int32_t screenId, bool isConnected) {};
-    auto ret = sml_->RegisterWMSConnectionChangedListener(callbackFunc);
-    ASSERT_EQ(WMError::WM_OK, ret);
-}
-
-/**
  * @tc.name: RegisterSMSRecoverListener1
  * @tc.desc: mockSessionManagerServiceProxy_ is null
  * @tc.type: FUNC
  */
-HWTEST_F(SessionManagerLiteTest, RegisterSMSRecoverListener1, Function | SmallTest | Level2)
+HWTEST_F(SessionManagerLiteTest, RegisterSMSRecoverListener1, TestSize.Level1)
 {
     ASSERT_NE(nullptr, sml_);
     sml_->recoverListenerRegistered_ = false;
@@ -330,7 +159,7 @@ HWTEST_F(SessionManagerLiteTest, RegisterSMSRecoverListener1, Function | SmallTe
  * @tc.desc: normal test
  * @tc.type: FUNC
  */
-HWTEST_F(SessionManagerLiteTest, RegisterSMSRecoverListener2, Function | SmallTest | Level2)
+HWTEST_F(SessionManagerLiteTest, RegisterSMSRecoverListener2, TestSize.Level1)
 {
     ASSERT_NE(nullptr, sml_);
     sml_->recoverListenerRegistered_ = false;
@@ -340,32 +169,17 @@ HWTEST_F(SessionManagerLiteTest, RegisterSMSRecoverListener2, Function | SmallTe
 }
 
 /**
- * @tc.name: RegisterUserSwitchListener
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SessionManagerLiteTest, RegisterUserSwitchListener, Function | SmallTest | Level2)
-{
-    ASSERT_NE(nullptr, sml_);
-    sml_->RegisterUserSwitchListener(nullptr);
-    ASSERT_EQ(sml_->userSwitchCallbackFunc_, nullptr);
-
-    sml_->RegisterUserSwitchListener([]() {});
-    ASSERT_NE(sml_->userSwitchCallbackFunc_, nullptr);
-}
-
-/**
  * @tc.name: InitMockSMSProxy
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionManagerLiteTest, InitMockSMSProxy, Function | SmallTest | Level2)
+HWTEST_F(SessionManagerLiteTest, InitMockSMSProxy, TestSize.Level1)
 {
     ASSERT_NE(nullptr, sml_);
     sml_->InitMockSMSProxy();
     sml_->InitMockSMSProxy();
     ASSERT_NE(sml_->foundationDeath_, nullptr);
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

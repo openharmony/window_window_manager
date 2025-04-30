@@ -38,13 +38,9 @@ public:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 500000;
 };
 
-void IntentionEventManagerTest::SetUpTestCase()
-{
-}
+void IntentionEventManagerTest::SetUpTestCase() {}
 
-void IntentionEventManagerTest::TearDownTestCase()
-{
-}
+void IntentionEventManagerTest::TearDownTestCase() {}
 
 void IntentionEventManagerTest::SetUp()
 {
@@ -53,8 +49,7 @@ void IntentionEventManagerTest::SetUp()
     runner_ = AppExecFwk::EventRunner::Create("TestRunner");
     eventHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner_);
     EXPECT_NE(nullptr, eventHandler_);
-    inputEventListener_ =
-        std::make_shared<IntentionEventManager::InputEventListener>(uIContent_.get(), eventHandler_);
+    inputEventListener_ = std::make_shared<IntentionEventManager::InputEventListener>(uIContent_.get(), eventHandler_);
     EXPECT_NE(nullptr, inputEventListener_);
     SceneSessionManager::GetInstance().sceneSessionMap_.clear();
 }
@@ -74,217 +69,16 @@ namespace {
  * @tc.desc: EnableInputEventListener Test
  * @tc.type: FUNC
  */
-HWTEST_F(IntentionEventManagerTest, EnableInputEventListener, Function | MediumTest | Level2)
+HWTEST_F(IntentionEventManagerTest, EnableInputEventListener, TestSize.Level0)
 {
-    bool enable = DelayedSingleton<IntentionEventManager>::GetInstance()->
-        EnableInputEventListener(nullptr, nullptr);
+    bool enable = DelayedSingleton<IntentionEventManager>::GetInstance()->EnableInputEventListener(nullptr, nullptr);
     EXPECT_EQ(false, enable);
-    enable = DelayedSingleton<IntentionEventManager>::GetInstance()->
-        EnableInputEventListener(uIContent_.get(), nullptr);
+    enable =
+        DelayedSingleton<IntentionEventManager>::GetInstance()->EnableInputEventListener(uIContent_.get(), nullptr);
     EXPECT_EQ(false, enable);
-    enable = DelayedSingleton<IntentionEventManager>::GetInstance()->
-        EnableInputEventListener(uIContent_.get(), eventHandler_);
+    enable = DelayedSingleton<IntentionEventManager>::GetInstance()->EnableInputEventListener(uIContent_.get(),
+                                                                                              eventHandler_);
     EXPECT_EQ(true, enable);
-}
-
-/**
- * @tc.name: OnInputEvent0
- * @tc.desc: OnInputEvent0 Test
- * @tc.type: FUNC
- */
-HWTEST_F(IntentionEventManagerTest, OnInputEvent0, Function | MediumTest | Level2)
-{
-    std::shared_ptr<MMI::PointerEvent> pointerEvent = nullptr;
-    inputEventListener_->OnInputEvent(pointerEvent);
-    pointerEvent = MMI::PointerEvent::Create();
-    EXPECT_NE(nullptr, pointerEvent);
-
-    pointerEvent->SetTargetWindowId(0);
-    inputEventListener_->OnInputEvent(pointerEvent);
-
-    SessionInfo info;
-    info.bundleName_ = "IntentionEventManager";
-    info.moduleName_ = "InputEventListener";
-    info.isSystem_ = true;
-    sptr<SceneSession::SpecificSessionCallback> callback =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    EXPECT_NE(nullptr, callback);
-    sptr<SceneSession> sceneSession0 = sptr<SceneSession>::MakeSptr(info, callback);
-    EXPECT_NE(nullptr, sceneSession0);
-    SceneSessionManager::GetInstance().sceneSessionMap_.emplace(std::make_pair(0, sceneSession0));
-
-    pointerEvent->SetDispatchTimes(10);
-    EXPECT_EQ(10, pointerEvent->GetDispatchTimes());
-    pointerEvent->SetPointerId(10);
-    EXPECT_EQ(10, pointerEvent->GetPointerId());
-
-    MMI::PointerEvent::PointerItem item;
-    item.SetPointerId(10);
-    EXPECT_EQ(10, item.GetPointerId());
-    pointerEvent->AddPointerItem(item);
-
-    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UP);
-    EXPECT_EQ(MMI::PointerEvent::POINTER_ACTION_UP, pointerEvent->GetPointerAction());
-    inputEventListener_->OnInputEvent(pointerEvent);
-
-    info.isSystem_ = false;
-    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info, callback);
-    EXPECT_NE(nullptr, sceneSession1);
-    SceneSessionManager::GetInstance().sceneSessionMap_.emplace(std::make_pair(1, sceneSession1));
-    pointerEvent->SetTargetWindowId(1);
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    EXPECT_NE(nullptr, property);
-    property->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_FLOAT);
-    sceneSession1->SetSessionProperty(property);
-    inputEventListener_->OnInputEvent(pointerEvent);
-    EXPECT_EQ(200010, pointerEvent->GetPointerId());
-}
-
-/**
- * @tc.name: OnInputEvent1
- * @tc.desc: OnInputEvent1 Test
- * @tc.type: FUNC
- */
-HWTEST_F(IntentionEventManagerTest, OnInputEvent1, Function | MediumTest | Level2)
-{
-    std::shared_ptr<MMI::KeyEvent> keyEvent = nullptr;
-    inputEventListener_->OnInputEvent(keyEvent);
-    keyEvent = MMI::KeyEvent::Create();
-    EXPECT_NE(nullptr, keyEvent);
-    SceneSessionManager::GetInstance().SetEnableInputEvent(false);
-    EXPECT_EQ(false, SceneSessionManager::GetInstance().IsInputEventEnabled());
-    inputEventListener_->OnInputEvent(keyEvent);
-
-    SceneSessionManager::GetInstance().SetEnableInputEvent(true);
-    SceneSessionManager::GetInstance().SetFocusedSessionId(INVALID_SESSION_ID, DEFAULT_DISPLAY_ID);
-    EXPECT_EQ(INVALID_SESSION_ID, SceneSessionManager::GetInstance().GetFocusedSessionId());
-    inputEventListener_->OnInputEvent(keyEvent);
-
-    SceneSessionManager::GetInstance().SetFocusedSessionId(1, DEFAULT_DISPLAY_ID);
-    inputEventListener_->OnInputEvent(keyEvent);
-
-    SessionInfo info;
-    info.bundleName_ = "IntentionEventManager";
-    info.moduleName_ = "InputEventListener";
-    info.isSystem_ = true;
-    sptr<SceneSession::SpecificSessionCallback> callback =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    EXPECT_NE(nullptr, callback);
-    sptr<SceneSession> sceneSession0 = sptr<SceneSession>::MakeSptr(info, callback);
-    EXPECT_NE(nullptr, sceneSession0);
-    SceneSessionManager::GetInstance().sceneSessionMap_.emplace(std::make_pair(1, sceneSession0));
-    EXPECT_EQ(1, SceneSessionManager::GetInstance().sceneSessionMap_.size());
-    inputEventListener_->OnInputEvent(keyEvent);
-
-    info.isSystem_ = false;
-    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info, callback);
-    EXPECT_NE(nullptr, sceneSession1);
-    SceneSessionManager::GetInstance().sceneSessionMap_.emplace(std::make_pair(2, sceneSession1));
-    SceneSessionManager::GetInstance().SetFocusedSessionId(2, DEFAULT_DISPLAY_ID);
-    EXPECT_EQ(2, SceneSessionManager::GetInstance().GetFocusedSessionId());
-    auto focusedSceneSession = SceneSessionManager::GetInstance().GetSceneSession(2);
-    inputEventListener_->OnInputEvent(keyEvent);
-    EXPECT_NE(nullptr, focusedSceneSession);
-}
-
-/**
- * @tc.name: OnInputEvent2
- * @tc.desc: OnInputEvent2 Test
- * @tc.type: FUNC
- */
-HWTEST_F(IntentionEventManagerTest, OnInputEvent2, Function | MediumTest | Level2)
-{
-    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
-    EXPECT_NE(nullptr, keyEvent);
-    SceneSessionManager::GetInstance().SetEnableInputEvent(true);
-    SceneSessionManager::GetInstance().SetFocusedSessionId(1, DEFAULT_DISPLAY_ID);
-    SessionInfo info;
-    info.bundleName_ = "IntentionEventManager";
-    info.moduleName_ = "InputEventListener";
-    info.isSystem_ = true;
-    sptr<SceneSession::SpecificSessionCallback> callback =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    EXPECT_NE(nullptr, callback);
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, callback);
-    EXPECT_NE(nullptr, sceneSession);
-    auto func = [](std::shared_ptr<MMI::KeyEvent> keyEvent, bool isPreImeEvent) {
-        return true;
-    };
-    sceneSession->SetNotifySystemSessionKeyEventFunc(func);
-    SceneSessionManager::GetInstance().sceneSessionMap_.emplace(std::make_pair(1, sceneSession));
-    EXPECT_EQ(1, SceneSessionManager::GetInstance().sceneSessionMap_.size());
-    inputEventListener_->OnInputEvent(keyEvent);
-    sceneSession->SetNotifySystemSessionKeyEventFunc(nullptr);
-    keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_FN);
-    EXPECT_EQ(MMI::KeyEvent::KEYCODE_FN, keyEvent->GetKeyCode());
-    auto focusedSceneSession = SceneSessionManager::GetInstance().GetSceneSession(1);
-    inputEventListener_->OnInputEvent(keyEvent);
-    EXPECT_NE(nullptr, focusedSceneSession);
-}
-
-/**
- * @tc.name: OnInputEvent3
- * @tc.desc: OnInputEvent3 Test
- * @tc.type: FUNC
- */
-HWTEST_F(IntentionEventManagerTest, OnInputEvent3, Function | MediumTest | Level2)
-{
-    std::shared_ptr<IntentionEventManager::InputEventListener> inputEventListener =
-        std::make_shared<IntentionEventManager::InputEventListener>(nullptr, nullptr);
-    EXPECT_NE(nullptr, inputEventListener);
-    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
-    EXPECT_NE(nullptr, keyEvent);
-    SceneSessionManager::GetInstance().SetEnableInputEvent(true);
-    SceneSessionManager::GetInstance().SetFocusedSessionId(1, DEFAULT_DISPLAY_ID);
-    SessionInfo info;
-    info.bundleName_ = "IntentionEventManager";
-    info.moduleName_ = "InputEventListener";
-    info.isSystem_ = true;
-    sptr<SceneSession::SpecificSessionCallback> callback =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    EXPECT_NE(nullptr, callback);
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, callback);
-    EXPECT_NE(nullptr, sceneSession);
-    sceneSession->SetNotifySystemSessionKeyEventFunc(nullptr);
-    SceneSessionManager::GetInstance().sceneSessionMap_.emplace(std::make_pair(1, sceneSession));
-    EXPECT_EQ(1, SceneSessionManager::GetInstance().sceneSessionMap_.size());
-    keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_UNKNOWN);
-    EXPECT_EQ(MMI::KeyEvent::KEYCODE_UNKNOWN, keyEvent->GetKeyCode());
-    inputEventListener->OnInputEvent(keyEvent);
-    auto focusedSceneSession = SceneSessionManager::GetInstance().GetSceneSession(1);
-    inputEventListener_->OnInputEvent(keyEvent);
-    EXPECT_NE(nullptr, focusedSceneSession);
-}
-
-/**
- * @tc.name: OnInputEvent4
- * @tc.desc: OnInputEvent4 Test
- * @tc.type: FUNC
- */
-HWTEST_F(IntentionEventManagerTest, OnInputEvent4, Function | MediumTest | Level2)
-{
-    std::shared_ptr<IntentionEventManager::InputEventListener> inputEventListener =
-        std::make_shared<IntentionEventManager::InputEventListener>(nullptr, nullptr);
-    EXPECT_EQ(nullptr, inputEventListener->uiContent_);
-    std::shared_ptr<MMI::AxisEvent> axisEvent = nullptr;
-    inputEventListener->OnInputEvent(axisEvent);
-    axisEvent = MMI::AxisEvent::Create();
-    EXPECT_NE(nullptr, axisEvent);
-    inputEventListener->OnInputEvent(axisEvent);
-}
-
-/**
- * @tc.name: IsKeyboardEvent
- * @tc.desc: IsKeyboardEvent Test
- * @tc.type: FUNC
- */
-HWTEST_F(IntentionEventManagerTest, IsKeyboardEvent, Function | MediumTest | Level2)
-{
-    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
-    EXPECT_NE(nullptr, keyEvent);
-    keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_BACK);
-    EXPECT_EQ(true, inputEventListener_->IsKeyboardEvent(keyEvent));
-    usleep(WAIT_SYNC_IN_NS);
 }
 
 /**
@@ -292,7 +86,7 @@ HWTEST_F(IntentionEventManagerTest, IsKeyboardEvent, Function | MediumTest | Lev
  * @tc.desc: DispatchKeyEventCallback Test
  * @tc.type: FUNC
  */
-HWTEST_F(IntentionEventManagerTest, DispatchKeyEventCallback, Function | MediumTest | Level2)
+HWTEST_F(IntentionEventManagerTest, DispatchKeyEventCallback, TestSize.Level0)
 {
     std::shared_ptr<MMI::KeyEvent> keyEvent = nullptr;
     inputEventListener_->DispatchKeyEventCallback(2024, keyEvent, true);
@@ -303,8 +97,7 @@ HWTEST_F(IntentionEventManagerTest, DispatchKeyEventCallback, Function | MediumT
     SessionInfo info;
     info.bundleName_ = "IntentionEventManager";
     info.moduleName_ = "InputEventListener";
-    sptr<SceneSession::SpecificSessionCallback> callback =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession::SpecificSessionCallback> callback = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(nullptr, callback);
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, callback);
     EXPECT_NE(nullptr, sceneSession);
@@ -320,7 +113,7 @@ HWTEST_F(IntentionEventManagerTest, DispatchKeyEventCallback, Function | MediumT
  * @tc.desc: CheckPointerEvent Test
  * @tc.type: FUNC
  */
-HWTEST_F(IntentionEventManagerTest, CheckPointerEvent, Function | MediumTest | Level2)
+HWTEST_F(IntentionEventManagerTest, CheckPointerEvent, TestSize.Level0)
 {
     std::shared_ptr<MMI::PointerEvent> pointerEvent = nullptr;
     std::shared_ptr<IntentionEventManager::InputEventListener> inputEventListener =
@@ -342,7 +135,7 @@ HWTEST_F(IntentionEventManagerTest, CheckPointerEvent, Function | MediumTest | L
  * @tc.desc: OnInputEventPointer1 Test
  * @tc.type: FUNC
  */
-HWTEST_F(IntentionEventManagerTest, OnInputEventPointer1, Function | MediumTest | Level2)
+HWTEST_F(IntentionEventManagerTest, OnInputEventPointer1, TestSize.Level0)
 {
     auto pointerEvent = MMI::PointerEvent::Create();
     EXPECT_NE(nullptr, pointerEvent);
@@ -350,8 +143,7 @@ HWTEST_F(IntentionEventManagerTest, OnInputEventPointer1, Function | MediumTest 
     info.bundleName_ = "IntentionEventManager";
     info.moduleName_ = "InputEventListener";
     info.isSystem_ = true;
-    sptr<SceneSession::SpecificSessionCallback> callback =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession::SpecificSessionCallback> callback = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(nullptr, callback);
     sptr<SceneSession> sceneSession0 = sptr<SceneSession>::MakeSptr(info, callback);
     EXPECT_NE(nullptr, sceneSession0);
@@ -383,7 +175,7 @@ HWTEST_F(IntentionEventManagerTest, OnInputEventPointer1, Function | MediumTest 
  * @tc.desc: SetPointerEventStatus Test
  * @tc.type: FUNC
  */
-HWTEST_F(IntentionEventManagerTest, SetPointerEventStatus, Function | MediumTest | Level2)
+HWTEST_F(IntentionEventManagerTest, SetPointerEventStatus, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "SetPointerEventStatus";
@@ -425,6 +217,237 @@ HWTEST_F(IntentionEventManagerTest, SetPointerEventStatus, Function | MediumTest
     inputEventListener_->SetPointerEventStatus(0, action, MMI::PointerEvent::SOURCE_TYPE_MOUSE, sceneSession);
     EXPECT_EQ(false, sceneSession->GetMousePointerDownEventStatus());
 }
+
+/**
+ * @tc.name: OnInputEvent0
+ * @tc.desc: OnInputEvent0 Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(IntentionEventManagerTest, OnInputEvent0, TestSize.Level1)
+{
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = nullptr;
+    inputEventListener_->OnInputEvent(pointerEvent);
+    pointerEvent = MMI::PointerEvent::Create();
+    EXPECT_NE(nullptr, pointerEvent);
+
+    pointerEvent->SetTargetWindowId(0);
+    inputEventListener_->OnInputEvent(pointerEvent);
+
+    SessionInfo info;
+    info.bundleName_ = "IntentionEventManager";
+    info.moduleName_ = "InputEventListener";
+    info.isSystem_ = true;
+    sptr<SceneSession::SpecificSessionCallback> callback = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    EXPECT_NE(nullptr, callback);
+    sptr<SceneSession> sceneSession0 = sptr<SceneSession>::MakeSptr(info, callback);
+    EXPECT_NE(nullptr, sceneSession0);
+    SceneSessionManager::GetInstance().sceneSessionMap_.emplace(std::make_pair(0, sceneSession0));
+
+    pointerEvent->SetDispatchTimes(10);
+    EXPECT_EQ(10, pointerEvent->GetDispatchTimes());
+    pointerEvent->SetPointerId(10);
+    EXPECT_EQ(10, pointerEvent->GetPointerId());
+
+    MMI::PointerEvent::PointerItem item;
+    item.SetPointerId(10);
+    EXPECT_EQ(10, item.GetPointerId());
+    pointerEvent->AddPointerItem(item);
+
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UP);
+    EXPECT_EQ(MMI::PointerEvent::POINTER_ACTION_UP, pointerEvent->GetPointerAction());
+    inputEventListener_->OnInputEvent(pointerEvent);
+
+    info.isSystem_ = false;
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info, callback);
+    EXPECT_NE(nullptr, sceneSession1);
+    SceneSessionManager::GetInstance().sceneSessionMap_.emplace(std::make_pair(1, sceneSession1));
+    pointerEvent->SetTargetWindowId(1);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    EXPECT_NE(nullptr, property);
+    property->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_FLOAT);
+    sceneSession1->SetSessionProperty(property);
+    inputEventListener_->OnInputEvent(pointerEvent);
+    EXPECT_EQ(200010, pointerEvent->GetPointerId());
 }
+
+/**
+ * @tc.name: OnInputEvent1
+ * @tc.desc: OnInputEvent1 Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(IntentionEventManagerTest, OnInputEvent1, TestSize.Level0)
+{
+    std::shared_ptr<MMI::KeyEvent> keyEvent = nullptr;
+    inputEventListener_->OnInputEvent(keyEvent);
+    keyEvent = MMI::KeyEvent::Create();
+    EXPECT_NE(nullptr, keyEvent);
+    SceneSessionManager::GetInstance().SetEnableInputEvent(false);
+    EXPECT_EQ(false, SceneSessionManager::GetInstance().IsInputEventEnabled());
+    inputEventListener_->OnInputEvent(keyEvent);
+
+    SceneSessionManager::GetInstance().SetEnableInputEvent(true);
+    SceneSessionManager::GetInstance().SetFocusedSessionId(INVALID_SESSION_ID, DEFAULT_DISPLAY_ID);
+    EXPECT_EQ(INVALID_SESSION_ID, SceneSessionManager::GetInstance().GetFocusedSessionId());
+    inputEventListener_->OnInputEvent(keyEvent);
+
+    SceneSessionManager::GetInstance().SetFocusedSessionId(1, DEFAULT_DISPLAY_ID);
+    inputEventListener_->OnInputEvent(keyEvent);
+
+    SessionInfo info;
+    info.bundleName_ = "IntentionEventManager";
+    info.moduleName_ = "InputEventListener";
+    info.isSystem_ = true;
+    sptr<SceneSession::SpecificSessionCallback> callback = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    EXPECT_NE(nullptr, callback);
+    sptr<SceneSession> sceneSession0 = sptr<SceneSession>::MakeSptr(info, callback);
+    EXPECT_NE(nullptr, sceneSession0);
+    SceneSessionManager::GetInstance().sceneSessionMap_.emplace(std::make_pair(1, sceneSession0));
+    EXPECT_EQ(1, SceneSessionManager::GetInstance().sceneSessionMap_.size());
+    inputEventListener_->OnInputEvent(keyEvent);
+
+    info.isSystem_ = false;
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info, callback);
+    EXPECT_NE(nullptr, sceneSession1);
+    SceneSessionManager::GetInstance().sceneSessionMap_.emplace(std::make_pair(2, sceneSession1));
+    SceneSessionManager::GetInstance().SetFocusedSessionId(2, DEFAULT_DISPLAY_ID);
+    EXPECT_EQ(2, SceneSessionManager::GetInstance().GetFocusedSessionId());
+    auto focusedSceneSession = SceneSessionManager::GetInstance().GetSceneSession(2);
+    inputEventListener_->OnInputEvent(keyEvent);
+    EXPECT_NE(nullptr, focusedSceneSession);
 }
+
+/**
+ * @tc.name: OnInputEvent2
+ * @tc.desc: OnInputEvent2 Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(IntentionEventManagerTest, OnInputEvent2, TestSize.Level1)
+{
+    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
+    EXPECT_NE(nullptr, keyEvent);
+    SceneSessionManager::GetInstance().SetEnableInputEvent(true);
+    SceneSessionManager::GetInstance().SetFocusedSessionId(1, DEFAULT_DISPLAY_ID);
+    SessionInfo info;
+    info.bundleName_ = "IntentionEventManager";
+    info.moduleName_ = "InputEventListener";
+    info.isSystem_ = true;
+    sptr<SceneSession::SpecificSessionCallback> callback = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    EXPECT_NE(nullptr, callback);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, callback);
+    EXPECT_NE(nullptr, sceneSession);
+    auto func = [](std::shared_ptr<MMI::KeyEvent> keyEvent, bool isPreImeEvent) { return true; };
+    sceneSession->SetNotifySystemSessionKeyEventFunc(func);
+    SceneSessionManager::GetInstance().sceneSessionMap_.emplace(std::make_pair(1, sceneSession));
+    EXPECT_EQ(1, SceneSessionManager::GetInstance().sceneSessionMap_.size());
+    inputEventListener_->OnInputEvent(keyEvent);
+    sceneSession->SetNotifySystemSessionKeyEventFunc(nullptr);
+    keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_FN);
+    EXPECT_EQ(MMI::KeyEvent::KEYCODE_FN, keyEvent->GetKeyCode());
+    auto focusedSceneSession = SceneSessionManager::GetInstance().GetSceneSession(1);
+    inputEventListener_->OnInputEvent(keyEvent);
+    EXPECT_NE(nullptr, focusedSceneSession);
 }
+
+/**
+ * @tc.name: OnInputEvent3
+ * @tc.desc: OnInputEvent3 Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(IntentionEventManagerTest, OnInputEvent3, TestSize.Level1)
+{
+    std::shared_ptr<IntentionEventManager::InputEventListener> inputEventListener =
+        std::make_shared<IntentionEventManager::InputEventListener>(nullptr, nullptr);
+    EXPECT_NE(nullptr, inputEventListener);
+    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
+    EXPECT_NE(nullptr, keyEvent);
+    SceneSessionManager::GetInstance().SetEnableInputEvent(true);
+    SceneSessionManager::GetInstance().SetFocusedSessionId(1, DEFAULT_DISPLAY_ID);
+    SessionInfo info;
+    info.bundleName_ = "IntentionEventManager";
+    info.moduleName_ = "InputEventListener";
+    info.isSystem_ = true;
+    sptr<SceneSession::SpecificSessionCallback> callback = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    EXPECT_NE(nullptr, callback);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, callback);
+    EXPECT_NE(nullptr, sceneSession);
+    sceneSession->SetNotifySystemSessionKeyEventFunc(nullptr);
+    SceneSessionManager::GetInstance().sceneSessionMap_.emplace(std::make_pair(1, sceneSession));
+    EXPECT_EQ(1, SceneSessionManager::GetInstance().sceneSessionMap_.size());
+    keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_UNKNOWN);
+    EXPECT_EQ(MMI::KeyEvent::KEYCODE_UNKNOWN, keyEvent->GetKeyCode());
+    inputEventListener->OnInputEvent(keyEvent);
+    auto focusedSceneSession = SceneSessionManager::GetInstance().GetSceneSession(1);
+    inputEventListener_->OnInputEvent(keyEvent);
+    EXPECT_NE(nullptr, focusedSceneSession);
+}
+
+/**
+ * @tc.name: OnInputEvent4
+ * @tc.desc: OnInputEvent4 Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(IntentionEventManagerTest, OnInputEvent4, TestSize.Level1)
+{
+    std::shared_ptr<IntentionEventManager::InputEventListener> inputEventListener =
+        std::make_shared<IntentionEventManager::InputEventListener>(nullptr, nullptr);
+    EXPECT_EQ(nullptr, inputEventListener->uiContent_);
+    std::shared_ptr<MMI::AxisEvent> axisEvent = nullptr;
+    inputEventListener->OnInputEvent(axisEvent);
+    axisEvent = MMI::AxisEvent::Create();
+    EXPECT_NE(nullptr, axisEvent);
+    inputEventListener->OnInputEvent(axisEvent);
+}
+
+/**
+ * @tc.name: IsKeyboardEvent
+ * @tc.desc: IsKeyboardEvent Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(IntentionEventManagerTest, IsKeyboardEvent, TestSize.Level1)
+{
+    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
+    EXPECT_NE(nullptr, keyEvent);
+    keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_BACK);
+    EXPECT_EQ(true, inputEventListener_->IsKeyboardEvent(keyEvent));
+    usleep(WAIT_SYNC_IN_NS);
+}
+
+/**
+ * @tc.name: ProcessInjectionEvent
+ * @tc.desc: ProcessInjectionEvent Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(IntentionEventManagerTest, ProcessInjectionEvent, TestSize.Level1)
+{
+    int32_t TRANSPARENT_FINGER_ID = 10000;
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    MMI::PointerEvent::PointerItem item;
+    pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
+    pointerEvent->SetPointerId(0);
+    item.SetPointerId(1);
+    pointerEvent->AddPointerItem(item);
+
+    int32_t oriPointerId = pointerEvent->GetPointerId();
+    inputEventListener_->ProcessInjectionEvent(pointerEvent);
+    EXPECT_EQ(oriPointerId, pointerEvent->GetPointerId());
+
+    pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_MOUSE);
+    inputEventListener_->ProcessInjectionEvent(pointerEvent);
+    EXPECT_EQ(MMI::PointerEvent::SOURCE_TYPE_MOUSE, pointerEvent->GetSourceType());
+
+    pointerEvent->AddFlag(MMI::InputEvent::EVENT_FLAG_SIMULATE);
+    inputEventListener_->ProcessInjectionEvent(pointerEvent);
+    EXPECT_EQ(MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, pointerEvent->GetSourceType());
+
+    pointerEvent->SetDispatchTimes(1);
+    inputEventListener_->ProcessInjectionEvent(pointerEvent);
+    EXPECT_EQ(oriPointerId, pointerEvent->GetPointerId());
+
+    item.SetPointerId(0);
+    pointerEvent->AddPointerItem(item);
+    inputEventListener_->ProcessInjectionEvent(pointerEvent);
+    EXPECT_EQ(oriPointerId + TRANSPARENT_FINGER_ID, pointerEvent->GetPointerId());
+}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

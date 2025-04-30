@@ -21,7 +21,7 @@
 #include "mock_display_manager_adapter.h"
 #include "singleton_mocker.h"
 #include "scene_board_judgement.h"
-#include "../../../window_scene/screen_session_manager/include/screen_scene_config.h"
+#include "screen_scene_config.h"
 
 using namespace testing;
 using namespace testing::ext;

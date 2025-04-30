@@ -50,6 +50,12 @@ public:
         TRANS_ID_ON_SECONDARY_REFLEXION_CHANGED,
         TRANS_ID_ON_CAMERA_BACKSELFIE_CHANGED,
         TRANS_ID_ON_EXTEND_SCREEN_CONNECT_STATUS_CHANGED,
+        TRANS_ID_ON_EXTEND_CHANGED,
+        TRANS_ID_ON_CREATE_SCREEN_SESSION_ONLY,
+        TRANS_ID_ON_MAIN_CHANGED,
+        TRANS_ID_SET_SCREEN_COMBINATION,
+        TRANS_ID_ON_DUMP_SCREEN_SESSION,
+        TRANS_ID_ON_BEFORE_PROPERTY_CHANGED,
     };
 
     virtual void SwitchUserCallback(std::vector<int32_t> oldScbPids, int32_t currentScbPid) = 0;
@@ -65,6 +71,7 @@ public:
     virtual void OnScreenExtendChanged(ScreenId mainScreenId, ScreenId extendScreenId) = 0;
     virtual void OnSuperFoldStatusChanged(ScreenId screenId, SuperFoldStatus superFoldStatus) = 0;
     virtual void OnSecondaryReflexionChanged(ScreenId screenId, bool isSecondaryReflexion) = 0;
+    virtual void OnBeforeScreenPropertyChanged(FoldStatus foldStatus) = 0;
 
     virtual void OnDisplayStateChanged(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type) = 0;
@@ -80,6 +87,13 @@ public:
     virtual void OnCameraBackSelfieChanged(ScreenId screenId, bool isCameraBackSelfie) = 0;
     virtual void OnExtendScreenConnectStatusChanged(ScreenId screenId,
         ExtendScreenConnectStatus extendScreenConnectStatus) = 0;
+    virtual bool OnExtendDisplayNodeChange(ScreenId mainScreenId, ScreenId extendScreenId) = 0;
+    virtual bool OnCreateScreenSessionOnly(ScreenId screenId, ScreenId rsId,
+        const std::string& name, bool isExtend) = 0;
+    virtual bool OnMainDisplayNodeChange(ScreenId mainScreenId, ScreenId extendScreenId, ScreenId extendRSId) = 0;
+    virtual void SetScreenCombination(ScreenId mainScreenId, ScreenId extendScreenId,
+        ScreenCombination extendCombination) = 0;
+    virtual std::string OnDumperClientScreenSessions() = 0;
 };
 } // namespace OHOS::Rosen
 

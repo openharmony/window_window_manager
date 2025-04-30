@@ -15,21 +15,21 @@
 
 // gtest
 #include <gtest/gtest.h>
-#include "wm_common.h"
+#include "scene_board_judgement.h"
 #include "window_manager.h"
 #include "window_test_utils.h"
-#include "scene_board_judgement.h"
+#include "wm_common.h"
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowFocusTest"};
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowFocusTest" };
 }
 
 using Utils = WindowTestUtils;
-const int WAIT_ASYNC_US = 100000;  // 100000us
+const int WAIT_ASYNC_US = 100000; // 100000us
 
 class TestFocusChangedListener : public IFocusChangedListener {
 public:
@@ -51,8 +51,7 @@ public:
     Utils::TestWindowInfo subAppInfo_;
 };
 
-sptr<TestFocusChangedListener> WindowFocusTest::testFocusChangedListener_ =
-    new TestFocusChangedListener();
+sptr<TestFocusChangedListener> WindowFocusTest::testFocusChangedListener_ = new TestFocusChangedListener();
 
 void TestFocusChangedListener::OnFocused(const sptr<FocusChangeInfo>& focusChangeInfo)
 {
@@ -70,47 +69,48 @@ void WindowFocusTest::SetUpTestCase()
 {
     auto display = DisplayManager::GetInstance().GetDisplayById(0);
     ASSERT_TRUE((display != nullptr));
-    WLOGI("GetDefaultDisplay: id %{public}" PRIu64", w %{public}d, h %{public}d, fps %{public}u",
-        display->GetId(), display->GetWidth(), display->GetHeight(), display->GetRefreshRate());
-    Rect displayRect = {0, 0, display->GetWidth(), display->GetHeight()};
+    WLOGI("GetDefaultDisplay: id %{public}" PRIu64 ", w %{public}d, h %{public}d, fps %{public}u",
+          display->GetId(),
+          display->GetWidth(),
+          display->GetHeight(),
+          display->GetRefreshRate());
+    Rect displayRect = { 0, 0, display->GetWidth(), display->GetHeight() };
     Utils::InitByDisplayRect(displayRect);
 }
 
-void WindowFocusTest::TearDownTestCase()
-{
-}
+void WindowFocusTest::TearDownTestCase() {}
 
 void WindowFocusTest::SetUp()
 {
     fullScreenAppInfo_ = {
-            .name = "FullWindow",
-            .rect = Utils::customAppRect_,
-            .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
-            .mode = WindowMode::WINDOW_MODE_FULLSCREEN,
-            .needAvoid = false,
-            .parentLimit = false,
-            .showWhenLocked = true,
-            .parentId = INVALID_WINDOW_ID,
+        .name = "FullWindow",
+        .rect = Utils::customAppRect_,
+        .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
+        .mode = WindowMode::WINDOW_MODE_FULLSCREEN,
+        .needAvoid = false,
+        .parentLimit = false,
+        .showWhenLocked = true,
+        .parentId = INVALID_WINDOW_ID,
     };
     floatAppInfo_ = {
-            .name = "ParentWindow",
-            .rect = Utils::customAppRect_,
-            .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
-            .mode = WindowMode::WINDOW_MODE_FLOATING,
-            .needAvoid = false,
-            .parentLimit = false,
-            .showWhenLocked = true,
-            .parentId = INVALID_WINDOW_ID,
+        .name = "ParentWindow",
+        .rect = Utils::customAppRect_,
+        .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
+        .mode = WindowMode::WINDOW_MODE_FLOATING,
+        .needAvoid = false,
+        .parentLimit = false,
+        .showWhenLocked = true,
+        .parentId = INVALID_WINDOW_ID,
     };
     subAppInfo_ = {
-            .name = "SubWindow",
-            .rect = Utils::customAppRect_,
-            .type = WindowType::WINDOW_TYPE_APP_SUB_WINDOW,
-            .mode = WindowMode::WINDOW_MODE_FLOATING,
-            .needAvoid = false,
-            .parentLimit = false,
-            .showWhenLocked = false,
-            .parentId = INVALID_WINDOW_ID,
+        .name = "SubWindow",
+        .rect = Utils::customAppRect_,
+        .type = WindowType::WINDOW_TYPE_APP_SUB_WINDOW,
+        .mode = WindowMode::WINDOW_MODE_FLOATING,
+        .needAvoid = false,
+        .parentLimit = false,
+        .showWhenLocked = false,
+        .parentId = INVALID_WINDOW_ID,
     };
     WindowManager::GetInstance().RegisterFocusChangedListener(testFocusChangedListener_);
 }
@@ -126,7 +126,7 @@ namespace {
  * @tc.desc: add main window and sub window and show it to test focus
  * @tc.type: FUNC
  */
-HWTEST_F(WindowFocusTest, FocusChangedTest01, Function | MediumTest | Level3)
+HWTEST_F(WindowFocusTest, FocusChangedTest01, TestSize.Level1)
 {
     fullScreenAppInfo_.name = "FocusChangedTest01_1";
     fullScreenAppInfo_.focusable_ = false;
@@ -181,7 +181,7 @@ HWTEST_F(WindowFocusTest, FocusChangedTest01, Function | MediumTest | Level3)
  * @tc.desc: hide focused window to test focus
  * @tc.type: FUNC
  */
-HWTEST_F(WindowFocusTest, FocusChangedTest02, Function | MediumTest | Level3)
+HWTEST_F(WindowFocusTest, FocusChangedTest02, TestSize.Level1)
 {
     floatAppInfo_.name = "FocusChangedTest02_1";
     floatAppInfo_.rect = { 10, 200, 300, 400 };
@@ -212,7 +212,7 @@ HWTEST_F(WindowFocusTest, FocusChangedTest02, Function | MediumTest | Level3)
  * @tc.desc: hide focused window to test focus
  * @tc.type: FUNC
  */
-HWTEST_F(WindowFocusTest, FocusChangedTest03, Function | MediumTest | Level3)
+HWTEST_F(WindowFocusTest, FocusChangedTest03, TestSize.Level1)
 {
     floatAppInfo_.name = "FocusChangedTest03_1";
     floatAppInfo_.rect = { 10, 200, 300, 400 };
@@ -251,7 +251,7 @@ HWTEST_F(WindowFocusTest, FocusChangedTest03, Function | MediumTest | Level3)
  * @tc.desc: hide focused window to test focus
  * @tc.type: FUNC
  */
-HWTEST_F(WindowFocusTest, FocusChangedTest04, Function | MediumTest | Level3)
+HWTEST_F(WindowFocusTest, FocusChangedTest04, TestSize.Level1)
 {
     floatAppInfo_.name = "FocusChangedTest04_1";
     floatAppInfo_.rect = { 10, 200, 300, 400 };
@@ -291,7 +291,7 @@ HWTEST_F(WindowFocusTest, FocusChangedTest04, Function | MediumTest | Level3)
  * @tc.desc: hide focused window to test focus
  * @tc.type: FUNC
  */
-HWTEST_F(WindowFocusTest, FocusChangedTest05, Function | MediumTest | Level3)
+HWTEST_F(WindowFocusTest, FocusChangedTest05, TestSize.Level1)
 {
     floatAppInfo_.name = "FocusChangedTest05_1";
     floatAppInfo_.rect = { 10, 200, 300, 400 };
@@ -340,7 +340,7 @@ HWTEST_F(WindowFocusTest, FocusChangedTest05, Function | MediumTest | Level3)
  * @tc.desc: hide unfocused window to test focus
  * @tc.type: FUNC
  */
-HWTEST_F(WindowFocusTest, FocusChangedTest06, Function | MediumTest | Level3)
+HWTEST_F(WindowFocusTest, FocusChangedTest06, TestSize.Level1)
 {
     floatAppInfo_.name = "FocusChangedTest06_1";
     floatAppInfo_.rect = { 10, 200, 300, 400 };
@@ -448,7 +448,7 @@ HWTEST_F(WindowFocusTest, FocusChangedTest07, Function | MediumTest | Level3)
  * @tc.desc: destroy unfocused window to test focus
  * @tc.type: FUNC
  */
-HWTEST_F(WindowFocusTest, FocusChangedTest08, Function | MediumTest | Level3)
+HWTEST_F(WindowFocusTest, FocusChangedTest08, TestSize.Level1)
 {
     floatAppInfo_.name = "FocusChangedTest08_1";
     floatAppInfo_.rect = { 10, 200, 300, 400 };
@@ -484,7 +484,7 @@ HWTEST_F(WindowFocusTest, FocusChangedTest08, Function | MediumTest | Level3)
  * @tc.desc: add main window and sub window and show it to test focus
  * @tc.type: FUNC
  */
-HWTEST_F(WindowFocusTest, WindowShowWithoutFocusTest, Function | MediumTest | Level3)
+HWTEST_F(WindowFocusTest, WindowShowWithoutFocusTest, TestSize.Level1)
 {
     fullScreenAppInfo_.name = "WindowShowWithoutFocusTest_1";
     const sptr<Window>& window1 = Utils::CreateTestWindow(fullScreenAppInfo_);
@@ -518,6 +518,6 @@ HWTEST_F(WindowFocusTest, WindowShowWithoutFocusTest, Function | MediumTest | Le
     window2->Destroy();
     subWindow->Destroy();
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

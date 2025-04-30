@@ -37,6 +37,9 @@ constexpr int UPDATE_TASK_DURATION = 10;
 const std::string UPDATE_WINDOW_INFO_TASK = "UpdateWindowInfoTask";
 static int32_t g_screenRotationOffset = system::GetIntParameter<int32_t>("const.fold.screen_rotation.offset", 0);
 constexpr float ZORDER_UIEXTENSION_INDEX = 0.1;
+constexpr int WINDOW_NAME_TYPE_UNKNOWN = 0;
+constexpr int WINDOW_NAME_TYPE_SCREENSHOT = 1;
+const std::string SCREENSHOT_WINDOW_NAME_PREFIX = "ScreenShotWindow";
 } // namespace
 
 static bool operator==(const MMI::Rect left, const MMI::Rect right)
@@ -194,7 +197,7 @@ void SceneSessionDirtyManager::UpdateDefaultHotAreas(sptr<SceneSession> sceneSes
         TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is nullptr");
         return;
     }
-    WSRect windowRect = sceneSession->GetSessionGlobalRect();
+    WSRect windowRect = sceneSession->GetSessionGlobalRectInMultiScreen();
     uint32_t touchOffset = 0;
     uint32_t pointerOffset = 0;
     bool isMidScene = sceneSession->GetIsMidScene();
@@ -601,6 +604,7 @@ std::pair<std::vector<MMI::WindowInfo>, std::vector<std::shared_ptr<Media::Pixel
         } else {
             GetModalUIExtensionInfo(windowInfoList, sceneSessionValue, windowInfo);
         }
+        windowInfo.groupId = SceneSessionManager::GetInstance().GetDisplayGroupId(windowInfo.displayId);
         TLOGD(WmsLogTag::WMS_EVENT, "windowId=%{public}d, agentWindowId=%{public}d, zOrder=%{public}f",
             windowInfo.id, windowInfo.agentWindowId, windowInfo.zOrder);
         windowInfoList.emplace_back(windowInfo);
@@ -715,7 +719,7 @@ std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyMa
         return {};
     }
     Matrix3f transform;
-    WSRect windowRect = sceneSession->GetSessionGlobalRect();
+    WSRect windowRect = sceneSession->GetSessionGlobalRectInMultiScreen();
     auto pid = sceneSession->GetCallingPid();
     auto uid = sceneSession->GetCallingUid();
     auto windowId = sceneSession->GetWindowId();
@@ -732,6 +736,12 @@ std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyMa
     std::vector<MMI::Rect> touchHotAreas;
     std::vector<MMI::Rect> pointerHotAreas;
     UpdateHotAreas(sceneSession, touchHotAreas, pointerHotAreas);
+    int windowNameType = WINDOW_NAME_TYPE_UNKNOWN;
+    std::string windowName = sceneSession->GetWindowNameAllType();
+    std::string prefix = SCREENSHOT_WINDOW_NAME_PREFIX;
+    if (windowName.size() >= prefix.size() && windowName.substr(0, prefix.size()) == prefix) {
+        windowNameType = WINDOW_NAME_TYPE_SCREENSHOT;
+    }
     auto pixelMap = windowSessionProperty->GetWindowMask();
     MMI::WindowInfo windowInfo = {
         .id = windowId,
@@ -752,6 +762,7 @@ std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyMa
         .windowInputType = static_cast<MMI::WindowInputType>(sceneSession->GetSessionInfo().windowInputType_),
         .windowType = static_cast<int32_t>(windowType),
         .isSkipSelfWhenShowOnVirtualScreen = sceneSession->GetSessionProperty()->GetSkipEventOnCastPlus(),
+        .windowNameType = windowNameType,
     };
     UpdateWindowFlags(displayId, sceneSession, windowInfo);
     if (windowSessionProperty->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_HANDWRITING)) {

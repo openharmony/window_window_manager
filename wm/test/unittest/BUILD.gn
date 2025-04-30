@@ -47,14 +47,12 @@ group("unittest") {
     ":wm_window_manager_test",
     ":wm_window_option_test",
     ":wm_window_scene_effect_test",
-    ":wm_window_scene_session_impl_layout_test",
     ":wm_window_scene_session_impl_test",
     ":wm_window_scene_session_impl_test2",
     ":wm_window_scene_session_impl_test3",
     ":wm_window_scene_session_impl_test4",
     ":wm_window_scene_session_impl_test5",
     ":wm_window_scene_test",
-    ":wm_window_session_impl_layout_test",
     ":wm_window_session_impl_test",
     ":wm_window_session_impl_test2",
     ":wm_window_session_impl_test3",
@@ -62,9 +60,14 @@ group("unittest") {
     ":wm_window_session_impl_test5",
     ":wm_window_stub_test",
     ":wm_window_test",
+    "animation:wm_window_scene_session_impl_animation_test",
+    "layout:wm_layout_test",
+    "rotation:wm_window_extension_session_impl_rotation_test",
+    "rotation:wm_window_session_impl_rotation_test",
     "special_window:window_scene_session_impl_special_window_test",
     "ui_extension:wm_extension_window_impl_test",
     "ui_extension:wm_window_extension_session_impl_test",
+    "window_recover:wm_window_recover_manager_test",
   ]
   if (!window_manager_use_sceneboard) {
     deps += [ ":wm_window_proxy_test" ]
@@ -284,20 +287,6 @@ ohos_unittest("wm_window_session_impl_test5") {
     ":wm_unittest_common",
     "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
   ]
-
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-    "init:libbegetutil",
-  ]
-}
-
-ohos_unittest("wm_window_session_impl_layout_test") {
-  module_out_path = module_out_path
-
-  sources = [ "window_session_impl_layout_test.cpp" ]
-
-  deps = [ ":wm_unittest_common" ]
 
   external_deps = [
     "c_utils:utils",
@@ -541,23 +530,6 @@ ohos_unittest("wm_window_scene_session_impl_test5") {
   ]
 }
 
-ohos_unittest("wm_window_scene_session_impl_layout_test") {
-  module_out_path = module_out_path
-
-  sources = [ "window_scene_session_impl_layout_test.cpp" ]
-
-  deps = [
-    ":wm_unittest_common",
-    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
-  ]
-
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-    "init:libbegetutil",
-  ]
-}
-
 ohos_unittest("wm_window_manager_stub_proxy_test") {
   module_out_path = module_out_path
 
@@ -678,7 +650,10 @@ ohos_unittest("wm_window_adapter_test") {
     "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
   ]
 
-  external_deps = [ "c_utils:utils" ]
+  external_deps = [
+    "c_utils:utils",
+    "safwk:system_ability_fwk",
+  ]
 }
 
 ohos_unittest("wm_pattern_detach_callback_test") {
@@ -788,8 +763,12 @@ config("wm_unittest_common_public_config") {
 ohos_static_library("wm_unittest_common") {
   visibility = [
     ":*",
+    "animation:*",
+    "layout:*",
+    "rotation:*",
     "special_window:*",
     "ui_extension:*",
+    "window_recover:*",
   ]
 
   testonly = true

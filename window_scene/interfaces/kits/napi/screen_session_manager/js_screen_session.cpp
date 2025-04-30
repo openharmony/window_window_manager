@@ -45,6 +45,7 @@ const std::string ON_CAMERA_FOLD_STATUS_CHANGE_CALLBACK = "cameraStatusChange";
 const std::string ON_SECONDARY_REFLEXION_CHANGE_CALLBACK = "secondaryReflexionChange";
 const std::string ON_CAMERA_BACKSELFIE_CHANGE_CALLBACK = "cameraBackSelfieChange";
 const std::string ON_EXTEND_SCREEN_CONNECT_STATUS_CHANGE_CALLBACK = "extendScreenConnectStatusChange";
+const std::string ON_BEFORE_PROPERTY_CHANGE_CALLBACK = "beforeScreenPropertyChange";
 constexpr size_t ARGC_ONE = 1;
 } // namespace
 
@@ -93,8 +94,10 @@ JsScreenSession::JsScreenSession(napi_env env, const sptr<ScreenSession>& screen
     std::string name = screenSession_ ? screenSession_->GetName() : "UNKNOWN";
     screenScene_ = new(std::nothrow) ScreenScene(name);
     if (screenSession_) {
+        screenScene_->SetDisplayId(screenSession_->GetScreenId());
         bool isRealScreen = screenSession_->GetIsRealScreen();
-        SetScreenSceneDpiFunc func = [this, isRealScreen](float density) {
+        float densityInCurResolution = screenSession_->GetDensityInCurResolution();
+        SetScreenSceneDpiFunc func = [this, isRealScreen, densityInCurResolution](float density) {
             TLOGNI(WmsLogTag::DMS, "Screen Scene Dpi change, new density = %{public}f", density);
             if (!screenScene_ || !screenSession_) {
                 TLOGNE(WmsLogTag::DMS, "[NAPI]screenScene or screenSession is nullptr");
@@ -104,8 +107,10 @@ JsScreenSession::JsScreenSession(napi_env env, const sptr<ScreenSession>& screen
             Rect rect = { screenBounds.rect_.left_, screenBounds.rect_.top_,
                 screenBounds.rect_.width_, screenBounds.rect_.height_ };
             screenScene_->SetDisplayDensity(density);
-            screenScene_->SetDisplayId(screenSession_->GetScreenId());
             if (!isRealScreen) {
+                screenScene_->UpdateViewportConfig(rect, WindowSizeChangeReason::UPDATE_DPI_SYNC);
+            } else {
+                screenScene_->SetDisplayDensity(densityInCurResolution);
                 screenScene_->UpdateViewportConfig(rect, WindowSizeChangeReason::UPDATE_DPI_SYNC);
             }
             OnScreenDensityChange();
@@ -946,6 +951,40 @@ void JsScreenSession::OnExtendScreenConnectStatusChange(ScreenId screenId,
         }
     } else {
         WLOGFE("OnExtendScreenConnectStatusChange: env is nullptr");
+    }
+}
+
+void JsScreenSession::OnBeforeScreenPropertyChange(FoldStatus foldStatus)
+{
+    const std::string callbackType = ON_BEFORE_PROPERTY_CHANGE_CALLBACK;
+    TLOGD(WmsLogTag::DMS, "Call js callback: %{public}s.", callbackType.c_str());
+    if (mCallback_.count(callbackType) == 0) {
+        TLOGE(WmsLogTag::DMS, "Callback %{public}s is unregistered!", callbackType.c_str());
+        return;
+    }
+    auto jsCallbackRef = mCallback_[callbackType];
+    auto asyncTask = [jsCallbackRef, callbackType, foldStatus, env = env_]() {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "jsScreenSession::OnBeforeScreenPropertyChange");
+        if (jsCallbackRef == nullptr) {
+            TLOGNE(WmsLogTag::DMS, "Call js callback failed, jsCallbackRef is null!");
+            return;
+        }
+        auto method = jsCallbackRef->GetNapiValue();
+        if (method == nullptr) {
+            TLOGNE(WmsLogTag::DMS, "Call js callback failed, method is null!");
+            return;
+        }
+        napi_value status = CreateJsValue(env, static_cast<std::uint32_t>(foldStatus));
+        napi_value argv[] = { status };
+        napi_call_function(env, NapiGetUndefined(env), method, ArraySize(argv), argv, nullptr);
+    };
+    if (env_ != nullptr) {
+        napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate);
+        if (ret != napi_status::napi_ok) {
+            TLOGE(WmsLogTag::DMS, "OnBeforeScreenPropertyChange: Failed to SendEvent.");
+        }
+    } else {
+        TLOGE(WmsLogTag::DMS, "OnBeforeScreenPropertyChange: env is nullptr");
     }
 }
 } // namespace OHOS::Rosen

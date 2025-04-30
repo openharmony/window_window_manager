@@ -61,13 +61,9 @@ void WindowPatternStartingWindowTest::TearDownTestCase()
     NativeRdb::RdbHelper::DeleteRdbStore(TEST_RDB_PATH + TEST_RDB_NAME);
 }
 
-void WindowPatternStartingWindowTest::SetUp()
-{
-}
+void WindowPatternStartingWindowTest::SetUp() {}
 
-void WindowPatternStartingWindowTest::TearDown()
-{
-}
+void WindowPatternStartingWindowTest::TearDown() {}
 
 void WindowPatternStartingWindowTest::InitTestStartingWindowRdb()
 {
@@ -85,7 +81,7 @@ namespace {
  * @tc.desc: GetStartupPage from want
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPatternStartingWindowTest, GetStartupPage01, Function | SmallTest | Level3)
+HWTEST_F(WindowPatternStartingWindowTest, GetStartupPage01, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     SessionInfo sessionInfo;
@@ -111,7 +107,7 @@ HWTEST_F(WindowPatternStartingWindowTest, GetStartupPage01, Function | SmallTest
  * @tc.desc: GetStartupPage from cache
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPatternStartingWindowTest, GetStartupPage02, Function | SmallTest | Level3)
+HWTEST_F(WindowPatternStartingWindowTest, GetStartupPage02, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     SessionInfo sessionInfo;
@@ -122,7 +118,7 @@ HWTEST_F(WindowPatternStartingWindowTest, GetStartupPage02, Function | SmallTest
     cachedInfo.iconPathEarlyVersion_ = "pathFromCache";
     ssm_->startingWindowMap_.clear();
     auto key = sessionInfo.moduleName_ + sessionInfo.abilityName_;
-    std::map<std::string, StartingWindowInfo> startingWindowInfoMap { { key, cachedInfo } };
+    std::map<std::string, StartingWindowInfo> startingWindowInfoMap{ { key, cachedInfo } };
     ssm_->startingWindowMap_.insert({ sessionInfo.bundleName_, startingWindowInfoMap });
     StartingWindowInfo outInfo;
     outInfo.iconPathEarlyVersion_ = "default";
@@ -135,7 +131,7 @@ HWTEST_F(WindowPatternStartingWindowTest, GetStartupPage02, Function | SmallTest
  * @tc.desc: GetStartupPage from rdb
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPatternStartingWindowTest, GetStartupPage03, Function | SmallTest | Level3)
+HWTEST_F(WindowPatternStartingWindowTest, GetStartupPage03, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     InitTestStartingWindowRdb();
@@ -162,7 +158,7 @@ HWTEST_F(WindowPatternStartingWindowTest, GetStartupPage03, Function | SmallTest
  * @tc.desc: GetStartingWindowInfoFromCache
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPatternStartingWindowTest, GetStartingWindowInfoFromCache, Function | SmallTest | Level3)
+HWTEST_F(WindowPatternStartingWindowTest, GetStartingWindowInfoFromCache, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     ssm_->startingWindowMap_.clear();
@@ -174,7 +170,7 @@ HWTEST_F(WindowPatternStartingWindowTest, GetStartingWindowInfoFromCache, Functi
     auto res = ssm_->GetStartingWindowInfoFromCache(sessionInfo, startingWindowInfo);
     ASSERT_EQ(res, false);
     auto key = sessionInfo.moduleName_ + sessionInfo.abilityName_;
-    std::map<std::string, StartingWindowInfo> startingWindowInfoMap { {key, startingWindowInfo } };
+    std::map<std::string, StartingWindowInfo> startingWindowInfoMap{ { key, startingWindowInfo } };
     ssm_->startingWindowMap_.insert({ sessionInfo.bundleName_, startingWindowInfoMap });
     res = ssm_->GetStartingWindowInfoFromCache(sessionInfo, startingWindowInfo);
     ASSERT_EQ(res, true);
@@ -188,7 +184,7 @@ HWTEST_F(WindowPatternStartingWindowTest, GetStartingWindowInfoFromCache, Functi
  * @tc.desc: GetStartingWindowInfoFromRdb
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPatternStartingWindowTest, GetStartingWindowInfoFromRdb, Function | SmallTest | Level3)
+HWTEST_F(WindowPatternStartingWindowTest, GetStartingWindowInfoFromRdb, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     InitTestStartingWindowRdb();
@@ -217,7 +213,7 @@ HWTEST_F(WindowPatternStartingWindowTest, GetStartingWindowInfoFromRdb, Function
  * @tc.desc: GetIconFromDesk
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPatternStartingWindowTest, GetIconFromDesk, Function | SmallTest | Level3)
+HWTEST_F(WindowPatternStartingWindowTest, GetIconFromDesk, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     SessionInfo sessionInfo;
@@ -239,7 +235,7 @@ HWTEST_F(WindowPatternStartingWindowTest, GetIconFromDesk, Function | SmallTest 
  * @tc.desc: GetStartupPageFromResource
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPatternStartingWindowTest, GetStartupPageFromResource, Function | SmallTest | Level3)
+HWTEST_F(WindowPatternStartingWindowTest, GetStartupPageFromResource, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     AppExecFwk::AbilityInfo info;
@@ -257,7 +253,7 @@ HWTEST_F(WindowPatternStartingWindowTest, GetStartupPageFromResource, Function |
  * @tc.desc: Cache new starting window info
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPatternStartingWindowTest, CacheStartingWindowInfo01, Function | SmallTest | Level3)
+HWTEST_F(WindowPatternStartingWindowTest, CacheStartingWindowInfo01, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     ssm_->startingWindowMap_.clear();
@@ -275,8 +271,7 @@ HWTEST_F(WindowPatternStartingWindowTest, CacheStartingWindowInfo01, Function | 
     /**
      * @tc.steps: step2. Cache info and check result.
      */
-    ssm_->CacheStartingWindowInfo(
-        abilityInfo.bundleName, abilityInfo.moduleName, abilityInfo.name, startingWindowInfo);
+    ssm_->CacheStartingWindowInfo(abilityInfo.bundleName, abilityInfo.moduleName, abilityInfo.name, startingWindowInfo);
     auto iter = ssm_->startingWindowMap_.find(abilityInfo.bundleName);
     ASSERT_NE(iter, ssm_->startingWindowMap_.end());
     auto& infoMap = iter->second;
@@ -291,7 +286,7 @@ HWTEST_F(WindowPatternStartingWindowTest, CacheStartingWindowInfo01, Function | 
  * @tc.desc: Execute when info is cached
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPatternStartingWindowTest, CacheStartingWindowInfo02, Function | SmallTest | Level3)
+HWTEST_F(WindowPatternStartingWindowTest, CacheStartingWindowInfo02, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     ssm_->startingWindowMap_.clear();
@@ -314,14 +309,13 @@ HWTEST_F(WindowPatternStartingWindowTest, CacheStartingWindowInfo02, Function | 
         .backgroundColorEarlyVersion_ = 0x00000000,
         .iconPathEarlyVersion_ = "path",
     };
-    std::map<std::string, StartingWindowInfo> startingWindowInfoMap{{ key, anotherStartingWindowInfo }};
-    ssm_->startingWindowMap_.insert({abilityInfo.bundleName, startingWindowInfoMap});
+    std::map<std::string, StartingWindowInfo> startingWindowInfoMap{ { key, anotherStartingWindowInfo } };
+    ssm_->startingWindowMap_.insert({ abilityInfo.bundleName, startingWindowInfoMap });
 
     /**
      * @tc.steps: step3. Execute and check result.
      */
-    ssm_->CacheStartingWindowInfo(
-        abilityInfo.bundleName, abilityInfo.moduleName, abilityInfo.name, startingWindowInfo);
+    ssm_->CacheStartingWindowInfo(abilityInfo.bundleName, abilityInfo.moduleName, abilityInfo.name, startingWindowInfo);
     auto iter = ssm_->startingWindowMap_.find(abilityInfo.bundleName);
     ASSERT_NE(iter, ssm_->startingWindowMap_.end());
     auto& infoMap = iter->second;
@@ -336,7 +330,7 @@ HWTEST_F(WindowPatternStartingWindowTest, CacheStartingWindowInfo02, Function | 
  * @tc.desc: GetPathInfoFromResource
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPatternStartingWindowTest, GetPathInfoFromResource, Function | SmallTest | Level3)
+HWTEST_F(WindowPatternStartingWindowTest, GetPathInfoFromResource, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     uint32_t resourceId = 0;
@@ -350,7 +344,7 @@ HWTEST_F(WindowPatternStartingWindowTest, GetPathInfoFromResource, Function | Sm
  * @tc.desc: GetBundleStartingWindowInfos
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPatternStartingWindowTest, GetBundleStartingWindowInfos, Function | SmallTest | Level3)
+HWTEST_F(WindowPatternStartingWindowTest, GetBundleStartingWindowInfos, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     AppExecFwk::BundleInfo bundleInfo;
@@ -358,6 +352,6 @@ HWTEST_F(WindowPatternStartingWindowTest, GetBundleStartingWindowInfos, Function
     ssm_->GetBundleStartingWindowInfos(bundleInfo, outValues);
     ASSERT_EQ(outValues.size(), 0);
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

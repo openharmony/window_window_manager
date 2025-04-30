@@ -33,21 +33,13 @@ public:
     void TearDown() override;
 };
 
-void SessionPermissionTest::SetUpTestCase()
-{
-}
+void SessionPermissionTest::SetUpTestCase() {}
 
-void SessionPermissionTest::TearDownTestCase()
-{
-}
+void SessionPermissionTest::TearDownTestCase() {}
 
-void SessionPermissionTest::SetUp()
-{
-}
+void SessionPermissionTest::SetUp() {}
 
-void SessionPermissionTest::TearDown()
-{
-}
+void SessionPermissionTest::TearDown() {}
 namespace {
 
 /**
@@ -55,7 +47,7 @@ namespace {
  * @tc.desc: test function : IsSystemServiceCalling
  * @tc.type: FUNC
  */
-HWTEST_F(SessionPermissionTest, IsSystemServiceCalling, Function | SmallTest | Level1)
+HWTEST_F(SessionPermissionTest, IsSystemServiceCalling, TestSize.Level1)
 {
     bool needPrintLog = true;
     bool result = SessionPermission::IsSystemServiceCalling(needPrintLog);
@@ -67,7 +59,7 @@ HWTEST_F(SessionPermissionTest, IsSystemServiceCalling, Function | SmallTest | L
  * @tc.desc: test function : IsSACalling
  * @tc.type: FUNC
  */
-HWTEST_F(SessionPermissionTest, IsSACalling, Function | SmallTest | Level1)
+HWTEST_F(SessionPermissionTest, IsSACalling, TestSize.Level1)
 {
     bool result = SessionPermission::IsSACalling();
     ASSERT_EQ(false, result);
@@ -78,9 +70,9 @@ HWTEST_F(SessionPermissionTest, IsSACalling, Function | SmallTest | Level1)
  * @tc.desc: test function : VerifyCallingPermission1
  * @tc.type: FUNC
  */
-HWTEST_F(SessionPermissionTest, VerifyCallingPermission, Function | SmallTest | Level1)
+HWTEST_F(SessionPermissionTest, VerifyCallingPermission, TestSize.Level1)
 {
-    const std::string *permissionNode = new string;
+    const std::string* permissionNode = new string;
     bool result = SessionPermission::VerifyCallingPermission(*permissionNode);
     ASSERT_EQ(false, result);
 }
@@ -90,10 +82,10 @@ HWTEST_F(SessionPermissionTest, VerifyCallingPermission, Function | SmallTest | 
  * @tc.desc: test function : VerifyPermissionByCallerToken
  * @tc.type: FUNC
  */
-HWTEST_F(SessionPermissionTest, VerifyPermissionByCallerToken, Function | SmallTest | Level1)
+HWTEST_F(SessionPermissionTest, VerifyPermissionByCallerToken, TestSize.Level1)
 {
     const uint32_t callerToken = 1000;
-    const std::string *permissionNode = new string;
+    const std::string* permissionNode = new string;
     bool result = SessionPermission::VerifyPermissionByCallerToken(callerToken, *permissionNode);
     ASSERT_EQ(false, result);
 }
@@ -103,13 +95,13 @@ HWTEST_F(SessionPermissionTest, VerifyPermissionByCallerToken, Function | SmallT
  * @tc.desc: test function : IsSameBundleNameAsCalling1
  * @tc.type: FUNC
  */
-HWTEST_F(SessionPermissionTest, IsSameBundleNameAsCalling, Function | SmallTest | Level1)
+HWTEST_F(SessionPermissionTest, IsSameBundleNameAsCalling, TestSize.Level1)
 {
-    const std::string *bundleName = new string;
+    const std::string* bundleName = new string;
     bool result = SessionPermission::IsSameBundleNameAsCalling(*bundleName);
     ASSERT_EQ(false, result);
 
-    const std::string *bundleName2 = new string("test");
+    const std::string* bundleName2 = new string("test");
     bool result2 = SessionPermission::IsSameBundleNameAsCalling(*bundleName2);
     ASSERT_EQ(false, result2);
 }
@@ -119,7 +111,7 @@ HWTEST_F(SessionPermissionTest, IsSameBundleNameAsCalling, Function | SmallTest 
  * @tc.desc: test function : IsSameAppAsCalling
  * @tc.type: FUNC
  */
-HWTEST_F(SessionPermissionTest, IsSameAppAsCalling, Function | SmallTest | Level1)
+HWTEST_F(SessionPermissionTest, IsSameAppAsCalling, TestSize.Level1)
 {
     const std::string appIdentifier = "123";
     const std::string bundleName = "";
@@ -136,7 +128,7 @@ HWTEST_F(SessionPermissionTest, IsSameAppAsCalling, Function | SmallTest | Level
  * @tc.desc: test function : VerifySessionPermission
  * @tc.type: FUNC
  */
-HWTEST_F(SessionPermissionTest, VerifySessionPermission, Function | SmallTest | Level1)
+HWTEST_F(SessionPermissionTest, VerifySessionPermission, TestSize.Level1)
 {
     bool result = SessionPermission::VerifySessionPermission();
     ASSERT_EQ(false, result);
@@ -147,7 +139,7 @@ HWTEST_F(SessionPermissionTest, VerifySessionPermission, Function | SmallTest | 
  * @tc.desc: test function : JudgeCallerIsAllowedToUseSystemAPI
  * @tc.type: FUNC
  */
-HWTEST_F(SessionPermissionTest, JudgeCallerIsAllowedToUseSystemAPI, Function | SmallTest | Level1)
+HWTEST_F(SessionPermissionTest, JudgeCallerIsAllowedToUseSystemAPI, TestSize.Level1)
 {
     bool result = SessionPermission::JudgeCallerIsAllowedToUseSystemAPI();
     ASSERT_EQ(true, result);
@@ -158,7 +150,7 @@ HWTEST_F(SessionPermissionTest, JudgeCallerIsAllowedToUseSystemAPI, Function | S
  * @tc.desc: test function : IsShellCall
  * @tc.type: FUNC
  */
-HWTEST_F(SessionPermissionTest, IsShellCall, Function | SmallTest | Level1)
+HWTEST_F(SessionPermissionTest, IsShellCall, TestSize.Level1)
 {
     bool result = SessionPermission::IsShellCall();
     ASSERT_EQ(true, result);
@@ -169,7 +161,7 @@ HWTEST_F(SessionPermissionTest, IsShellCall, Function | SmallTest | Level1)
  * @tc.desc: test function : IsStartByHdcd
  * @tc.type: FUNC
  */
-HWTEST_F(SessionPermissionTest, IsStartByHdcd, Function | SmallTest | Level1)
+HWTEST_F(SessionPermissionTest, IsStartByHdcd, TestSize.Level1)
 {
     bool result = SessionPermission::IsStartByHdcd();
     ASSERT_EQ(true, result);
@@ -180,7 +172,7 @@ HWTEST_F(SessionPermissionTest, IsStartByHdcd, Function | SmallTest | Level1)
  * @tc.desc: test function : IsStartedByInputMethod
  * @tc.type: FUNC
  */
-HWTEST_F(SessionPermissionTest, IsStartedByInputMethod, Function | SmallTest | Level1)
+HWTEST_F(SessionPermissionTest, IsStartedByInputMethod, TestSize.Level1)
 {
     bool result = SessionPermission::IsStartedByInputMethod();
     ASSERT_EQ(false, result);
@@ -191,7 +183,7 @@ HWTEST_F(SessionPermissionTest, IsStartedByInputMethod, Function | SmallTest | L
  * @tc.desc: test function : IsStartedByUIExtension
  * @tc.type: FUNC
  */
-HWTEST_F(SessionPermissionTest, IsStartedByUIExtension, Function | SmallTest | Level1)
+HWTEST_F(SessionPermissionTest, IsStartedByUIExtension, TestSize.Level1)
 {
     bool result = SessionPermission::IsStartedByUIExtension();
     ASSERT_EQ(result, false);
@@ -202,12 +194,12 @@ HWTEST_F(SessionPermissionTest, IsStartedByUIExtension, Function | SmallTest | L
  * @tc.desc: test function : IsFoundationCall
  * @tc.type: FUNC
  */
-HWTEST_F(SessionPermissionTest, IsFoundationCall, Function | SmallTest | Level1)
+HWTEST_F(SessionPermissionTest, IsFoundationCall, TestSize.Level1)
 {
     bool result = SessionPermission::IsFoundationCall();
     ASSERT_EQ(false, result);
 }
 
-} // namespacecd
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

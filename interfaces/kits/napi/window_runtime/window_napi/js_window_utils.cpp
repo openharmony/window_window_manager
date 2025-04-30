@@ -37,7 +37,6 @@ constexpr size_t ARG_COUNT_ZERO = 0;
 constexpr size_t ARG_COUNT_TWO = 2;
 constexpr size_t ARG_COUNT_THREE = 3;
 constexpr int32_t MAX_TOUCHABLE_AREAS = 10;
-constexpr uint32_t API_VERSION_18 = 18;
 const std::string RESOLVED_CALLBACK = "resolvedCallback";
 const std::string REJECTED_CALLBACK = "rejectedCallback";
 }
@@ -101,8 +100,6 @@ napi_value WindowTypeInit(napi_env env)
         static_cast<int32_t>(ApiWindowType::TYPE_SCREEN_CONTROL)));
     napi_set_named_property(env, objValue, "TYPE_FLOAT_NAVIGATION", CreateJsValue(env,
         static_cast<int32_t>(ApiWindowType::TYPE_FLOAT_NAVIGATION)));
-    napi_set_named_property(env, objValue, "TYPE_MAIN", CreateJsValue(env,
-        static_cast<int32_t>(ApiWindowType::TYPE_MAIN)));
 
     return objValue;
 }
@@ -447,52 +444,45 @@ napi_value GetRectAndConvertToJsValue(napi_env env, const Rect& rect)
     return objValue;
 }
 
-napi_value CreateJsWindowPropertiesObject(napi_env env, sptr<Window>& window, const Rect& drawableRect)
+napi_value CreateJsWindowPropertiesObject(napi_env env, const WindowPropertyInfo& windowPropertyInfo)
 {
     WLOGD("CreateJsWindowPropertiesObject");
     napi_value objValue = nullptr;
-    if (window == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window is nullptr.");
-        return objValue;
-    }
     CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
-    Rect windowRect = window->GetRect();
-    napi_value windowRectObj = GetRectAndConvertToJsValue(env, windowRect);
+
+    napi_value windowRectObj = GetRectAndConvertToJsValue(env, windowPropertyInfo.windowRect);
     if (windowRectObj == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "GetWindowRect failed!");
     }
     napi_set_named_property(env, objValue, "windowRect", windowRectObj);
 
-    napi_value drawableRectObj = GetRectAndConvertToJsValue(env, drawableRect);
+    napi_value drawableRectObj = GetRectAndConvertToJsValue(env, windowPropertyInfo.drawableRect);
     if (drawableRectObj == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "GetDrawableRect failed!");
     }
     napi_set_named_property(env, objValue, "drawableRect", drawableRectObj);
 
-    WindowType type = window->GetType();
-    uint32_t apiVersion = window->GetApiCompatibleVersion();
-    if (apiVersion < API_VERSION_18 && type == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
-        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "api version %{public}d.", apiVersion);
-        napi_set_named_property(env, objValue, "type", CreateJsValue(env, type));
-    } else if (NATIVE_JS_TO_WINDOW_TYPE_MAP.count(type) != 0) {
+    WindowType type = windowPropertyInfo.type;
+    if (NATIVE_JS_TO_WINDOW_TYPE_MAP.count(type) != 0) {
         napi_set_named_property(env, objValue, "type", CreateJsValue(env, NATIVE_JS_TO_WINDOW_TYPE_MAP.at(type)));
     } else {
         napi_set_named_property(env, objValue, "type", CreateJsValue(env, type));
     }
-    napi_set_named_property(env, objValue, "isLayoutFullScreen", CreateJsValue(env, window->IsLayoutFullScreen()));
-    napi_set_named_property(env, objValue, "isFullScreen", CreateJsValue(env, window->IsFullScreen()));
-    napi_set_named_property(env, objValue, "touchable", CreateJsValue(env, window->GetTouchable()));
-    napi_set_named_property(env, objValue, "focusable", CreateJsValue(env, window->GetFocusable()));
-    napi_set_named_property(env, objValue, "name", CreateJsValue(env, window->GetWindowName()));
-    napi_set_named_property(env, objValue, "isPrivacyMode", CreateJsValue(env, window->IsPrivacyMode()));
-    napi_set_named_property(env, objValue, "isKeepScreenOn", CreateJsValue(env, window->IsKeepScreenOn()));
-    napi_set_named_property(env, objValue, "brightness", CreateJsValue(env, window->GetBrightness()));
-    napi_set_named_property(env, objValue, "isTransparent", CreateJsValue(env, window->IsTransparent()));
+    napi_set_named_property(env, objValue, "isLayoutFullScreen",
+                            CreateJsValue(env, windowPropertyInfo.isLayoutFullScreen));
+    napi_set_named_property(env, objValue, "isFullScreen", CreateJsValue(env, windowPropertyInfo.isFullScreen));
+    napi_set_named_property(env, objValue, "touchable", CreateJsValue(env, windowPropertyInfo.isTouchable));
+    napi_set_named_property(env, objValue, "focusable", CreateJsValue(env, windowPropertyInfo.isFocusable));
+    napi_set_named_property(env, objValue, "name", CreateJsValue(env, windowPropertyInfo.name));
+    napi_set_named_property(env, objValue, "isPrivacyMode", CreateJsValue(env, windowPropertyInfo.isPrivacyMode));
+    napi_set_named_property(env, objValue, "isKeepScreenOn", CreateJsValue(env, windowPropertyInfo.isKeepScreenOn));
+    napi_set_named_property(env, objValue, "brightness", CreateJsValue(env, windowPropertyInfo.brightness));
+    napi_set_named_property(env, objValue, "isTransparent", CreateJsValue(env, windowPropertyInfo.isTransparent));
     napi_set_named_property(env, objValue, "isRoundCorner", CreateJsValue(env, false)); // empty method
     napi_set_named_property(env, objValue, "dimBehindValue", CreateJsValue(env, 0));
-    napi_set_named_property(env, objValue, "id", CreateJsValue(env, window->GetWindowId()));
+    napi_set_named_property(env, objValue, "id", CreateJsValue(env, windowPropertyInfo.id));
     napi_set_named_property(env, objValue, "displayId", CreateJsValue(env,
-        static_cast<int64_t>(window->GetDisplayId())));
+        static_cast<int64_t>(windowPropertyInfo.displayId)));
     return objValue;
 }
 
@@ -605,6 +595,10 @@ napi_value CreateJsDecorButtonStyleObj(napi_env env, DecorButtonStyle decorButto
         CreateJsValue(env, decorButtonStyle.spacingBetweenButtons));
     napi_set_named_property(env, objValue, "closeButtonRightMargin",
         CreateJsValue(env, decorButtonStyle.closeButtonRightMargin));
+    napi_set_named_property(env, objValue, "buttonIconSize",
+        CreateJsValue(env, decorButtonStyle.buttonIconSize));
+    napi_set_named_property(env, objValue, "buttonBackgroundCornerRadius",
+        CreateJsValue(env, decorButtonStyle.buttonBackgroundCornerRadius));
     return objValue;
 }
 
@@ -629,6 +623,16 @@ bool ConvertDecorButtonStyleFromJs(napi_env env, napi_value jsObject, DecorButto
     uint32_t closeButtonRightMargin;
     if (ParseJsValue(jsObject, env, "closeButtonRightMargin", closeButtonRightMargin)) {
         style.closeButtonRightMargin = closeButtonRightMargin;
+        emptyParam = false;
+    }
+    uint32_t buttonIconSize;
+    if (ParseJsValue(jsObject, env, "buttonIconSize", buttonIconSize)) {
+        style.buttonIconSize = buttonIconSize;
+        emptyParam = false;
+    }
+    uint32_t buttonBackgroundCornerRadius;
+    if (ParseJsValue(jsObject, env, "buttonBackgroundCornerRadius", buttonBackgroundCornerRadius)) {
+        style.buttonBackgroundCornerRadius = buttonBackgroundCornerRadius;
         emptyParam = false;
     }
     return !emptyParam;

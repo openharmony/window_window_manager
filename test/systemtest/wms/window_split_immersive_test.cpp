@@ -43,13 +43,9 @@ private:
     static constexpr uint32_t SPLIT_TEST_SLEEP_S = 1; // split test sleep time
 };
 
-void WindowSplitImmersiveTest::SetUpTestCase()
-{
-}
+void WindowSplitImmersiveTest::SetUpTestCase() {}
 
-void WindowSplitImmersiveTest::TearDownTestCase()
-{
-}
+void WindowSplitImmersiveTest::TearDownTestCase() {}
 
 void WindowSplitImmersiveTest::SetUp()
 {
@@ -90,7 +86,7 @@ namespace {
  * @tc.desc: one primary window and one fullscreen window, test enter and out split immersive
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSplitImmersiveTest, SplitImmersive01, Function | MediumTest | Level3)
+HWTEST_F(WindowSplitImmersiveTest, SplitImmersive01, TestSize.Level1)
 {
     // create fullscreen win and show
     fullInfo_.mode = WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
@@ -124,6 +120,6 @@ HWTEST_F(WindowSplitImmersiveTest, SplitImmersive01, Function | MediumTest | Lev
     ASSERT_EQ(WMError::WM_OK, priWindow->Hide());
     sleep(SPLIT_TEST_SLEEP_S);
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

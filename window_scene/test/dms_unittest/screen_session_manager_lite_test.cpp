@@ -180,6 +180,33 @@ HWTEST_F(ScreenSessionManagerLiteTest, Clear, TestSize.Level1)
     screenSessionManagerLite.Clear();
     ASSERT_EQ(screenSessionManagerLite.screenSessionManager_, nullptr);
 }
+
+/**
+ * @tc.name: GetInstance_ShouldCreateNewInstance_WhenInstanceIsNull
+ * @tc.desc: Test if GetInstance creates a new instance when instance is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerLiteTest, GetInstance_ShouldCreateNewInstance_WhenInstanceIsNull, TestSize.Level1)
+{
+    ScreenSessionManagerLite& instance = ScreenSessionManagerLite::GetInstance();
+
+    EXPECT_NE(nullptr, &instance);
+}
+
+/**
+ * @tc.name: GetInstance_ShouldReturnExistingInstance_WhenInstanceIsNotNull
+ * @tc.desc: Test if GetInstance returns the existing instance when it's not nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerLiteTest, GetInstance_ShouldReturnExistingInstance_WhenInstanceIsNotNull,
+    TestSize.Level1)
+{
+    ScreenSessionManagerLite& instance1 = ScreenSessionManagerLite::GetInstance();
+
+    ScreenSessionManagerLite& instance2 = ScreenSessionManagerLite::GetInstance();
+
+    EXPECT_EQ(&instance1, &instance2);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

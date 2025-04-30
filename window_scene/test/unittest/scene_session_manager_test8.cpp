@@ -35,18 +35,15 @@ public:
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
+
 private:
     sptr<SceneSessionManager> ssm_;
     static constexpr uint32_t WAIT_SYNC_IN_NS = 500000;
 };
 
-void SceneSessionManagerTest8::SetUpTestCase()
-{
-}
+void SceneSessionManagerTest8::SetUpTestCase() {}
 
-void SceneSessionManagerTest8::TearDownTestCase()
-{
-}
+void SceneSessionManagerTest8::TearDownTestCase() {}
 
 void SceneSessionManagerTest8::SetUp()
 {
@@ -63,29 +60,13 @@ void SceneSessionManagerTest8::TearDown()
 }
 
 namespace {
-/**
- * @tc.name: GetTotalUITreeInfo
- * @tc.desc: GetTotalUITreeInfo set gesture navigation enabled
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest8, GetTotalUITreeInfo, Function | SmallTest | Level3)
-{
-    std::string dumpInfo = "dumpInfo";
-    ssm_->SetDumpUITreeFunc(nullptr);
-    EXPECT_EQ(WSError::WS_OK, ssm_->GetTotalUITreeInfo(dumpInfo));
-    DumpUITreeFunc func = [](std::string& dumpInfo) {
-        return;
-    };
-    ssm_->SetDumpUITreeFunc(func);
-    EXPECT_EQ(WSError::WS_OK, ssm_->GetTotalUITreeInfo(dumpInfo));
-}
 
 /**
  * @tc.name: GetRemoteSessionSnapshotInfo
  * @tc.desc: GetRemoteSessionSnapshotInfo set gesture navigation enabled
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest8, GetRemoteSessionSnapshotInfo, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest8, GetRemoteSessionSnapshotInfo, TestSize.Level1)
 {
     AAFwk::MissionSnapshot sessionSnapshot;
     std::string deviceId = "";
@@ -98,7 +79,7 @@ HWTEST_F(SceneSessionManagerTest8, GetRemoteSessionSnapshotInfo, Function | Smal
  * @tc.desc: test function : WindowLayerInfoChangeCallback
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest8, WindowLayerInfoChangeCallback, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest8, WindowLayerInfoChangeCallback, TestSize.Level1)
 {
     std::shared_ptr<RSOcclusionData> rsData = nullptr;
     ssm_->WindowLayerInfoChangeCallback(rsData);
@@ -124,7 +105,7 @@ HWTEST_F(SceneSessionManagerTest8, WindowLayerInfoChangeCallback, Function | Sma
  * @tc.desc: test function : PostProcessFocus
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest8, PostProcessFocus, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest8, PostProcessFocus, TestSize.Level1)
 {
     ssm_->sceneSessionMap_.emplace(0, nullptr);
     ssm_->PostProcessFocus();
@@ -161,7 +142,7 @@ HWTEST_F(SceneSessionManagerTest8, PostProcessFocus, Function | SmallTest | Leve
  * @tc.desc: test function : PostProcessFocus with focusableOnShow
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest8, PostProcessFocus01, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest8, PostProcessFocus01, TestSize.Level1)
 {
     ssm_->sceneSessionMap_.clear();
     auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
@@ -175,7 +156,7 @@ HWTEST_F(SceneSessionManagerTest8, PostProcessFocus01, Function | SmallTest | Le
     sceneSession->state_ = SessionState::STATE_FOREGROUND;
     sceneSession->isVisible_ = true;
 
-    PostProcessFocusState state = {true, true, true, FocusChangeReason::FOREGROUND};
+    PostProcessFocusState state = { true, true, true, FocusChangeReason::FOREGROUND };
     sceneSession->SetPostProcessFocusState(state);
     sceneSession->SetFocusableOnShow(false);
     ssm_->sceneSessionMap_.emplace(1, sceneSession);
@@ -189,7 +170,7 @@ HWTEST_F(SceneSessionManagerTest8, PostProcessFocus01, Function | SmallTest | Le
  * @tc.desc: test function : PostProcessFocus
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest8, PostProcessFocus03, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest8, PostProcessFocus03, TestSize.Level1)
 {
     ssm_->sceneSessionMap_.clear();
 
@@ -200,7 +181,7 @@ HWTEST_F(SceneSessionManagerTest8, PostProcessFocus03, Function | SmallTest | Le
     sceneSession->persistentId_ = 1;
 
     sceneSession->SetFocusedOnShow(false);
-    PostProcessFocusState state = {true, true, true, FocusChangeReason::FOREGROUND};
+    PostProcessFocusState state = { true, true, true, FocusChangeReason::FOREGROUND };
     sceneSession->SetPostProcessFocusState(state);
     ssm_->sceneSessionMap_.emplace(1, sceneSession);
     ssm_->PostProcessFocus();
@@ -208,7 +189,7 @@ HWTEST_F(SceneSessionManagerTest8, PostProcessFocus03, Function | SmallTest | Le
 
     sceneSession->state_ = SessionState::STATE_FOREGROUND;
     sceneSession->isVisible_ = true;
-    state = {true, true, true, FocusChangeReason::FOREGROUND};
+    state = { true, true, true, FocusChangeReason::FOREGROUND };
     sceneSession->SetPostProcessFocusState(state);
     ssm_->sceneSessionMap_.emplace(1, sceneSession);
     ssm_->PostProcessFocus();
@@ -220,7 +201,7 @@ HWTEST_F(SceneSessionManagerTest8, PostProcessFocus03, Function | SmallTest | Le
  * @tc.desc: test function : PostProcessProperty
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest8, PostProcessProperty, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest8, PostProcessProperty, TestSize.Level1)
 {
     ssm_->sceneSessionMap_.emplace(0, nullptr);
     ssm_->PostProcessProperty(static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA));
@@ -252,7 +233,7 @@ HWTEST_F(SceneSessionManagerTest8, PostProcessProperty, Function | SmallTest | L
  * @tc.desc: test function : NotifyUpdateRectAfterLayout
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest8, NotifyUpdateRectAfterLayout, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest8, NotifyUpdateRectAfterLayout, TestSize.Level1)
 {
     ssm_->sceneSessionMap_.emplace(0, nullptr);
     ssm_->NotifyUpdateRectAfterLayout();
@@ -274,7 +255,7 @@ HWTEST_F(SceneSessionManagerTest8, NotifyUpdateRectAfterLayout, Function | Small
  * @tc.desc: test function : DestroyExtensionSession
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest8, DestroyExtensionSession, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest8, DestroyExtensionSession, TestSize.Level1)
 {
     ssm_->remoteExtSessionMap_.clear();
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
@@ -323,7 +304,7 @@ HWTEST_F(SceneSessionManagerTest8, DestroyExtensionSession, Function | SmallTest
  * @tc.desc: test function : FilterSceneSessionCovered
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest8, FilterSceneSessionCovered, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest8, FilterSceneSessionCovered, TestSize.Level1)
 {
     std::vector<sptr<SceneSession>> sceneSessionList;
     sptr<SceneSession> sceneSession = nullptr;
@@ -340,11 +321,33 @@ HWTEST_F(SceneSessionManagerTest8, FilterSceneSessionCovered, Function | SmallTe
 }
 
 /**
+ * @tc.name: SubtractIntersectArea
+ * @tc.desc: test function : SubtractIntersectArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, SubtractIntersectArea, TestSize.Level1)
+{
+    SkIRect rect{ .fLeft = 0, .fTop = 0, .fRight = 2880, .fBottom = 1920 };
+    auto unaccountedSpace = std::make_shared<SkRegion>(rect);
+    EXPECT_NE(unaccountedSpace, nullptr);
+
+    sptr<SceneSession> sceneSession = nullptr;
+    EXPECT_EQ(ssm_->SubtractIntersectArea(unaccountedSpace, sceneSession), false);
+
+    SessionInfo sessionInfo;
+    sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    WSRect wsRect{ .posX_ = 0, .posY_ = 0, .width_ = 100, .height_ = 100 };
+    sceneSession->winRect_ = wsRect;
+    EXPECT_EQ(ssm_->SubtractIntersectArea(unaccountedSpace, sceneSession), true);
+}
+
+/**
  * @tc.name: UpdateSubWindowVisibility
  * @tc.desc: test function : UpdateSubWindowVisibility
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest8, UpdateSubWindowVisibility, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest8, UpdateSubWindowVisibility, TestSize.Level1)
 {
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "UpdateSubWindowVisibility";
@@ -384,8 +387,8 @@ HWTEST_F(SceneSessionManagerTest8, UpdateSubWindowVisibility, Function | SmallTe
     sceneSession2->SetParentSession(sceneSession2);
     EXPECT_EQ(1998, sceneSession2->GetParentSession()->GetWindowId());
     ssm_->sceneSessionMap_.emplace(0, sceneSession2);
-    ssm_->UpdateSubWindowVisibility(sceneSession,
-        visibleState, visibilityChangeInfo, windowVisibilityInfos, visibilityInfo, currVisibleData);
+    ssm_->UpdateSubWindowVisibility(
+        sceneSession, visibleState, visibilityChangeInfo, windowVisibilityInfos, visibilityInfo, currVisibleData);
 }
 
 /**
@@ -393,7 +396,7 @@ HWTEST_F(SceneSessionManagerTest8, UpdateSubWindowVisibility, Function | SmallTe
  * @tc.desc: test function : RegisterSessionChangeByActionNotifyManagerFunc
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest8, RegisterSessionChangeByActionNotifyManagerFunc, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest8, RegisterSessionChangeByActionNotifyManagerFunc, TestSize.Level1)
 {
     sptr<SceneSession> sceneSession = nullptr;
     ssm_->RegisterSessionChangeByActionNotifyManagerFunc(sceneSession);
@@ -407,13 +410,13 @@ HWTEST_F(SceneSessionManagerTest8, RegisterSessionChangeByActionNotifyManagerFun
 
     sptr<WindowSessionProperty> property = nullptr;
     sceneSession->NotifySessionChangeByActionNotifyManager(property,
-        WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
+                                                           WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
 
     property = sptr<WindowSessionProperty>::MakeSptr();
     EXPECT_NE(nullptr, property);
 
     sceneSession->NotifySessionChangeByActionNotifyManager(property,
-        WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
+                                                           WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
 }
 
 /**
@@ -421,7 +424,7 @@ HWTEST_F(SceneSessionManagerTest8, RegisterSessionChangeByActionNotifyManagerFun
  * @tc.desc: test function : RegisterSessionChangeByActionNotifyManagerFunc1
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest8, RegisterSessionChangeByActionNotifyManagerFunc1, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest8, RegisterSessionChangeByActionNotifyManagerFunc1, TestSize.Level1)
 {
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "RegisterSessionChangeByActionNotifyManagerFunc1";
@@ -436,31 +439,27 @@ HWTEST_F(SceneSessionManagerTest8, RegisterSessionChangeByActionNotifyManagerFun
     EXPECT_NE(nullptr, property);
 
     sceneSession->NotifySessionChangeByActionNotifyManager(property,
-        WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
+                                                           WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
+
+    sceneSession->NotifySessionChangeByActionNotifyManager(
+        property, WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_INDICATOR_PROPS);
 
     sceneSession->NotifySessionChangeByActionNotifyManager(property,
-        WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_INDICATOR_PROPS);
+                                                           WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS);
 
     sceneSession->NotifySessionChangeByActionNotifyManager(property,
-        WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS);
+                                                           WSPropertyChangeAction::ACTION_UPDATE_SYSTEM_PRIVACY_MODE);
 
-    sceneSession->NotifySessionChangeByActionNotifyManager(property,
-        WSPropertyChangeAction::ACTION_UPDATE_SYSTEM_PRIVACY_MODE);
+    sceneSession->NotifySessionChangeByActionNotifyManager(property, WSPropertyChangeAction::ACTION_UPDATE_FLAGS);
 
-    sceneSession->NotifySessionChangeByActionNotifyManager(property,
-        WSPropertyChangeAction::ACTION_UPDATE_FLAGS);
+    sceneSession->NotifySessionChangeByActionNotifyManager(property, WSPropertyChangeAction::ACTION_UPDATE_MODE);
 
-    sceneSession->NotifySessionChangeByActionNotifyManager(property,
-        WSPropertyChangeAction::ACTION_UPDATE_MODE);
+    sceneSession->NotifySessionChangeByActionNotifyManager(
+        property, WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_FLOATING_WINDOWS);
 
-    sceneSession->NotifySessionChangeByActionNotifyManager(property,
-        WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_FLOATING_WINDOWS);
+    sceneSession->NotifySessionChangeByActionNotifyManager(property, WSPropertyChangeAction::ACTION_UPDATE_WINDOW_MASK);
 
-    sceneSession->NotifySessionChangeByActionNotifyManager(property,
-        WSPropertyChangeAction::ACTION_UPDATE_WINDOW_MASK);
-
-    sceneSession->NotifySessionChangeByActionNotifyManager(property,
-        WSPropertyChangeAction::ACTION_UPDATE_TOPMOST);
+    sceneSession->NotifySessionChangeByActionNotifyManager(property, WSPropertyChangeAction::ACTION_UPDATE_TOPMOST);
 }
 
 /**
@@ -468,7 +467,7 @@ HWTEST_F(SceneSessionManagerTest8, RegisterSessionChangeByActionNotifyManagerFun
  * @tc.desc: test function : RegisterRequestFocusStatusNotifyManagerFunc
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest8, RegisterRequestFocusStatusNotifyManagerFunc, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest8, RegisterRequestFocusStatusNotifyManagerFunc, TestSize.Level1)
 {
     sptr<SceneSession> sceneSession = nullptr;
     ssm_->RegisterRequestFocusStatusNotifyManagerFunc(sceneSession);
@@ -480,7 +479,7 @@ HWTEST_F(SceneSessionManagerTest8, RegisterRequestFocusStatusNotifyManagerFunc, 
  * @tc.desc: test function : CheckRequestFocusImmdediately
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest8, CheckRequestFocusImmdediately, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest8, CheckRequestFocusImmdediately, TestSize.Level1)
 {
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "CheckRequestFocusImmdediately";
@@ -498,7 +497,7 @@ HWTEST_F(SceneSessionManagerTest8, CheckRequestFocusImmdediately, Function | Sma
  * @tc.desc: test function : HandleTurnScreenOn
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest8, HandleTurnScreenOn, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest8, HandleTurnScreenOn, TestSize.Level1)
 {
     sptr<SceneSession> sceneSession = nullptr;
     ssm_->HandleTurnScreenOn(sceneSession);
@@ -522,7 +521,7 @@ HWTEST_F(SceneSessionManagerTest8, HandleTurnScreenOn, Function | SmallTest | Le
  * @tc.desc: test function : HandleKeepScreenOn
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest8, HandleKeepScreenOn, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest8, HandleKeepScreenOn, TestSize.Level1)
 {
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "HandleTurnScreenOn";
@@ -531,9 +530,10 @@ HWTEST_F(SceneSessionManagerTest8, HandleKeepScreenOn, Function | SmallTest | Le
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     EXPECT_NE(nullptr, sceneSession);
 
-    ssm_->HandleKeepScreenOn(sceneSession, false);
+    std::string lockName = "windowLock";
+    ssm_->HandleKeepScreenOn(sceneSession, false, lockName, sceneSession->keepScreenLock_);
     sceneSession->keepScreenLock_ = nullptr;
-    ssm_->HandleKeepScreenOn(sceneSession, true);
+    ssm_->HandleKeepScreenOn(sceneSession, true, lockName, sceneSession->keepScreenLock_);
     bool enable = true;
     EXPECT_EQ(WSError::WS_OK, ssm_->GetFreeMultiWindowEnableState(enable));
 }
@@ -543,7 +543,7 @@ HWTEST_F(SceneSessionManagerTest8, HandleKeepScreenOn, Function | SmallTest | Le
  * @tc.desc: test function : SetBrightness
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest8, SetBrightness, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest8, SetBrightness, TestSize.Level1)
 {
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "SetBrightness";
@@ -579,7 +579,7 @@ HWTEST_F(SceneSessionManagerTest8, SetBrightness, Function | SmallTest | Level3)
  * @tc.desc: test function : TerminateSessionNew
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest8, TerminateSessionNew, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest8, TerminateSessionNew, TestSize.Level1)
 {
     sptr<AAFwk::SessionInfo> sessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
     EXPECT_NE(nullptr, sessionInfo);
@@ -602,18 +602,14 @@ HWTEST_F(SceneSessionManagerTest8, TerminateSessionNew, Function | SmallTest | L
  * @tc.desc: test function : IsLastFrameLayoutFinished
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest8, IsLastFrameLayoutFinished, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest8, IsLastFrameLayoutFinished, TestSize.Level1)
 {
     ssm_->closeTargetFloatWindowFunc_ = nullptr;
     std::string bundleName = "SetCloseTargetFloatWindowFunc";
-    ProcessCloseTargetFloatWindowFunc func = [](const std::string& bundleName1) {
-        return ;
-    };
+    ProcessCloseTargetFloatWindowFunc func = [](const std::string& bundleName1) { return; };
     ssm_->SetCloseTargetFloatWindowFunc(func);
 
-    IsRootSceneLastFrameLayoutFinishedFunc func1 = []() {
-        return true;
-    };
+    IsRootSceneLastFrameLayoutFinishedFunc func1 = []() { return true; };
     ssm_->isRootSceneLastFrameLayoutFinishedFunc_ = func1;
     ASSERT_NE(ssm_->isRootSceneLastFrameLayoutFinishedFunc_, nullptr);
     bool isLayoutFinished = false;
@@ -627,7 +623,7 @@ HWTEST_F(SceneSessionManagerTest8, IsLastFrameLayoutFinished, Function | SmallTe
  * @tc.desc: test function : ReportScreenFoldStatus
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest8, ReportScreenFoldStatus, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest8, ReportScreenFoldStatus, TestSize.Level1)
 {
     sptr<SceneSession> sceneSession = nullptr;
     ssm_->sceneSessionMap_.insert(std::make_pair(0, sceneSession));
@@ -668,7 +664,7 @@ HWTEST_F(SceneSessionManagerTest8, ReportScreenFoldStatus, Function | SmallTest 
  * @tc.type: FUNC
  */
 
-HWTEST_F(SceneSessionManagerTest8, GetWindowModeType, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest8, GetWindowModeType, TestSize.Level1)
 {
     SessionInfo info;
     info.bundleName_ = "GetWindowModeType";
@@ -686,7 +682,7 @@ HWTEST_F(SceneSessionManagerTest8, GetWindowModeType, Function | SmallTest | Lev
  * @tc.desc: test function : GetHostWindowRect
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest8, GetHostWindowRect, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest8, GetHostWindowRect, TestSize.Level1)
 {
     sptr<IDisplayChangeListener> listener = sptr<DisplayChangeListener>::MakeSptr();
     ASSERT_NE(nullptr, listener);
@@ -705,49 +701,49 @@ HWTEST_F(SceneSessionManagerTest8, GetHostWindowRect, Function | SmallTest | Lev
     sceneSession->sessionInfo_.screenId_ = 0;
     EXPECT_EQ(sceneSession->GetScreenId(), 0);
     ssm_->sceneSessionMap_.insert(std::make_pair(hostWindowId, sceneSession));
-    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::EXPANDED,
-        { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(
+        0, SuperFoldStatus::EXPANDED, { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
     auto ret = ssm_->GetHostWindowRect(hostWindowId, rect);
     EXPECT_EQ(WSError::WS_OK, ret);
     EXPECT_EQ(rect.posY_, 0);
-    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::KEYBOARD,
-        { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
-    sceneSession->winRect_ = {0, 100, 0, 0};
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(
+        0, SuperFoldStatus::KEYBOARD, { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
+    sceneSession->winRect_ = { 0, 100, 0, 0 };
     ret = ssm_->GetHostWindowRect(hostWindowId, rect);
     EXPECT_EQ(WSError::WS_OK, ret);
     EXPECT_EQ(rect.posY_, 100);
 
-    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::HALF_FOLDED,
-        { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1649, 2472, 40 });
-    sceneSession->winRect_ = {0, 1000, 100, 100};
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(
+        0, SuperFoldStatus::HALF_FOLDED, { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1649, 2472, 40 });
+    sceneSession->winRect_ = { 0, 1000, 100, 100 };
     ret = ssm_->GetHostWindowRect(hostWindowId, rect);
     EXPECT_EQ(WSError::WS_OK, ret);
     EXPECT_EQ(rect.posY_, 1000);
-    sceneSession->winRect_ = {0, 2000, 100, 100};
+    sceneSession->winRect_ = { 0, 2000, 100, 100 };
     ret = ssm_->GetHostWindowRect(hostWindowId, rect);
-    WSRect hostRect = {0, 2000, 100, 100};
+    WSRect hostRect = { 0, 2000, 100, 100 };
     sceneSession->TransformGlobalRectToRelativeRect(hostRect);
     EXPECT_EQ(WSError::WS_OK, ret);
     EXPECT_EQ(rect.posY_, hostRect.posY_);
 
     sceneSession->GetSessionProperty()->SetIsSystemKeyboard(false);
-    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::UNKNOWN,
-        { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
-    sceneSession->winRect_ = {0, 0, 0, 0};
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(
+        0, SuperFoldStatus::UNKNOWN, { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
+    sceneSession->winRect_ = { 0, 0, 0, 0 };
     ret = ssm_->GetHostWindowRect(hostWindowId, rect);
     EXPECT_EQ(WSError::WS_OK, ret);
     EXPECT_EQ(rect.posY_, 0);
-    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::FOLDED,
-        { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
-    sceneSession->winRect_ = {0, 100, 0, 0};
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(
+        0, SuperFoldStatus::FOLDED, { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
+    sceneSession->winRect_ = { 0, 100, 0, 0 };
     ret = ssm_->GetHostWindowRect(hostWindowId, rect);
     EXPECT_EQ(WSError::WS_OK, ret);
     EXPECT_EQ(rect.posY_, 100);
 
     sceneSession->GetSessionProperty()->SetIsSystemKeyboard(true);
-    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::HALF_FOLDED,
-        { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1649, 2472, 40 });
-    sceneSession->winRect_ = {0, 1000, 100, 100};
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(
+        0, SuperFoldStatus::HALF_FOLDED, { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1649, 2472, 40 });
+    sceneSession->winRect_ = { 0, 1000, 100, 100 };
     ret = ssm_->GetHostWindowRect(hostWindowId, rect);
     EXPECT_EQ(WSError::WS_OK, ret);
     EXPECT_EQ(rect.posY_, 1000);
@@ -758,7 +754,7 @@ HWTEST_F(SceneSessionManagerTest8, GetHostWindowRect, Function | SmallTest | Lev
  * @tc.desc: test function : NotifyStackEmpty
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest8, NotifyStackEmpty, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest8, NotifyStackEmpty, TestSize.Level1)
 {
     SessionInfo info;
     info.bundleName_ = "NotifyStackEmpty";
@@ -780,7 +776,7 @@ HWTEST_F(SceneSessionManagerTest8, NotifyStackEmpty, Function | SmallTest | Leve
  * @tc.desc: test function : GetAppMainSceneSession
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest8, GetAppMainSceneSession, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest8, GetAppMainSceneSession, TestSize.Level1)
 {
     ssm_->isUserBackground_ = true;
     ssm_->FlushWindowInfoToMMI(true);
@@ -806,7 +802,7 @@ HWTEST_F(SceneSessionManagerTest8, GetAppMainSceneSession, Function | SmallTest 
  * @tc.desc: test function : PostProcessProperty
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest8, PostProcessProperty01, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest8, PostProcessProperty01, TestSize.Level1)
 {
     SessionInfo info;
     info.bundleName_ = "PostProcessProperty";
@@ -836,7 +832,7 @@ HWTEST_F(SceneSessionManagerTest8, PostProcessProperty01, Function | SmallTest |
  * @tc.desc: test function : SetVmaCacheStatus
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest8, SetVmaCacheStatus, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest8, SetVmaCacheStatus, TestSize.Level1)
 {
     AppExecFwk::AbilityInfo abilityInfo;
     ssm_->ProcessPreload(abilityInfo);
@@ -850,7 +846,7 @@ HWTEST_F(SceneSessionManagerTest8, SetVmaCacheStatus, Function | SmallTest | Lev
  * @tc.desc: test function : IsInDefaultScreen
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest8, IsInDefaultScreen, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest8, IsInDefaultScreen, TestSize.Level1)
 {
     sptr<SceneSession> sceneSession = nullptr;
     ssm_->ProcessFocusWhenForegroundScbCore(sceneSession);
@@ -869,7 +865,7 @@ HWTEST_F(SceneSessionManagerTest8, IsInDefaultScreen, Function | SmallTest | Lev
  * @tc.desc: test function : OnSessionStateChange
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest8, OnSessionStateChange, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest8, OnSessionStateChange, TestSize.Level1)
 {
     SessionInfo info;
     info.bundleName_ = "OnSessionStateChange";
@@ -898,7 +894,7 @@ HWTEST_F(SceneSessionManagerTest8, OnSessionStateChange, Function | SmallTest | 
  * @tc.desc: test function : OnSessionStateChange
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest8, OnSessionStateChange01, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest8, OnSessionStateChange01, TestSize.Level1)
 {
     SessionInfo info;
     info.bundleName_ = "OnSessionStateChange01";
@@ -926,101 +922,11 @@ HWTEST_F(SceneSessionManagerTest8, OnSessionStateChange01, Function | SmallTest 
 }
 
 /**
- * @tc.name: IsWindowSupportCacheForRecovering
- * @tc.desc: test function : IsWindowSupportCacheForRecovering
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest8, IsWindowSupportCacheForRecovering, Function | SmallTest | Level3)
-{
-    std::vector<int32_t> recoveredPersistentIds = {1};
-    ssm_->alivePersistentIds_.clear();
-    ssm_->alivePersistentIds_.push_back(1);
-    ssm_->alivePersistentIds_.push_back(2);
-    ssm_->alivePersistentIds_.push_back(3);
-    SessionInfo info;
-    info.bundleName_ = "IsWindowSupportCacheForRecovering";
-    info.abilityName_ = "IsWindowSupportCacheForRecovering";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
-    sceneSession->isRecovered_ = true;
-    ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession));
-    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(sceneSession1, nullptr);
-    sceneSession1->isRecovered_ = false;
-    ssm_->sceneSessionMap_.insert(std::make_pair(3, sceneSession1));
-    sptr<SceneSession> sceneSession2 = nullptr;
-    ssm_->sceneSessionMap_.insert(std::make_pair(4, sceneSession2));
-    ssm_->ClearUnrecoveredSessions(recoveredPersistentIds);
-
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(property, nullptr);
-    ssm_->recoveringFinished_ = true;
-    auto ret = ssm_->IsWindowSupportCacheForRecovering(sceneSession, property);
-    EXPECT_EQ(false, ret);
-}
-
-/**
- * @tc.name: IsWindowSupportCacheForRecovering01
- * @tc.desc: test function : IsWindowSupportCacheForRecovering
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest8, IsWindowSupportCacheForRecovering01, Function | SmallTest | Level3)
-{
-    std::vector<int32_t> windowIds = {0, 1};
-    sptr<SceneSession> sceneSession = nullptr;
-    ssm_->sceneSessionMap_.clear();
-    ssm_->sceneSessionMap_.insert(std::make_pair(0, sceneSession));
-    ssm_->OnNotifyAboveLockScreen(windowIds);
-
-    SessionInfo info;
-    info.bundleName_ = "IsWindowSupportCacheForRecovering01";
-    info.abilityName_ = "IsWindowSupportCacheForRecovering01";
-    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(sceneSession1, nullptr);
-    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession1));
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(property, nullptr);
-    ssm_->recoveringFinished_ = false;
-    property->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
-    auto ret = ssm_->IsWindowSupportCacheForRecovering(sceneSession1, property);
-    EXPECT_EQ(true, ret);
-    property->SetWindowType(WindowType::APP_SUB_WINDOW_END);
-    ret = ssm_->IsWindowSupportCacheForRecovering(sceneSession1, property);
-    EXPECT_EQ(false, ret);
-    property->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
-    ret = ssm_->IsWindowSupportCacheForRecovering(sceneSession1, property);
-    EXPECT_EQ(true, ret);
-}
-
-/**
- * @tc.name: IsWindowSupportCacheForRecovering02
- * @tc.desc: test function : IsWindowSupportCacheForRecovering
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest8, IsWindowSupportCacheForRecovering02, Function | SmallTest | Level3)
-{
-    SessionInfo info;
-    info.bundleName_ = "IsWindowSupportCacheForRecovering02";
-    info.abilityName_ = "IsWindowSupportCacheForRecovering02";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(property, nullptr);
-    ssm_->recoveringFinished_ = false;
-    property->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
-    property->parentPersistentId_ = 1;
-    NotifyBindDialogSessionFunc func = [](const sptr<SceneSession>& sceneSession) {};
-    ssm_->bindDialogTargetFuncMap_.insert(std::make_pair(1, func));
-    auto ret = ssm_->IsWindowSupportCacheForRecovering(sceneSession, property);
-    EXPECT_EQ(false, ret);
-}
-
-/**
  * @tc.name: UnregisterSpecificSessionCreateListener
  * @tc.desc: test function : UnregisterSpecificSessionCreateListener
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest8, UnregisterSpecificSessionCreateListener, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest8, UnregisterSpecificSessionCreateListener, TestSize.Level1)
 {
     sptr<SceneSession> sceneSession = nullptr;
     ssm_->DestroyUIServiceExtensionSubWindow(sceneSession);
@@ -1036,7 +942,7 @@ HWTEST_F(SceneSessionManagerTest8, UnregisterSpecificSessionCreateListener, Func
     ssm_->HandleHideNonSystemFloatingWindows(property, sceneSession);
 
     NotifyCreateKeyboardSessionFunc func = [](const sptr<SceneSession>& keyboardSession,
-        const sptr<SceneSession>& panelSession) {};
+                                              const sptr<SceneSession>& panelSession) {};
     ssm_->SetCreateKeyboardSessionListener(func);
 
     ProcessOutsideDownEventFunc func1 = [](int32_t x, int32_t y) {};
@@ -1056,7 +962,7 @@ HWTEST_F(SceneSessionManagerTest8, UnregisterSpecificSessionCreateListener, Func
  * @tc.desc: test function : GetIsLayoutFullScreen
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest8, GetIsLayoutFullScreen, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest8, GetIsLayoutFullScreen, TestSize.Level1)
 {
     std::ostringstream oss;
     SessionInfo info;
@@ -1087,6 +993,6 @@ HWTEST_F(SceneSessionManagerTest8, GetIsLayoutFullScreen, Function | SmallTest |
     ret = ssm_->GetIsLayoutFullScreen(isLayoutFullScreen);
     EXPECT_EQ(WSError::WS_OK, ret);
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

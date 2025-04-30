@@ -56,7 +56,7 @@ namespace {
  * @tc.desc: test PlaceHolderWindow create/destroy
  * @tc.type: FUNC
  */
-HWTEST_F(WindowInnerWindowTest, CreatePlaceHolderWindow01, Function | SmallTest | Level2)
+HWTEST_F(WindowInnerWindowTest, CreatePlaceHolderWindow01, TestSize.Level1)
 {
     Rect rect = { 100, 100, 200, 200 };
     holderWindow_->Create("test01", 0, rect, WindowMode::WINDOW_MODE_FULLSCREEN);
@@ -87,7 +87,7 @@ HWTEST_F(WindowInnerWindowTest, CreatePlaceHolderWindow01, Function | SmallTest 
  * @tc.desc: test PlaceholderWindowListener OnTouchOutside/AfterUnfocused
  * @tc.type: FUNC
  */
-HWTEST_F(WindowInnerWindowTest, PlaceholderWindowListener01, Function | SmallTest | Level2)
+HWTEST_F(WindowInnerWindowTest, PlaceholderWindowListener01, TestSize.Level1)
 {
     windowListener_->OnTouchOutside();
     windowListener_->AfterUnfocused();
@@ -102,7 +102,7 @@ HWTEST_F(WindowInnerWindowTest, PlaceholderWindowListener01, Function | SmallTes
  * @tc.desc: test PlaceholderInputEventConsumer OnInputEvent
  * @tc.type: FUNC
  */
-HWTEST_F(WindowInnerWindowTest, PlaceholderInputEventConsumer01, Function | SmallTest | Level2)
+HWTEST_F(WindowInnerWindowTest, PlaceholderInputEventConsumer01, TestSize.Level1)
 {
     std::shared_ptr<MMI::AxisEvent> axisEvent = nullptr;
     auto ret = inputEventConsumer_->OnInputEvent(axisEvent);

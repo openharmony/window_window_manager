@@ -15,10 +15,10 @@
 
 // gtest
 #include <gtest/gtest.h>
-#include "display_manager_proxy.h"
 #include "common_test_utils.h"
-#include "window_test_utils.h"
+#include "display_manager_proxy.h"
 #include "window_accessibility_controller.h"
+#include "window_test_utils.h"
 #include "wm_common.h"
 using namespace testing;
 using namespace testing::ext;
@@ -33,29 +33,26 @@ public:
     virtual void SetUp() override;
     virtual void TearDown() override;
     Utils::TestWindowInfo windowInfo_;
+
 private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
 
-void WindowEffectTest::SetUpTestCase()
-{
-}
+void WindowEffectTest::SetUpTestCase() {}
 
-void WindowEffectTest::TearDownTestCase()
-{
-}
+void WindowEffectTest::TearDownTestCase() {}
 
 void WindowEffectTest::SetUp()
 {
     CommonTestUtils::GuaranteeFloatWindowPermission("wms_window_effect_test");
     windowInfo_ = {
-            .name = "TestWindow",
-            .rect = {0, 0, 100, 200},
-            .type = WindowType::WINDOW_TYPE_FLOAT,
-            .mode = WindowMode::WINDOW_MODE_FLOATING,
-            .needAvoid = false,
-            .parentLimit = false,
-            .parentId = INVALID_WINDOW_ID,
+        .name = "TestWindow",
+        .rect = { 0, 0, 100, 200 },
+        .type = WindowType::WINDOW_TYPE_FLOAT,
+        .mode = WindowMode::WINDOW_MODE_FLOATING,
+        .needAvoid = false,
+        .parentLimit = false,
+        .parentId = INVALID_WINDOW_ID,
     };
 }
 
@@ -70,7 +67,7 @@ namespace {
  * @tc.desc: Set window corner radius
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEffectTest, WindowEffect01, Function | MediumTest | Level3)
+HWTEST_F(WindowEffectTest, WindowEffect01, TestSize.Level1)
 {
     const sptr<Window>& window = Utils::CreateTestWindow(windowInfo_);
     ASSERT_NE(nullptr, window);
@@ -88,7 +85,7 @@ HWTEST_F(WindowEffectTest, WindowEffect01, Function | MediumTest | Level3)
  * @tc.desc: Set window shadow radius
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEffectTest, WindowEffect02, Function | MediumTest | Level3)
+HWTEST_F(WindowEffectTest, WindowEffect02, TestSize.Level1)
 {
     const sptr<Window>& window = Utils::CreateTestWindow(windowInfo_);
     ASSERT_NE(nullptr, window);
@@ -106,7 +103,7 @@ HWTEST_F(WindowEffectTest, WindowEffect02, Function | MediumTest | Level3)
  * @tc.desc: Set window shadow color
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEffectTest, WindowEffect03, Function | MediumTest | Level3)
+HWTEST_F(WindowEffectTest, WindowEffect03, TestSize.Level1)
 {
     const sptr<Window>& window = Utils::CreateTestWindow(windowInfo_);
     ASSERT_NE(nullptr, window);
@@ -131,7 +128,7 @@ HWTEST_F(WindowEffectTest, WindowEffect03, Function | MediumTest | Level3)
  * @tc.desc: Set window shadow offset
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEffectTest, WindowEffect04, Function | MediumTest | Level3)
+HWTEST_F(WindowEffectTest, WindowEffect04, TestSize.Level1)
 {
     const sptr<Window>& window = Utils::CreateTestWindow(windowInfo_);
     ASSERT_NE(nullptr, window);
@@ -154,7 +151,7 @@ HWTEST_F(WindowEffectTest, WindowEffect04, Function | MediumTest | Level3)
  * @tc.desc: Set window blur radius
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEffectTest, WindowEffect05, Function | MediumTest | Level3)
+HWTEST_F(WindowEffectTest, WindowEffect05, TestSize.Level1)
 {
     const sptr<Window>& window = Utils::CreateTestWindow(windowInfo_);
     ASSERT_NE(nullptr, window);
@@ -172,7 +169,7 @@ HWTEST_F(WindowEffectTest, WindowEffect05, Function | MediumTest | Level3)
  * @tc.desc: Set window backdrop blur radius
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEffectTest, WindowEffect06, Function | MediumTest | Level3)
+HWTEST_F(WindowEffectTest, WindowEffect06, TestSize.Level1)
 {
     const sptr<Window>& window = Utils::CreateTestWindow(windowInfo_);
     ASSERT_NE(nullptr, window);
@@ -190,7 +187,7 @@ HWTEST_F(WindowEffectTest, WindowEffect06, Function | MediumTest | Level3)
  * @tc.desc: Set window backdrop blur style
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEffectTest, WindowEffect07, Function | MediumTest | Level3)
+HWTEST_F(WindowEffectTest, WindowEffect07, TestSize.Level1)
 {
     const sptr<Window>& window = Utils::CreateTestWindow(windowInfo_);
     ASSERT_NE(nullptr, window);
@@ -202,7 +199,6 @@ HWTEST_F(WindowEffectTest, WindowEffect07, Function | MediumTest | Level3)
     WindowAccessibilityController::GetInstance().SetAnchorOffset(-100, -100);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
-
 
 } // namespace
 } // namespace Rosen

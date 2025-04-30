@@ -35,17 +35,24 @@ namespace {
 constexpr uint32_t DEFAULT_SPACING_BETWEEN_BUTTONS = 12;
 constexpr uint32_t DEFAULT_BUTTON_BACKGROUND_SIZE = 28;
 constexpr uint32_t DEFAULT_CLOSE_BUTTON_RIGHT_MARGIN = 20;
+constexpr uint32_t DEFAULT_BUTTON_ICON_SIZE = 20;
+constexpr uint32_t DEFAULT_BUTTON_BACKGROUND_CORNER_RADIUS = 4;
 constexpr int32_t DEFAULT_COLOR_MODE = -1;
 constexpr int32_t MIN_COLOR_MODE = -1;
 constexpr int32_t MAX_COLOR_MODE = 1;
 constexpr int32_t LIGHT_COLOR_MODE = 0;
 constexpr int32_t DARK_COLOR_MODE = 1;
-constexpr uint32_t MIN_SPACING_BETWEEN_BUTTONS = 12;
+constexpr uint32_t MIN_SPACING_BETWEEN_BUTTONS = 8;
 constexpr uint32_t MAX_SPACING_BETWEEN_BUTTONS = 24;
 constexpr uint32_t MIN_BUTTON_BACKGROUND_SIZE = 20;
 constexpr uint32_t MAX_BUTTON_BACKGROUND_SIZE = 40;
-constexpr uint32_t MIN_CLOSE_BUTTON_RIGHT_MARGIN = 8;
+constexpr uint32_t MIN_CLOSE_BUTTON_RIGHT_MARGIN = 6;
 constexpr uint32_t MAX_CLOSE_BUTTON_RIGHT_MARGIN = 22;
+constexpr uint32_t MIN_BUTTON_ICON_SIZE = 16;
+constexpr uint32_t MAX_BUTTON_ICON_SIZE = 24;
+constexpr uint32_t MIN_BUTTON_BACKGROUND_CORNER_RADIUS = 4;
+constexpr uint32_t MAX_BUTTON_BACKGROUND_CORNER_RADIUS = 8;
+constexpr uint32_t MIN_BUTTON_BETWEEN = 40;
 constexpr int32_t MINIMUM_Z_LEVEL = -10000;
 constexpr int32_t MAXIMUM_Z_LEVEL = 10000;
 }
@@ -365,6 +372,12 @@ enum class WindowSizeChangeReason : uint32_t {
     AVOID_AREA_CHANGE,
     MAXIMIZE_TO_SPLIT,
     SPLIT_TO_MAXIMIZE,
+    SPLIT_DRAG_START,
+    SPLIT_DRAG,
+    SPLIT_DRAG_END,
+    RESIZE_BY_LIMIT,
+    PAGE_ROTATION,
+    MAXIMIZE_IN_IMPLICT = 32,
     END
 };
 
@@ -649,6 +662,31 @@ struct WindowDensityInfo {
 };
 
 /**
+ * @struct WindowPropertyInfo
+ *
+ * @brief Currently available window property
+ */
+struct WindowPropertyInfo {
+    Rect windowRect { 0, 0, 0, 0 };
+    Rect drawableRect { 0, 0, 0, 0 };
+    uint32_t apiCompatibleVersion = 0;
+    WindowType type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
+    bool isLayoutFullScreen = false;
+    bool isFullScreen = false;
+    bool isTouchable = false;
+    bool isFocusable = false;
+    std::string name;
+    bool isPrivacyMode = false;
+    bool isKeepScreenOn = false;
+    float brightness = 0.0f;
+    bool isTransparent = false;
+    bool isRoundCorner = false;
+    float dimBehindValue = 0.0f;
+    uint32_t id = INVALID_WINDOW_ID;
+    DisplayId displayId = DISPLAY_ID_INVALID;
+};
+
+/**
  * @brief Enumerates avoid area type.
  */
 enum class AvoidAreaType : uint32_t {
@@ -700,6 +738,8 @@ struct DecorButtonStyle {
     uint32_t spacingBetweenButtons = DEFAULT_SPACING_BETWEEN_BUTTONS;
     uint32_t closeButtonRightMargin = DEFAULT_CLOSE_BUTTON_RIGHT_MARGIN;
     uint32_t buttonBackgroundSize = DEFAULT_BUTTON_BACKGROUND_SIZE;
+    uint32_t buttonIconSize = DEFAULT_BUTTON_ICON_SIZE;
+    uint32_t buttonBackgroundCornerRadius = DEFAULT_BUTTON_BACKGROUND_CORNER_RADIUS;
 };
 
 /**
@@ -944,18 +984,20 @@ struct WindowDisplayInfo : public Parcelable {
  */
 struct WindowLayoutInfo : public Parcelable {
     Rect rect = Rect::EMPTY_RECT;
+    uint32_t zOrder = 0;
 
     bool Marshalling(Parcel& parcel) const override
     {
         return parcel.WriteInt32(rect.posX_) && parcel.WriteInt32(rect.posY_) && parcel.WriteUint32(rect.width_) &&
-               parcel.WriteUint32(rect.height_);
+               parcel.WriteUint32(rect.height_) && parcel.WriteUint32(zOrder);
     }
 
     static WindowLayoutInfo* Unmarshalling(Parcel& parcel)
     {
         WindowLayoutInfo* windowLayoutInfo = new WindowLayoutInfo();
         if (!parcel.ReadInt32(windowLayoutInfo->rect.posX_) || !parcel.ReadInt32(windowLayoutInfo->rect.posY_) ||
-            !parcel.ReadUint32(windowLayoutInfo->rect.width_) || !parcel.ReadUint32(windowLayoutInfo->rect.height_)) {
+            !parcel.ReadUint32(windowLayoutInfo->rect.width_) || !parcel.ReadUint32(windowLayoutInfo->rect.height_) ||
+            !parcel.ReadUint32(windowLayoutInfo->zOrder)) {
             delete windowLayoutInfo;
             return nullptr;
         }
@@ -974,21 +1016,35 @@ struct WindowMetaInfo : public Parcelable {
     std::string bundleName;
     std::string abilityName;
     int32_t appIndex = 0;
+    WindowType windowType = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
+    uint32_t parentWindowId = INVALID_WINDOW_ID;
+    uint64_t surfaceNodeId = 0;
+    uint64_t leashWinSurfaceNodeId = 0;
+    bool isPrivacyMode = false;
 
     bool Marshalling(Parcel& parcel) const override
     {
         return parcel.WriteInt32(windowId) && parcel.WriteString(windowName) && parcel.WriteString(bundleName) &&
-               parcel.WriteString(abilityName) && parcel.WriteInt32(appIndex);
+               parcel.WriteString(abilityName) && parcel.WriteInt32(appIndex) &&
+               parcel.WriteUint32(static_cast<uint32_t>(windowType)) && parcel.WriteUint32(parentWindowId) &&
+               parcel.WriteUint64(surfaceNodeId) && parcel.WriteUint64(leashWinSurfaceNodeId) &&
+               parcel.WriteBool(isPrivacyMode);
     }
+
     static WindowMetaInfo* Unmarshalling(Parcel& parcel)
     {
+        uint32_t windowTypeValue = 1;
         WindowMetaInfo* windowMetaInfo = new WindowMetaInfo();
         if (!parcel.ReadInt32(windowMetaInfo->windowId) || !parcel.ReadString(windowMetaInfo->windowName) ||
             !parcel.ReadString(windowMetaInfo->bundleName) || !parcel.ReadString(windowMetaInfo->abilityName) ||
-            !parcel.ReadInt32(windowMetaInfo->appIndex)) {
+            !parcel.ReadInt32(windowMetaInfo->appIndex) || !parcel.ReadUint32(windowTypeValue) ||
+            !parcel.ReadUint32(windowMetaInfo->parentWindowId) || !parcel.ReadUint64(windowMetaInfo->surfaceNodeId) ||
+            !parcel.ReadUint64(windowMetaInfo->leashWinSurfaceNodeId) ||
+            !parcel.ReadBool(windowMetaInfo->isPrivacyMode)) {
             delete windowMetaInfo;
             return nullptr;
         }
+        windowMetaInfo->windowType = static_cast<WindowType>(windowTypeValue);
         return windowMetaInfo;
     }
 };

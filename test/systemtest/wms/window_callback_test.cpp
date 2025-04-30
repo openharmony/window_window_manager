@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-//gtest
+// gtest
 #include <gtest/gtest.h>
 
 #include "ability_context_impl.h"
@@ -55,7 +55,7 @@ namespace {
  * @tc.desc: windowRectChange
  * @tc.type: FUNC
  */
-HWTEST_F(WindowCallbackTest, WindowRectChange01, Function | MediumTest | Level0)
+HWTEST_F(WindowCallbackTest, WindowRectChange01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window1_1");
@@ -83,7 +83,7 @@ HWTEST_F(WindowCallbackTest, WindowRectChange01, Function | MediumTest | Level0)
  * @tc.desc: windowRectChange
  * @tc.type: FUNC
  */
-HWTEST_F(WindowCallbackTest, WindowRectChange02, Function | MediumTest | Level0)
+HWTEST_F(WindowCallbackTest, WindowRectChange02, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window1_2");
@@ -117,7 +117,7 @@ HWTEST_F(WindowCallbackTest, WindowRectChange02, Function | MediumTest | Level0)
  * @tc.desc: windowRectChange
  * @tc.type: FUNC
  */
-HWTEST_F(WindowCallbackTest, WindowRectChange03, Function | MediumTest | Level0)
+HWTEST_F(WindowCallbackTest, WindowRectChange03, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window1_3");
@@ -151,7 +151,7 @@ HWTEST_F(WindowCallbackTest, WindowRectChange03, Function | MediumTest | Level0)
  * @tc.desc: windowRectChange
  * @tc.type: FUNC
  */
-HWTEST_F(WindowCallbackTest, WindowRectChange04, Function | MediumTest | Level0)
+HWTEST_F(WindowCallbackTest, WindowRectChange04, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window1_4");
@@ -185,7 +185,7 @@ HWTEST_F(WindowCallbackTest, WindowRectChange04, Function | MediumTest | Level0)
  * @tc.desc: windowTitleButtonRectChange
  * @tc.type: FUNC
  */
-HWTEST_F(WindowCallbackTest, WindowTitleButtonRectChange01, Function | MediumTest | Level0)
+HWTEST_F(WindowCallbackTest, WindowTitleButtonRectChange01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window2_1");
@@ -201,8 +201,7 @@ HWTEST_F(WindowCallbackTest, WindowTitleButtonRectChange01, Function | MediumTes
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->RegisterWindowTitleButtonRectChangeListener(listener));
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->UnregisterWindowTitleButtonRectChangeListener(listener));
 
-    sptr<IWindowTitleButtonRectChangedListener> listener1 =
-    sptr<IWindowTitleButtonRectChangedListener>::MakeSptr();
+    sptr<IWindowTitleButtonRectChangedListener> listener1 = sptr<IWindowTitleButtonRectChangedListener>::MakeSptr();
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->RegisterWindowTitleButtonRectChangeListener(listener1));
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->UnregisterWindowTitleButtonRectChangeListener(listener1));
 
@@ -214,7 +213,7 @@ HWTEST_F(WindowCallbackTest, WindowTitleButtonRectChange01, Function | MediumTes
  * @tc.desc: windowTitleButtonRectChange
  * @tc.type: FUNC
  */
-HWTEST_F(WindowCallbackTest, WindowTitleButtonRectChange02, Function | MediumTest | Level0)
+HWTEST_F(WindowCallbackTest, WindowTitleButtonRectChange02, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window2_2");
@@ -229,8 +228,7 @@ HWTEST_F(WindowCallbackTest, WindowTitleButtonRectChange02, Function | MediumTes
     window->property_->SetPersistentId(10022);
     window->hostSession_ = session;
 
-    sptr<IWindowTitleButtonRectChangedListener> listener =
-    sptr<IWindowTitleButtonRectChangedListener>::MakeSptr();
+    sptr<IWindowTitleButtonRectChangedListener> listener = sptr<IWindowTitleButtonRectChangedListener>::MakeSptr();
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     ASSERT_EQ(WMError::WM_OK, window->RegisterWindowTitleButtonRectChangeListener(listener));
@@ -252,7 +250,7 @@ HWTEST_F(WindowCallbackTest, WindowTitleButtonRectChange02, Function | MediumTes
  * @tc.desc: windowTitleButtonRectChange
  * @tc.type: FUNC
  */
-HWTEST_F(WindowCallbackTest, WindowTitleButtonRectChange03, Function | MediumTest | Level0)
+HWTEST_F(WindowCallbackTest, WindowTitleButtonRectChange03, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window2_3");
@@ -267,8 +265,7 @@ HWTEST_F(WindowCallbackTest, WindowTitleButtonRectChange03, Function | MediumTes
     window->property_->SetPersistentId(10023);
     window->hostSession_ = session;
 
-    sptr<IWindowTitleButtonRectChangedListener> listener =
-    sptr<IWindowTitleButtonRectChangedListener>::MakeSptr();
+    sptr<IWindowTitleButtonRectChangedListener> listener = sptr<IWindowTitleButtonRectChangedListener>::MakeSptr();
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     ASSERT_EQ(WMError::WM_OK, window->RegisterWindowTitleButtonRectChangeListener(listener));
@@ -290,7 +287,7 @@ HWTEST_F(WindowCallbackTest, WindowTitleButtonRectChange03, Function | MediumTes
  * @tc.desc: windowTitleButtonRectChange
  * @tc.type: FUNC
  */
-HWTEST_F(WindowCallbackTest, WindowTitleButtonRectChange04, Function | MediumTest | Level0)
+HWTEST_F(WindowCallbackTest, WindowTitleButtonRectChange04, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window2_4");
@@ -305,8 +302,7 @@ HWTEST_F(WindowCallbackTest, WindowTitleButtonRectChange04, Function | MediumTes
     window->property_->SetPersistentId(10024);
     window->hostSession_ = session;
 
-    sptr<IWindowTitleButtonRectChangedListener> listener =
-    sptr<IWindowTitleButtonRectChangedListener>::MakeSptr();
+    sptr<IWindowTitleButtonRectChangedListener> listener = sptr<IWindowTitleButtonRectChangedListener>::MakeSptr();
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     ASSERT_EQ(WMError::WM_OK, window->RegisterWindowTitleButtonRectChangeListener(listener));
@@ -328,7 +324,7 @@ HWTEST_F(WindowCallbackTest, WindowTitleButtonRectChange04, Function | MediumTes
  * @tc.desc: MainWindowClose
  * @tc.type: FUNC
  */
-HWTEST_F(WindowCallbackTest, MainWindowClose01, Function | MediumTest | Level0)
+HWTEST_F(WindowCallbackTest, MainWindowClose01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window3_1");
@@ -356,7 +352,7 @@ HWTEST_F(WindowCallbackTest, MainWindowClose01, Function | MediumTest | Level0)
  * @tc.desc: MainWindowClose
  * @tc.type: FUNC
  */
-HWTEST_F(WindowCallbackTest, MainWindowClose02, Function | MediumTest | Level0)
+HWTEST_F(WindowCallbackTest, MainWindowClose02, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window3_2");
@@ -393,7 +389,7 @@ HWTEST_F(WindowCallbackTest, MainWindowClose02, Function | MediumTest | Level0)
  * @tc.desc: MainWindowClose
  * @tc.type: FUNC
  */
-HWTEST_F(WindowCallbackTest, MainWindowClose03, Function | MediumTest | Level0)
+HWTEST_F(WindowCallbackTest, MainWindowClose03, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window3_3");
@@ -430,7 +426,7 @@ HWTEST_F(WindowCallbackTest, MainWindowClose03, Function | MediumTest | Level0)
  * @tc.desc: MainWindowClose
  * @tc.type: FUNC
  */
-HWTEST_F(WindowCallbackTest, MainWindowClose04, Function | MediumTest | Level0)
+HWTEST_F(WindowCallbackTest, MainWindowClose04, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window3_4");
@@ -462,6 +458,6 @@ HWTEST_F(WindowCallbackTest, MainWindowClose04, Function | MediumTest | Level0)
     window->Destroy(true, true);
 }
 
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

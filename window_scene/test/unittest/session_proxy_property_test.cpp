@@ -38,15 +38,14 @@ namespace {
  * @tc.desc: UpdateSessionPropertyByAction
  * @tc.type: FUNC
  */
-HWTEST_F(SessionProxyPropertyTest, UpdateSessionPropertyByAction01, Function | SmallTest | Level2)
+HWTEST_F(SessionProxyPropertyTest, UpdateSessionPropertyByAction01, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SessionProxyPropertyTest: UpdateSessionPropertyByAction01 start";
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     ASSERT_NE(iRemoteObjectMocker, nullptr);
     auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     ASSERT_NE(sProxy, nullptr);
-    WMError res = sProxy->UpdateSessionPropertyByAction(nullptr,
-        WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
+    WMError res = sProxy->UpdateSessionPropertyByAction(nullptr, WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
     ASSERT_EQ(res, WMError::WM_OK);
     GTEST_LOG_(INFO) << "SessionProxyPropertyTest: UpdateSessionPropertyByAction01 end";
 }
@@ -56,15 +55,14 @@ HWTEST_F(SessionProxyPropertyTest, UpdateSessionPropertyByAction01, Function | S
  * @tc.desc: UpdateSessionPropertyByAction
  * @tc.type: FUNC
  */
-HWTEST_F(SessionProxyPropertyTest, UpdateSessionPropertyByAction02, Function | SmallTest | Level2)
+HWTEST_F(SessionProxyPropertyTest, UpdateSessionPropertyByAction02, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SessionProxyPropertyTest: UpdateSessionPropertyByAction02 start";
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     ASSERT_NE(iRemoteObjectMocker, nullptr);
     auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     ASSERT_NE(sProxy, nullptr);
-    WMError res = sProxy->UpdateSessionPropertyByAction(nullptr,
-        WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON);
+    WMError res = sProxy->UpdateSessionPropertyByAction(nullptr, WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON);
     ASSERT_EQ(res, WMError::WM_OK);
     GTEST_LOG_(INFO) << "SessionProxyPropertyTest: UpdateSessionPropertyByAction02 end";
 }
@@ -74,44 +72,50 @@ HWTEST_F(SessionProxyPropertyTest, UpdateSessionPropertyByAction02, Function | S
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionProxyPropertyTest, UpdateSessionPropertyByAction, Function | SmallTest | Level2)
+HWTEST_F(SessionProxyPropertyTest, UpdateSessionPropertyByAction, TestSize.Level1)
 {
     MockMessageParcel::ClearAllErrorFlag();
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     auto sessionProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     ASSERT_NE(sessionProxy, nullptr);
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
-    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, sessionProxy->UpdateSessionPropertyByAction(nullptr,
-        WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
+    ASSERT_EQ(
+        WMError::WM_ERROR_IPC_FAILED,
+        sessionProxy->UpdateSessionPropertyByAction(nullptr, WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
     MockMessageParcel::ClearAllErrorFlag();
 
     MockMessageParcel::SetWriteUint32ErrorFlag(true);
-    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, sessionProxy->UpdateSessionPropertyByAction(nullptr,
-        WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
+    ASSERT_EQ(
+        WMError::WM_ERROR_IPC_FAILED,
+        sessionProxy->UpdateSessionPropertyByAction(nullptr, WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
     MockMessageParcel::ClearAllErrorFlag();
 
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(property, nullptr);
     MockMessageParcel::SetWriteBoolErrorFlag(true);
-    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, sessionProxy->UpdateSessionPropertyByAction(property,
-        WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
+    ASSERT_EQ(
+        WMError::WM_ERROR_IPC_FAILED,
+        sessionProxy->UpdateSessionPropertyByAction(property, WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
     MockMessageParcel::ClearAllErrorFlag();
 
     MockMessageParcel::SetWriteBoolErrorFlag(false);
-    ASSERT_EQ(WMError::WM_OK, sessionProxy->UpdateSessionPropertyByAction(property,
-        WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
+    ASSERT_EQ(
+        WMError::WM_OK,
+        sessionProxy->UpdateSessionPropertyByAction(property, WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
     MockMessageParcel::ClearAllErrorFlag();
 
     MockMessageParcel::SetWriteBoolErrorFlag(true);
-    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, sessionProxy->UpdateSessionPropertyByAction(nullptr,
-        WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
+    ASSERT_EQ(
+        WMError::WM_ERROR_IPC_FAILED,
+        sessionProxy->UpdateSessionPropertyByAction(nullptr, WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
     MockMessageParcel::ClearAllErrorFlag();
 
     MockMessageParcel::SetWriteBoolErrorFlag(false);
-    ASSERT_EQ(WMError::WM_OK, sessionProxy->UpdateSessionPropertyByAction(nullptr,
-        WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
+    ASSERT_EQ(
+        WMError::WM_OK,
+        sessionProxy->UpdateSessionPropertyByAction(nullptr, WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
     MockMessageParcel::ClearAllErrorFlag();
 }
-}
+} // namespace
 } // namespace Rosen
-} // OHOS
+} // namespace OHOS

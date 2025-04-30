@@ -50,12 +50,14 @@ public:
     void SetTouchable(bool isTouchable);
     void SetDragEnabled(bool dragEnabled);
     void SetHideNonSystemFloatingWindows(bool hide);
+    void SetSkipSelfWhenShowOnVirtualScreen(bool isSkip);
     void SetSkipEventOnCastPlus(bool isSkip);
     void SetForceHide(bool hide);
     void SetRaiseEnabled(bool raiseEnabled);
     void SetSystemCalling(bool isSystemCalling);
     void SetTurnScreenOn(bool turnScreenOn);
     void SetKeepScreenOn(bool keepScreenOn);
+    void SetViewKeepScreenOn(bool keepScreenOn);
     void SetRequestedOrientation(Orientation orientation, bool needAnimation = true);
     void SetDefaultRequestedOrientation(Orientation orientation);
     void SetPrivacyMode(bool isPrivate);
@@ -97,6 +99,7 @@ public:
     void SetWindowMask(const std::shared_ptr<Media::PixelMap>& windowMask);
     void SetIsShaped(bool isShaped);
     void SetCompatibleModeInPc(bool compatibleModeInPc);
+    void SetCompatibleModeInPcTitleVisible(bool compatibleModeInPcTitleVisible);
     void SetCompatibleWindowSizeInPc(int32_t portraitWidth, int32_t portraitHeight,
         int32_t landscapeWidth, int32_t landscapeHeight);
     void SetIsAppSupportPhoneInPc(bool isSupportPhone);
@@ -122,12 +125,14 @@ public:
     bool GetDragEnabled() const;
     bool GetTouchable() const;
     bool GetHideNonSystemFloatingWindows() const;
+    bool GetSkipSelfWhenShowOnVirtualScreen() const;
     bool GetSkipEventOnCastPlus() const;
     bool GetForceHide() const;
     bool GetRaiseEnabled() const;
     bool GetSystemCalling() const;
     bool IsTurnScreenOn() const;
     bool IsKeepScreenOn() const;
+    bool IsViewKeepScreenOn() const;
     Orientation GetRequestedOrientation() const;
     bool GetRequestedAnimation() const;
     Orientation GetDefaultRequestedOrientation() const;
@@ -163,6 +168,7 @@ public:
     bool GetIsShaped() const;
     KeyboardLayoutParams GetKeyboardLayoutParams() const;
     bool GetCompatibleModeInPc() const;
+    bool GetCompatibleModeInPcTitleVisible() const;
     int32_t GetCompatibleInPcPortraitWidth() const;
     int32_t GetCompatibleInPcPortraitHeight() const;
     int32_t GetCompatibleInPcLandscapeWidth() const;
@@ -211,6 +217,12 @@ public:
     bool GetFullScreenStart() const;
     void SetApiVersion(uint32_t version);
     uint32_t GetApiVersion() const;
+    void SetIsAbilityHookOff(bool isAbilityHookOff);
+    bool GetIsAbilityHookOff() const;
+    void SetIsAbilityHook(bool isAbilityHook);
+    bool GetIsAbilityHook() const;
+    void SetFollowScreenChange(bool isFollowScreenChange);
+    bool GetFollowScreenChange() const;
 
     /*
      * Sub Window
@@ -281,6 +293,7 @@ public:
     bool GetFocusableOnShow() const;
     bool GetExclusivelyHighlighted() const;
     void SetExclusivelyHighlighted(bool isExclusivelyHighlighted);
+    mutable std::mutex windowMaskMutex_;
 
 private:
     void setTouchHotAreasInner(const std::vector<Rect>& rects, std::vector<Rect>& touchHotAreas);
@@ -292,6 +305,7 @@ private:
     static void UnmarshallingKeyboardTouchHotAreas(Parcel& parcel, WindowSessionProperty* property);
     bool WriteActionUpdateTurnScreenOn(Parcel& parcel);
     bool WriteActionUpdateKeepScreenOn(Parcel& parcel);
+    bool WriteActionUpdateViewKeepScreenOn(Parcel& parcel);
     bool WriteActionUpdateFocusable(Parcel& parcel);
     bool WriteActionUpdateTouchable(Parcel& parcel);
     bool WriteActionUpdateSetBrightness(Parcel& parcel);
@@ -319,8 +333,10 @@ private:
     bool WriteActionUpdateAvoidAreaOption(Parcel& parcel);
     bool WriteActionUpdateBackgroundAlpha(Parcel& parcel);
     bool WriteActionUpdateExclusivelyHighlighted(Parcel& parcel);
+    bool WriteActionUpdateFollowScreenChange(Parcel& parcel);
     void ReadActionUpdateTurnScreenOn(Parcel& parcel);
     void ReadActionUpdateKeepScreenOn(Parcel& parcel);
+    void ReadActionUpdateViewKeepScreenOn(Parcel& parcel);
     void ReadActionUpdateFocusable(Parcel& parcel);
     void ReadActionUpdateTouchable(Parcel& parcel);
     void ReadActionUpdateSetBrightness(Parcel& parcel);
@@ -348,6 +364,7 @@ private:
     void ReadActionUpdateAvoidAreaOption(Parcel& parcel);
     void ReadActionUpdateBackgroundAlpha(Parcel& parcel);
     void ReadActionUpdateExclusivelyHighlighted(Parcel& parcel);
+    void ReadActionUpdateFollowScreenChange(Parcel& parcel);
     std::string windowName_;
     SessionInfo sessionInfo_;
     mutable std::mutex windowRectMutex_;
@@ -364,6 +381,7 @@ private:
     bool tokenState_ { false };
     bool turnScreenOn_ = false;
     bool keepScreenOn_ = false;
+    bool viewKeepScreenOn_ = false;
     bool topmost_ = false;
     bool mainWindowTopmost_ = false;
     Orientation requestedOrientation_ = Orientation::UNSPECIFIED;
@@ -372,6 +390,7 @@ private:
     bool isPrivacyMode_ { false };
     bool isSystemPrivacyMode_ { false };
     bool isSnapshotSkip_ { false };
+    bool isFollowScreenChange_ { false };
     float brightness_ = UNDEFINED_BRIGHTNESS;
     uint64_t displayId_ = 0;
     int32_t parentId_ = INVALID_SESSION_ID; // parentId of sceneSession, which is low 32 bite of parentPersistentId_
@@ -386,7 +405,7 @@ private:
     WindowLimits userLimits_;
     WindowLimits configLimitsVP_;
     float lastVpr_ = 0.0f;
-    PiPTemplateInfo pipTemplateInfo_ = {0, 0, {}};
+    PiPTemplateInfo pipTemplateInfo_ = {};
     KeyboardLayoutParams keyboardLayoutParams_;
     uint32_t windowModeSupportType_ {WindowModeSupport::WINDOW_MODE_SUPPORT_ALL};
     std::unordered_map<WindowType, SystemBarProperty> sysBarPropMap_ {
@@ -403,6 +422,7 @@ private:
     std::vector<Rect> touchHotAreas_;  // coordinates relative to window.
     KeyboardTouchHotAreas keyboardTouchHotAreas_;  // coordinates relative to window.
     bool hideNonSystemFloatingWindows_ = false;
+    bool isSkipSelfWhenShowOnVirtualScreen_ = false;
     bool isSkipEventOnCastPlus_ = false;
     bool forceHide_ = false;
     bool keepKeyboardFlag_ = false;
@@ -421,6 +441,7 @@ private:
     static const std::map<uint64_t, HandlWritePropertyFunc> writeFuncMap_;
     static const std::map<uint64_t, HandlReadPropertyFunc> readFuncMap_;
     bool compatibleModeInPc_ = false;
+    bool compatibleModeInPcTitleVisible_ = false;
     int32_t compatibleInPcPortraitWidth_ = 0;
     int32_t compatibleInPcPortraitHeight_ = 0;
     int32_t compatibleInPcLandscapeWidth_ = 0;
@@ -434,6 +455,8 @@ private:
     mutable std::mutex atomicServiceMutex_;
     bool isAtomicService_ = false;
     uint32_t apiVersion_ = 0;
+    bool isAbilityHookOff_ = false;
+    bool isAbilityHook_ = false;
 
     /*
      * Sub Window
@@ -584,6 +607,10 @@ struct SystemSessionConfig : public Parcelable {
     FreeMultiWindowConfig freeMultiWindowConfig_;
     WindowUIType windowUIType_ = WindowUIType::INVALID_WINDOW;
     bool supportTypeFloatWindow_ = false;
+    // 4: default max mid scene num
+    uint32_t maxMidSceneNum_ = 4;
+    // Product configuration
+    bool supportFollowParentWindowLayout_ = false;
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
@@ -622,6 +649,12 @@ struct SystemSessionConfig : public Parcelable {
             return false;
         }
         if (!parcel.WriteBool(supportTypeFloatWindow_)) {
+            return false;
+        }
+        if (!parcel.WriteBool(maxMidSceneNum_)) {
+            return false;
+        }
+        if (!parcel.WriteBool(supportFollowParentWindowLayout_)) {
             return false;
         }
         return true;
@@ -667,6 +700,8 @@ struct SystemSessionConfig : public Parcelable {
         config->freeMultiWindowConfig_ = *freeMultiWindowConfig;
         config->windowUIType_ = static_cast<WindowUIType>(parcel.ReadUint8());
         config->supportTypeFloatWindow_ = parcel.ReadBool();
+        config->maxMidSceneNum_ = parcel.ReadUint32();
+        config->supportFollowParentWindowLayout_ = parcel.ReadBool();
         return config;
     }
 
