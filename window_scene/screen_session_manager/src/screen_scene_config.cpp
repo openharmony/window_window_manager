@@ -500,7 +500,7 @@ DMRect ScreenSceneConfig::CalcCutoutBoundaryRect(std::string svgPath)
     int32_t top = static_cast<int32_t>(skiRect.top());
     uint32_t width = static_cast<uint32_t>(skiRect.width());
     uint32_t height = static_cast<uint32_t>(skiRect.height());
-    TLOGI(WmsLogTag::DMS,
+    TLOGI(WmsLogTag::DMS_SSM,
         "calc cutout boundary rect - left: [%{public}d top: %{public}d width: %{public}u height: %{public}u]",
         left, top, width, height);
     DMRect cutoutMinOuterRect = {

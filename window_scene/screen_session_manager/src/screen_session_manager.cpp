@@ -1754,7 +1754,7 @@ DMError ScreenSessionManager::SetVirtualPixelRatio(ScreenId screenId, float virt
     }
     // less to 1e-6 mean equal
     if (fabs(screenSession->GetScreenProperty().GetVirtualPixelRatio() - virtualPixelRatio) < 1e-6) {
-        TLOGE(WmsLogTag::DMS,
+        TLOGE(WmsLogTag::DMS_SSM,
             "The density is equivalent to the original value, no update operation is required, aborted.");
         return DMError::DM_OK;
     }
@@ -1814,7 +1814,7 @@ DMError ScreenSessionManager::SetDefaultDensityDpi(ScreenId screenId, float virt
     }
     // less to 1e-6 mean equal
     if (fabs(screenSession->GetScreenProperty().GetDefaultDensity() - virtualPixelRatio) < 1e-6) {
-        TLOGE(WmsLogTag::DMS,
+        TLOGE(WmsLogTag::DMS_SSM,
             "The density is equivalent to the original value, no update operation is required, aborted.");
         return DMError::DM_OK;
     }
@@ -1824,7 +1824,7 @@ DMError ScreenSessionManager::SetDefaultDensityDpi(ScreenId screenId, float virt
 
 DMError ScreenSessionManager::SetResolution(ScreenId screenId, uint32_t width, uint32_t height, float virtualPixelRatio)
 {
-    TLOGI(WmsLogTag::DMS,
+    TLOGI(WmsLogTag::DMS_SSM,
         "ScreenId: %{public}" PRIu64 ", w: %{public}u, h: %{public}u, virtualPixelRatio: %{public}f",
         screenId, width, height, virtualPixelRatio);
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
@@ -3164,7 +3164,7 @@ void ScreenSessionManager::SetScreenPowerForFold(ScreenId screenId, ScreenPowerS
         rsInterface_.SetScreenPowerStatus(screenId, status);
         return;
     }
-    TLOGW(WmsLogTag::DMS,
+    TLOGW(WmsLogTag::DMS_SSM,
         "screenId = %{public}" PRIu64\
         ", prepare set power status %{public}u, set %{public}u instead because preStatus is %{public}u",
         screenId,
@@ -3714,7 +3714,7 @@ DMError ScreenSessionManager::SetOrientation(ScreenId screenId, Orientation orie
 
 bool ScreenSessionManager::SetRotation(ScreenId screenId, Rotation rotationAfter, bool isFromWindow)
 {
-    TLOGI(WmsLogTag::DMS,
+    TLOGI(WmsLogTag::DMS_SSM,
         "Enter, screenId: %{public}" PRIu64 ", rotation: %{public}u, isFromWindow: %{public}u,",
         screenId, rotationAfter, isFromWindow);
     sptr<ScreenSession> screenSession = GetScreenSession(screenId);
@@ -6292,7 +6292,7 @@ void ScreenSessionManager::SetDisplayScaleInner(ScreenId screenId, const float& 
     } else {
         CalcDisplayNodeTranslateOnRotation(session, scaleX, scaleY, pivotX, pivotY, translateX, translateY);
     }
-    TLOGW(WmsLogTag::DMS,
+    TLOGW(WmsLogTag::DMS_SSM,
           "screenId %{public}" PRIu64 ", scale [%{public}f, %{public}f], "
           "pivot [%{public}f, %{public}f], translate [%{public}f, %{public}f]",
           screenId, scaleX, scaleY, pivotX, pivotY, translateX, translateY);
@@ -7668,7 +7668,7 @@ void ScreenSessionManager::UpdateSuperFoldExpandAvailableArea(ScreenId screenId,
         return;
     }
     if (screenSession->UpdateExpandAvailableArea(area)) {
-        TLOGI(WmsLogTag::DMS,
+        TLOGI(WmsLogTag::DMS_SSM,
             "ExpandAvailableArea x: %{public}d, y: %{public}d, width: %{public}d, height: %{public}d",
             area.posX_, area.posY_, area.width_, area.height_);
     }
@@ -8229,7 +8229,7 @@ DMError ScreenSessionManager::SetMultiScreenRelativePosition(MultiScreenPosition
     MultiScreenPositionOptions secondScreenOption)
 {
 #ifdef WM_MULTI_SCREEN_ENABLE
-    TLOGI(WmsLogTag::DMS,
+    TLOGI(WmsLogTag::DMS_SSM,
         "mID:%{public}" PRIu64", X:%{public}u, Y:%{public}u,sID:%{public}" PRIu64", X:%{public}u, Y:%{public}u",
         mainScreenOptions.screenId_, mainScreenOptions.startX_, mainScreenOptions.startY_,
         secondScreenOption.screenId_, secondScreenOption.startX_, secondScreenOption.startY_);
