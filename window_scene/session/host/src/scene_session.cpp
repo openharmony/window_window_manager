@@ -3424,13 +3424,12 @@ void SceneSession::WindowScaleTransfer(WSRect& rect, float scaleX, float scaleY)
 void SceneSession::HookStartMoveRect(WSRect& newRect, const WSRect& sessionRect)
 {
     newRect = sessionRect;
-    auto mainSession = GetMainSession();
-    if (!mainSession) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "mainSession is nullptr");
+    if (!WindowHelper::IsMainWindow(GetWindowType())) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "is not mainWindow");
         return;
     }
-    auto scaleX = mainSession->GetScaleX();
-    auto scaleY = mainSession->GetScaleY();
+    auto scaleX = GetScaleX();
+    auto scaleY = GetScaleY();
     if (IsCompatibilityModeScale(scaleX, scaleY)) {
         WindowScaleTransfer(newRect, scaleX, scaleY);
     }
@@ -3472,21 +3471,23 @@ void SceneSession::ThrowSlipToFullScreen(WSRect& endRect, WSRect& rect)
  */
 void SceneSession::CompatibilityModeWindowScaleTransfer(WSRect& rect, bool isScale)
 {
-    auto mainSession = GetMainSession();
-    if (!mainSession) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "mainSession is nullptr");
+    if (!WindowHelper::IsMainWindow(GetWindowType())) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "is not mainWindow");
         return;
     }
-    auto property = GetSessionProperty();
-    auto scaleX = mainSession->GetScaleX();
-    auto scaleY = mainSession->GetScaleY();
+    auto scaleX = GetScaleX();
+    auto scaleY = GetScaleY();
     if (MathHelper::NearZero(scaleX) || MathHelper::NearZero(scaleY)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "scale ratio is 0");
         return;
     }
     if (!isScale) {
-        scaleX = 1 / scaleX;
-        scaleY = 1 / scaleY;
+        if (!MathHelperNearZero(scaleX)) {
+            scaleX = 1 / scaleX;
+        }
+        if (!MathHelper::NearZero(scaleY)) {
+            scaleY = 1 / scaleY;
+        }
     }
     if (IsCompatibilityModeScale(scaleX, scaleY)) {
         WindowScaleTransfer(rect, scaleX, scaleY);
