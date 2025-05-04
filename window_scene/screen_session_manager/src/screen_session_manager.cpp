@@ -2743,6 +2743,11 @@ bool ScreenSessionManager::SuspendBegin(PowerStateChangeReason reason)
     return NotifyDisplayPowerEvent(DisplayPowerEvent::SLEEP, EventStatus::BEGIN, reason);
 }
 
+bool ScreenSessionManager::IsSystemSleep ()
+{
+    return powerStateChangeReason_ == PowerStateChangeReason::STATE_CHANGE_REASON_SYSTEM;
+}
+
 bool ScreenSessionManager::SuspendEnd()
 {
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
