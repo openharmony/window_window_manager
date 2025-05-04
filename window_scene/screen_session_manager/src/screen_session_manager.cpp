@@ -8602,6 +8602,7 @@ void ScreenSessionManager::InitFakeScreenSession(sptr<ScreenSession> screenSessi
     if (creaseRect.height_ > 0) {
         fakeScreenHeight = screenHeight - (static_cast<uint32_t>(creaseRect.posY_) + creaseRect.height_);
     }
+    fakeScreenSession->SetIsFakeSession(true);
     fakeScreenSession->UpdatePropertyByResolution(screenWidth, fakeScreenHeight);
     fakeScreenSession->SetXYPosition(0, DISPLAY_B_HEIGHT);
     fakeScreenSession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
