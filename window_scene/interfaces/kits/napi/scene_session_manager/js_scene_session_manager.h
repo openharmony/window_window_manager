@@ -119,7 +119,7 @@ public:
     static napi_value RegisterSingleHandContainerNode(napi_env env, napi_callback_info info);
     static napi_value NotifyRotationChange(napi_env env, napi_callback_info info);
     static napi_value SupportFollowParentWindowLayout(napi_env env, napi_callback_info info);
-    static napi_value SupportZlevel(napi_env env, napi_callback_info info);
+    static napi_value SupportZLevel(napi_env env, napi_callback_info info);
 
     /*
      * PC Window
@@ -222,7 +222,7 @@ private:
     napi_value OnRegisterSingleHandContainerNode(napi_env env, napi_callback_info info);
     napi_value OnNotifyRotationChange(napi_env env, napi_callback_info info);
     napi_value OnSupportFollowParentWindowLayout(napi_env env, napi_callback_info info);
-    napi_value OnSupportZlevel(napi_env env, napi_callback_info info);
+    napi_value OnSupportZLevel(napi_env env, napi_callback_info info);
     
     /*
      * PC Window

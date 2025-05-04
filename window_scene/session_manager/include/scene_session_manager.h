@@ -303,7 +303,7 @@ public:
     WSError RaiseWindowToTop(int32_t persistentId) override;
     void SetScreenLocked(const bool isScreenLocked);
     bool IsScreenLocked() const;
-    void ConfigSupportZlevel();
+    void ConfigSupportZLevel();
 
     /*
      * Multi User
