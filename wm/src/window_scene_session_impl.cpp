@@ -956,19 +956,23 @@ void WindowSceneSessionImpl::ResetSuperFoldDisplayY(const std::shared_ptr<MMI::P
         superFoldOffsetY_ = rect.height_ + rect.posY_;
         TLOGI(WmsLogTag::WMS_EVENT, "height: %{public}d, posY: %{public}d", rect.height_, rect.posY_);
     }
-    MMI::PointerEvent::PointerItem pointerItem;
-    if (!pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem)) {
-        TLOGE(WmsLogTag::WMS_INPUT_KEY_FLOW, "pointerItem is empty");
-        return;
-    }
-    if (auto displayY = pointerItem.GetDisplayY(); displayY >= superFoldOffsetY_) {
-        pointerItem.SetDisplayY(displayY - superFoldOffsetY_);
-        pointerItem.SetDisplayYPos(pointerItem.GetDisplayYPos() - superFoldOffsetY_);
-        pointerEvent->AddPointerItem(pointerItem);
-        pointerEvent->SetTargetDisplayId(DISPLAY_ID_C);
-        TLOGD(WmsLogTag::WMS_EVENT, "Calculated superFoldOffsetY: %{public}d, displayId: %{public}d",
-            superFoldOffsetY_, pointerEvent->GetTargetDisplayId());
-    }
+    std::vector<int32_t> pointerIds = pointerEvent->GetPointerIds();
+    for (int32_t pointerId : pointerIds) {
+        MMI::PointerEvent::PointerItem pointerItem;
+        if (!pointerEvent->GetPointerItem(pointerId, pointerItem)) {
+            TLOGE(WmsLogTag::WMS_INPUT_KEY_FLOW, "Get pointerItem failed");
+            return;
+        if (auto displayY = pointerItem.GetDisplayY(); displayY >= superFoldOffsetY_) {
+            pointerItem.SetDisplayY(displayY - superFoldOffsetY_);
+            pointerItem.SetDisplayYPos(pointerItem.GetDisplayYPos() - superFoldOffsetY_);
+            pointerEvent->UpdatePointerItem(pointerId, pointerItem);
+            pointerEvent->SetTargetDisplayId(DISPLAY_ID_C);
+            TLOGD(WmsLogTag::WMS_EVENT, "Calculated superFoldOffsetY:%{public}d,displayId:%{public}d,"
+                "InputId:%{public}d,pointerId:%{public}d,displayx:%{private}d,displayy:%{private}d,",
+                superFoldOffsetY_, pointerEvent->GetTargetDisplayId(), pointerEvent->GetId(),
+                pointerId, pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
+        }
+    } 
 }
 
 void WindowSceneSessionImpl::ConsumePointerEventInner(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
