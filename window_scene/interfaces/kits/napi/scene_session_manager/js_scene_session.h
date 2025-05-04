@@ -231,6 +231,11 @@ private:
     static napi_value SetCurrentRotation(napi_env env, napi_callback_info info);
     static napi_value SetSidebarBlurMaximize(napi_env env, napi_callback_info info);
 
+    /*
+     * PC Window
+     */
+    static napi_value GetZOrder(napi_env env, napi_callback_info info);
+
     napi_value OnActivateDragBySystem(napi_env env, napi_callback_info info);
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
     napi_value OnUpdateNativeVisibility(napi_env env, napi_callback_info info);
@@ -317,6 +322,11 @@ private:
     napi_value OnSetCurrentRotation(napi_env env, napi_callback_info info);
     napi_value OnSetSidebarBlurMaximize(napi_env env, napi_callback_info info);
     static napi_value GetJsPanelSessionObj(napi_env env, const sptr<SceneSession>& session);
+
+    /*
+     * PC Window
+     */
+    napi_value OnGetZOrder(napi_env env, napi_callback_info info);
 
     bool IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);
     void ProcessChangeSessionVisibilityWithStatusBarRegister();
