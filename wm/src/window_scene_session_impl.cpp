@@ -962,6 +962,7 @@ void WindowSceneSessionImpl::ResetSuperFoldDisplayY(const std::shared_ptr<MMI::P
         if (!pointerEvent->GetPointerItem(pointerId, pointerItem)) {
             TLOGE(WmsLogTag::WMS_INPUT_KEY_FLOW, "Get pointerItem failed");
             return;
+        }
         if (auto displayY = pointerItem.GetDisplayY(); displayY >= superFoldOffsetY_) {
             pointerItem.SetDisplayY(displayY - superFoldOffsetY_);
             pointerItem.SetDisplayYPos(pointerItem.GetDisplayYPos() - superFoldOffsetY_);
@@ -972,7 +973,7 @@ void WindowSceneSessionImpl::ResetSuperFoldDisplayY(const std::shared_ptr<MMI::P
                 superFoldOffsetY_, pointerEvent->GetTargetDisplayId(), pointerEvent->GetId(),
                 pointerId, pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
         }
-    } 
+    }
 }
 
 void WindowSceneSessionImpl::ConsumePointerEventInner(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
