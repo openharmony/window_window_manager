@@ -2428,7 +2428,7 @@ WMError WindowSceneSessionImpl::SetSubWindowZLevel(int32_t zLevel)
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
-    if (!windowSystemConfig_.supportZlevel_) {
+    if (!windowSystemConfig_.supportZLevel_) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -2462,7 +2462,7 @@ WMError WindowSceneSessionImpl::GetSubWindowZLevel(int32_t& zLevel)
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
-    if (!windowSystemConfig_.supportZlevel_) {
+    if (!windowSystemConfig_.supportZLevel_) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }

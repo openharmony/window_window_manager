@@ -279,8 +279,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::NotifyRotationChange);
     BindNativeFunction(env, exportObj, "supportFollowParentWindowLayout", moduleName,
         JsSceneSessionManager::SupportFollowParentWindowLayout);
-    BindNativeFunction(env, exportObj, "supportZlevel", moduleName,
-        JsSceneSessionManager::SupportZlevel);
+    BindNativeFunction(env, exportObj, "supportZLevel", moduleName,
+        JsSceneSessionManager::SupportZLevel);
     return NapiGetUndefined(env);
 }
 
@@ -1366,11 +1366,11 @@ napi_value JsSceneSessionManager::NotifyRotationChange(napi_env env, napi_callba
     return (me != nullptr) ? me->OnNotifyRotationChange(env, info) : nullptr;
 }
 
-napi_value JsSceneSessionManager::SupportZlevel(napi_env env, napi_callback_info info)
+napi_value JsSceneSessionManager::SupportZLevel(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_HIERARCHY, "[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
-    return (me != nullptr) ? me->OnSupportZlevel(env, info) : nullptr;
+    return (me != nullptr) ? me->OnSupportZLevel(env, info) : nullptr;
 }
 
 bool JsSceneSessionManager::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
@@ -4634,9 +4634,9 @@ napi_value JsSceneSessionManager::OnSupportFollowParentWindowLayout(napi_env env
     return NapiGetUndefined(env);
 }
 
-napi_value JsSceneSessionManager::OnSupportZlevel(napi_env env, napi_callback_info info)
+napi_value JsSceneSessionManager::OnSupportZLevel(napi_env env, napi_callback_info info)
 {
-    SceneSessionManager::GetInstance().ConfigSupportZlevel();
+    SceneSessionManager::GetInstance().ConfigSupportZLevel();
     return NapiGetUndefined(env);
 }
 } // namespace OHOS::Rosen

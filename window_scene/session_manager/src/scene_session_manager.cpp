@@ -14727,12 +14727,12 @@ void SceneSessionManager::RegisterSceneSessionDestructNotifyManagerFunc(const sp
     });
 }
 
-void SceneSessionManager::ConfigSupportZlevel()
+void SceneSessionManager::ConfigSupportZLevel()
 {
-    TLOGI(WmsLogTag::WMS_HIERARCHY, "support zlevel");
+    TLOGI(WmsLogTag::WMS_HIERARCHY, "support zLevel");
     auto task = [this] {
-        systemConfig_.supportZlevel_ = true;
+        systemConfig_.supportZLevel_ = true;
     };
-    taskScheduler_->PostAsyncTask(task, "ConfigSupportZlevel");
+    taskScheduler_->PostAsyncTask(task, "ConfigSupportZLevel");
 }
 } // namespace OHOS::Rosen
