@@ -611,6 +611,7 @@ struct SystemSessionConfig : public Parcelable {
     uint32_t maxMidSceneNum_ = 4;
     // Product configuration
     bool supportFollowParentWindowLayout_ = false;
+    bool supportZLevel_ = false;
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
@@ -655,6 +656,9 @@ struct SystemSessionConfig : public Parcelable {
             return false;
         }
         if (!parcel.WriteBool(supportFollowParentWindowLayout_)) {
+            return false;
+        }
+        if (!parcel.WriteBool(supportZLevel_)) {
             return false;
         }
         return true;
@@ -702,6 +706,7 @@ struct SystemSessionConfig : public Parcelable {
         config->supportTypeFloatWindow_ = parcel.ReadBool();
         config->maxMidSceneNum_ = parcel.ReadUint32();
         config->supportFollowParentWindowLayout_ = parcel.ReadBool();
+        config->supportZLevel_ = parcel.ReadBool();
         return config;
     }
 
