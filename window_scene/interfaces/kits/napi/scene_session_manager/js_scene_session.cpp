@@ -401,6 +401,7 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
     BindNativeFunction(env, objValue, "updateNativeVisibility", moduleName, JsSceneSession::UpdateNativeVisibility);
     BindNativeFunction(env, objValue, "setShowRecent", moduleName, JsSceneSession::SetShowRecent);
     BindNativeFunction(env, objValue, "setZOrder", moduleName, JsSceneSession::SetZOrder);
+    BindNativeFunction(env, objValue, "getZOrder", moduleName, JsSceneSession::GetZOrder);
     BindNativeFunction(env, objValue, "setTouchable", moduleName, JsSceneSession::SetTouchable);
     BindNativeFunction(env, objValue, "setSystemActive", moduleName, JsSceneSession::SetSystemActive);
     BindNativeFunction(env, objValue, "setPrivacyMode", moduleName, JsSceneSession::SetPrivacyMode);
@@ -2158,6 +2159,13 @@ napi_value JsSceneSession::SetZOrder(napi_env env, napi_callback_info info)
     WLOGFD("[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetZOrder(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::GetZOrder(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_PC, "[NAPI]");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnGetZOrder(env, info) : nullptr;
 }
 
 napi_value JsSceneSession::SetTouchable(napi_env env, napi_callback_info info)
@@ -4672,6 +4680,17 @@ napi_value JsSceneSession::OnSetZOrder(napi_env env, napi_callback_info info)
     }
     session->SetZOrder(zOrder);
     return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnGetZOrder(napi_env env, napi_callback_info info)
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_PC, "session is nullptr, id:%{public}d", persistentId_);
+        return NapiGetUndefined(env);
+    }
+    uint32_t sessionZOrder = session->GetZOrder();
+    return CreateJsValue(env, sessionZOrder);
 }
 
 napi_value JsSceneSession::OnSetFloatingScale(napi_env env, napi_callback_info info)
