@@ -448,6 +448,7 @@ public:
     void SetMultiScreenModeChangeTracker(std::string changeProc);
     void SetRSScreenPowerStatus(ScreenId screenId, ScreenPowerStatus status);
     void NotifyScreenMaskAppear() override;
+    bool IsSystemSleep();
 
 protected:
     ScreenSessionManager();
