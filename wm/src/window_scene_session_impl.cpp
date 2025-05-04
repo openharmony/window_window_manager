@@ -2427,6 +2427,12 @@ WMError WindowSceneSessionImpl::SetSubWindowZLevel(int32_t zLevel)
         TLOGE(WmsLogTag::WMS_HIERARCHY, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+
+    if (!windowSystemConfig_.supportZlevel_) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "The device is not supported");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
     if (!WindowHelper::IsNormalSubWindow(GetType(), property_->GetWindowFlags())) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "must be normal app sub window");
         return WMError::WM_ERROR_INVALID_CALLING;
@@ -2455,6 +2461,12 @@ WMError WindowSceneSessionImpl::GetSubWindowZLevel(int32_t& zLevel)
         TLOGE(WmsLogTag::WMS_HIERARCHY, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+
+    if (!windowSystemConfig_.supportZlevel_) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "The device is not supported");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
     if (!WindowHelper::IsSubWindow(GetType()) || !WindowHelper::IsDialogWindow(GetType())) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "must be app sub window!");
         return WMError::WM_ERROR_INVALID_CALLING;
