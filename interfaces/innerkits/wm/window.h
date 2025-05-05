@@ -3601,6 +3601,29 @@ public:
      */
     virtual WMError SetFollowParentWindowLayoutEnabled(bool isFollow) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
+    /**
+     * @brief Set the transition animation.
+     *
+     * @param transitionType window transition type.
+     * @param animation window transition animation.
+     * @return WM_OK means set success.
+     */
+    virtual WMError SetWindowTransitionAnimation(WindowTransitionType transitionType, TransitionAnimation animation)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Get the transition animation.
+     *
+     * @param transitionType window transition type.
+     * @return nullptr means get failed.
+     */
+    virtual std::shared_ptr<TransitionAnimation> GetWindowTransitionAnimation(WindowTransitionType transitionType)
+    {
+        return std::shared_ptr<TransitionAnimation>();
+    }
+
      /**
      * @brief Get is subwindow support maximize.
      *
