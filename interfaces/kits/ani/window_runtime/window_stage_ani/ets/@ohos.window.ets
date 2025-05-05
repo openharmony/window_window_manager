@@ -18,14 +18,12 @@ import { UIContext } from '@ohos.arkui.UIContext';
 import BaseContext from 'application.BaseContext';
 import hilog from '@ohos.hilog';
 export type AsyncCallbackVoid = (err: BusinessError) => void;
-export type WindowDialogTargetCallback = () => void;
 export type WindowEventCallback = (data: window.WindowEventType) => void;
 export type WindowSizeCallback = (data: window.Size) => void;
-export type WindowTouchOutCallback = () => void;
 export type WindowStatusCallback = (data: window.WindowStatusType) => void;
-export type WindowNoInteractionCallback = () => void;
 export type KeyboardHeightChangeCallback = (data: number) => void;
 export type KeyboardDidShowOrHideCallback = (data: window.KeyboardInfo) => void;
+export type WindowVoidCallback = () => void;
 const DOMAIN = 0x4200;
 const TAG = '[ANI]';
 namespace window {
@@ -1271,18 +1269,14 @@ export class WindowInternal implements Window {
     private native getWindowAvoidAreaSync(nativeObj: long, type: int): AvoidArea;
     private native setWaterMarkFlagSync(nativeObj: long, enable: boolean): void;
     private native setWindowTouchableSync(nativeObj: long, enable: boolean): void;
-    private native onNoInteractionDetected(nativeObj: long, timeout: number, callback: WindowNoInteractionCallback): void;
+    private native onNoInteractionDetected(nativeObj: long, type: string, timeout: number, callback: Object): void;
     private native keepKeyboardOnFocusSync(nativeObj: long, enable: boolean): void;
-    private native onSync(nativeObj: long, type: 'windowEvent' | 'windowSizeChange' | 'windowStatusChange' |
-        'keyboardHeightChange' | 'keyboardDidShow' | 'keyboardDidHide' |
-        'dialogTargetTouch' |'touchOutside' | 'noInteractionDetected',
-        callback: number | WindowEventCallback | WindowSizeCallback | WindowStatusCallback |
+    private native onSync(nativeObj: long, type: string,
+        callback: WindowEventCallback | WindowSizeCallback | WindowStatusCallback |
         KeyboardHeightChangeCallback | KeyboardDidShowOrHideCallback |
         WindowDialogTargetCallback | WindowTouchOutCallback | WindowNoInteractionCallback): void;
-    private native offSync(nativeObj: long, type: 'windowEvent' | 'windowSizeChange' | 'windowStatusChange' |
-        'keyboardHeightChange' | 'keyboardDidShow' | 'keyboardDidHide' |
-        'dialogTargetTouch' |'touchOutside' | 'noInteractionDetected',
-        callback: WindowEventCallback | WindowSizeCallback | WindowStatusCallback |
+    private native offSync(nativeObj: long, type: string,
+        callback?: WindowEventCallback | WindowSizeCallback | WindowStatusCallback |
         KeyboardHeightChangeCallback | KeyboardDidShowOrHideCallback |
         WindowDialogTargetCallback | WindowTouchOutCallback | WindowNoInteractionCallback): void;
 
@@ -1717,37 +1711,79 @@ export class WindowInternal implements Window {
        });
      }
 
-     public setWindowTouchable(enable: boolean, callback: AsyncCallback<void>): void {
-       taskpool.execute((): void => {
-         this.setWindowTouchableSync(this.nativeObj, enable);
-       }).then((ret: NullishType) => {
-         callback(new BusinessError(), undefined);
-       }).catch((err: NullishType) => {
-         callback(err as BusinessError, undefined);
-       });
-     }
-
-    public on(type: 'windowEvent' | 'windowSizeChange' | 'windowStatusChange' |
-        'keyboardHeightChange' | 'keyboardDidShow' | 'keyboardDidHide' |
-        'dialogTargetTouch' |'touchOutside' | 'noInteractionDetected',
-        callback: number | WindowEventCallback | WindowSizeCallback | WindowStatusCallback |
-        KeyboardHeightChangeCallback | KeyboardDidShowOrHideCallback |
-        WindowDialogTargetCallback | WindowTouchOutCallback | WindowNoInteractionCallback,
-        callbackForTimeout?:Callback<void>): void {
-        if (type == 'noInteractionDetected') {
-           this.onNoInteractionDetected(this.nativeObj, number, WindowNoInteractionCallback);
-         } else {
-           this.onSync(this.nativeObj, type, callback);
-         }
+    public setWindowTouchable(enable: boolean, callback: AsyncCallback<void>): void {
+      taskpool.execute((): void => {
+        this.setWindowTouchableSync(this.nativeObj, enable);
+      }).then((ret: NullishType) => {
+        callback(new BusinessError(), undefined);
+      }).catch((err: NullishType) => {
+        callback(err as BusinessError, undefined);
+      });
     }
 
-    public off(type: 'windowEvent' | 'windowSizeChange' | 'windowStatusChange' |
-        'keyboardHeightChange' | 'keyboardDidShow' | 'keyboardDidHide' |
-        'dialogTargetTouch' |'touchOutside' | 'noInteractionDetected',
-        callback: WindowEventCallback | WindowSizeCallback | WindowStatusCallback |
-        KeyboardHeightChangeCallback | KeyboardDidShowOrHideCallback |
-        WindowDialogTargetCallback | WindowTouchOutCallback | WindowNoInteractionCallback): void {
-        this.offSync(this.nativeObj, type, callback);
+    public on<T>(type: string, callback: Callback<T>): void {
+      switch (type) {
+        case 'windowEvent':
+          this.onSync(this.nativeObj, type, callback as WindowEventCallback);
+          break;
+        case 'windowSizeChange':
+          this.onSync(this.nativeObj, type, callback as WindowSizeCallback);
+          break;
+        case 'windowStatusChange':
+          this.onSync(this.nativeObj, type, callback as WindowStatusCallback);
+          break;
+        case 'keyboardHeightChange':
+          this.onSync(this.nativeObj, type, callback as KeyboardHeightChangeCallback);
+          break;
+        case 'keyboardDidShow':
+          this.onSync(this.nativeObj, type, callback as KeyboardDidShowOrHideCallback);
+          break;
+        case 'keyboardDidHide':
+          this.onSync(this.nativeObj, type, callback as KeyboardDidShowOrHideCallback);
+          break;
+        case 'dialogTargetTouch':
+          this.onSync(this.nativeObj, type, callback as WindowVoidCallback);
+          break;
+        case 'touchOutside':
+          this.onSync(this.nativeObj, type, callback as WindowVoidCallback);
+          break;
+      }
+    }
+
+    public on<T>(type: 'noInteractionDetected', timeout: number, callback: Callback<T>): void {
+      this.onNoInteractionDetected(this.nativeObj, type, timeout, callback as WindowVoidCallback);
+    }
+
+    public off<T>(type: string, callback: Callback<T>): void {
+      switch (type) {
+        case 'windowEvent':
+          this.offSync(this.nativeObj, type, callback as WindowEventCallback);
+          break;
+        case 'windowSizeChange':
+          this.offSync(this.nativeObj, type, callback as WindowSizeCallback);
+          break;
+        case 'windowStatusChange':
+          this.offSync(this.nativeObj, type, callback as WindowStatusCallback);
+          break;
+        case 'keyboardHeightChange':
+          this.offSync(this.nativeObj, type, callback as KeyboardHeightChangeCallback);
+          break;
+        case 'keyboardDidShow':
+          this.offSync(this.nativeObj, type, callback as KeyboardDidShowOrHideCallback);
+          break;
+        case 'keyboardDidHide':
+          this.offSync(this.nativeObj, type, callback as KeyboardDidShowOrHideCallback);
+          break;
+        case 'dialogTargetTouch':
+          this.offSync(this.nativeObj, type, callback as WindowVoidCallback);
+          break;
+        case 'touchOutside':
+          this.offSync(this.nativeObj, type, callback as WindowVoidCallback);
+          break;
+        case 'noInteractionDetected':
+          this.offSync(this.nativeObj, type, callback as WindowVoidCallback);
+          break;
+      }
     }
 }
 
@@ -1797,19 +1833,9 @@ export interface Window {
     keepKeyboardOnFocus(enable: boolean): void;
     setWindowTouchable(isTouchable: boolean): Promise<void>
     setWindowTouchable(isTouchable: boolean, callback: AsyncCallback<void>): void
-    on(type: 'windowEvent' | 'windowSizeChange' | 'windowStatusChange' |
-        'keyboardHeightChange' | 'keyboardDidShow' | 'keyboardDidHide' |
-        'dialogTargetTouch' |'touchOutside' | 'noInteractionDetected',
-        callbackOrTimeout: number | WindowEventCallback | WindowSizeCallback | WindowStatusCallback |
-        KeyboardHeightChangeCallback | KeyboardDidShowOrHideCallback |
-        WindowDialogTargetCallback | WindowTouchOutCallback | WindowNoInteractionCallback,
-        callbackForTimeout?:Callback<void>): void;
-    off(type: 'windowEvent' | 'windowSizeChange' | 'windowStatusChange' |
-        'keyboardHeightChange' | 'keyboardDidShow' | 'keyboardDidHide' |
-        'dialogTargetTouch' |'touchOutside' | 'noInteractionDetected',
-        callback: WindowEventCallback | WindowSizeCallback | WindowStatusCallback |
-        KeyboardHeightChangeCallback | KeyboardDidShowOrHideCallback |
-        WindowDialogTargetCallback | WindowTouchOutCallback | WindowNoInteractionCallback): void;
+    on<T>(type: string, calback: Callback<T>): void;
+    on<T>(type: 'noInteractionDetected', timeout: number, callback: Callback<T>): void;
+    off<T>(type:string, callback?: Callback<T>);
 }
 
 export native function CreateWindowStage(scene: long): WindowStageInternal;
