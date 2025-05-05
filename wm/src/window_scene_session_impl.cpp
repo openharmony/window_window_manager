@@ -5619,6 +5619,37 @@ WMError WindowSceneSessionImpl::SetFollowParentWindowLayoutEnabled(bool isFollow
     return ret != WSError::WS_OK ? WMError::WM_ERROR_SYSTEM_ABNORMALLY : WMError::WM_OK;
 }
 
+WMError WindowSceneSessionImpl::SetWindowTransitionAnimation(WindowTransitionType transitionType,
+    TransitionAnimation animation)
+{
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (!GetHostSession()) {
+        TLOGI(WmsLogTag::WMS_ANIMATION, "session is nullptr");
+        return WMError::WM_ERROR_INVALID_SESSION;
+    }
+    WSError ret = GetHostSession()->SetWindowTransitionAnimation(transitionType, animation);
+    if (ret == WSError::WS_OK) {
+        std::shared_ptr<TransitionAnimation> config = std::make_shared<TransitionAnimation>(animation);
+        TransitionAnimationConfig_[transitionType] = config;
+    }
+    return ret != WSError::WS_OK ? WMError::WM_ERROR_SYSTEM_ABNORMALLY : WMError::WM_OK;
+}
+
+std::shared_ptr<TransitionAnimation> WindowSceneSessionImpl::GetWindowTransitionAnimation(WindowTransitionType
+    transitionType)
+{
+    if (IsWindowSessionInvalid()) {
+        return std::shared_ptr<TransitionAnimation>();
+    }
+    if (TransitionAnimationConfig_.find(transitionType) != TransitionAnimationConfig_.end()) {
+        return TransitionAnimationConfig_[transitionType];
+    } else {
+        return std::shared_ptr<TransitionAnimation>();
+    }
+}
+
 WMError WindowSceneSessionImpl::SetCustomDensity(float density)
 {
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}u, density=%{public}f", GetWindowId(), density);

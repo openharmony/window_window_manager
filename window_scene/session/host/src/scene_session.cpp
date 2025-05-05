@@ -7937,4 +7937,43 @@ WSError SceneSession::SetCurrentRotation(int32_t currentRotation)
     }
     return sessionStage_->SetCurrentRotation(currentRotation);
 }
+
+/**
+ * Window Transition Animation
+ */
+WSError SceneSession::SetWindowTransitionAnimation(WindowTransitionType transitionType, TransitionAnimation animation)
+{
+    std::shared_ptr<TransitionAnimation> config = std::make_shared<TransitionAnimation>(animation);
+    TransitionAnimationConfig_[transitionType] = config;
+    return WSError::WS_OK;
+}
+
+std::shared_ptr<TransitionAnimation> SceneSession::GetWindowTransitionAnimation(WindowTransitionType transitionType)
+{
+    if (TransitionAnimationConfig_.find(transitionType) != TransitionAnimationConfig_.end()) {
+        return TransitionAnimationConfig_[transitionType];
+    } else {
+        return std::shared_ptr<TransitionAnimation>();
+    }
+}
+
+void SceneSession::SetSceneSessionDestructNotificationFunc(NotifySceneSessionDestructFunc&& func)
+{
+    notifySceneSessionDestructFunc_ = std::move(func);
+}
+
+void SceneSession::SetIsUserRequestedExit(bool isUserRequestedExit)
+{
+    isUserRequestedExit_ = isUserRequestedExit;
+}
+
+void SceneSession::SetIsAncoForFloatingWindow(bool isAncoForFloatingWindow)
+{
+    isAncoForFloatingWindow_ = isAncoForFloatingWindow;
+}
+
+bool SceneSession::GetIsAncoForFloatingWindow() const
+{
+    return isAncoForFloatingWindow_;
+}
 } // namespace OHOS::Rosen

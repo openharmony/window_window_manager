@@ -268,6 +268,11 @@ public:
     WMError SetFullScreen(bool status) override;
     WMError UpdateSystemBarProperties(const std::unordered_map<WindowType, SystemBarProperty>& systemBarProperties,
         const std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags) override;
+    /**
+     * Window Transition Animation
+     */
+    WMError SetWindowTransitionAnimation(WindowTransitionType transitionType, TransitionAnimation animation) override;
+    std::shared_ptr<TransitionAnimation> GetWindowTransitionAnimation(WindowTransitionType transitionType) override;
 
 protected:
     WMError CreateAndConnectSpecificSession();
@@ -446,6 +451,11 @@ private:
     void NotifyFreeMultiWindowModeResume();
     std::string TransferLifeCycleEventToString(LifeCycleEvent type) const;
     void RecordLifeCycleExceptionEvent(LifeCycleEvent event, WMError erCode) const;
+
+    /**
+     * Window Transition Animation
+     */
+    std::unordered_map<WindowTransitionType, std::shared_ptr<TransitionAnimation>> TransitionAnimationConfig_;
 };
 } // namespace Rosen
 } // namespace OHOS

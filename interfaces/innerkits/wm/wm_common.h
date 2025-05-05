@@ -2141,6 +2141,83 @@ enum class RotationChangeType : uint32_t {
     WINDOW_DID_ROTATE,
 };
 
+/*
+ * @brief Enumerates window transition type.
+ */
+enum class WindowTransitionType : uint32_t {
+    /**
+     * window destroy.
+     */
+    DESTROY = 0,
+};
+
+/*
+ * @brief Enumerates window animation curve type.
+ */
+enum class WindowAnimationCurve : uint32_t {
+    /**
+     * animation curve type linear.
+     */
+    LINEAR = 0,
+
+    /**
+     * animation curve type interpolationspring.
+     */
+    INTERPOLATIONSPRING = 0,
+};
+
+const int32_t TRANSITION_ANIMATION_PARAM_SIZE = 4;
+const int32_t TRANSITION_ANIMATION_MAX_DURATION = 3000;
+
+/*
+ * @brief Window transition animation configuration.
+ */
+struct WindowTransitonAnimationConfig {
+    WindowAnimationCurve curve;
+    uint32_t duration;
+    std::array<float, TRANSITION_ANIMATION_PARAM_SIZE> param;
+};
+
+/*
+ * @brief Transition animation configuration.
+ */
+struct TransitionAnimation : public Parcelable {
+    WindowTransitonAnimationConfig config;
+    float opacity;
+    
+    bool Marshalling(Parcel& parcel) const override
+    {
+        if (!(parcel.WriteFloat(opacity) && parcel.WriteUint32(static_cast<uint32_t>(config.curve)) &&
+              parcel.WriteUint32(config.duration))) {
+                return false;
+        }
+        for (auto param: config.param) {
+            if (!parcel.WriteFloat(param)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    static TransitionAnimation* Unmarshalling(Parcel& parcel)
+    {
+        TransitionAnimation* transitionAnimation = new TransitionAnimation();
+        if (!(parcel.ReadFloat(transitionAnimation->opacity) &&
+              parcel.ReadUint32(reinterpret_cast<uint32_t&>(transitionAnimation->config.curve)) &&
+              parcel.ReadUint32(transitionAnimation->config.duration))) {
+                delete transitionAnimation;
+                return nullptr;
+        }
+        for (auto& param: transitionAnimation->config.param) {
+            if (!parcel.ReadFloat(param)) {
+                delete transitionAnimation;
+                return nullptr;
+            }
+        }
+        return transitionAnimation;
+    }
+};
+
 /**
  * @brief Enumerates rect type
  */

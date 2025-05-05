@@ -617,6 +617,73 @@ napi_value CreateJsDecorButtonStyleObj(napi_env env, DecorButtonStyle decorButto
     return objValue;
 }
 
+napi_value ConvertTransitionAnimationToJsValue(napi_env env, std::shared_ptr<TransitionAnimation> transitionAnimation)
+{
+    napi_value objValue = nullptr;
+    if (!transitionAnimation) {
+        return objValue;
+    }
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+    napi_value configJsValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, configJsValue);
+    napi_set_named_property(env, configJsValue, "curve", CreateJsValue(env, transitionAnimation->config.curve));
+    if (transitionAnimation->config.curve == WindowAnimationCurve::LINEAR) {
+        napi_set_named_property(env, configJsValue, "duration",
+            CreateJsValue(env, transitionAnimation->config.duration));
+    } else if (transitionAnimation->config.curve == WindowAnimationCurve::INTERPOLATIONSPRING) {
+        napi_value params = nullptr;
+        napi_create_array(env, &params);
+        for (int i = 0; i < TRANSITION_ANIMATION_PARAM_SIZE; ++i) {
+            napi_value element;
+            napi_create_double(env, static_cast<double>(transitionAnimation->config.param[i]), &element);
+            napi_set_element(env, params, i, element);
+        }
+        napi_set_named_property(env, configJsValue, "param", params);
+    }
+
+    napi_set_named_property(env, objValue, "config", configJsValue);
+    napi_set_named_property(env, objValue, "opacity", CreateJsValue(env, transitionAnimation->opacity));
+
+    return objValue;
+}
+
+bool ConvertTransitionAnimationFromJsValue(napi_env env, napi_value jsObject, TransitionAnimation& transitionAnimation)
+{
+    napi_value config = nullptr;
+    napi_get_named_property(env, jsObject, "config", &config);
+    if (config == nullptr) {
+        return false;
+    }
+    uint32_t curve;
+    if (!ParseJsValue(config, env, "curve", curve)) {
+        return false;
+    }
+    uint32_t duration = 0;
+    std::array<double, TRANSITION_ANIMATION_PARAM_SIZE> params;
+    if (curve == static_cast<uint32_t>(WindowAnimationCurve::LINEAR)) {
+        if (!ParseJsValue(config, env, "duration", duration)) {
+            return false;
+        }
+    } else if (curve == static_cast<uint32_t>(WindowAnimationCurve::INTERPOLATIONSPRING)) {
+        napi_value paramsValue = nullptr;
+        napi_get_named_property(env, config, "param", &paramsValue);
+        for (int i = 0; i < TRANSITION_ANIMATION_PARAM_SIZE; ++i) {
+            napi_value element;
+            napi_get_element(env, paramsValue, i, &element);
+            ConvertFromJsValue(env, element, params[i]);
+        }
+    }
+    double opacity = 0.0f;
+    ParseJsValue(jsObject, env, "opacity", opacity);
+    transitionAnimation.opacity = static_cast<float>(opacity);
+    transitionAnimation.config.curve = static_cast<WindowAnimationCurve>(curve);
+    transitionAnimation.config.duration = duration;
+    for (int i = 0; i < TRANSITION_ANIMATION_PARAM_SIZE; ++i) {
+        transitionAnimation.config.param[i] = static_cast<float>(params[i]);
+    }
+    return true;
+}
+
 bool ConvertDecorButtonStyleFromJs(napi_env env, napi_value jsObject, DecorButtonStyle& style)
 {
     int32_t colorMode;
@@ -1364,6 +1431,28 @@ napi_value RectTypeInit(napi_env env)
         CreateJsValue(env, static_cast<uint32_t>(RectType::RELATIVE_TO_SCREEN)));
     napi_set_named_property(env, objValue, "RELATIVE_TO_PARENT_WINDOW",
         CreateJsValue(env, static_cast<uint32_t>(RectType::RELATIVE_TO_PARENT_WINDOW)));
+    return objValue;
+}
+
+napi_value WindowTransitionTypeInit(napi_env env)
+{
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+    napi_set_named_property(env, objValue, "DESTROY",
+        CreateJsValue(env, static_cast<uint32_t>(WindowTransitionType::DESTROY)));
+    return objValue;
+}
+
+napi_value WindowAnimationCurveInit(napi_env env)
+{
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+    napi_set_named_property(env, objValue, "LINEAR",
+        CreateJsValue(env, static_cast<uint32_t>(WindowAnimationCurve::LINEAR)));
+    napi_set_named_property(env, objValue, "INTERPOLATIONSPRING",
+        CreateJsValue(env, static_cast<uint32_t>(WindowAnimationCurve::INTERPOLATIONSPRING)));
     return objValue;
 }
 

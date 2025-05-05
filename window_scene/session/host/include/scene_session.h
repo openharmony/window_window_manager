@@ -752,6 +752,12 @@ public:
     */
     void NotifyWindowAttachStateListenerRegistered(bool registered) override;
 
+    /**
+     * Window Transition Animation
+     */
+    WSError SetWindowTransitionAnimation(WindowTransitionType transitionType, TransitionAnimation animation) override;
+    std::shared_ptr<TransitionAnimation> GetWindowTransitionAnimation(WindowTransitionType transitionType) override;
+
 protected:
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
     void SetMoveDragCallback();
@@ -1224,6 +1230,11 @@ private:
     std::shared_ptr<Rosen::RSAnimatableProperty<float>> blurSaturationValue_;
     std::shared_ptr<Rosen::RSAnimatableProperty<float>> blurBrightnessValue_;
     std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::RSColor>> blurMaskColorValue_;
+
+    /**
+     * Window Transition Animation
+     */
+    std::unordered_map<WindowTransitionType, std::shared_ptr<TransitionAnimation>> TransitionAnimationConfig_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
