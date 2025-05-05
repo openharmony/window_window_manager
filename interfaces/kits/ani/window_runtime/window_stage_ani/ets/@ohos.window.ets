@@ -1273,12 +1273,10 @@ export class WindowInternal implements Window {
     private native keepKeyboardOnFocusSync(nativeObj: long, enable: boolean): void;
     private native onSync(nativeObj: long, type: string,
         callback: WindowEventCallback | WindowSizeCallback | WindowStatusCallback |
-        KeyboardHeightChangeCallback | KeyboardDidShowOrHideCallback |
-        WindowDialogTargetCallback | WindowTouchOutCallback | WindowNoInteractionCallback): void;
+        KeyboardHeightChangeCallback | KeyboardDidShowOrHideCallback | WindowVoidCallback): void;
     private native offSync(nativeObj: long, type: string,
         callback?: WindowEventCallback | WindowSizeCallback | WindowStatusCallback |
-        KeyboardHeightChangeCallback | KeyboardDidShowOrHideCallback |
-        WindowDialogTargetCallback | WindowTouchOutCallback | WindowNoInteractionCallback): void;
+        KeyboardHeightChangeCallback | KeyboardDidShowOrHideCallback | WindowVoidCallback): void;
 
     public resize(width: double, height: double): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) :void => {
