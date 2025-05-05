@@ -17,6 +17,7 @@ import { LocalStorage } from '@ohos.arkui.stateManagement';
 import { UIContext } from '@ohos.arkui.UIContext';
 import BaseContext from 'application.BaseContext';
 import hilog from '@ohos.hilog';
+import { ColorMetrics } from '@ohos.arkui.node';
 export type AsyncCallbackVoid = (err: BusinessError) => void;
 export type WindowEventCallback = (data: window.WindowEventType) => void;
 export type WindowSizeCallback = (data: window.Size) => void;
@@ -1327,8 +1328,10 @@ export class WindowInternal implements Window {
        return ret;
     }
 
-    public setWindowBackgroundColor(color: string): void {
-       this.setWindowBackgroundColor(this.nativeObj, color);
+    public setWindowBackgroundColor(color: string | ColorMetrics): void {
+       if (color instanceof string) {
+         this.setWindowBackgroundColor(this.nativeObj, color as string);
+       }
     }
 
     public setBackgroundColor(color: string): Promise<void> {
@@ -1718,6 +1721,19 @@ export class WindowInternal implements Window {
         callback(err as BusinessError, undefined);
       });
     }
+    //public on(type: 'windowEvent', callback: Callback<WindowEventType>): void {
+    //  this.onSync(this.nativeObj, type, callback);
+    //}
+    //public on(type: 'windowStatusChange', callback: Callback<WindowStatusType>): void {
+    //  this.onSync(this.nativeObj, type, callback);
+    //}
+    //public on(type: 'windowEvent' | 'windowStatusChange' |
+    //    'keyboardHeightChange' | 'keyboardDidShow' | 'keyboardDidHide',
+    //    callback: WindowEventCallback | WindowSizeCallback | WindowStatusCallback |
+    //    KeyboardHeightChangeCallback | KeyboardDidShowOrHideCallback,
+    //    callbackForTimeout?:Callback<void>): void {
+    //    this.onSync(this.nativeObj, type, callback);
+    //}
 
     public on<T>(type: string, callback: Callback<T>): void {
       switch (type) {
@@ -1783,6 +1799,18 @@ export class WindowInternal implements Window {
           break;
       }
     }
+    //public off(type: 'windowEvent', callback?: Callback<WindowEventType>): void {
+    //    this.offSync(this.nativeObj, type, callback);
+    //}
+    //public off(type: 'windowStatusChange', callback?: Callback<WindowStatusType>): void {
+    //    this.offSync(this.nativeObj, type, callback);
+    //}
+    //public off(type: 'windowEvent' | 'windowStatusChange' |
+    //    'keyboardHeightChange' | 'keyboardDidShow' | 'keyboardDidHide',
+    //    callback?: WindowEventCallback | WindowSizeCallback | WindowStatusCallback |
+    //    KeyboardHeightChangeCallback | KeyboardDidShowOrHideCallback): void {
+    //    this.offSync(this.nativeObj, type, callback);
+    //}
 }
 
 export interface Window {
@@ -1791,7 +1819,7 @@ export interface Window {
     resize(width: double, height: double, callback: AsyncCallback<void>): void;
     moveWindowTo(x: double, y: double, callback: AsyncCallback<void>): void;
     getWindowDecorHeight(): double;
-    setWindowBackgroundColor(color: string): void;
+    setWindowBackgroundColor(color: string | ColorMetrics): void;
     setBackgroundColor(color: string): Promise<void>;
     setBackgroundColor(color: string, callback: AsyncCallback<void>): void;
     setImmersiveModeEnabledState(enable: boolean): void;

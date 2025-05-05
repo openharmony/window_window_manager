@@ -32,7 +32,7 @@ public:
     static void registerCallback(ani_env* env, ani_string type,
         ani_ref callback, ani_long nativeObj);
     static void unRegisterCallback(ani_env* env, ani_string type,
-        ani_ref callback, ani_long nativeObj);
+        ani_long nativeObj, ani_ref callback);
     static ani_status initScreenManagerAni(ani_namespace screenNameSpace, ani_env* env);
     DmErrorCode processRegisterCallback(ani_env* env, std::string& typeStr,
         sptr<ScreenAniListener> screenAniListener);
