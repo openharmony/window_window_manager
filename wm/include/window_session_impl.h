@@ -120,6 +120,7 @@ public:
      * PC Window
      */
     bool IsPcWindow() const override;
+    bool IsPadWindow() const override;
     bool IsPcOrPadCapabilityEnabled() const override;
     bool IsPcOrPadFreeMultiWindowMode() const override;
     bool IsSceneBoardEnabled() const override;

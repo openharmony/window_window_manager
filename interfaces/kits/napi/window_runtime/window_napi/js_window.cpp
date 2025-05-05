@@ -23,6 +23,7 @@
 #endif
 
 #include "js_err_utils.h"
+#include "js_window_animation_utils.h"
 #include "js_window_utils.h"
 #include "window.h"
 #include "window_helper.h"
@@ -947,6 +948,20 @@ napi_value JsWindow::SetFollowParentMultiScreenPolicy(napi_env env, napi_callbac
     TLOGD(WmsLogTag::WMS_MAIN, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetFollowParentMultiScreenPolicy(env, info) : nullptr;
+}
+
+napi_value JsWindow::SetWindowTransitionAnimation(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_ANIMATION, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetWindowTransitionAnimation(env, info) : nullptr;
+}
+
+napi_value JsWindow::GetWindowTransitionAnimation(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_ANIMATION, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnGetWindowTransitionAnimation(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetWindowDecorHeight(napi_env env, napi_callback_info info)
@@ -6969,6 +6984,98 @@ napi_value JsWindow::OnSetFollowParentMultiScreenPolicy(napi_env env, napi_callb
     return result;
 }
 
+static bool IsTransitionAnimationEnable(napi_env env, sptr<Window> windowToken, WmErrorCode& enableResult)
+{
+    if (!windowToken->IsPcWindow() && !windowToken->IsPadWindow()) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Device is invalid");
+        enableResult = WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
+        return false;
+    }
+    if (!WindowHelper::IsMainWindow(windowToken->GetType())) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Window type is invalid");
+        enableResult = WmErrorCode::WM_ERROR_INVALID_CALLING;
+        return false;
+    }
+    return true;
+}
+
+napi_value JsWindow::OnSetWindowTransitionAnimation(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_ANIMATION, "[NAPI]");
+    WmErrorCode enableResult;
+    if (!IsTransitionAnimationEnable(env, windowToken_, enableResult)) {
+        return NapiThrowError(env, enableResult);
+    }
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARG_COUNT_TWO) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    uint32_t type = 0;
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], type) || (type > static_cast<uint32_t>(WindowTransitionType::END))) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to convert parameter to type");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
+    }
+    TransitionAnimation animation;
+    WmErrorCode convertResult;
+    if (!ConvertTransitionAnimationFromJsValue(env, argv[INDEX_ONE], animation, convertResult)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to convert parameter to animation");
+        return NapiThrowError(env, convertResult);
+    }
+    const char* const where = __func__;
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    auto asyncTask = [weakToken = wptr<Window>(windowToken_), task = napiAsyncTask, env, type, animation, where] {
+        auto window = weakToken.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ANIMATION, "%{public}s window is nullptr", where);
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
+            return;
+        }
+        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetWindowTransitionAnimation(
+            static_cast<WindowTransitionType>(type), animation));
+        if (ret == WmErrorCode::WM_OK) {
+            task->Resolve(env, NapiGetUndefined(env));
+        } else {
+            TLOGNE(WmsLogTag::WMS_ANIMATION, "%{public}s set failed, ret is %{public}d", where, ret);
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "Set window transition animation failed"));
+        }
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+        napiAsyncTask->Reject(env, CreateJsError(env,
+            static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
+    }
+    return result;
+}
+
+napi_value JsWindow::OnGetWindowTransitionAnimation(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_ANIMATION, "[NAPI]");
+    WmErrorCode enableResult;
+    if (!IsTransitionAnimationEnable(env, windowToken_, enableResult)) {
+        return NapiThrowError(env, enableResult);
+    }
+    size_t argc = ONE_PARAMS_SIZE;
+    napi_value argv[ONE_PARAMS_SIZE] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARG_COUNT_ONE) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    WindowTransitionType type;
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], type) || (type > WindowTransitionType::END)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to convert parameter to type");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    napi_value result = ConvertTransitionAnimationToJsValue(env, windowToken_->GetWindowTransitionAnimation(type));
+    if (result != nullptr) {
+        return result;
+    }
+    return NapiGetUndefined(env);
+}
+
 napi_value JsWindow::OnSetWindowDecorHeight(napi_env env, napi_callback_info info)
 {
     size_t argc = FOUR_PARAMS_SIZE;
@@ -8290,6 +8397,10 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "setSubWindowModal", moduleName, JsWindow::SetSubWindowModal);
     BindNativeFunction(env, object, "setFollowParentMultiScreenPolicy",
         moduleName, JsWindow::SetFollowParentMultiScreenPolicy);
+    BindNativeFunction(env, object, "setWindowTransitionAnimation",
+        moduleName, JsWindow::SetWindowTransitionAnimation);
+    BindNativeFunction(env, object, "getWindowTransitionAnimation",
+        moduleName, JsWindow::GetWindowTransitionAnimation);
     BindNativeFunction(env, object, "enableDrag", moduleName, JsWindow::EnableDrag);
     BindNativeFunction(env, object, "setWindowDecorHeight", moduleName, JsWindow::SetWindowDecorHeight);
     BindNativeFunction(env, object, "getWindowDecorHeight", moduleName, JsWindow::GetWindowDecorHeight);
