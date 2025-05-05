@@ -123,6 +123,8 @@ public:
     bool IsPcOrPadFreeMultiWindowMode() const override;
     bool IsSceneBoardEnabled() const override;
     bool GetCompatibleModeInPc() const override;
+    void HookCompatibleModeAvoidAreaNotify() override;
+    bool IsAdaptToCompatibleImmersive() const override;
     WMError SetWindowDelayRaiseEnabled(bool isEnabled) override;
     bool IsWindowDelayRaiseEnabled() const override;
     WMError SetTitleButtonVisible(bool isMaximizeVisible, bool isMinimizeVisible, bool isSplitVisible,

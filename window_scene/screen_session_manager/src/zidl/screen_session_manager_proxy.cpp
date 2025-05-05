@@ -3762,9 +3762,9 @@ void ScreenSessionManagerProxy::GetDisplayHookInfo(int32_t uid, DMHookInfo& hook
         TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return;
     }
-    if (!reply.WriteUint32(hookInfo.width_) || !reply.WriteUint32(hookInfo.height_) ||
-        !reply.WriteFloat(hookInfo.density_) || !reply.WriteUint32(hookInfo.rotation_)||
-        !reply.WriteBool(hookInfo.enableHookRotation_)) {
+    if (!reply.ReadUint32(hookInfo.width_) || !reply.ReadUint32(hookInfo.height_) ||
+        !reply.ReadFloat(hookInfo.density_) || !reply.ReadUint32(hookInfo.rotation_)||
+        !reply.ReadBool(hookInfo.enableHookRotation_)) {
         TLOGE(WmsLogTag::DMS, "reply write hookInfo failed!");
     }
 }

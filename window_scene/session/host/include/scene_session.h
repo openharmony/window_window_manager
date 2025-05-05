@@ -963,8 +963,6 @@ private:
     void SetDragResizeTypeDuringDrag(DragResizeType dragResizeType) { dragResizeTypeDuringDrag_ = dragResizeType; }
     DragResizeType GetDragResizeTypeDuringDrag() const { return dragResizeTypeDuringDrag_; }
     void HandleSessionDragEvent(SessionEvent event);
-    void HandleCompatibleModeMoveDrag(WSRect& rect, SizeChangeReason reason);
-    void HandleCompatibleModeDrag(WSRect& rect, SizeChangeReason reason, bool isSupportDragInPcCompatibleMode);
     NotifySessionEventFunc onSessionEvent_;
     void ProcessWindowMoving(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void HandleSubSessionCrossNode(SizeChangeReason reason);

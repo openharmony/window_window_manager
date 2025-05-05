@@ -1115,6 +1115,45 @@ bool ConvertThrowSlipModeFromJs(napi_env env, napi_value value, ThrowSlipMode& t
     return true;
 }
 
+bool ConvertCompatibleModePropertyFromJs(napi_env env, napi_value value, CompatibleModeProperty& compatibleModeProperty)
+{
+    bool ret = false;
+    bool atLeastOneParam = false;
+    if (ParseJsValue(env, value, "isAdaptToImmersive", ret)) {
+        compatibleModeProperty.SetIsAdaptToImmersive(ret);
+        atLeastOneParam = true;
+    }
+    if (ParseJsValue(env, value, "isAdaptToEventMapping", ret)) {
+        compatibleModeProperty.SetIsAdaptToEventMapping(ret);
+        atLeastOneParam = true;
+    }
+    if (ParseJsValue(env, value, "isAdaptToProportionalScale", ret)) {
+        compatibleModeProperty.SetIsAdaptToProportionalScale(ret);
+        atLeastOneParam = true;
+    }
+    if (ParseJsValue(env, value, "isAdaptToBackButton", ret)) {
+        compatibleModeProperty.SetIsAdaptToBackButton(ret);
+        atLeastOneParam = true;
+    }
+    if (ParseJsValue(env, value, "disableDragResize", ret)) {
+        compatibleModeProperty.SetDisableDragResize(ret);
+        atLeastOneParam = true;
+    }
+    if (ParseJsValue(env, value, "disableResizeWithDpi", ret)) {
+        compatibleModeProperty.SetDisableResizeWithDpi(ret);
+        atLeastOneParam = true;
+    }
+    if (ParseJsValue(env, value, "disableFullScreen", ret)) {
+        compatibleModeProperty.SetDisableFullScreen(ret);
+        atLeastOneParam = true;
+    }
+    if (ParseJsValue(env, value, "disableWindowLimit", ret)) {
+        compatibleModeProperty.SetDisableWindowLimit(ret);
+        atLeastOneParam = true;
+    }
+    return atLeastOneParam;
+}
+
 bool ParseArrayStringValue(napi_env env, napi_value array, std::vector<std::string>& vector)
 {
     if (array == nullptr) {
