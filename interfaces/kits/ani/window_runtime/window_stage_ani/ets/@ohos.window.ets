@@ -1752,7 +1752,7 @@ export class WindowInternal implements Window {
       this.onNoInteractionDetected(this.nativeObj, type, timeout, callback as WindowVoidCallback);
     }
 
-    public off<T>(type: string, callback: Callback<T>): void {
+    public off<T>(type: string, callback?: Callback<T>): void {
       switch (type) {
         case 'windowEvent':
           this.offSync(this.nativeObj, type, callback as WindowEventCallback);
@@ -1833,7 +1833,7 @@ export interface Window {
     setWindowTouchable(isTouchable: boolean, callback: AsyncCallback<void>): void
     on<T>(type: string, calback: Callback<T>): void;
     on<T>(type: 'noInteractionDetected', timeout: number, callback: Callback<T>): void;
-    off<T>(type:string, callback?: Callback<T>);
+    off<T>(type:string, callback?: Callback<T>): void;
 }
 
 export native function CreateWindowStage(scene: long): WindowStageInternal;
