@@ -1198,7 +1198,7 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(AniWindow::KeepKeyboardOnFocus)},
         ani_native_function {"setWindowTouchableSync", "JZ:V",
             reinterpret_cast<void *>(AniWindow::setWindowTouchable)},
-        ani_native_function {"onNoInteractionDetected", "JLstd/core/Double;Lstd/core/Object;:V",
+        ani_native_function {"onNoInteractionDetected", nullptr,
             reinterpret_cast<void *>(AniWindow::RegisterNoInteractionDetectedCallback)},
         ani_native_function {"onSync", nullptr,
             reinterpret_cast<void *>(AniWindow::RegisterWindowCallback)},
