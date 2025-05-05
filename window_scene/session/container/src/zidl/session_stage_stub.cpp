@@ -164,16 +164,10 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleGetUIContentRemoteObj(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_KEYBOARD_INFO_CHANGE):
             return HandleNotifyKeyboardPanelInfoChange(data, reply);
-        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_COMPATIBLE_FULLSCREEN_RECOVER):
-            return HandleCompatibleFullScreenRecover(data, reply);
-        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_COMPATIBLE_FULLSCREEN_MINIMIZE):
-            return HandleCompatibleFullScreenMinimize(data, reply);
-        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_COMPATIBLE_FULLSCREEN_CLOSE):
-            return HandleCompatibleFullScreenClose(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_PCAPPINPADNORMAL_CLOSE):
             return HandlePcAppInPadNormalClose(data, reply);
-        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_COMPATIBLE_MODE_ENABLE):
-            return HandleNotifyCompatibleModeEnableInPad(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_COMPATIBLE_MODE_PROPERTY_CHANGE):
+            return HandleNotifyCompatibleModePropertyChange(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DENSITY_UNIQUE):
             return HandleSetUniqueVirtualPixelRatio(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SESSION_FULLSCREEN):
@@ -643,37 +637,16 @@ int SessionStageStub::HandleNotifyKeyboardPanelInfoChange(MessageParcel& data, M
     return ERR_NONE;
 }
 
-int SessionStageStub::HandleCompatibleFullScreenRecover(MessageParcel& data, MessageParcel& reply)
-{
-    WSError errCode = CompatibleFullScreenRecover();
-    reply.WriteInt32(static_cast<int32_t>(errCode));
-    return ERR_NONE;
-}
-
-int SessionStageStub::HandleCompatibleFullScreenMinimize(MessageParcel& data, MessageParcel& reply)
-{
-    WSError errCode = CompatibleFullScreenMinimize();
-    reply.WriteInt32(static_cast<int32_t>(errCode));
-    return ERR_NONE;
-}
-
-int SessionStageStub::HandleCompatibleFullScreenClose(MessageParcel& data, MessageParcel& reply)
-{
-    WSError errCode = CompatibleFullScreenClose();
-    reply.WriteInt32(static_cast<int32_t>(errCode));
-    return ERR_NONE;
-}
-
 int SessionStageStub::HandlePcAppInPadNormalClose(MessageParcel& data, MessageParcel& reply)
 {
     WSError errCode = PcAppInPadNormalClose();
     return ERR_NONE;
 }
 
-int SessionStageStub::HandleNotifyCompatibleModeEnableInPad(MessageParcel& data, MessageParcel& reply)
+int SessionStageStub::HandleNotifyCompatibleModePropertyChange(MessageParcel& data, MessageParcel& reply)
 {
-    bool enable = data.ReadBool();
-    WSError errCode = NotifyCompatibleModeEnableInPad(enable);
+    sptr<CompatibleModeProperty> property = data.ReadParcelable<CompatibleModeProperty>();
+    WSError errCode = NotifyCompatibleModePropertyChange(property);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }

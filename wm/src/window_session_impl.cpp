@@ -303,9 +303,15 @@ bool WindowSessionImpl::IsSceneBoardEnabled() const
     return SceneBoardJudgement::IsSceneBoardEnabled();
 }
 
+// method will be instead after ace fix
 bool WindowSessionImpl::GetCompatibleModeInPc() const
 {
-    return property_->GetCompatibleModeInPc();
+    return CompatibleModeProperty::IsAdaptToImmersive(property_);
+}
+
+bool WindowSessionImpl::IsAdaptToCompatibleImmersive() const
+{
+    return CompatibleModeProperty::IsAdaptToImmersive(property_);
 }
 
 void WindowSessionImpl::MakeSubOrDialogWindowDragableAndMoveble()
@@ -1576,18 +1582,21 @@ void WindowSessionImpl::HideTitleButton(bool& hideSplitButton, bool& hideMaximiz
     if (uiContent == nullptr || !IsDecorEnable()) {
         return;
     }
-    if (property_->GetCompatibleModeInPc() && !property_->GetIsAtomicService()) {
-        bool isLayoutFullScreen = property_->IsLayoutFullScreen();
-        uiContent->HideWindowTitleButton(true, !isLayoutFullScreen, hideMinimizeButton, hideCloseButton);
-        if (!property_->GetCompatibleModeInPcTitleVisible()) {
-            uiContent->OnContainerModalEvent(SCB_BACK_VISIBILITY, isLayoutFullScreen ? "false" : "true");
-            uiContent->OnContainerModalEvent(SCB_COMPATIBLE_MAXIMIZE_VISIBILITY, isLayoutFullScreen ? "false" : "true");
-        }
+    hideMaximizeButton = hideMaximizeButton || CompatibleModeProperty::DisableFullScreen(property_);
+    bool isLayoutFullScreen = property_->IsLayoutFullScreen();
+    if (CompatibleModeProperty::IsAdaptToImmersive(property_) && !property_->GetIsAtomicService()) {
+        uiContent->HideWindowTitleButton(true, !isLayoutFullScreen && hideMaximizeButton,
+            hideMinimizeButton, hideCloseButton);
     } else {
         uiContent->HideWindowTitleButton(hideSplitButton, hideMaximizeButton, hideMinimizeButton, hideCloseButton);
-        uiContent->OnContainerModalEvent(SCB_BACK_VISIBILITY, "false");
-        uiContent->OnContainerModalEvent(SCB_COMPATIBLE_MAXIMIZE_VISIBILITY, "false");
     }
+    // compatible mode adapt to proportional scale, will show its button
+    bool showScaleBtn = CompatibleModeProperty::IsAdaptToProportionalScale(property_);
+    uiContent->OnContainerModalEvent(SCB_COMPATIBLE_MAXIMIZE_VISIBILITY,
+        !isLayoutFullScreen && showScaleBtn  ? "true" : "false");
+    // compatible mode adapt to back, will show its button
+    bool isAdaptToBackButton = CompatibleModeProperty::IsAdaptToBackButton(property_);
+    uiContent->OnContainerModalEvent(SCB_BACK_VISIBILITY, isAdaptToBackButton ? "true" : "false");
 }
 
 WMError WindowSessionImpl::NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
@@ -1665,7 +1674,7 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
         std::unique_lock<std::shared_mutex> lock(uiContentMutex_);
         uiContent_ = std::move(uiContent);
         // compatibleMode app in pc, need change decor title to float title bar
-        if (property_->GetCompatibleModeInPc() && !property_->GetCompatibleModeInPcTitleVisible()) {
+        if (CompatibleModeProperty::IsAdaptToImmersive(property_)) {
             uiContent_->SetContainerModalTitleVisible(false, true);
             uiContent_->EnableContainerModalCustomGesture(true);
         }
@@ -2338,7 +2347,8 @@ void WindowSessionImpl::SetRequestedOrientation(Orientation orientation, bool ne
     if (orientation == Orientation::INVALID) {
         orientation = GetRequestedOrientation();
     }
-    if (property_->GetCompatibleModeInPc() && IsHorizontalOrientation(orientation)) {
+    // when compatible mode disable fullscreen and request orientation, will enter into immersive mode
+    if (CompatibleModeProperty::DisableFullScreen(property_) && IsHorizontalOrientation(orientation)) {
         TLOGI(WmsLogTag::WMS_COMPAT, "compatible request horizontal orientation %{public}u", orientation);
         property_->SetIsLayoutFullScreen(true);
     }
@@ -5250,6 +5260,15 @@ WMError WindowSessionImpl::UpdateSystemBarProperties(
 WMError WindowSessionImpl::SetSystemBarProperty(WindowType type, const SystemBarProperty& property)
 {
     return WMError::WM_OK;
+}
+
+void WindowSessionImpl::HookCompatibleModeAvoidAreaNotify()
+{
+    AvoidArea avoidArea;
+    Rect rect = GetRect();
+    GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM, avoidArea, rect);
+    auto avoidSptr = sptr<AvoidArea>::MakeSptr(avoidArea);
+    NotifyAvoidAreaChange(avoidSptr, AvoidAreaType::TYPE_SYSTEM);
 }
 
 void WindowSessionImpl::UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool systemBarEnableAnimation,

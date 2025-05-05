@@ -2391,6 +2391,11 @@ napi_value JsWindow::OnRegisterWindowCallback(napi_env env, napi_callback_info i
     }
     WLOGFI("Register end, window [%{public}u, %{public}s], type=%{public}s",
         windowToken->GetWindowId(), windowToken->GetWindowName().c_str(), cbType.c_str());
+    // if comptible mode app adpt to immersive, avoid area change will be called when regist
+    if (cbType == AVOID_AREA_CHANGE_CB && windowToken->IsAdaptToCompatibleImmersive()) {
+        TLOGI(WmsLogTag::WMS_COMPAT, "notify avoid area change for compatible mode app when regist callback");
+        windowToken->HookCompatibleModeAvoidAreaNotify();
+    }
     return NapiGetUndefined(env);
 }
 
@@ -2963,8 +2968,8 @@ napi_value JsWindow::OnSetWindowLayoutFullScreen(napi_env env, napi_callback_inf
                     "Invalidate params."));
                 return;
             }
-            // compatibleModeInPc need apply avoidArea method
-            if (window->IsPcOrPadFreeMultiWindowMode() && !window->GetCompatibleModeInPc()) {
+            // compatibleMode app adapt to immersive need apply avoidArea method
+            if (window->IsPcOrPadFreeMultiWindowMode() && !window->IsAdaptToCompatibleImmersive()) {
                 TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s device not support", where);
                 task.Resolve(env, NapiGetUndefined(env));
                 return;

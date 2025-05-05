@@ -583,23 +583,6 @@ HWTEST_F(WindowSessionTest3, NotifyUIRequestFocus, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetCompatibleModeInPc
- * @tc.desc: SetCompatibleModeInPc Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest3, SetCompatibleModeInPc, TestSize.Level1)
-{
-    auto enable = true;
-    auto isSupportDragInPcCompatibleMode = true;
-    ASSERT_EQ(WSError::WS_OK, session_->SetCompatibleModeInPc(enable, isSupportDragInPcCompatibleMode));
-
-    ASSERT_EQ(WSError::WS_OK, session_->SetCompatibleModeInPc(enable, isSupportDragInPcCompatibleMode));
-
-    enable = false;
-    ASSERT_EQ(WSError::WS_OK, session_->SetCompatibleModeInPc(enable, isSupportDragInPcCompatibleMode));
-}
-
-/**
  * @tc.name: NotifySessionTouchableChange
  * @tc.desc: NotifySessionTouchableChange Test
  * @tc.type: FUNC
@@ -903,28 +886,6 @@ HWTEST_F(WindowSessionTest3, NotifySessionInfoChange, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetCompatibleModeEnableInPad
- * @tc.desc: SetCompatibleModeEnableInPad Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest3, SetCompatibleModeEnableInPad, TestSize.Level1)
-{
-    ASSERT_NE(session_, nullptr);
-    session_->state_ = SessionState::STATE_FOREGROUND;
-    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
-    bool enable = true;
-    session_->sessionStage_ = nullptr;
-    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, session_->SetCompatibleModeEnableInPad(enable));
-
-    ASSERT_NE(nullptr, mockSessionStage);
-    session_->sessionStage_ = mockSessionStage;
-    ASSERT_EQ(WSError::WS_OK, session_->SetCompatibleModeEnableInPad(enable));
-
-    enable = false;
-    ASSERT_EQ(WSError::WS_OK, session_->SetCompatibleModeEnableInPad(enable));
-}
-
-/**
  * @tc.name: GetSurfaceNodeForMoveDrag
  * @tc.desc: GetSurfaceNodeForMoveDrag Test
  * @tc.type: FUNC
@@ -936,69 +897,6 @@ HWTEST_F(WindowSessionTest3, GetSurfaceNodeForMoveDrag, TestSize.Level1)
     session_->surfaceNode_ = nullptr;
     std::shared_ptr<RSSurfaceNode> res = session_->GetSurfaceNodeForMoveDrag();
     ASSERT_EQ(res, nullptr);
-}
-
-/**
- * @tc.name: CompatibleFullScreenRecover
- * @tc.desc: CompatibleFullScreenRecover Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest3, CompatibleFullScreenRecover, TestSize.Level1)
-{
-    ASSERT_NE(session_, nullptr);
-    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
-    ASSERT_NE(nullptr, mockSessionStage);
-    session_->sessionStage_ = mockSessionStage;
-    session_->sessionInfo_.isSystem_ = true;
-    auto result = session_->CompatibleFullScreenRecover();
-    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_SESSION);
-
-    session_->sessionInfo_.isSystem_ = false;
-    session_->SetSessionState(SessionState::STATE_FOREGROUND);
-    result = session_->CompatibleFullScreenRecover();
-    ASSERT_EQ(result, WSError::WS_OK);
-}
-
-/**
- * @tc.name: CompatibleFullScreenMinimize
- * @tc.desc: CompatibleFullScreenMinimize Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest3, CompatibleFullScreenMinimize, TestSize.Level1)
-{
-    ASSERT_NE(session_, nullptr);
-    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
-    ASSERT_NE(nullptr, mockSessionStage);
-    session_->sessionStage_ = mockSessionStage;
-    session_->sessionInfo_.isSystem_ = true;
-    auto result = session_->CompatibleFullScreenMinimize();
-    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_SESSION);
-
-    session_->sessionInfo_.isSystem_ = false;
-    session_->SetSessionState(SessionState::STATE_FOREGROUND);
-    result = session_->CompatibleFullScreenMinimize();
-    ASSERT_EQ(result, WSError::WS_OK);
-}
-
-/**
- * @tc.name: CompatibleFullScreenClose
- * @tc.desc: CompatibleFullScreenClose Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest3, CompatibleFullScreenClose, TestSize.Level1)
-{
-    ASSERT_NE(session_, nullptr);
-    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
-    ASSERT_NE(nullptr, mockSessionStage);
-    session_->sessionStage_ = mockSessionStage;
-    session_->sessionInfo_.isSystem_ = true;
-    auto result = session_->CompatibleFullScreenClose();
-    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_SESSION);
-
-    session_->sessionInfo_.isSystem_ = false;
-    session_->SetSessionState(SessionState::STATE_FOREGROUND);
-    result = session_->CompatibleFullScreenClose();
-    ASSERT_EQ(result, WSError::WS_OK);
 }
 
 /**
