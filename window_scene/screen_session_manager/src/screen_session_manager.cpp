@@ -6782,7 +6782,6 @@ void ScreenSessionManager::SetDisplayScale(ScreenId screenId, float scaleX, floa
 void ScreenSessionManager::SetFoldStatusLocked(bool locked)
 {
 #ifdef FOLD_ABILITY_ENABLE
-    HandleSuperFoldStatusLocked(locked);
     if (!g_foldScreenFlag) {
         return;
     }
@@ -7008,7 +7007,7 @@ void ScreenSessionManager::SetIsFoldStatusLocked(bool isFoldStatusLocked)
     isFoldStatusLocked_ = isFoldStatusLocked;
 }
 
-void ScreenSessionManager::HandleSuperFoldStatusLocked(bool isLocked)
+void ScreenSessionManager::SetFoldStatusExpandAndLocked(bool isLocked)
 {
 #ifdef FOLD_ABILITY_ENABLE
     if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {

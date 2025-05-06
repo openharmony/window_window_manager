@@ -245,6 +245,10 @@ void SuperFoldSensorManager::HandleScreenConnectChange()
 
 void SuperFoldSensorManager::HandleScreenDisconnectChange()
 {
+    if (ScreenSessionManager::GetInstance().GetIsFoldStatusLocked()) {
+        TLOGI(WmsLogTag::DMS, "Screen is disconnected, but fold status is locked");
+        return;
+    }
     TLOGI(WmsLogTag::DMS, "Screen disconnect to stop statemachine.");
     NotifyHallChanged(curHall_);
     NotifyFoldAngleChanged(curAngle_);
@@ -258,6 +262,10 @@ void SuperFoldSensorManager::HandleFoldStatusLocked()
 
 void SuperFoldSensorManager::HandleFoldStatusUnlocked()
 {
+    if (ScreenSessionManager::GetInstance().GetIsExtendScreenConnected()) {
+        TLOGI(WmsLogTag::DMS, "Fold status is unlocked, but screen is connected.");
+        return;
+    }
     TLOGI(WmsLogTag::DMS, "Fold status unlocked to start statemachine.");
     NotifyHallChanged(curHall_);
     NotifyFoldAngleChanged(curAngle_);

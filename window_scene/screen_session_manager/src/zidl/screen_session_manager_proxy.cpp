@@ -2502,6 +2502,31 @@ DMError ScreenSessionManagerProxy::SetFoldStatusLockedFromJs(bool locked)
     return ret;
 }
 
+void ScreenSessionManagerProxy::SetFoldStatusExpandAndLocked(bool locked)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("remote is null");
+        return;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken Failed");
+        return;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(locked))) {
+        WLOGFE("Write lock fold display status failed");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(
+                            DisplayManagerMessage::TRANS_ID_SET_FOLD_STATUS_EXPAND_AND_LOCKED),
+                            data, reply, option) != ERR_NONE) {
+        WLOGFE("Send TRANS_ID_SET_FOLD_STATUS_EXPAND_AND_LOCKED request failed");
+    }
+}
+
 FoldDisplayMode ScreenSessionManagerProxy::GetFoldDisplayMode()
 {
     sptr<IRemoteObject> remote = Remote();
