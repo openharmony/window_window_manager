@@ -123,7 +123,7 @@ void AniWindowManager::OnRegisterWindowManagerCallback(ani_env* env, ani_string 
     AniWindowUtils::GetStdString(env, type, cbType);
     TLOGI(WmsLogTag::DEFAULT, "[ANI] type:%{public}s", cbType.c_str());
     WmErrorCode ret = registerManager_->RegisterListener(nullptr, cbType, CaseType::CASE_WINDOW_MANAGER,
-        env, callback);
+        env, callback, ani_double(0));
     if (ret != WmErrorCode::WM_OK) {
         AniWindowUtils::AniThrowError(env, ret);
     }
