@@ -1250,6 +1250,11 @@ WMError WindowManager::GetAllWindowLayoutInfo(DisplayId displayId, std::vector<s
     return ret;
 }
 
+WMError WindowManager::GetGlobalWindowMode(DisplayId displayId, GlobalWindowMode& globalWinMode) const
+{
+    return SingletonContainer::Get<WindowAdapter>().GetGlobalWindowMode(displayId, globalWinMode);
+}
+
 WMError WindowManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) const
 {
     WMError ret = SingletonContainer::Get<WindowAdapter>().GetVisibilityWindowInfo(infos);
