@@ -33,10 +33,10 @@ public:
     static ani_status AniWindowManagerInit(ani_env* env, ani_namespace windowNameSpace);
     static ani_object GetLastWindow(ani_env* env, ani_long nativeObj, ani_object context);
     static void ShiftAppWindowFocus(ani_env* env, ani_object obj, ani_long nativeObj,
-        ani_double sourceWindowId, ani_double targerWindowId)
+        ani_double sourceWindowId, ani_double targetWindowId)
 private:
     ani_object OnGetLastWindow(ani_env* env, ani_object context);
-    void OnShiftAppWindowFocus(ani_env* env, ani_double sourceWindowId, ani_double targerWindowId);
+    void OnShiftAppWindowFocus(ani_env* env, ani_double sourceWindowId, ani_double targetWindowId);
     ani_object GetTopWindowTask(ani_env* env, void* contextPtr, bool newApi);
 };
 } // namespace Rosen
