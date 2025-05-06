@@ -270,14 +270,14 @@ public:
      */
     sptr<CompatibleModeProperty> GetCompatibleModeProperty() const;
     void SetCompatibleModeProperty(const sptr<CompatibleModeProperty> property);
-    bool IsAdaptToImmersive(sptr<WindowSessionProperty> property) const;
-    bool IsAdaptToEventMapping(sptr<WindowSessionProperty> property) const;
-    bool IsAdaptToProportionalScale(sptr<WindowSessionProperty> property) const;
-    bool IsAdaptToBackButton(sptr<WindowSessionProperty> property) const;
-    bool DisableDragResize(sptr<WindowSessionProperty> property) const;
-    bool DisableResizeWithDpi(sptr<WindowSessionProperty> property) const;
-    bool DisableFullScreen(sptr<WindowSessionProperty> property) const;
-    bool DisableWindowLimit(sptr<WindowSessionProperty> property) const;
+    bool IsAdaptToImmersive() const;
+    bool IsAdaptToEventMapping() const;
+    bool IsAdaptToProportionalScale() const;
+    bool IsAdaptToBackButton() const;
+    bool IsDragResizeDisabled() const;
+    bool IsResizeWithDpiDisabled() const;
+    bool IsFullScreenDisabled() const;
+    bool IsWindowLimitDisabled() const;
 
     /*
      * Keyboard
