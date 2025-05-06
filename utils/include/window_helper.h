@@ -158,6 +158,11 @@ public:
         return mode == WindowMode::WINDOW_MODE_FLOATING;
     }
 
+    static inline bool IsPipWindow(WindowMode mode)
+    {
+        return mode == WindowMode::WINDOW_MODE_PIP;
+    }
+
     static inline bool IsSystemBarWindow(WindowType type)
     {
         return (type == WindowType::WINDOW_TYPE_STATUS_BAR || type == WindowType::WINDOW_TYPE_NAVIGATION_BAR);
