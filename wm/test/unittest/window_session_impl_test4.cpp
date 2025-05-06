@@ -1683,7 +1683,6 @@ HWTEST_F(WindowSessionImplTest4, SetMainWindowContainerColor03, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetMainWindowContainerColor");
-    option->SetSubWindowMaximizeSupported(true);
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
@@ -1706,7 +1705,6 @@ HWTEST_F(WindowSessionImplTest4, SetMainWindowContainerColor04, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetMainWindowContainerColor");
-    option->SetSubWindowMaximizeSupported(true);
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
