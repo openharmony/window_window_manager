@@ -3754,7 +3754,7 @@ WMError WindowSessionImpl::SetWindowContainerColor(const std::string& activeColo
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     if (auto uiContent = GetUIContentSharedPtr()) {
-        uiContent->(activeColorValue, inactiveColorValue);
+        uiContent->SetWindowContainerColor(activeColorValue, inactiveColorValue);
     }
     return WMError::WM_OK;
 }
