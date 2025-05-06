@@ -157,7 +157,6 @@ WMError StartingWindow::CreateLeashAndStartingSurfaceNode(sptr<WindowNode>& node
     if (node->surfaceNode_) {
         rsUIContext = node->surfaceNode_->GetRSUIContext();
     }
-    rsSurfaceNodeConfig.rsUIContext = rsUIContext;
     rsSurfaceNodeConfig.SurfaceNodeName = "leashWindow" + std::to_string(node->GetWindowId());
     node->leashWinSurfaceNode_ = RSSurfaceNode::Create(
         rsSurfaceNodeConfig, RSSurfaceNodeType::LEASH_WINDOW_NODE, true, false, rsUIContext);

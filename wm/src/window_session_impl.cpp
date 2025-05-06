@@ -391,11 +391,9 @@ RSSurfaceNode::SharedPtr WindowSessionImpl::CreateSurfaceNode(const std::string&
             break;
     }
 
-    auto rsUIContext = rsUIDirector_->GetRSUIContext();
     auto surfaceNode = RSSurfaceNode::Create(
-        rsSurfaceNodeConfig, rsSurfaceNodeType, true, property_->IsConstrainedModal(), rsUIContext);
-    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
-          "Create RSSurfaceNode: %{public}s, name: %{public}s",
+        rsSurfaceNodeConfig, rsSurfaceNodeType, true, property_->IsConstrainedModal(), rsUIDirector_->GetRSUIContext());
+    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "Create RSSurfaceNode: %{public}s, name: %{public}s",
           RSAdapterUtil::RSNodeToStr(surfaceNode).c_str(), name.c_str());
     return surfaceNode;
 }
