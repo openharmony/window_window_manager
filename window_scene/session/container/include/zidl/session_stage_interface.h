@@ -19,7 +19,7 @@
 #include <iremote_broker.h>
 #include <list>
 #include <map>
-
+#include "common/include/window_session_property.h"
 #include "interfaces/include/ws_common.h"
 #include "occupied_area_change_info.h"
 
@@ -172,23 +172,11 @@ public:
     virtual void NotifyDisplayMove(DisplayId from, DisplayId to) = 0;
     virtual WSError SwitchFreeMultiWindow(bool enable) = 0;
     virtual WSError GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj) = 0;
-    virtual WSError CompatibleFullScreenRecover()
-    {
-        return WSError::WS_OK;
-    }
-    virtual WSError CompatibleFullScreenMinimize()
-    {
-        return WSError::WS_OK;
-    }
-    virtual WSError CompatibleFullScreenClose()
-    {
-        return WSError::WS_OK;
-    }
     virtual WSError PcAppInPadNormalClose()
     {
         return WSError::WS_OK;
     }
-    virtual WSError NotifyCompatibleModeEnableInPad(bool enable)
+    virtual WSError NotifyCompatibleModePropertyChange(const sptr<CompatibleModeProperty> property)
     {
         return WSError::WS_OK;
     }

@@ -30,6 +30,7 @@
 namespace OHOS {
 namespace Rosen {
 class WindowSessionProperty;
+class CompatibleModeProperty;
 using HandlWritePropertyFunc = bool (WindowSessionProperty::*)(Parcel& parcel);
 using HandlReadPropertyFunc = void (WindowSessionProperty::*)(Parcel& parcel);
 
@@ -98,14 +99,8 @@ public:
     void SetPiPTemplateInfo(const PiPTemplateInfo& pipTemplateInfo);
     void SetWindowMask(const std::shared_ptr<Media::PixelMap>& windowMask);
     void SetIsShaped(bool isShaped);
-    void SetCompatibleModeInPc(bool compatibleModeInPc);
-    void SetCompatibleModeInPcTitleVisible(bool compatibleModeInPcTitleVisible);
-    void SetCompatibleWindowSizeInPc(int32_t portraitWidth, int32_t portraitHeight,
-        int32_t landscapeWidth, int32_t landscapeHeight);
     void SetIsAppSupportPhoneInPc(bool isSupportPhone);
-    void SetIsSupportDragInPcCompatibleMode(bool isSupportDragInPcCompatibleMode);
     void SetIsPcAppInPad(bool isPcAppInPad);
-    void SetCompatibleModeEnableInPad(bool enable);
     void SetIsAtomicService(bool isAtomicService);
     
     /*
@@ -167,16 +162,8 @@ public:
     std::shared_ptr<Media::PixelMap> GetWindowMask() const;
     bool GetIsShaped() const;
     KeyboardLayoutParams GetKeyboardLayoutParams() const;
-    bool GetCompatibleModeInPc() const;
-    bool GetCompatibleModeInPcTitleVisible() const;
-    int32_t GetCompatibleInPcPortraitWidth() const;
-    int32_t GetCompatibleInPcPortraitHeight() const;
-    int32_t GetCompatibleInPcLandscapeWidth() const;
-    int32_t GetCompatibleInPcLandscapeHeight() const;
     bool GetIsAppSupportPhoneInPc() const;
     bool GetIsPcAppInPad() const;
-    bool GetIsSupportDragInPcCompatibleMode() const;
-    bool GetCompatibleModeEnableInPad() const;
     bool GetIsAtomicService() const;
 
     bool MarshallingWindowLimits(Parcel& parcel) const;
@@ -277,6 +264,20 @@ public:
     WindowSizeLimits GetWindowSizeLimits() const;
     void SetIsFullScreenWaterfallMode(bool isFullScreenWaterfallMode);
     bool GetIsFullScreenWaterfallMode() const;
+
+    /*
+     * Compatible mode
+     */
+    sptr<CompatibleModeProperty> GetCompatibleModeProperty() const;
+    void SetCompatibleModeProperty(const sptr<CompatibleModeProperty> property);
+    bool IsAdaptToImmersive() const;
+    bool IsAdaptToEventMapping() const;
+    bool IsAdaptToProportionalScale() const;
+    bool IsAdaptToBackButton() const;
+    bool IsDragResizeDisabled() const;
+    bool IsResizeWithDpiDisabled() const;
+    bool IsFullScreenDisabled() const;
+    bool IsWindowLimitDisabled() const;
 
     /*
      * Keyboard
@@ -440,17 +441,9 @@ private:
     int32_t collaboratorType_ = CollaboratorType::DEFAULT_TYPE;
     static const std::map<uint64_t, HandlWritePropertyFunc> writeFuncMap_;
     static const std::map<uint64_t, HandlReadPropertyFunc> readFuncMap_;
-    bool compatibleModeInPc_ = false;
-    bool compatibleModeInPcTitleVisible_ = false;
-    int32_t compatibleInPcPortraitWidth_ = 0;
-    int32_t compatibleInPcPortraitHeight_ = 0;
-    int32_t compatibleInPcLandscapeWidth_ = 0;
-    int32_t compatibleInPcLandscapeHeight_ = 0;
     bool isAppSupportPhoneInPc_ = false;
-    bool isSupportDragInPcCompatibleMode_ = false;
     bool isPcAppInPad_ = false;
     mutable std::mutex compatibleModeMutex_;
-    bool compatibleModeEnableInPad_ = false;
     uint8_t backgroundAlpha_ = 0xff; // default alpha is opaque.
     mutable std::mutex atomicServiceMutex_;
     bool isAtomicService_ = false;
@@ -516,6 +509,62 @@ private:
      */
     float cornerRadius_ = 0.0f;
     mutable std::mutex cornerRadiusMutex_;
+
+    sptr<CompatibleModeProperty> compatibleModeProperty_ = nullptr;
+};
+ 
+class CompatibleModeProperty : public Parcelable {
+public:
+    void SetIsAdaptToImmersive(bool isAdaptToImmersive);
+    bool IsAdaptToImmersive() const;
+
+    void SetIsAdaptToEventMapping(bool isAdaptToEventMapping);
+    bool IsAdaptToEventMapping() const;
+
+    void SetIsAdaptToProportionalScale(bool isAdaptToProportionalScale);
+    bool IsAdaptToProportionalScale() const;
+
+    void SetIsAdaptToBackButton(bool isAdaptToBackButton);
+    bool IsAdaptToBackButton() const;
+
+    void SetDisableDragResize(bool disableDragResize);
+    bool IsDragResizeDisabled() const;
+
+    void SetDisableResizeWithDpi(bool disableResizeWithDpi);
+    bool IsResizeWithDpiDisabled() const;
+
+    void SetDisableFullScreen(bool setDisableFullScreen);
+    bool IsFullScreenDisabled() const;
+
+    void SetDisableWindowLimit(bool disableWindowLimit);
+    bool IsWindowLimitDisabled() const;
+
+    bool Marshalling(Parcel& parcel) const override;
+    static CompatibleModeProperty* Unmarshalling(Parcel& parcel);
+
+    std::string ToString() const
+    {
+        std::stringstream ss;
+        ss << "isAdaptToImmersive_:" << isAdaptToImmersive_ << " ";
+        ss << "isAdaptToEventMapping_:" << isAdaptToEventMapping_ << " ";
+        ss << "isAdaptToProportionalScale_:" << isAdaptToProportionalScale_ << " ";
+        ss << "isAdaptToBackButton_:" << isAdaptToBackButton_<< " ";
+        ss << "disableDragResize_:" << disableDragResize_<< " ";
+        ss << "disableResizeWithDpi_:" << disableResizeWithDpi_<< " ";
+        ss << "disableFullScreen_:" << disableFullScreen_<< " ";
+        ss << "disableWindowLimit_:" << disableWindowLimit_<< " ";
+        return ss.str();
+    }
+
+private:
+    bool isAdaptToImmersive_ { false };
+    bool isAdaptToEventMapping_ { false };
+    bool isAdaptToProportionalScale_ { false };
+    bool isAdaptToBackButton_ { false };
+    bool disableDragResize_ { false };
+    bool disableResizeWithDpi_ { false };
+    bool disableFullScreen_ { false };
+    bool disableWindowLimit_ { false };
 };
 
 struct FreeMultiWindowConfig : public Parcelable {

@@ -181,17 +181,14 @@ HWTEST_F(WindowSessionTest, SetActive01, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetCompatibleModeEnableInPad
- * @tc.desc: SetCompatibleModeEnableInPad test
+ * @tc.name: SetCompatibleModeProperty
+ * @tc.desc: SetCompatibleModeProperty
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest, SetCompatibleModeEnableInPad, TestSize.Level1)
+HWTEST_F(WindowSessionTest, SetCompatibleModeProperty, TestSize.Level1)
 {
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(nullptr, property);
-    bool enable = true;
-    property->SetCompatibleModeEnableInPad(enable);
-    ASSERT_EQ(property->GetCompatibleModeEnableInPad(), true);
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    ASSERT_EQ(WSError::WS_OK, session_->SetCompatibleModeProperty(compatibleModeProperty));
 }
 
 /**
@@ -1445,23 +1442,6 @@ HWTEST_F(WindowSessionTest, TransferKeyEventForConsumed03, TestSize.Level1)
     std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
     bool isConsumed = false;
     ASSERT_EQ(WSError::WS_OK, session_->TransferKeyEventForConsumed(keyEvent, isConsumed));
-}
-
-/**
- * @tc.name: SetCompatibleModeInPc
- * @tc.desc: SetCompatibleModeInPc test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest, SetCompatibleModeInPc, TestSize.Level1)
-{
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(nullptr, property);
-    bool enable = true;
-    bool isSupportDragInPcCompatibleMode = true;
-    property->SetCompatibleModeInPc(enable);
-    ASSERT_EQ(property->GetCompatibleModeInPc(), true);
-    property->SetIsSupportDragInPcCompatibleMode(isSupportDragInPcCompatibleMode);
-    ASSERT_EQ(property->GetIsSupportDragInPcCompatibleMode(), true);
 }
 
 /**

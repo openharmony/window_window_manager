@@ -2453,6 +2453,7 @@ public:
 
     /**
      * @brief get compatible mode in pc.
+     * @deprecated use IsAdaptToImmersive instead
      *
      * @return True means window is compatible mode in pc, false means the opposite.
      */
@@ -3726,6 +3727,18 @@ public:
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
+
+    /**
+     * @brief notify avoid area for compatible mode app
+     */
+    virtual void HookCompatibleModeAvoidAreaNotify() {}
+
+     /**
+     * @brief The comaptible mode app adapt to immersive or not.
+     *
+     * @return true comptbleMode adapt to immersive, others means not.
+     */
+    virtual bool IsAdaptToCompatibleImmersive() const { return false; }
 };
 }
 }
