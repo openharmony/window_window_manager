@@ -421,7 +421,7 @@ namespace window {
 
   export class SystemBarTintStateInternal implements SystemBarTintState {
     displayId: number;
-    regionTint: Array<SystemBarRegionTintInternal>;
+    regionTint: Array<SystemBarRegionTint>;
   }
 
   export interface Rect {
