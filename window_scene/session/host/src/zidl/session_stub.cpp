@@ -445,21 +445,14 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         reply.WriteUint32(windowSizeLimits.minWindowWidth);
         reply.WriteUint32(windowSizeLimits.maxWindowHeight);
         reply.WriteUint32(windowSizeLimits.minWindowHeight);
-        reply.WriteBool(property->GetCompatibleModeInPc());
-        reply.WriteBool(property->GetCompatibleModeInPcTitleVisible());
-        reply.WriteInt32(property->GetCompatibleInPcPortraitWidth());
-        reply.WriteInt32(property->GetCompatibleInPcPortraitHeight());
-        reply.WriteInt32(property->GetCompatibleInPcLandscapeWidth());
-        reply.WriteInt32(property->GetCompatibleInPcLandscapeHeight());
         reply.WriteBool(property->GetIsAppSupportPhoneInPc());
-        reply.WriteBool(property->GetIsSupportDragInPcCompatibleMode());
         reply.WriteBool(property->GetIsPcAppInPad());
-        reply.WriteBool(property->GetCompatibleModeEnableInPad());
         reply.WriteUint32(static_cast<uint32_t>(property->GetRequestedOrientation()));
         reply.WriteString(property->GetAppInstanceKey());
         reply.WriteBool(property->GetDragEnabled());
         reply.WriteBool(property->GetIsAtomicService());
         reply.WriteBool(property->GetIsAbilityHook());
+        reply.WriteParcelable(property->GetCompatibleModeProperty());
     }
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;

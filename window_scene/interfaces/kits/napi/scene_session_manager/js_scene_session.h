@@ -192,11 +192,8 @@ private:
     static void BindNativeMethodForWaterfall(napi_env env, napi_value objValue, const char* moduleName);
     static napi_value SetSkipSelfWhenShowOnVirtualScreen(napi_env env, napi_callback_info info);
     static napi_value SetSkipEventOnCastPlus(napi_env env, napi_callback_info info);
-    static napi_value SetCompatibleModeInPc(napi_env env, napi_callback_info info);
-    static napi_value SetCompatibleModeInPcTitleVisible(napi_env env, napi_callback_info info);
+    static napi_value ToggleCompatibleMode(napi_env, napi_callback_info info);
     static napi_value SetAppSupportPhoneInPc(napi_env env, napi_callback_info info);
-    static napi_value SetCompatibleWindowSizeInPc(napi_env env, napi_callback_info info);
-    static napi_value SetCompatibleModeEnableInPad(napi_env env, napi_callback_info info);
     static napi_value SetUniqueDensityDpiFromSCB(napi_env env, napi_callback_info info);
     static napi_value SetBlank(napi_env env, napi_callback_info info);
     static napi_value RemoveBlank(napi_env env, napi_callback_info info);
@@ -206,9 +203,6 @@ private:
     static napi_value SyncDefaultRequestedOrientation(napi_env env, napi_callback_info info);
     static napi_value SetIsPcAppInPad(napi_env env, napi_callback_info info);
     static napi_value SetStartingWindowExitAnimationFlag(napi_env env, napi_callback_info info);
-    static napi_value CompatibleFullScreenRecover(napi_env env, napi_callback_info info);
-    static napi_value CompatibleFullScreenMinimize(napi_env env, napi_callback_info info);
-    static napi_value CompatibleFullScreenClose(napi_env env, napi_callback_info info);
     static napi_value PcAppInPadNormalClose(napi_env env, napi_callback_info info);
     static napi_value SetWindowEnableDragBySystem(napi_env env, napi_callback_info info);
     static napi_value SetIsPendingToBackgroundState(napi_env env, napi_callback_info info);
@@ -277,11 +271,8 @@ private:
     napi_value OnSetSkipDraw(napi_env env, napi_callback_info info);
     napi_value OnSetSkipSelfWhenShowOnVirtualScreen(napi_env env, napi_callback_info info);
     napi_value OnSetSkipEventOnCastPlus(napi_env env, napi_callback_info info);
-    napi_value OnSetCompatibleModeInPc(napi_env env, napi_callback_info info);
-    napi_value OnSetCompatibleModeInPcTitleVisible(napi_env env, napi_callback_info info);
+    napi_value OnToggleCompatibleMode(napi_env env, napi_callback_info info);
     napi_value OnSetAppSupportPhoneInPc(napi_env env, napi_callback_info info);
-    napi_value OnSetCompatibleWindowSizeInPc(napi_env env, napi_callback_info info);
-    napi_value OnSetCompatibleModeEnableInPad(napi_env env, napi_callback_info info);
     napi_value OnSetUniqueDensityDpiFromSCB(napi_env env, napi_callback_info info);
     napi_value OnSetBlank(napi_env env, napi_callback_info info);
     napi_value OnRemoveBlank(napi_env env, napi_callback_info info);
@@ -291,9 +282,6 @@ private:
     napi_value OnSyncDefaultRequestedOrientation(napi_env env, napi_callback_info info);
     napi_value OnSetIsPcAppInPad(napi_env env, napi_callback_info info);
     napi_value OnSetStartingWindowExitAnimationFlag(napi_env env, napi_callback_info info);
-    napi_value OnCompatibleFullScreenRecover(napi_env env, napi_callback_info info);
-    napi_value OnCompatibleFullScreenMinimize(napi_env env, napi_callback_info info);
-    napi_value OnCompatibleFullScreenClose(napi_env env, napi_callback_info info);
     napi_value OnPcAppInPadNormalClose(napi_env env, napi_callback_info info);
     napi_value OnSyncScenePanelGlobalPosition(napi_env env, napi_callback_info info);
     napi_value OnUnSyncScenePanelGlobalPosition(napi_env env, napi_callback_info info);

@@ -191,10 +191,7 @@ public:
     /*
      * Compatible Mode
      */
-    WSError NotifyCompatibleModeEnableInPad(bool enabled) override;
-    WSError CompatibleFullScreenRecover() override;
-    WSError CompatibleFullScreenMinimize() override;
-    WSError CompatibleFullScreenClose() override;
+    WSError NotifyCompatibleModePropertyChange(const sptr<CompatibleModeProperty> property) override;
     void HookDecorButtonStyleInCompatibleMode(uint32_t contentColor);
     WSError PcAppInPadNormalClose() override;
     void HandleWindowLimitsInCompatibleMode(WindowSizeLimits& windowSizeLimits);
