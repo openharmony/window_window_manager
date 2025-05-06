@@ -1965,6 +1965,46 @@ void WindowSessionProperty::SetCompatibleModeProperty(const sptr<CompatibleModeP
     compatibleModeProperty_ = property;
 }
 
+bool WindowSessionProperty::IsAdaptToImmersive()
+{
+    return compatibleModeProperty_ && compatibleModeProperty_->IsAdaptToImmersive();
+}
+
+bool WindowSessionProperty::IsAdaptToEventMapping()
+{
+    return compatibleModeProperty_ && compatibleModeProperty_->IsAdaptToEventMapping();
+}
+
+bool WindowSessionProperty::IsAdaptToProportionalScale() const
+{
+    return compatibleModeProperty_ && compatibleModeProperty_->IsAdaptToProportionalScale();
+}
+
+bool WindowSessionProperty::IsAdaptToBackButton() const
+{
+    return compatibleModeProperty_ && compatibleModeProperty_->IsAdaptToBackButton();
+}
+
+bool WindowSessionProperty::IsDragResizeDisabled() const
+{
+    return compatibleModeProperty_ && compatibleModeProperty_->IsDragResizeDisabled();
+}
+
+bool WindowSessionProperty::IsResizeWithDpiDisabled() const
+{
+    return compatibleModeProperty_ && compatibleModeProperty_->IsResizeWithDpiDisabled();
+}
+
+bool WindowSessionProperty::IsFullScreenDisabled() const
+{
+    return compatibleModeProperty_ && compatibleModeProperty_->IsFullScreenDisabled();
+}
+        
+bool WindowSessionProperty::IsWindowLimitDisabled() const
+{
+    return compatibleModeProperty_ && compatibleModeProperty_->IsWindowLimitDisabled();
+}
+
 void CompatibleModeProperty::SetIsAdaptToImmersive(bool isAdaptToImmersive)
 {
     isAdaptToImmersive_ = isAdaptToImmersive;
@@ -2010,7 +2050,7 @@ void CompatibleModeProperty::SetDisableDragResize(bool disableDragResize)
     disableDragResize_ = disableDragResize;
 }
 
-bool CompatibleModeProperty::DisableDragResize() const
+bool CompatibleModeProperty::IsDragResizeDisabled() const
 {
     return disableDragResize_;
 }
@@ -2020,7 +2060,7 @@ void CompatibleModeProperty::SetDisableResizeWithDpi(bool disableResizeWithDpi)
     disableResizeWithDpi_ = disableResizeWithDpi;
 }
         
-bool CompatibleModeProperty::DisableResizeWithDpi() const
+bool CompatibleModeProperty::IsResizeWithDpiDisabled() const
 {
     return disableResizeWithDpi_;
 }
@@ -2030,7 +2070,7 @@ void CompatibleModeProperty::SetDisableFullScreen(bool disableFullScreen)
     disableFullScreen_ = disableFullScreen;
 }
 
-bool CompatibleModeProperty::DisableFullScreen() const
+bool CompatibleModeProperty::IsFullScreenDisabled() const
 {
     return disableFullScreen_;
 }
@@ -2040,73 +2080,9 @@ void CompatibleModeProperty::SetDisableWindowLimit(bool disableWindowLimit)
     disableWindowLimit_ = disableWindowLimit;
 }
 
-bool CompatibleModeProperty::DisableWindowLimit() const
+bool CompatibleModeProperty::IsWindowLimitDisabled() const
 {
     return disableWindowLimit_;
-}
-
-bool CompatibleModeProperty::IsAdaptToImmersive(sptr<WindowSessionProperty> property)
-{
-    if (property && property->GetCompatibleModeProperty()) {
-        return property->GetCompatibleModeProperty()->IsAdaptToImmersive();
-    }
-    return false;
-}
-
-bool CompatibleModeProperty::IsAdaptToEventMapping(sptr<WindowSessionProperty> property)
-{
-    if (property && property->GetCompatibleModeProperty()) {
-        return property->GetCompatibleModeProperty()->IsAdaptToEventMapping();
-    }
-    return false;
-}
-
-bool CompatibleModeProperty::IsAdaptToProportionalScale(sptr<WindowSessionProperty> property)
-{
-    if (property && property->GetCompatibleModeProperty()) {
-        return property->GetCompatibleModeProperty()->IsAdaptToProportionalScale();
-    }
-    return false;
-}
-
-bool CompatibleModeProperty::IsAdaptToBackButton(sptr<WindowSessionProperty> property)
-{
-    if (property && property->GetCompatibleModeProperty()) {
-        return property->GetCompatibleModeProperty()->IsAdaptToBackButton();
-    }
-    return false;
-}
-
-bool CompatibleModeProperty::DisableDragResize(sptr<WindowSessionProperty> property)
-{
-    if (property && property->GetCompatibleModeProperty()) {
-        return property->GetCompatibleModeProperty()->DisableDragResize();
-    }
-    return false;
-}
-
-bool CompatibleModeProperty::DisableResizeWithDpi(sptr<WindowSessionProperty> property)
-{
-    if (property && property->GetCompatibleModeProperty()) {
-        return property->GetCompatibleModeProperty()->DisableResizeWithDpi();
-    }
-    return false;
-}
-
-bool CompatibleModeProperty::DisableFullScreen(sptr<WindowSessionProperty> property)
-{
-    if (property && property->GetCompatibleModeProperty()) {
-        return property->GetCompatibleModeProperty()->DisableFullScreen();
-    }
-    return false;
-}
-        
-bool CompatibleModeProperty::DisableWindowLimit(sptr<WindowSessionProperty> property)
-{
-    if (property && property->GetCompatibleModeProperty()) {
-        return property->GetCompatibleModeProperty()->DisableWindowLimit();
-    }
-    return false;
 }
 
 bool CompatibleModeProperty::Marshalling(Parcel& parcel) const

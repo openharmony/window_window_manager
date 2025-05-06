@@ -270,6 +270,14 @@ public:
      */
     sptr<CompatibleModeProperty> GetCompatibleModeProperty() const;
     void SetCompatibleModeProperty(const sptr<CompatibleModeProperty> property);
+    bool IsAdaptToImmersive(sptr<WindowSessionProperty> property) const;
+    bool IsAdaptToEventMapping(sptr<WindowSessionProperty> property) const;
+    bool IsAdaptToProportionalScale(sptr<WindowSessionProperty> property) const;
+    bool IsAdaptToBackButton(sptr<WindowSessionProperty> property) const;
+    bool DisableDragResize(sptr<WindowSessionProperty> property) const;
+    bool DisableResizeWithDpi(sptr<WindowSessionProperty> property) const;
+    bool DisableFullScreen(sptr<WindowSessionProperty> property) const;
+    bool DisableWindowLimit(sptr<WindowSessionProperty> property) const;
 
     /*
      * Keyboard
@@ -520,25 +528,16 @@ public:
     bool IsAdaptToBackButton() const;
 
     void SetDisableDragResize(bool disableDragResize);
-    bool DisableDragResize() const;
+    bool IsDragResizeDisabled() const;
 
     void SetDisableResizeWithDpi(bool disableResizeWithDpi);
-    bool DisableResizeWithDpi() const;
+    bool IsResizeWithDpiDisabled() const;
 
     void SetDisableFullScreen(bool setDisableFullScreen);
-    bool DisableFullScreen() const;
+    bool IsFullScreenDisabled() const;
 
     void SetDisableWindowLimit(bool disableWindowLimit);
-    bool DisableWindowLimit() const;
-
-    static bool IsAdaptToImmersive(sptr<WindowSessionProperty> property);
-    static bool IsAdaptToEventMapping(sptr<WindowSessionProperty> property);
-    static bool IsAdaptToProportionalScale(sptr<WindowSessionProperty> property);
-    static bool IsAdaptToBackButton(sptr<WindowSessionProperty> property);
-    static bool DisableDragResize(sptr<WindowSessionProperty> property);
-    static bool DisableResizeWithDpi(sptr<WindowSessionProperty> property);
-    static bool DisableFullScreen(sptr<WindowSessionProperty> property);
-    static bool DisableWindowLimit(sptr<WindowSessionProperty> property);
+    bool IsWindowLimitDisabled() const;
 
     bool Marshalling(Parcel& parcel) const override;
     static CompatibleModeProperty* Unmarshalling(Parcel& parcel);

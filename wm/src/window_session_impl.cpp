@@ -306,12 +306,12 @@ bool WindowSessionImpl::IsSceneBoardEnabled() const
 // method will be instead after ace fix
 bool WindowSessionImpl::GetCompatibleModeInPc() const
 {
-    return CompatibleModeProperty::IsAdaptToImmersive(property_);
+    return property_->IsAdaptToImmersive();
 }
 
 bool WindowSessionImpl::IsAdaptToCompatibleImmersive() const
 {
-    return CompatibleModeProperty::IsAdaptToImmersive(property_);
+    return property_->IsAdaptToImmersive();
 }
 
 void WindowSessionImpl::MakeSubOrDialogWindowDragableAndMoveble()
@@ -1582,20 +1582,20 @@ void WindowSessionImpl::HideTitleButton(bool& hideSplitButton, bool& hideMaximiz
     if (uiContent == nullptr || !IsDecorEnable()) {
         return;
     }
-    hideMaximizeButton = hideMaximizeButton || CompatibleModeProperty::DisableFullScreen(property_);
+    hideMaximizeButton = hideMaximizeButton || property_->IsFullScreenDisabled();
     bool isLayoutFullScreen = property_->IsLayoutFullScreen();
-    if (CompatibleModeProperty::IsAdaptToImmersive(property_) && !property_->GetIsAtomicService()) {
+    if (property_->IsAdaptToImmersive() && !property_->GetIsAtomicService()) {
         uiContent->HideWindowTitleButton(true, !isLayoutFullScreen && hideMaximizeButton,
             hideMinimizeButton, hideCloseButton);
     } else {
         uiContent->HideWindowTitleButton(hideSplitButton, hideMaximizeButton, hideMinimizeButton, hideCloseButton);
     }
     // compatible mode adapt to proportional scale, will show its button
-    bool showScaleBtn = CompatibleModeProperty::IsAdaptToProportionalScale(property_);
+    bool showScaleBtn = property_->IsAdaptToProportionalScale();
     uiContent->OnContainerModalEvent(SCB_COMPATIBLE_MAXIMIZE_VISIBILITY,
         !isLayoutFullScreen && showScaleBtn  ? "true" : "false");
     // compatible mode adapt to back, will show its button
-    bool isAdaptToBackButton = CompatibleModeProperty::IsAdaptToBackButton(property_);
+    bool isAdaptToBackButton = property_->IsAdaptToBackButton();
     uiContent->OnContainerModalEvent(SCB_BACK_VISIBILITY, isAdaptToBackButton ? "true" : "false");
 }
 
@@ -1674,7 +1674,7 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
         std::unique_lock<std::shared_mutex> lock(uiContentMutex_);
         uiContent_ = std::move(uiContent);
         // compatibleMode app in pc, need change decor title to float title bar
-        if (CompatibleModeProperty::IsAdaptToImmersive(property_)) {
+        if (property_->IsAdaptToImmersive()) {
             uiContent_->SetContainerModalTitleVisible(false, true);
             uiContent_->EnableContainerModalCustomGesture(true);
         }
@@ -2348,7 +2348,7 @@ void WindowSessionImpl::SetRequestedOrientation(Orientation orientation, bool ne
         orientation = GetRequestedOrientation();
     }
     // when compatible mode disable fullscreen and request orientation, will enter into immersive mode
-    if (CompatibleModeProperty::DisableFullScreen(property_) && IsHorizontalOrientation(orientation)) {
+    if (property_->IsFullScreenDisabled() && IsHorizontalOrientation(orientation)) {
         TLOGI(WmsLogTag::WMS_COMPAT, "compatible request horizontal orientation %{public}u", orientation);
         property_->SetIsLayoutFullScreen(true);
     }
