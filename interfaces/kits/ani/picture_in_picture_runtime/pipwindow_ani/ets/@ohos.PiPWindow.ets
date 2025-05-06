@@ -14,26 +14,26 @@
  */
 import type { AsyncCallback, Callback} from '@ohos.base';
 import { BusinessError } from '@ohos.base';
-import colorSpaceManager from '@ohos.graphics.colorSpaceManager';
-import hdrCapability from '@ohos.graphics.hdrCapability';
 
-namespace PiPWindow {
+export default namespace PiPWindow {
+  loadLibrary('pipwindowani_kit.z');
+  
   export interface PiPController {
     startPiP(): Promise<void>;
     stopPiP(): Promise<void>;
   }
   export class PiPControllerInternal implements PiPController {
-    static { loadLibrary('pipwindowani_kit.z') }
-    private nativeObj : long;
-    setNativeObj(nativeObj: long):void {
-       this.nativeObj = nativeObj;
+    static { loadLibrary('pipwindowani_kit.z') };
+    private nativeObj: long;
+    public setNativeObj(nativeObj: long): void {
+        this.nativeObj = nativeObj;
     }
 
-    private native startPiP(nativeObj: long): void;
-    private native stopPiP(nativeObj: long): void;'
+    public native startPiP(nativeObj: long): void;
+    public native stopPiP(nativeObj: long): void;
 
     public startPiP(): Promise<void> {
-        return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void) :void => {
+        return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
             taskpool.execute((): void => {
                 this.startPiP(this.nativeObj);
             }).then((ret: NullishType) :void => {
@@ -45,7 +45,7 @@ namespace PiPWindow {
     }
 
     public stopPiP(): Promise<void> {
-        return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void) :void => {
+        return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
             taskpool.execute((): void => {
                 this.stopPiP(this.nativeObj);
             }).then((ret: NullishType) :void => {
@@ -58,22 +58,9 @@ namespace PiPWindow {
   }
 
   let nativeObj: long;
-  function setNativeObj(nativeObj: long):void {
+  export function setNativeObj(nativeObj: long):void {
     nativeObj = nativeObj;
   }
 
-  native function isPiPEnabled(nativeObj: long): boolean;
-  export function isPiPEnabled(): boolean {
-    return new Promise<boolean>((resolve: (value: boolean) => void, reject: (error: BusinessError) => void ) => {
-    taskpool.execute((): boolean => {
-      return isPiPEnabled(nativeObj);
-    }).then((ret: NullishType) => {
-      resolve(ret as boolean);
-    }).catch((err: NullishType) => {
-      reject(err as BusinessError);
-    });
-    }); 
-  }
+  export native function isPiPEnabled(): boolean;
 }
-
-export default PiPWindow;

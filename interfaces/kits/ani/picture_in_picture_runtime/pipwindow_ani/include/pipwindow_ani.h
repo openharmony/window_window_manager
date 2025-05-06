@@ -23,7 +23,8 @@ namespace Rosen {
 
 class PiPWindowAni {
 public:
-    explicit PiPWindowAni(const sptr<PictureInPictureController>& pipController);
+    static ani_status Init(ani_env* env, ani_namespace nsp);
+    static ani_boolean isPiPEnabledAni(ani_env* env);
     sptr<PictureInPictureController> GetPiPController() { return pipControllerToken_; }
     
     static void startPiPAni(ani_env* env, ani_object obj, ani_long nativeObj);
@@ -33,9 +34,7 @@ private:
     void OnstartPiPAni(ani_env* env);
     void OnstopPiPAni(ani_env* env);
     sptr<PictureInPictureController> pipControllerToken_ = nullptr;
-
 };
-
 }  // namespace Rosen
 }  // namespace OHOS
-#endif
+#endif
