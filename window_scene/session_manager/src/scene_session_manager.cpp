@@ -11792,13 +11792,13 @@ WMError SceneSessionManager::GetGlobalWindowMode(DisplayId displayId, GlobalWind
             }
             WindowMode winMode = session->GetWindowMode();
             if (WindowHelper::IsFullScreenWindow(winMode)) {
-                globalWinMode |= GlobalWindowMode::FULLSCREEN;
+                globalWinMode = globalWinMode | GlobalWindowMode::FULLSCREEN;
             } else if (WindowHelper::IsSplitWindowMode(winMode)) {
-                globalWinMode |= GlobalWindowMode::SPLIT;
+                globalWinMode = globalWinMode | GlobalWindowMode::SPLIT;
             } else if (WindowHelper::IsFloatingWindow(winMode)) {
-                globalWinMode |= GlobalWindowMode::FLOAT;
-            } else if (WindowHelper::IsPipWindow(winMode)) {
-                globalWinMode |= GlobalWindowMode::PIP;
+                globalWinMode = globalWinMode | GlobalWindowMode::FLOAT;
+            } else if (WindowHelper::IsPipWindowMode(winMode)) {
+                globalWinMode = globalWinMode | GlobalWindowMode::PIP;
             }
             if (globalWinMode == GlobalWindowMode::ALL) {
                 break;
