@@ -322,7 +322,67 @@ namespace window {
     bottomRect: Rect;
   }
 
-  export class SystemBarRegionTintInternal {
+  /**
+   * System bar tint of region
+   *
+   * @interface SystemBarRegionTint
+   * @syscap SystemCapability.WindowManager.WindowManager.Core
+   * @systemapi Hide this for inner system use.
+   * @since 8
+   */
+  interface SystemBarRegionTint {
+    /**
+     * System bar type
+     *
+     * @type { WindowType }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @systemapi Hide this for inner system use.
+     * @since 8
+     */
+    type: WindowType;
+
+    /**
+     * The visibility of system bar
+     *
+     * @type { ?boolean }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @systemapi Hide this for inner system use.
+     * @since 8
+     */
+    isEnable?: boolean;
+
+    /**
+     * The region of system bar
+     *
+     * @type { ?Rect }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @systemapi Hide this for inner system use.
+     * @since 8
+     */
+    region?: Rect;
+
+    /**
+     * The background color of the system bar.
+     *
+     * @type { ?string }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @systemapi Hide this for inner system use.
+     * @since 8
+     */
+    backgroundColor?: string;
+
+    /**
+     * The content color of the system bar.
+     *
+     * @type { ?string }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @systemapi Hide this for inner system use.
+     * @since 8
+     */
+    contentColor?: string;
+  }
+
+  export class SystemBarRegionTintInternal implements SystemBarRegionTint {
     type: WindowType;
     isEnable?: boolean;
     region?: Rect;
@@ -330,7 +390,36 @@ namespace window {
     contentColor?: string;
   }
 
-  export class SystemBarTintStateInternal {
+  /**
+   * System bar tint state for systemui
+   *
+   * @interface SystemBarTintState
+   * @syscap SystemCapability.WindowManager.WindowManager.Core
+   * @systemapi Hide this for inner system use.
+   * @since 8
+   */
+  interface SystemBarTintState {
+    /**
+     * Id of display
+     *
+     * @type { number }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @systemapi Hide this for inner system use.
+     * @since 8
+     */
+    displayId: number;
+    /**
+     * Region tint of systembar
+     *
+     * @type { Array<SystemBarRegionTint> }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @systemapi Hide this for inner system use.
+     * @since 8
+     */
+    regionTint: Array<SystemBarRegionTint>;
+  }
+
+  export class SystemBarTintStateInternal implements SystemBarTintState {
     displayId: number;
     regionTint: Array<SystemBarRegionTintInternal>;
   }
@@ -1985,8 +2074,8 @@ function runWindowListenerBooleanArgCallBack(cb: object, cbArg: boolean): void {
 }
 
 function runSystemBarTintChangeCallBack(cb: object, tint: object): void {
-  const func = cb as (tint: SystemBarTintStateInternal) => void;
-  func(tint as SystemBarTintStateInternal);
+  const func = cb as (tint: SystemBarTintState) => void;
+  func(tint as SystemBarTintState);
 }
 
 function runAvoidAreaChangeCallBack(cb: object, area: object, type: int): void {
