@@ -3761,33 +3761,34 @@ WMError WindowSessionImpl::SetWindowContainerColor(const std::string& activeColo
 
 WMError WindowSessionImpl::SetMainWindowContainerColor(const std::string& activeColor, const std::string& inactiveColor)
 {
-    if (!windowSystemConfig_.IsPcWindow()) {
-        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
-    }
     if (!WindowHelper::IsMainWindow(GetType())) {
         return WMError::WM_ERROR_INVALID_CALLING;
     }
     if (!IsDecorEnable()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+    if (!windowSystemConfig_.IsPcWindow()) {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     uint32_t activeColorValue;
     if (!ColorParser::Parse(activeColor, activeColorValue)) {
-        TLOGW(WmsLogTag::WMS_DECOR, "window: %{public}s, active value: [%{public}s, %{public}u]",
+        TLOGE(WmsLogTag::WMS_DECOR, "window: %{public}s, active value: [%{public}s, %{public}u]",
             GetWindowName().c_str(), activeColor.c_str(), activeColorValue);
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     uint32_t inactiveColorValue;
     if (!ColorParser::Parse(inactiveColor, inactiveColorValue)) {
-        TLOGW(WmsLogTag::WMS_DECOR, "window: %{public}s, inactive value: [%{public}s, %{public}u]",
+        TLOGE(WmsLogTag::WMS_DECOR, "window: %{public}s, inactive value: [%{public}s, %{public}u]",
             GetWindowName().c_str(), inactiveColor.c_str(), inactiveColorValue);
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     if ((inactiveColorValue & 0xff000000) != 0xff000000) {
-        TLOGI(WmsLogTag::WMS_DECOR, "window: %{public}s, inactive value: [%{public}s, %{public}u]",
-            GetWindowName().c_str(), activeColor.c_str(), activeColorValue);
+        TLOGE(WmsLogTag::WMS_DECOR, "window: %{public}s, inactive alpha value error", GetWindowName().c_str());
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     if (auto uiContent = GetUIContentSharedPtr()) {
+        TLOGI(WmsLogTag::WMS_DECOR, "window: %{public}s, activeValue: %{public}u, inactiveValue: %{public}u",
+            GetWindowName().c_str(), activeColorValue, inactiveColorValue);
         uiContent->SetWindowContainerColor(activeColorValue, inactiveColorValue);
     }
     return WMError::WM_OK;
