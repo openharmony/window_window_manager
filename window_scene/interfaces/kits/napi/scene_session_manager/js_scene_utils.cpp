@@ -1117,40 +1117,28 @@ bool ConvertThrowSlipModeFromJs(napi_env env, napi_value value, ThrowSlipMode& t
 
 bool ConvertCompatibleModePropertyFromJs(napi_env env, napi_value value, CompatibleModeProperty& compatibleModeProperty)
 {
-    bool ret = false;
+    std::map<std::string, void (CompatibleModeProperty::*)(bool)> funcs = {
+        {"isAdaptToImmersive", &CompatibleModeProperty::SetIsAdaptToImmersive},
+        {"isAdaptToEventMapping", &CompatibleModeProperty::SetIsAdaptToProportionalScale},
+        {"isAdaptToProportionalScale", &CompatibleModeProperty::SetIsAdaptToProportionalScale},
+        {"isAdaptToBackButton", &CompatibleModeProperty::SetIsAdaptToBackButton},
+        {"disableDragResize", &CompatibleModeProperty::SetDisableDragResize},
+        {"disableResizeWithDpi", &CompatibleModeProperty::SetDisableResizeWithDpi},
+        {"disableFullScreen", &CompatibleModeProperty::SetDisableFullScreen},
+        {"disableWindowLimit", &CompatibleModeProperty::SetDisableWindowLimit},
+    };
     bool atLeastOneParam = false;
-    if (ParseJsValue(env, value, "isAdaptToImmersive", ret)) {
-        compatibleModeProperty.SetIsAdaptToImmersive(ret);
-        atLeastOneParam = true;
+    std::map<std::string, void (CompatibleModeProperty::*)(bool)>::iterator iter;
+    for (iter = funcs.begin(); iter != funcs.end(); ++iter) {
+        std::string paramStr = iter->first;
+        bool ret = false;
+        if (ParseJsValue(env, value, paramStr, ret)) {
+            void (CompatibleModeProperty::*func)(bool) = iter->second;
+            (compatibleModeProperty.*func)(ret);
+            atLeastOneParam = true;
+        }
     }
-    if (ParseJsValue(env, value, "isAdaptToEventMapping", ret)) {
-        compatibleModeProperty.SetIsAdaptToEventMapping(ret);
-        atLeastOneParam = true;
-    }
-    if (ParseJsValue(env, value, "isAdaptToProportionalScale", ret)) {
-        compatibleModeProperty.SetIsAdaptToProportionalScale(ret);
-        atLeastOneParam = true;
-    }
-    if (ParseJsValue(env, value, "isAdaptToBackButton", ret)) {
-        compatibleModeProperty.SetIsAdaptToBackButton(ret);
-        atLeastOneParam = true;
-    }
-    if (ParseJsValue(env, value, "disableDragResize", ret)) {
-        compatibleModeProperty.SetDisableDragResize(ret);
-        atLeastOneParam = true;
-    }
-    if (ParseJsValue(env, value, "disableResizeWithDpi", ret)) {
-        compatibleModeProperty.SetDisableResizeWithDpi(ret);
-        atLeastOneParam = true;
-    }
-    if (ParseJsValue(env, value, "disableFullScreen", ret)) {
-        compatibleModeProperty.SetDisableFullScreen(ret);
-        atLeastOneParam = true;
-    }
-    if (ParseJsValue(env, value, "disableWindowLimit", ret)) {
-        compatibleModeProperty.SetDisableWindowLimit(ret);
-        atLeastOneParam = true;
-    }
+    TLOGI(WmsLogTag::WMS_COMPAT, "property: %{public}s", compatibleModeProperty.ToString().c_str());
     return atLeastOneParam;
 }
 

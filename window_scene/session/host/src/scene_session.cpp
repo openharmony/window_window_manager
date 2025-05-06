@@ -834,7 +834,7 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
         TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s event: %{public}d", where, static_cast<int32_t>(event));
         session->UpdateWaterfallMode(event);
         auto property = session->GetSessionProperty();
-        bool proportionalScale = CompatibleModeProperty::IsAdaptToProportionalScale(property);
+        bool proportionalScale = property->IsAdaptToProportionalScale();
         if (event == SessionEvent::EVENT_START_MOVE) {
             if (!session->IsMovable()) {
                 return WSError::WS_OK;
@@ -2137,7 +2137,7 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
             GetPersistentId(), static_cast<uint32_t>(GetWindowType()), sessionProperty->GetWindowFlags());
         return;
     }
-    if (CompatibleModeProperty::IsAdaptToImmersive(sessionProperty)) {
+    if (sessionProperty->IsAdaptToImmersive()) {
         HookAvoidAreaInCompatibleMode(rect, AvoidAreaType::TYPE_SYSTEM, avoidArea);
         return;
     }
@@ -2307,7 +2307,7 @@ void SceneSession::GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea) con
         return;
     }
     // compatibleMode app need to hook avoidArea in pc
-    if (CompatibleModeProperty::IsAdaptToImmersive(GetSessionProperty())) {
+    if (GetSessionProperty()->IsAdaptToImmersive()) {
         HookAvoidAreaInCompatibleMode(rect, AvoidAreaType::TYPE_NAVIGATION_INDICATOR, avoidArea);
         return;
     }
@@ -2324,8 +2324,7 @@ void SceneSession::HookAvoidAreaInCompatibleMode(const WSRect& rect, AvoidAreaTy
     AvoidArea& avoidArea) const
 {
     WindowMode mode = GetWindowMode();
-    if (!CompatibleModeProperty::IsAdaptToImmersive(GetSessionProperty()) ||
-        mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
+    if (!GetSessionProperty()->IsAdaptToImmersive() || mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
         return;
     }
     float vpr = 1.9f; // 3.5f: default pixel ratio
@@ -2380,7 +2379,7 @@ bool SceneSession::CheckGetAvoidAreaAvailable(AvoidAreaType type)
     }
     if (WindowHelper::IsMainWindow(winType)) {
         // compatibleMode app in pc,need use avoid Area
-        if (CompatibleModeProperty::IsAdaptToImmersive(GetSessionProperty())) {
+        if (GetSessionProperty()->IsAdaptToImmersive()) {
             return true;
         }
 
@@ -3408,7 +3407,7 @@ void SceneSession::HookStartMoveRect(WSRect& newRect, const WSRect& sessionRect)
 bool SceneSession::IsCompatibilityModeScale(float scaleX, float scaleY)
 {
     auto property = GetSessionProperty();
-    if (CompatibleModeProperty::IsAdaptToProportionalScale(property) && MathHelper::GreatNotEqual(scaleX, 0.0f) &&
+    if (property->IsAdaptToProportionalScale() && MathHelper::GreatNotEqual(scaleX, 0.0f) &&
         MathHelper::GreatNotEqual(scaleY, 0.0f) && (!NearEqual(scaleX, 1.0f) || !NearEqual(scaleY, 1.0f))) {
         return true;
     }
@@ -7939,7 +7938,7 @@ bool SceneSession::CalcNewWindowRectIfNeed(DMRect& availableArea, float newVpr, 
         return false;
     }
     // The size of the window does not change in CompatibleMode
-    if (CompatibleModeProperty::DisableWindowLimit(property)) {
+    if (property->IsWindowLimitDisabled()) {
         return false;
     }
     float currVpr = 0.0f;

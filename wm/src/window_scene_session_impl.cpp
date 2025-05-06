@@ -980,7 +980,7 @@ void WindowSceneSessionImpl::ConsumePointerEventInner(const std::shared_ptr<MMI:
     bool isPointDown = (action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
         action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
     bool needNotifyEvent = true;
-    if (CompatibleModeProperty::IsAdaptToEventMapping(property_)) {
+    if (property_->IsAdaptToEventMapping()) {
         HandleEventForCompatibleMode(pointerEvent, pointerItem);
     }
     lastPointerEvent_ = pointerEvent;
@@ -1105,7 +1105,7 @@ static void GetWindowSizeLimits(std::shared_ptr<AppExecFwk::AbilityInfo> ability
 
 void WindowSceneSessionImpl::HandleWindowLimitsInCompatibleMode(WindowSizeLimits& windowSizeLimits)
 {
-    if (!CompatibleModeProperty::DisableWindowLimit(property_)) {
+    if (!property_->IsWindowLimitDisabled()) {
         return;
     }
     windowSizeLimits.maxWindowWidth = windowSystemConfig_.maxFloatingWindowSize_;
@@ -1175,7 +1175,7 @@ void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()
     if (abilityInfo != nullptr) {
         WindowSizeLimits windowSizeLimits = property_->GetWindowSizeLimits();
         GetWindowSizeLimits(abilityInfo, windowSizeLimits);
-        if (CompatibleModeProperty::DisableWindowLimit(property_)) {
+        if (property_->IsWindowLimitDisabled()) {
             HandleWindowLimitsInCompatibleMode(windowSizeLimits);
         }
         property_->SetConfigWindowLimitsVP({
@@ -1216,7 +1216,7 @@ void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()
             !WindowHelper::IsWindowModeSupported(windowModeSupportType, WindowMode::WINDOW_MODE_FLOATING));
         bool onlySupportFullScreen = isWindowModeSupportFullscreen &&
             ((!windowSystemConfig_.IsPhoneWindow() && !windowSystemConfig_.IsPadWindow()) || IsFreeMultiWindowMode());
-        bool compatibleDisableFullScreen = CompatibleModeProperty::DisableFullScreen(property_);
+        bool compatibleDisableFullScreen = property_->IsFullScreenDisabled();
         if ((onlySupportFullScreen || property_->GetFullScreenStart()) && !compatibleDisableFullScreen) {
             TLOGI(WmsLogTag::WMS_LAYOUT_PC, "onlySupportFullScreen:%{public}d fullScreenStart:%{public}d",
                 onlySupportFullScreen, property_->GetFullScreenStart());
@@ -2573,7 +2573,7 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
         return WMError::WM_OK;
     }
 
-    if (IsPcOrPadFreeMultiWindowMode() && CompatibleModeProperty::IsAdaptToImmersive(property_)) {
+    if (IsPcOrPadFreeMultiWindowMode() && property_->IsAdaptToImmersive()) {
         SetLayoutFullScreenByApiVersion(status);
         // compatibleMode app may set statusBarColor before ignoreSafeArea
         auto systemBarProperties = property_->GetSystemBarProperty();
@@ -2688,7 +2688,7 @@ WMError WindowSceneSessionImpl::NotifySpecificWindowSessionProperty(WindowType t
         if (auto uiContent = GetUIContentSharedPtr()) {
             uiContent->SetStatusBarItemColor(property.contentColor_);
         }
-        if (CompatibleModeProperty::IsAdaptToImmersive(property_) && isIgnoreSafeArea_) {
+        if (property_->IsAdaptToImmersive() && isIgnoreSafeArea_) {
             HookDecorButtonStyleInCompatibleMode(property.contentColor_);
         }
     } else if (type == WindowType::WINDOW_TYPE_NAVIGATION_BAR) {
@@ -2701,7 +2701,7 @@ WMError WindowSceneSessionImpl::NotifySpecificWindowSessionProperty(WindowType t
 
 void WindowSceneSessionImpl::HookDecorButtonStyleInCompatibleMode(uint32_t color)
 {
-    if (!CompatibleModeProperty::IsAdaptToImmersive(property_)) {
+    if (!property_->IsAdaptToImmersive()) {
         return;
     }
     // alpha Color Channel
@@ -3052,7 +3052,7 @@ WMError WindowSceneSessionImpl::Maximize(MaximizePresentation presentation)
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     // The device is not supported
-    if (!IsPcOrPadFreeMultiWindowMode() || CompatibleModeProperty::DisableFullScreen(property_)) {
+    if (!IsPcOrPadFreeMultiWindowMode() || property_->IsFullScreenDisabled()) {
         TLOGW(WmsLogTag::WMS_LAYOUT_PC, "The device is not supported");
         return WMError::WM_OK;
     }
@@ -3104,7 +3104,7 @@ WMError WindowSceneSessionImpl::MaximizeFloating()
         WindowMode::WINDOW_MODE_FULLSCREEN)) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (CompatibleModeProperty::DisableFullScreen(property_)) {
+    if (property_->IsFullScreenDisabled()) {
         TLOGW(WmsLogTag::WMS_COMPAT, "diable fullScreen in compatibleMode window ,id:%{public}d", GetPersistentId());
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
@@ -3364,7 +3364,7 @@ WMError WindowSceneSessionImpl::SetSupportedWindowModesInner(
     bool onlySupportFullScreen =
         WindowHelper::IsWindowModeSupported(windowModeSupportType, WindowMode::WINDOW_MODE_FULLSCREEN) &&
         !WindowHelper::IsWindowModeSupported(windowModeSupportType, WindowMode::WINDOW_MODE_FLOATING);
-    bool disableFullScreen = CompatibleModeProperty::DisableFullScreen(property_);
+    bool disableFullScreen = property_->IsFullScreenDisabled();
     if (onlySupportFullScreen && !property_->IsLayoutFullScreen() && !disableFullScreen) {
         TLOGI(WmsLogTag::WMS_LAYOUT_PC, "onlySupportFullScreen:%{public}d IsLayoutFullScreen:%{public}d",
             onlySupportFullScreen, property_->IsLayoutFullScreen());
@@ -5008,7 +5008,7 @@ WMError WindowSceneSessionImpl::GetWindowLimits(WindowLimits& windowLimits)
 
 void WindowSceneSessionImpl::UpdateNewSize()
 {
-    if (GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING || CompatibleModeProperty::DisableWindowLimit(property_)) {
+    if (GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING || property_->IsWindowLimitDisabled()) {
         TLOGI(WmsLogTag::WMS_LAYOUT, "Fullscreen couldnot update new size, Id: %{public}u", GetWindowId());
         return;
     }
