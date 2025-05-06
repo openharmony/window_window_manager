@@ -1965,12 +1965,12 @@ void WindowSessionProperty::SetCompatibleModeProperty(const sptr<CompatibleModeP
     compatibleModeProperty_ = property;
 }
 
-bool WindowSessionProperty::IsAdaptToImmersive()
+bool WindowSessionProperty::IsAdaptToImmersive() const
 {
     return compatibleModeProperty_ && compatibleModeProperty_->IsAdaptToImmersive();
 }
 
-bool WindowSessionProperty::IsAdaptToEventMapping()
+bool WindowSessionProperty::IsAdaptToEventMapping() const
 {
     return compatibleModeProperty_ && compatibleModeProperty_->IsAdaptToEventMapping();
 }
