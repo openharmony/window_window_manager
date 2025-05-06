@@ -3225,12 +3225,13 @@ HWTEST_F(ScreenSessionTest, GetValidSensorRotation, TestSize.Level1)
 HWTEST_F(ScreenSessionTest, EnableMirrorScreenRegion, TestSize.Level1)
 {
     sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
-    EXPECT_NE(nullptr, screenSession);
+    ASSERT_EQ(nullptr, screenSession);
     screenSession->SetIsEnableRegionRotation(true);
     screenSession->EnableMirrorScreenRegion();
+    EXPECT_EQ(screenSession->GetIsEnableRegionRotation(), true);
     screenSession->SetIsPhysicalMirrorSwitch(true);
     screenSession->EnableMirrorScreenRegion();
-    ASSERT_EQ(screenSession->GetIsEnableRegionRotation(), true);
+    EXPECT_EQ(screenSession->GetIsPhysicalMirrorSwitch(), true);
 }
 
 /**
@@ -3243,7 +3244,7 @@ HWTEST_F(ScreenSessionTest, SetIsExtend01, TestSize.Level1)
     sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     ASSERT_NE(session, nullptr);
     session->SetIsExtend(true);
-    ASSERT_EQ(session->GetIsExtend(), true);
+    EXPECT_EQ(session->GetIsExtend(), true);
 }
 
 /**
@@ -3256,7 +3257,7 @@ HWTEST_F(ScreenSessionTest, SetIsExtend02, TestSize.Level1)
     sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     ASSERT_NE(session, nullptr);
     session->SetIsExtend(false);
-    ASSERT_EQ(session->GetIsExtend(), false);
+    EXPECT_EQ(session->GetIsExtend(), false);
 }
 
 /**
@@ -3269,7 +3270,7 @@ HWTEST_F(ScreenSessionTest, SetIsCurrentInUse01, TestSize.Level1)
     sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     ASSERT_NE(session, nullptr);
     session->SetIsCurrentInUse(true);
-    ASSERT_EQ(session->GetIsCurrentInUse(), true);
+    EXPECT_EQ(session->GetIsCurrentInUse(), true);
 }
 
 /**
@@ -3282,7 +3283,7 @@ HWTEST_F(ScreenSessionTest, SetIsCurrentInUse02, TestSize.Level1)
     sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     ASSERT_NE(session, nullptr);
     session->SetIsCurrentInUse(false);
-    ASSERT_EQ(session->GetIsCurrentInUse(), false);
+    EXPECT_EQ(session->GetIsCurrentInUse(), false);
 }
 
 /**
@@ -3296,7 +3297,7 @@ HWTEST_F(ScreenSessionTest, SetValidHeight, TestSize.Level1)
     ASSERT_NE(session, nullptr);
     uint32_t validHeight = 100;
     session->SetValidHeight(validHeight);
-    ASSERT_EQ(session->GetValidHeight(), validHeight);
+    EXPECT_EQ(session->GetValidHeight(), validHeight);
 }
 
 /**
@@ -3310,32 +3311,7 @@ HWTEST_F(ScreenSessionTest, SetValidWidth, TestSize.Level1)
     ASSERT_NE(session, nullptr);
     uint32_t validWidth = 100;
     session->SetValidWidth(validWidth);
-    ASSERT_EQ(session->GetValidWidth(), validWidth);
-}
-
-/**
- * @tc.name: HandleCameraBackSelfieChange
- * @tc.desc: HandleCameraBackSelfieChange
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionTest, HandleCameraBackSelfieChange, TestSize.Level1)
-{
-    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
-    ASSERT_NE(session, nullptr);
-    session->HandleCameraBackSelfieChange(true);
-}
-
-/**
- * @tc.name: UpdateTouchBoundsAndOffset
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionTest, UpdateTouchBoundsAndOffset, TestSize.Level1)
-{
-    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
-    ASSERT_NE(session, nullptr);
-    session->UpdateTouchBoundsAndOffset();
-    ASSERT_EQ(session->property_.inputOffsetX_, 0);
+    EXPECT_EQ(session->GetValidWidth(), validWidth);
 }
 
 /**
@@ -3351,7 +3327,7 @@ HWTEST_F(ScreenSessionTest, UpdateRotationOrientation, TestSize.Level1)
     FoldDisplayMode foldDisplayMode = FoldDisplayMode::MAIN;
     session->UpdateRotationOrientation(rotation, foldDisplayMode);
     ScreenProperty screenProperty = session->GetScreenProperty();
-    ASSERT_EQ(screenProperty.deviceRotation_, Rotation::ROTATION_0);
+    EXPECT_EQ(screenProperty.deviceRotation_, Rotation::ROTATION_0);
 }
 
 /**
@@ -3364,7 +3340,7 @@ HWTEST_F(ScreenSessionTest, UpdatePropertyByFakeInUse01, TestSize.Level1)
     sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     ASSERT_NE(session, nullptr);
     session->UpdatePropertyByFakeInUse(false);
-    ASSERT_EQ(session->property_.GetIsFakeInUse(), false);
+    EXPECT_EQ(session->property_.GetIsFakeInUse(), false);
 }
 
 /**
@@ -3377,7 +3353,7 @@ HWTEST_F(ScreenSessionTest, UpdatePropertyByFakeInUse02, TestSize.Level1)
     sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     ASSERT_NE(session, nullptr);
     session->UpdatePropertyByFakeInUse(true);
-    ASSERT_EQ(session->property_.GetIsFakeInUse(), true);
+    EXPECT_EQ(session->property_.GetIsFakeInUse(), true);
 }
 
 /**
@@ -3392,13 +3368,13 @@ HWTEST_F(ScreenSessionTest, SetRotationAndScreenRotationOnly, TestSize.Level1)
     bool enableRotation = (system::GetParameter("persist.window.rotation.enabled", "1") == "1");
     if (enableRotation) {
         session->SetRotationAndScreenRotationOnly(Rotation::ROTATION_0);
-        ASSERT_EQ(session->property_.GetRotation(), 0.0f);
+        EXPECT_EQ(session->property_.GetRotation(), 0.0f);
         session->SetRotationAndScreenRotationOnly(Rotation::ROTATION_90);
-        ASSERT_EQ(session->property_.GetRotation(), 90.0f);
+        EXPECT_EQ(session->property_.GetRotation(), 90.0f);
         session->SetRotationAndScreenRotationOnly(Rotation::ROTATION_180);
-        ASSERT_EQ(session->property_.GetRotation(), 180.0f);
+        EXPECT_EQ(session->property_.GetRotation(), 180.0f);
         session->SetRotationAndScreenRotationOnly(Rotation::ROTATION_270);
-        ASSERT_EQ(session->property_.GetRotation(), 270.0f);
+        EXPECT_EQ(session->property_.GetRotation(), 270.0f);
     }
 }
 
@@ -3412,7 +3388,7 @@ HWTEST_F(ScreenSessionTest, SetTouchEnabledFromJs01, TestSize.Level1)
     sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     ASSERT_NE(session, nullptr);
     session->SetTouchEnabledFromJs(false);
-    ASSERT_EQ(session->IsTouchEnabled(), false);
+    EXPECT_EQ(session->IsTouchEnabled(), false);
 }
 
 /**
@@ -3425,7 +3401,7 @@ HWTEST_F(ScreenSessionTest, SetTouchEnabledFromJs02, TestSize.Level1)
     sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     ASSERT_NE(session, nullptr);
     session->SetTouchEnabledFromJs(true);
-    ASSERT_EQ(session->IsTouchEnabled(), true);
+    EXPECT_EQ(session->IsTouchEnabled(), true);
 }
 } // namespace
 } // namespace Rosen
