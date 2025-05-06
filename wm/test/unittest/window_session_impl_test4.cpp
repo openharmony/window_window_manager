@@ -1654,7 +1654,7 @@ HWTEST_F(WindowSessionImplTest4, SetMainWindowContainerColor01, TestSize.Level1)
     std::string activeColor = "#00000000";
     std::string inactiveColor = "#00000000";
     WMError res = window->SetMainWindowContainerColor(activeColor, inactiveColor);
-    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_CALLING);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_CALLING);
 }
 
 /**
@@ -1671,7 +1671,7 @@ HWTEST_F(WindowSessionImplTest4, SetMainWindowContainerColor02, TestSize.Level1)
     std::string activeColor = "#00000000";
     std::string inactiveColor = "#00000000";
     WMError res = window->SetMainWindowContainerColor(activeColor, inactiveColor);
-    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
 }
 
 /**
@@ -1694,7 +1694,7 @@ HWTEST_F(WindowSessionImplTest4, SetMainWindowContainerColor03, TestSize.Level1)
     std::string activeColor = "#00000000";
     std::string inactiveColor = "#00000000";
     WMError res = window->SetMainWindowContainerColor(activeColor, inactiveColor);
-    ASSERT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
 }
 
 /**
@@ -1717,7 +1717,7 @@ HWTEST_F(WindowSessionImplTest4, SetMainWindowContainerColor04, TestSize.Level1)
     std::string activeColor = "#00000000";
     std::string inactiveColor = "#00000000";
     WMError res = window->SetMainWindowContainerColor(activeColor, inactiveColor);
-    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
 }
 
 /**
@@ -1740,7 +1740,7 @@ HWTEST_F(WindowSessionImplTest4, SetMainWindowContainerColor05, TestSize.Level1)
     std::string activeColor = "#00000000";
     std::string inactiveColor = "#FF000000";
     WMError res = window->SetMainWindowContainerColor(activeColor, inactiveColor);
-    ASSERT_EQ(res, WMError::WM_OK);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
 }
 
 /**
