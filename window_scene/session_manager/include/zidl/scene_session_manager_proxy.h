@@ -153,6 +153,7 @@ public:
     WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId) override;
     WMError MinimizeByWindowId(const std::vector<int32_t>& windowIds) override;
     WMError SetForegroundWindowNum(int32_t windowNum) override;
+    WSError UseImplicitAnimation(int32_t hostWindowId, bool useImplicit) override;
 
 private:
     template<typename T>

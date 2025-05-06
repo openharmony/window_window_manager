@@ -252,6 +252,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleGetCrossAxisState(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_WATERFALL_MODE):
             return HandleGetWaterfallMode(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_USE_IMPLICT_ANIMATION):
+            return HandleUseImplicitAnimation(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CONTAINER_MODAL_EVENT):
             return HandleContainerModalEvent(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_WINDOW_ATTACH_STATE_LISTENER_REGISTERED):
@@ -1666,6 +1668,17 @@ int SessionStub::HandleGetWaterfallMode(MessageParcel& data, MessageParcel& repl
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write fail.");
         return ERR_INVALID_DATA;
     }
+    return ERR_NONE;
+}
+
+int SessionStub::HandleUseImplicitAnimation(MessageParcel& data, MessageParcel& reply)
+{
+    bool useImplicit = false;
+    if (!data.ReadBool(useImplicit)) {
+        TLOGE(WmsLogTag::WMS_PC, "Read useImplicit failed.");
+        return ERR_INVALID_DATA;
+    }
+    UseImplicitAnimation(useImplicit);
     return ERR_NONE;
 }
 

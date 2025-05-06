@@ -97,6 +97,7 @@ const std::string SET_PARENT_SESSION_CB = "setParentSession";
 const std::string UPDATE_FLAG_CB = "updateFlag";
 const std::string Z_LEVEL_CHANGE_CB = "zLevelChange";
 const std::string UPDATE_FOLLOW_SCREEN_CHANGE_CB = "sessionUpdateFollowScreenChange";
+const std::string USE_IMPLICITANIMATION_CB = "useImplicitAnimationChange";
 
 constexpr int ARG_COUNT_1 = 1;
 constexpr int ARG_COUNT_2 = 2;
@@ -183,6 +184,7 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {Z_LEVEL_CHANGE_CB,                     ListenerFuncType::Z_LEVEL_CHANGE_CB},
     {UPDATE_PIP_TEMPLATE_INFO_CB,           ListenerFuncType::UPDATE_PIP_TEMPLATE_INFO_CB},
     {UPDATE_FOLLOW_SCREEN_CHANGE_CB,        ListenerFuncType::UPDATE_FOLLOW_SCREEN_CHANGE_CB},
+    {USE_IMPLICITANIMATION_CB,              ListenerFuncType::USE_IMPLICIT_ANIMATION_CB},
 };
 
 const std::vector<std::string> g_syncGlobalPositionPermission {
@@ -870,6 +872,48 @@ void JsSceneSession::OnTitleAndDockHoverShowChange(bool isTitleHoverShown, bool 
         napi_value jsObjTitle = CreateJsValue(env, isTitleHoverShown);
         napi_value jsObjDock = CreateJsValue(env, isDockHoverShown);
         napi_value argv[] = {jsObjTitle, jsObjDock};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task, funcName);
+}
+
+void JsSceneSession::ProcessUseImplicitAnimationChangeRegister()
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_PC, "session is nullptr, id:%{public}d", persistentId_);
+        return;
+    }
+    const char* const funcName = __func__;
+    session->RegisterUseImplicitAnimationChangeCallback([weakThis = wptr(this), funcName](bool useImplicit) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_PC, "%{public}s jsSceneSession is null", funcName);
+            return;
+        }
+        jsSceneSession->OnUseImplicitAnimationChange(useImplicit);
+    });
+    TLOGD(WmsLogTag::WMS_PC, "Register success, persistent id %{public}d", persistentId_);
+}
+ 
+void JsSceneSession::OnUseImplicitAnimationChange(bool useImplicit)
+{
+    const char* const funcName = __func__;
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, useImplicit,
+        env = env_, funcName] {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
+            TLOGNE(WmsLogTag::WMS_PC, "%{public}s jsSceneSession id:%{public}d has been destroyed",
+                funcName, persistentId);
+            return;
+        }
+        auto jsCallBack = jsSceneSession->GetJSCallback(USE_IMPLICITANIMATION_CB);
+        if (!jsCallBack) {
+            TLOGNE(WmsLogTag::WMS_PC, "%{public}s jsCallBack is nullptr", funcName);
+            return;
+        }
+        napi_value jsObjUseImplicit = CreateJsValue(env, useImplicit);
+        napi_value argv[] = {jsObjUseImplicit};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, funcName);
@@ -2835,6 +2879,9 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
             break;
         case static_cast<uint32_t>(ListenerFuncType::UPDATE_FOLLOW_SCREEN_CHANGE_CB):
             ProcessSessionUpdateFollowScreenChange();
+            break;
+        case static_cast<uint32_t>(ListenerFuncType::USE_IMPLICIT_ANIMATION_CB):
+            ProcessUseImplicitAnimationChangeRegister();
             break;
         default:
             break;

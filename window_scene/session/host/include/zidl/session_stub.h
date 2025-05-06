@@ -124,6 +124,7 @@ private:
     int HandleStartMovingWithCoordinate(MessageParcel& data, MessageParcel& reply);
     int HandleContainerModalEvent(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateFlag(MessageParcel& data, MessageParcel& reply);
+    int HandleUseImplicitAnimation(MessageParcel& data, MessageParcel& reply);
 
     // PC Fold Screen
     int HandleGetWaterfallMode(MessageParcel& data, MessageParcel& reply);
