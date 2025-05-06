@@ -82,7 +82,7 @@ void AniWindowManager::OnShiftAppWindowFocus(ani_env* env, ani_double sourceWind
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
         SingletonContainer::Get<WindowManager>().ShiftAppWindowFocus(sourceWindowId, targerWindowId));
-    if(ret != WmErrorCode::WM_OK) {
+    if (ret != WmErrorCode::WM_OK) {
         AniWindowUtils::AniThrowError(env, ret, "ShiftAppWindowFocus failed.")
     }
     return ;
