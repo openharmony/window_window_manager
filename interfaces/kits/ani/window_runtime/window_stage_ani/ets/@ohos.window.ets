@@ -1936,7 +1936,8 @@ export function shiftAppWindowFocus(sourceWindowId: number, targetWindowId: numb
       }).catch((err: NullishType) => {
           reject(err as BusinessError);
       });
-  }); 
+  });
+} 
 function runWindowDialogTargetCallback(cb: object): void {
     const func = cb as () => void;
     func();
