@@ -70,18 +70,18 @@ ani_object AniWindowManager::OnGetLastWindow(ani_env* env, ani_object aniContext
 }
 
 void AniWindowManager::ShiftAppWindowFocus(ani_env* env, ani_object obj, ani_long nativeObj,
-    ani_double sourceWindowId, ani_double targerWindowId)
+    ani_double sourceWindowId, ani_double targetWindowId)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     AniWindowManager* aniWindowManager = reinterpret_cast<AniWindowManager*>(nativeObj);
-    aniWindowManager->OnShiftAppWindowFocus(env, sourceWindowId, targerWindowId);
+    aniWindowManager->OnShiftAppWindowFocus(env, sourceWindowId, targetWindowId);
 }
 
-void AniWindowManager::OnShiftAppWindowFocus(ani_env* env, ani_double sourceWindowId, ani_double targerWindowId)
+void AniWindowManager::OnShiftAppWindowFocus(ani_env* env, ani_double sourceWindowId, ani_double targetWindowId)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
-        SingletonContainer::Get<WindowManager>().ShiftAppWindowFocus(sourceWindowId, targerWindowId));
+        SingletonContainer::Get<WindowManager>().ShiftAppWindowFocus(sourceWindowId, targetWindowId));
     if (ret != WmErrorCode::WM_OK) {
         AniWindowUtils::AniThrowError(env, ret, "ShiftAppWindowFocus failed.")
     }
