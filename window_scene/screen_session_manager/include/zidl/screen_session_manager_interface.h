@@ -163,6 +163,7 @@ public:
 
     void SetFoldStatusLocked(bool locked) override {}
     DMError SetFoldStatusLockedFromJs(bool locked) override { return DMError::DM_OK; }
+    void SetFoldStatusExpandAndLocked(bool locked) override {}
 
     FoldDisplayMode GetFoldDisplayMode() override { return FoldDisplayMode::UNKNOWN; }
 
