@@ -255,6 +255,33 @@ void AniWindow::OnSetWaterMarkFlag(ani_env* env, ani_boolean enable)
     }
 }
 
+void AniWindow::setWindowTouchable(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isKeepScreenOn)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    if (aniWindow == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] aniWindow is nullptr");
+        return;
+    }
+    aniWindow->OnSetWindowKeepScreenOn(env, isKeepScreenOn);
+    TLOGI(WmsLogTag::DEFAULT, "[ANI] setWindowTouchable end");
+}
+
+void AniWindow::OnSetWindowTouchable(ani_env* env, ani_boolean isKeepScreenOn)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    auto window = GetWindow();
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] window is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetTouchable(static_cast<bool>(isKeepScreenOn)));
+    if (ret != WmErrorCode::WM_OK) {
+        AniWindowUtils::AniThrowError(env, ret, "Window set touchable on failed");
+    }
+}
+
 void AniWindow::LoadContent(ani_env* env, ani_object obj, ani_long nativeObj, ani_string path)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
@@ -596,14 +623,27 @@ void AniWindow::RegisterWindowCallback(ani_env* env, ani_object obj, ani_long na
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    ani_double timeOut = 0;
     if (aniWindow != nullptr) {
-        aniWindow->OnRegisterWindowCallback(env, type, callback);
+        aniWindow->OnRegisterWindowCallback(env, type, callback, timeOut);
     } else {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] aniWindow is nullptr");
     }
 }
 
-void AniWindow::OnRegisterWindowCallback(ani_env* env, ani_string type, ani_ref callback)
+void AniWindow::RegisterNoInteractionDetectedCallback(ani_env* env, ani_object obj, ani_long nativeObj, ani_string type,
+    ani_double timeOut, ani_ref callback)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    if (aniWindow != nullptr) {
+        aniWindow->OnRegisterWindowCallback(env, type, callback, timeOut);
+    } else {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] aniWindow is nullptr");
+    }
+}
+
+void AniWindow::OnRegisterWindowCallback(ani_env* env, ani_string type, ani_ref callback, ani_double timeOut)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     auto window = GetWindow();
@@ -615,7 +655,7 @@ void AniWindow::OnRegisterWindowCallback(ani_env* env, ani_string type, ani_ref 
     std::string cbType;
     AniWindowUtils::GetStdString(env, type, cbType);
     TLOGI(WmsLogTag::DEFAULT, "[ANI] type:%{public}s", cbType.c_str());
-    WmErrorCode ret = registerManager_->RegisterListener(window, cbType, CaseType::CASE_WINDOW, env, callback);
+    WmErrorCode ret = registerManager_->RegisterListener(window, cbType, CaseType::CASE_WINDOW, env, callback, timeOut);
     if (ret != WmErrorCode::WM_OK) {
         AniWindowUtils::AniThrowError(env, ret);
         return;
@@ -1156,6 +1196,10 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(AniWindow::SetWaterMarkFlag)},
         ani_native_function {"keepKeyboardOnFocusSync", "JZ:V",
             reinterpret_cast<void *>(AniWindow::KeepKeyboardOnFocus)},
+        ani_native_function {"setWindowTouchableSync", "JZ:V",
+            reinterpret_cast<void *>(AniWindow::setWindowTouchable)},
+        ani_native_function {"onNoInteractionDetected", nullptr,
+            reinterpret_cast<void *>(AniWindow::RegisterNoInteractionDetectedCallback)},
         ani_native_function {"onSync", nullptr,
             reinterpret_cast<void *>(AniWindow::RegisterWindowCallback)},
         ani_native_function {"offSync", nullptr,
