@@ -3394,7 +3394,7 @@ HWTEST_F(ScreenSessionTest, SetRotationAndScreenRotationOnly, TestSize.Level1)
         ASSERT_EQ(session->property_.GetRotation(), 180.0f);
         session->SetRotationAndScreenRotationOnly(Rotation::ROTATION_270);
         ASSERT_EQ(session->property_.GetRotation(), 270.0f);
-    } 
+    }
 }
 
 /**
