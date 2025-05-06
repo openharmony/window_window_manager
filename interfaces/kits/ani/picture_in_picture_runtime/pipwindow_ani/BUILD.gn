@@ -13,7 +13,6 @@
 
 import("//build/config/components/ets_frontend/ets2abc_config.gni")
 
-
 # abc generate
 generate_static_abc("pipwindow_ani") {
   base_url = "./ets"
@@ -29,4 +28,3 @@ ohos_prebuilt_etc("pipwindow_etc") {
   subsystem_name = "window"
   module_install_dir = "framework"
 }
-

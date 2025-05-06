@@ -16,7 +16,6 @@
 
 #include "ani.h"
 #include "pipwindow_ani.h"
-#include "pipwindow_ani_manager.h"
 #include "singleton_container.h"
 #include "window_manager_hilog.h"
 #include "dm_common.h"
@@ -26,9 +25,29 @@
 namespace OHOS {
 namespace Rosen {
 
-// construct, set registerManager.
-PiPWindowAni::PiPWindowAni(const sptr<PictureInPictureController>& pipController)
+ani_status PiPWindowAni::Init(ani_env* env, ani_namespace nsp)
 {
+    TLOGI(WmsLogTag::WMS_PIP, "[ANI] Init");
+    ani_function setObjFunc = nullptr;
+    ani_status ret = env->Namespace_FindFunction(nsp, "setNativeObj", "J:V", &setObjFunc);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_PIP, "[ANI] find setNativeObj func fail %{public}u", ret);
+        return ret;
+    }
+    std::unique_ptr<PiPWindowAni> aniPiPWindowAni = std::make_unique<PiPWindowAni>();
+    ret = env->Function_Call_Void(setObjFunc, aniPiPWindowAni.get());
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_PIP, "[ANI] find setNativeObj func fail %{public}u", ret);
+        return ret;
+    }
+    return ret;
+}
+
+ani_boolean PiPWindowAni::isPiPEnabledAni(ani_env* env)
+{
+    bool isPiPEnabled = true;
+    TLOGI(WmsLogTag::WMS_PIP, "[ANI] isPiPEnabled = %{public}u", isPiPEnabled);
+    return static_cast<ani_boolean>(isPiPEnabled);
 }
 
 void PiPWindowAni::startPiPAni(ani_env* env, ani_object obj, ani_long nativeObj)
@@ -76,7 +95,7 @@ void PiPWindowAni::OnstopPiPAni(ani_env* env)
 }
 
 extern "C" {
-ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
+ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
 {
     using namespace OHOS::Rosen;
     ani_status ret;
@@ -90,9 +109,8 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         TLOGE(WmsLogTag::WMS_PIP, "[ANI] null env %{public}u", ret);
         return ANI_NOT_FOUND;
     }
-    PiPWindowManagerAni::initPiPWindowManagerAni(nsp, env);
     std::array funcs = {
-        ani_native_function {"isPiPEnabled", ":Z", reinterpret_cast<void *>(PiPWindowManagerAni::isPiPEnabledAni)},
+        ani_native_function {"isPiPEnabled", ":Z", reinterpret_cast<void *>(PiPWindowAni::isPiPEnabledAni)},
         ani_native_function {"startPiP", ":V", reinterpret_cast<void *>(PiPWindowAni::startPiPAni)},
         ani_native_function {"stopPiP", ":V", reinterpret_cast<void *>(PiPWindowAni::stopPiPAni)},
     };
@@ -100,11 +118,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         TLOGE(WmsLogTag::WMS_PIP, "[ANI] bind namespace fail %{public}u", ret);
         return ANI_NOT_FOUND;
     }
-    ani_class cls = nullptr;
-    if ((ret = env->FindClass("L@ohos/PiPWindow/PiPWindow/PiPControllerInternal;", &cls)) != ANI_OK) {
-        TLOGD(WmsLogTag::WMS_PIP, "[ANI] null env %{public}u", ret);
-        return ANI_NOT_FOUND;
-    }
+    PiPWindowAni::Init(env, nsp);
     *result = ANI_VERSION_1;
     return ANI_OK;
 }

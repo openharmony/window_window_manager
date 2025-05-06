@@ -40,7 +40,6 @@ ohos_shared_library("pipwindowani_kit") {
   }
   sources = [
     "pipwindow_ani/src/pipwindow_ani.cpp",
-    "pipwindow_ani/src/pipwindow_ani_manager.cpp",
   ]
 
   configs = [
