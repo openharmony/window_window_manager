@@ -45,12 +45,15 @@ public:
     static void SetUIContent(ani_env* env, ani_object obj, ani_long nativeObj, ani_string path);
     static void SetWindowKeepScreenOn(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isKeepScreenOn);
     static void SetWaterMarkFlag(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean enable);
+    static void setWindowTouchable(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isTouchable);
     static void LoadContent(ani_env* env, ani_object obj, ani_long nativeObj, ani_string path);
     static void LoadContentNew(ani_env* env, ani_object obj, ani_long nativeObj,
         ani_string path, ani_object storage);
     static void SetWindowSystemBarEnable(ani_env* env, ani_object obj, ani_long nativeObj, ani_object nameAry);
     static ani_object GetUIContext(ani_env* env, ani_object obj, ani_long nativeObj);
     static ani_object GetWindowAvoidArea(ani_env* env, ani_object obj, ani_long nativeObj, ani_int type);
+    static void RegisterNoInteractionDetectedCallback(ani_env* env, ani_object obj, ani_long nativeObj,
+        ani_string type, ani_double timeout, ani_ref callback);
     static void RegisterWindowCallback(ani_env* env, ani_object obj, ani_long nativeObj, ani_string type,
         ani_ref callback);
     static void UnregisterWindowCallback(ani_env* env, ani_object obj, ani_long nativeObj, ani_string type,
@@ -76,6 +79,7 @@ private:
     void OnSetWindowColorSpace(ani_env* env, ani_int colorSpace);
     void OnSetPreferredOrientation(ani_env* env, ani_int orientation);
     void OnSetWindowPrivacyMode(ani_env* env, ani_boolean isPrivacyMode);
+    void OnSetWindowTouchable(ani_env* env, ani_boolean isTouchable);
     void OnRecover(ani_env* env);
     void OnSetUIContent(ani_env* env, ani_string path);
     void OnSetWindowKeepScreenOn(ani_env* env, ani_boolean isKeepScreenOn);
@@ -85,7 +89,7 @@ private:
     void OnSetWindowSystemBarEnable(ani_env* env, ani_object nameAry);
     ani_object OnGetUIContext(ani_env* env);
     ani_object OnGetWindowAvoidArea(ani_env* env, ani_int type);
-    void OnRegisterWindowCallback(ani_env* env, ani_string type, ani_ref callback);
+    void OnRegisterWindowCallback(ani_env* env, ani_string type, ani_ref callback, ani_double timeout);
     void OnUnregisterWindowCallback(ani_env* env, ani_string type, ani_ref callback);
     void OnKeepKeyboardOnFocus(ani_env* env, ani_boolean keepKeyboardFlag);
     bool GetSystemBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProperties,
