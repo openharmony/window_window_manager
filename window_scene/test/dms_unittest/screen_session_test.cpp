@@ -3334,7 +3334,7 @@ HWTEST_F(ScreenSessionTest, UpdateTouchBoundsAndOffset, TestSize.Level1)
 {
     sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     session->UpdateTouchBoundsAndOffset();
-    ASSERT_EQ(inputOffsetX_, 0);
+    ASSERT_EQ(session->property_.inputOffsetX_, 0);
 }
 
 /**
@@ -3385,13 +3385,13 @@ HWTEST_F(ScreenSessionTest, SetRotationAndScreenRotationOnly, TestSize.Level1)
 {
     sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     bool enableRotation = (system::GetParameter("persist.window.rotation.enabled", "1") == "1");
-    session->SetRotationAndScreenRotationOnly(0.0f);
+    session->SetRotationAndScreenRotationOnly(Rotation::ROTATION_0);
     ASSERT_EQ(session->property_.GetRotation(), 0.0f);
-    session->SetRotationAndScreenRotationOnly(90.0f);
+    session->SetRotationAndScreenRotationOnly(Rotation::ROTATION_90);
     ASSERT_EQ(session->property_.GetRotation(), 90.0f);
-    session->SetRotationAndScreenRotationOnly(180.0f);
+    session->SetRotationAndScreenRotationOnly(Rotation::ROTATION_180);
     ASSERT_EQ(session->property_.GetRotation(), 180.0f);
-    session->SetRotationAndScreenRotationOnly(270.0f);
+    session->SetRotationAndScreenRotationOnly(Rotation::ROTATION_270);
     ASSERT_EQ(session->property_.GetRotation(), 270.0f);
 }
 
