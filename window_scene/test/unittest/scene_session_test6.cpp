@@ -424,14 +424,53 @@ HWTEST_F(SceneSessionTest6, RegisterFollowScreenChangeCallback, Function | Small
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
     sceneSession->specificCallback_ = nullptr;
+    auto task = [] (bool isFollowScreenChange) {};
+    sceneSession->RegisterFollowScreenChangeCallback(std::move(task));
+    EXPECT_EQ(nullptr, sceneSession->specificCallback_);
+
     sptr<SceneSession::SpecificSessionCallback> callback = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     ASSERT_NE(nullptr, callback);
     sceneSession->specificCallback_ = callback;
     EXPECT_EQ(nullptr, callback->onUpdateFollowScreenChange_);
-
-    auto task = [] (bool isFollowScreenChange) {};
-    callback->onUpdateFollowScreenChange_ = task;
+    sceneSession->RegisterFollowScreenChangeCallback(std::move(task));
     EXPECT_NE(nullptr, callback->onUpdateFollowScreenChange_);
+}
+
+/**
+ * @tc.name: GetFollowScreenChange
+ * @tc.desc: GetFollowScreenChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, GetFollowScreenChange01, TestSize.Level1)
+{
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    bool isFollowScreenChange = true;
+    sceneSession->SetFollowScreenChange(isFollowScreenChange);
+    bool res = sceneSession->GetFollowScreenChange();
+    ASSERT_EQ(res, isFollowScreenChange);
+}
+
+/**
+ * @tc.name: HandleActionUpdateFollowScreenChange
+ * @tc.desc: test HandleActionUpdateFollowScreenChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, HandleActionUpdateFollowScreenChange, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "HandleActionUpdateFollowScreenChange";
+    info.bundleName_ = "HandleActionUpdateFollowScreenChange";
+    info.isSystem_ = true;
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, session);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    property->SetFollowScreenChange(true);
+    WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_FOLLOW_SCREEN_CHANGE;
+    auto res = session->HandleActionUpdateFollowScreenChange(property, action);
+    EXPECT_EQ(WMError::WM_OK, res);
 }
 } // namespace
 } // namespace Rosen
