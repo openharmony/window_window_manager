@@ -211,8 +211,8 @@ void Session::SetLeashWinSurfaceNode(std::shared_ptr<RSSurfaceNode> leashWinSurf
               RSAdapterUtil::RSUIContextToStr(originRSUIContext).c_str(), GetPersistentId());
     }
     if (g_enableForceUIFirst) {
-        AutoRSTransaction trans(leashWinSurfaceNode);
         if (!leashWinSurfaceNode && leashWinSurfaceNode_) {
+            AutoRSTransaction trans(leashWinSurfaceNode_);
             leashWinSurfaceNode_->SetForceUIFirst(false);
         }
     }

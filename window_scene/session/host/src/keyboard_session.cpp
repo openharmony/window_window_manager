@@ -815,10 +815,6 @@ void KeyboardSession::SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool n
         GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_, reason_);
     TLOGD(WmsLogTag::WMS_KEYBOARD, "id: %{public}d, rect: %{public}s isGlobal: %{public}d needFlush: %{public}d",
         GetPersistentId(), rect.ToString().c_str(), isGlobal, needFlush);
-    auto rsTransaction = RSTransactionProxy::GetInstance();
-    if (rsTransaction != nullptr && needFlush) {
-        rsTransaction->Begin();
-    }
     if (keyboardPanelSession_ == nullptr) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboard panel session is null");
         return;
@@ -828,13 +824,13 @@ void KeyboardSession::SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool n
         TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboard panel surfacenode is null");
         return;
     }
-    if (GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
-        surfaceNode->SetGlobalPositionEnabled(isGlobal);
-        surfaceNode->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
-        surfaceNode->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
-    }
-    if (rsTransaction != nullptr && needFlush) {
-        rsTransaction->Commit();
+    {
+        AutoRSTransaction trans(surfaceNode, needFlush);
+        if (GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+            surfaceNode->SetGlobalPositionEnabled(isGlobal);
+            surfaceNode->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
+            surfaceNode->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
+        }
     }
 }
 
