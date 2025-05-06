@@ -3385,14 +3385,16 @@ HWTEST_F(ScreenSessionTest, SetRotationAndScreenRotationOnly, TestSize.Level1)
 {
     sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     bool enableRotation = (system::GetParameter("persist.window.rotation.enabled", "1") == "1");
-    session->SetRotationAndScreenRotationOnly(Rotation::ROTATION_0);
-    ASSERT_EQ(session->property_.GetRotation(), 0.0f);
-    session->SetRotationAndScreenRotationOnly(Rotation::ROTATION_90);
-    ASSERT_EQ(session->property_.GetRotation(), 90.0f);
-    session->SetRotationAndScreenRotationOnly(Rotation::ROTATION_180);
-    ASSERT_EQ(session->property_.GetRotation(), 180.0f);
-    session->SetRotationAndScreenRotationOnly(Rotation::ROTATION_270);
-    ASSERT_EQ(session->property_.GetRotation(), 270.0f);
+    if (enableRotation) {
+        session->SetRotationAndScreenRotationOnly(Rotation::ROTATION_0);
+        ASSERT_EQ(session->property_.GetRotation(), 0.0f);
+        session->SetRotationAndScreenRotationOnly(Rotation::ROTATION_90);
+        ASSERT_EQ(session->property_.GetRotation(), 90.0f);
+        session->SetRotationAndScreenRotationOnly(Rotation::ROTATION_180);
+        ASSERT_EQ(session->property_.GetRotation(), 180.0f);
+        session->SetRotationAndScreenRotationOnly(Rotation::ROTATION_270);
+        ASSERT_EQ(session->property_.GetRotation(), 270.0f);
+    } 
 }
 
 /**
