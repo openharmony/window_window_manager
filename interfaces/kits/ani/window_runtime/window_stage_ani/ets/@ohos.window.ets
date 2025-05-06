@@ -1927,12 +1927,12 @@ export function getLastWindow(ctx: BaseContext, callback: AsyncCallback<Window>)
     });
 }
 
-export function shiftAppWindowFocus(sourceWindowId: number, targetWindowId: number): Promise<Window> {
-  return new Promise<Window>((resolve: (value: Window) => void, reject: (error: BusinessError) => void ) => {
-      taskpool.execute((): Window => {
-          return getLastWindowSync(nativeObj, sourceWindowId, targetWindowId);
+export function shiftAppWindowFocus(sourceWindowId: number, targetWindowId: number): Promise<void> {
+  return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) : void => {
+      taskpool.execute((): void => {
+          shiftAppWindowFocusSync(nativeObj, sourceWindowId, targetWindowId);
       }).then((ret: NullishType) => {
-          resolve(ret as Window);
+          resolve(undefined);
       }).catch((err: NullishType) => {
           reject(err as BusinessError);
       });
