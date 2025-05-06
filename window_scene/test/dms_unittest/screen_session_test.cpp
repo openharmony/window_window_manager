@@ -3361,7 +3361,7 @@ HWTEST_F(ScreenSessionTest, UpdatePropertyByFakeInUse01, TestSize.Level1)
 {
     sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     session->UpdatePropertyByFakeInUse(false);
-    ASSERT_EQ(session->GetIsFakeInUse(), false);
+    ASSERT_EQ(session->property_.GetIsFakeInUse(), false);
 }
 
 /**
@@ -3373,7 +3373,7 @@ HWTEST_F(ScreenSessionTest, UpdatePropertyByFakeInUse02, TestSize.Level1)
 {
     sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     session->UpdatePropertyByFakeInUse(true);
-    ASSERT_EQ(session->GetIsFakeInUse(), true);
+    ASSERT_EQ(session->property_.GetIsFakeInUse(), true);
 }
 
 /**
