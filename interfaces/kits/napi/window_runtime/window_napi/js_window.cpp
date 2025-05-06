@@ -8292,7 +8292,7 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "setTitleButtonVisible", moduleName, JsWindow::SetTitleButtonVisible);
     BindNativeFunction(env, object, "setWindowTitleButtonVisible", moduleName, JsWindow::SetWindowTitleButtonVisible);
     BindNativeFunction(env, object, "setWindowContainerColor", moduleName, JsWindow::SetWindowContainerColor);
-    BindNativeFunction(env, object, "setMainWindowContainerColor", moduleName, JsWindow::setMainWindowContainerColor);
+    BindNativeFunction(env, object, "setMainWindowContainerColor", moduleName, JsWindow::SetMainWindowContainerColor);
     BindNativeFunction(env, object, "setWindowMask", moduleName, JsWindow::SetWindowMask);
     BindNativeFunction(env, object, "setWindowGrayScale", moduleName, JsWindow::SetWindowGrayScale);
     BindNativeFunction(env, object, "setImmersiveModeEnabledState", moduleName, JsWindow::SetImmersiveModeEnabledState);
