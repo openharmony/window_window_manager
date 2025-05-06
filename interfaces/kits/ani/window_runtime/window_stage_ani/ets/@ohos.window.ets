@@ -1930,7 +1930,7 @@ export function getLastWindow(ctx: BaseContext, callback: AsyncCallback<Window>)
 export function shiftAppWindowFocus(sourceWindowId: number, targetWindowId: number): Promise<void> {
   return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) : void => {
       taskpool.execute((): void => {
-          shiftAppWindowFocusSync(nativeObj, sourceWindowId, targetWindowId);
+          return shiftAppWindowFocusSync(nativeObj, sourceWindowId, targetWindowId);
       }).then((ret: NullishType) => {
           resolve(undefined);
       }).catch((err: NullishType) => {
