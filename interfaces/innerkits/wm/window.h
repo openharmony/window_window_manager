@@ -2763,6 +2763,18 @@ public:
     }
 
     /**
+     * @brief Set main window container color.
+     *
+     * @param activeColor Background active color.
+     * @param inactiveColor Background active color.
+     * @return Errorcode of window.
+     */
+    virtual WMError SetMainWindowContainerColor(const std::string& activeColor, const std::string& inactiveColor)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
      * @brief Enable drag window.
      *
      * @param enableDrag The value true means to enable window dragging, and false means the opposite.
