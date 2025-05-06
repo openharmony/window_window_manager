@@ -991,6 +991,13 @@ napi_value JsWindow::SetWindowContainerColor(napi_env env, napi_callback_info in
     return (me != nullptr) ? me->OnSetWindowContainerColor(env, info) : nullptr;
 }
 
+napi_value JsWindow::SetMainWindowContainerColor(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetWindowContainerColor(env, info) : nullptr;
+}
+
 napi_value JsWindow::SetWindowMask(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_PC, "[NAPI]");
@@ -7116,6 +7123,38 @@ napi_value JsWindow::OnSetWindowContainerColor(napi_env env, napi_callback_info 
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     WMError errCode = windowToken_->SetWindowContainerColor(activeColor, inactiveColor);
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(errCode);
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_DECOR, "set window container color failed!");
+        return NapiThrowError(env, ret);
+    }
+    return NapiGetUndefined(env);
+}
+
+napi_value JsWindow::OnSetMainWindowContainerColor(napi_env env, napi_callback_info info)
+{
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != 2) {  // 2: params num
+        TLOGE(WmsLogTag::WMS_DECOR, "Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_DECOR, "WindowToken_ is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    std::string activeColor;
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], activeColor)) {
+        TLOGE(WmsLogTag::WMS_DECOR, "Failed to convert parameter to window container activeColor");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    std::string inactiveColor;
+    if (!ConvertFromJsValue(env, argv[INDEX_ONE], inactiveColor)) {
+        TLOGE(WmsLogTag::WMS_DECOR, "Failed to convert parameter to window container inactiveColor");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    WMError errCode = windowToken_->SetMainWindowContainerColor(activeColor, inactiveColor);
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(errCode);
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_DECOR, "set window container color failed!");

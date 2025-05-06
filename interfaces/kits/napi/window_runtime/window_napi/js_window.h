@@ -191,6 +191,7 @@ public:
     static napi_value SetTitleButtonVisible(napi_env env, napi_callback_info info);
     static napi_value SetWindowTitleButtonVisible(napi_env env, napi_callback_info info);
     static napi_value SetWindowContainerColor(napi_env env, napi_callback_info info);
+    static napi_value SetMainWindowContainerColor(napi_env env, napi_callback_info info);
     static napi_value SetDecorButtonStyle(napi_env env, napi_callback_info info);
     static napi_value GetDecorButtonStyle(napi_env env, napi_callback_info info);
     static napi_value SetWindowTitle(napi_env env, napi_callback_info info);
@@ -383,6 +384,7 @@ private:
     napi_value OnSetTitleButtonVisible(napi_env env, napi_callback_info info);
     napi_value OnSetWindowTitleButtonVisible(napi_env env, napi_callback_info info);
     napi_value OnSetWindowContainerColor(napi_env env, napi_callback_info info);
+    napi_value OnSetMainWindowContainerColor(napi_env env, napi_callback_info info);
     napi_value OnSetDecorButtonStyle(napi_env env, napi_callback_info info);
     napi_value OnGetDecorButtonStyle(napi_env env, napi_callback_info info);
     napi_value OnSetWindowTitle(napi_env env, napi_callback_info info);
