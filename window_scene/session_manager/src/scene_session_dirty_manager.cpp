@@ -201,9 +201,15 @@ void SceneSessionDirtyManager::UpdateDefaultHotAreas(sptr<SceneSession> sceneSes
     uint32_t touchOffset = 0;
     uint32_t pointerOffset = 0;
     bool isMidScene = sceneSession->GetIsMidScene();
-    bool isAppMainWindowOrPip = sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW ||
-                                sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_PIP;
-    if (isAppMainWindowOrPip && !isMidScene) {
+    bool isAppPipWindow = sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_PIP;
+    bool isAppMainWindow = sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
+    const auto& singleHandData = GetSingleHandData(sceneSession);
+    sptr<WindowSessionProperty> windowSessionProperty = sceneSession->GetSessionProperty();
+    if (singleHandData.mode != SingleHandMode::MIDDLE &&
+        windowSessionProperty->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
+        isAppMainWindow = false;
+    }
+    if ((isAppPipWindow || isAppMainWindow) && !isMidScene) {
         float vpr = 1.5f; // 1.5: default vp
         auto sessionProperty = sceneSession->GetSessionProperty();
         if (sessionProperty != nullptr) {
