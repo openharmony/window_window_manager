@@ -310,6 +310,8 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         ani_native_function {"getLastWindowSync",
             "JLapplication/BaseContext/BaseContext;:L@ohos/window/window/Window;",
             reinterpret_cast<void *>(AniWindowManager::GetLastWindow)},
+        ani_native_function {"shiftAppWindowFocusSync","JDD:V",
+            reinterpret_cast<void *>(AniWindowManager::ShiftAppWindowFocus)},
     };
     if ((ret = env->Namespace_BindNativeFunctions(ns, functions.data(), functions.size())) != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] bind ns func %{public}u", ret);
