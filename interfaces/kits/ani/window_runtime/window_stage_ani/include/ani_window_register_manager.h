@@ -56,7 +56,7 @@ public:
     AniWindowRegisterManager();
     ~AniWindowRegisterManager();
     WmErrorCode RegisterListener(sptr<Window> window, std::string type,
-    CaseType caseType, ani_env* env, ani_ref callback);
+    CaseType caseType, ani_env* env, ani_ref callback, ani_double timeout);
     WmErrorCode UnregisterListener(sptr<Window> window, std::string type,
     CaseType caseType, ani_env* env, ani_ref callback);
 private:
@@ -92,7 +92,7 @@ private:
     WmErrorCode ProcessWindowVisibilityChangeRegister(sptr<AniWindowListener> listener, sptr<Window> window,
         bool isRegister, ani_env* env);
     WmErrorCode ProcessWindowNoInteractionRegister(sptr<AniWindowListener> listener, sptr<Window> window,
-        bool isRegister, ani_env* env);
+        bool isRegister, ani_env* env, ani_double timeout);
     WmErrorCode ProcessWindowStatusChangeRegister(sptr<AniWindowListener> listener, sptr<Window> window,
         bool isRegister, ani_env* env);
     WmErrorCode ProcessWindowTitleButtonRectChangeRegister(sptr<AniWindowListener> listener, sptr<Window> window,
@@ -107,7 +107,7 @@ private:
         bool isRegister, ani_env* env);
     WmErrorCode ProcessListener(RegisterListenerType registerListenerType, CaseType caseType,
         const sptr<AniWindowListener>& windowManagerListener, const sptr<Window>& window, bool isRegister,
-        ani_env* env);
+        ani_env* env, ani_double timeout);
     std::map<std::string, std::map<ani_ref, sptr<AniWindowListener>>> jsCbMap_;
     std::mutex mtx_;
 };
