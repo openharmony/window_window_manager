@@ -23,7 +23,10 @@
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
-
+namespace {
+    constexpr float MOVE_DRAG_POSITION_Z = 100.5f;
+    constexpr int32_t INSERT_TO_THE_END = -1;
+}
 KeyboardSession::KeyboardSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback,
     const sptr<KeyboardSessionCallback>& keyboardCallback)
     : SystemSession(info, specificCallback)
@@ -314,11 +317,12 @@ WSError KeyboardSession::AdjustKeyboardLayout(const KeyboardLayoutParams& params
         TLOGI(WmsLogTag::WMS_KEYBOARD, "adjust keyboard layout, keyboardId: %{public}d, gravity: %{public}u, "
             "landscapeAvoidHeight: %{public}d, portraitAvoidHeight: %{public}d, "
             "LandscapeKeyboardRect: %{public}s, PortraitKeyboardRect: %{public}s, LandscapePanelRect: %{public}s, "
-            "PortraitPanelRect: %{public}s, requestRect: %{public}s", session->GetPersistentId(),
-            static_cast<uint32_t>(params.gravity_), params.landscapeAvoidHeight_, params.portraitAvoidHeight_,
+            "PortraitPanelRect: %{public}s, requestRect: %{public}s, displayId: %{public}" PRIu64,
+            session->GetPersistentId(), static_cast<uint32_t>(params.gravity_),
+            params.landscapeAvoidHeight_, params.portraitAvoidHeight_,
             params.LandscapeKeyboardRect_.ToString().c_str(), params.PortraitKeyboardRect_.ToString().c_str(),
             params.LandscapePanelRect_.ToString().c_str(), params.PortraitPanelRect_.ToString().c_str(),
-            session->GetSessionRequestRect().ToString().c_str());
+            session->GetSessionRequestRect().ToString().c_str(), params.displayId_);
         return WSError::WS_OK;
     }, "AdjustKeyboardLayout");
     return WSError::WS_OK;
@@ -555,6 +559,9 @@ void KeyboardSession::NotifySessionRectChange(const WSRect& rect,
         }
         bool isLand = screenWidth > screenHeight;
         KeyboardLayoutParams params = sessionProperty->GetKeyboardLayoutParams();
+        if (displayId != DISPLAY_ID_INVALID) {
+            params.displayId_ = displayId;
+        }
         if (isLand) {
             params.LandscapeKeyboardRect_.posX_ = rect.posX_;
             params.LandscapeKeyboardRect_.posY_ = rect.posY_;
@@ -566,8 +573,10 @@ void KeyboardSession::NotifySessionRectChange(const WSRect& rect,
             params.PortraitPanelRect_.posX_ = rect.posX_;
             params.PortraitPanelRect_.posY_ = rect.posY_;
         }
-        TLOGD(WmsLogTag::WMS_KEYBOARD, "isLand:%{public}d, landRect:%{public}s, portraitRect:%{public}s", isLand,
-            params.LandscapeKeyboardRect_.ToString().c_str(), params.PortraitKeyboardRect_.ToString().c_str());
+        TLOGD(WmsLogTag::WMS_KEYBOARD,
+            "isLand:%{public}d, landRect:%{public}s, portraitRect:%{public}s, displayId:%{public}" PRIu64,
+            isLand, params.LandscapeKeyboardRect_.ToString().c_str(),
+            params.PortraitKeyboardRect_.ToString().c_str(), displayId);
         session->AdjustKeyboardLayout(params);
     }, __func__ + GetRectInfo(rect));
 }
@@ -804,6 +813,79 @@ void KeyboardSession::NotifyRootSceneOccupiedAreaChange(const sptr<OccupiedAreaC
         return;
     }
     keyboardCallback_->onNotifyOccupiedAreaChange(info);
+}
+
+void KeyboardSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
+{
+    auto movedSurfaceNode = GetSurfaceNodeForMoveDrag();
+    if (movedSurfaceNode == nullptr) {
+        TLOGD(WmsLogTag::WMS_KEYBOARD, "SurfaceNode is null");
+        return;
+    }
+    if (reason == SizeChangeReason::DRAG || reason == SizeChangeReason::DRAG_MOVE) {
+        auto rsTransaction = RSTransactionProxy::GetInstance();
+        if (rsTransaction != nullptr) {
+            rsTransaction->Begin();
+        }
+        for (const auto displayId : moveDragController_->GetNewAddedDisplayIdsDuringMoveDrag()) {
+            if (displayId == moveDragController_->GetMoveDragStartDisplayId()) {
+                continue;
+            }
+            auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSessionById(displayId);
+            if (screenSession == nullptr) {
+                TLOGD(WmsLogTag::WMS_KEYBOARD, "ScreenSession is null");
+                continue;
+            }
+            if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::VIRTUAL) {
+                TLOGD(WmsLogTag::WMS_KEYBOARD, "virtual screen, no need to add cross parent child");
+                continue;
+            }
+            if (keyboardPanelSession_ == nullptr) {
+                TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboard panel session is null");
+                return;
+            }
+            auto keyboardPanelSurfaceNode = keyboardPanelSession_->GetSurfaceNode();
+            if (keyboardPanelSurfaceNode == nullptr) {
+                TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboard panel surface node is null");
+                return;
+            }
+            keyboardPanelSurfaceNode->SetPositionZ(MOVE_DRAG_POSITION_Z);
+            screenSession->GetDisplayNode()->AddCrossScreenChild(keyboardPanelSurfaceNode, INSERT_TO_THE_END, true);
+            keyboardPanelSurfaceNode->SetIsCrossNode(true);
+            TLOGD(WmsLogTag::WMS_KEYBOARD, "Add window to display: %{public}" PRIu64, displayId);
+        }
+        if (rsTransaction != nullptr) {
+            rsTransaction->Commit();
+        }
+    } else if (reason == SizeChangeReason::DRAG_END) {
+        for (const auto displayId : moveDragController_->GetDisplayIdsDuringMoveDrag()) {
+            if (displayId == moveDragController_->GetMoveDragStartDisplayId()) {
+                continue;
+            }
+            auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSessionById(displayId);
+            if (screenSession == nullptr) {
+                TLOGD(WmsLogTag::WMS_KEYBOARD, "ScreenSession is null");
+                continue;
+            }
+            if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::VIRTUAL) {
+                TLOGD(WmsLogTag::WMS_KEYBOARD, "virtual screen, no need to remove cross parent child");
+                continue;
+            }
+            if (keyboardPanelSession_ == nullptr) {
+                TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboard panel session is null");
+                return;
+            }
+            auto keyboardPanelSurfaceNode = keyboardPanelSession_->GetSurfaceNode();
+            if (keyboardPanelSurfaceNode == nullptr) {
+                TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboard panel surface node is null");
+                return;
+            }
+            keyboardPanelSurfaceNode->SetPositionZ(moveDragController_->GetOriginalPositionZ());
+            screenSession->GetDisplayNode()->RemoveCrossScreenChild(keyboardPanelSurfaceNode);
+            keyboardPanelSurfaceNode->SetIsCrossNode(false);
+            TLOGD(WmsLogTag::WMS_KEYBOARD, "Remove window from display: %{public}" PRIu64, displayId);
+        }
+    }
 }
 
 void KeyboardSession::SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool needFlush)
