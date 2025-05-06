@@ -14735,4 +14735,19 @@ void SceneSessionManager::ConfigSupportZLevel()
     };
     taskScheduler_->PostAsyncTask(task, "ConfigSupportZLevel");
 }
+
+WSError SceneSessionManager::UseImplicitAnimation(int32_t hostWindowId, bool useImplicit)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "hostWindowId:%{public}d, useImplicit:%{public}d", hostWindowId, useImplicit);
+    auto task = [this, hostWindowId, useImplicit]() {
+        auto sceneSession = GetSceneSession(hostWindowId);
+        if (sceneSession == nullptr) {
+            TLOGNE(WmsLogTag::WMS_UIEXT, "Session with persistentId %{public}d not found", hostWindowId);
+            return WSError::WS_ERROR_INVALID_SESSION;
+        }
+        return sceneSession->UseImplicitAnimation(useImplicit);
+    };
+ 
+    return taskScheduler_->PostSyncTask(task, "UseImplicitAnimation");
+}
 } // namespace OHOS::Rosen

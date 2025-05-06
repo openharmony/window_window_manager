@@ -5364,6 +5364,18 @@ WMError WindowSceneSessionImpl::SetFollowParentMultiScreenPolicy(bool enabled)
     return WMError::WM_OK;
 }
 
+WMError WindowSceneSessionImpl::UseImplicitAnimation(bool useImplicit)
+{
+    TLOGI(WmsLogTag::WMS_PC, "WindowId: %{public}u", GetWindowId());
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_PC, "session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
+    return static_cast<WMError>(hostSession->UseImplicitAnimation(useImplicit));
+}
+
 void WindowSceneSessionImpl::UpdateDensity()
 {
     UpdateDensityInner(nullptr);
