@@ -330,7 +330,7 @@ namespace window {
    * @systemapi Hide this for inner system use.
    * @since 8
    */
-  interface SystemBarRegionTint {
+  export interface SystemBarRegionTint {
     /**
      * System bar type
      *
@@ -398,7 +398,7 @@ namespace window {
    * @systemapi Hide this for inner system use.
    * @since 8
    */
-  interface SystemBarTintState {
+  export interface SystemBarTintState {
     /**
      * Id of display
      *
