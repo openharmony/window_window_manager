@@ -1268,6 +1268,8 @@ export class WindowInternal implements Window {
     private native getUIContextSync(nativeObj: long): UIContext;
     private native getWindowAvoidAreaSync(nativeObj: long, type: int): AvoidArea;
     private native setWaterMarkFlagSync(nativeObj: long, enable: boolean): void;
+    private native setWindowFocusableSync(nativeObj: long, isFocusable: boolean): void;
+
     private native keepKeyboardOnFocusSync(nativeObj: long, enable: boolean): void;
     private native onSync(nativeObj: long, type: string,
         callback: WindowEventCallback | WindowSizeCallback | WindowStatusCallback | KeyboardHeightChangeCallback |
@@ -1693,6 +1695,28 @@ export class WindowInternal implements Window {
       });
     }
 
+    public setWindowFocusable(isFocusable: boolean): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+          this.setWindowFocusableSync(this.nativeObj, isFocusable);
+        }).then((ret: NullishType) => {
+          resolve(undefined);
+        }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
+    public setWindowFocusable(isFocusable: boolean, callback: AsyncCallback<void>): void {
+      taskpool.execute((): void => {
+        this.setWindowFocusableSync(this.nativeObj, isFocusable);
+      }).then((ret: NullishType) => {
+        callback(new BusinessError(), undefined);
+      }).catch((err: NullishType) => {
+        callback(err as BusinessError, undefined);
+      });
+    }
+
     public keepKeyboardOnFocus(keepKeyboardFlag: boolean): void {
       this.keepKeyboardOnFocusSync(this.nativeObj, keepKeyboardFlag);
     }
@@ -1774,6 +1798,8 @@ export interface Window {
     getWindowAvoidArea(type: AvoidAreaType): AvoidArea;
     setWaterMarkFlag(enable: boolean): Promise<void>;
     setWaterMarkFlag(enable: boolean, callback: AsyncCallback<void>): void;
+    setWindowFocusable(isFocusable: boolean): Promise<void>;
+    setWindowFocusable(isFocusable: boolean, callback: AsyncCallback<void>): void;
     keepKeyboardOnFocus(enable: boolean): void;
     on<T>(type: string, callback: Callback<T>): void;
     off<T>(type: string, callback?: Callback<T>): void;
@@ -1803,6 +1829,7 @@ function setNativeObj(nativeObject: long):void {
 }
 
 native function getLastWindowSync(nativeObj: long, ctx: BaseContext): Window;
+native function shiftAppWindowFocusSync(nativeObj: long, sourceWindowId: number, targetWindowId: number): void;
 
 export function getLastWindow(ctx: BaseContext): Promise<Window> {
   return new Promise<Window>((resolve: (value: Window) => void, reject: (error: BusinessError) => void ) => {
@@ -1826,6 +1853,18 @@ export function getLastWindow(ctx: BaseContext, callback: AsyncCallback<Window>)
     }).catch((err: NullishType) => {
         callback(err as BusinessError, new WindowInternal());
     });
+}
+
+export function shiftAppWindowFocus(sourceWindowId: number, targetWindowId: number): Promise<Window> {
+  return new Promise<Window>((resolve: (value: Window) => void, reject: (error: BusinessError) => void ) => {
+      taskpool.execute((): Window => {
+          return getLastWindowSync(nativeObj, sourceWindowId, targetWindowId);
+      }).then((ret: NullishType) => {
+          resolve(ret as Window);
+      }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+      });
+  }); 
 }
 
 function runWindowEventCallBack(cb: object, cbArg: int): void {
