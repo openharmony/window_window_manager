@@ -59,6 +59,7 @@ public:
     void SetScreenCombination(ScreenId mainScreenId, ScreenId extendScreenId,
         ScreenCombination extendCombination) override {};
     std::string OnDumperClientScreenSessions() override { return ""; };
+    void OnScreenModeChanged(ScreenModeChangeEvent screenModeChangeEvent) override {};
     sptr<IRemoteObject> AsObject() override {return testPtr;};
     sptr<IRemoteObject> testPtr;
 };

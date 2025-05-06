@@ -67,6 +67,7 @@ private:
     static napi_value SetDefaultMultiScreenModeWhenSwitchUser(napi_env env, napi_callback_info info);
     static napi_value NotifyExtendScreenCreateFinish(napi_env env, napi_callback_info info);
     static napi_value NotifyExtendScreenDestroyFinish(napi_env env, napi_callback_info info);
+    static napi_value NotifyScreenMaskAppear(napi_env env, napi_callback_info info);
 
     napi_value OnRegisterCallback(napi_env env, const napi_callback_info info);
     napi_value OnUpdateScreenRotationProperty(napi_env env, const napi_callback_info info);
@@ -94,6 +95,7 @@ private:
     napi_value OnSetDefaultMultiScreenModeWhenSwitchUser(napi_env env, napi_callback_info info);
     napi_value OnNotifyExtendScreenCreateFinish(napi_env env, const napi_callback_info info);
     napi_value OnNotifyExtendScreenDestroyFinish(napi_env env, napi_callback_info info);
+    napi_value OnNotifyScreenMaskAppear(napi_env env, napi_callback_info info);
 
     std::shared_ptr<NativeReference> screenConnectionCallback_;
     std::shared_ptr<NativeReference> shutdownCallback_;

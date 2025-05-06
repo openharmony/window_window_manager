@@ -467,14 +467,105 @@ HWTEST_F(ScreenSceneConfigTest, GetCurvedCompressionAreaInLandscape, TestSize.Le
 }
 
 /**
- * @tc.name: Split
- * @tc.desc: Split func
+ * @tc.name: Split01
+ * @tc.desc: Split01 func
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigTest, Split, TestSize.Level1)
+HWTEST_F(ScreenSceneConfigTest, Split01, TestSize.Level1)
 {
     auto result = ScreenSceneConfig::Split("oo", "+9");
     ASSERT_NE(0, result.size());
+}
+
+/**
+ * @tc.name: Split02
+ * @tc.desc: Test Split function when no pattern is found in the string
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, Split02, TestSize.Level1)
+{
+    std::string str = "HelloWorld";
+    std::string pattern = "::";
+    std::vector<std::string> result = ScreenSceneConfig::Split(str, pattern);
+    EXPECT_EQ(result.size(), 1);
+    EXPECT_EQ(result[0], str);
+}
+
+/**
+ * @tc.name: Split03
+ * @tc.desc: Test Split function when one pattern is found in the string
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, Split03, TestSize.Level1)
+{
+    std::string str = "Hello::World";
+    std::string pattern = "::";
+    std::vector<std::string> result = ScreenSceneConfig::Split(str, pattern);
+    EXPECT_EQ(result.size(), 2);
+    EXPECT_EQ(result[0], "Hello");
+    EXPECT_EQ(result[1], "World");
+}
+
+/**
+ * @tc.name: Split04
+ * @tc.desc: Test Split function when multiple patterns are found in the string
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, Split04, TestSize.Level1)
+{
+    std::string str = "Hello::World::This::Is::A::Test";
+    std::string pattern = "::";
+    std::vector<std::string> result = ScreenSceneConfig::Split(str, pattern);
+    EXPECT_EQ(result.size(), 6);
+    EXPECT_EQ(result[0], "Hello");
+    EXPECT_EQ(result[1], "World");
+    EXPECT_EQ(result[2], "This");
+    EXPECT_EQ(result[3], "Is");
+    EXPECT_EQ(result[4], "A");
+    EXPECT_EQ(result[5], "Test");
+}
+
+/**
+ * @tc.name: Split05
+ * @tc.desc: Test Split function when the string ends with the pattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, Split05, TestSize.Level1)
+{
+    std::string str = "Hello::World::";
+    std::string pattern = "::";
+    std::vector<std::string> result = ScreenSceneConfig::Split(str, pattern);
+    EXPECT_EQ(result.size(), 3);
+    EXPECT_EQ(result[0], "Hello");
+    EXPECT_EQ(result[1], "World");
+    EXPECT_EQ(result[2], "");
+}
+
+/**
+ * @tc.name: Split06
+ * @tc.desc: Test Split function when the input string is the same as the pattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, Split06, TestSize.Level1)
+{
+    std::string str = "::";
+    std::string pattern = "::";
+    std::vector<std::string> result = ScreenSceneConfig::Split(str, pattern);
+    EXPECT_EQ(result.size(), 2);
+    EXPECT_EQ(result[0], "");
+    EXPECT_EQ(result[1], "");
+}
+
+/**
+ * @tc.name: GetAllDisplayPhysicalConfig01
+ * @tc.desc: GetAllDisplayPhysicalConfig01 func
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, GetAllDisplayPhysicalConfig01, TestSize.Level1)
+{
+    ScreenSceneConfig::displayPhysicalResolution_.clear();
+    std::vector<DisplayPhysicalResolution> actual = ScreenSceneConfig::GetAllDisplayPhysicalConfig();
+    EXPECT_TRUE(actual.empty());
 }
 
 /**

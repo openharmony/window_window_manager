@@ -56,6 +56,7 @@ public:
         TRANS_ID_SET_SCREEN_COMBINATION,
         TRANS_ID_ON_DUMP_SCREEN_SESSION,
         TRANS_ID_ON_BEFORE_PROPERTY_CHANGED,
+        TRANS_ID_ON_SCREEN_MODE_CHANGED,
     };
 
     virtual void SwitchUserCallback(std::vector<int32_t> oldScbPids, int32_t currentScbPid) = 0;
@@ -94,6 +95,7 @@ public:
     virtual void SetScreenCombination(ScreenId mainScreenId, ScreenId extendScreenId,
         ScreenCombination extendCombination) = 0;
     virtual std::string OnDumperClientScreenSessions() = 0;
+    virtual void OnScreenModeChanged(ScreenModeChangeEvent screenModeChangeEvent) = 0;
 };
 } // namespace OHOS::Rosen
 

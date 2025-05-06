@@ -72,6 +72,8 @@
 #include "user_switch_reporter.h"
 #include "window_helper.h"
 #include "xcollie/watchdog.h"
+#include "xcollie/xcollie.h"
+#include "xcollie/xcollie_define.h"
 
 #ifdef MEMMGR_WINDOW_ENABLE
 #include "mem_mgr_client.h"
@@ -2597,7 +2599,7 @@ sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<S
     abilitySessionInfo->requestId = sessionInfo.requestId;
     abilitySessionInfo->reuseDelegatorWindow = sessionInfo.reuseDelegatorWindow;
     if (sessionInfo.want != nullptr) {
-        abilitySessionInfo->want = sessionInfo.SafelyGetWant();
+        abilitySessionInfo->want = sessionInfo.GetWantSafely();
     } else {
         abilitySessionInfo->want.SetElementName("", sessionInfo.bundleName_, sessionInfo.abilityName_,
             sessionInfo.moduleName_);
@@ -2715,8 +2717,11 @@ int32_t SceneSessionManager::StartUIAbilityBySCBTimeoutCheck(const sptr<AAFwk::S
     std::shared_ptr<bool> coldStartFlag = std::make_shared<bool>(false);
     bool isTimeout = ffrtQueueHelper_->SubmitTaskAndWait([abilitySessionInfo, coldStartFlag, retCode,
         windowStateChangeReason] {
+        int timerId = HiviewDFX::XCollie::GetInstance().SetTimer("WMS:SSM:StartUIAbilityBySCB",
+            START_UI_ABILITY_TIMEOUT/1000, nullptr, nullptr, HiviewDFX::XCOLLIE_FLAG_LOG);
         auto result = AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(abilitySessionInfo,
             *coldStartFlag, windowStateChangeReason);
+        HiviewDFX::XCollie::GetInstance().CancelTimer(timerId);
         *retCode = static_cast<int32_t>(result);
         TLOGNI(WmsLogTag::WMS_LIFE, "start ui ability retCode: %{public}d", *retCode);
     }, START_UI_ABILITY_TIMEOUT);
@@ -3773,11 +3778,11 @@ SessionInfo SceneSessionManager::RecoverSessionInfo(const sptr<WindowSessionProp
         "Recover and reconnect session with: bundleName=%{public}s, moduleName=%{public}s, "
         "abilityName=%{public}s, windowMode=%{public}d, windowType=%{public}u, persistentId=%{public}d, "
         "windowState=%{public}u, appInstanceKey=%{public}s, isFollowParentMultiScreenPolicy=%{public}d, "
-        "screenId=%{public}d, isAbilityHook=%{public}d",
+        "screenId=%{public}" PRIu64 ", isAbilityHook=%{public}d",
         sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(), sessionInfo.abilityName_.c_str(),
         sessionInfo.windowMode, sessionInfo.windowType_, sessionInfo.persistentId_, sessionInfo.sessionState_,
         sessionInfo.appInstanceKey_.c_str(), sessionInfo.isFollowParentMultiScreenPolicy,
-        static_cast<int32_t>(sessionInfo.screenId_), sessionInfo.isAbilityHook_);
+        sessionInfo.screenId_, sessionInfo.isAbilityHook_);
     return sessionInfo;
 }
 
@@ -7709,6 +7714,7 @@ void SceneSessionManager::RegisterSessionChangeByActionNotifyManagerFunc(sptr<Sc
             case WSPropertyChangeAction::ACTION_UPDATE_STATUS_PROPS:
             case WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_PROPS:
             case WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_INDICATOR_PROPS:
+            case WSPropertyChangeAction::ACTION_UPDATE_FOLLOW_SCREEN_CHANGE:
                 NotifyWindowInfoChange(property->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
                 break;
             case WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS:
@@ -8712,7 +8718,7 @@ __attribute__((no_sanitize("cfi"))) WSError SceneSessionManager::GetAllAbilityIn
         TLOGE(WmsLogTag::DEFAULT, "invalid want:%{public}s", want.ToString().c_str());
         return WSError::WS_ERROR_INVALID_PARAM;
     }
-    return GetAbilityInfosFromBundleInfo(bundleInfos, scbAbilityInfos);
+    return GetAbilityInfosFromBundleInfo(bundleInfos, scbAbilityInfos, userId);
 }
 
 __attribute__((no_sanitize("cfi"))) WSError SceneSessionManager::GetBatchAbilityInfos(
@@ -8738,7 +8744,7 @@ __attribute__((no_sanitize("cfi"))) WSError SceneSessionManager::GetBatchAbility
         TLOGE(WmsLogTag::WMS_RECOVER, "Query batch ability infos from BMS failed!");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
-    return GetAbilityInfosFromBundleInfo(bundleInfos, scbAbilityInfos);
+    return GetAbilityInfosFromBundleInfo(bundleInfos, scbAbilityInfos, userId);
 }
 
 WSError SceneSessionManager::GetAbilityInfo(const std::string& bundleName, const std::string& moduleName,
@@ -8789,12 +8795,13 @@ WSError SceneSessionManager::GetAbilityInfo(const std::string& bundleName, const
 }
 
 WSError SceneSessionManager::GetAbilityInfosFromBundleInfo(const std::vector<AppExecFwk::BundleInfo>& bundleInfos,
-    std::vector<SCBAbilityInfo>& scbAbilityInfos)
+    std::vector<SCBAbilityInfo>& scbAbilityInfos, int32_t userId)
 {
     if (bundleInfos.empty()) {
         TLOGE(WmsLogTag::DEFAULT, "bundleInfos is empty");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
+    std::vector<AppExecFwk::BundleInfo> collaboratorBundleInfos;
     for (auto& bundleInfo : bundleInfos) {
         auto& hapModulesList = bundleInfo.hapModuleInfos;
         auto sdkVersion = bundleInfo.targetVersion % 100; // %100 to get the real version
@@ -8802,19 +8809,10 @@ WSError SceneSessionManager::GetAbilityInfosFromBundleInfo(const std::vector<App
             TLOGD(WmsLogTag::DEFAULT, "hapModulesList is empty");
             continue;
         }
-        if (bundleInfo.applicationInfo.codePath == std::to_string(CollaboratorType::RESERVE_TYPE) ||
-            bundleInfo.applicationInfo.codePath == std::to_string(CollaboratorType::OTHERS_TYPE)) {
-            auto iter = std::find_if(hapModulesList.begin(), hapModulesList.end(),
-                [](const AppExecFwk::HapModuleInfo& hapModule) { return !hapModule.abilityInfos.empty(); });
-            if (iter != hapModulesList.end()) {
-                SCBAbilityInfo scbAbilityInfo;
-                scbAbilityInfo.abilityInfo_ = iter->abilityInfos[0];
-                scbAbilityInfo.sdkVersion_ = sdkVersion;
-                scbAbilityInfo.codePath_ = bundleInfo.applicationInfo.codePath;
-                GetOrientationFromResourceManager(scbAbilityInfo.abilityInfo_);
-                scbAbilityInfos.push_back(scbAbilityInfo);
-                continue;
-            }
+        if (WindowHelper::IsNumber(bundleInfo.applicationInfo.codePath) &&
+            CheckCollaboratorType(std::stoi(bundleInfo.applicationInfo.codePath))) {
+            collaboratorBundleInfos.emplace_back(bundleInfo);
+            continue;
         }
         for (auto& hapModule : hapModulesList) {
             auto& abilityInfoList = hapModule.abilityInfos;
@@ -8834,7 +8832,55 @@ WSError SceneSessionManager::GetAbilityInfosFromBundleInfo(const std::vector<App
             }
         }
     }
+    GetCollaboratorAbilityInfos(collaboratorBundleInfos, scbAbilityInfos, userId);
     return WSError::WS_OK;
+}
+
+void SceneSessionManager::GetCollaboratorAbilityInfos(const std::vector<AppExecFwk::BundleInfo>& bundleInfos,
+    std::vector<SCBAbilityInfo>& scbAbilityInfos, int32_t userId)
+{
+    if (bundleInfos.empty()) {
+        TLOGD(WmsLogTag::DEFAULT, "bundleInfos is empty");
+        return;
+    }
+    std::vector<AppExecFwk::AbilityInfo> launcherAbilityInfos;
+    AAFwk::Want want;
+    want.SetAction(AAFwk::Want::ACTION_HOME);
+    want.AddEntity(AAFwk::Want::ENTITY_HOME);
+    if (!bundleMgr_ || bundleMgr_->QueryLauncherAbilityInfos(want, userId, launcherAbilityInfos) != ERR_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "Query launcher ability infos from BMS failed!");
+        return;
+    }
+    std::unordered_map<std::string, AppExecFwk::AbilityInfo> abilityInfoMap;
+    for (auto& abilityInfo : launcherAbilityInfos) {
+        abilityInfoMap.emplace(abilityInfo.bundleName, abilityInfo);
+    }
+    for (auto& bundleInfo : bundleInfos) {
+        AppExecFwk::AbilityInfo abilityInfo;
+        auto& hapModulesList = bundleInfo.hapModuleInfos;
+        auto iter = abilityInfoMap.find(bundleInfo.name);
+        if (iter == abilityInfoMap.end()) {
+            TLOGW(WmsLogTag::DEFAULT, "launcher ability not found, bundle:%{public}s", bundleInfo.name.c_str());
+            auto hapModuleListIter = std::find_if(hapModulesList.begin(), hapModulesList.end(),
+                [](const AppExecFwk::HapModuleInfo& hapModule) { return !hapModule.abilityInfos.empty(); }); 
+            if (hapModuleListIter != hapModulesList.end()) {
+                abilityInfo = hapModuleListIter->abilityInfos[0];
+            } else {
+                continue;
+            }
+        } else {
+            if (!AbilityInfoManager::FindAbilityInfo(
+                bundleInfo, iter->second.moduleName, iter->second.name, abilityInfo)) {
+                continue;
+            }
+        }
+        SCBAbilityInfo scbAbilityInfo;
+        scbAbilityInfo.abilityInfo_ = abilityInfo;
+        scbAbilityInfo.sdkVersion_ = bundleInfo.targetVersion % 100; // %100 to get the real version
+        scbAbilityInfo.codePath_ = bundleInfo.applicationInfo.codePath;
+        GetOrientationFromResourceManager(scbAbilityInfo.abilityInfo_);
+        scbAbilityInfos.push_back(scbAbilityInfo);
+    } 
 }
 
 void SceneSessionManager::GetOrientationFromResourceManager(AppExecFwk::AbilityInfo& abilityInfo)
@@ -10773,6 +10819,7 @@ void DisplayChangeListener::OnDisplayStateChange(DisplayId defaultDisplayId, spt
         case DisplayStateChangeType::VIRTUAL_PIXEL_RATIO_CHANGE: {
             SceneSessionManager::GetInstance().ProcessVirtualPixelRatioChange(defaultDisplayId,
                 displayInfo, displayInfoMap, type);
+            SceneSessionManager::GetInstance().FlushWindowInfoToMMI();
             break;
         }
         case DisplayStateChangeType::UPDATE_ROTATION: {
@@ -11167,11 +11214,14 @@ BrokerStates SceneSessionManager::NotifyStartAbility(
         }
         sessionInfo.want->SetParam("oh_persistentId", persistentId);
         std::shared_ptr<int32_t> ret = std::make_shared<int32_t>(0);
-        std::shared_ptr<AAFwk::Want> notifyWant = std::make_shared<AAFwk::Want>(sessionInfo.SafelyGetWant());
+        std::shared_ptr<AAFwk::Want> notifyWant = std::make_shared<AAFwk::Want>(sessionInfo.GetWantSafely());
         bool isTimeout = ffrtQueueHelper_->SubmitTaskAndWait([this, collaborator, accessTokenIDEx,
             notifyWant, abilityInfo = sessionInfo.abilityInfo, ret] {
+            int timerId = HiviewDFX::XCollie::GetInstance().SetTimer("WMS:SSM:NotifyStartAbility",
+                NOTIFY_START_ABILITY_TIMEOUT/1000, nullptr, nullptr, HiviewDFX::XCOLLIE_FLAG_LOG);
             auto result = collaborator->NotifyStartAbility(*abilityInfo, currentUserId_, *notifyWant,
                 static_cast<uint64_t>(accessTokenIDEx));
+            HiviewDFX::XCollie::GetInstance().CancelTimer(timerId);
             *ret = static_cast<int32_t>(result);
         }, NOTIFY_START_ABILITY_TIMEOUT);
 
@@ -11179,7 +11229,7 @@ BrokerStates SceneSessionManager::NotifyStartAbility(
             TLOGE(WmsLogTag::WMS_LIFE, "notify start ability timeout, id: %{public}d", persistentId);
             return BrokerStates::BROKER_NOT_START;
         }
-        sessionInfo.SafelySetWant(*notifyWant);
+        sessionInfo.SetWantSafely(*notifyWant);
         TLOGI(WmsLogTag::WMS_LIFE, "collaborator ret: %{public}d", *ret);
         if (*ret == 0) {
             return BrokerStates::BROKER_STARTED;
@@ -11202,7 +11252,7 @@ void SceneSessionManager::NotifySessionCreate(sptr<SceneSession> sceneSession, c
     }
     if (auto collaborator = GetCollaboratorByType(sceneSession->GetCollaboratorType())) {
         auto abilitySessionInfo = SetAbilitySessionInfo(sceneSession);
-        abilitySessionInfo->want = sessionInfo.SafelyGetWant();
+        abilitySessionInfo->want = sessionInfo.GetWantSafely();
         int32_t missionId = abilitySessionInfo->persistentId;
         std::string bundleName = sessionInfo.bundleName_;
         int64_t timestamp = containerStartAbilityTime_;
@@ -11253,7 +11303,10 @@ void SceneSessionManager::NotifyClearSession(int32_t collaboratorType, int32_t p
     if (auto collaborator = GetCollaboratorByType(collaboratorType)) {
         const char* const where = __func__;
         ffrtQueueHelper_->SubmitTask([collaborator, persistentId, where] {
+            int timerId = HiviewDFX::XCollie::GetInstance().SetTimer("WMS:SSM:NotifyClearMission",
+                NOTIFY_START_ABILITY_TIMEOUT/1000, nullptr, nullptr, HiviewDFX::XCOLLIE_FLAG_LOG);
             int32_t ret = collaborator->NotifyClearMission(persistentId);
+            HiviewDFX::XCollie::GetInstance().CancelTimer(timerId);
             TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s called clear mission ret: %{public}d, persistent id: %{public}d",
                 where, ret, persistentId);
         });
@@ -14672,5 +14725,14 @@ void SceneSessionManager::RegisterSceneSessionDestructNotifyManagerFunc(const sp
             onSceneSessionDestruct_(persistentId);
         }
     });
+}
+
+void SceneSessionManager::ConfigSupportZLevel()
+{
+    TLOGI(WmsLogTag::WMS_HIERARCHY, "support zLevel");
+    auto task = [this] {
+        systemConfig_.supportZLevel_ = true;
+    };
+    taskScheduler_->PostAsyncTask(task, "ConfigSupportZLevel");
 }
 } // namespace OHOS::Rosen

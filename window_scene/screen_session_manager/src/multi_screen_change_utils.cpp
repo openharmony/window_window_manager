@@ -259,6 +259,17 @@ void MultiScreenChangeUtils::ScreenPropertyChange(sptr<ScreenSession>& innerScre
     externalScreen->SetScreenProperty(innerPhyProperty);
 }
 
+void MultiScreenChangeUtils::SetScreenNotifyFlag(sptr<ScreenSession>& innerScreen,
+    sptr<ScreenSession>& externalScreen)
+{
+    if (innerScreen == nullptr || externalScreen == nullptr) {
+        TLOGE(WmsLogTag::DMS, "screen sessions null.");
+        return;
+    }
+    innerScreen->SetIsAvailableAreaNeedNotify(true);
+    externalScreen->SetIsAvailableAreaNeedNotify(true);
+}
+
 void MultiScreenChangeUtils::ScreenPhysicalInfoChange(sptr<ScreenSession>& innerScreen,
     sptr<ScreenSession>& externalScreen)
 {
@@ -290,6 +301,9 @@ void MultiScreenChangeUtils::ScreenPhysicalInfoChange(sptr<ScreenSession>& inner
 
     /* change active mode */
     ScreenActiveModesChange(innerScreen, externalScreen);
+
+    /* set notify flag */
+    SetScreenNotifyFlag(innerScreen, externalScreen);
     oss.str("");
     oss << "after innerScreen screenId: " << innerScreen->GetScreenId()
         << ", rsId: " << innerScreen->GetRSScreenId()

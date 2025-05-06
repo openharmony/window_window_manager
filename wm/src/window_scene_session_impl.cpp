@@ -956,18 +956,23 @@ void WindowSceneSessionImpl::ResetSuperFoldDisplayY(const std::shared_ptr<MMI::P
         superFoldOffsetY_ = rect.height_ + rect.posY_;
         TLOGI(WmsLogTag::WMS_EVENT, "height: %{public}d, posY: %{public}d", rect.height_, rect.posY_);
     }
-    MMI::PointerEvent::PointerItem pointerItem;
-    if (!pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem)) {
-        TLOGE(WmsLogTag::WMS_INPUT_KEY_FLOW, "pointerItem is empty");
-        return;
-    }
-    if (auto displayY = pointerItem.GetDisplayY(); displayY >= superFoldOffsetY_) {
-        pointerItem.SetDisplayY(displayY - superFoldOffsetY_);
-        pointerItem.SetDisplayYPos(pointerItem.GetDisplayYPos() - superFoldOffsetY_);
-        pointerEvent->AddPointerItem(pointerItem);
-        pointerEvent->SetTargetDisplayId(DISPLAY_ID_C);
-        TLOGD(WmsLogTag::WMS_EVENT, "Calculated superFoldOffsetY: %{public}d, displayId: %{public}d",
-            superFoldOffsetY_, pointerEvent->GetTargetDisplayId());
+    std::vector<int32_t> pointerIds = pointerEvent->GetPointerIds();
+    for (int32_t pointerId : pointerIds) {
+        MMI::PointerEvent::PointerItem pointerItem;
+        if (!pointerEvent->GetPointerItem(pointerId, pointerItem)) {
+            TLOGE(WmsLogTag::WMS_INPUT_KEY_FLOW, "Get pointerItem failed");
+            return;
+        }
+        if (auto displayY = pointerItem.GetDisplayY(); displayY >= superFoldOffsetY_) {
+            pointerItem.SetDisplayY(displayY - superFoldOffsetY_);
+            pointerItem.SetDisplayYPos(pointerItem.GetDisplayYPos() - superFoldOffsetY_);
+            pointerEvent->UpdatePointerItem(pointerId, pointerItem);
+            pointerEvent->SetTargetDisplayId(DISPLAY_ID_C);
+            TLOGD(WmsLogTag::WMS_EVENT, "Calculated superFoldOffsetY:%{public}d,displayId:%{public}d,"
+                "InputId:%{public}d,pointerId:%{public}d,displayx:%{private}d,displayy:%{private}d,",
+                superFoldOffsetY_, pointerEvent->GetTargetDisplayId(), pointerEvent->GetId(),
+                pointerId, pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
+        }
     }
 }
 
@@ -2427,6 +2432,12 @@ WMError WindowSceneSessionImpl::SetSubWindowZLevel(int32_t zLevel)
         TLOGE(WmsLogTag::WMS_HIERARCHY, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+
+    if (!windowSystemConfig_.supportZLevel_) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "The device is not supported");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
     if (!WindowHelper::IsNormalSubWindow(GetType(), property_->GetWindowFlags())) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "must be normal app sub window");
         return WMError::WM_ERROR_INVALID_CALLING;
@@ -2455,6 +2466,12 @@ WMError WindowSceneSessionImpl::GetSubWindowZLevel(int32_t& zLevel)
         TLOGE(WmsLogTag::WMS_HIERARCHY, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+
+    if (!windowSystemConfig_.supportZLevel_) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "The device is not supported");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
     if (!WindowHelper::IsSubWindow(GetType()) || !WindowHelper::IsDialogWindow(GetType())) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "must be app sub window!");
         return WMError::WM_ERROR_INVALID_CALLING;

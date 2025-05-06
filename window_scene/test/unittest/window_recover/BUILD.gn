@@ -14,8 +14,7 @@
 import("//build/test.gni")
 import("../../../../windowmanager_aafwk.gni")
 
-module_out_path =
-    "window_manager/window_manager/window_scene/test/unittest/window_recover"
+module_out_path = "window_manager/window_manager/window_scene/window_recover"
 ws_unittest_common = "../:ws_unittest_common"
 
 ohos_unittest("ws_window_recover_session_test") {

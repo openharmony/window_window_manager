@@ -140,6 +140,10 @@ void ScreenSessionManagerClientStub::InitScreenChangeMap()
         [this](MessageParcel& data, MessageParcel& reply) {
         return HandleOnBeforeScreenPropertyChange(data, reply);
     };
+    HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_ON_SCREEN_MODE_CHANGED] =
+        [this](MessageParcel& data, MessageParcel& reply) {
+        return HandleOnScreenModeChanged(data, reply);
+    };
 }
 
 ScreenSessionManagerClientStub::ScreenSessionManagerClientStub()
@@ -462,6 +466,14 @@ int ScreenSessionManagerClientStub::HandleOnBeforeScreenPropertyChange(MessagePa
     foldStatus = static_cast<FoldStatus>(status);
     TLOGI(WmsLogTag::DMS, "fold status %{public}d", foldStatus);
     OnBeforeScreenPropertyChanged(foldStatus);
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerClientStub::HandleOnScreenModeChanged(MessageParcel& data, MessageParcel& reply)
+{
+    auto screenModeChangeEvent = static_cast<ScreenModeChangeEvent>(data.ReadUint32());
+    TLOGI(WmsLogTag::DMS, "screenModeChangeEvent: %{public}d", screenModeChangeEvent);
+    OnScreenModeChanged(screenModeChangeEvent);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen
