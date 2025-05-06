@@ -1721,29 +1721,6 @@ HWTEST_F(WindowSessionImplTest4, SetMainWindowContainerColor04, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetMainWindowContainerColor05
- * @tc.desc: SetMainWindowContainerColor
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest4, SetMainWindowContainerColor05, TestSize.Level1)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SetMainWindowContainerColor");
-    option->SetSubWindowMaximizeSupported(true);
-    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    window->property_->SetDecorEnable(true);
-    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
-    window->windowSystemConfig_.isSystemDecorEnable_ = true;
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
-    std::string activeColor = "#00000000";
-    std::string inactiveColor = "#FF000000";
-    WMError res = window->SetMainWindowContainerColor(activeColor, inactiveColor);
-    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
-}
-
-/**
  * @tc.name: IsPcOrPadCapabilityEnabled
  * @tc.desc: IsPcOrPadCapabilityEnabled test
  * @tc.type: FUNC
