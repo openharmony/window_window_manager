@@ -104,6 +104,8 @@ private:
         bool isShow);
     void NotifySystemKeyboardAvoidChange(SystemKeyboardAvoidChangeReason reason);
     void NotifyRootSceneOccupiedAreaChange(const sptr<OccupiedAreaChangeInfo>& info);
+    void AddCrossScreenChild();
+    void RemoveCrossScreenChild();
     void HandleMoveDragSurfaceNode(SizeChangeReason reason) override;
     void SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool needFlush = true) override;
 

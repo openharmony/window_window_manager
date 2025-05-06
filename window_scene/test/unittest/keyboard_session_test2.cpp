@@ -178,6 +178,61 @@ HWTEST_F(KeyboardSessionTest2, AdjustKeyboardLayout02, Function | SmallTest | Le
 }
 
 /**
+ * @tc.name: AdjustKeyboardLayout03
+ * @tc.desc: AdjustKeyboardLayout test
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest2, AdjustKeyboardLayout03, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "AdjustKeyboardLayout03";
+    info.bundleName_ = "AdjustKeyboardLayout03";
+    sptr<SceneSession::SpecificSessionCallback> specificCb =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    EXPECT_NE(specificCb, nullptr);
+    sptr<KeyboardSession::KeyboardSessionCallback> keyboardCb =
+        sptr<KeyboardSession::KeyboardSessionCallback>::MakeSptr();
+    EXPECT_NE(keyboardCb, nullptr);
+    sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, specificCb, keyboardCb);
+    EXPECT_NE(keyboardSession, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    keyboardSession->SetSessionProperty(property);
+
+    KeyboardLayoutParams params;
+    ASSERT_EQ(keyboardSession->AdjustKeyboardLayout(params), WSError::WS_OK);
+
+    keyboardSession->adjustKeyboardLayoutFunc_ = nullptr;
+    ASSERT_EQ(keyboardSession->AdjustKeyboardLayout(params), WSError::WS_OK);
+
+    keyboardSession->adjustKeyboardLayoutFunc_ = [](const KeyboardLayoutParams& params){};
+    ASSERT_EQ(keyboardSession->AdjustKeyboardLayout(params), WSError::WS_OK);
+
+    params.displayId_ = 100;
+    ASSERT_EQ(keyboardSession->AdjustKeyboardLayout(params), WSError::WS_OK);
+
+    keyboardSession->adjustKeyboardLayoutFunc_ = nullptr;
+    ASSERT_EQ(keyboardSession->AdjustKeyboardLayout(params), WSError::WS_OK);
+}
+
+/**
+ * @tc.name: HandleMoveDragSurfaceNode01
+ * @tc.desc: HandleMoveDragSurfaceNode test
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest2, HandleMoveDragSurfaceNode01, Function | SmallTest | Level1)
+{
+    sptr<KeyboardSession> keyboardSession =
+        GetKeyboardSession("HandleMoveDragSurfaceNode01", "HandleMoveDragSurfaceNode01");
+    ASSERT_NE(keyboardSession, nullptr);
+
+    keyboardSession->HandleMoveDragSurfaceNode(SizeChangeReason::DRAG_START);
+    keyboardSession->HandleMoveDragSurfaceNode(SizeChangeReason::DRAG);
+    keyboardSession->HandleMoveDragSurfaceNode(SizeChangeReason::DRAG_MOVE);
+    keyboardSession->HandleMoveDragSurfaceNode(SizeChangeReason::DRAG_END);
+}
+
+/**
  * @tc.name: CheckIfNeedRaiseCallingSession
  * @tc.desc: CheckIfNeedRaiseCallingSession
  * @tc.type: FUNC
