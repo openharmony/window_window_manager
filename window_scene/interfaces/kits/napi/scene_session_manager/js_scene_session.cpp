@@ -96,6 +96,7 @@ const std::string HIGHLIGHT_CHANGE_CB = "highlightChange";
 const std::string SET_PARENT_SESSION_CB = "setParentSession";
 const std::string UPDATE_FLAG_CB = "updateFlag";
 const std::string Z_LEVEL_CHANGE_CB = "zLevelChange";
+const std::string UPDATE_FOLLOW_SCREEN_CHANGE_CB = "sessionUpdateFollowScreenChange";
 
 constexpr int ARG_COUNT_1 = 1;
 constexpr int ARG_COUNT_2 = 2;
@@ -181,6 +182,7 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {UPDATE_FLAG_CB,                        ListenerFuncType::UPDATE_FLAG_CB},
     {Z_LEVEL_CHANGE_CB,                     ListenerFuncType::Z_LEVEL_CHANGE_CB},
     {UPDATE_PIP_TEMPLATE_INFO_CB,           ListenerFuncType::UPDATE_PIP_TEMPLATE_INFO_CB},
+    {UPDATE_FOLLOW_SCREEN_CHANGE_CB,        ListenerFuncType::UPDATE_FOLLOW_SCREEN_CHANGE_CB},
 };
 
 const std::vector<std::string> g_syncGlobalPositionPermission {
@@ -299,15 +301,43 @@ static void ParseMetadataConfiguration(napi_env env, napi_value objValue, const 
     }
 }
 
+napi_value JsSceneSession::GetJsPanelSessionObj(napi_env env, const sptr<SceneSession>& session)
+{
+    if (session->GetWindowType() != WindowType::WINDOW_TYPE_KEYBOARD_PANEL) {
+        TLOGD(WmsLogTag::WMS_KEYBOARD, "This is not panel session");
+        return nullptr;
+    }
+    int32_t persistentId = session->GetPersistentId();
+    auto iter = jsSceneSessionMap_.find(persistentId);
+    if (iter != jsSceneSessionMap_.end()) {
+        const auto& ref = iter->second;
+        if (ref != nullptr) {
+            TLOGI(WmsLogTag::WMS_KEYBOARD, "Js panel session exists already and reuse it, id: %{public}d",
+                  persistentId);
+            napi_value panelSessionObj = nullptr;
+            napi_get_reference_value(env, ref, &panelSessionObj);
+            return panelSessionObj;
+        }
+    }
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Not find js panel session");
+    return nullptr;
+}
+
 napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& session)
 {
-    napi_value objValue = nullptr;
-    napi_create_object(env, &objValue);
-    if (objValue == nullptr || session == nullptr) {
-        WLOGFE("Object or session is null!");
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "session is null");
         return NapiGetUndefined(env);
     }
-
+    napi_value objValue = JsSceneSession::GetJsPanelSessionObj(env, session);
+    if (objValue != nullptr) {
+        return objValue;
+    }
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "objValue is null");
+        return NapiGetUndefined(env);
+    }
     sptr<JsSceneSession> jsSceneSession = sptr<JsSceneSession>::MakeSptr(env, session);
     jsSceneSession->IncStrongRef(nullptr);
     napi_wrap(env, objValue, jsSceneSession.GetRefPtr(), JsSceneSession::Finalizer, nullptr, nullptr);
@@ -2802,6 +2832,9 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
             break;
         case static_cast<uint32_t>(ListenerFuncType::UPDATE_FLAG_CB):
             ProcessUpdateFlagRegister();
+            break;
+        case static_cast<uint32_t>(ListenerFuncType::UPDATE_FOLLOW_SCREEN_CHANGE_CB):
+            ProcessSessionUpdateFollowScreenChange();
             break;
         default:
             break;
@@ -7072,6 +7105,45 @@ void JsSceneSession::OnUpdateFlag(const std::string& flag)
         napi_value argv[] = { jsFlag };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     }, __func__);
+}
+
+void JsSceneSession::ProcessSessionUpdateFollowScreenChange()
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "session is nullptr, id:%{public}d", persistentId_);
+        return;
+    }
+    session->RegisterFollowScreenChangeCallback([weakThis = wptr(this)](bool isFollowScreenChange) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::DEFAULT, "jsSceneSession is null");
+            return;
+        }
+        jsSceneSession->OnUpdateFollowScreenChange(isFollowScreenChange);
+    });
+}
+
+void JsSceneSession::OnUpdateFollowScreenChange(bool isFollowScreenChange)
+{
+    TLOGI(WmsLogTag::DEFAULT, "follow screen change: %{public}u", isFollowScreenChange);
+    std::string info = "OnUpdateFollowScreenChange, isFollowScreenChange:" + std::to_string(isFollowScreenChange);
+    taskScheduler_->PostMainThreadTask([weakThis = wptr(this), persistentId = persistentId_,
+        isFollowScreenChange, env = env_] {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
+            TLOGNE(WmsLogTag::DEFAULT, "jsSceneSession id:%{public}d has been destroyed", persistentId);
+            return;
+        }
+        auto jsCallBack = jsSceneSession->GetJSCallback(UPDATE_FOLLOW_SCREEN_CHANGE_CB);
+        if (!jsCallBack) {
+            TLOGNE(WmsLogTag::DEFAULT, "jsCallBack is nullptr");
+            return;
+        }
+        napi_value followScreenChangeObj = CreateJsValue(env, isFollowScreenChange);
+        napi_value argv[] = { followScreenChangeObj };
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+        }, info);
 }
 
 napi_value JsSceneSession::OnSetCurrentRotation(napi_env env, napi_callback_info info)

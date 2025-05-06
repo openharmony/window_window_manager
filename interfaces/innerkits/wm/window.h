@@ -946,6 +946,14 @@ public:
     virtual bool GetTouchable() const { return false; }
 
     /**
+     * @brief Set follow screen change property of window.
+     *
+     * @param isFollowScreenChange Window follow screen change.
+     * @return WMError.
+     */
+    virtual WMError SetFollowScreenChange(bool isFollowScreenChange) { return WMError::WM_OK; }
+
+    /**
      * @brief Get SystemBarProperty By WindowType.
      *
      * @param type Type of window.
@@ -3533,6 +3541,18 @@ public:
      * @param want the want to update param.
      */
     virtual void UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>& want) {}
+
+    /**
+     * @brief Receive async IPC message from UIExtensionComponent.
+     *
+     * @param code the message code.
+     * @param persistentId the persistent id of UIExtension.
+     * @param data the data transfered from UIExtensionComponent.
+     */
+    virtual WMError OnExtensionMessage(uint32_t code, int32_t persistentId, const AAFwk::Want& data)
+    {
+        return WMError::WM_OK;
+    }
 
     /**
      * @brief Query whether the waterfall mode is enabled or not.

@@ -100,6 +100,7 @@ private:
 
     void NotifyClientCreateSessionOnly(sptr<IScreenSessionManagerClient> ssmClient,
         sptr<ScreenSession> screenSession);
+    void CallRsSetScreenPowerStatusSyncToOn(ScreenId screenId);
 
     void CreateExternalScreenDisplayNodeOnly(sptr<ScreenSession>& innerScreen,
         sptr<ScreenSession>& externalScreen, ScreenCombination combination);
