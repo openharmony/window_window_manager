@@ -3333,6 +3333,7 @@ HWTEST_F(ScreenSessionTest, HandleCameraBackSelfieChange, TestSize.Level1)
 HWTEST_F(ScreenSessionTest, UpdateTouchBoundsAndOffset, TestSize.Level1)
 {
     sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
     session->UpdateTouchBoundsAndOffset();
     ASSERT_EQ(session->property_.inputOffsetX_, 0);
 }
@@ -3345,6 +3346,7 @@ HWTEST_F(ScreenSessionTest, UpdateTouchBoundsAndOffset, TestSize.Level1)
 HWTEST_F(ScreenSessionTest, UpdateRotationOrientation, TestSize.Level1)
 {
     sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
     int rotation = 0;
     FoldDisplayMode foldDisplayMode = FoldDisplayMode::MAIN;
     session->UpdateRotationOrientation(rotation, foldDisplayMode);
@@ -3360,6 +3362,7 @@ HWTEST_F(ScreenSessionTest, UpdateRotationOrientation, TestSize.Level1)
 HWTEST_F(ScreenSessionTest, UpdatePropertyByFakeInUse01, TestSize.Level1)
 {
     sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
     session->UpdatePropertyByFakeInUse(false);
     ASSERT_EQ(session->property_.GetIsFakeInUse(), false);
 }
@@ -3372,6 +3375,7 @@ HWTEST_F(ScreenSessionTest, UpdatePropertyByFakeInUse01, TestSize.Level1)
 HWTEST_F(ScreenSessionTest, UpdatePropertyByFakeInUse02, TestSize.Level1)
 {
     sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
     session->UpdatePropertyByFakeInUse(true);
     ASSERT_EQ(session->property_.GetIsFakeInUse(), true);
 }
@@ -3384,6 +3388,7 @@ HWTEST_F(ScreenSessionTest, UpdatePropertyByFakeInUse02, TestSize.Level1)
 HWTEST_F(ScreenSessionTest, SetRotationAndScreenRotationOnly, TestSize.Level1)
 {
     sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
     bool enableRotation = (system::GetParameter("persist.window.rotation.enabled", "1") == "1");
     if (enableRotation) {
         session->SetRotationAndScreenRotationOnly(Rotation::ROTATION_0);
@@ -3405,6 +3410,7 @@ HWTEST_F(ScreenSessionTest, SetRotationAndScreenRotationOnly, TestSize.Level1)
 HWTEST_F(ScreenSessionTest, SetTouchEnabledFromJs01, TestSize.Level1)
 {
     sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
     session->SetTouchEnabledFromJs(false);
     ASSERT_EQ(session->IsTouchEnabled(), false);
 }
@@ -3417,6 +3423,7 @@ HWTEST_F(ScreenSessionTest, SetTouchEnabledFromJs01, TestSize.Level1)
 HWTEST_F(ScreenSessionTest, SetTouchEnabledFromJs02, TestSize.Level1)
 {
     sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
     session->SetTouchEnabledFromJs(true);
     ASSERT_EQ(session->IsTouchEnabled(), true);
 }
