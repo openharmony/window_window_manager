@@ -3216,6 +3216,208 @@ HWTEST_F(ScreenSessionTest, GetValidSensorRotation, TestSize.Level1)
     ASSERT_EQ(0, screenSession->GetValidSensorRotation());
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetValidSensorRotation end";
 }
+
+/**
+ * @tc.name: EnableMirrorScreenRegion
+ * @tc.desc: EnableMirrorScreenRegion test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, EnableMirrorScreenRegion, TestSize.Level1)
+{
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
+    EXPECT_NE(nullptr, screenSession);
+    screenSession->SetIsEnableRegionRotation(true);
+    screenSession->EnableMirrorScreenRegion();
+    screenSession->SetIsPhysicalMirrorSwitch(true);
+    screenSession->EnableMirrorScreenRegion();
+    ASSERT_EQ(screenSession->GetIsEnableRegionRotation(), true);
+}
+
+/**
+ * @tc.name: SetIsExtend
+ * @tc.desc: SetIsExtend
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetIsExtend01, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    session->SetIsExtend(true);
+    ASSERT_EQ(session->GetIsExtend(), true);
+}
+
+/**
+ * @tc.name: SetIsExtend
+ * @tc.desc: SetIsExtend
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetIsExtend02, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    session->SetIsExtend(false);
+    ASSERT_EQ(session->GetIsExtend(), false);
+}
+
+/**
+ * @tc.name: SetIsCurrentInUse
+ * @tc.desc: SetIsCurrentInUse
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetIsCurrentInUse01, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    session->SetIsCurrentInUse(true);
+    ASSERT_EQ(session->GetIsCurrentInUse(), true);
+}
+
+/**
+ * @tc.name: SetIsCurrentInUse
+ * @tc.desc: SetIsCurrentInUse
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetIsCurrentInUse02, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    session->SetIsCurrentInUse(false);
+    ASSERT_EQ(session->GetIsCurrentInUse(), false);
+}
+
+/**
+ * @tc.name: SetValidHeight
+ * @tc.desc: SetValidHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetValidHeight, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    uint32_t validHeight = 100;
+    session->SetValidHeight(validHeight);
+    ASSERT_EQ(session->GetValidHeight(), validHeight);
+}
+
+/**
+ * @tc.name: SetValidWidth
+ * @tc.desc: SetValidWidth
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetValidWidth, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    uint32_t validWidth = 100;
+    session->SetValidWidth(validWidth);
+    ASSERT_EQ(session->GetValidWidth(), validWidth);
+}
+
+/**
+ * @tc.name: HandleCameraBackSelfieChange
+ * @tc.desc: HandleCameraBackSelfieChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, HandleCameraBackSelfieChange, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    session->HandleCameraBackSelfieChange(true);
+}
+
+/**
+ * @tc.name: UpdateTouchBoundsAndOffset
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, UpdateTouchBoundsAndOffset, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    session->UpdateTouchBoundsAndOffset();
+    ASSERT_EQ(inputOffsetX_, 0);
+}
+
+/**
+ * @tc.name: UpdateRotationOrientation
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, UpdateRotationOrientation, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    int rotation = 0;
+    FoldDisplayMode foldDisplayMode = FoldDisplayMode::MAIN;
+    session->UpdateRotationOrientation(rotation, foldDisplayMode);
+    ScreenProperty screenProperty = session->GetScreenProperty();
+    ASSERT_EQ(screenProperty.deviceRotation_, Rotation::ROTATION_0);
+}
+
+/**
+ * @tc.name: UpdatePropertyByFakeInUse
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, UpdatePropertyByFakeInUse01, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    session->UpdatePropertyByFakeInUse(false);
+    ASSERT_EQ(session->GetIsFakeInUse(), false);
+}
+
+/**
+ * @tc.name: UpdatePropertyByFakeInUse
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, UpdatePropertyByFakeInUse02, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    session->UpdatePropertyByFakeInUse(true);
+    ASSERT_EQ(session->GetIsFakeInUse(), true);
+}
+
+/**
+ * @tc.name: SetRotationAndScreenRotationOnly
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetRotationAndScreenRotationOnly, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    bool enableRotation = (system::GetParameter("persist.window.rotation.enabled", "1") == "1");
+    session->SetRotationAndScreenRotationOnly(0.0f);
+    ASSERT_EQ(session->property_.GetRotation(), 0.0f);
+    session->SetRotationAndScreenRotationOnly(90.0f);
+    ASSERT_EQ(session->property_.GetRotation(), 90.0f);
+    session->SetRotationAndScreenRotationOnly(180.0f);
+    ASSERT_EQ(session->property_.GetRotation(), 180.0f);
+    session->SetRotationAndScreenRotationOnly(270.0f);
+    ASSERT_EQ(session->property_.GetRotation(), 270.0f);
+}
+
+/**
+ * @tc.name: SetTouchEnabledFromJs
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetTouchEnabledFromJs01, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    session->SetTouchEnabledFromJs(false);
+    ASSERT_EQ(session->IsTouchEnabled(), false);
+}
+
+/**
+ * @tc.name: SetTouchEnabledFromJs
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetTouchEnabledFromJs02, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    session->SetTouchEnabledFromJs(true);
+    ASSERT_EQ(session->IsTouchEnabled(), true);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
