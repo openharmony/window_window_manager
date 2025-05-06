@@ -1641,6 +1641,109 @@ HWTEST_F(WindowSessionImplTest4, SetWindowContainerColor04, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetMainWindowContainerColor01
+ * @tc.desc: SetMainWindowContainerColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, SetMainWindowContainerColor01, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetMainWindowContainerColor");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    std::string activeColor = "#00000000";
+    std::string inactiveColor = "#00000000";
+    WMError res = window->SetMainWindowContainerColor(activeColor, inactiveColor);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_CALLING);
+}
+
+/**
+ * @tc.name: SetMainWindowContainerColor02
+ * @tc.desc: SetMainWindowContainerColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, SetMainWindowContainerColor02, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetMainWindowContainerColor");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    std::string activeColor = "#00000000";
+    std::string inactiveColor = "#00000000";
+    WMError res = window->SetMainWindowContainerColor(activeColor, inactiveColor);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+}
+
+/**
+ * @tc.name: SetMainWindowContainerColor03
+ * @tc.desc: SetMainWindowContainerColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, SetMainWindowContainerColor03, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetMainWindowContainerColor");
+    option->SetSubWindowMaximizeSupported(true);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    window->property_->SetDecorEnable(true);
+    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    window->windowSystemConfig_.isSystemDecorEnable_ = true;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    std::string activeColor = "#00000000";
+    std::string inactiveColor = "#00000000";
+    WMError res = window->SetMainWindowContainerColor(activeColor, inactiveColor);
+    ASSERT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+}
+
+/**
+ * @tc.name: SetMainWindowContainerColor04
+ * @tc.desc: SetMainWindowContainerColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, SetMainWindowContainerColor04, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetMainWindowContainerColor");
+    option->SetSubWindowMaximizeSupported(true);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    window->property_->SetDecorEnable(true);
+    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    window->windowSystemConfig_.isSystemDecorEnable_ = true;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    std::string activeColor = "#00000000";
+    std::string inactiveColor = "#00000000";
+    WMError res = window->SetMainWindowContainerColor(activeColor, inactiveColor);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: SetMainWindowContainerColor05
+ * @tc.desc: SetMainWindowContainerColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, SetMainWindowContainerColor05, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetMainWindowContainerColor");
+    option->SetSubWindowMaximizeSupported(true);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    window->property_->SetDecorEnable(true);
+    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    window->windowSystemConfig_.isSystemDecorEnable_ = true;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    std::string activeColor = "#00000000";
+    std::string inactiveColor = "#FF000000";
+    WMError res = window->SetMainWindowContainerColor(activeColor, inactiveColor);
+    ASSERT_EQ(res, WMError::WM_OK);
+}
+
+/**
  * @tc.name: IsPcOrPadCapabilityEnabled
  * @tc.desc: IsPcOrPadCapabilityEnabled test
  * @tc.type: FUNC

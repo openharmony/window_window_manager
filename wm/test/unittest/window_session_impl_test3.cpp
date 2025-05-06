@@ -1023,24 +1023,6 @@ HWTEST_F(WindowSessionImplTest3, SetWindowContainerColor, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetMainWindowContainerColor
- * @tc.desc: SetMainWindowContainerColor
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest3, SetMainWindowContainerColor, TestSize.Level1)
-{
-    window_ = GetTestWindowImpl("SetMainWindowContainerColor");
-    ASSERT_NE(window_, nullptr);
-    window_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    window_->windowSystemConfig_.isSystemDecorEnable_ = true;
-    window_->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    std::string activeColor = "";
-    std::string inactiveColor = "";
-    auto ret = window_->SetMainWindowContainerColor(activeColor, inactiveColor);
-    EXPECT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
-}
-
-/**
  * @tc.name: SetAvoidAreaOption
  * @tc.desc: SetAvoidAreaOption
  * @tc.type: FUNC
