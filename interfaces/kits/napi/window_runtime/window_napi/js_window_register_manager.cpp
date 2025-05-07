@@ -448,6 +448,7 @@ WmErrorCode JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::
     sptr<JsWindowListener> windowManagerListener = new(std::nothrow) JsWindowListener(env, callbackRef, caseType);
     if (windowManagerListener == nullptr) {
         WLOGFE("New JsWindowListener failed");
+        napi_delete_reference(env, result);
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     windowManagerListener->SetMainEventHandler();
@@ -455,6 +456,7 @@ WmErrorCode JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::
         env, parameter);
     if (ret != WmErrorCode::WM_OK) {
         WLOGFE("Register type %{public}s failed", type.c_str());
+        napi_delete_reference(env, result);
         return ret;
     }
     jsCbMap_[type][callbackRef] = windowManagerListener;
