@@ -38,9 +38,7 @@ ohos_shared_library("pipwindowani_kit") {
     cfi_vcall_icall_only = true
     debug = false
   }
-  sources = [
-    "pipwindow_ani/src/pipwindow_ani.cpp",
-  ]
+  sources = [ "pipwindow_ani/src/pipwindow_ani.cpp" ]
 
   configs = [
     ":pipwindow_common_config",
@@ -62,6 +60,9 @@ ohos_shared_library("pipwindowani_kit") {
     "ace_engine:ace_uicontent",
     "ace_engine:ace_xcomponent_controller",
     "c_utils:utils",
+    "graphic_2d:librender_service_base",
+    "graphic_2d:librender_service_client",
+    "graphic_surface:surface",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "napi:ace_napi",
