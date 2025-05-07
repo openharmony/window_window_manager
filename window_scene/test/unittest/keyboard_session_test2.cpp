@@ -189,30 +189,30 @@ HWTEST_F(KeyboardSessionTest2, AdjustKeyboardLayout03, Function | SmallTest | Le
     info.bundleName_ = "AdjustKeyboardLayout03";
     sptr<SceneSession::SpecificSessionCallback> specificCb =
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    EXPECT_NE(specificCb, nullptr);
+    ASSERT_NE(specificCb, nullptr);
     sptr<KeyboardSession::KeyboardSessionCallback> keyboardCb =
         sptr<KeyboardSession::KeyboardSessionCallback>::MakeSptr();
-    EXPECT_NE(keyboardCb, nullptr);
+    ASSERT_NE(keyboardCb, nullptr);
     sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, specificCb, keyboardCb);
-    EXPECT_NE(keyboardSession, nullptr);
+    ASSERT_NE(keyboardSession, nullptr);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     keyboardSession->SetSessionProperty(property);
 
     KeyboardLayoutParams params;
-    ASSERT_EQ(keyboardSession->AdjustKeyboardLayout(params), WSError::WS_OK);
+    EXPECT_EQ(keyboardSession->AdjustKeyboardLayout(params), WSError::WS_OK);
 
     keyboardSession->adjustKeyboardLayoutFunc_ = nullptr;
-    ASSERT_EQ(keyboardSession->AdjustKeyboardLayout(params), WSError::WS_OK);
+    EXPECT_EQ(keyboardSession->AdjustKeyboardLayout(params), WSError::WS_OK);
 
     keyboardSession->adjustKeyboardLayoutFunc_ = [](const KeyboardLayoutParams& params){};
-    ASSERT_EQ(keyboardSession->AdjustKeyboardLayout(params), WSError::WS_OK);
+    EXPECT_EQ(keyboardSession->AdjustKeyboardLayout(params), WSError::WS_OK);
 
     params.displayId_ = 100;
-    ASSERT_EQ(keyboardSession->AdjustKeyboardLayout(params), WSError::WS_OK);
+    EXPECT_EQ(keyboardSession->AdjustKeyboardLayout(params), WSError::WS_OK);
 
     keyboardSession->adjustKeyboardLayoutFunc_ = nullptr;
-    ASSERT_EQ(keyboardSession->AdjustKeyboardLayout(params), WSError::WS_OK);
+    EXPECT_EQ(keyboardSession->AdjustKeyboardLayout(params), WSError::WS_OK);
 }
 
 /**
