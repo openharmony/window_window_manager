@@ -5889,4 +5889,14 @@ WSError SceneSession::SetCurrentRotation(int32_t currentRotation)
     }
     return sessionStage_->SetCurrentRotation(currentRotation);
 }
+
+void SceneSession::SetIsAncoForFloatingWindow(bool isAncoForFloatingWindow)
+{
+    isAncoForFloatingWindow_ = isAncoForFloatingWindow;
+}
+
+bool SceneSession::GetIsAncoForFloatingWindow() const
+{
+    return isAncoForFloatingWindow_;
+}
 } // namespace OHOS::Rosen
