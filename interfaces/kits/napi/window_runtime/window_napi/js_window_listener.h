@@ -152,7 +152,7 @@ private:
     void LifeCycleCallBack(LifeCycleEventType eventType);
     int64_t noInteractionTimeout_ = 0;
     napi_env env_ = nullptr;
-    NativeReference* jsCallBack_ = nullptr;
+    NativeReference* jsCallBack_;
     CaseType caseType_ = CaseType::CASE_WINDOW;
     wptr<JsWindowListener> weakRef_ = nullptr;
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_ = nullptr;
