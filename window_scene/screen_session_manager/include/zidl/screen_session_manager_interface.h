@@ -254,6 +254,7 @@ public:
     virtual void NotifyExtendScreenCreateFinish() {};
     virtual void NotifyExtendScreenDestroyFinish() {};
     virtual void NotifyScreenMaskAppear() {};
+    virtual bool GetKeyBoardState() { return false; };
 };
 } // namespace Rosen
 } // namespace OHOS

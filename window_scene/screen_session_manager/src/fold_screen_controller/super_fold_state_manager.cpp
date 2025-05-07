@@ -538,5 +538,11 @@ bool SuperFoldStateManager::ChangeScreenState(bool toHalf)
         screenWidth, screenHeight, static_cast<long>(response));
     return true;
 }
+
+bool SuperFoldStateManager::GetKeyBoardState()
+{
+    TLOGI(WmsLogTag::DMS, "GetKeyBoardState isKeyboardOn_ : %{public}d", isKeyboardOn_);
+    return isKeyboardOn_;
+}
 } // Rosen
 } // OHOS

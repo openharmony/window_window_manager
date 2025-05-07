@@ -60,6 +60,8 @@ public:
 
     void SetSystemKeyboardStatus(bool isTpKeyboardOn = false);
     bool GetSystemKeyboardStatus();
+
+    bool GetKeyBoardState();
 private:
     std::atomic<SuperFoldStatus> curState_ = SuperFoldStatus::UNKNOWN;
     sptr<FoldCreaseRegion> currentSuperFoldCreaseRegion_ = nullptr;
