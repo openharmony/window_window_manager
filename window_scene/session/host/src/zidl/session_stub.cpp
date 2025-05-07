@@ -1568,7 +1568,7 @@ int SessionStub::HandleSetWindowTransitionAnimation(MessageParcel& data, Message
         TLOGE(WmsLogTag::WMS_ANIMATION, "Read type failed.");
         return ERR_INVALID_DATA;
     }
-    TransitionAnimation* animation = data.ReadParcelable<TransitionAnimation>();
+    std::shared_ptr<TransitionAnimation> animation = data.ReadStrongParcelable<TransitionAnimation>();
     if (animation == nullptr) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Read animation failed.");
         return ERR_INVALID_DATA;
