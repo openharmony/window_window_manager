@@ -1944,8 +1944,7 @@ struct KeyboardLayoutParams : public Parcelable {
             ReadParcel(parcel, params->LandscapeKeyboardRect_) &&
             ReadParcel(parcel, params->PortraitKeyboardRect_) &&
             ReadParcel(parcel, params->LandscapePanelRect_) &&
-            ReadParcel(parcel, params->PortraitPanelRect_) &&
-            parcel.ReadUint64(params->displayId_)) {
+            ReadParcel(parcel, params->PortraitPanelRect_)) {
             params->gravity_ = static_cast<WindowGravity>(gravity);
             return params;
         }
