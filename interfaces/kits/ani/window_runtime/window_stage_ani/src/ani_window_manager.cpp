@@ -18,6 +18,10 @@
 #include <ability.h>
 
 #include "ani.h"
+#include "window_scene.h"
+#include "window_manager_hilog.h"
+#include "ani_window_utils.h"
+#include "singleton_container.h"
 #include "ani_window.h"
 #include "ani_window_stage.h"
 #include "ani_window_utils.h"
@@ -46,6 +50,8 @@ ani_status AniWindowManager::AniWindowManagerInit(ani_env* env)
         ani_native_function {"getLastWindowSync",
             "JLapplication/BaseContext/BaseContext;:L@ohos/window/window/Window;",
             reinterpret_cast<void *>(AniWindowManager::GetLastWindow)},
+        ani_native_function {"shiftAppWindowFocusSync", "JDD:V",
+            reinterpret_cast<void *>(AniWindowManager::ShiftAppWindowFocus)},
         ani_native_function {"onSync", nullptr,
             reinterpret_cast<void *>(AniWindowManager::RegisterWindowManagerCallback)},
         ani_native_function {"offSync", nullptr,
@@ -151,6 +157,25 @@ void AniWindowManager::OnUnregisterWindowManagerCallback(ani_env* env, ani_strin
     if (ret != WmErrorCode::WM_OK) {
         AniWindowUtils::AniThrowError(env, ret);
     }
+}
+
+void AniWindowManager::ShiftAppWindowFocus(ani_env* env, ani_object obj, ani_long nativeObj,
+    ani_double sourceWindowId, ani_double targetWindowId)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    AniWindowManager* aniWindowManager = reinterpret_cast<AniWindowManager*>(nativeObj);
+    aniWindowManager->OnShiftAppWindowFocus(env, sourceWindowId, targetWindowId);
+}
+
+void AniWindowManager::OnShiftAppWindowFocus(ani_env* env, ani_double sourceWindowId, ani_double targetWindowId)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
+        SingletonContainer::Get<WindowManager>().ShiftAppWindowFocus(sourceWindowId, targetWindowId));
+    if (ret != WmErrorCode::WM_OK) {
+        AniWindowUtils::AniThrowError(env, ret, "ShiftAppWindowFocus failed.");
+    }
+    return ;
 }
 }  // namespace Rosen
 }  // namespace OHOS
