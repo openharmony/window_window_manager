@@ -15,6 +15,7 @@
 import { AsyncCallback, BusinessError, Callback } from '@ohos.base';
 import { LocalStorage } from '@ohos.arkui.stateManagement';
 import { UIContext } from '@ohos.arkui.UIContext';
+import image from '@ohos.multimedia.image';
 import BaseContext from 'application.BaseContext';
 import hilog from '@ohos.hilog';
 import { ColorMetrics } from '@ohos.arkui.node';
@@ -319,6 +320,108 @@ namespace window {
     topRect: Rect;
     rightRect: Rect;
     bottomRect: Rect;
+  }
+
+  /**
+   * System bar tint of region
+   *
+   * @interface SystemBarRegionTint
+   * @syscap SystemCapability.WindowManager.WindowManager.Core
+   * @systemapi Hide this for inner system use.
+   * @since 8
+   */
+  export interface SystemBarRegionTint {
+    /**
+     * System bar type
+     *
+     * @type { WindowType }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @systemapi Hide this for inner system use.
+     * @since 8
+     */
+    type: number;
+
+    /**
+     * The visibility of system bar
+     *
+     * @type { ?boolean }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @systemapi Hide this for inner system use.
+     * @since 8
+     */
+    isEnable: boolean;
+
+    /**
+     * The region of system bar
+     *
+     * @type { ?Rect }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @systemapi Hide this for inner system use.
+     * @since 8
+     */
+    region: Rect;
+
+    /**
+     * The background color of the system bar.
+     *
+     * @type { ?string }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @systemapi Hide this for inner system use.
+     * @since 8
+     */
+    backgroundColor: string;
+
+    /**
+     * The content color of the system bar.
+     *
+     * @type { ?string }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @systemapi Hide this for inner system use.
+     * @since 8
+     */
+    contentColor: string;
+  }
+
+  export class SystemBarRegionTintInternal implements SystemBarRegionTint {
+    type: number;
+    isEnable: boolean;
+    region: Rect;
+    backgroundColor: string;
+    contentColor: string;
+  }
+
+  /**
+   * System bar tint state for systemui
+   *
+   * @interface SystemBarTintState
+   * @syscap SystemCapability.WindowManager.WindowManager.Core
+   * @systemapi Hide this for inner system use.
+   * @since 8
+   */
+  export interface SystemBarTintState {
+    /**
+     * Id of display
+     *
+     * @type { number }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @systemapi Hide this for inner system use.
+     * @since 8
+     */
+    displayId: number;
+    /**
+     * Region tint of systembar
+     *
+     * @type { Array<SystemBarRegionTint> }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @systemapi Hide this for inner system use.
+     * @since 8
+     */
+    regionTint: Array<SystemBarRegionTint>;
+  }
+
+  export class SystemBarTintStateInternal implements SystemBarTintState {
+    displayId: number;
+    regionTint: Array<SystemBarRegionTint>;
   }
 
   export interface Rect {
@@ -1256,6 +1359,8 @@ export class WindowInternal implements Window {
     private native setWindowLayoutFullScreen(nativeObj: long, isLayoutFullScreen: boolean): int;
     private native setWindowSystemBarProperties(nativeObj: long, systemBarProperties: SystemBarProperties): int;
     private native setSpecificSystemBarEnabled(nativeObj: long, name: String, enable: boolean, enableAnimation: boolean): int;
+    private native snapshot(nativeObj: long): image.PixelMap;
+    private native hideNonSystemFloatingWindows(nativeObj: long, shouldHide: boolean): void;
 
     private native setWindowColorSpaceSync(nativeObj: long, colorSpace: int): void;
     private native setPreferredOrientationSync(nativeObj: long, orientation: int): void;
@@ -1274,12 +1379,8 @@ export class WindowInternal implements Window {
     private native setWindowTouchableSync(nativeObj: long, enable: boolean): void;
     private native onNoInteractionDetected(nativeObj: long, type: string, timeout: number, callback: Object): void;
     private native keepKeyboardOnFocusSync(nativeObj: long, enable: boolean): void;
-    private native onSync(nativeObj: long, type: string,
-        callback: WindowEventCallback | WindowSizeCallback | WindowStatusCallback |
-        KeyboardHeightChangeCallback | KeyboardDidShowOrHideCallback | WindowVoidCallback): void;
-    private native offSync(nativeObj: long, type: string,
-        callback?: WindowEventCallback | WindowSizeCallback | WindowStatusCallback |
-        KeyboardHeightChangeCallback | KeyboardDidShowOrHideCallback | WindowVoidCallback): void;
+    private native onSync(nativeObj: long, type: string, callback: object): void;
+    private native offSync(nativeObj: long, type: string, callback?: object): void;
 
     public resize(width: double, height: double): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) :void => {
@@ -1484,6 +1585,50 @@ export class WindowInternal implements Window {
                 reject(err as BusinessError);
             });
         });
+    }
+
+    public snapshot(): Promise<image.PixelMap> {
+      return new Promise<image.PixelMap>((resolve: (value: image.PixelMap) => void, reject: (error: BusinessError) => void) => {
+        taskpool.execute(() => {
+          return this.snapshot(this.nativeObj);
+        }).then((ret: NullishType) => {
+          resolve(ret as image.PixelMap);
+        }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
+    public snapshot(callback: AsyncCallback<image.PixelMap | undefined>): void {
+      taskpool.execute(() => {
+        return this.snapshot(this.nativeObj);
+      }).then((ret: NullishType) => {
+        callback(new BusinessError(), ret as image.PixelMap);
+      }).catch((err: NullishType) => {
+        callback(err as BusinessError, undefined);
+      });
+    }
+
+    public hideNonSystemFloatingWindows(shouldHide: boolean): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute(() => {
+          this.hideNonSystemFloatingWindows(this.nativeObj, shouldHide);
+        }).then(() => {
+          resolve(undefined);
+        }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
+    public hideNonSystemFloatingWindows(shouldHide: boolean, callback: AsyncCallback<void>): void {
+      taskpool.execute((): void => {
+        this.hideNonSystemFloatingWindows(this.nativeObj, shouldHide);
+      }).then(() => {
+        callback(new BusinessError(), undefined);
+      }).catch((err: NullishType) => {
+        callback(err as BusinessError, undefined);
+      });
     }
 
     public setWindowColorSpace(colorSpace: ColorSpace): Promise<void> {
@@ -1759,69 +1904,16 @@ export class WindowInternal implements Window {
     //    this.onSync(this.nativeObj, type, callback);
     //}
 
-    public on<T>(type: string, callback: Callback<T>): void {
-      switch (type) {
-        case 'windowEvent':
-          this.onSync(this.nativeObj, type, callback as WindowEventCallback);
-          break;
-        case 'windowSizeChange':
-          this.onSync(this.nativeObj, type, callback as WindowSizeCallback);
-          break;
-        case 'windowStatusChange':
-          this.onSync(this.nativeObj, type, callback as WindowStatusCallback);
-          break;
-        case 'keyboardHeightChange':
-          this.onSync(this.nativeObj, type, callback as KeyboardHeightChangeCallback);
-          break;
-        case 'keyboardDidShow':
-          this.onSync(this.nativeObj, type, callback as KeyboardDidShowOrHideCallback);
-          break;
-        case 'keyboardDidHide':
-          this.onSync(this.nativeObj, type, callback as KeyboardDidShowOrHideCallback);
-          break;
-        case 'dialogTargetTouch':
-          this.onSync(this.nativeObj, type, callback as WindowVoidCallback);
-          break;
-        case 'touchOutside':
-          this.onSync(this.nativeObj, type, callback as WindowVoidCallback);
-          break;
-      }
+    public on(type: string, callback: object): void {
+      this.onSync(this.nativeObj, type, callback);
     }
 
-    public on<T>(type: 'noInteractionDetected', timeout: number, callback: Callback<T>): void {
+    public on(type: 'noInteractionDetected', timeout: number, callback: object): void {
       this.onNoInteractionDetected(this.nativeObj, type, timeout, callback as WindowVoidCallback);
     }
 
-    public off<T>(type: string, callback?: Callback<T>): void {
-      switch (type) {
-        case 'windowEvent':
-          this.offSync(this.nativeObj, type, callback as WindowEventCallback);
-          break;
-        case 'windowSizeChange':
-          this.offSync(this.nativeObj, type, callback as WindowSizeCallback);
-          break;
-        case 'windowStatusChange':
-          this.offSync(this.nativeObj, type, callback as WindowStatusCallback);
-          break;
-        case 'keyboardHeightChange':
-          this.offSync(this.nativeObj, type, callback as KeyboardHeightChangeCallback);
-          break;
-        case 'keyboardDidShow':
-          this.offSync(this.nativeObj, type, callback as KeyboardDidShowOrHideCallback);
-          break;
-        case 'keyboardDidHide':
-          this.offSync(this.nativeObj, type, callback as KeyboardDidShowOrHideCallback);
-          break;
-        case 'dialogTargetTouch':
-          this.offSync(this.nativeObj, type, callback as WindowVoidCallback);
-          break;
-        case 'touchOutside':
-          this.offSync(this.nativeObj, type, callback as WindowVoidCallback);
-          break;
-        case 'noInteractionDetected':
-          this.offSync(this.nativeObj, type, callback as WindowVoidCallback);
-          break;
-      }
+    public off(type: string, callback?: object): void {
+      this.offSync(this.nativeObj, type, callback);
     }
     //public off(type: 'windowEvent', callback?: Callback<WindowEventType>): void {
     //    this.offSync(this.nativeObj, type, callback);
@@ -1859,6 +1951,10 @@ export interface Window {
     setWindowSystemBarProperties(systemBarProperties: SystemBarProperties): Promise<void>;
     setWindowSystemBarProperties(systemBarProperties: SystemBarProperties, callback: AsyncCallback<void>): void;
     setSpecificSystemBarEnabled(name: String, enable: boolean, enableAnimation?: boolean): Promise<void>;
+    snapshot(): Promise<image.PixelMap>;
+    snapshot(callback: AsyncCallback<image.PixelMap | undefined>): void;
+    hideNonSystemFloatingWindows(shouldHide: boolean): Promise<void>;
+    hideNonSystemFloatingWindows(shouldHide: boolean, callback: AsyncCallback<void>): void;
     setWindowColorSpace(colorSpace: ColorSpace): Promise<void>;
     setWindowColorSpace(colorSpace: ColorSpace, callback: AsyncCallback<void>): void;
     setPreferredOrientation(orientation: Orientation): Promise<void>;
@@ -1885,9 +1981,9 @@ export interface Window {
     keepKeyboardOnFocus(enable: boolean): void;
     setWindowTouchable(isTouchable: boolean): Promise<void>
     setWindowTouchable(isTouchable: boolean, callback: AsyncCallback<void>): void
-    on<T>(type: string, calback: Callback<T>): void;
-    on<T>(type: 'noInteractionDetected', timeout: number, callback: Callback<T>): void;
-    off<T>(type:string, callback?: Callback<T>): void;
+    on(type: string, calback: object): void;
+    on(type: 'noInteractionDetected', timeout: number, callback: object): void;
+    off(type:string, callback?: object): void;
 }
 
 export native function CreateWindowStage(scene: long): WindowStageInternal;
@@ -1895,12 +1991,14 @@ export function CreateWindowStageApi(scene: long): WindowStage { return CreateWi
 export native function CreateWindow(window: long): WindowInternal;
 
 let nativeObj: long;
-function setNativeObj(nativeObject: long):void {
+export function setNativeObj(nativeObject: long):void {
     hilog.info(DOMAIN, TAG, 'setNativeObj, nativeObject:' + nativeObject);
     nativeObj = nativeObject;
 }
 
 native function getLastWindowSync(nativeObj: long, ctx: BaseContext): Window;
+native function onSync(nativeObj: long, type: string, callback: object): void;
+native function offSync(nativeObj: long, type: string, callback: object): void;
 native function shiftAppWindowFocusSync(nativeObj: long, sourceWindowId: number, targetWindowId: number): void;
 
 export function getLastWindow(ctx: BaseContext): Promise<Window> {
@@ -1927,6 +2025,34 @@ export function getLastWindow(ctx: BaseContext, callback: AsyncCallback<Window>)
     });
 }
 
+export function on(type: string, callback: object): void {
+  onSync(nativeObj, type, callback);
+}
+
+export function off(type: string, callback: object): void {
+  offSync(nativeObj, type, callback);
+}
+
+function runWindowListenerVoidArgCallBack(cb: object): void {
+  const func = cb as () => void;
+  func();
+}
+
+function runWindowListenerBooleanArgCallBack(cb: object, cbArg: boolean): void {
+  const func = cb as (cbArg: boolean) => void;
+  func(cbArg);
+}
+
+function runSystemBarTintChangeCallBack(cb: object, tint: object): void {
+  const func = cb as (tint: SystemBarTintState) => void;
+  func(tint as SystemBarTintState);
+}
+
+function runAvoidAreaChangeCallBack(cb: object, area: object, type: int): void {
+  const func = cb as (data: AvoidAreaOptions) => void;
+  func({type: type as AvoidAreaType, area: area as AvoidArea});
+}
+
 export function shiftAppWindowFocus(sourceWindowId: number, targetWindowId: number): Promise<void> {
   return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) : void => {
       taskpool.execute((): void => {
@@ -1937,7 +2063,8 @@ export function shiftAppWindowFocus(sourceWindowId: number, targetWindowId: numb
           reject(err as BusinessError);
       });
   });
-} 
+}
+
 function runWindowDialogTargetCallback(cb: object): void {
     const func = cb as () => void;
     func();

@@ -23,6 +23,8 @@
 #include "ani.h"
 #include "ani_err_utils.h"
 #include "ani_window_utils.h"
+#include "pixel_map.h"
+#include "pixel_map_ani.h"
 #include "window_helper.h"
 #include "window_scene.h"
 #include "window_manager.h"
@@ -922,6 +924,49 @@ ani_object AniWindow::SetSpecificSystemBarEnabled(ani_env* env, ani_string name,
     TLOGE(WmsLogTag::WMS_IMMS, "SetSpecificSystemBarEnabled failed, ret = %{public}d", err);
     return AniWindowUtils::AniThrowError(env, err);
 }
+
+ani_object AniWindow::Snapshot(ani_env* env)
+{
+    if (windowToken_ == nullptr) {
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    std::shared_ptr<Media::PixelMap> pixelMap = windowToken_->Snapshot();
+    if (pixelMap == nullptr) {
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    auto nativePixelMap = Media::PixelMapAni::CreatePixelMap(env, pixelMap);
+    if (nativePixelMap == nullptr) {
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Window [%{public}u, %{public}s], WxH=%{public}dx%{public}d",
+        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(),
+        pixelMap->GetWidth(), pixelMap->GetHeight());
+    return nativePixelMap;
+}
+
+void AniWindow::HideNonSystemFloatingWindows(ani_env* env, ani_boolean shouldHide)
+{
+    if (windowToken_ == nullptr) {
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    if (windowToken_->IsFloatingWindowAppType()) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window is app floating window");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING,
+            "HideNonSystemFloatingWindows is not allowed since window is app floating window");
+        return;
+    }
+    WMError ret = windowToken_->HideNonSystemFloatingWindows(shouldHide);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "failed");
+        AniWindowUtils::AniThrowError(env, WM_JS_TO_ERROR_CODE_MAP.at(ret),
+            "Hide non-system floating windows failed");
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE,
+        "end. Window [%{public}u, %{public}s]",
+        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
+}
 }  // namespace Rosen
 }  // namespace OHOS
 
@@ -1089,6 +1134,30 @@ static ani_int WindowSetSpecificSystemBarEnabled(ani_env* env, ani_object obj, a
     return ANI_OK;
 }
 
+static ani_object Snapshot(ani_env* env, ani_object obj, ani_long nativeObj)
+{
+    using namespace OHOS::Rosen;
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    if (aniWindow == nullptr || aniWindow->GetWindow() == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] windowToken is nullptr");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    return aniWindow->Snapshot(env);
+}
+
+static void HideNonSystemFloatingWindows(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean shouldHide)
+{
+    using namespace OHOS::Rosen;
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    if (aniWindow == nullptr || aniWindow->GetWindow() == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] windowToken is nullptr");
+        return;
+    }
+    aniWindow->HideNonSystemFloatingWindows(env, shouldHide);
+}
+
 ani_object CreateAniWindow(ani_env* env, OHOS::sptr<OHOS::Rosen::Window>& window)
 __attribute__((no_sanitize("cfi")))
 {
@@ -1196,6 +1265,10 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(WindowSetSystemBarProperties)},
         ani_native_function {"setSpecificSystemBarEnabled", "JLstd/core/String;ZZ:I",
             reinterpret_cast<void *>(WindowSetSpecificSystemBarEnabled)},
+        ani_native_function {"snapshot", "J:L@ohos/multimedia/image/image/PixelMap;",
+            reinterpret_cast<void *>(Snapshot)},
+        ani_native_function {"hideNonSystemFloatingWindows", "JZ:V",
+            reinterpret_cast<void *>(HideNonSystemFloatingWindows)},
         ani_native_function {"setWindowColorSpaceSync", "JI:V",
             reinterpret_cast<void *>(AniWindow::SetWindowColorSpace)},
         ani_native_function {"setPreferredOrientationSync", "JI:V",
