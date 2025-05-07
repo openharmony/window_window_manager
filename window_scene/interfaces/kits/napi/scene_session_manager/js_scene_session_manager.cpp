@@ -3950,7 +3950,7 @@ napi_value JsSceneSessionManager::OnSetAppForceLandscapeConfig(napi_env env, nap
     }
 
     bool isSupportSplitMode = false;
-    if (!ConvertFromJsValue(env, argv[ARGC_THREE], isSupportSplitMode)) {
+    if (argc >= ARGC_FOUR && !ConvertFromJsValue(env, argv[ARGC_THREE], isSupportSplitMode)) {
         TLOGE(WmsLogTag::DEFAULT, "Failed to convert parameter to isSupportSplitMode");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
