@@ -58,6 +58,7 @@ ohos_shared_library("pipwindowani_kit") {
   external_deps = [
     "ability_runtime:ability_context_native",
     "ability_runtime:ability_manager",
+    "ability_runtime:runtime",
     "ace_engine:ace_uicontent",
     "ace_engine:ace_xcomponent_controller",
     "c_utils:utils",
