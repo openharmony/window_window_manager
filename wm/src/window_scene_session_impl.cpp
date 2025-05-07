@@ -5625,7 +5625,7 @@ WMError WindowSceneSessionImpl::SetWindowTransitionAnimation(WindowTransitionTyp
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    WSError ret = WSError::WM_DO_NOTHING;
+    WSError ret = WSError::WS_DO_NOTHING;
     auto hostSession = GetHostSession();
     if (!hostSession) {
         TLOGI(WmsLogTag::WMS_ANIMATION, "session is nullptr");
