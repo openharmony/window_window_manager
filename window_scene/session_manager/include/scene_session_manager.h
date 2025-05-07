@@ -751,6 +751,7 @@ private:
     void FilterForGetAllWindowLayoutInfo(DisplayId displayId, bool isVirtualDisplay,
         std::vector<sptr<SceneSession>>& filteredSessions);
     bool IsGetWindowLayoutInfoNeeded(const sptr<SceneSession>& session) const;
+    void CheckFloatWindowIsAnco(pid_t pid, const sptr<SceneSession>& newSession);
     bool IsNeedUpdateBrightness(float brightness);
 
     /**
