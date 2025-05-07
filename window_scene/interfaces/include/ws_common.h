@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,7 @@
 
 #include <iremote_broker.h>
 #include <want.h>
+#include "pixel_map.h"
 
 namespace OHOS::AAFwk {
 class AbilityStartSetting;
@@ -718,6 +719,15 @@ struct StartingWindowInfo {
     std::string brandingPath_;
     std::string backgroundImagePath_;
     std::string backgroundImageFit_;
+};
+
+struct StartingWindowPageDrawInfo {
+    std::shared_ptr<Media::PixelMap> appIconPixelMap = nullptr;
+    std::shared_ptr<Media::PixelMap> illustrationPixelMap = nullptr;
+    std::shared_ptr<Media::PixelMap> bgImagePixelMap = nullptr;
+    std::shared_ptr<Media::PixelMap> brandingPixelMap = nullptr;
+    uint32_t bgColor = 0;
+    std::string startWindowBackgroundImageFit = "";
 };
 
 struct StartingWindowAnimationConfig {
