@@ -249,7 +249,7 @@ void SuperFoldSensorManager::HandleScreenDisconnectChange()
         TLOGI(WmsLogTag::DMS, "Screen is disconnected, but fold status is locked");
         return;
     }
-    TLOGI(WmsLogTag::DMS, "Screen disconnect to stop statemachine.");
+    TLOGI(WmsLogTag::DMS, "Screen disconnect to start statemachine.");
     NotifyHallChanged(curHall_);
     NotifyFoldAngleChanged(curAngle_);
 }
