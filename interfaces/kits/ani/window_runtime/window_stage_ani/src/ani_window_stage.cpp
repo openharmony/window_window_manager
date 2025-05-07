@@ -246,15 +246,6 @@ static ani_int WindowStageLoadContent(ani_env* env, ani_object obj,
     return (ani_int)0u;
 }
 
-static ani_object WindowStageCreate(ani_env* env, ani_long scene)
-{
-    using namespace OHOS::Rosen;
-    TLOGD(WmsLogTag::DEFAULT, "[ANI] create windowstage with scene 0x%{public}p %{public}d",
-        reinterpret_cast<void*>(env), (int32_t)scene);
-    std::shared_ptr<WindowScene> scenePtr;
-    return CreateAniWindowStage(env, scenePtr); // just for test
-}
-
 static ani_object WindowGetMainWindow(ani_env* env, ani_object obj, ani_long nativeObj)
 {
     using namespace OHOS::Rosen;
@@ -298,27 +289,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     }
     *result = ANI_VERSION_1;
 
-    // just for test
-    ani_namespace ns;
-    if ((ret = env->FindNamespace("L@ohos/window/window;", &ns)) != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] find ns %{public}u", ret);
-        return ANI_NOT_FOUND;
-    }
-    std::array functions = {
-        ani_native_function {"CreateWindowStage", "J:L@ohos/window/window/WindowStageInternal;",
-            reinterpret_cast<void *>(WindowStageCreate)},
-        ani_native_function {"getLastWindowSync",
-            "JLapplication/BaseContext/BaseContext;:L@ohos/window/window/Window;",
-            reinterpret_cast<void *>(AniWindowManager::GetLastWindow)},
-        ani_native_function {"shiftAppWindowFocusSync", "JDD:V",
-            reinterpret_cast<void *>(AniWindowManager::ShiftAppWindowFocus)},
-    };
-    if ((ret = env->Namespace_BindNativeFunctions(ns, functions.data(), functions.size())) != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] bind ns func %{public}u", ret);
-        return ANI_NOT_FOUND;
-    }
-    AniWindowManager::AniWindowManagerInit(env, ns);
-
+    AniWindowManager::AniWindowManagerInit(env);
     OHOS::Rosen::ANI_Window_Constructor(vm, result);
     return ANI_OK;
 }

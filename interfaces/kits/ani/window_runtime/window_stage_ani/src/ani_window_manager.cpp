@@ -18,19 +18,49 @@
 #include <ability.h>
 
 #include "ani.h"
-#include "window_scene.h"
-#include "window_manager_hilog.h"
+#include "ani_window.h"
+#include "ani_window_stage.h"
 #include "ani_window_utils.h"
 #include "singleton_container.h"
-#include "ani_window.h"
+#include "window_manager.h"
+#include "window_manager_hilog.h"
+#include "window_scene.h"
 
 namespace OHOS {
 namespace Rosen {
-ani_status AniWindowManager::AniWindowManagerInit(ani_env* env, ani_namespace windowNameSpace)
+AniWindowManager::AniWindowManager() : registerManager_(std::make_unique<AniWindowRegisterManager>())
+{
+}
+
+ani_status AniWindowManager::AniWindowManagerInit(ani_env* env)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    ani_namespace ns;
+    ani_status ret;
+    if ((ret = env->FindNamespace("L@ohos/window/window;", &ns)) != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] find ns %{public}u", ret);
+        return ANI_NOT_FOUND;
+    }
+    std::array functions = {
+        ani_native_function {"CreateWindowStage", "J:L@ohos/window/window/WindowStageInternal;",
+            reinterpret_cast<void *>(AniWindowManager::WindowStageCreate)},
+        ani_native_function {"getLastWindowSync",
+            "JLapplication/BaseContext/BaseContext;:L@ohos/window/window/Window;",
+            reinterpret_cast<void *>(AniWindowManager::GetLastWindow)},
+        ani_native_function {"shiftAppWindowFocusSync", "JDD:V",
+            reinterpret_cast<void *>(AniWindowManager::ShiftAppWindowFocus)},
+        ani_native_function {"onSync", nullptr,
+            reinterpret_cast<void *>(AniWindowManager::RegisterWindowManagerCallback)},
+        ani_native_function {"offSync", nullptr,
+            reinterpret_cast<void *>(AniWindowManager::UnregisterWindowManagerCallback)},
+    };
+    if ((ret = env->Namespace_BindNativeFunctions(ns, functions.data(), functions.size())) != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] bind ns func %{public}u", ret);
+        return ANI_NOT_FOUND;
+    }
+
     ani_function setObjFunc = nullptr;
-    ani_status ret = env->Namespace_FindFunction(windowNameSpace, "setNativeObj", "J:V", &setObjFunc);
+    ret = env->Namespace_FindFunction(ns, "setNativeObj", "J:V", &setObjFunc);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] find setNativeObj func fail %{public}u", ret);
         return ret;
@@ -42,6 +72,15 @@ ani_status AniWindowManager::AniWindowManagerInit(ani_env* env, ani_namespace wi
         return ret;
     }
     return ret;
+}
+
+ani_object AniWindowManager::WindowStageCreate(ani_env* env, ani_long scene)
+{
+    using namespace OHOS::Rosen;
+    TLOGD(WmsLogTag::DEFAULT, "[ANI] create windowstage with scene 0x%{public}p %{public}d",
+        reinterpret_cast<void*>(env), (int32_t)scene);
+    std::shared_ptr<WindowScene> scenePtr;
+    return CreateAniWindowStage(env, scenePtr); // just for test
 }
 
 ani_object AniWindowManager::GetLastWindow(ani_env* env, ani_long nativeObj, ani_object context)
@@ -67,6 +106,54 @@ ani_object AniWindowManager::OnGetLastWindow(ani_env* env, ani_object aniContext
         return AniWindowUtils::AniThrowError(env, WMError::WM_ERROR_NULLPTR, "Get top window failed");
     }
     return CreateAniWindowObject(env, window);
+}
+
+void AniWindowManager::RegisterWindowManagerCallback(ani_env* env, ani_long nativeObj,
+    ani_string type, ani_ref callback)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    AniWindowManager* aniWindowManager = reinterpret_cast<AniWindowManager*>(nativeObj);
+    if (aniWindowManager != nullptr) {
+        aniWindowManager->OnRegisterWindowManagerCallback(env, type, callback);
+    } else {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] aniWindowManager is nullptr");
+    }
+}
+
+void AniWindowManager::OnRegisterWindowManagerCallback(ani_env* env, ani_string type, ani_ref callback)
+{
+    std::string cbType;
+    AniWindowUtils::GetStdString(env, type, cbType);
+    TLOGI(WmsLogTag::DEFAULT, "[ANI] type:%{public}s", cbType.c_str());
+    WmErrorCode ret = registerManager_->RegisterListener(nullptr, cbType, CaseType::CASE_WINDOW_MANAGER,
+        env, callback, ani_double(0));
+    if (ret != WmErrorCode::WM_OK) {
+        AniWindowUtils::AniThrowError(env, ret);
+    }
+}
+
+void AniWindowManager::UnregisterWindowManagerCallback(ani_env* env, ani_long nativeObj,
+    ani_string type, ani_ref callback)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    AniWindowManager* aniWindowManager = reinterpret_cast<AniWindowManager*>(nativeObj);
+    if (aniWindowManager != nullptr) {
+        aniWindowManager->OnUnregisterWindowManagerCallback(env, type, callback);
+    } else {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] aniWindowManager is nullptr");
+    }
+}
+
+void AniWindowManager::OnUnregisterWindowManagerCallback(ani_env* env, ani_string type, ani_ref callback)
+{
+    std::string cbType;
+    AniWindowUtils::GetStdString(env, type, cbType);
+    TLOGI(WmsLogTag::DEFAULT, "[ANI] type:%{public}s", cbType.c_str());
+    WmErrorCode ret = registerManager_->UnregisterListener(nullptr, cbType, CaseType::CASE_WINDOW_MANAGER,
+        env, callback);
+    if (ret != WmErrorCode::WM_OK) {
+        AniWindowUtils::AniThrowError(env, ret);
+    }
 }
 
 void AniWindowManager::ShiftAppWindowFocus(ani_env* env, ani_object obj, ani_long nativeObj,
